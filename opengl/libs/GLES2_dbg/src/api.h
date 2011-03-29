@@ -22,8 +22,7 @@
     unsigned readSize = GetBytesPerPixel(readFormat, readType) * width * height; \
     void * readData = dbg->GetReadPixelsBuffer(readSize); \
     dbg->hooks->gl.glReadPixels(x, y, width, height, readFormat, readType, readData); \
-    const unsigned compressedSize = dbg->CompressReadPixelBuffer(); \
-    msg.set_data(dbg->lzf_buf, compressedSize); \
+    dbg->CompressReadPixelBuffer(msg.mutable_data()); \
     msg.set_data_type(msg.ReferencedImage); \
     msg.set_pixel_format(readFormat); \
     msg.set_pixel_type(readType);
@@ -43,8 +42,7 @@
         DbgContext * const dbg = getDbgContextThreadSpecific(); \
         const unsigned size = GetBytesPerPixel(format, type) * width * height; \
         assert(0 < size); \
-        unsigned compressedSize = dbg->Compress(pixels, size); \
-        msg.set_data(dbg->lzf_buf, compressedSize); \
+        dbg->Compress(pixels, size, msg.mutable_data()); \
     }
 
 #define EXTEND_Debug_glTexSubImage2D EXTEND_Debug_glTexImage2D

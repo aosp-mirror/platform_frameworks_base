@@ -26,8 +26,7 @@ namespace android
 
 DbgContext::DbgContext(const unsigned version, const gl_hooks_t * const hooks,
                        const unsigned MAX_VERTEX_ATTRIBS)
-        : lzf_buf(NULL), lzf_bufSize(0)
-        , lzf_readIndex(0), lzf_refSize(0), lzf_refBufSize(0)
+        : lzf_buf(NULL), lzf_readIndex(0), lzf_refSize(0), lzf_refBufSize(0)
         , version(version), hooks(hooks)
         , MAX_VERTEX_ATTRIBS(MAX_VERTEX_ATTRIBS)
         , vertexAttribs(new VertexAttrib[MAX_VERTEX_ATTRIBS])
@@ -109,16 +108,26 @@ void DbgContext::Fetch(const unsigned index, std::string * const data) const
     }
 }
 
-unsigned DbgContext::Compress(const void * in_data, unsigned in_len)
+void DbgContext::Compress(const void * in_data, unsigned int in_len,
+                          std::string * const outStr)
 {
-    if (lzf_bufSize < in_len * 1.05f) {
-        lzf_bufSize = in_len * 1.05f;
-        lzf_buf = (char *)realloc(lzf_buf, lzf_bufSize);
+    if (!lzf_buf)
+        lzf_buf = (char *)malloc(LZF_CHUNK_SIZE);
+    const uint32_t totalDecompSize = in_len;
+    outStr->append((const char *)&totalDecompSize, sizeof(totalDecompSize));
+    for (unsigned int i = 0; i < in_len; i += LZF_CHUNK_SIZE) {
+        uint32_t chunkSize = LZF_CHUNK_SIZE;
+        if (i + LZF_CHUNK_SIZE > in_len)
+            chunkSize = in_len - i;
+        const uint32_t compSize = lzf_compress((const char *)in_data + i, chunkSize,
+                                               lzf_buf, LZF_CHUNK_SIZE);
+        outStr->append((const char *)&chunkSize, sizeof(chunkSize));
+        outStr->append((const char *)&compSize, sizeof(compSize));
+        if (compSize > 0)
+            outStr->append(lzf_buf, compSize);
+        else // compressed chunk bigger than LZF_CHUNK_SIZE (and uncompressed)
+            outStr->append((const char *)in_data + i, chunkSize);
     }
-    unsigned compressedSize = lzf_compress((const char *)in_data,
-                                           in_len, lzf_buf, lzf_bufSize);
-    assert (0 < compressedSize);
-    return compressedSize;
 }
 
 void * DbgContext::GetReadPixelsBuffer(const unsigned size)
@@ -140,13 +149,13 @@ void * DbgContext::GetReadPixelsBuffer(const unsigned size)
     return lzf_ref[lzf_readIndex];
 }
 
-unsigned DbgContext::CompressReadPixelBuffer()
+void DbgContext::CompressReadPixelBuffer(std::string * const outStr)
 {
     unsigned * const ref = lzf_ref[lzf_readIndex ^ 1];
     unsigned * const src = lzf_ref[lzf_readIndex];
     for (unsigned i = 0; i < lzf_refSize / sizeof(*ref) + 1; i++)
         ref[i] ^= src[i];
-    return Compress(ref, lzf_refSize);
+    Compress(ref, lzf_refSize, outStr);
 }
 
 void DbgContext::glUseProgram(GLuint program)
