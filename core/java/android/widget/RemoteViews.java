@@ -125,7 +125,7 @@ public class RemoteViews implements Parcelable, Filter {
      *  SUBCLASSES MUST BE IMMUTABLE SO CLONE WORKS!!!!!
      */
     private abstract static class Action implements Parcelable {
-        public abstract void apply(View root) throws ActionException;
+        public abstract void apply(View root, ViewGroup rootParent) throws ActionException;
 
         public int describeContents() {
             return 0;
@@ -183,7 +183,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root) {
+        public void apply(View root, ViewGroup rootParent) {
             final View view = root.findViewById(viewId);
             if (!(view instanceof AdapterView<?>)) return;
 
@@ -214,7 +214,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root) {
+        public void apply(View root, ViewGroup rootParent) {
             final View target = root.findViewById(viewId);
             if (target == null) return;
 
@@ -295,7 +295,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root) {
+        public void apply(View root, ViewGroup rootParent) {
             final View target = root.findViewById(viewId);
             if (target == null) return;
 
@@ -360,6 +360,60 @@ public class RemoteViews implements Parcelable, Filter {
         public final static int TAG = 8;
     }
 
+    private class SetRemoteViewsAdapterIntent extends Action {
+        public SetRemoteViewsAdapterIntent(int id, Intent intent) {
+            this.viewId = id;
+            this.intent = intent;
+        }
+
+        public SetRemoteViewsAdapterIntent(Parcel parcel) {
+            viewId = parcel.readInt();
+            intent = Intent.CREATOR.createFromParcel(parcel);
+        }
+
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(TAG);
+            dest.writeInt(viewId);
+            intent.writeToParcel(dest, flags);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent) {
+            final View target = root.findViewById(viewId);
+            if (target == null) return;
+
+            // Ensure that we are applying to an AppWidget root
+            if (!(rootParent instanceof AppWidgetHostView)) {
+                Log.e("RemoteViews", "SetRemoteViewsAdapterIntent action can only be used for " +
+                        "AppWidgets (root id: " + viewId + ")");
+                return;
+            }
+            // Ensure that we are calling setRemoteAdapter on an AdapterView that supports it
+            if (!(target instanceof AbsListView) && !(target instanceof AdapterViewAnimator)) {
+                Log.e("RemoteViews", "Cannot setRemoteViewsAdapter on a view which is not " +
+                        "an AbsListView or AdapterViewAnimator (id: " + viewId + ")");
+                return;
+            }
+
+            // Embed the AppWidget Id for use in RemoteViewsAdapter when connecting to the intent
+            // RemoteViewsService
+            AppWidgetHostView host = (AppWidgetHostView) rootParent;
+            intent.putExtra(EXTRA_REMOTEADAPTER_APPWIDGET_ID, host.getAppWidgetId());
+            if (target instanceof AbsListView) {
+                AbsListView v = (AbsListView) target;
+                v.setRemoteViewsAdapter(intent);
+            } else if (target instanceof AdapterViewAnimator) {
+                AdapterViewAnimator v = (AdapterViewAnimator) target;
+                v.setRemoteViewsAdapter(intent);
+            }
+        }
+
+        int viewId;
+        Intent intent;
+
+        public final static int TAG = 10;
+    }
+
     /**
      * Equivalent to calling
      * {@link android.view.View#setOnClickListener(android.view.View.OnClickListener)}
@@ -383,7 +437,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root) {
+        public void apply(View root, ViewGroup rootParent) {
             final View target = root.findViewById(viewId);
             if (target == null) return;
 
@@ -479,7 +533,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
         
         @Override
-        public void apply(View root) {
+        public void apply(View root, ViewGroup rootParent) {
             final View target = root.findViewById(viewId);
             if (target == null) return;
             
@@ -539,7 +593,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root) {
+        public void apply(View root, ViewGroup rootParent) {
             final View view = root.findViewById(viewId);
             if (view == null) return;
 
@@ -755,7 +809,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root) {
+        public void apply(View root, ViewGroup rootParent) {
             final View view = root.findViewById(viewId);
             if (view == null) return;
 
@@ -850,7 +904,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root) {
+        public void apply(View root, ViewGroup rootParent) {
             final Context context = root.getContext();
             final ViewGroup target = (ViewGroup) root.findViewById(viewId);
             if (target == null) return;
@@ -951,6 +1005,9 @@ public class RemoteViews implements Parcelable, Filter {
                     break;
                 case SetOnClickFillInIntent.TAG:
                     mActions.add(new SetOnClickFillInIntent(parcel));
+                    break;
+                case SetRemoteViewsAdapterIntent.TAG:
+                    mActions.add(new SetRemoteViewsAdapterIntent(parcel));
                     break;
                 default:
                     throw new ActionException("Tag " + tag + " not found");
@@ -1287,16 +1344,29 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
      *
-     * @param appWidgetId The id of the app widget which contains the specified view
+     * @param appWidgetId The id of the app widget which contains the specified view. (This
+     *      parameter is ignored in this deprecated method)
+     * @param viewId The id of the view whose text should change
+     * @param intent The intent of the service which will be
+     *            providing data to the RemoteViewsAdapter
+     * @deprecated This method has been deprecated. See
+     *      {@link android.widget.RemoteViews#setRemoteAdapter(int, Intent)}
+     */
+    @Deprecated
+    public void setRemoteAdapter(int appWidgetId, int viewId, Intent intent) {
+        setRemoteAdapter(viewId, intent);
+    }
+
+    /**
+     * Equivalent to calling {@link android.widget.AbsListView#setRemoteViewsAdapter(Intent)}.
+     * Can only be used for App Widgets.
+     *
      * @param viewId The id of the view whose text should change
      * @param intent The intent of the service which will be
      *            providing data to the RemoteViewsAdapter
      */
-    public void setRemoteAdapter(int appWidgetId, int viewId, Intent intent) {
-        // Embed the AppWidget Id for use in RemoteViewsAdapter when connecting to the intent
-        // RemoteViewsService
-        intent.putExtra(EXTRA_REMOTEADAPTER_APPWIDGET_ID, appWidgetId);
-        setIntent(viewId, "setRemoteViewsAdapter", intent);
+    public void setRemoteAdapter(int viewId, Intent intent) {
+        addAction(new SetRemoteViewsAdapterIntent(viewId, intent));
     }
 
     /**
@@ -1499,7 +1569,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         result = inflater.inflate(mLayoutId, parent, false);
 
-        performApply(result);
+        performApply(result, parent);
 
         return result;
     }
@@ -1514,15 +1584,15 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void reapply(Context context, View v) {
         prepareContext(context);
-        performApply(v);
+        performApply(v, (ViewGroup) v.getParent());
     }
 
-    private void performApply(View v) {
+    private void performApply(View v, ViewGroup parent) {
         if (mActions != null) {
             final int count = mActions.size();
             for (int i = 0; i < count; i++) {
                 Action a = mActions.get(i);
-                a.apply(v);
+                a.apply(v, parent);
             }
         }
     }
