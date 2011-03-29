@@ -22,12 +22,14 @@ import static com.android.ide.common.rendering.api.Result.Status.ERROR_UNKNOWN;
 import static com.android.ide.common.rendering.api.Result.Status.ERROR_VIEWGROUP_NO_CHILDREN;
 import static com.android.ide.common.rendering.api.Result.Status.SUCCESS;
 
+import com.android.ide.common.rendering.api.AdapterBinding;
 import com.android.ide.common.rendering.api.IAnimationListener;
 import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.RenderParams;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.RenderSession;
+import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.SessionParams;
@@ -44,6 +46,8 @@ import com.android.layoutlib.bridge.android.BridgeWindowSession;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.bars.PhoneSystemBar;
 import com.android.layoutlib.bridge.bars.TitleBar;
+import com.android.layoutlib.bridge.impl.binding.FakeAdapter;
+import com.android.layoutlib.bridge.impl.binding.FakeExpandableAdapter;
 import com.android.resources.ResourceType;
 import com.android.resources.ScreenSize;
 import com.android.util.Pair;
@@ -62,8 +66,13 @@ import android.view.ViewGroup;
 import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.AbsListView;
+import android.widget.AbsSpinner;
+import android.widget.AdapterView;
+import android.widget.ExpandableListView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TabHost.TabSpec;
@@ -267,6 +276,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
 
             View view = mInflater.inflate(mBlockParser, mContentRoot);
+
+            // done with the parser, pop it.
+            context.popParser();
 
             // set the AttachInfo on the root view.
             AttachInfo info = new AttachInfo(new BridgeWindowSession(), new BridgeWindow(),
@@ -875,6 +887,75 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             throws PostInflateException {
         if (view instanceof TabHost) {
             setupTabHost((TabHost)view, projectCallback);
+        } else if (view instanceof AdapterView<?>) {
+            // get the view ID.
+            int id = view.getId();
+
+            BridgeContext context = getContext();
+
+            // get a ResourceReference from the integer ID.
+            ResourceReference listRef = context.resolveId(id);
+
+            if (listRef != null) {
+                SessionParams params = getParams();
+                AdapterBinding binding = params.getAdapterBindings().get(listRef);
+
+                // if there was no adapter binding, trying to get it from the call back.
+                if (binding == null) {
+                    binding = params.getProjectCallback().getAdapterBinding(listRef,
+                            context.getViewKey(view), view);
+                }
+
+                if (binding != null) {
+
+                    if (view instanceof AbsListView) {
+                        if ((binding.getFooterCount() > 0 || binding.getHeaderCount() > 0) &&
+                                view instanceof ListView) {
+                            ListView list = (ListView) view;
+
+                            boolean skipCallbackParser = false;
+
+                            int count = binding.getHeaderCount();
+                            for (int i = 0 ; i < count ; i++) {
+                                Pair<View, Boolean> pair = context.inflateView(
+                                        binding.getHeaderAt(i),
+                                        list, false /*attachToRoot*/, skipCallbackParser);
+                                if (pair.getFirst() != null) {
+                                    list.addHeaderView(pair.getFirst());
+                                }
+
+                                skipCallbackParser |= pair.getSecond();
+                            }
+
+                            count = binding.getFooterCount();
+                            for (int i = 0 ; i < count ; i++) {
+                                Pair<View, Boolean> pair = context.inflateView(
+                                        binding.getFooterAt(i),
+                                        list, false /*attachToRoot*/, skipCallbackParser);
+                                if (pair.getFirst() != null) {
+                                    list.addFooterView(pair.getFirst());
+                                }
+
+                                skipCallbackParser |= pair.getSecond();
+                            }
+                        }
+
+                        if (view instanceof ExpandableListView) {
+                            ((ExpandableListView) view).setAdapter(
+                                    new FakeExpandableAdapter(
+                                            listRef, binding, params.getProjectCallback()));
+                        } else {
+                            ((AbsListView) view).setAdapter(
+                                    new FakeAdapter(
+                                            listRef, binding, params.getProjectCallback()));
+                        }
+                    } else if (view instanceof AbsSpinner) {
+                        ((AbsSpinner) view).setAdapter(
+                                new FakeAdapter(
+                                        listRef, binding, params.getProjectCallback()));
+                    }
+                }
+            }
         } else if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup)view;
             final int count = group.getChildCount();

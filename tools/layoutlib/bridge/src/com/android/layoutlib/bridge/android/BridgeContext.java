@@ -16,9 +16,11 @@
 
 package com.android.layoutlib.bridge.android;
 
+import com.android.ide.common.rendering.api.ILayoutPullParser;
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderResources;
+import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
@@ -26,6 +28,10 @@ import com.android.layoutlib.bridge.BridgeConstants;
 import com.android.layoutlib.bridge.impl.Stack;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;
+
+import org.kxml2.io.KXmlParser;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -57,11 +63,13 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -264,6 +272,107 @@ public final class BridgeContext extends Activity {
         return false;
     }
 
+
+    public ResourceReference resolveId(int id) {
+        // first get the String related to this id in the framework
+        Pair<ResourceType, String> resourceInfo = Bridge.resolveResourceId(id);
+
+        if (resourceInfo != null) {
+            return new ResourceReference(resourceInfo.getSecond(), true);
+        }
+
+        // didn't find a match in the framework? look in the project.
+        if (mProjectCallback != null) {
+            resourceInfo = mProjectCallback.resolveResourceId(id);
+
+            if (resourceInfo != null) {
+                return new ResourceReference(resourceInfo.getSecond(), false);
+            }
+        }
+
+        return null;
+    }
+
+    public Pair<View, Boolean> inflateView(ResourceReference resource, ViewGroup parent,
+            boolean attachToRoot, boolean skipCallbackParser) {
+        String layoutName = resource.getName();
+        boolean isPlatformLayout = resource.isFramework();
+
+        if (isPlatformLayout == false && skipCallbackParser == false) {
+            // check if the project callback can provide us with a custom parser.
+            ILayoutPullParser parser = mProjectCallback.getParser(layoutName);
+            if (parser != null) {
+                BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(parser,
+                        this, resource.isFramework());
+                try {
+                    pushParser(blockParser);
+                    return Pair.of(
+                            mBridgeInflater.inflate(blockParser, parent, attachToRoot),
+                            true);
+                } finally {
+                    popParser();
+                }
+            }
+        }
+
+        ResourceValue resValue;
+        if (resource instanceof ResourceValue) {
+            resValue = (ResourceValue) resource;
+        } else {
+            if (isPlatformLayout) {
+                resValue = mRenderResources.getFrameworkResource(ResourceType.LAYOUT,
+                        resource.getName());
+            } else {
+                resValue = mRenderResources.getProjectResource(ResourceType.LAYOUT,
+                        resource.getName());
+            }
+        }
+
+        if (resValue != null) {
+
+            File xml = new File(resValue.getValue());
+            if (xml.isFile()) {
+                // we need to create a pull parser around the layout XML file, and then
+                // give that to our XmlBlockParser
+                try {
+                    KXmlParser parser = new KXmlParser();
+                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+                    parser.setInput(new FileReader(xml));
+
+                    // set the resource ref to have correct view cookies
+                    mBridgeInflater.setResourceReference(resource);
+
+                    BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(parser,
+                            this, resource.isFramework());
+                    try {
+                        pushParser(blockParser);
+                        return Pair.of(
+                                mBridgeInflater.inflate(blockParser, parent, attachToRoot),
+                                false);
+                    } finally {
+                        popParser();
+                    }
+                } catch (XmlPullParserException e) {
+                    Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                            "Failed to configure parser for " + xml, e, null /*data*/);
+                    // we'll return null below.
+                } catch (FileNotFoundException e) {
+                    // this shouldn't happen since we check above.
+                } finally {
+                    mBridgeInflater.setResourceReference(null);
+                }
+            } else {
+                Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                        String.format("File %s is missing!", xml), null);
+            }
+        } else {
+            Bridge.getLog().error(LayoutLog.TAG_BROKEN,
+                    String.format("Layout %s%s does not exist.", isPlatformLayout ? "android:" : "",
+                            layoutName), null);
+        }
+
+        return Pair.of(null, false);
+    }
 
     // ------------- Activity Methods
 
