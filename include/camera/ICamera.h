@@ -102,12 +102,6 @@ public:
     // send command to camera driver
     virtual status_t        sendCommand(int32_t cmd, int32_t arg1, int32_t arg2) = 0;
 
-    // return the total number of available video buffers
-    virtual int32_t         getNumberOfVideoBuffers() const  = 0;
-
-    // return the individual video buffer corresponding to the given index.
-    virtual sp<IMemory>     getVideoBuffer(int32_t index) const = 0;
-
     // tell the camera hal to store meta data or real YUV data in video buffers.
     virtual status_t        storeMetaDataInBuffers(bool enabled) = 0;
 };

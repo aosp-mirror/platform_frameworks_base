@@ -99,8 +99,6 @@ private:
         virtual status_t        startPreview();
         virtual void            stopPreview();
         virtual bool            previewEnabled();
-        virtual int32_t         getNumberOfVideoBuffers() const;
-        virtual sp<IMemory>     getVideoBuffer(int32_t index) const;
         virtual status_t        storeMetaDataInBuffers(bool enabled);
         virtual status_t        startRecording();
         virtual void            stopRecording();
@@ -152,7 +150,7 @@ private:
         // convert client from cookie
         static sp<Client>       getClientFromCookie(void* user);
         // handlers for messages
-        void                    handleShutter(image_rect_type *size);
+        void                    handleShutter(void);
         void                    handlePreviewData(const sp<IMemory>& mem);
         void                    handlePostview(const sp<IMemory>& mem);
         void                    handleRawPicture(const sp<IMemory>& mem);

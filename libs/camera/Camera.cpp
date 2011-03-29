@@ -205,22 +205,6 @@ status_t Camera::startPreview()
     return c->startPreview();
 }
 
-int32_t Camera::getNumberOfVideoBuffers() const
-{
-    LOGV("getNumberOfVideoBuffers");
-    sp <ICamera> c = mCamera;
-    if (c == 0) return 0;
-    return c->getNumberOfVideoBuffers();
-}
-
-sp<IMemory> Camera::getVideoBuffer(int32_t index) const
-{
-    LOGV("getVideoBuffer: %d", index);
-    sp <ICamera> c = mCamera;
-    if (c == 0) return 0;
-    return c->getVideoBuffer(index);
-}
-
 status_t Camera::storeMetaDataInBuffers(bool enabled)
 {
     LOGV("storeMetaDataInBuffers: %s",

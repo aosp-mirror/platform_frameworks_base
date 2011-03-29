@@ -740,28 +740,6 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
     mFrameAvailableCondition.signal();
 }
 
-size_t CameraSource::getNumberOfVideoBuffers() const {
-    LOGV("getNumberOfVideoBuffers");
-    size_t nBuffers = 0;
-    int64_t token = IPCThreadState::self()->clearCallingIdentity();
-    if (mInitCheck == OK && mCamera != 0) {
-        nBuffers = mCamera->getNumberOfVideoBuffers();
-    }
-    IPCThreadState::self()->restoreCallingIdentity(token);
-    return nBuffers;
-}
-
-sp<IMemory> CameraSource::getVideoBuffer(size_t index) const {
-    LOGV("getVideoBuffer: %d", index);
-    sp<IMemory> buffer = 0;
-    int64_t token = IPCThreadState::self()->clearCallingIdentity();
-    if (mInitCheck == OK && mCamera != 0) {
-        buffer = mCamera->getVideoBuffer(index);
-    }
-    IPCThreadState::self()->restoreCallingIdentity(token);
-    return buffer;
-}
-
 bool CameraSource::isMetaDataStoredInVideoBuffers() const {
     LOGV("isMetaDataStoredInVideoBuffers");
     return mIsMetaDataStoredInVideoBuffers;

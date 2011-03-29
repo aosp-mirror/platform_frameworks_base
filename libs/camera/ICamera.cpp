@@ -46,8 +46,6 @@ enum {
     STOP_RECORDING,
     RECORDING_ENABLED,
     RELEASE_RECORDING_FRAME,
-    GET_NUM_VIDEO_BUFFERS,
-    GET_VIDEO_BUFFER,
     STORE_META_DATA_IN_BUFFERS,
 };
 
@@ -147,27 +145,6 @@ public:
         data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
         data.writeStrongBinder(mem->asBinder());
         remote()->transact(RELEASE_RECORDING_FRAME, data, &reply);
-    }
-
-    int32_t getNumberOfVideoBuffers() const
-    {
-        LOGV("getNumberOfVideoBuffers");
-        Parcel data, reply;
-        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
-        remote()->transact(GET_NUM_VIDEO_BUFFERS, data, &reply);
-        return reply.readInt32();
-    }
-
-    sp<IMemory> getVideoBuffer(int32_t index) const
-    {
-        LOGV("getVideoBuffer: %d", index);
-        Parcel data, reply;
-        data.writeInterfaceToken(ICamera::getInterfaceDescriptor());
-        data.writeInt32(index);
-        remote()->transact(GET_VIDEO_BUFFER, data, &reply);
-        sp<IMemory> mem = interface_cast<IMemory>(
-                            reply.readStrongBinder());
-        return mem;
     }
 
     status_t storeMetaDataInBuffers(bool enabled)
@@ -353,19 +330,6 @@ status_t BnCamera::onTransact(
             CHECK_INTERFACE(ICamera, data, reply);
             sp<IMemory> mem = interface_cast<IMemory>(data.readStrongBinder());
             releaseRecordingFrame(mem);
-            return NO_ERROR;
-        } break;
-        case GET_NUM_VIDEO_BUFFERS: {
-            LOGV("GET_NUM_VIDEO_BUFFERS");
-            CHECK_INTERFACE(ICamera, data, reply);
-            reply->writeInt32(getNumberOfVideoBuffers());
-            return NO_ERROR;
-        } break;
-        case GET_VIDEO_BUFFER: {
-            LOGV("GET_VIDEO_BUFFER");
-            CHECK_INTERFACE(ICamera, data, reply);
-            int32_t index = data.readInt32();
-            reply->writeStrongBinder(getVideoBuffer(index)->asBinder());
             return NO_ERROR;
         } break;
         case STORE_META_DATA_IN_BUFFERS: {
