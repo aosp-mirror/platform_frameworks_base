@@ -185,6 +185,7 @@ public class MediaFile {
         addFileType("IMY", FILE_TYPE_IMY, "audio/imelody");
         addFileType("RTX", FILE_TYPE_MID, "audio/midi");
         addFileType("OTA", FILE_TYPE_MID, "audio/midi");
+        addFileType("MXMF", FILE_TYPE_MID, "audio/midi");
         
         addFileType("MPEG", FILE_TYPE_MP4, "video/mpeg", MtpConstants.FORMAT_MPEG);
         addFileType("MPG", FILE_TYPE_MP4, "video/mpeg", MtpConstants.FORMAT_MPEG);
