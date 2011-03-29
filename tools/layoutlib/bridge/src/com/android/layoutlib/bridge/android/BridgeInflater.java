@@ -19,6 +19,7 @@ package com.android.layoutlib.bridge.android;
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.MergeCookie;
+import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.resources.ResourceType;
@@ -44,6 +45,7 @@ public final class BridgeInflater extends LayoutInflater {
 
     private final IProjectCallback mProjectCallback;
     private boolean mIsInMerge = false;
+    private ResourceReference mResourceReference;
 
     /**
      * List of class prefixes which are tried first by default.
@@ -223,23 +225,33 @@ public final class BridgeInflater extends LayoutInflater {
                 // get the view key
                 Object viewKey = parser.getViewCookie();
 
-                // if there's no view key and the depth is 1 (ie this is the first tag), or 2
-                // (this is first item in included merge layout)
-                // look for a previous parser in the context, and check if this one has a viewkey.
-                int testDepth = mIsInMerge ? 2 : 1;
-                if (viewKey == null && parser.getDepth() == testDepth) {
+                if (viewKey == null) {
+                    int currentDepth = parser.getDepth();
+
+                    // test whether we are in an included file or in a adapter binding view.
                     BridgeXmlBlockParser previousParser = bc.getPreviousParser();
                     if (previousParser != null) {
-                        viewKey = previousParser.getViewCookie();
+                        // looks like we inside an embedded layout.
+                        // only apply the cookie of the calling node (<include>) if we are at the
+                        // top level of the embedded layout. If there is a merge tag, then
+                        // skip it and look for the 2nd level
+                        int testDepth = mIsInMerge ? 2 : 1;
+                        if (currentDepth == testDepth) {
+                            viewKey = previousParser.getViewCookie();
+                            // if we are in a merge, wrap the cookie in a MergeCookie.
+                            if (viewKey != null && mIsInMerge) {
+                                viewKey = new MergeCookie(viewKey);
+                            }
+                        }
+                    } else if (mResourceReference != null && currentDepth == 1) {
+                        // else if there's a resource reference, this means we are in an adapter
+                        // binding case. Set the resource ref as the view cookie only for the top
+                        // level view.
+                        viewKey = mResourceReference;
                     }
                 }
 
                 if (viewKey != null) {
-                    if (testDepth == 2) {
-                        // include-merge case
-                        viewKey = new MergeCookie(viewKey);
-                    }
-
                     bc.addViewKey(view, viewKey);
                 }
             }
@@ -248,6 +260,10 @@ public final class BridgeInflater extends LayoutInflater {
 
     public void setIsInMerge(boolean isInMerge) {
         mIsInMerge = isInMerge;
+    }
+
+    public void setResourceReference(ResourceReference reference) {
+        mResourceReference = reference;
     }
 
     @Override
