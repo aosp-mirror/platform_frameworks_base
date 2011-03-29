@@ -87,6 +87,8 @@ private:
 
     sp<AMessage> mObserveBinaryMessage;
 
+    AString mUserAgent;
+
     void onConnect(const sp<AMessage> &msg);
     void onDisconnect(const sp<AMessage> &msg);
     void onCompleteConnection(const sp<AMessage> &msg);
@@ -106,6 +108,8 @@ private:
     bool parseAuthMethod(const sp<ARTSPResponse> &response);
     void addAuthentication(AString *request);
 
+    void addUserAgent(AString *request) const;
+
     status_t findPendingRequest(
             const sp<ARTSPResponse> &response, ssize_t *index) const;
 
@@ -113,6 +117,8 @@ private:
 
     static bool ParseSingleUnsignedLong(
             const char *from, unsigned long *x);
+
+    static void MakeUserAgent(AString *userAgent);
 
     DISALLOW_EVIL_CONSTRUCTORS(ARTSPConnection);
 };
