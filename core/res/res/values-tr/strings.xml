@@ -824,7 +824,7 @@
     <string name="anr_application_process" msgid="4185842666452210193">"<xliff:g id="APPLICATION">%1$s</xliff:g> uygulaması (<xliff:g id="PROCESS">%2$s</xliff:g> işleminde) yanıt vermiyor."</string>
     <string name="anr_process" msgid="1246866008169975783">"<xliff:g id="PROCESS">%1$s</xliff:g> işlemi yanıt vermiyor."</string>
     <string name="force_close" msgid="3653416315450806396">"Kapanmaya zorla"</string>
-    <string name="report" msgid="4060218260984795706">"Rapor"</string>
+    <string name="report" msgid="4060218260984795706">"Bildir"</string>
     <string name="wait" msgid="7147118217226317732">"Bekle"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Uygulama yönlendirildi"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> şimdi çalışıyor."</string>
@@ -895,7 +895,7 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"USB depolama birimini açarsanız, kullanmakta olduğunuz bazı uygulamalar durur ve USB depolama birimi kapatılıncaya kadar kullanılamayabilir."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB işlemi başarısız oldu"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Tamam"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"USB dep br biçimlndr"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"USB\'yi biçimlendir"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SD kartı biçimlendir"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"USB depolama birimi biçimlendirilsin mi? Depolama biriminde saklanan tüm dosyalar silinir. İşlem geri alınamaz!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"SD kartı biçimlendirmek istediğinizden emin misiniz? Kartınızdaki tüm veriler yok olacak."</string>

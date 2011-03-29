@@ -49,7 +49,7 @@
     <string name="needPuk" msgid="919668385956251611">"Votre carte SIM est verrouillée par clé PUK. Saisissez la clé PUK pour la déverrouiller."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Saisissez la clé PUK2 pour débloquer la carte SIM."</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Numéro de l\'appelant (entrant)"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"Numéro de l\'appelant sortant"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"Numéro de l\'appelant (sortant)"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Transfert d\'appel"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Appel en attente"</string>
     <string name="BaMmi" msgid="455193067926770581">"Interdiction d\'appel"</string>
@@ -160,7 +160,7 @@
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"Permet de lire et rédiger vos SMS, e-mails et autres messages."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Vos informations personnelles"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Accéder directement aux contacts et à l\'agenda enregistrés sur la tablette"</string>
-    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Accédez directement aux contacts et à l\'agenda enregistrés sur votre téléphone."</string>
+    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Accéder directement aux contacts et à l\'agenda enregistrés sur votre téléphone"</string>
     <string name="permgrouplab_location" msgid="635149742436692049">"Votre position"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Suivre votre position géographique"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Communications réseau"</string>
@@ -258,7 +258,7 @@
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"associer à un service widget"</string>
     <string name="permdesc_bindRemoteViews" msgid="2930855984822926963">"Permet à l\'application autorisée de s\'associer à l\'interface de plus haut niveau d\'un service widget. Les applications standard ne doivent jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"interagir avec l\'administrateur du périphérique"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permet à l\'application d\'envoyer des intentions à l\'administrateur du périphérique. Les applications standard ne devraient jamais avoir recours à cette fonctionnalité."</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permet à l\'application d\'envoyer des intentions à l\'administrateur de l\'appareil. Les applications standard ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"Changement d\'orientation de l\'écran"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Permet à une application de modifier la rotation de l\'écran à tout moment. Les applications normales ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"Envoi de signaux Linux aux applications"</string>
@@ -343,8 +343,8 @@
     <string name="permlab_reboot" product="default" msgid="2898560872462638242">"forcer le redémarrage du téléphone"</string>
     <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Permet à l\'application de forcer le redémarrage de la tablette."</string>
     <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"Permet à l\'application de forcer le redémarrage du téléphone."</string>
-    <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"Monter et démonter des systèmes de fichiers"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Permet à l\'application de monter et démonter des systèmes de fichiers pour des périphériques de stockage amovibles."</string>
+    <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"Installer et désinstaller des systèmes de fichiers"</string>
+    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Permet à l\'application d\'installer et de désinstaller des systèmes de fichiers pour des périphériques de stockage amovibles."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"Formatage du périphérique de stockage externe"</string>
     <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Permet à l\'application de formater le périphérique de stockage amovible."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"obtenir des informations sur la mémoire de stockage interne"</string>
@@ -460,11 +460,11 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Permet à une application de lire tous les mots, noms et expressions que l\'utilisateur a pu enregistrer dans son dictionnaire personnel."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"Enregistrement dans le dictionnaire défini par l\'utilisateur"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Permet à une application d\'enregistrer de nouveaux mots dans le dictionnaire personnel de l\'utilisateur."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modifier/supprimer le contenu de la mémoire de stockage USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"modif./suppr. contenu mémoire USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modifier/supprimer le contenu de la carte SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Autorise une application à écrire sur la mémoire USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Autorise une application à écrire sur la carte SD."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modif./suppr. contenu mémoire interne support"</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modif./suppr. contenu mémoire interne"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Permet à une application de modifier le contenu de la mémoire de stockage interne du support."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accéder au système de fichiers en cache"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permet à une application de lire et d\'écrire dans le système de fichiers en cache."</string>
@@ -606,11 +606,11 @@
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Saisissez le mot de passe pour procéder au déverrouillage."</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Saisissez le code PIN pour procéder au déverrouillage."</string>
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Le code PIN est incorrect !"</string>
-    <string name="keyguard_label_text" msgid="861796461028298424">"Pour débloquer le clavier, appuyez sur \"Menu\" puis sur 0."</string>
+    <string name="keyguard_label_text" msgid="861796461028298424">"Pour déverrouiller le clavier, appuyez sur \"Menu\" puis sur 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Numéro d\'urgence"</string>
     <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Aucun service)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Écran verrouillé"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Appuyez sur \"Menu\" pour débloquer le téléphone ou appeler un numéro d\'urgence"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Appuyez sur \"Menu\" pour déverrouiller le téléphone ou appeler un numéro d\'urgence"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Appuyez sur \"Menu\" pour déverrouiller le téléphone."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Dessinez un schéma pour déverrouiller le téléphone"</string>
     <string name="lockscreen_emergency_call" msgid="5347633784401285225">"Appel d\'urgence"</string>
@@ -635,8 +635,8 @@
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Vous avez mal reproduit le schéma de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Vous avez saisi un mot de passe incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Vous avez saisi un code PIN incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. "\n\n"Veuillez réessayer dans <xliff:g id="NUMBER_1">%d</xliff:g> secondes."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Vous avez saisi un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez débloquer votre tablette à l\'aide de votre identifiant Google."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Vous avez mal saisi le schéma de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. Au bout de <xliff:g id="NUMBER_1">%d</xliff:g> tentatives supplémentaires, vous devrez débloquer votre téléphone à l\'aide de votre identifiant Google."\n\n"Merci de réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="8687762517114904651">"Vous avez saisi un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%d</xliff:g> fois, vous devrez déverrouiller votre tablette à l\'aide de votre identifiant Google."\n\n" Veuillez réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Vous avez mal saisi le schéma de déverrouillage <xliff:g id="NUMBER_0">%d</xliff:g> fois. Au bout de <xliff:g id="NUMBER_1">%d</xliff:g> tentatives supplémentaires, vous devrez déverrouiller votre téléphone à l\'aide de votre identifiant Google."\n\n"Merci de réessayer dans <xliff:g id="NUMBER_2">%d</xliff:g> secondes."</string>
     <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6251480343394389665">"Réessayez dans <xliff:g id="NUMBER">%d</xliff:g> secondes."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"Schéma oublié ?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Déverrouillage du compte"</string>
@@ -648,7 +648,7 @@
     <string name="lockscreen_glogin_invalid_input" msgid="1364051473347485908">"Nom d\'utilisateur ou mot de passe incorrect."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="8253152905532900548">"Vous avez oublié votre nom d\'utilisateur ou votre mot de passe ?"\n"Accédez à la page "<b>"google.com/accounts/recovery"</b></string>
     <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Vérification..."</string>
-    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Débloquer"</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Déverrouiller"</string>
     <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Son activé"</string>
     <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Son désactivé"</string>
     <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
@@ -918,11 +918,11 @@
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Carte SD endommagée"</string>
     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"La mémoire de stockage USB est endommagée. Un reformatage est peut-être nécessaire."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"La carte SD est endommagée. Vous devrez peut-être la reformater."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Mémoire de stockage USB retirée inopinément"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Mémoire USB retirée inopinément"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Carte SD retirée inopinément"</string>
     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Désinstaller la mémoire de stockage USB avant de la retirer pour éviter toute perte de données."</string>
-    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Désactiver la carte SD avant de la retirer pour éviter toute perte de données."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"La mémoire de stockage USB peut être retirée en toute sécurité."</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Désinstaller la carte SD avant de la retirer pour éviter toute perte de données."</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Vous pouvez retirer la mémoire USB."</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"La carte SD peut être retirée en toute sécurité"</string>
     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Vous pouvez retirer la mémoire de stockage USB en toute sécurité."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Vous pouvez retirer la carte SD en toute sécurité."</string>
