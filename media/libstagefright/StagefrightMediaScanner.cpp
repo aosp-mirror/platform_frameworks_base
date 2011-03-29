@@ -37,7 +37,7 @@ static bool FileHasAcceptableExtension(const char *extension) {
         ".mp3", ".mp4", ".m4a", ".3gp", ".3gpp", ".3g2", ".3gpp2",
         ".mpeg", ".ogg", ".mid", ".smf", ".imy", ".wma", ".aac",
         ".wav", ".amr", ".midi", ".xmf", ".rtttl", ".rtx", ".ota",
-        ".mkv", ".mka", ".webm", ".ts", ".fl", ".flac"
+        ".mkv", ".mka", ".webm", ".ts", ".fl", ".flac", ".mxmf",
     };
     static const size_t kNumValidExtensions =
         sizeof(kValidExtensions) / sizeof(kValidExtensions[0]);
@@ -124,7 +124,8 @@ status_t StagefrightMediaScanner::processFile(
             || !strcasecmp(extension, ".xmf")
             || !strcasecmp(extension, ".rtttl")
             || !strcasecmp(extension, ".rtx")
-            || !strcasecmp(extension, ".ota")) {
+            || !strcasecmp(extension, ".ota")
+            || !strcasecmp(extension, ".mxmf")) {
         status_t status = HandleMIDI(path, &client);
         if (status != OK) {
             return status;
