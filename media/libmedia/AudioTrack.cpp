@@ -35,6 +35,7 @@
 #include <binder/Parcel.h>
 #include <binder/IPCThreadState.h>
 #include <utils/Timers.h>
+#include <utils/Atomic.h>
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
@@ -332,7 +333,7 @@ void AudioTrack::start()
         cblk->lock.lock();
         cblk->bufferTimeoutMs = MAX_STARTUP_TIMEOUT_MS;
         cblk->waitTimeMs = 0;
-        cblk->flags &= ~CBLK_DISABLED_ON;
+        android_atomic_and(~CBLK_DISABLED_ON, &cblk->flags);
         if (t != 0) {
            t->run("AudioTrackThread", THREAD_PRIORITY_AUDIO_CLIENT);
         } else {
@@ -345,7 +346,7 @@ void AudioTrack::start()
             status = mAudioTrack->start();
             cblk->lock.lock();
             if (status == DEAD_OBJECT) {
-                cblk->flags |= CBLK_INVALID_MSK;
+                android_atomic_or(CBLK_INVALID_ON, &cblk->flags);
             }
         }
         if (cblk->flags & CBLK_INVALID_MSK) {
@@ -636,7 +637,7 @@ status_t AudioTrack::setPosition(uint32_t position)
     if (position > mCblk->user) return BAD_VALUE;
 
     mCblk->server = position;
-    mCblk->flags |= CBLK_FORCEREADY_ON;
+    android_atomic_or(CBLK_FORCEREADY_ON, &mCblk->flags);
 
     return NO_ERROR;
 }
@@ -793,7 +794,7 @@ status_t AudioTrack::createTrack_l(
     mCblkMemory.clear();
     mCblkMemory = cblk;
     mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
-    mCblk->flags |= CBLK_DIRECTION_OUT;
+    android_atomic_or(CBLK_DIRECTION_OUT, &mCblk->flags);
     if (sharedBuffer == 0) {
         mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
     } else {
@@ -873,7 +874,7 @@ status_t AudioTrack::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                         result = mAudioTrack->start();
                         cblk->lock.lock();
                         if (result == DEAD_OBJECT) {
-                            cblk->flags |= CBLK_INVALID_MSK;
+                            android_atomic_or(CBLK_INVALID_ON, &cblk->flags);
 create_new_track:
                             result = restoreTrack_l(cblk, false);
                         }
@@ -900,14 +901,9 @@ create_new_track:
 
     // restart track if it was disabled by audioflinger due to previous underrun
     if (mActive && (cblk->flags & CBLK_DISABLED_MSK)) {
-        AutoMutex _l(cblk->lock);
-        if (mActive && (cblk->flags & CBLK_DISABLED_MSK)) {
-            cblk->flags &= ~CBLK_DISABLED_ON;
-            cblk->lock.unlock();
-            LOGW("obtainBuffer() track %p disabled, restarting", this);
-            mAudioTrack->start();
-            cblk->lock.lock();
-        }
+        android_atomic_and(~CBLK_DISABLED_ON, &cblk->flags);
+        LOGW("obtainBuffer() track %p disabled, restarting", this);
+        mAudioTrack->start();
     }
 
     cblk->waitTimeMs = 0;
@@ -1026,17 +1022,13 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
     mLock.unlock();
 
     // Manage underrun callback
-    if (mActive && (cblk->framesReady() == 0)) {
+    if (mActive && (cblk->framesAvailable() == cblk->frameCount)) {
         LOGV("Underrun user: %x, server: %x, flags %04x", cblk->user, cblk->server, cblk->flags);
-        AutoMutex _l(cblk->lock);
-        if ((cblk->flags & CBLK_UNDERRUN_MSK) == CBLK_UNDERRUN_OFF) {
-            cblk->flags |= CBLK_UNDERRUN_ON;
-            cblk->lock.unlock();
+        if (!(android_atomic_or(CBLK_UNDERRUN_ON, &cblk->flags) & CBLK_UNDERRUN_MSK)) {
             mCbf(EVENT_UNDERRUN, mUserData, 0);
             if (cblk->server == cblk->frameCount) {
                 mCbf(EVENT_BUFFER_END, mUserData, 0);
             }
-            cblk->lock.lock();
             if (mSharedBuffer != 0) return false;
         }
     }
@@ -1150,11 +1142,9 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
 {
     status_t result;
 
-    if (!(cblk->flags & CBLK_RESTORING_MSK)) {
+    if (!(android_atomic_or(CBLK_RESTORING_ON, &cblk->flags) & CBLK_RESTORING_MSK)) {
         LOGW("dead IAudioTrack, creating a new one from %s",
              fromStart ? "start()" : "obtainBuffer()");
-
-        cblk->flags |= CBLK_RESTORING_ON;
 
         // signal old cblk condition so that other threads waiting for available buffers stop
         // waiting now
@@ -1198,10 +1188,8 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
         }
 
         // signal old cblk condition for other threads waiting for restore completion
-        cblk->lock.lock();
-        cblk->flags |= CBLK_RESTORED_MSK;
+        android_atomic_or(CBLK_RESTORED_ON, &cblk->flags);
         cblk->cv.broadcast();
-        cblk->lock.unlock();
     } else {
         if (!(cblk->flags & CBLK_RESTORED_MSK)) {
             LOGW("dead IAudioTrack, waiting for a new one");
@@ -1275,11 +1263,12 @@ void AudioTrack::AudioTrackThread::onFirstRef()
 
 // =========================================================================
 
+
 audio_track_cblk_t::audio_track_cblk_t()
     : lock(Mutex::SHARED), cv(Condition::SHARED), user(0), server(0),
     userBase(0), serverBase(0), buffers(0), frameCount(0),
     loopStart(UINT_MAX), loopEnd(UINT_MAX), loopCount(0), volumeLR(0),
-    flags(0), sendLevel(0)
+    sendLevel(0), flags(0)
 {
 }
 
@@ -1307,10 +1296,7 @@ uint32_t audio_track_cblk_t::stepUser(uint32_t frameCount)
 
     // Clear flow control error condition as new data has been written/read to/from buffer.
     if (flags & CBLK_UNDERRUN_MSK) {
-        AutoMutex _l(lock);
-        if (flags & CBLK_UNDERRUN_MSK) {
-            flags &= ~CBLK_UNDERRUN_MSK;
-        }
+        android_atomic_and(~CBLK_UNDERRUN_MSK, &flags);
     }
 
     return u;
@@ -1318,18 +1304,8 @@ uint32_t audio_track_cblk_t::stepUser(uint32_t frameCount)
 
 bool audio_track_cblk_t::stepServer(uint32_t frameCount)
 {
-    // the code below simulates lock-with-timeout
-    // we MUST do this to protect the AudioFlinger server
-    // as this lock is shared with the client.
-    status_t err;
-
-    err = lock.tryLock();
-    if (err == -EBUSY) { // just wait a bit
-        usleep(1000);
-        err = lock.tryLock();
-    }
-    if (err != NO_ERROR) {
-        // probably, the client just died.
+    if (!tryLock()) {
+        LOGW("stepServer() could not lock cblk");
         return false;
     }
 
@@ -1406,16 +1382,40 @@ uint32_t audio_track_cblk_t::framesReady()
         if (u < loopEnd) {
             return u - s;
         } else {
-            Mutex::Autolock _l(lock);
-            if (loopCount >= 0) {
-                return (loopEnd - loopStart)*loopCount + u - s;
-            } else {
-                return UINT_MAX;
+            // do not block on mutex shared with client on AudioFlinger side
+            if (!tryLock()) {
+                LOGW("framesReady() could not lock cblk");
+                return 0;
             }
+            uint32_t frames = UINT_MAX;
+            if (loopCount >= 0) {
+                frames = (loopEnd - loopStart)*loopCount + u - s;
+            }
+            lock.unlock();
+            return frames;
         }
     } else {
         return s - u;
     }
+}
+
+bool audio_track_cblk_t::tryLock()
+{
+    // the code below simulates lock-with-timeout
+    // we MUST do this to protect the AudioFlinger server
+    // as this lock is shared with the client.
+    status_t err;
+
+    err = lock.tryLock();
+    if (err == -EBUSY) { // just wait a bit
+        usleep(1000);
+        err = lock.tryLock();
+    }
+    if (err != NO_ERROR) {
+        // probably, the client just died.
+        return false;
+    }
+    return true;
 }
 
 // -------------------------------------------------------------------------

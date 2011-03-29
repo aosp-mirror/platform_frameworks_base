@@ -35,6 +35,7 @@
 #include <binder/Parcel.h>
 #include <binder/IPCThreadState.h>
 #include <utils/Timers.h>
+#include <utils/Atomic.h>
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
@@ -299,7 +300,7 @@ status_t AudioRecord::start()
             ret = mAudioRecord->start();
             cblk->lock.lock();
             if (ret == DEAD_OBJECT) {
-                cblk->flags |= CBLK_INVALID_MSK;
+                android_atomic_or(CBLK_INVALID_ON, &cblk->flags);
             }
         }
         if (cblk->flags & CBLK_INVALID_MSK) {
@@ -467,7 +468,7 @@ status_t AudioRecord::openRecord_l(
     mCblkMemory = cblk;
     mCblk = static_cast<audio_track_cblk_t*>(cblk->pointer());
     mCblk->buffers = (char*)mCblk + sizeof(audio_track_cblk_t);
-    mCblk->flags &= ~CBLK_DIRECTION_MSK;
+    android_atomic_and(~CBLK_DIRECTION_MSK, &mCblk->flags);
     mCblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
     mCblk->waitTimeMs = 0;
     return NO_ERROR;
@@ -522,7 +523,7 @@ status_t AudioRecord::obtainBuffer(Buffer* audioBuffer, int32_t waitCount)
                     result = mAudioRecord->start();
                     cblk->lock.lock();
                     if (result == DEAD_OBJECT) {
-                        cblk->flags |= CBLK_INVALID_MSK;
+                        android_atomic_or(CBLK_INVALID_ON, &cblk->flags);
 create_new_record:
                         result = AudioRecord::restoreRecord_l(cblk);
                     }
@@ -722,12 +723,8 @@ bool AudioRecord::processAudioBuffer(const sp<ClientRecordThread>& thread)
     // Manage overrun callback
     if (mActive && (cblk->framesAvailable() == 0)) {
         LOGV("Overrun user: %x, server: %x, flags %04x", cblk->user, cblk->server, cblk->flags);
-        AutoMutex _l(cblk->lock);
-        if ((cblk->flags & CBLK_UNDERRUN_MSK) == CBLK_UNDERRUN_OFF) {
-            cblk->flags |= CBLK_UNDERRUN_ON;
-            cblk->lock.unlock();
+        if (!(android_atomic_or(CBLK_UNDERRUN_ON, &cblk->flags) & CBLK_UNDERRUN_MSK)) {
             mCbf(EVENT_OVERRUN, mUserData, 0);
-            cblk->lock.lock();
         }
     }
 
@@ -746,10 +743,8 @@ status_t AudioRecord::restoreRecord_l(audio_track_cblk_t*& cblk)
 {
     status_t result;
 
-    if (!(cblk->flags & CBLK_RESTORING_MSK)) {
+    if (!(android_atomic_or(CBLK_RESTORING_ON, &cblk->flags) & CBLK_RESTORING_MSK)) {
         LOGW("dead IAudioRecord, creating a new one");
-
-        cblk->flags |= CBLK_RESTORING_ON;
         // signal old cblk condition so that other threads waiting for available buffers stop
         // waiting now
         cblk->cv.broadcast();
@@ -768,10 +763,8 @@ status_t AudioRecord::restoreRecord_l(audio_track_cblk_t*& cblk)
         }
 
         // signal old cblk condition for other threads waiting for restore completion
-        cblk->lock.lock();
-        cblk->flags |= CBLK_RESTORED_MSK;
+        android_atomic_or(CBLK_RESTORED_ON, &cblk->flags);
         cblk->cv.broadcast();
-        cblk->lock.unlock();
     } else {
         if (!(cblk->flags & CBLK_RESTORED_MSK)) {
             LOGW("dead IAudioRecord, waiting for a new one to be created");

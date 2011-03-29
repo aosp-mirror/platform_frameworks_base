@@ -31,6 +31,7 @@
 #include <binder/IPCThreadState.h>
 #include <utils/String16.h>
 #include <utils/threads.h>
+#include <utils/Atomic.h>
 
 #include <cutils/properties.h>
 
@@ -1738,10 +1739,7 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                     LOGV("BUFFER TIMEOUT: remove(%d) from active list on thread %p", track->name(), this);
                     tracksToRemove->add(track);
                     // indicate to client process that the track was disabled because of underrun
-                    {
-                        AutoMutex _l(cblk->lock);
-                        cblk->flags |= CBLK_DISABLED_ON;
-                    }
+                    android_atomic_or(CBLK_DISABLED_ON, &cblk->flags);
                 } else if (mixerStatus != MIXER_TRACKS_READY) {
                     mixerStatus = MIXER_TRACKS_ENABLED;
                 }
@@ -1790,8 +1788,7 @@ void AudioFlinger::MixerThread::invalidateTracks(int streamType)
     for (size_t i = 0; i < size; i++) {
         sp<Track> t = mTracks[i];
         if (t->type() == streamType) {
-            AutoMutex _lcblk(t->mCblk->lock);
-            t->mCblk->flags |= CBLK_INVALID_ON;
+            android_atomic_or(CBLK_INVALID_ON, &t->mCblk->flags);
             t->mCblk->cv.signal();
         }
     }
@@ -2950,9 +2947,8 @@ bool AudioFlinger::PlaybackThread::Track::isReady() const {
 
     if (mCblk->framesReady() >= mCblk->frameCount ||
             (mCblk->flags & CBLK_FORCEREADY_MSK)) {
-        AutoMutex _l(mCblk->lock);
         mFillingUpStatus = FS_FILLED;
-        mCblk->flags &= ~CBLK_FORCEREADY_MSK;
+        android_atomic_and(~CBLK_FORCEREADY_MSK, &mCblk->flags);
         return true;
     }
     return false;
@@ -3066,26 +3062,25 @@ void AudioFlinger::PlaybackThread::Track::flush()
         // STOPPED state
         mState = STOPPED;
 
-        // NOTE: reset() will reset cblk->user and cblk->server with
-        // the risk that at the same time, the AudioMixer is trying to read
-        // data. In this case, getNextBuffer() would return a NULL pointer
-        // as audio buffer => the AudioMixer code MUST always test that pointer
-        // returned by getNextBuffer() is not NULL!
-        reset();
+        // do not reset the track if it is still in the process of being stopped or paused.
+        // this will be done by prepareTracks_l() when the track is stopped.
+        PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
+        if (playbackThread->mActiveTracks.indexOf(this) < 0) {
+            reset();
+        }
     }
 }
 
 void AudioFlinger::PlaybackThread::Track::reset()
 {
-    AutoMutex _l(mCblk->lock);
     // Do not reset twice to avoid discarding data written just after a flush and before
     // the audioflinger thread detects the track is stopped.
     if (!mResetDone) {
         TrackBase::reset();
         // Force underrun condition to avoid false underrun callback until first data is
         // written to buffer
-        mCblk->flags |= CBLK_UNDERRUN_ON;
-        mCblk->flags &= ~CBLK_FORCEREADY_MSK;
+        android_atomic_and(~CBLK_FORCEREADY_MSK, &mCblk->flags);
+        android_atomic_or(CBLK_UNDERRUN_ON, &mCblk->flags);
         mFillingUpStatus = FS_FILLING;
         mResetDone = true;
     }
@@ -3211,13 +3206,10 @@ void AudioFlinger::RecordThread::RecordTrack::stop()
     if (thread != 0) {
         RecordThread *recordThread = (RecordThread *)thread.get();
         recordThread->stop(this);
-        {
-            AutoMutex _l(mCblk->lock);
-            TrackBase::reset();
-            // Force overerrun condition to avoid false overrun callback until first data is
-            // read from buffer
-            mCblk->flags |= CBLK_UNDERRUN_ON;
-        }
+        TrackBase::reset();
+        // Force overerrun condition to avoid false overrun callback until first data is
+        // read from buffer
+        android_atomic_or(CBLK_UNDERRUN_ON, &mCblk->flags);
     }
 }
 

@@ -83,13 +83,12 @@ struct audio_track_cblk_t
 
                 uint8_t     frameSize;
                 uint8_t     channelCount;
-                uint16_t    flags;
-
                 uint16_t    bufferTimeoutMs; // Maximum cumulated timeout before restarting audioflinger
-                uint16_t    waitTimeMs;      // Cumulated wait time
 
+                uint16_t    waitTimeMs;      // Cumulated wait time
                 uint16_t    sendLevel;
-                uint16_t    reserved;
+    volatile    int32_t     flags;
+
                 // Cache line boundary (32 bytes)
                             audio_track_cblk_t();
                 uint32_t    stepUser(uint32_t frameCount);
@@ -98,6 +97,7 @@ struct audio_track_cblk_t
                 uint32_t    framesAvailable();
                 uint32_t    framesAvailable_l();
                 uint32_t    framesReady();
+                bool        tryLock();
 };
 
 
