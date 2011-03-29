@@ -1616,10 +1616,12 @@ public class MediaPlayer
 
     /** MediaPlayer is temporarily pausing playback internally in order to
      * buffer more data.
+     * @see android.media.MediaPlayer.OnInfoListener
      */
     public static final int MEDIA_INFO_BUFFERING_START = 701;
 
     /** MediaPlayer is resuming playback after filling buffers.
+     * @see android.media.MediaPlayer.OnInfoListener
      */
     public static final int MEDIA_INFO_BUFFERING_END = 702;
 
@@ -1654,6 +1656,8 @@ public class MediaPlayer
          * <ul>
          * <li>{@link #MEDIA_INFO_UNKNOWN}
          * <li>{@link #MEDIA_INFO_VIDEO_TRACK_LAGGING}
+         * <li>{@link #MEDIA_INFO_BUFFERING_START}
+         * <li>{@link #MEDIA_INFO_BUFFERING_END}
          * <li>{@link #MEDIA_INFO_BAD_INTERLEAVING}
          * <li>{@link #MEDIA_INFO_NOT_SEEKABLE}
          * <li>{@link #MEDIA_INFO_METADATA_UPDATE}
