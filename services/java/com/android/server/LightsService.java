@@ -148,7 +148,6 @@ public class LightsService {
                 fis.close();
                 return (result != '0');
             } catch (Exception e) {
-                Slog.e(TAG, "getFlashlightEnabled failed", e);
                 return false;
             }
         }
@@ -168,7 +167,7 @@ public class LightsService {
                 fos.write(bytes);
                 fos.close();
             } catch (Exception e) {
-                Slog.e(TAG, "setFlashlightEnabled failed", e);
+                // fail silently
             }
         }
     };
