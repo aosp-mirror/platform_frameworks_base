@@ -33,11 +33,22 @@ ALooperRoster gLooperRoster;
 struct ALooper::LooperThread : public Thread {
     LooperThread(ALooper *looper, bool canCallJava)
         : Thread(canCallJava),
-          mLooper(looper) {
+          mLooper(looper),
+          mThreadId(NULL) {
+    }
+
+    virtual status_t readyToRun() {
+        mThreadId = androidGetThreadId();
+
+        return Thread::readyToRun();
     }
 
     virtual bool threadLoop() {
         return mLooper->loop();
+    }
+
+    bool isCurrentThread() const {
+        return mThreadId == androidGetThreadId();
     }
 
 protected:
@@ -45,6 +56,7 @@ protected:
 
 private:
     ALooper *mLooper;
+    android_thread_id_t mThreadId;
 
     DISALLOW_EVIL_CONSTRUCTORS(LooperThread);
 };
@@ -136,7 +148,9 @@ status_t ALooper::stop() {
 
     mQueueChangedCondition.signal();
 
-    if (!runningLocally) {
+    if (!runningLocally && !thread->isCurrentThread()) {
+        // If not running locally and this thread _is_ the looper thread,
+        // the loop() function will return and never be called again.
         thread->requestExitAndWait();
     }
 
@@ -196,6 +210,11 @@ bool ALooper::loop() {
     }
 
     gLooperRoster.deliverMessage(event.mMessage);
+
+    // NOTE: It's important to note that at this point our "ALooper" object
+    // may no longer exist (its final reference may have gone away while
+    // delivering the message). We have made sure, however, that loop()
+    // won't be called again.
 
     return true;
 }
