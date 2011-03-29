@@ -918,11 +918,11 @@
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Skadet minnekort"</string>
     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"USB-lagring er skadet. Det kan være nødvendig å formatere enheten på nytt."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Minnekortet er skadet. Du må kanskje formatere det."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB-lagring fjernet uventet"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB-enhet fjernet uventet"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Minnekortet ble tatt ut uventet"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Koble fra USB-lagring før enheten tas ut av maskinen for å unngå tap av data."</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Koble fra USB-enheten før du tar den ut for å unngå tap av data."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Avmonter minnekortet før det tas ut, for å unngå datatap."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB-lagring kan trygt fjernes"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"USB-enheten kan trygt fjernes"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Trygt å ta ut minnekort"</string>
     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Det er trygt å ta ut enheten for USB-lagring."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Det er trygt å ta ut minnekortet."</string>
