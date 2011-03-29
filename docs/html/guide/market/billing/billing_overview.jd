@@ -33,11 +33,7 @@ parent.link=index.html
 </div>
 </div>
 
-<div class="special" style="margin-right:345px">
-  <p>During the testing phase of the in-app billing release you cannot publish applications that implement in-app billing. You can only upload in-app billing applications as draft applications. For more information, see <a href="{@docRoot}guide/market/billing/billing_about.html">About this Release</a></p>
-</div>
-
-<p>The Android Market In-app Billing service is an Android Market feature that provides checkout processing for in-app purchases. To use the service, your application sends a billing request for a specific in-app product. The service then handles all of the checkout details for the transaction, including requesting and validating the form of payment and processing the financial transaction. When the checkout process is complete, the service sends your application the purchase details, such as the order number, the order date and time, and the price paid. At no point does your application have to handle any financial transactions; that role is provided by the in-app billing service.</p>
+<p>Android Market In-app Billing is an Android Market service that provides checkout processing for in-app purchases. To use the service, your application sends a billing request for a specific in-app product. The service then handles all of the checkout details for the transaction, including requesting and validating the form of payment and processing the financial transaction. When the checkout process is complete, the service sends your application the purchase details, such as the order number, the order date and time, and the price paid. At no point does your application have to handle any financial transactions; that role is provided by Android Market's in-app billing service.</p>
 
 <h2 id="billing-arch">In-app Billing Architecture</h2>
 
@@ -53,7 +49,7 @@ parent.link=index.html
 
 <p>A typical in-app billing implementation relies on three components:</p>
 <ul>
-  <li>A {@link android.app.Service} (named <code>BillingService</code> in the sample application), which processes purchase messages from the application and sends billing requests to the in-app billing service.</li>
+  <li>A {@link android.app.Service} (named <code>BillingService</code> in the sample application), which processes purchase messages from the application and sends billing requests to Android Market's in-app billing service.</li>
   <li>A {@link android.content.BroadcastReceiver} (named <code>BillingReceiver</code> in the sample application), which receives all asynchronous billing responses from the Android Market application.</li>
   <li>A security component (named <code>Security</code> in the sample application), which performs security-related tasks, such as signature verification and nonce generation. For more information about in-app billing security, see <a href="#billing-security">Security controls</a> later in this document.</li>
 </ul>
@@ -68,7 +64,7 @@ parent.link=index.html
 
 <h2 id="billing-msgs">In-app Billing Messages</h2>
 
-<p>When the user initiates a purchase, your application sends billing messages to the in-app billing service (named <code>MarketBillingService</code>) using simple IPC method calls. The Android Market application responds to all billing requests synchronously, providing your application with status notifications and other information. The Android Market application also responds to some billing requests asynchronously, providing your application with error messages and detailed transaction information. The following section describes the basic request-response messaging that takes place between your application and the Android Market application.</p>
+<p>When the user initiates a purchase, your application sends billing messages to Android Market's in-app billing service (named <code>MarketBillingService</code>) using simple IPC method calls. The Android Market application responds to all billing requests synchronously, providing your application with status notifications and other information. The Android Market application also responds to some billing requests asynchronously, providing your application with error messages and detailed transaction information. The following section describes the basic request-response messaging that takes place between your application and the Android Market application.</p>
 
 <h3 id="billing-request">In-app billing requests</h3>
 
@@ -76,7 +72,7 @@ parent.link=index.html
 
 <p>The <code>sendBillingRequest()</code> method has a single {@link android.os.Bundle} parameter. The Bundle that you deliver must include several key-value pairs that specify various parameters for the request, such as the type of billing request you are making, the item that is being purchased, and the application that is making the request. For more information about the Bundle keys that are sent with a request, see <a href="{@docRoot}guide/market/billing/billing_reference.html#billing-interface">In-app Billing Service Interface</a>.
 
-<p>One of the most important keys that every request Bundle must have is the <code>BILLING_REQUEST</code> key. This key lets you specify the type of billing request you are making. The in-app billing service supports the following five types of billing requests:</p>
+<p>One of the most important keys that every request Bundle must have is the <code>BILLING_REQUEST</code> key. This key lets you specify the type of billing request you are making. Android Market's in-app billing service supports the following five types of billing requests:</p>
 
 <ul>
   <li><code>CHECK_BILLING_SUPPORTED</code>
@@ -190,7 +186,7 @@ parent.link=index.html
 </p>
 </div>
 
-<p>The synchronous response for a <code>CHECK_BILLING_SUPPORTED</code> request provides a Bundle with a server response code.  A <code>RESULT_OK</code> response code indicates that in-app billing is supported; a <code>RESULT_BILLING_UNAVAILABLE</code> response code indicates that in-app billing is unavailable because the in-app billing API version you specified is unrecognized or the user is not eligible to make in-app purchases (for example, the user resides in a country that does not allow in-app billing). A <code>SERVER_ERROR</code> can also be returned, indicating that there was a problem with the Android Market server.</p>
+<p>The synchronous response for a <code>CHECK_BILLING_SUPPORTED</code> request provides a Bundle with a server response code.  A <code>RESULT_OK</code> response code indicates that in-app billing is supported; a <code>RESULT_BILLING_UNAVAILABLE</code> response code indicates that in-app billing is unavailable because the API version you specified is unrecognized or the user is not eligible to make in-app purchases (for example, the user resides in a country that does not allow in-app billing). A <code>SERVER_ERROR</code> can also be returned, indicating that there was a problem with the Android Market server.</p>
 
 <h3 id="billing-action-notify">Handling IN_APP_NOTIFY messages</h3>
 
@@ -227,7 +223,7 @@ parent.link=index.html
 
 <ul>
   <li>In-app billing can be implemented only in applications that you publish through Android Market.</li>
-  <li>You must have a Google Checkout Merchant account to use the in-app billing service.</li>
+  <li>You must have a Google Checkout Merchant account to use Android Market In-app Billing.</li>
   <li>If your device is running Android 3.0, in-app billing requires version 5.0.12 (or higher) of the MyApps application. If your device is running any other version of Android, in-app billing requires version 2.3.4 (or higher) of the Android Market application.</li>
   <li>An application can use in-app billing only if the device is running Android 1.6 (API level 4) or higher.</li>
   <li>You can use in-app billing to sell only digital content. You cannot use in-app billing to sell physical goods, personal services, or anything that requires physical delivery.</li>
