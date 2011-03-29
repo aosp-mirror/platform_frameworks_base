@@ -929,6 +929,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View[] children = mChildren;
             for (int i = 0; i < count; i++) {
                 final View child = children[i];
+                child.mPrivateFlags2 &= ~View.DRAG_MASK;
                 if (child.getVisibility() == VISIBLE) {
                     final boolean handled = notifyChildOfDrag(children[i]);
                     if (handled) {
@@ -949,6 +950,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 for (View child : mDragNotifiedChildren) {
                     // If a child was notified about an ongoing drag, it's told that it's over
                     child.dispatchDragEvent(event);
+                    child.mPrivateFlags2 &= ~View.DRAG_MASK;
+                    child.refreshDrawableState();
                 }
 
                 mDragNotifiedChildren.clear();
@@ -979,8 +982,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final int action = event.mAction;
                 // If we've dragged off of a child view, send it the EXITED message
                 if (mCurrentDragView != null) {
+                    final View view = mCurrentDragView;
                     event.mAction = DragEvent.ACTION_DRAG_EXITED;
-                    mCurrentDragView.dispatchDragEvent(event);
+                    view.dispatchDragEvent(event);
+                    view.mPrivateFlags2 &= ~View.DRAG_HOVERED;
+                    view.refreshDrawableState();
                 }
                 mCurrentDragView = target;
 
@@ -988,6 +994,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (target != null) {
                     event.mAction = DragEvent.ACTION_DRAG_ENTERED;
                     target.dispatchDragEvent(event);
+                    target.mPrivateFlags2 |= View.DRAG_HOVERED;
+                    target.refreshDrawableState();
                 }
                 event.mAction = action;  // restore the event's original state
             }
@@ -1018,7 +1026,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         case DragEvent.ACTION_DRAG_EXITED: {
             if (mCurrentDragView != null) {
-                mCurrentDragView.dispatchDragEvent(event);
+                final View view = mCurrentDragView;
+                view.dispatchDragEvent(event);
+                view.mPrivateFlags2 &= ~View.DRAG_HOVERED;
+                view.refreshDrawableState();
+
                 mCurrentDragView = null;
             }
         } break;
@@ -1056,7 +1068,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         for (int i = count - 1; i >= 0; i--) {
             final View child = children[i];
-            if (!child.mCanAcceptDrop) {
+            if (!child.canAcceptDrag()) {
                 continue;
             }
 
@@ -1072,11 +1084,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             Log.d(View.VIEW_LOG_TAG, "Sending drag-started to view: " + child);
         }
 
+        boolean canAccept = false;
         if (! mDragNotifiedChildren.contains(child)) {
             mDragNotifiedChildren.add(child);
-            child.mCanAcceptDrop = child.dispatchDragEvent(mCurrentDrag);
+            canAccept = child.dispatchDragEvent(mCurrentDrag);
+            if (canAccept && !child.canAcceptDrag()) {
+                child.mPrivateFlags2 |= View.DRAG_CAN_ACCEPT;
+                child.refreshDrawableState();
+            }
         }
-        return child.mCanAcceptDrop;
+        return canAccept;
     }
 
     @Override

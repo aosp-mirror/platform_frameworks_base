@@ -3818,6 +3818,8 @@
          <li>"state_grow"
          <li>"state_move"
          <li>"state_hovered"
+         <li>"state_drag_can_accept"
+         <li>"state_drag_hovered"
          </ul>  -->
     <declare-styleable name="DrawableStates">
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
@@ -3870,6 +3872,14 @@
         <!-- State value for {@link android.graphics.drawable.StateListDrawable StateListDrawable},
              set when a pointer is hovering over the view. -->
         <attr name="state_hovered" format="boolean" />
+        <!-- State for {@link android.graphics.drawable.StateListDrawable StateListDrawable}
+             indicating that the Drawable is in a view that is capable of accepting a drop of
+             the content currently being manipulated in a drag-and-drop operation. -->
+        <attr name="state_drag_can_accept" format="boolean" />
+        <!-- State for {@link android.graphics.drawable.StateListDrawable StateListDrawable}
+             indicating that a drag operation (for which the Drawable's view is a valid recipient)
+             is currently positioned over the Drawable. -->
+        <attr name="state_drag_hovered" format="boolean" />
     </declare-styleable>
     <declare-styleable name="ViewDrawableStates">
         <attr name="state_pressed" />
@@ -3880,6 +3890,8 @@
         <attr name="state_activated" />
         <attr name="state_accelerated" />
         <attr name="state_hovered" />
+        <attr name="state_drag_can_accept" />
+        <attr name="state_drag_hovered" />
     </declare-styleable>
     <!-- State array representing a menu item that is currently checked. -->
     <declare-styleable name="MenuItemCheckedState">

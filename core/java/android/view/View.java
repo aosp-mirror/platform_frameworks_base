@@ -1305,6 +1305,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     static final int VIEW_STATE_ACTIVATED = 1 << 5;
     static final int VIEW_STATE_ACCELERATED = 1 << 6;
     static final int VIEW_STATE_HOVERED = 1 << 7;
+    static final int VIEW_STATE_DRAG_CAN_ACCEPT = 1 << 8;
+    static final int VIEW_STATE_DRAG_HOVERED = 1 << 9;
 
     static final int[] VIEW_STATE_IDS = new int[] {
         R.attr.state_window_focused,    VIEW_STATE_WINDOW_FOCUSED,
@@ -1315,6 +1317,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         R.attr.state_activated,         VIEW_STATE_ACTIVATED,
         R.attr.state_accelerated,       VIEW_STATE_ACCELERATED,
         R.attr.state_hovered,           VIEW_STATE_HOVERED,
+        R.attr.state_drag_can_accept,   VIEW_STATE_DRAG_CAN_ACCEPT,
+        R.attr.state_drag_hovered,      VIEW_STATE_DRAG_HOVERED,
     };
 
     static {
@@ -1651,6 +1655,27 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     static final int INVALIDATED                  = 0x80000000;
 
+    /* Masks for mPrivateFlags2 */
+
+    /**
+     * Indicates that this view has reported that it can accept the current drag's content.
+     * Cleared when the drag operation concludes.
+     * @hide
+     */
+    static final int DRAG_CAN_ACCEPT              = 0x00000001;
+
+    /**
+     * Indicates that this view is currently directly under the drag location in a
+     * drag-and-drop operation involving content that it can accept.  Cleared when
+     * the drag exits the view, or when the drag operation concludes.
+     * @hide
+     */
+    static final int DRAG_HOVERED                 = 0x00000002;
+
+    /* End of masks for mPrivateFlags2 */
+
+    static final int DRAG_MASK = DRAG_CAN_ACCEPT | DRAG_HOVERED;
+
     /**
      * Always allow a user to over-scroll this view, provided it is a
      * view that can scroll.
@@ -1822,6 +1847,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         @ViewDebug.FlagToString(mask = DIRTY_MASK, equals = DIRTY, name = "DIRTY")
     })
     int mPrivateFlags;
+    int mPrivateFlags2;
 
     /**
      * This view's request for the visibility of the status bar.
@@ -2249,12 +2275,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Object that handles automatic animation of view properties.
      */
     private ViewPropertyAnimator mAnimator = null;
-
-    /**
-     * Cache drag/drop state
-     *
-     */
-    boolean mCanAcceptDrop;
 
     /**
      * Flag indicating that a drag can cross window boundaries.  When
@@ -10035,6 +10055,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
         if ((privateFlags & HOVERED) != 0) viewStateIndex |= VIEW_STATE_HOVERED;
 
+        final int privateFlags2 = mPrivateFlags2;
+        if ((privateFlags2 & DRAG_CAN_ACCEPT) != 0) viewStateIndex |= VIEW_STATE_DRAG_CAN_ACCEPT;
+        if ((privateFlags2 & DRAG_HOVERED) != 0) viewStateIndex |= VIEW_STATE_DRAG_HOVERED;
+
         drawableState = VIEW_STATE_SETS[viewStateIndex];
 
         //noinspection ConstantIfStatement
@@ -11699,6 +11723,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             return true;
         }
         return onDragEvent(event);
+    }
+
+    boolean canAcceptDrag() {
+        return (mPrivateFlags2 & DRAG_CAN_ACCEPT) != 0;
     }
 
     /**
