@@ -189,11 +189,31 @@ offer UI designed for the generalized sizes and densities and let the system
 handle the actual rendering of the UI on the current device screen according to
 its characteristics. </p>
 
-
 <img src="{@docRoot}images/screens_support/screens-ranges.png" />
 <p class="img-caption"><strong>Figure 1.</strong>
 Illustration of how the Android platform maps actual screen densities and sizes
 to generalized density and size configurations. </p>
+
+<p>Layout designs often need to be done against a minimum amount of
+available space, so each screen size bucket has an associated minimum size.
+These sizes are in "dp" units -- the same units you should use in defining
+your layouts, which allow us to avoid worrying about changes in screen density.</p>
+
+<ul>
+<li> <em>xlarge</em> screens are at least 960dp x 720dp.
+<li> <em>large</em> screens are at least 640dp x 480dp.
+<li> <em>normal</em> screens are at least 470dp x 320dp.
+<li> <em>small</em> screens are at least 426dp x 320dp.
+</ul>
+
+<p>Note that these minimum screen sizes were not
+as well defined prior to Android 3.0, so you may encounter some devices
+that are mis-classified between normal and large.  These are also based
+on the physical resolution of the screen, so may vary across devices --
+for example a 1024x720 tablet with a system bar would actually have a bit
+less space available to the application due to it being used by the system
+bar.  Android does not currently support screens smaller than the "small"
+426dp x 320dp size.</p>
 
 <p>Although the platform lets your application provide customized resources for
 the various size and density configurations, you do not need to do write
@@ -212,7 +232,8 @@ of the emulator skins to replicate the characteristics of any specific
 screen.</p>
 
 <p class="table-caption" id="screens-table"><strong>Table 1.</strong> Screen
-sizes and densities of emulator skins included in the Android SDK.</p>
+sizes and densities of emulator skins included in the Android SDK and other
+representative resolutions.</p>
 
   <table>
     <tbody>
@@ -235,27 +256,33 @@ sizes and densities of emulator skins included in the Android SDK.</p>
       <td  style="background-color:#f3f3f3">
         <em>Small</em> screen
       </td>
-      <td style="font-size:.9em;">QVGA (240x320)</td>
+      <td style="font-size:.9em;"><strong>QVGA (240x320)</strong></td>
       </td>
       <td></td>
-      <td></td>
+      <td style="font-size:.9em;">480x640</td>
       <td></td>
     </tr>
     <tr>
       <td style="background-color:#f3f3f3">
         <em>Normal</em> screen
       </td>
-      <td style="font-size:.9em;">WQVGA400 (240x400)<br>WQVGA432 (240x432)</td>
-      <td style="font-size:.9em;">HVGA (320x480)</td>
-      <td style="font-size:.9em;">WVGA800 (480x800)<br>WVGA854 (480x854)</td>
-      <td style="font-size:.9em;"></td>
+      <td style="font-size:.9em;"><strong>WQVGA400 (240x400)</strong>
+        <br><strong>WQVGA432 (240x432)</strong></td>
+      <td style="font-size:.9em;"><strong>HVGA (320x480)</strong></td>
+      <td style="font-size:.9em;"><strong>WVGA800 (480x800)</strong>
+        <br><strong>WVGA854 (480x854)</strong>
+        <br>600x1024</td>
+      <td style="font-size:.9em;">640x960</td>
     </tr>
     <tr>
       <td style="background-color:#f3f3f3">
         <em>Large</em> screen
       </td>
-      <td></td>
-      <td style="font-size:.9em;">WVGA800* (480x800)<br>WVGA854* (480x854)</td>
+      <td style="font-size:.9em;"><strong>WVGA800** (480x800)</strong>
+        <br><strong>WVGA854** (480x854)</strong></td>
+      <td style="font-size:.9em;"><strong>WVGA800* (480x800)</strong>
+        <br><strong>WVGA854* (480x854)</strong>
+        <br>600x1024</td>
       <td></td>
       <td></td>
     </tr>
@@ -263,14 +290,23 @@ sizes and densities of emulator skins included in the Android SDK.</p>
       <td style="background-color:#f3f3f3">
         <em>Extra Large</em> screen
       </td>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td style="font-size:.9em;">600x1024</td>
+      <td style="font-size:.9em;">768x1024<br><strong>WXGA (768x1280)</strong>
+        <br>800x1280</td>
+      <td style="font-size:.9em;">1152x1536<br>1152x1920
+        <br>1200x1920</td>
+      <td style="font-size:.9em;">1536x2048<br>1536x2560
+        <br>1600x2560</td>
     </tr>
     <tr>
       <td colspan="4" style="border:none;font-size:90%;">* To emulate this
         configuration, specify a custom density of 160 when
+        creating an AVD that uses a WVGA800 or WVGA854 skin.
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4" style="border:none;font-size:90%;">** To emulate this
+        configuration, specify a custom density of 120 when
         creating an AVD that uses a WVGA800 or WVGA854 skin.
       </td>
     </tr>
