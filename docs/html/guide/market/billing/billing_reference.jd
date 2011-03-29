@@ -27,10 +27,6 @@ parent.link=index.html
 </div>
 </div>
 
-<div class="special" style="margin-right:345px">
-  <p>During the testing phase of the in-app billing release you cannot publish applications that implement in-app billing. You can only upload in-app billing applications as draft applications. For more information, see <a href="{@docRoot}guide/market/billing/billing_about.html">About this Release</a></p>
-</div>
-
 <p>The following document provides technical reference information for the following:</p>
 
 <ul>
@@ -84,7 +80,7 @@ parent.link=index.html
 
 <h2 id="billing-interface">In-app Billing Service Interface</h2>
 
-<p>The following section describes the interface for the Android Market in-app billing service. The interface is defined in the <code>IMarketBillingService.aidl</code> file, which is included with the in-app billing <a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample application</a>.</p>
+<p>The following section describes the interface for Android Market's in-app billing service. The interface is defined in the <code>IMarketBillingService.aidl</code> file, which is included with the in-app billing <a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample application</a>.</p>
 <p>The interface consists of a single request method <code>sendBillingRequest()</code>. This method takes a single {@link android.os.Bundle} parameter. The Bundle parameter includes several key-value pairs, which are summarized in table 2.</p>
 
 <p class="table-caption"><strong>Table 2.</strong> Description of Bundle keys passed in a <code>sendBillingRequest()</code> request.</p>
@@ -110,7 +106,7 @@ parent.link=index.html
   <td><code>int</code></td>
   <td>1</td>
   <td>Yes</td>
-  <td>The version of the in-app billing service you are using. The current version is 1.</td>
+  <td>The version of Android Market's in-app billing service you are using. The current version is 1.</td>
 </tr>
 <tr>
   <td><code>PACKAGE_NAME</code></td>
@@ -124,7 +120,7 @@ parent.link=index.html
   <td><code>String</code></td>
   <td>Any valid product identifier.</td>
   <td>Required for <code>REQUEST_PURCHASE</code> requests.</td>
-  <td>The product ID of the item you are making a billing request for. Every in-app item that you sell using the in-app billing service must have a unique product ID, which you specify on the Android Market publisher site.</td>
+  <td>The product ID of the item you are making a billing request for. Every in-app item that you sell using Android Market's in-app billing service must have a unique product ID, which you specify on the Android Market publisher site.</td>
 </tr>
 <tr>
   <td><code>NONCE</code></td>

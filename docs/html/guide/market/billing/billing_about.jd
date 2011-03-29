@@ -25,66 +25,6 @@ parent.link=index.html
 </div>
 </div>
 
-<p>The in-app billing release has now entered the testing phase. During this phase we are providing <a href="{@docRoot}guide/market/billing/index.html">documentation</a> and a <a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample application</a> that shows you how to implement in-app billing. You can use these resources to start designing and testing your in-app billing implementations.</p>
+<p>Android Market In-app Billing has reached the final launch milestone and is now available to developers and users. You can now publish applications that use Android Market's in-app billing service, and users can make in-app purchases. To find out how to implement in-app billing in your applications, see the  <a href="{@docRoot}guide/market/billing/index.html">documentation</a> and the <a href="{@docRoot}guide/market/billing/billing_integrate.html#billing-download">sample application</a>.</p>
 
-<p>Following the testing phase we will launch in-app billing to the general public (see table 1 for a summary launch milestones).
 
-<p class="table-caption"><strong>Table 1.</strong> Summary of launch milestones for in-app billing.</p>
-
-<table>
-
-<tr>
-<th>Release Phase</th>
-<th>Status</th>
-<th>Description</th>
-</tr>
-<tr>
-  <td>Early Development</td>
-  <td>Completed</td>
-  <td>Provided an early look at the documentation and the sample application.</td>
-</tr>
-<tr>
-  <td>Test Development</td>
-  <td>In process</td>
-  <td>You can perform static testing with reserved product IDs and end-to-end testing with real product IDs. You cannot publish applications that use in-app billing.</td>
-</tr>
-<tr>
-  <td>Final Release</td>
-  <td>Coming soon</td>
-  <td>You can perform static testing with reserved product IDs and end-to-end testing with real product IDs. You can publish applications that use in-app billing.</td>
-</tr>
-
-</table>
-
-<p>During the testing phase we are releasing version 2.3.4 of the Android Market application and version 5.0.12 of the MyApps application. To support in-app billing, devices running Android 3.0 must have version 5.0.12 (or higher) of the MyApps application. Devices running all other versions of Android must have version 2.3.4 (or higher) of the Android Market application. Table 2 summarizes these requirements.</p>
-
-<p class="table-caption"><strong>Table 2.</strong> Summary of in-app billing requirements.</p>
-
-<table>
-
-<tr>
-<th>If your device is running this...</th>
-<th>In-app billing requires this</th>
-</tr>
-<tr>
-  <td>Android 1.6</td>
-  <td>Android Market 2.3.4 (or higher)</td>
-</tr>
-<tr>
-  <td>Android 2.x</td>
-  <td>Android Market 2.3.4 (or higher)</td>
-</tr>
-<tr>
-  <td>Android 3.0</td>
-  <td>MyApps 5.0.12 (or higher)</td>
-</tr>
-
-</table>
-
-<p class="note"><strong>Note:</strong> To learn how to check the version of the Android Market application, see <a href="http://market.android.com/support/bin/answer.py?answer=190860">Updating Android Market</a>. To learn about other requirements for in-app billing, see <a href="{@docRoot}guide/market/billing/billing_overview.html#billing-limitations">Requirements and Limitations.</a></p>
-
-<p>You can test your in-app billing implementation two ways during the testing phase: you can use the <a href="{@docRoot}guide/market/billing/billing_testing.html#billing-testing-static">reserved product IDs</a> to test static responses or you can use <a href="{@docRoot}guide/market/billing/billing_testing.html#billing-testing-real">your own product IDs</a> to test end-to-end in-app purchases. To perform end-to-end testing you need to upload your application as a draft application and add products to the application's product list.</p>
-
-<p>During the testing phase, you cannot publish applications that use in-app billing; you can only upload the applications as draft applications. After the testing phase is complete, we will launch in-app billing to the general public and you will be able to publish applications that use in-app billing.</p>
-
-<p>This documentation may change as we move from the testing phase to the final release. Be sure to check this documentation frequently for updates.</p>
