@@ -643,12 +643,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Create (if necessary) and launch the recent apps dialog
      */
     void showRecentAppsDialog() {
-        if (mRecentAppsDialog == null) {
-            mRecentAppsDialog = new RecentApplicationsDialog(mContext);
-        }
-        mRecentAppsDialog.show();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mRecentAppsDialog == null) {
+                    mRecentAppsDialog = new RecentApplicationsDialog(mContext);
+                }
+                mRecentAppsDialog.show();
+            }
+        });
     }
-    
+
     /** {@inheritDoc} */
     public void init(Context context, IWindowManager windowManager,
             LocalPowerManager powerManager) {
@@ -1427,7 +1432,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             return false;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
-            if (!down) {
+            if (down && repeatCount == 0) {
                 showRecentAppsDialog();
             }
             return true;

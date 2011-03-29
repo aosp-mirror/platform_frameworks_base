@@ -594,18 +594,32 @@ private:
         void releaseEventEntryInjectionState(EventEntry* entry);
     };
 
-    /* Tracks dispatched key and motion event state so that cancelation events can be
-     * synthesized when events are dropped. */
-    class InputState {
-    public:
-        // Specifies the sources to cancel.
-        enum CancelationOptions {
+    /* Specifies which events are to be canceled and why. */
+    struct CancelationOptions {
+        enum Mode {
             CANCEL_ALL_EVENTS = 0,
             CANCEL_POINTER_EVENTS = 1,
             CANCEL_NON_POINTER_EVENTS = 2,
             CANCEL_FALLBACK_EVENTS = 3,
         };
 
+        // The criterion to use to determine which events should be canceled.
+        Mode mode;
+
+        // Descriptive reason for the cancelation.
+        const char* reason;
+
+        // The specific keycode of the key event to cancel, or -1 to cancel any key event.
+        int32_t keyCode;
+
+        CancelationOptions(Mode mode, const char* reason) :
+                mode(mode), reason(reason), keyCode(-1) { }
+    };
+
+    /* Tracks dispatched key and motion event state so that cancelation events can be
+     * synthesized when events are dropped. */
+    class InputState {
+    public:
         InputState();
         ~InputState();
 
@@ -623,13 +637,28 @@ private:
 
         // Synthesizes cancelation events for the current state and resets the tracked state.
         void synthesizeCancelationEvents(nsecs_t currentTime, Allocator* allocator,
-                Vector<EventEntry*>& outEvents, CancelationOptions options);
+                Vector<EventEntry*>& outEvents, const CancelationOptions& options);
 
         // Clears the current state.
         void clear();
 
         // Copies pointer-related parts of the input state to another instance.
         void copyPointerStateTo(InputState& other) const;
+
+        // Gets the fallback key associated with a keycode.
+        // Returns -1 if none.
+        // Returns AKEYCODE_UNKNOWN if we are only dispatching the unhandled key to the policy.
+        int32_t getFallbackKey(int32_t originalKeyCode);
+
+        // Sets the fallback key for a particular keycode.
+        void setFallbackKey(int32_t originalKeyCode, int32_t fallbackKeyCode);
+
+        // Removes the fallback key for a particular keycode.
+        void removeFallbackKey(int32_t originalKeyCode);
+
+        inline const KeyedVector<int32_t, int32_t>& getFallbackKeys() const {
+            return mFallbackKeys;
+        }
 
     private:
         struct KeyMemento {
@@ -656,11 +685,12 @@ private:
 
         Vector<KeyMemento> mKeyMementos;
         Vector<MotionMemento> mMotionMementos;
+        KeyedVector<int32_t, int32_t> mFallbackKeys;
 
         static bool shouldCancelKey(const KeyMemento& memento,
-                CancelationOptions options);
+                const CancelationOptions& options);
         static bool shouldCancelMotion(const MotionMemento& memento,
-                CancelationOptions options);
+                const CancelationOptions& options);
     };
 
     /* Manages the dispatch state associated with a single input channel. */
@@ -687,7 +717,6 @@ private:
 
         nsecs_t lastEventTime; // the time when the event was originally captured
         nsecs_t lastDispatchTime; // the time when the last event was dispatched
-        int32_t originalKeyCodeForFallback; // original keycode for fallback in progress, -1 if none
 
         explicit Connection(const sp<InputChannel>& inputChannel,
                 const sp<InputWindowHandle>& inputWindowHandle);
@@ -929,11 +958,11 @@ private:
     static int handleReceiveCallback(int receiveFd, int events, void* data);
 
     void synthesizeCancelationEventsForAllConnectionsLocked(
-            InputState::CancelationOptions options, const char* reason);
+            const CancelationOptions& options);
     void synthesizeCancelationEventsForInputChannelLocked(const sp<InputChannel>& channel,
-            InputState::CancelationOptions options, const char* reason);
+            const CancelationOptions& options);
     void synthesizeCancelationEventsForConnectionLocked(const sp<Connection>& connection,
-            InputState::CancelationOptions options, const char* reason);
+            const CancelationOptions& options);
 
     // Splitting motion events across windows.
     MotionEntry* splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet32 pointerIds);

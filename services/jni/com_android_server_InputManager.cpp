@@ -795,7 +795,9 @@ bool NativeInputManager::dispatchUnhandledKey(const sp<InputWindowHandle>& input
             jobject fallbackKeyEventObj = env->CallObjectMethod(mCallbacksObj,
                     gCallbacksClassInfo.dispatchUnhandledKey,
                     inputWindowHandleObj, keyEventObj, policyFlags);
-            checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey");
+            if (checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey")) {
+                fallbackKeyEventObj = NULL;
+            }
             android_view_KeyEvent_recycle(env, keyEventObj);
             env->DeleteLocalRef(keyEventObj);
 
@@ -826,7 +828,9 @@ bool NativeInputManager::checkInjectEventsPermissionNonReentrant(
     JNIEnv* env = jniEnv();
     jboolean result = env->CallBooleanMethod(mCallbacksObj,
             gCallbacksClassInfo.checkInjectEventsPermission, injectorPid, injectorUid);
-    checkAndClearExceptionFromCallback(env, "checkInjectEventsPermission");
+    if (checkAndClearExceptionFromCallback(env, "checkInjectEventsPermission")) {
+        result = false;
+    }
     return result;
 }
 
