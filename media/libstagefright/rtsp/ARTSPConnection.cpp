@@ -20,6 +20,8 @@
 
 #include "ARTSPConnection.h"
 
+#include <cutils/properties.h>
+
 #include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
@@ -44,6 +46,7 @@ ARTSPConnection::ARTSPConnection()
       mConnectionID(0),
       mNextCSeq(0),
       mReceiveResponseEventPending(false) {
+    MakeUserAgent(&mUserAgent);
 }
 
 ARTSPConnection::~ARTSPConnection() {
@@ -378,6 +381,7 @@ void ARTSPConnection::onSendRequest(const sp<AMessage> &msg) {
     reply->setString("original-request", request.c_str(), request.size());
 
     addAuthentication(&request);
+    addUserAgent(&request);
 
     // Find the boundary between headers and the body.
     ssize_t i = request.find("\r\n\r\n");
@@ -977,6 +981,29 @@ void ARTSPConnection::addAuthentication(AString *request) {
 
     request->insert(fragment, i + 2);
 #endif
+}
+
+// static
+void ARTSPConnection::MakeUserAgent(AString *userAgent) {
+    userAgent->clear();
+    userAgent->setTo("User-Agent: stagefright/1.1 (Linux;Android ");
+
+#if (PROPERTY_VALUE_MAX < 8)
+#error "PROPERTY_VALUE_MAX must be at least 8"
+#endif
+
+    char value[PROPERTY_VALUE_MAX];
+    property_get("ro.build.version.release", value, "Unknown");
+    userAgent->append(value);
+    userAgent->append(")\r\n");
+}
+
+void ARTSPConnection::addUserAgent(AString *request) const {
+    // Find the boundary between headers and the body.
+    ssize_t i = request->find("\r\n\r\n");
+    CHECK_GE(i, 0);
+
+    request->insert(mUserAgent, i + 2);
 }
 
 }  // namespace android
