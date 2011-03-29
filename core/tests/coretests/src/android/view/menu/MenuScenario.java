@@ -16,16 +16,12 @@
 
 package android.view.menu;
 
-import android.util.ListScenario;
-import com.android.internal.view.menu.MenuBuilder;
-import com.android.internal.view.menu.MenuBuilder.MenuAdapter;
-
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.ListScenario;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 /**
  * Utility base class for creating various Menu scenarios. Configurable by the
@@ -36,7 +32,6 @@ public class MenuScenario extends Activity implements MenuItem.OnMenuItemClickLi
     private Menu mMenu;
     private MenuItem[] mItems;
     private boolean[] mWasItemClicked;
-    private MenuAdapter[] mMenuAdapters = new MenuAdapter[MenuBuilder.NUM_TYPES];
     
     @Override
     protected void onCreate(Bundle icicle) {
@@ -147,39 +142,6 @@ public class MenuScenario extends Activity implements MenuItem.OnMenuItemClickLi
         }
         
         return -1;
-    }
-    
-    /**
-     * @see MenuBuilder#getMenuAdapter(int)
-     */
-    public MenuAdapter getMenuAdapter(int menuType) {
-        if (mMenuAdapters[menuType] == null) {
-            mMenuAdapters[menuType] = ((MenuBuilder) mMenu).getMenuAdapter(menuType);
-        }
-        
-        return mMenuAdapters[menuType];
-    }
-
-    /**
-     * Gets a menu view. Call this after you're sure it has been shown,
-     * otherwise it may not have the proper layout_* attributes set.
-     * 
-     * @param menuType The type of menu.
-     * @return The MenuView for that type.
-     */
-    public View getMenuView(int menuType) {
-        return ((MenuBuilder) mMenu).getMenuView(menuType, null);
-    }
-    
-    /**
-     * Gets the menu item view for a given position.
-     * 
-     * @param menuType The type of menu.
-     * @param position The position of the item.
-     * @return The menu item view for the given item in the given menu type.
-     */
-    public View getItemView(int menuType, int position) {
-        return getMenuAdapter(menuType).getView(position, null, null);
     }
     
     public static class Params {

@@ -687,7 +687,7 @@ public class ActionBarImpl extends ActionBar {
                 return;
             }
             invalidate();
-            mUpperContextView.openOverflowMenu();
+            mUpperContextView.showOverflowMenu();
         }
     }
 

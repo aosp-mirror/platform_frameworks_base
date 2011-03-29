@@ -16,6 +16,7 @@
 package com.android.internal.widget;
 
 import com.android.internal.R;
+import com.android.internal.view.menu.ActionMenuPresenter;
 import com.android.internal.view.menu.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
 
@@ -53,6 +54,7 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
     private int mTitleStyleRes;
     private int mSubtitleStyleRes;
     private ActionMenuView mMenuView;
+    private ActionMenuPresenter mPresenter;
 
     private Animator mCurrentAnimation;
     private boolean mAnimateInOnLayout;
@@ -176,9 +178,9 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
         });
 
         final MenuBuilder menu = (MenuBuilder) mode.getMenu();
-        mMenuView = (ActionMenuView) menu.getMenuView(MenuBuilder.TYPE_ACTION_BUTTON, this);
-        mMenuView.setOverflowReserved(true);
-        mMenuView.updateChildren(false);
+        mPresenter = new ActionMenuPresenter();
+        menu.addMenuPresenter(mPresenter);
+        mMenuView = (ActionMenuView) mPresenter.getMenuView(this);
         addView(mMenuView);
 
         mAnimateInOnLayout = true;
@@ -217,28 +219,22 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
     }
 
     public boolean showOverflowMenu() {
-        if (mMenuView != null) {
-            return mMenuView.showOverflowMenu();
+        if (mPresenter != null) {
+            return mPresenter.showOverflowMenu();
         }
         return false;
     }
 
-    public void openOverflowMenu() {
-        if (mMenuView != null) {
-            mMenuView.openOverflowMenu();
-        }
-    }
-
     public boolean hideOverflowMenu() {
-        if (mMenuView != null) {
-            return mMenuView.hideOverflowMenu();
+        if (mPresenter != null) {
+            return mPresenter.hideOverflowMenu();
         }
         return false;
     }
 
     public boolean isOverflowMenuShowing() {
-        if (mMenuView != null) {
-            return mMenuView.isOverflowMenuShowing();
+        if (mPresenter != null) {
+            return mPresenter.isOverflowMenuShowing();
         }
         return false;
     }

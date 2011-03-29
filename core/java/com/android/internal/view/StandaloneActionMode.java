@@ -135,6 +135,6 @@ public class StandaloneActionMode extends ActionMode implements MenuBuilder.Call
 
     public void onMenuModeChange(MenuBuilder menu) {
         invalidate();
-        mContextView.openOverflowMenu();
+        mContextView.showOverflowMenu();
     }
 }

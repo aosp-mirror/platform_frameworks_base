@@ -48,6 +48,8 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
     
     private int mMenuType;
     
+    private LayoutInflater mInflater;
+
     public ListMenuItemView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
     
@@ -187,7 +189,7 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
     }
     
     public void setIcon(Drawable icon) {
-        final boolean showIcon = mItemData.shouldShowIcon(mMenuType);
+        final boolean showIcon = mItemData.shouldShowIcon();
         if (!showIcon && !mPreserveIconSpacing) {
             return;
         }
@@ -212,14 +214,14 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
     }
     
     private void insertIconView() {
-        LayoutInflater inflater = mItemData.getLayoutInflater(mMenuType);
+        LayoutInflater inflater = getInflater();
         mIconView = (ImageView) inflater.inflate(com.android.internal.R.layout.list_menu_item_icon,
                 this, false);
         addView(mIconView, 0);
     }
     
     private void insertRadioButton() {
-        LayoutInflater inflater = mItemData.getLayoutInflater(mMenuType);
+        LayoutInflater inflater = getInflater();
         mRadioButton =
                 (RadioButton) inflater.inflate(com.android.internal.R.layout.list_menu_item_radio,
                 this, false);
@@ -227,7 +229,7 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
     }
     
     private void insertCheckBox() {
-        LayoutInflater inflater = mItemData.getLayoutInflater(mMenuType);
+        LayoutInflater inflater = getInflater();
         mCheckBox =
                 (CheckBox) inflater.inflate(com.android.internal.R.layout.list_menu_item_checkbox,
                 this, false);
@@ -242,4 +244,10 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
         return false;
     }
     
+    private LayoutInflater getInflater() {
+        if (mInflater == null) {
+            mInflater = LayoutInflater.from(mContext);
+        }
+        return mInflater;
+    }
 }

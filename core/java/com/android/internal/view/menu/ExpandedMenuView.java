@@ -17,17 +17,15 @@
 package com.android.internal.view.menu;
 
 
+import com.android.internal.view.menu.MenuBuilder.ItemInvoker;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
-
-import com.android.internal.view.menu.MenuBuilder.ItemInvoker;
+import android.widget.ListView;
 
 /**
  * The expanded menu view is a list-like menu with all of the available menu items.  It is opened
@@ -53,23 +51,8 @@ public final class ExpandedMenuView extends ListView implements ItemInvoker, Men
         setOnItemClickListener(this);
     }
 
-    public void initialize(MenuBuilder menu, int menuType) {
+    public void initialize(MenuBuilder menu) {
         mMenu = menu;
-
-        setAdapter(menu.new MenuAdapter(menuType));
-    }
-
-    public void updateChildren(boolean cleared) {
-        ListAdapter adapter = getAdapter();
-        // Tell adapter of the change, it will notify the mListView
-        if (adapter != null) {
-            if (cleared) {
-                ((BaseAdapter)adapter).notifyDataSetInvalidated();
-            }
-            else {
-                ((BaseAdapter)adapter).notifyDataSetChanged();
-            }
-        }
     }
 
     @Override
