@@ -36,7 +36,7 @@ public class YuvImage {
     private final static int WORKING_COMPRESS_STORAGE = 4096;
 
    /**
-     * The YUV format as defined in {@link PixelFormat}.
+     * The YUV format as defined in {@link ImageFormat}.
      */
     private int mFormat;
 
@@ -67,7 +67,7 @@ public class YuvImage {
      *
      * @param yuv     The YUV data. In the case of more than one image plane, all the planes must be
      *                concatenated into a single byte array.
-     * @param format  The YUV data format as defined in {@link PixelFormat}.
+     * @param format  The YUV data format as defined in {@link ImageFormat}.
      * @param width   The width of the YuvImage.
      * @param height  The height of the YuvImage.
      * @param strides (Optional) Row bytes of each image plane. If yuv contains padding, the stride
@@ -152,7 +152,7 @@ public class YuvImage {
     }
 
     /**
-     * @return the YUV format as defined in {@link PixelFormat}.
+     * @return the YUV format as defined in {@link ImageFormat}.
      */
     public int getYuvFormat() {
         return mFormat;
