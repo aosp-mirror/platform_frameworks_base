@@ -399,11 +399,9 @@
     <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Umožňuje aplikácii pripojiť sa k prístupovým bodom Wi-Fi alebo sa od nich odpojiť a uskutočňovať zmeny nakonfigurovaných sietí Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"Povoliť príjem viacsmerového vysielania Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Umožňuje aplikácii prijímať pakety, ktoré neboli adresované priamo vášmu zariadeniu. Pomocou tejto možnosti môžete objaviť služby ponúkané vo vašej blízkosti. Spotreba energie je vyššia ako v režime bez viacsmerového vysielania."</string>
-    <!-- no translation found for permlab_accessWimaxState (2800410363171809280) -->
-    <skip />
+    <string name="permlab_accessWimaxState" msgid="2800410363171809280">"zobraziť stav WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Umožňuje aplikácii zobraziť informácie o stave siete WiMAX."</string>
-    <!-- no translation found for permlab_changeWimaxState (340465839241528618) -->
-    <skip />
+    <string name="permlab_changeWimaxState" msgid="340465839241528618">"zmeniť stav WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Umožňuje aplikácii pripojiť sa a odpojiť zo siete WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"správa rozhrania Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Umožňuje aplikácii konfigurovať miestny telefón s rozhraním Bluetooth a vyhľadávať a párovať vzdialené zariadenia."</string>

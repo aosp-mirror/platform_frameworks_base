@@ -896,7 +896,7 @@
     <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Dotaknite da biste saznali više o upotrebi mobilnih podataka"</string>
     <string name="throttled_notification_title" msgid="6269541897729781332">"Prekoračeno je ograničenje za podatke na mobilnom uređaju"</string>
     <string name="throttled_notification_message" msgid="4712369856601275146">"Dotaknite da biste saznali više o upotrebi mobilnih podataka"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Isključivanje memorije USB..."</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Isključivanje USB memorije..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Isključivanje SD kartice..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Brisanje memorije USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Brisanje SD kartice..."</string>

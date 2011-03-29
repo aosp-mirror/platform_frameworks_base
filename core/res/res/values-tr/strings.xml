@@ -817,7 +817,7 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"USB depolama birimini açarsanız, kullanmakta olduğunuz bazı uygulamalar durur ve USB depolama birimi kapatılıncaya kadar kullanılamayabilir."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB işlemi başarısız oldu"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Tamam"</string>
-    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"USB dep br biçimlndr"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"USB\'yi biçimlendir"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SD kartı biçimlendir"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"USB depolama birimi biçimlendirilsin mi? Depolama biriminde saklanan tüm dosyalar silinir. İşlem geri alınamaz!"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"SD kartı biçimlendirmek istediğinizden emin misiniz? Kartınızdaki tüm veriler yok olacak."</string>
