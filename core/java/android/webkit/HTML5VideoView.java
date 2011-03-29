@@ -15,7 +15,7 @@ import java.util.TimerTask;
 /**
  * @hide This is only used by the browser
  */
-public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
+public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
 
     protected static final String LOGTAG = "HTML5VideoView";
 
@@ -189,6 +189,10 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
         mPlayer.setOnPreparedListener(this);
     }
 
+    public void setOnInfoListener(HTML5VideoViewProxy proxy) {
+        mPlayer.setOnInfoListener(proxy);
+    }
+
     // Normally called immediately after setVideoURI. But for full screen,
     // this should be after surface holder created
     public void prepareDataAndDisplayMode(HTML5VideoViewProxy proxy) {
@@ -198,7 +202,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener{
         setOnCompletionListener(proxy);
         setOnPreparedListener(proxy);
         setOnErrorListener(proxy);
-
+        setOnInfoListener(proxy);
         // When there is exception, we could just bail out silently.
         // No Video will be played though. Write the stack for debug
         try {
