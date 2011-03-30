@@ -66,8 +66,9 @@ public class MediaFile {
     public static final int FILE_TYPE_ASF     = 26;
     public static final int FILE_TYPE_MKV     = 27;
     public static final int FILE_TYPE_MP2TS   = 28;
+    public static final int FILE_TYPE_AVI     = 29;
     private static final int FIRST_VIDEO_FILE_TYPE = FILE_TYPE_MP4;
-    private static final int LAST_VIDEO_FILE_TYPE = FILE_TYPE_MP2TS;
+    private static final int LAST_VIDEO_FILE_TYPE = FILE_TYPE_AVI;
     
     // Image file types
     public static final int FILE_TYPE_JPEG    = 31;
@@ -198,6 +199,7 @@ public class MediaFile {
         addFileType("MKV", FILE_TYPE_MKV, "video/x-matroska");
         addFileType("WEBM", FILE_TYPE_MKV, "video/x-matroska");
         addFileType("TS", FILE_TYPE_MP2TS, "video/mp2ts");
+        addFileType("AVI", FILE_TYPE_AVI, "video/avi");
 
         if (isWMVEnabled()) {
             addFileType("WMV", FILE_TYPE_WMV, "video/x-ms-wmv", MtpConstants.FORMAT_WMV);
