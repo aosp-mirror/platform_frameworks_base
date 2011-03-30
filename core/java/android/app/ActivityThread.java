@@ -916,7 +916,7 @@ public final class ActivityThread {
         public static final int HIDE_WINDOW             = 106;
         public static final int RESUME_ACTIVITY         = 107;
         public static final int SEND_RESULT             = 108;
-        public static final int DESTROY_ACTIVITY         = 109;
+        public static final int DESTROY_ACTIVITY        = 109;
         public static final int BIND_APPLICATION        = 110;
         public static final int EXIT_APPLICATION        = 111;
         public static final int NEW_INTENT              = 112;
@@ -1130,8 +1130,8 @@ public final class ActivityThread {
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + msg.what);
         }
 
-        void maybeSnapshot() {
-            if (mBoundApplication != null) {
+        private void maybeSnapshot() {
+            if (mBoundApplication != null && SamplingProfilerIntegration.isEnabled()) {
                 // convert the *private* ActivityThread.PackageInfo to *public* known
                 // android.content.pm.PackageInfo
                 String packageName = mBoundApplication.info.mPackageName;
@@ -3396,8 +3396,7 @@ public final class ActivityThread {
     }
         
     final void handleLowMemory() {
-        ArrayList<ComponentCallbacks> callbacks
-                = new ArrayList<ComponentCallbacks>();
+        ArrayList<ComponentCallbacks> callbacks;
 
         synchronized (mPackages) {
             callbacks = collectComponentCallbacksLocked(true, null);
