@@ -410,7 +410,14 @@ ssize_t NuHTTPDataSource::readAt(off64_t offset, void *data, size_t size) {
             internalRead((uint8_t *)data + numBytesRead, size - numBytesRead);
 
         if (n < 0) {
-            return n;
+            if (numBytesRead == 0 || mContentLengthValid) {
+                return n;
+            }
+
+            // If there was an error we want to at least return the data
+            // we've already successfully read. The next call to read will
+            // then return the error.
+            n = 0;
         }
 
         int64_t delayUs = ALooper::GetNowUs() - startTimeUs;
