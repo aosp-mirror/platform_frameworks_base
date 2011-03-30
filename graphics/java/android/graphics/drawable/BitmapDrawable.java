@@ -67,7 +67,6 @@ public class BitmapDrawable extends Drawable {
     private final Rect mDstRect = new Rect();   // Gravity.apply() sets this
 
     private boolean mApplyGravity;
-    private boolean mRebuildShader;
     private boolean mMutated;
     
      // These are scaled to match the target density.
@@ -348,7 +347,7 @@ public class BitmapDrawable extends Drawable {
         if (state.mTileModeX != xmode || state.mTileModeY != ymode) {
             state.mTileModeX = xmode;
             state.mTileModeY = ymode;
-            mRebuildShader = true;
+            state.mRebuildShader = true;
             invalidateSelf();
         }
     }
@@ -369,7 +368,7 @@ public class BitmapDrawable extends Drawable {
         Bitmap bitmap = mBitmap;
         if (bitmap != null) {
             final BitmapState state = mBitmapState;
-            if (mRebuildShader) {
+            if (state.mRebuildShader) {
                 Shader.TileMode tmx = state.mTileModeX;
                 Shader.TileMode tmy = state.mTileModeY;
 
@@ -380,7 +379,7 @@ public class BitmapDrawable extends Drawable {
                             tmx == null ? Shader.TileMode.CLAMP : tmx,
                             tmy == null ? Shader.TileMode.CLAMP : tmy));
                 }
-                mRebuildShader = false;
+                state.mRebuildShader = false;
                 copyBounds(mDstRect);
             }
 
@@ -424,7 +423,6 @@ public class BitmapDrawable extends Drawable {
     public Drawable mutate() {
         if (!mMutated && super.mutate() == this) {
             mBitmapState = new BitmapState(mBitmapState);
-            mRebuildShader = true;
             mMutated = true;
         }
         return this;
@@ -511,6 +509,7 @@ public class BitmapDrawable extends Drawable {
         Shader.TileMode mTileModeX = null;
         Shader.TileMode mTileModeY = null;
         int mTargetDensity = DisplayMetrics.DENSITY_DEFAULT;
+        boolean mRebuildShader;
 
         BitmapState(Bitmap bitmap) {
             mBitmap = bitmap;
@@ -524,18 +523,19 @@ public class BitmapDrawable extends Drawable {
             mTileModeY = bitmapState.mTileModeY;
             mTargetDensity = bitmapState.mTargetDensity;
             mPaint = new Paint(bitmapState.mPaint);
+            mRebuildShader = bitmapState.mRebuildShader;
         }
 
         @Override
         public Drawable newDrawable() {
             return new BitmapDrawable(this, null);
         }
-        
+
         @Override
         public Drawable newDrawable(Resources res) {
             return new BitmapDrawable(this, res);
         }
-        
+
         @Override
         public int getChangingConfigurations() {
             return mChangingConfigurations;
