@@ -2240,8 +2240,8 @@ void OMXCodec::onEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
                         android_native_rect_t crop;
                         crop.left = left;
                         crop.top = top;
-                        crop.right = right;
-                        crop.bottom = bottom;
+                        crop.right = right + 1;
+                        crop.bottom = bottom + 1;
 
                         // We'll ignore any errors here, if the surface is
                         // already invalid, we'll know soon enough.
