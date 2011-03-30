@@ -1022,7 +1022,7 @@
     <permission android:name="android.permission.STOP_APP_SWITCHES"
         android:label="@string/permlab_stopAppSwitches"
         android:description="@string/permdesc_stopAppSwitches"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to retrieve the current state of keys and
          switches.  This is only for use by the system.-->
