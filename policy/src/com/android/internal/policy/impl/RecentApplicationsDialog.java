@@ -17,16 +17,13 @@
 package com.android.internal.policy.impl;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerNative;
 import android.app.Dialog;
-import android.app.IActivityManager;
 import android.app.StatusBarManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -34,6 +31,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -72,13 +71,12 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         }
     };
 
-    private int mIconSize;
+    private int mInitialModifiers;
 
-    public RecentApplicationsDialog(Context context) {
+    public RecentApplicationsDialog(Context context, int initialModifiers) {
         super(context, com.android.internal.R.style.Theme_Dialog_RecentApplications);
 
-        final Resources resources = context.getResources();
-        mIconSize = (int) resources.getDimension(android.R.dimen.app_icon_size);
+        mInitialModifiers = initialModifiers;
     }
 
     /**
@@ -127,32 +125,100 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         }
     }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_APP_SWITCH || keyCode == KeyEvent.KEYCODE_TAB) {
+            // Ignore all meta keys other than SHIFT.  The app switch key could be a
+            // fallback action chorded with ALT, META or even CTRL depending on the key map.
+            // DPad navigation is handled by the ViewRoot elsewhere.
+            final boolean backward = event.isShiftPressed();
+            final int numIcons = mIcons.length;
+            int numButtons = 0;
+            while (numButtons < numIcons && mIcons[numButtons].getVisibility() == View.VISIBLE) {
+                numButtons += 1;
+            }
+            if (numButtons != 0) {
+                int nextFocus = backward ? numButtons - 1 : 0;
+                for (int i = 0; i < numButtons; i++) {
+                    if (mIcons[i].hasFocus()) {
+                        if (backward) {
+                            nextFocus = (i + numButtons - 1) % numButtons;
+                        } else {
+                            nextFocus = (i + 1) % numButtons;
+                        }
+                        break;
+                    }
+                }
+                final int direction = backward ? View.FOCUS_BACKWARD : View.FOCUS_FORWARD;
+                if (mIcons[nextFocus].requestFocus(direction)) {
+                    mIcons[nextFocus].playSoundEffect(
+                            SoundEffectConstants.getContantForFocusDirection(direction));
+                }
+            }
+
+            // The dialog always handles the key to prevent the ViewRoot from
+            // performing the default navigation itself.
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (mInitialModifiers != 0 && event.hasNoModifiers()) {
+            final int numIcons = mIcons.length;
+            RecentTag tag = null;
+            for (int i = 0; i < numIcons; i++) {
+                if (mIcons[i].getVisibility() != View.VISIBLE) {
+                    break;
+                }
+                if (i == 0 || mIcons[i].hasFocus()) {
+                    tag = (RecentTag) mIcons[i].getTag();
+                    if (mIcons[i].hasFocus()) {
+                        break;
+                    }
+                }
+            }
+            if (tag != null) {
+                switchTo(tag);
+            }
+            dismiss();
+            return true;
+        }
+
+        return super.onKeyUp(keyCode, event);
+    }
+
     /**
      * Handler for user clicks.  If a button was clicked, launch the corresponding activity.
      */
     public void onClick(View v) {
-
         for (TextView b: mIcons) {
             if (b == v) {
                 RecentTag tag = (RecentTag)b.getTag();
-                if (tag.info.id >= 0) {
-                    // This is an active task; it should just go to the foreground.
-                    final ActivityManager am = (ActivityManager)
-                            getContext().getSystemService(Context.ACTIVITY_SERVICE);
-                    am.moveTaskToFront(tag.info.id, ActivityManager.MOVE_TASK_WITH_HOME);
-                } else if (tag.intent != null) {
-                    tag.intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
-                            | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-                    try {
-                        getContext().startActivity(tag.intent);
-                    } catch (ActivityNotFoundException e) {
-                        Log.w("Recent", "Unable to launch recent task", e);
-                    }
-                }
+                switchTo(tag);
                 break;
             }
         }
         dismiss();
+    }
+
+    private void switchTo(RecentTag tag) {
+        if (tag.info.id >= 0) {
+            // This is an active task; it should just go to the foreground.
+            final ActivityManager am = (ActivityManager)
+                    getContext().getSystemService(Context.ACTIVITY_SERVICE);
+            am.moveTaskToFront(tag.info.id, ActivityManager.MOVE_TASK_WITH_HOME);
+        } else if (tag.intent != null) {
+            tag.intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY
+                    | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+            try {
+                getContext().startActivity(tag.intent);
+            } catch (ActivityNotFoundException e) {
+                Log.w("Recent", "Unable to launch recent task", e);
+            }
+        }
     }
 
     /**
