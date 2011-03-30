@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.usb.UsbService;

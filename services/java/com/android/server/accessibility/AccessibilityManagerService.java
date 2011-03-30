@@ -14,7 +14,7 @@
  ** limitations under the License.
  */
 
-package com.android.server;
+package com.android.server.accessibility;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.HandlerCaller;
@@ -131,7 +131,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      *
      * @param context A {@link Context} instance.
      */
-    AccessibilityManagerService(Context context) {
+    public AccessibilityManagerService(Context context) {
         mContext = context;
         mPackageManager = mContext.getPackageManager();
         mCaller = new HandlerCaller(context, this);
