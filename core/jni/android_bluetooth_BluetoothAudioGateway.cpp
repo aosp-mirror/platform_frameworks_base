@@ -484,21 +484,21 @@ static int setup_listening_socket(int dev, int channel) {
         lm = RFCOMM_LM_AUTH | RFCOMM_LM_ENCRYPT;
     }
 
-	if (lm && setsockopt(sk, SOL_RFCOMM, RFCOMM_LM, &lm, sizeof(lm)) < 0) {
-		LOGE("Can't set RFCOMM link mode");
-		close(sk);
-		return -1;
-	}
+    if (lm && setsockopt(sk, SOL_RFCOMM, RFCOMM_LM, &lm, sizeof(lm)) < 0) {
+        LOGE("Can't set RFCOMM link mode");
+        close(sk);
+        return -1;
+    }
 
     laddr.rc_family = AF_BLUETOOTH;
-    bacpy(&laddr.rc_bdaddr, BDADDR_ANY);
+    memcpy(&laddr.rc_bdaddr, BDADDR_ANY, sizeof(bdaddr_t));
     laddr.rc_channel = channel;
 
-	if (bind(sk, (struct sockaddr *)&laddr, sizeof(laddr)) < 0) {
-		LOGE("Can't bind RFCOMM socket");
-		close(sk);
-		return -1;
-	}
+    if (bind(sk, (struct sockaddr *)&laddr, sizeof(laddr)) < 0) {
+        LOGE("Can't bind RFCOMM socket");
+        close(sk);
+        return -1;
+    }
 
     listen(sk, 10);
     return sk;

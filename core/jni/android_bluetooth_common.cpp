@@ -43,6 +43,7 @@ static Properties remote_device_properties[] = {
     {"Icon", DBUS_TYPE_STRING},
     {"Class", DBUS_TYPE_UINT32},
     {"UUIDs", DBUS_TYPE_ARRAY},
+    {"Services", DBUS_TYPE_ARRAY},
     {"Paired", DBUS_TYPE_BOOLEAN},
     {"Connected", DBUS_TYPE_BOOLEAN},
     {"Trusted", DBUS_TYPE_BOOLEAN},
@@ -52,7 +53,8 @@ static Properties remote_device_properties[] = {
     {"Adapter", DBUS_TYPE_OBJECT_PATH},
     {"LegacyPairing", DBUS_TYPE_BOOLEAN},
     {"RSSI", DBUS_TYPE_INT16},
-    {"TX", DBUS_TYPE_UINT32}
+    {"TX", DBUS_TYPE_UINT32},
+    {"Broadcaster", DBUS_TYPE_BOOLEAN}
 };
 
 static Properties adapter_properties[] = {
