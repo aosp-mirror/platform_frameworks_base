@@ -42,6 +42,8 @@ enum {
     AXIS_NAVHIDDEN,
     AXIS_NAVIGATION,
     AXIS_SCREENSIZE,
+    AXIS_SCREENWIDTHDP,
+    AXIS_SCREENHEIGHTDP,
     AXIS_VERSION
 };
 
@@ -52,6 +54,7 @@ enum {
     SDK_ECLAIR_0_1 = 6,
     SDK_MR1 = 7,
     SDK_FROYO = 8,
+    SDK_ICS = 13,
 };
 
 /**
@@ -71,6 +74,8 @@ public:
     String8 vendor;
     String8 screenLayoutSize;
     String8 screenLayoutLong;
+    String8 screenWidthDp;
+    String8 screenHeightDp;
     String8 orientation;
     String8 uiModeType;
     String8 uiModeNight;
@@ -102,6 +107,8 @@ public:
     static bool getNavigationName(const char* name, ResTable_config* out = NULL);
     static bool getNavHiddenName(const char* name, ResTable_config* out = NULL);
     static bool getScreenSizeName(const char* name, ResTable_config* out = NULL);
+    static bool getScreenWidthDpName(const char* name, ResTable_config* out = NULL);
+    static bool getScreenHeightDpName(const char* name, ResTable_config* out = NULL);
     static bool getVersionName(const char* name, ResTable_config* out = NULL);
 
     int compare(const AaptGroupEntry& o) const;

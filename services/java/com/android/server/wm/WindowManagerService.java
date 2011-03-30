@@ -5453,6 +5453,9 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplay.getMetrics(dm);
         CompatibilityInfo.updateCompatibleScreenFrame(dm, orientation, mCompatibleScreenFrame);
 
+        config.screenWidthDp = (int)(dm.widthPixels / dm.density);
+        config.screenHeightDp = (int)(dm.heightPixels / dm.density);
+
         if (mScreenLayout == Configuration.SCREENLAYOUT_SIZE_UNDEFINED) {
             // Note we only do this once because at this point we don't
             // expect the screen to change in this way at runtime, and want

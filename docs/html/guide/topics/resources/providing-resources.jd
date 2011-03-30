@@ -383,6 +383,46 @@ is not related to the screen orientation.</p>
 which indicates whether the screen is long.</p>
       </td>
     </tr>
+    <tr id="ScreenWidthQualifier">
+      <td>Screen width</td>
+      <td>Examples:<br/>
+        <code>w720dp</code><br/>
+        <code>w1024dp</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>Specifies a minimum screen width, in "dp" units, at which the resource
+          should be used.  This configuration value will change when the orientation
+          changes between landscape and portrait to match the current actual width.
+          When multiple screen width configurations are available, the closest to
+          the current screen width will be used.  The value specified here is
+          approximate; screen decorations like a status bar or system bar may cause
+          the actual space available in your UI to be slightly smaller.
+        <p><em>Added in API Level 13.</em></p>
+        <p>Also see the {@link android.content.res.Configuration#screenWidthDp}
+          configuration field, which holds the current screen width.</p>
+      </td>
+    </tr>
+    <tr id="ScreenHeightQualifier">
+      <td>Screen height</td>
+      <td>Examples:<br/>
+        <code>h720dp</code><br/>
+        <code>h1024dp</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>Specifies a minimum screen height, in "dp" units, at which the resource
+          should be used.  This configuration value will change when the orientation
+          changes between landscape and portrait to match the current actual height.
+          When multiple screen height configurations are available, the closest to
+          the current screen height will be used.  The value specified here is
+          approximate; screen decorations like a status bar or system bar may cause
+          the actual space available in your UI to be slightly smaller.
+        <p><em>Added in API Level 13.</em></p>
+        <p>Also see the {@link android.content.res.Configuration#screenHeightDp}
+          configuration field, which holds the current screen width.</p>
+      </td>
+    </tr>
     <tr id="OrientationQualifier">
       <td>Screen orientation</td>
       <td>

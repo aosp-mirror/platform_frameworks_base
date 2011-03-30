@@ -532,6 +532,7 @@ static void android_content_AssetManager_setConfiguration(JNIEnv* env, jobject c
                                                           jint keyboard, jint keyboardHidden,
                                                           jint navigation,
                                                           jint screenWidth, jint screenHeight,
+                                                          jint screenWidthDp, jint screenHeightDp,
                                                           jint screenLayout, jint uiMode,
                                                           jint sdkVersion)
 {
@@ -555,6 +556,8 @@ static void android_content_AssetManager_setConfiguration(JNIEnv* env, jobject c
     config.navigation = (uint8_t)navigation;
     config.screenWidth = (uint16_t)screenWidth;
     config.screenHeight = (uint16_t)screenHeight;
+    config.screenWidthDp = (uint16_t)screenWidthDp;
+    config.screenHeightDp = (uint16_t)screenHeightDp;
     config.screenLayout = (uint8_t)screenLayout;
     config.uiMode = (uint8_t)uiMode;
     config.sdkVersion = (uint16_t)sdkVersion;
@@ -1693,7 +1696,7 @@ static JNINativeMethod gAssetManagerMethods[] = {
         (void*) android_content_AssetManager_setLocale },
     { "getLocales",      "()[Ljava/lang/String;",
         (void*) android_content_AssetManager_getLocales },
-    { "setConfiguration", "(IILjava/lang/String;IIIIIIIIIII)V",
+    { "setConfiguration", "(IILjava/lang/String;IIIIIIIIIIIII)V",
         (void*) android_content_AssetManager_setConfiguration },
     { "getResourceIdentifier","(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I",
         (void*) android_content_AssetManager_getResourceIdentifier },

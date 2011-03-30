@@ -396,7 +396,7 @@ public class PackageParser {
             int cookie = assmgr.addAssetPath(mArchiveSourcePath);
             if (cookie != 0) {
                 res = new Resources(assmgr, metrics, null);
-                assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         Build.VERSION.RESOURCES_SDK_INT);
                 parser = assmgr.openXmlResourceParser(cookie, "AndroidManifest.xml");
                 assetError = false;
@@ -596,7 +596,7 @@ public class PackageParser {
         AssetManager assmgr = null;
         try {
             assmgr = new AssetManager();
-            assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     Build.VERSION.RESOURCES_SDK_INT);
             int cookie = assmgr.addAssetPath(packageFilePath);
             parser = assmgr.openXmlResourceParser(cookie, "AndroidManifest.xml");
@@ -1931,6 +1931,10 @@ public class PackageParser {
             a.info.configChanges = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_configChanges,
                     0);
+            if (owner.applicationInfo.targetSdkVersion
+                        < android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+                a.info.configChanges |= ActivityInfo.CONFIG_SCREEN_SIZE;
+            }
             a.info.softInputMode = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_windowSoftInputMode,
                     0);

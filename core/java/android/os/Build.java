@@ -230,6 +230,11 @@ public class Build {
          * Newest version of Android, version 3.1.
          */
         public static final int HONEYCOMB_MR1 = 12;
+
+        /**
+         * Current version under development.
+         */
+        public static final int ICE_CREAM_SANDWICH = CUR_DEVELOPMENT;
     }
     
     /** The type of build, like "user" or "eng". */
