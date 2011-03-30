@@ -296,7 +296,7 @@ parent.link=index.html
 <pre>
 try {
   boolean bindResult = mContext.bindService(
-    new Intent(IMarketBillingService.class.getName()), this, Context.BIND_AUTO_CREATE);
+    new Intent("com.android.vending.billing.MarketBillingService.BIND"), this, Context.BIND_AUTO_CREATE);
   if (bindResult) {
     Log.i(TAG, "Service bind successful.");
   } else {
