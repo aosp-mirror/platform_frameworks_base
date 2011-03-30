@@ -30,6 +30,7 @@
 
 #define LOG_TAG "AudioGroup"
 #include <cutils/atomic.h>
+#include <cutils/properties.h>
 #include <utils/Log.h>
 #include <utils/Errors.h>
 #include <utils/RefBase.h>
@@ -618,6 +619,14 @@ bool AudioGroup::setMode(int mode)
 {
     if (mode < 0 || mode > LAST_MODE) {
         return false;
+    }
+    //FIXME: temporary code to overcome echo and mic gain issues on herring board.
+    // Must be modified/removed when proper support for voice processing query and control
+    // is included in audio framework
+    char value[PROPERTY_VALUE_MAX];
+    property_get("ro.product.board", value, "");
+    if (mode == NORMAL && !strcmp(value, "herring")) {
+        mode = ECHO_SUPPRESSION;
     }
     if (mode == ECHO_SUPPRESSION && AudioSystem::getParameters(
         0, String8("ec_supported")) == "ec_supported=yes") {
