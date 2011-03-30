@@ -387,11 +387,14 @@ public class UsbService extends IUsbManager.Stub {
                     case MSG_UPDATE_STATE:
                         if (mConnected != mLastConnected || mConfiguration != mLastConfiguration) {
                             if (mConnected == 0) {
-                                // make sure accessory mode is off, and restore default functions
-                                if (mCurrentAccessory != null && UsbManager.setFunctionEnabled(
-                                        UsbManager.USB_FUNCTION_ACCESSORY, false)) {
+                                if (UsbManager.isFunctionEnabled(
+                                            UsbManager.USB_FUNCTION_ACCESSORY)) {
+                                    // make sure accessory mode is off, and restore default functions
                                     Log.d(TAG, "exited USB accessory mode");
-
+                                    if (!UsbManager.setFunctionEnabled
+                                            (UsbManager.USB_FUNCTION_ACCESSORY, false)) {
+                                        Log.e(TAG, "could not disable accessory function");
+                                    }
                                     int count = mDefaultFunctions.size();
                                     for (int i = 0; i < count; i++) {
                                         String function = mDefaultFunctions.get(i);
@@ -400,8 +403,10 @@ public class UsbService extends IUsbManager.Stub {
                                         }
                                     }
 
-                                    mDeviceManager.accessoryDetached(mCurrentAccessory);
-                                    mCurrentAccessory = null;
+                                    if (mCurrentAccessory != null) {
+                                        mDeviceManager.accessoryDetached(mCurrentAccessory);
+                                        mCurrentAccessory = null;
+                                    }
                                 }
                             }
 
