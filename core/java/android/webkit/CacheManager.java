@@ -857,6 +857,7 @@ public final class CacheManager {
         String cacheControl = headers.getCacheControl();
         if (cacheControl != null) {
             String[] controls = cacheControl.toLowerCase().split("[ ,;]");
+            boolean noCache = false;
             for (int i = 0; i < controls.length; i++) {
                 if (NO_STORE.equals(controls[i])) {
                     return null;
@@ -867,7 +868,12 @@ public final class CacheManager {
                 // can only be used in CACHE_MODE_CACHE_ONLY case
                 if (NO_CACHE.equals(controls[i])) {
                     ret.expires = 0;
-                } else if (controls[i].startsWith(MAX_AGE)) {
+                    noCache = true;
+                // if cache control = no-cache has been received, ignore max-age
+                // header, according to http spec:
+                // If a request includes the no-cache directive, it SHOULD NOT
+                // include min-fresh, max-stale, or max-age.
+                } else if (controls[i].startsWith(MAX_AGE) && !noCache) {
                     int separator = controls[i].indexOf('=');
                     if (separator < 0) {
                         separator = controls[i].indexOf(':');
