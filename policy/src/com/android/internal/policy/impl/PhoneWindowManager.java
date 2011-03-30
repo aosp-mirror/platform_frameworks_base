@@ -626,7 +626,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_DIALOG) {
-            showRecentAppsDialog();
+            showRecentAppsDialog(0);
         } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_ACTIVITY) {
             try {
                 Intent intent = new Intent();
@@ -645,12 +645,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /**
      * Create (if necessary) and launch the recent apps dialog
      */
-    void showRecentAppsDialog() {
+    void showRecentAppsDialog(final int initialModifiers) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (mRecentAppsDialog == null) {
-                    mRecentAppsDialog = new RecentApplicationsDialog(mContext);
+                    mRecentAppsDialog = new RecentApplicationsDialog(mContext, initialModifiers);
                 }
                 mRecentAppsDialog.show();
             }
@@ -1392,7 +1392,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return false;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
             if (down && repeatCount == 0) {
-                showRecentAppsDialog();
+                showRecentAppsDialog(event.getMetaState() & KeyEvent.getModifierMetaStateMask());
             }
             return true;
         }

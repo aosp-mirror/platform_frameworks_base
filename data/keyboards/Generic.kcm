@@ -287,8 +287,8 @@ key 9 {
 key SPACE {
     label:                              ' '
     base:                               ' '
-    ctrl, alt:                          none
-    meta:                               fallback SEARCH
+    ctrl:                               none
+    alt, meta:                          fallback SEARCH
 }
 
 key ENTER {
@@ -300,8 +300,8 @@ key ENTER {
 key TAB {
     label:                              '\t'
     base:                               '\t'
-    ctrl, alt:                          none
-    meta:                               fallback APP_SWITCH
+    ctrl:                               none
+    alt, meta:                          fallback APP_SWITCH
 }
 
 key COMMA {
@@ -542,8 +542,8 @@ key PLUS {
 
 key ESCAPE {
     base:                               fallback BACK
-    meta:                               fallback HOME
-    alt:                                fallback MENU
+    alt, meta:                          fallback HOME
+    ctrl:                               fallback MENU
 }
 
 ### Gamepad buttons ###
