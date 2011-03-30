@@ -78,6 +78,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
                         TIMEUPDATE_PERIOD);
             }
             mPlayer.start();
+            setPlayerBuffering(false);
         }
     }
 
@@ -294,6 +295,23 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
 
     public int getTextureName() {
         return 0;
+    }
+
+    // This is true only when the player is buffering and paused
+    public boolean mPlayerBuffering = false;
+
+    public boolean getPlayerBuffering() {
+        return mPlayerBuffering;
+    }
+
+    public void setPlayerBuffering(boolean playerBuffering) {
+        mPlayerBuffering = playerBuffering;
+        switchProgressView(playerBuffering);
+    }
+
+
+    protected void switchProgressView(boolean playerBuffering) {
+        // Only used in HTML5VideoFullScreen
     }
 
 }
