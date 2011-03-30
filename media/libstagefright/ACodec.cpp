@@ -1081,8 +1081,8 @@ void ACodec::sendFormatChange() {
                 android_native_rect_t crop;
                 crop.left = rect.nLeft;
                 crop.top = rect.nTop;
-                crop.right = rect.nLeft + rect.nWidth - 1;
-                crop.bottom = rect.nTop + rect.nHeight - 1;
+                crop.right = rect.nLeft + rect.nWidth;
+                crop.bottom = rect.nTop + rect.nHeight;
 
                 CHECK_EQ(0, native_window_set_crop(
                             mNativeWindow.get(), &crop));
