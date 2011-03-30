@@ -402,7 +402,7 @@
     <string name="permlab_accessWimaxState" msgid="2800410363171809280">"vizualizaţi starea WiMAX"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Permite unei aplicaţii să vizualizeze informaţiile despre starea WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"schimbaţi starea WiMAX"</string>
-    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite unei aplicaţii să se conecteze la şi să se deconecteze de la reţeaua WiMAX."</string>
+    <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Permite unei aplicaţii să se conecteze şi să se deconecteze de la reţeaua WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"administrare bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Permite unei aplicaţii să configureze telefonul Bluetooth local, să descopere şi să se asocieze cu dispozitive la distanţă."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"creare conexiuni Bluetooth"</string>

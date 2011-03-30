@@ -400,7 +400,7 @@
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"consenti ricezione multicast Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Consente a un\'applicazione di ricevere pacchetti non direttamente indirizzati al tuo dispositivo. Può essere utile durante la ricerca di servizi offerti nelle vicinanze. Consuma di più rispetto alla modalità non multicast."</string>
     <string name="permlab_accessWimaxState" msgid="2800410363171809280">"visualizzazione stato WiMAX"</string>
-    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Consente a un\'applicazione di visualizzare le informazioni relative allo stato della connessione WiMAX."</string>
+    <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Consente a un\'applicazione di visualizzare le informazioni relative allo stato della rete WiMAX."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"modifica stato WiMAX"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Consente a un\'applicazione di connettersi/disconnettersi dalla rete WiMAX."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"gestione Bluetooth"</string>
