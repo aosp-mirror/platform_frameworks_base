@@ -4604,6 +4604,10 @@ public class WindowManagerService extends IWindowManager.Stub
         return mInputManager.monitorInput(inputChannelName);
     }
 
+    public void setInputFilter(InputFilter filter) {
+        mInputManager.setInputFilter(filter);
+    }
+
     public InputDevice getInputDevice(int deviceId) {
         return mInputManager.getInputDevice(deviceId);
     }

@@ -176,6 +176,13 @@ public:
      */
     virtual int32_t getMaxEventsPerSecond() = 0;
 
+    /* Filters an input event.
+     * Return true to dispatch the event unmodified, false to consume the event.
+     * A filter can also transform and inject events later by passing POLICY_FLAG_FILTERED
+     * to injectInputEvent.
+     */
+    virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) = 0;
+
     /* Intercepts a key event immediately before queueing it.
      * The policy can use this method as an opportunity to perform power management functions
      * and early event preprocessing such as updating policy flags.
@@ -266,7 +273,8 @@ public:
      * This method may be called on any thread (usually by the input manager).
      */
     virtual int32_t injectInputEvent(const InputEvent* event,
-            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis) = 0;
+            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis,
+            uint32_t policyFlags) = 0;
 
     /* Sets the list of input windows.
      *
@@ -285,6 +293,14 @@ public:
      * This method may be called on any thread (usually by the input manager).
      */
     virtual void setInputDispatchMode(bool enabled, bool frozen) = 0;
+
+    /* Sets whether input event filtering is enabled.
+     * When enabled, incoming input events are sent to the policy's filterInputEvent
+     * method instead of being dispatched.  The filter is expected to use
+     * injectInputEvent to inject the events it would like to have dispatched.
+     * It should include POLICY_FLAG_FILTERED in the policy flags during injection.
+     */
+    virtual void setInputFilterEnabled(bool enabled) = 0;
 
     /* Transfers touch focus from the window associated with one channel to the
      * window associated with the other channel.
@@ -345,11 +361,13 @@ public:
             int32_t switchCode, int32_t switchValue, uint32_t policyFlags) ;
 
     virtual int32_t injectInputEvent(const InputEvent* event,
-            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis);
+            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis,
+            uint32_t policyFlags);
 
     virtual void setInputWindows(const Vector<InputWindow>& inputWindows);
     virtual void setFocusedApplication(const InputApplication* inputApplication);
     virtual void setInputDispatchMode(bool enabled, bool frozen);
+    virtual void setInputFilterEnabled(bool enabled);
 
     virtual bool transferTouchFocus(const sp<InputChannel>& fromChannel,
             const sp<InputChannel>& toChannel);
@@ -863,6 +881,7 @@ private:
     // Dispatch state.
     bool mDispatchEnabled;
     bool mDispatchFrozen;
+    bool mInputFilterEnabled;
 
     Vector<InputWindow> mWindows;
 
