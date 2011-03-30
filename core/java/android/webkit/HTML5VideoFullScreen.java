@@ -198,8 +198,6 @@ public class HTML5VideoFullScreen extends HTML5VideoView
 
         if (mProgressView != null) {
             mProgressView.setVisibility(View.GONE);
-            mLayout.removeView(mProgressView);
-            mProgressView = null;
         }
 
         mVideoWidth = mp.getVideoWidth();
@@ -321,4 +319,13 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         return false;
     }
 
+    @Override
+    protected void switchProgressView(boolean playerBuffering) {
+        if (playerBuffering) {
+            mProgressView.setVisibility(View.VISIBLE);
+        } else {
+            mProgressView.setVisibility(View.GONE);
+        }
+        return;
+    }
 }
