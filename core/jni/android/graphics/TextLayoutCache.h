@@ -65,7 +65,8 @@ namespace android {
 class TextLayoutCacheKey {
 public:
     TextLayoutCacheKey() : text(NULL), start(0), count(0), contextCount(0),
-            dirFlags(0), textSize(0), typeface(NULL), textSkewX(0), fakeBoldText(false)  {
+            dirFlags(0), typeface(NULL), textSize(0), textSkewX(0), textScaleX(0), flags(0),
+            hinting(SkPaint::kNo_Hinting)  {
     }
 
     TextLayoutCacheKey(const SkPaint* paint,
@@ -73,22 +74,28 @@ public:
             size_t contextCount, int dirFlags) :
                 text(text), start(start), count(count), contextCount(contextCount),
                 dirFlags(dirFlags) {
-        textSize = paint->getTextSize();
         typeface = paint->getTypeface();
+        textSize = paint->getTextSize();
         textSkewX = paint->getTextSkewX();
-        fakeBoldText = paint->isFakeBoldText();
+        textScaleX = paint->getTextScaleX();
+        flags = paint->getFlags();
+        hinting = paint->getHinting();
     }
 
     bool operator<(const TextLayoutCacheKey& rhs) const {
         LTE_INT(count) {
             LTE_INT(contextCount) {
                 LTE_INT(start) {
-                    LTE_FLOAT(textSize) {
-                        LTE_INT(typeface) {
-                            LTE_INT(textSkewX) {
-                                LTE_INT(fakeBoldText) {
-                                    LTE_INT(dirFlags) {
-                                        return strncmp16(text, rhs.text, contextCount) < 0;
+                    LTE_INT(typeface) {
+                        LTE_FLOAT(textSize) {
+                            LTE_FLOAT(textSkewX) {
+                                LTE_FLOAT(textScaleX) {
+                                    LTE_INT(flags) {
+                                        LTE_INT(hinting) {
+                                            LTE_INT(dirFlags) {
+                                                return strncmp16(text, rhs.text, contextCount) < 0;
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -121,10 +128,12 @@ private:
     size_t count;
     size_t contextCount;
     int dirFlags;
-    float textSize;
     SkTypeface* typeface;
-    float textSkewX;
-    bool fakeBoldText;
+    SkScalar textSize;
+    SkScalar textSkewX;
+    SkScalar textScaleX;
+    uint32_t flags;
+    SkPaint::Hinting hinting;
 }; // TextLayoutCacheKey
 
 /*
