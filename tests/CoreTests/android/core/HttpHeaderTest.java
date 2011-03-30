@@ -19,12 +19,19 @@ import android.test.AndroidTestCase;
 import org.apache.http.util.CharArrayBuffer;
 
 import android.net.http.Headers;
+import android.util.Log;
+import android.webkit.CacheManager;
+import android.webkit.CacheManager.CacheResult;
+
+import java.lang.reflect.Method;
 
 public class HttpHeaderTest extends AndroidTestCase {
 
     static final String LAST_MODIFIED = "Last-Modified: Fri, 18 Jun 2010 09:56:47 GMT";
     static final String CACHE_CONTROL_MAX_AGE = "Cache-Control:max-age=15";
     static final String CACHE_CONTROL_PRIVATE = "Cache-Control: private";
+    static final String CACHE_CONTROL_COMPOUND = "Cache-Control: no-cache, max-age=200000";
+    static final String CACHE_CONTROL_COMPOUND2 = "Cache-Control: max-age=200000, no-cache";
 
     /**
      * Tests that cache control header supports multiple instances of the header,
@@ -58,5 +65,40 @@ public class HttpHeaderTest extends AndroidTestCase {
         buffer.append(CACHE_CONTROL_PRIVATE);
         h.parseHeader(buffer);
         assertEquals("max-age=15,private", h.getCacheControl());
+    }
+
+    // Test that cache behaves correctly when receiving a compund
+    // cache-control statement containing no-cache and max-age argument.
+    //
+    // If a cache control header contains both a max-age arument and
+    // a no-cache argument the max-age argument should be ignored.
+    // The resource can be cached, but a validity check must be done on
+    // every request. Test case checks that the expiry time is 0 for
+    // this item, so item will be validated on subsequent requests.
+    public void testCacheControlMultipleArguments() throws Exception {
+        // get private method CacheManager.parseHeaders()
+        Method m = CacheManager.class.getDeclaredMethod("parseHeaders",
+                new Class[] {int.class, Headers.class, String.class});
+        m.setAccessible(true);
+
+        // create indata
+        Headers h = new Headers();
+        CharArrayBuffer buffer = new CharArrayBuffer(64);
+        buffer.append(CACHE_CONTROL_COMPOUND);
+        h.parseHeader(buffer);
+
+        CacheResult c = (CacheResult)m.invoke(null, 200, h, "text/html");
+
+        // Check that expires is set to 0, to ensure that no-cache has overridden
+        // the max-age argument
+        assertEquals(0, c.getExpires());
+
+        // check reverse order
+        buffer.clear();
+        buffer.append(CACHE_CONTROL_COMPOUND2);
+        h.parseHeader(buffer);
+
+        c = (CacheResult)m.invoke(null, 200, h, "text/html");
+        assertEquals(0, c.getExpires());
     }
 }
