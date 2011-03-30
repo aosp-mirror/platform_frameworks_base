@@ -391,6 +391,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     nst.startMonitoring();
                 }
                 mNetTrackers[netType] = nst;
+                if (noMobileData) {
+                    if (DBG) Slog.d(TAG, "tearing down WiMAX networks due to setting");
+                    mNetTrackers[netType].teardown();
+                }
                 break;
             default:
                 Slog.e(TAG, "Trying to create a DataStateTracker for an unknown radio type " +
@@ -987,6 +991,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
                 mNetTrackers[ConnectivityManager.TYPE_MOBILE].reconnect();
             }
+            if (mNetTrackers[ConnectivityManager.TYPE_WIMAX] != null) {
+                if (DBG) {
+                    Slog.d(TAG, "starting up " + mNetTrackers[ConnectivityManager.TYPE_WIMAX]);
+                }
+                mNetTrackers[ConnectivityManager.TYPE_WIMAX].reconnect();
+            }
         } else {
             for (NetworkStateTracker nt : mNetTrackers) {
                 if (nt == null) continue;
@@ -995,6 +1005,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     if (DBG) Slog.d(TAG, "tearing down " + nt);
                     nt.teardown();
                 }
+            }
+            if (mNetTrackers[ConnectivityManager.TYPE_WIMAX] != null) {
+                mNetTrackers[ConnectivityManager.TYPE_WIMAX].teardown();
             }
         }
     }
@@ -1119,6 +1132,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (mNetAttributes[checkType] == null) continue;
                 if (mNetAttributes[checkType].isDefault() == false) continue;
                 if (mNetAttributes[checkType].mRadio == ConnectivityManager.TYPE_MOBILE &&
+                        noMobileData) {
+                    Slog.e(TAG, "not failing over to mobile type " + checkType +
+                            " because Mobile Data Disabled");
+                    continue;
+                }
+                if (mNetAttributes[checkType].mRadio == ConnectivityManager.TYPE_WIMAX &&
                         noMobileData) {
                     Slog.e(TAG, "not failing over to mobile type " + checkType +
                             " because Mobile Data Disabled");
