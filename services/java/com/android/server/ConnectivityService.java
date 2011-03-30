@@ -594,18 +594,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     public NetworkInfo getActiveNetworkInfo() {
         enforceAccessPermission();
-        for (int type=0; type <= ConnectivityManager.MAX_NETWORK_TYPE; type++) {
-            if (mNetAttributes[type] == null || !mNetAttributes[type].isDefault()) {
-                continue;
-            }
-            NetworkStateTracker t = mNetTrackers[type];
-            NetworkInfo info = t.getNetworkInfo();
-            if (info.isConnected()) {
-                if (DBG && type != mActiveDefaultNetwork) Slog.e(TAG,
-                        "connected default network is not " +
-                        "mActiveDefaultNetwork!");
-                return info;
-            }
+        if (mActiveDefaultNetwork != -1) {
+            return mNetTrackers[mActiveDefaultNetwork].getNetworkInfo();
         }
         return null;
     }
@@ -1369,6 +1359,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (mNetAttributes[netType].isDefault()) {
                 mNetTrackers[netType].addDefaultRoute();
             } else {
+                // many radios add a default route even when we don't want one.
+                // remove the default interface unless we need it for our active network
+                if (mActiveDefaultNetwork != -1) {
+                    String defaultIface = mNetTrackers[mActiveDefaultNetwork].getInterfaceName();
+                    if (defaultIface != null &&
+                            !defaultIface.equals(mNetTrackers[netType].getInterfaceName())) {
+                        mNetTrackers[netType].removeDefaultRoute();
+                    }
+                }
                 mNetTrackers[netType].addPrivateDnsRoutes();
             }
         } else {
