@@ -1693,28 +1693,36 @@ status_t AwesomePlayer::finishSetDataSource_l() {
 
         dataSource = mCachedSource;
 
-        // We're going to prefill the cache before trying to instantiate
-        // the extractor below, as the latter is an operation that otherwise
-        // could block on the datasource for a significant amount of time.
-        // During that time we'd be unable to abort the preparation phase
-        // without this prefill.
+        String8 contentType = dataSource->getMIMEType();
 
-        mLock.unlock();
+        if (strncasecmp(contentType.string(), "audio/", 6)) {
+            // We're not doing this for streams that appear to be audio-only
+            // streams to ensure that even low bandwidth streams start
+            // playing back fairly instantly.
 
-        for (;;) {
-            status_t finalStatus;
-            size_t cachedDataRemaining =
-                mCachedSource->approxDataRemaining(&finalStatus);
+            // We're going to prefill the cache before trying to instantiate
+            // the extractor below, as the latter is an operation that otherwise
+            // could block on the datasource for a significant amount of time.
+            // During that time we'd be unable to abort the preparation phase
+            // without this prefill.
 
-            if (finalStatus != OK || cachedDataRemaining >= kHighWaterMarkBytes
-                    || (mFlags & PREPARE_CANCELLED)) {
-                break;
+            mLock.unlock();
+
+            for (;;) {
+                status_t finalStatus;
+                size_t cachedDataRemaining =
+                    mCachedSource->approxDataRemaining(&finalStatus);
+
+                if (finalStatus != OK || cachedDataRemaining >= kHighWaterMarkBytes
+                        || (mFlags & PREPARE_CANCELLED)) {
+                    break;
+                }
+
+                usleep(200000);
             }
 
-            usleep(200000);
+            mLock.lock();
         }
-
-        mLock.lock();
 
         if (mFlags & PREPARE_CANCELLED) {
             LOGI("Prepare cancelled while waiting for initial cache fill.");

@@ -136,6 +136,7 @@ status_t NuHTTPDataSource::connect(
     unsigned port;
 
     mUri = uri;
+    mContentType = String8("application/octet-stream");
 
     bool https;
     if (!ParseURL(uri, &host, &port, &path, &https)) {
@@ -262,6 +263,15 @@ status_t NuHTTPDataSource::connect(
 
                     return ERROR_UNSUPPORTED;
                 }
+            }
+        }
+
+        {
+            AString value;
+            if (mHTTP.find_header_value("Content-Type", &value)) {
+                mContentType = String8(value.c_str());
+            } else {
+                mContentType = String8("application/octet-stream");
             }
         }
 
@@ -562,6 +572,10 @@ void NuHTTPDataSource::getDrmInfo(sp<DecryptHandle> &handle, DrmManagerClient **
 
 String8 NuHTTPDataSource::getUri() {
     return mUri;
+}
+
+String8 NuHTTPDataSource::getMIMEType() const {
+    return mContentType;
 }
 
 }  // namespace android

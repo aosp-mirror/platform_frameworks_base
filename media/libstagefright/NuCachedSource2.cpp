@@ -493,4 +493,8 @@ String8 NuCachedSource2::getUri() {
     return mSource->getUri();
 }
 
+String8 NuCachedSource2::getMIMEType() const {
+    return mSource->getMIMEType();
+}
+
 }  // namespace android

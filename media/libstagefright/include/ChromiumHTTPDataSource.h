@@ -51,6 +51,8 @@ struct ChromiumHTTPDataSource : public HTTPBase {
 
     virtual String8 getUri();
 
+    virtual String8 getMIMEType() const;
+
 protected:
     virtual ~ChromiumHTTPDataSource();
 
@@ -90,6 +92,8 @@ private:
 
     int64_t mContentSize;
 
+    String8 mContentType;
+
     List<BandwidthEntry> mBandwidthHistory;
     size_t mNumBandwidthHistoryItems;
     int64_t mTotalTransferTimeUs;
@@ -110,7 +114,9 @@ private:
 
     void initiateRead(void *data, size_t size);
 
-    void onConnectionEstablished(int64_t contentSize);
+    void onConnectionEstablished(
+            int64_t contentSize, const char *contentType);
+
     void onConnectionFailed(status_t err);
     void onReadCompleted(ssize_t size);
     void onDisconnectComplete();

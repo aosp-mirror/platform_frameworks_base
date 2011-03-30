@@ -144,4 +144,8 @@ sp<DataSource> DataSource::CreateFromURI(
     return source;
 }
 
+String8 DataSource::getMIMEType() const {
+    return String8("application/octet-stream");
+}
+
 }  // namespace android
