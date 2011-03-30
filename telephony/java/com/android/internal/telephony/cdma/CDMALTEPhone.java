@@ -122,13 +122,7 @@ public class CDMALTEPhone extends CDMAPhone {
         } else if (mDataConnection.isApnTypeEnabled(apnType) == false) {
             ret = DataState.DISCONNECTED;
         } else {
-            DataConnectionTracker.State state;
-            if (isCdmaDataConnectionTracker) {
-                state = mDataConnection.getState();
-            } else {
-                state = ((GsmDataConnectionTracker)mDataConnection).getState(apnType);
-            }
-            switch (state) {
+            switch (mDataConnection.getState(apnType)) {
                 case FAILED:
                 case IDLE:
                     ret = DataState.DISCONNECTED;

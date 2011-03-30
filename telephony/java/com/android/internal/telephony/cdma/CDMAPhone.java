@@ -633,7 +633,7 @@ public class CDMAPhone extends PhoneBase {
                 mDataConnection.isApnTypeActive(apnType) == false) {
             ret = DataState.DISCONNECTED;
         } else {
-            switch (mDataConnection.getState()) {
+            switch (mDataConnection.getState(apnType)) {
                 case FAILED:
                 case IDLE:
                     ret = DataState.DISCONNECTED;

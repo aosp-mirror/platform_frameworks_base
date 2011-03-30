@@ -160,6 +160,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     @Override
+    public synchronized State getState(String apnType) {
+        return mState;
+    }
+
+    @Override
     protected boolean isApnTypeAvailable(String type) {
         for (String s : mSupportedApnTypes) {
             if (TextUtils.equals(type, s)) {
