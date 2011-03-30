@@ -51,6 +51,8 @@ struct NuHTTPDataSource : public HTTPBase {
     virtual void getDrmInfo(sp<DecryptHandle> &handle, DrmManagerClient **client);
     virtual String8 getUri();
 
+    virtual String8 getMIMEType() const;
+
 protected:
     virtual ~NuHTTPDataSource();
 
@@ -84,6 +86,8 @@ private:
     off64_t mContentLength;
     bool mContentLengthValid;
     bool mHasChunkedTransferEncoding;
+
+    String8 mContentType;
 
     // The number of data bytes in the current chunk before any subsequent
     // chunk header (or -1 if no more chunks).

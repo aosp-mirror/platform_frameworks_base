@@ -253,7 +253,11 @@ void SfDelegate::OnResponseStarted(URLRequest *request) {
 
     MY_LOGV(StringPrintf("response headers: %s", headers.c_str()).c_str());
 
-    mOwner->onConnectionEstablished(request->GetExpectedContentSize());
+    std::string contentType;
+    request->GetResponseHeaderByName("Content-Type", &contentType);
+
+    mOwner->onConnectionEstablished(
+            request->GetExpectedContentSize(), contentType.c_str());
 }
 
 void SfDelegate::OnReadCompleted(URLRequest *request, int bytes_read) {

@@ -79,6 +79,7 @@ status_t ChromiumHTTPDataSource::connect_l(
     }
 
     mURI = uri;
+    mContentType = String8("application/octet-stream");
 
     if (headers != NULL) {
         mHeaders = *headers;
@@ -99,10 +100,12 @@ status_t ChromiumHTTPDataSource::connect_l(
     return mState == CONNECTED ? OK : mIOResult;
 }
 
-void ChromiumHTTPDataSource::onConnectionEstablished(int64_t contentSize) {
+void ChromiumHTTPDataSource::onConnectionEstablished(
+        int64_t contentSize, const char *contentType) {
     Mutex::Autolock autoLock(mLock);
     mState = CONNECTED;
     mContentSize = (contentSize < 0) ? -1 : contentSize + mCurrentOffset;
+    mContentType = String8(contentType);
     mCondition.broadcast();
 }
 
@@ -312,6 +315,12 @@ String8 ChromiumHTTPDataSource::getUri() {
     Mutex::Autolock autoLock(mLock);
 
     return String8(mURI.c_str());
+}
+
+String8 ChromiumHTTPDataSource::getMIMEType() const {
+    Mutex::Autolock autoLock(mLock);
+
+    return mContentType;
 }
 
 void ChromiumHTTPDataSource::clearDRMState_l() {

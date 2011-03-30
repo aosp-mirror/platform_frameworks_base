@@ -84,6 +84,8 @@ public:
         return String8();
     }
 
+    virtual String8 getMIMEType() const;
+
 protected:
     virtual ~DataSource() {}
 
