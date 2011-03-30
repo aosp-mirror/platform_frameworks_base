@@ -48,6 +48,11 @@
 
     </LinearLayout>
 
+    <SeekBar android:id="@+id/seekbar"
+               android:layout_height="wrap_content"
+               android:layout_width="match_parent"
+               />
+
     <view class="com.android.bidi.BiDiTestView"
         android:id="@+id/main"
         android:layout_width="match_parent"

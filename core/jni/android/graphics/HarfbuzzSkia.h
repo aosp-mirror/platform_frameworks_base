@@ -27,22 +27,38 @@
 #ifndef HarfbuzzSkia_h
 #define HarfbuzzSkia_h
 
+#include "SkScalar.h"
 #include "SkTypeface.h"
+#include "SkPaint.h"
 
 extern "C" {
 #include "harfbuzz-shaper.h"
 }
 
 namespace android {
-    typedef struct {
-        SkTypeface* typeFace;
-        float textSize;
-        bool fakeBold;
-        bool fakeItalic;
-    } FontData;
 
-    HB_Error harfbuzzSkiaGetTable(void* voidface, const HB_Tag, HB_Byte* buffer, HB_UInt* len);
-    extern const HB_FontClass harfbuzzSkiaClass;
+static inline float HBFixedToFloat(HB_Fixed v) {
+    // Harfbuzz uses 26.6 fixed point values for pixel offsets
+    return v * (1.0f / 64);
+}
+
+static inline HB_Fixed SkScalarToHBFixed(SkScalar value) {
+    // HB_Fixed is a 26.6 fixed point format.
+    return SkScalarToFloat(value) * 64.0f;
+}
+
+typedef struct {
+    SkTypeface* typeFace;
+    SkScalar textSize;
+    SkScalar textSkewX;
+    SkScalar textScaleX;
+    uint32_t flags;
+    SkPaint::Hinting hinting;
+} FontData;
+
+HB_Error harfbuzzSkiaGetTable(void* voidface, const HB_Tag, HB_Byte* buffer, HB_UInt* len);
+extern const HB_FontClass harfbuzzSkiaClass;
+
 }  // namespace android
 
 #endif

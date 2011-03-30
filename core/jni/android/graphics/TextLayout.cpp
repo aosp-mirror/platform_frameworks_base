@@ -269,6 +269,21 @@ void TextLayout::getTextRunAdvances(SkPaint* paint, const jchar* chars, jint sta
 #endif
 }
 
+void TextLayout::getTextRunAdvancesHB(SkPaint* paint, const jchar* chars, jint start,
+                                    jint count, jint contextCount, jint dirFlags,
+                                    jfloat* resultAdvances, jfloat& resultTotalAdvance) {
+    // Compute advances and return them
+    RunAdvanceDescription::computeAdvancesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
+            resultAdvances, &resultTotalAdvance);
+}
+
+void TextLayout::getTextRunAdvancesICU(SkPaint* paint, const jchar* chars, jint start,
+                                    jint count, jint contextCount, jint dirFlags,
+                                    jfloat* resultAdvances, jfloat& resultTotalAdvance) {
+    // Compute advances and return them
+    RunAdvanceDescription::computeAdvancesWithICU(paint, chars, start, count, contextCount, dirFlags,
+            resultAdvances, &resultTotalAdvance);
+}
 
 // Draws a paragraph of text on a single line, running bidi and shaping
 void TextLayout::drawText(SkPaint* paint, const jchar* text, jsize len,

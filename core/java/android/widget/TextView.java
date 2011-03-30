@@ -2951,6 +2951,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     advancesIndex);
         }
 
+        public float getTextRunAdvancesICU(int start, int end, int contextStart,
+                int contextEnd, int flags, float[] advances, int advancesIndex,
+                Paint p) {
+            int count = end - start;
+            int contextCount = contextEnd - contextStart;
+            return p.getTextRunAdvancesICU(mChars, start + mStart, count,
+                    contextStart + mStart, contextCount, flags, advances,
+                    advancesIndex);
+        }
+
         public int getTextRunCursor(int contextStart, int contextEnd, int flags,
                 int offset, int cursorOpt, Paint p) {
             int contextCount = contextEnd - contextStart;

@@ -1170,6 +1170,35 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     }
 
     /**
+     * Don't call this yourself -- exists for Paint to use internally.
+     * {@hide}
+     */
+    public float getTextRunAdvancesICU(int start, int end, int contextStart, int contextEnd, int flags,
+            float[] advances, int advancesPos, Paint p) {
+
+        float ret;
+
+        int contextLen = contextEnd - contextStart;
+        int len = end - start;
+
+        if (end <= mGapStart) {
+            ret = p.getTextRunAdvancesICU(mText, start, len, contextStart, contextLen,
+                    flags, advances, advancesPos);
+        } else if (start >= mGapStart) {
+            ret = p.getTextRunAdvancesICU(mText, start + mGapLength, len,
+                    contextStart + mGapLength, contextLen, flags, advances, advancesPos);
+        } else {
+            char[] buf = TextUtils.obtain(contextLen);
+            getChars(contextStart, contextEnd, buf, 0);
+            ret = p.getTextRunAdvancesICU(buf, start - contextStart, len,
+                    0, contextLen, flags, advances, advancesPos);
+            TextUtils.recycle(buf);
+        }
+
+        return ret;
+    }
+
+    /**
      * Returns the next cursor position in the run.  This avoids placing the cursor between
      * surrogates, between characters that form conjuncts, between base characters and combining
      * marks, or within a reordering cluster.

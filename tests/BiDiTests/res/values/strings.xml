@@ -18,9 +18,11 @@
     <string name="edittext_text">mmmmmmmmmmmmmmmmmmmmmmmm</string>
     <string name="normal_text">Normal String</string>
     <string name="normal_long_text">mmmmmmmmmmmmmmmmmmmmmmmm</string>
+    <string name="normal_long_text_2">nnnnnnnnnnnnnnnnnnnnnnnn</string>
+    <string name="normal_long_text_3">Notify me when an open network is available</string>
     <string name="arabic_text">&#x0644;&#x0627;</string>
     <string name="chinese_text">利比亚局势或影响美俄关系发展</string>
     <string name="italic_text">Italic String</string>
-    <string name="bold_text">Bold String</string>
+    <string name="bold_text">Bold String - other text</string>
     <string name="bold_italic_text">Bold Italic String</string>
 </resources>

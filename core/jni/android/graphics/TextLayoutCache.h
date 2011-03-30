@@ -19,17 +19,20 @@
 
 #include "RtlProperties.h"
 
-#include "stddef.h"
+#include <stddef.h>
 #include <utils/threads.h>
 #include <utils/String16.h>
-#include "utils/GenerationCache.h"
-#include "utils/Compare.h"
+#include <utils/GenerationCache.h>
+#include <utils/Compare.h>
 
-#include "SkPaint.h"
-#include "SkTemplates.h"
+#include <SkPaint.h>
+#include <SkTemplates.h>
+#include <SkUtils.h>
+#include <SkScalerContext.h>
+#include <SkAutoKern.h>
 
-#include "unicode/ubidi.h"
-#include "unicode/ushape.h"
+#include <unicode/ubidi.h>
+#include <unicode/ushape.h>
 #include "HarfbuzzSkia.h"
 #include "harfbuzz-shaper.h"
 
@@ -54,13 +57,7 @@
 // Define the interval in number of cache hits between two statistics dump
 #define DEFAULT_DUMP_STATS_CACHE_HIT_INTERVAL 100
 
-// Define if we want to have Advances debug values
-#define DEBUG_ADVANCES 0
-
 namespace android {
-
-// Harfbuzz uses 26.6 fixed point values for pixel offsets
-#define HB_FIXED_TO_FLOAT(v) (((float) v) * (1.0 / 64))
 
 /**
  * TextLayoutCacheKey is the Cache key
@@ -202,6 +199,8 @@ public:
         shaperItem->font = font;
         shaperItem->face = HB_NewFace(shaperItem->font, harfbuzzSkiaGetTable);
 
+        shaperItem->kerning_applied = false;
+
         // We cannot know, ahead of time, how many glyphs a given script run
         // will produce. We take a guess that script runs will not produce more
         // than twice as many glyphs as there are code points plus a bit of
@@ -222,10 +221,12 @@ public:
         shaperItem->string = chars;
         shaperItem->stringLength = contextCount;
 
-        fontData->textSize = paint->getTextSize();
-        fontData->fakeBold = paint->isFakeBoldText();
-        fontData->fakeItalic = (paint->getTextSkewX() > 0);
         fontData->typeFace = paint->getTypeface();
+        fontData->textSize = paint->getTextSize();
+        fontData->textSkewX = paint->getTextSkewX();
+        fontData->textScaleX = paint->getTextScaleX();
+        fontData->flags = paint->getFlags();
+        fontData->hinting = paint->getHinting();
 
         shaperItem->font->userData = fontData;
     }
@@ -248,6 +249,21 @@ public:
         }
     }
 
+#define SkAutoKern_AdjustF(prev, next) (((next) - (prev) + 32) >> 6 << 16)
+
+    static int adjust(int prev, int next) {
+        int delta = next - prev;
+        if (delta >= 32) {
+            return -1;
+        }
+        else if (delta < -32) {
+            return +1;
+        }
+        else {
+            return 0;
+        }
+    }
+
     static void computeAdvancesWithHarfbuzz(SkPaint* paint, const UChar* chars, size_t start,
             size_t count, size_t contextCount, int dirFlags,
             jfloat* outAdvances, jfloat* outTotalAdvance) {
@@ -261,13 +277,15 @@ public:
                 contextCount, dirFlags);
 
 #if DEBUG_ADVANCES
-        LOGD("HARFBUZZ -- num_glypth=%d", shaperItem.num_glyphs);
+        LOGD("HARFBUZZ -- num_glypth=%d - kerning_applied=%d", shaperItem.num_glyphs, shaperItem.kerning_applied);
+        LOGD("         -- string= '%s'", String8(chars, contextCount).string());
+        LOGD("         -- isDevKernText=%d", paint->isDevKernText());
 #endif
 
         jfloat totalAdvance = 0;
+
         for (size_t i = 0; i < count; i++) {
-            // Be careful: we need to use ceilf() for doing the same way as what Skia is doing
-            totalAdvance += outAdvances[i] = ceilf(HB_FIXED_TO_FLOAT(shaperItem.advances[i]));
+            totalAdvance += outAdvances[i] = HBFixedToFloat(shaperItem.advances[i]);
 
 #if DEBUG_ADVANCES
             LOGD("hb-adv = %d - rebased = %f - total = %f", shaperItem.advances[i], outAdvances[i],

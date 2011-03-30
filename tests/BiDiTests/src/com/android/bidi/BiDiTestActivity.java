@@ -20,16 +20,44 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.SeekBar;
+
+import static com.android.bidi.BiDiTestConstants.FONT_MIN_SIZE;
+import static com.android.bidi.BiDiTestConstants.FONT_MAX_SIZE;
 
 public class BiDiTestActivity extends Activity {
 
     static final String TAG = "BiDiTestActivity";
+
+    static final int INIT_TEXT_SIZE = (FONT_MAX_SIZE - FONT_MIN_SIZE) / 2;
+
+    private BiDiTestView textView;
+    private SeekBar textSizeSeekBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.biditest_main);
+
+        textView = (BiDiTestView) findViewById(R.id.main);
+        textView.setCurrentTextSize(INIT_TEXT_SIZE);
+
+        textSizeSeekBar = (SeekBar) findViewById(R.id.seekbar);
+        textSizeSeekBar.setProgress(INIT_TEXT_SIZE);
+        textSizeSeekBar.setMax(FONT_MAX_SIZE - FONT_MIN_SIZE);
+
+        textSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                textView.setCurrentTextSize(FONT_MIN_SIZE + progress);
+            }
+
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
     }
 
     @Override
