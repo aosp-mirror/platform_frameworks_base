@@ -543,18 +543,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     public NetworkInfo getActiveNetworkInfo() {
         enforceAccessPermission();
-        for (int type=0; type <= ConnectivityManager.MAX_NETWORK_TYPE; type++) {
-            if (mNetAttributes[type] == null || !mNetAttributes[type].isDefault()) {
-                continue;
-            }
-            NetworkStateTracker t = mNetTrackers[type];
-            NetworkInfo info = t.getNetworkInfo();
-            if (info.isConnected()) {
-                if (DBG && type != mActiveDefaultNetwork) {
-                    loge("connected default network is not mActiveDefaultNetwork!");
-                }
-                return info;
-            }
+        if (mActiveDefaultNetwork != -1) {
+            return mNetTrackers[mActiveDefaultNetwork].getNetworkInfo();
         }
         return null;
     }
@@ -1353,7 +1343,20 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 handleApplyDefaultProxy(netType);
                 addDefaultRoute(mNetTrackers[netType]);
             } else {
-                addPrivateDnsRoutes(mNetTrackers[netType]);
+                // many radios add a default route even when we don't want one.
+                // remove the default interface unless we need it for our active network
+                if (mActiveDefaultNetwork != -1) {
+                    LinkProperties linkProperties =
+                            mNetTrackers[mActiveDefaultNetwork].getLinkProperties();
+                    LinkProperties newLinkProperties =
+                            mNetTrackers[netType].getLinkProperties();
+                    String defaultIface = linkProperties.getInterfaceName();
+                    if (defaultIface != null &&
+                            !defaultIface.equals(newLinkProperties.getInterfaceName())) {
+                        mNetTrackers[netType].removeDefaultRoute();
+                    }
+                }
+                mNetTrackers[netType].addPrivateDnsRoutes();
             }
         } else {
             if (mNetAttributes[netType].isDefault()) {
