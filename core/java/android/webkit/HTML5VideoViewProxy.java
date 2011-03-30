@@ -95,8 +95,10 @@ class HTML5VideoViewProxy extends Handler
         // identify the exact layer on the UI thread to use the SurfaceTexture.
         private static int mBaseLayer = 0;
 
-        // This is true only when the player is buffering and paused
-        private static boolean mPlayerBuffering = false;
+        private static void setPlayerBuffering(boolean playerBuffering) {
+            mHTML5VideoView.setPlayerBuffering(playerBuffering);
+        }
+
         // Every time webView setBaseLayer, this will be called.
         // When we found the Video layer, then we set the Surface Texture to it.
         // Otherwise, we may want to delete the Surface Texture to save memory.
@@ -111,7 +113,7 @@ class HTML5VideoViewProxy extends Handler
                 int currentVideoLayerId = mHTML5VideoView.getVideoLayerId();
                 if (layer != 0 && surfTexture != null && currentVideoLayerId != -1) {
                     int playerState = mHTML5VideoView.getCurrentState();
-                    if (mPlayerBuffering)
+                    if (mHTML5VideoView.getPlayerBuffering())
                         playerState = HTML5VideoView.STATE_NOTPREPARED;
                     boolean foundInTree = nativeSendSurfaceTexture(surfTexture,
                             layer, currentVideoLayerId, textureName,
@@ -166,7 +168,6 @@ class HTML5VideoViewProxy extends Handler
                 WebChromeClient client, int videoLayerId) {
             int currentVideoLayerId = -1;
             boolean backFromFullScreenMode = false;
-            mPlayerBuffering = false;
             if (mHTML5VideoView != null) {
                 currentVideoLayerId = mHTML5VideoView.getVideoLayerId();
                 if (mHTML5VideoView instanceof HTML5VideoFullScreen) {
@@ -231,7 +232,6 @@ class HTML5VideoViewProxy extends Handler
         }
 
         public static void onPrepared() {
-            mPlayerBuffering = false;
             if (!mHTML5VideoView.isFullScreenMode() || mHTML5VideoView.getAutostart()) {
                 mHTML5VideoView.start();
             }
@@ -351,11 +351,11 @@ class HTML5VideoViewProxy extends Handler
                 break;
             }
             case BUFFERING_START: {
-                VideoPlayer.mPlayerBuffering = true;
+                VideoPlayer.setPlayerBuffering(true);
                 break;
             }
             case BUFFERING_END: {
-                VideoPlayer.mPlayerBuffering = false;
+                VideoPlayer.setPlayerBuffering(false);
                 break;
             }
         }
