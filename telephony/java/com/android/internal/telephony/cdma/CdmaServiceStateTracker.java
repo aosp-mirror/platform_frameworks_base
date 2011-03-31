@@ -525,7 +525,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         synchronized (this) {
             if (!mPendingRadioPowerOffAfterDataOff) {
                 if (dcTracker.isAnyActiveDataConnections()) {
-                    dcTracker.cleanUpAllConnections();
+                    dcTracker.cleanUpAllConnections(Phone.REASON_RADIO_TURNED_OFF);
                     if (sendEmptyMessageDelayed(EVENT_SET_RADIO_POWER_OFF, 30000)) {
                         if (DBG) log("Wait upto 30s for data to disconnect, then turn off radio.");
                         mPendingRadioPowerOffAfterDataOff = true;
@@ -534,7 +534,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                         hangupAndPowerOff();
                     }
                 } else {
-                    dcTracker.cleanUpAllConnections();
+                    dcTracker.cleanUpAllConnections(Phone.REASON_RADIO_TURNED_OFF);
                     if (DBG) log("Data disconnected, turn off radio right away.");
                     hangupAndPowerOff();
                 }

@@ -461,7 +461,7 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract void onVoiceCallStarted();
     protected abstract void onVoiceCallEnded();
     protected abstract void onCleanUpConnection(boolean tearDown, int apnId, String reason);
-    protected abstract void onCleanUpAllConnections();
+    protected abstract void onCleanUpAllConnections(String cause);
 
     @Override
     public void handleMessage(Message msg) {
@@ -517,7 +517,7 @@ public abstract class DataConnectionTracker extends Handler {
                 break;
 
             case EVENT_CLEAN_UP_ALL_CONNECTIONS: {
-                onCleanUpAllConnections();
+                onCleanUpAllConnections((String) msg.obj);
                 break;
             }
             case EVENT_CLEAN_UP_CONNECTION: {
@@ -920,7 +920,7 @@ public abstract class DataConnectionTracker extends Handler {
                     resetAllRetryCounts();
                     onTrySetupData(Phone.REASON_DATA_ENABLED);
                 } else {
-                    cleanUpAllConnections();
+                    cleanUpAllConnections(null);
                 }
             }
         }
@@ -930,8 +930,9 @@ public abstract class DataConnectionTracker extends Handler {
         return mDataEnabled;
     }
 
-    public void cleanUpAllConnections() {
+    public void cleanUpAllConnections(String cause) {
         Message msg = obtainMessage(EVENT_CLEAN_UP_ALL_CONNECTIONS);
+        msg.obj = cause;
         sendMessage(msg);
     }
 
