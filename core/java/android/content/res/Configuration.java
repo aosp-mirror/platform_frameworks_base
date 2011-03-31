@@ -57,11 +57,30 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public boolean userSetLocale;
 
+    /** Constant for {@link #screenLayout}: bits that encode the size. */
     public static final int SCREENLAYOUT_SIZE_MASK = 0x0f;
+    /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
+     * value indicating that no size has been set. */
     public static final int SCREENLAYOUT_SIZE_UNDEFINED = 0x00;
+    /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
+     * value indicating the screen is at least approximately 320x426 dp units.
+     * See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
+     * Multiple Screens</a> for more information. */
     public static final int SCREENLAYOUT_SIZE_SMALL = 0x01;
+    /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
+     * value indicating the screen is at least approximately 320x470 dp units.
+     * See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
+     * Multiple Screens</a> for more information. */
     public static final int SCREENLAYOUT_SIZE_NORMAL = 0x02;
+    /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
+     * value indicating the screen is at least approximately 480x640 dp units.
+     * See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
+     * Multiple Screens</a> for more information. */
     public static final int SCREENLAYOUT_SIZE_LARGE = 0x03;
+    /** Constant for {@link #screenLayout}: a {@link #SCREENLAYOUT_SIZE_MASK}
+     * value indicating the screen is at least approximately 720x960 dp units.
+     * See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
+     * Multiple Screens</a> for more information.*/
     public static final int SCREENLAYOUT_SIZE_XLARGE = 0x04;
     
     public static final int SCREENLAYOUT_LONG_MASK = 0x30;
@@ -88,6 +107,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * <p>The {@link #SCREENLAYOUT_LONG_MASK} defines whether the screen
      * is wider/taller than normal.  They may be one of
      * {@link #SCREENLAYOUT_LONG_NO} or {@link #SCREENLAYOUT_LONG_YES}.
+     * 
+     * <p>See <a href="{@docRoot}guide/practices/screens_support.html">Supporting
+     * Multiple Screens</a> for more information.
      */
     public int screenLayout;
     
