@@ -186,7 +186,7 @@ InputDispatcher::InputDispatcher(const sp<InputDispatcherPolicyInterface>& polic
     mPolicy(policy),
     mPendingEvent(NULL), mAppSwitchSawKeyDown(false), mAppSwitchDueTime(LONG_LONG_MAX),
     mNextUnblockedEvent(NULL),
-    mDispatchEnabled(true), mDispatchFrozen(false),
+    mDispatchEnabled(true), mDispatchFrozen(false), mInputFilterEnabled(false),
     mFocusedWindow(NULL),
     mFocusedApplication(NULL),
     mCurrentInputTargetsValid(false),
@@ -725,7 +725,7 @@ bool InputDispatcher::dispatchKeyLocked(
         if (entry->repeatCount == 0
                 && entry->action == AKEY_EVENT_ACTION_DOWN
                 && (entry->policyFlags & POLICY_FLAG_TRUSTED)
-                && !entry->isInjected()) {
+                && (!(entry->policyFlags & POLICY_FLAG_DISABLE_KEY_REPEAT))) {
             if (mKeyRepeatState.lastKeyEntry
                     && mKeyRepeatState.lastKeyEntry->keyCode == entry->keyCode) {
                 // We have seen two identical key downs in a row which indicates that the device
@@ -2402,7 +2402,18 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t so
 
     bool needWake;
     { // acquire lock
-        AutoMutex _l(mLock);
+        mLock.lock();
+
+        if (mInputFilterEnabled) {
+            mLock.unlock();
+
+            policyFlags |= POLICY_FLAG_FILTERED;
+            if (!mPolicy->filterInputEvent(&event, policyFlags)) {
+                return; // event was consumed by the filter
+            }
+
+            mLock.lock();
+        }
 
         int32_t repeatCount = 0;
         KeyEntry* newEntry = mAllocator.obtainKeyEntry(eventTime,
@@ -2410,6 +2421,7 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t so
                 metaState, repeatCount, downTime);
 
         needWake = enqueueInboundEventLocked(newEntry);
+        mLock.unlock();
     } // release lock
 
     if (needWake) {
@@ -2452,7 +2464,23 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
 
     bool needWake;
     { // acquire lock
-        AutoMutex _l(mLock);
+        mLock.lock();
+
+        if (mInputFilterEnabled) {
+            mLock.unlock();
+
+            MotionEvent event;
+            event.initialize(deviceId, source, action, flags, edgeFlags, metaState, 0, 0,
+                    xPrecision, yPrecision, downTime, eventTime,
+                    pointerCount, pointerIds, pointerCoords);
+
+            policyFlags |= POLICY_FLAG_FILTERED;
+            if (!mPolicy->filterInputEvent(&event, policyFlags)) {
+                return; // event was consumed by the filter
+            }
+
+            mLock.lock();
+        }
 
         // Attempt batching and streaming of move events.
         if (action == AMOTION_EVENT_ACTION_MOVE
@@ -2491,6 +2519,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                 LOGD("Appended motion sample onto batch for most recent "
                         "motion event for this device in the inbound queue.");
 #endif
+                mLock.unlock();
                 return; // done!
             }
 
@@ -2579,6 +2608,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                             true /*resumeWithAppendedMotionSample*/);
 
                     runCommandsLockedInterruptible();
+                    mLock.unlock();
                     return; // done!
                 }
             }
@@ -2593,6 +2623,7 @@ NoBatchingOrStreaming:;
                 pointerCount, pointerIds, pointerCoords);
 
         needWake = enqueueInboundEventLocked(newEntry);
+        mLock.unlock();
     } // release lock
 
     if (needWake) {
@@ -2612,16 +2643,17 @@ void InputDispatcher::notifySwitch(nsecs_t when, int32_t switchCode, int32_t swi
 }
 
 int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
-        int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis) {
+        int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis,
+        uint32_t policyFlags) {
 #if DEBUG_INBOUND_EVENT_DETAILS
     LOGD("injectInputEvent - eventType=%d, injectorPid=%d, injectorUid=%d, "
-            "syncMode=%d, timeoutMillis=%d",
-            event->getType(), injectorPid, injectorUid, syncMode, timeoutMillis);
+            "syncMode=%d, timeoutMillis=%d, policyFlags=0x%08x",
+            event->getType(), injectorPid, injectorUid, syncMode, timeoutMillis, policyFlags);
 #endif
 
     nsecs_t endTime = now() + milliseconds_to_nanoseconds(timeoutMillis);
 
-    uint32_t policyFlags = POLICY_FLAG_INJECTED;
+    policyFlags |= POLICY_FLAG_INJECTED;
     if (hasInjectionPermission(injectorPid, injectorUid)) {
         policyFlags |= POLICY_FLAG_TRUSTED;
     }
@@ -2640,7 +2672,9 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
             policyFlags |= POLICY_FLAG_VIRTUAL;
         }
 
-        mPolicy->interceptKeyBeforeQueueing(keyEvent, /*byref*/ policyFlags);
+        if (!(policyFlags & POLICY_FLAG_FILTERED)) {
+            mPolicy->interceptKeyBeforeQueueing(keyEvent, /*byref*/ policyFlags);
+        }
 
         if (policyFlags & POLICY_FLAG_WOKE_HERE) {
             flags |= AKEY_EVENT_FLAG_WOKE_HERE;
@@ -2664,8 +2698,10 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
             return INPUT_EVENT_INJECTION_FAILED;
         }
 
-        nsecs_t eventTime = motionEvent->getEventTime();
-        mPolicy->interceptMotionBeforeQueueing(eventTime, /*byref*/ policyFlags);
+        if (!(policyFlags & POLICY_FLAG_FILTERED)) {
+            nsecs_t eventTime = motionEvent->getEventTime();
+            mPolicy->interceptMotionBeforeQueueing(eventTime, /*byref*/ policyFlags);
+        }
 
         mLock.lock();
         const nsecs_t* sampleEventTimes = motionEvent->getSampleEventTimes();
@@ -2780,7 +2816,8 @@ void InputDispatcher::setInjectionResultLocked(EventEntry* entry, int32_t inject
                  injectionResult, injectionState->injectorPid, injectionState->injectorUid);
 #endif
 
-        if (injectionState->injectionIsAsync) {
+        if (injectionState->injectionIsAsync
+                && !(entry->policyFlags & POLICY_FLAG_FILTERED)) {
             // Log the outcome since the injector did not wait for the injection result.
             switch (injectionResult) {
             case INPUT_EVENT_INJECTION_SUCCEEDED:
@@ -2980,6 +3017,26 @@ void InputDispatcher::setInputDispatchMode(bool enabled, bool frozen) {
         // Wake up poll loop since it may need to make new input dispatching choices.
         mLooper->wake();
     }
+}
+
+void InputDispatcher::setInputFilterEnabled(bool enabled) {
+#if DEBUG_FOCUS
+    LOGD("setInputFilterEnabled: enabled=%d", enabled);
+#endif
+
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mInputFilterEnabled == enabled) {
+            return;
+        }
+
+        mInputFilterEnabled = enabled;
+        resetAndDropEverythingLocked("input filter is being enabled or disabled");
+    } // release lock
+
+    // Wake up poll loop since there might be work to do to drop everything.
+    mLooper->wake();
 }
 
 bool InputDispatcher::transferTouchFocus(const sp<InputChannel>& fromChannel,

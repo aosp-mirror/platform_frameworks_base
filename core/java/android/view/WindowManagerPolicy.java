@@ -81,6 +81,8 @@ public interface WindowManagerPolicy {
 
     public final static int FLAG_INJECTED = 0x01000000;
     public final static int FLAG_TRUSTED = 0x02000000;
+    public final static int FLAG_FILTERED = 0x04000000;
+    public final static int FLAG_DISABLE_KEY_REPEAT = 0x08000000;
 
     public final static int FLAG_WOKE_HERE = 0x10000000;
     public final static int FLAG_BRIGHT_HERE = 0x20000000;

@@ -369,7 +369,8 @@ private:
     }
 
     virtual int32_t injectInputEvent(const InputEvent* event,
-            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis) {
+            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis,
+            uint32_t policyFlags) {
         ADD_FAILURE() << "Should never be called by input reader.";
         return INPUT_EVENT_INJECTION_FAILED;
     }
@@ -383,6 +384,10 @@ private:
     }
 
     virtual void setInputDispatchMode(bool enabled, bool frozen) {
+        ADD_FAILURE() << "Should never be called by input reader.";
+    }
+
+    virtual void setInputFilterEnabled(bool enabled) {
         ADD_FAILURE() << "Should never be called by input reader.";
     }
 

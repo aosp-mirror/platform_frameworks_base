@@ -19,6 +19,7 @@ package com.android.server.accessibility;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.HandlerCaller.SomeArgs;
+import com.android.server.wm.WindowManagerService;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -43,6 +44,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
@@ -106,6 +108,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private int mHandledFeedbackTypes = 0;
 
     private boolean mIsEnabled;
+    private AccessibilityInputFilter mInputFilter;
 
     /**
      * Handler for delayed event dispatch.
@@ -209,6 +212,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         }
 
                         manageServicesLocked();
+                        updateInputFilterLocked();
                     }
                     
                     return;
@@ -249,6 +253,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             unbindAllServicesLocked();
                         }
                         updateClientsLocked();
+                        updateInputFilterLocked();
                     }
                 }
             });
@@ -616,6 +621,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mClients.remove(i);
                 count--;
                 i--;
+            }
+        }
+    }
+
+    /**
+     * Installs or removes the accessibility input filter when accessibility is enabled
+     * or disabled.
+     */
+    private void updateInputFilterLocked() {
+        WindowManagerService wm = (WindowManagerService)ServiceManager.getService(
+                Context.WINDOW_SERVICE);
+        if (wm != null) {
+            if (mIsEnabled) {
+                if (mInputFilter == null) {
+                    mInputFilter = new AccessibilityInputFilter(mContext);
+                }
+                wm.setInputFilter(mInputFilter);
+            } else {
+                wm.setInputFilter(null);
             }
         }
     }

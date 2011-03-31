@@ -67,6 +67,15 @@ public abstract class InputEvent implements Parcelable {
      */
     public abstract void setSource(int source);
 
+    /**
+     * Recycles the event.
+     * This method should only be used by the system since applications do not
+     * expect {@link KeyEvent} objects to be recycled, although {@link MotionEvent}
+     * objects are fine.  See {@link KeyEvent#recycle()} for details.
+     * @hide
+     */
+    public abstract void recycle();
+
     public int describeContents() {
         return 0;
     }

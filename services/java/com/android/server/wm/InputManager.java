@@ -42,6 +42,7 @@ import android.view.KeyEvent;
 import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicy;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -78,8 +79,10 @@ public class InputManager {
     private static native void nativeRegisterInputChannel(InputChannel inputChannel,
             InputWindowHandle inputWindowHandle, boolean monitor);
     private static native void nativeUnregisterInputChannel(InputChannel inputChannel);
+    private static native void nativeSetInputFilterEnabled(boolean enable);
     private static native int nativeInjectInputEvent(InputEvent event,
-            int injectorPid, int injectorUid, int syncMode, int timeoutMillis);
+            int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
+            int policyFlags);
     private static native void nativeSetInputWindows(InputWindow[] windows);
     private static native void nativeSetInputDispatchMode(boolean enabled, boolean frozen);
     private static native void nativeSetSystemUiVisibility(int visibility);
@@ -116,6 +119,11 @@ public class InputManager {
 
     /** The key is down but is a virtual key press that is being emulated by the system. */
     public static final int KEY_STATE_VIRTUAL = 2;
+
+    // State for the currently installed input filter.
+    final Object mInputFilterLock = new Object();
+    InputFilter mInputFilter;
+    InputFilterHost mInputFilterHost;
 
     public InputManager(Context context, WindowManagerService windowManagerService) {
         this.mContext = context;
@@ -268,7 +276,42 @@ public class InputManager {
         
         nativeUnregisterInputChannel(inputChannel);
     }
-    
+
+    /**
+     * Sets an input filter that will receive all input events before they are dispatched.
+     * The input filter may then reinterpret input events or inject new ones.
+     *
+     * To ensure consistency, the input dispatcher automatically drops all events
+     * in progress whenever an input filter is installed or uninstalled.  After an input
+     * filter is uninstalled, it can no longer send input events unless it is reinstalled.
+     * Any events it attempts to send after it has been uninstalled will be dropped.
+     *
+     * @param filter The input filter, or null to remove the current filter.
+     */
+    public void setInputFilter(InputFilter filter) {
+        synchronized (mInputFilterLock) {
+            final InputFilter oldFilter = mInputFilter;
+            if (oldFilter == filter) {
+                return; // nothing to do
+            }
+
+            if (oldFilter != null) {
+                mInputFilter = null;
+                mInputFilterHost.disconnectLocked();
+                mInputFilterHost = null;
+                oldFilter.uninstall();
+            }
+
+            if (filter != null) {
+                mInputFilter = filter;
+                mInputFilterHost = new InputFilterHost();
+                filter.install(mInputFilterHost);
+            }
+
+            nativeSetInputFilterEnabled(filter != null);
+        }
+    }
+
     /**
      * Injects an input event into the event system on behalf of an application.
      * The synchronization mode determines whether the method blocks while waiting for
@@ -304,9 +347,10 @@ public class InputManager {
             throw new IllegalArgumentException("timeoutMillis must be positive");
         }
 
-        return nativeInjectInputEvent(event, injectorPid, injectorUid, syncMode, timeoutMillis);
+        return nativeInjectInputEvent(event, injectorPid, injectorUid, syncMode, timeoutMillis,
+                WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
     }
-    
+
     /**
      * Gets information about the input device with the specified id.
      * @param id The device id.
@@ -370,6 +414,27 @@ public class InputManager {
         }
     }
 
+    private final class InputFilterHost implements InputFilter.Host {
+        private boolean mDisconnected;
+
+        public void disconnectLocked() {
+            mDisconnected = true;
+        }
+
+        public void sendInputEvent(InputEvent event, int policyFlags) {
+            if (event == null) {
+                throw new IllegalArgumentException("event must not be null");
+            }
+
+            synchronized (mInputFilterLock) {
+                if (!mDisconnected) {
+                    nativeInjectInputEvent(event, 0, 0, INPUT_EVENT_INJECTION_SYNC_NONE, 0,
+                            policyFlags | WindowManagerPolicy.FLAG_FILTERED);
+                }
+            }
+        }
+    }
+
     private static final class PointerIcon {
         public Bitmap bitmap;
         public float hotSpotX;
@@ -415,7 +480,7 @@ public class InputManager {
     /*
      * Callbacks from native.
      */
-    private class Callbacks {
+    private final class Callbacks {
         static final String TAG = "InputManager-Callbacks";
         
         private static final boolean DEBUG_VIRTUAL_KEYS = false;
@@ -443,7 +508,19 @@ public class InputManager {
             return mWindowManagerService.mInputMonitor.notifyANR(
                     inputApplicationHandle, inputWindowHandle);
         }
-        
+
+        @SuppressWarnings("unused")
+        final boolean filterInputEvent(InputEvent event, int policyFlags) {
+            synchronized (mInputFilterLock) {
+                if (mInputFilter != null) {
+                    mInputFilter.filterInputEvent(event, policyFlags);
+                    return false;
+                }
+            }
+            event.recycle();
+            return true;
+        }
+
         @SuppressWarnings("unused")
         public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn) {
             return mWindowManagerService.mInputMonitor.interceptKeyBeforeQueueing(

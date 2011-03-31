@@ -56,6 +56,7 @@ static struct {
     jmethodID notifyLidSwitchChanged;
     jmethodID notifyInputChannelBroken;
     jmethodID notifyANR;
+    jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
     jmethodID interceptMotionBeforeQueueingWhenScreenOff;
     jmethodID interceptKeyBeforeDispatching;
@@ -174,6 +175,7 @@ public:
     virtual nsecs_t getKeyRepeatTimeout();
     virtual nsecs_t getKeyRepeatDelay();
     virtual int32_t getMaxEventsPerSecond();
+    virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags);
     virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags);
     virtual void interceptMotionBeforeQueueing(nsecs_t when, uint32_t& policyFlags);
     virtual bool interceptKeyBeforeDispatching(const sp<InputWindowHandle>& inputWindowHandle,
@@ -638,6 +640,38 @@ bool NativeInputManager::isScreenBright() {
     return android_server_PowerManagerService_isScreenBright();
 }
 
+bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) {
+    jobject inputEventObj;
+
+    JNIEnv* env = jniEnv();
+    switch (inputEvent->getType()) {
+    case AINPUT_EVENT_TYPE_KEY:
+        inputEventObj = android_view_KeyEvent_fromNative(env,
+                static_cast<const KeyEvent*>(inputEvent));
+        break;
+    case AINPUT_EVENT_TYPE_MOTION:
+        inputEventObj = android_view_MotionEvent_obtainAsCopy(env,
+                static_cast<const MotionEvent*>(inputEvent));
+        break;
+    default:
+        return true; // dispatch the event normally
+    }
+
+    if (!inputEventObj) {
+        LOGE("Failed to obtain input event object for filterInputEvent.");
+        return true; // dispatch the event normally
+    }
+
+    // The callee is responsible for recycling the event.
+    jboolean pass = env->CallBooleanMethod(mCallbacksObj, gCallbacksClassInfo.filterInputEvent,
+            inputEventObj, policyFlags);
+    if (checkAndClearExceptionFromCallback(env, "filterInputEvent")) {
+        pass = true;
+    }
+    env->DeleteLocalRef(inputEventObj);
+    return pass;
+}
+
 void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
         uint32_t& policyFlags) {
     // Policy:
@@ -1005,9 +1039,18 @@ static void android_server_InputManager_nativeUnregisterInputChannel(JNIEnv* env
     }
 }
 
+static void android_server_InputManager_nativeSetInputFilterEnabled(JNIEnv* env, jclass clazz,
+        jboolean enabled) {
+    if (checkInputManagerUnitialized(env)) {
+        return;
+    }
+
+    gNativeInputManager->getInputManager()->getDispatcher()->setInputFilterEnabled(enabled);
+}
+
 static jint android_server_InputManager_nativeInjectInputEvent(JNIEnv* env, jclass clazz,
         jobject inputEventObj, jint injectorPid, jint injectorUid,
-        jint syncMode, jint timeoutMillis) {
+        jint syncMode, jint timeoutMillis, jint policyFlags) {
     if (checkInputManagerUnitialized(env)) {
         return INPUT_EVENT_INJECTION_FAILED;
     }
@@ -1021,7 +1064,8 @@ static jint android_server_InputManager_nativeInjectInputEvent(JNIEnv* env, jcla
         }
 
         return gNativeInputManager->getInputManager()->getDispatcher()->injectInputEvent(
-                & keyEvent, injectorPid, injectorUid, syncMode, timeoutMillis);
+                & keyEvent, injectorPid, injectorUid, syncMode, timeoutMillis,
+                uint32_t(policyFlags));
     } else if (env->IsInstanceOf(inputEventObj, gMotionEventClassInfo.clazz)) {
         const MotionEvent* motionEvent = android_view_MotionEvent_getNativePtr(env, inputEventObj);
         if (!motionEvent) {
@@ -1030,7 +1074,8 @@ static jint android_server_InputManager_nativeInjectInputEvent(JNIEnv* env, jcla
         }
 
         return gNativeInputManager->getInputManager()->getDispatcher()->injectInputEvent(
-                motionEvent, injectorPid, injectorUid, syncMode, timeoutMillis);
+                motionEvent, injectorPid, injectorUid, syncMode, timeoutMillis,
+                uint32_t(policyFlags));
     } else {
         jniThrowRuntimeException(env, "Invalid input event type.");
         return INPUT_EVENT_INJECTION_FAILED;
@@ -1200,7 +1245,9 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeRegisterInputChannel },
     { "nativeUnregisterInputChannel", "(Landroid/view/InputChannel;)V",
             (void*) android_server_InputManager_nativeUnregisterInputChannel },
-    { "nativeInjectInputEvent", "(Landroid/view/InputEvent;IIII)I",
+    { "nativeSetInputFilterEnabled", "(Z)V",
+            (void*) android_server_InputManager_nativeSetInputFilterEnabled },
+    { "nativeInjectInputEvent", "(Landroid/view/InputEvent;IIIII)I",
             (void*) android_server_InputManager_nativeInjectInputEvent },
     { "nativeSetInputWindows", "([Lcom/android/server/wm/InputWindow;)V",
             (void*) android_server_InputManager_nativeSetInputWindows },
@@ -1256,6 +1303,9 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gCallbacksClassInfo.notifyANR, clazz,
             "notifyANR",
             "(Lcom/android/server/wm/InputApplicationHandle;Lcom/android/server/wm/InputWindowHandle;)J");
+
+    GET_METHOD_ID(gCallbacksClassInfo.filterInputEvent, clazz,
+            "filterInputEvent", "(Landroid/view/InputEvent;I)Z");
 
     GET_METHOD_ID(gCallbacksClassInfo.interceptKeyBeforeQueueing, clazz,
             "interceptKeyBeforeQueueing", "(Landroid/view/KeyEvent;IZ)I");

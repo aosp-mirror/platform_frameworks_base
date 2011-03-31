@@ -128,6 +128,12 @@ enum {
     // input device or an application with system-wide event injection permission.
     POLICY_FLAG_TRUSTED = 0x02000000,
 
+    // Indicates that the input event has passed through an input filter.
+    POLICY_FLAG_FILTERED = 0x04000000,
+
+    // Disables automatic key repeating behavior.
+    POLICY_FLAG_DISABLE_KEY_REPEAT = 0x08000000,
+
     /* These flags are set by the input reader policy as it intercepts each event. */
 
     // Indicates that the screen was off when the event was received and the event
