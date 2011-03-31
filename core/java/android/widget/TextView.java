@@ -43,7 +43,6 @@ import android.inputmethodservice.ExtractEditText;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -88,6 +87,7 @@ import android.text.style.URLSpan;
 import android.text.style.UpdateAppearance;
 import android.text.util.Linkify;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.FloatMath;
 import android.util.Log;
 import android.util.TypedValue;
@@ -310,6 +310,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mTextSelectHandleRes;
     private int mTextEditPasteWindowLayout, mTextEditSidePasteWindowLayout;
     private int mTextEditNoPasteWindowLayout, mTextEditSideNoPasteWindowLayout;
+
+    private int mTextEditSuggestionsBottomWindowLayout, mTextEditSuggestionsTopWindowLayout;
+    private int mTextEditSuggestionItemLayout;
+    private SuggestionsPopupWindow mSuggestionsPopupWindow;
 
     private int mCursorDrawableRes;
     private final Drawable[] mCursorDrawable = new Drawable[2];
@@ -777,6 +781,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case com.android.internal.R.styleable.TextView_textEditSideNoPasteWindowLayout:
                 mTextEditSideNoPasteWindowLayout = a.getResourceId(attr, 0);
+                break;
+
+            case com.android.internal.R.styleable.TextView_textEditSuggestionsBottomWindowLayout:
+                mTextEditSuggestionsBottomWindowLayout = a.getResourceId(attr, 0);
+                break;
+
+            case com.android.internal.R.styleable.TextView_textEditSuggestionsTopWindowLayout:
+                mTextEditSuggestionsTopWindowLayout = a.getResourceId(attr, 0);
+                break;
+
+            case com.android.internal.R.styleable.TextView_textEditSuggestionItemLayout:
+                mTextEditSuggestionItemLayout = a.getResourceId(attr, 0);
                 break;
 
             case com.android.internal.R.styleable.TextView_textIsSelectable:
@@ -7351,6 +7367,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     startSelectionActionMode();
                 } else {
                     stopSelectionActionMode();
+                    hideSuggestions();
                     if (hasInsertionController() && !selectAllGotFocus && mText.length() > 0) {
                         getInsertionController().show();
                     }
@@ -7784,7 +7801,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // Cases where the text ends with a '.' and we select from the end of the line
                 // (right after the dot), or when we select from the space character in "aaa, bbb".
                 continue;
-            }              
+            }
             if (type == Character.SURROGATE) { // Two Character codepoint
                 end = start - 1; // Recheck as a pair when scanning forward
                 continue;
@@ -8229,6 +8246,201 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return ((minOffset >= selectionStart) && (maxOffset < selectionEnd));
     }
 
+    private class SuggestionsPopupWindow implements OnClickListener {
+        private static final int MAX_NUMBER_SUGGESTIONS = 5;
+        private static final long NO_SUGGESTIONS = -1L;
+        private final PopupWindow mContainer;
+        private final ViewGroup[] mSuggestionViews = new ViewGroup[2];
+        private final int[] mSuggestionViewLayouts = new int[] {
+                mTextEditSuggestionsBottomWindowLayout, mTextEditSuggestionsTopWindowLayout};
+
+        public SuggestionsPopupWindow() {
+            mContainer = new PopupWindow(TextView.this.mContext, null,
+                    com.android.internal.R.attr.textSuggestionsWindowStyle);
+            mContainer.setSplitTouchEnabled(true);
+            mContainer.setClippingEnabled(false);
+            mContainer.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL);
+
+            mContainer.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+            mContainer.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        private ViewGroup getViewGroup(boolean under) {
+            final int viewIndex = under ? 0 : 1;
+            ViewGroup viewGroup = mSuggestionViews[viewIndex];
+
+            if (viewGroup == null) {
+                final int layout = mSuggestionViewLayouts[viewIndex];
+                LayoutInflater inflater = (LayoutInflater) TextView.this.mContext.
+                        getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+                if (inflater == null) {
+                    throw new IllegalArgumentException(
+                            "Unable to create TextEdit suggestion window inflater");
+                }
+
+                View view = inflater.inflate(layout, null);
+
+                if (! (view instanceof ViewGroup)) {
+                    throw new IllegalArgumentException(
+                            "Inflated TextEdit suggestion window is not a ViewGroup: " + view);
+                }
+
+                viewGroup = (ViewGroup) view;
+
+                // Inflate the suggestion items once and for all.
+                for (int i = 0; i < MAX_NUMBER_SUGGESTIONS; i++) {
+                    View childView = inflater.inflate(mTextEditSuggestionItemLayout, viewGroup,
+                            false);
+
+                    if (! (childView instanceof TextView)) {
+                        throw new IllegalArgumentException(
+                               "Inflated TextEdit suggestion item is not a TextView: " + childView);
+                    }
+
+                    viewGroup.addView(childView);
+                    childView.setOnClickListener(this);
+                }
+
+                mSuggestionViews[viewIndex] = viewGroup;
+            }
+
+            return viewGroup;
+        }
+
+        public void show() {
+            if (!(mText instanceof Editable)) return;
+
+            final int pos = TextView.this.getSelectionStart();
+            Spannable spannable = (Spannable)TextView.this.mText;
+            CorrectionSpan[] correctionSpans = spannable.getSpans(pos, pos, CorrectionSpan.class);
+            final int nbSpans = correctionSpans.length;
+
+            ViewGroup viewGroup = getViewGroup(true);
+            mContainer.setContentView(viewGroup);
+
+            int totalNbSuggestions = 0;
+            for (int spanIndex = 0; spanIndex < nbSpans; spanIndex++) {
+                CorrectionSpan correctionSpan = correctionSpans[spanIndex];
+                final int spanStart = spannable.getSpanStart(correctionSpan);
+                final int spanEnd = spannable.getSpanEnd(correctionSpan);
+                final Long spanRange = packRangeInLong(spanStart, spanEnd);
+
+                String[] suggestions = correctionSpan.getSuggestions();
+                int nbSuggestions = suggestions.length;
+                for (int suggestionIndex = 0; suggestionIndex < nbSuggestions; suggestionIndex++) {
+                    TextView textView = (TextView) viewGroup.getChildAt(totalNbSuggestions);
+                    textView.setText(suggestions[suggestionIndex]);
+                    textView.setTag(spanRange);
+
+                    totalNbSuggestions++;
+                    if (totalNbSuggestions == MAX_NUMBER_SUGGESTIONS) {
+                        spanIndex = nbSpans;
+                        break;
+                    }
+                }
+            }
+
+            if (totalNbSuggestions == 0) {
+                // TODO Replace by final text, use a dedicated layout, add a fade out timer...
+                TextView textView = (TextView) viewGroup.getChildAt(0);
+                textView.setText("No suggestions available");
+                textView.setTag(NO_SUGGESTIONS);
+                totalNbSuggestions++;
+            }
+
+            for (int i = 0; i < MAX_NUMBER_SUGGESTIONS; i++) {
+                viewGroup.getChildAt(i).setVisibility(i < totalNbSuggestions ? VISIBLE : GONE);
+            }
+
+            final int size = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+            viewGroup.measure(size, size);
+
+            positionAtCursor();
+        }
+
+        public void hide() {
+            mContainer.dismiss();
+        }
+
+        @Override
+        public void onClick(View view) {
+            if (view instanceof TextView) {
+                TextView textView = (TextView) view;
+                Long range = ((Long) view.getTag());
+                if (range != NO_SUGGESTIONS) {
+                    final int spanStart = extractRangeStartFromLong(range);
+                    final int spanEnd = extractRangeEndFromLong(range);
+                    ((Editable) mText).replace(spanStart, spanEnd, textView.getText());
+                }
+            }
+            hide();
+        }
+
+        void positionAtCursor() {
+            View contentView = mContainer.getContentView();
+            int width = contentView.getMeasuredWidth();
+            int height = contentView.getMeasuredHeight();
+            final int offset = TextView.this.getSelectionStart();
+            final int line = mLayout.getLineForOffset(offset);
+            final int lineBottom = mLayout.getLineBottom(line);
+            float primaryHorizontal = mLayout.getPrimaryHorizontal(offset);
+
+            final Rect bounds = sCursorControllerTempRect;
+            bounds.left = (int) (primaryHorizontal - width / 2.0f);
+            bounds.top = lineBottom;
+
+            bounds.right = bounds.left + width;
+            bounds.bottom = bounds.top + height;
+
+            convertFromViewportToContentCoordinates(bounds);
+
+            final int[] coords = mTempCoords;
+            TextView.this.getLocationInWindow(coords);
+            coords[0] += bounds.left;
+            coords[1] += bounds.top;
+
+            final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+            final int screenHeight = displayMetrics.heightPixels;
+
+            // Vertical clipping
+            if (coords[1] + height > screenHeight) {
+                // Try to position above current line instead
+                // TODO use top layout instead, reverse suggestion order,
+                // try full screen vertical down if it still does not fit. TBD with designers.
+
+                // Update dimensions from new view
+                contentView = mContainer.getContentView();
+                width = contentView.getMeasuredWidth();
+                height = contentView.getMeasuredHeight();
+
+                final int lineTop = mLayout.getLineTop(line);
+                final int lineHeight = lineBottom - lineTop;
+                coords[1] -= height + lineHeight;
+            }
+
+            // Horizontal clipping
+            coords[0] = Math.max(0, coords[0]);
+            coords[0] = Math.min(displayMetrics.widthPixels - width, coords[0]);
+
+            mContainer.showAtLocation(TextView.this, Gravity.NO_GRAVITY, coords[0], coords[1]);
+        }
+    }
+
+    void showSuggestions() {
+        if (mSuggestionsPopupWindow == null) {
+            mSuggestionsPopupWindow = new SuggestionsPopupWindow();
+        }
+        hideControllers();
+        mSuggestionsPopupWindow.show();
+    }
+
+    void hideSuggestions() {
+        if (mSuggestionsPopupWindow != null) {
+            mSuggestionsPopupWindow.hide();
+        }
+    }
+
     /**
      * If provided, this ActionMode.Callback will be used to create the ActionMode when text
      * selection is initiated in this View.
@@ -8437,16 +8649,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private class PastePopupMenu implements OnClickListener {
+    private class PastePopupWindow implements OnClickListener {
         private final PopupWindow mContainer;
-        private int mPositionX;
-        private int mPositionY;
         private final View[] mPasteViews = new View[4];
         private final int[] mPasteViewLayouts = new int[] { 
                 mTextEditPasteWindowLayout,  mTextEditNoPasteWindowLayout, 
                 mTextEditSidePasteWindowLayout, mTextEditSideNoPasteWindowLayout };
         
-        public PastePopupMenu() {
+        public PastePopupWindow() {
             mContainer = new PopupWindow(TextView.this.mContext, null,
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
             mContainer.setSplitTouchEnabled(true);
@@ -8529,14 +8739,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             convertFromViewportToContentCoordinates(bounds);
 
-            mPositionX = bounds.left;
-            mPositionY = bounds.top;
-
-
             final int[] coords = mTempCoords;
             TextView.this.getLocationInWindow(coords);
-            coords[0] += mPositionX;
-            coords[1] += mPositionY;
+            coords[0] += bounds.left;
+            coords[1] += bounds.top;
 
             final int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
             if (coords[1] < 0) {
@@ -8881,7 +9087,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         void hideAssociatedPopupWindow() {
             // No associated popup window by default
         }
-        
+
         public void onDetached() {
             // Should be overriden to clean possible Runnable
         }
@@ -8891,10 +9097,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private static final int DELAY_BEFORE_FADE_OUT = 4000;
         private static final int RECENT_CUT_COPY_DURATION = 15 * 1000; // seconds
 
-        // Used to detect taps on the insertion handle, which will affect the PastePopupMenu
+        // Used to detect taps on the insertion handle, which will affect the PastePopupWindow
         private long mTouchTimer;
         private float mDownPositionX, mDownPositionY;
-        private PastePopupMenu mPastePopupWindow;
+        private PastePopupWindow mPastePopupWindow;
         private Runnable mHider;
         private Runnable mPastePopupShower;
 
@@ -9034,7 +9240,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         void showAssociatedPopupWindow() {
             if (mPastePopupWindow == null) {
                 // Lazy initialisation: create when actually shown only.
-                mPastePopupWindow = new PastePopupMenu();
+                mPastePopupWindow = new PastePopupWindow();
             }
             mPastePopupWindow.show();
         }
@@ -9245,6 +9451,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mEndHandle.show();
 
             hideInsertionPointCursorController();
+            hideSuggestions();
         }
 
         public void hide() {
@@ -9272,7 +9479,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             final int deltaY = y - mPreviousTapPositionY;
                             final int distanceSquared = deltaX * deltaX + deltaY * deltaY;
                             if (distanceSquared < mSquaredTouchSlopDistance) {
-                                startSelectionActionMode();
+                                showSuggestions();
                                 mDiscardNextActionUp = true;
                             }
                         }
@@ -9362,6 +9569,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private void hideControllers() {
         hideInsertionPointCursorController();
         stopSelectionActionMode();
+        hideSuggestions();
     }
 
     /**

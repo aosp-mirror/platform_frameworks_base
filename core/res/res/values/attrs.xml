@@ -525,6 +525,9 @@
         <!-- Reference to a style that will be used for the window containing a text
              selection anchor. -->
         <attr name="textSelectHandleWindowStyle" format="reference" />
+        <!-- Reference to a style that will be used for the window containing a list of possible
+             text suggestions in an EditText. -->
+        <attr name="textSuggestionsWindowStyle" format="reference" />
         <!-- Default ListPopupWindow style. -->
         <attr name="listPopupWindowStyle" format="reference" />
         <!-- Default PopupMenu style. -->
@@ -672,6 +675,15 @@
         <attr name="textEditSidePasteWindowLayout" format="reference" />
         <!-- Variation of textEditSidePasteWindowLayout displayed when the clipboard is empty. -->
         <attr name="textEditSideNoPasteWindowLayout" format="reference" />
+
+        <!-- Layout of a the view that is used to create the text suggestions popup window in an
+             EditText. This window will be displayed below the text line. -->
+        <attr name="textEditSuggestionsBottomWindowLayout" format="reference" />
+        <!-- Same as textEditSuggestionsBottomWindowLayout, but used when the popup is displayed
+             above the current line of text instead of below. -->
+        <attr name="textEditSuggestionsTopWindowLayout" format="reference" />
+        <!-- Layout of the TextView item that will populate the suggestion popup window. -->
+        <attr name="textEditSuggestionItemLayout" format="reference" />
 
         <!-- Theme to use for dialogs spawned from this theme. -->
         <attr name="dialogTheme" format="reference" />
@@ -2809,6 +2821,16 @@
         <attr name="textEditSidePasteWindowLayout" />
         <!-- Variation of textEditSidePasteWindowLayout displayed when the clipboard is empty. -->
         <attr name="textEditSideNoPasteWindowLayout" />
+
+        <!-- Layout of a the view that is used to create the text suggestions popup window in an
+             EditText. This window will be displayed below the text line. -->
+        <attr name="textEditSuggestionsBottomWindowLayout" />
+        <!-- Same as textEditSuggestionsBottomWindowLayout, but used when the popup is displayed
+             above the current line of text instead of below. -->
+        <attr name="textEditSuggestionsTopWindowLayout" />
+        <!-- Layout of the TextView item that will populate the suggestion popup window. -->
+        <attr name="textEditSuggestionItemLayout" />
+
 
         <!-- Reference to a drawable that will be drawn under the insertion cursor. -->
         <attr name="textCursorDrawable" />
