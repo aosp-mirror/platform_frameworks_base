@@ -1348,10 +1348,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     String defaultIface = linkProperties.getInterfaceName();
                     if (defaultIface != null &&
                             !defaultIface.equals(newLinkProperties.getInterfaceName())) {
-                        mNetTrackers[netType].removeDefaultRoute();
+                        removeDefaultRoute(mNetTrackers[netType]);
                     }
                 }
-                mNetTrackers[netType].addPrivateDnsRoutes();
+                addPrivateDnsRoutes(mNetTrackers[netType]);
             }
         } else {
             if (mNetAttributes[netType].isDefault()) {
