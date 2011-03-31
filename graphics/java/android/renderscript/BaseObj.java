@@ -24,7 +24,7 @@ import android.util.Log;
  * disconecting the object from the native allocation for early cleanup.
  *
  **/
-class BaseObj {
+public class BaseObj {
     BaseObj(int id, RenderScript rs) {
         rs.validate();
         mRS = rs;
