@@ -66,8 +66,11 @@ public interface RILConstants {
     int NETWORK_MODE_EVDO_NO_CDMA   = 6; /* EvDo only */
     int NETWORK_MODE_GLOBAL         = 7; /* GSM/WCDMA, CDMA, and EvDo (auto mode, according to PRL)
                                             AVAILABLE Application Settings menu*/
-    int NETWORK_MODE_LTE_ONLY       = 8; /* LTE Only mode. Used only for testing purposes.Not
-                                            user selectable from regular UI */
+    int NETWORK_MODE_LTE_CDMA_EVDO  = 8; /* LTE, CDMA and EvDo */
+    int NETWORK_MODE_LTE_GSM_WCDMA  = 9; /* LTE, GSM/WCDMA */
+    int NETWORK_MODE_LTE_CMDA_EVDO_GSM_WCDMA = 10; /* LTE, CDMA, EvDo, GSM/WCDMA */
+    int NETWORK_MODE_LTE_ONLY       = 11; /* LTE Only mode. */
+
     int PREFERRED_NETWORK_MODE      = NETWORK_MODE_WCDMA_PREF;
 
     /* CDMA subscription source. See ril.h RIL_REQUEST_CDMA_SET_SUBSCRIPTION */
