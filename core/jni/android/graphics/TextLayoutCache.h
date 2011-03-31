@@ -249,21 +249,6 @@ public:
         }
     }
 
-#define SkAutoKern_AdjustF(prev, next) (((next) - (prev) + 32) >> 6 << 16)
-
-    static int adjust(int prev, int next) {
-        int delta = next - prev;
-        if (delta >= 32) {
-            return -1;
-        }
-        else if (delta < -32) {
-            return +1;
-        }
-        else {
-            return 0;
-        }
-    }
-
     static void computeAdvancesWithHarfbuzz(SkPaint* paint, const UChar* chars, size_t start,
             size_t count, size_t contextCount, int dirFlags,
             jfloat* outAdvances, jfloat* outTotalAdvance) {
