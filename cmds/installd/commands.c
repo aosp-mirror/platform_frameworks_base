@@ -17,6 +17,13 @@
 #include "installd.h"
 #include <diskusage/dirsize.h>
 
+/* Directory records that are used in execution of commands. */
+dir_rec_t android_data_dir;
+dir_rec_t android_asec_dir;
+dir_rec_t android_app_dir;
+dir_rec_t android_app_private_dir;
+dir_rec_array_t android_system_dirs;
+
 int install(const char *pkgname, uid_t uid, gid_t gid)
 {
     char pkgdir[PKG_PATH_MAX];
@@ -27,10 +34,15 @@ int install(const char *pkgname, uid_t uid, gid_t gid)
         return -1;
     }
 
-    if (create_pkg_path(pkgdir, PKG_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX))
+    if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, 0)) {
+        LOGE("cannot create package path\n");
         return -1;
-    if (create_pkg_path(libdir, PKG_LIB_PREFIX, pkgname, PKG_LIB_POSTFIX))
+    }
+
+    if (create_pkg_path(libdir, pkgname, PKG_LIB_POSTFIX, 0)) {
+        LOGE("cannot create package lib path\n");
         return -1;
+    }
 
     if (mkdir(pkgdir, 0751) < 0) {
         LOGE("cannot create dir '%s': %s\n", pkgdir, strerror(errno));
@@ -59,7 +71,7 @@ int uninstall(const char *pkgname)
 {
     char pkgdir[PKG_PATH_MAX];
 
-    if (create_pkg_path(pkgdir, PKG_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX))
+    if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, 0))
         return -1;
 
         /* delete contents AND directory, no exceptions */
@@ -71,9 +83,9 @@ int renamepkg(const char *oldpkgname, const char *newpkgname)
     char oldpkgdir[PKG_PATH_MAX];
     char newpkgdir[PKG_PATH_MAX];
 
-    if (create_pkg_path(oldpkgdir, PKG_DIR_PREFIX, oldpkgname, PKG_DIR_POSTFIX))
+    if (create_pkg_path(oldpkgdir, oldpkgname, PKG_DIR_POSTFIX, 0))
         return -1;
-    if (create_pkg_path(newpkgdir, PKG_DIR_PREFIX, newpkgname, PKG_DIR_POSTFIX))
+    if (create_pkg_path(newpkgdir, newpkgname, PKG_DIR_POSTFIX, 0))
         return -1;
 
     if (rename(oldpkgdir, newpkgdir) < 0) {
@@ -87,7 +99,7 @@ int delete_user_data(const char *pkgname)
 {
     char pkgdir[PKG_PATH_MAX];
 
-    if (create_pkg_path(pkgdir, PKG_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX))
+    if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, 0))
         return -1;
 
         /* delete contents, excluding "lib", but not the directory itself */
@@ -98,7 +110,7 @@ int delete_cache(const char *pkgname)
 {
     char cachedir[PKG_PATH_MAX];
 
-    if (create_pkg_path(cachedir, CACHE_DIR_PREFIX, pkgname, CACHE_DIR_POSTFIX))
+    if (create_pkg_path(cachedir, pkgname, CACHE_DIR_POSTFIX, 0))
         return -1;
 
         /* delete contents, not the directory, no exceptions */
@@ -108,10 +120,10 @@ int delete_cache(const char *pkgname)
 static int64_t disk_free()
 {
     struct statfs sfs;
-    if (statfs(PKG_DIR_PREFIX, &sfs) == 0) {
+    if (statfs(android_data_dir.path, &sfs) == 0) {
         return sfs.f_bavail * sfs.f_bsize;
     } else {
-        LOGE("Couldn't statfs " PKG_DIR_PREFIX ": %s\n", strerror(errno));
+        LOGE("Couldn't statfs %s: %s\n", android_data_dir.path, strerror(errno));
         return -1;
     }
 }
@@ -137,9 +149,9 @@ int free_cache(int64_t free_size)
     LOGI("free_cache(%" PRId64 ") avail %" PRId64 "\n", free_size, avail);
     if (avail >= free_size) return 0;
 
-    d = opendir(PKG_DIR_PREFIX);
+    d = opendir(android_data_dir.path);
     if (d == NULL) {
-        LOGE("cannot open %s: %s\n", PKG_DIR_PREFIX, strerror(errno));
+        LOGE("cannot open %s: %s\n", android_data_dir.path, strerror(errno));
         return -1;
     }
     dfd = dirfd(d);
@@ -172,43 +184,13 @@ int free_cache(int64_t free_size)
     return -1;
 }
 
-/* used by move_dex, rm_dex, etc to ensure that the provided paths
- * don't point anywhere other than at the APK_DIR_PREFIX
- */
-static int is_valid_apk_path(const char *path)
-{
-    int len = strlen(APK_DIR_PREFIX);
-int nosubdircheck = 0;
-    if (strncmp(path, APK_DIR_PREFIX, len)) {
-        len = strlen(PROTECTED_DIR_PREFIX);
-        if (strncmp(path, PROTECTED_DIR_PREFIX, len)) {
-            len = strlen(SDCARD_DIR_PREFIX);
-            if (strncmp(path, SDCARD_DIR_PREFIX, len)) {
-                LOGE("invalid apk path '%s' (bad prefix)\n", path);
-                return 0;
-            } else {
-                nosubdircheck = 1;
-            }
-        }
-    }
-    if ((nosubdircheck != 1) && strchr(path + len, '/')) {
-        LOGE("invalid apk path '%s' (subdir?)\n", path);
-        return 0;
-    }
-    if (path[len] == '.') {
-        LOGE("invalid apk path '%s' (trickery)\n", path);
-        return 0;
-    }
-    return 1;
-}
-
 int move_dex(const char *src, const char *dst)
 {
     char src_dex[PKG_PATH_MAX];
     char dst_dex[PKG_PATH_MAX];
 
-    if (!is_valid_apk_path(src)) return -1;
-    if (!is_valid_apk_path(dst)) return -1;
+    if (validate_apk_path(src)) return -1;
+    if (validate_apk_path(dst)) return -1;
 
     if (create_cache_path(src_dex, src)) return -1;
     if (create_cache_path(dst_dex, dst)) return -1;
@@ -226,7 +208,7 @@ int rm_dex(const char *path)
 {
     char dex_path[PKG_PATH_MAX];
 
-    if (!is_valid_apk_path(path)) return -1;
+    if (validate_apk_path(path)) return -1;
     if (create_cache_path(dex_path, path)) return -1;
 
     LOGI("unlink %s\n", dex_path);
@@ -245,7 +227,7 @@ int protect(char *pkgname, gid_t gid)
 
     if (gid < AID_SYSTEM) return -1;
 
-    if (create_pkg_path(pkgpath, PROTECTED_DIR_PREFIX, pkgname, ".apk"))
+    if (create_pkg_path_in_dir(pkgpath, &android_app_private_dir, pkgname, ".apk"))
         return -1;
 
     if (stat(pkgpath, &s) < 0) return -1;
@@ -280,8 +262,8 @@ int get_size(const char *pkgname, const char *apkpath,
         /* count the source apk as code -- but only if it's not
          * on the /system partition and its not on the sdcard.
          */
-    if (strncmp(apkpath, "/system", 7) != 0 &&
-            strncmp(apkpath, SDCARD_DIR_PREFIX, 7) != 0) {
+    if (validate_system_app_path(apkpath) &&
+            strncmp(apkpath, android_asec_dir.path, android_asec_dir.len) != 0) {
         if (stat(apkpath, &s) == 0) {
             codesize += stat_size(&s);
         }
@@ -300,7 +282,7 @@ int get_size(const char *pkgname, const char *apkpath,
         }
     }
 
-    if (create_pkg_path(path, PKG_DIR_PREFIX, pkgname, PKG_DIR_POSTFIX)) {
+    if (create_pkg_path(path, pkgname, PKG_DIR_POSTFIX, 0)) {
         goto done;
     }
 
@@ -310,10 +292,10 @@ int get_size(const char *pkgname, const char *apkpath,
     }
     dfd = dirfd(d);
 
-        /* most stuff in the pkgdir is data, except for the "cache"
-         * directory and below, which is cache, and the "lib" directory
-         * and below, which is code...
-         */
+    /* most stuff in the pkgdir is data, except for the "cache"
+     * directory and below, which is cache, and the "lib" directory
+     * and below, which is code...
+     */
     while ((de = readdir(d))) {
         const char *name = de->d_name;
 
@@ -544,15 +526,15 @@ fail:
 }
 
 int create_move_path(char path[PKG_PATH_MAX],
-    const char* prefix,
     const char* pkgname,
-    const char* leaf)
+    const char* leaf,
+    uid_t persona)
 {
-    if ((strlen(prefix) + strlen(pkgname) + strlen(leaf) + 1) >= PKG_PATH_MAX) {
+    if ((android_data_dir.len + strlen(pkgname) + strlen(leaf) + 1) >= PKG_PATH_MAX) {
         return -1;
     }
     
-    sprintf(path, "%s%s/%s", prefix, pkgname, leaf);
+    sprintf(path, "%s%s%s/%s", android_data_dir.path, PRIMARY_USER_PREFIX, pkgname, leaf);
     return 0;
 }
 
@@ -720,8 +702,8 @@ int movefiles()
                             // Skip -- source package no longer exists.
                         } else {
                             LOGV("Move file: %s (from %s to %s)\n", buf+bufp, srcpkg, dstpkg);
-                            if (!create_move_path(srcpath, PKG_DIR_PREFIX, srcpkg, buf+bufp) &&
-                                    !create_move_path(dstpath, PKG_DIR_PREFIX, dstpkg, buf+bufp)) {
+                            if (!create_move_path(srcpath, srcpkg, buf+bufp, 0) &&
+                                    !create_move_path(dstpath, dstpkg, buf+bufp, 0)) {
                                 movefileordir(srcpath, dstpath,
                                         strlen(dstpath)-strlen(buf+bufp),
                                         dstuid, dstgid, &s);
@@ -750,8 +732,7 @@ int movefiles()
                                         UPDATE_COMMANDS_DIR_PREFIX, name, div);
                             }
                             if (srcpkg[0] != 0) {
-                                if (!create_pkg_path(srcpath, PKG_DIR_PREFIX, srcpkg,
-                                        PKG_DIR_POSTFIX)) {
+                                if (!create_pkg_path(srcpath, srcpkg, PKG_DIR_POSTFIX, 0)) {
                                     if (lstat(srcpath, &s) < 0) {
                                         // Package no longer exists -- skip.
                                         srcpkg[0] = 0;
@@ -762,8 +743,7 @@ int movefiles()
                                             div, UPDATE_COMMANDS_DIR_PREFIX, name);
                                 }
                                 if (srcpkg[0] != 0) {
-                                    if (!create_pkg_path(dstpath, PKG_DIR_PREFIX, dstpkg,
-                                            PKG_DIR_POSTFIX)) {
+                                    if (!create_pkg_path(dstpath, dstpkg, PKG_DIR_POSTFIX, 0)) {
                                         if (lstat(dstpath, &s) == 0) {
                                             dstuid = s.st_uid;
                                             dstgid = s.st_gid;

@@ -49,37 +49,60 @@
 
 /* elements combined with a valid package name to form paths */
 
-#define PKG_DIR_PREFIX         "/data/data/"
+#define PRIMARY_USER_PREFIX    "data/"
+#define SECONDARY_USER_PREFIX  "user/"
+
 #define PKG_DIR_POSTFIX        ""
 
-#define PKG_LIB_PREFIX         "/data/data/"
 #define PKG_LIB_POSTFIX        "/lib"
 
-#define CACHE_DIR_PREFIX       "/data/data/"
 #define CACHE_DIR_POSTFIX      "/cache"
 
-#define APK_DIR_PREFIX         "/data/app/"
+#define APP_SUBDIR             "app/" // sub-directory under ANDROID_DATA
 
 /* other handy constants */
 
-#define PROTECTED_DIR_PREFIX  "/data/app-private/"
-#define SDCARD_DIR_PREFIX  getenv("ASEC_MOUNTPOINT")
+#define PRIVATE_APP_SUBDIR     "app-private/" // sub-directory under ANDROID_DATA
 
-#define DALVIK_CACHE_PREFIX   "/data/dalvik-cache/"
-#define DALVIK_CACHE_POSTFIX  "/classes.dex"
+#define DALVIK_CACHE_PREFIX    "/data/dalvik-cache/"
+#define DALVIK_CACHE_POSTFIX   "/classes.dex"
 
 #define UPDATE_COMMANDS_DIR_PREFIX  "/system/etc/updatecmds/"
 
 #define PKG_NAME_MAX  128   /* largest allowed package name */
 #define PKG_PATH_MAX  256   /* max size of any path we use */
 
+/* data structures */
+
+typedef struct {
+    char* path;
+    size_t len;
+} dir_rec_t;
+
+typedef struct {
+    size_t count;
+    dir_rec_t* dirs;
+} dir_rec_array_t;
+
+extern dir_rec_t android_app_dir;
+extern dir_rec_t android_app_private_dir;
+extern dir_rec_t android_data_dir;
+extern dir_rec_t android_asec_dir;
+extern dir_rec_array_t android_system_dirs;
 
 /* util.c */
 
+int create_pkg_path_in_dir(char path[PKG_PATH_MAX],
+                                const dir_rec_t* dir,
+                                const char* pkgname,
+                                const char* postfix);
+
 int create_pkg_path(char path[PKG_PATH_MAX],
-                    const char *prefix,
                     const char *pkgname,
-                    const char *postfix);
+                    const char *postfix,
+                    uid_t persona);
+
+int is_valid_package_name(const char* pkgname);
 
 int create_cache_path(char path[PKG_PATH_MAX], const char *src);
 
@@ -88,6 +111,18 @@ int delete_dir_contents(const char *pathname,
                         const char *ignore);
 
 int delete_dir_contents_fd(int dfd, const char *name);
+
+int validate_system_app_path(const char* path);
+
+int get_path_from_env(dir_rec_t* rec, const char* var);
+
+int get_path_from_string(dir_rec_t* rec, const char* path);
+
+int copy_and_append(dir_rec_t* dst, const dir_rec_t* src, const char* suffix);
+
+int validate_apk_path(const char *path);
+
+int append_and_increment(char** dst, const char* src, size_t* dst_size);
 
 /* commands.c */
 

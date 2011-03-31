@@ -1,13 +1,34 @@
 ifneq ($(TARGET_SIMULATOR),true)
 
 LOCAL_PATH := $(call my-dir)
+
+common_src_files := \
+    commands.c utils.c
+
+#
+# Static library used in testing and executable
+#
+
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-    installd.c commands.c utils.c
+    $(common_src_files)
 
-#LOCAL_C_INCLUDES := \
-#    $(call include-path-for, system-core)/cutils
+LOCAL_MODULE := libinstalld
+
+LOCAL_MODULE_TAGS := eng tests
+
+include $(BUILD_STATIC_LIBRARY)
+
+#
+# Executable
+#
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+    installd.c \
+    $(common_src_files)
 
 LOCAL_SHARED_LIBRARIES := \
     libcutils
