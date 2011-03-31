@@ -269,7 +269,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             if(conn != null) {
                 if (tearDown) {
                     if (DBG) log("cleanUpConnection: teardown, call conn.disconnect");
-                    conn.disconnect(obtainMessage(EVENT_DISCONNECT_DONE,
+                    conn.disconnect(reason, obtainMessage(EVENT_DISCONNECT_DONE,
                             conn.getDataConnectionId(), 0, reason));
                     notificationDeferred = true;
                 } else {
@@ -367,7 +367,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     protected void restartRadio() {
         if (DBG) log("Cleanup connection and wait " +
                 (TIME_DELAYED_TO_RESTART_RADIO / 1000) + "s to restart radio");
-        cleanUpAllConnections();
+        cleanUpAllConnections(null);
         sendEmptyMessageDelayed(EVENT_RESTART_RADIO, TIME_DELAYED_TO_RESTART_RADIO);
         mPendingRestartRadio = true;
     }
@@ -524,14 +524,14 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     protected void onRecordsLoaded() {
         if (mState == State.FAILED) {
-            cleanUpAllConnections();
+            cleanUpAllConnections(null);
         }
         sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA, Phone.REASON_SIM_LOADED));
     }
 
     protected void onNVReady() {
         if (mState == State.FAILED) {
-            cleanUpAllConnections();
+            cleanUpAllConnections(null);
         }
         sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA));
     }
@@ -570,7 +570,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             trySetupData(Phone.REASON_ROAMING_ON);
         } else {
             if (DBG) log("Tear down data connection on roaming.");
-            cleanUpAllConnections();
+            cleanUpAllConnections(null);
         }
     }
 
@@ -591,7 +591,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         notifyDataAvailability(null);
 
         if (mState != State.IDLE) {
-            cleanUpAllConnections();
+            cleanUpAllConnections(null);
         }
     }
 
@@ -608,7 +608,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             log("We're on the simulator; assuming radio off is meaningless");
         } else {
             if (DBG) log("Radio is off and clean up all connection");
-            cleanUpAllConnections();
+            cleanUpAllConnections(null);
         }
     }
 
@@ -714,9 +714,9 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     @Override
-    protected void onCleanUpAllConnections() {
+    protected void onCleanUpAllConnections(String cause) {
         // Only one CDMA connection is supported
-        cleanUpConnection(true, null);
+        cleanUpConnection(true, cause);
     }
 
     private void createAllDataConnectionList() {
