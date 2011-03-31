@@ -243,7 +243,7 @@ public abstract class PhoneBase extends Handler implements Phone {
         synchronized(PhoneProxy.lockForRadioTechnologyChange) {
             mCM.unSetOnCallRing(this);
             // Must cleanup all connectionS and needs to use sendMessage!
-            mDataConnection.cleanUpAllConnections();
+            mDataConnection.cleanUpAllConnections(null);
             mIsTheCurrentActivePhone = false;
         }
     }

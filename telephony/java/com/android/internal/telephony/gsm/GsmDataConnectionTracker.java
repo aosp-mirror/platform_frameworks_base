@@ -708,8 +708,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      */
 
     @Override
-    protected void onCleanUpAllConnections() {
-        cleanUpAllConnections(true, null);
+    protected void onCleanUpAllConnections(String cause) {
+        cleanUpAllConnections(true, cause);
     }
 
     private void cleanUpConnection(boolean tearDown, ApnContext apnContext) {
@@ -745,7 +745,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             apnContext.setState(State.DISCONNECTING);
             if (tearDown ) {
                 Message msg = obtainMessage(EVENT_DISCONNECT_DONE, apnContext);
-                conn.disconnect(msg);
+                conn.disconnect(apnContext.getReason(), msg);
             } else {
                 conn.resetSynchronously();
                 apnContext.setState(State.IDLE);

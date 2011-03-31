@@ -109,14 +109,17 @@ public abstract class DataConnection extends HierarchicalStateMachine {
      * Used internally for saving disconnecting parameters.
      */
     protected static class DisconnectParams {
-        public DisconnectParams(Message onCompletedMsg) {
+        public DisconnectParams(String reason, Message onCompletedMsg) {
+            this.reason = reason;
             this.onCompletedMsg = onCompletedMsg;
         }
         public DisconnectParams(ResetSynchronouslyLock lockObj) {
+            this.reason = null;
             this.lockObj = lockObj;
         }
 
         public int tag;
+        public String reason;
         public Message onCompletedMsg;
         public ResetSynchronouslyLock lockObj;
     }
@@ -274,10 +277,8 @@ public abstract class DataConnection extends HierarchicalStateMachine {
         if ((o != null) && (o instanceof DisconnectParams)) {
             DisconnectParams dp = (DisconnectParams)o;
             Message m = dp.onCompletedMsg;
-            if ((m != null) && (m.obj != null) && (m.obj instanceof String)) {
-                String reason = (String)m.obj;
-                if (TextUtils.equals(reason, Phone.REASON_RADIO_TURNED_OFF))
-                    discReason = RILConstants.DEACTIVATE_REASON_RADIO_OFF;
+            if (TextUtils.equals(dp.reason, Phone.REASON_RADIO_TURNED_OFF)) {
+                discReason = RILConstants.DEACTIVATE_REASON_RADIO_OFF;
             }
         }
         if (phone.mCM.getRadioState().isOn()) {
@@ -963,7 +964,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
      *        With AsyncResult.userObj set to the original msg.obj.
      */
     public void reset(Message onCompletedMsg) {
-        sendMessage(obtainMessage(EVENT_RESET, new DisconnectParams(onCompletedMsg)));
+        sendMessage(obtainMessage(EVENT_RESET, new DisconnectParams(null, onCompletedMsg)));
     }
 
     /**
@@ -1014,8 +1015,8 @@ public abstract class DataConnection extends HierarchicalStateMachine {
      * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
      *        With AsyncResult.userObj set to the original msg.obj.
      */
-    public void disconnect(Message onCompletedMsg) {
-        sendMessage(obtainMessage(EVENT_DISCONNECT, new DisconnectParams(onCompletedMsg)));
+    public void disconnect(String reason, Message onCompletedMsg) {
+        sendMessage(obtainMessage(EVENT_DISCONNECT, new DisconnectParams(reason, onCompletedMsg)));
     }
 
     // ****** The following are used for debugging.
