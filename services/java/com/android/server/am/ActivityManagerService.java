@@ -13144,4 +13144,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
     }
+
+    // Multi-user methods
+
+    public boolean switchUser(int userid) {
+        // TODO
+        return true;
+    }
 }

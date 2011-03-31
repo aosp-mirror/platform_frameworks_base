@@ -33,13 +33,13 @@ import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -1104,6 +1104,56 @@ final class ApplicationPackageManager extends PackageManager {
             // Should never happen!
         }
         return PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+    }
+
+    // Multi-user support
+
+    /**
+     * @hide
+     */
+    @Override
+    public UserInfo createUser(String name, int flags) {
+        // TODO
+        return null;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public List<UserInfo> getUsers() {
+        // TODO:
+        // Dummy code, always returns just the primary user
+        ArrayList<UserInfo> users = new ArrayList<UserInfo>();
+        UserInfo primary = new UserInfo(0, "Root!",
+                UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY);
+        users.add(primary);
+        return users;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean removeUser(int id) {
+        // TODO:
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void updateUserName(int id, String name) {
+        // TODO:
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void updateUserFlags(int id, int flags) {
+        // TODO:
     }
 
     private final ContextImpl mContext;
