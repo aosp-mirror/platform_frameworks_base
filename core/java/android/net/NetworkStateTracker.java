@@ -172,6 +172,7 @@ public abstract class NetworkStateTracker extends Handler {
             if (inetAddress == null) {
                 if (DBG) Log.d(TAG, " Unable to add default route. mDefaultGatewayAddr Error");
             } else {
+                NetworkUtils.addHostRoute(mInterfaceName, inetAddress, null);
                 if (!NetworkUtils.addDefaultRoute(mInterfaceName, inetAddress) && DBG) {
                     Log.d(TAG, "  Unable to add default route.");
                 }

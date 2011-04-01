@@ -247,6 +247,9 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                                     Log.d(TAG, "CONNECTED event did not supply interface name.");
                                 }
                                 mDefaultGatewayAddr = intent.getIntExtra(Phone.DATA_GATEWAY_KEY, 0);
+                                if (mDefaultGatewayAddr == 0) {
+                                    Log.d(TAG, "CONNECTED event did not supply a default gateway.");
+                                }
                                 setDetailedState(DetailedState.CONNECTED, reason, apnName);
                                 break;
                         }
@@ -385,6 +388,7 @@ public class MobileDataStateTracker extends NetworkStateTracker {
                 intent.putExtra(Phone.DATA_APN_KEY, mApnName);
                 intent.putExtra(Phone.DATA_IFACE_NAME_KEY, mInterfaceName);
                 intent.putExtra(Phone.NETWORK_UNAVAILABLE_KEY, false);
+                intent.putExtra(Phone.DATA_GATEWAY_KEY, mDefaultGatewayAddr);
                 if (mStateReceiver != null) mStateReceiver.onReceive(mContext, intent);
                 break;
             case Phone.APN_REQUEST_STARTED:
