@@ -95,6 +95,9 @@ int32_t ANativeWindow_getFormat(ANativeWindow* window);
  *
  * For all of these parameters, if 0 is supplied then the window's base
  * value will come back in force.
+ *
+ * width and height must be either both zero or both non-zero.
+ *
  */
 int32_t ANativeWindow_setBuffersGeometry(ANativeWindow* window, int32_t width, int32_t height, int32_t format);
 
