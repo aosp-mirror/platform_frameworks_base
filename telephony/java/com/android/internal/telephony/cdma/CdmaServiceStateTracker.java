@@ -97,8 +97,8 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     /**
      * Initially assume no data connection.
      */
-    protected int cdmaDataConnectionState = ServiceState.STATE_OUT_OF_SERVICE;
-    protected int newCdmaDataConnectionState = ServiceState.STATE_OUT_OF_SERVICE;
+    protected int mDataConnectionState = ServiceState.STATE_OUT_OF_SERVICE;
+    protected int mNewDataConnectionState = ServiceState.STATE_OUT_OF_SERVICE;
     protected int mRegistrationState = -1;
     protected RegistrantList cdmaForSubscriptionInfoReadyRegistrants = new RegistrantList();
 
@@ -217,8 +217,8 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         phone.mRuimRecords.unregisterForRecordsLoaded(this);
         cm.unSetOnSignalStrengthUpdate(this);
         cm.unSetOnNITZTime(this);
-        cr.unregisterContentObserver(this.mAutoTimeObserver);
-        cr.unregisterContentObserver(this.mAutoTimeZoneObserver);
+        cr.unregisterContentObserver(mAutoTimeObserver);
+        cr.unregisterContentObserver(mAutoTimeZoneObserver);
     }
 
     @Override
@@ -548,10 +548,12 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     }
 
     /**
-    * The LTE data connection state, only return true here
+    * Determine data network type based on radio technology.
     */
-    protected boolean checkAdditionalDataAvaiable(){
-        return true;
+    protected void setCdmaTechnology(int radioTechnology){
+        mNewDataConnectionState = radioTechnologyToDataServiceState(radioTechnology);
+        newSS.setRadioTechnology(radioTechnology);
+        newNetworkType = radioTechnology;
     }
 
     /**
@@ -639,12 +641,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                     regCodeIsRoaming(registrationState) && !isRoamIndForHomeSystem(states[10]);
             newSS.setState (regCodeToServiceState(registrationState));
 
-            if(checkAdditionalDataAvaiable()) {
-                this.newCdmaDataConnectionState =
-                        radioTechnologyToDataServiceState(radioTechnology);
-                newSS.setRadioTechnology(radioTechnology);
-                newNetworkType = radioTechnology;
-            }
+            setCdmaTechnology(radioTechnology);
 
             newSS.setCssIndicator(cssIndicator);
             newSS.setSystemAndNetworkId(systemId, networkId);
@@ -953,15 +950,15 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             && newSS.getState() != ServiceState.STATE_IN_SERVICE;
 
         boolean hasCdmaDataConnectionAttached =
-            this.cdmaDataConnectionState != ServiceState.STATE_IN_SERVICE
-            && this.newCdmaDataConnectionState == ServiceState.STATE_IN_SERVICE;
+            mDataConnectionState != ServiceState.STATE_IN_SERVICE
+            && mNewDataConnectionState == ServiceState.STATE_IN_SERVICE;
 
         boolean hasCdmaDataConnectionDetached =
-            this.cdmaDataConnectionState == ServiceState.STATE_IN_SERVICE
-            && this.newCdmaDataConnectionState != ServiceState.STATE_IN_SERVICE;
+            mDataConnectionState == ServiceState.STATE_IN_SERVICE
+            && mNewDataConnectionState != ServiceState.STATE_IN_SERVICE;
 
         boolean hasCdmaDataConnectionChanged =
-                       cdmaDataConnectionState != newCdmaDataConnectionState;
+                       mDataConnectionState != mNewDataConnectionState;
 
         boolean hasNetworkTypeChanged = networkType != newNetworkType;
 
@@ -975,10 +972,10 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
 
         // Add an event log when connection state changes
         if (ss.getState() != newSS.getState() ||
-                cdmaDataConnectionState != newCdmaDataConnectionState) {
+                mDataConnectionState != mNewDataConnectionState) {
             EventLog.writeEvent(EventLogTags.CDMA_SERVICE_STATE_CHANGE,
-                    ss.getState(), cdmaDataConnectionState,
-                    newSS.getState(), newCdmaDataConnectionState);
+                    ss.getState(), mDataConnectionState,
+                    newSS.getState(), mNewDataConnectionState);
         }
 
         ServiceState tss;
@@ -992,7 +989,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         cellLoc = newCellLoc;
         newCellLoc = tcl;
 
-        cdmaDataConnectionState = newCdmaDataConnectionState;
+        mDataConnectionState = mNewDataConnectionState;
         networkType = newNetworkType;
         // this new state has been applied - forget it until we get a new new state
         newNetworkType = 0;
@@ -1175,7 +1172,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     }
 
 
-    private int radioTechnologyToDataServiceState(int code) {
+    protected int radioTechnologyToDataServiceState(int code) {
         int retVal = ServiceState.STATE_OUT_OF_SERVICE;
         switch(code) {
         case 0:
@@ -1226,14 +1223,14 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
      * ServiceState.RADIO_TECHNOLOGY_UNKNOWN is the same as detached.
      */
     /*package*/ int getCurrentCdmaDataConnectionState() {
-        return cdmaDataConnectionState;
+        return mDataConnectionState;
     }
 
     /**
     * TODO: In the future, we need remove getCurrentCdmaDataConnectionState
     */
     public int getCurrentDataConnectionState() {
-        return cdmaDataConnectionState;
+        return mDataConnectionState;
     }
 
     /**
