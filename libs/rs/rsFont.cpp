@@ -566,7 +566,7 @@ void FontState::initVertexArrayBuffers() {
         indexPtr[i6 + 5] = i4 + 3;
     }
 
-    indexAlloc->deferedUploadToBufferObject(mRSC);
+    indexAlloc->deferredUploadToBufferObject(mRSC);
     mIndexBuffer.set(indexAlloc);
 
     const Element *posElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 3);

@@ -22,6 +22,8 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.renderscript.*;
+import android.renderscript.Element.DataKind;
+import android.renderscript.Element.DataType;
 import android.renderscript.Allocation.MipmapControl;
 import android.renderscript.Program.TextureType;
 import android.renderscript.ProgramStore.DepthFunc;
@@ -398,6 +400,23 @@ public class RsBenchRS {
         initMesh();
         initProgramRaster();
         initCustomShaders();
+
+        Type.Builder b = new Type.Builder(mRS, Element.RGBA_8888(mRS));
+        b.setX(1280).setY(720);
+        Allocation offscreen = Allocation.createTyped(mRS,
+                                                      b.create(),
+                                                      Allocation.USAGE_GRAPHICS_TEXTURE |
+                                                      Allocation.USAGE_GRAPHICS_RENDER_TARGET);
+        mScript.set_gRenderBufferColor(offscreen);
+
+        b = new Type.Builder(mRS,
+                             Element.createPixel(mRS, DataType.UNSIGNED_16,
+                             DataKind.PIXEL_DEPTH));
+        b.setX(1280).setY(720);
+        offscreen = Allocation.createTyped(mRS,
+                                           b.create(),
+                                           Allocation.USAGE_GRAPHICS_RENDER_TARGET);
+        mScript.set_gRenderBufferDepth(offscreen);
 
         mRS.bindRootScript(mScript);
     }

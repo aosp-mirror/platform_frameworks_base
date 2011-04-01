@@ -409,6 +409,7 @@ bool Context::setupCheck() {
     mFragment->setupGL2(this, &mStateFragment, &mShaderCache);
     mRaster->setupGL2(this, &mStateRaster);
     mVertex->setupGL2(this, &mStateVertex, &mShaderCache);
+    mFBOCache.setupGL2(this);
     return true;
 }
 

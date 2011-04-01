@@ -56,7 +56,8 @@ void Allocation::init(Context *rsc, const Type *type) {
 
     mTextureID = 0;
     mBufferID = 0;
-    mUploadDefered = false;
+    mRenderTargetID = 0;
+    mUploadDeferred = false;
 
     mUserBitmapCallback = NULL;
     mUserBitmapCallbackData = NULL;
@@ -93,6 +94,10 @@ Allocation::~Allocation() {
         glDeleteTextures(1, &mTextureID);
         mTextureID = 0;
     }
+    if (mRenderTargetID) {
+        glDeleteRenderbuffers(1, &mRenderTargetID);
+        mRenderTargetID = 0;
+    }
 #endif //ANDROID_RS_SERIALIZE
 }
 
@@ -112,9 +117,14 @@ bool Allocation::fixAllocation() {
     return false;
 }
 
-void Allocation::deferedUploadToTexture(const Context *rsc) {
+void Allocation::deferredUploadToTexture(const Context *rsc) {
     mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
-    mUploadDefered = true;
+    mUploadDeferred = true;
+}
+
+void Allocation::deferredAllocateRenderTarget(const Context *rsc) {
+    mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_RENDER_TARGET;
+    mUploadDeferred = true;
 }
 
 uint32_t Allocation::getGLTarget() const {
@@ -155,8 +165,11 @@ void Allocation::syncAll(Context *rsc, RsAllocationUsageType src) {
     if (getIsBufferObject()) {
         uploadToBufferObject(rsc);
     }
+    if (getIsRenderTarget() && !getIsTexture()) {
+        allocateRenderTarget(rsc);
+    }
 
-    mUploadDefered = false;
+    mUploadDeferred = false;
 }
 
 void Allocation::uploadToTexture(const Context *rsc) {
@@ -184,7 +197,7 @@ void Allocation::uploadToTexture(const Context *rsc) {
             // Force a crash to 1: restart the app, 2: make sure we get a bugreport.
             LOGE("Upload to texture failed to gen mTextureID");
             rsc->dumpDebug();
-            mUploadDefered = true;
+            mUploadDeferred = true;
             return;
         }
         isFirstUpload = true;
@@ -197,6 +210,32 @@ void Allocation::uploadToTexture(const Context *rsc) {
     }
 
     rsc->checkError("Allocation::uploadToTexture");
+#endif //ANDROID_RS_SERIALIZE
+}
+
+void Allocation::allocateRenderTarget(const Context *rsc) {
+#ifndef ANDROID_RS_SERIALIZE
+    mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_RENDER_TARGET;
+
+    GLenum format = mHal.state.type->getElement()->getComponent().getGLFormat();
+    if (!format) {
+        return;
+    }
+
+    if (!mRenderTargetID) {
+        glGenRenderbuffers(1, &mRenderTargetID);
+
+        if (!mRenderTargetID) {
+            // This should generally not happen
+            LOGE("allocateRenderTarget failed to gen mRenderTargetID");
+            rsc->dumpDebug();
+            return;
+        }
+        glBindRenderbuffer(GL_RENDERBUFFER, mRenderTargetID);
+        glRenderbufferStorage(GL_RENDERBUFFER, format,
+                              mHal.state.type->getDimX(),
+                              mHal.state.type->getDimY());
+    }
 #endif //ANDROID_RS_SERIALIZE
 }
 
@@ -271,9 +310,9 @@ void Allocation::upload2DTexture(bool isFirstUpload) {
 #endif //ANDROID_RS_SERIALIZE
 }
 
-void Allocation::deferedUploadToBufferObject(const Context *rsc) {
+void Allocation::deferredUploadToBufferObject(const Context *rsc) {
     mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_VERTEX;
-    mUploadDefered = true;
+    mUploadDeferred = true;
 }
 
 void Allocation::uploadToBufferObject(const Context *rsc) {
@@ -288,7 +327,7 @@ void Allocation::uploadToBufferObject(const Context *rsc) {
     }
     if (!mBufferID) {
         LOGE("Upload to buffer object failed");
-        mUploadDefered = true;
+        mUploadDeferred = true;
         return;
     }
     GLenum target = (GLenum)getGLTarget();
@@ -300,7 +339,7 @@ void Allocation::uploadToBufferObject(const Context *rsc) {
 }
 
 void Allocation::uploadCheck(Context *rsc) {
-    if (mUploadDefered) {
+    if (mUploadDeferred) {
         syncAll(rsc, RS_ALLOCATION_USAGE_SCRIPT);
     }
 }
@@ -329,7 +368,7 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t lod,
 
     memcpy(ptr, data, size);
     sendDirty();
-    mUploadDefered = true;
+    mUploadDeferred = true;
 }
 
 void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, RsAllocationCubemapFace face,
@@ -362,7 +401,7 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, 
             dst += destW * eSize;
         }
         sendDirty();
-        mUploadDefered = true;
+        mUploadDeferred = true;
     } else {
         update2DTexture(data, xoff, yoff, lod, face, w, h);
     }
@@ -407,7 +446,7 @@ void Allocation::elementData(Context *rsc, uint32_t x, const void *data,
 
     memcpy(ptr, data, sizeBytes);
     sendDirty();
-    mUploadDefered = true;
+    mUploadDeferred = true;
 }
 
 void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
@@ -450,7 +489,7 @@ void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
 
     memcpy(ptr, data, sizeBytes);
     sendDirty();
-    mUploadDefered = true;
+    mUploadDeferred = true;
 }
 
 void Allocation::addProgramToDirty(const Program *p) {
@@ -617,12 +656,12 @@ namespace renderscript {
 
 void rsi_AllocationUploadToTexture(Context *rsc, RsAllocation va, bool genmip, uint32_t baseMipLevel) {
     Allocation *alloc = static_cast<Allocation *>(va);
-    alloc->deferedUploadToTexture(rsc);
+    alloc->deferredUploadToTexture(rsc);
 }
 
 void rsi_AllocationUploadToBufferObject(Context *rsc, RsAllocation va) {
     Allocation *alloc = static_cast<Allocation *>(va);
-    alloc->deferedUploadToBufferObject(rsc);
+    alloc->deferredUploadToBufferObject(rsc);
 }
 
 static void mip565(const Adapter2D &out, const Adapter2D &in) {
@@ -792,7 +831,6 @@ RsAllocation rsaAllocationCreateTyped(RsContext con, RsType vtype,
     return alloc;
 }
 
-
 RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
                                            RsAllocationMipmapControl mips,
                                            const void *data, uint32_t usages) {
@@ -811,7 +849,7 @@ RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
         rsaAllocationGenerateScriptMips(rsc, texAlloc);
     }
 
-    texAlloc->deferedUploadToTexture(rsc);
+    texAlloc->deferredUploadToTexture(rsc);
     return texAlloc;
 }
 
@@ -852,7 +890,7 @@ RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
         rsaAllocationGenerateScriptMips(rsc, texAlloc);
     }
 
-    texAlloc->deferedUploadToTexture(rsc);
+    texAlloc->deferredUploadToTexture(rsc);
     return texAlloc;
 }
 

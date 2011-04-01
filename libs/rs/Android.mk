@@ -90,6 +90,7 @@ LOCAL_SRC_FILES:= \
 	rsContext.cpp \
 	rsDevice.cpp \
 	rsElement.cpp \
+	rsFBOCache.cpp \
 	rsFileA3D.cpp \
 	rsFont.cpp \
 	rsLocklessFifo.cpp \

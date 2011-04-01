@@ -71,13 +71,17 @@ public:
 
     void syncAll(Context *rsc, RsAllocationUsageType src);
 
-    void deferedUploadToTexture(const Context *rsc);
+    void deferredUploadToTexture(const Context *rsc);
     void uploadToTexture(const Context *rsc);
     uint32_t getTextureID() const {return mTextureID;}
 
+    void deferredAllocateRenderTarget(const Context *rsc);
+    void allocateRenderTarget(const Context *rsc);
+    uint32_t getRenderTargetID() const {return mRenderTargetID;}
+
     uint32_t getGLTarget() const;
 
-    void deferedUploadToBufferObject(const Context *rsc);
+    void deferredUploadToBufferObject(const Context *rsc);
     void uploadToBufferObject(const Context *rsc);
     uint32_t getBufferObjectID() const {return mBufferID;}
 
@@ -117,6 +121,9 @@ public:
     }
     bool getIsTexture() const {
         return (mHal.state.usageFlags & RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE) != 0;
+    }
+    bool getIsRenderTarget() const {
+        return (mHal.state.usageFlags & RS_ALLOCATION_USAGE_GRAPHICS_RENDER_TARGET) != 0;
     }
     bool getIsBufferObject() const {
         return (mHal.state.usageFlags & RS_ALLOCATION_USAGE_GRAPHICS_VERTEX) != 0;
@@ -161,7 +168,10 @@ protected:
     // is allowed.
     uint32_t mBufferID;
 
-    bool mUploadDefered;
+    // Is this a legal structure to be used as an FBO render target
+    uint32_t mRenderTargetID;
+
+    bool mUploadDeferred;
 
 private:
     void init(Context *rsc, const Type *);

@@ -18,6 +18,7 @@
 
 #ifndef ANDROID_RS_SERIALIZE
 #include <GLES/gl.h>
+#include <GLES2/gl2.h>
 #endif
 
 using namespace android;
@@ -207,6 +208,7 @@ uint32_t Component::getGLFormat() const {
     case RS_KIND_PIXEL_LA: return GL_LUMINANCE_ALPHA;
     case RS_KIND_PIXEL_RGB: return GL_RGB;
     case RS_KIND_PIXEL_RGBA: return GL_RGBA;
+    case RS_KIND_PIXEL_DEPTH: return GL_DEPTH_COMPONENT16;
     default: break;
     }
 #endif //ANDROID_RS_SERIALIZE

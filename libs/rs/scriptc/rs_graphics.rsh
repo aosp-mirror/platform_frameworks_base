@@ -1,6 +1,46 @@
 #ifndef __RS_GRAPHICS_RSH__
 #define __RS_GRAPHICS_RSH__
 
+/**
+ * Set the color target used for all subsequent rendering calls
+ * @param colorTarget
+ * @param slot
+ */
+extern void __attribute__((overloadable))
+    rsgBindColorTarget(rs_allocation colorTarget, uint slot);
+
+/**
+ * Clear the previously set color target
+ * @param slot
+ */
+extern void __attribute__((overloadable))
+    rsgClearColorTarget(uint slot);
+
+/**
+ * Set the depth target used for all subsequent rendering calls
+ * @param depthTarget
+ */
+extern void __attribute__((overloadable))
+    rsgBindDepthTarget(rs_allocation depthTarget);
+
+/**
+ * Clear the previously set depth target
+ */
+extern void __attribute__((overloadable))
+    rsgClearDepthTarget(void);
+
+/**
+ * Clear all color and depth targets and resume rendering into
+ * the framebuffer
+ */
+extern void __attribute__((overloadable))
+    rsgClearAllRenderTargets(void);
+
+/**
+ * Force RenderScript to finish all rendering commands
+ */
+extern uint __attribute__((overloadable))
+    rsgFinish(void);
 
 /**
  * Bind a new ProgramFragment to the rendering context.
