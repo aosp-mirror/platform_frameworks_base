@@ -601,7 +601,7 @@ static void
 android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor)
 {
     int fd = env->GetIntField(javaFileDescriptor, gFileDescriptorField);
-    uirenderer::DisplayList::outputLogBuffer(fd);
+    android::uirenderer::DisplayList::outputLogBuffer(fd);
 }
 
 // ----------------------------------------------------------------------------
