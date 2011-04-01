@@ -907,6 +907,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     @Override
+    public boolean isAnyActiveDataConnections() {
+        return (mState != State.IDLE);
+    }
+
+    @Override
     protected void log(String s) {
         Log.d(LOG_TAG, "[CdmaDataConnectionTracker] " + s);
     }

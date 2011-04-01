@@ -1073,7 +1073,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected void restartRadio() {
         log("************TURN OFF RADIO**************");
         cleanUpAllConnections(true, Phone.REASON_RADIO_TURNED_OFF);
-        mPhone.getServiceStateTracker().powerOffRadioSafely();
+        mPhone.getServiceStateTracker().powerOffRadioSafely(this);
         /* Note: no need to call setRadioPower(true).  Assuming the desired
          * radio power state is still ON (as tracked by ServiceStateTracker),
          * ServiceStateTracker will call setRadioPower when it receives the
@@ -1491,14 +1491,25 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
+
+        apnContext.setState(State.IDLE);
+        apnContext.setApnSetting(null);
+
+        // if all data connection are gone, check whether Airplane mode request was
+        // pending.
+        if (!isConnected()) {
+            if (mPhone.getServiceStateTracker().processPendingRadioPowerOffAfterDataOff()) {
+                // Radio will be turned off. No need to retry data setup
+                return;
+            }
+        }
+
         // Check if APN disabled.
         if (apnContext.getPendingAction() == ApnContext.PENDING_ACTION_APN_DISABLE) {
            mApnContexts.remove(apnContext.getApnType());
            return;
         }
 
-        apnContext.setState(State.IDLE);
-        apnContext.setApnSetting(null);
         if (TextUtils.equals(apnContext.getApnType(), Phone.APN_TYPE_DEFAULT)
             && retryAfterDisconnected(apnContext.getReason())) {
             SystemProperties.set("gsm.defaultpdpcontext.active", "false");
@@ -1891,6 +1902,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         } else {
             return RILConstants.DATA_PROFILE_DEFAULT;
         }
+    }
+
+    @Override
+    public boolean isAnyActiveDataConnections() {
+        return isConnected();
     }
 
     @Override

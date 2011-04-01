@@ -139,8 +139,6 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     private boolean isEriTextLoaded = false;
     private boolean isSubscriptionFromRuim = false;
 
-    private boolean mPendingRadioPowerOffAfterDataOff = false;
-
     /* Used only for debugging purposes. */
     private String mRegistrationDeniedReason;
 
@@ -485,18 +483,8 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             }
             break;
 
-        case EVENT_SET_RADIO_POWER_OFF:
-            synchronized(this) {
-                if (mPendingRadioPowerOffAfterDataOff) {
-                    if (DBG) log("EVENT_SET_RADIO_OFF, turn radio off now.");
-                    hangupAndPowerOff();
-                    mPendingRadioPowerOffAfterDataOff = false;
-                }
-            }
-            break;
-
         default:
-            Log.e(LOG_TAG, "Unhandled message with number: " + msg.what);
+            super.handleMessage(msg);
         break;
         }
     }
@@ -513,33 +501,8 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             DataConnectionTracker dcTracker = phone.mDataConnection;
 
             // If it's on and available and we want it off gracefully
-            powerOffRadioSafely();
+            powerOffRadioSafely(dcTracker);
         } // Otherwise, we're in the desired state
-    }
-
-    // TODO: Consider moving this method to DataConnectionTracker
-    @Override
-    public void powerOffRadioSafely() {
-        DataConnectionTracker dcTracker = phone.mDataConnection;
-
-        synchronized (this) {
-            if (!mPendingRadioPowerOffAfterDataOff) {
-                if (dcTracker.isAnyActiveDataConnections()) {
-                    dcTracker.cleanUpAllConnections(Phone.REASON_RADIO_TURNED_OFF);
-                    if (sendEmptyMessageDelayed(EVENT_SET_RADIO_POWER_OFF, 30000)) {
-                        if (DBG) log("Wait upto 30s for data to disconnect, then turn off radio.");
-                        mPendingRadioPowerOffAfterDataOff = true;
-                    } else {
-                        Log.w(LOG_TAG, "Cannot send delayed Msg, turn off radio right away.");
-                        hangupAndPowerOff();
-                    }
-                } else {
-                    dcTracker.cleanUpAllConnections(Phone.REASON_RADIO_TURNED_OFF);
-                    if (DBG) log("Data disconnected, turn off radio right away.");
-                    hangupAndPowerOff();
-                }
-            }
-        }
     }
 
     @Override
@@ -1658,24 +1621,6 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     }
 
     /**
-     * process the pending request to turn radio off after data is disconnected
-     *
-     * return true if there is pending request to process; false otherwise.
-     */
-    public boolean processPendingRadioPowerOffAfterDataOff() {
-        synchronized(this) {
-            if (mPendingRadioPowerOffAfterDataOff) {
-                if (DBG) log("Process pending request to turn radio off.");
-                removeMessages(EVENT_SET_RADIO_POWER_OFF);
-                hangupAndPowerOff();
-                mPendingRadioPowerOffAfterDataOff = false;
-                return true;
-            }
-            return false;
-        }
-    }
-
-    /**
      * Returns OTASP_UNKNOWN, OTASP_NEEDED or OTASP_NOT_NEEDED
      */
     int getOtasp() {
@@ -1701,7 +1646,8 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         Log.d(LOG_TAG, "[CdmaServiceStateTracker] " + s);
     }
 
-    private void hangupAndPowerOff() {
+    @Override
+    protected void hangupAndPowerOff() {
         // hang up all active voice calls
         phone.mCT.ringingCall.hangupIfAlive();
         phone.mCT.backgroundCall.hangupIfAlive();
