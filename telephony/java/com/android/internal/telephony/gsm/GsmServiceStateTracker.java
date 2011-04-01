@@ -164,8 +164,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     static final int PS_NOTIFICATION = 888;  // Id to update and cancel PS restricted
     static final int CS_NOTIFICATION = 999;  // Id to update and cancel CS restricted
 
-    static final int MAX_NUM_DATA_STATE_READS = 15;
-
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -459,7 +457,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 break;
 
             default:
-                Log.e(LOG_TAG, "Unhandled message with number: " + msg.what);
+                super.handleMessage(msg);
             break;
         }
     }
@@ -471,23 +469,13 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             cm.setRadioPower(true, null);
         } else if (!mDesiredPowerState && cm.getRadioState().isOn()) {
             // If it's on and available and we want it off gracefully
-            powerOffRadioSafely();
+            DataConnectionTracker dcTracker = phone.mDataConnection;
+            powerOffRadioSafely(dcTracker);
         } // Otherwise, we're in the desired state
     }
 
     @Override
-    public void powerOffRadioSafely() {
-        // Cleanup all connections
-        DataConnectionTracker dcTracker = phone.mDataConnection;
-        Message msg = dcTracker.obtainMessage(DataConnectionTracker.EVENT_CLEAN_UP_ALL_CONNECTIONS);
-        dcTracker.sendMessage(msg);
-
-        // poll data state up to 15 times, with a 100ms delay
-        // totaling 1.5 sec. Normal data disable action will finish in 100ms.
-        for (int i = 0; i < MAX_NUM_DATA_STATE_READS; i++) {
-            SystemClock.sleep(DATA_STATE_POLL_SLEEP_MS);
-        }
-
+    protected void hangupAndPowerOff() {
         // hang up all active voice calls
         if (phone.isInCall()) {
             phone.mCT.ringingCall.hangupIfAlive();
