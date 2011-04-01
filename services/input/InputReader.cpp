@@ -293,7 +293,7 @@ void InputReader::processEvents(const RawEvent* rawEvents, size_t count) {
                 handleConfigurationChanged(rawEvent->when);
                 break;
             default:
-                assert(false); // can't happen
+                LOG_ASSERT(false); // can't happen
                 break;
             }
         }
@@ -1378,7 +1378,7 @@ void CursorInputMapper::dumpParameters(String8& dump) {
         dump.append(INDENT4 "Mode: navigation\n");
         break;
     default:
-        assert(false);
+        LOG_ASSERT(false);
     }
 
     dump.appendFormat(INDENT4 "OrientationAware: %s\n",
@@ -1801,7 +1801,7 @@ void TouchInputMapper::configure() {
         mPointerSource = AINPUT_SOURCE_MOUSE;
         break;
     default:
-        assert(false);
+        LOG_ASSERT(false);
     }
 
     // Configure absolute axis information.
@@ -1874,7 +1874,7 @@ void TouchInputMapper::dumpParameters(String8& dump) {
         dump.append(INDENT4 "DeviceType: pointer\n");
         break;
     default:
-        assert(false);
+        LOG_ASSERT(false);
     }
 
     dump.appendFormat(INDENT4 "AssociatedDisplayId: %d\n",
@@ -2509,7 +2509,7 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
         dump.append(INDENT4 "touch.touchSize.calibration: pressure\n");
         break;
     default:
-        assert(false);
+        LOG_ASSERT(false);
     }
 
     // Tool Size
@@ -2527,7 +2527,7 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
         dump.append(INDENT4 "touch.toolSize.calibration: area\n");
         break;
     default:
-        assert(false);
+        LOG_ASSERT(false);
     }
 
     if (mCalibration.haveToolSizeLinearScale) {
@@ -2567,7 +2567,7 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
         dump.append(INDENT4 "touch.pressure.calibration: amplitude\n");
         break;
     default:
-        assert(false);
+        LOG_ASSERT(false);
     }
 
     switch (mCalibration.pressureSource) {
@@ -2580,7 +2580,7 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
     case Calibration::PRESSURE_SOURCE_DEFAULT:
         break;
     default:
-        assert(false);
+        LOG_ASSERT(false);
     }
 
     if (mCalibration.havePressureScale) {
@@ -2597,7 +2597,7 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
         dump.append(INDENT4 "touch.size.calibration: normalized\n");
         break;
     default:
-        assert(false);
+        LOG_ASSERT(false);
     }
 
     // Orientation
@@ -2612,7 +2612,7 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
         dump.append(INDENT4 "touch.orientation.calibration: vector\n");
         break;
     default:
-        assert(false);
+        LOG_ASSERT(false);
     }
 }
 
@@ -2901,7 +2901,7 @@ void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {
         // Although applications receive new locations as part of individual pointer up
         // events, they do not generally handle them except when presented in a move event.
         if (moveNeeded) {
-            assert(moveIdBits.value == dispatchedIdBits.value);
+            LOG_ASSERT(moveIdBits.value == dispatchedIdBits.value);
             dispatchMotion(when, policyFlags, mTouchSource,
                     AMOTION_EVENT_ACTION_MOVE, 0, metaState, 0,
                     mCurrentTouchCoords, mCurrentTouch.idToIndex, dispatchedIdBits, -1,
@@ -3550,7 +3550,7 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
         // Case 4. Exactly one finger down, button is not pressed. (HOVER)
         // The pointer follows the active touch point.
         // Emit HOVER_MOVE events at the pointer location.
-        assert(activeTouchId >= 0);
+        LOG_ASSERT(activeTouchId >= 0);
 
 #if DEBUG_GESTURES
         LOGD("Gestures: HOVER");
@@ -3600,7 +3600,7 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
         // Fix the centroid of the figure when the gesture actually starts.
         // We do not recalculate the centroid at any other time during the gesture because
         // it would affect the relationship of the touch points relative to the pointer location.
-        assert(activeTouchId >= 0);
+        LOG_ASSERT(activeTouchId >= 0);
 
         uint32_t currentTouchPointerCount = mCurrentTouch.pointerCount;
         if (currentTouchPointerCount > MAX_POINTERS) {
@@ -3712,7 +3712,7 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
                     "activeGestureId=%d, currentTouchPointerCount=%d",
                     activeTouchId, mPointerGesture.activeGestureId, currentTouchPointerCount);
 #endif
-            assert(mPointerGesture.activeGestureId >= 0);
+            LOG_ASSERT(mPointerGesture.activeGestureId >= 0);
 
             float x = (mCurrentTouch.pointers[0].x + mCurrentTouch.pointers[1].x
                     - mPointerGesture.initialCentroidX * 2) * 0.5f
@@ -3736,7 +3736,7 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
                     "activeGestureId=%d, currentTouchPointerCount=%d",
                     activeTouchId, mPointerGesture.activeGestureId, currentTouchPointerCount);
 #endif
-            assert(mPointerGesture.activeGestureId >= 0);
+            LOG_ASSERT(mPointerGesture.activeGestureId >= 0);
 
             mPointerGesture.currentGesturePointerCount = currentTouchPointerCount;
             mPointerGesture.currentGestureIdBits.clear();
@@ -3895,7 +3895,7 @@ void TouchInputMapper::dispatchMotion(nsecs_t when, uint32_t policyFlags, uint32
         pointerCount += 1;
     }
 
-    assert(pointerCount != 0);
+    LOG_ASSERT(pointerCount != 0);
 
     if (changedId >= 0 && pointerCount == 1) {
         // Replace initial down and final up action.
@@ -3907,7 +3907,7 @@ void TouchInputMapper::dispatchMotion(nsecs_t when, uint32_t policyFlags, uint32
             action = AMOTION_EVENT_ACTION_UP;
         } else {
             // Can't happen.
-            assert(false);
+            LOG_ASSERT(false);
         }
     }
 
@@ -4072,7 +4072,7 @@ void TouchInputMapper::calculatePointerIds() {
                     // Previous iterations consumed the root element of the heap.
                     // Pop root element off of the heap (sift down).
                     heapSize -= 1;
-                    assert(heapSize > 0);
+                    LOG_ASSERT(heapSize > 0);
 
                     // Sift down.
                     heap[0] = heap[heapSize];

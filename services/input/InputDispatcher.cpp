@@ -369,7 +369,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
 
     // Now we have an event to dispatch.
     // All events are eventually dequeued and processed this way, even if we intend to drop them.
-    assert(mPendingEvent != NULL);
+    LOG_ASSERT(mPendingEvent != NULL);
     bool done = false;
     DropReason dropReason = DROP_REASON_NOT_DROPPED;
     if (!(mPendingEvent->policyFlags & POLICY_FLAG_PASS_TO_USER)) {
@@ -431,7 +431,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
     }
 
     default:
-        assert(false);
+        LOG_ASSERT(false);
         break;
     }
 
@@ -558,7 +558,7 @@ void InputDispatcher::dropInboundEventLocked(EventEntry* entry, DropReason dropR
         reason = "inbound event was dropped because it is stale";
         break;
     default:
-        assert(false);
+        LOG_ASSERT(false);
         return;
     }
 
@@ -962,7 +962,7 @@ void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTi
             toString(resumeWithAppendedMotionSample));
 #endif
 
-    assert(eventEntry->dispatchInProgress); // should already have been set to true
+    LOG_ASSERT(eventEntry->dispatchInProgress); // should already have been set to true
 
     pokeUserActivityLocked(eventEntry);
 
@@ -1596,9 +1596,10 @@ void InputDispatcher::addMonitoringTargetsLocked() {
 
         InputTarget& target = mCurrentInputTargets.editTop();
         target.inputChannel = mMonitoringChannels[i];
-        target.flags = 0;
+        target.flags = InputTarget::FLAG_DISPATCH_AS_IS;
         target.xOffset = 0;
         target.yOffset = 0;
+        target.pointerIds.clear();
     }
 }
 
@@ -1711,7 +1712,7 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
 
     // Make sure we are never called for streaming when splitting across multiple windows.
     bool isSplit = inputTarget->flags & InputTarget::FLAG_SPLIT;
-    assert(! (resumeWithAppendedMotionSample && isSplit));
+    LOG_ASSERT(! (resumeWithAppendedMotionSample && isSplit));
 
     // Skip this event if the connection status is not normal.
     // We don't want to enqueue additional outbound events if the connection is broken.
@@ -1725,7 +1726,7 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
 
     // Split a motion event if needed.
     if (isSplit) {
-        assert(eventEntry->type == EventEntry::TYPE_MOTION);
+        LOG_ASSERT(eventEntry->type == EventEntry::TYPE_MOTION);
 
         MotionEntry* originalMotionEntry = static_cast<MotionEntry*>(eventEntry);
         if (inputTarget->pointerIds.count() != originalMotionEntry->pointerCount) {
@@ -1832,7 +1833,7 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
             resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_IS);
 
     // If the outbound queue was previously empty, start the dispatch cycle going.
-    if (wasEmpty) {
+    if (wasEmpty && !connection->outboundQueue.isEmpty()) {
         activateConnectionLocked(connection.get());
         startDispatchCycleLocked(currentTime, connection);
     }
@@ -1880,11 +1881,11 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             connection->getInputChannelName());
 #endif
 
-    assert(connection->status == Connection::STATUS_NORMAL);
-    assert(! connection->outboundQueue.isEmpty());
+    LOG_ASSERT(connection->status == Connection::STATUS_NORMAL);
+    LOG_ASSERT(! connection->outboundQueue.isEmpty());
 
     DispatchEntry* dispatchEntry = connection->outboundQueue.headSentinel.next;
-    assert(! dispatchEntry->inProgress);
+    LOG_ASSERT(! dispatchEntry->inProgress);
 
     // Mark the dispatch entry as in progress.
     dispatchEntry->inProgress = true;
@@ -2005,7 +2006,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
     }
 
     default: {
-        assert(false);
+        LOG_ASSERT(false);
     }
     }
 
@@ -2242,7 +2243,7 @@ void InputDispatcher::synthesizeCancelationEventsForConnectionLocked(
 
 InputDispatcher::MotionEntry*
 InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet32 pointerIds) {
-    assert(pointerIds.value != 0);
+    LOG_ASSERT(pointerIds.value != 0);
 
     uint32_t splitPointerIndexMap[MAX_POINTERS];
     int32_t splitPointerIds[MAX_POINTERS];
@@ -3510,7 +3511,7 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
                         return;
                     }
 
-                    assert(connection->outboundQueue.headSentinel.next == dispatchEntry);
+                    LOG_ASSERT(connection->outboundQueue.headSentinel.next == dispatchEntry);
 
                     // Latch the fallback keycode for this key on an initial down.
                     // The fallback keycode cannot change at any other point in the lifecycle.
@@ -3523,7 +3524,7 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
                         connection->inputState.setFallbackKey(originalKeyCode, fallbackKeyCode);
                     }
 
-                    assert(fallbackKeyCode != -1);
+                    LOG_ASSERT(fallbackKeyCode != -1);
 
                     // Cancel the fallback key if the policy decides not to send it anymore.
                     // We will continue to dispatch the key to the policy but we will no
@@ -3761,7 +3762,7 @@ void InputDispatcher::Allocator::releaseInjectionState(InjectionState* injection
     if (injectionState->refCount == 0) {
         mInjectionStatePool.free(injectionState);
     } else {
-        assert(injectionState->refCount > 0);
+        LOG_ASSERT(injectionState->refCount > 0);
     }
 }
 
@@ -3777,7 +3778,7 @@ void InputDispatcher::Allocator::releaseEventEntry(EventEntry* entry) {
         releaseMotionEntry(static_cast<MotionEntry*>(entry));
         break;
     default:
-        assert(false);
+        LOG_ASSERT(false);
         break;
     }
 }
@@ -3789,7 +3790,7 @@ void InputDispatcher::Allocator::releaseConfigurationChangedEntry(
         releaseEventEntryInjectionState(entry);
         mConfigurationChangeEntryPool.free(entry);
     } else {
-        assert(entry->refCount > 0);
+        LOG_ASSERT(entry->refCount > 0);
     }
 }
 
@@ -3799,7 +3800,7 @@ void InputDispatcher::Allocator::releaseKeyEntry(KeyEntry* entry) {
         releaseEventEntryInjectionState(entry);
         mKeyEntryPool.free(entry);
     } else {
-        assert(entry->refCount > 0);
+        LOG_ASSERT(entry->refCount > 0);
     }
 }
 
@@ -3814,7 +3815,7 @@ void InputDispatcher::Allocator::releaseMotionEntry(MotionEntry* entry) {
         }
         mMotionEntryPool.free(entry);
     } else {
-        assert(entry->refCount > 0);
+        LOG_ASSERT(entry->refCount > 0);
     }
 }
 

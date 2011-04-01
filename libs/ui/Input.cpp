@@ -724,7 +724,7 @@ void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Posi
             LOGD("  %d: position (%0.3f, %0.3f), vx=%0.3f, vy=%0.3f, speed=%0.3f",
                     id, positions[index].x, positions[index].y, vx, vy, sqrtf(vx * vx + vy * vy));
         } else {
-            assert(vx == 0 && vy == 0);
+            LOG_ASSERT(vx == 0 && vy == 0);
             LOGD("  %d: position (%0.3f, %0.3f), velocity not available",
                     id, positions[index].x, positions[index].y);
         }
