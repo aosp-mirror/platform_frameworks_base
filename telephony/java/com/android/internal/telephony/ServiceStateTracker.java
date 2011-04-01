@@ -68,6 +68,9 @@ public abstract class ServiceStateTracker extends Handler {
     protected RegistrantList mPsRestrictEnabledRegistrants = new RegistrantList();
     protected RegistrantList mPsRestrictDisabledRegistrants = new RegistrantList();
 
+    /* Radio power off pending flag and tag counter */
+    private boolean mPendingRadioPowerOffAfterDataOff = false;
+    private int mPendingRadioPowerOffAfterDataOffTag = 0;
 
     protected  static final boolean DBG = true;
 
@@ -76,8 +79,6 @@ public abstract class ServiceStateTracker extends Handler {
 
     /** Waiting period before recheck gprs and voice registration. */
     public static final int DEFAULT_GPRS_CHECK_PERIOD_MILLIS = 60 * 1000;
-
-    public static final int DATA_STATE_POLL_SLEEP_MS = 100;
 
     /** GSM events */
     protected static final int EVENT_RADIO_STATE_CHANGED               = 1;
@@ -262,7 +263,29 @@ public abstract class ServiceStateTracker extends Handler {
         }
     }
 
-    public abstract void handleMessage(Message msg);
+    @Override
+    public void handleMessage(Message msg) {
+        switch (msg.what) {
+            case EVENT_SET_RADIO_POWER_OFF:
+                synchronized(this) {
+                    if (mPendingRadioPowerOffAfterDataOff &&
+                            (msg.arg1 == mPendingRadioPowerOffAfterDataOffTag)) {
+                        if (DBG) log("EVENT_SET_RADIO_OFF, turn radio off now.");
+                        hangupAndPowerOff();
+                        mPendingRadioPowerOffAfterDataOffTag += 1;
+                        mPendingRadioPowerOffAfterDataOff = false;
+                    } else {
+                        log("EVENT_SET_RADIO_OFF is stale arg1=" + msg.arg1 +
+                                "!= tag=" + mPendingRadioPowerOffAfterDataOffTag);
+                    }
+                }
+                break;
+
+            default:
+                log("Unhandled message with number: " + msg.what);
+                break;
+        }
+    }
 
     protected abstract Phone getPhone();
     protected abstract void handlePollStateResult(int what, AsyncResult ar);
@@ -370,7 +393,52 @@ public abstract class ServiceStateTracker extends Handler {
      *
      * Hang up the existing voice calls to decrease call drop rate.
      */
-    public abstract void powerOffRadioSafely();
+    public void powerOffRadioSafely(DataConnectionTracker dcTracker) {
+        synchronized (this) {
+            if (!mPendingRadioPowerOffAfterDataOff) {
+                if (dcTracker.isAnyActiveDataConnections()) {
+                    dcTracker.cleanUpAllConnections(null);
+                    Message msg = Message.obtain(this);
+                    msg.what = EVENT_SET_RADIO_POWER_OFF;
+                    msg.arg1 = ++mPendingRadioPowerOffAfterDataOffTag;
+                    if (sendMessageDelayed(msg, 30000)) {
+                        if (DBG) log("Wait upto 30s for data to disconnect, then turn off radio.");
+                        mPendingRadioPowerOffAfterDataOff = true;
+                    } else {
+                        log("Cannot send delayed Msg, turn off radio right away.");
+                        hangupAndPowerOff();
+                    }
+                } else {
+                    dcTracker.cleanUpAllConnections(null);
+                    if (DBG) log("Data disconnected, turn off radio right away.");
+                    hangupAndPowerOff();
+                }
+            }
+        }
+    }
+
+    /**
+     * process the pending request to turn radio off after data is disconnected
+     *
+     * return true if there is pending request to process; false otherwise.
+     */
+    public boolean processPendingRadioPowerOffAfterDataOff() {
+        synchronized(this) {
+            if (mPendingRadioPowerOffAfterDataOff) {
+                if (DBG) log("Process pending request to turn radio off.");
+                mPendingRadioPowerOffAfterDataOffTag += 1;
+                hangupAndPowerOff();
+                mPendingRadioPowerOffAfterDataOff = false;
+                return true;
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Hang up all voice call and turn off radio. Implemented by derived class.
+     */
+    protected abstract void hangupAndPowerOff();
 
     /** Cancel a pending (if any) pollState() operation */
     protected void cancelPollState() {
