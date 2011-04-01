@@ -42,7 +42,8 @@ public class ApnContext {
 
     ArrayList<ApnSetting> mWaitingApns = null;
 
-    private int mWaitingApnsPermanentFailureCountDown = 0;
+    /** A zero indicates that all waiting APNs had a permanent error */
+    private int mWaitingApnsPermanentFailureCountDown;
 
     ApnSetting mApnSetting;
 
@@ -68,14 +69,6 @@ public class ApnContext {
         pendingAction = pa;
     }
 
-    public int getPermFailCount() {
-        return mWaitingApnsPermanentFailureCountDown;
-    }
-
-    public void decPermFailCount() {
-        mWaitingApnsPermanentFailureCountDown--;
-    }
-
     public String getApnType() {
         return mApnType;
     }
@@ -98,9 +91,18 @@ public class ApnContext {
 
     public void setWaitingApns(ArrayList<ApnSetting> waitingApns) {
         mWaitingApns = waitingApns;
+        mWaitingApnsPermanentFailureCountDown = mWaitingApns.size();
     }
 
-    public ApnSetting getNextApn() {
+    public int getWaitingApnsPermFailCount() {
+        return mWaitingApnsPermanentFailureCountDown;
+    }
+
+    public void decWaitingApnsPermFailCount() {
+        mWaitingApnsPermanentFailureCountDown--;
+    }
+
+    public ApnSetting getNextWaitingApn() {
         ArrayList<ApnSetting> list = mWaitingApns;
         ApnSetting apn = null;
 
@@ -112,7 +114,7 @@ public class ApnContext {
         return apn;
     }
 
-    public void removeNextApn() {
+    public void removeNextWaitingApn() {
         if ((mWaitingApns != null) && (!mWaitingApns.isEmpty())) {
             mWaitingApns.remove(0);
         }

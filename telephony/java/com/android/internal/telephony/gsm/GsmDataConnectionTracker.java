@@ -574,9 +574,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     private boolean trySetupData(String reason, String type) {
-        if (DBG)
-            log("***trySetupData for type:" + type+" due to " + (reason == null ? "(unspecified)" : reason));
-        log("[DSAC DEB] " + "trySetupData with mIsPsRestricted=" + mIsPsRestricted);
+        if (DBG) {
+            log("***trySetupData for type:" + type +
+                    " due to " + (reason == null ? "(unspecified)" : reason) +
+                    " isPsRestricted=" + mIsPsRestricted);
+        }
 
         if (type == null) {
             type = Phone.APN_TYPE_DEFAULT;
@@ -585,12 +587,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         ApnContext apnContext = mApnContexts.get(type);
 
         if (apnContext == null ){
-            if (DBG) log("***new apn context for type:" + type);
+            if (DBG) log("new apn context for type:" + type);
             apnContext = new ApnContext(type, LOG_TAG);
-            if (apnContext == null) {
-                if (DBG) log("***new apn context failed ");
-                return false;
-            }
             mApnContexts.put(type, apnContext);
         }
         apnContext.setReason(reason);
@@ -839,7 +837,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         GsmDataConnection dc;
 
         int profileId = getApnProfileID(apnContext.getApnType());
-        apn = apnContext.getNextApn();
+        apn = apnContext.getNextWaitingApn();
         if (apn == null) {
             if (DBG) log("setupData: return for no apn found!");
             return false;
@@ -1449,19 +1447,22 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
 
             // Count permanent failures and remove the APN we just tried
-            // TODO: Where is mWaitingApnsPermanentFailureCountDown initialized
-            if (cause.isPermanentFail())
-                apnContext.decPermFailCount();
+            if (cause.isPermanentFail()) apnContext.decWaitingApnsPermFailCount();
 
-            apnContext.removeNextApn();
-            if (DBG) log(String.format("onDataSetupComplete: mWaitingApns.size=%d" +
-                            " mWaitingApnsPermanenatFailureCountDown=%d",
-                            apnContext.getWaitingApns().size(), apnContext.getPermFailCount()));
+            apnContext.removeNextWaitingApn();
+            if (DBG) {
+                log(String.format("onDataSetupComplete: WaitingApns.size=%d" +
+                        " WaitingApnsPermFailureCountDown=%d",
+                        apnContext.getWaitingApns().size(),
+                        apnContext.getWaitingApnsPermFailCount()));
+            }
 
             // See if there are more APN's to try
             if (apnContext.getWaitingApns().isEmpty()) {
-                if (apnContext.getPermFailCount() == 0) {
-                    if (DBG) log("onDataSetupComplete: Permanent failures stop retrying");
+                if (apnContext.getWaitingApnsPermFailCount() == 0) {
+                    if (DBG) {
+                        log("onDataSetupComplete: All APN's had permanent failures, stop retrying");
+                    }
                     apnContext.setState(State.FAILED);
                     notifyDataConnection(Phone.REASON_APN_FAILED);
                 } else {
@@ -1473,7 +1474,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 apnContext.setState(State.SCANNING);
                 // Wait a bit before trying the next APN, so that
                 // we're not tying up the RIL command channel
-                sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, apnContext), APN_DELAY_MILLIS);
+                sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, apnContext),
+                        APN_DELAY_MILLIS);
             }
         }
     }
