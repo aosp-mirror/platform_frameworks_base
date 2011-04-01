@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.graphics.ImageFormat;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.Looper;
@@ -1083,6 +1084,52 @@ public class Camera {
     };
 
     /**
+     * Area class for focus.
+     *
+     * @see #setFocusAreas(List<Area>)
+     * @see #getFocusAreas()
+     * @hide
+     */
+    public static class Area {
+        /**
+         * Create an area with specified rectangle and weight.
+         *
+         * @param rect the rectangle of the area
+         * @param weight the weight of the area
+         */
+        public Area(Rect rect, int weight) {
+            this.rect = rect;
+            this.weight = weight;
+        }
+        /**
+         * Compares {@code obj} to this area.
+         *
+         * @param obj the object to compare this area with.
+         * @return {@code true} if the rectangle and weight of {@code obj} is
+         *         the same as those of this area. {@code false} otherwise.
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Area)) {
+                return false;
+            }
+            Area a = (Area) obj;
+            if (rect == null) {
+                if (a.rect != null) return false;
+            } else {
+                if (!rect.equals(a.rect)) return false;
+            }
+            return weight == a.weight;
+        }
+
+        /** rectangle of the area */
+        public Rect rect;
+
+        /** weight of the area */
+        public int weight;
+    };
+
+    /**
      * Camera service settings.
      *
      * <p>To make camera parameters take effect, applications have to call
@@ -1124,6 +1171,8 @@ public class Camera {
         private static final String KEY_SCENE_MODE = "scene-mode";
         private static final String KEY_FLASH_MODE = "flash-mode";
         private static final String KEY_FOCUS_MODE = "focus-mode";
+        private static final String KEY_FOCUS_AREAS = "focus-areas";
+        private static final String KEY_MAX_NUM_FOCUS_AREAS = "max-num-focus-areas";
         private static final String KEY_FOCAL_LENGTH = "focal-length";
         private static final String KEY_HORIZONTAL_VIEW_ANGLE = "horizontal-view-angle";
         private static final String KEY_VERTICAL_VIEW_ANGLE = "vertical-view-angle";
@@ -2499,6 +2548,89 @@ public class Camera {
             splitFloat(get(KEY_FOCUS_DISTANCES), output);
         }
 
+        /**
+         * Gets the maximum number of focus areas supported. This is the maximum
+         * length of the list in {@link #setFocusArea(List<Area>)} and
+         * {@link #getFocusArea()}.
+         *
+         * @return the maximum number of focus areas supported by the camera.
+         * @see #getFocusAreas()
+         * @hide
+         */
+        public int getMaxNumFocusAreas() {
+            return getInt(KEY_MAX_NUM_FOCUS_AREAS, 0);
+        }
+
+        /**
+         * Gets the current focus areas.
+         *
+         * Before using this API or {@link #setFocusAreas(List<int>)}, apps
+         * should call {@link #getMaxNumFocusArea()} to know the maximum number of
+         * focus areas first. If the value is 0, focus area is not supported.
+         *
+         * Each focus area is a rectangle with specified weight. The direction
+         * is relative to the sensor orientation, that is, what the sensor sees.
+         * The direction is not affected by the rotation or mirroring of
+         * {@link #setDisplayOrientation(int)}. Coordinates of the rectangle
+         * range from -1000 to 1000. (-1000, -1000) is the upper left point.
+         * (1000, 1000) is the lower right point. The length and width of focus
+         * areas cannot be 0 or negative.
+         *
+         * The weight ranges from 1 to 1000. The sum of the weights of all focus
+         * areas must be 1000. Focus areas can partially overlap and the driver
+         * will add the weights in the overlap region. But apps should not set
+         * two focus areas that have identical coordinates.
+         *
+         * A special case of all-zero single focus area means driver to decide
+         * the focus area. For example, the driver may use more signals to
+         * decide focus areas and change them dynamically. Apps can set all-zero
+         * if they want the driver to decide focus areas.
+         *
+         * Focus areas are relative to the current field of view
+         * ({@link #getZoom()}). No matter what the zoom level is, (-1000,-1000)
+         * represents the top of the currently visible camera frame. The focus
+         * area cannot be set to be outside the current field of view, even
+         * when using zoom.
+         *
+         * Focus area only has effect if the current focus mode is
+         * {@link #FOCUS_MODE_AUTO}, {@link #FOCUS_MODE_MACRO}, or
+         * {@link #FOCUS_MODE_CONTINOUS_VIDEO}.
+         *
+         * @return a list of current focus areas
+         * @hide
+         */
+        public List<Area> getFocusAreas() {
+            return splitArea(KEY_FOCUS_AREAS);
+        }
+
+        /**
+         * Sets focus areas. See {@link #getFocusAreas()} for documentation.
+         *
+         * @param focusArea the focus areas
+         * @see #getFocusAreas()
+         * @hide
+         */
+        public void setFocusAreas(List<Area> focusArea) {
+            StringBuilder buffer = new StringBuilder();
+            for (int i = 0; i < focusArea.size(); i++) {
+                Area area = focusArea.get(i);
+                Rect rect = area.rect;
+                buffer.append('(');
+                buffer.append(rect.left);
+                buffer.append(',');
+                buffer.append(rect.top);
+                buffer.append(',');
+                buffer.append(rect.right);
+                buffer.append(',');
+                buffer.append(rect.bottom);
+                buffer.append(',');
+                buffer.append(area.weight);
+                buffer.append(')');
+                if (i != focusArea.size() - 1) buffer.append(',');
+            }
+            set(KEY_FOCUS_AREAS, buffer.toString());
+        }
+
         // Splits a comma delimited string to an ArrayList of String.
         // Return null if the passing string is null or the size is 0.
         private ArrayList<String> split(String str) {
@@ -2623,6 +2755,32 @@ public class Camera {
 
             if (rangeList.size() == 0) return null;
             return rangeList;
+        }
+
+        // Splits a comma delimited string to an ArrayList of Area objects.
+        // Example string: "(-10,-10,0,0,300),(0,0,10,10,700)". Return null if
+        // the passing string is null or the size is 0.
+        private ArrayList<Area> splitArea(String str) {
+            if (str == null || str.charAt(0) != '('
+                    || str.charAt(str.length() - 1) != ')') {
+                Log.e(TAG, "Invalid area string=" + str);
+                return null;
+            }
+
+            ArrayList<Area> result = new ArrayList<Area>();
+            int endIndex, fromIndex = 1;
+            int[] array = new int[5];
+            do {
+                endIndex = str.indexOf("),(", fromIndex);
+                if (endIndex == -1) endIndex = str.length() - 1;
+                splitInt(str.substring(fromIndex, endIndex), array);
+                Rect rect = new Rect(array[0], array[1], array[2], array[3]);
+                result.add(new Area(rect, array[4]));
+                fromIndex = endIndex + 3;
+            } while (endIndex != str.length() - 1);
+
+            if (result.size() == 0) return null;
+            return result;
         }
     };
 }
