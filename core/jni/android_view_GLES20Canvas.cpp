@@ -600,8 +600,10 @@ jfieldID gFileDescriptorField;
 static void
 android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor)
 {
+#ifdef USE_OPENGL_RENDERER
     int fd = env->GetIntField(javaFileDescriptor, gFileDescriptorField);
     android::uirenderer::DisplayList::outputLogBuffer(fd);
+#endif // USE_OPENGL_RENDERER
 }
 
 // ----------------------------------------------------------------------------
