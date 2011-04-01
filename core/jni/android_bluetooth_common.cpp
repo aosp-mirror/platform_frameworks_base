@@ -81,6 +81,16 @@ static Properties pan_properties[] = {
     {"UUID", DBUS_TYPE_STRING},
 };
 
+static Properties health_device_properties[] = {
+    {"MainChannel", DBUS_TYPE_OBJECT_PATH},
+};
+
+static Properties health_channel_properties[] = {
+    {"Type", DBUS_TYPE_STRING},
+    {"Device", DBUS_TYPE_OBJECT_PATH},
+    {"Application", DBUS_TYPE_OBJECT_PATH},
+};
+
 typedef union {
     char *str_val;
     int int_val;
@@ -315,6 +325,22 @@ DBusMessage * dbus_func_args_error(JNIEnv *env,
     return ret;
 }
 
+jint dbus_returns_unixfd(JNIEnv *env, DBusMessage *reply) {
+
+    DBusError err;
+    jint ret = -1;
+
+    dbus_error_init(&err);
+    if (!dbus_message_get_args(reply, &err,
+                               DBUS_TYPE_UNIX_FD, &ret,
+                               DBUS_TYPE_INVALID)) {
+        LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, reply);
+    }
+    dbus_message_unref(reply);
+    return ret;
+}
+
+
 jint dbus_returns_int32(JNIEnv *env, DBusMessage *reply) {
 
     DBusError err;
@@ -485,6 +511,55 @@ void append_variant(DBusMessageIter *iter, int type, void *val)
     dbus_message_iter_append_basic(&value_iter, type, val);
     dbus_message_iter_close_container(iter, &value_iter);
 }
+
+static void dict_append_entry(DBusMessageIter *dict,
+                        const char *key, int type, void *val)
+{
+        DBusMessageIter dict_entry;
+        dbus_message_iter_open_container(dict, DBUS_TYPE_DICT_ENTRY,
+                                                        NULL, &dict_entry);
+
+        dbus_message_iter_append_basic(&dict_entry, DBUS_TYPE_STRING, &key);
+        append_variant(&dict_entry, type, val);
+        dbus_message_iter_close_container(dict, &dict_entry);
+}
+
+static void append_dict_valist(DBusMessageIter *iterator, const char *first_key,
+                                va_list var_args)
+{
+        DBusMessageIter dict;
+        int val_type;
+        const char *val_key;
+        void *val;
+
+        dbus_message_iter_open_container(iterator, DBUS_TYPE_ARRAY,
+                        DBUS_DICT_ENTRY_BEGIN_CHAR_AS_STRING
+                        DBUS_TYPE_STRING_AS_STRING DBUS_TYPE_VARIANT_AS_STRING
+                        DBUS_DICT_ENTRY_END_CHAR_AS_STRING, &dict);
+
+        val_key = first_key;
+        while (val_key) {
+                val_type = va_arg(var_args, int);
+                val = va_arg(var_args, void *);
+                dict_append_entry(&dict, val_key, val_type, val);
+                val_key = va_arg(var_args, char *);
+        }
+
+        dbus_message_iter_close_container(iterator, &dict);
+}
+
+void append_dict_args(DBusMessage *reply, const char *first_key, ...)
+{
+        DBusMessageIter iter;
+        va_list var_args;
+
+        dbus_message_iter_init_append(reply, &iter);
+
+        va_start(var_args, first_key);
+        append_dict_valist(&iter, first_key, var_args);
+        va_end(var_args);
+}
+
 
 int get_property(DBusMessageIter iter, Properties *properties,
                   int max_num_properties, int *prop_index, property_value *value, int *len) {
@@ -735,6 +810,21 @@ jobjectArray parse_remote_device_properties(JNIEnv *env, DBusMessageIter *iter) 
 jobjectArray parse_input_properties(JNIEnv *env, DBusMessageIter *iter) {
     return parse_properties(env, iter, (Properties *) &input_properties,
                           sizeof(input_properties) / sizeof(Properties));
+}
+
+jobjectArray parse_health_device_properties(JNIEnv *env, DBusMessageIter *iter) {
+    return parse_properties(env, iter, (Properties *) &health_device_properties,
+                          sizeof(health_device_properties) / sizeof(Properties));
+}
+
+jobjectArray parse_health_device_property_change(JNIEnv *env, DBusMessage *msg) {
+    return parse_property_change(env, msg, (Properties *) &health_device_properties,
+                    sizeof(health_device_properties) / sizeof(Properties));
+}
+
+jobjectArray parse_health_channel_properties(JNIEnv *env, DBusMessageIter *iter) {
+    return parse_properties(env, iter, (Properties *) &health_channel_properties,
+                          sizeof(health_channel_properties) / sizeof(Properties));
 }
 
 int get_bdaddr(const char *str, bdaddr_t *ba) {

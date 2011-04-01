@@ -1115,6 +1115,9 @@ public final class BluetoothAdapter {
         } else if (profile == BluetoothProfile.PAN) {
             BluetoothPan pan = new BluetoothPan(context, listener);
             return true;
+        } else if (profile == BluetoothProfile.HEALTH) {
+            BluetoothHealth health = new BluetoothHealth(context, listener);
+            return true;
         } else {
             return false;
         }

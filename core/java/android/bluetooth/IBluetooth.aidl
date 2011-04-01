@@ -18,7 +18,9 @@ package android.bluetooth;
 
 import android.bluetooth.IBluetoothCallback;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHealthAppConfiguration;
 import android.os.ParcelUuid;
+import android.os.ParcelFileDescriptor;
 
 /**
  * System private API for talking with the Bluetooth service.
@@ -97,6 +99,18 @@ interface IBluetooth
     List<BluetoothDevice> getPanDevicesMatchingConnectionStates(in int[] states);
     boolean connectPanDevice(in BluetoothDevice device);
     boolean disconnectPanDevice(in BluetoothDevice device);
+
+    // HDP profile APIs
+    boolean registerAppConfiguration(in BluetoothHealthAppConfiguration config);
+    boolean unregisterAppConfiguration(in BluetoothHealthAppConfiguration config);
+    boolean connectChannelToSource(in BluetoothDevice device, in BluetoothHealthAppConfiguration config);
+    boolean connectChannelToSink(in BluetoothDevice device, in BluetoothHealthAppConfiguration config,
+        int channelType);
+    boolean disconnectChannel(in BluetoothDevice device, in BluetoothHealthAppConfiguration config, in ParcelFileDescriptor fd);
+    ParcelFileDescriptor getMainChannelFd(in BluetoothDevice device, in BluetoothHealthAppConfiguration config);
+    List<BluetoothDevice> getConnectedHealthDevices();
+    List<BluetoothDevice> getHealthDevicesMatchingConnectionStates(in int[] states);
+    int getHealthDeviceConnectionState(in BluetoothDevice device);
 
     void sendConnectionStateChange(in BluetoothDevice device, int state, int prevState);
 }

@@ -149,6 +149,7 @@ DBusMessage * dbus_func_args_timeout_valist(JNIEnv *env,
 
 jint dbus_returns_int32(JNIEnv *env, DBusMessage *reply);
 jint dbus_returns_uint32(JNIEnv *env, DBusMessage *reply);
+jint dbus_returns_unixfd(JNIEnv *env, DBusMessage *reply);
 jstring dbus_returns_string(JNIEnv *env, DBusMessage *reply);
 jboolean dbus_returns_boolean(JNIEnv *env, DBusMessage *reply);
 jobjectArray dbus_returns_array_of_strings(JNIEnv *env, DBusMessage *reply);
@@ -164,8 +165,13 @@ jobjectArray parse_remote_device_properties(JNIEnv *env, DBusMessageIter *iter);
 jobjectArray parse_remote_device_property_change(JNIEnv *env, DBusMessage *msg);
 jobjectArray parse_adapter_property_change(JNIEnv *env, DBusMessage *msg);
 jobjectArray parse_input_properties(JNIEnv *env, DBusMessageIter *iter);
+jobjectArray parse_health_device_properties(JNIEnv *env, DBusMessageIter *iter);
+jobjectArray parse_health_channel_properties(JNIEnv *env, DBusMessageIter *iter);
 jobjectArray parse_input_property_change(JNIEnv *env, DBusMessage *msg);
 jobjectArray parse_pan_property_change(JNIEnv *env, DBusMessage *msg);
+jobjectArray parse_health_device_property_change(JNIEnv *env, DBusMessage *msg);
+
+void append_dict_args(DBusMessage *reply, const char *first_key, ...);
 void append_variant(DBusMessageIter *iter, int type, void *val);
 int get_bdaddr(const char *str, bdaddr_t *ba);
 void get_bdaddr_as_string(const bdaddr_t *ba, char *str);

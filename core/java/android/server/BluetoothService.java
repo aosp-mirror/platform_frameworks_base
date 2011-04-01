@@ -31,6 +31,7 @@ import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothDeviceProfileState;
 import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothHealthAppConfiguration;
 import android.bluetooth.BluetoothInputDevice;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothProfile;
@@ -49,6 +50,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -148,6 +150,7 @@ public class BluetoothService extends IBluetooth.Stub {
     private int mAdapterConnectionState = BluetoothAdapter.STATE_DISCONNECTED;
     private BluetoothPanProfileHandler mBluetoothPanProfileHandler;
     private BluetoothInputProfileHandler mBluetoothInputProfileHandler;
+    private BluetoothHealthProfileHandler mBluetoothHealthProfileHandler;
 
     private static class RemoteService {
         public String address;
@@ -220,6 +223,7 @@ public class BluetoothService extends IBluetooth.Stub {
         mContext.registerReceiver(mReceiver, filter);
         mBluetoothInputProfileHandler = BluetoothInputProfileHandler.getInstance(mContext, this);
         mBluetoothPanProfileHandler = BluetoothPanProfileHandler.getInstance(mContext, this);
+        mBluetoothHealthProfileHandler = BluetoothHealthProfileHandler.getInstance(mContext, this);
     }
 
     public static synchronized String readDockBluetoothAddress() {
@@ -2077,6 +2081,106 @@ public class BluetoothService extends IBluetooth.Stub {
         }
     }
 
+    /**** Handlers for Health Device Profile ****/
+    // TODO: All these need to be converted to a state machine.
+
+    public boolean registerAppConfiguration(BluetoothHealthAppConfiguration config) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
+                "Need BLUETOOTH permission");
+        synchronized (mBluetoothHealthProfileHandler) {
+                return mBluetoothHealthProfileHandler.registerAppConfiguration(config);
+        }
+    }
+
+    public boolean unregisterAppConfiguration(BluetoothHealthAppConfiguration config) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
+                "Need BLUETOOTH permission");
+        synchronized (mBluetoothHealthProfileHandler) {
+                return mBluetoothHealthProfileHandler.unregisterAppConfiguration(config);
+        }
+    }
+
+
+    public boolean connectChannelToSource(BluetoothDevice device,
+            BluetoothHealthAppConfiguration config) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
+                "Need BLUETOOTH permission");
+        synchronized (mBluetoothHealthProfileHandler) {
+            return mBluetoothHealthProfileHandler.connectChannelToSource(device,
+                    config);
+        }
+    }
+
+    public boolean connectChannelToSink(BluetoothDevice device,
+            BluetoothHealthAppConfiguration config, int channelType) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
+                                                "Need BLUETOOTH permission");
+        synchronized (mBluetoothHealthProfileHandler) {
+            return mBluetoothHealthProfileHandler.connectChannel(device, config,
+                    channelType);
+        }
+    }
+
+    public boolean disconnectChannel(BluetoothDevice device,
+            BluetoothHealthAppConfiguration config, ParcelFileDescriptor fd) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
+                "Need BLUETOOTH permission");
+        synchronized (mBluetoothHealthProfileHandler) {
+            return mBluetoothHealthProfileHandler.disconnectChannel(device, config, fd);
+        }
+    }
+
+    public ParcelFileDescriptor getMainChannelFd(BluetoothDevice device,
+            BluetoothHealthAppConfiguration config) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
+                "Need BLUETOOTH permission");
+        synchronized (mBluetoothHealthProfileHandler) {
+            return mBluetoothHealthProfileHandler.getMainChannelFd(device, config);
+        }
+    }
+
+    /*package*/ void onHealthDevicePropertyChanged(String devicePath,
+            String channelPath) {
+        synchronized (mBluetoothHealthProfileHandler) {
+            mBluetoothHealthProfileHandler.onHealthDevicePropertyChanged(devicePath,
+                    channelPath);
+        }
+    }
+
+    /*package*/ void onHealthDeviceChannelChanged(String devicePath,
+            String channelPath, boolean exists) {
+        synchronized(mBluetoothHealthProfileHandler) {
+            mBluetoothHealthProfileHandler.onHealthDeviceChannelChanged(devicePath,
+                    channelPath, exists);
+        }
+    }
+
+    public int getHealthDeviceConnectionState(BluetoothDevice device) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
+                "Need BLUETOOTH permission");
+        synchronized (mBluetoothHealthProfileHandler) {
+            return mBluetoothHealthProfileHandler.getHealthDeviceConnectionState(device);
+        }
+    }
+
+    public List<BluetoothDevice> getConnectedHealthDevices() {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
+                "Need BLUETOOTH permission");
+        synchronized (mBluetoothHealthProfileHandler) {
+            return mBluetoothHealthProfileHandler.getConnectedHealthDevices();
+        }
+    }
+
+    public List<BluetoothDevice> getHealthDevicesMatchingConnectionStates(
+            int[] states) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
+                "Need BLUETOOTH permission");
+        synchronized (mBluetoothHealthProfileHandler) {
+            return mBluetoothHealthProfileHandler.
+                    getHealthDevicesMatchingConnectionStates(states);
+        }
+    }
+
     public boolean connectHeadset(String address) {
         if (getBondState(address) != BluetoothDevice.BOND_BONDED) return false;
 
@@ -2375,4 +2479,16 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private native int[] addReservedServiceRecordsNative(int[] uuuids);
     private native boolean removeReservedServiceRecordsNative(int[] handles);
+
+    // Health API
+    native String registerHealthApplicationNative(int dataType, String role, String name,
+            String channelType);
+    native String registerHealthApplicationNative(int dataType, String role, String name);
+    native boolean unregisterHealthApplicationNative(String path);
+    native boolean createChannelNative(String devicePath, String appPath, String channelType);
+    native boolean destroyChannelNative(String devicePath, String channelpath);
+    native String getMainChannelNative(String path);
+    native String getChannelApplicationNative(String channelPath);
+    native ParcelFileDescriptor getChannelFdNative(String channelPath);
+    native boolean releaseChannelFdNative(String channelPath);
 }
