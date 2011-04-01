@@ -37,10 +37,16 @@ class SkMatrix;
  * Additional private constants not defined in ndk/ui/input.h.
  */
 enum {
-    /*
-     * Private control to determine when an app is tracking a key sequence.
-     */
-    AKEY_EVENT_FLAG_START_TRACKING = 0x40000000
+    /* Private control to determine when an app is tracking a key sequence. */
+    AKEY_EVENT_FLAG_START_TRACKING = 0x40000000,
+
+    /* Key event is inconsistent with previously sent key events. */
+    AKEY_EVENT_FLAG_TAINTED = 0x80000000,
+};
+
+enum {
+    /* Motion event is inconsistent with previously sent motion events. */
+    AMOTION_EVENT_FLAG_TAINTED = 0x80000000,
 };
 
 enum {
@@ -327,6 +333,8 @@ public:
     inline void setAction(int32_t action) { mAction = action; }
 
     inline int32_t getFlags() const { return mFlags; }
+
+    inline void setFlags(int32_t flags) { mFlags = flags; }
 
     inline int32_t getEdgeFlags() const { return mEdgeFlags; }
 

@@ -1170,7 +1170,18 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @hide
      */
     public static final int FLAG_START_TRACKING = 0x40000000;
-    
+
+    /**
+     * Private flag that indicates when the system has detected that this key event
+     * may be inconsistent with respect to the sequence of previously delivered key events,
+     * such as when a key up event is sent but the key was not down.
+     *
+     * @hide
+     * @see #isTainted
+     * @see #setTainted
+     */
+    public static final int FLAG_TAINTED = 0x80000000;
+
     /**
      * Returns the maximum keycode.
      */
@@ -1535,6 +1546,33 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     /**
+     * Obtains a (potentially recycled) copy of another key event.
+     *
+     * @hide
+     */
+    public static KeyEvent obtain(KeyEvent other) {
+        KeyEvent ev = obtain();
+        ev.mDownTime = other.mDownTime;
+        ev.mEventTime = other.mEventTime;
+        ev.mAction = other.mAction;
+        ev.mKeyCode = other.mKeyCode;
+        ev.mRepeatCount = other.mRepeatCount;
+        ev.mMetaState = other.mMetaState;
+        ev.mDeviceId = other.mDeviceId;
+        ev.mScanCode = other.mScanCode;
+        ev.mFlags = other.mFlags;
+        ev.mSource = other.mSource;
+        ev.mCharacters = other.mCharacters;
+        return ev;
+    }
+
+    /** @hide */
+    @Override
+    public KeyEvent copy() {
+        return obtain(this);
+    }
+
+    /**
      * Recycles a key event.
      * Key events should only be recycled if they are owned by the system since user
      * code expects them to be essentially immutable, "tracking" notwithstanding.
@@ -1635,7 +1673,19 @@ public class KeyEvent extends InputEvent implements Parcelable {
         event.mFlags = flags;
         return event;
     }
-    
+
+    /** @hide */
+    @Override
+    public final boolean isTainted() {
+        return (mFlags & FLAG_TAINTED) != 0;
+    }
+
+    /** @hide */
+    @Override
+    public final void setTainted(boolean tainted) {
+        mFlags = tainted ? mFlags | FLAG_TAINTED : mFlags & ~FLAG_TAINTED;
+    }
+
     /**
      * Don't use in new code, instead explicitly check
      * {@link #getAction()}.

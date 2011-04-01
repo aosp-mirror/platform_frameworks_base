@@ -308,6 +308,17 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int FLAG_WINDOW_IS_OBSCURED = 0x1;
 
     /**
+     * Private flag that indicates when the system has detected that this motion event
+     * may be inconsistent with respect to the sequence of previously delivered motion events,
+     * such as when a pointer move event is sent but the pointer is not down.
+     *
+     * @hide
+     * @see #isTainted
+     * @see #setTainted
+     */
+    public static final int FLAG_TAINTED = 0x80000000;
+
+    /**
      * Flag indicating the motion event intersected the top edge of the screen.
      */
     public static final int EDGE_TOP = 0x00000001;
@@ -1054,6 +1065,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     private static native void nativeSetAction(int nativePtr, int action);
     private static native boolean nativeIsTouchEvent(int nativePtr);
     private static native int nativeGetFlags(int nativePtr);
+    private static native void nativeSetFlags(int nativePtr, int flags);
     private static native int nativeGetEdgeFlags(int nativePtr);
     private static native void nativeSetEdgeFlags(int nativePtr, int action);
     private static native int nativeGetMetaState(int nativePtr);
@@ -1290,6 +1302,12 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         return ev;
     }
 
+    /** @hide */
+    @Override
+    public MotionEvent copy() {
+        return obtain(this);
+    }
+
     /**
      * Recycle the MotionEvent, to be re-used by a later caller.  After calling
      * this function you must not ever touch the event again.
@@ -1401,6 +1419,20 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public final int getFlags() {
         return nativeGetFlags(mNativePtr);
+    }
+
+    /** @hide */
+    @Override
+    public final boolean isTainted() {
+        final int flags = getFlags();
+        return (flags & FLAG_TAINTED) != 0;
+    }
+
+    /** @hide */
+    @Override
+    public final void setTainted(boolean tainted) {
+        final int flags = getFlags();
+        nativeSetFlags(mNativePtr, tainted ? flags | FLAG_TAINTED : flags & ~FLAG_TAINTED);
     }
 
     /**

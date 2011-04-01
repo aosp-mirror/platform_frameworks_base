@@ -163,6 +163,13 @@ public class ScaleGestureDetector {
     private int mActiveId1;
     private boolean mActive0MostRecent;
 
+    /**
+     * Consistency verifier for debugging purposes.
+     */
+    private final InputEventConsistencyVerifier mInputEventConsistencyVerifier =
+            InputEventConsistencyVerifier.isInstrumentationEnabled() ?
+                    new InputEventConsistencyVerifier(this, 0) : null;
+
     public ScaleGestureDetector(Context context, OnScaleGestureListener listener) {
         ViewConfiguration config = ViewConfiguration.get(context);
         mContext = context;
@@ -171,6 +178,10 @@ public class ScaleGestureDetector {
     }
 
     public boolean onTouchEvent(MotionEvent event) {
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onTouchEvent(event, 0);
+        }
+
         final int action = event.getActionMasked();
         boolean handled = true;
 
