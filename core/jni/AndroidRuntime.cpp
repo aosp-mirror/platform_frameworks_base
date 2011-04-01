@@ -698,6 +698,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
             case 'n':   val = "-Xdexopt:none";      break;
             case 'v':   val = "-Xdexopt:verified";  break;
             case 'a':   val = "-Xdexopt:all";       break;
+            case 'f':   val = "-Xdexopt:full";      break;
             default:    val = NULL;                 break;
             }
 

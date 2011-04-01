@@ -119,22 +119,12 @@ public class ClassPathPackageInfoSource {
                 try {
                     if (entryName.endsWith(".apk")) {
                         findClassesInApk(entryName, packageName, classNames, subpackageNames);
-                    } else if ("true".equals(System.getProperty("android.vm.dexfile", "false"))) {
-                        // If the vm supports dex files then scan the directories that contain
-                        // apk files. 
+                    } else {
+                        // scan the directories that contain apk files.
                         for (String apkPath : apkPaths) {
                             File file = new File(apkPath);
                             scanForApkFiles(file, packageName, classNames, subpackageNames);
                         }
-                    } else if (entryName.endsWith(".jar")) {
-                        findClassesInJar(classPathEntry, pathPrefix,
-                                classNames, subpackageNames);
-                    } else if (classPathEntry.isDirectory()) {
-                        findClassesInDirectory(classPathEntry, packagePrefix, pathPrefix,
-                                classNames, subpackageNames);
-                    } else {
-                        throw new AssertionError("Don't understand classpath entry " +
-                                classPathEntry);
                     }
                 } catch (IOException e) {
                     throw new AssertionError("Can't read classpath entry " +

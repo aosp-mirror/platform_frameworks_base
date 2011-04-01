@@ -16,23 +16,21 @@
 
 package android.util;
 
-import org.xml.sax.ContentHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-
-import org.apache.harmony.xml.ExpatPullParser;
 import org.apache.harmony.xml.ExpatReader;
+import org.kxml2.io.KXmlParser;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+import org.xmlpull.v1.XmlSerializer;
 
 /**
  * XML utility methods.
@@ -46,7 +44,7 @@ public class Xml {
      * @see <a href="http://xmlpull.org/v1/doc/features.html#relaxed">
      *  specification</a>
      */
-    public static String FEATURE_RELAXED = ExpatPullParser.FEATURE_RELAXED;
+    public static String FEATURE_RELAXED = "http://xmlpull.org/v1/doc/features.html#relaxed";
 
     /**
      * Parses the given xml string and fires events on the given SAX handler.
@@ -57,8 +55,7 @@ public class Xml {
             XMLReader reader = new ExpatReader();
             reader.setContentHandler(contentHandler);
             reader.parse(new InputSource(new StringReader(xml)));
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new AssertionError(e);
         }
     }
@@ -88,16 +85,17 @@ public class Xml {
     }
 
     /**
-     * Creates a new pull parser with namespace support.
-     *
-     * <p><b>Note:</b> This is actually slower than the SAX parser, and it's not
-     *   fully implemented. If you need a fast, mostly implemented pull parser,
-     *   use this. If you need a complete implementation, use KXML.
+     * Returns a new pull parser with namespace support.
      */
     public static XmlPullParser newPullParser() {
-        ExpatPullParser parser = new ExpatPullParser();
-        parser.setNamespaceProcessingEnabled(true);
-        return parser;
+        try {
+            KXmlParser parser = new KXmlParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL, true);
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
+            return parser;
+        } catch (XmlPullParserException e) {
+            throw new AssertionError();
+        }
     }
 
     /**
