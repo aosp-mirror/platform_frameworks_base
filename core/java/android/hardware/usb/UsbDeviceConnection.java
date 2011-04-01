@@ -23,7 +23,8 @@ import java.io.FileDescriptor;
 
 
 /**
- * A class representing a USB device.
+ * This class is used for sending and receiving data and control messages to a USB device.
+ * Instances of this class are created by {@link UsbManager#openDevice}.
  */
 public class UsbDeviceConnection {
 
@@ -48,15 +49,20 @@ public class UsbDeviceConnection {
 
     /**
      * Releases all system resources related to the device.
+     * Once the object is closed it cannot be used again.
+     * The client must call {@link UsbManager#openDevice} again
+     * to retrieve a new instance to reestablish communication with the device.
      */
     public void close() {
         native_close();
     }
 
     /**
-     * Returns an integer file descriptor for the device, or
+     * Returns the native file descriptor for the device, or
      * -1 if the device is not opened.
-     * This is intended for passing to native code to access the device
+     * This is intended for passing to native code to access the device.
+     *
+     * @return the native file descriptor
      */
     public int getFileDescriptor() {
         return native_get_fd();
@@ -65,7 +71,8 @@ public class UsbDeviceConnection {
     /**
      * Claims exclusive access to a {@link android.hardware.usb.UsbInterface}.
      * This must be done before sending or receiving data on any
-     * {@link android.hardware.usb.UsbEndpoint}s belonging to the interface
+     * {@link android.hardware.usb.UsbEndpoint}s belonging to the interface.
+     *
      * @param intf the interface to claim
      * @param force true to disconnect kernel driver if necessary
      * @return true if the interface was successfully claimed

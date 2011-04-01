@@ -34,7 +34,8 @@ public final class MtpStorageInfo {
     }
 
     /**
-     * Returns the storage ID for the storage unit
+     * Returns the storage ID for the storage unit.
+     * The storage ID uniquely identifies the storage unit on the MTP device.
      *
      * @return the storage ID
      */
@@ -61,7 +62,9 @@ public final class MtpStorageInfo {
     }
 
    /**
-     * Returns the description string for the storage unit
+     * Returns the description string for the storage unit.
+     * This is typically displayed to the user in the user interface on the
+     * MTP host.
      *
      * @return the storage unit description
      */

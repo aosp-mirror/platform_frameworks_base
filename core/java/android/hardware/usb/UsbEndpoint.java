@@ -21,7 +21,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A class representing an endpoint on a {@link android.hardware.usb.UsbInterface}.
+ * A class representing an endpoint on a {@link UsbInterface}.
+ * Endpoints are the channels for sending and receiving data over USB.
+ * Typically bulk endpoints are used for sending non-trivial amounts of data.
+ * Interrupt endpoints are used for sending small amounts of data, typically events,
+ * separately from the main data streams.
+ * The endpoint zero is a special endpoint for control messages sent from the host
+ * to device.
+ * Isochronous endpoints are currently unsupported.
  */
 public class UsbEndpoint implements Parcelable {
 
@@ -43,6 +50,10 @@ public class UsbEndpoint implements Parcelable {
 
     /**
      * Returns the endpoint's address field.
+     * The address is a bitfield containing both the endpoint number
+     * as well as the data direction of the endpoint.
+     * the endpoint number and direction can also be accessed via
+     * {@link #getEndpointNumber} and {@link #getDirection}.
      *
      * @return the endpoint's address
      */
@@ -61,10 +72,12 @@ public class UsbEndpoint implements Parcelable {
 
     /**
      * Returns the endpoint's direction.
-     * Returns {@link android.hardware.usb.UsbConstants#USB_DIR_OUT}
+     * Returns {@link UsbConstants#USB_DIR_OUT}
      * if the direction is host to device, and
-     * {@link android.hardware.usb.UsbConstants#USB_DIR_IN} if the
+     * {@link UsbConstants#USB_DIR_IN} if the
      * direction is device to host.
+     * @see {@link UsbConstants#USB_DIR_IN}
+     * @see {@link UsbConstants#USB_DIR_OUT}
      *
      * @return the endpoint's direction
      */
@@ -85,10 +98,10 @@ public class UsbEndpoint implements Parcelable {
      * Returns the endpoint's type.
      * Possible results are:
      * <ul>
-     * <li>{@link android.hardware.usb.UsbConstants#USB_ENDPOINT_XFER_CONTROL} (endpoint zero)
-     * <li>{@link android.hardware.usb.UsbConstants#USB_ENDPOINT_XFER_ISOC} (isochronous endpoint)
-     * <li>{@link android.hardware.usb.UsbConstants#USB_ENDPOINT_XFER_BULK} (bulk endpoint)
-     * <li>{@link android.hardware.usb.UsbConstants#USB_ENDPOINT_XFER_INT} (interrupt endpoint)
+     * <li>{@link UsbConstants#USB_ENDPOINT_XFER_CONTROL} (endpoint zero)
+     * <li>{@link UsbConstants#USB_ENDPOINT_XFER_ISOC} (isochronous endpoint)
+     * <li>{@link UsbConstants#USB_ENDPOINT_XFER_BULK} (bulk endpoint)
+     * <li>{@link UsbConstants#USB_ENDPOINT_XFER_INT} (interrupt endpoint)
      * </ul>
      *
      * @return the endpoint's type
