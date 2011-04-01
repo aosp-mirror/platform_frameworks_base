@@ -20,6 +20,7 @@ import java.lang.ref.WeakReference;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
@@ -132,6 +133,8 @@ public class StackView extends AdapterViewAnimator {
     private int mMaximumVelocity;
     private VelocityTracker mVelocityTracker;
     private boolean mTransitionIsSetup = false;
+    private int mResOutColor;
+    private int mClickColor;
 
     private static HolographicHelper sHolographicHelper;
     private ImageView mHighlight;
@@ -146,12 +149,24 @@ public class StackView extends AdapterViewAnimator {
     private final Rect stackInvalidateRect = new Rect();
 
     public StackView(Context context) {
-        super(context);
-        initStackView();
+        this(context, null);
     }
 
     public StackView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, com.android.internal.R.attr.stackViewStyle);
+    }
+
+    public StackView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        TypedArray a = context.obtainStyledAttributes(attrs,
+                com.android.internal.R.styleable.StackView, defStyleAttr, 0);
+
+        mResOutColor = a.getColor(
+                com.android.internal.R.styleable.StackView_resOutColor, 0);
+        mClickColor = a.getColor(
+                com.android.internal.R.styleable.StackView_clickColor, 0);
+
+        a.recycle();
         initStackView();
     }
 
@@ -357,7 +372,7 @@ public class StackView extends AdapterViewAnimator {
     private void setupStackSlider(View v, int mode) {
         mStackSlider.setMode(mode);
         if (v != null) {
-            mHighlight.setImageBitmap(sHolographicHelper.createOutline(v));
+            mHighlight.setImageBitmap(sHolographicHelper.createResOutline(v, mResOutColor));
             mHighlight.setRotation(v.getRotation());
             mHighlight.setTranslationY(v.getTranslationY());
             mHighlight.setTranslationX(v.getTranslationX());
@@ -429,8 +444,8 @@ public class StackView extends AdapterViewAnimator {
         if (!mClickFeedbackIsValid) {
             View v = getViewAtRelativeIndex(1);
             if (v != null) {
-                mClickFeedback.setImageBitmap(sHolographicHelper.createOutline(v,
-                        HolographicHelper.CLICK_FEEDBACK));
+                mClickFeedback.setImageBitmap(
+                        sHolographicHelper.createClickOutline(v, mClickColor));
                 mClickFeedback.setTranslationX(v.getTranslationX());
                 mClickFeedback.setTranslationY(v.getTranslationY());
             }
@@ -1355,16 +1370,19 @@ public class StackView extends AdapterViewAnimator {
             mLargeBlurMaskFilter = new BlurMaskFilter(4 * mDensity, BlurMaskFilter.Blur.NORMAL);
         }
 
-        Bitmap createOutline(View v) {
-            return createOutline(v, RES_OUT);
+        Bitmap createClickOutline(View v, int color) {
+            return createOutline(v, CLICK_FEEDBACK, color);
         }
 
-        Bitmap createOutline(View v, int type) {
+        Bitmap createResOutline(View v, int color) {
+            return createOutline(v, RES_OUT, color);
+        }
+
+        Bitmap createOutline(View v, int type, int color) {
+            mHolographicPaint.setColor(color);
             if (type == RES_OUT) {
-                mHolographicPaint.setColor(0xff6699ff);
                 mBlurPaint.setMaskFilter(mSmallBlurMaskFilter);
             } else if (type == CLICK_FEEDBACK) {
-                mHolographicPaint.setColor(0x886699ff);
                 mBlurPaint.setMaskFilter(mLargeBlurMaskFilter);
             }
 
