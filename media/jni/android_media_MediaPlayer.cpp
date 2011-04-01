@@ -317,8 +317,7 @@ static void setVideoSurfaceOrSurfaceTexture(
         if (surfaceTexture != NULL) {
             sp<ISurfaceTexture> native_surfaceTexture(
                     getSurfaceTexture(env, surfaceTexture));
-            LOGV("%s: texture=%p (id=%d)", prefix,
-                 native_surfaceTexture.get(), native_surfaceTexture->getIdentity());
+            LOGV("%s: texture=%p", prefix, native_surfaceTexture.get());
             mp->setVideoSurfaceTexture(native_surfaceTexture);
         }
     }
