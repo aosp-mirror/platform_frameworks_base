@@ -450,7 +450,7 @@ EventHub::Device* EventHub::getDeviceLocked(int32_t deviceId) const {
 size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSize) {
     // Note that we only allow one caller to getEvents(), so don't need
     // to do locking here...  only when adding/removing devices.
-    assert(bufferSize >= 1);
+    LOG_ASSERT(bufferSize >= 1);
 
     if (!mOpened) {
         mError = openPlatformInput() ? NO_ERROR : UNKNOWN_ERROR;
