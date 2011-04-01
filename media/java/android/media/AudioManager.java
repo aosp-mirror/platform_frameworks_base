@@ -828,29 +828,64 @@ public class AudioManager {
      * or {@link #SCO_AUDIO_STATE_CONNECTED}
      *
      * @see #startBluetoothSco()
+     * @deprecated Use  {@link #ACTION_SCO_AUDIO_STATE_UPDATED} instead
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SCO_AUDIO_STATE_CHANGED =
             "android.media.SCO_AUDIO_STATE_CHANGED";
+
+     /**
+     * Sticky broadcast intent action indicating that the bluetoooth SCO audio
+     * connection state has been updated.
+     * <p>This intent has two extras:
+     * <ul>
+     *   <li> {@link #EXTRA_SCO_AUDIO_STATE} - The new SCO audio state. </li>
+     *   <li> {@link #EXTRA_SCO_AUDIO_PREVIOUS_STATE}- The previous SCO audio state. </li>
+     * </ul>
+     * <p> EXTRA_SCO_AUDIO_STATE or EXTRA_SCO_AUDIO_PREVIOUS_STATE can be any of:
+     * <ul>
+     *   <li> {@link #SCO_AUDIO_STATE_DISCONNECTED}, </li>
+     *   <li> {@link #SCO_AUDIO_STATE_CONNECTING} or </li>
+     *   <li> {@link #SCO_AUDIO_STATE_CONNECTED}, </li>
+     * </ul>
+     * @see #startBluetoothSco()
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SCO_AUDIO_STATE_UPDATED =
+            "android.media.ACTION_SCO_AUDIO_STATE_UPDATED";
+
     /**
-     * Extra for intent {@link #ACTION_SCO_AUDIO_STATE_CHANGED} containing the new
-     * bluetooth SCO connection state.
+     * Extra for intent {@link #ACTION_SCO_AUDIO_STATE_CHANGED} or
+     * {@link #ACTION_SCO_AUDIO_STATE_UPDATED} containing the new bluetooth SCO connection state.
      */
     public static final String EXTRA_SCO_AUDIO_STATE =
             "android.media.extra.SCO_AUDIO_STATE";
 
     /**
-     * Value for extra {@link #EXTRA_SCO_AUDIO_STATE} indicating that the
-     * SCO audio channel is not established
+     * Extra for intent {@link #ACTION_SCO_AUDIO_STATE_UPDATED} containing the previous
+     * bluetooth SCO connection state.
+     */
+    public static final String EXTRA_SCO_AUDIO_PREVIOUS_STATE =
+            "android.media.extra.SCO_AUDIO_PREVIOUS_STATE";
+
+    /**
+     * Value for extra EXTRA_SCO_AUDIO_STATE or EXTRA_SCO_AUDIO_PREVIOUS_STATE
+     * indicating that the SCO audio channel is not established
      */
     public static final int SCO_AUDIO_STATE_DISCONNECTED = 0;
     /**
-     * Value for extra {@link #EXTRA_SCO_AUDIO_STATE} indicating that the
-     * SCO audio channel is established
+     * Value for extra {@link #EXTRA_SCO_AUDIO_STATE} or {@link #EXTRA_SCO_AUDIO_PREVIOUS_STATE}
+     * indicating that the SCO audio channel is established
      */
     public static final int SCO_AUDIO_STATE_CONNECTED = 1;
     /**
-     * Value for extra {@link #EXTRA_SCO_AUDIO_STATE} indicating that
+     * Value for extra EXTRA_SCO_AUDIO_STATE or EXTRA_SCO_AUDIO_PREVIOUS_STATE
+     * indicating that the SCO audio channel is being established
+     */
+    public static final int SCO_AUDIO_STATE_CONNECTING = 2;
+    /**
+     * Value for extra EXTRA_SCO_AUDIO_STATE indicating that
      * there was an error trying to obtain the state
      */
     public static final int SCO_AUDIO_STATE_ERROR = -1;
@@ -878,29 +913,37 @@ public class AudioManager {
      * to/from a bluetooth SCO headset while the phone is not in call.
      * <p>As the SCO connection establishment can take several seconds,
      * applications should not rely on the connection to be available when the method
-     * returns but instead register to receive the intent {@link #ACTION_SCO_AUDIO_STATE_CHANGED}
+     * returns but instead register to receive the intent {@link #ACTION_SCO_AUDIO_STATE_UPDATED}
      * and wait for the state to be {@link #SCO_AUDIO_STATE_CONNECTED}.
-     * <p>As the connection is not guaranteed to succeed, applications must wait for this intent with
-     * a timeout.
-     * <p>When finished with the SCO connection or if the establishment times out,
-     * the application must call {@link #stopBluetoothSco()} to clear the request and turn
-     * down the bluetooth connection.
+     * <p>As the ACTION_SCO_AUDIO_STATE_UPDATED intent is sticky, the application can check the SCO
+     * audio state before calling startBluetoothSco() by reading the intent returned by the receiver
+     * registration. If the state is already CONNECTED, no state change will be received via the
+     * intent after calling startBluetoothSco(). It is however useful to call startBluetoothSco()
+     * so that the connection stays active in case the current initiator stops the connection.
+     * <p>Unless the connection is already active as described above, the state will always
+     * transition from DISCONNECTED to CONNECTING and then either to CONNECTED if the connection
+     * succeeds or back to DISCONNECTED if the connection fails (e.g no headset is connected).
+     * <p>When finished with the SCO connection or if the establishment fails, the application must
+     * call {@link #stopBluetoothSco()} to clear the request and turn down the bluetooth connection.
      * <p>Even if a SCO connection is established, the following restrictions apply on audio
      * output streams so that they can be routed to SCO headset:
-     * - the stream type must be {@link #STREAM_VOICE_CALL}
-     * - the format must be mono
-     * - the sampling must be 16kHz or 8kHz
+     * <ul>
+     *   <li> the stream type must be {@link #STREAM_VOICE_CALL} </li>
+     *   <li> the format must be mono </li>
+     *   <li> the sampling must be 16kHz or 8kHz </li>
+     * </ul>
      * <p>The following restrictions apply on input streams:
-     * - the format must be mono
-     * - the sampling must be 8kHz
-     *
+     * <ul>
+     *   <li> the format must be mono </li>
+     *   <li> the sampling must be 8kHz </li>
+     * </ul>
      * <p>Note that the phone application always has the priority on the usage of the SCO
      * connection for telephony. If this method is called while the phone is in call
      * it will be ignored. Similarly, if a call is received or sent while an application
      * is using the SCO connection, the connection will be lost for the application and NOT
      * returned automatically when the call ends.
      * @see #stopBluetoothSco()
-     * @see #ACTION_SCO_AUDIO_STATE_CHANGED
+     * @see #ACTION_SCO_AUDIO_STATE_UPDATED
      */
     public void startBluetoothSco(){
         IAudioService service = getService();
@@ -917,7 +960,7 @@ public class AudioManager {
      *   {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}.
      * <p>This method must be called by applications having requested the use of
      * bluetooth SCO audio with {@link #startBluetoothSco()}
-     * when finished with the SCO connection or if the establishment times out.
+     * when finished with the SCO connection or if connection fails.
      * @see #startBluetoothSco()
      */
     public void stopBluetoothSco(){
