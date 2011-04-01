@@ -120,7 +120,7 @@ struct egl_display_t {
 
     SortedVector<egl_object_t*> objects;
 
-    egl_display_t() : magic('_dpy'), numTotalConfigs(0), configs(0) { }
+    egl_display_t() : magic('_dpy'), numTotalConfigs(0), configs(0), refs(0) { }
     ~egl_display_t() { magic = 0; }
     inline bool isReady() const { return (refs > 0); }
     inline bool isValid() const { return magic == '_dpy'; }
