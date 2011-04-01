@@ -121,7 +121,6 @@ parent.link=index.html
 
 <p>The in-app billing sample application is available as a downloadable component of the Android SDK. To download the sample application component, launch the Android SDK and AVD Manager and then select the "Google Market Billing package" component (see figure 1), and click <strong>Install Selected</strong> to begin the download.</p>
 
-<div style="margin-bottom:2em;">
 
 <img src="{@docRoot}images/billing_package.png" height="325" id="figure1" />
 <p class="img-caption">
@@ -663,8 +662,6 @@ public class BillingReceiver extends BroadcastReceiver {
 </ol>
 
 <p class="caution"><strong>Important</strong>: To keep your public key safe from malicious users and hackers, do not embed your public key as an entire literal string. Instead, construct the string at runtime from pieces or use bit manipulation (for example, XOR with some other string) to hide the actual key. The key itself is not secret information, but you do not want to make it easy for a hacker or malicious user to replace the public key with another key.</p>
-
-<div style="margin-bottom:2em;">
 
 <img src="{@docRoot}images/billing_public_key.png" height="510" id="figure2" />
 <p class="img-caption">
