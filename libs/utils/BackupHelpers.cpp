@@ -442,6 +442,184 @@ back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD
     return 0;
 }
 
+// Utility function, equivalent to stpcpy(): perform a strcpy, but instead of
+// returning the initial dest, return a pointer to the trailing NUL.
+static char* strcpy_ptr(char* dest, const char* str) {
+    if (dest && str) {
+        while ((*dest = *str) != 0) {
+            dest++;
+            str++;
+        }
+    }
+    return dest;
+}
+
+int write_tarfile(const String8& packageName, const String8& domain,
+        const String8& rootpath, const String8& filepath, BackupDataWriter* writer)
+{
+    // In the output stream everything is stored relative to the root
+    const char* relstart = filepath.string() + rootpath.length();
+    if (*relstart == '/') relstart++;     // won't be true when path == rootpath
+    String8 relpath(relstart);
+
+    // Too long a name for the ustar format?
+    //    "apps/" + packagename + '/' + domainpath < 155 chars
+    //    relpath < 100 chars
+    if ((5 + packageName.length() + 1 + domain.length() >= 155) || (relpath.length() >= 100)) {
+        LOGE("Filename [%s] too long, skipping", relpath.string());
+        return -1;
+    }
+
+    int err = 0;
+    struct stat64 s;
+    if (lstat64(filepath.string(), &s) != 0) {
+        err = errno;
+        LOGE("Error %d (%s) from lstat64(%s)", err, strerror(err), filepath.string());
+        return err;
+    }
+
+    const int isdir = S_ISDIR(s.st_mode);
+
+    // !!! TODO: use mmap when possible to avoid churning the buffer cache
+    // !!! TODO: this will break with symlinks; need to use readlink(2)
+    int fd = open(filepath.string(), O_RDONLY);
+    if (fd < 0) {
+        err = errno;
+        LOGE("Error %d (%s) from open(%s)", err, strerror(err), filepath.string());
+        return err;
+    }
+
+    // read/write up to this much at a time.
+    const size_t BUFSIZE = 32 * 1024;
+
+    char* buf = new char[BUFSIZE];
+    if (buf == NULL) {
+        LOGE("Out of mem allocating transfer buffer");
+        err = ENOMEM;
+        goto done;
+    }
+
+    // Good to go -- first construct the standard tar header at the start of the buffer
+    memset(buf, 0, 512);    // tar header is 512 bytes
+
+    // Magic fields for the ustar file format
+    strcat(buf + 257, "ustar");
+    strcat(buf + 263, "00");
+
+    {
+        // Prefix and main relative path.  Path lengths have been preflighted.
+
+        // [ 345 : 155 ] filename path prefix [ustar]
+        //
+        // packagename and domain can each be empty.
+        char* cp = buf + 345;
+        if (packageName.length() > 0) {
+            // it's an app; so prefix with "apps/packagename/"
+            cp = strcpy_ptr(cp, "apps/");
+            cp = strcpy_ptr(cp, packageName.string());
+        }
+
+        if (domain.length() > 0) {
+            // only need a / if there was a package name
+            if (packageName.length() > 0) *cp++ = '/';
+            cp = strcpy_ptr(cp, domain.string());
+        }
+
+        // [   0 : 100 ]; file name/path
+        strncpy(buf, relpath.string(), 100);
+
+        LOGI("   Name: %s/%s", buf + 345, buf);
+    }
+
+    // [ 100 :   8 ] file mode
+    snprintf(buf + 100, 8, "0%o", s.st_mode);
+
+    // [ 108 :   8 ] uid -- ignored in Android format; uids are remapped at restore time
+    // [ 116 :   8 ] gid -- ignored in Android format
+    snprintf(buf + 108, 8, "0%lo", s.st_uid);
+    snprintf(buf + 116, 8, "0%lo", s.st_gid);
+
+    // [ 124 :  12 ] file size in bytes
+    snprintf(buf + 124, 12, "0%llo", s.st_size);
+
+    // [ 136 :  12 ] last mod time as a UTC time_t
+    snprintf(buf + 136, 12, "%0lo", s.st_mtime);
+
+    // [ 148 :   8 ] checksum -- to be calculated with this field as space chars
+    memset(buf + 148, ' ', 8);
+
+    // [ 156 :   1 ] link/file type
+    uint8_t type;
+    if (isdir) {
+        type = '5';     // tar magic: '5' == directory
+    } else if (S_ISREG(s.st_mode)) {
+        type = '0';     // tar magic: '0' == normal file
+    } else {
+        LOGW("Error: unknown file mode 0%o [%s]", s.st_mode, filepath.string());
+        goto cleanup;
+    }
+    buf[156] = type;
+
+    // [ 157 : 100 ] name of linked file [not implemented]
+
+    // Now go back and calculate the header checksum
+    {
+        uint16_t sum = 0;
+        for (uint8_t* p = (uint8_t*) buf; p < ((uint8_t*)buf) + 512; p++) {
+            sum += *p;
+        }
+
+        // Now write the real checksum value:
+        // [ 148 :   8 ]  checksum: 6 octal digits [leading zeroes], NUL, SPC
+        sprintf(buf + 148, "%06o", sum); // the trailing space is already in place
+    }
+
+    // Write the 512-byte tar file header block to the output
+    writer->WriteEntityData(buf, 512);
+
+    // Now write the file data itself, for real files.  We honor tar's convention that
+    // only full 512-byte blocks are sent to write().
+    if (!isdir) {
+        off64_t toWrite = s.st_size;
+        while (toWrite > 0) {
+            size_t toRead = (toWrite < BUFSIZE) ? toWrite : BUFSIZE;
+            ssize_t nRead = read(fd, buf, toRead);
+            if (nRead < 0) {
+                err = errno;
+                LOGE("Unable to read file [%s], err=%d (%s)", filepath.string(),
+                        err, strerror(err));
+                break;
+            } else if (nRead == 0) {
+                LOGE("EOF but expect %lld more bytes in [%s]", (long long) toWrite,
+                        filepath.string());
+                err = EIO;
+                break;
+            }
+
+            // At EOF we might have a short block; NUL-pad that to a 512-byte multiple.  This
+            // depends on the OS guarantee that for ordinary files, read() will never return
+            // less than the number of bytes requested.
+            ssize_t partial = (nRead+512) % 512;
+            if (partial > 0) {
+                ssize_t remainder = 512 - partial;
+                memset(buf + nRead, 0, remainder);
+                nRead += remainder;
+            }
+            writer->WriteEntityData(buf, nRead);
+            toWrite -= nRead;
+        }
+    }
+
+cleanup:
+    delete [] buf;
+done:
+    close(fd);
+    return err;
+}
+// end tarfile
+
+
+
 #define RESTORE_BUF_SIZE (8*1024)
 
 RestoreHelperBase::RestoreHelperBase()

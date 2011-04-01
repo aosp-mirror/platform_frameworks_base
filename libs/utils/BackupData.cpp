@@ -20,11 +20,14 @@
 #include <utils/ByteOrder.h>
 
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 #include <cutils/log.h>
 
 namespace android {
+
+static const bool DEBUG = false;
 
 /*
  * File Format (v1):
@@ -75,6 +78,7 @@ BackupDataWriter::write_padding_for(int n)
     paddingSize = padding_extra(n);
     if (paddingSize > 0) {
         uint32_t padding = 0xbcbcbcbc;
+        if (DEBUG) LOGI("writing %d padding bytes for %d", paddingSize, n);
         amt = write(m_fd, &padding, paddingSize);
         if (amt != paddingSize) {
             m_status = errno;
@@ -107,8 +111,8 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
     } else {
         k = key;
     }
-    if (false) {
-        LOGD("Writing entity: prefix='%s' key='%s' dataSize=%d", m_keyPrefix.string(), key.string(),
+    if (DEBUG) {
+        LOGD("Writing header: prefix='%s' key='%s' dataSize=%d", m_keyPrefix.string(), key.string(),
                 dataSize);
     }
 
@@ -121,6 +125,7 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
     header.keyLen = tolel(keyLen);
     header.dataSize = tolel(dataSize);
 
+    if (DEBUG) LOGI("writing entity header, %d bytes", sizeof(entity_header_v1));
     amt = write(m_fd, &header, sizeof(entity_header_v1));
     if (amt != sizeof(entity_header_v1)) {
         m_status = errno;
@@ -128,6 +133,7 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
     }
     m_pos += amt;
 
+    if (DEBUG) LOGI("writing entity header key, %d bytes", keyLen+1);
     amt = write(m_fd, k.string(), keyLen+1);
     if (amt != keyLen+1) {
         m_status = errno;
@@ -145,7 +151,12 @@ BackupDataWriter::WriteEntityHeader(const String8& key, size_t dataSize)
 status_t
 BackupDataWriter::WriteEntityData(const void* data, size_t size)
 {
+    if (DEBUG) LOGD("Writing data: size=%lu", (unsigned long) size);
+
     if (m_status != NO_ERROR) {
+        if (DEBUG) {
+            LOGD("Not writing data - stream in error state %d (%s)", m_status, strerror(m_status));
+        }
         return m_status;
     }
 
@@ -155,6 +166,7 @@ BackupDataWriter::WriteEntityData(const void* data, size_t size)
     ssize_t amt = write(m_fd, data, size);
     if (amt != (ssize_t)size) {
         m_status = errno;
+        if (DEBUG) LOGD("write returned error %d (%s)", m_status, strerror(m_status));
         return m_status;
     }
     m_pos += amt;

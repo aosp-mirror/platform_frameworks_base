@@ -70,6 +70,14 @@ public:
     ~BackupDataWriter();
 
     status_t WriteEntityHeader(const String8& key, size_t dataSize);
+
+    /* Note: WriteEntityData will write arbitrary data into the file without
+     * validation or a previously-supplied header.  The full backup implementation
+     * uses it this way to generate a controlled binary stream that is not
+     * entity-structured.  If the implementation here is changed, either this
+     * use case must remain valid, or the full backup implementation should be
+     * adjusted to use some other appropriate mechanism.
+     */
     status_t WriteEntityData(const void* data, size_t size);
 
     void SetKeyPrefix(const String8& keyPrefix);
@@ -103,7 +111,7 @@ public:
 
     bool HasEntities();
     status_t ReadEntityHeader(String8* key, size_t* dataSize);
-    status_t SkipEntityData(); // must be called with the pointer at the begining of the data.
+    status_t SkipEntityData(); // must be called with the pointer at the beginning of the data.
     ssize_t ReadEntityData(void* data, size_t size);
 
 private:
@@ -125,6 +133,9 @@ private:
 
 int back_up_files(int oldSnapshotFD, BackupDataWriter* dataStream, int newSnapshotFD,
         char const* const* files, char const* const *keys, int fileCount);
+
+int write_tarfile(const String8& packageName, const String8& domain,
+        const String8& rootPath, const String8& filePath, BackupDataWriter* outputStream);
 
 class RestoreHelperBase
 {

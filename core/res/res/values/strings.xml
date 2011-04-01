@@ -631,6 +631,11 @@
     <string name="permdesc_backup">Allows the application to control the system\'s backup and restore mechanism.  Not for use by normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_confirm_full_backup">confirm a full backup or restore operation</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_confirm_full_backup">Allows the application to launch the full backup confirmation UI.  Not to be used by any application.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_internalSystemWindow">display unauthorized windows</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_internalSystemWindow">Allows the creation of

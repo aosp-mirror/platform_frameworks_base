@@ -20,6 +20,7 @@ package com.android.server;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupAgentHelper;
+import android.app.backup.FullBackup;
 import android.app.backup.WallpaperBackupHelper;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
@@ -37,12 +38,19 @@ public class SystemBackupAgent extends BackupAgentHelper {
     private static final String TAG = "SystemBackupAgent";
 
     // These paths must match what the WallpaperManagerService uses
-    private static final String WALLPAPER_IMAGE = "/data/data/com.android.settings/files/wallpaper";
-    private static final String WALLPAPER_INFO = "/data/system/wallpaper_info.xml";
+    private static final String WALLPAPER_IMAGE_DIR = "/data/data/com.android.settings/files";
+    private static final String WALLPAPER_IMAGE = WALLPAPER_IMAGE_DIR + "/wallpaper";
+    private static final String WALLPAPER_INFO_DIR = "/data/system";
+    private static final String WALLPAPER_INFO = WALLPAPER_INFO_DIR + "/wallpaper_info.xml";
 
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) throws IOException {
+        if (oldState == null) {
+            runFullBackup(data);
+            return;
+        }
+
         // We only back up the data under the current "wallpaper" schema with metadata
         WallpaperManagerService wallpaper = (WallpaperManagerService)ServiceManager.getService(
                 Context.WALLPAPER_SERVICE);
@@ -55,6 +63,14 @@ public class SystemBackupAgent extends BackupAgentHelper {
         }
         addHelper("wallpaper", new WallpaperBackupHelper(SystemBackupAgent.this, files));
         super.onBackup(oldState, data, newState);
+    }
+
+    private void runFullBackup(BackupDataOutput output) {
+        // Back up the data files directly
+        FullBackup.backupToTar(getPackageName(), null, null,
+                WALLPAPER_IMAGE_DIR, WALLPAPER_IMAGE, output);
+        FullBackup.backupToTar(getPackageName(), null, null,
+                WALLPAPER_INFO_DIR, WALLPAPER_INFO, output);
     }
 
     @Override

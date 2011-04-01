@@ -1506,7 +1506,17 @@ public class PackageParser {
                 }
             }
         }
-        
+
+        name = sa.getNonConfigurationString(
+                com.android.internal.R.styleable.AndroidManifestApplication_fullBackupAgent, 0);
+        if (name != null) {
+            ai.fullBackupAgentName = buildClassName(pkgName, name, outError);
+            if (true) {
+                Log.v(TAG, "android:fullBackupAgent=" + ai.fullBackupAgentName
+                        + " from " + pkgName + "+" + name);
+            }
+        }
+
         TypedValue v = sa.peekValue(
                 com.android.internal.R.styleable.AndroidManifestApplication_label);
         if (v != null && (ai.labelRes=v.resourceId) == 0) {
