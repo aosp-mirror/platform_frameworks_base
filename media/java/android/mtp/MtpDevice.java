@@ -61,7 +61,9 @@ public final class MtpDevice {
     }
 
     /**
-     * Closes all resources related to the MtpDevice object
+     * Closes all resources related to the MtpDevice object.
+     * After this is called, the object can not be used until {@link #open} is called again
+     * with a new {@link android.hardware.usb.UsbDeviceConnection}.
      */
     public void close() {
         native_close();
@@ -78,6 +80,8 @@ public final class MtpDevice {
 
     /**
      * Returns the name of the USB device
+     * This returns the same value as {@link android.hardware.usb.UsbDevice#getDeviceName}
+     * for the device's {@link android.hardware.usb.UsbDevice}
      *
      * @return the device name
      */
@@ -86,7 +90,9 @@ public final class MtpDevice {
     }
 
     /**
-     * Returns the ID of the USB device
+     * Returns the USB ID of the USB device.
+     * This returns the same value as {@link android.hardware.usb.UsbDevice#getDeviceId}
+     * for the device's {@link android.hardware.usb.UsbDevice}
      *
      * @return the device ID
      */
@@ -100,7 +106,7 @@ public final class MtpDevice {
     }
 
     /**
-     * Returns the {@link android.mtp.MtpDeviceInfo} for this device
+     * Returns the {@link MtpDeviceInfo} for this device
      *
      * @return the device info
      */
@@ -110,8 +116,9 @@ public final class MtpDevice {
 
     /**
      * Returns the list of IDs for all storage units on this device
+     * Information about each storage unit can be accessed via {@link #getStorageInfo}.
      *
-     * @return the storage IDs
+     * @return the list of storage IDs
      */
     public int[] getStorageIds() {
         return native_get_storage_ids();
@@ -120,6 +127,7 @@ public final class MtpDevice {
     /**
      * Returns the list of object handles for all objects on the given storage unit,
      * with the given format and parent.
+     * Information about each object can be accessed via {@link #getObjectInfo}.
      *
      * @param storageId the storage unit to query
      * @param format the format of the object to return, or zero for all formats
@@ -132,10 +140,12 @@ public final class MtpDevice {
 
     /**
      * Returns the data for an object as a byte array.
+     * This call may block for an arbitrary amount of time depending on the size
+     * of the data and speed of the devices.
      *
      * @param objectHandle handle of the object to read
      * @param objectSize the size of the object (this should match
-     *      {@link android.mtp.MtpObjectInfo#getCompressedSize}
+     *      {@link MtpObjectInfo#getCompressedSize}
      * @return the object's data, or null if reading fails
      */
     public byte[] getObject(int objectHandle, int objectSize) {
@@ -144,6 +154,10 @@ public final class MtpDevice {
 
     /**
      * Returns the thumbnail data for an object as a byte array.
+     * The size and format of the thumbnail data can be determined via
+     * {@link MtpObjectInfo#getThumbCompressedSize} and
+     * {@link MtpObjectInfo#getThumbFormat}.
+     * For typical devices the format is JPEG.
      *
      * @param objectHandle handle of the object to read
      * @return the object's thumbnail, or null if reading fails
@@ -153,7 +167,7 @@ public final class MtpDevice {
     }
 
     /**
-     * Retrieves the {@link android.mtp.MtpStorageInfo} for a storage unit.
+     * Retrieves the {@link MtpStorageInfo} for a storage unit.
      *
      * @param storageId the ID of the storage unit
      * @return the MtpStorageInfo
@@ -163,7 +177,7 @@ public final class MtpDevice {
     }
 
     /**
-     * Retrieves the {@link android.mtp.MtpObjectInfo} for an object.
+     * Retrieves the {@link MtpObjectInfo} for an object.
      *
      * @param objectHandle the handle of the object
      * @return the MtpObjectInfo
@@ -173,7 +187,9 @@ public final class MtpDevice {
     }
 
     /**
-     * Deletes an object on the device.
+     * Deletes an object on the device.  This call may block, since
+     * deleting a directory containing many files may take a long time
+     * on some devices.
      *
      * @param objectHandle handle of the object to delete
      * @return true if the deletion succeeds
@@ -204,6 +220,8 @@ public final class MtpDevice {
 
     /**
      * Copies the data for an object to a file in external storage.
+     * This call may block for an arbitrary amount of time depending on the size
+     * of the data and speed of the devices.
      *
      * @param objectHandle handle of the object to read
      * @param destPath path to destination for the file transfer.

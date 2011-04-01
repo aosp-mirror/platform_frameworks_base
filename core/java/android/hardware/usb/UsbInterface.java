@@ -21,7 +21,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * A class representing an interface on a {@link android.hardware.usb.UsbDevice}.
+ * A class representing an interface on a {@link UsbDevice}.
+ * USB devices can have one or more interfaces, each one providing a different
+ * piece of functionality, separate from the other interfaces.
+ * An interface will have one or more {@link UsbEndpoint}s, which are the
+ * channels by which the host transfers data with the device.
  */
 public class UsbInterface implements Parcelable {
 
@@ -46,6 +50,7 @@ public class UsbInterface implements Parcelable {
 
     /**
      * Returns the interface's ID field.
+     * This is an integer that uniquely identifies the interface on the device.
      *
      * @return the interface's ID
      */
@@ -55,8 +60,7 @@ public class UsbInterface implements Parcelable {
 
     /**
      * Returns the interface's class field.
-     * Some useful constants for USB classes can be found in
-     * {@link android.hardware.usb.UsbConstants}
+     * Some useful constants for USB classes can be found in {@link UsbConstants}
      *
      * @return the interface's class
      */
