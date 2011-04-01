@@ -30,6 +30,12 @@ struct SurfaceTexture {
     void setFrameAvailableListener(const sp<FrameAvailableListener>&) {}
 };
 
+static sp<SurfaceTexture> SurfaceTexture_getSurfaceTexture(JNIEnv* env, jobject thiz)
+{
+    sp<SurfaceTexture> s;
+    return s;
+}
+
 }
 
 #endif
