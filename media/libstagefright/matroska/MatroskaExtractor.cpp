@@ -291,6 +291,7 @@ void BlockIterator::reset() {
     Mutex::Autolock autoLock(mExtractor->mLock);
 
     mCluster = mExtractor->mSegment->GetFirst();
+    mBlockEntry = NULL;
     mBlockEntryIndex = 0;
 
     do {
@@ -302,11 +303,13 @@ void BlockIterator::seek(int64_t seekTimeUs) {
     Mutex::Autolock autoLock(mExtractor->mLock);
 
     mCluster = mExtractor->mSegment->FindCluster(seekTimeUs * 1000ll);
+    mBlockEntry = NULL;
     mBlockEntryIndex = 0;
 
-    while (!eos() && block()->GetTrackNumber() != mTrackNum) {
+    do {
         advance_l();
     }
+    while (!eos() && block()->GetTrackNumber() != mTrackNum);
 
     while (!eos() && !mBlockEntry->GetBlock()->IsKey()) {
         advance_l();
