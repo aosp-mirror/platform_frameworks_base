@@ -36,6 +36,8 @@ class ISurfaceTexture : public IInterface
 public:
     DECLARE_META_INTERFACE(SurfaceTexture);
 
+    enum { BUFFER_NEEDS_REALLOCATION = 1 };
+
     // requestBuffer requests a new buffer for the given index. The server (i.e.
     // the ISurfaceTexture implementation) assigns the newly created buffer to
     // the given slot index, and the client is expected to mirror the
@@ -56,6 +58,8 @@ public:
     // should call requestBuffer to assign a new buffer to that slot. The client
     // is expected to either call cancelBuffer on the dequeued slot or to fill
     // in the contents of its associated buffer contents and call queueBuffer.
+    // If dequeueBuffer return BUFFER_NEEDS_REALLOCATION, the client is
+    // expected to call requestBuffer immediately.
     virtual status_t dequeueBuffer(int *slot) = 0;
 
     // queueBuffer indicates that the client has finished filling in the

@@ -121,6 +121,12 @@ public:
     // buffers before the client is done with them.
     sp<IBinder> getAllocator();
 
+    // setDefaultBufferSize is used to set the size of buffers returned by
+    // requestBuffers when a with and height of zero is requested.
+    // A call to setDefaultBufferSize() may trigger requestBuffers() to
+    // be called from the client.
+    status_t setDefaultBufferSize(uint32_t w, uint32_t h);
+
 private:
 
     // freeAllBuffers frees the resources (both GraphicBuffer and EGLImage) for
@@ -157,6 +163,23 @@ private:
     // is initialized to NULL at construction time, and buffers are allocated
     // for a slot when requestBuffer is called with that slot's index.
     BufferSlot mSlots[NUM_BUFFER_SLOTS];
+
+    // mDefaultWidth holds the default width of allocated buffers. It is used
+    // in requestBuffers() if a width and height of zero is specified.
+    uint32_t mDefaultWidth;
+
+    // mDefaultHeight holds the default height of allocated buffers. It is used
+    // in requestBuffers() if a width and height of zero is specified.
+    uint32_t mDefaultHeight;
+
+    // mPixelFormat holds the pixel format of allocated buffers. It is used
+    // in requestBuffers() if a format of zero is specified.
+    uint32_t mPixelFormat;
+
+    // mUseDefaultSize indicates whether or not the default size should be used
+    // that is, if the last requestBuffer has been called with both width
+    // and height null.
+    bool mUseDefaultSize;
 
     // mBufferCount is the number of buffer slots that the client and server
     // must maintain. It defaults to MIN_BUFFER_SLOTS and can be changed by

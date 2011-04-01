@@ -76,6 +76,10 @@ static float mtxRot270[16] = {
 static void mtxMul(float out[16], const float a[16], const float b[16]);
 
 SurfaceTexture::SurfaceTexture(GLuint tex) :
+    mDefaultWidth(1),
+    mDefaultHeight(1),
+    mPixelFormat(PIXEL_FORMAT_RGBA_8888),
+    mUseDefaultSize(true),
     mBufferCount(MIN_BUFFER_SLOTS),
     mCurrentTexture(INVALID_BUFFER_SLOT),
     mCurrentTransform(0),
@@ -115,6 +119,16 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
     return OK;
 }
 
+status_t SurfaceTexture::setDefaultBufferSize(uint32_t w, uint32_t h)
+{
+    Mutex::Autolock lock(mMutex);
+    if ((w != mDefaultWidth) || (h != mDefaultHeight)) {
+        mDefaultWidth = w;
+        mDefaultHeight = h;
+    }
+    return OK;
+}
+
 sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf,
         uint32_t w, uint32_t h, uint32_t format, uint32_t usage) {
     LOGV("SurfaceTexture::requestBuffer");
@@ -124,12 +138,34 @@ sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf,
                 mBufferCount, buf);
         return 0;
     }
+    if ((w && !h) || (!w & h)) {
+        LOGE("requestBuffer: invalid size: w=%u, h=%u: %d", w, h, buf);
+        return 0;
+    }
+
+    const bool useDefaultSize = !w && !h;
+    if (useDefaultSize) {
+        // use the default size
+        w = mDefaultWidth;
+        h = mDefaultHeight;
+    }
+
+    const bool updateFormat = (format != 0);
+    if (!updateFormat) {
+        // keep the current (or default) format
+        format = mPixelFormat;
+    }
+
     usage |= GraphicBuffer::USAGE_HW_TEXTURE;
     sp<GraphicBuffer> graphicBuffer(
             mGraphicBufferAlloc->createGraphicBuffer(w, h, format, usage));
     if (graphicBuffer == 0) {
         LOGE("requestBuffer: SurfaceComposer::createGraphicBuffer failed");
     } else {
+        mUseDefaultSize = useDefaultSize;
+        if (updateFormat) {
+            mPixelFormat = format;
+        }
         mSlots[buf].mGraphicBuffer = graphicBuffer;
         if (mSlots[buf].mEglImage != EGL_NO_IMAGE_KHR) {
             eglDestroyImageKHR(mSlots[buf].mEglDisplay, mSlots[buf].mEglImage);
@@ -155,7 +191,18 @@ status_t SurfaceTexture::dequeueBuffer(int *buf) {
     if (found == INVALID_BUFFER_SLOT) {
         return -EBUSY;
     }
+
     *buf = found;
+
+    const sp<GraphicBuffer>& buffer(mSlots[found].mGraphicBuffer);
+    if (buffer == NULL) {
+        return ISurfaceTexture::BUFFER_NEEDS_REALLOCATION;
+    }
+    if ((mUseDefaultSize) &&
+        ((uint32_t(buffer->width) != mDefaultWidth) ||
+         (uint32_t(buffer->height) != mDefaultHeight))) {
+        return ISurfaceTexture::BUFFER_NEEDS_REALLOCATION;
+    }
     return OK;
 }
 
@@ -312,10 +359,10 @@ void SurfaceTexture::getTransformMatrix(float mtx[16]) {
         } else {
             tx = 0.0f;
         }
-        if (mCurrentCrop.right < buf->getWidth()) {
+        if (mCurrentCrop.right < int32_t(buf->getWidth())) {
             xshrink++;
         }
-        if (mCurrentCrop.bottom < buf->getHeight()) {
+        if (mCurrentCrop.bottom < int32_t(buf->getHeight())) {
             ty = (float(buf->getHeight() - mCurrentCrop.bottom) + 1.0f) /
                     float(buf->getHeight());
             yshrink++;
