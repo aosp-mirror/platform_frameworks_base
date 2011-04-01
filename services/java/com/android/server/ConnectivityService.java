@@ -543,18 +543,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     public NetworkInfo getActiveNetworkInfo() {
         enforceAccessPermission();
-        for (int type=0; type <= ConnectivityManager.MAX_NETWORK_TYPE; type++) {
-            if (mNetAttributes[type] == null || !mNetAttributes[type].isDefault()) {
-                continue;
-            }
-            NetworkStateTracker t = mNetTrackers[type];
-            NetworkInfo info = t.getNetworkInfo();
-            if (info.isConnected()) {
-                if (DBG && type != mActiveDefaultNetwork) {
-                    loge("connected default network is not mActiveDefaultNetwork!");
-                }
-                return info;
-            }
+        if (mActiveDefaultNetwork != -1) {
+            return mNetTrackers[mActiveDefaultNetwork].getNetworkInfo();
         }
         return null;
     }
@@ -1353,6 +1343,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 handleApplyDefaultProxy(netType);
                 addDefaultRoute(mNetTrackers[netType]);
             } else {
+                // many radios add a default route even when we don't want one.
+                // remove the default route unless we need it for our active network
+                if (mActiveDefaultNetwork != -1) {
+                    LinkProperties defaultLinkProperties =
+                            mNetTrackers[mActiveDefaultNetwork].getLinkProperties();
+                    LinkProperties newLinkProperties =
+                            mNetTrackers[netType].getLinkProperties();
+                    String defaultIface = defaultLinkProperties.getInterfaceName();
+                    if (defaultIface != null &&
+                            !defaultIface.equals(newLinkProperties.getInterfaceName())) {
+                        removeDefaultRoute(mNetTrackers[netType]);
+                    }
+                }
                 addPrivateDnsRoutes(mNetTrackers[netType]);
             }
         } else {
