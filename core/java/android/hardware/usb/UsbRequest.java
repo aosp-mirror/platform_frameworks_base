@@ -24,8 +24,13 @@ import java.nio.ByteBuffer;
  * A class representing USB request packet.
  * This can be used for both reading and writing data to or from a
  * {@link android.hardware.usb.UsbDeviceConnection}.
- * UsbRequests are sent asynchronously via {@link #queue} and the results
- * are read by {@link android.hardware.usb.UsbDeviceConnection#requestWait}.
+ * UsbRequests can be used to transfer data on bulk and interrupt endpoints.
+ * Requests on bulk endpoints can be sent synchronously via {@link UsbDeviceConnection#bulkTransfer}
+ * or asynchronously via {@link #queue} and {@link UsbDeviceConnection#requestWait}.
+ * Requests on interrupt endpoints are only send and received asynchronously.
+ *
+ * <p>Requests on endpoint zero are not supported by this class;
+ * use {@link UsbDeviceConnection#controlTransfer} for endpoint zero requests instead.
  */
 public class UsbRequest {
 

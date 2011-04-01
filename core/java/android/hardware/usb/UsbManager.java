@@ -31,7 +31,8 @@ import java.io.IOException;
 import java.util.HashMap;
 
 /**
- * This class allows you to access the state of USB, both in host and device mode.
+ * This class allows you to access the state of USB and communicate with USB devices.
+ * Currently only host mode is supported in the public API.
  *
  * <p>You can obtain an instance of this class by calling
  * {@link android.content.Context#getSystemService(java.lang.String) Context.getSystemService()}.
