@@ -100,4 +100,151 @@ TEST_F(SurfaceTextureClientTest, EglCreateWindowSurfaceFails) {
     eglTerminate(dpy);
 }
 
+TEST_F(SurfaceTextureClientTest, BufferGeometryInvalidSizesFail) {
+    sp<ANativeWindow> anw(mSTC);
+
+    EXPECT_GT(OK, native_window_set_buffers_geometry(anw.get(), -1,  0,  0));
+    EXPECT_GT(OK, native_window_set_buffers_geometry(anw.get(),  0, -1,  0));
+    EXPECT_GT(OK, native_window_set_buffers_geometry(anw.get(),  0,  0, -1));
+    EXPECT_GT(OK, native_window_set_buffers_geometry(anw.get(), -1, -1,  0));
+    EXPECT_GT(OK, native_window_set_buffers_geometry(anw.get(),  0,  8,  0));
+    EXPECT_GT(OK, native_window_set_buffers_geometry(anw.get(),  8,  0,  0));
+}
+
+TEST_F(SurfaceTextureClientTest, DefaultGeometryValues) {
+    sp<ANativeWindow> anw(mSTC);
+    android_native_buffer_t* buf;
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(1, buf->width);
+    EXPECT_EQ(1, buf->height);
+    EXPECT_EQ(PIXEL_FORMAT_RGBA_8888, buf->format);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+}
+
+TEST_F(SurfaceTextureClientTest, BufferGeometryCanBeSet) {
+    sp<ANativeWindow> anw(mSTC);
+    android_native_buffer_t* buf;
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 16, 8, PIXEL_FORMAT_RGB_565));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(16, buf->width);
+    EXPECT_EQ(8, buf->height);
+    EXPECT_EQ(PIXEL_FORMAT_RGB_565, buf->format);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+}
+
+TEST_F(SurfaceTextureClientTest, BufferGeometryDefaultSizeSetFormat) {
+    sp<ANativeWindow> anw(mSTC);
+    android_native_buffer_t* buf;
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 0, 0, PIXEL_FORMAT_RGB_565));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(1, buf->width);
+    EXPECT_EQ(1, buf->height);
+    EXPECT_EQ(PIXEL_FORMAT_RGB_565, buf->format);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+}
+
+TEST_F(SurfaceTextureClientTest, BufferGeometrySetSizeDefaultFormat) {
+    sp<ANativeWindow> anw(mSTC);
+    android_native_buffer_t* buf;
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 16, 8, 0));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(16, buf->width);
+    EXPECT_EQ(8, buf->height);
+    EXPECT_EQ(PIXEL_FORMAT_RGBA_8888, buf->format);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+}
+
+TEST_F(SurfaceTextureClientTest, BufferGeometrySizeCanBeUnset) {
+    sp<ANativeWindow> anw(mSTC);
+    android_native_buffer_t* buf;
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 16, 8, 0));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(16, buf->width);
+    EXPECT_EQ(8, buf->height);
+    EXPECT_EQ(PIXEL_FORMAT_RGBA_8888, buf->format);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 0, 0, 0));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(1, buf->width);
+    EXPECT_EQ(1, buf->height);
+    EXPECT_EQ(PIXEL_FORMAT_RGBA_8888, buf->format);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+}
+
+TEST_F(SurfaceTextureClientTest, BufferGeometrySizeCanBeChangedWithoutFormat) {
+    sp<ANativeWindow> anw(mSTC);
+    android_native_buffer_t* buf;
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 0, 0, PIXEL_FORMAT_RGB_565));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(1, buf->width);
+    EXPECT_EQ(1, buf->height);
+    EXPECT_EQ(PIXEL_FORMAT_RGB_565, buf->format);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 16, 8, 0));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(16, buf->width);
+    EXPECT_EQ(8, buf->height);
+    EXPECT_EQ(PIXEL_FORMAT_RGB_565, buf->format);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+}
+
+TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSize) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    android_native_buffer_t* buf;
+    EXPECT_EQ(OK, st->setDefaultBufferSize(16, 8));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(16, buf->width);
+    EXPECT_EQ(8, buf->height);
+    EXPECT_EQ(PIXEL_FORMAT_RGBA_8888, buf->format);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+}
+
+TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSizeAfterDequeue) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    android_native_buffer_t* buf[2];
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    EXPECT_NE(buf[0], buf[1]);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[1]));
+    EXPECT_EQ(OK, st->setDefaultBufferSize(16, 8));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    EXPECT_NE(buf[0], buf[1]);
+    EXPECT_EQ(16, buf[0]->width);
+    EXPECT_EQ(16, buf[1]->width);
+    EXPECT_EQ(8, buf[0]->height);
+    EXPECT_EQ(8, buf[1]->height);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[1]));
+}
+
+TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSizeVsGeometry) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    android_native_buffer_t* buf[2];
+    EXPECT_EQ(OK, st->setDefaultBufferSize(16, 8));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    EXPECT_NE(buf[0], buf[1]);
+    EXPECT_EQ(16, buf[0]->width);
+    EXPECT_EQ(16, buf[1]->width);
+    EXPECT_EQ(8, buf[0]->height);
+    EXPECT_EQ(8, buf[1]->height);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[1]));
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 12, 24, 0));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    EXPECT_NE(buf[0], buf[1]);
+    EXPECT_EQ(12, buf[0]->width);
+    EXPECT_EQ(12, buf[1]->width);
+    EXPECT_EQ(24, buf[0]->height);
+    EXPECT_EQ(24, buf[1]->height);
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[1]));
+}
+
 }

@@ -25,8 +25,8 @@ namespace android {
 
 SurfaceTextureClient::SurfaceTextureClient(
         const sp<ISurfaceTexture>& surfaceTexture):
-        mSurfaceTexture(surfaceTexture), mAllocator(0), mReqWidth(1),
-        mReqHeight(1), mReqFormat(DEFAULT_FORMAT), mReqUsage(0),
+        mSurfaceTexture(surfaceTexture), mAllocator(0), mReqWidth(0),
+        mReqHeight(0), mReqFormat(DEFAULT_FORMAT), mReqUsage(0),
         mTimestamp(NATIVE_WINDOW_TIMESTAMP_AUTO), mMutex() {
     // Initialize the ANativeWindow function pointers.
     ANativeWindow::setSwapInterval  = setSwapInterval;
@@ -100,7 +100,8 @@ int SurfaceTextureClient::dequeueBuffer(android_native_buffer_t** buffer) {
         return err;
     }
     sp<GraphicBuffer>& gbuf(mSlots[buf]);
-    if (gbuf == 0 || gbuf->getWidth() != mReqWidth ||
+    if (err == ISurfaceTexture::BUFFER_NEEDS_REALLOCATION ||
+        gbuf == 0 || gbuf->getWidth() != mReqWidth ||
         gbuf->getHeight() != mReqHeight ||
         uint32_t(gbuf->getPixelFormat()) != mReqFormat ||
         (gbuf->getUsage() & mReqUsage) != mReqUsage) {
