@@ -24,7 +24,16 @@ import android.util.Log;
 import java.io.FileDescriptor;
 
 /**
- * A class representing a USB device.
+ * This class represents a USB device attached to the android device with the android device
+ * acting as the USB host.
+ * Each device contains one or more {@link UsbInterface}s, each of which contains a number of
+ * {@link UsbEndpoint}s (the channels via which data is transmitted over USB).
+ *
+ * <p> This class contains information (along with {@link UsbInterface} and {@link UsbEndpoint})
+ * that describes the capabilities of the USB device.
+ * To communicate with the device, you open a {@link UsbDeviceConnection} for the device
+ * and use {@link UsbRequest} to send and receive data on an endpoint.
+ * {@link UsbDeviceConnection#controlTransfer} is used for control requests on endpoint zero.
  */
 public class UsbDevice implements Parcelable {
 
@@ -96,8 +105,7 @@ public class UsbDevice implements Parcelable {
 
     /**
      * Returns the devices's class field.
-     * Some useful constants for USB device classes can be found in
-     * {@link android.hardware.usb.UsbConstants}
+     * Some useful constants for USB device classes can be found in {@link UsbConstants}.
      *
      * @return the devices's class
      */
@@ -115,7 +123,7 @@ public class UsbDevice implements Parcelable {
     }
 
     /**
-     * Returns the device's subclass field.
+     * Returns the device's protocol field.
      *
      * @return the device's protocol
      */
@@ -124,7 +132,7 @@ public class UsbDevice implements Parcelable {
     }
 
     /**
-     * Returns the number of {@link android.hardware.usb.UsbInterface}s this device contains.
+     * Returns the number of {@link UsbInterface}s this device contains.
      *
      * @return the number of interfaces
      */
@@ -133,7 +141,7 @@ public class UsbDevice implements Parcelable {
     }
 
     /**
-     * Returns the {@link android.hardware.usb.UsbInterface} at the given index.
+     * Returns the {@link UsbInterface} at the given index.
      *
      * @return the interface
      */
