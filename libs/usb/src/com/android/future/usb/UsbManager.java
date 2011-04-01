@@ -28,7 +28,7 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 /**
- * This class allows you to access the state of USB, both in host and device mode.
+ * This is a wrapper class for the USB Manager to support USB accessories.
  *
  * <p>You can obtain an instance of this class by calling {@link #getInstance}
  *
@@ -141,7 +141,7 @@ public class UsbManager {
     /**
      * Returns true if the caller has permission to access the accessory.
      * Permission might have been granted temporarily via
-     * {@link #requestPermission(android.hardware.usb.UsbAccessory} or
+     * {@link #requestPermission} or
      * by the user choosing the caller as the default application for the accessory.
      *
      * @param accessory to check permissions for
