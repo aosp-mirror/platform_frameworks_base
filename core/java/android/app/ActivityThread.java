@@ -394,6 +394,8 @@ public final class ActivityThread {
         ParcelFileDescriptor fd;
     }
 
+    native private void dumpGraphicsInfo(FileDescriptor fd);
+
     private final class ApplicationThread extends ApplicationThreadNative {
         private static final String HEAP_COLUMN = "%17s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%17s %8d";
@@ -711,9 +713,14 @@ public final class ActivityThread {
                 }
             }
         }
-        
+
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (args != null && args.length == 1 && args[0].equals("graphics")) {
+                pw.flush();
+                dumpGraphicsInfo(fd);
+                return;
+            }
             long nativeMax = Debug.getNativeHeapSize() / 1024;
             long nativeAllocated = Debug.getNativeHeapAllocatedSize() / 1024;
             long nativeFree = Debug.getNativeHeapFreeSize() / 1024;

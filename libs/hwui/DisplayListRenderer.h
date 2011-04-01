@@ -26,6 +26,7 @@
 #include <SkTDArray.h>
 #include <SkTSearch.h>
 
+#include "DisplayListLogBuffer.h"
 #include "OpenGLRenderer.h"
 #include "utils/Functor.h"
 
@@ -105,6 +106,8 @@ public:
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
 
     bool replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level = 0);
+
+    static void outputLogBuffer(int fd);
 
 private:
     void init();

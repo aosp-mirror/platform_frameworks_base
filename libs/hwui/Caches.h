@@ -140,6 +140,7 @@ public:
      * Displays the memory usage of each cache and the total sum.
      */
     void dumpMemoryUsage();
+    void dumpMemoryUsage(String8& log);
 
     bool blend;
     GLenum lastSrcMode;

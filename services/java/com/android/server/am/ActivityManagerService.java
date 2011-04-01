@@ -1276,6 +1276,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             
             ServiceManager.addService("activity", m);
             ServiceManager.addService("meminfo", new MemBinder(m));
+            ServiceManager.addService("gfxinfo", new GraphicsBinder(m));
             if (MONITOR_CPU_USAGE) {
                 ServiceManager.addService("cpuinfo", new CpuBinder(m));
             }
@@ -1426,6 +1427,46 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             dumpApplicationMemoryUsage(fd, pw, procs, "  ", args);
+        }
+    }
+
+    static class GraphicsBinder extends Binder {
+        ActivityManagerService mActivityManagerService;
+        GraphicsBinder(ActivityManagerService activityManagerService) {
+            mActivityManagerService = activityManagerService;
+        }
+
+        @Override
+        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            ActivityManagerService service = mActivityManagerService;
+            ArrayList<ProcessRecord> procs;
+            synchronized (mActivityManagerService) {
+                if (args != null && args.length > 0
+                        && args[0].charAt(0) != '-') {
+                    procs = new ArrayList<ProcessRecord>();
+                    int pid = -1;
+                    try {
+                        pid = Integer.parseInt(args[0]);
+                    } catch (NumberFormatException e) {
+
+                    }
+                    for (int i=service.mLruProcesses.size()-1; i>=0; i--) {
+                        ProcessRecord proc = service.mLruProcesses.get(i);
+                        if (proc.pid == pid) {
+                            procs.add(proc);
+                        } else if (proc.processName.equals(args[0])) {
+                            procs.add(proc);
+                        }
+                    }
+                    if (procs.size() <= 0) {
+                        pw.println("No process found for: " + args[0]);
+                        return;
+                    }
+                } else {
+                    procs = new ArrayList<ProcessRecord>(service.mLruProcesses);
+                }
+            }
+            dumpGraphicsHardwareUsage(fd, pw, procs);
         }
     }
 
@@ -8469,6 +8510,28 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         }
+    }
+
+    static final void dumpGraphicsHardwareUsage(FileDescriptor fd,
+            PrintWriter pw, List list) {
+        String args[] = {"graphics"};
+        pw.println("-------------------------------------------------------------------------------");
+        pw.println("DUMP OF GRAPHICS ACCELERATION INFO:");
+        for (int i = list.size() - 1 ; i >= 0 ; i--) {
+            ProcessRecord r = (ProcessRecord)list.get(i);
+            if (r.thread != null) {
+                pw.println("\n** Graphics info for pid " + r.pid + " [" + r.processName + "] **");
+                pw.flush();
+                try {
+                    r.thread.asBinder().dump(fd, args);
+                } catch (RemoteException e) {
+                    pw.println("Got RemoteException!");
+                    pw.flush();
+                }
+            }
+        }
+        pw.println("\n");
+        pw.flush();
     }
 
     static final void dumpApplicationMemoryUsage(FileDescriptor fd,
