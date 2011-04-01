@@ -11,10 +11,14 @@ home=true
                             </div><!-- end homeTitle -->
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
-                                  <img src="{@docRoot}assets/images/home/GDC2011.png" alt="Android at GDC 2011" width="203px" style="padding-left:22px;padding-bottom:28px;padding-top:22px;"/>
+                                  <img src="{@docRoot}assets/images/home/IO-logo-2011.png"
+alt="Android at Google IO 2011" width="200px"
+style="padding-left:22px;padding-bottom:15px;padding-top:15px;"/>
                                   <div id="announcement" style="width:275px">
-    <p>Thanks to everyone who visited us at the <a href="http://www.gdconf.com/">Game Developers Conference</a> in San Francisco. We're looking forward to seeing your games running on Android!</p>
-    <p><a href="http://android-developers.blogspot.com/2011/02/heading-for-gdc.html">Learn more &raquo;</a></p>
+    <p>Google I/O is a two-day developer event that will take place May 10-11 at Moscone Center, San
+Francisco. The agenda includes several sessions about Android, presented by Android engineers and
+other team members.</p><p><a href="http://www.google.com/events/io/2011/sessions.html">Learn
+more &raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->
                         </div><!-- end topAnnouncement -->
