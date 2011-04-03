@@ -52,8 +52,8 @@ page.title=Android Supported Media Formats
 
 <table>
 <tbody>
-<tr>
 
+<tr>
 <th>Type</th>
 <th>Format / Codec</th>
 <th>Encoder</th>
@@ -63,12 +63,13 @@ page.title=Android Supported Media Formats
 </tr>
 
 <tr>
-<td rowspan="9">Audio</td>
+<td rowspan="10">Audio</td>
 <td>AAC LC/LTP</td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td style="text-align: center;"><big>&bull;</big></td>
-<td rowspan="3">Mono/Stereo content in any combination of standard bit rates up to 160 kbps and sampling rates from 8 to 48kHz</td>
-<td rowspan="3">3GPP (.3gp) and MPEG-4 (.mp4, .m4a). No support for raw AAC (.aac)</td>
+<td rowspan="3">Mono/Stereo content in any combination of standard bit
+rates up to 160 kbps and sampling rates from 8 to 48kHz</td>
+<td rowspan="3">3GPP (.3gp), and MPEG-4 (.mp4, .m4a). ADTS raw AAC (.aac, decode only, ADIF not supported, Android 3.1+). </td>
 </tr>
 
 <tr>
@@ -98,6 +99,18 @@ page.title=Android Supported Media Formats
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>9 rates from 6.60 kbit/s to 23.85 kbit/s sampled @ 16kHz</td>
 <td>3GPP (.3gp)</td>
+</tr>
+
+<tr>
+<td>FLAC</td>
+<td>&nbsp;</td>
+<td style="text-align: center;"><big>&bull;</big><br><small>(Android 3.1+)</small></td>
+<td>Mono/Stereo (no multichannel). Sample rates up to 48 kHz (but up to 44.1
+kHz is recommended on devices with 44.1 kHz output, as the 48 to 44.1 kHz
+downsampler does not include a low-pass filter). 16-bit recommended;
+no dither applied for 24-bit.
+</td>
+<td>FLAC (.flac) only</td>
 </tr>
 
 <tr>
