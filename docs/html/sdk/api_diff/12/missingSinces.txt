@@ -1,0 +1,171 @@
+NO DOC BLOCK: android.app.FragmentBreadCrumbs.OnBreadCrumbClickListener Interface
+NO DOC BLOCK: android.util.LruCache Class
+NO DOC BLOCK: android.view.View.OnAttachStateChangeListener Interface
+NO DOC BLOCK: android.view.View.OnGenericMotionListener Interface
+NO DOC BLOCK: android.view.ViewPropertyAnimator Class
+NO DOC BLOCK: android.drm.DrmErrorEvent Constructor (int, int, java.lang.String, java.util.HashMap<java.lang.String, java.lang.Object>)
+NO DOC BLOCK: android.drm.DrmEvent Constructor (int, int, java.lang.String, java.util.HashMap<java.lang.String, java.lang.Object>)
+NO DOC BLOCK: android.drm.DrmInfoEvent Constructor (int, int, java.lang.String, java.util.HashMap<java.lang.String, java.lang.Object>)
+NO DOC BLOCK: android.view.MotionEvent.PointerCoords Constructor (android.view.MotionEvent.PointerCoords)
+NO DOC BLOCK: android.app.DownloadManager Method addCompletedDownload(java.lang.String, java.lang.String, boolean, java.lang.String, java.lang.String, long, boolean)
+NO DOC BLOCK: android.view.View Method addOnAttachStateChangeListener(android.view.View.OnAttachStateChangeListener)
+NO DOC BLOCK: android.webkit.CookieManager Method allowFileSchemeCookies()
+NO DOC BLOCK: android.view.View Method animate()
+NO DOC BLOCK: android.view.MotionEvent Method axisFromString(java.lang.String)
+NO DOC BLOCK: android.view.MotionEvent Method axisToString(int)
+NO DOC BLOCK: android.view.View Method buildLayer()
+NO DOC BLOCK: android.view.MotionEvent.PointerCoords Method clear()
+NO DOC BLOCK: android.view.inputmethod.InputMethodSubtype Method containsExtraValueKey(java.lang.String)
+NO DOC BLOCK: android.view.MotionEvent.PointerCoords Method copyFrom(android.view.MotionEvent.PointerCoords)
+NO DOC BLOCK: android.os.ParcelFileDescriptor Method detachFd()
+NO DOC BLOCK: android.app.DialogFragment Method dismissAllowingStateLoss()
+NO DOC BLOCK: android.app.Activity Method dispatchGenericMotionEvent(android.view.MotionEvent)
+NO DOC BLOCK: android.app.Dialog Method dispatchGenericMotionEvent(android.view.MotionEvent)
+NO DOC BLOCK: android.view.View Method dispatchGenericMotionEvent(android.view.MotionEvent)
+NO DOC BLOCK: android.view.Window.Callback Method dispatchGenericMotionEvent(android.view.MotionEvent)
+NO DOC BLOCK: android.animation.ValueAnimator Method getAnimatedFraction()
+NO DOC BLOCK: android.drm.DrmEvent Method getAttribute(java.lang.String)
+NO DOC BLOCK: android.net.sip.SipProfile Method getAuthUserName()
+NO DOC BLOCK: android.view.InputDevice.MotionRange Method getAxis()
+NO DOC BLOCK: android.view.MotionEvent Method getAxisValue(int)
+NO DOC BLOCK: android.view.MotionEvent Method getAxisValue(int, int)
+NO DOC BLOCK: android.view.MotionEvent.PointerCoords Method getAxisValue(int)
+NO DOC BLOCK: android.view.animation.Animation Method getBackgroundColor()
+NO DOC BLOCK: android.graphics.Bitmap Method getByteCount()
+NO DOC BLOCK: android.widget.DatePicker Method getCalendarView()
+NO DOC BLOCK: android.os.Bundle Method getCharSequence(java.lang.String, java.lang.CharSequence)
+NO DOC BLOCK: android.view.inputmethod.InputMethodSubtype Method getExtraValueOf(java.lang.String)
+NO DOC BLOCK: android.os.ParcelFileDescriptor Method getFd()
+NO DOC BLOCK: android.graphics.Bitmap Method getGenerationId()
+NO DOC BLOCK: android.view.MotionEvent Method getHistoricalAxisValue(int, int)
+NO DOC BLOCK: android.view.MotionEvent Method getHistoricalAxisValue(int, int, int)
+NO DOC BLOCK: android.view.ViewConfiguration Method getKeyRepeatDelay()
+NO DOC BLOCK: android.view.ViewConfiguration Method getKeyRepeatTimeout()
+NO DOC BLOCK: android.view.InputDevice Method getMotionRange(int, int)
+NO DOC BLOCK: android.view.InputDevice Method getMotionRanges()
+NO DOC BLOCK: android.view.InputDevice.MotionRange Method getSource()
+NO DOC BLOCK: android.os.Bundle Method getString(java.lang.String, java.lang.String)
+NO DOC BLOCK: android.net.TrafficStats Method getUidRxPackets(int)
+NO DOC BLOCK: android.net.TrafficStats Method getUidTcpRxBytes(int)
+NO DOC BLOCK: android.net.TrafficStats Method getUidTcpRxSegments(int)
+NO DOC BLOCK: android.net.TrafficStats Method getUidTcpTxBytes(int)
+NO DOC BLOCK: android.net.TrafficStats Method getUidTcpTxSegments(int)
+NO DOC BLOCK: android.net.TrafficStats Method getUidTxPackets(int)
+NO DOC BLOCK: android.net.TrafficStats Method getUidUdpRxBytes(int)
+NO DOC BLOCK: android.net.TrafficStats Method getUidUdpRxPackets(int)
+NO DOC BLOCK: android.net.TrafficStats Method getUidUdpTxBytes(int)
+NO DOC BLOCK: android.net.TrafficStats Method getUidUdpTxPackets(int)
+NO DOC BLOCK: android.provider.MediaStore Method getVersion(android.content.Context)
+NO DOC BLOCK: android.view.KeyEvent Method isGamepadButton(int)
+NO DOC BLOCK: android.view.KeyEvent Method keyCodeFromString(java.lang.String)
+NO DOC BLOCK: android.view.KeyEvent Method keyCodeToString(int)
+NO DOC BLOCK: android.app.Activity Method onGenericMotionEvent(android.view.MotionEvent)
+NO DOC BLOCK: android.app.Dialog Method onGenericMotionEvent(android.view.MotionEvent)
+NO DOC BLOCK: android.text.method.BaseMovementMethod Method onGenericMotionEvent(android.widget.TextView, android.text.Spannable, android.view.MotionEvent)
+NO DOC BLOCK: android.text.method.MovementMethod Method onGenericMotionEvent(android.widget.TextView, android.text.Spannable, android.view.MotionEvent)
+NO DOC BLOCK: android.view.View Method onGenericMotionEvent(android.view.MotionEvent)
+NO DOC BLOCK: android.app.Fragment Method onInflate(android.app.Activity, android.util.AttributeSet, android.os.Bundle)
+NO DOC BLOCK: android.webkit.WebViewClient Method onReceivedLoginRequest(android.webkit.WebView, java.lang.String, java.lang.String, java.lang.String)
+NO DOC BLOCK: android.view.View Method removeOnAttachStateChangeListener(android.view.View.OnAttachStateChangeListener)
+NO DOC BLOCK: android.graphics.Camera Method rotate(float, float, float)
+NO DOC BLOCK: android.graphics.Bitmap Method sameAs(android.graphics.Bitmap)
+NO DOC BLOCK: android.webkit.CookieManager Method setAcceptFileSchemeCookies(boolean)
+NO DOC BLOCK: android.net.sip.SipProfile.Builder Method setAuthUserName(java.lang.String)
+NO DOC BLOCK: android.view.MotionEvent.PointerCoords Method setAxisValue(int, float)
+NO DOC BLOCK: android.view.animation.Animation Method setBackgroundColor(int)
+NO DOC BLOCK: android.view.View Method setCameraDistance(float)
+NO DOC BLOCK: android.widget.RemoteViews Method setDisplayedChild(int, int)
+NO DOC BLOCK: android.graphics.Bitmap Method setHasAlpha(boolean)
+NO DOC BLOCK: android.graphics.Camera Method setLocation(float, float, float)
+NO DOC BLOCK: android.app.FragmentBreadCrumbs Method setOnBreadCrumbClickListener(android.app.FragmentBreadCrumbs.OnBreadCrumbClickListener)
+NO DOC BLOCK: android.view.View Method setOnGenericMotionListener(android.view.View.OnGenericMotionListener)
+NO DOC BLOCK: android.view.KeyEvent Method setSource(int)
+NO DOC BLOCK: android.view.MotionEvent Method setSource(int)
+NO DOC BLOCK: android.view.Window Method superDispatchGenericMotionEvent(android.view.MotionEvent)
+NO DOC BLOCK: android.view.MotionEvent Field ACTION_HOVER_MOVE
+NO DOC BLOCK: android.content.Intent Field ACTION_MY_PACKAGE_REPLACED
+NO DOC BLOCK: android.content.Intent Field ACTION_PACKAGE_FIRST_LAUNCH
+NO DOC BLOCK: android.view.MotionEvent Field ACTION_SCROLL
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_BRAKE
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GAS
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_1
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_10
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_11
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_12
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_13
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_14
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_15
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_16
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_2
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_3
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_4
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_5
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_6
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_7
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_8
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_GENERIC_9
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_HAT_X
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_HAT_Y
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_HSCROLL
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_LTRIGGER
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_ORIENTATION
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_PRESSURE
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_RTRIGGER
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_RUDDER
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_RX
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_RY
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_RZ
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_SIZE
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_THROTTLE
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_TOOL_MAJOR
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_TOOL_MINOR
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_TOUCH_MAJOR
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_TOUCH_MINOR
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_VSCROLL
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_WHEEL
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_X
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_Y
+NO DOC BLOCK: android.view.MotionEvent Field AXIS_Z
+NO DOC BLOCK: android.drm.DrmEvent Field DRM_INFO_OBJECT
+NO DOC BLOCK: android.provider.Browser Field EXTRA_CREATE_NEW_TAB
+NO DOC BLOCK: android.app.SearchManager Field EXTRA_NEW_SEARCH
+NO DOC BLOCK: android.content.pm.PackageManager Field FEATURE_USB_ACCESSORY
+NO DOC BLOCK: android.content.pm.PackageManager Field FEATURE_USB_HOST
+NO DOC BLOCK: android.content.Intent Field FLAG_EXCLUDE_STOPPED_PACKAGES
+NO DOC BLOCK: android.content.Intent Field FLAG_INCLUDE_STOPPED_PACKAGES
+NO DOC BLOCK: android.content.pm.ApplicationInfo Field FLAG_STOPPED
+NO DOC BLOCK: android.os.Build.VERSION_CODES Field HONEYCOMB_MR1
+NO DOC BLOCK: android.app.DownloadManager Field INTENT_EXTRAS_SORT_BY_SIZE
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_1
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_10
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_11
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_12
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_13
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_14
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_15
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_16
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_2
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_3
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_4
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_5
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_6
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_7
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_8
+NO DOC BLOCK: android.view.KeyEvent Field KEYCODE_BUTTON_9
+NO DOC BLOCK: android.app.ActivityManager Field MOVE_TASK_NO_USER_ACTION
+NO DOC BLOCK: android.app.ActivityManager.RecentTaskInfo Field persistentId
+NO DOC BLOCK: android.appwidget.AppWidgetProviderInfo Field RESIZE_BOTH
+NO DOC BLOCK: android.appwidget.AppWidgetProviderInfo Field RESIZE_HORIZONTAL
+NO DOC BLOCK: android.appwidget.AppWidgetProviderInfo Field RESIZE_NONE
+NO DOC BLOCK: android.appwidget.AppWidgetProviderInfo Field RESIZE_VERTICAL
+NO DOC BLOCK: android.R.attr Field resizeMode
+NO DOC BLOCK: android.appwidget.AppWidgetProviderInfo Field resizeMode
+NO DOC BLOCK: android.view.InputDevice Field SOURCE_CLASS_JOYSTICK
+NO DOC BLOCK: android.view.InputDevice Field SOURCE_GAMEPAD
+NO DOC BLOCK: android.view.InputDevice Field SOURCE_JOYSTICK
+NO DOC BLOCK: android.R.attr Field textCursorDrawable
+NO DOC BLOCK: android.drm.DrmErrorEvent Field TYPE_ACQUIRE_DRM_INFO_FAILED
+NO DOC BLOCK: android.drm.DrmInfoEvent Field TYPE_RIGHTS_REMOVED
+NO DOC BLOCK: android.content.Context Field USB_SERVICE
+NO DOC BLOCK: android.app.DownloadManager.Request Field VISIBILITY_VISIBLE_NOTIFY_ONLY_COMPLETION
+NO DOC BLOCK: android.net.wifi.WifiManager Field WIFI_MODE_FULL_HIGH_PERF
