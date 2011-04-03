@@ -19,7 +19,7 @@ package android.util;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 
-import org.apache.harmony.luni.internal.util.ZoneInfoDB;
+import libcore.util.ZoneInfoDB;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 

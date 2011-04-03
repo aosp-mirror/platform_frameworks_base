@@ -640,6 +640,8 @@ LOCAL_MODULE := ext
 LOCAL_NO_EMMA_INSTRUMENT := true
 LOCAL_NO_EMMA_COMPILE := true
 
+LOCAL_DX_FLAGS := --core-library
+
 include $(BUILD_JAVA_LIBRARY)
 
 
