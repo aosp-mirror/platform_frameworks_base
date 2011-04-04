@@ -448,7 +448,7 @@ static jint writeNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
 #ifdef HAVE_BLUETOOTH
     LOGV(__FUNCTION__);
 
-    int ret;
+    int ret, total;
     jbyte *b;
     int sz;
     struct asocket *s = get_socketData(env, obj);
@@ -471,15 +471,21 @@ static jint writeNative(JNIEnv *env, jobject obj, jbyteArray jb, jint offset,
         return -1;
     }
 
-    ret = asocket_write(s, &b[offset], length, -1);
-    if (ret < 0) {
-        jniThrowIOException(env, errno);
-        env->ReleaseByteArrayElements(jb, b, JNI_ABORT);
-        return -1;
+    total = 0;
+    while (length > 0) {
+        ret = asocket_write(s, &b[offset], length, -1);
+        if (ret < 0) {
+            jniThrowIOException(env, errno);
+            env->ReleaseByteArrayElements(jb, b, JNI_ABORT);
+            return -1;
+        }
+        offset += ret;
+        total += ret;
+        length -= ret;
     }
 
     env->ReleaseByteArrayElements(jb, b, JNI_ABORT);  // no need to commit
-    return (jint)ret;
+    return (jint)total;
 
 #endif
     jniThrowIOException(env, ENOSYS);
