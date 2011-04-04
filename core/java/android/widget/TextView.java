@@ -7197,14 +7197,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
-
-        // Performed after super.onFocusChanged so that this TextView is registered and can ask for
-        // the IME. Showing the IME while focus is moved using the D-Pad is a bad idea, however this
-        // does not happen in that case (using the arrows on a bluetooth keyboard).
-        if (focused && isTextEditable()) {
-            final InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null) imm.showSoftInput(this, 0);
-        }
     }
 
     private int getLastTapPosition() {
