@@ -38,6 +38,7 @@
 #include "rsProgramRaster.h"
 #include "rsProgramVertex.h"
 #include "rsShaderCache.h"
+#include "rsFBOCache.h"
 #include "rsVertexArray.h"
 
 #include "rsgApiStructs.h"
@@ -119,6 +120,7 @@ public:
 
     ScriptCState mScriptC;
     ShaderCache mShaderCache;
+    FBOCache mFBOCache;
 
     void swapBuffers();
     void setRootScript(Script *);

@@ -282,13 +282,13 @@ void Mesh::renderPrimitiveRange(Context *rsc, uint32_t primIndex, uint32_t start
 void Mesh::uploadAll(Context *rsc) {
     for (uint32_t ct = 0; ct < mVertexBufferCount; ct ++) {
         if (mVertexBuffers[ct].get()) {
-            mVertexBuffers[ct]->deferedUploadToBufferObject(rsc);
+            mVertexBuffers[ct]->deferredUploadToBufferObject(rsc);
         }
     }
 
     for (uint32_t ct = 0; ct < mPrimitivesCount; ct ++) {
         if (mPrimitives[ct]->mIndexBuffer.get()) {
-            mPrimitives[ct]->mIndexBuffer->deferedUploadToBufferObject(rsc);
+            mPrimitives[ct]->mIndexBuffer->deferredUploadToBufferObject(rsc);
         }
     }
 }

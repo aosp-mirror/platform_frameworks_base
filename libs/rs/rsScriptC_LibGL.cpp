@@ -86,6 +86,33 @@ static void SC_bindProgramRaster(RsProgramRaster pv) {
     rsi_ContextBindProgramRaster(rsc, pv);
 }
 
+static void SC_bindFrameBufferObjectColorTarget(RsAllocation va, uint32_t slot) {
+    CHECK_OBJ(va);
+    GET_TLS();
+    rsc->mFBOCache.bindColorTarget(rsc, static_cast<Allocation *>(va), slot);
+}
+
+static void SC_bindFrameBufferObjectDepthTarget(RsAllocation va) {
+    CHECK_OBJ(va);
+    GET_TLS();
+    rsc->mFBOCache.bindDepthTarget(rsc, static_cast<Allocation *>(va));
+}
+
+static void SC_clearFrameBufferObjectColorTarget(uint32_t slot) {
+    GET_TLS();
+    rsc->mFBOCache.bindColorTarget(rsc, NULL, slot);
+}
+
+static void SC_clearFrameBufferObjectDepthTarget() {
+    GET_TLS();
+    rsc->mFBOCache.bindDepthTarget(rsc, NULL);
+}
+
+static void SC_clearFrameBufferObjectTargets() {
+    GET_TLS();
+    rsc->mFBOCache.resetAll(rsc);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // VP
 //////////////////////////////////////////////////////////////////////////////
@@ -275,6 +302,10 @@ static void SC_color(float r, float g, float b, float a) {
     pf->setConstantColor(rsc, r, g, b, a);
 }
 
+static void SC_finish() {
+    glFinish();
+}
+
 static void SC_allocationSyncAll(RsAllocation va) {
     CHECK_OBJ(va);
     GET_TLS();
@@ -291,6 +322,7 @@ static void SC_allocationSyncAll2(RsAllocation va, RsAllocationUsageType source)
 
 static void SC_ClearColor(float r, float g, float b, float a) {
     GET_TLS();
+    rsc->mFBOCache.setupGL2(rsc);
     rsc->setupProgramStore();
 
     glClearColor(r, g, b, a);
@@ -299,6 +331,7 @@ static void SC_ClearColor(float r, float g, float b, float a) {
 
 static void SC_ClearDepth(float v) {
     GET_TLS();
+    rsc->mFBOCache.setupGL2(rsc);
     rsc->setupProgramStore();
 
     glClearDepthf(v);
@@ -444,8 +477,15 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z11rsgBindFont7rs_font", (void *)&SC_BindFont, false },
     { "_Z12rsgFontColorffff", (void *)&SC_FontColor, false },
 
+    { "_Z18rsgBindColorTarget13rs_allocationj", (void *)&SC_bindFrameBufferObjectColorTarget, false },
+    { "_Z18rsgBindDepthTarget13rs_allocation", (void *)&SC_bindFrameBufferObjectDepthTarget, false },
+    { "_Z19rsgClearColorTargetj", (void *)&SC_clearFrameBufferObjectColorTarget, false },
+    { "_Z19rsgClearDepthTargetv", (void *)&SC_clearFrameBufferObjectDepthTarget, false },
+    { "_Z24rsgClearAllRenderTargetsv", (void *)&SC_clearFrameBufferObjectTargets, false },
+
     // misc
     { "_Z5colorffff", (void *)&SC_color, false },
+    { "_Z9rsgFinishv", (void *)&SC_finish, false },
 
     { NULL, NULL, false }
 };

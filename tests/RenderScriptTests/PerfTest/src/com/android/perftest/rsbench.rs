@@ -76,10 +76,16 @@ rs_program_vertex gProgVertexPixelLightMove;
 rs_program_fragment gProgFragmentPixelLight;
 rs_program_fragment gProgFragmentMultitex;
 
+rs_allocation gRenderBufferColor;
+rs_allocation gRenderBufferDepth;
+
 float gDt = 0;
 
 void init() {
 }
+
+static int gRenderSurfaceW;
+static int gRenderSurfaceH;
 
 static const char *sampleText = "This is a sample of small text for performace";
 // Offsets for multiple layer of text
@@ -91,6 +97,11 @@ static float textColors[] = {1.0f, 1.0f, 1.0f, 1.0f,
                              0.5f, 0.6f, 0.7f, 1.0f,
 };
 
+static void setupOffscreenTarget() {
+    rsgBindColorTarget(gRenderBufferColor, 0);
+    rsgBindDepthTarget(gRenderBufferDepth);
+}
+
 static void displayFontSamples(int fillNum) {
 
     rs_font fonts[5];
@@ -100,8 +111,8 @@ static void displayFontSamples(int fillNum) {
     rsSetObject(&fonts[3], gFontSerifBoldItalic);
     rsSetObject(&fonts[4], gFontSans);
 
-    uint width = rsgGetWidth();
-    uint height = rsgGetHeight();
+    uint width = gRenderSurfaceW;
+    uint height = gRenderSurfaceH;
     int left = 0, right = 0, top = 0, bottom = 0;
     rsgMeasureText(sampleText, &left, &right, &top, &bottom);
 
@@ -136,7 +147,7 @@ static void bindProgramVertexOrtho() {
     rsgBindProgramVertex(gProgVertex);
     // Setup the projection matrix
     rs_matrix4x4 proj;
-    rsMatrixLoadOrtho(&proj, 0, rsgGetWidth(), rsgGetHeight(), 0, -500, 500);
+    rsMatrixLoadOrtho(&proj, 0, gRenderSurfaceW, gRenderSurfaceH, 0, -500, 500);
     rsgProgramVertexLoadProjectionMatrix(&proj);
 }
 
@@ -158,7 +169,7 @@ static void displaySingletexFill(bool blend, int quadCount) {
 
     for (int i = 0; i < quadCount; i ++) {
         float startX = 10 * i, startY = 10 * i;
-        float width = rsgGetWidth() - startX, height = rsgGetHeight() - startY;
+        float width = gRenderSurfaceW - startX, height = gRenderSurfaceH - startY;
         rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
                              startX, startY + height, 0, 0, 1,
                              startX + width, startY + height, 0, 1, 1,
@@ -216,7 +227,7 @@ static void displayMeshSamples(int meshNum) {
 
     bindProgramVertexOrtho();
     rs_matrix4x4 matrix;
-    rsMatrixLoadTranslate(&matrix, rsgGetWidth()/2, rsgGetHeight()/2, 0);
+    rsMatrixLoadTranslate(&matrix, gRenderSurfaceW/2, gRenderSurfaceH/2, 0);
     rsgProgramVertexLoadModelMatrix(&matrix);
 
     // Fragment shader with texture
@@ -344,7 +355,7 @@ static void displaySimpleGeoSamples(bool useTexture, int numMeshes) {
     rsgBindProgramRaster(gCullBack);
     // Setup the projection matrix with 30 degree field of view
     rs_matrix4x4 proj;
-    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+    float aspect = (float)gRenderSurfaceW / (float)gRenderSurfaceH;
     rsMatrixLoadPerspective(&proj, 30.0f, aspect, 0.1f, 100.0f);
     rsgProgramVertexLoadProjectionMatrix(&proj);
 
@@ -445,7 +456,7 @@ static void displayCustomShaderSamples(int numMeshes) {
     }
 
     // Setup the projection matrix
-    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+    float aspect = (float)gRenderSurfaceW / (float)gRenderSurfaceH;
     rsMatrixLoadPerspective(&gVSConstants->proj, 30.0f, aspect, 0.1f, 100.0f);
     setupCustomShaderLights();
 
@@ -476,7 +487,7 @@ static void displayPixelLightSamples(int numMeshes, bool heavyVertex) {
     gVSConstPixel->time = rsUptimeMillis()*0.005;
 
     // Setup the projection matrix
-    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+    float aspect = (float)gRenderSurfaceW / (float)gRenderSurfaceH;
     rsMatrixLoadPerspective(&gVSConstPixel->proj, 30.0f, aspect, 0.1f, 100.0f);
     setupCustomShaderLights();
 
@@ -520,7 +531,7 @@ static void displayMultitextureSample(bool blend, int quadCount) {
 
     for (int i = 0; i < quadCount; i ++) {
         float startX = 10 * i, startY = 10 * i;
-        float width = rsgGetWidth() - startX, height = rsgGetHeight() - startY;
+        float width = gRenderSurfaceW - startX, height = gRenderSurfaceH - startY;
         rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
                              startX, startY + height, 0, 0, 1,
                              startX + width, startY + height, 0, 1, 1,
@@ -535,7 +546,7 @@ static void displayAnisoSample() {
     gAnisoTime += gDt;
 
     rsgBindProgramVertex(gProgVertex);
-    float aspect = (float)rsgGetWidth() / (float)rsgGetHeight();
+    float aspect = (float)gRenderSurfaceW / (float)gRenderSurfaceH;
     rs_matrix4x4 proj;
     rsMatrixLoadPerspective(&proj, 30.0f, aspect, 0.1f, 100.0f);
     rsgProgramVertexLoadProjectionMatrix(&proj);
@@ -592,10 +603,6 @@ static bool checkInit() {
 
     static int countdown = 5;
 
-    if (countdown == 0) {
-        gDt = 0;
-        countdown --;
-    }
     // Perform all the uploads so we only measure rendered time
     if(countdown > 1) {
         displayFontSamples(5);
@@ -612,19 +619,13 @@ static bool checkInit() {
         countdown --;
         rsgClearColor(0.2f, 0.2f, 0.2f, 0.0f);
 
-        // Now use text metrics to center the text
-        uint width = rsgGetWidth();
-        uint height = rsgGetHeight();
-        int left = 0, right = 0, top = 0, bottom = 0;
-
         rsgFontColor(0.9f, 0.9f, 0.95f, 1.0f);
         rsgBindFont(gFontSerifBoldItalic);
-
-        const char* text = "Initializing";
-        rsgMeasureText(text, &left, &right, &top, &bottom);
-        int centeredPosX = width / 2 - (right - left) / 2;
-        int centeredPosY = height / 2 - (top - bottom) / 2;
-        rsgDrawText(text, centeredPosX, centeredPosY);
+        if (countdown == 1) {
+            rsgDrawText("Rendering", 50, 50);
+        } else {
+            rsgDrawText("Initializing", 50, 50);
+        }
 
         return false;
     }
@@ -632,70 +633,40 @@ static bool checkInit() {
     return true;
 }
 
-static int frameCount = 0;
-static int totalFramesRendered = 0;
 static int benchMode = 0;
 
-#define testTime 5.0f
-static float curTestTime = testTime;
-
 static const char *testNames[] = {
-    "Finished text fill 1",
-    "Finished text fill 2",
-    "Finished text fill 3",
-    "Finished text fill 4",
-    "Finished text fill 5",
-    "Finished 25.6k geo flat color",
-    "Finished 51.2k geo flat color",
-    "Finished 204.8k geo raster load flat color",
-    "Finished 25.6k geo texture",
-    "Finished 51.2k geo texture",
-    "Finished 204.8k geo raster load texture",
-    "Finished full screen mesh 10 by 10",
-    "Finished full screen mesh 100 by 100",
-    "Finished full screen mesh W / 4 by H / 4",
-    "Finished 25.6k geo heavy vertex",
-    "Finished 51.2k geo heavy vertex",
-    "Finished 204.8k geo raster load heavy vertex",
-    "Finished singletexture 5x fill",
-    "Finished 3tex multitexture 5x fill",
-    "Finished blend singletexture 5x fill",
-    "Finished blend 3tex multitexture 5x fill",
-    "Finished 25.6k geo heavy fragment",
-    "Finished 51.2k geo heavy fragment",
-    "Finished 204.8k geo raster load heavy fragment",
-    "Finished 25.6k geo heavy fragment, heavy vertex",
-    "Finished 51.2k geo heavy fragment, heavy vertex",
-    "Finished 204.8k geo raster load heavy fragment, heavy vertex",
+    "Finished text fill 1,",
+    "Finished text fill 2,",
+    "Finished text fill 3,",
+    "Finished text fill 4,",
+    "Finished text fill 5,",
+    "Finished 25.6k geo flat color,",
+    "Finished 51.2k geo flat color,",
+    "Finished 204.8k geo raster load flat color,",
+    "Finished 25.6k geo texture,",
+    "Finished 51.2k geo texture,",
+    "Finished 204.8k geo raster load texture,",
+    "Finished full screen mesh 10 by 10,",
+    "Finished full screen mesh 100 by 100,",
+    "Finished full screen mesh W / 4 by H / 4,",
+    "Finished 25.6k geo heavy vertex,",
+    "Finished 51.2k geo heavy vertex,",
+    "Finished 204.8k geo raster load heavy vertex,",
+    "Finished singletexture 5x fill,",
+    "Finished 3tex multitexture 5x fill,",
+    "Finished blend singletexture 5x fill,",
+    "Finished blend 3tex multitexture 5x fill,",
+    "Finished 25.6k geo heavy fragment,",
+    "Finished 51.2k geo heavy fragment,",
+    "Finished 204.8k geo raster load heavy fragment,",
+    "Finished 25.6k geo heavy fragment heavy vertex,",
+    "Finished 51.2k geo heavy fragment heavy vertex,",
+    "Finished 204.8k geo raster load heavy fragment heavy vertex,",
 };
 
-int root(int launchID) {
-
-    gDt = rsGetDt();
-
-    rsgClearColor(0.2f, 0.2f, 0.2f, 0.0f);
-    rsgClearDepth(1.0f);
-
-    if(!checkInit()) {
-        return 1;
-    }
-
-    curTestTime -= gDt;
-    if(curTestTime < 0.0f) {
-        float fps = (float)(frameCount) / (testTime - curTestTime);
-        rsDebug(testNames[benchMode], fps);
-        benchMode ++;
-        curTestTime = testTime;
-        totalFramesRendered += frameCount;
-        frameCount = 0;
-        gTorusRotation = 0;
-
-        if (benchMode > gMaxModes) {
-            benchMode = 0;
-        }
-    }
-
-    switch (benchMode) {
+static void runTest(int index) {
+    switch (index) {
     case 0:
         displayFontSamples(1);
         break;
@@ -777,10 +748,87 @@ int root(int launchID) {
     case 26:
         displayPixelLightSamples(8, true);
         break;
+    }
+}
 
+static void drawOffscreenResult(int posX, int posY, int width, int height) {
+    bindProgramVertexOrtho();
+
+    rs_matrix4x4 matrix;
+    rsMatrixLoadIdentity(&matrix);
+    rsgProgramVertexLoadModelMatrix(&matrix);
+
+    rsgBindProgramFragment(gProgFragmentTexture);
+
+    rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
+    rsgBindTexture(gProgFragmentTexture, 0, gRenderBufferColor);
+
+    float startX = posX, startY = posY;
+    rsgDrawQuadTexCoords(startX, startY, 0, 0, 1,
+                         startX, startY + height, 0, 0, 0,
+                         startX + width, startY + height, 0, 1, 0,
+                         startX + width, startY, 0, 1, 1);
+}
+
+int root(int launchID) {
+
+    gRenderSurfaceW = rsgGetWidth();
+    gRenderSurfaceH = rsgGetHeight();
+    rsgClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    rsgClearDepth(1.0f);
+    if(!checkInit()) {
+        return 1;
     }
 
-    frameCount ++;
+    rsgFinish();
+    int64_t start = rsUptimeMillis();
+    rsGetDt();
+
+    int drawPos = 0;
+    int frameCount = 100;
+    for(int i = 0; i < frameCount; i ++) {
+        setupOffscreenTarget();
+        gRenderSurfaceW = rsAllocationGetDimX(gRenderBufferColor);
+        gRenderSurfaceH = rsAllocationGetDimY(gRenderBufferColor);
+        rsgClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        rsgClearDepth(1.0f);
+
+        runTest(benchMode);
+        rsgClearAllRenderTargets();
+        gRenderSurfaceW = rsgGetWidth();
+        gRenderSurfaceH = rsgGetHeight();
+        int size = 8;
+        drawOffscreenResult((drawPos+=size)%gRenderSurfaceW, (gRenderSurfaceH * 3) / 4, size, size);
+        gDt = rsGetDt();
+    }
+
+    rsgFinish();
+
+    int64_t end = rsUptimeMillis();
+    float fps = (float)(frameCount) / ((float)(end - start)*0.001f);
+    rsDebug(testNames[benchMode], fps);
+
+    drawOffscreenResult(0, 0,
+                        gRenderSurfaceW / 2,
+                        gRenderSurfaceH / 2);
+
+    const char* text = testNames[benchMode];
+    int left = 0, right = 0, top = 0, bottom = 0;
+    uint width = rsgGetWidth();
+    uint height = rsgGetHeight();
+    rsgFontColor(0.9f, 0.9f, 0.95f, 1.0f);
+    rsgBindFont(gFontSerifBoldItalic);
+    rsgMeasureText(text, &left, &right, &top, &bottom);
+    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
+    rsgDrawText(text, 2 -left, height - 2 + bottom);
+
+    benchMode ++;
+
+    gTorusRotation = 0;
+
+    if (benchMode > gMaxModes) {
+        benchMode = 0;
+    }
 
     return 1;
 }

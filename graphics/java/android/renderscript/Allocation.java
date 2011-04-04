@@ -99,6 +99,14 @@ public class Allocation extends BaseObj {
      */
     public static final int USAGE_GRAPHICS_CONSTANTS = 0x0008;
 
+    /**
+     * @hide
+     * USAGE_GRAPHICS_RENDER_TARGET The allcation will be used as a
+     * target for offscreen rendering
+     *
+     */
+    public static final int USAGE_GRAPHICS_RENDER_TARGET = 0x0010;
+
 
     /**
      * Controls mipmap behavior when using the bitmap creation and
@@ -137,7 +145,8 @@ public class Allocation extends BaseObj {
         if ((usage & ~(USAGE_SCRIPT |
                        USAGE_GRAPHICS_TEXTURE |
                        USAGE_GRAPHICS_VERTEX |
-                       USAGE_GRAPHICS_CONSTANTS)) != 0) {
+                       USAGE_GRAPHICS_CONSTANTS |
+                       USAGE_GRAPHICS_RENDER_TARGET)) != 0) {
             throw new RSIllegalArgumentException("Unknown usage specified.");
         }
         mType = t;
