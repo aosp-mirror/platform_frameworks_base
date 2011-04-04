@@ -529,6 +529,8 @@
         <attr name="listPopupWindowStyle" format="reference" />
         <!-- Default PopupMenu style. -->
         <attr name="popupMenuStyle" format="reference" />
+        <!-- Default StackView style. -->
+        <attr name="stackViewStyle" format="reference" />
 
         <!-- NumberPicker style. -->
         <attr name="numberPickerStyle" format="reference" />
@@ -2487,6 +2489,13 @@
         <attr name="thumb" format="reference" />
         <!-- An offset for the thumb that allows it to extend out of the range of the track. -->
         <attr name="thumbOffset" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="StackView">
+        <!-- Color of the res-out outline. -->
+        <attr name="resOutColor" format="color" />
+        <!-- Color of the outline of click feedback. -->
+        <attr name="clickColor" format="color" />
     </declare-styleable>
 
     <declare-styleable name="RatingBar">

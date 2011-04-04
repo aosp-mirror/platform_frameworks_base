@@ -103,11 +103,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     int mCurrentWindowStartUnbounded = 0;
 
     /**
-     * Handler to post events to the main thread
-     */
-    Handler mMainQueue;
-
-    /**
      * Listens for data changes from the adapter
      */
     AdapterDataSetObserver mDataSetObserver;
@@ -163,15 +158,18 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     private static final int DEFAULT_ANIMATION_DURATION = 200;
 
     public AdapterViewAnimator(Context context) {
-        super(context);
-        initViewAnimator();
+        this(context, null);
     }
 
     public AdapterViewAnimator(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
+    }
+
+    public AdapterViewAnimator(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.AdapterViewAnimator);
+                com.android.internal.R.styleable.AdapterViewAnimator, defStyleAttr, 0);
         int resource = a.getResourceId(
                 com.android.internal.R.styleable.AdapterViewAnimator_inAnimation, 0);
         if (resource > 0) {
@@ -203,7 +201,6 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * Initialize this {@link AdapterViewAnimator}
      */
     private void initViewAnimator() {
-        mMainQueue = new Handler(Looper.myLooper());
         mPreviousViews = new ArrayList<Integer>();
     }
 

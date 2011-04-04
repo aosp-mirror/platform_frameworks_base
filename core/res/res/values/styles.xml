@@ -1410,6 +1410,11 @@
         <item name="android:minWidth">64dip</item>
     </style>
 
+    <style name="Widget.Holo.StackView">
+        <item name="android:resOutColor">#ff6699ff</item>
+        <item name="android:clickColor">#886699ff</item>
+    </style>
+
     <style name="Widget.Holo.Button.Borderless">
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>

@@ -972,6 +972,7 @@
         <item name="quickContactBadgeStyleSmallWindowLarge">@android:style/Widget.Holo.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@android:style/Widget.Holo.ListPopupWindow</item>
         <item name="popupMenuStyle">@android:style/Widget.Holo.PopupMenu</item>
+        <item name="stackViewStyle">@android:style/Widget.Holo.StackView</item>
 
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.Holo.PreferenceScreen</item>
@@ -1255,7 +1256,8 @@
         <item name="quickContactBadgeStyleSmallWindowLarge">@android:style/Widget.Holo.QuickContactBadgeSmall.WindowLarge</item>
         <item name="listPopupWindowStyle">@android:style/Widget.Holo.Light.ListPopupWindow</item>
         <item name="popupMenuStyle">@android:style/Widget.Holo.Light.PopupMenu</item>
-        
+        <item name="stackViewStyle">@android:style/Widget.Holo.StackView</item>
+
         <!-- Preference styles -->
         <item name="preferenceScreenStyle">@android:style/Preference.Holo.PreferenceScreen</item>
         <item name="preferenceCategoryStyle">@android:style/Preference.Holo.Category</item>
