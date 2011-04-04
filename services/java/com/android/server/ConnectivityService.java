@@ -1297,6 +1297,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                             " teardown");
                     if (!teardown(otherNet)) {
                         Slog.e(TAG, "Network declined teardown request");
+                        teardown(thisNet);
                         return;
                     }
                     if (isFailover) {
