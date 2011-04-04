@@ -36,10 +36,7 @@
     <skip />
     <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
     <skip />
-    <!-- no translation found for title_usb_accessory (4966265263465181372) -->
-    <skip />
-    <!-- no translation found for label_view (6304565553218192990) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (1210954576979621596) -->
-    <skip />
+    <string name="title_usb_accessory" msgid="4966265263465181372">"อุปกรณ์เสริม USB"</string>
+    <string name="label_view" msgid="6304565553218192990">"ดู"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"ใช้ค่าเริ่มต้นสำหรับอุปกรณ์เสริม USB นี้"</string>
 </resources>
