@@ -78,6 +78,14 @@ public class LinkAddress implements Parcelable {
             this.prefixLength == linkAddress.prefixLength;
     }
 
+    @Override
+    /*
+     * generate hashcode based on significant fields
+     */
+    public int hashCode() {
+        return ((null == address) ? 0 : address.hashCode()) + prefixLength;
+    }
+
     /**
      * Returns the InetAddress for this address.
      */
