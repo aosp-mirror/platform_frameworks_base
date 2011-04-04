@@ -1289,6 +1289,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     if (!teardown(otherNet)) {
                         loge("Network declined teardown request");
+                        teardown(thisNet);
                         return;
                     }
                 }
