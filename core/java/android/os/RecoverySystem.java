@@ -16,6 +16,11 @@
 
 package android.os;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,9 +41,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import android.content.Context;
-import android.util.Log;
 
 import org.apache.harmony.security.asn1.BerInputStream;
 import org.apache.harmony.security.pkcs7.ContentInfo;
@@ -336,8 +338,21 @@ public class RecoverySystem {
      * @throws IOException  if writing the recovery command file
      * fails, or if the reboot itself fails.
      */
-    public static void rebootWipeUserData(Context context)
-        throws IOException {
+    public static void rebootWipeUserData(Context context) throws IOException {
+        final ConditionVariable condition = new ConditionVariable();
+
+        Intent intent = new Intent("android.intent.action.MASTER_CLEAR_NOTIFICATION");
+        context.sendOrderedBroadcast(intent, android.Manifest.permission.MASTER_CLEAR,
+                new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        condition.open();
+                    }
+                }, null, 0, null, null);
+
+        // Block until the ordered broadcast has completed.
+        condition.block();
+
         bootCommand(context, "--wipe_data");
     }
 
