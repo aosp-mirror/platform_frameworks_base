@@ -586,6 +586,35 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * {@inheritDoc}
      */
+    public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+        ViewParent parent = getParent();
+        if (parent == null) {
+            return false;
+        }
+        final boolean propagate = onRequestSendAccessibilityEvent(child, event);
+        if (!propagate) {
+            return false;
+        }
+        return parent.requestSendAccessibilityEvent(this, event);
+    }
+
+    /**
+     * Called when a child has requested sending an {@link AccessibilityEvent} and
+     * gives an opportunity to its parent to augment the event.
+     *
+     * @param child The child which requests sending the event.
+     * @param event The event to be sent.
+     * @return True if the event should be sent.
+     *
+     * @see #requestSendAccessibilityEvent(View, AccessibilityEvent)
+     */
+    public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean dispatchUnhandledMove(View focused, int direction) {
         return mFocused != null &&
@@ -1216,9 +1245,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 eventNoHistory.setAction(MotionEvent.ACTION_HOVER_EXIT);
                 handled |= dispatchTransformedGenericPointerEvent(eventNoHistory, mHoveredChild);
                 eventNoHistory.setAction(action);
-
                 mHoveredChild = null;
-            } else if (action == MotionEvent.ACTION_HOVER_MOVE) {
+            } else {
                 // Pointer is still within the child.
                 handled |= dispatchTransformedGenericPointerEvent(event, mHoveredChild);
             }
@@ -1276,6 +1304,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // Done.
         return handled;
+    }
+
+    @Override
+    public boolean onHoverEvent(MotionEvent event) {
+        // Handle the event only if leaf. This guarantees that
+        // the leafs (or any custom class that returns true from
+        // this method) will get a change to process the hover.
+        if (getChildCount() == 0) {
+            return super.onHoverEvent(event);
+        }
+        return false;
     }
 
     private static MotionEvent obtainMotionEventNoHistoryOrSelf(MotionEvent event) {
@@ -2091,11 +2130,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
     @Override
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        boolean populated = false;
+        // We first get a chance to populate the event.
+        onPopulateAccessibilityEvent(event);
+        // Let our children have a shot in populating the event.
         for (int i = 0, count = getChildCount(); i < count; i++) {
-            populated |= getChildAt(i).dispatchPopulateAccessibilityEvent(event);
+            boolean handled = getChildAt(i).dispatchPopulateAccessibilityEvent(event);
+            if (handled) {
+                return handled;
+            }
         }
-        return populated;
+        return false;
     }
 
     /**

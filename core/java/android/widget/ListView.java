@@ -1998,36 +1998,32 @@ public class ListView extends AbsListView {
     }
 
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        boolean populated = super.dispatchPopulateAccessibilityEvent(event);
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEvent(event);
 
         // If the item count is less than 15 then subtract disabled items from the count and
         // position. Otherwise ignore disabled items.
-        if (!populated) {
-            int itemCount = 0;
-            int currentItemIndex = getSelectedItemPosition();
+        int itemCount = 0;
+        int currentItemIndex = getSelectedItemPosition();
 
-            ListAdapter adapter = getAdapter();
-            if (adapter != null) {
-                final int count = adapter.getCount();
-                if (count < 15) {
-                    for (int i = 0; i < count; i++) {
-                        if (adapter.isEnabled(i)) {
-                            itemCount++;
-                        } else if (i <= currentItemIndex) {
-                            currentItemIndex--;
-                        }
+        ListAdapter adapter = getAdapter();
+        if (adapter != null) {
+            final int count = adapter.getCount();
+            if (count < 15) {
+                for (int i = 0; i < count; i++) {
+                    if (adapter.isEnabled(i)) {
+                        itemCount++;
+                    } else if (i <= currentItemIndex) {
+                        currentItemIndex--;
                     }
-                } else {
-                    itemCount = count;
                 }
+            } else {
+                itemCount = count;
             }
-
-            event.setItemCount(itemCount);
-            event.setCurrentItemIndex(currentItemIndex);
         }
 
-        return populated;
+        event.setItemCount(itemCount);
+        event.setCurrentItemIndex(currentItemIndex);
     }
 
     /**

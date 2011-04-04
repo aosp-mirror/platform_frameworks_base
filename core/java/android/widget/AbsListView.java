@@ -55,6 +55,7 @@ import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -2553,6 +2554,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             return handled;
         }
         return false;
+    }
+
+    @Override
+    public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+        // Add a record for ourselves as well.
+        AccessibilityEvent record = AccessibilityEvent.obtain();
+        // Set the class since it is not populated in #dispatchPopulateAccessibilityEvent
+        record.setClassName(getClass().getName());
+        child.dispatchPopulateAccessibilityEvent(record);
+        event.appendRecord(record);
+        return true;
     }
 
     @Override
