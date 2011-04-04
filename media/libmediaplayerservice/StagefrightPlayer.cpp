@@ -110,7 +110,7 @@ bool StagefrightPlayer::isPlaying() {
 }
 
 status_t StagefrightPlayer::seekTo(int msec) {
-    LOGV("seekTo");
+    LOGV("seekTo %.2f secs", msec / 1E3);
 
     status_t err = mPlayer->seekTo((int64_t)msec * 1000);
 

@@ -311,6 +311,10 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
         return size;
     }
 
+    bool postSeekComplete = false;
+    bool postEOS = false;
+    int64_t postEOSDelayUs = 0;
+
     size_t size_done = 0;
     size_t size_remaining = size;
     while (size_remaining > 0) {
@@ -337,7 +341,7 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
 
                 mSeeking = false;
                 if (mObserver) {
-                    mObserver->postAudioSeekComplete();
+                    postSeekComplete = true;
                 }
             }
         }
@@ -389,7 +393,8 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
                          numFramesPendingPlayout,
                          timeToCompletionUs, timeToCompletionUs / 1E6);
 
-                    mObserver->postAudioEOS(timeToCompletionUs + mLatencyUs);
+                    postEOS = true;
+                    postEOSDelayUs = timeToCompletionUs + mLatencyUs;
                 }
 
                 mReachedEOS = true;
@@ -433,8 +438,18 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
         size_remaining -= copy;
     }
 
-    Mutex::Autolock autoLock(mLock);
-    mNumFramesPlayed += size_done / mFrameSize;
+    {
+        Mutex::Autolock autoLock(mLock);
+        mNumFramesPlayed += size_done / mFrameSize;
+    }
+
+    if (postEOS) {
+        mObserver->postAudioEOS(postEOSDelayUs);
+    }
+
+    if (postSeekComplete) {
+        mObserver->postAudioSeekComplete();
+    }
 
     return size_done;
 }
