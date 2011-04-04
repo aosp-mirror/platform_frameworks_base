@@ -1859,10 +1859,12 @@ uint32_t AwesomePlayer::flags() const {
 }
 
 void AwesomePlayer::postAudioEOS(int64_t delayUs) {
+    Mutex::Autolock autoLock(mLock);
     postCheckAudioStatusEvent_l(delayUs);
 }
 
 void AwesomePlayer::postAudioSeekComplete() {
+    Mutex::Autolock autoLock(mLock);
     postCheckAudioStatusEvent_l(0 /* delayUs */);
 }
 
