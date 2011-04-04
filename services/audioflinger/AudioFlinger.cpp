@@ -5712,7 +5712,7 @@ uint32_t AudioFlinger::EffectModule::deviceAudioSystemToEffectApi(uint32_t devic
         const uint32_t i = 31 - __builtin_clz(device);
         device &= ~(1 << i);
         if (i >= sizeof(sDeviceConvTable)/sizeof(uint32_t)) {
-            LOGE("device convertion error for AudioSystem device 0x%08x", device);
+            LOGE("device conversion error for AudioSystem device 0x%08x", device);
             return 0;
         }
         deviceOut |= (uint32_t)sDeviceConvTable[i];

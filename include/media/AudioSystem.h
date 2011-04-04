@@ -33,6 +33,7 @@ class AudioSystem
 {
 public:
 
+    // must match android/media/AudioSystem.java STREAM_* constants
     enum stream_type {
         DEFAULT          =-1,
         VOICE_CALL       = 0,
@@ -53,6 +54,8 @@ public:
         PCM_SUB_16_BIT          = 0x1, // must be 1 for backward compatibility
         PCM_SUB_8_BIT           = 0x2, // must be 2 for backward compatibility
     };
+
+    // FIXME These sub_format enums are currently unused
 
     // MP3 sub format field definition : can use 11 LSBs in the same way as MP3 frame header to specify
     // bit rate, stereo mode, version...
@@ -100,7 +103,7 @@ public:
     };
 
 
-    // Channel mask definitions must be kept in sync with JAVA values in /media/java/android/media/AudioFormat.java
+    // Channel mask definitions must be kept in sync with values in /media/java/android/media/AudioFormat.java
     enum audio_channels {
         // output channels
         CHANNEL_OUT_FRONT_LEFT = 0x4,
@@ -150,6 +153,7 @@ public:
                 CHANNEL_IN_VOICE_UPLINK | CHANNEL_IN_VOICE_DNLINK)
     };
 
+    // must match android/media/AudioSystem.java MODE_* values
     enum audio_mode {
         MODE_INVALID = -2,
         MODE_CURRENT = -1,
@@ -189,6 +193,7 @@ public:
     // set/get master volume
     static status_t setMasterVolume(float value);
     static status_t getMasterVolume(float* volume);
+
     // mute/unmute audio outputs
     static status_t setMasterMute(bool mute);
     static status_t getMasterMute(bool* mute);
@@ -234,7 +239,7 @@ public:
     static status_t setVoiceVolume(float volume);
 
     // return the number of audio frames written by AudioFlinger to audio HAL and
-    // audio dsp to DAC since the output on which the specificed stream is playing
+    // audio dsp to DAC since the output on which the specified stream is playing
     // has exited standby.
     // returned status (from utils/Errors.h) can be:
     // - NO_ERROR: successful operation, halFrames and dspFrames point to valid data
@@ -321,7 +326,7 @@ public:
         FORCE_DEFAULT = FORCE_NONE
     };
 
-    // usages used for setForceUse()
+    // usages used for setForceUse(), must match AudioSystem.java
     enum force_use {
         FOR_COMMUNICATION,
         FOR_MEDIA,

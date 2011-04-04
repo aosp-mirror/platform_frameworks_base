@@ -34,6 +34,8 @@
 
 using namespace android;
 
+static const char* const kClassPathName = "android/media/AudioSystem";
+
 enum AudioError {
     kAudioStatusOk = 0,
     kAudioStatusError = 1,
@@ -96,14 +98,15 @@ android_media_AudioSystem_getParameters(JNIEnv *env, jobject thiz, jstring keys)
     return env->NewStringUTF(AudioSystem::getParameters(0, c_keys8).string());
 }
 
-void android_media_AudioSystem_error_callback(status_t err)
+static void
+android_media_AudioSystem_error_callback(status_t err)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     if (env == NULL) {
         return;
     }
 
-    jclass clazz = env->FindClass("android/media/AudioSystem");
+    jclass clazz = env->FindClass(kClassPathName);
 
     int error;
 
@@ -218,12 +221,10 @@ static JNINativeMethod gMethods[] = {
     {"getDevicesForStream", "(I)I",     (void *)android_media_AudioSystem_getDevicesForStream},
 };
 
-const char* const kClassPathName = "android/media/AudioSystem";
-
 int register_android_media_AudioSystem(JNIEnv *env)
 {
     AudioSystem::setErrorCallback(android_media_AudioSystem_error_callback);
     
     return AndroidRuntime::registerNativeMethods(env,
-                "android/media/AudioSystem", gMethods, NELEM(gMethods));
+                kClassPathName, gMethods, NELEM(gMethods));
 }
