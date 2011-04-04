@@ -1449,8 +1449,15 @@ void MediaPlayerService::AudioOutput::CallbackWrapper(
     size_t actualSize = (*me->mCallback)(
             me, buffer->raw, buffer->size, me->mCallbackCookie);
 
-    buffer->size = actualSize;
+    if (actualSize == 0 && buffer->size > 0) {
+        // We've reached EOS but the audio track is not stopped yet,
+        // keep playing silence.
 
+        memset(buffer->raw, 0, buffer->size);
+        actualSize = buffer->size;
+    }
+
+    buffer->size = actualSize;
 }
 
 int MediaPlayerService::AudioOutput::getSessionId()
