@@ -1173,13 +1173,11 @@ public class ValueAnimator extends Animator {
         if (oldValues != null) {
             int numValues = oldValues.length;
             anim.mValues = new PropertyValuesHolder[numValues];
-            for (int i = 0; i < numValues; ++i) {
-                anim.mValues[i] = oldValues[i].clone();
-            }
             anim.mValuesMap = new HashMap<String, PropertyValuesHolder>(numValues);
             for (int i = 0; i < numValues; ++i) {
-                PropertyValuesHolder valuesHolder = mValues[i];
-                anim.mValuesMap.put(valuesHolder.getPropertyName(), valuesHolder);
+                PropertyValuesHolder newValuesHolder = oldValues[i].clone();
+                anim.mValues[i] = newValuesHolder;
+                anim.mValuesMap.put(newValuesHolder.getPropertyName(), newValuesHolder);
             }
         }
         return anim;
