@@ -17,11 +17,26 @@
 
 package com.android.internal.telephony;
 
+import android.net.LinkAddress;
+import android.net.LinkProperties;
+import android.net.NetworkUtils;
+import android.os.SystemProperties;
+import android.util.Log;
+
+import com.android.internal.telephony.DataConnection.FailCause;
+
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 /**
  * This is RIL_Data_Call_Response_v5 from ril.h
  * TODO: Rename to DataCallResponse.
  */
 public class DataCallState {
+    private final boolean DBG = true;
+    private final String LOG_TAG = "GSM";
+
     public int version = 0;
     public int status = 0;
     public int cid = 0;
@@ -31,6 +46,29 @@ public class DataCallState {
     public String [] addresses = new String[0];
     public String [] dnses = new String[0];
     public String[] gateways = new String[0];
+
+    /**
+     * Class returned by onSetupConnectionCompleted.
+     */
+    protected enum SetupResult {
+        SUCCESS,
+        ERR_BadCommand,
+        ERR_UnacceptableParameter,
+        ERR_GetLastErrorFromRil,
+        ERR_Stale,
+        ERR_RilError;
+
+        public FailCause mFailCause;
+
+        SetupResult() {
+            mFailCause = FailCause.fromInt(0);
+        }
+
+        @Override
+        public String toString() {
+            return name() + "  SetupResult.mFailCause=" + mFailCause;
+        }
+    }
 
     @Override
     public String toString() {
@@ -63,4 +101,127 @@ public class DataCallState {
         sb.append("]}");
         return sb.toString();
     }
+
+    public SetupResult setLinkProperties(LinkProperties linkProperties,
+            boolean okToUseSystemPropertyDns) {
+        SetupResult result;
+
+        // Start with clean network properties and if we have
+        // a failure we'll clear again at the bottom of this code.
+        if (linkProperties == null)
+            linkProperties = new LinkProperties();
+        else
+            linkProperties.clear();
+
+        if (status == FailCause.NONE.getErrorCode()) {
+            String propertyPrefix = "net." + ifname + ".";
+
+            try {
+                // set interface name
+                linkProperties.setInterfaceName(ifname);
+
+                // set link addresses
+                if (addresses != null && addresses.length > 0) {
+                    for (String addr : addresses) {
+                        LinkAddress la;
+                        int addrPrefixLen;
+
+                        String [] ap = addr.split("/");
+                        if (ap.length == 2) {
+                            addr = ap[0];
+                            addrPrefixLen = Integer.parseInt(ap[1]);
+                        } else {
+                            addrPrefixLen = 0;
+                        }
+                        InetAddress ia;
+                        try {
+                            ia = NetworkUtils.numericToInetAddress(addr);
+                        } catch (IllegalArgumentException e) {
+                            throw new UnknownHostException("Non-numeric ip addr=" + addr);
+                        }
+                        if (addrPrefixLen == 0) {
+                            // Assume point to point
+                            addrPrefixLen = (ia instanceof Inet4Address) ? 32 : 128;
+                        }
+                        if (DBG) Log.d(LOG_TAG, "addr/pl=" + addr + "/" + addrPrefixLen);
+                        la = new LinkAddress(ia, addrPrefixLen);
+                        linkProperties.addLinkAddress(la);
+                    }
+                } else {
+                    throw new UnknownHostException("no address for ifname=" + ifname);
+                }
+
+                // set dns servers
+                if (dnses != null && dnses.length > 0) {
+                    for (String addr : dnses) {
+                        InetAddress ia;
+                        try {
+                            ia = NetworkUtils.numericToInetAddress(addr);
+                        } catch (IllegalArgumentException e) {
+                            throw new UnknownHostException("Non-numeric dns addr=" + addr);
+                        }
+                        linkProperties.addDns(ia);
+                    }
+                } else if (okToUseSystemPropertyDns){
+                    String dnsServers[] = new String[2];
+                    dnsServers[0] = SystemProperties.get(propertyPrefix + "dns1");
+                    dnsServers[1] = SystemProperties.get(propertyPrefix + "dns2");
+                    for (String dnsAddr : dnsServers) {
+                            InetAddress ia;
+                            try {
+                                ia = NetworkUtils.numericToInetAddress(dnsAddr);
+                            } catch (IllegalArgumentException e) {
+                                throw new UnknownHostException("Non-numeric dns addr="
+                                            + dnsAddr);
+                            }
+                            linkProperties.addDns(ia);
+                    }
+                } else {
+                    throw new UnknownHostException("Empty dns response and no system default dns");
+                }
+
+                // set gateways
+                if ((gateways == null) || (gateways.length == 0)) {
+                    String sysGateways = SystemProperties.get(propertyPrefix + "gw");
+                    if (sysGateways != null) {
+                        gateways = sysGateways.split(" ");
+                    } else {
+                        gateways = new String[0];
+                    }
+                }
+                for (String addr : gateways) {
+                    InetAddress ia;
+                    try {
+                        ia = NetworkUtils.numericToInetAddress(addr);
+                    } catch (IllegalArgumentException e) {
+                        throw new UnknownHostException("Non-numeric gateway addr=" + addr);
+                    }
+                    linkProperties.addGateway(ia);
+                }
+
+                result = SetupResult.SUCCESS;
+            } catch (UnknownHostException e) {
+                Log.d(LOG_TAG, "onSetupCompleted: UnknownHostException " + e);
+                e.printStackTrace();
+                result = SetupResult.ERR_UnacceptableParameter;
+            }
+        } else {
+            if (version < 4) {
+                result = SetupResult.ERR_GetLastErrorFromRil;
+            } else {
+                result = SetupResult.ERR_RilError;
+            }
+        }
+
+        // An error occurred so clear properties
+        if (result != SetupResult.SUCCESS) {
+            if(DBG) Log.d(LOG_TAG,
+                    "onSetupConnectionCompleted with an error, clearing LinkProperties");
+            linkProperties.clear();
+        }
+
+        return result;
+    }
 }
+
+
