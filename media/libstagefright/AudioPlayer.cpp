@@ -306,9 +306,7 @@ size_t AudioPlayer::fillBuffer(void *data, size_t size) {
     }
 
     if (mReachedEOS) {
-        memset(data, 0, size);
-
-        return size;
+        return 0;
     }
 
     size_t size_done = 0;
