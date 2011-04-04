@@ -96,7 +96,7 @@ public class EntropyService extends Binder {
 
     private void loadInitialEntropy() {
         try {
-            RandomBlock.fromFile(entropyFile).toFile(randomDevice);
+            RandomBlock.fromFile(entropyFile).toFile(randomDevice, false);
         } catch (IOException e) {
             Slog.w(TAG, "unable to load initial entropy (first boot?)", e);
         }
@@ -104,7 +104,7 @@ public class EntropyService extends Binder {
 
     private void writeEntropy() {
         try {
-            RandomBlock.fromFile(randomDevice).toFile(entropyFile);
+            RandomBlock.fromFile(randomDevice).toFile(entropyFile, true);
         } catch (IOException e) {
             Slog.w(TAG, "unable to write entropy", e);
         }
