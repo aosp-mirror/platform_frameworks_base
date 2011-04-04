@@ -194,7 +194,7 @@ no dither applied for 24-bit.
 <td style="text-align: center;" nowrap><big>&bull;</big><br><small>(Android 3.0+)</small></td>
 <td style="text-align: center;"><big>&bull;</big></td>
 <td>Baseline Profile (BP)</td>
-<td>3GPP (.3gp) and MPEG-4 (.mp4)</td>
+<td>3GPP (.3gp) and MPEG-4 (.mp4). MPEG-TS (.ts, AAC audio only, not seekable, Android 3.0+)</td>
 </tr>
 
 <tr>
