@@ -760,15 +760,15 @@ class BackupManagerService extends IBackupManager.Stub {
                     sf.delete();
                 }
             }
+        }
 
-            // Enqueue a new backup of every participant
-            int N = mBackupParticipants.size();
-            for (int i=0; i<N; i++) {
-                int uid = mBackupParticipants.keyAt(i);
-                HashSet<ApplicationInfo> participants = mBackupParticipants.valueAt(i);
-                for (ApplicationInfo app: participants) {
-                    dataChangedImpl(app.packageName);
-                }
+        // Enqueue a new backup of every participant
+        int N = mBackupParticipants.size();
+        for (int i=0; i<N; i++) {
+            int uid = mBackupParticipants.keyAt(i);
+            HashSet<ApplicationInfo> participants = mBackupParticipants.valueAt(i);
+            for (ApplicationInfo app: participants) {
+                dataChangedImpl(app.packageName);
             }
         }
     }
