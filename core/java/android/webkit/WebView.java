@@ -5569,6 +5569,7 @@ public class WebView extends AbsoluteLayout
                         ted.mNativeLayer = nativeScrollableLayer(
                                 contentX, contentY, ted.mNativeLayerRect, null);
                         ted.mSequence = mTouchEventQueue.nextTouchSequence();
+                        mTouchEventQueue.preQueueTouchEventData(ted);
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         if (mDeferTouchProcess) {
                             // still needs to set them for compute deltaX/Y
@@ -5618,6 +5619,7 @@ public class WebView extends AbsoluteLayout
                     ted.mNativeLayer = mScrollingLayer;
                     ted.mNativeLayerRect.set(mScrollingLayerRect);
                     ted.mSequence = mTouchEventQueue.nextTouchSequence();
+                    mTouchEventQueue.preQueueTouchEventData(ted);
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     mLastSentTouchTime = eventTime;
                     if (mDeferTouchProcess) {
@@ -5802,6 +5804,7 @@ public class WebView extends AbsoluteLayout
                     ted.mNativeLayer = mScrollingLayer;
                     ted.mNativeLayerRect.set(mScrollingLayerRect);
                     ted.mSequence = mTouchEventQueue.nextTouchSequence();
+                    mTouchEventQueue.preQueueTouchEventData(ted);
                     mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                 }
                 mLastTouchUpTime = eventTime;
@@ -5827,6 +5830,7 @@ public class WebView extends AbsoluteLayout
                                     contentX, contentY,
                                     ted.mNativeLayerRect, null);
                             ted.mSequence = mTouchEventQueue.nextTouchSequence();
+                            mTouchEventQueue.preQueueTouchEventData(ted);
                             mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                         } else if (mPreventDefault != PREVENT_DEFAULT_YES){
                             mZoomManager.handleDoubleTap(mLastTouchX, mLastTouchY);
@@ -5973,6 +5977,7 @@ public class WebView extends AbsoluteLayout
         ted.mReprocess = true;
         ted.mMotionEvent = MotionEvent.obtain(ev);
         ted.mSequence = sequence;
+        mTouchEventQueue.preQueueTouchEventData(ted);
         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
         cancelLongPress();
         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
@@ -7190,9 +7195,17 @@ public class WebView extends AbsoluteLayout
         private long mNextTouchSequence = Long.MIN_VALUE + 1;
         private long mLastHandledTouchSequence = Long.MIN_VALUE;
         private long mIgnoreUntilSequence = Long.MIN_VALUE + 1;
+
+        // Events waiting to be processed.
         private QueuedTouch mTouchEventQueue;
+
+        // Known events that are waiting on a response before being enqueued.
+        private QueuedTouch mPreQueue;
+
+        // Pool of QueuedTouch objects saved for later use.
         private QueuedTouch mQueuedTouchRecycleBin;
         private int mQueuedTouchRecycleCount;
+
         private long mLastEventTime = Long.MAX_VALUE;
         private static final int MAX_RECYCLED_QUEUED_TOUCH = 15;
 
@@ -7214,6 +7227,57 @@ public class WebView extends AbsoluteLayout
          */
         public void ignoreCurrentlyMissingEvents() {
             mIgnoreUntilSequence = mNextTouchSequence;
+
+            // Run any events we have available and complete, pre-queued or otherwise.
+            runQueuedAndPreQueuedEvents();
+        }
+
+        private void runQueuedAndPreQueuedEvents() {
+            QueuedTouch qd = mPreQueue;
+            boolean fromPreQueue = true;
+            while (qd != null && qd.mSequence == mLastHandledTouchSequence + 1) {
+                handleQueuedTouch(qd);
+                QueuedTouch recycleMe = qd;
+                if (fromPreQueue) {
+                    mPreQueue = qd.mNext;
+                } else {
+                    mTouchEventQueue = qd.mNext;
+                }
+                recycleQueuedTouch(recycleMe);
+                mLastHandledTouchSequence++;
+
+                long nextPre = mPreQueue != null ? mPreQueue.mSequence : Long.MAX_VALUE;
+                long nextQueued = mTouchEventQueue != null ?
+                        mTouchEventQueue.mSequence : Long.MAX_VALUE;
+                fromPreQueue = nextPre < nextQueued;
+                qd = fromPreQueue ? mPreQueue : mTouchEventQueue;
+            }
+        }
+
+        /**
+         * Add a TouchEventData to the pre-queue.
+         *
+         * An event in the pre-queue is an event that we know about that
+         * has been sent to webkit, but that we haven't received back and
+         * enqueued into the normal touch queue yet. If webkit ever times
+         * out and we need to ignore currently missing events, we'll run
+         * events from the pre-queue to patch the holes.
+         *
+         * @param ted TouchEventData to pre-queue
+         */
+        public void preQueueTouchEventData(TouchEventData ted) {
+            QueuedTouch newTouch = obtainQueuedTouch().set(ted);
+            if (mPreQueue == null) {
+                mPreQueue = newTouch;
+            } else {
+                QueuedTouch insertionPoint = mPreQueue;
+                while (insertionPoint.mNext != null &&
+                        insertionPoint.mNext.mSequence < newTouch.mSequence) {
+                    insertionPoint = insertionPoint.mNext;
+                }
+                newTouch.mNext = insertionPoint.mNext;
+                insertionPoint.mNext = newTouch;
+            }
         }
 
         private void recycleQueuedTouch(QueuedTouch qd) {
@@ -7235,6 +7299,11 @@ public class WebView extends AbsoluteLayout
             while (mTouchEventQueue != null) {
                 QueuedTouch recycleMe = mTouchEventQueue;
                 mTouchEventQueue = mTouchEventQueue.mNext;
+                recycleQueuedTouch(recycleMe);
+            }
+            while (mPreQueue != null) {
+                QueuedTouch recycleMe = mPreQueue;
+                mPreQueue = mPreQueue.mNext;
                 recycleQueuedTouch(recycleMe);
             }
         }
@@ -7259,6 +7328,28 @@ public class WebView extends AbsoluteLayout
          * @return true if the event was processed before returning, false if it was just enqueued.
          */
         public boolean enqueueTouchEvent(TouchEventData ted) {
+            // Remove from the pre-queue if present
+            QueuedTouch preQueue = mPreQueue;
+            if (preQueue != null) {
+                // On exiting this block, preQueue is set to the pre-queued QueuedTouch object
+                // if it was present in the pre-queue, and removed from the pre-queue itself.
+                if (preQueue.mSequence == ted.mSequence) {
+                    mPreQueue = preQueue.mNext;
+                } else {
+                    QueuedTouch prev = preQueue;
+                    preQueue = null;
+                    while (prev.mNext != null) {
+                        if (prev.mNext.mSequence == ted.mSequence) {
+                            preQueue = prev.mNext;
+                            prev.mNext = preQueue.mNext;
+                            break;
+                        } else {
+                            prev = prev.mNext;
+                        }
+                    }
+                }
+            }
+
             if (ted.mSequence < mLastHandledTouchSequence) {
                 // Stale event and we already moved on; drop it. (Should not be common.)
                 Log.w(LOGTAG, "Stale touch event " + MotionEvent.actionToString(ted.mAction) +
@@ -7270,23 +7361,24 @@ public class WebView extends AbsoluteLayout
                 return false;
             }
 
+            // dropStaleGestures above might have fast-forwarded us to
+            // an event we have already.
+            runNextQueuedEvents();
+
             if (mLastHandledTouchSequence + 1 == ted.mSequence) {
+                if (preQueue != null) {
+                    recycleQueuedTouch(preQueue);
+                    preQueue = null;
+                }
                 handleQueuedTouchEventData(ted);
 
                 mLastHandledTouchSequence++;
 
                 // Do we have any more? Run them if so.
-                QueuedTouch qd = mTouchEventQueue;
-                while (qd != null && qd.mSequence == mLastHandledTouchSequence + 1) {
-                    handleQueuedTouch(qd);
-                    QueuedTouch recycleMe = qd;
-                    qd = qd.mNext;
-                    recycleQueuedTouch(recycleMe);
-                    mLastHandledTouchSequence++;
-                }
-                mTouchEventQueue = qd;
+                runNextQueuedEvents();
             } else {
-                QueuedTouch qd = obtainQueuedTouch().set(ted);
+                // Reuse the pre-queued object if we had it.
+                QueuedTouch qd = preQueue != null ? preQueue : obtainQueuedTouch().set(ted);
                 mTouchEventQueue = mTouchEventQueue == null ? qd : mTouchEventQueue.add(qd);
             }
             return true;
@@ -7308,25 +7400,33 @@ public class WebView extends AbsoluteLayout
                 return;
             }
 
+            // dropStaleGestures above might have fast-forwarded us to
+            // an event we have already.
+            runNextQueuedEvents();
+
             if (mLastHandledTouchSequence + 1 == sequence) {
                 handleQueuedMotionEvent(ev);
 
                 mLastHandledTouchSequence++;
 
                 // Do we have any more? Run them if so.
-                QueuedTouch qd = mTouchEventQueue;
-                while (qd != null && qd.mSequence == mLastHandledTouchSequence + 1) {
-                    handleQueuedTouch(qd);
-                    QueuedTouch recycleMe = qd;
-                    qd = qd.mNext;
-                    recycleQueuedTouch(recycleMe);
-                    mLastHandledTouchSequence++;
-                }
-                mTouchEventQueue = qd;
+                runNextQueuedEvents();
             } else {
                 QueuedTouch qd = obtainQueuedTouch().set(ev, sequence);
                 mTouchEventQueue = mTouchEventQueue == null ? qd : mTouchEventQueue.add(qd);
             }
+        }
+
+        private void runNextQueuedEvents() {
+            QueuedTouch qd = mTouchEventQueue;
+            while (qd != null && qd.mSequence == mLastHandledTouchSequence + 1) {
+                handleQueuedTouch(qd);
+                QueuedTouch recycleMe = qd;
+                qd = qd.mNext;
+                recycleQueuedTouch(recycleMe);
+                mLastHandledTouchSequence++;
+            }
+            mTouchEventQueue = qd;
         }
 
         private boolean dropStaleGestures(MotionEvent ev, long sequence) {
@@ -7348,13 +7448,16 @@ public class WebView extends AbsoluteLayout
             }
 
             // If we have a new down event and it's been a while since the last event
-            // we saw, just reset and keep going.
+            // we saw, catch up as best we can and keep going.
             if (ev != null && ev.getAction() == MotionEvent.ACTION_DOWN) {
                 long eventTime = ev.getEventTime();
                 long lastHandledEventTime = mLastEventTime;
                 if (eventTime > lastHandledEventTime + QUEUED_GESTURE_TIMEOUT) {
                     Log.w(LOGTAG, "Got ACTION_DOWN but still waiting on stale event. " +
-                            "Ignoring previous queued events.");
+                            "Catching up.");
+                    runQueuedAndPreQueuedEvents();
+
+                    // Drop leftovers that we truly don't have.
                     QueuedTouch qd = mTouchEventQueue;
                     while (qd != null && qd.mSequence < sequence) {
                         QueuedTouch recycleMe = qd;
@@ -7375,6 +7478,17 @@ public class WebView extends AbsoluteLayout
                 }
                 mTouchEventQueue = qd;
                 mLastHandledTouchSequence = mIgnoreUntilSequence - 1;
+            }
+
+            if (mPreQueue != null) {
+                // Drop stale prequeued events
+                QueuedTouch qd = mPreQueue;
+                while (qd != null && qd.mSequence < mIgnoreUntilSequence) {
+                    QueuedTouch recycleMe = qd;
+                    qd = qd.mNext;
+                    recycleQueuedTouch(recycleMe);
+                }
+                mPreQueue = qd;
             }
 
             return sequence <= mLastHandledTouchSequence;
@@ -7626,6 +7740,7 @@ public class WebView extends AbsoluteLayout
                                 ted.mPoints[0].x, ted.mPoints[0].y,
                                 ted.mNativeLayerRect, null);
                         ted.mSequence = mTouchEventQueue.nextTouchSequence();
+                        mTouchEventQueue.preQueueTouchEventData(ted);
                         mWebViewCore.sendMessage(EventHub.TOUCH_EVENT, ted);
                     } else if (mPreventDefault != PREVENT_DEFAULT_YES) {
                         mTouchMode = TOUCH_DONE_MODE;
