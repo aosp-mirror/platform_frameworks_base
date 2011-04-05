@@ -245,7 +245,7 @@ __inline Word32 ASM_L_shl(Word32 L_var1, Word16 var2)
 		"MOV	%[result], %[L_var1], ASL %[var2] \n"
 		"TEQ	r2, %[result], ASR %[var2]\n"
 		"EORNE  %[result],r3,r2,ASR#31\n"
-		:[result]"+r"(result)
+		:[result]"=&r"(result)
 		:[L_var1]"r"(L_var1), [var2]"r"(var2)
 		:"r2", "r3"
 		);
@@ -277,7 +277,7 @@ __inline Word32 ASM_shl(Word32 L_var1, Word16 var2)
         "RSB    r3,r3,r3,LSL #15 \n"
         "TEQ    r2, %[result], ASR #31 \n"
         "EORNE  %[result], r3, %[result],ASR #31"
-		:[result]"+r"(result)
+		:[result]"=r"(result)
 		:[L_var1]"r"(L_var1), [var2]"r"(var2)
 		:"r2", "r3"
 		);
@@ -296,13 +296,13 @@ __inline Word16 saturate(Word32 L_var1)
 #if ARMV5TE_SAT
 	Word16 result;
 	asm volatile (
-		"MOV	%[result], %[L_var1]\n"
 		"MOV	r3, #1\n"
 		"MOV	r2,%[L_var1],ASR#15\n"
 		"RSB	r3, r3, r3, LSL #15\n"
 		"TEQ	r2,%[L_var1],ASR#31\n"
 		"EORNE	%[result],r3,%[L_var1],ASR#31\n"
-		:[result]"+r"(result)
+		"MOVEQ	%[result], %[L_var1]\n"
+		:[result]"=r"(result)
 		:[L_var1]"r"(L_var1)
 		:"r2", "r3"
 	);
@@ -423,7 +423,7 @@ __inline Word32 L_mult(Word16 var1, Word16 var2)
 	asm volatile(
 		"SMULBB %[result], %[var1], %[var2] \n"
 		"QADD %[result], %[result], %[result] \n"
-		:[result]"+r"(result)
+		:[result]"=r"(result)
 		:[var1]"r"(var1), [var2]"r"(var2)
 		);
 	return result;
@@ -454,7 +454,7 @@ __inline Word32 L_msu (Word32 L_var3, Word16 var1, Word16 var2)
 		"SMULBB %[result], %[var1], %[var2] \n"
 		"QADD %[result], %[result], %[result] \n"
 		"QSUB %[result], %[L_var3], %[result]\n"
-		:[result]"+r"(result)
+		:[result]"=&r"(result)
 		:[L_var3]"r"(L_var3), [var1]"r"(var1), [var2]"r"(var2)
 		);
 	return result;
@@ -476,7 +476,7 @@ __inline Word32 L_sub(Word32 L_var1, Word32 L_var2)
 	Word32 result;
 	asm volatile(
 		"QSUB %[result], %[L_var1], %[L_var2]\n"
-		:[result]"+r"(result)
+		:[result]"=r"(result)
 		:[L_var1]"r"(L_var1), [L_var2]"r"(L_var2)
 		);
 	return result;
@@ -596,7 +596,7 @@ __inline Word16 add (Word16 var1, Word16 var2)
 		"RSB  r3, r3, r3, LSL, #15\n"
 		"TEQ  r2, %[result], ASR #31\n"
 		"EORNE %[result], r3, %[result], ASR #31"
-		:[result]"+r"(result)
+		:[result]"=r"(result)
 		:[var1]"r"(var1), [var2]"r"(var2)
 		:"r2", "r3"
 		);
@@ -626,7 +626,7 @@ __inline Word16 sub(Word16 var1, Word16 var2)
 		"MOV   r2, %[var1], ASR #15 \n"
 		"TEQ   r2, %[var1], ASR #31 \n"
 		"EORNE %[result], r3, %[result], ASR #31 \n"
-		:[result]"+r"(result)
+		:[result]"=&r"(result)
 		:[var1]"r"(var1), [var2]"r"(var2)
 		:"r2", "r3"
 		);
@@ -692,7 +692,7 @@ __inline Word16 mult (Word16 var1, Word16 var2)
 		"MOV	r2, %[result], ASR #15\n"
 		"TEQ	r2, %[result], ASR #31\n"
 		"EORNE  %[result], r3, %[result], ASR #31 \n"
-		:[result]"+r"(result)
+		:[result]"=r"(result)
 		:[var1]"r"(var1), [var2]"r"(var2)
 		:"r2", "r3"
 		);
@@ -728,7 +728,7 @@ __inline Word16 norm_s (Word16 var1)
 		"MOVEQ %[result], #0\n"
 		"CMP   r2, #-1\n"
 		"MOVEQ %[result], #15\n"
-		:[result]"+r"(result)
+		:[result]"=r"(result)
 		:[var1]"r"(var1)
 		:"r2"
 		);
@@ -774,7 +774,7 @@ __inline Word16 norm_l (Word32 L_var1)
 		"CLZNE  %[result], %[L_var1]\n"
 		"SUBNE  %[result], %[result], #1\n"
 		"MOVEQ  %[result], #0\n"
-		:[result]"+r"(result)
+		:[result]"=r"(result)
 		:[L_var1]"r"(L_var1)
 		);
 	return result;
@@ -983,7 +983,7 @@ __inline Word16 round16(Word32 L_var1)
 		"MOV   r1,#0x00008000\n"
 		"QADD  %[result], %[L_var1], r1\n"
 		"MOV   %[result], %[result], ASR #16 \n"
-		:[result]"+r"(result)
+		:[result]"=r"(result)
 		:[L_var1]"r"(L_var1)
 		:"r1"
 		);
@@ -1009,7 +1009,7 @@ __inline Word32 L_mac (Word32 L_var3, Word16 var1, Word16 var2)
 		"SMULBB %[result], %[var1], %[var2]\n"
 		"QADD	%[result], %[result], %[result]\n"
 		"QADD   %[result], %[result], %[L_var3]\n"
-		:[result]"+r"(result)
+		:[result]"=&r"(result)
 		: [L_var3]"r"(L_var3), [var1]"r"(var1), [var2]"r"(var2)
 		);
 	return result;
@@ -1031,7 +1031,7 @@ __inline Word32 L_add (Word32 L_var1, Word32 L_var2)
 	Word32 result;
 	asm volatile(
 		"QADD %[result], %[L_var1], %[L_var2]\n"
-		:[result]"+r"(result)
+		:[result]"=r"(result)
 		:[L_var1]"r"(L_var1), [L_var2]"r"(L_var2)
 		);
 	return result;
