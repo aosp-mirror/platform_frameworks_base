@@ -44,22 +44,13 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Internetna povezava prek Bluetootha"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Nastavitev načinov vnosa"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Uporabi fizično tipkovn."</string>
-    <!-- no translation found for usb_device_permission_prompt (3816016361969816903) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (6888598803988889959) -->
-    <skip />
-    <!-- no translation found for usb_device_confirm_prompt (5161205258635253206) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (3808984931830229888) -->
-    <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
-    <skip />
-    <!-- no translation found for title_usb_accessory (4966265263465181372) -->
-    <skip />
-    <!-- no translation found for label_view (6304565553218192990) -->
-    <skip />
-    <!-- no translation found for always_use_device (1450287437017315906) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (1210954576979621596) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="3816016361969816903">"Želite programu <xliff:g id="APPLICATION">%1$s</xliff:g> omogočiti dostop do naprave USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="6888598803988889959">"Želite programu <xliff:g id="APPLICATION">%1$s</xliff:g> omogočiti dostop do dodatka USB?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Želite, da se odpre <xliff:g id="ACTIVITY">%1$s</xliff:g>, ko priključite to napravo USB?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Želite, da se odpre <xliff:g id="ACTIVITY">%1$s</xliff:g>, ko priključite ta dodatek USB?"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"Noben nameščen program ne deluje s tem dodatkom USB. Več o tem dodatku: <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"Dodatek USB"</string>
+    <string name="label_view" msgid="6304565553218192990">"Prikaži"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"Privzeto uporabi za to napravo USB"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"Privzeto uporabi za ta dodatek USB"</string>
 </resources>

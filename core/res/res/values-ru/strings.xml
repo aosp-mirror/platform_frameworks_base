@@ -416,7 +416,7 @@
     <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Разрешает приложению использовать возможности аутентификации диспетчера аккаунта, в том числе создавать аккаунты, получать и устанавливать пароли для них."</string>
     <string name="permlab_manageAccounts" msgid="4440380488312204365">"управление списком аккаунтов"</string>
     <string name="permdesc_manageAccounts" msgid="8804114016661104517">"Разрешает приложению добавлять и удалять аккаунты и стирать их пароли."</string>
-    <string name="permlab_useCredentials" msgid="6401886092818819856">"использование регистрационных данных аккаунта для аутентификации"</string>
+    <string name="permlab_useCredentials" msgid="6401886092818819856">"использование учетных данных аккаунта для аутентификации"</string>
     <string name="permdesc_useCredentials" msgid="7416570544619546974">"Разрешает приложению запрашивать маркеры аутентификации."</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"просматривать состояние сети"</string>
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Позволяет приложению просматривать состояние всех сетей."</string>
@@ -460,11 +460,11 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Позволяет приложению считывать любые слова, имена и фразы личного пользования, которые могут храниться в пользовательском словаре."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"записывать в словарь пользователя"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Позволяет приложению записывать новые слова в словарь пользователя."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"изменять и удалять содержимое USB-накопителя"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"изм./удал. содерж. накопителя"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"изменять/удалять содержимое SD-карты"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Разрешает приложению запись на USB-накопитель."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Разрешает приложению запись на SD-карту"</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"изменение/удаление данных из внутреннего хранилища мультимедиа"</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"изм./удал. данных мультимедиа"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Приложение сможет изменять содержание внутреннего хранилища мультимедиа."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"получать доступ к кэшу файловой системы"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Разрешает программам доступ для записи и чтения к кэшу файловой системы."</string>
@@ -825,7 +825,7 @@
     <string name="anr_application_process" msgid="4185842666452210193">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> (в процессе <xliff:g id="PROCESS">%2$s</xliff:g>) не отвечает."</string>
     <string name="anr_process" msgid="1246866008169975783">"Процесс <xliff:g id="PROCESS">%1$s</xliff:g> не отвечает."</string>
     <string name="force_close" msgid="3653416315450806396">"Закрыть"</string>
-    <string name="report" msgid="4060218260984795706">"Отчет"</string>
+    <string name="report" msgid="4060218260984795706">"Отзыв"</string>
     <string name="wait" msgid="7147118217226317732">"Подождать"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Приложение перенаправлено"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Приложение <xliff:g id="APP_NAME">%1$s</xliff:g> выполняется."</string>
@@ -919,7 +919,7 @@
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Поврежденная карта SD"</string>
     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"USB-накопитель поврежден. Попробуйте отформатировать его."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"SD-карта повреждена. Попробуйте отформатировать ее."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"USB-накопитель неожиданно отключен"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Накопитель неожиданно отключен"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Карта SD неожиданно извлечена"</string>
     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Перед извлечением USB-накопителя отключите его во избежание потери данных."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Перед извлечением карты SD отключите ее во избежание потери данных."</string>

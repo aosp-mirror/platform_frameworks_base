@@ -44,22 +44,13 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth getetherd"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Invoermethoden configureren"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Fysiek toetsenbord gebruiken"</string>
-    <!-- no translation found for usb_device_permission_prompt (3816016361969816903) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (6888598803988889959) -->
-    <skip />
-    <!-- no translation found for usb_device_confirm_prompt (5161205258635253206) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (3808984931830229888) -->
-    <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
-    <skip />
-    <!-- no translation found for title_usb_accessory (4966265263465181372) -->
-    <skip />
-    <!-- no translation found for label_view (6304565553218192990) -->
-    <skip />
-    <!-- no translation found for always_use_device (1450287437017315906) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (1210954576979621596) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="3816016361969816903">"De applicatie <xliff:g id="APPLICATION">%1$s</xliff:g> toegang tot het USB-apparaat geven?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="6888598803988889959">"De applicatie <xliff:g id="APPLICATION">%1$s</xliff:g> toegang tot het USB-accessoire geven?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"<xliff:g id="ACTIVITY">%1$s</xliff:g> openen wanneer dit USB-apparaat wordt aangesloten?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"<xliff:g id="ACTIVITY">%1$s</xliff:g> openen wanneer dit USB-accessoire wordt aangesloten?"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"Er zijn geen geïnstalleerde applicaties die werken met dit USB-accessoire. Meer informatie over dit accessoire vindt u op <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"USB-accessoire"</string>
+    <string name="label_view" msgid="6304565553218192990">"Weergeven"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"Standaard gebruiken voor dit USB-apparaat"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"Standaard gebruiken voor dit USB-accessoire"</string>
 </resources>

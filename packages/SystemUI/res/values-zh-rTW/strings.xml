@@ -44,22 +44,13 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"已透過藍牙進行網際網路共用"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"設定輸入方式"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"使用實體鍵盤"</string>
-    <!-- no translation found for usb_device_permission_prompt (3816016361969816903) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (6888598803988889959) -->
-    <skip />
-    <!-- no translation found for usb_device_confirm_prompt (5161205258635253206) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (3808984931830229888) -->
-    <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
-    <skip />
-    <!-- no translation found for title_usb_accessory (4966265263465181372) -->
-    <skip />
-    <!-- no translation found for label_view (6304565553218192990) -->
-    <skip />
-    <!-- no translation found for always_use_device (1450287437017315906) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (1210954576979621596) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="3816016361969816903">"允許 <xliff:g id="APPLICATION">%1$s</xliff:g> 應用程式存取 USB 裝置嗎？"</string>
+    <string name="usb_accessory_permission_prompt" msgid="6888598803988889959">"允許 <xliff:g id="APPLICATION">%1$s</xliff:g> 應用程式存取 USB 配件嗎？"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"連接這個 USB 裝置時啟用 <xliff:g id="ACTIVITY">%1$s</xliff:g> 嗎？"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"連接這個 USB 配件時啟用 <xliff:g id="ACTIVITY">%1$s</xliff:g> 嗎？"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"已安裝的應用程式均無法存取這類 USB 配件，如要進一步瞭解這個配件，請造訪 <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"USB 配件"</string>
+    <string name="label_view" msgid="6304565553218192990">"查看"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"預設用於這個 USB 裝置"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"預設用於這個 USB 配件"</string>
 </resources>
