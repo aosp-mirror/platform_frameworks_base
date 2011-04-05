@@ -460,8 +460,7 @@ __inline Word32 L_msu (Word32 L_var3, Word16 var1, Word16 var2)
 	Word32 result;
 	asm (
 		"SMULBB %[result], %[var1], %[var2] \n"
-		"QADD %[result], %[result], %[result] \n"
-		"QSUB %[result], %[L_var3], %[result]\n"
+		"QDSUB %[result], %[L_var3], %[result]\n"
 		:[result]"=&r"(result)
 		:[L_var3]"r"(L_var3), [var1]"r"(var1), [var2]"r"(var2)
 		);
@@ -1014,8 +1013,7 @@ __inline Word32 L_mac (Word32 L_var3, Word16 var1, Word16 var2)
 	Word32 result;
 	asm (
 		"SMULBB %[result], %[var1], %[var2]\n"
-		"QADD	%[result], %[result], %[result]\n"
-		"QADD   %[result], %[result], %[L_var3]\n"
+		"QDADD  %[result], %[L_var3], %[result]\n"
 		:[result]"=&r"(result)
 		: [L_var3]"r"(L_var3), [var1]"r"(var1), [var2]"r"(var2)
 		);
