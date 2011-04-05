@@ -65,6 +65,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -1730,6 +1731,18 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         } catch (NativeDaemonConnectorException e) {
             // Encryption failed
             return e.getCode();
+        }
+    }
+
+    public String[] getVolumeList() {
+        synchronized(mVolumeStates) {
+            Set<String> volumes = mVolumeStates.keySet();
+            String[] result = new String[volumes.size()];
+            int i = 0;
+            for (String volume : volumes) {
+                result[i++] = volume;
+            }
+            return result;
         }
     }
 
