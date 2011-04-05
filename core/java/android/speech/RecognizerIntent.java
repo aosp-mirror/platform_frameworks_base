@@ -100,6 +100,7 @@ public class RecognizerIntent {
      *   <li>{@link #EXTRA_MAX_RESULTS}
      *   <li>{@link #EXTRA_PARTIAL_RESULTS}
      *   <li>{@link #EXTRA_WEB_SEARCH_ONLY}
+     *   <li>{@link #EXTRA_ORIGIN}
      * </ul>
      * 
      * <p> Result extras (returned in the result, not to be specified in the request):
@@ -182,6 +183,13 @@ public class RecognizerIntent {
      * {@link java.util.Locale#getDefault()}.
      */
     public static final String EXTRA_LANGUAGE = "android.speech.extra.LANGUAGE";
+    
+    /**
+     * Optional value which can be used to indicate the referer url of a page in which
+     * speech was requested. For example, a web browser may choose to provide this for
+     * uses of speech on a given page.
+     */
+    public static final String EXTRA_ORIGIN = "android.speech.extra.ORIGIN";
 
     /** 
      * Optional limit on the maximum number of results to return. If omitted the recognizer
