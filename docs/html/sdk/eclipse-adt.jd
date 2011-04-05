@@ -656,7 +656,7 @@ ADT installation as described in the steps below. </p>
 <h3 id="downloading">Downloading the ADT Plugin</h3>
 
 <p>Use the Update Manager feature of your Eclipse installation to install the latest
-revision of ADT on your development computer.<p>
+revision of ADT on your development computer.<>
 
 <p>Assuming that you have a compatible version of the Eclipse IDE installed, as
 described in <a href="#preparing">Preparing for Installation</a>, above, follow
@@ -671,26 +671,32 @@ Software...</strong>.</li>
     <li>In the Add Repository dialog that appears, enter "ADT Plugin" for the <em>Name</em> and the
 following URL for the <em>Location</em>:
       <pre>https://dl-ssl.google.com/android/eclipse/</pre>
-        <p>Note: If you have trouble acquiring the plugin, try using "http" in the Location URL,
-        instead of "https" (https is preferred for security reasons).</p>
-      <p>Click <strong>OK</strong>.</p></li>
-    <li>In the Available Software dialog, select
-the checkbox next to Developer Tools and click <strong>Next</strong>.</li>
+    </li>
+    <li>Click <strong>OK</strong>
+      <p>Note: If you have trouble acquiring the plugin, try using "http" in the Location URL,
+instead of "https" (https is preferred for security reasons).</p></li>
+    <li>In the Available Software dialog, select the checkbox next to Developer Tools and click
+<strong>Next</strong>.</li>
     <li>In the next window, you'll see a list of the tools to be downloaded. Click
 <strong>Next</strong>. </li>
-    <li>Read and accept the license agreements, then click <strong>Finish</strong>.</li>
+    <li>Read and accept the license agreements, then click <strong>Finish</strong>.
+      <p>Note: If you get a security warning saying that the authenticity or validity of
+the software can't be established, click <strong>OK</strong>.</p></li>
     <li>When the installation completes, restart Eclipse. </li>
 </ol>
 
 <h3 id="configuring">Configuring the ADT Plugin</h3>
 
-<p>Once you've successfully downloaded ADT as described above, the next step
+<p>After you've successfully downloaded the ADT as described above, the next step
 is to modify your ADT preferences in Eclipse to point to the Android SDK directory:</p>
 
 <ol>
     <li>Select <strong>Window</strong> &gt; <strong>Preferences...</strong> to open the Preferences
         panel (Mac OS X: <strong>Eclipse</strong> &gt; <strong>Preferences</strong>).</li>
-    <li>Select <strong>Android</strong> from the left panel. </li>
+    <li>Select <strong>Android</strong> from the left panel.</li>
+      <p>You may see a dialog asking whether you want to send usage statistics to Google. If so,
+make your choice and click <strong>Proceed</strong>. You cannot continue with this procedure until
+you click <strong>Proceed</strong>.</p>
     <li>For the <em>SDK Location</em> in the main panel, click <strong>Browse...</strong> and
         locate your downloaded SDK directory. </li>
     <li>Click <strong>Apply</strong>, then <strong>OK</strong>.</li>
