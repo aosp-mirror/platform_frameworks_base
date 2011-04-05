@@ -50,7 +50,8 @@ public class MtpDatabase {
     private final IContentProvider mMediaProvider;
     private final String mVolumeName;
     private final Uri mObjectsUri;
-    private final String mMediaStoragePath;
+    private final String mMediaStoragePath; // path to primary storage
+    private final HashMap<String, MtpStorage> mStorageMap = new HashMap<String, MtpStorage>();
 
     // cached property groups for single properties
     private final HashMap<Integer, MtpPropertyGroup> mPropertyGroupsByProperty
@@ -67,9 +68,6 @@ public class MtpDatabase {
     private SharedPreferences mDeviceProperties;
     private static final int DEVICE_PROPERTIES_DATABASE_VERSION = 1;
 
-    // FIXME - this should be passed in via the constructor
-    private final int mStorageID = 0x00010001;
-
     private static final String[] ID_PROJECTION = new String[] {
             Files.FileColumns._ID, // 0
     };
@@ -85,16 +83,21 @@ public class MtpDatabase {
     };
     private static final String[] OBJECT_INFO_PROJECTION = new String[] {
             Files.FileColumns._ID, // 0
-            Files.FileColumns.DATA, // 1
+            Files.FileColumns.STORAGE_ID, // 1
             Files.FileColumns.FORMAT, // 2
             Files.FileColumns.PARENT, // 3
-            Files.FileColumns.SIZE, // 4
-            Files.FileColumns.DATE_MODIFIED, // 5
+            Files.FileColumns.DATA, // 4
+            Files.FileColumns.SIZE, // 5
+            Files.FileColumns.DATE_MODIFIED, // 6
     };
     private static final String ID_WHERE = Files.FileColumns._ID + "=?";
     private static final String PATH_WHERE = Files.FileColumns.DATA + "=?";
     private static final String PARENT_WHERE = Files.FileColumns.PARENT + "=?";
     private static final String PARENT_FORMAT_WHERE = PARENT_WHERE + " AND "
+                                            + Files.FileColumns.FORMAT + "=?";
+    private static final String PARENT_STORAGE_WHERE = PARENT_WHERE + " AND "
+                                            + Files.FileColumns.STORAGE_ID + "=?";
+    private static final String PARENT_STORAGE_FORMAT_WHERE = PARENT_STORAGE_WHERE + " AND "
                                             + Files.FileColumns.FORMAT + "=?";
 
     private final MediaScanner mMediaScanner;
@@ -122,6 +125,14 @@ public class MtpDatabase {
         } finally {
             super.finalize();
         }
+    }
+
+    public void addStorage(MtpStorage storage) {
+        mStorageMap.put(storage.getPath(), storage);
+    }
+
+    public void removeStorage(MtpStorage storage) {
+        mStorageMap.remove(storage.getPath());
     }
 
     private void initDeviceProperties(Context context) {
@@ -160,7 +171,7 @@ public class MtpDatabase {
     }
 
     private int beginSendObject(String path, int format, int parent,
-                         int storage, long size, long modified) {
+                         int storageId, long size, long modified) {
         // first make sure the object does not exist
         if (path != null) {
             Cursor c = null;
@@ -185,7 +196,7 @@ public class MtpDatabase {
         values.put(Files.FileColumns.DATA, path);
         values.put(Files.FileColumns.FORMAT, format);
         values.put(Files.FileColumns.PARENT, parent);
-        // storage is ignored for now
+        values.put(Files.FileColumns.STORAGE_ID, storageId);
         values.put(Files.FileColumns.SIZE, size);
         values.put(Files.FileColumns.DATE_MODIFIED, modified);
 
@@ -237,19 +248,35 @@ public class MtpDatabase {
         }
     }
 
-    private int[] getObjectList(int storageID, int format, int parent) {
-        // we can ignore storageID until we support multiple storages
-        Cursor c = null;
-        try {
+    private Cursor createObjectQuery(int storageID, int format, int parent) throws RemoteException {
+        if (storageID != 0) {
             if (format != 0) {
-                c = mMediaProvider.query(mObjectsUri, ID_PROJECTION,
+                return mMediaProvider.query(mObjectsUri, ID_PROJECTION,
+                        PARENT_STORAGE_FORMAT_WHERE,
+                        new String[] { Integer.toString(parent), Integer.toString(storageID),
+                                Integer.toString(format) }, null);
+            } else {
+                return mMediaProvider.query(mObjectsUri, ID_PROJECTION,
+                        PARENT_STORAGE_WHERE, new String[]
+                                { Integer.toString(parent), Integer.toString(storageID) }, null);
+            }
+        } else {
+            if (format != 0) {
+                return mMediaProvider.query(mObjectsUri, ID_PROJECTION,
                             PARENT_FORMAT_WHERE,
                             new String[] { Integer.toString(parent), Integer.toString(format) },
                              null);
             } else {
-                c = mMediaProvider.query(mObjectsUri, ID_PROJECTION,
+                return mMediaProvider.query(mObjectsUri, ID_PROJECTION,
                             PARENT_WHERE, new String[] { Integer.toString(parent) }, null);
             }
+        }
+    }
+
+    private int[] getObjectList(int storageID, int format, int parent) {
+        Cursor c = null;
+        try {
+            c = createObjectQuery(storageID, format, parent);
             if (c == null) {
                 return null;
             }
@@ -273,18 +300,9 @@ public class MtpDatabase {
     }
 
     private int getNumObjects(int storageID, int format, int parent) {
-        // we can ignore storageID until we support multiple storages
         Cursor c = null;
         try {
-            if (format != 0) {
-                c = mMediaProvider.query(mObjectsUri, ID_PROJECTION,
-                            PARENT_FORMAT_WHERE,
-                            new String[] { Integer.toString(parent), Integer.toString(format) },
-                             null);
-            } else {
-                c = mMediaProvider.query(mObjectsUri, ID_PROJECTION,
-                            PARENT_WHERE, new String[] { Integer.toString(parent) }, null);
-            }
+            c = createObjectQuery(storageID, format, parent);
             if (c != null) {
                 return c.getCount();
             }
@@ -508,7 +526,7 @@ public class MtpDatabase {
             }
         }
 
-        return propertyGroup.getPropertyList((int)handle, format, depth, mStorageID);
+        return propertyGroup.getPropertyList((int)handle, format, depth);
     }
 
     private int renameFile(int handle, String newName) {
@@ -631,12 +649,12 @@ public class MtpDatabase {
             c = mMediaProvider.query(mObjectsUri, OBJECT_INFO_PROJECTION,
                             ID_WHERE, new String[] {  Integer.toString(handle) }, null);
             if (c != null && c.moveToNext()) {
-                outStorageFormatParent[0] = mStorageID;
+                outStorageFormatParent[0] = c.getInt(1);
                 outStorageFormatParent[1] = c.getInt(2);
                 outStorageFormatParent[2] = c.getInt(3);
 
                 // extract name from path
-                String path = c.getString(1);
+                String path = c.getString(4);
                 int lastSlash = path.lastIndexOf('/');
                 int start = (lastSlash >= 0 ? lastSlash + 1 : 0);
                 int end = path.length();
@@ -646,8 +664,8 @@ public class MtpDatabase {
                 path.getChars(start, end, outName, 0);
                 outName[end - start] = 0;
 
-                outSizeModified[0] = c.getLong(4);
-                outSizeModified[1] = c.getLong(5);
+                outSizeModified[0] = c.getLong(5);
+                outSizeModified[1] = c.getLong(6);
                 return true;
             }
         } catch (RemoteException e) {

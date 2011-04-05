@@ -33,8 +33,8 @@ public class MtpServer {
         System.loadLibrary("media_jni");
     }
 
-    public MtpServer(MtpDatabase database, String storagePath, long reserveSpace) {
-        native_setup(database, storagePath, reserveSpace);
+    public MtpServer(MtpDatabase database) {
+        native_setup(database);
     }
 
     public void start() {
@@ -65,18 +65,20 @@ public class MtpServer {
         native_set_ptp_mode(usePtp);
     }
 
-    // Used to disable MTP by removing all storage units.
-    // This is done to disable access to file transfer when the device is locked.
-    public void setLocked(boolean locked) {
-        native_set_locked(locked);
+    public void addStorage(MtpStorage storage) {
+        native_add_storage(storage);
     }
 
-    private native final void native_setup(MtpDatabase database, String storagePath,
-            long reserveSpace);
+    public void removeStorage(MtpStorage storage) {
+        native_remove_storage(storage.getStorageId());
+    }
+
+    private native final void native_setup(MtpDatabase database);
     private native final void native_start();
     private native final void native_stop();
     private native final void native_send_object_added(int handle);
     private native final void native_send_object_removed(int handle);
     private native final void native_set_ptp_mode(boolean usePtp);
-    private native final void native_set_locked(boolean locked);
+    private native final void native_add_storage(MtpStorage storage);
+    private native final void native_remove_storage(int storageId);
 }
