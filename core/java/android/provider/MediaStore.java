@@ -346,6 +346,13 @@ public final class MediaStore {
          */
         public interface FileColumns extends MediaColumns {
             /**
+             * The MTP storage ID of the file
+             * <P>Type: INTEGER</P>
+             * @hide
+             */
+            public static final String STORAGE_ID = "storage_id";
+
+            /**
              * The MTP format code of the file
              * <P>Type: INTEGER</P>
              * @hide

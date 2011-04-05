@@ -70,6 +70,9 @@ public:
                                     int fileGroup, int filePerm, int directoryPerm);
     virtual             ~MtpServer();
 
+    MtpStorage*         getStorage(MtpStorageID id);
+    inline bool         hasStorage() { return mStorages.size() > 0; }
+    bool                hasStorage(MtpStorageID id);
     void                addStorage(MtpStorage* storage);
     void                removeStorage(MtpStorage* storage);
 
@@ -79,9 +82,6 @@ public:
     void                sendObjectRemoved(MtpObjectHandle handle);
 
 private:
-    MtpStorage*         getStorage(MtpStorageID id);
-    inline bool         hasStorage() { return mStorages.size() > 0; }
-    bool                hasStorage(MtpStorageID id);
     void                sendStoreAdded(MtpStorageID id);
     void                sendStoreRemoved(MtpStorageID id);
     void                sendEvent(MtpEventCode code, uint32_t param1);

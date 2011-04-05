@@ -29,13 +29,14 @@ class MtpStorage {
 private:
     MtpStorageID            mStorageID;
     MtpString               mFilePath;
+    MtpString               mDescription;
     uint64_t                mMaxCapacity;
     // amount of free space to leave unallocated
     uint64_t                mReserveSpace;
 
 public:
                             MtpStorage(MtpStorageID id, const char* filePath,
-                                    uint64_t reserveSpace);
+                                    const char* description, uint64_t reserveSpace);
     virtual                 ~MtpStorage();
 
     inline MtpStorageID     getStorageID() const { return mStorageID; }
