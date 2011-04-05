@@ -515,7 +515,7 @@ ExampleFragment fragment = (ExampleFragment) getFragmentManager().findFragmentBy
 </pre>
 
 
-<h4 id="EventCallbacks">Creating event callbacks to the activity</h4>
+<h3 id="EventCallbacks">Creating event callbacks to the activity</h3>
 
 <p>In some cases, you might need a fragment to share events with the activity. A good way to do that
 is to define a callback interface inside the fragment and require that the host activity implement

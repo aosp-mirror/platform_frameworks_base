@@ -18,18 +18,13 @@ other devices</li>
     <li><a href="#FindingDevices">Finding Devices</a>
       <ol>
         <li><a href="#QueryingPairedDevices">Querying paired devices</a></li>
-        <li><a href="#DiscoveringDevices">Discovering devices</a>
-          <ol><li><a href="#EnablingDiscoverability">Enabling
-                  discoverability</a></li></ol>
-        </li>
-      </ol>
-    </li>
+        <li><a href="#DiscoveringDevices">Discovering devices</a></li>
+      </ol></li>
     <li><a href="#ConnectingDevices">Connecting Devices</a>
       <ol>
         <li><a href="#ConnectingAsAServer">Connecting as a server</a></li>
         <li><a href="#ConnectingAsAClient">Connecting as a client</a></li>
-      </ol>
-    </li>
+      </ol></li>
     <li><a href="#ManagingAConnection">Managing a Connection</a></li>
   </ol>
 

@@ -16,9 +16,22 @@ page.title=Data Storage
   <h2>In this document</h2>
   <ol>
     <li><a href="#pref">Using Shared Preferences</a></li>
-    <li><a href="#filesInternal">Using the Internal Storage</a></li>
-    <li><a href="#filesExternal">Using the External Storage</a></li>
-    <li><a href="#db">Using Databases</a></li>
+    <li><a href="#filesInternal">Using the Internal Storage</a>
+      <ol>
+        <li><a href="#InternalCache">Saving cache files</a></li>
+        <li><a href="#InternalMethods">Other useful methods</a></li>
+      </ol></li>
+    <li><a href="#filesExternal">Using the External Storage</a>
+      <ol>
+        <li><a href="#MediaAvail">Checking media availability</a></li>
+        <li><a href="#AccessingExtFiles">Accessing files on external storage</a></li>
+        <li><a href="#SavingSharedFiles">Saving files that should be shared</a></li>
+        <li><a href="#ExternalCache">Saving cache files</a></li>
+      </ol></li>
+    <li><a href="#db">Using Databases</a>
+      <ol>
+        <li><a href="#dbDebugging">Database debugging</a></li>
+      </ol></li>
     <li><a href="#netw">Using a Network Connection</a></li>
   </ol>
 
@@ -238,7 +251,7 @@ save to the external storage. All applications can read and write files placed o
 storage and the user can remove them.</p>
 
 
-<h3>Checking media availability</h3>
+<h3 id="MediaAvail">Checking media availability</h3>
 
 <p>Before you do any work with the external storage, you should always call {@link
 android.os.Environment#getExternalStorageState()} to check whether the media is available. The
@@ -271,7 +284,7 @@ entirely, has been removed badly, etc. You can use these to notify the user with
 when your application needs to access the media.</p>
 
 
-<h3>Accessing files on external storage</h3>
+<h3 id="AccessingExtFiles">Accessing files on external storage</h3>
 
 <p>If you're using API Level 8 or greater, use {@link
 android.content.Context#getExternalFilesDir(String) getExternalFilesDir()} to open a {@link
@@ -310,7 +323,7 @@ files and including them in apps like Gallery or Music.</p>
 </div>
 
 
-<h3>Saving files that should be shared</h3>
+<h3 id="SavingSharedFiles">Saving files that should be shared</h3>
 
 <p>If you want to save files that are not specific to your application and that should <em>not</em>
 be deleted when your application is uninstalled, save them to one of the public directories on the

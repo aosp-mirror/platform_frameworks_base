@@ -1,35 +1,24 @@
 page.title=Near Field Communication
 @jd:body
 
-  <div id="qv-wrapper">
-    <div id="qv">
-      <h2>Near Field Communication quickview</h2>
-
+<div id="qv-wrapper">
+<div id="qv">
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#api">API Overview</a></li>
+    <li><a href="#manifest">Declaring Android Manifest elements</a></li>
+    <li><a href="#dispatch">The Tag Dispatch System</a>
       <ol>
-        <li><a href="#api">API Overview</a></li>
-
-        <li><a href="#manifest">Declaring Android Manifest Elements</a></li>
-
-        <li>
-          <a href="#dispatch">The Tag Dispatch System</a>
-
-          <ol>
-            <li><a href="#intent-dispatch">Using the intent dispatch system</a></li>
-            
-            <li><a href="#foreground-dispatch">Using the foreground dispatch system</a></li>
-          </ol>
-        </li>
-
-        <li><a href="#ndef">NDEF Messages</a></li>
-
-        <li><a href="#read">Reading an NFC Tag</a></li>
-
-        <li><a href="#write">Writing to an NFC Tag</a></li>
-
-        <li><a href="#p2p">Peer to Peer Data Exchange</a></li>
-      </ol>
-    </div>
-  </div>
+        <li><a href="#intent-dispatch">Using the intent dispatch system</a></li>
+        <li><a href="#foreground-dispatch">Using the foreground dispatch system</a></li>
+      </ol></li>
+    <li><a href="#ndef">Working with Data on NFC Tags</a></li>
+    <li><a href="#read">Reading an NFC Tag</a></li>
+    <li><a href="#write">Writing to an NFC Tag</a></li>
+    <li><a href="#p2p">Peer-to-Peer Data Exchange</a></li>
+  </ol>
+</div>
+</div>
 
   <p>Near Field Communication (NFC) is a set of short-range wireless technologies, typically
   requiring a distance of 4cm or less. NFC operates at 13.56mhz, and at rates ranging from 106
