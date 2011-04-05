@@ -227,13 +227,7 @@ Word32 L_shr_r (Word32 L_var1, Word16 var2);
 #if ARMV4_INASM
 __inline Word32 ASM_L_shr(Word32 L_var1, Word16 var2)
 {
-	Word32 result;
-	asm (
-		"MOV %[result], %[L_var1], ASR %[var2] \n"
-		:[result]"=r"(result)
-		:[L_var1]"r"(L_var1), [var2]"r"(var2)
-		);
-	return result;
+	return L_var1 >> var2;
 }
 
 __inline Word32 ASM_L_shl(Word32 L_var1, Word16 var2)
