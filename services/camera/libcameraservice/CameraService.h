@@ -79,12 +79,6 @@ private:
     sp<MediaPlayer>     mSoundPlayer[NUM_SOUNDS];
     int                 mSoundRef;  // reference count (release all MediaPlayer when 0)
 
-    // Used by Client objects to extract the ISurface from a Surface object.
-    // This is used because making Client a friend class of Surface would
-    // require including this header in Surface.h since Client is a nested
-    // class.
-    static sp<ISurface> getISurface(const sp<Surface>& surface);
-
     class Client : public BnCamera
     {
     public:
