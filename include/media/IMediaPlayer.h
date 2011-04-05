@@ -24,7 +24,6 @@
 namespace android {
 
 class Parcel;
-class ISurface;
 class Surface;
 class ISurfaceTexture;
 
