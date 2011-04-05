@@ -695,9 +695,7 @@ static jobjectArray getDevicePropertiesNative(JNIEnv *env, jobject object,
            str_array =  parse_remote_device_properties(env, &iter);
         dbus_message_unref(reply);
 
-        env->PopLocalFrame(NULL);
-
-        return str_array;
+        return (jobjectArray) env->PopLocalFrame(str_array);
     }
 #endif
     return NULL;
@@ -731,8 +729,7 @@ static jobjectArray getAdapterPropertiesNative(JNIEnv *env, jobject object) {
             str_array = parse_adapter_properties(env, &iter);
         dbus_message_unref(reply);
 
-        env->PopLocalFrame(NULL);
-        return str_array;
+        return (jobjectArray) env->PopLocalFrame(str_array);
     }
 #endif
     return NULL;

@@ -76,14 +76,13 @@ class BluetoothAdapterProperties {
         for (int i = 0; i < properties.length; i++) {
             String name = properties[i];
             String newValue = null;
-            int len;
             if (name == null) {
                 Log.e(TAG, "Error:Adapter Property at index " + i + " is null");
                 continue;
             }
             if (name.equals("Devices") || name.equals("UUIDs")) {
                 StringBuilder str = new StringBuilder();
-                len = Integer.valueOf(properties[++i]);
+                int len = Integer.valueOf(properties[++i]);
                 for (int j = 0; j < len; j++) {
                     str.append(properties[++i]);
                     str.append(",");
