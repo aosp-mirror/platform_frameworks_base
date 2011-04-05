@@ -9,25 +9,21 @@ page.title=Introduction
   <p>However, you may choose to develop with another IDE or a simple text editor and invoke the
   tools on the command line or with scripts. This is a less streamlined way to develop because you
   will sometimes have to call command line tools manually, but you will have access to the same
-  amount of features that you would have in Eclipse.</p>
+  number of features that you would have in Eclipse.</p>
+
+  <p class="note"><strong>Note:</strong> Before you begin developing Android applications, make
+    sure you have gone through all of the steps outlined in <a
+href="{@docRoot}sdk/installing.html">Installing the SDK</a>.</p>
 
   <p>The basic steps for developing applications with or without Eclipse are the same:</p>
 
   <ol>
-    <li>Install Eclipse or your own IDE.
-
-      <p>Install Eclipse along with <a href="{@docRoot}sdk/eclipse-adt.html#installing">the ADT
-      Plugin</a>, or install an editor of your choice if you want to use the command line SDK tools.
-      If you are already developing applications, be sure to <a href= 
-      "{@docRoot}sdk/eclipse-adt.html#updating">update Your ADT Plugin</a> to the latest version
-      before continuing.</p>
-    </li>
 
     <li>Set up Android Virtual Devices or hardware devices.
 
       <p>You need to create Android Virtual Devices (AVD) or connect hardware devices on which
       you will install your applications.</p>
-      
+
       <p>See <a href="{@docRoot}guide/developing/devices/index.html">Managing Virtual Devices</a>
       and <a href="{@docRoot}guide/developing/device.html">Using Hardware Devices</a> for more
 information.
