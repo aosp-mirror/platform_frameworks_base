@@ -48,9 +48,7 @@
 #define assert(_Expression)     ((void)0)
 #endif
 
-#ifdef LINUX
-#define __inline static __inline__
-#endif
+#define __inline static __inline
 
 #define INT_BITS   32
 /*
