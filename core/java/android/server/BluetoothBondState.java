@@ -18,6 +18,9 @@ package android.server;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothA2dp;
+import android.bluetooth.BluetoothHeadset;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -68,6 +71,8 @@ class BluetoothBondState {
     private final Context mContext;
     private final BluetoothService mService;
     private final BluetoothInputProfileHandler mBluetoothInputProfileHandler;
+    private BluetoothA2dp mA2dpProxy;
+    private BluetoothHeadset mHeadsetProxy;
 
     BluetoothBondState(Context context, BluetoothService service) {
         mContext = context;
@@ -126,14 +131,15 @@ class BluetoothBondState {
 
         if (state == BluetoothDevice.BOND_BONDED) {
             mService.addProfileState(address);
+        } else if (state == BluetoothDevice.BOND_BONDING) {
+            if (mA2dpProxy == null || mHeadsetProxy == null) {
+                getProfileProxy();
+            }
         } else if (state == BluetoothDevice.BOND_NONE) {
             mService.removeProfileState(address);
         }
 
-        // HID is handled by BluetoothService, other profiles
-        // will be handled by their respective services.
-        mBluetoothInputProfileHandler.setInitialInputDevicePriority(
-            mService.getRemoteDevice(address), state);
+        setProfilePriorities(address, state);
 
         if (DBG) {
             Log.d(TAG, address + " bond state " + oldState + " -> " + state
@@ -261,6 +267,52 @@ class BluetoothBondState {
         mPinAttempt.put(address, new Integer(newAttempt));
     }
 
+    private void getProfileProxy() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (mA2dpProxy == null) {
+            bluetoothAdapter.getProfileProxy(mContext, mProfileServiceListener,
+                                             BluetoothProfile.A2DP);
+        }
+
+        if (mHeadsetProxy == null) {
+            bluetoothAdapter.getProfileProxy(mContext, mProfileServiceListener,
+                                             BluetoothProfile.HEADSET);
+        }
+    }
+
+    private void closeProfileProxy() {
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        if (mA2dpProxy != null) {
+            bluetoothAdapter.closeProfileProxy(BluetoothProfile.A2DP, mA2dpProxy);
+        }
+
+        if (mHeadsetProxy != null) {
+            bluetoothAdapter.closeProfileProxy(BluetoothProfile.HEADSET, mHeadsetProxy);
+        }
+    }
+
+    private BluetoothProfile.ServiceListener mProfileServiceListener =
+        new BluetoothProfile.ServiceListener() {
+
+        public void onServiceConnected(int profile, BluetoothProfile proxy) {
+            if (profile == BluetoothProfile.A2DP) {
+                mA2dpProxy = (BluetoothA2dp) proxy;
+            } else if (profile == BluetoothProfile.HEADSET) {
+                mHeadsetProxy = (BluetoothHeadset) proxy;
+            }
+        }
+
+        public void onServiceDisconnected(int profile) {
+            if (profile == BluetoothProfile.A2DP) {
+                mA2dpProxy = null;
+            } else if (profile == BluetoothProfile.HEADSET) {
+                mHeadsetProxy = null;
+            }
+        }
+    };
+
     private void copyAutoPairingData() {
         FileInputStream in = null;
         FileOutputStream out = null;
@@ -365,4 +417,30 @@ class BluetoothBondState {
             }
         }
     }
+
+    // Set service priority of Hid, A2DP and Headset profiles depending on
+    // the bond state change
+    private void setProfilePriorities(String address, int state) {
+        BluetoothDevice remoteDevice = mService.getRemoteDevice(address);
+        // HID is handled by BluetoothService
+        mBluetoothInputProfileHandler.setInitialInputDevicePriority(remoteDevice, state);
+
+        // Set service priority of A2DP and Headset
+        // We used to do the priority change in the 2 services after the broadcast
+        //   intent reach them. But that left a small time gap that could reject
+        //   incoming connection due to undefined priorities.
+        if (state == BluetoothDevice.BOND_BONDED) {
+            if (mA2dpProxy.getPriority(remoteDevice) == BluetoothProfile.PRIORITY_UNDEFINED) {
+                mA2dpProxy.setPriority(remoteDevice, BluetoothProfile.PRIORITY_ON);
+            }
+
+            if (mHeadsetProxy.getPriority(remoteDevice) == BluetoothProfile.PRIORITY_UNDEFINED) {
+                mHeadsetProxy.setPriority(remoteDevice, BluetoothProfile.PRIORITY_ON);
+            }
+        } else if (state == BluetoothDevice.BOND_NONE) {
+            mA2dpProxy.setPriority(remoteDevice, BluetoothProfile.PRIORITY_UNDEFINED);
+            mHeadsetProxy.setPriority(remoteDevice, BluetoothProfile.PRIORITY_UNDEFINED);
+        }
+    }
+
 }
