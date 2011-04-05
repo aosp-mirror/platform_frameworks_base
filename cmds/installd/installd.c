@@ -21,7 +21,6 @@
 #define TOKEN_MAX     8     /* max number of arguments in buffer */
 #define REPLY_MAX     256   /* largest reply allowed */
 
-
 static int do_ping(char **arg, char reply[REPLY_MAX])
 {
     return 0;
@@ -235,11 +234,76 @@ done:
     return 0;
 }
 
-int main(const int argc, const char *argv[]) {    
+/**
+ * Initialize all the global variables that are used elsewhere. Returns 0 upon
+ * success and -1 on error.
+ */
+void free_globals() {
+    size_t i;
+
+    for (i = 0; i < android_system_dirs.count; i++) {
+        if (android_system_dirs.dirs[i].path != NULL) {
+            free(android_system_dirs.dirs[i].path);
+        }
+    }
+
+    free(android_system_dirs.dirs);
+}
+
+int initialize_globals() {
+    // Get the android data directory.
+    if (get_path_from_env(&android_data_dir, "ANDROID_DATA") < 0) {
+        return -1;
+    }
+
+    // Get the android app directory.
+    if (copy_and_append(&android_app_dir, &android_data_dir, APP_SUBDIR) < 0) {
+        return -1;
+    }
+
+    // Get the android protected app directory.
+    if (copy_and_append(&android_app_private_dir, &android_data_dir, PRIVATE_APP_SUBDIR) < 0) {
+        return -1;
+    }
+
+    // Get the sd-card ASEC mount point.
+    if (get_path_from_env(&android_asec_dir, "ASEC_MOUNTPOINT") < 0) {
+        return -1;
+    }
+
+    // Take note of the system and vendor directories.
+    android_system_dirs.count = 2;
+
+    android_system_dirs.dirs = calloc(android_system_dirs.count, sizeof(dir_rec_t));
+    if (android_system_dirs.dirs == NULL) {
+        LOGE("Couldn't allocate array for dirs; aborting\n");
+        return -1;
+    }
+
+    // system
+    if (get_path_from_env(&android_system_dirs.dirs[0], "ANDROID_ROOT") < 0) {
+        free_globals();
+        return -1;
+    }
+
+    // vendor
+    // TODO replace this with an environment variable (doesn't exist yet)
+    android_system_dirs.dirs[1].path = "/vendor/";
+    android_system_dirs.dirs[1].len = strlen(android_system_dirs.dirs[1].path);
+
+    return 0;
+}
+
+int main(const int argc, const char *argv[]) {
     char buf[BUFFER_MAX];
     struct sockaddr addr;
     socklen_t alen;
     int lsocket, s, count;
+
+    if (initialize_globals() < 0) {
+        LOGE("Could not initialize globals; exiting.\n");
+        exit(1);
+    }
 
     lsocket = android_get_control_socket(SOCKET_PATH);
     if (lsocket < 0) {
