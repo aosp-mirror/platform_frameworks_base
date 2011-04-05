@@ -130,6 +130,13 @@ typedef unsigned __int64 UWord64;
     #define ARMV5TE_NORM_L        1
 	#define ARMV5TE_L_MPY_LS	  1
 #endif
+#if ARMV6_INASM
+    #undef  ARMV5TE_ADD
+    #define ARMV5TE_ADD           0
+    #undef  ARMV5TE_SUB
+    #define ARMV5TE_SUB           0
+    #define ARMV6_SAT             1
+#endif
 
 //basic operation functions optimization flags
 #define SATRUATE_IS_INLINE              1   //define saturate as inline function

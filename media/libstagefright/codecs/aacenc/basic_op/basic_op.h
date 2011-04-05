@@ -264,6 +264,18 @@ __inline Word32 ASM_shr(Word32 L_var1, Word16 var2)
 
 __inline Word32 ASM_shl(Word32 L_var1, Word16 var2)
 {
+#if ARMV6_SAT
+	Word32 result;
+	asm (
+		"CMP	%[var2], #16\n"
+		"MOVLT  %[result], %[L_var1], ASL %[var2]\n"
+		"MOVGE  %[result], %[L_var1], ASL #16\n"
+		"SSAT   %[result], #16, %[result]\n"
+		:[result]"=r"(result)
+		:[L_var1]"r"(L_var1), [var2]"r"(var2)
+		);
+	return result;
+#else
 	Word32 result;
 	Word32 tmp;
 	asm (
@@ -277,6 +289,7 @@ __inline Word32 ASM_shl(Word32 L_var1, Word16 var2)
 		:[L_var1]"r"(L_var1), [var2]"r"(var2), [mask]"r"(0x7fff)
 		);
 	return result;
+#endif
 }
 #endif
 
@@ -288,7 +301,15 @@ __inline Word32 ASM_shl(Word32 L_var1, Word16 var2)
 #if (SATRUATE_IS_INLINE)
 __inline Word16 saturate(Word32 L_var1)
 {
-#if ARMV5TE_SAT
+#if ARMV6_SAT
+    Word16 result;
+	asm (
+		"SSAT %[result], #16, %[L_var1]"
+		: [result]"=r"(result)
+		: [L_var1]"r"(L_var1)
+		);
+	return result;
+#elif ARMV5TE_SAT
 	Word16 result;
 	Word32 tmp;
 	asm volatile (
@@ -671,7 +692,16 @@ __inline Word16 div_s (Word16 var1, Word16 var2)
 #if (MULT_IS_INLINE)
 __inline Word16 mult (Word16 var1, Word16 var2)
 {
-#if ARMV5TE_MULT
+#if ARMV5TE_MULT && ARMV6_SAT
+	Word32 result;
+	asm (
+		"SMULBB %[result], %[var1], %[var2] \n"
+		"SSAT   %[result], #16, %[result], ASR #15 \n"
+		:[result]"=r"(result)
+		:[var1]"r"(var1), [var2]"r"(var2)
+		);
+	return result;
+#elif ARMV5TE_MULT
 	Word32 result, tmp;
 	asm (
 		"SMULBB %[tmp], %[var1], %[var2] \n"
