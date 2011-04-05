@@ -93,7 +93,7 @@ class MtpPropertyGroup {
 
          switch (code) {
             case MtpConstants.PROPERTY_STORAGE_ID:
-                // no query needed until we support multiple storage units
+                column = Files.FileColumns.STORAGE_ID;
                 type = MtpConstants.TYPE_UINT32;
                 break;
              case MtpConstants.PROPERTY_OBJECT_FORMAT:
@@ -134,6 +134,7 @@ class MtpPropertyGroup {
                 break;
             case MtpConstants.PROPERTY_PERSISTENT_UID:
                 // PUID is concatenation of storageID and object handle
+                column = Files.FileColumns.STORAGE_ID;
                 type = MtpConstants.TYPE_UINT128;
                 break;
             case MtpConstants.PROPERTY_DURATION:
@@ -280,7 +281,7 @@ class MtpPropertyGroup {
         return path.substring(start, end);
     }
 
-    MtpPropertyList getPropertyList(int handle, int format, int depth, int storageID) {
+    MtpPropertyList getPropertyList(int handle, int format, int depth) {
         //Log.d(TAG, "getPropertyList handle: " + handle + " format: " + format + " depth: " + depth);
         if (depth > 1) {
             // we only support depth 0 and 1
@@ -348,10 +349,6 @@ class MtpPropertyGroup {
 
                     // handle some special cases
                     switch (propertyCode) {
-                        case MtpConstants.PROPERTY_STORAGE_ID:
-                            result.append(handle, propertyCode, MtpConstants.TYPE_UINT32,
-                                    storageID);
-                            break;
                         case MtpConstants.PROPERTY_PROTECTION_STATUS:
                             // protection status is always 0
                             result.append(handle, propertyCode, MtpConstants.TYPE_UINT16, 0);
@@ -398,7 +395,7 @@ class MtpPropertyGroup {
                             break;
                         case MtpConstants.PROPERTY_PERSISTENT_UID:
                             // PUID is concatenation of storageID and object handle
-                            long puid = storageID;
+                            long puid = c.getLong(column);
                             puid <<= 32;
                             puid += handle;
                             result.append(handle, propertyCode, MtpConstants.TYPE_UINT128, puid);

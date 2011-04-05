@@ -114,6 +114,23 @@
          removable. -->
     <bool name="config_externalStorageRemovable" product="default">true</bool>
 
+    <!-- List of mount points for external storage devices.
+         The first item on the list should be the primary external storage and should match the
+         value returned by Environment.getExternalStorageDirectory (/mnt/sdcard).
+         MTP storage IDs will be generated based on the position of the mountpoint in this list:
+            0x00010001 - ID for primary external storage (/mnt/sdcard)
+            0x00020001 - ID for first secondary external storage
+            0x00030001 - ID for second secondary external storage
+         etc. -->
+    <string-array translatable="false" name="config_externalStoragePaths">
+        <item>"/mnt/sdcard"</item>
+    </string-array>
+
+    <!-- User visible descriptions of the volumes in the config_externalStoragePaths array. -->
+    <string-array translatable="true" name="config_externalStorageDescriptions">
+        <item>"SD card"</item>
+    </string-array>
+
     <!-- Number of megabytes of space to leave unallocated by MTP.
          MTP will subtract this value from the free space it reports back
          to the host via GetStorageInfo, and will not allow new files to
