@@ -44,22 +44,13 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth con tethering"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Configura metodi di input"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Utilizza tastiera fisica"</string>
-    <!-- no translation found for usb_device_permission_prompt (3816016361969816903) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (6888598803988889959) -->
-    <skip />
-    <!-- no translation found for usb_device_confirm_prompt (5161205258635253206) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (3808984931830229888) -->
-    <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
-    <skip />
-    <!-- no translation found for title_usb_accessory (4966265263465181372) -->
-    <skip />
-    <!-- no translation found for label_view (6304565553218192990) -->
-    <skip />
-    <!-- no translation found for always_use_device (1450287437017315906) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (1210954576979621596) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="3816016361969816903">"Consentire all\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> di accedere al dispositivo USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="6888598803988889959">"Consentire all\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> di accedere all\'accessorio USB?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Aprire <xliff:g id="ACTIVITY">%1$s</xliff:g> quando questo dispositivo USB è collegato?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Aprire <xliff:g id="ACTIVITY">%1$s</xliff:g> quando questo accessorio USB è collegato?"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"Applicazioni installate non funzionano con accessorio USB. Altre informazioni su accessorio su <xliff:g id="URL">%1$s</xliff:g>."</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"Accessorio USB"</string>
+    <string name="label_view" msgid="6304565553218192990">"Visualizza"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"Usa per impostazione predef. per dispositivo USB"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"Usa per impostazione predef. per accessorio USB"</string>
 </resources>

@@ -44,22 +44,13 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth tertambat"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Konfigurasikan metode masukan"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Gunakan keyboard fisik"</string>
-    <!-- no translation found for usb_device_permission_prompt (3816016361969816903) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (6888598803988889959) -->
-    <skip />
-    <!-- no translation found for usb_device_confirm_prompt (5161205258635253206) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (3808984931830229888) -->
-    <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
-    <skip />
-    <!-- no translation found for title_usb_accessory (4966265263465181372) -->
-    <skip />
-    <!-- no translation found for label_view (6304565553218192990) -->
-    <skip />
-    <!-- no translation found for always_use_device (1450287437017315906) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (1210954576979621596) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="3816016361969816903">"Izinkan aplikasi <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses perangkat USB?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="6888598803988889959">"Izinkan aplikasi <xliff:g id="APPLICATION">%1$s</xliff:g> mengakses aksesori USB?"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Buka <xliff:g id="ACTIVITY">%1$s</xliff:g> ketika perangkat USB ini tersambung?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Buka <xliff:g id="ACTIVITY">%1$s</xliff:g> ketika aksesori USB ini tersambung?"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"Tidak ada aplikasi terpasang yang bekerja dengan aksesori USB ini. Pelajari aksesori ini lebih lanjut di <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"Aksesori USB"</string>
+    <string name="label_view" msgid="6304565553218192990">"Lihat"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"Gunakan secara bawaan untuk perangkat USB ini"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"Gunakan secara bawaan untuk aksesori USB ini"</string>
 </resources>

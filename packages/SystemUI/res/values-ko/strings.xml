@@ -44,22 +44,13 @@
     <string name="bluetooth_tethered" msgid="7094101612161133267">"블루투스 테더링됨"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"입력 방법 구성"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"물리적 키보드 사용"</string>
-    <!-- no translation found for usb_device_permission_prompt (3816016361969816903) -->
-    <skip />
-    <!-- no translation found for usb_accessory_permission_prompt (6888598803988889959) -->
-    <skip />
-    <!-- no translation found for usb_device_confirm_prompt (5161205258635253206) -->
-    <skip />
-    <!-- no translation found for usb_accessory_confirm_prompt (3808984931830229888) -->
-    <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
-    <skip />
-    <!-- no translation found for title_usb_accessory (4966265263465181372) -->
-    <skip />
-    <!-- no translation found for label_view (6304565553218192990) -->
-    <skip />
-    <!-- no translation found for always_use_device (1450287437017315906) -->
-    <skip />
-    <!-- no translation found for always_use_accessory (1210954576979621596) -->
-    <skip />
+    <string name="usb_device_permission_prompt" msgid="3816016361969816903">"애플리케이션 <xliff:g id="APPLICATION">%1$s</xliff:g>(이)가 USB 기기에 액세스하도록 허용하시겠습니까?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="6888598803988889959">"애플리케이션 <xliff:g id="APPLICATION">%1$s</xliff:g>(이)가 USB 액세서리에 액세스하도록 허용하시겠습니까"</string>
+    <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"USB 기기가 연결될 때 <xliff:g id="ACTIVITY">%1$s</xliff:g>(을)를 여시겠습니까?"</string>
+    <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"USB 액세서리가 연결될 때 <xliff:g id="ACTIVITY">%1$s</xliff:g>(을)를 여시겠습니까?"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"이 USB와 호환되는 설치 애플리케이션이 없습니다. <xliff:g id="URL">%1$s</xliff:g>에서 세부정보를 참조하세요."</string>
+    <string name="title_usb_accessory" msgid="4966265263465181372">"USB 액세서리"</string>
+    <string name="label_view" msgid="6304565553218192990">"보기"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"이 USB 기기에 기본값으로 사용"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"이 USB 액세서리에 기본값으로 사용"</string>
 </resources>
