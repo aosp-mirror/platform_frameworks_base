@@ -148,7 +148,8 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
 
     private Context                               mContext;
     private NativeDaemonConnector                 mConnector;
-    private String                                mLegacyState = Environment.MEDIA_REMOVED;
+    private final HashMap<String, String>         mVolumeStates = new HashMap<String, String>();
+    private String                                mExternalStoragePath;
     private PackageManagerService                 mPms;
     private boolean                               mUmsEnabling;
     // Used as a lock for methods that register/unregister listeners.
@@ -453,22 +454,25 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                     @Override
                     public void run() {
                         try {
-                            String path = Environment.getExternalStorageDirectory().getPath();
-                            String state = getVolumeState(path);
+                            synchronized (mVolumeStates) {
+                                for (String path : mVolumeStates.keySet()) {
+                                    String state = mVolumeStates.get(path);
 
-                            if (mEmulateExternalStorage) {
-                                notifyVolumeStateChange(null, path, VolumeState.NoMedia, VolumeState.Mounted);
-                            } else if (state.equals(Environment.MEDIA_UNMOUNTED)) {
-                                int rc = doMountVolume(path);
-                                if (rc != StorageResultCode.OperationSucceeded) {
-                                    Slog.e(TAG, String.format("Boot-time mount failed (%d)", rc));
+                                    if (state.equals(Environment.MEDIA_UNMOUNTED)) {
+                                        int rc = doMountVolume(path);
+                                        if (rc != StorageResultCode.OperationSucceeded) {
+                                            Slog.e(TAG, String.format("Boot-time mount failed (%d)",
+                                                    rc));
+                                        }
+                                    } else if (state.equals(Environment.MEDIA_SHARED)) {
+                                        /*
+                                         * Bootstrap UMS enabled state since vold indicates
+                                         * the volume is shared (runtime restart while ums enabled)
+                                         */
+                                        notifyVolumeStateChange(null, path, VolumeState.NoMedia,
+                                                VolumeState.Shared);
+                                    }
                                 }
-                            } else if (state.equals(Environment.MEDIA_SHARED)) {
-                                /*
-                                 * Bootstrap UMS enabled state since vold indicates
-                                 * the volume is shared (runtime restart while ums enabled)
-                                 */
-                                notifyVolumeStateChange(null, path, VolumeState.NoMedia, VolumeState.Shared);
                             }
 
                             /*
@@ -519,35 +523,36 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
     }
 
     private void updatePublicVolumeState(String path, String state) {
-        if (!path.equals(Environment.getExternalStorageDirectory().getPath())) {
-            Slog.w(TAG, "Multiple volumes not currently supported");
+        String oldState;
+        synchronized(mVolumeStates) {
+            oldState = mVolumeStates.put(path, state);
+        }
+        if (state.equals(oldState)) {
+            Slog.w(TAG, String.format("Duplicate state transition (%s -> %s) for %s",
+                    state, state, path));
             return;
         }
 
-        if (mLegacyState.equals(state)) {
-            Slog.w(TAG, String.format("Duplicate state transition (%s -> %s)", mLegacyState, state));
-            return;
-        }
-        // Update state on PackageManager, but only of real events
-        if (!mEmulateExternalStorage) {
-            if (Environment.MEDIA_UNMOUNTED.equals(state)) {
-                mPms.updateExternalMediaStatus(false, false);
+        Slog.d(TAG, "volume state changed for " + path + " (" + oldState + " -> " + state + ")");
 
-                /*
-                 * Some OBBs might have been unmounted when this volume was
-                 * unmounted, so send a message to the handler to let it know to
-                 * remove those from the list of mounted OBBS.
-                 */
-                mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(OBB_FLUSH_MOUNT_STATE,
-                        path));
-            } else if (Environment.MEDIA_MOUNTED.equals(state)) {
-                mPms.updateExternalMediaStatus(true, false);
+        if (path.equals(mExternalStoragePath)) {
+            // Update state on PackageManager, but only of real events
+            if (!mEmulateExternalStorage) {
+                if (Environment.MEDIA_UNMOUNTED.equals(state)) {
+                    mPms.updateExternalMediaStatus(false, false);
+
+                    /*
+                     * Some OBBs might have been unmounted when this volume was
+                     * unmounted, so send a message to the handler to let it know to
+                     * remove those from the list of mounted OBBS.
+                     */
+                    mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(
+                            OBB_FLUSH_MOUNT_STATE, path));
+                } else if (Environment.MEDIA_MOUNTED.equals(state)) {
+                    mPms.updateExternalMediaStatus(true, false);
+                }
             }
         }
-
-        String oldState = mLegacyState;
-        mLegacyState = state;
-
         synchronized (mListeners) {
             for (int i = mListeners.size() -1; i >= 0; i--) {
                 MountServiceBinderListener bl = mListeners.get(i);
@@ -578,20 +583,15 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                 /**
                  * Determine media state and UMS detection status
                  */
-                String path = Environment.getExternalStorageDirectory().getPath();
-                String state = Environment.MEDIA_REMOVED;
-
                 try {
                     String[] vols = mConnector.doListCommand(
                         "volume list", VoldResponseCode.VolumeListResult);
                     for (String volstr : vols) {
                         String[] tok = volstr.split(" ");
                         // FMT: <label> <mountpoint> <state>
-                        if (!tok[1].equals(path)) {
-                            Slog.w(TAG, String.format(
-                                    "Skipping unknown volume '%s'",tok[1]));
-                            continue;
-                        }
+                        String path = tok[1];
+                        String state = Environment.MEDIA_REMOVED;
+
                         int st = Integer.parseInt(tok[2]);
                         if (st == VolumeState.NoMedia) {
                             state = Environment.MEDIA_REMOVED;
@@ -606,14 +606,15 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                         } else {
                             throw new Exception(String.format("Unexpected state %d", st));
                         }
-                    }
-                    if (state != null) {
-                        if (DEBUG_EVENTS) Slog.i(TAG, "Updating valid state " + state);
-                        updatePublicVolumeState(path, state);
+
+                        if (state != null) {
+                            if (DEBUG_EVENTS) Slog.i(TAG, "Updating valid state " + state);
+                            updatePublicVolumeState(path, state);
+                        }
                     }
                 } catch (Exception e) {
                     Slog.e(TAG, "Error processing initial volume state", e);
-                    updatePublicVolumeState(path, Environment.MEDIA_REMOVED);
+                    updatePublicVolumeState(mExternalStoragePath, Environment.MEDIA_REMOVED);
                 }
 
                 try {
@@ -1055,11 +1056,12 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
     public MountService(Context context) {
         mContext = context;
 
+        mExternalStoragePath = Environment.getExternalStorageDirectory().getPath();
         mEmulateExternalStorage = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_emulateExternalStorage);
         if (mEmulateExternalStorage) {
             Slog.d(TAG, "using emulated external storage");
-            mLegacyState = Environment.MEDIA_MOUNTED;
+            mVolumeStates.put(mExternalStoragePath, Environment.MEDIA_MOUNTED);
         }
 
         // XXX: This will go away soon in favor of IMountServiceObserver
@@ -1127,54 +1129,56 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         validatePermission(android.Manifest.permission.SHUTDOWN);
 
         Slog.i(TAG, "Shutting down");
+        synchronized (mVolumeStates) {
+            for (String path : mVolumeStates.keySet()) {
+                String state = mVolumeStates.get(path);
 
-        String path = Environment.getExternalStorageDirectory().getPath();
-        String state = getVolumeState(path);
-
-        if (state.equals(Environment.MEDIA_SHARED)) {
-            /*
-             * If the media is currently shared, unshare it.
-             * XXX: This is still dangerous!. We should not
-             * be rebooting at *all* if UMS is enabled, since
-             * the UMS host could have dirty FAT cache entries
-             * yet to flush.
-             */
-            setUsbMassStorageEnabled(false);
-        } else if (state.equals(Environment.MEDIA_CHECKING)) {
-            /*
-             * If the media is being checked, then we need to wait for
-             * it to complete before being able to proceed.
-             */
-            // XXX: @hackbod - Should we disable the ANR timer here?
-            int retries = 30;
-            while (state.equals(Environment.MEDIA_CHECKING) && (retries-- >=0)) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException iex) {
-                    Slog.e(TAG, "Interrupted while waiting for media", iex);
-                    break;
+                if (state.equals(Environment.MEDIA_SHARED)) {
+                    /*
+                     * If the media is currently shared, unshare it.
+                     * XXX: This is still dangerous!. We should not
+                     * be rebooting at *all* if UMS is enabled, since
+                     * the UMS host could have dirty FAT cache entries
+                     * yet to flush.
+                     */
+                    setUsbMassStorageEnabled(false);
+                } else if (state.equals(Environment.MEDIA_CHECKING)) {
+                    /*
+                     * If the media is being checked, then we need to wait for
+                     * it to complete before being able to proceed.
+                     */
+                    // XXX: @hackbod - Should we disable the ANR timer here?
+                    int retries = 30;
+                    while (state.equals(Environment.MEDIA_CHECKING) && (retries-- >=0)) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException iex) {
+                            Slog.e(TAG, "Interrupted while waiting for media", iex);
+                            break;
+                        }
+                        state = Environment.getExternalStorageState();
+                    }
+                    if (retries == 0) {
+                        Slog.e(TAG, "Timed out waiting for media to check");
+                    }
                 }
-                state = Environment.getExternalStorageState();
-            }
-            if (retries == 0) {
-                Slog.e(TAG, "Timed out waiting for media to check");
-            }
-        }
 
-        if (state.equals(Environment.MEDIA_MOUNTED)) {
-            // Post a unmount message.
-            ShutdownCallBack ucb = new ShutdownCallBack(path, observer);
-            mHandler.sendMessage(mHandler.obtainMessage(H_UNMOUNT_PM_UPDATE, ucb));
-        } else if (observer != null) {
-            /*
-             * Observer is waiting for onShutDownComplete when we are done.
-             * Since nothing will be done send notification directly so shutdown
-             * sequence can continue.
-             */
-            try {
-                observer.onShutDownComplete(StorageResultCode.OperationSucceeded);
-            } catch (RemoteException e) {
-                Slog.w(TAG, "RemoteException when shutting down");
+                if (state.equals(Environment.MEDIA_MOUNTED)) {
+                    // Post a unmount message.
+                    ShutdownCallBack ucb = new ShutdownCallBack(path, observer);
+                    mHandler.sendMessage(mHandler.obtainMessage(H_UNMOUNT_PM_UPDATE, ucb));
+                } else if (observer != null) {
+                    /*
+                     * Observer is waiting for onShutDownComplete when we are done.
+                     * Since nothing will be done send notification directly so shutdown
+                     * sequence can continue.
+                     */
+                    try {
+                        observer.onShutDownComplete(StorageResultCode.OperationSucceeded);
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, "RemoteException when shutting down");
+                    }
+                }
             }
         }
     }
@@ -1246,16 +1250,15 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
      * @return state of the volume at the specified mount point
      */
     public String getVolumeState(String mountPoint) {
-        /*
-         * XXX: Until we have multiple volume discovery, just hardwire
-         * this to /sdcard
-         */
-        if (!mountPoint.equals(Environment.getExternalStorageDirectory().getPath())) {
-            Slog.w(TAG, "getVolumeState(" + mountPoint + "): Unknown volume");
-            throw new IllegalArgumentException();
-        }
+        synchronized (mVolumeStates) {
+            String state = mVolumeStates.get(mountPoint);
+            if (state == null) {
+                Slog.w(TAG, "getVolumeState(" + mountPoint + "): Unknown volume");
+                throw new IllegalArgumentException();
+            }
 
-        return mLegacyState;
+            return state;
+        }
     }
 
     public boolean isExternalStorageEmulated() {
