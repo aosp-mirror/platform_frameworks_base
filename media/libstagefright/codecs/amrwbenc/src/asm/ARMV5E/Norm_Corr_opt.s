@@ -32,8 +32,8 @@
 @ r6 --- corr_norm[]
 
 
-	.section  .text 
-        .global   Norm_corr_asm 
+	.section  .text
+        .global   Norm_corr_asm
         .extern   Convolve_asm
         .extern   Isqrt_n
 @******************************
@@ -47,17 +47,17 @@
 .equ         T_MIN         ,   212
 .equ         T_MAX         ,   216
 .equ         CORR_NORM     ,   220
-                  
+
 Norm_corr_asm:
 
-        STMFD      r13!, {r4 - r12, r14}  
+        STMFD      r13!, {r4 - r12, r14}
         SUB        r13, r13, #voSTACK
-  
+
         ADD        r8, r13, #20                 @get the excf[L_SUBFR]
         LDR        r4, [r13, #T_MIN]            @get t_min
         RSB        r11, r4, #0                  @k = -t_min
-        ADD        r5, r0, r11, LSL #1          @get the &exc[k]   
-        
+        ADD        r5, r0, r11, LSL #1          @get the &exc[k]
+
         @transfer Convolve function
         STMFD       sp!, {r0 - r3}
         MOV         r0, r5
@@ -68,7 +68,7 @@ Norm_corr_asm:
 
         @ r8 --- excf[]
 
-	MOV         r14, r1                       @copy xn[] address                      
+	MOV         r14, r1                       @copy xn[] address
         MOV         r5, #64
         MOV         r6, #0                       @L_tmp = 0
         MOV         r7, #1
@@ -93,21 +93,21 @@ LOOP1:
 	CLZ         r7, r9
 	SUB         r6, r7, #1                   @exp = norm_l(L_tmp)
         RSB         r7, r6, #32                  @exp = 32 - exp
-	MOV         r6, r7, ASR #1         
+	MOV         r6, r7, ASR #1
 	RSB         r7, r6, #0                   @scale = -(exp >> 1)
-	
+
         @loop for every possible period
 	@for(t = t_min@ t <= t_max@ t++)
 	@r7 --- scale r4 --- t_min r8 --- excf[]
 
-LOOPFOR:	
+LOOPFOR:
         MOV         r5, #0                       @L_tmp  = 0
 	MOV         r6, #0                       @L_tmp1 = 0
-	MOV         r9, #64  
+	MOV         r9, #64
 	MOV         r12, r1                      @copy of xn[]
 	ADD         r14, r13, #20                @copy of excf[]
 	MOV         r8, #0x8000
-        	
+
 LOOPi:
 	LDR         r11, [r14], #4               @load excf[i], excf[i+1]
         LDR         r10, [r12], #4               @load xn[i], xn[i+1]
@@ -128,13 +128,13 @@ LOOPi:
 	MOV         r10, #1
 	ADD         r5, r10, r5, LSL #1          @L_tmp = (L_tmp << 1) + 1
 	ADD         r6, r10, r6, LSL #1          @L_tmp1 = (L_tmp1 << 1) + 1
- 
-	CLZ         r10, r5        
+
+	CLZ         r10, r5
 	CMP         r5, #0
 	RSBLT       r11, r5, #0
 	CLZLT       r10, r11
 	SUB         r10, r10, #1                 @exp = norm_l(L_tmp)
-     
+
 	MOV         r5, r5, LSL r10              @L_tmp = (L_tmp << exp)
 	RSB         r10, r10, #30                @exp_corr = 30 - exp
 	MOV         r11, r5, ASR #16             @corr = extract_h(L_tmp)
@@ -150,7 +150,7 @@ LOOPi:
 	@Isqrt_n(&L_tmp, &exp_norm)
 
 	MOV         r14, r0
-	MOV         r12, r1 
+	MOV         r12, r1
 
         STMFD       sp!, {r0 - r4, r7 - r12, r14}
 	ADD         r1, sp, #4
@@ -168,7 +168,7 @@ LOOPi:
 	MOV         r6, r6, ASR #16              @norm = extract_h(L_tmp)
 	MUL         r12, r6, r11
 	ADD         r12, r12, r12                @L_tmp = vo_L_mult(corr, norm)
-  
+
 	ADD         r6, r10, r5
 	ADD         r6, r6, r7                   @exp_corr + exp_norm + scale
 
@@ -187,9 +187,9 @@ LOOPi:
 
 	CMP         r4, r6
 	BEQ         Norm_corr_asm_end
- 
+
 	ADD         r4, r4, #1                   @ t_min ++
-        
+
 	RSB         r5, r4, #0                   @ k
 
 	MOV         r6, #63                      @ i = 63
@@ -216,16 +216,16 @@ LOOPK:
 	MUL         r14, r11, r8
         LDR         r6, [r13, #T_MAX]            @ get t_max
 	MOV         r8, r14, ASR #15
-	STRH        r8, [r10]                    
+	STRH        r8, [r10]
 
 	CMP         r4, r6
 	BLE         LOOPFOR
 
-Norm_corr_asm_end: 
-        
-        ADD            r13, r13, #voSTACK      
+Norm_corr_asm_end:
+
+        ADD            r13, r13, #voSTACK
         LDMFD          r13!, {r4 - r12, r15}
-    
+
         .END
 
 

@@ -52,9 +52,9 @@ static Word16 countMsMaskBits(Word16   sfbCnt,
                               struct TOOLSINFO *toolsInfo)
 {
   Word16 msBits, sfbOff, sfb;
-  msBits = 0;                                            
+  msBits = 0;
 
-   
+
   switch(toolsInfo->msDigest) {
     case MS_NONE:
     case MS_ALL:
@@ -85,34 +85,34 @@ static Word16 tnsCount(TNS_INFO *tnsInfo, Word16 blockType)
   Word32 coefBits;
   Word16 *ptcoef;
 
-  count = 0;       
-  
+  count = 0;
+
   if (blockType == 2)
     numOfWindows = 8;
   else
     numOfWindows = 1;
-  tnsPresent = 0;                                        
+  tnsPresent = 0;
 
   for (i=0; i<numOfWindows; i++) {
-     
+
     if (tnsInfo->tnsActive[i]!=0) {
-      tnsPresent = 1;                                    
+      tnsPresent = 1;
     }
   }
-   
+
   if (tnsPresent) {
     /* there is data to be written*/
     /*count += 1; */
     for (i=0; i<numOfWindows; i++) {
-       
+
       if (blockType == 2)
         count += 1;
       else
         count += 2;
-       
+
       if (tnsInfo->tnsActive[i]) {
         count += 1;
-         
+
         if (blockType == 2) {
           count += 4;
           count += 3;
@@ -121,29 +121,29 @@ static Word16 tnsCount(TNS_INFO *tnsInfo, Word16 blockType)
           count += 6;
           count += 5;
         }
-         
+
         if (tnsInfo->order[i]) {
           count += 1; /*direction*/
-          count += 1; /*coef_compression */	
-           
+          count += 1; /*coef_compression */
+
           if (tnsInfo->coefRes[i] == 4) {
             ptcoef = tnsInfo->coef + i*TNS_MAX_ORDER_SHORT;
-			coefBits = 3;                                        
+			coefBits = 3;
             for(k=0; k<tnsInfo->order[i]; k++) {
-                 
+
               if ((ptcoef[k] > 3) || (ptcoef[k] < -4)) {
-                coefBits = 4;                                    
+                coefBits = 4;
                 break;
               }
             }
           }
           else {
-            coefBits = 2;                                        
+            coefBits = 2;
             ptcoef = tnsInfo->coef + i*TNS_MAX_ORDER_SHORT;
 			for(k=0; k<tnsInfo->order[i]; k++) {
-                 
+
               if ((ptcoef[k] > 1) || (ptcoef[k] < -2)) {
-                coefBits = 3;                                    
+                coefBits = 3;
                 break;
               }
             }
@@ -155,14 +155,14 @@ static Word16 tnsCount(TNS_INFO *tnsInfo, Word16 blockType)
       }
     }
   }
-  
+
   return count;
 }
 
 /**********************************************************************************
 *
 * function name: countTnsBits
-* description:   count tns bit demand  
+* description:   count tns bit demand
 *
 **********************************************************************************/
 static Word16 countTnsBits(TNS_INFO *tnsInfo,Word16 blockType)
@@ -173,29 +173,29 @@ static Word16 countTnsBits(TNS_INFO *tnsInfo,Word16 blockType)
 /*********************************************************************************
 *
 * function name: countStaticBitdemand
-* description:   count static bit demand include tns  
+* description:   count static bit demand include tns
 *
 **********************************************************************************/
 Word16 countStaticBitdemand(PSY_OUT_CHANNEL psyOutChannel[MAX_CHANNELS],
                             PSY_OUT_ELEMENT *psyOutElement,
-                            Word16 channels, 
+                            Word16 channels,
 							Word16 adtsUsed)
 {
   Word32 statBits;
   Word32 ch;
-  
-  statBits = 0;                                                  
+
+  statBits = 0;
 
   /* if adts used, add 56 bits */
   if(adtsUsed) statBits += 56;
 
-   
+
   switch (channels) {
     case 1:
       statBits += SI_ID_BITS+SI_SCE_BITS+SI_ICS_BITS;
       statBits += countTnsBits(&(psyOutChannel[0].tnsInfo),
                                psyOutChannel[0].windowSequence);
-       
+
       switch(psyOutChannel[0].windowSequence){
         case LONG_WINDOW:
         case START_WINDOW:
@@ -215,7 +215,7 @@ Word16 countStaticBitdemand(PSY_OUT_CHANNEL psyOutChannel[MAX_CHANNELS],
 								  psyOutChannel[0].sfbPerGroup,
 								  psyOutChannel[0].maxSfbPerGroup,
 								  &psyOutElement->toolsInfo);
-       
+
       switch (psyOutChannel[0].windowSequence) {
         case LONG_WINDOW:
         case START_WINDOW:

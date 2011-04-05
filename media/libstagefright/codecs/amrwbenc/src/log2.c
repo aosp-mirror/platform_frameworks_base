@@ -64,11 +64,11 @@ void Log2_norm (
 	Word32 L_y;
 	if (L_x <= (Word32) 0)
 	{
-		*exponent = 0; 
-		*fraction = 0; 
+		*exponent = 0;
+		*fraction = 0;
 		return;
 	}
-	*exponent = (30 - exp); 
+	*exponent = (30 - exp);
 	L_x = (L_x >> 9);
 	i = extract_h (L_x);                /* Extract b25-b31 */
 	L_x = (L_x >> 1);
@@ -78,7 +78,7 @@ void Log2_norm (
 	L_y = L_deposit_h (table[i]);       /* table[i] << 16        */
 	tmp = vo_sub(table[i], table[i + 1]); /* table[i] - table[i+1] */
 	L_y = vo_L_msu (L_y, tmp, a);          /* L_y -= tmp*a*2        */
-	*fraction = extract_h (L_y); 
+	*fraction = extract_h (L_y);
 
 	return;
 }

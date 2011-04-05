@@ -136,8 +136,8 @@ static void Down_samp(
 		L_sum += vo_mult32((*x++),(*y++));
 		L_sum += vo_mult32((*x),(*y));
 
-		L_sum = L_shl2(L_sum, 2);              
-		sig_d[j] = extract_h(L_add(L_sum, 0x8000)); 
+		L_sum = L_shl2(L_sum, 2);
+		sig_d[j] = extract_h(L_add(L_sum, 0x8000));
 		pos += FAC5;              /* pos + 5/4 */
 	}
 	return;

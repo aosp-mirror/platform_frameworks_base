@@ -24,8 +24,8 @@
 #define __LINE_PE_H
 
 
-#include "psy_const.h" 
-#include "interface.h" 
+#include "psy_const.h"
+#include "interface.h"
 
 
 typedef struct {
@@ -72,4 +72,4 @@ void calcSfbPe(PE_DATA *peData,
 
 
 
-#endif 
+#endif

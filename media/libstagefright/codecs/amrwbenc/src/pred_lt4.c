@@ -60,13 +60,13 @@ void Pred_lt4(
 	Word16 *ptr, *ptr1;
 	Word16 *ptr2;
 
-	x = exc - T0;   
+	x = exc - T0;
 	frac = -frac;
 	if (frac < 0)
 	{
 		frac += UP_SAMP;
 		x--;
-	}   
+	}
 	x -= 15;                                     /* x = L_INTERPOL2 - 1 */
 	k = 3 - frac;                                /* k = UP_SAMP - 1 - frac */
 

@@ -83,7 +83,7 @@ Word16 Q_gain2(                            /* Return index of quantization.     
 	Word32 i, j, L_tmp, dist_min;
 	Word16 *past_qua_en, *t_qua_gain;
 
-	past_qua_en = mem;                     
+	past_qua_en = mem;
 
 	/*-----------------------------------------------------------------*
 	 * - Find the initial quantization pitch index                     *
@@ -91,9 +91,9 @@ Word16 Q_gain2(                            /* Return index of quantization.     
 	 *-----------------------------------------------------------------*/
 	if (nbits == 6)
 	{
-		t_qua_gain = t_qua_gain6b;         
-		min_ind = 0;                       
-		size = RANGE;                      
+		t_qua_gain = t_qua_gain6b;
+		min_ind = 0;
+		size = RANGE;
 
 		if(gp_clip == 1)
 		{
@@ -101,18 +101,18 @@ Word16 Q_gain2(                            /* Return index of quantization.     
 		}
 	} else
 	{
-		t_qua_gain = t_qua_gain7b;         
+		t_qua_gain = t_qua_gain7b;
 
 		p = t_qua_gain7b + RANGE;            /* pt at 1/4th of table */
 
-		j = nb_qua_gain7b - RANGE;         
+		j = nb_qua_gain7b - RANGE;
 
 		if (gp_clip == 1)
 		{
 			j = j - 27;                /* limit gain pitch to 1.0 */
 		}
-		min_ind = 0;                       
-		g_pitch = *gain_pit;               
+		min_ind = 0;
+		g_pitch = *gain_pit;
 
 		for (i = 0; i < j; i++, p += 2)
 		{
@@ -121,7 +121,7 @@ Word16 Q_gain2(                            /* Return index of quantization.     
 				min_ind = min_ind + 1;
 			}
 		}
-		size = RANGE;                      
+		size = RANGE;
 	}
 
 	/*------------------------------------------------------------------*
@@ -137,10 +137,10 @@ Word16 Q_gain2(                            /* Return index of quantization.     
 	 * are in vector g_coeff[].                                         *
 	 *------------------------------------------------------------------*/
 
-	coeff[0] = g_coeff[0];                 
-	exp_coeff[0] = g_coeff[1];             
+	coeff[0] = g_coeff[0];
+	exp_coeff[0] = g_coeff[1];
 	coeff[1] = negate(g_coeff[2]);                    /* coeff[1] = -2 xn y1 */
-	exp_coeff[1] = g_coeff[3] + 1;     
+	exp_coeff[1] = g_coeff[3] + 1;
 
 	/* Compute scalar product <y2[],y2[]> */
 #ifdef ASM_OPT                   /* asm optimization branch */
@@ -242,20 +242,20 @@ Word16 Q_gain2(                            /* Return index of quantization.     
 	 *-------------------------------------------------------------------------*/
 
 	exp_code = (exp_gcode0 + 4);
-	exp_max[0] = (exp_coeff[0] - 13);    
-	exp_max[1] = (exp_coeff[1] - 14);    
-	exp_max[2] = (exp_coeff[2] + (15 + (exp_code << 1)));  
-	exp_max[3] = (exp_coeff[3] + exp_code);   
-	exp_max[4] = (exp_coeff[4] + (1 + exp_code));  
+	exp_max[0] = (exp_coeff[0] - 13);
+	exp_max[1] = (exp_coeff[1] - 14);
+	exp_max[2] = (exp_coeff[2] + (15 + (exp_code << 1)));
+	exp_max[3] = (exp_coeff[3] + exp_code);
+	exp_max[4] = (exp_coeff[4] + (1 + exp_code));
 
 	/* Find maximum exponant */
 
-	e_max = exp_max[0];                   
+	e_max = exp_max[0];
 	for (i = 1; i < 5; i++)
 	{
 		if(exp_max[i] > e_max)
 		{
-			e_max = exp_max[i];            
+			e_max = exp_max[i];
 		}
 	}
 
@@ -271,14 +271,14 @@ Word16 Q_gain2(                            /* Return index of quantization.     
 	}
 
 	/* Codebook search */
-	dist_min = MAX_32;                     
-	p = &t_qua_gain[min_ind << 1];      
+	dist_min = MAX_32;
+	p = &t_qua_gain[min_ind << 1];
 
-	index = 0;                             
+	index = 0;
 	for (i = 0; i < size; i++)
 	{
-		g_pitch = *p++;                    
-		g_code = *p++;                     
+		g_pitch = *p++;
+		g_code = *p++;
 
 		g_code = ((g_code * gcode0) + 0x4000)>>15;
 		g2_pitch = ((g_pitch * g_pitch) + 0x4000)>>15;
@@ -302,14 +302,14 @@ Word16 Q_gain2(                            /* Return index of quantization.     
 
 		if(L_tmp < dist_min)
 		{
-			dist_min = L_tmp;              
-			index = i;                     
+			dist_min = L_tmp;
+			index = i;
 		}
 	}
 
 	/* Read the quantized gains */
 	index = index + min_ind;
-	p = &t_qua_gain[(index + index)];    
+	p = &t_qua_gain[(index + index)];
 	*gain_pit = *p++;                       /* selected pitch gain in Q14 */
 	g_code = *p++;                          /* selected code gain in Q11  */
 
@@ -333,10 +333,10 @@ Word16 Q_gain2(                            /* Return index of quantization.     
 
 	/* update table of past quantized energies */
 
-	past_qua_en[3] = past_qua_en[2];       
-	past_qua_en[2] = past_qua_en[1];       
-	past_qua_en[1] = past_qua_en[0];       
-	past_qua_en[0] = qua_ener;             
+	past_qua_en[3] = past_qua_en[2];
+	past_qua_en[2] = past_qua_en[1];
+	past_qua_en[1] = past_qua_en[0];
+	past_qua_en[0] = qua_ener;
 
 	return (index);
 }

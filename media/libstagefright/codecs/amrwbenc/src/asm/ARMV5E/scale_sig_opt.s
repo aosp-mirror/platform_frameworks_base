@@ -38,7 +38,7 @@ Scale_sig_opt:
 	 MOV           r8, #0x7fffffff
 	 MOV           r9, #0x8000
 	 BLE           LOOP2
-	 
+
 LOOP1:
 
          LDRSH          r5, [r4]                    @load x[i]
@@ -65,11 +65,11 @@ LOOP2:
 
 The_end:
          LDMFD         r13!, {r4 - r12, r15}
-     
+
          @ENDFUNC
-         .END	 
-        
-	
-	  
+         .END
+
+
+
 
 

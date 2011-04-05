@@ -51,21 +51,21 @@ __inline Word32 L_mpy_ls(Word32 L_var2, Word16 var1)
     swHigh1 = (Word16)(L_var2 >> 16);
 
     l_var_out = (long)swLow1 * (long)var1 >> 15;
-    
+
     l_var_out += swHigh1 * var1 << 1;
-    
+
     return(l_var_out);
 }
 
 __inline Word32 L_mpy_wx(Word32 L_var2, Word16 var1)
 {
 #if ARMV5TE_L_MPY_LS
-	Word32 result; 
-	asm volatile( 
-		"SMULWB  %[result], %[L_var2], %[var1] \n" 
+	Word32 result;
+	asm volatile(
+		"SMULWB  %[result], %[L_var2], %[var1] \n"
 		:[result]"+r"(result)
 		:[L_var2]"r"(L_var2), [var1]"r"(var1)
-		); 
+		);
 	return result;
 #else
     unsigned short swLow1;
@@ -75,9 +75,9 @@ __inline Word32 L_mpy_wx(Word32 L_var2, Word16 var1)
     swLow1 = (unsigned short)(L_var2);
     swHigh1 = (Word16)(L_var2 >> 16);
 
-    l_var_out = (long)swLow1 * (long)var1 >> 16;    
+    l_var_out = (long)swLow1 * (long)var1 >> 16;
     l_var_out += swHigh1 * var1;
-    
+
     return(l_var_out);
 #endif
 }

@@ -43,8 +43,8 @@ void AacInitDefaultConfig(AACENC_CONFIG *config)
   config->adtsUsed        = 1;
   config->nChannelsIn     = 2;
   config->nChannelsOut    = 2;
-  config->bitRate         = 128000;                      
-  config->bandWidth       = 0;                           
+  config->bitRate         = 128000;
+  config->bandWidth       = 0;
 }
 
 /********************************************************************************
@@ -63,11 +63,11 @@ Word16  AacEncOpen(  AAC_ENCODER*      hAacEnc,        /* pointer to an encoder 
   Word16 profile = 1;
 
   ELEMENT_INFO *elInfo = NULL;
-   
+
   if (hAacEnc==0) {
-    error=1;                                  
+    error=1;
   }
-   
+
   if (!error) {
     hAacEnc->config = config;
   }
@@ -83,7 +83,7 @@ Word16  AacEncOpen(  AAC_ENCODER*      hAacEnc,        /* pointer to an encoder 
 
   if (!error) {
     /* use or not tns tool for long and short block */
-	 Word16 tnsMask=3;      
+	 Word16 tnsMask=3;
 
 	/* init encoder psychoacoustic */
     error = psyMainInit(&hAacEnc->psyKernel,
@@ -107,10 +107,10 @@ Word16  AacEncOpen(  AAC_ENCODER*      hAacEnc,        /* pointer to an encoder 
     qcInit.elInfo = &hAacEnc->elInfo;
 
     qcInit.maxBits = (Word16) (MAXBITS_COEF*elInfo->nChannelsInEl);
-    qcInit.bitRes = qcInit.maxBits;                                      
+    qcInit.bitRes = qcInit.maxBits;
     qcInit.averageBits = (Word16) ((config.bitRate * FRAME_LEN_LONG) / config.sampleRate);
 
-    qcInit.padding.paddingRest = config.sampleRate;                          
+    qcInit.padding.paddingRest = config.sampleRate;
 
     qcInit.meanPe = (Word16) ((10 * FRAME_LEN_LONG * hAacEnc->config.bandWidth) /
                                               (config.sampleRate>>1));
@@ -118,17 +118,17 @@ Word16  AacEncOpen(  AAC_ENCODER*      hAacEnc,        /* pointer to an encoder 
     qcInit.maxBitFac = (Word16) ((100 * (MAXBITS_COEF-MINBITS_COEF)* elInfo->nChannelsInEl)/
                                                  (qcInit.averageBits?qcInit.averageBits:1));
 
-    qcInit.bitrate = config.bitRate;                                     
+    qcInit.bitrate = config.bitRate;
 
     error = QCInit(&hAacEnc->qcKernel, &qcInit);
   }
 
   /* init bitstream encoder */
   if (!error) {
-    hAacEnc->bseInit.nChannels   = elInfo->nChannelsInEl;                
-    hAacEnc->bseInit.bitrate     = config.bitRate;                       
-    hAacEnc->bseInit.sampleRate  = config.sampleRate;                    
-    hAacEnc->bseInit.profile     = profile;                              
+    hAacEnc->bseInit.nChannels   = elInfo->nChannelsInEl;
+    hAacEnc->bseInit.bitrate     = config.bitRate;
+    hAacEnc->bseInit.sampleRate  = config.sampleRate;
+    hAacEnc->bseInit.profile     = profile;
   }
 
   return error;
@@ -152,14 +152,14 @@ Word16 AacEncEncode(AAC_ENCODER *aacEnc,		/*!< an encoder handle */
   ELEMENT_INFO *elInfo = &aacEnc->elInfo;
   Word16 globUsedBits;
   Word16 ancDataBytes, ancDataBytesLeft;
-  
-  ancDataBytes = ancDataBytesLeft = *numAncBytes;                          
+
+  ancDataBytes = ancDataBytesLeft = *numAncBytes;
 
   /* init output aac data buffer and length */
   aacEnc->hBitStream = CreateBitBuffer(&aacEnc->bitStream, outBytes, *numOutBytes);
 
   /* psychoacoustic process */
-  psyMain(aacEnc->config.nChannelsOut,    
+  psyMain(aacEnc->config.nChannelsOut,
           elInfo,
           timeSignal,
           &aacEnc->psyKernel.psyData[elInfo->ChannelIndex[0]],
@@ -175,9 +175,9 @@ Word16 AacEncEncode(AAC_ENCODER *aacEnc,		/*!< an encoder handle */
   AdjustBitrate(&aacEnc->qcKernel,
                 aacEnc->config.bitRate,
                 aacEnc->config.sampleRate);
-    
+
   /* quantization and coding process */
-  QCMain(&aacEnc->qcKernel,         
+  QCMain(&aacEnc->qcKernel,
          &aacEnc->qcKernel.elementBits,
          &aacEnc->qcKernel.adjThr.adjThrStateElem,
          &aacEnc->psyOut.psyOutChannel[elInfo->ChannelIndex[0]],
@@ -193,11 +193,11 @@ Word16 AacEncEncode(AAC_ENCODER *aacEnc,		/*!< an encoder handle */
                          &aacEnc->qcOut);
 
   /* write bitstream process */
-  WriteBitstream(aacEnc->hBitStream,				 
+  WriteBitstream(aacEnc->hBitStream,
                  *elInfo,
                  &aacEnc->qcOut,
                  &aacEnc->psyOut,
-                 &globUsedBits,				 
+                 &globUsedBits,
                  ancBytes,
 				 aacEnc->psyKernel.sampleRateIdx);
 
@@ -219,7 +219,7 @@ Word16 AacEncEncode(AAC_ENCODER *aacEnc,		/*!< an encoder handle */
 **********************************************************************************/
 void AacEncClose (AAC_ENCODER* hAacEnc, VO_MEM_OPERATOR *pMemOP)
 {
-  if (hAacEnc) {  
+  if (hAacEnc) {
     QCDelete(&hAacEnc->qcKernel, pMemOP);
 
     QCOutDelete(&hAacEnc->qcOut, pMemOP);

@@ -16,7 +16,7 @@
 /*******************************************************************************
 	File:		basicop2.c
 
-	Content:	Basic arithmetic operators. 
+	Content:	Basic arithmetic operators.
 
 *******************************************************************************/
 
@@ -462,7 +462,7 @@ Word32 L_mult(Word16 var1, Word16 var2)
     {
         L_var_out = MAX_32;
     }
-        
+
     return (L_var_out);
 }
 #endif

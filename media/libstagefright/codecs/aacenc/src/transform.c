@@ -31,7 +31,7 @@
 #define swap2(p0,p1) \
 	t = p0; t1 = *(&(p0)+1);	\
 	p0 = p1; *(&(p0)+1) = *(&(p1)+1);	\
-	p1 = t; *(&(p1)+1) = t1	
+	p1 = t; *(&(p1)+1) = t1
 
 /*********************************************************************************
 *
@@ -47,18 +47,18 @@ static void Shuffle(int *buf, int num, const unsigned char* bitTab)
 
 	part0 = buf;
     part1 = buf + num;
-	
+
 	while ((i = *bitTab++) != 0) {
         j = *bitTab++;
 
-        swap2(part0[4*i+0], part0[4*j+0]);	
-        swap2(part0[4*i+2], part1[4*j+0]);	
-        swap2(part1[4*i+0], part0[4*j+2]);	
-        swap2(part1[4*i+2], part1[4*j+2]);	
+        swap2(part0[4*i+0], part0[4*j+0]);
+        swap2(part0[4*i+2], part1[4*j+0]);
+        swap2(part1[4*i+0], part0[4*j+2]);
+        swap2(part1[4*i+2], part1[4*j+2]);
     }
 
     do {
-        swap2(part0[4*i+2], part1[4*i+0]);	
+        swap2(part0[4*i+2], part1[4*i+0]);
     } while ((i = *bitTab++) != 0);
 }
 
@@ -74,8 +74,8 @@ static void Radix4First(int *buf, int num)
 {
     int r0, r1, r2, r3;
 	int r4, r5, r6, r7;
-	
-	for (; num != 0; num--) 
+
+	for (; num != 0; num--)
 	{
 		r0 = buf[0] + buf[2];
 		r1 = buf[1] + buf[3];
@@ -113,7 +113,7 @@ static void Radix8First(int *buf, int num)
    int i4, i5, i6, i7;
    int t0, t1, t2, t3;
 
-	for ( ; num != 0; num--) 
+	for ( ; num != 0; num--)
 	{
 		r0 = buf[0] + buf[2];
 		i0 = buf[1] + buf[3];
@@ -194,23 +194,23 @@ static void Radix4FFT(int *buf, int num, int bgn, int *twidTab)
 	int i, j, step;
 	int *xptr, *csptr;
 
-	for (num >>= 2; num != 0; num >>= 2) 
+	for (num >>= 2; num != 0; num >>= 2)
 	{
 		step = 2*bgn;
 		xptr = buf;
 
-    	for (i = num; i != 0; i--) 
+    	for (i = num; i != 0; i--)
 		{
 			csptr = twidTab;
 
-			for (j = bgn; j != 0; j--) 
+			for (j = bgn; j != 0; j--)
 			{
 				r0 = xptr[0];
 				r1 = xptr[1];
 				xptr += step;
-				
+
 				t0 = xptr[0];
-				t1 = xptr[1];				
+				t1 = xptr[1];
 				cosx = csptr[0];
 				sinx = csptr[1];
 				r2 = MULHIGH(cosx, t0) + MULHIGH(sinx, t1);		/* cos*br + sin*bi */
@@ -223,7 +223,7 @@ static void Radix4FFT(int *buf, int num, int bgn, int *twidTab)
 				r1 = t1 - r3;
 				r2 = t0 + r2;
 				r3 = t1 + r3;
-				
+
 				t0 = xptr[0];
 				t1 = xptr[1];
 				cosx = csptr[2];
@@ -231,7 +231,7 @@ static void Radix4FFT(int *buf, int num, int bgn, int *twidTab)
 				r4 = MULHIGH(cosx, t0) + MULHIGH(sinx, t1);		/* cos*cr + sin*ci */
 				r5 = MULHIGH(cosx, t1) - MULHIGH(sinx, t0);		/* cos*ci - sin*cr */
 				xptr += step;
-				
+
 				t0 = xptr[0];
 				t1 = xptr[1];
 				cosx = csptr[4];
@@ -282,25 +282,25 @@ static void PreMDCT(int *buf0, int num, const int *csptr)
 	int tr1, ti1, tr2, ti2;
 	int cosa, sina, cosb, sinb;
 	int *buf1;
-	
+
 	buf1 = buf0 + num - 1;
 
 	for(i = num >> 2; i != 0; i--)
 	{
-		cosa = *csptr++;	
-		sina = *csptr++;	
-		cosb = *csptr++;	
-		sinb = *csptr++;		
+		cosa = *csptr++;
+		sina = *csptr++;
+		cosb = *csptr++;
+		sinb = *csptr++;
 
 		tr1 = *(buf0 + 0);
 		ti2 = *(buf0 + 1);
 		tr2 = *(buf1 - 1);
 		ti1 = *(buf1 + 0);
-		
+
 		*buf0++ = MULHIGH(cosa, tr1) + MULHIGH(sina, ti1);
-		*buf0++ = MULHIGH(cosa, ti1) - MULHIGH(sina, tr1);		
-		
-		*buf1-- = MULHIGH(cosb, ti2) - MULHIGH(sinb, tr2);		
+		*buf0++ = MULHIGH(cosa, ti1) - MULHIGH(sina, tr1);
+
+		*buf1-- = MULHIGH(cosb, ti2) - MULHIGH(sinb, tr2);
 		*buf1-- = MULHIGH(cosb, tr2) + MULHIGH(sinb, ti2);
 	}
 }
@@ -319,12 +319,12 @@ static void PostMDCT(int *buf0, int num, const int *csptr)
 	int *buf1;
 
 	buf1 = buf0 + num - 1;
-	
+
 	for(i = num >> 2; i != 0; i--)
 	{
-		cosa = *csptr++;	
-		sina = *csptr++;	
-		cosb = *csptr++;	
+		cosa = *csptr++;
+		sina = *csptr++;
+		cosb = *csptr++;
 		sinb = *csptr++;
 
 		tr1 = *(buf0 + 0);
@@ -333,10 +333,10 @@ static void PostMDCT(int *buf0, int num, const int *csptr)
 		tr2 = *(buf1 - 1);
 
 		*buf0++ = MULHIGH(cosa, tr1) + MULHIGH(sina, ti1);
-		*buf1-- = MULHIGH(sina, tr1) - MULHIGH(cosa, ti1);		
-		
+		*buf1-- = MULHIGH(sina, tr1) - MULHIGH(cosa, ti1);
+
 		*buf0++ = MULHIGH(sinb, tr2) - MULHIGH(cosb, ti2);
-		*buf1-- = MULHIGH(cosb, tr2) + MULHIGH(sinb, ti2);	
+		*buf1-- = MULHIGH(cosb, tr2) + MULHIGH(sinb, ti2);
 	}
 }
 #endif
@@ -353,17 +353,17 @@ void Mdct_Long(int *buf)
 	PreMDCT(buf, 1024, cossintab + 128);
 
 	Shuffle(buf, 512, bitrevTab + 17);
-	Radix8First(buf, 512 >> 3);						
+	Radix8First(buf, 512 >> 3);
 	Radix4FFT(buf, 512 >> 3, 8, (int *)twidTab512);
 
-	PostMDCT(buf, 1024, cossintab + 128);	
+	PostMDCT(buf, 1024, cossintab + 128);
 }
 
 
 /**********************************************************************************
 *
 * function name: Mdct_Short
-* description:  the short block mdct 
+* description:  the short block mdct
 *
 **********************************************************************************/
 void Mdct_Short(int *buf)
@@ -371,10 +371,10 @@ void Mdct_Short(int *buf)
 	PreMDCT(buf, 128, cossintab);
 
 	Shuffle(buf, 64, bitrevTab);
-	Radix4First(buf, 64 >> 2);						
-	Radix4FFT(buf, 64 >> 2, 4, (int *)twidTab64);	
+	Radix4First(buf, 64 >> 2);
+	Radix4FFT(buf, 64 >> 2, 4, (int *)twidTab64);
 
-	PostMDCT(buf, 128, cossintab);	
+	PostMDCT(buf, 128, cossintab);
 }
 
 
@@ -382,7 +382,7 @@ void Mdct_Short(int *buf)
 *
 * function name: shiftMdctDelayBuffer
 * description:    the mdct delay buffer has a size of 1600,
-*  so the calculation of LONG,STOP must be  spilt in two 
+*  so the calculation of LONG,STOP must be  spilt in two
 *  passes with 1024 samples and a mid shift,
 *  the SHORT transforms can be completed in the delay buffer,
 *  and afterwards a shift
@@ -409,7 +409,7 @@ static void shiftMdctDelayBuffer(Word16 *mdctDelayBuffer, /*! start of mdct dela
 	dsBuf = timeSignal;
 
 	for(i=0; i<FRAME_LEN_LONG; i+=8)
-	{   
+	{
 		*srBuf++ = *dsBuf; dsBuf += chIncrement;
 		*srBuf++ = *dsBuf; dsBuf += chIncrement;
 		*srBuf++ = *dsBuf; dsBuf += chIncrement;
@@ -470,10 +470,10 @@ void Transform_Real(Word16 *mdctDelayBuffer,
 
 	Word32 delayBufferSf,timeSignalSf,minSf;
 	Word32 headRoom=0;
-	
+
 	switch(blockType){
-		
-		
+
+
 	case LONG_WINDOW:
 		/*
 		we access BLOCK_SWITCHING_OFFSET (1600 ) delay buffer samples + 448 new timeSignal samples
@@ -483,15 +483,15 @@ void Transform_Real(Word16 *mdctDelayBuffer,
 		timeSignalSf  = getScalefactorOfShortVectorStride(timeSignal,2*FRAME_LEN_LONG-BLOCK_SWITCHING_OFFSET,chIncrement);
 		minSf = min(delayBufferSf,timeSignalSf);
 		minSf = min(minSf,14);
-		
+
 		dctIn0 = mdctDelayBuffer;
 		dctIn1 = mdctDelayBuffer + FRAME_LEN_LONG - 1;
 		outData0 = realOut + FRAME_LEN_LONG/2;
-		
+
 		/* add windows and pre add for mdct to last buffer*/
 		winPtr = (int *)LongWindowKBD;
 		for(i=0;i<FRAME_LEN_LONG/2;i++){
-			timeSignalSample = (*dctIn0++) << minSf; 
+			timeSignalSample = (*dctIn0++) << minSf;
 			ws1 = timeSignalSample * (*winPtr >> 16);
 			timeSignalSample = (*dctIn1--) << minSf;
 			ws2 = timeSignalSample * (*winPtr & 0xffff);
@@ -499,30 +499,30 @@ void Transform_Real(Word16 *mdctDelayBuffer,
 			/* shift 2 to avoid overflow next */
 			*outData0++ = (ws1 >> 2) - (ws2 >> 2);
 		}
-		
+
 		shiftMdctDelayBuffer(mdctDelayBuffer,timeSignal,chIncrement);
-		
+
 		/* add windows and pre add for mdct to new buffer*/
 		dctIn0 = mdctDelayBuffer;
 		dctIn1 = mdctDelayBuffer + FRAME_LEN_LONG - 1;
-		outData0 = realOut + FRAME_LEN_LONG/2 - 1; 
+		outData0 = realOut + FRAME_LEN_LONG/2 - 1;
 		winPtr = (int *)LongWindowKBD;
-		for(i=0;i<FRAME_LEN_LONG/2;i++){    
+		for(i=0;i<FRAME_LEN_LONG/2;i++){
 			timeSignalSample = (*dctIn0++) << minSf;
 			ws1 = timeSignalSample * (*winPtr & 0xffff);
 			timeSignalSample = (*dctIn1--) << minSf;
 			ws2 = timeSignalSample * (*winPtr >> 16);
 			winPtr++;
 			/* shift 2 to avoid overflow next */
-			*outData0-- = -((ws1 >> 2) + (ws2 >> 2)); 
+			*outData0-- = -((ws1 >> 2) + (ws2 >> 2));
 		}
 
 		Mdct_Long(realOut);
 		/* update scale factor */
 		minSf = 14 - minSf;
-		*mdctScale=minSf; 
+		*mdctScale=minSf;
 		break;
-		
+
 	case START_WINDOW:
 		/*
 		we access BLOCK_SWITCHING_OFFSET (1600 ) delay buffer samples + no timeSignal samples
@@ -533,7 +533,7 @@ void Transform_Real(Word16 *mdctDelayBuffer,
 
 		dctIn0 = mdctDelayBuffer;
 		dctIn1 = mdctDelayBuffer + FRAME_LEN_LONG - 1;
-		outData0 = realOut + FRAME_LEN_LONG/2; 		
+		outData0 = realOut + FRAME_LEN_LONG/2;
 		winPtr = (int *)LongWindowKBD;
 
 		/* add windows and pre add for mdct to last buffer*/
@@ -545,18 +545,18 @@ void Transform_Real(Word16 *mdctDelayBuffer,
 			winPtr ++;
 			*outData0++ = (ws1 >> 2) - (ws2 >> 2);  /* shift 2 to avoid overflow next */
 		}
-		
+
 		shiftMdctDelayBuffer(mdctDelayBuffer,timeSignal,chIncrement);
-		
-		outData0 = realOut + FRAME_LEN_LONG/2 - 1; 
+
+		outData0 = realOut + FRAME_LEN_LONG/2 - 1;
 		for(i=0;i<LS_TRANS;i++){
-			*outData0-- = -mdctDelayBuffer[i] << (15 - 2 + minSf);  
+			*outData0-- = -mdctDelayBuffer[i] << (15 - 2 + minSf);
 		}
-		
+
 		/* add windows and pre add for mdct to new buffer*/
 		dctIn0 = mdctDelayBuffer + LS_TRANS;
 		dctIn1 = mdctDelayBuffer + FRAME_LEN_LONG - 1 - LS_TRANS;
-		outData0 = realOut + FRAME_LEN_LONG/2 - 1 -LS_TRANS; 
+		outData0 = realOut + FRAME_LEN_LONG/2 - 1 -LS_TRANS;
 		winPtr = (int *)ShortWindowSine;
 		for(i=0;i<FRAME_LEN_SHORT/2;i++){
 			timeSignalSample= (*dctIn0++) << minSf;
@@ -572,7 +572,7 @@ void Transform_Real(Word16 *mdctDelayBuffer,
 		minSf = 14 - minSf;
 		*mdctScale= minSf;
 		break;
-		
+
 	case STOP_WINDOW:
 		/*
 		we access BLOCK_SWITCHING_OFFSET-LS_TRANS (1600-448 ) delay buffer samples + 448 new timeSignal samples
@@ -580,19 +580,19 @@ void Transform_Real(Word16 *mdctDelayBuffer,
 		*/
 		delayBufferSf = getScalefactorOfShortVectorStride(mdctDelayBuffer+LS_TRANS,BLOCK_SWITCHING_OFFSET-LS_TRANS,1);
 		timeSignalSf  = getScalefactorOfShortVectorStride(timeSignal,2*FRAME_LEN_LONG-BLOCK_SWITCHING_OFFSET,chIncrement);
-		minSf = min(delayBufferSf,timeSignalSf);    
+		minSf = min(delayBufferSf,timeSignalSf);
 		minSf = min(minSf,13);
-		
+
 		outData0 = realOut + FRAME_LEN_LONG/2;
 		dctIn1 = mdctDelayBuffer + FRAME_LEN_LONG - 1;
 		for(i=0;i<LS_TRANS;i++){
-			*outData0++ = -(*dctIn1--) << (15 - 2 + minSf);    
+			*outData0++ = -(*dctIn1--) << (15 - 2 + minSf);
 		}
-		
+
 		/* add windows and pre add for mdct to last buffer*/
 		dctIn0 = mdctDelayBuffer + LS_TRANS;
 		dctIn1 = mdctDelayBuffer + FRAME_LEN_LONG - 1 - LS_TRANS;
-		outData0 = realOut + FRAME_LEN_LONG/2 + LS_TRANS; 
+		outData0 = realOut + FRAME_LEN_LONG/2 + LS_TRANS;
 		winPtr = (int *)ShortWindowSine;
 		for(i=0;i<FRAME_LEN_SHORT/2;i++){
 			timeSignalSample = (*dctIn0++) << minSf;
@@ -602,13 +602,13 @@ void Transform_Real(Word16 *mdctDelayBuffer,
 			winPtr++;
 			*outData0++ = (ws1 >> 2) - (ws2 >> 2);  /* shift 2 to avoid overflow next */
 		}
-		
+
 		shiftMdctDelayBuffer(mdctDelayBuffer,timeSignal,chIncrement);
-		
+
 		/* add windows and pre add for mdct to new buffer*/
 		dctIn0 = mdctDelayBuffer;
 		dctIn1 = mdctDelayBuffer + FRAME_LEN_LONG - 1;
-		outData0 = realOut + FRAME_LEN_LONG/2 - 1; 
+		outData0 = realOut + FRAME_LEN_LONG/2 - 1;
 		winPtr = (int *)LongWindowKBD;
 		for(i=0;i<FRAME_LEN_LONG/2;i++){
 			timeSignalSample= (*dctIn0++) << minSf;
@@ -618,26 +618,26 @@ void Transform_Real(Word16 *mdctDelayBuffer,
 			*outData0-- =  -((ws1 >> 2) + (ws2 >> 2));  /* shift 2 to avoid overflow next */
 			winPtr++;
 		}
-		
+
 		Mdct_Long(realOut);
 		minSf = 14 - minSf;
 		*mdctScale= minSf; /* update scale factor */
 		break;
-		
+
 	case SHORT_WINDOW:
 		/*
 		we access BLOCK_SWITCHING_OFFSET (1600 ) delay buffer samples + no new timeSignal samples
 		and get the biggest scale factor for next calculate more precise
-		*/		
+		*/
 		minSf = getScalefactorOfShortVectorStride(mdctDelayBuffer+TRANSFORM_OFFSET_SHORT,9*FRAME_LEN_SHORT,1);
 		minSf = min(minSf,10);
-		
-		
+
+
 		for(w=0;w<TRANS_FAC;w++){
 			dctIn0 = mdctDelayBuffer+w*FRAME_LEN_SHORT+TRANSFORM_OFFSET_SHORT;
 			dctIn1 = mdctDelayBuffer+w*FRAME_LEN_SHORT+TRANSFORM_OFFSET_SHORT + FRAME_LEN_SHORT-1;
-			outData0 = realOut + FRAME_LEN_SHORT/2; 
-			outData1 = realOut + FRAME_LEN_SHORT/2 - 1; 
+			outData0 = realOut + FRAME_LEN_SHORT/2;
+			outData1 = realOut + FRAME_LEN_SHORT/2 - 1;
 
 			winPtr = (int *)ShortWindowSine;
 			for(i=0;i<FRAME_LEN_SHORT/2;i++){
@@ -646,7 +646,7 @@ void Transform_Real(Word16 *mdctDelayBuffer,
 				timeSignalSample= *dctIn1 << minSf;
 				ws2 = timeSignalSample * (*winPtr & 0xffff);
 				*outData0++ = (ws1 >> 2) - (ws2 >> 2);  /* shift 2 to avoid overflow next */
-				
+
 				timeSignalSample= *(dctIn0 + FRAME_LEN_SHORT) << minSf;
 				ws1 = timeSignalSample * (*winPtr & 0xffff);
 				timeSignalSample= *(dctIn1 + FRAME_LEN_SHORT) << minSf;
@@ -661,10 +661,10 @@ void Transform_Real(Word16 *mdctDelayBuffer,
 			Mdct_Short(realOut);
 			realOut += FRAME_LEN_SHORT;
 		}
-		
+
 		minSf = 11 - minSf;
 		*mdctScale = minSf; /* update scale factor */
-		
+
 		shiftMdctDelayBuffer(mdctDelayBuffer,timeSignal,chIncrement);
 		break;
   }

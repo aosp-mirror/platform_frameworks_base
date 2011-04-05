@@ -18,7 +18,7 @@
 *       File: cor_h_x.c                                                *
 *                                                                      *
 *	   Description:Compute correlation between target "x[]" and "h[]"  *
-*	               Designed for codebook search (24 pulses, 4 tracks,  * 
+*	               Designed for codebook search (24 pulses, 4 tracks,  *
 *				   4 pulses per track, 16 positions in each track) to  *
 *				   avoid saturation.                                   *
 *                                                                      *
@@ -44,8 +44,8 @@ void cor_h_x(
 	Word32 *p3;
 	Word32 L_max, L_max1, L_max2, L_max3;
 	/* first keep the result on 32 bits and find absolute maximum */
-	L_tot  = 1;                            
-	L_max  = 0; 
+	L_tot  = 1;
+	L_max  = 0;
 	L_max1 = 0;
 	L_max2 = 0;
 	L_max3 = 0;
@@ -57,11 +57,11 @@ void cor_h_x(
 		for (j = i; j < L_SUBFR; j++)
 			L_tmp += vo_L_mult(*p1++, *p2++);
 
-		y32[i] = L_tmp;               
+		y32[i] = L_tmp;
 		L_tmp = (L_tmp > 0)? L_tmp:-L_tmp;
 		if(L_tmp > L_max)
 		{
-			L_max = L_tmp;             
+			L_max = L_tmp;
 		}
 
 		L_tmp = 1L;
@@ -70,11 +70,11 @@ void cor_h_x(
 		for (j = i+1; j < L_SUBFR; j++)
 			L_tmp += vo_L_mult(*p1++, *p2++);
 
-		y32[i+1] = L_tmp;               
+		y32[i+1] = L_tmp;
 		L_tmp = (L_tmp > 0)? L_tmp:-L_tmp;
 		if(L_tmp > L_max1)
 		{
-			L_max1 = L_tmp;             
+			L_max1 = L_tmp;
 		}
 
 		L_tmp = 1;
@@ -83,11 +83,11 @@ void cor_h_x(
 		for (j = i+2; j < L_SUBFR; j++)
 			L_tmp += vo_L_mult(*p1++, *p2++);
 
-		y32[i+2] = L_tmp;               
+		y32[i+2] = L_tmp;
 		L_tmp = (L_tmp > 0)? L_tmp:-L_tmp;
 		if(L_tmp > L_max2)
 		{
-			L_max2 = L_tmp;             
+			L_max2 = L_tmp;
 		}
 
 		L_tmp = 1;
@@ -96,11 +96,11 @@ void cor_h_x(
 		for (j = i+3; j < L_SUBFR; j++)
 			L_tmp += vo_L_mult(*p1++, *p2++);
 
-		y32[i+3] = L_tmp;               
+		y32[i+3] = L_tmp;
 		L_tmp = (L_tmp > 0)? L_tmp:-L_tmp;
 		if(L_tmp > L_max3)
 		{
-			L_max3 = L_tmp;             
+			L_max3 = L_tmp;
 		}
 	}
 	/* tot += 3*max / 8 */

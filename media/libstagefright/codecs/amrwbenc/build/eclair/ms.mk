@@ -13,10 +13,10 @@
 # ** See the License for the specific language governing permissions and
 # ** limitations under the License.
 # */
-# please list all directories that all source files relative with your module(.h .c .cpp) locate 
+# please list all directories that all source files relative with your module(.h .c .cpp) locate
 VOSRCDIR:=../../../inc \
           ../../../src \
-	  ../../../../../Include 
+	  ../../../../../Include
 
 # please list all objects needed by your target here
 OBJS:= autocorr.o az_isp.o bits.o c2t64fx.o c4t64fx.o convolve.o cor_h_x.o decim54.o \
@@ -25,7 +25,7 @@ OBJS:= autocorr.o az_isp.o bits.o c2t64fx.o c4t64fx.o convolve.o cor_h_x.o decim
        oper_32b.o p_med_ol.o pit_shrp.o pitch_f4.o pred_lt4.o preemph.o q_gain2.o q_pulse.o \
        qisf_ns.o qpisf_2s.o random.o residu.o scale.o stream.o syn_filt.o updt_tar.o util.o \
        voAMRWBEnc.o voicefac.o wb_vad.o weight_a.o
-			
+
 
 ifeq ($(VOTT), v5)
 OBJS += cor_h_vec_opt.o Deemph_32_opt.o Dot_p_opt.o Filt_6k_7k_opt.o residu_asm_opt.o \

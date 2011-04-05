@@ -45,20 +45,20 @@ void prepareSfbPe(PE_DATA *peData,
                   const Word16 peOffset)
 {
   Word32 sfbGrp, sfb;
-  Word32 ch;     
+  Word32 ch;
 
   for(ch=0; ch<nChannels; ch++) {
     PSY_OUT_CHANNEL *psyOutChan = &psyOutChannel[ch];
     PE_CHANNEL_DATA *peChanData=&peData->peChannelData[ch];
     for(sfbGrp=0;sfbGrp<psyOutChan->sfbCnt; sfbGrp+=psyOutChan->sfbPerGroup){
       for (sfb=0; sfb<psyOutChan->maxSfbPerGroup; sfb++) {
-	    peChanData->sfbNLines4[sfbGrp+sfb] = sfbNRelevantLines[ch][sfbGrp+sfb];          
-        sfbNRelevantLines[ch][sfbGrp+sfb] = sfbNRelevantLines[ch][sfbGrp+sfb] >> 2;    
-	    peChanData->sfbLdEnergy[sfbGrp+sfb] = logSfbEnergy[ch][sfbGrp+sfb];              
+	    peChanData->sfbNLines4[sfbGrp+sfb] = sfbNRelevantLines[ch][sfbGrp+sfb];
+        sfbNRelevantLines[ch][sfbGrp+sfb] = sfbNRelevantLines[ch][sfbGrp+sfb] >> 2;
+	    peChanData->sfbLdEnergy[sfbGrp+sfb] = logSfbEnergy[ch][sfbGrp+sfb];
       }
     }
   }
-  peData->offset = peOffset;                                                             
+  peData->offset = peOffset;
 }
 
 
@@ -78,23 +78,23 @@ void calcSfbPe(PE_DATA *peData,
   Word32 ldThr, ldRatio;
   Word32 pe, constPart, nActiveLines;
 
-  peData->pe = peData->offset;                                           
-  peData->constPart = 0;                                                 
-  peData->nActiveLines = 0;                                              
+  peData->pe = peData->offset;
+  peData->constPart = 0;
+  peData->nActiveLines = 0;
   for(ch=0; ch<nChannels; ch++) {
     PSY_OUT_CHANNEL *psyOutChan = &psyOutChannel[ch];
     PE_CHANNEL_DATA *peChanData = &peData->peChannelData[ch];
     const Word32 *sfbEnergy = psyOutChan->sfbEnergy;
     const Word32 *sfbThreshold = psyOutChan->sfbThreshold;
 
-    pe = 0;                                                  
-    constPart = 0;                                           
-    nActiveLines = 0;                                        
+    pe = 0;
+    constPart = 0;
+    nActiveLines = 0;
 
     for(sfbGrp=0; sfbGrp<psyOutChan->sfbCnt; sfbGrp+=psyOutChan->sfbPerGroup) {
       for (sfb=0; sfb<psyOutChan->maxSfbPerGroup; sfb++) {
-        Word32 nrg = sfbEnergy[sfbGrp+sfb];                             
-        Word32 thres = sfbThreshold[sfbGrp+sfb];                           
+        Word32 nrg = sfbEnergy[sfbGrp+sfb];
+        Word32 thres = sfbThreshold[sfbGrp+sfb];
         Word32 sfbLDEn = peChanData->sfbLdEnergy[sfbGrp+sfb];
 
         if (nrg > thres) {
@@ -102,8 +102,8 @@ void calcSfbPe(PE_DATA *peData,
 
           ldRatio = sfbLDEn - ldThr;
 
-          nLines4 = peChanData->sfbNLines4[sfbGrp+sfb];                    
-           
+          nLines4 = peChanData->sfbNLines4[sfbGrp+sfb];
+
           /* sfbPe = nl*log2(en/thr)*/
 		  if (ldRatio >= C1_I) {
             peChanData->sfbPe[sfbGrp+sfb] = (nLines4*ldRatio + 8) >> 4;
@@ -120,26 +120,26 @@ void calcSfbPe(PE_DATA *peData,
           peChanData->sfbNActiveLines[sfbGrp+sfb] = nLines4 >> 2;
         }
         else {
-          peChanData->sfbPe[sfbGrp+sfb] = 0;                             
-          peChanData->sfbConstPart[sfbGrp+sfb] = 0;                      
-          peChanData->sfbNActiveLines[sfbGrp+sfb] = 0;                   
+          peChanData->sfbPe[sfbGrp+sfb] = 0;
+          peChanData->sfbConstPart[sfbGrp+sfb] = 0;
+          peChanData->sfbNActiveLines[sfbGrp+sfb] = 0;
         }
         pe = pe + peChanData->sfbPe[sfbGrp+sfb];
         constPart = constPart + peChanData->sfbConstPart[sfbGrp+sfb];
         nActiveLines = nActiveLines + peChanData->sfbNActiveLines[sfbGrp+sfb];
       }
     }
-	
-	peChanData->pe = saturate(pe);                                                  
-    peChanData->constPart = saturate(constPart);                                           
-    peChanData->nActiveLines = saturate(nActiveLines);                                        
 
-    
+	peChanData->pe = saturate(pe);
+    peChanData->constPart = saturate(constPart);
+    peChanData->nActiveLines = saturate(nActiveLines);
+
+
 	pe += peData->pe;
-	peData->pe = saturate(pe); 
+	peData->pe = saturate(pe);
     constPart += peData->constPart;
-	peData->constPart = saturate(constPart); 
+	peData->constPart = saturate(constPart);
     nActiveLines += peData->nActiveLines;
 	peData->nActiveLines = saturate(nActiveLines);
-  } 
+  }
 }

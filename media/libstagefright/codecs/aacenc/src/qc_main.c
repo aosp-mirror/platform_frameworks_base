@@ -68,12 +68,12 @@ static Word16 calcFrameLen(Word32 bitRate,
   result = (FRAME_LEN_LONG >> 3) * bitRate;
   quot = result / sampleRate;
 
-   
+
   if (mode == FRAME_LEN_BYTES_MODULO) {
     result -= quot * sampleRate;
   }
   else { /* FRAME_LEN_BYTES_INT */
-    result = quot;                                      
+    result = quot;
   }
 
   return result;
@@ -83,7 +83,7 @@ static Word16 calcFrameLen(Word32 bitRate,
 *
 *  function name:framePadding
 *  description: Calculates if padding is needed for actual frame
-*  returns: paddingOn or not 
+*  returns: paddingOn or not
 *
 *****************************************************************************/
 static Word16 framePadding(Word32 bitRate,
@@ -93,16 +93,16 @@ static Word16 framePadding(Word32 bitRate,
   Word16 paddingOn;
   Word16 difference;
 
-  paddingOn = 0;                                                 
+  paddingOn = 0;
 
   difference = calcFrameLen( bitRate,
                              sampleRate,
                              FRAME_LEN_BYTES_MODULO );
   *paddingRest = *paddingRest - difference;
 
-   
+
   if (*paddingRest <= 0 ) {
-    paddingOn = 1;                                               
+    paddingOn = 1;
     *paddingRest = *paddingRest + sampleRate;
   }
 
@@ -123,12 +123,12 @@ Word16 QCOutNew(QC_OUT *hQC, Word16 nChannels, VO_MEM_OPERATOR *pMemOP)
   Word32 i;
   Word16 *quantSpec;
   Word16 *scf;
-  UWord16 *maxValueInSfb;	
-	
+  UWord16 *maxValueInSfb;
+
   quantSpec = (Word16 *)mem_malloc(pMemOP, nChannels * FRAME_LEN_LONG * sizeof(Word16), 32, VO_INDEX_ENC_AAC);
   if(NULL == quantSpec)
 	  return 1;
-  scf = (Word16 *)mem_malloc(pMemOP, nChannels * MAX_GROUPED_SFB * sizeof(Word16), 32, VO_INDEX_ENC_AAC);     
+  scf = (Word16 *)mem_malloc(pMemOP, nChannels * MAX_GROUPED_SFB * sizeof(Word16), 32, VO_INDEX_ENC_AAC);
   if(NULL == scf)
   {
 	  return 1;
@@ -141,12 +141,12 @@ Word16 QCOutNew(QC_OUT *hQC, Word16 nChannels, VO_MEM_OPERATOR *pMemOP)
 
   for (i=0; i<nChannels; i++) {
     hQC->qcChannel[i].quantSpec = quantSpec + i*FRAME_LEN_LONG;
-    
+
     hQC->qcChannel[i].maxValueInSfb = maxValueInSfb + i*MAX_GROUPED_SFB;
-    
+
     hQC->qcChannel[i].scf = scf + i*MAX_GROUPED_SFB;
   }
- 
+
   return 0;
 }
 
@@ -165,21 +165,21 @@ void QCOutDelete(QC_OUT* hQC, VO_MEM_OPERATOR *pMemOP)
    {
       if(hQC->qcChannel[0].quantSpec);
 		 mem_free(pMemOP, hQC->qcChannel[0].quantSpec, VO_INDEX_ENC_AAC);
-    
+
       if(hQC->qcChannel[0].maxValueInSfb)
 		  mem_free(pMemOP, hQC->qcChannel[0].maxValueInSfb, VO_INDEX_ENC_AAC);
-    
+
 	  if(hQC->qcChannel[0].scf)
 		  mem_free(pMemOP, hQC->qcChannel[0].scf, VO_INDEX_ENC_AAC);
 
 	  for (i=0; i<MAX_CHANNELS; i++) {
 		  hQC->qcChannel[i].quantSpec = NULL;
-		  
+
 		  hQC->qcChannel[i].maxValueInSfb = NULL;
-		  
+
 		  hQC->qcChannel[i].scf = NULL;
 	  }
-   } 
+   }
 }
 
 /*********************************************************************************
@@ -204,8 +204,8 @@ Word16 QCNew(QC_STATE *hQC, VO_MEM_OPERATOR *pMemOP)
 **********************************************************************************/
 void QCDelete(QC_STATE *hQC, VO_MEM_OPERATOR *pMemOP)
 {
- 
-  /* 
+
+  /*
      nothing to do
   */
   hQC=NULL;
@@ -221,15 +221,15 @@ void QCDelete(QC_STATE *hQC, VO_MEM_OPERATOR *pMemOP)
 Word16 QCInit(QC_STATE *hQC,
               struct QC_INIT *init)
 {
-  hQC->nChannels       = init->elInfo->nChannelsInEl;              
-  hQC->maxBitsTot      = init->maxBits;                            
+  hQC->nChannels       = init->elInfo->nChannelsInEl;
+  hQC->maxBitsTot      = init->maxBits;
   hQC->bitResTot       = sub(init->bitRes, init->averageBits);
-  hQC->averageBitsTot  = init->averageBits;                        
-  hQC->maxBitFac       = init->maxBitFac;                          
+  hQC->averageBitsTot  = init->averageBits;
+  hQC->maxBitFac       = init->maxBitFac;
 
-  hQC->padding.paddingRest = init->padding.paddingRest;            
+  hQC->padding.paddingRest = init->padding.paddingRest;
 
-  hQC->globStatBits    = 3;                          /* for ID_END */ 
+  hQC->globStatBits    = 3;                          /* for ID_END */
 
   /* channel elements init */
   InitElementBits(&hQC->elementBits,
@@ -248,13 +248,13 @@ Word16 QCInit(QC_STATE *hQC,
 
 
 /*********************************************************************************
-* 
+*
 * function name: QCMain
 * description:  quantization and coding the spectrum
 * returns:      0 if success
 *
 **********************************************************************************/
-Word16 QCMain(QC_STATE* hQC,              
+Word16 QCMain(QC_STATE* hQC,
               ELEMENT_BITS* elBits,
               ATS_ELEMENT* adjThrStateElement,
               PSY_OUT_CHANNEL  psyOutChannel[MAX_CHANNELS],  /* may be modified in-place */
@@ -262,34 +262,34 @@ Word16 QCMain(QC_STATE* hQC,
               QC_OUT_CHANNEL  qcOutChannel[MAX_CHANNELS],    /* out                      */
               QC_OUT_ELEMENT* qcOutElement,
               Word16 nChannels,
-			  Word16 ancillaryDataBytes)      
+			  Word16 ancillaryDataBytes)
 {
   Word16 maxChDynBits[MAX_CHANNELS];
-  Word16 chBitDistribution[MAX_CHANNELS];  
+  Word16 chBitDistribution[MAX_CHANNELS];
   Word32 ch;
-   
+
   if (elBits->bitResLevel < 0) {
     return -1;
   }
-   
+
   if (elBits->bitResLevel > elBits->maxBitResBits) {
     return -1;
   }
 
   qcOutElement->staticBitsUsed = countStaticBitdemand(psyOutChannel,
                                                       psyOutElement,
-                                                      nChannels, 
+                                                      nChannels,
 													  qcOutElement->adtsUsed);
 
-   
+
   if (ancillaryDataBytes) {
     qcOutElement->ancBitsUsed = 7 + (ancillaryDataBytes << 3);
-     
+
     if (ancillaryDataBytes >= 15)
       qcOutElement->ancBitsUsed = qcOutElement->ancBitsUsed + 8;
   }
   else {
-    qcOutElement->ancBitsUsed = 0; 
+    qcOutElement->ancBitsUsed = 0;
   }
 
   CalcFormFactor(hQC->logSfbFormFactor, hQC->sfbNRelevantLines, hQC->logSfbEnergy, psyOutChannel, nChannels);
@@ -301,7 +301,7 @@ Word16 QCMain(QC_STATE* hQC,
                    psyOutElement,
                    chBitDistribution,
                    hQC->logSfbEnergy,
-                   hQC->sfbNRelevantLines,                   
+                   hQC->sfbNRelevantLines,
                    qcOutElement,
 				   elBits,
 				   nChannels,
@@ -323,14 +323,14 @@ Word16 QCMain(QC_STATE* hQC,
     maxChDynBits[ch] = extract_l(chBitDistribution[ch] * maxDynBits / 1000);
   }
 
-  qcOutElement->dynBitsUsed = 0;                                         
+  qcOutElement->dynBitsUsed = 0;
   for (ch = 0; ch < nChannels; ch++) {
     Word32 chDynBits;
     Flag   constraintsFulfilled;
     Word32 iter;
-    iter = 0;                                                          
+    iter = 0;
     do {
-      constraintsFulfilled = 1;                                        
+      constraintsFulfilled = 1;
 
       QuantizeSpectrum(psyOutChannel[ch].sfbCnt,
                        psyOutChannel[ch].maxSfbPerGroup,
@@ -340,14 +340,14 @@ Word16 QCMain(QC_STATE* hQC,
                        qcOutChannel[ch].globalGain,
                        qcOutChannel[ch].scf,
                        qcOutChannel[ch].quantSpec);
-       
+
       if (calcMaxValueInSfb(psyOutChannel[ch].sfbCnt,
                             psyOutChannel[ch].maxSfbPerGroup,
                             psyOutChannel[ch].sfbPerGroup,
                             psyOutChannel[ch].sfbOffsets,
                             qcOutChannel[ch].quantSpec,
                             qcOutChannel[ch].maxValueInSfb) > MAX_QUANT) {
-        constraintsFulfilled = 0;                                        
+        constraintsFulfilled = 0;
       }
 
       chDynBits = dynBitCount(qcOutChannel[ch].quantSpec,
@@ -359,24 +359,24 @@ Word16 QCMain(QC_STATE* hQC,
                               psyOutChannel[ch].sfbPerGroup,
                               psyOutChannel[ch].sfbOffsets,
                               &qcOutChannel[ch].sectionData);
-       
+
       if (chDynBits >= maxChDynBits[ch]) {
-        constraintsFulfilled = 0;                                        
+        constraintsFulfilled = 0;
       }
-       
+
       if (!constraintsFulfilled) {
         qcOutChannel[ch].globalGain = qcOutChannel[ch].globalGain + 1;
       }
 
       iter = iter + 1;
-       
+
     } while(!constraintsFulfilled);
 
     qcOutElement->dynBitsUsed = qcOutElement->dynBitsUsed + chDynBits;
 
-    qcOutChannel[ch].mdctScale    = psyOutChannel[ch].mdctScale;         
-    qcOutChannel[ch].groupingMask = psyOutChannel[ch].groupingMask;      
-    qcOutChannel[ch].windowShape  = psyOutChannel[ch].windowShape;       
+    qcOutChannel[ch].mdctScale    = psyOutChannel[ch].mdctScale;
+    qcOutChannel[ch].groupingMask = psyOutChannel[ch].groupingMask;
+    qcOutChannel[ch].windowShape  = psyOutChannel[ch].windowShape;
   }
 
   /* save dynBitsUsed for correction of bits2pe relation */
@@ -411,13 +411,13 @@ static Word16 calcMaxValueInSfb(Word16 sfbCnt,
   Word16 sfbOffs, sfb;
   Word16 maxValueAll;
 
-  maxValueAll = 0;                                       
+  maxValueAll = 0;
 
   for(sfbOffs=0;sfbOffs<sfbCnt;sfbOffs+=sfbPerGroup) {
     for (sfb = 0; sfb < maxSfbPerGroup; sfb++) {
       Word16 line;
       Word16 maxThisSfb;
-      maxThisSfb = 0;                                    
+      maxThisSfb = 0;
 
       for (line = sfbOffset[sfbOffs+sfb]; line < sfbOffset[sfbOffs+sfb+1]; line++) {
         Word16 absVal;
@@ -425,7 +425,7 @@ static Word16 calcMaxValueInSfb(Word16 sfbCnt,
         maxThisSfb = max(maxThisSfb, absVal);
       }
 
-      maxValue[sfbOffs+sfb] = maxThisSfb;                
+      maxValue[sfbOffs+sfb] = maxThisSfb;
       maxValueAll = max(maxValueAll, maxThisSfb);
     }
   }
@@ -441,15 +441,15 @@ static Word16 calcMaxValueInSfb(Word16 sfbCnt,
 **********************************************************************************/
 void updateBitres(QC_STATE* qcKernel,
                   QC_OUT*   qcOut)
-                  
+
 {
   ELEMENT_BITS *elBits;
- 
-  qcKernel->bitResTot = 0;                               
+
+  qcKernel->bitResTot = 0;
 
   elBits = &qcKernel->elementBits;
 
-   
+
   if (elBits->averageBits > 0) {
     /* constant bitrate */
     Word16 bitsUsed;
@@ -460,8 +460,8 @@ void updateBitres(QC_STATE* qcKernel,
   }
   else {
     /* variable bitrate */
-    elBits->bitResLevel = elBits->maxBits;           
-    qcKernel->bitResTot = qcKernel->maxBitsTot;      
+    elBits->bitResLevel = elBits->maxBits;
+    qcKernel->bitResTot = qcKernel->maxBitsTot;
   }
 }
 
@@ -476,55 +476,55 @@ Word16 FinalizeBitConsumption(QC_STATE *qcKernel,
 {
   Word32 nFullFillElem;
   Word32 totFillBits;
-  Word16 diffBits;  
+  Word16 diffBits;
   Word16 bitsUsed;
 
-  totFillBits = 0;                                       
+  totFillBits = 0;
 
-  qcOut->totStaticBitsUsed = qcKernel->globStatBits;     
+  qcOut->totStaticBitsUsed = qcKernel->globStatBits;
   qcOut->totStaticBitsUsed += qcOut->qcElement.staticBitsUsed;
   qcOut->totDynBitsUsed    = qcOut->qcElement.dynBitsUsed;
   qcOut->totAncBitsUsed    = qcOut->qcElement.ancBitsUsed;
   qcOut->totFillBits       = qcOut->qcElement.fillBits;
-   
+
   if (qcOut->qcElement.fillBits) {
     totFillBits += qcOut->qcElement.fillBits;
   }
 
   nFullFillElem = (max((qcOut->totFillBits - 1), 0) / maxFillElemBits) * maxFillElemBits;
-  
+
   qcOut->totFillBits = qcOut->totFillBits - nFullFillElem;
 
   /* check fill elements */
-   
+
   if (qcOut->totFillBits > 0) {
     /* minimum Fillelement contains 7 (TAG + byte cnt) bits */
     qcOut->totFillBits = max(7, qcOut->totFillBits);
     /* fill element size equals n*8 + 7 */
-    qcOut->totFillBits = qcOut->totFillBits + ((8 - ((qcOut->totFillBits - 7) & 0x0007)) & 0x0007);     
+    qcOut->totFillBits = qcOut->totFillBits + ((8 - ((qcOut->totFillBits - 7) & 0x0007)) & 0x0007);
   }
 
   qcOut->totFillBits = qcOut->totFillBits + nFullFillElem;
 
   /* now distribute extra fillbits and alignbits over channel elements */
   qcOut->alignBits = 7 - ((qcOut->totDynBitsUsed + qcOut->totStaticBitsUsed +
-                           qcOut->totAncBitsUsed + qcOut->totFillBits - 1) & 0x0007);             
+                           qcOut->totAncBitsUsed + qcOut->totFillBits - 1) & 0x0007);
 
-     
+
   if ( (qcOut->alignBits + qcOut->totFillBits - totFillBits == 8) &&
        (qcOut->totFillBits > 8))
     qcOut->totFillBits = qcOut->totFillBits - 8;
 
-   
+
   diffBits = qcOut->alignBits + qcOut->totFillBits - totFillBits;
-   
+
   if(diffBits>=0) {
     qcOut->qcElement.fillBits += diffBits;
   }
 
   bitsUsed = qcOut->totDynBitsUsed + qcOut->totStaticBitsUsed + qcOut->totAncBitsUsed;
   bitsUsed = bitsUsed + qcOut->totFillBits + qcOut->alignBits;
-   
+
   if (bitsUsed > qcKernel->maxBitsTot) {
     return -1;
   }
@@ -564,9 +564,9 @@ Word16 AdjustBitrate(QC_STATE        *hQC,
   codeBitsLast = hQC->averageBitsTot - hQC->globStatBits;
   codeBits     = frameLen - hQC->globStatBits;
 
-  /* calculate bits for every channel element */   
+  /* calculate bits for every channel element */
   if (codeBits != codeBitsLast) {
-    Word16 totalBits = 0;                                       
+    Word16 totalBits = 0;
 
     hQC->elementBits.averageBits = (hQC->elementBits.relativeBits * codeBits) >> 16; /* relativeBits was scaled down by 2 */
     totalBits += hQC->elementBits.averageBits;
@@ -574,7 +574,7 @@ Word16 AdjustBitrate(QC_STATE        *hQC,
     hQC->elementBits.averageBits = hQC->elementBits.averageBits + (codeBits - totalBits);
   }
 
-  hQC->averageBitsTot = frameLen;                        
+  hQC->averageBitsTot = frameLen;
 
   return 0;
 }

@@ -105,30 +105,30 @@ Word16 dtx_enc_reset(dtx_encState * st, Word16 isf_init[])
 		fprintf(stderr, "dtx_enc_reset: invalid parameter\n");
 		return -1;
 	}
-	st->hist_ptr = 0;                      
-	st->log_en_index = 0;                  
+	st->hist_ptr = 0;
+	st->log_en_index = 0;
 
 	/* Init isf_hist[] */
 	for (i = 0; i < DTX_HIST_SIZE; i++)
 	{
 		Copy(isf_init, &st->isf_hist[i * M], M);
 	}
-	st->cng_seed = RANDOM_INITSEED;       
+	st->cng_seed = RANDOM_INITSEED;
 
 	/* Reset energy history */
 	Set_zero(st->log_en_hist, DTX_HIST_SIZE);
 
-	st->dtxHangoverCount = DTX_HANG_CONST; 
-	st->decAnaElapsedCount = 32767;        
+	st->dtxHangoverCount = DTX_HANG_CONST;
+	st->decAnaElapsedCount = 32767;
 
 	for (i = 0; i < 28; i++)
 	{
-		st->D[i] = 0;                      
+		st->D[i] = 0;
 	}
 
 	for (i = 0; i < DTX_HIST_SIZE - 1; i++)
 	{
-		st->sumD[i] = 0;                   
+		st->sumD[i] = 0;
 	}
 
 	return 1;
@@ -279,7 +279,7 @@ Word16 dtx_enc(
 	for (i = 0; i < L_FRAME; i++)
 	{
 		tmp = mult(exc2[i], gain);         /* Q0 * Q15 */
-		exc2[i] = shl(tmp, exp); 
+		exc2[i] = shl(tmp, exp);
 	}
 
 	return 0;
@@ -301,7 +301,7 @@ Word16 dtx_buffer(
 
 	Word16 log_en_e;
 	Word16 log_en_m;
-	st->hist_ptr = add(st->hist_ptr, 1); 
+	st->hist_ptr = add(st->hist_ptr, 1);
 	if(st->hist_ptr == DTX_HIST_SIZE)
 	{
 		st->hist_ptr = 0;
@@ -345,7 +345,7 @@ void tx_dtx_handler(dtx_encState * st,     /* i/o : State struct           */
 {
 
 	/* this state machine is in synch with the GSMEFR txDtx machine      */
-	st->decAnaElapsedCount = add(st->decAnaElapsedCount, 1); 
+	st->decAnaElapsedCount = add(st->decAnaElapsedCount, 1);
 
 	if (vad_flag != 0)
 	{
@@ -354,8 +354,8 @@ void tx_dtx_handler(dtx_encState * st,     /* i/o : State struct           */
 	{                                      /* non-speech */
 		if (st->dtxHangoverCount == 0)
 		{                                  /* out of decoder analysis hangover  */
-			st->decAnaElapsedCount = 0;    
-			*usedMode = MRDTX;            
+			st->decAnaElapsedCount = 0;
+			*usedMode = MRDTX;
 		} else
 		{                                  /* in possible analysis hangover */
 			st->dtxHangoverCount = sub(st->dtxHangoverCount, 1);
@@ -394,8 +394,8 @@ static void aver_isf_history(
 		{
 			for (i = 0; i < M; i++)
 			{
-				isf_tmp[k * M + i] = isf_old[indices[k] * M + i];      
-				isf_old[indices[k] * M + i] = isf_old[indices[2] * M + i];    
+				isf_tmp[k * M + i] = isf_old[indices[k] * M + i];
+				isf_old[indices[k] * M + i] = isf_old[indices[2] * M + i];
 			}
 		}
 	}
@@ -403,13 +403,13 @@ static void aver_isf_history(
 	/* Perform the ISF averaging */
 	for (j = 0; j < M; j++)
 	{
-		L_tmp = 0;                      
+		L_tmp = 0;
 
 		for (i = 0; i < DTX_HIST_SIZE; i++)
 		{
 			L_tmp = L_add(L_tmp, L_deposit_l(isf_old[i * M + j]));
 		}
-		isf_aver[j] = L_tmp;              
+		isf_aver[j] = L_tmp;
 	}
 
 	/* Retrieve from isf_tmp[][] the ISF vectors saved prior to averaging */
@@ -441,12 +441,12 @@ static void find_frame_indices(
 	/* sum sumD[0..DTX_HIST_SIZE-1]. sumD[DTX_HIST_SIZE] is    */
 	/* not updated since it will be removed later.           */
 
-	tmp = DTX_HIST_SIZE_MIN_ONE;           
-	j = -1;                                
+	tmp = DTX_HIST_SIZE_MIN_ONE;
+	j = -1;
 	for (i = 0; i < DTX_HIST_SIZE_MIN_ONE; i++)
 	{
 		j = add(j, tmp);
-		st->sumD[i] = L_sub(st->sumD[i], st->D[j]);     
+		st->sumD[i] = L_sub(st->sumD[i], st->D[j]);
 		tmp = sub(tmp, 1);
 	}
 
@@ -458,86 +458,86 @@ static void find_frame_indices(
 
 	for (i = DTX_HIST_SIZE_MIN_ONE; i > 0; i--)
 	{
-		st->sumD[i] = st->sumD[i - 1];     
+		st->sumD[i] = st->sumD[i - 1];
 	}
-	st->sumD[0] = 0;                       
+	st->sumD[0] = 0;
 
 	/* Remove the oldest frame from the distance matrix.           */
 	/* Note that the distance matrix is replaced by a one-         */
 	/* dimensional array to save static memory.                    */
 
-	tmp = 0;                               
+	tmp = 0;
 	for (i = 27; i >= 12; i = (Word16) (i - tmp))
 	{
 		tmp = add(tmp, 1);
 		for (j = tmp; j > 0; j--)
 		{
-			st->D[i - j + 1] = st->D[i - j - tmp];   
+			st->D[i - j + 1] = st->D[i - j - tmp];
 		}
 	}
 
 	/* Compute the first column of the distance matrix D            */
 	/* (squared Euclidean distances from isf1[] to isf_old_tx[][]). */
 
-	ptr = st->hist_ptr;                 
+	ptr = st->hist_ptr;
 	for (i = 1; i < DTX_HIST_SIZE; i++)
 	{
 		/* Compute the distance between the latest isf and the other isfs. */
 		ptr = sub(ptr, 1);
 		if (ptr < 0)
 		{
-			ptr = DTX_HIST_SIZE_MIN_ONE;   
+			ptr = DTX_HIST_SIZE_MIN_ONE;
 		}
-		L_tmp = 0;                         
+		L_tmp = 0;
 		for (j = 0; j < M; j++)
 		{
 			tmp = sub(isf_old_tx[st->hist_ptr * M + j], isf_old_tx[ptr * M + j]);
 			L_tmp = L_mac(L_tmp, tmp, tmp);
 		}
-		st->D[i - 1] = L_tmp;           
+		st->D[i - 1] = L_tmp;
 
 		/* Update also the column sums. */
-		st->sumD[0] = L_add(st->sumD[0], st->D[i - 1]); 
-		st->sumD[i] = L_add(st->sumD[i], st->D[i - 1]); 
+		st->sumD[0] = L_add(st->sumD[0], st->D[i - 1]);
+		st->sumD[i] = L_add(st->sumD[i], st->D[i - 1]);
 	}
 
 	/* Find the minimum and maximum distances */
-	summax = st->sumD[0];                  
-	summin = st->sumD[0];                  
-	indices[0] = 0;                        
-	indices[2] = 0;                        
+	summax = st->sumD[0];
+	summin = st->sumD[0];
+	indices[0] = 0;
+	indices[2] = 0;
 	for (i = 1; i < DTX_HIST_SIZE; i++)
 	{
 		if (L_sub(st->sumD[i], summax) > 0)
 		{
-			indices[0] = i;                
-			summax = st->sumD[i];          
+			indices[0] = i;
+			summax = st->sumD[i];
 		}
 		if (L_sub(st->sumD[i], summin) < 0)
 		{
-			indices[2] = i;                
-			summin = st->sumD[i];          
+			indices[2] = i;
+			summin = st->sumD[i];
 		}
 	}
 
 	/* Find the second largest distance */
-	summax2nd = -2147483647L;              
-	indices[1] = -1;                       
+	summax2nd = -2147483647L;
+	indices[1] = -1;
 	for (i = 0; i < DTX_HIST_SIZE; i++)
 	{
 		if ((L_sub(st->sumD[i], summax2nd) > 0) && (sub(i, indices[0]) != 0))
 		{
-			indices[1] = i;                
-			summax2nd = st->sumD[i];       
+			indices[1] = i;
+			summax2nd = st->sumD[i];
 		}
 	}
 
 	for (i = 0; i < 3; i++)
 	{
-		indices[i] = sub(st->hist_ptr, indices[i]);     
+		indices[i] = sub(st->hist_ptr, indices[i]);
 		if (indices[i] < 0)
 		{
-			indices[i] = add(indices[i], DTX_HIST_SIZE);       
+			indices[i] = add(indices[i], DTX_HIST_SIZE);
 		}
 	}
 
@@ -549,7 +549,7 @@ static void find_frame_indices(
 	L_tmp = L_mult(voround(summax), INV_MED_THRESH);
 	if(L_tmp <= summin)
 	{
-		indices[0] = -1; 
+		indices[0] = -1;
 	}
 	/* If second largest distance/MED_THRESH is smaller than     */
 	/* minimum distance then the median ISF vector replacement is    */
@@ -558,7 +558,7 @@ static void find_frame_indices(
 	L_tmp = L_mult(voround(summax2nd), INV_MED_THRESH);
 	if(L_tmp <= summin)
 	{
-		indices[1] = -1;                 
+		indices[1] = -1;
 	}
 	return;
 }

@@ -33,12 +33,12 @@
 @ sig_lo[] --- r5
 @ lg       --- r6
 
-          .section  .text 
+          .section  .text
           .global   Syn_filt_32_asm
 
 Syn_filt_32_asm:
 
-          STMFD   	r13!, {r4 - r12, r14} 
+          STMFD   	r13!, {r4 - r12, r14}
           LDR           r4,  [r13, #40]                  @ get sig_hi[] address
           LDR           r5,  [r13, #44]                  @ get sig_lo[] address
 
@@ -49,8 +49,8 @@ Syn_filt_32_asm:
 	  SUB           r10, r4, #32                     @ sig_hi[-16] address
 	  SUB           r11, r5, #32                     @ sig_lo[-16] address
 
-	  VLD1.S16      {D0, D1, D2, D3}, [r0]!          @a[1] ~ a[16] 
-  
+	  VLD1.S16      {D0, D1, D2, D3}, [r0]!          @a[1] ~ a[16]
+
           MOV           r8, #0                           @ i = 0
 
 	  VLD1.S16      {D4, D5, D6, D7}, [r10]!         @ sig_hi[-16] ~ sig_hi[-1]
@@ -58,9 +58,9 @@ Syn_filt_32_asm:
           VREV64.16     D1, D1
 	  VLD1.S16      {D8, D9, D10, D11}, [r11]!       @ sig_lo[-16] ~ sig_lo[-1]
           VREV64.16     D2, D2
-          VREV64.16     D3, D3	
+          VREV64.16     D3, D3
           VDUP.S32      Q15, r8
-              
+
 SYN_LOOP:
 
           LDRSH         r6, [r2], #2                     @exc[i]
@@ -73,12 +73,12 @@ SYN_LOOP:
 
 	  VEXT.8        D9, D9, D10, #2
 	  VEXT.8        D10, D10, D11, #2
-	  
+
 	  VPADD.S32     D28, D20, D21
           MUL           r12, r6, r3                      @exc[i] * a0
 	  VPADD.S32     D29, D28, D28
 	  VDUP.S32      Q10, D29[0]                      @result1
-          
+
 	  VMULL.S16     Q11, D4, D3
 	  VMLAL.S16     Q11, D5, D2
           VSUB.S32      Q10, Q15, Q10
@@ -101,7 +101,7 @@ SYN_LOOP:
 
 	  VSHR.S32      Q10, Q10, #11                    @result1 >>= 11
 	  VSHL.S32      Q11, Q11, #1                     @result2 <<= 1
-	  VDUP.S32      Q12, r14                         
+	  VDUP.S32      Q12, r14
 	  VADD.S32      Q12, Q12, Q10                    @L_tmp = L_tmp - (result1 >>= 11) - (result2 <<= 1)
 	  VSUB.S32      Q12, Q12, Q11
 
@@ -122,12 +122,12 @@ SYN_LOOP:
 	  STRH          r12, [r5], #2                    @stroe sig_lo[i]
 
           CMP           r8, #64
-          BLT           SYN_LOOP                          
-         
+          BLT           SYN_LOOP
+
 Syn_filt_32_end:
-		     
-          LDMFD   	    r13!, {r4 - r12, r15} 
+
+          LDMFD   	    r13!, {r4 - r12, r15}
           @ENDFUNC
           .END
- 
+
 

@@ -25,9 +25,9 @@ VOMT:= lib
 
 
 # module macros
-# please append the additional macro definitions here for your module if necessary. 
-# e.g. -DVISUALON, macro VISUALON defined for your module 
-VOMM:= -DARMV5E -DARMV7Neon -DARM_INASM -DARMV5_INASM 
+# please append the additional macro definitions here for your module if necessary.
+# e.g. -DVISUALON, macro VISUALON defined for your module
+VOMM:= -DARMV5E -DARMV7Neon -DARM_INASM -DARMV5_INASM
 
 
 
@@ -36,10 +36,10 @@ VOTARGET:=libvoAACEncv7
 
 
 # please modify here to be sure to see the g1.mk
-include ../../../../../Tools/eclair.mk 
+include ../../../../../Tools/eclair.mk
 
 # dependent libraries.
-VODEPLIBS:=#-ldl -lstdc++ 
+VODEPLIBS:=#-ldl -lstdc++
 
 # module source
 # please modify here to be sure to see the ms.mk which specifies all source info of your module
@@ -51,5 +51,5 @@ VORELDIR:=../../../../../../Release
 
 
 # please modify here to be sure to see the doit.mk
-include ../../../../../Tools/doit.mk  
+include ../../../../../Tools/doit.mk
 

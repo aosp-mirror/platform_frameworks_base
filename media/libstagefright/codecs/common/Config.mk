@@ -1,8 +1,8 @@
-# 
+#
 # This configure file is just for Linux projects against Android
 #
 
-VOPRJ := 
+VOPRJ :=
 VONJ :=
 
 # WARNING:
@@ -20,5 +20,5 @@ endif
 
 VOTEST := 0
 
-VO_CFLAGS:=-DLINUX 
+VO_CFLAGS:=-DLINUX
 

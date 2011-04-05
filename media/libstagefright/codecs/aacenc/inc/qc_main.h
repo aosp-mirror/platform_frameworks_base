@@ -35,7 +35,7 @@ void QCOutDelete(QC_OUT *hQC, VO_MEM_OPERATOR *pMemOP);
 
 Word16 QCNew(QC_STATE *hQC, VO_MEM_OPERATOR *pMemOP);
 
-Word16 QCInit(QC_STATE *hQC, 
+Word16 QCInit(QC_STATE *hQC,
               struct QC_INIT *init);
 
 void QCDelete(QC_STATE *hQC, VO_MEM_OPERATOR *pMemOP);

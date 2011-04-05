@@ -26,17 +26,17 @@
 @lg         RN     r3
 
 	.section   .text
-        .global    Residu_opt 
+        .global    Residu_opt
 
 Residu_opt:
 
-        STMFD          r13!, {r4 - r12, r14} 
+        STMFD          r13!, {r4 - r12, r14}
         SUB            r7, r3, #4                       @i = lg - 4
-        
-        VLD1.S16       {D0, D1, D2, D3}, [r0]!              @get all a[]  
+
+        VLD1.S16       {D0, D1, D2, D3}, [r0]!              @get all a[]
 	VLD1.S16       {D4}, [r0]!
         VMOV.S32       Q8,  #0x8000
-        
+
 LOOP1:
         ADD            r9, r1, r7, LSL #1               @copy the address
         ADD            r10, r2, r7, LSL #1
@@ -45,7 +45,7 @@ LOOP1:
         VQDMULL.S16    Q10, D5, D0[0]                  @finish the first L_mult
 
         SUB            r8, r9, #2                       @get the x[i-1] address
-        VLD1.S16       D5, [r8]! 
+        VLD1.S16       D5, [r8]!
         VQDMLAL.S16    Q10, D5, D0[1]
 
         SUB            r8, r9, #4                       @load the x[i-2] address
@@ -53,36 +53,36 @@ LOOP1:
         VQDMLAL.S16    Q10, D5, D0[2]
 
         SUB            r8, r9, #6                       @load the x[i-3] address
-        VLD1.S16       D5, [r8]!     
-        VQDMLAL.S16    Q10, D5, D0[3]                    
+        VLD1.S16       D5, [r8]!
+        VQDMLAL.S16    Q10, D5, D0[3]
 
         SUB            r8, r9, #8                       @load the x[i-4] address
-        VLD1.S16       D5, [r8]!     
-        VQDMLAL.S16    Q10, D5, D1[0]  
+        VLD1.S16       D5, [r8]!
+        VQDMLAL.S16    Q10, D5, D1[0]
 
         SUB            r8, r9, #10                      @load the x[i-5] address
-        VLD1.S16       D5, [r8]!     
-        VQDMLAL.S16    Q10, D5, D1[1] 
+        VLD1.S16       D5, [r8]!
+        VQDMLAL.S16    Q10, D5, D1[1]
 
         SUB            r8, r9, #12                      @load the x[i-6] address
-        VLD1.S16       D5, [r8]!     
-        VQDMLAL.S16    Q10, D5, D1[2]  
+        VLD1.S16       D5, [r8]!
+        VQDMLAL.S16    Q10, D5, D1[2]
 
         SUB            r8, r9, #14                      @load the x[i-7] address
-        VLD1.S16       D5, [r8]!     
-        VQDMLAL.S16    Q10, D5, D1[3]  
+        VLD1.S16       D5, [r8]!
+        VQDMLAL.S16    Q10, D5, D1[3]
 
         SUB            r8, r9, #16                      @load the x[i-8] address
-        VLD1.S16       D5, [r8]!     
-        VQDMLAL.S16    Q10, D5, D2[0]  
+        VLD1.S16       D5, [r8]!
+        VQDMLAL.S16    Q10, D5, D2[0]
 
         SUB            r8, r9, #18                      @load the x[i-9] address
-        VLD1.S16       D5, [r8]!     
-        VQDMLAL.S16    Q10, D5, D2[1]         
-           
+        VLD1.S16       D5, [r8]!
+        VQDMLAL.S16    Q10, D5, D2[1]
+
         SUB            r8, r9, #20                      @load the x[i-10] address
-        VLD1.S16       D5, [r8]!     
-        VQDMLAL.S16    Q10, D5, D2[2]  
+        VLD1.S16       D5, [r8]!
+        VQDMLAL.S16    Q10, D5, D2[2]
 
 	SUB            r8, r9, #22                      @load the x[i-11] address
 	VLD1.S16       D5, [r8]!
@@ -117,10 +117,10 @@ LOOP1:
 
         BGE            LOOP1
 
-Residu_asm_end: 
- 
+Residu_asm_end:
+
         LDMFD      r13!, {r4 - r12, r15}
-    
+
         @ENDFUNC
         .END
 
