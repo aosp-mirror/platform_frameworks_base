@@ -23,7 +23,7 @@
 #ifndef __SF_ESTIM_H__
 #define __SF_ESTIM_H__
 /*
-   Scale factor estimation 
+   Scale factor estimation
  */
 #include "psy_const.h"
 #include "interface.h"

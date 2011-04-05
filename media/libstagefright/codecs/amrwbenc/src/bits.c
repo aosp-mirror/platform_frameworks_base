@@ -34,8 +34,8 @@
 
 int PackBits(Word16 prms[],             /*  i: analysis parameters */
 			 Word16 coding_mode,        /*  i: coding bit-stream ratio mode */
-			 Word16 mode,               /*  i: coding bit-stream ratio mode*/ 
-			 Coder_State *st            /*i/o: coder global parameters struct */           
+			 Word16 mode,               /*  i: coding bit-stream ratio mode*/
+			 Coder_State *st            /*i/o: coder global parameters struct */
 			 )
 {
 	Word16 i, frame_type;
@@ -46,7 +46,7 @@ int PackBits(Word16 prms[],             /*  i: analysis parameters */
 	unsigned short* dataOut = st->outputStream;
 
 	if (coding_mode == MRDTX)
-	{	   
+	{
 		st->sid_update_counter--;
 
 		if (st->prev_ft == TX_SPEECH)
@@ -92,7 +92,7 @@ int PackBits(Word16 prms[],             /*  i: analysis parameters */
 	} else
 	{
 		if (bitstreamformat == 1)		/* ITU file format */
-		{  						
+		{
 			*(dataOut) = 0x6b21;
 			if(frame_type != TX_NO_DATA && frame_type != TX_SID_FIRST)
 			{
@@ -100,17 +100,17 @@ int PackBits(Word16 prms[],             /*  i: analysis parameters */
 				for (i = 0; i < nb_of_bits[coding_mode]; i++)
 				{
 					if(prms[i] == BIT_0){
-						*(dataOut + 2 + i) = BIT_0_ITU;	 			
+						*(dataOut + 2 + i) = BIT_0_ITU;
 					}
 					else{
 						*(dataOut + 2 + i) = BIT_1_ITU;
 					}
 				}
-				return (2 + nb_of_bits[coding_mode])<<1;   
+				return (2 + nb_of_bits[coding_mode])<<1;
 			} else
 			{
 				*(dataOut + 1) = 0;
-				return 2<<1;	   
+				return 2<<1;
 			}
 		} else							/* MIME/storage file format */
 		{
@@ -191,7 +191,7 @@ void Parm_serial(
 		)
 {
 	Word16 i, bit;
-	*prms += no_of_bits;                  
+	*prms += no_of_bits;
 	for (i = 0; i < no_of_bits; i++)
 	{
 		bit = (Word16) (value & 0x0001);    /* get lsb */
@@ -199,9 +199,9 @@ void Parm_serial(
 			*--(*prms) = BIT_0;
 		else
 			*--(*prms) = BIT_1;
-		value >>= 1;          
+		value >>= 1;
 	}
-	*prms += no_of_bits;                  
+	*prms += no_of_bits;
 	return;
 }
 

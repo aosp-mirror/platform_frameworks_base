@@ -69,7 +69,7 @@ enum
 
 #define BLOCK_SWITCHING_OFFSET		   (1*1024+3*128+64+128)
 #define BLOCK_SWITCHING_DATA_SIZE          FRAME_LEN_LONG
-										    
+
 #define TRANSFORM_OFFSET_LONG    0
 #define TRANSFORM_OFFSET_SHORT   448
 

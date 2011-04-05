@@ -35,7 +35,7 @@
 
 pred_lt4_asm:
 
-         STMFD     r13!, {r4 - r12, r14} 
+         STMFD     r13!, {r4 - r12, r14}
          RSB       r4, r1, #0                         @-T0
          RSB       r2, r2, #0                         @frac = -frac
          ADD       r5, r0, r4, LSL #1                 @x = exc - T0
@@ -45,7 +45,7 @@ pred_lt4_asm:
          SUB       r5, r5, #30                        @x -= 15
          RSB       r4, r2, #3                         @k = 3 - frac
          LDR       r6, Table
-	 MOV       r8, r4, LSL #6                    
+	 MOV       r8, r4, LSL #6
          @MOV       r7, #0                             @j = 0
          ADD       r8, r6, r8                         @ptr2 = &(inter4_2[k][0])
 
@@ -63,7 +63,7 @@ THREE_LOOP:
 	 LDRSH     r6, [r1], #2                       @x[1]
 	 LDRSH     r9, [r1], #2                       @x[2]
 
-	 SMULBB    r10, r4, r3                        @x[0] * h[0]                  
+	 SMULBB    r10, r4, r3                        @x[0] * h[0]
 	 SMULBB    r11, r6, r3                        @x[1] * h[0]
 	 SMULBB    r12, r9, r3                        @x[2] * h[0]
 
@@ -285,7 +285,7 @@ Last2LOOP:
 
 	 SMLABB    r10, r9, r3, r10                   @x[2] * h[2]
          SMLABB    r11, r4, r3, r11                   @x[3] * h[2]
-      
+
 	 SMLABT    r10, r4, r3, r10                   @x[3] * h[3]
 	 SMLABT    r11, r6, r3, r11                   @x[4] * h[3]
 
@@ -435,7 +435,7 @@ Last2LOOP:
 	 MOV       r11, r11, LSL #1
 
 	 QADD      r10, r10, r10
-	 QADD      r11, r11, r11 
+	 QADD      r11, r11, r11
 
 	 QADD      r10, r10, r5
 	 QADD      r11, r11, r5

@@ -3,7 +3,7 @@ include $(CLEAR_VARS)
 include frameworks/base/media/libstagefright/codecs/common/Config.mk
 
 
- 	
+
 LOCAL_SRC_FILES := \
 	AMRWBEncoder.cpp \
 	src/autocorr.c \
@@ -91,7 +91,7 @@ LOCAL_MODULE := libstagefright_amrwbenc
 
 LOCAL_ARM_MODE := arm
 
-LOCAL_STATIC_LIBRARIES := 
+LOCAL_STATIC_LIBRARIES :=
 
 LOCAL_SHARED_LIBRARIES :=
 

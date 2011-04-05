@@ -27,21 +27,21 @@
 @ mem[]  ---   r3
 @ m ---  16  lg --- 80  update --- 1
 
-          .section  .text 
+          .section  .text
           .global   Syn_filt_asm
 
 Syn_filt_asm:
 
-          STMFD   	r13!, {r4 - r12, r14} 
+          STMFD   	r13!, {r4 - r12, r14}
           SUB           r13, r13, #700                   @ y_buf[L_FRAME16k + M16k]
-   
+
           MOV           r4, r3                           @ copy mem[] address
           MOV           r5, r13                          @ copy yy = y_buf address
 
           @ for(i = 0@ i < m@ i++)
           @{
           @    *yy++ = mem[i]@
-          @} 
+          @}
           VLD1.S16      {D0, D1, D2, D3}, [r4]!          @load 16 mems
 	  VST1.S16      {D0, D1, D2, D3}, [r5]!          @store 16 mem[] to *yy
 
@@ -54,7 +54,7 @@ Syn_filt_asm:
 	  VREV64.16     D0, D0
 	  VREV64.16     D1, D1
 	  VREV64.16     D2, D2
-	  VREV64.16     D3, D3 
+	  VREV64.16     D3, D3
 	  MOV           r8, #0                           @ loop times
 	  MOV           r10, r13                         @ temp = y_buf
 	  ADD           r4, r13, #32                     @ yy[i] address
@@ -68,7 +68,7 @@ SYN_LOOP:
 	  ADD           r10, r4, r8, LSL #1              @ y[i], yy[i] address
 
 	  VDUP.S32      Q10, r12
-	  VMULL.S16     Q5, D3, D4                    
+	  VMULL.S16     Q5, D3, D4
           VMLAL.S16     Q5, D2, D5
           VMLAL.S16     Q5, D1, D6
           VMLAL.S16     Q5, D0, D7
@@ -82,25 +82,25 @@ SYN_LOOP:
 	  VDUP.S32      Q7, D10[0]
 
 	  VSUB.S32      Q9, Q10, Q7
-          VQRSHRN.S32   D20, Q9, #12   
+          VQRSHRN.S32   D20, Q9, #12
           VMOV.S16      r9, D20[0]
           VEXT.8        D7, D7, D20, #2
           CMP           r8, #80
           STRH          r9, [r10]                        @ yy[i]
-          STRH          r9, [r2], #2                     @ y[i]          	         
-	  
+          STRH          r9, [r2], #2                     @ y[i]
+
           BLT           SYN_LOOP
- 
+
           @ update mem[]
           ADD           r5, r13, #160                    @ yy[64] address
 	  VLD1.S16      {D0, D1, D2, D3}, [r5]!
-	  VST1.S16      {D0, D1, D2, D3}, [r3]!              
+	  VST1.S16      {D0, D1, D2, D3}, [r3]!
 
 Syn_filt_asm_end:
- 
-          ADD           r13, r13, #700		     
-          LDMFD   	r13!, {r4 - r12, r15} 
+
+          ADD           r13, r13, #700
+          LDMFD   	r13!, {r4 - r12, r15}
           @ENDFUNC
           .END
- 
+
 
