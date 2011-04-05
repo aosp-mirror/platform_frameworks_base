@@ -46,7 +46,7 @@ public class RecognizerIntent {
     }
 
     /**
-     * Starts an activity that will prompt the user for speech and sends it through a
+     * Starts an activity that will prompt the user for speech and send it through a
      * speech recognizer.  The results will be returned via activity results (in
      * {@link Activity#onActivityResult}, if you start the intent using
      * {@link Activity#startActivityForResult(Intent, int)}), or forwarded via a PendingIntent
@@ -81,8 +81,8 @@ public class RecognizerIntent {
     public static final String ACTION_RECOGNIZE_SPEECH = "android.speech.action.RECOGNIZE_SPEECH";
 
     /**
-     * Starts an activity that will prompt the user for speech, sends it through a
-     * speech recognizer, and invokes and either displays a web search result or triggers
+     * Starts an activity that will prompt the user for speech, send it through a
+     * speech recognizer, and either display a web search result or trigger
      * another type of action based on the user's speech.
      *
      * <p>If you want to avoid triggering any type of action besides web search, you can use
@@ -105,6 +105,7 @@ public class RecognizerIntent {
      * <p> Result extras (returned in the result, not to be specified in the request):
      * <ul>
      *   <li>{@link #EXTRA_RESULTS}
+     *   <li>{@link #EXTRA_CONFIDENCE_SCORES} (optional)
      * </ul>
      * 
      * <p>NOTE: There may not be any applications installed to handle this action, so you should
@@ -232,11 +233,29 @@ public class RecognizerIntent {
 
     /**
      * An ArrayList&lt;String&gt; of the recognition results when performing
-     * {@link #ACTION_RECOGNIZE_SPEECH}. Returned in the results; not to be specified in the
-     * recognition request. Only present when {@link Activity#RESULT_OK} is returned in
-     * an activity result. In a PendingIntent, the lack of this extra indicates failure.
+     * {@link #ACTION_RECOGNIZE_SPEECH}. Generally this list should be ordered in
+     * descending order of speech recognizer confidence. (See {@link #EXTRA_CONFIDENCE_SCORES}).
+     * Returned in the results; not to be specified in the recognition request. Only present
+     * when {@link Activity#RESULT_OK} is returned in an activity result. In a PendingIntent,
+     * the lack of this extra indicates failure.
      */
     public static final String EXTRA_RESULTS = "android.speech.extra.RESULTS";
+    
+    /**
+     * A float array of confidence scores of the recognition results when performing
+     * {@link #ACTION_RECOGNIZE_SPEECH}. The array should be the same size as the ArrayList
+     * returned in {@link #EXTRA_RESULTS}, and should contain values ranging from 0.0 to 1.0,
+     * or -1 to represent an unavailable confidence score.
+     * <p>
+     * Confidence values close to 1.0 indicate high confidence (the speech recognizer is
+     * confident that the recognition result is correct), while values close to 0.0 indicate
+     * low confidence.
+     * <p>
+     * Returned in the results; not to be specified in the recognition request. This extra is
+     * optional and might not be provided. Only present when {@link Activity#RESULT_OK} is
+     * returned in an activity result.
+     */
+    public static final String EXTRA_CONFIDENCE_SCORES = "android.speech.extra.CONFIDENCE_SCORES";
     
     /**
      * Returns the broadcast intent to fire with
