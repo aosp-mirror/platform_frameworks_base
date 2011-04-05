@@ -19,14 +19,14 @@
 namespace android {
 
 TextLayoutCache::TextLayoutCache():
-        mCache(GenerationCache<TextLayoutCacheKey, RunAdvanceDescription*>::kUnlimitedCapacity),
+        mCache(GenerationCache<TextLayoutCacheKey, TextLayoutCacheValue*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_TEXT_LAYOUT_CACHE_SIZE_IN_MB)),
         mCacheHitCount(0), mNanosecondsSaved(0) {
     init();
 }
 
 TextLayoutCache::TextLayoutCache(uint32_t max):
-        mCache(GenerationCache<TextLayoutCacheKey, RunAdvanceDescription*>::kUnlimitedCapacity),
+        mCache(GenerationCache<TextLayoutCacheKey, TextLayoutCacheValue*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(max),
         mCacheHitCount(0), mNanosecondsSaved(0) {
     init();
@@ -88,12 +88,12 @@ void TextLayoutCache::removeOldests() {
 /**
  *  Callbacks
  */
-void TextLayoutCache::operator()(TextLayoutCacheKey& text, RunAdvanceDescription*& desc) {
+void TextLayoutCache::operator()(TextLayoutCacheKey& text, TextLayoutCacheValue*& desc) {
     if (desc) {
         size_t totalSizeToDelete = text.getSize() + desc->getSize();
         mSize -= totalSizeToDelete;
         if (mDebugEnabled) {
-            LOGD("RunAdvance description deleted, size = %d", totalSizeToDelete);
+            LOGD("Cache value deleted, size = %d", totalSizeToDelete);
         }
         delete desc;
     }
@@ -120,21 +120,21 @@ void TextLayoutCache::getRunAdvances(SkPaint* paint, const jchar* text,
         startTime = systemTime(SYSTEM_TIME_MONOTONIC);
     }
 
-    TextLayoutCacheKey entry(paint, text, start, count, contextCount, dirFlags);
+    TextLayoutCacheKey key(paint, text, start, count, contextCount, dirFlags);
 
     // Get entry for cache if possible
-    RunAdvanceDescription* desc = mCache.get(entry);
+    TextLayoutCacheValue* value = mCache.get(key);
 
     // Value not found for the entry, we need to add a new value in the cache
-    if (!desc) {
-        desc = new RunAdvanceDescription();
+    if (!value) {
+        value = new TextLayoutCacheValue();
 
         // Compute advances and store them
-        desc->computeAdvances(paint, text, start, count, contextCount, dirFlags);
-        desc->copyResult(outAdvances, outTotalAdvance);
+        value->computeAdvances(paint, text, start, count, contextCount, dirFlags);
+        value->copyResult(outAdvances, outTotalAdvance);
 
         // Don't bother to add in the cache if the entry is too big
-        size_t size = entry.getSize() + desc->getSize();
+        size_t size = key.getSize() + value->getSize();
         if (size <= mMaxSize) {
             // Cleanup to make some room if needed
             if (mSize + size > mMaxSize) {
@@ -152,18 +152,18 @@ void TextLayoutCache::getRunAdvances(SkPaint* paint, const jchar* text,
             mSize += size;
 
             // Copy the text when we insert the new entry
-            entry.internalTextCopy();
-            mCache.put(entry, desc);
+            key.internalTextCopy();
+            mCache.put(key, value);
 
             if (mDebugEnabled) {
                 // Update timing information for statistics.
-                desc->setElapsedTime(systemTime(SYSTEM_TIME_MONOTONIC) - startTime);
+                value->setElapsedTime(systemTime(SYSTEM_TIME_MONOTONIC) - startTime);
 
                 LOGD("CACHE MISS: Added entry for text='%s' with start=%d, count=%d, "
                         "contextCount=%d, entry size %d bytes, remaining space %d bytes"
                         " - Compute time in nanos: %d",
                         String8(text, contextCount).string(), start, count, contextCount,
-                        size, mMaxSize - mSize, desc->getElapsedTime());
+                        size, mMaxSize - mSize, value->getElapsedTime());
             }
         } else {
             if (mDebugEnabled) {
@@ -172,27 +172,27 @@ void TextLayoutCache::getRunAdvances(SkPaint* paint, const jchar* text,
                         "entry size %d bytes, remaining space %d bytes"
                         " - Compute time in nanos: %d",
                         String8(text, contextCount).string(), start, count, contextCount,
-                        size, mMaxSize - mSize, desc->getElapsedTime());
+                        size, mMaxSize - mSize, value->getElapsedTime());
             }
-            delete desc;
+            delete value;
         }
     } else {
         // This is a cache hit, just copy the pre-computed results
-        desc->copyResult(outAdvances, outTotalAdvance);
+        value->copyResult(outAdvances, outTotalAdvance);
         if (mDebugEnabled) {
             nsecs_t elapsedTimeThruCacheGet = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
-            mNanosecondsSaved += (desc->getElapsedTime() - elapsedTimeThruCacheGet);
+            mNanosecondsSaved += (value->getElapsedTime() - elapsedTimeThruCacheGet);
             ++mCacheHitCount;
 
-            if (desc->getElapsedTime() > 0) {
-                float deltaPercent = 100 * ((desc->getElapsedTime() - elapsedTimeThruCacheGet)
-                        / ((float)desc->getElapsedTime()));
+            if (value->getElapsedTime() > 0) {
+                float deltaPercent = 100 * ((value->getElapsedTime() - elapsedTimeThruCacheGet)
+                        / ((float)value->getElapsedTime()));
                 LOGD("CACHE HIT #%d for text='%s' with start=%d, count=%d, contextCount=%d "
                         "- Compute time in nanos: %d - "
                         "Cache get time in nanos: %lld - Gain in percent: %2.2f",
                         mCacheHitCount, String8(text, contextCount).string(), start, count,
                         contextCount,
-                        desc->getElapsedTime(), elapsedTimeThruCacheGet, deltaPercent);
+                        value->getElapsedTime(), elapsedTimeThruCacheGet, deltaPercent);
             }
             if (mCacheHitCount % DEFAULT_DUMP_STATS_CACHE_HIT_INTERVAL == 0) {
                 dumpCacheStats();

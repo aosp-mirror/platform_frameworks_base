@@ -137,16 +137,16 @@ private:
 }; // TextLayoutCacheKey
 
 /*
- * RunAdvanceDescription is the Cache entry
+ * TextLayoutCacheEntry is the Cache entry
  */
-class RunAdvanceDescription {
+class TextLayoutCacheValue {
 public:
-    RunAdvanceDescription() {
+    TextLayoutCacheValue() {
         advances = NULL;
         totalAdvance = 0;
     }
 
-    ~RunAdvanceDescription() {
+    ~TextLayoutCacheValue() {
         delete[] advances;
     }
 
@@ -186,7 +186,7 @@ public:
      * Get the size of the Cache entry
      */
     size_t getSize() {
-        return sizeof(RunAdvanceDescription) + sizeof(jfloat) * count;
+        return sizeof(TextLayoutCacheValue) + sizeof(jfloat) * count;
     }
 
     static void setupShaperItem(HB_ShaperItem* shaperItem, HB_FontRec* font, FontData* fontData,
@@ -396,10 +396,10 @@ private:
         memset(shaperItem->offsets, 0, size * sizeof(shaperItem->offsets[0]));
     }
 
-}; // RunAdvanceDescription
+}; // TextLayoutCacheEntry
 
 
-class TextLayoutCache: public OnEntryRemoved<TextLayoutCacheKey, RunAdvanceDescription*>
+class TextLayoutCache: public OnEntryRemoved<TextLayoutCacheKey, TextLayoutCacheValue*>
 {
 public:
     TextLayoutCache();
@@ -415,7 +415,7 @@ public:
      * Used as a callback when an entry is removed from the cache.
      * Do not invoke directly.
      */
-    void operator()(TextLayoutCacheKey& text, RunAdvanceDescription*& desc);
+    void operator()(TextLayoutCacheKey& text, TextLayoutCacheValue*& desc);
 
     /**
      * Get cache entries
@@ -448,7 +448,7 @@ private:
     Mutex mLock;
     bool mInitialized;
 
-    GenerationCache<TextLayoutCacheKey, RunAdvanceDescription*> mCache;
+    GenerationCache<TextLayoutCacheKey, TextLayoutCacheValue*> mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;

@@ -264,7 +264,7 @@ void TextLayout::getTextRunAdvances(SkPaint* paint, const jchar* chars, jint sta
             dirFlags, resultAdvances, &resultTotalAdvance);
 #else
     // Compute advances and return them
-    RunAdvanceDescription::computeAdvances(paint, chars, start, count, contextCount, dirFlags,
+    TextLayoutCacheValue::computeAdvances(paint, chars, start, count, contextCount, dirFlags,
             resultAdvances, &resultTotalAdvance);
 #endif
 }
@@ -273,7 +273,7 @@ void TextLayout::getTextRunAdvancesHB(SkPaint* paint, const jchar* chars, jint s
                                     jint count, jint contextCount, jint dirFlags,
                                     jfloat* resultAdvances, jfloat& resultTotalAdvance) {
     // Compute advances and return them
-    RunAdvanceDescription::computeAdvancesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
+    TextLayoutCacheValue::computeAdvancesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
             resultAdvances, &resultTotalAdvance);
 }
 
@@ -281,7 +281,7 @@ void TextLayout::getTextRunAdvancesICU(SkPaint* paint, const jchar* chars, jint 
                                     jint count, jint contextCount, jint dirFlags,
                                     jfloat* resultAdvances, jfloat& resultTotalAdvance) {
     // Compute advances and return them
-    RunAdvanceDescription::computeAdvancesWithICU(paint, chars, start, count, contextCount, dirFlags,
+    TextLayoutCacheValue::computeAdvancesWithICU(paint, chars, start, count, contextCount, dirFlags,
             resultAdvances, &resultTotalAdvance);
 }
 
