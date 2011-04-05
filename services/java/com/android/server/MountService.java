@@ -491,6 +491,13 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                                 }
                             }
 
+                            /* notify external storage has mounted to trigger media scanner */
+                            if (mEmulateExternalStorage) {
+                                notifyVolumeStateChange(null,
+                                        Environment.getExternalStorageDirectory().getPath(),
+                                        VolumeState.NoMedia, VolumeState.Mounted);
+                            }
+
                             /*
                              * If UMS was connected on boot, send the connected event
                              * now that we're up.
