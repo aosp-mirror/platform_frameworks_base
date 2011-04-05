@@ -407,7 +407,7 @@ public:
         HB_ShaperItem shaperItem;
         HB_FontRec font;
         FontData fontData;
-        RunAdvanceDescription::shapeWithHarfbuzz(&shaperItem, &font, &fontData, paint, text,
+        TextLayoutCacheValue::shapeWithHarfbuzz(&shaperItem, &font, &fontData, paint, text,
                 start, count, contextCount, flags);
 
         int glyphCount = shaperItem.num_glyphs;
