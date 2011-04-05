@@ -32,9 +32,11 @@
 
 namespace android {
 
-MtpStorage::MtpStorage(MtpStorageID id, const char* filePath, uint64_t reserveSpace)
+MtpStorage::MtpStorage(MtpStorageID id, const char* filePath,
+        const char* description, uint64_t reserveSpace)
     :   mStorageID(id),
         mFilePath(filePath),
+        mDescription(description),
         mMaxCapacity(0),
         mReserveSpace(reserveSpace)
 {
@@ -75,7 +77,7 @@ uint64_t MtpStorage::getFreeSpace() {
 }
 
 const char* MtpStorage::getDescription() const {
-    return "Device Storage";
+    return (const char *)mDescription;
 }
 
 }  // namespace android
