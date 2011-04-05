@@ -70,7 +70,8 @@ public interface RecognitionListener {
      * 
      * @param results the recognition results. To retrieve the results in {@code
      *        ArrayList&lt;String&gt;} format use {@link Bundle#getStringArrayList(String)} with
-     *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter
+     *        {@link SpeechRecognizer#RESULTS_RECOGNITION} as a parameter. A float array of
+     *        confidence values might also be given in {@link SpeechRecognizer#CONFIDENCE_SCORES}.
      */
     void onResults(Bundle results);
 
