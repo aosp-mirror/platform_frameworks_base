@@ -441,19 +441,20 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
 {
     jclass clazz = env->FindClass(kClassPathName);
     if (clazz == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/media/MediaMetadataRetriever");
         return;
     }
 
     fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
     if (fields.context == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaMetadataRetriever.mNativeContext");
         return;
     }
 
-    fields.bitmapClazz = env->FindClass("android/graphics/Bitmap");
+    jclass bitmapClazz = env->FindClass("android/graphics/Bitmap");
+    if (bitmapClazz == NULL) {
+        return;
+    }
+    fields.bitmapClazz = (jclass) env->NewGlobalRef(bitmapClazz);
     if (fields.bitmapClazz == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/graphics/Bitmap");
         return;
     }
     fields.createBitmapMethod =
@@ -461,8 +462,6 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
                     "(IILandroid/graphics/Bitmap$Config;)"
                     "Landroid/graphics/Bitmap;");
     if (fields.createBitmapMethod == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                "Can't find Bitmap.createBitmap(int, int, Config)  method");
         return;
     }
     fields.createScaledBitmapMethod =
@@ -470,28 +469,25 @@ static void android_media_MediaMetadataRetriever_native_init(JNIEnv *env)
                     "(Landroid/graphics/Bitmap;IIZ)"
                     "Landroid/graphics/Bitmap;");
     if (fields.createScaledBitmapMethod == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                "Can't find Bitmap.createScaledBitmap(Bitmap, int, int, boolean)  method");
         return;
     }
     fields.nativeBitmap = env->GetFieldID(fields.bitmapClazz, "mNativeBitmap", "I");
     if (fields.nativeBitmap == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                "Can't find Bitmap.mNativeBitmap field");
+        return;
     }
 
-    fields.configClazz = env->FindClass("android/graphics/Bitmap$Config");
+    jclass configClazz = env->FindClass("android/graphics/Bitmap$Config");
+    if (configClazz == NULL) {
+        return;
+    }
+    fields.configClazz = (jclass) env->NewGlobalRef(configClazz);
     if (fields.configClazz == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                               "Can't find Bitmap$Config class");
         return;
     }
     fields.createConfigMethod =
             env->GetStaticMethodID(fields.configClazz, "nativeToConfig",
                     "(I)Landroid/graphics/Bitmap$Config;");
     if (fields.createConfigMethod == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                "Can't find Bitmap$Config.nativeToConfig(int)  method");
         return;
     }
 }

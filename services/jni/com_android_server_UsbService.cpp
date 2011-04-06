@@ -260,7 +260,7 @@ int register_android_server_UsbService(JNIEnv *env)
         return -1;
     }
 
-   clazz = env->FindClass("java/io/FileDescriptor");
+    clazz = env->FindClass("java/io/FileDescriptor");
     LOG_FATAL_IF(clazz == NULL, "Unable to find class java.io.FileDescriptor");
     gFileDescriptorOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
     gFileDescriptorOffsets.mConstructor = env->GetMethodID(clazz, "<init>", "()V");
@@ -268,7 +268,7 @@ int register_android_server_UsbService(JNIEnv *env)
     LOG_FATAL_IF(gFileDescriptorOffsets.mDescriptor == NULL,
                  "Unable to find descriptor field in java.io.FileDescriptor");
 
-   clazz = env->FindClass("android/os/ParcelFileDescriptor");
+    clazz = env->FindClass("android/os/ParcelFileDescriptor");
     LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.ParcelFileDescriptor");
     gParcelFileDescriptorOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
     gParcelFileDescriptorOffsets.mConstructor = env->GetMethodID(clazz, "<init>", "(Ljava/io/FileDescriptor;)V");
