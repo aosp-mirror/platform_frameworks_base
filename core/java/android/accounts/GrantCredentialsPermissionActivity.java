@@ -58,6 +58,12 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
         mInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         final Bundle extras = getIntent().getExtras();
+        if (extras == null) {
+            // we were somehow started with bad parameters. abort the activity.
+            setResult(Activity.RESULT_CANCELED);
+            finish();
+            return;
+        }
 
         // Grant 'account'/'type' to mUID
         mAccount = extras.getParcelable(EXTRAS_ACCOUNT);
@@ -73,8 +79,15 @@ public class GrantCredentialsPermissionActivity extends Activity implements View
             return;
         }
 
-        final String accountTypeLabel = accountManagerService.getAccountLabel(mAccount.type);
-
+        String accountTypeLabel;
+        try {
+            accountTypeLabel = accountManagerService.getAccountLabel(mAccount.type);
+        } catch (IllegalArgumentException e) {
+            // label or resource was missing. abort the activity.
+            setResult(Activity.RESULT_CANCELED);
+            finish();
+            return;
+        }
 
         final TextView authTokenTypeView = (TextView) findViewById(R.id.authtoken_type);
         authTokenTypeView.setVisibility(View.GONE);

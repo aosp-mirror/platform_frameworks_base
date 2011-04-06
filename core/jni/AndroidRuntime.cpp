@@ -907,7 +907,7 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     blockSigpipe();
 
     /* 
-     * 'startSystemServer == true' means runtime is obslete and not run from 
+     * 'startSystemServer == true' means runtime is obsolete and not run from 
      * init.rc anymore, so we print out the boot start event here.
      */
     if (startSystemServer) {
