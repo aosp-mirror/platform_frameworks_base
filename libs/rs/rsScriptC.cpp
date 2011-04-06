@@ -185,7 +185,7 @@ bool ScriptC::runCompiler(Context *rsc,
 
     //LOGE("runCompiler %p %p %p %p %p %i", rsc, this, resName, cacheDir, bitcode, bitcodeLen);
 
-    rsc->mHal.funcs.script.scriptInit(rsc, this, resName, cacheDir, bitcode, bitcodeLen, 0, symbolLookup);
+    rsc->mHal.funcs.script.init(rsc, this, resName, cacheDir, bitcode, bitcodeLen, 0, symbolLookup);
 
     mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
     mEnviroment.mVertex.set(rsc->getDefaultProgramVertex());

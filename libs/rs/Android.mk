@@ -116,7 +116,8 @@ LOCAL_SRC_FILES:= \
 	rsType.cpp \
 	rsVertexArray.cpp \
 	driver/rsdBcc.cpp \
-	driver/rsdCore.cpp
+	driver/rsdCore.cpp \
+	driver/rsdProgramStore.cpp
 
 
 LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc
