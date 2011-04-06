@@ -427,6 +427,9 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyValue(MtpObjectHandle handle,
                 jstring stringValue = (jstring)env->GetObjectArrayElement(stringValuesArray, 0);
                 if (stringValue) {
                     const char* str = env->GetStringUTFChars(stringValue, NULL);
+                    if (str == NULL) {
+                        return MTP_RESPONSE_GENERAL_ERROR;
+                    }
                     packet.putString(str);
                     env->ReleaseStringUTFChars(stringValue, str);
                 } else {
