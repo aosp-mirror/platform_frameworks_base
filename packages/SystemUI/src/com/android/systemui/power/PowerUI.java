@@ -139,7 +139,6 @@ public class PowerUI extends SystemUI {
                     showInvalidChargerDialog();
                     return;
                 } else if (oldInvalidCharger != 0 && mInvalidCharger == 0) {
-                    Slog.d(TAG, "closing invalid charger warning");
                     dismissInvalidChargerDialog();
                 } else if (mInvalidChargerDialog != null) {
                     // if invalid charger is showing, don't show low battery
@@ -150,10 +149,9 @@ public class PowerUI extends SystemUI {
                         && (bucket < oldBucket || oldPlugged)
                         && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
                         && bucket < 0) {
-                    Slog.d(TAG, "showing low battery warning: level=" + mBatteryLevel);
+                    Slog.i(TAG, "showing low battery warning: level=" + mBatteryLevel);
                     showLowBatteryWarning();
                 } else if (plugged || (bucket > oldBucket && bucket > 0)) {
-                    Slog.d(TAG, "closing low battery warning: level=" + mBatteryLevel);
                     dismissLowBatteryWarning();
                 } else if (mBatteryLevelTextView != null) {
                     showLowBatteryWarning();
@@ -166,6 +164,7 @@ public class PowerUI extends SystemUI {
 
     void dismissLowBatteryWarning() {
         if (mLowBatteryDialog != null) {
+            Slog.i(TAG, "closing low battery warning: level=" + mBatteryLevel);
             mLowBatteryDialog.dismiss();
         }
     }
@@ -237,6 +236,7 @@ public class PowerUI extends SystemUI {
 
     void dismissInvalidChargerDialog() {
         if (mInvalidChargerDialog != null) {
+            Slog.d(TAG, "closing invalid charger warning");
             mInvalidChargerDialog.dismiss();
         }
     }
