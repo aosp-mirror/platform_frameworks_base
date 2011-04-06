@@ -53,7 +53,6 @@ using namespace android;
 // ----------------------------------------------------------------------------
 struct fields_t {
     jfieldID    synthProxyFieldJniData;
-    jclass      synthProxyClass;
     jmethodID   synthProxyMethodPost;
 };
 
@@ -1043,7 +1042,6 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
         goto bail;
     }
 
-    javaTTSFields.synthProxyClass = clazz;
     javaTTSFields.synthProxyFieldJniData = NULL;
     javaTTSFields.synthProxyMethodPost = NULL;
 

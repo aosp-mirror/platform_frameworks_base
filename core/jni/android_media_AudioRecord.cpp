@@ -41,7 +41,6 @@ static const char* const kClassPathName = "android/media/AudioRecord";
 
 struct fields_t {
     // these fields provide access from C++ to the...
-    jclass    audioRecordClass;      //... AudioRecord class
     jmethodID postNativeEventInJava; //... event post callback method
     int       PCM16;                 //...  format constants
     int       PCM8;                  //...  format constants
@@ -520,22 +519,20 @@ extern bool android_media_getIntConstantFromClass(JNIEnv* pEnv,
 // ----------------------------------------------------------------------------
 int register_android_media_AudioRecord(JNIEnv *env)
 {
-    javaAudioRecordFields.audioRecordClass = NULL;
     javaAudioRecordFields.postNativeEventInJava = NULL;
     javaAudioRecordFields.nativeRecorderInJavaObj = NULL;
     javaAudioRecordFields.nativeCallbackCookie = NULL;
     
 
     // Get the AudioRecord class
-    javaAudioRecordFields.audioRecordClass = env->FindClass(kClassPathName);
-    if (javaAudioRecordFields.audioRecordClass == NULL) {
+    jclass audioRecordClass = env->FindClass(kClassPathName);
+    if (audioRecordClass == NULL) {
         LOGE("Can't find %s", kClassPathName);
         return -1;
     }
-    
     // Get the postEvent method
     javaAudioRecordFields.postNativeEventInJava = env->GetStaticMethodID(
-            javaAudioRecordFields.audioRecordClass,
+            audioRecordClass,
             JAVA_POSTEVENT_CALLBACK_NAME, "(Ljava/lang/Object;IIILjava/lang/Object;)V");
     if (javaAudioRecordFields.postNativeEventInJava == NULL) {
         LOGE("Can't find AudioRecord.%s", JAVA_POSTEVENT_CALLBACK_NAME);
@@ -545,7 +542,7 @@ int register_android_media_AudioRecord(JNIEnv *env)
     // Get the variables
     //    mNativeRecorderInJavaObj
     javaAudioRecordFields.nativeRecorderInJavaObj = 
-        env->GetFieldID(javaAudioRecordFields.audioRecordClass,
+        env->GetFieldID(audioRecordClass,
                         JAVA_NATIVERECORDERINJAVAOBJ_FIELD_NAME, "I");
     if (javaAudioRecordFields.nativeRecorderInJavaObj == NULL) {
         LOGE("Can't find AudioRecord.%s", JAVA_NATIVERECORDERINJAVAOBJ_FIELD_NAME);
@@ -553,7 +550,7 @@ int register_android_media_AudioRecord(JNIEnv *env)
     }
     //     mNativeCallbackCookie
     javaAudioRecordFields.nativeCallbackCookie = env->GetFieldID(
-            javaAudioRecordFields.audioRecordClass,
+            audioRecordClass,
             JAVA_NATIVECALLBACKINFO_FIELD_NAME, "I");
     if (javaAudioRecordFields.nativeCallbackCookie == NULL) {
         LOGE("Can't find AudioRecord.%s", JAVA_NATIVECALLBACKINFO_FIELD_NAME);

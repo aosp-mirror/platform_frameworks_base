@@ -55,7 +55,6 @@ namespace android {
  * to look them up every time.
  */
 static struct fieldIds {
-    jclass dhcpInfoInternalClass;
     jmethodID constructorId;
     jfieldID ipaddress;
     jfieldID gateway;
@@ -163,7 +162,7 @@ static jboolean android_net_utils_runDhcp(JNIEnv* env, jobject clazz, jstring if
     result = ::dhcp_do_request(nameStr, ipaddr, gateway, &prefixLength,
                                         dns1, dns2, server, &lease);
     env->ReleaseStringUTFChars(ifname, nameStr);
-    if (result == 0 && dhcpInfoInternalFieldIds.dhcpInfoInternalClass != NULL) {
+    if (result == 0) {
         env->SetObjectField(info, dhcpInfoInternalFieldIds.ipaddress, env->NewStringUTF(ipaddr));
         env->SetObjectField(info, dhcpInfoInternalFieldIds.gateway, env->NewStringUTF(gateway));
         env->SetIntField(info, dhcpInfoInternalFieldIds.prefixLength, prefixLength);
@@ -229,17 +228,16 @@ int register_android_net_NetworkUtils(JNIEnv* env)
     jclass netutils = env->FindClass(NETUTILS_PKG_NAME);
     LOG_FATAL_IF(netutils == NULL, "Unable to find class " NETUTILS_PKG_NAME);
 
-    dhcpInfoInternalFieldIds.dhcpInfoInternalClass = env->FindClass("android/net/DhcpInfoInternal");
-    if (dhcpInfoInternalFieldIds.dhcpInfoInternalClass != NULL) {
-        dhcpInfoInternalFieldIds.constructorId = env->GetMethodID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "<init>", "()V");
-        dhcpInfoInternalFieldIds.ipaddress = env->GetFieldID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "ipAddress", "Ljava/lang/String;");
-        dhcpInfoInternalFieldIds.gateway = env->GetFieldID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "gateway", "Ljava/lang/String;");
-        dhcpInfoInternalFieldIds.prefixLength = env->GetFieldID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "prefixLength", "I");
-        dhcpInfoInternalFieldIds.dns1 = env->GetFieldID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "dns1", "Ljava/lang/String;");
-        dhcpInfoInternalFieldIds.dns2 = env->GetFieldID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "dns2", "Ljava/lang/String;");
-        dhcpInfoInternalFieldIds.serverAddress = env->GetFieldID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "serverAddress", "Ljava/lang/String;");
-        dhcpInfoInternalFieldIds.leaseDuration = env->GetFieldID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "leaseDuration", "I");
-    }
+    jclass dhcpInfoInternalClass = env->FindClass("android/net/DhcpInfoInternal");
+    LOG_FATAL_IF(dhcpInfoInternalClass == NULL, "Unable to find class android/net/DhcpInfoInternal");
+    dhcpInfoInternalFieldIds.constructorId = env->GetMethodID(dhcpInfoInternalClass, "<init>", "()V");
+    dhcpInfoInternalFieldIds.ipaddress = env->GetFieldID(dhcpInfoInternalClass, "ipAddress", "Ljava/lang/String;");
+    dhcpInfoInternalFieldIds.gateway = env->GetFieldID(dhcpInfoInternalClass, "gateway", "Ljava/lang/String;");
+    dhcpInfoInternalFieldIds.prefixLength = env->GetFieldID(dhcpInfoInternalClass, "prefixLength", "I");
+    dhcpInfoInternalFieldIds.dns1 = env->GetFieldID(dhcpInfoInternalClass, "dns1", "Ljava/lang/String;");
+    dhcpInfoInternalFieldIds.dns2 = env->GetFieldID(dhcpInfoInternalClass, "dns2", "Ljava/lang/String;");
+    dhcpInfoInternalFieldIds.serverAddress = env->GetFieldID(dhcpInfoInternalClass, "serverAddress", "Ljava/lang/String;");
+    dhcpInfoInternalFieldIds.leaseDuration = env->GetFieldID(dhcpInfoInternalClass, "leaseDuration", "I");
 
     return AndroidRuntime::registerNativeMethods(env,
             NETUTILS_PKG_NAME, gNetworkUtilMethods, NELEM(gNetworkUtilMethods));

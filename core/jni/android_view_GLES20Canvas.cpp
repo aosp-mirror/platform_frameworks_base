@@ -736,9 +736,9 @@ const char* const kActivityThreadPathName = "android/app/ActivityThread";
 
 int register_android_app_ActivityThread(JNIEnv* env)
 {
-    jclass gFileDescriptorClass = env->FindClass("java/io/FileDescriptor");
+    jclass fileDescriptorClass = env->FindClass("java/io/FileDescriptor");
     LOG_FATAL_IF(clazz == NULL, "Unable to find class java.io.FileDescriptor");
-    gFileDescriptorField = env->GetFieldID(gFileDescriptorClass, "descriptor", "I");
+    gFileDescriptorField = env->GetFieldID(fileDescriptorClass, "descriptor", "I");
     LOG_FATAL_IF(gFileDescriptorField == NULL,
                  "Unable to find descriptor field in java.io.FileDescriptor");
 

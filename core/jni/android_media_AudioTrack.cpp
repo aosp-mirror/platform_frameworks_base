@@ -43,7 +43,6 @@ static const char* const kClassPathName = "android/media/AudioTrack";
 
 struct fields_t {
     // these fields provide access from C++ to the...
-    jclass    audioTrackClass;       //... AudioTrack class
     jmethodID postNativeEventInJava; //... event post callback method
     int       PCM16;                 //...  format constants
     int       PCM8;                  //...  format constants
@@ -915,20 +914,19 @@ bool android_media_getIntConstantFromClass(JNIEnv* pEnv, jclass theClass, const 
 // ----------------------------------------------------------------------------
 int register_android_media_AudioTrack(JNIEnv *env)
 {
-    javaAudioTrackFields.audioTrackClass = NULL;
     javaAudioTrackFields.nativeTrackInJavaObj = NULL;
     javaAudioTrackFields.postNativeEventInJava = NULL;
 
     // Get the AudioTrack class
-    javaAudioTrackFields.audioTrackClass = env->FindClass(kClassPathName);
-    if (javaAudioTrackFields.audioTrackClass == NULL) {
+    jclass audioTrackClass = env->FindClass(kClassPathName);
+    if (audioTrackClass == NULL) {
         LOGE("Can't find %s", kClassPathName);
         return -1;
     }
 
     // Get the postEvent method
     javaAudioTrackFields.postNativeEventInJava = env->GetStaticMethodID(
-            javaAudioTrackFields.audioTrackClass,
+            audioTrackClass,
             JAVA_POSTEVENT_CALLBACK_NAME, "(Ljava/lang/Object;IIILjava/lang/Object;)V");
     if (javaAudioTrackFields.postNativeEventInJava == NULL) {
         LOGE("Can't find AudioTrack.%s", JAVA_POSTEVENT_CALLBACK_NAME);
@@ -938,7 +936,7 @@ int register_android_media_AudioTrack(JNIEnv *env)
     // Get the variables fields
     //      nativeTrackInJavaObj
     javaAudioTrackFields.nativeTrackInJavaObj = env->GetFieldID(
-            javaAudioTrackFields.audioTrackClass,
+            audioTrackClass,
             JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME, "I");
     if (javaAudioTrackFields.nativeTrackInJavaObj == NULL) {
         LOGE("Can't find AudioTrack.%s", JAVA_NATIVETRACKINJAVAOBJ_FIELD_NAME);
@@ -946,7 +944,7 @@ int register_android_media_AudioTrack(JNIEnv *env)
     }
     //      jniData;
     javaAudioTrackFields.jniData = env->GetFieldID(
-            javaAudioTrackFields.audioTrackClass,
+            audioTrackClass,
             JAVA_JNIDATA_FIELD_NAME, "I");
     if (javaAudioTrackFields.jniData == NULL) {
         LOGE("Can't find AudioTrack.%s", JAVA_JNIDATA_FIELD_NAME);
@@ -954,10 +952,10 @@ int register_android_media_AudioTrack(JNIEnv *env)
     }
 
     // Get the memory mode constants
-    if ( !android_media_getIntConstantFromClass(env, javaAudioTrackFields.audioTrackClass,
+    if ( !android_media_getIntConstantFromClass(env, audioTrackClass,
                kClassPathName, 
                JAVA_CONST_MODE_STATIC_NAME, &(javaAudioTrackFields.MODE_STATIC))
-         || !android_media_getIntConstantFromClass(env, javaAudioTrackFields.audioTrackClass,
+         || !android_media_getIntConstantFromClass(env, audioTrackClass,
                kClassPathName, 
                JAVA_CONST_MODE_STREAM_NAME, &(javaAudioTrackFields.MODE_STREAM)) ) {
         // error log performed in android_media_getIntConstantFromClass() 

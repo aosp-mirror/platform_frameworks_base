@@ -137,7 +137,6 @@ static JNINativeMethod gMethods[] = {
 
 #define RETURN_ERR_IF_NULL(value)   do { if (!(value)) { assert(0); return -1; } } while (false)
 
-int register_android_graphics_Movie(JNIEnv* env);
 int register_android_graphics_Movie(JNIEnv* env)
 {
     gMovie_class = env->FindClass(kClassPathName);
