@@ -326,6 +326,10 @@ class SipCommandInterface extends BaseCommands implements CommandsInterface {
     public void reportStkServiceIsRunning(Message result) {
     }
 
+    @Override
+    public void getCdmaSubscriptionSource(Message response) {
+    }
+
     public void getGsmBroadcastConfig(Message response) {
     }
 
