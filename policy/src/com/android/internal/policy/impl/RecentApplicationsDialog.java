@@ -71,12 +71,11 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         }
     };
 
-    private int mInitialModifiers;
+    private int mHeldModifiers;
 
-    public RecentApplicationsDialog(Context context, int initialModifiers) {
+    public RecentApplicationsDialog(Context context) {
         super(context, com.android.internal.R.style.Theme_Dialog_RecentApplications);
 
-        mInitialModifiers = initialModifiers;
     }
 
     /**
@@ -125,9 +124,20 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
         }
     }
 
+    /**
+     * Sets the modifier keys that are being held to keep the dialog open, or 0 if none.
+     * Used to make the recent apps dialog automatically dismiss itself when the modifiers
+     * all go up.
+     * @param heldModifiers The held key modifiers, such as {@link KeyEvent#META_ALT_ON}.
+     * Should exclude shift.
+     */
+    public void setHeldModifiers(int heldModifiers) {
+        mHeldModifiers = heldModifiers;
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_APP_SWITCH || keyCode == KeyEvent.KEYCODE_TAB) {
+        if (keyCode == KeyEvent.KEYCODE_TAB) {
             // Ignore all meta keys other than SHIFT.  The app switch key could be a
             // fallback action chorded with ALT, META or even CTRL depending on the key map.
             // DPad navigation is handled by the ViewRoot elsewhere.
@@ -166,7 +176,7 @@ public class RecentApplicationsDialog extends Dialog implements OnClickListener 
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (mInitialModifiers != 0 && event.hasNoModifiers()) {
+        if (mHeldModifiers != 0 && (event.getModifiers() & mHeldModifiers) == 0) {
             final int numIcons = mIcons.length;
             RecentTag tag = null;
             for (int i = 0; i < numIcons; i++) {
