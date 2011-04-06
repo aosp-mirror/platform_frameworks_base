@@ -509,7 +509,8 @@ void FontState::initRenderState() {
 
     ProgramStore *fontStore = new ProgramStore(mRSC, true, true, true, true,
                                                false, false,
-                                               RS_BLEND_SRC_SRC_ALPHA, RS_BLEND_DST_ONE_MINUS_SRC_ALPHA,
+                                               RS_BLEND_SRC_SRC_ALPHA,
+                                               RS_BLEND_DST_ONE_MINUS_SRC_ALPHA,
                                                RS_DEPTH_FUNC_ALWAYS);
     mFontProgramStore.set(fontStore);
     mFontProgramStore->init();

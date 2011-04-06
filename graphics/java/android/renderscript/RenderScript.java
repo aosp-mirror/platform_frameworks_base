@@ -492,7 +492,8 @@ public class RenderScript {
                                          boolean depthMask, boolean dither,
                                          int srcMode, int dstMode, int depthFunc) {
         validate();
-        return rsnProgramStoreCreate(mContext, r, g, b, a, depthMask, dither, srcMode, dstMode, depthFunc);
+        return rsnProgramStoreCreate(mContext, r, g, b, a, depthMask, dither, srcMode,
+                                     dstMode, depthFunc);
     }
 
     native int  rsnProgramRasterCreate(int con, boolean pointSmooth, boolean lineSmooth,
@@ -500,7 +501,8 @@ public class RenderScript {
     synchronized int nProgramRasterCreate(boolean pointSmooth, boolean lineSmooth,
                                           boolean pointSprite, float lineWidth, int cullMode) {
         validate();
-        return rsnProgramRasterCreate(mContext, pointSmooth, lineSmooth, pointSprite, lineWidth, cullMode);
+        return rsnProgramRasterCreate(mContext, pointSmooth, lineSmooth, pointSprite, lineWidth,
+                                      cullMode);
     }
 
     native void rsnProgramBindConstants(int con, int pv, int slot, int mID);
