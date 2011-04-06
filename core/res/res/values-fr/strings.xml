@@ -465,7 +465,7 @@
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Autorise une application à écrire sur la mémoire USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Autorise une application à écrire sur la carte SD."</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modif./suppr. contenu mémoire interne"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Permet à une application de modifier le contenu de la mémoire de stockage interne du support."</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Permet à une application de modifier le contenu de la mémoire de stockage interne."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"accéder au système de fichiers en cache"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permet à une application de lire et d\'écrire dans le système de fichiers en cache."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"effectuer/recevoir des appels Internet"</string>
