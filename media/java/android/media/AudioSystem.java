@@ -64,44 +64,20 @@ public class AudioSystem
     /*
      * Sets the microphone mute on or off.
      *
-     * param on set <var>true</var> to mute the microphone;
+     * @param on set <var>true</var> to mute the microphone;
      *           <var>false</var> to turn mute off
-     * return command completion status see AUDIO_STATUS_OK, see AUDIO_STATUS_ERROR
+     * @return command completion status see AUDIO_STATUS_OK, see AUDIO_STATUS_ERROR
      */
     public static native int muteMicrophone(boolean on);
 
     /*
      * Checks whether the microphone mute is on or off.
      *
-     * return true if microphone is muted, false if it's not
+     * @return true if microphone is muted, false if it's not
      */
     public static native boolean isMicrophoneMuted();
 
-    /*
-     * Sets the audio mode.
-     *
-     * param mode  the requested audio mode (NORMAL, RINGTONE, or IN_CALL).
-     *              Informs the HAL about the current audio state so that
-     *              it can route the audio appropriately.
-     * return command completion status see AUDIO_STATUS_OK, see AUDIO_STATUS_ERROR
-     */
-    /** @deprecated use {@link #setPhoneState(int)} */
-    public static int setMode(int mode) {
-        return AUDIO_STATUS_ERROR;
-    }
-    /*
-     * Returns the current audio mode.
-     *
-     * return      the current audio mode (NORMAL, RINGTONE, or IN_CALL).
-     *              Returns the current current audio state from the HAL.
-     *              
-     */
-    /** @deprecated Do not use. */
-    public static int getMode() {
-        return MODE_INVALID;
-    }
-
-    /* modes for setPhoneState */
+    /* modes for setPhoneState, must match AudioSystem.h audio_mode */
     public static final int MODE_INVALID            = -2;
     public static final int MODE_CURRENT            = -1;
     public static final int MODE_NORMAL             = 0;
@@ -111,7 +87,7 @@ public class AudioSystem
     public static final int NUM_MODES               = 4;
 
 
-    /* Routing bits for setRouting/getRouting API */
+    /* Routing bits for the former setRouting/getRouting API */
     /** @deprecated */
     @Deprecated public static final int ROUTE_EARPIECE          = (1 << 0);
     /** @deprecated */
@@ -128,33 +104,6 @@ public class AudioSystem
     @Deprecated public static final int ROUTE_ALL               = 0xFFFFFFFF;
 
     /*
-     * Sets the audio routing for a specified mode
-     *
-     * param mode   audio mode to change route. E.g., MODE_RINGTONE.
-     * param routes bit vector of routes requested, created from one or
-     *               more of ROUTE_xxx types. Set bits indicate that route should be on
-     * param mask   bit vector of routes to change, created from one or more of
-     * ROUTE_xxx types. Unset bits indicate the route should be left unchanged
-     * return command completion status see AUDIO_STATUS_OK, see AUDIO_STATUS_ERROR
-     */
-    /** @deprecated use {@link #setDeviceConnectionState(int,int,String)} */
-    public static int setRouting(int mode, int routes, int mask) {
-        return AUDIO_STATUS_ERROR;
-    }
-
-    /*
-     * Returns the current audio routing bit vector for a specified mode.
-     *
-     * param mode audio mode to change route (e.g., MODE_RINGTONE)
-     * return an audio route bit vector that can be compared with ROUTE_xxx
-     * bits
-     */
-    /** @deprecated use {@link #getDeviceConnectionState(int,String)} */
-    public static int getRouting(int mode) {
-        return 0;
-    }
-
-    /*
      * Checks whether the specified stream type is active.
      *
      * return true if any track playing on this stream is active.
@@ -163,7 +112,7 @@ public class AudioSystem
 
     /*
      * Sets a group generic audio configuration parameters. The use of these parameters
-     * are platform dependant, see libaudio
+     * are platform dependent, see libaudio
      *
      * param keyValuePairs  list of parameters key value pairs in the form:
      *    key1=value1;key2=value2;...
@@ -172,7 +121,7 @@ public class AudioSystem
 
     /*
      * Gets a group generic audio configuration parameters. The use of these parameters
-     * are platform dependant, see libaudio
+     * are platform dependent, see libaudio
      *
      * param keys  list of parameters
      * return value: list of parameters key value pairs in the form:
@@ -180,15 +129,7 @@ public class AudioSystem
      */
     public static native String getParameters(String keys);
 
-    /*
-    private final static String TAG = "audio";
-
-    private void log(String msg) {
-        Log.d(TAG, "[AudioSystem] " + msg);
-    }
-    */
-
-    // These match the enum in libs/android_runtime/android_media_AudioSystem.cpp
+    // These match the enum AudioError in frameworks/base/core/jni/android_media_AudioSystem.cpp
     /* Command sucessful or Media server restarted. see ErrorCallback */
     public static final int AUDIO_STATUS_OK = 0;
     /* Command failed or unspecified audio error.  see ErrorCallback */
@@ -215,7 +156,7 @@ public class AudioSystem
 
     /*
      * Registers a callback to be invoked when an error occurs.
-     * param cb the callback to run
+     * @param cb the callback to run
      */
     public static void setErrorCallback(ErrorCallback cb)
     {
@@ -272,16 +213,17 @@ public class AudioSystem
     public static final int DEVICE_IN_AUX_DIGITAL = 0x800000;
     public static final int DEVICE_IN_DEFAULT = 0x80000000;
 
-    // device states
+    // device states, must match AudioSystem::device_connection_state
     public static final int DEVICE_STATE_UNAVAILABLE = 0;
     public static final int DEVICE_STATE_AVAILABLE = 1;
+    private static final int NUM_DEVICE_STATES = 1;
 
-    // phone state
+    // phone state, match audio_mode???
     public static final int PHONE_STATE_OFFCALL = 0;
     public static final int PHONE_STATE_RINGING = 1;
     public static final int PHONE_STATE_INCALL = 2;
 
-    // config for setForceUse
+    // device categories config for setForceUse, must match AudioSystem::forced_config
     public static final int FORCE_NONE = 0;
     public static final int FORCE_SPEAKER = 1;
     public static final int FORCE_HEADPHONES = 2;
@@ -292,13 +234,15 @@ public class AudioSystem
     public static final int FORCE_BT_DESK_DOCK = 7;
     public static final int FORCE_ANALOG_DOCK = 8;
     public static final int FORCE_DIGITAL_DOCK = 9;
+    private static final int NUM_FORCE_CONFIG = 10;
     public static final int FORCE_DEFAULT = FORCE_NONE;
 
-    // usage for serForceUse
+    // usage for setForceUse, must match AudioSystem::force_use
     public static final int FOR_COMMUNICATION = 0;
     public static final int FOR_MEDIA = 1;
     public static final int FOR_RECORD = 2;
     public static final int FOR_DOCK = 3;
+    private static final int NUM_FORCE_USE = 4;
 
     public static native int setDeviceConnectionState(int device, int state, String device_address);
     public static native int getDeviceConnectionState(int device, String device_address);
