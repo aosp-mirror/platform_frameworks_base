@@ -213,7 +213,6 @@ android_media_MediaScanner_processDirectory(
 
     const char *pathStr = env->GetStringUTFChars(path, NULL);
     if (pathStr == NULL) {  // Out of memory
-        jniThrowException(env, kRunTimeException, "Out of memory");
         return;
     }
 
@@ -243,15 +242,14 @@ android_media_MediaScanner_processFile(
 
     const char *pathStr = env->GetStringUTFChars(path, NULL);
     if (pathStr == NULL) {  // Out of memory
-        jniThrowException(env, kRunTimeException, "Out of memory");
         return;
     }
 
     const char *mimeTypeStr =
         (mimeType ? env->GetStringUTFChars(mimeType, NULL) : NULL);
     if (mimeType && mimeTypeStr == NULL) {  // Out of memory
+        // ReleaseStringUTFChars can be called with an exception pending.
         env->ReleaseStringUTFChars(path, pathStr);
-        jniThrowException(env, kRunTimeException, "Out of memory");
         return;
     }
 
@@ -281,7 +279,6 @@ android_media_MediaScanner_setLocale(
     }
     const char *localeStr = env->GetStringUTFChars(locale, NULL);
     if (localeStr == NULL) {  // Out of memory
-        jniThrowException(env, kRunTimeException, "Out of memory");
         return;
     }
     mp->setLocale(localeStr);
