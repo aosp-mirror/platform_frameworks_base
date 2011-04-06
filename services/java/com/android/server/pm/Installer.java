@@ -28,7 +28,7 @@ import java.io.OutputStream;
 class Installer {
     private static final String TAG = "Installer";
 
-    private static final boolean LOCAL_DEBUG = true;
+    private static final boolean LOCAL_DEBUG = false;
 
     InputStream mIn;
 
