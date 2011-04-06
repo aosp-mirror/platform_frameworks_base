@@ -2382,6 +2382,8 @@ public class WebView extends AbsoluteLayout
      */
     public void setTitleBarGravity(int gravity) {
         mTitleGravity = gravity;
+        // force refresh
+        invalidate();
     }
 
     /**
