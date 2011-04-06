@@ -32,6 +32,7 @@ protected:
     virtual void SetUp() {
         mST = new SurfaceTexture(123);
         mSTC = new SurfaceTextureClient(mST);
+        mANW = mSTC;
 
         // We need a valid GL context so we can test updateTexImage()
         // This initializes EGL and create a dummy GL context with a
@@ -69,6 +70,8 @@ protected:
     virtual void TearDown() {
         mST.clear();
         mSTC.clear();
+        mANW.clear();
+
         eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
         eglDestroyContext(mEglDisplay, mEglContext);
         eglDestroySurface(mEglDisplay, mEglSurface);
@@ -86,6 +89,8 @@ protected:
 
     sp<SurfaceTexture> mST;
     sp<SurfaceTextureClient> mSTC;
+    sp<ANativeWindow> mANW;
+
     EGLDisplay mEglDisplay;
     EGLSurface mEglSurface;
     EGLContext mEglContext;
@@ -97,31 +102,26 @@ TEST_F(SurfaceTextureClientTest, GetISurfaceTextureIsNotNull) {
 }
 
 TEST_F(SurfaceTextureClientTest, QueuesToWindowCompositorIsFalse) {
-    sp<ANativeWindow> anw(mSTC);
     int result = -123;
-    int err = anw->query(anw.get(), NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER,
+    int err = mANW->query(mANW.get(), NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER,
             &result);
     EXPECT_EQ(NO_ERROR, err);
     EXPECT_EQ(0, result);
 }
 
 TEST_F(SurfaceTextureClientTest, ConcreteTypeIsSurfaceTextureClient) {
-    sp<ANativeWindow> anw(mSTC);
     int result = -123;
-    int err = anw->query(anw.get(), NATIVE_WINDOW_CONCRETE_TYPE, &result);
+    int err = mANW->query(mANW.get(), NATIVE_WINDOW_CONCRETE_TYPE, &result);
     EXPECT_EQ(NO_ERROR, err);
     EXPECT_EQ(NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT, result);
 }
 
 TEST_F(SurfaceTextureClientTest, ANativeWindowLockFails) {
-    sp<ANativeWindow> anw(mSTC);
     ANativeWindow_Buffer buf;
-    ASSERT_EQ(BAD_VALUE, ANativeWindow_lock(anw.get(), &buf, NULL));
+    ASSERT_EQ(BAD_VALUE, ANativeWindow_lock(mANW.get(), &buf, NULL));
 }
 
 TEST_F(SurfaceTextureClientTest, EglCreateWindowSurfaceSucceeds) {
-    sp<ANativeWindow> anw(mSTC);
-
     EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     ASSERT_EQ(EGL_SUCCESS, eglGetError());
     ASSERT_NE(EGL_NO_DISPLAY, dpy);
@@ -147,7 +147,7 @@ TEST_F(SurfaceTextureClientTest, EglCreateWindowSurfaceSucceeds) {
             &numConfigs));
     ASSERT_EQ(EGL_SUCCESS, eglGetError());
 
-    EGLSurface eglSurface = eglCreateWindowSurface(dpy, myConfig, anw.get(),
+    EGLSurface eglSurface = eglCreateWindowSurface(dpy, myConfig, mANW.get(),
             NULL);
     EXPECT_NE(EGL_NO_SURFACE, eglSurface);
     EXPECT_EQ(EGL_SUCCESS, eglGetError());
@@ -156,269 +156,246 @@ TEST_F(SurfaceTextureClientTest, EglCreateWindowSurfaceSucceeds) {
 }
 
 TEST_F(SurfaceTextureClientTest, BufferGeometryInvalidSizesFail) {
-    sp<ANativeWindow> anw(mSTC);
-
-    EXPECT_GT(OK, native_window_set_buffers_geometry(anw.get(), -1,  0,  0));
-    EXPECT_GT(OK, native_window_set_buffers_geometry(anw.get(),  0, -1,  0));
-    EXPECT_GT(OK, native_window_set_buffers_geometry(anw.get(),  0,  0, -1));
-    EXPECT_GT(OK, native_window_set_buffers_geometry(anw.get(), -1, -1,  0));
-    EXPECT_GT(OK, native_window_set_buffers_geometry(anw.get(),  0,  8,  0));
-    EXPECT_GT(OK, native_window_set_buffers_geometry(anw.get(),  8,  0,  0));
+    EXPECT_GT(OK, native_window_set_buffers_geometry(mANW.get(), -1,  0,  0));
+    EXPECT_GT(OK, native_window_set_buffers_geometry(mANW.get(),  0, -1,  0));
+    EXPECT_GT(OK, native_window_set_buffers_geometry(mANW.get(),  0,  0, -1));
+    EXPECT_GT(OK, native_window_set_buffers_geometry(mANW.get(), -1, -1,  0));
+    EXPECT_GT(OK, native_window_set_buffers_geometry(mANW.get(),  0,  8,  0));
+    EXPECT_GT(OK, native_window_set_buffers_geometry(mANW.get(),  8,  0,  0));
 }
 
 TEST_F(SurfaceTextureClientTest, DefaultGeometryValues) {
-    sp<ANativeWindow> anw(mSTC);
     ANativeWindowBuffer* buf;
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf));
     EXPECT_EQ(1, buf->width);
     EXPECT_EQ(1, buf->height);
     EXPECT_EQ(PIXEL_FORMAT_RGBA_8888, buf->format);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf));
 }
 
 TEST_F(SurfaceTextureClientTest, BufferGeometryCanBeSet) {
-    sp<ANativeWindow> anw(mSTC);
     ANativeWindowBuffer* buf;
-    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 16, 8, PIXEL_FORMAT_RGB_565));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(mANW.get(), 16, 8, PIXEL_FORMAT_RGB_565));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf));
     EXPECT_EQ(16, buf->width);
     EXPECT_EQ(8, buf->height);
     EXPECT_EQ(PIXEL_FORMAT_RGB_565, buf->format);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf));
 }
 
 TEST_F(SurfaceTextureClientTest, BufferGeometryDefaultSizeSetFormat) {
-    sp<ANativeWindow> anw(mSTC);
     ANativeWindowBuffer* buf;
-    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 0, 0, PIXEL_FORMAT_RGB_565));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(mANW.get(), 0, 0, PIXEL_FORMAT_RGB_565));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf));
     EXPECT_EQ(1, buf->width);
     EXPECT_EQ(1, buf->height);
     EXPECT_EQ(PIXEL_FORMAT_RGB_565, buf->format);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf));
 }
 
 TEST_F(SurfaceTextureClientTest, BufferGeometrySetSizeDefaultFormat) {
-    sp<ANativeWindow> anw(mSTC);
     ANativeWindowBuffer* buf;
-    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 16, 8, 0));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(mANW.get(), 16, 8, 0));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf));
     EXPECT_EQ(16, buf->width);
     EXPECT_EQ(8, buf->height);
     EXPECT_EQ(PIXEL_FORMAT_RGBA_8888, buf->format);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf));
 }
 
 TEST_F(SurfaceTextureClientTest, BufferGeometrySizeCanBeUnset) {
-    sp<ANativeWindow> anw(mSTC);
     ANativeWindowBuffer* buf;
-    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 16, 8, 0));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(mANW.get(), 16, 8, 0));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf));
     EXPECT_EQ(16, buf->width);
     EXPECT_EQ(8, buf->height);
     EXPECT_EQ(PIXEL_FORMAT_RGBA_8888, buf->format);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
-    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 0, 0, 0));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf));
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(mANW.get(), 0, 0, 0));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf));
     EXPECT_EQ(1, buf->width);
     EXPECT_EQ(1, buf->height);
     EXPECT_EQ(PIXEL_FORMAT_RGBA_8888, buf->format);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf));
 }
 
 TEST_F(SurfaceTextureClientTest, BufferGeometrySizeCanBeChangedWithoutFormat) {
-    sp<ANativeWindow> anw(mSTC);
     ANativeWindowBuffer* buf;
-    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 0, 0, PIXEL_FORMAT_RGB_565));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(mANW.get(), 0, 0, PIXEL_FORMAT_RGB_565));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf));
     EXPECT_EQ(1, buf->width);
     EXPECT_EQ(1, buf->height);
     EXPECT_EQ(PIXEL_FORMAT_RGB_565, buf->format);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
-    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 16, 8, 0));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf));
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(mANW.get(), 16, 8, 0));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf));
     EXPECT_EQ(16, buf->width);
     EXPECT_EQ(8, buf->height);
     EXPECT_EQ(PIXEL_FORMAT_RGB_565, buf->format);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf));
 }
 
 TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSize) {
-    sp<ANativeWindow> anw(mSTC);
     sp<SurfaceTexture> st(mST);
     ANativeWindowBuffer* buf;
     EXPECT_EQ(OK, st->setDefaultBufferSize(16, 8));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf));
     EXPECT_EQ(16, buf->width);
     EXPECT_EQ(8, buf->height);
     EXPECT_EQ(PIXEL_FORMAT_RGBA_8888, buf->format);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf));
 }
 
 TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSizeAfterDequeue) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
     ANativeWindowBuffer* buf[2];
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 4));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[1]));
     EXPECT_NE(buf[0], buf[1]);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[0]));
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[1]));
-    EXPECT_EQ(OK, st->setDefaultBufferSize(16, 8));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf[0]));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf[1]));
+    EXPECT_EQ(OK, mST->setDefaultBufferSize(16, 8));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[1]));
     EXPECT_NE(buf[0], buf[1]);
     EXPECT_EQ(16, buf[0]->width);
     EXPECT_EQ(16, buf[1]->width);
     EXPECT_EQ(8, buf[0]->height);
     EXPECT_EQ(8, buf[1]->height);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[0]));
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[1]));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf[0]));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf[1]));
 }
 
 TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSizeVsGeometry) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
     ANativeWindowBuffer* buf[2];
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
-    EXPECT_EQ(OK, st->setDefaultBufferSize(16, 8));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 4));
+    EXPECT_EQ(OK, mST->setDefaultBufferSize(16, 8));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[1]));
     EXPECT_NE(buf[0], buf[1]);
     EXPECT_EQ(16, buf[0]->width);
     EXPECT_EQ(16, buf[1]->width);
     EXPECT_EQ(8, buf[0]->height);
     EXPECT_EQ(8, buf[1]->height);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[0]));
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[1]));
-    EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 12, 24, 0));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf[0]));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf[1]));
+    EXPECT_EQ(OK, native_window_set_buffers_geometry(mANW.get(), 12, 24, 0));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[1]));
     EXPECT_NE(buf[0], buf[1]);
     EXPECT_EQ(12, buf[0]->width);
     EXPECT_EQ(12, buf[1]->width);
     EXPECT_EQ(24, buf[0]->height);
     EXPECT_EQ(24, buf[1]->height);
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[0]));
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[1]));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf[0]));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf[1]));
 }
 
 TEST_F(SurfaceTextureClientTest, SurfaceTextureTooManyUpdateTexImage) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
     android_native_buffer_t* buf[3];
-    ASSERT_EQ(OK, st->setSynchronousMode(false));
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
+    ASSERT_EQ(OK, mST->setSynchronousMode(false));
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 4));
 
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(OK, st->updateTexImage());
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[0]));
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(OK, mST->updateTexImage());
 
-    ASSERT_EQ(OK, st->setSynchronousMode(true));
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
+    ASSERT_EQ(OK, mST->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 3));
 
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[0]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[1]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[1]));
 
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(OK, mST->updateTexImage());
 }
 
 TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeSlowRetire) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
     android_native_buffer_t* buf[3];
-    ASSERT_EQ(OK, st->setSynchronousMode(true));
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+    ASSERT_EQ(OK, mST->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 4));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[1]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[2]));
     EXPECT_NE(buf[0], buf[1]);
     EXPECT_NE(buf[1], buf[2]);
     EXPECT_NE(buf[2], buf[0]);
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[2]));
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(st->getCurrentBuffer().get(), buf[0]);
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(st->getCurrentBuffer().get(), buf[1]);
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(st->getCurrentBuffer().get(), buf[2]);
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[0]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[1]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[2]));
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(mST->getCurrentBuffer().get(), buf[0]);
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(mST->getCurrentBuffer().get(), buf[1]);
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(mST->getCurrentBuffer().get(), buf[2]);
 }
 
 TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeFastRetire) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
     android_native_buffer_t* buf[3];
-    ASSERT_EQ(OK, st->setSynchronousMode(true));
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+    ASSERT_EQ(OK, mST->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 4));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[1]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[2]));
     EXPECT_NE(buf[0], buf[1]);
     EXPECT_NE(buf[1], buf[2]);
     EXPECT_NE(buf[2], buf[0]);
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(st->getCurrentBuffer().get(), buf[0]);
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(st->getCurrentBuffer().get(), buf[1]);
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[2]));
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(st->getCurrentBuffer().get(), buf[2]);
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[0]));
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(mST->getCurrentBuffer().get(), buf[0]);
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[1]));
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(mST->getCurrentBuffer().get(), buf[1]);
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[2]));
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(mST->getCurrentBuffer().get(), buf[2]);
 }
 
 TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeDQQR) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
     android_native_buffer_t* buf[3];
-    ASSERT_EQ(OK, st->setSynchronousMode(true));
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
+    ASSERT_EQ(OK, mST->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 3));
 
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(st->getCurrentBuffer().get(), buf[0]);
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[0]));
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(mST->getCurrentBuffer().get(), buf[0]);
 
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[1]));
     EXPECT_NE(buf[0], buf[1]);
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(st->getCurrentBuffer().get(), buf[1]);
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[1]));
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(mST->getCurrentBuffer().get(), buf[1]);
 
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[2]));
     EXPECT_NE(buf[1], buf[2]);
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[2]));
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(st->getCurrentBuffer().get(), buf[2]);
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[2]));
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(mST->getCurrentBuffer().get(), buf[2]);
 }
 
 // XXX: We currently have no hardware that properly handles dequeuing the
 // buffer that is currently bound to the texture.
 TEST_F(SurfaceTextureClientTest, DISABLED_SurfaceTextureSyncModeDequeueCurrent) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
     android_native_buffer_t* buf[3];
     android_native_buffer_t* firstBuf;
-    ASSERT_EQ(OK, st->setSynchronousMode(true));
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &firstBuf));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), firstBuf));
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(st->getCurrentBuffer().get(), firstBuf);
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[2]));
+    ASSERT_EQ(OK, mST->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 3));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &firstBuf));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), firstBuf));
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(mST->getCurrentBuffer().get(), firstBuf);
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[0]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[1]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[1]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[2]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[2]));
     EXPECT_NE(buf[0], buf[1]);
     EXPECT_NE(buf[1], buf[2]);
     EXPECT_NE(buf[2], buf[0]);
@@ -426,41 +403,36 @@ TEST_F(SurfaceTextureClientTest, DISABLED_SurfaceTextureSyncModeDequeueCurrent) 
 }
 
 TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeMinUndequeued) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
     android_native_buffer_t* buf[3];
-    ASSERT_EQ(OK, st->setSynchronousMode(true));
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
+    ASSERT_EQ(OK, mST->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 3));
 
-    // We should be able to dequeue all the buffers before we've queued any.
-    EXPECT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    EXPECT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
-    EXPECT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+    // We should be able to dequeue all the buffers before we've queued mANWy.
+    EXPECT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    EXPECT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[1]));
+    EXPECT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[2]));
 
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[2]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf[2]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[1]));
 
-    EXPECT_EQ(OK, st->updateTexImage());
-    EXPECT_EQ(st->getCurrentBuffer().get(), buf[1]);
+    EXPECT_EQ(OK, mST->updateTexImage());
+    EXPECT_EQ(mST->getCurrentBuffer().get(), buf[1]);
 
-    EXPECT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+    EXPECT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[2]));
 
     // Once we've queued a buffer, however we should not be able to dequeue more
     // than (buffer-count - MIN_UNDEQUEUED_BUFFERS), which is 2 in this case.
-    EXPECT_EQ(-EBUSY, anw->dequeueBuffer(anw.get(), &buf[1]));
+    EXPECT_EQ(-EBUSY, mANW->dequeueBuffer(mANW.get(), &buf[1]));
 
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[0]));
-    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[2]));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf[0]));
+    ASSERT_EQ(OK, mANW->cancelBuffer(mANW.get(), buf[2]));
 }
 
 // XXX: This is not expected to pass until the synchronization hacks are removed
 // from the SurfaceTexture class.
 TEST_F(SurfaceTextureClientTest, DISABLED_SurfaceTextureSyncModeWaitRetire) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
-
     class MyThread : public Thread {
-        sp<SurfaceTexture> st;
+        sp<SurfaceTexture> mST;
         EGLContext ctx;
         EGLSurface sur;
         EGLDisplay dpy;
@@ -470,14 +442,14 @@ TEST_F(SurfaceTextureClientTest, DISABLED_SurfaceTextureSyncModeWaitRetire) {
             eglMakeCurrent(dpy, sur, sur, ctx);
             usleep(20000);
             Mutex::Autolock _l(mLock);
-            st->updateTexImage();
+            mST->updateTexImage();
             mBufferRetired = true;
             eglMakeCurrent(dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
             return false;
         }
     public:
-        MyThread(const sp<SurfaceTexture>& st)
-            : st(st), mBufferRetired(false) {
+        MyThread(const sp<SurfaceTexture>& mST)
+            : mST(mST), mBufferRetired(false) {
             ctx = eglGetCurrentContext();
             sur = eglGetCurrentSurface(EGL_DRAW);
             dpy = eglGetCurrentDisplay();
@@ -493,37 +465,35 @@ TEST_F(SurfaceTextureClientTest, DISABLED_SurfaceTextureSyncModeWaitRetire) {
     };
 
     android_native_buffer_t* buf[3];
-    ASSERT_EQ(OK, st->setSynchronousMode(true));
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
+    ASSERT_EQ(OK, mST->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 3));
     // dequeue/queue/update so we have a current buffer
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
-    st->updateTexImage();
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[0]));
+    mST->updateTexImage();
 
-    MyThread* thread = new MyThread(st);
+    MyThread* thread = new MyThread(mST);
     sp<Thread> threadBase(thread);
 
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[0]));
     thread->run();
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
-    //ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
-    //ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[2]));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[1]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[1]));
+    //ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[2]));
+    //ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[2]));
     thread->bufferDequeued();
     thread->requestExitAndWait();
 }
 
 TEST_F(SurfaceTextureClientTest, GetTransformMatrixReturnsVerticalFlip) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
     android_native_buffer_t* buf[3];
     float mtx[16] = {};
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
-    ASSERT_EQ(OK, st->updateTexImage());
-    st->getTransformMatrix(mtx);
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 4));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[0]));
+    ASSERT_EQ(OK, mST->updateTexImage());
+    mST->getTransformMatrix(mtx);
 
     EXPECT_EQ(1.f, mtx[0]);
     EXPECT_EQ(0.f, mtx[1]);
@@ -547,16 +517,14 @@ TEST_F(SurfaceTextureClientTest, GetTransformMatrixReturnsVerticalFlip) {
 }
 
 TEST_F(SurfaceTextureClientTest, GetTransformMatrixSucceedsAfterFreeingBuffers) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
     android_native_buffer_t* buf[3];
     float mtx[16] = {};
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
-    ASSERT_EQ(OK, st->updateTexImage());
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 6)); // frees buffers
-    st->getTransformMatrix(mtx);
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 4));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[0]));
+    ASSERT_EQ(OK, mST->updateTexImage());
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 6)); // frees buffers
+    mST->getTransformMatrix(mtx);
 
     EXPECT_EQ(1.f, mtx[0]);
     EXPECT_EQ(0.f, mtx[1]);
@@ -580,8 +548,6 @@ TEST_F(SurfaceTextureClientTest, GetTransformMatrixSucceedsAfterFreeingBuffers) 
 }
 
 TEST_F(SurfaceTextureClientTest, GetTransformMatrixSucceedsAfterFreeingBuffersWithCrop) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
     android_native_buffer_t* buf[3];
     float mtx[16] = {};
     android_native_rect_t crop;
@@ -590,14 +556,14 @@ TEST_F(SurfaceTextureClientTest, GetTransformMatrixSucceedsAfterFreeingBuffersWi
     crop.right = 5;
     crop.bottom = 5;
 
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
-    ASSERT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 8, 8, 0));
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
-    ASSERT_EQ(OK, native_window_set_crop(anw.get(), &crop));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
-    ASSERT_EQ(OK, st->updateTexImage());
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 6)); // frees buffers
-    st->getTransformMatrix(mtx);
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 4));
+    ASSERT_EQ(OK, native_window_set_buffers_geometry(mANW.get(), 8, 8, 0));
+    ASSERT_EQ(OK, mANW->dequeueBuffer(mANW.get(), &buf[0]));
+    ASSERT_EQ(OK, native_window_set_crop(mANW.get(), &crop));
+    ASSERT_EQ(OK, mANW->queueBuffer(mANW.get(), buf[0]));
+    ASSERT_EQ(OK, mST->updateTexImage());
+    ASSERT_EQ(OK, native_window_set_buffer_count(mANW.get(), 6)); // frees buffers
+    mST->getTransformMatrix(mtx);
 
     // This accounts for the 1 texel shrink for each edge that's included in the
     // transform matrix to avoid texturing outside the crop region.
