@@ -372,8 +372,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             if (mViewRoot == null) {
                 return ERROR_NOT_INFLATED.createResult();
             }
-            // measure the views
-            int w_spec, h_spec;
 
             RenderingMode renderingMode = params.getRenderingMode();
 
@@ -385,38 +383,64 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 mMeasuredScreenHeight = params.getScreenHeight();
 
                 if (renderingMode != RenderingMode.NORMAL) {
-                    // measure the full size needed by the layout.
-                    w_spec = MeasureSpec.makeMeasureSpec(mMeasuredScreenWidth,
-                            renderingMode.isHorizExpand() ?
-                                    MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
-                                    : MeasureSpec.EXACTLY);
-                    h_spec = MeasureSpec.makeMeasureSpec(mMeasuredScreenHeight,
-                            renderingMode.isVertExpand() ?
-                                    MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
-                                    : MeasureSpec.EXACTLY);
-                    mViewRoot.measure(w_spec, h_spec);
+                    int widthMeasureSpecMode = renderingMode.isHorizExpand() ?
+                            MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
+                            : MeasureSpec.EXACTLY;
+                    int heightMeasureSpecMode = renderingMode.isVertExpand() ?
+                            MeasureSpec.UNSPECIFIED // this lets us know the actual needed size
+                            : MeasureSpec.EXACTLY;
 
+                    // We used to compare the measured size of the content to the screen size but
+                    // this does not work anymore due to the 2 following issues:
+                    // - If the content is in a decor (system bar, title/action bar), the root view
+                    //   will not resize even with the UNSPECIFIED because of the embedded layout.
+                    // - If there is no decor, but a dialog frame, then the dialog padding prevents
+                    //   comparing the size of the content to the screen frame (as it would not
+                    //   take into account the dialog padding).
+
+                    // The solution is to first get the content size in a normal rendering, inside
+                    // the decor or the dialog padding.
+                    // Then measure only the content with UNSPECIFIED to see the size difference
+                    // and apply this to the screen size.
+
+                    // first measure the full layout, with EXACTLY to get the size of the
+                    // content as it is inside the decor/dialog
+                    Pair<Integer, Integer> exactMeasure = measureView(
+                            mViewRoot, mContentRoot.getChildAt(0),
+                            mMeasuredScreenWidth, MeasureSpec.EXACTLY,
+                            mMeasuredScreenHeight, MeasureSpec.EXACTLY);
+
+                    // now measure the content only using UNSPECIFIED (where applicable, based on
+                    // the rendering mode). This will give us the size the content needs.
+                    Pair<Integer, Integer> result = measureView(
+                            mContentRoot, mContentRoot.getChildAt(0),
+                            mMeasuredScreenWidth, widthMeasureSpecMode,
+                            mMeasuredScreenHeight, heightMeasureSpecMode);
+
+                    // now look at the difference and add what is needed.
                     if (renderingMode.isHorizExpand()) {
-                        int neededWidth = mViewRoot.getChildAt(0).getMeasuredWidth();
-                        if (neededWidth > mMeasuredScreenWidth) {
-                            mMeasuredScreenWidth = neededWidth;
+                        int measuredWidth = exactMeasure.getFirst();
+                        int neededWidth = result.getFirst();
+                        if (neededWidth > measuredWidth) {
+                            mMeasuredScreenWidth += neededWidth - measuredWidth;
                         }
                     }
 
                     if (renderingMode.isVertExpand()) {
-                        int neededHeight = mViewRoot.getChildAt(0).getMeasuredHeight();
-                        if (neededHeight > mMeasuredScreenHeight) {
-                            mMeasuredScreenHeight = neededHeight;
+                        int measuredHeight = exactMeasure.getSecond();
+                        int neededHeight = result.getSecond();
+                        if (neededHeight > measuredHeight) {
+                            mMeasuredScreenHeight += neededHeight - measuredHeight;
                         }
                     }
                 }
             }
 
-            // remeasure with the size we need
+            // measure again with the size we need
             // This must always be done before the call to layout
-            w_spec = MeasureSpec.makeMeasureSpec(mMeasuredScreenWidth, MeasureSpec.EXACTLY);
-            h_spec = MeasureSpec.makeMeasureSpec(mMeasuredScreenHeight, MeasureSpec.EXACTLY);
-            mViewRoot.measure(w_spec, h_spec);
+            measureView(mViewRoot, null /*measuredView*/,
+                    mMeasuredScreenWidth, MeasureSpec.EXACTLY,
+                    mMeasuredScreenHeight, MeasureSpec.EXACTLY);
 
             // now do the layout.
             mViewRoot.layout(0, 0, mMeasuredScreenWidth, mMeasuredScreenHeight);
@@ -491,6 +515,34 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
             return ERROR_UNKNOWN.createResult(t.getMessage(), t);
         }
+    }
+
+    /**
+     * Executes {@link View#measure(int, int)} on a given view with the given parameters (used
+     * to create measure specs with {@link MeasureSpec#makeMeasureSpec(int, int)}.
+     *
+     * if <var>measuredView</var> is non null, the method returns a {@link Pair} of (width, height)
+     * for the view (using {@link View#getMeasuredWidth()} and {@link View#getMeasuredHeight()}).
+     *
+     * @param viewToMeasure the view on which to execute measure().
+     * @param measuredView if non null, the view to query for its measured width/height.
+     * @param width the width to use in the MeasureSpec.
+     * @param widthMode the MeasureSpec mode to use for the width.
+     * @param height the height to use in the MeasureSpec.
+     * @param heightMode the MeasureSpec mode to use for the height.
+     * @return the measured width/height if measuredView is non-null, null otherwise.
+     */
+    private Pair<Integer, Integer> measureView(ViewGroup viewToMeasure, View measuredView,
+            int width, int widthMode, int height, int heightMode) {
+        int w_spec = MeasureSpec.makeMeasureSpec(width, widthMode);
+        int h_spec = MeasureSpec.makeMeasureSpec(height, heightMode);
+        viewToMeasure.measure(w_spec, h_spec);
+
+        if (measuredView != null) {
+            return Pair.of(measuredView.getMeasuredWidth(), measuredView.getMeasuredHeight());
+        }
+
+        return null;
     }
 
     /**
