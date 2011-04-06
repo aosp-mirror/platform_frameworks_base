@@ -427,8 +427,8 @@ public class StackView extends AdapterViewAnimator {
         // Here we need to make sure that the z-order of the children is correct
         for (int i = mCurrentWindowEnd; i >= mCurrentWindowStart; i--) {
             int index = modulo(i, getWindowSize());
-            ViewAndIndex vi = mViewsMap.get(index);
-            if (vi != null) {
+            ViewAndMetaData vm = mViewsMap.get(index);
+            if (vm != null) {
                 View v = mViewsMap.get(index).view;
                 if (v != null) v.bringToFront();
             }

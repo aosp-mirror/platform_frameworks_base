@@ -79,7 +79,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     /**
      * Map of the children of the {@link AdapterViewAnimator}.
      */
-    HashMap<Integer, ViewAndIndex> mViewsMap = new HashMap<Integer, ViewAndIndex>();
+    HashMap<Integer, ViewAndMetaData> mViewsMap = new HashMap<Integer, ViewAndMetaData>();
 
     /**
      * List of views pending removal from the {@link AdapterViewAnimator}
@@ -204,13 +204,18 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         mPreviousViews = new ArrayList<Integer>();
     }
 
-    class ViewAndIndex {
-        ViewAndIndex(View v, int i) {
-            view = v;
-            index = i;
-        }
+    class ViewAndMetaData {
         View view;
-        int index;
+        int relativeIndex;
+        int adapterPosition;
+        long itemId;
+
+        ViewAndMetaData(View view, int relativeIndex, int adapterPosition, long itemId) {
+            this.view = view;
+            this.relativeIndex = relativeIndex;
+            this.adapterPosition = adapterPosition;
+            this.itemId = itemId;
+        }
     }
 
     /**
@@ -376,6 +381,15 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
         }
     }
 
+    private ViewAndMetaData getMetaDataForChild(View child) {
+        for (ViewAndMetaData vm: mViewsMap.values()) {
+            if (vm.view == child) {
+                return vm;
+            }
+        }
+        return null;
+     }
+
     LayoutParams createOrReuseLayoutParams(View v) {
         final ViewGroup.LayoutParams currentLp = v.getLayoutParams();
         if (currentLp instanceof ViewGroup.LayoutParams) {
@@ -478,7 +492,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
             if (remove) {
                 View previousView = mViewsMap.get(index).view;
-                int oldRelativeIndex = mViewsMap.get(index).index;
+                int oldRelativeIndex = mViewsMap.get(index).relativeIndex;
 
                 mPreviousViews.add(index);
                 transformViewForTransition(oldRelativeIndex, -1, previousView, animate);
@@ -494,7 +508,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                 int index = modulo(i, getWindowSize());
                 int oldRelativeIndex;
                 if (mViewsMap.containsKey(index)) {
-                    oldRelativeIndex = mViewsMap.get(index).index;
+                    oldRelativeIndex = mViewsMap.get(index).relativeIndex;
                 } else {
                     oldRelativeIndex = -1;
                 }
@@ -507,14 +521,16 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
 
                 if (inOldRange) {
                     View view = mViewsMap.get(index).view;
-                    mViewsMap.get(index).index = newRelativeIndex;
+                    mViewsMap.get(index).relativeIndex = newRelativeIndex;
                     applyTransformForChildAtIndex(view, newRelativeIndex);
                     transformViewForTransition(oldRelativeIndex, newRelativeIndex, view, animate);
 
                 // Otherwise this view is new to the window
                 } else {
                     // Get the new view from the adapter, add it and apply any transform / animation
-                    View newView = mAdapter.getView(modulo(i, adapterCount), null, this);
+                    final int adapterPosition = modulo(i, adapterCount);
+                    View newView = mAdapter.getView(adapterPosition, null, this);
+                    long itemId = mAdapter.getItemId(adapterPosition);
 
                     // We wrap the new view in a FrameLayout so as to respect the contract
                     // with the adapter, that is, that we don't modify this view directly
@@ -524,7 +540,8 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                     if (newView != null) {
                        fl.addView(newView);
                     }
-                    mViewsMap.put(index, new ViewAndIndex(fl, newRelativeIndex));
+                    mViewsMap.put(index, new ViewAndMetaData(fl, newRelativeIndex,
+                            adapterPosition, itemId));
                     addChild(fl);
                     applyTransformForChildAtIndex(fl, newRelativeIndex);
                     transformViewForTransition(-1, newRelativeIndex, fl, animate);
@@ -601,6 +618,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
             case MotionEvent.ACTION_UP: {
                 if (mTouchMode == TOUCH_MODE_DOWN_IN_CURRENT_VIEW) {
                     final View v = getCurrentView();
+                    final ViewAndMetaData viewData = getMetaDataForChild(v);
                     if (v != null) {
                         if (isTransformedTouchPointInView(ev.getX(), ev.getY(), v, null)) {
                             final Handler handler = getHandler();
@@ -613,7 +631,12 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                                     hideTapFeedback(v);
                                     post(new Runnable() {
                                         public void run() {
-                                            performItemClick(v, 0, 0);
+                                            if (viewData != null) {
+                                                performItemClick(v, viewData.adapterPosition,
+                                                        viewData.itemId);
+                                            } else {
+                                                performItemClick(v, 0, 0);
+                                            }
                                         }
                                     });
                                 }
