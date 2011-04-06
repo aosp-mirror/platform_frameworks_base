@@ -51,9 +51,8 @@ ContextDestroyWorker {
 }
 
 AssignName {
-	param void *obj
+	param RsObjectBase obj
 	param const char *name
-	param size_t len
 	}
 
 ObjDestroy {
@@ -69,7 +68,6 @@ ElementCreate {
 	}
 
 ElementCreate2 {
-	param size_t count
 	param const RsElement * elements
 	param const char ** names
 	param const size_t * nameLengths
@@ -80,7 +78,6 @@ ElementCreate2 {
 AllocationCopyToBitmap {
 	param RsAllocation alloc
 	param void * data
-	param size_t dataLen
 	}
 
 
@@ -90,7 +87,6 @@ Allocation1DData {
 	param uint32_t lod
 	param uint32_t count
 	param const void *data
-	param uint32_t bytes
 	handcodeApi
 	togglePlay
 	}
@@ -101,7 +97,6 @@ Allocation1DElementData {
 	param uint32_t lod
 	param const void *data
 	param uint32_t comp_offset
-	param uint32_t bytes
 	handcodeApi
 	togglePlay
 	}
@@ -115,7 +110,6 @@ Allocation2DData {
 	param uint32_t w
 	param uint32_t h
 	param const void *data
-	param uint32_t bytes
 	}
 
 Allocation2DElementData {
@@ -126,7 +120,6 @@ Allocation2DElementData {
 	param RsAllocationCubemapFace face
 	param const void *data
 	param uint32_t element_offset
-	param uint32_t bytes
 	}
 
 AllocationGenerateMipmaps {
@@ -184,7 +177,6 @@ ScriptBindAllocation {
 ScriptSetTimeZone {
 	param RsScript s
 	param const char * timeZone
-	param uint32_t length
 	}
 
 
@@ -197,7 +189,6 @@ ScriptInvokeV {
 	param RsScript s
 	param uint32_t slot
 	param const void * data
-	param uint32_t dataLen
 	handcodeApi
 	togglePlay
 	}
@@ -236,7 +227,6 @@ ScriptSetVarV {
 	param RsScript s
 	param uint32_t slot
 	param const void * data
-	param uint32_t dataLen
 	handcodeApi
 	togglePlay
 	}
@@ -246,7 +236,6 @@ ScriptCCreate {
         param const char * resName
         param const char * cacheDir
 	param const char * text
-	param uint32_t length
 	ret RsScript
 	}
 
@@ -294,17 +283,13 @@ ProgramBindSampler {
 
 ProgramFragmentCreate {
 	param const char * shaderText
-	param uint32_t shaderLength
 	param const uint32_t * params
-	param uint32_t paramLength
 	ret RsProgramFragment
 	}
 
 ProgramVertexCreate {
 	param const char * shaderText
-	param uint32_t shaderLength
 	param const uint32_t * params
-	param uint32_t paramLength
 	ret RsProgramVertex
 	}
 
@@ -319,8 +304,7 @@ FontCreateFromMemory {
 	param const char *name
 	param float fontSize
 	param uint32_t dpi
-    param const void *data
-    param uint32_t dataLen
+	param const void *data
 	ret RsFont
 	}
 
@@ -346,14 +330,3 @@ MeshBindVertex {
 MeshInitVertexAttribs {
 	param RsMesh mesh
 	}
-
-AnimationCreate {
-	param const float *inValues
-	param const float *outValues
-	param uint32_t valueCount
-	param RsAnimationInterpolation interp
-	param RsAnimationEdge pre
-	param RsAnimationEdge post
-	ret RsAnimation
-	}
-

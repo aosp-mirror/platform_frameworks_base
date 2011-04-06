@@ -20,6 +20,19 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 
    int typeNextState;
 
+   void checkPointerType() {
+       VarType *lastType = currType;
+       if (lastType->ptrLevel) {
+           currType = &apis[apiCount].params[apis[apiCount].paramCount];
+           currType->type = 4;
+           sprintf(currType->typeName, "%s", "size_t");
+           if (lastType->name[0]) {
+               sprintf(currType->name, "%s_length", lastType->name);
+           }
+           apis[apiCount].paramCount++;
+       }
+   }
+
    extern "C" int yylex();
 
 %%
@@ -145,6 +158,7 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 
 <api_entry_param>{ID} {
     memcpy(currType->name, yytext, yyleng);
+    checkPointerType();
     BEGIN(api_entry2);
     }
 

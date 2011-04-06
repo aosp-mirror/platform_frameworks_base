@@ -705,9 +705,9 @@ void rsi_ContextBindFont(Context *rsc, RsFont vfont) {
     rsc->setFont(font);
 }
 
-void rsi_AssignName(Context *rsc, void * obj, const char *name, uint32_t len) {
+void rsi_AssignName(Context *rsc, RsObjectBase obj, const char *name, uint32_t name_length) {
     ObjectBase *ob = static_cast<ObjectBase *>(obj);
-    rsc->assignName(ob, name, len);
+    rsc->assignName(ob, name, name_length);
 }
 
 void rsi_ObjDestroy(Context *rsc, void *optr) {
@@ -724,7 +724,7 @@ void rsi_ContextResume(Context *rsc) {
     rsc->resume();
 }
 
-void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, ANativeWindow *sur) {
+void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, ANativeWindow *sur, size_t sur_length) {
     rsc->setSurface(w, h, sur);
 }
 

@@ -348,12 +348,15 @@ RsElement rsi_ElementCreate(Context *rsc,
 }
 
 RsElement rsi_ElementCreate2(Context *rsc,
-                             size_t count,
                              const RsElement * ein,
+                             size_t ein_length,
                              const char ** names,
+                             size_t names_length,
                              const size_t * nameLengths,
-                             const uint32_t * arraySizes) {
-    const Element *e = Element::create(rsc, count, (const Element **)ein, names, nameLengths, arraySizes);
+                             size_t nameLengths_length,
+                             const uint32_t * arraySizes,
+                             size_t arraySizes_length) {
+    const Element *e = Element::create(rsc, ein_length, (const Element **)ein, names, nameLengths, arraySizes);
     e->incUserRef();
     return (RsElement)e;
 }

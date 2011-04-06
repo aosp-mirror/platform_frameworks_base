@@ -267,12 +267,13 @@ namespace android {
 namespace renderscript {
 
 RsScript rsi_ScriptCCreate(Context *rsc,
-                           const char *resName, const char *cacheDir,
-                           const char *text, uint32_t len)
+                           const char *resName, size_t resName_length,
+                           const char *cacheDir, size_t cacheDir_length,
+                           const char *text, uint32_t text_length)
 {
     ScriptC *s = new ScriptC(rsc);
 
-    if (!s->runCompiler(rsc, resName, cacheDir, (uint8_t *)text, len)) {
+    if (!s->runCompiler(rsc, resName, cacheDir, (uint8_t *)text, text_length)) {
         // Error during compile, destroy s and return null.
         delete s;
         return NULL;

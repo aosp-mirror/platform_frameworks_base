@@ -780,7 +780,7 @@ void rsi_Allocation2DData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t
     a->data(rsc, xoff, yoff, lod, face, w, h, data, sizeBytes);
 }
 
-void rsi_AllocationRead(Context *rsc, RsAllocation va, void *data) {
+void rsi_AllocationRead(Context *rsc, RsAllocation va, void *data, size_t data_length) {
     Allocation *a = static_cast<Allocation *>(va);
     a->read(data);
 }

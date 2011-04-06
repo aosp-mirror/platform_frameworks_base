@@ -197,7 +197,7 @@ nContextSetSurface(JNIEnv *_env, jobject _this, RsContext con, jint width, jint 
         window = (Surface*) android_Surface_getNativeWindow(_env, wnd).get();
     }
 
-    rsContextSetSurface(con, width, height, window);
+    rsContextSetSurface(con, width, height, window, 1);
 }
 
 static void
@@ -309,7 +309,11 @@ nElementCreate2(JNIEnv *_env, jobject _this, RsContext con, jintArray _ids, jobj
         nameArray[ct] = _env->GetStringUTFChars(s, NULL);
         sizeArray[ct] = _env->GetStringUTFLength(s);
     }
-    jint id = (jint)rsElementCreate2(con, fieldCount, (RsElement *)ids, nameArray, sizeArray, (const uint32_t *)arraySizes);
+    jint id = (jint)rsElementCreate2(con,
+                                     (RsElement *)ids, fieldCount,
+                                     nameArray, fieldCount,
+                                     sizeArray, fieldCount,
+                                     (const uint32_t *)arraySizes, fieldCount);
     for (int ct=0; ct < fieldCount; ct++) {
         jstring s = (jstring)_env->GetObjectArrayElement(_names, ct);
         _env->ReleaseStringUTFChars(s, nameArray[ct]);
@@ -579,7 +583,8 @@ nAllocationRead_i(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jintAr
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jint *ptr = _env->GetIntArrayElements(data, NULL);
-    rsAllocationRead(con, (RsAllocation)alloc, ptr);
+    jsize length = _env->GetArrayLength(data);
+    rsAllocationRead(con, (RsAllocation)alloc, ptr, length);
     _env->ReleaseIntArrayElements(data, ptr, 0);
 }
 
@@ -589,7 +594,8 @@ nAllocationRead_s(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jshort
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jshort *ptr = _env->GetShortArrayElements(data, NULL);
-    rsAllocationRead(con, (RsAllocation)alloc, ptr);
+    jsize length = _env->GetArrayLength(data);
+    rsAllocationRead(con, (RsAllocation)alloc, ptr, length);
     _env->ReleaseShortArrayElements(data, ptr, 0);
 }
 
@@ -599,7 +605,8 @@ nAllocationRead_b(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jbyteA
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocationRead_i, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jbyte *ptr = _env->GetByteArrayElements(data, NULL);
-    rsAllocationRead(con, (RsAllocation)alloc, ptr);
+    jsize length = _env->GetArrayLength(data);
+    rsAllocationRead(con, (RsAllocation)alloc, ptr, length);
     _env->ReleaseByteArrayElements(data, ptr, 0);
 }
 
@@ -609,7 +616,8 @@ nAllocationRead_f(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jfloat
     jint len = _env->GetArrayLength(data);
     LOG_API("nAllocationRead_f, con(%p), alloc(%p), len(%i)", con, (RsAllocation)alloc, len);
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
-    rsAllocationRead(con, (RsAllocation)alloc, ptr);
+    jsize length = _env->GetArrayLength(data);
+    rsAllocationRead(con, (RsAllocation)alloc, ptr, length);
     _env->ReleaseFloatArrayElements(data, ptr, 0);
 }
 
@@ -713,7 +721,9 @@ nFontCreateFromFile(JNIEnv *_env, jobject _this, RsContext con,
                     jstring fileName, jfloat fontSize, jint dpi)
 {
     AutoJavaStringToUTF8 fileNameUTF(_env, fileName);
-    jint id = (jint)rsFontCreateFromFile(con, fileNameUTF.c_str(), fontSize, dpi);
+    jint id = (jint)rsFontCreateFromFile(con,
+                                         fileNameUTF.c_str(), fileNameUTF.length(),
+                                         fontSize, dpi);
 
     return id;
 }
@@ -725,7 +735,9 @@ nFontCreateFromAssetStream(JNIEnv *_env, jobject _this, RsContext con,
     Asset* asset = reinterpret_cast<Asset*>(native_asset);
     AutoJavaStringToUTF8 nameUTF(_env, name);
 
-    jint id = (jint)rsFontCreateFromMemory(con, nameUTF.c_str(), fontSize, dpi,
+    jint id = (jint)rsFontCreateFromMemory(con,
+                                           nameUTF.c_str(), nameUTF.length(),
+                                           fontSize, dpi,
                                            asset->getBuffer(false), asset->getLength());
     return id;
 }
@@ -745,7 +757,9 @@ nFontCreateFromAsset(JNIEnv *_env, jobject _this, RsContext con, jobject _assetM
         return 0;
     }
 
-    jint id = (jint)rsFontCreateFromMemory(con, str.c_str(), fontSize, dpi,
+    jint id = (jint)rsFontCreateFromMemory(con,
+                                           str.c_str(), str.length(),
+                                           fontSize, dpi,
                                            asset->getBuffer(false), asset->getLength());
     delete asset;
     return id;
@@ -877,7 +891,9 @@ nScriptCCreate(JNIEnv *_env, jobject _this, RsContext con,
 
     //rsScriptCSetText(con, (const char *)script_ptr, length);
 
-    ret = (jint)rsScriptCCreate(con, resNameUTF.c_str(), cacheDirUTF.c_str(),
+    ret = (jint)rsScriptCCreate(con,
+                                resNameUTF.c_str(), resNameUTF.length(),
+                                cacheDirUTF.c_str(), cacheDirUTF.length(),
                                 (const char *)script_ptr, length);
 
 exit:

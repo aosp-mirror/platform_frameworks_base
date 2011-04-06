@@ -827,7 +827,9 @@ bool FontState::CacheTextureLine::fitBitmap(FT_Bitmap_ *bitmap, uint32_t *retOri
 namespace android {
 namespace renderscript {
 
-RsFont rsi_FontCreateFromFile(Context *rsc, char const *name, float fontSize, uint32_t dpi) {
+RsFont rsi_FontCreateFromFile(Context *rsc,
+                              char const *name, size_t name_length,
+                              float fontSize, uint32_t dpi) {
     Font *newFont = Font::create(rsc, name, fontSize, dpi);
     if (newFont) {
         newFont->incUserRef();
@@ -835,8 +837,11 @@ RsFont rsi_FontCreateFromFile(Context *rsc, char const *name, float fontSize, ui
     return newFont;
 }
 
-RsFont rsi_FontCreateFromMemory(Context *rsc, char const *name, float fontSize, uint32_t dpi, const void *data, uint32_t dataLen) {
-    Font *newFont = Font::create(rsc, name, fontSize, dpi, data, dataLen);
+RsFont rsi_FontCreateFromMemory(Context *rsc,
+                                char const *name, size_t name_length,
+                                float fontSize, uint32_t dpi,
+                                const void *data, size_t data_length) {
+    Font *newFont = Font::create(rsc, name, fontSize, dpi, data, data_length);
     if (newFont) {
         newFont->incUserRef();
     }
