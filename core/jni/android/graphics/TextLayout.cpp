@@ -26,10 +26,6 @@
 
 namespace android {
 
-#if USE_TEXT_LAYOUT_CACHE
-TextLayoutCache TextLayout::mCache;
-#endif
-
 // Returns true if we might need layout.  If bidiFlags force LTR, assume no layout, if
 // bidiFlags indicate there probably is RTL, assume we do, otherwise scan the text
 // looking for a character >= the first RTL character in unicode and assume we do if
@@ -260,12 +256,16 @@ void TextLayout::getTextRunAdvances(SkPaint* paint, const jchar* chars, jint sta
                                     jfloat* resultAdvances, jfloat& resultTotalAdvance) {
 #if USE_TEXT_LAYOUT_CACHE
     // Return advances from the cache. Compute them if needed
-    mCache.getRunAdvances(paint, chars, start, count, contextCount,
-            dirFlags, resultAdvances, &resultTotalAdvance);
+    sp<TextLayoutCacheValue> layout = gTextLayoutCache.getValue(
+            paint, chars, start, count, contextCount, dirFlags);
+    if (layout != NULL) {
+        memcpy(resultAdvances, layout->getAdvances(), layout->getAdvancesCount() * sizeof(jfloat));
+        resultTotalAdvance = layout->getTotalAdvance();
+    }
 #else
     // Compute advances and return them
-    TextLayoutCacheValue::computeAdvances(paint, chars, start, count, contextCount, dirFlags,
-            resultAdvances, &resultTotalAdvance);
+    TextLayoutCacheValue::computeValuesWithHarfbuzz(paint, chars, start, count, contextCount,
+            dirFlags, resultAdvances, &resultTotalAdvance, NULL, NULL );
 #endif
 }
 
@@ -273,8 +273,8 @@ void TextLayout::getTextRunAdvancesHB(SkPaint* paint, const jchar* chars, jint s
                                     jint count, jint contextCount, jint dirFlags,
                                     jfloat* resultAdvances, jfloat& resultTotalAdvance) {
     // Compute advances and return them
-    TextLayoutCacheValue::computeAdvancesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
-            resultAdvances, &resultTotalAdvance);
+    TextLayoutCacheValue::computeValuesWithHarfbuzz(paint, chars, start, count, contextCount,
+            dirFlags, resultAdvances, &resultTotalAdvance, NULL, NULL);
 }
 
 void TextLayout::getTextRunAdvancesICU(SkPaint* paint, const jchar* chars, jint start,

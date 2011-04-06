@@ -24,6 +24,7 @@
 #include <utils/String16.h>
 #include <utils/GenerationCache.h>
 #include <utils/Compare.h>
+#include <utils/RefBase.h>
 
 #include <SkPaint.h>
 #include <SkTemplates.h>
@@ -101,18 +102,24 @@ private:
 /*
  * TextLayoutCacheValue is the Cache value
  */
-class TextLayoutCacheValue {
+class TextLayoutCacheValue : public RefBase {
+protected:
+    ~TextLayoutCacheValue();
+
 public:
     TextLayoutCacheValue();
-    ~TextLayoutCacheValue();
 
     void setElapsedTime(uint32_t time);
     uint32_t getElapsedTime();
 
-    void computeAdvances(SkPaint* paint, const UChar* chars, size_t start, size_t count,
+    void computeValues(SkPaint* paint, const UChar* chars, size_t start, size_t count,
             size_t contextCount, int dirFlags);
 
-    void copyResult(jfloat* outAdvances, jfloat* outTotalAdvance);
+    inline const jfloat* getAdvances() const { return mAdvances; }
+    inline size_t getAdvancesCount() const { return mAdvancesCount; }
+    inline jfloat getTotalAdvance() const { return mTotalAdvance; }
+    inline const jchar* getGlyphs() const { return mGlyphs; }
+    inline size_t getGlyphsCount() const { return mGlyphsCount; }
 
     /**
      * Get the size of the Cache entry
@@ -127,20 +134,45 @@ public:
             SkPaint* paint, const UChar* chars, size_t start, size_t count, size_t contextCount,
             int dirFlags);
 
-    static void computeAdvancesWithHarfbuzz(SkPaint* paint, const UChar* chars, size_t start,
+    static void computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars, size_t start,
             size_t count, size_t contextCount, int dirFlags,
-            jfloat* outAdvances, jfloat* outTotalAdvance);
+            jfloat* outAdvances, jfloat* outTotalAdvance,
+            jchar** outGlyphs, size_t* outGlyphsCount);
 
     static void computeAdvancesWithICU(SkPaint* paint, const UChar* chars, size_t start,
             size_t count, size_t contextCount, int dirFlags,
             jfloat* outAdvances, jfloat* outTotalAdvance);
 
 private:
-    jfloat* advances;
-    jfloat totalAdvance;
-    size_t count;
+    /**
+     * Advances array
+     */
+    jfloat* mAdvances;
 
-    uint32_t elapsedTime;
+    /**
+     * Total number of advances
+     */
+    jfloat mTotalAdvance;
+
+    /**
+     * Allocated size for advances array
+     */
+    size_t mAdvancesCount;
+
+    /**
+     * Glyphs array
+     */
+    jchar* mGlyphs;
+
+    /**
+     * Total number of glyphs
+     */
+    size_t mGlyphsCount;
+
+    /**
+     * Time for computing the values (in milliseconds)
+     */
+    uint32_t mElapsedTime;
 
     static void deleteGlyphArrays(HB_ShaperItem* shaperItem);
     static void createGlyphArrays(HB_ShaperItem* shaperItem, int size);
@@ -148,8 +180,10 @@ private:
 
 }; // TextLayoutCacheValue
 
-
-class TextLayoutCache: public OnEntryRemoved<TextLayoutCacheKey, TextLayoutCacheValue*>
+/**
+ * Cache of text layout information.
+ */
+class TextLayoutCache : public OnEntryRemoved<TextLayoutCacheKey, sp<TextLayoutCacheValue> >
 {
 public:
     TextLayoutCache();
@@ -162,17 +196,13 @@ public:
     }
 
     /**
-     * Used as a callback when an entry is removed from the cache.
-     * Do not invoke directly.
+     * Used as a callback when an entry is removed from the cache
+     * Do not invoke directly
      */
-    void operator()(TextLayoutCacheKey& text, TextLayoutCacheValue*& desc);
+    void operator()(TextLayoutCacheKey& text, sp<TextLayoutCacheValue>& desc);
 
-    /**
-     * Get cache entries
-     */
-    void getRunAdvances(SkPaint* paint, const jchar* text,
-            jint start, jint count, jint contextCount, jint dirFlags,
-            jfloat* outAdvances, jfloat* outTotalAdvance);
+    sp<TextLayoutCacheValue> getValue(SkPaint* paint,
+            const jchar* text, jint start, jint count, jint contextCount, jint dirFlags);
 
     /**
      * Clear the cache
@@ -180,17 +210,17 @@ public:
     void clear();
 
     /**
-     * Sets the maximum size of the cache in bytes.
+     * Sets the maximum size of the cache in bytes
      */
     void setMaxSize(uint32_t maxSize);
 
     /**
-     * Returns the maximum size of the cache in bytes.
+     * Returns the maximum size of the cache in bytes
      */
     uint32_t getMaxSize();
 
     /**
-     * Returns the current size of the cache in bytes.
+     * Returns the current size of the cache in bytes
      */
     uint32_t getSize();
 
@@ -198,7 +228,7 @@ private:
     Mutex mLock;
     bool mInitialized;
 
-    GenerationCache<TextLayoutCacheKey, TextLayoutCacheValue*> mCache;
+    GenerationCache<TextLayoutCacheKey, sp<TextLayoutCacheValue> > mCache;
 
     uint32_t mSize;
     uint32_t mMaxSize;
