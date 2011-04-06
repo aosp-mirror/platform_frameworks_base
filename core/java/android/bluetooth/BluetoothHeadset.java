@@ -603,7 +603,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     public boolean setAudioState(BluetoothDevice device, int state) {
         if (DBG) log("setAudioState");
-        if (mService != null && isEnabled()) {
+        if (mService != null && !isDisabled()) {
             try {
                 return mService.setAudioState(device, state);
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
@@ -622,7 +622,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     public int getAudioState(BluetoothDevice device) {
         if (DBG) log("getAudioState");
-        if (mService != null && isEnabled()) {
+        if (mService != null && !isDisabled()) {
             try {
                 return mService.getAudioState(device);
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
@@ -702,6 +702,11 @@ public final class BluetoothHeadset implements BluetoothProfile {
 
     private boolean isEnabled() {
        if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
+       return false;
+    }
+
+    private boolean isDisabled() {
+       if (mAdapter.getState() == BluetoothAdapter.STATE_OFF) return true;
        return false;
     }
 
