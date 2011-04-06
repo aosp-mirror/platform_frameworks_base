@@ -300,8 +300,7 @@ key ENTER {
 key TAB {
     label:                              '\t'
     base:                               '\t'
-    ctrl:                               none
-    alt, meta:                          fallback APP_SWITCH
+    ctrl, alt, meta:                    none
 }
 
 key COMMA {

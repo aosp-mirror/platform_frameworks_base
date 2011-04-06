@@ -1807,9 +1807,30 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @see #META_CAPS_LOCK_ON
      * @see #META_NUM_LOCK_ON
      * @see #META_SCROLL_LOCK_ON
+     * @see #getModifiers
      */
     public final int getMetaState() {
         return mMetaState;
+    }
+
+    /**
+     * Returns the state of the modifier keys.
+     * <p>
+     * For the purposes of this function, {@link #KEYCODE_CAPS_LOCK},
+     * {@link #KEYCODE_SCROLL_LOCK}, and {@link #KEYCODE_NUM_LOCK} are
+     * not considered modifier keys.  Consequently, this function specifically masks out
+     * {@link #META_CAPS_LOCK_ON}, {@link #META_SCROLL_LOCK_ON} and {@link #META_NUM_LOCK_ON}.
+     * </p><p>
+     * The value returned consists of the meta state (from {@link #getMetaState})
+     * normalized using {@link #normalizeMetaState(int)} and then masked with
+     * {@link #getModifierMetaStateMask} so that only valid modifier bits are retained.
+     * </p>
+     *
+     * @return An integer in which each bit set to 1 represents a pressed modifier key.
+     * @see #getMetaState
+     */
+    public final int getModifiers() {
+        return normalizeMetaState(mMetaState) & META_MODIFIER_MASK;
     }
 
     /**

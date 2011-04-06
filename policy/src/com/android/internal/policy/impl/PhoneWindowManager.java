@@ -626,7 +626,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_DIALOG) {
-            showRecentAppsDialog(0);
+            showOrHideRecentAppsDialog(0, true /*dismissIfShown*/);
         } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_ACTIVITY) {
             try {
                 Intent intent = new Intent();
@@ -643,16 +643,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /**
-     * Create (if necessary) and launch the recent apps dialog
+     * Create (if necessary) and launch the recent apps dialog, or hide it if it is
+     * already shown.
      */
-    void showRecentAppsDialog(final int initialModifiers) {
+    void showOrHideRecentAppsDialog(final int heldModifiers, final boolean dismissIfShown) {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
                 if (mRecentAppsDialog == null) {
-                    mRecentAppsDialog = new RecentApplicationsDialog(mContext, initialModifiers);
+                    mRecentAppsDialog = new RecentApplicationsDialog(mContext);
                 }
-                mRecentAppsDialog.show();
+                if (mRecentAppsDialog.isShowing()) {
+                    if (dismissIfShown) {
+                        mRecentAppsDialog.dismiss();
+                    }
+                } else {
+                    mRecentAppsDialog.setHeldModifiers(heldModifiers);
+                    mRecentAppsDialog.show();
+                }
             }
         });
     }
@@ -1388,7 +1396,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return false;
         } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
             if (down && repeatCount == 0) {
-                showRecentAppsDialog(event.getMetaState() & KeyEvent.getModifierMetaStateMask());
+                showOrHideRecentAppsDialog(0, true /*dismissIfShown*/);
             }
             return true;
         }
@@ -1430,6 +1438,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags) {
+        // Note: This method is only called if the initial down was unhandled.
         if (DEBUG_FALLBACK) {
             Slog.d(TAG, "Unhandled key: win=" + win + ", action=" + event.getAction()
                     + ", flags=" + event.getFlags()
@@ -1441,28 +1450,44 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
-            // Invoke shortcuts using Meta as a fallback.
             final KeyCharacterMap kcm = event.getKeyCharacterMap();
             final int keyCode = event.getKeyCode();
             final int metaState = event.getMetaState();
-            if ((metaState & KeyEvent.META_META_ON) != 0) {
-                Intent shortcutIntent = mShortcutManager.getIntent(kcm, keyCode,
-                        metaState & ~(KeyEvent.META_META_ON
-                                | KeyEvent.META_META_LEFT_ON | KeyEvent.META_META_RIGHT_ON));
-                if (shortcutIntent != null) {
-                    shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    try {
-                        mContext.startActivity(shortcutIntent);
-                    } catch (ActivityNotFoundException ex) {
-                        Slog.w(TAG, "Dropping shortcut key combination because "
-                                + "the activity to which it is registered was not found: "
-                                + "META+" + KeyEvent.keyCodeToString(keyCode), ex);
+            final boolean initialDown = event.getAction() == KeyEvent.ACTION_DOWN
+                    && event.getRepeatCount() == 0;
+
+            if (initialDown) {
+                // Invoke shortcuts using Meta as a fallback.
+                if ((metaState & KeyEvent.META_META_ON) != 0) {
+                    Intent shortcutIntent = mShortcutManager.getIntent(kcm, keyCode,
+                            metaState & ~(KeyEvent.META_META_ON
+                                    | KeyEvent.META_META_LEFT_ON | KeyEvent.META_META_RIGHT_ON));
+                    if (shortcutIntent != null) {
+                        shortcutIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        try {
+                            mContext.startActivity(shortcutIntent);
+                        } catch (ActivityNotFoundException ex) {
+                            Slog.w(TAG, "Dropping shortcut key combination because "
+                                    + "the activity to which it is registered was not found: "
+                                    + "META+" + KeyEvent.keyCodeToString(keyCode), ex);
+                        }
+                        return null;
                     }
-                    return null;
+                }
+
+                // Display task switcher for ALT-TAB or Meta-TAB.
+                if (keyCode == KeyEvent.KEYCODE_TAB) {
+                    final int shiftlessModifiers = event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
+                    if (KeyEvent.metaStateHasModifiers(shiftlessModifiers, KeyEvent.META_ALT_ON)
+                            || KeyEvent.metaStateHasModifiers(
+                                    shiftlessModifiers, KeyEvent.META_META_ON)) {
+                        showOrHideRecentAppsDialog(shiftlessModifiers, false /*dismissIfShown*/);
+                        return null;
+                    }
                 }
             }
 
-            // Check for fallback actions.
+            // Check for fallback actions specified by the key character map.
             if (getFallbackAction(kcm, keyCode, metaState, mFallbackAction)) {
                 if (DEBUG_FALLBACK) {
                     Slog.d(TAG, "Fallback: keyCode=" + mFallbackAction.keyCode
