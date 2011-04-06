@@ -279,7 +279,6 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (!checkNotifyPermission("notifyServiceState()")){
             return;
         }
-        Slog.i(TAG, "notifyServiceState: " + state);
         synchronized (mRecords) {
             mServiceState = state;
             for (Record r : mRecords) {
