@@ -33,7 +33,6 @@ namespace android {
 class IMemory;
 class IOMXObserver;
 class IOMXRenderer;
-class ISurface;
 class Surface;
 
 class IOMX : public IInterface {
