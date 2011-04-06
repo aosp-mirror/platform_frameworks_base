@@ -110,6 +110,10 @@ android_mtp_MtpDevice_open(JNIEnv *env, jobject thiz, jstring deviceName, jint f
 #ifdef HAVE_ANDROID_OS
     LOGD("open\n");
     const char *deviceNameStr = env->GetStringUTFChars(deviceName, NULL);
+    if (deviceNameStr == NULL) {
+        return false;
+    }
+
     MtpDevice* device = MtpDevice::open(deviceNameStr, fd);
     env->ReleaseStringUTFChars(deviceName, deviceNameStr);
 
@@ -426,12 +430,16 @@ android_mtp_MtpDevice_import_file(JNIEnv *env, jobject thiz, jint object_id, jst
     MtpDevice* device = get_device_from_object(env, thiz);
     if (device) {
         const char *destPathStr = env->GetStringUTFChars(dest_path, NULL);
+        if (destPathStr == NULL) {
+            return false;
+        }
+
         bool result = device->readObject(object_id, destPathStr, AID_SDCARD_RW, 0664);
         env->ReleaseStringUTFChars(dest_path, destPathStr);
         return result;
     }
 #endif
-    return NULL;
+    return false;
 }
 
 // ----------------------------------------------------------------------------

@@ -97,7 +97,7 @@ public:
     void removeStorage(MtpStorageID id) {
         MtpStorage* storage = mServer->getStorage(id);
         if (storage) {
-            for (int i = 0; i < mStorageList.size(); i++) {
+            for (size_t i = 0; i < mStorageList.size(); i++) {
                 if (mStorageList[i] == storage) {
                     mStorageList.removeAt(i);
                     break;
@@ -122,7 +122,7 @@ public:
                     (mUsePtp ? MTP_INTERFACE_MODE_PTP : MTP_INTERFACE_MODE_MTP));
 
             mServer = new MtpServer(mFd, mDatabase, AID_MEDIA_RW, 0664, 0775);
-            for (int i = 0; i < mStorageList.size(); i++) {
+            for (size_t i = 0; i < mStorageList.size(); i++) {
                 mServer->addStorage(mStorageList[i]);
             }
         } else {
@@ -247,13 +247,17 @@ android_mtp_MtpServer_add_storage(JNIEnv *env, jobject thiz, jobject jstorage)
         jlong reserveSpace = env->GetLongField(jstorage, field_MtpStorage_reserveSpace);
 
         const char *pathStr = env->GetStringUTFChars(path, NULL);
-        const char *descriptionStr = env->GetStringUTFChars(description, NULL);
-
-        MtpStorage* storage = new MtpStorage(storageID, pathStr, descriptionStr, reserveSpace);
-        thread->addStorage(storage);
-
-        env->ReleaseStringUTFChars(path, pathStr);
-        env->ReleaseStringUTFChars(description, descriptionStr);
+        if (pathStr != NULL) {
+            const char *descriptionStr = env->GetStringUTFChars(description, NULL);
+            if (descriptionStr != NULL) {
+                MtpStorage* storage = new MtpStorage(storageID, pathStr, descriptionStr, reserveSpace);
+                thread->addStorage(storage);
+                env->ReleaseStringUTFChars(path, pathStr);
+                env->ReleaseStringUTFChars(description, descriptionStr);
+            } else {
+                env->ReleaseStringUTFChars(path, pathStr);
+            }
+        }
     } else {
         LOGE("MtpThread is null in add_storage");
     }
