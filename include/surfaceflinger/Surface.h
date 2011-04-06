@@ -102,10 +102,6 @@ private:
     friend class Test;
     // videoEditor preview classes
     friend class VideoEditorPreviewController;
-
-    const sp<ISurface>& getISurface() const { return mSurface; }
-    
-
     friend class Surface;
 
     SurfaceControl(
@@ -169,6 +165,7 @@ public:
     // setSwapRectangle() is intended to be used by GL ES clients
     void        setSwapRectangle(const Rect& r);
 
+    sp<IBinder> asBinder() const;
 
 private:
     /*
@@ -242,7 +239,6 @@ private:
      */
     void init();
     status_t validate(bool inCancelBuffer = false) const;
-    sp<ISurface> getISurface() const;
 
     // When the buffer pool is a fixed size we want to make sure SurfaceFlinger
     // won't stall clients, so we require an extra buffer.

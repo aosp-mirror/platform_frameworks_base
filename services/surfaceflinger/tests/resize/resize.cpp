@@ -29,13 +29,6 @@
 using namespace android;
 
 namespace android {
-class Test {
-public:
-    static const sp<ISurface>& getISurface(const sp<Surface>& s) {
-        return s->getISurface();
-    }
-};
-};
 
 int main(int argc, char** argv)
 {
