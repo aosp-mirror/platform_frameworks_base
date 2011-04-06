@@ -30,6 +30,7 @@ class Allocation;
 class Script;
 class ScriptC;
 class ProgramStore;
+class ProgramRaster;
 
 typedef void *(*RsHalSymbolLookupFunc)(void *usrptr, char const *symbolName);
 
@@ -93,6 +94,11 @@ typedef struct {
         void (*destroy)(const Context *rsc, const ProgramStore *ps);
     } store;
 
+    struct {
+        bool (*init)(const Context *rsc, const ProgramRaster *ps);
+        void (*setActive)(const Context *rsc, const ProgramRaster *ps);
+        void (*destroy)(const Context *rsc, const ProgramRaster *ps);
+    } raster;
 
 
 } RsdHalFunctions;

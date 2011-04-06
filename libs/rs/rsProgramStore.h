@@ -28,18 +28,14 @@ class ProgramStoreState;
 
 class ProgramStore : public Program {
 public:
-    ProgramStore(Context *);
+    ProgramStore(Context *,
+                 bool colorMaskR, bool colorMaskG, bool colorMaskB, bool colorMaskA,
+                 bool depthMask, bool ditherEnable,
+                 RsBlendSrcFunc srcFunc, RsBlendDstFunc destFunc,
+                 RsDepthFunc depthFunc);
     virtual ~ProgramStore();
 
-    virtual void setupGL2(const Context *, ProgramStoreState *);
-
-    void setDepthFunc(RsDepthFunc);
-    void setDepthMask(bool);
-
-    void setBlendFunc(RsBlendSrcFunc src, RsBlendDstFunc dst);
-    void setColorMask(bool, bool, bool, bool);
-
-    void setDitherEnable(bool);
+    virtual void setup(const Context *, ProgramStoreState *);
 
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_STORE; }
@@ -83,9 +79,6 @@ public:
 
     ObjectBaseRef<ProgramStore> mDefault;
     ObjectBaseRef<ProgramStore> mLast;
-
-
-    ProgramStore *mPFS;
 };
 
 }

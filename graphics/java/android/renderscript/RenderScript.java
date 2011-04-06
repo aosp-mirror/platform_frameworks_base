@@ -485,56 +485,22 @@ public class RenderScript {
         return rsnSamplerCreate(mContext);
     }
 
-    native void rsnProgramStoreBegin(int con, int in, int out);
-    synchronized void nProgramStoreBegin(int in, int out) {
+    native int  rsnProgramStoreCreate(int con, boolean r, boolean g, boolean b, boolean a,
+                                      boolean depthMask, boolean dither,
+                                      int srcMode, int dstMode, int depthFunc);
+    synchronized int nProgramStoreCreate(boolean r, boolean g, boolean b, boolean a,
+                                         boolean depthMask, boolean dither,
+                                         int srcMode, int dstMode, int depthFunc) {
         validate();
-        rsnProgramStoreBegin(mContext, in, out);
-    }
-    native void rsnProgramStoreDepthFunc(int con, int func);
-    synchronized void nProgramStoreDepthFunc(int func) {
-        validate();
-        rsnProgramStoreDepthFunc(mContext, func);
-    }
-    native void rsnProgramStoreDepthMask(int con, boolean enable);
-    synchronized void nProgramStoreDepthMask(boolean enable) {
-        validate();
-        rsnProgramStoreDepthMask(mContext, enable);
-    }
-    native void rsnProgramStoreColorMask(int con, boolean r, boolean g, boolean b, boolean a);
-    synchronized void nProgramStoreColorMask(boolean r, boolean g, boolean b, boolean a) {
-        validate();
-        rsnProgramStoreColorMask(mContext, r, g, b, a);
-    }
-    native void rsnProgramStoreBlendFunc(int con, int src, int dst);
-    synchronized void nProgramStoreBlendFunc(int src, int dst) {
-        validate();
-        rsnProgramStoreBlendFunc(mContext, src, dst);
-    }
-    native void rsnProgramStoreDither(int con, boolean enable);
-    synchronized void nProgramStoreDither(boolean enable) {
-        validate();
-        rsnProgramStoreDither(mContext, enable);
-    }
-    native int  rsnProgramStoreCreate(int con);
-    synchronized int nProgramStoreCreate() {
-        validate();
-        return rsnProgramStoreCreate(mContext);
+        return rsnProgramStoreCreate(mContext, r, g, b, a, depthMask, dither, srcMode, dstMode, depthFunc);
     }
 
-    native int  rsnProgramRasterCreate(int con, boolean pointSmooth, boolean lineSmooth, boolean pointSprite);
-    synchronized int nProgramRasterCreate(boolean pointSmooth, boolean lineSmooth, boolean pointSprite) {
+    native int  rsnProgramRasterCreate(int con, boolean pointSmooth, boolean lineSmooth,
+                                       boolean pointSprite, float lineWidth, int cullMode);
+    synchronized int nProgramRasterCreate(boolean pointSmooth, boolean lineSmooth,
+                                          boolean pointSprite, float lineWidth, int cullMode) {
         validate();
-        return rsnProgramRasterCreate(mContext, pointSmooth, lineSmooth, pointSprite);
-    }
-    native void rsnProgramRasterSetLineWidth(int con, int pr, float v);
-    synchronized void nProgramRasterSetLineWidth(int pr, float v) {
-        validate();
-        rsnProgramRasterSetLineWidth(mContext, pr, v);
-    }
-    native void rsnProgramRasterSetCullMode(int con, int pr, int mode);
-    synchronized void nProgramRasterSetCullMode(int pr, int mode) {
-        validate();
-        rsnProgramRasterSetCullMode(mContext, pr, mode);
+        return rsnProgramRasterCreate(mContext, pointSmooth, lineSmooth, pointSprite, lineWidth, cullMode);
     }
 
     native void rsnProgramBindConstants(int con, int pv, int slot, int mID);

@@ -251,36 +251,16 @@ ScriptCCreate {
 	}
 
 
-ProgramStoreBegin {
-	param RsElement in
-	param RsElement out
-	}
-
-ProgramStoreColorMask {
-	param bool r
-	param bool g
-	param bool b
-	param bool a
-	}
-
-ProgramStoreBlendFunc {
+ProgramStoreCreate {
+	param bool colorMaskR
+	param bool colorMaskG
+	param bool colorMaskB
+	param bool colorMaskA
+        param bool depthMask
+        param bool ditherEnable
 	param RsBlendSrcFunc srcFunc
 	param RsBlendDstFunc destFunc
-	}
-
-ProgramStoreDepthMask {
-	param bool enable
-}
-
-ProgramStoreDither {
-	param bool enable
-}
-
-ProgramStoreDepthFunc {
-	param RsDepthFunc func
-}
-
-ProgramStoreCreate {
+        param RsDepthFunc depthFunc
 	ret RsProgramStore
 	}
 
@@ -288,17 +268,9 @@ ProgramRasterCreate {
 	param bool pointSmooth
 	param bool lineSmooth
 	param bool pointSprite
+	param float lineWidth
+	param RsCullMode cull
 	ret RsProgramRaster
-}
-
-ProgramRasterSetLineWidth {
-	param RsProgramRaster pr
-	param float lw
-}
-
-ProgramRasterSetCullMode {
-	param RsProgramRaster pr
-	param RsCullMode mode
 }
 
 ProgramBindConstants {

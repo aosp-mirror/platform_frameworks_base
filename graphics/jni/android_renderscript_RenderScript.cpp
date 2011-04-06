@@ -897,53 +897,17 @@ exit:
 
 // ---------------------------------------------------------------------------
 
-static void
-nProgramStoreBegin(JNIEnv *_env, jobject _this, RsContext con, jint in, jint out)
-{
-    LOG_API("nProgramStoreBegin, con(%p), in(%p), out(%p)", con, (RsElement)in, (RsElement)out);
-    rsProgramStoreBegin(con, (RsElement)in, (RsElement)out);
-}
-
-static void
-nProgramStoreDepthFunc(JNIEnv *_env, jobject _this, RsContext con, jint func)
-{
-    LOG_API("nProgramStoreDepthFunc, con(%p), func(%i)", con, func);
-    rsProgramStoreDepthFunc(con, (RsDepthFunc)func);
-}
-
-static void
-nProgramStoreDepthMask(JNIEnv *_env, jobject _this, RsContext con, jboolean enable)
-{
-    LOG_API("nProgramStoreDepthMask, con(%p), enable(%i)", con, enable);
-    rsProgramStoreDepthMask(con, enable);
-}
-
-static void
-nProgramStoreColorMask(JNIEnv *_env, jobject _this, RsContext con, jboolean r, jboolean g, jboolean b, jboolean a)
-{
-    LOG_API("nProgramStoreColorMask, con(%p), r(%i), g(%i), b(%i), a(%i)", con, r, g, b, a);
-    rsProgramStoreColorMask(con, r, g, b, a);
-}
-
-static void
-nProgramStoreBlendFunc(JNIEnv *_env, jobject _this, RsContext con, int src, int dst)
-{
-    LOG_API("nProgramStoreBlendFunc, con(%p), src(%i), dst(%i)", con, src, dst);
-    rsProgramStoreBlendFunc(con, (RsBlendSrcFunc)src, (RsBlendDstFunc)dst);
-}
-
-static void
-nProgramStoreDither(JNIEnv *_env, jobject _this, RsContext con, jboolean enable)
-{
-    LOG_API("nProgramStoreDither, con(%p), enable(%i)", con, enable);
-    rsProgramStoreDither(con, enable);
-}
-
 static jint
-nProgramStoreCreate(JNIEnv *_env, jobject _this, RsContext con)
+nProgramStoreCreate(JNIEnv *_env, jobject _this, RsContext con,
+                    jboolean colorMaskR, jboolean colorMaskG, jboolean colorMaskB, jboolean colorMaskA,
+                    jboolean depthMask, jboolean ditherEnable,
+                    jint srcFunc, jint destFunc,
+                    jint depthFunc)
 {
     LOG_API("nProgramStoreCreate, con(%p)", con);
-    return (jint)rsProgramStoreCreate(con);
+    return (jint)rsProgramStoreCreate(con, colorMaskR, colorMaskG, colorMaskB, colorMaskA,
+                                      depthMask, ditherEnable, (RsBlendSrcFunc)srcFunc,
+                                      (RsBlendDstFunc)destFunc, (RsDepthFunc)depthFunc);
 }
 
 // ---------------------------------------------------------------------------
@@ -1005,25 +969,12 @@ nProgramVertexCreate(JNIEnv *_env, jobject _this, RsContext con, jstring shader,
 // ---------------------------------------------------------------------------
 
 static jint
-nProgramRasterCreate(JNIEnv *_env, jobject _this, RsContext con, jboolean pointSmooth, jboolean lineSmooth, jboolean pointSprite)
+nProgramRasterCreate(JNIEnv *_env, jobject _this, RsContext con, jboolean pointSmooth,
+                     jboolean lineSmooth, jboolean pointSprite, jfloat lineWidth, jint cull)
 {
     LOG_API("nProgramRasterCreate, con(%p), pointSmooth(%i), lineSmooth(%i), pointSprite(%i)",
             con, pointSmooth, lineSmooth, pointSprite);
-    return (jint)rsProgramRasterCreate(con, pointSmooth, lineSmooth, pointSprite);
-}
-
-static void
-nProgramRasterSetLineWidth(JNIEnv *_env, jobject _this, RsContext con, jint vpr, jfloat v)
-{
-    LOG_API("nProgramRasterSetLineWidth, con(%p), vpf(%p), value(%f)", con, (RsProgramRaster)vpr, v);
-    rsProgramRasterSetLineWidth(con, (RsProgramRaster)vpr, v);
-}
-
-static void
-nProgramRasterSetCullMode(JNIEnv *_env, jobject _this, RsContext con, jint vpr, jint v)
-{
-    LOG_API("nProgramRasterSetCullMode, con(%p), vpf(%p), value(%i)", con, (RsProgramRaster)vpr, v);
-    rsProgramRasterSetCullMode(con, (RsProgramRaster)vpr, (RsCullMode)v);
+    return (jint)rsProgramRasterCreate(con, pointSmooth, lineSmooth, pointSprite, lineWidth, (RsCullMode)cull);
 }
 
 
@@ -1270,24 +1221,14 @@ static JNINativeMethod methods[] = {
 
 {"rsnScriptCCreate",                 "(ILjava/lang/String;Ljava/lang/String;[BI)I",  (void*)nScriptCCreate },
 
-{"rsnProgramStoreBegin",             "(III)V",                                (void*)nProgramStoreBegin },
-{"rsnProgramStoreDepthFunc",         "(II)V",                                 (void*)nProgramStoreDepthFunc },
-{"rsnProgramStoreDepthMask",         "(IZ)V",                                 (void*)nProgramStoreDepthMask },
-{"rsnProgramStoreColorMask",         "(IZZZZ)V",                              (void*)nProgramStoreColorMask },
-{"rsnProgramStoreBlendFunc",         "(III)V",                                (void*)nProgramStoreBlendFunc },
-{"rsnProgramStoreDither",            "(IZ)V",                                 (void*)nProgramStoreDither },
-{"rsnProgramStoreCreate",            "(I)I",                                  (void*)nProgramStoreCreate },
+{"rsnProgramStoreCreate",            "(IZZZZZZIII)I",                         (void*)nProgramStoreCreate },
 
 {"rsnProgramBindConstants",          "(IIII)V",                               (void*)nProgramBindConstants },
 {"rsnProgramBindTexture",            "(IIII)V",                               (void*)nProgramBindTexture },
 {"rsnProgramBindSampler",            "(IIII)V",                               (void*)nProgramBindSampler },
 
 {"rsnProgramFragmentCreate",         "(ILjava/lang/String;[I)I",              (void*)nProgramFragmentCreate },
-
-{"rsnProgramRasterCreate",           "(IZZZ)I",                               (void*)nProgramRasterCreate },
-{"rsnProgramRasterSetLineWidth",     "(IIF)V",                                (void*)nProgramRasterSetLineWidth },
-{"rsnProgramRasterSetCullMode",      "(III)V",                                (void*)nProgramRasterSetCullMode },
-
+{"rsnProgramRasterCreate",           "(IZZZFI)I",                             (void*)nProgramRasterCreate },
 {"rsnProgramVertexCreate",           "(ILjava/lang/String;[I)I",              (void*)nProgramVertexCreate },
 
 {"rsnContextBindRootScript",         "(II)V",                                 (void*)nContextBindRootScript },

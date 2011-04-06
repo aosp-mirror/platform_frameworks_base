@@ -117,6 +117,7 @@ LOCAL_SRC_FILES:= \
 	rsVertexArray.cpp \
 	driver/rsdBcc.cpp \
 	driver/rsdCore.cpp \
+	driver/rsdProgramRaster.cpp \
 	driver/rsdProgramStore.cpp
 
 

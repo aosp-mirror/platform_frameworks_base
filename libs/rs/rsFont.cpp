@@ -507,12 +507,11 @@ void FontState::initRenderState() {
     mFontSampler.set(sampler);
     mFontShaderF->bindSampler(mRSC, 0, sampler);
 
-    ProgramStore *fontStore = new ProgramStore(mRSC);
+    ProgramStore *fontStore = new ProgramStore(mRSC, true, true, true, true,
+                                               false, false,
+                                               RS_BLEND_SRC_SRC_ALPHA, RS_BLEND_DST_ONE_MINUS_SRC_ALPHA,
+                                               RS_DEPTH_FUNC_ALWAYS);
     mFontProgramStore.set(fontStore);
-    mFontProgramStore->setDepthFunc(RS_DEPTH_FUNC_ALWAYS);
-    mFontProgramStore->setBlendFunc(RS_BLEND_SRC_SRC_ALPHA, RS_BLEND_DST_ONE_MINUS_SRC_ALPHA);
-    mFontProgramStore->setDitherEnable(false);
-    mFontProgramStore->setDepthMask(false);
     mFontProgramStore->init();
 }
 
