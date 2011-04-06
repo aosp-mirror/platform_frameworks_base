@@ -405,16 +405,16 @@ bool Context::setupCheck() {
         return false;
     }
 
-    mFragmentStore->setupGL2(this, &mStateFragmentStore);
+    mFragmentStore->setup(this, &mStateFragmentStore);
     mFragment->setupGL2(this, &mStateFragment, &mShaderCache);
-    mRaster->setupGL2(this, &mStateRaster);
+    mRaster->setup(this, &mStateRaster);
     mVertex->setupGL2(this, &mStateVertex, &mShaderCache);
     mFBOCache.setupGL2(this);
     return true;
 }
 
 void Context::setupProgramStore() {
-    mFragmentStore->setupGL2(this, &mStateFragmentStore);
+    mFragmentStore->setup(this, &mStateFragmentStore);
 }
 
 static bool getProp(const char *str) {

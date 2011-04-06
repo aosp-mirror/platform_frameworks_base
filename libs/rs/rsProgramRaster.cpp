@@ -15,11 +15,6 @@
  */
 
 #include "rsContext.h"
-#ifndef ANDROID_RS_SERIALIZE
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-#endif //ANDROID_RS_SERIALIZE
-
 #include "rsProgramRaster.h"
 
 using namespace android;
@@ -27,49 +22,33 @@ using namespace android::renderscript;
 
 
 ProgramRaster::ProgramRaster(Context *rsc, bool pointSmooth,
-                             bool lineSmooth, bool pointSprite)
+                             bool lineSmooth, bool pointSprite,
+                             float lineWidth, RsCullMode cull)
     : Program(rsc) {
 
-    mPointSmooth = pointSmooth;
-    mLineSmooth = lineSmooth;
-    mPointSprite = pointSprite;
-    mLineWidth = 1.0f;
-    mCull = RS_CULL_BACK;
+    memset(&mHal, 0, sizeof(mHal));
+
+    mHal.state.pointSmooth = pointSmooth;
+    mHal.state.lineSmooth = lineSmooth;
+    mHal.state.pointSprite = pointSprite;
+    mHal.state.lineWidth = lineWidth;
+    mHal.state.cull = cull;
+
+    rsc->mHal.funcs.raster.init(rsc, this);
 }
 
 ProgramRaster::~ProgramRaster() {
+    mRSC->mHal.funcs.raster.destroy(mRSC, this);
 }
 
-void ProgramRaster::setLineWidth(float s) {
-    mLineWidth = s;
-    mDirty = true;
-}
-
-void ProgramRaster::setCullMode(RsCullMode mode) {
-    mCull = mode;
-    mDirty = true;
-}
-
-void ProgramRaster::setupGL2(const Context *rsc, ProgramRasterState *state) {
+void ProgramRaster::setup(const Context *rsc, ProgramRasterState *state) {
     if (state->mLast.get() == this && !mDirty) {
         return;
     }
     state->mLast.set(this);
     mDirty = false;
 
-    switch (mCull) {
-        case RS_CULL_BACK:
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_BACK);
-            break;
-        case RS_CULL_FRONT:
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_FRONT);
-            break;
-        case RS_CULL_NONE:
-            glDisable(GL_CULL_FACE);
-            break;
-    }
+    rsc->mHal.funcs.raster.setActive(rsc, this);
 }
 
 void ProgramRaster::serialize(OStream *stream) const {
@@ -86,7 +65,7 @@ ProgramRasterState::~ProgramRasterState() {
 }
 
 void ProgramRasterState::init(Context *rsc) {
-    ProgramRaster *pr = new ProgramRaster(rsc, false, false, false);
+    ProgramRaster *pr = new ProgramRaster(rsc, false, false, false, 1.f, RS_CULL_BACK);
     mDefault.set(pr);
 }
 
@@ -101,25 +80,13 @@ namespace renderscript {
 RsProgramRaster rsi_ProgramRasterCreate(Context * rsc,
                                       bool pointSmooth,
                                       bool lineSmooth,
-                                      bool pointSprite) {
+                                      bool pointSprite,
+                                      float lineWidth,
+                                      RsCullMode cull) {
     ProgramRaster *pr = new ProgramRaster(rsc, pointSmooth,
-                                          lineSmooth, pointSprite);
+                                          lineSmooth, pointSprite, lineWidth, cull);
     pr->incUserRef();
     return pr;
-}
-
-void rsi_ProgramRasterSetLineWidth(Context * rsc,
-                                   RsProgramRaster vpr,
-                                   float s) {
-    ProgramRaster *pr = static_cast<ProgramRaster *>(vpr);
-    pr->setLineWidth(s);
-}
-
-void rsi_ProgramRasterSetCullMode(Context * rsc,
-                                  RsProgramRaster vpr,
-                                  RsCullMode mode) {
-    ProgramRaster *pr = static_cast<ProgramRaster *>(vpr);
-    pr->setCullMode(mode);
 }
 
 }

@@ -333,27 +333,15 @@ public class ProgramStore extends BaseObj {
             return this;
         }
 
-        static synchronized ProgramStore internalCreate(RenderScript rs, Builder b) {
-            rs.nProgramStoreBegin(0, 0);
-            rs.nProgramStoreDepthFunc(b.mDepthFunc.mID);
-            rs.nProgramStoreDepthMask(b.mDepthMask);
-            rs.nProgramStoreColorMask(b.mColorMaskR,
-                                              b.mColorMaskG,
-                                              b.mColorMaskB,
-                                              b.mColorMaskA);
-            rs.nProgramStoreBlendFunc(b.mBlendSrc.mID, b.mBlendDst.mID);
-            rs.nProgramStoreDither(b.mDither);
-
-            int id = rs.nProgramStoreCreate();
-            return new ProgramStore(id, rs);
-        }
-
         /**
         * Creates a program store from the current state of the builder
         */
         public ProgramStore create() {
             mRS.validate();
-            return internalCreate(mRS, this);
+            int id = mRS.nProgramStoreCreate(mColorMaskR, mColorMaskG, mColorMaskB, mColorMaskA,
+                                             mDepthMask, mDither,
+                                             mBlendSrc.mID, mBlendDst.mID, mDepthFunc.mID);
+            return new ProgramStore(id, mRS);
         }
     }
 

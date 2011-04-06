@@ -30,23 +30,31 @@ public:
     ProgramRaster(Context *rsc,
                   bool pointSmooth,
                   bool lineSmooth,
-                  bool pointSprite);
+                  bool pointSprite,
+                  float lineWidth,
+                  RsCullMode cull);
     virtual ~ProgramRaster();
 
-    virtual void setupGL2(const Context *, ProgramRasterState *);
+    virtual void setup(const Context *, ProgramRasterState *);
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_RASTER; }
     static ProgramRaster *createFromStream(Context *rsc, IStream *stream);
 
-    void setLineWidth(float w);
-    void setCullMode(RsCullMode mode);
+    struct Hal {
+        mutable void *drv;
+
+        struct State {
+            bool pointSmooth;
+            bool lineSmooth;
+            bool pointSprite;
+            float lineWidth;
+            RsCullMode cull;
+        };
+        State state;
+    };
+    Hal mHal;
 
 protected:
-    bool mPointSmooth;
-    bool mLineSmooth;
-    bool mPointSprite;
-    float mLineWidth;
-    RsCullMode mCull;
 };
 
 class ProgramRasterState {
