@@ -1462,11 +1462,16 @@ public class MediaPlayer
     public interface OnBufferingUpdateListener
     {
         /**
-         * Called to update status in buffering a media stream.
+         * Called to update status in buffering a media stream received through
+         * progressive HTTP download. The received buffering percentage
+         * indicates how much of the content has been buffered or played.
+         * For example a buffering update of 80 percent when half the content
+         * has already been played indicates that the next 30 percent of the
+         * content to play has been buffered.
          *
          * @param mp      the MediaPlayer the update pertains to
-         * @param percent the percentage (0-100) of the buffer
-         *                that has been filled thus far
+         * @param percent the percentage (0-100) of the content
+         *                that has been buffered or played thus far
          */
         void onBufferingUpdate(MediaPlayer mp, int percent);
     }
