@@ -426,8 +426,8 @@
     <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"允許應用程式修改 APN 設定，例如：Proxy 及 APN 的連接埠。"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"變更網路連線"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"允許應用程式變更網路連線狀態。"</string>
-    <string name="permlab_changeTetherState" msgid="2702121155761140799">"變更數據連線"</string>
-    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"允許應用程式變更數據網路連線狀態。"</string>
+    <string name="permlab_changeTetherState" msgid="2702121155761140799">"變更網路共用設定"</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"允許應用程式變更已共用網路的連線狀態。"</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"變更背景資料使用設定"</string>
     <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"允許應用程式變更背景資料使用設定。"</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"檢視 Wi-Fi 狀態"</string>
@@ -971,7 +971,7 @@
     <string name="submit" msgid="1602335572089911941">"提交"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"已啟用車用模式"</string>
     <string name="car_mode_disable_notification_message" msgid="668663626721675614">"選取結束車用模式。"</string>
-    <string name="tethered_notification_title" msgid="3146694234398202601">"數據連線或無線基地台已啟用"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"網路共用或無線基地台已啟用"</string>
     <string name="tethered_notification_message" msgid="3067108323903048927">"輕觸以設定"</string>
     <string name="back_button_label" msgid="2300470004503343439">"返回"</string>
     <string name="next_button_label" msgid="1080555104677992408">"繼續"</string>
