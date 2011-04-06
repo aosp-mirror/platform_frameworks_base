@@ -28,11 +28,11 @@ import java.util.Locale;
 /**
  * Sets correction candidates of words under this span.
  */
-public class CorrectionSpan implements ParcelableSpan {
+public class SuggestionSpan implements ParcelableSpan {
 
     /**
      * Flag for indicating that the input is verbatim. TextView refers to this flag to determine
-     * how it displays a word with CorrectionSpan.
+     * how it displays a word with SuggestionSpan.
      */
     public static final int FLAG_VERBATIM = 0x0001;
 
@@ -40,8 +40,8 @@ public class CorrectionSpan implements ParcelableSpan {
 
     /*
      * TODO: Needs to check the validity and add a feature that TextView will change
-     * the current IME to the other IME which is specified in CorrectionSpan.
-     * An IME needs to set the span by specifying the target IME and Subtype of CorrectionSpan.
+     * the current IME to the other IME which is specified in SuggestionSpan.
+     * An IME needs to set the span by specifying the target IME and Subtype of SuggestionSpan.
      * And the current IME might want to specify any IME as the target IME including other IMEs.
      */
 
@@ -59,7 +59,7 @@ public class CorrectionSpan implements ParcelableSpan {
      * @param suggestions Suggestions for the string under the span
      * @param flags Additional flags indicating how this span is handled in TextView
      */
-    public CorrectionSpan(Context context, String[] suggestions, int flags) {
+    public SuggestionSpan(Context context, String[] suggestions, int flags) {
         this(context, null, suggestions, flags, null);
     }
 
@@ -68,7 +68,7 @@ public class CorrectionSpan implements ParcelableSpan {
      * @param suggestions Suggestions for the string under the span
      * @param flags Additional flags indicating how this span is handled in TextView
      */
-    public CorrectionSpan(Locale locale, String[] suggestions, int flags) {
+    public SuggestionSpan(Locale locale, String[] suggestions, int flags) {
         this(null, locale, suggestions, flags, null);
     }
 
@@ -79,7 +79,7 @@ public class CorrectionSpan implements ParcelableSpan {
      * @param flags Additional flags indicating how this span is handled in TextView
      * @param originalString originalString for suggestions
      */
-    public CorrectionSpan(Context context, Locale locale, String[] suggestions, int flags,
+    public SuggestionSpan(Context context, Locale locale, String[] suggestions, int flags,
             String originalString) {
         final int N = Math.min(SUGGESTIONS_MAX_SIZE, suggestions.length);
         mSuggestions = Arrays.copyOf(suggestions, N);
@@ -92,7 +92,7 @@ public class CorrectionSpan implements ParcelableSpan {
         mOriginalString = originalString;
     }
 
-    public CorrectionSpan(Parcel src) {
+    public SuggestionSpan(Parcel src) {
         mSuggestions = src.readStringArray();
         mFlags = src.readInt();
         mLocaleString = src.readString();
@@ -142,16 +142,16 @@ public class CorrectionSpan implements ParcelableSpan {
         return TextUtils.CORRECTION_SPAN;
     }
 
-    public static final Parcelable.Creator<CorrectionSpan> CREATOR =
-            new Parcelable.Creator<CorrectionSpan>() {
+    public static final Parcelable.Creator<SuggestionSpan> CREATOR =
+            new Parcelable.Creator<SuggestionSpan>() {
         @Override
-        public CorrectionSpan createFromParcel(Parcel source) {
-            return new CorrectionSpan(source);
+        public SuggestionSpan createFromParcel(Parcel source) {
+            return new SuggestionSpan(source);
         }
 
         @Override
-        public CorrectionSpan[] newArray(int size) {
-            return new CorrectionSpan[size];
+        public SuggestionSpan[] newArray(int size) {
+            return new SuggestionSpan[size];
         }
     };
 }

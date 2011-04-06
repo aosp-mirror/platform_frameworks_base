@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.text.Editable;
 import android.text.method.KeyListener;
-import android.text.style.CorrectionSpan;
 import android.util.Log;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;

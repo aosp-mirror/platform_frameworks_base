@@ -81,7 +81,7 @@ import android.text.method.TextKeyListener;
 import android.text.method.TimeKeyListener;
 import android.text.method.TransformationMethod;
 import android.text.style.ClickableSpan;
-import android.text.style.CorrectionSpan;
+import android.text.style.SuggestionSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.URLSpan;
 import android.text.style.UpdateAppearance;
@@ -8305,20 +8305,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             final int pos = TextView.this.getSelectionStart();
             Spannable spannable = (Spannable)TextView.this.mText;
-            CorrectionSpan[] correctionSpans = spannable.getSpans(pos, pos, CorrectionSpan.class);
-            final int nbSpans = correctionSpans.length;
+            SuggestionSpan[] suggestionSpans = spannable.getSpans(pos, pos, SuggestionSpan.class);
+            final int nbSpans = suggestionSpans.length;
 
             ViewGroup viewGroup = getViewGroup(true);
             mContainer.setContentView(viewGroup);
 
             int totalNbSuggestions = 0;
             for (int spanIndex = 0; spanIndex < nbSpans; spanIndex++) {
-                CorrectionSpan correctionSpan = correctionSpans[spanIndex];
-                final int spanStart = spannable.getSpanStart(correctionSpan);
-                final int spanEnd = spannable.getSpanEnd(correctionSpan);
+                SuggestionSpan suggestionSpan = suggestionSpans[spanIndex];
+                final int spanStart = spannable.getSpanStart(suggestionSpan);
+                final int spanEnd = spannable.getSpanEnd(suggestionSpan);
                 final Long spanRange = packRangeInLong(spanStart, spanEnd);
 
-                String[] suggestions = correctionSpan.getSuggestions();
+                String[] suggestions = suggestionSpan.getSuggestions();
                 int nbSuggestions = suggestions.length;
                 for (int suggestionIndex = 0; suggestionIndex < nbSuggestions; suggestionIndex++) {
                     TextView textView = (TextView) viewGroup.getChildAt(totalNbSuggestions);

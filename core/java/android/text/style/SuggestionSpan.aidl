@@ -16,4 +16,4 @@
 
 package android.text.style;
 
-parcelable CorrectionSpan;
+parcelable SuggestionSpan;
