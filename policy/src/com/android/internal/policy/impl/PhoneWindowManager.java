@@ -728,15 +728,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mSafeModeEnabledVibePattern = getLongIntArray(mContext.getResources(),
                 com.android.internal.R.array.config_safeModeEnabledVibePattern);
 
-        // watch for HDMI plug messages if the hdmi switch exists
-        if (new File("/sys/devices/virtual/switch/hdmi/state").exists()) {
-            mHDMIObserver.startObserving("DEVPATH=/devices/virtual/switch/hdmi");
-        }
-        mHdmiPlugged = !readHdmiState();
-        setHdmiPlugged(!mHdmiPlugged);
-
         // Note: the Configuration is not stable here, so we cannot load mStatusBarCanHide from
         // config_statusBarCanHide because the latter depends on the screen size
+
+        // Controls rotation and the like.
+        initializeHdmiState();
     }
 
     public void updateSettings() {
@@ -2075,31 +2071,37 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    boolean readHdmiState() {
-        final String filename = "/sys/class/switch/hdmi/state";
-        FileReader reader = null;
-        try {
-            reader = new FileReader(filename);
-            char[] buf = new char[15];
-            int n = reader.read(buf);
-            if (n > 1) {
-                return 0 != Integer.parseInt(new String(buf, 0, n-1));
-            } else {
-                return false;
-            }
-        } catch (IOException ex) {
-            Slog.d(TAG, "couldn't read hdmi state from " + filename + ": " + ex);
-            return false;
-        } catch (NumberFormatException ex) {
-            Slog.d(TAG, "couldn't read hdmi state from " + filename + ": " + ex);
-            return false;
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException ex) {
+    void initializeHdmiState() {
+        // watch for HDMI plug messages if the hdmi switch exists
+        if (new File("/sys/devices/virtual/switch/hdmi/state").exists()) {
+            mHDMIObserver.startObserving("DEVPATH=/devices/virtual/switch/hdmi");
+
+            boolean plugged = false;
+            final String filename = "/sys/class/switch/hdmi/state";
+            FileReader reader = null;
+            try {
+                reader = new FileReader(filename);
+                char[] buf = new char[15];
+                int n = reader.read(buf);
+                if (n > 1) {
+                    plugged = 0 != Integer.parseInt(new String(buf, 0, n-1));
+                }
+            } catch (IOException ex) {
+                Slog.w(TAG, "Couldn't read hdmi state from " + filename + ": " + ex);
+            } catch (NumberFormatException ex) {
+                Slog.w(TAG, "Couldn't read hdmi state from " + filename + ": " + ex);
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException ex) {
+                    }
                 }
             }
+
+            // This dance forces the code in setHdmiPlugged to run.
+            mHdmiPlugged = !plugged;
+            setHdmiPlugged(!mHdmiPlugged);
         }
     }
 
