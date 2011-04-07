@@ -645,8 +645,21 @@ public abstract class HardwareRenderer {
                     }
     
                     attachInfo.mIgnoreDirtyState = false;
-    
+
+                    final long swapBuffersStartTime;
+                    if (ViewDebug.DEBUG_LATENCY) {
+                        swapBuffersStartTime = System.nanoTime();
+                    }
+
                     sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
+
+                    if (ViewDebug.DEBUG_LATENCY) {
+                        long now = System.nanoTime();
+                        Log.d(LOG_TAG, "Latency: Spent "
+                                + ((now - swapBuffersStartTime) * 0.000001f)
+                                + "ms waiting for eglSwapBuffers()");
+                    }
+
                     checkEglErrors();
                 }
             }

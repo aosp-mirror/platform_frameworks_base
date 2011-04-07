@@ -186,6 +186,8 @@ public final class ViewRoot extends Handler implements ViewParent,
     final Rect mVisRect; // used to retrieve visible rect of focused view.
 
     boolean mTraversalScheduled;
+    long mLastTraversalFinishedTimeNanos;
+    long mLastDrawDurationNanos;
     boolean mWillDrawSoon;
     boolean mLayoutRequested;
     boolean mFirst;
@@ -671,6 +673,14 @@ public final class ViewRoot extends Handler implements ViewParent,
     public void scheduleTraversals() {
         if (!mTraversalScheduled) {
             mTraversalScheduled = true;
+
+            if (ViewDebug.DEBUG_LATENCY && mLastTraversalFinishedTimeNanos != 0) {
+                final long now = System.nanoTime();
+                Log.d(TAG, "Latency: Scheduled traversal, it has been "
+                        + ((now - mLastTraversalFinishedTimeNanos) * 0.000001f)
+                        + "ms since the last traversal finished.");
+            }
+
             sendEmptyMessage(DO_TRAVERSAL);
         }
     }
@@ -1389,7 +1399,17 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         if (!cancelDraw && !newSurface) {
             mFullRedrawNeeded = false;
+
+            final long drawStartTime;
+            if (ViewDebug.DEBUG_LATENCY) {
+                drawStartTime = System.nanoTime();
+            }
+
             draw(fullRedrawNeeded);
+
+            if (ViewDebug.DEBUG_LATENCY) {
+                mLastDrawDurationNanos = System.nanoTime() - drawStartTime;
+            }
 
             if ((relayoutResult&WindowManagerImpl.RELAYOUT_FIRST_TIME) != 0
                     || mReportNextDraw) {
@@ -1601,7 +1621,19 @@ public final class ViewRoot extends Handler implements ViewParent,
                 int right = dirty.right;
                 int bottom = dirty.bottom;
 
+                final long lockCanvasStartTime;
+                if (ViewDebug.DEBUG_LATENCY) {
+                    lockCanvasStartTime = System.nanoTime();
+                }
+
                 canvas = surface.lockCanvas(dirty);
+
+                if (ViewDebug.DEBUG_LATENCY) {
+                    long now = System.nanoTime();
+                    Log.d(TAG, "Latency: Spent "
+                            + ((now - lockCanvasStartTime) * 0.000001f)
+                            + "ms waiting for surface.lockCanvas()");
+                }
 
                 if (left != dirty.left || top != dirty.top || right != dirty.right ||
                         bottom != dirty.bottom) {
@@ -2011,7 +2043,23 @@ public final class ViewRoot extends Handler implements ViewParent,
                 Debug.startMethodTracing("ViewRoot");
             }
 
+            final long traversalStartTime;
+            if (ViewDebug.DEBUG_LATENCY) {
+                traversalStartTime = System.nanoTime();
+                mLastDrawDurationNanos = 0;
+            }
+
             performTraversals();
+
+            if (ViewDebug.DEBUG_LATENCY) {
+                long now = System.nanoTime();
+                Log.d(TAG, "Latency: Spent "
+                        + ((now - traversalStartTime) * 0.000001f)
+                        + "ms in performTraversals(), with "
+                        + (mLastDrawDurationNanos * 0.000001f)
+                        + "ms of that time in draw()");
+                mLastTraversalFinishedTimeNanos = now;
+            }
 
             if (mProfile) {
                 Debug.stopMethodTracing();
@@ -2180,25 +2228,68 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     }
     
-    private void startInputEvent(InputQueue.FinishedCallback finishedCallback) {
+    private void startInputEvent(InputEvent event, InputQueue.FinishedCallback finishedCallback) {
         if (mFinishedCallback != null) {
             Slog.w(TAG, "Received a new input event from the input queue but there is "
                     + "already an unfinished input event in progress.");
         }
 
+        if (ViewDebug.DEBUG_LATENCY) {
+            mInputEventReceiveTimeNanos = System.nanoTime();
+            mInputEventDeliverTimeNanos = 0;
+            mInputEventDeliverPostImeTimeNanos = 0;
+        }
+
         mFinishedCallback = finishedCallback;
     }
 
-    private void finishInputEvent(boolean handled) {
+    private void finishInputEvent(InputEvent event, boolean handled) {
         if (LOCAL_LOGV) Log.v(TAG, "Telling window manager input event is finished");
 
-        if (mFinishedCallback != null) {
-            mFinishedCallback.finished(handled);
-            mFinishedCallback = null;
-        } else {
+        if (mFinishedCallback == null) {
             Slog.w(TAG, "Attempted to tell the input queue that the current input event "
                     + "is finished but there is no input event actually in progress.");
+            return;
         }
+
+        if (ViewDebug.DEBUG_LATENCY) {
+            final long now = System.nanoTime();
+            final long eventTime = event.getEventTimeNano();
+            final StringBuilder msg = new StringBuilder();
+            msg.append("Latency: Spent ");
+            msg.append((now - mInputEventReceiveTimeNanos) * 0.000001f);
+            msg.append("ms processing ");
+            if (event instanceof KeyEvent) {
+                final KeyEvent  keyEvent = (KeyEvent)event;
+                msg.append("key event, action=");
+                msg.append(KeyEvent.actionToString(keyEvent.getAction()));
+            } else {
+                final MotionEvent motionEvent = (MotionEvent)event;
+                msg.append("motion event, action=");
+                msg.append(MotionEvent.actionToString(motionEvent.getAction()));
+                msg.append(", historySize=");
+                msg.append(motionEvent.getHistorySize());
+            }
+            msg.append(", handled=");
+            msg.append(handled);
+            msg.append(", received at +");
+            msg.append((mInputEventReceiveTimeNanos - eventTime) * 0.000001f);
+            if (mInputEventDeliverTimeNanos != 0) {
+                msg.append("ms, delivered at +");
+                msg.append((mInputEventDeliverTimeNanos - eventTime) * 0.000001f);
+            }
+            if (mInputEventDeliverPostImeTimeNanos != 0) {
+                msg.append("ms, delivered post IME at +");
+                msg.append((mInputEventDeliverPostImeTimeNanos - eventTime) * 0.000001f);
+            }
+            msg.append("ms, finished at +");
+            msg.append((now - eventTime) * 0.000001f);
+            msg.append("ms.");
+            Log.d(TAG, msg.toString());
+        }
+
+        mFinishedCallback.finished(handled);
+        mFinishedCallback = null;
     }
     
     /**
@@ -2323,6 +2414,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     private void deliverPointerEvent(MotionEvent event, boolean sendDone) {
+        if (ViewDebug.DEBUG_LATENCY) {
+            mInputEventDeliverTimeNanos = System.nanoTime();
+        }
+
         if (mInputEventConsistencyVerifier != null) {
             if (event.isTouchEvent()) {
                 mInputEventConsistencyVerifier.onTouchEvent(event, 0);
@@ -2425,7 +2520,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     private void finishMotionEvent(MotionEvent event, boolean sendDone, boolean handled) {
         event.recycle();
         if (sendDone) {
-            finishInputEvent(handled);
+            finishInputEvent(event, handled);
         }
         if (LOCAL_LOGV || WATCH_POINTER) {
             if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
@@ -2435,6 +2530,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     private void deliverTrackballEvent(MotionEvent event, boolean sendDone) {
+        if (ViewDebug.DEBUG_LATENCY) {
+            mInputEventDeliverTimeNanos = System.nanoTime();
+        }
+
         if (DEBUG_TRACKBALL) Log.v(TAG, "Motion event:" + event);
 
         if (mInputEventConsistencyVerifier != null) {
@@ -2569,6 +2668,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     private void deliverGenericMotionEvent(MotionEvent event, boolean sendDone) {
+        if (ViewDebug.DEBUG_LATENCY) {
+            mInputEventDeliverTimeNanos = System.nanoTime();
+        }
+
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onGenericMotionEvent(event, 0);
         }
@@ -2808,6 +2911,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     private void deliverKeyEvent(KeyEvent event, boolean sendDone) {
+        if (ViewDebug.DEBUG_LATENCY) {
+            mInputEventDeliverTimeNanos = System.nanoTime();
+        }
+
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onKeyEvent(event, 0);
         }
@@ -2858,6 +2965,10 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     private void deliverKeyEventPostIme(KeyEvent event, boolean sendDone) {
+        if (ViewDebug.DEBUG_LATENCY) {
+            mInputEventDeliverPostImeTimeNanos = System.nanoTime();
+        }
+
         // If the view went away, then the event will not be handled.
         if (mView == null || !mAdded) {
             finishKeyEvent(event, sendDone, false);
@@ -2971,7 +3082,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     private void finishKeyEvent(KeyEvent event, boolean sendDone, boolean handled) {
         if (sendDone) {
-            finishInputEvent(handled);
+            finishInputEvent(event, handled);
         }
     }
 
@@ -3262,16 +3373,19 @@ public final class ViewRoot extends Handler implements ViewParent,
         sendMessage(msg);
     }
     
+    private long mInputEventReceiveTimeNanos;
+    private long mInputEventDeliverTimeNanos;
+    private long mInputEventDeliverPostImeTimeNanos;
     private InputQueue.FinishedCallback mFinishedCallback;
     
     private final InputHandler mInputHandler = new InputHandler() {
         public void handleKey(KeyEvent event, InputQueue.FinishedCallback finishedCallback) {
-            startInputEvent(finishedCallback);
+            startInputEvent(event, finishedCallback);
             dispatchKey(event, true);
         }
 
         public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback) {
-            startInputEvent(finishedCallback);
+            startInputEvent(event, finishedCallback);
             dispatchMotion(event, true);
         }
     };

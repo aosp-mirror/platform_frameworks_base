@@ -79,6 +79,22 @@ const nsecs_t APP_SWITCH_TIMEOUT = 500 * 1000000LL; // 0.5sec
 // before considering it stale and dropping it.
 const nsecs_t STALE_EVENT_TIMEOUT = 10000 * 1000000LL; // 10sec
 
+// Motion samples that are received within this amount of time are simply coalesced
+// when batched instead of being appended.  This is done because some drivers update
+// the location of pointers one at a time instead of all at once.
+// For example, when there are 10 fingers down, the input dispatcher may receive 10
+// samples in quick succession with only one finger's location changed in each sample.
+//
+// This value effectively imposes an upper bound on the touch sampling rate.
+// Touch sensors typically have a 50Hz - 200Hz sampling rate, so we expect distinct
+// samples to become available 5-20ms apart but individual finger reports can trickle
+// in over a period of 2-4ms or so.
+//
+// Empirical testing shows that a 2ms coalescing interval (500Hz) is not enough,
+// a 3ms coalescing interval (333Hz) works well most of the time and doesn't introduce
+// significant quantization noise on current hardware.
+const nsecs_t MOTION_SAMPLE_COALESCE_INTERVAL = 3 * 1000000LL; // 3ms, 333Hz
+
 
 static inline nsecs_t now() {
     return systemTime(SYSTEM_TIME_MONOTONIC);
@@ -2505,21 +2521,15 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                     continue;
                 }
 
-                if (motionEntry->action != action
-                        || motionEntry->pointerCount != pointerCount
-                        || motionEntry->isInjected()) {
+                if (!motionEntry->canAppendSamples(action, pointerCount, pointerIds)) {
                     // Last motion event in the queue for this device and source is
                     // not compatible for appending new samples.  Stop here.
                     goto NoBatchingOrStreaming;
                 }
 
-                // The last motion event is a move and is compatible for appending.
                 // Do the batching magic.
-                mAllocator.appendMotionSample(motionEntry, eventTime, pointerCoords);
-#if DEBUG_BATCHING
-                LOGD("Appended motion sample onto batch for most recent "
-                        "motion event for this device in the inbound queue.");
-#endif
+                batchMotionLocked(motionEntry, eventTime, metaState, pointerCoords,
+                        "most recent motion event for this device and source in the inbound queue");
                 mLock.unlock();
                 return; // done!
             }
@@ -2534,19 +2544,15 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                     && mPendingEvent->type == EventEntry::TYPE_MOTION) {
                 MotionEntry* motionEntry = static_cast<MotionEntry*>(mPendingEvent);
                 if (motionEntry->deviceId == deviceId && motionEntry->source == source) {
-                    if (motionEntry->action != action
-                            || motionEntry->pointerCount != pointerCount
-                            || motionEntry->isInjected()) {
-                        // Pending event is not compatible for appending new samples.  Stop here.
+                    if (!motionEntry->canAppendSamples(action, pointerCount, pointerIds)) {
+                        // Pending motion event is for this device and source but it is
+                        // not compatible for appending new samples.  Stop here.
                         goto NoBatchingOrStreaming;
                     }
 
-                    // The pending motion event is a move and is compatible for appending.
                     // Do the batching magic.
-                    mAllocator.appendMotionSample(motionEntry, eventTime, pointerCoords);
-#if DEBUG_BATCHING
-                    LOGD("Appended motion sample onto batch for the pending motion event.");
-#endif
+                    batchMotionLocked(motionEntry, eventTime, metaState, pointerCoords,
+                            "pending motion event");
                     mLock.unlock();
                     return; // done!
                 }
@@ -2629,7 +2635,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                     mAllocator.appendMotionSample(motionEntry, eventTime, pointerCoords);
 #if DEBUG_BATCHING
                     LOGD("Appended motion sample onto batch for most recently dispatched "
-                            "motion event for this device in the outbound queues.  "
+                            "motion event for this device and source in the outbound queues.  "
                             "Attempting to stream the motion sample.");
 #endif
                     nsecs_t currentTime = now();
@@ -2658,6 +2664,36 @@ NoBatchingOrStreaming:;
     if (needWake) {
         mLooper->wake();
     }
+}
+
+void InputDispatcher::batchMotionLocked(MotionEntry* entry, nsecs_t eventTime,
+        int32_t metaState, const PointerCoords* pointerCoords, const char* eventDescription) {
+    // Combine meta states.
+    entry->metaState |= metaState;
+
+    // Coalesce this sample if not enough time has elapsed since the last sample was
+    // initially appended to the batch.
+    MotionSample* lastSample = entry->lastSample;
+    long interval = eventTime - lastSample->eventTimeBeforeCoalescing;
+    if (interval <= MOTION_SAMPLE_COALESCE_INTERVAL) {
+        uint32_t pointerCount = entry->pointerCount;
+        for (uint32_t i = 0; i < pointerCount; i++) {
+            lastSample->pointerCoords[i].copyFrom(pointerCoords[i]);
+        }
+        lastSample->eventTime = eventTime;
+#if DEBUG_BATCHING
+        LOGD("Coalesced motion into last sample of batch for %s, events were %0.3f ms apart",
+                eventDescription, interval * 0.000001f);
+#endif
+        return;
+    }
+
+    // Append the sample.
+    mAllocator.appendMotionSample(entry, eventTime, pointerCoords);
+#if DEBUG_BATCHING
+    LOGD("Appended motion sample onto batch for %s, events were %0.3f ms apart",
+            eventDescription, interval * 0.000001f);
+#endif
 }
 
 void InputDispatcher::notifySwitch(nsecs_t when, int32_t switchCode, int32_t switchValue,
@@ -3755,6 +3791,7 @@ InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsec
     entry->downTime = downTime;
     entry->pointerCount = pointerCount;
     entry->firstSample.eventTime = eventTime;
+    entry->firstSample.eventTimeBeforeCoalescing = eventTime;
     entry->firstSample.next = NULL;
     entry->lastSample = & entry->firstSample;
     for (uint32_t i = 0; i < pointerCount; i++) {
@@ -3864,6 +3901,7 @@ void InputDispatcher::Allocator::appendMotionSample(MotionEntry* motionEntry,
         nsecs_t eventTime, const PointerCoords* pointerCoords) {
     MotionSample* sample = mMotionSamplePool.alloc();
     sample->eventTime = eventTime;
+    sample->eventTimeBeforeCoalescing = eventTime;
     uint32_t pointerCount = motionEntry->pointerCount;
     for (uint32_t i = 0; i < pointerCount; i++) {
         sample->pointerCoords[i].copyFrom(pointerCoords[i]);
@@ -3891,6 +3929,21 @@ uint32_t InputDispatcher::MotionEntry::countSamples() const {
         count += 1;
     }
     return count;
+}
+
+bool InputDispatcher::MotionEntry::canAppendSamples(int32_t action, uint32_t pointerCount,
+        const int32_t* pointerIds) const {
+    if (this->action != action
+            || this->pointerCount != pointerCount
+            || this->isInjected()) {
+        return false;
+    }
+    for (uint32_t i = 0; i < pointerCount; i++) {
+        if (this->pointerIds[i] != pointerIds[i]) {
+            return false;
+        }
+    }
+    return true;
 }
 
 
