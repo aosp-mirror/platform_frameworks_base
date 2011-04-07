@@ -21,7 +21,6 @@ import android.database.Cursor;
 import android.provider.Calendar;
 import android.text.TextUtils;
 import android.text.format.Time;
-import android.util.Config;
 import android.util.Log;
 
 import java.util.List;
@@ -197,7 +196,7 @@ public class RecurrenceSet {
                 (TextUtils.isEmpty(duration))||
                 ((TextUtils.isEmpty(rrule))&&
                         (TextUtils.isEmpty(rdate)))) {
-                if (Config.LOGD) {
+                if (false) {
                     Log.d(TAG, "Recurrence missing DTSTART, DTEND/DURATION, "
                                 + "or RRULE/RDATE: "
                                 + component.toString());
@@ -211,7 +210,7 @@ public class RecurrenceSet {
         long millis = start.toMillis(false /* use isDst */);
         values.put(Calendar.Events.DTSTART, millis);
         if (millis == -1) {
-            if (Config.LOGD) {
+            if (false) {
                 Log.d(TAG, "DTSTART is out of range: " + component.toString());
             }
             return false;

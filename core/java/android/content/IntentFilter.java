@@ -31,7 +31,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PatternMatcher;
 import android.util.AndroidException;
-import android.util.Config;
 import android.util.Log;
 import android.util.Printer;
 
@@ -670,7 +669,7 @@ public class IntentFilter implements Parcelable {
             if (host == null) {
                 return NO_MATCH_DATA;
             }
-            if (Config.LOGV) Log.v("IntentFilter",
+            if (false) Log.v("IntentFilter",
                     "Match host " + host + ": " + mHost);
             if (mWild) {
                 if (host.length() < mHost.length()) {
@@ -1095,14 +1094,14 @@ public class IntentFilter implements Parcelable {
     public final int match(String action, String type, String scheme,
             Uri data, Set<String> categories, String logTag) {
         if (action != null && !matchAction(action)) {
-            if (Config.LOGV) Log.v(
+            if (false) Log.v(
                 logTag, "No matching action " + action + " for " + this);
             return NO_MATCH_ACTION;
         }
 
         int dataMatch = matchData(type, scheme, data);
         if (dataMatch < 0) {
-            if (Config.LOGV) {
+            if (false) {
                 if (dataMatch == NO_MATCH_TYPE) {
                     Log.v(logTag, "No matching type " + type
                           + " for " + this);
@@ -1117,7 +1116,7 @@ public class IntentFilter implements Parcelable {
 
         String categoryMismatch = matchCategories(categories);
         if (categoryMismatch != null) {
-            if (Config.LOGV) {
+            if (false) {
                 Log.v(logTag, "No matching category " + categoryMismatch + " for " + this);
             }
             return NO_MATCH_CATEGORY;

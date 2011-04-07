@@ -17,7 +17,6 @@
 package android.net;
 
 import android.os.SystemClock;
-import android.util.Config;
 import android.util.Log;
 
 import java.io.IOException;
@@ -112,8 +111,8 @@ public class SntpClient
             //             = (transit + skew - transit + skew)/2
             //             = (2 * skew)/2 = skew
             long clockOffset = ((receiveTime - originateTime) + (transmitTime - responseTime))/2;
-            // if (Config.LOGD) Log.d(TAG, "round trip: " + roundTripTime + " ms");
-            // if (Config.LOGD) Log.d(TAG, "clock offset: " + clockOffset + " ms");
+            // if (false) Log.d(TAG, "round trip: " + roundTripTime + " ms");
+            // if (false) Log.d(TAG, "clock offset: " + clockOffset + " ms");
 
             // save our results - use the times on this side of the network latency
             // (response rather than request time)
@@ -121,7 +120,7 @@ public class SntpClient
             mNtpTimeReference = responseTicks;
             mRoundTripTime = roundTripTime;
         } catch (Exception e) {
-            if (Config.LOGD) Log.d(TAG, "request time failed: " + e);
+            if (false) Log.d(TAG, "request time failed: " + e);
             return false;
         } finally {
             if (socket != null) {

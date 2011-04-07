@@ -23,7 +23,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
 import android.os.StrictMode;
-import android.util.Config;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -251,7 +250,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             for (int i = 0; i < columnCount; i++) {
                 String columnName = mQuery.columnNameLocked(i);
                 mColumns[i] = columnName;
-                if (Config.LOGV) {
+                if (false) {
                     Log.v("DatabaseWindow", "mColumns[" + i + "] is "
                             + mColumns[i]);
                 }
@@ -366,13 +365,13 @@ public class SQLiteCursor extends AbstractWindowedCursor {
     }
 
     private void deactivateCommon() {
-        if (Config.LOGV) Log.v(TAG, "<<< Releasing cursor " + this);
+        if (false) Log.v(TAG, "<<< Releasing cursor " + this);
         mCursorState = 0;
         if (mWindow != null) {
             mWindow.close();
             mWindow = null;
         }
-        if (Config.LOGV) Log.v("DatabaseWindow", "closing window in release()");
+        if (false) Log.v("DatabaseWindow", "closing window in release()");
     }
 
     @Override
@@ -398,7 +397,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             return false;
         }
         long timeStart = 0;
-        if (Config.LOGV) {
+        if (false) {
             timeStart = System.currentTimeMillis();
         }
 
@@ -453,7 +452,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             }
         }
 
-        if (Config.LOGV) {
+        if (false) {
             Log.v("DatabaseWindow", "closing window in requery()");
             Log.v(TAG, "--- Requery()ed cursor " + this + ": " + mQuery);
         }
@@ -465,7 +464,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
             // for backwards compatibility, just return false
             Log.w(TAG, "requery() failed " + e.getMessage(), e);
         }
-        if (Config.LOGV) {
+        if (false) {
             long timeEnd = System.currentTimeMillis();
             Log.v(TAG, "requery (" + (timeEnd - timeStart) + " ms): " + mDriver.toString());
         }
@@ -513,7 +512,7 @@ public class SQLiteCursor extends AbstractWindowedCursor {
                 close();
                 SQLiteDebug.notifyActiveCursorFinalized();
             } else {
-                if (Config.LOGV) {
+                if (false) {
                     Log.v(TAG, "Finalizing cursor on database = " + mQuery.mDatabase.getPath() +
                             ", table = " + mEditTable + ", query = " + mQuery.mSql);
                 }

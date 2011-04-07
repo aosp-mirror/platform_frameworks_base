@@ -41,7 +41,6 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.AndroidException;
-import android.util.Config;
 import android.util.Log;
 
 import java.net.URISyntaxException;
@@ -569,7 +568,7 @@ public final class Settings {
     public static final String AUTHORITY = "settings";
 
     private static final String TAG = "Settings";
-    private static final boolean LOCAL_LOGV = Config.LOGV || false;
+    private static final boolean LOCAL_LOGV = false || false;
 
     public static class SettingNotFoundException extends AndroidException {
         public SettingNotFoundException(String msg) {

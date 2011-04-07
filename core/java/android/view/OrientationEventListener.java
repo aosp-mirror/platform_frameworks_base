@@ -21,7 +21,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.Config;
 import android.util.Log;
 
 /**
@@ -31,7 +30,7 @@ import android.util.Log;
 public abstract class OrientationEventListener {
     private static final String TAG = "OrientationEventListener";
     private static final boolean DEBUG = false;
-    private static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    private static final boolean localLOGV = false;
     private int mOrientation = ORIENTATION_UNKNOWN;
     private SensorManager mSensorManager;
     private boolean mEnabled = false;

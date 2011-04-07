@@ -30,7 +30,6 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PatternMatcher;
-import android.util.Config;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -238,7 +237,7 @@ public class ResolverActivity extends AlertActivity implements
                 ResolveInfo r0 = rList.get(0);
                 for (int i=1; i<N; i++) {
                     ResolveInfo ri = rList.get(i);
-                    if (Config.LOGV) Log.v(
+                    if (false) Log.v(
                         "ResolveListActivity",
                         r0.activityInfo.name + "=" +
                         r0.priority + "/" + r0.isDefault + " vs " +

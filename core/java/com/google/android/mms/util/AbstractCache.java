@@ -17,7 +17,6 @@
 
 package com.google.android.mms.util;
 
-import android.util.Config;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -25,7 +24,7 @@ import java.util.HashMap;
 public abstract class AbstractCache<K, V> {
     private static final String TAG = "AbstractCache";
     private static final boolean DEBUG = false;
-    private static final boolean LOCAL_LOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    private static final boolean LOCAL_LOGV = false;
 
     private static final int MAX_CACHED_ITEMS  = 500;
 

@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Config;
 import android.util.Log;
 import android.view.Surface;
 
@@ -40,7 +39,7 @@ public class RenderScript {
     static final String LOG_TAG = "RenderScript_jni";
     static final boolean DEBUG  = false;
     @SuppressWarnings({"UnusedDeclaration", "deprecation"})
-    static final boolean LOG_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean LOG_ENABLED = false;
 
     private Context mApplicationContext;
 

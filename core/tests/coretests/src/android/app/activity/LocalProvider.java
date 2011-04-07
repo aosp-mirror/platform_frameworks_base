@@ -23,7 +23,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.util.Config;
 import android.util.Log;
 
 /** Simple test provider that runs in the local process. */
@@ -106,7 +105,7 @@ public class LocalProvider extends ContentProvider {
                               null, null, sort);
 
         if (ret == null) {
-            if (Config.LOGD) Log.d(TAG, "Alarms.query: failed");
+            if (false) Log.d(TAG, "Alarms.query: failed");
         } else {
             ret.setNotificationUri(getContext().getContentResolver(), url);
         }
@@ -145,7 +144,7 @@ public class LocalProvider extends ContentProvider {
                         "Cannot update URL: " + url);
             }
         }
-        if (Config.LOGD) Log.d(TAG, "*** notifyChange() rowId: " + rowId);
+        if (false) Log.d(TAG, "*** notifyChange() rowId: " + rowId);
         getContext().getContentResolver().notifyChange(url, null);
         return count;
     }

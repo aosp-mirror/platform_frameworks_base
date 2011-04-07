@@ -20,7 +20,6 @@ import org.apache.harmony.dalvik.ddmc.Chunk;
 import org.apache.harmony.dalvik.ddmc.ChunkHandler;
 import org.apache.harmony.dalvik.ddmc.DdmServer;
 import android.os.Debug;
-import android.util.Config;
 import android.util.Log;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -69,7 +68,7 @@ public class DdmHandleProfiling extends ChunkHandler {
      * Handle a chunk of data.
      */
     public Chunk handleChunk(Chunk request) {
-        if (Config.LOGV)
+        if (false)
             Log.v("ddm-heap", "Handling " + name(request.type) + " chunk");
         int type = request.type;
 
@@ -99,7 +98,7 @@ public class DdmHandleProfiling extends ChunkHandler {
         int flags = in.getInt();
         int len = in.getInt();
         String fileName = getString(in, len);
-        if (Config.LOGV)
+        if (false)
             Log.v("ddm-heap", "Method profiling start: filename='" + fileName
                 + "', size=" + bufferSize + ", flags=" + flags);
 
@@ -139,7 +138,7 @@ public class DdmHandleProfiling extends ChunkHandler {
 
         int bufferSize = in.getInt();
         int flags = in.getInt();
-        if (Config.LOGV) {
+        if (false) {
             Log.v("ddm-heap", "Method prof stream start: size=" + bufferSize
                 + ", flags=" + flags);
         }
@@ -158,7 +157,7 @@ public class DdmHandleProfiling extends ChunkHandler {
     private Chunk handleMPSE(Chunk request) {
         byte result;
 
-        if (Config.LOGV) {
+        if (false) {
             Log.v("ddm-heap", "Method prof stream end");
         }
 

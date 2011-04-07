@@ -21,7 +21,6 @@ import android.content.ContentUris;
 import android.content.UriMatcher;
 import android.net.Uri;
 import android.provider.Telephony.Mms;
-import android.util.Config;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -30,7 +29,7 @@ import java.util.HashSet;
 public final class PduCache extends AbstractCache<Uri, PduCacheEntry> {
     private static final String TAG = "PduCache";
     private static final boolean DEBUG = false;
-    private static final boolean LOCAL_LOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    private static final boolean LOCAL_LOGV = false;
 
     private static final int MMS_ALL             = 0;
     private static final int MMS_ALL_ID          = 1;

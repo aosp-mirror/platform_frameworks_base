@@ -45,7 +45,6 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.telephony.TelephonyManager;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.view.KeyEvent;

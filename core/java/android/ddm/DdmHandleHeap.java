@@ -21,7 +21,6 @@ import org.apache.harmony.dalvik.ddmc.ChunkHandler;
 import org.apache.harmony.dalvik.ddmc.DdmServer;
 import org.apache.harmony.dalvik.ddmc.DdmVmInternal;
 import android.os.Debug;
-import android.util.Config;
 import android.util.Log;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -78,7 +77,7 @@ public class DdmHandleHeap extends ChunkHandler {
      * Handle a chunk of data.
      */
     public Chunk handleChunk(Chunk request) {
-        if (Config.LOGV)
+        if (false)
             Log.v("ddm-heap", "Handling " + name(request.type) + " chunk");
         int type = request.type;
 
@@ -113,7 +112,7 @@ public class DdmHandleHeap extends ChunkHandler {
         ByteBuffer in = wrapChunk(request);
 
         int when = in.get();
-        if (Config.LOGV)
+        if (false)
             Log.v("ddm-heap", "Heap segment enable: when=" + when);
 
         boolean ok = DdmVmInternal.heapInfoNotify(when);
@@ -132,7 +131,7 @@ public class DdmHandleHeap extends ChunkHandler {
 
         int when = in.get();
         int what = in.get();
-        if (Config.LOGV)
+        if (false)
             Log.v("ddm-heap", "Heap segment enable: when=" + when
                 + ", what=" + what + ", isNative=" + isNative);
 
@@ -160,7 +159,7 @@ public class DdmHandleHeap extends ChunkHandler {
         /* get the filename for the output file */
         int len = in.getInt();
         String fileName = getString(in, len);
-        if (Config.LOGD)
+        if (false)
             Log.d("ddm-heap", "Heap dump: file='" + fileName + "'");
 
         try {
@@ -192,7 +191,7 @@ public class DdmHandleHeap extends ChunkHandler {
         byte result;
 
         /* get the filename for the output file */
-        if (Config.LOGD)
+        if (false)
             Log.d("ddm-heap", "Heap dump: [DDMS]");
 
         String failMsg = null;
@@ -218,7 +217,7 @@ public class DdmHandleHeap extends ChunkHandler {
     private Chunk handleHPGC(Chunk request) {
         //ByteBuffer in = wrapChunk(request);
 
-        if (Config.LOGD)
+        if (false)
             Log.d("ddm-heap", "Heap GC request");
         System.gc();
 
@@ -234,7 +233,7 @@ public class DdmHandleHeap extends ChunkHandler {
 
         enable = (in.get() != 0);
 
-        if (Config.LOGD)
+        if (false)
             Log.d("ddm-heap", "Recent allocation enable request: " + enable);
 
         DdmVmInternal.enableRecentAllocations(enable);
@@ -259,7 +258,7 @@ public class DdmHandleHeap extends ChunkHandler {
     private Chunk handleREAL(Chunk request) {
         //ByteBuffer in = wrapChunk(request);
 
-        if (Config.LOGD)
+        if (false)
             Log.d("ddm-heap", "Recent allocations request");
 
         /* generate the reply in a ready-to-go format */

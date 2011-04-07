@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.util.Config;
 import android.util.Log;
 
 import java.io.InputStream;

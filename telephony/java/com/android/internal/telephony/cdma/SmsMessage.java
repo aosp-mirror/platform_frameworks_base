@@ -18,7 +18,6 @@ package com.android.internal.telephony.cdma;
 
 import android.os.Parcel;
 import android.os.SystemProperties;
-import android.util.Config;
 import android.util.Log;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.SmsHeader;
@@ -694,7 +693,7 @@ public class SmsMessage extends SmsMessageBase {
             if (mEnvelope.bearerData != null) {
                 mBearerData.numberOfMessages = 0x000000FF & mEnvelope.bearerData[0];
             }
-            if (Config.DEBUG) {
+            if (false) {
                 Log.d(LOG_TAG, "parseSms: get MWI " +
                       Integer.toString(mBearerData.numberOfMessages));
             }
@@ -715,7 +714,7 @@ public class SmsMessage extends SmsMessageBase {
 
         if (originatingAddress != null) {
             originatingAddress.address = new String(originatingAddress.origBytes);
-            if (Config.LOGV) Log.v(LOG_TAG, "SMS originating address: "
+            if (false) Log.v(LOG_TAG, "SMS originating address: "
                     + originatingAddress.address);
         }
 
@@ -723,7 +722,7 @@ public class SmsMessage extends SmsMessageBase {
             scTimeMillis = mBearerData.msgCenterTimeStamp.toMillis(true);
         }
 
-        if (Config.LOGD) Log.d(LOG_TAG, "SMS SC timestamp: " + scTimeMillis);
+        if (false) Log.d(LOG_TAG, "SMS SC timestamp: " + scTimeMillis);
 
         // Message Type (See 3GPP2 C.S0015-B, v2, 4.5.1)
         if (mBearerData.messageType == BearerData.MESSAGE_TYPE_DELIVERY_ACK) {
@@ -748,9 +747,9 @@ public class SmsMessage extends SmsMessageBase {
         }
 
         if (messageBody != null) {
-            if (Config.LOGV) Log.v(LOG_TAG, "SMS message body: '" + messageBody + "'");
+            if (false) Log.v(LOG_TAG, "SMS message body: '" + messageBody + "'");
             parseMessageBody();
-        } else if ((userData != null) && (Config.LOGV)) {
+        } else if ((userData != null) && (false)) {
             Log.v(LOG_TAG, "SMS payload: '" + IccUtils.bytesToHexString(userData) + "'");
         }
     }

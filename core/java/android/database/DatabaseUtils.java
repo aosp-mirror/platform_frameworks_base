@@ -33,7 +33,6 @@ import android.database.sqlite.SQLiteStatement;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.text.TextUtils;
-import android.util.Config;
 import android.util.Log;
 
 import java.io.FileNotFoundException;
@@ -49,7 +48,7 @@ public class DatabaseUtils {
     private static final String TAG = "DatabaseUtils";
 
     private static final boolean DEBUG = false;
-    private static final boolean LOCAL_LOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    private static final boolean LOCAL_LOGV = false;
 
     private static final String[] countProjection = new String[]{"count(*)"};
 

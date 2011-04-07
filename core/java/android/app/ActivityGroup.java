@@ -110,7 +110,7 @@ public class ActivityGroup extends Activity {
         if (who != null) {
             Activity act = mLocalActivityManager.getActivity(who);
             /*
-            if (Config.LOGV) Log.v(
+            if (false) Log.v(
                 TAG, "Dispatching result: who=" + who + ", reqCode=" + requestCode
                 + ", resCode=" + resultCode + ", data=" + data
                 + ", rec=" + rec);

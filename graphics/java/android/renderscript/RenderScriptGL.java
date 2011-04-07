@@ -22,7 +22,6 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Config;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;

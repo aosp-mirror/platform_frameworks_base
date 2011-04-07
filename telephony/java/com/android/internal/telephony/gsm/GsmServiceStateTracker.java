@@ -55,7 +55,6 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.TimeUtils;
@@ -1473,7 +1472,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 }
                 SystemProperties.set("gsm.nitz.time", String.valueOf(c.getTimeInMillis()));
                 saveNitzTime(c.getTimeInMillis());
-                if (Config.LOGV) {
+                if (false) {
                     long end = SystemClock.elapsedRealtime();
                     Log.v(LOG_TAG, "NITZ: end=" + end + " dur=" + (end - start));
                 }

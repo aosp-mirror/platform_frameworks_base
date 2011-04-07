@@ -26,7 +26,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings.System;
-import android.util.Config;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -42,7 +41,7 @@ public class RSTest extends Activity {
 
     private static final String LOG_TAG = "libRS_jni";
     private static final boolean DEBUG  = false;
-    private static final boolean LOG_ENABLED = DEBUG ? Config.LOGD : Config.LOGV;
+    private static final boolean LOG_ENABLED = false;
 
     private RSTestView mView;
 

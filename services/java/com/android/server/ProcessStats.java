@@ -20,7 +20,6 @@ import static android.os.Process.*;
 
 import android.os.Process;
 import android.os.SystemClock;
-import android.util.Config;
 import android.util.Slog;
 
 import java.io.File;
@@ -35,7 +34,7 @@ import java.util.StringTokenizer;
 public class ProcessStats {
     private static final String TAG = "ProcessStats";
     private static final boolean DEBUG = false;
-    private static final boolean localLOGV = DEBUG || Config.LOGV;
+    private static final boolean localLOGV = DEBUG || false;
     
     private static final int[] PROCESS_STATS_FORMAT = new int[] {
         PROC_SPACE_TERM,

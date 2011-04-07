@@ -4603,7 +4603,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         //noinspection SimplifiableIfStatement,deprecation
-        if (android.util.Config.LOGV) {
+        if (false) {
             captureViewInfo("captureViewKeyEvent", this);
         }
 

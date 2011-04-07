@@ -33,7 +33,6 @@ import android.os.Process;
 import android.os.SystemClock;
 import android.os.ServiceManager;
 import android.util.AndroidRuntimeException;
-import android.util.Config;
 import android.util.Log;
 import android.view.IWindowManager;
 import android.view.KeyCharacterMap;

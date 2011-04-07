@@ -19,7 +19,6 @@ package android.view;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.AndroidRuntimeException;
-import android.util.Config;
 import android.util.Log;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -102,7 +101,7 @@ public class WindowManagerImpl implements WindowManager {
     
     private void addView(View view, ViewGroup.LayoutParams params, boolean nest)
     {
-        if (Config.LOGV) Log.v("WindowManager", "addView view=" + view);
+        if (false) Log.v("WindowManager", "addView view=" + view);
 
         if (!(params instanceof WindowManager.LayoutParams)) {
             throw new IllegalArgumentException(

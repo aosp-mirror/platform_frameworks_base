@@ -19,7 +19,6 @@ package android.database;
 import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Config;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
@@ -285,7 +284,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
             }
         }
 
-        if (Config.LOGV) {
+        if (false) {
             if (getCount() > 0) {
                 Log.w("AbstractCursor", "Unknown column " + columnName);
             }

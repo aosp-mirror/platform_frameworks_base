@@ -17,7 +17,6 @@
 package android.os;
 
 import android.util.AndroidRuntimeException;
-import android.util.Config;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -128,7 +127,7 @@ public class MessageQueue {
                         mBlocked = false;
                         mMessages = msg.next;
                         msg.next = null;
-                        if (Config.LOGV) Log.v("MessageQueue", "Returning message: " + msg);
+                        if (false) Log.v("MessageQueue", "Returning message: " + msg);
                         msg.markInUse();
                         return msg;
                     } else {

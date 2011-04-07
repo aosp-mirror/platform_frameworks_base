@@ -39,7 +39,6 @@ import android.os.Parcel;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.text.TextUtils;
-import android.util.Config;
 import android.util.Log;
 import android.util.Singleton;
 
@@ -1410,11 +1409,11 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
     private static final Singleton<IActivityManager> gDefault = new Singleton<IActivityManager>() {
         protected IActivityManager create() {
             IBinder b = ServiceManager.getService("activity");
-            if (Config.LOGV) {
+            if (false) {
                 Log.v("ActivityManager", "default service binder = " + b);
             }
             IActivityManager am = asInterface(b);
-            if (Config.LOGV) {
+            if (false) {
                 Log.v("ActivityManager", "default service = " + am);
             }
             return am;

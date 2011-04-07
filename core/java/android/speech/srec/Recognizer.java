@@ -22,7 +22,6 @@
 
 package android.speech.srec;
 
-import android.util.Config;
 import android.util.Log;
 
 import java.io.File;

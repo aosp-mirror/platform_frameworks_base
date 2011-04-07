@@ -54,7 +54,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AndroidRuntimeException;
-import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -1456,7 +1455,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (focusedView.getId() != View.NO_ID) {
                 outState.putInt(FOCUSED_ID_TAG, focusedView.getId());
             } else {
-                if (Config.LOGD) {
+                if (false) {
                     Log.d(TAG, "couldn't save which view has focus because the focused view "
                             + focusedView + " has no id.");
                 }
@@ -2105,7 +2104,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     // if either the frame -or- the background is opaque.
                     int fop = fg.getOpacity();
                     int bop = bg.getOpacity();
-                    if (Config.LOGV)
+                    if (false)
                         Log.v(TAG, "Background opacity: " + bop + ", Frame opacity: " + fop);
                     if (fop == PixelFormat.OPAQUE || bop == PixelFormat.OPAQUE) {
                         opacity = PixelFormat.OPAQUE;
@@ -2120,15 +2119,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     // For now we have to assume translucent if there is a
                     // frame with padding... there is no way to tell if the
                     // frame and background together will draw all pixels.
-                    if (Config.LOGV)
+                    if (false)
                         Log.v(TAG, "Padding: " + mFramePadding);
                     opacity = PixelFormat.TRANSLUCENT;
                 }
             }
 
-            if (Config.LOGV)
+            if (false)
                 Log.v(TAG, "Background: " + bg + ", Frame: " + fg);
-            if (Config.LOGV)
+            if (false)
                 Log.v(TAG, "Selected default opacity: " + opacity);
 
             mDefaultOpacity = opacity;

@@ -20,7 +20,6 @@ package com.google.android.mms.pdu;
 import com.google.android.mms.ContentType;
 import com.google.android.mms.InvalidHeaderValueException;
 
-import android.util.Config;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
@@ -86,7 +85,7 @@ public class PduParser {
      */
     private static final String LOG_TAG = "PduParser";
     private static final boolean DEBUG = false;
-    private static final boolean LOCAL_LOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    private static final boolean LOCAL_LOGV = false;
 
     /**
      * Constructor.

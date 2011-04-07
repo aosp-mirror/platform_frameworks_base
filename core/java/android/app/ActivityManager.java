@@ -47,8 +47,7 @@ import java.util.Map;
  */
 public class ActivityManager {
     private static String TAG = "ActivityManager";
-    private static boolean DEBUG = false;
-    private static boolean localLOGV = DEBUG || android.util.Config.LOGV;
+    private static boolean localLOGV = false;
 
     private final Context mContext;
     private final Handler mHandler;

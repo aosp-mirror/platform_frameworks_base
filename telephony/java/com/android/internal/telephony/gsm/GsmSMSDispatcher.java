@@ -28,7 +28,6 @@ import android.provider.Telephony.Sms.Intents;
 import android.telephony.ServiceState;
 import android.telephony.SmsCbMessage;
 import android.telephony.gsm.GsmCellLocation;
-import android.util.Config;
 import android.util.Log;
 
 import com.android.internal.telephony.BaseCommands;
@@ -126,13 +125,13 @@ final class GsmSMSDispatcher extends SMSDispatcher {
         if (sms.isMWISetMessage()) {
             mGsmPhone.updateMessageWaitingIndicator(true);
             handled = sms.isMwiDontStore();
-            if (Config.LOGD) {
+            if (false) {
                 Log.d(TAG, "Received voice mail indicator set SMS shouldStore=" + !handled);
             }
         } else if (sms.isMWIClearMessage()) {
             mGsmPhone.updateMessageWaitingIndicator(false);
             handled = sms.isMwiDontStore();
-            if (Config.LOGD) {
+            if (false) {
                 Log.d(TAG, "Received voice mail indicator clear SMS shouldStore=" + !handled);
             }
         }
@@ -504,7 +503,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             byte[][] pdus = null;
             byte[] receivedPdu = (byte[])ar.result;
 
-            if (Config.LOGD) {
+            if (false) {
                 for (int i = 0; i < receivedPdu.length; i += 8) {
                     StringBuilder sb = new StringBuilder("SMS CB pdu data: ");
                     for (int j = i; j < i + 8 && j < receivedPdu.length; j++) {

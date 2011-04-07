@@ -57,7 +57,6 @@ import com.android.internal.view.BaseInputHandler;
 import com.android.internal.widget.PointerLocationView;
 
 import android.telephony.TelephonyManager;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -140,7 +139,7 @@ import java.util.ArrayList;
 public class PhoneWindowManager implements WindowManagerPolicy {
     static final String TAG = "WindowManager";
     static final boolean DEBUG = false;
-    static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean localLOGV = false;
     static final boolean DEBUG_LAYOUT = false;
     static final boolean DEBUG_FALLBACK = false;
     static final boolean SHOW_STARTING_ANIMATIONS = true;

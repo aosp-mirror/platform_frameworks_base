@@ -19,7 +19,6 @@ package com.android.internal.os;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 

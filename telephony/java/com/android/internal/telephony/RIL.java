@@ -45,7 +45,6 @@ import android.telephony.PhoneNumberUtils;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
 import android.text.TextUtils;
-import android.util.Config;
 import android.util.Log;
 
 import com.android.internal.telephony.CallForwardInfo;
@@ -1271,7 +1270,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         rr.mp.writeInt(1);
         rr.mp.writeInt(index);
 
-        if (Config.LOGD) {
+        if (false) {
             if (RILJ_LOGD) riljLog(rr.serialString() + "> "
                     + requestToString(rr.mRequest)
                     + " " + index);
@@ -1287,7 +1286,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         rr.mp.writeInt(1);
         rr.mp.writeInt(index);
 
-        if (Config.LOGD) {
+        if (false) {
             if (RILJ_LOGD) riljLog(rr.serialString() + "> "
                     + requestToString(rr.mRequest)
                     + " " + index);
@@ -1306,7 +1305,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         rr.mp.writeString(pdu);
         rr.mp.writeString(smsc);
 
-        if (Config.LOGD) {
+        if (false) {
             if (RILJ_LOGD) riljLog(rr.serialString() + "> "
                     + requestToString(rr.mRequest)
                     + " " + status);
@@ -1324,7 +1323,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         rr.mp.writeInt(status);
         rr.mp.writeString(pdu);
 
-        if (Config.LOGD) {
+        if (false) {
             if (RILJ_LOGD) riljLog(rr.serialString() + "> "
                     + requestToString(rr.mRequest)
                     + " " + status);

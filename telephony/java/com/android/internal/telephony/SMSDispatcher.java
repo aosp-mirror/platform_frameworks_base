@@ -43,7 +43,6 @@ import android.provider.Telephony.Sms.Intents;
 import android.provider.Settings;
 import android.telephony.SmsMessage;
 import android.telephony.ServiceState;
-import android.util.Config;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -303,7 +302,7 @@ public abstract class SMSDispatcher extends Handler {
         switch (msg.what) {
         case EVENT_NEW_SMS:
             // A new SMS has been received by the device
-            if (Config.LOGD) {
+            if (false) {
                 Log.d(TAG, "New SMS Message Received");
             }
 
@@ -364,7 +363,7 @@ public abstract class SMSDispatcher extends Handler {
                     Log.e(TAG, "failed to send back RESULT_ERROR_LIMIT_EXCEEDED");
                 }
             }
-            if (Config.LOGD) {
+            if (false) {
                 Log.d(TAG, "EVENT_ALERT_TIMEOUT, message stop sending");
             }
             break;
@@ -476,7 +475,7 @@ public abstract class SMSDispatcher extends Handler {
         PendingIntent sentIntent = tracker.mSentIntent;
 
         if (ar.exception == null) {
-            if (Config.LOGD) {
+            if (false) {
                 Log.d(TAG, "SMS send complete. Broadcasting "
                         + "intent: " + sentIntent);
             }
@@ -504,7 +503,7 @@ public abstract class SMSDispatcher extends Handler {
                 } catch (CanceledException ex) {}
             }
         } else {
-            if (Config.LOGD) {
+            if (false) {
                 Log.d(TAG, "SMS send failed");
             }
 
@@ -1070,7 +1069,7 @@ public abstract class SMSDispatcher extends Handler {
         Intent intent = new Intent("android.provider.telephony.SMS_CB_RECEIVED");
         intent.putExtra("pdus", pdus);
 
-        if (Config.LOGD)
+        if (false)
             Log.d(TAG, "Dispatching " + pdus.length + " SMS CB pdus");
 
         dispatch(intent, "android.permission.RECEIVE_SMS");

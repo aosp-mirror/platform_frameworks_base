@@ -35,7 +35,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 
@@ -1627,9 +1626,9 @@ public abstract class ContentResolver {
             return sContentService;
         }
         IBinder b = ServiceManager.getService(CONTENT_SERVICE_NAME);
-        if (Config.LOGV) Log.v("ContentService", "default service binder = " + b);
+        if (false) Log.v("ContentService", "default service binder = " + b);
         sContentService = IContentService.Stub.asInterface(b);
-        if (Config.LOGV) Log.v("ContentService", "default service = " + sContentService);
+        if (false) Log.v("ContentService", "default service = " + sContentService);
         return sContentService;
     }
 

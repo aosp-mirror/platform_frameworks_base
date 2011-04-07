@@ -17,7 +17,6 @@
 package android.content.res;
 
 import android.os.ParcelFileDescriptor;
-import android.util.Config;
 import android.util.Log;
 import android.util.TypedValue;
 
@@ -58,7 +57,7 @@ public final class AssetManager {
     public static final int ACCESS_BUFFER = 3;
 
     private static final String TAG = "AssetManager";
-    private static final boolean localLOGV = Config.LOGV || false;
+    private static final boolean localLOGV = false || false;
     
     private static final boolean DEBUG_REFS = false;
     

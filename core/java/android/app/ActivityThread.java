@@ -60,7 +60,6 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.util.AndroidRuntimeException;
-import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -125,7 +124,7 @@ public final class ActivityThread {
     public static final String TAG = "ActivityThread";
     private static final android.graphics.Bitmap.Config THUMBNAIL_FORMAT = Bitmap.Config.RGB_565;
     private static final boolean DEBUG = false;
-    static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean localLOGV = false;
     static final boolean DEBUG_MESSAGES = false;
     /** @hide */
     public static final boolean DEBUG_BROADCAST = false;
@@ -2660,7 +2659,7 @@ public final class ActivityThread {
             r.stopped = false;
         }
         if (r.activity.mDecor != null) {
-            if (Config.LOGV) Slog.v(
+            if (false) Slog.v(
                 TAG, "Handle window " + r + " visibility: " + show);
             updateVisibility(r, show);
         }
@@ -3868,7 +3867,7 @@ public final class ActivityThread {
                           info.applicationInfo.sourceDir);
                     return null;
                 }
-                if (Config.LOGV) Slog.v(
+                if (false) Slog.v(
                     TAG, "Instantiating local provider " + info.name);
                 // XXX Need to create the correct context for this provider.
                 localProvider.attachInfo(c, info);

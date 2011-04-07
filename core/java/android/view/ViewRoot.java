@@ -49,7 +49,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
-import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -1273,7 +1272,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
             host.layout(0, 0, host.getMeasuredWidth(), host.getMeasuredHeight());
 
-            if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
+            if (false && ViewDebug.consistencyCheckEnabled) {
                 if (!host.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_LAYOUT)) {
                     throw new IllegalStateException("The view hierarchy is an inconsistent state,"
                             + "please refer to the logs with the tag "
@@ -1711,7 +1710,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                         mAttachInfo.mIgnoreDirtyState = false;
                     }
 
-                    if (Config.DEBUG && ViewDebug.consistencyCheckEnabled) {
+                    if (false && ViewDebug.consistencyCheckEnabled) {
                         mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
                     }
 
@@ -2442,7 +2441,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         if (isDown) {
             ensureTouchMode(true);
         }
-        if(Config.LOGV) {
+        if(false) {
             captureMotionLog("captureDispatchPointer", event);
         }
 
@@ -2981,7 +2980,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             return;
         }
 
-        if (Config.LOGV) {
+        if (false) {
             captureKeyLog("captureDispatchKeyEvent", event);
         }
 

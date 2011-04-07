@@ -18,7 +18,6 @@ package android.renderscript;
 
 
 import android.graphics.Matrix;
-import android.util.Config;
 import android.util.Log;
 
 

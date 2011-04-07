@@ -35,7 +35,6 @@ import android.util.Slog;
 import android.util.LogPrinter;
 import android.util.Printer;
 
-import android.util.Config;
 import android.content.Intent;
 import android.content.IntentFilter;
 
@@ -45,7 +44,7 @@ import android.content.IntentFilter;
 public class IntentResolver<F extends IntentFilter, R extends Object> {
     final private static String TAG = "IntentResolver";
     final private static boolean DEBUG = false;
-    final private static boolean localLOGV = DEBUG || Config.LOGV;
+    final private static boolean localLOGV = DEBUG || false;
 
     public void addFilter(F f) {
         if (localLOGV) {

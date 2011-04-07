@@ -16,7 +16,6 @@
 
 package android.test;
 
-import android.util.Config;
 import android.util.Log;
 import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
@@ -229,7 +228,7 @@ public class ClassPathPackageInfoSource {
                 }
             }
         } catch (IOException e) {
-            if (Config.LOGV) {
+            if (false) {
                 Log.w("ClassPathPackageInfoSource",
                         "Error finding classes at apk path: " + apkPath, e);
             }

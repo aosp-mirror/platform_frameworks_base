@@ -47,18 +47,6 @@ LOCAL_SRC_FILES := $(filter-out \
 			org/mobilecontrol/% \
 			,$(LOCAL_SRC_FILES))
 
-# Include a different set of source files when building a debug build.
-# TODO: Maybe build these into a separate .jar and put it on the classpath
-#       in front of framework.jar.
-# NOTE: Do not use this as an example; this is a very special situation.
-#       Do not modify LOCAL_SRC_FILES based on any variable other
-#       than TARGET_BUILD_TYPE, otherwise builds can become inconsistent.
-ifeq ($(TARGET_BUILD_TYPE),debug)
-  LOCAL_SRC_FILES += $(call find-other-java-files,core/config/debug)
-else
-  LOCAL_SRC_FILES += $(call find-other-java-files,core/config/ndebug)
-endif
-
 ## READ ME: ########################################################
 ##
 ## When updating this list of aidl files, consider if that aidl is
@@ -308,11 +296,6 @@ fwbase_dirs_to_document := \
 	     ) \
 	   ) \
 	 )
-
-# Pass a special "fake-out" version of some classes to the doc/API tools.
-# ConfigBuildFlags uses this trick to prevent certain fields from appearing
-# as "final" in the official SDK APIs.
-fwbase_dirs_to_document += core/config/sdk
 
 # include definition of libcore_to_document
 include $(LOCAL_PATH)/../../libcore/Docs.mk

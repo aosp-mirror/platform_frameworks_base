@@ -33,7 +33,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Config;
 import android.util.Slog;
 
 import java.io.IOException;
@@ -73,8 +72,8 @@ import java.util.Random;
  */
 public class WifiWatchdogService {
     private static final String TAG = "WifiWatchdogService";
-    private static final boolean V = false || Config.LOGV;
-    private static final boolean D = true || Config.LOGD;
+    private static final boolean V = false || false;
+    private static final boolean D = true || false;
     
     private Context mContext;
     private ContentResolver mContentResolver;
@@ -1264,7 +1263,7 @@ public class WifiWatchdogService {
                 return false;
                 
             } catch (Exception e) {
-                if (V || Config.LOGD) {
+                if (V || false) {
                     Slog.d(TAG, "DnsPinger.isReachable got an unknown exception", e);
                 }
                 return false;

@@ -17,7 +17,6 @@
 package android.renderscript;
 
 
-import android.util.Config;
 import android.util.Log;
 
 

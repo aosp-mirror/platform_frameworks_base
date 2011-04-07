@@ -22,7 +22,6 @@ import java.io.InputStream;
 
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.util.Config;
 import android.util.Log;
 
 import android.graphics.Bitmap;

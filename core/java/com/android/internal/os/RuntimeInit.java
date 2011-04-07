@@ -23,7 +23,6 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.SystemProperties;
-import android.util.Config;
 import android.util.Log;
 import android.util.Slog;
 
@@ -90,14 +89,14 @@ public class RuntimeInit {
     }
 
     private static final void commonInit() {
-        if (Config.LOGV) Slog.d(TAG, "Entered RuntimeInit!");
+        if (false) Slog.d(TAG, "Entered RuntimeInit!");
 
         /* set default handler; this applies to all threads in the VM */
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtHandler());
 
         int hasQwerty = getQwertyKeyboard();
 
-        if (Config.LOGV) Slog.d(TAG, ">>>>> qwerty keyboard = " + hasQwerty);
+        if (false) Slog.d(TAG, ">>>>> qwerty keyboard = " + hasQwerty);
         if (hasQwerty == 1) {
             System.setProperty("qwerty", "1");
         }
@@ -234,7 +233,7 @@ public class RuntimeInit {
          */
         finishInit();
 
-        if (Config.LOGV) Slog.d(TAG, "Leaving RuntimeInit!");
+        if (false) Slog.d(TAG, "Leaving RuntimeInit!");
     }
 
     public static final native void finishInit();

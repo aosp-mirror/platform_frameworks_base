@@ -33,7 +33,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -45,7 +44,7 @@ import java.util.Calendar;
 /** This class calls its monitor every minute. Killing this process if they don't return **/
 public class Watchdog extends Thread {
     static final String TAG = "Watchdog";
-    static final boolean localLOGV = false || Config.LOGV;
+    static final boolean localLOGV = false || false;
 
     // Set this to true to use debug default values.
     static final boolean DB = false;

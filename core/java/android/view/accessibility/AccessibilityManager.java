@@ -16,8 +16,6 @@
 
 package android.view.accessibility;
 
-import static android.util.Config.LOGV;
-
 import android.content.Context;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
@@ -166,7 +164,7 @@ public final class AccessibilityManager {
             long identityToken = Binder.clearCallingIdentity();
             doRecycle = mService.sendAccessibilityEvent(event);
             Binder.restoreCallingIdentity(identityToken);
-            if (LOGV) {
+            if (false) {
                 Log.i(LOG_TAG, event + " sent");
             }
         } catch (RemoteException re) {
@@ -187,7 +185,7 @@ public final class AccessibilityManager {
         }
         try {
             mService.interrupt();
-            if (LOGV) {
+            if (false) {
                 Log.i(LOG_TAG, "Requested interrupt from all services");
             }
         } catch (RemoteException re) {
@@ -204,7 +202,7 @@ public final class AccessibilityManager {
         List<ServiceInfo> services = null;
         try {
             services = mService.getAccessibilityServiceList();
-            if (LOGV) {
+            if (false) {
                 Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
             }
         } catch (RemoteException re) {

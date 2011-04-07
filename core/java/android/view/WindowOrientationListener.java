@@ -21,7 +21,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.util.Config;
 import android.util.Log;
 import android.util.Slog;
 
@@ -47,7 +46,7 @@ import android.util.Slog;
 public abstract class WindowOrientationListener {
     private static final String TAG = "WindowOrientationListener";
     private static final boolean DEBUG = false;
-    private static final boolean localLOGV = DEBUG || Config.DEBUG;
+    private static final boolean localLOGV = DEBUG || false;
 
     private SensorManager mSensorManager;
     private boolean mEnabled;

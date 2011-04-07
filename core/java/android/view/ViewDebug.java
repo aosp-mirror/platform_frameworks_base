@@ -16,7 +16,6 @@
 
 package android.view;
 
-import android.util.Config;
 import android.util.Log;
 import android.util.DisplayMetrics;
 import android.content.res.Resources;
@@ -158,7 +157,7 @@ public class ViewDebug {
 
     /**
      * <p>Enables or disables views consistency check. Even when this property is enabled,
-     * view consistency checks happen only if {@link android.util.Config#DEBUG} is set
+     * view consistency checks happen only if {@link false} is set
      * to true. The value of this property can be configured externally in one of the
      * following files:</p>
      * <ul>
@@ -172,7 +171,7 @@ public class ViewDebug {
     public static boolean consistencyCheckEnabled = false;
 
     static {
-        if (Config.DEBUG) {        
+        if (false) {        
 	        Debug.setFieldsOn(ViewDebug.class, true);
 	    }
     }

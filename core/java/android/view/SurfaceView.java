@@ -34,7 +34,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.ParcelFileDescriptor;
 import android.util.AttributeSet;
-import android.util.Config;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
@@ -84,7 +83,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class SurfaceView extends View {
     static private final String TAG = "SurfaceView";
     static private final boolean DEBUG = false;
-    static private final boolean localLOGV = DEBUG ? true : Config.LOGV;
+    static private final boolean localLOGV = DEBUG ? true : false;
 
     final ArrayList<SurfaceHolder.Callback> mCallbacks
             = new ArrayList<SurfaceHolder.Callback>();

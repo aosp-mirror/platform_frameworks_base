@@ -19,7 +19,6 @@ package android.database;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.Config;
 import android.util.Log;
 
 
@@ -77,7 +76,7 @@ public final class CursorToBulkCursorAdaptor extends BulkCursorNative
             if (mCursor instanceof AbstractWindowedCursor) {
                 AbstractWindowedCursor windowedCursor = (AbstractWindowedCursor) cursor;
                 if (windowedCursor.hasWindow()) {
-                    if (Log.isLoggable(TAG, Log.VERBOSE) || Config.LOGV) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE) || false) {
                         Log.v(TAG, "Cross process cursor has a local window before setWindow in "
                                 + providerName, new RuntimeException());
                     }

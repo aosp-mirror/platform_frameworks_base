@@ -19,7 +19,6 @@ package com.android.internal.telephony.gsm;
 import android.os.Parcel;
 import android.telephony.PhoneNumberUtils;
 import android.text.format.Time;
-import android.util.Config;
 import android.util.Log;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.EncodeException;
@@ -458,7 +457,7 @@ public class SmsMessage extends SmsMessageBase {
         if (statusReportRequested) {
             // Set TP-Status-Report-Request bit.
             mtiByte |= 0x20;
-            if (Config.LOGD) Log.d(LOG_TAG, "SMS status report requested");
+            if (false) Log.d(LOG_TAG, "SMS status report requested");
         }
         bo.write(mtiByte);
 
@@ -942,7 +941,7 @@ public class SmsMessage extends SmsMessageBase {
         scAddress = p.getSCAddress();
 
         if (scAddress != null) {
-            if (Config.LOGD) Log.d(LOG_TAG, "SMS SC address: " + scAddress);
+            if (false) Log.d(LOG_TAG, "SMS SC address: " + scAddress);
         }
 
         // TODO(mkf) support reply path, user data header indicator
@@ -1024,7 +1023,7 @@ public class SmsMessage extends SmsMessageBase {
         originatingAddress = p.getAddress();
 
         if (originatingAddress != null) {
-            if (Config.LOGV) Log.v(LOG_TAG, "SMS originating address: "
+            if (false) Log.v(LOG_TAG, "SMS originating address: "
                     + originatingAddress.address);
         }
 
@@ -1036,14 +1035,14 @@ public class SmsMessage extends SmsMessageBase {
         // see TS 23.038
         dataCodingScheme = p.getByte();
 
-        if (Config.LOGV) {
+        if (false) {
             Log.v(LOG_TAG, "SMS TP-PID:" + protocolIdentifier
                     + " data coding scheme: " + dataCodingScheme);
         }
 
         scTimeMillis = p.getSCTimestampMillis();
 
-        if (Config.LOGD) Log.d(LOG_TAG, "SMS SC timestamp: " + scTimeMillis);
+        if (false) Log.d(LOG_TAG, "SMS SC timestamp: " + scTimeMillis);
 
         boolean hasUserDataHeader = (firstByte & 0x40) == 0x40;
 
@@ -1173,7 +1172,7 @@ public class SmsMessage extends SmsMessageBase {
             break;
         }
 
-        if (Config.LOGV) Log.v(LOG_TAG, "SMS message body (raw): '" + messageBody + "'");
+        if (false) Log.v(LOG_TAG, "SMS message body (raw): '" + messageBody + "'");
 
         if (messageBody != null) {
             parseMessageBody();

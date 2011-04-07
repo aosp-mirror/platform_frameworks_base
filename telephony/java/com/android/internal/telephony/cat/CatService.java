@@ -30,7 +30,6 @@ import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccRecords;
 
-import android.util.Config;
 
 import java.io.ByteArrayOutputStream;
 
@@ -366,7 +365,7 @@ public class CatService extends Handler implements AppInterface {
 
         byte[] rawData = buf.toByteArray();
         String hexString = IccUtils.bytesToHexString(rawData);
-        if (Config.LOGD) {
+        if (false) {
             CatLog.d(this, "TERMINAL RESPONSE: " + hexString);
         }
 

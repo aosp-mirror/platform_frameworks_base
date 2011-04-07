@@ -34,7 +34,6 @@ import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Slog;
 
@@ -59,7 +58,7 @@ import android.util.Slog;
 public class DeviceStorageMonitorService extends Binder {
     private static final String TAG = "DeviceStorageMonitorService";
     private static final boolean DEBUG = false;
-    private static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    private static final boolean localLOGV = false;
     private static final int DEVICE_MEMORY_WHAT = 1;
     private static final int MONITOR_INTERVAL = 1; //in minutes
     private static final int LOW_MEMORY_NOTIFICATION_ID = 1;

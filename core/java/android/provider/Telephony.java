@@ -28,7 +28,6 @@ import android.net.Uri;
 import android.os.Environment;
 import android.telephony.SmsMessage;
 import android.text.TextUtils;
-import android.util.Config;
 import android.util.Log;
 import android.util.Patterns;
 
@@ -46,7 +45,7 @@ import java.util.regex.Pattern;
 public final class Telephony {
     private static final String TAG = "Telephony";
     private static final boolean DEBUG = true;
-    private static final boolean LOCAL_LOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    private static final boolean LOCAL_LOGV = false;
 
     // Constructor
     public Telephony() {

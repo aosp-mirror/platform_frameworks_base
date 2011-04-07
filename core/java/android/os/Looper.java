@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.util.Config;
 import android.util.Log;
 import android.util.Printer;
 import android.util.PrefixPrinter;

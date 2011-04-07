@@ -61,8 +61,7 @@ import android.util.Log;
 public class NotificationManager
 {
     private static String TAG = "NotificationManager";
-    private static boolean DEBUG = false;
-    private static boolean localLOGV = DEBUG || android.util.Config.LOGV;
+    private static boolean localLOGV = false;
 
     private static INotificationManager sService;
 

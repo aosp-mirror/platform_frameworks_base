@@ -30,7 +30,6 @@ import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LruCache;
@@ -735,7 +734,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                         throw savedException;
                     }
                 } catch (SQLException e) {
-                    if (Config.LOGD) {
+                    if (false) {
                         Log.d(TAG, "exception during rollback, maybe the DB previously "
                                 + "performed an auto-rollback");
                     }
@@ -744,7 +743,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         } finally {
             mTransactionListener = null;
             unlockForced();
-            if (Config.LOGV) {
+            if (false) {
                 Log.v(TAG, "unlocked " + Thread.currentThread()
                         + ", holdCount is " + mLock.getHoldCount());
             }
@@ -1557,7 +1556,7 @@ public class SQLiteDatabase extends SQLiteClosable {
         BlockGuard.getThreadPolicy().onReadFromDisk();
         long timeStart = 0;
 
-        if (Config.LOGV || mSlowQueryThreshold != -1) {
+        if (false || mSlowQueryThreshold != -1) {
             timeStart = System.currentTimeMillis();
         }
 
@@ -1570,7 +1569,7 @@ public class SQLiteDatabase extends SQLiteClosable {
                     cursorFactory != null ? cursorFactory : mFactory,
                     selectionArgs);
         } finally {
-            if (Config.LOGV || mSlowQueryThreshold != -1) {
+            if (false || mSlowQueryThreshold != -1) {
 
                 // Force query execution
                 int count = -1;
@@ -1580,7 +1579,7 @@ public class SQLiteDatabase extends SQLiteClosable {
 
                 long duration = System.currentTimeMillis() - timeStart;
 
-                if (Config.LOGV || duration >= mSlowQueryThreshold) {
+                if (false || duration >= mSlowQueryThreshold) {
                     Log.v(SQLiteCursor.TAG,
                           "query (" + duration + " ms): " + driver.toString() + ", args are "
                                   + (selectionArgs != null

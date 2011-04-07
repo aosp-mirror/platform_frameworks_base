@@ -17,7 +17,6 @@
 package android.net.wifi;
 
 import android.util.Log;
-import android.util.Config;
 import android.net.NetworkInfo;
 
 import java.util.regex.Pattern;
@@ -182,7 +181,7 @@ public class WifiMonitor {
                 String eventStr = WifiNative.waitForEvent();
 
                 // Skip logging the common but mostly uninteresting scan-results event
-                if (Config.LOGD && eventStr.indexOf(scanResultsEvent) == -1) {
+                if (false && eventStr.indexOf(scanResultsEvent) == -1) {
                     Log.v(TAG, "Event [" + eventStr + "]");
                 }
                 if (!eventStr.startsWith(eventPrefix)) {
@@ -200,7 +199,7 @@ public class WifiMonitor {
                 if (nameEnd != -1)
                     eventName = eventName.substring(0, nameEnd);
                 if (eventName.length() == 0) {
-                    if (Config.LOGD) Log.i(TAG, "Received wpa_supplicant event with empty event name");
+                    if (false) Log.i(TAG, "Received wpa_supplicant event with empty event name");
                     continue;
                 }
                 /*
@@ -251,7 +250,7 @@ public class WifiMonitor {
                      * stopped the supplicant, simply exit the monitor thread
                      */
                     if (eventData.startsWith(monitorSocketClosed)) {
-                        if (Config.LOGD) {
+                        if (false) {
                             Log.d(TAG, "Monitor socket is closed, exiting thread");
                         }
                         break;
@@ -263,7 +262,7 @@ public class WifiMonitor {
                      */
                     if (eventData.startsWith(wpaRecvError)) {
                         if (++mRecvErrors > MAX_RECV_ERRORS) {
-                            if (Config.LOGD) {
+                            if (false) {
                                 Log.d(TAG, "too many recv errors, closing connection");
                             }
                         } else {
@@ -398,7 +397,7 @@ public class WifiMonitor {
         if (newState == NetworkInfo.DetailedState.CONNECTED) {
             Matcher match = mConnectedEventPattern.matcher(data);
             if (!match.find()) {
-                if (Config.LOGD) Log.d(TAG, "Could not find BSSID in CONNECTED event string");
+                if (false) Log.d(TAG, "Could not find BSSID in CONNECTED event string");
             } else {
                 BSSID = match.group(1);
                 try {

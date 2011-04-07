@@ -46,7 +46,6 @@ import android.sax.Element;
 import android.sax.ElementListener;
 import android.sax.RootElement;
 import android.text.TextUtils;
-import android.util.Config;
 import android.util.Log;
 import android.util.Xml;
 
@@ -1082,7 +1081,7 @@ public class MediaScanner
             }
 
             for (String fileToDelete : existingFiles) {
-                if (Config.LOGV)
+                if (false)
                     Log.v(TAG, "fileToDelete is " + fileToDelete);
                 try {
                     (new File(fileToDelete)).delete();
@@ -1200,7 +1199,7 @@ public class MediaScanner
             postscan(directories);
             long end = System.currentTimeMillis();
 
-            if (Config.LOGD) {
+            if (false) {
                 Log.d(TAG, " prescan time: " + (prescan - start) + "ms\n");
                 Log.d(TAG, "    scan time: " + (scan - prescan) + "ms\n");
                 Log.d(TAG, "postscan time: " + (end - scan) + "ms\n");

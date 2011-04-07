@@ -25,7 +25,6 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.Config;
 import android.util.Log;
 import android.Manifest;
 
@@ -104,7 +103,7 @@ public final class ContentService extends IContentService.Stub {
         }
         synchronized (mRootNode) {
             mRootNode.addObserverLocked(uri, observer, notifyForDescendents, mRootNode);
-            if (Config.LOGV) Log.v(TAG, "Registered observer " + observer + " at " + uri +
+            if (false) Log.v(TAG, "Registered observer " + observer + " at " + uri +
                     " with notifyForDescendents " + notifyForDescendents);
         }
     }
@@ -115,7 +114,7 @@ public final class ContentService extends IContentService.Stub {
         }
         synchronized (mRootNode) {
             mRootNode.removeObserverLocked(observer);
-            if (Config.LOGV) Log.v(TAG, "Unregistered observer " + observer);
+            if (false) Log.v(TAG, "Unregistered observer " + observer);
         }
     }
 

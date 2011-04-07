@@ -48,7 +48,6 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.TextUtils.SimpleStringSplitter;
-import android.util.Config;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
@@ -450,7 +449,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         try {
             listener.onAccessibilityEvent(event);
-            if (Config.DEBUG) {
+            if (false) {
                 Slog.i(LOG_TAG, "Event " + event + " sent to " + listener);
             }
         } catch (RemoteException re) {
@@ -470,7 +469,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @return True if the service was removed, false otherwise.
      */
     private boolean removeDeadServiceLocked(Service service) {
-        if (Config.DEBUG) {
+        if (false) {
             Slog.i(LOG_TAG, "Dead service " + service.mService + " removed");
         }
         mHandler.removeMessages(service.mId);

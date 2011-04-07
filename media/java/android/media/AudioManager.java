@@ -50,8 +50,7 @@ public class AudioManager {
     private long mVolumeKeyUpTime;
     private int  mVolumeControlStream = -1;
     private static String TAG = "AudioManager";
-    private static boolean DEBUG = false;
-    private static boolean localLOGV = DEBUG || android.util.Config.LOGV;
+    private static boolean localLOGV = false;
 
     /**
      * Broadcast intent, a hint for applications that audio is about to become

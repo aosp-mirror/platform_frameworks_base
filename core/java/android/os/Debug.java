@@ -18,7 +18,6 @@ package android.os;
 
 import com.android.internal.util.TypedProperties;
 
-import android.util.Config;
 import android.util.Log;
 
 import java.io.FileDescriptor;
@@ -1031,7 +1030,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      * Load the debug properties from the standard files into debugProperties.
      */
     static {
-        if (Config.DEBUG) {
+        if (false) {
             final String TAG = "DebugProperties";
             final String[] files = { "/system/debug.prop", "/debug.prop", "/data/debug.prop" };
             final TypedProperties tp = new TypedProperties();
@@ -1157,10 +1156,10 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
 
     /**
      * Reflectively sets static fields of a class based on internal debugging
-     * properties.  This method is a no-op if android.util.Config.DEBUG is
+     * properties.  This method is a no-op if false is
      * false.
      * <p>
-     * <strong>NOTE TO APPLICATION DEVELOPERS</strong>: Config.DEBUG will
+     * <strong>NOTE TO APPLICATION DEVELOPERS</strong>: false will
      * always be false in release builds.  This API is typically only useful
      * for platform developers.
      * </p>
@@ -1211,7 +1210,7 @@ href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Lo
      *         the internal debugging property value.
      */
     public static void setFieldsOn(Class<?> cl, boolean partial) {
-        if (Config.DEBUG) {
+        if (false) {
             if (debugProperties != null) {
                 /* Only look for fields declared directly by the class,
                  * so we don't mysteriously change static fields in superclasses.

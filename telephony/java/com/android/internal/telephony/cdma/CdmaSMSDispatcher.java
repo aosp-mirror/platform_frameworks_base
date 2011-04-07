@@ -33,7 +33,6 @@ import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage.MessageClass;
-import android.util.Config;
 import android.util.Log;
 
 import com.android.internal.telephony.CommandsInterface;
@@ -145,7 +144,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             handleCdmaStatusReport(sms);
             handled = true;
         } else if ((sms.getUserData() == null)) {
-            if (Config.LOGD) {
+            if (false) {
                 Log.d(TAG, "Received SMS without user data");
             }
             handled = true;
@@ -435,7 +434,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
                     sentIntent.send(SmsManager.RESULT_ERROR_NO_SERVICE);
                 } catch (CanceledException ex) {}
             }
-            if (Config.LOGD) {
+            if (false) {
                 Log.d(TAG, "Block SMS in Emergency Callback mode");
             }
             return;

@@ -22,7 +22,6 @@ import android.os.RegistrantList;
 import android.os.Registrant;
 import android.os.Handler;
 import android.os.AsyncResult;
-import android.util.Config;
 import android.util.Log;
 
 /**
@@ -676,7 +675,7 @@ public abstract class BaseCommands implements CommandsInterface {
         RadioState oldState;
 
         synchronized (mStateMonitor) {
-            if (Config.LOGV) {
+            if (false) {
                 Log.v(LOG_TAG, "setRadioState old: " + mState
                     + " new " + newState);
             }

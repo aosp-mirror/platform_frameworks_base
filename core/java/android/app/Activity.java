@@ -51,7 +51,6 @@ import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.method.TextKeyListener;
 import android.util.AttributeSet;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
@@ -3597,7 +3596,7 @@ public class Activity extends ContextThemeWrapper
                 resultCode = mResultCode;
                 resultData = mResultData;
             }
-            if (Config.LOGV) Log.v(TAG, "Finishing self: token=" + mToken);
+            if (false) Log.v(TAG, "Finishing self: token=" + mToken);
             try {
                 if (ActivityManagerNative.getDefault()
                     .finishActivity(mToken, resultCode, resultData)) {
@@ -4533,7 +4532,7 @@ public class Activity extends ContextThemeWrapper
 
     void dispatchActivityResult(String who, int requestCode, 
         int resultCode, Intent data) {
-        if (Config.LOGV) Log.v(
+        if (false) Log.v(
             TAG, "Dispatching result: who=" + who + ", reqCode=" + requestCode
             + ", resCode=" + resultCode + ", data=" + data);
         mFragments.noteStateNotSaved();

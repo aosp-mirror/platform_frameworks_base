@@ -28,7 +28,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
 import android.util.AttributeSet;
-import android.util.Config;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -384,7 +383,7 @@ public class PackageParser {
             return null;
         }
 
-        if ((flags&PARSE_CHATTY) != 0 && Config.LOGD) Log.d(
+        if ((flags&PARSE_CHATTY) != 0 && false) Log.d(
             TAG, "Scanning package: " + mArchiveSourcePath);
 
         XmlResourceParser parser = null;
@@ -666,7 +665,7 @@ public class PackageParser {
             outError[0] = "No start tag found";
             return null;
         }
-        if ((flags&PARSE_CHATTY) != 0 && Config.LOGV) Log.v(
+        if ((flags&PARSE_CHATTY) != 0 && false) Log.v(
             TAG, "Root element name: '" + parser.getName() + "'");
         if (!parser.getName().equals("manifest")) {
             outError[0] = "No <manifest> tag";
@@ -701,7 +700,7 @@ public class PackageParser {
             outError[0] = "No start tag found";
             return null;
         }
-        if ((flags&PARSE_CHATTY) != 0 && Config.LOGV) Log.v(
+        if ((flags&PARSE_CHATTY) != 0 && false) Log.v(
             TAG, "Root element name: '" + parser.getName() + "'");
         if (!parser.getName().equals("manifest")) {
             outError[0] = "No <manifest> tag";

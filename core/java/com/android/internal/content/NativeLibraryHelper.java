@@ -4,7 +4,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.FileUtils;
 import android.os.SystemProperties;
-import android.util.Config;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -176,7 +175,7 @@ public class NativeLibraryHelper {
                 continue;
             }
 
-            if (Config.LOGD) {
+            if (false) {
                 Log.d(TAG, "Found gdbserver: " + entry.getName());
             }
 

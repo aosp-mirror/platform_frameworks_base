@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.util.Config;
 import android.util.Log;
 
 import java.io.FileDescriptor;
@@ -291,7 +290,7 @@ public class Binder implements IBinder {
      */
     public final boolean transact(int code, Parcel data, Parcel reply,
             int flags) throws RemoteException {
-        if (Config.LOGV) Log.v("Binder", "Transact: " + code + " to " + this);
+        if (false) Log.v("Binder", "Transact: " + code + " to " + this);
         if (data != null) {
             data.setDataPosition(0);
         }
@@ -413,7 +412,7 @@ final class BinderProxy implements IBinder {
     private native final void destroy();
     
     private static final void sendDeathNotice(DeathRecipient recipient) {
-        if (Config.LOGV) Log.v("JavaBinder", "sendDeathNotice to " + recipient);
+        if (false) Log.v("JavaBinder", "sendDeathNotice to " + recipient);
         try {
             recipient.binderDied();
         }

@@ -52,8 +52,7 @@ import android.os.Bundle;
  */
 public class DeviceAdminReceiver extends BroadcastReceiver {
     private static String TAG = "DevicePolicy";
-    private static boolean DEBUG = false;
-    private static boolean localLOGV = DEBUG || android.util.Config.LOGV;
+    private static boolean localLOGV = false;
 
     /**
      * This is the primary action that a device administrator must implement to be

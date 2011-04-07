@@ -18,7 +18,6 @@ package android.renderscript;
 
 import java.util.Vector;
 
-import android.util.Config;
 import android.util.Log;
 
 /**

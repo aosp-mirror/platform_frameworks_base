@@ -19,7 +19,6 @@ package android.ddm;
 import org.apache.harmony.dalvik.ddmc.Chunk;
 import org.apache.harmony.dalvik.ddmc.ChunkHandler;
 import org.apache.harmony.dalvik.ddmc.DdmServer;
-import android.util.Config;
 import android.util.Log;
 import android.os.Debug;
 
@@ -53,7 +52,7 @@ public class DdmHandleHello extends ChunkHandler {
      * send messages to the server.
      */
     public void connected() {
-        if (Config.LOGV)
+        if (false)
             Log.v("ddm-hello", "Connected!");
 
         if (false) {
@@ -70,7 +69,7 @@ public class DdmHandleHello extends ChunkHandler {
      * periodic transmissions or clean up saved state.
      */
     public void disconnected() {
-        if (Config.LOGV)
+        if (false)
             Log.v("ddm-hello", "Disconnected!");
     }
 
@@ -78,7 +77,7 @@ public class DdmHandleHello extends ChunkHandler {
      * Handle a chunk of data.
      */
     public Chunk handleChunk(Chunk request) {
-        if (Config.LOGV)
+        if (false)
             Log.v("ddm-heap", "Handling " + name(request.type) + " chunk");
         int type = request.type;
 
@@ -105,7 +104,7 @@ public class DdmHandleHello extends ChunkHandler {
         ByteBuffer in = wrapChunk(request);
 
         int serverProtoVers = in.getInt();
-        if (Config.LOGV)
+        if (false)
             Log.v("ddm-hello", "Server version is " + serverProtoVers);
 
         /*
@@ -150,7 +149,7 @@ public class DdmHandleHello extends ChunkHandler {
         // is actually compiled in
         final String[] features = Debug.getVmFeatureList();
 
-        if (Config.LOGV)
+        if (false)
             Log.v("ddm-heap", "Got feature list request");
 
         int size = 4 + 4 * features.length;

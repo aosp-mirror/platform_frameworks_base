@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.apache.http.protocol.HTTP;
 import android.util.Log;
-import android.util.Config;
 import android.net.http.*;
 
 /**
@@ -157,7 +156,7 @@ public class TestEventHandler implements EventHandler {
      */
     public void status(int major_version, int minor_version,
         int code, String reason_phrase) {
-      if (Config.LOGV) {
+      if (false) {
         Log.v(LOGTAG, "TestEventHandler:status() major: " + major_version +
             " minor: " + minor_version +
             " code: " + code +
@@ -219,7 +218,7 @@ public class TestEventHandler implements EventHandler {
      * sends header fields
      */
     public void headers(Headers headers) {
-        if (Config.LOGV) {
+        if (false) {
             Log.v(LOGTAG, "TestEventHandler:headers()");
         }
         expects[TEST_HEADERS] = false;
@@ -325,7 +324,7 @@ public class TestEventHandler implements EventHandler {
      * @param permanent Indicator of whether this is a permanent change
      */
     public void locationChanged(String newLocation, boolean permanent) {
-      if (Config.LOGV) {
+      if (false) {
         Log.v(LOGTAG, "TestEventHandler: locationChanged() " +
             newLocation + " permanent " + permanent);
       }
@@ -371,7 +370,7 @@ public class TestEventHandler implements EventHandler {
     public void data(byte[] data, int len) {
       boolean mismatch = false;
 
-      if (Config.LOGV) {
+      if (false) {
         Log.v(LOGTAG, "TestEventHandler: data() " + len + " bytes");
       }
 
@@ -415,7 +414,7 @@ public class TestEventHandler implements EventHandler {
      * indicate completion or a request
      */
     public void endData() {
-      if (Config.LOGV) {
+      if (false) {
         Log.v(LOGTAG, "TestEventHandler: endData() called");
       }
 
@@ -455,7 +454,7 @@ public class TestEventHandler implements EventHandler {
      * @param description Brief description of the error
      */
     public void error(int id, String description) {
-      if (Config.LOGV) {
+      if (false) {
         Log.v(LOGTAG, "TestEventHandler: error() called Id:" + id +
             " description " + description);
       }
@@ -500,7 +499,7 @@ public class TestEventHandler implements EventHandler {
     public boolean handleSslErrorRequest(SslError error) {
       int primaryError = error.getPrimaryError();
 
-      if (Config.LOGV) {
+      if (false) {
         Log.v(LOGTAG, "TestEventHandler: handleSslErrorRequest(): "+
               " primary error:" + primaryError +
               " certificate: " + error.getCertificate());
@@ -792,7 +791,7 @@ public class TestEventHandler implements EventHandler {
      * @param requestHandle The RequestHandle
      */
     public void attachRequestHandle(RequestHandle requestHandle) {
-        if (Config.LOGV) {
+        if (false) {
             Log.v(LOGTAG, "TestEventHandler.attachRequestHandle(): " +
                     "requestHandle: " +  requestHandle);
         }
@@ -803,7 +802,7 @@ public class TestEventHandler implements EventHandler {
      * Detach the RequestHandle
      */
     public void detachRequestHandle() {
-        if (Config.LOGV) {
+        if (false) {
             Log.v(LOGTAG, "TestEventHandler.detachRequestHandle(): " +
                     "requestHandle: " + mRequestHandle);
         }

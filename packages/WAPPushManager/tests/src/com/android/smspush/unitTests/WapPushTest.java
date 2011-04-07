@@ -26,7 +26,6 @@ import android.os.RemoteException;
 import android.provider.Telephony.Sms.Intents;
 import android.test.ServiceTestCase;
 import android.util.Log;
-import android.util.Config;
 
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.IWapPushManager;
@@ -2051,7 +2050,7 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
      */
     public int dispatchWapPdu(byte[] pdu, IWapPushManager wapPushMan) {
 
-        if (Config.DEBUG) Log.d(LOG_TAG, "Rx: " + IccUtils.bytesToHexString(pdu));
+        if (false) Log.d(LOG_TAG, "Rx: " + IccUtils.bytesToHexString(pdu));
 
         int index = 0;
         int transactionId = pdu[index++] & 0xFF;
@@ -2060,7 +2059,7 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
 
         if ((pduType != WspTypeDecoder.PDU_TYPE_PUSH) &&
                 (pduType != WspTypeDecoder.PDU_TYPE_CONFIRMED_PUSH)) {
-            if (Config.DEBUG) Log.w(LOG_TAG, "Received non-PUSH WAP PDU. Type = " + pduType);
+            if (false) Log.w(LOG_TAG, "Received non-PUSH WAP PDU. Type = " + pduType);
             return Intents.RESULT_SMS_HANDLED;
         }
 
@@ -2073,7 +2072,7 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
          * So it will be encoded in no more than 5 octets.
          */
         if (pduDecoder.decodeUintvarInteger(index) == false) {
-            if (Config.DEBUG) Log.w(LOG_TAG, "Received PDU. Header Length error.");
+            if (false) Log.w(LOG_TAG, "Received PDU. Header Length error.");
             return Intents.RESULT_SMS_GENERIC_ERROR;
         }
         headerLength = (int) pduDecoder.getValue32();
@@ -2094,7 +2093,7 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
          * Length = Uintvar-integer
          */
         if (pduDecoder.decodeContentType(index) == false) {
-            if (Config.DEBUG) Log.w(LOG_TAG, "Received PDU. Header Content-Type error.");
+            if (false) Log.w(LOG_TAG, "Received PDU. Header Content-Type error.");
             return Intents.RESULT_SMS_GENERIC_ERROR;
         }
 
@@ -2131,13 +2130,13 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
 
             String contentType = ((mimeType == null) ?
                     Long.toString(binaryContentType) : mimeType);
-            if (Config.DEBUG) Log.v(LOG_TAG, "appid found: " + wapAppId + ":" + contentType);
+            if (false) Log.v(LOG_TAG, "appid found: " + wapAppId + ":" + contentType);
 
             try {
                 boolean processFurther = true;
                 // IWapPushManager wapPushMan = mWapConn.getWapPushManager();
                 if (wapPushMan == null) {
-                    if (Config.DEBUG) Log.w(LOG_TAG, "wap push manager not found!");
+                    if (false) Log.w(LOG_TAG, "wap push manager not found!");
                 } else {
                     Intent intent = new Intent();
                     intent.putExtra("transactionId", transactionId);
@@ -2148,7 +2147,7 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
                             pduDecoder.getContentParameters());
 
                     int procRet = wapPushMan.processMessage(wapAppId, contentType, intent);
-                    if (Config.DEBUG) Log.v(LOG_TAG, "procRet:" + procRet);
+                    if (false) Log.v(LOG_TAG, "procRet:" + procRet);
                     if ((procRet & WapPushManagerParams.MESSAGE_HANDLED) > 0
                             && (procRet & WapPushManagerParams.FURTHER_PROCESSING) == 0) {
                         processFurther = false;
@@ -2158,10 +2157,10 @@ public class WapPushTest extends ServiceTestCase<WapPushManager> {
                     return Intents.RESULT_SMS_HANDLED;
                 }
             } catch (RemoteException e) {
-                if (Config.DEBUG) Log.w(LOG_TAG, "remote func failed...");
+                if (false) Log.w(LOG_TAG, "remote func failed...");
             }
         }
-        if (Config.DEBUG) Log.v(LOG_TAG, "fall back to existing handler");
+        if (false) Log.v(LOG_TAG, "fall back to existing handler");
 
         return Activity.RESULT_OK;
     }

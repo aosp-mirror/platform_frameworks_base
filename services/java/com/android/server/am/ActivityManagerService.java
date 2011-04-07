@@ -103,7 +103,6 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.Log;
@@ -147,7 +146,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
     static final String TAG = "ActivityManager";
     static final boolean DEBUG = false;
-    static final boolean localLOGV = DEBUG ? Config.LOGD : Config.LOGV;
+    static final boolean localLOGV = false;
     static final boolean DEBUG_SWITCH = localLOGV || false;
     static final boolean DEBUG_TASKS = localLOGV || false;
     static final boolean DEBUG_PAUSE = localLOGV || false;
@@ -13072,7 +13071,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
                 // If we still have too many processes, now from the least
                 // recently used process we start finishing activities.
-                if (Config.LOGV) Slog.v(
+                if (false) Slog.v(
                     TAG, "*** NOW HAVE " + mLruProcesses.size() +
                     " of " + curMaxProcs + " processes");
                 for (   i=0;
@@ -13086,11 +13085,11 @@ public final class ActivityManagerService extends ActivityManagerNative
                         && app.services.size() == 0;
                     int NUMA = app.activities.size();
                     int j;
-                    if (Config.LOGV) Slog.v(
+                    if (false) Slog.v(
                         TAG, "Looking to quit " + app.processName);
                     for (j=0; j<NUMA && canQuit; j++) {
                         ActivityRecord r = app.activities.get(j);
-                        if (Config.LOGV) Slog.v(
+                        if (false) Slog.v(
                             TAG, "  " + r.intent.getComponent().flattenToShortString()
                             + ": frozen=" + r.haveState + ", visible=" + r.visible);
                         canQuit = (r.haveState || !r.stateNotNeeded)

@@ -23,7 +23,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.Registrant;
 import android.os.SystemClock;
-import android.util.Config;
 import android.util.Log;
 import android.telephony.PhoneNumberUtils;
 import android.telephony.ServiceState;
@@ -410,7 +409,7 @@ public class GsmConnection extends Connection {
             duration = SystemClock.elapsedRealtime() - connectTimeReal;
             disconnected = true;
 
-            if (Config.LOGD) Log.d(LOG_TAG,
+            if (false) Log.d(LOG_TAG,
                     "[GSMConn] onDisconnect: cause=" + cause);
 
             owner.phone.notifyDisconnect(this);

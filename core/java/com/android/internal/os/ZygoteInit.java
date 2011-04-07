@@ -25,7 +25,6 @@ import android.os.Debug;
 import android.os.FileUtils;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
 
@@ -272,12 +271,12 @@ public class ZygoteInit {
                     }
 
                     try {
-                        if (Config.LOGV) {
+                        if (false) {
                             Log.v(TAG, "Preloading " + line + "...");
                         }
                         Class.forName(line);
                         if (Debug.getGlobalAllocSize() > PRELOAD_GC_THRESHOLD) {
-                            if (Config.LOGV) {
+                            if (false) {
                                 Log.v(TAG,
                                     " GC at " + Debug.getGlobalAllocSize());
                             }
@@ -362,7 +361,7 @@ public class ZygoteInit {
         int N = ar.length();
         for (int i=0; i<N; i++) {
             if (Debug.getGlobalAllocSize() > PRELOAD_GC_THRESHOLD) {
-                if (Config.LOGV) {
+                if (false) {
                     Log.v(TAG, " GC at " + Debug.getGlobalAllocSize());
                 }
                 System.gc();
@@ -370,7 +369,7 @@ public class ZygoteInit {
                 Debug.resetGlobalAllocSize();
             }
             int id = ar.getResourceId(i, 0);
-            if (Config.LOGV) {
+            if (false) {
                 Log.v(TAG, "Preloading resource #" + Integer.toHexString(id));
             }
             if (id != 0) {
@@ -385,7 +384,7 @@ public class ZygoteInit {
         int N = ar.length();
         for (int i=0; i<N; i++) {
             if (Debug.getGlobalAllocSize() > PRELOAD_GC_THRESHOLD) {
-                if (Config.LOGV) {
+                if (false) {
                     Log.v(TAG, " GC at " + Debug.getGlobalAllocSize());
                 }
                 System.gc();
@@ -393,7 +392,7 @@ public class ZygoteInit {
                 Debug.resetGlobalAllocSize();
             }
             int id = ar.getResourceId(i, 0);
-            if (Config.LOGV) {
+            if (false) {
                 Log.v(TAG, "Preloading resource #" + Integer.toHexString(id));
             }
             if (id != 0) {

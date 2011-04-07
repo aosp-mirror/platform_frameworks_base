@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import android.content.res.Resources;
-import android.util.Config;
 import android.util.Log;
 
 
