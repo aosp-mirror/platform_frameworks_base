@@ -170,7 +170,6 @@ AudioEffect::~AudioEffect()
     LOGV("Destructor %p", this);
 
     if (mStatus == NO_ERROR || mStatus == ALREADY_EXISTS) {
-        setEnabled(false);
         if (mIEffect != NULL) {
             mIEffect->disconnect();
             mIEffect->asBinder()->unlinkToDeath(mIEffectClient);
