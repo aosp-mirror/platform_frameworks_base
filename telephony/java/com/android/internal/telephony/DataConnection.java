@@ -62,29 +62,6 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     protected static int mCount;
 
     /**
-     * Class returned by onSetupConnectionCompleted.
-     */
-    protected enum SetupResult {
-        SUCCESS,
-        ERR_BadCommand,
-        ERR_UnacceptableParameter,
-        ERR_GetLastErrorFromRil,
-        ERR_Stale,
-        ERR_RilError;
-
-        public FailCause mFailCause;
-
-        SetupResult() {
-            mFailCause = FailCause.fromInt(0);
-        }
-
-        @Override
-        public String toString() {
-            return name() + "  SetupResult.mFailCause=" + mFailCause;
-        }
-    }
-
-    /**
      * Used internally for saving connecting parameters.
      */
     protected static class ConnectionParams {
@@ -445,10 +422,10 @@ public abstract class DataConnection extends HierarchicalStateMachine {
      * @param ar is the result
      * @return SetupResult.
      */
-    private SetupResult onSetupConnectionCompleted(AsyncResult ar) {
+    private DataCallState.SetupResult onSetupConnectionCompleted(AsyncResult ar) {
         DataCallState response = (DataCallState) ar.result;
         ConnectionParams cp = (ConnectionParams) ar.userObj;
-        SetupResult result;
+        DataCallState.SetupResult result;
 
         if (ar.exception != null) {
             if (DBG) {
@@ -459,148 +436,35 @@ public abstract class DataConnection extends HierarchicalStateMachine {
             if (ar.exception instanceof CommandException
                     && ((CommandException) (ar.exception)).getCommandError()
                     == CommandException.Error.RADIO_NOT_AVAILABLE) {
-                result = SetupResult.ERR_BadCommand;
+                result = DataCallState.SetupResult.ERR_BadCommand;
                 result.mFailCause = FailCause.RADIO_NOT_AVAILABLE;
             } else if ((response == null) || (response.version < 4)) {
-                result = SetupResult.ERR_GetLastErrorFromRil;
+                result = DataCallState.SetupResult.ERR_GetLastErrorFromRil;
             } else {
-                result = SetupResult.ERR_RilError;
+                result = DataCallState.SetupResult.ERR_RilError;
                 result.mFailCause = FailCause.fromInt(response.status);
             }
         } else if (cp.tag != mTag) {
             if (DBG) {
                 log("BUG: onSetupConnectionCompleted is stale cp.tag=" + cp.tag + ", mtag=" + mTag);
             }
-            result = SetupResult.ERR_Stale;
+            result = DataCallState.SetupResult.ERR_Stale;
         } else {
             log("onSetupConnectionCompleted received DataCallState: " + response);
 
-            // Start with clean network properties and if we have
-            // a failure we'll clear again at the bottom of this code.
-            LinkProperties linkProperties = new LinkProperties();
-            if (response.status == FailCause.NONE.getErrorCode()) {
-                String propertyPrefix = "net." + response.ifname + ".";
+            // Check if system property dns usable
+            boolean okToUseSystemPropertyDns = false;
+            String propertyPrefix = "net." + response.ifname + ".";
+            String dnsServers[] = new String[2];
+            dnsServers[0] = SystemProperties.get(propertyPrefix + "dns1");
+            dnsServers[1] = SystemProperties.get(propertyPrefix + "dns2");
+            okToUseSystemPropertyDns = isDnsOk(dnsServers);
 
-                try {
-                    cid = response.cid;
-                    linkProperties.setInterfaceName(response.ifname);
-                    if (response.addresses != null && response.addresses.length > 0) {
-                        for (String addr : response.addresses) {
-                            LinkAddress la;
-                            int addrPrefixLen;
-
-                            String [] ap = addr.split("/");
-                            if (ap.length == 2) {
-                                addr = ap[0];
-                                addrPrefixLen = Integer.parseInt(ap[1]);
-                            } else {
-                                addrPrefixLen = 0;
-                            }
-                            InetAddress ia;
-                            try {
-                                ia = NetworkUtils.numericToInetAddress(addr);
-                            } catch (IllegalArgumentException e) {
-                                EventLogTags.writeBadIpAddress(addr);
-                                throw new UnknownHostException("Non-numeric ip addr=" + addr);
-                            }
-                            if (addrPrefixLen == 0) {
-                                // Assume point to point
-                                addrPrefixLen = (ia instanceof Inet4Address) ? 32 : 128;
-                            }
-                            if (DBG) log("addr/pl=" + addr + "/" + addrPrefixLen);
-                            la = new LinkAddress(ia, addrPrefixLen);
-                            linkProperties.addLinkAddress(la);
-                        }
-                    } else {
-                        EventLogTags.writeBadIpAddress("no address for ifname=" + response.ifname);
-                        throw new UnknownHostException("no address for ifname=" + response.ifname);
-                    }
-                    if (response.dnses != null && response.dnses.length > 0) {
-                        for (String addr : response.dnses) {
-                            InetAddress ia;
-                            try {
-                                ia = NetworkUtils.numericToInetAddress(addr);
-                            } catch (IllegalArgumentException e) {
-                                EventLogTags.writePdpBadDnsAddress("dns=" + addr); 
-                                throw new UnknownHostException("Non-numeric dns addr=" + addr);
-                            }
-                            linkProperties.addDns(ia);
-                        }
-                        result = SetupResult.SUCCESS;
-                    } else {
-                        String dnsServers[] = new String[2];
-                        dnsServers[0] = SystemProperties.get(propertyPrefix + "dns1");
-                        dnsServers[1] = SystemProperties.get(propertyPrefix + "dns2");
-                        if (isDnsOk(dnsServers)) {
-                            for (String dnsAddr : dnsServers) {
-                                InetAddress ia;
-                                try {
-                                    ia = NetworkUtils.numericToInetAddress(dnsAddr);
-                                } catch (IllegalArgumentException e) {
-                                    EventLogTags.writePdpBadDnsAddress("dnsAddr=" + dnsAddr);
-                                    throw new UnknownHostException("Non-numeric dns addr="
-                                                + dnsAddr);
-                                }
-                                linkProperties.addDns(ia);
-                            }
-                            result = SetupResult.SUCCESS;
-                        } else {
-                            StringBuilder sb = new StringBuilder();
-                            for (String dnsAddr : dnsServers) {
-                                sb.append(dnsAddr);
-                                sb.append(" ");
-                            }
-                            EventLogTags.writePdpBadDnsAddress("Unacceptable dns addresses=" + sb);
-                            throw new UnknownHostException("Unacceptable dns addresses=" + sb);
-                        }
-                    }
-                    if ((response.gateways == null) || (response.gateways.length == 0)) {
-                        String gateways = SystemProperties.get(propertyPrefix + "gw");
-                        if (gateways != null) {
-                            response.gateways = gateways.split(" ");
-                        } else {
-                            response.gateways = new String[0];
-                        }
-                    }
-                    for (String addr : response.gateways) {
-                        InetAddress ia;
-                        try {
-                            ia = NetworkUtils.numericToInetAddress(addr);
-                        } catch (IllegalArgumentException e) {
-                            EventLogTags.writePdpBadDnsAddress("gateway=" + addr);
-                            throw new UnknownHostException("Non-numeric gateway addr=" + addr);
-                        }
-                        linkProperties.addGateway(ia);
-                    }
-                    result = SetupResult.SUCCESS;
-                } catch (UnknownHostException e) {
-                    log("onSetupCompleted: UnknownHostException " + e);
-                    e.printStackTrace();
-                    result = SetupResult.ERR_UnacceptableParameter;
-                }
-            } else {
-                if (response.version < 4) {
-                    result = SetupResult.ERR_GetLastErrorFromRil;
-                } else {
-                    result = SetupResult.ERR_RilError;
-                }
-            }
-
-            // An error occurred so clear properties
-            if (result != SetupResult.SUCCESS) {
-                log("onSetupConnectionCompleted with an error, clearing LinkProperties");
-                linkProperties.clear();
-            }
-            mLinkProperties = linkProperties;
+            // set link properties based on data call response
+            result = response.setLinkProperties(mLinkProperties,
+                    okToUseSystemPropertyDns);
         }
 
-        if (DBG) {
-            log("onSetupConnectionCompleted: DataConnection setup result='"
-                    + result + "' on cid=" + cid);
-            if (result == SetupResult.SUCCESS) {
-                log("onSetupConnectionCompleted: LinkProperties: " + mLinkProperties.toString());
-            }
-        }
         return result;
     }
 
@@ -746,7 +610,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                     ar = (AsyncResult) msg.obj;
                     cp = (ConnectionParams) ar.userObj;
 
-                    SetupResult result = onSetupConnectionCompleted(ar);
+                    DataCallState.SetupResult result = onSetupConnectionCompleted(ar);
                     if (DBG) log("DcActivatingState onSetupConnectionCompleted result=" + result);
                     switch (result) {
                         case SUCCESS:
@@ -780,7 +644,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                             // Request is stale, ignore.
                             break;
                         default:
-                            throw new RuntimeException("Unkown SetupResult, should not happen");
+                            throw new RuntimeException("Unknown SetupResult, should not happen");
                     }
                     retVal = true;
                     break;
