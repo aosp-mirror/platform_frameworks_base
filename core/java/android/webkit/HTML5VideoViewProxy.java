@@ -46,6 +46,7 @@ class HTML5VideoViewProxy extends Handler
                           implements MediaPlayer.OnPreparedListener,
                           MediaPlayer.OnCompletionListener,
                           MediaPlayer.OnErrorListener,
+                          MediaPlayer.OnInfoListener,
                           SurfaceTexture.OnFrameAvailableListener {
     // Logging tag.
     private static final String LOGTAG = "HTML5VideoViewProxy";
@@ -56,6 +57,8 @@ class HTML5VideoViewProxy extends Handler
     private static final int PAUSE               = 102;
     private static final int ERROR               = 103;
     private static final int LOAD_DEFAULT_POSTER = 104;
+    private static final int BUFFERING_START     = 105;
+    private static final int BUFFERING_END       = 106;
 
     // Message Ids to be handled on the WebCore thread
     private static final int PREPARED          = 200;
@@ -92,6 +95,10 @@ class HTML5VideoViewProxy extends Handler
         // identify the exact layer on the UI thread to use the SurfaceTexture.
         private static int mBaseLayer = 0;
 
+        private static void setPlayerBuffering(boolean playerBuffering) {
+            mHTML5VideoView.setPlayerBuffering(playerBuffering);
+        }
+
         // Every time webView setBaseLayer, this will be called.
         // When we found the Video layer, then we set the Surface Texture to it.
         // Otherwise, we may want to delete the Surface Texture to save memory.
@@ -106,6 +113,8 @@ class HTML5VideoViewProxy extends Handler
                 int currentVideoLayerId = mHTML5VideoView.getVideoLayerId();
                 if (layer != 0 && surfTexture != null && currentVideoLayerId != -1) {
                     int playerState = mHTML5VideoView.getCurrentState();
+                    if (mHTML5VideoView.getPlayerBuffering())
+                        playerState = HTML5VideoView.STATE_NOTPREPARED;
                     boolean foundInTree = nativeSendSurfaceTexture(surfTexture,
                             layer, currentVideoLayerId, textureName,
                             playerState);
@@ -159,7 +168,6 @@ class HTML5VideoViewProxy extends Handler
                 WebChromeClient client, int videoLayerId) {
             int currentVideoLayerId = -1;
             boolean backFromFullScreenMode = false;
-
             if (mHTML5VideoView != null) {
                 currentVideoLayerId = mHTML5VideoView.getVideoLayerId();
                 if (mHTML5VideoView instanceof HTML5VideoFullScreen) {
@@ -340,6 +348,14 @@ class HTML5VideoViewProxy extends Handler
                 if (VideoPlayer.isPlaying(this)) {
                     sendTimeupdate();
                 }
+                break;
+            }
+            case BUFFERING_START: {
+                VideoPlayer.setPlayerBuffering(true);
+                break;
+            }
+            case BUFFERING_END: {
+                VideoPlayer.setPlayerBuffering(false);
                 break;
             }
         }
@@ -671,4 +687,14 @@ class HTML5VideoViewProxy extends Handler
     private native static boolean nativeSendSurfaceTexture(SurfaceTexture texture,
             int baseLayer, int videoLayerId, int textureName,
             int playerState);
+
+    @Override
+    public boolean onInfo(MediaPlayer mp, int what, int extra) {
+        if (what == MediaPlayer.MEDIA_INFO_BUFFERING_START) {
+            sendMessage(obtainMessage(BUFFERING_START, what, extra));
+        } else if (what == MediaPlayer.MEDIA_INFO_BUFFERING_END) {
+            sendMessage(obtainMessage(BUFFERING_END, what, extra));
+        }
+        return false;
+    }
 }
