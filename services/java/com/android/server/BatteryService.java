@@ -390,7 +390,7 @@ class BatteryService extends Binder {
         intent.putExtra(BatteryManager.EXTRA_TECHNOLOGY, mBatteryTechnology);
         intent.putExtra(BatteryManager.EXTRA_INVALID_CHARGER, mInvalidCharger);
 
-        if (true) {
+        if (false) {
             Slog.d(TAG, "level:" + mBatteryLevel +
                     " scale:" + BATTERY_SCALE + " status:" + mBatteryStatus +
                     " health:" + mBatteryHealth +  " present:" + mBatteryPresent +
