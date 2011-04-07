@@ -411,6 +411,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="android.widget.scroll.arrowscroll.MultiPageTextWithPadding" android:label="arrowscrollMultiPageTextWithPadding">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
+
         <activity android:name="android.view.Include" android:label="IncludeTag">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
