@@ -426,6 +426,9 @@
         <item name="android:textEditNoPasteWindowLayout">?android:attr/textEditNoPasteWindowLayout</item>
         <item name="android:textEditSidePasteWindowLayout">?android:attr/textEditSidePasteWindowLayout</item>
         <item name="android:textEditSideNoPasteWindowLayout">?android:attr/textEditSideNoPasteWindowLayout</item>
+        <item name="android:textEditSuggestionsBottomWindowLayout">?android:attr/textEditSuggestionsBottomWindowLayout</item>
+        <item name="android:textEditSuggestionsTopWindowLayout">?android:attr/textEditSuggestionsTopWindowLayout</item>
+        <item name="android:textEditSuggestionItemLayout">?android:attr/textEditSuggestionItemLayout</item>
         <item name="android:textCursorDrawable">?android:attr/textCursorDrawable</item>
     </style>
     
@@ -1047,6 +1050,17 @@
         <item name="windowExitAnimation">@android:anim/fade_out</item>
     </style>
 
+    <!-- Style for the popup window that contains text suggestions. -->
+    <style name="Widget.TextSuggestions">
+        <item name="android:popupAnimationStyle">@android:style/Animation.TextSuggestions</item>
+    </style>
+
+    <!-- Animation effects when showing/hiding the text suggestions popup window. -->
+    <style name="Animation.TextSuggestions">
+        <item name="windowEnterAnimation">@android:anim/fade_in</item>
+        <item name="windowExitAnimation">@android:anim/fade_out</item>
+    </style>
+
     <style name="Widget.ActionBar">
         <item name="android:background">@android:drawable/action_bar_background</item>
         <item name="android:displayOptions">useLogo|showHome|showTitle</item>
@@ -1463,6 +1477,9 @@
     </style>
 
     <style name="Widget.Holo.TextSelectHandle" parent="Widget.TextSelectHandle">
+    </style>
+
+    <style name="Widget.Holo.TextSuggestions" parent="Widget.TextSuggestions">
     </style>
 
     <style name="Widget.Holo.AbsListView" parent="Widget.AbsListView">

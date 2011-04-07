@@ -1659,4 +1659,9 @@
 
   <public type="style" name="Theme.Holo.Light.NoActionBar" />
 
+  <public type="attr" name="textSuggestionsWindowStyle" />
+  <public type="attr" name="textEditSuggestionsBottomWindowLayout" />
+  <public type="attr" name="textEditSuggestionsTopWindowLayout" />
+  <public type="attr" name="textEditSuggestionItemLayout" />
+
 </resources>
