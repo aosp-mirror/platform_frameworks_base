@@ -55,46 +55,54 @@ codes returned by Android Market.</p>
 
 <tr>
 <th>Response Code</th>
+<th>Value</th>
 <th>Description</th>
 </tr>
 <tr>
   <td><code>RESULT_OK</code></td>
+  <td>0</td>
   <td>Indicates that the request was sent to the server successfully. When this code is returned in
   response to a <code>CHECK_BILLING_SUPPORTED</code> request, indicates that billing is
   supported.</td>
 </tr>
 <tr>
   <td><code>RESULT_USER_CANCELED</code></td>
+  <td>1</td>
   <td>Indicates that the user pressed the back button on the checkout page instead of buying the
   item.</td>
 </tr>
 <tr>
   <td><code>RESULT_SERVICE_UNAVAILABLE</code></td>
+  <td>2</td>
   <td>Indicates that the network connection is down.</td>
 </tr>
 <tr>
   <td><code>RESULT_BILLING_UNAVAILABLE</code></td>
+  <td>3</td>
   <td>Indicates that in-app billing is not available because the <code>API_VERSION</code> that you
   specified is not recognized by the Android Market application or the user is ineligible for in-app
   billing (for example, the user resides in a country that prohibits in-app purchases).</td>
 </tr>
 <tr>
   <td><code>RESULT_ITEM_UNAVAILABLE</code></td>
+  <td>4</td>
   <td>Indicates that Android Market cannot find the requested item in the application's product
   list. This can happen if the product ID is misspelled in your <code>REQUEST_PURCHASE</code>
   request or if an item is unpublished in the application's product list.</td>
 </tr>
 <tr>
-  <td><code>RESULT_ERROR</code></td>
-  <td>Indicates an unexpected server error.</td>
-</tr>
-
-<tr>
   <td><code>RESULT_DEVELOPER_ERROR</code></td>
+  <td>5</td>
   <td>Indicates that an application is trying to make an in-app billing request but the application
   has not declared the com.android.vending.BILLING permission in its manifest. Can also indicate
   that an application is not properly signed, or that you sent a malformed request, such as a
   request with missing Bundle keys or a request that uses an unrecognized request type.</td>
+</tr>
+<tr>
+  <td><code>RESULT_ERROR</code></td>
+  <td>6</td>
+  <td>Indicates an unexpected server error. For example, this error is triggered if you try to
+purchase an item from yourself, which is not allowed by Google Checkout.</td>
 </tr>
 </table>
 
