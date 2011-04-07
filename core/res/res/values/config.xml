@@ -132,6 +132,7 @@
          based on the hardware -->
     <!-- An Array of "[Connection name],[ConnectivityManager connection type],
          [associated radio-type],[priority]  -->
+    <!-- an optional 5th element can be added indicating boot-time dependency-met value.  Defaults to true -->
     <string-array translatable="false" name="networkAttributes">
         <item>"wifi,1,1,1"</item>
         <item>"mobile,0,0,0"</item>

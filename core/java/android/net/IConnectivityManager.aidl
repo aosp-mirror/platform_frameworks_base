@@ -92,4 +92,6 @@ interface IConnectivityManager
     void setGlobalProxy(in ProxyProperties p);
 
     ProxyProperties getProxy();
+
+    void setDataDependency(int networkType, boolean met);
 }

@@ -690,4 +690,16 @@ public class ConnectivityManager
             return null;
         }
     }
+
+    /**
+     * @param networkType The network who's dependence has changed
+     * @param met Boolean - true if network use is ok, false if not
+     * {@hide}
+     */
+    public void setDataDependency(int networkType, boolean met) {
+        try {
+            mService.setDataDependency(networkType, met);
+        } catch (RemoteException e) {
+        }
+    }
 }

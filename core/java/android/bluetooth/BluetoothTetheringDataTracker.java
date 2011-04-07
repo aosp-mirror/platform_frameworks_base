@@ -300,4 +300,8 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
         msg = mCsHandler.obtainMessage(EVENT_STATE_CHANGED, mNetworkInfo);
         msg.sendToTarget();
     }
+
+    public void setDependencyMet(boolean met) {
+        // not supported on this network
+    }
 }
