@@ -783,6 +783,8 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
             }
         } catch(RemoteException e) {
             processException("updateMetaData", e);
+        } catch(RuntimeException e) {
+            processException("updateMetaData", e);
         }
     }
 
