@@ -20,7 +20,6 @@ import android.app.PendingIntent;
 
 import android.util.Log;
 import java.util.ArrayList;
-import com.android.internal.telephony.gsm.GsmDataConnection;
 
 /**
  * Maintain the Apn context
@@ -30,9 +29,13 @@ public class ApnContext {
     public static final int PENDING_ACTION_NONE = 1;
     public static final int PENDING_ACTION_RECONNECT = 2;
     public static final int PENDING_ACTION_APN_DISABLE = 3;
+
+    public static final int DATA_ENABLED = 1;
+    public static final int DATA_DISABLED = 2;
+
     public final String LOG_TAG;
 
-    int pendingAction;
+    int mPendingAction;
 
     protected static final boolean DBG = true;
 
@@ -47,37 +50,49 @@ public class ApnContext {
 
     ApnSetting mApnSetting;
 
-    GsmDataConnection mDataConnection;
+    DataConnection mDataConnection;
 
     String mReason;
 
     PendingIntent mReconnectIntent;
 
+    /**
+     * user/app requested connection on this APN
+     */
+    boolean mDataEnabled;
+
+    /**
+     * carrier requirements met
+     */
+    boolean mDependencyMet;
+
     public ApnContext(String apnType, String logTag) {
         mApnType = apnType;
         mState = DataConnectionTracker.State.IDLE;
         setReason(Phone.REASON_DATA_ENABLED);
-        pendingAction = PENDING_ACTION_NONE;
+        mPendingAction = PENDING_ACTION_NONE;
+        mDataEnabled = false;
+        mDependencyMet = true;
         LOG_TAG = logTag;
     }
 
     public int getPendingAction() {
-        return pendingAction;
+        return mPendingAction;
     }
 
     public void setPendingAction(int pa) {
-        pendingAction = pa;
+        mPendingAction = pa;
     }
 
     public String getApnType() {
         return mApnType;
     }
 
-    public GsmDataConnection getDataConnection() {
+    public DataConnection getDataConnection() {
         return mDataConnection;
     }
 
-    public void setDataConnection(GsmDataConnection dataConnection) {
+    public void setDataConnection(DataConnection dataConnection) {
         mDataConnection = dataConnection;
     }
 
@@ -158,6 +173,34 @@ public class ApnContext {
 
     public PendingIntent getReconnectIntent() {
         return mReconnectIntent;
+    }
+
+    public boolean isReady() {
+        return mDataEnabled && mDependencyMet;
+    }
+
+    public void setEnabled(boolean enabled) {
+        if (DBG) {
+            log("set enabled as " + enabled + ", for type " +
+                    mApnType + ", current state is " + mDataEnabled);
+        }
+        mDataEnabled = enabled;
+    }
+
+    public boolean isEnabled() {
+        return mDataEnabled;
+    }
+
+    public void setDependencyMet(boolean met) {
+        if (DBG) {
+            log("set mDependencyMet as " + met + ", for type " + mApnType +
+                    ", current state is " + mDependencyMet);
+        }
+        mDependencyMet = met;
+    }
+
+    public boolean getDependencyMet() {
+       return mDependencyMet;
     }
 
     protected void log(String s) {

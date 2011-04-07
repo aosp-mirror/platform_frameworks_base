@@ -117,11 +117,6 @@ public class GsmDataConnection extends DataConnection {
         return mProfileId;
     }
 
-    public int getCid() {
-        // 'cid' has been defined in parent class
-        return cid;
-    }
-
     public void setActiveApnType(String apnType) {
         mActiveApnType = apnType;
     }

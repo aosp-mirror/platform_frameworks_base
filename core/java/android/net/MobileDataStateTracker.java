@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Messenger;
@@ -490,6 +491,25 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             log("setDataEnable: X enabled=" + enabled);
         } catch (Exception e) {
             log("setDataEnable: X mAc was null" + e);
+        }
+    }
+
+    /**
+     * carrier dependency is met/unmet
+     * @param met
+     */
+    public void setDependencyMet(boolean met) {
+        Bundle bundle = Bundle.forPair(DataConnectionTracker.APN_TYPE_KEY, mApnType);
+        try {
+            log("setDependencyMet: E met=" + met);
+            Message msg = Message.obtain();
+            msg.what = DataConnectionTracker.CMD_SET_DEPENDENCY_MET;
+            msg.arg1 = (met ? DataConnectionTracker.ENABLED : DataConnectionTracker.DISABLED);
+            msg.setData(bundle);
+            mDataConnectionTrackerAc.sendMessage(msg);
+            log("setDependencyMet: X met=" + met);
+        } catch (NullPointerException e) {
+            log("setDependencyMet: X mAc was null" + e);
         }
     }
 
