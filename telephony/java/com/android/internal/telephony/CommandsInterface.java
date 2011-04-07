@@ -1441,6 +1441,12 @@ public interface CommandsInterface {
     void setCdmaSubscriptionSource(int cdmaSubscriptionType, Message response);
 
     /**
+     *  Requests to get the CDMA subscription srouce
+     * @param response is callback message
+     */
+    void getCdmaSubscriptionSource(Message response);
+
+    /**
      *  Set the TTY mode
      *
      * @param ttyMode one of the following:
