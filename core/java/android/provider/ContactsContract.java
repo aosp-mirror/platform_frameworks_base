@@ -144,6 +144,27 @@ public final class ContactsContract {
     public static final String LIMIT_PARAM_KEY = "limit";
 
     /**
+     * A query parameter specifing a primary account. This parameter should be used with
+     * {@link #PRIMARY_ACCOUNT_TYPE}. The contacts provider handling a query may rely on
+     * this information to optimize its query results.
+     *
+     * For example, in an email composition screen, its implementation can specify an account when
+     * obtaining possible recipients, letting the provider know which account is selected during
+     * the composition. The provider may use the "primary account" information to optimize
+     * the search result.
+     * @hide
+     */
+    public static final String PRIMARY_ACCOUNT_NAME = "name_for_primary_account";
+
+    /**
+     * A query parameter specifing a primary account. This parameter should be used with
+     * {@link #PRIMARY_ACCOUNT_NAME}. See the doc in {@link #PRIMARY_ACCOUNT_NAME}.
+     * @hide
+     */
+    public static final String PRIMARY_ACCOUNT_TYPE = "type_for_primary_account";
+
+
+    /**
      * @hide
      */
     public static final class Preferences {
