@@ -19,11 +19,9 @@ package android.net;
 import android.net.ProxyProperties;
 import android.os.Parcelable;
 import android.os.Parcel;
-import android.util.Log;
+import android.text.TextUtils;
 
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -141,7 +139,7 @@ public class LinkProperties implements Parcelable {
         String ifaceName = (mIfaceName == null ? "" : "InterfaceName: " + mIfaceName + " ");
 
         String linkAddresses = "LinkAddresses: [";
-        for (LinkAddress addr : mLinkAddresses) linkAddresses += addr.toString();
+        for (LinkAddress addr : mLinkAddresses) linkAddresses += addr.toString() + ",";
         linkAddresses += "] ";
 
         String dns = "DnsAddresses: [";
@@ -154,6 +152,67 @@ public class LinkProperties implements Parcelable {
         String proxy = (mHttpProxy == null ? "" : "HttpProxy: " + mHttpProxy.toString() + " ");
 
         return ifaceName + linkAddresses + gateways + dns + proxy;
+    }
+
+
+    @Override
+    /**
+     * Compares this {@code LinkProperties} instance against the target
+     * LinkProperties in {@code obj}. Two LinkPropertieses are equal if
+     * all their fields are equal in values.
+     *
+     * For collection fields, such as mDnses, containsAll() is used to check
+     * if two collections contains the same elements, independent of order.
+     * There are two thoughts regarding containsAll()
+     * 1. Duplicated elements. eg, (A, B, B) and (A, A, B) are equal.
+     * 2. Worst case performance is O(n^2).
+     *
+     * @param obj the object to be tested for equality.
+     * @return {@code true} if both objects are equal, {@code false} otherwise.
+     */
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+
+        if (!(obj instanceof LinkProperties)) return false;
+
+        boolean sameAddresses;
+        boolean sameDnses;
+        boolean sameGateways;
+
+        LinkProperties target = (LinkProperties) obj;
+
+        Collection<InetAddress> targetAddresses = target.getAddresses();
+        Collection<InetAddress> sourceAddresses = getAddresses();
+        sameAddresses = (sourceAddresses.size() == targetAddresses.size()) ?
+                sourceAddresses.containsAll(targetAddresses) : false;
+
+        Collection<InetAddress> targetDnses = target.getDnses();
+        sameDnses = (mDnses.size() == targetDnses.size()) ?
+                mDnses.containsAll(targetDnses) : false;
+
+        Collection<InetAddress> targetGateways = target.getGateways();
+        sameGateways = (mGateways.size() == targetGateways.size()) ?
+                mGateways.containsAll(targetGateways) : false;
+
+        return
+            sameAddresses && sameDnses && sameGateways
+            && TextUtils.equals(getInterfaceName(), target.getInterfaceName())
+            && (getHttpProxy() == null ? target.getHttpProxy() == null :
+                getHttpProxy().equals(target.getHttpProxy()));
+    }
+
+    @Override
+    /**
+     * generate hashcode based on significant fields
+     * Equal objects must produce the same hash code, while unequal objects
+     * may have the same hash codes.
+     */
+    public int hashCode() {
+        return ((null == mIfaceName) ? 0 : mIfaceName.hashCode()
+                + mLinkAddresses.size() * 31
+                + mDnses.size() * 37
+                + mGateways.size() * 41
+                + ((null == mHttpProxy) ? 0 : mHttpProxy.hashCode()));
     }
 
     /**
