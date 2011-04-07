@@ -2524,6 +2524,34 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                 return; // done!
             }
 
+            // BATCHING ONTO PENDING EVENT CASE
+            //
+            // Try to append a move sample to the currently pending event, if there is one.
+            // We can do this as long as we are still waiting to find the targets for the
+            // event.  Once the targets are locked-in we can only do streaming.
+            if (mPendingEvent
+                    && (!mPendingEvent->dispatchInProgress || !mCurrentInputTargetsValid)
+                    && mPendingEvent->type == EventEntry::TYPE_MOTION) {
+                MotionEntry* motionEntry = static_cast<MotionEntry*>(mPendingEvent);
+                if (motionEntry->deviceId == deviceId && motionEntry->source == source) {
+                    if (motionEntry->action != action
+                            || motionEntry->pointerCount != pointerCount
+                            || motionEntry->isInjected()) {
+                        // Pending event is not compatible for appending new samples.  Stop here.
+                        goto NoBatchingOrStreaming;
+                    }
+
+                    // The pending motion event is a move and is compatible for appending.
+                    // Do the batching magic.
+                    mAllocator.appendMotionSample(motionEntry, eventTime, pointerCoords);
+#if DEBUG_BATCHING
+                    LOGD("Appended motion sample onto batch for the pending motion event.");
+#endif
+                    mLock.unlock();
+                    return; // done!
+                }
+            }
+
             // STREAMING CASE
             //
             // There is no pending motion event (of any kind) for this device in the inbound queue.
