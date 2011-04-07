@@ -34,11 +34,11 @@ using namespace android;
 
 struct fields_t {
     jfieldID context;
-    jclass bitmapClazz;
+    jclass bitmapClazz;  // Must be a global ref
     jfieldID nativeBitmap;
     jmethodID createBitmapMethod;
     jmethodID createScaledBitmapMethod;
-    jclass configClazz;
+    jclass configClazz;  // Must be a global ref
     jmethodID createConfigMethod;
 };
 
@@ -120,33 +120,71 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
     if (headers) {
         // Get the Map's entry Set.
         jclass mapClass = env->FindClass("java/util/Map");
+        if (mapClass == NULL) {
+            return;
+        }
 
         jmethodID entrySet =
             env->GetMethodID(mapClass, "entrySet", "()Ljava/util/Set;");
+        if (entrySet == NULL) {
+            return;
+        }
 
         jobject set = env->CallObjectMethod(headers, entrySet);
+        if (set == NULL) {
+            return;
+        }
+
         // Obtain an iterator over the Set
         jclass setClass = env->FindClass("java/util/Set");
+        if (setClass == NULL) {
+            return;
+        }
 
         jmethodID iterator =
             env->GetMethodID(setClass, "iterator", "()Ljava/util/Iterator;");
+        if (iterator == NULL) {
+            return;
+        }
 
         jobject iter = env->CallObjectMethod(set, iterator);
+        if (iter == NULL) {
+            return;
+        }
+
         // Get the Iterator method IDs
         jclass iteratorClass = env->FindClass("java/util/Iterator");
+        if (iteratorClass == NULL) {
+            return;
+        }
         jmethodID hasNext = env->GetMethodID(iteratorClass, "hasNext", "()Z");
+        if (hasNext == NULL) {
+            return;
+        }
 
         jmethodID next =
             env->GetMethodID(iteratorClass, "next", "()Ljava/lang/Object;");
+        if (next == NULL) {
+            return;
+        }
 
         // Get the Entry class method IDs
         jclass entryClass = env->FindClass("java/util/Map$Entry");
+        if (entryClass == NULL) {
+            return;
+        }
 
         jmethodID getKey =
             env->GetMethodID(entryClass, "getKey", "()Ljava/lang/Object;");
+        if (getKey == NULL) {
+            return;
+        }
 
         jmethodID getValue =
             env->GetMethodID(entryClass, "getValue", "()Ljava/lang/Object;");
+        if (getValue == NULL) {
+            return;
+        }
 
         // Iterate over the entry Set
         while (env->CallBooleanMethod(iter, hasNext)) {
@@ -161,6 +199,7 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
 
             const char* valueStr = env->GetStringUTFChars(value, NULL);
             if (!valueStr) {  // Out of memory
+                env->ReleaseStringUTFChars(key, keyStr);
                 return;
             }
 
@@ -171,14 +210,8 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
             env->DeleteLocalRef(key);
             env->ReleaseStringUTFChars(value, valueStr);
             env->DeleteLocalRef(value);
-      }
+        }
 
-      env->DeleteLocalRef(entryClass);
-      env->DeleteLocalRef(iteratorClass);
-      env->DeleteLocalRef(iter);
-      env->DeleteLocalRef(setClass);
-      env->DeleteLocalRef(set);
-      env->DeleteLocalRef(mapClass);
     }
 
     process_media_retriever_call(

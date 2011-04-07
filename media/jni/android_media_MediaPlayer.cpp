@@ -1,4 +1,4 @@
-/* //device/libs/android_runtime/android_media_MediaPlayer.cpp
+/*
 **
 ** Copyright 2007, The Android Open Source Project
 **
@@ -185,11 +185,14 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
         return;
     }
 
-    const char *pathStr = env->GetStringUTFChars(path, NULL);
-    if (pathStr == NULL) {  // Out of memory
-        jniThrowException(env, "java/lang/RuntimeException", "Out of memory");
+    const char *tmp = env->GetStringUTFChars(path, NULL);
+    if (tmp == NULL) {  // Out of memory
         return;
     }
+
+    String8 pathStr(tmp);
+    env->ReleaseStringUTFChars(path, tmp);
+    tmp = NULL;
 
     // headers is a Map<String, String>.
     // We build a similar KeyedVector out of it.
@@ -197,33 +200,72 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
     if (headers) {
         // Get the Map's entry Set.
         jclass mapClass = env->FindClass("java/util/Map");
+        if (mapClass == NULL) {
+            return;
+        }
 
         jmethodID entrySet =
             env->GetMethodID(mapClass, "entrySet", "()Ljava/util/Set;");
+        if (entrySet == NULL) {
+            return;
+        }
 
         jobject set = env->CallObjectMethod(headers, entrySet);
+        if (set == NULL) {
+            return;
+        }
+
         // Obtain an iterator over the Set
         jclass setClass = env->FindClass("java/util/Set");
+        if (setClass == NULL) {
+            return;
+        }
 
         jmethodID iterator =
             env->GetMethodID(setClass, "iterator", "()Ljava/util/Iterator;");
+        if (iterator == NULL) {
+            return;
+        }
 
         jobject iter = env->CallObjectMethod(set, iterator);
+        if (iter == NULL) {
+            return;
+        }
+
         // Get the Iterator method IDs
         jclass iteratorClass = env->FindClass("java/util/Iterator");
+        if (iteratorClass == NULL) {
+            return;
+        }
+
         jmethodID hasNext = env->GetMethodID(iteratorClass, "hasNext", "()Z");
+        if (hasNext == NULL) {
+            return;
+        }
 
         jmethodID next =
             env->GetMethodID(iteratorClass, "next", "()Ljava/lang/Object;");
+        if (next == NULL) {
+            return;
+        }
 
         // Get the Entry class method IDs
         jclass entryClass = env->FindClass("java/util/Map$Entry");
+        if (entryClass == NULL) {
+            return;
+        }
 
         jmethodID getKey =
             env->GetMethodID(entryClass, "getKey", "()Ljava/lang/Object;");
+        if (getKey == NULL) {
+            return;
+        }
 
         jmethodID getValue =
             env->GetMethodID(entryClass, "getValue", "()Ljava/lang/Object;");
+        if (getValue == NULL) {
+            return;
+        }
 
         // Iterate over the entry Set
         while (env->CallBooleanMethod(iter, hasNext)) {
@@ -233,15 +275,12 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
 
             const char* keyStr = env->GetStringUTFChars(key, NULL);
             if (!keyStr) {  // Out of memory
-                jniThrowException(
-                        env, "java/lang/RuntimeException", "Out of memory");
                 return;
             }
 
             const char* valueStr = env->GetStringUTFChars(value, NULL);
             if (!valueStr) {  // Out of memory
-                jniThrowException(
-                        env, "java/lang/RuntimeException", "Out of memory");
+                env->ReleaseStringUTFChars(key, keyStr);
                 return;
             }
 
@@ -252,24 +291,15 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
             env->DeleteLocalRef(key);
             env->ReleaseStringUTFChars(value, valueStr);
             env->DeleteLocalRef(value);
-      }
+        }
 
-      env->DeleteLocalRef(entryClass);
-      env->DeleteLocalRef(iteratorClass);
-      env->DeleteLocalRef(iter);
-      env->DeleteLocalRef(setClass);
-      env->DeleteLocalRef(set);
-      env->DeleteLocalRef(mapClass);
     }
 
     LOGV("setDataSource: path %s", pathStr);
     status_t opStatus =
         mp->setDataSource(
-                String8(pathStr),
+                pathStr,
                 headers ? &headersVector : NULL);
-
-    // Make sure that local ref is released before a potential exception
-    env->ReleaseStringUTFChars(path, pathStr);
 
     process_media_player_call(
             env, thiz, opStatus, "java/io/IOException",
@@ -628,62 +658,49 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
 
     clazz = env->FindClass("android/media/MediaPlayer");
     if (clazz == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/media/MediaPlayer");
         return;
     }
 
     fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
     if (fields.context == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaPlayer.mNativeContext");
         return;
     }
 
     fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
                                                "(Ljava/lang/Object;IIILjava/lang/Object;)V");
     if (fields.post_event == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaPlayer.postEventFromNative");
         return;
     }
 
     fields.surface = env->GetFieldID(clazz, "mSurface", "Landroid/view/Surface;");
     if (fields.surface == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaPlayer.mSurface");
         return;
     }
 
     jclass surface = env->FindClass("android/view/Surface");
     if (surface == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/view/Surface");
         return;
     }
 
     fields.surface_native = env->GetFieldID(surface, ANDROID_VIEW_SURFACE_JNI_ID, "I");
     if (fields.surface_native == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                "Can't find Surface." ANDROID_VIEW_SURFACE_JNI_ID);
         return;
     }
 
     fields.surfaceTexture = env->GetFieldID(clazz, "mSurfaceTexture",
             "Landroid/graphics/SurfaceTexture;");
     if (fields.surfaceTexture == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                "Can't find MediaPlayer.mSurfaceTexture");
         return;
     }
 
     jclass surfaceTexture = env->FindClass("android/graphics/SurfaceTexture");
     if (surfaceTexture == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                "Can't find android/graphics/SurfaceTexture");
         return;
     }
 
     fields.surfaceTexture_native = env->GetFieldID(surfaceTexture,
             ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID, "I");
     if (fields.surfaceTexture_native == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                "Can't find SurfaceTexture." ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID);
         return;
     }
 
