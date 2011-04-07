@@ -71,6 +71,7 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mCdmaSubscriptionChangedRegistrants = new RegistrantList();
     protected RegistrantList mCdmaPrlChangedRegistrants = new RegistrantList();
     protected RegistrantList mExitEmergencyCallbackModeRegistrants = new RegistrantList();
+    protected RegistrantList mRilConnectedRegistrants = new RegistrantList();
 
     protected Registrant mSMSRegistrant;
     protected Registrant mNITZTimeRegistrant;
@@ -96,7 +97,8 @@ public abstract class BaseCommands implements CommandsInterface {
     protected int mCdmaSubscription;
     // Type of Phone, GSM or CDMA. Set by CDMAPhone or GSMPhone.
     protected int mPhoneType;
-
+    // RIL Version
+    protected int mRilVersion = -1;
 
     public BaseCommands(Context context) {
         mContext = context;  // May be null (if so we won't log statistics)
@@ -637,6 +639,25 @@ public abstract class BaseCommands implements CommandsInterface {
     @Override
     public void unregisterForExitEmergencyCallbackMode(Handler h) {
         mExitEmergencyCallbackModeRegistrants.remove(h);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void registerForRilConnected(Handler h, int what, Object obj) {
+        Log.d(LOG_TAG, "registerForRilConnected h=" + h + " w=" + what);
+        Registrant r = new Registrant (h, what, obj);
+        mRilConnectedRegistrants.add(r);
+        if (mRilVersion != -1) {
+            Log.d(LOG_TAG, "Notifying: ril connected mRilVersion=" + mRilVersion);
+            r.notifyRegistrant(new AsyncResult(null, new Integer(mRilVersion), null));
+        }
+    }
+
+    @Override
+    public void unregisterForRilConnected(Handler h) {
+        mRilConnectedRegistrants.remove(h);
     }
 
     //***** Protected Methods

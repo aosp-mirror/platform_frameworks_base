@@ -605,6 +605,9 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             }} catch (Throwable tr) {
                 Log.e(LOG_TAG,"Uncaught exception", tr);
             }
+
+            /* We're disconnected so we don't know the ril version */
+            notifyRegistrantsRilConnectionChanged(-1);
         }
     }
 
@@ -2468,6 +2471,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_CDMA_SUBSCRIPTION_CHANGED: ret = responseInts(p); break;
             case RIL_UNSOl_CDMA_PRL_CHANGED: ret = responseInts(p); break;
             case RIL_UNSOL_EXIT_EMERGENCY_CALLBACK_MODE: ret = responseVoid(p); break;
+            case RIL_UNSOL_RIL_CONNECTED: ret = responseInts(p); break;
 
             default:
                 throw new RuntimeException("Unrecognized unsol response: " + response);
@@ -2798,6 +2802,25 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                                         new AsyncResult (null, null, null));
                 }
                 break;
+
+            case RIL_UNSOL_RIL_CONNECTED: {
+                if (RILJ_LOGD) unsljLogRet(response, ret);
+                notifyRegistrantsRilConnectionChanged(((int[])ret)[0]);
+                break;
+            }
+        }
+    }
+
+    /**
+     * Notifiy all registrants that the ril has connected or disconnected.
+     *
+     * @param rilVer is the version of the ril or -1 if disconnected.
+     */
+    private void notifyRegistrantsRilConnectionChanged(int rilVer) {
+        mRilVersion = rilVer;
+        if (mRilConnectedRegistrants != null) {
+            mRilConnectedRegistrants.notifyRegistrants(
+                                new AsyncResult (null, new Integer(rilVer), null));
         }
     }
 
@@ -3535,6 +3558,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_CDMA_SUBSCRIPTION_CHANGED: return "CDMA_SUBSCRIPTION_CHANGED";
             case RIL_UNSOl_CDMA_PRL_CHANGED: return "UNSOL_CDMA_PRL_CHANGED";
             case RIL_UNSOL_EXIT_EMERGENCY_CALLBACK_MODE: return "UNSOL_EXIT_EMERGENCY_CALLBACK_MODE";
+            case RIL_UNSOL_RIL_CONNECTED: return "UNSOL_RIL_CONNECTED";
             default: return "<unknown reponse>";
         }
     }
