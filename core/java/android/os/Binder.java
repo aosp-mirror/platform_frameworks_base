@@ -256,6 +256,25 @@ public class Binder implements IBinder {
     }
     
     /**
+     * Like {@link #dump(FileDescriptor, String[])}, but ensures the target
+     * executes asynchronously.
+     */
+    public void dumpAsync(final FileDescriptor fd, final String[] args) {
+        final FileOutputStream fout = new FileOutputStream(fd);
+        final PrintWriter pw = new PrintWriter(fout);
+        Thread thr = new Thread("Binder.dumpAsync") {
+            public void run() {
+                try {
+                    dump(fd, pw, args);
+                } finally {
+                    pw.flush();
+                }
+            }
+        };
+        thr.start();
+    }
+
+    /**
      * Print the object's state into the given stream.
      * 
      * @param fd The raw file descriptor that the dump is being sent to.
@@ -364,6 +383,20 @@ final class BinderProxy implements IBinder {
         }
     }
     
+    public void dumpAsync(FileDescriptor fd, String[] args) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeFileDescriptor(fd);
+        data.writeStringArray(args);
+        try {
+            transact(DUMP_TRANSACTION, data, reply, FLAG_ONEWAY);
+            reply.readException();
+        } finally {
+            data.recycle();
+            reply.recycle();
+        }
+    }
+
     BinderProxy() {
         mSelf = new WeakReference(this);
     }

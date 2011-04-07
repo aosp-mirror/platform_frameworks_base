@@ -822,7 +822,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeFileDescriptor(fd);
         data.writeStrongBinder(token);
         data.writeStringArray(args);
-        mRemote.transact(DUMP_SERVICE_TRANSACTION, data, null, 0);
+        mRemote.transact(DUMP_SERVICE_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
     
@@ -944,7 +944,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeStrongBinder(token);
         data.writeString(prefix);
         data.writeStringArray(args);
-        mRemote.transact(DUMP_ACTIVITY_TRANSACTION, data, null, 0);
+        mRemote.transact(DUMP_ACTIVITY_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 
