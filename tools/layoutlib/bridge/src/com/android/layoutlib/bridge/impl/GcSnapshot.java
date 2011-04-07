@@ -609,12 +609,14 @@ public class GcSnapshot {
                     createCustomGraphics(originalGraphics, paint, compositeOnly, forceSrcMode) :
                         (Graphics2D) originalGraphics.create();
 
-        try {
-            drawable.draw(configuredGraphics2D, paint);
-            layer.change();
-        } finally {
-            // dispose Graphics2D object
-            configuredGraphics2D.dispose();
+        if (configuredGraphics2D != null) {
+            try {
+                drawable.draw(configuredGraphics2D, paint);
+                layer.change();
+            } finally {
+                // dispose Graphics2D object
+                configuredGraphics2D.dispose();
+            }
         }
     }
 
@@ -687,11 +689,13 @@ public class GcSnapshot {
         Graphics2D g = createCustomGraphics(baseGfx, mLocalLayerPaint,
                 true /*alphaOnly*/, false /*forceSrcMode*/);
 
-        g.drawImage(mLocalLayer.getImage(),
-                mLayerBounds.left, mLayerBounds.top, mLayerBounds.right, mLayerBounds.bottom,
-                mLayerBounds.left, mLayerBounds.top, mLayerBounds.right, mLayerBounds.bottom,
-                null);
-        g.dispose();
+        if (g != null) {
+            g.drawImage(mLocalLayer.getImage(),
+                    mLayerBounds.left, mLayerBounds.top, mLayerBounds.right, mLayerBounds.bottom,
+                    mLayerBounds.left, mLayerBounds.top, mLayerBounds.right, mLayerBounds.bottom,
+                    null);
+            g.dispose();
+        }
 
         baseGfx.dispose();
     }
@@ -721,11 +725,17 @@ public class GcSnapshot {
             Shader_Delegate shaderDelegate = paint.getShader();
             if (shaderDelegate != null) {
                 if (shaderDelegate.isSupported()) {
-                    java.awt.Paint shaderPaint = shaderDelegate.getJavaPaint();
-                    assert shaderPaint != null;
-                    if (shaderPaint != null) {
-                        g.setPaint(shaderPaint);
-                        customShader = true;
+                    // shader could have a local matrix that's not valid (for instance 0 scaling).
+                    if (shaderDelegate.isValid()) {
+                        java.awt.Paint shaderPaint = shaderDelegate.getJavaPaint();
+                        assert shaderPaint != null;
+                        if (shaderPaint != null) {
+                            g.setPaint(shaderPaint);
+                            customShader = true;
+                        }
+                    } else {
+                        g.dispose();
+                        return null;
                     }
                 } else {
                     Bridge.getLog().fidelityWarning(LayoutLog.TAG_SHADER,
@@ -749,7 +759,7 @@ public class GcSnapshot {
 
         if (forceSrcMode) {
             g.setComposite(AlphaComposite.getInstance(
-                    AlphaComposite.SRC, (float) alpha / 255.f));
+                    AlphaComposite.SRC, alpha / 255.f));
         } else {
             boolean customXfermode = false;
             Xfermode_Delegate xfermodeDelegate = paint.getXfermode();
@@ -773,7 +783,7 @@ public class GcSnapshot {
             // that will handle the alpha.
             if (customXfermode == false && alpha != 0xFF) {
                 g.setComposite(AlphaComposite.getInstance(
-                        AlphaComposite.SRC_OVER, (float) alpha / 255.f));
+                        AlphaComposite.SRC_OVER, alpha / 255.f));
             }
         }
 
