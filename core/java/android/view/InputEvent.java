@@ -106,6 +106,13 @@ public abstract class InputEvent implements Parcelable {
      */
     public abstract void setTainted(boolean tainted);
 
+    /**
+     * Returns the time (in ns) when this specific event was generated.
+     * The value is in nanosecond precision but it may not have nanosecond accuracy.
+     * @hide
+     */
+    public abstract long getEventTimeNano();
+
     public int describeContents() {
         return 0;
     }

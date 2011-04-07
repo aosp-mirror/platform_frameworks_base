@@ -2340,6 +2340,12 @@ public class KeyEvent extends InputEvent implements Parcelable {
         return mEventTime;
     }
 
+    /** @hide */
+    @Override
+    public final long getEventTimeNano() {
+        return mEventTime * 1000000L;
+    }
+
     /**
      * Renamed to {@link #getDeviceId}.
      * 

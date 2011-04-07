@@ -409,7 +409,7 @@ private:
 
         bool dispatchInProgress; // initially false, set to true while dispatching
 
-        inline bool isInjected() { return injectionState != NULL; }
+        inline bool isInjected() const { return injectionState != NULL; }
     };
 
     struct ConfigurationChangedEntry : EventEntry {
@@ -439,7 +439,8 @@ private:
     struct MotionSample {
         MotionSample* next;
 
-        nsecs_t eventTime;
+        nsecs_t eventTime; // may be updated during coalescing
+        nsecs_t eventTimeBeforeCoalescing; // not updated during coalescing
         PointerCoords pointerCoords[MAX_POINTERS];
     };
 
@@ -461,6 +462,10 @@ private:
         MotionSample* lastSample;
 
         uint32_t countSamples() const;
+
+        // Checks whether we can append samples, assuming the device id and source are the same.
+        bool canAppendSamples(int32_t action, uint32_t pointerCount,
+                const int32_t* pointerIds) const;
     };
 
     // Tracks the progress of dispatching a particular event to a particular connection.
@@ -801,6 +806,11 @@ private:
 
     void dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout, nsecs_t keyRepeatDelay,
             nsecs_t* nextWakeupTime);
+
+    // Batches a new sample onto a motion entry.
+    // Assumes that the we have already checked that we can append samples.
+    void batchMotionLocked(MotionEntry* entry, nsecs_t eventTime, int32_t metaState,
+            const PointerCoords* pointerCoords, const char* eventDescription);
 
     // Enqueues an inbound event.  Returns true if mLooper->wake() should be called.
     bool enqueueInboundEventLocked(EventEntry* entry);

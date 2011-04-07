@@ -141,6 +141,22 @@ public class ViewDebug {
     public static final boolean DEBUG_DRAG = false;
 
     /**
+     * Enables logging of factors that affect the latency and responsiveness of an application.
+     *
+     * Logs the relative difference between the time an event was created and the time it
+     * was delivered.
+     *
+     * Logs the time spent waiting for Surface.lockCanvas() or eglSwapBuffers().
+     * This is time that the event loop spends blocked and unresponsive.  Ideally, drawing
+     * and animations should be perfectly synchronized with VSYNC so that swap buffers
+     * is instantaneous.
+     *
+     * Logs the time spent in ViewRoot.performTraversals() or ViewRoot.draw().
+     * @hide
+     */
+    public static final boolean DEBUG_LATENCY = false;
+
+    /**
      * <p>Enables or disables views consistency check. Even when this property is enabled,
      * view consistency checks happen only if {@link android.util.Config#DEBUG} is set
      * to true. The value of this property can be configured externally in one of the
