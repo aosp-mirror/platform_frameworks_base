@@ -330,4 +330,8 @@ public class EthernetDataTracker implements NetworkStateTracker {
     public String getTcpBufferSizesPropName() {
         return "net.tcp.buffersize.wifi";
     }
+
+    public void setDependencyMet(boolean met) {
+        // not supported on this network
+    }
 }
