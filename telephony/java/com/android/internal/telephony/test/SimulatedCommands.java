@@ -1001,6 +1001,11 @@ public final class SimulatedCommands extends BaseCommands
         resultSuccess(result, null);
     }
 
+    @Override
+    public void getCdmaSubscriptionSource(Message result) {
+        unimplemented(result);
+    }
+
     private boolean isSimLocked() {
         if (mSimLockedState != SimLockState.NONE) {
             return true;
