@@ -114,13 +114,6 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         return mVideoSurfaceView;
     }
 
-    @Override
-    public void start() {
-        if (getAutostart()) {
-            super.start();
-        }
-    }
-
     HTML5VideoFullScreen(Context context, int videoLayerId, int position,
             boolean autoStart) {
         mVideoSurfaceView = new VideoSurfaceView(context);
