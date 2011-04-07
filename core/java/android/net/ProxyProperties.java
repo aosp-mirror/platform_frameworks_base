@@ -163,6 +163,16 @@ public class ProxyProperties implements Parcelable {
         return 0;
     }
 
+    @Override
+    /*
+     * generate hashcode based on significant fields
+     */
+    public int hashCode() {
+        return ((null == mHost) ? 0 : mHost.hashCode())
+        + ((null == mExclusionList) ? 0 : mExclusionList.hashCode())
+        + mPort;
+    }
+
     /**
      * Implement the Parcelable interface.
      * @hide
