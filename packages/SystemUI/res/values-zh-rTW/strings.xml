@@ -41,7 +41,7 @@
     <string name="recent_tasks_title" msgid="3691764623638127888">"最新的"</string>
     <string name="recent_tasks_empty" msgid="1905484479067697884">"沒有最近用過的應用程式。"</string>
     <string name="recent_tasks_app_label" msgid="3796483981246752469">"應用程式"</string>
-    <string name="bluetooth_tethered" msgid="7094101612161133267">"已透過藍牙進行網際網路共用"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"已透過 Bluetooth 進行網路共用"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"設定輸入方式"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"使用實體鍵盤"</string>
     <string name="usb_device_permission_prompt" msgid="3816016361969816903">"允許 <xliff:g id="APPLICATION">%1$s</xliff:g> 應用程式存取 USB 裝置嗎？"</string>
