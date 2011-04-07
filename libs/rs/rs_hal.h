@@ -18,6 +18,7 @@
 #define RS_HAL_H
 
 #include <RenderScriptDefines.h>
+#include <ui/egl/android_natives.h>
 
 namespace android {
 namespace renderscript {
@@ -44,6 +45,11 @@ typedef struct ScriptTLSStructRec {
  * Script management functions
  */
 typedef struct {
+    bool (*initGraphics)(const Context *);
+    void (*shutdownGraphics)(const Context *);
+    bool (*setSurface)(const Context *, uint32_t w, uint32_t h, ANativeWindow *);
+    void (*swap)(const Context *);
+
     void (*shutdownDriver)(Context *);
     void (*getVersion)(unsigned int *major, unsigned int *minor);
     void (*setPriority)(const Context *, int32_t priority);
@@ -86,7 +92,6 @@ typedef struct {
 
         void (*destroy)(const Context *rsc, Script *s);
     } script;
-
 
     struct {
         bool (*init)(const Context *rsc, const ProgramStore *ps);
