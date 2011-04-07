@@ -48,7 +48,7 @@ static const uint32_t kMask = 0xfffe0c00;
 bool MP3Extractor::get_mp3_frame_size(
         uint32_t header, size_t *frame_size,
         int *out_sampling_rate, int *out_channels,
-        int *out_bitrate) {
+        int *out_bitrate, int *out_num_samples) {
     *frame_size = 0;
 
     if (out_sampling_rate) {
@@ -61,6 +61,10 @@ bool MP3Extractor::get_mp3_frame_size(
 
     if (out_bitrate) {
         *out_bitrate = 0;
+    }
+
+    if (out_num_samples) {
+        *out_num_samples = 1152;
     }
 
     if ((header & 0xffe00000) != 0xffe00000) {
@@ -127,6 +131,10 @@ bool MP3Extractor::get_mp3_frame_size(
         }
 
         *frame_size = (12000 * bitrate / sampling_rate + padding) * 4;
+
+        if (out_num_samples) {
+            *out_num_samples = 384;
+        }
     } else {
         // layer II or III
 
@@ -150,10 +158,17 @@ bool MP3Extractor::get_mp3_frame_size(
             bitrate = (layer == 2 /* L2 */)
                 ? kBitrateV1L2[bitrate_index - 1]
                 : kBitrateV1L3[bitrate_index - 1];
+
+            if (out_num_samples) {
+                *out_num_samples = 1152;
+            }
         } else {
             // V2 (or 2.5)
 
             bitrate = kBitrateV2[bitrate_index - 1];
+            if (out_num_samples) {
+                *out_num_samples = 576;
+            }
         }
 
         if (out_bitrate) {
@@ -374,6 +389,9 @@ private:
     sp<MP3Seeker> mSeeker;
     MediaBufferGroup *mGroup;
 
+    int64_t mBasisTimeUs;
+    int64_t mSamplesRead;
+
     MP3Source(const MP3Source &);
     MP3Source &operator=(const MP3Source &);
 };
@@ -489,7 +507,9 @@ MP3Source::MP3Source(
       mCurrentTimeUs(0),
       mStarted(false),
       mSeeker(seeker),
-      mGroup(NULL) {
+      mGroup(NULL),
+      mBasisTimeUs(0),
+      mSamplesRead(0) {
 }
 
 MP3Source::~MP3Source() {
@@ -508,6 +528,9 @@ status_t MP3Source::start(MetaData *) {
 
     mCurrentPos = mFirstFramePos;
     mCurrentTimeUs = 0;
+
+    mBasisTimeUs = mCurrentTimeUs;
+    mSamplesRead = 0;
 
     mStarted = true;
 
@@ -552,6 +575,9 @@ status_t MP3Source::read(
         } else {
             mCurrentTimeUs = actualSeekTimeUs;
         }
+
+        mBasisTimeUs = mCurrentTimeUs;
+        mSamplesRead = 0;
     }
 
     MediaBuffer *buffer;
@@ -562,6 +588,8 @@ status_t MP3Source::read(
 
     size_t frame_size;
     int bitrate;
+    int num_samples;
+    int sample_rate;
     for (;;) {
         ssize_t n = mDataSource->readAt(mCurrentPos, buffer->data(), 4);
         if (n < 4) {
@@ -575,7 +603,7 @@ status_t MP3Source::read(
 
         if ((header & kMask) == (mFixedHeader & kMask)
             && MP3Extractor::get_mp3_frame_size(
-                header, &frame_size, NULL, NULL, &bitrate)) {
+                header, &frame_size, &sample_rate, NULL, &bitrate, &num_samples)) {
             break;
         }
 
@@ -613,7 +641,9 @@ status_t MP3Source::read(
     buffer->meta_data()->setInt32(kKeyIsSyncFrame, 1);
 
     mCurrentPos += frame_size;
-    mCurrentTimeUs += frame_size * 8000ll / bitrate;
+
+    mSamplesRead += num_samples;
+    mCurrentTimeUs = mBasisTimeUs + ((mSamplesRead * 1000000) / sample_rate);
 
     *out = buffer;
 
