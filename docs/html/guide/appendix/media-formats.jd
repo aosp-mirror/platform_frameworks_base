@@ -50,6 +50,8 @@ page.title=Android Supported Media Formats
 
 <p class="note"><strong>Note:</strong> Media codecs that are not guaranteed to be available on all Android platform versions are accordingly noted in parentheses&mdash;for example &quot;(Android 3.0+)&quot;.</p>
 
+<p class="table-caption" id="formats-table"><strong>Table 1.</strong> Core media format and codec support.</p>
+
 <table>
 <tbody>
 
@@ -218,81 +220,61 @@ no dither applied for 24-bit.
 
 <h2 id="recommendations">Video Encoding Recommendations</h2>
 
-<p>Below are examples of video encoding profiles and parameters that the Android media framework supports for playback.</p>
+<p>Table 2, below, lists examples of video encoding profiles and parameters that the Android media framework supports for playback. In addition to these encoding parameter recommendations, a device's available video recording profiles can be used as a proxy for media playback capabilities. These profiles can be inspected using the {@link android.media.CamcorderProfile CamcorderProfile} class, which is available since API level 8.</p>
+
+<p class="table-caption" id="encoding-recommendations-table"><strong>Table 2.</strong> Examples of supported video encoding parameters.</p>
+
+<table>
+  <thead>
+  <tr>
+    <th>&nbsp;</th>
+    <th style="background-color:#f3f3f3;font-weight:normal">Lower quality</th>
+    <th style="background-color:#f3f3f3;font-weight:normal">Higher quality</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+    <th>Video codec</th>
+    <td>H.264 Baseline Profile</th>
+    <td>H.264 Baseline Profile</th>
+  </tr>
+  <tr>
+    <th>Video resolution</th>
+    <td>176 x 144 px</th>
+    <td>480 x 360 px</th>
+  </tr>
+  <tr>
+    <th>Video frame rate</th>
+    <td>12 fps</th>
+    <td>30 fps</th>
+  </tr>
+  <tr>
+    <th>Video bitrate</th>
+    <td>56 Kbps</th>
+    <td>500 Kbps</th>
+  </tr>
+  <tr>
+    <th>Audio codec</th>
+    <td>AAC-LC</th>
+    <td>AAC-LC</th>
+  </tr>
+  <tr>
+    <th>Audio channels</th>
+    <td>1 (mono)</th>
+    <td>2 (stereo)</th>
+  </tr>
+  <tr>
+    <th>Audio bitrate</th>
+    <td>24 Kbps</th>
+    <td>128 Kbps</th>
+  </tr>
+  </tbody>
+</table>
+
+<p style="margin-top: 2em">For video content that is streamed over HTTP or RTSP, there are additional requirements:</p>
 
 <ul>
-  <li><strong>Lower quality video</strong><br>
-
-    <table style="margin-top: 4px">
-    <tbody>
-    <tr>
-      <th>Video codec</th>
-      <td>H.264 Baseline Profile</th>
-    </tr>
-    <tr>
-      <th>Video resolution</th>
-      <td>176 x 144 px</th>
-    </tr>
-    <tr>
-      <th>Video frame rate</th>
-      <td>12 fps</th>
-    </tr>
-    <tr>
-      <th>Video bitrate</th>
-      <td>56 Kbps</th>
-    </tr>
-    <tr>
-      <th>Audio codec</th>
-      <td>AAC-LC</th>
-    </tr>
-    <tr>
-      <th>Audio channels</th>
-      <td>1 (mono)</th>
-    </tr>
-    <tr>
-      <th>Audio bitrate</th>
-      <td>24 Kbps</th>
-    </tr>
-    </tbody>
-    </table>
-  </li>
-
-  <li><strong>Higher quality video</strong><br>
-
-    <table style="margin-top: 4px">
-    <tbody>
-    <tr>
-      <th>Video codec</th>
-      <td>H.264 Baseline Profile</th>
-    </tr>
-    <tr>
-      <th>Video resolution</th>
-      <td>480 x 360 px</th>
-    </tr>
-    <tr>
-      <th>Video frame rate</th>
-      <td>30 fps</th>
-    </tr>
-    <tr>
-      <th>Video bitrate</th>
-      <td>500 Kbps</th>
-    </tr>
-    <tr>
-      <th>Audio codec</th>
-      <td>AAC-LC</th>
-    </tr>
-    <tr>
-      <th>Audio channels</th>
-      <td>2 (stereo)</th>
-    </tr>
-    <tr>
-      <th>Audio bitrate</th>
-      <td>128 Kbps</th>
-    </tr>
-    </tbody>
-    </table>
-
-  </li>
+  <li>For 3GPP and MPEG-4 containers, the <code>moov</code> atom must precede any <code>mdat</code> atoms.</li>
+  <li>For 3GPP, MPEG-4, and WebM containers, audio and video samples corresponding to the same time offset may be no more than 500 KB apart.
+      To minimize this audio/video drift, consider interleaving audio and video in smaller chunk sizes.</li>
 </ul>
-
-<p>In addition to the encoding parameters above, a device's available video recording profiles can be used as a proxy for media playback capabilities. These profiles can be inspected using the {@link android.media.CamcorderProfile CamcorderProfile} class, which is available since API level 8.</p>
