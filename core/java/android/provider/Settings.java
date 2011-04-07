@@ -1103,6 +1103,18 @@ public final class Settings {
         public static final int END_BUTTON_BEHAVIOR_DEFAULT = END_BUTTON_BEHAVIOR_SLEEP;
 
         /**
+         * Is advanced settings mode turned on. 0 == no, 1 == yes
+         * @hide
+         */
+        public static final String ADVANCED_SETTINGS = "advanced_settings";
+
+        /**
+         * ADVANCED_SETTINGS default value.
+         * @hide
+         */
+        public static final int ADVANCED_SETTINGS_DEFAULT = 0;
+
+        /**
          * Whether Airplane Mode is on.
          */
         public static final String AIRPLANE_MODE_ON = "airplane_mode_on";

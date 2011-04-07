@@ -1908,6 +1908,21 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.HDMI_AUDIO_PLUG";
 
     /**
+     * <p>Broadcast Action: The user has switched on advanced settings in the settings app:</p>
+     * <ul>
+     *   <li><em>state</em> - A boolean value indicating whether the settings is on or off.</li>
+     * </ul>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     *
+     * @hide
+     */
+    //@SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ADVANCED_SETTINGS_CHANGED
+            = "android.intent.action.ADVANCED_SETTINGS";
+
+    /**
      * Broadcast Action: An outgoing call is about to be placed.
      *
      * <p>The Intent will have the following extra value:
