@@ -191,6 +191,10 @@ public class DummyDataStateTracker implements NetworkStateTracker {
         return new LinkCapabilities(mLinkCapabilities);
     }
 
+    public void setDependencyMet(boolean met) {
+        // not supported on this network
+    }
+
     static private void log(String s) {
         Slog.d(TAG, s);
     }
