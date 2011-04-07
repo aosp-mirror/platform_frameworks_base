@@ -3634,12 +3634,12 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     /**
      * {@inheritDoc}
      */
-    public void getCdmaSubscriptionSource(int cdmaSubscription , Message response) {
+    @Override
+    public void getCdmaSubscriptionSource(Message response) {
         RILRequest rr = RILRequest.obtain(
                 RILConstants.RIL_REQUEST_CDMA_GET_SUBSCRIPTION_SOURCE, response);
 
-        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
-                + " : " + cdmaSubscription);
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
 
         send(rr);
     }
