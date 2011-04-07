@@ -222,29 +222,10 @@ public:
     uint32_t getDPI() const {return mDPI;}
     void setDPI(uint32_t dpi) {mDPI = dpi;}
 
-protected:
     Device *mDev;
+protected:
 
     struct {
-        EGLint mNumConfigs;
-        EGLint mMajorVersion;
-        EGLint mMinorVersion;
-        EGLConfig mConfig;
-        EGLContext mContext;
-        EGLSurface mSurface;
-        EGLSurface mSurfaceDefault;
-        EGLDisplay mDisplay;
-    } mEGL;
-
-    struct {
-        const uint8_t * mVendor;
-        const uint8_t * mRenderer;
-        const uint8_t * mVersion;
-        const uint8_t * mExtensions;
-
-        uint32_t mMajorVersion;
-        uint32_t mMinorVersion;
-
         int32_t mMaxVaryingVectors;
         int32_t mMaxTextureImageUnits;
 

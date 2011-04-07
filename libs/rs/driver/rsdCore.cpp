@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 #include "rsdCore.h"
 #include "rsdBcc.h"
+#include "rsdGL.h"
 #include "rsdProgramStore.h"
 #include "rsdProgramRaster.h"
 
@@ -37,6 +38,11 @@ static void Shutdown(Context *rsc);
 static void SetPriority(const Context *rsc, int32_t priority);
 
 static RsdHalFunctions FunctionTable = {
+    rsdGLInit,
+    rsdGLShutdown,
+    rsdGLSetSurface,
+    rsdGLSwap,
+
     Shutdown,
     NULL,
     SetPriority,
