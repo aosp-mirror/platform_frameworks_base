@@ -316,22 +316,22 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         for (String naString : naStrings) {
             try {
                 NetworkConfig n = new NetworkConfig(naString);
-                if (n.mType > ConnectivityManager.MAX_NETWORK_TYPE) {
+                if (n.type > ConnectivityManager.MAX_NETWORK_TYPE) {
                     loge("Error in networkAttributes - ignoring attempt to define type " +
-                            n.mType);
+                            n.type);
                     continue;
                 }
-                if (mNetConfigs[n.mType] != null) {
+                if (mNetConfigs[n.type] != null) {
                     loge("Error in networkAttributes - ignoring attempt to redefine type " +
-                            n.mType);
+                            n.type);
                     continue;
                 }
-                if (mRadioAttributes[n.mRadio] == null) {
+                if (mRadioAttributes[n.radio] == null) {
                     loge("Error in networkAttributes - ignoring attempt to use undefined " +
-                            "radio " + n.mRadio + " in network type " + n.mType);
+                            "radio " + n.radio + " in network type " + n.type);
                     continue;
                 }
-                mNetConfigs[n.mType] = n;
+                mNetConfigs[n.type] = n;
                 mNetworksDefined++;
             } catch(Exception e) {
                 // ignore it - leave the entry null
@@ -347,14 +347,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             while (insertionPoint > -1) {
                 for (NetworkConfig na : mNetConfigs) {
                     if (na == null) continue;
-                    if (na.mPriority < currentLowest) continue;
-                    if (na.mPriority > currentLowest) {
-                        if (na.mPriority < nextLowest || nextLowest == 0) {
-                            nextLowest = na.mPriority;
+                    if (na.priority < currentLowest) continue;
+                    if (na.priority > currentLowest) {
+                        if (na.priority < nextLowest || nextLowest == 0) {
+                            nextLowest = na.priority;
                         }
                         continue;
                     }
-                    mPriorityList[insertionPoint--] = na.mType;
+                    mPriorityList[insertionPoint--] = na.type;
                 }
                 currentLowest = nextLowest;
                 nextLowest = 0;
@@ -380,7 +380,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          * to change very often.
          */
         for (int netType : mPriorityList) {
-            switch (mNetConfigs[netType].mRadio) {
+            switch (mNetConfigs[netType].radio) {
             case ConnectivityManager.TYPE_WIFI:
                 if (DBG) log("Starting Wifi Service.");
                 WifiStateTracker wst = new WifiStateTracker();
@@ -396,12 +396,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 break;
             case ConnectivityManager.TYPE_MOBILE:
                 mNetTrackers[netType] = new MobileDataStateTracker(netType,
-                        mNetConfigs[netType].mName);
+                        mNetConfigs[netType].name);
                 mNetTrackers[netType].startMonitoring(context, mHandler);
                 break;
             case ConnectivityManager.TYPE_DUMMY:
                 mNetTrackers[netType] = new DummyDataStateTracker(netType,
-                        mNetConfigs[netType].mName);
+                        mNetConfigs[netType].name);
                 mNetTrackers[netType].startMonitoring(context, mHandler);
                 break;
             case ConnectivityManager.TYPE_BLUETOOTH:
@@ -410,7 +410,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 break;
             default:
                 loge("Trying to create a DataStateTracker for an unknown radio type " +
-                        mNetConfigs[netType].mRadio);
+                        mNetConfigs[netType].radio);
                 continue;
             }
         }
@@ -1285,8 +1285,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (mNetConfigs[type].isDefault()) {
             if (mActiveDefaultNetwork != -1 && mActiveDefaultNetwork != type) {
                 if ((type != mNetworkPreference &&
-                        mNetConfigs[mActiveDefaultNetwork].mPriority >
-                        mNetConfigs[type].mPriority) ||
+                        mNetConfigs[mActiveDefaultNetwork].priority >
+                        mNetConfigs[type].priority) ||
                         mNetworkPreference == mActiveDefaultNetwork) {
                         // don't accept this one
                         if (DBG) {
