@@ -194,6 +194,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     protected static final int EVENT_GET_LAST_FAIL_DONE = 4;
     protected static final int EVENT_DEACTIVATE_DONE = 5;
     protected static final int EVENT_DISCONNECT = 6;
+    protected static final int EVENT_RIL_CONNECTED = 7;
 
     //***** Tag IDs for EventLog
     protected static final int EVENT_LOG_BAD_DNS_ADDRESS = 50100;
@@ -202,6 +203,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     protected ApnSetting mApn;
     protected int mTag;
     protected PhoneBase phone;
+    protected int mRilVersion = -1;
     protected int cid;
     protected LinkProperties mLinkProperties = new LinkProperties();
     protected LinkCapabilities mCapabilities = new LinkCapabilities();
@@ -318,6 +320,16 @@ public abstract class DataConnection extends HierarchicalStateMachine {
         }
 
         clearSettings();
+    }
+
+    protected int getRadioTechnology(int defaultRadioTechnology) {
+        int radioTechnology;
+        if (mRilVersion < 6) {
+            radioTechnology = defaultRadioTechnology;
+        } else {
+            radioTechnology = phone.getServiceState().getRadioTechnology() + 2;
+        }
+        return radioTechnology;
     }
 
     /*
@@ -473,6 +485,14 @@ public abstract class DataConnection extends HierarchicalStateMachine {
      */
     private class DcDefaultState extends HierarchicalState {
         @Override
+        protected void enter() {
+            phone.mCM.registerForRilConnected(getHandler(), EVENT_RIL_CONNECTED, null);
+        }
+        @Override
+        protected void exit() {
+            phone.mCM.unregisterForRilConnected(getHandler());
+        }
+        @Override
         protected boolean processMessage(Message msg) {
             AsyncResult ar;
 
@@ -495,6 +515,20 @@ public abstract class DataConnection extends HierarchicalStateMachine {
                 case EVENT_DISCONNECT:
                     if (DBG) log("DcDefaultState: msg.what=EVENT_DISCONNECT");
                     notifyDisconnectCompleted((DisconnectParams) msg.obj);
+                    break;
+
+                case EVENT_RIL_CONNECTED:
+                    ar = (AsyncResult)msg.obj;
+                    if (ar.exception == null) {
+                        mRilVersion = (Integer)ar.result;
+                        if (DBG) {
+                            log("DcDefaultState: msg.what=EVENT_RIL_CONNECTED mRilVersion=" +
+                                mRilVersion);
+                        }
+                    } else {
+                        log("Unexpected exception on EVENT_RIL_CONNECTED");
+                        mRilVersion = -1;
+                    }
                     break;
 
                 default:
