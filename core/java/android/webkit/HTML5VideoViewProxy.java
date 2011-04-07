@@ -224,8 +224,9 @@ class HTML5VideoViewProxy extends Handler
         }
 
         public static void onPrepared() {
-            // The VideoView will decide whether to really kick off to play.
-            mHTML5VideoView.start();
+            if (!mHTML5VideoView.isFullScreenMode() || mHTML5VideoView.getAutostart()) {
+                mHTML5VideoView.start();
+            }
             if (mBaseLayer != 0) {
                 setBaseLayer(mBaseLayer);
             }
