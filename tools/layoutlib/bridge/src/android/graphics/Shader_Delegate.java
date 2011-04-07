@@ -73,6 +73,14 @@ public abstract class Shader_Delegate {
     public abstract boolean isSupported();
     public abstract String getSupportMessage();
 
+    public boolean isValid() {
+        if (mLocalMatrix != null && mLocalMatrix.getAffineTransform().getDeterminant() == 0) {
+            return false;
+        }
+
+        return true;
+    }
+
     // ---- native methods ----
 
     @LayoutlibDelegate
@@ -126,5 +134,4 @@ public abstract class Shader_Delegate {
 
         return new java.awt.geom.AffineTransform();
     }
-
 }
