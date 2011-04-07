@@ -136,7 +136,7 @@ class ActivityRecord extends IApplicationToken.Stub {
         pw.print(prefix); pw.print("stateNotNeeded="); pw.print(stateNotNeeded);
                 pw.print(" componentSpecified="); pw.print(componentSpecified);
                 pw.print(" isHomeActivity="); pw.println(isHomeActivity);
-        pw.print(prefix); pw.print("configuration="); pw.println(configuration);
+        pw.print(prefix); pw.print("config="); pw.println(configuration);
         if (resultTo != null || resultWho != null) {
             pw.print(prefix); pw.print("resultTo="); pw.print(resultTo);
                     pw.print(" resultWho="); pw.print(resultWho);

@@ -157,6 +157,16 @@ public interface IBinder {
     public void dump(FileDescriptor fd, String[] args) throws RemoteException;
     
     /**
+     * Like {@link #dump(FileDescriptor, String[])} but always executes
+     * asynchronously.  If the object is local, a new thread is created
+     * to perform the dump.
+     *
+     * @param fd The raw file descriptor that the dump is being sent to.
+     * @param args additional arguments to the dump request.
+     */
+    public void dumpAsync(FileDescriptor fd, String[] args) throws RemoteException;
+
+    /**
      * Perform a generic operation with the object.
      * 
      * @param code The action to perform.  This should
