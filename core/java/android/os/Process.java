@@ -92,6 +92,12 @@ public class Process {
     public static final int SDCARD_RW_GID = 1015;
 
     /**
+     * Defines the UID for the KeyChain service.
+     * @hide
+     */
+    public static final int KEYCHAIN_UID = 1020;
+
+    /**
      * Defines the UID/GID for the NFC service process.
      * @hide
      */

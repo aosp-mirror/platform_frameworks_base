@@ -493,6 +493,7 @@ static struct user {
     {AID_VPN,      AID_SYSTEM, GET},
     {AID_WIFI,     AID_SYSTEM, GET},
     {AID_ROOT,     AID_SYSTEM, GET},
+    {AID_KEYCHAIN, AID_SYSTEM, TEST | GET | SAW},
     {~0,           ~0,         TEST | GET | INSERT | DELETE | EXIST | SAW},
 };
 
