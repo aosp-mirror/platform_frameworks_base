@@ -1572,12 +1572,15 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if(DBG) log("EVENT_DISCONNECT_DONE connId=" + connId);
         if (ar.userObj instanceof ApnContext) {
             apnContext = (ApnContext) ar.userObj;
+        } else {
+            loge("Invalid ar in onDisconnectDone");
+            return;
         }
-
-        mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
 
         apnContext.setState(State.IDLE);
         apnContext.setApnSetting(null);
+
+        mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
 
         // if all data connection are gone, check whether Airplane mode request was
         // pending.
