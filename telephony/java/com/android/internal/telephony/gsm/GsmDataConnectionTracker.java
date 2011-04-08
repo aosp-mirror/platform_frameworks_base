@@ -1991,11 +1991,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected void log(String s) {
-        Log.d(LOG_TAG, "[GsmDataConnectionTracker] " + s);
+        Log.d(LOG_TAG, "[GsmDCT] " + s);
     }
 
     @Override
     protected void loge(String s) {
-        Log.e(LOG_TAG, "[GsmDataConnectionTracker] " + s);
+        Log.e(LOG_TAG, "[GsmDCT] " + s);
     }
 }
