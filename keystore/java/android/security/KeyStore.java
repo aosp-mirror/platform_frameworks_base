@@ -23,10 +23,13 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charsets;
 import java.util.ArrayList;
 
 /**
- * {@hide}
+ * @hide This should not be made public in its present form because it
+ * assumes that private and secret key bytes are available and would
+ * preclude the use of hardware crypto.
  */
 public class KeyStore {
     public static final int NO_ERROR = 1;
@@ -211,20 +214,10 @@ public class KeyStore {
     }
 
     private static byte[] getBytes(String string) {
-        try {
-            return string.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            // will never happen
-            throw new RuntimeException(e);
-        }
+        return string.getBytes(Charsets.UTF_8);
     }
 
     private static String toString(byte[] bytes) {
-        try {
-            return new String(bytes, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            // will never happen
-            throw new RuntimeException(e);
-        }
+        return new String(bytes, Charsets.UTF_8);
     }
 }

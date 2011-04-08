@@ -31,6 +31,8 @@ import android.util.Log;
 import dalvik.system.VMRuntime;
 import dalvik.system.Zygote;
 
+import libcore.io.IoUtils;
+
 import java.io.BufferedReader;
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -304,6 +306,7 @@ public class ZygoteInit {
             } catch (IOException e) {
                 Log.e(TAG, "Error reading " + PRELOADED_CLASSES + ".", e);
             } finally {
+                IoUtils.closeQuietly(is);
                 // Restore default.
                 runtime.setTargetHeapUtilization(defaultUtilization);
 

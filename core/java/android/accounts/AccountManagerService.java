@@ -37,6 +37,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.RegisteredServicesCache;
 import android.content.pm.RegisteredServicesCacheListener;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
@@ -73,8 +74,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * accounts on the device. Some of these calls are implemented with the help of the corresponding
  * {@link IAccountAuthenticator} services. This service is not accessed by users directly,
  * instead one uses an instance of {@link AccountManager}, which can be accessed as follows:
- *    AccountManager accountManager =
- *      (AccountManager)context.getSystemService(Context.ACCOUNT_SERVICE)
+ *    AccountManager accountManager = AccountManager.get(context);
  * @hide
  */
 public class AccountManagerService
@@ -1064,14 +1064,18 @@ public class AccountManagerService
         } catch (PackageManager.NameNotFoundException e) {
             throw new IllegalArgumentException("unknown account type: " + accountType);
         }
-        return authContext.getString(serviceInfo.type.labelId);
+        try {
+            return authContext.getString(serviceInfo.type.labelId);
+        } catch (Resources.NotFoundException e) {
+            throw new IllegalArgumentException("unknown account type: " + accountType);
+        }
     }
 
     private Intent newGrantCredentialsPermissionIntent(Account account, int uid,
             AccountAuthenticatorResponse response, String authTokenType, String authTokenLabel) {
 
         Intent intent = new Intent(mContext, GrantCredentialsPermissionActivity.class);
-        // See FLAT_ACTIVITY_NEW_TASK docs for limitations and benefits of the flag.
+        // See FLAG_ACTIVITY_NEW_TASK docs for limitations and benefits of the flag.
         // Since it was set in Eclair+ we can't change it without breaking apps using
         // the intent from a non-Activity context.
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

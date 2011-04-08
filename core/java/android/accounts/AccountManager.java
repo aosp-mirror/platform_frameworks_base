@@ -179,6 +179,7 @@ public class AccountManager {
     public static final String KEY_PASSWORD = "password";
 
     public static final String KEY_ACCOUNTS = "accounts";
+
     public static final String KEY_ACCOUNT_AUTHENTICATOR_RESPONSE = "accountAuthenticatorResponse";
     public static final String KEY_ACCOUNT_MANAGER_RESPONSE = "accountManagerResponse";
     public static final String KEY_AUTHENTICATOR_TYPES = "authenticator_types";
@@ -1269,7 +1270,7 @@ public class AccountManager {
         /** Handles the responses from the AccountManager */
         private class Response extends IAccountManagerResponse.Stub {
             public void onResult(Bundle bundle) {
-                Intent intent = bundle.getParcelable("intent");
+                Intent intent = bundle.getParcelable(KEY_INTENT);
                 if (intent != null && mActivity != null) {
                     // since the user provided an Activity we will silently start intents
                     // that we see

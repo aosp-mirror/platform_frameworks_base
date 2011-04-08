@@ -18,6 +18,7 @@ package android.accounts;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -103,7 +104,12 @@ public class ChooseAccountActivity extends Activity {
             } catch (PackageManager.NameNotFoundException e) {
                 // Nothing we can do much here, just log
                 if (Log.isLoggable(TAG, Log.WARN)) {
-                    Log.w(TAG, "No icon for account type " + accountType);
+                    Log.w(TAG, "No icon name for account type " + accountType);
+                }
+            } catch (Resources.NotFoundException e) {
+                // Nothing we can do much here, just log
+                if (Log.isLoggable(TAG, Log.WARN)) {
+                    Log.w(TAG, "No icon resource for account type " + accountType);
                 }
             }
         }

@@ -26,7 +26,7 @@ import android.os.Bundle;
  * to handle the request then it can have the activity extend AccountAuthenticatorActivity.
  * The AbstractAccountAuthenticator passes in the response to the intent using the following:
  * <pre>
- *      intent.putExtra(Constants.ACCOUNT_AUTHENTICATOR_RESPONSE_KEY, response);
+ *      intent.putExtra({@link AccountManager#KEY_ACCOUNT_AUTHENTICATOR_RESPONSE}, response);
  * </pre>
  * The activity then sets the result that is to be handed to the response via
  * {@link #setAccountAuthenticatorResult(android.os.Bundle)}.
