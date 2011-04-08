@@ -72,12 +72,6 @@ private:
 
 // ---------------------------------------------------------------------------
 
-static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL)
-{
-    jclass npeClazz = env->FindClass(exc);
-    env->ThrowNew(npeClazz, msg);
-}
-
 static jfieldID gContextId = 0;
 static jfieldID gNativeBitmapID = 0;
 static jfieldID gTypeNativeCache = 0;
@@ -858,24 +852,24 @@ nScriptCCreate(JNIEnv *_env, jobject _this, RsContext con,
     AutoJavaStringToUTF8 resNameUTF(_env, resName);
     AutoJavaStringToUTF8 cacheDirUTF(_env, cacheDir);
     jint ret = 0;
-
+    jbyte* script_ptr = NULL;
     jint _exception = 0;
     jint remaining;
-    jbyte* script_ptr;
     if (!scriptRef) {
         _exception = 1;
-        //_env->ThrowNew(IAEClass, "script == null");
+        //jniThrowException(_env, "java/lang/IllegalArgumentException", "script == null");
         goto exit;
     }
     if (length < 0) {
         _exception = 1;
-        //_env->ThrowNew(IAEClass, "length < 0");
+        //jniThrowException(_env, "java/lang/IllegalArgumentException", "length < 0");
         goto exit;
     }
     remaining = _env->GetArrayLength(scriptRef);
     if (remaining < length) {
         _exception = 1;
-        //_env->ThrowNew(IAEClass, "length > script.length - offset");
+        //jniThrowException(_env, "java/lang/IllegalArgumentException",
+        //        "length > script.length - offset");
         goto exit;
     }
     script_ptr = (jbyte *)

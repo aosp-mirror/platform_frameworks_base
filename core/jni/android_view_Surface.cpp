@@ -35,6 +35,7 @@
 #include <SkPixelRef.h>
 
 #include "jni.h"
+#include "JNIHelp.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
 #include <utils/misc.h>
@@ -131,15 +132,15 @@ static void SurfaceSession_kill(JNIEnv* env, jobject clazz)
 
 static sp<SurfaceControl> getSurfaceControl(JNIEnv* env, jobject clazz)
 {
-    SurfaceControl* const p = 
+    SurfaceControl* const p =
         (SurfaceControl*)env->GetIntField(clazz, so.surfaceControl);
     return sp<SurfaceControl>(p);
 }
 
-static void setSurfaceControl(JNIEnv* env, jobject clazz, 
+static void setSurfaceControl(JNIEnv* env, jobject clazz,
         const sp<SurfaceControl>& surface)
 {
-    SurfaceControl* const p = 
+    SurfaceControl* const p =
         (SurfaceControl*)env->GetIntField(clazz, so.surfaceControl);
     if (surface.get()) {
         surface->incStrong(clazz);
@@ -157,12 +158,12 @@ static sp<Surface> getSurface(JNIEnv* env, jobject clazz)
         /*
          * if this method is called from the WindowManager's process, it means
          * the client is is not remote, and therefore is allowed to have
-         * a Surface (data), so we create it here. 
+         * a Surface (data), so we create it here.
          * If we don't have a SurfaceControl, it means we're in a different
          * process.
          */
-        
-        SurfaceControl* const control = 
+
+        SurfaceControl* const control =
             (SurfaceControl*)env->GetIntField(clazz, so.surfaceControl);
         if (control) {
             result = control->getSurface();
@@ -201,15 +202,15 @@ static void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)
 // ----------------------------------------------------------------------------
 
 static void Surface_init(
-        JNIEnv* env, jobject clazz, 
+        JNIEnv* env, jobject clazz,
         jobject session,
         jint pid, jstring jname, jint dpy, jint w, jint h, jint format, jint flags)
 {
     if (session == NULL) {
-        doThrow(env, "java/lang/NullPointerException");
+        doThrowNPE(env);
         return;
     }
-    
+
     SurfaceComposerClient* client =
             (SurfaceComposerClient*)env->GetIntField(session, sso.client);
 
@@ -224,7 +225,7 @@ static void Surface_init(
     }
 
     if (surface == 0) {
-        doThrow(env, OutOfResourcesException);
+        jniThrowException(env, OutOfResourcesException, NULL);
         return;
     }
     setSurfaceControl(env, clazz, surface);
@@ -234,7 +235,7 @@ static void Surface_initParcel(JNIEnv* env, jobject clazz, jobject argParcel)
 {
     Parcel* parcel = (Parcel*)env->GetIntField(argParcel, no.native_parcel);
     if (parcel == NULL) {
-        doThrow(env, "java/lang/NullPointerException", NULL);
+        doThrowNPE(env);
         return;
     }
 
@@ -297,7 +298,7 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
 {
     const sp<Surface>& surface(getSurface(env, clazz));
     if (!Surface::isValid(surface)) {
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+        doThrowIAE(env);
         return 0;
     }
 
@@ -310,7 +311,7 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
         dirty.right = env->GetIntField(dirtyRect, ro.r);
         dirty.bottom= env->GetIntField(dirtyRect, ro.b);
         if (!dirty.isEmpty()) {
-            dirtyRegion.set(dirty);    
+            dirtyRegion.set(dirty);
         }
     } else {
         dirtyRegion.set(Rect(0x3FFF,0x3FFF));
@@ -322,7 +323,7 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
         const char* const exception = (err == NO_MEMORY) ?
             OutOfResourcesException :
             "java/lang/IllegalArgumentException";
-        doThrow(env, exception, NULL);
+        jniThrowException(env, exception, NULL);
         return 0;
     }
 
@@ -344,7 +345,7 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
         bitmap.setPixels(NULL);
     }
     nativeCanvas->setBitmapDevice(bitmap);
-    
+
     SkRegion clipReg;
     if (dirtyRegion.isRect()) { // very common case
         const Rect b(dirtyRegion.getBounds());
@@ -359,7 +360,7 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
     }
 
     nativeCanvas->clipRegion(clipReg);
-    
+
     int saveCount = nativeCanvas->save();
     env->SetIntField(clazz, so.saveCount, saveCount);
 
@@ -370,7 +371,7 @@ static jobject Surface_lockCanvas(JNIEnv* env, jobject clazz, jobject dirtyRect)
         env->SetIntField(dirtyRect, ro.r, bounds.right);
         env->SetIntField(dirtyRect, ro.b, bounds.bottom);
     }
-    
+
     return canvas;
 }
 
@@ -379,10 +380,10 @@ static void Surface_unlockCanvasAndPost(
 {
     jobject canvas = env->GetObjectField(clazz, so.canvas);
     if (env->IsSameObject(canvas, argCanvas) == JNI_FALSE) {
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+        doThrowIAE(env);
         return;
     }
-    
+
     const sp<Surface>& surface(getSurface(env, clazz));
     if (!Surface::isValid(surface))
         return;
@@ -397,7 +398,7 @@ static void Surface_unlockCanvasAndPost(
     // unlock surface
     status_t err = surface->unlockAndPost();
     if (err < 0) {
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+        doThrowIAE(env);
     }
 }
 
@@ -405,7 +406,7 @@ static void Surface_unlockCanvas(
         JNIEnv* env, jobject clazz, jobject argCanvas)
 {
     // XXX: this API has been removed
-    doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    doThrowIAE(env);
 }
 
 static void Surface_openTransaction(
@@ -425,7 +426,7 @@ static void Surface_setOrientation(
 {
     int err = SurfaceComposerClient::setOrientation(display, orientation, flags);
     if (err < 0) {
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+        doThrowIAE(env);
     }
 }
 
@@ -434,7 +435,7 @@ static void Surface_freezeDisplay(
 {
     int err = SurfaceComposerClient::freezeDisplay(display, 0);
     if (err < 0) {
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+        doThrowIAE(env);
     }
 }
 
@@ -443,7 +444,7 @@ static void Surface_unfreezeDisplay(
 {
     int err = SurfaceComposerClient::unfreezeDisplay(display, 0);
     if (err < 0) {
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+        doThrowIAE(env);
     }
 }
 
@@ -554,8 +555,9 @@ static void Surface_setLayer(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     status_t err = surface->setLayer(zorder);
-    if (err<0 && err!=NO_INIT)
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 static void Surface_setPosition(
@@ -564,8 +566,9 @@ static void Surface_setPosition(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     status_t err = surface->setPosition(x, y);
-    if (err<0 && err!=NO_INIT)
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 static void Surface_setSize(
@@ -574,8 +577,9 @@ static void Surface_setSize(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     status_t err = surface->setSize(w, h);
-    if (err<0 && err!=NO_INIT)
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 static void Surface_hide(
@@ -584,8 +588,9 @@ static void Surface_hide(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     status_t err = surface->hide();
-    if (err<0 && err!=NO_INIT)
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 static void Surface_show(
@@ -594,8 +599,9 @@ static void Surface_show(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     status_t err = surface->show();
-    if (err<0 && err!=NO_INIT)
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 static void Surface_freeze(
@@ -604,8 +610,9 @@ static void Surface_freeze(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     status_t err = surface->freeze();
-    if (err<0 && err!=NO_INIT)
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 static void Surface_unfreeze(
@@ -614,8 +621,9 @@ static void Surface_unfreeze(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     status_t err = surface->unfreeze();
-    if (err<0 && err!=NO_INIT)
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 static void Surface_setFlags(
@@ -624,8 +632,9 @@ static void Surface_setFlags(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     status_t err = surface->setFlags(flags, mask);
-    if (err<0 && err!=NO_INIT)
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 static void Surface_setTransparentRegion(
@@ -634,7 +643,7 @@ static void Surface_setTransparentRegion(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     SkRegion* nativeRegion = (SkRegion*)env->GetIntField(argRegion, no.native_region);
-    
+
     const SkIRect& b(nativeRegion->getBounds());
     Region reg(Rect(b.fLeft, b.fTop, b.fRight, b.fBottom));
     if (nativeRegion->isComplex()) {
@@ -645,10 +654,11 @@ static void Surface_setTransparentRegion(
             it.next();
         }
     }
-    
+
     status_t err = surface->setTransparentRegionHint(reg);
-    if (err<0 && err!=NO_INIT)
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 static void Surface_setAlpha(
@@ -657,8 +667,9 @@ static void Surface_setAlpha(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     status_t err = surface->setAlpha(alpha);
-    if (err<0 && err!=NO_INIT)
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 static void Surface_setMatrix(
@@ -668,8 +679,9 @@ static void Surface_setMatrix(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     status_t err = surface->setMatrix(dsdx, dtdx, dsdy, dtdy);
-    if (err<0 && err!=NO_INIT)
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 static void Surface_setFreezeTint(
@@ -679,8 +691,9 @@ static void Surface_setFreezeTint(
     const sp<SurfaceControl>& surface(getSurfaceControl(env, clazz));
     if (surface == 0) return;
     status_t err = surface->setFreezeTint(tint);
-    if (err<0 && err!=NO_INIT)
-        doThrow(env, "java/lang/IllegalArgumentException", NULL);
+    if (err<0 && err!=NO_INIT) {
+        doThrowIAE(env);
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -692,7 +705,7 @@ static void Surface_copyFrom(
         return;
 
     if (other == NULL) {
-        doThrow(env, "java/lang/NullPointerException", NULL);
+        doThrowNPE(env);
         return;
     }
 
@@ -716,7 +729,7 @@ static void Surface_readFromParcel(
 {
     Parcel* parcel = (Parcel*)env->GetIntField( argParcel, no.native_parcel);
     if (parcel == NULL) {
-        doThrow(env, "java/lang/NullPointerException", NULL);
+        doThrowNPE(env);
         return;
     }
 
@@ -731,7 +744,7 @@ static void Surface_writeToParcel(
             argParcel, no.native_parcel);
 
     if (parcel == NULL) {
-        doThrow(env, "java/lang/NullPointerException", NULL);
+        doThrowNPE(env);
         return;
     }
 

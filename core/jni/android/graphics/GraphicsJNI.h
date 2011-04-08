@@ -29,26 +29,26 @@ public:
     static SkRect* jrectf_to_rect(JNIEnv*, jobject jrectf, SkRect*);
     static SkRect* jrect_to_rect(JNIEnv*, jobject jrect, SkRect*);
     static void rect_to_jrectf(const SkRect&, JNIEnv*, jobject jrectf);
-    
+
     static void set_jpoint(JNIEnv*, jobject jrect, int x, int y);
-    
+
     static SkIPoint* jpoint_to_ipoint(JNIEnv*, jobject jpoint, SkIPoint* point);
     static void ipoint_to_jpoint(const SkIPoint& point, JNIEnv*, jobject jpoint);
-    
+
     static SkPoint* jpointf_to_point(JNIEnv*, jobject jpointf, SkPoint* point);
     static void point_to_jpointf(const SkPoint& point, JNIEnv*, jobject jpointf);
-  
+
     static SkCanvas* getNativeCanvas(JNIEnv*, jobject canvas);
     static SkPaint*  getNativePaint(JNIEnv*, jobject paint);
     static SkBitmap* getNativeBitmap(JNIEnv*, jobject bitmap);
     static SkPicture* getNativePicture(JNIEnv*, jobject picture);
     static SkRegion* getNativeRegion(JNIEnv*, jobject region);
-    
+
     /** Return the corresponding native config from the java Config enum,
         or kNo_Config if the java object is null.
     */
     static SkBitmap::Config getNativeBitmapConfig(JNIEnv*, jobject jconfig);
-    
+
     /** Create a java Bitmap object given the native bitmap (required) and optional
         storage array (may be null).
     */
@@ -57,7 +57,7 @@ public:
 
     static jobject createBitmap(JNIEnv* env, SkBitmap* bitmap, bool isMutable,
                                 jbyteArray ninepatch, int density = -1);
-    
+
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
     static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
@@ -138,7 +138,7 @@ public:
     JavaPixelAllocator(JNIEnv* env);
     // overrides
     virtual bool allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable);
-    
+
     /** Return the Java array object created for the last allocation.
      *  This returns a local JNI reference which the caller is responsible
      *  for storing appropriately (usually by passing it to the Bitmap
@@ -173,10 +173,10 @@ public:
     AutoJavaFloatArray(JNIEnv* env, jfloatArray array,
                        int minLength = 0, JNIAccess = kRW_JNIAccess);
     ~AutoJavaFloatArray();
-    
+
     float* ptr() const { return fPtr; }
     int    length() const { return fLen; }
-    
+
 private:
     JNIEnv*     fEnv;
     jfloatArray fArray;
@@ -189,10 +189,10 @@ class AutoJavaIntArray {
 public:
     AutoJavaIntArray(JNIEnv* env, jintArray array, int minLength = 0);
     ~AutoJavaIntArray();
-    
+
     jint* ptr() const { return fPtr; }
     int    length() const { return fLen; }
-    
+
 private:
     JNIEnv*     fEnv;
     jintArray fArray;
@@ -205,10 +205,10 @@ public:
     AutoJavaShortArray(JNIEnv* env, jshortArray array,
                        int minLength = 0, JNIAccess = kRW_JNIAccess);
     ~AutoJavaShortArray();
-    
+
     jshort* ptr() const { return fPtr; }
     int    length() const { return fLen; }
-    
+
 private:
     JNIEnv*     fEnv;
     jshortArray fArray;
@@ -221,10 +221,10 @@ class AutoJavaByteArray {
 public:
     AutoJavaByteArray(JNIEnv* env, jbyteArray array, int minLength = 0);
     ~AutoJavaByteArray();
-    
+
     jbyte* ptr() const { return fPtr; }
     int    length() const { return fLen; }
-    
+
 private:
     JNIEnv*     fEnv;
     jbyteArray fArray;
@@ -232,7 +232,6 @@ private:
     int         fLen;
 };
 
-void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL);
 void doThrowNPE(JNIEnv* env);
 void doThrowAIOOBE(JNIEnv* env); // Array Index Out Of Bounds Exception
 void doThrowIAE(JNIEnv* env, const char* msg = NULL);   // Illegal Argument

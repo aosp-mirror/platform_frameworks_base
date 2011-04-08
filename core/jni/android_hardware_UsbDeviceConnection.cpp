@@ -132,7 +132,7 @@ android_hardware_UsbDeviceConnection_control_request(JNIEnv *env, jobject thiz,
     jbyte* bufferBytes = NULL;
     if (buffer) {
         if (env->GetArrayLength(buffer) < length) {
-            env->ThrowNew(env->FindClass("java/lang/ArrayIndexOutOfBoundsException"), NULL);
+            jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
             return -1;
         }
         bufferBytes = env->GetByteArrayElements(buffer, 0);
@@ -160,7 +160,7 @@ android_hardware_UsbDeviceConnection_bulk_request(JNIEnv *env, jobject thiz,
     jbyte* bufferBytes = NULL;
     if (buffer) {
         if (env->GetArrayLength(buffer) < length) {
-            env->ThrowNew(env->FindClass("java/lang/ArrayIndexOutOfBoundsException"), NULL);
+            jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
             return -1;
         }
         bufferBytes = env->GetByteArrayElements(buffer, 0);
@@ -239,4 +239,3 @@ int register_android_hardware_UsbDeviceConnection(JNIEnv *env)
     return AndroidRuntime::registerNativeMethods(env, "android/hardware/usb/UsbDeviceConnection",
             method_table, NELEM(method_table));
 }
-

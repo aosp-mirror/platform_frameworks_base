@@ -2,16 +2,16 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -24,6 +24,7 @@
 #include <utils/String8.h>
 
 #include "jni.h"
+#include "JNIHelp.h"
 #include "utils/misc.h"
 #include "android_runtime/AndroidRuntime.h"
 
@@ -41,7 +42,7 @@ struct levels_t {
 };
 static levels_t levels;
 
-static int toLevel(const char* value) 
+static int toLevel(const char* value)
 {
     switch (value[0]) {
         case 'V': return levels.verbose;
@@ -67,13 +68,12 @@ static jboolean android_util_Log_isLoggable(JNIEnv* env, jobject clazz, jstring 
     if (tag == NULL) {
         return false;
     }
-    
+
     jboolean result = false;
-    
+
     const char* chars = env->GetStringUTFChars(tag, NULL);
 
     if ((strlen(chars)+sizeof(LOG_NAMESPACE)) > PROPERTY_KEY_MAX) {
-        jclass clazz = env->FindClass("java/lang/IllegalArgumentException");
         char buf2[200];
         snprintf(buf2, sizeof(buf2), "Log tag \"%s\" exceeds limit of %d characters\n",
                 chars, PROPERTY_KEY_MAX - sizeof(LOG_NAMESPACE));
@@ -81,13 +81,13 @@ static jboolean android_util_Log_isLoggable(JNIEnv* env, jobject clazz, jstring 
         // release the chars!
         env->ReleaseStringUTFChars(tag, chars);
 
-        env->ThrowNew(clazz, buf2);
+        jniThrowException(env, "java/lang/IllegalArgumentException", buf2);
         return false;
     } else {
         strncpy(key, LOG_NAMESPACE, sizeof(LOG_NAMESPACE)-1);
         strcpy(key + sizeof(LOG_NAMESPACE) - 1, chars);
     }
-    
+
     env->ReleaseStringUTFChars(tag, chars);
 
     len = property_get(key, buf, "");
@@ -107,22 +107,12 @@ static jint android_util_Log_println_native(JNIEnv* env, jobject clazz,
     const char* msg = NULL;
 
     if (msgObj == NULL) {
-        jclass npeClazz;
-
-        npeClazz = env->FindClass("java/lang/NullPointerException");
-        assert(npeClazz != NULL);
-
-        env->ThrowNew(npeClazz, "println needs a message");
+        jniThrowNullPointerException(env, "println needs a message");
         return -1;
     }
 
     if (bufID < 0 || bufID >= LOG_ID_MAX) {
-        jclass npeClazz;
-
-        npeClazz = env->FindClass("java/lang/NullPointerException");
-        assert(npeClazz != NULL);
-
-        env->ThrowNew(npeClazz, "bad bufID");
+        jniThrowNullPointerException(env, "bad bufID");
         return -1;
     }
 
@@ -156,16 +146,15 @@ int register_android_util_Log(JNIEnv* env)
         LOGE("Can't find android/util/Log");
         return -1;
     }
-    
+
     levels.verbose = env->GetStaticIntField(clazz, env->GetStaticFieldID(clazz, "VERBOSE", "I"));
     levels.debug = env->GetStaticIntField(clazz, env->GetStaticFieldID(clazz, "DEBUG", "I"));
     levels.info = env->GetStaticIntField(clazz, env->GetStaticFieldID(clazz, "INFO", "I"));
     levels.warn = env->GetStaticIntField(clazz, env->GetStaticFieldID(clazz, "WARN", "I"));
     levels.error = env->GetStaticIntField(clazz, env->GetStaticFieldID(clazz, "ERROR", "I"));
     levels.assert = env->GetStaticIntField(clazz, env->GetStaticFieldID(clazz, "ASSERT", "I"));
-                
+
     return AndroidRuntime::registerNativeMethods(env, "android/util/Log", gMethods, NELEM(gMethods));
 }
 
 }; // namespace android
-
