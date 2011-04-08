@@ -8776,7 +8776,6 @@ public class WebView extends AbsoluteLayout
     private native int      nativeGetDrawGLFunction(Rect rect, Rect viewRect,
             float scale, int extras);
     private native void     nativeUpdateDrawGLFunction(Rect rect, Rect viewRect);
-    private native boolean  nativeDrawGL(Rect rect, float scale, int extras);
     private native void     nativeExtendSelection(int x, int y);
     private native int      nativeFindAll(String findLower, String findUpper,
             boolean sameAsLastSearch);
