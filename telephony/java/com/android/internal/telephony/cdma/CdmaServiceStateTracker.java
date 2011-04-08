@@ -148,7 +148,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     private ContentObserver mAutoTimeObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
-            Log.i("CdmaServiceStateTracker", "Auto time state changed");
+            if (DBG) log("Auto time state changed");
             revertToNitzTime();
         }
     };
@@ -156,7 +156,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     private ContentObserver mAutoTimeZoneObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
-            Log.i("CdmaServiceStateTracker", "Auto time zone state changed");
+            if (DBG) log("Auto time zone state changed");
             revertToNitzTimeZone();
         }
     };
@@ -344,7 +344,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                             networkId = Integer.parseInt(states[9]);
                         }
                     } catch (NumberFormatException ex) {
-                        Log.w(LOG_TAG, "error parsing cell location data: " + ex);
+                        loge("error parsing cell location data: " + ex);
                     }
                 }
 
@@ -378,11 +378,11 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                             try {
                                 mHomeSystemId[i] = Integer.parseInt(sid[i]);
                             } catch (NumberFormatException ex) {
-                                Log.e(LOG_TAG, "error parsing system id: ", ex);
+                                loge("error parsing system id: " + ex);
                             }
                         }
                     }
-                    Log.d(LOG_TAG,"GET_CDMA_SUBSCRIPTION SID=" + cdmaSubscription[1] );
+                    if (DBG) log("GET_CDMA_SUBSCRIPTION: SID=" + cdmaSubscription[1] );
 
                     if (cdmaSubscription[2] != null) {
                         String[] nid = cdmaSubscription[2].split(",");
@@ -391,14 +391,14 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                             try {
                                 mHomeNetworkId[i] = Integer.parseInt(nid[i]);
                             } catch (NumberFormatException ex) {
-                                Log.e(LOG_TAG, "error parsing network id: ", ex);
+                                loge("GET_CDMA_SUBSCRIPTION: error parsing network id: " + ex);
                             }
                         }
                     }
-                    Log.d(LOG_TAG,"GET_CDMA_SUBSCRIPTION NID=" + cdmaSubscription[2] );
+                    if (DBG) log("GET_CDMA_SUBSCRIPTION: NID=" + cdmaSubscription[2]);
                     mMin = cdmaSubscription[3];
                     mPrlVersion = cdmaSubscription[4];
-                    Log.d(LOG_TAG,"GET_CDMA_SUBSCRIPTION MDN=" + mMdn);
+                    if (DBG) log("GET_CDMA_SUBSCRIPTION: MDN=" + mMdn);
 
                     mIsMinInfoReady = true;
 
@@ -408,19 +408,23 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
 
                     // Notify apps subscription info is ready
                     if (cdmaForSubscriptionInfoReadyRegistrants != null) {
-                        Log.d(LOG_TAG, "call cdmaForSubscriptionInfoReady.notifyRegistrants()");
+                        if (DBG) log("GET_CDMA_SUBSCRIPTION: call notifyRegistrants()");
                         cdmaForSubscriptionInfoReadyRegistrants.notifyRegistrants();
                     }
                     if (oldOtaspMode != mCurrentOtaspMode) {
-                        Log.d(LOG_TAG, "call phone.notifyOtaspChanged old otaspMode=" +
+                        if (DBG) {
+                            log("GET_CDMA_SUBSCRIPTION: call notifyOtaspChanged old otaspMode=" +
                                 oldOtaspMode + " new otaspMode=" + mCurrentOtaspMode);
+                        }
                         phone.notifyOtaspChanged(mCurrentOtaspMode);
                     }
                     phone.getIccCard().broadcastIccStateChangedIntent(IccCard.INTENT_VALUE_ICC_IMSI,
                             null);
                 } else {
-                    Log.w(LOG_TAG,"error parsing cdmaSubscription params num="
+                    if (DBG) {
+                        log("GET_CDMA_SUBSCRIPTION: error parsing cdmaSubscription params num="
                             + cdmaSubscription.length);
+                    }
                 }
             }
             break;
@@ -475,9 +479,9 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             if (ar.exception == null) {
                 ints = (int[]) ar.result;
                 int otaStatus = ints[0];
-                if (otaStatus == phone.CDMA_OTA_PROVISION_STATUS_COMMITTED
-                    || otaStatus == phone.CDMA_OTA_PROVISION_STATUS_OTAPA_STOPPED) {
-                    Log.d(LOG_TAG, "Received OTA_PROGRAMMING Complete,Reload MDN ");
+                if (otaStatus == Phone.CDMA_OTA_PROVISION_STATUS_COMMITTED
+                    || otaStatus == Phone.CDMA_OTA_PROVISION_STATUS_OTAPA_STOPPED) {
+                    if (DBG) log("EVENT_OTA_PROVISION_STATUS_CHANGE: Complete, Reload MDN");
                     cm.getCDMASubscription( obtainMessage(EVENT_POLL_STATE_CDMA_SUBSCRIPTION));
                 }
             }
@@ -522,9 +526,10 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             // null and not blank. But this would cause us to incorrectly display
             // "No Service". Now showPlmn is set to true for any non null string.
             boolean showPlmn = plmn != null;
-            Log.d(LOG_TAG,
-                    String.format("updateSpnDisplay: changed sending intent" +
+            if (DBG) {
+                log(String.format("updateSpnDisplay: changed sending intent" +
                             " showPlmn='%b' plmn='%s'", showPlmn, plmn));
+            }
             Intent intent = new Intent(Intents.SPN_STRINGS_UPDATED_ACTION);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
             intent.putExtra(Intents.EXTRA_SHOW_SPN, false);
@@ -618,7 +623,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                         reasonForDenial = Integer.parseInt(states[13]);
                     }
                 } catch (NumberFormatException ex) {
-                    Log.w(LOG_TAG, "error parsing RegistrationState: " + ex);
+                    loge("EVENT_POLL_STATE_REGISTRATION_CDMA: error parsing: " + ex);
                 }
             } else {
                 throw new RuntimeException("Warning! Wrong number of parameters returned from "
@@ -689,12 +694,12 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                     newSS.setOperatorName(opNames[0], opNames[1], opNames[2]);
                 }
             } else {
-                Log.w(LOG_TAG, "error parsing opNames");
+                if (DBG) log("EVENT_POLL_STATE_OPERATOR_CDMA: error parsing opNames");
             }
             break;
         default:
-            Log.e(LOG_TAG, "RIL response handle in wrong phone!"
-                + " Expected CDMA RIL request and get GSM RIL request.");
+            loge("handlePollStateResultMessage: RIL response handle in wrong phone!"
+                    + " Expected CDMA RIL request and get GSM RIL request.");
         break;
         }
     }
@@ -703,7 +708,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
      * Handle the result of one of the pollState() - related requests
      */
     @Override
-    protected void handlePollStateResult (int what, AsyncResult ar) {
+    protected void handlePollStateResult(int what, AsyncResult ar) {
         // Ignore stale requests from last poll.
         if (ar.userObj != pollingContext) return;
 
@@ -727,15 +732,14 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             }
 
             if (err != CommandException.Error.OP_NOT_ALLOWED_BEFORE_REG_NW) {
-                Log.e(LOG_TAG,
-                        "RIL implementation has returned an error where it must succeed",
-                        ar.exception);
+                loge("handlePollStateResult: RIL returned an error where it must succeed"
+                        + ar.exception);
             }
         } else try {
             handlePollStateResultMessage(what, ar);
         } catch (RuntimeException ex) {
-            Log.e(LOG_TAG, "Exception while polling service state. "
-                    + "Probably malformed RIL response.", ex);
+            loge("handlePollStateResult: Exception while polling service state. "
+                    + "Probably malformed RIL response." + ex);
         }
 
         pollingContext[0]--;
@@ -842,7 +846,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         case SIM_NOT_READY:
         case SIM_LOCKED_OR_ABSENT:
         case SIM_READY:
-            log("Radio Technology Change ongoing, setting SS to off");
+            if (DBG) log("Radio Technology Change ongoing, setting SS to off");
             newSS.setStateOff();
             newCellLoc.setStateInvalid();
             setSignalStrengthDefaultValues();
@@ -892,7 +896,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             break;
         default:
             if (DBG) {
-                Log.e(LOG_TAG, "Wrong network. Can not return a string.");
+                slog("Wrong network. Can not return a string.");
             }
         break;
         }
@@ -938,7 +942,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     }
 
     protected void pollStateDone() {
-        if (DBG) log("Poll ServiceState done: oldSS=[" + ss + "] newSS=[" + newSS + "]");
+        if (DBG) log("pollStateDone: oldSS=[" + ss + "] newSS=[" + newSS + "]");
 
         boolean hasRegistered =
             ss.getState() != ServiceState.STATE_IN_SERVICE
@@ -1035,9 +1039,9 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                     isoCountryCode = MccTable.countryCodeForMcc(Integer.parseInt(
                             operatorNumeric.substring(0,3)));
                 } catch ( NumberFormatException ex){
-                    Log.w(LOG_TAG, "countryCodeForMcc error" + ex);
+                    loge("pollStateDone: countryCodeForMcc error" + ex);
                 } catch ( StringIndexOutOfBoundsException ex) {
-                    Log.w(LOG_TAG, "countryCodeForMcc error" + ex);
+                    loge("pollStateDone: countryCodeForMcc error" + ex);
                 }
 
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY,
@@ -1165,7 +1169,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         try {
             phone.notifySignalStrength();
         } catch (NullPointerException ex) {
-            log("onSignalStrengthResult() Phone already destroyed: " + ex
+            loge("onSignalStrengthResult() Phone already destroyed: " + ex
                     + "SignalStrength not notified");
         }
     }
@@ -1189,7 +1193,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             retVal = ServiceState.STATE_IN_SERVICE;
             break;
         default:
-            Log.e(LOG_TAG, "Wrong radioTechnology code.");
+            loge("radioTechnologyToDataServiceState: Wrong radioTechnology code.");
         break;
         }
         return(retVal);
@@ -1211,7 +1215,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             return ServiceState.STATE_IN_SERVICE;
 
         default:
-            Log.w(LOG_TAG, "unexpected service state " + code);
+            loge("regCodeToServiceState: unexpected service state " + code);
         return ServiceState.STATE_OUT_OF_SERVICE;
         }
     }
@@ -1302,8 +1306,10 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         // tz is in number of quarter-hours
 
         long start = SystemClock.elapsedRealtime();
-        Log.i(LOG_TAG, "NITZ: " + nitz + "," + nitzReceiveTime +
+        if (DBG) {
+            log("NITZ: " + nitz + "," + nitzReceiveTime +
                         " start=" + start + " delay=" + (start - nitzReceiveTime));
+        }
 
         try {
             /* NITZ time (hour:min:sec) will be in UTC but it supplies the timezone
@@ -1400,7 +1406,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
 
             String ignore = SystemProperties.get("gsm.ignore-nitz");
             if (ignore != null && ignore.equals("yes")) {
-                Log.i(LOG_TAG, "NITZ: Not setting clock because gsm.ignore-nitz is set");
+                if (DBG) log("NITZ: Not setting clock because gsm.ignore-nitz is set");
                 return;
             }
 
@@ -1415,17 +1421,21 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
 
                 if (millisSinceNitzReceived < 0) {
                     // Sanity check: something is wrong
-                    Log.i(LOG_TAG, "NITZ: not setting time, clock has rolled "
+                    if (DBG) {
+                        log("NITZ: not setting time, clock has rolled "
                                         + "backwards since NITZ time was received, "
                                         + nitz);
+                    }
                     return;
                 }
 
                 if (millisSinceNitzReceived > Integer.MAX_VALUE) {
                     // If the time is this far off, something is wrong > 24 days!
-                    Log.i(LOG_TAG, "NITZ: not setting time, processing has taken "
+                    if (DBG) {
+                        log("NITZ: not setting time, processing has taken "
                                     + (millisSinceNitzReceived / (1000 * 60 * 60 * 24))
                                     + " days");
+                    }
                     return;
                 }
 
@@ -1445,14 +1455,18 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
 
                     if ((mSavedAtTime == 0) || (timeSinceLastUpdate > nitzUpdateSpacing)
                             || (Math.abs(gained) > nitzUpdateDiff)) {
-                        Log.i(LOG_TAG, "NITZ: Auto updating time of day to " + c.getTime()
+                        if (DBG) {
+                            log("NITZ: Auto updating time of day to " + c.getTime()
                                 + " NITZ receive delay=" + millisSinceNitzReceived
                                 + "ms gained=" + gained + "ms from " + nitz);
+                        }
 
                         setAndBroadcastNetworkSetTime(c.getTimeInMillis());
                     } else {
-                        Log.i(LOG_TAG, "NITZ: ignore, a previous update was "
+                        if (DBG) {
+                            log("NITZ: ignore, a previous update was "
                                 + timeSinceLastUpdate + "ms ago and gained=" + gained + "ms");
+                        }
                         return;
                     }
                 }
@@ -1460,17 +1474,17 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                 /**
                  * Update properties and save the time we did the update
                  */
-                Log.i(LOG_TAG, "NITZ: update nitz time property");
+                if (DBG) log("NITZ: update nitz time property");
                 SystemProperties.set("gsm.nitz.time", String.valueOf(c.getTimeInMillis()));
                 mSavedTime = c.getTimeInMillis();
                 mSavedAtTime = SystemClock.elapsedRealtime();
             } finally {
                 long end = SystemClock.elapsedRealtime();
-                Log.i(LOG_TAG, "NITZ: end=" + end + " dur=" + (end - start));
+                if (DBG) log("NITZ: end=" + end + " dur=" + (end - start));
                 mWakeLock.release();
             }
         } catch (RuntimeException ex) {
-            Log.e(LOG_TAG, "NITZ: Parsing NITZ time " + nitz, ex);
+            loge("NITZ: Parsing NITZ time " + nitz + " ex=" + ex);
         }
     }
 
@@ -1528,8 +1542,9 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         if (Settings.System.getInt(cr, Settings.System.AUTO_TIME, 0) == 0) {
             return;
         }
-        Log.d(LOG_TAG, "Reverting to NITZ Time: mSavedTime=" + mSavedTime
-                + " mSavedAtTime=" + mSavedAtTime);
+        if (DBG) {
+            log("revertToNitzTime: mSavedTime=" + mSavedTime + " mSavedAtTime=" + mSavedAtTime);
+        }
         if (mSavedTime != 0 && mSavedAtTime != 0) {
             setAndBroadcastNetworkSetTime(mSavedTime
                     + (SystemClock.elapsedRealtime() - mSavedAtTime));
@@ -1541,7 +1556,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                 Settings.System.AUTO_TIME_ZONE, 0) == 0) {
             return;
         }
-        Log.d(LOG_TAG, "Reverting to NITZ TimeZone: tz='" + mSavedTimeZone);
+        if (DBG) log("revertToNitzTimeZone: tz='" + mSavedTimeZone);
         if (mSavedTimeZone != null) {
             setAndBroadcastNetworkSetTimeZone(mSavedTimeZone);
         }
@@ -1626,7 +1641,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     int getOtasp() {
         int provisioningState;
         if (mMin == null || (mMin.length() < 6)) {
-            if (DBG) Log.d(LOG_TAG, "getOtasp: bad mMin='" + mMin + "'");
+            if (DBG) log("getOtasp: bad mMin='" + mMin + "'");
             provisioningState = OTASP_UNKNOWN;
         } else {
             if ((mMin.equals(UNACTIVATED_MIN_VALUE)
@@ -1637,13 +1652,8 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                 provisioningState = OTASP_NOT_NEEDED;
             }
         }
-        if (DBG) Log.d(LOG_TAG, "getOtasp: state=" + provisioningState);
+        if (DBG) log("getOtasp: state=" + provisioningState);
         return provisioningState;
-    }
-
-    @Override
-    protected void log(String s) {
-        Log.d(LOG_TAG, "[CdmaServiceStateTracker] " + s);
     }
 
     @Override
@@ -1653,5 +1663,19 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         phone.mCT.backgroundCall.hangupIfAlive();
         phone.mCT.foregroundCall.hangupIfAlive();
         cm.setRadioPower(false, null);
+    }
+
+    @Override
+    protected void log(String s) {
+        Log.d(LOG_TAG, "[CdmaSST] " + s);
+    }
+
+    @Override
+    protected void loge(String s) {
+        Log.e(LOG_TAG, "[CdmaSST] " + s);
+    }
+
+    private static void slog(String s) {
+        Log.d(LOG_TAG, "[CdmaSST] " + s);
     }
 }

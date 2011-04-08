@@ -55,8 +55,7 @@ public class GsmDataConnection extends DataConnection {
         synchronized (mCountLock) {
             mCount += 1;
         }
-        GsmDataConnection gsmDc = new GsmDataConnection(phone, "GsmDataConnection-" + mCount,
-                id, rm);
+        GsmDataConnection gsmDc = new GsmDataConnection(phone, "GsmDC-" + mCount, id, rm);
         gsmDc.start();
         if (DBG) gsmDc.log("Made " + gsmDc.getName());
         return gsmDc;

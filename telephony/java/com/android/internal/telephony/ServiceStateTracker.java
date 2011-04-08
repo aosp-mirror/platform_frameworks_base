@@ -292,6 +292,7 @@ public abstract class ServiceStateTracker extends Handler {
     protected abstract void updateSpnDisplay();
     protected abstract void setPowerStateToDesired();
     protected abstract void log(String s);
+    protected abstract void loge(String s);
 
     public abstract int getCurrentDataConnectionState();
     public abstract boolean isConcurrentVoiceAndDataAllowed();

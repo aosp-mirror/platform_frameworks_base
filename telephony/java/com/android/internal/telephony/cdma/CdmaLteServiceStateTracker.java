@@ -51,7 +51,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
     public CdmaLteServiceStateTracker(CDMALTEPhone phone) {
         super(phone);
         mCdmaLtePhone = phone;
-        log("CdmaLteServiceStateTracker Constructors");
+        if (DBG) log("CdmaLteServiceStateTracker Constructors");
     }
 
     /**
@@ -68,7 +68,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         int[] ints;
         String[] strings;
         if (msg.what == EVENT_POLL_STATE_GPRS) {
-            log("handleMessage EVENT_POLL_STATE_GPRS");
+            if (DBG) log("handleMessage EVENT_POLL_STATE_GPRS");
             ar = (AsyncResult)msg.obj;
             handlePollStateResult(msg.what, ar);
         } else {
@@ -90,7 +90,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
     @Override
     protected void handlePollStateResultMessage(int what, AsyncResult ar) {
         if (what == EVENT_POLL_STATE_GPRS) {
-            log("handlePollStateResultMessage EVENT_POLL_STATE_GPRS");
+            if (DBG) log("handlePollStateResultMessage: EVENT_POLL_STATE_GPRS");
             String states[] = (String[])ar.result;
 
             int type = 0;
@@ -104,8 +104,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                         type = Integer.parseInt(states[3]);
                     }
                 } catch (NumberFormatException ex) {
-                    Log.w(LOG_TAG,
-                            "[CdmaLteServiceStateTracker] error parsing GprsRegistrationState: "
+                    loge("handlePollStateResultMessage: error parsing GprsRegistrationState: "
                                     + ex);
                 }
             }
@@ -170,8 +169,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                         .getContentResolver(),
                         android.provider.Settings.Secure.PREFERRED_NETWORK_MODE,
                         RILConstants.PREFERRED_NETWORK_MODE);
-                Log.v(LOG_TAG, "[CdmaLteServiceStateTracker] The network mode here is = "
-                        + networkMode);
+                if (DBG) log("pollState: network mode here is = " + networkMode);
                 if ((networkMode == RILConstants.NETWORK_MODE_GLOBAL)
                         || (networkMode == RILConstants.NETWORK_MODE_LTE_ONLY)) {
                     pollingContext[0]++;
@@ -210,10 +208,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 ret = "CDMA - eHRPD";
                 break;
             default:
-                if (DBG) {
-                    Log.e(LOG_TAG, " [CdmaLteServiceStateTracker] Wrong network."
-                           + " Can not return a string.");
-                }
+                sloge("networkTypeToString: Wrong network, can not return a string.");
                 break;
         }
         return ret;
@@ -221,7 +216,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
     @Override
     protected void pollStateDone() {
-        log("Poll ServiceState done: oldSS=[" + ss + "] newSS=[" + newSS + "]");
+        if (DBG) log("pollStateDone: oldSS=[" + ss + "] newSS=[" + newSS + "]");
 
         boolean hasRegistered = ss.getState() != ServiceState.STATE_IN_SERVICE
                 && newSS.getState() == ServiceState.STATE_IN_SERVICE;
@@ -266,12 +261,15 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             ((newNetworkType >= ServiceState.RADIO_TECHNOLOGY_IS95A) &&
              (newNetworkType <= ServiceState.RADIO_TECHNOLOGY_EVDO_A));
 
-        log("hasRegistered = " + hasRegistered + " hasCdmaDataConnectionAttached = "
+        if (DBG) {
+            log("pollStateDone: hasRegistered = "
+                + hasRegistered + " hasCdmaDataConnectionAttached = "
                 + hasCdmaDataConnectionAttached + " hasCdmaDataConnectionChanged = "
                 + hasCdmaDataConnectionChanged + " hasNetworkTypeChanged = "
                 + hasNetworkTypeChanged + " has4gHandoff = " + has4gHandoff
                 + " hasMultiApnSupport = " + hasMultiApnSupport + " hasLostMultiApnSupport = "
                 + hasLostMultiApnSupport);
+        }
         // Add an event log when connection state changes
         if (ss.getState() != newSS.getState()
                 || cdmaDataConnectionState != newCdmaDataConnectionState) {
@@ -295,14 +293,14 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
         if ((hasMultiApnSupport)
                 && (phone.mDataConnection instanceof CdmaDataConnectionTracker)) {
-            log("GsmDataConnectionTracker Created");
+            if (DBG) log("pollStateDone: dispose of current DCT create new GsmDCT");
             phone.mDataConnection.dispose();
             phone.mDataConnection = new GsmDataConnectionTracker(mCdmaLtePhone);
         }
 
         if ((hasLostMultiApnSupport)
                 && (phone.mDataConnection instanceof GsmDataConnectionTracker)) {
-            log("GsmDataConnectionTracker disposed");
+            if (DBG) log("pollStateDone: dispose of current DCT create new CdmaDCT");
             phone.mDataConnection.dispose();
             phone.mDataConnection = new CdmaDataConnectionTracker((CDMAPhone)phone);
         }
@@ -360,9 +358,9 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                     isoCountryCode = MccTable.countryCodeForMcc(Integer.parseInt(operatorNumeric
                             .substring(0, 3)));
                 } catch (NumberFormatException ex) {
-                    Log.w(LOG_TAG, "countryCodeForMcc error" + ex);
+                    loge("countryCodeForMcc error" + ex);
                 } catch (StringIndexOutOfBoundsException ex) {
-                    Log.w(LOG_TAG, "countryCodeForMcc error" + ex);
+                    loge("countryCodeForMcc error" + ex);
                 }
 
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY,
@@ -442,7 +440,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         try {
             phone.notifySignalStrength();
         } catch (NullPointerException ex) {
-            log("onSignalStrengthResult() Phone already destroyed: " + ex
+            loge("onSignalStrengthResult() Phone already destroyed: " + ex
                     + "SignalStrength not notified");
         }
     }
@@ -457,7 +455,15 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
     @Override
     protected void log(String s) {
-        if (DBG)
-            Log.d(LOG_TAG, "[CdmaLteServiceStateTracker] " + s);
+        Log.d(LOG_TAG, "[CdmaLteSST] " + s);
+    }
+
+    @Override
+    protected void loge(String s) {
+        Log.e(LOG_TAG, "[CdmaLteSST] " + s);
+    }
+
+    protected static void sloge(String s) {
+        Log.e(LOG_TAG, "[CdmaLteSST] " + s);
     }
 }

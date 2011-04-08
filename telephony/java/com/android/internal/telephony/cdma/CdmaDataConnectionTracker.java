@@ -913,11 +913,11 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected void log(String s) {
-        Log.d(LOG_TAG, "[CdmaDataConnectionTracker] " + s);
+        Log.d(LOG_TAG, "[CdmaDCT] " + s);
     }
 
     @Override
     protected void loge(String s) {
-        Log.e(LOG_TAG, "[CdmaDataConnectionTracker] " + s);
+        Log.e(LOG_TAG, "[CdmaDCT] " + s);
     }
 }
