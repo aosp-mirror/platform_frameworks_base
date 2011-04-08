@@ -1928,120 +1928,163 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /**** Handlers for PAN  Profile ****/
+    // TODO: This needs to be converted to a state machine.
 
-    public synchronized boolean isTetheringOn() {
+    public boolean isTetheringOn() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothPanProfileHandler.isTetheringOn();
+        synchronized (mBluetoothPanProfileHandler) {
+            return mBluetoothPanProfileHandler.isTetheringOn();
+        }
     }
 
-    /*package*/ synchronized boolean allowIncomingTethering() {
-        return mBluetoothPanProfileHandler.allowIncomingTethering();
+    /*package*/boolean allowIncomingTethering() {
+        synchronized (mBluetoothPanProfileHandler) {
+            return mBluetoothPanProfileHandler.allowIncomingTethering();
+        }
     }
 
-    public synchronized void setBluetoothTethering(boolean value) {
+    public void setBluetoothTethering(boolean value) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        mBluetoothPanProfileHandler.setBluetoothTethering(value);
+        synchronized (mBluetoothPanProfileHandler) {
+            mBluetoothPanProfileHandler.setBluetoothTethering(value);
+        }
     }
 
-    public synchronized int getPanDeviceConnectionState(BluetoothDevice device) {
+    public int getPanDeviceConnectionState(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothPanProfileHandler.getPanDeviceConnectionState(device);
+        synchronized (mBluetoothPanProfileHandler) {
+            return mBluetoothPanProfileHandler.getPanDeviceConnectionState(device);
+        }
     }
 
-    public synchronized boolean connectPanDevice(BluetoothDevice device) {
+    public boolean connectPanDevice(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
             "Need BLUETOOTH_ADMIN permission");
-        return mBluetoothPanProfileHandler.connectPanDevice(device);
+        synchronized (mBluetoothPanProfileHandler) {
+            return mBluetoothPanProfileHandler.connectPanDevice(device);
+        }
     }
 
-    public synchronized List<BluetoothDevice> getConnectedPanDevices() {
+    public List<BluetoothDevice> getConnectedPanDevices() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothPanProfileHandler.getConnectedPanDevices();
+        synchronized (mBluetoothPanProfileHandler) {
+            return mBluetoothPanProfileHandler.getConnectedPanDevices();
+        }
     }
 
-    public synchronized List<BluetoothDevice> getPanDevicesMatchingConnectionStates(
+    public List<BluetoothDevice> getPanDevicesMatchingConnectionStates(
             int[] states) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothPanProfileHandler.getPanDevicesMatchingConnectionStates(states);
+        synchronized (mBluetoothPanProfileHandler) {
+            return mBluetoothPanProfileHandler.getPanDevicesMatchingConnectionStates(states);
+        }
     }
 
-    public synchronized boolean disconnectPanDevice(BluetoothDevice device) {
+    public boolean disconnectPanDevice(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
             "Need BLUETOOTH_ADMIN permission");
-        return mBluetoothPanProfileHandler.disconnectPanDevice(device);
+        synchronized (mBluetoothPanProfileHandler) {
+            return mBluetoothPanProfileHandler.disconnectPanDevice(device);
+        }
     }
 
-    /*package*/ synchronized void handlePanDeviceStateChange(BluetoothDevice device,
+    /*package*/void handlePanDeviceStateChange(BluetoothDevice device,
                                                              String iface,
                                                              int state,
                                                              int role) {
-        mBluetoothPanProfileHandler.handlePanDeviceStateChange(device, iface, state, role);
+        synchronized (mBluetoothPanProfileHandler) {
+            mBluetoothPanProfileHandler.handlePanDeviceStateChange(device, iface, state, role);
+        }
     }
 
-    /*package*/ synchronized void handlePanDeviceStateChange(BluetoothDevice device,
+    /*package*/void handlePanDeviceStateChange(BluetoothDevice device,
                                                              int state, int role) {
-        mBluetoothPanProfileHandler.handlePanDeviceStateChange(device, null, state, role);
+        synchronized (mBluetoothPanProfileHandler) {
+            mBluetoothPanProfileHandler.handlePanDeviceStateChange(device, null, state, role);
+        }
     }
 
     /**** Handlers for Input Device Profile ****/
+    // This needs to be converted to state machine
 
-    public synchronized boolean connectInputDevice(BluetoothDevice device) {
+    public boolean connectInputDevice(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
         BluetoothDeviceProfileState state = mDeviceProfileState.get(device.getAddress());
-        return mBluetoothInputProfileHandler.connectInputDevice(device, state);
+        synchronized (mBluetoothInputProfileHandler) {
+            return mBluetoothInputProfileHandler.connectInputDevice(device, state);
+        }
     }
 
-    public synchronized boolean connectInputDeviceInternal(BluetoothDevice device) {
-        return mBluetoothInputProfileHandler.connectInputDeviceInternal(device);
+    public boolean connectInputDeviceInternal(BluetoothDevice device) {
+        synchronized (mBluetoothInputProfileHandler) {
+            return mBluetoothInputProfileHandler.connectInputDeviceInternal(device);
+        }
     }
 
-    public synchronized boolean disconnectInputDevice(BluetoothDevice device) {
+    public boolean disconnectInputDevice(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
         BluetoothDeviceProfileState state = mDeviceProfileState.get(device.getAddress());
-        return mBluetoothInputProfileHandler.disconnectInputDevice(device, state);
+        synchronized (mBluetoothInputProfileHandler) {
+            return mBluetoothInputProfileHandler.disconnectInputDevice(device, state);
+        }
     }
 
-    public synchronized boolean disconnectInputDeviceInternal(BluetoothDevice device) {
-        return mBluetoothInputProfileHandler.disconnectInputDeviceInternal(device);
+    public boolean disconnectInputDeviceInternal(BluetoothDevice device) {
+        synchronized (mBluetoothInputProfileHandler) {
+            return mBluetoothInputProfileHandler.disconnectInputDeviceInternal(device);
+        }
     }
 
-    public synchronized int getInputDeviceConnectionState(BluetoothDevice device) {
+    public int getInputDeviceConnectionState(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothInputProfileHandler.getInputDeviceConnectionState(device);
-
+        synchronized (mBluetoothInputProfileHandler) {
+            return mBluetoothInputProfileHandler.getInputDeviceConnectionState(device);
+        }
     }
 
-    public synchronized List<BluetoothDevice> getConnectedInputDevices() {
+    public List<BluetoothDevice> getConnectedInputDevices() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothInputProfileHandler.getConnectedInputDevices();
+        synchronized (mBluetoothInputProfileHandler) {
+            return mBluetoothInputProfileHandler.getConnectedInputDevices();
+        }
     }
 
-    public synchronized List<BluetoothDevice> getInputDevicesMatchingConnectionStates(
+    public List<BluetoothDevice> getInputDevicesMatchingConnectionStates(
             int[] states) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothInputProfileHandler.getInputDevicesMatchingConnectionStates(states);
+        synchronized (mBluetoothInputProfileHandler) {
+            return mBluetoothInputProfileHandler.getInputDevicesMatchingConnectionStates(states);
+        }
     }
 
 
-    public synchronized int getInputDevicePriority(BluetoothDevice device) {
+    public int getInputDevicePriority(BluetoothDevice device) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mBluetoothInputProfileHandler.getInputDevicePriority(device);
+        synchronized (mBluetoothInputProfileHandler) {
+            return mBluetoothInputProfileHandler.getInputDevicePriority(device);
+        }
     }
 
-    public synchronized boolean setInputDevicePriority(BluetoothDevice device, int priority) {
+    public boolean setInputDevicePriority(BluetoothDevice device, int priority) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
-        return mBluetoothInputProfileHandler.setInputDevicePriority(device, priority);
+        synchronized (mBluetoothInputProfileHandler) {
+            return mBluetoothInputProfileHandler.setInputDevicePriority(device, priority);
+        }
     }
 
-    /*package*/synchronized List<BluetoothDevice> lookupInputDevicesMatchingStates(int[] states) {
-        return mBluetoothInputProfileHandler.lookupInputDevicesMatchingStates(states);
+    /*package*/List<BluetoothDevice> lookupInputDevicesMatchingStates(int[] states) {
+        synchronized (mBluetoothInputProfileHandler) {
+            return mBluetoothInputProfileHandler.lookupInputDevicesMatchingStates(states);
+        }
     }
 
-    /*package*/ synchronized void handleInputDevicePropertyChange(String address, boolean connected) {
-        mBluetoothInputProfileHandler.handleInputDevicePropertyChange(address, connected);
+    /*package*/void handleInputDevicePropertyChange(String address, boolean connected) {
+        synchronized (mBluetoothInputProfileHandler) {
+            mBluetoothInputProfileHandler.handleInputDevicePropertyChange(address, connected);
+        }
     }
 
     public boolean connectHeadset(String address) {

@@ -76,17 +76,17 @@ final class BluetoothPanProfileHandler {
         }
     }
 
-    static synchronized BluetoothPanProfileHandler getInstance(Context context,
+    static BluetoothPanProfileHandler getInstance(Context context,
             BluetoothService service) {
         if (sInstance == null) sInstance = new BluetoothPanProfileHandler(context, service);
         return sInstance;
     }
 
-    synchronized boolean isTetheringOn() {
+    boolean isTetheringOn() {
         return mTetheringOn;
     }
 
-    synchronized boolean allowIncomingTethering() {
+    boolean allowIncomingTethering() {
         if (isTetheringOn() && getConnectedPanDevices().size() < mMaxPanDevices)
             return true;
         return false;
@@ -94,7 +94,7 @@ final class BluetoothPanProfileHandler {
 
     private BroadcastReceiver mTetheringReceiver = null;
 
-    synchronized void setBluetoothTethering(boolean value) {
+    void setBluetoothTethering(boolean value) {
         if (!value) {
             disconnectPanServerDevices();
         }
@@ -104,7 +104,7 @@ final class BluetoothPanProfileHandler {
             filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
             mTetheringReceiver = new BroadcastReceiver() {
                 @Override
-                public synchronized void onReceive(Context context, Intent intent) {
+                public void onReceive(Context context, Intent intent) {
                     if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.STATE_OFF)
                             == BluetoothAdapter.STATE_ON) {
                         mTetheringOn = true;
@@ -118,7 +118,7 @@ final class BluetoothPanProfileHandler {
         }
     }
 
-    synchronized int getPanDeviceConnectionState(BluetoothDevice device) {
+    int getPanDeviceConnectionState(BluetoothDevice device) {
         BluetoothPanDevice panDevice = mPanDevices.get(device);
         if (panDevice == null) {
             return BluetoothPan.STATE_DISCONNECTED;
@@ -126,7 +126,7 @@ final class BluetoothPanProfileHandler {
         return panDevice.mState;
     }
 
-    synchronized boolean connectPanDevice(BluetoothDevice device) {
+    boolean connectPanDevice(BluetoothDevice device) {
         String objectPath = mBluetoothService.getObjectPathFromAddress(device.getAddress());
         if (DBG) Log.d(TAG, "connect PAN(" + objectPath + ")");
         if (getPanDeviceConnectionState(device) != BluetoothPan.STATE_DISCONNECTED) {
@@ -158,7 +158,7 @@ final class BluetoothPanProfileHandler {
         }
     }
 
-    private synchronized boolean disconnectPanServerDevices() {
+    private boolean disconnectPanServerDevices() {
         debugLog("disconnect all PAN devices");
 
         for (BluetoothDevice device: mPanDevices.keySet()) {
@@ -187,7 +187,7 @@ final class BluetoothPanProfileHandler {
         return true;
     }
 
-    synchronized List<BluetoothDevice> getConnectedPanDevices() {
+    List<BluetoothDevice> getConnectedPanDevices() {
         List<BluetoothDevice> devices = new ArrayList<BluetoothDevice>();
 
         for (BluetoothDevice device: mPanDevices.keySet()) {
@@ -198,7 +198,7 @@ final class BluetoothPanProfileHandler {
         return devices;
     }
 
-    synchronized List<BluetoothDevice> getPanDevicesMatchingConnectionStates(int[] states) {
+    List<BluetoothDevice> getPanDevicesMatchingConnectionStates(int[] states) {
         List<BluetoothDevice> devices = new ArrayList<BluetoothDevice>();
 
         for (BluetoothDevice device: mPanDevices.keySet()) {
@@ -213,7 +213,7 @@ final class BluetoothPanProfileHandler {
         return devices;
     }
 
-    synchronized boolean disconnectPanDevice(BluetoothDevice device) {
+    boolean disconnectPanDevice(BluetoothDevice device) {
         String objectPath = mBluetoothService.getObjectPathFromAddress(device.getAddress());
         debugLog("disconnect PAN(" + objectPath + ")");
 
@@ -249,7 +249,7 @@ final class BluetoothPanProfileHandler {
         return true;
     }
 
-    synchronized void handlePanDeviceStateChange(BluetoothDevice device,
+    void handlePanDeviceStateChange(BluetoothDevice device,
                                                  String iface, int state, int role) {
         int prevState;
         String ifaceAddr = null;
@@ -304,7 +304,7 @@ final class BluetoothPanProfileHandler {
         mBluetoothService.sendConnectionStateChange(device, state, prevState);
     }
 
-    synchronized void handlePanDeviceStateChange(BluetoothDevice device,
+    void handlePanDeviceStateChange(BluetoothDevice device,
                                                  int state, int role) {
         handlePanDeviceStateChange(device, null, state, role);
     }
@@ -343,7 +343,7 @@ final class BluetoothPanProfileHandler {
     }
 
     // configured when we start tethering
-    private synchronized String enableTethering(String iface) {
+    private String enableTethering(String iface) {
         debugLog("updateTetherState:" + iface);
 
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
