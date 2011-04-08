@@ -49,7 +49,7 @@ public class CdmaDataConnection extends DataConnection {
         synchronized (mCountLock) {
             mCount += 1;
         }
-        CdmaDataConnection cdmaDc = new CdmaDataConnection(phone, "CdmaDataConnection-" + mCount,
+        CdmaDataConnection cdmaDc = new CdmaDataConnection(phone, "CdmaDC-" + mCount,
                 id, rm);
         cdmaDc.start();
         if (DBG) cdmaDc.log("Made " + cdmaDc.getName());
