@@ -38,8 +38,10 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Telephony;
+import android.telephony.CellLocation;
 import android.telephony.ServiceState;
 import android.telephony.TelephonyManager;
+import android.telephony.cdma.CdmaCellLocation;
 import android.telephony.gsm.GsmCellLocation;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -995,9 +997,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 Log.i(LOG_TAG, "PDP connection has dropped. Reconnecting");
 
                 // Add an event log when the network drops PDP
-                int cid = -1;
-                GsmCellLocation loc = ((GsmCellLocation)mPhone.getCellLocation());
-                if (loc != null) cid = loc.getCid();
+                int cid = getCellLocationId();
                 EventLog.writeEvent(EventLogTags.PDP_NETWORK_DROP, cid,
                         TelephonyManager.getDefault().getNetworkType());
 
@@ -1018,9 +1018,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                                     + " Reconnecting");
 
                     // Log the network drop on the event log.
-                    int cid = -1;
-                    GsmCellLocation loc = ((GsmCellLocation)mPhone.getCellLocation());
-                    if (loc != null) cid = loc.getCid();
+                    int cid = getCellLocationId();
                     EventLog.writeEvent(EventLogTags.PDP_NETWORK_DROP, cid,
                             TelephonyManager.getDefault().getNetworkType());
 
@@ -1522,10 +1520,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
             if (cause.isEventLoggable()) {
                 // Log this failure to the Event Logs.
-                GsmCellLocation loc = ((GsmCellLocation)mPhone.getCellLocation());
+                int cid = getCellLocationId();
                 EventLog.writeEvent(EventLogTags.PDP_SETUP_FAIL,
-                        cause.ordinal(), loc != null ? loc.getCid() : -1,
-                        TelephonyManager.getDefault().getNetworkType());
+                        cause.ordinal(), cid, TelephonyManager.getDefault().getNetworkType());
             }
 
             // Count permanent failures and remove the APN we just tried
@@ -1982,6 +1979,20 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         } else {
             return RILConstants.DATA_PROFILE_DEFAULT;
         }
+    }
+
+    private int getCellLocationId() {
+        int cid = -1;
+        CellLocation loc = mPhone.getCellLocation();
+
+        if (loc != null) {
+            if (loc instanceof GsmCellLocation) {
+                cid = ((GsmCellLocation)loc).getCid();
+            } else if (loc instanceof CdmaCellLocation) {
+                cid = ((CdmaCellLocation)loc).getBaseStationId();
+            }
+        }
+        return cid;
     }
 
     @Override
