@@ -256,7 +256,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     }
 
     protected void finalize() {
-        if(DBG) Log.d(LOG_TAG, "GsmServiceStateTracker finalized");
+        if(DBG) log("finalize");
     }
 
     @Override
@@ -449,7 +449,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 // This is a notification from
                 // CommandsInterface.setOnRestrictedStateChanged
 
-                Log.d(LOG_TAG, "[DSAC DEB] " + "EVENT_RESTRICTED_STATE_CHANGED");
+                if (DBG) log("EVENT_RESTRICTED_STATE_CHANGED");
 
                 ar = (AsyncResult) msg.obj;
 
@@ -495,7 +495,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         if (mEmergencyOnly && cm.getRadioState().isOn()) {
             plmn = Resources.getSystem().
                 getText(com.android.internal.R.string.emergency_calls_only).toString();
-            Log.d(LOG_TAG, "updateSpnDisplay: emergency only and radio is on plmn='" + plmn + "'");
+            if (DBG) log("updateSpnDisplay: emergency only and radio is on plmn='" + plmn + "'");
         }
 
         if (rule != curSpnRule
@@ -506,10 +506,11 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             boolean showPlmn = !TextUtils.isEmpty(plmn) &&
                 (rule & SIMRecords.SPN_RULE_SHOW_PLMN) == SIMRecords.SPN_RULE_SHOW_PLMN;
 
-            Log.d(LOG_TAG,
-                    String.format("updateSpnDisplay: changed sending intent" + " rule=" + rule +
+            if (DBG) {
+                log(String.format("updateSpnDisplay: changed sending intent" + " rule=" + rule +
                             " showPlmn='%b' plmn='%s' showSpn='%b' spn='%s'",
                             showPlmn, plmn, showSpn, spn));
+            }
             Intent intent = new Intent(Intents.SPN_STRINGS_UPDATED_ACTION);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
             intent.putExtra(Intents.EXTRA_SHOW_SPN, showSpn);
@@ -554,8 +555,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             }
 
             if (err != CommandException.Error.OP_NOT_ALLOWED_BEFORE_REG_NW) {
-                Log.e(LOG_TAG,
-                        "RIL implementation has returned an error where it must succeed" +
+                loge("RIL implementation has returned an error where it must succeed" +
                         ar.exception);
             }
         } else try {
@@ -584,7 +584,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                                 }
                             }
                         } catch (NumberFormatException ex) {
-                            Log.w(LOG_TAG, "error parsing RegistrationState: " + ex);
+                            loge("error parsing RegistrationState: " + ex);
                         }
                     }
 
@@ -624,7 +624,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                                 mNewMaxDataCalls = Integer.parseInt(states[5]);
                             }
                         } catch (NumberFormatException ex) {
-                            Log.w(LOG_TAG, "error parsing GprsRegistrationState: " + ex);
+                            loge("error parsing GprsRegistrationState: " + ex);
                         }
                     }
                     newGPRSState = regCodeToServiceState(regState);
@@ -649,8 +649,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             }
 
         } catch (RuntimeException ex) {
-            Log.e(LOG_TAG, "Exception while polling service state. "
-                            + "Probably malformed RIL response.", ex);
+            loge("Exception while polling service state. Probably malformed RIL response." + ex);
         }
 
         pollingContext[0]--;
@@ -713,7 +712,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             case RUIM_LOCKED_OR_ABSENT:
             case NV_NOT_READY:
             case NV_READY:
-                Log.d(LOG_TAG, "Radio Technology Change ongoing, setting SS to off");
+                if (DBG) log("Radio Technology Change ongoing, setting SS to off");
                 newSS.setStateOff();
                 newCellLoc.setStateInvalid();
                 setSignalStrengthDefaultValues();
@@ -774,7 +773,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 ret = "HSPA";
                 break;
             default:
-                Log.e(LOG_TAG, "Wrong network type: " + Integer.toString(type));
+                sloge("Wrong network type: " + Integer.toString(type));
                 break;
         }
 
@@ -783,7 +782,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
     private void pollStateDone() {
         if (DBG) {
-            Log.d(LOG_TAG, "Poll ServiceState done: " +
+            log("Poll ServiceState done: " +
                 " oldSS=[" + ss + "] newSS=[" + newSS +
                 "] oldGprs=" + gprsState + " newData=" + newGPRSState +
                 " oldMaxDataCalls=" + mMaxDataCalls +
@@ -845,9 +844,10 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
             if (loc != null) cid = loc.getCid();
             EventLog.writeEvent(EventLogTags.GSM_RAT_SWITCHED, cid, networkType, newNetworkType);
-            Log.d(LOG_TAG,
-                    "RAT switched " + networkTypeToString(networkType) + " -> "
+            if (DBG) {
+                log("RAT switched " + networkTypeToString(networkType) + " -> "
                     + networkTypeToString(newNetworkType) + " at cell " + cid);
+            }
         }
 
         gprsState = newGPRSState;
@@ -888,9 +888,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     iso = MccTable.countryCodeForMcc(Integer.parseInt(
                             operatorNumeric.substring(0,3)));
                 } catch ( NumberFormatException ex){
-                    Log.w(LOG_TAG, "countryCodeForMcc error" + ex);
+                    loge("countryCodeForMcc error" + ex);
                 } catch ( StringIndexOutOfBoundsException ex) {
-                    Log.w(LOG_TAG, "countryCodeForMcc error" + ex);
+                    loge("countryCodeForMcc error" + ex);
                 }
 
                 phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ISO_COUNTRY, iso);
@@ -1003,10 +1003,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             // Couldn't find a proper timezone.  Perhaps the DST data is wrong.
             guess = findTimeZone(offset, !dst, when);
         }
-        if (DBG) {
-            Log.d(LOG_TAG, "getNitzTimeZone returning "
-                    + (guess == null ? guess : guess.getID()));
-        }
+        if (DBG) log("getNitzTimeZone returning " + (guess == null ? guess : guess.getID()));
         return guess;
     }
 
@@ -1077,7 +1074,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 lteRssnr = ints[10];
                 lteCqi = ints[11];
             } else {
-                Log.e(LOG_TAG, "Bogus signal strength response");
+                loge("Bogus signal strength response");
                 rssi = 99;
             }
         }
@@ -1104,10 +1101,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * @param ar an int value of RIL_RESTRICTED_STATE_*
      */
     private void onRestrictedStateChanged(AsyncResult ar) {
-        Log.d(LOG_TAG, "[DSAC DEB] " + "onRestrictedStateChanged");
         RestrictedState newRs = new RestrictedState();
 
-        Log.d(LOG_TAG, "[DSAC DEB] " + "current rs at enter "+ mRestrictedState);
+        if (DBG) log("onRestrictedStateChanged: E rs "+ mRestrictedState);
 
         if (ar.exception == null) {
             int[] ints = (int[])ar.result;
@@ -1125,7 +1121,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                         (state & RILConstants.RIL_RESTRICTED_STATE_PS_ALL)!= 0);
             }
 
-            Log.d(LOG_TAG, "[DSAC DEB] " + "new rs "+ newRs);
+            if (DBG) log("onRestrictedStateChanged: new rs "+ newRs);
 
             if (!mRestrictedState.isPsRestricted() && newRs.isPsRestricted()) {
                 mPsRestrictEnabledRegistrants.notifyRegistrants();
@@ -1190,7 +1186,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
             mRestrictedState = newRs;
         }
-        Log.d(LOG_TAG, "[DSAC DEB] " + "current rs at return "+ mRestrictedState);
+        log("onRestrictedStateChanged: X rs "+ mRestrictedState);
     }
 
     /** code is registration state 0-5 from TS 27.007 7.2 */
@@ -1214,7 +1210,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 return ServiceState.STATE_IN_SERVICE;
 
             default:
-                Log.w(LOG_TAG, "unexpected service state " + code);
+                loge("regCodeToServiceState: unexpected service state " + code);
                 return ServiceState.STATE_OUT_OF_SERVICE;
         }
     }
@@ -1334,8 +1330,9 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         // tz is in number of quarter-hours
 
         long start = SystemClock.elapsedRealtime();
-        Log.i(LOG_TAG, "NITZ: " + nitz + "," + nitzReceiveTime +
+        if (DBG) {log("NITZ: " + nitz + "," + nitzReceiveTime +
                         " start=" + start + " delay=" + (start - nitzReceiveTime));
+        }
 
         try {
             /* NITZ time (hour:min:sec) will be in UTC but it supplies the timezone
@@ -1432,7 +1429,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
             String ignore = SystemProperties.get("gsm.ignore-nitz");
             if (ignore != null && ignore.equals("yes")) {
-                Log.i(LOG_TAG, "NITZ: Not setting clock because gsm.ignore-nitz is set");
+                log("NITZ: Not setting clock because gsm.ignore-nitz is set");
                 return;
             }
 
@@ -1445,43 +1442,49 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
                     if (millisSinceNitzReceived < 0) {
                         // Sanity check: something is wrong
-                        Log.i(LOG_TAG, "NITZ: not setting time, clock has rolled "
+                        if (DBG) {
+                            log("NITZ: not setting time, clock has rolled "
                                             + "backwards since NITZ time was received, "
                                             + nitz);
+                        }
                         return;
                     }
 
                     if (millisSinceNitzReceived > Integer.MAX_VALUE) {
                         // If the time is this far off, something is wrong > 24 days!
-                        Log.i(LOG_TAG, "NITZ: not setting time, processing has taken "
+                        if (DBG) {
+                            log("NITZ: not setting time, processing has taken "
                                         + (millisSinceNitzReceived / (1000 * 60 * 60 * 24))
                                         + " days");
+                        }
                         return;
                     }
 
                     // Note: with range checks above, cast to int is safe
                     c.add(Calendar.MILLISECOND, (int)millisSinceNitzReceived);
 
-                    Log.i(LOG_TAG, "NITZ: Setting time of day to " + c.getTime()
-                        + " NITZ receive delay(ms): " + millisSinceNitzReceived
-                        + " gained(ms): "
-                        + (c.getTimeInMillis() - System.currentTimeMillis())
-                        + " from " + nitz);
+                    if (DBG) {
+                        log("NITZ: Setting time of day to " + c.getTime()
+                            + " NITZ receive delay(ms): " + millisSinceNitzReceived
+                            + " gained(ms): "
+                            + (c.getTimeInMillis() - System.currentTimeMillis())
+                            + " from " + nitz);
+                    }
 
                     setAndBroadcastNetworkSetTime(c.getTimeInMillis());
                     Log.i(LOG_TAG, "NITZ: after Setting time of day");
                 }
                 SystemProperties.set("gsm.nitz.time", String.valueOf(c.getTimeInMillis()));
                 saveNitzTime(c.getTimeInMillis());
-                if (Config.LOGV) {
+                if (DBG) {
                     long end = SystemClock.elapsedRealtime();
-                    Log.v(LOG_TAG, "NITZ: end=" + end + " dur=" + (end - start));
+                    log("NITZ: end=" + end + " dur=" + (end - start));
                 }
             } finally {
                 mWakeLock.release();
             }
         } catch (RuntimeException ex) {
-            Log.e(LOG_TAG, "NITZ: Parsing NITZ time " + nitz, ex);
+            loge("NITZ: Parsing NITZ time " + nitz + " ex=" + ex);
         }
     }
 
@@ -1547,8 +1550,10 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 Settings.System.AUTO_TIME, 0) == 0) {
             return;
         }
-        Log.d(LOG_TAG, "Reverting to NITZ Time: mSavedTime=" + mSavedTime
+        if (DBG) {
+            log("Reverting to NITZ Time: mSavedTime=" + mSavedTime
                 + " mSavedAtTime=" + mSavedAtTime);
+        }
         if (mSavedTime != 0 && mSavedAtTime != 0) {
             setAndBroadcastNetworkSetTime(mSavedTime
                     + (SystemClock.elapsedRealtime() - mSavedAtTime));
@@ -1560,7 +1565,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 Settings.System.AUTO_TIME_ZONE, 0) == 0) {
             return;
         }
-        Log.d(LOG_TAG, "Reverting to NITZ TimeZone: tz='" + mSavedTimeZone);
+        if (DBG) log("Reverting to NITZ TimeZone: tz='" + mSavedTimeZone);
         if (mSavedTimeZone != null) {
             setAndBroadcastNetworkSetTimeZone(mSavedTimeZone);
         }
@@ -1573,7 +1578,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      */
     private void setNotification(int notifyType) {
 
-        Log.d(LOG_TAG, "[DSAC DEB] " + "create notification " + notifyType);
+        if (DBG) log("setNotification: create notification " + notifyType);
         Context context = phone.getContext();
 
         mNotification = new Notification();
@@ -1610,7 +1615,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             break;
         }
 
-        Log.d(LOG_TAG, "[DSAC DEB] " + "put notification " + title + " / " +details);
+        if (DBG) log("setNotification: put notification " + title + " / " +details);
         mNotification.tickerText = title;
         mNotification.setLatestEventInfo(context, title, details,
                 mNotification.contentIntent);
@@ -1629,6 +1634,15 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
 
     @Override
     protected void log(String s) {
-        Log.d(LOG_TAG, "[GsmServiceStateTracker] " + s);
+        Log.d(LOG_TAG, "[GsmSST] " + s);
+    }
+
+    @Override
+    protected void loge(String s) {
+        Log.e(LOG_TAG, "[GsmSST] " + s);
+    }
+
+    private static void sloge(String s) {
+        Log.e(LOG_TAG, "[GsmSST] " + s);
     }
 }
