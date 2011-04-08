@@ -163,7 +163,7 @@ public class CDMAPhone extends PhoneBase {
         mSMS = new CdmaSMSDispatcher(this);
         mIccFileHandler = new RuimFileHandler(this);
         mRuimRecords = new RuimRecords(this);
-        mDataConnection = new CdmaDataConnectionTracker (this);
+        mDataConnectionTracker = new CdmaDataConnectionTracker (this);
         mRuimCard = new RuimCard(this);
         mRuimPhoneBookInterfaceManager = new RuimPhoneBookInterfaceManager(this);
         mRuimSmsInterfaceManager = new RuimSmsInterfaceManager(this, mSMS);
@@ -237,7 +237,7 @@ public class CDMAPhone extends PhoneBase {
 
             //Force all referenced classes to unregister their former registered events
             mCT.dispose();
-            mDataConnection.dispose();
+            mDataConnectionTracker.dispose();
             mSST.dispose();
             mSMS.dispose();
             mIccFileHandler.dispose(); // instance of RuimFileHandler
@@ -259,7 +259,7 @@ public class CDMAPhone extends PhoneBase {
             this.mRuimRecords = null;
             this.mIccFileHandler = null;
             this.mRuimCard = null;
-            this.mDataConnection = null;
+            this.mDataConnectionTracker = null;
             this.mCT = null;
             this.mSST = null;
             this.mEriManager = null;
@@ -338,7 +338,7 @@ public class CDMAPhone extends PhoneBase {
 
         if (mSST.getCurrentCdmaDataConnectionState() == ServiceState.STATE_IN_SERVICE) {
 
-            switch (mDataConnection.getActivity()) {
+            switch (mDataConnectionTracker.getActivity()) {
                 case DATAIN:
                     ret = DataActivityState.DATAIN;
                 break;
@@ -564,7 +564,7 @@ public class CDMAPhone extends PhoneBase {
     }
 
     public void setDataRoamingEnabled(boolean enable) {
-        mDataConnection.setDataOnRoamingEnabled(enable);
+        mDataConnectionTracker.setDataOnRoamingEnabled(enable);
     }
 
     public void registerForCdmaOtaStatusChange(Handler h, int what, Object obj) {
@@ -629,11 +629,11 @@ public class CDMAPhone extends PhoneBase {
             // If we're out of service, open TCP sockets may still work
             // but no data will flow
             ret = DataState.DISCONNECTED;
-        } else if (mDataConnection.isApnTypeEnabled(apnType) == false ||
-                mDataConnection.isApnTypeActive(apnType) == false) {
+        } else if (mDataConnectionTracker.isApnTypeEnabled(apnType) == false ||
+                mDataConnectionTracker.isApnTypeActive(apnType) == false) {
             ret = DataState.DISCONNECTED;
         } else {
-            switch (mDataConnection.getState(apnType)) {
+            switch (mDataConnectionTracker.getState(apnType)) {
                 case FAILED:
                 case IDLE:
                     ret = DataState.DISCONNECTED;
@@ -724,11 +724,11 @@ public class CDMAPhone extends PhoneBase {
     }
 
     public boolean getDataRoamingEnabled() {
-        return mDataConnection.getDataOnRoamingEnabled();
+        return mDataConnectionTracker.getDataOnRoamingEnabled();
     }
 
     public List<DataConnection> getCurrentDataConnectionList () {
-        return mDataConnection.getAllDataConnections();
+        return mDataConnectionTracker.getAllDataConnections();
     }
 
     public void setVoiceMailNumber(String alphaTag,
@@ -929,7 +929,7 @@ public class CDMAPhone extends PhoneBase {
             // send an Intent
             sendEmergencyCallbackModeChange();
             // Re-initiate data connection
-            mDataConnection.setInternalDataEnabled(true);
+            mDataConnectionTracker.setInternalDataEnabled(true);
         }
     }
 

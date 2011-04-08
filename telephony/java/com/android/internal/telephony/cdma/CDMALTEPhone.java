@@ -96,7 +96,7 @@ public class CDMALTEPhone extends CDMAPhone {
     @Override
     public DataState getDataConnectionState(String apnType) {
         boolean isCdmaDataConnectionTracker = false;
-        if (mDataConnection instanceof CdmaDataConnectionTracker) {
+        if (mDataConnectionTracker instanceof CdmaDataConnectionTracker) {
             isCdmaDataConnectionTracker = true;
         }
         log("getDataConnectionState");
@@ -119,10 +119,10 @@ public class CDMALTEPhone extends CDMAPhone {
             // If we're out of service, open TCP sockets may still work
             // but no data will flow
             ret = DataState.DISCONNECTED;
-        } else if (mDataConnection.isApnTypeEnabled(apnType) == false) {
+        } else if (mDataConnectionTracker.isApnTypeEnabled(apnType) == false) {
             ret = DataState.DISCONNECTED;
         } else {
-            switch (mDataConnection.getState(apnType)) {
+            switch (mDataConnectionTracker.getState(apnType)) {
                 case FAILED:
                 case IDLE:
                     ret = DataState.DISCONNECTED;
@@ -164,10 +164,10 @@ public class CDMALTEPhone extends CDMAPhone {
     }
 
     public String getActiveApn(String apnType) {
-        if (mDataConnection instanceof CdmaDataConnectionTracker)
-            return mDataConnection.getActiveApnString();
+        if (mDataConnectionTracker instanceof CdmaDataConnectionTracker)
+            return mDataConnectionTracker.getActiveApnString();
 
-        return ((GsmDataConnectionTracker)mDataConnection).getActiveApnString(apnType);
+        return ((GsmDataConnectionTracker)mDataConnectionTracker).getActiveApnString(apnType);
     }
 
     protected void log(String s) {

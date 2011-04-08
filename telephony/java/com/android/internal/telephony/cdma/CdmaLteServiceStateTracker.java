@@ -286,23 +286,23 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
         // TODO: 4G Tech Handoff
         // if (has4gHandoff) {
-        // Message msg = phone.mDataConnection.obtainMessage(
+        // Message msg = phone.mDataConnectionTracker.obtainMessage(
         // DataConnectionTracker.EVENT_4G_TECHNOLOGY_CHANGE);
-        // phone.mDataConnection.sendMessage(msg);
+        // phone.mDataConnectionTracker.sendMessage(msg);
         // }
 
         if ((hasMultiApnSupport)
-                && (phone.mDataConnection instanceof CdmaDataConnectionTracker)) {
-            if (DBG) log("pollStateDone: dispose of current DCT create new GsmDCT");
-            phone.mDataConnection.dispose();
-            phone.mDataConnection = new GsmDataConnectionTracker(mCdmaLtePhone);
+                && (phone.mDataConnectionTracker instanceof CdmaDataConnectionTracker)) {
+            if (DBG) log("GsmDataConnectionTracker Created");
+            phone.mDataConnectionTracker.dispose();
+            phone.mDataConnectionTracker = new GsmDataConnectionTracker(mCdmaLtePhone);
         }
 
         if ((hasLostMultiApnSupport)
-                && (phone.mDataConnection instanceof GsmDataConnectionTracker)) {
-            if (DBG) log("pollStateDone: dispose of current DCT create new CdmaDCT");
-            phone.mDataConnection.dispose();
-            phone.mDataConnection = new CdmaDataConnectionTracker((CDMAPhone)phone);
+                && (phone.mDataConnectionTracker instanceof GsmDataConnectionTracker)) {
+            if (DBG)log("GsmDataConnectionTracker disposed");
+            phone.mDataConnectionTracker.dispose();
+            phone.mDataConnectionTracker = new CdmaDataConnectionTracker((CDMAPhone)phone);
         }
 
         CdmaCellLocation tcl = cellLoc;
@@ -387,7 +387,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         }
 
         if ((hasCdmaDataConnectionChanged || hasNetworkTypeChanged)
-                && (phone.mDataConnection instanceof CdmaDataConnectionTracker)) {
+                && (phone.mDataConnectionTracker instanceof CdmaDataConnectionTracker)) {
             phone.notifyDataConnection();
         }
 
