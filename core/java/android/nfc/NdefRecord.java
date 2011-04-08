@@ -163,6 +163,18 @@ public final class NdefRecord implements Parcelable {
      *                must not be null
      */
     public NdefRecord(short tnf, byte[] type, byte[] id, byte[] payload) {
+        /* New NDEF records created by applications will have FLAG_MB|FLAG_ME
+         * set by default; when multiple records are stored in a
+         * {@link NdefMessage}, these flags will be corrected when the {@link NdefMessage}
+         * is serialized to bytes.
+         */
+        this(tnf, type, id, payload, (byte)(FLAG_MB|FLAG_ME));
+    }
+
+    /**
+     * @hide
+     */
+    /*package*/ NdefRecord(short tnf, byte[] type, byte[] id, byte[] payload, byte flags) {
         /* check arguments */
         if ((type == null) || (id == null) || (payload == null)) {
             throw new IllegalArgumentException("Illegal null argument");
@@ -171,9 +183,6 @@ public final class NdefRecord implements Parcelable {
         if (tnf < 0 || tnf > 0x07) {
             throw new IllegalArgumentException("TNF out of range " + tnf);
         }
-
-        /* generate flag */
-        byte flags = FLAG_MB | FLAG_ME;
 
         /* Determine if it is a short record */
         if(payload.length < 0xFF) {
@@ -258,6 +267,7 @@ public final class NdefRecord implements Parcelable {
     }
 
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mFlags);
         dest.writeInt(mTnf);
         dest.writeInt(mType.length);
         dest.writeByteArray(mType);
@@ -270,6 +280,7 @@ public final class NdefRecord implements Parcelable {
     public static final Parcelable.Creator<NdefRecord> CREATOR =
             new Parcelable.Creator<NdefRecord>() {
         public NdefRecord createFromParcel(Parcel in) {
+            byte flags = (byte)in.readInt();
             short tnf = (short)in.readInt();
             int typeLength = in.readInt();
             byte[] type = new byte[typeLength];
@@ -281,7 +292,7 @@ public final class NdefRecord implements Parcelable {
             byte[] payload = new byte[payloadLength];
             in.readByteArray(payload);
 
-            return new NdefRecord(tnf, type, id, payload);
+            return new NdefRecord(tnf, type, id, payload, flags);
         }
         public NdefRecord[] newArray(int size) {
             return new NdefRecord[size];

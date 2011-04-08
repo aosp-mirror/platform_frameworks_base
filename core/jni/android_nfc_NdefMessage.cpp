@@ -86,7 +86,7 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
     if (records_array == NULL)
         goto end;
 
-    ctor = e->GetMethodID(record_cls, "<init>", "(S[B[B[B)V");
+    ctor = e->GetMethodID(record_cls, "<init>", "(S[B[B[BB)V");
 
     for (i = 0; i < num_of_records; i++) {
         jbyteArray type, id, payload;
@@ -128,7 +128,7 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
                 (jbyte *)record.PayloadData);
 
         new_record = e->NewObject(record_cls, ctor,
-                (jshort)record.Tnf, type, id, payload);
+                (jshort)record.Tnf, type, id, payload, (jbyte)record.Flags);
 
         e->SetObjectArrayElement(records_array, i, new_record);
 
