@@ -15,6 +15,7 @@
 ** limitations under the License.
 */
 
+#include "JNIHelp.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
 #include <utils/misc.h>
@@ -42,13 +43,6 @@ static jfieldID gSurface_NativePixelRefFieldID;
 static jfieldID gConfig_EGLConfigFieldID;
 static jfieldID gSurface_SurfaceFieldID;
 static jfieldID gBitmap_NativeBitmapFieldID;
-
-static __attribute__((noinline))
-void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL)
-{
-    jclass npeClazz = env->FindClass(exc);
-    env->ThrowNew(npeClazz, msg);
-}
 
 static __attribute__((noinline))
 bool hasException(JNIEnv *env) {
@@ -133,7 +127,7 @@ static jboolean jni_eglInitialize(JNIEnv *_env, jobject _this, jobject display,
         jintArray major_minor) {
     if (display == NULL || (major_minor != NULL &&
             _env->GetArrayLength(major_minor) < 2)) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
 
@@ -156,7 +150,7 @@ static jboolean jni_eglQueryContext(JNIEnv *_env, jobject _this, jobject display
         jobject context, jint attribute, jintArray value) {
     if (display == NULL || context == NULL || value == NULL
         || _env->GetArrayLength(value) < 1) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -175,7 +169,7 @@ static jboolean jni_eglQuerySurface(JNIEnv *_env, jobject _this, jobject display
         jobject surface, jint attribute, jintArray value) {
     if (display == NULL || surface == NULL || value == NULL
         || _env->GetArrayLength(value) < 1) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -197,7 +191,7 @@ static jboolean jni_eglChooseConfig(JNIEnv *_env, jobject _this, jobject display
         || !validAttribList(_env, attrib_list)
         || (configs != NULL && _env->GetArrayLength(configs) < config_size)
         || (num_config != NULL && _env->GetArrayLength(num_config) < 1)) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -230,7 +224,7 @@ static jint jni_eglCreateContext(JNIEnv *_env, jobject _this, jobject display,
         jobject config, jobject share_context, jintArray attrib_list) {
     if (display == NULL || config == NULL || share_context == NULL
         || !validAttribList(_env, attrib_list)) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -246,7 +240,7 @@ static jint jni_eglCreatePbufferSurface(JNIEnv *_env, jobject _this, jobject dis
         jobject config, jintArray attrib_list) {
     if (display == NULL || config == NULL
         || !validAttribList(_env, attrib_list)) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -274,7 +268,7 @@ static void jni_eglCreatePixmapSurface(JNIEnv *_env, jobject _this, jobject out_
 {
     if (display == NULL || config == NULL || native_pixmap == NULL
         || !validAttribList(_env, attrib_list)) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -286,7 +280,7 @@ static void jni_eglCreatePixmapSurface(JNIEnv *_env, jobject _this, jobject out_
                     gBitmap_NativeBitmapFieldID);
     SkPixelRef* ref = nativeBitmap ? nativeBitmap->pixelRef() : 0;
     if (ref == NULL) {
-        doThrow(_env, "java/lang/IllegalArgumentException", "Bitmap has no PixelRef");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", "Bitmap has no PixelRef");
         return;
     }
 
@@ -318,7 +312,7 @@ static jint jni_eglCreateWindowSurface(JNIEnv *_env, jobject _this, jobject disp
         jobject config, jobject native_window, jintArray attrib_list) {
     if (display == NULL || config == NULL
         || !validAttribList(_env, attrib_list)) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -326,7 +320,7 @@ static jint jni_eglCreateWindowSurface(JNIEnv *_env, jobject _this, jobject disp
     sp<ANativeWindow> window;
     if (native_window == NULL) {
 not_valid_surface:
-        doThrow(_env, "java/lang/IllegalArgumentException",
+        jniThrowException(_env, "java/lang/IllegalArgumentException",
                 "Make sure the SurfaceView or associated SurfaceHolder has a valid Surface");
         return 0;
     }
@@ -345,7 +339,7 @@ static jboolean jni_eglGetConfigAttrib(JNIEnv *_env, jobject _this, jobject disp
         jobject config, jint attribute, jintArray value) {
     if (display == NULL || config == NULL
         || (value == NULL || _env->GetArrayLength(value) < 1)) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -363,7 +357,7 @@ static jboolean jni_eglGetConfigs(JNIEnv *_env, jobject _this, jobject display,
         jobjectArray configs, jint config_size, jintArray num_config) {
     if (display == NULL || (configs != NULL && _env->GetArrayLength(configs) < config_size)
         || (num_config != NULL && _env->GetArrayLength(num_config) < 1)) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -401,7 +395,7 @@ static jint jni_eglGetCurrentDisplay(JNIEnv *_env, jobject _this) {
 
 static jint jni_eglGetCurrentSurface(JNIEnv *_env, jobject _this, jint readdraw) {
     if ((readdraw != EGL_READ) && (readdraw != EGL_DRAW)) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return 0;
     }
     return (jint)eglGetCurrentSurface(readdraw);
@@ -409,7 +403,7 @@ static jint jni_eglGetCurrentSurface(JNIEnv *_env, jobject _this, jint readdraw)
 
 static jboolean jni_eglDestroyContext(JNIEnv *_env, jobject _this, jobject display, jobject context) {
     if (display == NULL || context == NULL) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -419,7 +413,7 @@ static jboolean jni_eglDestroyContext(JNIEnv *_env, jobject _this, jobject displ
 
 static jboolean jni_eglDestroySurface(JNIEnv *_env, jobject _this, jobject display, jobject surface) {
     if (display == NULL || surface == NULL) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -442,7 +436,7 @@ static jint jni_eglGetDisplay(JNIEnv *_env, jobject _this, jobject native_displa
 
 static jboolean jni_eglMakeCurrent(JNIEnv *_env, jobject _this, jobject display, jobject draw, jobject read, jobject context) {
     if (display == NULL || draw == NULL || read == NULL || context == NULL) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -454,7 +448,7 @@ static jboolean jni_eglMakeCurrent(JNIEnv *_env, jobject _this, jobject display,
 
 static jstring jni_eglQueryString(JNIEnv *_env, jobject _this, jobject display, jint name) {
     if (display == NULL) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return NULL;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -464,7 +458,7 @@ static jstring jni_eglQueryString(JNIEnv *_env, jobject _this, jobject display, 
 
 static jboolean jni_eglSwapBuffers(JNIEnv *_env, jobject _this, jobject display, jobject surface) {
     if (display == NULL || surface == NULL) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -474,7 +468,7 @@ static jboolean jni_eglSwapBuffers(JNIEnv *_env, jobject _this, jobject display,
 
 static jboolean jni_eglTerminate(JNIEnv *_env, jobject _this, jobject display) {
     if (display == NULL) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     EGLDisplay dpy = getDisplay(_env, display);
@@ -484,7 +478,7 @@ static jboolean jni_eglTerminate(JNIEnv *_env, jobject _this, jobject display) {
 static jboolean jni_eglCopyBuffers(JNIEnv *_env, jobject _this, jobject display,
         jobject surface, jobject native_pixmap) {
     if (display == NULL || surface == NULL || native_pixmap == NULL) {
-        doThrow(_env, "java/lang/IllegalArgumentException");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
         return JNI_FALSE;
     }
     // TODO: Implement this
@@ -546,4 +540,3 @@ int register_com_google_android_gles_jni_EGLImpl(JNIEnv *_env)
             android::classPathName, android::methods, NELEM(android::methods));
     return err;
 }
-

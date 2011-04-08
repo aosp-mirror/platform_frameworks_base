@@ -25,18 +25,11 @@
 namespace android
 {
 
-static void throw_NullPointerException(JNIEnv *env, const char* msg)
-{
-    jclass clazz;
-    clazz = env->FindClass("java/lang/NullPointerException");
-    env->ThrowNew(clazz, msg);
-}
-
 static void
 acquireWakeLock(JNIEnv *env, jobject clazz, jint lock, jstring idObj)
 {
     if (idObj == NULL) {
-        throw_NullPointerException(env, "id is null");
+        jniThrowNullPointerException(env, "id is null");
         return ;
     }
 
@@ -51,7 +44,7 @@ static void
 releaseWakeLock(JNIEnv *env, jobject clazz, jstring idObj)
 {
     if (idObj == NULL) {
-        throw_NullPointerException(env, "id is null");
+        jniThrowNullPointerException(env, "id is null");
         return ;
     }
 

@@ -20,6 +20,7 @@
 #include <ui/PixelFormat.h>
 
 #include "jni.h"
+#include "JNIHelp.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/misc.h>
 
@@ -35,12 +36,6 @@ struct offsets_t {
 };
 
 static offsets_t offsets;
-
-static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL)
-{
-    jclass npeClazz = env->FindClass(exc);
-    env->ThrowNew(npeClazz, msg);
-}
 
 // ----------------------------------------------------------------------------
 
@@ -72,7 +67,7 @@ static void android_graphics_getPixelFormatInfo(
 
     err = getPixelFormatInfo(format, &info);
     if (err < 0) {
-        doThrow(env, "java/lang/IllegalArgumentException");
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
 
@@ -97,7 +92,7 @@ static JNINativeMethod gMethods[] = {
 void nativeClassInit(JNIEnv* env, jclass clazz)
 {
     offsets.bytesPerPixel = env->GetFieldID(clazz, "bytesPerPixel", "I");
-    offsets.bitsPerPixel  = env->GetFieldID(clazz, "bitsPerPixel", "I");    
+    offsets.bitsPerPixel  = env->GetFieldID(clazz, "bitsPerPixel", "I");
 }
 
 int register_android_graphics_PixelFormat(JNIEnv* env)

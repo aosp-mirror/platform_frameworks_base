@@ -21,6 +21,7 @@
 #include <utils/ObbFile.h>
 
 #include "jni.h"
+#include "JNIHelp.h"
 #include "utils/misc.h"
 #include "android_runtime/AndroidRuntime.h"
 
@@ -35,16 +36,6 @@ static struct {
     jfieldID salt;
 } gObbInfoClassInfo;
 
-static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL)
-{
-    jclass npeClazz;
-
-    npeClazz = env->FindClass(exc);
-    LOG_FATAL_IF(npeClazz == NULL, "Unable to find class %s", exc);
-
-    env->ThrowNew(npeClazz, msg);
-}
-
 static void android_content_res_ObbScanner_getObbInfo(JNIEnv* env, jobject clazz, jstring file,
         jobject obbInfo)
 {
@@ -53,7 +44,7 @@ static void android_content_res_ObbScanner_getObbInfo(JNIEnv* env, jobject clazz
     sp<ObbFile> obb = new ObbFile();
     if (!obb->readFrom(filePath)) {
         env->ReleaseStringUTFChars(file, filePath);
-        doThrow(env, "java/io/IOException", "Could not read OBB file");
+        jniThrowException(env, "java/io/IOException", "Could not read OBB file");
         return;
     }
 
@@ -63,7 +54,7 @@ static void android_content_res_ObbScanner_getObbInfo(JNIEnv* env, jobject clazz
 
     jstring packageName = env->NewStringUTF(packageNameStr);
     if (packageName == NULL) {
-        doThrow(env, "java/io/IOException", "Could not read OBB file");
+        jniThrowException(env, "java/io/IOException", "Could not read OBB file");
         return;
     }
 

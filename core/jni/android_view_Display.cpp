@@ -24,6 +24,7 @@
 #include <ui/DisplayInfo.h>
 
 #include "jni.h"
+#include "JNIHelp.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/misc.h>
 #include <utils/Log.h>
@@ -49,12 +50,6 @@ static int gLongSize = -1;
 static int gOldSize = -1;
 static int gNewSize = -1;
 
-static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL)
-{
-    jclass npeClazz = env->FindClass(exc);
-    env->ThrowNew(npeClazz, msg);
-}
-
 // ----------------------------------------------------------------------------
 
 static void android_view_Display_init(
@@ -63,7 +58,7 @@ static void android_view_Display_init(
     DisplayInfo info;
     status_t err = SurfaceComposerClient::getDisplayInfo(DisplayID(dpy), &info);
     if (err < 0) {
-        doThrow(env, "java/lang/IllegalArgumentException");
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
     env->SetIntField(clazz, offsets.pixelFormat,info.pixelFormatInfo.format);

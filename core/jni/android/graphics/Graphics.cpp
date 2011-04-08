@@ -1,6 +1,7 @@
 #define LOG_TAG "GraphicsJNI"
 
 #include "jni.h"
+#include "JNIHelp.h"
 #include "GraphicsJNI.h"
 
 #include "SkCanvas.h"
@@ -9,44 +10,32 @@
 #include "SkRegion.h"
 #include <android_runtime/AndroidRuntime.h>
 
-void doThrow(JNIEnv* env, const char* exc, const char* msg) {
-    // don't throw a new exception if we already have one pending
-    if (env->ExceptionCheck() == JNI_FALSE) {
-        jclass npeClazz;
-        
-        npeClazz = env->FindClass(exc);
-        LOG_FATAL_IF(npeClazz == NULL, "Unable to find class %s", exc);
-        
-        env->ThrowNew(npeClazz, msg);
-    }
-}
-
 void doThrowNPE(JNIEnv* env) {
-    doThrow(env, "java/lang/NullPointerException");
+    jniThrowException(env, "java/lang/NullPointerException", NULL);
 }
 
 void doThrowAIOOBE(JNIEnv* env) {
-    doThrow(env, "java/lang/ArrayIndexOutOfBoundsException");
+    jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
 }
 
 void doThrowRE(JNIEnv* env, const char* msg) {
-    doThrow(env, "java/lang/RuntimeException", msg);
+    jniThrowException(env, "java/lang/RuntimeException", msg);
 }
 
 void doThrowIAE(JNIEnv* env, const char* msg) {
-    doThrow(env, "java/lang/IllegalArgumentException", msg);
+    jniThrowException(env, "java/lang/IllegalArgumentException", msg);
 }
 
 void doThrowISE(JNIEnv* env, const char* msg) {
-    doThrow(env, "java/lang/IllegalStateException", msg);
+    jniThrowException(env, "java/lang/IllegalStateException", msg);
 }
 
 void doThrowOOME(JNIEnv* env, const char* msg) {
-    doThrow(env, "java/lang/OutOfMemoryError", msg);
+    jniThrowException(env, "java/lang/OutOfMemoryError", msg);
 }
 
 void doThrowIOE(JNIEnv* env, const char* msg) {
-    doThrow(env, "java/io/IOException", msg);
+    jniThrowException(env, "java/io/IOException", msg);
 }
 
 bool GraphicsJNI::hasException(JNIEnv *env) {
@@ -229,7 +218,7 @@ void GraphicsJNI::irect_to_jrect(const SkIRect& ir, JNIEnv* env, jobject obj)
 SkRect* GraphicsJNI::jrectf_to_rect(JNIEnv* env, jobject obj, SkRect* r)
 {
     SkASSERT(env->IsInstanceOf(obj, gRectF_class));
-    
+
     r->set(SkFloatToScalar(env->GetFloatField(obj, gRectF_leftFieldID)),
            SkFloatToScalar(env->GetFloatField(obj, gRectF_topFieldID)),
            SkFloatToScalar(env->GetFloatField(obj, gRectF_rightFieldID)),
@@ -240,7 +229,7 @@ SkRect* GraphicsJNI::jrectf_to_rect(JNIEnv* env, jobject obj, SkRect* r)
 SkRect* GraphicsJNI::jrect_to_rect(JNIEnv* env, jobject obj, SkRect* r)
 {
     SkASSERT(env->IsInstanceOf(obj, gRect_class));
-    
+
     r->set(SkIntToScalar(env->GetIntField(obj, gRect_leftFieldID)),
            SkIntToScalar(env->GetIntField(obj, gRect_topFieldID)),
            SkIntToScalar(env->GetIntField(obj, gRect_rightFieldID)),
@@ -261,7 +250,7 @@ void GraphicsJNI::rect_to_jrectf(const SkRect& r, JNIEnv* env, jobject obj)
 SkIPoint* GraphicsJNI::jpoint_to_ipoint(JNIEnv* env, jobject obj, SkIPoint* point)
 {
     SkASSERT(env->IsInstanceOf(obj, gPoint_class));
-    
+
     point->set(env->GetIntField(obj, gPoint_xFieldID),
                env->GetIntField(obj, gPoint_yFieldID));
     return point;
@@ -278,7 +267,7 @@ void GraphicsJNI::ipoint_to_jpoint(const SkIPoint& ir, JNIEnv* env, jobject obj)
 SkPoint* GraphicsJNI::jpointf_to_point(JNIEnv* env, jobject obj, SkPoint* point)
 {
     SkASSERT(env->IsInstanceOf(obj, gPointF_class));
-        
+
     point->set(SkFloatToScalar(env->GetIntField(obj, gPointF_xFieldID)),
                SkFloatToScalar(env->GetIntField(obj, gPointF_yFieldID)));
     return point;
@@ -360,7 +349,7 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buff
 {
     SkASSERT(bitmap);
     SkASSERT(bitmap->pixelRef());
-    
+
     jobject obj = env->AllocObject(gBitmap_class);
     if (obj) {
         env->CallVoidMethod(obj, gBitmap_constructorMethodID,
@@ -438,7 +427,7 @@ AndroidPixelRef::AndroidPixelRef(JNIEnv* env, void* storage, size_t size, jbyteA
 
     // If storageObj is NULL, the memory was NOT allocated on the Java heap
     fOnJavaHeap = (storageObj != NULL);
-    
+
 }
 
 AndroidPixelRef::~AndroidPixelRef() {
@@ -508,11 +497,11 @@ jbyteArray GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,
                                              SkColorTable* ctable) {
     Sk64 size64 = bitmap->getSize64();
     if (size64.isNeg() || !size64.is32()) {
-        doThrow(env, "java/lang/IllegalArgumentException",
-                     "bitmap size exceeds 32bits");
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "bitmap size exceeds 32bits");
         return NULL;
     }
-    
+
     size_t size = size64.get32();
     jbyteArray arrayObj = env->NewByteArray(size);
     if (arrayObj) {
@@ -540,7 +529,7 @@ JavaPixelAllocator::JavaPixelAllocator(JNIEnv* env)
         sk_throw();
     }
 }
-    
+
 bool JavaPixelAllocator::allocPixelRef(SkBitmap* bitmap, SkColorTable* ctable) {
     JNIEnv* env = vm2env(fVM);
 
@@ -625,14 +614,14 @@ int register_android_graphics_Graphics(JNIEnv* env)
 
     gBitmapConfig_class = make_globalref(env, "android/graphics/Bitmap$Config");
     gBitmapConfig_nativeInstanceID = getFieldIDCheck(env, gBitmapConfig_class,
-                                                     "nativeInt", "I");    
+                                                     "nativeInt", "I");
 
     gCanvas_class = make_globalref(env, "android/graphics/Canvas");
     gCanvas_nativeInstanceID = getFieldIDCheck(env, gCanvas_class, "mNativeCanvas", "I");
 
     gPaint_class = make_globalref(env, "android/graphics/Paint");
     gPaint_nativeInstanceID = getFieldIDCheck(env, gPaint_class, "mNativePaint", "I");
-    
+
     gPicture_class = make_globalref(env, "android/graphics/Picture");
     gPicture_nativeInstanceID = getFieldIDCheck(env, gPicture_class, "mNativePicture", "I");
 
@@ -640,6 +629,6 @@ int register_android_graphics_Graphics(JNIEnv* env)
     gRegion_nativeInstanceID = getFieldIDCheck(env, gRegion_class, "mNativeRegion", "I");
     gRegion_constructorMethodID = env->GetMethodID(gRegion_class, "<init>",
         "(II)V");
-    
+
     return 0;
 }
