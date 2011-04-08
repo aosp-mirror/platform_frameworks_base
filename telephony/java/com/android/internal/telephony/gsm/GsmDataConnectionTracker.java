@@ -199,13 +199,13 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         destroyDataConnections();
     }
 
+    @Override
     public boolean isApnTypeActive(String type) {
         ApnContext apnContext = mApnContexts.get(type);
         if (apnContext == null) return false;
 
         return (apnContext.getDataConnection() != null);
     }
-
 
     /**
      * The only circumstances under which we report that data connectivity is not
@@ -319,7 +319,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     // Return all active apn types
-    public synchronized String[] getActiveApnTypes() {
+    public String[] getActiveApnTypes() {
         if (DBG) log("get all active apn types");
         ArrayList<String> result = new ArrayList<String>();
 
