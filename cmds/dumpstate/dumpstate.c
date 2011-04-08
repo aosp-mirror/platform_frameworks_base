@@ -185,11 +185,16 @@ static void dumpstate() {
     run_command("DUMPSYS", 60, "dumpsys", NULL);
 
     printf("========================================================\n");
-    printf("== Application Services\n");
+    printf("== Running Application Activities\n");
     printf("========================================================\n");
 
-    /* Instead of a 60s timeout, we should give each service a 5 second timeout */
-    run_command("APP SERVICES", 60, "dumpsys", "activity", "service", NULL);
+    run_command("APP ACTIVITIES", 30, "dumpsys", "activity", "all", NULL);
+
+    printf("========================================================\n");
+    printf("== Running Application Services\n");
+    printf("========================================================\n");
+
+    run_command("APP SERVICES", 30, "dumpsys", "activity", "service", "all", NULL);
 
 }
 

@@ -1383,6 +1383,8 @@ public final class Parcel {
     private native FileDescriptor internalReadFileDescriptor();
     /*package*/ static native FileDescriptor openFileDescriptor(String file,
             int mode) throws FileNotFoundException;
+    /*package*/ static native FileDescriptor dupFileDescriptor(FileDescriptor orig)
+            throws IOException;
     /*package*/ static native void closeFileDescriptor(FileDescriptor desc)
             throws IOException;
     /*package*/ static native void clearFileDescriptor(FileDescriptor desc);

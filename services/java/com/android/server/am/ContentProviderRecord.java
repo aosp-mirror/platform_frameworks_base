@@ -60,7 +60,7 @@ class ContentProviderRecord extends ContentProviderHolder {
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("package=");
                 pw.print(info.applicationInfo.packageName);
-                pw.print("process="); pw.println(info.processName);
+                pw.print(" process="); pw.println(info.processName);
         pw.print(prefix); pw.print("app="); pw.println(app);
         if (launchingApp != null) {
             pw.print(prefix); pw.print("launchingApp="); pw.println(launchingApp);

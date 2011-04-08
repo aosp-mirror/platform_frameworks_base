@@ -363,11 +363,10 @@ public final class ActivityThread {
     }
 
     private static final class DumpComponentInfo {
-        FileDescriptor fd;
+        ParcelFileDescriptor fd;
         IBinder token;
         String prefix;
         String[] args;
-        boolean dumped;
     }
 
     private static final class ResultData {
@@ -621,20 +620,13 @@ public final class ActivityThread {
 
         public void dumpService(FileDescriptor fd, IBinder servicetoken, String[] args) {
             DumpComponentInfo data = new DumpComponentInfo();
-            data.fd = fd;
-            data.token = servicetoken;
-            data.args = args;
-            data.dumped = false;
-            queueOrSendMessage(H.DUMP_SERVICE, data);
-            synchronized (data) {
-                while (!data.dumped) {
-                    try {
-                        data.wait();
-                    } catch (InterruptedException e) {
-                        // no need to do anything here, we will keep waiting until
-                        // dumped is set
-                    }
-                }
+            try {
+                data.fd = ParcelFileDescriptor.dup(fd);
+                data.token = servicetoken;
+                data.args = args;
+                queueOrSendMessage(H.DUMP_SERVICE, data);
+            } catch (IOException e) {
+                Slog.w(TAG, "dumpService failed", e);
             }
         }
 
@@ -696,21 +688,14 @@ public final class ActivityThread {
         public void dumpActivity(FileDescriptor fd, IBinder activitytoken,
                 String prefix, String[] args) {
             DumpComponentInfo data = new DumpComponentInfo();
-            data.fd = fd;
-            data.token = activitytoken;
-            data.prefix = prefix;
-            data.args = args;
-            data.dumped = false;
-            queueOrSendMessage(H.DUMP_ACTIVITY, data);
-            synchronized (data) {
-                while (!data.dumped) {
-                    try {
-                        data.wait();
-                    } catch (InterruptedException e) {
-                        // no need to do anything here, we will keep waiting until
-                        // dumped is set
-                    }
-                }
+            try {
+                data.fd = ParcelFileDescriptor.dup(fd);
+                data.token = activitytoken;
+                data.prefix = prefix;
+                data.args = args;
+                queueOrSendMessage(H.DUMP_ACTIVITY, data);
+            } catch (IOException e) {
+                Slog.w(TAG, "dumpActivity failed", e);
             }
         }
 
@@ -2113,33 +2098,27 @@ public final class ActivityThread {
     }
 
     private void handleDumpService(DumpComponentInfo info) {
-        try {
-            Service s = mServices.get(info.token);
-            if (s != null) {
-                PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd));
-                s.dump(info.fd, pw, info.args);
-                pw.close();
-            }
-        } finally {
-            synchronized (info) {
-                info.dumped = true;
-                info.notifyAll();
+        Service s = mServices.get(info.token);
+        if (s != null) {
+            PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
+            s.dump(info.fd.getFileDescriptor(), pw, info.args);
+            pw.flush();
+            try {
+                info.fd.close();
+            } catch (IOException e) {
             }
         }
     }
 
     private void handleDumpActivity(DumpComponentInfo info) {
-        try {
-            ActivityClientRecord r = mActivities.get(info.token);
-            if (r != null && r.activity != null) {
-                PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd));
-                r.activity.dump(info.prefix, info.fd, pw, info.args);
-                pw.close();
-            }
-        } finally {
-            synchronized (info) {
-                info.dumped = true;
-                info.notifyAll();
+        ActivityClientRecord r = mActivities.get(info.token);
+        if (r != null && r.activity != null) {
+            PrintWriter pw = new PrintWriter(new FileOutputStream(info.fd.getFileDescriptor()));
+            r.activity.dump(info.prefix, info.fd.getFileDescriptor(), pw, info.args);
+            pw.flush();
+            try {
+                info.fd.close();
+            } catch (IOException e) {
             }
         }
     }
