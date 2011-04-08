@@ -20,6 +20,8 @@ import android.app.PendingIntent;
 
 import android.util.Log;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Maintain the Apn context
@@ -30,25 +32,22 @@ public class ApnContext {
     public static final int PENDING_ACTION_RECONNECT = 2;
     public static final int PENDING_ACTION_APN_DISABLE = 3;
 
-    public static final int DATA_ENABLED = 1;
-    public static final int DATA_DISABLED = 2;
-
     public final String LOG_TAG;
 
-    int mPendingAction;
+    private AtomicInteger mPendingAction;
 
     protected static final boolean DBG = true;
 
-    String mApnType;
+    private final String mApnType;
 
-    DataConnectionTracker.State mState;
+    private DataConnectionTracker.State mState;
 
-    ArrayList<ApnSetting> mWaitingApns = null;
+    private ArrayList<ApnSetting> mWaitingApns = null;
 
     /** A zero indicates that all waiting APNs had a permanent error */
-    private int mWaitingApnsPermanentFailureCountDown;
+    private AtomicInteger mWaitingApnsPermanentFailureCountDown;
 
-    ApnSetting mApnSetting;
+    private ApnSetting mApnSetting;
 
     DataConnection mDataConnection;
 
@@ -59,65 +58,66 @@ public class ApnContext {
     /**
      * user/app requested connection on this APN
      */
-    boolean mDataEnabled;
+    AtomicBoolean mDataEnabled;
 
     /**
      * carrier requirements met
      */
-    boolean mDependencyMet;
+    AtomicBoolean mDependencyMet;
 
     public ApnContext(String apnType, String logTag) {
         mApnType = apnType;
         mState = DataConnectionTracker.State.IDLE;
         setReason(Phone.REASON_DATA_ENABLED);
-        mPendingAction = PENDING_ACTION_NONE;
-        mDataEnabled = false;
-        mDependencyMet = true;
+        mPendingAction = new AtomicInteger(PENDING_ACTION_NONE);
+        mDataEnabled = new AtomicBoolean(false);
+        mDependencyMet = new AtomicBoolean(true);
+        mWaitingApnsPermanentFailureCountDown = new AtomicInteger(0);
         LOG_TAG = logTag;
     }
 
     public int getPendingAction() {
-        return mPendingAction;
+        return mPendingAction.get();
     }
 
     public void setPendingAction(int pa) {
-        mPendingAction = pa;
+        mPendingAction.set(pa);
     }
 
     public String getApnType() {
         return mApnType;
     }
 
-    public DataConnection getDataConnection() {
+    public synchronized DataConnection getDataConnection() {
         return mDataConnection;
     }
 
-    public void setDataConnection(DataConnection dataConnection) {
+    public synchronized void setDataConnection(DataConnection dataConnection) {
         mDataConnection = dataConnection;
     }
 
-    public ApnSetting getApnSetting() {
+    public synchronized ApnSetting getApnSetting() {
         return mApnSetting;
     }
 
-    public void setApnSetting(ApnSetting apnSetting) {
+    public synchronized void setApnSetting(ApnSetting apnSetting) {
         mApnSetting = apnSetting;
     }
 
-    public void setWaitingApns(ArrayList<ApnSetting> waitingApns) {
+    public synchronized void setWaitingApns(ArrayList<ApnSetting> waitingApns) {
         mWaitingApns = waitingApns;
-        mWaitingApnsPermanentFailureCountDown = mWaitingApns.size();
+        mWaitingApnsPermanentFailureCountDown.set(mWaitingApns.size());
     }
 
     public int getWaitingApnsPermFailCount() {
-        return mWaitingApnsPermanentFailureCountDown;
+        return mWaitingApnsPermanentFailureCountDown.get();
     }
 
     public void decWaitingApnsPermFailCount() {
-        mWaitingApnsPermanentFailureCountDown--;
+        mWaitingApnsPermanentFailureCountDown.decrementAndGet();
     }
 
-    public ApnSetting getNextWaitingApn() {
+    public synchronized ApnSetting getNextWaitingApn() {
         ArrayList<ApnSetting> list = mWaitingApns;
         ApnSetting apn = null;
 
@@ -129,78 +129,81 @@ public class ApnContext {
         return apn;
     }
 
-    public void removeNextWaitingApn() {
+    public synchronized void removeNextWaitingApn() {
         if ((mWaitingApns != null) && (!mWaitingApns.isEmpty())) {
             mWaitingApns.remove(0);
         }
     }
 
-    public ArrayList<ApnSetting> getWaitingApns() {
+    public synchronized ArrayList<ApnSetting> getWaitingApns() {
         return mWaitingApns;
     }
 
-    public void setState(DataConnectionTracker.State s) {
-        if (DBG)
+    public synchronized void setState(DataConnectionTracker.State s) {
+        if (DBG) {
             log("setState: " + s + " for type " + mApnType + ", previous state:" + mState);
+        }
 
         mState = s;
 
         if (mState == DataConnectionTracker.State.FAILED) {
-            if (mWaitingApns != null)
+            if (mWaitingApns != null) {
                 mWaitingApns.clear(); // when teardown the connection and set to IDLE
+            }
         }
     }
 
-    public DataConnectionTracker.State getState() {
+    public synchronized DataConnectionTracker.State getState() {
         return mState;
     }
 
-    public void setReason(String reason) {
-        if (DBG)
+    public synchronized void setReason(String reason) {
+        if (DBG) {
             log("set reason as " + reason + ", for type " + mApnType + ",current state " + mState);
+        }
         mReason = reason;
     }
 
-    public String getReason() {
+    public synchronized String getReason() {
         return mReason;
     }
 
-    public void setReconnectIntent(PendingIntent intent) {
+    public synchronized void setReconnectIntent(PendingIntent intent) {
         if (DBG)
             log("set ReconnectIntent for type " + mApnType);
         mReconnectIntent = intent;
     }
 
-    public PendingIntent getReconnectIntent() {
+    public synchronized PendingIntent getReconnectIntent() {
         return mReconnectIntent;
     }
 
     public boolean isReady() {
-        return mDataEnabled && mDependencyMet;
+        return mDataEnabled.get() && mDependencyMet.get();
     }
 
     public void setEnabled(boolean enabled) {
         if (DBG) {
             log("set enabled as " + enabled + ", for type " +
-                    mApnType + ", current state is " + mDataEnabled);
+                    mApnType + ", current state is " + mDataEnabled.get());
         }
-        mDataEnabled = enabled;
+        mDataEnabled.set(enabled);
     }
 
     public boolean isEnabled() {
-        return mDataEnabled;
+        return mDataEnabled.get();
     }
 
     public void setDependencyMet(boolean met) {
         if (DBG) {
             log("set mDependencyMet as " + met + ", for type " + mApnType +
-                    ", current state is " + mDependencyMet);
+                    ", current state is " + mDependencyMet.get());
         }
-        mDependencyMet = met;
+        mDependencyMet.set(met);
     }
 
     public boolean getDependencyMet() {
-       return mDependencyMet;
+       return mDependencyMet.get();
     }
 
     protected void log(String s) {
