@@ -184,7 +184,9 @@ class HTML5VideoViewProxy extends Handler
                 // we need to pause the old one and re-create a new media player
                 // inside the HTML5VideoView.
                 if (mHTML5VideoView != null) {
-                    mHTML5VideoView.pauseAndDispatch(mCurrentProxy);
+                    if (!backFromFullScreenMode) {
+                        mHTML5VideoView.pauseAndDispatch(mCurrentProxy);
+                    }
                     // release the media player to avoid finalize error
                     mHTML5VideoView.release();
                 }
