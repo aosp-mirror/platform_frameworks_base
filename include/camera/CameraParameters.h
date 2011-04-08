@@ -247,6 +247,44 @@ public:
     // Supported focus modes.
     // Example value: "auto,macro,fixed". Read only.
     static const char KEY_SUPPORTED_FOCUS_MODES[];
+    // The maximum number of focus areas supported. This is the maximum length
+    // of KEY_FOCUS_AREAS.
+    // Example value: "0" or "2". Read only.
+    static const char KEY_MAX_NUM_FOCUS_AREAS[];
+    // Current focus areas.
+    //
+    // Before accessing this parameter, apps should check
+    // KEY_MAX_NUM_FOCUS_AREAS first to know the maximum number of focus areas
+    // first. If the value is 0, focus area is not supported.
+    //
+    // Each focus area is a five-element int array. The first four elements are
+    // the rectangle of the area (left, top, right, bottom). The direction is
+    // relative to the sensor orientation, that is, what the sensor sees. The
+    // direction is not affected by the rotation or mirroring of
+    // CAMERA_CMD_SET_DISPLAY_ORIENTATION. Coordinates range from -1000 to 1000.
+    // (-1000,-1000) is the upper left point. (1000, 1000) is the lower right
+    // point. The length and width of focus areas cannot be 0 or negative.
+    //
+    // The fifth element is the weight. The weight ranges from 1 to 1000.
+    // The sum of the weights of all focus areas must be 1000. Focus areas
+    // can partially overlap and the driver will add the weights in the
+    // overlap region. But apps should not set two focus areas that have
+    // identical coordinates.
+    //
+    // A special case of single focus area (0,0,0,0,0) means driver to decide
+    // the focus area. For example, the driver may use more signals to decide
+    // focus areas and change them dynamically. Apps can set (0,0,0,0,0) if they
+    // want the driver to decide focus areas.
+    //
+    // Focus areas are relative to the current field of view (KEY_ZOOM). No
+    // matter what the zoom level is, (-1000,-1000) represents the top of the
+    // currently visible camera frame. The focus area cannot be set to be
+    // outside the current field of view, even when using zoom.
+    //
+    // Focus area only has effect if the current focus mode is FOCUS_MODE_AUTO,
+    // FOCUS_MODE_MACRO, or FOCUS_MODE_CONTINOUS_VIDEO.
+    // Example value: "(-10,-10,0,0,300),(0,0,10,10,700)". Read/write.
+    static const char KEY_FOCUS_AREAS[];
     // Focal length in millimeter.
     // Example value: "4.31". Read only.
     static const char KEY_FOCAL_LENGTH[];
