@@ -143,7 +143,7 @@ public class GSMPhone extends PhoneBase {
         mSMS = new GsmSMSDispatcher(this);
         mIccFileHandler = new SIMFileHandler(this);
         mSIMRecords = new SIMRecords(this);
-        mDataConnection = new GsmDataConnectionTracker (this);
+        mDataConnectionTracker = new GsmDataConnectionTracker (this);
         mSimCard = new SimCard(this);
         if (!unitTestMode) {
             mSimPhoneBookIntManager = new SimPhoneBookInterfaceManager(this);
@@ -218,7 +218,7 @@ public class GSMPhone extends PhoneBase {
             //Force all referenced classes to unregister their former registered events
             mStkService.dispose();
             mCT.dispose();
-            mDataConnection.dispose();
+            mDataConnectionTracker.dispose();
             mSST.dispose();
             mIccFileHandler.dispose(); // instance of SimFileHandler
             mSIMRecords.dispose();
@@ -239,7 +239,7 @@ public class GSMPhone extends PhoneBase {
             this.mSIMRecords = null;
             this.mIccFileHandler = null;
             this.mSimCard = null;
-            this.mDataConnection = null;
+            this.mDataConnectionTracker = null;
             this.mCT = null;
             this.mSST = null;
     }
@@ -308,11 +308,11 @@ public class GSMPhone extends PhoneBase {
             // If we're out of service, open TCP sockets may still work
             // but no data will flow
             ret = DataState.DISCONNECTED;
-        } else if (mDataConnection.isApnTypeEnabled(apnType) == false ||
-                mDataConnection.isApnTypeActive(apnType) == false) {
+        } else if (mDataConnectionTracker.isApnTypeEnabled(apnType) == false ||
+                mDataConnectionTracker.isApnTypeActive(apnType) == false) {
             ret = DataState.DISCONNECTED;
         } else { /* mSST.gprsState == ServiceState.STATE_IN_SERVICE */
-            switch (mDataConnection.getState(apnType)) {
+            switch (mDataConnectionTracker.getState(apnType)) {
                 case FAILED:
                 case IDLE:
                     ret = DataState.DISCONNECTED;
@@ -343,7 +343,7 @@ public class GSMPhone extends PhoneBase {
         DataActivityState ret = DataActivityState.NONE;
 
         if (mSST.getCurrentGprsState() == ServiceState.STATE_IN_SERVICE) {
-            switch (mDataConnection.getActivity()) {
+            switch (mDataConnectionTracker.getActivity()) {
                 case DATAIN:
                     ret = DataActivityState.DATAIN;
                 break;
@@ -1070,7 +1070,7 @@ public class GSMPhone extends PhoneBase {
     }
 
     public List<DataConnection> getCurrentDataConnectionList () {
-        return mDataConnection.getAllDataConnections();
+        return mDataConnectionTracker.getAllDataConnections();
     }
 
     public void updateServiceLocation() {
@@ -1086,11 +1086,11 @@ public class GSMPhone extends PhoneBase {
     }
 
     public boolean getDataRoamingEnabled() {
-        return mDataConnection.getDataOnRoamingEnabled();
+        return mDataConnectionTracker.getDataOnRoamingEnabled();
     }
 
     public void setDataRoamingEnabled(boolean enable) {
-        mDataConnection.setDataOnRoamingEnabled(enable);
+        mDataConnectionTracker.setDataOnRoamingEnabled(enable);
     }
 
     /**

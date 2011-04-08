@@ -112,7 +112,7 @@ public abstract class PhoneBase extends Handler implements Phone {
     public CommandsInterface mCM;
     protected IccFileHandler mIccFileHandler;
     boolean mDnsCheckDisabled = false;
-    public DataConnectionTracker mDataConnection;
+    public DataConnectionTracker mDataConnectionTracker;
     boolean mDoesRilSendMultipleCallRing;
     int mCallRingContinueToken = 0;
     int mCallRingDelay;
@@ -243,7 +243,7 @@ public abstract class PhoneBase extends Handler implements Phone {
         synchronized(PhoneProxy.lockForRadioTechnologyChange) {
             mCM.unSetOnCallRing(this);
             // Must cleanup all connectionS and needs to use sendMessage!
-            mDataConnection.cleanUpAllConnections(null);
+            mDataConnectionTracker.cleanUpAllConnections(null);
             mIsTheCurrentActivePhone = false;
         }
     }
@@ -974,31 +974,31 @@ public abstract class PhoneBase extends Handler implements Phone {
      }
 
     public String[] getActiveApnTypes() {
-        return mDataConnection.getActiveApnTypes();
+        return mDataConnectionTracker.getActiveApnTypes();
     }
 
     public String getActiveApnHost() {
-        return mDataConnection.getActiveApnString();
+        return mDataConnectionTracker.getActiveApnString();
     }
 
     public LinkProperties getLinkProperties(String apnType) {
-        return mDataConnection.getLinkProperties(apnType);
+        return mDataConnectionTracker.getLinkProperties(apnType);
     }
 
     public LinkCapabilities getLinkCapabilities(String apnType) {
-        return mDataConnection.getLinkCapabilities(apnType);
+        return mDataConnectionTracker.getLinkCapabilities(apnType);
     }
 
     public int enableApnType(String type) {
-        return mDataConnection.enableApnType(type);
+        return mDataConnectionTracker.enableApnType(type);
     }
 
     public int disableApnType(String type) {
-        return mDataConnection.disableApnType(type);
+        return mDataConnectionTracker.disableApnType(type);
     }
 
     public boolean isDataConnectivityPossible() {
-        return ((mDataConnection != null) && (mDataConnection.isDataPossible()));
+        return ((mDataConnectionTracker != null) && (mDataConnectionTracker.isDataPossible()));
     }
 
     /**
@@ -1028,7 +1028,7 @@ public abstract class PhoneBase extends Handler implements Phone {
                 break;
         }
 
-        mDataConnection.setState(dcState);
+        mDataConnectionTracker.setState(dcState);
         notifyDataConnection(null, Phone.APN_TYPE_DEFAULT);
     }
 

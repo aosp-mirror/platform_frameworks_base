@@ -469,7 +469,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             cm.setRadioPower(true, null);
         } else if (!mDesiredPowerState && cm.getRadioState().isOn()) {
             // If it's on and available and we want it off gracefully
-            DataConnectionTracker dcTracker = phone.mDataConnection;
+            DataConnectionTracker dcTracker = phone.mDataConnectionTracker;
             powerOffRadioSafely(dcTracker);
         } // Otherwise, we're in the desired state
     }

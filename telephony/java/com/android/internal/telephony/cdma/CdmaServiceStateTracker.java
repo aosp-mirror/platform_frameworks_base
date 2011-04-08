@@ -502,7 +502,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             && cm.getRadioState() == CommandsInterface.RadioState.RADIO_OFF) {
             cm.setRadioPower(true, null);
         } else if (!mDesiredPowerState && cm.getRadioState().isOn()) {
-            DataConnectionTracker dcTracker = phone.mDataConnection;
+            DataConnectionTracker dcTracker = phone.mDataConnectionTracker;
 
             // If it's on and available and we want it off gracefully
             powerOffRadioSafely(dcTracker);
