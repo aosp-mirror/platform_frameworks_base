@@ -2,22 +2,23 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
 #define LOG_TAG "AndroidUnicode"
 
 #include "JNIHelp.h"
+#include "ScopedPrimitiveArray.h"
 #include <android_runtime/AndroidRuntime.h>
 #include "utils/misc.h"
 #include "utils/Log.h"
@@ -49,19 +50,21 @@ static int directionality_map[U_CHAR_DIRECTION_COUNT] = {
 };
 
 namespace android {
-    
+
 static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray, jbyteArray destArray, int count)
 {
-    jchar* src = env->GetCharArrayElements(srcArray, NULL);
-    jbyte* dest = env->GetByteArrayElements(destArray, NULL);
-    if (src == NULL || dest == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
-        goto DIRECTION_END;
+    ScopedCharArrayRO src(env, srcArray);
+    if (src.get() == NULL) {
+        return;
+    }
+    ScopedByteArrayRW dest(env, destArray);
+    if (dest.get() == NULL) {
+        return;
     }
 
     if (env->GetArrayLength(srcArray) < count || env->GetArrayLength(destArray) < count) {
         jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
-        goto DIRECTION_END;
+        return;
     }
 
     for (int i = 0; i < count; i++) {
@@ -87,10 +90,6 @@ static void getDirectionalities(JNIEnv* env, jobject obj, jcharArray srcArray, j
                 dest[i] = directionality_map[dir];
         }
     }
-    
-DIRECTION_END:
-    env->ReleaseCharArrayElements(srcArray, src, JNI_ABORT);
-    env->ReleaseByteArrayElements(destArray, dest, JNI_ABORT);
 }
 
 static jint getEastAsianWidth(JNIEnv* env, jobject obj, jchar input)
@@ -105,18 +104,20 @@ static jint getEastAsianWidth(JNIEnv* env, jobject obj, jchar input)
 static void getEastAsianWidths(JNIEnv* env, jobject obj, jcharArray srcArray,
                                int start, int count, jbyteArray destArray)
 {
-    jchar* src = env->GetCharArrayElements(srcArray, NULL);
-    jbyte* dest = env->GetByteArrayElements(destArray, NULL);
-    if (src == NULL || dest == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
-        goto EA_END;
+    ScopedCharArrayRO src(env, srcArray);
+    if (src.get() == NULL) {
+        return;
+    }
+    ScopedByteArrayRW dest(env, destArray);
+    if (dest.get() == NULL) {
+        return;
     }
 
     if (start < 0 || start > start + count
             || env->GetArrayLength(srcArray) < (start + count)
             || env->GetArrayLength(destArray) < count) {
         jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
-        goto EA_END;
+        return;
     }
 
     for (int i = 0; i < count; i++) {
@@ -141,26 +142,19 @@ static void getEastAsianWidths(JNIEnv* env, jobject obj, jcharArray srcArray,
             dest[i] = width;
         }
     }
-
-EA_END:
-    env->ReleaseCharArrayElements(srcArray, src, JNI_ABORT);
-    env->ReleaseByteArrayElements(destArray, dest, JNI_ABORT);
 }
 
 static jboolean mirror(JNIEnv* env, jobject obj, jcharArray charArray, int start, int count)
 {
-    jchar* data = env->GetCharArrayElements(charArray, NULL);
-    bool ret = false;
-
-    if (data == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
-        goto MIRROR_END;
+    ScopedCharArrayRW data(env, charArray);
+    if (data.get() == NULL) {
+        return false;
     }
 
     if (start < 0 || start > start + count
             || env->GetArrayLength(charArray) < start + count) {
         jniThrowException(env, "java/lang/ArrayIndexOutOfBoundsException", NULL);
-        goto MIRROR_END;
+        return false;
     }
 
     for (int i = start; i < start + count; i++) {
@@ -171,17 +165,14 @@ static jboolean mirror(JNIEnv* env, jobject obj, jcharArray charArray, int start
 
         if (c1 != c2) {
             data[i] = c2;
-            ret = true;
+            return true;
         }
     }
-
-MIRROR_END:
-    env->ReleaseCharArrayElements(charArray, data, JNI_ABORT);
-	return ret;
+    return false;
 }
 
 static jchar getMirror(JNIEnv* env, jobject obj, jchar c)
-{   
+{
     return u_charMirror(c);
 }
 
@@ -202,7 +193,7 @@ int register_android_text_AndroidCharacter(JNIEnv* env)
 {
     jclass clazz = env->FindClass("android/text/AndroidCharacter");
     LOG_ASSERT(clazz, "Cannot find android/text/AndroidCharacter");
-    
+
     return AndroidRuntime::registerNativeMethods(env, "android/text/AndroidCharacter",
             gMethods, NELEM(gMethods));
 }

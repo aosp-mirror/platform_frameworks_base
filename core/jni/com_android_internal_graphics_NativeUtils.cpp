@@ -32,14 +32,14 @@ namespace android
 static jclass class_fileDescriptor;
 static jfieldID field_fileDescriptor_descriptor;
 static jmethodID method_fileDescriptor_init;
- 
+
 
 static jboolean scrollRect(JNIEnv* env, jobject graphics2D, jobject canvas, jobject rect, int dx, int dy) {
     if (canvas == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return false;
     }
-  
+
     SkIRect src, *srcPtr = NULL;
     if (NULL != rect) {
         GraphicsJNI::jrect_to_irect(env, rect, &src);

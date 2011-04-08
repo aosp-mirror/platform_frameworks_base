@@ -2,16 +2,16 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -84,8 +84,7 @@ static void
 EventRecurrence_parse(JNIEnv* env, jobject This, jstring jstr)
 {
     if (jstr == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", 
-                "EventRecurrence.parse str parameter null"); 
+        jniThrowNullPointerException(env, "EventRecurrence.parse str parameter null");
         return ;
     }
     jboolean isCopy;
@@ -112,8 +111,8 @@ EventRecurrence_parse(JNIEnv* env, jobject This, jstring jstr)
     if (er.until.size() > 0) {
         untilStr = env->NewString(er.until.string(), er.until.size());
         if (untilStr == NULL) {
-            jniThrowException(env, "java/lang/RuntimeException", 
-                    "EventRecurrence.parse error setting field 'until'"); 
+            jniThrowException(env, "java/lang/RuntimeException",
+                    "EventRecurrence.parse error setting field 'until'");
             return ;
         }
     } else {
@@ -132,7 +131,7 @@ EventRecurrence_parse(JNIEnv* env, jobject This, jstring jstr)
     SET_ARRAY_AND_CHECK(byday)
     // we'll just set the bydayCount field twice, it'll be less code total
     if (set_array(env, er.bydayCount, er.bydayNum, This, bydayNum_fields)
-            != NO_ERROR) { 
+            != NO_ERROR) {
         jniThrowException(env, "java/lang/RuntimeException",
                 "EventRecurrence.parse error setting field bydayNum or "
                 "bydayCount.");
@@ -196,4 +195,3 @@ int register_android_pim_EventRecurrence(JNIEnv* env)
 }
 
 }; // namespace android
-

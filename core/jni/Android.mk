@@ -176,7 +176,8 @@ LOCAL_C_INCLUDES += \
 	external/icu4c/common \
 	external/jpeg \
 	external/harfbuzz/src \
-	frameworks/opt/emoji
+	frameworks/opt/emoji \
+	libcore/include
 
 LOCAL_SHARED_LIBRARIES := \
 	libexpat \

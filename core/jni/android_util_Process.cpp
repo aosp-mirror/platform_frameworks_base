@@ -2,16 +2,16 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -107,10 +107,10 @@ static void signalExceptionForGroupError(JNIEnv* env, jobject obj, int err)
 static void fakeProcessEntry(void* arg)
 {
     String8* cls = (String8*)arg;
-    
+
     AndroidRuntime* jr = AndroidRuntime::getRuntime();
     jr->callMain(cls->string(), 0, NULL);
-        
+
     delete cls;
 }
 
@@ -132,10 +132,10 @@ jint android_os_Process_myTid(JNIEnv* env, jobject clazz)
 jint android_os_Process_getUidForName(JNIEnv* env, jobject clazz, jstring name)
 {
     if (name == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return -1;
     }
-    
+
     const jchar* str16 = env->GetStringCritical(name, 0);
     String8 name8;
     if (str16) {
@@ -163,10 +163,10 @@ jint android_os_Process_getUidForName(JNIEnv* env, jobject clazz, jstring name)
 jint android_os_Process_getGidForName(JNIEnv* env, jobject clazz, jstring name)
 {
     if (name == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return -1;
     }
-    
+
     const jchar* str16 = env->GetStringCritical(name, 0);
     String8 name8;
     if (str16) {
@@ -200,14 +200,14 @@ void android_os_Process_setThreadGroup(JNIEnv* env, jobject clazz, int pid, jint
     }
 }
 
-void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp) 
+void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jint grp)
 {
     DIR *d;
     FILE *fp;
     char proc_path[255];
     struct dirent *de;
 
-    if (grp > ANDROID_TGROUP_MAX || grp < 0) { 
+    if (grp > ANDROID_TGROUP_MAX || grp < 0) {
         signalExceptionForGroupError(env, clazz, EINVAL);
         return;
     }
@@ -225,7 +225,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
         cmdline[rc] = 0;
         close(fd);
     }
-    
+
     if (grp == ANDROID_TGROUP_BG_NONINTERACT) {
         LOGD("setProcessGroup: vvv pid %d (%s)", pid, cmdline);
     } else {
@@ -260,7 +260,7 @@ void android_os_Process_setProcessGroup(JNIEnv* env, jobject clazz, int pid, jin
             // This task wants to stay at background
             continue;
         }
-     
+
         if (androidSetThreadSchedulingGroup(t_pid, grp) != NO_ERROR) {
             signalExceptionForGroupError(env, clazz, errno);
             break;
@@ -312,7 +312,7 @@ void android_os_Process_setThreadPriority(JNIEnv* env, jobject clazz,
             signalExceptionForGroupError(env, clazz, errno);
         }
     }
-    
+
     //LOGI("Setting priority of %d: %d, getpriority returns %d\n",
     //     pid, pri, getpriority(PRIO_PROCESS, pid));
 }
@@ -358,10 +358,10 @@ jboolean android_os_Process_setOomAdj(JNIEnv* env, jobject clazz,
 void android_os_Process_setArgV0(JNIEnv* env, jobject clazz, jstring name)
 {
     if (name == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return;
     }
-    
+
     const jchar* str = env->GetStringCritical(name, 0);
     String8 name8;
     if (str) {
@@ -406,16 +406,16 @@ static int pid_compare(const void* v1, const void* v2)
 static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
 {
     int fd = open("/proc/meminfo", O_RDONLY);
-    
+
     if (fd < 0) {
         LOGW("Unable to open /proc/meminfo");
         return -1;
     }
-    
+
     char buffer[256];
     const int len = read(fd, buffer, sizeof(buffer)-1);
     close(fd);
-    
+
     if (len < 0) {
         LOGW("Unable to read /proc/meminfo");
         return -1;
@@ -424,10 +424,10 @@ static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
 
     int numFound = 0;
     jlong mem = 0;
-    
+
     static const char* const sums[] = { "MemFree:", "Cached:", NULL };
     static const int sumsLen[] = { strlen("MemFree:"), strlen("Cached:"), NULL };
-    
+
     char* p = buffer;
     while (*p && numFound < 2) {
         int i = 0;
@@ -450,7 +450,7 @@ static jlong android_os_Process_getFreeMemory(JNIEnv* env, jobject clazz)
         }
         p++;
     }
-    
+
     return numFound > 0 ? mem : -1;
 }
 
@@ -458,71 +458,71 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
                                       jobjectArray reqFields, jlongArray outFields)
 {
     //LOGI("getMemInfo: %p %p", reqFields, outFields);
-    
+
     if (fileStr == NULL || reqFields == NULL || outFields == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return;
     }
-    
+
     const char* file8 = env->GetStringUTFChars(fileStr, NULL);
     if (file8 == NULL) {
         return;
     }
     String8 file(file8);
     env->ReleaseStringUTFChars(fileStr, file8);
-    
+
     jsize count = env->GetArrayLength(reqFields);
     if (count > env->GetArrayLength(outFields)) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Array lengths differ");
         return;
     }
-    
+
     Vector<String8> fields;
     int i;
-    
+
     for (i=0; i<count; i++) {
         jobject obj = env->GetObjectArrayElement(reqFields, i);
         if (obj != NULL) {
             const char* str8 = env->GetStringUTFChars((jstring)obj, NULL);
             //LOGI("String at %d: %p = %s", i, obj, str8);
             if (str8 == NULL) {
-                jniThrowException(env, "java/lang/NullPointerException", "Element in reqFields");
+                jniThrowNullPointerException(env, "Element in reqFields");
                 return;
             }
             fields.add(String8(str8));
             env->ReleaseStringUTFChars((jstring)obj, str8);
         } else {
-            jniThrowException(env, "java/lang/NullPointerException", "Element in reqFields");
+            jniThrowNullPointerException(env, "Element in reqFields");
             return;
         }
     }
-    
+
     jlong* sizesArray = env->GetLongArrayElements(outFields, 0);
     if (sizesArray == NULL) {
         return;
     }
-    
+
     //LOGI("Clearing %d sizes", count);
     for (i=0; i<count; i++) {
         sizesArray[i] = 0;
     }
-    
+
     int fd = open(file.string(), O_RDONLY);
-    
+
     if (fd >= 0) {
         const size_t BUFFER_SIZE = 2048;
         char* buffer = (char*)malloc(BUFFER_SIZE);
         int len = read(fd, buffer, BUFFER_SIZE-1);
         close(fd);
-        
+
         if (len < 0) {
             LOGW("Unable to read %s", file.string());
             len = 0;
         }
         buffer[len] = 0;
-    
+
         int foundCount = 0;
-        
+
         char* p = buffer;
         while (*p && foundCount < count) {
             bool skipToEol = true;
@@ -555,12 +555,12 @@ void android_os_Process_readProcLines(JNIEnv* env, jobject clazz, jstring fileSt
                 }
             }
         }
-        
+
         free(buffer);
     } else {
         LOGW("Unable to open %s", file.string());
     }
-    
+
     //LOGI("Done!");
     env->ReleaseLongArrayElements(outFields, sizesArray, 0);
 }
@@ -569,33 +569,33 @@ jintArray android_os_Process_getPids(JNIEnv* env, jobject clazz,
                                      jstring file, jintArray lastArray)
 {
     if (file == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return NULL;
     }
-    
+
     const char* file8 = env->GetStringUTFChars(file, NULL);
     if (file8 == NULL) {
         jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         return NULL;
     }
-    
+
     DIR* dirp = opendir(file8);
-    
+
     env->ReleaseStringUTFChars(file, file8);
-    
+
     if(dirp == NULL) {
         return NULL;
     }
-    
+
     jsize curCount = 0;
     jint* curData = NULL;
     if (lastArray != NULL) {
         curCount = env->GetArrayLength(lastArray);
         curData = env->GetIntArrayElements(lastArray, 0);
     }
-    
+
     jint curPos = 0;
-    
+
     struct dirent* entry;
     while ((entry=readdir(dirp)) != NULL) {
         const char* p = entry->d_name;
@@ -604,7 +604,7 @@ jintArray android_os_Process_getPids(JNIEnv* env, jobject clazz,
             p++;
         }
         if (*p != 0) continue;
-        
+
         char* end;
         int pid = strtol(entry->d_name, &end, 10);
         //LOGI("File %s pid=%d\n", entry->d_name, pid);
@@ -625,26 +625,26 @@ jintArray android_os_Process_getPids(JNIEnv* env, jobject clazz,
             curCount = newCount;
             curData = newData;
         }
-        
+
         curData[curPos] = pid;
         curPos++;
     }
-    
+
     closedir(dirp);
-    
+
     if (curData != NULL && curPos > 0) {
         qsort(curData, curPos, sizeof(jint), pid_compare);
     }
-    
+
     while (curPos < curCount) {
         curData[curPos] = -1;
         curPos++;
     }
-    
+
     if (curData != NULL) {
         env->ReleaseIntArrayElements(lastArray, curData, 0);
     }
-    
+
     return lastArray;
 }
 
@@ -660,15 +660,15 @@ enum {
 };
 
 jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
-        char* buffer, jint startIndex, jint endIndex, jintArray format, 
+        char* buffer, jint startIndex, jint endIndex, jintArray format,
         jobjectArray outStrings, jlongArray outLongs, jfloatArray outFloats)
 {
-    
+
     const jsize NF = env->GetArrayLength(format);
     const jsize NS = outStrings ? env->GetArrayLength(outStrings) : 0;
     const jsize NL = outLongs ? env->GetArrayLength(outLongs) : 0;
     const jsize NR = outFloats ? env->GetArrayLength(outFloats) : 0;
-    
+
     jint* formatData = env->GetIntArrayElements(format, 0);
     jlong* longsData = outLongs ?
         env->GetLongArrayElements(outLongs, 0) : NULL;
@@ -691,9 +691,9 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
 
     jsize i = startIndex;
     jsize di = 0;
-    
+
     jboolean res = JNI_TRUE;
-    
+
     for (jsize fi=0; fi<NF; fi++) {
         const jint mode = formatData[fi];
         if ((mode&PROC_PARENS) != 0) {
@@ -705,7 +705,7 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
             res = JNI_FALSE;
             break;
         }
-        
+
         jsize end = -1;
         if ((mode&PROC_PARENS) != 0) {
             while (buffer[i] != ')' && i < endIndex) {
@@ -720,7 +720,7 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
         if (end < 0) {
             end = i;
         }
-        
+
         if (i < endIndex) {
             i++;
             if ((mode&PROC_COMBINE) != 0) {
@@ -729,9 +729,9 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
                 }
             }
         }
-        
+
         //LOGI("Field %d: %d-%d dest=%d mode=0x%x\n", i, start, end, di, mode);
-        
+
         if ((mode&(PROC_OUT_FLOAT|PROC_OUT_LONG|PROC_OUT_STRING)) != 0) {
             char c = buffer[end];
             buffer[end] = 0;
@@ -751,7 +751,7 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
             di++;
         }
     }
-    
+
     env->ReleaseIntArrayElements(format, formatData, 0);
     if (longsData != NULL) {
         env->ReleaseLongArrayElements(outLongs, longsData, 0);
@@ -759,22 +759,22 @@ jboolean android_os_Process_parseProcLineArray(JNIEnv* env, jobject clazz,
     if (floatsData != NULL) {
         env->ReleaseFloatArrayElements(outFloats, floatsData, 0);
     }
-    
+
     return res;
 }
 
 jboolean android_os_Process_parseProcLine(JNIEnv* env, jobject clazz,
-        jbyteArray buffer, jint startIndex, jint endIndex, jintArray format, 
+        jbyteArray buffer, jint startIndex, jint endIndex, jintArray format,
         jobjectArray outStrings, jlongArray outLongs, jfloatArray outFloats)
 {
         jbyte* bufferArray = env->GetByteArrayElements(buffer, NULL);
 
-        jboolean result = android_os_Process_parseProcLineArray(env, clazz, 
-                (char*) bufferArray, startIndex, endIndex, format, outStrings, 
+        jboolean result = android_os_Process_parseProcLineArray(env, clazz,
+                (char*) bufferArray, startIndex, endIndex, format, outStrings,
                 outLongs, outFloats);
-                
+
         env->ReleaseByteArrayElements(buffer, bufferArray, 0);
-        
+
         return result;
 }
 
@@ -783,7 +783,7 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
         jlongArray outLongs, jfloatArray outFloats)
 {
     if (file == NULL || format == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return JNI_FALSE;
     }
 
@@ -794,32 +794,32 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     }
     int fd = open(file8, O_RDONLY);
     env->ReleaseStringUTFChars(file, file8);
-    
+
     if (fd < 0) {
         //LOGW("Unable to open process file: %s\n", file8);
         return JNI_FALSE;
     }
-    
+
     char buffer[256];
     const int len = read(fd, buffer, sizeof(buffer)-1);
     close(fd);
-    
+
     if (len < 0) {
         //LOGW("Unable to open process file: %s fd=%d\n", file8, fd);
         return JNI_FALSE;
     }
     buffer[len] = 0;
-    
-    return android_os_Process_parseProcLineArray(env, clazz, buffer, 0, len, 
+
+    return android_os_Process_parseProcLineArray(env, clazz, buffer, 0, len,
             format, outStrings, outLongs, outFloats);
-    
+
 }
 
 void android_os_Process_setApplicationObject(JNIEnv* env, jobject clazz,
                                              jobject binderObject)
 {
     if (binderObject == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return;
     }
 
@@ -846,11 +846,11 @@ static jlong android_os_Process_getElapsedCpuTime(JNIEnv* env, jobject clazz)
     struct timespec ts;
 
     int res = clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
-    
+
     if (res != 0) {
         return (jlong) 0;
-    } 
-    
+    }
+
     nsecs_t when = seconds_to_nanoseconds(ts.tv_sec) + ts.tv_nsec;
     return (jlong) nanoseconds_to_milliseconds(when);
 }
