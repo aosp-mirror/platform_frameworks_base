@@ -150,11 +150,13 @@ public class BiDiTestView extends View {
         drawMetricsAroundText(canvas, x, y, textWidthHB, textWidthICU, textSize, Color.RED, Color.GREEN);
 
         paint.setColor(Color.WHITE);
-        char[] glyphs = new char[2*length];
-        int count = getGlyphs(text, glyphs, dir);
-
+//        char[] glyphs = new char[2*length];
+//        int count = getGlyphs(text, glyphs, dir);
+//
 //        logGlypths(glyphs, count);
-        drawTextWithDrawGlyph(canvas, glyphs, count, x, y + currentTextSize);
+//        drawTextWithDrawGlyph(canvas, glyphs, count, x, y + currentTextSize);
+
+        drawTextWithGlyphs(canvas, text, x, y + currentTextSize, dir);
 
         // Restore old paint properties
         paint.setFakeBoldText(oldFakeBold);
@@ -165,6 +167,11 @@ public class BiDiTestView extends View {
 
     private void drawTextWithDrawGlyph(Canvas canvas, char[] glyphs, int count, int x, int y) {
         canvas.drawGlyphs(glyphs, 0, count, x, y, paint);
+    }
+
+    private void drawTextWithGlyphs(Canvas canvas, String text, int x, int y, int dir) {
+        paint.setBidiFlags(dir);
+        canvas.drawTextWithGlyphs(text, x, y, paint);
     }
 
     private void logGlypths(char[] glyphs, int count) {

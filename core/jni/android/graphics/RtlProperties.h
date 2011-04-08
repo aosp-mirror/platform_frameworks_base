@@ -51,6 +51,8 @@ static RtlDebugLevel readRtlDebugLevel() {
 // Define if we want (1) to have Advances debug values or not (0)
 #define DEBUG_ADVANCES 0
 
+// Define if we want (1) to have Glyphs debug values or not (0)
+#define DEBUG_GLYPHS 0
 
 } // namespace android
 #endif // ANDROID_RTL_PROPERTIES_H

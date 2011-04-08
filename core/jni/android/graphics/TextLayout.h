@@ -41,6 +41,11 @@ namespace android {
  */
 #define USE_TEXT_LAYOUT_CACHE 1
 
+
+#if USE_TEXT_LAYOUT_CACHE
+    static TextLayoutCache gTextLayoutCache;
+#endif
+
 class TextLayout {
 public:
 
@@ -106,10 +111,5 @@ private:
                            UErrorCode &status);
     static void handleText(SkPaint* paint, const jchar* text, jsize len,
                            int bidiFlags, jfloat x, jfloat y, SkCanvas* canvas, SkPath* path);
-
-#if USE_TEXT_LAYOUT_CACHE
-    static TextLayoutCache mCache;
-#endif
 };
-
-}
+} // namespace android

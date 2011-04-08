@@ -27,6 +27,7 @@
 #include "SkTemplates.h"
 
 #include "TextLayout.h"
+#include "TextLayoutCache.h"
 
 #include "unicode/ubidi.h"
 #include "unicode/ushape.h"
@@ -755,11 +756,57 @@ public:
         env->ReleaseStringChars(text, textArray);
     }
 
-    static void drawGlyphs___CIIFFIPaint(JNIEnv* env, jobject, SkCanvas* canvas,
-                                         jcharArray glyphs, int index, int count,
-                                         jfloat x, jfloat y, int flags, SkPaint* paint) {
-        jchar* glyphArray = env->GetCharArrayElements(glyphs, NULL);
+    static void drawTextWithGlyphs___CIIFFIPaint(JNIEnv* env, jobject, SkCanvas* canvas,
+                                      jcharArray text, int index, int count,
+                                      jfloat x, jfloat y, int flags, SkPaint* paint) {
+        jchar* textArray = env->GetCharArrayElements(text, NULL);
+#if RTL_USE_HARFBUZZ && USE_TEXT_LAYOUT_CACHE
+        sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
+                paint, textArray + index, 0, count, count, flags);
+        if (value != NULL) {
+#if DEBUG_GLYPHS
+            LOGD("drawTextWithGlyphs -- got glyphs - count=%d", value->getGlyphsCount());
+            for (size_t i = 0; i < value->getGlyphsCount(); i++) {
+                LOGD("                          glyphs[%d]=%d", i, value->getGlyphs()[i]);
+            }
+#endif
+            doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
+                    x, y, flags, paint);
+        }
+#else
+        TextLayout::drawText(paint, textArray + index, count, flags, x, y, canvas);
+#endif
+        env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
+    }
 
+    static void drawTextWithGlyphs__StringIIFFIPaint(JNIEnv* env, jobject,
+                                          SkCanvas* canvas, jstring text,
+                                          int start, int end,
+                                          jfloat x, jfloat y, int flags, SkPaint* paint) {
+
+        const jchar* textArray = env->GetStringChars(text, NULL);
+#if RTL_USE_HARFBUZZ && USE_TEXT_LAYOUT_CACHE
+        size_t count = end - start;
+        sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
+                paint, textArray, start, count, count, flags);
+        if (value != NULL) {
+#if DEBUG_GLYPHS
+            LOGD("drawTextWithGlyphs -- got glyphs - count=%d", value->getGlyphsCount());
+            for (size_t i = 0; i < value->getGlyphsCount(); i++) {
+                LOGD("                          glyphs[%d]=%d", i, value->getGlyphs()[i]);
+            }
+#endif
+            doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
+                    x, y, flags, paint);
+        }
+#else
+        TextLayout::drawText(paint, textArray + start, end - start, flags, x, y, canvas);
+#endif
+        env->ReleaseStringChars(text, textArray);
+    }
+
+    static void doDrawGlyphs(SkCanvas* canvas, const jchar* glyphArray, int index, int count,
+            jfloat x, jfloat y, int flags, SkPaint* paint) {
         // TODO: need to suppress this code after the GL renderer is modified for not
         // copying the paint
 
@@ -768,10 +815,18 @@ public:
         // Define Glyph encoding
         paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
 
-        TextLayout::drawText(paint, glyphArray + index, count, flags, x, y, canvas);
+        canvas->drawText(glyphArray + index * 2, count * 2, x, y, *paint);
 
         // Get back old encoding
         paint->setTextEncoding(oldEncoding);
+    }
+
+    static void drawGlyphs___CIIFFIPaint(JNIEnv* env, jobject, SkCanvas* canvas,
+                                         jcharArray glyphs, int index, int count,
+                                         jfloat x, jfloat y, int flags, SkPaint* paint) {
+        jchar* glyphArray = env->GetCharArrayElements(glyphs, NULL);
+
+        doDrawGlyphs(canvas, glyphArray, index, count, x, y, flags, paint);
 
         env->ReleaseCharArrayElements(glyphs, glyphArray, JNI_ABORT);
     }
@@ -967,6 +1022,10 @@ static JNINativeMethod gCanvasMethods[] = {
         (void*) SkCanvasGlue::drawText___CIIFFIPaint},
     {"native_drawText","(ILjava/lang/String;IIFFII)V",
         (void*) SkCanvasGlue::drawText__StringIIFFIPaint},
+    {"native_drawTextWithGlyphs","(I[CIIFFII)V",
+        (void*) SkCanvasGlue::drawTextWithGlyphs___CIIFFIPaint},
+    {"native_drawTextWithGlyphs","(ILjava/lang/String;IIFFII)V",
+        (void*) SkCanvasGlue::drawTextWithGlyphs__StringIIFFIPaint},
     {"native_drawGlyphs","(I[CIIFFII)V",
         (void*) SkCanvasGlue::drawGlyphs___CIIFFIPaint},
     {"native_drawTextRun","(I[CIIIIFFII)V",

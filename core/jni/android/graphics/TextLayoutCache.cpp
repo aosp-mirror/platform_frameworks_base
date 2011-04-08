@@ -18,15 +18,15 @@
 
 namespace android {
 
-TextLayoutCache::TextLayoutCache():
-        mCache(GenerationCache<TextLayoutCacheKey, TextLayoutCacheValue*>::kUnlimitedCapacity),
+TextLayoutCache::TextLayoutCache() :
+        mCache(GenerationCache<TextLayoutCacheKey, sp<TextLayoutCacheValue> >::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_TEXT_LAYOUT_CACHE_SIZE_IN_MB)),
         mCacheHitCount(0), mNanosecondsSaved(0) {
     init();
 }
 
 TextLayoutCache::TextLayoutCache(uint32_t max):
-        mCache(GenerationCache<TextLayoutCacheKey, TextLayoutCacheValue*>::kUnlimitedCapacity),
+        mCache(GenerationCache<TextLayoutCacheKey, sp<TextLayoutCacheValue> >::kUnlimitedCapacity),
         mSize(0), mMaxSize(max),
         mCacheHitCount(0), mNanosecondsSaved(0) {
     init();
@@ -88,14 +88,14 @@ void TextLayoutCache::removeOldests() {
 /**
  *  Callbacks
  */
-void TextLayoutCache::operator()(TextLayoutCacheKey& text, TextLayoutCacheValue*& desc) {
-    if (desc) {
+void TextLayoutCache::operator()(TextLayoutCacheKey& text, sp<TextLayoutCacheValue>& desc) {
+    if (desc != NULL) {
         size_t totalSizeToDelete = text.getSize() + desc->getSize();
         mSize -= totalSizeToDelete;
         if (mDebugEnabled) {
             LOGD("Cache value deleted, size = %d", totalSizeToDelete);
         }
-        delete desc;
+        desc.clear();
     }
 }
 
@@ -109,29 +109,26 @@ void TextLayoutCache::clear() {
 /*
  * Caching
  */
-void TextLayoutCache::getRunAdvances(SkPaint* paint, const jchar* text,
-        jint start, jint count, jint contextCount, jint dirFlags,
-        jfloat* outAdvances, jfloat* outTotalAdvance) {
-
+sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
+            const jchar* text, jint start, jint count, jint contextCount, jint dirFlags) {
     AutoMutex _l(mLock);
-
     nsecs_t startTime = 0;
     if (mDebugEnabled) {
         startTime = systemTime(SYSTEM_TIME_MONOTONIC);
     }
 
+    // Create the key
     TextLayoutCacheKey key(paint, text, start, count, contextCount, dirFlags);
 
-    // Get entry for cache if possible
-    TextLayoutCacheValue* value = mCache.get(key);
+    // Get value from cache if possible
+    sp<TextLayoutCacheValue> value = mCache.get(key);
 
-    // Value not found for the entry, we need to add a new value in the cache
-    if (!value) {
+    // Value not found for the key, we need to add a new value in the cache
+    if (value == NULL) {
         value = new TextLayoutCacheValue();
 
         // Compute advances and store them
-        value->computeAdvances(paint, text, start, count, contextCount, dirFlags);
-        value->copyResult(outAdvances, outTotalAdvance);
+        value->computeValues(paint, text, start, count, contextCount, dirFlags);
 
         // Don't bother to add in the cache if the entry is too big
         size_t size = key.getSize() + value->getSize();
@@ -156,7 +153,7 @@ void TextLayoutCache::getRunAdvances(SkPaint* paint, const jchar* text,
             mCache.put(key, value);
 
             if (mDebugEnabled) {
-                // Update timing information for statistics.
+                // Update timing information for statistics
                 value->setElapsedTime(systemTime(SYSTEM_TIME_MONOTONIC) - startTime);
 
                 LOGD("CACHE MISS: Added entry for text='%s' with start=%d, count=%d, "
@@ -174,11 +171,10 @@ void TextLayoutCache::getRunAdvances(SkPaint* paint, const jchar* text,
                         String8(text, contextCount).string(), start, count, contextCount,
                         size, mMaxSize - mSize, value->getElapsedTime());
             }
-            delete value;
+            value.clear();
         }
     } else {
-        // This is a cache hit, just copy the pre-computed results
-        value->copyResult(outAdvances, outTotalAdvance);
+        // This is a cache hit, just log timestamp and user infos
         if (mDebugEnabled) {
             nsecs_t elapsedTimeThruCacheGet = systemTime(SYSTEM_TIME_MONOTONIC) - startTime;
             mNanosecondsSaved += (value->getElapsedTime() - elapsedTimeThruCacheGet);
@@ -199,6 +195,7 @@ void TextLayoutCache::getRunAdvances(SkPaint* paint, const jchar* text,
             }
         }
     }
+    return value;
 }
 
 void TextLayoutCache::dumpCacheStats() {
@@ -218,7 +215,7 @@ void TextLayoutCache::dumpCacheStats() {
 /**
  * TextLayoutCacheKey
  */
-TextLayoutCacheKey::TextLayoutCacheKey() : text(NULL), start(0), count(0), contextCount(0),
+TextLayoutCacheKey::TextLayoutCacheKey(): text(NULL), start(0), count(0), contextCount(0),
         dirFlags(0), typeface(NULL), textSize(0), textSkewX(0), textScaleX(0), flags(0),
         hinting(SkPaint::kNo_Hinting)  {
 }
@@ -273,49 +270,46 @@ size_t TextLayoutCacheKey::getSize() {
 /**
  * TextLayoutCacheValue
  */
-TextLayoutCacheValue::TextLayoutCacheValue() {
-    advances = NULL;
-    totalAdvance = 0;
+TextLayoutCacheValue::TextLayoutCacheValue() :
+        mAdvances(NULL), mTotalAdvance(0), mAdvancesCount(0),
+        mGlyphs(NULL), mGlyphsCount(0), mElapsedTime(0) {
 }
 
 TextLayoutCacheValue::~TextLayoutCacheValue() {
-    delete[] advances;
+    delete[] mAdvances;
+    delete[] mGlyphs;
 }
 
 void TextLayoutCacheValue::setElapsedTime(uint32_t time) {
-    elapsedTime = time;
+    mElapsedTime = time;
 }
 
 uint32_t TextLayoutCacheValue::getElapsedTime() {
-    return elapsedTime;
+    return mElapsedTime;
 }
 
-void TextLayoutCacheValue::computeAdvances(SkPaint* paint, const UChar* chars, size_t start,
+void TextLayoutCacheValue::computeValues(SkPaint* paint, const UChar* chars, size_t start,
         size_t count, size_t contextCount, int dirFlags) {
-    advances = new float[count];
-    this->count = count;
+    mAdvancesCount = count;
+    mAdvances = new float[count];
 
 #if RTL_USE_HARFBUZZ
-    computeAdvancesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
-            advances, &totalAdvance);
+    computeValuesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
+            mAdvances, &mTotalAdvance, &mGlyphs, &mGlyphsCount);
 #else
     computeAdvancesWithICU(paint, chars, start, count, contextCount, dirFlags,
-            advances, &totalAdvance);
+            mAdvances, &mTotalAdvance);
 #endif
 #if DEBUG_ADVANCES
     LOGD("Advances - count=%d - countextCount=%d - totalAdvance=%f - "
-            "adv[0]=%f adv[1]=%f adv[2]=%f adv[3]=%f", count, contextCount, totalAdvance,
-            advances[0], advances[1], advances[2], advances[3]);
+            "adv[0]=%f adv[1]=%f adv[2]=%f adv[3]=%f", count, contextCount, mTotalAdvance,
+            mAdvances[0], mAdvances[1], mAdvances[2], mAdvances[3]);
 #endif
 }
 
-void TextLayoutCacheValue::copyResult(jfloat* outAdvances, jfloat* outTotalAdvance) {
-    memcpy(outAdvances, advances, count * sizeof(jfloat));
-    *outTotalAdvance = totalAdvance;
-}
-
 size_t TextLayoutCacheValue::getSize() {
-    return sizeof(TextLayoutCacheValue) + sizeof(jfloat) * count;
+    return sizeof(TextLayoutCacheValue) + sizeof(jfloat) * mAdvancesCount +
+            sizeof(jchar) * mGlyphsCount;
 }
 
 void TextLayoutCacheValue::setupShaperItem(HB_ShaperItem* shaperItem, HB_FontRec* font,
@@ -387,49 +381,56 @@ void TextLayoutCacheValue::shapeWithHarfbuzz(HB_ShaperItem* shaperItem, HB_FontR
     }
 }
 
-void TextLayoutCacheValue::computeAdvancesWithHarfbuzz(SkPaint* paint, const UChar* chars,
+void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags,
-        jfloat* outAdvances, jfloat* outTotalAdvance) {
-
+        jfloat* outAdvances, jfloat* outTotalAdvance,
+        jchar** outGlyphs, size_t* outGlyphsCount) {
     bool isRTL = dirFlags & 0x1;
 
+    // TODO: need to run BiDi algo here to breakdown the text in several runs
     HB_ShaperItem shaperItem;
     HB_FontRec font;
     FontData fontData;
     shapeWithHarfbuzz(&shaperItem, &font, &fontData, paint, chars, start, count,
             contextCount, dirFlags);
 
-#if DEBUG_ADVANCES
+#if DEBUG_GLYPHS
     LOGD("HARFBUZZ -- num_glypth=%d - kerning_applied=%d", shaperItem.num_glyphs,
             shaperItem.kerning_applied);
     LOGD("         -- string= '%s'", String8(chars, contextCount).string());
     LOGD("         -- isDevKernText=%d", paint->isDevKernText());
 #endif
 
+    // Get Advances and their total
     jfloat totalAdvance = 0;
-
     for (size_t i = 0; i < count; i++) {
         totalAdvance += outAdvances[i] = HBFixedToFloat(shaperItem.advances[i]);
-
 #if DEBUG_ADVANCES
         LOGD("hb-adv = %d - rebased = %f - total = %f", shaperItem.advances[i], outAdvances[i],
                 totalAdvance);
 #endif
     }
+    *outTotalAdvance = totalAdvance;
 
+    // Get Glyphs
+    if (outGlyphs) {
+        *outGlyphsCount = shaperItem.num_glyphs;
+        *outGlyphs = new jchar[shaperItem.num_glyphs];
+        for (size_t i = 0; i < shaperItem.num_glyphs; i++) {
+            (*outGlyphs)[i] = (jchar) shaperItem.glyphs[i];
+        }
+    }
+
+    // Cleaning
     deleteGlyphArrays(&shaperItem);
     HB_FreeFace(shaperItem.face);
-
-    *outTotalAdvance = totalAdvance;
 }
 
 void TextLayoutCacheValue::computeAdvancesWithICU(SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags,
         jfloat* outAdvances, jfloat* outTotalAdvance) {
-
     SkAutoSTMalloc<CHAR_BUFFER_SIZE, jchar> tempBuffer(contextCount);
     jchar* buffer = tempBuffer.get();
-
     SkScalar* scalarArray = (SkScalar*)outAdvances;
 
     // this is where we'd call harfbuzz
