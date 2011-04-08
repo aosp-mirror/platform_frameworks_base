@@ -94,7 +94,7 @@ static jint com_android_internal_os_ZygoteInit_getpgid(
     return ret;
 }
 
-static void com_android_internal_os_ZygoteInit_reopenStdio(JNIEnv* env, 
+static void com_android_internal_os_ZygoteInit_reopenStdio(JNIEnv* env,
         jobject clazz, jobject in, jobject out, jobject errfd)
 {
     int fd;
@@ -131,7 +131,7 @@ static void com_android_internal_os_ZygoteInit_reopenStdio(JNIEnv* env,
     } while (err < 0 && errno == EINTR);
 }
 
-static void com_android_internal_os_ZygoteInit_closeDescriptor(JNIEnv* env, 
+static void com_android_internal_os_ZygoteInit_closeDescriptor(JNIEnv* env,
         jobject clazz, jobject descriptor)
 {
     int fd;
@@ -206,7 +206,7 @@ static void com_android_internal_os_ZygoteInit_setCapabilities (JNIEnv *env,
     capdata.effective = effective;
     capdata.permitted = permitted;
 
-    err = capset (&capheader, &capdata); 
+    err = capset (&capheader, &capdata);
 
     if (err < 0) {
         jniThrowIOException(env, errno);
@@ -231,7 +231,7 @@ static jlong com_android_internal_os_ZygoteInit_capgetPermitted (JNIEnv *env,
     capheader.version = _LINUX_CAPABILITY_VERSION;
     capheader.pid = pid;
 
-    err = capget (&capheader, &capdata); 
+    err = capget (&capheader, &capdata);
 
     if (err < 0) {
         jniThrowIOException(env, errno);
@@ -243,11 +243,10 @@ static jlong com_android_internal_os_ZygoteInit_capgetPermitted (JNIEnv *env,
 }
 
 static jint com_android_internal_os_ZygoteInit_selectReadable (
-        JNIEnv *env, jobject clazz, jobjectArray fds) 
+        JNIEnv *env, jobject clazz, jobjectArray fds)
 {
     if (fds == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException",
-            "fds == null");
+        jniThrowNullPointerException(env, "fds == null");
         return -1;
     }
 
@@ -311,7 +310,7 @@ static jint com_android_internal_os_ZygoteInit_selectReadable (
 }
 
 static jobject com_android_internal_os_ZygoteInit_createFileDescriptor (
-        JNIEnv *env, jobject clazz, jint fd) 
+        JNIEnv *env, jobject clazz, jint fd)
 {
     return jniCreateFileDescriptor(env, fd);
 }
@@ -329,17 +328,17 @@ static JNINativeMethod gMethods[] = {
       (void *) com_android_internal_os_ZygoteInit_setpgid },
     { "getpgid", "(I)I",
       (void *) com_android_internal_os_ZygoteInit_getpgid },
-    { "reopenStdio",   
+    { "reopenStdio",
         "(Ljava/io/FileDescriptor;Ljava/io/FileDescriptor;"
-        "Ljava/io/FileDescriptor;)V", 
+        "Ljava/io/FileDescriptor;)V",
             (void *) com_android_internal_os_ZygoteInit_reopenStdio},
-    { "closeDescriptor", "(Ljava/io/FileDescriptor;)V", 
+    { "closeDescriptor", "(Ljava/io/FileDescriptor;)V",
         (void *) com_android_internal_os_ZygoteInit_closeDescriptor},
-    { "setCloseOnExec", "(Ljava/io/FileDescriptor;Z)V", 
+    { "setCloseOnExec", "(Ljava/io/FileDescriptor;Z)V",
         (void *)  com_android_internal_os_ZygoteInit_setCloseOnExec},
-    { "setCapabilities", "(JJ)V", 
+    { "setCapabilities", "(JJ)V",
         (void *) com_android_internal_os_ZygoteInit_setCapabilities },
-    { "capgetPermitted", "(I)J", 
+    { "capgetPermitted", "(I)J",
         (void *) com_android_internal_os_ZygoteInit_capgetPermitted },
     { "selectReadable", "([Ljava/io/FileDescriptor;)I",
         (void *) com_android_internal_os_ZygoteInit_selectReadable },
@@ -353,4 +352,3 @@ int register_com_android_internal_os_ZygoteInit(JNIEnv* env)
 }
 
 }; // namespace android
-

@@ -993,7 +993,7 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
                                                 jobject replyObj, jint flags)
 {
     if (dataObj == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return JNI_FALSE;
     }
 
@@ -1045,7 +1045,7 @@ static void android_os_BinderProxy_linkToDeath(JNIEnv* env, jobject obj,
                                                jobject recipient, jint flags)
 {
     if (recipient == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return;
     }
 
@@ -1077,7 +1077,7 @@ static jboolean android_os_BinderProxy_unlinkToDeath(JNIEnv* env, jobject obj,
 {
     jboolean res = JNI_FALSE;
     if (recipient == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return res;
     }
 
@@ -1166,7 +1166,7 @@ static int int_register_android_os_BinderProxy(JNIEnv* env)
     clazz = env->FindClass("java/lang/Error");
     LOG_FATAL_IF(clazz == NULL, "Unable to find class java.lang.Error");
     gErrorOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
-    
+
     clazz = env->FindClass(kBinderProxyPathName);
     LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.BinderProxy");
 
@@ -1474,7 +1474,7 @@ static jobject android_os_Parcel_openFileDescriptor(JNIEnv* env, jobject clazz,
                                                     jstring name, jint mode)
 {
     if (name == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return NULL;
     }
     const jchar* str = env->GetStringCritical(name, 0);
@@ -1522,7 +1522,7 @@ static jobject android_os_Parcel_openFileDescriptor(JNIEnv* env, jobject clazz,
 static jobject android_os_Parcel_dupFileDescriptor(JNIEnv* env, jobject clazz, jobject orig)
 {
     if (orig == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return NULL;
     }
     int origfd = env->GetIntField(orig, gFileDescriptorOffsets.mDescriptor);
@@ -1533,7 +1533,7 @@ static jobject android_os_Parcel_dupFileDescriptor(JNIEnv* env, jobject clazz, j
 
     int fd = dup(origfd);
     if (fd < 0) {
-        jniThrowException(env, "java/io/IOException", strerror(errno));
+        jniThrowIOException(env, errno);
         return NULL;
     }
     jobject object = newFileDescriptor(env, fd);
@@ -1546,7 +1546,7 @@ static jobject android_os_Parcel_dupFileDescriptor(JNIEnv* env, jobject clazz, j
 static void android_os_Parcel_closeFileDescriptor(JNIEnv* env, jobject clazz, jobject object)
 {
     if (object == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return;
     }
     int fd = env->GetIntField(object, gFileDescriptorOffsets.mDescriptor);
@@ -1560,7 +1560,7 @@ static void android_os_Parcel_closeFileDescriptor(JNIEnv* env, jobject clazz, jo
 static void android_os_Parcel_clearFileDescriptor(JNIEnv* env, jobject clazz, jobject object)
 {
     if (object == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return;
     }
     int fd = env->GetIntField(object, gFileDescriptorOffsets.mDescriptor);

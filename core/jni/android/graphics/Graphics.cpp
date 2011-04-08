@@ -11,7 +11,7 @@
 #include <android_runtime/AndroidRuntime.h>
 
 void doThrowNPE(JNIEnv* env) {
-    jniThrowException(env, "java/lang/NullPointerException", NULL);
+    jniThrowNullPointerException(env, NULL);
 }
 
 void doThrowAIOOBE(JNIEnv* env) {
@@ -19,7 +19,7 @@ void doThrowAIOOBE(JNIEnv* env) {
 }
 
 void doThrowRE(JNIEnv* env, const char* msg) {
-    jniThrowException(env, "java/lang/RuntimeException", msg);
+    jniThrowRuntimeException(env, msg);
 }
 
 void doThrowIAE(JNIEnv* env, const char* msg) {

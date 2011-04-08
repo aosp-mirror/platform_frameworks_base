@@ -30,7 +30,7 @@
 extern void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
                 const SkBitmap& bitmap, const android::Res_png_9patch& chunk,
                            const SkPaint* paint, SkRegion** outRegion);
-    
+
 using namespace android;
 
 class SkNinePatchGlue {
@@ -58,8 +58,7 @@ public:
     static void validateNinePatchChunk(JNIEnv* env, jobject, jint, jbyteArray obj)
     {
         if (env->GetArrayLength(obj) < (int) (sizeof(Res_png_9patch))) {
-            jniThrowException(env, "java/lang/RuntimeException",
-                              "Array too small for chunk.");
+            jniThrowRuntimeException(env, "Array too small for chunk.");
             return;
         }
 
@@ -80,7 +79,7 @@ public:
             assert(chunkSize == chunk->serializedSize());
             // this relies on deserialization being done in place
             Res_png_9patch::deserialize(chunk);
-            
+
             if (destDensity == srcDensity || destDensity == 0
                     || srcDensity == 0) {
                 LOGV("Drawing unscaled 9-patch: (%g,%g)-(%g,%g)",
@@ -89,26 +88,26 @@ public:
                 NinePatch_Draw(canvas, bounds, *bitmap, *chunk, paint, NULL);
             } else {
                 canvas->save();
-                
+
                 SkScalar scale = SkFloatToScalar(destDensity / (float)srcDensity);
                 canvas->translate(bounds.fLeft, bounds.fTop);
                 canvas->scale(scale, scale);
-    
+
                 bounds.fRight = SkScalarDiv(bounds.fRight-bounds.fLeft, scale);
                 bounds.fBottom = SkScalarDiv(bounds.fBottom-bounds.fTop, scale);
                 bounds.fLeft = bounds.fTop = 0;
-    
+
                 LOGV("Drawing scaled 9-patch: (%g,%g)-(%g,%g) srcDensity=%d destDensity=%d",
                         SkScalarToFloat(bounds.fLeft), SkScalarToFloat(bounds.fTop),
                         SkScalarToFloat(bounds.fRight), SkScalarToFloat(bounds.fBottom),
                         srcDensity, destDensity);
-                
+
                 NinePatch_Draw(canvas, bounds, *bitmap, *chunk, paint, NULL);
-    
+
                 canvas->restore();
             }
         }
-    } 
+    }
 
     static void drawF(JNIEnv* env, jobject, SkCanvas* canvas, jobject boundsRectF,
                       const SkBitmap* bitmap, jbyteArray chunkObj, const SkPaint* paint,
@@ -125,7 +124,7 @@ public:
 
         draw(env, canvas, bounds, bitmap, chunkObj, paint, destDensity, srcDensity);
     }
- 
+
     static void drawI(JNIEnv* env, jobject, SkCanvas* canvas, jobject boundsRect,
                       const SkBitmap* bitmap, jbyteArray chunkObj, const SkPaint* paint,
                       jint destDensity, jint srcDensity)
@@ -140,7 +139,7 @@ public:
         GraphicsJNI::jrect_to_rect(env, boundsRect, &bounds);
         draw(env, canvas, bounds, bitmap, chunkObj, paint, destDensity, srcDensity);
     }
-    
+
     static jint getTransparentRegion(JNIEnv* env, jobject,
                     const SkBitmap* bitmap, jbyteArray chunkObj,
                     jobject boundsRect)
@@ -148,7 +147,7 @@ public:
         SkASSERT(bitmap);
         SkASSERT(chunkObj);
         SkASSERT(boundsRect);
-        
+
         SkRect      bounds;
         GraphicsJNI::jrect_to_rect(env, boundsRect, &bounds);
         size_t chunkSize = env->GetArrayLength(chunkObj);
@@ -179,7 +178,7 @@ static JNINativeMethod gNinePatchMethods[] = {
     { "validateNinePatchChunk", "(I[B)V",               (void*)SkNinePatchGlue::validateNinePatchChunk   },
     { "nativeDraw", "(ILandroid/graphics/RectF;I[BIII)V", (void*)SkNinePatchGlue::drawF   },
     { "nativeDraw", "(ILandroid/graphics/Rect;I[BIII)V",  (void*)SkNinePatchGlue::drawI   },
-    { "nativeGetTransparentRegion", "(I[BLandroid/graphics/Rect;)I", 
+    { "nativeGetTransparentRegion", "(I[BLandroid/graphics/Rect;)I",
                                                         (void*)SkNinePatchGlue::getTransparentRegion   }
 };
 

@@ -2,16 +2,16 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -32,8 +32,7 @@ static jstring SystemProperties_getSS(JNIEnv *env, jobject clazz,
     jstring rvJ = NULL;
 
     if (keyJ == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException",
-                                "key must not be null.");
+        jniThrowNullPointerException(env, "key must not be null.");
         goto error;
     }
 
@@ -69,8 +68,7 @@ static jint SystemProperties_get_int(JNIEnv *env, jobject clazz,
     jint result = defJ;
 
     if (keyJ == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException",
-                                "key must not be null.");
+        jniThrowNullPointerException(env, "key must not be null.");
         goto error;
     }
 
@@ -98,8 +96,7 @@ static jlong SystemProperties_get_long(JNIEnv *env, jobject clazz,
     jlong result = defJ;
 
     if (keyJ == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException",
-                                "key must not be null.");
+        jniThrowNullPointerException(env, "key must not be null.");
         goto error;
     }
 
@@ -127,8 +124,7 @@ static jboolean SystemProperties_get_boolean(JNIEnv *env, jobject clazz,
     jboolean result = defJ;
 
     if (keyJ == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException",
-                                "key must not be null.");
+        jniThrowNullPointerException(env, "key must not be null.");
         goto error;
     }
 
@@ -163,8 +159,7 @@ static void SystemProperties_set(JNIEnv *env, jobject clazz,
     const char* val;
 
     if (keyJ == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException",
-                          "key must not be null.");
+        jniThrowNullPointerException(env, "key must not be null.");
         return ;
     }
     key = env->GetStringUTFChars(keyJ, NULL);

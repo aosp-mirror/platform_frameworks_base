@@ -105,7 +105,7 @@ sp<Camera> get_native_camera(JNIEnv *env, jobject thiz, JNICameraContext** pCont
     }
     LOGV("get_native_camera: context=%p, camera=%p", context, camera.get());
     if (camera == 0) {
-        jniThrowException(env, "java/lang/RuntimeException", "Method called after release()");
+        jniThrowRuntimeException(env, "Method called after release()");
     }
 
     if (pContext != NULL) *pContext = context;
@@ -232,8 +232,7 @@ void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int 
                         break;
                     }
                     default: {
-                        jniThrowException(env,
-                            "java/lang/RuntimeException", "Unsupported message type");
+                        jniThrowRuntimeException(env, "Unsupported message type");
                         return;
                     }
                 }
@@ -391,8 +390,7 @@ static void android_hardware_Camera_getCameraInfo(JNIEnv *env, jobject thiz,
     CameraInfo cameraInfo;
     status_t rc = Camera::getCameraInfo(cameraId, &cameraInfo);
     if (rc != NO_ERROR) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                          "Fail to get camera info");
+        jniThrowRuntimeException(env, "Fail to get camera info");
         return;
     }
     env->SetIntField(info_obj, fields.facing, cameraInfo.facing);
@@ -406,20 +404,19 @@ static void android_hardware_Camera_native_setup(JNIEnv *env, jobject thiz,
     sp<Camera> camera = Camera::connect(cameraId);
 
     if (camera == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException",
-                          "Fail to connect to camera service");
+        jniThrowRuntimeException(env, "Fail to connect to camera service");
         return;
     }
 
     // make sure camera hardware is alive
     if (camera->getStatus() != NO_ERROR) {
-        jniThrowException(env, "java/lang/RuntimeException", "Camera initialization failed");
+        jniThrowRuntimeException(env, "Camera initialization failed");
         return;
     }
 
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/hardware/Camera");
+        jniThrowRuntimeException(env, "Can't find android/hardware/Camera");
         return;
     }
 
@@ -508,7 +505,7 @@ static void android_hardware_Camera_startPreview(JNIEnv *env, jobject thiz)
     if (camera == 0) return;
 
     if (camera->startPreview() != NO_ERROR) {
-        jniThrowException(env, "java/lang/RuntimeException", "startPreview failed");
+        jniThrowRuntimeException(env, "startPreview failed");
         return;
     }
 }
@@ -564,7 +561,7 @@ static void android_hardware_Camera_autoFocus(JNIEnv *env, jobject thiz)
     if (c == 0) return;
 
     if (c->autoFocus() != NO_ERROR) {
-        jniThrowException(env, "java/lang/RuntimeException", "autoFocus failed");
+        jniThrowRuntimeException(env, "autoFocus failed");
     }
 }
 
@@ -576,7 +573,7 @@ static void android_hardware_Camera_cancelAutoFocus(JNIEnv *env, jobject thiz)
     if (c == 0) return;
 
     if (c->cancelAutoFocus() != NO_ERROR) {
-        jniThrowException(env, "java/lang/RuntimeException", "cancelAutoFocus failed");
+        jniThrowRuntimeException(env, "cancelAutoFocus failed");
     }
 }
 
@@ -606,7 +603,7 @@ static void android_hardware_Camera_takePicture(JNIEnv *env, jobject thiz, int m
     }
 
     if (camera->takePicture(msgType) != NO_ERROR) {
-        jniThrowException(env, "java/lang/RuntimeException", "takePicture failed");
+        jniThrowRuntimeException(env, "takePicture failed");
         return;
     }
 }
@@ -624,7 +621,7 @@ static void android_hardware_Camera_setParameters(JNIEnv *env, jobject thiz, jst
         env->ReleaseStringCritical(params, str);
     }
     if (camera->setParameters(params8) != NO_ERROR) {
-        jniThrowException(env, "java/lang/RuntimeException", "setParameters failed");
+        jniThrowRuntimeException(env, "setParameters failed");
         return;
     }
 }
@@ -657,7 +654,7 @@ static void android_hardware_Camera_lock(JNIEnv *env, jobject thiz)
     if (camera == 0) return;
 
     if (camera->lock() != NO_ERROR) {
-        jniThrowException(env, "java/lang/RuntimeException", "lock failed");
+        jniThrowRuntimeException(env, "lock failed");
     }
 }
 
@@ -668,7 +665,7 @@ static void android_hardware_Camera_unlock(JNIEnv *env, jobject thiz)
     if (camera == 0) return;
 
     if (camera->unlock() != NO_ERROR) {
-        jniThrowException(env, "java/lang/RuntimeException", "unlock failed");
+        jniThrowRuntimeException(env, "unlock failed");
     }
 }
 
@@ -684,7 +681,7 @@ static void android_hardware_Camera_startSmoothZoom(JNIEnv *env, jobject thiz, j
         sprintf(msg, "invalid zoom value=%d", value);
         jniThrowException(env, "java/lang/IllegalArgumentException", msg);
     } else if (rc != NO_ERROR) {
-        jniThrowException(env, "java/lang/RuntimeException", "start smooth zoom failed");
+        jniThrowRuntimeException(env, "start smooth zoom failed");
     }
 }
 
@@ -695,7 +692,7 @@ static void android_hardware_Camera_stopSmoothZoom(JNIEnv *env, jobject thiz)
     if (camera == 0) return;
 
     if (camera->sendCommand(CAMERA_CMD_STOP_SMOOTH_ZOOM, 0, 0) != NO_ERROR) {
-        jniThrowException(env, "java/lang/RuntimeException", "stop smooth zoom failed");
+        jniThrowRuntimeException(env, "stop smooth zoom failed");
     }
 }
 
@@ -707,7 +704,7 @@ static void android_hardware_Camera_setDisplayOrientation(JNIEnv *env, jobject t
     if (camera == 0) return;
 
     if (camera->sendCommand(CAMERA_CMD_SET_DISPLAY_ORIENTATION, value, 0) != NO_ERROR) {
-        jniThrowException(env, "java/lang/RuntimeException", "set display orientation failed");
+        jniThrowRuntimeException(env, "set display orientation failed");
     }
 }
 

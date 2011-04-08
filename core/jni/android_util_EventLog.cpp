@@ -151,7 +151,7 @@ static void android_util_EventLog_readEvents(JNIEnv* env, jobject clazz,
                                              jintArray tags,
                                              jobject out) {
     if (tags == NULL || out == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", NULL);
+        jniThrowNullPointerException(env, NULL);
         return;
     }
 
