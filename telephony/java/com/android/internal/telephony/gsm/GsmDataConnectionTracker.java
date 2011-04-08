@@ -197,6 +197,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         destroyDataConnections();
     }
 
+    public boolean isApnTypeActive(String type) {
+        ApnContext apnContext = mApnContexts.get(type);
+        if (apnContext == null) return false;
+
+        return (apnContext.getDataConnection() != null);
+    }
+
+
     /**
      * The only circumstances under which we report that data connectivity is not
      * possible are
