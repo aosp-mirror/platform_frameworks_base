@@ -390,7 +390,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
         }
 
         private boolean isValidOffset(int offset) {
-            return offset >= 0 && offset < mCurrent.length();
+            return offset >= 0 && offset <= mCurrent.length();
         }
 
         private boolean isLetterOrDigit(int offset) {
@@ -404,7 +404,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
         /** {@inheritDoc} */
         public int preceding(int offset) {
             // always round cursor index into valid string index
-            offset = MathUtils.constrain(offset, 0, mCurrent.length() - 1);
+            offset = MathUtils.constrain(offset, 0, mCurrent.length());
 
             do {
                 offset = mIterator.preceding(offset);
@@ -417,7 +417,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
         /** {@inheritDoc} */
         public int following(int offset) {
             // always round cursor index into valid string index
-            offset = MathUtils.constrain(offset, 0, mCurrent.length() - 1);
+            offset = MathUtils.constrain(offset, 0, mCurrent.length());
 
             do {
                 offset = mIterator.following(offset);
