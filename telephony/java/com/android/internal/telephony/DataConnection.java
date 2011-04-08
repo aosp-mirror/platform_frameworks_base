@@ -466,6 +466,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
 
             // Check if system property dns usable
             boolean okToUseSystemPropertyDns = false;
+            cid = response.cid;
             String propertyPrefix = "net." + response.ifname + ".";
             String dnsServers[] = new String[2];
             dnsServers[0] = SystemProperties.get(propertyPrefix + "dns1");
