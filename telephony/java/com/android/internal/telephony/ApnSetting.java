@@ -23,21 +23,21 @@ public class ApnSetting {
 
     static final String V2_FORMAT_REGEX = "^\\[ApnSettingV2\\]\\s*";
 
-    public String carrier;
-    public String apn;
-    public String proxy;
-    public String port;
-    public String mmsc;
-    public String mmsProxy;
-    public String mmsPort;
-    public String user;
-    public String password;
-    public int authType;
-    public String[] types;
-    public int id;
-    public String numeric;
-    public String protocol;
-    public String roamingProtocol;
+    public final String carrier;
+    public final String apn;
+    public final String proxy;
+    public final String port;
+    public final String mmsc;
+    public final String mmsProxy;
+    public final String mmsPort;
+    public final String user;
+    public final String password;
+    public final int authType;
+    public final String[] types;
+    public final int id;
+    public final String numeric;
+    public final String protocol;
+    public final String roamingProtocol;
 
     public ApnSetting(int id, String numeric, String carrier, String apn,
             String proxy, String port,

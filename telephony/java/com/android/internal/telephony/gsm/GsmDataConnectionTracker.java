@@ -336,11 +336,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     /**
      * Return DEFAULT APN due to the limit of the interface
      */
-    public synchronized String getActiveApnString() {
+    public String getActiveApnString() {
         if (DBG) log( "get default active apn string");
         ApnContext defaultApnContext = mApnContexts.get(Phone.APN_TYPE_DEFAULT);
-        if (defaultApnContext != null && defaultApnContext.getApnSetting() != null) {
-            return defaultApnContext.getApnSetting().apn;
+        if (defaultApnContext != null) {
+            ApnSetting apnSetting = defaultApnContext.getApnSetting();
+            if (apnSetting != null) {
+                return apnSetting.apn;
+            }
         }
         return null;
     }
