@@ -1593,6 +1593,11 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         return allocateOutputBuffersFromNativeWindow();
     }
 
+    if (mEnableGrallocUsageProtected && portIndex == kPortIndexOutput) {
+        LOGE("protected output buffers must be stent to an ANativeWindow");
+        return PERMISSION_DENIED;
+    }
+
     OMX_PARAM_PORTDEFINITIONTYPE def;
     InitOMXParams(&def);
     def.nPortIndex = portIndex;
@@ -1759,6 +1764,25 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
     }
     if (mEnableGrallocUsageProtected) {
         usage |= GRALLOC_USAGE_PROTECTED;
+    }
+
+    // Make sure to check whether either Stagefright or the video decoder
+    // requested protected buffers.
+    if (usage & GRALLOC_USAGE_PROTECTED) {
+        // Verify that the ANativeWindow sends images directly to
+        // SurfaceFlinger.
+        int queuesToNativeWindow = 0;
+        err = mNativeWindow->query(
+                mNativeWindow.get(), NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER,
+                &queuesToNativeWindow);
+        if (err != 0) {
+            LOGE("error authenticating native window: %d", err);
+            return err;
+        }
+        if (queuesToNativeWindow != 1) {
+            LOGE("native window could not be authenticated");
+            return PERMISSION_DENIED;
+        }
     }
 
     LOGV("native_window_set_usage usage=0x%x", usage);
