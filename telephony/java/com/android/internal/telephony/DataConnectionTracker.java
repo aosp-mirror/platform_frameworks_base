@@ -949,10 +949,6 @@ public abstract class DataConnectionTracker extends Handler {
         }
     }
 
-    public synchronized boolean getDataEnabled() {
-        return mDataEnabled;
-    }
-
     public void cleanUpAllConnections(String cause) {
         Message msg = obtainMessage(EVENT_CLEAN_UP_ALL_CONNECTIONS);
         msg.obj = cause;
