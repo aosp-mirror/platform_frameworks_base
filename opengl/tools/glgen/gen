@@ -21,7 +21,7 @@ mkdir -p out/android/util
 echo "package android.graphics;" > out/android/graphics/Canvas.java
 echo "public interface Canvas {}" >> out/android/graphics/Canvas.java
 
-echo "package android.app; import android.content.pm.IPackageManager; public class ActivityThread { public static final ActivityThread currentActivityThread() { return null; } public static final String currentPackageName(){ return null; } public static IPackageManager getPackageManager() { return null;} }" > out/android/app/ActivityThread.java
+echo "package android.app; import android.content.pm.IPackageManager; public class AppGlobals { public static IPackageManager getPackageManager() { return null;} }" > out/android/app/AppGlobals.java
 # echo "package android.content; import android.content.pm.PackageManager; public interface Context { public PackageManager getPackageManager(); }" > out/android/content/Context.java
 echo "package android.content.pm; public class ApplicationInfo {public int targetSdkVersion;}" > out/android/content/pm/ApplicationInfo.java
 echo "package android.content.pm; public interface IPackageManager {ApplicationInfo getApplicationInfo(java.lang.String packageName, int flags) throws android.os.RemoteException;}" > out/android/content/pm/IPackageManager.java
