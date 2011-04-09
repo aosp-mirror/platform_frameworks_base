@@ -36,19 +36,6 @@
 using namespace android;
 
 
-//
-// helper function to throw an exception
-//
-static void throwException(JNIEnv *env, const char* ex, const char* fmt, int data) {
-    if (jclass cls = env->FindClass(ex)) {
-        char msg[1000];
-        sprintf(msg, fmt, data);
-        env->ThrowNew(cls, msg);
-        env->DeleteLocalRef(cls);
-    }
-}
-
-
 #define FIR_COEF(coef) (short)(0x10000 * coef)
 static const short fir21[] = {
     FIR_COEF(-0.006965742326),
@@ -90,18 +77,18 @@ static void android_media_ResampleInputStream_fir21(JNIEnv *env, jclass clazz,
          jbyteArray jIn,  jint jInOffset,
          jbyteArray jOut, jint jOutOffset,
          jint jNpoints) {
-    
+
     // safety first!
     if (nFir21 + jNpoints * 2 > BUF_SIZE) {
-        throwException(env, "java/lang/IllegalArgumentException",
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                 "FIR+data too long %d", nFir21 + jNpoints);
         return;
     }
-    
+
     // get input data
     short in[BUF_SIZE];
     env->GetByteArrayRegion(jIn, jInOffset, (jNpoints * 2 + nFir21 - 1) * 2, (jbyte*)in);
-    
+
     // compute filter
     short out[BUF_SIZE];
     for (int i = 0; i < jNpoints; i++) {
@@ -132,5 +119,3 @@ int register_android_media_ResampleInputStream(JNIEnv *env)
     return AndroidRuntime::registerNativeMethods(env,
             kClassPathName, gMethods, NELEM(gMethods));
 }
-
-

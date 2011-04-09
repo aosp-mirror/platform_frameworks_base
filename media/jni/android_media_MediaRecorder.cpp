@@ -152,7 +152,7 @@ static void android_media_MediaRecorder_setCamera(JNIEnv* env, jobject thiz, job
 {
     // we should not pass a null camera to get_native_camera() call.
     if (camera == NULL) {
-        jniThrowException(env, "java/lang/NullPointerException", "camera object is a NULL pointer");
+        jniThrowNullPointerException(env, "camera object is a NULL pointer");
         return;
     }
     sp<Camera> c = get_native_camera(env, camera, NULL);
@@ -505,5 +505,3 @@ int register_android_media_MediaRecorder(JNIEnv *env)
     return AndroidRuntime::registerNativeMethods(env,
                 "android/media/MediaRecorder", gMethods, NELEM(gMethods));
 }
-
-
