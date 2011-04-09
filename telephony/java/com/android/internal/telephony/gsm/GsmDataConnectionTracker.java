@@ -67,7 +67,6 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -296,25 +295,29 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected LinkProperties getLinkProperties(String apnType) {
         ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext != null && apnContext.getDataConnection() != null) {
-             if (DBG) log("get active pdp is not null, return link properites for " + apnType);
-             return apnContext.getDataConnection().getLinkProperties();
-        } else {
-            if (DBG) log("return new LinkProperties");
-            return new LinkProperties();
+        if (apnContext != null) {
+            DataConnection dataConnection = apnContext.getDataConnection();
+            if (dataConnection != null) {
+                if (DBG) log("get active pdp is not null, return link properites for " + apnType);
+                return dataConnection.getLinkProperties();
+            }
         }
+        if (DBG) log("return new LinkProperties");
+        return new LinkProperties();
     }
 
     @Override
     protected LinkCapabilities getLinkCapabilities(String apnType) {
         ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext!=null && apnContext.getDataConnection() != null) {
-             if (DBG) log("get active pdp is not null, return link Capabilities for " + apnType);
-             return apnContext.getDataConnection().getLinkCapabilities();
-        } else {
-            if (DBG) log("return new LinkCapabilities");
-            return new LinkCapabilities();
+        if (apnContext!=null) {
+            DataConnection dataConnection = apnContext.getDataConnection();
+            if (dataConnection != null) {
+                if (DBG) log("get active pdp is not null, return link Capabilities for " + apnType);
+                return dataConnection.getLinkCapabilities();
+            }
         }
+        if (DBG) log("return new LinkCapabilities");
+        return new LinkCapabilities();
     }
 
     @Override
@@ -323,9 +326,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (DBG) log("get all active apn types");
         ArrayList<String> result = new ArrayList<String>();
 
-        Iterator<ApnContext> it = mApnContexts.values().iterator();
-        while (it.hasNext()) {
-            ApnContext apnContext = it.next();
+        for (ApnContext apnContext : mApnContexts.values()) {
             if (apnContext.isReady()) {
                 result.add(apnContext.getApnType());
             }
@@ -348,11 +349,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     // Return active apn of specific apn type
-    public synchronized String getActiveApnString(String apnType) {
+    public String getActiveApnString(String apnType) {
         if (DBG) log( "get active apn string for type:" + apnType);
         ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext != null && apnContext.getApnSetting() != null) {
-            return apnContext.getApnSetting().apn;
+        if (apnContext != null) {
+            ApnSetting apnSetting = apnContext.getApnSetting();
+            if (apnSetting != null) {
+                return apnSetting.apn;
+            }
         }
         return null;
     }
@@ -364,7 +368,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     // Return state of specific apn type
     @Override
-    public synchronized State getState(String apnType) {
+    public State getState(String apnType) {
         ApnContext apnContext = mApnContexts.get(apnType);
         if (apnContext != null) {
             return apnContext.getState();
@@ -375,9 +379,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     // Return state of overall
     public State getOverallState() {
         boolean isConnecting = false;
-        Iterator<ApnContext> it = mApnContexts.values().iterator();
-        while (it.hasNext()) {
-            ApnContext apnContext = it.next();
+        for (ApnContext apnContext : mApnContexts.values()) {
             if (apnContext.getState() == State.CONNECTED ||
                     apnContext.getState() == State.DISCONNECTING) {
                 if (DBG) log("overall state is CONNECTED");
@@ -710,10 +712,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected void cleanUpAllConnections(boolean tearDown, String reason) {
         if (DBG) log("Clean up all connections due to " + reason);
 
-        Iterator<ApnContext> it = mApnContexts.values().iterator();
-        while (it.hasNext()) {
-            ApnContext apnContext = it.next();
-                apnContext.setReason(reason);
+        for (ApnContext apnContext : mApnContexts.values()) {
+            apnContext.setReason(reason);
             cleanUpConnection(tearDown, apnContext);
         }
 
@@ -967,9 +967,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return;
         }
 
-        Iterator<ApnContext> it = mApnContexts.values().iterator();
-        while (it.hasNext()) {
-            ApnContext apnContext = it.next();
+        for (ApnContext apnContext : mApnContexts.values()) {
             onDataStateChanged(dataCallStates, explicitPoll, apnContext);
         }
     }
@@ -1652,9 +1650,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     protected boolean isConnected() {
-        Iterator<ApnContext> it = mApnContexts.values().iterator();
-         while (it.hasNext()) {
-            ApnContext apnContext = it.next();
+        for (ApnContext apnContext : mApnContexts.values()) {
             if (apnContext.getState() == State.CONNECTED) {
             return true;
             }
@@ -1665,9 +1661,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected void notifyDataConnection(String reason) {
         if (DBG) log("notify all enabled connection for:" + reason);
-        Iterator<ApnContext> it = mApnContexts.values().iterator();
-        while (it.hasNext()) {
-            ApnContext apnContext = it.next();
+        for (ApnContext apnContext : mApnContexts.values()) {
             if (apnContext.isReady()) {
                 if (DBG) log("notify for type:"+apnContext.getApnType());
                 mPhone.notifyDataConnection(reason != null ? reason : apnContext.getReason(),
