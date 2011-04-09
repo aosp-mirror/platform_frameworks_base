@@ -83,9 +83,14 @@ private:
     unsigned lzf_refSize, lzf_refBufSize; // bytes
 
 public:
-    const unsigned version; // 0 is GLES1, 1 is GLES2
+    const unsigned int version; // 0 is GLES1, 1 is GLES2
     const gl_hooks_t * const hooks;
-    const unsigned MAX_VERTEX_ATTRIBS;
+    const unsigned int MAX_VERTEX_ATTRIBS;
+    const GLenum readFormat, readType; // implementation supported glReadPixels
+    const unsigned int readBytesPerPixel;
+
+    unsigned int captureSwap; // number of eglSwapBuffers to glReadPixels
+    unsigned int captureDraw; // number of glDrawArrays/Elements to glReadPixels
 
     GLFunctionBitfield expectResponse;
 
@@ -118,7 +123,8 @@ public:
     unsigned maxAttrib; // number of slots used by program
 
     DbgContext(const unsigned version, const gl_hooks_t * const hooks,
-               const unsigned MAX_VERTEX_ATTRIBS);
+               const unsigned MAX_VERTEX_ATTRIBS, const GLenum readFormat,
+               const GLenum readType);
     ~DbgContext();
 
     void Fetch(const unsigned index, std::string * const data) const;
@@ -151,7 +157,6 @@ struct FunctionCall {
 };
 
 // move these into DbgContext as static
-extern bool capture;
 extern int timeMode; // SYSTEM_TIME_
 
 extern int clientSock, serverSock;

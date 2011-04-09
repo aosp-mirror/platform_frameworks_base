@@ -18,6 +18,7 @@
 
 EGLBoolean Debug_eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
 {
+    DbgContext * const dbg = getDbgContextThreadSpecific();
     glesv2debugger::Message msg;
     struct : public FunctionCall {
         EGLDisplay dpy;
@@ -33,7 +34,21 @@ EGLBoolean Debug_eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
 
     msg.set_arg0(reinterpret_cast<int>(dpy));
     msg.set_arg1(reinterpret_cast<int>(draw));
-
+    if (dbg->captureSwap > 0) {
+        dbg->captureSwap--;
+        int viewport[4] = {};
+        dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
+        void * pixels = dbg->GetReadPixelsBuffer(viewport[2] * viewport[3] *
+                        dbg->readBytesPerPixel);
+        dbg->hooks->gl.glReadPixels(viewport[0], viewport[1], viewport[2],
+                                    viewport[3], dbg->readFormat, dbg->readType, pixels);
+        dbg->CompressReadPixelBuffer(msg.mutable_data());
+        msg.set_data_type(msg.ReferencedImage);
+        msg.set_pixel_format(dbg->readFormat);
+        msg.set_pixel_type(dbg->readType);
+        msg.set_image_width(viewport[2]);
+        msg.set_image_height(viewport[3]);
+    }
     int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_eglSwapBuffers);
     return static_cast<EGLBoolean>(reinterpret_cast<int>(ret));
 }
