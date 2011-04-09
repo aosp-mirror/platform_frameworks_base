@@ -32,7 +32,6 @@ namespace android {
 
 enum {
     CREATE_GRAPHIC_BUFFER = IBinder::FIRST_CALL_TRANSACTION,
-    FREE_ALL_GRAPHIC_BUFFERS_EXCEPT,
 };
 
 class BpGraphicBufferAlloc : public BpInterface<IGraphicBufferAlloc>
@@ -46,8 +45,7 @@ public:
     virtual sp<GraphicBuffer> createGraphicBuffer(uint32_t w, uint32_t h,
             PixelFormat format, uint32_t usage) {
         Parcel data, reply;
-        data.writeInterfaceToken(
-                IGraphicBufferAlloc::getInterfaceDescriptor());
+        data.writeInterfaceToken(IGraphicBufferAlloc::getInterfaceDescriptor());
         data.writeInt32(w);
         data.writeInt32(h);
         data.writeInt32(format);
@@ -58,16 +56,11 @@ public:
         if (nonNull) {
             graphicBuffer = new GraphicBuffer();
             reply.read(*graphicBuffer);
+            // reply.readStrongBinder();
+            // here we don't even have to read the BufferReference from
+            // the parcel, it'll die with the parcel.
         }
         return graphicBuffer;
-    }
-
-    virtual void freeAllGraphicBuffersExcept(int bufIdx) {
-        Parcel data, reply;
-        data.writeInterfaceToken(
-                IGraphicBufferAlloc::getInterfaceDescriptor());
-        data.writeInt32(bufIdx);
-        remote()->transact(FREE_ALL_GRAPHIC_BUFFERS_EXCEPT, data, &reply);
     }
 };
 
@@ -80,6 +73,17 @@ status_t BnGraphicBufferAlloc::onTransact(
 {
     // codes that don't require permission check
 
+    /* BufferReference just keeps a strong reference to a
+     * GraphicBuffer until it is destroyed (that is, until
+     * no local or remote process have a reference to it).
+     */
+    class BufferReference : public BBinder {
+        sp<GraphicBuffer> buffer;
+    public:
+        BufferReference(const sp<GraphicBuffer>& buffer) : buffer(buffer) { }
+    };
+
+
     switch(code) {
         case CREATE_GRAPHIC_BUFFER: {
             CHECK_INTERFACE(IGraphicBufferAlloc, data, reply);
@@ -91,13 +95,14 @@ status_t BnGraphicBufferAlloc::onTransact(
             reply->writeInt32(result != 0);
             if (result != 0) {
                 reply->write(*result);
+                // We add a BufferReference to this parcel to make sure the
+                // buffer stays alive until the GraphicBuffer object on
+                // the other side has been created.
+                // This is needed so that the buffer handle can be
+                // registered before the buffer is destroyed on implementations
+                // that do not use file-descriptors to track their buffers.
+                reply->writeStrongBinder( new BufferReference(result) );
             }
-            return NO_ERROR;
-        } break;
-        case FREE_ALL_GRAPHIC_BUFFERS_EXCEPT: {
-            CHECK_INTERFACE(IGraphicBufferAlloc, data, reply);
-            int bufIdx = data.readInt32();
-            freeAllGraphicBuffersExcept(bufIdx);
             return NO_ERROR;
         } break;
         default:

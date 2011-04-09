@@ -125,14 +125,8 @@ class GraphicBufferAlloc : public BnGraphicBufferAlloc
 public:
     GraphicBufferAlloc();
     virtual ~GraphicBufferAlloc();
-
     virtual sp<GraphicBuffer> createGraphicBuffer(uint32_t w, uint32_t h,
         PixelFormat format, uint32_t usage);
-    virtual void freeAllGraphicBuffersExcept(int bufIdx);
-
-private:
-    Vector<sp<GraphicBuffer> > mBuffers;
-    Mutex mLock;
 };
 
 // ---------------------------------------------------------------------------
