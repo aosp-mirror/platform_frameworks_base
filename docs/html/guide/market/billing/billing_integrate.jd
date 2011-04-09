@@ -163,11 +163,11 @@ Selected</strong> to begin the download.</p>
 <p>When the download is complete, the Android SDK and AVD Manager saves the component into the
 following directory:</p>
 
-<p><code>&lt;sdk&gt;/google-market_billing/</code></p>
+<p><code>&lt;sdk&gt;/extras/google/market_billing/</code></p>
 
 <p>If you want to see an end-to-end demonstration of in-app billing before you integrate in-app
 billing into your own application, you can build and run the sample application. Building and
-running the sample application involves three tasks:<p>
+running the sample application involves three tasks:</p>
 
 <ul>
   <li>Configuring and building the sample application.</li>
@@ -501,7 +501,7 @@ protected Bundle makeRequestBundle(String method) {
 
 <p>To use this helper method, you pass in a <code>String</code> that corresponds to one of the five
 types of billing requests. The method returns a Bundle that has the three required keys defined. The
-following sections show you how to use this helper method when you send a billing request.<p>
+following sections show you how to use this helper method when you send a billing request.</p>
 
 <p class="caution"><strong>Important</strong>: You must make all in-app billing requests from your
 application's main thread.</p>
