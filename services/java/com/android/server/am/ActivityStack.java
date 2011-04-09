@@ -69,7 +69,7 @@ import java.util.List;
 /**
  * State and management of a single stack of activities.
  */
-public class ActivityStack {
+final public class ActivityStack {
     static final String TAG = ActivityManagerService.TAG;
     static final boolean localLOGV = ActivityManagerService.localLOGV;
     static final boolean DEBUG_SWITCH = ActivityManagerService.DEBUG_SWITCH;
@@ -789,10 +789,7 @@ public class ActivityStack {
         mLastPausedActivity = prev;
         prev.state = ActivityState.PAUSING;
         prev.task.touchActiveTime();
-        prev.thumbnail = screenshotActivities(prev);
-        if (prev.task != null) {
-            prev.task.lastThumbnail = prev.thumbnail;
-        }
+        prev.updateThumbnail(screenshotActivities(prev), null);
 
         mService.updateCpuStats();
         
@@ -986,7 +983,7 @@ public class ActivityStack {
             mService.reportResumedActivityLocked(next);
         }
         
-        next.thumbnail = null;
+        next.clearThumbnail();
         if (mMainStack) {
             mService.setFocusedActivityLocked(next);
         }
@@ -1513,8 +1510,7 @@ public class ActivityStack {
                     addPos = i+1;
                     if (!startIt) {
                         mHistory.add(addPos, r);
-                        r.inHistory = true;
-                        r.task.numActivities++;
+                        r.putInHistory();
                         mService.mWindowManager.addAppToken(addPos, r, r.task.taskId,
                                 r.info.screenOrientation, r.fullscreen);
                         if (VALIDATE_TOKENS) {
@@ -1546,9 +1542,8 @@ public class ActivityStack {
         
         // Slot the activity into the history stack and proceed
         mHistory.add(addPos, r);
-        r.inHistory = true;
+        r.putInHistory();
         r.frontOfTask = newTask;
-        r.task.numActivities++;
         if (NH > 0) {
             // We want to show the starting preview window if we are
             // switching to a new task, or the next activity's process is
@@ -1711,7 +1706,7 @@ public class ActivityStack {
                             // If the activity currently at the bottom has the
                             // same task affinity as the one we are moving,
                             // then merge it into the same task.
-                            target.task = p.task;
+                            target.setTask(p.task, p.thumbHolder, false);
                             if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                                     + " out to bottom task " + p.task);
                         } else {
@@ -1719,7 +1714,8 @@ public class ActivityStack {
                             if (mService.mCurTask <= 0) {
                                 mService.mCurTask = 1;
                             }
-                            target.task = new TaskRecord(mService.mCurTask, target.info, null);
+                            target.setTask(new TaskRecord(mService.mCurTask, target.info, null),
+                                    null, false);
                             target.task.affinityIntent = target.intent;
                             if (DEBUG_TASKS) Slog.v(TAG, "Start pushing activity " + target
                                     + " out to new task " + target.task);
@@ -1729,6 +1725,7 @@ public class ActivityStack {
                             replyChainEnd = targetI;
                         }
                         int dstPos = 0;
+                        ThumbnailHolder curThumbHolder = target.thumbHolder;
                         for (int srcPos=targetI; srcPos<=replyChainEnd; srcPos++) {
                             p = (ActivityRecord)mHistory.get(srcPos);
                             if (p.finishing) {
@@ -1736,9 +1733,8 @@ public class ActivityStack {
                             }
                             if (DEBUG_TASKS) Slog.v(TAG, "Pushing next activity " + p
                                     + " out to target's task " + target.task);
-                            task.numActivities--;
-                            p.task = target.task;
-                            target.task.numActivities++;
+                            p.setTask(target.task, curThumbHolder, false);
+                            curThumbHolder = p.thumbHolder;
                             mHistory.remove(srcPos);
                             mHistory.add(dstPos, p);
                             mService.mWindowManager.moveAppToken(dstPos, p);
@@ -1867,12 +1863,10 @@ public class ActivityStack {
                             lastReparentPos--;
                         }
                         mHistory.remove(srcPos);
-                        p.task.numActivities--;
-                        p.task = task;
+                        p.setTask(task, null, false);
                         mHistory.add(lastReparentPos, p);
                         if (DEBUG_TASKS) Slog.v(TAG, "Pulling activity " + p
                                 + " in to resetting task " + task);
-                        task.numActivities++;
                         mService.mWindowManager.moveAppToken(lastReparentPos, p);
                         mService.mWindowManager.setAppGroupId(p, p.task.taskId);
                         if (VALIDATE_TOKENS) {
@@ -2525,11 +2519,11 @@ public class ActivityStack {
                 if (mService.mCurTask <= 0) {
                     mService.mCurTask = 1;
                 }
-                r.task = new TaskRecord(mService.mCurTask, r.info, intent);
+                r.setTask(new TaskRecord(mService.mCurTask, r.info, intent), null, true);
                 if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                         + " in new task " + r.task);
             } else {
-                r.task = reuseTask;
+                r.setTask(reuseTask, reuseTask, true);
             }
             newTask = true;
             moveHomeToFrontFromLaunchLocked(launchFlags);
@@ -2572,7 +2566,7 @@ public class ActivityStack {
             // An existing activity is starting this new activity, so we want
             // to keep the new one in the same task as the one that is starting
             // it.
-            r.task = sourceRecord.task;
+            r.setTask(sourceRecord.task, sourceRecord.thumbHolder, false);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in existing task " + r.task);
 
@@ -2583,9 +2577,9 @@ public class ActivityStack {
             final int N = mHistory.size();
             ActivityRecord prev =
                 N > 0 ? (ActivityRecord)mHistory.get(N-1) : null;
-            r.task = prev != null
+            r.setTask(prev != null
                     ? prev.task
-                    : new TaskRecord(mService.mCurTask, r.info, intent);
+                    : new TaskRecord(mService.mCurTask, r.info, intent), null, true);
             if (DEBUG_TASKS) Slog.v(TAG, "Starting new activity " + r
                     + " in new guessed " + r.task);
         }
@@ -3403,7 +3397,7 @@ public class ActivityStack {
         if (r.state != ActivityState.DESTROYED) {
             r.makeFinishing();
             mHistory.remove(r);
-            r.inHistory = false;
+            r.takeFromHistory();
             r.state = ActivityState.DESTROYED;
             mService.mWindowManager.removeAppToken(r);
             if (VALIDATE_TOKENS) {
