@@ -44,6 +44,7 @@ import android.app.IInstrumentationWatcher;
 import android.app.INotificationManager;
 import android.app.IServiceConnection;
 import android.app.IThumbnailReceiver;
+import android.app.IThumbnailRetriever;
 import android.app.Instrumentation;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -2602,8 +2603,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + " finishing=" + r.finishing);
                     r.makeFinishing();
                     mMainStack.mHistory.remove(i);
-
-                    r.inHistory = false;
+                    r.takeFromHistory();
                     mWindowManager.removeAppToken(r);
                     if (VALIDATE_TOKENS) {
                         mWindowManager.validateAppTokens(mMainStack.mHistory);
@@ -3807,16 +3807,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 r = (ActivityRecord)mMainStack.mHistory.get(index);
                 r.icicle = icicle;
                 r.haveState = true;
-                if (thumbnail != null) {
-                    r.thumbnail = thumbnail;
-                    if (r.task != null) {
-                        r.task.lastThumbnail = r.thumbnail;
-                    }
-                }
-                r.description = description;
-                if (r.task != null) {
-                    r.task.lastDescription = r.description;
-                }
+                r.updateThumbnail(thumbnail, description);
                 r.stopped = true;
                 r.state = ActivityState.STOPPED;
                 if (!r.finishing) {
@@ -4850,7 +4841,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             ActivityRecord next =
                 pos >= 0 ? (ActivityRecord)mMainStack.mHistory.get(pos) : null;
             ActivityRecord top = null;
-            CharSequence topDescription = null;
             TaskRecord curTask = null;
             int numActivities = 0;
             int numRunning = 0;
@@ -4864,7 +4854,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                         (top.state == ActivityState.INITIALIZING
                             && top.task == r.task)) {
                     top = r;
-                    topDescription = r.description;
                     curTask = r.task;
                     numActivities = numRunning = 0;
                 }
@@ -4873,9 +4862,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 numActivities++;
                 if (r.app != null && r.app.thread != null) {
                     numRunning++;
-                }
-                if (topDescription == null) {
-                    topDescription = r.description;
                 }
 
                 if (localLOGV) Slog.v(
@@ -4891,13 +4877,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ci.baseActivity = r.intent.getComponent();
                     ci.topActivity = top.intent.getComponent();
                     if (canReadFb) {
-                        if (top.thumbnail != null) {
-                            ci.thumbnail = top.thumbnail;
-                        } else if (top.state == ActivityState.RESUMED) {
+                        if (top.state == ActivityState.RESUMED) {
                             ci.thumbnail = top.stack.screenshotActivities(top);
+                        } else if (top.thumbHolder != null) {
+                            ci.thumbnail = top.thumbHolder.lastThumbnail;
                         }
                     }
-                    ci.description = topDescription;
+                    if (top.thumbHolder != null) {
+                        ci.description = top.thumbHolder.lastDescription;
+                    }
                     ci.numActivities = numActivities;
                     ci.numRunning = numRunning;
                     //System.out.println(
@@ -5014,7 +5002,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public Bitmap getTaskThumbnail(int id) {
+    public ActivityManager.TaskThumbnails getTaskThumbnails(int id) {
         synchronized (this) {
             enforceCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
                     "getTaskThumbnail()");
@@ -5023,11 +5011,61 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<N; i++) {
                 TaskRecord tr = mRecentTasks.get(i);
                 if (tr.taskId == id) {
-                    if (resumed != null && resumed.task == tr) {
-                        return resumed.stack.screenshotActivities(resumed);
+                    final ActivityManager.TaskThumbnails thumbs
+                            = new ActivityManager.TaskThumbnails();
+                    if (resumed != null && resumed.thumbHolder == tr) {
+                        thumbs.mainThumbnail = resumed.stack.screenshotActivities(resumed);
                     } else {
-                        return tr.lastThumbnail;
+                        thumbs.mainThumbnail = tr.lastThumbnail;
                     }
+                    // How many different sub-thumbnails?
+                    final int NA = mMainStack.mHistory.size();
+                    int j = 0;
+                    ThumbnailHolder holder = null;
+                    while (j < NA) {
+                        ActivityRecord ar = (ActivityRecord)mMainStack.mHistory.get(j);
+                        j++;
+                        if (ar.task == tr) {
+                            holder = ar.thumbHolder;
+                            break;
+                        }
+                    }
+                    ArrayList<Bitmap> bitmaps = new ArrayList<Bitmap>();
+                    thumbs.otherThumbnails = bitmaps;
+                    ActivityRecord lastActivity = null;
+                    while (j < NA) {
+                        ActivityRecord ar = (ActivityRecord)mMainStack.mHistory.get(j);
+                        j++;
+                        if (ar.task != tr) {
+                            break;
+                        }
+                        lastActivity = ar;
+                        if (ar.thumbHolder != holder && holder != null) {
+                            thumbs.numSubThumbbails++;
+                            holder = ar.thumbHolder;
+                            bitmaps.add(holder.lastThumbnail);
+                        }
+                    }
+                    if (lastActivity != null && bitmaps.size() > 0) {
+                        if (resumed == lastActivity) {
+                            Bitmap bm = lastActivity.stack.screenshotActivities(lastActivity);
+                            if (bm != null) {
+                                bitmaps.remove(bitmaps.size()-1);
+                                bitmaps.add(bm);
+                            }
+                        }
+                    }
+                    if (thumbs.numSubThumbbails > 0) {
+                        thumbs.retriever = new IThumbnailRetriever.Stub() {
+                            public Bitmap getThumbnail(int index) {
+                                if (index < 0 || index >= thumbs.otherThumbnails.size()) {
+                                    return null;
+                                }
+                                return thumbs.otherThumbnails.get(index);
+                            }
+                        };
+                    }
+                    return thumbs;
                 }
             }
         }
@@ -5253,9 +5291,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 r = (ActivityRecord)mMainStack.mHistory.get(index);
             }
-            if (thumbnail == null) {
-                thumbnail = r.thumbnail;
-                description = r.description;
+            if (thumbnail == null && r.thumbHolder != null) {
+                thumbnail = r.thumbHolder.lastThumbnail;
+                description = r.thumbHolder.lastDescription;
             }
             if (thumbnail == null && !always) {
                 // If there is no thumbnail, and this entry is not actually
@@ -8439,7 +8477,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         final String[] args = new String[0];
         for (int i=list.size()-1; i>=0; i--) {
             final ActivityRecord r = (ActivityRecord)list.get(i);
-            final boolean full = !brief && (complete || !r.inHistory);
+            final boolean full = !brief && (complete || !r.isInHistory());
             if (needNL) {
                 pw.println(" ");
                 needNL = false;

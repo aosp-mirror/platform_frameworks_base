@@ -47,7 +47,7 @@ import java.util.HashSet;
 /**
  * An entry in the history stack, representing an activity.
  */
-class ActivityRecord extends IApplicationToken.Stub {
+final class ActivityRecord extends IApplicationToken.Stub {
     final ActivityManagerService service; // owner
     final ActivityStack stack; // owner
     final ActivityInfo info; // all about me
@@ -74,6 +74,7 @@ class ActivityRecord extends IApplicationToken.Stub {
     int realTheme;          // actual theme resource we will use, never 0.
     int windowFlags;        // custom window flags for preview window.
     TaskRecord task;        // the task this is in.
+    ThumbnailHolder thumbHolder; // where our thumbnails should go.
     long launchTime;        // when we starting launching this activity
     long startTime;         // last time this activity was started
     long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
@@ -86,9 +87,7 @@ class ActivityRecord extends IApplicationToken.Stub {
     ArrayList newIntents;   // any pending new intents for single-top mode
     HashSet<ConnectionRecord> connections; // All ConnectionRecord we hold
     UriPermissionOwner uriPermissions; // current special URI access perms.
-    ProcessRecord app;  // if non-null, hosting application
-    Bitmap thumbnail;       // icon representation of paused screen
-    CharSequence description; // textual description of paused screen
+    ProcessRecord app;      // if non-null, hosting application
     ActivityState state;    // current state we are in
     Bundle  icicle;         // last saved activity state
     boolean frontOfTask;    // is this the root activity of its task?
@@ -100,7 +99,6 @@ class ActivityRecord extends IApplicationToken.Stub {
     boolean configDestroy;  // need to destroy due to config change?
     int configChangeFlags;  // which config values have changed
     boolean keysPaused;     // has key dispatching been paused for it?
-    boolean inHistory;      // are we in the history stack?
     int launchMode;         // the launch mode activity attribute.
     boolean visible;        // does this activity's window need to be shown?
     boolean sleeping;       // have we told the activity to sleep?
@@ -114,6 +112,8 @@ class ActivityRecord extends IApplicationToken.Stub {
 
     String stringName;      // for caching of toString().
     
+    private boolean inHistory;  // are we in the history stack?
+
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("packageName="); pw.print(packageName);
                 pw.print(" processName="); pw.println(processName);
@@ -175,6 +175,7 @@ class ActivityRecord extends IApplicationToken.Stub {
                 pw.print(" launchMode="); pw.println(launchMode);
         pw.print(prefix); pw.print("frozenBeforeDestroy="); pw.print(frozenBeforeDestroy);
                 pw.print(" thumbnailNeeded="); pw.println(thumbnailNeeded);
+        pw.print(prefix); pw.print("thumbHolder="); pw.println(thumbHolder);
         if (launchTime != 0 || startTime != 0) {
             pw.print(prefix); pw.print("launchTime=");
                     TimeUtils.formatDuration(launchTime, pw); pw.print(" startTime=");
@@ -328,10 +329,55 @@ class ActivityRecord extends IApplicationToken.Stub {
         }
     }
 
+    void setTask(TaskRecord newTask, ThumbnailHolder newThumbHolder, boolean isRoot) {
+        if (inHistory && !finishing) {
+            if (task != null) {
+                task.numActivities--;
+            }
+            if (newTask != null) {
+                newTask.numActivities++;
+            }
+        }
+        if (newThumbHolder == null) {
+            newThumbHolder = newTask;
+        }
+        task = newTask;
+        if (!isRoot && (intent.getFlags()&Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
+            // This is the start of a new sub-task.
+            if (thumbHolder == null) {
+                thumbHolder = new ThumbnailHolder();
+            }
+        } else {
+            thumbHolder = newThumbHolder;
+        }
+    }
+
+    void putInHistory() {
+        if (!inHistory) {
+            inHistory = true;
+            if (task != null && !finishing) {
+                task.numActivities++;
+            }
+        }
+    }
+
+    void takeFromHistory() {
+        if (inHistory) {
+            inHistory = false;
+            if (task != null && !finishing) {
+                task.numActivities--;
+            }
+        }
+    }
+
+    boolean isInHistory() {
+        return inHistory;
+    }
+
     void makeFinishing() {
         if (!finishing) {
             finishing = true;
-            if (task != null) {
+            if (task != null && inHistory) {
                 task.numActivities--;
             }
         }
@@ -427,6 +473,25 @@ class ActivityRecord extends IApplicationToken.Stub {
         if (keysPaused) {
             keysPaused = false;
             service.mWindowManager.resumeKeyDispatching(this);
+        }
+    }
+
+    void updateThumbnail(Bitmap newThumbnail, CharSequence description) {
+        if ((intent.getFlags()&Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET) != 0) {
+            // This is a logical break in the task; it repre
+        }
+        if (thumbHolder != null) {
+            if (newThumbnail != null) {
+                thumbHolder.lastThumbnail = newThumbnail;
+            }
+            thumbHolder.lastDescription = description;
+        }
+    }
+
+    void clearThumbnail() {
+        if (thumbHolder != null) {
+            thumbHolder.lastThumbnail = null;
+            thumbHolder.lastDescription = null;
         }
     }
 

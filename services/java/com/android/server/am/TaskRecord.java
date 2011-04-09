@@ -23,7 +23,7 @@ import android.graphics.Bitmap;
 
 import java.io.PrintWriter;
 
-class TaskRecord {
+class TaskRecord extends ThumbnailHolder {
     final int taskId;       // Unique identifier for this task.
     final String affinity;  // The affinity name for this task, or null.
     Intent intent;          // The original intent that started the task.
@@ -34,8 +34,6 @@ class TaskRecord {
     long lastActiveTime;    // Last time this task was active, including sleep.
     boolean rootWasReset;   // True if the intent at the root of the task had
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
-    Bitmap lastThumbnail;   // Last thumbnail captured for this task.
-    CharSequence lastDescription; // Last description captured for this task.
 
     String stringName;      // caching of toString() result.
     

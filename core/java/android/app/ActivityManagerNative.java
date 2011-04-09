@@ -441,10 +441,10 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
         
-        case GET_TASK_THUMBNAIL_TRANSACTION: {
+        case GET_TASK_THUMBNAILS_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int id = data.readInt();
-            Bitmap bm = getTaskThumbnail(id);
+            ActivityManager.TaskThumbnails bm = getTaskThumbnails(id);
             reply.writeNoException();
             if (bm != null) {
                 reply.writeInt(1);
@@ -1830,16 +1830,16 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         return list;
     }
-    public Bitmap getTaskThumbnail(int id) throws RemoteException {
+    public ActivityManager.TaskThumbnails getTaskThumbnails(int id) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeInt(id);
-        mRemote.transact(GET_TASK_THUMBNAIL_TRANSACTION, data, reply, 0);
+        mRemote.transact(GET_TASK_THUMBNAILS_TRANSACTION, data, reply, 0);
         reply.readException();
-        Bitmap bm = null;
+        ActivityManager.TaskThumbnails bm = null;
         if (reply.readInt() != 0) {
-            bm = Bitmap.CREATOR.createFromParcel(reply);
+            bm = ActivityManager.TaskThumbnails.CREATOR.createFromParcel(reply);
         }
         data.recycle();
         reply.recycle();
