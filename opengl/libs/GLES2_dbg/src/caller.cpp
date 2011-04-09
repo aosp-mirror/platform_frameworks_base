@@ -771,7 +771,7 @@ const int * GenerateCall(DbgContext * const dbg, const glesv2debugger::Message &
     msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
     msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_function(cmd.function());
-    msg.set_type(glesv2debugger::Message_Type_AfterCall);
+    msg.set_type(glesv2debugger::Message_Type_AfterGeneratedCall);
     return ret;
 }
 

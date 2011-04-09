@@ -169,14 +169,13 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
     }
 
     // try to receive commands even though not expecting response,
-    // since client can send SETPROP commands anytime
+    //  since client can send SETPROP and other commands anytime
     if (!msg.expect_response()) {
         if (TryReceive(cmd)) {
-            LOGD("Send: TryReceived");
             if (glesv2debugger::Message_Function_SETPROP == cmd.function())
-                LOGD("Send: received SETPROP");
+                LOGD("Send: TryReceived SETPROP");
             else
-                LOGD("Send: received something else");
+                LOGD("Send: TryReceived %u", cmd.function());
         }
     } else
         Receive(cmd);
@@ -213,12 +212,16 @@ int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
     glesv2debugger::Message cmd;
     msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_type(glesv2debugger::Message_Type_BeforeCall);
-    const bool expectResponse = dbg->expectResponse.Bit(function);
+    bool expectResponse = dbg->expectResponse.Bit(function);
     msg.set_expect_response(expectResponse);
     msg.set_function(function);
-    if (!expectResponse)
-        cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
+
+    // when not exectResponse, set cmd to CONTINUE then SKIP
+    cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
+    cmd.set_expect_response(false);
+    glesv2debugger::Message_Function oldCmd = cmd.function();
     Send(msg, cmd);
+    expectResponse = cmd.expect_response();
     while (true) {
         msg.Clear();
         nsecs_t c0 = systemTime(timeMode);
@@ -233,22 +236,34 @@ int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
             msg.set_function(function);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
-            if (!expectResponse)
+            if (!expectResponse) {
                 cmd.set_function(glesv2debugger::Message_Function_SKIP);
+                cmd.set_expect_response(false);
+            }
+            oldCmd = cmd.function();
             Send(msg, cmd);
+            expectResponse = cmd.expect_response();
             break;
         case glesv2debugger::Message_Function_SKIP:
             return const_cast<int *>(ret);
         case glesv2debugger::Message_Function_SETPROP:
             SetProp(dbg, cmd);
-            Receive(cmd);
+            expectResponse = cmd.expect_response();
+            if (!expectResponse) // SETPROP is "out of band"
+                cmd.set_function(oldCmd);
+            else
+                Receive(cmd);
             break;
         default:
             ret = GenerateCall(dbg, cmd, msg, ret);
             msg.set_expect_response(expectResponse);
-            if (!expectResponse)
+            if (!expectResponse) {
                 cmd.set_function(cmd.SKIP);
+                cmd.set_expect_response(expectResponse);
+            }
+            oldCmd = cmd.function();
             Send(msg, cmd);
+            expectResponse = cmd.expect_response();
             break;
         }
     }

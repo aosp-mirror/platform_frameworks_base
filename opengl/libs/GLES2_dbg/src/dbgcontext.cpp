@@ -124,6 +124,7 @@ void DbgContext::Compress(const void * in_data, unsigned int in_len,
 {
     if (!lzf_buf)
         lzf_buf = (char *)malloc(LZF_CHUNK_SIZE);
+    assert(lzf_buf);
     const uint32_t totalDecompSize = in_len;
     outStr->append((const char *)&totalDecompSize, sizeof(totalDecompSize));
     for (unsigned int i = 0; i < in_len; i += LZF_CHUNK_SIZE) {
@@ -146,8 +147,10 @@ void * DbgContext::GetReadPixelsBuffer(const unsigned size)
     if (lzf_refBufSize < size + 8) {
         lzf_refBufSize = size + 8;
         lzf_ref[0] = (unsigned *)realloc(lzf_ref[0], lzf_refBufSize);
+        assert(lzf_ref[0]);
         memset(lzf_ref[0], 0, lzf_refBufSize);
         lzf_ref[1] = (unsigned *)realloc(lzf_ref[1], lzf_refBufSize);
+        assert(lzf_ref[1]);
         memset(lzf_ref[1], 0, lzf_refBufSize);
     }
     if (lzf_refSize != size) // need to clear unused ref to maintain consistency
@@ -162,11 +165,31 @@ void * DbgContext::GetReadPixelsBuffer(const unsigned size)
 
 void DbgContext::CompressReadPixelBuffer(std::string * const outStr)
 {
+    assert(lzf_ref[0] && lzf_ref[1]);
     unsigned * const ref = lzf_ref[lzf_readIndex ^ 1];
     unsigned * const src = lzf_ref[lzf_readIndex];
     for (unsigned i = 0; i < lzf_refSize / sizeof(*ref) + 1; i++)
         ref[i] ^= src[i];
     Compress(ref, lzf_refSize, outStr);
+}
+
+char * DbgContext::GetBuffer()
+{
+    if (!lzf_buf)
+        lzf_buf = (char *)malloc(LZF_CHUNK_SIZE);
+    assert(lzf_buf);
+    return lzf_buf;
+}
+
+unsigned int DbgContext::GetBufferSize()
+{
+    if (!lzf_buf)
+        lzf_buf = (char *)malloc(LZF_CHUNK_SIZE);
+    assert(lzf_buf);
+    if (lzf_buf)
+        return LZF_CHUNK_SIZE;
+    else
+        return 0;
 }
 
 void DbgContext::glUseProgram(GLuint program)

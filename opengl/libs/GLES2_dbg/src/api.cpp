@@ -597,6 +597,9 @@ void Debug_glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, G
 
         const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
             _c->glCopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+#ifdef EXTEND_AFTER_CALL_Debug_glCopyTexImage2D
+            EXTEND_AFTER_CALL_Debug_glCopyTexImage2D;
+#endif
             return 0;
         }
     } caller;
@@ -618,7 +621,9 @@ void Debug_glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, G
     msg.set_arg6(height);
     msg.set_arg7(border);
 
+#ifdef EXTEND_Debug_glCopyTexImage2D
     EXTEND_Debug_glCopyTexImage2D;
+#endif
     int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glCopyTexImage2D);
 }
 
@@ -637,6 +642,9 @@ void Debug_glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint 
 
         const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
             _c->glCopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
+#ifdef EXTEND_AFTER_CALL_Debug_glCopyTexSubImage2D
+            EXTEND_AFTER_CALL_Debug_glCopyTexSubImage2D;
+#endif
             return 0;
         }
     } caller;
@@ -658,7 +666,9 @@ void Debug_glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint 
     msg.set_arg6(width);
     msg.set_arg7(height);
 
+#ifdef EXTEND_Debug_glCopyTexSubImage2D
     EXTEND_Debug_glCopyTexSubImage2D;
+#endif
     int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glCopyTexSubImage2D);
 }
 
@@ -2169,6 +2179,49 @@ void Debug_glPolygonOffset(GLfloat factor, GLfloat units)
     int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glPolygonOffset);
 }
 
+void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels)
+{
+    glesv2debugger::Message msg;
+    struct : public FunctionCall {
+        GLint x;
+        GLint y;
+        GLsizei width;
+        GLsizei height;
+        GLenum format;
+        GLenum type;
+        GLvoid* pixels;
+
+        const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
+            _c->glReadPixels(x, y, width, height, format, type, pixels);
+#ifdef EXTEND_AFTER_CALL_Debug_glReadPixels
+            EXTEND_AFTER_CALL_Debug_glReadPixels;
+#endif
+            return 0;
+        }
+    } caller;
+    caller.x = x;
+    caller.y = y;
+    caller.width = width;
+    caller.height = height;
+    caller.format = format;
+    caller.type = type;
+    caller.pixels = pixels;
+
+    msg.set_arg0(x);
+    msg.set_arg1(y);
+    msg.set_arg2(width);
+    msg.set_arg3(height);
+    msg.set_arg4(format);
+    msg.set_arg5(type);
+    msg.set_arg6(ToInt(pixels));
+
+    // FIXME: check for pointer usage
+#ifdef EXTEND_Debug_glReadPixels
+    EXTEND_Debug_glReadPixels;
+#endif
+    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glReadPixels);
+}
+
 void Debug_glReleaseShaderCompiler(void)
 {
     glesv2debugger::Message msg;
@@ -2302,6 +2355,9 @@ void Debug_glShaderSource(GLuint shader, GLsizei count, const GLchar** string, c
 
         const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
             _c->glShaderSource(shader, count, string, length);
+#ifdef EXTEND_AFTER_CALL_Debug_glShaderSource
+            EXTEND_AFTER_CALL_Debug_glShaderSource;
+#endif
             return 0;
         }
     } caller;
@@ -2316,7 +2372,9 @@ void Debug_glShaderSource(GLuint shader, GLsizei count, const GLchar** string, c
     msg.set_arg3(ToInt(length));
 
     // FIXME: check for pointer usage
+#ifdef EXTEND_Debug_glShaderSource
     EXTEND_Debug_glShaderSource;
+#endif
     int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glShaderSource);
 }
 
@@ -2477,6 +2535,9 @@ void Debug_glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsize
 
         const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
             _c->glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+#ifdef EXTEND_AFTER_CALL_Debug_glTexImage2D
+            EXTEND_AFTER_CALL_Debug_glTexImage2D;
+#endif
             return 0;
         }
     } caller;
@@ -2501,7 +2562,9 @@ void Debug_glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsize
     msg.set_arg8(ToInt(pixels));
 
     // FIXME: check for pointer usage
+#ifdef EXTEND_Debug_glTexImage2D
     EXTEND_Debug_glTexImage2D;
+#endif
     int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glTexImage2D);
 }
 
@@ -2621,6 +2684,9 @@ void Debug_glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
 
         const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {
             _c->glTexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+#ifdef EXTEND_AFTER_CALL_Debug_glTexSubImage2D
+            EXTEND_AFTER_CALL_Debug_glTexSubImage2D;
+#endif
             return 0;
         }
     } caller;
@@ -2645,7 +2711,9 @@ void Debug_glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoff
     msg.set_arg8(ToInt(pixels));
 
     // FIXME: check for pointer usage
+#ifdef EXTEND_Debug_glTexSubImage2D
     EXTEND_Debug_glTexSubImage2D;
+#endif
     int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_glTexSubImage2D);
 }
 

@@ -70,41 +70,42 @@ message Message
 """)
 
     i = 0;
-    
+
     lines = open("gl2_api_annotated.in").readlines()
     i = generate_gl_entries(output, lines, i)
     output.write("        // end of GL functions\n")
-    
+
     #lines = open("gl2ext_api.in").readlines()
     #i = generate_gl_entries(output, lines, i)
     #output.write("        // end of GL EXT functions\n")
-    
+
     lines = open("../EGL/egl_entries.in").readlines()
     i = generate_egl_entries(output, lines, i)
     output.write("        // end of GL EXT functions\n")
-    
+
     output.write("        ACK = %d;\n" % (i))
     i += 1
-    
+
     output.write("        NEG = %d;\n" % (i))
     i += 1
-    
+
     output.write("        CONTINUE = %d;\n" % (i))
     i += 1
-    
+
     output.write("        SKIP = %d;\n" % (i))
     i += 1
-    
+
     output.write("        SETPROP = %d;\n" % (i))
     i += 1
-    
+
     output.write("""    }
     required Function function = 2 [default = NEG]; // type/function of message
     enum Type
     {
         BeforeCall = 0;
         AfterCall = 1;
-        Response = 2; // currently used for misc messages
+        AfterGeneratedCall = 2;
+        Response = 3; // currently used for misc messages
     }
     required Type type = 3;
     required bool expect_response = 4;
@@ -128,7 +129,7 @@ message Message
     optional DataType data_type = 23; // most data types can be inferred from function
     optional int32 pixel_format = 24; // used for image data if format and type 
     optional int32 pixel_type = 25;   //     cannot be determined from arg 
-    
+
     optional float time = 11; // duration of previous GL call (ms)
     enum Prop
     {
@@ -142,6 +143,6 @@ message Message
 """)
 
     output.close()
-    
+
     os.system("aprotoc --cpp_out=src --java_out=../../../../../development/tools/glesv2debugger/src debugger_message.proto")
     os.system('mv -f "src/debugger_message.pb.cc" "src/debugger_message.pb.cpp"')
