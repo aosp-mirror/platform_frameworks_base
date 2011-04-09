@@ -28,7 +28,8 @@ namespace android
 {
 
 int serverSock = -1, clientSock = -1;
-
+FILE * file = NULL;
+unsigned int MAX_FILE_SIZE = 0;
 int timeMode = SYSTEM_TIME_THREAD;
 
 static void Die(const char * msg)
@@ -38,18 +39,25 @@ static void Die(const char * msg)
     exit(1);
 }
 
-void StartDebugServer(unsigned short port)
+void StartDebugServer(const unsigned short port, const bool forceUseFile,
+                      const unsigned int maxFileSize, const char * const filePath)
 {
+    MAX_FILE_SIZE = maxFileSize;
+
     LOGD("GLESv2_dbg: StartDebugServer");
-    if (serverSock >= 0)
+    if (serverSock >= 0 || file)
         return;
 
     LOGD("GLESv2_dbg: StartDebugServer create socket");
     struct sockaddr_in server = {}, client = {};
 
     /* Create the TCP socket */
-    if ((serverSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-        Die("Failed to create socket");
+    if (forceUseFile || (serverSock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
+        file = fopen(filePath, "wb");
+        if (!file)
+            Die("Failed to create socket and file");
+        else
+            return;
     }
     /* Construct the server sockaddr_in structure */
     server.sin_family = AF_INET;                  /* Internet/IP */
@@ -92,13 +100,17 @@ void StopDebugServer()
         close(serverSock);
         serverSock = -1;
     }
-
+    if (file) {
+        fclose(file);
+        file = NULL;
+    }
 }
 
 void Receive(glesv2debugger::Message & cmd)
 {
+    if (clientSock < 0)
+        return;
     unsigned len = 0;
-
     int received = recv(clientSock, &len, 4, MSG_WAITALL);
     if (received < 0)
         Die("Failed to receive response length");
@@ -106,7 +118,6 @@ void Receive(glesv2debugger::Message & cmd)
         LOGD("received %dB: %.8X", received, len);
         Die("Received length mismatch, expected 4");
     }
-    len = ntohl(len);
     static void * buffer = NULL;
     static unsigned bufferSize = 0;
     if (bufferSize < len) {
@@ -125,6 +136,8 @@ void Receive(glesv2debugger::Message & cmd)
 
 bool TryReceive(glesv2debugger::Message & cmd)
 {
+    if (clientSock < 0)
+        return false;
     fd_set readSet;
     FD_ZERO(&readSet);
     FD_SET(clientSock, &readSet);
@@ -153,7 +166,19 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
         assert(msg.has_context_id() && msg.context_id() != 0);
     static std::string str;
     msg.SerializeToString(&str);
-    uint32_t len = htonl(str.length());
+    const uint32_t len = str.length();
+    if (clientSock < 0) {
+        if (file) {
+            fwrite(&len, sizeof(len), 1, file);
+            fwrite(str.data(), len, 1, file);
+            if (ftell(file) >= MAX_FILE_SIZE) {
+                fclose(file);
+                Die("MAX_FILE_SIZE reached");
+            }
+        }
+        pthread_mutex_unlock(&mutex);
+        return 0;
+    }
     int sent = -1;
     sent = send(clientSock, &len, sizeof(len), 0);
     if (sent != sizeof(len)) {

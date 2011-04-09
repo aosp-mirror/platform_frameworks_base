@@ -311,7 +311,7 @@ static void initEglTraceLevel() {
     int propertyLevel = atoi(value);
     int applicationLevel = gEGLApplicationTraceLevel;
     gEGLTraceLevel = propertyLevel > applicationLevel ? propertyLevel : applicationLevel;
-    
+
     property_get("debug.egl.debug_proc", value, "");
     long pid = getpid();
     char procPath[128] = {};
@@ -324,14 +324,20 @@ static void initEglTraceLevel() {
         {
             if (!strcmp(value, cmdline))
                 gEGLDebugLevel = 1;
-        }    
+        }
         fclose(file);
     }
-    
+
     if (gEGLDebugLevel > 0)
     {
         property_get("debug.egl.debug_port", value, "5039");
-        StartDebugServer(atoi(value));
+        const unsigned short port = (unsigned short)atoi(value);
+        property_get("debug.egl.debug_forceUseFile", value, "0");
+        const bool forceUseFile = (bool)atoi(value);
+        property_get("debug.egl.debug_maxFileSize", value, "8");
+        const unsigned int maxFileSize = atoi(value) << 20;
+        property_get("debug.egl.debug_filePath", value, "/data/local/tmp/dump.gles2dbg");
+        StartDebugServer(port, forceUseFile, maxFileSize, value);
     }
 }
 

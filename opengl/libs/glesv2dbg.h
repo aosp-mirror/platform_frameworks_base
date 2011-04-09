@@ -28,7 +28,10 @@ DbgContext * CreateDbgContext(const pthread_key_t EGLThreadLocalStorageKey,
 
 void DestroyDbgContext(DbgContext * const dbg);
 
-void StartDebugServer(unsigned short port); // create and bind socket if haven't already
+// create and bind socket if haven't already, if failed to create socket or
+//  forceUseFile, then open /data/local/tmp/dump.gles2dbg, exit when size reached
+void StartDebugServer(const unsigned short port, const bool forceUseFile,
+                      const unsigned int maxFileSize, const char * const filePath);
 void StopDebugServer(); // close socket if open
 
 }; // namespace android

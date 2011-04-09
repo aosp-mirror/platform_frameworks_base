@@ -16,16 +16,13 @@
 
 #define EXTEND_Debug_glCopyTexImage2D \
     DbgContext * const dbg = getDbgContextThreadSpecific(); \
-    GLint readFormat, readType; \
-    dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat); \
-    dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType); \
-    unsigned readSize = GetBytesPerPixel(readFormat, readType) * width * height; \
-    void * readData = dbg->GetReadPixelsBuffer(readSize); \
-    dbg->hooks->gl.glReadPixels(x, y, width, height, readFormat, readType, readData); \
+    void * readData = dbg->GetReadPixelsBuffer(4 * width * height); \
+    /* pick easy format for client to convert */ \
+    dbg->hooks->gl.glReadPixels(x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, readData); \
     dbg->CompressReadPixelBuffer(msg.mutable_data()); \
     msg.set_data_type(msg.ReferencedImage); \
-    msg.set_pixel_format(readFormat); \
-    msg.set_pixel_type(readType);
+    msg.set_pixel_format(GL_RGBA); \
+    msg.set_pixel_type(GL_UNSIGNED_BYTE);
 
 #define EXTEND_Debug_glCopyTexSubImage2D EXTEND_Debug_glCopyTexImage2D
 
