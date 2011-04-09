@@ -24,6 +24,7 @@
 #include <jni/drm1_jni.h>
 #include <objmng/svc_drm.h>
 #include "log.h"
+#include "JNIHelp.h"
 
 
 #define MS_PER_SECOND 1000                  /* Milliseconds per second */
@@ -659,23 +660,13 @@ Java_android_drm_mobile1_DrmRawContent_nativeReadContent
     jfieldID field;
 
     if (NULL == buf) {
-        jclass newExcCls = (*env)->FindClass(env, "java/lang/NullPointerException");
-
-        if (newExcCls == NULL)
-            /* Unable to find the exception class, give up. */
-            return JNI_DRM_FAILURE;
-
-        (*env)->ThrowNew(env, newExcCls, "b is null");
+        jniThrowNullPointerException(env, "b == null");
+        return JNI_DRM_FAILURE;
     }
 
     if (len < 0 || bufOff < 0 || len + bufOff > (*env)->GetArrayLength(env, buf)) {
-        jclass newExcCls = (*env)->FindClass(env, "java/lang/IndexOutOfBoundsException");
-
-        if (newExcCls == NULL)
-            /* Unable to find the exception class, give up. */
-            return JNI_DRM_FAILURE;
-
-        (*env)->ThrowNew(env, newExcCls, NULL);
+        jniThrowException(env, "java/lang/IndexOutOfBoundsException", NULL);
+        return JNI_DRM_FAILURE;
     }
 
     if (mediaOff < 0 || len == 0)

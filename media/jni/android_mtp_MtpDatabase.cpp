@@ -182,28 +182,23 @@ MyMtpDatabase::MyMtpDatabase(JNIEnv *env, jobject client)
         mLongBuffer(NULL),
         mStringBuffer(NULL)
 {
-    jintArray intArray;
-    jlongArray longArray;
-    jcharArray charArray;
-
     // create buffers for out arguments
     // we don't need to be thread-safe so this is OK
-    intArray = env->NewIntArray(3);
-    if (!intArray)
-        goto out_of_memory;
+    jintArray intArray = env->NewIntArray(3);
+    if (!intArray) {
+        return; // Already threw.
+    }
     mIntBuffer = (jintArray)env->NewGlobalRef(intArray);
-    longArray = env->NewLongArray(2);
-    if (!longArray)
-        goto out_of_memory;
+    jlongArray longArray = env->NewLongArray(2);
+    if (!longArray) {
+        return; // Already threw.
+    }
     mLongBuffer = (jlongArray)env->NewGlobalRef(longArray);
-    charArray = env->NewCharArray(256);
-    if (!charArray)
-        goto out_of_memory;
+    jcharArray charArray = env->NewCharArray(256);
+    if (!charArray) {
+        return; // Already threw.
+    }
     mStringBuffer = (jcharArray)env->NewGlobalRef(charArray);
-    return;
-
-out_of_memory:
-    env->ThrowNew(env->FindClass("java/lang/OutOfMemoryError"), NULL);
 }
 
 void MyMtpDatabase::cleanup(JNIEnv *env) {
@@ -823,7 +818,7 @@ MtpResponseCode MyMtpDatabase::getObjectFilePath(MtpObjectHandle handle,
     outFileLength = longValues[0];
     outFormat = longValues[1];
     env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
-    
+
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return result;
 }

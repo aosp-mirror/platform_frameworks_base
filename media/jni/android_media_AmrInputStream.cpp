@@ -49,24 +49,11 @@ struct GsmAmrEncoderState {
     int32_t mLastModeUsed;
 };
 
-//
-// helper function to throw an exception
-//
-static void throwException(JNIEnv *env, const char* ex, const char* fmt, int data) {
-    if (jclass cls = env->FindClass(ex)) {
-        char msg[128];
-        sprintf(msg, fmt, data);
-        env->ThrowNew(cls, msg);
-        env->DeleteLocalRef(cls);
-    }
-}
-
 static jint android_media_AmrInputStream_GsmAmrEncoderNew
         (JNIEnv *env, jclass clazz) {
     GsmAmrEncoderState* gae = new GsmAmrEncoderState();
     if (gae == NULL) {
-        throwException(env, "java/lang/RuntimeException",
-                "Out of memory", 0);
+        jniThrowRuntimeException(env, "Out of memory");
     }
     return (jint)gae;
 }
@@ -76,7 +63,7 @@ static void android_media_AmrInputStream_GsmAmrEncoderInitialize
     GsmAmrEncoderState *state = (GsmAmrEncoderState *) gae;
     int32_t nResult = AMREncodeInit(&state->mEncState, &state->mSidState, false);
     if (nResult != OK) {
-        throwException(env, "java/lang/IllegalArgumentException",
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException",
                 "GsmAmrEncoder initialization failed %d", nResult);
     }
 }
@@ -97,7 +84,7 @@ static jint android_media_AmrInputStream_GsmAmrEncoderEncode
                                 (Frame_Type_3GPP*) &state->mLastModeUsed,
                                 AMR_TX_WMF);
     if (length < 0) {
-        throwException(env, "java/io/IOException",
+        jniThrowExceptionFmt(env, "java/io/IOException",
                 "Failed to encode a frame with error code: %d", length);
         return -1;
     }
@@ -148,5 +135,3 @@ int register_android_media_AmrInputStream(JNIEnv *env)
     return AndroidRuntime::registerNativeMethods(env,
             kClassPathName, gMethods, NELEM(gMethods));
 }
-
-
