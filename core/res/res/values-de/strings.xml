@@ -151,7 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Flugmodus"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flugmodus ist AN."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flugmodus ist AUS."</string>
-    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100 +"</string>
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"Mehr als 100"</string>
     <string name="safeMode" msgid="2788228061547930246">"Abgesicherter Modus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-System"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Kostenpflichtige Dienste"</string>
@@ -465,7 +465,7 @@
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Ermöglicht der Anwendung Schreiben in USB-Speicher"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Ermöglicht einer Anwendung, auf die SD-Karte zu schreiben"</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Intern. Mediensp. änd./löschen"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Ermöglicht es einer Anwendung, den Inhalt des internen Medienspeichers zu ändern"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Ermöglicht einer Anwendung, den Inhalt des internen Medienspeichers zu ändern"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"Zugriff auf das Cache-Dateisystem"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Gewährt einer Anwendung Lese- und Schreibzugriff auf das Cache-Dateisystem."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"Internetanrufe tätigen/annehmen"</string>
