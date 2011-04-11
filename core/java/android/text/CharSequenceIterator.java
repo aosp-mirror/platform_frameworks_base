@@ -16,22 +16,18 @@
 
 package android.text;
 
-import android.util.MathUtils;
-
 import java.text.CharacterIterator;
 
 /** {@hide} */
 public class CharSequenceIterator implements CharacterIterator {
     private final CharSequence mValue;
 
-    private final int mStart;
-    private final int mEnd;
+    private final int mLength;
     private int mIndex;
 
     public CharSequenceIterator(CharSequence value) {
         mValue = value;
-        mStart = 0;
-        mEnd = value.length();
+        mLength = value.length();
         mIndex = 0;
     }
 
@@ -46,7 +42,7 @@ public class CharSequenceIterator implements CharacterIterator {
 
     /** {@inheritDoc} */
     public char current() {
-        if (mIndex == mEnd) {
+        if (mIndex == mLength) {
             return DONE;
         }
         return mValue.charAt(mIndex);
@@ -54,12 +50,12 @@ public class CharSequenceIterator implements CharacterIterator {
 
     /** {@inheritDoc} */
     public int getBeginIndex() {
-        return mStart;
+        return 0;
     }
 
     /** {@inheritDoc} */
     public int getEndIndex() {
-        return mEnd;
+        return mLength;
     }
 
     /** {@inheritDoc} */
@@ -69,27 +65,36 @@ public class CharSequenceIterator implements CharacterIterator {
 
     /** {@inheritDoc} */
     public char first() {
-        return setIndex(mStart);
+        return setIndex(0);
     }
 
     /** {@inheritDoc} */
     public char last() {
-        return setIndex(mEnd - 1);
+        return setIndex(mLength - 1);
     }
 
     /** {@inheritDoc} */
     public char next() {
+        if (mIndex == mLength) {
+            return DONE;
+        }
         return setIndex(mIndex + 1);
     }
 
     /** {@inheritDoc} */
     public char previous() {
+        if (mIndex == 0) {
+            return DONE;
+        }
         return setIndex(mIndex - 1);
     }
 
     /** {@inheritDoc} */
     public char setIndex(int index) {
-        mIndex = MathUtils.constrain(index, mStart, mEnd);
+        if ((index < 0) || (index > mLength)) {
+            throw new IllegalArgumentException("Valid range is [" + 0 + "..." + mLength + "]");
+        }
+        mIndex = index;
         return current();
     }
 }
