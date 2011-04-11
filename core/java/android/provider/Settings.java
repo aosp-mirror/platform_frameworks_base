@@ -3688,6 +3688,13 @@ public final class Settings {
                 "inet_condition_debounce_down_delay";
 
         /**
+         * URL to open browser on to allow user to manage a prepay account
+         * @hide
+         */
+        public static final String SETUP_PREPAID_DATA_SERVICE_URL =
+                "setup_prepaid_data_service_url";
+
+        /**
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
