@@ -22,7 +22,9 @@ LOCAL_SRC_FILES:= \
     InputManager.cpp \
     InputReader.cpp \
     InputWindow.cpp \
-    PointerController.cpp
+    PointerController.cpp \
+    SpotController.cpp \
+    SpriteController.cpp
 
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
