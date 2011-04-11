@@ -18,6 +18,7 @@ package com.android.nfc_extras;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.nfc.ApduList;
 import android.nfc.INfcAdapterExtras;
 import android.nfc.NfcAdapter;
 import android.os.RemoteException;
@@ -183,5 +184,21 @@ public final class NfcAdapterExtras {
      */
     public NfcExecutionEnvironment getEmbeddedExecutionEnvironment() {
         return sEmbeddedEe;
+    }
+
+    public void registerTearDownApdus(String packageName, ApduList apdus) {
+        try {
+            sService.registerTearDownApdus(packageName, apdus);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
+    }
+
+    public void unregisterTearDownApdus(String packageName) {
+        try {
+            sService.unregisterTearDownApdus(packageName);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+        }
     }
 }
