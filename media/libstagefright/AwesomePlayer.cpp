@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#undef DEBUG_HDCP
+#define DEBUG_HDCP
 
 //#define LOG_NDEBUG 0
 #define LOG_TAG "AwesomePlayer"
