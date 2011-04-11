@@ -22579,6 +22579,7 @@ package android.view.inputmethod {
     method public java.util.List<android.view.inputmethod.InputMethodInfo> getEnabledInputMethodList();
     method public java.util.List<android.view.inputmethod.InputMethodSubtype> getEnabledInputMethodSubtypeList(android.view.inputmethod.InputMethodInfo, boolean);
     method public java.util.List<android.view.inputmethod.InputMethodInfo> getInputMethodList();
+    method public android.view.inputmethod.InputMethodSubtype getLastInputMethodSubtype();
     method public java.util.Map<android.view.inputmethod.InputMethodInfo, java.util.List<android.view.inputmethod.InputMethodSubtype>> getShortcutInputMethodsAndSubtypes();
     method public void hideSoftInputFromInputMethod(android.os.IBinder, int);
     method public boolean hideSoftInputFromWindow(android.os.IBinder, int);

@@ -1504,6 +1504,17 @@ public final class InputMethodManager {
         }
     }
 
+    public InputMethodSubtype getLastInputMethodSubtype() {
+        synchronized (mH) {
+            try {
+                return mService.getLastInputMethodSubtype();
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+                return null;
+            }
+        }
+    }
+
     void doDump(FileDescriptor fd, PrintWriter fout, String[] args) {
         final Printer p = new PrintWriterPrinter(fout);
         p.println("Input method client state for " + this + ":");

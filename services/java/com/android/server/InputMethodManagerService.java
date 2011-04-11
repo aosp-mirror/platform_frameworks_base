@@ -1399,6 +1399,24 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    public InputMethodSubtype getLastInputMethodSubtype() {
+        synchronized (mMethodMap) {
+            final Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
+            // TODO: Handle the case of the last IME with no subtypes
+            if (lastIme == null || TextUtils.isEmpty(lastIme.first)
+                    || TextUtils.isEmpty(lastIme.second)) return null;
+            final InputMethodInfo lastImi = mMethodMap.get(lastIme.first);
+            if (lastImi == null) return null;
+            try {
+                final int lastSubtypeHash = Integer.valueOf(lastIme.second);
+                return lastImi.getSubtypeAt(getSubtypeIdFromHashCode(
+                        lastImi, lastSubtypeHash));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+    }
+
     private void setInputMethodWithSubtypeId(IBinder token, String id, int subtypeId) {
         synchronized (mMethodMap) {
             if (token == null) {

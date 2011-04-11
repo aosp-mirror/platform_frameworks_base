@@ -33,6 +33,7 @@ interface IInputMethodManager {
     List<InputMethodInfo> getEnabledInputMethodList();
     List<InputMethodSubtype> getEnabledInputMethodSubtypeList(in InputMethodInfo imi,
             boolean allowsImplicitlySelectedSubtypes);
+    InputMethodSubtype getLastInputMethodSubtype();
     // TODO: We should change the return type from List to List<Parcelable>
     // Currently there is a bug that aidl doesn't accept List<Parcelable>
     List getShortcutInputMethodsAndSubtypes();
