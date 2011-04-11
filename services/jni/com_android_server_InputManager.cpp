@@ -36,6 +36,8 @@
 
 #include <input/InputManager.h>
 #include <input/PointerController.h>
+#include <input/SpotController.h>
+#include <input/SpriteController.h>
 
 #include <android_os_MessageQueue.h>
 #include <android_view_KeyEvent.h>
@@ -163,6 +165,7 @@ public:
     virtual nsecs_t getVirtualKeyQuietTime();
     virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames);
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId);
+    virtual sp<SpotControllerInterface> obtainSpotController(int32_t deviceId);
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
@@ -213,12 +216,16 @@ private:
         // System UI visibility.
         int32_t systemUiVisibility;
 
+        // Sprite controller singleton, created on first use.
+        sp<SpriteController> spriteController;
+
         // Pointer controller singleton, created and destroyed as needed.
         wp<PointerController> pointerController;
     } mLocked;
 
     void updateInactivityFadeDelayLocked(const sp<PointerController>& controller);
     void handleInterceptActions(jint wmActions, nsecs_t when, uint32_t& policyFlags);
+    void ensureSpriteControllerLocked();
 
     // Power manager interactions.
     bool isScreenOn();
@@ -419,18 +426,15 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
 
     sp<PointerController> controller = mLocked.pointerController.promote();
     if (controller == NULL) {
-        JNIEnv* env = jniEnv();
-        jint layer = env->CallIntMethod(mCallbacksObj, gCallbacksClassInfo.getPointerLayer);
-        if (checkAndClearExceptionFromCallback(env, "getPointerLayer")) {
-            layer = -1;
-        }
+        ensureSpriteControllerLocked();
 
-        controller = new PointerController(mLooper, layer);
+        controller = new PointerController(mLooper, mLocked.spriteController);
         mLocked.pointerController = controller;
 
         controller->setDisplaySize(mLocked.displayWidth, mLocked.displayHeight);
         controller->setDisplayOrientation(mLocked.displayOrientation);
 
+        JNIEnv* env = jniEnv();
         jobject iconObj = env->CallObjectMethod(mCallbacksObj, gCallbacksClassInfo.getPointerIcon);
         if (!checkAndClearExceptionFromCallback(env, "getPointerIcon") && iconObj) {
             jfloat iconHotSpotX = env->GetFloatField(iconObj, gPointerIconClassInfo.hotSpotX);
@@ -449,6 +453,24 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
         updateInactivityFadeDelayLocked(controller);
     }
     return controller;
+}
+
+sp<SpotControllerInterface> NativeInputManager::obtainSpotController(int32_t deviceId) {
+    AutoMutex _l(mLock);
+
+    ensureSpriteControllerLocked();
+    return new SpotController(mLooper, mLocked.spriteController);
+}
+
+void NativeInputManager::ensureSpriteControllerLocked() {
+    if (mLocked.spriteController == NULL) {
+        JNIEnv* env = jniEnv();
+        jint layer = env->CallIntMethod(mCallbacksObj, gCallbacksClassInfo.getPointerLayer);
+        if (checkAndClearExceptionFromCallback(env, "getPointerLayer")) {
+            layer = -1;
+        }
+        mLocked.spriteController = new SpriteController(mLooper, layer);
+    }
 }
 
 void NativeInputManager::notifySwitch(nsecs_t when, int32_t switchCode,
