@@ -24,6 +24,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Vector;
 
 /**
  * {@hide}
@@ -433,6 +434,180 @@ public class HierarchicalStateMachine {
      */
     public static final boolean NOT_HANDLED = false;
 
+    /**
+     * {@hide}
+     *
+     * The information maintained for a processed message.
+     */
+    public static class ProcessedMessageInfo {
+        private int what;
+        private HierarchicalState state;
+        private HierarchicalState orgState;
+
+        /**
+         * Constructor
+         * @param message
+         * @param state that handled the message
+         * @param orgState is the first state the received the message but
+         * did not processes the message.
+         */
+        ProcessedMessageInfo(Message message, HierarchicalState state, HierarchicalState orgState) {
+            update(message, state, orgState);
+        }
+
+        /**
+         * Update the information in the record.
+         * @param state that handled the message
+         * @param orgState is the first state the received the message but
+         * did not processes the message.
+         */
+        public void update(Message message, HierarchicalState state, HierarchicalState orgState) {
+            this.what = message.what;
+            this.state = state;
+            this.orgState = orgState;
+        }
+
+        /**
+         * @return the command that was executing
+         */
+        public int getWhat() {
+            return what;
+        }
+
+        /**
+         * @return the state that handled this message
+         */
+        public HierarchicalState getState() {
+            return state;
+        }
+
+        /**
+         * @return the original state that received the message.
+         */
+        public HierarchicalState getOriginalState() {
+            return orgState;
+        }
+
+        /**
+         * @return as string
+         */
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append("what=");
+            sb.append(what);
+            sb.append(" state=");
+            sb.append(cn(state));
+            sb.append(" orgState=");
+            sb.append(cn(orgState));
+            return sb.toString();
+        }
+
+        /**
+         * @return an objects class name
+         */
+        private String cn(Object n) {
+            if (n == null) {
+                return "null";
+            } else {
+                String name = n.getClass().getName();
+                int lastDollar = name.lastIndexOf('$');
+                return name.substring(lastDollar + 1);
+            }
+        }
+    }
+
+    /**
+     * A list of messages recently processed by the state machine.
+     *
+     * The class maintains a list of messages that have been most
+     * recently processed. The list is finite and may be set in the
+     * constructor or by calling setSize. The public interface also
+     * includes size which returns the number of recent messages,
+     * count which is the number of message processed since the
+     * the last setSize, get which returns a processed message and
+     * add which adds a processed messaged.
+     */
+    private static class ProcessedMessages {
+
+        private static final int DEFAULT_SIZE = 20;
+
+        private Vector<ProcessedMessageInfo> mMessages = new Vector<ProcessedMessageInfo>();
+        private int mMaxSize = DEFAULT_SIZE;
+        private int mOldestIndex = 0;
+        private int mCount = 0;
+
+        /**
+         * Constructor
+         */
+        ProcessedMessages() {
+        }
+
+        /**
+         * Set size of messages to maintain and clears all current messages.
+         *
+         * @param maxSize number of messages to maintain at anyone time.
+        */
+        void setSize(int maxSize) {
+            mMaxSize = maxSize;
+            mCount = 0;
+            mMessages.clear();
+        }
+
+        /**
+         * @return the number of recent messages.
+         */
+        int size() {
+            return mMessages.size();
+        }
+
+        /**
+         * @return the total number of messages processed since size was set.
+         */
+        int count() {
+            return mCount;
+        }
+
+        /**
+         * @return the information on a particular record. 0 is the oldest
+         * record and size()-1 is the newest record. If the index is to
+         * large null is returned.
+         */
+        ProcessedMessageInfo get(int index) {
+            int nextIndex = mOldestIndex + index;
+            if (nextIndex >= mMaxSize) {
+                nextIndex -= mMaxSize;
+            }
+            if (nextIndex >= size()) {
+                return null;
+            } else {
+                return mMessages.get(nextIndex);
+            }
+        }
+
+        /**
+         * Add a processed message.
+         *
+         * @param message
+         * @param state that handled the message
+         * @param orgState is the first state the received the message but
+         * did not processes the message.
+         */
+        void add(Message message, HierarchicalState state, HierarchicalState orgState) {
+            mCount += 1;
+            if (mMessages.size() < mMaxSize) {
+                mMessages.add(new ProcessedMessageInfo(message, state, orgState));
+            } else {
+                ProcessedMessageInfo pmi = mMessages.get(mOldestIndex);
+                mOldestIndex += 1;
+                if (mOldestIndex >= mMaxSize) {
+                    mOldestIndex = 0;
+                }
+                pmi.update(message, state, orgState);
+            }
+        }
+    }
+
     private static class HsmHandler extends Handler {
 
         /** The debug flag */
@@ -440,9 +615,6 @@ public class HierarchicalStateMachine {
 
         /** The quit object */
         private static final Object mQuitObj = new Object();
-
-        /** The initialization message */
-        private static final Message mInitMsg = null;
 
         /** The current message */
         private Message mMsg;
@@ -615,8 +787,9 @@ public class HierarchicalStateMachine {
                      */
                     mHsm.quitting();
                     if (mHsm.mHsmThread != null) {
-                        // If we made the thread then quit looper
+                        // If we made the thread then quit looper which stops the thread.
                         getLooper().quit();
+                        mHsm.mHsmThread = null;
                     }
                 } else if (destState == mHaltingState) {
                     /**
@@ -963,8 +1136,8 @@ public class HierarchicalStateMachine {
             return mProcessedMessages.count();
         }
 
-        /** @see HierarchicalStateMachine#getProcessedMessage(int) */
-        private final ProcessedMessages.Info getProcessedMessage(int index) {
+        /** @see HierarchicalStateMachine#getProcessedMessageInfo(int) */
+        private final ProcessedMessageInfo getProcessedMessageInfo(int index) {
             return mProcessedMessages.get(index);
         }
 
@@ -1090,9 +1263,7 @@ public class HierarchicalStateMachine {
      * @param msg that couldn't be handled.
      */
     protected void unhandledMessage(Message msg) {
-        if (false) {
-            Log.e(TAG, mName + " - unhandledMessage: msg.what=" + msg.what);
-        }
+        if (mHsmHandler.mDbg) Log.e(TAG, mName + " - unhandledMessage: msg.what=" + msg.what);
     }
 
     /**
@@ -1103,16 +1274,18 @@ public class HierarchicalStateMachine {
     }
 
     /**
-     * Called after the message that called transitionToHalting
-     * is called and should be overridden by StateMachine's that
-     * call transitionToHalting.
+     * This will be called once after handling a message that called
+     * transitionToHalting. All subsequent messages will invoke
+     * {@link HierarchicalStateMachine#haltedProcessMessage(Message)}
      */
     protected void halting() {
     }
 
     /**
-     * Called after the quitting message was NOT handled and
-     * just before the quit actually occurs.
+     * This will be called once after a quit message that was NOT handled by
+     * the derived HSM. The HSM will stop and any subsequent messages will be
+     * ignored. In addition, if this HSM created the thread, the thread will
+     * be stopped after this method returns.
      */
     protected void quitting() {
     }
@@ -1148,10 +1321,10 @@ public class HierarchicalStateMachine {
     }
 
     /**
-     * @return a processed message
+     * @return a processed message information
      */
-    public final ProcessedMessages.Info getProcessedMessage(int index) {
-        return mHsmHandler.getProcessedMessage(index);
+    public final ProcessedMessageInfo getProcessedMessageInfo(int index) {
+        return mHsmHandler.getProcessedMessageInfo(index);
     }
 
     /**

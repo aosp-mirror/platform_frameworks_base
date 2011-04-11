@@ -24,7 +24,7 @@ import android.os.SystemClock;
 
 import com.android.internal.util.HierarchicalState;
 import com.android.internal.util.HierarchicalStateMachine;
-import com.android.internal.util.ProcessedMessages;
+import com.android.internal.util.HierarchicalStateMachine.ProcessedMessageInfo;
 
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -125,21 +125,21 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         assertTrue(smQuitTest.getProcessedMessagesCount() == 9);
 
-        ProcessedMessages.Info pmi;
+        ProcessedMessageInfo pmi;
 
         // The first two message didn't quit and were handled by mS1
-        pmi = smQuitTest.getProcessedMessage(6);
+        pmi = smQuitTest.getProcessedMessageInfo(6);
         assertEquals(HierarchicalStateMachine.HSM_QUIT_CMD, pmi.getWhat());
         assertEquals(smQuitTest.mS1, pmi.getState());
         assertEquals(smQuitTest.mS1, pmi.getOriginalState());
 
-        pmi = smQuitTest.getProcessedMessage(7);
+        pmi = smQuitTest.getProcessedMessageInfo(7);
         assertEquals(HierarchicalStateMachine.HSM_QUIT_CMD, pmi.getWhat());
         assertEquals(smQuitTest.mS1, pmi.getState());
         assertEquals(smQuitTest.mS1, pmi.getOriginalState());
 
         // The last message was never handled so the states are null
-        pmi = smQuitTest.getProcessedMessage(8);
+        pmi = smQuitTest.getProcessedMessageInfo(8);
         assertEquals(HierarchicalStateMachine.HSM_QUIT_CMD, pmi.getWhat());
         assertEquals(null, pmi.getState());
         assertEquals(null, pmi.getOriginalState());
@@ -285,10 +285,10 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         assertTrue(smEnterExitTranstionToTest.getProcessedMessagesCount() == 1);
 
-        ProcessedMessages.Info pmi;
+        ProcessedMessageInfo pmi;
 
         // Message should be handled by mS2.
-        pmi = smEnterExitTranstionToTest.getProcessedMessage(0);
+        pmi = smEnterExitTranstionToTest.getProcessedMessageInfo(0);
         assertEquals(TEST_CMD_1, pmi.getWhat());
         assertEquals(smEnterExitTranstionToTest.mS2, pmi.getState());
         assertEquals(smEnterExitTranstionToTest.mS2, pmi.getOriginalState());
@@ -369,18 +369,18 @@ public class HierarchicalStateMachineTest extends TestCase {
         assertTrue(sm0.getProcessedMessagesCount() == 6);
         assertTrue(sm0.getProcessedMessagesSize() == 3);
 
-        ProcessedMessages.Info pmi;
-        pmi = sm0.getProcessedMessage(0);
+        ProcessedMessageInfo pmi;
+        pmi = sm0.getProcessedMessageInfo(0);
         assertEquals(TEST_CMD_4, pmi.getWhat());
         assertEquals(sm0.mS1, pmi.getState());
         assertEquals(sm0.mS1, pmi.getOriginalState());
 
-        pmi = sm0.getProcessedMessage(1);
+        pmi = sm0.getProcessedMessageInfo(1);
         assertEquals(TEST_CMD_5, pmi.getWhat());
         assertEquals(sm0.mS1, pmi.getState());
         assertEquals(sm0.mS1, pmi.getOriginalState());
 
-        pmi = sm0.getProcessedMessage(2);
+        pmi = sm0.getProcessedMessageInfo(2);
         assertEquals(TEST_CMD_6, pmi.getWhat());
         assertEquals(sm0.mS1, pmi.getState());
         assertEquals(sm0.mS1, pmi.getOriginalState());
@@ -469,13 +469,13 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         assertTrue(sm1.getProcessedMessagesSize() == 2);
 
-        ProcessedMessages.Info pmi;
-        pmi = sm1.getProcessedMessage(0);
+        ProcessedMessageInfo pmi;
+        pmi = sm1.getProcessedMessageInfo(0);
         assertEquals(TEST_CMD_1, pmi.getWhat());
         assertEquals(sm1.mS1, pmi.getState());
         assertEquals(sm1.mS1, pmi.getOriginalState());
 
-        pmi = sm1.getProcessedMessage(1);
+        pmi = sm1.getProcessedMessageInfo(1);
         assertEquals(TEST_CMD_2, pmi.getWhat());
         assertEquals(sm1.mS1, pmi.getState());
         assertEquals(sm1.mS1, pmi.getOriginalState());
@@ -571,20 +571,20 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         assertTrue(sm2.getProcessedMessagesSize() == 4);
 
-        ProcessedMessages.Info pmi;
-        pmi = sm2.getProcessedMessage(0);
+        ProcessedMessageInfo pmi;
+        pmi = sm2.getProcessedMessageInfo(0);
         assertEquals(TEST_CMD_1, pmi.getWhat());
         assertEquals(sm2.mS1, pmi.getState());
 
-        pmi = sm2.getProcessedMessage(1);
+        pmi = sm2.getProcessedMessageInfo(1);
         assertEquals(TEST_CMD_2, pmi.getWhat());
         assertEquals(sm2.mS1, pmi.getState());
 
-        pmi = sm2.getProcessedMessage(2);
+        pmi = sm2.getProcessedMessageInfo(2);
         assertEquals(TEST_CMD_1, pmi.getWhat());
         assertEquals(sm2.mS2, pmi.getState());
 
-        pmi = sm2.getProcessedMessage(3);
+        pmi = sm2.getProcessedMessageInfo(3);
         assertEquals(TEST_CMD_2, pmi.getWhat());
         assertEquals(sm2.mS2, pmi.getState());
 
@@ -663,13 +663,13 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         assertTrue(sm3.getProcessedMessagesSize() == 2);
 
-        ProcessedMessages.Info pmi;
-        pmi = sm3.getProcessedMessage(0);
+        ProcessedMessageInfo pmi;
+        pmi = sm3.getProcessedMessageInfo(0);
         assertEquals(TEST_CMD_1, pmi.getWhat());
         assertEquals(sm3.mParentState, pmi.getState());
         assertEquals(sm3.mChildState, pmi.getOriginalState());
 
-        pmi = sm3.getProcessedMessage(1);
+        pmi = sm3.getProcessedMessageInfo(1);
         assertEquals(TEST_CMD_2, pmi.getWhat());
         assertEquals(sm3.mParentState, pmi.getState());
         assertEquals(sm3.mChildState, pmi.getOriginalState());
@@ -757,13 +757,13 @@ public class HierarchicalStateMachineTest extends TestCase {
 
         assertTrue(sm4.getProcessedMessagesSize() == 2);
 
-        ProcessedMessages.Info pmi;
-        pmi = sm4.getProcessedMessage(0);
+        ProcessedMessageInfo pmi;
+        pmi = sm4.getProcessedMessageInfo(0);
         assertEquals(TEST_CMD_1, pmi.getWhat());
         assertEquals(sm4.mChildState1, pmi.getState());
         assertEquals(sm4.mChildState1, pmi.getOriginalState());
 
-        pmi = sm4.getProcessedMessage(1);
+        pmi = sm4.getProcessedMessageInfo(1);
         assertEquals(TEST_CMD_2, pmi.getWhat());
         assertEquals(sm4.mParentState, pmi.getState());
         assertEquals(sm4.mChildState2, pmi.getOriginalState());
@@ -1050,33 +1050,33 @@ public class HierarchicalStateMachineTest extends TestCase {
         assertEquals(1, sm5.mChildState5EnterCount);
         assertEquals(1, sm5.mChildState5ExitCount);
 
-        ProcessedMessages.Info pmi;
-        pmi = sm5.getProcessedMessage(0);
+        ProcessedMessageInfo pmi;
+        pmi = sm5.getProcessedMessageInfo(0);
         assertEquals(TEST_CMD_1, pmi.getWhat());
         assertEquals(sm5.mChildState1, pmi.getState());
         assertEquals(sm5.mChildState1, pmi.getOriginalState());
 
-        pmi = sm5.getProcessedMessage(1);
+        pmi = sm5.getProcessedMessageInfo(1);
         assertEquals(TEST_CMD_2, pmi.getWhat());
         assertEquals(sm5.mChildState2, pmi.getState());
         assertEquals(sm5.mChildState2, pmi.getOriginalState());
 
-        pmi = sm5.getProcessedMessage(2);
+        pmi = sm5.getProcessedMessageInfo(2);
         assertEquals(TEST_CMD_3, pmi.getWhat());
         assertEquals(sm5.mChildState5, pmi.getState());
         assertEquals(sm5.mChildState5, pmi.getOriginalState());
 
-        pmi = sm5.getProcessedMessage(3);
+        pmi = sm5.getProcessedMessageInfo(3);
         assertEquals(TEST_CMD_4, pmi.getWhat());
         assertEquals(sm5.mChildState3, pmi.getState());
         assertEquals(sm5.mChildState3, pmi.getOriginalState());
 
-        pmi = sm5.getProcessedMessage(4);
+        pmi = sm5.getProcessedMessageInfo(4);
         assertEquals(TEST_CMD_5, pmi.getWhat());
         assertEquals(sm5.mChildState4, pmi.getState());
         assertEquals(sm5.mChildState4, pmi.getOriginalState());
 
-        pmi = sm5.getProcessedMessage(5);
+        pmi = sm5.getProcessedMessageInfo(5);
         assertEquals(TEST_CMD_6, pmi.getWhat());
         assertEquals(sm5.mParentState2, pmi.getState());
         assertEquals(sm5.mParentState2, pmi.getOriginalState());
@@ -1434,7 +1434,7 @@ public class HierarchicalStateMachineTest extends TestCase {
         for (StateMachineSharedThread sm : sms) {
             assertTrue(sm.getProcessedMessagesCount() == 4);
             for (int i = 0; i < sm.getProcessedMessagesCount(); i++) {
-                ProcessedMessages.Info pmi = sm.getProcessedMessage(i);
+                ProcessedMessageInfo pmi = sm.getProcessedMessageInfo(i);
                 assertEquals(i+1, pmi.getWhat());
                 assertEquals(sm.mS1, pmi.getState());
                 assertEquals(sm.mS1, pmi.getOriginalState());
@@ -1464,37 +1464,37 @@ public class HierarchicalStateMachineTest extends TestCase {
         }
 
         assertEquals(7, sm.getProcessedMessagesCount());
-        ProcessedMessages.Info pmi = sm.getProcessedMessage(0);
+        ProcessedMessageInfo pmi = sm.getProcessedMessageInfo(0);
         assertEquals(Hsm1.CMD_1, pmi.getWhat());
         assertEquals(sm.mS1, pmi.getState());
         assertEquals(sm.mS1, pmi.getOriginalState());
 
-        pmi = sm.getProcessedMessage(1);
+        pmi = sm.getProcessedMessageInfo(1);
         assertEquals(Hsm1.CMD_2, pmi.getWhat());
         assertEquals(sm.mP1, pmi.getState());
         assertEquals(sm.mS1, pmi.getOriginalState());
 
-        pmi = sm.getProcessedMessage(2);
+        pmi = sm.getProcessedMessageInfo(2);
         assertEquals(Hsm1.CMD_2, pmi.getWhat());
         assertEquals(sm.mS2, pmi.getState());
         assertEquals(sm.mS2, pmi.getOriginalState());
 
-        pmi = sm.getProcessedMessage(3);
+        pmi = sm.getProcessedMessageInfo(3);
         assertEquals(Hsm1.CMD_3, pmi.getWhat());
         assertEquals(sm.mS2, pmi.getState());
         assertEquals(sm.mS2, pmi.getOriginalState());
 
-        pmi = sm.getProcessedMessage(4);
+        pmi = sm.getProcessedMessageInfo(4);
         assertEquals(Hsm1.CMD_3, pmi.getWhat());
         assertEquals(sm.mP2, pmi.getState());
         assertEquals(sm.mP2, pmi.getOriginalState());
 
-        pmi = sm.getProcessedMessage(5);
+        pmi = sm.getProcessedMessageInfo(5);
         assertEquals(Hsm1.CMD_4, pmi.getWhat());
         assertEquals(sm.mP2, pmi.getState());
         assertEquals(sm.mP2, pmi.getOriginalState());
 
-        pmi = sm.getProcessedMessage(6);
+        pmi = sm.getProcessedMessageInfo(6);
         assertEquals(Hsm1.CMD_5, pmi.getWhat());
         assertEquals(sm.mP2, pmi.getState());
         assertEquals(sm.mP2, pmi.getOriginalState());
