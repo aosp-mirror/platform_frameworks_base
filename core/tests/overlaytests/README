@@ -1,0 +1,15 @@
+Unit tests for runtime resource overlay
+=======================================
+
+As of this writing, runtime resource overlay is only triggered for
+/system/framework/framework-res.apk. Because of this, installation of
+overlay packages require the Android platform be rebooted. However, the
+regular unit tests (triggered via development/testrunner/runtest.py)
+cannot handle reboots. As a workaround, this directory contains a shell
+script which will trigger the tests in a non-standard way.
+
+Once runtime resource overlay may be applied to applications, the tests
+in this directory should be moved to core/tests/coretests. Also, by
+applying runtime resource overlay to a dedicated test application, the
+test cases would not need to assume default values for non-overlaid
+resources.
