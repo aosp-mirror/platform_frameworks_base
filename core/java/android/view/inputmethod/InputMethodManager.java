@@ -505,6 +505,13 @@ public final class InputMethodManager {
         }
     }
 
+    /**
+     * Returns a list of enabled input method subtypes for the specified input method info.
+     * @param imi An input method info whose subtypes list will be returned.
+     * @param allowsImplicitlySelectedSubtypes A boolean flag to allow to return the implicitly
+     * selected subtypes. If an input method info doesn't have enabled subtypes, the framework
+     * will implicitly enable subtypes according to the current system language.
+     */
     public List<InputMethodSubtype> getEnabledInputMethodSubtypeList(InputMethodInfo imi,
             boolean allowsImplicitlySelectedSubtypes) {
         try {
@@ -1429,16 +1436,26 @@ public final class InputMethodManager {
         }
     }
 
-    public void showInputMethodAndSubtypeEnabler(String topId) {
+    /**
+     * Show the settings for enabling subtypes of the specified input method.
+     * @param imiId An input method, whose subtypes settings will be shown. If imiId is null,
+     * subtypes of all input methods will be shown.
+     */
+    public void showInputMethodAndSubtypeEnabler(String imiId) {
         synchronized (mH) {
             try {
-                mService.showInputMethodAndSubtypeEnablerFromClient(mClient, topId);
+                mService.showInputMethodAndSubtypeEnablerFromClient(mClient, imiId);
             } catch (RemoteException e) {
                 Log.w(TAG, "IME died: " + mCurId, e);
             }
         }
     }
 
+    /**
+     * Returns the current input method subtype. This subtype is one of the subtypes in
+     * the current input method. This method returns null when the current input method doesn't
+     * have any input method subtype.
+     */
     public InputMethodSubtype getCurrentInputMethodSubtype() {
         synchronized (mH) {
             try {
@@ -1450,6 +1467,12 @@ public final class InputMethodManager {
         }
     }
 
+    /**
+     * Switch to a new input method subtype of the current input method.
+     * @param subtype A new input method subtype to switch.
+     * @return true if the current subtype was successfully switched. When the specified subtype is
+     * null, this method returns false.
+     */
     public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
         synchronized (mH) {
             try {
@@ -1461,6 +1484,9 @@ public final class InputMethodManager {
         }
     }
 
+    /**
+     * Returns a map of all shortcut input method info and their subtypes.
+     */
     public Map<InputMethodInfo, List<InputMethodSubtype>> getShortcutInputMethodsAndSubtypes() {
         synchronized (mH) {
             HashMap<InputMethodInfo, List<InputMethodSubtype>> ret =
@@ -1493,6 +1519,15 @@ public final class InputMethodManager {
         }
     }
 
+    /**
+     * Force switch to the last used input method and subtype. If the last input method didn't have
+     * any subtypes, the framework will simply switch to the last input method with no subtype
+     * specified.
+     * @param imeToken Supplies the identifying token given to an input method when it was started,
+     * which allows it to perform this operation on itself.
+     * @return true if the current input method and subtype was successfully switched to the last
+     * used input method and subtype.
+     */
     public boolean switchToLastInputMethod(IBinder imeToken) {
         synchronized (mH) {
             try {
