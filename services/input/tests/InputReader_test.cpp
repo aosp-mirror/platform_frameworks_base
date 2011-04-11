@@ -192,6 +192,10 @@ private:
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId) {
         return mPointerControllers.valueFor(deviceId);
     }
+
+    virtual sp<SpotControllerInterface> obtainSpotController(int32_t device) {
+        return NULL;
+    }
 };
 
 

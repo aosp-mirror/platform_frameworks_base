@@ -20,6 +20,7 @@
 #include "EventHub.h"
 #include "InputDispatcher.h"
 #include "PointerController.h"
+#include "SpotController.h"
 
 #include <ui/Input.h>
 #include <ui/DisplayInfo.h>
@@ -89,6 +90,9 @@ public:
 
     /* Gets a pointer controller associated with the specified cursor device (ie. a mouse). */
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId) = 0;
+
+    /* Gets a spot controller associated with the specified touch pad device. */
+    virtual sp<SpotControllerInterface> obtainSpotController(int32_t deviceId) = 0;
 };
 
 

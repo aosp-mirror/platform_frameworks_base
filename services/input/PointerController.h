@@ -17,15 +17,13 @@
 #ifndef _UI_POINTER_CONTROLLER_H
 #define _UI_POINTER_CONTROLLER_H
 
+#include "SpriteController.h"
+
 #include <ui/DisplayInfo.h>
 #include <ui/Input.h>
 #include <utils/RefBase.h>
 #include <utils/Looper.h>
 #include <utils/String8.h>
-
-#include <surfaceflinger/Surface.h>
-#include <surfaceflinger/SurfaceComposerClient.h>
-#include <surfaceflinger/ISurfaceComposer.h>
 
 #include <SkBitmap.h>
 
@@ -86,7 +84,7 @@ public:
         INACTIVITY_FADE_DELAY_SHORT = 1,
     };
 
-    PointerController(const sp<Looper>& looper, int32_t pointerLayer);
+    PointerController(const sp<Looper>& looper, const sp<SpriteController>& spriteController);
 
     virtual bool getBounds(float* outMinX, float* outMinY,
             float* outMaxX, float* outMaxY) const;
@@ -111,9 +109,8 @@ private:
     mutable Mutex mLock;
 
     sp<Looper> mLooper;
-    int32_t mPointerLayer;
-    sp<SurfaceComposerClient> mSurfaceComposerClient;
-    sp<SurfaceControl> mSurfaceControl;
+    sp<SpriteController> mSpriteController;
+    sp<WeakMessageHandler> mHandler;
 
     struct Locked {
         int32_t displayWidth;
@@ -124,26 +121,17 @@ private:
         float pointerY;
         uint32_t buttonState;
 
-        SkBitmap* iconBitmap;
-        float iconHotSpotX;
-        float iconHotSpotY;
-
         float fadeAlpha;
         InactivityFadeDelay inactivityFadeDelay;
 
-        bool wantVisible;
         bool visible;
-        bool drawn;
-    } mLocked;
 
-    sp<WeakMessageHandler> mHandler;
+        sp<Sprite> sprite;
+    } mLocked;
 
     bool getBoundsLocked(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
     void setPositionLocked(float x, float y);
     void updateLocked();
-    bool createSurfaceIfNeededLocked();
-    bool drawPointerIfNeededLocked();
-    bool resizeSurfaceLocked(int32_t width, int32_t height);
 
     void handleMessage(const Message& message);
     bool unfadeBeforeUpdateLocked();
