@@ -27,7 +27,6 @@
         android:layout_marginRight="8dip"
         android:layout_marginLeft="-1dip"
         style="@*android:style/Widget.QuickContactBadge.WindowSmall" />
-    />
 
     <LinearLayout
         android:layout_width="0dip"
