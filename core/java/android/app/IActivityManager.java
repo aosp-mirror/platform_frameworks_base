@@ -342,6 +342,9 @@ public interface IActivityManager extends IInterface {
     public int startActivitiesInPackage(int uid,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo) throws RemoteException;
 
+    // Multi-user APIs
+    public boolean switchUser(int userid) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -557,4 +560,5 @@ public interface IActivityManager extends IInterface {
     int START_ACTIVITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+120;
     int START_ACTIVITIES_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+121;
     int ACTIVITY_SLEPT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+122;
+    int SWITCH_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+123;
 }

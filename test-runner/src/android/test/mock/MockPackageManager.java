@@ -23,32 +23,30 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.FeatureInfo;
-import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageDataObserver;
+import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.RemoteException;
 
 import java.util.List;
 
 /**
  * A mock {@link android.content.pm.PackageManager} class.  All methods are non-functional and throw
- * {@link java.lang.UnsupportedOperationException}. Override it to provide the operations that you 
+ * {@link java.lang.UnsupportedOperationException}. Override it to provide the operations that you
  * need.
  */
 public class MockPackageManager extends PackageManager {
@@ -63,12 +61,12 @@ public class MockPackageManager extends PackageManager {
     public String[] currentToCanonicalPackageNames(String[] names) {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public String[] canonicalToCurrentPackageNames(String[] names) {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public Intent getLaunchIntentForPackage(String packageName) {
         throw new UnsupportedOperationException();
@@ -101,7 +99,7 @@ public class MockPackageManager extends PackageManager {
     public List<PermissionGroupInfo> getAllPermissionGroups(int flags) {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public ApplicationInfo getApplicationInfo(String packageName, int flags)
     throws NameNotFoundException {
@@ -176,7 +174,7 @@ public class MockPackageManager extends PackageManager {
     public String getNameForUid(int uid) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * @hide - to match hiding in superclass
      */
@@ -273,7 +271,7 @@ public class MockPackageManager extends PackageManager {
     public Drawable getApplicationIcon(String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public Drawable getActivityLogo(ComponentName activityName) throws NameNotFoundException {
         throw new UnsupportedOperationException();
@@ -354,7 +352,7 @@ public class MockPackageManager extends PackageManager {
     public void movePackage(String packageName, IPackageMoveObserver observer, int flags) {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public String getInstallerPackageName(String packageName) {
         throw new UnsupportedOperationException();
@@ -368,7 +366,7 @@ public class MockPackageManager extends PackageManager {
             String packageName, IPackageDataObserver observer) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * @hide - to match hiding in superclass
      */
@@ -377,7 +375,7 @@ public class MockPackageManager extends PackageManager {
             String packageName, IPackageDataObserver observer) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * @hide - to match hiding in superclass
      */
@@ -435,7 +433,7 @@ public class MockPackageManager extends PackageManager {
     public void setApplicationEnabledSetting(String packageName, int newState, int flags) {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public int getApplicationEnabledSetting(String packageName) {
         throw new UnsupportedOperationException();
@@ -446,7 +444,7 @@ public class MockPackageManager extends PackageManager {
             int match, ComponentName[] set, ComponentName activity) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * @hide - to match hiding in superclass
      */
@@ -475,24 +473,64 @@ public class MockPackageManager extends PackageManager {
             List<ComponentName> outActivities, String packageName) {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public String[] getSystemSharedLibraryNames() {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public FeatureInfo[] getSystemAvailableFeatures() {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public boolean hasSystemFeature(String name) {
         throw new UnsupportedOperationException();
     }
-    
+
     @Override
     public boolean isSafeMode() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public UserInfo createUser(String name, int flags) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public List<UserInfo> getUsers() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public boolean removeUser(int id) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void updateUserName(int id, String name) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    public void updateUserFlags(int id, int flags) {
         throw new UnsupportedOperationException();
     }
 }

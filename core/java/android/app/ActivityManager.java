@@ -16,6 +16,9 @@
 
 package android.app;
 
+import com.android.internal.app.IUsageStats;
+import com.android.internal.os.PkgUsageStats;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -26,17 +29,15 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Debug;
-import android.os.RemoteException;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import com.android.internal.app.IUsageStats;
-import com.android.internal.os.PkgUsageStats;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -676,7 +677,7 @@ public class ActivityManager {
     public List<RunningServiceInfo> getRunningServices(int maxNum)
             throws SecurityException {
         try {
-            return (List<RunningServiceInfo>)ActivityManagerNative.getDefault()
+            return ActivityManagerNative.getDefault()
                     .getServices(maxNum, 0);
         } catch (RemoteException e) {
             // System dead, we will be dead too soon!
@@ -1331,4 +1332,17 @@ public class ActivityManager {
             return new HashMap<String, Integer>();
         }
     }
+
+    /**
+     * @param userid the user's id. Zero indicates the default user 
+     * @hide
+     */
+    public boolean switchUser(int userid) {
+        try {
+            return ActivityManagerNative.getDefault().switchUser(userid);
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
 }
