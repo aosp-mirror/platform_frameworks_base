@@ -143,7 +143,7 @@ static jstring native_1x1_string(JNIEnv* env, jobject object)
 static jobject createParcelFileDescriptor(JNIEnv * env, int fd)
 {
     // Create FileDescriptor object
-    jobject fileDesc = newFileDescriptor(env, fd);
+    jobject fileDesc = jniCreateFileDescriptor(env, fd);
     if (fileDesc == NULL) {
         // FileDescriptor constructor has thrown an exception
         close(fd);

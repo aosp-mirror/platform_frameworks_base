@@ -42,7 +42,7 @@ static jboolean
 android_hardware_UsbDeviceConnection_open(JNIEnv *env, jobject thiz, jstring deviceName,
         jobject fileDescriptor)
 {
-    int fd = getParcelFileDescriptorFD(env, fileDescriptor);
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     // duplicate the file descriptor, since ParcelFileDescriptor will eventually close its copy
     fd = dup(fd);
     if (fd < 0)

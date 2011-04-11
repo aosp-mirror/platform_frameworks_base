@@ -25,9 +25,6 @@
 namespace android
 {
 
-// java.io.FileDescriptor
-static jfieldID s_descriptorField = 0;
-
 // android.app.backup.BackupDataInput$EntityHeader
 static jfieldID s_keyField = 0;
 static jfieldID s_dataSizeField = 0;
@@ -35,9 +32,7 @@ static jfieldID s_dataSizeField = 0;
 static int
 ctor_native(JNIEnv* env, jobject clazz, jobject fileDescriptor)
 {
-    int err;
-
-    int fd = env->GetIntField(fileDescriptor, s_descriptorField);
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     if (fd == -1) {
         return NULL;
     }
@@ -140,15 +135,7 @@ int register_android_backup_BackupDataInput(JNIEnv* env)
 {
     //LOGD("register_android_backup_BackupDataInput");
 
-    jclass clazz;
-
-    clazz = env->FindClass("java/io/FileDescriptor");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class java.io.FileDescriptor");
-    s_descriptorField = env->GetFieldID(clazz, "descriptor", "I");
-    LOG_FATAL_IF(s_descriptorField == NULL,
-            "Unable to find descriptor field in java.io.FileDescriptor");
-
-    clazz = env->FindClass("android/app/backup/BackupDataInput$EntityHeader");
+    jclass clazz = env->FindClass("android/app/backup/BackupDataInput$EntityHeader");
     LOG_FATAL_IF(clazz == NULL, "Unable to find class android.app.backup.BackupDataInput.EntityHeader");
     s_keyField = env->GetFieldID(clazz, "key", "Ljava/lang/String;");
     LOG_FATAL_IF(s_keyField == NULL,

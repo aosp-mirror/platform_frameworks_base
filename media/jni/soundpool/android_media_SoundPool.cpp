@@ -60,7 +60,7 @@ android_media_SoundPool_load_FD(JNIEnv *env, jobject thiz, jobject fileDescripto
     LOGV("android_media_SoundPool_load_FD");
     SoundPool *ap = MusterSoundPool(env, thiz);
     if (ap == NULL) return 0;
-    return ap->load(getParcelFileDescriptorFD(env, fileDescriptor),
+    return ap->load(jniGetFDFromFileDescriptor(env, fileDescriptor),
             int64_t(offset), int64_t(length), int(priority));
 }
 

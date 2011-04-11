@@ -175,7 +175,7 @@ android_media_JetPlayer_loadFromFileD(JNIEnv *env, jobject thiz,
     lpJet->setEventCallback(jetPlayerEventCallback);
 
     LOGV("android_media_JetPlayer_openFileDescr(): trying to load JET file through its fd" );
-    EAS_RESULT result = lpJet->loadFromFD(getParcelFileDescriptorFD(env, fileDescriptor),
+    EAS_RESULT result = lpJet->loadFromFD(jniGetFDFromFileDescriptor(env, fileDescriptor),
         (long long)offset, (long long)length); // cast params to types used by EAS_FILE
 
     if(result==EAS_SUCCESS) {

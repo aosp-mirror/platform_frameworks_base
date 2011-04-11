@@ -325,7 +325,7 @@ android_media_MediaPlayer_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fil
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
-    int fd = getParcelFileDescriptorFD(env, fileDescriptor);
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     LOGV("setDataSourceFD: fd %d", fd);
     process_media_player_call( env, thiz, mp->setDataSource(fd, offset, length), "java/io/IOException", "setDataSourceFD failed." );
 }

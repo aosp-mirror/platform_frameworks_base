@@ -131,13 +131,6 @@ static struct log_offsets_t
     jmethodID mLogE;
 } gLogOffsets;
 
-static struct file_descriptor_offsets_t
-{
-    jclass mClass;
-    jmethodID mConstructor;
-    jfieldID mDescriptor;
-} gFileDescriptorOffsets;
-
 static struct parcel_file_descriptor_offsets_t
 {
     jclass mClass;
@@ -589,17 +582,6 @@ Parcel* parcelForJavaObject(JNIEnv* env, jobject obj)
         jniThrowException(env, "java/lang/IllegalStateException", "Parcel has been finalized!");
     }
     return NULL;
-}
-
-jobject newFileDescriptor(JNIEnv* env, int fd)
-{
-    jobject object = env->NewObject(
-            gFileDescriptorOffsets.mClass, gFileDescriptorOffsets.mConstructor);
-    if (object != NULL) {
-        //LOGI("Created new FileDescriptor %p with fd %d\n", object, fd);
-        env->SetIntField(object, gFileDescriptorOffsets.mDescriptor, fd);
-    }
-    return object;
 }
 
 jobject newParcelFileDescriptor(JNIEnv* env, jobject fileDesc)
@@ -1358,8 +1340,8 @@ static void android_os_Parcel_writeFileDescriptor(JNIEnv* env, jobject clazz, jo
 {
     Parcel* parcel = parcelForJavaObject(env, clazz);
     if (parcel != NULL) {
-        const status_t err = parcel->writeDupFileDescriptor(
-                env->GetIntField(object, gFileDescriptorOffsets.mDescriptor));
+        const status_t err =
+                parcel->writeDupFileDescriptor(jniGetFDFromFileDescriptor(env, object));
         if (err != NO_ERROR) {
             jniThrowException(env, "java/lang/OutOfMemoryError", NULL);
         }
@@ -1459,13 +1441,7 @@ static jobject android_os_Parcel_readFileDescriptor(JNIEnv* env, jobject clazz)
         if (fd < 0) return NULL;
         fd = dup(fd);
         if (fd < 0) return NULL;
-        jobject object = env->NewObject(
-                gFileDescriptorOffsets.mClass, gFileDescriptorOffsets.mConstructor);
-        if (object != NULL) {
-            //LOGI("Created new FileDescriptor %p with fd %d\n", object, fd);
-            env->SetIntField(object, gFileDescriptorOffsets.mDescriptor, fd);
-        }
-        return object;
+        return jniCreateFileDescriptor(env, fd);
     }
     return NULL;
 }
@@ -1512,7 +1488,7 @@ static jobject android_os_Parcel_openFileDescriptor(JNIEnv* env, jobject clazz,
         jniThrowException(env, "java/io/FileNotFoundException", strerror(errno));
         return NULL;
     }
-    jobject object = newFileDescriptor(env, fd);
+    jobject object = jniCreateFileDescriptor(env, fd);
     if (object == NULL) {
         close(fd);
     }
@@ -1525,7 +1501,7 @@ static jobject android_os_Parcel_dupFileDescriptor(JNIEnv* env, jobject clazz, j
         jniThrowNullPointerException(env, NULL);
         return NULL;
     }
-    int origfd = env->GetIntField(orig, gFileDescriptorOffsets.mDescriptor);
+    int origfd = jniGetFDFromFileDescriptor(env, orig);
     if (origfd < 0) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "bad FileDescriptor");
         return NULL;
@@ -1536,7 +1512,7 @@ static jobject android_os_Parcel_dupFileDescriptor(JNIEnv* env, jobject clazz, j
         jniThrowIOException(env, errno);
         return NULL;
     }
-    jobject object = newFileDescriptor(env, fd);
+    jobject object = jniCreateFileDescriptor(env, fd);
     if (object == NULL) {
         close(fd);
     }
@@ -1549,9 +1525,9 @@ static void android_os_Parcel_closeFileDescriptor(JNIEnv* env, jobject clazz, jo
         jniThrowNullPointerException(env, NULL);
         return;
     }
-    int fd = env->GetIntField(object, gFileDescriptorOffsets.mDescriptor);
+    int fd = jniGetFDFromFileDescriptor(env, object);
     if (fd >= 0) {
-        env->SetIntField(object, gFileDescriptorOffsets.mDescriptor, -1);
+        jniSetFileDescriptorOfFD(env, object, -1);
         //LOGI("Closing ParcelFileDescriptor %d\n", fd);
         close(fd);
     }
@@ -1563,9 +1539,9 @@ static void android_os_Parcel_clearFileDescriptor(JNIEnv* env, jobject clazz, jo
         jniThrowNullPointerException(env, NULL);
         return;
     }
-    int fd = env->GetIntField(object, gFileDescriptorOffsets.mDescriptor);
+    int fd = jniGetFDFromFileDescriptor(env, object);
     if (fd >= 0) {
-        env->SetIntField(object, gFileDescriptorOffsets.mDescriptor, -1);
+        jniSetFileDescriptorOfFD(env, object, -1);
     }
 }
 
@@ -1794,15 +1770,6 @@ static int int_register_android_os_Parcel(JNIEnv* env)
         clazz, "e", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I");
     assert(gLogOffsets.mLogE);
 
-    clazz = env->FindClass("java/io/FileDescriptor");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class java.io.FileDescriptor");
-    gFileDescriptorOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
-    gFileDescriptorOffsets.mConstructor
-        = env->GetMethodID(clazz, "<init>", "()V");
-    gFileDescriptorOffsets.mDescriptor = env->GetFieldID(clazz, "descriptor", "I");
-    LOG_FATAL_IF(gFileDescriptorOffsets.mDescriptor == NULL,
-                 "Unable to find descriptor field in java.io.FileDescriptor");
-
     clazz = env->FindClass("android/os/ParcelFileDescriptor");
     LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.ParcelFileDescriptor");
     gParcelFileDescriptorOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
@@ -1841,14 +1808,4 @@ int register_android_os_Binder(JNIEnv* env)
     if (int_register_android_os_Parcel(env) < 0)
         return -1;
     return 0;
-}
-
-namespace android {
-
-// Returns the Unix file descriptor for a ParcelFileDescriptor object
-int getParcelFileDescriptorFD(JNIEnv* env, jobject object)
-{
-    return env->GetIntField(object, gFileDescriptorOffsets.mDescriptor);
-}
-
 }

@@ -25,14 +25,10 @@
 namespace android
 {
 
-static jfieldID s_descriptorField = 0;
-
 static int
 ctor_native(JNIEnv* env, jobject clazz, jobject fileDescriptor)
 {
-    int err;
-
-    int fd = env->GetIntField(fileDescriptor, s_descriptorField);
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     if (fd == -1) {
         return NULL;
     }
@@ -112,15 +108,6 @@ static const JNINativeMethod g_methods[] = {
 int register_android_backup_BackupDataOutput(JNIEnv* env)
 {
     //LOGD("register_android_backup_BackupDataOutput");
-
-    jclass clazz;
-
-    clazz = env->FindClass("java/io/FileDescriptor");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class java.io.FileDescriptor");
-    s_descriptorField = env->GetFieldID(clazz, "descriptor", "I");
-    LOG_FATAL_IF(s_descriptorField == NULL,
-            "Unable to find descriptor field in java.io.FileDescriptor");
-
     return AndroidRuntime::registerNativeMethods(env, "android/app/backup/BackupDataOutput",
             g_methods, NELEM(g_methods));
 }
