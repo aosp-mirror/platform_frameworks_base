@@ -114,8 +114,8 @@ public class DefaultPhoneNotifier implements PhoneNotifier {
         try {
             mRegistry.notifyDataConnection(
                     convertDataState(state),
-                    sender.isDataConnectivityPossible(), reason,
-                    sender.getActiveApnHost(),
+                    sender.isDataConnectivityPossible(apnType), reason,
+                    sender.getActiveApnHost(apnType),
                     apnType,
                     linkProperties,
                     linkCapabilities,

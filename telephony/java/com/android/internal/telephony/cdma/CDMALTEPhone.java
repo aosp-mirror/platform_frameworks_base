@@ -164,10 +164,7 @@ public class CDMALTEPhone extends CDMAPhone {
     }
 
     public String getActiveApn(String apnType) {
-        if (mDataConnectionTracker instanceof CdmaDataConnectionTracker)
-            return mDataConnectionTracker.getActiveApnString();
-
-        return ((GsmDataConnectionTracker)mDataConnectionTracker).getActiveApnString(apnType);
+        return mDataConnectionTracker.getActiveApnString(apnType);
     }
 
     protected void log(String s) {

@@ -208,8 +208,8 @@ public class PhoneProxy extends Handler implements Phone {
         return mActivePhone.getActiveApnTypes();
     }
 
-    public String getActiveApnHost() {
-        return mActivePhone.getActiveApnHost();
+    public String getActiveApnHost(String apnType) {
+        return mActivePhone.getActiveApnHost(apnType);
     }
 
     public LinkProperties getLinkProperties(String apnType) {
@@ -659,6 +659,10 @@ public class PhoneProxy extends Handler implements Phone {
 
     public boolean isDataConnectivityPossible() {
         return mActivePhone.isDataConnectivityPossible();
+    }
+
+    public boolean isDataConnectivityPossible(String apnType) {
+        return mActivePhone.isDataConnectivityPossible(apnType);
     }
 
     public String getDeviceId() {
