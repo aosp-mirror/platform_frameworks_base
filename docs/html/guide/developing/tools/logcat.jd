@@ -2,7 +2,6 @@ page.title=logcat
 parent.title=Tools
 parent.link=index.html
 @jd:body
-<div></div>
 
   <p>The Android logging system provides a mechanism for collecting and viewing system debug
   output. Logs from various applications and portions of the system are collected in a series of
@@ -23,7 +22,7 @@ For more
 
   <p>You can run <code>logcat</code> as an adb command or directly in a shell prompt
   of your emulator or connected device. To view log output using adb, navigate to your SDK
-  <code>platform-tools/</code> directory and execute:/p>
+  <code>platform-tools/</code> directory and execute:</p>
   <pre>
 $ adb logcat
 </pre>
