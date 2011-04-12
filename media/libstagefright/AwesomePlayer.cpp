@@ -184,7 +184,8 @@ AwesomePlayer::AwesomePlayer()
       mFlags(0),
       mExtractorFlags(0),
       mVideoBuffer(NULL),
-      mDecryptHandle(NULL) {
+      mDecryptHandle(NULL),
+      mLastVideoTimeUs(-1) {
     CHECK_EQ(mClient.connect(), (status_t)OK);
 
     DataSource::RegisterDefaultSniffers();
@@ -470,28 +471,13 @@ void AwesomePlayer::reset_l() {
 
     mVideoRenderer.clear();
 
-    if (mVideoBuffer) {
-        mVideoBuffer->release();
-        mVideoBuffer = NULL;
-    }
-
     if (mRTSPController != NULL) {
         mRTSPController->disconnect();
         mRTSPController.clear();
     }
 
     if (mVideoSource != NULL) {
-        mVideoSource->stop();
-
-        // The following hack is necessary to ensure that the OMX
-        // component is completely released by the time we may try
-        // to instantiate it again.
-        wp<MediaSource> tmp = mVideoSource;
-        mVideoSource.clear();
-        while (tmp.promote() != NULL) {
-            usleep(1000);
-        }
-        IPCThreadState::self()->flushCommands();
+        shutdownVideoDecoder_l();
     }
 
     mDurationUs = -1;
@@ -510,6 +496,7 @@ void AwesomePlayer::reset_l() {
     mFileSource.clear();
 
     mBitrate = -1;
+    mLastVideoTimeUs = -1;
 }
 
 void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
@@ -1012,7 +999,7 @@ void AwesomePlayer::setSurface(const sp<Surface> &surface) {
     Mutex::Autolock autoLock(mLock);
 
     mSurface = surface;
-    mNativeWindow = surface;
+    setNativeWindow_l(surface);
 }
 
 void AwesomePlayer::setSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture) {
@@ -1020,9 +1007,57 @@ void AwesomePlayer::setSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture)
 
     mSurface.clear();
     if (surfaceTexture != NULL) {
-        mNativeWindow = new SurfaceTextureClient(surfaceTexture);
+        setNativeWindow_l(new SurfaceTextureClient(surfaceTexture));
+    }
+}
+
+void AwesomePlayer::shutdownVideoDecoder_l() {
+    if (mVideoBuffer) {
+        mVideoBuffer->release();
+        mVideoBuffer = NULL;
     }
 
+    mVideoSource->stop();
+
+    // The following hack is necessary to ensure that the OMX
+    // component is completely released by the time we may try
+    // to instantiate it again.
+    wp<MediaSource> tmp = mVideoSource;
+    mVideoSource.clear();
+    while (tmp.promote() != NULL) {
+        usleep(1000);
+    }
+    IPCThreadState::self()->flushCommands();
+}
+
+void AwesomePlayer::setNativeWindow_l(const sp<ANativeWindow> &native) {
+    mNativeWindow = native;
+
+    if (mVideoSource == NULL) {
+        return;
+    }
+
+    LOGI("attempting to reconfigure to use new surface");
+
+    bool wasPlaying = (mFlags & PLAYING) != 0;
+
+    pause_l();
+    mVideoRenderer.clear();
+
+    shutdownVideoDecoder_l();
+
+    CHECK_EQ(initVideoDecoder(), (status_t)OK);
+
+    if (mLastVideoTimeUs >= 0) {
+        mSeeking = SEEK;
+        mSeekNotificationSent = true;
+        mSeekTimeUs = mLastVideoTimeUs;
+        mFlags &= ~(AT_EOS | AUDIO_AT_EOS | VIDEO_AT_EOS);
+    }
+
+    if (wasPlaying) {
+        play_l();
+    }
 }
 
 void AwesomePlayer::setAudioSink(
@@ -1411,6 +1446,8 @@ void AwesomePlayer::onVideoEvent() {
 
     int64_t timeUs;
     CHECK(mVideoBuffer->meta_data()->findInt64(kKeyTime, &timeUs));
+
+    mLastVideoTimeUs = timeUs;
 
     if (mSeeking == SEEK_VIDEO_ONLY) {
         if (mSeekTimeUs > timeUs) {

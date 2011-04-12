@@ -218,6 +218,8 @@ private:
     DrmManagerClient *mDrmManagerClient;
     sp<DecryptHandle> mDecryptHandle;
 
+    int64_t mLastVideoTimeUs;
+
     status_t setDataSource_l(
             const char *uri,
             const KeyedVector<String8, String8> *headers = NULL);
@@ -266,6 +268,9 @@ private:
     void ensureCacheIsFetching_l();
 
     status_t startAudioPlayer_l();
+
+    void shutdownVideoDecoder_l();
+    void setNativeWindow_l(const sp<ANativeWindow> &native);
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);
