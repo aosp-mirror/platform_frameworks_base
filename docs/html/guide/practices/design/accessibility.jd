@@ -60,8 +60,9 @@ access-related problems:</p>
 <li>Make all of your user interface controls accessible with a trackball or directional
 controller (d-pad).</li>
 <li>Label your {@link android.widget.ImageButton}, {@link android.widget.EditText}, and other input
-widgets using the <a href="{@docRoot}reference/android/view/View#attr_android:contentDescription"
->{@code android:contentDescription}</a> attribute.</li>
+widgets using the <a
+href="{@docRoot}reference/android/view/View.html#attr_android:contentDescription">{@code
+android:contentDescription}</a> attribute.</li>
 </ul>
 
 
@@ -100,8 +101,9 @@ request that a widget be given focus. Such methods include:</p>
 </ul>
 
 <p>When working with a view that is not focusable by default, you can make it focusable from the XML
-layout file by setting the <a href="{@docRoot}reference/android/view/View#attr_android:focusable"
->{@code android:focusable}</a> attribute to {@code "true"}.</p>
+layout file by setting the <a
+href="{@docRoot}reference/android/view/View.html#attr_android:focusable">{@code
+android:focusable}</a> attribute to {@code "true"}.</p>
 
 
 
@@ -181,13 +183,13 @@ a label near it that indicates its purpose.  When a visually impaired user acces
 application, these visual cues are often useless.</p>
 
 <p>To provide textual information about these widgets (as an alternative to the visual cues), you
-should use the <a href="{@docRoot}reference/android/view/View#attr_android:contentDescription"
+should use the <a href="{@docRoot}reference/android/view/View.html#attr_android:contentDescription"
 >{@code android:contentDescription}</a> attribute. The text you provide in this attribute
 is not visible on the screen, but if a user has enabled accessibility speech tools then the
 description in this attribute is read aloud to the user.</p>
 
 <p>You should set the <a
-href="{@docRoot}reference/android/view/View#attr_android:contentDescription" >{@code
+href="{@docRoot}reference/android/view/View.html#attr_android:contentDescription" >{@code
 android:contentDescription}</a> attribute on every {@link android.widget.ImageButton}, {@link
 android.widget.EditText}, {@link android.widget.CheckBox}, and on any other input widgets that might
 benefit users with extra information.</p>
