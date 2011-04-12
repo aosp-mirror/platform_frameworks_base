@@ -368,7 +368,7 @@ to set up your development environment for licensing. </p>
 
 <ol>
 <li><a href="#download-sdk">Downloading the latest SDK</a>, if you haven't already done so </li>
-<li><a href="#runtime-setup">Setting up the runtime environment</a> for development</a></li>
+<li><a href="#runtime-setup">Setting up the runtime environment</a> for development</li>
 <li><a href="#download-lvl">Downloading the Market Licensing component</a> into your SDK </li>
 <li><a href="#lvl-setup">Setting up the Licensing Verification Library</a></li>
 <li><a href="#add-library">Including the LVL library project in your application</a></li>
@@ -582,9 +582,9 @@ Licensing package contains the LVL and the LVL sample application. </div>
 <p>When the download is complete, the Android SDK and AVD Manager installs both
 the LVL library project and the example application into these directories: </p>
 
-<p style="margin-left:2em"><code>&lt;<em>sdk</em>&gt;/market_licensing/library/</code>
+<p style="margin-left:2em"><code>&lt;<em>sdk</em>&gt;/extras/google/market_licensing/library/</code>
 &nbsp;&nbsp;(the LVL library project)<br />
-<code>&lt;<em>sdk</em>&gt;/market_licensing/sample/</code>&nbsp;&nbsp;(the example
+<code>&lt;<em>sdk</em>&gt;/extras/google/market_licensing/sample/</code>&nbsp;&nbsp;(the example
 application)</p>
 
 <p>If you aren't familiar with how to download components into your SDK, see the
@@ -1530,7 +1530,7 @@ Make sure that you sign in to the account from which the application you are
 licensing is published (or will be published). </li>
 <li>In the account home page, locate the "Edit profile" link and click it. </li>
 <li>In the Edit Profile page, locate the "Licensing" pane, shown below. Your
-public key for licensing is given in the "Public key" text box. </p>
+public key for licensing is given in the "Public key" text box. </li>
 </ol>
 
 <p>To add the public key to your application, simply copy/paste the key string
