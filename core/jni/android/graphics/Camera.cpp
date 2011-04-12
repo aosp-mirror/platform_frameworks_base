@@ -98,7 +98,6 @@ static JNINativeMethod gCameraMethods[] = {
     { "dotWithNormal",       "(FFF)F", (void*)Camera_dotWithNormal }
 };
 
-int register_android_graphics_Camera(JNIEnv* env);
 int register_android_graphics_Camera(JNIEnv* env) {
     jclass clazz = env->FindClass("android/graphics/Camera");
     if (clazz == 0) {
@@ -113,4 +112,3 @@ int register_android_graphics_Camera(JNIEnv* env) {
                                                gCameraMethods,
                                                SK_ARRAY_COUNT(gCameraMethods));
 }
-

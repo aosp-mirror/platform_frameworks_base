@@ -182,7 +182,6 @@ static JNINativeMethod gNinePatchMethods[] = {
                                                         (void*)SkNinePatchGlue::getTransparentRegion   }
 };
 
-int register_android_graphics_NinePatch(JNIEnv* env);
 int register_android_graphics_NinePatch(JNIEnv* env)
 {
     return android::AndroidRuntime::registerNativeMethods(env,

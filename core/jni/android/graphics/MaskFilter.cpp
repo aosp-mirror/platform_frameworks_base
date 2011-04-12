@@ -23,7 +23,7 @@ public:
         ThrowIAE_IfNull(env, filter);
         return filter;
     }
- 
+
     static SkMaskFilter* createEmboss(JNIEnv* env, jobject, jfloatArray dirArray, float ambient, float specular, float radius) {
         SkScalar direction[3];
 
@@ -79,16 +79,14 @@ static JNINativeMethod gTableMaskFilterMethods[] = {
     result = android::AndroidRuntime::registerNativeMethods(env, name, array, SK_ARRAY_COUNT(array));  \
     if (result < 0) return result
 
-int register_android_graphics_MaskFilter(JNIEnv* env);
 int register_android_graphics_MaskFilter(JNIEnv* env)
 {
     int result;
-    
+
     REG(env, "android/graphics/MaskFilter", gMaskFilterMethods);
     REG(env, "android/graphics/BlurMaskFilter", gBlurMaskFilterMethods);
     REG(env, "android/graphics/EmbossMaskFilter", gEmbossMaskFilterMethods);
     REG(env, "android/graphics/TableMaskFilter", gTableMaskFilterMethods);
-    
+
     return 0;
 }
-
