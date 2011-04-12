@@ -93,8 +93,6 @@ static EmojiFactoryCaller* gCaller;
 static pthread_once_t g_once = PTHREAD_ONCE_INIT;
 static bool lib_emoji_factory_is_ready;
 
-static jclass    gString_class;
-
 static jclass    gBitmap_class;
 static jmethodID gBitmap_constructorMethodID;
 

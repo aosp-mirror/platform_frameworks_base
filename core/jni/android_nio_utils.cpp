@@ -32,20 +32,20 @@ void* android::nio_getPointer(JNIEnv *_env, jobject buffer, jarray *array) {
     jlong pointer;
     jint offset;
     void *data;
-    
+
     pointer = _env->CallStaticLongMethod(gNioJNI.nioAccessClass,
                                          gNioJNI.getBasePointerID, buffer);
     if (pointer != 0L) {
         *array = NULL;
         return (void *) (jint) pointer;
     }
-    
+
     *array = (jarray) _env->CallStaticObjectMethod(gNioJNI.nioAccessClass,
                                                gNioJNI.getBaseArrayID, buffer);
     offset = _env->CallStaticIntMethod(gNioJNI.nioAccessClass,
                                        gNioJNI.getBaseArrayOffsetID, buffer);
     data = _env->GetPrimitiveArrayCritical(*array, (jboolean *) 0);
-    
+
     return (void *) ((char *) data + offset);
 }
 
@@ -94,8 +94,7 @@ static jfieldID getFieldID(JNIEnv* env, jclass c, const char name[],
 }
 
 namespace android {
-    
-int register_android_nio_utils(JNIEnv* env);
+
 int register_android_nio_utils(JNIEnv* env) {
     jclass localClass = findClass(env, "java/nio/NIOAccess");
     gNioJNI.getBasePointerID = findStaticMethod(env, localClass,

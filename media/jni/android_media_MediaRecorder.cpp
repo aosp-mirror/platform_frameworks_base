@@ -404,38 +404,32 @@ android_media_MediaRecorder_native_init(JNIEnv *env)
 
     clazz = env->FindClass("android/media/MediaRecorder");
     if (clazz == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/media/MediaRecorder");
         return;
     }
 
     fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
     if (fields.context == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaRecorder.mNativeContext");
         return;
     }
 
     fields.surface = env->GetFieldID(clazz, "mSurface", "Landroid/view/Surface;");
     if (fields.surface == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaRecorder.mSurface");
         return;
     }
 
     jclass surface = env->FindClass("android/view/Surface");
     if (surface == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/view/Surface");
         return;
     }
 
     fields.surface_native = env->GetFieldID(surface, ANDROID_VIEW_SURFACE_JNI_ID, "I");
     if (fields.surface_native == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find Surface.mSurface");
         return;
     }
 
     fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
                                                "(Ljava/lang/Object;IIILjava/lang/Object;)V");
     if (fields.post_event == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "MediaRecorder.postEventFromNative");
         return;
     }
 }

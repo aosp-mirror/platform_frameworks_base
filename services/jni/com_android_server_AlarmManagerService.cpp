@@ -2,16 +2,16 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -84,7 +84,7 @@ static void android_server_AlarmManagerService_set(JNIEnv* env, jobject obj, jin
     struct timespec ts;
     ts.tv_sec = seconds;
     ts.tv_nsec = nanoseconds;
-    
+
 	int result = ioctl(fd, ANDROID_ALARM_SET(type), &ts);
 	if (result < 0)
 	{
@@ -97,18 +97,18 @@ static jint android_server_AlarmManagerService_waitForAlarm(JNIEnv* env, jobject
 {
 #ifdef HAVE_ANDROID_OS
 	int result = 0;
-	
+
 	do
 	{
 		result = ioctl(fd, ANDROID_ALARM_WAIT);
 	} while (result < 0 && errno == EINTR);
-	
+
 	if (result < 0)
 	{
         LOGE("Unable to wait on alarm: %s\n", strerror(errno));
         return 0;
     }
-    
+
     return result;
 #endif
 }
@@ -124,14 +124,6 @@ static JNINativeMethod sMethods[] = {
 
 int register_android_server_AlarmManagerService(JNIEnv* env)
 {
-    jclass clazz = env->FindClass("com/android/server/AlarmManagerService");
-
-    if (clazz == NULL)
-	{
-        LOGE("Can't find com/android/server/AlarmManagerService");
-        return -1;
-    }
-
     return jniRegisterNativeMethods(env, "com/android/server/AlarmManagerService",
                                     sMethods, NELEM(sMethods));
 }

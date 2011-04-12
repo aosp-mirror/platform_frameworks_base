@@ -39,7 +39,7 @@ static struct {
 static void android_content_res_ObbScanner_getObbInfo(JNIEnv* env, jobject clazz, jstring file,
         jobject obbInfo)
 {
-    const char* filePath = env->GetStringUTFChars(file, JNI_FALSE);
+    const char* filePath = env->GetStringUTFChars(file, NULL);
 
     sp<ObbFile> obb = new ObbFile();
     if (!obb->readFrom(filePath)) {

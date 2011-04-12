@@ -29,9 +29,6 @@
 
 namespace android {
 
-static jclass gDisplay_class;
-static jclass gContext_class;
-static jclass gSurface_class;
 static jclass gConfig_class;
 
 static jmethodID gConfig_ctorID;
@@ -43,21 +40,6 @@ static jfieldID gSurface_NativePixelRefFieldID;
 static jfieldID gConfig_EGLConfigFieldID;
 static jfieldID gSurface_SurfaceFieldID;
 static jfieldID gBitmap_NativeBitmapFieldID;
-
-static __attribute__((noinline))
-bool hasException(JNIEnv *env) {
-    if (env->ExceptionCheck() != 0) {
-        env->ExceptionDescribe();
-        return true;
-    }
-    return false;
-}
-
-static __attribute__((noinline))
-jclass make_globalref(JNIEnv* env, const char classname[]) {
-    jclass c = env->FindClass(classname);
-    return (jclass)env->NewGlobalRef(c);
-}
 
 static inline EGLDisplay getDisplay(JNIEnv* env, jobject o) {
     if (!o) return EGL_NO_DISPLAY;
@@ -77,18 +59,20 @@ static inline EGLConfig getConfig(JNIEnv* env, jobject o) {
 }
 static void nativeClassInit(JNIEnv *_env, jclass eglImplClass)
 {
-    gDisplay_class = make_globalref(_env, "com/google/android/gles_jni/EGLDisplayImpl");
-    gContext_class = make_globalref(_env, "com/google/android/gles_jni/EGLContextImpl");
-    gSurface_class = make_globalref(_env, "com/google/android/gles_jni/EGLSurfaceImpl");
-    gConfig_class  = make_globalref(_env, "com/google/android/gles_jni/EGLConfigImpl");
+    jclass config_class = _env->FindClass("com/google/android/gles_jni/EGLConfigImpl");
+    gConfig_class = (jclass) _env->NewGlobalRef(config_class);
+    gConfig_ctorID = _env->GetMethodID(gConfig_class,  "<init>", "(I)V");
+    gConfig_EGLConfigFieldID = _env->GetFieldID(gConfig_class,  "mEGLConfig",  "I");
 
-    gConfig_ctorID  = _env->GetMethodID(gConfig_class,  "<init>", "(I)V");
+    jclass display_class = _env->FindClass("com/google/android/gles_jni/EGLDisplayImpl");
+    gDisplay_EGLDisplayFieldID = _env->GetFieldID(display_class, "mEGLDisplay", "I");
 
-    gDisplay_EGLDisplayFieldID = _env->GetFieldID(gDisplay_class, "mEGLDisplay", "I");
-    gContext_EGLContextFieldID = _env->GetFieldID(gContext_class, "mEGLContext", "I");
-    gSurface_EGLSurfaceFieldID = _env->GetFieldID(gSurface_class, "mEGLSurface", "I");
-    gSurface_NativePixelRefFieldID = _env->GetFieldID(gSurface_class, "mNativePixelRef", "I");
-    gConfig_EGLConfigFieldID   = _env->GetFieldID(gConfig_class,  "mEGLConfig",  "I");
+    jclass context_class = _env->FindClass("com/google/android/gles_jni/EGLContextImpl");
+    gContext_EGLContextFieldID = _env->GetFieldID(context_class, "mEGLContext", "I");
+
+    jclass surface_class = _env->FindClass("com/google/android/gles_jni/EGLSurfaceImpl");
+    gSurface_EGLSurfaceFieldID = _env->GetFieldID(surface_class, "mEGLSurface", "I");
+    gSurface_NativePixelRefFieldID = _env->GetFieldID(surface_class, "mNativePixelRef", "I");
 
     jclass bitmap_class = _env->FindClass("android/graphics/Bitmap");
     gBitmap_NativeBitmapFieldID = _env->GetFieldID(bitmap_class, "mNativeBitmap", "I");

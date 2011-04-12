@@ -191,9 +191,6 @@ static JNINativeMethod gMethods[] = {
 
 int register_android_text_AndroidCharacter(JNIEnv* env)
 {
-    jclass clazz = env->FindClass("android/text/AndroidCharacter");
-    LOG_ASSERT(clazz, "Cannot find android/text/AndroidCharacter");
-
     return AndroidRuntime::registerNativeMethods(env, "android/text/AndroidCharacter",
             gMethods, NELEM(gMethods));
 }

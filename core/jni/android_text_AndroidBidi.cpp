@@ -2,16 +2,16 @@
 **
 ** Copyright 2010, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -24,8 +24,8 @@
 #include "unicode/ubidi.h"
 
 namespace android {
-    
-static jint runBidi(JNIEnv* env, jobject obj, jint dir, jcharArray chsArray, 
+
+static jint runBidi(JNIEnv* env, jobject obj, jint dir, jcharArray chsArray,
                     jbyteArray infoArray, int n, jboolean haveInfo)
 {
     // Parameters are checked on java side
@@ -63,9 +63,6 @@ static JNINativeMethod gMethods[] = {
 
 int register_android_text_AndroidBidi(JNIEnv* env)
 {
-    jclass clazz = env->FindClass("android/text/AndroidBidi");
-    LOG_ASSERT(clazz, "Cannot find android/text/AndroidBidi");
-    
     return AndroidRuntime::registerNativeMethods(env, "android/text/AndroidBidi",
             gMethods, NELEM(gMethods));
 }

@@ -54,13 +54,6 @@ static JNINativeMethod method_table[] = {
 
 int register_android_hardware_UsbDevice(JNIEnv *env)
 {
-    jclass clazz = env->FindClass("android/hardware/usb/UsbDevice");
-    if (clazz == NULL) {
-        LOGE("Can't find android/hardware/usb/UsbDevice");
-        return -1;
-    }
-
     return AndroidRuntime::registerNativeMethods(env, "android/hardware/usb/UsbDevice",
             method_table, NELEM(method_table));
 }
-

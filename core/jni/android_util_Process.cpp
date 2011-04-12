@@ -915,11 +915,6 @@ const char* const kProcessPathName = "android/os/Process";
 
 int register_android_os_Process(JNIEnv* env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass(kProcessPathName);
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.Process");
-
     return AndroidRuntime::registerNativeMethods(
         env, kProcessPathName,
         methods, NELEM(methods));
