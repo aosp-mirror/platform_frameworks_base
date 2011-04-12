@@ -25,9 +25,6 @@
 namespace android
 {
 
-// java.io.FileDescriptor
-static jfieldID s_descriptorField = 0;
-
 static int
 ctor(JNIEnv* env, jobject clazz)
 {
@@ -47,8 +44,8 @@ performBackup_native(JNIEnv* env, jobject clazz, jobject oldState, int data,
     int err;
 
     // all parameters have already been checked against null
-    int oldStateFD = oldState != NULL ? env->GetIntField(oldState, s_descriptorField) : -1;
-    int newStateFD = env->GetIntField(newState, s_descriptorField);
+    int oldStateFD = oldState != NULL ? jniGetFDFromFileDescriptor(env, oldState) : -1;
+    int newStateFD = jniGetFDFromFileDescriptor(env, newState);
     BackupDataWriter* dataStream = (BackupDataWriter*)data;
 
     const int fileCount = env->GetArrayLength(files);
@@ -102,7 +99,7 @@ writeSnapshot_native(JNIEnv* env, jobject clazz, jint ptr, jobject fileDescripto
     int err;
 
     RestoreHelperBase* restore = (RestoreHelperBase*)ptr;
-    int fd = env->GetIntField(fileDescriptor, s_descriptorField);
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
     err = restore->WriteSnapshot(fd);
 
@@ -121,14 +118,6 @@ static const JNINativeMethod g_methods[] = {
 
 int register_android_backup_FileBackupHelperBase(JNIEnv* env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass("java/io/FileDescriptor");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class java.io.FileDescriptor");
-    s_descriptorField = env->GetFieldID(clazz, "descriptor", "I");
-    LOG_FATAL_IF(s_descriptorField == NULL,
-            "Unable to find descriptor field in java.io.FileDescriptor");
-    
     return AndroidRuntime::registerNativeMethods(env, "android/app/backup/FileBackupHelperBase",
             g_methods, NELEM(g_methods));
 }

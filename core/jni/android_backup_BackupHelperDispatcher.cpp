@@ -37,8 +37,6 @@ struct chunk_header_v1 {
     int nameLength; // not including the NULL terminator, which is not written to the file
 };
 
-// java.io.FileDescriptor
-static jfieldID s_descriptorField = 0;
 static jfieldID s_chunkSizeField = 0;
 static jfieldID s_keyPrefixField = 0;
 
@@ -46,12 +44,11 @@ static int
 readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
 {
     chunk_header_v1 flattenedHeader;
-    int fd;
     ssize_t amt;
     String8 keyPrefix;
     char* buf;
 
-    fd = env->GetIntField(fdObj, s_descriptorField);
+    int fd = jniGetFDFromFileDescriptor(env, fdObj);
 
     amt = read(fd, &flattenedHeader.headerSize, sizeof(flattenedHeader.headerSize));
     if (amt != sizeof(flattenedHeader.headerSize)) {
@@ -128,9 +125,7 @@ readHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj)
 static int
 skipChunk_native(JNIEnv* env, jobject clazz, jobject fdObj, jint bytesToSkip)
 {
-    int fd;
-
-    fd = env->GetIntField(fdObj, s_descriptorField);
+    int fd = jniGetFDFromFileDescriptor(env, fdObj);
 
     lseek(fd, bytesToSkip, SEEK_CUR);
 
@@ -152,9 +147,8 @@ allocateHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdO
     int nameLength;
     int namePadding;
     int headerSize;
-    int fd;
 
-    fd = env->GetIntField(fdObj, s_descriptorField);
+    int fd = jniGetFDFromFileDescriptor(env, fdObj);
 
     nameObj = (jstring)env->GetObjectField(headerObj, s_keyPrefixField);
 
@@ -166,7 +160,7 @@ allocateHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdO
     pos = lseek(fd, 0, SEEK_CUR);
 
     lseek(fd, headerSize, SEEK_CUR);
-    
+
     return pos;
 }
 
@@ -175,13 +169,12 @@ writeHeader_native(JNIEnv* env, jobject clazz, jobject headerObj, jobject fdObj,
 {
     int err;
     chunk_header_v1 header;
-    int fd;
     int namePadding;
     int prevPos;
     jstring nameObj;
     const char* buf;
 
-    fd = env->GetIntField(fdObj, s_descriptorField);
+    int fd = jniGetFDFromFileDescriptor(env, fdObj);
     prevPos = lseek(fd, 0, SEEK_CUR);
 
     nameObj = (jstring)env->GetObjectField(headerObj, s_keyPrefixField);
@@ -234,15 +227,7 @@ static const JNINativeMethod g_methods[] = {
 
 int register_android_backup_BackupHelperDispatcher(JNIEnv* env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass("java/io/FileDescriptor");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class java.io.FileDescriptor");
-    s_descriptorField = env->GetFieldID(clazz, "descriptor", "I");
-    LOG_FATAL_IF(s_descriptorField == NULL,
-            "Unable to find descriptor field in java.io.FileDescriptor");
-    
-    clazz = env->FindClass("android/app/backup/BackupHelperDispatcher$Header");
+    jclass clazz = env->FindClass("android/app/backup/BackupHelperDispatcher$Header");
     LOG_FATAL_IF(clazz == NULL,
             "Unable to find class android.app.backup.BackupHelperDispatcher.Header");
     s_chunkSizeField = env->GetFieldID(clazz, "chunkSize", "I");
@@ -251,7 +236,7 @@ int register_android_backup_BackupHelperDispatcher(JNIEnv* env)
     s_keyPrefixField = env->GetFieldID(clazz, "keyPrefix", "Ljava/lang/String;");
     LOG_FATAL_IF(s_keyPrefixField == NULL,
             "Unable to find keyPrefix field in android.app.backup.BackupHelperDispatcher.Header");
-    
+
     return AndroidRuntime::registerNativeMethods(env, "android/app/backup/BackupHelperDispatcher",
             g_methods, NELEM(g_methods));
 }

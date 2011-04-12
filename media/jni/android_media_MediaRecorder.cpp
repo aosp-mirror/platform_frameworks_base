@@ -253,7 +253,7 @@ android_media_MediaRecorder_setOutputFileFD(JNIEnv *env, jobject thiz, jobject f
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
-    int fd = getParcelFileDescriptorFD(env, fileDescriptor);
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     status_t opStatus = mr->setOutputFile(fd, offset, length);
     process_media_recorder_call(env, opStatus, "java/io/IOException", "setOutputFile failed.");
@@ -267,7 +267,7 @@ android_media_MediaRecorder_setOutputFileAuxFD(JNIEnv *env, jobject thiz, jobjec
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
-    int fd = getParcelFileDescriptorFD(env, fileDescriptor);
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
     status_t opStatus = mr->setOutputFileAuxiliary(fd);
     process_media_recorder_call(env, opStatus, "java/io/IOException", "setOutputFile failed.");

@@ -241,7 +241,7 @@ static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jo
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return;
     }
-    int fd = getParcelFileDescriptorFD(env, fileDescriptor);
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     if (offset < 0 || length < 0 || fd < 0) {
         if (offset < 0) {
             LOGE("negative offset (%lld)", offset);

@@ -12,6 +12,7 @@
 #include "CreateJavaOutputStreamAdaptor.h"
 #include "AutoDecodeCancel.h"
 #include "Utils.h"
+#include "JNIHelp.h"
 
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/Asset.h>
@@ -20,7 +21,6 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 
-jclass gOptions_class;
 jfieldID gOptions_justBoundsFieldID;
 jfieldID gOptions_sampleSizeFieldID;
 jfieldID gOptions_configFieldID;
@@ -34,11 +34,7 @@ jfieldID gOptions_heightFieldID;
 jfieldID gOptions_mimeFieldID;
 jfieldID gOptions_mCancelID;
 jfieldID gOptions_bitmapFieldID;
-jclass gBitmap_class;
 jfieldID gBitmap_nativeBitmapFieldID;
-
-static jclass gFileDescriptor_class;
-static jfieldID gFileDescriptor_descriptor;
 
 #if 0
     #define TRACE_BITMAP(code)  code
@@ -66,7 +62,7 @@ jstring getMimeTypeString(JNIEnv* env, SkImageDecoder::Format format) {
         { SkImageDecoder::kPNG_Format,  "image/png" },
         { SkImageDecoder::kWBMP_Format, "image/vnd.wap.wbmp" }
     };
-    
+
     const char* cstr = NULL;
     for (size_t i = 0; i < SK_ARRAY_COUNT(gMimeTypes); i++) {
         if (gMimeTypes[i].fFormat == format) {
@@ -127,7 +123,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
                         (allowPurgeable && optionsPurgeable(env, options));
     bool preferQualityOverSpeed = false;
     jobject javaBitmap = NULL;
-    
+
     if (NULL != options) {
         sampleSize = env->GetIntField(options, gOptions_sampleSizeFieldID);
         if (optionsJustBounds(env, options)) {
@@ -137,7 +133,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
         env->SetIntField(options, gOptions_widthFieldID, -1);
         env->SetIntField(options, gOptions_heightFieldID, -1);
         env->SetObjectField(options, gOptions_mimeFieldID, 0);
-        
+
         jobject jconfig = env->GetObjectField(options, gOptions_configFieldID);
         prefConfig = GraphicsJNI::getNativeBitmapConfig(env, jconfig);
         isMutable = env->GetBooleanField(options, gOptions_mutableFieldID);
@@ -151,7 +147,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
     if (NULL == decoder) {
         return nullObjectReturn("SkImageDecoder::Factory returned null");
     }
-    
+
     decoder->setSampleSize(sampleSize);
     decoder->setDitherImage(doDither);
     decoder->setPreferQualityOverSpeed(preferQualityOverSpeed);
@@ -298,8 +294,7 @@ static jobject nativeDecodeFileDescriptor(JNIEnv* env, jobject clazz,
                                           jobject bitmapFactoryOptions) {
     NPE_CHECK_RETURN_ZERO(env, fileDescriptor);
 
-    jint descriptor = env->GetIntField(fileDescriptor,
-                                       gFileDescriptor_descriptor);
+    jint descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
 
     bool isPurgeable = optionsPurgeable(env, bitmapFactoryOptions);
     bool isShareable = optionsShareable(env, bitmapFactoryOptions);
@@ -424,7 +419,7 @@ static jbyteArray nativeScaleNinePatch(JNIEnv* env, jobject, jbyteArray chunkObj
         }
 
         for (int i = 0; i < chunk->numYDivs; i++) {
-            chunk->yDivs[i] = int(chunk->yDivs[i] * scale + 0.5f);            
+            chunk->yDivs[i] = int(chunk->yDivs[i] * scale + 0.5f);
             if (i > 0 && chunk->yDivs[i] == chunk->yDivs[i - 1]) {
                 chunk->yDivs[i]++;
             }
@@ -460,7 +455,7 @@ static void nativeSetDefaultConfig(JNIEnv* env, jobject, int nativeConfig) {
 }
 
 static jboolean nativeIsSeekable(JNIEnv* env, jobject, jobject fileDescriptor) {
-    jint descriptor = env->GetIntField(fileDescriptor, gFileDescriptor_descriptor);
+    jint descriptor = jniGetFDFromFileDescriptor(env, fileDescriptor);
     return ::lseek64(descriptor, 0, SEEK_CUR) != -1 ? JNI_TRUE : JNI_FALSE;
 }
 
@@ -504,12 +499,6 @@ static JNINativeMethod gOptionsMethods[] = {
     {   "requestCancel", "()V", (void*)nativeRequestCancel }
 };
 
-static jclass make_globalref(JNIEnv* env, const char classname[]) {
-    jclass c = env->FindClass(classname);
-    SkASSERT(c);
-    return (jclass)env->NewGlobalRef(c);
-}
-
 static jfieldID getFieldIDCheck(JNIEnv* env, jclass clazz,
                                 const char fieldname[], const char type[]) {
     jfieldID id = env->GetFieldID(clazz, fieldname, type);
@@ -517,35 +506,29 @@ static jfieldID getFieldIDCheck(JNIEnv* env, jclass clazz,
     return id;
 }
 
-#define kClassPathName  "android/graphics/BitmapFactory"
-
-#define RETURN_ERR_IF_NULL(value) \
-    do { if (!(value)) { assert(0); return -1; } } while (false)
-
-int register_android_graphics_BitmapFactory(JNIEnv* env);
 int register_android_graphics_BitmapFactory(JNIEnv* env) {
-    gOptions_class = make_globalref(env, "android/graphics/BitmapFactory$Options");
-    gOptions_bitmapFieldID = getFieldIDCheck(env, gOptions_class, "inBitmap",
+    jclass options_class = env->FindClass("android/graphics/BitmapFactory$Options");
+    SkASSERT(options_class);
+    gOptions_bitmapFieldID = getFieldIDCheck(env, options_class, "inBitmap",
         "Landroid/graphics/Bitmap;");
-    gOptions_justBoundsFieldID = getFieldIDCheck(env, gOptions_class, "inJustDecodeBounds", "Z");
-    gOptions_sampleSizeFieldID = getFieldIDCheck(env, gOptions_class, "inSampleSize", "I");
-    gOptions_configFieldID = getFieldIDCheck(env, gOptions_class, "inPreferredConfig",
+    gOptions_justBoundsFieldID = getFieldIDCheck(env, options_class, "inJustDecodeBounds", "Z");
+    gOptions_sampleSizeFieldID = getFieldIDCheck(env, options_class, "inSampleSize", "I");
+    gOptions_configFieldID = getFieldIDCheck(env, options_class, "inPreferredConfig",
             "Landroid/graphics/Bitmap$Config;");
-    gOptions_mutableFieldID = getFieldIDCheck(env, gOptions_class, "inMutable", "Z");
-    gOptions_ditherFieldID = getFieldIDCheck(env, gOptions_class, "inDither", "Z");
-    gOptions_purgeableFieldID = getFieldIDCheck(env, gOptions_class, "inPurgeable", "Z");
-    gOptions_shareableFieldID = getFieldIDCheck(env, gOptions_class, "inInputShareable", "Z");
-    gOptions_preferQualityOverSpeedFieldID = getFieldIDCheck(env, gOptions_class,
+    gOptions_mutableFieldID = getFieldIDCheck(env, options_class, "inMutable", "Z");
+    gOptions_ditherFieldID = getFieldIDCheck(env, options_class, "inDither", "Z");
+    gOptions_purgeableFieldID = getFieldIDCheck(env, options_class, "inPurgeable", "Z");
+    gOptions_shareableFieldID = getFieldIDCheck(env, options_class, "inInputShareable", "Z");
+    gOptions_preferQualityOverSpeedFieldID = getFieldIDCheck(env, options_class,
             "inPreferQualityOverSpeed", "Z");
-    gOptions_widthFieldID = getFieldIDCheck(env, gOptions_class, "outWidth", "I");
-    gOptions_heightFieldID = getFieldIDCheck(env, gOptions_class, "outHeight", "I");
-    gOptions_mimeFieldID = getFieldIDCheck(env, gOptions_class, "outMimeType", "Ljava/lang/String;");
-    gOptions_mCancelID = getFieldIDCheck(env, gOptions_class, "mCancel", "Z");
+    gOptions_widthFieldID = getFieldIDCheck(env, options_class, "outWidth", "I");
+    gOptions_heightFieldID = getFieldIDCheck(env, options_class, "outHeight", "I");
+    gOptions_mimeFieldID = getFieldIDCheck(env, options_class, "outMimeType", "Ljava/lang/String;");
+    gOptions_mCancelID = getFieldIDCheck(env, options_class, "mCancel", "Z");
 
-    gBitmap_class = make_globalref(env, "android/graphics/Bitmap");
-    gBitmap_nativeBitmapFieldID = getFieldIDCheck(env, gBitmap_class, "mNativeBitmap", "I");
-    gFileDescriptor_class = make_globalref(env, "java/io/FileDescriptor");
-    gFileDescriptor_descriptor = getFieldIDCheck(env, gFileDescriptor_class, "descriptor", "I");
+    jclass bitmap_class = env->FindClass("android/graphics/Bitmap");
+    SkASSERT(bitmap_class);
+    gBitmap_nativeBitmapFieldID = getFieldIDCheck(env, bitmap_class, "mNativeBitmap", "I");
 
     int ret = AndroidRuntime::registerNativeMethods(env,
                                     "android/graphics/BitmapFactory$Options",
@@ -554,6 +537,6 @@ int register_android_graphics_BitmapFactory(JNIEnv* env) {
     if (ret) {
         return ret;
     }
-    return android::AndroidRuntime::registerNativeMethods(env, kClassPathName,
+    return android::AndroidRuntime::registerNativeMethods(env, "android/graphics/BitmapFactory",
                                          gMethods, SK_ARRAY_COUNT(gMethods));
 }

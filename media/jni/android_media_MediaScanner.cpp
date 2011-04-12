@@ -303,7 +303,7 @@ android_media_MediaScanner_extractAlbumArt(
         return NULL;
     }
 
-    int fd = getParcelFileDescriptorFD(env, fileDescriptor);
+    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
     char* data = mp->extractAlbumArt(fd);
     if (!data) {
         return NULL;
@@ -426,5 +426,3 @@ int register_android_media_MediaScanner(JNIEnv *env)
     return AndroidRuntime::registerNativeMethods(env,
                 kClassMediaScanner, gMethods, NELEM(gMethods));
 }
-
-

@@ -169,7 +169,7 @@ static jobject returnParcelFileDescriptor(JNIEnv* env, Asset* a, jlongArray outO
 
     env->ReleasePrimitiveArrayCritical(outOffsets, offsets, 0);
 
-    jobject fileDesc = newFileDescriptor(env, fd);
+    jobject fileDesc = jniCreateFileDescriptor(env, fd);
     if (fileDesc == NULL) {
         close(fd);
         return NULL;

@@ -37,13 +37,6 @@
 namespace android
 {
 
-static struct file_descriptor_offsets_t
-{
-    jclass mClass;
-    jmethodID mConstructor;
-    jfieldID mDescriptor;
-} gFileDescriptorOffsets;
-
 static struct parcel_file_descriptor_offsets_t
 {
     jclass mClass;
@@ -167,11 +160,8 @@ static jobject android_server_UsbService_openDevice(JNIEnv *env, jobject thiz, j
     int newFD = dup(fd);
     usb_device_close(device);
 
-    jobject fileDescriptor = env->NewObject(gFileDescriptorOffsets.mClass,
-        gFileDescriptorOffsets.mConstructor);
-    if (fileDescriptor != NULL) {
-        env->SetIntField(fileDescriptor, gFileDescriptorOffsets.mDescriptor, newFD);
-    } else {
+    jobject fileDescriptor = jniCreateFileDescriptor(env, newFD);
+    if (fileDescriptor == NULL) {
         return NULL;
     }
     return env->NewObject(gParcelFileDescriptorOffsets.mClass,
@@ -221,11 +211,8 @@ static jobject android_server_UsbService_openAccessory(JNIEnv *env, jobject thiz
         LOGE("could not open %s", DRIVER_NAME);
         return NULL;
     }
-    jobject fileDescriptor = env->NewObject(gFileDescriptorOffsets.mClass,
-        gFileDescriptorOffsets.mConstructor);
-    if (fileDescriptor != NULL) {
-        env->SetIntField(fileDescriptor, gFileDescriptorOffsets.mDescriptor, fd);
-    } else {
+    jobject fileDescriptor = jniCreateFileDescriptor(env, fd);
+    if (fileDescriptor == NULL) {
         return NULL;
     }
     return env->NewObject(gParcelFileDescriptorOffsets.mClass,
@@ -259,14 +246,6 @@ int register_android_server_UsbService(JNIEnv *env)
         LOGE("Can't find usbDeviceRemoved");
         return -1;
     }
-
-    clazz = env->FindClass("java/io/FileDescriptor");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class java.io.FileDescriptor");
-    gFileDescriptorOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
-    gFileDescriptorOffsets.mConstructor = env->GetMethodID(clazz, "<init>", "()V");
-    gFileDescriptorOffsets.mDescriptor = env->GetFieldID(clazz, "descriptor", "I");
-    LOG_FATAL_IF(gFileDescriptorOffsets.mDescriptor == NULL,
-                 "Unable to find descriptor field in java.io.FileDescriptor");
 
     clazz = env->FindClass("android/os/ParcelFileDescriptor");
     LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.ParcelFileDescriptor");

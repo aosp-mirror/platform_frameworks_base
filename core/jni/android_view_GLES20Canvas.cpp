@@ -595,13 +595,11 @@ static jboolean android_view_GLES20Canvas_isAvailable(JNIEnv* env, jobject clazz
 // Logging
 // ----------------------------------------------------------------------------
 
-jfieldID gFileDescriptorField;
-
 static void
 android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor)
 {
 #ifdef USE_OPENGL_RENDERER
-    int fd = env->GetIntField(javaFileDescriptor, gFileDescriptorField);
+    int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
     android::uirenderer::DisplayList::outputLogBuffer(fd);
 #endif // USE_OPENGL_RENDERER
 }
@@ -736,12 +734,6 @@ const char* const kActivityThreadPathName = "android/app/ActivityThread";
 
 int register_android_app_ActivityThread(JNIEnv* env)
 {
-    jclass fileDescriptorClass = env->FindClass("java/io/FileDescriptor");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class java.io.FileDescriptor");
-    gFileDescriptorField = env->GetFieldID(fileDescriptorClass, "descriptor", "I");
-    LOG_FATAL_IF(gFileDescriptorField == NULL,
-                 "Unable to find descriptor field in java.io.FileDescriptor");
-
     return AndroidRuntime::registerNativeMethods(
             env, kActivityThreadPathName,
             gActivityThreadMethods, NELEM(gActivityThreadMethods));
