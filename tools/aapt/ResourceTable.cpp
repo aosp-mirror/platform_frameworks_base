@@ -3681,7 +3681,9 @@ sp<ResourceTable::Package> ResourceTable::getPackage(const String16& package)
 {
     sp<Package> p = mPackages.valueFor(package);
     if (p == NULL) {
-        if (mIsAppPackage) {
+        if (mBundle->getIsOverlayPackage()) {
+            p = new Package(package, 0x00);
+        } else if (mIsAppPackage) {
             if (mHaveAppPackage) {
                 fprintf(stderr, "Adding multiple application package resources; only one is allowed.\n"
                                 "Use -x to create extended resources.\n");
