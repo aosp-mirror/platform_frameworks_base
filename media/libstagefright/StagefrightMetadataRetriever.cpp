@@ -146,7 +146,8 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
 
     int64_t thumbNailTime;
     if (frameTimeUs < 0) {
-        if (!trackMeta->findInt64(kKeyThumbnailTime, &thumbNailTime)) {
+        if (!trackMeta->findInt64(kKeyThumbnailTime, &thumbNailTime)
+                || thumbNailTime < 0) {
             thumbNailTime = 0;
         }
         options.setSeekTo(thumbNailTime, mode);
