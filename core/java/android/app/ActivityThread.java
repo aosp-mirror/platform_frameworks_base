@@ -70,7 +70,7 @@ import android.view.HardwareRenderer;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewManager;
-import android.view.ViewRoot;
+import android.view.ViewAncestor;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -728,7 +728,7 @@ public final class ActivityThread {
             long dalvikFree = runtime.freeMemory() / 1024;
             long dalvikAllocated = dalvikMax - dalvikFree;
             long viewInstanceCount = ViewDebug.getViewInstanceCount();
-            long viewRootInstanceCount = ViewDebug.getViewRootInstanceCount();
+            long viewRootInstanceCount = ViewDebug.getViewAncestorInstanceCount();
             long appContextInstanceCount = Debug.countInstancesOfClass(ContextImpl.class);
             long activityInstanceCount = Debug.countInstancesOfClass(Activity.class);
             int globalAssetCount = AssetManager.getGlobalAssetCount();
@@ -843,7 +843,7 @@ public final class ActivityThread {
 
             pw.println(" ");
             pw.println(" Objects");
-            printRow(pw, TWO_COUNT_COLUMNS, "Views:", viewInstanceCount, "ViewRoots:",
+            printRow(pw, TWO_COUNT_COLUMNS, "Views:", viewInstanceCount, "ViewAncestors:",
                     viewRootInstanceCount);
 
             printRow(pw, TWO_COUNT_COLUMNS, "AppContexts:", appContextInstanceCount,
@@ -3918,7 +3918,7 @@ public final class ActivityThread {
         sThreadLocal.set(this);
         mSystemThread = system;
         if (!system) {
-            ViewRoot.addFirstDrawHandler(new Runnable() {
+            ViewAncestor.addFirstDrawHandler(new Runnable() {
                 public void run() {
                     ensureJitEnabled();
                 }
@@ -3948,7 +3948,7 @@ public final class ActivityThread {
             }
         }
         
-        ViewRoot.addConfigCallback(new ComponentCallbacks() {
+        ViewAncestor.addConfigCallback(new ComponentCallbacks() {
             public void onConfigurationChanged(Configuration newConfig) {
                 synchronized (mPackages) {
                     // We need to apply this change to the resources

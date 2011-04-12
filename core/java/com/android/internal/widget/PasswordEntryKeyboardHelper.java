@@ -29,7 +29,7 @@ import android.util.Log;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewRoot;
+import android.view.ViewAncestor;
 import com.android.internal.R;
 
 public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
@@ -150,7 +150,7 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
                 KeyEvent event = events[i];
                 event = KeyEvent.changeFlags(event, event.getFlags()
                         | KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE);
-                handler.sendMessage(handler.obtainMessage(ViewRoot.DISPATCH_KEY, event));
+                handler.sendMessage(handler.obtainMessage(ViewAncestor.DISPATCH_KEY, event));
             }
         }
     }
@@ -158,11 +158,11 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
     public void sendDownUpKeyEvents(int keyEventCode) {
         long eventTime = SystemClock.uptimeMillis();
         Handler handler = mTargetView.getHandler();
-        handler.sendMessage(handler.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
+        handler.sendMessage(handler.obtainMessage(ViewAncestor.DISPATCH_KEY_FROM_IME,
                 new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_DOWN, keyEventCode, 0, 0,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                     KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE)));
-        handler.sendMessage(handler.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
+        handler.sendMessage(handler.obtainMessage(ViewAncestor.DISPATCH_KEY_FROM_IME,
                 new KeyEvent(eventTime, eventTime, KeyEvent.ACTION_UP, keyEventCode, 0, 0,
                         KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                         KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE)));

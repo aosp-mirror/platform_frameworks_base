@@ -34,7 +34,7 @@ import android.util.LogPrinter;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewRoot;
+import android.view.ViewAncestor;
 
 class ComposingText implements NoCopySpan {
 }
@@ -501,7 +501,7 @@ public class BaseInputConnection implements InputConnection {
                 }
             }
             if (h != null) {
-                h.sendMessage(h.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
+                h.sendMessage(h.obtainMessage(ViewAncestor.DISPATCH_KEY_FROM_IME,
                         event));
             }
         }

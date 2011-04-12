@@ -34,7 +34,7 @@ import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 
 /**
- * Interface for rendering a ViewRoot using hardware acceleration.
+ * Interface for rendering a ViewAncestor using hardware acceleration.
  * 
  * @hide
  */
@@ -209,7 +209,7 @@ public abstract class HardwareRenderer {
     
     /**
      * Initializes the hardware renderer for the specified surface and setup the
-     * renderer for drawing, if needed. This is invoked when the ViewRoot has
+     * renderer for drawing, if needed. This is invoked when the ViewAncestor has
      * potentially lost the hardware renderer. The hardware renderer should be
      * reinitialized and setup when the render {@link #isRequested()} and
      * {@link #isEnabled()}.

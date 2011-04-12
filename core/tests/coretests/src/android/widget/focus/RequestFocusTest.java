@@ -90,7 +90,7 @@ public class RequestFocusTest extends ActivityInstrumentationTestCase<RequestFoc
             fail("requestFocus from wrong thread should raise exception.");
         } catch (AndroidRuntimeException e) {
             // Expected.  The actual exception is not public, so we can't catch it.
-            assertEquals("android.view.ViewRoot$CalledFromWrongThreadException",
+            assertEquals("android.view.ViewAncestor$CalledFromWrongThreadException",
                          e.getClass().getName());
         }
     }

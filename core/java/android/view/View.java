@@ -4496,10 +4496,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         return true;
     }
 
-    /** Gets the ViewRoot, or null if not attached. */
-    /*package*/ ViewRoot getViewRoot() {
+    /** Gets the ViewAncestor, or null if not attached. */
+    /*package*/ ViewAncestor getViewAncestor() {
         View root = getRootView();
-        return root != null ? (ViewRoot)root.getParent() : null;
+        return root != null ? (ViewAncestor)root.getParent() : null;
     }
 
     /**
@@ -4515,7 +4515,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public final boolean requestFocusFromTouch() {
         // Leave touch mode if we need to
         if (isInTouchMode()) {
-            ViewRoot viewRoot = getViewRoot();
+            ViewAncestor viewRoot = getViewAncestor();
             if (viewRoot != null) {
                 viewRoot.ensureTouchMode(false);
             }
@@ -5083,7 +5083,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (mAttachInfo != null) {
             return mAttachInfo.mInTouchMode;
         } else {
-            return ViewRoot.isInTouchMode();
+            return ViewAncestor.isInTouchMode();
         }
     }
 
@@ -7311,7 +7311,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
                 if (p != null && ai != null && ai.mHardwareAccelerated) {
                     // fast-track for GL-enabled applications; just invalidate the whole hierarchy
-                    // with a null dirty rect, which tells the ViewRoot to redraw everything
+                    // with a null dirty rect, which tells the ViewAncestor to redraw everything
                     p.invalidateChild(this, null);
                     return;
                 }
@@ -7354,7 +7354,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
                 if (p != null && ai != null && ai.mHardwareAccelerated) {
                     // fast-track for GL-enabled applications; just invalidate the whole hierarchy
-                    // with a null dirty rect, which tells the ViewRoot to redraw everything
+                    // with a null dirty rect, which tells the ViewAncestor to redraw everything
                     p.invalidateChild(this, null);
                     return;
                 }
@@ -7409,7 +7409,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if (!HardwareRenderer.RENDER_DIRTY_REGIONS) {
                 if (p != null && ai != null && ai.mHardwareAccelerated) {
                     // fast-track for GL-enabled applications; just invalidate the whole hierarchy
-                    // with a null dirty rect, which tells the ViewRoot to redraw everything
+                    // with a null dirty rect, which tells the ViewAncestor to redraw everything
                     p.invalidateChild(this, null);
                     return;
                 }
@@ -7558,7 +7558,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             handler = attachInfo.mHandler;
         } else {
             // Assume that post will succeed later
-            ViewRoot.getRunQueue().post(action);
+            ViewAncestor.getRunQueue().post(action);
             return true;
         }
 
@@ -7588,7 +7588,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             handler = attachInfo.mHandler;
         } else {
             // Assume that post will succeed later
-            ViewRoot.getRunQueue().postDelayed(action, delayMillis);
+            ViewAncestor.getRunQueue().postDelayed(action, delayMillis);
             return true;
         }
 
@@ -7612,7 +7612,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             handler = attachInfo.mHandler;
         } else {
             // Assume that post will succeed later
-            ViewRoot.getRunQueue().removeCallbacks(action);
+            ViewAncestor.getRunQueue().removeCallbacks(action);
             return true;
         }
 
@@ -10593,9 +10593,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             viewParent = view.mParent;
         }
 
-        if (viewParent instanceof ViewRoot) {
+        if (viewParent instanceof ViewAncestor) {
             // *cough*
-            final ViewRoot vr = (ViewRoot)viewParent;
+            final ViewAncestor vr = (ViewAncestor)viewParent;
             location[1] -= vr.mCurScrollY;
         }
     }
@@ -11405,7 +11405,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * therefore all View objects remove themselves from the global transparent
      * region (passed as a parameter to this function).
      *
-     * @param region The transparent region for this ViewRoot (window).
+     * @param region The transparent region for this ViewAncestor (window).
      *
      * @return Returns true if the effective visibility of the view at this
      * point is opaque, regardless of the transparent region; returns false
@@ -11711,7 +11711,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     surface.unlockCanvasAndPost(canvas);
                 }
 
-                final ViewRoot root = getViewRoot();
+                final ViewAncestor root = getViewAncestor();
 
                 // Cache the local state object for delivery with DragEvents
                 root.setLocalDragState(myLocalState);
@@ -12497,7 +12497,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         boolean mScalingRequired;
 
         /**
-         * If set, ViewRoot doesn't use its lame animation for when the window resizes.
+         * If set, ViewAncestor doesn't use its lame animation for when the window resizes.
          */
         boolean mTurnOffWindowResizeAnim;
 
@@ -12576,7 +12576,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         boolean mInTouchMode;
 
         /**
-         * Indicates that ViewRoot should trigger a global layout change
+         * Indicates that ViewAncestor should trigger a global layout change
          * the next time it performs a traversal
          */
         boolean mRecomputeGlobalAttributes;
@@ -12638,7 +12638,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         Canvas mCanvas;
 
         /**
-         * A Handler supplied by a view's {@link android.view.ViewRoot}. This
+         * A Handler supplied by a view's {@link android.view.ViewAncestor}. This
          * handler can be used to pump events in the UI events queue.
          */
         final Handler mHandler;

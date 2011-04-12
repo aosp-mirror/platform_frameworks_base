@@ -35,7 +35,7 @@ namespace android {
 
 static int gPrevDur;
 
-static void android_view_ViewRoot_showFPS(JNIEnv* env, jobject, jobject jcanvas,
+static void android_view_ViewAncestor_showFPS(JNIEnv* env, jobject, jobject jcanvas,
                                           jint dur) {
     NPE_CHECK_RETURN_VOID(env, jcanvas);
     SkCanvas* canvas = GraphicsJNI::getNativeCanvas(env, jcanvas);
@@ -79,14 +79,14 @@ static void android_view_ViewRoot_showFPS(JNIEnv* env, jobject, jobject jcanvas,
 
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/ViewRoot";
+const char* const kClassPathName = "android/view/ViewAncestor";
 
 static JNINativeMethod gMethods[] = {
     {   "nativeShowFPS", "(Landroid/graphics/Canvas;I)V",
-                                        (void*)android_view_ViewRoot_showFPS }
+                                        (void*)android_view_ViewAncestor_showFPS }
 };
 
-int register_android_view_ViewRoot(JNIEnv* env) {
+int register_android_view_ViewAncestor(JNIEnv* env) {
     return AndroidRuntime::registerNativeMethods(env,
             kClassPathName, gMethods, NELEM(gMethods));
 }

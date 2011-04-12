@@ -38,7 +38,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.ViewRoot;
+import android.view.ViewAncestor;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -632,7 +632,7 @@ public class WallpaperManager {
     public void setWallpaperOffsets(IBinder windowToken, float xOffset, float yOffset) {
         try {
             //Log.v(TAG, "Sending new wallpaper offsets from app...");
-            ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
+            ViewAncestor.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
                     windowToken, xOffset, yOffset, mWallpaperXStep, mWallpaperYStep);
             //Log.v(TAG, "...app returning after sending offsets!");
         } catch (RemoteException e) {
@@ -670,7 +670,7 @@ public class WallpaperManager {
             int x, int y, int z, Bundle extras) {
         try {
             //Log.v(TAG, "Sending new wallpaper offsets from app...");
-            ViewRoot.getWindowSession(mContext.getMainLooper()).sendWallpaperCommand(
+            ViewAncestor.getWindowSession(mContext.getMainLooper()).sendWallpaperCommand(
                     windowToken, action, x, y, z, extras, false);
             //Log.v(TAG, "...app returning after sending offsets!");
         } catch (RemoteException e) {
@@ -690,7 +690,7 @@ public class WallpaperManager {
      */
     public void clearWallpaperOffsets(IBinder windowToken) {
         try {
-            ViewRoot.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
+            ViewAncestor.getWindowSession(mContext.getMainLooper()).setWallpaperPosition(
                     windowToken, -1, -1, -1, -1);
         } catch (RemoteException e) {
             // Ignore.

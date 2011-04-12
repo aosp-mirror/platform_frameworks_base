@@ -33,7 +33,7 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewParent;
-import android.view.ViewRoot;
+import android.view.ViewAncestor;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.WindowManager.LayoutParams;
@@ -501,7 +501,7 @@ public class ZoomButtonsController implements View.OnTouchListener {
 
         } else {
 
-            ViewRoot viewRoot = getOwnerViewRoot();
+            ViewAncestor viewRoot = getOwnerViewAncestor();
             if (viewRoot != null) {
                 viewRoot.dispatchKey(event);
             }
@@ -526,15 +526,15 @@ public class ZoomButtonsController implements View.OnTouchListener {
         }
     }
 
-    private ViewRoot getOwnerViewRoot() {
+    private ViewAncestor getOwnerViewAncestor() {
         View rootViewOfOwner = mOwnerView.getRootView();
         if (rootViewOfOwner == null) {
             return null;
         }
 
         ViewParent parentOfRootView = rootViewOfOwner.getParent();
-        if (parentOfRootView instanceof ViewRoot) {
-            return (ViewRoot) parentOfRootView;
+        if (parentOfRootView instanceof ViewAncestor) {
+            return (ViewAncestor) parentOfRootView;
         } else {
             return null;
         }
