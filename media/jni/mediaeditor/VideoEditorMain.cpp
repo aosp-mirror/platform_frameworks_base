@@ -780,7 +780,7 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
         {
             M4OSA_Context fileContext;
             M4OSA_Char* fileName = (M4OSA_Char*)"/mnt/sdcard/FirstRGB565.raw";
-            M4OSA_fileExtraDelete((const M4OSA_Char *)fileName);
+            remove((const char *)fileName);
             M4OSA_fileWriteOpen(&fileContext, (M4OSA_Void*) fileName,\
                 M4OSA_kFileWrite|M4OSA_kFileCreate);
             M4OSA_fileWriteData(fileContext, (M4OSA_MemAddr8) pixelArray,
@@ -826,7 +826,7 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
         {
             M4OSA_Context fileContext;
             M4OSA_Char* fileName = (M4OSA_Char*)"/mnt/sdcard/ConvertedYuv.yuv";
-            M4OSA_fileExtraDelete((const M4OSA_Char *)fileName);
+            remove((const char *)fileName);
             M4OSA_fileWriteOpen(&fileContext, (M4OSA_Void*) fileName,\
                 M4OSA_kFileWrite|M4OSA_kFileCreate);
             M4OSA_fileWriteData(fileContext,
@@ -1188,19 +1188,19 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
 
     // generate the path for temp 3gp output file
     pTemp3gpFilePath = (M4OSA_Char*) M4OSA_malloc (
-        (M4OSA_chrLength((M4OSA_Char*)pContext->initParams.pTempPath)
-        + M4OSA_chrLength ((M4OSA_Char*)TEMP_MCS_OUT_FILE_PATH)) + 1 /* for null termination */ , 0x0,
-        (M4OSA_Char*) "Malloc for temp 3gp file");
-    if ( pTemp3gpFilePath != M4OSA_NULL )
+        (strlen((const char*)pContext->initParams.pTempPath)
+        + strlen((const char*)TEMP_MCS_OUT_FILE_PATH)) + 1 /* for null termination */ , 0x0,
+        (M4OSA_Char*)"Malloc for temp 3gp file");
+    if (pTemp3gpFilePath != M4OSA_NULL)
     {
         M4OSA_memset(pTemp3gpFilePath  ,
-            M4OSA_chrLength((M4OSA_Char*)pContext->initParams.pTempPath)
-            + M4OSA_chrLength((M4OSA_Char*)TEMP_MCS_OUT_FILE_PATH) + 1, 0);
-        M4OSA_chrNCat ( (M4OSA_Char*)pTemp3gpFilePath,
-            (M4OSA_Char*)pContext->initParams.pTempPath  ,
-            M4OSA_chrLength ((M4OSA_Char*)pContext->initParams.pTempPath));
-        M4OSA_chrNCat ( pTemp3gpFilePath , (M4OSA_Char*)TEMP_MCS_OUT_FILE_PATH,
-            M4OSA_chrLength ((M4OSA_Char*)TEMP_MCS_OUT_FILE_PATH));
+            strlen((const char*)pContext->initParams.pTempPath)
+            + strlen((const char*)TEMP_MCS_OUT_FILE_PATH) + 1,0);
+        strncat((char *)pTemp3gpFilePath,
+            (const char *)pContext->initParams.pTempPath  ,
+            (size_t) ((M4OSA_Char*)pContext->initParams.pTempPath));
+        strncat((char *)pTemp3gpFilePath , (const char *)TEMP_MCS_OUT_FILE_PATH,
+            (size_t)strlen ((const char*)TEMP_MCS_OUT_FILE_PATH));
     }
     else {
          M4MCS_abort(mcsContext);
@@ -1219,7 +1219,7 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
     pInputFileType = (M4VIDEOEDITING_FileType)pContext->mAudioSettings->fileType;
 
     VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEO_EDITOR", "TEMP_MCS_OUT_FILE_PATH len %d",
-        M4OSA_chrLength ((M4OSA_Char*)TEMP_MCS_OUT_FILE_PATH));
+        strlen ((const char*)TEMP_MCS_OUT_FILE_PATH));
     VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEO_EDITOR", "pTemp3gpFilePath %s",
         pOutputFile);
 
@@ -1395,7 +1395,7 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
         (M4NO_ERROR != result), result);
 
     //pContext->mAudioSettings->pFile = pOutputParams->pOutputPCMfile;
-    M4OSA_fileExtraDelete((const M4OSA_Char *) pTemp3gpFilePath);
+    remove((const char *) pTemp3gpFilePath);
     VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR", "videoEditor_generateAudio() EXIT ");
 
     if (pTemp3gpFilePath != M4OSA_NULL) {
@@ -2237,7 +2237,7 @@ videoEditor_toUTF8Fct(
     // Determine the length of the input buffer.
     if (M4OSA_NULL != pBufferIn)
     {
-        length = M4OSA_chrLength((M4OSA_Char *)pBufferIn);
+        length = strlen((const char *)pBufferIn);
     }
 
     // Check if the output buffer is large enough to hold the input buffer.
@@ -2282,7 +2282,7 @@ videoEditor_fromUTF8Fct(
     // Determine the length of the input buffer.
     if (M4OSA_NULL != pBufferIn)
     {
-        length = M4OSA_chrLength((M4OSA_Char *)pBufferIn);
+        length = strlen((const char *)pBufferIn);
     }
 
     // Check if the output buffer is large enough to hold the input buffer.
@@ -2498,13 +2498,14 @@ videoEditor_init(
                 (M4OSA_Char *)videoEditJava_getString(&initialized, pEnv, tempPath,
                 NULL, M4OSA_NULL);
             pContext->initParams.pTempPath = (M4OSA_Char *)
-                 M4OSA_malloc(M4OSA_chrLength(tmpString) + 1, 0x0,
+                 M4OSA_malloc(strlen((const char *)tmpString) + 1, 0x0,
                                                  (M4OSA_Char *)"tempPath");
             //initialize the first char. so that strcat works.
             M4OSA_Char *ptmpChar = (M4OSA_Char*)pContext->initParams.pTempPath;
             ptmpChar[0] = 0x00;
-            M4OSA_chrNCat((M4OSA_Char*)pContext->initParams.pTempPath, tmpString, M4OSA_chrLength(tmpString));
-            M4OSA_chrNCat((M4OSA_Char*)pContext->initParams.pTempPath, (M4OSA_Char*)"/", 1);
+            strncat((char *)pContext->initParams.pTempPath, (const char *)tmpString, 
+                (size_t)strlen((const char *)tmpString));
+            strncat((char *)pContext->initParams.pTempPath, (const char *)"/", (size_t)1);
             M4OSA_free((M4OSA_MemAddr32)tmpString);
             pContext->mIsUpdateOverlay = false;
             pContext->mOverlayFileName = NULL;

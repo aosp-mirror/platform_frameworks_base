@@ -339,7 +339,7 @@ videoEditJava_getString(
             {
                 // Determine the length of the path
                 // (add one extra character for the zero terminator).
-                length = M4OSA_chrLength(pLocal) + 1;
+                length = strlen((const char *)pLocal) + 1;
 
                 // Allocate memory for the string.
                 pString = videoEditOsal_alloc(pResult, pEnv, length, "String");

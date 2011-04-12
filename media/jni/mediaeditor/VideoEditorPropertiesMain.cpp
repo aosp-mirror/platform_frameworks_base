@@ -147,8 +147,8 @@ jobject videoEditProp_getProperties(
     if (gotten)
     {
         // Retrieve the extension.
-        result = M4OSA_chrReverseFindChar(pFile, '.', &pExtension);
-        if ((M4NO_ERROR == result) && (M4OSA_NULL != pExtension))
+        pExtension = (M4OSA_Char *)strrchr((const char *)pFile, (int)'.');
+        if (M4OSA_NULL != pExtension)
         {
             // Skip the dot.
             pExtension++;
@@ -341,7 +341,7 @@ static void getFileAndMediaTypeFromExtension (
     M4OSA_UInt32 index = 0;
     M4OSA_ERR result = M4NO_ERROR;
     M4OSA_Int32 cmpResult = 0;
-    M4OSA_UInt32  extLength = M4OSA_chrLength(pExtension);
+    M4OSA_UInt32  extLength = strlen((const char *)pExtension);
 
     // Assign default
     *pFileType = VideoEditClasses_kFileType_Unsupported;
@@ -353,7 +353,7 @@ static void getFileAndMediaTypeFromExtension (
         // Convert the extension to lowercase.
         for (index = 0; index < extLength ; index++)
         {
-            extension[index] = M4OSA_chrToLower(pExtension[index]);
+            extension[index] = tolower((int)pExtension[index]);
         }
 
         // Check if the extension is ".mp3".
@@ -539,7 +539,7 @@ VideoEdit_chrCompare(M4OSA_Char* pStrIn1,
                      M4OSA_Char* pStrIn2,
                       M4OSA_Int32* pCmpResult)
 {
-    M4OSA_chrCompare(pStrIn1, pStrIn2, pCmpResult);
+    *pCmpResult = strcmp((const char *)pStrIn1, (const char *)pStrIn2);
     return *pCmpResult;
 }
 
