@@ -308,6 +308,44 @@ public:
     // 0.3333, EV is -2.
     // Example value: "0.333333333" or "0.5". Read only.
     static const char KEY_EXPOSURE_COMPENSATION_STEP[];
+    // The maximum number of metering areas supported. This is the maximum
+    // length of KEY_METERING_AREAS.
+    // Example value: "0" or "2". Read only.
+    static const char KEY_MAX_NUM_METERING_AREAS[];
+    // Current metering areas. Camera driver uses these areas to decide
+    // exposure.
+    //
+    // Before accessing this parameter, apps should check
+    // KEY_MAX_NUM_METERING_AREAS first to know the maximum number of metering
+    // areas first. If the value is 0, metering area is not supported.
+    //
+    // Each metering area is a rectangle with specified weight. The direction is
+    // relative to the sensor orientation, that is, what the sensor sees. The
+    // direction is not affected by the rotation or mirroring of
+    // CAMERA_CMD_SET_DISPLAY_ORIENTATION. Coordinates of the rectangle range
+    // from -1000 to 1000. (-1000, -1000) is the upper left point. (1000, 1000)
+    // is the lower right point. The length and width of metering areas cannot
+    // be 0 or negative.
+    //
+    // The weight ranges from 1 to 1000. The sum of the weights of all metering
+    // areas must be 1000. Metering areas can partially overlap and the driver
+    // will add the weights in the overlap region. But apps should not set two
+    // metering areas that have identical coordinates.
+    //
+    // A special case of all-zero single metering area means driver to decide
+    // the metering area. For example, the driver may use more signals to decide
+    // metering areas and change them dynamically. Apps can set all-zero if they
+    // want the driver to decide metering areas.
+    //
+    // Metering areas are relative to the current field of view (KEY_ZOOM).
+    // No matter what the zoom level is, (-1000,-1000) represents the top of the
+    // currently visible camera frame. The metering area cannot be set to be
+    // outside the current field of view, even when using zoom.
+    //
+    // No matter what metering areas are, the final exposure are compensated
+    // by KEY_EXPOSURE_COMPENSATION.
+    // Example value: "(-10,-10,0,0,300),(0,0,10,10,700)". Read/write.
+    static const char KEY_METERING_AREAS[];
     // Current zoom value.
     // Example value: "0" or "6". Read/write.
     static const char KEY_ZOOM[];
