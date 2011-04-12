@@ -25,7 +25,7 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"진행 중"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"알림"</string>
     <string name="battery_low_title" msgid="7923774589611311406">"충전기를 연결하세요."</string>
-    <string name="battery_low_subtitle" msgid="7388781709819722764">"배터리 전원이 부족합니다."</string>
+    <string name="battery_low_subtitle" msgid="7388781709819722764">"배터리가 얼마 남지 않았습니다."</string>
     <string name="battery_low_percent_format" msgid="696154104579022959">"잔여 배터리가 <xliff:g id="NUMBER">%d%%</xliff:g> 이하입니다."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"배터리 사용량"</string>
     <!-- no translation found for usb_accessory_permission_prompt (3969745913539898765) -->
@@ -34,8 +34,7 @@
     <skip />
     <!-- no translation found for usb_accessory_confirm_prompt (3947430407252730383) -->
     <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
-    <skip />
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"이 USB와 호환되는 설치 애플리케이션이 없습니다. <xliff:g id="URL">%1$s</xliff:g>에서 세부정보를 참조하세요."</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB 액세서리"</string>
     <string name="label_view" msgid="6304565553218192990">"보기"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"이 USB 액세서리에 기본값으로 사용"</string>

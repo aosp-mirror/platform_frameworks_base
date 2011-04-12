@@ -34,8 +34,7 @@
     <skip />
     <!-- no translation found for usb_accessory_confirm_prompt (3947430407252730383) -->
     <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
-    <skip />
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"S tímto periferním zařízením USB nefunguje žádná nainstalovaná aplikace. Další informace naleznete na stránkách <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"Periferní zařízení USB"</string>
     <string name="label_view" msgid="6304565553218192990">"Zobrazit"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Pro toto periferní zařízení USB použít jako výchozí"</string>
