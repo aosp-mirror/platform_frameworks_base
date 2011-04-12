@@ -651,9 +651,6 @@ static JNINativeMethod gWifiMethods[] = {
 
 int register_android_net_wifi_WifiManager(JNIEnv* env)
 {
-    jclass wifi = env->FindClass(WIFI_PKG_NAME);
-    LOG_FATAL_IF(wifi == NULL, "Unable to find class " WIFI_PKG_NAME);
-
     return AndroidRuntime::registerNativeMethods(env,
             WIFI_PKG_NAME, gWifiMethods, NELEM(gWifiMethods));
 }

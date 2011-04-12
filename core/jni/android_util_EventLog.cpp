@@ -35,9 +35,6 @@ static jmethodID gEventInitID;
 static jclass gIntegerClass;
 static jfieldID gIntegerValueID;
 
-static jclass gListClass;
-static jfieldID gListItemsID;
-
 static jclass gLongClass;
 static jfieldID gLongValueID;
 

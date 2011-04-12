@@ -335,15 +335,11 @@ android_media_MediaScanner_native_init(JNIEnv *env)
     LOGV("native_init");
     jclass clazz = env->FindClass(kClassMediaScanner);
     if (clazz == NULL) {
-        const char* err = "Can't find android/media/MediaScanner";
-        jniThrowException(env, kRunTimeException, err);
         return;
     }
 
     fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
     if (fields.context == NULL) {
-        const char* err = "Can't find MediaScanner.mNativeContext";
-        jniThrowException(env, kRunTimeException, err);
         return;
     }
 }

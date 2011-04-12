@@ -28,7 +28,6 @@ struct cached_array_fields_t
     jfieldID count;
 };
 
-static jclass clazz;
 static jfieldID freq_field;
 static jfieldID until_field;
 static jfieldID count_field;
@@ -87,8 +86,7 @@ EventRecurrence_parse(JNIEnv* env, jobject This, jstring jstr)
         jniThrowNullPointerException(env, "EventRecurrence.parse str parameter null");
         return ;
     }
-    jboolean isCopy;
-    const jchar* jchars = env->GetStringChars(jstr, &isCopy);
+    const jchar* jchars = env->GetStringChars(jstr, NULL);
     jsize len = env->GetStringLength(jstr);
     String16 str(jchars, len);
     env->ReleaseStringChars(jstr, jchars);
@@ -156,7 +154,7 @@ static const char*const CLASS_NAME = "android/pim/EventRecurrence";
 
 int register_android_pim_EventRecurrence(JNIEnv* env)
 {
-    clazz = env->FindClass(CLASS_NAME);
+    jclass clazz = env->FindClass(CLASS_NAME);
     if (clazz == NULL) {
         LOGE("Field lookup unable to find class '%s'\n", CLASS_NAME);
         return -1;

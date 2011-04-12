@@ -2,16 +2,16 @@
 **
 ** Copyright 2006, The Android Open Source Project
 **
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
 **
-**     http://www.apache.org/licenses/LICENSE-2.0 
+**     http://www.apache.org/licenses/LICENSE-2.0
 **
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
 ** limitations under the License.
 */
 
@@ -145,7 +145,7 @@ jint android_os_FileUtils_getFatVolumeId(JNIEnv* env, jobject clazz, jstring pat
 jboolean android_os_FileUtils_getFileStatus(JNIEnv* env, jobject clazz, jstring path, jobject fileStatus) {
     const char* pathStr = env->GetStringUTFChars(path, NULL);
     jboolean ret = false;
-    
+
     struct stat s;
     int res = stat(pathStr, &s);
     if (res == 0) {
@@ -165,9 +165,9 @@ jboolean android_os_FileUtils_getFileStatus(JNIEnv* env, jobject clazz, jstring 
             env->SetLongField(fileStatus, gFileStatusCtimeFieldID, s.st_ctime);
         }
     }
-    
+
     env->ReleaseStringUTFChars(path, pathStr);
-    
+
     return ret;
 }
 
@@ -183,11 +183,6 @@ static const char* const kFileUtilsPathName = "android/os/FileUtils";
 
 int register_android_os_FileUtils(JNIEnv* env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass(kFileUtilsPathName);
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.FileUtils");
-    
     jclass fileStatusClass = env->FindClass("android/os/FileUtils$FileStatus");
     LOG_FATAL_IF(fileStatusClass == NULL, "Unable to find class android.os.FileUtils$FileStatus");
 
