@@ -35,7 +35,7 @@ static void Color_RGBToHSV(JNIEnv* env, jobject, int red, int green, int blue, j
         values[i] = SkScalarToFloat(hsv[i]);
     }
 }
- 
+
 static int Color_HSVToColor(JNIEnv* env, jobject, int alpha, jfloatArray hsvArray)
 {
     AutoJavaFloatArray  autoHSV(env, hsvArray, 3);
@@ -45,7 +45,7 @@ static int Color_HSVToColor(JNIEnv* env, jobject, int alpha, jfloatArray hsvArra
     for (int i = 0; i < 3; i++) {
         hsv[i] = SkFloatToScalar(values[i]);
     }
-    
+
     return SkHSVToColor(alpha, hsv);
 }
 
@@ -104,7 +104,7 @@ static SkiaShader* BitmapShader_postConstructor(JNIEnv* env, jobject o, SkShader
     return NULL;
 #endif
 }
-    
+
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
 static SkShader* LinearGradient_create1(JNIEnv* env, jobject o,
@@ -129,7 +129,7 @@ static SkShader* LinearGradient_create1(JNIEnv* env, jobject o,
             pos[i] = SkFloatToScalar(posValues[i]);
         }
     }
-    
+
     SkShader* shader = SkGradientShader::CreateLinear(pts,
                                 reinterpret_cast<const SkColor*>(colorValues),
                                 pos, count,
@@ -218,7 +218,7 @@ static SkShader* LinearGradient_create2(JNIEnv* env, jobject o,
     SkColor colors[2];
     colors[0] = color0;
     colors[1] = color1;
-    
+
     SkShader* s = SkGradientShader::CreateLinear(pts, colors, NULL, 2, (SkShader::TileMode)tileMode);
 
     ThrowIAE_IfNull(env, s);
@@ -237,7 +237,7 @@ static SkShader* RadialGradient_create1(JNIEnv* env, jobject, float x, float y, 
 
     SkAutoSTMalloc<8, SkScalar> storage(posArray ? count : 0);
     SkScalar*                   pos = NULL;
-    
+
     if (posArray) {
         AutoJavaFloatArray autoPos(env, posArray, count);
         const float* posValues = autoPos.ptr();
@@ -338,10 +338,10 @@ static SkShader* SweepGradient_create1(JNIEnv* env, jobject, float x, float y,
         jintArray jcolors, jfloatArray jpositions) {
     size_t      count = env->GetArrayLength(jcolors);
     const jint* colors = env->GetIntArrayElements(jcolors, NULL);
-    
+
     SkAutoSTMalloc<8, SkScalar> storage(jpositions ? count : 0);
     SkScalar*                   pos = NULL;
-    
+
     if (NULL != jpositions) {
         AutoJavaFloatArray autoPos(env, jpositions, count);
         const float* posValues = autoPos.ptr();
@@ -520,11 +520,10 @@ static JNINativeMethod gComposeShaderMethods[] = {
     result = android::AndroidRuntime::registerNativeMethods(env, name, array, SK_ARRAY_COUNT(array));  \
     if (result < 0) return result
 
-int register_android_graphics_Shader(JNIEnv* env);
 int register_android_graphics_Shader(JNIEnv* env)
 {
     int result;
-    
+
     REG(env, "android/graphics/Color", gColorMethods);
     REG(env, "android/graphics/Shader", gShaderMethods);
     REG(env, "android/graphics/BitmapShader", gBitmapShaderMethods);
@@ -532,7 +531,6 @@ int register_android_graphics_Shader(JNIEnv* env)
     REG(env, "android/graphics/RadialGradient", gRadialGradientMethods);
     REG(env, "android/graphics/SweepGradient", gSweepGradientMethods);
     REG(env, "android/graphics/ComposeShader", gComposeShaderMethods);
-    
+
     return result;
 }
-

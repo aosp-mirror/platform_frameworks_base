@@ -655,7 +655,6 @@ static JNINativeMethod gBitmapMethods[] = {
 
 #define kClassPathName  "android/graphics/Bitmap"
 
-int register_android_graphics_Bitmap(JNIEnv* env);
 int register_android_graphics_Bitmap(JNIEnv* env)
 {
     return android::AndroidRuntime::registerNativeMethods(env, kClassPathName,

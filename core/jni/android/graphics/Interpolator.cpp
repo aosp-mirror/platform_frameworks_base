@@ -61,7 +61,7 @@ static int Interpolator_timeToValues(JNIEnv* env, jobject clazz, SkInterpolator*
 
     float* values = valueArray ? env->GetFloatArrayElements(valueArray, NULL) : NULL;
     result = interp->timeToValues(msec, (SkScalar*)values);
-    
+
     if (valueArray) {
         int n = env->GetArrayLength(valueArray);
         for (int i = 0; i < n; i++) {
@@ -69,7 +69,7 @@ static int Interpolator_timeToValues(JNIEnv* env, jobject clazz, SkInterpolator*
         }
         env->ReleaseFloatArrayElements(valueArray, values, 0);
     }
-    
+
     return result;
 }
 
@@ -87,7 +87,6 @@ static JNINativeMethod gInterpolatorMethods[] = {
     { "nativeTimeToValues",     "(II[F)I",      (void*)Interpolator_timeToValues    }
 };
 
-int register_android_graphics_Interpolator(JNIEnv* env);
 int register_android_graphics_Interpolator(JNIEnv* env)
 {
     return android::AndroidRuntime::registerNativeMethods(env,

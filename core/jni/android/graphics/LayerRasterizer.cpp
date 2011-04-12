@@ -11,7 +11,7 @@ public:
         SkASSERT(layer);
         SkASSERT(paint);
         layer->addLayer(*paint, SkFloatToScalar(dx), SkFloatToScalar(dy));
-    } 
+    }
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -23,7 +23,6 @@ static JNINativeMethod gLayerRasterizerMethods[] = {
     { "nativeAddLayer",     "(IIFF)V",  (void*)SkLayerRasterizerGlue::addLayer  }
 };
 
-int register_android_graphics_LayerRasterizer(JNIEnv* env);
 int register_android_graphics_LayerRasterizer(JNIEnv* env)
 {
     return android::AndroidRuntime::registerNativeMethods(env,
@@ -31,4 +30,3 @@ int register_android_graphics_LayerRasterizer(JNIEnv* env)
                                                        gLayerRasterizerMethods,
                                                        SK_ARRAY_COUNT(gLayerRasterizerMethods));
 }
-
