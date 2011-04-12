@@ -127,11 +127,28 @@ public:
     // be called from the client.
     status_t setDefaultBufferSize(uint32_t w, uint32_t h);
 
-private:
+    // getCurrentBuffer returns the buffer associated with the current image.
+    sp<GraphicBuffer> getCurrentBuffer() const;
+
+    // getCurrentTextureTarget returns the texture target of the current
+    // texture as returned by updateTexImage().
+    GLenum getCurrentTextureTarget() const;
+
+    // getCurrentCrop returns the cropping rectangle of the current buffer
+    Rect getCurrentCrop() const;
+
+    // getCurrentTransform returns the transform of the current buffer
+    uint32_t getCurrentTransform() const;
+
+protected:
 
     // freeAllBuffers frees the resources (both GraphicBuffer and EGLImage) for
     // all slots.
     void freeAllBuffers();
+    static bool isExternalFormat(uint32_t format);
+    static GLenum getTextureTarget(uint32_t format);
+
+private:
 
     // createImage creates a new EGLImage from a GraphicBuffer.
     EGLImageKHR createImage(EGLDisplay dpy,
@@ -193,6 +210,10 @@ private:
     // that no buffer is bound to the texture. A call to setBufferCount will
     // reset mCurrentTexture to INVALID_BUFFER_SLOT.
     int mCurrentTexture;
+
+    // mCurrentTextureTarget is the GLES texture target to be used with the
+    // current texture.
+    GLenum mCurrentTextureTarget;
 
     // mCurrentTextureBuf is the graphic buffer of the current texture. It's
     // possible that this buffer is not associated with any buffer slot, so we
@@ -262,7 +283,7 @@ private:
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of SurfaceTexture objects. It must be locked whenever the
     // member variables are accessed.
-    Mutex mMutex;
+    mutable Mutex mMutex;
 };
 
 // ----------------------------------------------------------------------------

@@ -27,6 +27,8 @@
 
 #include <gui/SurfaceTexture.h>
 
+#include <hardware/hardware.h>
+
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
 #include <surfaceflinger/IGraphicBufferAlloc.h>
@@ -82,6 +84,7 @@ SurfaceTexture::SurfaceTexture(GLuint tex) :
     mUseDefaultSize(true),
     mBufferCount(MIN_BUFFER_SLOTS),
     mCurrentTexture(INVALID_BUFFER_SLOT),
+    mCurrentTextureTarget(GL_TEXTURE_EXTERNAL_OES),
     mCurrentTransform(0),
     mCurrentTimestamp(0),
     mLastQueued(INVALID_BUFFER_SLOT),
@@ -198,6 +201,7 @@ status_t SurfaceTexture::dequeueBuffer(int *buf) {
     if (buffer == NULL) {
         return ISurfaceTexture::BUFFER_NEEDS_REALLOCATION;
     }
+
     if ((mUseDefaultSize) &&
         ((uint32_t(buffer->width) != mDefaultWidth) ||
          (uint32_t(buffer->height) != mDefaultHeight))) {
@@ -264,9 +268,6 @@ status_t SurfaceTexture::updateTexImage() {
     LOGV("SurfaceTexture::updateTexImage");
     Mutex::Autolock lock(mMutex);
 
-    // We always bind the texture even if we don't update its contents.
-    glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTexName);
-
     // Initially both mCurrentTexture and mLastQueued are INVALID_BUFFER_SLOT,
     // so this check will fail until a buffer gets queued.
     if (mCurrentTexture != mLastQueued) {
@@ -284,7 +285,15 @@ status_t SurfaceTexture::updateTexImage() {
         while ((error = glGetError()) != GL_NO_ERROR) {
             LOGE("GL error cleared before updating SurfaceTexture: %#04x", error);
         }
-        glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, (GLeglImageOES)image);
+
+        GLenum target = getTextureTarget(
+                mSlots[mLastQueued].mGraphicBuffer->format);
+        if (target != mCurrentTextureTarget) {
+            glDeleteTextures(1, &mTexName);
+        }
+        glBindTexture(target, mTexName);
+        glEGLImageTargetTexture2DOES(target, (GLeglImageOES)image);
+
         bool failed = false;
         while ((error = glGetError()) != GL_NO_ERROR) {
             LOGE("error binding external texture image %p (slot %d): %#04x",
@@ -297,12 +306,51 @@ status_t SurfaceTexture::updateTexImage() {
 
         // Update the SurfaceTexture state.
         mCurrentTexture = mLastQueued;
+        mCurrentTextureTarget = target;
         mCurrentTextureBuf = mSlots[mCurrentTexture].mGraphicBuffer;
         mCurrentCrop = mLastQueuedCrop;
         mCurrentTransform = mLastQueuedTransform;
         mCurrentTimestamp = mLastQueuedTimestamp;
+    } else {
+        // We always bind the texture even if we don't update its contents.
+        glBindTexture(mCurrentTextureTarget, mTexName);
     }
     return OK;
+}
+
+bool SurfaceTexture::isExternalFormat(uint32_t format)
+{
+    switch (format) {
+    // supported YUV formats
+    case HAL_PIXEL_FORMAT_YV12:
+    // Legacy/deprecated YUV formats
+    case HAL_PIXEL_FORMAT_YCbCr_422_SP:
+    case HAL_PIXEL_FORMAT_YCrCb_420_SP:
+    case HAL_PIXEL_FORMAT_YCbCr_422_I:
+        return true;
+    }
+
+    // Any OEM format needs to be considered
+    if (format>=0x100 && format<=0x1FF)
+        return true;
+
+    return false;
+}
+
+GLenum SurfaceTexture::getTextureTarget(uint32_t format)
+{
+    GLenum target = GL_TEXTURE_2D;
+#if defined(GL_OES_EGL_image_external)
+    if (isExternalFormat(format)) {
+        target = GL_TEXTURE_EXTERNAL_OES;
+    }
+#endif
+    return target;
+}
+
+GLenum SurfaceTexture::getCurrentTextureTarget() const {
+    Mutex::Autolock lock(mMutex);
+    return mCurrentTextureTarget;
 }
 
 void SurfaceTexture::getTransformMatrix(float mtx[16]) {
@@ -458,6 +506,22 @@ EGLImageKHR SurfaceTexture::createImage(EGLDisplay dpy,
     }
     return image;
 }
+
+sp<GraphicBuffer> SurfaceTexture::getCurrentBuffer() const {
+    Mutex::Autolock lock(mMutex);
+    return mCurrentTextureBuf;
+}
+
+Rect SurfaceTexture::getCurrentCrop() const {
+    Mutex::Autolock lock(mMutex);
+    return mCurrentCrop;
+}
+
+uint32_t SurfaceTexture::getCurrentTransform() const {
+    Mutex::Autolock lock(mMutex);
+    return mCurrentTransform;
+}
+
 
 static void mtxMul(float out[16], const float a[16], const float b[16]) {
     out[0] = a[0]*b[0] + a[4]*b[1] + a[8]*b[2] + a[12]*b[3];
