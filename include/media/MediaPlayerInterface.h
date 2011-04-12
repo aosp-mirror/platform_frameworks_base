@@ -55,7 +55,8 @@ enum player_type {
 
 
 // callback mechanism for passing messages to MediaPlayer object
-typedef void (*notify_callback_f)(void* cookie, int msg, int ext1, int ext2);
+typedef void (*notify_callback_f)(void* cookie,
+        int msg, int ext1, int ext2, const Parcel *obj);
 
 // abstract base class - use MediaPlayerInterface
 class MediaPlayerBase : public RefBase
@@ -159,9 +160,10 @@ public:
         mCookie = cookie; mNotify = notifyFunc;
     }
 
-    void        sendEvent(int msg, int ext1=0, int ext2=0) {
+    void        sendEvent(int msg, int ext1=0, int ext2=0,
+                          const Parcel *obj=NULL) {
         Mutex::Autolock autoLock(mNotifyLock);
-        if (mNotify) mNotify(mCookie, msg, ext1, ext2);
+        if (mNotify) mNotify(mCookie, msg, ext1, ext2, obj);
     }
 
 private:

@@ -551,7 +551,7 @@ status_t MediaPlayer::attachAuxEffect(int effectId)
     return mPlayer->attachAuxEffect(effectId);
 }
 
-void MediaPlayer::notify(int msg, int ext1, int ext2)
+void MediaPlayer::notify(int msg, int ext1, int ext2, const Parcel *obj)
 {
     LOGV("message received msg=%d, ext1=%d, ext2=%d", msg, ext1, ext2);
     bool send = true;
@@ -641,6 +641,9 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
         mVideoWidth = ext1;
         mVideoHeight = ext2;
         break;
+    case MEDIA_TIMED_TEXT:
+        LOGV("Received timed text message");
+        break;
     default:
         LOGV("unrecognized message: (%d, %d, %d)", msg, ext1, ext2);
         break;
@@ -653,7 +656,7 @@ void MediaPlayer::notify(int msg, int ext1, int ext2)
     if ((listener != 0) && send) {
         Mutex::Autolock _l(mNotifyLock);
         LOGV("callback application");
-        listener->notify(msg, ext1, ext2);
+        listener->notify(msg, ext1, ext2, obj);
         LOGV("back from callback");
     }
 }

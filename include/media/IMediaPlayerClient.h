@@ -28,7 +28,7 @@ class IMediaPlayerClient: public IInterface
 public:
     DECLARE_META_INTERFACE(MediaPlayerClient);
 
-    virtual void notify(int msg, int ext1, int ext2) = 0;
+    virtual void notify(int msg, int ext1, int ext2, const Parcel *obj) = 0;
 };
 
 // ----------------------------------------------------------------------------

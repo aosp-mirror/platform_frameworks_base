@@ -107,7 +107,7 @@ struct MyClient : public BnMediaPlayerClient {
         : mEOS(false) {
     }
 
-    virtual void notify(int msg, int ext1, int ext2) {
+    virtual void notify(int msg, int ext1, int ext2, const Parcel *obj) {
         Mutex::Autolock autoLock(mLock);
 
         if (msg == MEDIA_ERROR || msg == MEDIA_PLAYBACK_COMPLETE) {
