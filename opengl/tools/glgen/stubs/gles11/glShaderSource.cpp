@@ -6,7 +6,7 @@ android_glShaderSource
     (JNIEnv *_env, jobject _this, jint shader, jstring string) {
 
     if (!string) {
-        _env->ThrowNew(IAEClass, "string == null");
+        jniThrowException(_env, "java/lang/IllegalArgumentException", "string == null");
         return;
     }
 
