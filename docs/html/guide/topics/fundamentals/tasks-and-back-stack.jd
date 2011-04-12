@@ -11,7 +11,7 @@ parent.link=activities.html
   <li>A task contains a collection of activities in the order in which the user interacts with
 them</li>
   <li>Tasks can move to the background and retain the state of each activity in order for the user
-to perform other tasks without loosing their work</li>
+to perform other tasks without losing their work</li>
 </ul>
 
 <h2>In this document</h2>
@@ -181,7 +181,7 @@ system memory. When this happens, information about the activity state is lost. 
 system still
 knows that the activity has a place in the back stack, but when the activity is brought to the
 top of the stack the system must recreate it (rather than resume it). In order to
-avoid loosing the user's work, you should proactively retain it by implementing the {@link
+avoid losing the user's work, you should proactively retain it by implementing the {@link
 android.app.Activity#onSaveInstanceState onSaveInstanceState()} callback
 methods in your activity.</p>
 
@@ -201,7 +201,7 @@ the normal behavior. Perhaps you want an activity in your application to begin a
 started (instead of being placed within the current task); or, when you start an activity, you want
 to bring forward an existing instance of it (instead of creating a new
 instance on top of the back stack); or, you want your back stack to be cleared of all
-activitiesstart an activity except for the root activity when the user leaves the task.</p>
+activities except for the root activity when the user leaves the task.</p>
 
 <p>You can do these things and more, with attributes in the
 <a href="{@docRoot}guide/topics/manifest/activity-element.html">{@code
