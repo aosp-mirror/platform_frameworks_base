@@ -1336,6 +1336,19 @@ final class Settings {
         }
         mPendingPackages.clear();
 
+        /*
+         * Make sure all the updated system packages have their shared users
+         * associated with them.
+         */
+        final Iterator<PackageSetting> disabledIt = mDisabledSysPackages.values().iterator();
+        while (disabledIt.hasNext()) {
+            final PackageSetting disabledPs = disabledIt.next();
+            final Object id = getUserIdLPr(disabledPs.userId);
+            if (id != null && id instanceof SharedUserSetting) {
+                disabledPs.sharedUser = (SharedUserSetting) id;
+            }
+        }
+
         readStoppedLPw();
 
         mReadMessages.append("Read completed successfully: " + mPackages.size() + " packages, "
