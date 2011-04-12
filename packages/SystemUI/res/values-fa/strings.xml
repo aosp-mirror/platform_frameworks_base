@@ -34,8 +34,7 @@
     <skip />
     <!-- no translation found for usb_accessory_confirm_prompt (3947430407252730383) -->
     <skip />
-    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
-    <skip />
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"برنامه های نصب شده با این وسیله جانبی USB کار می کنند. در <xliff:g id="URL">%1$s</xliff:g>راجع به این لوازم جانبی بیشتر بیاموزید"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"لوازم جانبی USB"</string>
     <string name="label_view" msgid="6304565553218192990">"مشاهده"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"استفاده به صورت پیش فرض برای این دستگاه USB"</string>
