@@ -242,10 +242,10 @@ public class ConnectivityManagerTestActivity extends Activity {
 
         initializeNetworkStates();
 
-        if (mWifiManager.isWifiEnabled()) {
-            log("Clear Wifi before we start the test.");
-            removeConfiguredNetworksAndDisableWifi();
-        }
+        mWifiManager.setWifiEnabled(true);
+        log("Clear Wifi before we start the test.");
+        sleep(SHORT_TIMEOUT);
+        removeConfiguredNetworksAndDisableWifi();
         mWifiRegexs = mCM.getTetherableWifiRegexs();
      }
 
@@ -633,13 +633,13 @@ public class ConnectivityManagerTestActivity extends Activity {
      * Disconnect from the current AP and remove configured networks.
      */
     public boolean disconnectAP() {
-        if (mWifiManager.isWifiEnabled()) {
-            // remove saved networks
-            List<WifiConfiguration> wifiConfigList = mWifiManager.getConfiguredNetworks();
-            for (WifiConfiguration wifiConfig: wifiConfigList) {
-                log("remove wifi configuration: " + wifiConfig.toString());
-                mWifiManager.forgetNetwork(wifiConfig.networkId);
-            }
+        // remove saved networks
+        List<WifiConfiguration> wifiConfigList = mWifiManager.getConfiguredNetworks();
+        log("size of wifiConfigList: " + wifiConfigList.size());
+        for (WifiConfiguration wifiConfig: wifiConfigList) {
+            log("remove wifi configuration: " + wifiConfig.networkId);
+            int netId = wifiConfig.networkId;
+            mWifiManager.forgetNetwork(netId);
         }
         return true;
     }
@@ -655,18 +655,21 @@ public class ConnectivityManagerTestActivity extends Activity {
      * Remove configured networks and disable wifi
      */
     public boolean removeConfiguredNetworksAndDisableWifi() {
-            if (!disconnectAP()) {
-                return false;
-            }
-            // Disable Wifi
-            if (!mWifiManager.setWifiEnabled(false)) {
-                return false;
-            }
-            // Wait for the actions to be completed
-            try {
-                Thread.sleep(SHORT_TIMEOUT);
-            } catch (InterruptedException e) {}
+        if (!disconnectAP()) {
+           return false;
+        }
+        sleep(SHORT_TIMEOUT);
+        if (!mWifiManager.setWifiEnabled(false)) {
+            return false;
+        }
+        sleep(SHORT_TIMEOUT);
         return true;
+    }
+
+    private void sleep(long sleeptime) {
+        try {
+            Thread.sleep(sleeptime);
+        } catch (InterruptedException e) {}
     }
 
     /**
