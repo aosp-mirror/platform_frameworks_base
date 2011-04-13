@@ -46,26 +46,26 @@ namespace android {
     static TextLayoutCache gTextLayoutCache;
 #endif
 
+enum {
+    kBidi_LTR = 0,
+    kBidi_RTL = 1,
+    kBidi_Default_LTR = 2,
+    kBidi_Default_RTL = 3,
+    kBidi_Force_LTR = 4,
+    kBidi_Force_RTL = 5,
+
+    kBidi_Mask = 0x7
+};
+
+enum {
+    kDirection_LTR = 0,
+    kDirection_RTL = 1,
+
+    kDirection_Mask = 0x1
+};
+
 class TextLayout {
 public:
-
-    enum {
-        kDirection_LTR = 0,
-        kDirection_RTL = 1,
-
-        kDirection_Mask = 0x1
-    };
-
-    enum {
-        kBidi_LTR = 0,
-        kBidi_RTL = 1,
-        kBidi_Default_LTR = 2,
-        kBidi_Default_RTL = 3,
-        kBidi_Force_LTR = 4,
-        kBidi_Force_RTL = 5,
-
-        kBidi_Mask = 0x7
-    };
 
     /*
      * Draws a unidirectional run of text.

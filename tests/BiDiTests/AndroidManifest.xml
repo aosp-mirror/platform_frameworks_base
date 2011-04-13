@@ -25,7 +25,8 @@
     android:versionName="1.0">
 
     <application android:label="BiDiTests">
-        <activity android:name="BiDiTestActivity">
+        <activity android:name="BiDiTestActivity"
+                android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

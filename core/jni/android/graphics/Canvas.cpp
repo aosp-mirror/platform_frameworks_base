@@ -756,26 +756,36 @@ public:
         env->ReleaseStringChars(text, textArray);
     }
 
+    static void logGlyphs(sp<TextLayoutCacheValue> value) {
+        LOGD("drawTextWithGlyphs -- got glyphs - count=%d", value->getGlyphsCount());
+        for (size_t i = 0; i < value->getGlyphsCount(); i++) {
+            LOGD("                          glyphs[%d]=%d", i, value->getGlyphs()[i]);
+        }
+    }
+
+    static void drawTextWithGlyphs(SkCanvas* canvas, const jchar* textArray,
+            int start, int end,
+            jfloat x, jfloat y, int flags, SkPaint* paint) {
+
+        jint count = end - start;
+        sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
+                paint, textArray, start, count, count, flags);
+        if (value == NULL) {
+            LOGE("drawTextWithGlyphs -- cannot get Cache value");
+            return ;
+        }
+#if DEBUG_GLYPHS
+        logGlyphs(value);
+#endif
+        doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
+                x, y, flags, paint);
+    }
+
     static void drawTextWithGlyphs___CIIFFIPaint(JNIEnv* env, jobject, SkCanvas* canvas,
                                       jcharArray text, int index, int count,
                                       jfloat x, jfloat y, int flags, SkPaint* paint) {
         jchar* textArray = env->GetCharArrayElements(text, NULL);
-#if RTL_USE_HARFBUZZ && USE_TEXT_LAYOUT_CACHE
-        sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
-                paint, textArray + index, 0, count, count, flags);
-        if (value != NULL) {
-#if DEBUG_GLYPHS
-            LOGD("drawTextWithGlyphs -- got glyphs - count=%d", value->getGlyphsCount());
-            for (size_t i = 0; i < value->getGlyphsCount(); i++) {
-                LOGD("                          glyphs[%d]=%d", i, value->getGlyphs()[i]);
-            }
-#endif
-            doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
-                    x, y, flags, paint);
-        }
-#else
-        TextLayout::drawText(paint, textArray + index, count, flags, x, y, canvas);
-#endif
+        drawTextWithGlyphs(canvas, textArray + index, 0, count, x, y, flags, paint);
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
     }
 
@@ -785,23 +795,7 @@ public:
                                           jfloat x, jfloat y, int flags, SkPaint* paint) {
 
         const jchar* textArray = env->GetStringChars(text, NULL);
-#if RTL_USE_HARFBUZZ && USE_TEXT_LAYOUT_CACHE
-        size_t count = end - start;
-        sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
-                paint, textArray, start, count, count, flags);
-        if (value != NULL) {
-#if DEBUG_GLYPHS
-            LOGD("drawTextWithGlyphs -- got glyphs - count=%d", value->getGlyphsCount());
-            for (size_t i = 0; i < value->getGlyphsCount(); i++) {
-                LOGD("                          glyphs[%d]=%d", i, value->getGlyphs()[i]);
-            }
-#endif
-            doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
-                    x, y, flags, paint);
-        }
-#else
-        TextLayout::drawText(paint, textArray + start, end - start, flags, x, y, canvas);
-#endif
+        drawTextWithGlyphs(canvas, textArray, start, end, x, y, flags, paint);
         env->ReleaseStringChars(text, textArray);
     }
 
