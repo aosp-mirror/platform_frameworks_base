@@ -1022,7 +1022,8 @@ status_t MediaPlayerService::Client::attachAuxEffect(int effectId)
     return NO_ERROR;
 }
 
-void MediaPlayerService::Client::notify(void* cookie, int msg, int ext1, int ext2)
+void MediaPlayerService::Client::notify(
+        void* cookie, int msg, int ext1, int ext2, const Parcel *obj)
 {
     Client* client = static_cast<Client*>(cookie);
 
@@ -1039,7 +1040,7 @@ void MediaPlayerService::Client::notify(void* cookie, int msg, int ext1, int ext
         client->addNewMetadataUpdate(metadata_type);
     }
     LOGV("[%d] notify (%p, %d, %d, %d)", client->mConnId, cookie, msg, ext1, ext2);
-    client->mClient->notify(msg, ext1, ext2);
+    client->mClient->notify(msg, ext1, ext2, obj);
 }
 
 
@@ -1623,7 +1624,8 @@ status_t MediaPlayerService::AudioCache::wait()
     return mError;
 }
 
-void MediaPlayerService::AudioCache::notify(void* cookie, int msg, int ext1, int ext2)
+void MediaPlayerService::AudioCache::notify(
+        void* cookie, int msg, int ext1, int ext2, const Parcel *obj)
 {
     LOGV("notify(%p, %d, %d, %d)", cookie, msg, ext1, ext2);
     AudioCache* p = static_cast<AudioCache*>(cookie);

@@ -69,7 +69,7 @@ class JNIMediaPlayerListener: public MediaPlayerListener
 public:
     JNIMediaPlayerListener(JNIEnv* env, jobject thiz, jobject weak_thiz);
     ~JNIMediaPlayerListener();
-    void notify(int msg, int ext1, int ext2);
+    virtual void notify(int msg, int ext1, int ext2, const Parcel *obj = NULL);
 private:
     JNIMediaPlayerListener();
     jclass      mClass;     // Reference to MediaPlayer class
@@ -102,10 +102,23 @@ JNIMediaPlayerListener::~JNIMediaPlayerListener()
     env->DeleteGlobalRef(mClass);
 }
 
-void JNIMediaPlayerListener::notify(int msg, int ext1, int ext2)
+void JNIMediaPlayerListener::notify(int msg, int ext1, int ext2, const Parcel *obj)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->CallStaticVoidMethod(mClass, fields.post_event, mObject, msg, ext1, ext2, 0);
+    if (obj && obj->dataSize() > 0) {
+        jbyteArray jArray = env->NewByteArray(obj->dataSize());
+        if (jArray != NULL) {
+            jbyte *nArray = env->GetByteArrayElements(jArray, NULL);
+            memcpy(nArray, obj->data(), obj->dataSize());
+            env->ReleaseByteArrayElements(jArray, nArray, 0);
+            env->CallStaticVoidMethod(mClass, fields.post_event, mObject,
+                    msg, ext1, ext2, jArray);
+            env->DeleteLocalRef(jArray);
+        }
+    } else {
+        env->CallStaticVoidMethod(mClass, fields.post_event, mObject,
+                msg, ext1, ext2, NULL);
+    }
 }
 
 // ----------------------------------------------------------------------------

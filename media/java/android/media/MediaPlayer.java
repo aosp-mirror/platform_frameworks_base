@@ -1120,6 +1120,7 @@ public class MediaPlayer
         mOnErrorListener = null;
         mOnInfoListener = null;
         mOnVideoSizeChangedListener = null;
+        mOnTimedTextListener = null;
         _release();
     }
 
@@ -1301,6 +1302,7 @@ public class MediaPlayer
     private static final int MEDIA_BUFFERING_UPDATE = 3;
     private static final int MEDIA_SEEK_COMPLETE = 4;
     private static final int MEDIA_SET_VIDEO_SIZE = 5;
+    private static final int MEDIA_TIMED_TEXT = 99;
     private static final int MEDIA_ERROR = 100;
     private static final int MEDIA_INFO = 200;
 
@@ -1368,6 +1370,11 @@ public class MediaPlayer
                     mOnInfoListener.onInfo(mMediaPlayer, msg.arg1, msg.arg2);
                 }
                 // No real default action so far.
+                return;
+            case MEDIA_TIMED_TEXT:
+                if (mOnTimedTextListener != null) {
+                    mOnTimedTextListener.onTimedText(mMediaPlayer, (String)msg.obj);
+                }
                 return;
 
             case MEDIA_NOP: // interface test message - ignore
@@ -1544,6 +1551,39 @@ public class MediaPlayer
     }
 
     private OnVideoSizeChangedListener mOnVideoSizeChangedListener;
+
+    /**
+     * Interface definition of a callback to be invoked when a
+     * timed text is available for display.
+     * {@hide}
+     */
+    public interface OnTimedTextListener
+    {
+        /**
+         * Called to indicate the video size
+         *
+         * @param mp             the MediaPlayer associated with this callback
+         * @param text           the timed text sample which contains the
+         *                       text needed to be displayed.
+         * {@hide}
+         */
+        public void onTimedText(MediaPlayer mp, String text);
+    }
+
+    /**
+     * Register a callback to be invoked when a timed text is available
+     * for display.
+     *
+     * @param listener the callback that will be run
+     * {@hide}
+     */
+    public void setOnTimedTextListener(OnTimedTextListener listener)
+    {
+        mOnTimedTextListener = listener;
+    }
+
+    private OnTimedTextListener mOnTimedTextListener;
+
 
     /* Do not change these values without updating their counterparts
      * in include/media/mediaplayer.h!

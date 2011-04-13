@@ -156,7 +156,8 @@ class MediaPlayerService : public BnMediaPlayerService
 
                 sp<IMemoryHeap> getHeap() const { return mHeap; }
 
-        static  void            notify(void* cookie, int msg, int ext1, int ext2);
+        static  void            notify(void* cookie, int msg,
+                                       int ext1, int ext2, const Parcel *obj);
         virtual status_t        dump(int fd, const Vector<String16>& args) const;
 
     private:
@@ -287,7 +288,8 @@ private:
 
                 status_t        setDataSource(const sp<IStreamSource> &source);
 
-        static  void            notify(void* cookie, int msg, int ext1, int ext2);
+        static  void            notify(void* cookie, int msg,
+                                       int ext1, int ext2, const Parcel *obj);
 
                 pid_t           pid() const { return mPid; }
         virtual status_t        dump(int fd, const Vector<String16>& args) const;

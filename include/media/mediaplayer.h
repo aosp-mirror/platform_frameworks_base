@@ -37,6 +37,7 @@ enum media_event_type {
     MEDIA_BUFFERING_UPDATE  = 3,
     MEDIA_SEEK_COMPLETE     = 4,
     MEDIA_SET_VIDEO_SIZE    = 5,
+    MEDIA_TIMED_TEXT        = 99,
     MEDIA_ERROR             = 100,
     MEDIA_INFO              = 200,
 };
@@ -129,7 +130,7 @@ enum media_player_states {
 class MediaPlayerListener: virtual public RefBase
 {
 public:
-    virtual void notify(int msg, int ext1, int ext2) = 0;
+    virtual void notify(int msg, int ext1, int ext2, const Parcel *obj) = 0;
 };
 
 class MediaPlayer : public BnMediaPlayerClient,
@@ -166,7 +167,7 @@ public:
             status_t        setLooping(int loop);
             bool            isLooping();
             status_t        setVolume(float leftVolume, float rightVolume);
-            void            notify(int msg, int ext1, int ext2);
+            void            notify(int msg, int ext1, int ext2, const Parcel *obj = NULL);
     static  sp<IMemory>     decode(const char* url, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
     static  sp<IMemory>     decode(int fd, int64_t offset, int64_t length, uint32_t *pSampleRate, int* pNumChannels, int* pFormat);
             status_t        invoke(const Parcel& request, Parcel *reply);
