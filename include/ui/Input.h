@@ -620,6 +620,11 @@ private:
     // Oldest sample to consider when calculating the velocity.
     static const nsecs_t MAX_AGE = 200 * 1000000; // 200 ms
 
+    // When the total duration of the window of samples being averaged is less
+    // than the window size, the resulting velocity is scaled to reduce the impact
+    // of overestimation in short traces.
+    static const nsecs_t MIN_WINDOW = 100 * 1000000; // 100 ms
+
     // The minimum duration between samples when estimating velocity.
     static const nsecs_t MIN_DURATION = 10 * 1000000; // 10 ms
 

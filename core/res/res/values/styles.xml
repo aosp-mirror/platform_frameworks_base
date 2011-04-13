@@ -2210,4 +2210,12 @@
         <item name="android:borderLeft">0dip</item>
         <item name="android:borderRight">0dip</item>
     </style>
+
+    <!-- Pointer styles -->
+    <style name="Pointer">
+        <item name="android:pointerIconArrow">@android:drawable/pointer_arrow_icon</item>
+        <item name="android:pointerIconSpotHover">@android:drawable/pointer_spot_hover_icon</item>
+        <item name="android:pointerIconSpotTouch">@android:drawable/pointer_spot_touch_icon</item>
+        <item name="android:pointerIconSpotAnchor">@android:drawable/pointer_spot_anchor_icon</item>
+    </style>
 </resources>

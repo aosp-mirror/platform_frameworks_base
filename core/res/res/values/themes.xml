@@ -323,6 +323,8 @@
         <item name="fastScrollOverlayPosition">floating</item>
         <item name="fastScrollTextColor">@android:color/primary_text_dark</item>
 
+        <!-- Pointer style -->
+        <item name="pointerStyle">@android:style/Pointer</item>
     </style>
 
     <!-- Variant of the default (dark) theme with no title bar -->

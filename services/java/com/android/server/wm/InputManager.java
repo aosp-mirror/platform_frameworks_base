@@ -23,12 +23,6 @@ import org.xmlpull.v1.XmlPullParser;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.content.res.XmlResourceParser;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.os.Looper;
 import android.os.MessageQueue;
@@ -39,6 +33,7 @@ import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
 import android.view.KeyEvent;
+import android.view.PointerIcon;
 import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
@@ -63,7 +58,8 @@ public class InputManager {
     private final Context mContext;
     private final WindowManagerService mWindowManagerService;
     
-    private static native void nativeInit(Callbacks callbacks, MessageQueue messageQueue);
+    private static native void nativeInit(Context context,
+            Callbacks callbacks, MessageQueue messageQueue);
     private static native void nativeStart();
     private static native void nativeSetDisplaySize(int displayId, int width, int height);
     private static native void nativeSetDisplayOrientation(int displayId, int rotation);
@@ -133,7 +129,7 @@ public class InputManager {
         Looper looper = windowManagerService.mH.getLooper();
 
         Slog.i(TAG, "Initializing input manager");
-        nativeInit(mCallbacks, looper.getQueue());
+        nativeInit(mContext, mCallbacks, looper.getQueue());
     }
     
     public void start() {
@@ -435,48 +431,6 @@ public class InputManager {
         }
     }
 
-    private static final class PointerIcon {
-        public Bitmap bitmap;
-        public float hotSpotX;
-        public float hotSpotY;
-
-        public static PointerIcon load(Resources resources, int resourceId) {
-            PointerIcon icon = new PointerIcon();
-
-            XmlResourceParser parser = resources.getXml(resourceId);
-            final int bitmapRes;
-            try {
-                XmlUtils.beginDocument(parser, "pointer-icon");
-
-                TypedArray a = resources.obtainAttributes(
-                        parser, com.android.internal.R.styleable.PointerIcon);
-                bitmapRes = a.getResourceId(com.android.internal.R.styleable.PointerIcon_bitmap, 0);
-                icon.hotSpotX = a.getFloat(com.android.internal.R.styleable.PointerIcon_hotSpotX, 0);
-                icon.hotSpotY = a.getFloat(com.android.internal.R.styleable.PointerIcon_hotSpotY, 0);
-                a.recycle();
-            } catch (Exception ex) {
-                Slog.e(TAG, "Exception parsing pointer icon resource.", ex);
-                return null;
-            } finally {
-                parser.close();
-            }
-
-            if (bitmapRes == 0) {
-                Slog.e(TAG, "<pointer-icon> is missing bitmap attribute");
-                return null;
-            }
-
-            Drawable drawable = resources.getDrawable(bitmapRes);
-            if (!(drawable instanceof BitmapDrawable)) {
-                Slog.e(TAG, "<pointer-icon> bitmap attribute must refer to a bitmap drawable");
-                return null;
-            }
-
-            icon.bitmap = ((BitmapDrawable)drawable).getBitmap();
-            return icon;
-        }
-    }
-
     /*
      * Callbacks from native.
      */
@@ -641,8 +595,7 @@ public class InputManager {
 
         @SuppressWarnings("unused")
         public PointerIcon getPointerIcon() {
-            return PointerIcon.load(mContext.getResources(),
-                    com.android.internal.R.drawable.pointer_arrow_icon);
+            return PointerIcon.getDefaultIcon(mContext);
         }
     }
 }

@@ -33,6 +33,8 @@ namespace android {
  */
 struct SpriteTransformationMatrix {
     inline SpriteTransformationMatrix() : dsdx(1.0f), dtdx(0.0f), dsdy(0.0f), dtdy(1.0f) { }
+    inline SpriteTransformationMatrix(float dsdx, float dtdx, float dsdy, float dtdy) :
+            dsdx(dsdx), dtdx(dtdx), dsdy(dsdy), dtdy(dtdy) { }
 
     float dsdx;
     float dtdx;
@@ -52,6 +54,35 @@ struct SpriteTransformationMatrix {
 };
 
 /*
+ * Icon that a sprite displays, including its hotspot.
+ */
+struct SpriteIcon {
+    inline SpriteIcon() : hotSpotX(0), hotSpotY(0) { }
+    inline SpriteIcon(const SkBitmap& bitmap, float hotSpotX, float hotSpotY) :
+            bitmap(bitmap), hotSpotX(hotSpotX), hotSpotY(hotSpotY) { }
+
+    SkBitmap bitmap;
+    float hotSpotX;
+    float hotSpotY;
+
+    inline SpriteIcon copy() const {
+        SkBitmap bitmapCopy;
+        bitmap.copyTo(&bitmapCopy, SkBitmap::kARGB_8888_Config);
+        return SpriteIcon(bitmapCopy, hotSpotX, hotSpotY);
+    }
+
+    inline void reset() {
+        bitmap.reset();
+        hotSpotX = 0;
+        hotSpotY = 0;
+    }
+
+    inline bool isValid() const {
+        return !bitmap.isNull() && !bitmap.empty();
+    }
+};
+
+/*
  * A sprite is a simple graphical object that is displayed on-screen above other layers.
  * The basic sprite class is an interface.
  * The implementation is provided by the sprite controller.
@@ -62,9 +93,21 @@ protected:
     virtual ~Sprite() { }
 
 public:
+    enum {
+        // The base layer for pointer sprites.
+        BASE_LAYER_POINTER = 0, // reserve space for 1 pointer
+
+        // The base layer for spot sprites.
+        BASE_LAYER_SPOT = 1, // reserve space for MAX_POINTER_ID spots
+    };
+
     /* Sets the bitmap that is drawn by the sprite.
      * The sprite retains a copy of the bitmap for subsequent rendering. */
-    virtual void setBitmap(const SkBitmap* bitmap, float hotSpotX, float hotSpotY) = 0;
+    virtual void setIcon(const SpriteIcon& icon) = 0;
+
+    inline void clearIcon() {
+        setIcon(SpriteIcon());
+    }
 
     /* Sets whether the sprite is visible. */
     virtual void setVisible(bool visible) = 0;
@@ -81,14 +124,6 @@ public:
 
     /* Sets the sprite transformation matrix. */
     virtual void setTransformationMatrix(const SpriteTransformationMatrix& matrix) = 0;
-
-    /* Opens or closes a transaction to perform a batch of sprite updates as part of
-     * a single operation such as setPosition and setAlpha.  It is not necessary to
-     * open a transaction when updating a single property.
-     * Calls to openTransaction() nest and must be matched by an equal number
-     * of calls to closeTransaction(). */
-    virtual void openTransaction() = 0;
-    virtual void closeTransaction() = 0;
 };
 
 /*
@@ -111,6 +146,14 @@ public:
 
     /* Creates a new sprite, initially invisible. */
     sp<Sprite> createSprite();
+
+    /* Opens or closes a transaction to perform a batch of sprite updates as part of
+     * a single operation such as setPosition and setAlpha.  It is not necessary to
+     * open a transaction when updating a single property.
+     * Calls to openTransaction() nest and must be matched by an equal number
+     * of calls to closeTransaction(). */
+    void openTransaction();
+    void closeTransaction();
 
 private:
     enum {
@@ -135,16 +178,14 @@ private:
      * Note that the SkBitmap holds a reference to a shared (and immutable) pixel ref. */
     struct SpriteState {
         inline SpriteState() :
-                dirty(0), hotSpotX(0), hotSpotY(0), visible(false),
+                dirty(0), visible(false),
                 positionX(0), positionY(0), layer(0), alpha(1.0f),
                 surfaceWidth(0), surfaceHeight(0), surfaceDrawn(false), surfaceVisible(false) {
         }
 
         uint32_t dirty;
 
-        SkBitmap bitmap;
-        float hotSpotX;
-        float hotSpotY;
+        SpriteIcon icon;
         bool visible;
         float positionX;
         float positionY;
@@ -159,7 +200,7 @@ private:
         bool surfaceVisible;
 
         inline bool wantSurfaceVisible() const {
-            return visible && alpha > 0.0f && !bitmap.isNull() && !bitmap.empty();
+            return visible && alpha > 0.0f && icon.isValid();
         }
     };
 
@@ -177,37 +218,36 @@ private:
     public:
         SpriteImpl(const sp<SpriteController> controller);
 
-        virtual void setBitmap(const SkBitmap* bitmap, float hotSpotX, float hotSpotY);
+        virtual void setIcon(const SpriteIcon& icon);
         virtual void setVisible(bool visible);
         virtual void setPosition(float x, float y);
         virtual void setLayer(int32_t layer);
         virtual void setAlpha(float alpha);
         virtual void setTransformationMatrix(const SpriteTransformationMatrix& matrix);
-        virtual void openTransaction();
-        virtual void closeTransaction();
 
         inline const SpriteState& getStateLocked() const {
-            return mState;
+            return mLocked.state;
         }
 
         inline void resetDirtyLocked() {
-            mState.dirty = 0;
+            mLocked.state.dirty = 0;
         }
 
         inline void setSurfaceLocked(const sp<SurfaceControl>& surfaceControl,
                 int32_t width, int32_t height, bool drawn, bool visible) {
-            mState.surfaceControl = surfaceControl;
-            mState.surfaceWidth = width;
-            mState.surfaceHeight = height;
-            mState.surfaceDrawn = drawn;
-            mState.surfaceVisible = visible;
+            mLocked.state.surfaceControl = surfaceControl;
+            mLocked.state.surfaceWidth = width;
+            mLocked.state.surfaceHeight = height;
+            mLocked.state.surfaceDrawn = drawn;
+            mLocked.state.surfaceVisible = visible;
         }
 
     private:
         sp<SpriteController> mController;
 
-        SpriteState mState; // guarded by mController->mLock
-        uint32_t mTransactionNestingCount; // guarded by mController->mLock
+        struct Locked {
+            SpriteState state;
+        } mLocked; // guarded by mController->mLock
 
         void invalidateLocked(uint32_t dirty);
     };
@@ -232,8 +272,12 @@ private:
 
     sp<SurfaceComposerClient> mSurfaceComposerClient;
 
-    Vector<sp<SpriteImpl> > mInvalidatedSprites; // guarded by mLock
-    Vector<sp<SurfaceControl> > mDisposedSurfaces; // guarded by mLock
+    struct Locked {
+        Vector<sp<SpriteImpl> > invalidatedSprites;
+        Vector<sp<SurfaceControl> > disposedSurfaces;
+        uint32_t transactionNestingCount;
+        bool deferredSpriteUpdate;
+    } mLocked; // guarded by mLock
 
     void invalidateSpriteLocked(const sp<SpriteImpl>& sprite);
     void disposeSurfaceLocked(const sp<SurfaceControl>& surfaceControl);
