@@ -182,6 +182,7 @@ public class AccessPointParserHelper {
                 }
                 config.proxySettings = ProxySettings.NONE;
                 networks.add(config);
+                mLinkProperties = null;
             }
         }
 
