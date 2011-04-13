@@ -29,30 +29,10 @@
 namespace android
 {
 
-static struct socket_offsets_t
-{
-    jfieldID mSocketImpl;
-} gSocketOffsets;
-
-static struct socket_impl_offsets_t
-{
-    jfieldID mFileDescriptor;
-} gSocketImplOffsets;
-
 static struct parcel_file_descriptor_offsets_t
 {
-    jclass mClass;
     jfieldID mFileDescriptor;
 } gParcelFileDescriptorOffsets;
-
-static jobject android_os_ParcelFileDescriptor_getFileDescriptorFromSocket(JNIEnv* env,
-    jobject clazz, jobject object)
-{
-    jobject socketImpl = env->GetObjectField(object, gSocketOffsets.mSocketImpl);
-    jobject fileDescriptor = env->GetObjectField(socketImpl, gSocketImplOffsets.mFileDescriptor);
-    jint fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    return jniCreateFileDescriptor(env, dup(fd));
-}
 
 static int android_os_ParcelFileDescriptor_createPipeNative(JNIEnv* env,
     jobject clazz, jobjectArray outFds)
@@ -122,8 +102,6 @@ static jlong android_os_ParcelFileDescriptor_getFdNative(JNIEnv* env, jobject cl
 }
 
 static const JNINativeMethod gParcelFileDescriptorMethods[] = {
-    {"getFileDescriptorFromSocket", "(Ljava/net/Socket;)Ljava/io/FileDescriptor;",
-        (void*)android_os_ParcelFileDescriptor_getFileDescriptorFromSocket},
     {"createPipeNative", "([Ljava/io/FileDescriptor;)I",
         (void*)android_os_ParcelFileDescriptor_createPipeNative},
     {"getStatSize", "()J",
@@ -138,23 +116,8 @@ const char* const kParcelFileDescriptorPathName = "android/os/ParcelFileDescript
 
 int register_android_os_ParcelFileDescriptor(JNIEnv* env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass("java/net/Socket");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class java.net.Socket");
-    gSocketOffsets.mSocketImpl = env->GetFieldID(clazz, "impl", "Ljava/net/SocketImpl;");
-    LOG_FATAL_IF(gSocketOffsets.mSocketImpl == NULL,
-        "Unable to find impl field in java.net.Socket");
-
-    clazz = env->FindClass("java/net/SocketImpl");
-    LOG_FATAL_IF(clazz == NULL, "Unable to find class java.net.SocketImpl");
-    gSocketImplOffsets.mFileDescriptor = env->GetFieldID(clazz, "fd", "Ljava/io/FileDescriptor;");
-    LOG_FATAL_IF(gSocketImplOffsets.mFileDescriptor == NULL,
-                 "Unable to find fd field in java.net.SocketImpl");
-
-    clazz = env->FindClass(kParcelFileDescriptorPathName);
+    jclass clazz = env->FindClass(kParcelFileDescriptorPathName);
     LOG_FATAL_IF(clazz == NULL, "Unable to find class android.os.ParcelFileDescriptor");
-    gParcelFileDescriptorOffsets.mClass = (jclass) env->NewGlobalRef(clazz);
     gParcelFileDescriptorOffsets.mFileDescriptor = env->GetFieldID(clazz, "mFileDescriptor", "Ljava/io/FileDescriptor;");
     LOG_FATAL_IF(gParcelFileDescriptorOffsets.mFileDescriptor == NULL,
                  "Unable to find mFileDescriptor field in android.os.ParcelFileDescriptor");
