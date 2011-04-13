@@ -569,7 +569,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (defaultApnContext != null) {
                 if (defaultApnContext.getState() == State.FAILED) {
                     cleanUpConnection(false, defaultApnContext);
-                    defaultApnContext.getDataConnection().resetRetryCount();
+                    if (defaultApnContext.getDataConnection() != null) {
+                        defaultApnContext.getDataConnection().resetRetryCount();
+                    }
                 }
                 trySetupData(Phone.REASON_GPRS_ATTACHED, Phone.APN_TYPE_DEFAULT);
             }
