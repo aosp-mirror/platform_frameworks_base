@@ -25,6 +25,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <cutils/logger.h>
 #include <jni.h>
+#include <ScopedUtfChars.h>
 #include <utils/misc.h>
 #include <utils/Log.h>
 
@@ -130,13 +131,14 @@ static jlong getMobileRxBytes(JNIEnv* env, jobject clazz) {
             "/sys/class/net/ppp0/statistics/rx_bytes");
 }
 
-static jlong getData(JNIEnv* env, char *what, jstring interface) {
+static jlong getData(JNIEnv* env, const char* what, jstring javaInterface) {
+    ScopedUtfChars interface(env, javaInterface);
+    if (interface.c_str() == NULL) {
+        return -1;
+    }
+
     char filename[80];
-    jboolean isCopy;
-
-    const char *interfaceStr = env->GetStringUTFChars(interface, &isCopy);
-    snprintf(filename, sizeof(filename), "/sys/class/net/%s/statistics/%s", interfaceStr, what);
-
+    snprintf(filename, sizeof(filename), "/sys/class/net/%s/statistics/%s", interface.c_str(), what);
     return readNumber(filename);
 }
 
