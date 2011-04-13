@@ -1180,6 +1180,8 @@ public class Camera {
         private static final String KEY_MAX_EXPOSURE_COMPENSATION = "max-exposure-compensation";
         private static final String KEY_MIN_EXPOSURE_COMPENSATION = "min-exposure-compensation";
         private static final String KEY_EXPOSURE_COMPENSATION_STEP = "exposure-compensation-step";
+        private static final String KEY_METERING_AREAS = "metering-areas";
+        private static final String KEY_MAX_NUM_METERING_AREAS = "max-num-metering-areas";
         private static final String KEY_ZOOM = "zoom";
         private static final String KEY_MAX_ZOOM = "max-zoom";
         private static final String KEY_ZOOM_RATIOS = "zoom-ratios";
@@ -1516,6 +1518,27 @@ public class Camera {
          */
         public void set(String key, int value) {
             mMap.put(key, Integer.toString(value));
+        }
+
+        private void set(String key, List<Area> areas) {
+            StringBuilder buffer = new StringBuilder();
+            for (int i = 0; i < areas.size(); i++) {
+                Area area = areas.get(i);
+                Rect rect = area.rect;
+                buffer.append('(');
+                buffer.append(rect.left);
+                buffer.append(',');
+                buffer.append(rect.top);
+                buffer.append(',');
+                buffer.append(rect.right);
+                buffer.append(',');
+                buffer.append(rect.bottom);
+                buffer.append(',');
+                buffer.append(area.weight);
+                buffer.append(')');
+                if (i != areas.size() - 1) buffer.append(',');
+            }
+            set(key, buffer.toString());
         }
 
         /**
@@ -2562,7 +2585,8 @@ public class Camera {
         }
 
         /**
-         * Gets the current focus areas.
+         * Gets the current focus areas. Camera driver uses the areas to decide
+         * focus.
          *
          * Before using this API or {@link #setFocusAreas(List<int>)}, apps
          * should call {@link #getMaxNumFocusArea()} to know the maximum number of
@@ -2610,25 +2634,76 @@ public class Camera {
          * @see #getFocusAreas()
          * @hide
          */
-        public void setFocusAreas(List<Area> focusArea) {
-            StringBuilder buffer = new StringBuilder();
-            for (int i = 0; i < focusArea.size(); i++) {
-                Area area = focusArea.get(i);
-                Rect rect = area.rect;
-                buffer.append('(');
-                buffer.append(rect.left);
-                buffer.append(',');
-                buffer.append(rect.top);
-                buffer.append(',');
-                buffer.append(rect.right);
-                buffer.append(',');
-                buffer.append(rect.bottom);
-                buffer.append(',');
-                buffer.append(area.weight);
-                buffer.append(')');
-                if (i != focusArea.size() - 1) buffer.append(',');
-            }
-            set(KEY_FOCUS_AREAS, buffer.toString());
+        public void setFocusAreas(List<Area> focusAreas) {
+            set(KEY_FOCUS_AREAS, focusAreas);
+        }
+
+        /**
+         * Gets the maximum number of metering areas supported. This is the
+         * maximum length of the list in {@link #setMeteringArea(List<Area>)}
+         * and {@link #getMeteringArea()}.
+         *
+         * @return the maximum number of metering areas supported by the camera.
+         * @see #getMeteringAreas()
+         * @hide
+         */
+        public int getMaxNumMeteringAreas() {
+            return getInt(KEY_MAX_NUM_METERING_AREAS, 0);
+        }
+
+        /**
+         * Gets the current metering areas. Camera driver uses these areas to
+         * decide exposure.
+         *
+         * Before using this API or {@link #setMeteringAreas(List<int>)}, apps
+         * should call {@link #getMaxNumMeteringArea()} to know the maximum
+         * number of metering areas first. If the value is 0, metering area is
+         * not supported.
+         *
+         * Each metering area is a rectangle with specified weight. The
+         * direction is relative to the sensor orientation, that is, what the
+         * sensor sees. The direction is not affected by the rotation or
+         * mirroring of {@link #setDisplayOrientation(int)}. Coordinates of the
+         * rectangle range from -1000 to 1000. (-1000, -1000) is the upper left
+         * point. (1000, 1000) is the lower right point. The length and width of
+         * metering areas cannot be 0 or negative.
+         *
+         * The weight ranges from 1 to 1000. The sum of the weights of all
+         * metering areas must be 1000. Metering areas can partially overlap and
+         * the driver will add the weights in the overlap region. But apps
+         * should not set two metering areas that have identical coordinates.
+         *
+         * A special case of all-zero single metering area means driver to
+         * decide the metering area. For example, the driver may use more
+         * signals to decide metering areas and change them dynamically. Apps
+         * can set all-zero if they want the driver to decide metering areas.
+         *
+         * Metering areas are relative to the current field of view
+         * ({@link #getZoom()}). No matter what the zoom level is, (-1000,-1000)
+         * represents the top of the currently visible camera frame. The
+         * metering area cannot be set to be outside the current field of view,
+         * even when using zoom.
+         *
+         * No matter what metering areas are, the final exposure are compensated
+         * by {@link setExposureCompensation(int)}.
+         *
+         * @return a list of current metering areas
+         * @hide
+         */
+        public List<Area> getMeteringAreas() {
+            return splitArea(KEY_METERING_AREAS);
+        }
+
+        /**
+         * Sets metering areas. See {@link #getMeteringAreas()} for
+         * documentation.
+         *
+         * @param meteringArea the metering areas
+         * @see #getMeteringAreas()
+         * @hide
+         */
+        public void setMeteringAreas(List<Area> meteringAreas) {
+            set(KEY_METERING_AREAS, meteringAreas);
         }
 
         // Splits a comma delimited string to an ArrayList of String.
