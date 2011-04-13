@@ -97,6 +97,16 @@ private:
 
     virtual void unfade() {
     }
+
+    virtual void setPresentation(Presentation presentation) {
+    }
+
+    virtual void setSpots(SpotGesture spotGesture,
+            const PointerCoords* spotCoords, const uint32_t* spotIdToIndex, BitSet32 spotIdBits) {
+    }
+
+    virtual void clearSpots() {
+    }
 };
 
 
@@ -191,10 +201,6 @@ private:
 
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId) {
         return mPointerControllers.valueFor(deviceId);
-    }
-
-    virtual sp<SpotControllerInterface> obtainSpotController(int32_t device) {
-        return NULL;
     }
 };
 

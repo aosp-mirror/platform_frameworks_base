@@ -36,6 +36,9 @@ namespace android {
 SpriteController::SpriteController(const sp<Looper>& looper, int32_t overlayLayer) :
         mLooper(looper), mOverlayLayer(overlayLayer) {
     mHandler = new WeakMessageHandler(this);
+
+    mLocked.transactionNestingCount = 0;
+    mLocked.deferredSpriteUpdate = false;
 }
 
 SpriteController::~SpriteController() {
@@ -51,17 +54,40 @@ sp<Sprite> SpriteController::createSprite() {
     return new SpriteImpl(this);
 }
 
-void SpriteController::invalidateSpriteLocked(const sp<SpriteImpl>& sprite) {
-    bool wasEmpty = mInvalidatedSprites.isEmpty();
-    mInvalidatedSprites.push(sprite);
-    if (wasEmpty) {
+void SpriteController::openTransaction() {
+    AutoMutex _l(mLock);
+
+    mLocked.transactionNestingCount += 1;
+}
+
+void SpriteController::closeTransaction() {
+    AutoMutex _l(mLock);
+
+    LOG_ALWAYS_FATAL_IF(mLocked.transactionNestingCount == 0,
+            "Sprite closeTransaction() called but there is no open sprite transaction");
+
+    mLocked.transactionNestingCount -= 1;
+    if (mLocked.transactionNestingCount == 0 && mLocked.deferredSpriteUpdate) {
+        mLocked.deferredSpriteUpdate = false;
         mLooper->sendMessage(mHandler, Message(MSG_UPDATE_SPRITES));
     }
 }
 
+void SpriteController::invalidateSpriteLocked(const sp<SpriteImpl>& sprite) {
+    bool wasEmpty = mLocked.invalidatedSprites.isEmpty();
+    mLocked.invalidatedSprites.push(sprite);
+    if (wasEmpty) {
+        if (mLocked.transactionNestingCount != 0) {
+            mLocked.deferredSpriteUpdate = true;
+        } else {
+            mLooper->sendMessage(mHandler, Message(MSG_UPDATE_SPRITES));
+        }
+    }
+}
+
 void SpriteController::disposeSurfaceLocked(const sp<SurfaceControl>& surfaceControl) {
-    bool wasEmpty = mDisposedSurfaces.isEmpty();
-    mDisposedSurfaces.push(surfaceControl);
+    bool wasEmpty = mLocked.disposedSurfaces.isEmpty();
+    mLocked.disposedSurfaces.push(surfaceControl);
     if (wasEmpty) {
         mLooper->sendMessage(mHandler, Message(MSG_DISPOSE_SURFACES));
     }
@@ -89,14 +115,14 @@ void SpriteController::doUpdateSprites() {
     { // acquire lock
         AutoMutex _l(mLock);
 
-        numSprites = mInvalidatedSprites.size();
+        numSprites = mLocked.invalidatedSprites.size();
         for (size_t i = 0; i < numSprites; i++) {
-            const sp<SpriteImpl>& sprite = mInvalidatedSprites.itemAt(i);
+            const sp<SpriteImpl>& sprite = mLocked.invalidatedSprites.itemAt(i);
 
             updates.push(SpriteUpdate(sprite, sprite->getStateLocked()));
             sprite->resetDirtyLocked();
         }
-        mInvalidatedSprites.clear();
+        mLocked.invalidatedSprites.clear();
     } // release lock
 
     // Create missing surfaces.
@@ -105,8 +131,8 @@ void SpriteController::doUpdateSprites() {
         SpriteUpdate& update = updates.editItemAt(i);
 
         if (update.state.surfaceControl == NULL && update.state.wantSurfaceVisible()) {
-            update.state.surfaceWidth = update.state.bitmap.width();
-            update.state.surfaceHeight = update.state.bitmap.height();
+            update.state.surfaceWidth = update.state.icon.bitmap.width();
+            update.state.surfaceHeight = update.state.icon.bitmap.height();
             update.state.surfaceDrawn = false;
             update.state.surfaceVisible = false;
             update.state.surfaceControl = obtainSurface(
@@ -123,8 +149,8 @@ void SpriteController::doUpdateSprites() {
         SpriteUpdate& update = updates.editItemAt(i);
 
         if (update.state.surfaceControl != NULL && update.state.wantSurfaceVisible()) {
-            int32_t desiredWidth = update.state.bitmap.width();
-            int32_t desiredHeight = update.state.bitmap.height();
+            int32_t desiredWidth = update.state.icon.bitmap.width();
+            int32_t desiredHeight = update.state.icon.bitmap.height();
             if (update.state.surfaceWidth < desiredWidth
                     || update.state.surfaceHeight < desiredHeight) {
                 if (!haveGlobalTransaction) {
@@ -187,16 +213,16 @@ void SpriteController::doUpdateSprites() {
 
                 SkPaint paint;
                 paint.setXfermodeMode(SkXfermode::kSrc_Mode);
-                surfaceCanvas.drawBitmap(update.state.bitmap, 0, 0, &paint);
+                surfaceCanvas.drawBitmap(update.state.icon.bitmap, 0, 0, &paint);
 
-                if (surfaceInfo.w > uint32_t(update.state.bitmap.width())) {
+                if (surfaceInfo.w > uint32_t(update.state.icon.bitmap.width())) {
                     paint.setColor(0); // transparent fill color
-                    surfaceCanvas.drawRectCoords(update.state.bitmap.width(), 0,
-                            surfaceInfo.w, update.state.bitmap.height(), paint);
+                    surfaceCanvas.drawRectCoords(update.state.icon.bitmap.width(), 0,
+                            surfaceInfo.w, update.state.icon.bitmap.height(), paint);
                 }
-                if (surfaceInfo.h > uint32_t(update.state.bitmap.height())) {
+                if (surfaceInfo.h > uint32_t(update.state.icon.bitmap.height())) {
                     paint.setColor(0); // transparent fill color
-                    surfaceCanvas.drawRectCoords(0, update.state.bitmap.height(),
+                    surfaceCanvas.drawRectCoords(0, update.state.icon.bitmap.height(),
                             surfaceInfo.w, surfaceInfo.h, paint);
                 }
 
@@ -246,8 +272,8 @@ void SpriteController::doUpdateSprites() {
                     && (becomingVisible || (update.state.dirty & (DIRTY_POSITION
                             | DIRTY_HOTSPOT)))) {
                 status = update.state.surfaceControl->setPosition(
-                        update.state.positionX - update.state.hotSpotX,
-                        update.state.positionY - update.state.hotSpotY);
+                        update.state.positionX - update.state.icon.hotSpotX,
+                        update.state.positionY - update.state.icon.hotSpotY);
                 if (status) {
                     LOGE("Error %d setting sprite surface position.", status);
                 }
@@ -329,8 +355,10 @@ void SpriteController::doDisposeSurfaces() {
     // Collect disposed surfaces.
     Vector<sp<SurfaceControl> > disposedSurfaces;
     { // acquire lock
-        disposedSurfaces = mDisposedSurfaces;
-        mDisposedSurfaces.clear();
+        AutoMutex _l(mLock);
+
+        disposedSurfaces = mLocked.disposedSurfaces;
+        mLocked.disposedSurfaces.clear();
     } // release lock
 
     // Release the last reference to each surface outside of the lock.
@@ -349,7 +377,8 @@ sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height
 
     sp<SurfaceControl> surfaceControl = mSurfaceComposerClient->createSurface(
             getpid(), String8("Sprite"), 0, width, height, PIXEL_FORMAT_RGBA_8888);
-    if (surfaceControl == NULL) {
+    if (surfaceControl == NULL || !surfaceControl->isValid()
+            || !surfaceControl->getSurface()->isValid()) {
         LOGE("Error creating sprite surface.");
         return NULL;
     }
@@ -360,7 +389,7 @@ sp<SurfaceControl> SpriteController::obtainSurface(int32_t width, int32_t height
 // --- SpriteController::SpriteImpl ---
 
 SpriteController::SpriteImpl::SpriteImpl(const sp<SpriteController> controller) :
-        mController(controller), mTransactionNestingCount(0) {
+        mController(controller) {
 }
 
 SpriteController::SpriteImpl::~SpriteImpl() {
@@ -368,27 +397,33 @@ SpriteController::SpriteImpl::~SpriteImpl() {
 
     // Let the controller take care of deleting the last reference to sprite
     // surfaces so that we do not block the caller on an IPC here.
-    if (mState.surfaceControl != NULL) {
-        mController->disposeSurfaceLocked(mState.surfaceControl);
-        mState.surfaceControl.clear();
+    if (mLocked.state.surfaceControl != NULL) {
+        mController->disposeSurfaceLocked(mLocked.state.surfaceControl);
+        mLocked.state.surfaceControl.clear();
     }
 }
 
-void SpriteController::SpriteImpl::setBitmap(const SkBitmap* bitmap,
-        float hotSpotX, float hotSpotY) {
+void SpriteController::SpriteImpl::setIcon(const SpriteIcon& icon) {
     AutoMutex _l(mController->mLock);
 
-    if (bitmap) {
-        bitmap->copyTo(&mState.bitmap, SkBitmap::kARGB_8888_Config);
-    } else {
-        mState.bitmap.reset();
-    }
+    uint32_t dirty;
+    if (icon.isValid()) {
+        icon.bitmap.copyTo(&mLocked.state.icon.bitmap, SkBitmap::kARGB_8888_Config);
 
-    uint32_t dirty = DIRTY_BITMAP;
-    if (mState.hotSpotX != hotSpotX || mState.hotSpotY != hotSpotY) {
-        mState.hotSpotX = hotSpotX;
-        mState.hotSpotY = hotSpotY;
-        dirty |= DIRTY_HOTSPOT;
+        if (!mLocked.state.icon.isValid()
+                || mLocked.state.icon.hotSpotX != icon.hotSpotX
+                || mLocked.state.icon.hotSpotY != icon.hotSpotY) {
+            mLocked.state.icon.hotSpotX = icon.hotSpotX;
+            mLocked.state.icon.hotSpotY = icon.hotSpotY;
+            dirty = DIRTY_BITMAP | DIRTY_HOTSPOT;
+        } else {
+            dirty = DIRTY_BITMAP;
+        }
+    } else if (mLocked.state.icon.isValid()) {
+        mLocked.state.icon.bitmap.reset();
+        dirty = DIRTY_BITMAP | DIRTY_HOTSPOT;
+    } else {
+        return; // setting to invalid icon and already invalid so nothing to do
     }
 
     invalidateLocked(dirty);
@@ -397,8 +432,8 @@ void SpriteController::SpriteImpl::setBitmap(const SkBitmap* bitmap,
 void SpriteController::SpriteImpl::setVisible(bool visible) {
     AutoMutex _l(mController->mLock);
 
-    if (mState.visible != visible) {
-        mState.visible = visible;
+    if (mLocked.state.visible != visible) {
+        mLocked.state.visible = visible;
         invalidateLocked(DIRTY_VISIBILITY);
     }
 }
@@ -406,9 +441,9 @@ void SpriteController::SpriteImpl::setVisible(bool visible) {
 void SpriteController::SpriteImpl::setPosition(float x, float y) {
     AutoMutex _l(mController->mLock);
 
-    if (mState.positionX != x || mState.positionY != y) {
-        mState.positionX = x;
-        mState.positionY = y;
+    if (mLocked.state.positionX != x || mLocked.state.positionY != y) {
+        mLocked.state.positionX = x;
+        mLocked.state.positionY = y;
         invalidateLocked(DIRTY_POSITION);
     }
 }
@@ -416,8 +451,8 @@ void SpriteController::SpriteImpl::setPosition(float x, float y) {
 void SpriteController::SpriteImpl::setLayer(int32_t layer) {
     AutoMutex _l(mController->mLock);
 
-    if (mState.layer != layer) {
-        mState.layer = layer;
+    if (mLocked.state.layer != layer) {
+        mLocked.state.layer = layer;
         invalidateLocked(DIRTY_LAYER);
     }
 }
@@ -425,8 +460,8 @@ void SpriteController::SpriteImpl::setLayer(int32_t layer) {
 void SpriteController::SpriteImpl::setAlpha(float alpha) {
     AutoMutex _l(mController->mLock);
 
-    if (mState.alpha != alpha) {
-        mState.alpha = alpha;
+    if (mLocked.state.alpha != alpha) {
+        mLocked.state.alpha = alpha;
         invalidateLocked(DIRTY_ALPHA);
     }
 }
@@ -435,37 +470,18 @@ void SpriteController::SpriteImpl::setTransformationMatrix(
         const SpriteTransformationMatrix& matrix) {
     AutoMutex _l(mController->mLock);
 
-    if (mState.transformationMatrix != matrix) {
-        mState.transformationMatrix = matrix;
+    if (mLocked.state.transformationMatrix != matrix) {
+        mLocked.state.transformationMatrix = matrix;
         invalidateLocked(DIRTY_TRANSFORMATION_MATRIX);
     }
 }
 
-void SpriteController::SpriteImpl::openTransaction() {
-    AutoMutex _l(mController->mLock);
-
-    mTransactionNestingCount += 1;
-}
-
-void SpriteController::SpriteImpl::closeTransaction() {
-    AutoMutex _l(mController->mLock);
-
-    LOG_ALWAYS_FATAL_IF(mTransactionNestingCount == 0,
-            "Sprite closeTransaction() called but there is no open sprite transaction");
-
-    mTransactionNestingCount -= 1;
-    if (mTransactionNestingCount == 0 && mState.dirty) {
-        mController->invalidateSpriteLocked(this);
-    }
-}
-
 void SpriteController::SpriteImpl::invalidateLocked(uint32_t dirty) {
-    if (mTransactionNestingCount > 0) {
-        bool wasDirty = mState.dirty;
-        mState.dirty |= dirty;
-        if (!wasDirty) {
-            mController->invalidateSpriteLocked(this);
-        }
+    bool wasDirty = mLocked.state.dirty;
+    mLocked.state.dirty |= dirty;
+
+    if (!wasDirty) {
+        mController->invalidateSpriteLocked(this);
     }
 }
 

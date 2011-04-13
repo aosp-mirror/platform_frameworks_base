@@ -20,7 +20,6 @@
 #include "EventHub.h"
 #include "InputDispatcher.h"
 #include "PointerController.h"
-#include "SpotController.h"
 
 #include <ui/Input.h>
 #include <ui/DisplayInfo.h>
@@ -90,9 +89,6 @@ public:
 
     /* Gets a pointer controller associated with the specified cursor device (ie. a mouse). */
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId) = 0;
-
-    /* Gets a spot controller associated with the specified touch pad device. */
-    virtual sp<SpotControllerInterface> obtainSpotController(int32_t deviceId) = 0;
 };
 
 
@@ -648,6 +644,20 @@ protected:
             idBits.clear();
             buttonState = 0;
         }
+
+        void getCentroid(float* outX, float* outY) {
+            float x = 0, y = 0;
+            if (pointerCount != 0) {
+                for (uint32_t i = 0; i < pointerCount; i++) {
+                    x += pointers[i].x;
+                    y += pointers[i].y;
+                }
+                x /= pointerCount;
+                y /= pointerCount;
+            }
+            *outX = x;
+            *outY = y;
+        }
     };
 
     // Input sources supported by the device.
@@ -670,6 +680,12 @@ protected:
         bool useJumpyTouchFilter;
         bool useAveragingTouchFilter;
         nsecs_t virtualKeyQuietTime;
+
+        enum GestureMode {
+            GESTURE_MODE_POINTER,
+            GESTURE_MODE_SPOTS,
+        };
+        GestureMode gestureMode;
     } mParameters;
 
     // Immutable calibration parameters in parsed form.
@@ -841,8 +857,8 @@ protected:
         float pointerGestureXZoomScale;
         float pointerGestureYZoomScale;
 
-        // The maximum swipe width squared.
-        int32_t pointerGestureMaxSwipeWidthSquared;
+        // The maximum swipe width.
+        float pointerGestureMaxSwipeWidth;
     } mLocked;
 
     virtual void configureParameters();
@@ -929,27 +945,31 @@ private:
             // Emits HOVER_MOVE events at the pointer location.
             HOVER,
 
-            // More than two fingers involved but they haven't moved enough for us
-            // to figure out what is intended.
-            INDETERMINATE_MULTITOUCH,
+            // Exactly two fingers but neither have moved enough to clearly indicate
+            // whether a swipe or freeform gesture was intended.  We consider the
+            // pointer to be pressed so this enables clicking or long-pressing on buttons.
+            // Pointer does not move.
+            // Emits DOWN, MOVE and UP events with a single stationary pointer coordinate.
+            PRESS,
 
             // Exactly two fingers moving in the same direction, button is not pressed.
             // Pointer does not move.
             // Emits DOWN, MOVE and UP events with a single pointer coordinate that
             // follows the midpoint between both fingers.
-            // The centroid is fixed when entering this state.
             SWIPE,
 
             // Two or more fingers moving in arbitrary directions, button is not pressed.
             // Pointer does not move.
             // Emits DOWN, POINTER_DOWN, MOVE, POINTER_UP and UP events that follow
             // each finger individually relative to the initial centroid of the finger.
-            // The centroid is fixed when entering this state.
             FREEFORM,
 
             // Waiting for quiet time to end before starting the next gesture.
             QUIET,
         };
+
+        // Time the first finger went down.
+        nsecs_t firstTouchTime;
 
         // The active pointer id from the raw touch data.
         int32_t activeTouchId; // -1 if none
@@ -959,32 +979,20 @@ private:
 
         // Pointer coords and ids for the current and previous pointer gesture.
         Mode currentGestureMode;
-        uint32_t currentGesturePointerCount;
         BitSet32 currentGestureIdBits;
         uint32_t currentGestureIdToIndex[MAX_POINTER_ID + 1];
         PointerCoords currentGestureCoords[MAX_POINTERS];
 
         Mode lastGestureMode;
-        uint32_t lastGesturePointerCount;
         BitSet32 lastGestureIdBits;
         uint32_t lastGestureIdToIndex[MAX_POINTER_ID + 1];
         PointerCoords lastGestureCoords[MAX_POINTERS];
 
-        // Tracks for all pointers originally went down.
-        TouchData touchOrigin;
-
-        // Describes how touch ids are mapped to gesture ids for freeform gestures.
-        uint32_t freeformTouchToGestureIdMap[MAX_POINTER_ID + 1];
-
-        // Initial centroid of the movement.
-        // Used to calculate how far the touch pointers have moved since the gesture started.
-        int32_t initialCentroidX;
-        int32_t initialCentroidY;
-
-        // Initial pointer location.
-        // Used to track where the pointer was when the gesture started.
-        float initialPointerX;
-        float initialPointerY;
+        // Pointer coords and ids for the current spots.
+        PointerControllerInterface::SpotGesture spotGesture;
+        BitSet32 spotIdBits; // same set of ids as touch ids
+        uint32_t spotIdToIndex[MAX_POINTER_ID + 1];
+        PointerCoords spotCoords[MAX_POINTERS];
 
         // Time the pointer gesture last went down.
         nsecs_t downTime;
@@ -992,26 +1000,34 @@ private:
         // Time we started waiting for a tap gesture.
         nsecs_t tapTime;
 
+        // Location of initial tap.
+        float tapX, tapY;
+
         // Time we started waiting for quiescence.
         nsecs_t quietTime;
+
+        // Reference points for multitouch gestures.
+        float referenceTouchX;    // reference touch X/Y coordinates in surface units
+        float referenceTouchY;
+        float referenceGestureX;  // reference gesture X/Y coordinates in pixels
+        float referenceGestureY;
+
+        // Describes how touch ids are mapped to gesture ids for freeform gestures.
+        uint32_t freeformTouchToGestureIdMap[MAX_POINTER_ID + 1];
 
         // A velocity tracker for determining whether to switch active pointers during drags.
         VelocityTracker velocityTracker;
 
         void reset() {
+            firstTouchTime = LLONG_MIN;
             activeTouchId = -1;
             activeGestureId = -1;
             currentGestureMode = NEUTRAL;
-            currentGesturePointerCount = 0;
             currentGestureIdBits.clear();
             lastGestureMode = NEUTRAL;
-            lastGesturePointerCount = 0;
             lastGestureIdBits.clear();
-            touchOrigin.clear();
-            initialCentroidX = 0;
-            initialCentroidY = 0;
-            initialPointerX = 0;
-            initialPointerY = 0;
+            spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
+            spotIdBits.clear();
             downTime = 0;
             velocityTracker.clear();
             resetTapTime();
@@ -1035,6 +1051,7 @@ private:
     void dispatchPointerGestures(nsecs_t when, uint32_t policyFlags);
     void preparePointerGestures(nsecs_t when,
             bool* outCancelPreviousGesture, bool* outFinishPreviousGesture);
+    void moveSpotsLocked();
 
     // Dispatches a motion event.
     // If the changedId is >= 0 and the action is POINTER_DOWN or POINTER_UP, the

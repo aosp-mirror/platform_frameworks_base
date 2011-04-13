@@ -831,6 +831,7 @@ bool VelocityTracker::getVelocity(uint32_t id, float* outVx, float* outVy) const
         const Position& oldestPosition =
                 oldestMovement.positions[oldestMovement.idBits.getIndexOfBit(id)];
         nsecs_t lastDuration = 0;
+
         while (numTouches-- > 1) {
             if (++index == HISTORY_SIZE) {
                 index = 0;
@@ -857,6 +858,14 @@ bool VelocityTracker::getVelocity(uint32_t id, float* outVx, float* outVy) const
 
         // Make sure we used at least one sample.
         if (samplesUsed != 0) {
+            // Scale the velocity linearly if the window of samples is small.
+            nsecs_t totalDuration = newestMovement.eventTime - oldestMovement.eventTime;
+            if (totalDuration < MIN_WINDOW) {
+                float scale = float(totalDuration) / float(MIN_WINDOW);
+                accumVx *= scale;
+                accumVy *= scale;
+            }
+
             *outVx = accumVx;
             *outVy = accumVy;
             return true;
