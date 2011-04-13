@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * Sets correction candidates of words under this span.
+ * Holds suggestion candidates of words under this span.
  */
 public class SuggestionSpan implements ParcelableSpan {
 
@@ -139,7 +139,7 @@ public class SuggestionSpan implements ParcelableSpan {
 
     @Override
     public int getSpanTypeId() {
-        return TextUtils.CORRECTION_SPAN;
+        return TextUtils.SUGGESTION_SPAN;
     }
 
     public static final Parcelable.Creator<SuggestionSpan> CREATOR =
