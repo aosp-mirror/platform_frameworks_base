@@ -96,6 +96,12 @@
 
     <application android:theme="@style/Theme">
         <uses-library android:name="android.test.runner" />
+        <activity android:name="android.view.ViewAttachTestActivity" android:label="View Attach Test">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.FRAMEWORK_INSTRUMENTATION_TEST" />
+            </intent-filter>
+        </activity>
         <activity android:name="StubTestBrowserActivity" android:label="Stubbed Test Browser">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
