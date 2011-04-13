@@ -353,12 +353,12 @@ status_t Parcel::setData(const uint8_t* buffer, size_t len)
     return err;
 }
 
-status_t Parcel::appendFrom(Parcel *parcel, size_t offset, size_t len)
+status_t Parcel::appendFrom(const Parcel *parcel, size_t offset, size_t len)
 {
     const sp<ProcessState> proc(ProcessState::self());
     status_t err;
-    uint8_t *data = parcel->mData;
-    size_t *objects = parcel->mObjects;
+    const uint8_t *data = parcel->mData;
+    const size_t *objects = parcel->mObjects;
     size_t size = parcel->mObjectsSize;
     int startPos = mDataPos;
     int firstIndex = -1, lastIndex = -2;
