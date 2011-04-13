@@ -866,7 +866,13 @@ public interface WindowManagerPolicy {
     public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always);
     
     /**
-     * Called when we have stopped keeping the screen on because a window
+     * Called when we have started keeping the screen on because a window
+     * requesting this has become visible.
+     */
+    public void screenOnStartedLw();
+
+    /**
+     * Called when we have stopped keeping the screen on because the last window
      * requesting this is no longer visible.
      */
     public void screenOnStoppedLw();

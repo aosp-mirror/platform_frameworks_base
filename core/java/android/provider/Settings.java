@@ -3737,6 +3737,23 @@ public final class Settings {
                 "setup_prepaid_detection_redir_host";
 
         /**
+         * The user's preferred "dream" (interactive screensaver) component.
+         *
+         * This component will be launched by the PhoneWindowManager after the user's chosen idle
+         * timeout (specified by {@link #DREAM_TIMEOUT}).
+         * @hide
+         */
+        public static final String DREAM_COMPONENT =
+                "dream_component";
+
+        /**
+         * The delay before a "dream" is started (set to 0 to disable).
+         * @hide
+         */
+        public static final String DREAM_TIMEOUT =
+                "dream_timeout";
+
+        /**
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
