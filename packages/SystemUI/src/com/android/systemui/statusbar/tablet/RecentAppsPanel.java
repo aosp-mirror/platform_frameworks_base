@@ -429,8 +429,7 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
 
         final List<ActivityManager.RecentTaskInfo> recentTasks =
-                am.getRecentTasks(MAX_TASKS, ActivityManager.RECENT_IGNORE_UNAVAILABLE
-                        | ActivityManager.TASKS_GET_THUMBNAILS);
+                am.getRecentTasks(MAX_TASKS, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
 
         ActivityInfo homeInfo = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
                     .resolveActivityInfo(pm, 0);

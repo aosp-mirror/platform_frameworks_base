@@ -219,6 +219,7 @@ public abstract class ApplicationThreadNative extends Binder
         {
             data.enforceInterface(IApplicationThread.descriptor);
             IBinder token = data.readStrongBinder();
+            boolean taskRemoved = data.readInt() != 0;
             int startId = data.readInt();
             int fl = data.readInt();
             Intent args;
@@ -227,7 +228,7 @@ public abstract class ApplicationThreadNative extends Binder
             } else {
                 args = null;
             }
-            scheduleServiceArgs(token, startId, fl, args);
+            scheduleServiceArgs(token, taskRemoved, startId, fl, args);
             return true;
         }
 
@@ -688,11 +689,12 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
-    public final void scheduleServiceArgs(IBinder token, int startId,
+    public final void scheduleServiceArgs(IBinder token, boolean taskRemoved, int startId,
 	    int flags, Intent args) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
+        data.writeInt(taskRemoved ? 1 : 0);
         data.writeInt(startId);
         data.writeInt(flags);
         if (args != null) {

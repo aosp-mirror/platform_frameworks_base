@@ -65,6 +65,7 @@ class ProcessRecord {
     boolean foregroundServices; // Running any services that are foreground?
     boolean bad;                // True if disabled in the bad process list
     boolean killedBackground;   // True when proc has been killed due to too many bg
+    String waitingToKill;       // Process is waiting to be killed when in the bg; reason
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
     int adjSeq;                 // Sequence id for identifying oom_adj assignment cycles
     int lruSeq;                 // Sequence id for identifying LRU update cycles
@@ -202,8 +203,9 @@ class ProcessRecord {
                 pw.print(" lastLowMemory=");
                 TimeUtils.formatDuration(lastLowMemory, now, pw);
                 pw.print(" reportLowMemory="); pw.println(reportLowMemory);
-        if (killedBackground) {
-            pw.print(prefix); pw.print("killedBackground="); pw.println(killedBackground);
+        if (killedBackground || waitingToKill != null) {
+            pw.print(prefix); pw.print("killedBackground="); pw.print(killedBackground);
+                    pw.print(" waitingToKill="); pw.println(waitingToKill);
         }
         if (debugging || crashing || crashDialog != null || notResponding
                 || anrDialog != null || bad) {

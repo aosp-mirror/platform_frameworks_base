@@ -2473,6 +2473,13 @@ public class PackageParser {
             s.info.permission = str.length() > 0 ? str.toString().intern() : null;
         }
 
+        s.info.flags = 0;
+        if (sa.getBoolean(
+                com.android.internal.R.styleable.AndroidManifestService_stopWithTask,
+                false)) {
+            s.info.flags |= ServiceInfo.FLAG_STOP_WITH_TASK;
+        }
+
         sa.recycle();
 
         if ((owner.applicationInfo.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {

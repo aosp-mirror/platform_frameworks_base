@@ -410,7 +410,7 @@ public class RecentApplicationsActivity extends Activity {
 
     void updateRunningTasks() {
         mRunningTaskList = mActivityManager.getRunningTasks(MAX_TASKS,
-                ActivityManager.TASKS_GET_THUMBNAILS, mThumbnailReceiver);
+                0, mThumbnailReceiver);
         if (DBG) Log.v(TAG, "Portrait: " + mPortraitMode);
         for (RunningTaskInfo r : mRunningTaskList) {
             if (r.thumbnail != null) {
@@ -441,8 +441,7 @@ public class RecentApplicationsActivity extends Activity {
         final ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 
         final List<ActivityManager.RecentTaskInfo> recentTasks =
-                am.getRecentTasks(MAX_TASKS, ActivityManager.RECENT_IGNORE_UNAVAILABLE
-                        | ActivityManager.TASKS_GET_THUMBNAILS);
+                am.getRecentTasks(MAX_TASKS, ActivityManager.RECENT_IGNORE_UNAVAILABLE);
 
         ActivityInfo homeInfo = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
                     .resolveActivityInfo(pm, 0);

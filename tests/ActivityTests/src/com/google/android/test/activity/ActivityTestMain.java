@@ -23,6 +23,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.Application;
+import android.content.ActivityNotFoundException;
 import android.os.Bundle;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
@@ -43,7 +44,11 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 
 public class ActivityTestMain extends Activity {
-    private void addThumbnail(LinearLayout container, Bitmap bm) {
+    ActivityManager mAm;
+
+    private void addThumbnail(LinearLayout container, Bitmap bm,
+            final ActivityManager.RecentTaskInfo task,
+            final ActivityManager.TaskThumbnails thumbs, final int subIndex) {
         ImageView iv = new ImageView(this);
         if (bm != null) {
             iv.setImageBitmap(bm);
@@ -52,24 +57,72 @@ public class ActivityTestMain extends Activity {
         int w = getResources().getDimensionPixelSize(android.R.dimen.thumbnail_width);
         int h = getResources().getDimensionPixelSize(android.R.dimen.thumbnail_height);
         container.addView(iv, new LinearLayout.LayoutParams(w, h));
+
+        iv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (task.id >= 0 && thumbs != null) {
+                    if (subIndex < (thumbs.numSubThumbbails-1)) {
+                        mAm.removeSubTask(task.id, subIndex+1);
+                    }
+                    mAm.moveTaskToFront(task.id, ActivityManager.MOVE_TASK_WITH_HOME);
+                } else {
+                    try {
+                        startActivity(task.baseIntent);
+                    } catch (ActivityNotFoundException e) {
+                        Log.w("foo", "Unable to start task: " + e);
+                    }
+                }
+                buildUi();
+            }
+        });
+        iv.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (task.id >= 0 && thumbs != null) {
+                    if (subIndex < 0) {
+                        mAm.removeTask(task.id, ActivityManager.REMOVE_TASK_KILL_PROCESS);
+                    } else {
+                        mAm.removeSubTask(task.id, subIndex);
+                    }
+                    buildUi();
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ActivityManager am = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
+        mAm = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        buildUi();
+    }
+
+    private View scrollWrap(View view) {
+        ScrollView scroller = new ScrollView(this);
+        scroller.addView(view, new ScrollView.LayoutParams(ScrollView.LayoutParams.MATCH_PARENT,
+                ScrollView.LayoutParams.MATCH_PARENT));
+        return scroller;
+    }
+
+    private void buildUi() {
         LinearLayout top = new LinearLayout(this);
         top.setOrientation(LinearLayout.VERTICAL);
 
-        List<ActivityManager.RecentTaskInfo> recents = am.getRecentTasks(10,
+        List<ActivityManager.RecentTaskInfo> recents = mAm.getRecentTasks(10,
                 ActivityManager.RECENT_WITH_EXCLUDED);
         if (recents != null) {
             for (int i=0; i<recents.size(); i++) {
                 ActivityManager.RecentTaskInfo r = recents.get(i);
-                ActivityManager.TaskThumbnails tt = r != null
-                        ? am.getTaskThumbnails(r.persistentId) : null;
+                ActivityManager.TaskThumbnails tt = mAm.getTaskThumbnails(r.persistentId);
                 TextView tv = new TextView(this);
                 tv.setText(r.baseIntent.getComponent().flattenToShortString());
                 top.addView(tv, new LinearLayout.LayoutParams(
@@ -77,9 +130,9 @@ public class ActivityTestMain extends Activity {
                         LinearLayout.LayoutParams.WRAP_CONTENT));
                 LinearLayout item = new LinearLayout(this);
                 item.setOrientation(LinearLayout.HORIZONTAL);
-                addThumbnail(item, tt != null ? tt.mainThumbnail : null);
+                addThumbnail(item, tt != null ? tt.mainThumbnail : null, r, tt, -1);
                 for (int j=0; j<tt.numSubThumbbails; j++) {
-                    addThumbnail(item, tt.getSubThumbnail(j));
+                    addThumbnail(item, tt.getSubThumbnail(j), r, tt, j);
                 }
                 top.addView(item, new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -88,12 +141,5 @@ public class ActivityTestMain extends Activity {
         }
 
         setContentView(scrollWrap(top));
-    }
-
-    private View scrollWrap(View view) {
-        ScrollView scroller = new ScrollView(this);
-        scroller.addView(view, new ScrollView.LayoutParams(ScrollView.LayoutParams.MATCH_PARENT,
-                ScrollView.LayoutParams.MATCH_PARENT));
-        return scroller;
     }
 }

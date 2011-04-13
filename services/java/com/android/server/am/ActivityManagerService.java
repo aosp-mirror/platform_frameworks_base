@@ -441,8 +441,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     /**
      * List of intents that were used to start the most recent tasks.
      */
-    final ArrayList<TaskRecord> mRecentTasks
-            = new ArrayList<TaskRecord>();
+    final ArrayList<TaskRecord> mRecentTasks = new ArrayList<TaskRecord>();
 
     /**
      * All of the applications we currently have running organized by name.
@@ -450,8 +449,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * returned by the package manager), and the keys are ApplicationRecord
      * objects.
      */
-    final ProcessMap<ProcessRecord> mProcessNames
-            = new ProcessMap<ProcessRecord>();
+    final ProcessMap<ProcessRecord> mProcessNames = new ProcessMap<ProcessRecord>();
 
     /**
      * The currently running heavy-weight process, if any.
@@ -480,8 +478,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * <p>NOTE: This object is protected by its own lock, NOT the global
      * activity manager lock!
      */
-    final SparseArray<ProcessRecord> mPidsSelfLocked
-            = new SparseArray<ProcessRecord>();
+    final SparseArray<ProcessRecord> mPidsSelfLocked = new SparseArray<ProcessRecord>();
 
     /**
      * All of the processes that have been forced to be foreground.  The key
@@ -2981,7 +2978,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         synchronized (this) {
             if (!showBackground && !app.isInterestingToUserLocked() && app.pid != MY_PID) {
-                Process.killProcess(app.pid);
+                Slog.w(TAG, "Killing " + app + ": background ANR");
+                EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
+                        app.processName, app.setAdj, "background ANR");
+                Process.killProcessQuiet(app.pid);
                 return;
             }
     
@@ -3446,7 +3446,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     bringDownServiceLocked(sr, true);
                 }
             }
-            Process.killProcess(pid);
+            EventLog.writeEvent(EventLogTags.AM_KILL, pid,
+                    app.processName, app.setAdj, "start timeout");
+            Process.killProcessQuiet(pid);
             if (mBackupTarget != null && mBackupTarget.app.pid == pid) {
                 Slog.w(TAG, "Unattached app died before backup, skipping");
                 try {
@@ -3492,7 +3494,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + " (IApplicationThread " + thread + "); dropping process");
             EventLog.writeEvent(EventLogTags.AM_DROP_PROCESS, pid);
             if (pid > 0 && pid != MY_PID) {
-                Process.killProcess(pid);
+                Process.killProcessQuiet(pid);
             } else {
                 try {
                     thread.scheduleExit();
@@ -4832,11 +4834,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 throw new SecurityException(msg);
             }
 
-            final boolean canReadFb = (flags&ActivityManager.TASKS_GET_THUMBNAILS) != 0
-                    && checkCallingPermission(
-                            android.Manifest.permission.READ_FRAME_BUFFER)
-                            == PackageManager.PERMISSION_GRANTED;
-
             int pos = mMainStack.mHistory.size()-1;
             ActivityRecord next =
                 pos >= 0 ? (ActivityRecord)mMainStack.mHistory.get(pos) : null;
@@ -4876,13 +4873,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ci.id = curTask.taskId;
                     ci.baseActivity = r.intent.getComponent();
                     ci.topActivity = top.intent.getComponent();
-                    if (canReadFb) {
-                        if (top.state == ActivityState.RESUMED) {
-                            ci.thumbnail = top.stack.screenshotActivities(top);
-                        } else if (top.thumbHolder != null) {
-                            ci.thumbnail = top.thumbHolder.lastThumbnail;
-                        }
-                    }
                     if (top.thumbHolder != null) {
                         ci.description = top.thumbHolder.lastDescription;
                     }
@@ -4955,8 +4945,6 @@ public final class ActivityManagerService extends ActivityManagerNative
 
             IPackageManager pm = AppGlobals.getPackageManager();
             
-            ActivityRecord resumed = mMainStack.mResumedActivity;
-            
             final int N = mRecentTasks.size();
             ArrayList<ActivityManager.RecentTaskInfo> res
                     = new ArrayList<ActivityManager.RecentTaskInfo>(
@@ -5002,74 +4990,121 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public ActivityManager.TaskThumbnails getTaskThumbnails(int id) {
-        synchronized (this) {
-            enforceCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
-                    "getTaskThumbnail()");
-            ActivityRecord resumed = mMainStack.mResumedActivity;
-            final int N = mRecentTasks.size();
-            for (int i=0; i<N; i++) {
-                TaskRecord tr = mRecentTasks.get(i);
-                if (tr.taskId == id) {
-                    final ActivityManager.TaskThumbnails thumbs
-                            = new ActivityManager.TaskThumbnails();
-                    if (resumed != null && resumed.thumbHolder == tr) {
-                        thumbs.mainThumbnail = resumed.stack.screenshotActivities(resumed);
-                    } else {
-                        thumbs.mainThumbnail = tr.lastThumbnail;
-                    }
-                    // How many different sub-thumbnails?
-                    final int NA = mMainStack.mHistory.size();
-                    int j = 0;
-                    ThumbnailHolder holder = null;
-                    while (j < NA) {
-                        ActivityRecord ar = (ActivityRecord)mMainStack.mHistory.get(j);
-                        j++;
-                        if (ar.task == tr) {
-                            holder = ar.thumbHolder;
-                            break;
-                        }
-                    }
-                    ArrayList<Bitmap> bitmaps = new ArrayList<Bitmap>();
-                    thumbs.otherThumbnails = bitmaps;
-                    ActivityRecord lastActivity = null;
-                    while (j < NA) {
-                        ActivityRecord ar = (ActivityRecord)mMainStack.mHistory.get(j);
-                        j++;
-                        if (ar.task != tr) {
-                            break;
-                        }
-                        lastActivity = ar;
-                        if (ar.thumbHolder != holder && holder != null) {
-                            thumbs.numSubThumbbails++;
-                            holder = ar.thumbHolder;
-                            bitmaps.add(holder.lastThumbnail);
-                        }
-                    }
-                    if (lastActivity != null && bitmaps.size() > 0) {
-                        if (resumed == lastActivity) {
-                            Bitmap bm = lastActivity.stack.screenshotActivities(lastActivity);
-                            if (bm != null) {
-                                bitmaps.remove(bitmaps.size()-1);
-                                bitmaps.add(bm);
-                            }
-                        }
-                    }
-                    if (thumbs.numSubThumbbails > 0) {
-                        thumbs.retriever = new IThumbnailRetriever.Stub() {
-                            public Bitmap getThumbnail(int index) {
-                                if (index < 0 || index >= thumbs.otherThumbnails.size()) {
-                                    return null;
-                                }
-                                return thumbs.otherThumbnails.get(index);
-                            }
-                        };
-                    }
-                    return thumbs;
-                }
+    private TaskRecord taskForIdLocked(int id) {
+        final int N = mRecentTasks.size();
+        for (int i=0; i<N; i++) {
+            TaskRecord tr = mRecentTasks.get(i);
+            if (tr.taskId == id) {
+                return tr;
             }
         }
         return null;
+    }
+
+    public ActivityManager.TaskThumbnails getTaskThumbnails(int id) {
+        synchronized (this) {
+            enforceCallingPermission(android.Manifest.permission.READ_FRAME_BUFFER,
+                    "getTaskThumbnails()");
+            TaskRecord tr = taskForIdLocked(id);
+            if (tr != null) {
+                return mMainStack.getTaskThumbnailsLocked(tr);
+            }
+        }
+        return null;
+    }
+
+    public boolean removeSubTask(int taskId, int subTaskIndex) {
+        synchronized (this) {
+            enforceCallingPermission(android.Manifest.permission.REMOVE_TASKS,
+                    "removeSubTask()");
+            long ident = Binder.clearCallingIdentity();
+            try {
+                return mMainStack.removeTaskActivitiesLocked(taskId, subTaskIndex) != null;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    private void removeTaskProcessesLocked(ActivityRecord root) {
+        TaskRecord tr = root.task;
+        Intent baseIntent = new Intent(
+                tr.intent != null ? tr.intent : tr.affinityIntent);
+        ComponentName component = baseIntent.getComponent();
+        if (component == null) {
+            Slog.w(TAG, "Now component for base intent of task: " + tr);
+            return;
+        }
+
+        // Find any running services associated with this app.
+        ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
+        for (ServiceRecord sr : mServices.values()) {
+            if (sr.packageName.equals(component.getPackageName())) {
+                services.add(sr);
+            }
+        }
+
+        // Take care of any running services associated with the app.
+        for (int i=0; i<services.size(); i++) {
+            ServiceRecord sr = services.get(i);
+            if (sr.startRequested) {
+                if ((sr.serviceInfo.flags&ServiceInfo.FLAG_STOP_WITH_TASK) != 0) {
+                    stopServiceLocked(sr);
+                } else {
+                    sr.pendingStarts.add(new ServiceRecord.StartItem(sr, true,
+                            sr.makeNextStartId(), baseIntent, -1));
+                    if (sr.app != null && sr.app.thread != null) {
+                        sendServiceArgsLocked(sr, false);
+                    }
+                }
+            }
+        }
+
+        // Find any running processes associated with this app.
+        ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
+        SparseArray<ProcessRecord> appProcs
+                = mProcessNames.getMap().get(component.getPackageName());
+        if (appProcs != null) {
+            for (int i=0; i<appProcs.size(); i++) {
+                procs.add(appProcs.valueAt(i));
+            }
+        }
+
+        // Kill the running processes.
+        for (int i=0; i<procs.size(); i++) {
+            ProcessRecord pr = procs.get(i);
+            if (pr.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
+                Slog.i(TAG, "Killing " + pr + ": remove task");
+                EventLog.writeEvent(EventLogTags.AM_KILL, pr.pid,
+                        pr.processName, pr.setAdj, "remove task");
+                Process.killProcessQuiet(pr.pid);
+            } else {
+                pr.waitingToKill = "remove task";
+            }
+        }
+    }
+
+    public boolean removeTask(int taskId, int flags) {
+        synchronized (this) {
+            enforceCallingPermission(android.Manifest.permission.REMOVE_TASKS,
+                    "removeTask()");
+            long ident = Binder.clearCallingIdentity();
+            try {
+                ActivityRecord r = mMainStack.removeTaskActivitiesLocked(taskId, -1);
+                if (r != null) {
+                    mRecentTasks.remove(r.task);
+
+                    if ((flags&ActivityManager.REMOVE_TASK_KILL_PROCESS) != 0) {
+                        removeTaskProcessesLocked(r);
+                    }
+
+                    return true;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+        return false;
     }
     
     private final int findAffinityTaskTopLocked(int startIndex, String affinity) {
@@ -5123,21 +5158,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             final long origId = Binder.clearCallingIdentity();
             try {
-                int N = mRecentTasks.size();
-                for (int i=0; i<N; i++) {
-                    TaskRecord tr = mRecentTasks.get(i);
-                    if (tr.taskId == task) {
-                        if ((flags&ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
-                            mMainStack.mUserLeaving = true;
-                        }
-                        if ((flags&ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
-                            // Caller wants the home activity moved with it.  To accomplish this,
-                            // we'll just move the home task to the top first.
-                            mMainStack.moveHomeToFrontLocked();
-                        }
-                        mMainStack.moveTaskToFrontLocked(tr, null);
-                        return;
+                TaskRecord tr = taskForIdLocked(task);
+                if (tr != null) {
+                    if ((flags&ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
+                        mMainStack.mUserLeaving = true;
                     }
+                    if ((flags&ActivityManager.MOVE_TASK_WITH_HOME) != 0) {
+                        // Caller wants the home activity moved with it.  To accomplish this,
+                        // we'll just move the home task to the top first.
+                        mMainStack.moveHomeToFrontLocked();
+                    }
+                    mMainStack.moveTaskToFrontLocked(tr, null);
+                    return;
                 }
                 for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
                     ActivityRecord hr = (ActivityRecord)mMainStack.mHistory.get(i);
@@ -6661,11 +6693,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (app.pid > 0 && app.pid != MY_PID) {
                 handleAppCrashLocked(app);
-                Slog.i(ActivityManagerService.TAG, "Killing "
-                        + app.processName + " (pid=" + app.pid + "): user's request");
+                Slog.i(ActivityManagerService.TAG, "Killing " + app + ": user's request");
                 EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
                         app.processName, app.setAdj, "user's request after error");
-                Process.killProcess(app.pid);
+                Process.killProcessQuiet(app.pid);
             }
         }
     }
@@ -8946,7 +8977,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + " in dying process " + proc.processName);
                 EventLog.writeEvent(EventLogTags.AM_KILL, capp.pid,
                         capp.processName, capp.setAdj, "dying provider " + proc.processName);
-                Process.killProcess(capp.pid);
+                Process.killProcessQuiet(capp.pid);
             }
         }
         
@@ -9453,7 +9484,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (si.doneExecutingCount > 0) {
                     flags |= Service.START_FLAG_REDELIVERY;
                 }
-                r.app.thread.scheduleServiceArgs(r, si.id, flags, si.intent);
+                r.app.thread.scheduleServiceArgs(r, si.taskRemoved, si.id, flags, si.intent);
             } catch (RemoteException e) {
                 // Remote process gone...  we'll let the normal cleanup take
                 // care of this.
@@ -9539,11 +9570,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         // pending arguments, then fake up one so its onStartCommand() will
         // be called.
         if (r.startRequested && r.callStart && r.pendingStarts.size() == 0) {
-            r.lastStartId++;
-            if (r.lastStartId < 1) {
-                r.lastStartId = 1;
-            }
-            r.pendingStarts.add(new ServiceRecord.StartItem(r, r.lastStartId, null, -1));
+            r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
+                    null, -1));
         }
         
         sendServiceArgsLocked(r, true);
@@ -9897,11 +9925,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             r.startRequested = true;
             r.callStart = false;
-            r.lastStartId++;
-            if (r.lastStartId < 1) {
-                r.lastStartId = 1;
-            }
-            r.pendingStarts.add(new ServiceRecord.StartItem(r, r.lastStartId,
+            r.pendingStarts.add(new ServiceRecord.StartItem(r, false, r.makeNextStartId(),
                     service, targetPermissionUid));
             r.lastActivity = SystemClock.uptimeMillis();
             synchronized (r.stats.getBatteryStats()) {
@@ -9943,6 +9967,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    private void stopServiceLocked(ServiceRecord service) {
+        synchronized (service.stats.getBatteryStats()) {
+            service.stats.stopRunningLocked();
+        }
+        service.startRequested = false;
+        service.callStart = false;
+        bringDownServiceLocked(service, false);
+    }
+
     public int stopService(IApplicationThread caller, Intent service,
             String resolvedType) {
         // Refuse possible leaked file descriptors
@@ -9966,14 +9999,12 @@ public final class ActivityManagerService extends ActivityManagerNative
             ServiceLookupResult r = findServiceLocked(service, resolvedType);
             if (r != null) {
                 if (r.record != null) {
-                    synchronized (r.record.stats.getBatteryStats()) {
-                        r.record.stats.stopRunningLocked();
-                    }
-                    r.record.startRequested = false;
-                    r.record.callStart = false;
                     final long origId = Binder.clearCallingIdentity();
-                    bringDownServiceLocked(r.record, false);
-                    Binder.restoreCallingIdentity(origId);
+                    try {
+                        stopServiceLocked(r.record);
+                    } finally {
+                        Binder.restoreCallingIdentity(origId);
+                    }
                     return 1;
                 }
                 return -1;
@@ -10035,7 +10066,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         }
                     }
                     
-                    if (r.lastStartId != startId) {
+                    if (r.getLastStartId() != startId) {
                         return false;
                     }
                     
@@ -10476,7 +10507,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         case Service.START_NOT_STICKY: {
                             // We are done with the associated start arguments.
                             r.findDeliveredStart(startId, true);
-                            if (r.lastStartId == startId) {
+                            if (r.getLastStartId() == startId) {
                                 // There is no more work, and this service
                                 // doesn't want to hang around if killed.
                                 r.stopIfKilled = true;
@@ -10494,6 +10525,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 // Don't stop if killed.
                                 r.stopIfKilled = true;
                             }
+                            break;
+                        }
+                        case Service.START_TASK_REMOVED_COMPLETE: {
+                            // Special processing for onTaskRemoved().  Don't
+                            // impact normal onStartCommand() processing.
+                            r.findDeliveredStart(startId, true);
                             break;
                         }
                         default:
@@ -12885,23 +12922,31 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
                         "Setting process group of " + app.processName
                         + " to " + app.curSchedGroup);
-                if (true) {
-                    long oldId = Binder.clearCallingIdentity();
-                    try {
-                        Process.setProcessGroup(app.pid, app.curSchedGroup);
-                    } catch (Exception e) {
-                        Slog.w(TAG, "Failed setting process group of " + app.pid
-                                + " to " + app.curSchedGroup);
-                        e.printStackTrace();
-                    } finally {
-                        Binder.restoreCallingIdentity(oldId);
-                    }
-                }
-                if (false) {
-                    if (app.thread != null) {
+                if (app.waitingToKill != null &&
+                        app.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
+                    Slog.i(TAG, "Killing " + app + ": " + app.waitingToKill);
+                    EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
+                            app.processName, app.setAdj, app.waitingToKill);
+                    Process.killProcessQuiet(app.pid);
+                } else {
+                    if (true) {
+                        long oldId = Binder.clearCallingIdentity();
                         try {
-                            app.thread.setSchedulingGroup(app.curSchedGroup);
-                        } catch (RemoteException e) {
+                            Process.setProcessGroup(app.pid, app.curSchedGroup);
+                        } catch (Exception e) {
+                            Slog.w(TAG, "Failed setting process group of " + app.pid
+                                    + " to " + app.curSchedGroup);
+                            e.printStackTrace();
+                        } finally {
+                            Binder.restoreCallingIdentity(oldId);
+                        }
+                    }
+                    if (false) {
+                        if (app.thread != null) {
+                            try {
+                                app.thread.setSchedulingGroup(app.curSchedGroup);
+                            } catch (RemoteException e) {
+                            }
                         }
                     }
                 }
@@ -13024,7 +13069,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + (app.thread != null ? app.thread.asBinder() : null)
                         + ")\n");
                     if (app.pid > 0 && app.pid != MY_PID) {
-                        Process.killProcess(app.pid);
+                        EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
+                                app.processName, app.setAdj, "empty");
+                        Process.killProcessQuiet(app.pid);
                     } else {
                         try {
                             app.thread.scheduleExit();
@@ -13090,7 +13137,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                             + (app.thread != null ? app.thread.asBinder() : null)
                             + ")\n");
                         if (app.pid > 0 && app.pid != MY_PID) {
-                            Process.killProcess(app.pid);
+                            EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
+                                    app.processName, app.setAdj, "empty");
+                            Process.killProcessQuiet(app.pid);
                         } else {
                             try {
                                 app.thread.scheduleExit();
@@ -13147,7 +13196,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                               + (app.thread != null ? app.thread.asBinder() : null)
                               + ")\n");
                         if (app.pid > 0 && app.pid != MY_PID) {
-                            Process.killProcess(app.pid);
+                            EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
+                                    app.processName, app.setAdj, "old background");
+                            Process.killProcessQuiet(app.pid);
                         } else {
                             try {
                                 app.thread.scheduleExit();

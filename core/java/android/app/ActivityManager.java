@@ -205,13 +205,6 @@ public class ActivityManager {
     public static final int RECENT_IGNORE_UNAVAILABLE = 0x0002;
 
     /**
-     * Flag for use with {@link #getRecentTasks}: also return the thumbnail
-     * bitmap (if available) for each recent task.
-     * @hide
-     */
-    public static final int TASKS_GET_THUMBNAILS = 0x0001000;
-    
-    /**
      * Return a list of the tasks that the user has recently launched, with
      * the most recent being first and older ones after in order.
      * 
@@ -241,7 +234,7 @@ public class ActivityManager {
     /**
      * Information you can retrieve about a particular task that is currently
      * "running" in the system.  Note that a running task does not mean the
-     * given task actual has a process it is actively running in; it simply
+     * given task actually has a process it is actively running in; it simply
      * means that the user has gone to it and never closed it, but currently
      * the system may have killed its process and is only holding on to its
      * last state in order to restart it when the user returns.
@@ -396,6 +389,55 @@ public class ActivityManager {
         return getRunningTasks(maxNum, 0, null);
     }
 
+    /**
+     * Remove some end of a task's activity stack that is not part of
+     * the main application.  The selected activities will be finished, so
+     * they are no longer part of the main task.
+     *
+     * @param taskId The identifier of the task.
+     * @param subTaskIndex The number of the sub-task; this corresponds
+     * to the index of the thumbnail returned by {@link #getTaskThumbnails(int)}.
+     * @return Returns true if the sub-task was found and was removed.
+     *
+     * @hide
+     */
+    public boolean removeSubTask(int taskId, int subTaskIndex)
+            throws SecurityException {
+        try {
+            return ActivityManagerNative.getDefault().removeSubTask(taskId, subTaskIndex);
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+            return false;
+        }
+    }
+
+    /**
+     * If set, the process of the root activity of the task will be killed
+     * as part of removing the task.
+     * @hide
+     */
+    public static final int REMOVE_TASK_KILL_PROCESS = 0x0001;
+
+    /**
+     * Completely remove the given task.
+     *
+     * @param taskId Identifier of the task to be removed.
+     * @param flags Additional operational flags.  May be 0 or
+     * {@link #REMOVE_TASK_KILL_PROCESS}.
+     * @return Returns true if the given task was found and removed.
+     *
+     * @hide
+     */
+    public boolean removeTask(int taskId, int flags)
+            throws SecurityException {
+        try {
+            return ActivityManagerNative.getDefault().removeTask(taskId, flags);
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+            return false;
+        }
+    }
+
     /** @hide */
     public static class TaskThumbnails implements Parcelable {
         public Bitmap mainThumbnail;
@@ -404,9 +446,6 @@ public class ActivityManager {
 
         /** @hide */
         public IThumbnailRetriever retriever;
-
-        /** @hide Magic for ActivityManagerService.  Not marshalled */
-        public ArrayList<Bitmap> otherThumbnails;
 
         public TaskThumbnails() {
         }

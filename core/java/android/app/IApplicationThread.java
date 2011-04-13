@@ -73,8 +73,8 @@ public interface IApplicationThread extends IInterface {
             Intent intent, boolean rebind) throws RemoteException;
     void scheduleUnbindService(IBinder token,
             Intent intent) throws RemoteException;
-    void scheduleServiceArgs(IBinder token, int startId, int flags, Intent args)
-            throws RemoteException;
+    void scheduleServiceArgs(IBinder token, boolean taskRemoved, int startId,
+            int flags, Intent args) throws RemoteException;
     void scheduleStopService(IBinder token) throws RemoteException;
     static final int DEBUG_OFF = 0;
     static final int DEBUG_ON = 1;

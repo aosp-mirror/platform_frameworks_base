@@ -334,6 +334,7 @@ public final class ActivityThread {
 
     private static final class ServiceArgsData {
         IBinder token;
+        boolean taskRemoved;
         int startId;
         int flags;
         Intent args;
@@ -534,10 +535,11 @@ public final class ActivityThread {
             queueOrSendMessage(H.UNBIND_SERVICE, s);
         }
 
-        public final void scheduleServiceArgs(IBinder token, int startId,
+        public final void scheduleServiceArgs(IBinder token, boolean taskRemoved, int startId,
             int flags ,Intent args) {
             ServiceArgsData s = new ServiceArgsData();
             s.token = token;
+            s.taskRemoved = taskRemoved;
             s.startId = startId;
             s.flags = flags;
             s.args = args;
@@ -2129,7 +2131,13 @@ public final class ActivityThread {
                 if (data.args != null) {
                     data.args.setExtrasClassLoader(s.getClassLoader());
                 }
-                int res = s.onStartCommand(data.args, data.flags, data.startId);
+                int res;
+                if (!data.taskRemoved) {
+                    res = s.onStartCommand(data.args, data.flags, data.startId);
+                } else {
+                    s.onTaskRemoved(data.args);
+                    res = Service.START_TASK_REMOVED_COMPLETE;
+                }
 
                 QueuedWork.waitToFinish();
 

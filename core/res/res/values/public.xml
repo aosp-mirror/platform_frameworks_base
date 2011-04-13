@@ -1656,6 +1656,7 @@
   <public type="attr" name="state_hovered" />
   <public type="attr" name="state_drag_can_accept" />
   <public type="attr" name="state_drag_hovered" />
+  <public type="attr" name="stopWithTask" />
 
   <public type="style" name="Theme.Holo.Light.NoActionBar" />
 

@@ -33,17 +33,35 @@ public class ServiceInfo extends ComponentInfo
      */
     public String permission;
 
+    /**
+     * Bit in {@link #flags}: If set, the service will automatically be
+     * stopped by the system if the user removes a task that is rooted
+     * in one of the application's activities.  Set from the
+     * {@link android.R.attr#stopWithTask} attribute.
+     */
+    public static final int FLAG_STOP_WITH_TASK = 0x0001;
+
+    /**
+     * Options that have been set in the service declaration in the
+     * manifest.
+     * These include:
+     * {@link #FLAG_STOP_WITH_TASK}
+     */
+    public int flags;
+
     public ServiceInfo() {
     }
 
     public ServiceInfo(ServiceInfo orig) {
         super(orig);
         permission = orig.permission;
+        flags = orig.flags;
     }
 
     public void dump(Printer pw, String prefix) {
         super.dumpFront(pw, prefix);
         pw.println(prefix + "permission=" + permission);
+        pw.println(prefix + "flags=0x" + Integer.toHexString(flags));
     }
     
     public String toString() {
@@ -59,6 +77,7 @@ public class ServiceInfo extends ComponentInfo
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         super.writeToParcel(dest, parcelableFlags);
         dest.writeString(permission);
+        dest.writeInt(flags);
     }
 
     public static final Creator<ServiceInfo> CREATOR =
@@ -74,5 +93,6 @@ public class ServiceInfo extends ComponentInfo
     private ServiceInfo(Parcel source) {
         super(source);
         permission = source.readString();
+        flags = source.readInt();
     }
 }

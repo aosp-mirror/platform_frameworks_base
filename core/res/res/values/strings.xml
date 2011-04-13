@@ -506,6 +506,13 @@
         tasks to the foreground and background. Malicious applications can force
         themselves to the front without your control.</string>
 
+    <!-- Title of an application permission, allowing an application to remove/kill tasks -->
+    <string name="permlab_removeTasks">stop running applications</string>
+    <!-- Description of an application permission, allowing an application to remove/kill tasks -->
+    <string name="permdesc_removeTasks">Allows an application to remove
+        tasks and kill their applications. Malicious applications can disrupt
+        the behavior of other applications.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_setDebugApp">enable application debugging</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

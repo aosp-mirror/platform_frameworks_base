@@ -344,6 +344,10 @@ public interface IActivityManager extends IInterface {
 
     // Multi-user APIs
     public boolean switchUser(int userid) throws RemoteException;
+    
+    public boolean removeSubTask(int taskId, int subTaskIndex) throws RemoteException;
+
+    public boolean removeTask(int taskId, int flags) throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -561,4 +565,6 @@ public interface IActivityManager extends IInterface {
     int START_ACTIVITIES_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+121;
     int ACTIVITY_SLEPT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+122;
     int SWITCH_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+123;
+    int REMOVE_SUB_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+124;
+    int REMOVE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+125;
 }

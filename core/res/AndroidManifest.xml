@@ -607,6 +607,13 @@
         android:label="@string/permlab_reorderTasks"
         android:description="@string/permdesc_reorderTasks" />
 
+    <!-- Allows an application to change to remove/kill tasks -->
+    <permission android:name="android.permission.REMOVE_TASKS"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_removeTasks"
+        android:description="@string/permdesc_removeTasks" />
+
     <!-- Allows an application to modify the current configuration, such
          as locale. -->
     <permission android:name="android.permission.CHANGE_CONFIGURATION"
