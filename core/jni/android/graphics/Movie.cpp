@@ -23,11 +23,8 @@ jobject create_jmovie(JNIEnv* env, SkMovie* moov) {
     if (NULL == moov) {
         return NULL;
     }
-    jobject obj = env->AllocObject(gMovie_class);
-    if (obj) {
-        env->CallVoidMethod(obj, gMovie_constructorMethodID, (jint)moov);
-    }
-    return obj;
+    return env->NewObject(gMovie_class, gMovie_constructorMethodID,
+            static_cast<jint>(reinterpret_cast<uintptr_t>(moov)));
 }
 
 static SkMovie* J2Movie(JNIEnv* env, jobject movie) {

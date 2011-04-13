@@ -350,14 +350,10 @@ jobject GraphicsJNI::createBitmap(JNIEnv* env, SkBitmap* bitmap, jbyteArray buff
     SkASSERT(bitmap);
     SkASSERT(bitmap->pixelRef());
 
-    jobject obj = env->AllocObject(gBitmap_class);
-    if (obj) {
-        env->CallVoidMethod(obj, gBitmap_constructorMethodID,
-                            (jint)bitmap, buffer, isMutable, ninepatch, density);
-        if (hasException(env)) {
-            obj = NULL;
-        }
-    }
+    jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
+            static_cast<jint>(reinterpret_cast<uintptr_t>(bitmap)),
+            buffer, isMutable, ninepatch, density);
+    hasException(env); // For the side effect of logging.
     return obj;
 }
 
@@ -372,30 +368,19 @@ jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecode
 {
     SkASSERT(bitmap != NULL);
 
-    jobject obj = env->AllocObject(gBitmapRegionDecoder_class);
-    if (hasException(env)) {
-        obj = NULL;
-        return obj;
-    }
-    if (obj) {
-        env->CallVoidMethod(obj, gBitmapRegionDecoder_constructorMethodID, (jint)bitmap);
-        if (hasException(env)) {
-            obj = NULL;
-        }
-    }
+    jobject obj = env->NewObject(gBitmapRegionDecoder_class,
+            gBitmapRegionDecoder_constructorMethodID,
+            static_cast<jint>(reinterpret_cast<uintptr_t>(bitmap)));
+    hasException(env); // For the side effect of logging.
     return obj;
 }
 
 jobject GraphicsJNI::createRegion(JNIEnv* env, SkRegion* region)
 {
     SkASSERT(region != NULL);
-    jobject obj = env->AllocObject(gRegion_class);
-    if (obj) {
-        env->CallVoidMethod(obj, gRegion_constructorMethodID, (jint)region, 0);
-        if (hasException(env)) {
-            obj = NULL;
-        }
-    }
+    jobject obj = env->NewObject(gRegion_class, gRegion_constructorMethodID,
+            static_cast<jint>(reinterpret_cast<uintptr_t>(region)), 0);
+    hasException(env); // For the side effect of logging.
     return obj;
 }
 
