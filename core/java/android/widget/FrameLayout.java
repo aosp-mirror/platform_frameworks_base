@@ -39,7 +39,7 @@ import java.util.ArrayList;
  * Children are drawn in a stack, with the most recently added child on top.
  * The size of the frame layout is the size of its largest child (plus padding), visible
  * or not (if the FrameLayout's parent permits). Views that are GONE are used for sizing
- * only if {@link #setMeasureAllChildren(boolean) setConsiderGoneChildrenWhenMeasuring()}
+ * only if {@link #setMeasureAllChildren(boolean) setMeasureAllChildren()}
  * is set to true.
  *
  * @attr ref android.R.styleable#FrameLayout_foreground
@@ -566,4 +566,3 @@ public class FrameLayout extends ViewGroup {
         }
     }
 }
-
