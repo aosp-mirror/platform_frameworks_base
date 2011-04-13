@@ -72,10 +72,8 @@ public class WifiConnectionTest
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        log("before we launch the test activity, we preserve all the configured networks.");
         mRunner = ((ConnectivityManagerTestRunner)getInstrumentation());
         mWifiManager = (WifiManager) mRunner.getContext().getSystemService(Context.WIFI_SERVICE);
-        enabledNetworks = getEnabledNetworks(mWifiManager.getConfiguredNetworks());
 
         mAct = getActivity();
         mWifiManager.asyncConnect(mAct, new WifiServiceHandler());
@@ -123,40 +121,7 @@ public class WifiConnectionTest
     public void tearDown() throws Exception {
         log("tearDown()");
         mAct.removeConfiguredNetworksAndDisableWifi();
-        reEnableNetworks(enabledNetworks);
         super.tearDown();
-    }
-
-    private Set<WifiConfiguration> getEnabledNetworks(List<WifiConfiguration> configuredNetworks) {
-        Set<WifiConfiguration> networks = new HashSet<WifiConfiguration>();
-        for (WifiConfiguration wifiConfig : configuredNetworks) {
-            if (wifiConfig.status == Status.ENABLED || wifiConfig.status == Status.CURRENT) {
-                networks.add(wifiConfig);
-                log("remembering enabled network " + wifiConfig.SSID +
-                        " status is " + wifiConfig.status);
-            }
-        }
-        return networks;
-    }
-
-    private void reEnableNetworks(Set<WifiConfiguration> enabledNetworks) {
-        if (!mWifiManager.isWifiEnabled()) {
-            log("reEnableNetworks: enable Wifi");
-            mWifiManager.setWifiEnabled(true);
-            sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT,
-                    "interruped while waiting for wifi to be enabled");
-        }
-
-        for (WifiConfiguration config : enabledNetworks) {
-            if (DEBUG) {
-                log("recover wifi configuration: " + config.toString());
-            }
-            config.SSID = "\"" + config.SSID + "\"";
-            config.networkId = -1;
-            mWifiManager.connectNetwork(config);
-            sleep(ConnectivityManagerTestActivity.SHORT_TIMEOUT,
-                    "interruped while connecting to " + config.SSID);
-        }
     }
 
     /**
