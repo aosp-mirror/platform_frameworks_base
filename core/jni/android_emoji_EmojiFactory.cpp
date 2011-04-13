@@ -106,15 +106,11 @@ static void InitializeCaller() {
 
 static jobject create_java_EmojiFactory(
     JNIEnv* env, EmojiFactory* factory, jstring name) {
-  jobject obj = env->AllocObject(gEmojiFactory_class);
-  if (obj) {
-    env->CallVoidMethod(obj, gEmojiFactory_constructorMethodID,
-                        (jint)factory, name);
-    if (env->ExceptionCheck() != 0) {
-      LOGE("*** Uncaught exception returned from Java call!\n");
-      env->ExceptionDescribe();
-      obj = NULL;
-    }
+  jobject obj = env->NewObject(gEmojiFactory_class, gEmojiFactory_constructorMethodID,
+      static_cast<jint>(reinterpret_cast<uintptr_t>(factory)), name);
+  if (env->ExceptionCheck() != 0) {
+    LOGE("*** Uncaught exception returned from Java call!\n");
+    env->ExceptionDescribe();
   }
   return obj;
 }
@@ -180,17 +176,12 @@ static jobject android_emoji_EmojiFactory_getBitmapFromAndroidPua(
     return NULL;
   }
 
-  jobject obj = env->AllocObject(gBitmap_class);
-  if (obj) {
-    env->CallVoidMethod(obj, gBitmap_constructorMethodID,
-                        reinterpret_cast<jint>(bitmap), NULL, false, NULL, -1);
-    if (env->ExceptionCheck() != 0) {
-      LOGE("*** Uncaught exception returned from Java call!\n");
-      env->ExceptionDescribe();
-      return NULL;
-    }
+  jobject obj = env->NewObject(gBitmap_class, gBitmap_constructorMethodID,
+      static_cast<jint>(reinterpret_cast<uintptr_t>(bitmap)), NULL, false, NULL, -1);
+  if (env->ExceptionCheck() != 0) {
+    LOGE("*** Uncaught exception returned from Java call!\n");
+    env->ExceptionDescribe();
   }
-
   return obj;
 }
 
