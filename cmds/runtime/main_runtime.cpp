@@ -12,7 +12,7 @@
 
 #include <binder/IPCThreadState.h>
 #include <binder/ProcessState.h>
-#include <utils/Log.h>  
+#include <utils/Log.h>
 #include <cutils/zygote.h>
 
 #include <cutils/properties.h>
@@ -41,7 +41,7 @@
 #undef LOG_TAG
 #define LOG_TAG "runtime"
 
-static const char* ZYGOTE_ARGV[] = { 
+static const char* ZYGOTE_ARGV[] = {
     "--setuid=1000",
     "--setgid=1000",
     "--setgroups=1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,3001,3002,3003",
@@ -68,7 +68,6 @@ extern Condition gEventQCondition;
 
 namespace android {
 
-extern status_t app_init(const char* className);
 extern void set_finish_init_func(void (*func)());
 
 
@@ -76,7 +75,7 @@ extern void set_finish_init_func(void (*func)());
  * This class is used to kill this process (runtime) when the system_server dies.
  */
 class GrimReaper : public IBinder::DeathRecipient {
-public: 
+public:
     GrimReaper() { }
 
     virtual void binderDied(const wp<IBinder>& who)
@@ -170,7 +169,7 @@ LOGI("run() sending FIRST_CALL_TRANSACTION to activity manager");
 
 /*
  * Post-system-process initialization.
- * 
+ *
  * This function continues initialization after the system process
  * has been initialized.  It needs to be separate because the system
  * initialization needs to care of starting the Android runtime if it is not
@@ -210,17 +209,17 @@ static bool contextChecker(
 static void boot_init()
 {
     LOGI("Entered boot_init()!\n");
-    
+
     sp<ProcessState> proc(ProcessState::self());
     LOGD("ProcessState: %p\n", proc.get());
     proc->becomeContextManager(contextChecker, NULL);
-    
+
     if (proc->supportsProcesses()) {
         LOGI("Binder driver opened.  Multiprocess enabled.\n");
     } else {
         LOGI("Binder driver not found.  Processes not supported.\n");
     }
-    
+
     sp<BServiceManager> sm = new BServiceManager;
     proc->setContextObject(sm);
 }
@@ -258,7 +257,7 @@ static void validateTime()
     int res;
     time_t min_time = 1167652800; // jan 1 2007, type 'date -ud "1/1 12:00" +%s' to get value for current year
     struct timespec ts;
-    
+
     fd = open("/dev/alarm", O_RDWR);
     if(fd < 0) {
         LOGW("Unable to open alarm driver: %s\n", strerror(errno));
@@ -346,14 +345,14 @@ int main(int argc, char* const argv[])
     int ic;
     int result = 1;
     pid_t systemPid;
-    
+
     sp<ProcessState> proc;
 
 #ifndef HAVE_ANDROID_OS
     /* Set stdout/stderr to unbuffered for MinGW/MSYS. */
     //setvbuf(stdout, NULL, _IONBF, 0);
     //setvbuf(stderr, NULL, _IONBF, 0);
-    
+
     LOGI("commandline args:\n");
     for (int i = 0; i < argc; i++)
         LOGI("  %2d: '%s'\n", i, argv[i]);
@@ -455,7 +454,7 @@ int main(int argc, char* const argv[])
 
 #if 0
     // Hack to keep libc from beating the filesystem to death.  It's
-    // hitting /etc/localtime frequently, 
+    // hitting /etc/localtime frequently,
     //
     // This statement locks us into Pacific time.  We could do better,
     // but there's not much point until we're sure that the library
@@ -467,15 +466,15 @@ int main(int argc, char* const argv[])
 
     /* track our progress through the boot sequence */
     const int LOG_BOOT_PROGRESS_START = 3000;
-    LOG_EVENT_LONG(LOG_BOOT_PROGRESS_START, 
+    LOG_EVENT_LONG(LOG_BOOT_PROGRESS_START,
         ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
 
     validateTime();
 
     proc = ProcessState::self();
-    
+
     boot_init();
-    
+
     /* If we are in multiprocess mode, have zygote spawn the system
      * server process and call system_init(). If we are running in
      * single process mode just call system_init() directly.
@@ -488,8 +487,8 @@ int main(int argc, char* const argv[])
         property_get("log.redirect-stdio", propBuf, "");
         logStdio = (strcmp(propBuf, "true") == 0);
 
-        zygote_run_oneshot((int)(!logStdio), 
-                sizeof(ZYGOTE_ARGV) / sizeof(ZYGOTE_ARGV[0]), 
+        zygote_run_oneshot((int)(!logStdio),
+                sizeof(ZYGOTE_ARGV) / sizeof(ZYGOTE_ARGV[0]),
                 ZYGOTE_ARGV);
 
         //start_process("/system/bin/mediaserver");
@@ -497,7 +496,7 @@ int main(int argc, char* const argv[])
     } else {
 #ifndef HAVE_ANDROID_OS
         QuickRuntime* runt = new QuickRuntime();
-        runt->start("com/android/server/SystemServer", 
+        runt->start("com/android/server/SystemServer",
                     false /* spontaneously fork system server from zygote */);
 #endif
     }
@@ -506,11 +505,11 @@ int main(int argc, char* const argv[])
 
     finish_system_init(proc);
     run(proc);
-    
+
 bail:
     if (proc != NULL) {
         proc->setContextObject(NULL);
     }
-    
+
     return 0;
 }

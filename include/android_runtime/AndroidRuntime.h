@@ -46,14 +46,10 @@ public:
         const char* className, const JNINativeMethod* gMethods, int numMethods);
 
     /**
-     * Call a static Java function that takes no arguments and returns void.
-     */
-    status_t callStatic(const char* className, const char* methodName);
-
-    /**
      * Call a class's static main method with the given arguments,
      */
-    status_t callMain(const char* className, int argc, const char* const argv[]);
+    status_t callMain(const char* className, jclass clazz, int argc,
+        const char* const argv[]);
 
     /**
      * Find a class, with the input either of the form
@@ -67,6 +63,13 @@ public:
     void start();       // start in android.util.RuntimeInit
 
     static AndroidRuntime* getRuntime();
+
+    /**
+     * This gets called after the VM has been created, but before we
+     * run any code. Override it to make any FindClass calls that need
+     * to use CLASSPATH.
+     */
+    virtual void onVmCreated(JNIEnv* env);
 
     /**
      * This gets called after the JavaVM has initialized.  Override it
@@ -97,6 +100,9 @@ public:
 
     /** return a pointer to the JNIEnv pointer for this thread */
     static JNIEnv* getJNIEnv();
+
+    /** return a new string corresponding to 'className' with all '.'s replaced by '/'s. */
+    static char* toSlashClassName(const char* className);
 
 private:
     static int startReg(JNIEnv* env);

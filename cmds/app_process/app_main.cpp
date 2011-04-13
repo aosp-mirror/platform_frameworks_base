@@ -1,8 +1,8 @@
 /*
  * Main entry of app process.
- * 
+ *
  * Starts the interpreted runtime, then starts up the application.
- * 
+ *
  */
 
 #define LOG_TAG "appproc"
@@ -25,23 +25,13 @@ void app_usage()
         "Usage: app_process [java-options] cmd-dir start-class-name [options]\n");
 }
 
-status_t app_init(const char* className, int argc, const char* const argv[])
-{
-    LOGV("Entered app_init()!\n");
-
-    AndroidRuntime* jr = AndroidRuntime::getRuntime();
-    jr->callMain(className, argc, argv);
-    
-    LOGV("Exiting app_init()!\n");
-    return NO_ERROR;
-}
-
 class AppRuntime : public AndroidRuntime
 {
 public:
     AppRuntime()
         : mParentDir(NULL)
         , mClassName(NULL)
+        , mClass(NULL)
         , mArgC(0)
         , mArgV(NULL)
     {
@@ -60,6 +50,35 @@ public:
         return mClassName;
     }
 
+    virtual void onVmCreated(JNIEnv* env)
+    {
+        if (mClassName == NULL) {
+            return; // Zygote. Nothing to do here.
+        }
+
+        /*
+         * This is a little awkward because the JNI FindClass call uses the
+         * class loader associated with the native method we're executing in.
+         * If called in onStarted (from RuntimeInit.finishInit because we're
+         * launching "am", for example), FindClass would see that we're calling
+         * from a boot class' native method, and so wouldn't look for the class
+         * we're trying to look up in CLASSPATH. Unfortunately it needs to,
+         * because the "am" classes are not boot classes.
+         *
+         * The easiest fix is to call FindClass here, early on before we start
+         * executing boot class Java code and thereby deny ourselves access to
+         * non-boot classes.
+         */
+        char* slashClassName = toSlashClassName(mClassName);
+        mClass = env->FindClass(slashClassName);
+        if (mClass == NULL) {
+            LOGE("ERROR: could not find class '%s'\n", mClassName);
+        }
+        free(slashClassName);
+
+        mClass = reinterpret_cast<jclass>(env->NewGlobalRef(mClass));
+    }
+
     virtual void onStarted()
     {
         sp<ProcessState> proc = ProcessState::self();
@@ -67,8 +86,9 @@ public:
             LOGV("App process: starting thread pool.\n");
             proc->startThreadPool();
         }
-        
-        app_init(mClassName, mArgC, mArgV);
+
+        AndroidRuntime* ar = AndroidRuntime::getRuntime();
+        ar->callMain(mClassName, mClass, mArgC, mArgV);
 
         if (ProcessState::self()->supportsProcesses()) {
             IPCThreadState::self()->stopProcess();
@@ -81,7 +101,7 @@ public:
         if (proc->supportsProcesses()) {
             LOGV("App process: starting thread pool.\n");
             proc->startThreadPool();
-        }       
+        }
     }
 
     virtual void onExit(int code)
@@ -96,9 +116,10 @@ public:
         AndroidRuntime::onExit(code);
     }
 
-    
+
     const char* mParentDir;
     const char* mClassName;
+    jclass mClass;
     int mArgC;
     const char* const* mArgV;
 };
@@ -120,7 +141,7 @@ int main(int argc, const char* const argv[])
     // These are global variables in ProcessState.cpp
     mArgC = argc;
     mArgV = argv;
-    
+
     mArgLen = 0;
     for (int i=0; i<argc; i++) {
         mArgLen += strlen(argv[i]) + 1;
@@ -139,7 +160,7 @@ int main(int argc, const char* const argv[])
     argv++;
 
     // Everything up to '--' or first non '-' arg goes to the vm
-    
+
     int i = runtime.addVmArguments(argc, argv);
 
     // Next arg is parent directory
@@ -151,7 +172,7 @@ int main(int argc, const char* const argv[])
     if (i < argc) {
         arg = argv[i++];
         if (0 == strcmp("--zygote", arg)) {
-            bool startSystemServer = (i < argc) ? 
+            bool startSystemServer = (i < argc) ?
                     strcmp(argv[i], "--start-system-server") == 0 : false;
             setArgv0(argv0, "zygote");
             set_process_name("zygote");
