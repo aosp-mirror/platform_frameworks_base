@@ -37,6 +37,7 @@ import android.text.style.ScaleXSpan;
 import android.text.style.StrikethroughSpan;
 import android.text.style.StyleSpan;
 import android.text.style.SubscriptSpan;
+import android.text.style.SuggestionSpan;
 import android.text.style.SuperscriptSpan;
 import android.text.style.TextAppearanceSpan;
 import android.text.style.TypefaceSpan;
@@ -566,7 +567,7 @@ public class TextUtils {
     /** @hide */
     public static final int ANNOTATION = 18;
     /** @hide */
-    public static final int CORRECTION_SPAN = 19;
+    public static final int SUGGESTION_SPAN = 19;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -710,6 +711,10 @@ public class TextUtils {
 
                 case ANNOTATION:
                     readSpan(p, sp, new Annotation(p));
+                    break;
+
+                case SUGGESTION_SPAN:
+                    readSpan(p, sp, new SuggestionSpan(p));
                     break;
 
                 default:
