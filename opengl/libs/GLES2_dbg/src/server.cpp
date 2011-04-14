@@ -186,7 +186,7 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
         Die("Failed to send message length");
     }
     nsecs_t c0 = systemTime(timeMode);
-    sent = send(clientSock, str.c_str(), str.length(), 0);
+    sent = send(clientSock, str.data(), str.length(), 0);
     float t = (float)ns2ms(systemTime(timeMode) - c0);
     if (sent != str.length()) {
         LOGD("actual sent=%d expected=%d clientSock=%d", sent, str.length(), clientSock);
@@ -246,8 +246,9 @@ int * MessageLoop(FunctionCall & functionCall, glesv2debugger::Message & msg,
     msg.set_function(function);
 
     // when not exectResponse, set cmd to CONTINUE then SKIP
+    // cmd will be overwritten by received command
     cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
-    cmd.set_expect_response(false);
+    cmd.set_expect_response(expectResponse);
     glesv2debugger::Message_Function oldCmd = cmd.function();
     Send(msg, cmd);
     expectResponse = cmd.expect_response();

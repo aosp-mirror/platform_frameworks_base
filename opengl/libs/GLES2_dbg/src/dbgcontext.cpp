@@ -25,11 +25,11 @@ extern "C"
 namespace android
 {
 
-static pthread_key_t sEGLThreadLocalStorageKey = -1;
+pthread_key_t dbgEGLThreadLocalStorageKey = -1;
 
 DbgContext * getDbgContextThreadSpecific()
 {
-    tls_t* tls = (tls_t*)pthread_getspecific(sEGLThreadLocalStorageKey);
+    tls_t* tls = (tls_t*)pthread_getspecific(dbgEGLThreadLocalStorageKey);
     return tls->dbg;
 }
 
@@ -63,7 +63,7 @@ DbgContext::~DbgContext()
 DbgContext * CreateDbgContext(const pthread_key_t EGLThreadLocalStorageKey,
                               const unsigned version, const gl_hooks_t * const hooks)
 {
-    sEGLThreadLocalStorageKey = EGLThreadLocalStorageKey;
+    dbgEGLThreadLocalStorageKey = EGLThreadLocalStorageKey;
     assert(version < 2);
     assert(GL_NO_ERROR == hooks->gl.glGetError());
     GLint MAX_VERTEX_ATTRIBS = 0;
@@ -147,6 +147,37 @@ void DbgContext::Compress(const void * in_data, unsigned int in_len,
         else // compressed chunk bigger than LZF_CHUNK_SIZE (and uncompressed)
             outStr->append((const char *)in_data + i, chunkSize);
     }
+}
+
+unsigned char * DbgContext::Decompress(const void * in, const unsigned int inLen,
+                                       unsigned int * const outLen)
+{
+    assert(inLen > 4 * 3);
+    if (inLen < 4 * 3)
+        return NULL;
+    *outLen = *(uint32_t *)in;
+    unsigned char * const out = (unsigned char *)malloc(*outLen);
+    unsigned int outPos = 0;
+    const unsigned char * const end = (const unsigned char *)in + inLen;
+    for (const unsigned char * inData = (const unsigned char *)in + 4; inData < end; ) {
+        const uint32_t chunkOut = *(uint32_t *)inData;
+        inData += 4;
+        const uint32_t chunkIn = *(uint32_t *)inData;
+        inData += 4;
+        if (chunkIn > 0) {
+            assert(inData + chunkIn <= end);
+            assert(outPos + chunkOut <= *outLen);
+            outPos += lzf_decompress(inData, chunkIn, out + outPos, chunkOut);
+            inData += chunkIn;
+        } else {
+            assert(inData + chunkOut <= end);
+            assert(outPos + chunkOut <= *outLen);
+            memcpy(out + outPos, inData, chunkOut);
+            inData += chunkOut;
+            outPos += chunkOut;
+        }
+    }
+    return out;
 }
 
 void * DbgContext::GetReadPixelsBuffer(const unsigned size)

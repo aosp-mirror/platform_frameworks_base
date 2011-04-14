@@ -43,10 +43,8 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
 
     void * pixels = NULL;
     int viewport[4] = {};
-    if (!expectResponse) {
-        cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
-        cmd.set_expect_response(false);
-    }
+    cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
+    cmd.set_expect_response(expectResponse);
     glesv2debugger::Message_Function oldCmd = cmd.function();
     Send(msg, cmd);
     expectResponse = cmd.expect_response();
@@ -61,8 +59,6 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
             msg.set_function(glesv2debugger::Message_Function_glDrawArrays);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
-            if (!expectResponse)
-                cmd.set_function(glesv2debugger::Message_Function_SKIP);
             if (!expectResponse) {
                 cmd.set_function(glesv2debugger::Message_Function_SKIP);
                 cmd.set_expect_response(false);
@@ -154,10 +150,8 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
 
     void * pixels = NULL;
     int viewport[4] = {};
-    if (!expectResponse) {
-        cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
-        cmd.set_expect_response(false);
-    }
+    cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
+    cmd.set_expect_response(expectResponse);
     glesv2debugger::Message_Function oldCmd = cmd.function();
     Send(msg, cmd);
     expectResponse = cmd.expect_response();
@@ -172,8 +166,6 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
             msg.set_function(glesv2debugger::Message_Function_glDrawElements);
             msg.set_type(glesv2debugger::Message_Type_AfterCall);
             msg.set_expect_response(expectResponse);
-            if (!expectResponse)
-                cmd.set_function(glesv2debugger::Message_Function_SKIP);
             if (!expectResponse) {
                 cmd.set_function(glesv2debugger::Message_Function_SKIP);
                 cmd.set_expect_response(false);

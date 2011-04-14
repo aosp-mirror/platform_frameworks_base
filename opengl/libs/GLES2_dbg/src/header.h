@@ -73,8 +73,9 @@ struct GLFunctionBitfield {
 };
 
 struct DbgContext {
-private:
     static const unsigned int LZF_CHUNK_SIZE = 256 * 1024;
+
+private:
     char * lzf_buf; // malloc / free; for lzf chunk compression and other uses
 
     // used as buffer and reference frame for ReadPixels; malloc/free
@@ -129,6 +130,8 @@ public:
 
     void Fetch(const unsigned index, std::string * const data) const;
     void Compress(const void * in_data, unsigned in_len, std::string * const outStr);
+    static unsigned char * Decompress(const void * in, const unsigned int inLen,
+                                      unsigned int * const outLen); // malloc/free
     void * GetReadPixelsBuffer(const unsigned size);
     bool IsReadPixelBuffer(const void * const ptr)  {
         return ptr == lzf_ref[lzf_readIndex];
