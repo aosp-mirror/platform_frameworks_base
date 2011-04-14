@@ -49,7 +49,7 @@ private:
     static int dequeueBuffer(ANativeWindow* window, android_native_buffer_t** buffer);
     static int lockBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
     static int perform(ANativeWindow* window, int operation, ...);
-    static int query(ANativeWindow* window, int what, int* value);
+    static int query(const ANativeWindow* window, int what, int* value);
     static int queueBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
     static int setSwapInterval(ANativeWindow* window, int interval);
 
@@ -57,7 +57,7 @@ private:
     int dequeueBuffer(android_native_buffer_t** buffer);
     int lockBuffer(android_native_buffer_t* buffer);
     int perform(int operation, va_list args);
-    int query(int what, int* value);
+    int query(int what, int* value) const;
     int queueBuffer(android_native_buffer_t* buffer);
     int setSwapInterval(int interval);
 

@@ -70,7 +70,7 @@ private:
     static int dequeueBuffer(ANativeWindow* window, android_native_buffer_t** buffer);
     static int lockBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
     static int queueBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
-    static int query(ANativeWindow* window, int what, int* value);
+    static int query(const ANativeWindow* window, int what, int* value);
     static int perform(ANativeWindow* window, int operation, ...);
     
     framebuffer_device_t* fbDev;

@@ -270,10 +270,10 @@ int FramebufferNativeWindow::queueBuffer(ANativeWindow* window,
     return res;
 }
 
-int FramebufferNativeWindow::query(ANativeWindow* window,
+int FramebufferNativeWindow::query(const ANativeWindow* window,
         int what, int* value) 
 {
-    FramebufferNativeWindow* self = getSelf(window);
+    const FramebufferNativeWindow* self = getSelf(window);
     Mutex::Autolock _l(self->mutex);
     framebuffer_device_t* fb = self->fbDev;
     switch (what) {
