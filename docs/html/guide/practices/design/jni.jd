@@ -36,7 +36,7 @@ code, e.g. functions written in C/C++.  It's VM-neutral, has support for loading
 dynamic shared libraries, and while cumbersome at times is reasonably efficient.</p>
 
 <p>You really should read through the
-<a href="http://java.sun.com/javase/6/docs/technotes/guides/jni/spec/jniTOC.html">JNI spec for J2SE 1.6</a>
+<a href="http://java.sun.com/javase/6/docs/technotes/guides/jni/spec/jniTOC.html">JNI spec for J2SE 6</a>
 to get a sense for how JNI works and what features are available.  Some
 aspects of the interface aren't immediately obvious on
 first reading, so you may find the next few sections handy.
@@ -48,8 +48,9 @@ The more detailed <i>JNI Programmer's Guide and Specification</i> can be found
 <h2>JavaVM and JNIEnv</h2>
 
 <p>JNI defines two key data structures, "JavaVM" and "JNIEnv".  Both of these are essentially
-pointers to pointers to function tables.  (In the C++ version, it's a class whose sole member
-is a pointer to a function table.)  The JavaVM provides the "invocation interface" functions,
+pointers to pointers to function tables.  (In the C++ version, they're classes with a
+pointer to a function table and a member function for each JNI function that indirects through
+the table.)  The JavaVM provides the "invocation interface" functions,
 which allow you to create and destroy the VM.  In theory you can have multiple VMs per process,
 but Android's VM only allows one.</p>
 
@@ -58,7 +59,7 @@ the first argument.</p>
 
 <p>On some VMs, the JNIEnv is used for thread-local storage.  For this reason, <strong>you cannot share a JNIEnv between threads</strong>.
 If a piece of code has no other way to get its JNIEnv, you should share
-the JavaVM, and use JavaVM-&gt;GetEnv to discover the thread's JNIEnv.</p>
+the JavaVM, and use JavaVM-&gt;GetEnv to discover the thread's JNIEnv. (Assuming it has one; see <code>AttachCurrentThread</code> below.)</p>
 
 <p>The C declarations of JNIEnv and JavaVM are different from the C++
 declarations.  "jni.h" provides different typedefs
@@ -90,13 +91,14 @@ request, the VM will pause the thread the next time it makes a JNI call.</p>
 
 <p>Threads attached through JNI <strong>must call
 <code>DetachCurrentThread</code> before they exit</strong>.
-If coding this directly is awkward, in Android &gt;= 2.0 you
+If coding this directly is awkward, in Android &gt;= 2.0 ("Eclair") you
 can use <code>pthread_key_create</code> to define a destructor
 function that will be called before the thread exits, and
 call <code>DetachCurrentThread</code> from there.  (Use that
 key with <code>pthread_setspecific</code> to store the JNIEnv in
 thread-local-storage; that way it'll be passed into your destructor as
 the argument.)</p>
+
 
 <a name="jclass_jmethodID_and_jfieldID" id="jclass_jmethodID_and_jfieldID"></a>
 <h2>jclass, jmethodID, and jfieldID</h2>
@@ -148,7 +150,7 @@ the IDs is to add a piece of code that looks like this to the appropriate class:
         if (!nativeClassInit())
             throw new RuntimeException("native init failed");
     }</pre>
-    
+
 <p>Create a nativeClassInit method in your C/C++ code that performs the ID lookups.  The code
 will be executed once, when the class is initialized.  If the class is ever unloaded and
 then reloaded, it will be executed again.  (See the implementation of java.io.FileDescriptor
@@ -324,7 +326,7 @@ to do is copy data in or out.  Consider the following:</p>
         memcpy(buffer, data, len);
         env->ReleaseByteArrayElements(array, data, JNI_ABORT);
     }</pre>
-    
+
 <p>This grabs the array, copies the first <code>len</code> byte
 elements out of it, and then releases the array.  Depending upon the VM
 policies the <code>Get</code> call will either pin or copy the array contents.
@@ -334,7 +336,7 @@ we use <code>JNI_ABORT</code> so there's no chance of a third copy.</p>
 <p>We can accomplish the same thing with this:</p>
 <pre>
     env->GetByteArrayRegion(array, 0, len, buffer);</pre>
-    
+
 <p>This has several advantages:</p>
 <ul>
     <li>Requires one JNI call instead of 2, reducing overhead.
@@ -544,22 +546,22 @@ that use 64-bit pointers, <strong>you need to stash your native pointers in a
     <code>DeleteWeakGlobalRef</code>.  (The spec strongly encourages
     programmers to create hard references to weak globals before doing
     anything with them, so this should not be at all limiting.)</li>
-    <li><code>GetObjectRefType</code> (new in 1.6) is implemented but not fully
+    <li><code>GetObjectRefType</code> (new in JNI 1.6) is implemented but not fully
     functional &mdash; it can't always tell the difference between "local" and
     "global" references.</li>
 </ul>
 
 <p>For backward compatibility, you may need to be aware of:</p>
 <ul>
-    <li>Until 2.0 ("Eclair"), the '$' character was not properly
+    <li>Until Android 2.0 ("Eclair"), the '$' character was not properly
     converted to "_00024" during searches for method names.  Working
     around this requires using explicit registration or moving the
     native methods out of inner classes.
-    <li>Until 2.0, it was not possible to use a <code>pthread_key_create</code>
+    <li>Until Android 2.0 ("Eclair"), it was not possible to use a <code>pthread_key_create</code>
     destructor function to avoid the VM's "thread must be detached before
     exit" check.  (The VM also uses a pthread key destructor function,
     so it'd be a race to see which gets called first.)
-    <li>"Weak global" references were not implemented until 2.2 ("Froyo").
+    <li>"Weak global" references were not implemented until Android 2.2 ("Froyo").
     Older VMs will vigorously reject attempts to use them.  You can use
     the Android platform version constants to test for support.
 </ul>

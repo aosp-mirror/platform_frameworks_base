@@ -375,8 +375,8 @@ code compiled for the ARM in the Nexus One won't run on the ARM in the G1.</p>
 <p>Native code is primarily useful when you have an existing native codebase
 that you want to port to Android, not for "speeding up" parts of a Java app.</p>
 
-<p>We have <a href="{@docRoot}guide/practices/design/jni.html">JNI Tips</a> for
-more about JNI on Android.</p>
+<p>If you do need to use native code, you should read our
+<a href="{@docRoot}guide/practices/design/jni.html">JNI Tips</a>.</p>
 
 <p>(See also <em>Effective Java</em> item 54.)</p>
 
