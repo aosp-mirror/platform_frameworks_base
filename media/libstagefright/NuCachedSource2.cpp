@@ -326,24 +326,31 @@ void NuCachedSource2::onRead(const sp<AMessage> &msg) {
     mCondition.signal();
 }
 
-void NuCachedSource2::restartPrefetcherIfNecessary_l() {
+void NuCachedSource2::restartPrefetcherIfNecessary_l(bool force) {
     static const size_t kGrayArea = 256 * 1024;
 
     if (mFetching || mFinalStatus != OK) {
         return;
     }
 
-    if (mCacheOffset + mCache->totalSize() - mLastAccessPos
-            >= kLowWaterThreshold) {
-        return;
-    }
+    size_t maxBytes;
 
-    size_t maxBytes = mLastAccessPos - mCacheOffset;
-    if (maxBytes < kGrayArea) {
-        return;
-    }
+    if (!force) {
+        if (mCacheOffset + mCache->totalSize() - mLastAccessPos
+                >= kLowWaterThreshold) {
+            return;
+        }
 
-    maxBytes -= kGrayArea;
+        maxBytes = mLastAccessPos - mCacheOffset;
+        if (maxBytes < kGrayArea) {
+            return;
+        }
+
+        maxBytes -= kGrayArea;
+    } else {
+        // Empty it all out.
+        maxBytes = mLastAccessPos - mCacheOffset;
+    }
 
     size_t actualBytes = mCache->releaseFromStart(maxBytes);
     mCacheOffset += actualBytes;
@@ -415,9 +422,16 @@ size_t NuCachedSource2::approxDataRemaining_l(bool *eos) {
 }
 
 ssize_t NuCachedSource2::readInternal(off_t offset, void *data, size_t size) {
+    CHECK(size <= kHighWaterThreshold);
+
     LOGV("readInternal offset %ld size %d", offset, size);
 
     Mutex::Autolock autoLock(mLock);
+
+    if (!mFetching) {
+        mLastAccessPos = offset;
+        restartPrefetcherIfNecessary_l(true /* force */);
+    }
 
     if (offset < mCacheOffset
             || offset >= (off_t)(mCacheOffset + mCache->totalSize())) {
