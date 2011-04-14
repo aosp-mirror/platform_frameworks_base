@@ -16,6 +16,7 @@
 */
 
 #define LOG_TAG "CameraService"
+//#define LOG_NDEBUG 0
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -37,6 +38,7 @@
 #include <utils/String16.h>
 
 #include "CameraService.h"
+#include "CameraHardwareInterface.h"
 
 namespace android {
 
@@ -69,22 +71,32 @@ static int getCallingUid() {
 static CameraService *gCameraService;
 
 CameraService::CameraService()
-:mSoundRef(0)
+:mSoundRef(0), mModule(0)
 {
     LOGI("CameraService started (pid=%d)", getpid());
-
-    mNumberOfCameras = HAL_getNumberOfCameras();
-    if (mNumberOfCameras > MAX_CAMERAS) {
-        LOGE("Number of cameras(%d) > MAX_CAMERAS(%d).",
-             mNumberOfCameras, MAX_CAMERAS);
-        mNumberOfCameras = MAX_CAMERAS;
-    }
-
-    for (int i = 0; i < mNumberOfCameras; i++) {
-        setCameraFree(i);
-    }
-
     gCameraService = this;
+}
+
+void CameraService::onFirstRef()
+{
+    BnCameraService::onFirstRef();
+
+    if (hw_get_module(CAMERA_HARDWARE_MODULE_ID,
+                (const hw_module_t **)&mModule) < 0) {
+        LOGE("Could not load camera HAL module");
+        mNumberOfCameras = 0;
+    }
+    else {
+        mNumberOfCameras = mModule->get_number_of_cameras();
+        if (mNumberOfCameras > MAX_CAMERAS) {
+            LOGE("Number of cameras(%d) > MAX_CAMERAS(%d).",
+                    mNumberOfCameras, MAX_CAMERAS);
+            mNumberOfCameras = MAX_CAMERAS;
+        }
+        for (int i = 0; i < mNumberOfCameras; i++) {
+            setCameraFree(i);
+        }
+    }
 }
 
 CameraService::~CameraService() {
@@ -103,18 +115,30 @@ int32_t CameraService::getNumberOfCameras() {
 
 status_t CameraService::getCameraInfo(int cameraId,
                                       struct CameraInfo* cameraInfo) {
+    if (!mModule) {
+        return NO_INIT;
+    }
+
     if (cameraId < 0 || cameraId >= mNumberOfCameras) {
         return BAD_VALUE;
     }
 
-    HAL_getCameraInfo(cameraId, cameraInfo);
-    return OK;
+    struct camera_info info;
+    status_t rc = mModule->get_camera_info(cameraId, &info);
+    cameraInfo->facing = info.facing;
+    cameraInfo->orientation = info.orientation;
+    return rc;
 }
 
 sp<ICamera> CameraService::connect(
         const sp<ICameraClient>& cameraClient, int cameraId) {
     int callingPid = getCallingPid();
     LOG1("CameraService::connect E (pid %d, id %d)", callingPid, cameraId);
+
+    if (!mModule) {
+        LOGE("Camera HAL module not loaded");
+        return NULL;
+    }
 
     sp<Client> client;
     if (cameraId < 0 || cameraId >= mNumberOfCameras) {
@@ -146,15 +170,19 @@ sp<ICamera> CameraService::connect(
         return NULL;
     }
 
-    sp<CameraHardwareInterface> hardware = HAL_openCameraHardware(cameraId);
-    if (hardware == NULL) {
-        LOGE("Fail to open camera hardware (id=%d)", cameraId);
+    struct camera_info info;
+    if (mModule->get_camera_info(cameraId, &info) != OK) {
+        LOGE("Invalid camera id %d", cameraId);
         return NULL;
     }
-    CameraInfo info;
-    HAL_getCameraInfo(cameraId, &info);
-    client = new Client(this, cameraClient, hardware, cameraId, info.facing,
-                        callingPid);
+
+    char camera_device_name[10];
+    snprintf(camera_device_name, sizeof(camera_device_name), "%d", cameraId);
+
+    client = new Client(this, cameraClient,
+                new CameraHardwareInterface(&mModule->common,
+                                            camera_device_name),
+                cameraId, info.facing, callingPid);
     mClient[cameraId] = client;
     LOG1("CameraService::connect X");
     return client;
