@@ -7,11 +7,24 @@ parent.link=index.html
   <div id="qv">
   <h2>In this document</h2>
   <ol>
-    <li><a href="#listingtargets">Listing targets</a></li>
-    <li><a href="#AVDCmdLine">Creating AVDs</a></li>
+    <li><a href="#listingtargets">Listing Targets</a></li>
+    <li><a href="#AVDCmdLine">Creating AVDs</a>
+      <ol>
+        <li><a href="#CustomDensity">Customize the device resolution or density</a></li>
+        <li><a href="#DefaultLocation">Default location of AVD files</a></li>
+        <li><a href="#hardwareopts">Setting hardware emulation options</a></li>
+      </ol>
+    </li>
     <li><a href="#moving">Moving an AVD</a></li>
     <li><a href="#updating">Updating an AVD</a></li>
     <li><a href="#deleting">Deleting an AVD</a></li>
+  </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/developing/building/building-cmdline.html">Building and Running
+from the Command Line</a></li>
+    <li><a href="{@docRoot}guide/developing/devices/emulator.html">Using the Android
+Emulator</a></li>
   </ol>
   </div>
 </div>
@@ -23,7 +36,7 @@ of the command line options that you can use, see the reference for the
 
 
 
-<h2 id="listingtargets">Listing targets</h2>
+<h2 id="listingtargets">Listing Targets</h2>
 
 <p>To generate a list of system image targets, use this command: </p>
 
@@ -67,7 +80,10 @@ id: 5 or "android-9"
      Skins: HVGA (default), WVGA800, WQVGA432, QVGA, WVGA854, WQVGA400
 </pre>
 
-<h2 id="AVDCmdLine">Creating AVDs</h2> 
+
+
+<h2 id="AVDCmdLine">Creating AVDs</h2>
+
 <p>In addition to creating AVDs with the 
 <a href="{@docRoot}guide/developing/devices/managing-avds-cmdline.html">AVD Manager user interface</a>,
 you can also create them by passing in command line arguments to the <code>android</code> tool.
@@ -92,8 +108,9 @@ general characteristics offered by the AVD. The target ID is an integer assigned
 <code>android</code> tool. The target ID is not derived from the system image name, 
 version, or API Level, or other attribute, so you need to run the <code>android list targets</code>
 command to list the target ID of each system image. You should do this <em>before</em> you run
-the <code>android create avd</code> command. See the <a href="{@docRoot}guide/developing/tools/android.html">android</a></p>
-tool documentation for more information on the command line options.  
+the <code>android create avd</code> command. See the <a
+href="{@docRoot}guide/developing/tools/android.html">android</a>
+tool documentation for more information on the command line options.</p>
 
 
 <p>When you've selected the target you want to use and made a note of its ID,
@@ -124,7 +141,45 @@ appropriately for the device that the add-on is modeling, and so prevents you
 from resetting the options. </p>
 
 
-<h3>Default location of AVD files</h3>
+<h3 id="CustomDensity">Customize the device resolution or density</h3>
+
+<p>When testing your application, we recommend that you test your application in several different
+AVDs, using different screen configurations (different combinations of size and density). In
+addition, you should set up the AVDs to run at a physical size that closely matches an actual
+device.</p>
+
+<p>To set up your AVDs for a specific resolution or density, follow these steps:</p>
+
+<ol>
+  <li>Use the <code>create avd</code> command to create a new AVD, specifying
+the <code>--skin</code> option with a value that references either a default
+skin name (such as "WVGA800") or a custom skin resolution (such as 240x432).
+Here's an example:
+     <pre>android create avd -n &lt;name&gt; -t &lt;targetID&gt; --skin WVGA800</pre>
+  </li>
+  <li>To specify a custom density for the skin, answer "yes" when asked whether
+you want to create a custom hardware profile for the new AVD.</li>
+  <li>Continue through the various profile settings until the tool asks you to
+specify "Abstracted LCD density" (<em>hw.lcd.density</em>). Enter an appropriate
+value, such as "120" for a low-density screen, "160" for a medium density screen,
+or "240" for a high-density screen.</li>
+  <li>Set any other hardware options and complete the AVD creation.</li>
+</ol>
+
+<p>In the example above (WVGA medium density), the new AVD will emulate a 5.8"
+WVGA screen.</p>
+
+<p>As an alternative to adjusting the emulator skin configuration, you can use
+the emulator skin's default density and add the <code>-dpi-device</code> option
+to the <a href="{@docRoot}guide/developing/tools/emulator.html">emulator</a> command line when
+starting the AVD. For example:</p>
+
+<pre>emulator -avd WVGA800 -scale 96dpi -dpi-device 160</pre>
+
+
+
+<h3 id="DefaultLocation">Default location of AVD files</h3>
+
 <p>When you create an AVD, the <code>android</code> tool creates a dedicated directory for it
 on your development computer. The directory contains the AVD configuration file,
 the user data image and SD card image (if available), and any other files
@@ -153,7 +208,7 @@ The  AVD's .ini file remains in the .android directory on the network
 drive, regardless of the location of the AVD directory. 
 
 
-<h3 id="hardwareopts">Setting Hardware Emulation Options</h3>
+<h3 id="hardwareopts">Setting hardware emulation options</h3>
 
 <p>When you are creating a new AVD that uses a standard Android system image ("Type:
 platform"), the <code>android</code> tool lets you set hardware emulation
