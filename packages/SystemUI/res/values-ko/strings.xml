@@ -27,7 +27,7 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"진행 중"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"알림"</string>
     <string name="battery_low_title" msgid="7923774589611311406">"충전기를 연결하세요."</string>
-    <string name="battery_low_subtitle" msgid="1752040062087829196">"배터리 전원이 부족합니다."</string>
+    <string name="battery_low_subtitle" msgid="1752040062087829196">"배터리가 얼마 남지 않았습니다."</string>
     <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g>개 남음"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB 충전이 지원되지 않습니다."\n"제공된 충전기만 사용하세요."</string>
     <string name="battery_low_why" msgid="7279169609518386372">"배터리 사용량"</string>
