@@ -338,7 +338,7 @@ void Parcel::setDataPosition(size_t pos) const
 
 status_t Parcel::setDataCapacity(size_t size)
 {
-    if (size > mDataSize) return continueWrite(size);
+    if (size > mDataCapacity) return continueWrite(size);
     return NO_ERROR;
 }
 
@@ -386,10 +386,12 @@ status_t Parcel::appendFrom(Parcel *parcel, size_t offset, size_t len)
     }
     int numObjects = lastIndex - firstIndex + 1;
 
-    // grow data
-    err = growData(len);
-    if (err != NO_ERROR) {
-        return err;
+    if ((mDataSize+len) > mDataCapacity) {
+        // grow data
+        err = growData(len);
+        if (err != NO_ERROR) {
+            return err;
+        }
     }
 
     // append data
@@ -1384,8 +1386,10 @@ status_t Parcel::continueWrite(size_t desired)
                 return NO_MEMORY;
             }
         } else {
-            mDataSize = desired;
-            LOGV("continueWrite Setting data size of %p to %d\n", this, mDataSize);
+            if (mDataSize > desired) {
+                mDataSize = desired;
+                LOGV("continueWrite Setting data size of %p to %d\n", this, mDataSize);
+            }
             if (mDataPos > desired) {
                 mDataPos = desired;
                 LOGV("continueWrite Setting data pos of %p to %d\n", this, mDataPos);

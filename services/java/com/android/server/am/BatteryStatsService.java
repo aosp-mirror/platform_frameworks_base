@@ -449,6 +449,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         boolean isCheckin = false;
+        boolean noOutput = false;
         if (args != null) {
             for (String arg : args) {
                 if ("--checkin".equals(arg)) {
@@ -457,9 +458,21 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                     synchronized (mStats) {
                         mStats.resetAllStatsLocked();
                         pw.println("Battery stats reset.");
+                        noOutput = true;
                     }
+                } else if ("--write".equals(arg)) {
+                    synchronized (mStats) {
+                        mStats.writeSyncLocked();
+                        pw.println("Battery stats written.");
+                        noOutput = true;
+                    }
+                } else {
+                    pw.println("Unknown option: " + arg);
                 }
             }
+        }
+        if (noOutput) {
+            return;
         }
         if (isCheckin) {
             List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(0);

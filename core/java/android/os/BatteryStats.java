@@ -412,6 +412,7 @@ public abstract class BatteryStats implements Parcelable {
         
         public long time;
         
+        public static final byte CMD_NULL = -1;
         public static final byte CMD_UPDATE = 0;
         public static final byte CMD_START = 1;
         public static final byte CMD_OVERFLOW = 2;
@@ -466,16 +467,7 @@ public abstract class BatteryStats implements Parcelable {
         
         public HistoryItem(long time, Parcel src) {
             this.time = time;
-            int bat = src.readInt();
-            cmd = (byte)(bat&0xff);
-            batteryLevel = (byte)((bat>>8)&0xff);
-            batteryStatus = (byte)((bat>>16)&0xf);
-            batteryHealth = (byte)((bat>>20)&0xf);
-            batteryPlugType = (byte)((bat>>24)&0xf);
-            bat = src.readInt();
-            batteryTemperature = (char)(bat&0xffff);
-            batteryVoltage = (char)((bat>>16)&0xffff);
-            states = src.readInt();
+            readFromParcel(src);
         }
         
         public int describeContents() {
@@ -496,6 +488,28 @@ public abstract class BatteryStats implements Parcelable {
             dest.writeInt(states);
         }
         
+        public void writeDelta(Parcel dest, HistoryItem last) {
+            writeToParcel(dest, 0);
+        }
+
+        private void readFromParcel(Parcel src) {
+            int bat = src.readInt();
+            cmd = (byte)(bat&0xff);
+            batteryLevel = (byte)((bat>>8)&0xff);
+            batteryStatus = (byte)((bat>>16)&0xf);
+            batteryHealth = (byte)((bat>>20)&0xf);
+            batteryPlugType = (byte)((bat>>24)&0xf);
+            bat = src.readInt();
+            batteryTemperature = (char)(bat&0xffff);
+            batteryVoltage = (char)((bat>>16)&0xffff);
+            states = src.readInt();
+        }
+
+        public void readDelta(Parcel src, HistoryItem last) {
+            time = src.readLong();
+            readFromParcel(src);
+        }
+
         public void setTo(HistoryItem o) {
             time = o.time;
             cmd = o.cmd;
@@ -556,11 +570,14 @@ public abstract class BatteryStats implements Parcelable {
 
     public abstract boolean getNextHistoryLocked(HistoryItem out);
 
-    /**
-     * Return the current history of battery state changes.
-     */
-    public abstract HistoryItem getHistory();
-    
+    public abstract void finishIteratingHistoryLocked();
+
+    public abstract boolean startIteratingOldHistoryLocked();
+
+    public abstract boolean getNextOldHistoryLocked(HistoryItem out);
+
+    public abstract void finishIteratingOldHistoryLocked();
+
     /**
      * Return the base time offset for the battery history.
      */
@@ -1729,7 +1746,7 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
 
-    void printBitDescriptions(PrintWriter pw, int oldval, int newval, BitDescription[] descriptions) {
+    static void printBitDescriptions(PrintWriter pw, int oldval, int newval, BitDescription[] descriptions) {
         int diff = oldval ^ newval;
         if (diff == 0) return;
         for (int i=0; i<descriptions.length; i++) {
@@ -1753,6 +1770,125 @@ public abstract class BatteryStats implements Parcelable {
         }
     }
     
+    public void prepareForDumpLocked() {
+    }
+
+    public static class HistoryPrinter {
+        int oldState = 0;
+        int oldStatus = -1;
+        int oldHealth = -1;
+        int oldPlug = -1;
+        int oldTemp = -1;
+        int oldVolt = -1;
+
+        public void printNextItem(PrintWriter pw, HistoryItem rec, long now) {
+            pw.print("  ");
+            TimeUtils.formatDuration(rec.time-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
+            pw.print(" ");
+            if (rec.cmd == HistoryItem.CMD_START) {
+                pw.println(" START");
+            } else if (rec.cmd == HistoryItem.CMD_OVERFLOW) {
+                pw.println(" *OVERFLOW*");
+            } else {
+                if (rec.batteryLevel < 10) pw.print("00");
+                else if (rec.batteryLevel < 100) pw.print("0");
+                pw.print(rec.batteryLevel);
+                pw.print(" ");
+                if (rec.states < 0x10) pw.print("0000000");
+                else if (rec.states < 0x100) pw.print("000000");
+                else if (rec.states < 0x1000) pw.print("00000");
+                else if (rec.states < 0x10000) pw.print("0000");
+                else if (rec.states < 0x100000) pw.print("000");
+                else if (rec.states < 0x1000000) pw.print("00");
+                else if (rec.states < 0x10000000) pw.print("0");
+                pw.print(Integer.toHexString(rec.states));
+                if (oldStatus != rec.batteryStatus) {
+                    oldStatus = rec.batteryStatus;
+                    pw.print(" status=");
+                    switch (oldStatus) {
+                        case BatteryManager.BATTERY_STATUS_UNKNOWN:
+                            pw.print("unknown");
+                            break;
+                        case BatteryManager.BATTERY_STATUS_CHARGING:
+                            pw.print("charging");
+                            break;
+                        case BatteryManager.BATTERY_STATUS_DISCHARGING:
+                            pw.print("discharging");
+                            break;
+                        case BatteryManager.BATTERY_STATUS_NOT_CHARGING:
+                            pw.print("not-charging");
+                            break;
+                        case BatteryManager.BATTERY_STATUS_FULL:
+                            pw.print("full");
+                            break;
+                        default:
+                            pw.print(oldStatus);
+                            break;
+                    }
+                }
+                if (oldHealth != rec.batteryHealth) {
+                    oldHealth = rec.batteryHealth;
+                    pw.print(" health=");
+                    switch (oldHealth) {
+                        case BatteryManager.BATTERY_HEALTH_UNKNOWN:
+                            pw.print("unknown");
+                            break;
+                        case BatteryManager.BATTERY_HEALTH_GOOD:
+                            pw.print("good");
+                            break;
+                        case BatteryManager.BATTERY_HEALTH_OVERHEAT:
+                            pw.print("overheat");
+                            break;
+                        case BatteryManager.BATTERY_HEALTH_DEAD:
+                            pw.print("dead");
+                            break;
+                        case BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE:
+                            pw.print("over-voltage");
+                            break;
+                        case BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE:
+                            pw.print("failure");
+                            break;
+                        default:
+                            pw.print(oldHealth);
+                            break;
+                    }
+                }
+                if (oldPlug != rec.batteryPlugType) {
+                    oldPlug = rec.batteryPlugType;
+                    pw.print(" plug=");
+                    switch (oldPlug) {
+                        case 0:
+                            pw.print("none");
+                            break;
+                        case BatteryManager.BATTERY_PLUGGED_AC:
+                            pw.print("ac");
+                            break;
+                        case BatteryManager.BATTERY_PLUGGED_USB:
+                            pw.print("usb");
+                            break;
+                        default:
+                            pw.print(oldPlug);
+                            break;
+                    }
+                }
+                if (oldTemp != rec.batteryTemperature) {
+                    oldTemp = rec.batteryTemperature;
+                    pw.print(" temp=");
+                    pw.print(oldTemp);
+                }
+                if (oldVolt != rec.batteryVoltage) {
+                    oldVolt = rec.batteryVoltage;
+                    pw.print(" volt=");
+                    pw.print(oldVolt);
+                }
+                printBitDescriptions(pw, oldState, rec.states,
+                        HISTORY_STATE_DESCRIPTIONS);
+                pw.println();
+            }
+            oldState = rec.states;
+        }
+    }
+
     /**
      * Dumps a human-readable summary of the battery statistics to the given PrintWriter.
      *
@@ -1760,122 +1896,28 @@ public abstract class BatteryStats implements Parcelable {
      */
     @SuppressWarnings("unused")
     public void dumpLocked(PrintWriter pw) {
+        prepareForDumpLocked();
+
+        long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
+
         final HistoryItem rec = new HistoryItem();
         if (startIteratingHistoryLocked()) {
             pw.println("Battery History:");
-            long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
-            int oldState = 0;
-            int oldStatus = -1;
-            int oldHealth = -1;
-            int oldPlug = -1;
-            int oldTemp = -1;
-            int oldVolt = -1;
+            HistoryPrinter hprinter = new HistoryPrinter();
             while (getNextHistoryLocked(rec)) {
-                pw.print("  ");
-                TimeUtils.formatDuration(rec.time-now, pw, TimeUtils.HUNDRED_DAY_FIELD_LEN);
-                pw.print(" ");
-                if (rec.cmd == HistoryItem.CMD_START) {
-                    pw.println(" START");
-                } else if (rec.cmd == HistoryItem.CMD_OVERFLOW) {
-                    pw.println(" *OVERFLOW*");
-                } else {
-                    if (rec.batteryLevel < 10) pw.print("00");
-                    else if (rec.batteryLevel < 100) pw.print("0");
-                    pw.print(rec.batteryLevel);
-                    pw.print(" ");
-                    if (rec.states < 0x10) pw.print("0000000");
-                    else if (rec.states < 0x100) pw.print("000000");
-                    else if (rec.states < 0x1000) pw.print("00000");
-                    else if (rec.states < 0x10000) pw.print("0000");
-                    else if (rec.states < 0x100000) pw.print("000");
-                    else if (rec.states < 0x1000000) pw.print("00");
-                    else if (rec.states < 0x10000000) pw.print("0");
-                    pw.print(Integer.toHexString(rec.states));
-                    if (oldStatus != rec.batteryStatus) {
-                        oldStatus = rec.batteryStatus;
-                        pw.print(" status=");
-                        switch (oldStatus) {
-                            case BatteryManager.BATTERY_STATUS_UNKNOWN:
-                                pw.print("unknown");
-                                break;
-                            case BatteryManager.BATTERY_STATUS_CHARGING:
-                                pw.print("charging");
-                                break;
-                            case BatteryManager.BATTERY_STATUS_DISCHARGING:
-                                pw.print("discharging");
-                                break;
-                            case BatteryManager.BATTERY_STATUS_NOT_CHARGING:
-                                pw.print("not-charging");
-                                break;
-                            case BatteryManager.BATTERY_STATUS_FULL:
-                                pw.print("full");
-                                break;
-                            default:
-                                pw.print(oldStatus);
-                                break;
-                        }
-                    }
-                    if (oldHealth != rec.batteryHealth) {
-                        oldHealth = rec.batteryHealth;
-                        pw.print(" health=");
-                        switch (oldHealth) {
-                            case BatteryManager.BATTERY_HEALTH_UNKNOWN:
-                                pw.print("unknown");
-                                break;
-                            case BatteryManager.BATTERY_HEALTH_GOOD:
-                                pw.print("good");
-                                break;
-                            case BatteryManager.BATTERY_HEALTH_OVERHEAT:
-                                pw.print("overheat");
-                                break;
-                            case BatteryManager.BATTERY_HEALTH_DEAD:
-                                pw.print("dead");
-                                break;
-                            case BatteryManager.BATTERY_HEALTH_OVER_VOLTAGE:
-                                pw.print("over-voltage");
-                                break;
-                            case BatteryManager.BATTERY_HEALTH_UNSPECIFIED_FAILURE:
-                                pw.print("failure");
-                                break;
-                            default:
-                                pw.print(oldHealth);
-                                break;
-                        }
-                    }
-                    if (oldPlug != rec.batteryPlugType) {
-                        oldPlug = rec.batteryPlugType;
-                        pw.print(" plug=");
-                        switch (oldPlug) {
-                            case 0:
-                                pw.print("none");
-                                break;
-                            case BatteryManager.BATTERY_PLUGGED_AC:
-                                pw.print("ac");
-                                break;
-                            case BatteryManager.BATTERY_PLUGGED_USB:
-                                pw.print("usb");
-                                break;
-                            default:
-                                pw.print(oldPlug);
-                                break;
-                        }
-                    }
-                    if (oldTemp != rec.batteryTemperature) {
-                        oldTemp = rec.batteryTemperature;
-                        pw.print(" temp=");
-                        pw.print(oldTemp);
-                    }
-                    if (oldVolt != rec.batteryVoltage) {
-                        oldVolt = rec.batteryVoltage;
-                        pw.print(" volt=");
-                        pw.print(oldVolt);
-                    }
-                    printBitDescriptions(pw, oldState, rec.states,
-                            HISTORY_STATE_DESCRIPTIONS);
-                    pw.println();
-                }
-                oldState = rec.states;
+                hprinter.printNextItem(pw, rec, now);
             }
+            finishIteratingHistoryLocked();
+            pw.println("");
+        }
+
+        if (startIteratingOldHistoryLocked()) {
+            pw.println("Old battery History:");
+            HistoryPrinter hprinter = new HistoryPrinter();
+            while (getNextOldHistoryLocked(rec)) {
+                hprinter.printNextItem(pw, rec, now);
+            }
+            finishIteratingOldHistoryLocked();
             pw.println("");
         }
         
@@ -1918,6 +1960,8 @@ public abstract class BatteryStats implements Parcelable {
     
     @SuppressWarnings("unused")
     public void dumpCheckinLocked(PrintWriter pw, String[] args, List<ApplicationInfo> apps) {
+        prepareForDumpLocked();
+
         boolean isUnpluggedOnly = false;
         
         for (String arg : args) {

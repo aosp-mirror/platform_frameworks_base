@@ -36,6 +36,7 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.util.LogWriter;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
@@ -70,7 +71,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 54;
+    private static final int VERSION = 57;
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -154,11 +155,26 @@ public final class BatteryStatsImpl extends BatteryStats {
     boolean mHaveBatteryLevel = false;
     boolean mRecordingHistory = true;
     int mNumHistoryItems;
+
+    static final int MAX_HISTORY_BUFFER = 64*1024; // 64KB
+    static final int MAX_MAX_HISTORY_BUFFER = 92*1024; // 92KB
+    final Parcel mHistoryBuffer = Parcel.obtain();
+    final HistoryItem mHistoryLastWritten = new HistoryItem();
+    final HistoryItem mHistoryLastLastWritten = new HistoryItem();
+    int mHistoryBufferLastPos = -1;
+    boolean mHistoryOverflow = false;
+    long mLastHistoryTime = 0;
+
+    final HistoryItem mHistoryCur = new HistoryItem();
+
     HistoryItem mHistory;
     HistoryItem mHistoryEnd;
     HistoryItem mHistoryLastEnd;
     HistoryItem mHistoryCache;
-    final HistoryItem mHistoryCur = new HistoryItem();
+
+    private HistoryItem mHistoryIterator;
+    private boolean mReadOverflow;
+    private boolean mIteratingHistory;
 
     int mStartCount;
 
@@ -1189,9 +1205,82 @@ public final class BatteryStatsImpl extends BatteryStats {
         mBtHeadset = headset;
     }
 
+    int mChangedBufferStates = 0;
+
+    void addHistoryBufferLocked(long curTime) {
+        if (!mHaveBatteryLevel || !mRecordingHistory) {
+            return;
+        }
+
+        if (mHistoryBufferLastPos >= 0 && mHistoryLastWritten.cmd == HistoryItem.CMD_UPDATE
+                && (mHistoryBaseTime+curTime) < (mHistoryLastWritten.time+2000)
+                && ((mHistoryLastWritten.states^mHistoryCur.states)&mChangedBufferStates) == 0) {
+            // If the current is the same as the one before, then we no
+            // longer need the entry.
+            mHistoryBuffer.setDataSize(mHistoryBufferLastPos);
+            mHistoryBuffer.setDataPosition(mHistoryBufferLastPos);
+            mHistoryBufferLastPos = -1;
+            if (mHistoryLastLastWritten.cmd == HistoryItem.CMD_UPDATE
+                    && mHistoryLastLastWritten.same(mHistoryCur)) {
+                // If this results in us returning to the state written
+                // prior to the last one, then we can just delete the last
+                // written one and drop the new one.  Nothing more to do.
+                mHistoryLastWritten.setTo(mHistoryLastLastWritten);
+                mHistoryLastLastWritten.cmd = HistoryItem.CMD_NULL;
+                return;
+            }
+            mChangedBufferStates |= mHistoryLastWritten.states^mHistoryCur.states;
+            curTime = mHistoryLastWritten.time - mHistoryBaseTime;
+        } else {
+            mChangedBufferStates = 0;
+        }
+
+        final int dataSize = mHistoryBuffer.dataSize();
+        if (dataSize >= MAX_HISTORY_BUFFER) {
+            if (!mHistoryOverflow) {
+                mHistoryOverflow = true;
+                addHistoryBufferLocked(curTime, HistoryItem.CMD_OVERFLOW);
+            }
+
+            // Once we've reached the maximum number of items, we only
+            // record changes to the battery level and the most interesting states.
+            // Once we've reached the maximum maximum number of items, we only
+            // record changes to the battery level.
+            if (mHistoryLastWritten.batteryLevel == mHistoryCur.batteryLevel &&
+                    (dataSize >= MAX_MAX_HISTORY_BUFFER
+                            || ((mHistoryEnd.states^mHistoryCur.states)
+                                    & HistoryItem.MOST_INTERESTING_STATES) == 0)) {
+                return;
+            }
+        }
+
+        addHistoryBufferLocked(curTime, HistoryItem.CMD_UPDATE);
+    }
+
+    void addHistoryBufferLocked(long curTime, byte cmd) {
+        int origPos = 0;
+        if (mIteratingHistory) {
+            origPos = mHistoryBuffer.dataPosition();
+            mHistoryBuffer.setDataPosition(mHistoryBuffer.dataSize());
+        }
+        mHistoryBufferLastPos = mHistoryBuffer.dataPosition();
+        mHistoryLastLastWritten.setTo(mHistoryLastWritten);
+        mHistoryLastWritten.setTo(mHistoryBaseTime + curTime, cmd, mHistoryCur);
+        mHistoryLastWritten.writeDelta(mHistoryBuffer, mHistoryLastLastWritten);
+        mLastHistoryTime = curTime;
+        if (DEBUG_HISTORY) Slog.i(TAG, "Writing history buffer: was " + mHistoryBufferLastPos
+                + " now " + mHistoryBuffer.dataPosition()
+                + " size is now " + mHistoryBuffer.dataSize());
+        if (mIteratingHistory) {
+            mHistoryBuffer.setDataPosition(origPos);
+        }
+    }
+
     int mChangedStates = 0;
 
     void addHistoryRecordLocked(long curTime) {
+        addHistoryBufferLocked(curTime);
+
         if (!mHaveBatteryLevel || !mRecordingHistory) {
             return;
         }
@@ -1268,6 +1357,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     void clearHistoryLocked() {
+        if (DEBUG_HISTORY) Slog.i(TAG, "********** CLEARING HISTORY!");
         if (mHistory != null) {
             mHistoryEnd.next = mHistoryCache;
             mHistoryCache = mHistory;
@@ -1275,6 +1365,15 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
         mNumHistoryItems = 0;
         mHistoryBaseTime = 0;
+        mLastHistoryTime = 0;
+
+        mHistoryBuffer.setDataSize(0);
+        mHistoryBuffer.setDataPosition(0);
+        mHistoryBuffer.setDataCapacity(MAX_HISTORY_BUFFER/2);
+        mHistoryLastLastWritten.cmd = HistoryItem.CMD_NULL;
+        mHistoryLastWritten.cmd = HistoryItem.CMD_NULL;
+        mHistoryBufferLastPos = -1;
+        mHistoryOverflow = false;
     }
 
     public void doUnplugLocked(long batteryUptime, long batteryRealtime) {
@@ -3910,11 +4009,13 @@ public final class BatteryStatsImpl extends BatteryStats {
         mDischargeUnplugLevel = 0;
         mDischargeCurrentLevel = 0;
         initDischarge();
+        clearHistoryLocked();
     }
 
     public BatteryStatsImpl(Parcel p) {
         mFile = null;
         mHandler = null;
+        clearHistoryLocked();
         readFromParcel(p);
     }
 
@@ -3932,25 +4033,79 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    private HistoryItem mHistoryIterator;
-
-    public boolean startIteratingHistoryLocked() {
+    @Override
+    public boolean startIteratingOldHistoryLocked() {
+        if (DEBUG_HISTORY) Slog.i(TAG, "ITERATING: buff size=" + mHistoryBuffer.dataSize()
+                + " pos=" + mHistoryBuffer.dataPosition());
+        mHistoryBuffer.setDataPosition(0);
+        mReadOverflow = false;
+        mIteratingHistory = true;
         return (mHistoryIterator = mHistory) != null;
     }
 
-    public boolean getNextHistoryLocked(HistoryItem out) {
+    @Override
+    public boolean getNextOldHistoryLocked(HistoryItem out) {
+        boolean end = mHistoryBuffer.dataPosition() >= mHistoryBuffer.dataSize();
+        if (!end) {
+            mHistoryLastWritten.readDelta(mHistoryBuffer, null);
+            mReadOverflow |= mHistoryLastWritten.cmd == HistoryItem.CMD_OVERFLOW;
+        }
         HistoryItem cur = mHistoryIterator;
         if (cur == null) {
+            if (!mReadOverflow && !end) {
+                Slog.w(TAG, "Old history ends before new history!");
+            }
             return false;
         }
         out.setTo(cur);
         mHistoryIterator = cur.next;
+        if (!mReadOverflow) {
+            if (end) {
+                Slog.w(TAG, "New history ends before old history!");
+            } else if (!out.same(mHistoryLastWritten)) {
+                long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
+                PrintWriter pw = new PrintWriter(new LogWriter(android.util.Log.WARN, TAG));
+                pw.println("Histories differ!");
+                pw.println("Old history:");
+                (new HistoryPrinter()).printNextItem(pw, out, now);
+                pw.println("New history:");
+                (new HistoryPrinter()).printNextItem(pw, mHistoryLastWritten, now);
+            }
+        }
         return true;
     }
 
     @Override
-    public HistoryItem getHistory() {
-        return mHistory;
+    public void finishIteratingOldHistoryLocked() {
+        mIteratingHistory = false;
+        mHistoryBuffer.setDataPosition(mHistoryBuffer.dataSize());
+    }
+
+    @Override
+    public boolean startIteratingHistoryLocked() {
+        if (DEBUG_HISTORY) Slog.i(TAG, "ITERATING: buff size=" + mHistoryBuffer.dataSize()
+                + " pos=" + mHistoryBuffer.dataPosition());
+        mHistoryBuffer.setDataPosition(0);
+        mReadOverflow = false;
+        mIteratingHistory = true;
+        return mHistoryBuffer.dataSize() > 0;
+    }
+
+    @Override
+    public boolean getNextHistoryLocked(HistoryItem out) {
+        boolean end = mHistoryBuffer.dataPosition() >= mHistoryBuffer.dataSize();
+        if (end) {
+            return false;
+        }
+
+        out.readDelta(mHistoryBuffer, null);
+        return true;
+    }
+
+    @Override
+    public void finishIteratingHistoryLocked() {
+        mIteratingHistory = false;
+        mHistoryBuffer.setDataPosition(mHistoryBuffer.dataSize());
     }
 
     @Override
@@ -4697,7 +4852,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             Slog.e("BatteryStats", "Error reading battery statistics", e);
         }
 
-        addHistoryRecordLocked(SystemClock.elapsedRealtime(), HistoryItem.CMD_START);
+        long now = SystemClock.elapsedRealtime();
+        addHistoryRecordLocked(now, HistoryItem.CMD_START);
+        addHistoryBufferLocked(now, HistoryItem.CMD_START);
     }
 
     public int describeContents() {
@@ -4705,30 +4862,54 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     void readHistory(Parcel in) {
-        mHistory = mHistoryEnd = mHistoryCache = null;
-        mHistoryBaseTime = 0;
-        long time;
-        while ((time=in.readLong()) >= 0) {
-            HistoryItem rec = new HistoryItem(time, in);
-            addHistoryRecordLocked(rec);
-            if (rec.time > mHistoryBaseTime) {
-                mHistoryBaseTime = rec.time;
-            }
+        mHistoryBaseTime = in.readLong();
+
+        mHistoryBuffer.setDataSize(0);
+        mHistoryBuffer.setDataPosition(0);
+
+        int bufSize = in.readInt();
+        int curPos = in.dataPosition();
+        if (bufSize >= (MAX_MAX_HISTORY_BUFFER*3)) {
+            Slog.w(TAG, "File corrupt: history data buffer too large " + bufSize);
+        } else if ((bufSize&~3) != bufSize) {
+            Slog.w(TAG, "File corrupt: history data buffer not aligned " + bufSize);
+        } else {
+            if (DEBUG_HISTORY) Slog.i(TAG, "***************** READING NEW HISTORY: " + bufSize
+                    + " bytes at " + curPos);
+            mHistoryBuffer.appendFrom(in, curPos, bufSize);
+            in.setDataPosition(curPos + bufSize);
         }
 
-        long oldnow = SystemClock.elapsedRealtime() - (5*60*100);
+        long oldnow = SystemClock.elapsedRealtime() - (5*60*1000);
         if (oldnow > 0) {
             // If the system process has restarted, but not the entire
             // system, then the mHistoryBaseTime already accounts for
             // much of the elapsed time.  We thus want to adjust it back,
             // to avoid large gaps in the data.  We determine we are
             // in this case by arbitrarily saying it is so if at this
-            // point in boot the elapsed time is already more than 5 seconds.
+            // point in boot the elapsed time is already more than 5 minutes.
             mHistoryBaseTime -= oldnow;
         }
     }
 
+    void readOldHistory(Parcel in) {
+        mHistory = mHistoryEnd = mHistoryCache = null;
+        long time;
+        while ((time=in.readLong()) >= 0) {
+            HistoryItem rec = new HistoryItem(time, in);
+            addHistoryRecordLocked(rec);
+        }
+    }
+
     void writeHistory(Parcel out) {
+        out.writeLong(mLastHistoryTime);
+        out.writeInt(mHistoryBuffer.dataSize());
+        if (DEBUG_HISTORY) Slog.i(TAG, "***************** WRITING HISTORY: "
+                + mHistoryBuffer.dataSize() + " bytes at " + out.dataPosition());
+        out.appendFrom(mHistoryBuffer, 0, mHistoryBuffer.dataSize());
+    }
+
+    void writeOldHistory(Parcel out) {
         HistoryItem rec = mHistory;
         while (rec != null) {
             if (rec.time >= 0) rec.writeToParcel(out, 0);
@@ -4746,6 +4927,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         readHistory(in);
+        readOldHistory(in);
 
         mStartCount = in.readInt();
         mBatteryUptime = in.readLong();
@@ -4935,6 +5117,9 @@ public final class BatteryStatsImpl extends BatteryStats {
      * @param out the Parcel to be written to.
      */
     public void writeSummaryToParcel(Parcel out) {
+        // Need to update with current kernel wake lock counts.
+        updateKernelWakelocksLocked();
+
         final long NOW_SYS = SystemClock.uptimeMillis() * 1000;
         final long NOWREAL_SYS = SystemClock.elapsedRealtime() * 1000;
         final long NOW = getBatteryUptimeLocked(NOW_SYS);
@@ -4943,6 +5128,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         out.writeInt(VERSION);
 
         writeHistory(out);
+        writeOldHistory(out);
 
         out.writeInt(mStartCount);
         out.writeLong(computeBatteryUptime(NOW_SYS, STATS_SINCE_CHARGED));
@@ -5256,6 +5442,9 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     @SuppressWarnings("unused")
     void writeToParcelLocked(Parcel out, boolean inclUids, int flags) {
+        // Need to update with current kernel wake lock counts.
+        updateKernelWakelocksLocked();
+
         final long uSecUptime = SystemClock.uptimeMillis() * 1000;
         final long uSecRealtime = SystemClock.elapsedRealtime() * 1000;
         final long batteryUptime = getBatteryUptimeLocked(uSecUptime);
@@ -5357,6 +5546,11 @@ public final class BatteryStatsImpl extends BatteryStats {
             return new BatteryStatsImpl[size];
         }
     };
+
+    public void prepareForDumpLocked() {
+        // Need to retrieve current kernel wake lock stats before printing.
+        updateKernelWakelocksLocked();
+    }
 
     public void dumpLocked(PrintWriter pw) {
         if (DEBUG) {
