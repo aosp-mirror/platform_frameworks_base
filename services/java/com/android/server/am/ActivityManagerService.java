@@ -3914,18 +3914,17 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             for (int i=0; i<intents.length; i++) {
                 Intent intent = intents[i];
-                if (intent == null) {
-                    throw new IllegalArgumentException("Null intent at index " + i);
+                if (intent != null) {
+                    if (intent.hasFileDescriptors()) {
+                        throw new IllegalArgumentException("File descriptors passed in Intent");
+                    }
+                    if (type == INTENT_SENDER_BROADCAST &&
+                            (intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0) {
+                        throw new IllegalArgumentException(
+                                "Can't use FLAG_RECEIVER_BOOT_UPGRADE here");
+                    }
+                    intents[i] = new Intent(intent);
                 }
-                if (intent.hasFileDescriptors()) {
-                    throw new IllegalArgumentException("File descriptors passed in Intent");
-                }
-                if (type == INTENT_SENDER_BROADCAST &&
-                        (intent.getFlags()&Intent.FLAG_RECEIVER_BOOT_UPGRADE) != 0) {
-                    throw new IllegalArgumentException(
-                            "Can't use FLAG_RECEIVER_BOOT_UPGRADE here");
-                }
-                intents[i] = new Intent(intent);
             }
             if (resolvedTypes != null && resolvedTypes.length != intents.length) {
                 throw new IllegalArgumentException(
