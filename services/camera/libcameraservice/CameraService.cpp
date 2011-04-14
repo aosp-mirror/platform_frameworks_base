@@ -320,7 +320,7 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
                   CAMERA_MSG_FOCUS);
 
     // Callback is disabled by default
-    mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
+    mPreviewCallbackFlag = CAMERA_FRAME_CALLBACK_FLAG_NOOP;
     mOrientation = getOrientation(0, mCameraFacing == CAMERA_FACING_FRONT);
     mPlayShutterSound = true;
     cameraService->setCameraBusy(cameraId);
@@ -410,7 +410,7 @@ status_t CameraService::Client::connect(const sp<ICameraClient>& client) {
         return NO_ERROR;
     }
 
-    mPreviewCallbackFlag = FRAME_CALLBACK_FLAG_NOOP;
+    mPreviewCallbackFlag = CAMERA_FRAME_CALLBACK_FLAG_NOOP;
     mClientPid = callingPid;
     mCameraClient = client;
 
@@ -543,7 +543,7 @@ void CameraService::Client::setPreviewCallbackFlag(int callback_flag) {
     if (checkPidAndHardware() != NO_ERROR) return;
 
     mPreviewCallbackFlag = callback_flag;
-    if (mPreviewCallbackFlag & FRAME_CALLBACK_FLAG_ENABLE_MASK) {
+    if (mPreviewCallbackFlag & CAMERA_FRAME_CALLBACK_FLAG_ENABLE_MASK) {
         enableMsgType(CAMERA_MSG_PREVIEW_FRAME);
     } else {
         disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
@@ -1009,7 +1009,7 @@ void CameraService::Client::handlePreviewData(const sp<IMemory>& mem) {
     int flags = mPreviewCallbackFlag;
 
     // is callback enabled?
-    if (!(flags & FRAME_CALLBACK_FLAG_ENABLE_MASK)) {
+    if (!(flags & CAMERA_FRAME_CALLBACK_FLAG_ENABLE_MASK)) {
         // If the enable bit is off, the copy-out and one-shot bits are ignored
         LOG2("frame callback is disabled");
         mLock.unlock();
@@ -1020,17 +1020,17 @@ void CameraService::Client::handlePreviewData(const sp<IMemory>& mem) {
     sp<ICameraClient> c = mCameraClient;
 
     // clear callback flags if no client or one-shot mode
-    if (c == 0 || (mPreviewCallbackFlag & FRAME_CALLBACK_FLAG_ONE_SHOT_MASK)) {
+    if (c == 0 || (mPreviewCallbackFlag & CAMERA_FRAME_CALLBACK_FLAG_ONE_SHOT_MASK)) {
         LOG2("Disable preview callback");
-        mPreviewCallbackFlag &= ~(FRAME_CALLBACK_FLAG_ONE_SHOT_MASK |
-                                  FRAME_CALLBACK_FLAG_COPY_OUT_MASK |
-                                  FRAME_CALLBACK_FLAG_ENABLE_MASK);
+        mPreviewCallbackFlag &= ~(CAMERA_FRAME_CALLBACK_FLAG_ONE_SHOT_MASK |
+                                  CAMERA_FRAME_CALLBACK_FLAG_COPY_OUT_MASK |
+                                  CAMERA_FRAME_CALLBACK_FLAG_ENABLE_MASK);
         disableMsgType(CAMERA_MSG_PREVIEW_FRAME);
     }
 
     if (c != 0) {
         // Is the received frame copied out or not?
-        if (flags & FRAME_CALLBACK_FLAG_COPY_OUT_MASK) {
+        if (flags & CAMERA_FRAME_CALLBACK_FLAG_COPY_OUT_MASK) {
             LOG2("frame is copied");
             copyFrameAndPostCopiedFrame(c, heap, offset, size);
         } else {
