@@ -57,6 +57,7 @@ namespace uirenderer {
 #define PROGRAM_KEY_COLOR_BLEND 0x80
 #define PROGRAM_KEY_BITMAP_NPOT 0x100
 #define PROGRAM_KEY_SWAP_SRC_DST 0x2000
+#define PROGRAM_KEY_VERTEX_WIDTH 0x4000
 
 #define PROGRAM_KEY_BITMAP_WRAPS_MASK 0x600
 #define PROGRAM_KEY_BITMAP_WRAPT_MASK 0x1800
@@ -119,6 +120,8 @@ struct ProgramDescription {
     bool hasBitmap;
     bool isBitmapNpot;
 
+    bool hasWidth;
+
     bool hasGradient;
     Gradient gradientType;
 
@@ -147,6 +150,8 @@ struct ProgramDescription {
     void reset() {
         hasTexture = false;
         hasAlpha8Texture = false;
+
+        hasWidth = false;
 
         modulate = false;
 
@@ -200,6 +205,7 @@ struct ProgramDescription {
     programid key() const {
         programid key = 0;
         if (hasTexture) key |= PROGRAM_KEY_TEXTURE;
+        if (hasWidth) key |= PROGRAM_KEY_VERTEX_WIDTH;
         if (hasAlpha8Texture) key |= PROGRAM_KEY_A8_TEXTURE;
         if (hasBitmap) {
             key |= PROGRAM_KEY_BITMAP;

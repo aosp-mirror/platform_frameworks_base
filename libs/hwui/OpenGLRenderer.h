@@ -283,6 +283,19 @@ private:
     void drawAlphaBitmap(Texture* texture, float left, float top, SkPaint* paint);
 
     /**
+     * Draws a line as a quad. Called by drawLines() for all cases except hairline without AA.
+     *
+     * @param points The vertices of the lines. Every four entries specifies the x/y points
+     * of a single line segment.
+     * @param count The number of entries in the points array.
+     * @param isAA Whether the line is anti-aliased
+     * @param isHairline Whether the line has strokeWidth==0, which results in the line being
+     * one pixel wide on the display regardless of scale.
+     */
+    void drawLinesAsQuads(float *points, int count, bool isAA, bool isHairline,
+            float strokeWidth);
+
+    /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
      * are transformed by the current snapshot's transform matrix.
      *
@@ -425,6 +438,7 @@ private:
      * Various methods to setup OpenGL rendering.
      */
     void setupDrawWithTexture(bool isAlpha8 = false);
+    void setupDrawAALine();
     void setupDrawPoint(float pointSize);
     void setupDrawColor(int color);
     void setupDrawColor(int color, int alpha);
@@ -453,6 +467,8 @@ private:
     void setupDrawSimpleMesh();
     void setupDrawTexture(GLuint texture);
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
+    void setupDrawVertices(GLvoid* vertices);
+    void setupDrawAALine(GLvoid* vertices, GLvoid* distanceCoords, float strokeWidth);
     void finishDrawTexture();
 
     void drawRegionRects(const Region& region);

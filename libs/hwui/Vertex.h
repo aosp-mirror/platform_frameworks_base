@@ -23,6 +23,18 @@ namespace uirenderer {
 /**
  * Simple structure to describe a vertex with a position and a texture.
  */
+struct Vertex {
+    float position[2];
+
+    static inline void set(Vertex* vertex, float x, float y) {
+        vertex[0].position[0] = x;
+        vertex[0].position[1] = y;
+    }
+}; // struct Vertex
+
+/**
+ * Simple structure to describe a vertex with a position and a texture.
+ */
 struct TextureVertex {
     float position[2];
     float texture[2];
@@ -39,6 +51,22 @@ struct TextureVertex {
         vertex[0].texture[1] = v;
     }
 }; // struct TextureVertex
+
+/**
+ * Simple structure to describe a vertex with a position and an alpha value.
+ */
+struct AlphaVertex : Vertex {
+    float alpha;
+
+    static inline void set(AlphaVertex* vertex, float x, float y, float alpha) {
+        Vertex::set(vertex, x, y);
+        vertex[0].alpha = alpha;
+    }
+
+    static inline void setColor(AlphaVertex* vertex, float alpha) {
+        vertex[0].alpha = alpha;
+    }
+}; // struct AlphaVertex
 
 }; // namespace uirenderer
 }; // namespace android
