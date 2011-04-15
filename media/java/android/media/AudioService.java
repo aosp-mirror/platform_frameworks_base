@@ -111,6 +111,7 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_BTA2DP_DOCK_TIMEOUT = 8;
     private static final int MSG_LOAD_SOUND_EFFECTS = 9;
     private static final int MSG_SET_FORCE_USE = 10;
+    private static final int MSG_PERSIST_MEDIABUTTONRECEIVER = 11;
 
 
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
@@ -355,6 +356,12 @@ public class AudioService extends IAudioService.Stub {
         intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
         context.registerReceiver(mReceiver, intentFilter);
 
+        // Register for package removal intent broadcasts for media button receiver persistence
+        IntentFilter pkgFilter = new IntentFilter();
+        pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        pkgFilter.addDataScheme("package");
+        context.registerReceiver(mReceiver, pkgFilter);
+
         // Register for media button intent broadcasts.
         intentFilter = new IntentFilter(Intent.ACTION_MEDIA_BUTTON);
         intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
@@ -444,6 +451,9 @@ public class AudioService extends IAudioService.Stub {
         // Broadcast vibrate settings
         broadcastVibrateSetting(AudioManager.VIBRATE_TYPE_RINGER);
         broadcastVibrateSetting(AudioManager.VIBRATE_TYPE_NOTIFICATION);
+
+        // Restore the default media button receiver from the system settings
+        restoreMediaButtonReceiver();
     }
 
     private void setStreamVolumeIndex(int stream, int index) {
@@ -1912,6 +1922,11 @@ public class AudioService extends IAudioService.Stub {
             }
         }
 
+        private void persistMediaButtonReceiver(ComponentName receiver) {
+            Settings.System.putString(mContentResolver, Settings.System.MEDIA_BUTTON_RECEIVER,
+                    receiver == null ? "" : receiver.flattenToString());
+        }
+
         private void cleanupPlayer(MediaPlayer mp) {
             if (mp != null) {
                 try {
@@ -2021,6 +2036,10 @@ public class AudioService extends IAudioService.Stub {
 
                 case MSG_SET_FORCE_USE:
                     setForceUse(msg.arg1, msg.arg2);
+                    break;
+
+                case MSG_PERSIST_MEDIABUTTONRECEIVER:
+                    persistMediaButtonReceiver( (ComponentName) msg.obj );
                     break;
             }
         }
@@ -2354,6 +2373,14 @@ public class AudioService extends IAudioService.Stub {
                 newIntent.putExtra(AudioManager.EXTRA_SCO_AUDIO_STATE,
                         AudioManager.SCO_AUDIO_STATE_DISCONNECTED);
                 mContext.sendStickyBroadcast(newIntent);
+            } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)) {
+                if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                    // a package is being removed, not replaced
+                    String packageName = intent.getData().getSchemeSpecificPart();
+                    if (packageName != null) {
+                        removeMediaButtonReceiverForPackage(packageName);
+                    }
+                }
             }
         }
     }
@@ -2701,6 +2728,56 @@ public class AudioService extends IAudioService.Stub {
 
     /**
      * Helper function:
+     * Remove any entry in the remote control stack that has the same package name as packageName
+     * Pre-condition: packageName != null
+     */
+    private void removeMediaButtonReceiverForPackage(String packageName) {
+        synchronized(mRCStack) {
+            if (mRCStack.empty()) {
+                return;
+            } else {
+                RemoteControlStackEntry oldTop = mRCStack.peek();
+                Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+                // iterate over the stack entries
+                while(stackIterator.hasNext()) {
+                    RemoteControlStackEntry rcse = (RemoteControlStackEntry)stackIterator.next();
+                    if (packageName.equalsIgnoreCase(rcse.mReceiverComponent.getPackageName())) {
+                        // a stack entry is from the package being removed, remove it from the stack
+                        stackIterator.remove();
+                    }
+                }
+                if (mRCStack.empty()) {
+                    // no saved media button receiver
+                    mAudioHandler.sendMessage(
+                            mAudioHandler.obtainMessage(MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0,
+                                    null));
+                    return;
+                } else if (oldTop != mRCStack.peek()) {
+                    // the top of the stack has changed, save it in the system settings
+                    // by posting a message to persist it
+                    mAudioHandler.sendMessage(
+                            mAudioHandler.obtainMessage(MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0,
+                                    mRCStack.peek().mReceiverComponent));
+                }
+            }
+        }
+    }
+
+    /**
+     * Helper function:
+     * Restore remote control receiver from the system settings
+     */
+    private void restoreMediaButtonReceiver() {
+        String receiverName = Settings.System.getString(mContentResolver,
+                Settings.System.MEDIA_BUTTON_RECEIVER);
+        if ((null != receiverName) && !receiverName.isEmpty()) {
+            ComponentName receiverComponentName = ComponentName.unflattenFromString(receiverName);
+            registerMediaButtonEventReceiver(receiverComponentName);
+        }
+    }
+
+    /**
+     * Helper function:
      * Set the new remote control receiver at the top of the RC focus stack
      */
     private void pushMediaButtonReceiver(ComponentName newReceiver) {
@@ -2717,6 +2794,10 @@ public class AudioService extends IAudioService.Stub {
             }
         }
         mRCStack.push(new RemoteControlStackEntry(newReceiver));
+
+        // post message to persist the default media button receiver
+        mAudioHandler.sendMessage( mAudioHandler.obtainMessage(
+                MSG_PERSIST_MEDIABUTTONRECEIVER, 0, 0, newReceiver/*obj*/) );
     }
 
     /**
