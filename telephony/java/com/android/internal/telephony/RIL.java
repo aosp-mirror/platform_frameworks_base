@@ -914,10 +914,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     getIMSI(Message result) {
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_GET_IMSI, result);
 
-        if (RILJ_LOGD) riljLog(rr.serialString() +
-                              "> getIMSI:RIL_REQUEST_GET_IMSI " +
-                              RIL_REQUEST_GET_IMSI +
-                              " " + requestToString(rr.mRequest));
+        if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest));
 
         send(rr);
     }

@@ -640,7 +640,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (DBG) {
             log("trySetupData for type:" + apnContext.getApnType() +
                     " due to " + apnContext.getReason());
-            log("[DSAC DEB] " + "trySetupData with mIsPsRestricted=" + mIsPsRestricted);
+            log("trySetupData with mIsPsRestricted=" + mIsPsRestricted);
         }
 
         if (mPhone.getSimulatedRadioControl() != null) {
@@ -943,8 +943,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         // TODO: It'd be nice to only do this if the changed entrie(s)
         // match the current operator.
+        if (DBG) log("onApnChanged createAllApnList and cleanUpAllConnections");
         createAllApnList();
-        if (DBG) log("onApnChanged clean all connections");
         cleanUpAllConnections(isConnected, Phone.REASON_APN_CHANGED);
         if (!isConnected) {
             // TODO: Won't work for multiple connections!!!!
@@ -1298,6 +1298,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     private void onRecordsLoaded() {
+        if (DBG) log("onRecordsLoaded: createAllApnList");
         createAllApnList();
         for (ApnContext apnContext : mApnContexts.values()) {
             if (apnContext.isReady()) {
@@ -1922,7 +1923,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                  * PDP context and notify us with PDP_CONTEXT_CHANGED.
                  * But we should stop the network polling and prevent reset PDP.
                  */
-                log("[DSAC DEB] " + "EVENT_PS_RESTRICT_ENABLED " + mIsPsRestricted);
+                log("EVENT_PS_RESTRICT_ENABLED " + mIsPsRestricted);
                 stopNetStatPoll();
                 mIsPsRestricted = true;
                 break;
@@ -1932,7 +1933,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                  * When PS restrict is removed, we need setup PDP connection if
                  * PDP connection is down.
                  */
-                log("[DSAC DEB] " + "EVENT_PS_RESTRICT_DISABLED " + mIsPsRestricted);
+                log("EVENT_PS_RESTRICT_DISABLED " + mIsPsRestricted);
                 mIsPsRestricted  = false;
                 if (isConnected()) {
                     startNetStatPoll();
