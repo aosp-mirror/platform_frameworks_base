@@ -204,6 +204,10 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"애플리케이션이 현재 실행 중이거나 최근에 실행된 작업에 대한 정보를 검색할 수 있도록 합니다. 이 경우 악성 애플리케이션이 다른 애플리케이션에 대한 개인 정보를 검색할 수 있습니다."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"실행 중인 애플리케이션 순서 재지정"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"애플리케이션이 작업을 포그라운드나 백그라운드로 이동할 수 있도록 합니다. 이 경우 악성 애플리케이션이 사용자의 조작 없이 앞으로 이동할 수 있습니다."</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"애플리케이션 디버깅 사용"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"애플리케이션이 다른 애플리케이션에 대해 디버깅을 사용할 수 있도록 합니다. 이 경우 악성 애플리케이션이 다른 애플리케이션을 중지시킬 수 있습니다."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"UI 설정 변경"</string>

@@ -204,6 +204,10 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Cho phép ứng dụng truy xuất thông tin về các công việc hiện đang chạy. Có thể cho phép các ứng dụng độc hại phát hiện thông tin riêng tư về các ứng dụng khác."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"sắp xếp lại các ứng dụng đang chạy"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Cho phép ứng dụng di chuyển công việc lên trên nền và dưới nền. Các ứng dụng độc hại có thể tự hiện lên trước mà không cần sự kiểm soát của bạn."</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"cho phép gỡ lỗi ứng dụng"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Cho phép ứng dụng bật gỡ lỗi cho ứng dụng khác. Các ứng dụng độc hại có thể sử dụng quyền này đề loại bỏ các ứng dụng khác."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"thay đổi cài đặt giao diện người dùng của bạn"</string>

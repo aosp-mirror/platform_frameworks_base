@@ -204,6 +204,10 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"允許應用程式取得最近執行任務的資訊。請注意：惡意程式可能利用此功能找出其他應用程式的隱私資訊。"</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"重新安排執行中的應用程式"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"允許應用程式將工作移至前端或背景作業。請注意：惡意程式可能使用此功能自行把自己拉到前端。"</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"啟用應用程式偵錯"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"允許應用程式為其他程式開啟偵錯功能。請注意：惡意程式可利用此功能終止其他應用程式。"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"變更介面設定"</string>

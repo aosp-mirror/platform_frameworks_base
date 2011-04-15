@@ -204,6 +204,10 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Tillåter att program hämtar information om uppgifter som körs och har körts. Skadliga program kan upptäcka privat information om andra program."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"byt ordning på appar som körs"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Tillåter att ett program flyttar uppgifter till förgrunden eller bakgrunden. Skadliga program kan tvinga sig till förgrunden utan att du kan styra det."</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"aktivera felsökning av appar"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Tillåter att ett program aktiverar felsökning för ett annat program. Skadliga program kan använda detta för att avsluta andra program."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"ändra dina gränssnittsinställningar"</string>

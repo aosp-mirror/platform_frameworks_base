@@ -208,6 +208,10 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Permetta a l\'applicaziun da recuperar infurmaziuns davart incumbensas che vegnan exequidas u èn gist vegnidas exequidas. Applicaziuns donnegiusas pon uschia obtegnair infurmaziuns privatas concernent autras applicaziuns."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"reorganisar las applicaziuns che vegnan exequidas"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Permetta ad ina applicaziun da spustar las incumbensas en il fund davant u en il fund davos. Applicaziuns donnegiusas pon sa mussar en il fund davant senza Vossa autorisaziun."</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"activar il debugging da l\'applicaziun"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Permetta ad ina applicaziun dad activar il debugging per autras applicaziuns. Applicaziuns donnegiusas pon uschia serrar autras applicaziuns."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"modifitgar ils parameters da la UI"</string>

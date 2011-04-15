@@ -204,6 +204,10 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Pinapayagan ang application na ibalik ang impormasyon tungkol sa mga kasalukuyan at kamakailang tumatakbong gawain. Maaaring payagan ang mga nakakahamak na application na tuklasin ang pribadong impormasyon tungkol sa ibang mga application."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"muling pagsunud-sunurin ang mga tumatakbong application"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Pinapayagan ang isang application na ilipat ang mga gawain sa foreground at background. Mapupuwersa ng mga nakakahamak na application ang mga sarili nito sa harapan nang wala ng iyong kontrol."</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"paganahin ang debugging ng application"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Pinapayagan ang isang application na i-on ang debugging para sa isa pang application. Magagamit ito ng mga nakakahamak na application upang alisin ang ibang mga application."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"baguhin ang iyong mga setting ng UI"</string>

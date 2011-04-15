@@ -204,6 +204,10 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Lehetővé teszi az alkalmazás számára a jelenleg és a nemrég futó feladatok adatainak lekérését. A rosszindulatú alkalmazások privát adatokhoz juthatnak más alkalmazásokból."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"futó alkalmazások átrendezése"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Lehetővé teszi egy alkalmazás számára, hogy feladatokat helyezzen át az előtérből a háttérbe és fordítva. A rosszindulatú alkalmazások az előtérbe helyezhetik magukat az Ön engedélye nélkül."</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"hibakeresés engedélyezése alkalmazásoknál"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Lehetővé teszi egy alkalmazás számára, hogy hibakeresést végezzen egy másik alkalmazáson. A rosszindulatú alkalmazások ezzel leállíthatnak más alkalmazásokat."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"a felhasználói felület beállításainak módosítása"</string>

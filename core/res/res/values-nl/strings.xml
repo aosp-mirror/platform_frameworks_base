@@ -204,6 +204,10 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Hiermee kan een app informatie over huidige en recent uitgevoerde taken ophalen. Schadelijke apps kunnen op deze manier mogelijk privé-informatie over andere apps achterhalen."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"actieve toepassingen opnieuw indelen"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Hiermee kan een app taken naar de voor- en achtergrond verplaatsen. Schadelijke apps kunnen zichzelf op de voorgrond plaatsen zonder dat u hier iets aan kunt doen."</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"foutopsporing in toepassingen inschakelen"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Hiermee kan een app de foutopsporing voor een andere app inschakelen. Schadelijke apps kunnen dit gebruiken om andere apps af te sluiten."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"uw UI-instellingen wijzigen"</string>
