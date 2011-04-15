@@ -161,7 +161,7 @@
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Ihre persönlichen Informationen"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Direkter Zugriff auf die Kontakte und den Kalender Ihres Tablets"</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Direkter Zugriff auf die Kontakte und den Kalender Ihres Telefons"</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"Ihren Standort"</string>
+    <string name="permgrouplab_location" msgid="635149742436692049">"Meinen Standort"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Ihren physischen Standort überwachen"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netzwerkkommunikation"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Ermöglicht Anwendungen den Zugriff auf verschiedene Netzwerkfunktionen"</string>
@@ -204,6 +204,10 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Ermöglicht der Anwendung, Informationen zu aktuellen und kürzlich ausführten Aufgaben abzurufen. Schädliche Anwendungen können so eventuell geheime Informationen zu anderen Anwendungen entdecken."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"Laufende Anwendungen neu ordnen"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Ermöglicht einer Anwendung, Aufgaben in den Vorder- und Hintergrund zu verschieben. Schädliche Anwendungen können so ohne Ihr Zutun eine Anzeige im Vordergrund erzwingen."</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"Fehlerbeseitigung für Anwendung aktivieren"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Ermöglicht einer Anwendung, die Fehlerbeseitigung für eine andere Anwendung zu aktivieren. Schädliche Anwendungen können so andere Anwendungen löschen."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"UI-Einstellungen ändern"</string>
@@ -966,7 +970,7 @@
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec-VPN mit vorinstalliertem Schlüssel"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec-VPN mit Zertifikat"</string>
     <string name="upload_file" msgid="2897957172366730416">"Datei auswählen"</string>
-    <string name="no_file_chosen" msgid="6363648562170759465">"Keine Datei ausgewählt"</string>
+    <string name="no_file_chosen" msgid="6363648562170759465">"Keine ausgewählt"</string>
     <string name="reset" msgid="2448168080964209908">"Zurücksetzen"</string>
     <string name="submit" msgid="1602335572089911941">"Senden"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Automodus aktiviert"</string>

@@ -204,6 +204,10 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Permite que o aplicativo recupere as informações sobre tarefas em execução no momento ou recentemente. Pode permitir que aplicativos maliciosos descubram informações particulares sobre outros aplicativos."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"reorganizar aplicativos em execução"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Permite que um aplicativo mova as tarefas para o primeiro e para o segundo planos. Aplicativos maliciosos podem se forçar à frente sem o seu controle."</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"ativar depuração do aplicativo"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Permite que um aplicativo ative a depuração de outro aplicativo. Aplicativos maliciosos podem usar isso para encerrar outros aplicativos."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"alterar as suas configurações de UI"</string>

@@ -204,6 +204,10 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"به برنامه کاربردی اجازه می دهد اطلاعات مربوط به کارهای در حال اجرای فعلی و کارهای اخیر را بازیابی کند. ممکن است برنامه های مضر بتوانند اطلاعات خصوصی مربوط به شما را در ارتباط به سایر برنامه ها مشاهده کنند."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"ترتیب بندی مجدد برنامه های در حال اجرا"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"به یک برنامه کاربردی اجازه می دهد تا وظایف را به پیش زمینه و پس زمینه منتقل کند. برنامه های مضر می توانند بدون کنترل شما خودشان را به پیش زمینه منتقل کنند."</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"فعال کردن رفع عیب برنامه"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"به یک برنامه کاربردی اجازه می دهد رفع عیب را برای یک برنامه دیگر فعال کند. برنامه های مضر می توانند از این ویژگی برای از بین بردن سایر برنامه ها استفاده کنند."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"تغییر تنظیمات UI"</string>

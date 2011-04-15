@@ -204,6 +204,10 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Consente all\'applicazione di recuperare informazioni sulle attività in esecuzione ed eseguite di recente. Le applicazioni dannose potrebbero essere in grado di scoprire informazioni riservate su altre applicazioni."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"riordinamento applicazioni in esecuz."</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Consente a un\'applicazione di spostare attività in primo e secondo piano. Le applicazioni dannose possono imporsi ponendosi automaticamente in primo piano."</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"attivazione debug delle applicazioni"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Consente a un\'applicazione di attivare il debug per un\'altra applicazione. Le applicazioni dannose possono sfruttare questa possibilità per interrompere altre applicazioni."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"modifica impostazioni UI"</string>
