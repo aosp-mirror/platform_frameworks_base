@@ -1086,7 +1086,7 @@ public class Camera {
     /**
      * Area class for focus.
      *
-     * @see #setFocusAreas(List<Area>)
+     * @see #setFocusAreas(List)
      * @see #getFocusAreas()
      * @hide
      */
@@ -2573,8 +2573,8 @@ public class Camera {
 
         /**
          * Gets the maximum number of focus areas supported. This is the maximum
-         * length of the list in {@link #setFocusArea(List<Area>)} and
-         * {@link #getFocusArea()}.
+         * length of the list in {@link #setFocusAreas(List)} and
+         * {@link #getFocusAreas()}.
          *
          * @return the maximum number of focus areas supported by the camera.
          * @see #getFocusAreas()
@@ -2588,8 +2588,8 @@ public class Camera {
          * Gets the current focus areas. Camera driver uses the areas to decide
          * focus.
          *
-         * Before using this API or {@link #setFocusAreas(List<int>)}, apps
-         * should call {@link #getMaxNumFocusArea()} to know the maximum number of
+         * Before using this API or {@link #setFocusAreas(List)}, apps should
+         * call {@link #getMaxNumFocusAreas()} to know the maximum number of
          * focus areas first. If the value is 0, focus area is not supported.
          *
          * Each focus area is a rectangle with specified weight. The direction
@@ -2618,7 +2618,7 @@ public class Camera {
          *
          * Focus area only has effect if the current focus mode is
          * {@link #FOCUS_MODE_AUTO}, {@link #FOCUS_MODE_MACRO}, or
-         * {@link #FOCUS_MODE_CONTINOUS_VIDEO}.
+         * {@link #FOCUS_MODE_CONTINUOUS_VIDEO}.
          *
          * @return a list of current focus areas
          * @hide
@@ -2630,7 +2630,7 @@ public class Camera {
         /**
          * Sets focus areas. See {@link #getFocusAreas()} for documentation.
          *
-         * @param focusArea the focus areas
+         * @param focusAreas the focus areas
          * @see #getFocusAreas()
          * @hide
          */
@@ -2640,8 +2640,8 @@ public class Camera {
 
         /**
          * Gets the maximum number of metering areas supported. This is the
-         * maximum length of the list in {@link #setMeteringArea(List<Area>)}
-         * and {@link #getMeteringArea()}.
+         * maximum length of the list in {@link #setMeteringAreas(List)} and
+         * {@link #getMeteringAreas()}.
          *
          * @return the maximum number of metering areas supported by the camera.
          * @see #getMeteringAreas()
@@ -2655,10 +2655,10 @@ public class Camera {
          * Gets the current metering areas. Camera driver uses these areas to
          * decide exposure.
          *
-         * Before using this API or {@link #setMeteringAreas(List<int>)}, apps
-         * should call {@link #getMaxNumMeteringArea()} to know the maximum
-         * number of metering areas first. If the value is 0, metering area is
-         * not supported.
+         * Before using this API or {@link #setMeteringAreas(List)}, apps should
+         * call {@link #getMaxNumMeteringAreas()} to know the maximum number of
+         * metering areas first. If the value is 0, metering area is not
+         * supported.
          *
          * Each metering area is a rectangle with specified weight. The
          * direction is relative to the sensor orientation, that is, what the
@@ -2685,7 +2685,7 @@ public class Camera {
          * even when using zoom.
          *
          * No matter what metering areas are, the final exposure are compensated
-         * by {@link setExposureCompensation(int)}.
+         * by {@link #setExposureCompensation(int)}.
          *
          * @return a list of current metering areas
          * @hide
@@ -2698,7 +2698,7 @@ public class Camera {
          * Sets metering areas. See {@link #getMeteringAreas()} for
          * documentation.
          *
-         * @param meteringArea the metering areas
+         * @param meteringAreas the metering areas
          * @see #getMeteringAreas()
          * @hide
          */
