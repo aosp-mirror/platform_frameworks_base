@@ -26,6 +26,7 @@ import android.content.pm.ApplicationInfo;
 import android.telephony.SignalStrength;
 import android.util.Log;
 import android.util.Printer;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 
@@ -408,16 +409,19 @@ public abstract class BatteryStats implements Parcelable {
     }
 
     public final static class HistoryItem implements Parcelable {
+        static final String TAG = "HistoryItem";
+        static final boolean DEBUG = false;
+        
         public HistoryItem next;
         
         public long time;
         
-        public static final byte CMD_NULL = -1;
-        public static final byte CMD_UPDATE = 0;
-        public static final byte CMD_START = 1;
-        public static final byte CMD_OVERFLOW = 2;
+        public static final byte CMD_NULL = 0;
+        public static final byte CMD_UPDATE = 1;
+        public static final byte CMD_START = 2;
+        public static final byte CMD_OVERFLOW = 3;
         
-        public byte cmd;
+        public byte cmd = CMD_NULL;
         
         public byte batteryLevel;
         public byte batteryStatus;
@@ -428,33 +432,38 @@ public abstract class BatteryStats implements Parcelable {
         public char batteryVoltage;
         
         // Constants from SCREEN_BRIGHTNESS_*
-        public static final int STATE_BRIGHTNESS_MASK = 0x000000f;
+        public static final int STATE_BRIGHTNESS_MASK = 0x0000000f;
         public static final int STATE_BRIGHTNESS_SHIFT = 0;
         // Constants from SIGNAL_STRENGTH_*
-        public static final int STATE_SIGNAL_STRENGTH_MASK = 0x00000f0;
+        public static final int STATE_SIGNAL_STRENGTH_MASK = 0x000000f0;
         public static final int STATE_SIGNAL_STRENGTH_SHIFT = 4;
         // Constants from ServiceState.STATE_*
-        public static final int STATE_PHONE_STATE_MASK = 0x0000f00;
+        public static final int STATE_PHONE_STATE_MASK = 0x00000f00;
         public static final int STATE_PHONE_STATE_SHIFT = 8;
         // Constants from DATA_CONNECTION_*
-        public static final int STATE_DATA_CONNECTION_MASK = 0x000f000;
+        public static final int STATE_DATA_CONNECTION_MASK = 0x0000f000;
         public static final int STATE_DATA_CONNECTION_SHIFT = 12;
         
-        public static final int STATE_BATTERY_PLUGGED_FLAG = 1<<30;
-        public static final int STATE_SCREEN_ON_FLAG = 1<<29;
+        // These states always appear directly in the first int token
+        // of a delta change; they should be ones that change relatively
+        // frequently.
+        public static final int STATE_WAKE_LOCK_FLAG = 1<<30;
+        public static final int STATE_SENSOR_ON_FLAG = 1<<29;
         public static final int STATE_GPS_ON_FLAG = 1<<28;
-        public static final int STATE_PHONE_IN_CALL_FLAG = 1<<27;
-        public static final int STATE_PHONE_SCANNING_FLAG = 1<<26;
-        public static final int STATE_WIFI_ON_FLAG = 1<<25;
-        public static final int STATE_WIFI_RUNNING_FLAG = 1<<24;
-        public static final int STATE_WIFI_FULL_LOCK_FLAG = 1<<23;
-        public static final int STATE_WIFI_SCAN_LOCK_FLAG = 1<<22;
-        public static final int STATE_WIFI_MULTICAST_ON_FLAG = 1<<21;
-        public static final int STATE_BLUETOOTH_ON_FLAG = 1<<20;
-        public static final int STATE_AUDIO_ON_FLAG = 1<<19;
-        public static final int STATE_VIDEO_ON_FLAG = 1<<18;
-        public static final int STATE_WAKE_LOCK_FLAG = 1<<17;
-        public static final int STATE_SENSOR_ON_FLAG = 1<<16;
+        public static final int STATE_PHONE_SCANNING_FLAG = 1<<27;
+        public static final int STATE_WIFI_RUNNING_FLAG = 1<<26;
+        public static final int STATE_WIFI_FULL_LOCK_FLAG = 1<<25;
+        public static final int STATE_WIFI_SCAN_LOCK_FLAG = 1<<24;
+        public static final int STATE_WIFI_MULTICAST_ON_FLAG = 1<<23;
+        // These are on the lower bits used for the command; if they change
+        // we need to write another int of data.
+        public static final int STATE_AUDIO_ON_FLAG = 1<<22;
+        public static final int STATE_VIDEO_ON_FLAG = 1<<21;
+        public static final int STATE_SCREEN_ON_FLAG = 1<<20;
+        public static final int STATE_BATTERY_PLUGGED_FLAG = 1<<19;
+        public static final int STATE_PHONE_IN_CALL_FLAG = 1<<18;
+        public static final int STATE_WIFI_ON_FLAG = 1<<17;
+        public static final int STATE_BLUETOOTH_ON_FLAG = 1<<16;
         
         public static final int MOST_INTERESTING_STATES =
             STATE_BATTERY_PLUGGED_FLAG | STATE_SCREEN_ON_FLAG
@@ -487,10 +496,6 @@ public abstract class BatteryStats implements Parcelable {
             dest.writeInt(bat);
             dest.writeInt(states);
         }
-        
-        public void writeDelta(Parcel dest, HistoryItem last) {
-            writeToParcel(dest, 0);
-        }
 
         private void readFromParcel(Parcel src) {
             int bat = src.readInt();
@@ -505,11 +510,161 @@ public abstract class BatteryStats implements Parcelable {
             states = src.readInt();
         }
 
-        public void readDelta(Parcel src, HistoryItem last) {
-            time = src.readLong();
-            readFromParcel(src);
+        // Part of initial delta int that specifies the time delta.
+        static final int DELTA_TIME_MASK = 0x3ffff;
+        static final int DELTA_TIME_ABS = 0x3fffd;    // Following is an entire abs update.
+        static final int DELTA_TIME_INT = 0x3fffe;    // The delta is a following int
+        static final int DELTA_TIME_LONG = 0x3ffff;   // The delta is a following long
+        // Part of initial delta int holding the command code.
+        static final int DELTA_CMD_MASK = 0x3;
+        static final int DELTA_CMD_SHIFT = 18;
+        // Flag in delta int: a new battery level int follows.
+        static final int DELTA_BATTERY_LEVEL_FLAG = 1<<20;
+        // Flag in delta int: a new full state and battery status int follows.
+        static final int DELTA_STATE_FLAG = 1<<21;
+        static final int DELTA_STATE_MASK = 0xffc00000;
+        
+        public void writeDelta(Parcel dest, HistoryItem last) {
+            if (last == null || last.cmd != CMD_UPDATE) {
+                dest.writeInt(DELTA_TIME_ABS);
+                writeToParcel(dest, 0);
+                return;
+            }
+            
+            final long deltaTime = time - last.time;
+            final int lastBatteryLevelInt = last.buildBatteryLevelInt();
+            final int lastStateInt = last.buildStateInt();
+            
+            int deltaTimeToken;
+            if (deltaTime < 0 || deltaTime > Integer.MAX_VALUE) {
+                deltaTimeToken = DELTA_TIME_LONG;
+            } else if (deltaTime >= DELTA_TIME_ABS) {
+                deltaTimeToken = DELTA_TIME_INT;
+            } else {
+                deltaTimeToken = (int)deltaTime;
+            }
+            int firstToken = deltaTimeToken
+                    | (cmd<<DELTA_CMD_SHIFT)
+                    | (states&DELTA_STATE_MASK);
+            final int batteryLevelInt = buildBatteryLevelInt();
+            final boolean batteryLevelIntChanged = batteryLevelInt != lastBatteryLevelInt;
+            if (batteryLevelIntChanged) {
+                firstToken |= DELTA_BATTERY_LEVEL_FLAG;
+            }
+            final int stateInt = buildStateInt();
+            final boolean stateIntChanged = stateInt != lastStateInt;
+            if (stateIntChanged) {
+                firstToken |= DELTA_STATE_FLAG;
+            }
+            dest.writeInt(firstToken);
+            if (DEBUG) Slog.i(TAG, "WRITE DELTA: firstToken=0x" + Integer.toHexString(firstToken)
+                    + " deltaTime=" + deltaTime);
+            
+            if (deltaTimeToken >= DELTA_TIME_INT) {
+                if (deltaTimeToken == DELTA_TIME_INT) {
+                    if (DEBUG) Slog.i(TAG, "WRITE DELTA: int deltaTime=" + (int)deltaTime);
+                    dest.writeInt((int)deltaTime);
+                } else {
+                    if (DEBUG) Slog.i(TAG, "WRITE DELTA: long deltaTime=" + deltaTime);
+                    dest.writeLong(deltaTime);
+                }
+            }
+            if (batteryLevelIntChanged) {
+                dest.writeInt(batteryLevelInt);
+                if (DEBUG) Slog.i(TAG, "WRITE DELTA: batteryToken=0x"
+                        + Integer.toHexString(batteryLevelInt)
+                        + " batteryLevel=" + batteryLevel
+                        + " batteryTemp=" + (int)batteryTemperature
+                        + " batteryVolt=" + (int)batteryVoltage);
+            }
+            if (stateIntChanged) {
+                dest.writeInt(stateInt);
+                if (DEBUG) Slog.i(TAG, "WRITE DELTA: stateToken=0x"
+                        + Integer.toHexString(stateInt)
+                        + " batteryStatus=" + batteryStatus
+                        + " batteryHealth=" + batteryHealth
+                        + " batteryPlugType=" + batteryPlugType
+                        + " states=0x" + Integer.toHexString(states));
+            }
+        }
+        
+        private int buildBatteryLevelInt() {
+            return ((((int)batteryLevel)<<24)&0xff000000)
+                    | ((((int)batteryTemperature)<<14)&0x00ffc000)
+                    | (((int)batteryVoltage)&0x00003fff);
+        }
+        
+        private int buildStateInt() {
+            return ((((int)batteryStatus)<<28)&0xf0000000)
+                    | ((((int)batteryHealth)<<24)&0x0f000000)
+                    | ((((int)batteryPlugType)<<22)&0x00c00000)
+                    | (states&(~DELTA_STATE_MASK));
+        }
+        
+        public void readDelta(Parcel src) {
+            int firstToken = src.readInt();
+            int deltaTimeToken = firstToken&DELTA_TIME_MASK;
+            cmd = (byte)((firstToken>>DELTA_CMD_SHIFT)&DELTA_CMD_MASK);
+            if (DEBUG) Slog.i(TAG, "READ DELTA: firstToken=0x" + Integer.toHexString(firstToken)
+                    + " deltaTimeToken=" + deltaTimeToken);
+            
+            if (deltaTimeToken < DELTA_TIME_ABS) {
+                time += deltaTimeToken;
+            } else if (deltaTimeToken == DELTA_TIME_ABS) {
+                time = src.readLong();
+                readFromParcel(src);
+                return;
+            } else if (deltaTimeToken == DELTA_TIME_INT) {
+                int delta = src.readInt();
+                time += delta;
+                if (DEBUG) Slog.i(TAG, "READ DELTA: time delta=" + delta + " new time=" + time);
+            } else {
+                long delta = src.readLong();
+                if (DEBUG) Slog.i(TAG, "READ DELTA: time delta=" + delta + " new time=" + time);
+                time += delta;
+            }
+            
+            if ((firstToken&DELTA_BATTERY_LEVEL_FLAG) != 0) {
+                int batteryLevelInt = src.readInt();
+                batteryLevel = (byte)((batteryLevelInt>>24)&0xff);
+                batteryTemperature = (char)((batteryLevelInt>>14)&0x3ff);
+                batteryVoltage = (char)(batteryLevelInt&0x3fff);
+                if (DEBUG) Slog.i(TAG, "READ DELTA: batteryToken=0x"
+                        + Integer.toHexString(batteryLevelInt)
+                        + " batteryLevel=" + batteryLevel
+                        + " batteryTemp=" + (int)batteryTemperature
+                        + " batteryVolt=" + (int)batteryVoltage);
+            }
+            
+            if ((firstToken&DELTA_STATE_FLAG) != 0) {
+                int stateInt = src.readInt();
+                states = (firstToken&DELTA_STATE_MASK) | (stateInt&(~DELTA_STATE_MASK));
+                batteryStatus = (byte)((stateInt>>28)&0xf);
+                batteryHealth = (byte)((stateInt>>24)&0xf);
+                batteryPlugType = (byte)((stateInt>>22)&0x3);
+                if (DEBUG) Slog.i(TAG, "READ DELTA: stateToken=0x"
+                        + Integer.toHexString(stateInt)
+                        + " batteryStatus=" + batteryStatus
+                        + " batteryHealth=" + batteryHealth
+                        + " batteryPlugType=" + batteryPlugType
+                        + " states=0x" + Integer.toHexString(states));
+            } else {
+                states = (firstToken&DELTA_STATE_MASK) | (states&(~DELTA_STATE_MASK));
+            }
         }
 
+        public void clear() {
+            time = 0;
+            cmd = CMD_NULL;
+            batteryLevel = 0;
+            batteryStatus = 0;
+            batteryHealth = 0;
+            batteryPlugType = 0;
+            batteryTemperature = 0;
+            batteryVoltage = 0;
+            states = 0;
+        }
+        
         public void setTo(HistoryItem o) {
             time = o.time;
             cmd = o.cmd;

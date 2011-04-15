@@ -71,7 +71,7 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 57;
+    private static final int VERSION = 60;
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -156,11 +156,12 @@ public final class BatteryStatsImpl extends BatteryStats {
     boolean mRecordingHistory = true;
     int mNumHistoryItems;
 
-    static final int MAX_HISTORY_BUFFER = 64*1024; // 64KB
-    static final int MAX_MAX_HISTORY_BUFFER = 92*1024; // 92KB
+    static final int MAX_HISTORY_BUFFER = 128*1024; // 128KB
+    static final int MAX_MAX_HISTORY_BUFFER = 144*1024; // 144KB
     final Parcel mHistoryBuffer = Parcel.obtain();
     final HistoryItem mHistoryLastWritten = new HistoryItem();
     final HistoryItem mHistoryLastLastWritten = new HistoryItem();
+    final HistoryItem mHistoryReadTmp = new HistoryItem();
     int mHistoryBufferLastPos = -1;
     boolean mHistoryOverflow = false;
     long mLastHistoryTime = 0;
@@ -1212,8 +1213,9 @@ public final class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
+        final long timeDiff = (mHistoryBaseTime+curTime) - mHistoryLastWritten.time;
         if (mHistoryBufferLastPos >= 0 && mHistoryLastWritten.cmd == HistoryItem.CMD_UPDATE
-                && (mHistoryBaseTime+curTime) < (mHistoryLastWritten.time+2000)
+                && timeDiff < 2000
                 && ((mHistoryLastWritten.states^mHistoryCur.states)&mChangedBufferStates) == 0) {
             // If the current is the same as the one before, then we no
             // longer need the entry.
@@ -1221,7 +1223,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             mHistoryBuffer.setDataPosition(mHistoryBufferLastPos);
             mHistoryBufferLastPos = -1;
             if (mHistoryLastLastWritten.cmd == HistoryItem.CMD_UPDATE
-                    && mHistoryLastLastWritten.same(mHistoryCur)) {
+                    && timeDiff < 500 && mHistoryLastLastWritten.same(mHistoryCur)) {
                 // If this results in us returning to the state written
                 // prior to the last one, then we can just delete the last
                 // written one and drop the new one.  Nothing more to do.
@@ -1231,6 +1233,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             }
             mChangedBufferStates |= mHistoryLastWritten.states^mHistoryCur.states;
             curTime = mHistoryLastWritten.time - mHistoryBaseTime;
+            mHistoryLastWritten.setTo(mHistoryLastLastWritten);
         } else {
             mChangedBufferStates = 0;
         }
@@ -1295,6 +1298,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             // If the current is the same as the one before, then we no
             // longer need the entry.
             if (mHistoryLastEnd != null && mHistoryLastEnd.cmd == HistoryItem.CMD_UPDATE
+                    && (mHistoryBaseTime+curTime) < (mHistoryEnd.time+500)
                     && mHistoryLastEnd.same(mHistoryCur)) {
                 mHistoryLastEnd.next = null;
                 mHistoryEnd.next = mHistoryCache;
@@ -4038,6 +4042,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (DEBUG_HISTORY) Slog.i(TAG, "ITERATING: buff size=" + mHistoryBuffer.dataSize()
                 + " pos=" + mHistoryBuffer.dataPosition());
         mHistoryBuffer.setDataPosition(0);
+        mHistoryReadTmp.clear();
         mReadOverflow = false;
         mIteratingHistory = true;
         return (mHistoryIterator = mHistory) != null;
@@ -4047,8 +4052,8 @@ public final class BatteryStatsImpl extends BatteryStats {
     public boolean getNextOldHistoryLocked(HistoryItem out) {
         boolean end = mHistoryBuffer.dataPosition() >= mHistoryBuffer.dataSize();
         if (!end) {
-            mHistoryLastWritten.readDelta(mHistoryBuffer, null);
-            mReadOverflow |= mHistoryLastWritten.cmd == HistoryItem.CMD_OVERFLOW;
+            mHistoryReadTmp.readDelta(mHistoryBuffer);
+            mReadOverflow |= mHistoryReadTmp.cmd == HistoryItem.CMD_OVERFLOW;
         }
         HistoryItem cur = mHistoryIterator;
         if (cur == null) {
@@ -4062,14 +4067,14 @@ public final class BatteryStatsImpl extends BatteryStats {
         if (!mReadOverflow) {
             if (end) {
                 Slog.w(TAG, "New history ends before old history!");
-            } else if (!out.same(mHistoryLastWritten)) {
+            } else if (!out.same(mHistoryReadTmp)) {
                 long now = getHistoryBaseTime() + SystemClock.elapsedRealtime();
                 PrintWriter pw = new PrintWriter(new LogWriter(android.util.Log.WARN, TAG));
                 pw.println("Histories differ!");
                 pw.println("Old history:");
                 (new HistoryPrinter()).printNextItem(pw, out, now);
                 pw.println("New history:");
-                (new HistoryPrinter()).printNextItem(pw, mHistoryLastWritten, now);
+                (new HistoryPrinter()).printNextItem(pw, mHistoryReadTmp, now);
             }
         }
         return true;
@@ -4093,12 +4098,16 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     @Override
     public boolean getNextHistoryLocked(HistoryItem out) {
-        boolean end = mHistoryBuffer.dataPosition() >= mHistoryBuffer.dataSize();
+        final int pos = mHistoryBuffer.dataPosition();
+        if (pos == 0) {
+            out.clear();
+        }
+        boolean end = pos >= mHistoryBuffer.dataSize();
         if (end) {
             return false;
         }
 
-        out.readDelta(mHistoryBuffer, null);
+        out.readDelta(mHistoryBuffer);
         return true;
     }
 
