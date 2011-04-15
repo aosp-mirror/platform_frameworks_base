@@ -96,6 +96,46 @@ int create_pkg_path(char path[PKG_PATH_MAX],
 }
 
 /**
+ * Create the path name for user data for a certain persona.
+ * Returns 0 on success, and -1 on failure.
+ */
+int create_persona_path(char path[PKG_PATH_MAX],
+                    uid_t persona)
+{
+    size_t uid_len;
+    char* persona_prefix;
+    if (persona == 0) {
+        persona_prefix = PRIMARY_USER_PREFIX;
+        uid_len = 0;
+    } else {
+        persona_prefix = SECONDARY_USER_PREFIX;
+        uid_len = snprintf(NULL, 0, "%d", persona);
+    }
+
+    char *dst = path;
+    size_t dst_size = PKG_PATH_MAX;
+
+    if (append_and_increment(&dst, android_data_dir.path, &dst_size) < 0
+            || append_and_increment(&dst, persona_prefix, &dst_size) < 0) {
+        LOGE("Error building prefix for user path");
+        return -1;
+    }
+
+    if (persona != 0) {
+        if (dst_size < uid_len + 1) {
+            LOGE("Error building user path");
+            return -1;
+        }
+        int ret = snprintf(dst, dst_size, "%d", persona);
+        if (ret < 0 || (size_t) ret != uid_len) {
+            LOGE("Error appending persona id to path");
+            return -1;
+        }
+    }
+    return 0;
+}
+
+/**
  * Checks whether the package name is valid. Returns -1 on error and
  * 0 on success.
  */
@@ -407,4 +447,36 @@ int append_and_increment(char** dst, const char* src, size_t* dst_size) {
     *dst += ret;
     *dst_size -= ret;
     return 0;
+}
+
+char *build_string2(char *s1, char *s2) {
+    if (s1 == NULL || s2 == NULL) return NULL;
+
+    int len_s1 = strlen(s1);
+    int len_s2 = strlen(s2);
+    int len = len_s1 + len_s2 + 1;
+    char *result = malloc(len);
+    if (result == NULL) return NULL;
+
+    strcpy(result, s1);
+    strcpy(result + len_s1, s2);
+
+    return result;
+}
+
+char *build_string3(char *s1, char *s2, char *s3) {
+    if (s1 == NULL || s2 == NULL || s3 == NULL) return NULL;
+
+    int len_s1 = strlen(s1);
+    int len_s2 = strlen(s2);
+    int len_s3 = strlen(s3);
+    int len = len_s1 + len_s2 + len_s3 + 1;
+    char *result = malloc(len);
+    if (result == NULL) return NULL;
+
+    strcpy(result, s1);
+    strcpy(result + len_s1, s2);
+    strcpy(result + len_s1 + len_s2, s3);
+
+    return result;
 }

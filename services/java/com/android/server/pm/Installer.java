@@ -225,10 +225,12 @@ class Installer {
         return execute(builder.toString());
     }
 
-    public int remove(String name) {
+    public int remove(String name, int userId) {
         StringBuilder builder = new StringBuilder("remove");
         builder.append(' ');
         builder.append(name);
+        builder.append(' ');
+        builder.append(userId);
         return execute(builder.toString());
     }
 
@@ -248,10 +250,30 @@ class Installer {
         return execute(builder.toString());
     }
 
-    public int clearUserData(String name) {
+    public int createUserData(String name, int uid, int userId) {
+        StringBuilder builder = new StringBuilder("mkuserdata");
+        builder.append(' ');
+        builder.append(name);
+        builder.append(' ');
+        builder.append(uid);
+        builder.append(' ');
+        builder.append(userId);
+        return execute(builder.toString());
+    }
+
+    public int removeUserDataDirs(int userId) {
+        StringBuilder builder = new StringBuilder("rmuser");
+        builder.append(' ');
+        builder.append(userId);
+        return execute(builder.toString());
+    }
+
+    public int clearUserData(String name, int userId) {
         StringBuilder builder = new StringBuilder("rmuserdata");
         builder.append(' ');
         builder.append(name);
+        builder.append(' ');
+        builder.append(userId);
         return execute(builder.toString());
     }
 

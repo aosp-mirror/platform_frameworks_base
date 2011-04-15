@@ -67,15 +67,15 @@ int install(const char *pkgname, uid_t uid, gid_t gid)
     return 0;
 }
 
-int uninstall(const char *pkgname)
+int uninstall(const char *pkgname, uid_t persona)
 {
     char pkgdir[PKG_PATH_MAX];
 
-    if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, 0))
+    if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, persona))
         return -1;
 
-        /* delete contents AND directory, no exceptions */
-    return delete_dir_contents(pkgdir, 1, 0);
+    /* delete contents AND directory, no exceptions */
+    return delete_dir_contents(pkgdir, 1, NULL);
 }
 
 int renamepkg(const char *oldpkgname, const char *newpkgname)
@@ -95,15 +95,46 @@ int renamepkg(const char *oldpkgname, const char *newpkgname)
     return 0;
 }
 
-int delete_user_data(const char *pkgname)
+int delete_user_data(const char *pkgname, uid_t persona)
 {
     char pkgdir[PKG_PATH_MAX];
 
-    if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, 0))
+    if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, persona))
         return -1;
 
-        /* delete contents, excluding "lib", but not the directory itself */
+    /* delete contents, excluding "lib", but not the directory itself */
     return delete_dir_contents(pkgdir, 0, "lib");
+}
+
+int make_user_data(const char *pkgname, uid_t uid, uid_t persona)
+{
+    char pkgdir[PKG_PATH_MAX];
+    char real_libdir[PKG_PATH_MAX];
+
+    // Create the data dir for the package
+    if (create_pkg_path(pkgdir, pkgname, PKG_DIR_POSTFIX, persona)) {
+        return -1;
+    }
+    if (mkdir(pkgdir, 0751) < 0) {
+        LOGE("cannot create dir '%s': %s\n", pkgdir, strerror(errno));
+        return -errno;
+    }
+    if (chown(pkgdir, uid, uid) < 0) {
+        LOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
+        unlink(pkgdir);
+        return -errno;
+    }
+    return 0;
+}
+
+int delete_persona(uid_t persona)
+{
+    char pkgdir[PKG_PATH_MAX];
+
+    if (create_persona_path(pkgdir, persona))
+        return -1;
+
+    return delete_dir_contents(pkgdir, 1, NULL);
 }
 
 int delete_cache(const char *pkgname)

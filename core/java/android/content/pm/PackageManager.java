@@ -662,10 +662,15 @@ public abstract class PackageManager {
     public static final int MOVE_EXTERNAL_MEDIA = 0x00000002;
 
     /**
-     * Feature for {@link #getSystemAvailableFeatures} and
-     * {@link #hasSystemFeature}: The device's audio pipeline is low-latency,
-     * more suitable for audio applications sensitive to delays or lag in
-     * sound input or output.
+     * Range of IDs allocated for a user.
+     * @hide
+     */
+    public static final int PER_USER_RANGE = 100000;
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device's
+     * audio pipeline is low-latency, more suitable for audio applications sensitive to delays or
+     * lag in sound input or output.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_AUDIO_LOW_LATENCY = "android.hardware.audio.low_latency";
@@ -2387,4 +2392,37 @@ public abstract class PackageManager {
      * @hide
      */
     public abstract void updateUserFlags(int id, int flags);
+
+    /**
+     * Checks to see if the user id is the same for the two uids, i.e., they belong to the same
+     * user.
+     * @hide
+     */
+    public static boolean isSameUser(int uid1, int uid2) {
+        return getUserId(uid1) == getUserId(uid2);
+    }
+
+    /**
+     * Returns the user id for a given uid.
+     * @hide
+     */
+    public static int getUserId(int uid) {
+        return uid / PER_USER_RANGE;
+    }
+
+    /**
+     * Returns the uid that is composed from the userId and the appId.
+     * @hide
+     */
+    public static int getUid(int userId, int appId) {
+        return userId * PER_USER_RANGE + (appId % PER_USER_RANGE);
+    }
+
+    /**
+     * Returns the app id (or base uid) for a given uid, stripping out the user id from it.
+     * @hide
+     */
+    public static int getAppId(int uid) {
+        return uid % PER_USER_RANGE;
+    }
 }

@@ -35,9 +35,9 @@ import android.content.pm.PermissionInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.provider.Settings;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -60,6 +60,7 @@ public final class Pm {
 
     private static final String PM_NOT_RUNNING_ERR =
         "Error: Could not access the Package Manager.  Is the system running?";
+    private static final int ROOT_UID = 0;
 
     public static void main(String[] args) {
         new Pm().run(args);
@@ -124,6 +125,16 @@ public final class Pm {
 
         if ("getInstallLocation".equals(op)) {
             runGetInstallLocation();
+            return;
+        }
+
+        if ("createUser".equals(op)) {
+            runCreateUser();
+            return;
+        }
+
+        if ("removeUser".equals(op)) {
+            runRemoveUser();
             return;
         }
 
@@ -763,6 +774,63 @@ public final class Pm {
         }
     }
 
+    public void runCreateUser() {
+        // Need to be run as root
+        if (Process.myUid() != ROOT_UID) {
+            System.err.println("Error: createUser must be run as root");
+            return;
+        }
+        String name;
+        String arg = nextArg();
+        if (arg == null) {
+            System.err.println("Error: no user name specified.");
+            showUsage();
+            return;
+        }
+        name = arg;
+        try {
+            if (mPm.createUser(name, 0) == null) {
+                System.err.println("Error: couldn't create user.");
+                showUsage();
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+
+    }
+
+    public void runRemoveUser() {
+        // Need to be run as root
+        if (Process.myUid() != ROOT_UID) {
+            System.err.println("Error: removeUser must be run as root");
+            return;
+        }
+        int userId;
+        String arg = nextArg();
+        if (arg == null) {
+            System.err.println("Error: no user id specified.");
+            showUsage();
+            return;
+        }
+        try {
+            userId = Integer.parseInt(arg);
+        } catch (NumberFormatException e) {
+            System.err.println("Error: user id has to be a number.");
+            showUsage();
+            return;
+        }
+        try {
+            if (!mPm.removeUser(userId)) {
+                System.err.println("Error: couldn't remove user.");
+                showUsage();
+            }
+        } catch (RemoteException e) {
+            System.err.println(e.toString());
+            System.err.println(PM_NOT_RUNNING_ERR);
+        }
+    }
+
     class PackageDeleteObserver extends IPackageDeleteObserver.Stub {
         boolean finished;
         boolean result;
@@ -1006,6 +1074,8 @@ public final class Pm {
         System.err.println("       pm enable PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable PACKAGE_OR_COMPONENT");
         System.err.println("       pm setInstallLocation [0/auto] [1/internal] [2/external]");
+        System.err.println("       pm createUser USER_NAME");
+        System.err.println("       pm removeUser USER_ID");
         System.err.println("");
         System.err.println("The list packages command prints all packages, optionally only");
         System.err.println("those whose package name contains the text in FILTER.  Options:");
