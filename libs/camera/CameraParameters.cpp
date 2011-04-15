@@ -68,6 +68,8 @@ const char CameraParameters::KEY_EXPOSURE_COMPENSATION[] = "exposure-compensatio
 const char CameraParameters::KEY_MAX_EXPOSURE_COMPENSATION[] = "max-exposure-compensation";
 const char CameraParameters::KEY_MIN_EXPOSURE_COMPENSATION[] = "min-exposure-compensation";
 const char CameraParameters::KEY_EXPOSURE_COMPENSATION_STEP[] = "exposure-compensation-step";
+const char CameraParameters::KEY_AUTO_EXPOSURE_LOCK[] = "auto-exposure-lock";
+const char CameraParameters::KEY_AUTO_EXPOSURE_LOCK_SUPPORTED[] = "auto-exposure-lock-supported";
 const char CameraParameters::KEY_MAX_NUM_METERING_AREAS[] = "max-num-metering-areas";
 const char CameraParameters::KEY_METERING_AREAS[] = "metering-areas";
 const char CameraParameters::KEY_ZOOM[] = "zoom";
@@ -82,6 +84,7 @@ const char CameraParameters::KEY_SUPPORTED_VIDEO_SIZES[] = "video-size-values";
 const char CameraParameters::KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO[] = "preferred-preview-size-for-video";
 
 const char CameraParameters::TRUE[] = "true";
+const char CameraParameters::FALSE[] = "false";
 const char CameraParameters::FOCUS_DISTANCE_INFINITY[] = "Infinity";
 
 // Values for white balance settings.

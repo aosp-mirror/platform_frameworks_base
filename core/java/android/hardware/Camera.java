@@ -1179,6 +1179,8 @@ public class Camera {
         private static final String KEY_MAX_EXPOSURE_COMPENSATION = "max-exposure-compensation";
         private static final String KEY_MIN_EXPOSURE_COMPENSATION = "min-exposure-compensation";
         private static final String KEY_EXPOSURE_COMPENSATION_STEP = "exposure-compensation-step";
+        private static final String KEY_AUTO_EXPOSURE_LOCK = "auto-exposure-lock";
+        private static final String KEY_AUTO_EXPOSURE_LOCK_SUPPORTED = "auto-exposure-lock-supported";
         private static final String KEY_METERING_AREAS = "metering-areas";
         private static final String KEY_MAX_NUM_METERING_AREAS = "max-num-metering-areas";
         private static final String KEY_ZOOM = "zoom";
@@ -1195,6 +1197,7 @@ public class Camera {
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
 
         private static final String TRUE = "true";
+        private static final String FALSE = "false";
 
         // Values for white balance settings.
         public static final String WHITE_BALANCE_AUTO = "auto";
@@ -2460,6 +2463,80 @@ public class Camera {
          */
         public float getExposureCompensationStep() {
             return getFloat(KEY_EXPOSURE_COMPENSATION_STEP, 0);
+        }
+
+        /**
+         * Sets the auto-exposure lock state. Applications should check
+         * {@link #isAutoExposureLockSupported} before using this method.
+         *
+         * If set to true, the camera auto-exposure routine will pause until the
+         * lock is set to false. Exposure compensation settings changes will
+         * still take effect while auto-exposure is locked. Stopping preview
+         * with {@link #stopPreview()}, or triggering still image capture with
+         * {@link #takePicture(Camera.ShutterCallback, Camera.PictureCallback,
+         * Camera.PictureCallback)}, will automatically set the lock to
+         * false. However, the lock can be re-enabled before preview is
+         * re-started to keep the same AE parameters. Exposure compensation, in
+         * conjunction with re-enabling the AE lock after each still capture,
+         * can be used to capture an exposure-bracketed burst of images, for
+         * example. Auto-exposure state, including the lock state, will not be
+         * maintained after camera {@link #release()} is called.  Locking
+         * auto-exposure after {@link #open()} but before the first call to
+         * {@link #startPreview()} will not allow the auto-exposure routine to
+         * run at all, and may result in severely over- or under-exposed images.
+         *
+         * The driver may also independently lock auto-exposure after auto-focus
+         * completes. If this is undesirable, be sure to always set the
+         * auto-exposure lock to false after the
+         * {@link AutoFocusCallback#onAutoFocus(boolean, Camera)} callback is
+         * received. The {@link #getAutoExposureLock()} method can be used after
+         * the callback to determine if the camera has locked auto-exposure
+         * independently.
+         *
+         * @param toggle new state of the auto-exposure lock. True means that
+         *        auto-exposure is locked, false means that the auto-exposure
+         *        routine is free to run normally.
+         *
+         * @hide
+         */
+        public void setAutoExposureLock(boolean toggle) {
+            set(KEY_AUTO_EXPOSURE_LOCK, toggle ? TRUE : FALSE);
+        }
+
+        /**
+         * Gets the state of the auto-exposure lock. Applications should check
+         * {@link #isAutoExposureLockSupported} before using this method. See
+         * {@link #setAutoExposureLock} for details about the lock.
+         *
+         * @return State of the auto-exposure lock. Returns true if
+         *         auto-exposure is currently locked, and false otherwise. The
+         *         auto-exposure lock may be independently enabled by the camera
+         *         subsystem when auto-focus has completed. This method can be
+         *         used after the {@link AutoFocusCallback#onAutoFocus(boolean,
+         *         Camera)} callback to determine if the camera has locked AE.
+         *
+         * @see #setAutoExposureLock(boolean)
+         *
+         * @hide
+         */
+        public boolean getAutoExposureLock() {
+            String str = get(KEY_AUTO_EXPOSURE_LOCK);
+            return TRUE.equals(str);
+        }
+
+        /**
+         * Returns true if auto-exposure locking is supported. Applications
+         * should call this before trying to lock auto-exposure. See
+         * {@link #setAutoExposureLock} for details about the lock.
+         *
+         * @return true if auto-exposure lock is supported.
+         * @see #setAutoExposureLock(boolean)
+         *
+         * @hide
+         */
+        public boolean isAutoExposureLockSupported() {
+            String str = get(KEY_AUTO_EXPOSURE_LOCK_SUPPORTED);
+            return TRUE.equals(str);
         }
 
         /**
