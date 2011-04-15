@@ -28,6 +28,7 @@ import com.android.internal.widget.PasswordEntryKeyboardView;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.telephony.TelephonyManager;
+import android.text.InputType;
 import android.text.method.DigitsKeyListener;
 import android.text.method.TextKeyListener;
 import android.util.Log;
@@ -70,6 +71,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     private CountDownTimer mCountdownTimer;
 
     private StatusView mStatusView;
+    private final boolean mUseSystemIME = true; // TODO: Make configurable
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
     // any passwords with length less than or equal to this length.
@@ -108,14 +110,23 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mPasswordEntry.setOnEditorActionListener(this);
         mPasswordEntry.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                if (mIsAlpha && !isPhysicalKbShowing) {
-                    mKeyboardViewAlpha.setVisibility(
-                            mKeyboardViewAlpha.getVisibility() == View.VISIBLE
-                            ? View.GONE : View.VISIBLE);
-                    mCallback.pokeWakelock();
+                if (mIsAlpha && !isPhysicalKbShowing && !mUseSystemIME) {
+                    // Toggle visibility of alpha keyboard
+                    final boolean visible = mKeyboardViewAlpha.getVisibility() == View.VISIBLE;
+                    mKeyboardViewAlpha.setVisibility(visible ? View.GONE : View.VISIBLE);
                 }
+                mCallback.pokeWakelock();
             }
         });
+
+        // We don't currently use the IME for PIN mode, but this will make it work if we ever do...
+        if (!mIsAlpha) {
+            mPasswordEntry.setInputType(InputType.TYPE_CLASS_NUMBER
+                    | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        } else {
+            mPasswordEntry.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        }
+
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCall);
         mEmergencyCallButton.setOnClickListener(this);
         mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
@@ -176,7 +187,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
     /** {@inheritDoc} */
     public boolean needsInput() {
-        return false;
+        return mUseSystemIME && mIsAlpha;
     }
 
     /** {@inheritDoc} */
@@ -295,7 +306,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         // Check if this was the result of hitting the enter key
-        if (actionId == EditorInfo.IME_NULL) {
+        if (actionId == EditorInfo.IME_NULL || actionId == EditorInfo.IME_ACTION_DONE) {
             verifyPasswordAndUnlock();
             return true;
         }
