@@ -234,9 +234,6 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     // WAKE_LOCK_TIMEOUT occurs.
     int mRequestMessagesWaiting;
 
-    // Is this the first radio state change?
-    private boolean mInitialRadioStateChange = true;
-
     //I'd rather this be LinkedList or something
     ArrayList<RILRequest> mRequestsList = new ArrayList<RILRequest>();
 
@@ -613,11 +610,6 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
 
     //***** Constructors
-    public
-    RIL(Context context) {
-        this(context, RILConstants.PREFERRED_NETWORK_MODE,
-                RILConstants.PREFERRED_CDMA_SUBSCRIPTION);
-    }
 
     public RIL(Context context, int networkMode, int cdmaSubscription) {
         super(context);
@@ -1394,24 +1386,6 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
     public void
     setRadioPower(boolean on, Message result) {
-        //if radio is OFF set preferred NW type and cmda subscription
-        if(mInitialRadioStateChange) {
-            synchronized (mStateMonitor) {
-                if (!mState.isOn()) {
-                    setPreferredNetworkType(mNetworkMode, null);
-
-                    RILRequest rrCs = RILRequest.obtain(
-                                   RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE, null);
-                    rrCs.mp.writeInt(1);
-                    rrCs.mp.writeInt(mCdmaSubscription);
-                    if (RILJ_LOGD) {
-                        riljLog(rrCs.serialString() + "> "
-                                + requestToString(rrCs.mRequest) + " : " + mCdmaSubscription);
-                    }
-                    send(rrCs);
-                }
-            }
-        }
         RILRequest rr = RILRequest.obtain(RIL_REQUEST_RADIO_POWER, result);
 
         rr.mp.writeInt(1);
@@ -2058,26 +2032,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     }
 
     private void switchToRadioState(RadioState newState) {
-
-        if (mInitialRadioStateChange) {
-            if (newState.isOn()) {
-                /* If this is our first notification, make sure the radio
-                 * is powered off.  This gets the radio into a known state,
-                 * since it's possible for the phone proc to have restarted
-                 * (eg, if it or the runtime crashed) without the RIL
-                 * and/or radio knowing.
-                 */
-                if (RILJ_LOGD) Log.d(LOG_TAG, "Radio ON @ init; reset to OFF");
-                setRadioPower(false, null);
-            } else {
-                if (RILJ_LOGD) Log.d(LOG_TAG, "Radio OFF @ init");
-                setRadioState(newState);
-                setPreferredNetworkType(mNetworkMode, null);
-            }
-            mInitialRadioStateChange = false;
-        } else {
-            setRadioState(newState);
-        }
+        setRadioState(newState);
     }
 
     /**
@@ -2467,7 +2422,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_OEM_HOOK_RAW: ret = responseRaw(p); break;
             case RIL_UNSOL_RINGBACK_TONE: ret = responseInts(p); break;
             case RIL_UNSOL_RESEND_INCALL_MUTE: ret = responseVoid(p); break;
-            case RIL_UNSOL_CDMA_SUBSCRIPTION_CHANGED: ret = responseInts(p); break;
+            case RIL_UNSOL_CDMA_SUBSCRIPTION_SOURCE_CHANGED: ret = responseInts(p); break;
             case RIL_UNSOl_CDMA_PRL_CHANGED: ret = responseInts(p); break;
             case RIL_UNSOL_EXIT_EMERGENCY_CALLBACK_MODE: ret = responseVoid(p); break;
             case RIL_UNSOL_RIL_CONNECTED: ret = responseInts(p); break;
@@ -2775,7 +2730,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                 }
                 break;
 
-            case RIL_UNSOL_CDMA_SUBSCRIPTION_CHANGED:
+            case RIL_UNSOL_CDMA_SUBSCRIPTION_SOURCE_CHANGED:
                 if (RILJ_LOGD) unsljLogRet(response, ret);
 
                 if (mCdmaSubscriptionChangedRegistrants != null) {
@@ -2804,6 +2759,11 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
             case RIL_UNSOL_RIL_CONNECTED: {
                 if (RILJ_LOGD) unsljLogRet(response, ret);
+
+                // Initial conditions
+                setRadioPower(false, null);
+                setPreferredNetworkType(mNetworkMode, null);
+                setCdmaSubscriptionSource(mCdmaSubscription, null);
                 notifyRegistrantsRilConnectionChanged(((int[])ret)[0]);
                 break;
             }
@@ -3554,7 +3514,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_OEM_HOOK_RAW: return "UNSOL_OEM_HOOK_RAW";
             case RIL_UNSOL_RINGBACK_TONE: return "UNSOL_RINGBACK_TONG";
             case RIL_UNSOL_RESEND_INCALL_MUTE: return "UNSOL_RESEND_INCALL_MUTE";
-            case RIL_UNSOL_CDMA_SUBSCRIPTION_CHANGED: return "CDMA_SUBSCRIPTION_CHANGED";
+            case RIL_UNSOL_CDMA_SUBSCRIPTION_SOURCE_CHANGED: return "CDMA_SUBSCRIPTION_SOURCE_CHANGED";
             case RIL_UNSOl_CDMA_PRL_CHANGED: return "UNSOL_CDMA_PRL_CHANGED";
             case RIL_UNSOL_EXIT_EMERGENCY_CALLBACK_MODE: return "UNSOL_EXIT_EMERGENCY_CALLBACK_MODE";
             case RIL_UNSOL_RIL_CONNECTED: return "UNSOL_RIL_CONNECTED";
