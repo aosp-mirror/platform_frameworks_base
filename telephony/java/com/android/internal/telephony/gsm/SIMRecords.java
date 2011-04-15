@@ -472,17 +472,23 @@ public final class SIMRecords extends IccRecords {
      *  provided the SIM card. Returns null of SIM is not yet ready
      */
     public String getSIMOperatorNumeric() {
-        if (imsi == null || mncLength == UNINITIALIZED || mncLength == UNKNOWN) {
+        if (imsi == null) {
+            Log.d(LOG_TAG, "getSIMOperatorNumeric: IMSI == null");
+            return null;
+        }
+        if (mncLength == UNINITIALIZED || mncLength == UNKNOWN) {
+            Log.d(LOG_TAG, "getSIMOperatorNumeric: bad mncLength");
             return null;
         }
 
-        // Length = length of MCC + length of MNC
-        // length of mcc = 3 (TS 23.003 Section 2.2)
+        // STOPSHIP: to be removed
         if (SystemProperties.getInt(com.android.internal.telephony.TelephonyProperties
                 .PROPERTY_NETWORK_LTE_ON_CDMA, 0) == 1) {
             Log.e(LOG_TAG, "getSIMOperatorNumeric: STOPSHIP bad numeric operators in lte");
             return SystemProperties.get("ro.cdma.home.operator.numeric", "310004");
         }
+        // Length = length of MCC + length of MNC
+        // length of mcc = 3 (TS 23.003 Section 2.2)
         return imsi.substring(0, 3 + mncLength);
     }
 
@@ -524,7 +530,7 @@ public final class SIMRecords extends IccRecords {
                     imsi = null;
                 }
 
-                Log.d(LOG_TAG, "IMSI: " + imsi.substring(0, 6) + "xxxxxxx");
+                Log.d(LOG_TAG, "IMSI: " + /* imsi.substring(0, 6) +*/ "xxxxxxx");
 
                 if (((mncLength == UNKNOWN) || (mncLength == 2)) &&
                         ((imsi != null) && (imsi.length() >= 6))) {
