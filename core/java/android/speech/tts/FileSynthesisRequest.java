@@ -19,6 +19,7 @@ import android.media.AudioFormat;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -31,6 +32,8 @@ class FileSynthesisRequest extends SynthesisRequest {
 
     private static final String TAG = "FileSynthesisRequest";
     private static final boolean DBG = false;
+
+    private static final int MAX_AUDIO_BUFFER_SIZE = 8192;
 
     private static final int WAV_HEADER_LENGTH = 44;
     private static final short WAV_FORMAT_PCM = 0x0001;
@@ -78,6 +81,11 @@ class FileSynthesisRequest extends SynthesisRequest {
         } catch (IOException ex) {
             Log.e(TAG, "Failed to close " + mFileName + ": " + ex);
         }
+    }
+
+    @Override
+    public int getMaxBufferSize() {
+        return MAX_AUDIO_BUFFER_SIZE;
     }
 
     @Override
@@ -152,8 +160,9 @@ class FileSynthesisRequest extends SynthesisRequest {
             try {
                 // Write WAV header at start of file
                 mFile.seek(0);
-                int fileLen = (int) mFile.length();
-                mFile.write(makeWavHeader(mSampleRateInHz, mAudioFormat, mChannelCount, fileLen));
+                int dataLength = (int) (mFile.length() - WAV_HEADER_LENGTH);
+                mFile.write(
+                        makeWavHeader(mSampleRateInHz, mAudioFormat, mChannelCount, dataLength));
                 closeFile();
                 return TextToSpeech.SUCCESS;
             } catch (IOException ex) {
@@ -164,8 +173,37 @@ class FileSynthesisRequest extends SynthesisRequest {
         }
     }
 
+    @Override
+    public int completeAudioAvailable(int sampleRateInHz, int audioFormat, int channelCount,
+            byte[] buffer, int offset, int length) {
+        synchronized (mStateLock) {
+            if (mStopped) {
+                if (DBG) Log.d(TAG, "Request has been aborted.");
+                return TextToSpeech.ERROR;
+            }
+        }
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(mFileName);
+            out.write(makeWavHeader(sampleRateInHz, audioFormat, channelCount, length));
+            out.write(buffer, offset, length);
+            return TextToSpeech.SUCCESS;
+        } catch (IOException ex) {
+            Log.e(TAG, "Failed to write to " + mFileName + ": " + ex);
+            return TextToSpeech.ERROR;
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException ex) {
+                Log.e(TAG, "Failed to close " + mFileName + ": " + ex);
+            }
+        }
+    }
+
     private byte[] makeWavHeader(int sampleRateInHz, int audioFormat, int channelCount,
-            int fileLength) {
+            int dataLength) {
         // TODO: is AudioFormat.ENCODING_DEFAULT always the same as ENCODING_PCM_16BIT?
         int sampleSizeInBytes = (audioFormat == AudioFormat.ENCODING_PCM_8BIT ? 1 : 2);
         int byteRate = sampleRateInHz * sampleSizeInBytes * channelCount;
@@ -177,7 +215,7 @@ class FileSynthesisRequest extends SynthesisRequest {
         header.order(ByteOrder.LITTLE_ENDIAN);
 
         header.put(new byte[]{ 'R', 'I', 'F', 'F' });
-        header.putInt(fileLength - 8);  // RIFF chunk size
+        header.putInt(dataLength + WAV_HEADER_LENGTH - 8);  // RIFF chunk size
         header.put(new byte[]{ 'W', 'A', 'V', 'E' });
         header.put(new byte[]{ 'f', 'm', 't', ' ' });
         header.putInt(16);  // size of fmt chunk
@@ -188,7 +226,6 @@ class FileSynthesisRequest extends SynthesisRequest {
         header.putShort(blockAlign);
         header.putShort(bitsPerSample);
         header.put(new byte[]{ 'd', 'a', 't', 'a' });
-        int dataLength = fileLength - WAV_HEADER_LENGTH;
         header.putInt(dataLength);
 
         return headerBuf;

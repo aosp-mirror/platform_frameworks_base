@@ -18,6 +18,13 @@ package android.speech.tts;
 /**
  * A request for speech synthesis given to a TTS engine for processing.
  *
+ * The engine can provide streaming audio by calling
+ * {@link #start}, then {@link #audioAvailable} until all audio has been provided, then finally
+ * {@link #done}.
+ *
+ * Alternatively, the engine can provide all the audio at once, by using
+ * {@link #completeAudioAvailable}.
+ *
  * @hide Pending approval
  */
 public abstract class SynthesisRequest {
@@ -101,6 +108,12 @@ public abstract class SynthesisRequest {
     }
 
     /**
+     * Gets the maximum number of bytes that the TTS engine can pass in a single call of
+     * {@link #audioAvailable}. This does not apply to {@link #completeAudioAvailable}.
+     */
+    public abstract int getMaxBufferSize();
+
+    /**
      * Aborts the speech request.
      *
      * Can be called from multiple threads.
@@ -117,7 +130,7 @@ public abstract class SynthesisRequest {
      * @param sampleRateInHz Sample rate in HZ of the generated audio.
      * @param audioFormat Audio format of the generated audio. Must be one of
      *         the ENCODING_ constants defined in {@link android.media.AudioFormat}.
-     * @param channelCount The number of channels
+     * @param channelCount The number of channels. Must be {@code 1} or {@code 2}.
      * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
      */
     public abstract int start(int sampleRateInHz, int audioFormat, int channelCount);
@@ -131,8 +144,8 @@ public abstract class SynthesisRequest {
      * @param buffer The generated audio data. This method will not hold on to {@code buffer},
      *         so the caller is free to modify it after this method returns.
      * @param offset The offset into {@code buffer} where the audio data starts.
-     * @param length The number of bytes of audio data in {@code buffer}.
-     *         Must be less than or equal to {@code buffer.length - offset}.
+     * @param length The number of bytes of audio data in {@code buffer}. This must be
+     *         less than or equal to the return value of {@link #getMaxBufferSize}.
      * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
      */
     public abstract int audioAvailable(byte[] buffer, int offset, int length);
@@ -148,4 +161,20 @@ public abstract class SynthesisRequest {
      */
     public abstract int done();
 
+    /**
+     * The service can call this method instead of using {@link #start}, {@link #audioAvailable}
+     * and {@link #done} if all the audio data is available in a single buffer.
+     *
+     * @param sampleRateInHz Sample rate in HZ of the generated audio.
+     * @param audioFormat Audio format of the generated audio. Must be one of
+     *         the ENCODING_ constants defined in {@link android.media.AudioFormat}.
+     * @param channelCount The number of channels. Must be {@code 1} or {@code 2}.
+     * @param buffer The generated audio data. This method will not hold on to {@code buffer},
+     *         so the caller is free to modify it after this method returns.
+     * @param offset The offset into {@code buffer} where the audio data starts.
+     * @param length The number of bytes of audio data in {@code buffer}.
+     * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
+     */
+    public abstract int completeAudioAvailable(int sampleRateInHz, int audioFormat,
+            int channelCount, byte[] buffer, int offset, int length);
 }
