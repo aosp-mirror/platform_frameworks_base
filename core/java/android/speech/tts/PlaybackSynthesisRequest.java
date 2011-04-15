@@ -78,6 +78,13 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
         }
     }
 
+    @Override
+    public int getMaxBufferSize() {
+        // The AudioTrack buffer will be at least MIN_AUDIO_BUFFER_SIZE, so that should always be
+        // a safe buffer size to pass in.
+        return MIN_AUDIO_BUFFER_SIZE;
+    }
+
     // TODO: add a thread that writes to the AudioTrack?
     @Override
     public int start(int sampleRateInHz, int audioFormat, int channelCount) {
@@ -85,20 +92,6 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
             Log.d(TAG, "start(" + sampleRateInHz + "," + audioFormat
                     + "," + channelCount + ")");
         }
-
-        int channelConfig;
-        if (channelCount == 1) {
-            channelConfig = AudioFormat.CHANNEL_OUT_MONO;
-        } else if (channelCount == 2){
-            channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
-        } else {
-            Log.e(TAG, "Unsupported number of channels: " + channelCount);
-            return TextToSpeech.ERROR;
-        }
-
-        int minBufferSizeInBytes
-                = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);
-        int bufferSizeInBytes = Math.max(MIN_AUDIO_BUFFER_SIZE, minBufferSizeInBytes);
 
         synchronized (mStateLock) {
             if (mStopped) {
@@ -111,22 +104,19 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
                 return TextToSpeech.ERROR;
             }
 
-            mAudioTrack = new AudioTrack(mStreamType, sampleRateInHz, channelConfig, audioFormat,
-                    bufferSizeInBytes, AudioTrack.MODE_STREAM);
-            if (mAudioTrack.getState() != AudioTrack.STATE_INITIALIZED) {
-                cleanUp();
+            mAudioTrack = createAudioTrack(sampleRateInHz, audioFormat, channelCount,
+                    AudioTrack.MODE_STREAM);
+            if (mAudioTrack == null) {
                 return TextToSpeech.ERROR;
             }
-
-            setupVolume();
         }
 
         return TextToSpeech.SUCCESS;
     }
 
-    private void setupVolume() {
-        float vol = clip(mVolume, 0.0f, 1.0f);
-        float panning = clip(mPan, -1.0f, 1.0f);
+    private void setupVolume(AudioTrack audioTrack, float volume, float pan) {
+        float vol = clip(volume, 0.0f, 1.0f);
+        float panning = clip(pan, -1.0f, 1.0f);
         float volLeft = vol;
         float volRight = vol;
         if (panning > 0.0f) {
@@ -135,7 +125,7 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
             volRight *= (1.0f + panning);
         }
         if (DBG) Log.d(TAG, "volLeft=" + volLeft + ",volRight=" + volRight);
-        if (mAudioTrack.setStereoVolume(volLeft, volRight) != AudioTrack.SUCCESS) {
+        if (audioTrack.setStereoVolume(volLeft, volRight) != AudioTrack.SUCCESS) {
             Log.e(TAG, "Failed to set volume");
         }
     }
@@ -148,7 +138,10 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
     public int audioAvailable(byte[] buffer, int offset, int length) {
         if (DBG) {
             Log.d(TAG, "audioAvailable(byte[" + buffer.length + "],"
-                    + offset + "," + length + "), thread ID=" + android.os.Process.myTid());
+                    + offset + "," + length + ")");
+        }
+        if (length > getMaxBufferSize()) {
+            throw new IllegalArgumentException("buffer is too large (" + length + " bytes)");
         }
         synchronized (mStateLock) {
             if (mStopped) {
@@ -193,5 +186,73 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
             cleanUp();
         }
         return TextToSpeech.SUCCESS;
+    }
+
+    @Override
+    public int completeAudioAvailable(int sampleRateInHz, int audioFormat, int channelCount,
+            byte[] buffer, int offset, int length) {
+        if (DBG) {
+            Log.d(TAG, "completeAudioAvailable(" + sampleRateInHz + "," + audioFormat
+                    + "," + channelCount + "byte[" + buffer.length + "],"
+                    + offset + "," + length + ")");
+        }
+
+        synchronized (mStateLock) {
+            if (mStopped) {
+                if (DBG) Log.d(TAG, "Request has been aborted.");
+                return TextToSpeech.ERROR;
+            }
+            if (mAudioTrack != null) {
+                Log.e(TAG, "start() called before completeAudioAvailable()");
+                cleanUp();
+                return TextToSpeech.ERROR;
+            }
+
+            mAudioTrack = createAudioTrack(sampleRateInHz, audioFormat, channelCount,
+                    AudioTrack.MODE_STATIC);
+            if (mAudioTrack == null) {
+                return TextToSpeech.ERROR;
+            }
+
+            try {
+                mAudioTrack.write(buffer, offset, length);
+                mAudioTrack.play();
+            } catch (IllegalStateException ex) {
+                Log.e(TAG, "Playback error", ex);
+                return TextToSpeech.ERROR;
+            } finally {
+                cleanUp();
+            }
+        }
+
+        return TextToSpeech.SUCCESS;
+    }
+
+    private AudioTrack createAudioTrack(int sampleRateInHz, int audioFormat, int channelCount,
+            int mode) {
+        int channelConfig;
+        if (channelCount == 1) {
+            channelConfig = AudioFormat.CHANNEL_OUT_MONO;
+        } else if (channelCount == 2){
+            channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
+        } else {
+            Log.e(TAG, "Unsupported number of channels: " + channelCount);
+            return null;
+        }
+
+        int minBufferSizeInBytes
+                = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);
+        int bufferSizeInBytes = Math.max(MIN_AUDIO_BUFFER_SIZE, minBufferSizeInBytes);
+        AudioTrack audioTrack = new AudioTrack(mStreamType, sampleRateInHz, channelConfig,
+                audioFormat, bufferSizeInBytes, mode);
+        if (audioTrack == null) {
+            return null;
+        }
+        if (audioTrack.getState() != AudioTrack.STATE_INITIALIZED) {
+            audioTrack.release();
+            return null;
+        }
+        setupVolume(audioTrack, mVolume, mPan);
+        return audioTrack;
     }
 }
