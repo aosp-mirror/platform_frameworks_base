@@ -1,19 +1,18 @@
-/* //device/libs/android_runtime/AndroidRuntime.cpp
-**
-** Copyright 2006, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+/*
+ * Copyright (C) 2006 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #define LOG_TAG "AndroidRuntime"
 //#define LOG_NDEBUG 0
@@ -212,7 +211,7 @@ static jint com_android_internal_os_RuntimeInit_getQwertyKeyboard(JNIEnv* env, j
     if (value != NULL && strcmp(value, "true") == 0) {
         return 1;
     }
-    
+
     return 0;
 }
 
@@ -227,7 +226,7 @@ static JNINativeMethod gMethods[] = {
     { "isComputerOn", "()I",
         (void*) com_android_internal_os_RuntimeInit_isComputerOn },
     { "turnComputerOn", "()V",
-        (void*) com_android_internal_os_RuntimeInit_turnComputerOn },    
+        (void*) com_android_internal_os_RuntimeInit_turnComputerOn },
     { "getQwertyKeyboard", "()I",
         (void*) com_android_internal_os_RuntimeInit_getQwertyKeyboard },
 };
@@ -278,51 +277,16 @@ AndroidRuntime::~AndroidRuntime()
     return jniRegisterNativeMethods(env, className, gMethods, numMethods);
 }
 
-/*
- * Call a static Java Programming Language function that takes no arguments and returns void.
- */
-status_t AndroidRuntime::callStatic(const char* className, const char* methodName)
+status_t AndroidRuntime::callMain(const char* className,
+    jclass clazz, int argc, const char* const argv[])
 {
     JNIEnv* env;
-    jclass clazz;
-    jmethodID methodId;
-
-    env = getJNIEnv();
-    if (env == NULL)
-        return UNKNOWN_ERROR;
-
-    clazz = findClass(env, className);
-    if (clazz == NULL) {
-        LOGE("ERROR: could not find class '%s'\n", className);
-        return UNKNOWN_ERROR;
-    }
-    methodId = env->GetStaticMethodID(clazz, methodName, "()V");
-    if (methodId == NULL) {
-        LOGE("ERROR: could not find method %s.%s\n", className, methodName);
-        return UNKNOWN_ERROR;
-    }
-
-    env->CallStaticVoidMethod(clazz, methodId);
-
-    return NO_ERROR;
-}
-
-status_t AndroidRuntime::callMain(
-    const char* className, int argc, const char* const argv[])
-{
-    JNIEnv* env;
-    jclass clazz;
     jmethodID methodId;
 
     LOGD("Calling main entry %s", className);
 
     env = getJNIEnv();
-    if (env == NULL)
-        return UNKNOWN_ERROR;
-
-    clazz = findClass(env, className);
-    if (clazz == NULL) {
-        LOGE("ERROR: could not find class '%s'\n", className);
+    if (clazz == NULL || env == NULL) {
         return UNKNOWN_ERROR;
     }
 
@@ -349,70 +313,6 @@ status_t AndroidRuntime::callMain(
 
     env->CallStaticVoidMethod(clazz, methodId, strArray);
     return NO_ERROR;
-}
-
-/*
- * Find the named class.
- */
-jclass AndroidRuntime::findClass(JNIEnv* env, const char* className)
-{
-    if (env->ExceptionCheck()) {
-        LOGE("ERROR: exception pending on entry to findClass()");
-        return NULL;
-    }
-
-    /*
-     * This is a little awkward because the JNI FindClass call uses the
-     * class loader associated with the native method we're executing in.
-     * Because this native method is part of a "boot" class, JNI doesn't
-     * look for the class in CLASSPATH, which unfortunately is a likely
-     * location for it.  (Had we issued the FindClass call before calling
-     * into the VM -- at which point there isn't a native method frame on
-     * the stack -- the VM would have checked CLASSPATH.  We have to do
-     * this because we call into Java Programming Language code and
-     * bounce back out.)
-     *
-     * JNI lacks a "find class in a specific class loader" operation, so we
-     * have to do things the hard way.
-     */
-    jclass cls = NULL;
-
-    jclass javaLangClassLoader;
-    jmethodID getSystemClassLoader, loadClass;
-    jobject systemClassLoader;
-    jstring strClassName;
-
-    /* find the "system" class loader; none of this is expected to fail */
-    javaLangClassLoader = env->FindClass("java/lang/ClassLoader");
-    assert(javaLangClassLoader != NULL);
-    getSystemClassLoader = env->GetStaticMethodID(javaLangClassLoader,
-        "getSystemClassLoader", "()Ljava/lang/ClassLoader;");
-    loadClass = env->GetMethodID(javaLangClassLoader,
-        "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
-    assert(getSystemClassLoader != NULL && loadClass != NULL);
-    systemClassLoader = env->CallStaticObjectMethod(javaLangClassLoader,
-        getSystemClassLoader);
-    assert(systemClassLoader != NULL);
-
-    /* create an object for the class name string; alloc could fail */
-    strClassName = env->NewStringUTF(className);
-    if (env->ExceptionCheck()) {
-        LOGE("ERROR: unable to convert '%s' to string", className);
-        return NULL;
-    }
-    LOGV("system class loader is %p, loading %p (%s)",
-        systemClassLoader, strClassName, className);
-
-    /* try to find the named class */
-    cls = (jclass) env->CallObjectMethod(systemClassLoader, loadClass,
-                        strClassName);
-    if (env->ExceptionCheck()) {
-        LOGE("ERROR: unable to load class '%s' from %p",
-            className, systemClassLoader);
-        return NULL;
-    }
-
-    return cls;
 }
 
 /*
@@ -457,7 +357,7 @@ static bool runtime_isSensitiveThread() {
 int AndroidRuntime::addVmArguments(int argc, const char* const argv[])
 {
     int i;
-    
+
     for (i = 0; i<argc; i++) {
         if (argv[i][0] != '-') {
             return i;
@@ -890,6 +790,17 @@ bail:
     return result;
 }
 
+char* AndroidRuntime::toSlashClassName(const char* className)
+{
+    char* result = strdup(className);
+    for (char* cp = result; *cp != '\0'; cp++) {
+        if (*cp == '.') {
+            *cp = '/';
+        }
+    }
+    return result;
+}
+
 /*
  * Start the Android runtime.  This involves starting the virtual machine
  * and calling the "static void main(String[] args)" method in the class
@@ -900,20 +811,16 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     LOGD("\n>>>>>> AndroidRuntime START %s <<<<<<\n",
             className != NULL ? className : "(unknown)");
 
-    char* slashClassName = NULL;
-    char* cp;
-    JNIEnv* env;
-
     blockSigpipe();
 
-    /* 
-     * 'startSystemServer == true' means runtime is obsolete and not run from 
+    /*
+     * 'startSystemServer == true' means runtime is obsolete and not run from
      * init.rc anymore, so we print out the boot start event here.
      */
     if (startSystemServer) {
         /* track our progress through the boot sequence */
         const int LOG_BOOT_PROGRESS_START = 3000;
-        LOG_EVENT_LONG(LOG_BOOT_PROGRESS_START, 
+        LOG_EVENT_LONG(LOG_BOOT_PROGRESS_START,
                        ns2ms(systemTime(SYSTEM_TIME_MONOTONIC)));
     }
 
@@ -922,7 +829,7 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
         rootDir = "/system";
         if (!hasDir("/system")) {
             LOG_FATAL("No root directory specified, and /android does not exist.");
-            goto bail;
+            return;
         }
         setenv("ANDROID_ROOT", rootDir, 1);
     }
@@ -931,15 +838,18 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     //LOGD("Found LD_ASSUME_KERNEL='%s'\n", kernelHack);
 
     /* start the virtual machine */
-    if (startVm(&mJavaVM, &env) != 0)
-        goto bail;
+    JNIEnv* env;
+    if (startVm(&mJavaVM, &env) != 0) {
+        return;
+    }
+    onVmCreated(env);
 
     /*
      * Register android functions.
      */
     if (startReg(env) < 0) {
         LOGE("Unable to register all android natives\n");
-        goto bail;
+        return;
     }
 
     /*
@@ -959,7 +869,7 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
     classNameStr = env->NewStringUTF(className);
     assert(classNameStr != NULL);
     env->SetObjectArrayElement(strArray, 0, classNameStr);
-    startSystemServerStr = env->NewStringUTF(startSystemServer ? 
+    startSystemServerStr = env->NewStringUTF(startSystemServer ?
                                                  "true" : "false");
     env->SetObjectArrayElement(strArray, 1, startSystemServerStr);
 
@@ -967,20 +877,13 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
      * Start VM.  This thread becomes the main thread of the VM, and will
      * not return until the VM exits.
      */
-    jclass startClass;
-    jmethodID startMeth;
-
-    slashClassName = strdup(className);
-    for (cp = slashClassName; *cp != '\0'; cp++)
-        if (*cp == '.')
-            *cp = '/';
-
-    startClass = env->FindClass(slashClassName);
+    char* slashClassName = toSlashClassName(className);
+    jclass startClass = env->FindClass(slashClassName);
     if (startClass == NULL) {
         LOGE("JavaVM unable to locate class '%s'\n", slashClassName);
         /* keep going */
     } else {
-        startMeth = env->GetStaticMethodID(startClass, "main",
+        jmethodID startMeth = env->GetStaticMethodID(startClass, "main",
             "([Ljava/lang/String;)V");
         if (startMeth == NULL) {
             LOGE("JavaVM unable to find main() in '%s'\n", className);
@@ -994,15 +897,13 @@ void AndroidRuntime::start(const char* className, const bool startSystemServer)
 #endif
         }
     }
+    free(slashClassName);
 
     LOGD("Shutting down VM\n");
     if (mJavaVM->DetachCurrentThread() != JNI_OK)
         LOGW("Warning: unable to detach main thread\n");
     if (mJavaVM->DestroyJavaVM() != 0)
         LOGW("Warning: VM did not shut down cleanly\n");
-
-bail:
-    free(slashClassName);
 }
 
 void AndroidRuntime::start()
@@ -1015,6 +916,11 @@ void AndroidRuntime::onExit(int code)
 {
     LOGV("AndroidRuntime onExit calling exit(%d)", code);
     exit(code);
+}
+
+void AndroidRuntime::onVmCreated(JNIEnv* env)
+{
+    // If AndroidRuntime had anything to do here, we'd have done it in 'start'.
 }
 
 /*
@@ -1111,7 +1017,7 @@ static int javaDetachThread(void)
  * into the VM before it really starts executing.
  */
 /*static*/ int AndroidRuntime::javaCreateThreadEtc(
-                                android_thread_func_t entryFunction, 
+                                android_thread_func_t entryFunction,
                                 void* userData,
                                 const char* threadName,
                                 int32_t threadPriority,
@@ -1299,7 +1205,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_backup_BackupDataOutput),
     REG_JNI(register_android_backup_FileBackupHelperBase),
     REG_JNI(register_android_backup_BackupHelperDispatcher),
-    
+
     REG_JNI(register_android_app_ActivityThread),
     REG_JNI(register_android_app_NativeActivity),
     REG_JNI(register_android_view_InputChannel),

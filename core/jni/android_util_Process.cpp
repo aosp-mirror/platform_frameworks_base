@@ -103,17 +103,6 @@ static void signalExceptionForGroupError(JNIEnv* env, jobject obj, int err)
     }
 }
 
-
-static void fakeProcessEntry(void* arg)
-{
-    String8* cls = (String8*)arg;
-
-    AndroidRuntime* jr = AndroidRuntime::getRuntime();
-    jr->callMain(cls->string(), 0, NULL);
-
-    delete cls;
-}
-
 jint android_os_Process_myPid(JNIEnv* env, jobject clazz)
 {
     return getpid();
