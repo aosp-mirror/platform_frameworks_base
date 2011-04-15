@@ -106,10 +106,32 @@ public class PhoneFactory {
                         Settings.Secure.PREFERRED_NETWORK_MODE, preferredNetworkMode);
                 Log.i(LOG_TAG, "Network Mode set to " + Integer.toString(networkMode));
 
-                //Get preferredNetworkMode from Settings.System
-                int cdmaSubscription = Settings.Secure.getInt(context.getContentResolver(),
-                        Settings.Secure.PREFERRED_CDMA_SUBSCRIPTION, preferredCdmaSubscription);
-                Log.i(LOG_TAG, "Cdma Subscription set to " + Integer.toString(cdmaSubscription));
+                // Get cdmaSubscription
+                // TODO: Change when the ril will provides a way to know at runtime
+                //       the configuration, bug 4202572. And the ril issues the
+                //       RIL_UNSOL_CDMA_SUBSCRIPTION_SOURCE_CHANGED, bug 4295439.
+                int cdmaSubscription;
+                int lteOnCdma = SystemProperties.getInt(
+                                TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA, -1);
+                switch (lteOnCdma) {
+                    case 0:
+                        cdmaSubscription = RILConstants.SUBSCRIPTION_FROM_NV;
+                        Log.i(LOG_TAG, "lteOnCdma is 0 use SUBSCRIPTION_FROM_NV");
+                        break;
+                    case 1:
+                        cdmaSubscription = RILConstants.SUBSCRIPTION_FROM_RUIM;
+                        Log.i(LOG_TAG, "lteOnCdma is 1 use SUBSCRIPTION_FROM_RUIM");
+                        break;
+                    case -1:
+                    default:
+                        //Get cdmaSubscription mode from Settings.System
+                        cdmaSubscription = Settings.Secure.getInt(context.getContentResolver(),
+                                Settings.Secure.PREFERRED_CDMA_SUBSCRIPTION,
+                                preferredCdmaSubscription);
+                        Log.i(LOG_TAG, "lteOnCdma not set, using PREFERRED_CDMA_SUBSCRIPTION");
+                        break;
+                }
+                Log.i(LOG_TAG, "Cdma Subscription set to " + cdmaSubscription);
 
                 //reads the system properties and makes commandsinterface
                 sCommandsInterface = new RIL(context, networkMode, cdmaSubscription);
