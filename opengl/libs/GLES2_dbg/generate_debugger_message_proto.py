@@ -142,6 +142,7 @@ message Message
         TimeMode = 1; // arg0 = SYSTEM_TIME_* in utils/Timers.h
         ExpectResponse = 2; // arg0 = enum Function, arg1 = true/false
         CaptureSwap = 3; // arg0 = number of eglSwapBuffers to glReadPixels
+        GLConstant = 4; // arg0 = GLenum, arg1 = constant; send GL impl. constants
     };
     optional Prop prop = 21; // used with SETPROP, value in arg0
     optional float clock = 22; // wall clock in seconds

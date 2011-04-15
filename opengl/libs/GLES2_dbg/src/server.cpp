@@ -159,8 +159,17 @@ bool TryReceive(glesv2debugger::Message & cmd)
 
 float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
 {
+    // TODO: use per DbgContext send/receive buffer and async socket
+    //  instead of mutex and blocking io; watch out for large messages
     static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    pthread_mutex_lock(&mutex); // TODO: this is just temporary
+    struct Autolock {
+        Autolock() {
+            pthread_mutex_lock(&mutex);
+        }
+        ~Autolock() {
+            pthread_mutex_unlock(&mutex);
+        }
+    } autolock;
 
     if (msg.function() != glesv2debugger::Message_Function_ACK)
         assert(msg.has_context_id() && msg.context_id() != 0);
@@ -176,7 +185,6 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
                 Die("MAX_FILE_SIZE reached");
             }
         }
-        pthread_mutex_unlock(&mutex);
         return 0;
     }
     int sent = -1;
@@ -192,7 +200,11 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
         LOGD("actual sent=%d expected=%d clientSock=%d", sent, str.length(), clientSock);
         Die("Failed to send message");
     }
-
+    // TODO: factor Receive & TryReceive out and into MessageLoop, or add control argument.
+    // mean while, if server is sending a SETPROP then don't try to receive,
+    //  because server will not be processing received command
+    if (msg.function() == msg.SETPROP)
+        return t;
     // try to receive commands even though not expecting response,
     //  since client can send SETPROP and other commands anytime
     if (!msg.expect_response()) {
@@ -204,8 +216,6 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
         }
     } else
         Receive(cmd);
-
-    pthread_mutex_unlock(&mutex);
     return t;
 }
 

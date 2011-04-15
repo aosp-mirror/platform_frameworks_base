@@ -50,7 +50,7 @@ protected:
             pthread_key_create(&dbgEGLThreadLocalStorageKey, NULL);
         ASSERT_NE(-1, dbgEGLThreadLocalStorageKey);
         tls.dbg = new DbgContext(1, &hooks, 32, GL_RGBA, GL_UNSIGNED_BYTE);
-        ASSERT_NE((void *)NULL, tls.dbg);
+        ASSERT_TRUE(tls.dbg != NULL);
         pthread_setspecific(dbgEGLThreadLocalStorageKey, &tls);
         for (unsigned int i = 0; i < sizeof(hooks) / sizeof(void *); i++)
             ((void **)&hooks)[i] = (void *)glNoop;
@@ -95,7 +95,7 @@ protected:
         if (len > bufferSize) {
             bufferSize = len;
             buffer = new char[bufferSize];
-            ASSERT_NE((char *)NULL, buffer);
+            ASSERT_TRUE(buffer != NULL);
         }
         ASSERT_EQ(len, recv(sock, buffer, len, 0));
         msg.Clear();
@@ -427,7 +427,7 @@ TEST_F(SocketContextTest, CopyTexImage2D)
             EXPECT_EQ(_height, height);
             EXPECT_EQ(GL_RGBA, format);
             EXPECT_EQ(GL_UNSIGNED_BYTE, type);
-            ASSERT_NE((void *)NULL, pixels);
+            ASSERT_TRUE(pixels != NULL);
             memcpy(pixels, _pixels, sizeof(_pixels));
             readPixels++;
         }

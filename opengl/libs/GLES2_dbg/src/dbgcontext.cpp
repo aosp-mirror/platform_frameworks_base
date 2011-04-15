@@ -71,7 +71,24 @@ DbgContext * CreateDbgContext(const pthread_key_t EGLThreadLocalStorageKey,
     GLint readFormat, readType;
     hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
     hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
-    return new DbgContext(version, hooks, MAX_VERTEX_ATTRIBS, readFormat, readType);
+    DbgContext * const dbg = new DbgContext(version, hooks, MAX_VERTEX_ATTRIBS, readFormat, readType);
+
+    glesv2debugger::Message msg, cmd;
+    msg.set_context_id(reinterpret_cast<int>(dbg));
+    msg.set_expect_response(false);
+    msg.set_type(msg.Response);
+    msg.set_function(msg.SETPROP);
+    msg.set_prop(msg.GLConstant);
+    msg.set_arg0(GL_MAX_VERTEX_ATTRIBS);
+    msg.set_arg1(MAX_VERTEX_ATTRIBS);
+    Send(msg, cmd);
+
+    GLint MAX_COMBINED_TEXTURE_IMAGE_UNITS = 0;
+    hooks->gl.glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+    msg.set_arg0(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+    msg.set_arg1(MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+    Send(msg, cmd);
+    return dbg;
 }
 
 void DestroyDbgContext(DbgContext * const dbg)
