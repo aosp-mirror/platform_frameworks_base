@@ -996,7 +996,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      * via an unsolicited response (which could have happened at any
      * previous state
      */
-    private void onDataStateChanged (AsyncResult ar, boolean explicitPoll) {
+    private void onDataStateChanged (AsyncResult ar) {
         ArrayList<DataCallState> dataCallStates;
 
         dataCallStates = (ArrayList<DataCallState>)(ar.result);
@@ -1009,12 +1009,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         for (ApnContext apnContext : mApnContexts.values()) {
-            onDataStateChanged(dataCallStates, explicitPoll, apnContext);
+            onDataStateChanged(dataCallStates, apnContext);
         }
     }
 
     private void onDataStateChanged (ArrayList<DataCallState> dataCallStates,
-                                     boolean explicitPoll,
                                      ApnContext apnContext) {
 
         if (apnContext == null) {
@@ -1044,25 +1043,16 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 return;
             } else if (!dataCallStatesHasActiveCID(dataCallStates,
                     apnContext.getDataConnection().getCid())) {
-                // Here, we only consider this authoritative if we asked for the
-                // PDP list. If it was an unsolicited response, we poll again
-                // to make sure everyone agrees on the initial state.
 
-                if (!explicitPoll) {
-                    // We think it disconnected but aren't sure...poll from our side
-                    mPhone.mCM.getPDPContextList(
-                            this.obtainMessage(EVENT_GET_PDP_LIST_COMPLETE));
-                } else {
-                    Log.i(LOG_TAG, "PDP connection has dropped (active=false case). "
+                Log.i(LOG_TAG, "PDP connection has dropped (active=false case). "
                                     + " Reconnecting");
 
-                    // Log the network drop on the event log.
-                    int cid = getCellLocationId();
-                    EventLog.writeEvent(EventLogTags.PDP_NETWORK_DROP, cid,
-                            TelephonyManager.getDefault().getNetworkType());
+                // Log the network drop on the event log.
+                int cid = getCellLocationId();
+                EventLog.writeEvent(EventLogTags.PDP_NETWORK_DROP, cid,
+                        TelephonyManager.getDefault().getNetworkType());
 
-                    cleanUpConnection(true, apnContext);
-                }
+                cleanUpConnection(true, apnContext);
             }
         }
     }
@@ -1214,7 +1204,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     // It's possible the PDP context went down and we weren't notified.
                     // Start polling the context list in an attempt to recover.
                     if (DBG) log("no DATAIN in a while; polling PDP");
-                    mPhone.mCM.getDataCallList(obtainMessage(EVENT_GET_PDP_LIST_COMPLETE));
+                    mPhone.mCM.getDataCallList(obtainMessage(EVENT_DATA_STATE_CHANGED));
 
                     mNoRecvPollCount++;
 
@@ -1653,7 +1643,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected void onPollPdp() {
         if (getOverallState() == State.CONNECTED) {
             // only poll when connected
-            mPhone.mCM.getPDPContextList(this.obtainMessage(EVENT_GET_PDP_LIST_COMPLETE));
+            mPhone.mCM.getDataCallList(this.obtainMessage(EVENT_DATA_STATE_CHANGED));
             sendMessageDelayed(obtainMessage(EVENT_POLL_PDP), POLL_PDP_MILLIS);
         }
     }
@@ -1933,11 +1923,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 break;
 
             case EVENT_DATA_STATE_CHANGED:
-                onDataStateChanged((AsyncResult) msg.obj, false);
-                break;
-
-            case EVENT_GET_PDP_LIST_COMPLETE:
-                onDataStateChanged((AsyncResult) msg.obj, true);
+                onDataStateChanged((AsyncResult) msg.obj);
                 break;
 
             case EVENT_POLL_PDP:
