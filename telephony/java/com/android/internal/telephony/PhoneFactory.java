@@ -178,7 +178,10 @@ public class PhoneFactory {
         case RILConstants.NETWORK_MODE_GSM_UMTS:
             return Phone.PHONE_TYPE_GSM;
 
+        // Use CDMA Phone for the global mode including CDMA
         case RILConstants.NETWORK_MODE_GLOBAL:
+        case RILConstants.NETWORK_MODE_LTE_CDMA_EVDO:
+        case RILConstants.NETWORK_MODE_LTE_CMDA_EVDO_GSM_WCDMA:
             return Phone.PHONE_TYPE_CDMA;
 
         case RILConstants.NETWORK_MODE_LTE_ONLY:
