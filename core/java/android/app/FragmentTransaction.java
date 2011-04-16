@@ -87,6 +87,31 @@ public abstract class FragmentTransaction {
     public abstract FragmentTransaction show(Fragment fragment);
 
     /**
+     * Detach the given fragment from the UI.  This is the same state as
+     * when it is put on the back stack: the fragment is removed from
+     * the UI, however its state is still being actively managed by the
+     * fragment manager.  When going into this state its view hierarchy
+     * is destroyed.
+     *
+     * @param fragment The fragment to be detached.
+     *
+     * @return Returns the same FragmentTransaction instance.
+     */
+    public abstract FragmentTransaction detach(Fragment fragment);
+
+    /**
+     * Re-attach a fragment after it had previously been deatched from
+     * the UI with {@link #detach(Fragment)}.  This
+     * causes its view hierarchy to be re-created, attached to the UI,
+     * and displayed.
+     *
+     * @param fragment The fragment to be attached.
+     *
+     * @return Returns the same FragmentTransaction instance.
+     */
+    public abstract FragmentTransaction attach(Fragment fragment);
+
+    /**
      * @return <code>true</code> if this transaction contains no operations,
      * <code>false</code> otherwise.
      */

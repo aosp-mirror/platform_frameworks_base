@@ -173,6 +173,8 @@ final class BackStackRecord extends FragmentTransaction implements
     static final int OP_REMOVE = 3;
     static final int OP_HIDE = 4;
     static final int OP_SHOW = 5;
+    static final int OP_DETACH = 6;
+    static final int OP_ATTACH = 7;
 
     static final class Op {
         Op next;
@@ -416,6 +418,32 @@ final class BackStackRecord extends FragmentTransaction implements
         return this;
     }
 
+    public FragmentTransaction detach(Fragment fragment) {
+        //if (fragment.mImmediateActivity == null) {
+        //    throw new IllegalStateException("Fragment not added: " + fragment);
+        //}
+
+        Op op = new Op();
+        op.cmd = OP_DETACH;
+        op.fragment = fragment;
+        addOp(op);
+
+        return this;
+    }
+
+    public FragmentTransaction attach(Fragment fragment) {
+        //if (fragment.mImmediateActivity == null) {
+        //    throw new IllegalStateException("Fragment not added: " + fragment);
+        //}
+
+        Op op = new Op();
+        op.cmd = OP_ATTACH;
+        op.fragment = fragment;
+        addOp(op);
+
+        return this;
+    }
+
     public FragmentTransaction setCustomAnimations(int enter, int exit) {
         return setCustomAnimations(enter, exit, 0, 0);
     }
@@ -589,6 +617,16 @@ final class BackStackRecord extends FragmentTransaction implements
                     f.mNextAnim = op.enterAnim;
                     mManager.showFragment(f, mTransition, mTransitionStyle);
                 } break;
+                case OP_DETACH: {
+                    Fragment f = op.fragment;
+                    f.mNextAnim = op.exitAnim;
+                    mManager.detachFragment(f, mTransition, mTransitionStyle);
+                } break;
+                case OP_ATTACH: {
+                    Fragment f = op.fragment;
+                    f.mNextAnim = op.enterAnim;
+                    mManager.attachFragment(f, mTransition, mTransitionStyle);
+                } break;
                 default: {
                     throw new IllegalArgumentException("Unknown cmd: " + op.cmd);
                 }
@@ -653,6 +691,16 @@ final class BackStackRecord extends FragmentTransaction implements
                     Fragment f = op.fragment;
                     f.mNextAnim = op.popExitAnim;
                     mManager.hideFragment(f,
+                            FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
+                } break;
+                case OP_DETACH: {
+                    Fragment f = op.fragment;
+                    mManager.attachFragment(f,
+                            FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
+                } break;
+                case OP_ATTACH: {
+                    Fragment f = op.fragment;
+                    mManager.detachFragment(f,
                             FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
                 } break;
                 default: {

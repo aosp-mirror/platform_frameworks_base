@@ -2923,8 +2923,10 @@ package android.app {
     method public abstract android.app.FragmentTransaction add(int, android.app.Fragment);
     method public abstract android.app.FragmentTransaction add(int, android.app.Fragment, java.lang.String);
     method public abstract android.app.FragmentTransaction addToBackStack(java.lang.String);
+    method public abstract android.app.FragmentTransaction attach(android.app.Fragment);
     method public abstract int commit();
     method public abstract int commitAllowingStateLoss();
+    method public abstract android.app.FragmentTransaction detach(android.app.Fragment);
     method public abstract android.app.FragmentTransaction disallowAddToBackStack();
     method public abstract android.app.FragmentTransaction hide(android.app.Fragment);
     method public abstract boolean isAddToBackStackAllowed();

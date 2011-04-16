@@ -52,6 +52,7 @@ final class FragmentState implements Parcelable {
     final int mContainerId;
     final String mTag;
     final boolean mRetainInstance;
+    final boolean mDetached;
     final Bundle mArguments;
     
     Bundle mSavedFragmentState;
@@ -66,6 +67,7 @@ final class FragmentState implements Parcelable {
         mContainerId = frag.mContainerId;
         mTag = frag.mTag;
         mRetainInstance = frag.mRetainInstance;
+        mDetached = frag.mDetached;
         mArguments = frag.mArguments;
     }
     
@@ -77,6 +79,7 @@ final class FragmentState implements Parcelable {
         mContainerId = in.readInt();
         mTag = in.readString();
         mRetainInstance = in.readInt() != 0;
+        mDetached = in.readInt() != 0;
         mArguments = in.readBundle();
         mSavedFragmentState = in.readBundle();
     }
@@ -103,6 +106,7 @@ final class FragmentState implements Parcelable {
         mInstance.mContainerId = mContainerId;
         mInstance.mTag = mTag;
         mInstance.mRetainInstance = mRetainInstance;
+        mInstance.mDetached = mDetached;
         mInstance.mFragmentManager = activity.mFragments;
         
         return mInstance;
@@ -120,6 +124,7 @@ final class FragmentState implements Parcelable {
         dest.writeInt(mContainerId);
         dest.writeString(mTag);
         dest.writeInt(mRetainInstance ? 1 : 0);
+        dest.writeInt(mDetached ? 1 : 0);
         dest.writeBundle(mArguments);
         dest.writeBundle(mSavedFragmentState);
     }
@@ -404,6 +409,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     // from the user.
     boolean mHidden;
     
+    // Set to true when the app has requested that this fragment be detached.
+    boolean mDetached;
+
     // If set this fragment would like its instance retained across
     // configuration changes.
     boolean mRetainInstance;
@@ -511,23 +519,27 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         }
     }
     
-    void restoreViewState() {
+    final void restoreViewState() {
         if (mSavedViewState != null) {
             mView.restoreHierarchyState(mSavedViewState);
             mSavedViewState = null;
         }
     }
     
-    void setIndex(int index) {
+    final void setIndex(int index) {
         mIndex = index;
         mWho = "android:fragment:" + mIndex;
    }
     
-    void clearIndex() {
+    final void clearIndex() {
         mIndex = -1;
         mWho = null;
     }
     
+    final boolean isInBackStack() {
+        return mBackStackNesting > 0;
+    }
+
     /**
      * Subclasses can not override equals().
      */
@@ -1280,6 +1292,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
                 writer.print(" mFromLayout="); writer.print(mFromLayout);
                 writer.print(" mInLayout="); writer.println(mInLayout);
         writer.print(prefix); writer.print("mHidden="); writer.print(mHidden);
+                writer.print(" mDetached="); writer.print(mDetached);
                 writer.print(" mRetainInstance="); writer.print(mRetainInstance);
                 writer.print(" mRetaining="); writer.print(mRetaining);
                 writer.print(" mHasMenu="); writer.println(mHasMenu);
