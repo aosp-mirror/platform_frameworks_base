@@ -545,16 +545,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return false;
     }
 
-    protected boolean isEnabled(String apnType) {
-        ApnContext apnContext = mApnContexts.get(apnType);
-        if (apnContext == null) return false;
-        if (apnContext.getState() == State.DISCONNECTING
-                && apnContext.getPendingAction() == ApnContext.PENDING_ACTION_APN_DISABLE) {
-            return false;
-        }
-        return true;
-    }
-
     /**
      * Report on whether data connectivity is enabled for any APN.
      * @return {@code false} if data connectivity has been explicitly disabled,
@@ -1613,6 +1603,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
 
+        // Check if APN disabled.
+        if (apnContext.getPendingAction() == ApnContext.PENDING_ACTION_APN_DISABLE) {
+           apnContext.setEnabled(false);
+           apnContext.setPendingAction(ApnContext.PENDING_ACTION_NONE);
+        }
+
         // if all data connection are gone, check whether Airplane mode request was
         // pending.
         if (!isConnected()) {
@@ -1620,12 +1616,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 // Radio will be turned off. No need to retry data setup
                 return;
             }
-        }
-
-        // Check if APN disabled.
-        if (apnContext.getPendingAction() == ApnContext.PENDING_ACTION_APN_DISABLE) {
-           apnContext.setEnabled(false);
-           apnContext.setPendingAction(ApnContext.PENDING_ACTION_NONE);
         }
 
         if (TextUtils.equals(apnContext.getApnType(), Phone.APN_TYPE_DEFAULT)
