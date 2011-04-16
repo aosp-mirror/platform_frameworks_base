@@ -333,7 +333,7 @@ public interface Phone {
      * Returns string for the active APN host.
      *  @return type as a string or null if none.
      */
-    String getActiveApnHost();
+    String getActiveApnHost(String apnType);
 
     /**
      * Return the LinkProperties for the named apn or null if not available
@@ -1373,6 +1373,11 @@ public interface Phone {
      * Report on whether data connectivity is allowed.
      */
     boolean isDataConnectivityPossible();
+
+    /**
+     * Report on whether data connectivity is allowed for an APN.
+     */
+    boolean isDataConnectivityPossible(String apnType);
 
     /**
      * Retrieves the unique device ID, e.g., IMEI for GSM phones and MEID for CDMA phones.

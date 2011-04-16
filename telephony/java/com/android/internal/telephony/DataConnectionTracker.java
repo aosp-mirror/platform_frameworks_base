@@ -408,7 +408,7 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     /** TODO: See if we can remove */
-    public String getActiveApnString() {
+    public String getActiveApnString(String apnType) {
         String result = null;
         if (mActiveApn != null) {
             result = mActiveApn.apn;
@@ -466,6 +466,8 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract void onVoiceCallEnded();
     protected abstract void onCleanUpConnection(boolean tearDown, int apnId, String reason);
     protected abstract void onCleanUpAllConnections(String cause);
+    protected abstract boolean isDataPossible();
+    protected abstract boolean isDataPossible(String apnType);
 
     @Override
     public void handleMessage(Message msg) {
@@ -717,29 +719,6 @@ public abstract class DataConnectionTracker extends Handler {
         // note that we either just turned all off because we lost availability
         // or all were off and could now go on, so only have off apns to worry about
         notifyOffApnsOfAvailability(reason, isDataPossible());
-    }
-
-    /**
-     * The only circumstances under which we report that data connectivity is not
-     * possible are
-     * <ul>
-     * <li>Data is disallowed (roaming, power state, voice call, etc).</li>
-     * <li>The current data state is {@code DISCONNECTED} for a reason other than
-     * having explicitly disabled connectivity. In other words, data is not available
-     * because the phone is out of coverage or some like reason.</li>
-     * </ul>
-     * @return {@code true} if data connectivity is possible, {@code false} otherwise.
-     */
-    protected boolean isDataPossible() {
-        boolean dataAllowed = isDataAllowed();
-        boolean anyDataEnabled = getAnyDataEnabled();
-        boolean possible = (dataAllowed
-                && !(anyDataEnabled && (mState == State.FAILED || mState == State.IDLE)));
-        if (!possible && DBG) {
-            log("isDataPossible() " + possible + ", dataAllowed=" + dataAllowed +
-                    " anyDataEnabled=" + anyDataEnabled + " dataState=" + mState);
-        }
-        return possible;
     }
 
     public boolean isApnTypeEnabled(String apnType) {
