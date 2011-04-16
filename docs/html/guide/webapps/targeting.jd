@@ -368,14 +368,14 @@ that the hdpi device shows a different image that's applied in CSS.</p>
 }
 
 &#64;media screen and (-webkit-device-pixel-ratio: 1.5) {
-    // CSS for high-density screens
+    /* CSS for high-density screens */
     #header {
         background:url(high-density-image.png);
     }
 }
 
 &#64;media screen and (-webkit-device-pixel-ratio: 0.75) {
-    // CSS for low-density screens
+    /* CSS for low-density screens */
     #header {
         background:url(low-density-image.png);
     }
@@ -426,7 +426,7 @@ target to affect how your web page is scaled for different screen densities.</p>
 <pre>
 if (window.devicePixelRatio == 1.5) {
   alert("This is a high-density screen");
-} else if (window.devicePixelRation == 0.75) {
+} else if (window.devicePixelRatio == 0.75) {
   alert("This is a low-density screen");
 }
 </pre>
