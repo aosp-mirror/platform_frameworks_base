@@ -97,7 +97,6 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final int EVENT_TRY_SETUP_DATA = 5;
     protected static final int EVENT_DATA_STATE_CHANGED = 6;
     protected static final int EVENT_POLL_PDP = 7;
-    protected static final int EVENT_GET_PDP_LIST_COMPLETE = 11;
     protected static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = 12;
     protected static final int EVENT_VOICE_CALL_STARTED = 14;
     protected static final int EVENT_VOICE_CALL_ENDED = 15;
