@@ -221,9 +221,31 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected boolean isDataPossible() {
         boolean possible = (isDataAllowed()
-                && getAnyDataEnabled() && (getOverallState() == State.CONNECTED));
+                && !(getAnyDataEnabled() && (getOverallState() == State.FAILED)));
         if (!possible && DBG && isDataAllowed()) {
             log("Data not possible.  No coverage: dataState = " + getOverallState());
+        }
+        return possible;
+    }
+
+    @Override
+    protected boolean isDataPossible(String apnType) {
+        ApnContext apnContext = mApnContexts.get(apnType);
+        if (apnContext == null) {
+            return false;
+        }
+        boolean apnContextIsEnabled = apnContext.isEnabled();
+        State apnContextState = apnContext.getState();
+        boolean apnTypePossible = !(apnContextIsEnabled &&
+                (apnContextState == State.FAILED));
+        boolean dataAllowed = isDataAllowed();
+        boolean possible = dataAllowed && apnTypePossible;
+
+        if (DBG) {
+            log(String.format("isDataPossible(%s): possible=%b isDataAllowed=%b " +
+                    "apnTypePossible=%b apnContextisEnabled=%b apnContextState()=%s",
+                    apnType, possible, dataAllowed, apnTypePossible,
+                    apnContextIsEnabled, apnContextState));
         }
         return possible;
     }
@@ -336,21 +358,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     @Override
-    /**
-     * Return DEFAULT APN due to the limit of the interface
-     */
-    public String getActiveApnString() {
-        if (DBG) log( "get default active apn string");
-        ApnContext defaultApnContext = mApnContexts.get(Phone.APN_TYPE_DEFAULT);
-        if (defaultApnContext != null) {
-            ApnSetting apnSetting = defaultApnContext.getApnSetting();
-            if (apnSetting != null) {
-                return apnSetting.apn;
-            }
-        }
-        return null;
-    }
-
     // Return active apn of specific apn type
     public String getActiveApnString(String apnType) {
         if (DBG) log( "get active apn string for type:" + apnType);
@@ -362,6 +369,15 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean isApnTypeEnabled(String apnType) {
+        ApnContext apnContext = mApnContexts.get(apnType);
+        if (apnContext == null) {
+            return false;
+        }
+        return apnContext.isEnabled();
     }
 
     @Override
@@ -382,23 +398,43 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     // Return state of overall
     public State getOverallState() {
         boolean isConnecting = false;
+        boolean isFailed = true; // All enabled Apns should be FAILED.
+        boolean isAnyEnabled = false;
+
         for (ApnContext apnContext : mApnContexts.values()) {
-            if (apnContext.getState() == State.CONNECTED ||
-                    apnContext.getState() == State.DISCONNECTING) {
-                if (DBG) log("overall state is CONNECTED");
-                return State.CONNECTED;
-            }
-            else if (apnContext.getState() == State.CONNECTING
-                    || apnContext.getState() == State.INITING) {
-                isConnecting = true;
+            if (apnContext.isEnabled()) {
+                isAnyEnabled = true;
+                switch (apnContext.getState()) {
+                case CONNECTED:
+                case DISCONNECTING:
+                    if (DBG) log("overall state is CONNECTED");
+                    return State.CONNECTED;
+                case CONNECTING:
+                case INITING:
+                    isConnecting = true;
+                    isFailed = false;
+                    break;
+                case IDLE:
+                case SCANNING:
+                    isFailed = false;
+                    break;
+                }
             }
         }
+
+        if (!isAnyEnabled) { // Nothing enabled. return IDLE.
+            return State.IDLE;
+        }
+
         if (isConnecting) {
             if (DBG) log( "overall state is CONNECTING");
             return State.CONNECTING;
-        } else {
+        } else if (!isFailed) {
             if (DBG) log( "overall state is IDLE");
             return State.IDLE;
+        } else {
+            if (DBG) log( "overall state is FAILED");
+            return State.FAILED;
         }
     }
 
@@ -1432,6 +1468,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             log("We're on the simulator; assuming data is connected");
         }
 
+        if (mPhone.mSIMRecords.getRecordsLoaded()) {
+            notifyDataAvailability(null);
+        }
+
         if (getOverallState() != State.IDLE) {
             cleanUpConnection(true, null);
         }
@@ -1473,8 +1513,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 log(String.format("onDataSetupComplete: success apn=%s",
                     apnContext.getWaitingApns().get(0).apn));
             }
-            mLinkProperties = getLinkProperties(apnContext.getDataConnection());
-            mLinkCapabilities = getLinkCapabilities(apnContext.getDataConnection());
+            mLinkProperties = getLinkProperties(apnContext.getApnType());
+            mLinkCapabilities = getLinkCapabilities(apnContext.getApnType());
 
             ApnSetting apn = apnContext.getApnSetting();
             if (apn.proxy != null && apn.proxy.length() != 0) {

@@ -977,8 +977,8 @@ public abstract class PhoneBase extends Handler implements Phone {
         return mDataConnectionTracker.getActiveApnTypes();
     }
 
-    public String getActiveApnHost() {
-        return mDataConnectionTracker.getActiveApnString();
+    public String getActiveApnHost(String apnType) {
+        return mDataConnectionTracker.getActiveApnString(apnType);
     }
 
     public LinkProperties getLinkProperties(String apnType) {
@@ -999,6 +999,11 @@ public abstract class PhoneBase extends Handler implements Phone {
 
     public boolean isDataConnectivityPossible() {
         return ((mDataConnectionTracker != null) && (mDataConnectionTracker.isDataPossible()));
+    }
+
+    public boolean isDataConnectivityPossible(String apnType) {
+        return ((mDataConnectionTracker != null) &&
+                (mDataConnectionTracker.isDataPossible(apnType)));
     }
 
     /**
