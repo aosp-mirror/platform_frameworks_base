@@ -19,7 +19,11 @@
 #include "rs_graphics.rsh"
 #include "shader_def.rsh"
 
+/* Message sent from script to renderscript */
+const int RS_MSG_TEST_DONE = 100;
+
 const int gMaxModes = 26;
+int gMaxLoops;
 
 rs_program_vertex gProgVertex;
 rs_program_fragment gProgFragmentColor;
@@ -634,6 +638,8 @@ static bool checkInit() {
 }
 
 static int benchMode = 0;
+static int runningLoops = 0;
+static bool sendMsgFlag = false;
 
 static const char *testNames[] = {
     "Finished text fill 1,",
@@ -828,7 +834,13 @@ int root(int launchID) {
 
     if (benchMode > gMaxModes) {
         benchMode = 0;
+        runningLoops++;
+        if ((gMaxLoops > 0) && (runningLoops > gMaxLoops) && !sendMsgFlag) {
+            //Notifiy the test to stop and get results
+            rsDebug("gMaxLoops and runningLoops: ", gMaxLoops, runningLoops);
+            rsSendToClientBlocking(RS_MSG_TEST_DONE);
+            sendMsgFlag = true;
+        }
     }
-
     return 1;
 }

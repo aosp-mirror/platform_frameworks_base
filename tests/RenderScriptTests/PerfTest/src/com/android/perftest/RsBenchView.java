@@ -23,6 +23,7 @@ import java.util.concurrent.Semaphore;
 import android.renderscript.RSSurfaceView;
 import android.renderscript.RenderScript;
 import android.renderscript.RenderScriptGL;
+import android.renderscript.RenderScript.RSMessageHandler;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -47,7 +48,7 @@ public class RsBenchView extends RSSurfaceView {
 
     private RenderScriptGL mRS;
     private RsBenchRS mRender;
-
+    private int mLoops = 0;
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         super.surfaceChanged(holder, format, w, h);
@@ -57,7 +58,8 @@ public class RsBenchView extends RSSurfaceView {
             mRS = createRenderScriptGL(sc);
             mRS.setSurface(holder, w, h);
             mRender = new RsBenchRS();
-            mRender.init(mRS, getResources(), w, h);
+            Log.v("RsBenchView", "mLoops = " + mLoops);
+            mRender.init(mRS, getResources(), w, h, mLoops);
         }
     }
 
@@ -86,6 +88,21 @@ public class RsBenchView extends RSSurfaceView {
 
         return ret;
     }
+
+    /**
+     * Set the total number of loops the benchmark tests will run
+     * before the test results are collected.
+     */
+    public void setLoops(int iterations) {
+        if (iterations > 0) {
+            mLoops = iterations;
+        }
+    }
+
+    /**
+     * Wait for message from the script
+     */
+    public boolean testIsFinished() {
+        return mRender.testIsFinished();
+    }
 }
-
-
