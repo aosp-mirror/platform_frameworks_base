@@ -248,12 +248,6 @@ private:
     // allocate new GraphicBuffer objects.
     sp<IGraphicBufferAlloc> mGraphicBufferAlloc;
 
-    // mAllocdBuffers is mirror of the list of buffers that SurfaceFlinger is
-    // referencing. This is kept so that gralloc implementations do not need to
-    // properly handle the case where SurfaceFlinger no longer holds a reference
-    // to a buffer, but other processes do.
-    Vector<sp<GraphicBuffer> > mAllocdBuffers;
-
     // mFrameAvailableListener is the listener object that will be called when a
     // new frame becomes available. If it is not NULL it will be called from
     // queueBuffer.

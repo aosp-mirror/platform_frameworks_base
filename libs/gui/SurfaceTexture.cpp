@@ -172,7 +172,6 @@ sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf,
             mSlots[buf].mEglImage = EGL_NO_IMAGE_KHR;
             mSlots[buf].mEglDisplay = EGL_NO_DISPLAY;
         }
-        mAllocdBuffers.add(graphicBuffer);
     }
     return graphicBuffer;
 }
@@ -425,19 +424,6 @@ void SurfaceTexture::freeAllBuffers() {
             mSlots[i].mEglDisplay = EGL_NO_DISPLAY;
         }
     }
-
-    int exceptBuf = -1;
-    for (size_t i = 0; i < mAllocdBuffers.size(); i++) {
-        if (mAllocdBuffers[i] == mCurrentTextureBuf) {
-            exceptBuf = i;
-            break;
-        }
-    }
-    mAllocdBuffers.clear();
-    if (exceptBuf >= 0) {
-        mAllocdBuffers.add(mCurrentTextureBuf);
-    }
-    mGraphicBufferAlloc->freeAllGraphicBuffersExcept(exceptBuf);
 }
 
 EGLImageKHR SurfaceTexture::createImage(EGLDisplay dpy,
