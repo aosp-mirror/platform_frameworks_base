@@ -398,7 +398,7 @@ public abstract class ServiceStateTracker extends Handler {
         synchronized (this) {
             if (!mPendingRadioPowerOffAfterDataOff) {
                 if (dcTracker.isAnyActiveDataConnections()) {
-                    dcTracker.cleanUpAllConnections(null);
+                    dcTracker.cleanUpAllConnections(Phone.REASON_RADIO_TURNED_OFF);
                     Message msg = Message.obtain(this);
                     msg.what = EVENT_SET_RADIO_POWER_OFF;
                     msg.arg1 = ++mPendingRadioPowerOffAfterDataOffTag;
@@ -410,7 +410,7 @@ public abstract class ServiceStateTracker extends Handler {
                         hangupAndPowerOff();
                     }
                 } else {
-                    dcTracker.cleanUpAllConnections(null);
+                    dcTracker.cleanUpAllConnections(Phone.REASON_RADIO_TURNED_OFF);
                     if (DBG) log("Data disconnected, turn off radio right away.");
                     hangupAndPowerOff();
                 }
