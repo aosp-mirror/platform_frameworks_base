@@ -326,8 +326,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     static final int INITIALIZING = 0;     // Not yet created.
     static final int CREATED = 1;          // Created.
     static final int ACTIVITY_CREATED = 2; // The activity has finished its creation.
-    static final int STARTED = 3;          // Created and started, not resumed.
-    static final int RESUMED = 4;          // Created started and resumed.
+    static final int STOPPED = 3;          // Fully created, not started.
+    static final int STARTED = 4;          // Created and started, not resumed.
+    static final int RESUMED = 5;          // Created started and resumed.
     
     int mState = INITIALIZING;
     
@@ -956,6 +957,19 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      */
     public void onCreate(Bundle savedInstanceState) {
         mCalled = true;
+    }
+    
+    /**
+     * Called immediately after {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}
+     * has returned, but before any saved state has been restored in to the view.
+     * This gives subclasses a chance to initialize themselves once
+     * they know their view hierarchy has been completely created.  The fragment's
+     * view hierarchy is not however attached to its parent at this point.
+     * @param view The View returned by {@link #onCreateView(LayoutInflater, ViewGroup, Bundle)}.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     */
+    public void onViewCreated(View view, Bundle savedInstanceState) {
     }
     
     /**
