@@ -73,24 +73,6 @@ private:
         virtual status_t initCheck() const;
     };
 
-    class ConsoleManagerThread : public DisplayEventThreadBase 
-    {
-        int consoleFd;
-        int vt_num;
-        int prev_vt_num;
-        vt_mode vm;
-        static void sigHandler(int sig);
-        static pid_t sSignalCatcherPid;
-    public:
-                ConsoleManagerThread(const sp<SurfaceFlinger>& flinger);
-        virtual ~ConsoleManagerThread();
-        virtual bool threadLoop();
-        virtual status_t readyToRun();
-        virtual void requestExit();
-        virtual status_t releaseScreen() const;
-        virtual status_t initCheck() const;
-    };
-
     sp<DisplayEventThreadBase>  mDisplayEventThread;
     mutable int                 mCanDraw;
     mutable int                 mScreenAcquired;
