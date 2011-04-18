@@ -15,6 +15,7 @@
  */
 
 #include "header.h"
+#include "egl_tls.h"
 
 extern "C"
 {
@@ -23,6 +24,14 @@ extern "C"
 
 namespace android
 {
+
+static pthread_key_t sEGLThreadLocalStorageKey = -1;
+
+DbgContext * getDbgContextThreadSpecific()
+{
+    tls_t* tls = (tls_t*)pthread_getspecific(sEGLThreadLocalStorageKey);
+    return tls->dbg;
+}
 
 DbgContext::DbgContext(const unsigned version, const gl_hooks_t * const hooks,
                        const unsigned MAX_VERTEX_ATTRIBS)
@@ -47,8 +56,10 @@ DbgContext::~DbgContext()
     free(lzf_ref[1]);
 }
 
-DbgContext * CreateDbgContext(const unsigned version, const gl_hooks_t * const hooks)
+DbgContext * CreateDbgContext(const pthread_key_t EGLThreadLocalStorageKey,
+                              const unsigned version, const gl_hooks_t * const hooks)
 {
+    sEGLThreadLocalStorageKey = EGLThreadLocalStorageKey;
     assert(version < 2);
     assert(GL_NO_ERROR == hooks->gl.glGetError());
     GLint MAX_VERTEX_ATTRIBS = 0;

@@ -105,7 +105,6 @@ const int * GenerateCall(DbgContext * const dbg, const glesv2debugger::Message &
 {
     LOGD("GenerateCall function=%u", cmd.function());
     const int * ret = prevRet; // only some functions have return value
-    gl_hooks_t::gl_t const * const _c = &getGLTraceThreadSpecific()->gl;
     nsecs_t c0 = systemTime(timeMode);
     switch (cmd.function()) {    case glesv2debugger::Message_Function_glActiveTexture:
         dbg->hooks->gl.glActiveTexture(

@@ -46,6 +46,7 @@
 #include "egl_impl.h"
 #include "Loader.h"
 #include "glesv2dbg.h"
+#include "egl_tls.h"
 
 #define setError(_e, _r) setErrorEtc(__FUNCTION__, __LINE__, _e, _r)
 
@@ -58,7 +59,7 @@ namespace android {
 static char const * const gVendorString     = "Android";
 static char const * const gVersionString    = "1.4 Android META-EGL";
 static char const * const gClientApiString  = "OpenGL ES";
-static char const * const gExtensionString  = 
+static char const * const gExtensionString  =
         "EGL_KHR_image "
         "EGL_KHR_image_base "
         "EGL_KHR_image_pixmap "
@@ -221,18 +222,15 @@ struct egl_surface_t : public egl_object_t
 struct egl_context_t : public egl_object_t
 {
     typedef egl_object_t::LocalRef<egl_context_t, EGLContext> Ref;
-    
+
     egl_context_t(EGLDisplay dpy, EGLContext context, EGLConfig config,
-            int impl, egl_connection_t const* cnx, int version) 
-    : egl_object_t(dpy), dpy(dpy), context(context), config(config), read(0), draw(0), 
-      impl(impl), cnx(cnx), version(version), dbg(NULL)
+            int impl, egl_connection_t const* cnx, int version)
+    : egl_object_t(dpy), dpy(dpy), context(context), config(config), read(0), draw(0),
+      impl(impl), cnx(cnx), version(version)
     {
     }
     ~egl_context_t()
     {
-        if (dbg)
-            DestroyDbgContext(dbg);
-        dbg = NULL;
     }
     EGLDisplay                  dpy;
     EGLContext                  context;
@@ -242,7 +240,6 @@ struct egl_context_t : public egl_object_t
     int                         impl;
     egl_connection_t const*     cnx;
     int                         version;
-    DbgContext *                dbg;
 };
 
 struct egl_image_t : public egl_object_t
@@ -276,15 +273,6 @@ typedef egl_surface_t::Ref  SurfaceRef;
 typedef egl_context_t::Ref  ContextRef;
 typedef egl_image_t::Ref    ImageRef;
 typedef egl_sync_t::Ref     SyncRef;
-
-struct tls_t
-{
-    tls_t() : error(EGL_SUCCESS), ctx(0), logCallWithNoContext(EGL_TRUE) { }
-    EGLint      error;
-    EGLContext  ctx;
-    EGLBoolean  logCallWithNoContext;
-};
-
 
 // ----------------------------------------------------------------------------
 
@@ -586,18 +574,13 @@ static inline NATIVE* egl_to_native_cast(EGL arg) {
 }
 
 static inline
-egl_surface_t* get_surface(EGLSurface surface) {   
+egl_surface_t* get_surface(EGLSurface surface) {
     return egl_to_native_cast<egl_surface_t>(surface);
 }
 
 static inline
 egl_context_t* get_context(EGLContext context) {
     return egl_to_native_cast<egl_context_t>(context);
-}
-
-DbgContext * getDbgContextThreadSpecific()
-{
-    return get_context(getContext())->dbg;
 }
 
 static inline
@@ -1442,10 +1425,12 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
         loseCurrent(cur_c);
 
         if (ctx != EGL_NO_CONTEXT) {
-            if (!c->dbg && gEGLDebugLevel > 0)
-                c->dbg = CreateDbgContext(c->version, c->cnx->hooks[c->version]);
             setGLHooksThreadSpecific(c->cnx->hooks[c->version]);
             setContext(ctx);
+            tls_t * const tls = getTLS();
+            if (!tls->dbg && gEGLDebugLevel > 0)
+                tls->dbg = CreateDbgContext(gEGLThreadLocalStorageKey, c->version,
+                                            c->cnx->hooks[c->version]);
             _c.acquire();
             _r.acquire();
             _d.acquire();

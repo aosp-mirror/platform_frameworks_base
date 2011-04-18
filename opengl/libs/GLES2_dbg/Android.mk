@@ -11,7 +11,7 @@ LOCAL_SRC_FILES := \
     src/server.cpp \
     src/vertex.cpp
 
-LOCAL_C_INCLUDES :=	\
+LOCAL_C_INCLUDES := \
     $(LOCAL_PATH) \
     $(LOCAL_PATH)/../ \
     external/stlport/stlport \
@@ -21,7 +21,8 @@ LOCAL_C_INCLUDES :=	\
 
 #LOCAL_CFLAGS += -O0 -g -DDEBUG -UNDEBUG
 LOCAL_CFLAGS := -DGOOGLE_PROTOBUF_NO_RTTI
-
+LOCAL_STATIC_LIBRARIES := libprotobuf-cpp-2.3.0-lite liblzf
+LOCAL_SHARED_LIBRARIES := libcutils libutils libstlport
 ifeq ($(TARGET_ARCH),arm)
 	LOCAL_CFLAGS += -fstrict-aliasing
 endif
@@ -43,4 +44,4 @@ endif
 LOCAL_MODULE:= libGLESv2_dbg
 LOCAL_MODULE_TAGS := optional
 
-include $(BUILD_STATIC_LIBRARY)
+include $(BUILD_SHARED_LIBRARY)
