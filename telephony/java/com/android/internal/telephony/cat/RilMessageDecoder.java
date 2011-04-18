@@ -20,15 +20,15 @@ import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccUtils;
 
 import android.os.Handler;
-import com.android.internal.util.HierarchicalState;
-import com.android.internal.util.HierarchicalStateMachine;
+import com.android.internal.util.State;
+import com.android.internal.util.StateMachine;
 import android.os.Message;
 
 /**
  * Class used for queuing raw ril messages, decoding them into CommanParams
  * objects and sending the result back to the CAT Service.
  */
-class RilMessageDecoder extends HierarchicalStateMachine {
+class RilMessageDecoder extends StateMachine {
 
     // constants
     private static final int CMD_START = 1;
@@ -101,8 +101,9 @@ class RilMessageDecoder extends HierarchicalStateMachine {
         mCmdParamsFactory = CommandParamsFactory.getInstance(this, fh);
     }
 
-    private class StateStart extends HierarchicalState {
-        @Override protected boolean processMessage(Message msg) {
+    private class StateStart extends State {
+        @Override
+        public boolean processMessage(Message msg) {
             if (msg.what == CMD_START) {
                 if (decodeMessageParams((RilMessage)msg.obj)) {
                     transitionTo(mStateCmdParamsReady);
@@ -115,8 +116,9 @@ class RilMessageDecoder extends HierarchicalStateMachine {
         }
     }
 
-    private class StateCmdParamsReady extends HierarchicalState {
-        @Override protected boolean processMessage(Message msg) {
+    private class StateCmdParamsReady extends State {
+        @Override
+        public boolean processMessage(Message msg) {
             if (msg.what == CMD_PARAMS_READY) {
                 mCurrentRilMessage.mResCode = ResultCode.fromInt(msg.arg1);
                 mCurrentRilMessage.mData = msg.obj;

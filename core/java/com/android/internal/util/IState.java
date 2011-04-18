@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,21 +21,29 @@ import android.os.Message;
 /**
  * {@hide}
  *
- * The class for implementing states in a HierarchicalStateMachine
+ * The interface for implementing states in a {@link StateMachine}
  */
-public class HierarchicalState {
+public interface IState {
 
     /**
-     * Constructor
+     * Returned by processMessage to indicate the the message was processed.
      */
-    protected HierarchicalState() {
-    }
+    static final boolean HANDLED = true;
+
+    /**
+     * Returned by processMessage to indicate the the message was NOT processed.
+     */
+    static final boolean NOT_HANDLED = false;
 
     /**
      * Called when a state is entered.
      */
-    protected void enter() {
-    }
+    void enter();
+
+    /**
+     * Called when a state is exited.
+     */
+    void exit();
 
     /**
      * Called when a message is to be processed by the
@@ -49,28 +57,15 @@ public class HierarchicalState {
      * be processed until this routine returns.
      *
      * @param msg to process
-     * @return true if processing has completed and false
-     *         if the parent state's processMessage should
-     *         be invoked.
+     * @return HANDLED if processing has completed and NOT_HANDLED
+     *         if the message wasn't processed.
      */
-    protected boolean processMessage(Message msg) {
-        return false;
-    }
+    boolean processMessage(Message msg);
 
     /**
-     * Called when a state is exited.
+     * Name of State for debugging purposes.
+     *
+     * @return name of state.
      */
-    protected void exit() {
-    }
-
-    /**
-     * @return name of state, but default returns the states
-     * class name. An instance name would be better but requiring
-     * it seems unnecessary.
-     */
-    public String getName() {
-        String name = getClass().getName();
-        int lastDollar = name.lastIndexOf('$');
-        return name.substring(lastDollar + 1);
-    }
+    String getName();
 }

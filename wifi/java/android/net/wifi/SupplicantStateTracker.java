@@ -16,8 +16,8 @@
 
 package android.net.wifi;
 
-import com.android.internal.util.HierarchicalState;
-import com.android.internal.util.HierarchicalStateMachine;
+import com.android.internal.util.State;
+import com.android.internal.util.StateMachine;
 
 import android.net.wifi.WifiStateMachine.StateChangeResult;
 import android.content.Context;
@@ -33,7 +33,7 @@ import android.util.Log;
  * - detect a failed WPA handshake that loops indefinitely
  * - authentication failure handling
  */
-class SupplicantStateTracker extends HierarchicalStateMachine {
+class SupplicantStateTracker extends StateMachine {
 
     private static final String TAG = "SupplicantStateTracker";
     private static final boolean DBG = false;
@@ -53,14 +53,14 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
 
     private Context mContext;
 
-    private HierarchicalState mUninitializedState = new UninitializedState();
-    private HierarchicalState mDefaultState = new DefaultState();
-    private HierarchicalState mInactiveState = new InactiveState();
-    private HierarchicalState mDisconnectState = new DisconnectedState();
-    private HierarchicalState mScanState = new ScanState();
-    private HierarchicalState mHandshakeState = new HandshakeState();
-    private HierarchicalState mCompletedState = new CompletedState();
-    private HierarchicalState mDormantState = new DormantState();
+    private State mUninitializedState = new UninitializedState();
+    private State mDefaultState = new DefaultState();
+    private State mInactiveState = new InactiveState();
+    private State mDisconnectState = new DisconnectedState();
+    private State mScanState = new ScanState();
+    private State mHandshakeState = new HandshakeState();
+    private State mCompletedState = new CompletedState();
+    private State mDormantState = new DormantState();
 
     public SupplicantStateTracker(Context context, WifiStateMachine wsm, Handler target) {
         super(TAG, target.getLooper());
@@ -146,7 +146,7 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
      * HSM states
      *******************************************************/
 
-    class DefaultState extends HierarchicalState {
+    class DefaultState extends State {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
@@ -188,21 +188,21 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
      * or after we have lost the control channel
      * connection to the supplicant
      */
-    class UninitializedState extends HierarchicalState {
+    class UninitializedState extends State {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
          }
     }
 
-    class InactiveState extends HierarchicalState {
+    class InactiveState extends State {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
          }
     }
 
-    class DisconnectedState extends HierarchicalState {
+    class DisconnectedState extends State {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
@@ -221,14 +221,14 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
          }
     }
 
-    class ScanState extends HierarchicalState {
+    class ScanState extends State {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
          }
     }
 
-    class HandshakeState extends HierarchicalState {
+    class HandshakeState extends State {
         /**
          * The max number of the WPA supplicant loop iterations before we
          * decide that the loop should be terminated:
@@ -277,7 +277,7 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
         }
     }
 
-    class CompletedState extends HierarchicalState {
+    class CompletedState extends State {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
@@ -318,7 +318,7 @@ class SupplicantStateTracker extends HierarchicalStateMachine {
     }
 
     //TODO: remove after getting rid of the state in supplicant
-    class DormantState extends HierarchicalState {
+    class DormantState extends State {
         @Override
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
