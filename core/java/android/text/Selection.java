@@ -16,10 +16,7 @@
 
 package android.text;
 
-import android.util.Log;
-
 import java.text.BreakIterator;
-import java.text.CharacterIterator;
 
 
 /**
