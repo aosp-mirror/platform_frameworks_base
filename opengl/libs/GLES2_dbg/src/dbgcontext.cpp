@@ -195,10 +195,12 @@ unsigned int DbgContext::GetBufferSize()
 void DbgContext::glUseProgram(GLuint program)
 {
     while (GLenum error = hooks->gl.glGetError())
-        LOGD("DbgContext::glUseProgram: before glGetError() = 0x%.4X", error);
-
+        LOGD("DbgContext::glUseProgram(%u): before glGetError() = 0x%.4X",
+             program, error);
     this->program = program;
-
+    maxAttrib = 0;
+    if (program == 0)
+        return;
     GLint activeAttributes = 0;
     hooks->gl.glGetProgramiv(program, GL_ACTIVE_ATTRIBUTES, &activeAttributes);
     maxAttrib = 0;
@@ -236,9 +238,9 @@ void DbgContext::glUseProgram(GLuint program)
             maxAttrib = slot;
     }
     delete name;
-
     while (GLenum error = hooks->gl.glGetError())
-        LOGD("DbgContext::glUseProgram: after glGetError() = 0x%.4X", error);
+        LOGD("DbgContext::glUseProgram(%u): after glGetError() = 0x%.4X",
+             program, error);
 }
 
 static bool HasNonVBOAttribs(const DbgContext * const ctx)
@@ -288,14 +290,16 @@ void DbgContext::glVertexAttribPointer(GLuint indx, GLint size, GLenum type,
 
 void DbgContext::glEnableVertexAttribArray(GLuint index)
 {
-    assert(index < MAX_VERTEX_ATTRIBS);
+    if (index >= MAX_VERTEX_ATTRIBS)
+        return;
     vertexAttribs[index].enabled = true;
     hasNonVBOAttribs = HasNonVBOAttribs(this);
 }
 
 void DbgContext::glDisableVertexAttribArray(GLuint index)
 {
-    assert(index < MAX_VERTEX_ATTRIBS);
+    if (index >= MAX_VERTEX_ATTRIBS)
+        return;
     vertexAttribs[index].enabled = false;
     hasNonVBOAttribs = HasNonVBOAttribs(this);
 }

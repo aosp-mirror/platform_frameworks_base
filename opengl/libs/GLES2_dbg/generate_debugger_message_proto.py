@@ -106,6 +106,7 @@ message Message
         AfterCall = 1;
         AfterGeneratedCall = 2;
         Response = 3; // currently used for misc messages
+        CompleteCall = 4; // BeforeCall and AfterCall merged
     }
     required Type type = 3;
     required bool expect_response = 4;

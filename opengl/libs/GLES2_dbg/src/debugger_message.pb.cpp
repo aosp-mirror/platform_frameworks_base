@@ -437,6 +437,7 @@ bool Message_Type_IsValid(int value) {
     case 1:
     case 2:
     case 3:
+    case 4:
       return true;
     default:
       return false;
@@ -448,6 +449,7 @@ const Message_Type Message::BeforeCall;
 const Message_Type Message::AfterCall;
 const Message_Type Message::AfterGeneratedCall;
 const Message_Type Message::Response;
+const Message_Type Message::CompleteCall;
 const Message_Type Message::Type_MIN;
 const Message_Type Message::Type_MAX;
 const int Message::Type_ARRAYSIZE;

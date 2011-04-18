@@ -237,11 +237,12 @@ enum Message_Type {
   Message_Type_BeforeCall = 0,
   Message_Type_AfterCall = 1,
   Message_Type_AfterGeneratedCall = 2,
-  Message_Type_Response = 3
+  Message_Type_Response = 3,
+  Message_Type_CompleteCall = 4
 };
 bool Message_Type_IsValid(int value);
 const Message_Type Message_Type_Type_MIN = Message_Type_BeforeCall;
-const Message_Type Message_Type_Type_MAX = Message_Type_Response;
+const Message_Type Message_Type_Type_MAX = Message_Type_CompleteCall;
 const int Message_Type_Type_ARRAYSIZE = Message_Type_Type_MAX + 1;
 
 enum Message_DataType {
@@ -513,6 +514,7 @@ class Message : public ::google::protobuf::MessageLite {
   static const Type AfterCall = Message_Type_AfterCall;
   static const Type AfterGeneratedCall = Message_Type_AfterGeneratedCall;
   static const Type Response = Message_Type_Response;
+  static const Type CompleteCall = Message_Type_CompleteCall;
   static inline bool Type_IsValid(int value) {
     return Message_Type_IsValid(value);
   }
