@@ -159,8 +159,8 @@ public interface Phone {
     static final String REASON_ROAMING_OFF = "roamingOff";
     static final String REASON_DATA_DISABLED = "dataDisabled";
     static final String REASON_DATA_ENABLED = "dataEnabled";
-    static final String REASON_GPRS_ATTACHED = "gprsAttached";
-    static final String REASON_GPRS_DETACHED = "gprsDetached";
+    static final String REASON_DATA_ATTACHED = "dataAttached";
+    static final String REASON_DATA_DETACHED = "dataDetached";
     static final String REASON_CDMA_DATA_ATTACHED = "cdmaDataAttached";
     static final String REASON_CDMA_DATA_DETACHED = "cdmaDataDetached";
     static final String REASON_APN_CHANGED = "apnChanged";
