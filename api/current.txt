@@ -2851,6 +2851,7 @@ package android.app {
     method public void onSaveInstanceState(android.os.Bundle);
     method public void onStart();
     method public void onStop();
+    method public void onViewCreated(android.view.View, android.os.Bundle);
     method public void registerForContextMenu(android.view.View);
     method public void setArguments(android.os.Bundle);
     method public void setHasOptionsMenu(boolean);

@@ -714,13 +714,14 @@ final class FragmentManagerImpl extends FragmentManager {
                                 null, f.mSavedFragmentState);
                         if (f.mView != null) {
                             f.mView.setSaveFromParentEnabled(false);
+                            if (f.mHidden) f.mView.setVisibility(View.GONE);
                             f.restoreViewState();
-                            if (f.mHidden) f.mView.setVisibility(View.GONE); 
+                            f.onViewCreated(f.mView, f.mSavedFragmentState);
                         }
                     }
                 case Fragment.CREATED:
                     if (newState > Fragment.CREATED) {
-                        if (DEBUG) Log.v(TAG, "moveto CONTENT: " + f);
+                        if (DEBUG) Log.v(TAG, "moveto ACTIVITY_CREATED: " + f);
                         if (!f.mFromLayout) {
                             ViewGroup container = null;
                             if (f.mContainerId != 0) {
@@ -744,9 +745,10 @@ final class FragmentManagerImpl extends FragmentManager {
                                         anim.start();
                                     }
                                     container.addView(f.mView);
-                                    f.restoreViewState();
                                 }
-                                if (f.mHidden) f.mView.setVisibility(View.GONE); 
+                                if (f.mHidden) f.mView.setVisibility(View.GONE);
+                                f.restoreViewState();
+                                f.onViewCreated(f.mView, f.mSavedFragmentState);
                             }
                         }
                         
@@ -756,10 +758,13 @@ final class FragmentManagerImpl extends FragmentManager {
                             throw new SuperNotCalledException("Fragment " + f
                                     + " did not call through to super.onActivityCreated()");
                         }
+                        if (f.mView != null) {
+                        }
                         f.mSavedFragmentState = null;
                     }
                 case Fragment.ACTIVITY_CREATED:
-                    if (newState > Fragment.ACTIVITY_CREATED) {
+                case Fragment.STOPPED:
+                    if (newState > Fragment.STOPPED) {
                         if (DEBUG) Log.v(TAG, "moveto STARTED: " + f);
                         f.mCalled = false;
                         f.onStart();
@@ -803,9 +808,10 @@ final class FragmentManagerImpl extends FragmentManager {
                                     + " did not call through to super.onStop()");
                         }
                     }
+                case Fragment.STOPPED:
                 case Fragment.ACTIVITY_CREATED:
                     if (newState < Fragment.ACTIVITY_CREATED) {
-                        if (DEBUG) Log.v(TAG, "movefrom CONTENT: " + f);
+                        if (DEBUG) Log.v(TAG, "movefrom ACTIVITY_CREATED: " + f);
                         if (f.mView != null) {
                             // Need to save the current view state if not
                             // done already.
@@ -1631,7 +1637,7 @@ final class FragmentManagerImpl extends FragmentManager {
     }
     
     public void dispatchStop() {
-        moveToState(Fragment.ACTIVITY_CREATED, false);
+        moveToState(Fragment.STOPPED, false);
     }
     
     public void dispatchDestroy() {
