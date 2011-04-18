@@ -1505,6 +1505,13 @@ public final class Settings {
         public static final Uri DEFAULT_ALARM_ALERT_URI = getUriFor(ALARM_ALERT);
 
         /**
+         * Persistent store for the system default media button event receiver.
+         *
+         * @hide
+         */
+        public static final String MEDIA_BUTTON_RECEIVER = "media_button_receiver";
+
+        /**
          * Setting to enable Auto Replace (AutoText) in text editors. 1 = On, 0 = Off
          */
         public static final String TEXT_AUTO_REPLACE = "auto_replace";
