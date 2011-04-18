@@ -53,7 +53,8 @@ public:
     
     status_t            setData(const uint8_t* buffer, size_t len);
 
-    status_t            appendFrom(Parcel *parcel, size_t start, size_t len);
+    status_t            appendFrom(const Parcel *parcel,
+                                   size_t start, size_t len);
 
     bool                hasFileDescriptors() const;
 
