@@ -49,6 +49,7 @@ public class BiDiTestView extends View {
     private String BOLD_ITALIC_TEXT;
     private String ARABIC_TEXT;
     private String CHINESE_TEXT;
+    private String MIXED_TEXT_1;
 
     private Typeface typeface;
 
@@ -79,6 +80,7 @@ public class BiDiTestView extends View {
         BOLD_ITALIC_TEXT = context.getString(R.string.bold_italic_text);
         ARABIC_TEXT = context.getString(R.string.arabic_text);
         CHINESE_TEXT = context.getString(R.string.chinese_text);
+        MIXED_TEXT_1 = context.getString(R.string.mixed_text_1);
 
         typeface = paint.getTypeface();
         paint.setAntiAlias(true);
@@ -124,6 +126,10 @@ public class BiDiTestView extends View {
         // Test Chinese
         deltaX = testString(canvas, CHINESE_TEXT, ORIGIN, ORIGIN + 10 * currentTextSize,
                 paint, typeface, false, false,  Paint.DIRECTION_LTR, currentTextSize);
+
+        // Test Mixed (English and Arabic)
+        deltaX = testString(canvas, MIXED_TEXT_1, ORIGIN, ORIGIN + 12 * currentTextSize,
+                paint, typeface, false, false,  Paint.DIRECTION_LTR, currentTextSize);
     }
 
     private int testString(Canvas canvas, String text, int x, int y, Paint paint, Typeface typeface,
@@ -139,12 +145,15 @@ public class BiDiTestView extends View {
             paint.setTextSkewX(DEFAULT_ITALIC_SKEW_X);
         }
 
-        drawTextWithCanvasDrawText(text, canvas, x, y, textSize, Color.WHITE);
+        Log.v(TAG, "START -- drawTextWithCanvasDrawText");
+        drawTextWithCanvasDrawText(text, canvas, x, y, textSize, Color.WHITE, dir);
+        Log.v(TAG, "END   -- drawTextWithCanvasDrawText");
 
         int length = text.length();
         float[] advances = new float[length];
-        float textWidthHB = paint.getTextRunAdvances(text, 0, length, 0, length, 0, advances, 0);
-        float textWidthICU = paint.getTextRunAdvancesICU(text, 0, length, 0, length, 0, advances, 0);
+        float textWidthHB = paint.getTextRunAdvances(text, 0, length, 0, length, dir, advances, 0);
+        setPaintDir(paint, dir);
+        float textWidthICU = paint.getTextRunAdvancesICU(text, 0, length, 0, length, dir, advances, 0);
 
         logAdvances(text, textWidthHB, textWidthICU, advances);
         drawMetricsAroundText(canvas, x, y, textWidthHB, textWidthICU, textSize, Color.RED, Color.GREEN);
@@ -156,7 +165,9 @@ public class BiDiTestView extends View {
 //        logGlypths(glyphs, count);
 //        drawTextWithDrawGlyph(canvas, glyphs, count, x, y + currentTextSize);
 
+        Log.v(TAG, "START -- drawTextWithGlyphs");
         drawTextWithGlyphs(canvas, text, x, y + currentTextSize, dir);
+        Log.v(TAG, "END   -- drawTextWithGlyphs");
 
         // Restore old paint properties
         paint.setFakeBoldText(oldFakeBold);
@@ -165,12 +176,17 @@ public class BiDiTestView extends View {
         return (int) Math.ceil(textWidthHB) + TEXT_PADDING;
     }
 
+    private void setPaintDir(Paint paint, int dir) {
+        Log.v(TAG, "Setting Paint dir=" + dir);
+        paint.setBidiFlags(dir);
+    }
+
     private void drawTextWithDrawGlyph(Canvas canvas, char[] glyphs, int count, int x, int y) {
         canvas.drawGlyphs(glyphs, 0, count, x, y, paint);
     }
 
     private void drawTextWithGlyphs(Canvas canvas, String text, int x, int y, int dir) {
-        paint.setBidiFlags(dir);
+        setPaintDir(paint, dir);
         canvas.drawTextWithGlyphs(text, x, y, paint);
     }
 
@@ -182,7 +198,6 @@ public class BiDiTestView extends View {
     }
 
     private int getGlyphs(String text, char[] glyphs, int dir) {
-//        int dir = 1; // Paint.DIRECTION_LTR;
         return paint.getTextGlypths(text, 0, text.length(), 0, text.length(), dir, glyphs);
     }
 
@@ -195,7 +210,8 @@ public class BiDiTestView extends View {
     }
 
     private void drawTextWithCanvasDrawText(String text, Canvas canvas,
-            float x, float y, float textSize, int color) {
+            float x, float y, float textSize, int color, int dir) {
+        setPaintDir(paint, dir);
         paint.setColor(color);
         paint.setTextSize(textSize);
         canvas.drawText(text, x, y, paint);

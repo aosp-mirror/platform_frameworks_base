@@ -15,6 +15,7 @@
  */
 
 #include "TextLayoutCache.h"
+#include "TextLayout.h"
 
 namespace android {
 
@@ -381,13 +382,127 @@ void TextLayoutCacheValue::shapeWithHarfbuzz(HB_ShaperItem* shaperItem, HB_FontR
     }
 }
 
+struct GlyphRun {
+    inline GlyphRun() {}
+    inline GlyphRun(jchar* glyphs, size_t glyphsCount, bool isRTL) :
+            glyphs(glyphs), glyphsCount(glyphsCount), isRTL(isRTL) { }
+    jchar* glyphs;
+    size_t glyphsCount;
+    int isRTL;
+};
+
 void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags,
         jfloat* outAdvances, jfloat* outTotalAdvance,
         jchar** outGlyphs, size_t* outGlyphsCount) {
+
+        UBiDiLevel bidiReq = 0;
+        bool forceLTR = false;
+        bool forceRTL = false;
+
+        switch (dirFlags) {
+            case kBidi_LTR: bidiReq = 0; break; // no ICU constant, canonical LTR level
+            case kBidi_RTL: bidiReq = 1; break; // no ICU constant, canonical RTL level
+            case kBidi_Default_LTR: bidiReq = UBIDI_DEFAULT_LTR; break;
+            case kBidi_Default_RTL: bidiReq = UBIDI_DEFAULT_RTL; break;
+            case kBidi_Force_LTR: forceLTR = true; break; // every char is LTR
+            case kBidi_Force_RTL: forceRTL = true; break; // every char is RTL
+        }
+
+        if (forceLTR || forceRTL) {
+#if DEBUG_GLYPHS
+                    LOGD("computeValuesWithHarfbuzz -- forcing run with LTR=%d RTL=%d",
+                            forceLTR, forceRTL);
+#endif
+            computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
+                    outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
+        } else {
+            UBiDi* bidi = ubidi_open();
+            if (bidi) {
+                UErrorCode status = U_ZERO_ERROR;
+                LOGD("computeValuesWithHarfbuzz -- bidiReq=%d", bidiReq);
+                ubidi_setPara(bidi, chars, contextCount, bidiReq, NULL, &status);
+                if (U_SUCCESS(status)) {
+                    int paraDir = ubidi_getParaLevel(bidi) & kDirection_Mask; // 0 if ltr, 1 if rtl
+                    size_t rc = ubidi_countRuns(bidi, &status);
+#if DEBUG_GLYPHS
+                    LOGD("computeValuesWithHarfbuzz -- dirFlags=%d run-count=%d paraDir=%d", dirFlags, rc, paraDir);
+#endif
+
+                    if (rc == 1 || !U_SUCCESS(status)) {
+                        LOGD("HERE !!!");
+                        computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount,
+                                dirFlags, outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
+                        ubidi_close(bidi);
+                        return;
+                    }
+
+                    size_t runIndex = 0;
+                    Vector<GlyphRun> glyphRuns;
+                    for (size_t i = 0; i < rc; ++i) {
+                        int32_t startRun;
+                        int32_t lengthRun;
+                        UBiDiDirection runDir = ubidi_getVisualRun(bidi, i, &startRun, &lengthRun);
+
+                        int newFlags = (runDir == UBIDI_RTL) ? kDirection_RTL : kDirection_LTR;
+                        jfloat runTotalAdvance = 0;
+                        jchar* runGlyphs;
+                        size_t runGlyphsCount = 0;
+
+#if DEBUG_GLYPHS
+                        LOGD("computeValuesWithHarfbuzz -- run-start=%d run-len=%d newFlags=%d",
+                                startRun, lengthRun, newFlags);
+#endif
+                        computeRunValuesWithHarfbuzz(paint, chars, startRun,
+                                lengthRun, contextCount, newFlags,
+                                outAdvances + runIndex, &runTotalAdvance,
+                                &runGlyphs, &runGlyphsCount);
+
+                        runIndex += lengthRun;
+
+                        *outTotalAdvance += runTotalAdvance;
+                        *outGlyphsCount += runGlyphsCount;
+
+#if DEBUG_GLYPHS
+                        LOGD("computeValuesWithHarfbuzz -- run=%d run-glyphs-count=%d",
+                                i, runGlyphsCount);
+                        for (size_t j = 0; j < runGlyphsCount; j++) {
+                            LOGD("                          -- glyphs[%d]=%d", j, runGlyphs[j]);
+                        }
+#endif
+                        glyphRuns.push(GlyphRun(runGlyphs, runGlyphsCount, newFlags));
+                    }
+
+#if DEBUG_GLYPHS
+                    LOGD("computeValuesWithHarfbuzz -- total-glyphs-count=%d", *outGlyphsCount);
+#endif
+                    *outGlyphs = new jchar[*outGlyphsCount];
+                    jchar* glyphs = *outGlyphs;
+                    for (size_t i = 0; i < glyphRuns.size(); i++) {
+                        const GlyphRun& glyphRun = glyphRuns.itemAt(i);
+                        if (glyphRun.isRTL) {
+                            for (size_t n = 0; n < glyphRun.glyphsCount; n++) {
+                                glyphs[glyphRun.glyphsCount - n - 1] = glyphRun.glyphs[n];
+                            }
+                        } else {
+                            memcpy(glyphs, glyphRun.glyphs, glyphRun.glyphsCount * sizeof(jchar));
+                        }
+                        glyphs += glyphRun.glyphsCount;
+                        delete[] glyphRun.glyphs;
+                    }
+                }
+                ubidi_close(bidi);
+            }
+        }
+}
+
+void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
+        size_t start, size_t count, size_t contextCount, int dirFlags,
+        jfloat* outAdvances, jfloat* outTotalAdvance,
+        jchar** outGlyphs, size_t* outGlyphsCount) {
+
     bool isRTL = dirFlags & 0x1;
 
-    // TODO: need to run BiDi algo here to breakdown the text in several runs
     HB_ShaperItem shaperItem;
     HB_FontRec font;
     FontData fontData;
@@ -397,7 +512,7 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
 #if DEBUG_GLYPHS
     LOGD("HARFBUZZ -- num_glypth=%d - kerning_applied=%d", shaperItem.num_glyphs,
             shaperItem.kerning_applied);
-    LOGD("         -- string= '%s'", String8(chars, contextCount).string());
+    LOGD("         -- string= '%s'", String8(chars + start, count).string());
     LOGD("         -- isDevKernText=%d", paint->isDevKernText());
 #endif
 

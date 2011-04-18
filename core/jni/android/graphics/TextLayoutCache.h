@@ -178,6 +178,10 @@ private:
     static void createGlyphArrays(HB_ShaperItem* shaperItem, int size);
     static void resetGlyphArrays(HB_ShaperItem* shaperItem);
 
+    static void computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars, size_t start,
+            size_t count, size_t contextCount, int dirFlags,
+            jfloat* outAdvances, jfloat* outTotalAdvance,
+            jchar** outGlyphs, size_t* outGlyphsCount);
 }; // TextLayoutCacheValue
 
 /**
