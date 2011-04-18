@@ -1066,7 +1066,8 @@ public class TextToSpeech {
     public List<EngineInfo> getEngines() {
         PackageManager pm = mContext.getPackageManager();
         Intent intent = new Intent(Engine.INTENT_ACTION_TTS_SERVICE);
-        List<ResolveInfo> resolveInfos = pm.queryIntentServices(intent, 0);
+        List<ResolveInfo> resolveInfos =
+                pm.queryIntentServices(intent, PackageManager.MATCH_DEFAULT_ONLY);
         if (resolveInfos == null) return Collections.emptyList();
         List<EngineInfo> engines = new ArrayList<EngineInfo>(resolveInfos.size());
         for (ResolveInfo resolveInfo : resolveInfos) {
