@@ -29,6 +29,19 @@
 
 #define EXTEND_Debug_glCopyTexSubImage2D EXTEND_Debug_glCopyTexImage2D
 
+#define EXTEND_AFTER_CALL_Debug_glReadPixels \
+    { \
+        DbgContext * const dbg = getDbgContextThreadSpecific(); \
+        if (dbg->IsReadPixelBuffer(pixels)) { \
+            dbg->CompressReadPixelBuffer(msg.mutable_data()); \
+            msg.set_data_type(msg.ReferencedImage); \
+        } else { \
+            const unsigned int size = width * height * GetBytesPerPixel(format, type); \
+            dbg->Compress(pixels, size, msg.mutable_data()); \
+            msg.set_data_type(msg.NonreferencedImage); \
+        } \
+    }
+
 #define EXTEND_Debug_glShaderSource \
     std::string * const data = msg.mutable_data(); \
     for (unsigned i = 0; i < count; i++) \

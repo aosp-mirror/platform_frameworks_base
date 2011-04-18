@@ -138,7 +138,9 @@ static const int * GenerateCall_glGetProgramiv(DbgContext * const dbg,
         const glesv2debugger::Message & cmd,
         glesv2debugger::Message & msg, const int * const prevRet)
 {
-    assert(0);
+    GLint params = -1;
+    dbg->hooks->gl.glGetProgramiv(cmd.arg0(), cmd.arg1(), &params);
+    msg.mutable_data()->append(reinterpret_cast<char *>(&params), sizeof(params));
     return prevRet;
 }
 
@@ -146,7 +148,10 @@ static const int * GenerateCall_glGetProgramInfoLog(DbgContext * const dbg,
         const glesv2debugger::Message & cmd,
         glesv2debugger::Message & msg, const int * const prevRet)
 {
-    assert(0);
+    const GLsizei bufSize = static_cast<GLsizei>(dbg->GetBufferSize());
+    GLsizei length = -1;
+    dbg->hooks->gl.glGetProgramInfoLog(cmd.arg0(), bufSize, &length, dbg->GetBuffer());
+    msg.mutable_data()->append(dbg->GetBuffer(), length);
     return prevRet;
 }
 
@@ -162,7 +167,9 @@ static const int * GenerateCall_glGetShaderiv(DbgContext * const dbg,
                                         const glesv2debugger::Message & cmd,
                                         glesv2debugger::Message & msg, const int * const prevRet)
 {
-    assert(0);
+    GLint params = -1;
+    dbg->hooks->gl.glGetShaderiv(cmd.arg0(), cmd.arg1(), &params);
+    msg.mutable_data()->append(reinterpret_cast<char *>(&params), sizeof(params));
     return prevRet;
 }
 
@@ -170,7 +177,10 @@ static const int * GenerateCall_glGetShaderInfoLog(DbgContext * const dbg,
         const glesv2debugger::Message & cmd,
         glesv2debugger::Message & msg, const int * const prevRet)
 {
-    assert(0);
+    const GLsizei bufSize = static_cast<GLsizei>(dbg->GetBufferSize());
+    GLsizei length = -1;
+    dbg->hooks->gl.glGetShaderInfoLog(cmd.arg0(), bufSize, &length, dbg->GetBuffer());
+    msg.mutable_data()->append(dbg->GetBuffer(), length);
     return prevRet;
 }
 

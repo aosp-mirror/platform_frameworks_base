@@ -26,36 +26,36 @@ def RemoveAnnotation(line):
         return line.replace(annotation, "*")
     else:
         return line
-    
+
 def generate_api(lines):
     externs = []
     i = 0
     # these have been hand written
-    skipFunctions = ["glReadPixels", "glDrawArrays", "glDrawElements"]
-    
+    skipFunctions = ["glDrawArrays", "glDrawElements"]
+
     # these have an EXTEND_Debug_* macro for getting data
-    extendFunctions = ["glCopyTexImage2D", "glCopyTexSubImage2D", "glShaderSource",
-"glTexImage2D", "glTexSubImage2D"]
-    
+    extendFunctions = ["glCopyTexImage2D", "glCopyTexSubImage2D", "glReadPixels",
+"glShaderSource", "glTexImage2D", "glTexSubImage2D"]
+
     # these also needs to be forwarded to DbgContext
     contextFunctions = ["glUseProgram", "glEnableVertexAttribArray", "glDisableVertexAttribArray", 
 "glVertexAttribPointer", "glBindBuffer", "glBufferData", "glBufferSubData", "glDeleteBuffers",]
-    
+
     for line in lines:
         if line.find("API_ENTRY(") >= 0: # a function prototype
             returnType = line[0: line.find(" API_ENTRY(")]
             functionName = line[line.find("(") + 1: line.find(")")] #extract GL function name
             parameterList = line[line.find(")(") + 2: line.find(") {")]
-            
+
             #if line.find("*") >= 0:
             #    extern = "%s Debug_%s(%s);" % (returnType, functionName, parameterList)
             #    externs.append(extern)
             #    continue
-            
+
             if functionName in skipFunctions:
                 sys.stderr.write("!\n! skipping function '%s'\n!\n" % (functionName))
                 continue
-                
+
             parameters = parameterList.split(',')
             paramIndex = 0
             if line.find("*") >= 0 and (line.find("*") < line.find(":") or line.find("*") > line.rfind(":")): # unannotated pointer
@@ -65,21 +65,21 @@ def generate_api(lines):
                     sys.stderr.write("%s should be hand written\n" % (extern))
                     print "// FIXME: this function has pointers, it should be hand written"
                     externs.append(extern)
-                
+
             print "%s Debug_%s(%s)\n{" % (returnType, functionName, RemoveAnnotation(parameterList))
             print "    glesv2debugger::Message msg;"
-    
+
             if parameterList == "void":
                 parameters = []
             arguments = ""
             paramNames = []
             inout = ""
             getData = ""
-            
+
             callerMembers = ""
             setCallerMembers = ""
             setMsgParameters = ""
-            
+
             for parameter in parameters:
                 const = parameter.find("const")
                 parameter = parameter.replace("const", "")
@@ -107,7 +107,7 @@ def generate_api(lines):
                         annotation = "strlen(%s)" % (paramName)
                     else:
                         count = int(annotation)
-            
+
                     setMsgParameters += "    msg.set_arg%d(ToInt(%s));\n" % (paramIndex, paramName)
                     if paramType.find("void") >= 0:
                         getData += "    msg.mutable_data()->assign(reinterpret_cast<const char *>(%s), %s * sizeof(char));" % (paramName, annotation)
@@ -127,7 +127,7 @@ def generate_api(lines):
                 paramIndex += 1
                 callerMembers += "        %s %s;\n" % (paramType, paramName)
                 setCallerMembers += "    caller.%s = %s;\n" % (paramName, paramName)
-            
+
             print "    struct : public FunctionCall {"
             print callerMembers
             print "        const int * operator()(gl_hooks_t::gl_t const * const _c, glesv2debugger::Message & msg) {"
@@ -141,6 +141,11 @@ def generate_api(lines):
             if inout in ["out", "inout"]:
                 print "            msg.set_time((systemTime(timeMode) - c0) * 1e-6f);"
                 print "        " + getData
+            if functionName in extendFunctions:
+                print "\
+#ifdef EXTEND_AFTER_CALL_Debug_%s\n\
+            EXTEND_AFTER_CALL_Debug_%s;\n\
+#endif" % (functionName, functionName)
             if functionName in contextFunctions:
                 print "            getDbgContextThreadSpecific()->%s(%s);" % (functionName, arguments)
             if returnType == "void":
@@ -157,7 +162,10 @@ def generate_api(lines):
             if inout in ["in", "inout"]:
                 print getData
             if functionName in extendFunctions:
-                print "    EXTEND_Debug_%s;" % (functionName) 
+                print "\
+#ifdef EXTEND_Debug_%s\n\
+    EXTEND_Debug_%s;\n\
+#endif" % (functionName, functionName)
             print "    int * ret = MessageLoop(caller, msg, glesv2debugger::Message_Function_%s);"\
                 % (functionName)
             if returnType != "void":
@@ -166,8 +174,8 @@ def generate_api(lines):
                 else:
                     print "    return reinterpret_cast<%s>(ret);" % (returnType)
             print "}\n"
-                        
-            
+
+
     print "// FIXME: the following functions should be written by hand"
     for extern in externs:
         print extern
@@ -189,7 +197,7 @@ if __name__ == "__main__":
  ** See the License for the specific language governing permissions and
  ** limitations under the License.
  */
- 
+
 // auto generated by generate_api_cpp.py
 
 #include <utils/Debug.h>
@@ -202,10 +210,10 @@ template<typename T> static int ToInt(const T & t)
     COMPILE_TIME_ASSERT_FUNCTION_SCOPE(sizeof(T) == sizeof(int));
     return (int &)t;
 }
-"""    
+"""
     lines = open("gl2_api_annotated.in").readlines()
     generate_api(lines)
     #lines = open("gl2ext_api.in").readlines()
     #generate_api(lines)
-            
+
 

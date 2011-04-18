@@ -236,7 +236,8 @@ const int Message_Function_Function_ARRAYSIZE = Message_Function_Function_MAX + 
 enum Message_Type {
   Message_Type_BeforeCall = 0,
   Message_Type_AfterCall = 1,
-  Message_Type_Response = 2
+  Message_Type_AfterGeneratedCall = 2,
+  Message_Type_Response = 3
 };
 bool Message_Type_IsValid(int value);
 const Message_Type Message_Type_Type_MIN = Message_Type_BeforeCall;
@@ -510,6 +511,7 @@ class Message : public ::google::protobuf::MessageLite {
   typedef Message_Type Type;
   static const Type BeforeCall = Message_Type_BeforeCall;
   static const Type AfterCall = Message_Type_AfterCall;
+  static const Type AfterGeneratedCall = Message_Type_AfterGeneratedCall;
   static const Type Response = Message_Type_Response;
   static inline bool Type_IsValid(int value) {
     return Message_Type_IsValid(value);

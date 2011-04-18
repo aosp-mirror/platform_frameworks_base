@@ -21,74 +21,13 @@ namespace android
 bool capture; // capture after each glDraw*
 }
 
-void Debug_glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels)
-{
-    DbgContext * const dbg = getDbgContextThreadSpecific();
-    glesv2debugger::Message msg, cmd;
-    msg.set_context_id(reinterpret_cast<int>(dbg));
-    msg.set_type(glesv2debugger::Message_Type_BeforeCall);
-    const bool expectResponse = dbg->expectResponse.Bit(glesv2debugger::Message_Function_glReadPixels);
-    msg.set_expect_response(expectResponse);
-    msg.set_function(glesv2debugger::Message_Function_glReadPixels);
-    msg.set_arg0(x);
-    msg.set_arg1(y);
-    msg.set_arg2(width);
-    msg.set_arg3(height);
-    msg.set_arg4(format);
-    msg.set_arg5(type);
-    msg.set_arg6(reinterpret_cast<int>(pixels));
-
-    const unsigned size = width * height * GetBytesPerPixel(format, type);
-    if (!expectResponse)
-        cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
-    Send(msg, cmd);
-    float t = 0;
-    while (true) {
-        msg.Clear();
-        nsecs_t c0 = systemTime(timeMode);
-        switch (cmd.function()) {
-        case glesv2debugger::Message_Function_CONTINUE:
-            dbg->hooks->gl.glReadPixels(x, y, width, height, format, type, pixels);
-            msg.set_time((systemTime(timeMode) - c0) * 1e-6f);
-            msg.set_context_id(reinterpret_cast<int>(dbg));
-            msg.set_function(glesv2debugger::Message_Function_glReadPixels);
-            msg.set_type(glesv2debugger::Message_Type_AfterCall);
-            msg.set_expect_response(expectResponse);
-            if (dbg->IsReadPixelBuffer(pixels)) {
-                dbg->CompressReadPixelBuffer(msg.mutable_data());
-                msg.set_data_type(msg.ReferencedImage);
-            } else {
-                dbg->Compress(pixels, size, msg.mutable_data());
-                msg.set_data_type(msg.NonreferencedImage);
-            }
-            if (!expectResponse)
-                cmd.set_function(glesv2debugger::Message_Function_SKIP);
-            Send(msg, cmd);
-            break;
-        case glesv2debugger::Message_Function_SKIP:
-            return;
-        case glesv2debugger::Message_Function_SETPROP:
-            SetProp(dbg, cmd);
-            Receive(cmd);
-            break;
-        default:
-            GenerateCall(dbg, cmd, msg, NULL);
-            msg.set_expect_response(expectResponse);
-            if (!expectResponse)
-                cmd.set_function(cmd.SKIP);
-            Send(msg, cmd);
-            break;
-        }
-    }
-}
-
 void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
 {
     DbgContext * const dbg = getDbgContextThreadSpecific();
     glesv2debugger::Message msg, cmd;
     msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_type(glesv2debugger::Message_Type_BeforeCall);
-    const bool expectResponse = dbg->expectResponse.Bit(glesv2debugger::Message_Function_glDrawArrays);
+    bool expectResponse = dbg->expectResponse.Bit(glesv2debugger::Message_Function_glDrawArrays);
     msg.set_expect_response(expectResponse);
     msg.set_function(glesv2debugger::Message_Function_glDrawArrays);
     msg.set_arg0(mode);
@@ -105,9 +44,13 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
     void * pixels = NULL;
     GLint readFormat = 0, readType = 0;
     int viewport[4] = {};
-    if (!expectResponse)
+    if (!expectResponse) {
         cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
+        cmd.set_expect_response(false);
+    }
+    glesv2debugger::Message_Function oldCmd = cmd.function();
     Send(msg, cmd);
+    expectResponse = cmd.expect_response();
     while (true) {
         msg.Clear();
         nsecs_t c0 = systemTime(timeMode);
@@ -121,7 +64,16 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
             msg.set_expect_response(expectResponse);
             if (!expectResponse)
                 cmd.set_function(glesv2debugger::Message_Function_SKIP);
+            if (!expectResponse) {
+                cmd.set_function(glesv2debugger::Message_Function_SKIP);
+                cmd.set_expect_response(false);
+            }
+            oldCmd = cmd.function();
             Send(msg, cmd);
+            expectResponse = cmd.expect_response();
+            // TODO: pack glReadPixels data with vertex data instead of
+            //  relying on sperate call for transport, this would allow
+            //  auto generated message loop using EXTEND_Debug macro
             if (capture) {
                 dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
                 dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
@@ -138,14 +90,22 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
             return;
         case glesv2debugger::Message_Function_SETPROP:
             SetProp(dbg, cmd);
-            Receive(cmd);
+            expectResponse = cmd.expect_response();
+            if (!expectResponse) // SETPROP is "out of band"
+                cmd.set_function(oldCmd);
+            else
+                Receive(cmd);
             break;
         default:
             GenerateCall(dbg, cmd, msg, NULL);
             msg.set_expect_response(expectResponse);
-            if (!expectResponse)
+            if (!expectResponse) {
                 cmd.set_function(cmd.SKIP);
+                cmd.set_expect_response(expectResponse);
+            }
+            oldCmd = cmd.function();
             Send(msg, cmd);
+            expectResponse = cmd.expect_response();
             break;
         }
     }
@@ -169,7 +129,7 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
     glesv2debugger::Message msg, cmd;
     msg.set_context_id(reinterpret_cast<int>(dbg));
     msg.set_type(glesv2debugger::Message_Type_BeforeCall);
-    const bool expectResponse = dbg->expectResponse.Bit(glesv2debugger::Message_Function_glDrawElements);
+    bool expectResponse = dbg->expectResponse.Bit(glesv2debugger::Message_Function_glDrawElements);
     msg.set_expect_response(expectResponse);
     msg.set_function(glesv2debugger::Message_Function_glDrawElements);
     msg.set_arg0(mode);
@@ -197,9 +157,13 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
     void * pixels = NULL;
     GLint readFormat = 0, readType = 0;
     int viewport[4] = {};
-    if (!expectResponse)
+    if (!expectResponse) {
         cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
+        cmd.set_expect_response(false);
+    }
+    glesv2debugger::Message_Function oldCmd = cmd.function();
     Send(msg, cmd);
+    expectResponse = cmd.expect_response();
     while (true) {
         msg.Clear();
         nsecs_t c0 = systemTime(timeMode);
@@ -213,7 +177,16 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
             msg.set_expect_response(expectResponse);
             if (!expectResponse)
                 cmd.set_function(glesv2debugger::Message_Function_SKIP);
+            if (!expectResponse) {
+                cmd.set_function(glesv2debugger::Message_Function_SKIP);
+                cmd.set_expect_response(false);
+            }
+            oldCmd = cmd.function();
             Send(msg, cmd);
+            expectResponse = cmd.expect_response();
+            // TODO: pack glReadPixels data with vertex data instead of
+            //  relying on sperate call for transport, this would allow
+            //  auto generated message loop using EXTEND_Debug macro
             if (capture) {
                 dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
                 dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
@@ -230,14 +203,22 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
             return;
         case glesv2debugger::Message_Function_SETPROP:
             SetProp(dbg, cmd);
-            Receive(cmd);
+            expectResponse = cmd.expect_response();
+            if (!expectResponse) // SETPROP is "out of band"
+                cmd.set_function(oldCmd);
+            else
+                Receive(cmd);
             break;
         default:
             GenerateCall(dbg, cmd, msg, NULL);
             msg.set_expect_response(expectResponse);
-            if (!expectResponse)
+            if (!expectResponse) {
                 cmd.set_function(cmd.SKIP);
+                cmd.set_expect_response(expectResponse);
+            }
+            oldCmd = cmd.function();
             Send(msg, cmd);
+            expectResponse = cmd.expect_response();
             break;
         }
     }
