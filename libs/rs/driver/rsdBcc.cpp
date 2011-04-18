@@ -381,7 +381,7 @@ void rsdScriptInvokeForEach(const Context *rsc,
     mtls.zEnd = rsMax((uint32_t)1, mtls.zEnd);
     mtls.arrayEnd = rsMax((uint32_t)1, mtls.arrayEnd);
 
-    rsAssert(ain->getType()->getDimZ() == 0);
+    rsAssert(!ain || (ain->getType()->getDimZ() == 0));
 
     Context *mrsc = (Context *)rsc;
     Script * oldTLS = setTLS(s);
