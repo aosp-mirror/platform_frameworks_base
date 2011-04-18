@@ -29,10 +29,10 @@ import java.util.Vector;
 /**
  * {@hide}
  *
- * <p>A hierarchical state machine is a state machine which processes messages
+ * <p>The state machine defined here is a hierarchical state machine which processes messages
  * and can have states arranged hierarchically.</p>
  * 
- * <p>A state is a <code>HierarchicalState</code> object and must implement
+ * <p>A state is a <code>State</code> object and must implement
  * <code>processMessage</code> and optionally <code>enter/exit/getName</code>.
  * The enter/exit methods are equivalent to the construction and destruction
  * in Object Oriented programming and are used to perform initialization and
@@ -76,7 +76,7 @@ import java.util.Vector;
  * will exit the current state and its parent and then exit from the controlling thread
  * and no further messages will be processed.</p>
  *
- * <p>In addition to <code>processMessage</code> each <code>HierarchicalState</code> has
+ * <p>In addition to <code>processMessage</code> each <code>State</code> has
  * an <code>enter</code> method and <code>exit</exit> method which may be overridden.</p>
  *
  * <p>Since the states are arranged in a hierarchy transitioning to a new state
@@ -122,11 +122,11 @@ import java.util.Vector;
  * mS4.enter. The new list of active states is mP0, mP1, mS2 and mS4. So
  * when the next message is received mS4.processMessage will be invoked.</p>
  *
- * <p>Now for some concrete examples, here is the canonical HelloWorld as an HSM.
+ * <p>Now for some concrete examples, here is the canonical HelloWorld as a state machine.
  * It responds with "Hello World" being printed to the log for every message.</p>
 <code>
-class HelloWorld extends HierarchicalStateMachine {
-    Hsm1(String name) {
+class HelloWorld extends StateMachine {
+    HelloWorld(String name) {
         super(name);
         addState(mState1);
         setInitialState(mState1);
@@ -138,7 +138,7 @@ class HelloWorld extends HierarchicalStateMachine {
         return hw;
     }
 
-    class State1 extends HierarchicalState {
+    class State1 extends State {
         &#64;Override public boolean processMessage(Message message) {
             Log.d(TAG, "Hello World");
             return HANDLED;
@@ -221,9 +221,9 @@ state mP2 {
      }
 }
 </code>
- * <p>The implementation is below and also in HierarchicalStateMachineTest:</p>
+ * <p>The implementation is below and also in StateMachineTest:</p>
 <code>
-class Hsm1 extends HierarchicalStateMachine {
+class Hsm1 extends StateMachine {
     private static final String TAG = "hsm1";
 
     public static final int CMD_1 = 1;
@@ -255,7 +255,7 @@ class Hsm1 extends HierarchicalStateMachine {
         Log.d(TAG, "ctor X");
     }
 
-    class P1 extends HierarchicalState {
+    class P1 extends State {
         &#64;Override public void enter() {
             Log.d(TAG, "mP1.enter");
         }
@@ -282,7 +282,7 @@ class Hsm1 extends HierarchicalStateMachine {
         }
     }
 
-    class S1 extends HierarchicalState {
+    class S1 extends State {
         &#64;Override public void enter() {
             Log.d(TAG, "mS1.enter");
         }
@@ -302,7 +302,7 @@ class Hsm1 extends HierarchicalStateMachine {
         }
     }
 
-    class S2 extends HierarchicalState {
+    class S2 extends State {
         &#64;Override public void enter() {
             Log.d(TAG, "mS2.enter");
         }
@@ -330,7 +330,7 @@ class Hsm1 extends HierarchicalStateMachine {
         }
     }
 
-    class P2 extends HierarchicalState {
+    class P2 extends State {
         &#64;Override public void enter() {
             Log.d(TAG, "mP2.enter");
             sendMessage(obtainMessage(CMD_5));
@@ -409,16 +409,16 @@ D/hsm1    ( 1999): mP2.exit
 D/hsm1    ( 1999): halting
 </code>
  */
-public class HierarchicalStateMachine {
+public class StateMachine {
 
-    private static final String TAG = "HierarchicalStateMachine";
+    private static final String TAG = "StateMachine";
     private String mName;
 
     /** Message.what value when quitting */
-    public static final int HSM_QUIT_CMD = -1;
+    public static final int SM_QUIT_CMD = -1;
 
     /** Message.what value when initializing */
-    public static final int HSM_INIT_CMD = -1;
+    public static final int SM_INIT_CMD = -1;
 
     /**
      * Convenience constant that maybe returned by processMessage
@@ -441,8 +441,8 @@ public class HierarchicalStateMachine {
      */
     public static class ProcessedMessageInfo {
         private int what;
-        private HierarchicalState state;
-        private HierarchicalState orgState;
+        private State state;
+        private State orgState;
 
         /**
          * Constructor
@@ -451,7 +451,7 @@ public class HierarchicalStateMachine {
          * @param orgState is the first state the received the message but
          * did not processes the message.
          */
-        ProcessedMessageInfo(Message message, HierarchicalState state, HierarchicalState orgState) {
+        ProcessedMessageInfo(Message message, State state, State orgState) {
             update(message, state, orgState);
         }
 
@@ -461,7 +461,7 @@ public class HierarchicalStateMachine {
          * @param orgState is the first state the received the message but
          * did not processes the message.
          */
-        public void update(Message message, HierarchicalState state, HierarchicalState orgState) {
+        public void update(Message message, State state, State orgState) {
             this.what = message.what;
             this.state = state;
             this.orgState = orgState;
@@ -477,14 +477,14 @@ public class HierarchicalStateMachine {
         /**
          * @return the state that handled this message
          */
-        public HierarchicalState getState() {
+        public State getState() {
             return state;
         }
 
         /**
          * @return the original state that received the message.
          */
-        public HierarchicalState getOriginalState() {
+        public State getOriginalState() {
             return orgState;
         }
 
@@ -593,7 +593,7 @@ public class HierarchicalStateMachine {
          * @param orgState is the first state the received the message but
          * did not processes the message.
          */
-        void add(Message message, HierarchicalState state, HierarchicalState orgState) {
+        void add(Message message, State state, State orgState) {
             mCount += 1;
             if (mMessages.size() < mMaxSize) {
                 mMessages.add(new ProcessedMessageInfo(message, state, orgState));
@@ -608,7 +608,7 @@ public class HierarchicalStateMachine {
         }
     }
 
-    private static class HsmHandler extends Handler {
+    private static class SmHandler extends Handler {
 
         /** The debug flag */
         private boolean mDbg = false;
@@ -643,8 +643,8 @@ public class HierarchicalStateMachine {
         /** State used when state machine is quitting */
         private QuittingState mQuittingState = new QuittingState();
 
-        /** Reference to the HierarchicalStateMachine */
-        private HierarchicalStateMachine mHsm;
+        /** Reference to the StateMachine */
+        private StateMachine mSm;
 
         /**
          * Information about a state.
@@ -652,7 +652,7 @@ public class HierarchicalStateMachine {
          */
         private class StateInfo {
             /** The state */
-            HierarchicalState state;
+            State state;
 
             /** The parent of this state, null if there is no parent */
             StateInfo parentStateInfo;
@@ -672,14 +672,14 @@ public class HierarchicalStateMachine {
         }
 
         /** The map of all of the states in the state machine */
-        private HashMap<HierarchicalState, StateInfo> mStateInfo =
-            new HashMap<HierarchicalState, StateInfo>();
+        private HashMap<State, StateInfo> mStateInfo =
+            new HashMap<State, StateInfo>();
 
         /** The initial state that will process the first message */
-        private HierarchicalState mInitialState;
+        private State mInitialState;
 
         /** The destination state when transitionTo has been invoked */
-        private HierarchicalState mDestState;
+        private State mDestState;
 
         /** The list of deferred messages */
         private ArrayList<Message> mDeferredMessages = new ArrayList<Message>();
@@ -687,10 +687,10 @@ public class HierarchicalStateMachine {
         /**
          * State entered when transitionToHaltingState is called.
          */
-        private class HaltingState extends HierarchicalState {
+        private class HaltingState extends State {
             @Override
             public boolean processMessage(Message msg) {
-                mHsm.haltedProcessMessage(msg);
+                mSm.haltedProcessMessage(msg);
                 return true;
             }
         }
@@ -698,7 +698,7 @@ public class HierarchicalStateMachine {
         /**
          * State entered when a valid quit message is handled.
          */
-        private class QuittingState extends HierarchicalState {
+        private class QuittingState extends State {
             @Override
             public boolean processMessage(Message msg) {
                 return NOT_HANDLED;
@@ -745,7 +745,7 @@ public class HierarchicalStateMachine {
              * the appropriate states. We loop on this to allow
              * enter and exit methods to use transitionTo.
              */
-            HierarchicalState destState = null;
+            State destState = null;
             while (mDestState != null) {
                 if (mDbg) Log.d(TAG, "handleMessage: new destination call exit");
 
@@ -785,11 +785,11 @@ public class HierarchicalStateMachine {
                     /**
                      * We are quitting so ignore all messages.
                      */
-                    mHsm.quitting();
-                    if (mHsm.mHsmThread != null) {
+                    mSm.quitting();
+                    if (mSm.mSmThread != null) {
                         // If we made the thread then quit looper which stops the thread.
                         getLooper().quit();
-                        mHsm.mHsmThread = null;
+                        mSm.mSmThread = null;
                     }
                 } else if (destState == mHaltingState) {
                     /**
@@ -797,7 +797,7 @@ public class HierarchicalStateMachine {
                      * state. All subsequent messages will be processed in
                      * in the halting state which invokes haltedProcessMessage(msg);
                      */
-                    mHsm.halting();
+                    mSm.halting();
                 }
             }
         }
@@ -833,7 +833,7 @@ public class HierarchicalStateMachine {
              * starting at the first entry.
              */
             mIsConstructionCompleted = true;
-            mMsg = obtainMessage(HSM_INIT_CMD);
+            mMsg = obtainMessage(SM_INIT_CMD);
             invokeEnterMethods(0);
 
             /**
@@ -863,7 +863,7 @@ public class HierarchicalStateMachine {
                     /**
                      * No parents left so it's not handled
                      */
-                    mHsm.unhandledMessage(msg);
+                    mSm.unhandledMessage(msg);
                     if (isQuit(msg)) {
                         transitionTo(mQuittingState);
                     }
@@ -878,7 +878,7 @@ public class HierarchicalStateMachine {
              * Record that we processed the message
              */
             if (curStateInfo != null) {
-                HierarchicalState orgState = mStateStack[mStateStackTopIndex].state;
+                State orgState = mStateStack[mStateStackTopIndex].state;
                 mProcessedMessages.add(msg, curStateInfo.state, orgState);
             } else {
                 mProcessedMessages.add(msg, null, null);
@@ -892,7 +892,7 @@ public class HierarchicalStateMachine {
         private final void invokeExitMethods(StateInfo commonStateInfo) {
             while ((mStateStackTopIndex >= 0) &&
                     (mStateStack[mStateStackTopIndex] != commonStateInfo)) {
-                HierarchicalState curState = mStateStack[mStateStackTopIndex].state;
+                State curState = mStateStack[mStateStackTopIndex].state;
                 if (mDbg) Log.d(TAG, "invokeExitMethods: " + curState.getName());
                 curState.exit();
                 mStateStack[mStateStackTopIndex].active = false;
@@ -934,7 +934,7 @@ public class HierarchicalStateMachine {
          * reversing the order of the items on the temporary stack as
          * they are moved.
          *
-         * @return index into mStateState where entering needs to start
+         * @return index into mStateStack where entering needs to start
          */
         private final int moveTempStateStackToStateStack() {
             int startingIndex = mStateStackTopIndex + 1;
@@ -967,7 +967,7 @@ public class HierarchicalStateMachine {
          * @return StateInfo of the common ancestor for the destState and
          * current state or null if there is no common parent.
          */
-        private final StateInfo setupTempStateStackWithStatesToEnter(HierarchicalState destState) {
+        private final StateInfo setupTempStateStackWithStatesToEnter(State destState) {
             /**
              * Search up the parent list of the destination state for an active
              * state. Use a do while() loop as the destState must always be entered
@@ -1019,7 +1019,7 @@ public class HierarchicalStateMachine {
         /**
          * @return current state
          */
-        private final HierarchicalState getCurrentState() {
+        private final IState getCurrentState() {
             return mStateStack[mStateStackTopIndex].state;
         }
 
@@ -1032,7 +1032,7 @@ public class HierarchicalStateMachine {
          * @param parent the parent of state
          * @return stateInfo for this state
          */
-        private final StateInfo addState(HierarchicalState state, HierarchicalState parent) {
+        private final StateInfo addState(State state, State parent) {
             if (mDbg) {
                 Log.d(TAG, "addStateInternal: E state=" + state.getName()
                         + ",parent=" + ((parent == null) ? "" : parent.getName()));
@@ -1067,29 +1067,29 @@ public class HierarchicalStateMachine {
          * Constructor
          *
          * @param looper for dispatching messages
-         * @param hsm the hierarchical state machine
+         * @param sm the hierarchical state machine
          */
-        private HsmHandler(Looper looper, HierarchicalStateMachine hsm) {
+        private SmHandler(Looper looper, StateMachine sm) {
             super(looper);
-            mHsm = hsm;
+            mSm = sm;
 
             addState(mHaltingState, null);
             addState(mQuittingState, null);
         }
 
-        /** @see HierarchicalStateMachine#setInitialState(HierarchicalState) */
-        private final void setInitialState(HierarchicalState initialState) {
+        /** @see StateMachine#setInitialState(State) */
+        private final void setInitialState(State initialState) {
             if (mDbg) Log.d(TAG, "setInitialState: initialState" + initialState.getName());
             mInitialState = initialState;
         }
 
-        /** @see HierarchicalStateMachine#transitionTo(HierarchicalState) */
-        private final void transitionTo(HierarchicalState destState) {
-            if (mDbg) Log.d(TAG, "StateMachine.transitionTo EX destState" + destState.getName());
-            mDestState = destState;
+        /** @see StateMachine#transitionTo(IState) */
+        private final void transitionTo(IState destState) {
+            mDestState = (State) destState;
+            if (mDbg) Log.d(TAG, "StateMachine.transitionTo EX destState" + mDestState.getName());
         }
 
-        /** @see HierarchicalStateMachine#deferMessage(Message) */
+        /** @see StateMachine#deferMessage(Message) */
         private final void deferMessage(Message msg) {
             if (mDbg) Log.d(TAG, "deferMessage: msg=" + msg.what);
 
@@ -1100,51 +1100,51 @@ public class HierarchicalStateMachine {
             mDeferredMessages.add(newMsg);
         }
 
-        /** @see HierarchicalStateMachine#deferMessage(Message) */
+        /** @see StateMachine#deferMessage(Message) */
         private final void quit() {
             if (mDbg) Log.d(TAG, "quit:");
-            sendMessage(obtainMessage(HSM_QUIT_CMD, mQuitObj));
+            sendMessage(obtainMessage(SM_QUIT_CMD, mQuitObj));
         }
 
-        /** @see HierarchicalStateMachine#isQuit(Message) */
+        /** @see StateMachine#isQuit(Message) */
         private final boolean isQuit(Message msg) {
-            return (msg.what == HSM_QUIT_CMD) && (msg.obj == mQuitObj);
+            return (msg.what == SM_QUIT_CMD) && (msg.obj == mQuitObj);
         }
 
-        /** @see HierarchicalStateMachine#isDbg() */
+        /** @see StateMachine#isDbg() */
         private final boolean isDbg() {
             return mDbg;
         }
 
-        /** @see HierarchicalStateMachine#setDbg(boolean) */
+        /** @see StateMachine#setDbg(boolean) */
         private final void setDbg(boolean dbg) {
             mDbg = dbg;
         }
 
-        /** @see HierarchicalStateMachine#setProcessedMessagesSize(int) */
+        /** @see StateMachine#setProcessedMessagesSize(int) */
         private final void setProcessedMessagesSize(int maxSize) {
             mProcessedMessages.setSize(maxSize);
         }
 
-        /** @see HierarchicalStateMachine#getProcessedMessagesSize() */
+        /** @see StateMachine#getProcessedMessagesSize() */
         private final int getProcessedMessagesSize() {
             return mProcessedMessages.size();
         }
 
-        /** @see HierarchicalStateMachine#getProcessedMessagesCount() */
+        /** @see StateMachine#getProcessedMessagesCount() */
         private final int getProcessedMessagesCount() {
             return mProcessedMessages.count();
         }
 
-        /** @see HierarchicalStateMachine#getProcessedMessageInfo(int) */
+        /** @see StateMachine#getProcessedMessageInfo(int) */
         private final ProcessedMessageInfo getProcessedMessageInfo(int index) {
             return mProcessedMessages.get(index);
         }
 
     }
 
-    private HsmHandler mHsmHandler;
-    private HandlerThread mHsmThread;
+    private SmHandler mSmHandler;
+    private HandlerThread mSmThread;
 
     /**
      * Initialize.
@@ -1154,28 +1154,28 @@ public class HierarchicalStateMachine {
      */
     private void initStateMachine(String name, Looper looper) {
         mName = name;
-        mHsmHandler = new HsmHandler(looper, this);
+        mSmHandler = new SmHandler(looper, this);
     }
 
     /**
-     * Constructor creates an HSM with its own thread.
+     * Constructor creates a StateMachine with its own thread.
      *
      * @param name of the state machine
      */
-    protected HierarchicalStateMachine(String name) {
-        mHsmThread = new HandlerThread(name);
-        mHsmThread.start();
-        Looper looper = mHsmThread.getLooper();
+    protected StateMachine(String name) {
+        mSmThread = new HandlerThread(name);
+        mSmThread.start();
+        Looper looper = mSmThread.getLooper();
 
         initStateMachine(name, looper);
     }
 
     /**
-     * Constructor creates an HSMStateMachine using the looper.
+     * Constructor creates an StateMachine using the looper.
      *
      * @param name of the state machine
      */
-    protected HierarchicalStateMachine(String name, Looper looper) {
+    protected StateMachine(String name, Looper looper) {
         initStateMachine(name, looper);
     }
 
@@ -1184,30 +1184,30 @@ public class HierarchicalStateMachine {
      * @param state the state to add
      * @param parent the parent of state
      */
-    protected final void addState(HierarchicalState state, HierarchicalState parent) {
-        mHsmHandler.addState(state, parent);
+    protected final void addState(State state, State parent) {
+        mSmHandler.addState(state, parent);
     }
 
     /**
      * @return current message
      */
     protected final Message getCurrentMessage() {
-        return mHsmHandler.getCurrentMessage();
+        return mSmHandler.getCurrentMessage();
     }
 
     /**
      * @return current state
      */
-    protected final HierarchicalState getCurrentState() {
-        return mHsmHandler.getCurrentState();
+    protected final IState getCurrentState() {
+        return mSmHandler.getCurrentState();
     }
 
     /**
      * Add a new state to the state machine, parent will be null
      * @param state to add
      */
-    protected final void addState(HierarchicalState state) {
-        mHsmHandler.addState(state, null);
+    protected final void addState(State state) {
+        mSmHandler.addState(state, null);
     }
 
     /**
@@ -1216,8 +1216,8 @@ public class HierarchicalStateMachine {
      *
      * @param initialState is the state which will receive the first message.
      */
-    protected final void setInitialState(HierarchicalState initialState) {
-        mHsmHandler.setInitialState(initialState);
+    protected final void setInitialState(State initialState) {
+        mSmHandler.setInitialState(initialState);
     }
 
     /**
@@ -1228,8 +1228,8 @@ public class HierarchicalStateMachine {
      *
      * @param destState will be the state that receives the next message.
      */
-    protected final void transitionTo(HierarchicalState destState) {
-        mHsmHandler.transitionTo(destState);
+    protected final void transitionTo(IState destState) {
+        mSmHandler.transitionTo(destState);
     }
 
     /**
@@ -1240,7 +1240,7 @@ public class HierarchicalStateMachine {
      * will be called.
      */
     protected final void transitionToHaltingState() {
-        mHsmHandler.transitionTo(mHsmHandler.mHaltingState);
+        mSmHandler.transitionTo(mSmHandler.mHaltingState);
     }
 
     /**
@@ -1253,7 +1253,7 @@ public class HierarchicalStateMachine {
      * @param msg is deferred until the next transition.
      */
     protected final void deferMessage(Message msg) {
-        mHsmHandler.deferMessage(msg);
+        mSmHandler.deferMessage(msg);
     }
 
 
@@ -1263,7 +1263,7 @@ public class HierarchicalStateMachine {
      * @param msg that couldn't be handled.
      */
     protected void unhandledMessage(Message msg) {
-        if (mHsmHandler.mDbg) Log.e(TAG, mName + " - unhandledMessage: msg.what=" + msg.what);
+        if (mSmHandler.mDbg) Log.e(TAG, mName + " - unhandledMessage: msg.what=" + msg.what);
     }
 
     /**
@@ -1276,15 +1276,15 @@ public class HierarchicalStateMachine {
     /**
      * This will be called once after handling a message that called
      * transitionToHalting. All subsequent messages will invoke
-     * {@link HierarchicalStateMachine#haltedProcessMessage(Message)}
+     * {@link StateMachine#haltedProcessMessage(Message)}
      */
     protected void halting() {
     }
 
     /**
      * This will be called once after a quit message that was NOT handled by
-     * the derived HSM. The HSM will stop and any subsequent messages will be
-     * ignored. In addition, if this HSM created the thread, the thread will
+     * the derived StateMachine. The StateMachine will stop and any subsequent messages will be
+     * ignored. In addition, if this StateMachine created the thread, the thread will
      * be stopped after this method returns.
      */
     protected void quitting() {
@@ -1303,35 +1303,35 @@ public class HierarchicalStateMachine {
      * @param maxSize number of messages to maintain at anyone time.
      */
     public final void setProcessedMessagesSize(int maxSize) {
-        mHsmHandler.setProcessedMessagesSize(maxSize);
+        mSmHandler.setProcessedMessagesSize(maxSize);
     }
 
     /**
      * @return number of messages processed
      */
     public final int getProcessedMessagesSize() {
-        return mHsmHandler.getProcessedMessagesSize();
+        return mSmHandler.getProcessedMessagesSize();
     }
 
     /**
      * @return the total number of messages processed
      */
     public final int getProcessedMessagesCount() {
-        return mHsmHandler.getProcessedMessagesCount();
+        return mSmHandler.getProcessedMessagesCount();
     }
 
     /**
      * @return a processed message information
      */
     public final ProcessedMessageInfo getProcessedMessageInfo(int index) {
-        return mHsmHandler.getProcessedMessageInfo(index);
+        return mSmHandler.getProcessedMessageInfo(index);
     }
 
     /**
      * @return Handler
      */
     public final Handler getHandler() {
-        return mHsmHandler;
+        return mSmHandler;
     }
 
     /**
@@ -1341,7 +1341,7 @@ public class HierarchicalStateMachine {
      */
     public final Message obtainMessage()
     {
-        return Message.obtain(mHsmHandler);
+        return Message.obtain(mSmHandler);
     }
 
     /**
@@ -1351,7 +1351,7 @@ public class HierarchicalStateMachine {
      * @return message
      */
     public final Message obtainMessage(int what) {
-        return Message.obtain(mHsmHandler, what);
+        return Message.obtain(mSmHandler, what);
     }
 
     /**
@@ -1364,7 +1364,7 @@ public class HierarchicalStateMachine {
      */
     public final Message obtainMessage(int what, Object obj)
     {
-        return Message.obtain(mHsmHandler, what, obj);
+        return Message.obtain(mSmHandler, what, obj);
     }
 
     /**
@@ -1378,7 +1378,7 @@ public class HierarchicalStateMachine {
      */
     public final Message obtainMessage(int what, int arg1, int arg2)
     {
-        return Message.obtain(mHsmHandler, what, arg1, arg2);
+        return Message.obtain(mSmHandler, what, arg1, arg2);
     }
 
     /**
@@ -1393,107 +1393,107 @@ public class HierarchicalStateMachine {
      */
     public final Message obtainMessage(int what, int arg1, int arg2, Object obj)
     {
-        return Message.obtain(mHsmHandler, what, arg1, arg2, obj);
+        return Message.obtain(mSmHandler, what, arg1, arg2, obj);
     }
 
     /**
      * Enqueue a message to this state machine.
      */
     public final void sendMessage(int what) {
-        mHsmHandler.sendMessage(obtainMessage(what));
+        mSmHandler.sendMessage(obtainMessage(what));
     }
 
     /**
      * Enqueue a message to this state machine.
      */
     public final void sendMessage(int what, Object obj) {
-        mHsmHandler.sendMessage(obtainMessage(what,obj));
+        mSmHandler.sendMessage(obtainMessage(what,obj));
     }
 
     /**
      * Enqueue a message to this state machine.
      */
     public final void sendMessage(Message msg) {
-        mHsmHandler.sendMessage(msg);
+        mSmHandler.sendMessage(msg);
     }
 
     /**
      * Enqueue a message to this state machine after a delay.
      */
     public final void sendMessageDelayed(int what, long delayMillis) {
-        mHsmHandler.sendMessageDelayed(obtainMessage(what), delayMillis);
+        mSmHandler.sendMessageDelayed(obtainMessage(what), delayMillis);
     }
 
     /**
      * Enqueue a message to this state machine after a delay.
      */
     public final void sendMessageDelayed(int what, Object obj, long delayMillis) {
-        mHsmHandler.sendMessageDelayed(obtainMessage(what, obj), delayMillis);
+        mSmHandler.sendMessageDelayed(obtainMessage(what, obj), delayMillis);
     }
 
     /**
      * Enqueue a message to this state machine after a delay.
      */
     public final void sendMessageDelayed(Message msg, long delayMillis) {
-        mHsmHandler.sendMessageDelayed(msg, delayMillis);
+        mSmHandler.sendMessageDelayed(msg, delayMillis);
     }
 
     /**
      * Enqueue a message to the front of the queue for this state machine.
-     * Protected, may only be called by instances of HierarchicalStateMachine.
+     * Protected, may only be called by instances of StateMachine.
      */
     protected final void sendMessageAtFrontOfQueue(int what, Object obj) {
-        mHsmHandler.sendMessageAtFrontOfQueue(obtainMessage(what, obj));
+        mSmHandler.sendMessageAtFrontOfQueue(obtainMessage(what, obj));
     }
 
     /**
      * Enqueue a message to the front of the queue for this state machine.
-     * Protected, may only be called by instances of HierarchicalStateMachine.
+     * Protected, may only be called by instances of StateMachine.
      */
     protected final void sendMessageAtFrontOfQueue(int what) {
-        mHsmHandler.sendMessageAtFrontOfQueue(obtainMessage(what));
+        mSmHandler.sendMessageAtFrontOfQueue(obtainMessage(what));
     }
 
     /**
      * Enqueue a message to the front of the queue for this state machine.
-     * Protected, may only be called by instances of HierarchicalStateMachine.
+     * Protected, may only be called by instances of StateMachine.
      */
     protected final void sendMessageAtFrontOfQueue(Message msg) {
-        mHsmHandler.sendMessageAtFrontOfQueue(msg);
+        mSmHandler.sendMessageAtFrontOfQueue(msg);
     }
 
     /**
      * Removes a message from the message queue.
-     * Protected, may only be called by instances of HierarchicalStateMachine.
+     * Protected, may only be called by instances of StateMachine.
      */
     protected final void removeMessages(int what) {
-        mHsmHandler.removeMessages(what);
+        mSmHandler.removeMessages(what);
     }
 
     /**
      * Conditionally quit the looper and stop execution.
      *
-     * This sends the HSM_QUIT_MSG to the state machine and
+     * This sends the SM_QUIT_MSG to the state machine and
      * if not handled by any state's processMessage then the
      * state machine will be stopped and no further messages
      * will be processed.
      */
     public final void quit() {
-        mHsmHandler.quit();
+        mSmHandler.quit();
     }
 
     /**
      * @return ture if msg is quit
      */
     protected final boolean isQuit(Message msg) {
-        return mHsmHandler.isQuit(msg);
+        return mSmHandler.isQuit(msg);
     }
 
     /**
      * @return if debugging is enabled
      */
     public boolean isDbg() {
-        return mHsmHandler.isDbg();
+        return mSmHandler.isDbg();
     }
 
     /**
@@ -1502,7 +1502,7 @@ public class HierarchicalStateMachine {
      * @param dbg is true to enable debugging.
      */
     public void setDbg(boolean dbg) {
-        mHsmHandler.setDbg(dbg);
+        mSmHandler.setDbg(dbg);
     }
 
     /**
@@ -1510,6 +1510,6 @@ public class HierarchicalStateMachine {
      */
     public void start() {
         /** Send the complete construction message */
-        mHsmHandler.completeConstruction();
+        mSmHandler.completeConstruction();
     }
 }

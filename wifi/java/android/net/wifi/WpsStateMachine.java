@@ -17,8 +17,8 @@
 package android.net.wifi;
 
 import com.android.internal.util.AsyncChannel;
-import com.android.internal.util.HierarchicalState;
-import com.android.internal.util.HierarchicalStateMachine;
+import com.android.internal.util.State;
+import com.android.internal.util.StateMachine;
 
 import android.content.Context;
 import android.content.Intent;
@@ -46,7 +46,7 @@ import android.util.Log;
  * reloads the configuration and updates the IP and proxy
  * settings, if any.
  */
-class WpsStateMachine extends HierarchicalStateMachine {
+class WpsStateMachine extends StateMachine {
 
     private static final String TAG = "WpsStateMachine";
     private static final boolean DBG = false;
@@ -58,9 +58,9 @@ class WpsStateMachine extends HierarchicalStateMachine {
     private Context mContext;
     AsyncChannel mReplyChannel = new AsyncChannel();
 
-    private HierarchicalState mDefaultState = new DefaultState();
-    private HierarchicalState mInactiveState = new InactiveState();
-    private HierarchicalState mActiveState = new ActiveState();
+    private State mDefaultState = new DefaultState();
+    private State mInactiveState = new InactiveState();
+    private State mActiveState = new ActiveState();
 
     public WpsStateMachine(Context context, WifiStateMachine wsm, Handler target) {
         super(TAG, target.getLooper());
@@ -82,7 +82,7 @@ class WpsStateMachine extends HierarchicalStateMachine {
      * HSM states
      *******************************************************/
 
-    class DefaultState extends HierarchicalState {
+    class DefaultState extends State {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
@@ -128,7 +128,7 @@ class WpsStateMachine extends HierarchicalStateMachine {
         }
     }
 
-    class ActiveState extends HierarchicalState {
+    class ActiveState extends State {
         @Override
          public void enter() {
              if (DBG) Log.d(TAG, getName() + "\n");
@@ -182,7 +182,7 @@ class WpsStateMachine extends HierarchicalStateMachine {
         }
     }
 
-    class InactiveState extends HierarchicalState {
+    class InactiveState extends State {
         @Override
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
