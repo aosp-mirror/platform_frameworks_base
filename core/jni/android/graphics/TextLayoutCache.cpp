@@ -420,7 +420,9 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
             UBiDi* bidi = ubidi_open();
             if (bidi) {
                 UErrorCode status = U_ZERO_ERROR;
+#if DEBUG_GLYPHS
                 LOGD("computeValuesWithHarfbuzz -- bidiReq=%d", bidiReq);
+#endif
                 ubidi_setPara(bidi, chars, contextCount, bidiReq, NULL, &status);
                 if (U_SUCCESS(status)) {
                     int paraDir = ubidi_getParaLevel(bidi) & kDirection_Mask; // 0 if ltr, 1 if rtl
@@ -430,7 +432,6 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
 #endif
 
                     if (rc == 1 || !U_SUCCESS(status)) {
-                        LOGD("HERE !!!");
                         computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount,
                                 dirFlags, outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
                         ubidi_close(bidi);
@@ -517,15 +518,24 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UC
 #endif
 
     // Get Advances and their total
-    jfloat totalAdvance = 0;
-    for (size_t i = 0; i < count; i++) {
-        totalAdvance += outAdvances[i] = HBFixedToFloat(shaperItem.advances[i]);
-#if DEBUG_ADVANCES
-        LOGD("hb-adv = %d - rebased = %f - total = %f", shaperItem.advances[i], outAdvances[i],
-                totalAdvance);
-#endif
+    jfloat totalAdvance = outAdvances[0] = HBFixedToFloat(shaperItem.advances[shaperItem.log_clusters[0]]);
+    for (size_t i = 1; i < count; i++) {
+        size_t clusterPrevious = shaperItem.log_clusters[i - 1];
+        size_t cluster = shaperItem.log_clusters[i];
+        if (cluster == clusterPrevious) {
+            outAdvances[i] = 0;
+        } else {
+            totalAdvance += outAdvances[i] = HBFixedToFloat(shaperItem.advances[shaperItem.log_clusters[i]]);
+        }
     }
     *outTotalAdvance = totalAdvance;
+
+#if DEBUG_ADVANCES
+    for (size_t i = 0; i < count; i++) {
+        LOGD("hb-adv[%d] = %f - log_clusters = %d - total = %f", i,
+                outAdvances[i], shaperItem.log_clusters[i], totalAdvance);
+    }
+#endif
 
     // Get Glyphs
     if (outGlyphs) {
