@@ -593,10 +593,6 @@ public class PhoneProxy extends Handler implements Phone {
         mActivePhone.getDataCallList(response);
     }
 
-    public List<DataConnection> getCurrentDataConnectionList() {
-        return mActivePhone.getCurrentDataConnectionList();
-    }
-
     public void updateServiceLocation() {
         mActivePhone.updateServiceLocation();
     }
