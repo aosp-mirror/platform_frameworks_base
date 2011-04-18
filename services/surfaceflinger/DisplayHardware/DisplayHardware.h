@@ -108,7 +108,7 @@ private:
     PixelFormat     mFormat;
     uint32_t        mFlags;
     mutable uint32_t mPageFlipCount;
-    GLint           mMaxViewportDims;
+    GLint           mMaxViewportDims[2];
     GLint           mMaxTextureSize;
     
     HWComposer*     mHwc;
