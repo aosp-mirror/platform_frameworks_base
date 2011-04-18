@@ -42,7 +42,6 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
     }
 
     void * pixels = NULL;
-    GLint readFormat = 0, readType = 0;
     int viewport[4] = {};
     if (!expectResponse) {
         cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
@@ -74,16 +73,15 @@ void Debug_glDrawArrays(GLenum mode, GLint first, GLsizei count)
             // TODO: pack glReadPixels data with vertex data instead of
             //  relying on sperate call for transport, this would allow
             //  auto generated message loop using EXTEND_Debug macro
-            if (capture) {
+            if (dbg->captureDraw > 0) {
+                dbg->captureDraw--;
                 dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
-                dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
-                dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
 //                LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
 //                     viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
                 pixels = dbg->GetReadPixelsBuffer(viewport[2] * viewport[3] *
-                                                  GetBytesPerPixel(readFormat, readType));
+                                                  dbg->readBytesPerPixel);
                 Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
-                                   readFormat, readType, pixels);
+                                   dbg->readFormat, dbg->readType, pixels);
             }
             break;
         case glesv2debugger::Message_Function_SKIP:
@@ -155,7 +153,6 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
         assert(0);
 
     void * pixels = NULL;
-    GLint readFormat = 0, readType = 0;
     int viewport[4] = {};
     if (!expectResponse) {
         cmd.set_function(glesv2debugger::Message_Function_CONTINUE);
@@ -187,16 +184,13 @@ void Debug_glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid*
             // TODO: pack glReadPixels data with vertex data instead of
             //  relying on sperate call for transport, this would allow
             //  auto generated message loop using EXTEND_Debug macro
-            if (capture) {
+            if (dbg->captureDraw > 0) {
+                dbg->captureDraw--;
                 dbg->hooks->gl.glGetIntegerv(GL_VIEWPORT, viewport);
-                dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
-                dbg->hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
-//                LOGD("glDrawArrays CAPTURE: x=%d y=%d width=%d height=%d format=0x%.4X type=0x%.4X",
-//                     viewport[0], viewport[1], viewport[2], viewport[3], readFormat, readType);
                 pixels = dbg->GetReadPixelsBuffer(viewport[2] * viewport[3] *
-                                                  GetBytesPerPixel(readFormat, readType));
+                                                  dbg->readBytesPerPixel);
                 Debug_glReadPixels(viewport[0], viewport[1], viewport[2], viewport[3],
-                                   readFormat, readType, pixels);
+                                   dbg->readFormat, dbg->readType, pixels);
             }
             break;
         case glesv2debugger::Message_Function_SKIP:

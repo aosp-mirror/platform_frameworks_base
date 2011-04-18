@@ -212,9 +212,9 @@ float Send(const glesv2debugger::Message & msg, glesv2debugger::Message & cmd)
 void SetProp(DbgContext * const dbg, const glesv2debugger::Message & cmd)
 {
     switch (cmd.prop()) {
-    case glesv2debugger::Message_Prop_Capture:
-        LOGD("SetProp Message_Prop_Capture %d", cmd.arg0());
-        capture = cmd.arg0();
+    case glesv2debugger::Message_Prop_CaptureDraw:
+        LOGD("SetProp Message_Prop_CaptureDraw %d", cmd.arg0());
+        dbg->captureDraw = cmd.arg0();
         break;
     case glesv2debugger::Message_Prop_TimeMode:
         LOGD("SetProp Message_Prop_TimeMode %d", cmd.arg0());
@@ -223,6 +223,10 @@ void SetProp(DbgContext * const dbg, const glesv2debugger::Message & cmd)
     case glesv2debugger::Message_Prop_ExpectResponse:
         LOGD("SetProp Message_Prop_ExpectResponse %d=%d", cmd.arg0(), cmd.arg1());
         dbg->expectResponse.Bit((glesv2debugger::Message_Function)cmd.arg0(), cmd.arg1());
+        break;
+    case glesv2debugger::Message_Prop_CaptureSwap:
+        LOGD("SetProp CaptureSwap %d", cmd.arg0());
+        dbg->captureSwap = cmd.arg0();
         break;
     default:
         assert(0);

@@ -476,6 +476,7 @@ bool Message_Prop_IsValid(int value) {
     case 0:
     case 1:
     case 2:
+    case 3:
       return true;
     default:
       return false;
@@ -483,9 +484,10 @@ bool Message_Prop_IsValid(int value) {
 }
 
 #ifndef _MSC_VER
-const Message_Prop Message::Capture;
+const Message_Prop Message::CaptureDraw;
 const Message_Prop Message::TimeMode;
 const Message_Prop Message::ExpectResponse;
+const Message_Prop Message::CaptureSwap;
 const Message_Prop Message::Prop_MIN;
 const Message_Prop Message::Prop_MAX;
 const int Message::Prop_ARRAYSIZE;
@@ -510,6 +512,8 @@ const int Message::kDataFieldNumber;
 const int Message::kDataTypeFieldNumber;
 const int Message::kPixelFormatFieldNumber;
 const int Message::kPixelTypeFieldNumber;
+const int Message::kImageWidthFieldNumber;
+const int Message::kImageHeightFieldNumber;
 const int Message::kTimeFieldNumber;
 const int Message::kPropFieldNumber;
 const int Message::kClockFieldNumber;
@@ -549,6 +553,8 @@ void Message::SharedCtor() {
   data_type_ = 0;
   pixel_format_ = 0;
   pixel_type_ = 0;
+  image_width_ = 0;
+  image_height_ = 0;
   time_ = 0;
   prop_ = 0;
   clock_ = 0;
@@ -610,6 +616,8 @@ void Message::Clear() {
   if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     pixel_format_ = 0;
     pixel_type_ = 0;
+    image_width_ = 0;
+    image_height_ = 0;
     time_ = 0;
     prop_ = 0;
     clock_ = 0;
@@ -794,7 +802,7 @@ bool Message::MergePartialFromCodedStream(
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
                  input, &time_)));
-          _set_bit(18);
+          _set_bit(20);
         } else {
           goto handle_uninterpreted;
         }
@@ -909,7 +917,7 @@ bool Message::MergePartialFromCodedStream(
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    float, ::google::protobuf::internal::WireFormatLite::TYPE_FLOAT>(
                  input, &clock_)));
-          _set_bit(20);
+          _set_bit(22);
         } else {
           goto handle_uninterpreted;
         }
@@ -961,6 +969,38 @@ bool Message::MergePartialFromCodedStream(
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &pixel_type_)));
           _set_bit(17);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(208)) goto parse_image_width;
+        break;
+      }
+
+      // optional int32 image_width = 26;
+      case 26: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_image_width:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &image_width_)));
+          _set_bit(18);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(216)) goto parse_image_height;
+        break;
+      }
+
+      // optional int32 image_height = 27;
+      case 27: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_image_height:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &image_height_)));
+          _set_bit(19);
         } else {
           goto handle_uninterpreted;
         }
@@ -1039,7 +1079,7 @@ void Message::SerializeWithCachedSizes(
   }
   
   // optional float time = 11;
-  if (_has_bit(18)) {
+  if (_has_bit(20)) {
     ::google::protobuf::internal::WireFormatLite::WriteFloat(11, this->time(), output);
   }
   
@@ -1069,13 +1109,13 @@ void Message::SerializeWithCachedSizes(
   }
   
   // optional .com.android.glesv2debugger.Message.Prop prop = 21;
-  if (_has_bit(19)) {
+  if (_has_bit(21)) {
     ::google::protobuf::internal::WireFormatLite::WriteEnum(
       21, this->prop(), output);
   }
   
   // optional float clock = 22;
-  if (_has_bit(20)) {
+  if (_has_bit(22)) {
     ::google::protobuf::internal::WireFormatLite::WriteFloat(22, this->clock(), output);
   }
   
@@ -1095,6 +1135,16 @@ void Message::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(25, this->pixel_type(), output);
   }
   
+  // optional int32 image_width = 26;
+  if (_has_bit(18)) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(26, this->image_width(), output);
+  }
+
+  // optional int32 image_height = 27;
+  if (_has_bit(19)) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(27, this->image_height(), output);
+  }
+
 }
 
 int Message::ByteSize() const {
@@ -1226,6 +1276,20 @@ int Message::ByteSize() const {
           this->pixel_type());
     }
     
+    // optional int32 image_width = 26;
+    if (has_image_width()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->image_width());
+    }
+
+    // optional int32 image_height = 27;
+    if (has_image_height()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->image_height());
+    }
+
     // optional float time = 11;
     if (has_time()) {
       total_size += 1 + 4;
@@ -1316,12 +1380,18 @@ void Message::MergeFrom(const Message& from) {
       set_pixel_type(from.pixel_type());
     }
     if (from._has_bit(18)) {
-      set_time(from.time());
+      set_image_width(from.image_width());
     }
     if (from._has_bit(19)) {
-      set_prop(from.prop());
+      set_image_height(from.image_height());
     }
     if (from._has_bit(20)) {
+      set_time(from.time());
+    }
+    if (from._has_bit(21)) {
+      set_prop(from.prop());
+    }
+    if (from._has_bit(22)) {
       set_clock(from.clock());
     }
   }
@@ -1359,6 +1429,8 @@ void Message::Swap(Message* other) {
     std::swap(data_type_, other->data_type_);
     std::swap(pixel_format_, other->pixel_format_);
     std::swap(pixel_type_, other->pixel_type_);
+    std::swap(image_width_, other->image_width_);
+    std::swap(image_height_, other->image_height_);
     std::swap(time_, other->time_);
     std::swap(prop_, other->prop_);
     std::swap(clock_, other->clock_);

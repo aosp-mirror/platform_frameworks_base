@@ -34,10 +34,14 @@ DbgContext * getDbgContextThreadSpecific()
 }
 
 DbgContext::DbgContext(const unsigned version, const gl_hooks_t * const hooks,
-                       const unsigned MAX_VERTEX_ATTRIBS)
+                       const unsigned MAX_VERTEX_ATTRIBS, const GLenum readFormat,
+                       const GLenum readType)
         : lzf_buf(NULL), lzf_readIndex(0), lzf_refSize(0), lzf_refBufSize(0)
         , version(version), hooks(hooks)
         , MAX_VERTEX_ATTRIBS(MAX_VERTEX_ATTRIBS)
+        , readFormat(readFormat), readType(readType)
+        , readBytesPerPixel(GetBytesPerPixel(readFormat, readType))
+        , captureSwap(0), captureDraw(0)
         , vertexAttribs(new VertexAttrib[MAX_VERTEX_ATTRIBS])
         , hasNonVBOAttribs(false), indexBuffers(NULL), indexBuffer(NULL)
         , program(0), maxAttrib(0)
@@ -64,7 +68,10 @@ DbgContext * CreateDbgContext(const pthread_key_t EGLThreadLocalStorageKey,
     assert(GL_NO_ERROR == hooks->gl.glGetError());
     GLint MAX_VERTEX_ATTRIBS = 0;
     hooks->gl.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &MAX_VERTEX_ATTRIBS);
-    return new DbgContext(version, hooks, MAX_VERTEX_ATTRIBS);
+    GLint readFormat, readType;
+    hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
+    hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
+    return new DbgContext(version, hooks, MAX_VERTEX_ATTRIBS, readFormat, readType);
 }
 
 void DestroyDbgContext(DbgContext * const dbg)

@@ -127,16 +127,21 @@ message Message
         ReferencedImage = 0; // for image sourced from ReadPixels
         NonreferencedImage = 1; // for image sourced from ReadPixels
     };
-    optional DataType data_type = 23; // most data types can be inferred from function
-    optional int32 pixel_format = 24; // used for image data if format and type 
-    optional int32 pixel_type = 25;   //     cannot be determined from arg 
+    // most data types can be inferred from function
+    optional DataType data_type = 23;
+    // these are used for image data when they cannot be determined from args
+    optional int32 pixel_format = 24;
+    optional int32 pixel_type = 25;
+    optional int32 image_width = 26;
+    optional int32 image_height = 27;
 
     optional float time = 11; // duration of previous GL call (ms)
     enum Prop
     {
-        Capture = 0; // arg0 = true | false
+        CaptureDraw = 0; // arg0 = number of glDrawArrays/Elements to glReadPixels
         TimeMode = 1; // arg0 = SYSTEM_TIME_* in utils/Timers.h
         ExpectResponse = 2; // arg0 = enum Function, arg1 = true/false
+        CaptureSwap = 3; // arg0 = number of eglSwapBuffers to glReadPixels
     };
     optional Prop prop = 21; // used with SETPROP, value in arg0
     optional float clock = 22; // wall clock in seconds

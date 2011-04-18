@@ -255,13 +255,14 @@ const Message_DataType Message_DataType_DataType_MAX = Message_DataType_Nonrefer
 const int Message_DataType_DataType_ARRAYSIZE = Message_DataType_DataType_MAX + 1;
 
 enum Message_Prop {
-  Message_Prop_Capture = 0,
+  Message_Prop_CaptureDraw = 0,
   Message_Prop_TimeMode = 1,
-  Message_Prop_ExpectResponse = 2
+  Message_Prop_ExpectResponse = 2,
+  Message_Prop_CaptureSwap = 3
 };
 bool Message_Prop_IsValid(int value);
-const Message_Prop Message_Prop_Prop_MIN = Message_Prop_Capture;
-const Message_Prop Message_Prop_Prop_MAX = Message_Prop_ExpectResponse;
+const Message_Prop Message_Prop_Prop_MIN = Message_Prop_CaptureDraw;
+const Message_Prop Message_Prop_Prop_MAX = Message_Prop_CaptureSwap;
 const int Message_Prop_Prop_ARRAYSIZE = Message_Prop_Prop_MAX + 1;
 
 // ===================================================================
@@ -539,9 +540,10 @@ class Message : public ::google::protobuf::MessageLite {
     Message_DataType_DataType_ARRAYSIZE;
   
   typedef Message_Prop Prop;
-  static const Prop Capture = Message_Prop_Capture;
+  static const Prop CaptureDraw = Message_Prop_CaptureDraw;
   static const Prop TimeMode = Message_Prop_TimeMode;
   static const Prop ExpectResponse = Message_Prop_ExpectResponse;
+  static const Prop CaptureSwap = Message_Prop_CaptureSwap;
   static inline bool Prop_IsValid(int value) {
     return Message_Prop_IsValid(value);
   }
@@ -683,6 +685,20 @@ class Message : public ::google::protobuf::MessageLite {
   inline ::google::protobuf::int32 pixel_type() const;
   inline void set_pixel_type(::google::protobuf::int32 value);
   
+  // optional int32 image_width = 26;
+  inline bool has_image_width() const;
+  inline void clear_image_width();
+  static const int kImageWidthFieldNumber = 26;
+  inline ::google::protobuf::int32 image_width() const;
+  inline void set_image_width(::google::protobuf::int32 value);
+
+  // optional int32 image_height = 27;
+  inline bool has_image_height() const;
+  inline void clear_image_height();
+  static const int kImageHeightFieldNumber = 27;
+  inline ::google::protobuf::int32 image_height() const;
+  inline void set_image_height(::google::protobuf::int32 value);
+
   // optional float time = 11;
   inline bool has_time() const;
   inline void clear_time();
@@ -727,6 +743,8 @@ class Message : public ::google::protobuf::MessageLite {
   int data_type_;
   ::google::protobuf::int32 pixel_format_;
   ::google::protobuf::int32 pixel_type_;
+  ::google::protobuf::int32 image_width_;
+  ::google::protobuf::int32 image_height_;
   float time_;
   int prop_;
   float clock_;
@@ -734,7 +752,7 @@ class Message : public ::google::protobuf::MessageLite {
   friend void protobuf_AssignDesc_debugger_5fmessage_2eproto();
   friend void protobuf_ShutdownFile_debugger_5fmessage_2eproto();
   
-  ::google::protobuf::uint32 _has_bits_[(21 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(23 + 31) / 32];
   
   // WHY DOES & HAVE LOWER PRECEDENCE THAN != !?
   inline bool _has_bit(int index) const {
@@ -1074,52 +1092,84 @@ inline void Message::set_pixel_type(::google::protobuf::int32 value) {
   pixel_type_ = value;
 }
 
+// optional int32 image_width = 26;
+inline bool Message::has_image_width() const {
+  return _has_bit(18);
+}
+inline void Message::clear_image_width() {
+  image_width_ = 0;
+  _clear_bit(18);
+}
+inline ::google::protobuf::int32 Message::image_width() const {
+  return image_width_;
+}
+inline void Message::set_image_width(::google::protobuf::int32 value) {
+  _set_bit(18);
+  image_width_ = value;
+}
+
+// optional int32 image_height = 27;
+inline bool Message::has_image_height() const {
+  return _has_bit(19);
+}
+inline void Message::clear_image_height() {
+  image_height_ = 0;
+  _clear_bit(19);
+}
+inline ::google::protobuf::int32 Message::image_height() const {
+  return image_height_;
+}
+inline void Message::set_image_height(::google::protobuf::int32 value) {
+  _set_bit(19);
+  image_height_ = value;
+}
+
 // optional float time = 11;
 inline bool Message::has_time() const {
-  return _has_bit(18);
+  return _has_bit(20);
 }
 inline void Message::clear_time() {
   time_ = 0;
-  _clear_bit(18);
+  _clear_bit(20);
 }
 inline float Message::time() const {
   return time_;
 }
 inline void Message::set_time(float value) {
-  _set_bit(18);
+  _set_bit(20);
   time_ = value;
 }
 
 // optional .com.android.glesv2debugger.Message.Prop prop = 21;
 inline bool Message::has_prop() const {
-  return _has_bit(19);
+  return _has_bit(21);
 }
 inline void Message::clear_prop() {
   prop_ = 0;
-  _clear_bit(19);
+  _clear_bit(21);
 }
 inline ::com::android::glesv2debugger::Message_Prop Message::prop() const {
   return static_cast< ::com::android::glesv2debugger::Message_Prop >(prop_);
 }
 inline void Message::set_prop(::com::android::glesv2debugger::Message_Prop value) {
   GOOGLE_DCHECK(::com::android::glesv2debugger::Message_Prop_IsValid(value));
-  _set_bit(19);
+  _set_bit(21);
   prop_ = value;
 }
 
 // optional float clock = 22;
 inline bool Message::has_clock() const {
-  return _has_bit(20);
+  return _has_bit(22);
 }
 inline void Message::clear_clock() {
   clock_ = 0;
-  _clear_bit(20);
+  _clear_bit(22);
 }
 inline float Message::clock() const {
   return clock_;
 }
 inline void Message::set_clock(float value) {
-  _set_bit(20);
+  _set_bit(22);
   clock_ = value;
 }
 
