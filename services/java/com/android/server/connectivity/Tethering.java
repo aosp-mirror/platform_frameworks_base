@@ -49,8 +49,9 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.android.internal.telephony.Phone;
-import com.android.internal.util.HierarchicalState;
-import com.android.internal.util.HierarchicalStateMachine;
+import com.android.internal.util.IState;
+import com.android.internal.util.State;
+import com.android.internal.util.StateMachine;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -122,7 +123,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     // resampled each time we turn on tethering - used as cache for settings/config-val
     private boolean mDunRequired;  // configuration info - must use DUN apn on 3g
 
-    private HierarchicalStateMachine mTetherMasterSM;
+    private StateMachine mTetherMasterSM;
 
     private Notification mTetheredNotification;
 
@@ -668,7 +669,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
 
-    class TetherInterfaceSM extends HierarchicalStateMachine {
+    class TetherInterfaceSM extends StateMachine {
         // notification from the master SM that it's not in tether mode
         static final int CMD_TETHER_MODE_DEAD            =  1;
         // request from the user that it wants to tether
@@ -694,13 +695,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         // the upstream connection has changed
         static final int CMD_TETHER_CONNECTION_CHANGED   = 12;
 
-        private HierarchicalState mDefaultState;
+        private State mDefaultState;
 
-        private HierarchicalState mInitialState;
-        private HierarchicalState mStartingState;
-        private HierarchicalState mTetheredState;
+        private State mInitialState;
+        private State mStartingState;
+        private State mTetheredState;
 
-        private HierarchicalState mUnavailableState;
+        private State mUnavailableState;
 
         private boolean mAvailable;
         private boolean mTethered;
@@ -732,7 +733,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         public String toString() {
             String res = new String();
             res += mIfaceName + " - ";
-            HierarchicalState current = getCurrentState();
+            IState current = getCurrentState();
             if (current == mInitialState) res += "InitialState";
             if (current == mStartingState) res += "StartingState";
             if (current == mTetheredState) res += "TetheredState";
@@ -782,7 +783,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             return (mLastError != ConnectivityManager.TETHER_ERROR_NO_ERROR);
         }
 
-        class InitialState extends HierarchicalState {
+        class InitialState extends State {
             @Override
             public void enter() {
                 setAvailable(true);
@@ -812,7 +813,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             }
         }
 
-        class StartingState extends HierarchicalState {
+        class StartingState extends State {
             @Override
             public void enter() {
                 setAvailable(false);
@@ -870,7 +871,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             }
         }
 
-        class TetheredState extends HierarchicalState {
+        class TetheredState extends State {
             @Override
             public void enter() {
                 IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
@@ -1034,7 +1035,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             }
         }
 
-        class UnavailableState extends HierarchicalState {
+        class UnavailableState extends State {
             @Override
             public void enter() {
                 setAvailable(false);
@@ -1064,7 +1065,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     }
 
-    class TetherMasterSM extends HierarchicalStateMachine {
+    class TetherMasterSM extends StateMachine {
         // an interface SM has requested Tethering
         static final int CMD_TETHER_MODE_REQUESTED   = 1;
         // an interface SM has unrequested Tethering
@@ -1082,14 +1083,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         // We do not flush the old ones.
         private int mSequenceNumber;
 
-        private HierarchicalState mInitialState;
-        private HierarchicalState mTetherModeAliveState;
+        private State mInitialState;
+        private State mTetherModeAliveState;
 
-        private HierarchicalState mSetIpForwardingEnabledErrorState;
-        private HierarchicalState mSetIpForwardingDisabledErrorState;
-        private HierarchicalState mStartTetheringErrorState;
-        private HierarchicalState mStopTetheringErrorState;
-        private HierarchicalState mSetDnsForwardersErrorState;
+        private State mSetIpForwardingEnabledErrorState;
+        private State mSetIpForwardingDisabledErrorState;
+        private State mStartTetheringErrorState;
+        private State mStopTetheringErrorState;
+        private State mSetDnsForwardersErrorState;
 
         private ArrayList mNotifyList;
 
@@ -1125,7 +1126,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             setInitialState(mInitialState);
         }
 
-        class TetherMasterUtilState extends HierarchicalState {
+        class TetherMasterUtilState extends State {
             protected final static boolean TRY_TO_SETUP_MOBILE_CONNECTION = true;
             protected final static boolean WAIT_FOR_NETWORK_TO_SETTLE     = false;
 
@@ -1440,7 +1441,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             }
         }
 
-        class ErrorState extends HierarchicalState {
+        class ErrorState extends State {
             int mErrorNotification;
             @Override
             public boolean processMessage(Message message) {

@@ -26,8 +26,8 @@ import android.server.BluetoothA2dpService;
 import android.server.BluetoothService;
 import android.util.Log;
 
-import com.android.internal.util.HierarchicalState;
-import com.android.internal.util.HierarchicalStateMachine;
+import com.android.internal.util.State;
+import com.android.internal.util.StateMachine;
 
 import java.util.Set;
 
@@ -57,7 +57,7 @@ import java.util.Set;
  * Todo(): Write tests for this class, when the Android Mock support is completed.
  * @hide
  */
-public final class BluetoothDeviceProfileState extends HierarchicalStateMachine {
+public final class BluetoothDeviceProfileState extends StateMachine {
     private static final String TAG = "BluetoothDeviceProfileState";
     private static final boolean DBG = false;
 
@@ -235,16 +235,16 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
     }
 
-    private class BondedDevice extends HierarchicalState {
+    private class BondedDevice extends State {
         @Override
-        protected void enter() {
+        public void enter() {
             Log.i(TAG, "Entering ACL Connected state with: " + getCurrentMessage().what);
             Message m = new Message();
             m.copyFrom(getCurrentMessage());
             sendMessageAtFrontOfQueue(m);
         }
         @Override
-        protected boolean processMessage(Message message) {
+        public boolean processMessage(Message message) {
             log("ACL Connected State -> Processing Message: " + message.what);
             switch(message.what) {
                 case CONNECT_HFP_OUTGOING:
@@ -353,12 +353,12 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
     }
 
-    private class OutgoingHandsfree extends HierarchicalState {
+    private class OutgoingHandsfree extends State {
         private boolean mStatus = false;
         private int mCommand;
 
         @Override
-        protected void enter() {
+        public void enter() {
             Log.i(TAG, "Entering OutgoingHandsfree state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_HFP_OUTGOING &&
@@ -374,7 +374,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
 
         @Override
-        protected boolean processMessage(Message message) {
+        public boolean processMessage(Message message) {
             log("OutgoingHandsfree State -> Processing Message: " + message.what);
             Message deferMsg = new Message();
             int command = message.what;
@@ -466,12 +466,12 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
     }
 
-    private class IncomingHandsfree extends HierarchicalState {
+    private class IncomingHandsfree extends State {
         private boolean mStatus = false;
         private int mCommand;
 
         @Override
-        protected void enter() {
+        public void enter() {
             Log.i(TAG, "Entering IncomingHandsfree state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_HFP_INCOMING &&
@@ -487,7 +487,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
 
         @Override
-        protected boolean processMessage(Message message) {
+        public boolean processMessage(Message message) {
             log("IncomingHandsfree State -> Processing Message: " + message.what);
             switch(message.what) {
                 case CONNECT_HFP_OUTGOING:
@@ -546,12 +546,12 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
     }
 
-    private class OutgoingA2dp extends HierarchicalState {
+    private class OutgoingA2dp extends State {
         private boolean mStatus = false;
         private int mCommand;
 
         @Override
-        protected void enter() {
+        public void enter() {
             Log.i(TAG, "Entering OutgoingA2dp state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_A2DP_OUTGOING &&
@@ -567,7 +567,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
 
         @Override
-        protected boolean processMessage(Message message) {
+        public boolean processMessage(Message message) {
             log("OutgoingA2dp State->Processing Message: " + message.what);
             Message deferMsg = new Message();
             switch(message.what) {
@@ -656,12 +656,12 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
     }
 
-    private class IncomingA2dp extends HierarchicalState {
+    private class IncomingA2dp extends State {
         private boolean mStatus = false;
         private int mCommand;
 
         @Override
-        protected void enter() {
+        public void enter() {
             Log.i(TAG, "Entering IncomingA2dp state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_A2DP_INCOMING &&
@@ -677,7 +677,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
 
         @Override
-        protected boolean processMessage(Message message) {
+        public boolean processMessage(Message message) {
             log("IncomingA2dp State->Processing Message: " + message.what);
             switch(message.what) {
                 case CONNECT_HFP_OUTGOING:
@@ -734,12 +734,12 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
     }
 
 
-    private class OutgoingHid extends HierarchicalState {
+    private class OutgoingHid extends State {
         private boolean mStatus = false;
         private int mCommand;
 
         @Override
-        protected void enter() {
+        public void enter() {
             log("Entering OutgoingHid state with: " + getCurrentMessage().what);
             mCommand = getCurrentMessage().what;
             if (mCommand != CONNECT_HID_OUTGOING &&
@@ -751,7 +751,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
 
         @Override
-        protected boolean processMessage(Message message) {
+        public boolean processMessage(Message message) {
             log("OutgoingHid State->Processing Message: " + message.what);
             Message deferMsg = new Message();
             switch(message.what) {
@@ -815,12 +815,12 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
         }
     }
 
-  private class IncomingHid extends HierarchicalState {
+  private class IncomingHid extends State {
       private boolean mStatus = false;
       private int mCommand;
 
       @Override
-      protected void enter() {
+    public void enter() {
           log("Entering IncomingHid state with: " + getCurrentMessage().what);
           mCommand = getCurrentMessage().what;
           if (mCommand != CONNECT_HID_INCOMING &&
@@ -832,7 +832,7 @@ public final class BluetoothDeviceProfileState extends HierarchicalStateMachine 
       }
 
       @Override
-      protected boolean processMessage(Message message) {
+    public boolean processMessage(Message message) {
           log("IncomingHid State->Processing Message: " + message.what);
           Message deferMsg = new Message();
           switch(message.what) {

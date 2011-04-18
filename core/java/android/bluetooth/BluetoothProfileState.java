@@ -22,8 +22,8 @@ import android.content.IntentFilter;
 import android.os.Message;
 import android.util.Log;
 
-import com.android.internal.util.HierarchicalState;
-import com.android.internal.util.HierarchicalStateMachine;
+import com.android.internal.util.State;
+import com.android.internal.util.StateMachine;
 
 /**
  * This state machine is used to serialize the connections
@@ -39,7 +39,7 @@ import com.android.internal.util.HierarchicalStateMachine;
  * @hide
  */
 
-public class BluetoothProfileState extends HierarchicalStateMachine {
+public class BluetoothProfileState extends StateMachine {
     private static final boolean DBG = true;
     private static final String TAG = "BluetoothProfileState";
 
@@ -101,15 +101,15 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
         context.registerReceiver(mBroadcastReceiver, filter);
     }
 
-    private class StableState extends HierarchicalState {
+    private class StableState extends State {
         @Override
-        protected void enter() {
+        public void enter() {
             log("Entering Stable State");
             mPendingDevice = null;
         }
 
         @Override
-        protected boolean processMessage(Message msg) {
+        public boolean processMessage(Message msg) {
             if (msg.what != TRANSITION_TO_STABLE) {
                 transitionTo(mPendingCommandState);
             }
@@ -117,15 +117,15 @@ public class BluetoothProfileState extends HierarchicalStateMachine {
         }
     }
 
-    private class PendingCommandState extends HierarchicalState {
+    private class PendingCommandState extends State {
         @Override
-        protected void enter() {
+        public void enter() {
             log("Entering PendingCommandState State");
             dispatchMessage(getCurrentMessage());
         }
 
         @Override
-        protected boolean processMessage(Message msg) {
+        public boolean processMessage(Message msg) {
             if (msg.what == TRANSITION_TO_STABLE) {
                 transitionTo(mStableState);
             } else {

@@ -17,8 +17,8 @@
 package com.android.internal.telephony;
 
 
-import com.android.internal.util.HierarchicalState;
-import com.android.internal.util.HierarchicalStateMachine;
+import com.android.internal.util.State;
+import com.android.internal.util.StateMachine;
 
 import android.net.LinkAddress;
 import android.net.LinkCapabilities;
@@ -37,7 +37,7 @@ import java.util.HashMap;
 /**
  * {@hide}
  *
- * DataConnection HierarchicalStateMachine.
+ * DataConnection StateMachine.
  *
  * This is an abstract base class for representing a single data connection.
  * Instances of this class such as <code>CdmaDataConnection</code> and
@@ -55,7 +55,7 @@ import java.util.HashMap;
  *
  * The other public methods are provided for debugging.
  */
-public abstract class DataConnection extends HierarchicalStateMachine {
+public abstract class DataConnection extends StateMachine {
     protected static final boolean DBG = true;
 
     protected static Object mCountLock = new Object();
@@ -484,17 +484,17 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     /**
      * The parent state for all other states.
      */
-    private class DcDefaultState extends HierarchicalState {
+    private class DcDefaultState extends State {
         @Override
-        protected void enter() {
+        public void enter() {
             phone.mCM.registerForRilConnected(getHandler(), EVENT_RIL_CONNECTED, null);
         }
         @Override
-        protected void exit() {
+        public void exit() {
             phone.mCM.unregisterForRilConnected(getHandler());
         }
         @Override
-        protected boolean processMessage(Message msg) {
+        public boolean processMessage(Message msg) {
             AsyncResult ar;
 
             switch (msg.what) {
@@ -547,7 +547,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     /**
      * The state machine is inactive and expects a EVENT_CONNECT.
      */
-    private class DcInactiveState extends HierarchicalState {
+    private class DcInactiveState extends State {
         private ConnectionParams mConnectionParams = null;
         private FailCause mFailCause = null;
         private DisconnectParams mDisconnectParams = null;
@@ -563,7 +563,8 @@ public abstract class DataConnection extends HierarchicalStateMachine {
             mDisconnectParams = dp;
         }
 
-        @Override protected void enter() {
+        @Override
+        public void enter() {
             mTag += 1;
 
             /**
@@ -583,14 +584,16 @@ public abstract class DataConnection extends HierarchicalStateMachine {
             }
         }
 
-        @Override protected void exit() {
+        @Override
+        public void exit() {
             // clear notifications
             mConnectionParams = null;
             mFailCause = null;
             mDisconnectParams = null;
         }
 
-        @Override protected boolean processMessage(Message msg) {
+        @Override
+        public boolean processMessage(Message msg) {
             boolean retVal;
 
             switch (msg.what) {
@@ -626,8 +629,9 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     /**
      * The state machine is activating a connection.
      */
-    private class DcActivatingState extends HierarchicalState {
-        @Override protected boolean processMessage(Message msg) {
+    private class DcActivatingState extends State {
+        @Override
+        public boolean processMessage(Message msg) {
             boolean retVal;
             AsyncResult ar;
             ConnectionParams cp;
@@ -722,7 +726,7 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     /**
      * The state machine is connected, expecting an EVENT_DISCONNECT.
      */
-    private class DcActiveState extends HierarchicalState {
+    private class DcActiveState extends State {
         private ConnectionParams mConnectionParams = null;
         private FailCause mFailCause = null;
 
@@ -746,13 +750,15 @@ public abstract class DataConnection extends HierarchicalStateMachine {
             }
         }
 
-        @Override protected void exit() {
+        @Override
+        public void exit() {
             // clear notifications
             mConnectionParams = null;
             mFailCause = null;
         }
 
-        @Override protected boolean processMessage(Message msg) {
+        @Override
+        public boolean processMessage(Message msg) {
             boolean retVal;
 
             switch (msg.what) {
@@ -778,8 +784,9 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     /**
      * The state machine is disconnecting.
      */
-    private class DcDisconnectingState extends HierarchicalState {
-        @Override protected boolean processMessage(Message msg) {
+    private class DcDisconnectingState extends State {
+        @Override
+        public boolean processMessage(Message msg) {
             boolean retVal;
 
             switch (msg.what) {
@@ -812,8 +819,9 @@ public abstract class DataConnection extends HierarchicalStateMachine {
     /**
      * The state machine is disconnecting after an creating a connection.
      */
-    private class DcDisconnectionErrorCreatingConnection extends HierarchicalState {
-        @Override protected boolean processMessage(Message msg) {
+    private class DcDisconnectionErrorCreatingConnection extends State {
+        @Override
+        public boolean processMessage(Message msg) {
             boolean retVal;
 
             switch (msg.what) {
