@@ -45,6 +45,7 @@ class FileSynthesisRequest extends SynthesisRequest {
     private int mChannelCount;
     private RandomAccessFile mFile;
     private boolean mStopped = false;
+    private boolean mDone = false;
 
     FileSynthesisRequest(String text, File fileName) {
         super(text);
@@ -86,6 +87,11 @@ class FileSynthesisRequest extends SynthesisRequest {
     @Override
     public int getMaxBufferSize() {
         return MAX_AUDIO_BUFFER_SIZE;
+    }
+
+    @Override
+    boolean isDone() {
+        return mDone;
     }
 
     @Override
@@ -164,12 +170,21 @@ class FileSynthesisRequest extends SynthesisRequest {
                 mFile.write(
                         makeWavHeader(mSampleRateInHz, mAudioFormat, mChannelCount, dataLength));
                 closeFile();
+                mDone = true;
                 return TextToSpeech.SUCCESS;
             } catch (IOException ex) {
                 Log.e(TAG, "Failed to write to " + mFileName + ": " + ex);
                 cleanUp();
                 return TextToSpeech.ERROR;
             }
+        }
+    }
+
+    @Override
+    public void error() {
+        if (DBG) Log.d(TAG, "FileSynthesisRequest.error()");
+        synchronized (mStateLock) {
+            cleanUp();
         }
     }
 
@@ -187,9 +202,11 @@ class FileSynthesisRequest extends SynthesisRequest {
             out = new FileOutputStream(mFileName);
             out.write(makeWavHeader(sampleRateInHz, audioFormat, channelCount, length));
             out.write(buffer, offset, length);
+            mDone = true;
             return TextToSpeech.SUCCESS;
         } catch (IOException ex) {
             Log.e(TAG, "Failed to write to " + mFileName + ": " + ex);
+            mFileName.delete();
             return TextToSpeech.ERROR;
         } finally {
             try {

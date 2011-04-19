@@ -50,6 +50,7 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
     private final Object mStateLock = new Object();
     private AudioTrack mAudioTrack = null;
     private boolean mStopped = false;
+    private boolean mDone = false;
 
     PlaybackSynthesisRequest(String text, int streamType, float volume, float pan) {
         super(text);
@@ -83,6 +84,11 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
         // The AudioTrack buffer will be at least MIN_AUDIO_BUFFER_SIZE, so that should always be
         // a safe buffer size to pass in.
         return MIN_AUDIO_BUFFER_SIZE;
+    }
+
+    @Override
+    boolean isDone() {
+        return mDone;
     }
 
     // TODO: add a thread that writes to the AudioTrack?
@@ -183,9 +189,18 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
                 Log.e(TAG, "done(): Not started");
                 return TextToSpeech.ERROR;
             }
+            mDone = true;
             cleanUp();
         }
         return TextToSpeech.SUCCESS;
+    }
+
+    @Override
+    public void error() {
+        if (DBG) Log.d(TAG, "error()");
+        synchronized (mStateLock) {
+            cleanUp();
+        }
     }
 
     @Override
@@ -217,6 +232,7 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
             try {
                 mAudioTrack.write(buffer, offset, length);
                 mAudioTrack.play();
+                mDone = true;
             } catch (IllegalStateException ex) {
                 Log.e(TAG, "Playback error", ex);
                 return TextToSpeech.ERROR;

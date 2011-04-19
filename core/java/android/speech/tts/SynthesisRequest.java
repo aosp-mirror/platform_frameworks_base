@@ -114,6 +114,11 @@ public abstract class SynthesisRequest {
     public abstract int getMaxBufferSize();
 
     /**
+     * Checks whether the synthesis request completed successfully.
+     */
+    abstract boolean isDone();
+
+    /**
      * Aborts the speech request.
      *
      * Can be called from multiple threads.
@@ -160,6 +165,14 @@ public abstract class SynthesisRequest {
      * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
      */
     public abstract int done();
+
+    /**
+     * The service should call this method if the speech synthesis fails.
+     *
+     * This method should only be called on the synthesis thread,
+     * while in {@link TextToSpeechService#onSynthesizeText}.
+     */
+    public abstract void error();
 
     /**
      * The service can call this method instead of using {@link #start}, {@link #audioAvailable}
