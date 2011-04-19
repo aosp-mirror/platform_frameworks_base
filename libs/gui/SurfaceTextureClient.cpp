@@ -26,8 +26,10 @@ namespace android {
 SurfaceTextureClient::SurfaceTextureClient(
         const sp<ISurfaceTexture>& surfaceTexture):
         mSurfaceTexture(surfaceTexture), mAllocator(0), mReqWidth(0),
-        mReqHeight(0), mReqFormat(DEFAULT_FORMAT), mReqUsage(0),
-        mTimestamp(NATIVE_WINDOW_TIMESTAMP_AUTO), mMutex() {
+        mReqHeight(0), mReqFormat(0), mReqUsage(0),
+        mTimestamp(NATIVE_WINDOW_TIMESTAMP_AUTO), mConnectedApi(0),
+        mQueryWidth(0), mQueryHeight(0), mQueryFormat(0),
+        mMutex() {
     // Initialize the ANativeWindow function pointers.
     ANativeWindow::setSwapInterval  = setSwapInterval;
     ANativeWindow::dequeueBuffer    = dequeueBuffer;
@@ -101,9 +103,10 @@ int SurfaceTextureClient::dequeueBuffer(android_native_buffer_t** buffer) {
     }
     sp<GraphicBuffer>& gbuf(mSlots[buf]);
     if (err == ISurfaceTexture::BUFFER_NEEDS_REALLOCATION ||
-        gbuf == 0 || gbuf->getWidth() != mReqWidth ||
-        gbuf->getHeight() != mReqHeight ||
-        uint32_t(gbuf->getPixelFormat()) != mReqFormat ||
+        gbuf == 0 ||
+        (mReqWidth && gbuf->getWidth() != mReqWidth) ||
+        (mReqHeight && gbuf->getHeight() != mReqHeight) ||
+        (mReqFormat && uint32_t(gbuf->getPixelFormat()) != mReqFormat) ||
         (gbuf->getUsage() & mReqUsage) != mReqUsage) {
         gbuf = mSurfaceTexture->requestBuffer(buf, mReqWidth, mReqHeight,
                 mReqFormat, mReqUsage);
@@ -111,6 +114,9 @@ int SurfaceTextureClient::dequeueBuffer(android_native_buffer_t** buffer) {
             LOGE("dequeueBuffer: ISurfaceTexture::requestBuffer failed");
             return NO_MEMORY;
         }
+        mQueryWidth  = gbuf->width;
+        mQueryHeight = gbuf->height;
+        mQueryFormat = gbuf->format;
     }
     *buffer = gbuf.get();
     return OK;
@@ -159,13 +165,13 @@ int SurfaceTextureClient::query(int what, int* value) {
     Mutex::Autolock lock(mMutex);
     switch (what) {
     case NATIVE_WINDOW_WIDTH:
+        *value = mQueryWidth ? mQueryWidth : mReqWidth;
+        return NO_ERROR;
     case NATIVE_WINDOW_HEIGHT:
-        // XXX: How should SurfaceTexture behave if setBuffersGeometry didn't
-        // override the size?
-        *value = 0;
+        *value = mQueryHeight ? mQueryHeight : mReqHeight;
         return NO_ERROR;
     case NATIVE_WINDOW_FORMAT:
-        *value = DEFAULT_FORMAT;
+        *value = mQueryFormat ? mQueryFormat : mReqFormat;
         return NO_ERROR;
     case NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS:
         *value = MIN_UNDEQUEUED_BUFFERS;
@@ -260,15 +266,48 @@ int SurfaceTextureClient::dispatchSetBuffersTimestamp(va_list args) {
 
 int SurfaceTextureClient::connect(int api) {
     LOGV("SurfaceTextureClient::connect");
-    // XXX: Implement this!
-    return INVALID_OPERATION;
+    Mutex::Autolock lock(mMutex);
+    int err = NO_ERROR;
+    switch (api) {
+        case NATIVE_WINDOW_API_EGL:
+            if (mConnectedApi) {
+                err = -EINVAL;
+            } else {
+                mConnectedApi = api;
+            }
+            break;
+        default:
+            err = -EINVAL;
+            break;
+    }
+    return err;
 }
 
 int SurfaceTextureClient::disconnect(int api) {
     LOGV("SurfaceTextureClient::disconnect");
-    // XXX: Implement this!
-    return INVALID_OPERATION;
+    Mutex::Autolock lock(mMutex);
+    int err = NO_ERROR;
+    switch (api) {
+        case NATIVE_WINDOW_API_EGL:
+            if (mConnectedApi == api) {
+                mConnectedApi = 0;
+            } else {
+                err = -EINVAL;
+            }
+            break;
+        default:
+            err = -EINVAL;
+            break;
+    }
+    return err;
 }
+
+int SurfaceTextureClient::getConnectedApi() const
+{
+    Mutex::Autolock lock(mMutex);
+    return mConnectedApi;
+}
+
 
 int SurfaceTextureClient::setUsage(uint32_t reqUsage)
 {

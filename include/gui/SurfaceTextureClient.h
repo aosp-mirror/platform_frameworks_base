@@ -27,6 +27,8 @@
 
 namespace android {
 
+class Surface;
+
 class SurfaceTextureClient
     : public EGLNativeBase<ANativeWindow, SurfaceTextureClient, RefBase>
 {
@@ -36,6 +38,7 @@ public:
     sp<ISurfaceTexture> getISurfaceTexture() const;
 
 private:
+    friend class Surface;
 
     // can't be copied
     SurfaceTextureClient& operator = (const SurfaceTextureClient& rhs);
@@ -77,6 +80,8 @@ private:
     int setUsage(uint32_t reqUsage);
 
     void freeAllBuffers();
+
+    int getConnectedApi() const;
 
     enum { MIN_UNDEQUEUED_BUFFERS = SurfaceTexture::MIN_UNDEQUEUED_BUFFERS };
     enum { MIN_BUFFER_SLOTS = SurfaceTexture::MIN_BUFFER_SLOTS };
@@ -121,10 +126,25 @@ private:
     // a timestamp is auto-generated when queueBuffer is called.
     int64_t mTimestamp;
 
+    // mConnectedApi holds the currently connected API to this surface
+    int mConnectedApi;
+
+    // mQueryWidth is the width returned by query(). It is set to width
+    // of the last dequeued buffer or to mReqWidth if no buffer was dequeued.
+    uint32_t mQueryWidth;
+
+    // mQueryHeight is the height returned by query(). It is set to height
+    // of the last dequeued buffer or to mReqHeight if no buffer was dequeued.
+    uint32_t mQueryHeight;
+
+    // mQueryFormat is the format returned by query(). It is set to the last
+    // dequeued format or to mReqFormat if no buffer was dequeued.
+    uint32_t mQueryFormat;
+
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of SurfaceTexture objects. It must be locked whenever the
     // member variables are accessed.
-    Mutex mMutex;
+    mutable Mutex mMutex;
 };
 
 }; // namespace android
