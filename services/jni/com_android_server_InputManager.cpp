@@ -36,13 +36,13 @@
 
 #include <input/InputManager.h>
 #include <input/PointerController.h>
-#include <input/SpotController.h>
 #include <input/SpriteController.h>
 
 #include <android_os_MessageQueue.h>
 #include <android_view_KeyEvent.h>
 #include <android_view_MotionEvent.h>
 #include <android_view_InputChannel.h>
+#include <android_view_PointerIcon.h>
 #include <android/graphics/GraphicsJNI.h>
 
 #include "com_android_server_PowerManagerService.h"
@@ -101,12 +101,6 @@ static struct {
     jfieldID navigation;
 } gConfigurationClassInfo;
 
-static struct {
-    jfieldID bitmap;
-    jfieldID hotSpotX;
-    jfieldID hotSpotY;
-} gPointerIconClassInfo;
-
 
 // --- Global functions ---
 
@@ -128,17 +122,30 @@ static jobject getInputWindowHandleObjLocalRef(JNIEnv* env,
             getInputWindowHandleObjLocalRef(env);
 }
 
+static void loadSystemIconAsSprite(JNIEnv* env, jobject contextObj, int32_t style,
+        SpriteIcon* outSpriteIcon) {
+    PointerIcon pointerIcon;
+    status_t status = android_view_PointerIcon_loadSystemIcon(env,
+            contextObj, style, &pointerIcon);
+    if (!status) {
+        pointerIcon.bitmap.copyTo(&outSpriteIcon->bitmap, SkBitmap::kARGB_8888_Config);
+        outSpriteIcon->hotSpotX = pointerIcon.hotSpotX;
+        outSpriteIcon->hotSpotY = pointerIcon.hotSpotY;
+    }
+}
+
 
 // --- NativeInputManager ---
 
 class NativeInputManager : public virtual RefBase,
     public virtual InputReaderPolicyInterface,
-    public virtual InputDispatcherPolicyInterface {
+    public virtual InputDispatcherPolicyInterface,
+    public virtual PointerControllerPolicyInterface {
 protected:
     virtual ~NativeInputManager();
 
 public:
-    NativeInputManager(jobject callbacksObj, const sp<Looper>& looper);
+    NativeInputManager(jobject contextObj, jobject callbacksObj, const sp<Looper>& looper);
 
     inline sp<InputManager> getInputManager() const { return mInputManager; }
 
@@ -165,7 +172,6 @@ public:
     virtual nsecs_t getVirtualKeyQuietTime();
     virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames);
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId);
-    virtual sp<SpotControllerInterface> obtainSpotController(int32_t deviceId);
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
@@ -189,9 +195,14 @@ public:
     virtual bool checkInjectEventsPermissionNonReentrant(
             int32_t injectorPid, int32_t injectorUid);
 
+    /* --- PointerControllerPolicyInterface implementation --- */
+
+    virtual void loadPointerResources(PointerResources* outResources);
+
 private:
     sp<InputManager> mInputManager;
 
+    jobject mContextObj;
     jobject mCallbacksObj;
     sp<Looper> mLooper;
 
@@ -223,7 +234,7 @@ private:
         wp<PointerController> pointerController;
     } mLocked;
 
-    void updateInactivityFadeDelayLocked(const sp<PointerController>& controller);
+    void updateInactivityTimeoutLocked(const sp<PointerController>& controller);
     void handleInterceptActions(jint wmActions, nsecs_t when, uint32_t& policyFlags);
     void ensureSpriteControllerLocked();
 
@@ -240,13 +251,15 @@ private:
 
 
 
-NativeInputManager::NativeInputManager(jobject callbacksObj, const sp<Looper>& looper) :
+NativeInputManager::NativeInputManager(jobject contextObj,
+        jobject callbacksObj, const sp<Looper>& looper) :
         mLooper(looper),
         mFilterTouchEvents(-1), mFilterJumpyTouchEvents(-1), mVirtualKeyQuietTime(-1),
         mKeyRepeatTimeout(-1), mKeyRepeatDelay(-1),
         mMaxEventsPerSecond(-1) {
     JNIEnv* env = jniEnv();
 
+    mContextObj = env->NewGlobalRef(contextObj);
     mCallbacksObj = env->NewGlobalRef(callbacksObj);
 
     {
@@ -265,6 +278,7 @@ NativeInputManager::NativeInputManager(jobject callbacksObj, const sp<Looper>& l
 NativeInputManager::~NativeInputManager() {
     JNIEnv* env = jniEnv();
 
+    env->DeleteGlobalRef(mContextObj);
     env->DeleteGlobalRef(mCallbacksObj);
 }
 
@@ -288,9 +302,13 @@ bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const c
 
 void NativeInputManager::setDisplaySize(int32_t displayId, int32_t width, int32_t height) {
     if (displayId == 0) {
-        AutoMutex _l(mLock);
+        { // acquire lock
+            AutoMutex _l(mLock);
 
-        if (mLocked.displayWidth != width || mLocked.displayHeight != height) {
+            if (mLocked.displayWidth == width && mLocked.displayHeight == height) {
+                return;
+            }
+
             mLocked.displayWidth = width;
             mLocked.displayHeight = height;
 
@@ -298,7 +316,7 @@ void NativeInputManager::setDisplaySize(int32_t displayId, int32_t width, int32_
             if (controller != NULL) {
                 controller->setDisplaySize(width, height);
             }
-        }
+        } // release lock
     }
 }
 
@@ -428,38 +446,31 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
     if (controller == NULL) {
         ensureSpriteControllerLocked();
 
-        controller = new PointerController(mLooper, mLocked.spriteController);
+        controller = new PointerController(this, mLooper, mLocked.spriteController);
         mLocked.pointerController = controller;
 
         controller->setDisplaySize(mLocked.displayWidth, mLocked.displayHeight);
         controller->setDisplayOrientation(mLocked.displayOrientation);
 
         JNIEnv* env = jniEnv();
-        jobject iconObj = env->CallObjectMethod(mCallbacksObj, gCallbacksClassInfo.getPointerIcon);
-        if (!checkAndClearExceptionFromCallback(env, "getPointerIcon") && iconObj) {
-            jfloat iconHotSpotX = env->GetFloatField(iconObj, gPointerIconClassInfo.hotSpotX);
-            jfloat iconHotSpotY = env->GetFloatField(iconObj, gPointerIconClassInfo.hotSpotY);
-            jobject iconBitmapObj = env->GetObjectField(iconObj, gPointerIconClassInfo.bitmap);
-            if (iconBitmapObj) {
-                SkBitmap* iconBitmap = GraphicsJNI::getNativeBitmap(env, iconBitmapObj);
-                if (iconBitmap) {
-                    controller->setPointerIcon(iconBitmap, iconHotSpotX, iconHotSpotY);
-                }
-                env->DeleteLocalRef(iconBitmapObj);
+        jobject pointerIconObj = env->CallObjectMethod(mCallbacksObj,
+                gCallbacksClassInfo.getPointerIcon);
+        if (!checkAndClearExceptionFromCallback(env, "getPointerIcon")) {
+            PointerIcon pointerIcon;
+            status_t status = android_view_PointerIcon_load(env, pointerIconObj,
+                    mContextObj, &pointerIcon);
+            if (!status && !pointerIcon.isNullIcon()) {
+                controller->setPointerIcon(SpriteIcon(pointerIcon.bitmap,
+                        pointerIcon.hotSpotX, pointerIcon.hotSpotY));
+            } else {
+                controller->setPointerIcon(SpriteIcon());
             }
-            env->DeleteLocalRef(iconObj);
+            env->DeleteLocalRef(pointerIconObj);
         }
 
-        updateInactivityFadeDelayLocked(controller);
+        updateInactivityTimeoutLocked(controller);
     }
     return controller;
-}
-
-sp<SpotControllerInterface> NativeInputManager::obtainSpotController(int32_t deviceId) {
-    AutoMutex _l(mLock);
-
-    ensureSpriteControllerLocked();
-    return new SpotController(mLooper, mLocked.spriteController);
 }
 
 void NativeInputManager::ensureSpriteControllerLocked() {
@@ -642,16 +653,16 @@ void NativeInputManager::setSystemUiVisibility(int32_t visibility) {
 
         sp<PointerController> controller = mLocked.pointerController.promote();
         if (controller != NULL) {
-            updateInactivityFadeDelayLocked(controller);
+            updateInactivityTimeoutLocked(controller);
         }
     }
 }
 
-void NativeInputManager::updateInactivityFadeDelayLocked(const sp<PointerController>& controller) {
+void NativeInputManager::updateInactivityTimeoutLocked(const sp<PointerController>& controller) {
     bool lightsOut = mLocked.systemUiVisibility & ASYSTEM_UI_VISIBILITY_STATUS_BAR_HIDDEN;
-    controller->setInactivityFadeDelay(lightsOut
-            ? PointerController::INACTIVITY_FADE_DELAY_SHORT
-            : PointerController::INACTIVITY_FADE_DELAY_NORMAL);
+    controller->setInactivityTimeout(lightsOut
+            ? PointerController::INACTIVITY_TIMEOUT_SHORT
+            : PointerController::INACTIVITY_TIMEOUT_NORMAL);
 }
 
 bool NativeInputManager::isScreenOn() {
@@ -884,6 +895,17 @@ bool NativeInputManager::checkInjectEventsPermissionNonReentrant(
     return result;
 }
 
+void NativeInputManager::loadPointerResources(PointerResources* outResources) {
+    JNIEnv* env = jniEnv();
+
+    loadSystemIconAsSprite(env, mContextObj, POINTER_ICON_STYLE_SPOT_HOVER,
+            &outResources->spotHover);
+    loadSystemIconAsSprite(env, mContextObj, POINTER_ICON_STYLE_SPOT_TOUCH,
+            &outResources->spotTouch);
+    loadSystemIconAsSprite(env, mContextObj, POINTER_ICON_STYLE_SPOT_ANCHOR,
+            &outResources->spotAnchor);
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -899,10 +921,10 @@ static bool checkInputManagerUnitialized(JNIEnv* env) {
 }
 
 static void android_server_InputManager_nativeInit(JNIEnv* env, jclass clazz,
-        jobject callbacks, jobject messageQueueObj) {
+        jobject contextObj, jobject callbacksObj, jobject messageQueueObj) {
     if (gNativeInputManager == NULL) {
         sp<Looper> looper = android_os_MessageQueue_getLooper(env, messageQueueObj);
-        gNativeInputManager = new NativeInputManager(callbacks, looper);
+        gNativeInputManager = new NativeInputManager(contextObj, callbacksObj, looper);
     } else {
         LOGE("Input manager already initialized.");
         jniThrowRuntimeException(env, "Input manager already initialized.");
@@ -1246,7 +1268,8 @@ static jstring android_server_InputManager_nativeDump(JNIEnv* env, jclass clazz)
 
 static JNINativeMethod gInputManagerMethods[] = {
     /* name, signature, funcPtr */
-    { "nativeInit", "(Lcom/android/server/wm/InputManager$Callbacks;Landroid/os/MessageQueue;)V",
+    { "nativeInit", "(Landroid/content/Context;"
+            "Lcom/android/server/wm/InputManager$Callbacks;Landroid/os/MessageQueue;)V",
             (void*) android_server_InputManager_nativeInit },
     { "nativeStart", "()V",
             (void*) android_server_InputManager_nativeStart },
@@ -1372,7 +1395,7 @@ int register_android_server_InputManager(JNIEnv* env) {
             "getPointerLayer", "()I");
 
     GET_METHOD_ID(gCallbacksClassInfo.getPointerIcon, clazz,
-            "getPointerIcon", "()Lcom/android/server/wm/InputManager$PointerIcon;");
+            "getPointerIcon", "()Landroid/view/PointerIcon;");
 
     // KeyEvent
 
@@ -1420,19 +1443,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_FIELD_ID(gConfigurationClassInfo.navigation, clazz,
             "navigation", "I");
-
-    // PointerIcon
-
-    FIND_CLASS(clazz, "com/android/server/wm/InputManager$PointerIcon");
-
-    GET_FIELD_ID(gPointerIconClassInfo.bitmap, clazz,
-            "bitmap", "Landroid/graphics/Bitmap;");
-
-    GET_FIELD_ID(gPointerIconClassInfo.hotSpotX, clazz,
-            "hotSpotX", "F");
-
-    GET_FIELD_ID(gPointerIconClassInfo.hotSpotY, clazz,
-            "hotSpotY", "F");
 
     return 0;
 }

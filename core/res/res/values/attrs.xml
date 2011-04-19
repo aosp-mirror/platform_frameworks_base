@@ -757,6 +757,13 @@
         <!-- Default style for the Switch widget. -->
         <attr name="switchStyle" format="reference" />
 
+        <!-- ============== -->
+        <!-- Pointer styles -->
+        <!-- ============== -->
+        <eat-comment />
+
+        <!-- Reference to the Pointer style -->
+        <attr name="pointerStyle" format="reference" />
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -4919,6 +4926,17 @@
         <attr name="switchMinWidth" format="dimension" />
         <!-- Minimum space between the switch and caption text -->
         <attr name="switchPadding" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="Pointer">
+        <!-- Reference to a pointer icon drawable with STYLE_ARROW -->
+        <attr name="pointerIconArrow" format="reference" />
+        <!-- Reference to a pointer icon drawable with STYLE_SPOT_HOVER -->
+        <attr name="pointerIconSpotHover" format="reference" />
+        <!-- Reference to a pointer icon drawable with STYLE_SPOT_TOUCH -->
+        <attr name="pointerIconSpotTouch" format="reference" />
+        <!-- Reference to a pointer icon drawable with STYLE_SPOT_ANCHOR -->
+        <attr name="pointerIconSpotAnchor" format="reference" />
     </declare-styleable>
 
     <declare-styleable name="PointerIcon">
