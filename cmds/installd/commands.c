@@ -48,6 +48,11 @@ int install(const char *pkgname, uid_t uid, gid_t gid)
         LOGE("cannot create dir '%s': %s\n", pkgdir, strerror(errno));
         return -errno;
     }
+    if (chmod(pkgdir, 0751) < 0) {
+        LOGE("cannot chmod dir '%s': %s\n", pkgdir, strerror(errno));
+        unlink(pkgdir);
+        return -errno;
+    }
     if (chown(pkgdir, uid, gid) < 0) {
         LOGE("cannot chown dir '%s': %s\n", pkgdir, strerror(errno));
         unlink(pkgdir);
@@ -55,6 +60,12 @@ int install(const char *pkgname, uid_t uid, gid_t gid)
     }
     if (mkdir(libdir, 0755) < 0) {
         LOGE("cannot create dir '%s': %s\n", libdir, strerror(errno));
+        unlink(pkgdir);
+        return -errno;
+    }
+    if (chmod(libdir, 0755) < 0) {
+        LOGE("cannot chmod dir '%s': %s\n", libdir, strerror(errno));
+        unlink(libdir);
         unlink(pkgdir);
         return -errno;
     }
