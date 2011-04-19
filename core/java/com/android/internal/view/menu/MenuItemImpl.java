@@ -93,6 +93,7 @@ public final class MenuItemImpl implements MenuItem {
      */ 
     private ContextMenuInfo mMenuInfo;
     
+    private static String sLanguage;
     private static String sPrependShortcutLabel;
     private static String sEnterShortcutLabel;
     private static String sDeleteShortcutLabel;
@@ -114,7 +115,9 @@ public final class MenuItemImpl implements MenuItem {
     MenuItemImpl(MenuBuilder menu, int group, int id, int categoryOrder, int ordering,
             CharSequence title, int showAsAction) {
 
-        if (sPrependShortcutLabel == null) {
+        String lang = menu.getContext().getResources().getConfiguration().locale.toString();
+        if (sPrependShortcutLabel == null || !lang.equals(sLanguage)) {
+            sLanguage = lang;
             // This is instantiated from the UI thread, so no chance of sync issues 
             sPrependShortcutLabel = menu.getContext().getResources().getString(
                     com.android.internal.R.string.prepend_shortcut_label);
