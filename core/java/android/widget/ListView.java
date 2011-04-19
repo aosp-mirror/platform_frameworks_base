@@ -251,7 +251,7 @@ public class ListView extends AbsListView {
      */
     public void addHeaderView(View v, Object data, boolean isSelectable) {
 
-        if (mAdapter != null) {
+        if (mAdapter != null && ! (mAdapter instanceof HeaderViewListAdapter)) {
             throw new IllegalStateException(
                     "Cannot add header view to list -- setAdapter has already been called.");
         }
@@ -261,6 +261,12 @@ public class ListView extends AbsListView {
         info.data = data;
         info.isSelectable = isSelectable;
         mHeaderViewInfos.add(info);
+
+        // in the case of re-adding a header view, or adding one later on,
+        // we need to notify the observer
+        if (mDataSetObserver != null) {
+            mDataSetObserver.onChanged();
+        }
     }
 
     /**
@@ -294,7 +300,9 @@ public class ListView extends AbsListView {
         if (mHeaderViewInfos.size() > 0) {
             boolean result = false;
             if (((HeaderViewListAdapter) mAdapter).removeHeader(v)) {
-                mDataSetObserver.onChanged();
+                if (mDataSetObserver != null) {
+                    mDataSetObserver.onChanged();
+                }
                 result = true;
             }
             removeFixedViewInfo(v, mHeaderViewInfos);
@@ -328,6 +336,12 @@ public class ListView extends AbsListView {
      * @param isSelectable true if the footer view can be selected
      */
     public void addFooterView(View v, Object data, boolean isSelectable) {
+
+        if (mAdapter != null && ! (mAdapter instanceof HeaderViewListAdapter)) {
+            throw new IllegalStateException(
+                    "Cannot add footer view to list -- setAdapter has already been called.");
+        }
+
         FixedViewInfo info = new FixedViewInfo();
         info.view = v;
         info.data = data;
@@ -371,7 +385,9 @@ public class ListView extends AbsListView {
         if (mFooterViewInfos.size() > 0) {
             boolean result = false;
             if (((HeaderViewListAdapter) mAdapter).removeFooter(v)) {
-                mDataSetObserver.onChanged();
+                if (mDataSetObserver != null) {
+                    mDataSetObserver.onChanged();
+                }
                 result = true;
             }
             removeFixedViewInfo(v, mFooterViewInfos);
