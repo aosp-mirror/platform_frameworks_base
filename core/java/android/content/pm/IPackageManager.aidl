@@ -35,6 +35,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.content.IntentSender;
 
@@ -329,4 +330,7 @@ interface IPackageManager {
 
     boolean setInstallLocation(int loc);
     int getInstallLocation();
+
+    UserInfo createUser(in String name, int flags);
+    boolean removeUser(int userId);
 }

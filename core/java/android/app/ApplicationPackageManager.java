@@ -1113,7 +1113,11 @@ final class ApplicationPackageManager extends PackageManager {
      */
     @Override
     public UserInfo createUser(String name, int flags) {
-        // TODO
+        try {
+            return mPM.createUser(name, flags);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
         return null;
     }
 
@@ -1136,8 +1140,11 @@ final class ApplicationPackageManager extends PackageManager {
      */
     @Override
     public boolean removeUser(int id) {
-        // TODO:
-        return false;
+        try {
+            return mPM.removeUser(id);
+        } catch (RemoteException e) {
+            return false;
+        }
     }
 
     /**

@@ -102,6 +102,9 @@ int create_pkg_path(char path[PKG_PATH_MAX],
                     const char *postfix,
                     uid_t persona);
 
+int create_persona_path(char path[PKG_PATH_MAX],
+                    uid_t persona);
+
 int is_valid_package_name(const char* pkgname);
 
 int create_cache_path(char path[PKG_PATH_MAX], const char *src);
@@ -124,12 +127,17 @@ int validate_apk_path(const char *path);
 
 int append_and_increment(char** dst, const char* src, size_t* dst_size);
 
+char *build_string2(char *s1, char *s2);
+char *build_string3(char *s1, char *s2, char *s3);
+
 /* commands.c */
 
 int install(const char *pkgname, uid_t uid, gid_t gid);
-int uninstall(const char *pkgname);
+int uninstall(const char *pkgname, uid_t persona);
 int renamepkg(const char *oldpkgname, const char *newpkgname);
-int delete_user_data(const char *pkgname);
+int delete_user_data(const char *pkgname, uid_t persona);
+int make_user_data(const char *pkgname, uid_t uid, uid_t persona);
+int delete_persona(uid_t persona);
 int delete_cache(const char *pkgname);
 int move_dex(const char *src, const char *dst);
 int rm_dex(const char *path);

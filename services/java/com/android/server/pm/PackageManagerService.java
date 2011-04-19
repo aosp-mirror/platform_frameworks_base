@@ -65,6 +65,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
+import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -207,6 +208,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // This is where all application persistent data goes.
     final File mAppDataDir;
+
+    // This is where all application persistent data goes for secondary users.
+    final File mUserAppDataDir;
 
     // This is the object monitoring the framework dir.
     final FileObserver mFrameworkInstallObserver;
@@ -358,6 +362,8 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     // Delay time in millisecs
     static final int BROADCAST_DELAY = 10 * 1000;
+
+    final UserManager mUserManager;
 
     final private DefaultContainerConnection mDefContainerConn =
             new DefaultContainerConnection();
@@ -797,7 +803,10 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             File dataDir = Environment.getDataDirectory();
             mAppDataDir = new File(dataDir, "data");
+            mUserAppDataDir = new File(dataDir, "user");
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
+
+            mUserManager = new UserManager(mInstaller, mUserAppDataDir);
 
             if (mInstaller == null) {
                 // Make sure these dirs exist, when we are running in
@@ -806,6 +815,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 File miscDir = new File(dataDir, "misc");
                 miscDir.mkdirs();
                 mAppDataDir.mkdirs();
+                mUserAppDataDir.mkdirs();
                 mDrmAppPrivateInstallDir.mkdirs();
             }
 
@@ -974,7 +984,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                             + " no longer exists; wiping its data";
                     reportSettingsProblem(Log.WARN, msg);
                     if (mInstaller != null) {
-                        mInstaller.remove(ps.name);
+                        mInstaller.remove(ps.name, 0);
+                        mUserManager.removePackageForAllUsers(ps.name);
                     }
                 }
             }
@@ -1059,10 +1070,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     void cleanupInstallFailedPackage(PackageSetting ps) {
         Slog.i(TAG, "Cleaning up incompletely installed app: " + ps.name);
         if (mInstaller != null) {
-            int retCode = mInstaller.remove(ps.name);
+            int retCode = mInstaller.remove(ps.name, 0);
             if (retCode < 0) {
                 Slog.w(TAG, "Couldn't remove app data directory for package: "
                            + ps.name + ", retcode=" + retCode);
+            } else {
+                mUserManager.removePackageForAllUsers(ps.name);
             }
         } else {
             //for emulator
@@ -1510,7 +1523,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 ps.pkg.applicationInfo.flags = ps.pkgFlags;
                 ps.pkg.applicationInfo.publicSourceDir = ps.resourcePathString;
                 ps.pkg.applicationInfo.sourceDir = ps.codePathString;
-                ps.pkg.applicationInfo.dataDir = getDataPathForPackage(ps.pkg).getPath();
+                ps.pkg.applicationInfo.dataDir =
+                        getDataPathForPackage(ps.pkg.packageName, 0).getPath();
                 ps.pkg.applicationInfo.nativeLibraryDir = ps.nativeLibraryPathString;
                 ps.pkg.mSetEnabled = ps.enabled;
                 ps.pkg.mSetStopped = ps.stopped;
@@ -2836,11 +2850,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
-    private File getDataPathForPackage(PackageParser.Package pkg) {
-        final File dataPath = new File(mAppDataDir, pkg.packageName);
-        return dataPath;
+    File getDataPathForUser(int userId) {
+        return new File(mUserAppDataDir.getAbsolutePath() + File.separator + userId);
     }
-    
+
+    private File getDataPathForPackage(String packageName, int userId) {
+        return new File(mUserAppDataDir.getAbsolutePath() + File.separator
+                    + userId + File.separator + packageName);
+    }
+
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
             int parseFlags, int scanMode, long currentTime) {
         File scanFile = new File(pkg.mScanPath);
@@ -3162,7 +3180,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkg.applicationInfo.dataDir = dataPath.getPath();
         } else {
             // This is a normal package, need to make its data directory.
-            dataPath = getDataPathForPackage(pkg);
+            dataPath = getDataPathForPackage(pkg.packageName, 0);
             
             boolean uidError = false;
             
@@ -3178,8 +3196,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                         // If this is a system app, we can at least delete its
                         // current data so the application will still work.
                         if (mInstaller != null) {
-                            int ret = mInstaller.remove(pkgName);
+                            int ret = mInstaller.remove(pkgName, 0);
                             if (ret >= 0) {
+                                // TODO: Kill the processes first
+                                // Remove the data directories for all users
+                                mUserManager.removePackageForAllUsers(pkgName);
                                 // Old data gone!
                                 String msg = "System package " + pkg.packageName
                                         + " has changed from uid: "
@@ -3199,6 +3220,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                                     mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                                     return null;
                                 }
+                                // Create data directories for all users
+                                mUserManager.installPackageForAllUsers(pkgName,
+                                        pkg.applicationInfo.uid);
                             }
                         }
                         if (!recovered) {
@@ -3235,11 +3259,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 if (mInstaller != null) {
                     int ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
                             pkg.applicationInfo.uid);
-                    if(ret < 0) {
+                    if (ret < 0) {
                         // Error from installer
                         mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                         return null;
                     }
+                    // Create data directories for all users
+                    mUserManager.installPackageForAllUsers(pkgName, pkg.applicationInfo.uid);
                 } else {
                     dataPath.mkdirs();
                     if (dataPath.exists()) {
@@ -5703,7 +5729,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // Remember this for later, in case we need to rollback this install
         String pkgName = pkg.packageName;
 
-        boolean dataDirExists = getDataPathForPackage(pkg).exists();
+        boolean dataDirExists = getDataPathForPackage(pkg.packageName, 0).exists();
         res.name = pkgName;
         synchronized(mPackages) {
             if (mSettings.mRenamedPackages.containsKey(pkgName)) {
@@ -6390,11 +6416,14 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if ((flags&PackageManager.DONT_DELETE_DATA) == 0) {
             if (mInstaller != null) {
-                int retCode = mInstaller.remove(packageName);
+                int retCode = mInstaller.remove(packageName, 0);
                 if (retCode < 0) {
                     Slog.w(TAG, "Couldn't remove app data or cache directory for package: "
                                + packageName + ", retcode=" + retCode);
                     // we don't consider this to be a failure of the core package deletion
+                } else {
+                    // TODO: Kill the processes first
+                    mUserManager.removePackageForAllUsers(packageName);
                 }
             } else {
                 // for simulator
@@ -6654,7 +6683,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         if (mInstaller != null) {
-            int retCode = mInstaller.clearUserData(packageName);
+            int retCode = mInstaller.clearUserData(packageName, 0); // TODO - correct userId
             if (retCode < 0) {
                 Slog.w(TAG, "Couldn't remove cache files for package: "
                         + packageName);
@@ -8014,5 +8043,18 @@ public class PackageManagerService extends IPackageManager.Stub {
         return android.provider.Settings.System.getInt(mContext.getContentResolver(),
                 android.provider.Settings.Secure.DEFAULT_INSTALL_LOCATION,
                 PackageHelper.APP_INSTALL_AUTO);
+    }
+
+    public UserInfo createUser(String name, int flags) {
+        UserInfo userInfo = mUserManager.createUser(name, flags, getInstalledApplications(0));
+        return userInfo;
+    }
+
+    public boolean removeUser(int userId) {
+        if (userId == 0) {
+            return false;
+        }
+        mUserManager.removeUser(userId);
+        return true;
     }
 }

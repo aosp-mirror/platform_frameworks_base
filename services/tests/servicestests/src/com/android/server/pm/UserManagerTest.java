@@ -16,7 +16,7 @@
 
 package com.android.server.pm;
 
-import com.android.server.pm.UserDetails;
+import com.android.server.pm.UserManager;
 
 import android.content.pm.UserInfo;
 import android.os.Debug;
@@ -25,23 +25,24 @@ import android.test.AndroidTestCase;
 
 import java.util.List;
 
-/** Test {@link UserDetails} functionality. */
-public class UserDetailsTest extends AndroidTestCase {
+/** Test {@link UserManager} functionality. */
+public class UserManagerTest extends AndroidTestCase {
 
-    UserDetails mDetails = null;
+    UserManager mUserManager = null;
 
     @Override
     public void setUp() throws Exception {
-        mDetails = new UserDetails(Environment.getExternalStorageDirectory());
+        mUserManager = new UserManager(Environment.getExternalStorageDirectory(),
+                Environment.getExternalStorageDirectory());
     }
 
     @Override
     public void tearDown() throws Exception {
-        List<UserInfo> users = mDetails.getUsers();
+        List<UserInfo> users = mUserManager.getUsers();
         // Remove all except the primary user
         for (UserInfo user : users) {
             if (!user.isPrimary()) {
-                mDetails.removeUser(user.id);
+                mUserManager.removeUser(user.id);
             }
         }
     }
@@ -51,9 +52,9 @@ public class UserDetailsTest extends AndroidTestCase {
     }
 
     public void testAddUser() throws Exception {
-        final UserDetails details = mDetails;
+        final UserManager details = mUserManager;
 
-        UserInfo userInfo = details.createUser("Guest 1", UserInfo.FLAG_GUEST);
+        UserInfo userInfo = details.createUser("Guest 1", UserInfo.FLAG_GUEST, null);
         assertTrue(userInfo != null);
 
         List<UserInfo> list = details.getUsers();
@@ -70,10 +71,10 @@ public class UserDetailsTest extends AndroidTestCase {
     }
 
     public void testAdd2Users() throws Exception {
-        final UserDetails details = mDetails;
+        final UserManager details = mUserManager;
 
-        UserInfo user1 = details.createUser("Guest 1", UserInfo.FLAG_GUEST);
-        UserInfo user2 = details.createUser("User 2", UserInfo.FLAG_ADMIN);
+        UserInfo user1 = details.createUser("Guest 1", UserInfo.FLAG_GUEST, null);
+        UserInfo user2 = details.createUser("User 2", UserInfo.FLAG_ADMIN, null);
 
         assertTrue(user1 != null);
         assertTrue(user2 != null);
@@ -84,9 +85,9 @@ public class UserDetailsTest extends AndroidTestCase {
     }
 
     public void testRemoveUser() throws Exception {
-        final UserDetails details = mDetails;
+        final UserManager details = mUserManager;
 
-        UserInfo userInfo = details.createUser("Guest 1", UserInfo.FLAG_GUEST);
+        UserInfo userInfo = details.createUser("Guest 1", UserInfo.FLAG_GUEST, null);
 
         details.removeUser(userInfo.id);
 
@@ -94,7 +95,7 @@ public class UserDetailsTest extends AndroidTestCase {
     }
 
     private boolean findUser(int id) {
-        List<UserInfo> list = mDetails.getUsers();
+        List<UserInfo> list = mUserManager.getUsers();
 
         for (UserInfo user : list) {
             if (user.id == id) {

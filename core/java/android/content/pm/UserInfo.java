@@ -74,8 +74,7 @@ public class UserInfo implements Parcelable {
 
     @Override
     public String toString() {
-        return "UserInfo{"
- + id + ":" + name + ":" + Integer.toHexString(flags) + "}";
+        return "UserInfo{" + id + ":" + name + ":" + Integer.toHexString(flags) + "}";
     }
 
     public int describeContents() {
