@@ -258,11 +258,12 @@ enum Message_Prop {
   Message_Prop_CaptureDraw = 0,
   Message_Prop_TimeMode = 1,
   Message_Prop_ExpectResponse = 2,
-  Message_Prop_CaptureSwap = 3
+  Message_Prop_CaptureSwap = 3,
+  Message_Prop_GLConstant = 4
 };
 bool Message_Prop_IsValid(int value);
 const Message_Prop Message_Prop_Prop_MIN = Message_Prop_CaptureDraw;
-const Message_Prop Message_Prop_Prop_MAX = Message_Prop_CaptureSwap;
+const Message_Prop Message_Prop_Prop_MAX = Message_Prop_GLConstant;
 const int Message_Prop_Prop_ARRAYSIZE = Message_Prop_Prop_MAX + 1;
 
 // ===================================================================
@@ -544,6 +545,7 @@ class Message : public ::google::protobuf::MessageLite {
   static const Prop TimeMode = Message_Prop_TimeMode;
   static const Prop ExpectResponse = Message_Prop_ExpectResponse;
   static const Prop CaptureSwap = Message_Prop_CaptureSwap;
+  static const Prop GLConstant = Message_Prop_GLConstant;
   static inline bool Prop_IsValid(int value) {
     return Message_Prop_IsValid(value);
   }
@@ -691,14 +693,14 @@ class Message : public ::google::protobuf::MessageLite {
   static const int kImageWidthFieldNumber = 26;
   inline ::google::protobuf::int32 image_width() const;
   inline void set_image_width(::google::protobuf::int32 value);
-
+  
   // optional int32 image_height = 27;
   inline bool has_image_height() const;
   inline void clear_image_height();
   static const int kImageHeightFieldNumber = 27;
   inline ::google::protobuf::int32 image_height() const;
   inline void set_image_height(::google::protobuf::int32 value);
-
+  
   // optional float time = 11;
   inline bool has_time() const;
   inline void clear_time();

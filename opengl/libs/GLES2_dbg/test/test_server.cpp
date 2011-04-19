@@ -60,9 +60,13 @@ protected:
         msg.ParseFromArray(buffer, len);
         delete buffer;
     }
+
+    void CheckNoAvailable() {
+        const long pos = ftell(file);
+        fseek(file, 0, SEEK_END);
+        EXPECT_EQ(pos, ftell(file)) << "check no available";
+    }
 };
-
-
 
 TEST_F(ServerFileTest, Send)
 {
@@ -79,6 +83,56 @@ TEST_F(ServerFileTest, Send)
     EXPECT_EQ(msg.function(), read.function());
     EXPECT_EQ(msg.expect_response(), read.expect_response());
     EXPECT_EQ(msg.type(), read.type());
+}
+
+TEST_F(ServerFileTest, CreateDbgContext)
+{
+    gl_hooks_t hooks;
+    struct Constant {
+        GLenum pname;
+        GLint param;
+    };
+    static const Constant constants [] = {
+        {GL_MAX_VERTEX_ATTRIBS, 16},
+        {GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, 32},
+        {GL_IMPLEMENTATION_COLOR_READ_FORMAT, GL_RGBA},
+        {GL_IMPLEMENTATION_COLOR_READ_TYPE, GL_UNSIGNED_BYTE},
+    };
+    struct HookMock {
+        static void GetIntegerv(GLenum pname, GLint* params) {
+            ASSERT_TRUE(params != NULL);
+            for (unsigned int i = 0; i < sizeof(constants) / sizeof(*constants); i++)
+                if (pname == constants[i].pname) {
+                    *params = constants[i].param;
+                    return;
+                }
+            FAIL() << "GetIntegerv unknown pname: " << pname;
+        }
+        static GLenum GetError() {
+            return GL_NO_ERROR;
+        }
+    };
+    hooks.gl.glGetError = HookMock::GetError;
+    hooks.gl.glGetIntegerv = HookMock::GetIntegerv;
+    DbgContext * const dbg = CreateDbgContext(-1, 1, &hooks);
+    ASSERT_TRUE(dbg != NULL);
+    EXPECT_TRUE(dbg->vertexAttribs != NULL);
+
+    rewind(file);
+    glesv2debugger::Message read;
+    for (unsigned int i = 0; i < 2; i++) {
+        Read(read);
+        EXPECT_EQ(reinterpret_cast<int>(dbg), read.context_id());
+        EXPECT_FALSE(read.expect_response());
+        EXPECT_EQ(read.Response, read.type());
+        EXPECT_EQ(read.SETPROP, read.function());
+        EXPECT_EQ(read.GLConstant, read.prop());
+        GLint expectedConstant = 0;
+        HookMock::GetIntegerv(read.arg0(), &expectedConstant);
+        EXPECT_EQ(expectedConstant, read.arg1());
+    }
+    CheckNoAvailable();
+    DestroyDbgContext(dbg);
 }
 
 void * glNoop()

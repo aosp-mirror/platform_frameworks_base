@@ -477,6 +477,7 @@ bool Message_Prop_IsValid(int value) {
     case 1:
     case 2:
     case 3:
+    case 4:
       return true;
     default:
       return false;
@@ -488,6 +489,7 @@ const Message_Prop Message::CaptureDraw;
 const Message_Prop Message::TimeMode;
 const Message_Prop Message::ExpectResponse;
 const Message_Prop Message::CaptureSwap;
+const Message_Prop Message::GLConstant;
 const Message_Prop Message::Prop_MIN;
 const Message_Prop Message::Prop_MAX;
 const int Message::Prop_ARRAYSIZE;
@@ -975,7 +977,7 @@ bool Message::MergePartialFromCodedStream(
         if (input->ExpectTag(208)) goto parse_image_width;
         break;
       }
-
+      
       // optional int32 image_width = 26;
       case 26: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
@@ -991,7 +993,7 @@ bool Message::MergePartialFromCodedStream(
         if (input->ExpectTag(216)) goto parse_image_height;
         break;
       }
-
+      
       // optional int32 image_height = 27;
       case 27: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
@@ -1139,12 +1141,12 @@ void Message::SerializeWithCachedSizes(
   if (_has_bit(18)) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(26, this->image_width(), output);
   }
-
+  
   // optional int32 image_height = 27;
   if (_has_bit(19)) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(27, this->image_height(), output);
   }
-
+  
 }
 
 int Message::ByteSize() const {
@@ -1282,14 +1284,14 @@ int Message::ByteSize() const {
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->image_width());
     }
-
+    
     // optional int32 image_height = 27;
     if (has_image_height()) {
       total_size += 2 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->image_height());
     }
-
+    
     // optional float time = 11;
     if (has_time()) {
       total_size += 1 + 4;
