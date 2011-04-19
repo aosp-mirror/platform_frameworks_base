@@ -1978,17 +1978,6 @@ public class WifiStateMachine extends StateMachine {
             boolean eventLoggingEnabled = true;
             switch(message.what) {
                 case CMD_STOP_SUPPLICANT:   /* Supplicant stopped by user */
-                    Log.d(TAG, "stopping supplicant");
-                    if (!WifiNative.stopSupplicant()) {
-                        Log.e(TAG, "Failed to stop supplicant, issue kill");
-                        WifiNative.killSupplicant();
-                    }
-                    mNetworkInfo.setIsAvailable(false);
-                    handleNetworkDisconnect();
-                    setWifiState(WIFI_STATE_DISABLING);
-                    sendSupplicantConnectionChangedBroadcast(false);
-                    mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
-                    mWpsStateMachine.sendMessage(CMD_RESET_WPS_STATE);
                     transitionTo(mSupplicantStoppingState);
                     break;
                 case SUP_DISCONNECTION_EVENT:  /* Supplicant connection lost */
@@ -2089,6 +2078,17 @@ public class WifiStateMachine extends StateMachine {
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+            Log.d(TAG, "stopping supplicant");
+            if (!WifiNative.stopSupplicant()) {
+                Log.e(TAG, "Failed to stop supplicant, issue kill");
+                WifiNative.killSupplicant();
+            }
+            mNetworkInfo.setIsAvailable(false);
+            handleNetworkDisconnect();
+            setWifiState(WIFI_STATE_DISABLING);
+            sendSupplicantConnectionChangedBroadcast(false);
+            mSupplicantStateTracker.sendMessage(CMD_RESET_SUPPLICANT_STATE);
+            mWpsStateMachine.sendMessage(CMD_RESET_WPS_STATE);
         }
         @Override
         public boolean processMessage(Message message) {
