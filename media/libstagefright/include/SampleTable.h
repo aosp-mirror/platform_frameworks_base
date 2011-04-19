@@ -63,7 +63,7 @@ public:
             uint32_t sampleIndex,
             off64_t *offset,
             size_t *size,
-            uint32_t *decodingTime,
+            uint32_t *compositionTime,
             bool *isSyncSample = NULL);
 
     enum {
@@ -107,6 +107,12 @@ private:
     uint32_t mTimeToSampleCount;
     uint32_t *mTimeToSample;
 
+    struct SampleTimeEntry {
+        uint32_t mSampleIndex;
+        uint32_t mCompositionTime;
+    };
+    SampleTimeEntry *mSampleTimeEntries;
+
     uint32_t *mCompositionTimeDeltaEntries;
     size_t mNumCompositionTimeDeltaEntries;
 
@@ -129,6 +135,10 @@ private:
     status_t getSampleSize_l(uint32_t sample_index, size_t *sample_size);
 
     uint32_t getCompositionTimeOffset(uint32_t sampleIndex) const;
+
+    static int CompareIncreasingTime(const void *, const void *);
+
+    void buildSampleEntriesTable();
 
     SampleTable(const SampleTable &);
     SampleTable &operator=(const SampleTable &);

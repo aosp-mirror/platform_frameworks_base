@@ -92,8 +92,6 @@ private:
 
     Track *findTrackByMimePrefix(const char *mimePrefix);
 
-    status_t verifyIfStreamable();
-
     MPEG4Extractor(const MPEG4Extractor &);
     MPEG4Extractor &operator=(const MPEG4Extractor &);
 };
