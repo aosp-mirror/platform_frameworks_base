@@ -449,8 +449,8 @@ public final class ClientSession extends ObexSession {
                 maxPacketSize = (mInput.read() << 8) + mInput.read();
 
                 //check with local max size
-                if (maxPacketSize > ObexHelper.MAX_PACKET_SIZE_INT) {
-                    maxPacketSize = ObexHelper.MAX_PACKET_SIZE_INT;
+                if (maxPacketSize > ObexHelper.MAX_CLIENT_PACKET_SIZE) {
+                    maxPacketSize = ObexHelper.MAX_CLIENT_PACKET_SIZE;
                 }
 
                 if (length > 7) {
