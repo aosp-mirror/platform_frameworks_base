@@ -150,12 +150,10 @@ public abstract class TextToSpeechService extends Service {
      *
      * Called on the synthesis thread.
      *
-     * @param request The synthesis request. The method should
-     *         call {@link SynthesisRequest#start}, {@link SynthesisRequest#audioAvailable},
-     *         and {@link SynthesisRequest#done} on this request.
-     * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
+     * @param request The synthesis request. The method should use the methods in the request
+     *         object to communicate the results of the synthesis.
      */
-    protected abstract int onSynthesizeText(SynthesisRequest request);
+    protected abstract void onSynthesizeText(SynthesisRequest request);
 
     private boolean areDefaultsEnforced() {
         return getSecureSettingInt(Settings.Secure.TTS_USE_DEFAULTS,
@@ -442,7 +440,8 @@ public abstract class TextToSpeechService extends Service {
                 synthesisRequest = mSynthesisRequest;
             }
             setRequestParams(synthesisRequest);
-            return TextToSpeechService.this.onSynthesizeText(synthesisRequest);
+            TextToSpeechService.this.onSynthesizeText(synthesisRequest);
+            return synthesisRequest.isDone() ? TextToSpeech.SUCCESS : TextToSpeech.ERROR;
         }
 
         protected SynthesisRequest createSynthesisRequest() {
