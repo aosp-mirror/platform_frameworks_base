@@ -98,6 +98,8 @@ public final class Calendar {
         public static final String SYNC4 = "sync4";
         /** Generic column for use by sync adapters. */
         public static final String SYNC5 = "sync5";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC6 = "sync6";
     }
 
     /**
@@ -133,15 +135,6 @@ public final class Calendar {
          * <P>Type: TEXT</P>
          */
         public static final String _SYNC_VERSION = "_sync_version";
-
-        /**
-         * For use by sync adapter at its discretion; not modified by CalendarProvider
-         * Note that this column was formerly named _SYNC_LOCAL_ID.  We are using it to avoid a
-         * schema change.
-         * TODO Replace this with something more general in the future.
-         * <P>Type: INTEGER (long)</P>
-         */
-        public static final String _SYNC_DATA = "_sync_local_id";
 
         /**
          * Used only in persistent providers, and only during merging.
@@ -212,7 +205,7 @@ public final class Calendar {
          * Is the calendar selected to be displayed?
          * <P>Type: INTEGER (boolean)</P>
          */
-        public static final String SELECTED = "selected";
+        public static final String VISIBLE = "visible";
 
         /**
          * The timezone the calendar's events occurs in
@@ -288,29 +281,32 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_TIME);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_DATA);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
-                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_MARK);
 
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC1);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC2);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC3);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC4);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC5);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC6);
 
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.NAME);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
                         Calendars.DISPLAY_NAME);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, Calendars.COLOR);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, ACCESS_LEVEL);
-                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, SELECTED);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, VISIBLE);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, SYNC_EVENTS);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.LOCATION);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, TIMEZONE);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
                         Calendars.OWNER_ACCOUNT);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv,
-                        Calendars.ORGANIZER_CAN_RESPOND);
+                        Calendars.CAN_ORGANIZER_RESPOND);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv,
+                        Calendars.CAN_MODIFY_TIME_ZONE);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv,
+                        Calendars.MAX_REMINDERS);
 
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, DELETED);
 
@@ -432,7 +428,19 @@ public final class Calendar {
          * organizer should not be shown by the UI.  Defaults to 1
          * <P>Type: INTEGER (boolean)</P>
          */
-        public static final String ORGANIZER_CAN_RESPOND = "organizerCanRespond";
+        public static final String CAN_ORGANIZER_RESPOND = "canOrganizerRespond";
+
+        /**
+         * Can the organizer modify the time zone of the event?
+         * <P>Type: INTEGER (boolean)</P>
+        */
+        public static final String CAN_MODIFY_TIME_ZONE = "canModifyTimeZone";
+
+        /**
+         * The maximum number of reminders allowed for an event.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String MAX_REMINDERS = "maxReminders";
     }
 
     /**
@@ -504,6 +512,15 @@ public final class Calendar {
      * Columns from the Events table that other tables join into themselves.
      */
     public interface EventsColumns {
+        /**
+         * For use by sync adapter at its discretion; not modified by CalendarProvider
+         * Note that this column was formerly named _SYNC_LOCAL_ID.  We are using it to avoid a
+         * schema change.
+         * TODO Replace this with something more general in the future.
+         * <P>Type: INTEGER (long)</P>
+         */
+        public static final String _SYNC_DATA = "_sync_local_id";
+
         /**
          * The calendar the event belongs to
          * <P>Type: INTEGER (foreign key to the Calendars table)</P>
@@ -1011,7 +1028,7 @@ public final class Calendar {
      */
     public static final class Instances implements BaseColumns, EventsColumns, CalendarsColumns {
 
-        private static final String WHERE_CALENDARS_SELECTED = Calendars.SELECTED + "=1";
+        private static final String WHERE_CALENDARS_SELECTED = Calendars.VISIBLE + "=1";
 
         public static final Cursor query(ContentResolver cr, String[] projection,
                                          long begin, long end) {
