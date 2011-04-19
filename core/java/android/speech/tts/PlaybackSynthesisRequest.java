@@ -73,7 +73,6 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
         if (mAudioTrack != null) {
             mAudioTrack.flush();
             mAudioTrack.stop();
-            // TODO: do we need to wait for playback to finish before releasing?
             mAudioTrack.release();
             mAudioTrack = null;
         }
@@ -110,8 +109,7 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
                 return TextToSpeech.ERROR;
             }
 
-            mAudioTrack = createAudioTrack(sampleRateInHz, audioFormat, channelCount,
-                    AudioTrack.MODE_STREAM);
+            mAudioTrack = createStreamingAudioTrack(sampleRateInHz, audioFormat, channelCount);
             if (mAudioTrack == null) {
                 return TextToSpeech.ERROR;
             }
@@ -223,16 +221,32 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
                 return TextToSpeech.ERROR;
             }
 
-            mAudioTrack = createAudioTrack(sampleRateInHz, audioFormat, channelCount,
-                    AudioTrack.MODE_STATIC);
+            int channelConfig = getChannelConfig(channelCount);
+            if (channelConfig < 0) {
+                Log.e(TAG, "Unsupported number of channels :" + channelCount);
+                cleanUp();
+                return TextToSpeech.ERROR;
+            }
+            int bytesPerFrame = getBytesPerFrame(audioFormat);
+            if (bytesPerFrame < 0) {
+                Log.e(TAG, "Unsupported audio format :" + audioFormat);
+                cleanUp();
+                return TextToSpeech.ERROR;
+            }
+
+            mAudioTrack = new AudioTrack(mStreamType, sampleRateInHz, channelConfig,
+                    audioFormat, buffer.length, AudioTrack.MODE_STATIC);
             if (mAudioTrack == null) {
                 return TextToSpeech.ERROR;
             }
 
             try {
                 mAudioTrack.write(buffer, offset, length);
+                setupVolume(mAudioTrack, mVolume, mPan);
                 mAudioTrack.play();
+                blockUntilDone(mAudioTrack, bytesPerFrame, length);
                 mDone = true;
+                if (DBG) Log.d(TAG, "Wrote data to audio track succesfully : " + length);
             } catch (IllegalStateException ex) {
                 Log.e(TAG, "Playback error", ex);
                 return TextToSpeech.ERROR;
@@ -244,15 +258,48 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
         return TextToSpeech.SUCCESS;
     }
 
-    private AudioTrack createAudioTrack(int sampleRateInHz, int audioFormat, int channelCount,
-            int mode) {
-        int channelConfig;
+    private void blockUntilDone(AudioTrack audioTrack, int bytesPerFrame, int length) {
+        int lengthInFrames = length / bytesPerFrame;
+        int currentPosition = 0;
+        while ((currentPosition = audioTrack.getPlaybackHeadPosition()) < lengthInFrames) {
+            long estimatedTimeMs = ((lengthInFrames - currentPosition) * 1000) /
+                    audioTrack.getSampleRate();
+            if (DBG) Log.d(TAG, "About to sleep for : " + estimatedTimeMs + " ms," +
+                    " Playback position : " + currentPosition);
+            try {
+                Thread.sleep(estimatedTimeMs);
+            } catch (InterruptedException ie) {
+                break;
+            }
+        }
+    }
+
+    private int getBytesPerFrame(int audioFormat) {
+        if (audioFormat == AudioFormat.ENCODING_PCM_8BIT) {
+            return 1;
+        } else if (audioFormat == AudioFormat.ENCODING_PCM_16BIT) {
+            return 2;
+        }
+
+        return -1;
+    }
+
+    private int getChannelConfig(int channelCount) {
         if (channelCount == 1) {
-            channelConfig = AudioFormat.CHANNEL_OUT_MONO;
+            return AudioFormat.CHANNEL_OUT_MONO;
         } else if (channelCount == 2){
-            channelConfig = AudioFormat.CHANNEL_OUT_STEREO;
-        } else {
-            Log.e(TAG, "Unsupported number of channels: " + channelCount);
+            return AudioFormat.CHANNEL_OUT_STEREO;
+        }
+
+        return -1;
+    }
+
+    private AudioTrack createStreamingAudioTrack(int sampleRateInHz, int audioFormat,
+            int channelCount) {
+        int channelConfig = getChannelConfig(channelCount);
+
+        if (channelConfig < 0) {
+            Log.e(TAG, "Unsupported number of channels : " + channelCount);
             return null;
         }
 
@@ -260,10 +307,11 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
                 = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);
         int bufferSizeInBytes = Math.max(MIN_AUDIO_BUFFER_SIZE, minBufferSizeInBytes);
         AudioTrack audioTrack = new AudioTrack(mStreamType, sampleRateInHz, channelConfig,
-                audioFormat, bufferSizeInBytes, mode);
+                audioFormat, bufferSizeInBytes, AudioTrack.MODE_STREAM);
         if (audioTrack == null) {
             return null;
         }
+
         if (audioTrack.getState() != AudioTrack.STATE_INITIALIZED) {
             audioTrack.release();
             return null;
