@@ -70,6 +70,12 @@ public final class ObexHelper {
      */
     public static final int MAX_PACKET_SIZE_INT = 0xFFFE;
 
+    /**
+     * Temporary workaround to be able to push files to Windows 7.
+     * TODO: Should be removed as soon as Microsoft updates their driver.
+     */
+    public static final int MAX_CLIENT_PACKET_SIZE = 0xFC00;
+
     public static final int OBEX_OPCODE_CONNECT = 0x80;
 
     public static final int OBEX_OPCODE_DISCONNECT = 0x81;
