@@ -24,8 +24,6 @@ package android.speech.tts;
  *
  * Alternatively, the engine can provide all the audio at once, by using
  * {@link #completeAudioAvailable}.
- *
- * @hide Pending approval
  */
 public abstract class SynthesisRequest {
 
@@ -92,16 +90,14 @@ public abstract class SynthesisRequest {
     }
 
     /**
-     * Gets the speech rate to use. {@link TextToSpeech.Engine#DEFAULT_RATE} (100)
-     * is the normal rate.
+     * Gets the speech rate to use. The normal rate is 100.
      */
     public int getSpeechRate() {
         return mSpeechRate;
     }
 
     /**
-     * Gets the pitch to use. {@link TextToSpeech.Engine#DEFAULT_PITCH} (100)
-     * is the normal pitch.
+     * Gets the pitch to use. The normal pitch is 100.
      */
     public int getPitch() {
         return mPitch;
