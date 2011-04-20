@@ -16,7 +16,6 @@
 
 #include "rsContext.h"
 #include "rsScriptC.h"
-#include "rsMatrix.h"
 #include "utils/Timers.h"
 #include "utils/StopWatch.h"
 
@@ -120,13 +119,14 @@ void ScriptC::runForEach(Context *rsc,
                          const Allocation * ain,
                          Allocation * aout,
                          const void * usr,
+                         size_t usrBytes,
                          const RsScriptCall *sc) {
 
     Context::PushState ps(rsc);
 
     setupGLState(rsc);
     setupScript(rsc);
-    rsc->mHal.funcs.script.invokeForEach(rsc, this, ain, aout, usr, 0, sc);
+    rsc->mHal.funcs.script.invokeForEach(rsc, this, ain, aout, usr, usrBytes, sc);
 }
 
 void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len) {
@@ -148,6 +148,7 @@ ScriptCState::ScriptCState() {
 ScriptCState::~ScriptCState() {
 }
 
+/*
 static void* symbolLookup(void* pContext, char const* name) {
     const ScriptCState::SymbolTable_t *sym;
     ScriptC *s = (ScriptC *)pContext;
@@ -171,6 +172,7 @@ static void* symbolLookup(void* pContext, char const* name) {
     LOGE("ScriptC sym lookup failed for %s", name);
     return NULL;
 }
+*/
 
 #if 0
 extern const char rs_runtime_lib_bc[];
@@ -185,7 +187,7 @@ bool ScriptC::runCompiler(Context *rsc,
 
     //LOGE("runCompiler %p %p %p %p %p %i", rsc, this, resName, cacheDir, bitcode, bitcodeLen);
 
-    rsc->mHal.funcs.script.init(rsc, this, resName, cacheDir, bitcode, bitcodeLen, 0, symbolLookup);
+    rsc->mHal.funcs.script.init(rsc, this, resName, cacheDir, bitcode, bitcodeLen, 0);
 
     mEnviroment.mFragment.set(rsc->getDefaultProgramFragment());
     mEnviroment.mVertex.set(rsc->getDefaultProgramVertex());

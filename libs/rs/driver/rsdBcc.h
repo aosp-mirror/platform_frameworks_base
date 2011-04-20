@@ -18,12 +18,12 @@
 #define RSD_BCC_H
 
 #include <rs_hal.h>
+#include <rsRuntime.h>
 
 
 bool rsdScriptInit(const android::renderscript::Context *, android::renderscript::ScriptC *,
                    char const *resName, char const *cacheDir,
-                   uint8_t const *bitcode, size_t bitcodeSize,
-                   uint32_t flags, android::renderscript::RsHalSymbolLookupFunc lookupFunc);
+                   uint8_t const *bitcode, size_t bitcodeSize, uint32_t flags);
 void rsdScriptInvokeFunction(const android::renderscript::Context *dc,
                              android::renderscript::Script *script,
                              uint32_t slot,

@@ -95,7 +95,9 @@ LOCAL_SRC_FILES:= \
 	rsFont.cpp \
 	rsLocklessFifo.cpp \
 	rsObjectBase.cpp \
-	rsMatrix.cpp \
+	rsMatrix2x2.cpp \
+	rsMatrix3x3.cpp \
+	rsMatrix4x4.cpp \
 	rsMesh.cpp \
 	rsMutex.cpp \
 	rsProgram.cpp \
@@ -107,7 +109,6 @@ LOCAL_SRC_FILES:= \
 	rsScript.cpp \
 	rsScriptC.cpp \
 	rsScriptC_Lib.cpp \
-	rsScriptC_LibCL.cpp \
 	rsScriptC_LibGL.cpp \
 	rsShaderCache.cpp \
 	rsSignal.cpp \
@@ -119,7 +120,9 @@ LOCAL_SRC_FILES:= \
 	driver/rsdCore.cpp \
 	driver/rsdGL.cpp \
 	driver/rsdProgramRaster.cpp \
-	driver/rsdProgramStore.cpp
+	driver/rsdProgramStore.cpp \
+	driver/rsdRuntimeMath.cpp \
+	driver/rsdRuntimeStubs.cpp
 
 
 LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc

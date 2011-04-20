@@ -47,6 +47,7 @@ public:
                             const Allocation * ain,
                             Allocation * aout,
                             const void * usr,
+                            size_t usrBytes,
                             const RsScriptCall *sc = NULL);
 
     virtual void serialize(OStream *stream) const {    }

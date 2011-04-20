@@ -62,8 +62,7 @@ typedef struct {
                      char const *cacheDir,
                      uint8_t const *bitcode,
                      size_t bitcodeSize,
-                     uint32_t flags,
-                     RsHalSymbolLookupFunc lookupFunc);
+                     uint32_t flags);
 
         void (*invokeFunction)(const Context *rsc, Script *s,
                                uint32_t slot,
@@ -108,9 +107,6 @@ typedef struct {
 
 } RsdHalFunctions;
 
-void rsiSetObject(ObjectBase **vdst, ObjectBase * vsrc);
-void rsiClearObject(ObjectBase **vdst);
-bool rsiIsObject(const ObjectBase *vdst);
 
 }
 }

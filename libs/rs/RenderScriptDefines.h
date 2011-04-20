@@ -52,6 +52,18 @@ typedef void * RsProgramRaster;
 
 typedef void (* RsBitmapCallback_t)(void *);
 
+typedef struct {
+    float m[16];
+} rs_matrix4x4;
+
+typedef struct {
+    float m[9];
+} rs_matrix3x3;
+
+typedef struct {
+    float m[4];
+} rs_matrix2x2;
+
 enum RsDeviceParam {
     RS_DEVICE_PARAM_FORCE_SOFTWARE_GL,
     RS_DEVICE_PARAM_COUNT

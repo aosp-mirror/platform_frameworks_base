@@ -17,6 +17,7 @@
 
 #include "rsdCore.h"
 #include "rsdBcc.h"
+#include "rsdRuntime.h"
 
 #include "rsContext.h"
 #include "rsScriptC.h"
@@ -129,8 +130,7 @@ bool rsdScriptInit(const Context *rsc,
                      char const *cacheDir,
                      uint8_t const *bitcode,
                      size_t bitcodeSize,
-                     uint32_t flags,
-                     RsHalSymbolLookupFunc lookupFunc) {
+                     uint32_t flags) {
     //LOGE("rsdScriptCreate %p %p %p %p %i %i %p", rsc, resName, cacheDir, bitcode, bitcodeSize, flags, lookupFunc);
 
     char *cachePath = NULL;
@@ -149,7 +149,7 @@ bool rsdScriptInit(const Context *rsc,
 
     //LOGE("mBccScript %p", script->mBccScript);
 
-    if (bccRegisterSymbolCallback(drv->mBccScript, lookupFunc, script) != 0) {
+    if (bccRegisterSymbolCallback(drv->mBccScript, &rsdLookupRuntimeStub, script) != 0) {
         LOGE("bcc: FAILS to register symbol callback");
         goto error;
     }
@@ -334,7 +334,7 @@ void rsdScriptInvokeForEach(const Context *rsc,
                             uint32_t usrLen,
                             const RsScriptCall *sc) {
 
-    RsHal * dc = (RsHal *)rsc->mHal.drv;
+    RsdHal * dc = (RsdHal *)rsc->mHal.drv;
 
     MTLaunchStruct mtls;
     memset(&mtls, 0, sizeof(mtls));
@@ -513,7 +513,7 @@ void rsdScriptSetGlobalObj(const Context *dc, const Script *script, uint32_t slo
         return;
     }
 
-    rsiSetObject((ObjectBase **)destPtr, data);
+    rsrSetObject(dc, script, (ObjectBase **)destPtr, data);
 }
 
 void rsdScriptDestroy(const Context *dc, Script *script) {
@@ -525,7 +525,7 @@ void rsdScriptDestroy(const Context *dc, Script *script) {
                 // The field address can be NULL if the script-side has
                 // optimized the corresponding global variable away.
                 if (drv->mFieldAddress[ct]) {
-                    rsiClearObject((ObjectBase **)drv->mFieldAddress[ct]);
+                    rsrClearObject(dc, script, (ObjectBase **)drv->mFieldAddress[ct]);
                 }
             }
         }

@@ -107,7 +107,7 @@ static void printEGLConfiguration(EGLDisplay dpy, EGLConfig config) {
     }
 }
 
-static void DumpDebug(RsHal *dc) {
+static void DumpDebug(RsdHal *dc) {
     LOGE(" EGL ver %i %i", dc->gl.egl.majorVersion, dc->gl.egl.minorVersion);
     LOGE(" EGL context %p  surface %p,  Display=%p", dc->gl.egl.context, dc->gl.egl.surface,
          dc->gl.egl.display);
@@ -126,7 +126,7 @@ static void DumpDebug(RsHal *dc) {
 }
 
 void rsdGLShutdown(const Context *rsc) {
-    RsHal *dc = (RsHal *)rsc->mHal.drv;
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
 
     LOGV("%p, deinitEGL", rsc);
 
@@ -147,7 +147,7 @@ void rsdGLShutdown(const Context *rsc) {
 }
 
 bool rsdGLInit(const Context *rsc) {
-    RsHal *dc = (RsHal *)rsc->mHal.drv;
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
 
     dc->gl.egl.numConfigs = -1;
     EGLint configAttribs[128];
@@ -289,7 +289,7 @@ bool rsdGLInit(const Context *rsc) {
 
 
 bool rsdGLSetSurface(const Context *rsc, uint32_t w, uint32_t h, ANativeWindow *sur) {
-    RsHal *dc = (RsHal *)rsc->mHal.drv;
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
 
     EGLBoolean ret;
     // WAR: Some drivers fail to handle 0 size surfaces correcntly.
@@ -327,7 +327,7 @@ bool rsdGLSetSurface(const Context *rsc, uint32_t w, uint32_t h, ANativeWindow *
 }
 
 void rsdGLSwap(const android::renderscript::Context *rsc) {
-    RsHal *dc = (RsHal *)rsc->mHal.drv;
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
     eglSwapBuffers(dc->gl.egl.display, dc->gl.egl.surface);
 }
 

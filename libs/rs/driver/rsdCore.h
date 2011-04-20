@@ -28,7 +28,13 @@
 typedef void (* InvokeFunc_t)(void);
 typedef void (*WorkerCallback_t)(void *usr, uint32_t idx);
 
-typedef struct RsHalRec {
+typedef struct RsdSymbolTableRec {
+    const char * mName;
+    void * mPtr;
+    bool threadable;
+} RsdSymbolTable;
+
+typedef struct RsdHalRec {
     uint32_t version_major;
     uint32_t version_minor;
 
@@ -48,7 +54,7 @@ typedef struct RsHalRec {
     bool mExit;
 
     RsdGL gl;
-} RsHal;
+} RsdHal;
 
 
 
