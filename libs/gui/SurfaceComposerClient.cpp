@@ -273,7 +273,6 @@ ssize_t SurfaceComposerClient::getNumberOfDisplays()
 }
 
 sp<SurfaceControl> SurfaceComposerClient::createSurface(
-        int pid,
         DisplayID display,
         uint32_t w,
         uint32_t h,
@@ -286,12 +285,11 @@ sp<SurfaceControl> SurfaceComposerClient::createSurface(
     snprintf(buffer, SIZE, "<pid_%d>", getpid());
     name.append(buffer);
 
-    return SurfaceComposerClient::createSurface(pid, name, display,
+    return SurfaceComposerClient::createSurface(name, display,
             w, h, format, flags);
 }
 
 sp<SurfaceControl> SurfaceComposerClient::createSurface(
-        int pid,
         const String8& name,
         DisplayID display,
         uint32_t w,
@@ -302,7 +300,7 @@ sp<SurfaceControl> SurfaceComposerClient::createSurface(
     sp<SurfaceControl> result;
     if (mStatus == NO_ERROR) {
         ISurfaceComposerClient::surface_data_t data;
-        sp<ISurface> surface = mClient->createSurface(&data, pid, name,
+        sp<ISurface> surface = mClient->createSurface(&data, name,
                 display, w, h, format, flags);
         if (surface != 0) {
             result = new SurfaceControl(this, surface, data, w, h, format, flags);

@@ -64,7 +64,6 @@ public:
      * Requires ACCESS_SURFACE_FLINGER permission
      */
     virtual sp<ISurface> createSurface( surface_data_t* data,
-                                        int pid,
                                         const String8& name,
                                         DisplayID display,
                                         uint32_t w,
