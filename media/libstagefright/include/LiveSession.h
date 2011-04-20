@@ -20,6 +20,8 @@
 
 #include <media/stagefright/foundation/AHandler.h>
 
+#include <utils/String8.h>
+
 namespace android {
 
 struct ABuffer;
@@ -37,7 +39,10 @@ struct LiveSession : public AHandler {
 
     sp<DataSource> getDataSource();
 
-    void connect(const char *url);
+    void connect(
+            const char *url,
+            const KeyedVector<String8, String8> *headers = NULL);
+
     void disconnect();
 
     // Blocks until seek is complete.
@@ -78,6 +83,8 @@ private:
     sp<HTTPBase> mHTTPDataSource;
 
     AString mMasterURL;
+    KeyedVector<String8, String8> mExtraHeaders;
+
     Vector<BandwidthItem> mBandwidthItems;
 
     KeyedVector<AString, sp<ABuffer> > mAESKeyForURI;

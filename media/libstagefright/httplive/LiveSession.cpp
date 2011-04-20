@@ -67,9 +67,17 @@ sp<DataSource> LiveSession::getDataSource() {
     return mDataSource;
 }
 
-void LiveSession::connect(const char *url) {
+void LiveSession::connect(
+        const char *url, const KeyedVector<String8, String8> *headers) {
     sp<AMessage> msg = new AMessage(kWhatConnect, id());
     msg->setString("url", url);
+
+    if (headers != NULL) {
+        msg->setPointer(
+                "headers",
+                new KeyedVector<String8, String8>(*headers));
+    }
+
     msg->post();
 }
 
@@ -144,6 +152,16 @@ void LiveSession::onConnect(const sp<AMessage> &msg) {
     AString url;
     CHECK(msg->findString("url", &url));
 
+    KeyedVector<String8, String8> *headers = NULL;
+    if (!msg->findPointer("headers", (void **)&headers)) {
+        mExtraHeaders.clear();
+    } else {
+        mExtraHeaders = *headers;
+
+        delete headers;
+        headers = NULL;
+    }
+
     if (!(mFlags & kFlagIncognito)) {
         LOGI("onConnect '%s'", url.c_str());
     } else {
@@ -210,7 +228,8 @@ status_t LiveSession::fetchFile(const char *url, sp<ABuffer> *out) {
             }
         }
 
-        status_t err = mHTTPDataSource->connect(url);
+        status_t err = mHTTPDataSource->connect(
+                url, mExtraHeaders.isEmpty() ? NULL : &mExtraHeaders);
 
         if (err != OK) {
             return err;

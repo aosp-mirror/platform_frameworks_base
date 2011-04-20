@@ -27,11 +27,9 @@ struct ATSParser;
 struct LiveSession;
 
 struct NuPlayer::HTTPLiveSource : public NuPlayer::Source {
-    enum Flags {
-        // Don't log any URLs.
-        kFlagIncognito = 1,
-    };
-    HTTPLiveSource(const char *url, uint32_t flags = 0);
+    HTTPLiveSource(
+            const char *url,
+            const KeyedVector<String8, String8> *headers);
 
     virtual void start();
 
@@ -49,7 +47,13 @@ protected:
     virtual ~HTTPLiveSource();
 
 private:
+    enum Flags {
+        // Don't log any URLs.
+        kFlagIncognito = 1,
+    };
+
     AString mURL;
+    KeyedVector<String8, String8> mExtraHeaders;
     uint32_t mFlags;
     bool mEOS;
     off64_t mOffset;

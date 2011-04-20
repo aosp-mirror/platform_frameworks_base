@@ -33,11 +33,25 @@
 
 namespace android {
 
-NuPlayer::HTTPLiveSource::HTTPLiveSource(const char *url, uint32_t flags)
+NuPlayer::HTTPLiveSource::HTTPLiveSource(
+        const char *url,
+        const KeyedVector<String8, String8> *headers)
     : mURL(url),
-      mFlags(flags),
+      mFlags(0),
       mEOS(false),
       mOffset(0) {
+    if (headers) {
+        mExtraHeaders = *headers;
+
+        ssize_t index =
+            mExtraHeaders.indexOfKey(String8("x-hide-urls-from-log"));
+
+        if (index >= 0) {
+            mFlags |= kFlagIncognito;
+
+            mExtraHeaders.removeItemsAt(index);
+        }
+    }
 }
 
 NuPlayer::HTTPLiveSource::~HTTPLiveSource() {
@@ -55,7 +69,8 @@ void NuPlayer::HTTPLiveSource::start() {
 
     mLiveLooper->registerHandler(mLiveSession);
 
-    mLiveSession->connect(mURL.c_str());
+    mLiveSession->connect(
+            mURL.c_str(), mExtraHeaders.isEmpty() ? NULL : &mExtraHeaders);
 
     mTSParser = new ATSParser;
 }
