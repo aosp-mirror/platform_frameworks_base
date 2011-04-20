@@ -570,6 +570,7 @@ public:
             const int32_t* keyCodes, uint8_t* outFlags);
 
     virtual void fadePointer();
+    virtual void timeoutExpired(nsecs_t when);
 
 protected:
     Mutex mLock;
@@ -935,10 +936,15 @@ private:
             // Emits DOWN and UP events at the pointer location.
             TAP,
 
+            // Exactly one finger dragging following a tap.
+            // Pointer follows the active finger.
+            // Emits DOWN, MOVE and UP events at the pointer location.
+            TAP_DRAG,
+
             // Button is pressed.
             // Pointer follows the active finger if there is one.  Other fingers are ignored.
             // Emits DOWN, MOVE and UP events at the pointer location.
-            CLICK_OR_DRAG,
+            BUTTON_CLICK_OR_DRAG,
 
             // Exactly one finger, button is not pressed.
             // Pointer follows the active finger.
@@ -997,8 +1003,11 @@ private:
         // Time the pointer gesture last went down.
         nsecs_t downTime;
 
-        // Time we started waiting for a tap gesture.
-        nsecs_t tapTime;
+        // Time when the pointer went down for a TAP.
+        nsecs_t tapDownTime;
+
+        // Time when the pointer went up for a TAP.
+        nsecs_t tapUpTime;
 
         // Location of initial tap.
         float tapX, tapY;
@@ -1030,12 +1039,13 @@ private:
             spotIdBits.clear();
             downTime = 0;
             velocityTracker.clear();
-            resetTapTime();
+            resetTap();
             resetQuietTime();
         }
 
-        void resetTapTime() {
-            tapTime = LLONG_MIN;
+        void resetTap() {
+            tapDownTime = LLONG_MIN;
+            tapUpTime = LLONG_MIN;
         }
 
         void resetQuietTime() {
@@ -1048,9 +1058,9 @@ private:
     TouchResult consumeOffScreenTouches(nsecs_t when, uint32_t policyFlags);
     void dispatchTouches(nsecs_t when, uint32_t policyFlags);
     void prepareTouches(int32_t* outEdgeFlags, float* outXPrecision, float* outYPrecision);
-    void dispatchPointerGestures(nsecs_t when, uint32_t policyFlags);
-    void preparePointerGestures(nsecs_t when,
-            bool* outCancelPreviousGesture, bool* outFinishPreviousGesture);
+    void dispatchPointerGestures(nsecs_t when, uint32_t policyFlags, bool isTimeout);
+    bool preparePointerGestures(nsecs_t when,
+            bool* outCancelPreviousGesture, bool* outFinishPreviousGesture, bool isTimeout);
     void moveSpotsLocked();
 
     // Dispatches a motion event.
