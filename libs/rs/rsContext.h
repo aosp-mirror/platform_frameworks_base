@@ -27,7 +27,7 @@
 #ifndef ANDROID_RS_SERIALIZE
 #include "rsMutex.h"
 #include "rsThreadIO.h"
-#include "rsMatrix.h"
+#include "rsMatrix4x4.h"
 #include "rsDevice.h"
 #include "rsScriptC.h"
 #include "rsAdapter.h"

@@ -34,25 +34,6 @@ public:
     struct Hal {
         void * drv;
 
-        struct State {
-            ObjectBaseRef<const Type> type;
-            void * mallocPtr;
-
-            uint32_t usageFlags;
-            RsAllocationMipmapControl mipmapControl;
-
-            // Cached fields from the Type and Element
-            // to prevent pointer chasing in critical loops.
-            uint32_t dimensionX;
-            uint32_t dimensionY;
-            uint32_t dimensionZ;
-            uint32_t elementSizeBytes;
-            bool hasMipmaps;
-            bool hasFaces;
-            bool hasReferences;
-        };
-        State state;
-
         struct DriverInfo {
             int mVersionMajor;
             int mVersionMinor;
@@ -96,6 +77,7 @@ public:
                             const Allocation * ain,
                             Allocation * aout,
                             const void * usr,
+                            size_t usrBytes,
                             const RsScriptCall *sc = NULL) = 0;
 
     virtual void Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len) = 0;

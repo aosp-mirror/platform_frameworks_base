@@ -14,57 +14,65 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_RS_MATRIX_H
-#define ANDROID_RS_MATRIX_H
+#ifndef ANDROID_RS_MATRIX_4x4_H
+#define ANDROID_RS_MATRIX_4x4_H
 
+#include "rsType.h"
 
 
 // ---------------------------------------------------------------------------
 namespace android {
 namespace renderscript {
 
-struct Matrix {
-    float m[16];
-
-    inline float get(int i, int j) const {
-        return m[i*4 + j];
+struct Matrix4x4 : public rs_matrix4x4 {
+    float get(uint32_t row, uint32_t col) const {
+        return m[row*4 + col];
     }
 
-    inline void set(int i, int j, float v) {
-        m[i*4 + j] = v;
+    void set(uint32_t row, uint32_t col, float v) {
+        m[row*4 + col] = v;
     }
 
     void loadIdentity();
     void load(const float *);
-    void load(const Matrix *);
+    void load(const rs_matrix4x4 *);
+    void load(const rs_matrix3x3 *);
+    void load(const rs_matrix2x2 *);
 
     void loadRotate(float rot, float x, float y, float z);
     void loadScale(float x, float y, float z);
     void loadTranslate(float x, float y, float z);
-    void loadMultiply(const Matrix *lhs, const Matrix *rhs);
+    void loadMultiply(const rs_matrix4x4 *lhs, const rs_matrix4x4 *rhs);
 
     void loadOrtho(float l, float r, float b, float t, float n, float f);
     void loadFrustum(float l, float r, float b, float t, float n, float f);
+    void loadPerspective(float fovy, float aspect, float near, float far);
 
     void vectorMultiply(float *v4out, const float *v3in) const;
 
-    void multiply(const Matrix *rhs) {
-        Matrix tmp;
+    bool inverse();
+    bool inverseTranspose();
+    void transpose();
+
+
+
+    void multiply(const rs_matrix4x4 *rhs) {
+        Matrix4x4 tmp;
         tmp.loadMultiply(this, rhs);
         load(&tmp);
     }
     void rotate(float rot, float x, float y, float z) {
-        Matrix tmp;
+        Matrix4x4 tmp;
         tmp.loadRotate(rot, x, y, z);
         multiply(&tmp);
     }
     void scale(float x, float y, float z) {
-        Matrix tmp;
+        Matrix4x4 tmp;
         tmp.loadScale(x, y, z);
         multiply(&tmp);
     }
     void translate(float x, float y, float z) {
-        Matrix tmp;
+        Matrix4x4 tmp;
         tmp.loadTranslate(x, y, z);
         multiply(&tmp);
     }

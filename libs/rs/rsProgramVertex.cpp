@@ -96,9 +96,9 @@ void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state, ShaderCach
             return;
         }
         float *f = static_cast<float *>(mConstants[0]->getPtr());
-        Matrix mvp;
+        Matrix4x4 mvp;
         mvp.load(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
-        Matrix t;
+        Matrix4x4 t;
         t.load(&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET]);
         mvp.multiply(&t);
         for (uint32_t i = 0; i < 16; i ++) {
@@ -181,9 +181,9 @@ void ProgramVertex::transformToScreen(Context *rsc, float *v4out, const float *v
         return;
     }
     float *f = static_cast<float *>(mConstants[0]->getPtr());
-    Matrix mvp;
-    mvp.loadMultiply((Matrix *)&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET],
-                     (Matrix *)&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
+    Matrix4x4 mvp;
+    mvp.loadMultiply((Matrix4x4 *)&f[RS_PROGRAM_VERTEX_MODELVIEW_OFFSET],
+                     (Matrix4x4 *)&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET]);
     mvp.vectorMultiply(v4out, v3in);
 }
 
@@ -269,7 +269,7 @@ void ProgramVertexState::init(Context *rsc) {
 void ProgramVertexState::updateSize(Context *rsc) {
     float *f = static_cast<float *>(mDefaultAlloc->getPtr());
 
-    Matrix m;
+    Matrix4x4 m;
     m.loadOrtho(0,rsc->getWidth(), rsc->getHeight(),0, -1,1);
     memcpy(&f[RS_PROGRAM_VERTEX_PROJECTION_OFFSET], m.m, sizeof(m));
     memcpy(&f[RS_PROGRAM_VERTEX_MVP_OFFSET], m.m, sizeof(m));

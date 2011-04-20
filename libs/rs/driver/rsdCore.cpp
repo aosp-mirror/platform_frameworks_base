@@ -77,7 +77,7 @@ static RsdHalFunctions FunctionTable = {
 
 static void * HelperThreadProc(void *vrsc) {
     Context *rsc = static_cast<Context *>(vrsc);
-    RsHal *dc = (RsHal *)rsc->mHal.drv;
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
 
 
     uint32_t idx = (uint32_t)android_atomic_inc(&dc->mWorkers.mLaunchCount);
@@ -116,7 +116,7 @@ static void * HelperThreadProc(void *vrsc) {
 }
 
 void rsdLaunchThreads(Context *rsc, WorkerCallback_t cbk, void *data) {
-    RsHal *dc = (RsHal *)rsc->mHal.drv;
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
 
     dc->mWorkers.mLaunchData = data;
     dc->mWorkers.mLaunchCallback = cbk;
@@ -132,7 +132,7 @@ void rsdLaunchThreads(Context *rsc, WorkerCallback_t cbk, void *data) {
 bool rsdHalInit(Context *rsc, uint32_t version_major, uint32_t version_minor) {
     rsc->mHal.funcs = FunctionTable;
 
-    RsHal *dc = (RsHal *)calloc(1, sizeof(RsHal));
+    RsdHal *dc = (RsdHal *)calloc(1, sizeof(RsdHal));
     if (!dc) {
         LOGE("Calloc for driver hal failed.");
         return false;
@@ -181,14 +181,14 @@ bool rsdHalInit(Context *rsc, uint32_t version_major, uint32_t version_minor) {
 
 
 void SetPriority(const Context *rsc, int32_t priority) {
-    RsHal *dc = (RsHal *)rsc->mHal.drv;
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
     for (uint32_t ct=0; ct < dc->mWorkers.mCount; ct++) {
         setpriority(PRIO_PROCESS, dc->mWorkers.mNativeThreadId[ct], priority);
     }
 }
 
 void Shutdown(Context *rsc) {
-    RsHal *dc = (RsHal *)rsc->mHal.drv;
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
 
     dc->mExit = true;
     dc->mWorkers.mLaunchData = NULL;

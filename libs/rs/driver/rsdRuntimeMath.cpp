@@ -16,8 +16,12 @@
 
 #include "rsContext.h"
 #include "rsScriptC.h"
+#include "rsMatrix4x4.h"
+#include "rsMatrix3x3.h"
+#include "rsMatrix2x2.h"
 
-// Implements rs_cl.rsh
+#include "rsdCore.h"
+#include "rsdRuntime.h"
 
 
 using namespace android;
@@ -135,6 +139,133 @@ static float SC_sign_f32(float value) {
     return value;
 }
 
+static void SC_MatrixLoadIdentity_4x4(Matrix4x4 *m) {
+    m->loadIdentity();
+}
+static void SC_MatrixLoadIdentity_3x3(Matrix3x3 *m) {
+    m->loadIdentity();
+}
+static void SC_MatrixLoadIdentity_2x2(Matrix2x2 *m) {
+    m->loadIdentity();
+}
+
+static void SC_MatrixLoad_4x4_f(Matrix4x4 *m, const float *f) {
+    m->load(f);
+}
+static void SC_MatrixLoad_3x3_f(Matrix3x3 *m, const float *f) {
+    m->load(f);
+}
+static void SC_MatrixLoad_2x2_f(Matrix2x2 *m, const float *f) {
+    m->load(f);
+}
+
+static void SC_MatrixLoad_4x4_4x4(Matrix4x4 *m, const Matrix4x4 *s) {
+    m->load(s);
+}
+static void SC_MatrixLoad_4x4_3x3(Matrix4x4 *m, const Matrix3x3 *s) {
+    m->load(s);
+}
+static void SC_MatrixLoad_4x4_2x2(Matrix4x4 *m, const Matrix2x2 *s) {
+    m->load(s);
+}
+static void SC_MatrixLoad_3x3_3x3(Matrix3x3 *m, const Matrix3x3 *s) {
+    m->load(s);
+}
+static void SC_MatrixLoad_2x2_2x2(Matrix2x2 *m, const Matrix2x2 *s) {
+    m->load(s);
+}
+
+static void SC_MatrixLoadRotate(Matrix4x4 *m, float rot, float x, float y, float z) {
+    m->loadRotate(rot, x, y, z);
+}
+static void SC_MatrixLoadScale(Matrix4x4 *m, float x, float y, float z) {
+    m->loadScale(x, y, z);
+}
+static void SC_MatrixLoadTranslate(Matrix4x4 *m, float x, float y, float z) {
+    m->loadTranslate(x, y, z);
+}
+static void SC_MatrixRotate(Matrix4x4 *m, float rot, float x, float y, float z) {
+    m->rotate(rot, x, y, z);
+}
+static void SC_MatrixScale(Matrix4x4 *m, float x, float y, float z) {
+    m->scale(x, y, z);
+}
+static void SC_MatrixTranslate(Matrix4x4 *m, float x, float y, float z) {
+    m->translate(x, y, z);
+}
+
+static void SC_MatrixLoadMultiply_4x4_4x4_4x4(Matrix4x4 *m, const Matrix4x4 *lhs, const Matrix4x4 *rhs) {
+    m->loadMultiply(lhs, rhs);
+}
+static void SC_MatrixLoadMultiply_3x3_3x3_3x3(Matrix3x3 *m, const Matrix3x3 *lhs, const Matrix3x3 *rhs) {
+    m->loadMultiply(lhs, rhs);
+}
+static void SC_MatrixLoadMultiply_2x2_2x2_2x2(Matrix2x2 *m, const Matrix2x2 *lhs, const Matrix2x2 *rhs) {
+    m->loadMultiply(lhs, rhs);
+}
+
+static void SC_MatrixMultiply_4x4_4x4(Matrix4x4 *m, const Matrix4x4 *rhs) {
+    m->multiply(rhs);
+}
+static void SC_MatrixMultiply_3x3_3x3(Matrix3x3 *m, const Matrix3x3 *rhs) {
+    m->multiply(rhs);
+}
+static void SC_MatrixMultiply_2x2_2x2(Matrix2x2 *m, const Matrix2x2 *rhs) {
+    m->multiply(rhs);
+}
+
+static void SC_MatrixLoadOrtho(Matrix4x4 *m, float l, float r, float b, float t, float n, float f) {
+    m->loadOrtho(l, r, b, t, n, f);
+}
+static void SC_MatrixLoadFrustum(Matrix4x4 *m, float l, float r, float b, float t, float n, float f) {
+    m->loadFrustum(l, r, b, t, n, f);
+}
+static void SC_MatrixLoadPerspective(Matrix4x4 *m, float fovy, float aspect, float near, float far) {
+    m->loadPerspective(fovy, aspect, near, far);
+}
+
+static bool SC_MatrixInverse_4x4(Matrix4x4 *m) {
+    return m->inverse();
+}
+static bool SC_MatrixInverseTranspose_4x4(Matrix4x4 *m) {
+    return m->inverseTranspose();
+}
+static void SC_MatrixTranspose_4x4(Matrix4x4 *m) {
+    m->transpose();
+}
+static void SC_MatrixTranspose_3x3(Matrix3x3 *m) {
+    m->transpose();
+}
+static void SC_MatrixTranspose_2x2(Matrix2x2 *m) {
+    m->transpose();
+}
+
+static float SC_randf(float max) {
+    float r = (float)rand();
+    r *= max;
+    return r / RAND_MAX;
+}
+
+static float SC_randf2(float min, float max) {
+    float r = (float)rand();
+    r = r * (max - min) + min;
+    return r / RAND_MAX;
+}
+
+static int SC_randi(int max) {
+    return (int)SC_randf(max);
+}
+
+static int SC_randi2(int min, int max) {
+    return (int)SC_randf2(min, max);
+}
+
+static float SC_frac(float v) {
+    int i = (int)floor(v);
+    return fmin(v - i, 0x1.fffffep-1f);
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Class implementation
 //////////////////////////////////////////////////////////////////////////////
@@ -156,8 +287,7 @@ static float SC_sign_f32(float value) {
 //                 ::= f  # float
 //                 ::= d  # double
 
-static ScriptCState::SymbolTable_t gSyms[] = {
-    // OpenCL math
+static RsdSymbolTable gSyms[] = {
     { "_Z4acosf", (void *)&acosf, true },
     { "_Z5acoshf", (void *)&acoshf, true },
     { "_Z4asinf", (void *)&asinf, true },
@@ -215,7 +345,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z6tgammaf", (void *)&tgammaf, true },
     { "_Z5truncf", (void *)&truncf, true },
 
-    // OpenCL Int
     { "_Z3absi", (void *)&SC_abs_i32, true },
     { "_Z3abss", (void *)&SC_abs_i16, true },
     { "_Z3absc", (void *)&SC_abs_i8, true },
@@ -238,7 +367,6 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     { "_Z3minss", (void *)&SC_min_i16, true },
     { "_Z3mincc", (void *)&SC_min_i8, true },
 
-    // OpenCL 6.11.4
     { "_Z5clampfff", (void *)&SC_clamp_f32, true },
     { "_Z7degreesf", (void *)&SC_degrees, true },
     { "_Z3maxff", (void *)&SC_max_f32, true },
@@ -249,11 +377,57 @@ static ScriptCState::SymbolTable_t gSyms[] = {
     //{ "smoothstep", (void *)&, true },
     { "_Z4signf", (void *)&SC_sign_f32, true },
 
+    // matrix
+    { "_Z20rsMatrixLoadIdentityP12rs_matrix4x4", (void *)&SC_MatrixLoadIdentity_4x4, true },
+    { "_Z20rsMatrixLoadIdentityP12rs_matrix3x3", (void *)&SC_MatrixLoadIdentity_3x3, true },
+    { "_Z20rsMatrixLoadIdentityP12rs_matrix2x2", (void *)&SC_MatrixLoadIdentity_2x2, true },
+
+    { "_Z12rsMatrixLoadP12rs_matrix4x4PKf", (void *)&SC_MatrixLoad_4x4_f, true },
+    { "_Z12rsMatrixLoadP12rs_matrix3x3PKf", (void *)&SC_MatrixLoad_3x3_f, true },
+    { "_Z12rsMatrixLoadP12rs_matrix2x2PKf", (void *)&SC_MatrixLoad_2x2_f, true },
+
+    { "_Z12rsMatrixLoadP12rs_matrix4x4PKS_", (void *)&SC_MatrixLoad_4x4_4x4, true },
+    { "_Z12rsMatrixLoadP12rs_matrix4x4PK12rs_matrix3x3", (void *)&SC_MatrixLoad_4x4_3x3, true },
+    { "_Z12rsMatrixLoadP12rs_matrix4x4PK12rs_matrix2x2", (void *)&SC_MatrixLoad_4x4_2x2, true },
+    { "_Z12rsMatrixLoadP12rs_matrix3x3PKS_", (void *)&SC_MatrixLoad_3x3_3x3, true },
+    { "_Z12rsMatrixLoadP12rs_matrix2x2PKS_", (void *)&SC_MatrixLoad_2x2_2x2, true },
+
+    { "_Z18rsMatrixLoadRotateP12rs_matrix4x4ffff", (void *)&SC_MatrixLoadRotate, true },
+    { "_Z17rsMatrixLoadScaleP12rs_matrix4x4fff", (void *)&SC_MatrixLoadScale, true },
+    { "_Z21rsMatrixLoadTranslateP12rs_matrix4x4fff", (void *)&SC_MatrixLoadTranslate, true },
+    { "_Z14rsMatrixRotateP12rs_matrix4x4ffff", (void *)&SC_MatrixRotate, true },
+    { "_Z13rsMatrixScaleP12rs_matrix4x4fff", (void *)&SC_MatrixScale, true },
+    { "_Z17rsMatrixTranslateP12rs_matrix4x4fff", (void *)&SC_MatrixTranslate, true },
+
+    { "_Z20rsMatrixLoadMultiplyP12rs_matrix4x4PKS_S2_", (void *)&SC_MatrixLoadMultiply_4x4_4x4_4x4, true },
+    { "_Z16rsMatrixMultiplyP12rs_matrix4x4PKS_", (void *)&SC_MatrixMultiply_4x4_4x4, true },
+    { "_Z20rsMatrixLoadMultiplyP12rs_matrix3x3PKS_S2_", (void *)&SC_MatrixLoadMultiply_3x3_3x3_3x3, true },
+    { "_Z16rsMatrixMultiplyP12rs_matrix3x3PKS_", (void *)&SC_MatrixMultiply_3x3_3x3, true },
+    { "_Z20rsMatrixLoadMultiplyP12rs_matrix2x2PKS_S2_", (void *)&SC_MatrixLoadMultiply_2x2_2x2_2x2, true },
+    { "_Z16rsMatrixMultiplyP12rs_matrix2x2PKS_", (void *)&SC_MatrixMultiply_2x2_2x2, true },
+
+    { "_Z17rsMatrixLoadOrthoP12rs_matrix4x4ffffff", (void *)&SC_MatrixLoadOrtho, true },
+    { "_Z19rsMatrixLoadFrustumP12rs_matrix4x4ffffff", (void *)&SC_MatrixLoadFrustum, true },
+    { "_Z23rsMatrixLoadPerspectiveP12rs_matrix4x4ffff", (void *)&SC_MatrixLoadPerspective, true },
+
+    { "_Z15rsMatrixInverseP12rs_matrix4x4", (void *)&SC_MatrixInverse_4x4, true },
+    { "_Z24rsMatrixInverseTransposeP12rs_matrix4x4", (void *)&SC_MatrixInverseTranspose_4x4, true },
+    { "_Z17rsMatrixTransposeP12rs_matrix4x4", (void *)&SC_MatrixTranspose_4x4, true },
+    { "_Z17rsMatrixTransposeP12rs_matrix4x4", (void *)&SC_MatrixTranspose_3x3, true },
+    { "_Z17rsMatrixTransposeP12rs_matrix4x4", (void *)&SC_MatrixTranspose_2x2, true },
+
+    // RS Math
+    { "_Z6rsRandi", (void *)&SC_randi, true },
+    { "_Z6rsRandii", (void *)&SC_randi2, true },
+    { "_Z6rsRandf", (void *)&SC_randf, true },
+    { "_Z6rsRandff", (void *)&SC_randf2, true },
+    { "_Z6rsFracf", (void *)&SC_frac, true },
+
     { NULL, NULL, false }
 };
 
-const ScriptCState::SymbolTable_t * ScriptCState::lookupSymbolCL(const char *sym) {
-    ScriptCState::SymbolTable_t *syms = gSyms;
+const RsdSymbolTable * rsdLookupSymbolMath(const char *sym) {
+    const RsdSymbolTable *syms = gSyms;
 
     while (syms->mPtr) {
         if (!strcmp(syms->mName, sym)) {
