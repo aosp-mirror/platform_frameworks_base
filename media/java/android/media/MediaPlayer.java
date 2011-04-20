@@ -745,7 +745,6 @@ public class MediaPlayer
      * @param uri the Content URI of the data you want to play
      * @param headers the headers to be sent together with the request for the data
      * @throws IllegalStateException if it is called in an invalid state
-     * @hide pending API council
      */
     public void setDataSource(Context context, Uri uri, Map<String, String> headers)
         throws IOException, IllegalArgumentException, SecurityException, IllegalStateException {
