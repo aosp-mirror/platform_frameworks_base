@@ -17,14 +17,72 @@
 package android.accessibilityservice;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
- * Interface AccessibilityManagerService#Service implements, and passes to an
- * AccessibilityService so it can dynamically configure how the system handles it.
+ * Interface given to an AccessibilitySerivce to talk to the AccessibilityManagerService.
  *
  * @hide
  */
-oneway interface IAccessibilityServiceConnection {
+interface IAccessibilityServiceConnection {
 
     void setServiceInfo(in AccessibilityServiceInfo info);
+
+    /**
+     * Finds an {@link AccessibilityNodeInfo} by accessibility id.
+     * <p>
+     *   <strong>
+     *     It is a client responsibility to recycle the received info by
+     *     calling {@link AccessibilityNodeInfo#recycle()} to avoid creating
+     *     of multiple instances.
+     *   </strong>
+     * </p>
+     *
+     * @param accessibilityWindowId A unique window id.
+     * @param accessibilityViewId A unique View accessibility id.
+     * @return The node info.
+     */
+    AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(int accessibilityWindowId,
+        int accessibilityViewId);
+
+    /**
+     * Finds {@link AccessibilityNodeInfo}s by View text. The match is case
+     * insensitive containment.
+     * <p>
+     *   <strong>
+     *     It is a client responsibility to recycle the received infos by
+     *     calling {@link AccessibilityNodeInfo#recycle()} to avoid creating
+     *     of multiple instances.
+     *   </strong>
+     * </p>
+     *
+     * @param text The searched text.
+     * @return A list of node info.
+     */
+    List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewText(String text);
+
+    /**
+     * Finds an {@link AccessibilityNodeInfo} by View id.
+     * <p>
+     *   <strong>
+     *     It is a client responsibility to recycle the received info by
+     *     calling {@link AccessibilityNodeInfo#recycle()} to avoid creating
+     *     of multiple instances.
+     *   </strong>
+     * </p>
+     *
+     * @param id The id of the node.
+     * @return The node info.
+     */
+    AccessibilityNodeInfo findAccessibilityNodeInfoByViewId(int viewId);
+
+    /**
+     * Performs an accessibility action on an {@link AccessibilityNodeInfo}.
+     *
+     * @param accessibilityWindowId The id of the window.
+     * @param accessibilityViewId The of a view in the .
+     * @return Whether the action was performed.
+     */
+    boolean performAccessibilityAction(int accessibilityWindowId, int accessibilityViewId,
+        int action);
 }

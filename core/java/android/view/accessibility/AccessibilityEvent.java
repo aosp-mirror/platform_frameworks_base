@@ -16,9 +16,12 @@
 
 package android.view.accessibility;
 
+import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
 import android.text.TextUtils;
+import android.view.View;
 
 import java.util.ArrayList;
 
@@ -159,6 +162,7 @@ import java.util.ArrayList;
  * @see android.accessibilityservice.AccessibilityService
  */
 public final class AccessibilityEvent extends AccessibilityRecord implements Parcelable {
+    private static final boolean DEBUG = false;
 
     /**
      * Invalid selection/focus position.
@@ -256,21 +260,38 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     private static final Object sPoolLock = new Object();
     private static AccessibilityEvent sPool;
     private static int sPoolSize;
-
     private AccessibilityEvent mNext;
     private boolean mIsInPool;
 
     private int mEventType;
+    private int mSourceAccessibilityViewId;
+    private int mSourceAccessibilityWindowId;
     private CharSequence mPackageName;
     private long mEventTime;
 
     private final ArrayList<AccessibilityRecord> mRecords = new ArrayList<AccessibilityRecord>();
 
+    private IAccessibilityServiceConnection mConnection;
+
     /*
      * Hide constructor from clients.
      */
     private AccessibilityEvent() {
+    }
 
+    /**
+     * Initialize an event from another one.
+     *
+     * @param event The event to initialize from.
+     */
+    void init(AccessibilityEvent event) {
+        super.init(event);
+        mEventType = event.mEventType;
+        mEventTime = event.mEventTime;
+        mSourceAccessibilityWindowId = event.mSourceAccessibilityWindowId;
+        mSourceAccessibilityViewId = event.mSourceAccessibilityViewId;
+        mPackageName = event.mPackageName;
+        mConnection = event.mConnection;
     }
 
     /**
@@ -286,8 +307,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * Appends an {@link AccessibilityRecord} to the end of event records.
      *
      * @param record The record to append.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void appendRecord(AccessibilityRecord record) {
+        enforceNotSealed();
         mRecords.add(record);
     }
 
@@ -311,11 +335,89 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
+     * Sets the event source.
+     *
+     * @param source The source.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setSource(View source) {
+        enforceNotSealed();
+        if (source != null) {
+            mSourceAccessibilityWindowId = source.getAccessibilityWindowId();
+            mSourceAccessibilityViewId = source.getAccessibilityViewId();
+        } else {
+            mSourceAccessibilityWindowId = View.NO_ID;
+            mSourceAccessibilityViewId = View.NO_ID;
+        }
+    }
+
+    /**
+     * Gets the {@link AccessibilityNodeInfo} of the event source.
+     * <p>
+     *   <strong>
+     *     It is a client responsibility to recycle the received info by
+     *     calling {@link AccessibilityNodeInfo#recycle()} to avoid creating
+     *     of multiple instances.
+     *   </strong>
+     * </p>
+     * @return The info.
+     */
+    public AccessibilityNodeInfo getSource() {
+        enforceSealed();
+        if (mSourceAccessibilityWindowId == View.NO_ID
+                || mSourceAccessibilityViewId == View.NO_ID) {
+            return null;
+        }
+        try {
+            return mConnection.findAccessibilityNodeInfoByAccessibilityId(
+                    mSourceAccessibilityWindowId, mSourceAccessibilityViewId);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Gets the id of the window from which the event comes from.
+     *
+     * @return The window id.
+     */
+    public int getAccessibilityWindowId() {
+        return mSourceAccessibilityWindowId;
+    }
+
+    /**
+     * Sets the client token for the accessibility service that
+     * provided this node info.
+     *
+     * @param connection The connection.
+     *
+     * @hide
+     */
+    public final void setConnection(IAccessibilityServiceConnection connection) {
+        mConnection = connection;
+    }
+
+    /**
+     * Gets the accessibility window id of the source window.
+     *
+     * @return The id.
+     *
+     * @hide
+     */
+    public int getSourceAccessibilityWindowId() {
+        return mSourceAccessibilityWindowId;
+    }
+
+    /**
      * Sets the event type.
      *
      * @param eventType The event type.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setEventType(int eventType) {
+        enforceNotSealed();
         mEventType = eventType;
     }
 
@@ -332,8 +434,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * Sets the time in which this event was sent.
      *
      * @param eventTime The event time.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setEventTime(long eventTime) {
+        enforceNotSealed();
         mEventTime = eventTime;
     }
 
@@ -350,8 +455,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * Sets the package name of the source.
      *
      * @param packageName The package name.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setPackageName(CharSequence packageName) {
+        enforceNotSealed();
         mPackageName = packageName;
     }
 
@@ -366,6 +474,27 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         AccessibilityEvent event = AccessibilityEvent.obtain();
         event.setEventType(eventType);
         return event;
+    }
+
+    /**
+     * Returns a cached instance if such is available or a new one is
+     * instantiated with type property set.
+     *
+     * @param event The other event.
+     * @return An instance.
+     */
+    public static AccessibilityEvent obtain(AccessibilityEvent event) {
+        AccessibilityEvent eventClone = AccessibilityEvent.obtain();
+        eventClone.init(event);
+
+        final int recordCount = event.mRecords.size();
+        for (int i = 0; i < recordCount; i++) {
+            AccessibilityRecord record = event.mRecords.get(i);
+            AccessibilityRecord recordClone = AccessibilityRecord.obtain(record);
+            eventClone.mRecords.add(recordClone);
+        }
+
+        return eventClone;
     }
 
     /**
@@ -413,11 +542,16 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Clears the state of this instance.
+     *
+     * @hide
      */
     @Override
     protected void clear() {
         super.clear();
+        mConnection = null;
         mEventType = 0;
+        mSourceAccessibilityViewId = View.NO_ID;
+        mSourceAccessibilityWindowId = View.NO_ID;
         mPackageName = null;
         mEventTime = 0;
         while (!mRecords.isEmpty()) {
@@ -432,7 +566,14 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @param parcel A parcel containing the state of a {@link AccessibilityEvent}.
      */
     public void initFromParcel(Parcel parcel) {
+        if (parcel.readInt() == 1) {
+            mConnection = IAccessibilityServiceConnection.Stub.asInterface(
+                    parcel.readStrongBinder());
+        }
+        setSealed(parcel.readInt() == 1);
         mEventType = parcel.readInt();
+        mSourceAccessibilityWindowId = parcel.readInt();
+        mSourceAccessibilityViewId = parcel.readInt();
         mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         mEventTime = parcel.readLong();
         readAccessibilityRecordFromParcel(this, parcel);
@@ -471,7 +612,16 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * {@inheritDoc}
      */
     public void writeToParcel(Parcel parcel, int flags) {
+        if (mConnection == null) {
+            parcel.writeInt(0);
+        } else {
+            parcel.writeInt(1);
+            parcel.writeStrongBinder(mConnection.asBinder());
+        }
+        parcel.writeInt(isSealed() ? 1 : 0);
         parcel.writeInt(mEventType);
+        parcel.writeInt(mSourceAccessibilityWindowId);
+        parcel.writeInt(mSourceAccessibilityViewId);
         TextUtils.writeToParcel(mPackageName, parcel, 0);
         parcel.writeLong(mEventTime);
         writeAccessibilityRecordToParcel(this, parcel, flags);
@@ -519,18 +669,36 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         builder.append("; EventType: ").append(eventTypeToString(mEventType));
         builder.append("; EventTime: ").append(mEventTime);
         builder.append("; PackageName: ").append(mPackageName);
-        builder.append(" \n{\n");
         builder.append(super.toString());
-        builder.append("\n");
-        for (int i = 0; i < mRecords.size(); i++) {
-            AccessibilityRecord record = mRecords.get(i);
-            builder.append("  Record ");
-            builder.append(i);
-            builder.append(":");
-            builder.append(record.toString());
+        if (DEBUG) {
             builder.append("\n");
+            builder.append("; sourceAccessibilityWindowId: ").append(mSourceAccessibilityWindowId);
+            builder.append("; sourceAccessibilityViewId: ").append(mSourceAccessibilityViewId);
+            for (int i = 0; i < mRecords.size(); i++) {
+                AccessibilityRecord record = mRecords.get(i);
+                builder.append("  Record ");
+                builder.append(i);
+                builder.append(":");
+                builder.append(" [ ClassName: " + record.mClassName);
+                builder.append("; Text: " + record.mText);
+                builder.append("; ContentDescription: " + record.mContentDescription);
+                builder.append("; ItemCount: " + record.mItemCount);
+                builder.append("; CurrentItemIndex: " + record.mCurrentItemIndex);
+                builder.append("; IsEnabled: " + record.isEnabled());
+                builder.append("; IsPassword: " + record.isPassword());
+                builder.append("; IsChecked: " + record.isChecked());
+                builder.append("; IsFullScreen: " + record.isFullScreen());
+                builder.append("; BeforeText: " + record.mBeforeText);
+                builder.append("; FromIndex: " + record.mFromIndex);
+                builder.append("; AddedCount: " + record.mAddedCount);
+                builder.append("; RemovedCount: " + record.mRemovedCount);
+                builder.append("; ParcelableData: " + record.mParcelableData);
+                builder.append(" ]");
+                builder.append("\n");
+            }
+        } else {
+            builder.append("; recordCount: ").append(getAddedCount());
         }
-        builder.append("}\n");
         return builder.toString();
     }
 

@@ -25,6 +25,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
  * An accessibility service runs in the background and receives callbacks by the system
@@ -51,7 +52,11 @@ import android.view.accessibility.AccessibilityEvent;
  * enabling or disabling it in the device settings. After the system binds to a service it
  * calls {@link AccessibilityService#onServiceConnected()}. This method can be
  * overriden by clients that want to perform post binding setup.
+ * </p>
  * <p>
+ * An accessibility service can be configured to receive specific types of accessibility events,
+ * listen only to specific packages, get events from each type only once in a given time frame,
+ * retrieve window content, specify a settings activity, etc.
  * </p>
  * There are two approaches for configuring an accessibility service:
  * <ul>
@@ -59,19 +64,22 @@ import android.view.accessibility.AccessibilityEvent;
  *     Providing a {@link #SERVICE_META_DATA meta-data} entry in the manifest when declaring
  *     the service. A service declaration with a meta-data tag is presented below:
  *     <p>
- *     <code>
- *       &lt;service android:name=".MyAccessibilityService"&gt;<br>
- *       &nbsp;&nbsp;&lt;intent-filter&gt;<br>
- *       &nbsp;&nbsp;&nbsp;&nbsp;&lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;<br>
- *       &nbsp;&nbsp;&lt;/intent-filter&gt;<br>
- *       &nbsp;&nbsp;&lt;meta-data android:name="android.accessibilityservice.as" android:resource="@xml/accessibilityservice" /&gt;<br>
- *       &lt;/service&gt;<br>
- *     </code>
+ *       <code>
+ *         &lt;service android:name=".MyAccessibilityService"&gt;<br>
+ *         &nbsp;&nbsp;&lt;intent-filter&gt;<br>
+ *         &nbsp;&nbsp;&nbsp;&nbsp;&lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;<br>
+ *         &nbsp;&nbsp;&lt;/intent-filter&gt;<br>
+ *         &nbsp;&nbsp;&lt;meta-data android:name="android.accessibilityservice.as" android:resource="@xml/accessibilityservice" /&gt;<br>
+ *         &lt;/service&gt;<br>
+ *       </code>
  *     </p>
  *     <p>
  *     <strong>
  *       This approach enables setting all accessibility service properties.
  *     </strong>
+ *     </p>
+ *     <p>
+ *       For more details refer to {@link #SERVICE_META_DATA}.
  *     </p>
  *   </li>
  *   <li>
@@ -87,6 +95,9 @@ import android.view.accessibility.AccessibilityEvent;
  *       {@link AccessibilityServiceInfo#notificationTimeout},
  *       {@link AccessibilityServiceInfo#packageNames}
  *     </strong>
+ *     </p>
+ *     <p>
+ *       For more details refer to {@link AccessibilityServiceInfo}.
  *     </p>
  *   </li>
  * </ul>
@@ -151,15 +162,48 @@ public abstract class AccessibilityService extends Service {
      * <code>
      *   &lt;?xml version="1.0" encoding="utf-8"?&gt;<br>
      *   &lt;accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"<br>
-     *   &nbsp;&nbsp;android:eventTypes="typeViewClicked|typeViewFocused"<br>
+     *   &nbsp;&nbsp;android:accessibilityEventTypes="typeViewClicked|typeViewFocused"<br>
      *   &nbsp;&nbsp;android:packageNames="foo.bar, foo.baz"<br>
-     *   &nbsp;&nbsp;android:feedbackType="feedbackSpoken"<br>
+     *   &nbsp;&nbsp;android:accessibilityFeedbackType="feedbackSpoken"<br>
      *   &nbsp;&nbsp;android:notificationTimeout="100"<br>
-     *   &nbsp;&nbsp;android:flags="flagDefault"<br>
+     *   &nbsp;&nbsp;android:accessibilityFlags="flagDefault"<br>
      *   &nbsp;&nbsp;android:settingsActivity="foo.bar.TestBackActivity"<br>
      *   &nbsp;&nbsp;. . .<br>
      *   /&gt;
      * </code>
+     * </p>
+     * <p>
+     *  <strong>Note:</strong> A service can retrieve only the content of the active window.
+     *          An active window is the source of the most recent event of type
+     *          {@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_START},
+     *          {@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END},
+     *          {@link AccessibilityEvent#TYPE_VIEW_CLICKED},
+     *          {@link AccessibilityEvent#TYPE_VIEW_FOCUSED},
+     *          {@link AccessibilityEvent#TYPE_VIEW_HOVER_ENTER},
+     *          {@link AccessibilityEvent#TYPE_VIEW_HOVER_EXIT},
+     *          {@link AccessibilityEvent#TYPE_VIEW_LONG_CLICKED},
+     *          {@link AccessibilityEvent#TYPE_VIEW_SELECTED},
+     *          {@link AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED},
+     *          {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED}.
+     *          Therefore the service should:
+     *          <ul>
+     *            <li>
+     *              Register for all event types with no notification timeout and keep track
+     *              for the active window by calling
+     *              {@link AccessibilityEvent#getAccessibilityWindowId()} of the last received
+     *              event and compare this with the
+     *              {@link AccessibilityNodeInfo#getAccessibilityWindowId()} before calling
+     *              retrieval methods on the latter.
+     *            </li>
+     *            <li>
+     *              Prepare that a retrieval method on {@link AccessibilityNodeInfo} may fail
+     *              since the active window has changed and the service did not get the 
+     *              accessibility event. Note that it is possible to have a retrieval method
+     *              failing event adopting the strategy specified in the previous bullet
+     *              because the accessibility event dispatch is asynchronous and crosses
+     *              process boundaries. 
+     *            </li>
+     *          <ul>
      * </p>
      */
     public static final String SERVICE_META_DATA = "android.accessibilityservice";
@@ -224,7 +268,7 @@ public abstract class AccessibilityService extends Service {
 
     /**
      * Implement to return the implementation of the internal accessibility
-     * service interface.  Subclasses should not override.
+     * service interface.
      */
     @Override
     public final IBinder onBind(Intent intent) {

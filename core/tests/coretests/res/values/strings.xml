@@ -117,4 +117,16 @@
 
     <string name="searchable_label">SearchManager Test</string>
     <string name="searchable_hint">A search hint</string>
+
+    <!-- InterrogationActivity -->
+    <string name="button1">Button1</string>
+    <string name="button2">Button2</string>
+    <string name="button3">Button3</string>
+    <string name="button4">Button4</string>
+    <string name="button5">Button5</string>
+    <string name="button6">Button6</string>
+    <string name="button7">Button7</string>
+    <string name="button8">Button8</string>
+    <string name="button9">Button9</string>
+
 </resources>

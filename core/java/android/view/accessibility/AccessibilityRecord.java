@@ -38,13 +38,14 @@ public class AccessibilityRecord {
     private static final int PROPERTY_PASSWORD = 0x00000004;
     private static final int PROPERTY_FULL_SCREEN = 0x00000080;
 
+    // Housekeeping
     private static final int MAX_POOL_SIZE = 10;
     private static final Object sPoolLock = new Object();
     private static AccessibilityRecord sPool;
     private static int sPoolSize;
-
     private AccessibilityRecord mNext;
     private boolean mIsInPool;
+    private boolean mSealed;
 
     protected int mBooleanProperties;
     protected int mCurrentItemIndex;
@@ -68,6 +69,26 @@ public class AccessibilityRecord {
     }
 
     /**
+     * Initialize this record from another one.
+     *
+     * @param record The to initialize from.
+     */
+    void init(AccessibilityRecord record) {
+        mSealed = record.isSealed();
+        mBooleanProperties = record.mBooleanProperties;
+        mCurrentItemIndex = record.mCurrentItemIndex;
+        mItemCount = record.mItemCount;
+        mFromIndex = record.mFromIndex;
+        mAddedCount = record.mAddedCount;
+        mRemovedCount = record.mRemovedCount;
+        mClassName = record.mClassName;
+        mContentDescription = record.mContentDescription;
+        mBeforeText = record.mBeforeText;
+        mParcelableData = record.mParcelableData;
+        mText.addAll(record.mText);
+    }
+
+    /**
      * Gets if the source is checked.
      *
      * @return True if the view is checked, false otherwise.
@@ -80,8 +101,11 @@ public class AccessibilityRecord {
      * Sets if the source is checked.
      *
      * @param isChecked True if the view is checked, false otherwise.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setChecked(boolean isChecked) {
+        enforceNotSealed();
         setBooleanProperty(PROPERTY_CHECKED, isChecked);
     }
 
@@ -98,8 +122,11 @@ public class AccessibilityRecord {
      * Sets if the source is enabled.
      *
      * @param isEnabled True if the view is enabled, false otherwise.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setEnabled(boolean isEnabled) {
+        enforceNotSealed();
         setBooleanProperty(PROPERTY_ENABLED, isEnabled);
     }
 
@@ -116,18 +143,12 @@ public class AccessibilityRecord {
      * Sets if the source is a password field.
      *
      * @param isPassword True if the view is a password field, false otherwise.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setPassword(boolean isPassword) {
+        enforceNotSealed();
         setBooleanProperty(PROPERTY_PASSWORD, isPassword);
-    }
-
-    /**
-     * Sets if the source is taking the entire screen.
-     *
-     * @param isFullScreen True if the source is full screen, false otherwise.
-     */
-    public void setFullScreen(boolean isFullScreen) {
-        setBooleanProperty(PROPERTY_FULL_SCREEN, isFullScreen);
     }
 
     /**
@@ -137,6 +158,18 @@ public class AccessibilityRecord {
      */
     public boolean isFullScreen() {
         return getBooleanProperty(PROPERTY_FULL_SCREEN);
+    }
+
+    /**
+     * Sets if the source is taking the entire screen.
+     *
+     * @param isFullScreen True if the source is full screen, false otherwise.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setFullScreen(boolean isFullScreen) {
+        enforceNotSealed();
+        setBooleanProperty(PROPERTY_FULL_SCREEN, isFullScreen);
     }
 
     /**
@@ -152,8 +185,11 @@ public class AccessibilityRecord {
      * Sets the number of items that can be visited.
      *
      * @param itemCount The number of items.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setItemCount(int itemCount) {
+        enforceNotSealed();
         mItemCount = itemCount;
     }
 
@@ -170,8 +206,11 @@ public class AccessibilityRecord {
      * Sets the index of the source in the list of items that can be visited.
      *
      * @param currentItemIndex The current item index.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setCurrentItemIndex(int currentItemIndex) {
+        enforceNotSealed();
         mCurrentItemIndex = currentItemIndex;
     }
 
@@ -188,8 +227,11 @@ public class AccessibilityRecord {
      * Sets the index of the first character of the changed sequence.
      *
      * @param fromIndex The index of the first character.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setFromIndex(int fromIndex) {
+        enforceNotSealed();
         mFromIndex = fromIndex;
     }
 
@@ -206,8 +248,11 @@ public class AccessibilityRecord {
      * Sets the number of added characters.
      *
      * @param addedCount The number of added characters.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setAddedCount(int addedCount) {
+        enforceNotSealed();
         mAddedCount = addedCount;
     }
 
@@ -224,8 +269,11 @@ public class AccessibilityRecord {
      * Sets the number of removed characters.
      *
      * @param removedCount The number of removed characters.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setRemovedCount(int removedCount) {
+        enforceNotSealed();
         mRemovedCount = removedCount;
     }
 
@@ -242,8 +290,11 @@ public class AccessibilityRecord {
      * Sets the class name of the source.
      *
      * @param className The lass name.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setClassName(CharSequence className) {
+        enforceNotSealed();
         mClassName = className;
     }
 
@@ -270,8 +321,11 @@ public class AccessibilityRecord {
      * Sets the text before a change.
      *
      * @param beforeText The text before the change.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setBeforeText(CharSequence beforeText) {
+        enforceNotSealed();
         mBeforeText = beforeText;
     }
 
@@ -288,8 +342,11 @@ public class AccessibilityRecord {
      * Sets the description of the source.
      *
      * @param contentDescription The description.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setContentDescription(CharSequence contentDescription) {
+        enforceNotSealed();
         mContentDescription = contentDescription;
     }
 
@@ -306,9 +363,62 @@ public class AccessibilityRecord {
      * Sets the {@link Parcelable} data of the event.
      *
      * @param parcelableData The parcelable data.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setParcelableData(Parcelable parcelableData) {
+        enforceNotSealed();
         mParcelableData = parcelableData;
+    }
+
+    /**
+     * Sets if this instance is sealed.
+     *
+     * @param sealed Whether is sealed.
+     *
+     * @hide
+     */
+    public void setSealed(boolean sealed) {
+        mSealed = sealed;
+    }
+
+    /**
+     * Gets if this instance is sealed.
+     *
+     * @return Whether is sealed.
+     *
+     * @hide
+     */
+    public boolean isSealed() {
+        return mSealed;
+    }
+
+    /**
+     * Enforces that this instance is sealed.
+     *
+     * @throws IllegalStateException If this instance is not sealed.
+     *
+     * @hide
+     */
+    protected void enforceSealed() {
+        if (!isSealed()) {
+            throw new IllegalStateException("Cannot perform this "
+                    + "action on a not sealed instance.");
+        }
+    }
+
+    /**
+     * Enforces that this instance is not sealed.
+     *
+     * @throws IllegalStateException If this instance is sealed.
+     *
+     * @hide
+     */
+    protected void enforceNotSealed() {
+        if (isSealed()) {
+            throw new IllegalStateException("Cannot perform this "
+                    + "action on an sealed instance.");
+        }
     }
 
     /**
@@ -317,7 +427,7 @@ public class AccessibilityRecord {
      * @param property The property.
      * @return The value.
      */
-    public boolean getBooleanProperty(int property) {
+    private boolean getBooleanProperty(int property) {
         return (mBooleanProperties & property) == property;
     }
 
@@ -333,6 +443,19 @@ public class AccessibilityRecord {
         } else {
             mBooleanProperties &= ~property;
         }
+    }
+
+    /**
+     * Returns a cached instance if such is available or a new one is
+     * instantiated. The instance is initialized with data from the
+     * given record.
+     *
+     * @return An instance.
+     */
+    public static AccessibilityRecord obtain(AccessibilityRecord record) {
+       AccessibilityRecord clone = AccessibilityRecord.obtain();
+       clone.init(record);
+       return clone;
     }
 
     /**
@@ -379,8 +502,11 @@ public class AccessibilityRecord {
 
     /**
      * Clears the state of this instance.
+     *
+     * @hide
      */
     protected void clear() {
+        mSealed = false;
         mBooleanProperties = 0;
         mCurrentItemIndex = INVALID_POSITION;
         mItemCount = 0;

@@ -50,6 +50,7 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
 
     private int mPtr;
     private VelocityTracker mNext;
+    private boolean mIsPooled;
 
     private static native int nativeInitialize();
     private static native void nativeDispose(int ptr);
@@ -91,6 +92,20 @@ public final class VelocityTracker implements Poolable<VelocityTracker> {
      */
     public VelocityTracker getNextPoolable() {
         return mNext;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isPooled() {
+        return mIsPooled;
+    }
+
+    /**
+     * @hide
+     */
+    public void setPooled(boolean isPooled) {
+        mIsPooled = isPooled;
     }
 
     private VelocityTracker() {

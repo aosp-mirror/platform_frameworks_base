@@ -132,6 +132,7 @@
     <assign-permission name="android.permission.BATTERY_STATS" uid="shell" />
     <assign-permission name="android.permission.INTERNAL_SYSTEM_WINDOW" uid="shell" />
     <assign-permission name="android.permission.INJECT_EVENTS" uid="shell" />
+    <assign-permission name="android.permission.RETRIEVE_WINDOW_CONTENT" uid="shell" />
     <assign-permission name="android.permission.SET_ACTIVITY_WATCHER" uid="shell" />
     <assign-permission name="android.permission.READ_INPUT_STATE" uid="shell" />
     <assign-permission name="android.permission.SET_ORIENTATION" uid="shell" />

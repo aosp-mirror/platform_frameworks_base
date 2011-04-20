@@ -18,8 +18,13 @@
 package android.view.accessibility;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.IAccessibilityServiceConnection;
+import android.accessibilityservice.IEventListener;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityManagerClient;
+import android.view.IWindow;
 
 /**
  * Interface implemented by the AccessibilityManagerService called by
@@ -38,4 +43,11 @@ interface IAccessibilityManager {
     List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType);
 
     void interrupt();
+
+    int addAccessibilityInteractionConnection(IWindow windowToken,
+        in IAccessibilityInteractionConnection connection);
+
+    void removeAccessibilityInteractionConnection(IWindow windowToken);
+
+    IAccessibilityServiceConnection registerEventListener(IEventListener client);
 }

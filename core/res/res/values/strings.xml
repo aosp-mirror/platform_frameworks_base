@@ -562,6 +562,13 @@
         never normally need.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_retrieve_window_content">retrieve screen content</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_retrieve_window_content">Allows application to retrieve
+        the content of the active window. Malicious applications may retrieve
+        the entire window content and examine all its text except passwords.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_shutdown">partial shutdown</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_shutdown">Puts the activity manager into a shutdown

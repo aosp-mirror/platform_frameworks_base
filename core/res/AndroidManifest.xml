@@ -677,6 +677,14 @@
         android:label="@string/permlab_dump"
         android:description="@string/permdesc_dump" />
 
+    <!-- Allows an application to retrieve the content of the active window
+         An active window is the window that has fired an accessibility event. -->
+    <permission android:name="android.permission.RETRIEVE_WINDOW_CONTENT"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_retrieve_window_content"
+        android:description="@string/permdesc_retrieve_window_content" />
+
     <!-- Allows an application to open windows using the type
          {@link android.view.WindowManager.LayoutParams#TYPE_SYSTEM_ALERT},
          shown on top of all other applications.  Very few applications

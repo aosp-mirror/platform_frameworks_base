@@ -127,11 +127,13 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/INetworkManagementService.aidl \
 	core/java/android/os/IPermissionController.aidl \
 	core/java/android/os/IPowerManager.aidl \
-    core/java/android/os/IRemoteCallback.aidl \
+	core/java/android/os/IRemoteCallback.aidl \
 	core/java/android/os/IVibratorService.aidl \
-    core/java/android/service/wallpaper/IWallpaperConnection.aidl \
-    core/java/android/service/wallpaper/IWallpaperEngine.aidl \
-    core/java/android/service/wallpaper/IWallpaperService.aidl \
+	core/java/android/service/wallpaper/IWallpaperConnection.aidl \
+	core/java/android/service/wallpaper/IWallpaperEngine.aidl \
+	core/java/android/service/wallpaper/IWallpaperService.aidl \
+	core/java/android/view/accessibility/IAccessibilityInteractionConnection.aidl\
+	core/java/android/view/accessibility/IAccessibilityInteractionConnectionCallback.aidl\
 	core/java/android/view/accessibility/IAccessibilityManager.aidl \
 	core/java/android/view/accessibility/IAccessibilityManagerClient.aidl \
 	core/java/android/view/IApplicationToken.aidl \

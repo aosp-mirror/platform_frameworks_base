@@ -69,6 +69,7 @@ class FinitePool<T extends Poolable<T>> implements Pool<T> {
 
         if (element != null) {
             element.setNextPoolable(null);
+            element.setPooled(false);
             mManager.onAcquired(element);            
         }
 
@@ -76,9 +77,13 @@ class FinitePool<T extends Poolable<T>> implements Pool<T> {
     }
 
     public void release(T element) {
+        if (element.isPooled()) {
+            throw new IllegalArgumentException("Element already in the pool.");
+        }
         if (mInfinite || mPoolCount < mLimit) {
             mPoolCount++;
             element.setNextPoolable(mRoot);
+            element.setPooled(true);
             mRoot = element;
         }
         mManager.onReleased(element);

@@ -1441,6 +1441,7 @@ public class RelativeLayout extends ViewGroup {
             );
 
             private Node mNext;
+            private boolean mIsPooled;
 
             public void setNextPoolable(Node element) {
                 mNext = element;
@@ -1448,6 +1449,14 @@ public class RelativeLayout extends ViewGroup {
 
             public Node getNextPoolable() {
                 return mNext;
+            }
+
+            public boolean isPooled() {
+                return mIsPooled;
+            }
+
+            public void setPooled(boolean isPooled) {
+                mIsPooled = isPooled;
             }
 
             static Node acquire(View view) {

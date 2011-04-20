@@ -28,10 +28,13 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.IWindow;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * System level service that serves as an event dispatch for {@link AccessibilityEvent}s.
@@ -62,6 +65,21 @@ public final class AccessibilityManager {
 
     boolean mIsEnabled;
 
+    final CopyOnWriteArrayList<AccessibilityStateChangeListener> mAccessibilityStateChangeListeners =
+        new CopyOnWriteArrayList<AccessibilityStateChangeListener>();
+
+    /**
+     * Listener for the accessibility state.
+     */
+    public interface AccessibilityStateChangeListener {
+        /**
+         * Called back on change in the accessibility state.
+         *
+         * @param enabled
+         */
+        public void onAccessibilityStateChanged(boolean enabled);
+    }
+
     final IAccessibilityManagerClient.Stub mClient = new IAccessibilityManagerClient.Stub() {
         public void setEnabled(boolean enabled) {
             mHandler.obtainMessage(DO_SET_ENABLED, enabled ? 1 : 0, 0).sendToTarget();
@@ -78,9 +96,8 @@ public final class AccessibilityManager {
         public void handleMessage(Message message) {
             switch (message.what) {
                 case DO_SET_ENABLED :
-                    synchronized (mHandler) {
-                        mIsEnabled = (message.arg1 == 1);
-                    }
+                    final boolean isEnabled = (message.arg1 == 1);
+                    setAccessibilityState(isEnabled);
                     return;
                 default :
                     Log.w(LOG_TAG, "Unknown message type: " + message.what);
@@ -117,7 +134,8 @@ public final class AccessibilityManager {
         mService = service;
 
         try {
-            mIsEnabled = mService.addClient(mClient);
+            final boolean isEnabled = mService.addClient(mClient);
+            setAccessibilityState(isEnabled);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);
         }
@@ -252,5 +270,82 @@ public final class AccessibilityManager {
             Log.e(LOG_TAG, "Error while obtaining the installed AccessibilityServices. ", re);
         }
         return Collections.unmodifiableList(services);
+    }
+
+    /**
+     * Registers an {@link AccessibilityStateChangeListener}.
+     *
+     * @param listener The listener.
+     * @return True if successfully registered.
+     */
+    public boolean addAccessibilityStateChangeListener(
+            AccessibilityStateChangeListener listener) {
+        return mAccessibilityStateChangeListeners.add(listener);
+    }
+
+    /**
+     * Unregisters an {@link AccessibilityStateChangeListener}.
+     *
+     * @param listener The listener.
+     * @return True if successfully unregistered.
+     */
+    public boolean removeAccessibilityStateChangeListener(
+            AccessibilityStateChangeListener listener) {
+        return mAccessibilityStateChangeListeners.remove(listener);
+    }
+
+    /**
+     * Sets the enabled state.
+     *
+     * @param isEnabled The accessibility state.
+     */
+    private void setAccessibilityState(boolean isEnabled) {
+        synchronized (mHandler) {
+            if (isEnabled != mIsEnabled) {
+                mIsEnabled = isEnabled;
+                notifyAccessibilityStateChanged();
+            }
+        }
+    }
+
+    /**
+     * Notifies the registered {@link AccessibilityStateChangeListener}s.
+     */
+    private void notifyAccessibilityStateChanged() {
+        final int listenerCount = mAccessibilityStateChangeListeners.size();
+        for (int i = 0; i < listenerCount; i++) {
+            mAccessibilityStateChangeListeners.get(i).onAccessibilityStateChanged(mIsEnabled);
+        }
+    }
+
+    /**
+     * Adds an accessibility interaction connection interface for a given window.
+     * @param windowToken The window token to which a connection is added.
+     * @param connection The connection.
+     *
+     * @hide
+     */
+    public int addAccessibilityInteractionConnection(IWindow windowToken,
+            IAccessibilityInteractionConnection connection) {
+        try {
+            return mService.addAccessibilityInteractionConnection(windowToken, connection);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while adding an accessibility interaction connection. ", re);
+        }
+        return View.NO_ID;
+    }
+
+    /**
+     * Removed an accessibility interaction connection interface for a given window.
+     * @param windowToken The window token to which a connection is removed.
+     *
+     * @hide
+     */
+    public void removeAccessibilityInteractionConnection(IWindow windowToken) {
+        try {
+            mService.removeAccessibilityInteractionConnection(windowToken);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while removing an accessibility interaction connection. ", re);
+        }
     }
 }

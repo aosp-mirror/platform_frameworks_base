@@ -90,6 +90,7 @@ package android {
     field public static final java.lang.String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final java.lang.String REORDER_TASKS = "android.permission.REORDER_TASKS";
     field public static final deprecated java.lang.String RESTART_PACKAGES = "android.permission.RESTART_PACKAGES";
+    field public static final java.lang.String RETRIEVE_WINDOW_CONTENT = "android.permission.RETRIEVE_WINDOW_CONTENT";
     field public static final java.lang.String SEND_SMS = "android.permission.SEND_SMS";
     field public static final java.lang.String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
     field public static final java.lang.String SET_ALARM = "com.android.alarm.permission.SET_ALARM";
@@ -21478,6 +21479,7 @@ package android.view {
     method protected int computeVerticalScrollExtent();
     method protected int computeVerticalScrollOffset();
     method protected int computeVerticalScrollRange();
+    method public android.view.accessibility.AccessibilityNodeInfo createAccessibilityNodeInfo();
     method public void createContextMenu(android.view.ContextMenu);
     method public void destroyDrawingCache();
     method public void dispatchConfigurationChanged(android.content.res.Configuration);
@@ -21506,6 +21508,7 @@ package android.view {
     method public android.view.View findFocus();
     method public final android.view.View findViewById(int);
     method public final android.view.View findViewWithTag(java.lang.Object);
+    method public void findViewsWithText(java.util.ArrayList<android.view.View>, java.lang.CharSequence);
     method protected boolean fitSystemWindows(android.graphics.Rect);
     method public android.view.View focusSearch(int);
     method public void forceLayout();
@@ -21674,6 +21677,7 @@ package android.view {
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onHoverEvent(android.view.MotionEvent);
     method public void onInitializeAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
+    method public void onInitializeAccessibilityNodeInfo(android.view.accessibility.AccessibilityNodeInfo);
     method public boolean onKeyDown(int, android.view.KeyEvent);
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);
@@ -22567,17 +22571,21 @@ package android.view.accessibility {
     method public void appendRecord(android.view.accessibility.AccessibilityRecord);
     method public int describeContents();
     method public static java.lang.String eventTypeToString(int);
+    method public int getAccessibilityWindowId();
     method public long getEventTime();
     method public int getEventType();
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityRecord getRecord(int);
     method public int getRecordCount();
+    method public android.view.accessibility.AccessibilityNodeInfo getSource();
     method public void initFromParcel(android.os.Parcel);
     method public static android.view.accessibility.AccessibilityEvent obtain(int);
+    method public static android.view.accessibility.AccessibilityEvent obtain(android.view.accessibility.AccessibilityEvent);
     method public static android.view.accessibility.AccessibilityEvent obtain();
     method public void setEventTime(long);
     method public void setEventType(int);
     method public void setPackageName(java.lang.CharSequence);
+    method public void setSource(android.view.View);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int INVALID_POSITION = -1; // 0xffffffff
@@ -22602,20 +22610,75 @@ package android.view.accessibility {
   }
 
   public final class AccessibilityManager {
+    method public boolean addAccessibilityStateChangeListener(android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
     method public deprecated java.util.List<android.content.pm.ServiceInfo> getAccessibilityServiceList();
     method public java.util.List<android.accessibilityservice.AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int);
     method public java.util.List<android.accessibilityservice.AccessibilityServiceInfo> getInstalledAccessibilityServiceList();
     method public void interrupt();
     method public boolean isEnabled();
+    method public boolean removeAccessibilityStateChangeListener(android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
     method public void sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
+  }
+
+  public static abstract interface AccessibilityManager.AccessibilityStateChangeListener {
+    method public abstract void onAccessibilityStateChanged(boolean);
+  }
+
+  public class AccessibilityNodeInfo implements android.os.Parcelable {
+    method public void addAction(int);
+    method public void addChild(android.view.View);
+    method public int describeContents();
+    method public int getAccessibilityWindowId();
+    method public int getActions();
+    method public void getBounds(android.graphics.Rect);
+    method public android.view.accessibility.AccessibilityNodeInfo getChild(int);
+    method public int getChildCount();
+    method public java.lang.CharSequence getClassName();
+    method public java.lang.CharSequence getContentDescription();
+    method public java.lang.CharSequence getPackageName();
+    method public android.view.accessibility.AccessibilityNodeInfo getParent();
+    method public java.lang.CharSequence getText();
+    method public boolean isCheckable();
+    method public boolean isChecked();
+    method public boolean isClickable();
+    method public boolean isEnabled();
+    method public boolean isFocusable();
+    method public boolean isFocused();
+    method public boolean isLongClickable();
+    method public boolean isPassword();
+    method public boolean isSelected();
+    method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
+    method public static android.view.accessibility.AccessibilityNodeInfo obtain();
+    method public boolean performAction(int);
+    method public void recycle();
+    method public void setBounds(android.graphics.Rect);
+    method public void setCheckable(boolean);
+    method public void setChecked(boolean);
+    method public void setClassName(java.lang.CharSequence);
+    method public void setClickable(boolean);
+    method public void setContentDescription(java.lang.CharSequence);
+    method public void setEnabled(boolean);
+    method public void setFocusable(boolean);
+    method public void setFocused(boolean);
+    method public void setLongClickable(boolean);
+    method public void setPackageName(java.lang.CharSequence);
+    method public void setParent(android.view.View);
+    method public void setPassword(boolean);
+    method public void setSelected(boolean);
+    method public void setSource(android.view.View);
+    method public void setText(java.lang.CharSequence);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ACTION_CLEAR_FOCUS = 2; // 0x2
+    field public static final int ACTION_CLEAR_SELECTION = 8; // 0x8
+    field public static final int ACTION_FOCUS = 1; // 0x1
+    field public static final int ACTION_SELECT = 4; // 0x4
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public class AccessibilityRecord {
     ctor protected AccessibilityRecord();
-    method protected void clear();
     method public int getAddedCount();
     method public java.lang.CharSequence getBeforeText();
-    method public boolean getBooleanProperty(int);
     method public java.lang.CharSequence getClassName();
     method public java.lang.CharSequence getContentDescription();
     method public int getCurrentItemIndex();
@@ -22628,6 +22691,7 @@ package android.view.accessibility {
     method public boolean isEnabled();
     method public boolean isFullScreen();
     method public boolean isPassword();
+    method public static android.view.accessibility.AccessibilityRecord obtain(android.view.accessibility.AccessibilityRecord);
     method public static android.view.accessibility.AccessibilityRecord obtain();
     method public void recycle();
     method public void setAddedCount(int);

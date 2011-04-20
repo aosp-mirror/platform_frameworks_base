@@ -61,6 +61,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityEventSource;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.EditorInfo;
@@ -1492,6 +1493,11 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     private static final Object sTagsLock = new Object();
 
     /**
+     * The next available accessiiblity id.
+     */
+    private static int sNextAccessibilityViewId;
+
+    /**
      * The animation currently associated with this view.
      * @hide
      */
@@ -1531,6 +1537,11 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      */
     @ViewDebug.ExportedProperty(resolveId = true)
     int mID = NO_ID;
+
+    /**
+     * The stable ID of this view for accessibility porposes.
+     */
+    int mAccessibilityViewId = NO_ID;
 
     /**
      * The view's tag.
@@ -3649,6 +3660,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @see #dispatchPopulateAccessibilityEvent(AccessibilityEvent)
      */
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        event.setSource(this);
         event.setClassName(getClass().getName());
         event.setPackageName(getContext().getPackageName());
         event.setEnabled(isEnabled());
@@ -3661,6 +3673,112 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             event.setCurrentItemIndex(focusablesTempList.indexOf(this));
             focusablesTempList.clear();
         }
+    }
+
+    /**
+     * Returns an {@link AccessibilityNodeInfo} representing this view from the
+     * point of view of an {@link android.accessibilityservice.AccessibilityService}.
+     * This method is responsible for obtaining an accessibility node info from a
+     * pool of reusable instances and calling
+     * {@link #onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo)} on this view to
+     * initialize the former.
+     * <p>
+     * Note: The client is responsible for recycling the obtained instance by calling
+     *       {@link AccessibilityNodeInfo#recycle()} to minimize object creation.
+     * </p>
+     * @return A populated {@link AccessibilityNodeInfo}.
+     *
+     * @see AccessibilityNodeInfo
+     */
+    public AccessibilityNodeInfo createAccessibilityNodeInfo() {
+        AccessibilityNodeInfo info = AccessibilityNodeInfo.obtain(this);
+        onInitializeAccessibilityNodeInfo(info);
+        return info;
+    }
+
+    /**
+     * Initializes an {@link AccessibilityNodeInfo} with information about this view.
+     * The base implementation sets:
+     * <ul>
+     *   <li>{@link AccessibilityNodeInfo#setParent(View)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setBounds(Rect)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setPackageName(CharSequence)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setClassName(CharSequence)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setContentDescription(CharSequence)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setEnabled(boolean)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setClickable(boolean)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setFocusable(boolean)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setFocused(boolean)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setLongClickable(boolean)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setSelected(boolean)},</li>
+     * </ul>
+     * <p>
+     * Subclasses should override this method, call the super implementation,
+     * and set additional attributes.
+     * </p>
+     * @param info The instance to initialize.
+     */
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        Rect bounds = mAttachInfo.mTmpInvalRect;
+        getDrawingRect(bounds);
+        info.setBounds(bounds);
+
+        ViewParent parent = getParent();
+        if (parent instanceof View) {
+            View parentView = (View) parent;
+            info.setParent(parentView);
+        }
+
+        info.setPackageName(mContext.getPackageName());
+        info.setClassName(getClass().getName());
+        info.setContentDescription(getContentDescription());
+
+        info.setEnabled(isEnabled());
+        info.setClickable(isClickable());
+        info.setFocusable(isFocusable());
+        info.setFocused(isFocused());
+        info.setSelected(isSelected());
+        info.setLongClickable(isLongClickable());
+
+        // TODO: These make sense only if we are in an AdapterView but all
+        // views can be selected. Maybe from accessiiblity perspective
+        // we should report as selectable view in an AdapterView.
+        info.addAction(AccessibilityNodeInfo.ACTION_SELECT);
+        info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_SELECTION);
+
+        if (isFocusable()) {
+            if (isFocused()) {
+                info.addAction(AccessibilityNodeInfo.ACTION_CLEAR_FOCUS);
+            } else {
+                info.addAction(AccessibilityNodeInfo.ACTION_FOCUS);
+            }
+        }
+    }
+
+    /**
+     * Gets the unique identifier of this view on the screen for accessibility purposes.
+     * If this {@link View} is not attached to any window, {@value #NO_ID} is returned.
+     *
+     * @return The view accessibility id.
+     *
+     * @hide
+     */
+    public int getAccessibilityViewId() {
+        if (mAccessibilityViewId == NO_ID) {
+            mAccessibilityViewId = sNextAccessibilityViewId++;
+        }
+        return mAccessibilityViewId;
+    }
+
+    /**
+     * Gets the unique identifier of the window in which this View reseides.
+     *
+     * @return The window accessibility id.
+     *
+     * @hide
+     */
+    public int getAccessibilityWindowId() {
+        return mAttachInfo != null ? mAttachInfo.mAccessibilityWindowId : NO_ID;
     }
 
     /**
@@ -4571,6 +4689,16 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
+     * Finds the Views that contain given text. The containment is case insensitive.
+     * As View's text is considered any text content that View renders.
+     *
+     * @param outViews The output list of matching Views.
+     * @param text The text to match against.
+     */
+    public void findViewsWithText(ArrayList<View> outViews, CharSequence text) {
+    }
+
+    /**
      * Find and return all touchable views that are descendants of this view,
      * possibly including this view if it is touchable itself.
      *
@@ -4677,8 +4805,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
         // need to be focusable in touch mode if in touch mode
         if (isInTouchMode() &&
-                (FOCUSABLE_IN_TOUCH_MODE != (mViewFlags & FOCUSABLE_IN_TOUCH_MODE))) {
-            return false;
+            (FOCUSABLE_IN_TOUCH_MODE != (mViewFlags & FOCUSABLE_IN_TOUCH_MODE))) {
+               return false;
         }
 
         // need to not have any parents blocking us
@@ -12719,6 +12847,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             );
 
             private InvalidateInfo mNext;
+            private boolean mIsPooled;
 
             View target;
 
@@ -12741,6 +12870,14 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
             void release() {
                 sPool.release(this);
+            }
+
+            public boolean isPooled() {
+                return mIsPooled;
+            }
+
+            public void setPooled(boolean isPooled) {
+                mIsPooled = isPooled;
             }
         }
 
@@ -12950,6 +13087,11 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
          * Temporary list for use in collecting focusable descendents of a view.
          */
         final ArrayList<View> mFocusablesTempList = new ArrayList<View>(24);
+
+        /**
+         * The id of the window for accessibility purposes.
+         */
+        int mAccessibilityWindowId = View.NO_ID;
 
         /**
          * Creates a new set of attachment information with the specified

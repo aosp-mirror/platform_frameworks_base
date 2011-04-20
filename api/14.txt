@@ -22250,10 +22250,8 @@ package android.view.accessibility {
 
   public class AccessibilityRecord {
     ctor protected AccessibilityRecord();
-    method protected void clear();
     method public int getAddedCount();
     method public java.lang.CharSequence getBeforeText();
-    method public boolean getBooleanProperty(int);
     method public java.lang.CharSequence getClassName();
     method public java.lang.CharSequence getContentDescription();
     method public int getCurrentItemIndex();

@@ -113,6 +113,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.CompletionInfo;
@@ -7647,7 +7648,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     protected int computeVerticalScrollExtent() {
         return getHeight() - getCompoundPaddingTop() - getCompoundPaddingBottom();
     }
-    
+
+    @Override
+    public void findViewsWithText(ArrayList<View> outViews, CharSequence text) {
+        CharSequence thisText = getText();
+        if (TextUtils.isEmpty(thisText)) {
+            return;
+        }
+        if (thisText.toString().toLowerCase().contains(text)) {
+            outViews.add(this);
+        }
+    }
+
     public enum BufferType {
         NORMAL, SPANNABLE, EDITABLE,
     }
@@ -7897,6 +7909,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final boolean isPassword = hasPasswordTransformationMethod();
         event.setPassword(isPassword);
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+
+        final boolean isPassword = hasPasswordTransformationMethod();
+        if (!isPassword) {
+            info.setText(getText());
+        }
+        info.setPassword(isPassword);
     }
 
     void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,

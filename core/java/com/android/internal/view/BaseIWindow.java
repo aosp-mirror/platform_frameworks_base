@@ -16,8 +16,6 @@
 
 package com.android.internal.view;
 
-import android.content.ClipData;
-import android.content.ClipDescription;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -26,8 +24,6 @@ import android.os.RemoteException;
 import android.view.DragEvent;
 import android.view.IWindow;
 import android.view.IWindowSession;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
 
 public class BaseIWindow extends IWindow.Stub {
     private IWindowSession mSession;

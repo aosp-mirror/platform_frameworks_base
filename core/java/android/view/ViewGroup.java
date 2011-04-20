@@ -35,6 +35,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -769,6 +770,18 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 // No focusable descendants
                 (focusableCount == views.size())) {
             super.addFocusables(views, direction, focusableMode);
+        }
+    }
+
+    @Override
+    public void findViewsWithText(ArrayList<View> outViews, CharSequence text) {
+        final int childrenCount = mChildrenCount;
+        final View[] children = mChildren;
+        for (int i = 0; i < childrenCount; i++) {
+            View child = children[i];
+            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
+                child.findViewsWithText(outViews, text);
+            }
         }
     }
 
@@ -2005,6 +2018,16 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
         }
         return false;
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+
+        for (int i = 0, count = mChildrenCount; i < count; i++) {
+            View child = mChildren[i];
+            info.addChild(child);
+        }
     }
 
     /**
