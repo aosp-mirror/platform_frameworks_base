@@ -1069,10 +1069,6 @@ public class GSMPhone extends PhoneBase {
         mCM.getDataCallList(response);
     }
 
-    public List<DataConnection> getCurrentDataConnectionList () {
-        return mDataConnectionTracker.getAllDataConnections();
-    }
-
     public void updateServiceLocation() {
         mSST.enableSingleLocationUpdate();
     }

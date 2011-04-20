@@ -365,14 +365,6 @@ public abstract class DataConnectionTracker extends Handler {
         return mActivity;
     }
 
-    /**
-     * @return the data connections
-     */
-    public ArrayList<DataConnection> getAllDataConnections() {
-        /** TODO: change return type to Collection? */
-        return new ArrayList<DataConnection>(mDataConnections.values());
-    }
-
     public boolean isApnTypeActive(String type) {
         // TODO: support simultaneous with List instead
         if (Phone.APN_TYPE_DUN.equals(type)) {

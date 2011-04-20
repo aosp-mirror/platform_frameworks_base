@@ -727,10 +727,6 @@ public class CDMAPhone extends PhoneBase {
         return mDataConnectionTracker.getDataOnRoamingEnabled();
     }
 
-    public List<DataConnection> getCurrentDataConnectionList () {
-        return mDataConnectionTracker.getAllDataConnections();
-    }
-
     public void setVoiceMailNumber(String alphaTag,
                                    String voiceMailNumber,
                                    Message onComplete) {
