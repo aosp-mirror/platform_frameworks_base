@@ -54,6 +54,7 @@ public final class InputEventConsistencyVerifier {
 
     // Copy of the most recent events.
     private InputEvent[] mRecentEvents;
+    private boolean[] mRecentEventsUnhandled;
     private int mMostRecentEventIndex;
 
     // Current event and its type.
@@ -65,6 +66,7 @@ public final class InputEventConsistencyVerifier {
 
     // Current state of the trackball.
     private boolean mTrackballDown;
+    private boolean mTrackballUnhandled;
 
     // Bitfield of pointer ids that are currently down.
     // Assumes that the largest possible pointer id is 31, which is potentially subject to change.
@@ -78,6 +80,9 @@ public final class InputEventConsistencyVerifier {
     // Set to true when we discover that the touch event stream is inconsistent.
     // Reset on down or cancel.
     private boolean mTouchEventStreamIsTainted;
+
+    // Set to true if the touch event stream is partially unhandled.
+    private boolean mTouchEventStreamUnhandled;
 
     // Set to true if we received hover enter.
     private boolean mHoverEntered;
@@ -117,9 +122,17 @@ public final class InputEventConsistencyVerifier {
         mLastEvent = null;
         mLastNestingLevel = 0;
         mTrackballDown = false;
+        mTrackballUnhandled = false;
         mTouchEventStreamPointers = 0;
         mTouchEventStreamIsTainted = false;
+        mTouchEventStreamUnhandled = false;
         mHoverEntered = false;
+
+        while (mKeyStateList != null) {
+            final KeyState state = mKeyStateList;
+            mKeyStateList = state.next;
+            state.recycle();
+        }
     }
 
     /**
@@ -176,7 +189,9 @@ public final class InputEventConsistencyVerifier {
                         // We don't perform this check when processing raw device input
                         // because the input dispatcher itself is responsible for setting
                         // the key repeat count before it delivers input events.
-                        if ((mFlags & FLAG_RAW_DEVICE_INPUT) == 0
+                        if (state.unhandled) {
+                            state.unhandled = false;
+                        } else if ((mFlags & FLAG_RAW_DEVICE_INPUT) == 0
                                 && event.getRepeatCount() == 0) {
                             problem("ACTION_DOWN but key is already down and this event "
                                     + "is not a key repeat.");
@@ -229,10 +244,11 @@ public final class InputEventConsistencyVerifier {
             if ((source & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
                 switch (action) {
                     case MotionEvent.ACTION_DOWN:
-                        if (mTrackballDown) {
+                        if (mTrackballDown && !mTrackballUnhandled) {
                             problem("ACTION_DOWN but trackball is already down.");
                         } else {
                             mTrackballDown = true;
+                            mTrackballUnhandled = false;
                         }
                         ensureHistorySizeIsZeroForThisAction(event);
                         ensurePointerCountIsOneForThisAction(event);
@@ -242,6 +258,7 @@ public final class InputEventConsistencyVerifier {
                             problem("ACTION_UP but trackball is not down.");
                         } else {
                             mTrackballDown = false;
+                            mTrackballUnhandled = false;
                         }
                         ensureHistorySizeIsZeroForThisAction(event);
                         ensurePointerCountIsOneForThisAction(event);
@@ -285,11 +302,13 @@ public final class InputEventConsistencyVerifier {
         final int action = event.getAction();
         final boolean newStream = action == MotionEvent.ACTION_DOWN
                 || action == MotionEvent.ACTION_CANCEL;
-        if (mTouchEventStreamIsTainted) {
+        if (mTouchEventStreamIsTainted || mTouchEventStreamUnhandled) {
             if (newStream) {
                 mTouchEventStreamIsTainted = false;
+                mTouchEventStreamUnhandled = false;
+                mTouchEventStreamPointers = 0;
             } else {
-                finishEvent(true);
+                finishEvent(mTouchEventStreamIsTainted);
                 return;
             }
         }
@@ -467,6 +486,48 @@ public final class InputEventConsistencyVerifier {
         }
     }
 
+    /**
+     * Notifies the verifier that a given event was unhandled and the rest of the
+     * trace for the event should be ignored.
+     * This method should only be called if the event was previously checked by
+     * the consistency verifier using {@link #onInputEvent} and other methods.
+     * @param event The event.
+     * @param nestingLevel The nesting level: 0 if called from the base class,
+     * or 1 from a subclass.  If the event was already checked by this consistency verifier
+     * at a higher nesting level, it will not be checked again.  Used to handle the situation
+     * where a subclass dispatching method delegates to its superclass's dispatching method
+     * and both dispatching methods call into the consistency verifier.
+     */
+    public void onUnhandledEvent(InputEvent event, int nestingLevel) {
+        if (nestingLevel != mLastNestingLevel) {
+            return;
+        }
+
+        if (mRecentEventsUnhandled != null) {
+            mRecentEventsUnhandled[mMostRecentEventIndex] = true;
+        }
+
+        if (event instanceof KeyEvent) {
+            final KeyEvent keyEvent = (KeyEvent)event;
+            final int deviceId = keyEvent.getDeviceId();
+            final int source = keyEvent.getSource();
+            final int keyCode = keyEvent.getKeyCode();
+            final KeyState state = findKeyState(deviceId, source, keyCode, /*remove*/ false);
+            if (state != null) {
+                state.unhandled = true;
+            }
+        } else {
+            final MotionEvent motionEvent = (MotionEvent)event;
+            if (motionEvent.isTouchEvent()) {
+                mTouchEventStreamUnhandled = true;
+            } else if ((motionEvent.getSource() & InputDevice.SOURCE_CLASS_TRACKBALL) != 0) {
+                if (mTrackballDown) {
+                    mTrackballUnhandled = true;
+                }
+            }
+        }
+    }
+
     private void ensureMetaStateIsNormalized(int metaState) {
         final int normalizedMetaState = KeyEvent.normalizeMetaState(metaState);
         if (normalizedMetaState != metaState) {
@@ -518,7 +579,8 @@ public final class InputEventConsistencyVerifier {
     private void finishEvent(boolean tainted) {
         if (mViolationMessage != null && mViolationMessage.length() != 0) {
             mViolationMessage.append("\n  in ").append(mCaller);
-            mViolationMessage.append("\n  ").append(mCurrentEvent);
+            mViolationMessage.append("\n  ");
+            appendEvent(mViolationMessage, 0, mCurrentEvent, false);
 
             if (RECENT_EVENTS_TO_LOG != 0 && mRecentEvents != null) {
                 mViolationMessage.append("\n  -- recent events --");
@@ -529,7 +591,8 @@ public final class InputEventConsistencyVerifier {
                     if (event == null) {
                         break;
                     }
-                    mViolationMessage.append("\n  ").append(i + 1).append(": ").append(event);
+                    mViolationMessage.append("\n  ");
+                    appendEvent(mViolationMessage, i + 1, event, mRecentEventsUnhandled[index]);
                 }
             }
 
@@ -547,6 +610,7 @@ public final class InputEventConsistencyVerifier {
         if (RECENT_EVENTS_TO_LOG != 0) {
             if (mRecentEvents == null) {
                 mRecentEvents = new InputEvent[RECENT_EVENTS_TO_LOG];
+                mRecentEventsUnhandled = new boolean[RECENT_EVENTS_TO_LOG];
             }
             final int index = (mMostRecentEventIndex + 1) % RECENT_EVENTS_TO_LOG;
             mMostRecentEventIndex = index;
@@ -554,10 +618,21 @@ public final class InputEventConsistencyVerifier {
                 mRecentEvents[index].recycle();
             }
             mRecentEvents[index] = mCurrentEvent.copy();
+            mRecentEventsUnhandled[index] = false;
         }
 
         mCurrentEvent = null;
         mCurrentEventType = null;
+    }
+
+    private static void appendEvent(StringBuilder message, int index,
+            InputEvent event, boolean unhandled) {
+        message.append(index).append(": sent at ").append(event.getEventTimeNano());
+        message.append(", ");
+        if (unhandled) {
+            message.append("(unhandled) ");
+        }
+        message.append(event);
     }
 
     private void problem(String message) {
@@ -608,6 +683,7 @@ public final class InputEventConsistencyVerifier {
         public int deviceId;
         public int source;
         public int keyCode;
+        public boolean unhandled;
 
         private KeyState() {
         }
@@ -625,6 +701,7 @@ public final class InputEventConsistencyVerifier {
             state.deviceId = deviceId;
             state.source = source;
             state.keyCode = keyCode;
+            state.unhandled = false;
             return state;
         }
 
