@@ -142,7 +142,8 @@ public class KeyboardView extends View implements View.OnClickListener {
     private int mPreviewTextSizeLarge;
     private int mPreviewOffset;
     private int mPreviewHeight;
-    private int[] mOffsetInWindow;
+    // Working variable
+    private final int[] mCoordinates = new int[2];
 
     private PopupWindow mPopupKeyboard;
     private View mMiniKeyboardContainer;
@@ -152,7 +153,6 @@ public class KeyboardView extends View implements View.OnClickListener {
     private int mMiniKeyboardOffsetX;
     private int mMiniKeyboardOffsetY;
     private Map<Key,View> mMiniKeyboardCache;
-    private int[] mWindowOffset;
     private Key[] mKeys;
 
     /** Listener for {@link OnKeyboardActionListener}. */
@@ -905,23 +905,19 @@ public class KeyboardView extends View implements View.OnClickListener {
             mPopupPreviewY = - mPreviewText.getMeasuredHeight();
         }
         mHandler.removeMessages(MSG_REMOVE_PREVIEW);
-        if (mOffsetInWindow == null) {
-            mOffsetInWindow = new int[2];
-            getLocationInWindow(mOffsetInWindow);
-            mOffsetInWindow[0] += mMiniKeyboardOffsetX; // Offset may be zero
-            mOffsetInWindow[1] += mMiniKeyboardOffsetY; // Offset may be zero
-            int[] mWindowLocation = new int[2];
-            getLocationOnScreen(mWindowLocation);
-            mWindowY = mWindowLocation[1];
-        }
+        getLocationInWindow(mCoordinates);
+        mCoordinates[0] += mMiniKeyboardOffsetX; // Offset may be zero
+        mCoordinates[1] += mMiniKeyboardOffsetY; // Offset may be zero
+
         // Set the preview background state
         mPreviewText.getBackground().setState(
                 key.popupResId != 0 ? LONG_PRESSABLE_STATE_SET : EMPTY_STATE_SET);
-        mPopupPreviewX += mOffsetInWindow[0];
-        mPopupPreviewY += mOffsetInWindow[1];
+        mPopupPreviewX += mCoordinates[0];
+        mPopupPreviewY += mCoordinates[1];
 
         // If the popup cannot be shown above the key, put it on the side
-        if (mPopupPreviewY + mWindowY < 0) {
+        getLocationOnScreen(mCoordinates);
+        if (mPopupPreviewY + mCoordinates[1] < 0) {
             // If the key you're pressing is on the left side of the keyboard, show the popup on
             // the right, offset by enough to see at least one key to the left/right.
             if (key.x + key.width <= getWidth() / 2) {
@@ -1057,16 +1053,13 @@ public class KeyboardView extends View implements View.OnClickListener {
                 mMiniKeyboard = (KeyboardView) mMiniKeyboardContainer.findViewById(
                         com.android.internal.R.id.keyboardView);
             }
-            if (mWindowOffset == null) {
-                mWindowOffset = new int[2];
-                getLocationInWindow(mWindowOffset);
-            }
+            getLocationInWindow(mCoordinates);
             mPopupX = popupKey.x + mPaddingLeft;
             mPopupY = popupKey.y + mPaddingTop;
             mPopupX = mPopupX + popupKey.width - mMiniKeyboardContainer.getMeasuredWidth();
             mPopupY = mPopupY - mMiniKeyboardContainer.getMeasuredHeight();
-            final int x = mPopupX + mMiniKeyboardContainer.getPaddingRight() + mWindowOffset[0];
-            final int y = mPopupY + mMiniKeyboardContainer.getPaddingBottom() + mWindowOffset[1];
+            final int x = mPopupX + mMiniKeyboardContainer.getPaddingRight() + mCoordinates[0];
+            final int y = mPopupY + mMiniKeyboardContainer.getPaddingBottom() + mCoordinates[1];
             mMiniKeyboard.setPopupOffset(x < 0 ? 0 : x, y);
             mMiniKeyboard.setShifted(isShifted());
             mPopupKeyboard.setContentView(mMiniKeyboardContainer);
