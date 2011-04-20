@@ -337,10 +337,10 @@ public class ListView extends AbsListView {
      */
     public void addFooterView(View v, Object data, boolean isSelectable) {
 
-        if (mAdapter != null && ! (mAdapter instanceof HeaderViewListAdapter)) {
-            throw new IllegalStateException(
-                    "Cannot add footer view to list -- setAdapter has already been called.");
-        }
+        // NOTE: do not enforce the adapter being null here, since unlike in
+        // addHeaderView, it was never enforced here, and so existing apps are
+        // relying on being able to add a footer and then calling setAdapter to
+        // force creation of the HeaderViewListAdapter wrapper
 
         FixedViewInfo info = new FixedViewInfo();
         info.view = v;
