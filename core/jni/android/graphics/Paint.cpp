@@ -331,14 +331,19 @@ public:
             return 0;
         }
 
-        const SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
+        SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         const jchar* textArray = env->GetCharArrayElements(text, NULL);
+        jfloat result = 0;
+#if RTL_USE_HARFBUZZ
+        TextLayout::getTextRunAdvances(paint, textArray, index, count, count, paint->getFlags(),
+                NULL /* dont need all advances */, result);
+#else
         // we double count, since measureText wants a byteLength
         SkScalar width = paint->measureText(textArray + index, count << 1);
-        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray),
-                                      JNI_ABORT);
-
-        return SkScalarToFloat(width);
+        result = SkScalarToFloat(width);
+#endif
+        env->ReleaseCharArrayElements(text, const_cast<jchar*>(textArray), JNI_ABORT);
+        return result;
     }
 
     static jfloat measureText_StringII(JNIEnv* env, jobject jpaint, jstring text, int start, int end) {
@@ -347,15 +352,22 @@ public:
 
         SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         const jchar* textArray = env->GetStringChars(text, NULL);
-        size_t textLength = env->GetStringLength(text);
 
         int count = end - start;
+        size_t textLength = env->GetStringLength(text);
         if ((start | count) < 0 || (size_t)count > textLength) {
             doThrowAIOOBE(env);
             return 0;
         }
+        jfloat width = 0;
 
-        jfloat width = SkScalarToFloat(paint->measureText(textArray + start, count << 1));
+#if RTL_USE_HARFBUZZ
+        TextLayout::getTextRunAdvances(paint, textArray, 0, count, count, paint->getFlags(),
+                NULL /* dont need all advances */, width);
+#else
+
+        width = SkScalarToFloat(paint->measureText(textArray + start, count << 1));
+#endif
         env->ReleaseStringChars(text, textArray);
         return width;
     }
@@ -367,8 +379,13 @@ public:
         SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         const jchar* textArray = env->GetStringChars(text, NULL);
         size_t textLength = env->GetStringLength(text);
-
-        jfloat width = SkScalarToFloat(paint->measureText(textArray, textLength << 1));
+        jfloat width = 0;
+#if RTL_USE_HARFBUZZ
+        TextLayout::getTextRunAdvances(paint, textArray, 0, textLength, textLength, paint->getFlags(),
+                NULL /* dont need all advances */, width);
+#else
+        width = SkScalarToFloat(paint->measureText(textArray, textLength << 1));
+#endif
         env->ReleaseStringChars(text, textArray);
         return width;
     }
@@ -376,12 +393,19 @@ public:
     static int dotextwidths(JNIEnv* env, SkPaint* paint, const jchar text[], int count, jfloatArray widths) {
         AutoJavaFloatArray autoWidths(env, widths, count);
         jfloat* widthsArray = autoWidths.ptr();
+#if RTL_USE_HARFBUZZ
+        jfloat totalAdvance;
+
+        TextLayout::getTextRunAdvances(paint, text, 0, count, count, paint->getFlags(),
+                widthsArray, totalAdvance);
+#else
         SkScalar* scalarArray = (SkScalar*)widthsArray;
 
         count = paint->getTextWidths(text, count << 1, scalarArray);
         for (int i = 0; i < count; i++) {
             widthsArray[i] = SkScalarToFloat(scalarArray[i]);
         }
+#endif
         return count;
     }
 
@@ -502,6 +526,13 @@ public:
 
     static jint doTextRunCursor(JNIEnv *env, SkPaint* paint, const jchar *text, jint start,
             jint count, jint flags, jint offset, jint opt) {
+#if RTL_USE_HARFBUZZ
+        jfloat scalarArray[count];
+        jfloat totalAdvance;
+
+        TextLayout::getTextRunAdvances(paint, text, start, count, count, flags,
+                scalarArray, totalAdvance);
+#else
         SkScalar scalarArray[count];
         jchar buffer[count];
 
@@ -543,7 +574,7 @@ public:
                 }
             }
         }
-
+#endif
         jint pos = offset - start;
         switch (opt) {
         case AFTER:

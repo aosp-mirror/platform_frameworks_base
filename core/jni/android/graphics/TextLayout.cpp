@@ -259,7 +259,9 @@ void TextLayout::getTextRunAdvances(SkPaint* paint, const jchar* chars, jint sta
     sp<TextLayoutCacheValue> layout = gTextLayoutCache.getValue(
             paint, chars, start, count, contextCount, dirFlags);
     if (layout != NULL) {
-        memcpy(resultAdvances, layout->getAdvances(), layout->getAdvancesCount() * sizeof(jfloat));
+        if (resultAdvances != NULL) {
+            memcpy(resultAdvances, layout->getAdvances(), layout->getAdvancesCount() * sizeof(jfloat));
+        }
         resultTotalAdvance = layout->getTotalAdvance();
     }
 #else
