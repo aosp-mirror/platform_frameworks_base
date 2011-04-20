@@ -871,8 +871,9 @@ public class WebView extends AbsoluteLayout
          */
         public static final int UNKNOWN_TYPE = 0;
         /**
-         * HitTestResult for hitting a HTML::a tag
+         * @deprecated This type is no longer used.
          */
+        @Deprecated
         public static final int ANCHOR_TYPE = 1;
         /**
          * HitTestResult for hitting a phone number
@@ -891,8 +892,9 @@ public class WebView extends AbsoluteLayout
          */
         public static final int IMAGE_TYPE = 5;
         /**
-         * HitTestResult for hitting a HTML::a tag which contains HTML::img
+         * @deprecated This type is no longer used.
          */
+        @Deprecated
         public static final int IMAGE_ANCHOR_TYPE = 6;
         /**
          * HitTestResult for hitting a HTML::a tag with src=http
