@@ -1131,9 +1131,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
-            return super.dispatchKeyEvent(event);
+            if (super.dispatchKeyEvent(event)) {
+                return true;
+            }
         } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
-            return mFocused.dispatchKeyEvent(event);
+            if (mFocused.dispatchKeyEvent(event)) {
+                return true;
+            }
+        }
+
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onUnhandledEvent(event, 1);
         }
         return false;
     }
@@ -1161,9 +1169,17 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if ((mPrivateFlags & (FOCUSED | HAS_BOUNDS)) == (FOCUSED | HAS_BOUNDS)) {
-            return super.dispatchTrackballEvent(event);
+            if (super.dispatchTrackballEvent(event)) {
+                return true;
+            }
         } else if (mFocused != null && (mFocused.mPrivateFlags & HAS_BOUNDS) == HAS_BOUNDS) {
-            return mFocused.dispatchTrackballEvent(event);
+            if (mFocused.dispatchTrackballEvent(event)) {
+                return true;
+            }
+        }
+
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onUnhandledEvent(event, 1);
         }
         return false;
     }
@@ -1344,155 +1360,158 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mInputEventConsistencyVerifier.onTouchEvent(ev, 1);
         }
 
-        if (!onFilterTouchEventForSecurity(ev)) {
-            return false;
-        }
+        boolean handled = false;
+        if (onFilterTouchEventForSecurity(ev)) {
+            final int action = ev.getAction();
+            final int actionMasked = action & MotionEvent.ACTION_MASK;
 
-        final int action = ev.getAction();
-        final int actionMasked = action & MotionEvent.ACTION_MASK;
-
-        // Handle an initial down.
-        if (actionMasked == MotionEvent.ACTION_DOWN) {
-            // Throw away all previous state when starting a new touch gesture.
-            // The framework may have dropped the up or cancel event for the previous gesture
-            // due to an app switch, ANR, or some other state change.
-            cancelAndClearTouchTargets(ev);
-            resetTouchState();
-        }
-
-        // Check for interception.
-        final boolean intercepted;
-        if (actionMasked == MotionEvent.ACTION_DOWN
-                || mFirstTouchTarget != null) {
-            final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
-            if (!disallowIntercept) {
-                intercepted = onInterceptTouchEvent(ev);
-                ev.setAction(action); // restore action in case onInterceptTouchEvent() changed it
-            } else {
-                intercepted = false;
+            // Handle an initial down.
+            if (actionMasked == MotionEvent.ACTION_DOWN) {
+                // Throw away all previous state when starting a new touch gesture.
+                // The framework may have dropped the up or cancel event for the previous gesture
+                // due to an app switch, ANR, or some other state change.
+                cancelAndClearTouchTargets(ev);
+                resetTouchState();
             }
-        } else {
-            // There are no touch targets and this action is not an initial down
-            // so this view group continues to intercept touches.
-            intercepted = true;
-        }
 
-        // Check for cancelation.
-        final boolean canceled = resetCancelNextUpFlag(this)
-                || actionMasked == MotionEvent.ACTION_CANCEL;
-
-        // Update list of touch targets for pointer down, if needed.
-        final boolean split = (mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) != 0;
-        TouchTarget newTouchTarget = null;
-        boolean alreadyDispatchedToNewTouchTarget = false;
-        if (!canceled && !intercepted) {
+            // Check for interception.
+            final boolean intercepted;
             if (actionMasked == MotionEvent.ACTION_DOWN
-                    || (split && actionMasked == MotionEvent.ACTION_POINTER_DOWN)
-                    || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
-                final int actionIndex = ev.getActionIndex(); // always 0 for down
-                final int idBitsToAssign = split ? 1 << ev.getPointerId(actionIndex)
-                        : TouchTarget.ALL_POINTER_IDS;
+                    || mFirstTouchTarget != null) {
+                final boolean disallowIntercept = (mGroupFlags & FLAG_DISALLOW_INTERCEPT) != 0;
+                if (!disallowIntercept) {
+                    intercepted = onInterceptTouchEvent(ev);
+                    ev.setAction(action); // restore action in case it was changed
+                } else {
+                    intercepted = false;
+                }
+            } else {
+                // There are no touch targets and this action is not an initial down
+                // so this view group continues to intercept touches.
+                intercepted = true;
+            }
 
-                // Clean up earlier touch targets for this pointer id in case they
-                // have become out of sync.
-                removePointersFromTouchTargets(idBitsToAssign);
+            // Check for cancelation.
+            final boolean canceled = resetCancelNextUpFlag(this)
+                    || actionMasked == MotionEvent.ACTION_CANCEL;
 
-                final int childrenCount = mChildrenCount;
-                if (childrenCount != 0) {
-                    // Find a child that can receive the event.  Scan children from front to back.
-                    final View[] children = mChildren;
-                    final float x = ev.getX(actionIndex);
-                    final float y = ev.getY(actionIndex);
+            // Update list of touch targets for pointer down, if needed.
+            final boolean split = (mGroupFlags & FLAG_SPLIT_MOTION_EVENTS) != 0;
+            TouchTarget newTouchTarget = null;
+            boolean alreadyDispatchedToNewTouchTarget = false;
+            if (!canceled && !intercepted) {
+                if (actionMasked == MotionEvent.ACTION_DOWN
+                        || (split && actionMasked == MotionEvent.ACTION_POINTER_DOWN)
+                        || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
+                    final int actionIndex = ev.getActionIndex(); // always 0 for down
+                    final int idBitsToAssign = split ? 1 << ev.getPointerId(actionIndex)
+                            : TouchTarget.ALL_POINTER_IDS;
 
-                    for (int i = childrenCount - 1; i >= 0; i--) {
-                        final View child = children[i];
-                        if (!canViewReceivePointerEvents(child)
-                                || !isTransformedTouchPointInView(x, y, child, null)) {
+                    // Clean up earlier touch targets for this pointer id in case they
+                    // have become out of sync.
+                    removePointersFromTouchTargets(idBitsToAssign);
+
+                    final int childrenCount = mChildrenCount;
+                    if (childrenCount != 0) {
+                        // Find a child that can receive the event.
+                        // Scan children from front to back.
+                        final View[] children = mChildren;
+                        final float x = ev.getX(actionIndex);
+                        final float y = ev.getY(actionIndex);
+
+                        for (int i = childrenCount - 1; i >= 0; i--) {
+                            final View child = children[i];
+                            if (!canViewReceivePointerEvents(child)
+                                    || !isTransformedTouchPointInView(x, y, child, null)) {
+                                continue;
+                            }
+
+                            newTouchTarget = getTouchTarget(child);
+                            if (newTouchTarget != null) {
+                                // Child is already receiving touch within its bounds.
+                                // Give it the new pointer in addition to the ones it is handling.
+                                newTouchTarget.pointerIdBits |= idBitsToAssign;
+                                break;
+                            }
+
+                            resetCancelNextUpFlag(child);
+                            if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
+                                // Child wants to receive touch within its bounds.
+                                mLastTouchDownTime = ev.getDownTime();
+                                mLastTouchDownIndex = i;
+                                mLastTouchDownX = ev.getX();
+                                mLastTouchDownY = ev.getY();
+                                newTouchTarget = addTouchTarget(child, idBitsToAssign);
+                                alreadyDispatchedToNewTouchTarget = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (newTouchTarget == null && mFirstTouchTarget != null) {
+                        // Did not find a child to receive the event.
+                        // Assign the pointer to the least recently added target.
+                        newTouchTarget = mFirstTouchTarget;
+                        while (newTouchTarget.next != null) {
+                            newTouchTarget = newTouchTarget.next;
+                        }
+                        newTouchTarget.pointerIdBits |= idBitsToAssign;
+                    }
+                }
+            }
+
+            // Dispatch to touch targets.
+            if (mFirstTouchTarget == null) {
+                // No touch targets so treat this as an ordinary view.
+                handled = dispatchTransformedTouchEvent(ev, canceled, null,
+                        TouchTarget.ALL_POINTER_IDS);
+            } else {
+                // Dispatch to touch targets, excluding the new touch target if we already
+                // dispatched to it.  Cancel touch targets if necessary.
+                TouchTarget predecessor = null;
+                TouchTarget target = mFirstTouchTarget;
+                while (target != null) {
+                    final TouchTarget next = target.next;
+                    if (alreadyDispatchedToNewTouchTarget && target == newTouchTarget) {
+                        handled = true;
+                    } else {
+                        final boolean cancelChild = resetCancelNextUpFlag(target.child)
+                        || intercepted;
+                        if (dispatchTransformedTouchEvent(ev, cancelChild,
+                                target.child, target.pointerIdBits)) {
+                            handled = true;
+                        }
+                        if (cancelChild) {
+                            if (predecessor == null) {
+                                mFirstTouchTarget = next;
+                            } else {
+                                predecessor.next = next;
+                            }
+                            target.recycle();
+                            target = next;
                             continue;
                         }
-
-                        newTouchTarget = getTouchTarget(child);
-                        if (newTouchTarget != null) {
-                            // Child is already receiving touch within its bounds.
-                            // Give it the new pointer in addition to the ones it is handling.
-                            newTouchTarget.pointerIdBits |= idBitsToAssign;
-                            break;
-                        }
-
-                        resetCancelNextUpFlag(child);
-                        if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
-                            // Child wants to receive touch within its bounds.
-                            mLastTouchDownTime = ev.getDownTime();
-                            mLastTouchDownIndex = i;
-                            mLastTouchDownX = ev.getX();
-                            mLastTouchDownY = ev.getY();
-                            newTouchTarget = addTouchTarget(child, idBitsToAssign);
-                            alreadyDispatchedToNewTouchTarget = true;
-                            break;
-                        }
                     }
+                    predecessor = target;
+                    target = next;
                 }
+            }
 
-                if (newTouchTarget == null && mFirstTouchTarget != null) {
-                    // Did not find a child to receive the event.
-                    // Assign the pointer to the least recently added target.
-                    newTouchTarget = mFirstTouchTarget;
-                    while (newTouchTarget.next != null) {
-                        newTouchTarget = newTouchTarget.next;
-                    }
-                    newTouchTarget.pointerIdBits |= idBitsToAssign;
-                }
+            // Update list of touch targets for pointer up or cancel, if needed.
+            if (canceled
+                    || actionMasked == MotionEvent.ACTION_UP
+                    || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
+                resetTouchState();
+            } else if (split && actionMasked == MotionEvent.ACTION_POINTER_UP) {
+                final int actionIndex = ev.getActionIndex();
+                final int idBitsToRemove = 1 << ev.getPointerId(actionIndex);
+                removePointersFromTouchTargets(idBitsToRemove);
             }
         }
 
-        // Dispatch to touch targets.
-        boolean handled = false;
-        if (mFirstTouchTarget == null) {
-            // No touch targets so treat this as an ordinary view.
-            handled = dispatchTransformedTouchEvent(ev, canceled, null,
-                    TouchTarget.ALL_POINTER_IDS);
-        } else {
-            // Dispatch to touch targets, excluding the new touch target if we already
-            // dispatched to it.  Cancel touch targets if necessary.
-            TouchTarget predecessor = null;
-            TouchTarget target = mFirstTouchTarget;
-            while (target != null) {
-                final TouchTarget next = target.next;
-                if (alreadyDispatchedToNewTouchTarget && target == newTouchTarget) {
-                    handled = true;
-                } else {
-                    final boolean cancelChild = resetCancelNextUpFlag(target.child) || intercepted;
-                    if (dispatchTransformedTouchEvent(ev, cancelChild,
-                            target.child, target.pointerIdBits)) {
-                        handled = true;
-                    }
-                    if (cancelChild) {
-                        if (predecessor == null) {
-                            mFirstTouchTarget = next;
-                        } else {
-                            predecessor.next = next;
-                        }
-                        target.recycle();
-                        target = next;
-                        continue;
-                    }
-                }
-                predecessor = target;
-                target = next;
-            }
+        if (!handled && mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onUnhandledEvent(ev, 1);
         }
-
-        // Update list of touch targets for pointer up or cancel, if needed.
-        if (canceled
-                || actionMasked == MotionEvent.ACTION_UP
-                || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
-            resetTouchState();
-        } else if (split && actionMasked == MotionEvent.ACTION_POINTER_UP) {
-            final int actionIndex = ev.getActionIndex();
-            final int idBitsToRemove = 1 << ev.getPointerId(actionIndex);
-            removePointersFromTouchTargets(idBitsToRemove);
-        }
-
         return handled;
     }
 

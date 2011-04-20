@@ -590,8 +590,14 @@ public class GestureDetector {
             mHandler.removeMessages(SHOW_PRESS);
             mHandler.removeMessages(LONG_PRESS);
             break;
+
         case MotionEvent.ACTION_CANCEL:
             cancel();
+            break;
+        }
+
+        if (!handled && mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onUnhandledEvent(ev, 0);
         }
         return handled;
     }

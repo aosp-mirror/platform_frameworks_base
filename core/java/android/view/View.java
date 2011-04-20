@@ -4614,8 +4614,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             return true;
         }
 
-        return event.dispatch(this, mAttachInfo != null
-                ? mAttachInfo.mKeyDispatchState : null, this);
+        if (event.dispatch(this, mAttachInfo != null
+                ? mAttachInfo.mKeyDispatchState : null, this)) {
+            return true;
+        }
+
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onUnhandledEvent(event, 0);
+        }
+        return false;
     }
 
     /**
@@ -4640,16 +4647,22 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mInputEventConsistencyVerifier.onTouchEvent(event, 0);
         }
 
-        if (!onFilterTouchEventForSecurity(event)) {
-            return false;
+        if (onFilterTouchEventForSecurity(event)) {
+            //noinspection SimplifiableIfStatement
+            if (mOnTouchListener != null && (mViewFlags & ENABLED_MASK) == ENABLED &&
+                    mOnTouchListener.onTouch(this, event)) {
+                return true;
+            }
+
+            if (onTouchEvent(event)) {
+                return true;
+            }
         }
 
-        //noinspection SimplifiableIfStatement
-        if (mOnTouchListener != null && (mViewFlags & ENABLED_MASK) == ENABLED &&
-                mOnTouchListener.onTouch(this, event)) {
-            return true;
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onUnhandledEvent(event, 0);
         }
-        return onTouchEvent(event);
+        return false;
     }
 
     /**
@@ -4682,7 +4695,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
 
         //Log.i("view", "view=" + this + ", " + event.toString());
-        return onTrackballEvent(event);
+        if (onTrackballEvent(event)) {
+            return true;
+        }
+
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onUnhandledEvent(event, 0);
+        }
+        return false;
     }
 
     /**
@@ -4723,7 +4743,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 && mOnGenericMotionListener.onGenericMotion(this, event)) {
             return true;
         }
-        return onGenericMotionEvent(event);
+
+        if (onGenericMotionEvent(event)) {
+            return true;
+        }
+
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onUnhandledEvent(event, 0);
+        }
+        return false;
     }
 
     /**

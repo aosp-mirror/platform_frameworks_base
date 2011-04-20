@@ -183,15 +183,15 @@ public class ScaleGestureDetector {
         }
 
         final int action = event.getActionMasked();
-        boolean handled = true;
 
         if (action == MotionEvent.ACTION_DOWN) {
             reset(); // Start fresh
         }
 
-        if (mInvalidGesture) return false;
-
-        if (!mGestureInProgress) {
+        boolean handled = true;
+        if (mInvalidGesture) {
+            handled = false;
+        } else if (!mGestureInProgress) {
             switch (action) {
             case MotionEvent.ACTION_DOWN: {
                 mActiveId0 = event.getPointerId(0);
@@ -466,6 +466,10 @@ public class ScaleGestureDetector {
                 }
                 break;
             }
+        }
+
+        if (!handled && mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onUnhandledEvent(event, 0);
         }
         return handled;
     }
