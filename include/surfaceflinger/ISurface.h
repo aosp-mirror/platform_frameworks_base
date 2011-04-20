@@ -27,42 +27,23 @@
 
 #include <ui/PixelFormat.h>
 
-#include <hardware/hardware.h>
-#include <hardware/gralloc.h>
-
 namespace android {
 
 typedef int32_t    SurfaceID;
 
-class GraphicBuffer;
+class ISurfaceTexture;
 
 class ISurface : public IInterface
 {
 protected:
     enum {
-        RESERVED0 = IBinder::FIRST_CALL_TRANSACTION,
-        RESERVED1,
-        RESERVED2,
-        REQUEST_BUFFER,
-        SET_BUFFER_COUNT,
+        GET_SURFACE_TEXTURE = IBinder::FIRST_CALL_TRANSACTION,
     };
 
 public: 
     DECLARE_META_INTERFACE(Surface);
 
-    /*
-     * requests a new buffer for the given index. If w, h, or format are
-     * null the buffer is created with the parameters assigned to the
-     * surface it is bound to. Otherwise the buffer's parameters are
-     * set to those specified.
-     */
-    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
-            uint32_t w, uint32_t h, uint32_t format, uint32_t usage) = 0;
-
-    /*
-     * sets the number of buffers dequeuable for this surface.
-     */
-    virtual status_t setBufferCount(int bufferCount) = 0;
+    virtual sp<ISurfaceTexture> getSurfaceTexture() const = 0;
 };
 
 // ----------------------------------------------------------------------------

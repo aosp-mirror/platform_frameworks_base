@@ -32,8 +32,6 @@
 #include "LayerBase.h"
 #include "SurfaceFlinger.h"
 #include "DisplayHardware/DisplayHardware.h"
-#include "TextureManager.h"
-
 
 namespace android {
 
@@ -44,7 +42,7 @@ int32_t LayerBase::sSequence = 1;
 LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
     : dpy(display), contentDirty(false),
       sequence(uint32_t(android_atomic_inc(&sSequence))),
-      mFlinger(flinger),
+      mFlinger(flinger), mFiltering(false),
       mNeedsFiltering(false),
       mOrientation(0),
       mLeft(0), mTop(0),
@@ -54,8 +52,6 @@ LayerBase::LayerBase(SurfaceFlinger* flinger, DisplayID display)
 {
     const DisplayHardware& hw(flinger->graphicPlane(0).displayHardware());
     mFlags = hw.getFlags();
-    mBufferCrop.makeInvalid();
-    mBufferTransform = 0;
 }
 
 LayerBase::~LayerBase()
@@ -310,6 +306,16 @@ void LayerBase::setPerFrameData(hwc_layer_t* hwcl) {
     hwcl->handle = NULL;
 }
 
+void LayerBase::setFiltering(bool filtering)
+{
+    mFiltering = filtering;
+}
+
+bool LayerBase::getFiltering() const
+{
+    return mFiltering;
+}
+
 void LayerBase::draw(const Region& clip) const
 {
     // reset GL state
@@ -318,10 +324,12 @@ void LayerBase::draw(const Region& clip) const
     onDraw(clip);
 }
 
-void LayerBase::drawForSreenShot() const
+void LayerBase::drawForSreenShot()
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    setFiltering(true);
     onDraw( Region(hw.bounds()) );
+    setFiltering(false);
 }
 
 void LayerBase::clearWithOpenGL(const Region& clip, GLclampf red,
@@ -332,8 +340,12 @@ void LayerBase::clearWithOpenGL(const Region& clip, GLclampf red,
     const uint32_t fbHeight = hw.getHeight();
     glColor4f(red,green,blue,alpha);
 
-    TextureManager::deactivateTextures();
-
+#if defined(GL_OES_EGL_image_external)
+        if (GLExtensions::getInstance().haveTextureExternal()) {
+            glDisable(GL_TEXTURE_EXTERNAL_OES);
+        }
+#endif
+    glDisable(GL_TEXTURE_2D);
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
 
@@ -354,24 +366,11 @@ void LayerBase::clearWithOpenGL(const Region& clip) const
     clearWithOpenGL(clip,0,0,0,0);
 }
 
-template <typename T>
-static inline
-void swap(T& a, T& b) {
-    T t(a);
-    a = b;
-    b = t;
-}
-
-void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
+void LayerBase::drawWithOpenGL(const Region& clip) const
 {
     const DisplayHardware& hw(graphicPlane(0).displayHardware());
     const uint32_t fbHeight = hw.getHeight();
     const State& s(drawingState());
-    
-    // bind our texture
-    TextureManager::activateTexture(texture, needsFiltering());
-    uint32_t width  = texture.width; 
-    uint32_t height = texture.height;
 
     GLenum src = mPremultipliedAlpha ? GL_ONE : GL_SRC_ALPHA;
     if (UNLIKELY(s.alpha < 0xFF)) {
@@ -387,7 +386,7 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
     } else {
         glColor4f(1, 1, 1, 1);
         glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-        if (needsBlending()) {
+        if (!isOpaque()) {
             glEnable(GL_BLEND);
             glBlendFunc(src, GL_ONE_MINUS_SRC_ALPHA);
         } else {
@@ -395,86 +394,20 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
         }
     }
 
-    /*
-     *  compute texture coordinates
-     *  here, we handle NPOT, cropping and buffer transformations
-     */
-
-    GLfloat cl, ct, cr, cb;
-    if (!mBufferCrop.isEmpty()) {
-        // source is cropped
-        const GLfloat us = (texture.NPOTAdjust ? texture.wScale : 1.0f) / width;
-        const GLfloat vs = (texture.NPOTAdjust ? texture.hScale : 1.0f) / height;
-        cl = mBufferCrop.left   * us;
-        ct = mBufferCrop.top    * vs;
-        cr = mBufferCrop.right  * us;
-        cb = mBufferCrop.bottom * vs;
-    } else {
-        cl = 0;
-        ct = 0;
-        cr = (texture.NPOTAdjust ? texture.wScale : 1.0f);
-        cb = (texture.NPOTAdjust ? texture.hScale : 1.0f);
-    }
-
-    /*
-     * For the buffer transformation, we apply the rotation last.
-     * Since we're transforming the texture-coordinates, we need
-     * to apply the inverse of the buffer transformation:
-     *   inverse( FLIP_V -> FLIP_H -> ROT_90 )
-     *   <=> inverse( ROT_90 * FLIP_H * FLIP_V )
-     *    =  inverse(FLIP_V) * inverse(FLIP_H) * inverse(ROT_90)
-     *    =  FLIP_V * FLIP_H * ROT_270
-     *   <=> ROT_270 -> FLIP_H -> FLIP_V
-     *
-     * The rotation is performed first, in the texture coordinate space.
-     *
-     */
-
     struct TexCoords {
         GLfloat u;
         GLfloat v;
     };
 
-    enum {
-        // name of the corners in the texture map
-        LB = 0, // left-bottom
-        LT = 1, // left-top
-        RT = 2, // right-top
-        RB = 3  // right-bottom
-    };
-
-    // vertices in screen space
-    int vLT = LB;
-    int vLB = LT;
-    int vRB = RT;
-    int vRT = RB;
-
-    // the texture's source is rotated
-    uint32_t transform = mBufferTransform;
-    if (transform & HAL_TRANSFORM_ROT_90) {
-        vLT = RB;
-        vLB = LB;
-        vRB = LT;
-        vRT = RT;
-    }
-    if (transform & HAL_TRANSFORM_FLIP_V) {
-        swap(vLT, vLB);
-        swap(vRT, vRB);
-    }
-    if (transform & HAL_TRANSFORM_FLIP_H) {
-        swap(vLT, vRT);
-        swap(vLB, vRB);
-    }
-
     TexCoords texCoords[4];
-    texCoords[vLT].u = cl;
-    texCoords[vLT].v = ct;
-    texCoords[vLB].u = cl;
-    texCoords[vLB].v = cb;
-    texCoords[vRB].u = cr;
-    texCoords[vRB].v = cb;
-    texCoords[vRT].u = cr;
-    texCoords[vRT].v = ct;
+    texCoords[0].u = 0;
+    texCoords[0].v = 1;
+    texCoords[1].u = 0;
+    texCoords[1].v = 0;
+    texCoords[2].u = 1;
+    texCoords[2].v = 0;
+    texCoords[3].u = 1;
+    texCoords[3].v = 1;
 
     if (needsDithering()) {
         glEnable(GL_DITHER);
@@ -497,20 +430,6 @@ void LayerBase::drawWithOpenGL(const Region& clip, const Texture& texture) const
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
-void LayerBase::setBufferCrop(const Rect& crop) {
-    if (mBufferCrop != crop) {
-        mBufferCrop = crop;
-        mFlinger->invalidateHwcGeometry();
-    }
-}
-
-void LayerBase::setBufferTransform(uint32_t transform) {
-    if (mBufferTransform != transform) {
-        mBufferTransform = transform;
-        mFlinger->invalidateHwcGeometry();
-    }
-}
-
 void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
 {
     const Layer::State& s(drawingState());
@@ -518,10 +437,10 @@ void LayerBase::dump(String8& result, char* buffer, size_t SIZE) const
             "+ %s %p\n"
             "      "
             "z=%9d, pos=(%4d,%4d), size=(%4d,%4d), "
-            "needsBlending=%1d, needsDithering=%1d, invalidate=%1d, "
+            "isOpaque=%1d, needsDithering=%1d, invalidate=%1d, "
             "alpha=0x%02x, flags=0x%08x, tr=[%.2f, %.2f][%.2f, %.2f]\n",
             getTypeId(), this, s.z, tx(), ty(), s.w, s.h,
-            needsBlending(), needsDithering(), contentDirty,
+            isOpaque(), needsDithering(), contentDirty,
             s.alpha, s.flags,
             s.transform[0][0], s.transform[0][1],
             s.transform[1][0], s.transform[1][1]);
@@ -555,9 +474,22 @@ LayerBaseClient::~LayerBaseClient()
     }
 }
 
-sp<LayerBaseClient::Surface> LayerBaseClient::getSurface()
+sp<ISurface> LayerBaseClient::createSurface()
 {
-    sp<Surface> s;
+    class BSurface : public BnSurface, public LayerCleaner {
+        virtual sp<ISurfaceTexture> getSurfaceTexture() const { return 0; }
+    public:
+        BSurface(const sp<SurfaceFlinger>& flinger,
+                const sp<LayerBaseClient>& layer)
+            : LayerCleaner(flinger, layer) { }
+    };
+    sp<ISurface> sur(new BSurface(mFlinger, this));
+    return sur;
+}
+
+sp<ISurface> LayerBaseClient::getSurface()
+{
+    sp<ISurface> s;
     Mutex::Autolock _l(mLock);
 
     LOG_ALWAYS_FATAL_IF(mHasSurface,
@@ -571,12 +503,6 @@ sp<LayerBaseClient::Surface> LayerBaseClient::getSurface()
 
 wp<IBinder> LayerBaseClient::getSurfaceBinder() const {
     return mClientSurfaceBinder;
-}
-
-sp<LayerBaseClient::Surface> LayerBaseClient::createSurface() const
-{
-    return new Surface(mFlinger, mIdentity,
-            const_cast<LayerBaseClient *>(this));
 }
 
 void LayerBaseClient::dump(String8& result, char* buffer, size_t SIZE) const
@@ -601,44 +527,14 @@ void LayerBaseClient::shortDump(String8& result, char* scratch, size_t size) con
 
 // ---------------------------------------------------------------------------
 
-LayerBaseClient::Surface::Surface(
-        const sp<SurfaceFlinger>& flinger,
-        int identity,
-        const sp<LayerBaseClient>& owner) 
-    : mFlinger(flinger), mIdentity(identity), mOwner(owner)
-{
+LayerBaseClient::LayerCleaner::LayerCleaner(const sp<SurfaceFlinger>& flinger,
+        const sp<LayerBaseClient>& layer)
+    : mFlinger(flinger), mLayer(layer) {
 }
 
-LayerBaseClient::Surface::~Surface() 
-{
-    /*
-     * This is a good place to clean-up all client resources 
-     */
-
+LayerBaseClient::LayerCleaner::~LayerCleaner() {
     // destroy client resources
-    mFlinger->destroySurface(mOwner);
-}
-
-sp<LayerBaseClient> LayerBaseClient::Surface::getOwner() const {
-    sp<LayerBaseClient> owner(mOwner.promote());
-    return owner;
-}
-
-status_t LayerBaseClient::Surface::onTransact(
-        uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
-{
-    return BnSurface::onTransact(code, data, reply, flags);
-}
-
-sp<GraphicBuffer> LayerBaseClient::Surface::requestBuffer(int bufferIdx,
-        uint32_t w, uint32_t h, uint32_t format, uint32_t usage)
-{
-    return NULL; 
-}
-
-status_t LayerBaseClient::Surface::setBufferCount(int bufferCount)
-{
-    return INVALID_OPERATION;
+    mFlinger->destroySurface(mLayer);
 }
 
 // ---------------------------------------------------------------------------

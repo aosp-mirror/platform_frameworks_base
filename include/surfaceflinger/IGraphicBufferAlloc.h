@@ -27,6 +27,8 @@
 namespace android {
 // ----------------------------------------------------------------------------
 
+class GraphicBuffer;
+
 class IGraphicBufferAlloc : public IInterface
 {
 public:

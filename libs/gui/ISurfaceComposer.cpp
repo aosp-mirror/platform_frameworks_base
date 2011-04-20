@@ -57,15 +57,6 @@ public:
         return interface_cast<ISurfaceComposerClient>(reply.readStrongBinder());
     }
 
-    virtual sp<ISurfaceComposerClient> createClientConnection()
-    {
-        uint32_t n;
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
-        remote()->transact(BnSurfaceComposer::CREATE_CLIENT_CONNECTION, data, &reply);
-        return interface_cast<ISurfaceComposerClient>(reply.readStrongBinder());
-    }
-
     virtual sp<IGraphicBufferAlloc> createGraphicBufferAlloc()
     {
         uint32_t n;
@@ -174,13 +165,6 @@ public:
         return reply.readInt32();
     }
 
-    virtual void signal() const
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
-        remote()->transact(BnSurfaceComposer::SIGNAL, data, &reply, IBinder::FLAG_ONEWAY);
-    }
-
     virtual bool authenticateSurface(const sp<ISurface>& surface) const
     {
         Parcel data, reply;
@@ -229,11 +213,6 @@ status_t BnSurfaceComposer::onTransact(
             sp<IBinder> b = createConnection()->asBinder();
             reply->writeStrongBinder(b);
         } break;
-        case CREATE_CLIENT_CONNECTION: {
-            CHECK_INTERFACE(ISurfaceComposer, data, reply);
-            sp<IBinder> b = createClientConnection()->asBinder();
-            reply->writeStrongBinder(b);
-        } break;
         case CREATE_GRAPHIC_BUFFER_ALLOC: {
             CHECK_INTERFACE(ISurfaceComposer, data, reply);
             sp<IBinder> b = createGraphicBufferAlloc()->asBinder();
@@ -269,10 +248,6 @@ status_t BnSurfaceComposer::onTransact(
         case BOOT_FINISHED: {
             CHECK_INTERFACE(ISurfaceComposer, data, reply);
             bootFinished();
-        } break;
-        case SIGNAL: {
-            CHECK_INTERFACE(ISurfaceComposer, data, reply);
-            signal();
         } break;
         case GET_CBLK: {
             CHECK_INTERFACE(ISurfaceComposer, data, reply);

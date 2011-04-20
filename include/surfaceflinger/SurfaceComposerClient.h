@@ -36,10 +36,10 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-class Region;
-class SharedClient;
-class ISurfaceComposer;
 class DisplayInfo;
+class IMemoryHeap;
+class ISurfaceComposer;
+class Region;
 class surface_flinger_cblk_t;
 
 // ---------------------------------------------------------------------------

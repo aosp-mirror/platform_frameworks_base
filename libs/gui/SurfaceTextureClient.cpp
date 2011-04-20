@@ -181,6 +181,12 @@ int SurfaceTextureClient::queueBuffer(android_native_buffer_t* buffer) {
 int SurfaceTextureClient::query(int what, int* value) const {
     LOGV("SurfaceTextureClient::query");
     switch (what) {
+    case NATIVE_WINDOW_FORMAT:
+        if (mReqFormat) {
+            *value = mReqFormat;
+            return NO_ERROR;
+        }
+        break;
     case NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER:
         // TODO: this is not needed anymore
         *value = 0;

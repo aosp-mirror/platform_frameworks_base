@@ -43,9 +43,7 @@ class IOMX;
 class Rect;
 class Surface;
 class SurfaceComposerClient;
-class SharedClient;
-class SharedBufferClient;
-class SurfaceClient;
+class SurfaceTextureClient;
 
 // ---------------------------------------------------------------------------
 
@@ -162,9 +160,6 @@ public:
     status_t    lock(SurfaceInfo* info, Region* dirty, bool blocking = true);
     status_t    unlockAndPost();
 
-    // setSwapRectangle() is intended to be used by GL ES clients
-    void        setSwapRectangle(const Rect& r);
-
     sp<IBinder> asBinder() const;
 
 private:
@@ -209,6 +204,7 @@ private:
     static int query(const ANativeWindow* window, int what, int* value);
     static int perform(ANativeWindow* window, int operation, ...);
 
+    int setSwapInterval(int interval);
     int dequeueBuffer(ANativeWindowBuffer** buffer);
     int lockBuffer(ANativeWindowBuffer* buffer);
     int queueBuffer(ANativeWindowBuffer* buffer);
@@ -216,83 +212,23 @@ private:
     int query(int what, int* value) const;
     int perform(int operation, va_list args);
 
-    void dispatch_setUsage(va_list args);
-    int  dispatch_connect(va_list args);
-    int  dispatch_disconnect(va_list args);
-    int  dispatch_crop(va_list args);
-    int  dispatch_set_buffer_count(va_list args);
-    int  dispatch_set_buffers_geometry(va_list args);
-    int  dispatch_set_buffers_transform(va_list args);
-    int  dispatch_set_buffers_timestamp(va_list args);
-
-    void setUsage(uint32_t reqUsage);
-    int  connect(int api);
-    int  disconnect(int api);
-    int  crop(Rect const* rect);
-    int  setBufferCount(int bufferCount);
-    int  setBuffersGeometry(int w, int h, int format);
-    int  setBuffersTransform(int transform);
-    int  setBuffersTimestamp(int64_t timestamp);
-
     /*
      *  private stuff...
      */
     void init();
     status_t validate(bool inCancelBuffer = false) const;
 
-    // When the buffer pool is a fixed size we want to make sure SurfaceFlinger
-    // won't stall clients, so we require an extra buffer.
-    enum { MIN_UNDEQUEUED_BUFFERS = 2 };
-
-    inline const GraphicBufferMapper& getBufferMapper() const { return mBufferMapper; }
-    inline GraphicBufferMapper& getBufferMapper() { return mBufferMapper; }
-
-    status_t getBufferLocked(int index,
-            uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
-    int getBufferIndex(const sp<GraphicBuffer>& buffer) const;
-
     int getConnectedApi() const;
     
-    bool needNewBuffer(int bufIdx,
-            uint32_t *pWidth, uint32_t *pHeight,
-            uint32_t *pFormat, uint32_t *pUsage) const;
-
     static void cleanCachedSurfacesLocked();
 
-    class BufferInfo {
-        uint32_t mWidth;
-        uint32_t mHeight;
-        uint32_t mFormat;
-        uint32_t mUsage;
-        mutable uint32_t mDirty;
-        enum {
-            GEOMETRY = 0x01
-        };
-    public:
-        BufferInfo();
-        void set(uint32_t w, uint32_t h, uint32_t format);
-        void set(uint32_t usage);
-        void get(uint32_t *pWidth, uint32_t *pHeight,
-                uint32_t *pFormat, uint32_t *pUsage) const;
-        bool validateBuffer(const sp<GraphicBuffer>& buffer) const;
-    };
-
     // constants
-    GraphicBufferMapper&        mBufferMapper;
-    SurfaceClient&              mClient;
-    SharedBufferClient*         mSharedBufferClient;
     status_t                    mInitCheck;
     sp<ISurface>                mSurface;
+    sp<SurfaceTextureClient>    mSurfaceTextureClient;
     uint32_t                    mIdentity;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
-
-    // protected by mSurfaceLock
-    Rect                        mSwapRectangle;
-    int                         mConnected;
-    Rect                        mNextBufferCrop;
-    uint32_t                    mNextBufferTransform;
-    BufferInfo                  mBufferInfo;
     
     // protected by mSurfaceLock. These are also used from lock/unlock
     // but in that case, they must be called form the same thread.
@@ -303,9 +239,6 @@ private:
     sp<GraphicBuffer>           mPostedBuffer;
     mutable Region              mOldDirtyRegion;
     bool                        mReserved;
-
-    // only used from dequeueBuffer()
-    Vector< sp<GraphicBuffer> > mBuffers;
 
     // query() must be called from dequeueBuffer() thread
     uint32_t                    mWidth;

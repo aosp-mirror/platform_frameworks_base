@@ -33,6 +33,8 @@
 namespace android {
 // ----------------------------------------------------------------------------
 
+class IMemoryHeap;
+
 class ISurfaceComposer : public IInterface
 {
 public:
@@ -95,10 +97,6 @@ public:
      */
     virtual sp<ISurfaceComposerClient> createConnection() = 0;
 
-    /* create a client connection with surface flinger
-     */
-    virtual sp<ISurfaceComposerClient> createClientConnection() = 0;
-
     /* create a graphic buffer allocator
      */
     virtual sp<IGraphicBufferAlloc> createGraphicBufferAlloc() = 0;
@@ -134,11 +132,6 @@ public:
     virtual status_t turnElectronBeamOff(int32_t mode) = 0;
     virtual status_t turnElectronBeamOn(int32_t mode) = 0;
 
-    /* Signal surfaceflinger that there might be some work to do
-     * This is an ASYNCHRONOUS call.
-     */
-    virtual void signal() const = 0;
-
     /* verify that an ISurface was created by SurfaceFlinger.
      */
     virtual bool authenticateSurface(const sp<ISurface>& surface) const = 0;
@@ -154,7 +147,6 @@ public:
         // Java by ActivityManagerService.
         BOOT_FINISHED = IBinder::FIRST_CALL_TRANSACTION,
         CREATE_CONNECTION,
-        CREATE_CLIENT_CONNECTION,
         CREATE_GRAPHIC_BUFFER_ALLOC,
         GET_CBLK,
         OPEN_GLOBAL_TRANSACTION,
@@ -162,7 +154,6 @@ public:
         SET_ORIENTATION,
         FREEZE_DISPLAY,
         UNFREEZE_DISPLAY,
-        SIGNAL,
         CAPTURE_SCREEN,
         TURN_ELECTRON_BEAM_OFF,
         TURN_ELECTRON_BEAM_ON,

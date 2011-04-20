@@ -37,7 +37,7 @@ public:
         virtual ~LayerDim();
 
     virtual void onDraw(const Region& clip) const;
-    virtual bool needsBlending() const    { return true; }
+    virtual bool isOpaque() const         { return false; }
     virtual bool isSecure() const         { return false; }
     virtual bool isProtectedByApp() const { return false; }
     virtual bool isProtectedByDRM() const { return false; }

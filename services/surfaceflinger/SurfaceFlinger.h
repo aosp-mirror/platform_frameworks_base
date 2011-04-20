@@ -50,6 +50,7 @@ class DisplayHardware;
 class FreezeLock;
 class Layer;
 class LayerDim;
+struct surface_flinger_cblk_t;
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
@@ -72,14 +73,14 @@ public:
 private:
 
     // ISurfaceComposerClient interface
-    virtual sp<IMemoryHeap> getControlBlock() const;
-    virtual ssize_t getTokenForSurface(const sp<ISurface>& sur) const;
     virtual sp<ISurface> createSurface(
             surface_data_t* params, const String8& name,
             DisplayID display, uint32_t w, uint32_t h,PixelFormat format,
             uint32_t flags);
     virtual status_t destroySurface(SurfaceID surfaceId);
     virtual status_t setState(int32_t count, const layer_state_t* states);
+    virtual status_t onTransact(
+        uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
 
     // constant
     sp<SurfaceFlinger> mFlinger;
@@ -90,40 +91,6 @@ private:
 
     // thread-safe
     mutable Mutex mLock;
-};
-
-class UserClient : public BnSurfaceComposerClient
-{
-public:
-    // pointer to this client's control block
-    SharedClient* ctrlblk;
-
-public:
-        UserClient(const sp<SurfaceFlinger>& flinger);
-        ~UserClient();
-
-    status_t initCheck() const;
-
-    // protected by SurfaceFlinger::mStateLock
-    void detachLayer(const Layer* layer);
-
-private:
-
-    // ISurfaceComposerClient interface
-    virtual sp<IMemoryHeap> getControlBlock() const;
-    virtual ssize_t getTokenForSurface(const sp<ISurface>& sur) const;
-    virtual sp<ISurface> createSurface(
-            surface_data_t* params, const String8& name,
-            DisplayID display, uint32_t w, uint32_t h,PixelFormat format,
-            uint32_t flags);
-    virtual status_t destroySurface(SurfaceID surfaceId);
-    virtual status_t setState(int32_t count, const layer_state_t* states);
-
-    // atomic-ops
-    mutable volatile int32_t mBitmap;
-
-    sp<IMemoryHeap> mCblkHeap;
-    sp<SurfaceFlinger> mFlinger;
 };
 
 class GraphicBufferAlloc : public BnGraphicBufferAlloc
@@ -199,7 +166,6 @@ public:
 
     // ISurfaceComposer interface
     virtual sp<ISurfaceComposerClient>  createConnection();
-    virtual sp<ISurfaceComposerClient>  createClientConnection();
     virtual sp<IGraphicBufferAlloc>     createGraphicBufferAlloc();
     virtual sp<IMemoryHeap>             getCblk() const;
     virtual void                        bootFinished();
@@ -208,7 +174,6 @@ public:
     virtual status_t                    freezeDisplay(DisplayID dpy, uint32_t flags);
     virtual status_t                    unfreezeDisplay(DisplayID dpy, uint32_t flags);
     virtual int                         setOrientation(DisplayID dpy, int orientation, uint32_t flags);
-    virtual void                        signal() const;
     virtual bool                        authenticateSurface(const sp<ISurface>& surface) const;
 
     virtual status_t captureScreen(DisplayID dpy,
@@ -235,7 +200,6 @@ private:
     friend class Client;
     friend class LayerBase;
     friend class LayerBaseClient;
-    friend class LayerBaseClient::Surface;
     friend class Layer;
     friend class LayerDim;
 
