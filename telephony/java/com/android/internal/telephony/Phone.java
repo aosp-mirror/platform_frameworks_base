@@ -1250,13 +1250,6 @@ public interface Phone {
     void getDataCallList(Message response);
 
     /**
-     * Get current mutiple data connection status
-     *
-     * @return list of data connections
-     */
-    List<DataConnection> getCurrentDataConnectionList();
-
-    /**
      * Update the ServiceState CellLocation for current network registration.
      */
     void updateServiceLocation();
