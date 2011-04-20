@@ -172,6 +172,10 @@ AudioFlinger::AudioFlinger()
     : BnAudioFlinger(),
         mPrimaryHardwareDev(0), mMasterVolume(1.0f), mMasterMute(false), mNextUniqueId(1)
 {
+}
+
+void AudioFlinger::onFirstRef()
+{
     int rc = 0;
 
     Mutex::Autolock _l(mLock);
@@ -194,8 +198,7 @@ AudioFlinger::AudioFlinger()
         if (!mPrimaryHardwareDev) {
             mPrimaryHardwareDev = dev;
             LOGI("Using '%s' (%s.%s) as the primary audio interface",
-                 AUDIO_HARDWARE_INTERFACE, mod->name, mod->id,
-                 audio_interfaces[i]);
+                 mod->name, mod->id, audio_interfaces[i]);
         }
     }
 
@@ -222,6 +225,14 @@ AudioFlinger::AudioFlinger()
             mHardwareStatus = AUDIO_HW_IDLE;
         }
     }
+}
+
+status_t AudioFlinger::initCheck() const
+{
+    Mutex::Autolock _l(mLock);
+    if (mPrimaryHardwareDev == NULL || mAudioHwDevs.size() == 0)
+        return NO_INIT;
+    return NO_ERROR;
 }
 
 AudioFlinger::~AudioFlinger()

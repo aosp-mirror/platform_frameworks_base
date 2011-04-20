@@ -212,6 +212,8 @@ private:
                             AudioFlinger();
     virtual                 ~AudioFlinger();
 
+    status_t                initCheck() const;
+    virtual     void        onFirstRef();
     audio_hw_device_t*      findSuitableHwDev_l(uint32_t devices);
 
     // Internal dump utilites.
