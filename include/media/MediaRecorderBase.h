@@ -20,6 +20,8 @@
 
 #include <media/mediarecorder.h>
 
+#include <hardware/audio.h>
+
 namespace android {
 
 class Surface;
@@ -29,7 +31,7 @@ struct MediaRecorderBase {
     virtual ~MediaRecorderBase() {}
 
     virtual status_t init() = 0;
-    virtual status_t setAudioSource(audio_source as) = 0;
+    virtual status_t setAudioSource(audio_source_t as) = 0;
     virtual status_t setVideoSource(video_source vs) = 0;
     virtual status_t setOutputFormat(output_format of) = 0;
     virtual status_t setAudioEncoder(audio_encoder ae) = 0;

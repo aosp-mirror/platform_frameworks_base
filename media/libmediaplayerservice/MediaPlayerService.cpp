@@ -53,6 +53,8 @@
 #include <media/AudioTrack.h>
 #include <media/MemoryLeakTrackUtil.h>
 
+#include <hardware/audio.h>
+
 #include <private/android_filesystem_config.h>
 
 #include "MediaRecorderClient.h"
@@ -1209,7 +1211,7 @@ MediaPlayerService::AudioOutput::AudioOutput(int sessionId)
       mSessionId(sessionId) {
     LOGV("AudioOutput(%d)", sessionId);
     mTrack = 0;
-    mStreamType = AudioSystem::MUSIC;
+    mStreamType = AUDIO_STREAM_MUSIC;
     mLeftVolume = 1.0;
     mRightVolume = 1.0;
     mLatency = 0;
@@ -1319,7 +1321,7 @@ status_t MediaPlayerService::AudioOutput::open(
                 mStreamType,
                 sampleRate,
                 format,
-                (channelCount == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO,
+                (channelCount == 2) ? AUDIO_CHANNEL_OUT_STEREO : AUDIO_CHANNEL_OUT_MONO,
                 frameCount,
                 0 /* flags */,
                 CallbackWrapper,
@@ -1331,7 +1333,7 @@ status_t MediaPlayerService::AudioOutput::open(
                 mStreamType,
                 sampleRate,
                 format,
-                (channelCount == 2) ? AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO,
+                (channelCount == 2) ? AUDIO_CHANNEL_OUT_STEREO : AUDIO_CHANNEL_OUT_MONO,
                 frameCount,
                 0,
                 NULL,

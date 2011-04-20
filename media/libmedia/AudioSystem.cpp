@@ -23,6 +23,8 @@
 #include <media/IAudioPolicyService.h>
 #include <math.h>
 
+#include <hardware/audio.h>
+
 // ----------------------------------------------------------------------------
 // the sim build doesn't have gettid
 
@@ -45,7 +47,7 @@ DefaultKeyedVector<audio_io_handle_t, AudioSystem::OutputDescriptor *> AudioSyst
 
 // Cached values for recording queries
 uint32_t AudioSystem::gPrevInSamplingRate = 16000;
-int AudioSystem::gPrevInFormat = AudioSystem::PCM_16_BIT;
+int AudioSystem::gPrevInFormat = AUDIO_FORMAT_PCM_16_BIT;
 int AudioSystem::gPrevInChannelCount = 1;
 size_t AudioSystem::gInBuffSize = 0;
 
@@ -127,7 +129,7 @@ status_t AudioSystem::getMasterMute(bool* mute)
 
 status_t AudioSystem::setStreamVolume(int stream, float value, int output)
 {
-    if (uint32_t(stream) >= NUM_STREAM_TYPES) return BAD_VALUE;
+    if (uint32_t(stream) >= AUDIO_STREAM_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
     af->setStreamVolume(stream, value, output);
@@ -136,7 +138,7 @@ status_t AudioSystem::setStreamVolume(int stream, float value, int output)
 
 status_t AudioSystem::setStreamMute(int stream, bool mute)
 {
-    if (uint32_t(stream) >= NUM_STREAM_TYPES) return BAD_VALUE;
+    if (uint32_t(stream) >= AUDIO_STREAM_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
     af->setStreamMute(stream, mute);
@@ -145,7 +147,7 @@ status_t AudioSystem::setStreamMute(int stream, bool mute)
 
 status_t AudioSystem::getStreamVolume(int stream, float* volume, int output)
 {
-    if (uint32_t(stream) >= NUM_STREAM_TYPES) return BAD_VALUE;
+    if (uint32_t(stream) >= AUDIO_STREAM_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
     *volume = af->streamVolume(stream, output);
@@ -154,7 +156,7 @@ status_t AudioSystem::getStreamVolume(int stream, float* volume, int output)
 
 status_t AudioSystem::getStreamMute(int stream, bool* mute)
 {
-    if (uint32_t(stream) >= NUM_STREAM_TYPES) return BAD_VALUE;
+    if (uint32_t(stream) >= AUDIO_STREAM_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
     *mute = af->streamMute(stream);
@@ -163,7 +165,7 @@ status_t AudioSystem::getStreamMute(int stream, bool* mute)
 
 status_t AudioSystem::setMode(int mode)
 {
-    if (mode >= NUM_MODES) return BAD_VALUE;
+    if (mode >= AUDIO_MODE_CNT) return BAD_VALUE;
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
     return af->setMode(mode);
@@ -213,11 +215,11 @@ status_t AudioSystem::getOutputSamplingRate(int* samplingRate, int streamType)
     OutputDescriptor *outputDesc;
     audio_io_handle_t output;
 
-    if (streamType == DEFAULT) {
-        streamType = MUSIC;
+    if (streamType == AUDIO_STREAM_DEFAULT) {
+        streamType = AUDIO_STREAM_MUSIC;
     }
 
-    output = getOutput((stream_type)streamType);
+    output = getOutput((audio_stream_type_t)streamType);
     if (output == 0) {
         return PERMISSION_DENIED;
     }
@@ -246,11 +248,11 @@ status_t AudioSystem::getOutputFrameCount(int* frameCount, int streamType)
     OutputDescriptor *outputDesc;
     audio_io_handle_t output;
 
-    if (streamType == DEFAULT) {
-        streamType = MUSIC;
+    if (streamType == AUDIO_STREAM_DEFAULT) {
+        streamType = AUDIO_STREAM_MUSIC;
     }
 
-    output = getOutput((stream_type)streamType);
+    output = getOutput((audio_stream_type_t)streamType);
     if (output == 0) {
         return PERMISSION_DENIED;
     }
@@ -277,11 +279,11 @@ status_t AudioSystem::getOutputLatency(uint32_t* latency, int streamType)
     OutputDescriptor *outputDesc;
     audio_io_handle_t output;
 
-    if (streamType == DEFAULT) {
-        streamType = MUSIC;
+    if (streamType == AUDIO_STREAM_DEFAULT) {
+        streamType = AUDIO_STREAM_MUSIC;
     }
 
-    output = getOutput((stream_type)streamType);
+    output = getOutput((audio_stream_type_t)streamType);
     if (output == 0) {
         return PERMISSION_DENIED;
     }
@@ -338,11 +340,11 @@ status_t AudioSystem::getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
     if (af == 0) return PERMISSION_DENIED;
 
-    if (stream == DEFAULT) {
-        stream = MUSIC;
+    if (stream == AUDIO_STREAM_DEFAULT) {
+        stream = AUDIO_STREAM_MUSIC;
     }
 
-    return af->getRenderPosition(halFrames, dspFrames, getOutput((stream_type)stream));
+    return af->getRenderPosition(halFrames, dspFrames, getOutput((audio_stream_type_t)stream));
 }
 
 unsigned int AudioSystem::getInputFramesLost(audio_io_handle_t ioHandle) {
@@ -455,10 +457,10 @@ void AudioSystem::setErrorCallback(audio_error_callback cb) {
 
 bool AudioSystem::routedToA2dpOutput(int streamType) {
     switch(streamType) {
-    case MUSIC:
-    case VOICE_CALL:
-    case BLUETOOTH_SCO:
-    case SYSTEM:
+    case AUDIO_STREAM_MUSIC:
+    case AUDIO_STREAM_VOICE_CALL:
+    case AUDIO_STREAM_BLUETOOTH_SCO:
+    case AUDIO_STREAM_SYSTEM:
         return true;
     default:
         return false;
@@ -497,9 +499,9 @@ const sp<IAudioPolicyService>& AudioSystem::get_audio_policy_service()
     return gAudioPolicyService;
 }
 
-status_t AudioSystem::setDeviceConnectionState(audio_devices device,
-                                                  device_connection_state state,
-                                                  const char *device_address)
+status_t AudioSystem::setDeviceConnectionState(audio_devices_t device,
+                                               audio_policy_dev_state_t state,
+                                               const char *device_address)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;
@@ -507,11 +509,11 @@ status_t AudioSystem::setDeviceConnectionState(audio_devices device,
     return aps->setDeviceConnectionState(device, state, device_address);
 }
 
-AudioSystem::device_connection_state AudioSystem::getDeviceConnectionState(audio_devices device,
+audio_policy_dev_state_t AudioSystem::getDeviceConnectionState(audio_devices_t device,
                                                   const char *device_address)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
-    if (aps == 0) return DEVICE_STATE_UNAVAILABLE;
+    if (aps == 0) return AUDIO_POLICY_DEVICE_STATE_UNAVAILABLE;
 
     return aps->getDeviceConnectionState(device, device_address);
 }
@@ -531,26 +533,26 @@ status_t AudioSystem::setRingerMode(uint32_t mode, uint32_t mask)
     return aps->setRingerMode(mode, mask);
 }
 
-status_t AudioSystem::setForceUse(force_use usage, forced_config config)
+status_t AudioSystem::setForceUse(audio_policy_force_use_t usage, audio_policy_forced_cfg_t config)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;
     return aps->setForceUse(usage, config);
 }
 
-AudioSystem::forced_config AudioSystem::getForceUse(force_use usage)
+audio_policy_forced_cfg_t AudioSystem::getForceUse(audio_policy_force_use_t usage)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
-    if (aps == 0) return FORCE_NONE;
+    if (aps == 0) return AUDIO_POLICY_FORCE_NONE;
     return aps->getForceUse(usage);
 }
 
 
-audio_io_handle_t AudioSystem::getOutput(stream_type stream,
+audio_io_handle_t AudioSystem::getOutput(audio_stream_type_t stream,
                                     uint32_t samplingRate,
                                     uint32_t format,
                                     uint32_t channels,
-                                    output_flags flags)
+                                    audio_policy_output_flags_t flags)
 {
     audio_io_handle_t output = 0;
     // Do not use stream to output map cache if the direct output
@@ -561,9 +563,9 @@ audio_io_handle_t AudioSystem::getOutput(stream_type stream,
     // be reworked for proper operation with direct outputs. This code is too specific
     // to the first use case we want to cover (Voice Recognition and Voice Dialer over
     // Bluetooth SCO
-    if ((flags & AudioSystem::OUTPUT_FLAG_DIRECT) == 0 &&
-        ((stream != AudioSystem::VOICE_CALL && stream != AudioSystem::BLUETOOTH_SCO) ||
-         channels != AudioSystem::CHANNEL_OUT_MONO ||
+    if ((flags & AUDIO_POLICY_OUTPUT_FLAG_DIRECT) == 0 &&
+        ((stream != AUDIO_STREAM_VOICE_CALL && stream != AUDIO_STREAM_BLUETOOTH_SCO) ||
+         channels != AUDIO_CHANNEL_OUT_MONO ||
          (samplingRate != 8000 && samplingRate != 16000))) {
         Mutex::Autolock _l(gLock);
         output = AudioSystem::gStreamOutputMap.valueFor(stream);
@@ -573,7 +575,7 @@ audio_io_handle_t AudioSystem::getOutput(stream_type stream,
         const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
         if (aps == 0) return 0;
         output = aps->getOutput(stream, samplingRate, format, channels, flags);
-        if ((flags & AudioSystem::OUTPUT_FLAG_DIRECT) == 0) {
+        if ((flags & AUDIO_POLICY_OUTPUT_FLAG_DIRECT) == 0) {
             Mutex::Autolock _l(gLock);
             AudioSystem::gStreamOutputMap.add(stream, output);
         }
@@ -582,7 +584,7 @@ audio_io_handle_t AudioSystem::getOutput(stream_type stream,
 }
 
 status_t AudioSystem::startOutput(audio_io_handle_t output,
-                                  AudioSystem::stream_type stream,
+                                  audio_stream_type_t stream,
                                   int session)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
@@ -591,7 +593,7 @@ status_t AudioSystem::startOutput(audio_io_handle_t output,
 }
 
 status_t AudioSystem::stopOutput(audio_io_handle_t output,
-                                 AudioSystem::stream_type stream,
+                                 audio_stream_type_t stream,
                                  int session)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
@@ -610,7 +612,7 @@ audio_io_handle_t AudioSystem::getInput(int inputSource,
                                     uint32_t samplingRate,
                                     uint32_t format,
                                     uint32_t channels,
-                                    audio_in_acoustics acoustics)
+                                    audio_in_acoustics_t acoustics)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return 0;
@@ -638,7 +640,7 @@ void AudioSystem::releaseInput(audio_io_handle_t input)
     aps->releaseInput(input);
 }
 
-status_t AudioSystem::initStreamVolume(stream_type stream,
+status_t AudioSystem::initStreamVolume(audio_stream_type_t stream,
                                     int indexMin,
                                     int indexMax)
 {
@@ -647,28 +649,28 @@ status_t AudioSystem::initStreamVolume(stream_type stream,
     return aps->initStreamVolume(stream, indexMin, indexMax);
 }
 
-status_t AudioSystem::setStreamVolumeIndex(stream_type stream, int index)
+status_t AudioSystem::setStreamVolumeIndex(audio_stream_type_t stream, int index)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;
     return aps->setStreamVolumeIndex(stream, index);
 }
 
-status_t AudioSystem::getStreamVolumeIndex(stream_type stream, int *index)
+status_t AudioSystem::getStreamVolumeIndex(audio_stream_type_t stream, int *index)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;
     return aps->getStreamVolumeIndex(stream, index);
 }
 
-uint32_t AudioSystem::getStrategyForStream(AudioSystem::stream_type stream)
+uint32_t AudioSystem::getStrategyForStream(audio_stream_type_t stream)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return 0;
     return aps->getStrategyForStream(stream);
 }
 
-uint32_t AudioSystem::getDevicesForStream(AudioSystem::stream_type stream)
+uint32_t AudioSystem::getDevicesForStream(audio_stream_type_t stream)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return 0;
@@ -715,123 +717,6 @@ void AudioSystem::AudioPolicyServiceClient::binderDied(const wp<IBinder>& who) {
     AudioSystem::gAudioPolicyService.clear();
 
     LOGW("AudioPolicyService server died!");
-}
-
-// ---------------------------------------------------------------------------
-
-
-// use emulated popcount optimization
-// http://www.df.lth.se/~john_e/gems/gem002d.html
-uint32_t AudioSystem::popCount(uint32_t u)
-{
-    u = ((u&0x55555555) + ((u>>1)&0x55555555));
-    u = ((u&0x33333333) + ((u>>2)&0x33333333));
-    u = ((u&0x0f0f0f0f) + ((u>>4)&0x0f0f0f0f));
-    u = ((u&0x00ff00ff) + ((u>>8)&0x00ff00ff));
-    u = ( u&0x0000ffff) + (u>>16);
-    return u;
-}
-
-bool AudioSystem::isOutputDevice(audio_devices device)
-{
-    if ((popCount(device) == 1 ) &&
-        ((device & ~AudioSystem::DEVICE_OUT_ALL) == 0)) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool AudioSystem::isInputDevice(audio_devices device)
-{
-    if ((popCount(device) == 1 ) &&
-        ((device & ~AudioSystem::DEVICE_IN_ALL) == 0)) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool AudioSystem::isA2dpDevice(audio_devices device)
-{
-    if ((popCount(device) == 1 ) &&
-        (device & (AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP |
-                   AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
-                   AudioSystem::DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER))) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool AudioSystem::isBluetoothScoDevice(audio_devices device)
-{
-    if ((popCount(device) == 1 ) &&
-        (device & (AudioSystem::DEVICE_OUT_BLUETOOTH_SCO |
-                   AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_HEADSET |
-                   AudioSystem::DEVICE_OUT_BLUETOOTH_SCO_CARKIT |
-                   AudioSystem::DEVICE_IN_BLUETOOTH_SCO_HEADSET))) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool AudioSystem::isLowVisibility(stream_type stream)
-{
-    if (stream == AudioSystem::SYSTEM ||
-        stream == AudioSystem::NOTIFICATION ||
-        stream == AudioSystem::RING) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool AudioSystem::isInputChannel(uint32_t channel)
-{
-    if ((channel & ~AudioSystem::CHANNEL_IN_ALL) == 0) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool AudioSystem::isOutputChannel(uint32_t channel)
-{
-    if ((channel & ~AudioSystem::CHANNEL_OUT_ALL) == 0) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-bool AudioSystem::isValidFormat(uint32_t format)
-{
-    switch (format & MAIN_FORMAT_MASK) {
-    case         PCM:
-    case         MP3:
-    case         AMR_NB:
-    case         AMR_WB:
-    case         AAC:
-    case         HE_AAC_V1:
-    case         HE_AAC_V2:
-    case         VORBIS:
-        return true;
-    default:
-        return false;
-    }
-}
-
-bool AudioSystem::isLinearPCM(uint32_t format)
-{
-    switch (format) {
-    case         PCM_16_BIT:
-    case         PCM_8_BIT:
-        return true;
-    default:
-        return false;
-    }
 }
 
 }; // namespace android

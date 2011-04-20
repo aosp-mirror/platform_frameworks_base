@@ -46,6 +46,8 @@
 #include <ctype.h>
 #include <unistd.h>
 
+#include <hardware/audio.h>
+
 #include "ARTPWriter.h"
 
 namespace android {
@@ -64,7 +66,7 @@ static void addBatteryData(uint32_t params) {
 StagefrightRecorder::StagefrightRecorder()
     : mWriter(NULL), mWriterAux(NULL),
       mOutputFd(-1), mOutputFdAux(-1),
-      mAudioSource(AUDIO_SOURCE_LIST_END),
+      mAudioSource(AUDIO_SOURCE_CNT),
       mVideoSource(VIDEO_SOURCE_LIST_END),
       mStarted(false) {
 
@@ -82,10 +84,10 @@ status_t StagefrightRecorder::init() {
     return OK;
 }
 
-status_t StagefrightRecorder::setAudioSource(audio_source as) {
+status_t StagefrightRecorder::setAudioSource(audio_source_t as) {
     LOGV("setAudioSource: %d", as);
     if (as < AUDIO_SOURCE_DEFAULT ||
-        as >= AUDIO_SOURCE_LIST_END) {
+        as >= AUDIO_SOURCE_CNT) {
         LOGE("Invalid audio source: %d", as);
         return BAD_VALUE;
     }
@@ -800,7 +802,7 @@ status_t StagefrightRecorder::start() {
         mStarted = true;
 
         uint32_t params = IMediaPlayerService::kBatteryDataCodecStarted;
-        if (mAudioSource != AUDIO_SOURCE_LIST_END) {
+        if (mAudioSource != AUDIO_SOURCE_CNT) {
             params |= IMediaPlayerService::kBatteryDataTrackAudio;
         }
         if (mVideoSource != VIDEO_SOURCE_LIST_END) {
@@ -874,7 +876,7 @@ status_t StagefrightRecorder::startAACRecording() {
           mOutputFormat == OUTPUT_FORMAT_AAC_ADTS);
 
     CHECK(mAudioEncoder == AUDIO_ENCODER_AAC);
-    CHECK(mAudioSource != AUDIO_SOURCE_LIST_END);
+    CHECK(mAudioSource != AUDIO_SOURCE_CNT);
 
     CHECK(0 == "AACWriter is not implemented yet");
 
@@ -900,7 +902,7 @@ status_t StagefrightRecorder::startAMRRecording() {
         }
     }
 
-    if (mAudioSource >= AUDIO_SOURCE_LIST_END) {
+    if (mAudioSource >= AUDIO_SOURCE_CNT) {
         LOGE("Invalid audio source: %d", mAudioSource);
         return BAD_VALUE;
     }
@@ -933,9 +935,9 @@ status_t StagefrightRecorder::startAMRRecording() {
 status_t StagefrightRecorder::startRTPRecording() {
     CHECK_EQ(mOutputFormat, OUTPUT_FORMAT_RTP_AVP);
 
-    if ((mAudioSource != AUDIO_SOURCE_LIST_END
+    if ((mAudioSource != AUDIO_SOURCE_CNT
                 && mVideoSource != VIDEO_SOURCE_LIST_END)
-            || (mAudioSource == AUDIO_SOURCE_LIST_END
+            || (mAudioSource == AUDIO_SOURCE_CNT
                 && mVideoSource == VIDEO_SOURCE_LIST_END)) {
         // Must have exactly one source.
         return BAD_VALUE;
@@ -947,7 +949,7 @@ status_t StagefrightRecorder::startRTPRecording() {
 
     sp<MediaSource> source;
 
-    if (mAudioSource != AUDIO_SOURCE_LIST_END) {
+    if (mAudioSource != AUDIO_SOURCE_CNT) {
         source = createAudioSource();
     } else {
 
@@ -975,7 +977,7 @@ status_t StagefrightRecorder::startMPEG2TSRecording() {
 
     sp<MediaWriter> writer = new MPEG2TSWriter(mOutputFd);
 
-    if (mAudioSource != AUDIO_SOURCE_LIST_END) {
+    if (mAudioSource != AUDIO_SOURCE_CNT) {
         if (mAudioEncoder != AUDIO_ENCODER_AAC) {
             return ERROR_UNSUPPORTED;
         }
@@ -1383,7 +1385,7 @@ status_t StagefrightRecorder::setupMPEG4Recording(
     // Audio source is added at the end if it exists.
     // This help make sure that the "recoding" sound is suppressed for
     // camcorder applications in the recorded files.
-    if (!mCaptureTimeLapse && (mAudioSource != AUDIO_SOURCE_LIST_END)) {
+    if (!mCaptureTimeLapse && (mAudioSource != AUDIO_SOURCE_CNT)) {
         err = setupAudioEncoder(writer);
         if (err != OK) return err;
         *totalBitRate += mAudioBitRate;
@@ -1504,7 +1506,7 @@ status_t StagefrightRecorder::pause() {
         mStarted = false;
 
         uint32_t params = 0;
-        if (mAudioSource != AUDIO_SOURCE_LIST_END) {
+        if (mAudioSource != AUDIO_SOURCE_CNT) {
             params |= IMediaPlayerService::kBatteryDataTrackAudio;
         }
         if (mVideoSource != VIDEO_SOURCE_LIST_END) {
@@ -1555,7 +1557,7 @@ status_t StagefrightRecorder::stop() {
         mStarted = false;
 
         uint32_t params = 0;
-        if (mAudioSource != AUDIO_SOURCE_LIST_END) {
+        if (mAudioSource != AUDIO_SOURCE_CNT) {
             params |= IMediaPlayerService::kBatteryDataTrackAudio;
         }
         if (mVideoSource != VIDEO_SOURCE_LIST_END) {
@@ -1581,7 +1583,7 @@ status_t StagefrightRecorder::reset() {
     stop();
 
     // No audio or video source by default
-    mAudioSource = AUDIO_SOURCE_LIST_END;
+    mAudioSource = AUDIO_SOURCE_CNT;
     mVideoSource = VIDEO_SOURCE_LIST_END;
 
     // Default parameters

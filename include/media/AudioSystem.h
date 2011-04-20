@@ -21,13 +21,15 @@
 #include <utils/threads.h>
 #include <media/IAudioFlinger.h>
 
+#include <hardware/audio.h>
+#include <hardware/audio_policy.h>
+
 /* XXX: Should be include by all the users instead */
 #include <media/AudioParameter.h>
 
 namespace android {
 
 typedef void (*audio_error_callback)(status_t err);
-typedef int audio_io_handle_t;
 
 class IAudioPolicyService;
 class String8;
@@ -35,155 +37,6 @@ class String8;
 class AudioSystem
 {
 public:
-
-    // must match android/media/AudioSystem.java STREAM_* constants
-    enum stream_type {
-        DEFAULT          =-1,
-        VOICE_CALL       = 0,
-        SYSTEM           = 1,
-        RING             = 2,
-        MUSIC            = 3,
-        ALARM            = 4,
-        NOTIFICATION     = 5,
-        BLUETOOTH_SCO    = 6,
-        ENFORCED_AUDIBLE = 7, // Sounds that cannot be muted by user and must be routed to speaker
-        DTMF             = 8,
-        TTS              = 9,
-        NUM_STREAM_TYPES
-    };
-
-    // Audio sub formats (see AudioSystem::audio_format).
-    enum pcm_sub_format {
-        PCM_SUB_16_BIT          = 0x1, // must be 1 for backward compatibility
-        PCM_SUB_8_BIT           = 0x2, // must be 2 for backward compatibility
-    };
-
-    // FIXME These sub_format enums are currently unused
-
-    // MP3 sub format field definition : can use 11 LSBs in the same way as MP3 frame header to specify
-    // bit rate, stereo mode, version...
-    enum mp3_sub_format {
-        //TODO
-    };
-
-    // AMR NB/WB sub format field definition: specify frame block interleaving, bandwidth efficient or octet aligned,
-    // encoding mode for recording...
-    enum amr_sub_format {
-        //TODO
-    };
-
-    // AAC sub format field definition: specify profile or bitrate for recording...
-    enum aac_sub_format {
-        //TODO
-    };
-
-    // VORBIS sub format field definition: specify quality for recording...
-    enum vorbis_sub_format {
-        //TODO
-    };
-
-    // Audio format consists in a main format field (upper 8 bits) and a sub format field (lower 24 bits).
-    // The main format indicates the main codec type. The sub format field indicates options and parameters
-    // for each format. The sub format is mainly used for record to indicate for instance the requested bitrate
-    // or profile. It can also be used for certain formats to give informations not present in the encoded
-    // audio stream (e.g. octet alignement for AMR).
-    enum audio_format {
-        INVALID_FORMAT      = -1,
-        FORMAT_DEFAULT      = 0,
-        PCM                 = 0x00000000, // must be 0 for backward compatibility
-        MP3                 = 0x01000000,
-        AMR_NB              = 0x02000000,
-        AMR_WB              = 0x03000000,
-        AAC                 = 0x04000000,
-        HE_AAC_V1           = 0x05000000,
-        HE_AAC_V2           = 0x06000000,
-        VORBIS              = 0x07000000,
-        MAIN_FORMAT_MASK    = 0xFF000000,
-        SUB_FORMAT_MASK     = 0x00FFFFFF,
-        // Aliases
-        PCM_16_BIT          = (PCM|PCM_SUB_16_BIT),
-        PCM_8_BIT          = (PCM|PCM_SUB_8_BIT)
-    };
-
-
-    // Channel mask definitions must be kept in sync with values in /media/java/android/media/AudioFormat.java
-    enum audio_channels {
-        // output channels
-        CHANNEL_OUT_FRONT_LEFT = 0x4,
-        CHANNEL_OUT_FRONT_RIGHT = 0x8,
-        CHANNEL_OUT_FRONT_CENTER = 0x10,
-        CHANNEL_OUT_LOW_FREQUENCY = 0x20,
-        CHANNEL_OUT_BACK_LEFT = 0x40,
-        CHANNEL_OUT_BACK_RIGHT = 0x80,
-        CHANNEL_OUT_FRONT_LEFT_OF_CENTER = 0x100,
-        CHANNEL_OUT_FRONT_RIGHT_OF_CENTER = 0x200,
-        CHANNEL_OUT_BACK_CENTER = 0x400,
-        CHANNEL_OUT_MONO = CHANNEL_OUT_FRONT_LEFT,
-        CHANNEL_OUT_STEREO = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT),
-        CHANNEL_OUT_QUAD = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
-                CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT),
-        CHANNEL_OUT_SURROUND = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
-                CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_BACK_CENTER),
-        CHANNEL_OUT_5POINT1 = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
-                CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY | CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT),
-        CHANNEL_OUT_7POINT1 = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
-                CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY | CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT |
-                CHANNEL_OUT_FRONT_LEFT_OF_CENTER | CHANNEL_OUT_FRONT_RIGHT_OF_CENTER),
-        CHANNEL_OUT_ALL = (CHANNEL_OUT_FRONT_LEFT | CHANNEL_OUT_FRONT_RIGHT |
-                CHANNEL_OUT_FRONT_CENTER | CHANNEL_OUT_LOW_FREQUENCY | CHANNEL_OUT_BACK_LEFT | CHANNEL_OUT_BACK_RIGHT |
-                CHANNEL_OUT_FRONT_LEFT_OF_CENTER | CHANNEL_OUT_FRONT_RIGHT_OF_CENTER | CHANNEL_OUT_BACK_CENTER),
-
-        // input channels
-        CHANNEL_IN_LEFT = 0x4,
-        CHANNEL_IN_RIGHT = 0x8,
-        CHANNEL_IN_FRONT = 0x10,
-        CHANNEL_IN_BACK = 0x20,
-        CHANNEL_IN_LEFT_PROCESSED = 0x40,
-        CHANNEL_IN_RIGHT_PROCESSED = 0x80,
-        CHANNEL_IN_FRONT_PROCESSED = 0x100,
-        CHANNEL_IN_BACK_PROCESSED = 0x200,
-        CHANNEL_IN_PRESSURE = 0x400,
-        CHANNEL_IN_X_AXIS = 0x800,
-        CHANNEL_IN_Y_AXIS = 0x1000,
-        CHANNEL_IN_Z_AXIS = 0x2000,
-        CHANNEL_IN_VOICE_UPLINK = 0x4000,
-        CHANNEL_IN_VOICE_DNLINK = 0x8000,
-        CHANNEL_IN_MONO = CHANNEL_IN_FRONT,
-        CHANNEL_IN_STEREO = (CHANNEL_IN_LEFT | CHANNEL_IN_RIGHT),
-        CHANNEL_IN_ALL = (CHANNEL_IN_LEFT | CHANNEL_IN_RIGHT | CHANNEL_IN_FRONT | CHANNEL_IN_BACK|
-                CHANNEL_IN_LEFT_PROCESSED | CHANNEL_IN_RIGHT_PROCESSED | CHANNEL_IN_FRONT_PROCESSED | CHANNEL_IN_BACK_PROCESSED|
-                CHANNEL_IN_PRESSURE | CHANNEL_IN_X_AXIS | CHANNEL_IN_Y_AXIS | CHANNEL_IN_Z_AXIS |
-                CHANNEL_IN_VOICE_UPLINK | CHANNEL_IN_VOICE_DNLINK)
-    };
-
-    // must match android/media/AudioSystem.java MODE_* values
-    enum audio_mode {
-        MODE_INVALID = -2,
-        MODE_CURRENT = -1,
-        MODE_NORMAL = 0,
-        MODE_RINGTONE,
-        MODE_IN_CALL,
-        MODE_IN_COMMUNICATION,
-        NUM_MODES  // not a valid entry, denotes end-of-list
-    };
-
-    enum audio_in_acoustics {
-        AGC_ENABLE    = 0x0001,
-        AGC_DISABLE   = 0,
-        NS_ENABLE     = 0x0002,
-        NS_DISABLE    = 0,
-        TX_IIR_ENABLE = 0x0004,
-        TX_DISABLE    = 0
-    };
-
-    // special audio session values
-    enum audio_sessions {
-        SESSION_OUTPUT_STAGE = -1, // session for effects attached to a particular output stream
-                                   // (value must be less than 0)
-        SESSION_OUTPUT_MIX = 0,    // session for effects applied to output mix. These effects can
-                                   // be moved by audio policy manager to another output stream
-                                   // (value must be 0)
-    };
 
     /* These are static methods to control the system-wide AudioFlinger
      * only privileged processes can have access to them
@@ -209,7 +62,7 @@ public:
     static status_t setStreamMute(int stream, bool mute);
     static status_t getStreamMute(int stream, bool* mute);
 
-    // set audio mode in audio hardware (see AudioSystem::audio_mode)
+    // set audio mode in audio hardware (see audio_mode_t)
     static status_t setMode(int mode);
 
     // returns true in *state if tracks are active on the specified stream or has been active
@@ -230,9 +83,9 @@ public:
     static float linearToLog(int volume);
     static int logToLinear(float volume);
 
-    static status_t getOutputSamplingRate(int* samplingRate, int stream = DEFAULT);
-    static status_t getOutputFrameCount(int* frameCount, int stream = DEFAULT);
-    static status_t getOutputLatency(uint32_t* latency, int stream = DEFAULT);
+    static status_t getOutputSamplingRate(int* samplingRate, int stream = AUDIO_STREAM_DEFAULT);
+    static status_t getOutputFrameCount(int* frameCount, int stream = AUDIO_STREAM_DEFAULT);
+    static status_t getOutputLatency(uint32_t* latency, int stream = AUDIO_STREAM_DEFAULT);
 
     static bool routedToA2dpOutput(int streamType);
 
@@ -250,93 +103,11 @@ public:
     // - BAD_VALUE: invalid parameter
     // NOTE: this feature is not supported on all hardware platforms and it is
     // necessary to check returned status before using the returned values.
-    static status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int stream = DEFAULT);
+    static status_t getRenderPosition(uint32_t *halFrames, uint32_t *dspFrames, int stream = AUDIO_STREAM_DEFAULT);
 
     static unsigned int  getInputFramesLost(audio_io_handle_t ioHandle);
 
     static int newAudioSessionId();
-    //
-    // AudioPolicyService interface
-    //
-
-    enum audio_devices {
-        // output devices
-        DEVICE_OUT_EARPIECE = 0x1,
-        DEVICE_OUT_SPEAKER = 0x2,
-        DEVICE_OUT_WIRED_HEADSET = 0x4,
-        DEVICE_OUT_WIRED_HEADPHONE = 0x8,
-        DEVICE_OUT_BLUETOOTH_SCO = 0x10,
-        DEVICE_OUT_BLUETOOTH_SCO_HEADSET = 0x20,
-        DEVICE_OUT_BLUETOOTH_SCO_CARKIT = 0x40,
-        DEVICE_OUT_BLUETOOTH_A2DP = 0x80,
-        DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES = 0x100,
-        DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER = 0x200,
-        DEVICE_OUT_AUX_DIGITAL = 0x400,
-        DEVICE_OUT_ANLG_DOCK_HEADSET = 0x800,
-        DEVICE_OUT_DGTL_DOCK_HEADSET = 0x1000,
-        DEVICE_OUT_DEFAULT = 0x8000,
-        DEVICE_OUT_ALL = (DEVICE_OUT_EARPIECE | DEVICE_OUT_SPEAKER | DEVICE_OUT_WIRED_HEADSET |
-                DEVICE_OUT_WIRED_HEADPHONE | DEVICE_OUT_BLUETOOTH_SCO | DEVICE_OUT_BLUETOOTH_SCO_HEADSET |
-                DEVICE_OUT_BLUETOOTH_SCO_CARKIT | DEVICE_OUT_BLUETOOTH_A2DP | DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
-                DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER | DEVICE_OUT_AUX_DIGITAL |
-                DEVICE_OUT_ANLG_DOCK_HEADSET | DEVICE_OUT_DGTL_DOCK_HEADSET |
-                DEVICE_OUT_DEFAULT),
-        DEVICE_OUT_ALL_A2DP = (DEVICE_OUT_BLUETOOTH_A2DP | DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES |
-                DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER),
-
-        // input devices
-        DEVICE_IN_COMMUNICATION = 0x10000,
-        DEVICE_IN_AMBIENT = 0x20000,
-        DEVICE_IN_BUILTIN_MIC = 0x40000,
-        DEVICE_IN_BLUETOOTH_SCO_HEADSET = 0x80000,
-        DEVICE_IN_WIRED_HEADSET = 0x100000,
-        DEVICE_IN_AUX_DIGITAL = 0x200000,
-        DEVICE_IN_VOICE_CALL = 0x400000,
-        DEVICE_IN_BACK_MIC = 0x800000,
-        DEVICE_IN_DEFAULT = 0x80000000,
-
-        DEVICE_IN_ALL = (DEVICE_IN_COMMUNICATION | DEVICE_IN_AMBIENT | DEVICE_IN_BUILTIN_MIC |
-                DEVICE_IN_BLUETOOTH_SCO_HEADSET | DEVICE_IN_WIRED_HEADSET | DEVICE_IN_AUX_DIGITAL |
-                DEVICE_IN_VOICE_CALL | DEVICE_IN_BACK_MIC | DEVICE_IN_DEFAULT)
-    };
-
-    // device connection states used for setDeviceConnectionState()
-    enum device_connection_state {
-        DEVICE_STATE_UNAVAILABLE,
-        DEVICE_STATE_AVAILABLE,
-        NUM_DEVICE_STATES
-    };
-
-    // request to open a direct output with getOutput() (by opposition to sharing an output with other AudioTracks)
-    enum output_flags {
-        OUTPUT_FLAG_INDIRECT = 0x0,
-        OUTPUT_FLAG_DIRECT = 0x1
-    };
-
-    // device categories used for setForceUse()
-    enum forced_config {
-        FORCE_NONE,
-        FORCE_SPEAKER,
-        FORCE_HEADPHONES,
-        FORCE_BT_SCO,
-        FORCE_BT_A2DP,
-        FORCE_WIRED_ACCESSORY,
-        FORCE_BT_CAR_DOCK,
-        FORCE_BT_DESK_DOCK,
-        FORCE_ANALOG_DOCK,
-        FORCE_DIGITAL_DOCK,
-        NUM_FORCE_CONFIG,
-        FORCE_DEFAULT = FORCE_NONE
-    };
-
-    // usages used for setForceUse(), must match AudioSystem.java
-    enum force_use {
-        FOR_COMMUNICATION,
-        FOR_MEDIA,
-        FOR_RECORD,
-        FOR_DOCK,
-        NUM_FORCE_USE
-    };
 
     // types of io configuration change events received with ioConfigChanged()
     enum io_config_event {
@@ -367,40 +138,40 @@ public:
     //
     // IAudioPolicyService interface (see AudioPolicyInterface for method descriptions)
     //
-    static status_t setDeviceConnectionState(audio_devices device, device_connection_state state, const char *device_address);
-    static device_connection_state getDeviceConnectionState(audio_devices device, const char *device_address);
+    static status_t setDeviceConnectionState(audio_devices_t device, audio_policy_dev_state_t state, const char *device_address);
+    static audio_policy_dev_state_t getDeviceConnectionState(audio_devices_t device, const char *device_address);
     static status_t setPhoneState(int state);
     static status_t setRingerMode(uint32_t mode, uint32_t mask);
-    static status_t setForceUse(force_use usage, forced_config config);
-    static forced_config getForceUse(force_use usage);
-    static audio_io_handle_t getOutput(stream_type stream,
+    static status_t setForceUse(audio_policy_force_use_t usage, audio_policy_forced_cfg_t config);
+    static audio_policy_forced_cfg_t getForceUse(audio_policy_force_use_t usage);
+    static audio_io_handle_t getOutput(audio_stream_type_t stream,
                                         uint32_t samplingRate = 0,
-                                        uint32_t format = FORMAT_DEFAULT,
-                                        uint32_t channels = CHANNEL_OUT_STEREO,
-                                        output_flags flags = OUTPUT_FLAG_INDIRECT);
+                                        uint32_t format = AUDIO_FORMAT_DEFAULT,
+                                        uint32_t channels = AUDIO_CHANNEL_OUT_STEREO,
+                                        audio_policy_output_flags_t flags = AUDIO_POLICY_OUTPUT_FLAG_INDIRECT);
     static status_t startOutput(audio_io_handle_t output,
-                                AudioSystem::stream_type stream,
+                                audio_stream_type_t stream,
                                 int session = 0);
     static status_t stopOutput(audio_io_handle_t output,
-                               AudioSystem::stream_type stream,
+                               audio_stream_type_t stream,
                                int session = 0);
     static void releaseOutput(audio_io_handle_t output);
     static audio_io_handle_t getInput(int inputSource,
                                     uint32_t samplingRate = 0,
-                                    uint32_t format = FORMAT_DEFAULT,
-                                    uint32_t channels = CHANNEL_IN_MONO,
-                                    audio_in_acoustics acoustics = (audio_in_acoustics)0);
+                                    uint32_t format = AUDIO_FORMAT_DEFAULT,
+                                    uint32_t channels = AUDIO_CHANNEL_IN_MONO,
+                                    audio_in_acoustics_t acoustics = (audio_in_acoustics_t)0);
     static status_t startInput(audio_io_handle_t input);
     static status_t stopInput(audio_io_handle_t input);
     static void releaseInput(audio_io_handle_t input);
-    static status_t initStreamVolume(stream_type stream,
+    static status_t initStreamVolume(audio_stream_type_t stream,
                                       int indexMin,
                                       int indexMax);
-    static status_t setStreamVolumeIndex(stream_type stream, int index);
-    static status_t getStreamVolumeIndex(stream_type stream, int *index);
+    static status_t setStreamVolumeIndex(audio_stream_type_t stream, int index);
+    static status_t getStreamVolumeIndex(audio_stream_type_t stream, int *index);
 
-    static uint32_t getStrategyForStream(stream_type stream);
-    static uint32_t getDevicesForStream(stream_type stream);
+    static uint32_t getStrategyForStream(audio_stream_type_t stream);
+    static uint32_t getDevicesForStream(audio_stream_type_t stream);
 
     static audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc);
     static status_t registerEffect(effect_descriptor_t *desc,
@@ -413,17 +184,6 @@ public:
     static const sp<IAudioPolicyService>& get_audio_policy_service();
 
     // ----------------------------------------------------------------------------
-
-    static uint32_t popCount(uint32_t u);
-    static bool isOutputDevice(audio_devices device);
-    static bool isInputDevice(audio_devices device);
-    static bool isA2dpDevice(audio_devices device);
-    static bool isBluetoothScoDevice(audio_devices device);
-    static bool isLowVisibility(stream_type stream);
-    static bool isOutputChannel(uint32_t channel);
-    static bool isInputChannel(uint32_t channel);
-    static bool isValidFormat(uint32_t format);
-    static bool isLinearPCM(uint32_t format);
 
 private:
 

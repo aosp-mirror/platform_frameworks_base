@@ -244,7 +244,7 @@ void CameraService::setCameraFree(int cameraId) {
 static MediaPlayer* newMediaPlayer(const char *file) {
     MediaPlayer* mp = new MediaPlayer();
     if (mp->setDataSource(file, NULL) == NO_ERROR) {
-        mp->setAudioStreamType(AudioSystem::ENFORCED_AUDIBLE);
+        mp->setAudioStreamType(AUDIO_STREAM_ENFORCED_AUDIBLE);
         mp->prepare();
     } else {
         LOGE("Failed to load CameraService sounds: %s", file);
@@ -283,7 +283,7 @@ void CameraService::playSound(sound_kind kind) {
         // do not play the sound if stream volume is 0
         // (typically because ringer mode is silent).
         int index;
-        AudioSystem::getStreamVolumeIndex(AudioSystem::ENFORCED_AUDIBLE, &index);
+        AudioSystem::getStreamVolumeIndex(AUDIO_STREAM_ENFORCED_AUDIBLE, &index);
         if (index != 0) {
             player->seekTo(0);
             player->start();

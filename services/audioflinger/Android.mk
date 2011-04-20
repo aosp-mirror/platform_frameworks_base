@@ -15,9 +15,12 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libbinder \
     libmedia \
+    libhardware \
     libhardware_legacy \
     libeffects
 
+LOCAL_STATIC_LIBRARIES := \
+    libmedia_helper
 
 ifeq ($(TARGET_SIMULATOR),true)
  LOCAL_LDLIBS += -ldl

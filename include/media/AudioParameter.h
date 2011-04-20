@@ -33,12 +33,12 @@ public:
     // reserved parameter keys for changing standard parameters with setParameters() function.
     // Using these keys is mandatory for AudioFlinger to properly monitor audio output/input
     // configuration changes and act accordingly.
-    //  keyRouting: to change audio routing, value is an int in AudioSystem::audio_devices
+    //  keyRouting: to change audio routing, value is an int in audio_devices_t
     //  keySamplingRate: to change sampling rate routing, value is an int
-    //  keyFormat: to change audio format, value is an int in AudioSystem::audio_format
-    //  keyChannels: to change audio channel configuration, value is an int in AudioSystem::audio_channels
+    //  keyFormat: to change audio format, value is an int in audio_format_t
+    //  keyChannels: to change audio channel configuration, value is an int in audio_channels_t
     //  keyFrameCount: to change audio output frame count, value is an int
-    //  keyInputSource: to change audio input source, value is an int in audio_source
+    //  keyInputSource: to change audio input source, value is an int in audio_source_t
     //     (defined in media/mediarecorder.h)
     static const char *keyRouting;
     static const char *keySamplingRate;

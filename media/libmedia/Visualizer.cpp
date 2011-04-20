@@ -24,6 +24,8 @@
 #include <sys/types.h>
 #include <limits.h>
 
+#include <cutils/bitops.h>
+
 #include <media/Visualizer.h>
 
 extern void fixed_fft_real(int n, int32_t *v);
@@ -127,7 +129,7 @@ status_t Visualizer::setCaptureSize(uint32_t size)
 {
     if (size > VISUALIZER_CAPTURE_SIZE_MAX ||
         size < VISUALIZER_CAPTURE_SIZE_MIN ||
-        AudioSystem::popCount(size) != 1) {
+        popcount(size) != 1) {
         return BAD_VALUE;
     }
 

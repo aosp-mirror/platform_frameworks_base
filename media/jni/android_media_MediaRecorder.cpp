@@ -33,6 +33,7 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 
+#include <hardware/audio.h>
 
 // ----------------------------------------------------------------------------
 
@@ -177,7 +178,7 @@ static void
 android_media_MediaRecorder_setAudioSource(JNIEnv *env, jobject thiz, jint as)
 {
     LOGV("setAudioSource(%d)", as);
-    if (as < AUDIO_SOURCE_DEFAULT || as >= AUDIO_SOURCE_LIST_END) {
+    if (as < AUDIO_SOURCE_DEFAULT || as >= AUDIO_SOURCE_CNT) {
         jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid audio source");
         return;
     }

@@ -26,6 +26,7 @@
 #include <binder/IInterface.h>
 #include <media/AudioSystem.h>
 
+#include <hardware/audio_policy.h>
 
 namespace android {
 
@@ -39,42 +40,42 @@ public:
     //
     // IAudioPolicyService interface (see AudioPolicyInterface for method descriptions)
     //
-    virtual status_t setDeviceConnectionState(AudioSystem::audio_devices device,
-                                              AudioSystem::device_connection_state state,
+    virtual status_t setDeviceConnectionState(audio_devices_t device,
+                                              audio_policy_dev_state_t state,
                                               const char *device_address) = 0;
-    virtual AudioSystem::device_connection_state getDeviceConnectionState(AudioSystem::audio_devices device,
+    virtual audio_policy_dev_state_t getDeviceConnectionState(audio_devices_t device,
                                                                           const char *device_address) = 0;
     virtual status_t setPhoneState(int state) = 0;
     virtual status_t setRingerMode(uint32_t mode, uint32_t mask) = 0;
-    virtual status_t setForceUse(AudioSystem::force_use usage, AudioSystem::forced_config config) = 0;
-    virtual AudioSystem::forced_config getForceUse(AudioSystem::force_use usage) = 0;
-    virtual audio_io_handle_t getOutput(AudioSystem::stream_type stream,
+    virtual status_t setForceUse(audio_policy_force_use_t usage, audio_policy_forced_cfg_t config) = 0;
+    virtual audio_policy_forced_cfg_t getForceUse(audio_policy_force_use_t usage) = 0;
+    virtual audio_io_handle_t getOutput(audio_stream_type_t stream,
                                         uint32_t samplingRate = 0,
-                                        uint32_t format = AudioSystem::FORMAT_DEFAULT,
+                                        uint32_t format = AUDIO_FORMAT_DEFAULT,
                                         uint32_t channels = 0,
-                                        AudioSystem::output_flags flags = AudioSystem::OUTPUT_FLAG_INDIRECT) = 0;
+                                        audio_policy_output_flags_t flags = AUDIO_POLICY_OUTPUT_FLAG_INDIRECT) = 0;
     virtual status_t startOutput(audio_io_handle_t output,
-                                 AudioSystem::stream_type stream,
+                                 audio_stream_type_t stream,
                                  int session = 0) = 0;
     virtual status_t stopOutput(audio_io_handle_t output,
-                                AudioSystem::stream_type stream,
+                                audio_stream_type_t stream,
                                 int session = 0) = 0;
     virtual void releaseOutput(audio_io_handle_t output) = 0;
     virtual audio_io_handle_t getInput(int inputSource,
                                     uint32_t samplingRate = 0,
-                                    uint32_t format = AudioSystem::FORMAT_DEFAULT,
+                                    uint32_t format = AUDIO_FORMAT_DEFAULT,
                                     uint32_t channels = 0,
-                                    AudioSystem::audio_in_acoustics acoustics = (AudioSystem::audio_in_acoustics)0) = 0;
+                                    audio_in_acoustics_t acoustics = (audio_in_acoustics_t)0) = 0;
     virtual status_t startInput(audio_io_handle_t input) = 0;
     virtual status_t stopInput(audio_io_handle_t input) = 0;
     virtual void releaseInput(audio_io_handle_t input) = 0;
-    virtual status_t initStreamVolume(AudioSystem::stream_type stream,
+    virtual status_t initStreamVolume(audio_stream_type_t stream,
                                       int indexMin,
                                       int indexMax) = 0;
-    virtual status_t setStreamVolumeIndex(AudioSystem::stream_type stream, int index) = 0;
-    virtual status_t getStreamVolumeIndex(AudioSystem::stream_type stream, int *index) = 0;
-    virtual uint32_t getStrategyForStream(AudioSystem::stream_type stream) = 0;
-    virtual uint32_t getDevicesForStream(AudioSystem::stream_type stream) = 0;
+    virtual status_t setStreamVolumeIndex(audio_stream_type_t stream, int index) = 0;
+    virtual status_t getStreamVolumeIndex(audio_stream_type_t stream, int *index) = 0;
+    virtual uint32_t getStrategyForStream(audio_stream_type_t stream) = 0;
+    virtual uint32_t getDevicesForStream(audio_stream_type_t stream) = 0;
     virtual audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc) = 0;
     virtual status_t registerEffect(effect_descriptor_t *desc,
                                     audio_io_handle_t output,

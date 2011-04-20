@@ -30,6 +30,9 @@
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
 
+#include <hardware/audio.h>
+#include <hardware/audio_policy.h>
+
 // ----------------------------------------------------------------------------
 
 using namespace android;
@@ -129,8 +132,8 @@ static int
 android_media_AudioSystem_setDeviceConnectionState(JNIEnv *env, jobject thiz, jint device, jint state, jstring device_address)
 {
     const char *c_address = env->GetStringUTFChars(device_address, NULL);
-    int status = check_AudioSystem_Command(AudioSystem::setDeviceConnectionState(static_cast <AudioSystem::audio_devices>(device),
-                                          static_cast <AudioSystem::device_connection_state>(state),
+    int status = check_AudioSystem_Command(AudioSystem::setDeviceConnectionState(static_cast <audio_devices_t>(device),
+                                          static_cast <audio_policy_dev_state_t>(state),
                                           c_address));
     env->ReleaseStringUTFChars(device_address, c_address);
     return status;
@@ -140,7 +143,7 @@ static int
 android_media_AudioSystem_getDeviceConnectionState(JNIEnv *env, jobject thiz, jint device, jstring device_address)
 {
     const char *c_address = env->GetStringUTFChars(device_address, NULL);
-    int state = static_cast <int>(AudioSystem::getDeviceConnectionState(static_cast <AudioSystem::audio_devices>(device),
+    int state = static_cast <int>(AudioSystem::getDeviceConnectionState(static_cast <audio_devices_t>(device),
                                           c_address));
     env->ReleaseStringUTFChars(device_address, c_address);
     return state;
@@ -161,20 +164,20 @@ android_media_AudioSystem_setRingerMode(JNIEnv *env, jobject thiz, jint mode, ji
 static int
 android_media_AudioSystem_setForceUse(JNIEnv *env, jobject thiz, jint usage, jint config)
 {
-    return check_AudioSystem_Command(AudioSystem::setForceUse(static_cast <AudioSystem::force_use>(usage),
-                                                           static_cast <AudioSystem::forced_config>(config)));
+    return check_AudioSystem_Command(AudioSystem::setForceUse(static_cast <audio_policy_force_use_t>(usage),
+                                                           static_cast <audio_policy_forced_cfg_t>(config)));
 }
 
 static int
 android_media_AudioSystem_getForceUse(JNIEnv *env, jobject thiz, jint usage)
 {
-    return static_cast <int>(AudioSystem::getForceUse(static_cast <AudioSystem::force_use>(usage)));
+    return static_cast <int>(AudioSystem::getForceUse(static_cast <audio_policy_force_use_t>(usage)));
 }
 
 static int
 android_media_AudioSystem_initStreamVolume(JNIEnv *env, jobject thiz, jint stream, jint indexMin, jint indexMax)
 {
-    return check_AudioSystem_Command(AudioSystem::initStreamVolume(static_cast <AudioSystem::stream_type>(stream),
+    return check_AudioSystem_Command(AudioSystem::initStreamVolume(static_cast <audio_stream_type_t>(stream),
                                                                    indexMin,
                                                                    indexMax));
 }
@@ -182,14 +185,14 @@ android_media_AudioSystem_initStreamVolume(JNIEnv *env, jobject thiz, jint strea
 static int
 android_media_AudioSystem_setStreamVolumeIndex(JNIEnv *env, jobject thiz, jint stream, jint index)
 {
-    return check_AudioSystem_Command(AudioSystem::setStreamVolumeIndex(static_cast <AudioSystem::stream_type>(stream), index));
+    return check_AudioSystem_Command(AudioSystem::setStreamVolumeIndex(static_cast <audio_stream_type_t>(stream), index));
 }
 
 static int
 android_media_AudioSystem_getStreamVolumeIndex(JNIEnv *env, jobject thiz, jint stream)
 {
     int index;
-    if (AudioSystem::getStreamVolumeIndex(static_cast <AudioSystem::stream_type>(stream), &index) != NO_ERROR) {
+    if (AudioSystem::getStreamVolumeIndex(static_cast <audio_stream_type_t>(stream), &index) != NO_ERROR) {
         index = -1;
     }
     return index;
@@ -198,7 +201,7 @@ android_media_AudioSystem_getStreamVolumeIndex(JNIEnv *env, jobject thiz, jint s
 static jint
 android_media_AudioSystem_getDevicesForStream(JNIEnv *env, jobject thiz, jint stream)
 {
-    return (jint) AudioSystem::getDevicesForStream(static_cast <AudioSystem::stream_type>(stream));
+    return (jint) AudioSystem::getDevicesForStream(static_cast <audio_stream_type_t>(stream));
 }
 
 // ----------------------------------------------------------------------------

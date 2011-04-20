@@ -33,23 +33,6 @@ class ICamera;
 
 typedef void (*media_completion_f)(status_t status, void *cookie);
 
-/* Do not change these values without updating their counterparts
- * in media/java/android/media/MediaRecorder.java!
- */
-enum audio_source {
-    AUDIO_SOURCE_DEFAULT = 0,
-    AUDIO_SOURCE_MIC = 1,
-    AUDIO_SOURCE_VOICE_UPLINK = 2,
-    AUDIO_SOURCE_VOICE_DOWNLINK = 3,
-    AUDIO_SOURCE_VOICE_CALL = 4,
-    AUDIO_SOURCE_CAMCORDER = 5,
-    AUDIO_SOURCE_VOICE_RECOGNITION = 6,
-    AUDIO_SOURCE_VOICE_COMMUNICATION = 7,
-    AUDIO_SOURCE_MAX = AUDIO_SOURCE_VOICE_COMMUNICATION,
-
-    AUDIO_SOURCE_LIST_END  // must be last - used to validate audio source type
-};
-
 enum video_source {
     VIDEO_SOURCE_DEFAULT = 0,
     VIDEO_SOURCE_CAMERA = 1,

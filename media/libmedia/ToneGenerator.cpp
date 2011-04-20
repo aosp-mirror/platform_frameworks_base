@@ -1026,8 +1026,8 @@ bool ToneGenerator::initAudioTrack() {
 
     mpAudioTrack->set(mStreamType,
                       0,
-                      AudioSystem::PCM_16_BIT,
-                      AudioSystem::CHANNEL_OUT_MONO,
+                      AUDIO_FORMAT_PCM_16_BIT,
+                      AUDIO_CHANNEL_OUT_MONO,
                       0,
                       0,
                       audioCallback,
