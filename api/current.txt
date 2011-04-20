@@ -23130,11 +23130,11 @@ package android.webkit {
   public class WebView.HitTestResult {
     method public java.lang.String getExtra();
     method public int getType();
-    field public static final int ANCHOR_TYPE = 1; // 0x1
+    field public static final deprecated int ANCHOR_TYPE = 1; // 0x1
     field public static final int EDIT_TEXT_TYPE = 9; // 0x9
     field public static final int EMAIL_TYPE = 4; // 0x4
     field public static final int GEO_TYPE = 3; // 0x3
-    field public static final int IMAGE_ANCHOR_TYPE = 6; // 0x6
+    field public static final deprecated int IMAGE_ANCHOR_TYPE = 6; // 0x6
     field public static final int IMAGE_TYPE = 5; // 0x5
     field public static final int PHONE_TYPE = 2; // 0x2
     field public static final int SRC_ANCHOR_TYPE = 7; // 0x7
