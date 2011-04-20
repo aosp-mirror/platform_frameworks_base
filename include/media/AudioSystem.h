@@ -21,6 +21,9 @@
 #include <utils/threads.h>
 #include <media/IAudioFlinger.h>
 
+/* XXX: Should be include by all the users instead */
+#include <media/AudioParameter.h>
+
 namespace android {
 
 typedef void (*audio_error_callback)(status_t err);
@@ -471,50 +474,6 @@ private:
     static DefaultKeyedVector<int, audio_io_handle_t> gStreamOutputMap;
     // list of output descritor containing cached parameters (sampling rate, framecount, channel count...)
     static DefaultKeyedVector<audio_io_handle_t, OutputDescriptor *> gOutputs;
-};
-
-class AudioParameter {
-
-public:
-    AudioParameter() {}
-    AudioParameter(const String8& keyValuePairs);
-    virtual ~AudioParameter();
-
-    // reserved parameter keys for changing standard parameters with setParameters() function.
-    // Using these keys is mandatory for AudioFlinger to properly monitor audio output/input
-    // configuration changes and act accordingly.
-    //  keyRouting: to change audio routing, value is an int in AudioSystem::audio_devices
-    //  keySamplingRate: to change sampling rate routing, value is an int
-    //  keyFormat: to change audio format, value is an int in AudioSystem::audio_format
-    //  keyChannels: to change audio channel configuration, value is an int in AudioSystem::audio_channels
-    //  keyFrameCount: to change audio output frame count, value is an int
-    //  keyInputSource: to change audio input source, value is an int in audio_source
-    //     (defined in media/mediarecorder.h)
-    static const char *keyRouting;
-    static const char *keySamplingRate;
-    static const char *keyFormat;
-    static const char *keyChannels;
-    static const char *keyFrameCount;
-    static const char *keyInputSource;
-
-    String8 toString();
-
-    status_t add(const String8& key, const String8& value);
-    status_t addInt(const String8& key, const int value);
-    status_t addFloat(const String8& key, const float value);
-
-    status_t remove(const String8& key);
-
-    status_t get(const String8& key, String8& value);
-    status_t getInt(const String8& key, int& value);
-    status_t getFloat(const String8& key, float& value);
-    status_t getAt(size_t index, String8& key, String8& value);
-
-    size_t size() { return mParameters.size(); }
-
-private:
-    String8 mKeyValuePairs;
-    KeyedVector <String8, String8> mParameters;
 };
 
 };  // namespace android
