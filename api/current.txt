@@ -2180,7 +2180,7 @@ package android.app {
     method public void closeContextMenu();
     method public void closeOptionsMenu();
     method public android.app.PendingIntent createPendingResult(int, android.content.Intent, int);
-    method public final void dismissDialog(int);
+    method public final deprecated void dismissDialog(int);
     method public boolean dispatchGenericMotionEvent(android.view.MotionEvent);
     method public boolean dispatchKeyEvent(android.view.KeyEvent);
     method public boolean dispatchKeyShortcutEvent(android.view.KeyEvent);
@@ -2202,7 +2202,7 @@ package android.app {
     method public android.view.View getCurrentFocus();
     method public android.app.FragmentManager getFragmentManager();
     method public android.content.Intent getIntent();
-    method public java.lang.Object getLastNonConfigurationInstance();
+    method public deprecated java.lang.Object getLastNonConfigurationInstance();
     method public android.view.LayoutInflater getLayoutInflater();
     method public android.app.LoaderManager getLoaderManager();
     method public java.lang.String getLocalClassName();
@@ -2239,7 +2239,7 @@ package android.app {
     method public void onCreateContextMenu(android.view.ContextMenu, android.view.View, android.view.ContextMenu.ContextMenuInfo);
     method public java.lang.CharSequence onCreateDescription();
     method protected deprecated android.app.Dialog onCreateDialog(int);
-    method protected android.app.Dialog onCreateDialog(int, android.os.Bundle);
+    method protected deprecated android.app.Dialog onCreateDialog(int, android.os.Bundle);
     method public boolean onCreateOptionsMenu(android.view.Menu);
     method public boolean onCreatePanelMenu(int, android.view.Menu);
     method public android.view.View onCreatePanelView(int);
@@ -2265,13 +2265,13 @@ package android.app {
     method protected void onPostCreate(android.os.Bundle);
     method protected void onPostResume();
     method protected deprecated void onPrepareDialog(int, android.app.Dialog);
-    method protected void onPrepareDialog(int, android.app.Dialog, android.os.Bundle);
+    method protected deprecated void onPrepareDialog(int, android.app.Dialog, android.os.Bundle);
     method public boolean onPrepareOptionsMenu(android.view.Menu);
     method public boolean onPreparePanel(int, android.view.View, android.view.Menu);
     method protected void onRestart();
     method protected void onRestoreInstanceState(android.os.Bundle);
     method protected void onResume();
-    method public java.lang.Object onRetainNonConfigurationInstance();
+    method public deprecated java.lang.Object onRetainNonConfigurationInstance();
     method protected void onSaveInstanceState(android.os.Bundle);
     method public boolean onSearchRequested();
     method protected void onStart();
@@ -2289,7 +2289,7 @@ package android.app {
     method public void overridePendingTransition(int, int);
     method public void recreate();
     method public void registerForContextMenu(android.view.View);
-    method public final void removeDialog(int);
+    method public final deprecated void removeDialog(int);
     method public final boolean requestWindowFeature(int);
     method public final void runOnUiThread(java.lang.Runnable);
     method public void setContentView(int);
@@ -2315,8 +2315,8 @@ package android.app {
     method public void setTitleColor(int);
     method public void setVisible(boolean);
     method public final void setVolumeControlStream(int);
-    method public final void showDialog(int);
-    method public final boolean showDialog(int, android.os.Bundle);
+    method public final deprecated void showDialog(int);
+    method public final deprecated boolean showDialog(int, android.os.Bundle);
     method public android.view.ActionMode startActionMode(android.view.ActionMode.Callback);
     method public void startActivityForResult(android.content.Intent, int);
     method public void startActivityFromChild(android.app.Activity, android.content.Intent, int);
@@ -3042,12 +3042,12 @@ package android.app {
   }
 
   public class KeyguardManager {
-    method public void exitKeyguardSecurely(android.app.KeyguardManager.OnKeyguardExitResult);
+    method public deprecated void exitKeyguardSecurely(android.app.KeyguardManager.OnKeyguardExitResult);
     method public boolean inKeyguardRestrictedInputMode();
-    method public android.app.KeyguardManager.KeyguardLock newKeyguardLock(java.lang.String);
+    method public deprecated android.app.KeyguardManager.KeyguardLock newKeyguardLock(java.lang.String);
   }
 
-  public class KeyguardManager.KeyguardLock {
+  public deprecated class KeyguardManager.KeyguardLock {
     method public void disableKeyguard();
     method public void reenableKeyguard();
   }
@@ -13961,7 +13961,7 @@ package android.os {
     field public static final int FULL_WAKE_LOCK = 26; // 0x1a
     field public static final int ON_AFTER_RELEASE = 536870912; // 0x20000000
     field public static final int PARTIAL_WAKE_LOCK = 1; // 0x1
-    field public static final int SCREEN_BRIGHT_WAKE_LOCK = 10; // 0xa
+    field public static final deprecated int SCREEN_BRIGHT_WAKE_LOCK = 10; // 0xa
     field public static final int SCREEN_DIM_WAKE_LOCK = 6; // 0x6
   }
 

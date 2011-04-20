@@ -164,10 +164,20 @@ final class FragmentState implements Parcelable {
  *
  * <p>Topics covered here:
  * <ol>
+ * <li><a href="#OlderPlatforms">Older Platforms</a>
  * <li><a href="#Lifecycle">Lifecycle</a>
  * <li><a href="#Layout">Layout</a>
  * <li><a href="#BackStack">Back Stack</a>
  * </ol>
+ *
+ * <a name="OlderPlatforms"></a>
+ * <h3>Older Platforms</h3>
+ *
+ * While the Fragment API was introduced in
+ * {@link android.os.Build.VERSION_CODES#HONEYCOMB}, a version of the API
+ * is also available for use on older platforms.  See the blog post
+ * <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
+ * Fragments For All</a> for more details.
  *
  * <a name="Lifecycle"></a>
  * <h3>Lifecycle</h3>

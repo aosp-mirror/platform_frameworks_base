@@ -26,7 +26,7 @@ import java.io.PrintWriter;
 /**
  * An abstract class that performs asynchronous loading of data. While Loaders are active
  * they should monitor the source of their data and deliver new results when the contents
- * change.
+ * change.  See {@link android.app.LoaderManager} for more detail.
  *
  * <p><b>Note on threading:</b> Clients of loaders should as a rule perform
  * any calls on to a Loader from the main thread of their process (that is,
@@ -36,7 +36,10 @@ import java.io.PrintWriter;
  * be done on the main thread.</p>
  *
  * <p>Subclasses generally must implement at least {@link #onStartLoading()},
- * {@link #onStopLoading()}, {@link #onForceLoad()}, and {@link #onReset()}.
+ * {@link #onStopLoading()}, {@link #onForceLoad()}, and {@link #onReset()}.</p>
+ *
+ * <p>Most implementations should not derive directly from this class, but
+ * instead inherit from {@link AsyncTaskLoader}.</p>
  *
  * @param <D> The result returned when the load is complete
  */
@@ -76,8 +79,12 @@ public class Loader<D> {
     }
 
     /**
-     * Stores away the application context associated with context. Since Loaders can be used
-     * across multiple activities it's dangerous to store the context directly.
+     * Stores away the application context associated with context.
+     * Since Loaders can be used across multiple activities it's dangerous to
+     * store the context directly; always use {@link #getContext()} to retrieve
+     * the Loader's Context, don't use the constructor argument directly.
+     * The Context returned by {@link #getContext} is safe to use across
+     * Activity instances.
      *
      * @param context used to retrieve the application context.
      */

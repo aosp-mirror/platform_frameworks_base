@@ -27,7 +27,24 @@ import java.io.PrintWriter;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * Abstract Loader that provides an {@link AsyncTask} to do the work.
+ * Abstract Loader that provides an {@link AsyncTask} to do the work.  See
+ * {@link Loader} and {@link android.app.LoaderManager} for more details.
+ *
+ * <p>Here is an example implementation of an AsyncTaskLoader subclass that
+ * loads the currently installed applications from the package manager.  This
+ * implementation takes care of retrieving the application labels and sorting
+ * its result set from them, monitoring for changes to the installed
+ * applications, and rebuilding the list when a change in configuration requires
+ * this (such as a locale change).
+ *
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/LoaderCustom.java
+ *      loader}
+ *
+ * <p>An example implementation of a fragment that uses the above loader to show
+ * the currently installed applications in a list is below.
+ *
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/LoaderCustom.java
+ *      fragment}
  *
  * @param <D> the data type to be loaded.
  */
