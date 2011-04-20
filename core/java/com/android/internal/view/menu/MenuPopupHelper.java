@@ -16,31 +16,35 @@
 
 package com.android.internal.view.menu;
 
-import com.android.internal.view.menu.MenuBuilder.MenuAdapter;
-
 import android.content.Context;
-import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
+import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListPopupWindow;
 import android.widget.PopupWindow;
 
-import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 /**
+ * Presents a menu as a small, simple popup anchored to another view.
  * @hide
  */
 public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.OnKeyListener,
         ViewTreeObserver.OnGlobalLayoutListener, PopupWindow.OnDismissListener,
-        View.OnAttachStateChangeListener {
+        View.OnAttachStateChangeListener, MenuPresenter {
     private static final String TAG = "MenuPopupHelper";
 
+    static final int ITEM_LAYOUT = com.android.internal.R.layout.popup_menu_item_layout;
+
     private Context mContext;
+    private LayoutInflater mInflater;
     private ListPopupWindow mPopup;
     private MenuBuilder mMenu;
     private int mPopupMaxWidth;
@@ -48,7 +52,9 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     private boolean mOverflowOnly;
     private ViewTreeObserver mTreeObserver;
 
-    private final Handler mHandler = new Handler();
+    private MenuAdapter mAdapter;
+
+    private Callback mPresenterCallback;
 
     public MenuPopupHelper(Context context, MenuBuilder menu) {
         this(context, menu, null, false);
@@ -61,6 +67,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
     public MenuPopupHelper(Context context, MenuBuilder menu,
             View anchorView, boolean overflowOnly) {
         mContext = context;
+        mInflater = LayoutInflater.from(context);
         mMenu = menu;
         mOverflowOnly = overflowOnly;
 
@@ -68,6 +75,8 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         mPopupMaxWidth = metrics.widthPixels / 2;
 
         mAnchorView = anchorView;
+
+        menu.addMenuPresenter(this);
     }
 
     public void setAnchorView(View anchor) {
@@ -82,23 +91,14 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
 
     public boolean tryShow() {
         mPopup = new ListPopupWindow(mContext, null, com.android.internal.R.attr.popupMenuStyle);
-        mPopup.setOnItemClickListener(this);
         mPopup.setOnDismissListener(this);
+        mPopup.setOnItemClickListener(this);
 
-        final MenuAdapter adapter = mOverflowOnly ?
-                mMenu.getOverflowMenuAdapter(MenuBuilder.TYPE_POPUP) :
-                mMenu.getMenuAdapter(MenuBuilder.TYPE_POPUP);
-        mPopup.setAdapter(adapter);
+        mAdapter = new MenuAdapter(mMenu);
+        mPopup.setAdapter(mAdapter);
         mPopup.setModal(true);
 
         View anchor = mAnchorView;
-        if (anchor == null && mMenu instanceof SubMenuBuilder) {
-            SubMenuBuilder subMenu = (SubMenuBuilder) mMenu;
-            final MenuItemImpl itemImpl = (MenuItemImpl) subMenu.getItem();
-            anchor = itemImpl.getItemView(MenuBuilder.TYPE_ACTION_BUTTON, null);
-            mAnchorView = anchor;
-        }
-
         if (anchor != null) {
             final boolean addGlobalListener = mTreeObserver == null;
             mTreeObserver = anchor.getViewTreeObserver(); // Refresh to latest
@@ -109,7 +109,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
             return false;
         }
 
-        mPopup.setContentWidth(Math.min(measureContentWidth(adapter), mPopupMaxWidth));
+        mPopup.setContentWidth(Math.min(measureContentWidth(mAdapter), mPopupMaxWidth));
         mPopup.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
         mPopup.show();
         mPopup.getListView().setOnKeyListener(this);
@@ -136,23 +136,10 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         return mPopup != null && mPopup.isShowing();
     }
 
+    @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (!isShowing()) return;
-
-        MenuItem item = null;
-        if (mOverflowOnly) {
-            item = mMenu.getOverflowItem(position);
-        } else {
-            item = mMenu.getVisibleItems().get(position);
-        }
-        dismiss();
-
-        final MenuItem performItem = item;
-        mHandler.post(new Runnable() {
-            public void run() {
-                mMenu.performItemAction(performItem, 0);
-            }
-        });
+        MenuAdapter adapter = mAdapter;
+        adapter.mAdapterMenu.performItemAction(adapter.getItem(position), 0);
     }
 
     public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -163,7 +150,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         return false;
     }
 
-    private int measureContentWidth(MenuAdapter adapter) {
+    private int measureContentWidth(ListAdapter adapter) {
         // Menus don't tend to be long, so this is more sane than it looks.
         int width = 0;
         View itemView = null;
@@ -210,5 +197,92 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
             mTreeObserver.removeGlobalOnLayoutListener(this);
         }
         v.removeOnAttachStateChangeListener(this);
+    }
+
+    @Override
+    public void initForMenu(Context context, MenuBuilder menu) {
+        // Don't need to do anything; we added as a presenter in the constructor.
+    }
+
+    @Override
+    public MenuView getMenuView(ViewGroup root) {
+        throw new UnsupportedOperationException("MenuPopupHelpers manage their own views");
+    }
+
+    @Override
+    public void updateMenuView(boolean cleared) {
+        if (mAdapter != null) mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void setCallback(Callback cb) {
+        mPresenterCallback = cb;
+    }
+
+    @Override
+    public boolean onSubMenuSelected(SubMenuBuilder subMenu) {
+        if (subMenu.hasVisibleItems()) {
+            MenuPopupHelper subPopup = new MenuPopupHelper(mContext, subMenu, mAnchorView, false);
+            subPopup.setCallback(mPresenterCallback);
+            if (subPopup.tryShow()) {
+                if (mPresenterCallback != null) {
+                    mPresenterCallback.onOpenSubMenu(subMenu);
+                }
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
+        // Only care about the (sub)menu we're presenting.
+        if (menu != mMenu) return;
+
+        dismiss();
+        if (mPresenterCallback != null) {
+            mPresenterCallback.onCloseMenu(menu, allMenusAreClosing);
+        }
+    }
+
+    @Override
+    public boolean flagActionItems() {
+        return false;
+    }
+
+    private class MenuAdapter extends BaseAdapter {
+        private MenuBuilder mAdapterMenu;
+
+        public MenuAdapter(MenuBuilder menu) {
+            mAdapterMenu = menu;
+        }
+
+        public int getCount() {
+            ArrayList<MenuItemImpl> items = mOverflowOnly ?
+                    mAdapterMenu.getNonActionItems() : mAdapterMenu.getVisibleItems();
+            return items.size();
+        }
+
+        public MenuItemImpl getItem(int position) {
+            ArrayList<MenuItemImpl> items = mOverflowOnly ?
+                    mAdapterMenu.getNonActionItems() : mAdapterMenu.getVisibleItems();
+            return items.get(position);
+        }
+
+        public long getItemId(int position) {
+            // Since a menu item's ID is optional, we'll use the position as an
+            // ID for the item in the AdapterView
+            return position;
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if (convertView == null) {
+                convertView = mInflater.inflate(ITEM_LAYOUT, parent, false);
+            }
+
+            MenuView.ItemView itemView = (MenuView.ItemView) convertView;
+            itemView.initialize(getItem(position), 0);
+            return convertView;
+        }
     }
 }

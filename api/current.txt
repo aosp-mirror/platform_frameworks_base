@@ -24069,6 +24069,7 @@ package android.widget {
     ctor public LinearLayout(android.content.Context, android.util.AttributeSet);
     ctor public LinearLayout(android.content.Context, android.util.AttributeSet, int);
     method public int getBaselineAlignedChildIndex();
+    method public int getDividerPadding();
     method public int getOrientation();
     method public int getShowDividers();
     method public float getWeightSum();
@@ -24078,6 +24079,7 @@ package android.widget {
     method public void setBaselineAligned(boolean);
     method public void setBaselineAlignedChildIndex(int);
     method public void setDividerDrawable(android.graphics.drawable.Drawable);
+    method public void setDividerPadding(int);
     method public void setGravity(int);
     method public void setHorizontalGravity(int);
     method public void setMeasureWithLargestChildEnabled(boolean);

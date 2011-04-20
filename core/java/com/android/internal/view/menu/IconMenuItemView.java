@@ -112,6 +112,10 @@ public final class IconMenuItemView extends TextView implements MenuView.ItemVie
         setEnabled(itemData.isEnabled());
     }
 
+    public void setItemData(MenuItemImpl data) {
+        mItemData = data;
+    }
+
     @Override
     public boolean performClick() {
         // Let the view's click listener have top priority (the More button relies on this)

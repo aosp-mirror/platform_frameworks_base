@@ -602,11 +602,10 @@
         <item name="android:divider">@android:drawable/divider_horizontal_bright_opaque</item>
     </style>
 
-    <style name="Widget.ListView.Menu">
+    <style name="Widget.ListView.Menu" parent="Widget.Holo.ListView">
 		<item name="android:cacheColorHint">@null</item>
         <item name="android:scrollbars">vertical</item>
         <item name="android:fadingEdge">none</item>
-        <item name="listSelector">@android:drawable/menu_selector</item>
         <!-- Light background for the list in menus, so the divider for bright themes -->
         <item name="android:divider">@android:drawable/divider_horizontal_dark</item>
     </style>

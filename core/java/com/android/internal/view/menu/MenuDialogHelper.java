@@ -24,17 +24,19 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ListAdapter;
 
 /**
  * Helper for menus that appear as Dialogs (context and submenus).
  * 
  * @hide
  */
-public class MenuDialogHelper implements DialogInterface.OnKeyListener, DialogInterface.OnClickListener {
+public class MenuDialogHelper implements DialogInterface.OnKeyListener,
+        DialogInterface.OnClickListener,
+        DialogInterface.OnDismissListener,
+        MenuPresenter.Callback {
     private MenuBuilder mMenu;
-    private ListAdapter mAdapter;
     private AlertDialog mDialog;
+    ListMenuPresenter mPresenter;
     
     public MenuDialogHelper(MenuBuilder menu) {
         mMenu = menu;
@@ -49,12 +51,15 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener, DialogIn
         // Many references to mMenu, create local reference
         final MenuBuilder menu = mMenu;
         
-        // Get an adapter for the menu item views
-        mAdapter = menu.getMenuAdapter(MenuBuilder.TYPE_DIALOG);
-        
         // Get the builder for the dialog
-        final AlertDialog.Builder builder = new AlertDialog.Builder(menu.getContext())
-                .setAdapter(mAdapter, this); 
+        final AlertDialog.Builder builder = new AlertDialog.Builder(menu.getContext());
+
+        mPresenter = new ListMenuPresenter(builder.getContext(),
+                com.android.internal.R.layout.list_menu_item_layout);
+
+        mPresenter.setCallback(this);
+        mMenu.addMenuPresenter(mPresenter);
+        builder.setAdapter(mPresenter.getAdapter(), this);
 
         // Set the title
         final View headerView = menu.getHeaderView();
@@ -68,13 +73,10 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener, DialogIn
         
         // Set the key listener
         builder.setOnKeyListener(this);
-
-        // Since this is for a menu, disable the recycling of views
-        // This is done by the menu framework anyway
-        builder.setRecycleOnMeasureEnabled(false);
         
         // Show the menu
         mDialog = builder.create();
+        mDialog.setOnDismissListener(this);
         
         WindowManager.LayoutParams lp = mDialog.getWindow().getAttributes();
         lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
@@ -132,9 +134,25 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener, DialogIn
             mDialog.dismiss();
         }
     }
-    
-    public void onClick(DialogInterface dialog, int which) {
-        mMenu.performItemAction((MenuItemImpl) mAdapter.getItem(which), 0);
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        mPresenter.onCloseMenu(mMenu, true);
     }
-    
+
+    @Override
+    public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
+        if (allMenusAreClosing || menu == mMenu) {
+            dismiss();
+        }
+    }
+
+    @Override
+    public boolean onOpenSubMenu(MenuBuilder subMenu) {
+        return false;
+    }
+
+    public void onClick(DialogInterface dialog, int which) {
+        mMenu.performItemAction((MenuItemImpl) mPresenter.getAdapter().getItem(which), 0);
+    }
 }

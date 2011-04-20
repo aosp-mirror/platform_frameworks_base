@@ -67,11 +67,6 @@ public class SubMenuBuilder extends MenuBuilder implements SubMenu {
     }
 
     @Override
-    public Callback getCallback() {
-        return mParentMenu.getCallback();
-    }
-
-    @Override
     public void setCallback(Callback callback) {
         mParentMenu.setCallback(callback);
     }
@@ -110,5 +105,4 @@ public class SubMenuBuilder extends MenuBuilder implements SubMenu {
     public SubMenu setHeaderView(View view) {
         return (SubMenu) super.setHeaderViewInt(view);
     }
-    
 }

@@ -230,6 +230,30 @@ public class LinearLayout extends ViewGroup {
         requestLayout();
     }
 
+    /**
+     * Set padding displayed on both ends of dividers.
+     *
+     * @param padding Padding value in pixels that will be applied to each end
+     *
+     * @see #setShowDividers(int)
+     * @see #setDividerDrawable(Drawable)
+     * @see #getDividerPadding()
+     */
+    public void setDividerPadding(int padding) {
+        mDividerPadding = padding;
+    }
+
+    /**
+     * Get the padding size used to inset dividers in pixels
+     *
+     * @see #setShowDividers(int)
+     * @see #setDividerDrawable(Drawable)
+     * @see #setDividerPadding(int)
+     */
+    public int getDividerPadding() {
+        return mDividerPadding;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         if (mDivider == null) {
@@ -244,29 +268,15 @@ public class LinearLayout extends ViewGroup {
     }
 
     void drawDividersVertical(Canvas canvas) {
-        final boolean showDividerBeginning =
-            (mShowDividers & SHOW_DIVIDER_BEGINNING) == SHOW_DIVIDER_BEGINNING;
-        final boolean showDividerMiddle =
-                (mShowDividers & SHOW_DIVIDER_MIDDLE) == SHOW_DIVIDER_MIDDLE;
-        final boolean showDividerEnd =
-                (mShowDividers & SHOW_DIVIDER_END) == SHOW_DIVIDER_END;
-
         final int count = getVirtualChildCount();
         int top = getPaddingTop();
-        boolean firstVisible = true;
         for (int i = 0; i < count; i++) {
             final View child = getVirtualChildAt(i);
 
             if (child == null) {
                 top += measureNullChild(i);
             } else if (child.getVisibility() != GONE) {
-                if (firstVisible) {
-                    firstVisible = false;
-                    if (showDividerBeginning) {
-                        drawHorizontalDivider(canvas, top);
-                        top += mDividerHeight;
-                    }
-                } else if (showDividerMiddle) {
+                if (hasDividerBeforeChildAt(i)) {
                     drawHorizontalDivider(canvas, top);
                     top += mDividerHeight;
                 }
@@ -276,35 +286,21 @@ public class LinearLayout extends ViewGroup {
             }
         }
 
-        if (showDividerEnd) {
+        if (hasDividerBeforeChildAt(count)) {
             drawHorizontalDivider(canvas, top);
         }
     }
 
     void drawDividersHorizontal(Canvas canvas) {
-        final boolean showDividerBeginning =
-            (mShowDividers & SHOW_DIVIDER_BEGINNING) == SHOW_DIVIDER_BEGINNING;
-        final boolean showDividerMiddle =
-                (mShowDividers & SHOW_DIVIDER_MIDDLE) == SHOW_DIVIDER_MIDDLE;
-        final boolean showDividerEnd =
-                (mShowDividers & SHOW_DIVIDER_END) == SHOW_DIVIDER_END;
-
         final int count = getVirtualChildCount();
         int left = getPaddingLeft();
-        boolean firstVisible = true;
         for (int i = 0; i < count; i++) {
             final View child = getVirtualChildAt(i);
 
             if (child == null) {
                 left += measureNullChild(i);
             } else if (child.getVisibility() != GONE) {
-                if (firstVisible) {
-                    firstVisible = false;
-                    if (showDividerBeginning) {
-                        drawVerticalDivider(canvas, left);
-                        left += mDividerWidth;
-                    }
-                } else if (showDividerMiddle) {
+                if (hasDividerBeforeChildAt(i)) {
                     drawVerticalDivider(canvas, left);
                     left += mDividerWidth;
                 }
@@ -314,7 +310,7 @@ public class LinearLayout extends ViewGroup {
             }
         }
 
-        if (showDividerEnd) {
+        if (hasDividerBeforeChildAt(count)) {
             drawVerticalDivider(canvas, left);
         }
     }
@@ -523,6 +519,23 @@ public class LinearLayout extends ViewGroup {
     }
 
     /**
+     * Determines where to position dividers between children.
+     *
+     * @param childIndex Index of child to check for preceding divider
+     * @return true if there should be a divider before the child at childIndex
+     * @hide Pending API consideration. Currently only used internally by the system.
+     */
+    protected boolean hasDividerBeforeChildAt(int childIndex) {
+        if (childIndex == 0) {
+            return (mShowDividers & SHOW_DIVIDER_BEGINNING) != 0;
+        } else if (childIndex == getChildCount()) {
+            return (mShowDividers & SHOW_DIVIDER_END) != 0;
+        } else {
+            return (mShowDividers & SHOW_DIVIDER_MIDDLE) != 0;
+        }
+    }
+
+    /**
      * Measures the children when the orientation of this LinearLayout is set
      * to {@link #VERTICAL}.
      *
@@ -554,14 +567,7 @@ public class LinearLayout extends ViewGroup {
 
         int largestChildHeight = Integer.MIN_VALUE;
 
-        // A divider at the end will change how much space views can consume.
-        final boolean showDividerBeginning =
-                (mShowDividers & SHOW_DIVIDER_BEGINNING) == SHOW_DIVIDER_BEGINNING;
-        final boolean showDividerMiddle =
-            (mShowDividers & SHOW_DIVIDER_MIDDLE) == SHOW_DIVIDER_MIDDLE;
-
         // See how tall everyone is. Also remember max width.
-        boolean firstVisible = true;
         for (int i = 0; i < count; ++i) {
             final View child = getVirtualChildAt(i);
 
@@ -575,12 +581,7 @@ public class LinearLayout extends ViewGroup {
                continue;
             }
 
-            if (firstVisible) {
-                firstVisible = false;
-                if (showDividerBeginning) {
-                    mTotalLength += mDividerHeight;
-                }
-            } else if (showDividerMiddle) {
+            if (hasDividerBeforeChildAt(i)) {
                 mTotalLength += mDividerHeight;
             }
 
@@ -677,7 +678,7 @@ public class LinearLayout extends ViewGroup {
             i += getChildrenSkipCount(child, i);
         }
 
-        if (mTotalLength > 0 && (mShowDividers & SHOW_DIVIDER_END) == SHOW_DIVIDER_END) {
+        if (mTotalLength > 0 && hasDividerBeforeChildAt(count)) {
             mTotalLength += mDividerHeight;
         }
 
@@ -881,14 +882,7 @@ public class LinearLayout extends ViewGroup {
 
         int largestChildWidth = Integer.MIN_VALUE;
 
-        // A divider at the end will change how much space views can consume.
-        final boolean showDividerBeginning =
-                (mShowDividers & SHOW_DIVIDER_BEGINNING) == SHOW_DIVIDER_BEGINNING;
-        final boolean showDividerMiddle =
-            (mShowDividers & SHOW_DIVIDER_MIDDLE) == SHOW_DIVIDER_MIDDLE;
-
         // See how wide everyone is. Also remember max height.
-        boolean firstVisible = true;
         for (int i = 0; i < count; ++i) {
             final View child = getVirtualChildAt(i);
 
@@ -902,12 +896,7 @@ public class LinearLayout extends ViewGroup {
                 continue;
             }
 
-            if (firstVisible) {
-                firstVisible = false;
-                if (showDividerBeginning) {
-                    mTotalLength += mDividerWidth;
-                }
-            } else if (showDividerMiddle) {
+            if (hasDividerBeforeChildAt(i)) {
                 mTotalLength += mDividerWidth;
             }
 
@@ -1022,7 +1011,7 @@ public class LinearLayout extends ViewGroup {
             i += getChildrenSkipCount(child, i);
         }
 
-        if (mTotalLength > 0 && (mShowDividers & SHOW_DIVIDER_END) == SHOW_DIVIDER_END) {
+        if (mTotalLength > 0 && hasDividerBeforeChildAt(count)) {
             mTotalLength += mDividerWidth;
         }
 
@@ -1358,13 +1347,6 @@ public class LinearLayout extends ViewGroup {
            
         }
 
-        final boolean showDividerMiddle =
-                (mShowDividers & SHOW_DIVIDER_MIDDLE) == SHOW_DIVIDER_MIDDLE;
-
-        if ((mShowDividers & SHOW_DIVIDER_BEGINNING) == SHOW_DIVIDER_BEGINNING) {
-            childTop += mDividerHeight;
-        }
-
         for (int i = 0; i < count; i++) {
             final View child = getVirtualChildAt(i);
             if (child == null) {
@@ -1399,14 +1381,14 @@ public class LinearLayout extends ViewGroup {
                         break;
                 }
                 
+                if (hasDividerBeforeChildAt(i)) {
+                    childTop += mDividerHeight;
+                }
+
                 childTop += lp.topMargin;
                 setChildFrame(child, childLeft, childTop + getLocationOffset(child),
                         childWidth, childHeight);
                 childTop += childHeight + lp.bottomMargin + getNextLocationOffset(child);
-
-                if (showDividerMiddle) {
-                    childTop += mDividerHeight;
-                }
 
                 i += getChildrenSkipCount(child, i);
             }
@@ -1456,13 +1438,6 @@ public class LinearLayout extends ViewGroup {
                     childLeft += ((mRight - mLeft) - mTotalLength) / 2;
                     break;
             }
-        }
-
-        final boolean showDividerMiddle =
-                (mShowDividers & SHOW_DIVIDER_MIDDLE) == SHOW_DIVIDER_MIDDLE;
-
-        if ((mShowDividers & SHOW_DIVIDER_BEGINNING) == SHOW_DIVIDER_BEGINNING) {
-            childLeft += mDividerWidth;
         }
 
         for (int i = 0; i < count; i++) {
@@ -1523,15 +1498,15 @@ public class LinearLayout extends ViewGroup {
                         break;
                 }
 
+                if (hasDividerBeforeChildAt(i)) {
+                    childLeft += mDividerWidth;
+                }
+
                 childLeft += lp.leftMargin;
                 setChildFrame(child, childLeft + getLocationOffset(child), childTop,
                         childWidth, childHeight);
                 childLeft += childWidth + lp.rightMargin +
                         getNextLocationOffset(child);
-
-                if (showDividerMiddle) {
-                    childLeft += mDividerWidth;
-                }
 
                 i += getChildrenSkipCount(child, i);
             }

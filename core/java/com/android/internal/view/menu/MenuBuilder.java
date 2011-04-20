@@ -25,29 +25,22 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
-import android.util.TypedValue;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.ContextThemeWrapper;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Implementation of the {@link android.view.Menu} interface for creating a
@@ -55,60 +48,6 @@ import java.util.Vector;
  */
 public class MenuBuilder implements Menu {
     private static final String LOGTAG = "MenuBuilder";
-    
-    /** The number of different menu types */
-    public static final int NUM_TYPES = 5;
-    /** The menu type that represents the icon menu view */
-    public static final int TYPE_ICON = 0;
-    /** The menu type that represents the expanded menu view */
-    public static final int TYPE_EXPANDED = 1;
-    /**
-     * The menu type that represents a menu dialog. Examples are context and sub
-     * menus. This menu type will not have a corresponding MenuView, but it will
-     * have an ItemView.
-     */
-    public static final int TYPE_DIALOG = 2;
-    /**
-     * The menu type that represents a button in the application's action bar.
-     */
-    public static final int TYPE_ACTION_BUTTON = 3;
-    /**
-     * The menu type that represents a menu popup.
-     */
-    public static final int TYPE_POPUP = 4;
-
-    private static final String VIEWS_TAG = "android:views";
-
-    private static final int THEME_SYSTEM_DEFAULT = 0;
-    private static final int THEME_APPLICATION = -1;
-    private static final int THEME_ALERT_DIALOG = -2;
-
-    // Order must be the same order as the TYPE_*
-    static final int THEME_RES_FOR_TYPE[] = new int[] {
-        com.android.internal.R.style.Theme_IconMenu,
-        com.android.internal.R.style.Theme_ExpandedMenu,
-        THEME_ALERT_DIALOG,
-        THEME_APPLICATION,
-        THEME_APPLICATION,
-    };
-    
-    // Order must be the same order as the TYPE_*
-    static final int LAYOUT_RES_FOR_TYPE[] = new int[] {
-        com.android.internal.R.layout.icon_menu_layout,
-        com.android.internal.R.layout.expanded_menu_layout,
-        0,
-        com.android.internal.R.layout.action_menu_layout,
-        0,
-    };
-
-    // Order must be the same order as the TYPE_*
-    static final int ITEM_LAYOUT_RES_FOR_TYPE[] = new int[] {
-        com.android.internal.R.layout.icon_menu_item_layout,
-        com.android.internal.R.layout.list_menu_item_layout,
-        com.android.internal.R.layout.list_menu_item_layout,
-        com.android.internal.R.layout.action_menu_item_layout,
-        com.android.internal.R.layout.popup_menu_item_layout,
-    };
 
     private static final int[]  sCategoryToOrder = new int[] {
         1, /* No category */
@@ -160,25 +99,12 @@ public class MenuBuilder implements Menu {
      * Contains items that should NOT appear in the Action Bar, if present.
      */
     private ArrayList<MenuItemImpl> mNonActionItems;
-    /**
-     * The number of visible action buttons permitted in this menu
-     */
-    private int mMaxActionItems;
-    /**
-     * The total width limit in pixels for all action items within a menu
-     */
-    private int mActionWidthLimit;
+
     /**
      * Whether or not the items (or any one item's action state) has changed since it was
      * last fetched.
      */
     private boolean mIsActionItemsStale;
-
-    /**
-     * Whether the process of granting space as action items should reserve a space for
-     * an overflow option in the action list.
-     */
-    private boolean mReserveActionOverflow;
 
     /**
      * Default value for how added items should show in the action list.
@@ -210,100 +136,19 @@ public class MenuBuilder implements Menu {
      * that may individually call onItemsChanged.
      */
     private boolean mPreventDispatchingItemsChanged = false;
+    private boolean mItemsChangedWhileDispatchPrevented = false;
     
     private boolean mOptionalIconsVisible = false;
 
-    private ViewGroup mMeasureActionButtonParent;
+    private boolean mIsClosing = false;
 
-    private final WeakReference<MenuAdapter>[] mAdapterCache =
-            new WeakReference[NUM_TYPES];
-    private final WeakReference<OverflowMenuAdapter>[] mOverflowAdapterCache =
-            new WeakReference[NUM_TYPES];
+    private ArrayList<MenuItemImpl> mTempShortcutItemList = new ArrayList<MenuItemImpl>();
 
-    // Group IDs that have been added as actions - used temporarily, allocated here for reuse.
-    private final SparseBooleanArray mActionButtonGroups = new SparseBooleanArray();
-
-    private static int getAlertDialogTheme(Context context) {
-        TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(com.android.internal.R.attr.alertDialogTheme,
-                outValue, true);
-        return outValue.resourceId;
-    }
-
-    private MenuType[] mMenuTypes;
-    class MenuType {
-        private int mMenuType;
-        
-        /** The layout inflater that uses the menu type's theme */
-        private LayoutInflater mInflater;
-
-        /** The lazily loaded {@link MenuView} */
-        private WeakReference<MenuView> mMenuView;
-
-        MenuType(int menuType) {
-            mMenuType = menuType;
-        }
-        
-        LayoutInflater getInflater() {
-            // Create an inflater that uses the given theme for the Views it inflates
-            if (mInflater == null) {
-                Context wrappedContext;
-                int themeResForType = THEME_RES_FOR_TYPE[mMenuType];
-                switch (themeResForType) {
-                    case THEME_APPLICATION:
-                        wrappedContext = mContext;
-                        break;
-                    case THEME_ALERT_DIALOG:
-                        wrappedContext = new ContextThemeWrapper(mContext,
-                                getAlertDialogTheme(mContext));
-                        break;
-                    default:
-                        wrappedContext = new ContextThemeWrapper(mContext, themeResForType);
-                        break;
-                }
-                mInflater = (LayoutInflater) wrappedContext
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            }
-            
-            return mInflater;
-        }
-        
-        MenuView getMenuView(ViewGroup parent) {
-            if (LAYOUT_RES_FOR_TYPE[mMenuType] == 0) {
-                return null;
-            }
-
-            synchronized (this) {
-                MenuView menuView = mMenuView != null ? mMenuView.get() : null;
-                
-                if (menuView == null) {
-                    menuView = (MenuView) getInflater().inflate(
-                            LAYOUT_RES_FOR_TYPE[mMenuType], parent, false);
-                    menuView.initialize(MenuBuilder.this, mMenuType);
-
-                    // Cache the view
-                    mMenuView = new WeakReference<MenuView>(menuView);
-                    
-                    if (mFrozenViewStates != null) {
-                        View view = (View) menuView;
-                        view.restoreHierarchyState(mFrozenViewStates);
-
-                        // Clear this menu type's frozen state, since we just restored it
-                        mFrozenViewStates.remove(view.getId());
-                    }
-                }
-            
-                return menuView;
-            }
-        }
-        
-        boolean hasMenuView() {
-            return mMenuView != null && mMenuView.get() != null;
-        }
-    }
+    private CopyOnWriteArrayList<WeakReference<MenuPresenter>> mPresenters =
+            new CopyOnWriteArrayList<WeakReference<MenuPresenter>>();
     
     /**
-     * Called by menu to notify of close and selection changes
+     * Called by menu to notify of close and selection changes.
      */
     public interface Callback {
         /**
@@ -313,30 +158,6 @@ public class MenuBuilder implements Menu {
          * @return whether the menu item selection was handled
          */
         public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item);
-        
-        /**
-         * Called when a menu is closed.
-         * @param menu The menu that was closed.
-         * @param allMenusAreClosing Whether the menus are completely closing (true),
-         *            or whether there is another menu opening shortly
-         *            (false). For example, if the menu is closing because a
-         *            sub menu is about to be shown, <var>allMenusAreClosing</var>
-         *            is false.
-         */
-        public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing);
-        
-        /**
-         * Called when a sub menu is selected.  This is a cue to open the given sub menu's decor.
-         * @param subMenu the sub menu that is being opened
-         * @return whether the sub menu selection was handled by the callback
-         */
-        public boolean onSubMenuSelected(SubMenuBuilder subMenu);
-
-        /**
-         * Called when a sub menu is closed
-         * @param menu the sub menu that was closed
-         */
-        public void onCloseSubMenu(SubMenuBuilder menu);
         
         /**
          * Called when the mode of the menu changes (for example, from icon to expanded).
@@ -354,8 +175,6 @@ public class MenuBuilder implements Menu {
     }
 
     public MenuBuilder(Context context) {
-        mMenuTypes = new MenuType[NUM_TYPES];
-        
         mContext = context;
         mResources = context.getResources();
         
@@ -375,82 +194,66 @@ public class MenuBuilder implements Menu {
         mDefaultShowAsAction = defaultShowAsAction;
         return this;
     }
-    
-    public void setCallback(Callback callback) {
-        mCallback = callback;
+
+    /**
+     * Add a presenter to this menu. This will only hold a WeakReference;
+     * you do not need to explicitly remove a presenter, but you can using
+     * {@link #removeMenuPresenter(MenuPresenter)}.
+     *
+     * @param presenter The presenter to add
+     */
+    public void addMenuPresenter(MenuPresenter presenter) {
+        mPresenters.add(new WeakReference<MenuPresenter>(presenter));
+        presenter.initForMenu(mContext, this);
+        mIsActionItemsStale = true;
     }
 
-    MenuType getMenuType(int menuType) {
-        if (mMenuTypes[menuType] == null) {
-            mMenuTypes[menuType] = new MenuType(menuType);
-        }
-        
-        return mMenuTypes[menuType];
-    }
-    
     /**
-     * Gets a menu View that contains this menu's items.
-     * 
-     * @param menuType The type of menu to get a View for (must be one of
-     *            {@link #TYPE_ICON}, {@link #TYPE_EXPANDED},
-     *            {@link #TYPE_DIALOG}).
-     * @param parent The ViewGroup that provides a set of LayoutParams values
-     *            for this menu view
-     * @return A View for the menu of type <var>menuType</var>
+     * Remove a presenter from this menu. That presenter will no longer
+     * receive notifications of updates to this menu's data.
+     *
+     * @param presenter The presenter to remove
      */
-    public View getMenuView(int menuType, ViewGroup parent) {
-        // The expanded menu depends on the number if items shown in the icon menu (which
-        // is adjustable as setters/XML attributes on IconMenuView [imagine a larger LCD
-        // wanting to show more icons]). If, for example, the activity goes through
-        // an orientation change while the expanded menu is open, the icon menu's view
-        // won't have an instance anymore; so here we make sure we have an icon menu view (matching
-        // the same parent so the layout parameters from the XML are used). This
-        // will create the icon menu view and cache it (if it doesn't already exist). 
-        if (menuType == TYPE_EXPANDED
-                && (mMenuTypes[TYPE_ICON] == null || !mMenuTypes[TYPE_ICON].hasMenuView())) {
-            getMenuType(TYPE_ICON).getMenuView(parent);
+    public void removeMenuPresenter(MenuPresenter presenter) {
+        for (WeakReference<MenuPresenter> ref : mPresenters) {
+            final MenuPresenter item = ref.get();
+            if (item == null || item == presenter) {
+                mPresenters.remove(ref);
+            }
         }
-        
-        return (View) getMenuType(menuType).getMenuView(parent);
     }
     
-    private int getNumIconMenuItemsShown() {
-        ViewGroup parent = null;
-        
-        if (!mMenuTypes[TYPE_ICON].hasMenuView()) {
-            /*
-             * There isn't an icon menu view instantiated, so when we get it
-             * below, it will lazily instantiate it. We should pass a proper
-             * parent so it uses the layout_ attributes present in the XML
-             * layout file.
-             */
-            if (mMenuTypes[TYPE_EXPANDED].hasMenuView()) {
-                View expandedMenuView = (View) mMenuTypes[TYPE_EXPANDED].getMenuView(null);
-                parent = (ViewGroup) expandedMenuView.getParent();
+    private void dispatchPresenterUpdate(boolean cleared) {
+        if (mPresenters.isEmpty()) return;
+
+        for (WeakReference<MenuPresenter> ref : mPresenters) {
+            final MenuPresenter presenter = ref.get();
+            if (presenter == null) {
+                mPresenters.remove(ref);
+            } else {
+                presenter.updateMenuView(cleared);
             }
         }
-        
-        return ((IconMenuView) getMenuView(TYPE_ICON, parent)).getNumActualItemsShown(); 
     }
     
-    /**
-     * Clears the cached menu views. Call this if the menu views need to another
-     * layout (for example, if the screen size has changed).
-     */
-    public void clearMenuViews() {
-        for (int i = NUM_TYPES - 1; i >= 0; i--) {
-            if (mMenuTypes[i] != null) {
-                mMenuTypes[i].mMenuView = null;
+    private boolean dispatchSubMenuSelected(SubMenuBuilder subMenu) {
+        if (mPresenters.isEmpty()) return false;
+
+        boolean result = false;
+
+        for (WeakReference<MenuPresenter> ref : mPresenters) {
+            final MenuPresenter presenter = ref.get();
+            if (presenter == null) {
+                mPresenters.remove(ref);
+            } else if (!result) {
+                result = presenter.onSubMenuSelected(subMenu);
             }
         }
-        
-        for (int i = mItems.size() - 1; i >= 0; i--) {
-            MenuItemImpl item = mItems.get(i);
-            if (item.hasSubMenu()) {
-                ((SubMenuBuilder) item.getSubMenu()).clearMenuViews();
-            }
-            item.clearItemViews();
-        }
+        return result;
+    }
+
+    public void setCallback(Callback cb) {
+        mCallback = cb;
     }
     
     /**
@@ -468,7 +271,7 @@ public class MenuBuilder implements Menu {
         }
         
         mItems.add(findInsertIndex(mItems, ordering), item);
-        onItemsChanged(false);
+        onItemsChanged(true);
         
         return item;
     }
@@ -554,7 +357,7 @@ public class MenuBuilder implements Menu {
             }
             
             // Notify menu views
-            onItemsChanged(false);
+            onItemsChanged(true);
         }
     }
 
@@ -573,7 +376,7 @@ public class MenuBuilder implements Menu {
 
         mItems.remove(index);
         
-        if (updateChildrenOnMenuViews) onItemsChanged(false);
+        if (updateChildrenOnMenuViews) onItemsChanged(true);
     }
     
     public void removeItemAt(int index) {
@@ -585,6 +388,7 @@ public class MenuBuilder implements Menu {
         clear();
         clearHeader();
         mPreventDispatchingItemsChanged = false;
+        mItemsChangedWhileDispatchPrevented = false;
         onItemsChanged(true);
     }
     
@@ -725,19 +529,14 @@ public class MenuBuilder implements Menu {
         return mItems.get(index);
     }
 
-    public MenuItem getOverflowItem(int index) {
-        flagActionItems(true);
-        return mNonActionItems.get(index);
-    }
-
     public boolean isShortcutKey(int keyCode, KeyEvent event) {
         return findItemWithShortcutForKey(keyCode, event) != null;
     }
 
     public void setQwertyMode(boolean isQwerty) {
         mQwertyMode = isQwerty;
-        
-        refreshShortcuts(isShortcutsVisible(), isQwerty);
+
+        onItemsChanged(false);
     }
 
     /**
@@ -751,8 +550,7 @@ public class MenuBuilder implements Menu {
      * @return An ordering integer that can be used to order this item across
      *         all the items (even from other categories).
      */
-    private static int getOrdering(int categoryOrder)
-    {
+    private static int getOrdering(int categoryOrder) {
         final int index = (categoryOrder & CATEGORY_MASK) >> CATEGORY_SHIFT;
         
         if (index < 0 || index >= sCategoryToOrder.length) {
@@ -770,23 +568,6 @@ public class MenuBuilder implements Menu {
     }
 
     /**
-     * Refreshes the shortcut labels on each of the displayed items.  Passes the arguments
-     * so submenus don't need to call their parent menu for the same values.
-     */
-    private void refreshShortcuts(boolean shortcutsVisible, boolean qwertyMode) {
-        MenuItemImpl item;
-        for (int i = mItems.size() - 1; i >= 0; i--) {
-            item = mItems.get(i);
-            
-            if (item.hasSubMenu()) {
-                ((MenuBuilder) item.getSubMenu()).refreshShortcuts(shortcutsVisible, qwertyMode);
-            }
-            
-            item.refreshShortcutOnItemViews(shortcutsVisible, qwertyMode);
-        }
-    }
-
-    /**
      * Sets whether the shortcuts should be visible on menus.  Devices without hardware
      * key input will never make shortcuts visible even if this method is passed 'true'.
      * 
@@ -798,7 +579,7 @@ public class MenuBuilder implements Menu {
         if (mShortcutsVisible == shortcutsVisible) return;
 
         setShortcutsVisibleInner(shortcutsVisible);
-        refreshShortcuts(mShortcutsVisible, isQwertyMode());
+        onItemsChanged(false);
     }
 
     private void setShortcutsVisibleInner(boolean shortcutsVisible) {
@@ -818,15 +599,24 @@ public class MenuBuilder implements Menu {
     Resources getResources() {
         return mResources;
     }
-
-    public Callback getCallback() {
-        return mCallback;
-    }
     
     public Context getContext() {
         return mContext;
     }
     
+    boolean dispatchMenuItemSelected(MenuBuilder menu, MenuItem item) {
+        return mCallback != null && mCallback.onMenuItemSelected(menu, item);
+    }
+
+    /**
+     * Dispatch a mode change event to this menu's callback.
+     */
+    public void changeMenuMode() {
+        if (mCallback != null) {
+            mCallback.onMenuModeChange(this);
+        }
+    }
+
     private static int findInsertIndex(ArrayList<MenuItemImpl> items, int ordering) {
         for (int i = items.size() - 1; i >= 0; i--) {
             MenuItemImpl item = items.get(i);
@@ -860,7 +650,7 @@ public class MenuBuilder implements Menu {
      * (the ALT-enabled char corresponds to the shortcut) associated
      * with the keyCode.
      */
-    List<MenuItemImpl> findItemsWithShortcutForKey(int keyCode, KeyEvent event) {
+    void findItemsWithShortcutForKey(List<MenuItemImpl> items, int keyCode, KeyEvent event) {
         final boolean qwerty = isQwertyMode();
         final int metaState = event.getMetaState();
         final KeyCharacterMap.KeyData possibleChars = new KeyCharacterMap.KeyData();
@@ -868,18 +658,15 @@ public class MenuBuilder implements Menu {
         final boolean isKeyCodeMapped = event.getKeyData(possibleChars);
         // The delete key is not mapped to '\b' so we treat it specially
         if (!isKeyCodeMapped && (keyCode != KeyEvent.KEYCODE_DEL)) {
-            return null;
+            return;
         }
 
-        Vector<MenuItemImpl> items = new Vector();
         // Look for an item whose shortcut is this key.
         final int N = mItems.size();
         for (int i = 0; i < N; i++) {
             MenuItemImpl item = mItems.get(i);
             if (item.hasSubMenu()) {
-                List<MenuItemImpl> subMenuItems = ((MenuBuilder)item.getSubMenu())
-                    .findItemsWithShortcutForKey(keyCode, event);
-                items.addAll(subMenuItems);
+                ((MenuBuilder)item.getSubMenu()).findItemsWithShortcutForKey(items, keyCode, event);
             }
             final char shortcutChar = qwerty ? item.getAlphabeticShortcut() : item.getNumericShortcut();
             if (((metaState & (KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON)) == 0) &&
@@ -892,7 +679,6 @@ public class MenuBuilder implements Menu {
                 items.add(item);
             }
         }
-        return items;
     }
 
     /*
@@ -908,9 +694,11 @@ public class MenuBuilder implements Menu {
      */
     MenuItemImpl findItemWithShortcutForKey(int keyCode, KeyEvent event) {
         // Get all items that can be associated directly or indirectly with the keyCode
-        List<MenuItemImpl> items = findItemsWithShortcutForKey(keyCode, event);
+        ArrayList<MenuItemImpl> items = mTempShortcutItemList;
+        items.clear();
+        findItemsWithShortcutForKey(items, keyCode, event);
 
-        if (items == null) {
+        if (items.isEmpty()) {
             return null;
         }
 
@@ -920,15 +708,18 @@ public class MenuBuilder implements Menu {
         event.getKeyData(possibleChars);
 
         // If we have only one element, we can safely returns it
-        if (items.size() == 1) {
+        final int size = items.size();
+        if (size == 1) {
             return items.get(0);
         }
 
         final boolean qwerty = isQwertyMode();
         // If we found more than one item associated with the key,
         // we have to return the exact match
-        for (MenuItemImpl item : items) {
-            final char shortcutChar = qwerty ? item.getAlphabeticShortcut() : item.getNumericShortcut();
+        for (int i = 0; i < size; i++) {
+            final MenuItemImpl item = items.get(i);
+            final char shortcutChar = qwerty ? item.getAlphabeticShortcut() :
+                    item.getNumericShortcut();
             if ((shortcutChar == possibleChars.meta[0] &&
                     (metaState & KeyEvent.META_ALT_ON) == 0)
                 || (shortcutChar == possibleChars.meta[2] &&
@@ -958,11 +749,8 @@ public class MenuBuilder implements Menu {
         if (item.hasSubMenu()) {
             close(false);
 
-            if (mCallback != null) {
-                // Return true if the sub menu was invoked or the item was invoked previously
-                invoked = mCallback.onSubMenuSelected((SubMenuBuilder) item.getSubMenu())
-                        || invoked;
-            }
+            invoked |= dispatchSubMenuSelected((SubMenuBuilder) item.getSubMenu());
+            if (!invoked) close(true);
         } else {
             if ((flags & FLAG_PERFORM_NO_CLOSE) == 0) {
                 close(true);
@@ -982,10 +770,18 @@ public class MenuBuilder implements Menu {
      *            is false.
      */
     final void close(boolean allMenusAreClosing) {
-        Callback callback = getCallback();
-        if (callback != null) {
-            callback.onCloseMenu(this, allMenusAreClosing);
+        if (mIsClosing) return;
+
+        mIsClosing = true;
+        for (WeakReference<MenuPresenter> ref : mPresenters) {
+            final MenuPresenter presenter = ref.get();
+            if (presenter == null) {
+                mPresenters.remove(ref);
+            } else {
+                presenter.onCloseMenu(this, allMenusAreClosing);
+            }
         }
+        mIsClosing = false;
     }
 
     /** {@inheritDoc} */
@@ -996,26 +792,38 @@ public class MenuBuilder implements Menu {
     /**
      * Called when an item is added or removed.
      * 
-     * @param cleared Whether the items were cleared or just changed.
+     * @param structureChanged true if the menu structure changed,
+     *                         false if only item properties changed.
      */
-    private void onItemsChanged(boolean cleared) {
+    void onItemsChanged(boolean structureChanged) {
         if (!mPreventDispatchingItemsChanged) {
-            if (mIsVisibleItemsStale == false) mIsVisibleItemsStale = true;
-            if (mIsActionItemsStale == false) mIsActionItemsStale = true;
-            
-            MenuType[] menuTypes = mMenuTypes;
-            for (int i = 0; i < NUM_TYPES; i++) {
-                if ((menuTypes[i] != null) && (menuTypes[i].hasMenuView())) {
-                    MenuView menuView = menuTypes[i].mMenuView.get();
-                    menuView.updateChildren(cleared);
-                }
-
-                MenuAdapter adapter = mAdapterCache[i] == null ? null : mAdapterCache[i].get();
-                if (adapter != null) adapter.notifyDataSetChanged();
-
-                adapter = mOverflowAdapterCache[i] == null ? null : mOverflowAdapterCache[i].get();
-                if (adapter != null) adapter.notifyDataSetChanged();
+            if (structureChanged) {
+                mIsVisibleItemsStale = true;
+                mIsActionItemsStale = true;
             }
+
+            dispatchPresenterUpdate(structureChanged);
+        } else {
+            mItemsChangedWhileDispatchPrevented = true;
+        }
+    }
+
+    /**
+     * Stop dispatching item changed events to presenters until
+     * {@link #startDispatchingItemsChanged()} is called. Useful when
+     * many menu operations are going to be performed as a batch.
+     */
+    public void stopDispatchingItemsChanged() {
+        mPreventDispatchingItemsChanged = true;
+        mItemsChangedWhileDispatchPrevented = false;
+    }
+
+    public void startDispatchingItemsChanged() {
+        mPreventDispatchingItemsChanged = false;
+
+        if (mItemsChangedWhileDispatchPrevented) {
+            mItemsChangedWhileDispatchPrevented = false;
+            onItemsChanged(true);
         }
     }
 
@@ -1025,6 +833,7 @@ public class MenuBuilder implements Menu {
      */
     void onItemVisibleChanged(MenuItemImpl item) {
         // Notify of items being changed
+        mIsVisibleItemsStale = true;
         onItemsChanged(false);
     }
     
@@ -1034,6 +843,7 @@ public class MenuBuilder implements Menu {
      */
     void onItemActionRequestChanged(MenuItemImpl item) {
         // Notify of items being changed
+        mIsActionItemsStale = true;
         onItemsChanged(false);
     }
     
@@ -1054,17 +864,6 @@ public class MenuBuilder implements Menu {
         mIsActionItemsStale = true;
         
         return mVisibleItems;
-    }
-    
-    /**
-     * @return A fake action button parent view for obtaining child views.
-     */
-    private ViewGroup getMeasureActionButtonParent() {
-        if (mMeasureActionButtonParent == null) {
-            mMeasureActionButtonParent = (ViewGroup) getMenuType(TYPE_ACTION_BUTTON).getInflater()
-                    .inflate(LAYOUT_RES_FOR_TYPE[TYPE_ACTION_BUTTON], null, false);
-        }
-        return mMeasureActionButtonParent;
     }
 
     /**
@@ -1090,146 +889,55 @@ public class MenuBuilder implements Menu {
      * <p>The space freed by demoting a full group cannot be consumed by future menu items.
      * Once items begin to overflow, all future items become overflow items as well. This is
      * to avoid inadvertent reordering that may break the app's intended design.
-     *
-     * @param reserveActionOverflow true if an overflow button should consume one space
-     *                              in the available item count
      */
-    private void flagActionItems(boolean reserveActionOverflow) {
-        if (reserveActionOverflow != mReserveActionOverflow) {
-            mReserveActionOverflow = reserveActionOverflow;
-            mIsActionItemsStale = true;
-        }
-
+    public void flagActionItems() {
         if (!mIsActionItemsStale) {
             return;
         }
 
-        final ArrayList<MenuItemImpl> visibleItems = getVisibleItems();
-        final int itemsSize = visibleItems.size();
-        int maxActions = mMaxActionItems;
-        int widthLimit = mActionWidthLimit;
-        final int querySpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-        final ViewGroup parent = getMeasureActionButtonParent();
-
-        int requiredItems = 0;
-        int requestedItems = 0;
-        int firstActionWidth = 0;
-        boolean hasOverflow = false;
-        for (int i = 0; i < itemsSize; i++) {
-            MenuItemImpl item = visibleItems.get(i);
-            if (item.requiresActionButton()) {
-                requiredItems++;
-            } else if (item.requestsActionButton()) {
-                requestedItems++;
+        // Presenters flag action items as needed.
+        boolean flagged = false;
+        for (WeakReference<MenuPresenter> ref : mPresenters) {
+            final MenuPresenter presenter = ref.get();
+            if (presenter == null) {
+                mPresenters.remove(ref);
             } else {
-                hasOverflow = true;
+                flagged |= presenter.flagActionItems();
             }
         }
 
-        // Reserve a spot for the overflow item if needed.
-        if (reserveActionOverflow &&
-                (hasOverflow || requiredItems + requestedItems > maxActions)) {
-            maxActions--;
-        }
-        maxActions -= requiredItems;
-
-        final SparseBooleanArray seenGroups = mActionButtonGroups;
-        seenGroups.clear();
-
-        // Flag as many more requested items as will fit.
-        for (int i = 0; i < itemsSize; i++) {
-            MenuItemImpl item = visibleItems.get(i);
-
-            if (item.requiresActionButton()) {
-                View v = item.getActionView();
-                if (v == null) {
-                    v = item.getItemView(TYPE_ACTION_BUTTON, parent);
+        if (flagged) {
+            mActionItems.clear();
+            mNonActionItems.clear();
+            ArrayList<MenuItemImpl> visibleItems = getVisibleItems();
+            final int itemsSize = visibleItems.size();
+            for (int i = 0; i < itemsSize; i++) {
+                MenuItemImpl item = visibleItems.get(i);
+                if (item.isActionButton()) {
+                    mActionItems.add(item);
+                } else {
+                    mNonActionItems.add(item);
                 }
-                v.measure(querySpec, querySpec);
-                final int measuredWidth = v.getMeasuredWidth();
-                widthLimit -= measuredWidth;
-                if (firstActionWidth == 0) {
-                    firstActionWidth = measuredWidth;
-                }
-                final int groupId = item.getGroupId();
-                if (groupId != 0) {
-                    seenGroups.put(groupId, true);
-                }
-            } else if (item.requestsActionButton()) {
-                // Items in a group with other items that already have an action slot
-                // can break the max actions rule, but not the width limit.
-                final int groupId = item.getGroupId();
-                final boolean inGroup = seenGroups.get(groupId);
-                boolean isAction = (maxActions > 0 || inGroup) && widthLimit > 0;
-                maxActions--;
-
-                if (isAction) {
-                    View v = item.getActionView();
-                    if (v == null) {
-                        v = item.getItemView(TYPE_ACTION_BUTTON, parent);
-                    }
-                    v.measure(querySpec, querySpec);
-                    final int measuredWidth = v.getMeasuredWidth();
-                    widthLimit -= measuredWidth;
-                    if (firstActionWidth == 0) {
-                        firstActionWidth = measuredWidth;
-                    }
-
-                    // Did this push the entire first item past halfway?
-                    if (widthLimit + firstActionWidth <= 0) {
-                        isAction = false;
-                    }
-                }
-
-                if (isAction && groupId != 0) {
-                    seenGroups.put(groupId, true);
-                } else if (inGroup) {
-                    // We broke the width limit. Demote the whole group, they all overflow now.
-                    seenGroups.put(groupId, false);
-                    for (int j = 0; j < i; j++) {
-                        MenuItemImpl areYouMyGroupie = visibleItems.get(j);
-                        if (areYouMyGroupie.getGroupId() == groupId) {
-                            areYouMyGroupie.setIsActionButton(false);
-                        }
-                    }
-                }
-
-                item.setIsActionButton(isAction);
             }
+        } else if (mActionItems.size() + mNonActionItems.size() != getVisibleItems().size()) {
+            // Nobody flagged anything, but if something doesn't add up then treat everything
+            // as non-action items.
+            // (This happens during a first pass with no action-item presenters.)
+            mActionItems.clear();
+            mNonActionItems.clear();
+            mNonActionItems.addAll(getVisibleItems());
         }
-
-        mActionItems.clear();
-        mNonActionItems.clear();
-        for (int i = 0; i < itemsSize; i++) {
-            MenuItemImpl item = visibleItems.get(i);
-            if (item.isActionButton()) {
-                mActionItems.add(item);
-            } else {
-                mNonActionItems.add(item);
-            }
-        }
-
         mIsActionItemsStale = false;
     }
     
-    ArrayList<MenuItemImpl> getActionItems(boolean reserveActionOverflow) {
-        flagActionItems(reserveActionOverflow);
+    ArrayList<MenuItemImpl> getActionItems() {
+        flagActionItems();
         return mActionItems;
     }
     
-    ArrayList<MenuItemImpl> getNonActionItems(boolean reserveActionOverflow) {
-        flagActionItems(reserveActionOverflow);
+    ArrayList<MenuItemImpl> getNonActionItems() {
+        flagActionItems();
         return mNonActionItems;
-    }
-    
-    void setMaxActionItems(int maxActionItems) {
-        mMaxActionItems = maxActionItems;
-        mIsActionItemsStale = true;
-    }
-
-    void setActionWidthLimit(int widthLimit) {
-        mActionWidthLimit = widthLimit;
-        mIsActionItemsStale = true;
     }
 
     public void clearHeader() {
@@ -1362,148 +1070,11 @@ public class MenuBuilder implements Menu {
         mCurrentMenuInfo = menuInfo;
     }
 
-    /**
-     * Gets an adapter for providing items and their views.
-     * 
-     * @param menuType The type of menu to get an adapter for.
-     * @return A {@link MenuAdapter} for this menu with the given menu type.
-     */
-    public MenuAdapter getMenuAdapter(int menuType) {
-        MenuAdapter adapter = mAdapterCache[menuType] == null ?
-                null : mAdapterCache[menuType].get();
-        if (adapter != null) return adapter;
-
-        adapter = new MenuAdapter(menuType);
-        mAdapterCache[menuType] = new WeakReference<MenuAdapter>(adapter);
-        return adapter;
-    }
-
-    /**
-     * Gets an adapter for providing overflow (non-action) items and their views.
-     *
-     * @param menuType The type of menu to get an adapter for.
-     * @return A {@link MenuAdapter} for this menu with the given menu type.
-     */
-    public MenuAdapter getOverflowMenuAdapter(int menuType) {
-        OverflowMenuAdapter adapter = mOverflowAdapterCache[menuType] == null ?
-                null : mOverflowAdapterCache[menuType].get();
-        if (adapter != null) return adapter;
-
-        adapter = new OverflowMenuAdapter(menuType);
-        mOverflowAdapterCache[menuType] = new WeakReference<OverflowMenuAdapter>(adapter);
-        return adapter;
-    }
-
     void setOptionalIconsVisible(boolean visible) {
         mOptionalIconsVisible = visible;
     }
     
     boolean getOptionalIconsVisible() {
         return mOptionalIconsVisible;
-    }
-
-    public void saveHierarchyState(Bundle outState) {
-        SparseArray<Parcelable> viewStates = new SparseArray<Parcelable>();
-        
-        MenuType[] menuTypes = mMenuTypes;
-        for (int i = NUM_TYPES - 1; i >= 0; i--) {
-            if (menuTypes[i] == null) {
-                continue;
-            }
-
-            if (menuTypes[i].hasMenuView()) {
-                ((View) menuTypes[i].getMenuView(null)).saveHierarchyState(viewStates);
-            }
-        }
-        
-        outState.putSparseParcelableArray(VIEWS_TAG, viewStates);
-    }
-
-    public void restoreHierarchyState(Bundle inState) {
-        // Save this for menu views opened later
-        SparseArray<Parcelable> viewStates = mFrozenViewStates = inState
-                .getSparseParcelableArray(VIEWS_TAG);
-        
-        // Thaw those menu views already open
-        MenuType[] menuTypes = mMenuTypes;
-        for (int i = NUM_TYPES - 1; i >= 0; i--) {
-            if (menuTypes[i] == null) {
-                continue;
-            }
-            
-            if (menuTypes[i].hasMenuView()) {
-                ((View) menuTypes[i].getMenuView(null)).restoreHierarchyState(viewStates);
-            }
-        }
-    }
-    
-    /**
-     * An adapter that allows an {@link AdapterView} to use this {@link MenuBuilder} as a data
-     * source.  This adapter will use only the visible/shown items from the menu.
-     */
-    public class MenuAdapter extends BaseAdapter {
-        private int mMenuType;
-        
-        public MenuAdapter(int menuType) {
-            mMenuType = menuType;
-        }
-
-        public int getOffset() {
-            if (mMenuType == TYPE_EXPANDED) {
-                return getNumIconMenuItemsShown(); 
-            } else {
-                return 0;
-            }
-        }
-        
-        public int getCount() {
-            return getVisibleItems().size() - getOffset();
-        }
-
-        public MenuItemImpl getItem(int position) {
-            return getVisibleItems().get(position + getOffset());
-        }
-
-        public long getItemId(int position) {
-            // Since a menu item's ID is optional, we'll use the position as an
-            // ID for the item in the AdapterView
-            return position;
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView != null) {
-                MenuView.ItemView itemView = (MenuView.ItemView) convertView;
-                itemView.getItemData().setItemView(mMenuType, null);
-
-                MenuItemImpl item = (MenuItemImpl) getItem(position);
-                itemView.initialize(item, mMenuType);
-                item.setItemView(mMenuType, itemView);
-                return convertView;
-            } else {
-                MenuItemImpl item = (MenuItemImpl) getItem(position);
-                item.setItemView(mMenuType, null);
-                return item.getItemView(mMenuType, parent);
-            }
-        }
-    }
-
-    /**
-     * An adapter that allows an {@link AdapterView} to use this {@link MenuBuilder} as a data
-     * source for overflow menu items that do not fit in the list of action items.
-     */
-    private class OverflowMenuAdapter extends MenuAdapter {
-        public OverflowMenuAdapter(int menuType) {
-            super(menuType);
-        }
-
-        @Override
-        public MenuItemImpl getItem(int position) {
-            return getNonActionItems(true).get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return getNonActionItems(true).size();
-        }
     }
 }

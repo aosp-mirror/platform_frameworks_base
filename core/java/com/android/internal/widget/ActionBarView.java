@@ -18,8 +18,10 @@ package com.android.internal.widget;
 
 import com.android.internal.R;
 import com.android.internal.view.menu.ActionMenuItem;
+import com.android.internal.view.menu.ActionMenuPresenter;
 import com.android.internal.view.menu.ActionMenuView;
 import com.android.internal.view.menu.MenuBuilder;
+import com.android.internal.view.menu.MenuPresenter;
 
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
@@ -112,6 +114,7 @@ public class ActionBarView extends ViewGroup {
 
     private MenuBuilder mOptionsMenu;
     private ActionMenuView mMenuView;
+    private ActionMenuPresenter mActionMenuPresenter;
     
     private ActionBarContextView mContextView;
 
@@ -250,16 +253,24 @@ public class ActionBarView extends ViewGroup {
         mCallback = callback;
     }
 
-    public void setMenu(Menu menu) {
+    public void setMenu(Menu menu, MenuPresenter.Callback cb) {
         if (menu == mOptionsMenu) return;
+
+        if (mOptionsMenu != null) {
+            mOptionsMenu.removeMenuPresenter(mActionMenuPresenter);
+        }
 
         MenuBuilder builder = (MenuBuilder) menu;
         mOptionsMenu = builder;
         if (mMenuView != null) {
             removeView(mMenuView);
         }
-        final ActionMenuView menuView = (ActionMenuView) builder.getMenuView(
-                MenuBuilder.TYPE_ACTION_BUTTON, null);
+        if (mActionMenuPresenter == null) {
+            mActionMenuPresenter = new ActionMenuPresenter();
+            mActionMenuPresenter.setCallback(cb);
+            builder.addMenuPresenter(mActionMenuPresenter);
+        }
+        final ActionMenuView menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
         menuView.setLayoutParams(layoutParams);
@@ -268,15 +279,15 @@ public class ActionBarView extends ViewGroup {
     }
 
     public boolean showOverflowMenu() {
-        if (mMenuView != null) {
-            return mMenuView.showOverflowMenu();
+        if (mActionMenuPresenter != null) {
+            return mActionMenuPresenter.showOverflowMenu();
         }
         return false;
     }
 
     public void openOverflowMenu() {
-        if (mMenuView != null) {
-            mMenuView.openOverflowMenu();
+        if (mActionMenuPresenter != null) {
+            showOverflowMenu();
         }
     }
 
@@ -289,28 +300,27 @@ public class ActionBarView extends ViewGroup {
     }
 
     public boolean hideOverflowMenu() {
-        if (mMenuView != null) {
-            return mMenuView.hideOverflowMenu();
+        if (mActionMenuPresenter != null) {
+            return mActionMenuPresenter.hideOverflowMenu();
         }
         return false;
     }
 
     public boolean isOverflowMenuShowing() {
-        if (mMenuView != null) {
-            return mMenuView.isOverflowMenuShowing();
-        }
-        return false;
-    }
-
-    public boolean isOverflowMenuOpen() {
-        if (mMenuView != null) {
-            return mMenuView.isOverflowMenuOpen();
+        if (mActionMenuPresenter != null) {
+            return mActionMenuPresenter.isOverflowMenuShowing();
         }
         return false;
     }
 
     public boolean isOverflowReserved() {
-        return mMenuView != null && mMenuView.isOverflowReserved();
+        return mActionMenuPresenter != null && mActionMenuPresenter.isOverflowReserved();
+    }
+
+    public void dismissPopupMenus() {
+        if (mActionMenuPresenter != null) {
+            mActionMenuPresenter.dismissPopupMenus();
+        }
     }
 
     public void setCustomNavigationView(View view) {

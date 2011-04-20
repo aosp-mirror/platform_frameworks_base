@@ -28,7 +28,7 @@ import android.widget.LinearLayout;
  * @hide
  */
 public class ActionMenuItemView extends LinearLayout
-        implements MenuView.ItemView, View.OnClickListener {
+        implements MenuView.ItemView, View.OnClickListener, ActionMenuView.ActionMenuChildView {
     private static final String TAG = "ActionMenuItemView";
 
     private MenuItemImpl mItemData;
@@ -136,5 +136,13 @@ public class ActionMenuItemView extends LinearLayout
 
     public boolean showsIcon() {
         return true;
+    }
+
+    public boolean needsDividerBefore() {
+        return hasText() && mItemData.getIcon() == null;
+    }
+
+    public boolean needsDividerAfter() {
+        return hasText();
     }
 }

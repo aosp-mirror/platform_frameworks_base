@@ -80,10 +80,7 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
     
     /** Icon for the 'More' button */
     private Drawable mMoreIcon;
-    
-    /** Item view for the 'More' button */
-    private IconMenuItemView mMoreItemView;
-    
+
     /** Background of each item (should contain the selected and focused states) */
     private Drawable mItemBackground;
 
@@ -170,6 +167,10 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
         setFocusableInTouchMode(true);
         // This is so our children can still be arrow-key focused
         setDescendantFocusability(FOCUS_AFTER_DESCENDANTS);
+    }
+
+    int getMaxItems() {
+        return mMaxItems;
     }
 
     /**
@@ -277,23 +278,8 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
         return true;
     }
 
-    /**
-     * Adds an IconMenuItemView to this icon menu view.
-     * @param itemView The item's view to add
-     */
-    private void addItemView(IconMenuItemView itemView) {   
-        // Set ourselves on the item view
-        itemView.setIconMenuView(this);
-        
-        // Apply the background to the item view
-        itemView.setBackgroundDrawable(
-                mItemBackground.getConstantState().newDrawable(
-                        getContext().getResources()));
-
-        // This class is the invoker for all its item views 
-        itemView.setItemInvoker(this);
-        
-        addView(itemView, itemView.getTextAppropriateLayoutParams());
+    Drawable getItemBackgroundDrawable() {
+        return mItemBackground.getConstantState().newDrawable(getContext().getResources());
     }
 
     /**
@@ -302,25 +288,23 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
      * have a MenuItemData backing it.
      * @return The IconMenuItemView for the 'More' button
      */
-    private IconMenuItemView createMoreItemView() {
-        LayoutInflater inflater = mMenu.getMenuType(MenuBuilder.TYPE_ICON).getInflater();
+    IconMenuItemView createMoreItemView() {
+        Context context = getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
         
         final IconMenuItemView itemView = (IconMenuItemView) inflater.inflate(
                 com.android.internal.R.layout.icon_menu_item_layout, null);
         
-        Resources r = getContext().getResources();
+        Resources r = context.getResources();
         itemView.initialize(r.getText(com.android.internal.R.string.more_item_label), mMoreIcon);
         
         // Set up a click listener on the view since there will be no invocation sequence
         // due to the lack of a MenuItemData this view
         itemView.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-                // Switches the menu to expanded mode
-                MenuBuilder.Callback cb = mMenu.getCallback();
-                if (cb != null) {
-                    // Call callback
-                    cb.onMenuModeChange(mMenu);
-                }
+                // Switches the menu to expanded mode. Requires support from
+                // the menu's active callback.
+                mMenu.changeMenuMode();
             }
         });
         
@@ -328,51 +312,8 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
     }
     
     
-    public void initialize(MenuBuilder menu, int menuType) {
+    public void initialize(MenuBuilder menu) {
         mMenu = menu;
-        updateChildren(true);
-    }
-
-    public void updateChildren(boolean cleared) {
-        // This method does a clear refresh of children
-        removeAllViews();
-        
-        // IconMenuView never wants content sorted for an overflow action button, since
-        // it is never used in the presence of an overflow button.
-        final ArrayList<MenuItemImpl> itemsToShow = mMenu.getNonActionItems(false);
-        final int numItems = itemsToShow.size();
-        final int numItemsThatCanFit = mMaxItems;
-        // Minimum of the num that can fit and the num that we have
-        final int minFitMinus1AndNumItems = Math.min(numItemsThatCanFit - 1, numItems);
-        
-        MenuItemImpl itemData;
-        // Traverse through all but the last item that can fit since that last item can either
-        // be a 'More' button or a sixth item
-        for (int i = 0; i < minFitMinus1AndNumItems; i++) {
-            itemData = itemsToShow.get(i);
-            addItemView((IconMenuItemView) itemData.getItemView(MenuBuilder.TYPE_ICON, this));
-        }
-
-        if (numItems > numItemsThatCanFit) {
-            // If there are more items than we can fit, show the 'More' button to
-            // switch to expanded mode
-            if (mMoreItemView == null) {
-                mMoreItemView = createMoreItemView();
-            }
-            
-            addItemView(mMoreItemView);
-            
-            // The last view is the more button, so the actual number of items is one less than
-            // the number that can fit
-            mNumActualItemsShown = numItemsThatCanFit - 1;
-        } else if (numItems == numItemsThatCanFit) {
-            // There are exactly the number we can show, so show the last item 
-            final MenuItemImpl lastItemData = itemsToShow.get(numItemsThatCanFit - 1);
-            addItemView((IconMenuItemView) lastItemData.getItemView(MenuBuilder.TYPE_ICON, this));
-            
-            // The items shown fit exactly
-            mNumActualItemsShown = numItemsThatCanFit;
-        }
     }
 
     /**
@@ -463,13 +404,6 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mHasStaleChildren) {
-            mHasStaleChildren = false;
-
-            // If we have stale data, resync with the menu
-            updateChildren(false);
-        }
-        
         int measuredWidth = resolveSize(Integer.MAX_VALUE, widthMeasureSpec);
         calculateItemFittingMetadata(measuredWidth);
         layoutItems(measuredWidth);
@@ -564,6 +498,9 @@ public final class IconMenuView extends ViewGroup implements ItemInvoker, MenuVi
         return mNumActualItemsShown;
     }
     
+    void setNumActualItemsShown(int count) {
+        mNumActualItemsShown = count;
+    }
     
     public int getWindowAnimations() {
         return mAnimations;

@@ -16,21 +16,18 @@
 
 package com.android.internal.view.menu;
 
-import java.lang.ref.WeakReference;
+import com.android.internal.view.menu.MenuView.ItemView;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewDebug;
-import android.view.ViewGroup;
-import android.view.ContextMenu.ContextMenuInfo;
-
-import com.android.internal.view.menu.MenuView.ItemView;
 
 /**
  * @hide
@@ -60,9 +57,6 @@ public final class MenuItemImpl implements MenuItem {
      * needed).
      */ 
     private int mIconResId = NO_ICON;
-
-    /** The (cached) menu item views for this item */  
-    private WeakReference<ItemView> mItemViews[];
     
     /** The menu to which this item belongs */
     private MenuBuilder mMenu;
@@ -128,7 +122,6 @@ public final class MenuItemImpl implements MenuItem {
                     com.android.internal.R.string.menu_space_shortcut_label);
         }
         
-        mItemViews = new WeakReference[MenuBuilder.NUM_TYPES];
         mMenu = menu;
         mId = id;
         mGroup = group;
@@ -149,9 +142,7 @@ public final class MenuItemImpl implements MenuItem {
             return true;
         }
 
-        MenuBuilder.Callback callback = mMenu.getCallback(); 
-        if (callback != null &&
-            callback.onMenuItemSelected(mMenu.getRootMenu(), this)) {
+        if (mMenu.dispatchMenuItemSelected(mMenu.getRootMenu(), this)) {
             return true;
         }
 
@@ -172,10 +163,6 @@ public final class MenuItemImpl implements MenuItem {
         return false;
     }
     
-    private boolean hasItemView(int menuType) {
-        return mItemViews[menuType] != null && mItemViews[menuType].get() != null;
-    }
-    
     public boolean isEnabled() {
         return (mFlags & ENABLED) != 0;
     }
@@ -187,13 +174,7 @@ public final class MenuItemImpl implements MenuItem {
             mFlags &= ~ENABLED;
         }
 
-        for (int i = MenuBuilder.NUM_TYPES - 1; i >= 0; i--) {
-            // If the item view prefers a condensed title, only set this title if there
-            // is no condensed title for this item
-            if (hasItemView(i)) {
-                mItemViews[i].get().setEnabled(enabled);
-            }
-        }
+        mMenu.onItemsChanged(false);
         
         return this;
     }
@@ -242,7 +223,7 @@ public final class MenuItemImpl implements MenuItem {
         
         mShortcutAlphabeticChar = Character.toLowerCase(alphaChar);
         
-        refreshShortcutOnItemViews();
+        mMenu.onItemsChanged(false);
         
         return this;
     }
@@ -256,7 +237,7 @@ public final class MenuItemImpl implements MenuItem {
         
         mShortcutNumericChar = numericChar;
         
-        refreshShortcutOnItemViews();
+        mMenu.onItemsChanged(false);
         
         return this;
     }
@@ -265,7 +246,7 @@ public final class MenuItemImpl implements MenuItem {
         mShortcutNumericChar = numericChar;
         mShortcutAlphabeticChar = Character.toLowerCase(alphaChar);
         
-        refreshShortcutOnItemViews();
+        mMenu.onItemsChanged(false);
         
         return this;
     }
@@ -322,38 +303,6 @@ public final class MenuItemImpl implements MenuItem {
         return mMenu.isShortcutsVisible() && (getShortcut() != 0);
     }
     
-    /**
-     * Refreshes the shortcut shown on the ItemViews.  This method retrieves current
-     * shortcut state (mode and shown) from the menu that contains this item.
-     */
-    private void refreshShortcutOnItemViews() {
-        refreshShortcutOnItemViews(mMenu.isShortcutsVisible(), mMenu.isQwertyMode());
-    }
-
-    /**
-     * Refreshes the shortcut shown on the ItemViews. This is usually called by
-     * the {@link MenuBuilder} when it is refreshing the shortcuts on all item
-     * views, so it passes arguments rather than each item calling a method on the menu to get
-     * the same values.
-     * 
-     * @param menuShortcutShown The menu's shortcut shown mode. In addition,
-     *            this method will ensure this item has a shortcut before it
-     *            displays the shortcut.
-     * @param isQwertyMode Whether the shortcut mode is qwerty mode
-     */
-    void refreshShortcutOnItemViews(boolean menuShortcutShown, boolean isQwertyMode) {
-        final char shortcutKey = (isQwertyMode) ? mShortcutAlphabeticChar : mShortcutNumericChar;
-
-        // Show shortcuts if the menu is supposed to show shortcuts AND this item has a shortcut
-        final boolean showShortcut = menuShortcutShown && (shortcutKey != 0);
-        
-        for (int i = MenuBuilder.NUM_TYPES - 1; i >= 0; i--) {
-            if (hasItemView(i)) {
-                mItemViews[i].get().setShortcut(showShortcut, shortcutKey);
-            }
-        }
-    }
-    
     public SubMenu getSubMenu() {
         return mSubMenu;
     }
@@ -394,18 +343,7 @@ public final class MenuItemImpl implements MenuItem {
     public MenuItem setTitle(CharSequence title) {
         mTitle = title;
 
-        for (int i = MenuBuilder.NUM_TYPES - 1; i >= 0; i--) {
-            // If the item view prefers a condensed title, only set this title if there
-            // is no condensed title for this item
-            if (!hasItemView(i)) {
-                continue;
-            }
-            
-            ItemView itemView = mItemViews[i].get(); 
-            if (!itemView.prefersCondensedTitle() || mTitleCondensed == null) {
-                itemView.setTitle(title);
-            }
-        }
+        mMenu.onItemsChanged(false);
         
         if (mSubMenu != null) {
             mSubMenu.setHeaderTitle(title);
@@ -430,18 +368,12 @@ public final class MenuItemImpl implements MenuItem {
             title = mTitle;
         }
         
-        for (int i = MenuBuilder.NUM_TYPES - 1; i >= 0; i--) {
-            // Refresh those item views that prefer a condensed title
-            if (hasItemView(i) && (mItemViews[i].get().prefersCondensedTitle())) {
-                mItemViews[i].get().setTitle(title);
-            }
-        }
+        mMenu.onItemsChanged(false);
         
         return this;
     }
 
     public Drawable getIcon() {
-        
         if (mIconDrawable != null) {
             return mIconDrawable;
         }
@@ -456,7 +388,7 @@ public final class MenuItemImpl implements MenuItem {
     public MenuItem setIcon(Drawable icon) {
         mIconResId = NO_ICON;
         mIconDrawable = icon;
-        setIconOnViews(icon);
+        mMenu.onItemsChanged(false);
         
         return this;
     }
@@ -466,32 +398,9 @@ public final class MenuItemImpl implements MenuItem {
         mIconResId = iconResId;
 
         // If we have a view, we need to push the Drawable to them
-        if (haveAnyOpenedIconCapableItemViews()) {
-            Drawable drawable = iconResId != NO_ICON ? mMenu.getResources().getDrawable(iconResId)
-                    : null;
-            setIconOnViews(drawable);
-        }
+        mMenu.onItemsChanged(false);
         
         return this;
-    }
-
-    private void setIconOnViews(Drawable icon) {
-        for (int i = MenuBuilder.NUM_TYPES - 1; i >= 0; i--) {
-            // Refresh those item views that are able to display an icon
-            if (hasItemView(i) && mItemViews[i].get().showsIcon()) {
-                mItemViews[i].get().setIcon(icon);
-            }
-        }
-    }
-    
-    private boolean haveAnyOpenedIconCapableItemViews() {
-        for (int i = MenuBuilder.NUM_TYPES - 1; i >= 0; i--) {
-            if (hasItemView(i) && mItemViews[i].get().showsIcon()) {
-                return true;
-            }
-        }
-        
-        return false;
     }
     
     public boolean isCheckable() {
@@ -502,19 +411,14 @@ public final class MenuItemImpl implements MenuItem {
         final int oldFlags = mFlags;
         mFlags = (mFlags & ~CHECKABLE) | (checkable ? CHECKABLE : 0);
         if (oldFlags != mFlags) {
-            for (int i = MenuBuilder.NUM_TYPES - 1; i >= 0; i--) {
-                if (hasItemView(i)) {
-                    mItemViews[i].get().setCheckable(checkable);
-                }
-            }
+            mMenu.onItemsChanged(false);
         }
         
         return this;
     }
 
-    public void setExclusiveCheckable(boolean exclusive)
-    {
-        mFlags = (mFlags&~EXCLUSIVE) | (exclusive ? EXCLUSIVE : 0);
+    public void setExclusiveCheckable(boolean exclusive) {
+        mFlags = (mFlags & ~EXCLUSIVE) | (exclusive ? EXCLUSIVE : 0);
     }
 
     public boolean isExclusiveCheckable() {
@@ -541,11 +445,7 @@ public final class MenuItemImpl implements MenuItem {
         final int oldFlags = mFlags;
         mFlags = (mFlags & ~CHECKED) | (checked ? CHECKED : 0);
         if (oldFlags != mFlags) {
-            for (int i = MenuBuilder.NUM_TYPES - 1; i >= 0; i--) {
-                if (hasItemView(i)) {
-                    mItemViews[i].get().setChecked(checked);
-                }
-            }
+            mMenu.onItemsChanged(false);
         }
     }
     
@@ -581,39 +481,6 @@ public final class MenuItemImpl implements MenuItem {
         mClickListener = clickListener;
         return this;
     }
-
-    View getItemView(int menuType, ViewGroup parent) {
-        if (!hasItemView(menuType)) {
-            mItemViews[menuType] = new WeakReference<ItemView>(createItemView(menuType, parent));
-        }
-        
-        return (View) mItemViews[menuType].get();
-    }
-
-    void setItemView(int menuType, ItemView view) {
-        mItemViews[menuType] = new WeakReference<ItemView>(view);
-    }
-
-    /**
-     * Create and initializes a menu item view that implements {@link MenuView.ItemView}.
-     * @param menuType The type of menu to get a View for (must be one of
-     *            {@link MenuBuilder#TYPE_ICON}, {@link MenuBuilder#TYPE_EXPANDED},
-     *            {@link MenuBuilder#TYPE_SUB}, {@link MenuBuilder#TYPE_CONTEXT}).
-     * @return The inflated {@link MenuView.ItemView} that is ready for use
-     */
-    private MenuView.ItemView createItemView(int menuType, ViewGroup parent) {
-        // Create the MenuView
-        MenuView.ItemView itemView = (MenuView.ItemView) getLayoutInflater(menuType)
-                .inflate(MenuBuilder.ITEM_LAYOUT_RES_FOR_TYPE[menuType], parent, false);
-        itemView.initialize(this, menuType);
-        return itemView;
-    }
-    
-    void clearItemViews() {
-        for (int i = mItemViews.length - 1; i >= 0; i--) {
-            mItemViews[i] = null;
-        }
-    }
     
     @Override
     public String toString() {
@@ -627,24 +494,12 @@ public final class MenuItemImpl implements MenuItem {
     public ContextMenuInfo getMenuInfo() {
         return mMenuInfo;
     }
-    
-    /**
-     * Returns a LayoutInflater that is themed for the given menu type.
-     * 
-     * @param menuType The type of menu.
-     * @return A LayoutInflater.
-     */
-    public LayoutInflater getLayoutInflater(int menuType) {
-        return mMenu.getMenuType(menuType).getInflater();
-    }
 
     /**
-     * @return Whether the given menu type should show icons for menu items.
+     * @return Whether the menu should show icons for menu items.
      */
-    public boolean shouldShowIcon(int menuType) {
-        return menuType == MenuBuilder.TYPE_ICON ||
-                menuType == MenuBuilder.TYPE_ACTION_BUTTON ||
-                mMenu.getOptionalIconsVisible();
+    public boolean shouldShowIcon() {
+        return mMenu.getOptionalIconsVisible();
     }
     
     public boolean isActionButton() {
@@ -696,8 +551,8 @@ public final class MenuItemImpl implements MenuItem {
 
     public MenuItem setActionView(int resId) {
         LayoutInflater inflater = LayoutInflater.from(mMenu.getContext());
-        ViewGroup parent = (ViewGroup) mMenu.getMenuView(MenuBuilder.TYPE_ACTION_BUTTON, null);
-        setActionView(inflater.inflate(resId, parent, false));
+        // TODO - Fix for proper parent. Lazily inflate in the presenter.
+        setActionView(inflater.inflate(resId, null));
         return this;
     }
 
