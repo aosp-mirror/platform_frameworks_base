@@ -94,8 +94,8 @@ TEST_F(SurfaceTextureClientTest, EglCreateWindowSurfaceSucceeds) {
 
     EGLSurface eglSurface = eglCreateWindowSurface(dpy, myConfig, anw.get(),
             NULL);
-    ASSERT_NE(EGL_NO_SURFACE, eglSurface);
-    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+    EXPECT_NE(EGL_NO_SURFACE, eglSurface);
+    EXPECT_EQ(EGL_SUCCESS, eglGetError());
 
     eglTerminate(dpy);
 }

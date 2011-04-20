@@ -31,10 +31,15 @@
 namespace android {
 // ----------------------------------------------------------------------------
 
+class SurfaceTextureClient;
+
 class ISurfaceTexture : public IInterface
 {
 public:
     DECLARE_META_INTERFACE(SurfaceTexture);
+
+protected:
+    friend class SurfaceTextureClient;
 
     enum { BUFFER_NEEDS_REALLOCATION = 1 };
 
@@ -85,6 +90,10 @@ public:
     // Holding this binder reference prevents SurfaceFlinger from freeing the
     // buffers before the client is done with them.
     virtual sp<IBinder> getAllocator() = 0;
+
+    // query retrieves some information for this surface
+    // 'what' tokens allowed are that of android_natives.h
+    virtual int query(int what, int* value) = 0;
 };
 
 // ----------------------------------------------------------------------------

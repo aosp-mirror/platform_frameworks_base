@@ -159,29 +159,17 @@ int SurfaceTextureClient::queueBuffer(android_native_buffer_t* buffer) {
 
 int SurfaceTextureClient::query(int what, int* value) const {
     LOGV("SurfaceTextureClient::query");
-    Mutex::Autolock lock(mMutex);
     switch (what) {
-    case NATIVE_WINDOW_WIDTH:
-        *value = mQueryWidth ? mQueryWidth : mReqWidth;
-        return NO_ERROR;
-    case NATIVE_WINDOW_HEIGHT:
-        *value = mQueryHeight ? mQueryHeight : mReqHeight;
-        return NO_ERROR;
-    case NATIVE_WINDOW_FORMAT:
-        *value = mQueryFormat ? mQueryFormat : mReqFormat;
-        return NO_ERROR;
-    case NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS:
-        *value = MIN_UNDEQUEUED_BUFFERS;
-        return NO_ERROR;
     case NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER:
-        // SurfaceTextureClient currently never queues frames to SurfaceFlinger.
+        // TODO: this is not needed anymore
         *value = 0;
         return NO_ERROR;
     case NATIVE_WINDOW_CONCRETE_TYPE:
+        // TODO: this is not needed anymore
         *value = NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT;
         return NO_ERROR;
     }
-    return BAD_VALUE;
+    return mSurfaceTexture->query(what, value);
 }
 
 int SurfaceTextureClient::perform(int operation, va_list args)

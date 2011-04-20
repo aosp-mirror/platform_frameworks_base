@@ -509,6 +509,34 @@ uint32_t SurfaceTexture::getCurrentTransform() const {
     return mCurrentTransform;
 }
 
+int SurfaceTexture::query(int what, int* outValue)
+{
+    Mutex::Autolock lock(mMutex);
+    int value;
+    switch (what) {
+    case NATIVE_WINDOW_WIDTH:
+        value = mDefaultWidth;
+        if (!mDefaultWidth && !mDefaultHeight && mCurrentTextureBuf!=0)
+            value = mCurrentTextureBuf->width;
+        break;
+    case NATIVE_WINDOW_HEIGHT:
+        value = mDefaultHeight;
+        if (!mDefaultWidth && !mDefaultHeight && mCurrentTextureBuf!=0)
+            value = mCurrentTextureBuf->height;
+        break;
+    case NATIVE_WINDOW_FORMAT:
+        value = mPixelFormat;
+        break;
+    case NATIVE_WINDOW_MIN_UNDEQUEUED_BUFFERS:
+        value = mSynchronousMode ?
+                (MIN_UNDEQUEUED_BUFFERS-1) : MIN_UNDEQUEUED_BUFFERS;
+        break;
+    default:
+        return BAD_VALUE;
+    }
+    outValue[0] = value;
+    return NO_ERROR;
+}
 
 static void mtxMul(float out[16], const float a[16], const float b[16]) {
     out[0] = a[0]*b[0] + a[4]*b[1] + a[8]*b[2] + a[12]*b[3];

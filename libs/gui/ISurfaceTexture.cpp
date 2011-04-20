@@ -39,6 +39,7 @@ enum {
     SET_CROP,
     SET_TRANSFORM,
     GET_ALLOCATOR,
+    QUERY,
 };
 
 
@@ -132,6 +133,17 @@ public:
         remote()->transact(GET_ALLOCATOR, data, &reply);
         return reply.readStrongBinder();
     }
+
+    virtual int query(int what, int* value) {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
+        data.writeInt32(what);
+        remote()->transact(QUERY, data, &reply);
+        value[0] = reply.readInt32();
+        status_t result = reply.readInt32();
+        return result;
+    }
+
 };
 
 IMPLEMENT_META_INTERFACE(SurfaceTexture, "android.gui.SurfaceTexture");
@@ -207,6 +219,15 @@ status_t BnSurfaceTexture::onTransact(
             CHECK_INTERFACE(ISurfaceTexture, data, reply);
             sp<IBinder> result = getAllocator();
             reply->writeStrongBinder(result);
+            return NO_ERROR;
+        } break;
+        case QUERY: {
+            CHECK_INTERFACE(ISurfaceTexture, data, reply);
+            int value;
+            int what = data.readInt32();
+            int res = query(what, &value);
+            reply->writeInt32(value);
+            reply->writeInt32(res);
             return NO_ERROR;
         } break;
     }

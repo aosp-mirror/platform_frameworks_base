@@ -76,6 +76,8 @@ public:
     virtual status_t setCrop(const Rect& reg);
     virtual status_t setTransform(uint32_t transform);
 
+    virtual int query(int what, int* value);
+
     // updateTexImage sets the image contents of the target texture to that of
     // the most recently queued buffer.
     //
