@@ -34,12 +34,18 @@ import java.lang.reflect.Modifier;
  * {@link android.content.CursorLoader}, however applications are free to write
  * their own loaders for loading other types of data.
  *
+ * While the LoaderManager API was introduced in
+ * {@link android.os.Build.VERSION_CODES#HONEYCOMB}, a version of the API
+ * is also available for use on older platforms.  See the blog post
+ * <a href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">
+ * Fragments For All</a> for more details.
+ *
  * <p>As an example, here is the full implementation of a {@link Fragment}
  * that displays a {@link android.widget.ListView} containing the results of
  * a query against the contacts content provider.  It uses a
  * {@link android.content.CursorLoader} to manage the query on the provider.
  *
- * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentListCursorLoader.java
+ * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/LoaderCursor.java
  *      fragment_cursor}
  */
 public abstract class LoaderManager {
