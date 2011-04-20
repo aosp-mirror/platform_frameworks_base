@@ -72,9 +72,14 @@ static const float DRAG_MIN_SWITCH_SPEED = 50.0f; // pixels per second
 // The time between down and up must be less than this to be considered a tap.
 static const nsecs_t TAP_INTERVAL = 150 * 1000000; // 150 ms
 
+// Tap drag gesture delay time.
+// The time between up and the next up must be greater than this to be considered a
+// drag.  Otherwise, the previous tap is finished and a new tap begins.
+static const nsecs_t TAP_DRAG_INTERVAL = 150 * 1000000; // 150 ms
+
 // The distance in pixels that the pointer is allowed to move from initial down
 // to up and still be called a tap.
-static const float TAP_SLOP = 5.0f; // 5 pixels
+static const float TAP_SLOP = 10.0f; // 10 pixels
 
 // Time after the first touch points go down to settle on an initial centroid.
 // This is intended to be enough time to handle cases where the user puts down two
@@ -2761,14 +2766,21 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
         }
     }
 
-    // Process touches and virtual keys.
-    TouchResult touchResult = consumeOffScreenTouches(when, policyFlags);
-    if (touchResult == DISPATCH_TOUCH) {
-        suppressSwipeOntoVirtualKeys(when);
-        if (mPointerController != NULL) {
-            dispatchPointerGestures(when, policyFlags);
+    TouchResult touchResult;
+    if (mLastTouch.pointerCount == 0 && mCurrentTouch.pointerCount == 0
+            && mLastTouch.buttonState == mCurrentTouch.buttonState) {
+        // Drop spurious syncs.
+        touchResult = DROP_STROKE;
+    } else {
+        // Process touches and virtual keys.
+        touchResult = consumeOffScreenTouches(when, policyFlags);
+        if (touchResult == DISPATCH_TOUCH) {
+            suppressSwipeOntoVirtualKeys(when);
+            if (mPointerController != NULL) {
+                dispatchPointerGestures(when, policyFlags, false /*isTimeout*/);
+            }
+            dispatchTouches(when, policyFlags);
         }
-        dispatchTouches(when, policyFlags);
     }
 
     // Copy current touch to last touch in preparation for the next cycle.
@@ -2778,6 +2790,12 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
         mLastTouch.buttonState = savedTouch->buttonState;
     } else {
         mLastTouch.copyFrom(*savedTouch);
+    }
+}
+
+void TouchInputMapper::timeoutExpired(nsecs_t when) {
+    if (mPointerController != NULL) {
+        dispatchPointerGestures(when, 0 /*policyFlags*/, true /*isTimeout*/);
     }
 }
 
@@ -3224,7 +3242,8 @@ void TouchInputMapper::prepareTouches(int32_t* outEdgeFlags,
     *outYPrecision = mLocked.orientedYPrecision;
 }
 
-void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlags) {
+void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlags,
+        bool isTimeout) {
     // Switch pointer presentation.
     mPointerController->setPresentation(
             mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS
@@ -3233,7 +3252,11 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
 
     // Update current gesture coordinates.
     bool cancelPreviousGesture, finishPreviousGesture;
-    preparePointerGestures(when, &cancelPreviousGesture, &finishPreviousGesture);
+    bool sendEvents = preparePointerGestures(when,
+            &cancelPreviousGesture, &finishPreviousGesture, isTimeout);
+    if (!sendEvents) {
+        return;
+    }
 
     // Show the pointer if needed.
     if (mPointerGesture.currentGestureMode != PointerGesture::NEUTRAL
@@ -3246,7 +3269,9 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
 
     // Update last coordinates of pointers that have moved so that we observe the new
     // pointer positions at the same time as other pointers that have just gone up.
-    bool down = mPointerGesture.currentGestureMode == PointerGesture::CLICK_OR_DRAG
+    bool down = mPointerGesture.currentGestureMode == PointerGesture::TAP
+            || mPointerGesture.currentGestureMode == PointerGesture::TAP_DRAG
+            || mPointerGesture.currentGestureMode == PointerGesture::BUTTON_CLICK_OR_DRAG
             || mPointerGesture.currentGestureMode == PointerGesture::PRESS
             || mPointerGesture.currentGestureMode == PointerGesture::SWIPE
             || mPointerGesture.currentGestureMode == PointerGesture::FREEFORM;
@@ -3334,27 +3359,6 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
         }
     }
 
-    // Send down and up for a tap.
-    if (mPointerGesture.currentGestureMode == PointerGesture::TAP) {
-        const PointerCoords& coords = mPointerGesture.currentGestureCoords[0];
-        int32_t edgeFlags = calculateEdgeFlagsUsingPointerBounds(mPointerController,
-                coords.getAxisValue(AMOTION_EVENT_AXIS_X),
-                coords.getAxisValue(AMOTION_EVENT_AXIS_Y));
-        nsecs_t downTime = mPointerGesture.downTime = mPointerGesture.tapTime;
-        mPointerGesture.resetTapTime();
-
-        dispatchMotion(downTime, policyFlags, mPointerSource,
-                AMOTION_EVENT_ACTION_DOWN, 0, metaState, edgeFlags,
-                mPointerGesture.currentGestureCoords, mPointerGesture.currentGestureIdToIndex,
-                mPointerGesture.currentGestureIdBits, -1,
-                0, 0, downTime);
-        dispatchMotion(when, policyFlags, mPointerSource,
-                AMOTION_EVENT_ACTION_UP, 0, metaState, edgeFlags,
-                mPointerGesture.currentGestureCoords, mPointerGesture.currentGestureIdToIndex,
-                mPointerGesture.currentGestureIdBits, -1,
-                0, 0, downTime);
-    }
-
     // Send motion events for hover.
     if (mPointerGesture.currentGestureMode == PointerGesture::HOVER) {
         dispatchMotion(when, policyFlags, mPointerSource,
@@ -3381,12 +3385,48 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
     }
 }
 
-void TouchInputMapper::preparePointerGestures(nsecs_t when,
-        bool* outCancelPreviousGesture, bool* outFinishPreviousGesture) {
+bool TouchInputMapper::preparePointerGestures(nsecs_t when,
+        bool* outCancelPreviousGesture, bool* outFinishPreviousGesture, bool isTimeout) {
     *outCancelPreviousGesture = false;
     *outFinishPreviousGesture = false;
 
     AutoMutex _l(mLock);
+
+    // Handle TAP timeout.
+    if (isTimeout) {
+#if DEBUG_GESTURES
+        LOGD("Gestures: Processing timeout");
+#endif
+
+        if (mPointerGesture.lastGestureMode == PointerGesture::TAP) {
+            if (when <= mPointerGesture.tapUpTime + TAP_DRAG_INTERVAL) {
+                // The tap/drag timeout has not yet expired.
+                getContext()->requestTimeoutAtTime(mPointerGesture.tapUpTime + TAP_DRAG_INTERVAL);
+            } else {
+                // The tap is finished.
+#if DEBUG_GESTURES
+                LOGD("Gestures: TAP finished");
+#endif
+                *outFinishPreviousGesture = true;
+
+                mPointerGesture.activeGestureId = -1;
+                mPointerGesture.currentGestureMode = PointerGesture::NEUTRAL;
+                mPointerGesture.currentGestureIdBits.clear();
+
+                mPointerController->setButtonState(0);
+
+                if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
+                    mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
+                    mPointerGesture.spotIdBits.clear();
+                    moveSpotsLocked();
+                }
+                return true;
+            }
+        }
+
+        // We did not handle this timeout.
+        return false;
+    }
 
     // Update the velocity tracker.
     {
@@ -3442,7 +3482,7 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
                 // This is to prevent accidentally entering the hover state and flinging the
                 // pointer when finishing a swipe and there is still one pointer left onscreen.
                 isQuietTime = true;
-            } else if (mPointerGesture.lastGestureMode == PointerGesture::CLICK_OR_DRAG
+            } else if (mPointerGesture.lastGestureMode == PointerGesture::BUTTON_CLICK_OR_DRAG
                     && mCurrentTouch.pointerCount >= 2
                     && !isPointerDown(mCurrentTouch.buttonState)) {
                 // Enter quiet time when releasing the button and there are still two or more
@@ -3477,7 +3517,7 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
             moveSpotsLocked();
         }
     } else if (isPointerDown(mCurrentTouch.buttonState)) {
-        // Case 2: Button is pressed. (CLICK_OR_DRAG)
+        // Case 2: Button is pressed. (BUTTON_CLICK_OR_DRAG)
         // The pointer follows the active touch point.
         // Emit DOWN, MOVE, UP events at the pointer location.
         //
@@ -3491,11 +3531,11 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
         // finger to drag then the active pointer should switch to the finger that is
         // being dragged.
 #if DEBUG_GESTURES
-        LOGD("Gestures: CLICK_OR_DRAG activeTouchId=%d, "
+        LOGD("Gestures: BUTTON_CLICK_OR_DRAG activeTouchId=%d, "
                 "currentTouchPointerCount=%d", activeTouchId, mCurrentTouch.pointerCount);
 #endif
         // Reset state when just starting.
-        if (mPointerGesture.lastGestureMode != PointerGesture::CLICK_OR_DRAG) {
+        if (mPointerGesture.lastGestureMode != PointerGesture::BUTTON_CLICK_OR_DRAG) {
             *outFinishPreviousGesture = true;
             mPointerGesture.activeGestureId = 0;
         }
@@ -3521,7 +3561,7 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
                     mPointerGesture.activeTouchId = activeTouchId = bestId;
                     activeTouchChanged = true;
 #if DEBUG_GESTURES
-                    LOGD("Gestures: CLICK_OR_DRAG switched pointers, "
+                    LOGD("Gestures: BUTTON_CLICK_OR_DRAG switched pointers, "
                             "bestId=%d, bestSpeed=%0.3f", bestId, bestSpeed);
 #endif
                 }
@@ -3547,7 +3587,7 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
         float x, y;
         mPointerController->getPosition(&x, &y);
 
-        mPointerGesture.currentGestureMode = PointerGesture::CLICK_OR_DRAG;
+        mPointerGesture.currentGestureMode = PointerGesture::BUTTON_CLICK_OR_DRAG;
         mPointerGesture.currentGestureIdBits.clear();
         mPointerGesture.currentGestureIdBits.markBit(mPointerGesture.activeGestureId);
         mPointerGesture.currentGestureIdToIndex[mPointerGesture.activeGestureId] = 0;
@@ -3584,11 +3624,12 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
         // Case 3. No fingers down and button is not pressed. (NEUTRAL)
         *outFinishPreviousGesture = true;
 
-        // Watch for taps coming out of HOVER mode.
+        // Watch for taps coming out of HOVER or TAP_DRAG mode.
         bool tapped = false;
-        if (mPointerGesture.lastGestureMode == PointerGesture::HOVER
+        if ((mPointerGesture.lastGestureMode == PointerGesture::HOVER
+                || mPointerGesture.lastGestureMode == PointerGesture::TAP_DRAG)
                 && mLastTouch.pointerCount == 1) {
-            if (when <= mPointerGesture.tapTime + TAP_INTERVAL) {
+            if (when <= mPointerGesture.tapDownTime + TAP_INTERVAL) {
                 float x, y;
                 mPointerController->getPosition(&x, &y);
                 if (fabs(x - mPointerGesture.tapX) <= TAP_SLOP
@@ -3596,6 +3637,10 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
 #if DEBUG_GESTURES
                     LOGD("Gestures: TAP");
 #endif
+
+                    mPointerGesture.tapUpTime = when;
+                    getContext()->requestTimeoutAtTime(when + TAP_DRAG_INTERVAL);
+
                     mPointerGesture.activeGestureId = 0;
                     mPointerGesture.currentGestureMode = PointerGesture::TAP;
                     mPointerGesture.currentGestureIdBits.clear();
@@ -3612,7 +3657,6 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
                             AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
 
                     mPointerController->setButtonState(BUTTON_STATE_PRIMARY);
-                    mPointerController->setButtonState(0);
 
                     if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
                         mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_TAP;
@@ -3633,8 +3677,8 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
                 }
             } else {
 #if DEBUG_GESTURES
-                LOGD("Gestures: Not a TAP, delay=%lld",
-                        when - mPointerGesture.tapTime);
+                LOGD("Gestures: Not a TAP, %0.3fms since down",
+                        (when - mPointerGesture.tapDownTime) * 0.000001f);
 #endif
             }
         }
@@ -3656,14 +3700,36 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
             }
         }
     } else if (mCurrentTouch.pointerCount == 1) {
-        // Case 4. Exactly one finger down, button is not pressed. (HOVER)
+        // Case 4. Exactly one finger down, button is not pressed. (HOVER or TAP_DRAG)
         // The pointer follows the active touch point.
-        // Emit HOVER_MOVE events at the pointer location.
+        // When in HOVER, emit HOVER_MOVE events at the pointer location.
+        // When in TAP_DRAG, emit MOVE events at the pointer location.
         LOG_ASSERT(activeTouchId >= 0);
 
+        mPointerGesture.currentGestureMode = PointerGesture::HOVER;
+        if (mPointerGesture.lastGestureMode == PointerGesture::TAP) {
+            if (when <= mPointerGesture.tapUpTime + TAP_DRAG_INTERVAL) {
+                float x, y;
+                mPointerController->getPosition(&x, &y);
+                if (fabs(x - mPointerGesture.tapX) <= TAP_SLOP
+                        && fabs(y - mPointerGesture.tapY) <= TAP_SLOP) {
+                    mPointerGesture.currentGestureMode = PointerGesture::TAP_DRAG;
+                } else {
 #if DEBUG_GESTURES
-        LOGD("Gestures: HOVER");
+                    LOGD("Gestures: Not a TAP_DRAG, deltaX=%f, deltaY=%f",
+                            x - mPointerGesture.tapX,
+                            y - mPointerGesture.tapY);
 #endif
+                }
+            } else {
+#if DEBUG_GESTURES
+                LOGD("Gestures: Not a TAP_DRAG, %0.3fms time since up",
+                        (when - mPointerGesture.tapUpTime) * 0.000001f);
+#endif
+            }
+        } else if (mPointerGesture.lastGestureMode == PointerGesture::TAP_DRAG) {
+            mPointerGesture.currentGestureMode = PointerGesture::TAP_DRAG;
+        }
 
         if (mLastTouch.idBits.hasBit(activeTouchId)) {
             const PointerData& currentPointer =
@@ -3676,35 +3742,49 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
                     * mLocked.pointerGestureYMovementScale;
 
             // Move the pointer using a relative motion.
-            // When using spots, the hover will occur at the position of the anchor spot.
+            // When using spots, the hover or drag will occur at the position of the anchor spot.
             mPointerController->move(deltaX, deltaY);
         }
 
-        *outFinishPreviousGesture = true;
-        mPointerGesture.activeGestureId = 0;
+        bool down;
+        if (mPointerGesture.currentGestureMode == PointerGesture::TAP_DRAG) {
+#if DEBUG_GESTURES
+            LOGD("Gestures: TAP_DRAG");
+#endif
+            down = true;
+        } else {
+#if DEBUG_GESTURES
+            LOGD("Gestures: HOVER");
+#endif
+            *outFinishPreviousGesture = true;
+            mPointerGesture.activeGestureId = 0;
+            down = false;
+        }
 
         float x, y;
         mPointerController->getPosition(&x, &y);
 
-        mPointerGesture.currentGestureMode = PointerGesture::HOVER;
         mPointerGesture.currentGestureIdBits.clear();
         mPointerGesture.currentGestureIdBits.markBit(mPointerGesture.activeGestureId);
         mPointerGesture.currentGestureIdToIndex[mPointerGesture.activeGestureId] = 0;
         mPointerGesture.currentGestureCoords[0].clear();
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_X, x);
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_Y, y);
-        mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, 0.0f);
+        mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE,
+                down ? 1.0f : 0.0f);
+
+        mPointerController->setButtonState(down ? BUTTON_STATE_PRIMARY : 0);
 
         if (mLastTouch.pointerCount == 0 && mCurrentTouch.pointerCount != 0) {
-            mPointerGesture.tapTime = when;
+            mPointerGesture.resetTap();
+            mPointerGesture.tapDownTime = when;
             mPointerGesture.tapX = x;
             mPointerGesture.tapY = y;
         }
 
-        mPointerController->setButtonState(0);
-
         if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
-            mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_HOVER;
+            mPointerGesture.spotGesture = down ? PointerControllerInterface::SPOT_GESTURE_DRAG
+                    : PointerControllerInterface::SPOT_GESTURE_HOVER;
             mPointerGesture.spotIdBits.clear();
             mPointerGesture.spotIdBits.markBit(activeTouchId);
             mPointerGesture.spotIdToIndex[activeTouchId] = 0;
@@ -4107,6 +4187,7 @@ void TouchInputMapper::preparePointerGestures(nsecs_t when,
                 coords.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE));
     }
 #endif
+    return true;
 }
 
 void TouchInputMapper::moveSpotsLocked() {

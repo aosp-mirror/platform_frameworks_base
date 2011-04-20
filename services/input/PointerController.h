@@ -91,6 +91,9 @@ public:
         // Tap at current location.
         // Briefly display one spot at the tapped location.
         SPOT_GESTURE_TAP,
+        // Drag at current location.
+        // Display spot at pressed location.
+        SPOT_GESTURE_DRAG,
         // Button pressed but no finger is down.
         // Display spot at pressed location.
         SPOT_GESTURE_BUTTON_CLICK,
