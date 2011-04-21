@@ -39,6 +39,8 @@ const char* gVS_Header_Attributes =
         "attribute vec4 position;\n";
 const char* gVS_Header_Attributes_TexCoords =
         "attribute vec2 texCoords;\n";
+const char* gVS_Header_Attributes_Distance =
+        "attribute float vtxDistance;\n";
 const char* gVS_Header_Uniforms =
         "uniform mat4 transform;\n";
 const char* gVS_Header_Uniforms_IsPoint =
@@ -56,6 +58,8 @@ const char* gVS_Header_Uniforms_HasBitmap =
         "uniform mediump vec2 textureDimension;\n";
 const char* gVS_Header_Varyings_HasTexture =
         "varying vec2 outTexCoords;\n";
+const char* gVS_Header_Varyings_HasWidth =
+        "varying float distance;\n";
 const char* gVS_Header_Varyings_HasBitmap =
         "varying vec2 outBitmapTexCoords;\n";
 const char* gVS_Header_Varyings_PointHasBitmap =
@@ -88,6 +92,8 @@ const char* gVS_Main_Position =
         "    gl_Position = transform * position;\n";
 const char* gVS_Main_PointSize =
         "    gl_PointSize = pointSize;\n";
+const char* gVS_Main_Width =
+        "    distance = vtxDistance;\n";
 const char* gVS_Footer =
         "}\n\n";
 
@@ -101,6 +107,10 @@ const char* gFS_Header =
         "precision mediump float;\n\n";
 const char* gFS_Uniforms_Color =
         "uniform vec4 color;\n";
+const char* gFS_Uniforms_Width =
+        "uniform float width;\n"
+        "uniform float boundaryWidth;\n"
+        "uniform float inverseBoundaryWidth;\n";
 const char* gFS_Header_Uniforms_PointHasBitmap =
         "uniform vec2 textureDimension;\n"
         "uniform float pointSize;\n";
@@ -169,6 +179,12 @@ const char* gFS_Fast_SingleModulateGradient =
 // General case
 const char* gFS_Main_FetchColor =
         "    fragColor = color;\n";
+const char* gFS_Main_AccountForWidth =
+        "    if (distance < boundaryWidth) {\n"
+        "        fragColor *= (distance * inverseBoundaryWidth);\n"
+        "    } else if (distance > (1.0 - boundaryWidth)) {\n"
+        "        fragColor *= ((1.0 - distance) * inverseBoundaryWidth);\n"
+        "    }\n";
 const char* gFS_Main_FetchTexture[2] = {
         // Don't modulate
         "    fragColor = texture2D(sampler, outTexCoords);\n",
@@ -354,6 +370,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
     if (description.hasTexture) {
         shader.append(gVS_Header_Attributes_TexCoords);
     }
+    if (description.hasWidth) {
+        shader.append(gVS_Header_Attributes_Distance);
+    }
     // Uniforms
     shader.append(gVS_Header_Uniforms);
     if (description.hasGradient) {
@@ -369,6 +388,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
     if (description.hasTexture) {
         shader.append(gVS_Header_Varyings_HasTexture);
     }
+    if (description.hasWidth) {
+        shader.append(gVS_Header_Varyings_HasWidth);
+    }
     if (description.hasGradient) {
         shader.append(gVS_Header_Varyings_HasGradient[description.gradientType]);
     }
@@ -382,6 +404,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
     shader.append(gVS_Main); {
         if (description.hasTexture) {
             shader.append(gVS_Main_OutTexCoords);
+        }
+        if (description.hasWidth) {
+            shader.append(gVS_Main_Width);
         }
         if (description.hasGradient) {
             shader.append(gVS_Main_OutGradient[description.gradientType]);
@@ -420,6 +445,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (description.hasTexture) {
         shader.append(gVS_Header_Varyings_HasTexture);
     }
+    if (description.hasWidth) {
+        shader.append(gVS_Header_Varyings_HasWidth);
+    }
     if (description.hasGradient) {
         shader.append(gVS_Header_Varyings_HasGradient[description.gradientType]);
     }
@@ -441,6 +469,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (description.hasTexture) {
         shader.append(gFS_Uniforms_TextureSampler);
     }
+    if (description.hasWidth) {
+        shader.append(gFS_Uniforms_Width);
+    }
     if (description.hasGradient) {
         shader.append(gFS_Uniforms_GradientSampler[description.gradientType]);
     }
@@ -449,8 +480,8 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     }
 
     // Optimization for common cases
-    if (!blendFramebuffer && description.colorOp == ProgramDescription::kColorNone &&
-            !description.isPoint) {
+    if (!description.hasWidth && !blendFramebuffer &&
+            description.colorOp == ProgramDescription::kColorNone && !description.isPoint) {
         bool fast = false;
 
         const bool noShader = !description.hasGradient && !description.hasBitmap;
@@ -533,6 +564,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
             if ((!description.hasGradient && !description.hasBitmap) || description.modulate) {
                 shader.append(gFS_Main_FetchColor);
             }
+        }
+        if (description.hasWidth) {
+            shader.append(gFS_Main_AccountForWidth);
         }
         if (description.hasGradient) {
             shader.append(gFS_Main_FetchGradient[description.gradientType]);

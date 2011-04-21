@@ -53,7 +53,7 @@ public class LinesActivity extends Activity {
     }
 
     public static class LinesView extends View {
-        private static final boolean LINE_AA = false;
+        private static final boolean LINE_AA = true;
 
         private final Bitmap mBitmap1;
         private final Paint mSmallPaint;

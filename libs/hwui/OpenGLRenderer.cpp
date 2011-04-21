@@ -882,6 +882,10 @@ void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
     mDescription.hasAlpha8Texture = isAlpha8;
 }
 
+void OpenGLRenderer::setupDrawAALine() {
+    mDescription.hasWidth = true;
+}
+
 void OpenGLRenderer::setupDrawPoint(float pointSize) {
     mDescription.isPoint = true;
     mDescription.pointSize = pointSize;
@@ -893,6 +897,7 @@ void OpenGLRenderer::setupDrawColor(int color) {
 
 void OpenGLRenderer::setupDrawColor(int color, int alpha) {
     mColorA = alpha / 255.0f;
+    // BUG on this next line? a is alpha divided by 255 *twice*
     const float a = mColorA / 255.0f;
     mColorR = a * ((color >> 16) & 0xFF);
     mColorG = a * ((color >>  8) & 0xFF);
@@ -1058,6 +1063,37 @@ void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLuint v
     if (mTexCoordsSlot >= 0) {
         glVertexAttribPointer(mTexCoordsSlot, 2, GL_FLOAT, GL_FALSE, gMeshStride, texCoords);
     }
+}
+
+void OpenGLRenderer::setupDrawVertices(GLvoid* vertices) {
+    mCaches.unbindMeshBuffer();
+    glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
+            gVertexStride, vertices);
+}
+
+/**
+ * Sets up the shader to draw an AA line. We draw AA lines with quads, where there is an
+ * outer boundary that fades out to 0. The variables set in the shader define the width of the
+ * core line primitive ("width") and the width of the fading boundary ("boundaryWidth"). The
+ * "vtxDistance" attribute (one per vertex) is a value from zero to one that tells the fragment
+ * shader where the fragment is in relation to the line width overall; this value is then used
+ * to compute the proper color, based on whether the fragment lies in the fading AA region of
+ * the line.
+ */
+void OpenGLRenderer::setupDrawAALine(GLvoid* vertices, GLvoid* distanceCoords, float strokeWidth) {
+    mCaches.unbindMeshBuffer();
+    glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
+            gAlphaVertexStride, vertices);
+    int distanceSlot = mCaches.currentProgram->getAttrib("vtxDistance");
+    glEnableVertexAttribArray(distanceSlot);
+    glVertexAttribPointer(distanceSlot, 1, GL_FLOAT, GL_FALSE, gAlphaVertexStride, distanceCoords);
+    int widthSlot = mCaches.currentProgram->getUniform("width");
+    int boundaryWidthSlot = mCaches.currentProgram->getUniform("boundaryWidth");
+    int inverseBoundaryWidthSlot = mCaches.currentProgram->getUniform("inverseBoundaryWidth");
+    float boundaryWidth = (1 - strokeWidth) / 2;
+    glUniform1f(widthSlot, strokeWidth);
+    glUniform1f(boundaryWidthSlot, boundaryWidth);
+    glUniform1f(inverseBoundaryWidthSlot, (1 / boundaryWidth));
 }
 
 void OpenGLRenderer::finishDrawTexture() {
@@ -1350,114 +1386,199 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     }
 }
 
+void OpenGLRenderer::drawLinesAsQuads(float *points, int count, bool isAA, bool isHairline,
+        float strokeWidth) {
+    int verticesCount = count;
+    if (count > 4) {
+        // Polyline: account for extra vertices needed for continous tri-strip
+        verticesCount += (count -4);
+    }
+    if (isAA) {
+        // Expand boundary to enable AA calculations on the quad border
+        strokeWidth += .5f;
+    }
+    Vertex lines[verticesCount];
+    Vertex* vertices = &lines[0];
+    AlphaVertex wLines[verticesCount];
+    AlphaVertex* aaVertices = &wLines[0];
+    if (!isAA) {
+        setupDrawVertices(vertices);
+    } else {
+        void *alphaCoords = ((void*) aaVertices) + gVertexAlphaOffset;
+        // innerProportion is the ratio of the inner (non-AA) port of the line to the total
+        // AA stroke width (the base stroke width expanded by a half pixel on either side).
+        // This value is used in the fragment shader to determine how to fill fragments.
+        float innerProportion = fmax(strokeWidth - 1.0f, 0) / (strokeWidth + .5f);
+        setupDrawAALine((void*) aaVertices, (void*) alphaCoords, innerProportion);
+    }
+
+    int generatedVerticesCount = 0;
+    AlphaVertex *prevAAVertex = NULL;
+    Vertex *prevVertex = NULL;
+    float inverseScaleX, inverseScaleY;
+    if (isHairline) {
+        // The quad that we use for AA hairlines needs to account for scaling because the line
+        // should always be one pixel wide regardless of scale.
+        inverseScaleX = 1.0f;
+        inverseScaleY = 1.0f;
+        if (!mSnapshot->transform->isPureTranslate()) {
+            Matrix4 *mat = mSnapshot->transform;
+            float m00 = mat->data[Matrix4::kScaleX];
+            float m01 = mat->data[Matrix4::kSkewY];
+            float m02 = mat->data[2];
+            float m10 = mat->data[Matrix4::kSkewX];
+            float m11 = mat->data[Matrix4::kScaleX];
+            float m12 = mat->data[6];
+            float scaleX = sqrt(m00*m00 + m01*m01);
+            float scaleY = sqrt(m10*m10 + m11*m11);
+            inverseScaleX = (scaleX != 0) ? (inverseScaleX / scaleX) : 0;
+            inverseScaleY = (scaleY != 0) ? (inverseScaleY / scaleY) : 0;
+        }
+    }
+    for (int i = 0; i < count; i += 4) {
+        // a = start point, b = end point
+        vec2 a(points[i], points[i + 1]);
+        vec2 b(points[i + 2], points[i + 3]);
+
+        // Bias to snap to the same pixels as Skia
+        a += 0.375;
+        b += 0.375;
+
+        // Find the normal to the line
+        vec2 n = (b - a).copyNormalized() * strokeWidth;
+        if (isHairline) {
+            float wideningFactor;
+            if (fabs(n.x) >= fabs(n.y)) {
+                wideningFactor = fabs(1.0f / n.x);
+            } else {
+                wideningFactor = fabs(1.0f / n.y);
+            }
+            n.x *= inverseScaleX;
+            n.y *= inverseScaleY;
+            n *= wideningFactor;
+        }
+        float x = n.x;
+        n.x = -n.y;
+        n.y = x;
+
+        // Four corners of the rectangle defining a thick line
+        vec2 p1 = a - n;
+        vec2 p2 = a + n;
+        vec2 p3 = b + n;
+        vec2 p4 = b - n;
+
+        const float left = fmin(p1.x, fmin(p2.x, fmin(p3.x, p4.x)));
+        const float right = fmax(p1.x, fmax(p2.x, fmax(p3.x, p4.x)));
+        const float top = fmin(p1.y, fmin(p2.y, fmin(p3.y, p4.y)));
+        const float bottom = fmax(p1.y, fmax(p2.y, fmax(p3.y, p4.y)));
+
+        if (!quickReject(left, top, right, bottom)) {
+            // Draw the line as 2 triangles, could be optimized
+            // by using only 4 vertices and the correct indices
+            // Also we should probably used non textured vertices
+            // when line AA is disabled to save on bandwidth
+            if (!isAA) {
+                if (prevVertex != NULL) {
+                    // Issue two repeat vertices to create degenerate triangles to bridge
+                    // between the previous line and the new one. This is necessary because
+                    // we are creating a single triangle_strip which will contain
+                    // potentially discontinuous line segments.
+                    Vertex::set(vertices++, prevVertex->position[0], prevVertex->position[1]);
+                    Vertex::set(vertices++, p1.x, p1.y);
+                    generatedVerticesCount += 2;
+                }
+                Vertex::set(vertices++, p1.x, p1.y);
+                Vertex::set(vertices++, p2.x, p2.y);
+                Vertex::set(vertices++, p4.x, p4.y);
+                Vertex::set(vertices++, p3.x, p3.y);
+                prevVertex = vertices - 1;
+                generatedVerticesCount += 4;
+            } else {
+                if (prevAAVertex != NULL) {
+                    // Issue two repeat vertices to create degenerate triangles to bridge
+                    // between the previous line and the new one. This is necessary because
+                    // we are creating a single triangle_strip which will contain
+                    // potentially discontinuous line segments.
+                    AlphaVertex::set(aaVertices++,prevAAVertex->position[0],
+                            prevAAVertex->position[1], prevAAVertex->alpha);
+                    AlphaVertex::set(aaVertices++, p4.x, p4.y, 1);
+                    generatedVerticesCount += 2;
+                }
+                AlphaVertex::set(aaVertices++, p4.x, p4.y, 1);
+                AlphaVertex::set(aaVertices++, p1.x, p1.y, 1);
+                AlphaVertex::set(aaVertices++, p3.x, p3.y, 0);
+                AlphaVertex::set(aaVertices++, p2.x, p2.y, 0);
+                prevAAVertex = aaVertices - 1;
+                generatedVerticesCount += 4;
+            }
+            dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+        }
+    }
+    if (generatedVerticesCount > 0) {
+       glDrawArrays(GL_TRIANGLE_STRIP, 0, generatedVerticesCount);
+    }
+}
+
 void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 
     const bool isAA = paint->isAntiAlias();
     const float strokeWidth = paint->getStrokeWidth() * 0.5f;
-    // A stroke width of 0 has a special meaningin Skia:
-    // it draws an unscaled 1px wide line
-    const bool isHairLine = paint->getStrokeWidth() == 0.0f;
+    // A stroke width of 0 has a special meaning in Skia:
+    // it draws a line 1 px wide regardless of current transform
+    bool isHairLine = paint->getStrokeWidth() == 0.0f;
 
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
-
-    int verticesCount = count >> 2;
     int generatedVerticesCount = 0;
-    if (!isHairLine) {
-        // TODO: AA needs more vertices
-        verticesCount *= 6;
-    } else {
-        // TODO: AA will be different
-        verticesCount *= 2;
-    }
-
-    TextureVertex lines[verticesCount];
-    TextureVertex* vertex = &lines[0];
 
     setupDraw();
+    if (isAA) {
+        setupDrawAALine();
+    }
     setupDrawColor(paint->getColor(), alpha);
     setupDrawColorFilter();
     setupDrawShader();
-    setupDrawBlending(mode);
+    if (isAA) {
+        setupDrawBlending(true, mode);
+    } else {
+        setupDrawBlending(mode);
+    }
     setupDrawProgram();
     setupDrawModelViewIdentity();
     setupDrawColorUniforms();
     setupDrawColorFilterUniforms();
     setupDrawShaderIdentityUniforms();
-    setupDrawMesh(vertex);
 
     if (!isHairLine) {
-        // TODO: Handle the AA case
-        for (int i = 0; i < count; i += 4) {
-            // a = start point, b = end point
-            vec2 a(points[i], points[i + 1]);
-            vec2 b(points[i + 2], points[i + 3]);
-
-            // Bias to snap to the same pixels as Skia
-            a += 0.375;
-            b += 0.375;
-
-            // Find the normal to the line
-            vec2 n = (b - a).copyNormalized() * strokeWidth;
-            float x = n.x;
-            n.x = -n.y;
-            n.y = x;
-
-            // Four corners of the rectangle defining a thick line
-            vec2 p1 = a - n;
-            vec2 p2 = a + n;
-            vec2 p3 = b + n;
-            vec2 p4 = b - n;
-
-            const float left = fmin(p1.x, fmin(p2.x, fmin(p3.x, p4.x)));
-            const float right = fmax(p1.x, fmax(p2.x, fmax(p3.x, p4.x)));
-            const float top = fmin(p1.y, fmin(p2.y, fmin(p3.y, p4.y)));
-            const float bottom = fmax(p1.y, fmax(p2.y, fmax(p3.y, p4.y)));
-
-            if (!quickReject(left, top, right, bottom)) {
-                // Draw the line as 2 triangles, could be optimized
-                // by using only 4 vertices and the correct indices
-                // Also we should probably used non textured vertices
-                // when line AA is disabled to save on bandwidth
-                TextureVertex::set(vertex++, p1.x, p1.y, 0.0f, 0.0f);
-                TextureVertex::set(vertex++, p2.x, p2.y, 0.0f, 0.0f);
-                TextureVertex::set(vertex++, p3.x, p3.y, 0.0f, 0.0f);
-                TextureVertex::set(vertex++, p1.x, p1.y, 0.0f, 0.0f);
-                TextureVertex::set(vertex++, p3.x, p3.y, 0.0f, 0.0f);
-                TextureVertex::set(vertex++, p4.x, p4.y, 0.0f, 0.0f);
-
-                generatedVerticesCount += 6;
-
-                dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
-            }
-        }
-
-        if (generatedVerticesCount > 0) {
-            // GL_LINE does not give the result we want to match Skia
-            glDrawArrays(GL_TRIANGLES, 0, generatedVerticesCount);
-        }
+        drawLinesAsQuads(points, count, isAA, isHairLine, strokeWidth);
     } else {
-        // TODO: Handle the AA case
-        for (int i = 0; i < count; i += 4) {
-            TextureVertex::set(vertex++, points[i], points[i + 1], 0.0f, 0.0f);
-            TextureVertex::set(vertex++, points[i + 2], points[i + 3], 0.0f, 0.0f);
+        if (isAA) {
+            drawLinesAsQuads(points, count, isAA, isHairLine, .5f);
+        } else {
+            int verticesCount = count >> 1;
+            Vertex lines[verticesCount];
+            Vertex* vertices = &lines[0];
+            setupDrawVertices(vertices);
+            for (int i = 0; i < count; i += 4) {
 
-            generatedVerticesCount += 2;
+                const float left = fmin(points[i], points[i + 2]);
+                const float right = fmax(points[i], points[i + 2]);
+                const float top = fmin(points[i + 1], points[i + 3]);
+                const float bottom = fmax(points[i + 1], points[i + 3]);
 
-            const float left = fmin(points[i], points[i + 2]);
-            const float right = fmax(points[i], points[i + 2]);
-            const float top = fmin(points[i + 1], points[i + 3]);
-            const float bottom = fmax(points[i + 1], points[i + 3]);
+                Vertex::set(vertices++, points[i], points[i + 1]);
+                Vertex::set(vertices++, points[i + 2], points[i + 3]);
+                generatedVerticesCount += 2;
+                dirtyLayer(left, top,
+                        right == left ? left + 1 : right, bottom == top ? top + 1 : bottom,
+                        *mSnapshot->transform);
+            }
 
-            dirtyLayer(left, top,
-                    right == left ? left + 1 : right, bottom == top ? top + 1 : bottom,
-                    *mSnapshot->transform);
+            glLineWidth(1.0f);
+            glDrawArrays(GL_LINES, 0, generatedVerticesCount);
         }
-
-        glLineWidth(1.0f);
-        glDrawArrays(GL_LINES, 0, generatedVerticesCount);
     }
 }
 
@@ -1467,7 +1588,7 @@ void OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
     // TODO: The paint's cap style defines whether the points are square or circular
     // TODO: Handle AA for round points
 
-    // A stroke width of 0 has a special meaningin Skia:
+    // A stroke width of 0 has a special meaning in Skia:
     // it draws an unscaled 1px point
     const bool isHairLine = paint->getStrokeWidth() == 0.0f;
 
