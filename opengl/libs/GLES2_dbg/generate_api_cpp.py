@@ -38,7 +38,7 @@ def generate_api(lines):
 "glShaderSource", "glTexImage2D", "glTexSubImage2D"]
 
     # these also needs to be forwarded to DbgContext
-    contextFunctions = ["glUseProgram", "glEnableVertexAttribArray", "glDisableVertexAttribArray", 
+    contextFunctions = ["glUseProgram", "glEnableVertexAttribArray", "glDisableVertexAttribArray",
 "glVertexAttribPointer", "glBindBuffer", "glBufferData", "glBufferSubData", "glDeleteBuffers",]
 
     for line in lines:
@@ -114,10 +114,10 @@ def generate_api(lines):
                     else:
                         getData += "    msg.mutable_data()->assign(reinterpret_cast<const char *>(%s), %s * sizeof(%s));" % (paramName, annotation, paramType)
                     paramType += "*"
-                else:     
+                else:
                     if paramType == "GLfloat" or paramType == "GLclampf" or paramType.find("*") >= 0:
                         setMsgParameters += "    msg.set_arg%d(ToInt(%s));\n" % (paramIndex, paramName)
-                    else: 
+                    else:
                         setMsgParameters += "    msg.set_arg%d(%s);\n" % (paramIndex, paramName)
                 if paramIndex < len(parameters) - 1:
                         arguments += ', '
@@ -156,7 +156,7 @@ def generate_api(lines):
     } caller;"""
             print setCallerMembers
             print setMsgParameters
-    
+
             if line.find("*") >= 0 or line.find(":") >= 0:
                 print "    // FIXME: check for pointer usage"
             if inout in ["in", "inout"]:
