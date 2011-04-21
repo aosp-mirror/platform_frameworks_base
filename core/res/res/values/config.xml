@@ -101,10 +101,6 @@
          for backward compatibility with apps that require external storage. -->
     <bool name="config_emulateExternalStorage">false</bool>
 
-    <!-- Set to true if external storage is case sensitive.
-         Typically external storage is FAT, which is case insensitive. -->
-    <bool name="config_caseSensitiveExternalStorage">false</bool>
-    
     <!-- A product with no SD card == not removable. -->
     <bool name="config_externalStorageRemovable" product="nosdcard">false</bool>
     <!-- Configures whether the primary external storage device is

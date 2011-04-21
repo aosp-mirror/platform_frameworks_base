@@ -1176,8 +1176,7 @@ public class MediaScanner
             mGenresUri = Genres.getContentUri(volumeName);
             mPlaylistsUri = Playlists.getContentUri(volumeName);
 
-            mCaseInsensitivePaths = !mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_caseSensitiveExternalStorage);
+            mCaseInsensitivePaths = true;
             if (!Process.supportsProcesses()) {
                 // Simulator uses host file system, so it should be case sensitive.
                 mCaseInsensitivePaths = false;
