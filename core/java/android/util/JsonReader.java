@@ -16,12 +16,13 @@
 
 package android.util;
 
+import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.Reader;
-import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.List;
+import libcore.internal.StringPool;
 
 /**
  * Reads a JSON (<a href="http://www.ietf.org/rfc/rfc4627.txt">RFC 4627</a>)
@@ -176,6 +177,8 @@ public final class JsonReader implements Closeable {
 
     private static final String TRUE = "true";
     private static final String FALSE = "false";
+
+    private final StringPool stringPool = new StringPool();
 
     /** The input JSON. */
     private final Reader in;
@@ -836,7 +839,7 @@ public final class JsonReader implements Closeable {
                     if (skipping) {
                         return "skipped!";
                     } else if (builder == null) {
-                        return new String(buffer, start, pos - start - 1);
+                        return stringPool.get(buffer, start, pos - start - 1);
                     } else {
                         builder.append(buffer, start, pos - start - 1);
                         return builder.toString();
@@ -934,7 +937,7 @@ public final class JsonReader implements Closeable {
         } else if (skipping) {
             result = "skipped!";
         } else if (builder == null) {
-            result = new String(buffer, pos, i);
+            result = stringPool.get(buffer, pos, i);
         } else {
             builder.append(buffer, pos, i);
             result = builder.toString();
@@ -968,7 +971,7 @@ public final class JsonReader implements Closeable {
                 if (pos + 4 > limit && !fillBuffer(4)) {
                     throw syntaxError("Unterminated escape sequence");
                 }
-                String hex = new String(buffer, pos, 4);
+                String hex = stringPool.get(buffer, pos, 4);
                 pos += 4;
                 return (char) Integer.parseInt(hex, 16);
 
@@ -1040,7 +1043,7 @@ public final class JsonReader implements Closeable {
             value = FALSE;
             return JsonToken.BOOLEAN;
         } else {
-            value = new String(buffer, valuePos, valueLength);
+            value = stringPool.get(buffer, valuePos, valueLength);
             return decodeNumber(buffer, valuePos, valueLength);
         }
     }
