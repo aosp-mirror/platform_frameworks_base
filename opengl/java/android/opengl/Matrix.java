@@ -362,7 +362,7 @@ public class Matrix {
 
         m[offset + 12] = 0.0f;
         m[offset + 13] = 0.0f;
-        m[offset + 14] = 2.0f * zFar * rangeReciprocal;
+        m[offset + 14] = 2.0f * zFar * zNear * rangeReciprocal;
         m[offset + 15] = 0.0f;
     }
 
