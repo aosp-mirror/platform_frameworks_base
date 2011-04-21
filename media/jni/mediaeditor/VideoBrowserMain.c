@@ -159,15 +159,15 @@ M4OSA_ERR videoBrowserCreate(
             VIDEOBROWSER, (M4OSA_Char*)"Video browser context");
 
     CHECK_PTR(videoBrowserCreate, pContext,err, M4ERR_ALLOC);
-    M4OSA_memset((M4OSA_MemAddr8)pContext, sizeof(VideoBrowserContext), 0);
+    memset((void *)pContext, 0,sizeof(VideoBrowserContext));
 
     /*--- Initialize the context parameters ---*/
     pContext->m_state = VideoBrowser_kVBCreating ;
     pContext->m_frameColorType = clrType;
 
     /*--- Copy the file reader functions ---*/
-    M4OSA_memcpy((M4OSA_MemAddr8)&pContext->m_fileReadPtr,
-                 (M4OSA_MemAddr8)ptrF,
+    memcpy((void *)&pContext->m_fileReadPtr,
+                 (void *)ptrF,
                  sizeof(M4OSA_FileReadPointer)) ;
 
     /* PR#SP00013 DGR bug 13 : first frame is not visible */

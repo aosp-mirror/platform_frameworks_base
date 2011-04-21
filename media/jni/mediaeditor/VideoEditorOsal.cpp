@@ -280,7 +280,7 @@ videoEditOsal_alloc(
         if (M4OSA_NULL != pData)
         {
             // Reset the allocated memory.
-            M4OSA_memset((M4OSA_MemAddr8)pData, size, 0);
+            memset((void *)pData, 0,size);
 #ifdef OSAL_MEM_LEAK_DEBUG
             // Update the allocated block count.
             gAllocatedBlockCount++;

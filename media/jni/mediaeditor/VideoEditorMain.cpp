@@ -1193,9 +1193,9 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
         (M4OSA_Char*)"Malloc for temp 3gp file");
     if (pTemp3gpFilePath != M4OSA_NULL)
     {
-        M4OSA_memset(pTemp3gpFilePath  ,
+        memset((void *)pTemp3gpFilePath  ,0,
             strlen((const char*)pContext->initParams.pTempPath)
-            + strlen((const char*)TEMP_MCS_OUT_FILE_PATH) + 1,0);
+            + strlen((const char*)TEMP_MCS_OUT_FILE_PATH) + 1);
         strncat((char *)pTemp3gpFilePath,
             (const char *)pContext->initParams.pTempPath  ,
             (size_t) ((M4OSA_Char*)pContext->initParams.pTempPath));
@@ -1709,9 +1709,9 @@ videoEditor_populateSettings(
                     goto videoEditor_populateSettings_cleanup;
                 }
 
-                M4OSA_memcpy((M4OSA_Int8 *)&pContext->pEditSettings->\
+                memcpy((void *)&pContext->pEditSettings->\
                     Effects[j].xVSS.pFramingBuffer->\
-                    pac_data[0],(M4OSA_Int8 *)&aFramingCtx->FramingRgb->pac_data[0],(width*height*2));
+                    pac_data[0],(void *)&aFramingCtx->FramingRgb->pac_data[0],(width*height*2));
 
                 //As of now rgb type is 565
                 pContext->pEditSettings->Effects[j].xVSS.rgbType =
@@ -1854,8 +1854,8 @@ videoEditor_populateSettings(
                 (M4OSA_UInt32)(strlen((const char*)pTempChar))+1 /* +1 for NULL termination */, 0,
                 (M4OSA_Char*)"strPath allocation " );
             if (pContext->mAudioSettings->pFile != M4OSA_NULL) {
-                M4OSA_memcpy((M4OSA_Int8 *)pContext->mAudioSettings->pFile ,
-                    (M4OSA_Int8 *)pTempChar , strlen((const char*)pTempChar));
+                memcpy((void *)pContext->mAudioSettings->pFile ,
+                    (void *)pTempChar , strlen((const char*)pTempChar));
                 ((M4OSA_Int8 *)(pContext->mAudioSettings->pFile))[strlen((const char*)pTempChar)] = '\0';
                 pEnv->ReleaseStringUTFChars(strPath,(const char *)pTempChar);
             } else {
@@ -1879,8 +1879,8 @@ videoEditor_populateSettings(
                 (M4OSA_UInt32)(strlen((const char*)pTempChar))+1 /* +1 for NULL termination */, 0,
                 (M4OSA_Char*)"strPCMPath allocation " );
             if (pContext->mAudioSettings->pPCMFilePath != M4OSA_NULL) {
-                M4OSA_memcpy((M4OSA_Int8 *)pContext->mAudioSettings->pPCMFilePath ,
-                    (M4OSA_Int8 *)pTempChar , strlen((const char*)pTempChar));
+                memcpy((void *)pContext->mAudioSettings->pPCMFilePath ,
+                    (void *)pTempChar , strlen((const char*)pTempChar));
                 ((M4OSA_Int8 *)(pContext->mAudioSettings->pPCMFilePath))[strlen((const char*)pTempChar)] = '\0';
                 pEnv->ReleaseStringUTFChars(strPCMPath,(const char *)pTempChar);
             } else {
@@ -3287,7 +3287,7 @@ M4OSA_ERR M4MA_generateAudioGraphFile(JNIEnv* pEnv, M4OSA_Char* pInputFileURL,
     /* loop until EOF */
     do
     {
-        M4OSA_memset((M4OSA_MemAddr8)bufferIn.m_dataAddress,bufferIn.m_bufferSize, 0);
+        memset((void *)bufferIn.m_dataAddress,0,bufferIn.m_bufferSize);
 
         numBytesToRead = samplesCountInBytes;
 

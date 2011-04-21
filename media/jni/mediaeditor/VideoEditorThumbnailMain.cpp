@@ -134,7 +134,7 @@ M4OSA_Void VBcallback(  M4OSA_Context  pInstance,
 
         for (j = 0; j < pPlane->u_height; j++)
         {
-            M4OSA_memcpy((M4OSA_MemAddr8 )dst, (M4OSA_MemAddr8 )src, pPlane->u_stride);
+            memcpy((void * )dst, (void * )src, pPlane->u_stride);
             for (i = pPlane->u_width; i < pC->m_width; i++)
             {
                 dst[i] = 0;
@@ -170,7 +170,7 @@ M4OSA_ERR ThumbnailOpen(M4OSA_Context *pPContext,
     M4OSA_TRACE3_1("context value is = %d",pContext);
     CHECK_PTR(ThumbnailOpen, pContext, err, M4ERR_ALLOC);
 
-    M4OSA_memset((M4OSA_MemAddr8)pContext, sizeof(ThumbnailContext), 0);
+    memset((void *)pContext, 0,sizeof(ThumbnailContext));
 
     M4OSA_FileReadPointer optFP;
     M4OSA_FileReadPointer llFP;
