@@ -49,6 +49,7 @@ import android.service.wallpaper.IWallpaperService;
 import android.service.wallpaper.WallpaperService;
 import android.util.Slog;
 import android.util.Xml;
+import android.view.Display;
 import android.view.IWindowManager;
 import android.view.WindowManager;
 
@@ -725,6 +726,17 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
             mWidth = -1;
             mHeight = -1;
             mName = "";
+        }
+
+        // We always want to have some reasonable width hint.
+        WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
+        Display d = wm.getDefaultDisplay();
+        int baseSize = d.getMaximumSizeDimension();
+        if (mWidth < baseSize) {
+            mWidth = baseSize;
+        }
+        if (mHeight < baseSize) {
+            mHeight = baseSize;
         }
     }
 

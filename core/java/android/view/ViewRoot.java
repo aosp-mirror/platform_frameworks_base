@@ -263,9 +263,8 @@ public final class ViewRoot extends Handler implements ViewParent,
             if (!mInitialized) {
                 try {
                     InputMethodManager imm = InputMethodManager.getInstance(mainLooper);
-                    sWindowSession = IWindowManager.Stub.asInterface(
-                            ServiceManager.getService("window"))
-                            .openSession(imm.getClient(), imm.getInputContext());
+                    sWindowSession = Display.getWindowManager().openSession(
+                            imm.getClient(), imm.getInputContext());
                     mInitialized = true;
                 } catch (RemoteException e) {
                 }

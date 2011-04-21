@@ -7941,29 +7941,37 @@ package android.graphics {
     ctor public PixelXorXfermode(int);
   }
 
-  public class Point {
+  public class Point implements android.os.Parcelable {
     ctor public Point();
     ctor public Point(int, int);
     ctor public Point(android.graphics.Point);
+    method public int describeContents();
     method public final boolean equals(int, int);
     method public final void negate();
     method public final void offset(int, int);
+    method public void readFromParcel(android.os.Parcel);
     method public void set(int, int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
     field public int x;
     field public int y;
   }
 
-  public class PointF {
+  public class PointF implements android.os.Parcelable {
     ctor public PointF();
     ctor public PointF(float, float);
     ctor public PointF(android.graphics.Point);
+    method public int describeContents();
     method public final boolean equals(float, float);
     method public final float length();
     method public static float length(float, float);
     method public final void negate();
     method public final void offset(float, float);
+    method public void readFromParcel(android.os.Parcel);
     method public final void set(float, float);
     method public final void set(android.graphics.PointF);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
     field public float x;
     field public float y;
   }
@@ -19895,13 +19903,15 @@ package android.view {
 
   public class Display {
     method public int getDisplayId();
-    method public int getHeight();
+    method public deprecated int getHeight();
     method public void getMetrics(android.util.DisplayMetrics);
     method public deprecated int getOrientation();
     method public int getPixelFormat();
+    method public void getRectSize(android.graphics.Rect);
     method public float getRefreshRate();
     method public int getRotation();
-    method public int getWidth();
+    method public void getSize(android.graphics.Point);
+    method public deprecated int getWidth();
     field public static final int DEFAULT_DISPLAY = 0; // 0x0
   }
 

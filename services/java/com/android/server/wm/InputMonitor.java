@@ -132,8 +132,8 @@ final class InputMonitor {
         // The drag window covers the entire display
         inputWindow.frameLeft = 0;
         inputWindow.frameTop = 0;
-        inputWindow.frameRight = mService.mDisplay.getWidth();
-        inputWindow.frameBottom = mService.mDisplay.getHeight();
+        inputWindow.frameRight = mService.mDisplay.getRealWidth();
+        inputWindow.frameBottom = mService.mDisplay.getRealHeight();
 
         // The drag window cannot receive new touches.
         inputWindow.touchableRegion.setEmpty();
