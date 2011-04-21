@@ -16,10 +16,15 @@
 
 package android.view;
 
+import android.graphics.Point;
+import android.graphics.Rect;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.util.DisplayMetrics;
+import android.util.Slog;
 
-public class Display
-{
+public class Display {
     /**
      * Specify the default Display
      */
@@ -35,10 +40,10 @@ public class Display
     Display(int display) {
         // initalize the statics when this class is first instansiated. This is
         // done here instead of in the static block because Zygote
-        synchronized (mStaticInit) {
-            if (!mInitialized) {
+        synchronized (sStaticInit) {
+            if (!sInitialized) {
                 nativeClassInit();
-                mInitialized = true;
+                sInitialized = true;
             }
         }
         mDisplay = display;
@@ -60,29 +65,92 @@ public class Display
     native static int getDisplayCount();
     
     /**
-     * Returns the raw width of the display, in pixels.  Note that this
+     * Returns the raw size of the display, in pixels.  Note that this
      * should <em>not</em> generally be used for computing layouts, since
      * a device will typically have screen decoration (such as a status bar)
      * along the edges of the display that reduce the amount of application
      * space available from the raw size returned here.  This value is
      * adjusted for you based on the current rotation of the display.
      */
-    native public int getWidth();
+    public void getSize(Point outSize) {
+        try {
+            IWindowManager wm = getWindowManager();
+            if (wm != null) {
+                wm.getDisplaySize(outSize);
+            } else {
+                // This is just for boot-strapping, initializing the
+                // system process before the window manager is up.
+                outSize.y = getRealHeight();
+            }
+        } catch (RemoteException e) {
+            Slog.w("Display", "Unable to get display size", e);
+        }
+    }
     
     /**
-     * Returns the raw height of the display, in pixels.  Note that this
-     * should <em>not</em> generally be used for computing layouts, since
-     * a device will typically have screen decoration (such as a status bar)
-     * along the edges of the display that reduce the amount of application
-     * space available from the raw size returned here.  This value is
-     * adjusted for you based on the current rotation of the display.
+     * This is just easier for some parts of the framework.
      */
-    native public int getHeight();
+    public void getRectSize(Rect outSize) {
+        synchronized (mTmpPoint) {
+            getSize(mTmpPoint);
+            outSize.set(0, 0, mTmpPoint.x, mTmpPoint.y);
+        }
+    }
+
+    /**
+     * Return the maximum screen size dimension that will happen.  This is
+     * mostly for wallpapers.
+     * @hide
+     */
+    public int getMaximumSizeDimension() {
+        try {
+            IWindowManager wm = getWindowManager();
+            return wm.getMaximumSizeDimension();
+        } catch (RemoteException e) {
+            Slog.w("Display", "Unable to get display maximum size dimension", e);
+            return 0;
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #getSize(Point)} instead.
+     */
+    @Deprecated
+    public int getWidth() {
+        synchronized (mTmpPoint) {
+            long now = SystemClock.uptimeMillis();
+            if (now > (mLastGetTime+20)) {
+                getSize(mTmpPoint);
+                mLastGetTime = now;
+            }
+            return mTmpPoint.x;
+        }
+    }
+
+    /**
+     * @deprecated Use {@link #getSize(Point)} instead.
+     */
+    @Deprecated
+    public int getHeight() {
+        synchronized (mTmpPoint) {
+            long now = SystemClock.uptimeMillis();
+            if (now > (mLastGetTime+20)) {
+                getSize(mTmpPoint);
+                mLastGetTime = now;
+            }
+            return mTmpPoint.y;
+        }
+    }
+
+    /** @hide Returns the actual screen size, not including any decor. */
+    native public int getRealWidth();
+    /** @hide Returns the actual screen size, not including any decor. */
+    native public int getRealHeight();
 
     /** @hide special for when we are faking the screen size. */
-    native public int getRealWidth();
+    native public int getRawWidth();
     /** @hide special for when we are faking the screen size. */
-    native public int getRealHeight();
+    native public int getRawHeight();
     
     /**
      * Returns the rotation of the screen from its "natural" orientation.
@@ -144,6 +212,16 @@ public class Display
         outMetrics.realHeightPixels = outMetrics.heightPixels;
     }
 
+    static IWindowManager getWindowManager() {
+        synchronized (sStaticInit) {
+            if (sWindowManager == null) {
+                sWindowManager = IWindowManager.Stub.asInterface(
+                        ServiceManager.getService("window"));
+            }
+            return sWindowManager;
+        }
+    }
+
     /*
      * We use a class initializer to allow the native code to cache some
      * field offsets.
@@ -160,8 +238,12 @@ public class Display
     private float       mDpiX;
     private float       mDpiY;
     
-    private static final Object mStaticInit = new Object();
-    private static boolean mInitialized = false;
+    private final Point mTmpPoint = new Point();
+    private float mLastGetTime;
+
+    private static final Object sStaticInit = new Object();
+    private static boolean sInitialized = false;
+    private static IWindowManager sWindowManager;
 
     /**
      * Returns a display object which uses the metric's width/height instead.
