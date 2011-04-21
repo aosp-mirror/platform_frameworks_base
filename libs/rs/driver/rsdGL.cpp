@@ -197,7 +197,9 @@ bool rsdGLInit(const Context *rsc) {
        LOGE("%p, couldn't find an EGLConfig matching the screen format\n", rsc);
     }
     //if (props.mLogVisual) {
+    if (0) {
         printEGLConfiguration(dc->gl.egl.display, dc->gl.egl.config);
+    }
     //}
 
     dc->gl.egl.context = eglCreateContext(dc->gl.egl.display, dc->gl.egl.config,
@@ -281,7 +283,9 @@ bool rsdGLInit(const Context *rsc) {
         glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &dc->gl.gl.EXT_texture_max_aniso);
     }
 
-    DumpDebug(dc);
+    if (0) {
+        DumpDebug(dc);
+    }
 
     LOGV("initGLThread end %p", rsc);
     return true;
