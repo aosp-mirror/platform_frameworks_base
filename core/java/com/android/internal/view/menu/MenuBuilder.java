@@ -814,8 +814,10 @@ public class MenuBuilder implements Menu {
      * many menu operations are going to be performed as a batch.
      */
     public void stopDispatchingItemsChanged() {
-        mPreventDispatchingItemsChanged = true;
-        mItemsChangedWhileDispatchPrevented = false;
+        if (!mPreventDispatchingItemsChanged) {
+            mPreventDispatchingItemsChanged = true;
+            mItemsChangedWhileDispatchPrevented = false;
+        }
     }
 
     public void startDispatchingItemsChanged() {
