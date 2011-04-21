@@ -2600,10 +2600,12 @@ public class Camera {
          * (1000, 1000) is the lower right point. The length and width of focus
          * areas cannot be 0 or negative.
          *
-         * The weight ranges from 1 to 1000. The sum of the weights of all focus
-         * areas must be 1000. Focus areas can partially overlap and the driver
-         * will add the weights in the overlap region. But apps should not set
-         * two focus areas that have identical coordinates.
+         * The weight must range from 1 to 1000. The weight should be
+         * interpreted as a per-pixel weight - all pixels in the area have the
+         * specified weight. This means a small area with the same weight as a
+         * larger area will have less influence on the focusing than the larger
+         * area. Focus areas can partially overlap and the driver will add the
+         * weights in the overlap region.
          *
          * A special case of all-zero single focus area means driver to decide
          * the focus area. For example, the driver may use more signals to
@@ -2668,10 +2670,11 @@ public class Camera {
          * point. (1000, 1000) is the lower right point. The length and width of
          * metering areas cannot be 0 or negative.
          *
-         * The weight ranges from 1 to 1000. The sum of the weights of all
-         * metering areas must be 1000. Metering areas can partially overlap and
-         * the driver will add the weights in the overlap region. But apps
-         * should not set two metering areas that have identical coordinates.
+         * The weight must range from 1 to 1000, and represents a weight for
+         * every pixel in the area. This means that a large metering area with
+         * the same weight as a smaller area will have more effect in the
+         * metering result.  Metering areas can partially overlap and the driver
+         * will add the weights in the overlap region.
          *
          * A special case of all-zero single metering area means driver to
          * decide the metering area. For example, the driver may use more
