@@ -1878,7 +1878,7 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.USB_ANLG_HEADSET_PLUG";
 
     /**
-     * Broadcast Action: An analog audio speaker/headset plugged in or unplugged.
+     * Broadcast Action: A digital audio speaker/headset plugged in or unplugged.
      *
      * <p>The intent will have the following extra values:
      * <ul>
