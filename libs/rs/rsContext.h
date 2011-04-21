@@ -84,9 +84,6 @@ public:
     static Context * createContext(Device *, const RsSurfaceConfig *sc);
     ~Context();
 
-    static pthread_key_t gThreadTLSKey;
-    static uint32_t gThreadTLSKeyCount;
-    static uint32_t gGLContextCount;
     static pthread_mutex_t gInitMutex;
     // Library mutex (for providing thread-safe calls from the runtime)
     static pthread_mutex_t gLibMutex;
@@ -105,7 +102,6 @@ public:
         Context *mRsc;
     };
 
-    ScriptTLSStruct *mTlsStruct;
     RsSurfaceConfig mUserSurfaceConfig;
 
     ElementState mStateElement;

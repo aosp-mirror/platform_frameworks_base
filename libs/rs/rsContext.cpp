@@ -39,12 +39,8 @@
 using namespace android;
 using namespace android::renderscript;
 
-pthread_key_t Context::gThreadTLSKey = 0;
-uint32_t Context::gThreadTLSKeyCount = 0;
 pthread_mutex_t Context::gInitMutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t Context::gLibMutex = PTHREAD_MUTEX_INITIALIZER;
-
-
 
 bool Context::initGLThread() {
     pthread_mutex_lock(&gInitMutex);
@@ -263,94 +259,86 @@ void Context::displayDebugStats() {
 }
 
 void * Context::threadProc(void *vrsc) {
-     Context *rsc = static_cast<Context *>(vrsc);
-     rsc->mNativeThreadId = gettid();
+    Context *rsc = static_cast<Context *>(vrsc);
+    rsc->mNativeThreadId = gettid();
 
-     setpriority(PRIO_PROCESS, rsc->mNativeThreadId, ANDROID_PRIORITY_DISPLAY);
-     rsc->mThreadPriority = ANDROID_PRIORITY_DISPLAY;
+    setpriority(PRIO_PROCESS, rsc->mNativeThreadId, ANDROID_PRIORITY_DISPLAY);
+    rsc->mThreadPriority = ANDROID_PRIORITY_DISPLAY;
 
-     rsc->props.mLogTimes = getProp("debug.rs.profile");
-     rsc->props.mLogScripts = getProp("debug.rs.script");
-     rsc->props.mLogObjects = getProp("debug.rs.object");
-     rsc->props.mLogShaders = getProp("debug.rs.shader");
-     rsc->props.mLogShadersAttr = getProp("debug.rs.shader.attributes");
-     rsc->props.mLogShadersUniforms = getProp("debug.rs.shader.uniforms");
-     rsc->props.mLogVisual = getProp("debug.rs.visual");
+    rsc->props.mLogTimes = getProp("debug.rs.profile");
+    rsc->props.mLogScripts = getProp("debug.rs.script");
+    rsc->props.mLogObjects = getProp("debug.rs.object");
+    rsc->props.mLogShaders = getProp("debug.rs.shader");
+    rsc->props.mLogShadersAttr = getProp("debug.rs.shader.attributes");
+    rsc->props.mLogShadersUniforms = getProp("debug.rs.shader.uniforms");
+    rsc->props.mLogVisual = getProp("debug.rs.visual");
 
-     rsc->mTlsStruct = new ScriptTLSStruct;
-     if (!rsc->mTlsStruct) {
-         LOGE("Error allocating tls storage");
-         rsc->setError(RS_ERROR_OUT_OF_MEMORY, "Failed allocation for TLS");
-         return NULL;
-     }
-     rsc->mTlsStruct->mContext = rsc;
-     rsc->mTlsStruct->mScript = NULL;
-     int status = pthread_setspecific(rsc->gThreadTLSKey, rsc->mTlsStruct);
-     if (status) {
-         LOGE("pthread_setspecific %i", status);
-     }
+    if (!rsdHalInit(rsc, 0, 0)) {
+        LOGE("Hal init failed");
+        return NULL;
+    }
+    rsc->mHal.funcs.setPriority(rsc, rsc->mThreadPriority);
 
-     if (!rsc->initGLThread()) {
-         rsc->setError(RS_ERROR_OUT_OF_MEMORY, "Failed initializing GL");
-         return NULL;
-     }
+    if (!rsc->initGLThread()) {
+        rsc->setError(RS_ERROR_OUT_OF_MEMORY, "Failed initializing GL");
+        return NULL;
+    }
 
-     if (rsc->mIsGraphicsContext) {
-         rsc->mStateRaster.init(rsc);
-         rsc->setProgramRaster(NULL);
-         rsc->mStateVertex.init(rsc);
-         rsc->setProgramVertex(NULL);
-         rsc->mStateFragment.init(rsc);
-         rsc->setProgramFragment(NULL);
-         rsc->mStateFragmentStore.init(rsc);
-         rsc->setProgramStore(NULL);
-         rsc->mStateFont.init(rsc);
-         rsc->setFont(NULL);
-         rsc->mStateVertexArray.init(rsc);
-     }
+    if (rsc->mIsGraphicsContext) {
+        rsc->mStateRaster.init(rsc);
+        rsc->setProgramRaster(NULL);
+        rsc->mStateVertex.init(rsc);
+        rsc->setProgramVertex(NULL);
+        rsc->mStateFragment.init(rsc);
+        rsc->setProgramFragment(NULL);
+        rsc->mStateFragmentStore.init(rsc);
+        rsc->setProgramStore(NULL);
+        rsc->mStateFont.init(rsc);
+        rsc->setFont(NULL);
+        rsc->mStateVertexArray.init(rsc);
+    }
 
-     rsc->mRunning = true;
-     bool mDraw = true;
-     while (!rsc->mExit) {
-         mDraw |= rsc->mIO.playCoreCommands(rsc, !mDraw);
-         mDraw &= (rsc->mRootScript.get() != NULL);
-         mDraw &= (rsc->mWndSurface != NULL);
+    rsc->mRunning = true;
+    bool mDraw = true;
+    while (!rsc->mExit) {
+        mDraw |= rsc->mIO.playCoreCommands(rsc, !mDraw);
+        mDraw &= (rsc->mRootScript.get() != NULL);
+        mDraw &= (rsc->mWndSurface != NULL);
 
-         uint32_t targetTime = 0;
-         if (mDraw && rsc->mIsGraphicsContext) {
-             targetTime = rsc->runRootScript();
+        uint32_t targetTime = 0;
+        if (mDraw && rsc->mIsGraphicsContext) {
+            targetTime = rsc->runRootScript();
 
-             if (rsc->props.mLogVisual) {
-                 rsc->displayDebugStats();
-             }
+            if (rsc->props.mLogVisual) {
+                rsc->displayDebugStats();
+            }
 
-             mDraw = targetTime && !rsc->mPaused;
-             rsc->timerSet(RS_TIMER_CLEAR_SWAP);
-             rsc->mHal.funcs.swap(rsc);
-             rsc->timerFrame();
-             rsc->timerSet(RS_TIMER_INTERNAL);
-             rsc->timerPrint();
-             rsc->timerReset();
-         }
-         if (targetTime > 1) {
-             int32_t t = (targetTime - (int32_t)(rsc->mTimeMSLastScript + rsc->mTimeMSLastSwap)) * 1000;
-             if (t > 0) {
-                 usleep(t);
-             }
-         }
-     }
+            mDraw = targetTime && !rsc->mPaused;
+            rsc->timerSet(RS_TIMER_CLEAR_SWAP);
+            rsc->mHal.funcs.swap(rsc);
+            rsc->timerFrame();
+            rsc->timerSet(RS_TIMER_INTERNAL);
+            rsc->timerPrint();
+            rsc->timerReset();
+        }
+        if (targetTime > 1) {
+            int32_t t = (targetTime - (int32_t)(rsc->mTimeMSLastScript + rsc->mTimeMSLastSwap)) * 1000;
+            if (t > 0) {
+                usleep(t);
+            }
+        }
+    }
 
-     LOGV("%p, RS Thread exiting", rsc);
+    LOGV("%p, RS Thread exiting", rsc);
 
-     if (rsc->mIsGraphicsContext) {
-         pthread_mutex_lock(&gInitMutex);
-         rsc->deinitEGL();
-         pthread_mutex_unlock(&gInitMutex);
-     }
-     delete rsc->mTlsStruct;
+    if (rsc->mIsGraphicsContext) {
+        pthread_mutex_lock(&gInitMutex);
+        rsc->deinitEGL();
+        pthread_mutex_unlock(&gInitMutex);
+    }
 
-     LOGV("%p, RS Thread exited", rsc);
-     return NULL;
+    LOGV("%p, RS Thread exited", rsc);
+    return NULL;
 }
 
 void Context::destroyWorkerThreadResources() {
@@ -429,16 +417,6 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
     int status;
     pthread_attr_t threadAttr;
 
-    if (!gThreadTLSKeyCount) {
-        status = pthread_key_create(&gThreadTLSKey, NULL);
-        if (status) {
-            LOGE("Failed to init thread tls key.");
-            pthread_mutex_unlock(&gInitMutex);
-            return false;
-        }
-    }
-    gThreadTLSKeyCount++;
-
     pthread_mutex_unlock(&gInitMutex);
 
     // Global init done at this point.
@@ -453,12 +431,6 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
 
     timerInit();
     timerSet(RS_TIMER_INTERNAL);
-
-    if (!rsdHalInit(this, 0, 0)) {
-        LOGE("Hal init failed");
-        return false;
-    }
-    mHal.funcs.setPriority(this, mThreadPriority);
 
     status = pthread_create(&mThreadId, &threadAttr, threadProc, this);
     if (status) {
@@ -499,10 +471,6 @@ Context::~Context() {
     pthread_mutex_lock(&gInitMutex);
     if (mDev) {
         mDev->removeContext(this);
-        --gThreadTLSKeyCount;
-        if (!gThreadTLSKeyCount) {
-            pthread_key_delete(gThreadTLSKey);
-        }
         mDev = NULL;
     }
     pthread_mutex_unlock(&gInitMutex);

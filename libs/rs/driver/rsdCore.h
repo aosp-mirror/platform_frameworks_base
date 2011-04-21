@@ -34,6 +34,11 @@ typedef struct RsdSymbolTableRec {
     bool threadable;
 } RsdSymbolTable;
 
+typedef struct ScriptTLSStructRec {
+    android::renderscript::Context * mContext;
+    android::renderscript::Script * mScript;
+} ScriptTLSStruct;
+
 typedef struct RsdHalRec {
     uint32_t version_major;
     uint32_t version_minor;
@@ -53,9 +58,14 @@ typedef struct RsdHalRec {
     Workers mWorkers;
     bool mExit;
 
+    ScriptTLSStruct mTlsStruct;
+
     RsdGL gl;
 } RsdHal;
 
+extern pthread_key_t rsdgThreadTLSKey;
+extern uint32_t rsdgThreadTLSKeyCount;
+extern pthread_mutex_t rsdgInitMutex;
 
 
 void rsdLaunchThreads(android::renderscript::Context *rsc, WorkerCallback_t cbk, void *data);
