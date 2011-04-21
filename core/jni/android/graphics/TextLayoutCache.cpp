@@ -126,10 +126,16 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
 
     // Value not found for the key, we need to add a new value in the cache
     if (value == NULL) {
+        if (mDebugEnabled) {
+            startTime = systemTime(SYSTEM_TIME_MONOTONIC);
+        }
+
         value = new TextLayoutCacheValue();
 
         // Compute advances and store them
         value->computeValues(paint, text, start, count, contextCount, dirFlags);
+
+        nsecs_t endTime = systemTime(SYSTEM_TIME_MONOTONIC);
 
         // Don't bother to add in the cache if the entry is too big
         size_t size = key.getSize() + value->getSize();
@@ -155,7 +161,7 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
 
             if (mDebugEnabled) {
                 // Update timing information for statistics
-                value->setElapsedTime(systemTime(SYSTEM_TIME_MONOTONIC) - startTime);
+                value->setElapsedTime(endTime - startTime);
 
                 LOGD("CACHE MISS: Added entry for text='%s' with start=%d, count=%d, "
                         "contextCount=%d, entry size %d bytes, remaining space %d bytes"
@@ -168,9 +174,9 @@ sp<TextLayoutCacheValue> TextLayoutCache::getValue(SkPaint* paint,
                 LOGD("CACHE MISS: Calculated but not storing entry because it is too big "
                         "for text='%s' with start=%d, count=%d, contextCount=%d, "
                         "entry size %d bytes, remaining space %d bytes"
-                        " - Compute time in nanos: %d",
+                        " - Compute time in nanos: %lld",
                         String8(text, contextCount).string(), start, count, contextCount,
-                        size, mMaxSize - mSize, value->getElapsedTime());
+                        size, mMaxSize - mSize, endTime);
             }
             value.clear();
         }
@@ -205,7 +211,9 @@ void TextLayoutCache::dumpCacheStats() {
     LOGD("------------------------------------------------");
     LOGD("TextLayoutCache stats");
     LOGD("------------------------------------------------");
+    LOGD("pid       : %d", getpid());
     LOGD("running   : %.0f seconds", timeRunningInSec);
+    LOGD("entries   : %d", mCache.size());
     LOGD("size      : %d bytes", mMaxSize);
     LOGD("remaining : %d bytes or %2.2f percent", mMaxSize - mSize, remainingPercent);
     LOGD("hits      : %d", mCacheHitCount);
