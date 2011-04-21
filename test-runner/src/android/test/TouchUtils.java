@@ -18,6 +18,7 @@ package android.test;
 
 import android.app.Activity;
 import android.app.Instrumentation;
+import android.graphics.Point;
 import android.os.SystemClock;
 import android.view.Display;
 import android.view.Gravity;
@@ -53,12 +54,12 @@ public class TouchUtils {
      */
     public static void dragQuarterScreenDown(InstrumentationTestCase test, Activity activity) {
         Display display = activity.getWindowManager().getDefaultDisplay();
-        int screenHeight = display.getHeight();
-        int screenWidth = display.getWidth();
+        final Point size = new Point();
+        display.getSize(size);
         
-        final float x = screenWidth / 2.0f;
-        final float fromY = screenHeight * 0.5f;
-        final float toY = screenHeight * 0.75f;
+        final float x = size.x / 2.0f;
+        final float fromY = size.y * 0.5f;
+        final float toY = size.y * 0.75f;
       
         drag(test, x, x, fromY, toY, 4);
     }
@@ -83,12 +84,12 @@ public class TouchUtils {
      */
     public static void dragQuarterScreenUp(InstrumentationTestCase test, Activity activity) {
         Display display = activity.getWindowManager().getDefaultDisplay();
-        int screenHeight = display.getHeight();
-        int screenWidth = display.getWidth();
+        final Point size = new Point();
+        display.getSize(size);
         
-        final float x = screenWidth / 2.0f;
-        final float fromY = screenHeight * 0.5f;
-        final float toY = screenHeight * 0.25f;
+        final float x = size.x / 2.0f;
+        final float fromY = size.y * 0.5f;
+        final float toY = size.y * 0.25f;
       
         drag(test, x, x, fromY, toY, 4);
     }

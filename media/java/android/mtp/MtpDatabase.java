@@ -616,8 +616,8 @@ public class MtpDatabase {
                 // use screen size as max image size
                 Display display = ((WindowManager)mContext.getSystemService(
                         Context.WINDOW_SERVICE)).getDefaultDisplay();
-                int width = display.getWidth();
-                int height = display.getHeight();
+                int width = display.getMaximumSizeDimension();
+                int height = display.getMaximumSizeDimension();
                 String imageSize = Integer.toString(width) + "x" +  Integer.toString(height);
                 imageSize.getChars(0, imageSize.length(), outStringValue, 0);
                 outStringValue[imageSize.length()] = 0;
