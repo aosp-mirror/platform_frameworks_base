@@ -43,7 +43,6 @@ using namespace android::renderscript;
 //////////////////////////////////////////////////////////////////////////////
 
 static uint32_t SC_allocGetDimX(Allocation *a) {
-    LOGE("SC_allocGetDimX %p", a);
     return a->mHal.state.dimensionX;
 }
 
