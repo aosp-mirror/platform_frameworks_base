@@ -53,7 +53,7 @@
 #define MB(s) s * 1024 * 1024
 
 // Define the default cache size in Mb
-#define DEFAULT_TEXT_LAYOUT_CACHE_SIZE_IN_MB 0.125f
+#define DEFAULT_TEXT_LAYOUT_CACHE_SIZE_IN_MB 0.250f
 
 // Define the interval in number of cache hits between two statistics dump
 #define DEFAULT_DUMP_STATS_CACHE_HIT_INTERVAL 100
