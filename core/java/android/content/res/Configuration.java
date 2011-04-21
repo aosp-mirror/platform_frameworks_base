@@ -26,7 +26,11 @@ import java.util.Locale;
  * This class describes all device configuration information that can
  * impact the resources the application retrieves.  This includes both
  * user-specified configuration options (locale and scaling) as well
- * as dynamic device configuration (various types of input devices).
+ * as device configurations (such as input modes, screen size and screen orientation).
+ * <p>You can acquire this object from {@link Resources}, using {@link
+ * Resources#getConfiguration}. Thus, from an activity, you can get it by chaining the request
+ * with {@link android.app.Activity#getResources}:</p>
+ * <pre>Configuration config = getResources().getConfiguration();</pre>
  */
 public final class Configuration implements Parcelable, Comparable<Configuration> {
     /**
