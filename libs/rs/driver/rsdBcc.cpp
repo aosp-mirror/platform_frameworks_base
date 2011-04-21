@@ -56,8 +56,9 @@ struct DrvScript {
 
 };
 
+
 static Script * setTLS(Script *sc) {
-    ScriptTLSStruct * tls = (ScriptTLSStruct *)pthread_getspecific(Context::gThreadTLSKey);
+    ScriptTLSStruct * tls = (ScriptTLSStruct *)pthread_getspecific(rsdgThreadTLSKey);
     rsAssert(tls);
     Script *old = tls->mScript;
     tls->mScript = sc;
@@ -133,12 +134,13 @@ bool rsdScriptInit(const Context *rsc,
                      uint32_t flags) {
     //LOGE("rsdScriptCreate %p %p %p %p %i %i %p", rsc, resName, cacheDir, bitcode, bitcodeSize, flags, lookupFunc);
 
+    pthread_mutex_lock(&rsdgInitMutex);
     char *cachePath = NULL;
     uint32_t objectSlotCount = 0;
 
     DrvScript *drv = (DrvScript *)calloc(1, sizeof(DrvScript));
     if (drv == NULL) {
-        return false;
+        goto error;
     }
     script->mHal.drv = drv;
 
@@ -159,20 +161,20 @@ bool rsdScriptInit(const Context *rsc,
                   (char const *)drv->mScriptText,
                   drv->mScriptTextLength, 0) != 0) {
         LOGE("bcc: FAILS to read bitcode");
-        return NULL;
+        goto error;
     }
 
 #if 1
     if (bccLinkFile(drv->mBccScript, "/system/lib/libclcore.bc", 0) != 0) {
         LOGE("bcc: FAILS to link bitcode");
-        return NULL;
+        goto error;
     }
 #endif
     cachePath = genCacheFileName(cacheDir, resName, ".oBCC");
 
     if (bccPrepareExecutable(drv->mBccScript, cachePath, 0) != 0) {
         LOGE("bcc: FAILS to prepare executable");
-        return NULL;
+        goto error;
     }
 
     free(cachePath);
@@ -234,10 +236,12 @@ bool rsdScriptInit(const Context *rsc,
     script->mHal.info.root = drv->mRoot;
 
 
+    pthread_mutex_unlock(&rsdgInitMutex);
     return true;
 
 error:
 
+    pthread_mutex_unlock(&rsdgInitMutex);
     free(drv);
     return false;
 

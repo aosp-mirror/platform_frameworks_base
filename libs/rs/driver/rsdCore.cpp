@@ -73,6 +73,9 @@ static RsdHalFunctions FunctionTable = {
 
 };
 
+pthread_key_t rsdgThreadTLSKey = 0;
+uint32_t rsdgThreadTLSKeyCount = 0;
+pthread_mutex_t rsdgInitMutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 static void * HelperThreadProc(void *vrsc) {
@@ -87,6 +90,11 @@ static void * HelperThreadProc(void *vrsc) {
     dc->mWorkers.mLaunchSignals[idx].init();
     dc->mWorkers.mNativeThreadId[idx] = gettid();
 
+    int status = pthread_setspecific(rsdgThreadTLSKey, &dc->mTlsStruct);
+    if (status) {
+        LOGE("pthread_setspecific %i", status);
+    }
+
 #if 0
     typedef struct {uint64_t bits[1024 / 64]; } cpu_set_t;
     cpu_set_t cpuset;
@@ -96,11 +104,6 @@ static void * HelperThreadProc(void *vrsc) {
               sizeof(cpuset), &cpuset);
     LOGE("SETAFFINITY ret = %i %s", ret, EGLUtils::strerror(ret));
 #endif
-
-    int status = pthread_setspecific(rsc->gThreadTLSKey, rsc->mTlsStruct);
-    if (status) {
-        LOGE("pthread_setspecific %i", status);
-    }
 
     while (!dc->mExit) {
         dc->mWorkers.mLaunchSignals[idx].wait();
@@ -139,6 +142,25 @@ bool rsdHalInit(Context *rsc, uint32_t version_major, uint32_t version_minor) {
     }
     rsc->mHal.drv = dc;
 
+    pthread_mutex_lock(&rsdgInitMutex);
+    if (!rsdgThreadTLSKeyCount) {
+        int status = pthread_key_create(&rsdgThreadTLSKey, NULL);
+        if (status) {
+            LOGE("Failed to init thread tls key.");
+            pthread_mutex_unlock(&rsdgInitMutex);
+            return false;
+        }
+    }
+    rsdgThreadTLSKeyCount++;
+    pthread_mutex_unlock(&rsdgInitMutex);
+
+    dc->mTlsStruct.mContext = rsc;
+    dc->mTlsStruct.mScript = NULL;
+    int status = pthread_setspecific(rsdgThreadTLSKey, &dc->mTlsStruct);
+    if (status) {
+        LOGE("pthread_setspecific %i", status);
+    }
+
 
     int cpu = sysconf(_SC_NPROCESSORS_ONLN);
     LOGV("RS Launching thread(s), reported CPU count %i", cpu);
@@ -155,7 +177,6 @@ bool rsdHalInit(Context *rsc, uint32_t version_major, uint32_t version_minor) {
     android_atomic_release_store(dc->mWorkers.mCount, &dc->mWorkers.mRunningCount);
     android_atomic_release_store(0, &dc->mWorkers.mLaunchCount);
 
-    int status;
     pthread_attr_t threadAttr;
     status = pthread_attr_init(&threadAttr);
     if (status) {
@@ -203,6 +224,15 @@ void Shutdown(Context *rsc) {
         status = pthread_join(dc->mWorkers.mThreadId[ct], &res);
     }
     rsAssert(android_atomic_acquire_load(&dc->mWorkers.mRunningCount) == 0);
+
+    // Global structure cleanup.
+    pthread_mutex_lock(&rsdgInitMutex);
+    --rsdgThreadTLSKeyCount;
+    if (!rsdgThreadTLSKeyCount) {
+        pthread_key_delete(rsdgThreadTLSKey);
+    }
+    pthread_mutex_unlock(&rsdgInitMutex);
+
 }
 
 

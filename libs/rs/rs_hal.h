@@ -35,12 +35,6 @@ class ProgramRaster;
 
 typedef void *(*RsHalSymbolLookupFunc)(void *usrptr, char const *symbolName);
 
-typedef struct ScriptTLSStructRec {
-    Context * mContext;
-    Script * mScript;
-} ScriptTLSStruct;
-
-
 /**
  * Script management functions
  */
