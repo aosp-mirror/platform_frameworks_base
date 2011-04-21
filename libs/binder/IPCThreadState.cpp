@@ -851,6 +851,9 @@ status_t IPCThreadState::writeTransactionData(int32_t cmd, uint32_t binderFlags,
     tr.target.handle = handle;
     tr.code = code;
     tr.flags = binderFlags;
+    tr.cookie = 0;
+    tr.sender_pid = 0;
+    tr.sender_euid = 0;
     
     const status_t err = data.errorCheck();
     if (err == NO_ERROR) {
