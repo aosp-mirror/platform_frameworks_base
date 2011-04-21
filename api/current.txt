@@ -13171,6 +13171,7 @@ package android.opengl {
     method public static void multiplyMM(float[], int, float[], int, float[], int);
     method public static void multiplyMV(float[], int, float[], int, float[], int);
     method public static void orthoM(float[], int, float, float, float, float, float, float);
+    method public static void perspectiveM(float[], int, float, float, float, float);
     method public static void rotateM(float[], int, float[], int, float, float, float, float);
     method public static void rotateM(float[], int, float, float, float, float);
     method public static void scaleM(float[], int, float[], int, float, float, float);
