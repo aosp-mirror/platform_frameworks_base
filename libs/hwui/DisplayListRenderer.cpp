@@ -177,6 +177,331 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
 void DisplayList::init() {
 }
 
+/**
+ * This function is a simplified version of replay(), where we simply retrieve and log the
+ * display list. This function should remain in sync with the replay() function.
+ */
+void DisplayList::output(OpenGLRenderer& renderer, uint32_t level) {
+    TextContainer text;
+
+    uint32_t count = (level + 1) * 2;
+    char indent[count + 1];
+    for (uint32_t i = 0; i < count; i++) {
+        indent[i] = ' ';
+    }
+    indent[count] = '\0';
+    LOGD("%sStart display list (%p)", (char*) indent + 2, this);
+
+    int saveCount = renderer.getSaveCount() - 1;
+
+    mReader.rewind();
+
+    while (!mReader.eof()) {
+        int op = mReader.readInt();
+
+        switch (op) {
+            case DrawGLFunction: {
+                Functor *functor = (Functor *) getInt();
+                LOGD("%s%s %p", (char*) indent, OP_NAMES[op], functor);
+            }
+            break;
+            case Save: {
+                int rendererNum = getInt();
+                LOGD("%s%s %d", (char*) indent, OP_NAMES[op], rendererNum);
+            }
+            break;
+            case Restore: {
+                LOGD("%s%s", (char*) indent, OP_NAMES[op]);
+            }
+            break;
+            case RestoreToCount: {
+                int restoreCount = saveCount + getInt();
+                LOGD("%s%s %d", (char*) indent, OP_NAMES[op], restoreCount);
+            }
+            break;
+            case SaveLayer: {
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                SkPaint* paint = getPaint();
+                int flags = getInt();
+                LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %p, 0x%x", (char*) indent,
+                    OP_NAMES[op], f1, f2, f3, f4, paint, flags);
+            }
+            break;
+            case SaveLayerAlpha: {
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                int alpha = getInt();
+                int flags = getInt();
+                LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d, 0x%x", (char*) indent,
+                    OP_NAMES[op], f1, f2, f3, f4, alpha, flags);
+            }
+            break;
+            case Translate: {
+                float f1 = getFloat();
+                float f2 = getFloat();
+                LOGD("%s%s %.2f, %.2f", (char*) indent, OP_NAMES[op], f1, f2);
+            }
+            break;
+            case Rotate: {
+                float rotation = getFloat();
+                LOGD("%s%s %.2f", (char*) indent, OP_NAMES[op], rotation);
+            }
+            break;
+            case Scale: {
+                float sx = getFloat();
+                float sy = getFloat();
+                LOGD("%s%s %.2f, %.2f", (char*) indent, OP_NAMES[op], sx, sy);
+            }
+            break;
+            case Skew: {
+                float sx = getFloat();
+                float sy = getFloat();
+                LOGD("%s%s %.2f, %.2f", (char*) indent, OP_NAMES[op], sx, sy);
+            }
+            break;
+            case SetMatrix: {
+                SkMatrix* matrix = getMatrix();
+                LOGD("%s%s %p", (char*) indent, OP_NAMES[op], matrix);
+            }
+            break;
+            case ConcatMatrix: {
+                SkMatrix* matrix = getMatrix();
+                LOGD("%s%s %p", (char*) indent, OP_NAMES[op], matrix);
+            }
+            break;
+            case ClipRect: {
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                int regionOp = getInt();
+                LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %d", (char*) indent, OP_NAMES[op],
+                    f1, f2, f3, f4, regionOp);
+            }
+            break;
+            case DrawDisplayList: {
+                DisplayList* displayList = getDisplayList();
+                uint32_t width = getUInt();
+                uint32_t height = getUInt();
+                LOGD("%s%s %p, %dx%d, %d", (char*) indent, OP_NAMES[op],
+                    displayList, width, height, level + 1);
+                renderer.outputDisplayList(displayList, level + 1);
+            }
+            break;
+            case DrawLayer: {
+                Layer* layer = (Layer*) getInt();
+                float x = getFloat();
+                float y = getFloat();
+                SkPaint* paint = getPaint();
+                LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
+                    layer, x, y, paint);
+            }
+            break;
+            case DrawBitmap: {
+                SkBitmap* bitmap = getBitmap();
+                float x = getFloat();
+                float y = getFloat();
+                SkPaint* paint = getPaint();
+                LOGD("%s%s %p, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
+                    bitmap, x, y, paint);
+            }
+            break;
+            case DrawBitmapMatrix: {
+                SkBitmap* bitmap = getBitmap();
+                SkMatrix* matrix = getMatrix();
+                SkPaint* paint = getPaint();
+                LOGD("%s%s %p, %p, %p", (char*) indent, OP_NAMES[op],
+                    bitmap, matrix, paint);
+            }
+            break;
+            case DrawBitmapRect: {
+                SkBitmap* bitmap = getBitmap();
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                float f5 = getFloat();
+                float f6 = getFloat();
+                float f7 = getFloat();
+                float f8 = getFloat();
+                SkPaint* paint = getPaint();
+                LOGD("%s%s %p, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %p",
+                    (char*) indent, OP_NAMES[op], bitmap, f1, f2, f3, f4, f5, f6, f7, f8, paint);
+            }
+            break;
+            case DrawBitmapMesh: {
+                int verticesCount = 0;
+                uint32_t colorsCount = 0;
+                SkBitmap* bitmap = getBitmap();
+                uint32_t meshWidth = getInt();
+                uint32_t meshHeight = getInt();
+                float* vertices = getFloats(verticesCount);
+                bool hasColors = getInt();
+                int* colors = hasColors ? getInts(colorsCount) : NULL;
+                SkPaint* paint = getPaint();
+                LOGD("%s%s", (char*) indent, OP_NAMES[op]);
+            }
+            break;
+            case DrawPatch: {
+                int32_t* xDivs = NULL;
+                int32_t* yDivs = NULL;
+                uint32_t* colors = NULL;
+                uint32_t xDivsCount = 0;
+                uint32_t yDivsCount = 0;
+                int8_t numColors = 0;
+                SkBitmap* bitmap = getBitmap();
+                xDivs = getInts(xDivsCount);
+                yDivs = getInts(yDivsCount);
+                colors = getUInts(numColors);
+                DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
+                getFloat();
+                getFloat();
+                getFloat();
+                getFloat();
+                getPaint();
+            }
+            break;
+            case DrawColor: {
+                int color = getInt();
+                int xferMode = getInt();
+                LOGD("%s%s 0x%x %d", (char*) indent, OP_NAMES[op], color, xferMode);
+            }
+            break;
+            case DrawRect: {
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                SkPaint* paint = getPaint();
+                LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
+                    f1, f2, f3, f4, paint);
+            }
+            break;
+            case DrawRoundRect: {
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                float f5 = getFloat();
+                float f6 = getFloat();
+                SkPaint* paint = getPaint();
+                LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %p",
+                    (char*) indent, OP_NAMES[op], f1, f2, f3, f4, f5, f6, paint);
+            }
+            break;
+            case DrawCircle: {
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                SkPaint* paint = getPaint();
+                LOGD("%s%s %.2f, %.2f, %.2f, %p",
+                    (char*) indent, OP_NAMES[op], f1, f2, f3, paint);
+            }
+            break;
+            case DrawOval: {
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                SkPaint* paint = getPaint();
+                LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %p",
+                    (char*) indent, OP_NAMES[op], f1, f2, f3, f4, paint);
+            }
+            break;
+            case DrawArc: {
+                float f1 = getFloat();
+                float f2 = getFloat();
+                float f3 = getFloat();
+                float f4 = getFloat();
+                float f5 = getFloat();
+                float f6 = getFloat();
+                int i1 = getInt();
+                SkPaint* paint = getPaint();
+                LOGD("%s%s %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %d, %p",
+                    (char*) indent, OP_NAMES[op], f1, f2, f3, f4, f5, f6, i1, paint);
+            }
+            break;
+            case DrawPath: {
+                SkPath* path = getPath();
+                SkPaint* paint = getPaint();
+                LOGD("%s%s %p, %p", (char*) indent, OP_NAMES[op], path, paint);
+            }
+            break;
+            case DrawLines: {
+                int count = 0;
+                float* points = getFloats(count);
+                SkPaint* paint = getPaint();
+                LOGD("%s%s", (char*) indent, OP_NAMES[op]);
+            }
+            break;
+            case DrawPoints: {
+                int count = 0;
+                float* points = getFloats(count);
+                SkPaint* paint = getPaint();
+                LOGD("%s%s", (char*) indent, OP_NAMES[op]);
+            }
+            break;
+            case DrawText: {
+                getText(&text);
+                int count = getInt();
+                float x = getFloat();
+                float y = getFloat();
+                SkPaint* paint = getPaint();
+                LOGD("%s%s %s, %d, %d, %.2f, %.2f, %p", (char*) indent, OP_NAMES[op],
+                    text.text(), text.length(), count, x, y, paint);
+            }
+            break;
+            case ResetShader: {
+                LOGD("%s%s", (char*) indent, OP_NAMES[op]);
+            }
+            break;
+            case SetupShader: {
+                SkiaShader* shader = getShader();
+                LOGD("%s%s %p", (char*) indent, OP_NAMES[op], shader);
+            }
+            break;
+            case ResetColorFilter: {
+                LOGD("%s%s", (char*) indent, OP_NAMES[op]);
+            }
+            break;
+            case SetupColorFilter: {
+                SkiaColorFilter *colorFilter = getColorFilter();
+                LOGD("%s%s %p", (char*) indent, OP_NAMES[op], colorFilter);
+            }
+            break;
+            case ResetShadow: {
+                LOGD("%s%s", (char*) indent, OP_NAMES[op]);
+            }
+            break;
+            case SetupShadow: {
+                float radius = getFloat();
+                float dx = getFloat();
+                float dy = getFloat();
+                int color = getInt();
+                LOGD("%s%s %.2f, %.2f, %.2f, 0x%x", (char*) indent, OP_NAMES[op],
+                    radius, dx, dy, color);
+            }
+            break;
+            default:
+                LOGD("Display List error: op not handled: %s%s",
+                    (char*) indent, OP_NAMES[op]);
+                break;
+        }
+    }
+
+    LOGD("%sDone", (char*) indent + 2);
+}
+
+/**
+ * Changes to replay(), specifically those involving opcode or parameter changes, should be mimicked
+ * in the output() function, since that function processes the same list of opcodes for the
+ * purposes of logging display list info for a given view.
+ */
 bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) {
     bool needsInvalidate = false;
     TextContainer text;

@@ -1507,6 +1507,20 @@ public final class ViewAncestor extends Handler implements ViewParent,
         }
     }
 
+    /**
+     * @hide
+     */
+    void outputDisplayList(View view) {
+        if (mAttachInfo != null && mAttachInfo.mHardwareCanvas != null) {
+
+            HardwareCanvas canvas = (HardwareCanvas) mAttachInfo.mHardwareCanvas;
+            DisplayList displayList = view.getDisplayList();
+            if (displayList != null) {
+                canvas.outputDisplayList(displayList);
+            }
+        }
+    }
+
     private void draw(boolean fullRedrawNeeded) {
         Surface surface = mSurface;
         if (surface == null || !surface.isValid()) {
