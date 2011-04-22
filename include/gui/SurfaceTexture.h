@@ -142,6 +142,13 @@ public:
     // getCurrentTransform returns the transform of the current buffer
     uint32_t getCurrentTransform() const;
 
+    // setSynchronousMode set whether dequeueBuffer is synchronous or
+    // asynchronous. In synchronous mode, dequeueBuffer blocks until
+    // a buffer is available, the currently bound buffer can be dequeued and
+    // queued buffers will be retired in order.
+    // The default mode is asynchronous.
+    status_t setSynchronousMode(bool enabled);
+
 protected:
 
     // freeAllBuffers frees the resources (both GraphicBuffer and EGLImage) for
@@ -159,6 +166,16 @@ private:
     enum { INVALID_BUFFER_SLOT = -1 };
 
     struct BufferSlot {
+
+        BufferSlot()
+            : mEglImage(EGL_NO_IMAGE_KHR),
+              mEglDisplay(EGL_NO_DISPLAY),
+              mBufferState(BufferSlot::FREE),
+              mRequestBufferCalled(false),
+              mLastQueuedTransform(0),
+              mLastQueuedTimestamp(0) {
+        }
+
         // mGraphicBuffer points to the buffer allocated for this slot or is NULL
         // if no buffer has been allocated.
         sp<GraphicBuffer> mGraphicBuffer;
@@ -169,11 +186,32 @@ private:
         // mEglDisplay is the EGLDisplay used to create mEglImage.
         EGLDisplay mEglDisplay;
 
-        // mOwnedByClient indicates whether the slot is currently accessible to a
+        // mBufferState indicates whether the slot is currently accessible to a
         // client and should not be used by the SurfaceTexture object. It gets
         // set to true when dequeueBuffer returns the slot and is reset to false
         // when the client calls either queueBuffer or cancelBuffer on the slot.
-        bool mOwnedByClient;
+        enum { DEQUEUED=-2, FREE=-1, QUEUED=0 };
+        int8_t mBufferState;
+
+
+        // mRequestBufferCalled is used for validating that the client did
+        // call requestBuffer() when told to do so. Technically this is not
+        // needed but useful for debugging and catching client bugs.
+        bool mRequestBufferCalled;
+
+        // mLastQueuedCrop is the crop rectangle for the buffer that was most
+        // recently queued. This gets set to mNextCrop each time queueBuffer gets
+        // called.
+        Rect mLastQueuedCrop;
+
+        // mLastQueuedTransform is the transform identifier for the buffer that was
+        // most recently queued. This gets set to mNextTransform each time
+        // queueBuffer gets called.
+        uint32_t mLastQueuedTransform;
+
+        // mLastQueuedTimestamp is the timestamp for the buffer that was most
+        // recently queued. This gets set by queueBuffer.
+        int64_t mLastQueuedTimestamp;
     };
 
     // mSlots is the array of buffer slots that must be mirrored on the client
@@ -230,25 +268,6 @@ private:
     // gets set to mLastQueuedTimestamp each time updateTexImage is called.
     int64_t mCurrentTimestamp;
 
-    // mLastQueued is the buffer slot index of the most recently enqueued buffer.
-    // At construction time it is initialized to INVALID_BUFFER_SLOT, and is
-    // updated each time queueBuffer is called.
-    int mLastQueued;
-
-    // mLastQueuedCrop is the crop rectangle for the buffer that was most
-    // recently queued. This gets set to mNextCrop each time queueBuffer gets
-    // called.
-    Rect mLastQueuedCrop;
-
-    // mLastQueuedTransform is the transform identifier for the buffer that was
-    // most recently queued. This gets set to mNextTransform each time
-    // queueBuffer gets called.
-    uint32_t mLastQueuedTransform;
-
-    // mLastQueuedTimestamp is the timestamp for the buffer that was most
-    // recently queued. This gets set by queueBuffer.
-    int64_t mLastQueuedTimestamp;
-
     // mNextCrop is the crop rectangle that will be used for the next buffer
     // that gets queued. It is set by calling setCrop.
     Rect mNextCrop;
@@ -270,6 +289,16 @@ private:
     // new frame becomes available. If it is not NULL it will be called from
     // queueBuffer.
     sp<FrameAvailableListener> mFrameAvailableListener;
+
+    // mSynchronousMode whether we're in synchronous mode or not
+    bool mSynchronousMode;
+
+    // mDequeueCondition condition used for dequeueBuffer in synchronous mode
+    mutable Condition mDequeueCondition;
+
+    // mQueue is a FIFO of queued buffers used in synchronous mode
+    typedef Vector<int> Fifo;
+    Fifo mQueue;
 
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of SurfaceTexture objects. It must be locked whenever the

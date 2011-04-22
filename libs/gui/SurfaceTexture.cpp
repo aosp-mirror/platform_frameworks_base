@@ -86,17 +86,10 @@ SurfaceTexture::SurfaceTexture(GLuint tex) :
     mCurrentTextureTarget(GL_TEXTURE_EXTERNAL_OES),
     mCurrentTransform(0),
     mCurrentTimestamp(0),
-    mLastQueued(INVALID_BUFFER_SLOT),
-    mLastQueuedTransform(0),
-    mLastQueuedTimestamp(0),
     mNextTransform(0),
-    mTexName(tex) {
+    mTexName(tex),
+    mSynchronousMode(false) {
     LOGV("SurfaceTexture::SurfaceTexture");
-    for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
-        mSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
-        mSlots[i].mEglDisplay = EGL_NO_DISPLAY;
-        mSlots[i].mOwnedByClient = false;
-    }
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
     mNextCrop.makeInvalid();
@@ -109,16 +102,21 @@ SurfaceTexture::~SurfaceTexture() {
 
 status_t SurfaceTexture::setBufferCount(int bufferCount) {
     LOGV("SurfaceTexture::setBufferCount");
+    Mutex::Autolock lock(mMutex);
 
-    if (bufferCount < MIN_BUFFER_SLOTS) {
+    const int minBufferSlots = mSynchronousMode ?
+            MIN_BUFFER_SLOTS-1 : MIN_BUFFER_SLOTS;
+
+    if (bufferCount < minBufferSlots) {
         return BAD_VALUE;
     }
 
-    Mutex::Autolock lock(mMutex);
     freeAllBuffers();
     mBufferCount = bufferCount;
     mCurrentTexture = INVALID_BUFFER_SLOT;
-    mLastQueued = INVALID_BUFFER_SLOT;
+    mQueue.clear();
+    mQueue.reserve(mSynchronousMode ? mBufferCount : 1);
+    mDequeueCondition.signal();
     return OK;
 }
 
@@ -140,6 +138,7 @@ sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf) {
                 mBufferCount, buf);
         return 0;
     }
+    mSlots[buf].mRequestBufferCalled = true;
     return mSlots[buf].mGraphicBuffer;
 }
 
@@ -153,14 +152,44 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
     }
 
     Mutex::Autolock lock(mMutex);
-    int found = INVALID_BUFFER_SLOT;
-    for (int i = 0; i < mBufferCount; i++) {
-        if (!mSlots[i].mOwnedByClient && i != mCurrentTexture && i != mLastQueued) {
-            mSlots[i].mOwnedByClient = true;
-            found = i;
-            break;
+    int found, foundSync;
+    int dequeuedCount = 0;
+    bool tryAgain = true;
+    while (tryAgain) {
+        found = INVALID_BUFFER_SLOT;
+        foundSync = INVALID_BUFFER_SLOT;
+        dequeuedCount = 0;
+        for (int i = 0; i < mBufferCount; i++) {
+            const int state = mSlots[i].mBufferState;
+            if (state == BufferSlot::DEQUEUED) {
+                dequeuedCount++;
+            }
+            if (state == BufferSlot::FREE || i == mCurrentTexture) {
+                foundSync = i;
+                if (i != mCurrentTexture) {
+                    found = i;
+                    break;
+                }
+            }
+        }
+        // we're in synchronous mode and didn't find a buffer, we need to wait
+        tryAgain = mSynchronousMode && (foundSync == INVALID_BUFFER_SLOT);
+        if (tryAgain) {
+            mDequeueCondition.wait(mMutex);
         }
     }
+
+    if (mSynchronousMode) {
+        // we're dequeuing more buffers than allowed in synchronous mode
+        if ((mBufferCount - (dequeuedCount+1)) < MIN_UNDEQUEUED_BUFFERS-1)
+            return -EBUSY;
+
+        if (found == INVALID_BUFFER_SLOT) {
+            // foundSync guaranteed to be != INVALID_BUFFER_SLOT
+            found = foundSync;
+        }
+    }
+
     if (found == INVALID_BUFFER_SLOT) {
         return -EBUSY;
     }
@@ -181,7 +210,11 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         format = mPixelFormat;
     }
 
-    const sp<GraphicBuffer>& buffer(mSlots[found].mGraphicBuffer);
+    // buffer is now in DEQUEUED (but can also be current at the same time,
+    // if we're in synchronous mode)
+    mSlots[buf].mBufferState = BufferSlot::DEQUEUED;
+
+    const sp<GraphicBuffer>& buffer(mSlots[buf].mGraphicBuffer);
     if ((buffer == NULL) ||
         (uint32_t(buffer->width)  != w) ||
         (uint32_t(buffer->height) != h) ||
@@ -199,6 +232,7 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             mPixelFormat = format;
         }
         mSlots[buf].mGraphicBuffer = graphicBuffer;
+        mSlots[buf].mRequestBufferCalled = false;
         if (mSlots[buf].mEglImage != EGL_NO_IMAGE_KHR) {
             eglDestroyImageKHR(mSlots[buf].mEglDisplay, mSlots[buf].mEglImage);
             mSlots[buf].mEglImage = EGL_NO_IMAGE_KHR;
@@ -209,44 +243,78 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
     return OK;
 }
 
+status_t SurfaceTexture::setSynchronousMode(bool enabled) {
+    Mutex::Autolock lock(mMutex);
+    if (mSynchronousMode != enabled) {
+        mSynchronousMode = enabled;
+        freeAllBuffers();
+        mCurrentTexture = INVALID_BUFFER_SLOT;
+        mQueue.clear();
+        mQueue.reserve(mSynchronousMode ? mBufferCount : 1);
+        mDequeueCondition.signal();
+    }
+    return NO_ERROR;
+}
+
 status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp) {
     LOGV("SurfaceTexture::queueBuffer");
     Mutex::Autolock lock(mMutex);
-    if (buf < 0 || mBufferCount <= buf) {
+    if (buf < 0 || buf >= mBufferCount) {
         LOGE("queueBuffer: slot index out of range [0, %d]: %d",
                 mBufferCount, buf);
         return -EINVAL;
-    } else if (!mSlots[buf].mOwnedByClient) {
-        LOGE("queueBuffer: slot %d is not owned by the client", buf);
+    } else if (mSlots[buf].mBufferState != BufferSlot::DEQUEUED) {
+        LOGE("queueBuffer: slot %d is not owned by the client (state=%d)",
+                buf, mSlots[buf].mBufferState);
         return -EINVAL;
-    } else if (mSlots[buf].mGraphicBuffer == 0) {
+    } else if (!mSlots[buf].mRequestBufferCalled) {
         LOGE("queueBuffer: slot %d was enqueued without requesting a buffer",
                 buf);
         return -EINVAL;
     }
-    mSlots[buf].mOwnedByClient = false;
-    mLastQueued = buf;
-    mLastQueuedCrop = mNextCrop;
-    mLastQueuedTransform = mNextTransform;
-    mLastQueuedTimestamp = timestamp;
+
+    if (mSynchronousMode) {
+        // in synchronous mode we queue all buffers in a FIFO
+        mQueue.push_back(buf);
+    } else {
+        // in asynchronous mode we only keep the most recent buffer
+        if (mQueue.empty()) {
+            mQueue.push_back(buf);
+        } else {
+            Fifo::iterator front(mQueue.begin());
+            // buffer currently queued is freed
+            mSlots[*front].mBufferState = BufferSlot::FREE;
+            // and we record the new buffer index in the queued list
+            *front = buf;
+        }
+    }
+
+    mSlots[buf].mBufferState = BufferSlot::QUEUED;
+    mSlots[buf].mLastQueuedCrop = mNextCrop;
+    mSlots[buf].mLastQueuedTransform = mNextTransform;
+    mSlots[buf].mLastQueuedTimestamp = timestamp;
+
     if (mFrameAvailableListener != 0) {
         mFrameAvailableListener->onFrameAvailable();
     }
+    mDequeueCondition.signal();
     return OK;
 }
 
 void SurfaceTexture::cancelBuffer(int buf) {
     LOGV("SurfaceTexture::cancelBuffer");
     Mutex::Autolock lock(mMutex);
-    if (buf < 0 || mBufferCount <= buf) {
-        LOGE("cancelBuffer: slot index out of range [0, %d]: %d", mBufferCount,
-                buf);
+    if (buf < 0 || buf >= mBufferCount) {
+        LOGE("cancelBuffer: slot index out of range [0, %d]: %d",
+                mBufferCount, buf);
         return;
-    } else if (!mSlots[buf].mOwnedByClient) {
-        LOGE("cancelBuffer: slot %d is not owned by the client", buf);
+    } else if (mSlots[buf].mBufferState != BufferSlot::DEQUEUED) {
+        LOGE("cancelBuffer: slot %d is not owned by the client (state=%d)",
+                buf, mSlots[buf].mBufferState);
         return;
     }
-    mSlots[buf].mOwnedByClient = false;
+    mSlots[buf].mBufferState = BufferSlot::FREE;
+    mDequeueCondition.signal();
 }
 
 status_t SurfaceTexture::setCrop(const Rect& crop) {
@@ -267,16 +335,25 @@ status_t SurfaceTexture::updateTexImage() {
     LOGV("SurfaceTexture::updateTexImage");
     Mutex::Autolock lock(mMutex);
 
-    // Initially both mCurrentTexture and mLastQueued are INVALID_BUFFER_SLOT,
+    int buf = mCurrentTexture;
+    if (!mQueue.empty()) {
+        // in asynchronous mode the list is guaranteed to be one buffer deep,
+        // while in synchronous mode we use the oldest buffer
+        Fifo::iterator front(mQueue.begin());
+        buf = *front;
+        mQueue.erase(front);
+    }
+
+    // Initially both mCurrentTexture and buf are INVALID_BUFFER_SLOT,
     // so this check will fail until a buffer gets queued.
-    if (mCurrentTexture != mLastQueued) {
+    if (mCurrentTexture != buf) {
         // Update the GL texture object.
-        EGLImageKHR image = mSlots[mLastQueued].mEglImage;
+        EGLImageKHR image = mSlots[buf].mEglImage;
         if (image == EGL_NO_IMAGE_KHR) {
             EGLDisplay dpy = eglGetCurrentDisplay();
-            image = createImage(dpy, mSlots[mLastQueued].mGraphicBuffer);
-            mSlots[mLastQueued].mEglImage = image;
-            mSlots[mLastQueued].mEglDisplay = dpy;
+            image = createImage(dpy, mSlots[buf].mGraphicBuffer);
+            mSlots[buf].mEglImage = image;
+            mSlots[buf].mEglDisplay = dpy;
             if (image == EGL_NO_IMAGE_KHR) {
                 // NOTE: if dpy was invalid, createImage() is guaranteed to
                 // fail. so we'd end up here.
@@ -289,8 +366,7 @@ status_t SurfaceTexture::updateTexImage() {
             LOGE("GL error cleared before updating SurfaceTexture: %#04x", error);
         }
 
-        GLenum target = getTextureTarget(
-                mSlots[mLastQueued].mGraphicBuffer->format);
+        GLenum target = getTextureTarget(mSlots[buf].mGraphicBuffer->format);
         if (target != mCurrentTextureTarget) {
             glDeleteTextures(1, &mTexName);
         }
@@ -300,20 +376,29 @@ status_t SurfaceTexture::updateTexImage() {
         bool failed = false;
         while ((error = glGetError()) != GL_NO_ERROR) {
             LOGE("error binding external texture image %p (slot %d): %#04x",
-                    image, mLastQueued, error);
+                    image, buf, error);
             failed = true;
         }
         if (failed) {
             return -EINVAL;
         }
 
+        if (mCurrentTexture != INVALID_BUFFER_SLOT) {
+            // the current buffer becomes FREE if it was still in the queued
+            // state. If it has already been given to the client
+            // (synchronous mode), then it stays in DEQUEUED state.
+            if (mSlots[mCurrentTexture].mBufferState == BufferSlot::QUEUED)
+                mSlots[mCurrentTexture].mBufferState = BufferSlot::FREE;
+        }
+
         // Update the SurfaceTexture state.
-        mCurrentTexture = mLastQueued;
+        mCurrentTexture = buf;
         mCurrentTextureTarget = target;
-        mCurrentTextureBuf = mSlots[mCurrentTexture].mGraphicBuffer;
-        mCurrentCrop = mLastQueuedCrop;
-        mCurrentTransform = mLastQueuedTransform;
-        mCurrentTimestamp = mLastQueuedTimestamp;
+        mCurrentTextureBuf = mSlots[buf].mGraphicBuffer;
+        mCurrentCrop = mSlots[buf].mLastQueuedCrop;
+        mCurrentTransform = mSlots[buf].mLastQueuedTransform;
+        mCurrentTimestamp = mSlots[buf].mLastQueuedTimestamp;
+        mDequeueCondition.signal();
     } else {
         // We always bind the texture even if we don't update its contents.
         glBindTexture(mCurrentTextureTarget, mTexName);
@@ -469,7 +554,7 @@ sp<IBinder> SurfaceTexture::getAllocator() {
 void SurfaceTexture::freeAllBuffers() {
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         mSlots[i].mGraphicBuffer = 0;
-        mSlots[i].mOwnedByClient = false;
+        mSlots[i].mBufferState = BufferSlot::FREE;
         if (mSlots[i].mEglImage != EGL_NO_IMAGE_KHR) {
             eglDestroyImageKHR(mSlots[i].mEglDisplay, mSlots[i].mEglImage);
             mSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
