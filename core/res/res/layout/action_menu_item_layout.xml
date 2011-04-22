@@ -31,10 +31,9 @@
                  android:layout_height="wrap_content"
                  android:layout_gravity="center"
                  android:visibility="gone"
-                 android:paddingLeft="4dip"
-                 android:paddingRight="4dip"
-                 android:minHeight="56dip"
-                 android:scaleType="center"
+                 android:padding="@dimen/action_bar_icon_vertical_padding"
+                 android:scaleType="fitCenter"
+                 android:adjustViewBounds="true"
                  android:background="@null"
                  android:focusable="false" />
     <Button android:id="@+id/textButton"
@@ -46,7 +45,6 @@
             style="?attr/buttonStyleSmall"
             android:textColor="?attr/actionMenuTextColor"
             android:background="@null"
-            android:paddingLeft="4dip"
-            android:paddingRight="4dip"
+            android:padding="4dip"
             android:focusable="false" />
 </com.android.internal.view.menu.ActionMenuItemView>

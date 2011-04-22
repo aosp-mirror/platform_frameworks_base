@@ -861,7 +861,7 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void setIcon(int resId) {
-        mActionView.setIcon(mContext.getResources().getDrawable(resId));
+        mActionView.setIcon(resId);
     }
 
     @Override
@@ -871,7 +871,7 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void setLogo(int resId) {
-        mActionView.setLogo(mContext.getResources().getDrawable(resId));
+        mActionView.setLogo(resId);
     }
 
     @Override

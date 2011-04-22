@@ -276,7 +276,7 @@
         <item name="actionModeStyle">@style/Widget.ActionMode</item>
         <item name="actionModeCloseButtonStyle">@style/Widget.ActionButton.CloseMode</item>
         <item name="actionBarStyle">@android:style/Widget.ActionBar</item>
-        <item name="actionBarSize">56dip</item>
+        <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">?android:attr/popupWindowStyle</item>
         <item name="actionMenuTextAppearance">?android:attr/textAppearanceMedium</item>
         <item name="actionMenuTextColor">?android:attr/textColorPrimary</item>
@@ -1009,7 +1009,7 @@
         <item name="actionModeStyle">@style/Widget.Holo.ActionMode</item>
         <item name="actionModeCloseButtonStyle">@style/Widget.Holo.ActionButton.CloseMode</item>
         <item name="actionBarStyle">@android:style/Widget.Holo.ActionBar</item>
-        <item name="actionBarSize">56dip</item>
+        <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@android:style/Widget.Holo.PopupWindow.ActionMode</item>
 
         <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_holo_dark</item>
@@ -1294,7 +1294,7 @@
         <item name="actionModeStyle">@style/Widget.Holo.Light.ActionMode</item>
         <item name="actionModeCloseButtonStyle">@style/Widget.Holo.Light.ActionButton.CloseMode</item>
         <item name="actionBarStyle">@android:style/Widget.Holo.Light.ActionBar</item>
-        <item name="actionBarSize">56dip</item>
+        <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">@android:style/Widget.Holo.Light.PopupWindow.ActionMode</item>
 
         <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_holo_light</item>

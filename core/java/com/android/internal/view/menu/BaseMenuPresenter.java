@@ -104,6 +104,10 @@ public abstract class BaseMenuPresenter implements MenuPresenter {
      * @param childIndex Index within the parent to insert at
      */
     protected void addItemView(View itemView, int childIndex) {
+        final ViewGroup currentParent = (ViewGroup) itemView.getParent();
+        if (currentParent != null) {
+            currentParent.removeView(itemView);
+        }
         ((ViewGroup) mMenuView).addView(itemView, childIndex);
     }
 

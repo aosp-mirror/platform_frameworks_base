@@ -523,7 +523,9 @@ public final class MenuItemImpl implements MenuItem {
     }
 
     public boolean showsTextAsAction() {
-        return (mShowAsAction & SHOW_AS_ACTION_WITH_TEXT) == SHOW_AS_ACTION_WITH_TEXT;
+        return (mShowAsAction & SHOW_AS_ACTION_WITH_TEXT) == SHOW_AS_ACTION_WITH_TEXT &&
+                mMenu.getContext().getResources().getBoolean(
+                        com.android.internal.R.bool.allow_action_menu_item_text_with_icon);
     }
 
     public void setShowAsAction(int actionEnum) {

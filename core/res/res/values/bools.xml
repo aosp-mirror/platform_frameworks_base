@@ -17,15 +17,5 @@
 */
 -->
 <resources>
-    <item type="dimen" name="dialog_min_width_major">55%</item>
-    <item type="dimen" name="dialog_min_width_minor">80%</item>
-
-    <!-- Preference UI dimensions for larger screens. -->
-    <dimen name="preference_widget_width">56dp</dimen>
-    <!-- The maximum number of action buttons that should be permitted within
-         an action bar/action mode. This will be used to determine how many
-         showAsAction="ifRoom" items can fit. "always" items can override this. -->
-    <integer name="max_action_buttons">5</integer>
-    <!-- Default height of an action bar. -->
-    <dimen name="action_bar_default_height">56dip</dimen>
+    <bool name="allow_action_menu_item_text_with_icon">false</bool>
 </resources>

@@ -30,11 +30,13 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.Gravity;
@@ -85,7 +87,6 @@ public class ActionBarView extends ViewGroup {
     private CharSequence mSubtitle;
     private Drawable mIcon;
     private Drawable mLogo;
-    private Drawable mDivider;
 
     private View mHomeLayout;
     private View mHomeAsUpView;
@@ -211,8 +212,6 @@ public class ActionBarView extends ViewGroup {
 
         mContentHeight = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
         
-        mDivider = a.getDrawable(R.styleable.ActionBar_divider);
-
         a.recycle();
         
         mLogoNavItem = new ActionMenuItem(context, 0, android.R.id.home, 0, 0, mTitle);
@@ -434,11 +433,38 @@ public class ActionBarView extends ViewGroup {
         }
     }
 
+    public void setIcon(int resId) {
+        setIcon(mContext.getResources().getDrawableForDensity(resId, getPreferredIconDensity()));
+    }
+
     public void setLogo(Drawable logo) {
         mLogo = logo;
         if (logo != null && (mDisplayOptions & ActionBar.DISPLAY_USE_LOGO) != 0) {
             mIconView.setImageDrawable(logo);
         }
+    }
+
+    public void setLogo(int resId) {
+        mContext.getResources().getDrawable(resId);
+    }
+
+    /**
+     * @return Drawable density to load that will best fit the available height.
+     */
+    private int getPreferredIconDensity() {
+        final Resources res = mContext.getResources();
+        final int availableHeight = getLayoutParams().height -
+                mIconView.getPaddingTop() - mIconView.getPaddingBottom();
+        int iconSize = res.getDimensionPixelSize(android.R.dimen.app_icon_size);
+
+        if (iconSize * DisplayMetrics.DENSITY_LOW > availableHeight) {
+            return DisplayMetrics.DENSITY_LOW;
+        } else if (iconSize * DisplayMetrics.DENSITY_MEDIUM > availableHeight) {
+            return DisplayMetrics.DENSITY_MEDIUM;
+        } else if (iconSize * DisplayMetrics.DENSITY_HIGH > availableHeight) {
+            return DisplayMetrics.DENSITY_HIGH;
+        }
+        return DisplayMetrics.DENSITY_XHIGH;
     }
 
     public void setNavigationMode(int mode) {

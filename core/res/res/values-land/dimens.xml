@@ -28,4 +28,8 @@
     <dimen name="preference_screen_side_margin">96dp</dimen>
     <dimen name="preference_screen_side_margin_negative">-100dp</dimen>
     <dimen name="preference_widget_width">72dp</dimen>
+
+    <!-- Default height of an action bar. -->
+    <dimen name="action_bar_default_height">40dip</dimen>
+
 </resources>
