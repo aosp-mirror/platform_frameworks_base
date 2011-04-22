@@ -2028,14 +2028,18 @@ status_t MPEG4Source::read(
             size_t dstOffset = 0;
 
             while (srcOffset < size) {
-                CHECK(srcOffset + mNALLengthSize <= size);
-                size_t nalLength = parseNALSize(&mSrcBuffer[srcOffset]);
-                srcOffset += mNALLengthSize;
+                bool isMalFormed = (srcOffset + mNALLengthSize > size);
+                size_t nalLength = 0;
+                if (!isMalFormed) {
+                    nalLength = parseNALSize(&mSrcBuffer[srcOffset]);
+                    srcOffset += mNALLengthSize;
+                    isMalFormed = srcOffset + nalLength > size;
+                }
 
-                if (srcOffset + nalLength > size) {
+                if (isMalFormed) {
+                    LOGE("Video is malformed");
                     mBuffer->release();
                     mBuffer = NULL;
-
                     return ERROR_MALFORMED;
                 }
 
