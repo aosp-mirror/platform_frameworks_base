@@ -10778,6 +10778,9 @@ package android.net {
     field public static final java.lang.String EXTRA_NO_CONNECTIVITY = "noConnectivity";
     field public static final java.lang.String EXTRA_OTHER_NETWORK_INFO = "otherNetwork";
     field public static final java.lang.String EXTRA_REASON = "reason";
+    field public static final int TYPE_BLUETOOTH = 7; // 0x7
+    field public static final int TYPE_DUMMY = 8; // 0x8
+    field public static final int TYPE_ETHERNET = 9; // 0x9
     field public static final int TYPE_MOBILE = 0; // 0x0
     field public static final int TYPE_MOBILE_DUN = 4; // 0x4
     field public static final int TYPE_MOBILE_HIPRI = 5; // 0x5
