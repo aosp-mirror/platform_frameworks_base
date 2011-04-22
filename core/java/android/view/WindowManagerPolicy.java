@@ -396,6 +396,12 @@ public interface WindowManagerPolicy {
             LocalPowerManager powerManager);
 
     /**
+     * Called by window manager once it has the initial, default native
+     * display dimensions.
+     */
+    public void setInitialDisplaySize(int width, int height);
+    
+    /**
      * Check permissions when adding a window.
      * 
      * @param attrs The window's LayoutParams. 
