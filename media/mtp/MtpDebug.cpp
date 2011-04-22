@@ -63,6 +63,12 @@ static const CodeEntry sOperationCodes[] = {
     { "MTP_OPERATION_GET_OBJECT_REFERENCES",        0x9810 },
     { "MTP_OPERATION_SET_OBJECT_REFERENCES",        0x9811 },
     { "MTP_OPERATION_SKIP",                         0x9820 },
+    // android extensions
+    { "MTP_OPERATION_GET_PARTIAL_OBJECT_64",        0x95C1 },
+    { "MTP_OPERATION_SEND_PARTIAL_OBJECT",          0x95C2 },
+    { "MTP_OPERATION_TRUNCATE_OBJECT",              0x95C3 },
+    { "MTP_OPERATION_BEGIN_EDIT_OBJECT",            0x95C4 },
+    { "MTP_OPERATION_END_EDIT_OBJECT",              0x95C5 },
     { 0,                                            0      },
 };
 

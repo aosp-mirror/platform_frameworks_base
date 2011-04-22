@@ -23,6 +23,7 @@ namespace android {
 
 class MtpDataPacket;
 class MtpProperty;
+class MtpObjectInfo;
 
 class MtpDatabase {
 public:
@@ -81,7 +82,7 @@ public:
                                             MtpDataPacket& packet) = 0;
 
     virtual MtpResponseCode         getObjectInfo(MtpObjectHandle handle,
-                                            MtpDataPacket& packet) = 0;
+                                            MtpObjectInfo& info) = 0;
 
     virtual MtpResponseCode         getObjectFilePath(MtpObjectHandle handle,
                                             MtpString& outFilePath,
