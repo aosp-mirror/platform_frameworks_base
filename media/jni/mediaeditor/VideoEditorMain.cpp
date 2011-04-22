@@ -41,15 +41,12 @@ extern "C" {
 #include <M4OSA_FileCommon.h>
 #include <M4OSA_FileReader.h>
 #include <M4OSA_FileWriter.h>
-#include <M4OSA_FileExtra.h>
 #include <M4OSA_Memory.h>
-#include <M4OSA_String.h>
 #include <M4OSA_Thread.h>
 #include <M4xVSS_API.h>
 #include <M4VSS3GPP_ErrorCodes.h>
 #include <M4MCS_API.h>
 #include <M4MCS_ErrorCodes.h>
-#include <M4MDP_API.h>
 #include <M4READER_Common.h>
 #include <M4WRITER_common.h>
 };

@@ -28,7 +28,6 @@ extern "C" {
 #include <M4OSA_FileWriter.h>
 #include <M4OSA_Memory.h>
 #include <M4OSA_Debug.h>
-#include <M4OSA_String.h>
 #include <M4OSA_Thread.h>
 #include <M4VSS3GPP_API.h>
 #include <M4xVSS_API.h>

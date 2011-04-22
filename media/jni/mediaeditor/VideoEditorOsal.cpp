@@ -25,7 +25,6 @@ extern "C" {
 #include <M4OSA_FileReader.h>
 #include <M4OSA_FileWriter.h>
 #include <M4OSA_Memory.h>
-#include <M4OSA_String.h>
 #include <M4OSA_Thread.h>
 #include <M4xVSS_API.h>
 #include <M4VSS3GPP_ErrorCodes.h>
@@ -81,14 +80,6 @@ static const VideoEdit_Osal_Result gkRESULTS[] =
     VIDEOEDIT_OSAL_RESULT_INIT(M4ERR_FILE_LOCKED                                      ),
     VIDEOEDIT_OSAL_RESULT_INIT(M4ERR_FILE_BAD_MODE_ACCESS                             ),
     VIDEOEDIT_OSAL_RESULT_INIT(M4ERR_FILE_INVALID_POSITION                            ),
-
-    // M4OSA_String.h
-    VIDEOEDIT_OSAL_RESULT_INIT(M4ERR_STR_BAD_STRING                                   ),
-    VIDEOEDIT_OSAL_RESULT_INIT(M4ERR_STR_CONV_FAILED                                  ),
-    VIDEOEDIT_OSAL_RESULT_INIT(M4ERR_STR_OVERFLOW                                     ),
-    VIDEOEDIT_OSAL_RESULT_INIT(M4ERR_STR_BAD_ARGS                                     ),
-    VIDEOEDIT_OSAL_RESULT_INIT(M4WAR_STR_OVERFLOW                                     ),
-    VIDEOEDIT_OSAL_RESULT_INIT(M4WAR_STR_NOT_FOUND                                    ),
 
     // M4OSA_Thread.h
     VIDEOEDIT_OSAL_RESULT_INIT(M4ERR_THREAD_NOT_STARTED                               ),
