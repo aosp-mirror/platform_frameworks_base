@@ -204,7 +204,7 @@ static void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)
 static void Surface_init(
         JNIEnv* env, jobject clazz,
         jobject session,
-        jint pid, jstring jname, jint dpy, jint w, jint h, jint format, jint flags)
+        jint, jstring jname, jint dpy, jint w, jint h, jint format, jint flags)
 {
     if (session == NULL) {
         doThrowNPE(env);
@@ -216,12 +216,12 @@ static void Surface_init(
 
     sp<SurfaceControl> surface;
     if (jname == NULL) {
-        surface = client->createSurface(pid, dpy, w, h, format, flags);
+        surface = client->createSurface(dpy, w, h, format, flags);
     } else {
         const jchar* str = env->GetStringCritical(jname, 0);
         const String8 name(str, env->GetStringLength(jname));
         env->ReleaseStringCritical(jname, str);
-        surface = client->createSurface(pid, name, dpy, w, h, format, flags);
+        surface = client->createSurface(name, dpy, w, h, format, flags);
     }
 
     if (surface == 0) {

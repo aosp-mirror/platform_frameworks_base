@@ -1241,8 +1241,10 @@ int SurfaceFlinger::setOrientation(DisplayID dpy,
     return orientation;
 }
 
-sp<ISurface> SurfaceFlinger::createSurface(const sp<Client>& client, int pid,
-        const String8& name, ISurfaceComposerClient::surface_data_t* params,
+sp<ISurface> SurfaceFlinger::createSurface(
+        ISurfaceComposerClient::surface_data_t* params,
+        const String8& name,
+        const sp<Client>& client,
         DisplayID d, uint32_t w, uint32_t h, PixelFormat format,
         uint32_t flags)
 {
@@ -2414,12 +2416,12 @@ ssize_t Client::getTokenForSurface(const sp<ISurface>& sur) const {
     return -1;
 }
 sp<ISurface> Client::createSurface(
-        ISurfaceComposerClient::surface_data_t* params, int pid,
+        ISurfaceComposerClient::surface_data_t* params,
         const String8& name,
         DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
         uint32_t flags)
 {
-    return mFlinger->createSurface(this, pid, name, params,
+    return mFlinger->createSurface(params, name, this,
             display, w, h, format, flags);
 }
 status_t Client::destroySurface(SurfaceID sid) {
@@ -2523,7 +2525,7 @@ ssize_t UserClient::getTokenForSurface(const sp<ISurface>& sur) const
 }
 
 sp<ISurface> UserClient::createSurface(
-        ISurfaceComposerClient::surface_data_t* params, int pid,
+        ISurfaceComposerClient::surface_data_t* params,
         const String8& name,
         DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
         uint32_t flags) {

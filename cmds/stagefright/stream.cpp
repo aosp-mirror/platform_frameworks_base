@@ -149,7 +149,6 @@ int main(int argc, char **argv) {
 
     sp<SurfaceControl> control =
         composerClient->createSurface(
-                getpid(),
                 String8("A Surface"),
                 0,
                 1280,

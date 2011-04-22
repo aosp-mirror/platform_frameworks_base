@@ -543,7 +543,6 @@ int main(int argc, char **argv) {
         CHECK_EQ(composerClient->initCheck(), (status_t)OK);
 
         control = composerClient->createSurface(
-                getpid(),
                 String8("A Surface"),
                 0,
                 1280,

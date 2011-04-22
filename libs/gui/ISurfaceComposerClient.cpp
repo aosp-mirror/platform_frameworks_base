@@ -83,7 +83,6 @@ public:
     }
 
     virtual sp<ISurface> createSurface( surface_data_t* params,
-                                        int pid,
                                         const String8& name,
                                         DisplayID display,
                                         uint32_t w,
@@ -93,7 +92,6 @@ public:
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceComposerClient::getInterfaceDescriptor());
-        data.writeInt32(pid);
         data.writeString8(name);
         data.writeInt32(display);
         data.writeInt32(w);
@@ -172,14 +170,13 @@ status_t BnSurfaceComposerClient::onTransact(
         case CREATE_SURFACE: {
             CHECK_INTERFACE(ISurfaceComposerClient, data, reply);
             surface_data_t params;
-            int32_t pid = data.readInt32();
             String8 name = data.readString8();
             DisplayID display = data.readInt32();
             uint32_t w = data.readInt32();
             uint32_t h = data.readInt32();
             PixelFormat format = data.readInt32();
             uint32_t flags = data.readInt32();
-            sp<ISurface> s = createSurface(&params, pid, name, display, w, h,
+            sp<ISurface> s = createSurface(&params, name, display, w, h,
                     format, flags);
             params.writeToParcel(reply);
             reply->writeStrongBinder(s->asBinder());

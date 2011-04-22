@@ -75,7 +75,7 @@ private:
     virtual sp<IMemoryHeap> getControlBlock() const;
     virtual ssize_t getTokenForSurface(const sp<ISurface>& sur) const;
     virtual sp<ISurface> createSurface(
-            surface_data_t* params, int pid, const String8& name,
+            surface_data_t* params, const String8& name,
             DisplayID display, uint32_t w, uint32_t h,PixelFormat format,
             uint32_t flags);
     virtual status_t destroySurface(SurfaceID surfaceId);
@@ -107,7 +107,7 @@ private:
     virtual sp<IMemoryHeap> getControlBlock() const;
     virtual ssize_t getTokenForSurface(const sp<ISurface>& sur) const;
     virtual sp<ISurface> createSurface(
-            surface_data_t* params, int pid, const String8& name,
+            surface_data_t* params, const String8& name,
             DisplayID display, uint32_t w, uint32_t h,PixelFormat format,
             uint32_t flags);
     virtual status_t destroySurface(SurfaceID surfaceId);
@@ -232,9 +232,10 @@ private:
     friend class Layer;
     friend class LayerDim;
 
-    sp<ISurface> createSurface(const sp<Client>& client,
-            int pid, const String8& name,
+    sp<ISurface> createSurface(
             ISurfaceComposerClient::surface_data_t* params,
+            const String8& name,
+            const sp<Client>& client,
             DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
             uint32_t flags);
 
