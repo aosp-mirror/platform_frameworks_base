@@ -19,7 +19,7 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
     } else {
         for (int r = -fs->radius; r <= fs->radius; r ++) {
             // Stepping left and right away from the pixel
-            int validW = rsClamp(x + r, (uint)0, (uint)(fs->width - 1));
+            int validW = rsClamp((int)x + r, (int)0, (int)(fs->width - 1));
             blurredPixel += input[validW].xyz * gPtr[0];
             gPtr++;
         }
