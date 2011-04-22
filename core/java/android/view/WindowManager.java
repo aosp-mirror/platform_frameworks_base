@@ -388,6 +388,12 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_POINTER = FIRST_SYSTEM_WINDOW+18;
 
         /**
+         * Window type: Navigation bar (when distinct from status bar)
+         * @hide
+         */
+        public static final int TYPE_NAVIGATION_BAR = FIRST_SYSTEM_WINDOW+19;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;

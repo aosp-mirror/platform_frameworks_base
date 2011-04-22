@@ -45,6 +45,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
@@ -141,6 +142,9 @@ public class PhoneStatusBar extends StatusBar {
     // for immersive activities
     private View mIntruderAlertView;
 
+    // on-screen navigation buttons
+    private NavigationBarView mNavigationBarView;
+
     // the tracker view
     TrackingView mTrackingView;
     WindowManager.LayoutParams mTrackingParams;
@@ -199,7 +203,9 @@ public class PhoneStatusBar extends StatusBar {
 
         super.start();
 
-        addIntruderView();
+        addNavigationBar();
+
+        //addIntruderView();
 
         // Lastly, call to the icon policy to install/update all the icons.
         mIconPolicy = new PhoneStatusBarPolicy(mContext);
@@ -222,6 +228,9 @@ public class PhoneStatusBar extends StatusBar {
         mIntruderAlertView = View.inflate(context, R.layout.intruder_alert, null);
         mIntruderAlertView.setVisibility(View.GONE);
         mIntruderAlertView.setClickable(true);
+
+        mNavigationBarView = 
+            (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
 
         PhoneStatusBarView sb = (PhoneStatusBarView)View.inflate(context,
                 R.layout.status_bar, null);
@@ -290,6 +299,58 @@ public class PhoneStatusBar extends StatusBar {
     public int getStatusBarHeight() {
         final Resources res = mContext.getResources();
         return res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
+    }
+
+    // For small-screen devices (read: phones) that lack hardware navigation buttons
+    private void addNavigationBar() {
+        mNavigationBarView.reorient();
+        WindowManagerImpl.getDefault().addView(
+                mNavigationBarView, getNavigationBarLayoutParams());
+    }
+
+    private void repositionNavigationBar() {
+        mNavigationBarView.reorient();
+        WindowManagerImpl.getDefault().updateViewLayout(
+                mNavigationBarView, getNavigationBarLayoutParams());
+    }
+
+    private WindowManager.LayoutParams getNavigationBarLayoutParams() {
+        final int rotation = mDisplay.getRotation();
+        final boolean sideways = 
+            (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270);
+
+        final Resources res = mContext.getResources();
+        final int size = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
+
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                sideways ? size : ViewGroup.LayoutParams.MATCH_PARENT,
+                sideways ? ViewGroup.LayoutParams.MATCH_PARENT : size,
+                WindowManager.LayoutParams.TYPE_NAVIGATION_BAR,
+                    0
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                    | WindowManager.LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING
+                    | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                PixelFormat.TRANSLUCENT);
+
+        lp.setTitle("NavigationBar");
+        switch (rotation) {
+            case Surface.ROTATION_90:
+                // device has been turned 90deg counter-clockwise
+                lp.gravity = Gravity.RIGHT | Gravity.FILL_VERTICAL;
+                break;
+            case Surface.ROTATION_270:
+                // device has been turned 90deg clockwise
+                lp.gravity = Gravity.LEFT | Gravity.FILL_VERTICAL;
+                break;
+            default:
+                lp.gravity = Gravity.BOTTOM | Gravity.FILL_HORIZONTAL;
+                break;
+        }
+        lp.windowAnimations = 0;
+
+        return lp;
     }
 
     private void addIntruderView() {
@@ -1497,6 +1558,7 @@ public class PhoneStatusBar extends StatusBar {
                 animateCollapse();
             }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
+                repositionNavigationBar();
                 updateResources();
             }
         }

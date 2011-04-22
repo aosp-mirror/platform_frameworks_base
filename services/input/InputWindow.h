@@ -119,6 +119,7 @@ struct InputWindow {
         TYPE_DRAG               = FIRST_SYSTEM_WINDOW+16,
         TYPE_STATUS_BAR_SUB_PANEL  = FIRST_SYSTEM_WINDOW+17,
         TYPE_POINTER            = FIRST_SYSTEM_WINDOW+18,
+        TYPE_NAVIGATION_BAR     = FIRST_SYSTEM_WINDOW+19,
         LAST_SYSTEM_WINDOW      = 2999,
     };
 
