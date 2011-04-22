@@ -1185,6 +1185,12 @@ bool OpenGLRenderer::drawDisplayList(DisplayList* displayList, uint32_t width, u
     return false;
 }
 
+void OpenGLRenderer::outputDisplayList(DisplayList* displayList, uint32_t level) {
+    if (displayList) {
+        displayList->output(*this, level);
+    }
+}
+
 void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, SkPaint* paint) {
     int alpha;
     SkXfermode::Mode mode;

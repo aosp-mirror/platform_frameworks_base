@@ -98,6 +98,7 @@ public:
 
     virtual bool drawDisplayList(DisplayList* displayList, uint32_t width, uint32_t height,
             Rect& dirty, uint32_t level = 0);
+    virtual void outputDisplayList(DisplayList* displayList, uint32_t level = 0);
     virtual void drawLayer(Layer* layer, float x, float y, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, float left, float top, SkPaint* paint);
     virtual void drawBitmap(SkBitmap* bitmap, SkMatrix* matrix, SkPaint* paint);
