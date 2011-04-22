@@ -400,7 +400,7 @@ public interface WindowManagerPolicy {
      * display dimensions.
      */
     public void setInitialDisplaySize(int width, int height);
-    
+
     /**
      * Check permissions when adding a window.
      * 
@@ -815,6 +815,13 @@ public interface WindowManagerPolicy {
     public int rotationForOrientationLw(int orientation, int lastRotation,
             boolean displayEnabled);
     
+    /**
+     * Return the currently locked screen rotation, if any.  Return
+     * Surface.ROTATION_0, Surface.ROTATION_90, Surface.ROTATION_180, or
+     * Surface.ROTATION_270 if locked; return -1 if not locked.
+     */
+    public int getLockedRotationLw();
+
     /**
      * Called when the system is mostly done booting to determine whether
      * the system should go into safe mode.

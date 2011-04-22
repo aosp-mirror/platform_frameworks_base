@@ -2615,6 +2615,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    public int getLockedRotationLw() {
+        synchronized (mLock) {
+            if (false) {
+                // Not yet working.
+                if (mHdmiPlugged) {
+                    return Surface.ROTATION_0;
+                } else if (mLidOpen == LID_OPEN) {
+                    return mLidOpenRotation;
+                } else if (mDockMode == Intent.EXTRA_DOCK_STATE_CAR && mCarDockRotation >= 0) {
+                    return mCarDockRotation;
+                } else if (mDockMode == Intent.EXTRA_DOCK_STATE_DESK && mDeskDockRotation >= 0) {
+                    return mDeskDockRotation;
+                } else if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
+                    return mUserRotation;
+                }
+            }
+            return -1;
+        }
+    }
+
     private int getCurrentLandscapeRotation(int lastRotation) {
         // if the user has locked rotation, we ignore the sensor 
         if (mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED) {

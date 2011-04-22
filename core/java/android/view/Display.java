@@ -200,8 +200,27 @@ public class Display {
      * @param outMetrics
      */
     public void getMetrics(DisplayMetrics outMetrics) {
-        outMetrics.widthPixels  = getWidth();
-        outMetrics.heightPixels = getHeight();
+        synchronized (mTmpPoint) {
+            getSize(mTmpPoint);
+            outMetrics.widthPixels = mTmpPoint.x;
+            outMetrics.heightPixels = mTmpPoint.y;
+        }
+        getNonSizeMetrics(outMetrics);
+    }
+
+    /**
+     * Initialize a DisplayMetrics object from this display's data.
+     *
+     * @param outMetrics
+     * @hide
+     */
+    public void getRealMetrics(DisplayMetrics outMetrics) {
+        outMetrics.widthPixels = getRealWidth();
+        outMetrics.heightPixels = getRealHeight();
+        getNonSizeMetrics(outMetrics);
+    }
+
+    private void getNonSizeMetrics(DisplayMetrics outMetrics) {
         outMetrics.density      = mDensity;
         outMetrics.densityDpi   = (int)((mDensity*DisplayMetrics.DENSITY_DEFAULT)+.5f);
         outMetrics.scaledDensity= outMetrics.density;
