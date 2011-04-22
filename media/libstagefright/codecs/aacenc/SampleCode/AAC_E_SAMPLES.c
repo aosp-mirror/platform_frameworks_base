@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 	/* open output file */
 	if(isOutput)
 	{
-		outfile = fopen(outfileName, "wb"); 
+		outfile = fopen(outfileName, "wb");
 		if (!outfile) {
 			printf("Open output file fail...");
 			return -1;
@@ -195,7 +195,7 @@ int main(int argc, char **argv)
 		return -1;
 	}
 	// Get API;
-	pfunc = dlsym(handle, "voGetAACEncAPI");	
+	pfunc = dlsym(handle, "voGetAACEncAPI");
 	if(pfunc == 0)
 	{
 		printf("open function error......");
@@ -215,13 +215,13 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	returnCode = AudioAPI.SetParam(hCodec, VO_PID_AAC_ENCPARAM, &aacpara);	
-	
+	returnCode = AudioAPI.SetParam(hCodec, VO_PID_AAC_ENCPARAM, &aacpara);
+
 	inData.Buffer = inBuf;
 	bytesLeft = ReadFile2Buf(infile,inData.Buffer,READ_SIZE);
 
 //#######################################    Encoding Section   #########################################
-	
+
 	do {
 
 		inData.Length    = bytesLeft;
@@ -229,9 +229,9 @@ int main(int argc, char **argv)
 		outData.Length = 1024*8;
 
 		t1 = clock();
-		
+
 		returnCode = AudioAPI.SetInputData(hCodec,&inData);
-		
+
 		do {
 			outData.Buffer   = outBuf;
 			outData.Length = 1024*8;
