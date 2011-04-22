@@ -550,6 +550,14 @@
         android:description="@string/permdesc_sdcardWrite"
         android:protectionLevel="dangerous" />
 
+    <!-- Allows an application to write to internal media storage
+         @hide  -->
+    <permission android:name="android.permission.WRITE_MEDIA_STORAGE"
+        android:permissionGroup="android.permission-group.STORAGE"
+        android:label="@string/permlab_mediaStorageWrite"
+        android:description="@string/permdesc_mediaStorageWrite"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- ============================================ -->
     <!-- Permissions for low-level system interaction -->
     <!-- ============================================ -->
