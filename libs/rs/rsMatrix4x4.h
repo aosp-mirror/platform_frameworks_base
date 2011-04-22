@@ -54,6 +54,7 @@ struct Matrix4x4 : public rs_matrix4x4 {
     bool inverseTranspose();
     void transpose();
 
+    void logv(const char *s) const;
 
 
     void multiply(const rs_matrix4x4 *rhs) {

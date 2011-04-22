@@ -305,3 +305,10 @@ void Matrix4x4::vectorMultiply(float *out, const float *in) const {
     out[2] = (m[2] * in[0]) + (m[6] * in[1]) + (m[10] * in[2]) + m[14];
     out[3] = (m[3] * in[0]) + (m[7] * in[1]) + (m[11] * in[2]) + m[15];
 }
+
+void Matrix4x4::logv(const char *s) const {
+    LOGV("%s {%f, %f, %f, %f",  s, m[0], m[4], m[8], m[12]);
+    LOGV("%s  %f, %f, %f, %f",  s, m[1], m[5], m[9], m[13]);
+    LOGV("%s  %f, %f, %f, %f",  s, m[2], m[6], m[10], m[14]);
+    LOGV("%s  %f, %f, %f, %f}", s, m[3], m[7], m[11], m[15]);
+}
