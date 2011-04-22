@@ -23,6 +23,18 @@ import static android.net.wifi.WifiManager.WIFI_STATE_ENABLING;
 import static android.net.wifi.WifiManager.WIFI_STATE_UNKNOWN;
 
 import android.app.ActivityManagerNative;
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothA2dp;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.net.NetworkInfo;
 import android.net.NetworkStateTracker;
 import android.net.DhcpInfo;
@@ -32,8 +44,10 @@ import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo.State;
 import android.os.Message;
 import android.os.Parcelable;
+import android.os.PowerManager;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -44,15 +58,6 @@ import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Config;
-import android.app.Notification;
-import android.app.PendingIntent;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHeadset;
-import android.bluetooth.BluetoothA2dp;
-import android.content.ContentResolver;
-import android.content.Intent;
-import android.content.Context;
-import android.database.ContentObserver;
 import com.android.internal.app.IBatteryStats;
 
 import java.net.UnknownHostException;
@@ -91,15 +96,16 @@ public class WifiStateTracker extends NetworkStateTracker {
     private static final int EVENT_INTERFACE_CONFIGURATION_FAILED    = 7;
     private static final int EVENT_POLL_INTERVAL                     = 8;
     private static final int EVENT_DHCP_START                        = 9;
-    private static final int EVENT_DEFERRED_DISCONNECT               = 10;
-    private static final int EVENT_DEFERRED_RECONNECT                = 11;
+    private static final int EVENT_DHCP_RENEW                        = 10;
+    private static final int EVENT_DEFERRED_DISCONNECT               = 11;
+    private static final int EVENT_DEFERRED_RECONNECT                = 12;
     /**
      * The driver is started or stopped. The object will be the state: true for
      * started, false for stopped.
      */
-    private static final int EVENT_DRIVER_STATE_CHANGED              = 12;
-    private static final int EVENT_PASSWORD_KEY_MAY_BE_INCORRECT     = 13;
-    private static final int EVENT_MAYBE_START_SCAN_POST_DISCONNECT  = 14;
+    private static final int EVENT_DRIVER_STATE_CHANGED              = 13;
+    private static final int EVENT_PASSWORD_KEY_MAY_BE_INCORRECT     = 14;
+    private static final int EVENT_MAYBE_START_SCAN_POST_DISCONNECT  = 15;
 
     /**
      * The driver state indication.
@@ -217,6 +223,15 @@ public class WifiStateTracker extends NetworkStateTracker {
     private int mLastNetworkId = -1;
     private boolean mUseStaticIp = false;
     private int mReconnectCount;
+
+    private AlarmManager mAlarmManager;
+    private PendingIntent mDhcpRenewalIntent;
+    private PowerManager.WakeLock mDhcpRenewWakeLock;
+    private static final String WAKELOCK_TAG = "*wifi*";
+
+    private static final int DHCP_RENEW = 0;
+    private static final String ACTION_DHCP_RENEW = "android.net.wifi.DHCP_RENEW";
+
 
     /* Tracks if any network in the configuration is disabled */
     private AtomicBoolean mIsAnyNetworkDisabled = new AtomicBoolean(false);
@@ -384,6 +399,27 @@ public class WifiStateTracker extends NetworkStateTracker {
         // Allocate DHCP info object once, and fill it in on each request
         mDhcpInfo = new DhcpInfo();
         mRunState = RUN_STATE_STARTING;
+
+        mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
+        Intent dhcpRenewalIntent = new Intent(ACTION_DHCP_RENEW, null);
+        mDhcpRenewalIntent = PendingIntent.getBroadcast(mContext, DHCP_RENEW, dhcpRenewalIntent, 0);
+
+        mContext.registerReceiver(
+            new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    //DHCP renew
+                    if (mDhcpTarget != null) {
+                        Log.d(TAG, "Sending a DHCP renewal");
+                        //acquire a 40s wakelock to finish DHCP renewal
+                        mDhcpRenewWakeLock.acquire(40000);
+                        mDhcpTarget.sendEmptyMessage(EVENT_DHCP_RENEW);
+                    }
+                }
+            },new IntentFilter(ACTION_DHCP_RENEW));
+
+        PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        mDhcpRenewWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
 
         // Setting is in seconds
         NOTIFICATION_REPEAT_DELAY_MS = Settings.Secure.getInt(context.getContentResolver(), 
@@ -2388,7 +2424,7 @@ public class WifiStateTracker extends NetworkStateTracker {
 
     private class DhcpHandler extends Handler {
 
-        private Handler mTarget;
+        private Handler mWifiStateTrackerHandler;
         
         /**
          * Whether to skip the DHCP result callback to the target. For example,
@@ -2409,10 +2445,10 @@ public class WifiStateTracker extends NetworkStateTracker {
          * in an error state and we will not disable coexistence.
          */
         private BluetoothHeadset mBluetoothHeadset;
-        
+
         public DhcpHandler(Looper looper, Handler target) {
             super(looper);
-            mTarget = target;
+            mWifiStateTrackerHandler = target;
             
             mBluetoothHeadset = new BluetoothHeadset(mContext, null);
         }
@@ -2422,7 +2458,7 @@ public class WifiStateTracker extends NetworkStateTracker {
 
             switch (msg.what) {
                 case EVENT_DHCP_START:
-                    
+                case EVENT_DHCP_RENEW:
                     boolean modifiedBluetoothCoexistenceMode = false;
                     int powerMode = DRIVER_POWER_MODE_AUTO;
 
@@ -2464,14 +2500,70 @@ public class WifiStateTracker extends NetworkStateTracker {
                         // A new request is being made, so assume we will callback
                         mCancelCallback = false;
                     }
-                    Log.d(TAG, "DhcpHandler: DHCP request started");
-                    if (NetworkUtils.runDhcp(mInterfaceName, mDhcpInfo)) {
-                        event = EVENT_INTERFACE_CONFIGURATION_SUCCEEDED;
-                        if (LOCAL_LOGD) Log.v(TAG, "DhcpHandler: DHCP request succeeded");
-                    } else {
-                        event = EVENT_INTERFACE_CONFIGURATION_FAILED;
-                        Log.i(TAG, "DhcpHandler: DHCP request failed: " +
-                            NetworkUtils.getDhcpError());
+
+                    if (msg.what == EVENT_DHCP_START) {
+                        Log.d(TAG, "DHCP request started");
+                        if (NetworkUtils.runDhcp(mInterfaceName, mDhcpInfo)) {
+                            event = EVENT_INTERFACE_CONFIGURATION_SUCCEEDED;
+                            Log.d(TAG, "DHCP succeeded with lease: " + mDhcpInfo.leaseDuration);
+                            //Do it a bit earlier than half the lease duration time
+                            //to beat the native DHCP client and avoid extra packets
+                            //48% for one hour lease time = 29 minutes
+                            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                                    SystemClock.elapsedRealtime() +
+                                    mDhcpInfo.leaseDuration * 480, //in milliseconds
+                                    mDhcpRenewalIntent);
+                        } else {
+                            event = EVENT_INTERFACE_CONFIGURATION_FAILED;
+                            Log.e(TAG, "DHCP request failed: " + NetworkUtils.getDhcpError());
+                        }
+                        synchronized (this) {
+                            if (!mCancelCallback) {
+                                mWifiStateTrackerHandler.sendEmptyMessage(event);
+                            }
+                        }
+
+                    } else if (msg.what == EVENT_DHCP_RENEW) {
+                        Log.d(TAG, "DHCP renewal started");
+                        int oIp = mDhcpInfo.ipAddress;
+                        int oGw = mDhcpInfo.gateway;
+                        int oMsk = mDhcpInfo.netmask;
+                        int oDns1 = mDhcpInfo.dns1;
+                        int oDns2 = mDhcpInfo.dns2;
+
+                        if (NetworkUtils.runDhcpRenew(mInterfaceName, mDhcpInfo)) {
+                            Log.d(TAG, "DHCP renewal with lease: " + mDhcpInfo.leaseDuration);
+
+                            boolean changed =
+                                (oIp   != mDhcpInfo.ipAddress ||
+                                 oGw   != mDhcpInfo.gateway ||
+                                 oMsk  != mDhcpInfo.netmask ||
+                                 oDns1 != mDhcpInfo.dns1 ||
+                                 oDns2 != mDhcpInfo.dns2);
+
+                            if (changed) {
+                                Log.d(TAG, "IP config change on renewal");
+                                mWifiInfo.setIpAddress(mDhcpInfo.ipAddress);
+                                NetworkUtils.resetConnections(mInterfaceName);
+                                msg = mTarget.obtainMessage(EVENT_CONFIGURATION_CHANGED,
+                                        mNetworkInfo);
+                                msg.sendToTarget();
+                            }
+
+                            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                                    SystemClock.elapsedRealtime() +
+                                    mDhcpInfo.leaseDuration * 480,
+                                    mDhcpRenewalIntent);
+                        } else {
+                            event = EVENT_INTERFACE_CONFIGURATION_FAILED;
+                            Log.d(TAG, "DHCP renewal failed: " + NetworkUtils.getDhcpError());
+
+                            synchronized (this) {
+                                if (!mCancelCallback) {
+                                    mWifiStateTrackerHandler.sendEmptyMessage(event);
+                                }
+                            }
+                        }
                     }
 
                     if (powerMode != DRIVER_POWER_MODE_ACTIVE) {
@@ -2484,17 +2576,15 @@ public class WifiStateTracker extends NetworkStateTracker {
                                 WifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);
                     }
 
-                    synchronized (this) {
-                        if (!mCancelCallback) {
-                            mTarget.sendEmptyMessage(event);
-                        }
-                    }
                     break;
             }
         }
 
         public synchronized void setCancelCallback(boolean cancelCallback) {
             mCancelCallback = cancelCallback;
+            if (cancelCallback) {
+                mAlarmManager.cancel(mDhcpRenewalIntent);
+            }
         }
 
         /**
@@ -2510,6 +2600,7 @@ public class WifiStateTracker extends NetworkStateTracker {
             int state = mBluetoothHeadset.getState(mBluetoothHeadset.getCurrentHeadset());
             return state == BluetoothHeadset.STATE_DISCONNECTED;
         }
+
     }
     
     private void checkUseStaticIp() {
