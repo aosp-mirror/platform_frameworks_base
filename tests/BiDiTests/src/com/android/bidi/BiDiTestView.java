@@ -153,7 +153,8 @@ public class BiDiTestView extends View {
         float[] advances = new float[length];
         float textWidthHB = paint.getTextRunAdvances(text, 0, length, 0, length, dir, advances, 0);
         setPaintDir(paint, dir);
-        float textWidthICU = paint.getTextRunAdvancesICU(text, 0, length, 0, length, dir, advances, 0);
+        float textWidthICU = paint.getTextRunAdvances(text, 0, length, 0, length, dir, advances, 0,
+                1 /* use ICU */);
 
         logAdvances(text, textWidthHB, textWidthICU, advances);
         drawMetricsAroundText(canvas, x, y, textWidthHB, textWidthICU, textSize, Color.RED, Color.GREEN);

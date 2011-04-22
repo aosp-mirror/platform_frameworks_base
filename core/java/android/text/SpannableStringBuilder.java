@@ -1173,8 +1173,8 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
      * Don't call this yourself -- exists for Paint to use internally.
      * {@hide}
      */
-    public float getTextRunAdvancesICU(int start, int end, int contextStart, int contextEnd, int flags,
-            float[] advances, int advancesPos, Paint p) {
+    public float getTextRunAdvances(int start, int end, int contextStart, int contextEnd, int flags,
+            float[] advances, int advancesPos, Paint p, int reserved) {
 
         float ret;
 
@@ -1182,16 +1182,16 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
         int len = end - start;
 
         if (end <= mGapStart) {
-            ret = p.getTextRunAdvancesICU(mText, start, len, contextStart, contextLen,
-                    flags, advances, advancesPos);
+            ret = p.getTextRunAdvances(mText, start, len, contextStart, contextLen,
+                    flags, advances, advancesPos, reserved);
         } else if (start >= mGapStart) {
-            ret = p.getTextRunAdvancesICU(mText, start + mGapLength, len,
-                    contextStart + mGapLength, contextLen, flags, advances, advancesPos);
+            ret = p.getTextRunAdvances(mText, start + mGapLength, len,
+                    contextStart + mGapLength, contextLen, flags, advances, advancesPos, reserved);
         } else {
             char[] buf = TextUtils.obtain(contextLen);
             getChars(contextStart, contextEnd, buf, 0);
-            ret = p.getTextRunAdvancesICU(buf, start - contextStart, len,
-                    0, contextLen, flags, advances, advancesPos);
+            ret = p.getTextRunAdvances(buf, start - contextStart, len,
+                    0, contextLen, flags, advances, advancesPos, reserved);
             TextUtils.recycle(buf);
         }
 

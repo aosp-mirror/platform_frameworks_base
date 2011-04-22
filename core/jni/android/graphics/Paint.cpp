@@ -482,44 +482,28 @@ public:
         return totalAdvance;
     }
 
-    static float getTextRunAdvances___CIIIII_FI(JNIEnv* env, jobject clazz, SkPaint* paint,
+    static float getTextRunAdvances___CIIIII_FII(JNIEnv* env, jobject clazz, SkPaint* paint,
             jcharArray text, jint index, jint count, jint contextIndex, jint contextCount,
-            jint flags, jfloatArray advances, jint advancesIndex) {
+            jint flags, jfloatArray advances, jint advancesIndex, jint reserved) {
         jchar* textArray = env->GetCharArrayElements(text, NULL);
-        jfloat result = doTextRunAdvances(env, paint, textArray + contextIndex,
-            index - contextIndex, count, contextCount, flags, advances, advancesIndex);
+        jfloat result = (reserved == 0) ?
+                doTextRunAdvances(env, paint, textArray + contextIndex, index - contextIndex,
+                        count, contextCount, flags, advances, advancesIndex) :
+                doTextRunAdvancesICU(env, paint, textArray + contextIndex, index - contextIndex,
+                        count, contextCount, flags, advances, advancesIndex);
         env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
         return result;
     }
 
-    static float getTextRunAdvances__StringIIIII_FI(JNIEnv* env, jobject clazz, SkPaint* paint,
+    static float getTextRunAdvances__StringIIIII_FII(JNIEnv* env, jobject clazz, SkPaint* paint,
             jstring text, jint start, jint end, jint contextStart, jint contextEnd, jint flags,
-            jfloatArray advances, jint advancesIndex) {
+            jfloatArray advances, jint advancesIndex, jint reserved) {
         const jchar* textArray = env->GetStringChars(text, NULL);
-        jfloat result = doTextRunAdvances(env, paint, textArray + contextStart,
-            start - contextStart, end - start, contextEnd - contextStart, flags, advances,
-            advancesIndex);
-        env->ReleaseStringChars(text, textArray);
-        return result;
-    }
-
-    static float getTextRunAdvancesICU___CIIIII_FI(JNIEnv* env, jobject clazz, SkPaint* paint,
-            jcharArray text, jint index, jint count, jint contextIndex, jint contextCount,
-            jint flags, jfloatArray advances, jint advancesIndex) {
-        jchar* textArray = env->GetCharArrayElements(text, NULL);
-        jfloat result = doTextRunAdvancesICU(env, paint, textArray + contextIndex,
-            index - contextIndex, count, contextCount, flags, advances, advancesIndex);
-        env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
-        return result;
-    }
-
-    static float getTextRunAdvancesICU__StringIIIII_FI(JNIEnv* env, jobject clazz, SkPaint* paint,
-            jstring text, jint start, jint end, jint contextStart, jint contextEnd, jint flags,
-            jfloatArray advances, jint advancesIndex) {
-        const jchar* textArray = env->GetStringChars(text, NULL);
-        jfloat result = doTextRunAdvancesICU(env, paint, textArray + contextStart,
-            start - contextStart, end - start, contextEnd - contextStart, flags, advances,
-            advancesIndex);
+        jfloat result = (reserved == 0) ?
+                doTextRunAdvances(env, paint, textArray + contextStart, start - contextStart,
+                        end - start, contextEnd - contextStart, flags, advances, advancesIndex) :
+                doTextRunAdvancesICU(env, paint, textArray + contextStart, start - contextStart,
+                        end - start, contextEnd - contextStart, flags, advances, advancesIndex);
         env->ReleaseStringChars(text, textArray);
         return result;
     }
@@ -816,14 +800,12 @@ static JNINativeMethod methods[] = {
     {"native_breakText","(Ljava/lang/String;ZF[F)I", (void*) SkPaintGlue::breakTextS},
     {"native_getTextWidths","(I[CII[F)I", (void*) SkPaintGlue::getTextWidths___CII_F},
     {"native_getTextWidths","(ILjava/lang/String;II[F)I", (void*) SkPaintGlue::getTextWidths__StringII_F},
-    {"native_getTextRunAdvances","(I[CIIIII[FI)F",
-        (void*) SkPaintGlue::getTextRunAdvances___CIIIII_FI},
-    {"native_getTextRunAdvances","(ILjava/lang/String;IIIII[FI)F",
-        (void*) SkPaintGlue::getTextRunAdvances__StringIIIII_FI},
-    {"native_getTextRunAdvancesICU","(I[CIIIII[FI)F",
-        (void*) SkPaintGlue::getTextRunAdvancesICU___CIIIII_FI},
-    {"native_getTextRunAdvancesICU","(ILjava/lang/String;IIIII[FI)F",
-        (void*) SkPaintGlue::getTextRunAdvancesICU__StringIIIII_FI},
+    {"native_getTextRunAdvances","(I[CIIIII[FII)F",
+        (void*) SkPaintGlue::getTextRunAdvances___CIIIII_FII},
+    {"native_getTextRunAdvances","(ILjava/lang/String;IIIII[FII)F",
+        (void*) SkPaintGlue::getTextRunAdvances__StringIIIII_FII},
+
+
     {"native_getTextGlyphs","(ILjava/lang/String;IIIII[C)I",
         (void*) SkPaintGlue::getTextGlyphs__StringIIIII_C},
     {"native_getTextRunCursor", "(I[CIIIII)I", (void*) SkPaintGlue::getTextRunCursor___C},
