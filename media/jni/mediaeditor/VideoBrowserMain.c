@@ -73,7 +73,7 @@ M4OSA_ERR videoBrowserSetWindow(
 
     if (pC->m_frameColorType == VideoBrowser_kGB565) {
         pC->m_outputPlane[0].u_stride = pC->m_outputPlane[0].u_width << 1;
-        pC->m_outputPlane[0].pac_data = (M4OSA_UInt8*)M4OSA_malloc(
+        pC->m_outputPlane[0].pac_data = (M4OSA_UInt8*)M4OSA_32bitAlignedMalloc(
             pC->m_outputPlane[0].u_stride * pC->m_outputPlane[0].u_height,
             VIDEOBROWSER, (M4OSA_Char *)"output plane");
 
@@ -154,7 +154,7 @@ M4OSA_ERR videoBrowserCreate(
     CHECK_PTR(videoBrowserCreate, pURL,  err, M4ERR_PARAMETER);
 
     /*--- Create context ---*/
-    pContext = (VideoBrowserContext*)M4OSA_malloc(
+    pContext = (VideoBrowserContext*)M4OSA_32bitAlignedMalloc(
             sizeof(VideoBrowserContext),
             VIDEOBROWSER, (M4OSA_Char*)"Video browser context");
 

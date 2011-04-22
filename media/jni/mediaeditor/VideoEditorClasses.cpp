@@ -2465,7 +2465,7 @@ videoEditClasses_getEffectSettings(
         if (pSettings->xVSS.pFramingFilePath != M4OSA_NULL)
         {
             pSettings->xVSS.pFramingBuffer =
-                (M4VIFI_ImagePlane *)M4OSA_malloc(sizeof(M4VIFI_ImagePlane),
+                (M4VIFI_ImagePlane *)M4OSA_32bitAlignedMalloc(sizeof(M4VIFI_ImagePlane),
                 0x00,(M4OSA_Char *)"framing buffer");
         }
 
