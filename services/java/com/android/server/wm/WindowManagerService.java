@@ -5853,6 +5853,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mInitialDisplayWidth = mCurDisplayWidth = mDisplay.getRealWidth();
             mInitialDisplayHeight = mCurDisplayHeight = mDisplay.getRealHeight();
             mInputManager.setDisplaySize(0, mDisplay.getRawWidth(), mDisplay.getRawHeight());
+            mPolicy.setInitialDisplaySize(mInitialDisplayWidth, mInitialDisplayHeight);
         }
 
         try {
@@ -8711,21 +8712,21 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(", mForcedAppOrientation="); pw.print(mForcedAppOrientation);
                     pw.print(", mRequestedRotation="); pw.println(mRequestedRotation);
             pw.print("  mDeferredRotation="); pw.print(mDeferredRotation);
-                    pw.print(", mDeferredRotationAnimFlags="); pw.print(mDeferredRotationAnimFlags);
+                    pw.print(", mDeferredRotationAnimFlags="); pw.println(mDeferredRotationAnimFlags);
             pw.print("  mAnimationPending="); pw.print(mAnimationPending);
                     pw.print(" mWindowAnimationScale="); pw.print(mWindowAnimationScale);
                     pw.print(" mTransitionWindowAnimationScale="); pw.println(mTransitionAnimationScale);
             pw.print("  mNextAppTransition=0x");
                     pw.print(Integer.toHexString(mNextAppTransition));
-                    pw.print(", mAppTransitionReady="); pw.print(mAppTransitionReady);
-                    pw.print(", mAppTransitionRunning="); pw.print(mAppTransitionRunning);
-                    pw.print(", mAppTransitionTimeout="); pw.println( mAppTransitionTimeout);
+                    pw.print(" mAppTransitionReady="); pw.println(mAppTransitionReady);
+            pw.print("  mAppTransitionRunning="); pw.print(mAppTransitionRunning);
+                    pw.print(" mAppTransitionTimeout="); pw.println( mAppTransitionTimeout);
             if (mNextAppTransitionPackage != null) {
                 pw.print("  mNextAppTransitionPackage=");
                     pw.print(mNextAppTransitionPackage);
-                    pw.print(", mNextAppTransitionEnter=0x");
+                    pw.print(" mNextAppTransitionEnter=0x");
                     pw.print(Integer.toHexString(mNextAppTransitionEnter));
-                    pw.print(", mNextAppTransitionExit=0x");
+                    pw.print(" mNextAppTransitionExit=0x");
                     pw.print(Integer.toHexString(mNextAppTransitionExit));
             }
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);

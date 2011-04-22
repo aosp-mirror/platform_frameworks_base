@@ -35,7 +35,6 @@ import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocalPowerManager;
@@ -56,11 +55,9 @@ import com.android.internal.telephony.ITelephony;
 import com.android.internal.view.BaseInputHandler;
 import com.android.internal.widget.PointerLocationView;
 
-import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.IWindowManager;
@@ -348,10 +345,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     // (See Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR.)
     int mIncallPowerBehavior;
 
-    int mLandscapeRotation = -1; // default landscape rotation
-    int mSeascapeRotation = -1; // "other" landscape rotation, 180 degrees from mLandscapeRotation
-    int mPortraitRotation = -1; // default portrait rotation
-    int mUpsideDownRotation = -1; // "other" portrait rotation
+    int mLandscapeRotation = 0;  // default landscape rotation
+    int mSeascapeRotation = 0;   // "other" landscape rotation, 180 degrees from mLandscapeRotation
+    int mPortraitRotation = 0;   // default portrait rotation
+    int mUpsideDownRotation = 0; // "other" portrait rotation
 
     // Nothing to see here, move along...
     int mFancyRotationAnimation;
@@ -740,6 +737,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Controls rotation and the like.
         initializeHdmiState();
+    }
+
+    public void setInitialDisplaySize(int width, int height) {
+        if (width > height) {
+            mLandscapeRotation = Surface.ROTATION_0;
+            mSeascapeRotation = Surface.ROTATION_180;
+            if (mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_reverseDefaultRotation)) {
+                mPortraitRotation = Surface.ROTATION_90;
+                mUpsideDownRotation = Surface.ROTATION_270;
+            } else {
+                mPortraitRotation = Surface.ROTATION_270;
+                mUpsideDownRotation = Surface.ROTATION_90;
+            }
+        } else {
+            mPortraitRotation = Surface.ROTATION_0;
+            mUpsideDownRotation = Surface.ROTATION_180;
+            if (mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_reverseDefaultRotation)) {
+                mLandscapeRotation = Surface.ROTATION_270;
+                mSeascapeRotation = Surface.ROTATION_90;
+            } else {
+                mLandscapeRotation = Surface.ROTATION_90;
+                mSeascapeRotation = Surface.ROTATION_270;
+            }
+        }
     }
 
     public void updateSettings() {
@@ -2528,7 +2551,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
     }
-
+    
     public int rotationForOrientationLw(int orientation, int lastRotation,
             boolean displayEnabled) {
 
@@ -2539,35 +2562,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         + ((mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED)
                             ? "USER_ROTATION_LOCKED" : "")
                         );
-        }
-
-        if (mPortraitRotation < 0) {
-            // Initialize the rotation angles for each orientation once.
-            Display d = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
-                    .getDefaultDisplay();
-            if (d.getWidth() > d.getHeight()) {
-                mLandscapeRotation = Surface.ROTATION_0;
-                mSeascapeRotation = Surface.ROTATION_180;
-                if (mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.config_reverseDefaultRotation)) {
-                    mPortraitRotation = Surface.ROTATION_90;
-                    mUpsideDownRotation = Surface.ROTATION_270;
-                } else {
-                    mPortraitRotation = Surface.ROTATION_270;
-                    mUpsideDownRotation = Surface.ROTATION_90;
-                }
-            } else {
-                mPortraitRotation = Surface.ROTATION_0;
-                mUpsideDownRotation = Surface.ROTATION_180;
-                if (mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.config_reverseDefaultRotation)) {
-                    mLandscapeRotation = Surface.ROTATION_270;
-                    mSeascapeRotation = Surface.ROTATION_90;
-                } else {
-                    mLandscapeRotation = Surface.ROTATION_90;
-                    mSeascapeRotation = Surface.ROTATION_270;
-                }
-            }
         }
 
         synchronized (mLock) {
