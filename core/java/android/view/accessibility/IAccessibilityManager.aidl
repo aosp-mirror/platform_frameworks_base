@@ -35,5 +35,7 @@ interface IAccessibilityManager {
 
     List<ServiceInfo> getAccessibilityServiceList();
 
+    List<ServiceInfo> getEnabledAccessibilityServiceList(int feedbackType);
+
     void interrupt();
 }

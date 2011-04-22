@@ -1027,12 +1027,10 @@ public class ProgressBar extends View {
     }
 
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        if (!super.dispatchPopulateAccessibilityEvent(event)) {
-            event.setItemCount(mMax);
-            event.setCurrentItemIndex(mProgress);
-        }
-        return true;
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEvent(event);
+        event.setItemCount(mMax);
+        event.setCurrentItemIndex(mProgress);
     }
 
     /**

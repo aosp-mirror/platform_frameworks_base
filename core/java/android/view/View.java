@@ -3455,6 +3455,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (!isShown()) {
             return;
         }
+
+        // Populate these here since they are related to the View that
+        // sends the event and should not be modified while dispatching
+        // to descendants.
         event.setClassName(getClass().getName());
         event.setPackageName(getContext().getPackageName());
         event.setEnabled(isEnabled());
@@ -3470,19 +3474,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         dispatchPopulateAccessibilityEvent(event);
 
-        AccessibilityManager.getInstance(mContext).sendAccessibilityEvent(event);
+        // In the beginning we called #isShown(), so we know that getParent() is not null.
+        getParent().requestSendAccessibilityEvent(this, event);
     }
 
     /**
-     * Dispatches an {@link AccessibilityEvent} to the {@link View} children
-     * to be populated.
+     * Dispatches an {@link AccessibilityEvent} to the {@link View} children to be populated.
+     * This method first calls {@link #onPopulateAccessibilityEvent(AccessibilityEvent)}
+     * on this view allowing it to populate information about itself and also decide
+     * whether to intercept the population i.e. to prevent its children from populating
+     * the event.
      *
      * @param event The event.
      *
      * @return True if the event population was completed.
      */
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        onPopulateAccessibilityEvent(event);
         return false;
+    }
+
+    /**
+     * Called from {@link #dispatchPopulateAccessibilityEvent(AccessibilityEvent)}
+     * giving a chance to this View to populate the accessibility evnet with
+     * information about itself.
+     *
+     * @param event The accessibility event which to populate.
+     */
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+
     }
 
     /**
@@ -5390,20 +5410,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * to receive the hover event.
      */
     public boolean onHoverEvent(MotionEvent event) {
-        final int viewFlags = mViewFlags;
-
-        if (((viewFlags & CLICKABLE) != CLICKABLE &&
-                (viewFlags & LONG_CLICKABLE) != LONG_CLICKABLE)) {
-            // Nothing to do if the view is not clickable.
-            return false;
-        }
-
-        if ((viewFlags & ENABLED_MASK) == DISABLED) {
-            // A disabled view that is clickable still consumes the hover events, it just doesn't
-            // respond to them.
-            return true;
-        }
-
         switch (event.getAction()) {
             case MotionEvent.ACTION_HOVER_ENTER:
                 setHovered(true);
@@ -5414,7 +5420,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 break;
         }
 
-        return true;
+        return false;
     }
 
     /**
@@ -5436,11 +5442,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             if ((mPrivateFlags & HOVERED) == 0) {
                 mPrivateFlags |= HOVERED;
                 refreshDrawableState();
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
             }
         } else {
             if ((mPrivateFlags & HOVERED) != 0) {
                 mPrivateFlags &= ~HOVERED;
                 refreshDrawableState();
+                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
             }
         }
     }
