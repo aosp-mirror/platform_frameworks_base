@@ -429,21 +429,18 @@ private class MyTabListener implements ActionBar.TabListener {
     private TabContentFragment mFragment;
 
     // Called to create an instance of the listener when adding a new tab
-    public TabListener(TabContentFragment fragment) {
+    public MyTabListener(TabContentFragment fragment) {
         mFragment = fragment;
     }
 
-    &#64;Override
     public void onTabSelected(Tab tab, FragmentTransaction ft) {
         ft.add(R.id.fragment_content, mFragment, null);
     }
 
-    &#64;Override
     public void onTabUnselected(Tab tab, FragmentTransaction ft) {
         ft.remove(mFragment);
     }
 
-    &#64;Override
     public void onTabReselected(Tab tab, FragmentTransaction ft) {
         // do nothing
     }
