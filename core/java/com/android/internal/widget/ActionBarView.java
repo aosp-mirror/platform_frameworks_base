@@ -457,11 +457,11 @@ public class ActionBarView extends ViewGroup {
                 mIconView.getPaddingTop() - mIconView.getPaddingBottom();
         int iconSize = res.getDimensionPixelSize(android.R.dimen.app_icon_size);
 
-        if (iconSize * DisplayMetrics.DENSITY_LOW > availableHeight) {
+        if (iconSize * DisplayMetrics.DENSITY_LOW >= availableHeight) {
             return DisplayMetrics.DENSITY_LOW;
-        } else if (iconSize * DisplayMetrics.DENSITY_MEDIUM > availableHeight) {
+        } else if (iconSize * DisplayMetrics.DENSITY_MEDIUM >= availableHeight) {
             return DisplayMetrics.DENSITY_MEDIUM;
-        } else if (iconSize * DisplayMetrics.DENSITY_HIGH > availableHeight) {
+        } else if (iconSize * DisplayMetrics.DENSITY_HIGH >= availableHeight) {
             return DisplayMetrics.DENSITY_HIGH;
         }
         return DisplayMetrics.DENSITY_XHIGH;
