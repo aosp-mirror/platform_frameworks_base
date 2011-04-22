@@ -311,7 +311,7 @@ app widget looks like and is shown to the user from the widget picker. If this f
 supplied, the app widget's icon is used for the preview.</p>
 
 <p>To help create a preview image for your app widget (to specify in the {@link
-android.appwidget.AppWidgetProviderInfo#autoAdvanceViewId} field), the Android emulator includes an
+android.appwidget.AppWidgetProviderInfo#previewImage} field), the Android emulator includes an
 application called "Widget Preview." To create a preview image, launch this application, select the
 app widget for your application and set it up how you'd like your preview image to appear, then save
 it and place it in your application's drawable resources.</p>
