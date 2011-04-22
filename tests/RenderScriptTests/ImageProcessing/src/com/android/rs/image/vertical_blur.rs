@@ -74,7 +74,7 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
         }
     } else {
         for (int r = -fs->radius; r <= fs->radius; r ++) {
-            int validH = rsClamp(y + r, (uint)0, (uint)(fs->height - 1));
+            int validH = rsClamp((int)y + r, (int)0, (int)(fs->height - 1));
             const float4 *i = input + validH * fs->width;
             blurredPixel += i->xyz * gPtr[0];
             gPtr++;

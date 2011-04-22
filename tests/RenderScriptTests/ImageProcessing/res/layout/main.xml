@@ -17,31 +17,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:orientation="vertical"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="fill_parent"
+            android:id="@+id/toplevel">
     <SurfaceView
         android:id="@+id/surface"
         android:layout_width="1dip"
         android:layout_height="1dip" />
-    <ImageView
-        android:id="@+id/display"
-        android:layout_width="320dip"
-        android:layout_height="266dip" />
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/benchmark"
-                android:onClick="benchmark"/>
-            <TextView
-                android:id="@+id/benchmarkText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="8pt"
-                android:text="@string/saturation"/>
-    </LinearLayout>
     <ScrollView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
@@ -49,6 +30,26 @@
                 android:orientation="vertical"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent">
+            <ImageView
+                android:id="@+id/display"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/benchmark"
+                        android:onClick="benchmark"/>
+                    <TextView
+                        android:id="@+id/benchmarkText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="8pt"
+                        android:text="@string/saturation"/>
+            </LinearLayout>
             <TextView
                 android:id="@+id/inSaturationText"
                 android:layout_width="match_parent"

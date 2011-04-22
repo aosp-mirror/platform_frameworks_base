@@ -2,10 +2,10 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.rs.image">
-
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />    
     <uses-sdk android:minSdkVersion="11" />
-    <application android:label="Image Processing">
+    <application android:label="Image Processing"
+                 android:hardwareAccelerated="true">
         <activity android:name="ImageProcessingActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -40,7 +40,6 @@ public class ImageProcessingActivity extends Activity
                                        SeekBar.OnSeekBarChangeListener {
     private Bitmap mBitmapIn;
     private Bitmap mBitmapOut;
-    private Bitmap mBitmapScratch;
     private ScriptC_threshold mScript;
     private ScriptC_vertical_blur mScriptVBlur;
     private ScriptC_horizontal_blur mScriptHBlur;
@@ -78,9 +77,20 @@ public class ImageProcessingActivity extends Activity
     private SurfaceView mSurfaceView;
     private ImageView mDisplayView;
 
+    private boolean mIsProcessing;
+
     class FilterCallback extends RenderScript.RSMessageHandler {
         private Runnable mAction = new Runnable() {
             public void run() {
+
+                synchronized (mDisplayView) {
+                    mIsProcessing = false;
+                }
+
+                // This is a hack to work around an invalidation bug
+                mBitmapOut = Bitmap.createBitmap(mBitmapOut);
+                mOutPixelsAllocation.copyTo(mBitmapOut);
+                mDisplayView.setImageBitmap(mBitmapOut);
                 mDisplayView.invalidate();
             }
         };
@@ -98,156 +108,6 @@ public class ImageProcessingActivity extends Activity
     int MAX_RADIUS = 25;
     // Store our coefficients here
     float gaussian[];
-
-    private long javaFilter() {
-        final int width = mBitmapIn.getWidth();
-        final int height = mBitmapIn.getHeight();
-        final int count = width * height;
-
-        if (in == null) {
-            in = new int[count];
-            interm = new int[count];
-            out = new int[count];
-            gaussian = new float[MAX_RADIUS * 2 + 1];
-            mBitmapIn.getPixels(in, 0, width, 0, 0, width, height);
-        }
-
-        long t = java.lang.System.currentTimeMillis();
-
-        int w, h, r;
-
-        float fRadius = (float)mRadius;
-        int radius = (int)mRadius;
-
-        // Compute gaussian weights for the blur
-        // e is the euler's number
-        float e = 2.718281828459045f;
-        float pi = 3.1415926535897932f;
-        // g(x) = ( 1 / sqrt( 2 * pi ) * sigma) * e ^ ( -x^2 / 2 * sigma^2 )
-        // x is of the form [-radius .. 0 .. radius]
-        // and sigma varies with radius.
-        // Based on some experimental radius values and sigma's
-        // we approximately fit sigma = f(radius) as
-        // sigma = radius * 0.4  + 0.6
-        // The larger the radius gets, the more our gaussian blur
-        // will resemble a box blur since with large sigma
-        // the gaussian curve begins to lose its shape
-        float sigma = 0.4f * fRadius + 0.6f;
-        // Now compute the coefficints
-        // We will store some redundant values to save some math during
-        // the blur calculations
-        // precompute some values
-        float coeff1 = 1.0f / (float)(Math.sqrt( 2.0f * pi ) * sigma);
-        float coeff2 = - 1.0f / (2.0f * sigma * sigma);
-        float normalizeFactor = 0.0f;
-        float floatR = 0.0f;
-        for (r = -radius; r <= radius; r ++) {
-            floatR = (float)r;
-            gaussian[r + radius] = coeff1 * (float)Math.pow(e, floatR * floatR * coeff2);
-            normalizeFactor += gaussian[r + radius];
-        }
-
-        //Now we need to normalize the weights because all our coefficients need to add up to one
-        normalizeFactor = 1.0f / normalizeFactor;
-        for (r = -radius; r <= radius; r ++) {
-            floatR = (float)r;
-            gaussian[r + radius] *= normalizeFactor;
-        }
-
-        float blurredPixelR = 0.0f;
-        float blurredPixelG = 0.0f;
-        float blurredPixelB = 0.0f;
-        float blurredPixelA = 0.0f;
-
-        for (h = 0; h < height; h ++) {
-            for (w = 0; w < width; w ++) {
-
-                blurredPixelR = 0.0f;
-                blurredPixelG = 0.0f;
-                blurredPixelB = 0.0f;
-                blurredPixelA = 0.0f;
-
-                for (r = -radius; r <= radius; r ++) {
-                    // Stepping left and right away from the pixel
-                    int validW = w + r;
-                    // Clamp to zero and width max() isn't exposed for ints yet
-                    if (validW < 0) {
-                        validW = 0;
-                    }
-                    if (validW > width - 1) {
-                        validW = width - 1;
-                    }
-
-                    int input = in[h*width + validW];
-
-                    int R = ((input >> 24) & 0xff);
-                    int G = ((input >> 16) & 0xff);
-                    int B = ((input >> 8) & 0xff);
-                    int A = (input & 0xff);
-
-                    float weight = gaussian[r + radius];
-
-                    blurredPixelR += (float)(R)*weight;
-                    blurredPixelG += (float)(G)*weight;
-                    blurredPixelB += (float)(B)*weight;
-                    blurredPixelA += (float)(A)*weight;
-                }
-
-                int R = (int)blurredPixelR;
-                int G = (int)blurredPixelG;
-                int B = (int)blurredPixelB;
-                int A = (int)blurredPixelA;
-
-                interm[h*width + w] = (R << 24) | (G << 16) | (B << 8) | (A);
-            }
-        }
-
-        for (h = 0; h < height; h ++) {
-            for (w = 0; w < width; w ++) {
-
-                blurredPixelR = 0.0f;
-                blurredPixelG = 0.0f;
-                blurredPixelB = 0.0f;
-                blurredPixelA = 0.0f;
-                for (r = -radius; r <= radius; r ++) {
-                    int validH = h + r;
-                    // Clamp to zero and width
-                    if (validH < 0) {
-                        validH = 0;
-                    }
-                    if (validH > height - 1) {
-                        validH = height - 1;
-                    }
-
-                    int input = interm[validH*width + w];
-
-                    int R = ((input >> 24) & 0xff);
-                    int G = ((input >> 16) & 0xff);
-                    int B = ((input >> 8) & 0xff);
-                    int A = (input & 0xff);
-
-                    float weight = gaussian[r + radius];
-
-                    blurredPixelR += (float)(R)*weight;
-                    blurredPixelG += (float)(G)*weight;
-                    blurredPixelB += (float)(B)*weight;
-                    blurredPixelA += (float)(A)*weight;
-                }
-
-                int R = (int)blurredPixelR;
-                int G = (int)blurredPixelG;
-                int B = (int)blurredPixelB;
-                int A = (int)blurredPixelA;
-
-                out[h*width + w] = (R << 24) | (G << 16) | (B << 8) | (A);
-            }
-        }
-
-        t = java.lang.System.currentTimeMillis() - t;
-        android.util.Log.v("Img", "Java frame time ms " + t);
-        mBitmapOut.setPixels(out, 0, width, 0, 0, width, height);
-        return t;
-    }
 
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (fromUser) {
@@ -280,17 +140,14 @@ public class ImageProcessingActivity extends Activity
                 mScriptVBlur.invoke_setSaturation(mSaturation);
             }
 
-            long t = java.lang.System.currentTimeMillis();
-            if (true) {
-                mScript.invoke_filter();
-                mOutPixelsAllocation.copyTo(mBitmapOut);
-            } else {
-                javaFilter();
-                mDisplayView.invalidate();
+            synchronized (mDisplayView) {
+                if (mIsProcessing) {
+                    return;
+                }
+                mIsProcessing = true;
             }
 
-            t = java.lang.System.currentTimeMillis() - t;
-            android.util.Log.v("Img", "Renderscript frame time core ms " + t);
+            mScript.invoke_filter();
         }
     }
 
@@ -305,9 +162,8 @@ public class ImageProcessingActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        mBitmapIn = loadBitmap(R.drawable.data);
-        mBitmapOut = loadBitmap(R.drawable.data);
-        mBitmapScratch = loadBitmap(R.drawable.data);
+        mBitmapIn = loadBitmap(R.drawable.city);
+        mBitmapOut = loadBitmap(R.drawable.city);
 
         mSurfaceView = (SurfaceView) findViewById(R.id.surface);
         mSurfaceView.getHolder().addCallback(this);
