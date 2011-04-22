@@ -511,7 +511,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             // This will populate st.shownPanelView
-            if (!initializePanelContent(st) || (st.shownPanelView == null)) {
+            if (!initializePanelContent(st) || !st.hasPanelItems()) {
                 return;
             }
 
@@ -2974,6 +2974,16 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             this.featureId = featureId;
 
             refreshDecorView = false;
+        }
+
+        public boolean hasPanelItems() {
+            if (shownPanelView == null) return false;
+
+            if (isInExpandedMode) {
+                return expandedMenuPresenter.getAdapter().getCount() > 0;
+            } else {
+                return ((ViewGroup) shownPanelView).getChildCount() > 0;
+            }
         }
 
         /**
