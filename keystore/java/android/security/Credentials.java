@@ -31,6 +31,8 @@ public class Credentials {
 
     public static final String INSTALL_ACTION = "android.credentials.INSTALL";
 
+    public static final String UNLOCK_ACTION = "com.android.credentials.UNLOCK";
+
     /** Key prefix for CA certificates. */
     public static final String CA_CERTIFICATE = "CACERT_";
 
@@ -69,7 +71,7 @@ public class Credentials {
 
     public void unlock(Context context) {
         try {
-            Intent intent = new Intent("com.android.credentials.UNLOCK");
+            Intent intent = new Intent(UNLOCK_ACTION);
             context.startActivity(intent);
         } catch (ActivityNotFoundException e) {
             Log.w(LOGTAG, e.toString());
