@@ -67,7 +67,7 @@
 { \
     if (M4OSA_NULL != p) \
     { \
-        M4OSA_free((M4OSA_MemAddr32)p) ; \
+        free(p) ; \
         p = M4OSA_NULL ; \
     } \
 }

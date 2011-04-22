@@ -165,7 +165,7 @@ M4OSA_ERR ThumbnailOpen(M4OSA_Context *pPContext,
     CHECK_PTR(ThumbnailOpen, pString, err, M4ERR_BAD_CONTEXT);
 
     /*--- Create context ---*/
-    pContext = (ThumbnailContext*)M4OSA_malloc(sizeof(ThumbnailContext), VIDEOBROWSER,
+    pContext = (ThumbnailContext*)M4OSA_32bitAlignedMalloc(sizeof(ThumbnailContext), VIDEOBROWSER,
         (M4OSA_Char*)"Thumbnail context") ;
     M4OSA_TRACE3_1("context value is = %d",pContext);
     CHECK_PTR(ThumbnailOpen, pContext, err, M4ERR_ALLOC);
@@ -211,7 +211,7 @@ ThumbnailOpen_cleanUp:
         {
             videoBrowserCleanUp(pContext->m_pVideoBrowser) ;
         }
-        M4OSA_free((M4OSA_MemAddr32)pContext) ;
+        free(pContext) ;
     }
     return err;
 }
@@ -320,7 +320,7 @@ void ThumbnailClose(const M4OSA_Context pContext)
         {
             videoBrowserCleanUp(pC->m_pVideoBrowser);
         }
-        M4OSA_free((M4OSA_MemAddr32)pC);
+        free(pC);
     }
 
 ThumbnailClose_cleanUp:

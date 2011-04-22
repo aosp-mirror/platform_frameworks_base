@@ -276,7 +276,7 @@ videoEditOsal_alloc(
     if (*pResult)
     {
         // Allocate memory for the settings.
-        pData = (M4VSS3GPP_EditSettings*)M4OSA_malloc(size, 0, (M4OSA_Char*)pDescription);
+        pData = (M4VSS3GPP_EditSettings*)M4OSA_32bitAlignedMalloc(size, 0, (M4OSA_Char*)pDescription);
         if (M4OSA_NULL != pData)
         {
             // Reset the allocated memory.
@@ -314,10 +314,10 @@ videoEditOsal_free(
         VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR_OSAL", "videoEditOsal_free()");
 
         // Log the API call.
-        VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEO_EDITOR_OSAL", "M4OSA_free()");
+        VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEO_EDITOR_OSAL", "free");
 
         // Free the memory.
-        M4OSA_free((M4OSA_MemAddr32)pData);
+        free(pData);
 #ifdef OSAL_MEM_LEAK_DEBUG
         // Update the allocated block count.
         gAllocatedBlockCount--;
