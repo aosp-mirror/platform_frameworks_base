@@ -897,7 +897,8 @@ void OpenGLRenderer::setupDrawColor(int color) {
 
 void OpenGLRenderer::setupDrawColor(int color, int alpha) {
     mColorA = alpha / 255.0f;
-    // BUG on this next line? a is alpha divided by 255 *twice*
+    // Second divide of a by 255 is an optimization, allowing us to simply multiply
+    // the rgb values by a instead of also dividing by 255
     const float a = mColorA / 255.0f;
     mColorR = a * ((color >> 16) & 0xFF);
     mColorG = a * ((color >>  8) & 0xFF);
@@ -908,6 +909,8 @@ void OpenGLRenderer::setupDrawColor(int color, int alpha) {
 
 void OpenGLRenderer::setupDrawAlpha8Color(int color, int alpha) {
     mColorA = alpha / 255.0f;
+    // Double-divide of a by 255 is an optimization, allowing us to simply multiply
+    // the rgb values by a instead of also dividing by 255
     const float a = mColorA / 255.0f;
     mColorR = a * ((color >> 16) & 0xFF);
     mColorG = a * ((color >>  8) & 0xFF);
