@@ -391,6 +391,19 @@
 #define MTP_OPERATION_SET_OBJECT_REFERENCES                 0x9811
 #define MTP_OPERATION_SKIP                                  0x9820
 
+// Android extensions for direct file IO
+
+// Same as GetPartialObject, but with 64 bit offset
+#define MTP_OPERATION_GET_PARTIAL_OBJECT_64                 0x95C1
+// Same as GetPartialObject64, but copying host to device
+#define MTP_OPERATION_SEND_PARTIAL_OBJECT                   0x95C2
+// Truncates file to 64 bit length
+#define MTP_OPERATION_TRUNCATE_OBJECT                       0x95C3
+// Must be called before using SendPartialObject and TruncateObject
+#define MTP_OPERATION_BEGIN_EDIT_OBJECT                     0x95C4
+// Called to commit changes made by SendPartialObject and TruncateObject
+#define MTP_OPERATION_END_EDIT_OBJECT                       0x95C5
+
 // MTP Response Codes
 #define MTP_RESPONSE_UNDEFINED                                  0x2000
 #define MTP_RESPONSE_OK                                         0x2001

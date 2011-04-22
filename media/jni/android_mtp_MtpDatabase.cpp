@@ -29,6 +29,7 @@
 
 #include "MtpDatabase.h"
 #include "MtpDataPacket.h"
+#include "MtpObjectInfo.h"
 #include "MtpProperty.h"
 #include "MtpStringBuffer.h"
 #include "MtpUtils.h"
@@ -138,7 +139,7 @@ public:
                                             MtpDataPacket& packet);
 
     virtual MtpResponseCode         getObjectInfo(MtpObjectHandle handle,
-                                            MtpDataPacket& packet);
+                                            MtpObjectInfo& info);
 
     virtual MtpResponseCode         getObjectFilePath(MtpObjectHandle handle,
                                             MtpString& outFilePath,
@@ -746,7 +747,7 @@ MtpResponseCode MyMtpDatabase::getObjectPropertyList(MtpObjectHandle handle,
 }
 
 MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
-                                            MtpDataPacket& packet) {
+                                            MtpObjectInfo& info) {
     char    date[20];
 
     JNIEnv* env = AndroidRuntime::getJNIEnv();
@@ -756,45 +757,26 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
         return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
 
     jint* intValues = env->GetIntArrayElements(mIntBuffer, 0);
-    MtpStorageID storageID = intValues[0];
-    MtpObjectFormat format = intValues[1];
-    MtpObjectHandle parent = intValues[2];
+    info.mStorageID = intValues[0];
+    info.mFormat = intValues[1];
+    info.mParent = intValues[2];
     env->ReleaseIntArrayElements(mIntBuffer, intValues, 0);
 
     jlong* longValues = env->GetLongArrayElements(mLongBuffer, 0);
     uint64_t size = longValues[0];
-    uint64_t modified = longValues[1];
+    info.mCompressedSize = (size > 0xFFFFFFFFLL ? 0xFFFFFFFF : size);
+    info.mDateModified = longValues[1];
     env->ReleaseLongArrayElements(mLongBuffer, longValues, 0);
 
-//    int associationType = (format == MTP_FORMAT_ASSOCIATION ?
+//    info.mAssociationType = (format == MTP_FORMAT_ASSOCIATION ?
 //                            MTP_ASSOCIATION_TYPE_GENERIC_FOLDER :
 //                            MTP_ASSOCIATION_TYPE_UNDEFINED);
-    int associationType = MTP_ASSOCIATION_TYPE_UNDEFINED;
-
-    packet.putUInt32(storageID);
-    packet.putUInt16(format);
-    packet.putUInt16(0);   // protection status
-    packet.putUInt32((size > 0xFFFFFFFFLL ? 0xFFFFFFFF : size));
-    packet.putUInt16(0);   // thumb format
-    packet.putUInt32(0);   // thumb compressed size
-    packet.putUInt32(0);   // thumb pix width
-    packet.putUInt32(0);   // thumb pix height
-    packet.putUInt32(0);   // image pix width
-    packet.putUInt32(0);   // image pix height
-    packet.putUInt32(0);   // image bit depth
-    packet.putUInt32(parent);
-    packet.putUInt16(associationType);
-    packet.putUInt32(0);   // association desc
-    packet.putUInt32(0);   // sequence number
+    info.mAssociationType = MTP_ASSOCIATION_TYPE_UNDEFINED;
 
     jchar* str = env->GetCharArrayElements(mStringBuffer, 0);
-    packet.putString(str);   // file name
+    MtpString temp(str);
+    info.mName = strdup((const char *)temp);
     env->ReleaseCharArrayElements(mStringBuffer, str, 0);
-
-    packet.putEmptyString();
-    formatDateTime(modified, date, sizeof(date));
-    packet.putString(date);   // date modified
-    packet.putEmptyString();   // keywords
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return MTP_RESPONSE_OK;
