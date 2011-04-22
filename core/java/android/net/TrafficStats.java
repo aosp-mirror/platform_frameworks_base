@@ -16,11 +16,10 @@
 
 package android.net;
 
-import android.util.Log;
+import dalvik.system.BlockGuard;
 
-import java.io.File;
-import java.io.RandomAccessFile;
-import java.io.IOException;
+import java.net.Socket;
+import java.net.SocketException;
 
 /**
  * Class that provides network traffic statistics.  These statistics include
@@ -35,6 +34,63 @@ public class TrafficStats {
      * The return value to indicate that the device does not support the statistic.
      */
     public final static int UNSUPPORTED = -1;
+
+    /**
+     * Set active tag to use when accounting {@link Socket} traffic originating
+     * from the current thread. Only one active tag per thread is supported.
+     * <p>
+     * Changes only take effect during subsequent calls to
+     * {@link #tagSocket(Socket)}.
+     */
+    public static void setThreadStatsTag(String tag) {
+        BlockGuard.setThreadSocketStatsTag(tag);
+    }
+
+    public static void clearThreadStatsTag() {
+        BlockGuard.setThreadSocketStatsTag(null);
+    }
+
+    /**
+     * Set specific UID to use when accounting {@link Socket} traffic
+     * originating from the current thread. Designed for use when performing an
+     * operation on behalf of another application.
+     * <p>
+     * Changes only take effect during subsequent calls to
+     * {@link #tagSocket(Socket)}.
+     * <p>
+     * To take effect, caller must hold
+     * {@link android.Manifest.permission#UPDATE_DEVICE_STATS} permission.
+     *
+     * {@hide}
+     */
+    public static void setThreadStatsUid(int uid) {
+        BlockGuard.setThreadSocketStatsUid(uid);
+    }
+
+    /** {@hide} */
+    public static void clearThreadStatsUid() {
+        BlockGuard.setThreadSocketStatsUid(-1);
+    }
+
+    /**
+     * Tag the given {@link Socket} with any statistics parameters active for
+     * the current thread. Subsequent calls always replace any existing
+     * parameters. When finished, call {@link #untagSocket(Socket)} to remove
+     * statistics parameters.
+     *
+     * @see #setThreadStatsTag(String)
+     * @see #setThreadStatsUid(int)
+     */
+    public static void tagSocket(Socket socket) throws SocketException {
+        BlockGuard.tagSocketFd(socket.getFileDescriptor$());
+    }
+
+    /**
+     * Remove any statistics parameters from the given {@link Socket}.
+     */
+    public static void untagSocket(Socket socket) throws SocketException {
+        BlockGuard.untagSocketFd(socket.getFileDescriptor$());
+    }
 
     /**
      * Get the total number of packets transmitted through the mobile interface.

@@ -10951,6 +10951,7 @@ package android.net {
 
   public class TrafficStats {
     ctor public TrafficStats();
+    method public static void clearThreadStatsTag();
     method public static long getMobileRxBytes();
     method public static long getMobileRxPackets();
     method public static long getMobileTxBytes();
@@ -10971,6 +10972,9 @@ package android.net {
     method public static long getUidUdpRxPackets(int);
     method public static long getUidUdpTxBytes(int);
     method public static long getUidUdpTxPackets(int);
+    method public static void setThreadStatsTag(java.lang.String);
+    method public static void tagSocket(java.net.Socket) throws java.net.SocketException;
+    method public static void untagSocket(java.net.Socket) throws java.net.SocketException;
     field public static final int UNSUPPORTED = -1; // 0xffffffff
   }
 
