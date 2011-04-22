@@ -243,13 +243,15 @@ static void SC_MatrixTranspose_2x2(Matrix2x2 *m) {
 static float SC_randf(float max) {
     float r = (float)rand();
     r *= max;
-    return r / RAND_MAX;
+    r /= RAND_MAX;
+    return r;
 }
 
 static float SC_randf2(float min, float max) {
     float r = (float)rand();
+    r /= RAND_MAX;
     r = r * (max - min) + min;
-    return r / RAND_MAX;
+    return r;
 }
 
 static int SC_randi(int max) {
