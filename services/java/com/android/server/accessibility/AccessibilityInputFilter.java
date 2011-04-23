@@ -20,8 +20,8 @@ import com.android.server.wm.InputFilter;
 
 import android.content.Context;
 import android.util.Slog;
-import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.WindowManagerPolicy;
 
@@ -32,34 +32,9 @@ import android.view.WindowManagerPolicy;
  */
 public class AccessibilityInputFilter extends InputFilter {
     private static final String TAG = "AccessibilityInputFilter";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     private final Context mContext;
-
-    /**
-     * This is an interface for explorers that take a {@link MotionEvent}
-     * stream and perform touch exploration of the screen content.
-     */
-    public interface Explorer {
-        /**
-         * Handles a {@link MotionEvent}.
-         *
-         * @param event The event to handle.
-         * @param policyFlags The policy flags associated with the event.
-         */
-        public void onMotionEvent(MotionEvent event, int policyFlags);
-
-        /**
-         * Requests that the explorer clears its internal state.
-         *
-         * @param event The last received event.
-         * @param policyFlags The policy flags associated with the event.
-         */
-        public void clear(MotionEvent event, int policyFlags);
-    }
-
-    private TouchExplorer mTouchExplorer;
-    private int mTouchscreenSourceDeviceId;
 
     public AccessibilityInputFilter(Context context) {
         super(context.getMainLooper());
@@ -85,27 +60,27 @@ public class AccessibilityInputFilter extends InputFilter {
     @Override
     public void onInputEvent(InputEvent event, int policyFlags) {
         if (DEBUG) {
-            Slog.d(TAG, "Received event: " + event + ", policyFlags=0x" 
-                    + Integer.toHexString(policyFlags));
+            Slog.d(TAG, "Accessibility input filter received input event: "
+                    + event + ", policyFlags=0x" + Integer.toHexString(policyFlags));
         }
-        if (event.getSource() == InputDevice.SOURCE_TOUCHSCREEN) {
-            MotionEvent motionEvent = (MotionEvent) event;
-            int deviceId = event.getDeviceId();
-            if (mTouchscreenSourceDeviceId != deviceId) {
-                mTouchscreenSourceDeviceId = deviceId;
-                if (mTouchExplorer != null) {
-                    mTouchExplorer.clear(motionEvent, policyFlags);
-                } else {
-                    mTouchExplorer = new TouchExplorer(this, mContext);
+
+        // To prove that this is working as intended, we will silently transform
+        // Q key presses into non-repeating Z's as part of this stub implementation.
+        // TODO: Replace with the real thing.
+        if (event instanceof KeyEvent) {
+            final KeyEvent keyEvent = (KeyEvent)event;
+            if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_Q) {
+                if (keyEvent.getRepeatCount() == 0) {
+                    sendInputEvent(new KeyEvent(keyEvent.getDownTime(), keyEvent.getEventTime(),
+                            keyEvent.getAction(), KeyEvent.KEYCODE_Z, keyEvent.getRepeatCount(),
+                            keyEvent.getMetaState(), keyEvent.getDeviceId(), keyEvent.getScanCode(),
+                            keyEvent.getFlags(), keyEvent.getSource()),
+                            policyFlags | WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
                 }
+                return;
             }
-            if ((policyFlags & WindowManagerPolicy.FLAG_PASS_TO_USER) != 0) {
-                mTouchExplorer.onMotionEvent(motionEvent, policyFlags);
-            } else {
-                mTouchExplorer.clear(motionEvent, policyFlags);
-            }
-        } else {
-            super.onInputEvent(event, policyFlags);
         }
+
+        super.onInputEvent(event, policyFlags);
     }
 }

@@ -19,6 +19,7 @@ package android.view;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
@@ -155,13 +156,6 @@ public class ViewConfiguration {
     private static final int MAXIMUM_FLING_VELOCITY = 8000;
 
     /**
-     * Distance between a touch up event denoting the end of a touch exploration
-     * gesture and the touch up event of a subsequent tap for the latter tap to be
-     * considered as a tap i.e. to perform a click.
-     */
-    private static final int TOUCH_EXPLORATION_TAP_SLOP = 80;
-
-    /**
      * The maximum size of View's drawing cache, expressed in bytes. This size
      * should be at least equal to the size of the screen in ARGB888 format.
      */
@@ -191,7 +185,6 @@ public class ViewConfiguration {
     private final int mTouchSlop;
     private final int mPagingTouchSlop;
     private final int mDoubleTapSlop;
-    private final int mScaledTouchExplorationTapSlop;
     private final int mWindowTouchSlop;
     private final int mMaximumDrawingCacheSize;
     private final int mOverscrollDistance;
@@ -213,7 +206,6 @@ public class ViewConfiguration {
         mTouchSlop = TOUCH_SLOP;
         mPagingTouchSlop = PAGING_TOUCH_SLOP;
         mDoubleTapSlop = DOUBLE_TAP_SLOP;
-        mScaledTouchExplorationTapSlop = TOUCH_EXPLORATION_TAP_SLOP;
         mWindowTouchSlop = WINDOW_TOUCH_SLOP;
         //noinspection deprecation
         mMaximumDrawingCacheSize = MAXIMUM_DRAWING_CACHE_SIZE;
@@ -250,7 +242,6 @@ public class ViewConfiguration {
         mTouchSlop = (int) (sizeAndDensity * TOUCH_SLOP + 0.5f);
         mPagingTouchSlop = (int) (sizeAndDensity * PAGING_TOUCH_SLOP + 0.5f);
         mDoubleTapSlop = (int) (sizeAndDensity * DOUBLE_TAP_SLOP + 0.5f);
-        mScaledTouchExplorationTapSlop = (int) (density * TOUCH_EXPLORATION_TAP_SLOP + 0.5f);
         mWindowTouchSlop = (int) (sizeAndDensity * WINDOW_TOUCH_SLOP + 0.5f);
 
         // Size of the screen in bytes, in ARGB_8888 format
@@ -450,17 +441,6 @@ public class ViewConfiguration {
      */
     public int getScaledDoubleTapSlop() {
         return mDoubleTapSlop;
-    }
-
-    /**
-     * @return Distance between a touch up event denoting the end of a touch exploration
-     * gesture and the touch up event of a subsequent tap for the latter tap to be
-     * considered as a tap i.e. to perform a click.
-     *
-     * @hide
-     */
-    public int getScaledTouchExplorationTapSlop() {
-        return mScaledTouchExplorationTapSlop;
     }
 
     /**

@@ -105,13 +105,11 @@ public abstract class InputFilter {
     private final InputEventConsistencyVerifier mInboundInputEventConsistencyVerifier =
             InputEventConsistencyVerifier.isInstrumentationEnabled() ?
                     new InputEventConsistencyVerifier(this,
-                            InputEventConsistencyVerifier.FLAG_RAW_DEVICE_INPUT,
-                            "InputFilter#InboundInputEventConsistencyVerifier") : null;
+                            InputEventConsistencyVerifier.FLAG_RAW_DEVICE_INPUT) : null;
     private final InputEventConsistencyVerifier mOutboundInputEventConsistencyVerifier =
             InputEventConsistencyVerifier.isInstrumentationEnabled() ?
                     new InputEventConsistencyVerifier(this,
-                            InputEventConsistencyVerifier.FLAG_RAW_DEVICE_INPUT,
-                            "InputFilter#OutboundInputEventConsistencyVerifier") : null;
+                            InputEventConsistencyVerifier.FLAG_RAW_DEVICE_INPUT) : null;
 
     /**
      * Creates the input filter.

@@ -56,7 +56,6 @@ import android.view.accessibility.IAccessibilityManagerClient;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -74,8 +73,6 @@ import java.util.Set;
  */
 public class AccessibilityManagerService extends IAccessibilityManager.Stub
         implements HandlerCaller.Callback {
-
-    private static final boolean DEBUG = false;
 
     private static final String LOG_TAG = "AccessibilityManagerService";
 
@@ -104,9 +101,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private final Set<ComponentName> mEnabledServices = new HashSet<ComponentName>();
 
     private final SimpleStringSplitter mStringColonSplitter = new SimpleStringSplitter(':');
-
-    private final SparseArray<List<ServiceInfo>> mFeedbackTypeToEnabledServicesMap =
-        new SparseArray<List<ServiceInfo>>();
 
     private PackageManager mPackageManager;
 
@@ -217,6 +211,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         }
 
                         manageServicesLocked();
+                        updateInputFilterLocked();
                     }
                     
                     return;
@@ -257,6 +252,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             unbindAllServicesLocked();
                         }
                         updateClientsLocked();
+                        updateInputFilterLocked();
                     }
                 }
             });
@@ -304,16 +300,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    public List<ServiceInfo> getEnabledAccessibilityServiceList(int feedbackType) {
-        synchronized (mLock) {
-            List<ServiceInfo> enabledServices = mFeedbackTypeToEnabledServicesMap.get(feedbackType);
-            if (enabledServices == null) {
-                return Collections.emptyList();
-            }
-            return enabledServices;
-        }
-    }
-
     public void interrupt() {
         synchronized (mLock) {
             for (int i = 0, count = mServices.size(); i < count; i++) {
@@ -353,8 +339,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                     service.mNotificationTimeout = info.notificationTimeout;
                     service.mIsDefault = (info.flags & AccessibilityServiceInfo.DEFAULT) != 0;
-
-                    updateStateOnEnabledService(service);
                 }
                 return;
             default:
@@ -465,7 +449,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         try {
             listener.onAccessibilityEvent(event);
-            if (DEBUG) {
+            if (false) {
                 Slog.i(LOG_TAG, "Event " + event + " sent to " + listener);
             }
         } catch (RemoteException re) {
@@ -485,11 +469,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @return True if the service was removed, false otherwise.
      */
     private boolean removeDeadServiceLocked(Service service) {
-        if (DEBUG) {
+        if (false) {
             Slog.i(LOG_TAG, "Dead service " + service.mService + " removed");
         }
         mHandler.removeMessages(service.mId);
-        updateStateOnDisabledService(service);
         return mServices.remove(service);
     }
 
@@ -610,7 +593,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             if (isEnabled) {
                 if (enabledServices.contains(componentName)) {
                     if (service == null) {
-                        service = new Service(componentName, intalledService);
+                        service = new Service(componentName);
                     }
                     service.bind();
                 } else if (!enabledServices.contains(componentName)) {
@@ -661,47 +644,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
-     * Updates the set of enabled services for a given feedback type and
-     * if more than one of them provides spoken feedback enables touch
-     * exploration.
-     *
-     * @param service An enable service.
-     */
-    private void updateStateOnEnabledService(Service service) {
-        int feedbackType = service.mFeedbackType;
-        List<ServiceInfo> enabledServices = mFeedbackTypeToEnabledServicesMap.get(feedbackType);
-        if (enabledServices == null) {
-            enabledServices = new ArrayList<ServiceInfo>();
-            mFeedbackTypeToEnabledServicesMap.put(feedbackType, enabledServices);
-        }
-        enabledServices.add(service.mServiceInfo);
-
-        // We enable touch exploration if at least one
-        // enabled service provides spoken feedback.
-        if (enabledServices.size() > 0
-                && service.mFeedbackType == AccessibilityServiceInfo.FEEDBACK_SPOKEN) {
-            updateClientsLocked();
-            updateInputFilterLocked();
-        }
-    }
-
-    private void updateStateOnDisabledService(Service service) {
-        List<ServiceInfo> enabledServices =
-            mFeedbackTypeToEnabledServicesMap.get(service.mFeedbackType);
-        if (enabledServices == null) {
-            return;
-        }
-        enabledServices.remove(service.mServiceInfo);
-        // We disable touch exploration if no
-        // enabled service provides spoken feedback.
-        if (enabledServices.isEmpty()
-                && service.mFeedbackType == AccessibilityServiceInfo.FEEDBACK_SPOKEN) {
-            updateClientsLocked();
-            updateInputFilterLocked();
-        }
-    }
-
-    /**
      * This class represents an accessibility service. It stores all per service
      * data required for the service management, provides API for starting/stopping the
      * service and is responsible for adding/removing the service in the data structures
@@ -711,8 +653,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     class Service extends IAccessibilityServiceConnection.Stub implements ServiceConnection {
         int mId = 0;
-
-        ServiceInfo mServiceInfo;
 
         IBinder mService;
 
@@ -738,10 +678,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final SparseArray<AccessibilityEvent> mPendingEvents =
             new SparseArray<AccessibilityEvent>();
 
-        Service(ComponentName componentName, ServiceInfo serviceInfo) {
+        Service(ComponentName componentName) {
             mId = sIdCounter++;
             mComponentName = componentName;
-            mServiceInfo = serviceInfo;
             mIntent = new Intent().setComponent(mComponentName);
             mIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                     com.android.internal.R.string.accessibility_binding_label);
@@ -773,7 +712,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mContext.unbindService(this);
                 mComponentNameToServiceMap.remove(mComponentName);
                 mServices.remove(this);
-                updateStateOnDisabledService(this);
                 return true;
             }
             return false;
