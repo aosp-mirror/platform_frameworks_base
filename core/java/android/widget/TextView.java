@@ -7896,9 +7896,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
         if (!isShown()) {
-            return;
+            return false;
         }
 
         final boolean isPassword = hasPasswordTransformationMethod();
@@ -7914,6 +7914,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         } else {
             event.setPassword(isPassword);
         }
+        return false;
     }
 
     void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,

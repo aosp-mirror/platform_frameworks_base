@@ -30,6 +30,7 @@ import android.util.Log;
  * @hide
  */
 public final class InputEventConsistencyVerifier {
+    private static final String TAG = "InputEventConsistencyVerifier";
     private static final boolean IS_ENG_BUILD = "eng".equals(Build.TYPE);
 
     // The number of recent events to log when a problem is detected.
@@ -42,11 +43,6 @@ public final class InputEventConsistencyVerifier {
 
     // Consistency verifier flags.
     private final int mFlags;
-
-    // Tag for logging which a client can set to help distinguish the output
-    // from different verifiers since several can be active at the same time.
-    // If not provided defaults to the simple class name.
-    private final String mLogTag;
 
     // The most recently checked event and the nesting level at which it was checked.
     // This is only set when the verifier is called from a nesting level greater than 0
@@ -107,19 +103,8 @@ public final class InputEventConsistencyVerifier {
      * @param flags Flags to the verifier, or 0 if none.
      */
     public InputEventConsistencyVerifier(Object caller, int flags) {
-        this(caller, flags, InputEventConsistencyVerifier.class.getSimpleName());
-    }
-
-    /**
-     * Creates an input consistency verifier.
-     * @param caller The object to which the verifier is attached.
-     * @param flags Flags to the verifier, or 0 if none.
-     * @param logTag Tag for logging. If null defaults to the short class name.
-     */
-    public InputEventConsistencyVerifier(Object caller, int flags, String logTag) {
         this.mCaller = caller;
         this.mFlags = flags;
-        this.mLogTag = (logTag != null) ? logTag : "InputEventConsistencyVerifier";
     }
 
     /**
@@ -611,7 +596,7 @@ public final class InputEventConsistencyVerifier {
                 }
             }
 
-            Log.d(mLogTag, mViolationMessage.toString());
+            Log.d(TAG, mViolationMessage.toString());
             mViolationMessage.setLength(0);
             tainted = true;
         }
