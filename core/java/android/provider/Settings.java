@@ -3721,6 +3721,22 @@ public final class Settings {
                 "setup_prepaid_data_service_url";
 
         /**
+         * URL to attempt a GET on to see if this is a prepay device
+         * @hide
+         */
+        public static final String SETUP_PREPAID_DETECTION_TARGET_URL =
+                "setup_prepaid_detection_target_url";
+
+        /**
+         * Host to check for a redirect to after an attempt to GET
+         * SETUP_PREPAID_DETECTION_TARGET_URL. (If we redirected there,
+         * this is a prepaid device with zero balance.)
+         * @hide
+         */
+        public static final String SETUP_PREPAID_DETECTION_REDIR_HOST =
+                "setup_prepaid_detection_redir_host";
+
+        /**
          * @hide
          */
         public static final String[] SETTINGS_TO_BACKUP = {
