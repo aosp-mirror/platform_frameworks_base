@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,22 +21,21 @@ import android.util.Log;
 
 
 /**
- * Class for exposing the native Renderscript byte3 type back to the Android system.
+ * Class for exposing the native Renderscript double2 type back
+ * to the Android system.
  *
  **/
-public class Byte3 {
-    public Byte3() {
+public class Double2 {
+    public Double2() {
     }
 
-    public Byte3(byte initX, byte initY, byte initZ) {
+    public Double2(double initX, double initY) {
         x = initX;
         y = initY;
-        z = initZ;
     }
 
-    public byte x;
-    public byte y;
-    public byte z;
+    public double x;
+    public double y;
 }
 
 

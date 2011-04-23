@@ -28,6 +28,13 @@ public class Short4 {
     public Short4() {
     }
 
+    public Short4(short initX, short initY, short initZ, short initW) {
+        x = initX;
+        y = initY;
+        z = initZ;
+        w = initW;
+    }
+
     public short x;
     public short y;
     public short z;
