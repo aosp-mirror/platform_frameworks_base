@@ -25,7 +25,7 @@ def generate_egl_entries(output, lines, i):
             line = line.split(",")[1].strip() #extract EGL function name
             output.write("        %s = %d;\n" % (line, i))
             i += 1
-    return i    
+    return i
 
 
 def generate_gl_entries(output,lines,i):
@@ -118,7 +118,7 @@ message Message
     optional int32 arg4 = 16;
     optional int32 arg5 = 17;
     optional int32 arg6 = 18;
-    optional int32 arg7 = 19;
+    optional int32 arg7 = 19; // glDrawArrays/Elements sets this to active number of attributes
     optional int32 arg8 = 20;
 
     optional bytes data = 10; // variable length data used for GL call
