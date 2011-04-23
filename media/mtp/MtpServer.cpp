@@ -30,6 +30,7 @@
 
 #include "MtpDebug.h"
 #include "MtpDatabase.h"
+#include "MtpObjectInfo.h"
 #include "MtpProperty.h"
 #include "MtpServer.h"
 #include "MtpStorage.h"
@@ -79,6 +80,12 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
     MTP_OPERATION_GET_OBJECT_REFERENCES,
     MTP_OPERATION_SET_OBJECT_REFERENCES,
 //    MTP_OPERATION_SKIP,
+    // Android extension for direct file IO
+    MTP_OPERATION_GET_PARTIAL_OBJECT_64,
+    MTP_OPERATION_SEND_PARTIAL_OBJECT,
+    MTP_OPERATION_TRUNCATE_OBJECT,
+    MTP_OPERATION_BEGIN_EDIT_OBJECT,
+    MTP_OPERATION_END_EDIT_OBJECT,
 };
 
 static const MtpEventCode kSupportedEventCodes[] = {
@@ -218,6 +225,15 @@ void MtpServer::run() {
         }
     }
 
+    // commit any open edits
+    int count = mObjectEditList.size();
+    for (int i = 0; i < count; i++) {
+        ObjectEdit* edit = mObjectEditList[i];
+        commitEdit(edit);
+        delete edit;
+    }
+    mObjectEditList.clear();
+
     if (mSessionOpen)
         mDatabase->sessionEnded();
 }
@@ -251,6 +267,44 @@ void MtpServer::sendEvent(MtpEventCode code, uint32_t param1) {
         LOGV("mEvent.write returned %d\n", ret);
     }
 }
+
+void MtpServer::addEditObject(MtpObjectHandle handle, MtpString& path,
+        uint64_t size, MtpObjectFormat format, int fd) {
+    ObjectEdit*  edit = new ObjectEdit;
+    edit->handle = handle;
+    edit->path = path;
+    edit->size = size;
+    edit->format = format;
+    edit->fd = fd;
+    mObjectEditList.add(edit);
+}
+
+MtpServer::ObjectEdit* MtpServer::getEditObject(MtpObjectHandle handle) {
+    int count = mObjectEditList.size();
+    for (int i = 0; i < count; i++) {
+        ObjectEdit* edit = mObjectEditList[i];
+        if (edit->handle == handle) return edit;
+    }
+    return NULL;
+}
+
+void MtpServer::removeEditObject(MtpObjectHandle handle) {
+    int count = mObjectEditList.size();
+    for (int i = 0; i < count; i++) {
+        ObjectEdit* edit = mObjectEditList[i];
+        if (edit->handle == handle) {
+            delete edit;
+            mObjectEditList.removeAt(i);
+            return;
+        }
+    }
+    LOGE("ObjectEdit not found in removeEditObject");
+}
+
+void MtpServer::commitEdit(ObjectEdit* edit) {
+    mDatabase->endSendObject((const char *)edit->path, edit->handle, edit->format, true);
+}
+
 
 bool MtpServer::handleRequest() {
     Mutex::Autolock autoLock(mMutex);
@@ -322,7 +376,8 @@ bool MtpServer::handleRequest() {
             response = doGetObject();
             break;
         case MTP_OPERATION_GET_PARTIAL_OBJECT:
-            response = doGetPartialObject();
+        case MTP_OPERATION_GET_PARTIAL_OBJECT_64:
+            response = doGetPartialObject(operation);
             break;
         case MTP_OPERATION_SEND_OBJECT_INFO:
             response = doSendObjectInfo();
@@ -338,6 +393,18 @@ bool MtpServer::handleRequest() {
             break;
         case MTP_OPERATION_GET_DEVICE_PROP_DESC:
             response = doGetDevicePropDesc();
+            break;
+        case MTP_OPERATION_SEND_PARTIAL_OBJECT:
+            response = doSendPartialObject();
+            break;
+        case MTP_OPERATION_TRUNCATE_OBJECT:
+            response = doTruncateObject();
+            break;
+        case MTP_OPERATION_BEGIN_EDIT_OBJECT:
+            response = doBeginEditObject();
+            break;
+        case MTP_OPERATION_END_EDIT_OBJECT:
+            response = doEndEditObject();
             break;
         default:
             LOGE("got unsupported command %s", MtpDebug::getOperationCodeName(operation));
@@ -363,7 +430,7 @@ MtpResponseCode MtpServer::doGetDeviceInfo() {
     mData.putUInt16(MTP_STANDARD_VERSION);
     mData.putUInt32(6); // MTP Vendor Extension ID
     mData.putUInt16(MTP_STANDARD_VERSION);
-    string.set("microsoft.com: 1.0;");
+    string.set("microsoft.com: 1.0; android.com: 1.0;");
     mData.putString(string); // MTP Extensions
     mData.putUInt16(0); //Functional Mode
     mData.putAUInt16(kSupportedOperationCodes,
@@ -601,7 +668,40 @@ MtpResponseCode MtpServer::doGetObjectInfo() {
     if (!hasStorage())
         return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     MtpObjectHandle handle = mRequest.getParameter(1);
-    return mDatabase->getObjectInfo(handle, mData);
+    MtpObjectInfo info(handle);
+    MtpResponseCode result = mDatabase->getObjectInfo(handle, info);
+    if (result == MTP_RESPONSE_OK) {
+        char    date[20];
+
+        mData.putUInt32(info.mStorageID);
+        mData.putUInt16(info.mFormat);
+        mData.putUInt16(info.mProtectionStatus);
+
+        // if object is being edited the database size may be out of date
+        uint32_t size = info.mCompressedSize;
+        ObjectEdit* edit = getEditObject(handle);
+        if (edit)
+            size = (edit->size > 0xFFFFFFFFLL ? 0xFFFFFFFF : (uint32_t)edit->size);
+        mData.putUInt32(size);
+
+        mData.putUInt16(info.mThumbFormat);
+        mData.putUInt32(info.mThumbCompressedSize);
+        mData.putUInt32(info.mThumbPixWidth);
+        mData.putUInt32(info.mThumbPixHeight);
+        mData.putUInt32(info.mImagePixWidth);
+        mData.putUInt32(info.mImagePixHeight);
+        mData.putUInt32(info.mImagePixDepth);
+        mData.putUInt32(info.mParent);
+        mData.putUInt16(info.mAssociationType);
+        mData.putUInt32(info.mAssociationDesc);
+        mData.putUInt32(info.mSequenceNumber);
+        mData.putString(info.mName);
+        mData.putEmptyString();    // date created
+        formatDateTime(info.mDateModified, date, sizeof(date));
+        mData.putString(date);   // date modified
+        mData.putEmptyString();   // keywords
+    }
+    return result;
 }
 
 MtpResponseCode MtpServer::doGetObject() {
@@ -641,12 +741,22 @@ MtpResponseCode MtpServer::doGetObject() {
     return MTP_RESPONSE_OK;
 }
 
-MtpResponseCode MtpServer::doGetPartialObject() {
+MtpResponseCode MtpServer::doGetPartialObject(MtpOperationCode operation) {
     if (!hasStorage())
         return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
     MtpObjectHandle handle = mRequest.getParameter(1);
-    uint32_t offset = mRequest.getParameter(2);
-    uint32_t length = mRequest.getParameter(3);
+    uint64_t offset;
+    uint32_t length;
+    offset = mRequest.getParameter(2);
+    if (operation == MTP_OPERATION_GET_PARTIAL_OBJECT_64) {
+        // android extension with 64 bit offset
+        uint64_t offset2 = mRequest.getParameter(3);
+        offset = offset | (offset2 << 32);
+        length = mRequest.getParameter(4);
+    } else {
+        // standard GetPartialObject
+        length = mRequest.getParameter(3);
+    }
     MtpString pathBuf;
     int64_t fileLength;
     MtpObjectFormat format;
@@ -930,6 +1040,115 @@ MtpResponseCode MtpServer::doGetDevicePropDesc() {
         return MTP_RESPONSE_DEVICE_PROP_NOT_SUPPORTED;
     property->write(mData);
     delete property;
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doSendPartialObject() {
+    if (!hasStorage())
+        return MTP_RESPONSE_INVALID_OBJECT_HANDLE;
+    MtpObjectHandle handle = mRequest.getParameter(1);
+    uint64_t offset = mRequest.getParameter(2);
+    uint64_t offset2 = mRequest.getParameter(3);
+    offset = offset | (offset2 << 32);
+    uint32_t length = mRequest.getParameter(4);
+
+    ObjectEdit* edit = getEditObject(handle);
+    if (!edit) {
+        LOGE("object not open for edit in doSendPartialObject");
+        return MTP_RESPONSE_GENERAL_ERROR;
+    }
+
+    // can't start writing past the end of the file
+    if (offset > edit->size) {
+        LOGD("writing past end of object, offset: %lld, edit->size: %lld", offset, edit->size);
+        return MTP_RESPONSE_GENERAL_ERROR;
+    }
+
+    // read the header
+    int ret = mData.readDataHeader(mFD);
+    // FIXME - check for errors here.
+
+    // reset so we don't attempt to send this back
+    mData.reset();
+
+    const char* filePath = (const char *)edit->path;
+    LOGV("receiving partial %s %lld %ld\n", filePath, offset, length);
+    mtp_file_range  mfr;
+    mfr.fd = edit->fd;
+    mfr.offset = offset;
+    mfr.length = length;
+
+    // transfer the file
+    ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
+    LOGV("MTP_RECEIVE_FILE returned %d", ret);
+    if (ret < 0) {
+        mResponse.setParameter(1, 0);
+        if (errno == ECANCELED)
+            return MTP_RESPONSE_TRANSACTION_CANCELLED;
+        else
+            return MTP_RESPONSE_GENERAL_ERROR;
+    }
+    mResponse.setParameter(1, length);
+    uint64_t end = offset + length;
+    if (end > edit->size) {
+        edit->size = end;
+    }
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doTruncateObject() {
+    MtpObjectHandle handle = mRequest.getParameter(1);
+    ObjectEdit* edit = getEditObject(handle);
+    if (!edit) {
+        LOGE("object not open for edit in doTruncateObject");
+        return MTP_RESPONSE_GENERAL_ERROR;
+    }
+
+    uint64_t offset = mRequest.getParameter(2);
+    uint64_t offset2 = mRequest.getParameter(3);
+    offset |= (offset2 << 32);
+    if (ftruncate(edit->fd, offset) != 0) {
+        return MTP_RESPONSE_GENERAL_ERROR;
+    } else {
+        edit->size = offset;
+        return MTP_RESPONSE_OK;
+    }
+}
+
+MtpResponseCode MtpServer::doBeginEditObject() {
+    MtpObjectHandle handle = mRequest.getParameter(1);
+    if (getEditObject(handle)) {
+        LOGE("object already open for edit in doBeginEditObject");
+        return MTP_RESPONSE_GENERAL_ERROR;
+    }
+
+    MtpString path;
+    int64_t fileLength;
+    MtpObjectFormat format;
+    int result = mDatabase->getObjectFilePath(handle, path, fileLength, format);
+    if (result != MTP_RESPONSE_OK)
+        return result;
+
+    int fd = open((const char *)path, O_RDWR | O_EXCL);
+    if (fd < 0) {
+        LOGE("open failed for %s in doBeginEditObject (%d)", (const char *)path, errno);
+        return MTP_RESPONSE_GENERAL_ERROR;
+    }
+
+    addEditObject(handle, path, fileLength, format, fd);
+    return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doEndEditObject() {
+    MtpObjectHandle handle = mRequest.getParameter(1);
+    ObjectEdit* edit = getEditObject(handle);
+    if (!edit) {
+        LOGE("object not open for edit in doEndEditObject");
+        return MTP_RESPONSE_GENERAL_ERROR;
+    }
+
+    commitEdit(edit);
+    removeEditObject(handle);
     return MTP_RESPONSE_OK;
 }
 
