@@ -21,12 +21,25 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class represents accessibility events that are sent by the system when
  * something notable happens in the user interface. For example, when a
  * {@link android.widget.Button} is clicked, a {@link android.view.View} is focused, etc.
+ * <p>
+ * An accessibility event is fired by an individual view which populates the event with
+ * a record for its state and requests from its parent to send the event to interested
+ * parties. The parent can optionally add a record for itself before dispatching a similar
+ * request to its parent. A parent can also choose not to respect the request for sending
+ * an event. The accessibility event is sent by the topmost view in the view tree.
+ * Therefore, an {@link android.accessibilityservice.AccessibilityService} can explore
+ * all records in an accessibility event to obtain more information about the context
+ * in which the event was fired.
+ * <p>
+ * A client can add, remove, and modify records. The getters and setters for individual
+ * properties operate on the current record which can be explicitly set by the client. By
+ * default current is the first record. Thus, querying a record would require setting
+ * it as the current one and interacting with the property getters and setters.
  * <p>
  * This class represents various semantically different accessibility event
  * types. Each event type has associated a set of related properties. In other
@@ -145,7 +158,7 @@ import java.util.List;
  * @see android.view.accessibility.AccessibilityManager
  * @see android.accessibilityservice.AccessibilityService
  */
-public final class AccessibilityEvent implements Parcelable {
+public final class AccessibilityEvent extends AccessibilityRecord implements Parcelable {
 
     /**
      * Invalid selection/focus position.
@@ -207,6 +220,26 @@ public final class AccessibilityEvent implements Parcelable {
     public static final int TYPE_NOTIFICATION_STATE_CHANGED = 0x00000040;
 
     /**
+     * Represents the event of a hover enter over a {@link android.view.View}.
+     */
+    public static final int TYPE_VIEW_HOVER_ENTER = 0x00000080;
+
+    /**
+     * Represents the event of a hover exit over a {@link android.view.View}.
+     */
+    public static final int TYPE_VIEW_HOVER_EXIT = 0x00000100;
+
+    /**
+     * Represents the event of starting a touch exploration gesture.
+     */
+    public static final int TYPE_TOUCH_EXPLORATION_GESTURE_START = 0x00000200;
+
+    /**
+     * Represents the event of ending a touch exploration gesture.
+     */
+    public static final int TYPE_TOUCH_EXPLORATION_GESTURE_END = 0x00000400;
+
+    /**
      * Mask for {@link AccessibilityEvent} all types.
      *
      * @see #TYPE_VIEW_CLICKED
@@ -219,116 +252,53 @@ public final class AccessibilityEvent implements Parcelable {
      */
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
-    private static final int MAX_POOL_SIZE = 2;
+    private static final int MAX_POOL_SIZE = 10;
     private static final Object mPoolLock = new Object();
     private static AccessibilityEvent sPool;
     private static int sPoolSize;
 
-    private static final int CHECKED = 0x00000001;
-    private static final int ENABLED = 0x00000002;
-    private static final int PASSWORD = 0x00000004;
-    private static final int FULL_SCREEN = 0x00000080;
-
     private AccessibilityEvent mNext;
+    private boolean mIsInPool;
 
     private int mEventType;
-    private int mBooleanProperties;
-    private int mCurrentItemIndex;
-    private int mItemCount;
-    private int mFromIndex;
-    private int mAddedCount;
-    private int mRemovedCount;
-
+    private CharSequence mPackageName;
     private long mEventTime;
 
-    private CharSequence mClassName;
-    private CharSequence mPackageName;
-    private CharSequence mContentDescription;
-    private CharSequence mBeforeText;
-
-    private Parcelable mParcelableData;
-
-    private final List<CharSequence> mText = new ArrayList<CharSequence>();
-
-    private boolean mIsInPool;
+    private final ArrayList<AccessibilityRecord> mRecords = new ArrayList<AccessibilityRecord>();
 
     /*
      * Hide constructor from clients.
      */
     private AccessibilityEvent() {
-        mCurrentItemIndex = INVALID_POSITION;
+
     }
 
     /**
-     * Gets if the source is checked.
+     * Gets the number of records contained in the event.
      *
-     * @return True if the view is checked, false otherwise.
+     * @return The number of records.
      */
-    public boolean isChecked() {
-        return getBooleanProperty(CHECKED);
+    public int getRecordCount() {
+        return mRecords.size();
     }
 
     /**
-     * Sets if the source is checked.
+     * Appends an {@link AccessibilityRecord} to the end of event records.
      *
-     * @param isChecked True if the view is checked, false otherwise.
+     * @param record The record to append.
      */
-    public void setChecked(boolean isChecked) {
-        setBooleanProperty(CHECKED, isChecked);
+    public void appendRecord(AccessibilityRecord record) {
+        mRecords.add(record);
     }
 
     /**
-     * Gets if the source is enabled.
+     * Gets the records at a given index.
      *
-     * @return True if the view is enabled, false otherwise.
+     * @param index The index.
+     * @return The records at the specified index.
      */
-    public boolean isEnabled() {
-        return getBooleanProperty(ENABLED);
-    }
-
-    /**
-     * Sets if the source is enabled.
-     *
-     * @param isEnabled True if the view is enabled, false otherwise.
-     */
-    public void setEnabled(boolean isEnabled) {
-        setBooleanProperty(ENABLED, isEnabled);
-    }
-
-    /**
-     * Gets if the source is a password field.
-     *
-     * @return True if the view is a password field, false otherwise.
-     */
-    public boolean isPassword() {
-        return getBooleanProperty(PASSWORD);
-    }
-
-    /**
-     * Sets if the source is a password field.
-     *
-     * @param isPassword True if the view is a password field, false otherwise.
-     */
-    public void setPassword(boolean isPassword) {
-        setBooleanProperty(PASSWORD, isPassword);
-    }
-
-    /**
-     * Sets if the source is taking the entire screen.
-     *
-     * @param isFullScreen True if the source is full screen, false otherwise.
-     */
-    public void setFullScreen(boolean isFullScreen) {
-        setBooleanProperty(FULL_SCREEN, isFullScreen);
-    }
-
-    /**
-     * Gets if the source is taking the entire screen.
-     *
-     * @return True if the source is full screen, false otherwise.
-     */
-    public boolean isFullScreen() {
-        return getBooleanProperty(FULL_SCREEN);
+    public AccessibilityRecord getRecord(int index) {
+        return mRecords.get(index);
     }
 
     /**
@@ -350,96 +320,6 @@ public final class AccessibilityEvent implements Parcelable {
     }
 
     /**
-     * Gets the number of items that can be visited.
-     *
-     * @return The number of items.
-     */
-    public int getItemCount() {
-        return mItemCount;
-    }
-
-    /**
-     * Sets the number of items that can be visited.
-     *
-     * @param itemCount The number of items.
-     */
-    public void setItemCount(int itemCount) {
-        mItemCount = itemCount;
-    }
-
-    /**
-     * Gets the index of the source in the list of items the can be visited.
-     *
-     * @return The current item index.
-     */
-    public int getCurrentItemIndex() {
-        return mCurrentItemIndex;
-    }
-
-    /**
-     * Sets the index of the source in the list of items that can be visited.
-     *
-     * @param currentItemIndex The current item index.
-     */
-    public void setCurrentItemIndex(int currentItemIndex) {
-        mCurrentItemIndex = currentItemIndex;
-    }
-
-    /**
-     * Gets the index of the first character of the changed sequence.
-     *
-     * @return The index of the first character.
-     */
-    public int getFromIndex() {
-        return mFromIndex;
-    }
-
-    /**
-     * Sets the index of the first character of the changed sequence.
-     *
-     * @param fromIndex The index of the first character.
-     */
-    public void setFromIndex(int fromIndex) {
-        mFromIndex = fromIndex;
-    }
-
-    /**
-     * Gets the number of added characters.
-     *
-     * @return The number of added characters.
-     */
-    public int getAddedCount() {
-        return mAddedCount;
-    }
-
-    /**
-     * Sets the number of added characters.
-     *
-     * @param addedCount The number of added characters.
-     */
-    public void setAddedCount(int addedCount) {
-        mAddedCount = addedCount;
-    }
-
-    /**
-     * Gets the number of removed characters.
-     *
-     * @return The number of removed characters.
-     */
-    public int getRemovedCount() {
-        return mRemovedCount;
-    }
-
-    /**
-     * Sets the number of removed characters.
-     *
-     * @param removedCount The number of removed characters.
-     */
-    public void setRemovedCount(int removedCount) {
-        mRemovedCount = removedCount;
-    }
-
-    /**
      * Gets the time in which this event was sent.
      *
      * @return The event time.
@@ -458,24 +338,6 @@ public final class AccessibilityEvent implements Parcelable {
     }
 
     /**
-     * Gets the class name of the source.
-     *
-     * @return The class name.
-     */
-    public CharSequence getClassName() {
-        return mClassName;
-    }
-
-    /**
-     * Sets the class name of the source.
-     *
-     * @param className The lass name.
-     */
-    public void setClassName(CharSequence className) {
-        mClassName = className;
-    }
-
-    /**
      * Gets the package name of the source.
      *
      * @return The package name.
@@ -491,70 +353,6 @@ public final class AccessibilityEvent implements Parcelable {
      */
     public void setPackageName(CharSequence packageName) {
         mPackageName = packageName;
-    }
-
-    /**
-     * Gets the text of the event. The index in the list represents the priority
-     * of the text. Specifically, the lower the index the higher the priority.
-     *
-     * @return The text.
-     */
-    public List<CharSequence> getText() {
-        return mText;
-    }
-
-    /**
-     * Sets the text before a change.
-     *
-     * @return The text before the change.
-     */
-    public CharSequence getBeforeText() {
-        return mBeforeText;
-    }
-
-    /**
-     * Sets the text before a change.
-     *
-     * @param beforeText The text before the change.
-     */
-    public void setBeforeText(CharSequence beforeText) {
-        mBeforeText = beforeText;
-    }
-
-    /**
-     * Gets the description of the source.
-     *
-     * @return The description.
-     */
-    public CharSequence getContentDescription() {
-        return mContentDescription;
-    }
-
-    /**
-     * Sets the description of the source.
-     *
-     * @param contentDescription The description.
-     */
-    public void setContentDescription(CharSequence contentDescription) {
-        mContentDescription = contentDescription;
-    }
-
-    /**
-     * Gets the {@link Parcelable} data.
-     *
-     * @return The parcelable data.
-     */
-    public Parcelable getParcelableData() {
-        return mParcelableData;
-    }
-
-    /**
-     * Sets the {@link Parcelable} data of the event.
-     *
-     * @param parcelableData The parcelable data.
-     */
-    public void setParcelableData(Parcelable parcelableData) {
-        mParcelableData = parcelableData;
     }
 
     /**
@@ -595,11 +393,11 @@ public final class AccessibilityEvent implements Parcelable {
      * <p>
      * <b>Note: You must not touch the object after calling this function.</b>
      */
+    @Override
     public void recycle() {
         if (mIsInPool) {
             return;
         }
-
         clear();
         synchronized (mPoolLock) {
             if (sPoolSize <= MAX_POOL_SIZE) {
@@ -614,44 +412,15 @@ public final class AccessibilityEvent implements Parcelable {
     /**
      * Clears the state of this instance.
      */
-    private void clear() {
+    @Override
+    protected void clear() {
+        super.clear();
         mEventType = 0;
-        mBooleanProperties = 0;
-        mCurrentItemIndex = INVALID_POSITION;
-        mItemCount = 0;
-        mFromIndex = 0;
-        mAddedCount = 0;
-        mRemovedCount = 0;
-        mEventTime = 0;
-        mClassName = null;
         mPackageName = null;
-        mContentDescription = null;
-        mBeforeText = null;
-        mParcelableData = null;
-        mText.clear();
-    }
-
-    /**
-     * Gets the value of a boolean property.
-     *
-     * @param property The property.
-     * @return The value.
-     */
-    private boolean getBooleanProperty(int property) {
-        return (mBooleanProperties & property) == property;
-    }
-
-    /**
-     * Sets a boolean property.
-     *
-     * @param property The property.
-     * @param value The value.
-     */
-    private void setBooleanProperty(int property, boolean value) {
-        if (value) {
-            mBooleanProperties |= property;
-        } else {
-            mBooleanProperties &= ~property;
+        mEventTime = 0;
+        while (!mRecords.isEmpty()) {
+            AccessibilityRecord record = mRecords.remove(0);
+            record.recycle();
         }
     }
 
@@ -662,38 +431,82 @@ public final class AccessibilityEvent implements Parcelable {
      */
     public void initFromParcel(Parcel parcel) {
         mEventType = parcel.readInt();
-        mBooleanProperties = parcel.readInt();
-        mCurrentItemIndex = parcel.readInt();
-        mItemCount = parcel.readInt();
-        mFromIndex = parcel.readInt();
-        mAddedCount = parcel.readInt();
-        mRemovedCount = parcel.readInt();
-        mEventTime = parcel.readLong();
-        mClassName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
-        mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
-        mBeforeText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
-        mParcelableData = parcel.readParcelable(null);
-        parcel.readList(mText, null);
+        mEventTime = parcel.readLong();
+        readAccessibilityRecordFromParcel(this, parcel);
+
+        // Read the records.
+        final int recordCount = parcel.readInt();
+        for (int i = 0; i < recordCount; i++) {
+            AccessibilityRecord record = AccessibilityRecord.obtain();
+            readAccessibilityRecordFromParcel(record, parcel);
+            mRecords.add(record);
+        }
     }
 
+    /**
+     * Reads an {@link AccessibilityRecord} from a parcel.
+     *
+     * @param record The record to initialize.
+     * @param parcel The parcel to read from.
+     */
+    private void readAccessibilityRecordFromParcel(AccessibilityRecord record,
+            Parcel parcel) {
+        record.mBooleanProperties = parcel.readInt();
+        record.mCurrentItemIndex = parcel.readInt();
+        record.mItemCount = parcel.readInt();
+        record.mFromIndex = parcel.readInt();
+        record.mAddedCount = parcel.readInt();
+        record.mRemovedCount = parcel.readInt();
+        record.mClassName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
+        record.mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
+        record.mBeforeText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
+        record.mParcelableData = parcel.readParcelable(null);
+        parcel.readList(record.mText, null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mEventType);
-        parcel.writeInt(mBooleanProperties);
-        parcel.writeInt(mCurrentItemIndex);
-        parcel.writeInt(mItemCount);
-        parcel.writeInt(mFromIndex);
-        parcel.writeInt(mAddedCount);
-        parcel.writeInt(mRemovedCount);
-        parcel.writeLong(mEventTime);
-        TextUtils.writeToParcel(mClassName, parcel, 0);
         TextUtils.writeToParcel(mPackageName, parcel, 0);
-        TextUtils.writeToParcel(mContentDescription, parcel, 0);
-        TextUtils.writeToParcel(mBeforeText, parcel, 0);
-        parcel.writeParcelable(mParcelableData, flags);
-        parcel.writeList(mText);
+        parcel.writeLong(mEventTime);
+        writeAccessibilityRecordToParcel(this, parcel, flags);
+
+        // Write the records.
+        final int recordCount = getRecordCount();
+        parcel.writeInt(recordCount);
+        for (int i = 0; i < recordCount; i++) {
+            AccessibilityRecord record = mRecords.get(i);
+            writeAccessibilityRecordToParcel(record, parcel, flags);
+        }
     }
 
+    /**
+     * Writes an {@link AccessibilityRecord} to a parcel.
+     *
+     * @param record The record to write.
+     * @param parcel The parcel to which to write.
+     */
+    private void writeAccessibilityRecordToParcel(AccessibilityRecord record, Parcel parcel,
+            int flags) {
+        parcel.writeInt(record.mBooleanProperties);
+        parcel.writeInt(record.mCurrentItemIndex);
+        parcel.writeInt(record.mItemCount);
+        parcel.writeInt(record.mFromIndex);
+        parcel.writeInt(record.mAddedCount);
+        parcel.writeInt(record.mRemovedCount);
+        TextUtils.writeToParcel(record.mClassName, parcel, flags);
+        TextUtils.writeToParcel(record.mContentDescription, parcel, flags);
+        TextUtils.writeToParcel(record.mBeforeText, parcel, flags);
+        parcel.writeParcelable(record.mParcelableData, flags);
+        parcel.writeList(record.mText);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public int describeContents() {
         return 0;
     }
@@ -701,24 +514,21 @@ public final class AccessibilityEvent implements Parcelable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append(super.toString());
         builder.append("; EventType: " + mEventType);
         builder.append("; EventTime: " + mEventTime);
-        builder.append("; ClassName: " + mClassName);
         builder.append("; PackageName: " + mPackageName);
-        builder.append("; Text: " + mText);
-        builder.append("; ContentDescription: " + mContentDescription);
-        builder.append("; ItemCount: " + mItemCount);
-        builder.append("; CurrentItemIndex: " + mCurrentItemIndex);
-        builder.append("; IsEnabled: " + isEnabled());
-        builder.append("; IsPassword: " + isPassword());
-        builder.append("; IsChecked: " + isChecked());
-        builder.append("; IsFullScreen: " + isFullScreen());
-        builder.append("; BeforeText: " + mBeforeText);
-        builder.append("; FromIndex: " + mFromIndex);
-        builder.append("; AddedCount: " + mAddedCount);
-        builder.append("; RemovedCount: " + mRemovedCount);
-        builder.append("; ParcelableData: " + mParcelableData);
+        builder.append(" \n{\n");
+        builder.append(super.toString());
+        builder.append("\n");
+        for (int i = 0; i < mRecords.size(); i++) {
+            AccessibilityRecord record = mRecords.get(i);
+            builder.append("  Record ");
+            builder.append(i);
+            builder.append(":");
+            builder.append(record.toString());
+            builder.append("\n");
+        }
+        builder.append("}\n");
         return builder.toString();
     }
 

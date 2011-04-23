@@ -3530,6 +3530,14 @@ public final class ViewRoot extends Handler implements ViewParent,
     public void childDrawableStateChanged(View child) {
     }
 
+    public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+        if (mView == null) {
+            return false;
+        }
+        AccessibilityManager.getInstance(child.mContext).sendAccessibilityEvent(event);
+        return true;
+    }
+
     void checkThread() {
         if (mThread != Thread.currentThread()) {
             throw new CalledFromWrongThreadException(
