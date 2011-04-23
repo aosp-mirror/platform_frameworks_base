@@ -16,6 +16,8 @@
 
 package android.view.accessibility;
 
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
@@ -44,6 +46,8 @@ import java.util.List;
  * @see android.content.Context#getSystemService
  */
 public final class AccessibilityManager {
+    private static final boolean DEBUG = false;
+
     private static final String LOG_TAG = "AccessibilityManager";
 
     static final Object sInstanceSync = new Object();
@@ -164,7 +168,7 @@ public final class AccessibilityManager {
             long identityToken = Binder.clearCallingIdentity();
             doRecycle = mService.sendAccessibilityEvent(event);
             Binder.restoreCallingIdentity(identityToken);
-            if (false) {
+            if (DEBUG) {
                 Log.i(LOG_TAG, event + " sent");
             }
         } catch (RemoteException re) {
@@ -185,7 +189,7 @@ public final class AccessibilityManager {
         }
         try {
             mService.interrupt();
-            if (false) {
+            if (DEBUG) {
                 Log.i(LOG_TAG, "Requested interrupt from all services");
             }
         } catch (RemoteException re) {
@@ -202,7 +206,33 @@ public final class AccessibilityManager {
         List<ServiceInfo> services = null;
         try {
             services = mService.getAccessibilityServiceList();
-            if (false) {
+            if (DEBUG) {
+                Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
+            }
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while obtaining the installed AccessibilityServices. ", re);
+        }
+        return Collections.unmodifiableList(services);
+    }
+
+    /**
+     * Returns the {@link ServiceInfo}s of the enabled accessibility services
+     * for a given feedback type.
+     *
+     * @param feedbackType The type of feedback.
+     * @return An unmodifiable list with {@link ServiceInfo}s.
+     *
+     * @see AccessibilityServiceInfo#FEEDBACK_AUDIBLE
+     * @see AccessibilityServiceInfo#FEEDBACK_HAPTIC
+     * @see AccessibilityServiceInfo#FEEDBACK_SPOKEN
+     * @see AccessibilityServiceInfo#FEEDBACK_VISUAL
+     * @see AccessibilityServiceInfo#FEEDBACK_GENERIC
+     */
+    public List<ServiceInfo> getEnabledAccessibilityServiceList(int feedbackType) {
+        List<ServiceInfo> services = null;
+        try {
+            services = mService.getEnabledAccessibilityServiceList(feedbackType);
+            if (DEBUG) {
                 Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
             }
         } catch (RemoteException re) {

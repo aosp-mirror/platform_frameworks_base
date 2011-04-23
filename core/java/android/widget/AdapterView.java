@@ -876,7 +876,6 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
 
     @Override
     public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        boolean populated = false;
         // This is an exceptional case which occurs when a window gets the
         // focus and sends a focus event via its focused child to announce
         // current focus/selection. AdapterView fires selection but not focus
@@ -885,22 +884,27 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
             event.setEventType(AccessibilityEvent.TYPE_VIEW_SELECTED);
         }
 
-        // we send selection events only from AdapterView to avoid
-        // generation of such event for each child
+        // We first get a chance to populate the event.
+        onPopulateAccessibilityEvent(event);
+
+        // We send selection events only from AdapterView to avoid
+        // generation of such event for each child.
         View selectedView = getSelectedView();
         if (selectedView != null) {
-            populated = selectedView.dispatchPopulateAccessibilityEvent(event);
+            return selectedView.dispatchPopulateAccessibilityEvent(event);
         }
 
-        if (!populated) {
-            if (selectedView != null) {
-                event.setEnabled(selectedView.isEnabled());
-            }
-            event.setItemCount(getCount());
-            event.setCurrentItemIndex(getSelectedItemPosition());
-        }
+        return false;
+    }
 
-        return populated;
+    @Override
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        View selectedView = getSelectedView();
+        if (selectedView != null) {
+            event.setEnabled(selectedView.isEnabled());
+        }
+        event.setItemCount(getCount());
+        event.setCurrentItemIndex(getSelectedItemPosition());
     }
 
     @Override

@@ -199,11 +199,8 @@ public class CheckedTextView extends TextView implements Checkable {
     }
 
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        boolean populated = super.dispatchPopulateAccessibilityEvent(event);
-        if (!populated) {
-            event.setChecked(mChecked);
-        }
-        return populated;
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEvent(event);
+        event.setChecked(mChecked);
     }
 }

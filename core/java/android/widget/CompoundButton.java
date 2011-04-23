@@ -208,22 +208,18 @@ public abstract class CompoundButton extends Button implements Checkable {
     }
 
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
-        boolean populated = super.dispatchPopulateAccessibilityEvent(event);
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEvent(event);
 
-        if (!populated) {
-            int resourceId = 0;
-            if (mChecked) {
-                resourceId = R.string.accessibility_compound_button_selected;
-            } else {
-                resourceId = R.string.accessibility_compound_button_unselected;
-            }
-            String state = getResources().getString(resourceId);
-            event.getText().add(state);
-            event.setChecked(mChecked);
+        int resourceId = 0;
+        if (mChecked) {
+            resourceId = R.string.accessibility_compound_button_selected;
+        } else {
+            resourceId = R.string.accessibility_compound_button_unselected;
         }
-
-        return populated;
+        String state = getResources().getString(resourceId);
+        event.getText().add(state);
+        event.setChecked(mChecked);
     }
 
     @Override

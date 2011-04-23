@@ -409,7 +409,9 @@ public class TimePicker extends FrameLayout {
     }
 
     @Override
-    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEvent(event);
+
         int flags = DateUtils.FORMAT_SHOW_TIME;
         if (mIs24HourView) {
             flags |= DateUtils.FORMAT_24HOUR;
@@ -421,7 +423,6 @@ public class TimePicker extends FrameLayout {
         String selectedDateUtterance = DateUtils.formatDateTime(mContext,
                 mTempCalendar.getTimeInMillis(), flags);
         event.getText().add(selectedDateUtterance);
-        return true;
     }
 
     private void updateHourControl() {

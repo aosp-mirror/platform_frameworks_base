@@ -21945,49 +21945,24 @@ package android.view {
 
 package android.view.accessibility {
 
-  public final class AccessibilityEvent implements android.os.Parcelable {
+  public final class AccessibilityEvent extends android.view.accessibility.AccessibilityRecord implements android.os.Parcelable {
+    method public void appendRecord(android.view.accessibility.AccessibilityRecord);
     method public int describeContents();
-    method public int getAddedCount();
-    method public java.lang.CharSequence getBeforeText();
-    method public java.lang.CharSequence getClassName();
-    method public java.lang.CharSequence getContentDescription();
-    method public int getCurrentItemIndex();
     method public long getEventTime();
     method public int getEventType();
-    method public int getFromIndex();
-    method public int getItemCount();
     method public java.lang.CharSequence getPackageName();
-    method public android.os.Parcelable getParcelableData();
-    method public int getRemovedCount();
-    method public java.util.List<java.lang.CharSequence> getText();
+    method public android.view.accessibility.AccessibilityRecord getRecord(int);
+    method public int getRecordCount();
     method public void initFromParcel(android.os.Parcel);
-    method public boolean isChecked();
-    method public boolean isEnabled();
-    method public boolean isFullScreen();
-    method public boolean isPassword();
     method public static android.view.accessibility.AccessibilityEvent obtain(int);
     method public static android.view.accessibility.AccessibilityEvent obtain();
-    method public void recycle();
-    method public void setAddedCount(int);
-    method public void setBeforeText(java.lang.CharSequence);
-    method public void setChecked(boolean);
-    method public void setClassName(java.lang.CharSequence);
-    method public void setContentDescription(java.lang.CharSequence);
-    method public void setCurrentItemIndex(int);
-    method public void setEnabled(boolean);
     method public void setEventTime(long);
     method public void setEventType(int);
-    method public void setFromIndex(int);
-    method public void setFullScreen(boolean);
-    method public void setItemCount(int);
     method public void setPackageName(java.lang.CharSequence);
-    method public void setParcelableData(android.os.Parcelable);
-    method public void setPassword(boolean);
-    method public void setRemovedCount(int);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int INVALID_POSITION = -1; // 0xffffffff
-    field public static final int MAX_TEXT_LENGTH = 500; // 0x1f4
+    field public static final deprecated int MAX_TEXT_LENGTH = 500; // 0x1f4
     field public static final int TYPES_ALL_MASK = -1; // 0xffffffff
     field public static final int TYPE_NOTIFICATION_STATE_CHANGED = 64; // 0x40
     field public static final int TYPE_VIEW_CLICKED = 1; // 0x1
@@ -22010,6 +21985,51 @@ package android.view.accessibility {
     method public void sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
   }
 
+  public class AccessibilityRecord {
+    ctor protected AccessibilityRecord();
+    method protected void clear();
+    method public int getAddedCount();
+    method public java.lang.CharSequence getBeforeText();
+    method public boolean getBooleanProperty(int);
+    method public java.lang.CharSequence getClassName();
+    method public java.lang.CharSequence getContentDescription();
+    method public int getCurrentItemIndex();
+    method public int getFromIndex();
+    method public int getItemCount();
+    method public android.os.Parcelable getParcelableData();
+    method public int getRemovedCount();
+    method public java.util.List<java.lang.CharSequence> getText();
+    method public boolean isChecked();
+    method public boolean isEnabled();
+    method public boolean isFullScreen();
+    method public boolean isPassword();
+    method protected static android.view.accessibility.AccessibilityRecord obtain();
+    method public void recycle();
+    method public void setAddedCount(int);
+    method public void setBeforeText(java.lang.CharSequence);
+    method public void setChecked(boolean);
+    method public void setClassName(java.lang.CharSequence);
+    method public void setContentDescription(java.lang.CharSequence);
+    method public void setCurrentItemIndex(int);
+    method public void setEnabled(boolean);
+    method public void setFromIndex(int);
+    method public void setFullScreen(boolean);
+    method public void setItemCount(int);
+    method public void setParcelableData(android.os.Parcelable);
+    method public void setPassword(boolean);
+    method public void setRemovedCount(int);
+    field protected int mAddedCount;
+    field protected java.lang.CharSequence mBeforeText;
+    field protected int mBooleanProperties;
+    field protected java.lang.CharSequence mClassName;
+    field protected java.lang.CharSequence mContentDescription;
+    field protected int mCurrentItemIndex;
+    field protected int mFromIndex;
+    field protected int mItemCount;
+    field protected android.os.Parcelable mParcelableData;
+    field protected int mRemovedCount;
+    field protected final java.util.List mText;
+  }
 }
 
 package android.view.animation {
