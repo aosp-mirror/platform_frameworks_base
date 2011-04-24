@@ -62,12 +62,10 @@ public:
         }
         else {
             mScanFileMethodID = env->GetMethodID(mediaScannerClientInterface, "scanFile",
-                                                     "(Ljava/lang/String;JJZ)V");
+                                                     "(Ljava/lang/String;JJZZ)V");
             mHandleStringTagMethodID = env->GetMethodID(mediaScannerClientInterface, "handleStringTag",
                                                      "(Ljava/lang/String;Ljava/lang/String;)V");
             mSetMimeTypeMethodID = env->GetMethodID(mediaScannerClientInterface, "setMimeType",
-                                                     "(Ljava/lang/String;)V");
-            mAddNoMediaFolderMethodID = env->GetMethodID(mediaScannerClientInterface, "addNoMediaFolder",
                                                      "(Ljava/lang/String;)V");
         }
     }
@@ -79,13 +77,13 @@ public:
     
     // returns true if it succeeded, false if an exception occured in the Java code
     virtual bool scanFile(const char* path, long long lastModified,
-            long long fileSize, bool isDirectory)
+            long long fileSize, bool isDirectory, bool noMedia)
     {
         jstring pathStr;
         if ((pathStr = mEnv->NewStringUTF(path)) == NULL) return false;
 
         mEnv->CallVoidMethod(mClient, mScanFileMethodID, pathStr, lastModified,
-                fileSize, isDirectory);
+                fileSize, isDirectory, noMedia);
 
         mEnv->DeleteLocalRef(pathStr);
         return (!mEnv->ExceptionCheck());
@@ -117,26 +115,12 @@ public:
         return (!mEnv->ExceptionCheck());
     }
 
-    // returns true if it succeeded, false if an exception occured in the Java code
-    virtual bool addNoMediaFolder(const char* path)
-    {
-        jstring pathStr;
-        if ((pathStr = mEnv->NewStringUTF(path)) == NULL) return false;
-
-        mEnv->CallVoidMethod(mClient, mAddNoMediaFolderMethodID, pathStr);
-
-        mEnv->DeleteLocalRef(pathStr);
-        return (!mEnv->ExceptionCheck());
-    }
-
-
 private:
     JNIEnv *mEnv;
     jobject mClient;
     jmethodID mScanFileMethodID; 
     jmethodID mHandleStringTagMethodID; 
     jmethodID mSetMimeTypeMethodID;
-    jmethodID mAddNoMediaFolderMethodID;
 };
 
 

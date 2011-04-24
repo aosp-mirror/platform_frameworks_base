@@ -55,7 +55,7 @@ private:
 
     status_t doProcessDirectory(
             char *path, int pathRemaining, MediaScannerClient &client,
-            ExceptionCheck exceptionCheck, void *exceptionEnv);
+            bool noMedia, ExceptionCheck exceptionCheck, void *exceptionEnv);
 
     MediaScanner(const MediaScanner &);
     MediaScanner &operator=(const MediaScanner &);
@@ -72,10 +72,9 @@ public:
     void endFile();
 
     virtual bool scanFile(const char* path, long long lastModified,
-            long long fileSize, bool isDirectory) = 0;
+            long long fileSize, bool isDirectory, bool noMedia) = 0;
     virtual bool handleStringTag(const char* name, const char* value) = 0;
     virtual bool setMimeType(const char* mimeType) = 0;
-    virtual bool addNoMediaFolder(const char* path) = 0;
 
 protected:
     void convertValues(uint32_t encoding);
