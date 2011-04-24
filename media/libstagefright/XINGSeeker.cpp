@@ -41,8 +41,6 @@ sp<XINGSeeker> XINGSeeker::CreateFromSource(
         return NULL;
     }
 
-    LOGI("Found XING header.");
-
     return seeker;
 }
 
