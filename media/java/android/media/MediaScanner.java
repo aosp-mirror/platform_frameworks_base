@@ -422,9 +422,10 @@ public class MediaScanner
         private long mFileSize;
         private String mWriter;
         private int mCompilation;
+        private boolean mNoMedia;   // flag to suppress file from appearing in media tables
 
         public FileCacheEntry beginFile(String path, String mimeType, long lastModified,
-                long fileSize, boolean isDirectory) {
+                long fileSize, boolean isDirectory, boolean noMedia) {
             mMimeType = mimeType;
             mFileType = 0;
             mFileSize = fileSize;
@@ -435,28 +436,31 @@ public class MediaScanner
                 // to avoid memory allocation
                 int lastSlash = path.lastIndexOf('/');
                 if (lastSlash >= 0 && lastSlash + 2 < path.length()) {
-                    // ignore those ._* files created by MacOS
-                    if (path.regionMatches(lastSlash + 1, "._", 0, 2)) {
-                        return null;
-                    }
-
-                    // ignore album art files created by Windows Media Player:
-                    // Folder.jpg, AlbumArtSmall.jpg, AlbumArt_{...}_Large.jpg
-                    // and AlbumArt_{...}_Small.jpg
-                    if (path.regionMatches(true, path.length() - 4, ".jpg", 0, 4)) {
-                        if (path.regionMatches(true, lastSlash + 1, "AlbumArt_{", 0, 10) ||
-                                path.regionMatches(true, lastSlash + 1, "AlbumArt.", 0, 9)) {
-                            return null;
+                    if (!noMedia) {
+                        // ignore those ._* files created by MacOS
+                        if (path.regionMatches(lastSlash + 1, "._", 0, 2)) {
+                            noMedia = true;
                         }
-                        int length = path.length() - lastSlash - 1;
-                        if ((length == 17 && path.regionMatches(
-                                true, lastSlash + 1, "AlbumArtSmall", 0, 13)) ||
-                                (length == 10
-                                 && path.regionMatches(true, lastSlash + 1, "Folder", 0, 6))) {
-                            return null;
+
+                        // ignore album art files created by Windows Media Player:
+                        // Folder.jpg, AlbumArtSmall.jpg, AlbumArt_{...}_Large.jpg
+                        // and AlbumArt_{...}_Small.jpg
+                        if (path.regionMatches(true, path.length() - 4, ".jpg", 0, 4)) {
+                            if (path.regionMatches(true, lastSlash + 1, "AlbumArt_{", 0, 10) ||
+                                    path.regionMatches(true, lastSlash + 1, "AlbumArt.", 0, 9)) {
+                                noMedia = true;
+                            }
+                            int length = path.length() - lastSlash - 1;
+                            if ((length == 17 && path.regionMatches(
+                                    true, lastSlash + 1, "AlbumArtSmall", 0, 13)) ||
+                                    (length == 10
+                                     && path.regionMatches(true, lastSlash + 1, "Folder", 0, 6))) {
+                                noMedia = true;
+                            }
                         }
                     }
                 }
+                mNoMedia = noMedia;
 
                 // try mimeType first, if it is specified
                 if (mimeType != null) {
@@ -523,36 +527,41 @@ public class MediaScanner
             return entry;
         }
 
-        public void scanFile(String path, long lastModified, long fileSize, boolean isDirectory) {
+        public void scanFile(String path, long lastModified, long fileSize,
+                boolean isDirectory, boolean noMedia) {
             // This is the callback funtion from native codes.
             // Log.v(TAG, "scanFile: "+path);
-            doScanFile(path, null, lastModified, fileSize, isDirectory, false);
+            doScanFile(path, null, lastModified, fileSize, isDirectory, false, noMedia);
         }
 
         public Uri doScanFile(String path, String mimeType, long lastModified,
-                long fileSize, boolean isDirectory, boolean scanAlways) {
+                long fileSize, boolean isDirectory, boolean scanAlways, boolean noMedia) {
             Uri result = null;
 //            long t1 = System.currentTimeMillis();
             try {
                 FileCacheEntry entry = beginFile(path, mimeType, lastModified,
-                        fileSize, isDirectory);
+                        fileSize, isDirectory, noMedia);
                 // rescan for metadata if file was modified since last scan
                 if (entry != null && (entry.mLastModifiedChanged || scanAlways)) {
-                    String lowpath = path.toLowerCase();
-                    boolean ringtones = (lowpath.indexOf(RINGTONES_DIR) > 0);
-                    boolean notifications = (lowpath.indexOf(NOTIFICATIONS_DIR) > 0);
-                    boolean alarms = (lowpath.indexOf(ALARMS_DIR) > 0);
-                    boolean podcasts = (lowpath.indexOf(PODCAST_DIR) > 0);
-                    boolean music = (lowpath.indexOf(MUSIC_DIR) > 0) ||
-                        (!ringtones && !notifications && !alarms && !podcasts);
+                    if (noMedia) {
+                        result = endFile(entry, false, false, false, false, false);
+                    } else {
+                        String lowpath = path.toLowerCase();
+                        boolean ringtones = (lowpath.indexOf(RINGTONES_DIR) > 0);
+                        boolean notifications = (lowpath.indexOf(NOTIFICATIONS_DIR) > 0);
+                        boolean alarms = (lowpath.indexOf(ALARMS_DIR) > 0);
+                        boolean podcasts = (lowpath.indexOf(PODCAST_DIR) > 0);
+                        boolean music = (lowpath.indexOf(MUSIC_DIR) > 0) ||
+                            (!ringtones && !notifications && !alarms && !podcasts);
 
-                    // we only extract metadata for audio and video files
-                    if (MediaFile.isAudioFileType(mFileType)
-                            || MediaFile.isVideoFileType(mFileType)) {
-                        processFile(path, mimeType, this);
+                        // we only extract metadata for audio and video files
+                        if (MediaFile.isAudioFileType(mFileType)
+                                || MediaFile.isVideoFileType(mFileType)) {
+                            processFile(path, mimeType, this);
+                        }
+
+                        result = endFile(entry, ringtones, notifications, alarms, music, podcasts);
                     }
-
-                    result = endFile(entry, ringtones, notifications, alarms, music, podcasts);
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);
@@ -689,27 +698,31 @@ public class MediaScanner
             map.put(MediaStore.MediaColumns.SIZE, mFileSize);
             map.put(MediaStore.MediaColumns.MIME_TYPE, mMimeType);
 
-            if (MediaFile.isVideoFileType(mFileType)) {
-                map.put(Video.Media.ARTIST, (mArtist != null && mArtist.length() > 0 ? mArtist : MediaStore.UNKNOWN_STRING));
-                map.put(Video.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0 ? mAlbum : MediaStore.UNKNOWN_STRING));
-                map.put(Video.Media.DURATION, mDuration);
-                // FIXME - add RESOLUTION
-            } else if (MediaFile.isImageFileType(mFileType)) {
-                // FIXME - add DESCRIPTION
-            } else if (MediaFile.isAudioFileType(mFileType)) {
-                map.put(Audio.Media.ARTIST, (mArtist != null && mArtist.length() > 0) ?
-                        mArtist : MediaStore.UNKNOWN_STRING);
-                map.put(Audio.Media.ALBUM_ARTIST, (mAlbumArtist != null &&
-                        mAlbumArtist.length() > 0) ? mAlbumArtist : null);
-                map.put(Audio.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0) ?
-                        mAlbum : MediaStore.UNKNOWN_STRING);
-                map.put(Audio.Media.COMPOSER, mComposer);
-                if (mYear != 0) {
-                    map.put(Audio.Media.YEAR, mYear);
+            if (!mNoMedia) {
+                if (MediaFile.isVideoFileType(mFileType)) {
+                    map.put(Video.Media.ARTIST, (mArtist != null && mArtist.length() > 0
+                            ? mArtist : MediaStore.UNKNOWN_STRING));
+                    map.put(Video.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0
+                            ? mAlbum : MediaStore.UNKNOWN_STRING));
+                    map.put(Video.Media.DURATION, mDuration);
+                    // FIXME - add RESOLUTION
+                } else if (MediaFile.isImageFileType(mFileType)) {
+                    // FIXME - add DESCRIPTION
+                } else if (MediaFile.isAudioFileType(mFileType)) {
+                    map.put(Audio.Media.ARTIST, (mArtist != null && mArtist.length() > 0) ?
+                            mArtist : MediaStore.UNKNOWN_STRING);
+                    map.put(Audio.Media.ALBUM_ARTIST, (mAlbumArtist != null &&
+                            mAlbumArtist.length() > 0) ? mAlbumArtist : null);
+                    map.put(Audio.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0) ?
+                            mAlbum : MediaStore.UNKNOWN_STRING);
+                    map.put(Audio.Media.COMPOSER, mComposer);
+                    if (mYear != 0) {
+                        map.put(Audio.Media.YEAR, mYear);
+                    }
+                    map.put(Audio.Media.TRACK, mTrack);
+                    map.put(Audio.Media.DURATION, mDuration);
+                    map.put(Audio.Media.COMPILATION, mCompilation);
                 }
-                map.put(Audio.Media.TRACK, mTrack);
-                map.put(Audio.Media.DURATION, mDuration);
-                map.put(Audio.Media.COMPILATION, mCompilation);
             }
             return map;
         }
@@ -719,7 +732,7 @@ public class MediaScanner
                 throws RemoteException {
             // update database
 
-             // use album artist if artist is missing
+            // use album artist if artist is missing
             if (mArtist == null || mArtist.length() == 0) {
                 mArtist = mAlbumArtist;
             }
@@ -761,7 +774,7 @@ public class MediaScanner
                 values.put(Audio.Media.IS_ALARM, alarms);
                 values.put(Audio.Media.IS_MUSIC, music);
                 values.put(Audio.Media.IS_PODCAST, podcasts);
-            } else if (mFileType == MediaFile.FILE_TYPE_JPEG) {
+            } else if (mFileType == MediaFile.FILE_TYPE_JPEG && !mNoMedia) {
                 ExifInterface exif = null;
                 try {
                     exif = new ExifInterface(entry.mPath);
@@ -814,12 +827,14 @@ public class MediaScanner
             }
 
             Uri tableUri = mFilesUri;
-            if (MediaFile.isVideoFileType(mFileType)) {
-                tableUri = mVideoUri;
-            } else if (MediaFile.isImageFileType(mFileType)) {
-                tableUri = mImagesUri;
-            } else if (MediaFile.isAudioFileType(mFileType)) {
-                tableUri = mAudioUri;
+            if (!mNoMedia) {
+                if (MediaFile.isVideoFileType(mFileType)) {
+                    tableUri = mVideoUri;
+                } else if (MediaFile.isImageFileType(mFileType)) {
+                    tableUri = mImagesUri;
+                } else if (MediaFile.isAudioFileType(mFileType)) {
+                    tableUri = mAudioUri;
+                }
             }
             Uri result = null;
             if (rowId == 0) {
@@ -927,25 +942,6 @@ public class MediaScanner
                 // Set the setting to the given URI
                 Settings.System.putString(mContext.getContentResolver(), settingName,
                         ContentUris.withAppendedId(uri, rowId).toString());
-            }
-        }
-
-        public void addNoMediaFolder(String path) {
-            ContentValues values = new ContentValues();
-            values.put(MediaStore.Images.ImageColumns.DATA, "");
-            String [] pathSpec = new String[] {path + '%'};
-            try {
-                // These tables have DELETE_FILE triggers that delete the file from the
-                // sd card when deleting the database entry. We don't want to do this in
-                // this case, since it would cause those files to be removed if a .nomedia
-                // file was added after the fact, when in that case we only want the database
-                // entries to be removed.
-                mMediaProvider.update(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values,
-                        MediaStore.Images.ImageColumns.DATA + " LIKE ?", pathSpec);
-                mMediaProvider.update(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, values,
-                        MediaStore.Images.ImageColumns.DATA + " LIKE ?", pathSpec);
-            } catch (RemoteException e) {
-                throw new RuntimeException();
             }
         }
 
@@ -1228,11 +1224,35 @@ public class MediaScanner
 
             // always scan the file, so we can return the content://media Uri for existing files
             return mClient.doScanFile(path, mimeType, lastModifiedSeconds, file.length(),
-                    false, true);
+                    false, true, false);
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);
             return null;
         }
+    }
+
+    public static boolean isNoMediaPath(String path) {
+        if (path == null) return false;
+
+        // return true if file or any parent directory has name starting with a dot
+        if (path.indexOf("/.") >= 0) return true;
+
+        // now check to see if any parent directories have a ".nomedia" file
+        // start from 1 so we don't bother checking in the root directory
+        int offset = 1;
+        while (offset >= 0) {
+            int slashIndex = path.indexOf('/', offset);
+            if (slashIndex > offset) {
+                slashIndex++; // move past slash
+                File file = new File(path.substring(0, slashIndex) + ".nomedia");
+                if (file.exists()) {
+                    // we have a .nomedia in one of the parent directories
+                    return true;
+                }
+            }
+            offset = slashIndex;
+        }
+        return false;
     }
 
     public void scanMtpFile(String path, String volumeName, int objectHandle, int format) {
@@ -1279,7 +1299,7 @@ public class MediaScanner
 
                 // always scan the file, so we can return the content://media Uri for existing files
                 mClient.doScanFile(path, mediaFileType.mimeType, lastModifiedSeconds, file.length(),
-                    (format == MtpConstants.FORMAT_ASSOCIATION), true);
+                    (format == MtpConstants.FORMAT_ASSOCIATION), true, isNoMediaPath(path));
             }
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException in MediaScanner.scanFile()", e);
