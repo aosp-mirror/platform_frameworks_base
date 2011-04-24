@@ -70,8 +70,7 @@ status_t MediaScanner::processDirectory(
     client.setLocale(locale());
 
     status_t result =
-        doProcessDirectory(
-                pathBuffer, pathRemaining, client, exceptionCheck, exceptionEnv);
+        doProcessDirectory(pathBuffer, pathRemaining, client, false, exceptionCheck, exceptionEnv);
 
     free(pathBuffer);
 
@@ -80,20 +79,18 @@ status_t MediaScanner::processDirectory(
 
 status_t MediaScanner::doProcessDirectory(
         char *path, int pathRemaining, MediaScannerClient &client,
-        ExceptionCheck exceptionCheck, void *exceptionEnv) {
+        bool noMedia, ExceptionCheck exceptionCheck, void *exceptionEnv) {
     // place to copy file or directory name
     char* fileSpot = path + strlen(path);
     struct dirent* entry;
     struct stat statbuf;
 
-    // ignore directories that contain a  ".nomedia" file
+    // Treat all files as non-media in directories that contain a  ".nomedia" file
     if (pathRemaining >= 8 /* strlen(".nomedia") */ ) {
         strcpy(fileSpot, ".nomedia");
         if (access(path, F_OK) == 0) {
-            LOGD("found .nomedia, skipping directory\n");
-            fileSpot[0] = 0;
-            client.addNoMediaFolder(path);
-            return OK;
+            LOGD("found .nomedia, setting noMedia flag\n");
+            noMedia = true;
         }
 
         // restore path
@@ -138,19 +135,20 @@ status_t MediaScanner::doProcessDirectory(
         }
         if (type == DT_REG || type == DT_DIR) {
             if (type == DT_DIR) {
-                // ignore directories with a name that starts with '.'
+                // set noMedia flag on directories with a name that starts with '.'
                 // for example, the Mac ".Trashes" directory
-                if (name[0] == '.') continue;
+                if (name[0] == '.')
+                    noMedia = true;
 
                 // report the directory to the client
                 if (stat(path, &statbuf) == 0) {
-                    client.scanFile(path, statbuf.st_mtime, 0, true);
+                    client.scanFile(path, statbuf.st_mtime, 0, true, noMedia);
                 }
 
                 // and now process its contents
                 strcat(fileSpot, "/");
                 int err = doProcessDirectory(path, pathRemaining - nameLength - 1, client,
-                        exceptionCheck, exceptionEnv);
+                        noMedia, exceptionCheck, exceptionEnv);
                 if (err) {
                     // pass exceptions up - ignore other errors
                     if (exceptionCheck && exceptionCheck(exceptionEnv)) goto failure;
@@ -159,7 +157,7 @@ status_t MediaScanner::doProcessDirectory(
                 }
             } else {
                 stat(path, &statbuf);
-                client.scanFile(path, statbuf.st_mtime, statbuf.st_size, false);
+                client.scanFile(path, statbuf.st_mtime, statbuf.st_size, false, noMedia);
                 if (exceptionCheck && exceptionCheck(exceptionEnv)) goto failure;
             }
         }
