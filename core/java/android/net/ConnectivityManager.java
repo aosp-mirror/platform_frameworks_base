@@ -215,15 +215,20 @@ public class ConnectivityManager
 
     /**
      * Bluetooth data connection. This is used for Bluetooth reverse tethering.
-     * @hide
      */
     public static final int TYPE_BLUETOOTH   = 7;
 
-    /** {@hide} */
+    /**
+     * Dummy data connection.  This should not be used on shipping devices.
+     */
     public static final int TYPE_DUMMY       = 8;
 
-    /** {@hide} */
+    /**
+     * Ethernet data connection.  This may be via USB dongle or more
+     * traditional means.
+     */
     public static final int TYPE_ETHERNET    = 9;
+
     /**
      * Over the air Adminstration.
      * {@hide}
