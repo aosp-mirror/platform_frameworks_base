@@ -57,7 +57,6 @@ namespace uirenderer {
 #define PROGRAM_KEY_COLOR_BLEND 0x80
 #define PROGRAM_KEY_BITMAP_NPOT 0x100
 #define PROGRAM_KEY_SWAP_SRC_DST 0x2000
-#define PROGRAM_KEY_VERTEX_WIDTH (1 << 37)
 
 #define PROGRAM_KEY_BITMAP_WRAPS_MASK 0x600
 #define PROGRAM_KEY_BITMAP_WRAPT_MASK 0x1800
@@ -75,6 +74,8 @@ namespace uirenderer {
 #define PROGRAM_MODULATE_SHIFT 35
 
 #define PROGRAM_IS_POINT_SHIFT 36
+
+#define PROGRAM_HAS_WIDTH_SHIFT 37
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types
@@ -205,7 +206,6 @@ struct ProgramDescription {
     programid key() const {
         programid key = 0;
         if (hasTexture) key |= PROGRAM_KEY_TEXTURE;
-        if (hasWidth) key |= PROGRAM_KEY_VERTEX_WIDTH;
         if (hasAlpha8Texture) key |= PROGRAM_KEY_A8_TEXTURE;
         if (hasBitmap) {
             key |= PROGRAM_KEY_BITMAP;
@@ -239,6 +239,7 @@ struct ProgramDescription {
         if (swapSrcDst) key |= PROGRAM_KEY_SWAP_SRC_DST;
         if (modulate) key |= programid(0x1) << PROGRAM_MODULATE_SHIFT;
         if (isPoint) key |= programid(0x1) << PROGRAM_IS_POINT_SHIFT;
+        if (hasWidth) key |= programid(0x1) << PROGRAM_HAS_WIDTH_SHIFT;
         return key;
     }
 
