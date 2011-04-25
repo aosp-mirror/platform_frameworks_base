@@ -270,12 +270,7 @@ void MtpServer::sendEvent(MtpEventCode code, uint32_t param1) {
 
 void MtpServer::addEditObject(MtpObjectHandle handle, MtpString& path,
         uint64_t size, MtpObjectFormat format, int fd) {
-    ObjectEdit*  edit = new ObjectEdit;
-    edit->handle = handle;
-    edit->path = path;
-    edit->size = size;
-    edit->format = format;
-    edit->fd = fd;
+    ObjectEdit*  edit = new ObjectEdit(handle, path, size, format, fd);
     mObjectEditList.add(edit);
 }
 
@@ -283,7 +278,7 @@ MtpServer::ObjectEdit* MtpServer::getEditObject(MtpObjectHandle handle) {
     int count = mObjectEditList.size();
     for (int i = 0; i < count; i++) {
         ObjectEdit* edit = mObjectEditList[i];
-        if (edit->handle == handle) return edit;
+        if (edit->mHandle == handle) return edit;
     }
     return NULL;
 }
@@ -292,7 +287,7 @@ void MtpServer::removeEditObject(MtpObjectHandle handle) {
     int count = mObjectEditList.size();
     for (int i = 0; i < count; i++) {
         ObjectEdit* edit = mObjectEditList[i];
-        if (edit->handle == handle) {
+        if (edit->mHandle == handle) {
             delete edit;
             mObjectEditList.removeAt(i);
             return;
@@ -302,7 +297,7 @@ void MtpServer::removeEditObject(MtpObjectHandle handle) {
 }
 
 void MtpServer::commitEdit(ObjectEdit* edit) {
-    mDatabase->endSendObject((const char *)edit->path, edit->handle, edit->format, true);
+    mDatabase->endSendObject((const char *)edit->mPath, edit->mHandle, edit->mFormat, true);
 }
 
 
@@ -681,7 +676,7 @@ MtpResponseCode MtpServer::doGetObjectInfo() {
         uint32_t size = info.mCompressedSize;
         ObjectEdit* edit = getEditObject(handle);
         if (edit)
-            size = (edit->size > 0xFFFFFFFFLL ? 0xFFFFFFFF : (uint32_t)edit->size);
+            size = (edit->mSize > 0xFFFFFFFFLL ? 0xFFFFFFFF : (uint32_t)edit->mSize);
         mData.putUInt32(size);
 
         mData.putUInt16(info.mThumbFormat);
@@ -1059,8 +1054,8 @@ MtpResponseCode MtpServer::doSendPartialObject() {
     }
 
     // can't start writing past the end of the file
-    if (offset > edit->size) {
-        LOGD("writing past end of object, offset: %lld, edit->size: %lld", offset, edit->size);
+    if (offset > edit->mSize) {
+        LOGD("writing past end of object, offset: %lld, edit->mSize: %lld", offset, edit->mSize);
         return MTP_RESPONSE_GENERAL_ERROR;
     }
 
@@ -1071,10 +1066,10 @@ MtpResponseCode MtpServer::doSendPartialObject() {
     // reset so we don't attempt to send this back
     mData.reset();
 
-    const char* filePath = (const char *)edit->path;
+    const char* filePath = (const char *)edit->mPath;
     LOGV("receiving partial %s %lld %ld\n", filePath, offset, length);
     mtp_file_range  mfr;
-    mfr.fd = edit->fd;
+    mfr.fd = edit->mFD;
     mfr.offset = offset;
     mfr.length = length;
 
@@ -1090,8 +1085,8 @@ MtpResponseCode MtpServer::doSendPartialObject() {
     }
     mResponse.setParameter(1, length);
     uint64_t end = offset + length;
-    if (end > edit->size) {
-        edit->size = end;
+    if (end > edit->mSize) {
+        edit->mSize = end;
     }
     return MTP_RESPONSE_OK;
 }
@@ -1107,10 +1102,10 @@ MtpResponseCode MtpServer::doTruncateObject() {
     uint64_t offset = mRequest.getParameter(2);
     uint64_t offset2 = mRequest.getParameter(3);
     offset |= (offset2 << 32);
-    if (ftruncate(edit->fd, offset) != 0) {
+    if (ftruncate(edit->mFD, offset) != 0) {
         return MTP_RESPONSE_GENERAL_ERROR;
     } else {
-        edit->size = offset;
+        edit->mSize = offset;
         return MTP_RESPONSE_OK;
     }
 }
