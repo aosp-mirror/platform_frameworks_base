@@ -192,8 +192,9 @@ public:
     }
 
     status_t invoke(const Parcel& request, Parcel *reply)
-    { // Avoid doing any extra copy. The interface descriptor should
-      // have been set by MediaPlayer.java.
+    {
+        // Avoid doing any extra copy. The interface descriptor should
+        // have been set by MediaPlayer.java.
         return remote()->transact(INVOKE, request, reply);
     }
 
@@ -334,8 +335,8 @@ status_t BnMediaPlayer::onTransact(
         } break;
         case INVOKE: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
-            invoke(data, reply);
-            return NO_ERROR;
+            status_t result = invoke(data, reply);
+            return result;
         } break;
         case SET_METADATA_FILTER: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
