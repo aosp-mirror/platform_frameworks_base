@@ -2102,6 +2102,7 @@ package android.app {
     method public abstract void setCustomView(android.view.View);
     method public abstract void setCustomView(android.view.View, android.app.ActionBar.LayoutParams);
     method public abstract void setCustomView(int);
+    method public abstract void setDisplayDisableHomeEnabled(boolean);
     method public abstract void setDisplayHomeAsUpEnabled(boolean);
     method public abstract void setDisplayOptions(int);
     method public abstract void setDisplayOptions(int, int);
@@ -2121,6 +2122,7 @@ package android.app {
     method public abstract void setTitle(java.lang.CharSequence);
     method public abstract void setTitle(int);
     method public abstract void show();
+    field public static final int DISPLAY_DISABLE_HOME = 32; // 0x20
     field public static final int DISPLAY_HOME_AS_UP = 4; // 0x4
     field public static final int DISPLAY_SHOW_CUSTOM = 16; // 0x10
     field public static final int DISPLAY_SHOW_HOME = 2; // 0x2

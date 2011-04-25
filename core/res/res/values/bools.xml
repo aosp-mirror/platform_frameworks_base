@@ -18,4 +18,5 @@
 -->
 <resources>
     <bool name="allow_action_menu_item_text_with_icon">false</bool>
+    <bool name="action_bar_embed_tabs">false</bool>
 </resources>

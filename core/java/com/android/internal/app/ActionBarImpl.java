@@ -42,8 +42,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.SpinnerAdapter;
 
@@ -71,6 +73,7 @@ public class ActionBarImpl extends ActionBar {
     private ActionBarContextView mUpperContextView;
     private LinearLayout mLowerContextView;
     private View mContentView;
+    private ViewGroup mExternalTabView;
 
     private ArrayList<TabImpl> mTabs = new ArrayList<TabImpl>();
 
@@ -172,6 +175,18 @@ public class ActionBarImpl extends ActionBar {
         mActionView.setContextView(mUpperContextView);
         mContextDisplayMode = mLowerContextView == null ?
                 CONTEXT_DISPLAY_NORMAL : CONTEXT_DISPLAY_SPLIT;
+
+        if (!mActionView.hasEmbeddedTabs()) {
+            HorizontalScrollView tabScroller = new HorizontalScrollView(mContext);
+            ViewGroup tabContainer = mActionView.createTabContainer();
+            tabScroller.setHorizontalFadingEdgeEnabled(true);
+            tabScroller.addView(tabContainer);
+            tabScroller.setVisibility(getNavigationMode() == NAVIGATION_MODE_TABS ?
+                    View.VISIBLE : View.GONE);
+            mActionView.setExternalTabLayout(tabContainer);
+            mContainerView.setTabContainer(tabScroller);
+            mExternalTabView = tabScroller;
+        }
     }
 
     /**
@@ -236,6 +251,11 @@ public class ActionBarImpl extends ActionBar {
     @Override
     public void setDisplayShowCustomEnabled(boolean showCustom) {
         setDisplayOptions(showCustom ? DISPLAY_SHOW_CUSTOM : 0, DISPLAY_SHOW_CUSTOM);
+    }
+
+    @Override
+    public void setDisplayDisableHomeEnabled(boolean disableHome) {
+        setDisplayOptions(disableHome ? DISPLAY_DISABLE_HOME : 0, DISPLAY_DISABLE_HOME);
     }
 
     @Override
@@ -533,7 +553,7 @@ public class ActionBarImpl extends ActionBar {
         final int count = mContainerView.getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = mContainerView.getChildAt(i);
-            if (i == viewIndex) {
+            if (i == viewIndex || child == mContainerView.getTabContainer()) {
                 continue;
             }
 
@@ -840,11 +860,17 @@ public class ActionBarImpl extends ActionBar {
             case NAVIGATION_MODE_TABS:
                 mSavedTabPosition = getSelectedNavigationIndex();
                 selectTab(null);
+                if (!mActionView.hasEmbeddedTabs()) {
+                    mExternalTabView.setVisibility(View.GONE);
+                }
                 break;
         }
         mActionView.setNavigationMode(mode);
         switch (mode) {
             case NAVIGATION_MODE_TABS:
+                if (!mActionView.hasEmbeddedTabs()) {
+                    mExternalTabView.setVisibility(View.VISIBLE);
+                }
                 if (mSavedTabPosition != INVALID_POSITION) {
                     setSelectedNavigationItem(mSavedTabPosition);
                     mSavedTabPosition = INVALID_POSITION;
