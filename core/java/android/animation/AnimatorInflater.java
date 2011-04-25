@@ -31,11 +31,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
- * This class is used to instantiate menu XML files into Animator objects.
+ * This class is used to instantiate animator XML files into Animator objects.
  * <p>
- * For performance reasons, menu inflation relies heavily on pre-processing of
+ * For performance reasons, inflation relies heavily on pre-processing of
  * XML files that is done at build time. Therefore, it is not currently possible
- * to use MenuInflater with an XmlPullParser over a plain XML file at runtime;
+ * to use this inflater with an XmlPullParser over a plain XML file at runtime;
  * it only works with an XmlPullParser returned from a compiled resource (R.
  * <em>something</em> file.)
  */
