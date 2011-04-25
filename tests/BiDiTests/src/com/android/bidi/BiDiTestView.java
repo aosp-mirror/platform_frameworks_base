@@ -50,6 +50,7 @@ public class BiDiTestView extends View {
     private String ARABIC_TEXT;
     private String CHINESE_TEXT;
     private String MIXED_TEXT_1;
+    private String HEBREW_TEXT;
 
     private Typeface typeface;
 
@@ -81,6 +82,7 @@ public class BiDiTestView extends View {
         ARABIC_TEXT = context.getString(R.string.arabic_text);
         CHINESE_TEXT = context.getString(R.string.chinese_text);
         MIXED_TEXT_1 = context.getString(R.string.mixed_text_1);
+        HEBREW_TEXT = context.getString(R.string.hebrew_text);
 
         typeface = paint.getTypeface();
         paint.setAntiAlias(true);
@@ -95,7 +97,9 @@ public class BiDiTestView extends View {
     public void onDraw(Canvas canvas) {
         drawInsideRect(canvas, Color.BLACK);
 
-        int deltaX = testString(canvas, NORMAL_TEXT, ORIGIN, ORIGIN,
+        int deltaX = 0;
+
+        deltaX  = testString(canvas, NORMAL_TEXT, ORIGIN, ORIGIN,
                 paint, typeface, false, false,  Paint.DIRECTION_LTR, currentTextSize);
 
         deltaX += testString(canvas, ITALIC_TEXT, ORIGIN + deltaX, ORIGIN,
@@ -130,6 +134,10 @@ public class BiDiTestView extends View {
         // Test Mixed (English and Arabic)
         deltaX = testString(canvas, MIXED_TEXT_1, ORIGIN, ORIGIN + 12 * currentTextSize,
                 paint, typeface, false, false,  Paint.DIRECTION_LTR, currentTextSize);
+
+        // Test Hebrew
+        deltaX = testString(canvas, HEBREW_TEXT, ORIGIN, ORIGIN + 14 * currentTextSize,
+                paint, typeface, false, false,  Paint.DIRECTION_RTL, currentTextSize);
     }
 
     private int testString(Canvas canvas, String text, int x, int y, Paint paint, Typeface typeface,

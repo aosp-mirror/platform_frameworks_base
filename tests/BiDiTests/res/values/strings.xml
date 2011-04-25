@@ -20,10 +20,11 @@
     <string name="normal_long_text">mmmmmmmmmmmmmmmmmmmmmmmm</string>
     <string name="normal_long_text_2">nnnnnnnnnnnnnnnnnnnnnnnn</string>
     <string name="normal_long_text_3">Notify me when an open network is available</string>
-    <string name="arabic_text">&#x0644;&#x0627; &#x0627;&#x0646;&#x0627; hello world</string>
+    <string name="arabic_text">&#x0644;&#x0627; &#x0627;&#x0646;&#x0627; hello Arabic</string>
     <string name="chinese_text">利比亚局势或影响美俄关系发展</string>
     <string name="italic_text">Italic String</string>
     <string name="bold_text">Bold String - other text</string>
     <string name="bold_italic_text">Bold Italic String</string>
     <string name="mixed_text_1">he said in Arabic: &#x0644;&#x0627;. Wow this is cool</string>
+    <string name="hebrew_text">&#x05DD;&#x05DE;</string>
 </resources>

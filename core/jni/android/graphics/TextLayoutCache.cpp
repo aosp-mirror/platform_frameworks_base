@@ -399,6 +399,14 @@ struct GlyphRun {
     int isRTL;
 };
 
+void static reverseGlyphArray(jchar* glyphs, size_t count) {
+    for (size_t i = 0; i < count / 2; i++) {
+        jchar temp = glyphs[i];
+        glyphs[i] = glyphs[count - 1 - i];
+        glyphs[count - 1 - i] = temp;
+    }
+}
+
 void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, int dirFlags,
         jfloat* outAdvances, jfloat* outTotalAdvance,
@@ -424,6 +432,10 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
 #endif
             computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
                     outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
+
+            if (forceRTL && *outGlyphsCount > 1) {
+                reverseGlyphArray(*outGlyphs, *outGlyphsCount);
+            }
         } else {
             UBiDi* bidi = ubidi_open();
             if (bidi) {
@@ -438,71 +450,81 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
 #if DEBUG_GLYPHS
                     LOGD("computeValuesWithHarfbuzz -- dirFlags=%d run-count=%d paraDir=%d", dirFlags, rc, paraDir);
 #endif
-
                     if (rc == 1 || !U_SUCCESS(status)) {
                         computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount,
                                 dirFlags, outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
-                        ubidi_close(bidi);
-                        return;
-                    }
 
-                    size_t runIndex = 0;
-                    Vector<GlyphRun> glyphRuns;
-                    for (size_t i = 0; i < rc; ++i) {
-                        int32_t startRun;
-                        int32_t lengthRun;
-                        UBiDiDirection runDir = ubidi_getVisualRun(bidi, i, &startRun, &lengthRun);
-
-                        int newFlags = (runDir == UBIDI_RTL) ? kDirection_RTL : kDirection_LTR;
-                        jfloat runTotalAdvance = 0;
+                        if (dirFlags == 1 && *outGlyphsCount > 1) {
+                            reverseGlyphArray(*outGlyphs, *outGlyphsCount);
+                        }
+                    } else {
+                        Vector<GlyphRun> glyphRuns;
                         jchar* runGlyphs;
                         size_t runGlyphsCount = 0;
+                        size_t runIndex = 0;
+                        for (size_t i = 0; i < rc; ++i) {
+                            int32_t startRun;
+                            int32_t lengthRun;
+                            UBiDiDirection runDir = ubidi_getVisualRun(bidi, i, &startRun, &lengthRun);
 
+                            int newFlags = (runDir == UBIDI_RTL) ? kDirection_RTL : kDirection_LTR;
+                            jfloat runTotalAdvance = 0;
 #if DEBUG_GLYPHS
-                        LOGD("computeValuesWithHarfbuzz -- run-start=%d run-len=%d newFlags=%d",
-                                startRun, lengthRun, newFlags);
+                            LOGD("computeValuesWithHarfbuzz -- run-start=%d run-len=%d newFlags=%d",
+                                    startRun, lengthRun, newFlags);
 #endif
-                        computeRunValuesWithHarfbuzz(paint, chars, startRun,
-                                lengthRun, contextCount, newFlags,
-                                outAdvances + runIndex, &runTotalAdvance,
-                                &runGlyphs, &runGlyphsCount);
+                            computeRunValuesWithHarfbuzz(paint, chars, startRun,
+                                    lengthRun, contextCount, newFlags,
+                                    outAdvances + runIndex, &runTotalAdvance,
+                                    &runGlyphs, &runGlyphsCount);
 
-                        runIndex += lengthRun;
+                            runIndex += lengthRun;
 
-                        *outTotalAdvance += runTotalAdvance;
-                        *outGlyphsCount += runGlyphsCount;
-
+                            *outTotalAdvance += runTotalAdvance;
+                            *outGlyphsCount += runGlyphsCount;
 #if DEBUG_GLYPHS
-                        LOGD("computeValuesWithHarfbuzz -- run=%d run-glyphs-count=%d",
-                                i, runGlyphsCount);
-                        for (size_t j = 0; j < runGlyphsCount; j++) {
-                            LOGD("                          -- glyphs[%d]=%d", j, runGlyphs[j]);
-                        }
-#endif
-                        glyphRuns.push(GlyphRun(runGlyphs, runGlyphsCount, newFlags));
-                    }
-
-#if DEBUG_GLYPHS
-                    LOGD("computeValuesWithHarfbuzz -- total-glyphs-count=%d", *outGlyphsCount);
-#endif
-                    *outGlyphs = new jchar[*outGlyphsCount];
-                    jchar* glyphs = *outGlyphs;
-                    for (size_t i = 0; i < glyphRuns.size(); i++) {
-                        const GlyphRun& glyphRun = glyphRuns.itemAt(i);
-                        if (glyphRun.isRTL) {
-                            for (size_t n = 0; n < glyphRun.glyphsCount; n++) {
-                                glyphs[glyphRun.glyphsCount - n - 1] = glyphRun.glyphs[n];
+                            LOGD("computeValuesWithHarfbuzz -- run=%d run-glyphs-count=%d",
+                                    i, runGlyphsCount);
+                            for (size_t j = 0; j < runGlyphsCount; j++) {
+                                LOGD("                          -- glyphs[%d]=%d", j, runGlyphs[j]);
                             }
-                        } else {
-                            memcpy(glyphs, glyphRun.glyphs, glyphRun.glyphsCount * sizeof(jchar));
+#endif
+                            glyphRuns.push(GlyphRun(runGlyphs, runGlyphsCount, newFlags));
                         }
-                        glyphs += glyphRun.glyphsCount;
-                        delete[] glyphRun.glyphs;
+                        *outGlyphs = new jchar[*outGlyphsCount];
+
+                        jchar* glyphs = *outGlyphs;
+                        for (size_t i = 0; i < glyphRuns.size(); i++) {
+                            const GlyphRun& glyphRun = glyphRuns.itemAt(i);
+                            if (glyphRun.isRTL) {
+                                for (size_t n = 0; n < glyphRun.glyphsCount; n++) {
+                                    glyphs[glyphRun.glyphsCount - n - 1] = glyphRun.glyphs[n];
+                                }
+                            } else {
+                                memcpy(glyphs, glyphRun.glyphs, glyphRun.glyphsCount * sizeof(jchar));
+                            }
+                            glyphs += glyphRun.glyphsCount;
+                            delete[] glyphRun.glyphs;
+                        }
                     }
                 }
                 ubidi_close(bidi);
+            } else {
+                // Cannot run BiDi, just consider one Run
+#if DEBUG_GLYPHS
+                LOGD("computeValuesWithHarfbuzz -- cannot run BiDi, considering only one Run");
+#endif
+                computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
+                        outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
+
+                if (dirFlags == 1 && *outGlyphsCount > 1) {
+                    reverseGlyphArray(*outGlyphs, *outGlyphsCount);
+                }
             }
         }
+#if DEBUG_GLYPHS
+        LOGD("computeValuesWithHarfbuzz -- total-glyphs-count=%d", *outGlyphsCount);
+#endif
 }
 
 void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
