@@ -50,7 +50,7 @@ static const MtpOperationCode kSupportedOperationCodes[] = {
     MTP_OPERATION_GET_OBJECT_HANDLES,
     MTP_OPERATION_GET_OBJECT_INFO,
     MTP_OPERATION_GET_OBJECT,
-//    MTP_OPERATION_GET_THUMB,
+    MTP_OPERATION_GET_THUMB,
     MTP_OPERATION_DELETE_OBJECT,
     MTP_OPERATION_SEND_OBJECT_INFO,
     MTP_OPERATION_SEND_OBJECT,
@@ -369,6 +369,9 @@ bool MtpServer::handleRequest() {
             break;
         case MTP_OPERATION_GET_OBJECT:
             response = doGetObject();
+            break;
+        case MTP_OPERATION_GET_THUMB:
+            response = doGetThumb();
             break;
         case MTP_OPERATION_GET_PARTIAL_OBJECT:
         case MTP_OPERATION_GET_PARTIAL_OBJECT_64:
@@ -734,6 +737,22 @@ MtpResponseCode MtpServer::doGetObject() {
             return MTP_RESPONSE_GENERAL_ERROR;
     }
     return MTP_RESPONSE_OK;
+}
+
+MtpResponseCode MtpServer::doGetThumb() {
+    MtpObjectHandle handle = mRequest.getParameter(1);
+    size_t thumbSize;
+    void* thumb = mDatabase->getThumbnail(handle, thumbSize);
+    if (thumb) {
+        // send data
+        mData.setOperationCode(mRequest.getOperationCode());
+        mData.setTransactionID(mRequest.getTransactionID());
+        mData.writeData(mFD, thumb, thumbSize);
+        free(thumb);
+        return MTP_RESPONSE_OK;
+    } else {
+        return MTP_RESPONSE_GENERAL_ERROR;
+    }
 }
 
 MtpResponseCode MtpServer::doGetPartialObject(MtpOperationCode operation) {
