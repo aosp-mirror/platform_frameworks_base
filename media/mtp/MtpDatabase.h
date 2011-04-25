@@ -84,6 +84,8 @@ public:
     virtual MtpResponseCode         getObjectInfo(MtpObjectHandle handle,
                                             MtpObjectInfo& info) = 0;
 
+    virtual void*                   getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) = 0;
+
     virtual MtpResponseCode         getObjectFilePath(MtpObjectHandle handle,
                                             MtpString& outFilePath,
                                             int64_t& outFileLength,

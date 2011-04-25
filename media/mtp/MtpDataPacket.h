@@ -100,6 +100,7 @@ public:
     // write our data to the given file descriptor
     int                 write(int fd);
     int                 writeDataHeader(int fd, uint32_t length);
+    int                 writeData(int fd, void* data, uint32_t length);
 #endif
 
 #ifdef MTP_HOST
