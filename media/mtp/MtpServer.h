@@ -67,12 +67,22 @@ private:
 
     // represents an MTP object that is being edited using the android extensions
     // for direct editing (BeginEditObject, SendPartialObject, TruncateObject and EndEditObject)
-    struct ObjectEdit {
-        MtpObjectHandle     handle;
-        MtpString           path;
-        uint64_t            size;
-        MtpObjectFormat     format;
-        int                 fd;
+    class ObjectEdit {
+        public:
+        MtpObjectHandle     mHandle;
+        MtpString           mPath;
+        uint64_t            mSize;
+        MtpObjectFormat     mFormat;
+        int                 mFD;
+
+        ObjectEdit(MtpObjectHandle handle, const char* path, uint64_t size,
+            MtpObjectFormat format, int fd)
+                : mHandle(handle), mPath(path), mSize(size), mFormat(format), mFD(fd) {
+            }
+
+        virtual ~ObjectEdit() {
+            close(mFD);
+        }
     };
     Vector<ObjectEdit*>  mObjectEditList;
 
