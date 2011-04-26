@@ -64,7 +64,7 @@ TEST_F(SurfaceTextureClientTest, ANativeWindowLockFails) {
     ASSERT_EQ(BAD_VALUE, ANativeWindow_lock(anw.get(), &buf, NULL));
 }
 
-TEST_F(SurfaceTextureClientTest, EglCreateWindowSurfaceFails) {
+TEST_F(SurfaceTextureClientTest, EglCreateWindowSurfaceSucceeds) {
     sp<ANativeWindow> anw(mSTC);
 
     EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -94,8 +94,8 @@ TEST_F(SurfaceTextureClientTest, EglCreateWindowSurfaceFails) {
 
     EGLSurface eglSurface = eglCreateWindowSurface(dpy, myConfig, anw.get(),
             NULL);
-    ASSERT_EQ(EGL_NO_SURFACE, eglSurface);
-    ASSERT_EQ(EGL_BAD_NATIVE_WINDOW, eglGetError());
+    ASSERT_NE(EGL_NO_SURFACE, eglSurface);
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
 
     eglTerminate(dpy);
 }
