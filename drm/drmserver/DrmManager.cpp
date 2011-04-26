@@ -101,6 +101,7 @@ status_t DrmManager::loadPlugIns(const String8& plugInDirPath) {
             DrmSupportInfo* info = mPlugInManager.getPlugIn(plugInPath).getSupportInfo(0);
             if (NULL != info) {
                 mSupportInfoToPlugInIdMap.add(*info, plugInPath);
+                delete info;
             }
         }
     }
@@ -178,6 +179,7 @@ status_t DrmManager::installDrmEngine(int uniqueId, const String8& absolutePath)
 
     DrmSupportInfo* info = rDrmEngine.getSupportInfo(0);
     mSupportInfoToPlugInIdMap.add(*info, absolutePath);
+    delete info;
 
     return DRM_NO_ERROR;
 }
