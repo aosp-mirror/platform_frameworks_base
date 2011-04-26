@@ -237,7 +237,11 @@ nContextGetErrorMessage(JNIEnv *_env, jobject _this, RsContext con)
 
     size_t receiveLen;
     uint32_t subID;
-    int id = rsContextGetMessage(con, buf, &receiveLen, &subID, sizeof(buf), true);
+    int id = rsContextGetMessage(con,
+                                 buf, sizeof(buf),
+                                 &receiveLen, sizeof(receiveLen),
+                                 &subID, sizeof(subID),
+                                 true);
     if (!id && receiveLen) {
         LOGV("message receive buffer too small.  %i", receiveLen);
     }
@@ -252,7 +256,11 @@ nContextGetUserMessage(JNIEnv *_env, jobject _this, RsContext con, jintArray dat
     jint *ptr = _env->GetIntArrayElements(data, NULL);
     size_t receiveLen;
     uint32_t subID;
-    int id = rsContextGetMessage(con, ptr, &receiveLen, &subID, len * 4, true);
+    int id = rsContextGetMessage(con,
+                                 ptr, len * 4,
+                                 &receiveLen, sizeof(receiveLen),
+                                 &subID, sizeof(subID),
+                                 true);
     if (!id && receiveLen) {
         LOGV("message receive buffer too small.  %i", receiveLen);
     }
@@ -266,7 +274,8 @@ nContextPeekMessage(JNIEnv *_env, jobject _this, RsContext con, jintArray auxDat
     jint *auxDataPtr = _env->GetIntArrayElements(auxData, NULL);
     size_t receiveLen;
     uint32_t subID;
-    int id = rsContextPeekMessage(con, &receiveLen, &subID, wait);
+    int id = rsContextPeekMessage(con, &receiveLen, sizeof(receiveLen),
+                                  &subID, sizeof(subID), wait);
     auxDataPtr[0] = (jint)subID;
     auxDataPtr[1] = (jint)receiveLen;
     _env->ReleaseIntArrayElements(auxData, auxDataPtr, 0);
@@ -426,7 +435,9 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint typ
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
-    jint id = (jint)rsaAllocationCreateFromBitmap(con, (RsType)type, (RsAllocationMipmapControl)mip, ptr, usage);
+    jint id = (jint)rsaAllocationCreateFromBitmap(con,
+                                                  (RsType)type, (RsAllocationMipmapControl)mip,
+                                                  ptr, bitmap.getSize(), usage);
     bitmap.unlockPixels();
     return id;
 }
@@ -440,7 +451,9 @@ nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
-    jint id = (jint)rsaAllocationCubeCreateFromBitmap(con, (RsType)type, (RsAllocationMipmapControl)mip, ptr, usage);
+    jint id = (jint)rsaAllocationCubeCreateFromBitmap(con,
+                                                      (RsType)type, (RsAllocationMipmapControl)mip,
+                                                      ptr, bitmap.getSize(), usage);
     bitmap.unlockPixels();
     return id;
 }

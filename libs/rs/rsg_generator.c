@@ -4,7 +4,7 @@
 
 void printFileHeader(FILE *f) {
     fprintf(f, "/*\n");
-    fprintf(f, " * Copyright (C) 2010 The Android Open Source Project\n");
+    fprintf(f, " * Copyright (C) 2011 The Android Open Source Project\n");
     fprintf(f, " *\n");
     fprintf(f, " * Licensed under the Apache License, Version 2.0 (the \"License\");\n");
     fprintf(f, " * you may not use this file except in compliance with the License.\n");
@@ -96,12 +96,14 @@ void printStructures(FILE *f) {
 void printFuncDecl(FILE *f, const ApiEntry *api, const char *prefix, int addContext) {
     printVarType(f, &api->ret);
     fprintf(f, " %s%s (", prefix, api->name);
-    if (addContext) {
-        fprintf(f, "Context *");
-    } else {
-        fprintf(f, "RsContext rsc");
+    if (!api->nocontext) {
+        if (addContext) {
+            fprintf(f, "Context *");
+        } else {
+            fprintf(f, "RsContext rsc");
+        }
     }
-    printArgList(f, api, 1);
+    printArgList(f, api, !api->nocontext);
     fprintf(f, ")");
 }
 
@@ -117,6 +119,10 @@ void printFuncDecls(FILE *f, const char *prefix, int addContext) {
 void printPlaybackFuncs(FILE *f, const char *prefix) {
     int ct;
     for (ct=0; ct < apiCount; ct++) {
+        if (apis[ct].direct) {
+            continue;
+        }
+
         fprintf(f, "void %s%s (Context *, const void *);\n", prefix, apis[ct].name);
     }
 }
@@ -139,6 +145,10 @@ void printApiCpp(FILE *f) {
     for (ct=0; ct < apiCount; ct++) {
         int needFlush = 0;
         const ApiEntry * api = &apis[ct];
+
+        if (api->direct) {
+            continue;
+        }
 
         printFuncDecl(f, api, "rs", 0);
         fprintf(f, "\n{\n");
@@ -198,31 +208,37 @@ void printPlaybackCpp(FILE *f) {
     for (ct=0; ct < apiCount; ct++) {
         const ApiEntry * api = &apis[ct];
 
+        if (api->direct) {
+            continue;
+        }
+
         fprintf(f, "void rsp_%s(Context *con, const void *vp)\n", api->name);
         fprintf(f, "{\n");
-        if (api->handcodePlay) {
-            fprintf(f, "    rsHCPLAY_%s(con, vp);\n", api->name);
-        } else {
-            //fprintf(f, "    LOGE(\"play command %s\\n\");\n", api->name);
-            fprintf(f, "    const RS_CMD_%s *cmd = static_cast<const RS_CMD_%s *>(vp);\n", api->name, api->name);
-            fprintf(f, "    ");
-            if (api->ret.typeName[0]) {
-                fprintf(f, "con->mIO.mToCoreRet = (intptr_t)");
-            }
-            fprintf(f, "rsi_%s(con", api->name);
-            for (ct2=0; ct2 < api->paramCount; ct2++) {
-                const VarType *vt = &api->params[ct2];
-                fprintf(f, ",\n           cmd->%s", vt->name);
-            }
-            fprintf(f, ");\n");
+
+        //fprintf(f, "    LOGE(\"play command %s\\n\");\n", api->name);
+        fprintf(f, "    const RS_CMD_%s *cmd = static_cast<const RS_CMD_%s *>(vp);\n", api->name, api->name);
+        fprintf(f, "    ");
+        if (api->ret.typeName[0]) {
+            fprintf(f, "con->mIO.mToCoreRet = (intptr_t)");
         }
+        fprintf(f, "rsi_%s(con", api->name);
+        for (ct2=0; ct2 < api->paramCount; ct2++) {
+            const VarType *vt = &api->params[ct2];
+            fprintf(f, ",\n           cmd->%s", vt->name);
+        }
+        fprintf(f, ");\n");
+
         fprintf(f, "};\n\n");
     }
 
     fprintf(f, "RsPlaybackFunc gPlaybackFuncs[%i] = {\n", apiCount + 1);
     fprintf(f, "    NULL,\n");
     for (ct=0; ct < apiCount; ct++) {
-        fprintf(f, "    %s%s,\n", "rsp_", apis[ct].name);
+        if (apis[ct].direct) {
+            fprintf(f, "    NULL,\n");
+        } else {
+            fprintf(f, "    %s%s,\n", "rsp_", apis[ct].name);
+        }
     }
     fprintf(f, "};\n");
 

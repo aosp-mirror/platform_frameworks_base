@@ -768,14 +768,20 @@ RsContext rsContextCreateGL(RsDevice vdev, uint32_t version,
     return rsc;
 }
 
-RsMessageToClientType rsContextPeekMessage(RsContext vrsc, size_t *receiveLen, uint32_t *subID, bool wait) {
+RsMessageToClientType rsContextPeekMessage(RsContext vrsc,
+                                           size_t * receiveLen, size_t receiveLen_length,
+                                           uint32_t * subID, size_t subID_length, bool wait) {
     Context * rsc = static_cast<Context *>(vrsc);
     return rsc->peekMessageToClient(receiveLen, subID, wait);
 }
 
-RsMessageToClientType rsContextGetMessage(RsContext vrsc, void *data, size_t *receiveLen, uint32_t *subID, size_t bufferLen, bool wait) {
+RsMessageToClientType rsContextGetMessage(RsContext vrsc, void * data, size_t data_length,
+                                          size_t * receiveLen, size_t receiveLen_length,
+                                          uint32_t * subID, size_t subID_length, bool wait) {
     Context * rsc = static_cast<Context *>(vrsc);
-    return rsc->getMessageToClient(data, receiveLen, subID, bufferLen, wait);
+    rsAssert(subID_length == sizeof(uint32_t));
+    rsAssert(receiveLen_length == sizeof(size_t));
+    return rsc->getMessageToClient(data, receiveLen, subID, data_length, wait);
 }
 
 void rsContextInitToClient(RsContext vrsc) {

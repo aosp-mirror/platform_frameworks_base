@@ -26,20 +26,6 @@ extern "C" {
 
 #include "RenderScriptDefines.h"
 
-RsDevice rsDeviceCreate();
-void rsDeviceDestroy(RsDevice);
-void rsDeviceSetConfig(RsDevice, RsDeviceParam, int32_t value);
-
-RsContext rsContextCreate(RsDevice, uint32_t version);
-RsContext rsContextCreateGL(RsDevice, uint32_t version,
-                            RsSurfaceConfig sc, uint32_t dpi);
-void rsContextDestroy(RsContext);
-
-RsMessageToClientType rsContextGetMessage(RsContext vrsc, void *data, size_t *receiveLen, uint32_t *subID, size_t bufferLen, bool wait);
-RsMessageToClientType rsContextPeekMessage(RsContext vrsc, size_t *receiveLen, uint32_t *subID, bool wait);
-void rsContextInitToClient(RsContext);
-void rsContextDeinitToClient(RsContext);
-
 //
 // A3D loading and object update code.
 // Should only be called at object creation, not thread safe
@@ -63,18 +49,8 @@ void rsaTypeGetNativeData(RsContext, RsType, uint32_t *typeData, uint32_t typeDa
 void rsaElementGetNativeData(RsContext, RsElement, uint32_t *elemData, uint32_t elemDataSize);
 void rsaElementGetSubElements(RsContext, RsElement, uint32_t *ids, const char **names, uint32_t dataSize);
 
-// Async commands for returning new IDS
-RsType rsaTypeCreate(RsContext, RsElement, uint32_t dimX, uint32_t dimY,
-                     uint32_t dimZ, bool mips, bool faces);
-RsAllocation rsaAllocationCreateTyped(RsContext rsc, RsType vtype,
-                                      RsAllocationMipmapControl mips,
-                                      uint32_t usages);
-RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
-                                           RsAllocationMipmapControl mips,
-                                           const void *data, uint32_t usages);
-RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
-                                               RsAllocationMipmapControl mips,
-                                               const void *data, uint32_t usages);
+
+
 #ifdef ANDROID_RS_SERIALIZE
 #define NO_RS_FUNCS
 #endif

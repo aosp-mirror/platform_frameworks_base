@@ -44,6 +44,7 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
 <comment>"*"+"/"        BEGIN(INITIAL);
 
 <*>" "   //printf("found ' '\n");
+<*>"\t"   //printf("found ' '\n");
 <*>"\n"  ++num_lines; //printf("found lf \n");
 
 {ID} {
@@ -64,8 +65,12 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
     apis[apiCount].handcodeApi = 1;
     }
 
-<api_entry2>"handcodePlay" {
-    apis[apiCount].handcodePlay = 1;
+<api_entry2>"direct" {
+    apis[apiCount].direct = 1;
+    }
+
+<api_entry2>"nocontext" {
+    apis[apiCount].nocontext = 1;
     }
 
 <api_entry2>"ret" {
