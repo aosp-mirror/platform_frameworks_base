@@ -16,18 +16,18 @@
 
 package android.webkit.webdriver;
 
-import com.google.android.collect.Lists;
-import com.google.android.collect.Maps;
+import android.os.Handler;
+import android.os.Message;
+import android.webkit.WebView;
 
 import com.android.internal.R;
+
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.os.Handler;
-import android.os.Message;
-import android.webkit.WebView;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -190,7 +190,6 @@ public class WebDriver {
         WebchromeClientWrapper chromeWrapper = new WebchromeClientWrapper(
                 webview.getWebChromeClient(), this);
         mWebView.setWebChromeClient(chromeWrapper);
-        mDocumentElement = new WebElement(this, "");
         mWebView.addJavascriptInterface(new JavascriptResultReady(),
                 "webdriver");
     }
@@ -203,6 +202,7 @@ public class WebDriver {
      */
     public void get(String url) {
         executeCommand(CMD_GET_URL, url, LOADING_TIMEOUT);
+        mDocumentElement = (WebElement) executeScript("return document.body;");
     }
 
     /**
@@ -223,7 +223,23 @@ public class WebDriver {
      * no matching element was found.
      */
     public WebElement findElement(By by) {
+        checkNotNull(mDocumentElement, "Load a page using WebDriver.get() "
+                + "before looking for elements.");
         return by.findElement(mDocumentElement);
+    }
+
+    /**
+     * Finds all {@link android.webkit.webdriver.WebElement} within the page
+     * using the given method.
+     *
+     * @param by The locating mechanism to use.
+     * @return A list of all {@link android.webkit.webdriver.WebElement} found,
+     * or an empty list if nothing matches.
+     */
+    public List<WebElement> findElements(By by) {
+        checkNotNull(mDocumentElement, "Load a page using WebDriver.get() "
+                + "before looking for elements.");
+        return by.findElements(mDocumentElement);
     }
 
     /**
@@ -300,8 +316,10 @@ public class WebDriver {
                 toReturn.append(toAdd.substring(0, toAdd.length() -1) + "}");
             } else if (args[i] instanceof WebElement) {
                 // WebElement are represented in JavaScript by Objects as
-                // follow: {ELEMENT:"id"}
-                toReturn.append("{" + ELEMENT_KEY + ":\""
+                // follow: {ELEMENT:"id"} where "id" refers to the id
+                // of the HTML element in the javascript cache that can
+                // be accessed throught bot.inject.cache.getCache_()
+                toReturn.append("{\"" + ELEMENT_KEY + "\":\""
                         + ((WebElement) args[i]).getId() + "\"}");
             } else if (args[i] instanceof Number || args[i] instanceof Boolean) {
                 toReturn.append(String.valueOf(args[i]));
@@ -310,9 +328,10 @@ public class WebDriver {
             } else {
                 throw new IllegalArgumentException(
                         "Javascript arguments can be "
-                            + "a Number, a Boolean, a String, a WebElement, "
-                            + "or a List or a Map of those. Got: "
-                            + ((args[i] == null) ? "null" : args[i].toString()));
+                        + "a Number, a Boolean, a String, a WebElement, "
+                        + "or a List or a Map of those. Got: "
+                        + ((args[i] == null) ? "null" : args[i].getClass()
+                        + ", value: " + args[i].toString()));
             }
         }
         return toReturn.toString();
@@ -457,7 +476,7 @@ public class WebDriver {
             case STALE_ELEMENT_REFERENCE:
                 throw new WebElementStaleException("WebElement is stale.");
             default:
-                throw new RuntimeException("Error: " + errorMsg);
+                throw new WebDriverException("Error: " + errorMsg);
         }
     }
 
@@ -522,5 +541,11 @@ public class WebDriver {
             }
         }
         return mJsResult;
+    }
+
+    private void checkNotNull(Object obj, String errosMsg) {
+        if (obj == null) {
+            throw new NullPointerException(errosMsg);
+        }
     }
 }

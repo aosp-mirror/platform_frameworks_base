@@ -16,12 +16,15 @@
 
 package android.webkit.webdriver;
 
+import java.util.List;
+
 /**
  * Mechanism to locate elements within the DOM of the page.
  * @hide
  */
 public abstract class By {
     public abstract WebElement findElement(WebElement element);
+    public abstract List<WebElement> findElements(WebElement element);
 
     /**
      * Locates an element by its HTML id attribute.
@@ -35,6 +38,11 @@ public abstract class By {
             @Override
             public WebElement findElement(WebElement element) {
                 return element.findElementById(id);
+            }
+
+            @Override
+            public List<WebElement> findElements(WebElement element) {
+                return element.findElementsById(id); // Yes, it happens a lot.
             }
 
             @Override
@@ -57,6 +65,11 @@ public abstract class By {
             @Override
             public WebElement findElement(WebElement element) {
                 return element.findElementByLinkText(linkText);
+            }
+
+            @Override
+            public List<WebElement> findElements(WebElement element) {
+                return element.findElementsByLinkText(linkText);
             }
 
             @Override
@@ -84,6 +97,11 @@ public abstract class By {
             }
 
             @Override
+            public List<WebElement> findElements(WebElement element) {
+                return element.findElementsByPartialLinkText(linkText);
+            }
+
+            @Override
             public String toString() {
                 return "By.partialLinkText: " + linkText;
             }
@@ -105,6 +123,11 @@ public abstract class By {
             }
 
             @Override
+            public List<WebElement> findElements(WebElement element) {
+                return element.findElementsByName(name);
+            }
+
+            @Override
             public String toString() {
                 return "By.name: " + name;
             }
@@ -122,6 +145,11 @@ public abstract class By {
             @Override
             public WebElement findElement(WebElement element) {
                 return element.findElementByClassName(className);
+            }
+
+            @Override
+            public List<WebElement> findElements(WebElement element) {
+                return element.findElementsByClassName(className);
             }
 
             @Override
@@ -146,6 +174,11 @@ public abstract class By {
             }
 
             @Override
+            public List<WebElement> findElements(WebElement element) {
+                return element.findElementsByCss(css);
+            }
+
+            @Override
             public String toString() {
                 return "By.css: " + css;
             }
@@ -165,6 +198,11 @@ public abstract class By {
             @Override
             public WebElement findElement(WebElement element) {
                 return element.findElementByTagName(tagName);
+            }
+
+            @Override
+            public List<WebElement> findElements(WebElement element) {
+                return element.findElementsByTagName(tagName);
             }
 
             @Override
@@ -191,6 +229,11 @@ public abstract class By {
             @Override
             public WebElement findElement(WebElement element) {
                 return element.findElementByXPath(xpath);
+            }
+
+            @Override
+            public List<WebElement> findElements(WebElement element) {
+                return element.findElementsByXPath(xpath);
             }
 
             @Override
