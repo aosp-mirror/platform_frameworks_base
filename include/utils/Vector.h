@@ -179,8 +179,8 @@ public:
      inline const_iterator end() const   { return array() + size(); }
      inline void reserve(size_t n) { setCapacity(n); }
      inline bool empty() const{ return isEmpty(); }
-     inline void push_back(const TYPE& item)  { insertAt(size(), item); }
-     inline void push_front(const TYPE& item) { insertAt(0, item); }
+     inline void push_back(const TYPE& item)  { insertAt(item, size()); }
+     inline void push_front(const TYPE& item) { insertAt(item, 0); }
      inline iterator erase(iterator pos) {
          return begin() + removeItemsAt(pos-array());
      }
