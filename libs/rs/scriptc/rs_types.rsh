@@ -36,6 +36,10 @@ typedef float float2 __attribute__((ext_vector_type(2)));
 typedef float float3 __attribute__((ext_vector_type(3)));
 typedef float float4 __attribute__((ext_vector_type(4)));
 
+typedef double double2 __attribute__((ext_vector_type(2)));
+typedef double double3 __attribute__((ext_vector_type(3)));
+typedef double double4 __attribute__((ext_vector_type(4)));
+
 typedef uchar uchar2 __attribute__((ext_vector_type(2)));
 typedef uchar uchar3 __attribute__((ext_vector_type(3)));
 typedef uchar uchar4 __attribute__((ext_vector_type(4)));
@@ -47,6 +51,10 @@ typedef ushort ushort4 __attribute__((ext_vector_type(4)));
 typedef uint uint2 __attribute__((ext_vector_type(2)));
 typedef uint uint3 __attribute__((ext_vector_type(3)));
 typedef uint uint4 __attribute__((ext_vector_type(4)));
+
+typedef ulong ulong2 __attribute__((ext_vector_type(2)));
+typedef ulong ulong3 __attribute__((ext_vector_type(3)));
+typedef ulong ulong4 __attribute__((ext_vector_type(4)));
 
 typedef char char2 __attribute__((ext_vector_type(2)));
 typedef char char3 __attribute__((ext_vector_type(3)));
@@ -60,6 +68,9 @@ typedef int int2 __attribute__((ext_vector_type(2)));
 typedef int int3 __attribute__((ext_vector_type(3)));
 typedef int int4 __attribute__((ext_vector_type(4)));
 
+typedef long long2 __attribute__((ext_vector_type(2)));
+typedef long long3 __attribute__((ext_vector_type(3)));
+typedef long long4 __attribute__((ext_vector_type(4)));
 
 typedef struct {
     float m[16];

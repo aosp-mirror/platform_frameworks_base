@@ -16245,12 +16245,14 @@ package android.renderscript {
 
   public class Byte2 {
     ctor public Byte2();
+    ctor public Byte2(byte, byte);
     field public byte x;
     field public byte y;
   }
 
   public class Byte3 {
     ctor public Byte3();
+    ctor public Byte3(byte, byte, byte);
     field public byte x;
     field public byte y;
     field public byte z;
@@ -16258,10 +16260,35 @@ package android.renderscript {
 
   public class Byte4 {
     ctor public Byte4();
+    ctor public Byte4(byte, byte, byte, byte);
     field public byte w;
     field public byte x;
     field public byte y;
     field public byte z;
+  }
+
+  public class Double2 {
+    ctor public Double2();
+    ctor public Double2(double, double);
+    field public double x;
+    field public double y;
+  }
+
+  public class Double3 {
+    ctor public Double3();
+    ctor public Double3(double, double, double);
+    field public double x;
+    field public double y;
+    field public double z;
+  }
+
+  public class Double4 {
+    ctor public Double4();
+    ctor public Double4(double, double, double, double);
+    field public double w;
+    field public double x;
+    field public double y;
+    field public double z;
   }
 
   public class Element extends android.renderscript.BaseObj {
@@ -16427,12 +16454,14 @@ package android.renderscript {
 
   public class Int2 {
     ctor public Int2();
+    ctor public Int2(int, int);
     field public int x;
     field public int y;
   }
 
   public class Int3 {
     ctor public Int3();
+    ctor public Int3(int, int, int);
     field public int x;
     field public int y;
     field public int z;
@@ -16440,6 +16469,7 @@ package android.renderscript {
 
   public class Int4 {
     ctor public Int4();
+    ctor public Int4(int, int, int, int);
     field public int w;
     field public int x;
     field public int y;
@@ -16448,12 +16478,14 @@ package android.renderscript {
 
   public class Long2 {
     ctor public Long2();
+    ctor public Long2(long, long);
     field public long x;
     field public long y;
   }
 
   public class Long3 {
     ctor public Long3();
+    ctor public Long3(long, long, long);
     field public long x;
     field public long y;
     field public long z;
@@ -16461,6 +16493,7 @@ package android.renderscript {
 
   public class Long4 {
     ctor public Long4();
+    ctor public Long4(long, long, long, long);
     field public long w;
     field public long x;
     field public long y;
@@ -16857,12 +16890,14 @@ package android.renderscript {
 
   public class Short2 {
     ctor public Short2();
+    ctor public Short2(short, short);
     field public short x;
     field public short y;
   }
 
   public class Short3 {
     ctor public Short3();
+    ctor public Short3(short, short, short);
     field public short x;
     field public short y;
     field public short z;
@@ -16870,6 +16905,7 @@ package android.renderscript {
 
   public class Short4 {
     ctor public Short4();
+    ctor public Short4(short, short, short, short);
     field public short w;
     field public short x;
     field public short y;
