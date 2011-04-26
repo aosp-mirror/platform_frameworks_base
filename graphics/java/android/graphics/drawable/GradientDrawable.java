@@ -931,6 +931,7 @@ public class GradientDrawable extends Drawable {
                 mPositions = state.mPositions.clone();
             }
             mHasSolidColor = state.mHasSolidColor;
+            mSolidColor = state.mSolidColor;
             mStrokeWidth = state.mStrokeWidth;
             mStrokeColor = state.mStrokeColor;
             mStrokeDashWidth = state.mStrokeDashWidth;
