@@ -10106,7 +10106,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if ((privateFlags & SELECTED) != 0) viewStateIndex |= VIEW_STATE_SELECTED;
         if (hasWindowFocus()) viewStateIndex |= VIEW_STATE_WINDOW_FOCUSED;
         if ((privateFlags & ACTIVATED) != 0) viewStateIndex |= VIEW_STATE_ACTIVATED;
-        if (mAttachInfo != null && mAttachInfo.mHardwareAccelerationRequested) {
+        if (mAttachInfo != null && mAttachInfo.mHardwareAccelerationRequested &&
+                HardwareRenderer.isAvailable()) {
             // This is set if HW acceleration is requested, even if the current
             // process doesn't allow it.  This is just to allow app preview
             // windows to better match their app.
