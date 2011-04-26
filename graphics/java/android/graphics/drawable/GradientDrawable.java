@@ -240,16 +240,19 @@ public class GradientDrawable extends Drawable {
 
     public void setGradientCenter(float x, float y) {
         mGradientState.setGradientCenter(x, y);
+        mRectIsDirty = true;
         invalidateSelf();
     }
 
     public void setGradientRadius(float gradientRadius) {
         mGradientState.setGradientRadius(gradientRadius);
+        mRectIsDirty = true;
         invalidateSelf();
     }
 
     public void setUseLevel(boolean useLevel) {
         mGradientState.mUseLevel = useLevel;
+        mRectIsDirty = true;
         invalidateSelf();
     }
     
