@@ -56,15 +56,15 @@ public:
     // SurfaceTexture object (i.e. they are not owned by the client).
     virtual status_t setBufferCount(int bufferCount);
 
-    virtual sp<GraphicBuffer> requestBuffer(int buf, uint32_t w, uint32_t h,
-            uint32_t format, uint32_t usage);
+    virtual sp<GraphicBuffer> requestBuffer(int buf);
 
     // dequeueBuffer gets the next buffer slot index for the client to use. If a
     // buffer slot is available then that slot index is written to the location
     // pointed to by the buf argument and a status of OK is returned.  If no
     // slot is available then a status of -EBUSY is returned and buf is
     // unmodified.
-    virtual status_t dequeueBuffer(int *buf);
+    virtual status_t dequeueBuffer(int *buf, uint32_t w, uint32_t h,
+            uint32_t format, uint32_t usage);
 
     // queueBuffer returns a filled buffer to the SurfaceTexture. In addition, a
     // timestamp must be provided for the buffer. The timestamp is in
@@ -192,11 +192,6 @@ private:
     // mPixelFormat holds the pixel format of allocated buffers. It is used
     // in requestBuffers() if a format of zero is specified.
     uint32_t mPixelFormat;
-
-    // mUseDefaultSize indicates whether or not the default size should be used
-    // that is, if the last requestBuffer has been called with both width
-    // and height null.
-    bool mUseDefaultSize;
 
     // mBufferCount is the number of buffer slots that the client and server
     // must maintain. It defaults to MIN_BUFFER_SLOTS and can be changed by

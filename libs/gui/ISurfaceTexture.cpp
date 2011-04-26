@@ -50,15 +50,10 @@ public:
     {
     }
 
-    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
-            uint32_t w, uint32_t h, uint32_t format, uint32_t usage) {
+    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx) {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(bufferIdx);
-        data.writeInt32(w);
-        data.writeInt32(h);
-        data.writeInt32(format);
-        data.writeInt32(usage);
         remote()->transact(REQUEST_BUFFER, data, &reply);
         sp<GraphicBuffer> buffer;
         bool nonNull = reply.readInt32();
@@ -79,9 +74,14 @@ public:
         return err;
     }
 
-    virtual status_t dequeueBuffer(int *buf) {
+    virtual status_t dequeueBuffer(int *buf, uint32_t w, uint32_t h,
+            uint32_t format, uint32_t usage) {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
+        data.writeInt32(w);
+        data.writeInt32(h);
+        data.writeInt32(format);
+        data.writeInt32(usage);
         remote()->transact(DEQUEUE_BUFFER, data, &reply);
         *buf = reply.readInt32();
         int result = reply.readInt32();
@@ -145,12 +145,7 @@ status_t BnSurfaceTexture::onTransact(
         case REQUEST_BUFFER: {
             CHECK_INTERFACE(ISurfaceTexture, data, reply);
             int bufferIdx   = data.readInt32();
-            uint32_t w      = data.readInt32();
-            uint32_t h      = data.readInt32();
-            uint32_t format = data.readInt32();
-            uint32_t usage  = data.readInt32();
-            sp<GraphicBuffer> buffer(requestBuffer(bufferIdx, w, h, format,
-                    usage));
+            sp<GraphicBuffer> buffer(requestBuffer(bufferIdx));
             reply->writeInt32(buffer != 0);
             if (buffer != 0) {
                 reply->write(*buffer);
@@ -166,8 +161,12 @@ status_t BnSurfaceTexture::onTransact(
         } break;
         case DEQUEUE_BUFFER: {
             CHECK_INTERFACE(ISurfaceTexture, data, reply);
+            uint32_t w      = data.readInt32();
+            uint32_t h      = data.readInt32();
+            uint32_t format = data.readInt32();
+            uint32_t usage  = data.readInt32();
             int buf;
-            int result = dequeueBuffer(&buf);
+            int result = dequeueBuffer(&buf, w, h, format, usage);
             reply->writeInt32(buf);
             reply->writeInt32(result);
             return NO_ERROR;

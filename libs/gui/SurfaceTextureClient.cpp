@@ -97,20 +97,16 @@ int SurfaceTextureClient::dequeueBuffer(android_native_buffer_t** buffer) {
     LOGV("SurfaceTextureClient::dequeueBuffer");
     Mutex::Autolock lock(mMutex);
     int buf = -1;
-    status_t err = mSurfaceTexture->dequeueBuffer(&buf);
+    status_t err = mSurfaceTexture->dequeueBuffer(&buf, mReqWidth, mReqHeight,
+            mReqFormat, mReqUsage);
     if (err < 0) {
-        LOGV("dequeueBuffer: ISurfaceTexture::dequeueBuffer failed: %d", err);
+        LOGV("dequeueBuffer: ISurfaceTexture::dequeueBuffer(%d, %d, %d, %d)"
+             "failed: %d", err, mReqWidth, mReqHeight, mReqFormat, mReqUsage);
         return err;
     }
     sp<GraphicBuffer>& gbuf(mSlots[buf]);
-    if (err == ISurfaceTexture::BUFFER_NEEDS_REALLOCATION ||
-        gbuf == 0 ||
-        (mReqWidth && gbuf->getWidth() != mReqWidth) ||
-        (mReqHeight && gbuf->getHeight() != mReqHeight) ||
-        (mReqFormat && uint32_t(gbuf->getPixelFormat()) != mReqFormat) ||
-        (gbuf->getUsage() & mReqUsage) != mReqUsage) {
-        gbuf = mSurfaceTexture->requestBuffer(buf, mReqWidth, mReqHeight,
-                mReqFormat, mReqUsage);
+    if (err == ISurfaceTexture::BUFFER_NEEDS_REALLOCATION || gbuf == 0) {
+        gbuf = mSurfaceTexture->requestBuffer(buf);
         if (gbuf == 0) {
             LOGE("dequeueBuffer: ISurfaceTexture::requestBuffer failed");
             return NO_MEMORY;

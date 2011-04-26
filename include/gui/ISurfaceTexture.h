@@ -43,8 +43,7 @@ public:
     // the given slot index, and the client is expected to mirror the
     // slot->buffer mapping so that it's not necessary to transfer a
     // GraphicBuffer for every dequeue operation.
-    virtual sp<GraphicBuffer> requestBuffer(int slot, uint32_t w, uint32_t h,
-            uint32_t format, uint32_t usage) = 0;
+    virtual sp<GraphicBuffer> requestBuffer(int slot) = 0;
 
     // setBufferCount sets the number of buffer slots available. Calling this
     // will also cause all buffer slots to be emptied. The caller should empty
@@ -60,7 +59,8 @@ public:
     // in the contents of its associated buffer contents and call queueBuffer.
     // If dequeueBuffer return BUFFER_NEEDS_REALLOCATION, the client is
     // expected to call requestBuffer immediately.
-    virtual status_t dequeueBuffer(int *slot) = 0;
+    virtual status_t dequeueBuffer(int *slot, uint32_t w, uint32_t h,
+            uint32_t format, uint32_t usage) = 0;
 
     // queueBuffer indicates that the client has finished filling in the
     // contents of the buffer associated with slot and transfers ownership of

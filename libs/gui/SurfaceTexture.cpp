@@ -81,7 +81,6 @@ SurfaceTexture::SurfaceTexture(GLuint tex) :
     mDefaultWidth(1),
     mDefaultHeight(1),
     mPixelFormat(PIXEL_FORMAT_RGBA_8888),
-    mUseDefaultSize(true),
     mBufferCount(MIN_BUFFER_SLOTS),
     mCurrentTexture(INVALID_BUFFER_SLOT),
     mCurrentTextureTarget(GL_TEXTURE_EXTERNAL_OES),
@@ -133,8 +132,7 @@ status_t SurfaceTexture::setDefaultBufferSize(uint32_t w, uint32_t h)
     return OK;
 }
 
-sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf,
-        uint32_t w, uint32_t h, uint32_t format, uint32_t usage) {
+sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf) {
     LOGV("SurfaceTexture::requestBuffer");
     Mutex::Autolock lock(mMutex);
     if (buf < 0 || mBufferCount <= buf) {
@@ -142,10 +140,33 @@ sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf,
                 mBufferCount, buf);
         return 0;
     }
+    return mSlots[buf].mGraphicBuffer;
+}
+
+status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
+        uint32_t format, uint32_t usage) {
+    LOGV("SurfaceTexture::dequeueBuffer");
+
     if ((w && !h) || (!w & h)) {
-        LOGE("requestBuffer: invalid size: w=%u, h=%u: %d", w, h, buf);
-        return 0;
+        LOGE("dequeueBuffer: invalid size: w=%u, h=%u", w, h);
+        return BAD_VALUE;
     }
+
+    Mutex::Autolock lock(mMutex);
+    int found = INVALID_BUFFER_SLOT;
+    for (int i = 0; i < mBufferCount; i++) {
+        if (!mSlots[i].mOwnedByClient && i != mCurrentTexture && i != mLastQueued) {
+            mSlots[i].mOwnedByClient = true;
+            found = i;
+            break;
+        }
+    }
+    if (found == INVALID_BUFFER_SLOT) {
+        return -EBUSY;
+    }
+
+    const int buf = found;
+    *outBuf = found;
 
     const bool useDefaultSize = !w && !h;
     if (useDefaultSize) {
@@ -160,13 +181,20 @@ sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf,
         format = mPixelFormat;
     }
 
-    usage |= GraphicBuffer::USAGE_HW_TEXTURE;
-    sp<GraphicBuffer> graphicBuffer(
-            mGraphicBufferAlloc->createGraphicBuffer(w, h, format, usage));
-    if (graphicBuffer == 0) {
-        LOGE("requestBuffer: SurfaceComposer::createGraphicBuffer failed");
-    } else {
-        mUseDefaultSize = useDefaultSize;
+    const sp<GraphicBuffer>& buffer(mSlots[found].mGraphicBuffer);
+    if ((buffer == NULL) ||
+        (uint32_t(buffer->width)  != w) ||
+        (uint32_t(buffer->height) != h) ||
+        (uint32_t(buffer->format) != format) ||
+        ((uint32_t(buffer->usage) & usage) != usage))
+    {
+        usage |= GraphicBuffer::USAGE_HW_TEXTURE;
+        sp<GraphicBuffer> graphicBuffer(
+                mGraphicBufferAlloc->createGraphicBuffer(w, h, format, usage));
+        if (graphicBuffer == 0) {
+            LOGE("dequeueBuffer: SurfaceComposer::createGraphicBuffer failed");
+            return NO_MEMORY;
+        }
         if (updateFormat) {
             mPixelFormat = format;
         }
@@ -176,35 +204,6 @@ sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf,
             mSlots[buf].mEglImage = EGL_NO_IMAGE_KHR;
             mSlots[buf].mEglDisplay = EGL_NO_DISPLAY;
         }
-    }
-    return graphicBuffer;
-}
-
-status_t SurfaceTexture::dequeueBuffer(int *buf) {
-    LOGV("SurfaceTexture::dequeueBuffer");
-    Mutex::Autolock lock(mMutex);
-    int found = INVALID_BUFFER_SLOT;
-    for (int i = 0; i < mBufferCount; i++) {
-        if (!mSlots[i].mOwnedByClient && i != mCurrentTexture && i != mLastQueued) {
-            mSlots[i].mOwnedByClient = true;
-            found = i;
-            break;
-        }
-    }
-    if (found == INVALID_BUFFER_SLOT) {
-        return -EBUSY;
-    }
-
-    *buf = found;
-
-    const sp<GraphicBuffer>& buffer(mSlots[found].mGraphicBuffer);
-    if (buffer == NULL) {
-        return ISurfaceTexture::BUFFER_NEEDS_REALLOCATION;
-    }
-
-    if ((mUseDefaultSize) &&
-        ((uint32_t(buffer->width) != mDefaultWidth) ||
-         (uint32_t(buffer->height) != mDefaultHeight))) {
         return ISurfaceTexture::BUFFER_NEEDS_REALLOCATION;
     }
     return OK;
