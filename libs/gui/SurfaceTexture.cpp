@@ -274,10 +274,14 @@ status_t SurfaceTexture::updateTexImage() {
         EGLImageKHR image = mSlots[mLastQueued].mEglImage;
         if (image == EGL_NO_IMAGE_KHR) {
             EGLDisplay dpy = eglGetCurrentDisplay();
-            sp<GraphicBuffer> graphicBuffer = mSlots[mLastQueued].mGraphicBuffer;
-            image = createImage(dpy, graphicBuffer);
+            image = createImage(dpy, mSlots[mLastQueued].mGraphicBuffer);
             mSlots[mLastQueued].mEglImage = image;
             mSlots[mLastQueued].mEglDisplay = dpy;
+            if (image == EGL_NO_IMAGE_KHR) {
+                // NOTE: if dpy was invalid, createImage() is guaranteed to
+                // fail. so we'd end up here.
+                return -EINVAL;
+            }
         }
 
         GLint error;
@@ -483,12 +487,9 @@ EGLImageKHR SurfaceTexture::createImage(EGLDisplay dpy,
     };
     EGLImageKHR image = eglCreateImageKHR(dpy, EGL_NO_CONTEXT,
             EGL_NATIVE_BUFFER_ANDROID, cbuf, attrs);
-    EGLint error = eglGetError();
-    if (error != EGL_SUCCESS) {
+    if (image == EGL_NO_IMAGE_KHR) {
+        EGLint error = eglGetError();
         LOGE("error creating EGLImage: %#x", error);
-    } else if (image == EGL_NO_IMAGE_KHR) {
-        LOGE("no error reported, but no image was returned by "
-                "eglCreateImageKHR");
     }
     return image;
 }
