@@ -235,6 +235,7 @@ public final class AssetManager {
             StringBlock[] blocks = mStringBlocks;
             if (blocks == null) {
                 ensureStringBlocks();
+                blocks = mStringBlocks;
             }
             outValue.string = blocks[block].get(outValue.data);
             return true;
