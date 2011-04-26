@@ -55,6 +55,13 @@ public:
     virtual status_t    invoke(const Parcel& request, Parcel *reply) {
         return INVALID_OPERATION;
     }
+    virtual status_t    setParameter(int key, const Parcel &request) {
+        return INVALID_OPERATION;
+    }
+    virtual status_t    getParameter(int key, Parcel *reply) {
+        return INVALID_OPERATION;
+    }
+
 
 private:
             status_t    createOutputTrack();

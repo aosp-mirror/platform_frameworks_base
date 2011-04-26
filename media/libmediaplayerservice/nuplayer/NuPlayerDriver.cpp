@@ -246,6 +246,14 @@ void NuPlayerDriver::setAudioSink(const sp<AudioSink> &audioSink) {
     mPlayer->setAudioSink(audioSink);
 }
 
+status_t NuPlayerDriver::setParameter(int key, const Parcel &request) {
+    return INVALID_OPERATION;
+}
+
+status_t NuPlayerDriver::getParameter(int key, Parcel *reply) {
+    return INVALID_OPERATION;
+}
+
 status_t NuPlayerDriver::getMetadata(
         const media::Metadata::Filter& ids, Parcel *records) {
     return INVALID_OPERATION;

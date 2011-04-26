@@ -1228,6 +1228,84 @@ public class MediaPlayer
     public native void attachAuxEffect(int effectId);
 
     /**
+     * Sets the parameter indicated by key.
+     * @param key key indicates the parameter to be set.
+     * @param value value of the parameter to be set.
+     * @return true if the parameter is set successfully, false otherwise
+     * {@hide}
+     */
+    public native boolean setParameter(int key, Parcel value);
+
+    /**
+     * Sets the parameter indicated by key.
+     * @param key key indicates the parameter to be set.
+     * @param value value of the parameter to be set.
+     * @return true if the parameter is set successfully, false otherwise
+     * {@hide}
+     */
+    public boolean setParameter(int key, String value) {
+        Parcel p = Parcel.obtain();
+        p.writeString(value);
+        return setParameter(key, p);
+    }
+
+    /**
+     * Sets the parameter indicated by key.
+     * @param key key indicates the parameter to be set.
+     * @param value value of the parameter to be set.
+     * @return true if the parameter is set successfully, false otherwise
+     * {@hide}
+     */
+    public boolean setParameter(int key, int value) {
+        Parcel p = Parcel.obtain();
+        p.writeInt(value);
+        return setParameter(key, p);
+    }
+
+    /**
+     * Gets the value of the parameter indicated by key.
+     * @param key key indicates the parameter to get.
+     * @param reply value of the parameter to get.
+     */
+    private native void getParameter(int key, Parcel reply);
+
+    /**
+     * Gets the value of the parameter indicated by key.
+     * @param key key indicates the parameter to get.
+     * @return value of the parameter.
+     * {@hide}
+     */
+    public Parcel getParcelParameter(int key) {
+        Parcel p = Parcel.obtain();
+        getParameter(key, p);
+        return p;
+    }
+
+    /**
+     * Gets the value of the parameter indicated by key.
+     * @param key key indicates the parameter to get.
+     * @return value of the parameter.
+     * {@hide}
+     */
+    public String getStringParameter(int key) {
+        Parcel p = Parcel.obtain();
+        getParameter(key, p);
+        return p.readString();
+    }
+
+    /**
+     * Gets the value of the parameter indicated by key.
+     * @param key key indicates the parameter to get.
+     * @return value of the parameter.
+     * {@hide}
+     */
+    public int getIntParameter(int key) {
+        Parcel p = Parcel.obtain();
+        getParameter(key, p);
+        return p.readInt();
+    }
+
+    /**
      * Sets the send level of the player to the attached auxiliary effect
      * {@see #attachAuxEffect(int)}. The level value range is 0 to 1.0.
      * <p>By default the send level is 0, so even if an effect is attached to the player

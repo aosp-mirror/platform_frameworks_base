@@ -553,6 +553,28 @@ status_t MediaPlayer::attachAuxEffect(int effectId)
     return mPlayer->attachAuxEffect(effectId);
 }
 
+status_t MediaPlayer::setParameter(int key, const Parcel& request)
+{
+    LOGV("MediaPlayer::setParameter(%d)", key);
+    Mutex::Autolock _l(mLock);
+    if (mPlayer != NULL) {
+        return  mPlayer->setParameter(key, request);
+    }
+    LOGV("setParameter: no active player");
+    return INVALID_OPERATION;
+}
+
+status_t MediaPlayer::getParameter(int key, Parcel *reply)
+{
+    LOGV("MediaPlayer::getParameter(%d)", key);
+    Mutex::Autolock _l(mLock);
+    if (mPlayer != NULL) {
+         return  mPlayer->getParameter(key, reply);
+    }
+    LOGV("getParameter: no active player");
+    return INVALID_OPERATION;
+}
+
 void MediaPlayer::notify(int msg, int ext1, int ext2, const Parcel *obj)
 {
     LOGV("message received msg=%d, ext1=%d, ext2=%d", msg, ext1, ext2);

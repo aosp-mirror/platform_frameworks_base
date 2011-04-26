@@ -48,6 +48,8 @@ enum {
     SET_AUX_EFFECT_SEND_LEVEL,
     ATTACH_AUX_EFFECT,
     SET_VIDEO_SURFACETEXTURE,
+    SET_PARAMETER,
+    GET_PARAMETER,
 };
 
 class BpMediaPlayer: public BpInterface<IMediaPlayer>
@@ -236,6 +238,26 @@ public:
         return reply.readInt32();
     }
 
+    status_t setParameter(int key, const Parcel& request)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        data.writeInt32(key);
+        if (request.dataSize() > 0) {
+            data.appendFrom(const_cast<Parcel *>(&request), 0, request.dataSize());
+        }
+        remote()->transact(SET_PARAMETER, data, &reply);
+        return reply.readInt32();
+    }
+
+    status_t getParameter(int key, Parcel *reply)
+    {
+        Parcel data;
+        data.writeInterfaceToken(IMediaPlayer::getInterfaceDescriptor());
+        data.writeInt32(key);
+        return remote()->transact(GET_PARAMETER, data, reply);
+    }
+
 };
 
 IMPLEMENT_META_INTERFACE(MediaPlayer, "android.media.IMediaPlayer");
@@ -360,6 +382,23 @@ status_t BnMediaPlayer::onTransact(
             CHECK_INTERFACE(IMediaPlayer, data, reply);
             reply->writeInt32(attachAuxEffect(data.readInt32()));
             return NO_ERROR;
+        } break;
+        case SET_PARAMETER: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            int key = data.readInt32();
+
+            Parcel request;
+            if (data.dataAvail() > 0) {
+                request.appendFrom(
+                        const_cast<Parcel *>(&data), data.dataPosition(), data.dataAvail());
+            }
+            request.setDataPosition(0);
+            reply->writeInt32(setParameter(key, request));
+            return NO_ERROR;
+        } break;
+        case GET_PARAMETER: {
+            CHECK_INTERFACE(IMediaPlayer, data, reply);
+            return getParameter(data.readInt32(), reply);
         } break;
         default:
             return BBinder::onTransact(code, data, reply, flags);

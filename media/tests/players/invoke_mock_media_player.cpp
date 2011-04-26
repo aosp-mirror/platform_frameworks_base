@@ -84,6 +84,9 @@ class Player: public MediaPlayerBase
     virtual status_t    setLooping(int loop) {return OK;}
     virtual player_type playerType() {return TEST_PLAYER;}
     virtual status_t    invoke(const Parcel& request, Parcel *reply);
+    virtual status_t    setParameter(int key, const Parcel &request) {return OK;}
+    virtual status_t    getParameter(int key, Parcel *reply) {return OK;}
+
 
   private:
     // Take a request, copy it to the reply.

@@ -177,6 +177,9 @@ public:
             int             getAudioSessionId();
             status_t        setAuxEffectSendLevel(float level);
             status_t        attachAuxEffect(int effectId);
+            status_t        setParameter(int key, const Parcel& request);
+            status_t        getParameter(int key, Parcel* reply);
+
 private:
             void            clear_l();
             status_t        seekTo_l(int msec);
