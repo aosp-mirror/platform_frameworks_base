@@ -17,23 +17,78 @@
 #include <EGL/egl.h>
 #include <gtest/gtest.h>
 #include <gui/SurfaceTextureClient.h>
+#include <utils/threads.h>
 
 namespace android {
 
 class SurfaceTextureClientTest : public ::testing::Test {
 protected:
+    SurfaceTextureClientTest():
+            mEglDisplay(EGL_NO_DISPLAY),
+            mEglSurface(EGL_NO_SURFACE),
+            mEglContext(EGL_NO_CONTEXT) {
+    }
+
     virtual void SetUp() {
         mST = new SurfaceTexture(123);
         mSTC = new SurfaceTextureClient(mST);
+
+        // We need a valid GL context so we can test updateTexImage()
+        // This initializes EGL and create a dummy GL context with a
+        // pbuffer render target.
+        mEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        ASSERT_NE(EGL_NO_DISPLAY, mEglDisplay);
+
+        EGLint majorVersion, minorVersion;
+        EXPECT_TRUE(eglInitialize(mEglDisplay, &majorVersion, &minorVersion));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+        EGLConfig myConfig;
+        EGLint numConfigs = 0;
+        EXPECT_TRUE(eglChooseConfig(mEglDisplay, getConfigAttribs(),
+                &myConfig, 1, &numConfigs));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+        EGLint pbufferAttribs[] = {
+            EGL_WIDTH, 16,
+            EGL_HEIGHT, 16,
+            EGL_NONE };
+        mEglSurface = eglCreatePbufferSurface(mEglDisplay, myConfig, pbufferAttribs);
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        ASSERT_NE(EGL_NO_SURFACE, mEglSurface);
+
+        mEglContext = eglCreateContext(mEglDisplay, myConfig, EGL_NO_CONTEXT, 0);
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        ASSERT_NE(EGL_NO_CONTEXT, mEglContext);
+
+        EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface, mEglContext));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
     }
 
     virtual void TearDown() {
         mST.clear();
         mSTC.clear();
+        eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        eglDestroyContext(mEglDisplay, mEglContext);
+        eglDestroySurface(mEglDisplay, mEglSurface);
+        eglTerminate(mEglDisplay);
+    }
+
+    virtual EGLint const* getConfigAttribs() {
+        static EGLint sDefaultConfigAttribs[] = {
+            EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+            EGL_NONE
+        };
+
+        return sDefaultConfigAttribs;
     }
 
     sp<SurfaceTexture> mST;
     sp<SurfaceTextureClient> mSTC;
+    EGLDisplay mEglDisplay;
+    EGLSurface mEglSurface;
+    EGLContext mEglContext;
 };
 
 TEST_F(SurfaceTextureClientTest, GetISurfaceTextureIsNotNull) {
@@ -245,6 +300,214 @@ TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSizeVsGeometry) {
     EXPECT_EQ(24, buf[1]->height);
     ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[0]));
     ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[1]));
+}
+
+TEST_F(SurfaceTextureClientTest, SurfaceTextureTooManyUpdateTexImage) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    android_native_buffer_t* buf[3];
+    ASSERT_EQ(OK, st->setSynchronousMode(false));
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
+
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(OK, st->updateTexImage());
+
+    ASSERT_EQ(OK, st->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 2));
+
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
+
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(OK, st->updateTexImage());
+}
+
+TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeSlowRetire) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    android_native_buffer_t* buf[3];
+    ASSERT_EQ(OK, st->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+    EXPECT_NE(buf[0], buf[1]);
+    EXPECT_NE(buf[1], buf[2]);
+    EXPECT_NE(buf[2], buf[0]);
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[2]));
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(st->getCurrentBuffer().get(), buf[0]);
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(st->getCurrentBuffer().get(), buf[1]);
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(st->getCurrentBuffer().get(), buf[2]);
+}
+
+TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeFastRetire) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    android_native_buffer_t* buf[3];
+    ASSERT_EQ(OK, st->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+    EXPECT_NE(buf[0], buf[1]);
+    EXPECT_NE(buf[1], buf[2]);
+    EXPECT_NE(buf[2], buf[0]);
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(st->getCurrentBuffer().get(), buf[0]);
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(st->getCurrentBuffer().get(), buf[1]);
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[2]));
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(st->getCurrentBuffer().get(), buf[2]);
+}
+
+TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeDQQR) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    android_native_buffer_t* buf[3];
+    ASSERT_EQ(OK, st->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
+
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(st->getCurrentBuffer().get(), buf[0]);
+
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    EXPECT_NE(buf[0], buf[1]);
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(st->getCurrentBuffer().get(), buf[1]);
+
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+    EXPECT_NE(buf[1], buf[2]);
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[2]));
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(st->getCurrentBuffer().get(), buf[2]);
+}
+
+TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeDequeueCurrent) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    android_native_buffer_t* buf[3];
+    android_native_buffer_t* firstBuf;
+    ASSERT_EQ(OK, st->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &firstBuf));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), firstBuf));
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(st->getCurrentBuffer().get(), firstBuf);
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[2]));
+    EXPECT_NE(buf[0], buf[1]);
+    EXPECT_NE(buf[1], buf[2]);
+    EXPECT_NE(buf[2], buf[0]);
+    EXPECT_EQ(firstBuf, buf[2]);
+}
+
+TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeTwoBuffers) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    ASSERT_EQ(OK, st->setSynchronousMode(true));
+    EXPECT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
+    EXPECT_EQ(OK, native_window_set_buffer_count(anw.get(), 2));
+    EXPECT_NE(OK, native_window_set_buffer_count(anw.get(), 1));
+}
+
+TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeMinUndequeued) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    android_native_buffer_t* buf[3];
+    ASSERT_EQ(OK, st->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
+    EXPECT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    EXPECT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    EXPECT_EQ(-EBUSY, anw->dequeueBuffer(anw.get(), &buf[2]));
+
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
+
+    EXPECT_EQ(OK, st->updateTexImage());
+    EXPECT_EQ(st->getCurrentBuffer().get(), buf[1]);
+
+    EXPECT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[2]));
+}
+
+TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeWaitRetire) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+
+    class MyThread : public Thread {
+        sp<SurfaceTexture> st;
+        EGLContext ctx;
+        EGLSurface sur;
+        EGLDisplay dpy;
+        bool mBufferRetired;
+        Mutex mLock;
+        virtual bool threadLoop() {
+            eglMakeCurrent(dpy, sur, sur, ctx);
+            usleep(20000);
+            Mutex::Autolock _l(mLock);
+            st->updateTexImage();
+            mBufferRetired = true;
+            eglMakeCurrent(dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            return false;
+        }
+    public:
+        MyThread(const sp<SurfaceTexture>& st)
+            : st(st), mBufferRetired(false) {
+            ctx = eglGetCurrentContext();
+            sur = eglGetCurrentSurface(EGL_DRAW);
+            dpy = eglGetCurrentDisplay();
+            eglMakeCurrent(dpy, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+        }
+        ~MyThread() {
+            eglMakeCurrent(dpy, sur, sur, ctx);
+        }
+        void bufferDequeued() {
+            Mutex::Autolock _l(mLock);
+            EXPECT_EQ(true, mBufferRetired);
+        }
+    };
+
+    android_native_buffer_t* buf[3];
+    ASSERT_EQ(OK, st->setSynchronousMode(true));
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 2));
+    // dequeue/queue/update so we have a current buffer
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    st->updateTexImage();
+
+    MyThread* thread = new MyThread(st);
+    sp<Thread> threadBase(thread);
+
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
+    thread->run();
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[2]));
+    thread->bufferDequeued();
+    thread->requestExitAndWait();
 }
 
 }
