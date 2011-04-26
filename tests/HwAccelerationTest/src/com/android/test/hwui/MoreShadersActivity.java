@@ -96,6 +96,7 @@ public class MoreShadersActivity extends Activity {
             mLargePaint.setAntiAlias(true);
             mLargePaint.setTextSize(36.0f);
             mLargePaint.setColor(0xff000000);
+            mLargePaint.setShadowLayer(3.0f, 0.0f, 3.0f, 0x7f00ff00);
             
             mPaint = new Paint();
         }
