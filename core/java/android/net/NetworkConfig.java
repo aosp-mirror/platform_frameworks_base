@@ -60,11 +60,7 @@ public class NetworkConfig {
         type = Integer.parseInt(fragments[1]);
         radio = Integer.parseInt(fragments[2]);
         priority = Integer.parseInt(fragments[3]);
-        if (fragments.length > 4) {
-            dependencyMet = Boolean.parseBoolean(fragments[4]);
-        } else {
-            dependencyMet = true;
-        }
+        dependencyMet = Boolean.parseBoolean(fragments[4]);
     }
 
     /**
