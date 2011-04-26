@@ -16,6 +16,9 @@
 
 package com.android.server;
 
+import com.android.internal.R;
+import com.android.internal.telephony.TelephonyProperties;
+
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -30,7 +33,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.INetworkManagementEventObserver;
 import android.net.IThrottleManager;
-import android.net.SntpClient;
 import android.net.ThrottleManager;
 import android.os.Binder;
 import android.os.Environment;
@@ -47,10 +49,9 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.NtpTrustedTime;
 import android.util.Slog;
-
-import com.android.internal.R;
-import com.android.internal.telephony.TelephonyProperties;
+import android.util.TrustedTime;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -60,11 +61,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Calendar;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.GregorianCalendar;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 // TODO - add comments - reference the ThrottleManager for public API
 public class ThrottleService extends IThrottleManager.Stub {
@@ -83,6 +84,11 @@ public class ThrottleService extends IThrottleManager.Stub {
     private static final int TESTING_POLLING_PERIOD_SEC = 60 * 1;
     private static final int TESTING_RESET_PERIOD_SEC = 60 * 10;
     private static final long TESTING_THRESHOLD = 1 * 1024 * 1024;
+
+    private static final long MAX_NTP_CACHE_AGE = 24 * 60 * 60 * 1000;
+    private static final long MAX_NTP_FETCH_WAIT = 20 * 1000;
+
+    private long mMaxNtpCacheAge = MAX_NTP_CACHE_AGE;
 
     private int mPolicyPollPeriodSec;
     private AtomicLong mPolicyThreshold;
@@ -121,10 +127,24 @@ public class ThrottleService extends IThrottleManager.Stub {
     private static final int THROTTLE_INDEX_UNTHROTTLED   =  0;
 
     private static final String PROPERTIES_FILE = "/etc/gps.conf";
-    private String mNtpServer;
-    private boolean mNtpActive;
+
+    private Intent mPollStickyBroadcast;
+
+    private TrustedTime mTime;
+
+    private static INetworkManagementService getNetworkManagementService() {
+        final IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+        return INetworkManagementService.Stub.asInterface(b);
+    }
 
     public ThrottleService(Context context) {
+        // TODO: move to using cached NtpTrustedTime
+        this(context, getNetworkManagementService(), new NtpTrustedTime(),
+                context.getResources().getString(R.string.config_datause_iface));
+    }
+
+    public ThrottleService(Context context, INetworkManagementService nmService, TrustedTime time,
+            String iface) {
         if (VDBG) Slog.v(TAG, "Starting ThrottleService");
         mContext = context;
 
@@ -132,17 +152,15 @@ public class ThrottleService extends IThrottleManager.Stub {
         mPolicyThrottleValue = new AtomicInteger();
         mThrottleIndex = new AtomicInteger();
 
-        mNtpActive = false;
-
-        mIface = mContext.getResources().getString(R.string.config_datause_iface);
+        mIface = iface;
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
         Intent pollIntent = new Intent(ACTION_POLL, null);
         mPendingPollIntent = PendingIntent.getBroadcast(mContext, POLL_REQUEST, pollIntent, 0);
         Intent resetIntent = new Intent(ACTION_RESET, null);
         mPendingResetIntent = PendingIntent.getBroadcast(mContext, RESET_REQUEST, resetIntent, 0);
 
-        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        mNMService = INetworkManagementService.Stub.asInterface(b);
+        mNMService = nmService;
+        mTime = time;
 
         mNotificationManager = (NotificationManager)mContext.getSystemService(
                 Context.NOTIFICATION_SERVICE);
@@ -189,7 +207,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             mMsg = msg;
         }
 
-        void observe(Context context) {
+        void register(Context context) {
             ContentResolver resolver = context.getContentResolver();
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.THROTTLE_POLLING_SEC), false, this);
@@ -207,6 +225,11 @@ public class ThrottleService extends IThrottleManager.Stub {
                     Settings.Secure.THROTTLE_MAX_NTP_CACHE_AGE_SEC), false, this);
         }
 
+        void unregister(Context context) {
+            final ContentResolver resolver = context.getContentResolver();
+            resolver.unregisterContentObserver(this);
+        }
+
         @Override
         public void onChange(boolean selfChange) {
             mHandler.obtainMessage(mMsg).sendToTarget();
@@ -220,7 +243,9 @@ public class ThrottleService extends IThrottleManager.Stub {
     }
 
     private long ntpToWallTime(long ntpTime) {
-        long bestNow = getBestTime(true); // do it quickly
+        // get time quickly without worrying about trusted state
+        long bestNow = mTime.hasCache() ? mTime.currentTimeMillis()
+                : System.currentTimeMillis();
         long localNow = System.currentTimeMillis();
         return localNow + (ntpTime - bestNow);
     }
@@ -300,7 +325,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    mHandler.obtainMessage(EVENT_POLL_ALARM).sendToTarget();
+                    dispatchPoll();
                 }
             }, new IntentFilter(ACTION_POLL));
 
@@ -308,7 +333,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    mHandler.obtainMessage(EVENT_RESET_ALARM).sendToTarget();
+                    dispatchReset();
                 }
             }, new IntentFilter(ACTION_RESET));
 
@@ -318,7 +343,10 @@ public class ThrottleService extends IThrottleManager.Stub {
             File file = new File(PROPERTIES_FILE);
             stream = new FileInputStream(file);
             properties.load(stream);
-            mNtpServer = properties.getProperty("NTP_SERVER", null);
+            final String ntpServer = properties.getProperty("NTP_SERVER", null);
+            if (mTime instanceof NtpTrustedTime) {
+                ((NtpTrustedTime) mTime).setNtpServer(ntpServer, MAX_NTP_FETCH_WAIT);
+            }
         } catch (IOException e) {
             Slog.e(TAG, "Could not open GPS configuration file " + PROPERTIES_FILE);
         } finally {
@@ -343,9 +371,33 @@ public class ThrottleService extends IThrottleManager.Stub {
         }
 
         mSettingsObserver = new SettingsObserver(mHandler, EVENT_POLICY_CHANGED);
-        mSettingsObserver.observe(mContext);
+        mSettingsObserver.register(mContext);
     }
 
+    void shutdown() {
+        // TODO: eventually connect with ShutdownThread to persist stats during
+        // graceful shutdown.
+
+        if (mThread != null) {
+            mThread.quit();
+        }
+
+        if (mSettingsObserver != null) {
+            mSettingsObserver.unregister(mContext);
+        }
+
+        if (mPollStickyBroadcast != null) {
+            mContext.removeStickyBroadcast(mPollStickyBroadcast);
+        }
+    }
+
+    void dispatchPoll() {
+        mHandler.obtainMessage(EVENT_POLL_ALARM).sendToTarget();
+    }
+
+    void dispatchReset() {
+        mHandler.obtainMessage(EVENT_RESET_ALARM).sendToTarget();
+    }
 
     private static final int EVENT_REBOOT_RECOVERY = 0;
     private static final int EVENT_POLICY_CHANGED  = 1;
@@ -440,15 +492,17 @@ public class ThrottleService extends IThrottleManager.Stub {
             mPolicyNotificationsAllowedMask = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.THROTTLE_NOTIFICATION_TYPE, defaultNotificationType);
 
-            mMaxNtpCacheAgeSec = Settings.Secure.getInt(mContext.getContentResolver(),
-                    Settings.Secure.THROTTLE_MAX_NTP_CACHE_AGE_SEC, MAX_NTP_CACHE_AGE_SEC);
+            final int maxNtpCacheAgeSec = Settings.Secure.getInt(mContext.getContentResolver(),
+                    Settings.Secure.THROTTLE_MAX_NTP_CACHE_AGE_SEC,
+                    (int) (MAX_NTP_CACHE_AGE / 1000));
+            mMaxNtpCacheAge = maxNtpCacheAgeSec * 1000;
 
             if (VDBG || (mPolicyThreshold.get() != 0)) {
                 Slog.d(TAG, "onPolicyChanged testing=" + testing +", period=" +
                         mPolicyPollPeriodSec + ", threshold=" + mPolicyThreshold.get() +
                         ", value=" + mPolicyThrottleValue.get() + ", resetDay=" + mPolicyResetDay +
-                        ", noteType=" + mPolicyNotificationsAllowedMask + ", maxNtpCacheAge=" +
-                        mMaxNtpCacheAgeSec);
+                        ", noteType=" + mPolicyNotificationsAllowedMask + ", mMaxNtpCacheAge=" +
+                        mMaxNtpCacheAge);
             }
 
             // force updates
@@ -464,9 +518,15 @@ public class ThrottleService extends IThrottleManager.Stub {
 
         private void onPollAlarm() {
             long now = SystemClock.elapsedRealtime();
-            long next = now + mPolicyPollPeriodSec*1000;
+            long next = now + mPolicyPollPeriodSec * 1000;
 
-            checkForAuthoritativeTime();
+            // when trusted cache outdated, try refreshing
+            if (mTime.getCacheAge() > mMaxNtpCacheAge) {
+                if (mTime.forceRefresh()) {
+                    if (VDBG) Slog.d(TAG, "updated trusted time, reseting alarm");
+                    dispatchReset();
+                }
+            }
 
             long incRead = 0;
             long incWrite = 0;
@@ -509,6 +569,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             broadcast.putExtra(ThrottleManager.EXTRA_CYCLE_START, getPeriodStartTime(mIface));
             broadcast.putExtra(ThrottleManager.EXTRA_CYCLE_END, getResetTime(mIface));
             mContext.sendStickyBroadcast(broadcast);
+            mPollStickyBroadcast = broadcast;
 
             mAlarmManager.cancel(mPendingPollIntent);
             mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, next, mPendingPollIntent);
@@ -538,7 +599,8 @@ public class ThrottleService extends IThrottleManager.Stub {
 
             // have we spoken with an ntp server yet?
             // this is controversial, but we'd rather err towards not throttling
-            if ((mNtpServer != null) && !mNtpActive) {
+            if (!mTime.hasCache()) {
+                Slog.w(TAG, "missing trusted time, skipping throttle check");
                 return;
             }
 
@@ -697,9 +759,15 @@ public class ThrottleService extends IThrottleManager.Stub {
                         " bytes read and " + mRecorder.getPeriodTx(0) + " written");
             }
 
-            long now = getBestTime(false);
+            // when trusted cache outdated, try refreshing
+            if (mTime.getCacheAge() > mMaxNtpCacheAge) {
+                mTime.forceRefresh();
+            }
 
-            if (mNtpActive || (mNtpServer == null)) {
+            // as long as we have a trusted time cache, we always reset alarms,
+            // even if the refresh above failed.
+            if (mTime.hasCache()) {
+                final long now = mTime.currentTimeMillis();
                 Calendar end = calculatePeriodEnd(now);
                 Calendar start = calculatePeriodStart(end);
 
@@ -714,54 +782,9 @@ public class ThrottleService extends IThrottleManager.Stub {
                         SystemClock.elapsedRealtime() + offset,
                         mPendingResetIntent);
             } else {
-                if (VDBG) Slog.d(TAG, "no authoritative time - not resetting period");
+                if (VDBG) Slog.d(TAG, "no trusted time, not resetting period");
             }
         }
-    }
-
-    private void checkForAuthoritativeTime() {
-        if (mNtpActive || (mNtpServer == null)) return;
-
-        // will try to get the ntp time and switch to it if found.
-        // will also cache the time so we don't fetch it repeatedly.
-        getBestTime(false);
-    }
-
-    private static final int MAX_NTP_CACHE_AGE_SEC = 60 * 60 * 24; // 1 day
-    private static final int MAX_NTP_FETCH_WAIT = 20 * 1000;
-    private int mMaxNtpCacheAgeSec = MAX_NTP_CACHE_AGE_SEC;
-    private long cachedNtp;
-    private long cachedNtpTimestamp;
-
-    // if the request is tied to UI and ANR's are a danger, request a fast result
-    // the regular polling should have updated the cached time recently using the
-    // slower method (!fast)
-    private long getBestTime(boolean fast) {
-        if (mNtpServer != null) {
-            if (mNtpActive) {
-                long ntpAge = SystemClock.elapsedRealtime() - cachedNtpTimestamp;
-                if (ntpAge < mMaxNtpCacheAgeSec * 1000 || fast) {
-                    if (VDBG) Slog.v(TAG, "using cached time");
-                    return cachedNtp + ntpAge;
-                }
-            }
-            SntpClient client = new SntpClient();
-            if (client.requestTime(mNtpServer, MAX_NTP_FETCH_WAIT)) {
-                cachedNtp = client.getNtpTime();
-                cachedNtpTimestamp = SystemClock.elapsedRealtime();
-                if (!mNtpActive) {
-                    mNtpActive = true;
-                    if (VDBG) Slog.d(TAG, "found Authoritative time - reseting alarm");
-                    mHandler.obtainMessage(EVENT_RESET_ALARM).sendToTarget();
-                }
-                if (VDBG) Slog.v(TAG, "using Authoritative time: " + cachedNtp);
-                return cachedNtp;
-            }
-        }
-        long time = System.currentTimeMillis();
-        if (VDBG) Slog.v(TAG, "using User time: " + time);
-        mNtpActive = false;
-        return time;
     }
 
     // records bytecount data for a given time and accumulates it into larger time windows
@@ -929,7 +952,7 @@ public class ThrottleService extends IThrottleManager.Stub {
         private void checkAndDeleteLRUDataFile(File dir) {
             File[] files = dir.listFiles();
 
-            if (files.length <= MAX_SIMS_SUPPORTED) return;
+            if (files == null || files.length <= MAX_SIMS_SUPPORTED) return;
             if (DBG) Slog.d(TAG, "Too many data files");
             do {
                 File oldest = null;
@@ -949,9 +972,11 @@ public class ThrottleService extends IThrottleManager.Stub {
             File newest = null;
             File[] files = dir.listFiles();
 
-            for (File f : files) {
-                if ((newest == null) || (newest.lastModified() < f.lastModified())) {
-                    newest = f;
+            if (files != null) {
+                for (File f : files) {
+                    if ((newest == null) || (newest.lastModified() < f.lastModified())) {
+                        newest = f;
+                    }
                 }
             }
             if (newest == null) {
@@ -1126,7 +1151,7 @@ public class ThrottleService extends IThrottleManager.Stub {
                 " seconds.");
         pw.println("Polling every " + mPolicyPollPeriodSec + " seconds");
         pw.println("Current Throttle Index is " + mThrottleIndex.get());
-        pw.println("Max NTP Cache Age is " + mMaxNtpCacheAgeSec);
+        pw.println("mMaxNtpCacheAge=" + mMaxNtpCacheAge);
 
         for (int i = 0; i < mRecorder.getPeriodCount(); i++) {
             pw.println(" Period[" + i + "] - read:" + mRecorder.getPeriodRx(i) + ", written:" +
