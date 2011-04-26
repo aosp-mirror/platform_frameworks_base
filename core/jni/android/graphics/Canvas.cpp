@@ -936,7 +936,7 @@ public:
             SkPath* path, jfloat hOffset, jfloat vOffset, jint bidiFlags, SkPaint* paint) {
 
         jchar* textArray = env->GetCharArrayElements(text, NULL);
-        TextLayout::drawTextOnPath(paint, textArray, count, bidiFlags, hOffset, vOffset,
+        TextLayout::drawTextOnPath(paint, textArray + index, count, bidiFlags, hOffset, vOffset,
                                    path, canvas);
         env->ReleaseCharArrayElements(text, textArray, 0);
     }
