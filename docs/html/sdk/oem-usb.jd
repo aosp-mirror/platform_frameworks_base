@@ -64,7 +64,7 @@ href="https://www.garminasus.com/en_US/support/pcsync/">https://www.garminasus.c
 support tab to select your products/device.  Different regions will have different links.</td>
 </tr>
 <tr><td>Huawei</td>	<td><a
-href="http://www.huaweidevice.com/worldwide/downloadCenter.do?method=list&flay=software&directoryId=20&treeId=0">http://www.huaweidevice.com/worldwide/downloadCenter.do?method=list&flay=software&directoryId=20&treeId=0</a></td>
+href="http://www.huaweidevice.com/worldwide/downloadCenter.do?method=list&flay=software&directoryId=20&treeId=0">http://www.huaweidevice.com/worldwide/downloadCenter.do?method=list&amp;flay=software&amp;directoryId=20&amp;treeId=0</a></td>
 </tr><tr><td>KT Tech</td>	<td><a
 href="http://www.kttech.co.kr/cscenter/download05.asp">http://www.kttech.co.kr/cscenter/download05.asp</a> for EV-S100(Take)</td>
 </tr>
@@ -72,7 +72,7 @@ href="http://www.kttech.co.kr/cscenter/download05.asp">http://www.kttech.co.kr/c
     <td>
       Kyocera
     </td>
-    <td><a href="http://www.kyocera-wireless.com/">http://www.kyocera-wireless.com/</a>
+    <td><a href="http://www.kyocera-wireless.com/support/phone_drivers.htm">http://www.kyocera-wireless.com/support/phone_drivers.htm</a>
     </td>
   </tr>
   <tr><td>LGE</td>	<td><a
@@ -88,7 +88,7 @@ href="http://k-tai.sharp.co.jp/support/">http://k-tai.sharp.co.jp/support/</a></
 </tr><tr><td>SK Telesys</td>	<td><a
 href="http://www.sk-w.com/service/wDownload/wDownload.jsp">http://www.sk-w.com/service/wDownload/wDownload.jsp</a></td></tr><tr>
 <td>Sony Ericsson</td>	<td><a
-href="http://developer.sonyericsson.com/wportal/devworld/search-downloads/android">http://developer.sonyericsson.com/wportal/devworld/search-downloads/android</a></td></tr><tr>
+href="http://developer.sonyericsson.com/wportal/devworld/search-downloads/driver?cc=gb&lc=en">http://developer.sonyericsson.com/wportal/devworld/search-downloads/driver?cc=gb&amp;lc=en</a></td></tr><tr>
 <td>ZTE</td>	<td><a
 href="http://support.zte.com.cn/support/news/NewsDetail.aspx?newsId=1000442">http://support.zte.com.cn/support/news/NewsDetail.aspx?newsId=1000442</a></td></tr>
 </table>
