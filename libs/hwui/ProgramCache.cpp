@@ -179,6 +179,8 @@ const char* gFS_Fast_SingleModulateGradient =
 // General case
 const char* gFS_Main_FetchColor =
         "    fragColor = color;\n";
+const char* gFS_Main_ModulateColor =
+        "    fragColor *= color.a;\n";
 const char* gFS_Main_AccountForWidth =
         "    if (distance < boundaryWidth) {\n"
         "        fragColor *= (distance * inverseBoundaryWidth);\n"
@@ -581,6 +583,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
                 shader.append(gFS_Main_FetchBitmapNpot);
             }
         }
+        bool applyModulate = false;
         // Case when we have two shaders set
         if (description.hasGradient && description.hasBitmap) {
             int op = description.hasAlpha8Texture ? MODULATE_OP_MODULATE_A8 : modulateOp;
@@ -590,14 +593,20 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
                 shader.append(gFS_Main_BlendShadersGB);
             }
             shader.append(gFS_Main_BlendShaders_Modulate[op]);
+            applyModulate = true;
         } else {
             if (description.hasGradient) {
                 int op = description.hasAlpha8Texture ? MODULATE_OP_MODULATE_A8 : modulateOp;
                 shader.append(gFS_Main_GradientShader_Modulate[op]);
+                applyModulate = true;
             } else if (description.hasBitmap) {
                 int op = description.hasAlpha8Texture ? MODULATE_OP_MODULATE_A8 : modulateOp;
                 shader.append(gFS_Main_BitmapShader_Modulate[op]);
+                applyModulate = true;
             }
+        }
+        if (description.modulate && applyModulate) {
+            shader.append(gFS_Main_ModulateColor);
         }
         // Apply the color op if needed
         shader.append(gFS_Main_ApplyColorOp[description.colorOp]);

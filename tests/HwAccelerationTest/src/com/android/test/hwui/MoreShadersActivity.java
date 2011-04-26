@@ -97,7 +97,7 @@ public class MoreShadersActivity extends Activity {
             mLargePaint.setTextSize(36.0f);
             mLargePaint.setColor(0xff000000);
             mLargePaint.setShadowLayer(3.0f, 0.0f, 3.0f, 0x7f00ff00);
-            
+
             mPaint = new Paint();
         }
 
@@ -123,19 +123,19 @@ public class MoreShadersActivity extends Activity {
 
             mLargePaint.setShader(mHorGradient);
             canvas.drawText("OpenGL rendering", 0.0f, 20.0f, mLargePaint);
-            
+
             mLargePaint.setShader(mScaled2Shader);
             canvas.drawText("OpenGL rendering", 0.0f, 60.0f, mLargePaint);
-            
+
             mLargePaint.setShader(mCompose2Shader);
             mLargePaint.setColorFilter(mColorFilter);
             canvas.drawText("OpenGL rendering", 0.0f, 100.0f, mLargePaint);
             mLargePaint.setColorFilter(null);
-            
+
             canvas.translate(0.0f, 40.0f + mDrawHeight);
             mLargePaint.setShader(mVertGradient);
             canvas.drawText("OpenGL rendering", 0.0f, 20.0f, mLargePaint);
-            
+
             canvas.restore();
         }
     }
