@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.FrameLayout;
 
 /**
@@ -29,6 +30,7 @@ import android.widget.FrameLayout;
  */
 public class ActionBarContainer extends FrameLayout {
     private boolean mIsTransitioning;
+    private View mTabContainer;
 
     public ActionBarContainer(Context context) {
         this(context, null);
@@ -65,6 +67,44 @@ public class ActionBarContainer extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         super.onTouchEvent(ev);
+
+        // An action bar always eats touch events.
         return true;
+    }
+
+    public void setTabContainer(View tabView) {
+        if (mTabContainer != null) {
+            removeView(mTabContainer);
+        }
+        mTabContainer = tabView;
+        addView(tabView);
+    }
+
+    public View getTabContainer() {
+        return mTabContainer;
+    }
+
+    @Override
+    public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        if (mTabContainer != null && mTabContainer.getVisibility() != GONE) {
+            final int mode = MeasureSpec.getMode(heightMeasureSpec);
+            if (mode == MeasureSpec.AT_MOST) {
+                final int measuredHeight = getMeasuredHeight();
+                final int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
+                setMeasuredDimension(getMeasuredWidth(),
+                        Math.min(measuredHeight + mTabContainer.getMeasuredHeight(), maxHeight));
+            }
+        }
+    }
+
+    @Override
+    public void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        if (mTabContainer != null && mTabContainer.getVisibility() != GONE) {
+            final int containerHeight = getMeasuredHeight();
+            mTabContainer.layout(l, containerHeight - mTabContainer.getMeasuredHeight(),
+                    r, containerHeight);
+        }
     }
 }

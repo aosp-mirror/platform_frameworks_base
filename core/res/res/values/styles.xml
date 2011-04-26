@@ -1074,6 +1074,7 @@
         <item name="android:progressBarStyle">@android:style/Widget.ProgressBar.Horizontal</item>
         <item name="android:indeterminateProgressStyle">@android:style/Widget.ProgressBar.Small</item>
         <item name="android:homeLayout">@android:layout/action_bar_home</item>
+        <item name="android:embeddedTabs">@android:bool/action_bar_embed_tabs</item>
     </style>
 
     <style name="Widget.ActionMode">

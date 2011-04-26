@@ -97,7 +97,7 @@ public class ActionBarView extends ViewGroup {
     private Spinner mSpinner;
     private LinearLayout mListNavLayout;
     private HorizontalScrollView mTabScrollView;
-    private LinearLayout mTabLayout;
+    private ViewGroup mTabLayout;
     private View mCustomNavView;
     private ProgressBar mProgressView;
     private ProgressBar mIndeterminateProgressView;
@@ -112,6 +112,7 @@ public class ActionBarView extends ViewGroup {
 
     private boolean mShowMenu;
     private boolean mUserTitle;
+    private boolean mIncludeTabs;
 
     private MenuBuilder mOptionsMenu;
     private ActionMenuView mMenuView;
@@ -201,6 +202,8 @@ public class ActionBarView extends ViewGroup {
         mProgressBarPadding = a.getDimensionPixelOffset(R.styleable.ActionBar_progressBarPadding, 0);
         mItemPadding = a.getDimensionPixelOffset(R.styleable.ActionBar_itemPadding, 0);
 
+        mIncludeTabs = a.getBoolean(R.styleable.ActionBar_embeddedTabs, true);
+
         setDisplayOptions(a.getInt(R.styleable.ActionBar_displayOptions, DISPLAY_DEFAULT));
 
         final int customNavId = a.getResourceId(R.styleable.ActionBar_customNavigationLayout, 0);
@@ -240,6 +243,14 @@ public class ActionBarView extends ViewGroup {
                 mIndeterminateProgressStyle);
         mIndeterminateProgressView.setId(R.id.progress_circular);
         addView(mIndeterminateProgressView);
+    }
+
+    public boolean hasEmbeddedTabs() {
+        return mIncludeTabs;
+    }
+
+    public void setExternalTabLayout(ViewGroup tabLayout) {
+        mTabLayout = tabLayout;
     }
 
     @Override
@@ -389,6 +400,12 @@ public class ActionBarView extends ViewGroup {
     public void setDisplayOptions(int options) {
         final int flagsChanged = options ^ mDisplayOptions;
         mDisplayOptions = options;
+
+        if ((flagsChanged & ActionBar.DISPLAY_DISABLE_HOME) != 0) {
+            final boolean disableHome = (options & ActionBar.DISPLAY_DISABLE_HOME) != 0;
+            mHomeLayout.setEnabled(!disableHome);
+        }
+
         if ((flagsChanged & DISPLAY_RELAYOUT_MASK) != 0) {
             final int vis = (options & ActionBar.DISPLAY_SHOW_HOME) != 0 ? VISIBLE : GONE;
             mHomeLayout.setVisibility(vis);
@@ -477,7 +494,7 @@ public class ActionBarView extends ViewGroup {
                 }
                 break;
             case ActionBar.NAVIGATION_MODE_TABS:
-                if (mTabLayout != null) {
+                if (mTabScrollView != null) {
                     removeView(mTabScrollView);
                 }
             }
@@ -502,7 +519,9 @@ public class ActionBarView extends ViewGroup {
                 break;
             case ActionBar.NAVIGATION_MODE_TABS:
                 ensureTabsExist();
-                addView(mTabScrollView);
+                if (mTabScrollView != null) {
+                    addView(mTabScrollView);
+                }
                 break;
             }
             mNavigationMode = mode;
@@ -511,13 +530,22 @@ public class ActionBarView extends ViewGroup {
     }
     
     private void ensureTabsExist() {
+        if (!mIncludeTabs) return;
+
         if (mTabScrollView == null) {
             mTabScrollView = new HorizontalScrollView(getContext());
             mTabScrollView.setHorizontalFadingEdgeEnabled(true);
-            mTabLayout = new LinearLayout(getContext(), null,
-                    com.android.internal.R.attr.actionBarTabBarStyle);
+            mTabLayout = createTabContainer();
             mTabScrollView.addView(mTabLayout);
         }
+    }
+
+    public ViewGroup createTabContainer() {
+        ViewGroup result = new LinearLayout(getContext(), null,
+                com.android.internal.R.attr.actionBarTabBarStyle);
+        result.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
+                mContentHeight));
+        return result;
     }
 
     public void setDropdownAdapter(SpinnerAdapter adapter) {

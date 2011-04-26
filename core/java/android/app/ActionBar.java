@@ -107,6 +107,18 @@ public abstract class ActionBar {
     public static final int DISPLAY_SHOW_CUSTOM = 0x10;
 
     /**
+     * Disable the 'home' element. This may be combined with
+     * {@link #DISPLAY_SHOW_HOME} to create a non-focusable/non-clickable
+     * 'home' element. Useful for a level of your app's navigation hierarchy
+     * where clicking 'home' doesn't do anything.
+     *
+     * @see #setDisplayOptions(int)
+     * @see #setDisplayOptions(int, int)
+     * @see #setDisplayDisableHomeEnabled(boolean)
+     */
+    public static final int DISPLAY_DISABLE_HOME = 0x20;
+
+    /**
      * Set the action bar into custom navigation mode, supplying a view
      * for custom navigation.
      *
@@ -391,6 +403,21 @@ public abstract class ActionBar {
      * @see #setDisplayOptions(int, int)
      */
     public abstract void setDisplayShowCustomEnabled(boolean showCustom);
+
+    /**
+     * Set whether the 'home' affordance on the action bar should be disabled.
+     * If set, the 'home' element will not be focusable or clickable, useful if
+     * the user is at the top level of the app's navigation hierarchy.
+     *
+     * <p>To set several display options at once, see the setDisplayOptions methods.
+     *
+     * @param disableHome true to disable the 'home' element.
+     *
+     * @see #setDisplayOptions(int)
+     * @see #setDisplayOptions(int, int)
+     * @see #DISPLAY_DISABLE_HOME
+     */
+    public abstract void setDisplayDisableHomeEnabled(boolean disableHome);
 
     /**
      * Set the ActionBar's background.

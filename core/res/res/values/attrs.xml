@@ -4850,6 +4850,7 @@
             <flag name="homeAsUp" value="0x4" />
             <flag name="showTitle" value="0x8" />
             <flag name="showCustom" value="0x10" />
+            <flag name="disableHome" value="0x20" />
         </attr>
         <!-- Specifies title text used for navigationMode="normal" -->
         <attr name="title" />
@@ -4882,6 +4883,9 @@
         <!-- Specifies padding that should be applied to the left and right sides of
              system-provided items in the bar. -->
         <attr name="itemPadding" format="dimension" />
+        <!-- Specifies whether tabs should be embedded within the bar itself (true)
+             or displayed elsewhere (false). -->
+        <attr name="embeddedTabs" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="ActionMode">
