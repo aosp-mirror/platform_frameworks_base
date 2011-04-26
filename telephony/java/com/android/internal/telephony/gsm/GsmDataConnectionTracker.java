@@ -1596,13 +1596,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         apnContext.setState(State.IDLE);
         apnContext.setApnSetting(null);
 
-        mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
-
         // Check if APN disabled.
         if (apnContext.getPendingAction() == ApnContext.PENDING_ACTION_APN_DISABLE) {
            apnContext.setEnabled(false);
            apnContext.setPendingAction(ApnContext.PENDING_ACTION_NONE);
         }
+        mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
 
         // if all data connection are gone, check whether Airplane mode request was
         // pending.
