@@ -2253,6 +2253,27 @@ final class WebViewCore {
         // set the viewport settings from WebKit
         setViewportSettingsFromNative();
 
+        if (mSettings.forceUserScalable()) {
+            mViewportUserScalable = true;
+            if (mViewportInitialScale > 0) {
+                if (mViewportMinimumScale > 0) {
+                    mViewportMinimumScale = Math.min(mViewportMinimumScale,
+                            mViewportInitialScale / 2);
+                }
+                if (mViewportMaximumScale > 0) {
+                    mViewportMaximumScale = Math.max(mViewportMaximumScale,
+                            mViewportInitialScale * 2);
+                }
+            } else {
+                if (mViewportMinimumScale > 0) {
+                    mViewportMinimumScale = Math.min(mViewportMinimumScale, 50);
+                }
+                if (mViewportMaximumScale > 0) {
+                    mViewportMaximumScale = Math.max(mViewportMaximumScale, 200);
+                }
+            }
+        }
+
         // adjust the default scale to match the densityDpi
         float adjust = 1.0f;
         if (mViewportDensityDpi == -1) {
@@ -2589,11 +2610,11 @@ final class WebViewCore {
 
     // called by JNI
     private Class<?> getPluginClass(String libName, String clsName) {
-        
+
         if (mWebView == null) {
             return null;
         }
-        
+
         PluginManager pluginManager = PluginManager.getInstance(null);
 
         String pkgName = pluginManager.getPluginsAPKName(libName);
@@ -2601,7 +2622,7 @@ final class WebViewCore {
             Log.w(LOGTAG, "Unable to resolve " + libName + " to a plugin APK");
             return null;
         }
-        
+
         try {
             return pluginManager.getPluginClass(pkgName, clsName);
         } catch (NameNotFoundException e) {
@@ -2656,7 +2677,7 @@ final class WebViewCore {
         view.mView = pluginView;
         return view;
     }
-    
+
     // called by JNI.  PluginWidget functions for creating an embedded View for
     // the surface drawing model.
     private ViewManager.ChildView addSurface(View pluginView, int x, int y,

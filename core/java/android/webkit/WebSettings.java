@@ -219,6 +219,7 @@ public class WebSettings {
     private boolean         mAllowContentAccess = true;
     private boolean         mLoadWithOverviewMode = false;
     private boolean         mEnableSmoothTransition = false;
+    private boolean         mForceUserScalable = false;
 
     // AutoFill Profile data
     /**
@@ -1656,6 +1657,23 @@ public class WebSettings {
 
             postSync();
         }
+    }
+
+    /**
+     * Returns whether the viewport metatag can disable zooming
+     * @hide
+     */
+    public boolean forceUserScalable() {
+        return mForceUserScalable;
+    }
+
+    /**
+     * Sets whether viewport metatag can disable zooming.
+     * @param flag Whether or not to forceably enable user scalable.
+     * @hide
+     */
+    public synchronized void setForceUserScalable(boolean flag) {
+        mForceUserScalable = flag;
     }
 
     synchronized void setSyntheticLinksEnabled(boolean flag) {
