@@ -42,8 +42,9 @@ public class Lines2Activity extends Activity {
         swView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         frame.addView(swView);
         final LinesView hwBothView = new LinesView(this, 850, Color.GREEN);
-        // BUG: some lines not drawn or drawn with alpha when enabling hw layers
-//        hwBothView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        // Don't actually need to render to a hw layer, but it's a good sanity-check that
+        // we're rendering to/from layers correctly
+        hwBothView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         frame.addView(hwBothView);
         final LinesView swBothView = new LinesView(this, 854, Color.RED);
         swBothView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);

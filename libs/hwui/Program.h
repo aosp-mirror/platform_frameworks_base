@@ -81,7 +81,7 @@ public:
      * transform matrices.
      */
     void set(const mat4& projectionMatrix, const mat4& modelViewMatrix,
-             const mat4& transformMatrix);
+             const mat4& transformMatrix, bool offset = false);
 
     /**
      * Sets the color associated with this shader.

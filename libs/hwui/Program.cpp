@@ -124,8 +124,15 @@ GLuint Program::buildShader(const char* source, GLenum type) {
 }
 
 void Program::set(const mat4& projectionMatrix, const mat4& modelViewMatrix,
-        const mat4& transformMatrix) {
+        const mat4& transformMatrix, bool offset) {
     mat4 t(projectionMatrix);
+    if (offset) {
+        // offset screenspace xy by an amount that compensates for typical precision issues
+        // in GPU hardware that tends to paint hor/vert lines in pixels shifted up and to the left.
+        // This offset value is based on an assumption that some hardware may use as little
+        // as 12.4 precision, so we offset by slightly more than 1/16.
+        t.translate(.375, .375, 0);
+    }
     t.multiply(transformMatrix);
     t.multiply(modelViewMatrix);
 

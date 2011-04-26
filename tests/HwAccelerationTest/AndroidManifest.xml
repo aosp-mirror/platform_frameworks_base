@@ -406,6 +406,15 @@
         </activity>
 
         <activity
+                android:name="PointsActivity"
+                android:label="_Points">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="Transform3dActivity"
                 android:label="_3d">
             <intent-filter>
