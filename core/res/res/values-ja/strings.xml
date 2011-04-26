@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"現在実行中または最近実行したタスクに関する情報の取得をアプリケーションに許可します。悪意のあるアプリケーションが他のアプリケーションの非公開情報を取得する恐れがあります。"</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"実行中のアプリケーションの順序の変更"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"タスクをフォアグラウンドやバックグラウンドに移動することをアプリケーションに許可します。悪意のあるアプリケーションが優先されて、コントロールできなくなる恐れがあります。"</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"アプリケーションの実行停止"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"タスクの削除とアプリケーションの終了をアプリケーションに許可します。悪意のあるアプリケーションが他のアプリケーションの動作を妨害する恐れがあります。"</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"アプリケーションのデバッグを有効にする"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"別のアプリケーションをデバッグモードにすることをアプリケーションに許可します。悪意のあるアプリケーションが別のアプリケーションを終了させる恐れがあります。"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"UI設定の変更"</string>

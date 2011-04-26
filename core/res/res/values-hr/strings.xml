@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Aplikaciji omogućuje dohvaćanje podataka o trenutačno ili nedavno pokrenutim zadacima. Zlonamjernim aplikacijama može omogućiti otkrivanje privatnih podataka o drugim aplikacijama."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"promjena redoslijeda pokrenutih aplikacija"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Aplikaciji omogućuje premještanje zadataka u prvi plan ili u pozadinu. Zlonamjerne aplikacije mogu se prisilno postaviti u prednji plan bez vašeg znanja."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"zaustavljanje pokrenutih aplikacija"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Omogućuje aplikaciji da ukloni zadatke i uništi njihove aplikacije. Zlonamjerne aplikacije mogu poremetiti ponašanje drugih aplikacija."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"omogućavanje uklanjanja programskih pogrešaka u aplikacijama"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Aplikaciji omogućuje uključivanje značajke uklanjanja programske pogreške za drugu aplikaciju. Zlonamjerne aplikacije to mogu koristiti za uklanjanje drugih aplikacija."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"promjena postavki korisničkog sučelja"</string>

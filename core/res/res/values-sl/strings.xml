@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Programu dovoljuje pridobivanje informacij o trenutnih in nedavno izvajajočih se opravilih. Zlonamerni programi lahko odkrijejo zasebne podatke o drugih programih."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"preurejanje programov, ki se izvajajo"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Programu dovoljuje premikanje opravil v ospredje in ozadje. Zlonamerni programi se lahko brez vašega nadzora vsilijo v ospredje."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"ustavitev programov, ki se izvajajo"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Dovoli programu, da odstrani opravila in ukine njihove programe. Zlonamerni programi lahko motijo delovanje drugih programov."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"omogočanje iskanja in odpravljanja napak v programu"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Programu dovoljuje vklop funkcije iskanja in odpravljanja napak za drug program. Zlonamerni programi lahko to uporabijo za zapiranje drugih programov."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"spreminjanje nastavitev UV"</string>

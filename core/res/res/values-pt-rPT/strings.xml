@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Permite à aplicação obter informações sobre tarefas actualmente em execução e recentemente executadas. Pode permitir que aplicações maliciosas descubram informações privadas sobre outras aplicações."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"reordenar aplicações em execução"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Permite a uma aplicação mover tarefas do primeiro e do segundo planos.  Algumas aplicações maliciosas podem impor-se no primeiro plano sem o controlo do utilizador."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"parar a execução de aplicações"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Permite que uma aplicação remova tarefas e elimine as respetivas aplicações. As aplicações maliciosas podem perturbar o comportamento de outras aplicações."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"activar depuração da aplicação"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Permite a uma aplicação activar a depuração para outra aplicação. Algumas aplicações maliciosas podem utilizar este item para eliminar outras aplicações."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"alterar definições da IU"</string>

@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"للسماح للتطبيق باسترداد معلومات حول المهام المُشغلة الحالية والحديثة. قد يسمح ذلك للتطبيقات الضارة باكتشاف معلومات خاصة حول التطبيقات الأخرى."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"إعادة ترتيب التطبيقات التي قيد التشغيل"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"للسماح لتطبيق ما بنقل المهام إلى المقدمة والخلفية. قد تفرض التطبيقات الضارة نفسها إلى المقدمة بدون تحكم منك."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"إيقاف التطبيقات التي قيد التشغيل"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"للسماح لأحد التطبيقات بإزالة المهام وإيقاف التطبيقات المتعلقة بها. يمكن للتطبيقات الضارة تعطيل سلوك التطبيقات الأخرى."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"تمكين تصحيح أخطاء التطبيق"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"للسماح لتطبيق ما بتشغيل تصحيح الأخطاء لتطبيق آخر. قد تستخدم التطبيقات الضارة ذلك لإنهاء التطبيقات الأخرى."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"تغيير إعدادات واجهة المستخدم"</string>

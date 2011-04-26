@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Ermöglicht der Anwendung, Informationen zu aktuellen und kürzlich ausführten Aufgaben abzurufen. Schädliche Anwendungen können so eventuell geheime Informationen zu anderen Anwendungen entdecken."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"Laufende Anwendungen neu ordnen"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Ermöglicht einer Anwendung, Aufgaben in den Vorder- und Hintergrund zu verschieben. Schädliche Anwendungen können so ohne Ihr Zutun eine Anzeige im Vordergrund erzwingen."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"Aktive Anwendungen beenden"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Ermöglicht einer Anwendung das Entfernen von Aufgaben und Beenden der entsprechenden Anwendungen. Schädliche Anwendungen können das Verhalten anderer Anwendungen stören."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"Fehlerbeseitigung für Anwendung aktivieren"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Ermöglicht einer Anwendung, die Fehlerbeseitigung für eine andere Anwendung zu aktivieren. Schädliche Anwendungen können so andere Anwendungen löschen."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"UI-Einstellungen ändern"</string>

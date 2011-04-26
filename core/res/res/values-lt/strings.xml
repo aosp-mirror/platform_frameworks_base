@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Leidžia programai nuskaityti informaciją apie dabar ir neseniai veikusias užduotis. Gali leisti kenkėjiškoms programoms atrasti privačią informaciją apie kitas programas."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"iš naujo užsakyti veikiančias programas"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Leidžia programai perkelti užduotis į aktyvųjį langą ir foną. Kenkėjiškos programos gali persikelti į priekį jums nieko nedarant."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"sustabdyti vykdomas programas"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Leidžiama programai pašalinti užduotis ir naikinti programas. Kenkėjiškos programos gali trukdyti kitoms programoms veikti."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"įgalinti programos derinimą"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Leidžia programai įjungti kitos programos derinimą. Kenkėjiškos programos tai gali naudoti, kad nutrauktų kitas programas."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"keisti UI nustatymus"</string>

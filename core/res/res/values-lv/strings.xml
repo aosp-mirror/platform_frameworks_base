@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Ļauj lietojumprogrammai izgūt informāciju par pašlaik un nesen darbinātajiem uzdevumiem. Var atļaut lietojumprogrammām atklāt privātu informāciju par citām lietojumprogrammām."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"pārkārtot aktīvās lietojumprogrammas"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Ļauj lietojumprogrammai pārvietot uzdevumus priekšplānā vai fonā. Ļaunprātīgas lietojumprogrammas var tikt parādītas priekšplānā bez jūsu vadības."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"pārtrauc lietojumprogrammu darbību"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Ļauj lietojumprogrammai noņemt uzdevumus un dzēst to lietojumprogrammas. Ļaunprātīgas lietojumprogrammas var traucēt citu lietojumprogrammu darbību."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"iespējot lietojumprogrammas atkļūdošanu"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Ļauj lietojumprogrammai ieslēgt citas lietojumprogrammas atkļūdošanu. Ļaunprātīgas lietojumprogrammas var to izmantot, lai pārtrauktu citu lietojumprogrammu darbību."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"mainīt lietotāja saskarnes iestatījumus"</string>

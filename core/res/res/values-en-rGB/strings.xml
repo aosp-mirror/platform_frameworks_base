@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Allows application to retrieve information about currently and recently running tasks. May allow malicious applications to discover private information about other applications."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"reorder applications running"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Allows an application to move tasks to the foreground and background. Malicious applications can force themselves to the front without your control."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"stop running applications"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Allows an application to remove tasks and kill their applications. Malicious applications can disrupt the behaviour of other applications."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"enable application debugging"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Allows an application to turn on debugging for another application. Malicious applications can use this to kill other applications."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"change your UI settings"</string>

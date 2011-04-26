@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Antaa sovelluksen noutaa tietoja käynnissä olevista ja äskettäin käynnissä olleista tehtävistä. Haitalliset sovellukset saattavat saada selville yksityisiä tietoja muista sovelluksista."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"muuttaa käynnissä olevien sovelluksien järjestystä"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Antaa sovelluksen siirtää tehtäviä etualalle ja taustalle. Haitalliset sovellukset voivat tunkeutua etualalle väkisin."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"sulje sovellukset"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Antaa sovelluksen poistaa tehtäviä ja sulkea sovelluksia. Haittaohjelmat voivat häiritä muiden sovelluksien toimintaa."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"ota sovelluksen vianetsintä käyttöön"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Antaa sovelluksen käynnistää toisen sovelluksen vianetsinnän. Haitalliset sovellukset saattavat sulkea muita sovelluksia."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"muuta käyttöliittymäsi asetuksia"</string>

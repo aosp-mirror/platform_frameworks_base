@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"允许应用程序检索有关当前和最近运行的任务的信息。恶意应用程序可借此发现有关其他应用程序的保密信息。"</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"对正在运行的应用程序重新排序"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"允许应用程序将任务移至前端和后台。恶意应用程序可借此强行进入前端，而不受您的控制。"</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"停止正在运行的应用程序"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"允许应用程序删除任务以及终止执行这些任务的应用程序。恶意应用程序可能会干扰其他应用程序的运行。"</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"启用应用程序调试"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"允许应用程序启动对其他应用程序的调试。恶意应用程序可借此终止其他应用程序。"</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"更改用户界面设置"</string>

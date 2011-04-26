@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Дозволяє програмі отримувати інформацію про теперішні й останні завдання. Може дозволити шкідливим програмам дізнаватися приватну інформацію про інші програми."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"змін. порядок запущених програм"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Дозволяє програмі робити завдання активними та фоновими. Шкідливі програми можуть примусово ставати активними без контролю з вашого боку."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"зупиняти запущені програми"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Дозволяє програмі видаляти завдання та завершувати роботу відповідних програм. Шкідливі програми можуть переривати роботу інших програм."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"увімк. налагодження програми"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Дозволяє програмі вмикати налагодження для іншої програми. Шкідливі програми можуть використовувати це для заверш. роботи ін. програм."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"змін. налашт. інтерф. кор."</string>

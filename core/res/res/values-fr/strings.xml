@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Permet à l\'application de récupérer des informations sur des tâches en cours d\'exécution ou récemment utilisées. Des applications malveillantes peuvent ainsi obtenir des informations d\'ordre privé concernant d\'autres applications."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"Réorganisation des applications en cours d\'exécution"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Permet à une application de placer des tâches au premier plan ou en arrière-plan. Des applications malveillantes peuvent se placer inopinément au premier plan sans votre autorisation."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"arrêter l\'exécution d\'applications"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Permet à une application de supprimer des tâches et de fermer leurs processus. Des applications malveillantes peuvent perturber le comportement des autres applications."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"Activation du débogage de l\'application"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Permet à une application d\'activer le mode de débogage d\'une autre application. Des applications malveillantes peuvent utiliser cette fonctionnalité pour interrompre d\'autres applications de façon inopinée."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"Modification des paramètres de l\'IU"</string>
