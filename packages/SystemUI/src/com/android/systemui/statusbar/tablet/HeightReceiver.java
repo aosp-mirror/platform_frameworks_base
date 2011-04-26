@@ -77,7 +77,9 @@ public class HeightReceiver extends BroadcastReceiver {
         if (plugged) {
             final DisplayMetrics metrics = new DisplayMetrics();
             mWindowManager.getDefaultDisplay().getMetrics(metrics);
-            height = metrics.heightPixels - 720;
+            //Slog.i(TAG, "setPlugged: display metrics=" + metrics);
+            final int shortSide = Math.min(metrics.widthPixels, metrics.heightPixels);
+            height = shortSide - 720;
         }
 
         final int minHeight
