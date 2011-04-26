@@ -60,6 +60,7 @@ import android.text.Selection;
 import android.text.SpanWatcher;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.StaticLayout;
@@ -80,10 +81,13 @@ import android.text.method.SingleLineTransformationMethod;
 import android.text.method.TextKeyListener;
 import android.text.method.TimeKeyListener;
 import android.text.method.TransformationMethod;
+import android.text.method.WordIterator;
 import android.text.style.ClickableSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.SuggestionSpan;
+import android.text.style.TextAppearanceSpan;
 import android.text.style.URLSpan;
+import android.text.style.UnderlineSpan;
 import android.text.style.UpdateAppearance;
 import android.text.util.Linkify;
 import android.util.AttributeSet;
@@ -127,6 +131,7 @@ import android.widget.RemoteViews.RemoteView;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 
 /**
@@ -314,6 +319,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mTextEditSuggestionsBottomWindowLayout, mTextEditSuggestionsTopWindowLayout;
     private int mTextEditSuggestionItemLayout;
     private SuggestionsPopupWindow mSuggestionsPopupWindow;
+    private SuggestionRangeSpan mSuggestionRangeSpan;
 
     private int mCursorDrawableRes;
     private final Drawable[] mCursorDrawable = new Drawable[2];
@@ -8225,13 +8231,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return ((minOffset >= selectionStart) && (maxOffset < selectionEnd));
     }
 
+    private static class SuggestionRangeSpan extends UnderlineSpan {
+        // TODO themable, would be nice to make it a child class of TextAppearanceSpan, but
+        // there is no way to have underline and TextAppearanceSpan.
+    }
+
     private class SuggestionsPopupWindow implements OnClickListener {
         private static final int MAX_NUMBER_SUGGESTIONS = 5;
-        private static final long NO_SUGGESTIONS = -1L;
+        private static final int NO_SUGGESTIONS = -1;
         private final PopupWindow mContainer;
         private final ViewGroup[] mSuggestionViews = new ViewGroup[2];
         private final int[] mSuggestionViewLayouts = new int[] {
                 mTextEditSuggestionsBottomWindowLayout, mTextEditSuggestionsTopWindowLayout};
+        private WordIterator mWordIterator;
+        private TextAppearanceSpan[] mHighlightSpans = new TextAppearanceSpan[0];
 
         public SuggestionsPopupWindow() {
             mContainer = new PopupWindow(TextView.this.mContext, null,
@@ -8242,6 +8255,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             mContainer.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
             mContainer.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        private class SuggestionInfo {
+            int suggestionStart, suggestionEnd; // range of suggestion item with replacement text
+            int spanStart, spanEnd; // range in TextView where text should be inserted
         }
 
         private ViewGroup getViewGroup(boolean under) {
@@ -8277,6 +8295,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                "Inflated TextEdit suggestion item is not a TextView: " + childView);
                     }
 
+                    childView.setTag(new SuggestionInfo());
                     viewGroup.addView(childView);
                     childView.setOnClickListener(this);
                 }
@@ -8299,21 +8318,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mContainer.setContentView(viewGroup);
 
             int totalNbSuggestions = 0;
+            int spanUnionStart = mText.length();
+            int spanUnionEnd = 0;
+
             for (int spanIndex = 0; spanIndex < nbSpans; spanIndex++) {
                 SuggestionSpan suggestionSpan = suggestionSpans[spanIndex];
                 final int spanStart = spannable.getSpanStart(suggestionSpan);
                 final int spanEnd = spannable.getSpanEnd(suggestionSpan);
-                final Long spanRange = packRangeInLong(spanStart, spanEnd);
+                spanUnionStart = Math.min(spanStart, spanUnionStart);
+                spanUnionEnd = Math.max(spanEnd, spanUnionEnd);
 
                 String[] suggestions = suggestionSpan.getSuggestions();
                 int nbSuggestions = suggestions.length;
                 for (int suggestionIndex = 0; suggestionIndex < nbSuggestions; suggestionIndex++) {
                     TextView textView = (TextView) viewGroup.getChildAt(totalNbSuggestions);
                     textView.setText(suggestions[suggestionIndex]);
-                    textView.setTag(spanRange);
+                    SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
+                    suggestionInfo.spanStart = spanStart;
+                    suggestionInfo.spanEnd = spanEnd;
 
                     totalNbSuggestions++;
-                    if (totalNbSuggestions == MAX_NUMBER_SUGGESTIONS) {
+                    if (totalNbSuggestions > MAX_NUMBER_SUGGESTIONS) {
+                        // Also end outer for loop
                         spanIndex = nbSpans;
                         break;
                     }
@@ -8324,8 +8350,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // TODO Replace by final text, use a dedicated layout, add a fade out timer...
                 TextView textView = (TextView) viewGroup.getChildAt(0);
                 textView.setText("No suggestions available");
-                textView.setTag(NO_SUGGESTIONS);
+                SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
+                suggestionInfo.spanStart = NO_SUGGESTIONS;
                 totalNbSuggestions++;
+            } else {
+                if (mSuggestionRangeSpan == null) mSuggestionRangeSpan = new SuggestionRangeSpan();
+                ((Editable) mText).setSpan(mSuggestionRangeSpan, spanUnionStart, spanUnionEnd,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                for (int i = 0; i < totalNbSuggestions; i++) {
+                    final TextView textView = (TextView) viewGroup.getChildAt(i);
+                    highlightTextDifferences(textView, spanUnionStart, spanUnionEnd);
+                }
             }
 
             for (int i = 0; i < MAX_NUMBER_SUGGESTIONS; i++) {
@@ -8338,7 +8374,158 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             positionAtCursor();
         }
 
+        private long[] getWordLimits(CharSequence text) {
+            if (mWordIterator == null) mWordIterator = new WordIterator(); // TODO locale
+            mWordIterator.setCharSequence(text);
+
+            // First pass will simply count the number of words to be able to create an array
+            // Not too expensive since previous break positions are cached by the BreakIterator
+            int nbWords = 0;
+            int position = mWordIterator.following(0);
+            while (position != BreakIterator.DONE) {
+                nbWords++;
+                position = mWordIterator.following(position);
+            }
+
+            int index = 0;
+            long[] result = new long[nbWords];
+
+            position = mWordIterator.following(0);
+            while (position != BreakIterator.DONE) {
+                int wordStart = mWordIterator.getBeginning(position);
+                result[index++] = packRangeInLong(wordStart, position);
+                position = mWordIterator.following(position);
+            }
+
+            return result;
+        }
+
+        private TextAppearanceSpan highlightSpan(int index) {
+            final int length = mHighlightSpans.length;
+            if (index < length) {
+                return mHighlightSpans[index];
+            }
+
+            // Assumes indexes are requested in sequence: simply append one more item
+            TextAppearanceSpan[] newArray = new TextAppearanceSpan[length + 1];
+            System.arraycopy(mHighlightSpans, 0, newArray, 0, length);
+            TextAppearanceSpan highlightSpan = new TextAppearanceSpan(mContext,
+                    android.R.style.TextAppearance_SuggestionHighlight);
+            newArray[length] = highlightSpan;
+            mHighlightSpans = newArray;
+            return highlightSpan;
+        }
+
+        private void highlightTextDifferences(TextView textView, int unionStart, int unionEnd) {
+            SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
+            final int spanStart = suggestionInfo.spanStart;
+            final int spanEnd = suggestionInfo.spanEnd;
+
+            // Remove all text formating by converting to Strings
+            final String text = textView.getText().toString();
+            final String sourceText = mText.subSequence(spanStart, spanEnd).toString();
+
+            long[] sourceWordLimits = getWordLimits(sourceText);
+            long[] wordLimits = getWordLimits(text);
+
+            SpannableStringBuilder ssb = new SpannableStringBuilder();
+            // span [spanStart, spanEnd] is included in union [spanUnionStart, int spanUnionEnd]
+            // The final result is made of 3 parts: the text before, between and after the span
+            // This is the text before, provided for context
+            ssb.append(mText.subSequence(unionStart, spanStart).toString());
+
+            // shift is used to offset spans positions wrt span's beginning
+            final int shift = spanStart - unionStart;
+            suggestionInfo.suggestionStart = shift;
+            suggestionInfo.suggestionEnd = shift + text.length();
+
+            // This is the actual suggestion text, which will be highlighted by the following code
+            ssb.append(text);
+
+            String[] words = new String[wordLimits.length];
+            for (int i = 0; i < wordLimits.length; i++) {
+                int wordStart = extractRangeStartFromLong(wordLimits[i]);
+                int wordEnd = extractRangeEndFromLong(wordLimits[i]);
+                words[i] = text.substring(wordStart, wordEnd);
+            }
+
+            // Highlighted word algorithm is bases on word matching between source and text
+            // Matching words are found from left to right. TODO: change for RTL languages
+            // Characters between matching words are highlighted
+            int previousCommonWordIndex = -1;
+            int nbHighlightSpans = 0;
+            for (int i = 0; i < sourceWordLimits.length; i++) {
+                int wordStart = extractRangeStartFromLong(sourceWordLimits[i]);
+                int wordEnd = extractRangeEndFromLong(sourceWordLimits[i]);
+                String sourceWord = sourceText.substring(wordStart, wordEnd);
+
+                for (int j = previousCommonWordIndex + 1; j < words.length; j++) {
+                    if (sourceWord.equals(words[j])) {
+                        if (j != previousCommonWordIndex + 1) {
+                            int firstDifferentPosition = previousCommonWordIndex < 0 ? 0 :
+                                extractRangeEndFromLong(wordLimits[previousCommonWordIndex]);
+                            int lastDifferentPosition = extractRangeStartFromLong(wordLimits[j]);
+                            ssb.setSpan(highlightSpan(nbHighlightSpans++),
+                                    shift + firstDifferentPosition, shift + lastDifferentPosition,
+                                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        } else {
+                            // Compare characters between words
+                            int previousSourceWordEnd = i == 0 ? 0 :
+                                extractRangeEndFromLong(sourceWordLimits[i - 1]);
+                            int sourceWordStart = extractRangeStartFromLong(sourceWordLimits[i]);
+                            String sourceSpaces = sourceText.substring(previousSourceWordEnd,
+                                    sourceWordStart);
+
+                            int previousWordEnd = j == 0 ? 0 :
+                                extractRangeEndFromLong(wordLimits[j - 1]);
+                            int currentWordStart = extractRangeStartFromLong(wordLimits[j]);
+                            String textSpaces = text.substring(previousWordEnd, currentWordStart);
+
+                            if (!sourceSpaces.equals(textSpaces)) {
+                                ssb.setSpan(highlightSpan(nbHighlightSpans++),
+                                        shift + previousWordEnd, shift + currentWordStart,
+                                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                            }
+                        }
+                        previousCommonWordIndex = j;
+                        break;
+                    }
+                }
+            }
+
+            // Finally, compare ends of Strings
+            if (previousCommonWordIndex < words.length - 1) {
+                int firstDifferentPosition = previousCommonWordIndex < 0 ? 0 :
+                    extractRangeEndFromLong(wordLimits[previousCommonWordIndex]);
+                int lastDifferentPosition = textView.length();
+                ssb.setSpan(highlightSpan(nbHighlightSpans++),
+                        shift + firstDifferentPosition, shift + lastDifferentPosition,
+                        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            } else {
+                int lastSourceWordEnd = sourceWordLimits.length == 0 ? 0 :
+                    extractRangeEndFromLong(sourceWordLimits[sourceWordLimits.length - 1]);
+                String sourceSpaces = sourceText.substring(lastSourceWordEnd, sourceText.length());
+
+                int lastCommonTextWordEnd = previousCommonWordIndex < 0 ? 0 :
+                    extractRangeEndFromLong(wordLimits[previousCommonWordIndex]);
+                String textSpaces = text.substring(lastCommonTextWordEnd, textView.length());
+
+                if (!sourceSpaces.equals(textSpaces) && textSpaces.length() > 0) {
+                    ssb.setSpan(highlightSpan(nbHighlightSpans++),
+                            shift + lastCommonTextWordEnd, shift + textView.length(),
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+            }
+
+            // Final part, text after the current suggestion range.
+            ssb.append(mText.subSequence(spanEnd, unionEnd).toString());
+            textView.setText(ssb);
+        }
+
         public void hide() {
+            if ((mText instanceof Editable) && mSuggestionRangeSpan != null) {
+                ((Editable) mText).removeSpan(mSuggestionRangeSpan);
+            }
             mContainer.dismiss();
         }
 
@@ -8346,11 +8533,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void onClick(View view) {
             if (view instanceof TextView) {
                 TextView textView = (TextView) view;
-                Long range = ((Long) view.getTag());
-                if (range != NO_SUGGESTIONS) {
-                    final int spanStart = extractRangeStartFromLong(range);
-                    final int spanEnd = extractRangeEndFromLong(range);
-                    ((Editable) mText).replace(spanStart, spanEnd, textView.getText());
+                SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
+                final int spanStart = suggestionInfo.spanStart;
+                final int spanEnd = suggestionInfo.spanEnd;
+                if (spanStart != NO_SUGGESTIONS) {
+                    final int suggestionStart = suggestionInfo.suggestionStart;
+                    final int suggestionEnd = suggestionInfo.suggestionEnd;
+                    final String suggestion = textView.getText().subSequence(
+                            suggestionStart, suggestionEnd).toString();
+                    ((Editable) mText).replace(spanStart, spanEnd, suggestion);
                 }
             }
             hide();
