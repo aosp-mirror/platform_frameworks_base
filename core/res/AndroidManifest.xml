@@ -150,6 +150,15 @@
         android:label="@string/permlab_receiveMms"
         android:description="@string/permdesc_receiveMms" />
 
+    <!-- Allows an application to receive emergency cell broadcast messages,
+         to record or display them to the user. Reserved for system apps.
+         @hide Pending API council approval -->
+    <permission android:name="android.permission.RECEIVE_EMERGENCY_BROADCAST"
+        android:permissionGroup="android.permission-group.MESSAGES"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_receiveEmergencyBroadcast"
+        android:description="@string/permdesc_receiveEmergencyBroadcast" />
+
     <!-- Allows an application to read SMS messages. -->
     <permission android:name="android.permission.READ_SMS"
         android:permissionGroup="android.permission-group.MESSAGES"

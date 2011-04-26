@@ -21,7 +21,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
 
-import com.android.internal.telephony.EncodeException;
 import com.android.internal.telephony.ISms;
 import com.android.internal.telephony.IccConstants;
 import com.android.internal.telephony.SmsRawData;
@@ -341,7 +340,129 @@ public final class SmsManager {
         }
 
         return createMessageListFromRawRecords(records);
-   }
+    }
+
+    /**
+     * Enable reception of cell broadcast (SMS-CB) messages with the given
+     * message identifier. Note that if two different clients enable the same
+     * message identifier, they must both disable it for the device to stop
+     * receiving those messages. All received messages will be broadcast in an
+     * intent with the action "android.provider.Telephony.SMS_CB_RECEIVED".
+     * Note: This call is blocking, callers may want to avoid calling it from
+     * the main thread of an application.
+     *
+     * @param messageIdentifier Message identifier as specified in TS 23.041
+     * @return true if successful, false otherwise
+     * @see #disableCellBroadcast(int)
+     *
+     * {@hide}
+     */
+    public boolean enableCellBroadcast(int messageIdentifier) {
+        boolean success = false;
+
+        try {
+            ISms iccISms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
+            if (iccISms != null) {
+                success = iccISms.enableCellBroadcast(messageIdentifier);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return success;
+    }
+
+    /**
+     * Disable reception of cell broadcast (SMS-CB) messages with the given
+     * message identifier. Note that if two different clients enable the same
+     * message identifier, they must both disable it for the device to stop
+     * receiving those messages.
+     * Note: This call is blocking, callers may want to avoid calling it from
+     * the main thread of an application.
+     *
+     * @param messageIdentifier Message identifier as specified in TS 23.041
+     * @return true if successful, false otherwise
+     *
+     * @see #enableCellBroadcast(int)
+     *
+     * {@hide}
+     */
+    public boolean disableCellBroadcast(int messageIdentifier) {
+        boolean success = false;
+
+        try {
+            ISms iccISms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
+            if (iccISms != null) {
+                success = iccISms.disableCellBroadcast(messageIdentifier);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return success;
+    }
+
+    /**
+     * Enable reception of cell broadcast (SMS-CB) messages with the given
+     * message identifier range. Note that if two different clients enable the same
+     * message identifier, they must both disable it for the device to stop
+     * receiving those messages. All received messages will be broadcast in an
+     * intent with the action "android.provider.Telephony.SMS_CB_RECEIVED".
+     * Note: This call is blocking, callers may want to avoid calling it from
+     * the main thread of an application.
+     *
+     * @param startMessageId first message identifier as specified in TS 23.041
+     * @param endMessageId last message identifier as specified in TS 23.041
+     * @return true if successful, false otherwise
+     * @see #disableCellBroadcastRange(int, int)
+     *
+     * {@hide}
+     */
+    public boolean enableCellBroadcastRange(int startMessageId, int endMessageId) {
+        boolean success = false;
+
+        try {
+            ISms iccISms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
+            if (iccISms != null) {
+                success = iccISms.enableCellBroadcastRange(startMessageId, endMessageId);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return success;
+    }
+
+    /**
+     * Disable reception of cell broadcast (SMS-CB) messages with the given
+     * message identifier range. Note that if two different clients enable the same
+     * message identifier, they must both disable it for the device to stop
+     * receiving those messages.
+     * Note: This call is blocking, callers may want to avoid calling it from
+     * the main thread of an application.
+     *
+     * @param startMessageId first message identifier as specified in TS 23.041
+     * @param endMessageId last message identifier as specified in TS 23.041
+     * @return true if successful, false otherwise
+     *
+     * @see #enableCellBroadcastRange(int, int)
+     *
+     * {@hide}
+     */
+    public boolean disableCellBroadcastRange(int startMessageId, int endMessageId) {
+        boolean success = false;
+
+        try {
+            ISms iccISms = ISms.Stub.asInterface(ServiceManager.getService("isms"));
+            if (iccISms != null) {
+                success = iccISms.disableCellBroadcastRange(startMessageId, endMessageId);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return success;
+    }
 
     /**
      * Create a list of <code>SmsMessage</code>s from a list of RawSmsData

@@ -68,4 +68,21 @@ public class IccSmsInterfaceManagerProxy extends ISms.Stub {
                 parts, sentIntents, deliveryIntents);
     }
 
+    public boolean enableCellBroadcast(int messageIdentifier) throws android.os.RemoteException {
+        return mIccSmsInterfaceManager.enableCellBroadcast(messageIdentifier);
+    }
+
+    public boolean disableCellBroadcast(int messageIdentifier) throws android.os.RemoteException {
+        return mIccSmsInterfaceManager.disableCellBroadcast(messageIdentifier);
+    }
+
+    public boolean enableCellBroadcastRange(int startMessageId, int endMessageId)
+            throws android.os.RemoteException {
+        return mIccSmsInterfaceManager.enableCellBroadcastRange(startMessageId, endMessageId);
+    }
+
+    public boolean disableCellBroadcastRange(int startMessageId, int endMessageId)
+            throws android.os.RemoteException {
+        return mIccSmsInterfaceManager.disableCellBroadcastRange(startMessageId, endMessageId);
+    }
 }
