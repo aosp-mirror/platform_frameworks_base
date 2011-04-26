@@ -388,6 +388,16 @@ int MtpDataPacket::writeDataHeader(int fd, uint32_t length) {
     int ret = ::write(fd, mBuffer, MTP_CONTAINER_HEADER_SIZE);
     return (ret < 0 ? ret : 0);
 }
+
+int MtpDataPacket::writeData(int fd, void* data, uint32_t length) {
+    MtpPacket::putUInt32(MTP_CONTAINER_LENGTH_OFFSET, length + MTP_CONTAINER_HEADER_SIZE);
+    MtpPacket::putUInt16(MTP_CONTAINER_TYPE_OFFSET, MTP_CONTAINER_TYPE_DATA);
+    int ret = ::write(fd, mBuffer, MTP_CONTAINER_HEADER_SIZE);
+    if (ret == MTP_CONTAINER_HEADER_SIZE)
+        ret = ::write(fd, data, length);
+    return (ret < 0 ? ret : 0);
+}
+
 #endif // MTP_DEVICE
 
 #ifdef MTP_HOST

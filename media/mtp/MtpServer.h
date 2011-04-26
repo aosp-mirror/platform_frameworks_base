@@ -133,6 +133,7 @@ private:
     MtpResponseCode     doGetObjectPropList();
     MtpResponseCode     doGetObjectInfo();
     MtpResponseCode     doGetObject();
+    MtpResponseCode     doGetThumb();
     MtpResponseCode     doGetPartialObject(MtpOperationCode operation);
     MtpResponseCode     doSendObjectInfo();
     MtpResponseCode     doSendObject();

@@ -35,6 +35,10 @@
 #include "MtpUtils.h"
 #include "mtp.h"
 
+extern "C" {
+#include "jhead.h"
+}
+
 using namespace android;
 
 // ----------------------------------------------------------------------------
@@ -140,6 +144,8 @@ public:
 
     virtual MtpResponseCode         getObjectInfo(MtpObjectHandle handle,
                                             MtpObjectInfo& info);
+
+    virtual void*                   getThumbnail(MtpObjectHandle handle, size_t& outThumbSize);
 
     virtual MtpResponseCode         getObjectFilePath(MtpObjectHandle handle,
                                             MtpString& outFilePath,
@@ -776,8 +782,65 @@ MtpResponseCode MyMtpDatabase::getObjectInfo(MtpObjectHandle handle,
     info.mName = strdup((const char *)temp);
     env->ReleaseCharArrayElements(mStringBuffer, str, 0);
 
+    // read EXIF data for thumbnail information
+    if (info.mFormat == MTP_FORMAT_EXIF_JPEG || info.mFormat == MTP_FORMAT_JFIF) {
+        MtpString path;
+        int64_t length;
+        MtpObjectFormat format;
+        if (getObjectFilePath(handle, path, length, format) == MTP_RESPONSE_OK) {
+            ResetJpgfile();
+             // Start with an empty image information structure.
+            memset(&ImageInfo, 0, sizeof(ImageInfo));
+            ImageInfo.FlashUsed = -1;
+            ImageInfo.MeteringMode = -1;
+            ImageInfo.Whitebalance = -1;
+            strncpy(ImageInfo.FileName, (const char *)path, PATH_MAX);
+            if (ReadJpegFile((const char*)path, READ_METADATA)) {
+                Section_t* section = FindSection(M_EXIF);
+                if (section) {
+                    info.mThumbCompressedSize = ImageInfo.ThumbnailSize;
+                    info.mThumbFormat = MTP_FORMAT_EXIF_JPEG;
+                    info.mImagePixWidth = ImageInfo.Width;
+                    info.mImagePixHeight = ImageInfo.Height;
+                }
+            }
+            DiscardData();
+        }
+    }
+
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return MTP_RESPONSE_OK;
+}
+
+void* MyMtpDatabase::getThumbnail(MtpObjectHandle handle, size_t& outThumbSize) {
+    MtpString path;
+    int64_t length;
+    MtpObjectFormat format;
+    void* result = NULL;
+    outThumbSize = 0;
+
+    if (getObjectFilePath(handle, path, length, format) == MTP_RESPONSE_OK
+            && (format == MTP_FORMAT_EXIF_JPEG || format == MTP_FORMAT_JFIF)) {
+        ResetJpgfile();
+         // Start with an empty image information structure.
+        memset(&ImageInfo, 0, sizeof(ImageInfo));
+        ImageInfo.FlashUsed = -1;
+        ImageInfo.MeteringMode = -1;
+        ImageInfo.Whitebalance = -1;
+        strncpy(ImageInfo.FileName, (const char *)path, PATH_MAX);
+        if (ReadJpegFile((const char*)path, READ_METADATA)) {
+            Section_t* section = FindSection(M_EXIF);
+            if (section) {
+                outThumbSize = ImageInfo.ThumbnailSize;
+                result = malloc(outThumbSize);
+                if (result)
+                    memcpy(result, section->Data + ImageInfo.ThumbnailOffset + 8, outThumbSize);
+            }
+            DiscardData();
+        }
+    }
+
+    return result;
 }
 
 MtpResponseCode MyMtpDatabase::getObjectFilePath(MtpObjectHandle handle,

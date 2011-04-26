@@ -27,9 +27,11 @@ LOCAL_SHARED_LIBRARIES := \
     libcamera_client \
     libsqlite \
     libmtp \
-    libusbhost
+    libusbhost \
+    libexif
 
 LOCAL_C_INCLUDES += \
+    external/jhead \
     external/tremor/Tremor \
     frameworks/base/core/jni \
     frameworks/base/media/libmedia \
