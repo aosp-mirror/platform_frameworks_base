@@ -33,9 +33,15 @@ def main(options, args):
   # Include all tests if none are specified.
   if not args:
     print "need a URL, e.g. file:///sdcard/webkit/page_cycler/moz/start.html\?auto=1\&iterations=10"
+    print "  or remote:android-browser-test:80/page_cycler/"
     sys.exit(1)
   else:
     path = ' '.join(args);
+
+  if path[:7] == "remote:":
+    remote_path = path[7:]
+  else:
+    remote_path = None
 
   adb_cmd = "adb ";
   if options.adb_options:
@@ -56,7 +62,20 @@ def main(options, args):
   run_load_test_cmd_postfix = " -w com.android.dumprendertree/.LayoutTestsAutoRunner"
 
   # Call LoadTestsAutoTest::runTest.
-  run_load_test_cmd = run_load_test_cmd_prefix + " -e class com.android.dumprendertree.LoadTestsAutoTest#runPageCyclerTest -e path \"" + path + "\" -e timeout " + timeout_ms
+  run_load_test_cmd = run_load_test_cmd_prefix + " -e class com.android.dumprendertree.LoadTestsAutoTest#runPageCyclerTest -e timeout " + timeout_ms
+
+  if remote_path:
+    if options.suite:
+      run_load_test_cmd += " -e suite %s -e forward %s " % (options.suite,
+                                                            remote_path)
+    else:
+      print "for network mode, need to specify --suite as well."
+      sys.exit(1)
+    if options.iteration:
+      run_load_test_cmd += " -e iteration %s" % options.iteration
+  else:
+    run_load_test_cmd += " -e path \"%s\" " % path
+
 
   if options.drawtime:
     run_load_test_cmd += " -e drawtime true "
@@ -129,6 +148,16 @@ if '__main__' == __name__:
   option_parser.add_option("-s", "--save-image",
                            default=None,
                            help="stores rendered page to a location on device.")
+
+  option_parser.add_option("-u", "--suite",
+                           default=None,
+                           help="(for network mode) specify the suite to"
+                           " run by name")
+
+  option_parser.add_option("-i", "--iteration",
+                           default="5",
+                           help="(for network mode) specify how many iterations"
+                           " to run")
 
   options, args = option_parser.parse_args();
   main(options, args)

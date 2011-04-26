@@ -25,7 +25,7 @@ import junit.framework.TestSuite;
 
 /**
  * Instrumentation Test Runner for all DumpRenderTree tests.
- * 
+ *
  * Running all tests:
  *
  * adb shell am instrument \
@@ -57,7 +57,7 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
                 e.printStackTrace();
             }
         }
-        
+
         String delay_str = (String) icicle.get("delay");
         if(delay_str != null) {
             try {
@@ -66,30 +66,37 @@ public class LayoutTestsAutoRunner extends InstrumentationTestRunner {
             }
         }
 
-        String r = (String)icicle.get("rebaseline");
+        String r = icicle.getString("rebaseline");
         this.mRebaseline = (r != null && r.toLowerCase().equals("true"));
 
-        String logtime = (String) icicle.get("logtime");
+        String logtime = icicle.getString("logtime");
         this.mLogtime = (logtime != null
                 && logtime.toLowerCase().equals("true"));
 
-        String drawTime = (String) icicle.get("drawtime");
+        String drawTime = icicle.getString("drawtime");
         this.mGetDrawTime = (drawTime != null
                 && drawTime.toLowerCase().equals("true"));
 
-        mSaveImagePath = (String) icicle.get("saveimage");
+        mSaveImagePath = icicle.getString("saveimage");
 
-        mJsEngine = (String) icicle.get("jsengine");
+        mJsEngine = icicle.getString("jsengine");
+
+        mPageCyclerSuite = icicle.getString("suite");
+        mPageCyclerForwardHost = icicle.getString("forward");
+        mPageCyclerIteration = icicle.getString("iteration", "5");
 
         super.onCreate(icicle);
     }
-    
-    public String mTestPath;
-    public String mSaveImagePath;
-    public int mTimeoutInMillis;
-    public int mDelay;
-    public boolean mRebaseline;
-    public boolean mLogtime;
-    public boolean mGetDrawTime;
-    public String mJsEngine;
+
+    String mPageCyclerSuite;
+    String mPageCyclerForwardHost;
+    String mPageCyclerIteration;
+    String mTestPath;
+    String mSaveImagePath;
+    int mTimeoutInMillis;
+    int mDelay;
+    boolean mRebaseline;
+    boolean mLogtime;
+    boolean mGetDrawTime;
+    String mJsEngine;
 }
