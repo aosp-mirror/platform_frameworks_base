@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"מאפשר ליישום לאחזר מידע על משימות הפועלות כעת ושפעלו לאחרונה. עלול לאפשר ליישומים זדוניים לגלות מידע פרטי על יישומים אחרים."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"שנה את סדר היישומים הפועלים"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"מאפשר ליישום להעביר משימות לחזית ולרקע. יישומים זדוניים עלולים לאלץ את עצמם לחזית מבלי שתוכל לשלוט בהם."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"הפסקת יישומים פועלים"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"מאפשר ליישום להסיר משימות ולסיים את פעולת היישומים שלהן. יישומים זדוניים עלולים לשבש את פעולת היישומים האחרים."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"הפוך איתור באגים ביישום לפעיל"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"מאפשר ליישום להפעיל איתור באגים עבור יישום אחר. יישומים זדוניים יכולים להשתמש ביכולת זו כדי להשמיד יישומים אחרים."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"שנה את הגדרות ממשק המשתמש"</string>

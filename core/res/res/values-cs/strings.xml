@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Umožňuje aplikaci načíst informace o aktuálně a nedávno spuštěných úlohách. Toto nastavení může škodlivým aplikacím umožnit odhalení soukromých informací o jiných aplikacích."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"změna uspořádání spuštěných aplikací"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Umožňuje aplikaci přesouvat úlohy do popředí či pozadí. Škodlivé aplikace mohou vynutit své přesunutí do popředí bez vašeho přičinění."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"zastavení činnosti aplikací"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Umožňuje aplikaci odebírat úlohy a ukončit činnost souvisejících aplikací. Škodlivé aplikace mohou narušovat chování jiných aplikací."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"povolit ladění aplikací"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Umožňuje aplikaci povolit ladění jiné aplikace. Škodlivé aplikace mohou pomocí tohoto nastavení ukončit jiné aplikace."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"změna vašeho nastavení uživatelského rozhraní"</string>

@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Uygulamaların şu anda ve yakın geçmişte çalışmakta olan işlemler hakkında bilgi almasına izin verir. Kötü amaçlı uygulamaların diğer uygulamalar ile ilgili gizli bilgileri keşfetmesine izin verebilir."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"çalışan uygulamaları yeniden sırala"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Uygulamaların görevleri ön plana ve arka plana taşımasına izin verir. Kötü amaçlı uygulamalar kendilerini sizin denetiminiz dışında zorla ön plana çıkarabilir."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"çalışan uygulamaları durdur"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Uygulamanın, görevleri kaldırmasına ve bunlara ait uygulamaları kapatmasına izin verir. Kötü niyetli uygulamalar diğer uygulamaların davranışlarını bozabilir."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"uygulama hata ayıklamayı etkinleştir"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Bir uygulamanın başka bir uygulama için hata ayıklamayı çalıştırmasına izin verir. Kötü amaçlı uygulamalar bu işlevi başka uygulamaları kapatmak için kullanabilir."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"kullanıcı arayüzü ayarlarınızı değiştirin"</string>

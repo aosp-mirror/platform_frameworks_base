@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Tillater applikasjonen å hente informasjon om aktive og nylig kjørte programmer. Kan tillate ondsinnede applikasjoner å oppdage privat informasjon om andre applikasjoner."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"omordne kjørende applikasjoner"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Tillater applikasjonen å flytte programmer til forgrunnen eller bakgrunnen. Ondsinnede applikasjoner kan tvinge seg selv til fronten."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"stopp kjøring av applikasjoner"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Gjør applikasjoner i stand til å fjerne og ødelegge for oppgaver. Skadelige applikasjoner kan forstyrre oppførselen til andre applikasjoner."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"aktiver applikasjonsdebugging"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Lar applikasjonen skru på debugging for en annen applikasjon. Ondsinnede applikasjoner kan bruke dette til å drepe andre applikasjoner."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"endre innstillingene for brukergrensesnitt"</string>

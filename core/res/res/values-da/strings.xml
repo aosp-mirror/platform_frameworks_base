@@ -204,10 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Tillader, at et program henter oplysninger om nuværende og for nyligt kørende opgaver. Tillader, at eventuelt ondsindede programmer finder private oplysninger om andre programmer."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"omorganiser kørende programmer"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Tillader, at et program flytter opgaver til forgrunden og baggrunden. Ondsindede programmer kan tvinge dem selv til forgrunden uden din kontrol."</string>
-    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
-    <skip />
-    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
-    <skip />
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"stop kørende programmer"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Tillader, at et program fjerner opgaver og standser deres programmer. Ondsindede programmer kan forstyrre andre programmers opførsel."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"aktiver programfejlretning"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Tillader, at et program slår fejlretning af andet program til. Ondsindede programmer kan bruge dette til at standse andre programmer."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"skift indstillinger for brugergrænsefladen"</string>
