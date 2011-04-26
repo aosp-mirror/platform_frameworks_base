@@ -75,7 +75,7 @@ public class PathsActivity extends Activity {
 
             mLargePaint = new Paint();
             mLargePaint.setAntiAlias(true);
-            mLargePaint.setColor(0xff00ff00);
+            mLargePaint.setColor(0x7f00ff00);
             mLargePaint.setStrokeWidth(15.0f);
             mLargePaint.setStyle(Paint.Style.FILL);
 

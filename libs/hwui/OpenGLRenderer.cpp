@@ -1407,7 +1407,7 @@ void OpenGLRenderer::drawLinesAsQuads(float *points, int count, bool isAA, bool 
     if (!isAA) {
         setupDrawVertices(vertices);
     } else {
-        void *alphaCoords = ((void*) aaVertices) + gVertexAlphaOffset;
+        AlphaVertex* alphaCoords = aaVertices + gVertexAlphaOffset;
         // innerProportion is the ratio of the inner (non-AA) port of the line to the total
         // AA stroke width (the base stroke width expanded by a half pixel on either side).
         // This value is used in the fragment shader to determine how to fill fragments.
@@ -1418,7 +1418,9 @@ void OpenGLRenderer::drawLinesAsQuads(float *points, int count, bool isAA, bool 
     int generatedVerticesCount = 0;
     AlphaVertex *prevAAVertex = NULL;
     Vertex *prevVertex = NULL;
-    float inverseScaleX, inverseScaleY;
+    float inverseScaleX = 1.0f;
+    float inverseScaleY = 1.0f;
+
     if (isHairline) {
         // The quad that we use for AA hairlines needs to account for scaling because the line
         // should always be one pixel wide regardless of scale.
@@ -1438,6 +1440,7 @@ void OpenGLRenderer::drawLinesAsQuads(float *points, int count, bool isAA, bool 
             inverseScaleY = (scaleY != 0) ? (inverseScaleY / scaleY) : 0;
         }
     }
+
     for (int i = 0; i < count; i += 4) {
         // a = start point, b = end point
         vec2 a(points[i], points[i + 1]);
@@ -1767,23 +1770,32 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
                 count, mShadowRadius);
         const AutoTexture autoCleanup(shadow);
 
-        const float sx = x - shadow->left + mShadowDx;
-        const float sy = y - shadow->top + mShadowDy;
+        const float sx = oldX - shadow->left + mShadowDx;
+        const float sy = oldY - shadow->top + mShadowDy;
 
         const int shadowAlpha = ((mShadowColor >> 24) & 0xFF);
+        int shadowColor = mShadowColor;
+        if (mShader) {
+            shadowColor = 0xffffffff;
+        }
 
         glActiveTexture(gTextureUnits[0]);
         setupDraw();
         setupDrawWithTexture(true);
-        setupDrawAlpha8Color(mShadowColor, shadowAlpha < 255 ? shadowAlpha : alpha);
+        setupDrawAlpha8Color(shadowColor, shadowAlpha < 255 ? shadowAlpha : alpha);
+        setupDrawColorFilter();
+        setupDrawShader();
         setupDrawBlending(true, mode);
         setupDrawProgram();
-        setupDrawModelView(sx, sy, sx + shadow->width, sy + shadow->height, pureTranslate);
+        setupDrawModelView(sx, sy, sx + shadow->width, sy + shadow->height);
         setupDrawTexture(shadow->id);
         setupDrawPureColorUniforms();
+        setupDrawColorFilterUniforms();
+        setupDrawShaderUniforms();
         setupDrawMesh(NULL, (GLvoid*) gMeshTextureOffset);
 
         glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+
         finishDrawTexture();
     }
 
