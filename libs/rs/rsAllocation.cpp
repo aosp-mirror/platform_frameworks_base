@@ -833,7 +833,7 @@ RsAllocation rsaAllocationCreateTyped(RsContext con, RsType vtype,
 
 RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
                                            RsAllocationMipmapControl mips,
-                                           const void *data, uint32_t usages) {
+                                           const void *data, size_t data_length, uint32_t usages) {
     Context *rsc = static_cast<Context *>(con);
     Type *t = static_cast<Type *>(vtype);
 
@@ -855,7 +855,7 @@ RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
 
 RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
                                                RsAllocationMipmapControl mips,
-                                               const void *data, uint32_t usages) {
+                                               const void *data, size_t data_length, uint32_t usages) {
     Context *rsc = static_cast<Context *>(con);
     Type *t = static_cast<Type *>(vtype);
 

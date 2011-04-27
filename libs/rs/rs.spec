@@ -1,4 +1,110 @@
 
+DeviceCreate {
+    direct
+    nocontext
+    ret RsDevice
+}
+
+DeviceDestroy {
+    direct
+    nocontext
+    param RsDevice dev
+}
+
+DeviceSetConfig {
+    direct
+    nocontext
+    param RsDevice dev
+    param RsDeviceParam p
+    param int32_t value
+}
+
+ContextCreate {
+    direct
+    nocontext
+    param RsDevice dev
+    param uint32_t version
+    ret RsContext
+}
+
+ContextCreateGL {
+    direct
+    nocontext
+    param RsDevice dev
+    param uint32_t version
+    param RsSurfaceConfig sc
+    param uint32_t dpi
+    ret RsContext
+}
+
+ContextDestroy {
+    direct
+}
+
+ContextGetMessage {
+    direct
+    param void *data
+    param size_t *receiveLen
+    param uint32_t *subID
+    param bool wait
+    ret RsMessageToClientType
+}
+
+ContextPeekMessage {
+    direct
+    param size_t *receiveLen
+    param uint32_t *subID
+    param bool wait
+    ret RsMessageToClientType
+}
+
+ContextInitToClient {
+    direct
+}
+
+ContextDeinitToClient {
+    direct
+}
+
+aTypeCreate {
+    direct
+    param RsElement e
+    param uint32_t dimX
+    param uint32_t dimY
+    param uint32_t dimZ
+    param bool mips
+    param bool faces
+    ret RsType
+}
+
+aAllocationCreateTyped {
+    direct
+    param RsType vtype
+    param RsAllocationMipmapControl mips
+    param uint32_t usages
+    ret RsAllocation
+}
+
+aAllocationCreateFromBitmap {
+    direct
+    param RsType vtype
+    param RsAllocationMipmapControl mips
+    param const void *data
+    param uint32_t usages
+    ret RsAllocation
+}
+
+aAllocationCubeCreateFromBitmap {
+    direct
+    param RsType vtype
+    param RsAllocationMipmapControl mips
+    param const void *data
+    param uint32_t usages
+    ret RsAllocation
+}
+
+
+
 ContextFinish {
 	handcodeApi
 	}
@@ -82,23 +188,21 @@ AllocationCopyToBitmap {
 
 
 Allocation1DData {
+	handcodeApi
 	param RsAllocation va
 	param uint32_t xoff
 	param uint32_t lod
 	param uint32_t count
 	param const void *data
-	handcodeApi
-	togglePlay
 	}
 
 Allocation1DElementData {
+	handcodeApi
 	param RsAllocation va
 	param uint32_t x
 	param uint32_t lod
 	param const void *data
 	param uint32_t comp_offset
-	handcodeApi
-	togglePlay
 	}
 
 Allocation2DData {
@@ -186,11 +290,10 @@ ScriptInvoke {
 	}
 
 ScriptInvokeV {
+	handcodeApi
 	param RsScript s
 	param uint32_t slot
 	param const void * data
-	handcodeApi
-	togglePlay
 	}
 
 ScriptSetVarI {
@@ -224,11 +327,10 @@ ScriptSetVarD {
 	}
 
 ScriptSetVarV {
+	handcodeApi
 	param RsScript s
 	param uint32_t slot
 	param const void * data
-	handcodeApi
-	togglePlay
 	}
 
 
@@ -330,3 +432,4 @@ MeshBindVertex {
 MeshInitVertexAttribs {
 	param RsMesh mesh
 	}
+
