@@ -986,6 +986,7 @@ public class WebView extends AbsoluteLayout
     protected WebView(Context context, AttributeSet attrs, int defStyle,
             Map<String, Object> javaScriptInterfaces, boolean privateBrowsing) {
         super(context, attrs, defStyle);
+        checkThread();
 
         // Used by the chrome stack to find application paths
         JniUtil.setContext(context);
@@ -1138,7 +1139,7 @@ public class WebView extends AbsoluteLayout
                         PackageInfo pInfo = pm.getPackageInfo(name,
                                 PackageManager.GET_ACTIVITIES | PackageManager.GET_SERVICES);
                         installedPackages.add(name);
-                    } catch(PackageManager.NameNotFoundException e) {
+                    } catch (PackageManager.NameNotFoundException e) {
                         // package not found
                     }
                 }
@@ -1309,6 +1310,7 @@ public class WebView extends AbsoluteLayout
      * @param overlay TRUE if horizontal scrollbar should have overlay style.
      */
     public void setHorizontalScrollbarOverlay(boolean overlay) {
+        checkThread();
         mOverlayHorizontalScrollbar = overlay;
     }
 
@@ -1317,6 +1319,7 @@ public class WebView extends AbsoluteLayout
      * @param overlay TRUE if vertical scrollbar should have overlay style.
      */
     public void setVerticalScrollbarOverlay(boolean overlay) {
+        checkThread();
         mOverlayVerticalScrollbar = overlay;
     }
 
@@ -1325,6 +1328,7 @@ public class WebView extends AbsoluteLayout
      * @return TRUE if horizontal scrollbar has overlay style.
      */
     public boolean overlayHorizontalScrollbar() {
+        checkThread();
         return mOverlayHorizontalScrollbar;
     }
 
@@ -1333,6 +1337,7 @@ public class WebView extends AbsoluteLayout
      * @return TRUE if vertical scrollbar has overlay style.
      */
     public boolean overlayVerticalScrollbar() {
+        checkThread();
         return mOverlayVerticalScrollbar;
     }
 
@@ -1364,6 +1369,7 @@ public class WebView extends AbsoluteLayout
      * @deprecated This method is now obsolete.
      */
     public int getVisibleTitleHeight() {
+        checkThread();
         // need to restrict mScrollY due to over scroll
         return Math.max(getTitleHeight() - Math.max(0, mScrollY), 0);
     }
@@ -1390,6 +1396,7 @@ public class WebView extends AbsoluteLayout
      * there is no certificate (the site is not secure).
      */
     public SslCertificate getCertificate() {
+        checkThread();
         return mCertificate;
     }
 
@@ -1397,6 +1404,7 @@ public class WebView extends AbsoluteLayout
      * Sets the SSL certificate for the main top-level page.
      */
     public void setCertificate(SslCertificate certificate) {
+        checkThread();
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "setCertificate=" + certificate);
         }
@@ -1416,6 +1424,7 @@ public class WebView extends AbsoluteLayout
      * @param password The password for the given host.
      */
     public void savePassword(String host, String username, String password) {
+        checkThread();
         mDatabase.setUsernamePassword(host, username, password);
     }
 
@@ -1430,6 +1439,7 @@ public class WebView extends AbsoluteLayout
      */
     public void setHttpAuthUsernamePassword(String host, String realm,
             String username, String password) {
+        checkThread();
         mDatabase.setHttpAuthUsernamePassword(host, realm, username, password);
     }
 
@@ -1443,6 +1453,7 @@ public class WebView extends AbsoluteLayout
      *         String[1] is password. Return null if it can't find anything.
      */
     public String[] getHttpAuthUsernamePassword(String host, String realm) {
+        checkThread();
         return mDatabase.getHttpAuthUsernamePassword(host, realm);
     }
 
@@ -1475,6 +1486,11 @@ public class WebView extends AbsoluteLayout
      * methods may be called on a WebView after destroy.
      */
     public void destroy() {
+        checkThread();
+        destroyImpl();
+    }
+
+    private void destroyImpl() {
         clearHelpers();
         if (mListBoxDialog != null) {
             mListBoxDialog.dismiss();
@@ -1511,6 +1527,7 @@ public class WebView extends AbsoluteLayout
      * Enables platform notifications of data state and proxy changes.
      */
     public static void enablePlatformNotifications() {
+        checkThread();
         Network.enablePlatformNotifications();
     }
 
@@ -1519,6 +1536,7 @@ public class WebView extends AbsoluteLayout
      * from the Activity's onPause() or onStop().
      */
     public static void disablePlatformNotifications() {
+        checkThread();
         Network.disablePlatformNotifications();
     }
 
@@ -1530,6 +1548,7 @@ public class WebView extends AbsoluteLayout
      * @hide pending API solidification
      */
     public void setJsFlags(String flags) {
+        checkThread();
         mWebViewCore.sendMessage(EventHub.SET_JS_FLAGS, flags);
     }
 
@@ -1540,6 +1559,7 @@ public class WebView extends AbsoluteLayout
      * @param networkUp boolean indicating if network is available
      */
     public void setNetworkAvailable(boolean networkUp) {
+        checkThread();
         mWebViewCore.sendMessage(EventHub.SET_NETWORK_STATE,
                 networkUp ? 1 : 0, 0);
     }
@@ -1549,6 +1569,7 @@ public class WebView extends AbsoluteLayout
      * {@hide}
      */
     public void setNetworkType(String type, String subtype) {
+        checkThread();
         Map<String, String> map = new HashMap<String, String>();
         map.put("type", type);
         map.put("subtype", subtype);
@@ -1568,6 +1589,7 @@ public class WebView extends AbsoluteLayout
      * @see #restorePicture
      */
     public WebBackForwardList saveState(Bundle outState) {
+        checkThread();
         if (outState == null) {
             return null;
         }
@@ -1622,6 +1644,7 @@ public class WebView extends AbsoluteLayout
      * @return True if the picture was successfully saved.
      */
     public boolean savePicture(Bundle b, final File dest) {
+        checkThread();
         if (dest == null || b == null) {
             return false;
         }
@@ -1684,6 +1707,7 @@ public class WebView extends AbsoluteLayout
      * @return True if the picture was successfully restored.
      */
     public boolean restorePicture(Bundle b, File src) {
+        checkThread();
         if (src == null || b == null) {
             return false;
         }
@@ -1736,6 +1760,7 @@ public class WebView extends AbsoluteLayout
      * @see #restorePicture
      */
     public WebBackForwardList restoreState(Bundle inState) {
+        checkThread();
         WebBackForwardList returnList = null;
         if (inState == null) {
             return returnList;
@@ -1795,6 +1820,11 @@ public class WebView extends AbsoluteLayout
      *            will be replaced by the intrinsic value of the WebView.
      */
     public void loadUrl(String url, Map<String, String> extraHeaders) {
+        checkThread();
+        loadUrlImpl(url, extraHeaders);
+    }
+
+    private void loadUrlImpl(String url, Map<String, String> extraHeaders) {
         switchOutDrawHistory();
         WebViewCore.GetUrlData arg = new WebViewCore.GetUrlData();
         arg.mUrl = url;
@@ -1808,10 +1838,15 @@ public class WebView extends AbsoluteLayout
      * @param url The url of the resource to load.
      */
     public void loadUrl(String url) {
+        checkThread();
+        loadUrlImpl(url);
+    }
+
+    private void loadUrlImpl(String url) {
         if (url == null) {
             return;
         }
-        loadUrl(url, null);
+        loadUrlImpl(url, null);
     }
 
     /**
@@ -1823,6 +1858,7 @@ public class WebView extends AbsoluteLayout
      * @param postData The data will be passed to "POST" request.
      */
     public void postUrl(String url, byte[] postData) {
+        checkThread();
         if (URLUtil.isNetworkUrl(url)) {
             switchOutDrawHistory();
             WebViewCore.PostUrlData arg = new WebViewCore.PostUrlData();
@@ -1831,7 +1867,7 @@ public class WebView extends AbsoluteLayout
             mWebViewCore.sendMessage(EventHub.POST_URL, arg);
             clearHelpers();
         } else {
-            loadUrl(url);
+            loadUrlImpl(url);
         }
     }
 
@@ -1846,7 +1882,12 @@ public class WebView extends AbsoluteLayout
      * @param encoding The encoding of the data. i.e. utf-8, base64
      */
     public void loadData(String data, String mimeType, String encoding) {
-        loadUrl("data:" + mimeType + ";" + encoding + "," + data);
+        checkThread();
+        loadDataImpl(data, mimeType, encoding);
+    }
+
+    private void loadDataImpl(String data, String mimeType, String encoding) {
+        loadUrlImpl("data:" + mimeType + ";" + encoding + "," + data);
     }
 
     /**
@@ -1872,9 +1913,10 @@ public class WebView extends AbsoluteLayout
      */
     public void loadDataWithBaseURL(String baseUrl, String data,
             String mimeType, String encoding, String historyUrl) {
+        checkThread();
 
         if (baseUrl != null && baseUrl.toLowerCase().startsWith("data:")) {
-            loadData(data, mimeType, encoding);
+            loadDataImpl(data, mimeType, encoding);
             return;
         }
         switchOutDrawHistory();
@@ -1894,7 +1936,8 @@ public class WebView extends AbsoluteLayout
      * @param filename The filename where the archive should be placed.
      */
     public void saveWebArchive(String filename) {
-        saveWebArchive(filename, false, null);
+        checkThread();
+        saveWebArchiveImpl(filename, false, null);
     }
 
     /* package */ static class SaveWebArchiveMessage {
@@ -1923,6 +1966,12 @@ public class WebView extends AbsoluteLayout
      *                 file failed.
      */
     public void saveWebArchive(String basename, boolean autoname, ValueCallback<String> callback) {
+        checkThread();
+        saveWebArchiveImpl(basename, autoname, callback);
+    }
+
+    private void saveWebArchiveImpl(String basename, boolean autoname,
+            ValueCallback<String> callback) {
         mWebViewCore.sendMessage(EventHub.SAVE_WEBARCHIVE,
             new SaveWebArchiveMessage(basename, autoname, callback));
     }
@@ -1931,6 +1980,7 @@ public class WebView extends AbsoluteLayout
      * Stop the current load.
      */
     public void stopLoading() {
+        checkThread();
         // TODO: should we clear all the messages in the queue before sending
         // STOP_LOADING?
         switchOutDrawHistory();
@@ -1941,6 +1991,7 @@ public class WebView extends AbsoluteLayout
      * Reload the current url.
      */
     public void reload() {
+        checkThread();
         clearHelpers();
         switchOutDrawHistory();
         mWebViewCore.sendMessage(EventHub.RELOAD);
@@ -1951,6 +2002,7 @@ public class WebView extends AbsoluteLayout
      * @return True iff this WebView has a back history item.
      */
     public boolean canGoBack() {
+        checkThread();
         WebBackForwardList l = mCallbackProxy.getBackForwardList();
         synchronized (l) {
             if (l.getClearPending()) {
@@ -1965,7 +2017,8 @@ public class WebView extends AbsoluteLayout
      * Go back in the history of this WebView.
      */
     public void goBack() {
-        goBackOrForward(-1);
+        checkThread();
+        goBackOrForwardImpl(-1);
     }
 
     /**
@@ -1973,6 +2026,7 @@ public class WebView extends AbsoluteLayout
      * @return True iff this Webview has a forward history item.
      */
     public boolean canGoForward() {
+        checkThread();
         WebBackForwardList l = mCallbackProxy.getBackForwardList();
         synchronized (l) {
             if (l.getClearPending()) {
@@ -1987,7 +2041,8 @@ public class WebView extends AbsoluteLayout
      * Go forward in the history of this WebView.
      */
     public void goForward() {
-        goBackOrForward(1);
+        checkThread();
+        goBackOrForwardImpl(1);
     }
 
     /**
@@ -1997,6 +2052,7 @@ public class WebView extends AbsoluteLayout
      *              history.
      */
     public boolean canGoBackOrForward(int steps) {
+        checkThread();
         WebBackForwardList l = mCallbackProxy.getBackForwardList();
         synchronized (l) {
             if (l.getClearPending()) {
@@ -2016,6 +2072,11 @@ public class WebView extends AbsoluteLayout
      *              forward list.
      */
     public void goBackOrForward(int steps) {
+        checkThread();
+        goBackOrForwardImpl(steps);
+    }
+
+    private void goBackOrForwardImpl(int steps) {
         goBackOrForward(steps, false);
     }
 
@@ -2031,6 +2092,7 @@ public class WebView extends AbsoluteLayout
      * Returns true if private browsing is enabled in this WebView.
      */
     public boolean isPrivateBrowsingEnabled() {
+        checkThread();
         return getSettings().isPrivateBrowsingEnabled();
     }
 
@@ -2053,6 +2115,7 @@ public class WebView extends AbsoluteLayout
      * @return true if the page was scrolled
      */
     public boolean pageUp(boolean top) {
+        checkThread();
         if (mNativeClass == 0) {
             return false;
         }
@@ -2079,6 +2142,7 @@ public class WebView extends AbsoluteLayout
      * @return true if the page was scrolled
      */
     public boolean pageDown(boolean bottom) {
+        checkThread();
         if (mNativeClass == 0) {
             return false;
         }
@@ -2103,6 +2167,7 @@ public class WebView extends AbsoluteLayout
      * and onMeasure() will return 0 if MeasureSpec is not MeasureSpec.EXACTLY
      */
     public void clearView() {
+        checkThread();
         mContentWidth = 0;
         mContentHeight = 0;
         setBaseLayer(0, null, false, false);
@@ -2119,6 +2184,7 @@ public class WebView extends AbsoluteLayout
      *         bounds of the view.
      */
     public Picture capturePicture() {
+        checkThread();
         if (mNativeClass == 0) return null;
         Picture result = new Picture();
         nativeCopyBaseContentToPicture(result);
@@ -2149,6 +2215,7 @@ public class WebView extends AbsoluteLayout
      * @return The current scale.
      */
     public float getScale() {
+        checkThread();
         return mZoomManager.getScale();
     }
 
@@ -2161,6 +2228,7 @@ public class WebView extends AbsoluteLayout
      * @param scaleInPercent The initial scale in percent.
      */
     public void setInitialScale(int scaleInPercent) {
+        checkThread();
         mZoomManager.setInitialScaleInPercent(scaleInPercent);
     }
 
@@ -2170,6 +2238,7 @@ public class WebView extends AbsoluteLayout
      * level of this WebView.
      */
     public void invokeZoomPicker() {
+        checkThread();
         if (!getSettings().supportZoom()) {
             Log.w(LOGTAG, "This WebView doesn't support zoom.");
             return;
@@ -2197,6 +2266,7 @@ public class WebView extends AbsoluteLayout
      * HitTestResult type is set to UNKNOWN_TYPE.
      */
     public HitTestResult getHitTestResult() {
+        checkThread();
         return hitTestResult(mInitialHitTestResult);
     }
 
@@ -2278,6 +2348,7 @@ public class WebView extends AbsoluteLayout
      *                - "src" returns the image's src attribute.
      */
     public void requestFocusNodeHref(Message hrefMsg) {
+        checkThread();
         if (hrefMsg == null) {
             return;
         }
@@ -2306,6 +2377,7 @@ public class WebView extends AbsoluteLayout
      *            as the data member with "url" as key. The result can be null.
      */
     public void requestImageRef(Message msg) {
+        checkThread();
         if (0 == mNativeClass) return; // client isn't initialized
         int contentX = viewToContentX(mLastTouchX + mScrollX);
         int contentY = viewToContentY(mLastTouchY + mScrollY);
@@ -2802,6 +2874,7 @@ public class WebView extends AbsoluteLayout
      * @return The url for the current page.
      */
     public String getUrl() {
+        checkThread();
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
         return h != null ? h.getUrl() : null;
     }
@@ -2815,6 +2888,7 @@ public class WebView extends AbsoluteLayout
      * @return The url that was originally requested for the current page.
      */
     public String getOriginalUrl() {
+        checkThread();
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
         return h != null ? h.getOriginalUrl() : null;
     }
@@ -2825,6 +2899,7 @@ public class WebView extends AbsoluteLayout
      * @return The title for the current page.
      */
     public String getTitle() {
+        checkThread();
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
         return h != null ? h.getTitle() : null;
     }
@@ -2835,6 +2910,7 @@ public class WebView extends AbsoluteLayout
      * @return The favicon for the current page.
      */
     public Bitmap getFavicon() {
+        checkThread();
         WebHistoryItem h = mCallbackProxy.getBackForwardList().getCurrentItem();
         return h != null ? h.getFavicon() : null;
     }
@@ -2855,6 +2931,7 @@ public class WebView extends AbsoluteLayout
      * @return The progress for the current page between 0 and 100.
      */
     public int getProgress() {
+        checkThread();
         return mCallbackProxy.getProgress();
     }
 
@@ -2862,6 +2939,7 @@ public class WebView extends AbsoluteLayout
      * @return the height of the HTML content.
      */
     public int getContentHeight() {
+        checkThread();
         return mContentHeight;
     }
 
@@ -2879,6 +2957,7 @@ public class WebView extends AbsoluteLayout
      * useful if the application has been paused.
      */
     public void pauseTimers() {
+        checkThread();
         mWebViewCore.sendMessage(EventHub.PAUSE_TIMERS);
     }
 
@@ -2887,6 +2966,7 @@ public class WebView extends AbsoluteLayout
      * This will resume dispatching all timers.
      */
     public void resumeTimers() {
+        checkThread();
         mWebViewCore.sendMessage(EventHub.RESUME_TIMERS);
     }
 
@@ -2899,6 +2979,7 @@ public class WebView extends AbsoluteLayout
      * Note that this differs from pauseTimers(), which affects all WebViews.
      */
     public void onPause() {
+        checkThread();
         if (!mIsPaused) {
             mIsPaused = true;
             mWebViewCore.sendMessage(EventHub.ON_PAUSE);
@@ -2914,6 +2995,7 @@ public class WebView extends AbsoluteLayout
      * Call this to resume a WebView after a previous call to onPause().
      */
     public void onResume() {
+        checkThread();
         if (mIsPaused) {
             mIsPaused = false;
             mWebViewCore.sendMessage(EventHub.ON_RESUME);
@@ -2934,6 +3016,7 @@ public class WebView extends AbsoluteLayout
      * free any available memory.
      */
     public void freeMemory() {
+        checkThread();
         mWebViewCore.sendMessage(EventHub.FREE_MEMORY);
     }
 
@@ -2944,6 +3027,7 @@ public class WebView extends AbsoluteLayout
      * @param includeDiskFiles If false, only the RAM cache is cleared.
      */
     public void clearCache(boolean includeDiskFiles) {
+        checkThread();
         // Note: this really needs to be a static method as it clears cache for all
         // WebView. But we need mWebViewCore to send message to WebCore thread, so
         // we can't make this static.
@@ -2956,6 +3040,7 @@ public class WebView extends AbsoluteLayout
      * currently focused textfield if there is one.
      */
     public void clearFormData() {
+        checkThread();
         if (inEditingMode()) {
             AutoCompleteAdapter adapter = null;
             mWebTextView.setAdapterCustom(adapter);
@@ -2966,6 +3051,7 @@ public class WebView extends AbsoluteLayout
      * Tell the WebView to clear its internal back/forward list.
      */
     public void clearHistory() {
+        checkThread();
         mCallbackProxy.getBackForwardList().setClearPending();
         mWebViewCore.sendMessage(EventHub.CLEAR_HISTORY);
     }
@@ -2975,6 +3061,7 @@ public class WebView extends AbsoluteLayout
      * certificate errors.
      */
     public void clearSslPreferences() {
+        checkThread();
         mWebViewCore.sendMessage(EventHub.CLEAR_SSL_PREF_TABLE);
     }
 
@@ -2987,6 +3074,7 @@ public class WebView extends AbsoluteLayout
      * updated to reflect any new state.
      */
     public WebBackForwardList copyBackForwardList() {
+        checkThread();
         return mCallbackProxy.getBackForwardList().clone();
     }
 
@@ -2998,6 +3086,7 @@ public class WebView extends AbsoluteLayout
      * @param forward Direction to search.
      */
     public void findNext(boolean forward) {
+        checkThread();
         if (0 == mNativeClass) return; // client isn't initialized
         nativeFindNext(forward);
     }
@@ -3009,6 +3098,7 @@ public class WebView extends AbsoluteLayout
      *              that were found.
      */
     public int findAll(String find) {
+        checkThread();
         if (0 == mNativeClass) return 0; // client isn't initialized
         int result = find != null ? nativeFindAll(find.toLowerCase(),
                 find.toUpperCase(), find.equalsIgnoreCase(mLastFind)) : 0;
@@ -3028,6 +3118,7 @@ public class WebView extends AbsoluteLayout
      * @return boolean True if the find dialog is shown, false otherwise.
      */
     public boolean showFindDialog(String text, boolean showIme) {
+        checkThread();
         FindActionModeCallback callback = new FindActionModeCallback(mContext);
         if (getParent() == null || startActionMode(callback) == null) {
             // Could not start the action mode, so end Find on page
@@ -3104,6 +3195,7 @@ public class WebView extends AbsoluteLayout
      * @return the address, or if no address is found, return null.
      */
     public static String findAddress(String addr) {
+        checkThread();
         return findAddress(addr, false);
     }
 
@@ -3137,6 +3229,7 @@ public class WebView extends AbsoluteLayout
      * Clear the highlighting surrounding text matches created by findAll.
      */
     public void clearMatches() {
+        checkThread();
         if (mNativeClass == 0)
             return;
         nativeSetFindIsEmpty();
@@ -3166,6 +3259,7 @@ public class WebView extends AbsoluteLayout
      * @param response The message that will be dispatched with the result.
      */
     public void documentHasImages(Message response) {
+        checkThread();
         if (response == null) {
             return;
         }
@@ -3561,6 +3655,7 @@ public class WebView extends AbsoluteLayout
      * @param client An implementation of WebViewClient.
      */
     public void setWebViewClient(WebViewClient client) {
+        checkThread();
         mCallbackProxy.setWebViewClient(client);
     }
 
@@ -3581,6 +3676,7 @@ public class WebView extends AbsoluteLayout
      * @param listener An implementation of DownloadListener.
      */
     public void setDownloadListener(DownloadListener listener) {
+        checkThread();
         mCallbackProxy.setDownloadListener(listener);
     }
 
@@ -3591,6 +3687,7 @@ public class WebView extends AbsoluteLayout
      * @param client An implementation of WebChromeClient.
      */
     public void setWebChromeClient(WebChromeClient client) {
+        checkThread();
         mCallbackProxy.setWebChromeClient(client);
     }
 
@@ -3629,6 +3726,7 @@ public class WebView extends AbsoluteLayout
      * @param listener An implementation of WebView.PictureListener.
      */
     public void setPictureListener(PictureListener listener) {
+        checkThread();
         mPictureListener = listener;
     }
 
@@ -3670,6 +3768,7 @@ public class WebView extends AbsoluteLayout
      *                      JavaScript.
      */
     public void addJavascriptInterface(Object obj, String interfaceName) {
+        checkThread();
         if (obj == null) {
             return;
         }
@@ -3684,6 +3783,7 @@ public class WebView extends AbsoluteLayout
      * @param interfaceName The name of the interface to remove.
      */
     public void removeJavascriptInterface(String interfaceName) {
+        checkThread();
         if (mWebViewCore != null) {
             WebViewCore.JSInterfaceData arg = new WebViewCore.JSInterfaceData();
             arg.mInterfaceName = interfaceName;
@@ -3698,6 +3798,7 @@ public class WebView extends AbsoluteLayout
      *         settings.
      */
     public WebSettings getSettings() {
+        checkThread();
         return (mWebViewCore != null) ? mWebViewCore.getSettings() : null;
     }
 
@@ -3710,6 +3811,7 @@ public class WebView extends AbsoluteLayout
     */
     @Deprecated
     public static synchronized PluginList getPluginList() {
+        checkThread();
         return new PluginList();
     }
 
@@ -3718,7 +3820,9 @@ public class WebView extends AbsoluteLayout
     * @deprecated This was used for Gears, which has been deprecated.
     */
     @Deprecated
-    public void refreshPlugins(boolean reloadOpenPages) { }
+    public void refreshPlugins(boolean reloadOpenPages) {
+        checkThread();
+    }
 
     //-------------------------------------------------------------------------
     // Override View methods
@@ -3727,7 +3831,7 @@ public class WebView extends AbsoluteLayout
     @Override
     protected void finalize() throws Throwable {
         try {
-            destroy();
+            destroyImpl();
         } finally {
             super.finalize();
         }
@@ -4988,6 +5092,7 @@ public class WebView extends AbsoluteLayout
      * Do not rely on this functionality; it will be deprecated in the future.
      */
     public void emulateShiftHeld() {
+        checkThread();
         setUpSelect(false, 0, 0);
     }
 
@@ -6257,6 +6362,7 @@ public class WebView extends AbsoluteLayout
     private boolean mMapTrackballToArrowKeys = true;
 
     public void setMapTrackballToArrowKeys(boolean setMap) {
+        checkThread();
         mMapTrackballToArrowKeys = setMap;
     }
 
@@ -6549,6 +6655,7 @@ public class WebView extends AbsoluteLayout
     }
 
     public void flingScroll(int vx, int vy) {
+        checkThread();
         mScroller.fling(mScrollX, mScrollY, vx, vy, 0, computeMaxScrollX(), 0,
                 computeMaxScrollY(), mOverflingDistance, mOverflingDistance);
         invalidate();
@@ -6684,6 +6791,7 @@ public class WebView extends AbsoluteLayout
      */
     @Deprecated
     public View getZoomControls() {
+        checkThread();
         if (!getSettings().supportZoom()) {
             Log.w(LOGTAG, "This WebView doesn't support zoom.");
             return null;
@@ -6703,6 +6811,7 @@ public class WebView extends AbsoluteLayout
      * @return TRUE if the WebView can be zoomed in.
      */
     public boolean canZoomIn() {
+        checkThread();
         return mZoomManager.canZoomIn();
     }
 
@@ -6710,6 +6819,7 @@ public class WebView extends AbsoluteLayout
      * @return TRUE if the WebView can be zoomed out.
      */
     public boolean canZoomOut() {
+        checkThread();
         return mZoomManager.canZoomOut();
     }
 
@@ -6718,6 +6828,7 @@ public class WebView extends AbsoluteLayout
      * @return TRUE if zoom in succeeds. FALSE if no zoom changes.
      */
     public boolean zoomIn() {
+        checkThread();
         return mZoomManager.zoomIn();
     }
 
@@ -6726,6 +6837,7 @@ public class WebView extends AbsoluteLayout
      * @return TRUE if zoom out succeeds. FALSE if no zoom changes.
      */
     public boolean zoomOut() {
+        checkThread();
         return mZoomManager.zoomOut();
     }
 
@@ -8682,6 +8794,7 @@ public class WebView extends AbsoluteLayout
     }
 
     public void debugDump() {
+        checkThread();
         nativeDebugDump();
         mWebViewCore.sendMessage(EventHub.DUMP_NAVTREE);
     }
@@ -8741,6 +8854,19 @@ public class WebView extends AbsoluteLayout
 
     /* package */ ViewManager getViewManager() {
         return mViewManager;
+    }
+
+    private static void checkThread() {
+        if (!"main".equals(Thread.currentThread().getName())) {
+            try {
+                throw new RuntimeException("A WebView method was called on thread '" +
+                        Thread.currentThread().getName() + "'. " +
+                        "All WebView methods must be called on the UI thread. " +
+                        "Future versions of WebView may not support use on other threads.");
+            } catch (RuntimeException e) {
+                Log.e(LOGTAG, Log.getStackTraceString(e));
+            }
+        }
     }
 
     private native int nativeCacheHitFramePointer();
