@@ -2815,4 +2815,10 @@
     <!-- Description of the button to decrement the NumberPicker value. [CHAR LIMIT=NONE] -->
     <string name="number_picker_decrement_button">Decrement</string>
 
+    <!-- Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] -->
+    <string name="action_bar_home_description">Navigate home</string>
+    <!-- Content description for the action bar "up" affordance. [CHAR LIMIT=NONE] -->
+    <string name="action_bar_up_description">Navigate up</string>
+    <!-- Content description for the action menu overflow button. [CHAR LIMIT=NONE] -->
+    <string name="action_menu_overflow_description">More options</string>
 </resources>

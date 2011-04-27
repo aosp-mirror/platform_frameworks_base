@@ -1117,7 +1117,7 @@
 
     <style name="Widget.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_menu_more</item>
-        <item name="android:contentDescription">@string/more_item_label</item>
+        <item name="android:contentDescription">@string/action_menu_overflow_description</item>
     </style>
 
     <style name="Widget.ActionButton.CloseMode">
@@ -1778,6 +1778,7 @@
         <item name="android:background">?android:attr/selectableItemBackground</item>
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">16dip</item>
+        <item name="android:contentDescription">@string/action_menu_overflow_description</item>
     </style>
 
     <style name="Widget.Holo.ActionButton.TextButton" parent="Widget.Holo.ButtonBar.Button">
@@ -2112,6 +2113,7 @@
         <item name="android:src">@android:drawable/ic_menu_moreoverflow_holo_light</item>
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">16dip</item>
+        <item name="android:contentDescription">@string/action_menu_overflow_description</item>
     </style>
 
     <style name="Widget.Holo.Light.ActionBarView_TabView" parent="Widget.Holo.ActionBarView_TabView">

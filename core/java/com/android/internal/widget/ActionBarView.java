@@ -390,8 +390,8 @@ public class ActionBarView extends AbsActionBarView {
             mHomeLayout.setVisibility(vis);
 
             if ((flagsChanged & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-                mHomeAsUpView.setVisibility((options & ActionBar.DISPLAY_HOME_AS_UP) != 0
-                        ? VISIBLE : GONE);
+                final boolean isUp = (options & ActionBar.DISPLAY_HOME_AS_UP) != 0;
+                mHomeAsUpView.setVisibility(isUp ? VISIBLE : GONE);
             }
 
             if ((flagsChanged & ActionBar.DISPLAY_USE_LOGO) != 0) {
@@ -418,6 +418,17 @@ public class ActionBarView extends AbsActionBarView {
             requestLayout();
         } else {
             invalidate();
+        }
+
+        // Make sure the home button has an accurate content description for accessibility.
+        if ((options & ActionBar.DISPLAY_DISABLE_HOME) != 0) {
+            mHomeLayout.setContentDescription(null);
+        } else if ((options & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
+            mHomeLayout.setContentDescription(mContext.getResources().getText(
+                    R.string.action_bar_up_description));
+        } else {
+            mHomeLayout.setContentDescription(mContext.getResources().getText(
+                    R.string.action_bar_home_description));
         }
     }
 
