@@ -420,6 +420,16 @@ public class RenderScript {
         validate();
         rsnScriptInvoke(mContext, id, slot);
     }
+    native void rsnScriptForEach(int con, int id, int slot, int ain, int aout, byte[] params);
+    native void rsnScriptForEach(int con, int id, int slot, int ain, int aout);
+    synchronized void nScriptForEach(int id, int slot, int ain, int aout, byte[] params) {
+        validate();
+        if (params == null) {
+            rsnScriptForEach(mContext, id, slot, ain, aout);
+        } else {
+            rsnScriptForEach(mContext, id, slot, ain, aout, params);
+        }
+    }
     native void rsnScriptInvokeV(int con, int id, int slot, byte[] params);
     synchronized void nScriptInvokeV(int id, int slot, byte[] params) {
         validate();

@@ -43,6 +43,35 @@ public class Script extends BaseObj {
         }
     }
 
+    /**
+     * @hide
+     * Only intended for use by generated reflected code.
+     *
+     * @param slot
+     * @param ain
+     * @param aout
+     * @param v
+     */
+    protected void forEach(int slot, Allocation ain, Allocation aout, FieldPacker v) {
+        if (ain == null && aout == null) {
+            throw new RSIllegalArgumentException(
+                "At least one of ain or aout is required to be non-null.");
+        }
+        int in_id = 0;
+        if (ain != null) {
+            in_id = ain.getID();
+        }
+        int out_id = 0;
+        if (aout != null) {
+            out_id = aout.getID();
+        }
+        byte[] params = null;
+        if (v != null) {
+            params = v.getData();
+        }
+        mRS.nScriptForEach(getID(), slot, in_id, out_id, params);
+    }
+
 
     Script(int id, RenderScript rs) {
         super(id, rs);
