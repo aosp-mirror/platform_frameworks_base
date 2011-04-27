@@ -56,6 +56,7 @@ import java.util.TimerTask;
 public class ComprehensiveCountryDetector extends CountryDetectorBase {
 
     private final static String TAG = "ComprehensiveCountryDetector";
+    /* package */ static final boolean DEBUG = false;
 
     /**
      * The refresh interval when the location based country was used
@@ -90,7 +91,9 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
      * The listener for receiving the notification from LocationBasedCountryDetector.
      */
     private CountryListener mLocationBasedCountryDetectionListener = new CountryListener() {
+        @Override
         public void onCountryDetected(Country country) {
+            if (DEBUG) Slog.d(TAG, "Country detected via LocationBasedCountryDetector");
             mCountryFromLocation = country;
             // Don't start the LocationBasedCountryDetector.
             detectCountry(true, false);
@@ -206,6 +209,7 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
     protected void runAfterDetectionAsync(final Country country, final Country detectedCountry,
             final boolean notifyChange, final boolean startLocationBasedDetection) {
         mHandler.post(new Runnable() {
+            @Override
             public void run() {
                 runAfterDetection(
                         country, detectedCountry, notifyChange, startLocationBasedDetection);
@@ -233,9 +237,20 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
         if (notifyChange) {
             notifyIfCountryChanged(country, detectedCountry);
         }
+        if (DEBUG) {
+            Slog.d(TAG, "startLocationBasedDetection=" + startLocationBasedDetection
+                    + " detectCountry=" + (detectedCountry == null ? null :
+                        "(source: " + detectedCountry.getSource()
+                        + ", countryISO: " + detectedCountry.getCountryIso() + ")")
+                    + " isAirplaneModeOff()=" + isAirplaneModeOff()
+                    + " mListener=" + mListener
+                    + " isGeoCoderImplemnted()=" + isGeoCoderImplemented());
+        }
+
         if (startLocationBasedDetection && (detectedCountry == null
                 || detectedCountry.getSource() > Country.COUNTRY_SOURCE_LOCATION)
                 && isAirplaneModeOff() && mListener != null && isGeoCoderImplemented()) {
+            if (DEBUG) Slog.d(TAG, "run startLocationBasedDetector()");
             // Start finding location when the source is less reliable than the
             // location and the airplane mode is off (as geocoder will not
             // work).
@@ -266,12 +281,20 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
         if (mLocationBasedCountryDetector != null) {
             return;
         }
+        if (DEBUG) {
+            Slog.d(TAG, "starts LocationBasedDetector to detect Country code via Location info "
+                    + "(e.g. GPS)");
+        }
         mLocationBasedCountryDetector = createLocationBasedCountryDetector();
         mLocationBasedCountryDetector.setCountryListener(listener);
         mLocationBasedCountryDetector.detectCountry();
     }
 
     private synchronized void stopLocationBasedDetector() {
+        if (DEBUG) {
+            Slog.d(TAG, "tries to stop LocationBasedDetector "
+                    + "(current detector: " + mLocationBasedCountryDetector + ")");
+        }
         if (mLocationBasedCountryDetector != null) {
             mLocationBasedCountryDetector.stop();
             mLocationBasedCountryDetector = null;
@@ -305,10 +328,17 @@ public class ComprehensiveCountryDetector extends CountryDetectorBase {
      */
     private synchronized void scheduleLocationRefresh() {
         if (mLocationRefreshTimer != null) return;
+        if (DEBUG) {
+            Slog.d(TAG, "start periodic location refresh timer. Interval: "
+                    + LOCATION_REFRESH_INTERVAL);
+        }
         mLocationRefreshTimer = new Timer();
         mLocationRefreshTimer.schedule(new TimerTask() {
             @Override
             public void run() {
+                if (DEBUG) {
+                    Slog.d(TAG, "periodic location refresh event. Starts detecting Country code");
+                }
                 mLocationRefreshTimer = null;
                 detectCountry(false, true);
             }
