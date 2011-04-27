@@ -401,15 +401,6 @@ public class LayoutTestsAutoTest extends ActivityInstrumentationTestCase2<TestSh
         activity.setDefaultDumpDataType(DumpDataType.EXT_REPR);
 
         // Run tests.
-        int addr = -1;
-        try{
-            addr = AdbUtils.resolve("android-browser-test.mtv.corp.google.com");
-        } catch (IOException ioe) {
-            Log.w(LOGTAG, "error while resolving test host name", ioe);
-        }
-        if(addr == -1) {
-            Log.w(LOGTAG, "failed to resolve test host. http tests will fail.");
-        }
         for (int i = 0; i < mTestList.size(); i++) {
             String s = mTestList.elementAt(i);
             boolean ignoreResult = mTestListIgnoreResult.elementAt(i);

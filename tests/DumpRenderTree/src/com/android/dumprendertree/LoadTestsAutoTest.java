@@ -16,6 +16,9 @@
 
 package com.android.dumprendertree;
 
+import com.android.dumprendertree.forwarder.AdbUtils;
+import com.android.dumprendertree.forwarder.ForwardServer;
+
 import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
@@ -34,6 +37,8 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShellActivity> {
 
@@ -41,13 +46,15 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
     private final static String LOAD_TEST_RESULT =
         Environment.getExternalStorageDirectory() + "/load_test_result.txt";
     private final static int MAX_GC_WAIT_SEC = 10;
+    private final static int LOCAL_PORT = 17171;
     private boolean mFinished;
     static final String LOAD_TEST_RUNNER_FILES[] = {
         "run_page_cycler.py"
     };
+    private ForwardServer mForwardServer;
 
     public LoadTestsAutoTest() {
-        super("com.android.dumprendertree", TestShellActivity.class);
+        super(TestShellActivity.class);
     }
 
     // This function writes the result of the layout test to
@@ -59,14 +66,38 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
         inst.sendStatus(0, bundle);
     }
 
+    private String setUpForwarding(String forwardInfo, String suite, String iteration) throws IOException {
+        // read forwarding information first
+        Pattern forwardPattern = Pattern.compile("(.*):(\\d+)/(.*)/");
+        Matcher matcher = forwardPattern.matcher(forwardInfo);
+        if (!matcher.matches()) {
+            throw new RuntimeException("Invalid forward information");
+        }
+        String host = matcher.group(1);
+        int port = Integer.parseInt(matcher.group(2));
+        mForwardServer = new ForwardServer(LOCAL_PORT, AdbUtils.resolve(host), port);
+        mForwardServer.start();
+        return String.format("http://127.0.0.1:%d/%s/%s/start.html?auto=1&iterations=%s",
+                LOCAL_PORT, matcher.group(3), suite, iteration);
+    }
+
     // Invokes running of layout tests
     // and waits till it has finished running.
-    public void runPageCyclerTest() {
+    public void runPageCyclerTest() throws IOException {
         LayoutTestsAutoRunner runner = (LayoutTestsAutoRunner) getInstrumentation();
 
+        if (runner.mPageCyclerSuite != null) {
+            // start forwarder to use page cycler suites hosted on external web server
+            if (runner.mPageCyclerForwardHost == null) {
+                throw new RuntimeException("no forwarder information provided");
+            }
+            runner.mTestPath = setUpForwarding(runner.mPageCyclerForwardHost,
+                    runner.mPageCyclerSuite, runner.mPageCyclerIteration);
+            Log.d(LOGTAG, "using path: " + runner.mTestPath);
+        }
+
         if (runner.mTestPath == null) {
-            Log.e(LOGTAG, "No test specified");
-            return;
+            throw new RuntimeException("No test specified");
         }
 
         TestShellActivity activity = (TestShellActivity) getActivity();
@@ -79,6 +110,10 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
                 runner.mGetDrawTime, runner.mSaveImagePath);
 
         activity.clearCache();
+        if (mForwardServer != null) {
+            mForwardServer.stop();
+            mForwardServer = null;
+        }
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
@@ -92,7 +127,9 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
     private void freeMem() {
         Log.v(LOGTAG, "freeMem: calling gc...");
         final CountDownLatch latch = new CountDownLatch(1);
+        @SuppressWarnings("unused")
         Object dummy = new Object() {
+            // this object instance is used to track gc
             @Override
             protected void finalize() throws Throwable {
                 latch.countDown();
