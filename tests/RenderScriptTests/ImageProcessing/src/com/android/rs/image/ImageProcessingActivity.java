@@ -88,9 +88,8 @@ public class ImageProcessingActivity extends Activity
                 }
 
                 // This is a hack to work around an invalidation bug
-                mBitmapOut = Bitmap.createBitmap(mBitmapOut);
+                mBitmapOut.setPixel(0, 0, 0);
                 mOutPixelsAllocation.copyTo(mBitmapOut);
-                mDisplayView.setImageBitmap(mBitmapOut);
                 mDisplayView.invalidate();
             }
         };
