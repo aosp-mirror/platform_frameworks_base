@@ -53,6 +53,23 @@ struct Layer {
     }
 
     /**
+     * Sets this layer's region to a rectangle. Computes the appropriate
+     * texture coordinates.
+     */
+    void setRegionAsRect() {
+        const android::Rect& bounds = region.getBounds();
+        regionRect.set(bounds.leftTop().x, bounds.leftTop().y,
+               bounds.rightBottom().x, bounds.rightBottom().y);
+
+        const float texX = 1.0f / float(width);
+        const float texY = 1.0f / float(height);
+        const float height = layer.getHeight();
+        texCoords.set(
+               regionRect.left * texX, (height - regionRect.top) * texY,
+               regionRect.right * texX, (height - regionRect.bottom) * texY);
+    }
+
+    /**
      * Bounds of the layer.
      */
     Rect layer;

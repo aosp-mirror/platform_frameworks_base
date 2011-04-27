@@ -218,15 +218,16 @@ public class ImageView extends View {
     
     /**
      * An optional argument to supply a maximum width for this view. Only valid if
-     * {@link #setAdjustViewBounds} has been set to true. To set an image to be a maximum of 100 x
-     * 100 while preserving the original aspect ratio, do the following: 1) set adjustViewBounds to
-     * true 2) set maxWidth and maxHeight to 100 3) set the height and width layout params to
-     * WRAP_CONTENT.
+     * {@link #setAdjustViewBounds(boolean)} has been set to true. To set an image to be a maximum
+     * of 100 x 100 while preserving the original aspect ratio, do the following: 1) set
+     * adjustViewBounds to true 2) set maxWidth and maxHeight to 100 3) set the height and width
+     * layout params to WRAP_CONTENT.
      * 
      * <p>
      * Note that this view could be still smaller than 100 x 100 using this approach if the original
      * image is small. To set an image to a fixed size, specify that size in the layout params and
-     * then use {@link #setScaleType} to determine how to fit the image within the bounds.
+     * then use {@link #setScaleType(android.widget.ImageView.ScaleType)} to determine how to fit
+     * the image within the bounds.
      * </p>
      * 
      * @param maxWidth maximum width for this view
@@ -240,15 +241,16 @@ public class ImageView extends View {
     
     /**
      * An optional argument to supply a maximum height for this view. Only valid if
-     * {@link #setAdjustViewBounds} has been set to true. To set an image to be a maximum of 100 x
-     * 100 while preserving the original aspect ratio, do the following: 1) set adjustViewBounds to
-     * true 2) set maxWidth and maxHeight to 100 3) set the height and width layout params to
-     * WRAP_CONTENT.
+     * {@link #setAdjustViewBounds(boolean)} has been set to true. To set an image to be a
+     * maximum of 100 x 100 while preserving the original aspect ratio, do the following: 1) set
+     * adjustViewBounds to true 2) set maxWidth and maxHeight to 100 3) set the height and width
+     * layout params to WRAP_CONTENT.
      * 
      * <p>
      * Note that this view could be still smaller than 100 x 100 using this approach if the original
      * image is small. To set an image to a fixed size, specify that size in the layout params and
-     * then use {@link #setScaleType} to determine how to fit the image within the bounds.
+     * then use {@link #setScaleType(android.widget.ImageView.ScaleType)} to determine how to fit
+     * the image within the bounds.
      * </p>
      * 
      * @param maxHeight maximum height for this view
@@ -272,8 +274,8 @@ public class ImageView extends View {
      *
      * <p class="note">This does Bitmap reading and decoding on the UI
      * thread, which can cause a latency hiccup.  If that's a concern,
-     * consider using {@link #setImageDrawable} or
-     * {@link #setImageBitmap} and
+     * consider using {@link #setImageDrawable(android.graphics.drawable.Drawable)} or
+     * {@link #setImageBitmap(android.graphics.Bitmap)} and
      * {@link android.graphics.BitmapFactory} instead.</p>
      *
      * @param resId the resource identifier of the the drawable
@@ -297,8 +299,8 @@ public class ImageView extends View {
      *
      * <p class="note">This does Bitmap reading and decoding on the UI
      * thread, which can cause a latency hiccup.  If that's a concern,
-     * consider using {@link #setImageDrawable} or
-     * {@link #setImageBitmap} and
+     * consider using {@link #setImageDrawable(android.graphics.drawable.Drawable)} or
+     * {@link #setImageBitmap(android.graphics.Bitmap)} and
      * {@link android.graphics.BitmapFactory} instead.</p>
      *
      * @param uri The Uri of an image
@@ -902,12 +904,12 @@ public class ImageView extends View {
 
     /**
      * <p>Set the offset of the widget's text baseline from the widget's top
-     * boundary.  This value is overridden by the {@link #setBaselineAlignBottom}
+     * boundary.  This value is overridden by the {@link #setBaselineAlignBottom(boolean)}
      * property.</p>
      *
      * @param baseline The baseline to use, or -1 if none is to be provided.
      *
-     * @see #setBaseline
+     * @see #setBaseline(int) 
      * @attr ref android.R.styleable#ImageView_baseline
      */
     public void setBaseline(int baseline) {
