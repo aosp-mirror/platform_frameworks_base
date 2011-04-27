@@ -220,8 +220,6 @@ public class TextToSpeech {
          * extend {@link TextToSpeechService}. Normal applications should not use this intent
          * directly, instead they should talk to the TTS service using the the methods in this
          * class.
-         *
-         * @hide Pending API council approval
          */
         @SdkConstant(SdkConstantType.SERVICE_ACTION)
         public static final String INTENT_ACTION_TTS_SERVICE =
@@ -428,7 +426,7 @@ public class TextToSpeech {
     private final Bundle mParams = new Bundle();
 
     /**
-     * The constructor for the TextToSpeech class.
+     * The constructor for the TextToSpeech class, using the default TTS engine.
      * This will also initialize the associated TextToSpeech engine if it isn't already running.
      *
      * @param context
@@ -442,7 +440,15 @@ public class TextToSpeech {
     }
 
     /**
-     * @hide pending approval
+     * The constructor for the TextToSpeech class, using the given TTS engine.
+     * This will also initialize the associated TextToSpeech engine if it isn't already running.
+     *
+     * @param context
+     *            The context this instance is running in.
+     * @param listener
+     *            The {@link TextToSpeech.OnInitListener} that will be called when the
+     *            TextToSpeech engine has initialized.
+     * @param engine Package name of the TTS engine to use.
      */
     public TextToSpeech(Context context, OnInitListener listener, String engine) {
         mContext = context;
@@ -1060,8 +1066,6 @@ public class TextToSpeech {
      * Gets a list of all installed TTS engines.
      *
      * @return A list of engine info objects. The list can be empty, but will never by {@code null}.
-     *
-     * @hide Pending approval
      */
     public List<EngineInfo> getEngines() {
         PackageManager pm = mContext.getPackageManager();
@@ -1144,7 +1148,6 @@ public class TextToSpeech {
      * Information about an installed text-to-speech engine.
      *
      * @see TextToSpeech#getEngines
-     * @hide Pending approval
      */
     public static class EngineInfo {
         /**

@@ -17115,14 +17115,32 @@ package android.speech {
 
 package android.speech.tts {
 
+  public abstract class SynthesisRequest {
+    ctor public SynthesisRequest(java.lang.String);
+    method public abstract int audioAvailable(byte[], int, int);
+    method public abstract int completeAudioAvailable(int, int, int, byte[], int, int);
+    method public abstract int done();
+    method public abstract void error();
+    method public java.lang.String getCountry();
+    method public java.lang.String getLanguage();
+    method public abstract int getMaxBufferSize();
+    method public int getPitch();
+    method public int getSpeechRate();
+    method public java.lang.String getText();
+    method public java.lang.String getVariant();
+    method public abstract int start(int, int, int);
+  }
+
   public class TextToSpeech {
     ctor public TextToSpeech(android.content.Context, android.speech.tts.TextToSpeech.OnInitListener);
+    ctor public TextToSpeech(android.content.Context, android.speech.tts.TextToSpeech.OnInitListener, java.lang.String);
     method public int addEarcon(java.lang.String, java.lang.String, int);
     method public int addEarcon(java.lang.String, java.lang.String);
     method public int addSpeech(java.lang.String, java.lang.String, int);
     method public int addSpeech(java.lang.String, java.lang.String);
     method public boolean areDefaultsEnforced();
     method public java.lang.String getDefaultEngine();
+    method public java.util.List<android.speech.tts.TextToSpeech.EngineInfo> getEngines();
     method public java.util.Locale getLanguage();
     method public int isLanguageAvailable(java.util.Locale);
     method public boolean isSpeaking();
@@ -17167,10 +17185,18 @@ package android.speech.tts {
     field public static final java.lang.String EXTRA_VOICE_DATA_FILES = "dataFiles";
     field public static final java.lang.String EXTRA_VOICE_DATA_FILES_INFO = "dataFilesInfo";
     field public static final java.lang.String EXTRA_VOICE_DATA_ROOT_DIRECTORY = "dataRoot";
+    field public static final java.lang.String INTENT_ACTION_TTS_SERVICE = "android.intent.action.TTS_SERVICE";
     field public static final java.lang.String KEY_PARAM_PAN = "pan";
     field public static final java.lang.String KEY_PARAM_STREAM = "streamType";
     field public static final java.lang.String KEY_PARAM_UTTERANCE_ID = "utteranceId";
     field public static final java.lang.String KEY_PARAM_VOLUME = "volume";
+  }
+
+  public static class TextToSpeech.EngineInfo {
+    ctor public TextToSpeech.EngineInfo();
+    field public int icon;
+    field public java.lang.String label;
+    field public java.lang.String name;
   }
 
   public static abstract interface TextToSpeech.OnInitListener {
@@ -17179,6 +17205,16 @@ package android.speech.tts {
 
   public static abstract interface TextToSpeech.OnUtteranceCompletedListener {
     method public abstract void onUtteranceCompleted(java.lang.String);
+  }
+
+  public abstract class TextToSpeechService extends android.app.Service {
+    ctor public TextToSpeechService();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method protected abstract java.lang.String[] onGetLanguage();
+    method protected abstract int onIsLanguageAvailable(java.lang.String, java.lang.String, java.lang.String);
+    method protected abstract int onLoadLanguage(java.lang.String, java.lang.String, java.lang.String);
+    method protected abstract void onStop();
+    method protected abstract void onSynthesizeText(android.speech.tts.SynthesisRequest);
   }
 
 }

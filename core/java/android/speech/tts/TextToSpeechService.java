@@ -41,8 +41,6 @@ import java.util.Locale;
 
 /**
  * Abstract base class for TTS engine implementations.
- *
- * @hide Pending approval
  */
 public abstract class TextToSpeechService extends Service {
 
