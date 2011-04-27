@@ -58,7 +58,7 @@ bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand) {
             LOGE("playCoreCommands error con %p, cmd %i", con, cmdID);
             mToCore.printDebugData();
         }
-        gPlaybackFuncs[cmdID](con, data);
+        gPlaybackFuncs[cmdID](con, data, cmdSize << 2);
         mToCore.next();
     }
     return ret;

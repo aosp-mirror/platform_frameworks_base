@@ -188,7 +188,6 @@ AllocationCopyToBitmap {
 
 
 Allocation1DData {
-	handcodeApi
 	param RsAllocation va
 	param uint32_t xoff
 	param uint32_t lod
@@ -197,7 +196,6 @@ Allocation1DData {
 	}
 
 Allocation1DElementData {
-	handcodeApi
 	param RsAllocation va
 	param uint32_t x
 	param uint32_t lod
@@ -290,11 +288,18 @@ ScriptInvoke {
 	}
 
 ScriptInvokeV {
-	handcodeApi
 	param RsScript s
 	param uint32_t slot
 	param const void * data
 	}
+
+ScriptForEach { 
+    param RsScript s
+    param uint32_t slot
+    param RsAllocation ain
+    param RsAllocation aout
+    param const void * usr
+}
 
 ScriptSetVarI {
 	param RsScript s
@@ -327,7 +332,6 @@ ScriptSetVarD {
 	}
 
 ScriptSetVarV {
-	handcodeApi
 	param RsScript s
 	param uint32_t slot
 	param const void * data

@@ -87,6 +87,16 @@ void rsi_ScriptSetTimeZone(Context * rsc, RsScript vs, const char * timeZone, ui
     s->mEnviroment.mTimeZone = timeZone;
 }
 
+void rsi_ScriptForEach(Context *rsc, RsScript vs, uint32_t slot,
+                       RsAllocation vain, RsAllocation vaout,
+                       const void *params, uint32_t paramLen) {
+    Script *s = static_cast<Script *>(vs);
+    s->runForEach(rsc,
+                  static_cast<const Allocation *>(vain), static_cast<Allocation *>(vaout),
+                  params, paramLen);
+
+}
+
 void rsi_ScriptInvoke(Context *rsc, RsScript vs, uint32_t slot) {
     Script *s = static_cast<Script *>(vs);
     s->Invoke(rsc, slot, NULL, 0);
