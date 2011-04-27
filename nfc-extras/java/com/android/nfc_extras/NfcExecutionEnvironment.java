@@ -29,7 +29,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 
 public class NfcExecutionEnvironment {
-    private final INfcAdapterExtras mService;
+    private final NfcAdapterExtras mExtras;
 
     /**
      * Broadcast Action: An ISO-DEP AID was selected.
@@ -55,8 +55,8 @@ public class NfcExecutionEnvironment {
      */
     public static final String EXTRA_AID = "com.android.nfc_extras.extra.AID";
 
-    NfcExecutionEnvironment(INfcAdapterExtras service) {
-        mService = service;
+    NfcExecutionEnvironment(NfcAdapterExtras extras) {
+        mExtras = extras;
     }
 
     /**
@@ -75,10 +75,11 @@ public class NfcExecutionEnvironment {
      */
     public void open() throws IOException {
         try {
-            Bundle b = mService.open(new Binder());
+            Bundle b = mExtras.getService().open(new Binder());
             throwBundle(b);
         } catch (RemoteException e) {
-            return;
+            mExtras.attemptDeadServiceRecovery(e);
+            throw new IOException("NFC Service was dead, try again");
         }
     }
 
@@ -92,9 +93,10 @@ public class NfcExecutionEnvironment {
      */
     public void close() throws IOException {
         try {
-            throwBundle(mService.close());
+            throwBundle(mExtras.getService().close());
         } catch (RemoteException e) {
-            return;
+            mExtras.attemptDeadServiceRecovery(e);
+            throw new IOException("NFC Service was dead");
         }
     }
 
@@ -109,9 +111,10 @@ public class NfcExecutionEnvironment {
     public byte[] transceive(byte[] in) throws IOException {
         Bundle b;
         try {
-            b = mService.transceive(in);
+            b = mExtras.getService().transceive(in);
         } catch (RemoteException e) {
-            throw new IOException(e.getMessage());
+            mExtras.attemptDeadServiceRecovery(e);
+            throw new IOException("NFC Service was dead, need to re-open");
         }
         throwBundle(b);
         return b.getByteArray("out");
