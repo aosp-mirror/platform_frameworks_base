@@ -99,9 +99,9 @@ public class CdmaDataConnection extends DataConnection {
 
     @Override
     protected boolean isDnsOk(String[] domainNameServers) {
-        if ((NULL_IP.equals(domainNameServers[0])
+        if (NULL_IP.equals(domainNameServers[0])
                 && NULL_IP.equals(domainNameServers[1])
-                && !((CDMAPhone) phone).isDnsCheckDisabled())) {
+                && !phone.isDnsCheckDisabled()) {
             return false;
         } else {
             return true;
