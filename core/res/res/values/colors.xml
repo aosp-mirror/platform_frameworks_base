@@ -60,6 +60,7 @@
     <color name="highlighted_text_light">#9983CC39</color>
     <color name="link_text_dark">#5c5cff</color>
     <color name="link_text_light">#0000ee</color>
+    <color name="suggestion_highlight_text">#177bbd</color>
 
     <drawable name="stat_notify_sync_noanim">@drawable/stat_notify_sync_anim0</drawable>
     <drawable name="stat_sys_download_done">@drawable/stat_sys_download_anim0</drawable>

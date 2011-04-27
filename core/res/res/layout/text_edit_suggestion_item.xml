@@ -21,7 +21,7 @@
           android:paddingRight="16dip"
           android:paddingTop="8dip"
           android:paddingBottom="8dip"
-          android:layout_gravity="center"
+          android:layout_gravity="left|center_vertical"
           android:textAppearance="?android:attr/textAppearanceMedium"
-          android:textColor="@android:color/black" />
+          android:textColor="@android:color/dim_foreground_light" />
 
