@@ -283,19 +283,6 @@ private:
     void drawAlphaBitmap(Texture* texture, float left, float top, SkPaint* paint);
 
     /**
-     * Draws a line as a quad. Called by drawLines() for all cases except hairline without AA.
-     *
-     * @param points The vertices of the lines. Every four entries specifies the x/y points
-     * of a single line segment.
-     * @param count The number of entries in the points array.
-     * @param isAA Whether the line is anti-aliased
-     * @param isHairline Whether the line has strokeWidth==0, which results in the line being
-     * one pixel wide on the display regardless of scale.
-     */
-    void drawLinesAsQuads(float *points, int count, bool isAA, bool isHairline,
-            float strokeWidth);
-
-    /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
      * are transformed by the current snapshot's transform matrix.
      *
@@ -453,7 +440,7 @@ private:
             bool swapSrcDst = false);
     void setupDrawProgram();
     void setupDrawDirtyRegionsDisabled();
-    void setupDrawModelViewIdentity();
+    void setupDrawModelViewIdentity(bool offset = false);
     void setupDrawModelView(float left, float top, float right, float bottom,
             bool ignoreTransform = false, bool ignoreModelView = false);
     void setupDrawModelViewTranslate(float left, float top, float right, float bottom,

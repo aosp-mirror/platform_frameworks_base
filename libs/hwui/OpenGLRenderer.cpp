@@ -979,8 +979,8 @@ void OpenGLRenderer::setupDrawModelViewTranslate(float left, float top, float ri
     }
 }
 
-void OpenGLRenderer::setupDrawModelViewIdentity() {
-    mCaches.currentProgram->set(mOrthoMatrix, mIdentity, *mSnapshot->transform);
+void OpenGLRenderer::setupDrawModelViewIdentity(bool offset) {
+    mCaches.currentProgram->set(mOrthoMatrix, mIdentity, *mSnapshot->transform, offset);
 }
 
 void OpenGLRenderer::setupDrawModelView(float left, float top, float right, float bottom,
@@ -1389,12 +1389,45 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     }
 }
 
-void OpenGLRenderer::drawLinesAsQuads(float *points, int count, bool isAA, bool isHairline,
-        float strokeWidth) {
+void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
+    if (mSnapshot->isIgnored()) return;
+
+    const bool isAA = paint->isAntiAlias();
+    float strokeWidth = paint->getStrokeWidth() * 0.5f;
+    // A stroke width of 0 has a special meaning in Skia:
+    // it draws a line 1 px wide regardless of current transform
+    bool isHairLine = paint->getStrokeWidth() == 0.0f;
+    int alpha;
+    SkXfermode::Mode mode;
+    int generatedVerticesCount = 0;
     int verticesCount = count;
     if (count > 4) {
         // Polyline: account for extra vertices needed for continous tri-strip
         verticesCount += (count -4);
+    }
+
+    getAlphaAndMode(paint, &alpha, &mode);
+    setupDraw();
+    if (isAA) {
+        setupDrawAALine();
+    }
+    setupDrawColor(paint->getColor(), alpha);
+    setupDrawColorFilter();
+    setupDrawShader();
+    if (isAA) {
+        setupDrawBlending(true, mode);
+    } else {
+        setupDrawBlending(mode);
+    }
+    setupDrawProgram();
+    setupDrawModelViewIdentity(true);
+    setupDrawColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawShaderIdentityUniforms();
+
+    if (isHairLine) {
+        // Set a real stroke width to be used in quad construction
+        strokeWidth = .5;
     }
     if (isAA) {
         // Expand boundary to enable AA calculations on the quad border
@@ -1407,25 +1440,22 @@ void OpenGLRenderer::drawLinesAsQuads(float *points, int count, bool isAA, bool 
     if (!isAA) {
         setupDrawVertices(vertices);
     } else {
-        AlphaVertex* alphaCoords = aaVertices + gVertexAlphaOffset;
+        void* alphaCoords = ((GLbyte*) aaVertices) + gVertexAlphaOffset;
         // innerProportion is the ratio of the inner (non-AA) port of the line to the total
         // AA stroke width (the base stroke width expanded by a half pixel on either side).
         // This value is used in the fragment shader to determine how to fill fragments.
         float innerProportion = fmax(strokeWidth - 1.0f, 0) / (strokeWidth + .5f);
-        setupDrawAALine((void*) aaVertices, (void*) alphaCoords, innerProportion);
+        setupDrawAALine((void*) aaVertices, alphaCoords, innerProportion);
     }
 
-    int generatedVerticesCount = 0;
     AlphaVertex *prevAAVertex = NULL;
     Vertex *prevVertex = NULL;
     float inverseScaleX = 1.0f;
     float inverseScaleY = 1.0f;
 
-    if (isHairline) {
+    if (isHairLine) {
         // The quad that we use for AA hairlines needs to account for scaling because the line
         // should always be one pixel wide regardless of scale.
-        inverseScaleX = 1.0f;
-        inverseScaleY = 1.0f;
         if (!mSnapshot->transform->isPureTranslate()) {
             Matrix4 *mat = mSnapshot->transform;
             float m00 = mat->data[Matrix4::kScaleX];
@@ -1446,22 +1476,19 @@ void OpenGLRenderer::drawLinesAsQuads(float *points, int count, bool isAA, bool 
         vec2 a(points[i], points[i + 1]);
         vec2 b(points[i + 2], points[i + 3]);
 
-        // Bias to snap to the same pixels as Skia
-        a += 0.375;
-        b += 0.375;
-
         // Find the normal to the line
         vec2 n = (b - a).copyNormalized() * strokeWidth;
-        if (isHairline) {
-            float wideningFactor;
-            if (fabs(n.x) >= fabs(n.y)) {
-                wideningFactor = fabs(1.0f / n.x);
-            } else {
-                wideningFactor = fabs(1.0f / n.y);
+        if (isHairLine) {
+            n *= inverseScaleX;
+            if (isAA) {
+                float wideningFactor;
+                if (fabs(n.x) >= fabs(n.y)) {
+                    wideningFactor = fabs(1.0f / n.x);
+                } else {
+                    wideningFactor = fabs(1.0f / n.y);
+                }
+                n *= wideningFactor;
             }
-            n.x *= inverseScaleX;
-            n.y *= inverseScaleY;
-            n *= wideningFactor;
         }
         float x = n.x;
         n.x = -n.y;
@@ -1525,69 +1552,6 @@ void OpenGLRenderer::drawLinesAsQuads(float *points, int count, bool isAA, bool 
     }
 }
 
-void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
-    if (mSnapshot->isIgnored()) return;
-
-    const bool isAA = paint->isAntiAlias();
-    const float strokeWidth = paint->getStrokeWidth() * 0.5f;
-    // A stroke width of 0 has a special meaning in Skia:
-    // it draws a line 1 px wide regardless of current transform
-    bool isHairLine = paint->getStrokeWidth() == 0.0f;
-
-    int alpha;
-    SkXfermode::Mode mode;
-    getAlphaAndMode(paint, &alpha, &mode);
-    int generatedVerticesCount = 0;
-
-    setupDraw();
-    if (isAA) {
-        setupDrawAALine();
-    }
-    setupDrawColor(paint->getColor(), alpha);
-    setupDrawColorFilter();
-    setupDrawShader();
-    if (isAA) {
-        setupDrawBlending(true, mode);
-    } else {
-        setupDrawBlending(mode);
-    }
-    setupDrawProgram();
-    setupDrawModelViewIdentity();
-    setupDrawColorUniforms();
-    setupDrawColorFilterUniforms();
-    setupDrawShaderIdentityUniforms();
-
-    if (!isHairLine) {
-        drawLinesAsQuads(points, count, isAA, isHairLine, strokeWidth);
-    } else {
-        if (isAA) {
-            drawLinesAsQuads(points, count, isAA, isHairLine, .5f);
-        } else {
-            int verticesCount = count >> 1;
-            Vertex lines[verticesCount];
-            Vertex* vertices = &lines[0];
-            setupDrawVertices(vertices);
-            for (int i = 0; i < count; i += 4) {
-
-                const float left = fmin(points[i], points[i + 2]);
-                const float right = fmax(points[i], points[i + 2]);
-                const float top = fmin(points[i + 1], points[i + 3]);
-                const float bottom = fmax(points[i + 1], points[i + 3]);
-
-                Vertex::set(vertices++, points[i], points[i + 1]);
-                Vertex::set(vertices++, points[i + 2], points[i + 3]);
-                generatedVerticesCount += 2;
-                dirtyLayer(left, top,
-                        right == left ? left + 1 : right, bottom == top ? top + 1 : bottom,
-                        *mSnapshot->transform);
-            }
-
-            glLineWidth(1.0f);
-            glDrawArrays(GL_LINES, 0, generatedVerticesCount);
-        }
-    }
-}
-
 void OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 
@@ -1596,8 +1560,13 @@ void OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
 
     // A stroke width of 0 has a special meaning in Skia:
     // it draws an unscaled 1px point
+    float strokeWidth = paint->getStrokeWidth();
     const bool isHairLine = paint->getStrokeWidth() == 0.0f;
-
+    if (isHairLine) {
+        // Now that we know it's hairline, we can set the effective width, to be used later
+        strokeWidth = 1.0f;
+    }
+    const float halfWidth = strokeWidth / 2;
     int alpha;
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
@@ -1609,13 +1578,13 @@ void OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
     TextureVertex* vertex = &pointsData[0];
 
     setupDraw();
-    setupDrawPoint(isHairLine ? 1.0f : paint->getStrokeWidth());
+    setupDrawPoint(strokeWidth);
     setupDrawColor(paint->getColor(), alpha);
     setupDrawColorFilter();
     setupDrawShader();
     setupDrawBlending(mode);
     setupDrawProgram();
-    setupDrawModelViewIdentity();
+    setupDrawModelViewIdentity(true);
     setupDrawColorUniforms();
     setupDrawColorFilterUniforms();
     setupDrawPointUniforms();
@@ -1625,6 +1594,11 @@ void OpenGLRenderer::drawPoints(float* points, int count, SkPaint* paint) {
     for (int i = 0; i < count; i += 2) {
         TextureVertex::set(vertex++, points[i], points[i + 1], 0.0f, 0.0f);
         generatedVerticesCount++;
+        float left = points[i] - halfWidth;
+        float right = points[i] + halfWidth;
+        float top = points[i + 1] - halfWidth;
+        float bottom = points [i + 1] + halfWidth;
+        dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
     }
 
     glDrawArrays(GL_POINTS, 0, generatedVerticesCount);
