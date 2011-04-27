@@ -453,6 +453,10 @@ status_t SampleTable::findSampleAtTime(
     }
 
     if (left == mNumSampleSizes) {
+        if (flags == kFlagAfter) {
+            return ERROR_OUT_OF_RANGE;
+        }
+
         --left;
     }
 
