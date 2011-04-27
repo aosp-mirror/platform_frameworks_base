@@ -36,9 +36,6 @@ LOCAL_C_INCLUDES := \
 
 include $(BUILD_EXECUTABLE)
 
-# Build the manual test programs.
-include $(call all-subdir-makefiles)
-
 endif
 
 # Include subdirectory makefiles
