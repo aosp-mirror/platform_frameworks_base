@@ -48,7 +48,10 @@ import java.util.Set;
 
 import junit.framework.Assert;
 
-final class WebViewCore {
+/**
+ * @hide
+ */
+public final class WebViewCore {
 
     private static final String LOGTAG = "webcore";
 
@@ -905,7 +908,10 @@ final class WebViewCore {
             "REMOVE_JS_INTERFACE", // = 149;
         };
 
-    class EventHub {
+    /**
+     * @hide
+     */
+    public class EventHub {
         // Message Ids
         static final int REVEAL_SELECTION = 96;
         static final int REQUEST_LABEL = 97;
@@ -936,7 +942,7 @@ final class WebViewCore {
         static final int DELETE_SELECTION = 122;
         static final int LISTBOX_CHOICES = 123;
         static final int SINGLE_LISTBOX_CHOICE = 124;
-        static final int MESSAGE_RELAY = 125;
+        public static final int MESSAGE_RELAY = 125;
         static final int SET_BACKGROUND_COLOR = 126;
         static final int SET_MOVE_FOCUS = 127;
         static final int SAVE_DOCUMENT_STATE = 128;
@@ -1702,7 +1708,10 @@ final class WebViewCore {
     // If it needs WebCore, it has to send message.
     //-------------------------------------------------------------------------
 
-    void sendMessage(Message msg) {
+    /**
+     * @hide
+     */
+    public void sendMessage(Message msg) {
         mEventHub.sendMessage(msg);
     }
 

@@ -7260,7 +7260,10 @@ public class WebView extends AbsoluteLayout
                 cursorData(), 1000);
     }
 
-    /* package */ synchronized WebViewCore getWebViewCore() {
+    /**
+     * @hide
+     */
+    public synchronized WebViewCore getWebViewCore() {
         return mWebViewCore;
     }
 
