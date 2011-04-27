@@ -487,14 +487,12 @@ static const char *GetURLForMime(const char *mime) {
         { "audio/3gpp",
           "file:///sdcard/media_api/video/H263_500_AMRNB_12.3gp" },
         { "audio/amr-wb",
-          "file:///sdcard/media_api/music_perf/AMRWB/"
-          "NIN_AMR-WB_15.85kbps_16kbps.amr" },
+          "file:///sdcard/media_api/music/"
+          "AI_AMR-WB_12.65kbps(13kbps)_16khz_mono_NMC.awb" },
         { "audio/mp4a-latm",
-          "file:///sdcard/media_api/music_perf/AAC/"
-          "WC_AAC_80kbps_32khz_Stereo_1pCBR_SSE.mp4" },
+          "file:///sdcard/media_api/video/H264_AAC.3gp" },
         { "audio/mpeg",
-          "file:///sdcard/media_api/music_perf/MP3/"
-          "WC_256kbps_44.1khz_mono_CBR_DPA.mp3" }
+          "file:///sdcard/media_api/music/MP3CBR.mp3" }
     };
 
     for (size_t i = 0; i < sizeof(kMimeToURL) / sizeof(kMimeToURL[0]); ++i) {
@@ -626,8 +624,10 @@ status_t Harness::testSeek(
                      requestedSeekTimeUs, requestedSeekTimeUs / 1E6);
             }
 
-            MediaBuffer *buffer;
-            options.setSeekTo(requestedSeekTimeUs);
+            MediaBuffer *buffer = NULL;
+            options.setSeekTo(
+                    requestedSeekTimeUs, MediaSource::ReadOptions::SEEK_NEXT_SYNC);
+
             if (seekSource->read(&buffer, &options) != OK) {
                 CHECK_EQ(buffer, NULL);
                 actualSeekTimeUs = -1;
