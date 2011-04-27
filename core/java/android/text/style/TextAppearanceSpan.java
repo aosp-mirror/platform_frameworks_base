@@ -51,10 +51,9 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
      * to determine the color.  The <code>appearance</code> should be,
      * for example, <code>android.R.style.TextAppearance_Small</code>,
      * and the <code>colorList</code> should be, for example,
-     * <code>android.R.styleable.Theme_textColorDim</code>.
+     * <code>android.R.styleable.Theme_textColorPrimary</code>.
      */
-    public TextAppearanceSpan(Context context, int appearance,
-                              int colorList) {
+    public TextAppearanceSpan(Context context, int appearance, int colorList) {
         ColorStateList textColor;
         
         TypedArray a =
