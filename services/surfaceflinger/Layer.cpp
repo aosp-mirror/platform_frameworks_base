@@ -986,8 +986,16 @@ status_t Layer::BufferManager::initEglImage(EGLDisplay dpy,
     ssize_t index = mActiveBufferIndex;
     if (index >= 0) {
         if (!mFailover) {
-            Image& texture(mBufferData[index].texture);
-            err = mTextureManager.initEglImage(&texture, dpy, buffer);
+            {
+               // Without that lock, there is a chance of race condition
+               // where while composing a specific index, requestBuf
+               // with the same index can be executed and touch the same data
+               // that is being used in initEglImage.
+               // (e.g. dirty flag in texture)
+               Mutex::Autolock _l(mLock);
+               Image& texture(mBufferData[index].texture);
+               err = mTextureManager.initEglImage(&texture, dpy, buffer);
+            }
             // if EGLImage fails, we switch to regular texture mode, and we
             // free all resources associated with using EGLImages.
             if (err == NO_ERROR) {
