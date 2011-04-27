@@ -21,6 +21,8 @@ import android.renderscript.RenderScript;
 
 import android.app.Activity;
 import android.content.res.Configuration;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -37,17 +39,27 @@ import android.widget.ListView;
 import java.lang.Runtime;
 
 public class RsBench extends Activity {
-
-    private RsBenchView mView;
+    private final String TAG = "RsBench";
+    public RsBenchView mView;
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
-
+        int iterations = 0;
+        Intent intent = getIntent();
+        Uri uri = intent.getData();
+        if (uri != null) {
+            // when lauched from instrumentation
+            String scheme = uri.getScheme();
+            if ("iterations".equals(scheme)) {
+                iterations = Integer.parseInt(uri.getSchemeSpecificPart());
+            }
+        }
         // Create our Preview view and set it as the content of our
         // Activity
         mView = new RsBenchView(this);
         setContentView(mView);
+        mView.setLoops(iterations);
     }
 
     @Override
@@ -65,6 +77,4 @@ public class RsBench extends Activity {
         super.onPause();
         mView.pause();
     }
-
 }
-

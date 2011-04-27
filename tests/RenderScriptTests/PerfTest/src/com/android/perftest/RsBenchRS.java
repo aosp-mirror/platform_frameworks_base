@@ -29,6 +29,7 @@ import android.renderscript.Program.TextureType;
 import android.renderscript.ProgramStore.DepthFunc;
 import android.renderscript.ProgramStore.BlendSrcFunc;
 import android.renderscript.ProgramStore.BlendDstFunc;
+import android.renderscript.RenderScript.RSMessageHandler;
 import android.renderscript.Sampler.Value;
 import android.util.Log;
 
@@ -37,11 +38,12 @@ public class RsBenchRS {
 
     int mWidth;
     int mHeight;
+    int mLoops;
 
     public RsBenchRS() {
     }
 
-    public void init(RenderScriptGL rs, Resources res, int width, int height) {
+    public void init(RenderScriptGL rs, Resources res, int width, int height, int loops) {
         mRS = rs;
         mRes = res;
         mWidth = width;
@@ -50,8 +52,11 @@ public class RsBenchRS {
         mOptionsARGB.inPreferredConfig = Bitmap.Config.ARGB_8888;
         mMode = 0;
         mMaxModes = 0;
+        mLoops = loops;
         initRS();
     }
+
+    private boolean stopTest = false;
 
     private Resources mRes;
     private RenderScriptGL mRS;
@@ -119,6 +124,43 @@ public class RsBenchRS {
         mMode ++;
         mMode = mMode % mMaxModes;
         mScript.set_gDisplayMode(mMode);
+    }
+
+    /**
+     * Create a message handler to handle message sent from the script
+     */
+    protected RSMessageHandler mRsMessage = new RSMessageHandler() {
+        public void run() {
+            if (mID == mScript.get_RS_MSG_TEST_DONE()) {
+                synchronized(this) {
+                    stopTest = true;
+                    this.notifyAll();
+                }
+                return;
+            } else {
+                Log.v("RsBenchRS", "Perf test got unexpected message");
+                return;
+            }
+        }
+    };
+
+    /**
+     * Wait for message from the script
+     */
+    public boolean testIsFinished() {
+        synchronized(this) {
+            while (true) {
+                if (stopTest) {
+                    return true;
+                } else {
+                    try {
+                        this.wait(60*1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
 
     ProgramStore BLEND_ADD_DEPTH_NONE(RenderScript rs) {
@@ -388,8 +430,10 @@ public class RsBenchRS {
     private void initRS() {
 
         mScript = new ScriptC_rsbench(mRS, mRes, R.raw.rsbench);
+        mRS.setMessageHandler(mRsMessage);
 
         mMaxModes = mScript.get_gMaxModes();
+        mScript.set_gMaxLoops(mLoops);
 
         initSamplers();
         initProgramStore();
@@ -421,6 +465,3 @@ public class RsBenchRS {
         mRS.bindRootScript(mScript);
     }
 }
-
-
-
