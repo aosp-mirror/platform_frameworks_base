@@ -2203,10 +2203,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Perform dispatching of a {@link #saveHierarchyState freeze()} to only this view,
-     * not to its children.  For use when overriding
-     * {@link #dispatchSaveInstanceState dispatchFreeze()} to allow subclasses to freeze
-     * their own state but not the state of their children.
+     * Perform dispatching of a {@link #saveHierarchyState(android.util.SparseArray)}  freeze()}
+     * to only this view, not to its children.  For use when overriding
+     * {@link #dispatchSaveInstanceState(android.util.SparseArray)}  dispatchFreeze()} to allow
+     * subclasses to freeze their own state but not the state of their children.
      *
      * @param container the container
      */

@@ -102,19 +102,7 @@ void LayerRenderer::generateMesh() {
             mLayer->meshElementCount = 0;
         }
 
-        const android::Rect& bounds = mLayer->region.getBounds();
-        mLayer->regionRect.set(bounds.leftTop().x, bounds.leftTop().y,
-                bounds.rightBottom().x, bounds.rightBottom().y);
-
-        const float texX = 1.0f / float(mLayer->width);
-        const float texY = 1.0f / float(mLayer->height);
-        const float height = mLayer->layer.getHeight();
-        mLayer->texCoords.set(
-                mLayer->regionRect.left * texX,
-                (height - mLayer->regionRect.top) * texY,
-                mLayer->regionRect.right * texX,
-                (height - mLayer->regionRect.bottom) * texY);
-
+        mLayer->setRegionAsRect();
         return;
     }
 

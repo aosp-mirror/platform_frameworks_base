@@ -647,10 +647,10 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
 void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
 #if RENDER_LAYERS_AS_REGIONS
     if (layer->region.isRect()) {
-        const android::Rect& bounds = layer->region.getBounds();
-        layer->regionRect.set(bounds.leftTop().x, bounds.leftTop().y,
-                bounds.rightBottom().x, bounds.rightBottom().y);
+        layer->setRegionAsRect();
+
         composeLayerRect(layer, layer->regionRect);
+
         layer->region.clear();
         return;
     }
