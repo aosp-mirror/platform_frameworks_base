@@ -139,6 +139,9 @@ public class Display
         outMetrics.scaledDensity= outMetrics.density;
         outMetrics.xdpi         = mDpiX;
         outMetrics.ydpi         = mDpiY;
+
+        outMetrics.realWidthPixels  = outMetrics.widthPixels;
+        outMetrics.realHeightPixels = outMetrics.heightPixels;
     }
 
     /*

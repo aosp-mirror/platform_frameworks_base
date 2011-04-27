@@ -202,7 +202,7 @@ public final class ActivityThread {
 
     Bundle mCoreSettings = null;
 
-    private static final class ActivityClientRecord {
+    static final class ActivityClientRecord {
         IBinder token;
         int ident;
         Intent intent;
@@ -220,6 +220,7 @@ public final class ActivityThread {
         ActivityClientRecord nextIdle;
 
         ActivityInfo activityInfo;
+        CompatibilityInfo compatInfo;
         LoadedApk packageInfo;
 
         List<ResultInfo> pendingResults;
@@ -260,7 +261,7 @@ public final class ActivityThread {
         }
     }
 
-    private final class ProviderClientRecord implements IBinder.DeathRecipient {
+    final class ProviderClientRecord implements IBinder.DeathRecipient {
         final String mName;
         final IContentProvider mProvider;
         final ContentProvider mLocalProvider;
@@ -277,7 +278,7 @@ public final class ActivityThread {
         }
     }
 
-    private static final class NewIntentData {
+    static final class NewIntentData {
         List<Intent> intents;
         IBinder token;
         public String toString() {
@@ -285,7 +286,7 @@ public final class ActivityThread {
         }
     }
 
-    private static final class ReceiverData extends BroadcastReceiver.PendingResult {
+    static final class ReceiverData extends BroadcastReceiver.PendingResult {
         public ReceiverData(Intent intent, int resultCode, String resultData, Bundle resultExtras,
                 boolean ordered, boolean sticky, IBinder token) {
             super(resultCode, resultData, resultExtras, TYPE_COMPONENT, ordered, sticky, token);
@@ -294,6 +295,7 @@ public final class ActivityThread {
 
         Intent intent;
         ActivityInfo info;
+        CompatibilityInfo compatInfo;
         public String toString() {
             return "ReceiverData{intent=" + intent + " packageName=" +
                     info.packageName + " resultCode=" + getResultCode()
@@ -302,8 +304,9 @@ public final class ActivityThread {
         }
     }
 
-    private static final class CreateBackupAgentData {
+    static final class CreateBackupAgentData {
         ApplicationInfo appInfo;
+        CompatibilityInfo compatInfo;
         int backupMode;
         public String toString() {
             return "CreateBackupAgentData{appInfo=" + appInfo
@@ -312,9 +315,10 @@ public final class ActivityThread {
         }
     }
 
-    private static final class CreateServiceData {
+    static final class CreateServiceData {
         IBinder token;
         ServiceInfo info;
+        CompatibilityInfo compatInfo;
         Intent intent;
         public String toString() {
             return "CreateServiceData{token=" + token + " className="
@@ -323,7 +327,7 @@ public final class ActivityThread {
         }
     }
 
-    private static final class BindServiceData {
+    static final class BindServiceData {
         IBinder token;
         Intent intent;
         boolean rebind;
@@ -332,7 +336,7 @@ public final class ActivityThread {
         }
     }
 
-    private static final class ServiceArgsData {
+    static final class ServiceArgsData {
         IBinder token;
         int startId;
         int flags;
@@ -343,7 +347,7 @@ public final class ActivityThread {
         }
     }
 
-    private static final class AppBindData {
+    static final class AppBindData {
         LoadedApk info;
         String processName;
         ApplicationInfo appInfo;
@@ -355,13 +359,14 @@ public final class ActivityThread {
         int debugMode;
         boolean restrictedBackupMode;
         Configuration config;
+        CompatibilityInfo compatInfo;
         boolean handlingProfiling;
         public String toString() {
             return "AppBindData{appInfo=" + appInfo + "}";
         }
     }
 
-    private static final class DumpComponentInfo {
+    static final class DumpComponentInfo {
         FileDescriptor fd;
         IBinder token;
         String prefix;
@@ -369,7 +374,7 @@ public final class ActivityThread {
         boolean dumped;
     }
 
-    private static final class ResultData {
+    static final class ResultData {
         IBinder token;
         List<ResultInfo> results;
         public String toString() {
@@ -377,20 +382,25 @@ public final class ActivityThread {
         }
     }
 
-    private static final class ContextCleanupInfo {
+    static final class ContextCleanupInfo {
         ContextImpl context;
         String what;
         String who;
     }
 
-    private static final class ProfilerControlData {
+    static final class ProfilerControlData {
         String path;
         ParcelFileDescriptor fd;
     }
 
-    private static final class DumpHeapData {
+    static final class DumpHeapData {
         String path;
         ParcelFileDescriptor fd;
+    }
+
+    static final class UpdateCompatibilityData {
+        String pkg;
+        CompatibilityInfo info;
     }
 
     private final class ApplicationThread extends ApplicationThreadNative {
@@ -443,7 +453,8 @@ public final class ActivityThread {
         // we use token to identify this activity without having to send the
         // activity itself back to the activity manager. (matters more with ipc)
         public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
-                ActivityInfo info, Bundle state, List<ResultInfo> pendingResults,
+                ActivityInfo info, CompatibilityInfo compatInfo, Bundle state,
+                List<ResultInfo> pendingResults,
                 List<Intent> pendingNewIntents, boolean notResumed, boolean isForward) {
             ActivityClientRecord r = new ActivityClientRecord();
 
@@ -451,6 +462,7 @@ public final class ActivityThread {
             r.ident = ident;
             r.intent = intent;
             r.activityInfo = info;
+            r.compatInfo = compatInfo;
             r.state = state;
 
             r.pendingResults = pendingResults;
@@ -484,33 +496,40 @@ public final class ActivityThread {
         }
 
         public final void scheduleReceiver(Intent intent, ActivityInfo info,
-                int resultCode, String data, Bundle extras, boolean sync) {
+                CompatibilityInfo compatInfo, int resultCode, String data, Bundle extras,
+                boolean sync) {
             ReceiverData r = new ReceiverData(intent, resultCode, data, extras,
                     sync, false, mAppThread.asBinder());
             r.info = info;
+            r.compatInfo = compatInfo;
             queueOrSendMessage(H.RECEIVER, r);
         }
 
-        public final void scheduleCreateBackupAgent(ApplicationInfo app, int backupMode) {
+        public final void scheduleCreateBackupAgent(ApplicationInfo app,
+                CompatibilityInfo compatInfo, int backupMode) {
             CreateBackupAgentData d = new CreateBackupAgentData();
             d.appInfo = app;
+            d.compatInfo = compatInfo;
             d.backupMode = backupMode;
 
             queueOrSendMessage(H.CREATE_BACKUP_AGENT, d);
         }
 
-        public final void scheduleDestroyBackupAgent(ApplicationInfo app) {
+        public final void scheduleDestroyBackupAgent(ApplicationInfo app,
+                CompatibilityInfo compatInfo) {
             CreateBackupAgentData d = new CreateBackupAgentData();
             d.appInfo = app;
+            d.compatInfo = compatInfo;
 
             queueOrSendMessage(H.DESTROY_BACKUP_AGENT, d);
         }
 
         public final void scheduleCreateService(IBinder token,
-                ServiceInfo info) {
+                ServiceInfo info, CompatibilityInfo compatInfo) {
             CreateServiceData s = new CreateServiceData();
             s.token = token;
             s.info = info;
+            s.compatInfo = compatInfo;
 
             queueOrSendMessage(H.CREATE_SERVICE, s);
         }
@@ -553,7 +572,8 @@ public final class ActivityThread {
                 ComponentName instrumentationName, String profileFile,
                 Bundle instrumentationArgs, IInstrumentationWatcher instrumentationWatcher,
                 int debugMode, boolean isRestrictedBackupMode, Configuration config,
-                Map<String, IBinder> services, Bundle coreSettings) {
+                CompatibilityInfo compatInfo, Map<String, IBinder> services,
+                Bundle coreSettings) {
 
             if (services != null) {
                 // Setup the service cache in the ServiceManager
@@ -573,6 +593,7 @@ public final class ActivityThread {
             data.debugMode = debugMode;
             data.restrictedBackupMode = isRestrictedBackupMode;
             data.config = config;
+            data.compatInfo = compatInfo;
             queueOrSendMessage(H.BIND_APPLICATION, data);
         }
 
@@ -903,6 +924,13 @@ public final class ActivityThread {
         public void setCoreSettings(Bundle coreSettings) {
             queueOrSendMessage(H.SET_CORE_SETTINGS, coreSettings);
         }
+
+        public void updatePackageCompatibilityInfo(String pkg, CompatibilityInfo info) {
+            UpdateCompatibilityData ucd = new UpdateCompatibilityData();
+            ucd.pkg = pkg;
+            ucd.info = info;
+            queueOrSendMessage(H.UPDATE_PACKAGE_COMPATIBILITY_INFO, ucd);
+        }
     }
 
     private final class H extends Handler {
@@ -945,6 +973,7 @@ public final class ActivityThread {
         public static final int DUMP_ACTIVITY           = 136;
         public static final int SLEEPING                = 137;
         public static final int SET_CORE_SETTINGS       = 138;
+        public static final int UPDATE_PACKAGE_COMPATIBILITY_INFO = 139;
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -987,6 +1016,7 @@ public final class ActivityThread {
                     case DUMP_ACTIVITY: return "DUMP_ACTIVITY";
                     case SLEEPING: return "SLEEPING";
                     case SET_CORE_SETTINGS: return "SET_CORE_SETTINGS";
+                    case UPDATE_PACKAGE_COMPATIBILITY_INFO: return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
                 }
             }
             return "(unknown)";
@@ -998,7 +1028,7 @@ public final class ActivityThread {
                     ActivityClientRecord r = (ActivityClientRecord)msg.obj;
 
                     r.packageInfo = getPackageInfoNoCheck(
-                            r.activityInfo.applicationInfo);
+                            r.activityInfo.applicationInfo, r.compatInfo);
                     handleLaunchActivity(r, null);
                 } break;
                 case RELAUNCH_ACTIVITY: {
@@ -1072,7 +1102,7 @@ public final class ActivityThread {
                     handleRequestThumbnail((IBinder)msg.obj);
                     break;
                 case CONFIGURATION_CHANGED:
-                    handleConfigurationChanged((Configuration)msg.obj);
+                    handleConfigurationChanged((Configuration)msg.obj, null);
                     break;
                 case CLEAN_UP_CONTEXT:
                     ContextCleanupInfo cci = (ContextCleanupInfo)msg.obj;
@@ -1125,6 +1155,8 @@ public final class ActivityThread {
                 case SET_CORE_SETTINGS:
                     handleSetCoreSettings((Bundle) msg.obj);
                     break;
+                case UPDATE_PACKAGE_COMPATIBILITY_INFO:
+                    handleUpdatePackageCompatibilityInfo((UpdateCompatibilityData)msg.obj);
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + msg.what);
         }
@@ -1335,7 +1367,8 @@ public final class ActivityThread {
         return mH;
     }
 
-    public final LoadedApk getPackageInfo(String packageName, int flags) {
+    public final LoadedApk getPackageInfo(String packageName, CompatibilityInfo compatInfo,
+            int flags) {
         synchronized (mPackages) {
             WeakReference<LoadedApk> ref;
             if ((flags&Context.CONTEXT_INCLUDE_CODE) != 0) {
@@ -1369,13 +1402,14 @@ public final class ActivityThread {
         }
 
         if (ai != null) {
-            return getPackageInfo(ai, flags);
+            return getPackageInfo(ai, compatInfo, flags);
         }
 
         return null;
     }
 
-    public final LoadedApk getPackageInfo(ApplicationInfo ai, int flags) {
+    public final LoadedApk getPackageInfo(ApplicationInfo ai, CompatibilityInfo compatInfo,
+            int flags) {
         boolean includeCode = (flags&Context.CONTEXT_INCLUDE_CODE) != 0;
         boolean securityViolation = includeCode && ai.uid != 0
                 && ai.uid != Process.SYSTEM_UID && (mBoundApplication != null
@@ -1394,14 +1428,27 @@ public final class ActivityThread {
                 throw new SecurityException(msg);
             }
         }
-        return getPackageInfo(ai, null, securityViolation, includeCode);
+        return getPackageInfo(ai, compatInfo, null, securityViolation, includeCode);
     }
 
-    public final LoadedApk getPackageInfoNoCheck(ApplicationInfo ai) {
-        return getPackageInfo(ai, null, false, true);
+    public final LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,
+            CompatibilityInfo compatInfo) {
+        return getPackageInfo(ai, compatInfo, null, false, true);
     }
 
-    private final LoadedApk getPackageInfo(ApplicationInfo aInfo,
+    public final LoadedApk peekPackageInfo(String packageName, boolean includeCode) {
+        synchronized (mPackages) {
+            WeakReference<LoadedApk> ref;
+            if (includeCode) {
+                ref = mPackages.get(packageName);
+            } else {
+                ref = mResourcePackages.get(packageName);
+            }
+            return ref != null ? ref.get() : null;
+        }
+    }
+
+    private final LoadedApk getPackageInfo(ApplicationInfo aInfo, CompatibilityInfo compatInfo,
             ClassLoader baseLoader, boolean securityViolation, boolean includeCode) {
         synchronized (mPackages) {
             WeakReference<LoadedApk> ref;
@@ -1419,7 +1466,7 @@ public final class ActivityThread {
                                 ? mBoundApplication.processName : null)
                         + ")");
                 packageInfo =
-                    new LoadedApk(this, aInfo, this, baseLoader,
+                    new LoadedApk(this, aInfo, compatInfo, this, baseLoader,
                             securityViolation, includeCode &&
                             (aInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0);
                 if (includeCode) {
@@ -1476,7 +1523,8 @@ public final class ActivityThread {
             if (mSystemContext == null) {
                 ContextImpl context =
                     ContextImpl.createSystemContext(this);
-                LoadedApk info = new LoadedApk(this, "android", context, null);
+                LoadedApk info = new LoadedApk(this, "android", context, null,
+                        CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO);
                 context.init(info, null, this);
                 context.getResources().updateConfiguration(
                         getConfiguration(), getDisplayMetricsLocked(false));
@@ -1491,7 +1539,8 @@ public final class ActivityThread {
     public void installSystemApplicationInfo(ApplicationInfo info) {
         synchronized (this) {
             ContextImpl context = getSystemContext();
-            context.init(new LoadedApk(this, "android", context, info), null, this);
+            context.init(new LoadedApk(this, "android", context, info,
+                    new CompatibilityInfo(info, 0, false)), null, this);
         }
     }
 
@@ -1641,7 +1690,7 @@ public final class ActivityThread {
 
         ActivityInfo aInfo = r.activityInfo;
         if (r.packageInfo == null) {
-            r.packageInfo = getPackageInfo(aInfo.applicationInfo,
+            r.packageInfo = getPackageInfo(aInfo.applicationInfo, r.compatInfo,
                     Context.CONTEXT_INCLUDE_CODE);
         }
 
@@ -1865,7 +1914,7 @@ public final class ActivityThread {
         String component = data.intent.getComponent().getClassName();
 
         LoadedApk packageInfo = getPackageInfoNoCheck(
-                data.info.applicationInfo);
+                data.info.applicationInfo, data.compatInfo);
 
         IActivityManager mgr = ActivityManagerNative.getDefault();
 
@@ -1926,7 +1975,7 @@ public final class ActivityThread {
         unscheduleGcIdler();
 
         // instantiate the BackupAgent class named in the manifest
-        LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo);
+        LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
         String packageName = packageInfo.mPackageName;
         if (mBackupAgents.get(packageName) != null) {
             Slog.d(TAG, "BackupAgent " + "  for " + packageName
@@ -1988,7 +2037,7 @@ public final class ActivityThread {
     private final void handleDestroyBackupAgent(CreateBackupAgentData data) {
         if (DEBUG_BACKUP) Slog.v(TAG, "handleDestroyBackupAgent: " + data);
 
-        LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo);
+        LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
         String packageName = packageInfo.mPackageName;
         BackupAgent agent = mBackupAgents.get(packageName);
         if (agent != null) {
@@ -2010,7 +2059,7 @@ public final class ActivityThread {
         unscheduleGcIdler();
 
         LoadedApk packageInfo = getPackageInfoNoCheck(
-                data.info.applicationInfo);
+                data.info.applicationInfo, data.compatInfo);
         Service service = null;
         try {
             java.lang.ClassLoader cl = packageInfo.getClassLoader();
@@ -2727,6 +2776,18 @@ public final class ActivityThread {
         }
     }
 
+    private void handleUpdatePackageCompatibilityInfo(UpdateCompatibilityData data) {
+        LoadedApk apk = peekPackageInfo(data.pkg, false);
+        if (apk != null) {
+            apk.mCompatibilityInfo = data.info;
+        }
+        apk = peekPackageInfo(data.pkg, true);
+        if (apk != null) {
+            apk.mCompatibilityInfo = data.info;
+        }
+        handleConfigurationChanged(mConfiguration, data.info);
+    }
+
     private final void deliverResults(ActivityClientRecord r, List<ResultInfo> results) {
         final int N = results.size();
         for (int i=0; i<N; i++) {
@@ -3064,7 +3125,7 @@ public final class ActivityThread {
         
         // If there was a pending configuration change, execute it first.
         if (changedConfig != null) {
-            handleConfigurationChanged(changedConfig);
+            handleConfigurationChanged(changedConfig, null);
         }
 
         ActivityClientRecord r = mActivities.get(tmp.token);
@@ -3234,11 +3295,12 @@ public final class ActivityThread {
         }
     }
 
-    final boolean applyConfigurationToResourcesLocked(Configuration config) {
+    final boolean applyConfigurationToResourcesLocked(Configuration config,
+            CompatibilityInfo compat) {
         if (mResConfiguration == null) {
             mResConfiguration = new Configuration();
         }
-        if (!mResConfiguration.isOtherSeqNewer(config)) {
+        if (!mResConfiguration.isOtherSeqNewer(config) && compat == null) {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Skipping new config: curSeq="
                     + mResConfiguration.seq + ", newSeq=" + config.seq);
             return false;
@@ -3251,7 +3313,7 @@ public final class ActivityThread {
             Locale.setDefault(config.locale);
         }
 
-        Resources.updateSystemConfiguration(config, dm);
+        Resources.updateSystemConfiguration(config, dm, compat);
 
         ApplicationPackageManager.configurationChanged();
         //Slog.i(TAG, "Configuration changed in " + currentPackageName());
@@ -3266,7 +3328,7 @@ public final class ActivityThread {
             if (r != null) {
                 if (DEBUG_CONFIGURATION) Slog.v(TAG, "Changing resources "
                         + r + " config to: " + config);
-                r.updateConfiguration(config, dm);
+                r.updateConfiguration(config, dm, compat);
                 //Slog.i(TAG, "Updated app resources " + v.getKey()
                 //        + " " + r + ": " + r.getConfiguration());
             } else {
@@ -3278,7 +3340,7 @@ public final class ActivityThread {
         return changes != 0;
     }
     
-    final void handleConfigurationChanged(Configuration config) {
+    final void handleConfigurationChanged(Configuration config, CompatibilityInfo compat) {
 
         ArrayList<ComponentCallbacks> callbacks = null;
 
@@ -3297,15 +3359,21 @@ public final class ActivityThread {
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle configuration changed: "
                     + config);
         
-            applyConfigurationToResourcesLocked(config);
+            applyConfigurationToResourcesLocked(config, compat);
             
             if (mConfiguration == null) {
                 mConfiguration = new Configuration();
             }
-            if (!mConfiguration.isOtherSeqNewer(config)) {
+            if (!mConfiguration.isOtherSeqNewer(config) && compat == null) {
                 return;
             }
             mConfiguration.updateFrom(config);
+            if (compat != null) {
+                // Can't do this here, because it causes us to report the
+                // comatible config back to the am as the current config
+                // of the activity, and much unhappiness results.
+                //compat.applyToConfiguration(mConfiguration);
+            }
 
             callbacks = collectComponentCallbacksLocked(false, config);
         }
@@ -3445,9 +3513,10 @@ public final class ActivityThread {
          * reflect configuration changes. The configuration object passed
          * in AppBindData can be safely assumed to be up to date
          */
-        Resources.getSystem().updateConfiguration(mConfiguration, null);
+        Resources.getSystem().updateConfiguration(mConfiguration,
+                Resources.getSystem().getDisplayMetrics(), data.compatInfo);
 
-        data.info = getPackageInfoNoCheck(data.appInfo);
+        data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
 
         /**
          * For system applications on userdebug/eng builds, log stack
@@ -3539,7 +3608,7 @@ public final class ActivityThread {
             instrApp.publicSourceDir = ii.publicSourceDir;
             instrApp.dataDir = ii.dataDir;
             instrApp.nativeLibraryDir = ii.nativeLibraryDir;
-            LoadedApk pi = getPackageInfo(instrApp,
+            LoadedApk pi = getPackageInfo(instrApp, data.compatInfo,
                     appContext.getClassLoader(), false, true);
             ContextImpl instrContext = new ContextImpl();
             instrContext.init(pi, null, this);
@@ -3953,7 +4022,7 @@ public final class ActivityThread {
                     // We need to apply this change to the resources
                     // immediately, because upon returning the view
                     // hierarchy will be informed about it.
-                    if (applyConfigurationToResourcesLocked(newConfig)) {
+                    if (applyConfigurationToResourcesLocked(newConfig, null)) {
                         // This actually changed the resources!  Tell
                         // everyone about it.
                         if (mPendingConfiguration == null ||
