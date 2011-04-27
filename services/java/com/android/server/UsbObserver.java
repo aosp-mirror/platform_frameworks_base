@@ -128,6 +128,9 @@ class UsbObserver extends UEventObserver {
 
         try {
             File[] files = new File(USB_COMPOSITE_CLASS_PATH).listFiles();
+            if (files == null) {
+                return; // nothing to do
+            }
             for (int i = 0; i < files.length; i++) {
                 File file = new File(files[i], "enable");
                 FileReader reader = new FileReader(file);
