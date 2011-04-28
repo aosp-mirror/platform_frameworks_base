@@ -295,7 +295,9 @@ Available Resources</a> document.</p>
    {@link android.view.ViewGroup.MarginLayoutParams} for further information.
    </p>
 
-<p>For more information about dimensions, see <a href="{@docRoot}guide/topics/resources/available-resources.html#dimension">Dimension Values</a>.</p>
+   <p>For more information about dimensions, see 
+   <a href="{@docRoot}guide/topics/resources/more-resources.html#Dimension">Dimension Values</a>.
+   </p>
    
 
 
