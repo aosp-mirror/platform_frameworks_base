@@ -1926,6 +1926,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     void dispatchDetachedFromWindow() {
         if (mView != null && mView.mAttachInfo != null) {
             mView.dispatchDetachedFromWindow();
+            mAttached = false;
         }
 
         mView = null;
