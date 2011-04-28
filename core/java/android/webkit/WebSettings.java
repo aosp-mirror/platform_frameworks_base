@@ -19,7 +19,6 @@ package android.webkit;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -136,6 +135,9 @@ public class WebSettings {
         ON_DEMAND,
         OFF
     }
+
+    // TODO: Keep this up to date
+    private static final String PREVIOUS_VERSION = "3.1";
 
     // WebView associated with this WebSettings.
     private WebView mWebView;
@@ -470,7 +472,14 @@ public class WebSettings {
         // Add version
         final String version = Build.VERSION.RELEASE;
         if (version.length() > 0) {
-            buffer.append(version);
+            if (Character.isDigit(version.charAt(0))) {
+                // Release is a version, eg "3.1"
+                buffer.append(version);
+            } else {
+                // Release is a codename, eg "Honeycomb"
+                // In this case, use the previous release's version
+                buffer.append(PREVIOUS_VERSION);
+            }
         } else {
             // default to "1.0"
             buffer.append("1.0");
