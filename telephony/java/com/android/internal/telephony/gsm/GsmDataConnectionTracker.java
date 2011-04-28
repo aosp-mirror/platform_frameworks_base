@@ -519,6 +519,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             } else {
                 if (DBG) log("return APN_ALREADY_INACTIVE");
                 apnContext.setEnabled(false);
+                apnContext.setDataConnection(null);
                 return Phone.APN_ALREADY_INACTIVE;
             }
 
@@ -1267,6 +1268,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (!apnContext.getDataConnection().isRetryNeeded()) {
                 if (!apnContext.getApnType().equals(Phone.APN_TYPE_DEFAULT)){
                     // if no more retries on a secondary APN attempt, tell the world and revert.
+                    apnContext.setDataConnection(null);
                     notifyDataConnection(Phone.REASON_APN_FAILED);
                     return;
                 }
@@ -1562,6 +1564,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         log("onDataSetupComplete: All APN's had permanent failures, stop retrying");
                     }
                     apnContext.setState(State.FAILED);
+                    apnContext.setDataConnection(null);
                     notifyDataConnection(Phone.REASON_APN_FAILED);
                 } else {
                     if (DBG) log("onDataSetupComplete: Not all permanent failures, retry");
@@ -1600,6 +1603,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (apnContext.getPendingAction() == ApnContext.PENDING_ACTION_APN_DISABLE) {
            apnContext.setEnabled(false);
            apnContext.setPendingAction(ApnContext.PENDING_ACTION_NONE);
+           apnContext.setDataConnection(null);
         }
         mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
 
