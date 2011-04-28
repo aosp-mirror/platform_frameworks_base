@@ -46,7 +46,7 @@ void init() {
     gRotate = 0.0f;
 }
 
-int root(int launchID) {
+int root(void) {
 
     gGroup->transforms[1].w += 0.5f;
     gGroup->isDirty = 1;

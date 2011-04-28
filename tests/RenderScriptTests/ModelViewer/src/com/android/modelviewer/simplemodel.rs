@@ -130,7 +130,7 @@ void drawDescription() {
     rsgDrawText(gTextAlloc, 2 -left, height - 2 + bottom);
 }
 
-int root(int launchID) {
+int root(void) {
 
     rsgClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     rsgClearDepth(1.0f);

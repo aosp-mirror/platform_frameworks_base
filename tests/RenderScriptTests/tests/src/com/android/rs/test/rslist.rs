@@ -35,7 +35,7 @@ void init() {
 
 int textPos = 0;
 
-int root(int launchID) {
+int root(void) {
 
     rsgClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     rsgClearDepth(1.0f);
