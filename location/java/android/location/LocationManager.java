@@ -1310,7 +1310,7 @@ public class LocationManager {
      * @param listener GPS status listener object to register
      *
      * @return true if the listener was successfully added
-     * 
+     *
      * @throws SecurityException if the ACCESS_FINE_LOCATION permission is not present
      */
     public boolean addGpsStatusListener(GpsStatus.Listener listener) {
@@ -1434,7 +1434,7 @@ public class LocationManager {
             return false;
         }
     }
-    
+
     /**
      * Used by NetInitiatedActivity to report user response
      * for network initiated GPS fix requests.
@@ -1449,5 +1449,5 @@ public class LocationManager {
             return false;
         }
     }
- 
+
 }

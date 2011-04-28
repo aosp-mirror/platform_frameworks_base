@@ -16,12 +16,6 @@
 
 package com.android.server.location;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.content.Context;
 import android.location.Address;
 import android.location.Country;
@@ -31,6 +25,12 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Slog;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * This class detects which country the user currently is in through the enabled
@@ -86,24 +86,23 @@ public class LocationBasedCountryDetector extends CountryDetectorBase {
         return country;
     }
 
-    /**
-     * Register the listeners with the location providers
-     */
-    protected void registerEnabledProviders(List<LocationListener> listeners) {
-        int total = listeners.size();
-        for (int i = 0; i< total; i++) {
-            mLocationManager.requestLocationUpdates(
-                    mEnabledProviders.get(i), 0, 0, listeners.get(i));
-        }
+    protected boolean isAcceptableProvider(String provider) {
+        // We don't want to actively initiate a location fix here (with gps or network providers).
+        return LocationManager.PASSIVE_PROVIDER.equals(provider);
     }
 
     /**
-     * Unregister the listeners with the location providers
+     * Register a listener with a provider name
      */
-    protected void unregisterProviders(List<LocationListener> listeners) {
-        for (LocationListener listener : listeners) {
-            mLocationManager.removeUpdates(listener);
-        }
+    protected void registerListener(String provider, LocationListener listener) {
+        mLocationManager.requestLocationUpdates(provider, 0, 0, listener);
+    }
+
+    /**
+     * Unregister an already registered listener
+     */
+    protected void unregisterListener(LocationListener listener) {
+        mLocationManager.removeUpdates(listener);
     }
 
     /**
@@ -130,14 +129,11 @@ public class LocationBasedCountryDetector extends CountryDetectorBase {
         return QUERY_LOCATION_TIMEOUT;
     }
 
-    /**
-     * @return the total number of enabled location providers
-     */
-    protected int getTotalEnabledProviders() {
+    protected List<String> getEnabledProviders() {
         if (mEnabledProviders == null) {
             mEnabledProviders = mLocationManager.getProviders(true);
         }
-        return mEnabledProviders.size();
+        return mEnabledProviders;
     }
 
     /**
@@ -152,27 +148,36 @@ public class LocationBasedCountryDetector extends CountryDetectorBase {
             throw new IllegalStateException();
         }
         // Request the location from all enabled providers.
-        int totalProviders = getTotalEnabledProviders();
+        List<String> enabledProviders = getEnabledProviders();
+        int totalProviders = enabledProviders.size();
         if (totalProviders > 0) {
             mLocationListeners = new ArrayList<LocationListener>(totalProviders);
             for (int i = 0; i < totalProviders; i++) {
-                LocationListener listener = new LocationListener () {
-                    public void onLocationChanged(Location location) {
-                        if (location != null) {
-                            LocationBasedCountryDetector.this.stop();
-                            queryCountryCode(location);
+                String provider = enabledProviders.get(i);
+                if (isAcceptableProvider(provider)) {
+                    LocationListener listener = new LocationListener () {
+                        @Override
+                        public void onLocationChanged(Location location) {
+                            if (location != null) {
+                                LocationBasedCountryDetector.this.stop();
+                                queryCountryCode(location);
+                            }
                         }
-                    }
-                    public void onProviderDisabled(String provider) {
-                    }
-                    public void onProviderEnabled(String provider) {
-                    }
-                    public void onStatusChanged(String provider, int status, Bundle extras) {
-                    }
-                };
-                mLocationListeners.add(listener);
+                        @Override
+                        public void onProviderDisabled(String provider) {
+                        }
+                        @Override
+                        public void onProviderEnabled(String provider) {
+                        }
+                        @Override
+                        public void onStatusChanged(String provider, int status, Bundle extras) {
+                        }
+                    };
+                    mLocationListeners.add(listener);
+                    registerListener(provider, listener);
+                }
             }
-            registerEnabledProviders(mLocationListeners);
+
             mTimer = new Timer();
             mTimer.schedule(new TimerTask() {
                 @Override
@@ -197,7 +202,9 @@ public class LocationBasedCountryDetector extends CountryDetectorBase {
     @Override
     public synchronized void stop() {
         if (mLocationListeners != null) {
-            unregisterProviders(mLocationListeners);
+            for (LocationListener listener : mLocationListeners) {
+                unregisterListener(listener);
+            }
             mLocationListeners = null;
         }
         if (mTimer != null) {
@@ -216,6 +223,7 @@ public class LocationBasedCountryDetector extends CountryDetectorBase {
         }
         if (mQueryThread != null) return;
         mQueryThread = new Thread(new Runnable() {
+            @Override
             public void run() {
                 String countryIso = null;
                 if (location != null) {

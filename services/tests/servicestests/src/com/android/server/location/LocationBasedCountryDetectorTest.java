@@ -15,17 +15,25 @@
  */
 package com.android.server.location;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-
 import android.location.Country;
 import android.location.CountryListener;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.test.AndroidTestCase;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.Timer;
+
 public class LocationBasedCountryDetectorTest extends AndroidTestCase {
+    private static final List<String> sEnabledProviders = Arrays.asList(
+            LocationManager.GPS_PROVIDER, LocationManager.PASSIVE_PROVIDER);
     private class TestCountryDetector extends LocationBasedCountryDetector {
         public static final int TOTAL_PROVIDERS = 2;
         protected Object countryFoundLocker = new Object();
@@ -33,7 +41,7 @@ public class LocationBasedCountryDetectorTest extends AndroidTestCase {
         private final Location mLocation;
         private final String mCountry;
         private final long mQueryLocationTimeout;
-        private List<LocationListener> mListeners;
+        private Map<String, LocationListener> mListeners;
 
         public TestCountryDetector(String country, String provider) {
             this(country, provider, 1000 * 60 * 5);
@@ -44,7 +52,7 @@ public class LocationBasedCountryDetectorTest extends AndroidTestCase {
             mCountry = country;
             mLocation = new Location(provider);
             mQueryLocationTimeout = queryLocationTimeout;
-            mListeners = new ArrayList<LocationListener>();
+            mListeners = new HashMap<String, LocationListener>();
         }
 
         @Override
@@ -69,16 +77,40 @@ public class LocationBasedCountryDetectorTest extends AndroidTestCase {
             return mLocation;
         }
 
-        @Override
-        protected void registerEnabledProviders(List<LocationListener> listeners) {
-            mListeners.addAll(listeners);
+        private Set<String> mAcceptableProviders;
+
+        public void setAcceptableProvider(Set<String> acceptableProviders) {
+            mAcceptableProviders = acceptableProviders;
         }
 
         @Override
-        protected void unregisterProviders(List<LocationListener> listeners) {
-            for (LocationListener listener : mLocationListeners) {
-                assertTrue(mListeners.remove(listener));
+        protected boolean isAcceptableProvider(String provider) {
+            if (mAcceptableProviders != null) {
+                return mAcceptableProviders.contains(provider);
+            } else {
+                return true;
             }
+        }
+
+        @Override
+        protected void registerListener(String provider, LocationListener listener) {
+            assertNotNull(provider);
+            mListeners.put(provider, listener);
+        }
+
+        @Override
+        protected void unregisterListener(LocationListener listener) {
+            for (Entry<String, LocationListener> entry : mListeners.entrySet()) {
+                if (entry.getValue().equals(listener)) {
+                    mListeners.remove(entry.getKey());
+                    return;
+                }
+            }
+            fail("Not registered");
+        }
+
+        public Map<String, LocationListener> getListeners() {
+            return mListeners;
         }
 
         @Override
@@ -87,8 +119,8 @@ public class LocationBasedCountryDetectorTest extends AndroidTestCase {
         }
 
         @Override
-        protected int getTotalEnabledProviders() {
-            return TOTAL_PROVIDERS;
+        protected List<String> getEnabledProviders() {
+            return sEnabledProviders;
         }
 
         public void notifyLocationFound() {
@@ -140,16 +172,39 @@ public class LocationBasedCountryDetectorTest extends AndroidTestCase {
     }
 
     public void testFindingCountry() {
+        testFindingCountryCommon(null);
+    }
+
+    public void testFindingCountryWithAcceptableProvider() {
+        testFindingCountryCommon(new HashSet<String>(Arrays.asList("passive")));
+    }
+
+    private void testFindingCountryCommon(Set<String> acceptableProviders) {
         final String country = "us";
         final String provider = "Good";
         CountryListenerImpl countryListener = new CountryListenerImpl();
         TestCountryDetector detector = new TestCountryDetector(country, provider);
+
+        if (acceptableProviders != null) {
+            detector.setAcceptableProvider(acceptableProviders);
+        }
+
         detector.setCountryListener(countryListener);
         detector.detectCountry();
-        assertEquals(detector.getListenersCount(), TestCountryDetector.TOTAL_PROVIDERS);
+
+        if (acceptableProviders != null) {
+            assertEquals(acceptableProviders.size(), detector.getListenersCount());
+            Map<String, LocationListener> listeners = detector.getListeners();
+            for (String acceptableProvider : acceptableProviders) {
+                assertTrue(listeners.containsKey(acceptableProvider));
+            }
+        } else {
+            assertEquals(TestCountryDetector.TOTAL_PROVIDERS, detector.getListenersCount());
+        }
+
         detector.notifyLocationFound();
         // All listeners should be unregistered
-        assertEquals(detector.getListenersCount(), 0);
+        assertEquals(0, detector.getListenersCount());
         assertNull(detector.getTimer());
         Thread queryThread = waitForQueryThreadLaunched(detector);
         detector.notifyCountryFound();
@@ -168,10 +223,10 @@ public class LocationBasedCountryDetectorTest extends AndroidTestCase {
         TestCountryDetector detector = new TestCountryDetector(country, provider);
         detector.setCountryListener(countryListener);
         detector.detectCountry();
-        assertEquals(detector.getListenersCount(), TestCountryDetector.TOTAL_PROVIDERS);
+        assertEquals(TestCountryDetector.TOTAL_PROVIDERS, detector.getListenersCount());
         detector.notifyLocationFound();
         // All listeners should be unregistered
-        assertEquals(detector.getListenersCount(), 0);
+        assertEquals(0, detector.getListenersCount());
         // The time should be stopped
         assertNull(detector.getTimer());
         Thread queryThread = waitForQueryThreadLaunched(detector);
@@ -193,10 +248,10 @@ public class LocationBasedCountryDetectorTest extends AndroidTestCase {
         TestCountryDetector detector = new TestCountryDetector(country, provider);
         detector.setCountryListener(countryListener);
         detector.detectCountry();
-        assertEquals(detector.getListenersCount(), TestCountryDetector.TOTAL_PROVIDERS);
+        assertEquals(TestCountryDetector.TOTAL_PROVIDERS, detector.getListenersCount());
         detector.stop();
         // All listeners should be unregistered
-        assertEquals(detector.getListenersCount(), 0);
+        assertEquals(0, detector.getListenersCount());
         // The time should be stopped
         assertNull(detector.getTimer());
         // QueryThread should still be NULL
@@ -217,10 +272,10 @@ public class LocationBasedCountryDetectorTest extends AndroidTestCase {
         CountryListenerImpl countryListener = new CountryListenerImpl();
         detector.setCountryListener(countryListener);
         detector.detectCountry();
-        assertEquals(detector.getListenersCount(), TestCountryDetector.TOTAL_PROVIDERS);
+        assertEquals(TestCountryDetector.TOTAL_PROVIDERS, detector.getListenersCount());
         waitForTimerReset(detector);
         // All listeners should be unregistered
-        assertEquals(detector.getListenersCount(), 0);
+        assertEquals(0, detector.getListenersCount());
         // QueryThread should still be NULL
         assertNull(detector.getQueryThread());
         assertTrue(countryListener.notified());
@@ -248,10 +303,10 @@ public class LocationBasedCountryDetectorTest extends AndroidTestCase {
         CountryListenerImpl countryListener = new CountryListenerImpl();
         detector.setCountryListener(countryListener);
         detector.detectCountry();
-        assertEquals(detector.getListenersCount(), TestCountryDetector.TOTAL_PROVIDERS);
+        assertEquals(TestCountryDetector.TOTAL_PROVIDERS, detector.getListenersCount());
         detector.notifyLocationFound();
         // All listeners should be unregistered
-        assertEquals(detector.getListenersCount(), 0);
+        assertEquals(0, detector.getListenersCount());
         assertNull(detector.getTimer());
         Thread queryThread = waitForQueryThreadLaunched(detector);
         detector.notifyCountryFound();
@@ -272,10 +327,10 @@ public class LocationBasedCountryDetectorTest extends AndroidTestCase {
         CountryListenerImpl countryListener = new CountryListenerImpl();
         detector.setCountryListener(countryListener);
         detector.detectCountry();
-        assertEquals(detector.getListenersCount(), TestCountryDetector.TOTAL_PROVIDERS);
+        assertEquals(TestCountryDetector.TOTAL_PROVIDERS, detector.getListenersCount());
         waitForTimerReset(detector);
         // All listeners should be unregistered
-        assertEquals(detector.getListenersCount(), 0);
+        assertEquals(0, detector.getListenersCount());
         Thread queryThread = waitForQueryThreadLaunched(detector);
         detector.notifyCountryFound();
         // Wait for query thread ending
