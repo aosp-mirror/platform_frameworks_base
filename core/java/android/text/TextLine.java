@@ -815,6 +815,13 @@ class TextLine {
             int limit, boolean runIsRtl, Canvas c, float x, int top, int y,
             int bottom, FontMetricsInt fmi, boolean needWidth) {
 
+        // Case of an empty line, make sure we update fmi according to mPaint
+        if (start == measureLimit) {
+            TextPaint wp = mWorkPaint;
+            wp.set(mPaint);
+            return handleText(wp, 0, 0, 0, 0, runIsRtl, c, x, top, y, bottom, fmi, needWidth);
+        }
+
         // Shaping needs to take into account context up to metric boundaries,
         // but rendering needs to take into account character style boundaries.
         // So we iterate through metric runs to get metric bounds,
