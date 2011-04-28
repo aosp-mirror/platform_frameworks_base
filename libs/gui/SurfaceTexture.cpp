@@ -100,6 +100,7 @@ SurfaceTexture::SurfaceTexture(GLuint tex) :
     }
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
+    mNextCrop.makeInvalid();
 }
 
 SurfaceTexture::~SurfaceTexture() {
