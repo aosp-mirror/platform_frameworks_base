@@ -135,6 +135,7 @@ public class CatService extends Handler implements AppInterface {
     static final int MSG_ID_CALL_SETUP               = 4;
     static final int MSG_ID_REFRESH                  = 5;
     static final int MSG_ID_RESPONSE                 = 6;
+    static final int MSG_ID_SIM_READY                = 7;
 
     static final int MSG_ID_RIL_MSG_DECODED          = 10;
 
@@ -172,9 +173,11 @@ public class CatService extends Handler implements AppInterface {
         mIccRecords = ir;
 
         // Register for SIM ready event.
+        mCmdIf.registerForSIMReady(this, MSG_ID_SIM_READY, null);
+        mCmdIf.registerForRUIMReady(this, MSG_ID_SIM_READY, null);
+        mCmdIf.registerForNVReady(this, MSG_ID_SIM_READY, null);
         mIccRecords.registerForRecordsLoaded(this, MSG_ID_ICC_RECORDS_LOADED, null);
 
-        mCmdIf.reportStkServiceIsRunning(null);
         CatLog.d(this, "Is running");
     }
 
@@ -587,6 +590,10 @@ public class CatService extends Handler implements AppInterface {
             break;
         case MSG_ID_RESPONSE:
             handleCmdResponse((CatResponseMessage) msg.obj);
+            break;
+        case MSG_ID_SIM_READY:
+            CatLog.d(this, "SIM ready. Reporting STK service running now...");
+            mCmdIf.reportStkServiceIsRunning(null);
             break;
         default:
             throw new AssertionError("Unrecognized CAT command: " + msg.what);
