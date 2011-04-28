@@ -2587,6 +2587,21 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     if ((localFeatures & (1 << FEATURE_INDETERMINATE_PROGRESS)) != 0) {
                         mActionBar.initIndeterminateProgress();
                     }
+
+                    final boolean splitActionBar = getWindowStyle().getBoolean(
+                            com.android.internal.R.styleable.Window_windowSplitActionBar, false);
+                    if (splitActionBar) {
+                        final ViewGroup splitView = (ViewGroup) findViewById(
+                                com.android.internal.R.id.lower_action_context_bar);
+                        if (splitView != null) {
+                            mActionBar.setSplitActionBar(splitActionBar);
+                            mActionBar.setSplitView(splitView);
+                        } else {
+                            Log.e(TAG, "Window style requested split action bar with " +
+                                    "incompatible window decor! Ignoring request.");
+                        }
+                    }
+
                     // Post the panel invalidate for later; avoid application onCreateOptionsMenu
                     // being called in the middle of onCreate or similar.
                     mDecor.post(new Runnable() {

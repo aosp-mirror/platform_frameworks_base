@@ -299,6 +299,10 @@
              when there is not reserved space for their UI (such as an Action Bar). -->
         <attr name="windowActionModeOverlay" format="boolean" />
 
+        <!-- Flag indicating that the action bar should be split to provide more
+             room for elements. -->
+        <attr name="windowSplitActionBar" format="boolean" />
+
         <!-- Defines the default soft input state that this window would
              like when it is displayed. -->
         <attr name="windowSoftInputMode">
@@ -1429,6 +1433,7 @@
         <attr name="windowActionBar" />
         <attr name="windowActionModeOverlay" />
         <attr name="windowActionBarOverlay" />
+        <attr name="windowSplitActionBar" />
         <attr name="windowEnableSplitTouch" />
         <attr name="windowCloseOnTouchOutside" />
         <!-- The minimum width the window is allowed to be, along the major

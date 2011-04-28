@@ -73,10 +73,11 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
 
         int width = mWidthLimit;
         if (mReserveOverflow) {
-            OverflowMenuButton button = new OverflowMenuButton(mContext);
-            mOverflowButton = button;
-            final int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-            mOverflowButton.measure(spec, spec);
+            if (mOverflowButton == null) {
+                mOverflowButton = new OverflowMenuButton(mContext);
+                final int spec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+                mOverflowButton.measure(spec, spec);
+            }
             width -= mOverflowButton.getMeasuredWidth();
         } else {
             mOverflowButton = null;
@@ -86,6 +87,17 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
 
         // Drop a scrap view as it may no longer reflect the proper context/config.
         mScrapActionButtonView = null;
+    }
+
+    public void setWidthLimit(int width) {
+        if (mReserveOverflow) {
+            width -= mOverflowButton.getMeasuredWidth();
+        }
+        mActionItemWidthLimit = width;
+    }
+
+    public void setItemLimit(int itemCount) {
+        mMaxItems = itemCount;
     }
 
     @Override

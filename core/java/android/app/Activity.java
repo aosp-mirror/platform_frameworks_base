@@ -2482,6 +2482,7 @@ public class Activity extends ContextThemeWrapper
                 break;
 
             case Window.FEATURE_ACTION_BAR:
+                initActionBar();
                 mActionBar.dispatchMenuVisibilityChanged(false);
                 break;
         }

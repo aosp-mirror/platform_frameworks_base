@@ -110,7 +110,7 @@ public class ActionBarView extends ViewGroup {
     private int mProgressStyle;
     private int mIndeterminateProgressStyle;
 
-    private boolean mShowMenu;
+    private boolean mSplitActionBar;
     private boolean mUserTitle;
     private boolean mIncludeTabs;
 
@@ -119,6 +119,7 @@ public class ActionBarView extends ViewGroup {
     private ActionMenuPresenter mActionMenuPresenter;
     
     private ActionBarContextView mContextView;
+    private ViewGroup mSplitView;
 
     private ActionMenuItem mLogoNavItem;
 
@@ -245,6 +246,26 @@ public class ActionBarView extends ViewGroup {
         addView(mIndeterminateProgressView);
     }
 
+    public void setSplitActionBar(boolean splitActionBar) {
+        if (mSplitActionBar != splitActionBar) {
+            if (mMenuView != null) {
+                if (splitActionBar) {
+                    removeView(mMenuView);
+                    if (mSplitView != null) {
+                        mSplitView.addView(mMenuView);
+                    }
+                } else {
+                    addView(mMenuView);
+                }
+            }
+            mSplitActionBar = splitActionBar;
+        }
+    }
+
+    public boolean isSplitActionBar() {
+        return mSplitActionBar;
+    }
+
     public boolean hasEmbeddedTabs() {
         return mIncludeTabs;
     }
@@ -284,8 +305,27 @@ public class ActionBarView extends ViewGroup {
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
         menuView.setLayoutParams(layoutParams);
-        addView(menuView);
+        if (!mSplitActionBar) {
+            addView(menuView);
+        } else {
+            // Allow full screen width in split mode.
+            mActionMenuPresenter.setWidthLimit(
+                    getContext().getResources().getDisplayMetrics().widthPixels);
+            // No limit to the item count; use whatever will fit.
+            mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
+            if (mSplitView != null) {
+                mSplitView.addView(menuView);
+            } // We'll add this later if we missed it this time.
+        }
         mMenuView = menuView;
+    }
+
+    public void setSplitView(ViewGroup splitView) {
+        mSplitView = splitView;
+        splitView.setVisibility(VISIBLE);
+        if (mMenuView != null) {
+            splitView.addView(mMenuView);
+        }
     }
 
     public boolean showOverflowMenu() {
@@ -718,7 +758,7 @@ public class ActionBarView extends ViewGroup {
             leftOfCenter -= homeWidth;
         }
         
-        if (mMenuView != null) {
+        if (mMenuView != null && mMenuView.getParent() == this) {
             availableWidth = measureChildView(mMenuView, availableWidth,
                     childSpecHeight, 0);
             rightOfCenter -= mMenuView.getMeasuredWidth();
@@ -880,7 +920,7 @@ public class ActionBarView extends ViewGroup {
         }
 
         int menuLeft = r - l - getPaddingRight();
-        if (mMenuView != null) {
+        if (mMenuView != null && mMenuView.getParent() == this) {
             positionChildInverse(mMenuView, menuLeft, y, contentHeight);
             menuLeft -= mMenuView.getMeasuredWidth();
         }

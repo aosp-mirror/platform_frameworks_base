@@ -1660,6 +1660,8 @@
 
   <public type="style" name="Theme.Holo.Light.NoActionBar" />
   <public type="style" name="TextAppearance.SuggestionHighlight" />
+  <public type="style" name="Theme.Holo.SplitActionBarWhenNarrow" />
+  <public type="style" name="Theme.Holo.Light.SplitActionBarWhenNarrow" />
 
   <public type="attr" name="textSuggestionsWindowStyle" />
   <public type="attr" name="textEditSuggestionsBottomWindowLayout" />

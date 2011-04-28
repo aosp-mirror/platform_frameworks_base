@@ -47,5 +47,6 @@ This is an optimized layout for a screen with the Action Bar enabled.
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   style="?android:attr/actionBarStyle"
-                  android:visibility="gone" />
+                  android:visibility="gone"
+                  android:gravity="center"/>
 </LinearLayout>

@@ -1490,9 +1490,11 @@ package android {
     field public static final int Theme_Holo_Light_Dialog_NoActionBar_MinWidth = 16973942; // 0x1030076
     field public static final int Theme_Holo_Light_NoActionBar = 16974064; // 0x10300f0
     field public static final int Theme_Holo_Light_Panel = 16973948; // 0x103007c
+    field public static final int Theme_Holo_Light_SplitActionBarWhenNarrow = 16974067; // 0x10300f3
     field public static final int Theme_Holo_NoActionBar = 16973932; // 0x103006c
     field public static final int Theme_Holo_NoActionBar_Fullscreen = 16973933; // 0x103006d
     field public static final int Theme_Holo_Panel = 16973947; // 0x103007b
+    field public static final int Theme_Holo_SplitActionBarWhenNarrow = 16974066; // 0x10300f2
     field public static final int Theme_Holo_Wallpaper = 16973949; // 0x103007d
     field public static final int Theme_Holo_Wallpaper_NoTitleBar = 16973950; // 0x103007e
     field public static final int Theme_InputMethod = 16973908; // 0x1030054

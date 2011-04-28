@@ -71,7 +71,7 @@ public class ActionBarImpl extends ActionBar {
     private ActionBarContainer mContainerView;
     private ActionBarView mActionView;
     private ActionBarContextView mUpperContextView;
-    private LinearLayout mLowerContextView;
+    private LinearLayout mLowerView;
     private View mContentView;
     private ViewGroup mExternalTabView;
 
@@ -106,8 +106,8 @@ public class ActionBarImpl extends ActionBar {
             new AnimatorListenerAdapter() { // NORMAL_VIEW
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    if (mLowerContextView != null) {
-                        mLowerContextView.removeAllViews();
+                    if (mLowerView != null) {
+                        mLowerView.removeAllViews();
                     }
                     mCurrentModeAnim = null;
                     hideAllExcept(NORMAL_VIEW);
@@ -162,7 +162,7 @@ public class ActionBarImpl extends ActionBar {
         mActionView = (ActionBarView) decor.findViewById(com.android.internal.R.id.action_bar);
         mUpperContextView = (ActionBarContextView) decor.findViewById(
                 com.android.internal.R.id.action_context_bar);
-        mLowerContextView = (LinearLayout) decor.findViewById(
+        mLowerView = (LinearLayout) decor.findViewById(
                 com.android.internal.R.id.lower_action_context_bar);
         mContainerView = (ActionBarContainer) decor.findViewById(
                 com.android.internal.R.id.action_bar_container);
@@ -173,8 +173,8 @@ public class ActionBarImpl extends ActionBar {
         }
 
         mActionView.setContextView(mUpperContextView);
-        mContextDisplayMode = mLowerContextView == null ?
-                CONTEXT_DISPLAY_NORMAL : CONTEXT_DISPLAY_SPLIT;
+        mContextDisplayMode = mActionView.isSplitActionBar() ?
+                CONTEXT_DISPLAY_SPLIT : CONTEXT_DISPLAY_NORMAL;
 
         if (!mActionView.hasEmbeddedTabs()) {
             HorizontalScrollView tabScroller = new HorizontalScrollView(mContext);
@@ -348,9 +348,9 @@ public class ActionBarImpl extends ActionBar {
             mode.invalidate();
             mUpperContextView.initForMode(mode);
             animateTo(CONTEXT_VIEW);
-            if (mLowerContextView != null) {
+            if (mLowerView != null) {
                 // TODO animate this
-                mLowerContextView.setVisibility(View.VISIBLE);
+                mLowerView.setVisibility(View.VISIBLE);
             }
             mActionMode = mode;
             return mode;
@@ -616,9 +616,9 @@ public class ActionBarImpl extends ActionBar {
 
             // Clear out the context mode views after the animation finishes
             mUpperContextView.closeMode();
-            if (mLowerContextView != null && mLowerContextView.getVisibility() != View.GONE) {
+            if (mLowerView != null && mLowerView.getVisibility() != View.GONE) {
                 // TODO Animate this
-                mLowerContextView.setVisibility(View.GONE);
+                mLowerView.setVisibility(View.GONE);
             }
             mActionMode = null;
 

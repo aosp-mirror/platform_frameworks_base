@@ -51,5 +51,6 @@ the Action Bar enabled overlaying application content.
                   android:layout_height="wrap_content"
                   android:layout_alignParentBottom="true"
                   style="?android:attr/actionBarStyle"
-                  android:visibility="gone" />
+                  android:visibility="gone"
+                  android:gravity="center"/>
 </RelativeLayout>
