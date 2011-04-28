@@ -36,12 +36,14 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Handler;
 import android.os.Message;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -100,6 +102,8 @@ public class PhoneStatusBar extends StatusBar {
 
     int mIconSize;
     Display mDisplay;
+
+    IWindowManager mWindowManager;
 
     PhoneStatusBarView mStatusBarView;
     int mPixelFormat;
@@ -200,6 +204,9 @@ public class PhoneStatusBar extends StatusBar {
     public void start() {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
+
+        mWindowManager = IWindowManager.Stub.asInterface(
+                ServiceManager.getService(Context.WINDOW_SERVICE));
 
         super.start();
 
@@ -1103,11 +1110,22 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     public void setLightsOn(boolean on) {
+        Log.v(TAG, "lights " + (on ? "on" : "off"));
         if (!on) {
             // All we do for "lights out" mode on a phone is hide the status bar,
             // which the window manager does.  But we do need to hide the windowshade
             // on our own.
             animateCollapse();
+        }
+        notifyLightsChanged(on);
+    }
+
+    private void notifyLightsChanged(boolean shown) {
+        try {
+            Slog.d(TAG, "lights " + (shown?"on":"out"));
+            mWindowManager.statusBarVisibilityChanged(
+                    shown ? View.STATUS_BAR_VISIBLE : View.STATUS_BAR_HIDDEN);
+        } catch (RemoteException ex) {
         }
     }
 
@@ -1517,6 +1535,12 @@ public class PhoneStatusBar extends StatusBar {
             mExpandedParams.height = getExpandedHeight();
             mExpandedDialog.getWindow().setAttributes(mExpandedParams);
         }
+    }
+
+    public void userActivity() {
+        try {
+            mBarService.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
+        } catch (RemoteException ex) { }
     }
 
     /**
