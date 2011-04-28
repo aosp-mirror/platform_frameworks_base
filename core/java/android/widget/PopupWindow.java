@@ -1421,6 +1421,10 @@ public class PopupWindow {
         @Override
         public boolean dispatchKeyEvent(KeyEvent event) {
             if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+                if (getKeyDispatcherState() == null) {
+                    return super.dispatchKeyEvent(event);
+                }
+
                 if (event.getAction() == KeyEvent.ACTION_DOWN
                         && event.getRepeatCount() == 0) {
                     getKeyDispatcherState().startTracking(event, this);
