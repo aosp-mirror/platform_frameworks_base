@@ -130,7 +130,7 @@ public class GsmDataConnection extends DataConnection {
     @Override
     protected boolean isDnsOk(String[] domainNameServers) {
         if (NULL_IP.equals(domainNameServers[0]) && NULL_IP.equals(domainNameServers[1])
-                && !((GSMPhone) phone).isDnsCheckDisabled()) {
+                && !phone.isDnsCheckDisabled()) {
             // Work around a race condition where QMI does not fill in DNS:
             // Deactivate PDP and let DataConnectionTracker retry.
             // Do not apply the race condition workaround for MMS APN
