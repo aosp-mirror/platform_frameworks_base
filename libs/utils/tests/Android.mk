@@ -6,6 +6,7 @@ ifneq ($(TARGET_SIMULATOR),true)
 
 # Build the unit tests.
 test_src_files := \
+	BlobCache_test.cpp \
 	ObbFile_test.cpp \
 	Looper_test.cpp \
 	String8_test.cpp \

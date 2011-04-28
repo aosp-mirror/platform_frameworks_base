@@ -21,6 +21,7 @@ commonSources:= \
 	Asset.cpp \
 	AssetDir.cpp \
 	AssetManager.cpp \
+	BlobCache.cpp \
 	BufferedTextOutput.cpp \
 	CallStack.cpp \
 	Debug.cpp \
