@@ -866,6 +866,24 @@ nScriptInvokeV(JNIEnv *_env, jobject _this, RsContext con, jint script, jint slo
     _env->ReleaseByteArrayElements(data, ptr, JNI_ABORT);
 }
 
+static void
+nScriptForEach(JNIEnv *_env, jobject _this, RsContext con,
+               jint script, jint slot, jint ain, jint aout)
+{
+    LOG_API("nScriptForEach, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
+    rsScriptForEach(con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout, NULL, 0);
+}
+static void
+nScriptForEachV(JNIEnv *_env, jobject _this, RsContext con,
+                jint script, jint slot, jint ain, jint aout, jbyteArray params)
+{
+    LOG_API("nScriptForEach, con(%p), s(%p), slot(%i)", con, (void *)script, slot);
+    jint len = _env->GetArrayLength(params);
+    jbyte *ptr = _env->GetByteArrayElements(params, NULL);
+    rsScriptForEach(con, (RsScript)script, slot, (RsAllocation)ain, (RsAllocation)aout, ptr, len);
+    _env->ReleaseByteArrayElements(params, ptr, JNI_ABORT);
+}
+
 
 // -----------------------------------
 
@@ -1235,6 +1253,8 @@ static JNINativeMethod methods[] = {
 {"rsnScriptSetTimeZone",             "(II[B)V",                               (void*)nScriptSetTimeZone },
 {"rsnScriptInvoke",                  "(III)V",                                (void*)nScriptInvoke },
 {"rsnScriptInvokeV",                 "(III[B)V",                              (void*)nScriptInvokeV },
+{"rsnScriptForEach",                 "(IIIII)V",                              (void*)nScriptForEach },
+{"rsnScriptForEach",                 "(IIIII[B)V",                            (void*)nScriptForEachV },
 {"rsnScriptSetVarI",                 "(IIII)V",                               (void*)nScriptSetVarI },
 {"rsnScriptSetVarJ",                 "(IIIJ)V",                               (void*)nScriptSetVarJ },
 {"rsnScriptSetVarF",                 "(IIIF)V",                               (void*)nScriptSetVarF },
