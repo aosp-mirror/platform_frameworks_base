@@ -34,6 +34,7 @@ import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
 import android.net.Proxy;
 import android.net.ProxyProperties;
+import android.net.RouteInfo;
 import android.net.vpn.VpnManager;
 import android.net.wifi.WifiStateTracker;
 import android.os.Binder;
@@ -1413,14 +1414,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (p == null) return;
         String interfaceName = p.getInterfaceName();
         if (TextUtils.isEmpty(interfaceName)) return;
-        for (InetAddress gateway : p.getGateways()) {
+        for (RouteInfo route : p.getRoutes()) {
 
-            if (NetworkUtils.addHostRoute(interfaceName, gateway, null) &&
-                    NetworkUtils.addDefaultRoute(interfaceName, gateway)) {
-                if (DBG) {
-                    NetworkInfo networkInfo = nt.getNetworkInfo();
-                    log("addDefaultRoute for " + networkInfo.getTypeName() +
-                            " (" + interfaceName + "), GatewayAddr=" + gateway.getHostAddress());
+            //TODO - handle non-default routes
+            if (route.isDefaultRoute()) {
+                InetAddress gateway = route.getGateway();
+                if (NetworkUtils.addHostRoute(interfaceName, gateway, null) &&
+                        NetworkUtils.addDefaultRoute(interfaceName, gateway)) {
+                    if (DBG) {
+                        NetworkInfo networkInfo = nt.getNetworkInfo();
+                        log("addDefaultRoute for " + networkInfo.getTypeName() +
+                                " (" + interfaceName + "), GatewayAddr=" +
+                                gateway.getHostAddress());
+                    }
                 }
             }
         }

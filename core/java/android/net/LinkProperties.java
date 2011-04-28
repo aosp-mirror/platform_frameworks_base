@@ -54,7 +54,7 @@ public class LinkProperties implements Parcelable {
     String mIfaceName;
     private Collection<LinkAddress> mLinkAddresses;
     private Collection<InetAddress> mDnses;
-    private Collection<InetAddress> mGateways;
+    private Collection<RouteInfo> mRoutes;
     private ProxyProperties mHttpProxy;
 
     public LinkProperties() {
@@ -67,7 +67,7 @@ public class LinkProperties implements Parcelable {
             mIfaceName = source.getInterfaceName();
             mLinkAddresses = source.getLinkAddresses();
             mDnses = source.getDnses();
-            mGateways = source.getGateways();
+            mRoutes = source.getRoutes();
             mHttpProxy = new ProxyProperties(source.getHttpProxy());
         }
     }
@@ -104,11 +104,11 @@ public class LinkProperties implements Parcelable {
         return Collections.unmodifiableCollection(mDnses);
     }
 
-    public void addGateway(InetAddress gateway) {
-        if (gateway != null) mGateways.add(gateway);
+    public void addRoute(RouteInfo route) {
+        if (route != null) mRoutes.add(route);
     }
-    public Collection<InetAddress> getGateways() {
-        return Collections.unmodifiableCollection(mGateways);
+    public Collection<RouteInfo> getRoutes() {
+        return Collections.unmodifiableCollection(mRoutes);
     }
 
     public void setHttpProxy(ProxyProperties proxy) {
@@ -122,7 +122,7 @@ public class LinkProperties implements Parcelable {
         mIfaceName = null;
         mLinkAddresses = new ArrayList<LinkAddress>();
         mDnses = new ArrayList<InetAddress>();
-        mGateways = new ArrayList<InetAddress>();
+        mRoutes = new ArrayList<RouteInfo>();
         mHttpProxy = null;
     }
 
@@ -146,12 +146,12 @@ public class LinkProperties implements Parcelable {
         for (InetAddress addr : mDnses) dns += addr.getHostAddress() + ",";
         dns += "] ";
 
-        String gateways = "Gateways: [";
-        for (InetAddress gw : mGateways) gateways += gw.getHostAddress() + ",";
-        gateways += "] ";
+        String routes = "Routes: [";
+        for (RouteInfo route : mRoutes) routes += route.toString() + ",";
+        routes += "] ";
         String proxy = (mHttpProxy == null ? "" : "HttpProxy: " + mHttpProxy.toString() + " ");
 
-        return ifaceName + linkAddresses + gateways + dns + proxy;
+        return ifaceName + linkAddresses + routes + dns + proxy;
     }
 
 
@@ -177,7 +177,7 @@ public class LinkProperties implements Parcelable {
 
         boolean sameAddresses;
         boolean sameDnses;
-        boolean sameGateways;
+        boolean sameRoutes;
 
         LinkProperties target = (LinkProperties) obj;
 
@@ -190,12 +190,12 @@ public class LinkProperties implements Parcelable {
         sameDnses = (mDnses.size() == targetDnses.size()) ?
                 mDnses.containsAll(targetDnses) : false;
 
-        Collection<InetAddress> targetGateways = target.getGateways();
-        sameGateways = (mGateways.size() == targetGateways.size()) ?
-                mGateways.containsAll(targetGateways) : false;
+        Collection<RouteInfo> targetRoutes = target.getRoutes();
+        sameRoutes = (mRoutes.size() == targetRoutes.size()) ?
+                mRoutes.containsAll(targetRoutes) : false;
 
         return
-            sameAddresses && sameDnses && sameGateways
+            sameAddresses && sameDnses && sameRoutes
             && TextUtils.equals(getInterfaceName(), target.getInterfaceName())
             && (getHttpProxy() == null ? target.getHttpProxy() == null :
                 getHttpProxy().equals(target.getHttpProxy()));
@@ -211,7 +211,7 @@ public class LinkProperties implements Parcelable {
         return ((null == mIfaceName) ? 0 : mIfaceName.hashCode()
                 + mLinkAddresses.size() * 31
                 + mDnses.size() * 37
-                + mGateways.size() * 41
+                + mRoutes.size() * 41
                 + ((null == mHttpProxy) ? 0 : mHttpProxy.hashCode()));
     }
 
@@ -231,9 +231,9 @@ public class LinkProperties implements Parcelable {
             dest.writeByteArray(d.getAddress());
         }
 
-        dest.writeInt(mGateways.size());
-        for(InetAddress gw : mGateways) {
-            dest.writeByteArray(gw.getAddress());
+        dest.writeInt(mRoutes.size());
+        for(RouteInfo route : mRoutes) {
+            dest.writeParcelable(route, flags);
         }
 
         if (mHttpProxy != null) {
@@ -272,9 +272,7 @@ public class LinkProperties implements Parcelable {
                 }
                 addressCount = in.readInt();
                 for (int i=0; i<addressCount; i++) {
-                    try {
-                        netProp.addGateway(InetAddress.getByAddress(in.createByteArray()));
-                    } catch (UnknownHostException e) { }
+                    netProp.addRoute((RouteInfo)in.readParcelable(null));
                 }
                 if (in.readByte() == 1) {
                     netProp.setHttpProxy((ProxyProperties)in.readParcelable(null));
