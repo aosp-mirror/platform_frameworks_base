@@ -37,6 +37,11 @@
 #include <utils/Timers.h>
 #include <utils/Atomic.h>
 
+#include <cutils/bitops.h>
+
+#include <hardware/audio.h>
+#include <hardware/audio_policy.h>
+
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
@@ -165,39 +170,41 @@ status_t AudioTrack::set(
     }
 
     // handle default values first.
-    if (streamType == AudioSystem::DEFAULT) {
-        streamType = AudioSystem::MUSIC;
+    if (streamType == AUDIO_STREAM_DEFAULT) {
+        streamType = AUDIO_STREAM_MUSIC;
     }
     if (sampleRate == 0) {
         sampleRate = afSampleRate;
     }
     // these below should probably come from the audioFlinger too...
     if (format == 0) {
-        format = AudioSystem::PCM_16_BIT;
+        format = AUDIO_FORMAT_PCM_16_BIT;
     }
     if (channels == 0) {
-        channels = AudioSystem::CHANNEL_OUT_STEREO;
+        channels = AUDIO_CHANNEL_OUT_STEREO;
     }
 
     // validate parameters
-    if (!AudioSystem::isValidFormat(format)) {
+    if (!audio_is_valid_format(format)) {
         LOGE("Invalid format");
         return BAD_VALUE;
     }
 
     // force direct flag if format is not linear PCM
-    if (!AudioSystem::isLinearPCM(format)) {
-        flags |= AudioSystem::OUTPUT_FLAG_DIRECT;
+    if (!audio_is_linear_pcm(format)) {
+        flags |= AUDIO_POLICY_OUTPUT_FLAG_DIRECT;
     }
 
-    if (!AudioSystem::isOutputChannel(channels)) {
+    if (!audio_is_output_channel(channels)) {
         LOGE("Invalid channel mask");
         return BAD_VALUE;
     }
-    uint32_t channelCount = AudioSystem::popCount(channels);
+    uint32_t channelCount = popcount(channels);
 
-    audio_io_handle_t output = AudioSystem::getOutput((AudioSystem::stream_type)streamType,
-            sampleRate, format, channels, (AudioSystem::output_flags)flags);
+    audio_io_handle_t output = AudioSystem::getOutput(
+                                    (audio_stream_type_t)streamType,
+                                    sampleRate,format, channels,
+                                    (audio_policy_output_flags_t)flags);
 
     if (output == 0) {
         LOGE("Could not get audio output for stream type %d", streamType);
@@ -290,8 +297,8 @@ uint32_t AudioTrack::frameCount() const
 
 int AudioTrack::frameSize() const
 {
-    if (AudioSystem::isLinearPCM(mFormat)) {
-        return channelCount()*((format() == AudioSystem::PCM_8_BIT) ? sizeof(uint8_t) : sizeof(int16_t));
+    if (audio_is_linear_pcm(mFormat)) {
+        return channelCount()*((format() == AUDIO_FORMAT_PCM_8_BIT) ? sizeof(uint8_t) : sizeof(int16_t));
     } else {
         return sizeof(uint8_t);
     }
@@ -673,8 +680,8 @@ audio_io_handle_t AudioTrack::getOutput()
 // must be called with mLock held
 audio_io_handle_t AudioTrack::getOutput_l()
 {
-    return AudioSystem::getOutput((AudioSystem::stream_type)mStreamType,
-            mCblk->sampleRate, mFormat, mChannels, (AudioSystem::output_flags)mFlags);
+    return AudioSystem::getOutput((audio_stream_type_t)mStreamType,
+            mCblk->sampleRate, mFormat, mChannels, (audio_policy_output_flags_t)mFlags);
 }
 
 int AudioTrack::getSessionId()
@@ -727,7 +734,7 @@ status_t AudioTrack::createTrack_l(
     }
 
     mNotificationFramesAct = mNotificationFramesReq;
-    if (!AudioSystem::isLinearPCM(format)) {
+    if (!audio_is_linear_pcm(format)) {
         if (sharedBuffer != 0) {
             frameCount = sharedBuffer->size();
         }
@@ -923,8 +930,8 @@ create_new_track:
     audioBuffer->channelCount = mChannelCount;
     audioBuffer->frameCount = framesReq;
     audioBuffer->size = framesReq * cblk->frameSize;
-    if (AudioSystem::isLinearPCM(mFormat)) {
-        audioBuffer->format = AudioSystem::PCM_16_BIT;
+    if (audio_is_linear_pcm(mFormat)) {
+        audioBuffer->format = AUDIO_FORMAT_PCM_16_BIT;
     } else {
         audioBuffer->format = mFormat;
     }
@@ -982,7 +989,7 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
 
         size_t toWrite;
 
-        if (mFormat == AudioSystem::PCM_8_BIT && !(mFlags & AudioSystem::OUTPUT_FLAG_DIRECT)) {
+        if (mFormat == AUDIO_FORMAT_PCM_8_BIT && !(mFlags & AUDIO_POLICY_OUTPUT_FLAG_DIRECT)) {
             // Divide capacity by 2 to take expansion into account
             toWrite = audioBuffer.size>>1;
             // 8 to 16 bit conversion
@@ -1085,7 +1092,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         // Divide buffer size by 2 to take into account the expansion
         // due to 8 to 16 bit conversion: the callback must fill only half
         // of the destination buffer
-        if (mFormat == AudioSystem::PCM_8_BIT && !(mFlags & AudioSystem::OUTPUT_FLAG_DIRECT)) {
+        if (mFormat == AUDIO_FORMAT_PCM_8_BIT && !(mFlags & AUDIO_POLICY_OUTPUT_FLAG_DIRECT)) {
             audioBuffer.size >>= 1;
         }
 
@@ -1104,7 +1111,7 @@ bool AudioTrack::processAudioBuffer(const sp<AudioTrackThread>& thread)
         }
         if (writtenSize > reqSize) writtenSize = reqSize;
 
-        if (mFormat == AudioSystem::PCM_8_BIT && !(mFlags & AudioSystem::OUTPUT_FLAG_DIRECT)) {
+        if (mFormat == AUDIO_FORMAT_PCM_8_BIT && !(mFlags & AUDIO_POLICY_OUTPUT_FLAG_DIRECT)) {
             // 8 to 16 bit conversion
             const int8_t *src = audioBuffer.i8 + writtenSize-1;
             int count = writtenSize;

@@ -32,12 +32,14 @@
 #include <utils/Errors.h>
 #include <utils/threads.h>
 #include <utils/SortedVector.h>
+#include <utils/TypeHelpers.h>
 #include <utils/Vector.h>
 
 #include <binder/BinderService.h>
 #include <binder/MemoryDealer.h>
 
-#include <hardware_legacy/AudioHardwareInterface.h>
+#include <hardware/audio.h>
+#include <hardware/audio_hal.h>
 
 #include "AudioBufferProvider.h"
 
@@ -48,7 +50,6 @@ class effect_param_cblk_t;
 class AudioMixer;
 class AudioBuffer;
 class AudioResampler;
-
 
 // ----------------------------------------------------------------------------
 
@@ -211,6 +212,9 @@ private:
                             AudioFlinger();
     virtual                 ~AudioFlinger();
 
+    status_t                initCheck() const;
+    virtual     void        onFirstRef();
+    audio_hw_device_t*      findSuitableHwDev_l(uint32_t devices);
 
     // Internal dump utilites.
     status_t dumpPermissionDenial(int fd, const Vector<String16>& args);
@@ -268,6 +272,8 @@ private:
     class EffectModule;
     class EffectHandle;
     class EffectChain;
+    struct AudioStreamOut;
+    struct AudioStreamIn;
 
     class ThreadBase : public Thread {
     public:
@@ -495,7 +501,7 @@ private:
             void reset();
 
             bool isOutputTrack() const {
-                return (mStreamType == AudioSystem::NUM_STREAM_TYPES);
+                return (mStreamType == AUDIO_STREAM_CNT);
             }
 
             // we don't really need a lock for these
@@ -689,7 +695,7 @@ private:
 
         SortedVector< sp<Track> >       mTracks;
         // mStreamTypes[] uses 1 additionnal stream type internally for the OutputTrack used by DuplicatingThread
-        stream_type_t                   mStreamTypes[AudioSystem::NUM_STREAM_TYPES + 1];
+        stream_type_t                   mStreamTypes[AUDIO_STREAM_CNT + 1];
         AudioStreamOut*                 mOutput;
         float                           mMasterVolume;
         nsecs_t                         mLastWriteTime;
@@ -1159,21 +1165,37 @@ private:
         uint32_t mStrategy; // strategy for this effect chain
     };
 
+    struct AudioStreamOut {
+        audio_hw_device_t   *hwDev;
+        audio_stream_out_t  *stream;
+
+        AudioStreamOut(audio_hw_device_t *dev, audio_stream_out_t *out) :
+            hwDev(dev), stream(out) {}
+    };
+
+    struct AudioStreamIn {
+        audio_hw_device_t   *hwDev;
+        audio_stream_in_t   *stream;
+
+        AudioStreamIn(audio_hw_device_t *dev, audio_stream_in_t *in) :
+            hwDev(dev), stream(in) {}
+    };
+
     friend class RecordThread;
     friend class PlaybackThread;
-
 
     mutable     Mutex                               mLock;
 
                 DefaultKeyedVector< pid_t, wp<Client> >     mClients;
 
                 mutable     Mutex                   mHardwareLock;
-                AudioHardwareInterface*             mAudioHardware;
+                audio_hw_device_t*                  mPrimaryHardwareDev;
+                Vector<audio_hw_device_t*>          mAudioHwDevs;
     mutable     int                                 mHardwareStatus;
 
 
                 DefaultKeyedVector< int, sp<PlaybackThread> >  mPlaybackThreads;
-                PlaybackThread::stream_type_t       mStreamTypes[AudioSystem::NUM_STREAM_TYPES];
+                PlaybackThread::stream_type_t       mStreamTypes[AUDIO_STREAM_CNT];
                 float                               mMasterVolume;
                 bool                                mMasterMute;
 
@@ -1184,6 +1206,7 @@ private:
                 uint32_t mMode;
 
 };
+
 
 // ----------------------------------------------------------------------------
 

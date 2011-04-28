@@ -30,6 +30,7 @@
 #include <binder/IMemory.h>
 #include <utils/threads.h>
 
+#include <hardware/audio.h>
 
 namespace android {
 
@@ -127,9 +128,9 @@ public:
      *
      * inputSource:        Select the audio input to record to (e.g. AUDIO_SOURCE_DEFAULT).
      * sampleRate:         Track sampling rate in Hz.
-     * format:             Audio format (e.g AudioSystem::PCM_16_BIT for signed
+     * format:             Audio format (e.g AUDIO_FORMAT_PCM_16_BIT for signed
      *                     16 bits per sample).
-     * channels:           Channel mask: see AudioSystem::audio_channels.
+     * channels:           Channel mask: see audio_channels_t.
      * frameCount:         Total size of track PCM buffer in frames. This defines the
      *                     latency of the track.
      * flags:              A bitmask of acoustic values from enum record_flags.  It enables
@@ -142,15 +143,15 @@ public:
      */
 
      enum record_flags {
-         RECORD_AGC_ENABLE = AudioSystem::AGC_ENABLE,
-         RECORD_NS_ENABLE  = AudioSystem::NS_ENABLE,
-         RECORD_IIR_ENABLE = AudioSystem::TX_IIR_ENABLE
+         RECORD_AGC_ENABLE = AUDIO_IN_ACOUSTICS_AGC_ENABLE,
+         RECORD_NS_ENABLE  = AUDIO_IN_ACOUSTICS_NS_ENABLE,
+         RECORD_IIR_ENABLE = AUDIO_IN_ACOUSTICS_TX_IIR_ENABLE,
      };
 
                         AudioRecord(int inputSource,
                                     uint32_t sampleRate = 0,
                                     int format          = 0,
-                                    uint32_t channels = AudioSystem::CHANNEL_IN_MONO,
+                                    uint32_t channels = AUDIO_CHANNEL_IN_MONO,
                                     int frameCount      = 0,
                                     uint32_t flags      = 0,
                                     callback_t cbf = 0,
@@ -176,7 +177,7 @@ public:
             status_t    set(int inputSource     = 0,
                             uint32_t sampleRate = 0,
                             int format          = 0,
-                            uint32_t channels = AudioSystem::CHANNEL_IN_MONO,
+                            uint32_t channels = AUDIO_CHANNEL_IN_MONO,
                             int frameCount      = 0,
                             uint32_t flags      = 0,
                             callback_t cbf = 0,

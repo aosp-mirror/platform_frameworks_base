@@ -31,6 +31,9 @@
 #include "media/AudioRecord.h"
 #include "media/mediarecorder.h"
 
+#include <cutils/bitops.h>
+
+#include <hardware/audio.h>
 
 // ----------------------------------------------------------------------------
 
@@ -130,11 +133,11 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     //LOGV("sampleRate=%d, audioFormat=%d, channels=%x, buffSizeInBytes=%d",
     //     sampleRateInHertz, audioFormat, channels,     buffSizeInBytes);
 
-    if (!AudioSystem::isInputChannel(channels)) {
+    if (!audio_is_input_channel(channels)) {
         LOGE("Error creating AudioRecord: channel count is not 1 or 2.");
         return AUDIORECORD_ERROR_SETUP_INVALIDCHANNELMASK;
     }
-    uint32_t nbChannels = AudioSystem::popCount(channels);
+    uint32_t nbChannels = popcount(channels);
 
     // compare the format against the Java constants
     if ((audioFormat != javaAudioRecordFields.PCM16) 
@@ -145,7 +148,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
 
     int bytesPerSample = audioFormat==javaAudioRecordFields.PCM16 ? 2 : 1;
     int format = audioFormat==javaAudioRecordFields.PCM16 ? 
-            AudioSystem::PCM_16_BIT : AudioSystem::PCM_8_BIT;
+            AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT;
 
     if (buffSizeInBytes == 0) {
          LOGE("Error creating AudioRecord: frameCount is 0.");
@@ -154,7 +157,7 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
     int frameSize = nbChannels * bytesPerSample;
     size_t frameCount = buffSizeInBytes / frameSize;
     
-    if (source >= AUDIO_SOURCE_LIST_END) {
+    if (source >= AUDIO_SOURCE_CNT) {
         LOGE("Error creating AudioRecord: unknown source.");
         return AUDIORECORD_ERROR_SETUP_INVALIDSOURCE;
     }
@@ -463,7 +466,7 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
     status_t result = AudioRecord::getMinFrameCount(&frameCount,
             sampleRateInHertz,
             (audioFormat == javaAudioRecordFields.PCM16 ?
-                AudioSystem::PCM_16_BIT : AudioSystem::PCM_8_BIT),
+                AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT),
             nbChannels);
 
     if (result == BAD_VALUE) {

@@ -110,7 +110,7 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
 
     if (mAudioSink.get() != NULL) {
         status_t err = mAudioSink->open(
-                mSampleRate, numChannels, AudioSystem::PCM_16_BIT,
+                mSampleRate, numChannels, AUDIO_FORMAT_PCM_16_BIT,
                 DEFAULT_AUDIOSINK_BUFFERCOUNT,
                 &AudioPlayer::AudioSinkCallback, this);
         if (err != OK) {
@@ -132,10 +132,10 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
         mAudioSink->start();
     } else {
         mAudioTrack = new AudioTrack(
-                AudioSystem::MUSIC, mSampleRate, AudioSystem::PCM_16_BIT,
+                AUDIO_STREAM_MUSIC, mSampleRate, AUDIO_FORMAT_PCM_16_BIT,
                 (numChannels == 2)
-                    ? AudioSystem::CHANNEL_OUT_STEREO
-                    : AudioSystem::CHANNEL_OUT_MONO,
+                    ? AUDIO_CHANNEL_OUT_STEREO
+                    : AUDIO_CHANNEL_OUT_MONO,
                 0, 0, &AudioCallback, this, 0);
 
         if ((err = mAudioTrack->initCheck()) != OK) {

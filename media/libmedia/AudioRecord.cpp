@@ -37,6 +37,9 @@
 #include <utils/Timers.h>
 #include <utils/Atomic.h>
 
+#include <hardware/audio.h>
+#include <cutils/bitops.h>
+
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))
 #define UNLIKELY( exp )     (__builtin_expect( (exp) != 0, false ))
 
@@ -66,8 +69,8 @@ status_t AudioRecord::getMinFrameCount(
     // We double the size of input buffer for ping pong use of record buffer.
     size <<= 1;
 
-    if (AudioSystem::isLinearPCM(format)) {
-        size /= channelCount * (format == AudioSystem::PCM_16_BIT ? 2 : 1);
+    if (audio_is_linear_pcm(format)) {
+        size /= channelCount * (format == AUDIO_FORMAT_PCM_16_BIT ? 2 : 1);
     }
 
     *frameCount = size;
@@ -145,22 +148,22 @@ status_t AudioRecord::set(
     }
     // these below should probably come from the audioFlinger too...
     if (format == 0) {
-        format = AudioSystem::PCM_16_BIT;
+        format = AUDIO_FORMAT_PCM_16_BIT;
     }
     // validate parameters
-    if (!AudioSystem::isValidFormat(format)) {
+    if (!audio_is_valid_format(format)) {
         LOGE("Invalid format");
         return BAD_VALUE;
     }
 
-    if (!AudioSystem::isInputChannel(channels)) {
+    if (!audio_is_input_channel(channels)) {
         return BAD_VALUE;
     }
 
-    int channelCount = AudioSystem::popCount(channels);
+    int channelCount = popcount(channels);
 
     audio_io_handle_t input = AudioSystem::getInput(inputSource,
-                                    sampleRate, format, channels, (AudioSystem::audio_in_acoustics)flags);
+                                    sampleRate, format, channels, (audio_in_acoustics_t)flags);
     if (input == 0) {
         LOGE("Could not get audio input for record source %d", inputSource);
         return BAD_VALUE;
@@ -254,8 +257,8 @@ uint32_t AudioRecord::frameCount() const
 
 int AudioRecord::frameSize() const
 {
-    if (AudioSystem::isLinearPCM(mFormat)) {
-        return channelCount()*((format() == AudioSystem::PCM_8_BIT) ? sizeof(uint8_t) : sizeof(int16_t));
+    if (audio_is_linear_pcm(mFormat)) {
+        return channelCount()*((format() == AUDIO_FORMAT_PCM_8_BIT) ? sizeof(uint8_t) : sizeof(int16_t));
     } else {
         return sizeof(uint8_t);
     }
@@ -587,7 +590,7 @@ audio_io_handle_t AudioRecord::getInput_l()
     mInput = AudioSystem::getInput(mInputSource,
                                 mCblk->sampleRate,
                                 mFormat, mChannels,
-                                (AudioSystem::audio_in_acoustics)mFlags);
+                                (audio_in_acoustics_t)mFlags);
     return mInput;
 }
 

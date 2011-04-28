@@ -37,6 +37,8 @@
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
 
+#include <hardware/audio.h>
+
 namespace android {
 
 MediaPlayer::MediaPlayer()
@@ -45,7 +47,7 @@ MediaPlayer::MediaPlayer()
     mListener = NULL;
     mCookie = NULL;
     mDuration = -1;
-    mStreamType = AudioSystem::MUSIC;
+    mStreamType = AUDIO_STREAM_MUSIC;
     mCurrentPosition = -1;
     mSeekPosition = -1;
     mCurrentState = MEDIA_PLAYER_IDLE;

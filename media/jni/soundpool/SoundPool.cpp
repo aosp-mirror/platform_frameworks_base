@@ -27,6 +27,8 @@
 #include <media/AudioTrack.h>
 #include <media/mediaplayer.h>
 
+#include <hardware/audio.h>
+
 #include "SoundPool.h"
 #include "SoundPoolThread.h"
 
@@ -584,7 +586,7 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
 
         if (loop) {
             frameCount = sample->size()/numChannels/
-                ((sample->format() == AudioSystem::PCM_16_BIT) ? sizeof(int16_t) : sizeof(uint8_t));
+                ((sample->format() == AUDIO_FORMAT_PCM_16_BIT) ? sizeof(int16_t) : sizeof(uint8_t));
         }
 
 #ifndef USE_SHARED_MEM_BUFFER
@@ -602,7 +604,7 @@ void SoundChannel::play(const sp<Sample>& sample, int nextChannelID, float leftV
         unsigned long toggle = mToggle ^ 1;
         void *userData = (void *)((unsigned long)this | toggle);
         uint32_t channels = (numChannels == 2) ?
-                AudioSystem::CHANNEL_OUT_STEREO : AudioSystem::CHANNEL_OUT_MONO;
+                AUDIO_CHANNEL_OUT_STEREO : AUDIO_CHANNEL_OUT_MONO;
 
         // do not create a new audio track if current track is compatible with sample parameters
 #ifdef USE_SHARED_MEM_BUFFER
@@ -865,7 +867,7 @@ void SoundChannel::setLoop(int loop)
     Mutex::Autolock lock(&mLock);
     if (mAudioTrack != 0 && mSample.get() != 0) {
         uint32_t loopEnd = mSample->size()/mNumChannels/
-            ((mSample->format() == AudioSystem::PCM_16_BIT) ? sizeof(int16_t) : sizeof(uint8_t));
+            ((mSample->format() == AUDIO_FORMAT_PCM_16_BIT) ? sizeof(int16_t) : sizeof(uint8_t));
         mAudioTrack->setLoop(0, loopEnd, loop);
         mLoop = loop;
     }

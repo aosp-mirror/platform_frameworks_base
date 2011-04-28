@@ -30,7 +30,6 @@
 #include <binder/IMemory.h>
 #include <utils/threads.h>
 
-
 namespace android {
 
 // ----------------------------------------------------------------------------
@@ -126,11 +125,11 @@ public:
      * Parameters:
      *
      * streamType:         Select the type of audio stream this track is attached to
-     *                     (e.g. AudioSystem::MUSIC).
+     *                     (e.g. AUDIO_STREAM_MUSIC).
      * sampleRate:         Track sampling rate in Hz.
-     * format:             Audio format (e.g AudioSystem::PCM_16_BIT for signed
+     * format:             Audio format (e.g AUDIO_FORMAT_PCM_16_BIT for signed
      *                     16 bits per sample).
-     * channels:           Channel mask: see AudioSystem::audio_channels.
+     * channels:           Channel mask: see audio_channels_t.
      * frameCount:         Total size of track PCM buffer in frames. This defines the
      *                     latency of the track.
      * flags:              Reserved for future use.

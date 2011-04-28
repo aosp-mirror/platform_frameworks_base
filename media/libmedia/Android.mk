@@ -1,4 +1,14 @@
 LOCAL_PATH:= $(call my-dir)
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES:= \
+    AudioParameter.cpp
+LOCAL_MODULE:= libmedia_helper
+LOCAL_MODULE_TAGS := optional
+
+include $(BUILD_STATIC_LIBRARY)
+
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
@@ -40,6 +50,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox libicuuc libexpat \
         libcamera_client libstagefright_foundation \
         libgui
+
+LOCAL_WHOLE_STATIC_LIBRARY := libmedia_helper
 
 LOCAL_MODULE:= libmedia
 

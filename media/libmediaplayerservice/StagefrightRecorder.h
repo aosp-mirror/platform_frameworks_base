@@ -22,6 +22,8 @@
 #include <camera/CameraParameters.h>
 #include <utils/String8.h>
 
+#include <hardware/audio.h>
+
 namespace android {
 
 class Camera;
@@ -39,7 +41,7 @@ struct StagefrightRecorder : public MediaRecorderBase {
     virtual ~StagefrightRecorder();
 
     virtual status_t init();
-    virtual status_t setAudioSource(audio_source as);
+    virtual status_t setAudioSource(audio_source_t as);
     virtual status_t setVideoSource(video_source vs);
     virtual status_t setOutputFormat(output_format of);
     virtual status_t setAudioEncoder(audio_encoder ae);
@@ -69,7 +71,7 @@ private:
     sp<MediaWriter> mWriter, mWriterAux;
     sp<AudioSource> mAudioSourceNode;
 
-    audio_source mAudioSource;
+    audio_source_t mAudioSource;
     video_source mVideoSource;
     output_format mOutputFormat;
     audio_encoder mAudioEncoder;

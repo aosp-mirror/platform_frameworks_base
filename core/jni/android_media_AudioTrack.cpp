@@ -33,6 +33,9 @@
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>
 
+#include <cutils/bitops.h>
+
+#include <hardware/audio.h>
 
 // ----------------------------------------------------------------------------
 
@@ -77,7 +80,7 @@ class AudioTrackJniStorage {
     AudioTrackJniStorage() {
         mCallbackData.audioTrack_class = 0;
         mCallbackData.audioTrack_ref = 0;
-        mStreamType = AudioSystem::DEFAULT;
+        mStreamType = AUDIO_STREAM_DEFAULT;
     }
 
     ~AudioTrackJniStorage() {
@@ -181,30 +184,30 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
         return AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
     }
 
-    if (!AudioSystem::isOutputChannel(channels)) {
+    if (!audio_is_output_channel(channels)) {
         LOGE("Error creating AudioTrack: invalid channel mask.");
         return AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK;
     }
-    int nbChannels = AudioSystem::popCount(channels);
+    int nbChannels = popcount(channels);
     
     // check the stream type
-    AudioSystem::stream_type atStreamType;
+    audio_stream_type_t atStreamType;
     if (streamType == javaAudioTrackFields.STREAM_VOICE_CALL) {
-        atStreamType = AudioSystem::VOICE_CALL;
+        atStreamType = AUDIO_STREAM_VOICE_CALL;
     } else if (streamType == javaAudioTrackFields.STREAM_SYSTEM) {
-        atStreamType = AudioSystem::SYSTEM;
+        atStreamType = AUDIO_STREAM_SYSTEM;
     } else if (streamType == javaAudioTrackFields.STREAM_RING) {
-        atStreamType = AudioSystem::RING;
+        atStreamType = AUDIO_STREAM_RING;
     } else if (streamType == javaAudioTrackFields.STREAM_MUSIC) {
-        atStreamType = AudioSystem::MUSIC;
+        atStreamType = AUDIO_STREAM_MUSIC;
     } else if (streamType == javaAudioTrackFields.STREAM_ALARM) {
-        atStreamType = AudioSystem::ALARM;
+        atStreamType = AUDIO_STREAM_ALARM;
     } else if (streamType == javaAudioTrackFields.STREAM_NOTIFICATION) {
-        atStreamType = AudioSystem::NOTIFICATION;
+        atStreamType = AUDIO_STREAM_NOTIFICATION;
     } else if (streamType == javaAudioTrackFields.STREAM_BLUETOOTH_SCO) {
-        atStreamType = AudioSystem::BLUETOOTH_SCO;
+        atStreamType = AUDIO_STREAM_BLUETOOTH_SCO;
     } else if (streamType == javaAudioTrackFields.STREAM_DTMF) {
-        atStreamType = AudioSystem::DTMF;
+        atStreamType = AUDIO_STREAM_DTMF;
     } else {
         LOGE("Error creating AudioTrack: unknown stream type.");
         return AUDIOTRACK_ERROR_SETUP_INVALIDSTREAMTYPE;
@@ -233,7 +236,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
     // compute the frame count
     int bytesPerSample = audioFormat == javaAudioTrackFields.PCM16 ? 2 : 1;
     int format = audioFormat == javaAudioTrackFields.PCM16 ? 
-            AudioSystem::PCM_16_BIT : AudioSystem::PCM_8_BIT;
+            AUDIO_FORMAT_PCM_16_BIT : AUDIO_FORMAT_PCM_8_BIT;
     int frameCount = buffSizeInBytes / (nbChannels * bytesPerSample);
     
     AudioTrackJniStorage* lpJniStorage = new AudioTrackJniStorage();
@@ -755,25 +758,25 @@ static jint android_media_AudioTrack_get_output_sample_rate(JNIEnv *env,  jobjec
     int afSamplingRate;
     // convert the stream type from Java to native value
     // FIXME: code duplication with android_media_AudioTrack_native_setup()
-    AudioSystem::stream_type nativeStreamType;
+    audio_stream_type_t nativeStreamType;
     if (javaStreamType == javaAudioTrackFields.STREAM_VOICE_CALL) {
-        nativeStreamType = AudioSystem::VOICE_CALL;
+        nativeStreamType = AUDIO_STREAM_VOICE_CALL;
     } else if (javaStreamType == javaAudioTrackFields.STREAM_SYSTEM) {
-        nativeStreamType = AudioSystem::SYSTEM;
+        nativeStreamType = AUDIO_STREAM_SYSTEM;
     } else if (javaStreamType == javaAudioTrackFields.STREAM_RING) {
-        nativeStreamType = AudioSystem::RING;
+        nativeStreamType = AUDIO_STREAM_RING;
     } else if (javaStreamType == javaAudioTrackFields.STREAM_MUSIC) {
-        nativeStreamType = AudioSystem::MUSIC;
+        nativeStreamType = AUDIO_STREAM_MUSIC;
     } else if (javaStreamType == javaAudioTrackFields.STREAM_ALARM) {
-        nativeStreamType = AudioSystem::ALARM;
+        nativeStreamType = AUDIO_STREAM_ALARM;
     } else if (javaStreamType == javaAudioTrackFields.STREAM_NOTIFICATION) {
-        nativeStreamType = AudioSystem::NOTIFICATION;
+        nativeStreamType = AUDIO_STREAM_NOTIFICATION;
     } else if (javaStreamType == javaAudioTrackFields.STREAM_BLUETOOTH_SCO) {
-        nativeStreamType = AudioSystem::BLUETOOTH_SCO;
+        nativeStreamType = AUDIO_STREAM_BLUETOOTH_SCO;
     } else if (javaStreamType == javaAudioTrackFields.STREAM_DTMF) {
-        nativeStreamType = AudioSystem::DTMF;
+        nativeStreamType = AUDIO_STREAM_DTMF;
     } else {
-        nativeStreamType = AudioSystem::DEFAULT;
+        nativeStreamType = AUDIO_STREAM_DEFAULT;
     }
 
     if (AudioSystem::getOutputSamplingRate(&afSamplingRate, nativeStreamType) != NO_ERROR) {
@@ -793,7 +796,7 @@ static jint android_media_AudioTrack_get_min_buff_size(JNIEnv *env,  jobject thi
     jint sampleRateInHertz, jint nbChannels, jint audioFormat) {
 
     int frameCount = 0;
-    if (AudioTrack::getMinFrameCount(&frameCount, AudioSystem::DEFAULT,
+    if (AudioTrack::getMinFrameCount(&frameCount, AUDIO_STREAM_DEFAULT,
             sampleRateInHertz) != NO_ERROR) {
         return -1;
     }

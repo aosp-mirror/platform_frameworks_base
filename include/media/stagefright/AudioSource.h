@@ -24,16 +24,18 @@
 #include <media/stagefright/MediaBuffer.h>
 #include <utils/List.h>
 
+#include <hardware/audio.h>
+
 namespace android {
 
 class AudioRecord;
 
 struct AudioSource : public MediaSource, public MediaBufferObserver {
     // Note that the "channels" parameter is _not_ the number of channels,
-    // but a bitmask of AudioSystem::audio_channels constants.
+    // but a bitmask of audio_channels_t constants.
     AudioSource(
             int inputSource, uint32_t sampleRate,
-            uint32_t channels = AudioSystem::CHANNEL_IN_MONO);
+            uint32_t channels = AUDIO_CHANNEL_IN_MONO);
 
     status_t initCheck() const;
 

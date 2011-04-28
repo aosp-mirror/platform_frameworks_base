@@ -35,6 +35,8 @@
 
 #include <media/AudioTrack.h>
 
+#include <hardware/audio.h>
+
 #include "MediaRecorderClient.h"
 #include "MediaPlayerService.h"
 
@@ -102,7 +104,7 @@ status_t MediaRecorderClient::setAudioSource(int as)
         LOGE("recorder is not initialized");
         return NO_INIT;
     }
-    return mRecorder->setAudioSource((audio_source)as);
+    return mRecorder->setAudioSource((audio_source_t)as);
 }
 
 status_t MediaRecorderClient::setOutputFormat(int of)

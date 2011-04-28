@@ -41,6 +41,8 @@
 #include <media/AudioTrack.h>
 #include <media/mediarecorder.h>
 
+#include <hardware/audio.h>
+
 #include "jni.h"
 #include "JNIHelp.h"
 
@@ -767,10 +769,10 @@ bool AudioGroup::DeviceThread::threadLoop()
     // Find out the frame count for AudioTrack and AudioRecord.
     int output = 0;
     int input = 0;
-    if (AudioTrack::getMinFrameCount(&output, AudioSystem::VOICE_CALL,
+    if (AudioTrack::getMinFrameCount(&output, AUDIO_STREAM_VOICE_CALL,
         sampleRate) != NO_ERROR || output <= 0 ||
         AudioRecord::getMinFrameCount(&input, sampleRate,
-        AudioSystem::PCM_16_BIT, 1) != NO_ERROR || input <= 0) {
+        AUDIO_FORMAT_PCM_16_BIT, 1) != NO_ERROR || input <= 0) {
         LOGE("cannot compute frame count");
         return false;
     }
@@ -787,10 +789,10 @@ bool AudioGroup::DeviceThread::threadLoop()
     // Initialize AudioTrack and AudioRecord.
     AudioTrack track;
     AudioRecord record;
-    if (track.set(AudioSystem::VOICE_CALL, sampleRate, AudioSystem::PCM_16_BIT,
-        AudioSystem::CHANNEL_OUT_MONO, output) != NO_ERROR || record.set(
-        AUDIO_SOURCE_VOICE_COMMUNICATION, sampleRate, AudioSystem::PCM_16_BIT,
-        AudioSystem::CHANNEL_IN_MONO, input) != NO_ERROR) {
+    if (track.set(AUDIO_STREAM_VOICE_CALL, sampleRate, AUDIO_FORMAT_PCM_16_BIT,
+        AUDIO_CHANNEL_OUT_MONO, output) != NO_ERROR || record.set(
+        AUDIO_SOURCE_VOICE_COMMUNICATION, sampleRate, AUDIO_FORMAT_PCM_16_BIT,
+        AUDIO_CHANNEL_IN_MONO, input) != NO_ERROR) {
         LOGE("cannot initialize audio device");
         return false;
     }
