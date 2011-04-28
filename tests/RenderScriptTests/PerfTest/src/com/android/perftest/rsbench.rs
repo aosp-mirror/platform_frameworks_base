@@ -776,7 +776,7 @@ static void drawOffscreenResult(int posX, int posY, int width, int height) {
                          startX + width, startY, 0, 1, 1);
 }
 
-int root(int launchID) {
+int root(void) {
 
     gRenderSurfaceW = rsgGetWidth();
     gRenderSurfaceH = rsgGetHeight();

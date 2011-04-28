@@ -184,7 +184,7 @@ static void drawOffscreenResult(int posX, int posY) {
                          startX + width, startY, 0, 1, 1);
 }
 
-int root(int launchID) {
+int root(void) {
 
     rsgClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     rsgClearDepth(1.0f);
