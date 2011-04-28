@@ -234,18 +234,17 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      * provided Metrics object (or a new one if the provided one was null)
      * if boring.
      */
-    public static Metrics isBoring(CharSequence text, TextPaint paint,
-                                   Metrics metrics) {
+    public static Metrics isBoring(CharSequence text, TextPaint paint, Metrics metrics) {
         char[] temp = TextUtils.obtain(500);
-        int len = text.length();
+        int length = text.length();
         boolean boring = true;
 
         outer:
-        for (int i = 0; i < len; i += 500) {
+        for (int i = 0; i < length; i += 500) {
             int j = i + 500;
 
-            if (j > len)
-                j = len;
+            if (j > length)
+                j = length;
 
             TextUtils.getChars(text, i, j, temp, 0);
 
@@ -265,7 +264,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
 
         if (boring && text instanceof Spanned) {
             Spanned sp = (Spanned) text;
-            Object[] styles = sp.getSpans(0, text.length(), ParagraphStyle.class);
+            Object[] styles = sp.getSpans(0, length, ParagraphStyle.class);
             if (styles.length > 0) {
                 boring = false;
             }
@@ -278,7 +277,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             }
 
             TextLine line = TextLine.obtain();
-            line.set(paint, text, 0, text.length(), Layout.DIR_LEFT_TO_RIGHT,
+            line.set(paint, text, 0, length, Layout.DIR_LEFT_TO_RIGHT,
                     Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null);
             fm.width = (int) FloatMath.ceil(line.metrics(fm));
             TextLine.recycle(line);
@@ -289,52 +288,63 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
         }
     }
 
-    @Override public int getHeight() {
+    @Override
+    public int getHeight() {
         return mBottom;
     }
 
-    @Override public int getLineCount() {
+    @Override
+    public int getLineCount() {
         return 1;
     }
 
-    @Override public int getLineTop(int line) {
+    @Override
+    public int getLineTop(int line) {
         if (line == 0)
             return 0;
         else
             return mBottom;
     }
 
-    @Override public int getLineDescent(int line) {
+    @Override
+    public int getLineDescent(int line) {
         return mDesc;
     }
 
-    @Override public int getLineStart(int line) {
+    @Override
+    public int getLineStart(int line) {
         if (line == 0)
             return 0;
         else
             return getText().length();
     }
 
-    @Override public int getParagraphDirection(int line) {
+    @Override
+    public int getParagraphDirection(int line) {
         return DIR_LEFT_TO_RIGHT;
     }
 
-    @Override public boolean getLineContainsTab(int line) {
+    @Override
+    public boolean getLineContainsTab(int line) {
         return false;
     }
 
-    @Override public float getLineMax(int line) {
+    @Override
+    public float getLineMax(int line) {
         return mMax;
     }
 
-    @Override public final Directions getLineDirections(int line) {
+    @Override
+    public final Directions getLineDirections(int line) {
         return Layout.DIRS_ALL_LEFT_TO_RIGHT;
     }
 
+    @Override
     public int getTopPadding() {
         return mTopPadding;
     }
 
+    @Override
     public int getBottomPadding() {
         return mBottomPadding;
     }
