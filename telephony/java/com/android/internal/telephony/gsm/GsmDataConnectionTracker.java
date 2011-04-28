@@ -1618,7 +1618,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (apnContext.getPendingAction() == ApnContext.PENDING_ACTION_RECONNECT) {
                 apnContext.setPendingAction(ApnContext.PENDING_ACTION_NONE);
             }
-            trySetupData(apnContext);
+            // Wait a bit before trying the next APN, so that
+            // we're not tying up the RIL command channel.
+            // This also helps in any external dependency to turn off the context.
+            sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, apnContext),APN_DELAY_MILLIS);
         }
     }
 
