@@ -115,6 +115,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     static final Uri PREFERAPN_URI = Uri.parse("content://telephony/carriers/preferapn");
     static final String APN_ID = "apn_id";
     private boolean canSetPreferApn = false;
+    private boolean mRadioAvailable = false;
 
     @Override
     protected void onActionIntentReconnectAlarm(Intent intent) {
@@ -1325,6 +1326,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     private void onRecordsLoaded() {
         if (DBG) log("onRecordsLoaded: createAllApnList");
         createAllApnList();
+        if (mRadioAvailable) {
+            if (DBG) log("onRecordsLoaded, notifying data availability");
+            notifyDataAvailability(null);
+        }
         setupDataOnReadyApns(Phone.REASON_SIM_LOADED);
     }
 
@@ -1436,6 +1441,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected void onRadioAvailable() {
+
+        mRadioAvailable = true;
         if (mPhone.getSimulatedRadioControl() != null) {
             // Assume data is connected on the simulator
             // FIXME  this can be improved
@@ -1463,6 +1470,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             dc.resetRetryCount();
         }
         mReregisterOnReconnectFailure = false;
+        mRadioAvailable = false;
 
         if (mPhone.getSimulatedRadioControl() != null) {
             // Assume data is connected on the simulator
@@ -1472,6 +1480,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (DBG) log("Radio is off and clean up all connection");
             cleanUpAllConnections(false, Phone.REASON_RADIO_TURNED_OFF);
         }
+        notifyDataAvailability(null);
     }
 
     @Override
