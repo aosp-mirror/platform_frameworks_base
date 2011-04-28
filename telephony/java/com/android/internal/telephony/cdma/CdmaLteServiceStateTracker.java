@@ -424,8 +424,8 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                     : -1;
             if (networkType == ServiceState.RADIO_TECHNOLOGY_LTE) {
                 lteRssi = (ints[offset + 5] >= 0) ? ints[offset + 5] : 99;
-                lteRsrp = (ints[offset + 6] > 0) ? -ints[offset + 7] : -1;
-                lteCqi = (ints[offset + 7] >= 0) ? ints[offset + 6] : 99;
+                lteRsrp = (ints[offset + 6] < 0) ? ints[offset + 6] : -1;
+                lteCqi = (ints[offset + 7] >= 0) ? ints[offset + 7] : 99;
             }
 
             if (networkType != ServiceState.RADIO_TECHNOLOGY_LTE) {
