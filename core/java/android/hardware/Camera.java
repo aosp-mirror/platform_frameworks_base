@@ -1088,7 +1088,6 @@ public class Camera {
      *
      * @see #setFocusAreas(List)
      * @see #getFocusAreas()
-     * @hide
      */
     public static class Area {
         /**
@@ -1521,24 +1520,28 @@ public class Camera {
         }
 
         private void set(String key, List<Area> areas) {
-            StringBuilder buffer = new StringBuilder();
-            for (int i = 0; i < areas.size(); i++) {
-                Area area = areas.get(i);
-                Rect rect = area.rect;
-                buffer.append('(');
-                buffer.append(rect.left);
-                buffer.append(',');
-                buffer.append(rect.top);
-                buffer.append(',');
-                buffer.append(rect.right);
-                buffer.append(',');
-                buffer.append(rect.bottom);
-                buffer.append(',');
-                buffer.append(area.weight);
-                buffer.append(')');
-                if (i != areas.size() - 1) buffer.append(',');
+            if (areas == null) {
+                set(key, "(0,0,0,0,0)");
+            } else {
+                StringBuilder buffer = new StringBuilder();
+                for (int i = 0; i < areas.size(); i++) {
+                    Area area = areas.get(i);
+                    Rect rect = area.rect;
+                    buffer.append('(');
+                    buffer.append(rect.left);
+                    buffer.append(',');
+                    buffer.append(rect.top);
+                    buffer.append(',');
+                    buffer.append(rect.right);
+                    buffer.append(',');
+                    buffer.append(rect.bottom);
+                    buffer.append(',');
+                    buffer.append(area.weight);
+                    buffer.append(')');
+                    if (i != areas.size() - 1) buffer.append(',');
+                }
+                set(key, buffer.toString());
             }
-            set(key, buffer.toString());
         }
 
         /**
@@ -2578,7 +2581,6 @@ public class Camera {
          *
          * @return the maximum number of focus areas supported by the camera.
          * @see #getFocusAreas()
-         * @hide
          */
         public int getMaxNumFocusAreas() {
             return getInt(KEY_MAX_NUM_FOCUS_AREAS, 0);
@@ -2607,10 +2609,10 @@ public class Camera {
          * area. Focus areas can partially overlap and the driver will add the
          * weights in the overlap region.
          *
-         * A special case of all-zero single focus area means driver to decide
-         * the focus area. For example, the driver may use more signals to
-         * decide focus areas and change them dynamically. Apps can set all-zero
-         * if they want the driver to decide focus areas.
+         * A special case of null focus area means driver to decide the focus
+         * area. For example, the driver may use more signals to decide focus
+         * areas and change them dynamically. Apps can set all-zero if they want
+         * the driver to decide focus areas.
          *
          * Focus areas are relative to the current field of view
          * ({@link #getZoom()}). No matter what the zoom level is, (-1000,-1000)
@@ -2623,10 +2625,9 @@ public class Camera {
          * {@link #FOCUS_MODE_CONTINUOUS_VIDEO}.
          *
          * @return a list of current focus areas
-         * @hide
          */
         public List<Area> getFocusAreas() {
-            return splitArea(KEY_FOCUS_AREAS);
+            return splitArea(get(KEY_FOCUS_AREAS));
         }
 
         /**
@@ -2634,7 +2635,6 @@ public class Camera {
          *
          * @param focusAreas the focus areas
          * @see #getFocusAreas()
-         * @hide
          */
         public void setFocusAreas(List<Area> focusAreas) {
             set(KEY_FOCUS_AREAS, focusAreas);
@@ -2647,7 +2647,6 @@ public class Camera {
          *
          * @return the maximum number of metering areas supported by the camera.
          * @see #getMeteringAreas()
-         * @hide
          */
         public int getMaxNumMeteringAreas() {
             return getInt(KEY_MAX_NUM_METERING_AREAS, 0);
@@ -2676,10 +2675,10 @@ public class Camera {
          * metering result.  Metering areas can partially overlap and the driver
          * will add the weights in the overlap region.
          *
-         * A special case of all-zero single metering area means driver to
-         * decide the metering area. For example, the driver may use more
-         * signals to decide metering areas and change them dynamically. Apps
-         * can set all-zero if they want the driver to decide metering areas.
+         * A special case of null metering area means driver to decide the
+         * metering area. For example, the driver may use more signals to decide
+         * metering areas and change them dynamically. Apps can set all-zero if
+         * they want the driver to decide metering areas.
          *
          * Metering areas are relative to the current field of view
          * ({@link #getZoom()}). No matter what the zoom level is, (-1000,-1000)
@@ -2691,7 +2690,6 @@ public class Camera {
          * by {@link #setExposureCompensation(int)}.
          *
          * @return a list of current metering areas
-         * @hide
          */
         public List<Area> getMeteringAreas() {
             return splitArea(KEY_METERING_AREAS);
@@ -2703,7 +2701,6 @@ public class Camera {
          *
          * @param meteringAreas the metering areas
          * @see #getMeteringAreas()
-         * @hide
          */
         public void setMeteringAreas(List<Area> meteringAreas) {
             set(KEY_METERING_AREAS, meteringAreas);
@@ -2837,7 +2834,7 @@ public class Camera {
 
         // Splits a comma delimited string to an ArrayList of Area objects.
         // Example string: "(-10,-10,0,0,300),(0,0,10,10,700)". Return null if
-        // the passing string is null or the size is 0.
+        // the passing string is null or the size is 0 or (0,0,0,0,0).
         private ArrayList<Area> splitArea(String str) {
             if (str == null || str.charAt(0) != '('
                     || str.charAt(str.length() - 1) != ')') {
@@ -2858,6 +2855,16 @@ public class Camera {
             } while (endIndex != str.length() - 1);
 
             if (result.size() == 0) return null;
+
+            if (result.size() == 1) {
+                Area area = (Area) result.get(0);
+                Rect rect = area.rect;
+                if (rect.left == 0 && rect.top == 0 && rect.right == 0
+                        && rect.bottom == 0 && area.weight == 0) {
+                    return null;
+                }
+            }
+
             return result;
         }
     };

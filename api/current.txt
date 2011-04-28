@@ -8624,6 +8624,12 @@ package android.hardware {
     field public static final int CAMERA_ERROR_UNKNOWN = 1; // 0x1
   }
 
+  public static class Camera.Area {
+    ctor public Camera.Area(android.graphics.Rect, int);
+    field public android.graphics.Rect rect;
+    field public int weight;
+  }
+
   public static abstract interface Camera.AutoFocusCallback {
     method public abstract void onAutoFocus(boolean, android.hardware.Camera);
   }
@@ -8653,6 +8659,7 @@ package android.hardware {
     method public float getExposureCompensationStep();
     method public java.lang.String getFlashMode();
     method public float getFocalLength();
+    method public java.util.List<android.hardware.Camera.Area> getFocusAreas();
     method public void getFocusDistances(float[]);
     method public java.lang.String getFocusMode();
     method public float getHorizontalViewAngle();
@@ -8661,7 +8668,10 @@ package android.hardware {
     method public int getJpegThumbnailQuality();
     method public android.hardware.Camera.Size getJpegThumbnailSize();
     method public int getMaxExposureCompensation();
+    method public int getMaxNumFocusAreas();
+    method public int getMaxNumMeteringAreas();
     method public int getMaxZoom();
+    method public java.util.List<android.hardware.Camera.Area> getMeteringAreas();
     method public int getMinExposureCompensation();
     method public int getPictureFormat();
     method public android.hardware.Camera.Size getPictureSize();
@@ -8699,6 +8709,7 @@ package android.hardware {
     method public void setColorEffect(java.lang.String);
     method public void setExposureCompensation(int);
     method public void setFlashMode(java.lang.String);
+    method public void setFocusAreas(java.util.List<android.hardware.Camera.Area>);
     method public void setFocusMode(java.lang.String);
     method public void setGpsAltitude(double);
     method public void setGpsLatitude(double);
@@ -8708,6 +8719,7 @@ package android.hardware {
     method public void setJpegQuality(int);
     method public void setJpegThumbnailQuality(int);
     method public void setJpegThumbnailSize(int, int);
+    method public void setMeteringAreas(java.util.List<android.hardware.Camera.Area>);
     method public void setPictureFormat(int);
     method public void setPictureSize(int, int);
     method public void setPreviewFormat(int);
