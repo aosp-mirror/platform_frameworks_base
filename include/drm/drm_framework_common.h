@@ -31,14 +31,17 @@ namespace android {
  * Error code for DRM Frameowrk
  */
 enum {
-    DRM_ERROR_BASE = -2000,
+    // The following constant values should be in sync with
+    // media/stagefright/MediaErrors.h
+    ERROR_BASE = -2000,
 
-    DRM_ERROR_UNKNOWN                       = DRM_ERROR_BASE,
-    DRM_ERROR_LICENSE_EXPIRED               = DRM_ERROR_BASE - 1,
-    DRM_ERROR_SESSION_NOT_OPENED            = DRM_ERROR_BASE - 2,
-    DRM_ERROR_DECRYPT_UNIT_NOT_INITIALIZED  = DRM_ERROR_BASE - 3,
-    DRM_ERROR_DECRYPT                       = DRM_ERROR_BASE - 4,
-    DRM_ERROR_CANNOT_HANDLE                 = DRM_ERROR_BASE - 5,
+    DRM_ERROR_UNKNOWN                       = ERROR_BASE,
+    DRM_ERROR_NO_LICENSE                    = ERROR_BASE - 1,
+    DRM_ERROR_LICENSE_EXPIRED               = ERROR_BASE - 2,
+    DRM_ERROR_SESSION_NOT_OPENED            = ERROR_BASE - 3,
+    DRM_ERROR_DECRYPT_UNIT_NOT_INITIALIZED  = ERROR_BASE - 4,
+    DRM_ERROR_DECRYPT                       = ERROR_BASE - 5,
+    DRM_ERROR_CANNOT_HANDLE                 = ERROR_BASE - 6,
 
     DRM_NO_ERROR                            = NO_ERROR
 };
