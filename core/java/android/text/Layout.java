@@ -1170,7 +1170,7 @@ public abstract class Layout {
         if (h2 < 0.5f)
             h2 = 0.5f;
 
-        if (h1 == h2) {
+        if (Float.compare(h1, h2) == 0) {
             dest.moveTo(h1, top);
             dest.lineTo(h1, bottom);
         } else {
