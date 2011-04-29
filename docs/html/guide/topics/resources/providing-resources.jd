@@ -264,8 +264,8 @@ href="#Compatibility">Providing the Best Device Compatibility with Resources</a>
 names.</p>
 <table>
     <tr>
-        <th>Qualifier</th>
-        <th>Values</th>
+        <th>Configuration</th>
+        <th>Qualifier Values</th>
         <th>Description</th>
     </tr>
     <tr id="MccQualifier">
