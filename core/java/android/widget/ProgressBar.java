@@ -66,15 +66,16 @@ import android.widget.RemoteViews.RemoteView;
  *
  * <p>
  * A progress bar can also be made indeterminate. In indeterminate mode, the
- * progress bar shows a cyclic animation. This mode is used by applications
- * when the length of the task is unknown. 
+ * progress bar shows a cyclic animation without an indication of progress. This mode is used by
+ * applications when the length of the task is unknown. The indeterminate progress bar can be either
+ * a spinning wheel or a horizontal bar.
  * </p>
  *
  * <p>The following code example shows how a progress bar can be used from
  * a worker thread to update the user interface to notify the user of progress:
  * </p>
  * 
- * <pre class="prettyprint">
+ * <pre>
  * public class MyActivity extends Activity {
  *     private static final int PROGRESS = 0x1;
  *
@@ -93,7 +94,7 @@ import android.widget.RemoteViews.RemoteView;
  *         // Start lengthy operation in a background thread
  *         new Thread(new Runnable() {
  *             public void run() {
- *                 while (mProgressStatus < 100) {
+ *                 while (mProgressStatus &lt; 100) {
  *                     mProgressStatus = doWork();
  *
  *                     // Update the progress bar
@@ -106,8 +107,61 @@ import android.widget.RemoteViews.RemoteView;
  *             }
  *         }).start();
  *     }
- * }
- * </pre>
+ * }</pre>
+ *
+ * <p>To add a progress bar to a layout file, you can use the {@code &lt;ProgressBar&gt;} element.
+ * By default, the progress bar is a spinning wheel (an indeterminate indicator). To change to a
+ * horizontal progress bar, apply the {@link android.R.style#Widget_ProgressBar_Horizontal
+ * Widget.ProgressBar.Horizontal} style, like so:</p>
+ *
+ * <pre>
+ * &lt;ProgressBar
+ *     style="@android:style/Widget.ProgressBar.Horizontal"
+ *     ... /&gt;</pre>
+ *
+ * <p>If you will use the progress bar to show real progress, you must use the horizontal bar. You
+ * can then increment the  progress with {@link #incrementProgressBy incrementProgressBy()} or
+ * {@link #setProgress setProgress()}. By default, the progress bar is full when it reaches 100. If
+ * necessary, you can adjust the maximum value (the value for a full bar) using the {@link
+ * android.R.styleable#ProgressBar_max android:max} attribute. Other attributes available are listed
+ * below.</p>
+ *
+ * <p>Another common style to apply to the progress bar is {@link
+ * android.R.style#Widget_ProgressBar_Small Widget.ProgressBar.Small}, which shows a smaller
+ * version of the spinning wheel&mdash;useful when waiting for content to load.
+ * For example, you can insert this kind of progress bar into your default layout for
+ * a view that will be populated by some content fetched from the Internet&mdash;the spinning wheel
+ * appears immediately and when your application receives the content, it replaces the progress bar
+ * with the loaded content. For example:</p>
+ *
+ * <pre>
+ * &lt;LinearLayout
+ *     android:orientation="horizontal"
+ *     ... &gt;
+ *     &lt;ProgressBar
+ *         android:layout_width="wrap_content"
+ *         android:layout_height="wrap_content"
+ *         style="@android:style/Widget.ProgressBar.Small"
+ *         android:layout_marginRight="5dp" /&gt;
+ *     &lt;TextView
+ *         android:layout_width="wrap_content"
+ *         android:layout_height="wrap_content"
+ *         android:text="@string/loading" /&gt;
+ * &lt;/LinearLayout&gt;</pre>
+ *
+ * <p>Other progress bar styles provided by the system include:</p>
+ * <ul>
+ * <li>{@link android.R.style#Widget_ProgressBar_Horizontal Widget.ProgressBar.Horizontal}</li>
+ * <li>{@link android.R.style#Widget_ProgressBar_Small Widget.ProgressBar.Small}</li>
+ * <li>{@link android.R.style#Widget_ProgressBar_Large Widget.ProgressBar.Large}</li>
+ * <li>{@link android.R.style#Widget_ProgressBar_Inverse Widget.ProgressBar.Inverse}</li>
+ * <li>{@link android.R.style#Widget_ProgressBar_Small_Inverse
+ * Widget.ProgressBar.Small.Inverse}</li>
+ * <li>{@link android.R.style#Widget_ProgressBar_Large_Inverse
+ * Widget.ProgressBar.Large.Inverse}</li>
+ * </ul>
+ * <p>The "inverse" styles provide an inverse color scheme for the spinner, which may be necessary
+ * if your application uses a light colored theme (a white background).</p>
  *  
  * <p><strong>XML attributes</b></strong> 
  * <p> 
@@ -115,13 +169,21 @@ import android.widget.RemoteViews.RemoteView;
  * {@link android.R.styleable#View View Attributes}
  * </p>
  * 
- * <p><strong>Styles</b></strong> 
- * <p> 
- * @attr ref android.R.styleable#Theme_progressBarStyle
- * @attr ref android.R.styleable#Theme_progressBarStyleSmall
- * @attr ref android.R.styleable#Theme_progressBarStyleLarge
- * @attr ref android.R.styleable#Theme_progressBarStyleHorizontal
- * </p>
+ * @attr ref android.R.styleable#ProgressBar_animationResolution
+ * @attr ref android.R.styleable#ProgressBar_indeterminate
+ * @attr ref android.R.styleable#ProgressBar_indeterminateBehavior
+ * @attr ref android.R.styleable#ProgressBar_indeterminateDrawable
+ * @attr ref android.R.styleable#ProgressBar_indeterminateDuration
+ * @attr ref android.R.styleable#ProgressBar_indeterminateOnly
+ * @attr ref android.R.styleable#ProgressBar_interpolator
+ * @attr ref android.R.styleable#ProgressBar_max
+ * @attr ref android.R.styleable#ProgressBar_maxHeight
+ * @attr ref android.R.styleable#ProgressBar_maxWidth
+ * @attr ref android.R.styleable#ProgressBar_minHeight
+ * @attr ref android.R.styleable#ProgressBar_minWidth
+ * @attr ref android.R.styleable#ProgressBar_progress
+ * @attr ref android.R.styleable#ProgressBar_progressDrawable
+ * @attr ref android.R.styleable#ProgressBar_secondaryProgress
  */
 @RemoteView
 public class ProgressBar extends View {
