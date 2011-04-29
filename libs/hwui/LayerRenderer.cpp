@@ -20,6 +20,7 @@
 
 #include "LayerCache.h"
 #include "LayerRenderer.h"
+#include "Matrix.h"
 #include "Properties.h"
 #include "Rect.h"
 
@@ -165,6 +166,40 @@ void LayerRenderer::generateMesh() {
 // Layers management
 ///////////////////////////////////////////////////////////////////////////////
 
+Layer* LayerRenderer::createTextureLayer() {
+    LAYER_RENDERER_LOGD("Creating new texture layer");
+
+    Layer* layer = new Layer(0, 0);
+    layer->isCacheable = false;
+    layer->isTextureLayer = true;
+    layer->blend = true;
+    layer->empty = true;
+    layer->fbo = 0;
+    layer->colorFilter = NULL;
+    layer->fbo = 0;
+    layer->layer.set(0.0f, 0.0f, 0.0f, 0.0f);
+    layer->texCoords.set(0.0f, 1.0f, 0.0f, 1.0f);
+    layer->alpha = 255;
+    layer->mode = SkXfermode::kSrcOver_Mode;
+    layer->colorFilter = NULL;
+    layer->region.clear();
+
+    glActiveTexture(GL_TEXTURE0);
+
+    glGenTextures(1, &layer->texture);
+    glBindTexture(GL_TEXTURE_EXTERNAL_OES, layer->texture);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    return layer;
+}
+
 Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque) {
     LAYER_RENDERER_LOGD("Creating new layer %dx%d", width, height);
 
@@ -242,6 +277,18 @@ bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
     }
 
     return true;
+}
+
+void LayerRenderer::updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
+        float* transform) {
+    if (layer) {
+        layer->width = width;
+        layer->height = height;
+        layer->layer.set(0.0f, 0.0f, width, height);
+        layer->region.set(width, height);
+        layer->regionRect.set(0.0f, 0.0f, width, height);
+        layer->texTransform.load(transform);
+    }
 }
 
 void LayerRenderer::destroyLayer(Layer* layer) {

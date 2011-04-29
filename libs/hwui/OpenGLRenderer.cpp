@@ -633,15 +633,43 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     }
 }
 
+void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
+    float alpha = layer->alpha / 255.0f;
+
+    setupDraw();
+    setupDrawWithExternalTexture();
+    setupDrawColor(alpha, alpha, alpha, alpha);
+    setupDrawColorFilter();
+    setupDrawBlending(layer->blend, layer->mode);
+    setupDrawProgram();
+    setupDrawModelView(rect.left, rect.top, rect.right, rect.bottom);
+    setupDrawPureColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawExternalTexture(layer->texture);
+    setupDrawTextureTransform(layer->texTransform);
+    setupDrawMesh(&mMeshVertices[0].position[0], &mMeshVertices[0].texture[0]);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
+
+    finishDrawTexture();
+}
+
 void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap) {
-    const Rect& texCoords = layer->texCoords;
-    resetDrawTextureTexCoords(texCoords.left, texCoords.top, texCoords.right, texCoords.bottom);
+    if (!layer->isTextureLayer) {
+        const Rect& texCoords = layer->texCoords;
+        resetDrawTextureTexCoords(texCoords.left, texCoords.top,
+                texCoords.right, texCoords.bottom);
 
-    drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
-            layer->alpha / 255.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
-            &mMeshVertices[0].texture[0], GL_TRIANGLE_STRIP, gMeshCount, swap, swap);
+        drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
+                layer->alpha / 255.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
+                &mMeshVertices[0].texture[0], GL_TRIANGLE_STRIP, gMeshCount, swap, swap);
 
-    resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
+        resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
+    } else {
+        resetDrawTextureTexCoords(0.0f, 1.0f, 1.0f, 0.0f);
+        drawTextureLayer(layer, rect);
+        resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
+    }
 }
 
 void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
@@ -882,6 +910,10 @@ void OpenGLRenderer::setupDrawWithTexture(bool isAlpha8) {
     mDescription.hasAlpha8Texture = isAlpha8;
 }
 
+void OpenGLRenderer::setupDrawWithExternalTexture() {
+    mDescription.hasExternalTexture = true;
+}
+
 void OpenGLRenderer::setupDrawAALine() {
     mDescription.hasWidth = true;
 }
@@ -1053,6 +1085,19 @@ void OpenGLRenderer::setupDrawTexture(GLuint texture) {
 
     mTexCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
     glEnableVertexAttribArray(mTexCoordsSlot);
+}
+
+void OpenGLRenderer::setupDrawExternalTexture(GLuint texture) {
+    bindExternalTexture(texture);
+    glUniform1i(mCaches.currentProgram->getUniform("sampler"), mTextureUnit++);
+
+    mTexCoordsSlot = mCaches.currentProgram->getAttrib("texCoords");
+    glEnableVertexAttribArray(mTexCoordsSlot);
+}
+
+void OpenGLRenderer::setupDrawTextureTransform(mat4& transform) {
+    glUniformMatrix4fv(mCaches.currentProgram->getUniform("mainTextureTransform"), 1,
+            GL_FALSE, &transform.data[0]);
 }
 
 void OpenGLRenderer::setupDrawMesh(GLvoid* vertices, GLvoid* texCoords, GLuint vbo) {

@@ -14,39 +14,21 @@
  * limitations under the License.
  */
 
-package android.view;
 
-import android.graphics.Canvas;
+package android.view;
 
 /**
  * An OpenGL ES 2.0 implementation of {@link HardwareLayer}.
  */
-class GLES20Layer extends HardwareLayer {
-    private int mLayer;
+abstract class GLES20Layer extends HardwareLayer {
+    int mLayer;
+    Finalizer mFinalizer;
 
-    private int mLayerWidth;
-    private int mLayerHeight;
+    GLES20Layer() {
+    }
 
-    private final GLES20Canvas mCanvas;
-
-    @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
-    private final Finalizer mFinalizer;
-
-    GLES20Layer(int width, int height, boolean isOpaque) {
-        super(width, height, isOpaque);
-
-        int[] layerInfo = new int[2];
-        mLayer = GLES20Canvas.nCreateLayer(width, height, isOpaque, layerInfo);
-        if (mLayer != 0) {
-            mLayerWidth = layerInfo[0];
-            mLayerHeight = layerInfo[1];
-
-            mCanvas = new GLES20Canvas(mLayer, !isOpaque);
-            mFinalizer = new Finalizer(mLayer);
-        } else {
-            mCanvas = null;
-            mFinalizer = null;
-        }
+    GLES20Layer(int width, int height, boolean opaque) {
+        super(width, height, opaque);
     }
 
     /**
@@ -58,55 +40,14 @@ class GLES20Layer extends HardwareLayer {
         return mLayer;
     }
 
-    @Override
-    boolean isValid() {
-        return mLayer != 0 && mLayerWidth > 0 && mLayerHeight > 0;
-    }
-
-    @Override
-    void resize(int width, int height) {
-        if (!isValid() || width <= 0 || height <= 0) return;
-
-        mWidth = width;
-        mHeight = height;
-        
-        if (width != mLayerWidth || height != mLayerHeight) {
-            int[] layerInfo = new int[2];
-
-            GLES20Canvas.nResizeLayer(mLayer, width, height, layerInfo);
-
-            mLayerWidth = layerInfo[0];
-            mLayerHeight = layerInfo[1];
-        }
-    }
-
-    @Override
-    HardwareCanvas getCanvas() {
-        return mCanvas;
-    }
-
-    @Override
-    void end(Canvas currentCanvas) {
-        if (currentCanvas instanceof GLES20Canvas) {
-            ((GLES20Canvas) currentCanvas).resume();
-        }
-    }
-
-    @Override
-    HardwareCanvas start(Canvas currentCanvas) {
-        if (currentCanvas instanceof GLES20Canvas) {
-            ((GLES20Canvas) currentCanvas).interrupt();
-        }
-        return getCanvas();
-    }
-
+    
     @Override
     void destroy() {
-        mFinalizer.destroy();
+        if (mFinalizer != null) mFinalizer.destroy();
         mLayer = 0;
     }
 
-    private static class Finalizer {
+    static class Finalizer {
         private int mLayerId;
 
         public Finalizer(int layerId) {

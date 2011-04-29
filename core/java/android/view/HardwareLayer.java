@@ -26,10 +26,22 @@ import android.graphics.Canvas;
  * drawn several times.
  */
 abstract class HardwareLayer {
+    /**
+     * Indicates an unknown dimension (width or height.)
+     */
+    static final int DIMENSION_UNDEFINED = -1;
+    
     int mWidth;
     int mHeight;
 
     final boolean mOpaque;
+
+    /**
+     * Creates a new hardware layer with undefined dimensions.
+     */
+    HardwareLayer() {
+        this(DIMENSION_UNDEFINED, DIMENSION_UNDEFINED, false);
+    }
 
     /**
      * Creates a new hardware layer at least as large as the supplied

@@ -20962,6 +20962,21 @@ package android.view {
     method public void setZOrderOnTop(boolean);
   }
 
+  public class TextureView extends android.view.View {
+    ctor public TextureView(android.content.Context);
+    ctor public TextureView(android.content.Context, android.util.AttributeSet);
+    ctor public TextureView(android.content.Context, android.util.AttributeSet, int);
+    method public final void draw(android.graphics.Canvas);
+    method public android.graphics.SurfaceTexture getSurfaceTexture();
+    method public android.view.TextureView.SurfaceTextureListener getSurfaceTextureListener();
+    method protected final void onDraw(android.graphics.Canvas);
+    method public void setSurfaceTextureListener(android.view.TextureView.SurfaceTextureListener);
+  }
+
+  public static abstract interface TextureView.SurfaceTextureListener {
+    method public abstract void onSurfaceTextureAvailable(android.graphics.SurfaceTexture);
+  }
+
   public class TouchDelegate {
     ctor public TouchDelegate(android.graphics.Rect, android.view.View);
     method public boolean onTouchEvent(android.view.MotionEvent);

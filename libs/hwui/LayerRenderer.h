@@ -53,8 +53,11 @@ public:
     Region* getRegion();
     GLint getTargetFbo();
 
+    static Layer* createTextureLayer();
     static Layer* createLayer(uint32_t width, uint32_t height, bool isOpaque = false);
     static bool resizeLayer(Layer* layer, uint32_t width, uint32_t height);
+    static void updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
+            float* transform);
     static void destroyLayer(Layer* layer);
     static void destroyLayerDeferred(Layer* layer);
 

@@ -248,6 +248,8 @@ private:
      */
     void composeLayerRect(Layer* layer, const Rect& rect, bool swap = false);
 
+    void drawTextureLayer(Layer* layer, const Rect& rect);
+
     /**
      * Mark the layer as dirty at the specified coordinates. The coordinates
      * are transformed with the supplied matrix.
@@ -400,6 +402,14 @@ private:
     }
 
     /**
+     * Binds the specified EGLImage texture. The texture unit must have been selected
+     * prior to calling this method.
+     */
+    inline void bindExternalTexture(GLuint texture) {
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture);
+    }
+
+    /**
      * Sets the wrap modes for the specified texture. The wrap modes are modified
      * only when needed.
      */
@@ -438,6 +448,7 @@ private:
      * Various methods to setup OpenGL rendering.
      */
     void setupDrawWithTexture(bool isAlpha8 = false);
+    void setupDrawWithExternalTexture();
     void setupDrawAALine();
     void setupDrawPoint(float pointSize);
     void setupDrawColor(int color);
@@ -466,6 +477,8 @@ private:
     void setupDrawColorFilterUniforms();
     void setupDrawSimpleMesh();
     void setupDrawTexture(GLuint texture);
+    void setupDrawExternalTexture(GLuint texture);
+    void setupDrawTextureTransform(mat4& transform);
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
     void setupDrawVertices(GLvoid* vertices);
     void setupDrawAALine(GLvoid* vertices, GLvoid* distanceCoords, float strokeWidth);
