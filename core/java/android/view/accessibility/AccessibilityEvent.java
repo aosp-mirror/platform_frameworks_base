@@ -253,7 +253,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
     private static final int MAX_POOL_SIZE = 10;
-    private static final Object mPoolLock = new Object();
+    private static final Object sPoolLock = new Object();
     private static AccessibilityEvent sPool;
     private static int sPoolSize;
 
@@ -375,7 +375,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @return An instance.
      */
     public static AccessibilityEvent obtain() {
-        synchronized (mPoolLock) {
+        synchronized (sPoolLock) {
             if (sPool != null) {
                 AccessibilityEvent event = sPool;
                 sPool = sPool.mNext;
@@ -392,14 +392,16 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * Return an instance back to be reused.
      * <p>
      * <b>Note: You must not touch the object after calling this function.</b>
+     *
+     * @throws IllegalStateException If the event is already recycled.
      */
     @Override
     public void recycle() {
         if (mIsInPool) {
-            return;
+            throw new IllegalStateException("Event already recycled!");
         }
         clear();
-        synchronized (mPoolLock) {
+        synchronized (sPoolLock) {
             if (sPoolSize <= MAX_POOL_SIZE) {
                 mNext = sPool;
                 sPool = this;
