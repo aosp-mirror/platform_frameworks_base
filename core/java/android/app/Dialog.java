@@ -823,7 +823,7 @@ public class Dialog implements DialogInterface, Window.Callback,
 
         // associate search with owner activity
         final ComponentName appName = getAssociatedActivity();
-        if (appName != null) {
+        if (appName != null && searchManager.getSearchableInfo(appName) != null) {
             searchManager.startSearch(null, false, appName, null, false);
             dismiss();
             return true;
