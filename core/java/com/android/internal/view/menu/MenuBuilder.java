@@ -226,6 +226,7 @@ public class MenuBuilder implements Menu {
     private void dispatchPresenterUpdate(boolean cleared) {
         if (mPresenters.isEmpty()) return;
 
+        stopDispatchingItemsChanged();
         for (WeakReference<MenuPresenter> ref : mPresenters) {
             final MenuPresenter presenter = ref.get();
             if (presenter == null) {
@@ -234,6 +235,7 @@ public class MenuBuilder implements Menu {
                 presenter.updateMenuView(cleared);
             }
         }
+        startDispatchingItemsChanged();
     }
     
     private boolean dispatchSubMenuSelected(SubMenuBuilder subMenu) {

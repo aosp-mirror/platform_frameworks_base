@@ -46,7 +46,7 @@ the Action Bar enabled overlaying application content.
                android:layout_width="match_parent"
                android:layout_height="wrap_content"
                android:layout_below="@id/action_bar_container" />
-    <LinearLayout android:id="@+id/lower_action_context_bar"
+    <com.android.internal.widget.ActionBarContainer android:id="@+id/split_action_bar"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_alignParentBottom="true"
