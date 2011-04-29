@@ -4708,7 +4708,7 @@ public final class BatteryStatsImpl extends BatteryStats {
         mHistory = mHistoryEnd = mHistoryCache = null;
         mHistoryBaseTime = 0;
         long time;
-        while ((time=in.readLong()) >= 0) {
+        while (in.dataAvail() > 0 && (time=in.readLong()) >= 0) {
             HistoryItem rec = new HistoryItem(time, in);
             addHistoryRecordLocked(rec);
             if (rec.time > mHistoryBaseTime) {
