@@ -66,7 +66,7 @@ ContextDeinitToClient {
     direct
 }
 
-aTypeCreate {
+TypeCreate {
     direct
     param RsElement e
     param uint32_t dimX
@@ -77,7 +77,7 @@ aTypeCreate {
     ret RsType
 }
 
-aAllocationCreateTyped {
+AllocationCreateTyped {
     direct
     param RsType vtype
     param RsAllocationMipmapControl mips
@@ -85,7 +85,7 @@ aAllocationCreateTyped {
     ret RsAllocation
 }
 
-aAllocationCreateFromBitmap {
+AllocationCreateFromBitmap {
     direct
     param RsType vtype
     param RsAllocationMipmapControl mips
@@ -94,7 +94,7 @@ aAllocationCreateFromBitmap {
     ret RsAllocation
 }
 
-aAllocationCubeCreateFromBitmap {
+AllocationCubeCreateFromBitmap {
     direct
     param RsType vtype
     param RsAllocationMipmapControl mips
