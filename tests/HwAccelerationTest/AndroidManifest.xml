@@ -18,12 +18,26 @@
     package="com.android.test.hwui">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+
     <uses-sdk android:minSdkVersion="11" />
     
     <application
         android:label="HwUi"
         android:hardwareAccelerated="true">
 
+        <activity
+                android:name="TextureViewActivity"
+                android:label="_TextureView">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
         <activity
                 android:name="BitmapMeshActivity"
                 android:label="_BitmapMesh">

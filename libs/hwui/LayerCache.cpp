@@ -154,6 +154,8 @@ bool LayerCache::resize(Layer* layer, const uint32_t width, const uint32_t heigh
 }
 
 bool LayerCache::put(Layer* layer) {
+    if (!layer->isCacheable) return false;
+
     const uint32_t size = layer->width * layer->height * 4;
     // Don't even try to cache a layer that's bigger than the cache
     if (size < mMaxSize) {

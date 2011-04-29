@@ -45,6 +45,8 @@ struct Layer {
         mesh = NULL;
         meshIndices = NULL;
         meshElementCount = 0;
+        isCacheable = true;
+        isTextureLayer = false;
     }
 
     ~Layer() {
@@ -137,6 +139,22 @@ struct Layer {
     TextureVertex* mesh;
     uint16_t* meshIndices;
     GLsizei meshElementCount;
+
+    /**
+     * If set to true (by default), the layer can be reused.
+     */
+    bool isCacheable;
+
+    /**
+     * When set to true, this layer must be treated as a texture
+     * layer.
+     */
+    bool isTextureLayer;
+
+    /**
+     * Optional texture coordinates transform.
+     */
+    mat4 texTransform;
 }; // struct Layer
 
 }; // namespace uirenderer

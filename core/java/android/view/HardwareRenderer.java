@@ -20,6 +20,7 @@ package android.view;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.SurfaceTexture;
 import android.os.*;
 import android.util.EventLog;
 import android.util.Log;
@@ -166,6 +167,14 @@ public abstract class HardwareRenderer {
     abstract DisplayList createDisplayList(View v);
 
     /**
+     * Creates a new hardware layer. A hardware layer built by calling this
+     * method will be treated as a texture layer, instead of as a render target.
+     * 
+     * @return A hardware layer
+     */    
+    abstract HardwareLayer createHardwareLayer();
+    
+    /**
      * Creates a new hardware layer.
      * 
      * @param width The minimum width of the layer
@@ -175,6 +184,29 @@ public abstract class HardwareRenderer {
      * @return A hardware layer
      */
     abstract HardwareLayer createHardwareLayer(int width, int height, boolean isOpaque);
+
+    /**
+     * Creates a new {@link SurfaceTexture} that can be used to render into the
+     * specified hardware layer.
+     * 
+     *
+     * @param layer The layer to render into using a {@link android.graphics.SurfaceTexture}
+     * 
+     * @return A {@link SurfaceTexture}
+     */
+    abstract SurfaceTexture createSuraceTexture(HardwareLayer layer);
+
+    /**
+     * Updates the specified layer.
+     * 
+     * @param layer The hardware layer to update
+     * @param width The layer's width
+     * @param height The layer's height
+     * @param textureTransform A 4x4 column-first transform matrix to apply to
+     *        texture coordinates
+     */
+    abstract void updateTextureLayer(HardwareLayer layer, int width, int height,
+            float[] textureTransform);    
     
     /**
      * Initializes the hardware renderer for the specified surface and setup the
@@ -856,10 +888,26 @@ public abstract class HardwareRenderer {
         DisplayList createDisplayList(View v) {
             return new GLES20DisplayList(v);
         }
-        
+
+        @Override
+        HardwareLayer createHardwareLayer() {
+            return new GLES20TextureLayer();
+        }
+
         @Override
         HardwareLayer createHardwareLayer(int width, int height, boolean isOpaque) {
-            return new GLES20Layer(width, height, isOpaque);
+            return new GLES20RenderLayer(width, height, isOpaque);
+        }
+
+        @Override
+        SurfaceTexture createSuraceTexture(HardwareLayer layer) {
+            return ((GLES20TextureLayer) layer).getSurfaceTexture();
+        }
+
+        @Override
+        void updateTextureLayer(HardwareLayer layer, int width, int height,
+                float[] textureTransform) {
+            ((GLES20TextureLayer) layer).update(width, height, textureTransform);
         }
 
         static HardwareRenderer create(boolean translucent) {

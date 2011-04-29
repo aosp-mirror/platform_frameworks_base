@@ -41,6 +41,8 @@ const char* gVS_Header_Attributes_TexCoords =
         "attribute vec2 texCoords;\n";
 const char* gVS_Header_Attributes_Distance =
         "attribute float vtxDistance;\n";
+const char* gVS_Header_Uniforms_TextureTransform =
+        "uniform mat4 mainTextureTransform;\n";
 const char* gVS_Header_Uniforms =
         "uniform mat4 transform;\n";
 const char* gVS_Header_Uniforms_IsPoint =
@@ -76,6 +78,8 @@ const char* gVS_Main =
         "\nvoid main(void) {\n";
 const char* gVS_Main_OutTexCoords =
         "    outTexCoords = texCoords;\n";
+const char* gVS_Main_OutTransformedTexCoords =
+        "    outTexCoords = (mainTextureTransform * vec4(texCoords, 0.0, 1.0)).xy;\n";
 const char* gVS_Main_OutGradient[3] = {
         // Linear
         "    linear = vec2((screenSpace * position).x, 0.5);\n",
@@ -103,6 +107,8 @@ const char* gVS_Footer =
 
 const char* gFS_Header_Extension_FramebufferFetch =
         "#extension GL_NV_shader_framebuffer_fetch : enable\n\n";
+const char* gFS_Header_Extension_ExternalTexture =
+        "#extension GL_OES_EGL_image_external : require\n\n";
 const char* gFS_Header =
         "precision mediump float;\n\n";
 const char* gFS_Uniforms_Color =
@@ -116,6 +122,8 @@ const char* gFS_Header_Uniforms_PointHasBitmap =
         "uniform float pointSize;\n";
 const char* gFS_Uniforms_TextureSampler =
         "uniform sampler2D sampler;\n";
+const char* gFS_Uniforms_ExternalTextureSampler =
+        "uniform samplerExternalOES sampler;\n";
 const char* gFS_Uniforms_GradientSampler[3] = {
         // Linear
         "uniform sampler2D gradientSampler;\n",
@@ -369,7 +377,7 @@ Program* ProgramCache::generateProgram(const ProgramDescription& description, pr
 String8 ProgramCache::generateVertexShader(const ProgramDescription& description) {
     // Add attributes
     String8 shader(gVS_Header_Attributes);
-    if (description.hasTexture) {
+    if (description.hasTexture || description.hasExternalTexture) {
         shader.append(gVS_Header_Attributes_TexCoords);
     }
     if (description.hasWidth) {
@@ -377,6 +385,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
     }
     // Uniforms
     shader.append(gVS_Header_Uniforms);
+    if (description.hasExternalTexture) {
+        shader.append(gVS_Header_Uniforms_TextureTransform);
+    }
     if (description.hasGradient) {
         shader.append(gVS_Header_Uniforms_HasGradient[description.gradientType]);
     }
@@ -387,7 +398,7 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
         shader.append(gVS_Header_Uniforms_IsPoint);
     }
     // Varyings
-    if (description.hasTexture) {
+    if (description.hasTexture || description.hasExternalTexture) {
         shader.append(gVS_Header_Varyings_HasTexture);
     }
     if (description.hasWidth) {
@@ -406,6 +417,9 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
     shader.append(gVS_Main); {
         if (description.hasTexture) {
             shader.append(gVS_Main_OutTexCoords);
+        }
+        if (description.hasExternalTexture) {
+            shader.append(gVS_Main_OutTransformedTexCoords);
         }
         if (description.hasWidth) {
             shader.append(gVS_Main_Width);
@@ -440,11 +454,14 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     if (blendFramebuffer) {
         shader.append(gFS_Header_Extension_FramebufferFetch);
     }
+    if (description.hasExternalTexture) {
+        shader.append(gFS_Header_Extension_ExternalTexture);
+    }
 
     shader.append(gFS_Header);
 
     // Varyings
-    if (description.hasTexture) {
+    if (description.hasTexture || description.hasExternalTexture) {
         shader.append(gVS_Header_Varyings_HasTexture);
     }
     if (description.hasWidth) {
@@ -461,7 +478,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
 
     // Uniforms
     int modulateOp = MODULATE_OP_NO_MODULATE;
-    const bool singleColor = !description.hasTexture &&
+    const bool singleColor = !description.hasTexture && !description.hasExternalTexture &&
             !description.hasGradient && !description.hasBitmap;
 
     if (description.modulate || singleColor) {
@@ -470,6 +487,9 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     }
     if (description.hasTexture) {
         shader.append(gFS_Uniforms_TextureSampler);
+    }
+    if (description.hasExternalTexture) {
+        shader.append(gFS_Uniforms_ExternalTextureSampler);
     }
     if (description.hasWidth) {
         shader.append(gFS_Uniforms_Width);
@@ -487,11 +507,11 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         bool fast = false;
 
         const bool noShader = !description.hasGradient && !description.hasBitmap;
-        const bool singleTexture = description.hasTexture &&
+        const bool singleTexture = (description.hasTexture || description.hasExternalTexture) &&
                 !description.hasAlpha8Texture && noShader;
         const bool singleA8Texture = description.hasTexture &&
                 description.hasAlpha8Texture && noShader;
-        const bool singleGradient = !description.hasTexture &&
+        const bool singleGradient = !description.hasTexture && !description.hasExternalTexture &&
                 description.hasGradient && !description.hasBitmap &&
                 description.gradientType == ProgramDescription::kGradientLinear;
 
@@ -554,7 +574,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     // Begin the shader
     shader.append(gFS_Main); {
         // Stores the result in fragColor directly
-        if (description.hasTexture) {
+        if (description.hasTexture || description.hasExternalTexture) {
             if (description.hasAlpha8Texture) {
                 if (!description.hasGradient && !description.hasBitmap) {
                     shader.append(gFS_Main_FetchA8Texture[modulateOp]);

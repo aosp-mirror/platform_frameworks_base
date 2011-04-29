@@ -77,6 +77,8 @@ namespace uirenderer {
 
 #define PROGRAM_HAS_WIDTH_SHIFT 37
 
+#define PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT 38
+
 ///////////////////////////////////////////////////////////////////////////////
 // Types
 ///////////////////////////////////////////////////////////////////////////////
@@ -113,6 +115,7 @@ struct ProgramDescription {
     // Texturing
     bool hasTexture;
     bool hasAlpha8Texture;
+    bool hasExternalTexture;
 
     // Modulate, this should only be set when setColor() return true
     bool modulate;
@@ -151,6 +154,7 @@ struct ProgramDescription {
     void reset() {
         hasTexture = false;
         hasAlpha8Texture = false;
+        hasExternalTexture = false;
 
         hasWidth = false;
 
@@ -240,6 +244,7 @@ struct ProgramDescription {
         if (modulate) key |= programid(0x1) << PROGRAM_MODULATE_SHIFT;
         if (isPoint) key |= programid(0x1) << PROGRAM_IS_POINT_SHIFT;
         if (hasWidth) key |= programid(0x1) << PROGRAM_HAS_WIDTH_SHIFT;
+        if (hasExternalTexture) key |= programid(0x1) << PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT;
         return key;
     }
 

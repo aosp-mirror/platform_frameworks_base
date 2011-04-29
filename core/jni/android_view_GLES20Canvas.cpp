@@ -539,6 +539,19 @@ static OpenGLRenderer* android_view_GLES20Canvas_createLayerRenderer(JNIEnv* env
     return NULL;
 }
 
+static Layer* android_view_GLES20Canvas_createTextureLayer(JNIEnv* env, jobject clazz,
+        jintArray layerInfo) {
+    Layer* layer = LayerRenderer::createTextureLayer();
+
+    if (layer) {
+        jint* storage = env->GetIntArrayElements(layerInfo, NULL);
+        storage[0] = layer->texture;
+        env->ReleaseIntArrayElements(layerInfo, storage, 0);
+    }
+
+    return layer;
+}
+
 static Layer* android_view_GLES20Canvas_createLayer(JNIEnv* env, jobject clazz,
         jint width, jint height, jboolean isOpaque, jintArray layerInfo) {
     Layer* layer = LayerRenderer::createLayer(width, height, isOpaque);
@@ -561,6 +574,13 @@ static void android_view_GLES20Canvas_resizeLayer(JNIEnv* env, jobject clazz,
     storage[0] = layer->width;
     storage[1] = layer->height;
     env->ReleaseIntArrayElements(layerInfo, storage, 0);
+}
+
+static void android_view_GLES20Canvas_updateTextureLayer(JNIEnv* env, jobject clazz,
+        Layer* layer, jint width, jint height, jfloatArray texTransform) {
+    jfloat* transform = env->GetFloatArrayElements(texTransform, NULL);
+    LayerRenderer::updateTextureLayer(layer, width, height, transform);
+    env->ReleaseFloatArrayElements(texTransform, transform, 0);
 }
 
 static void android_view_GLES20Canvas_destroyLayer(JNIEnv* env, jobject clazz, Layer* layer) {
@@ -696,6 +716,8 @@ static JNINativeMethod gMethods[] = {
     { "nCreateLayerRenderer",    "(I)I",       (void*) android_view_GLES20Canvas_createLayerRenderer },
     { "nCreateLayer",            "(IIZ[I)I",   (void*) android_view_GLES20Canvas_createLayer },
     { "nResizeLayer",            "(III[I)V" ,  (void*) android_view_GLES20Canvas_resizeLayer },
+    { "nCreateTextureLayer",     "([I)I",      (void*) android_view_GLES20Canvas_createTextureLayer },
+    { "nUpdateTextureLayer",     "(III[F)V" ,  (void*) android_view_GLES20Canvas_updateTextureLayer },
     { "nDestroyLayer",           "(I)V",       (void*) android_view_GLES20Canvas_destroyLayer },
     { "nDestroyLayerDeferred",   "(I)V",       (void*) android_view_GLES20Canvas_destroyLayerDeferred },
     { "nDrawLayer",              "(IIFFI)V",   (void*) android_view_GLES20Canvas_drawLayer },
