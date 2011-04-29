@@ -26,7 +26,6 @@
 #endif
 
 #include <private/pixelflinger/ggl_context.h>
-#include <hardware/copybit.h>
 #include <hardware/gralloc.h>
 
 #include <GLES/gl.h>
@@ -606,7 +605,6 @@ struct prims_t {
 
 struct copybits_context_t {
     // A handle to the blit engine, if it exists, else NULL.
-    copybit_device_t*       blitEngine;
     int32_t                 minScale;
     int32_t                 maxScale;
     android_native_buffer_t* drawSurfaceBuffer;

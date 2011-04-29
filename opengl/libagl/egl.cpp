@@ -41,8 +41,6 @@
 
 #include <private/ui/android_natives_priv.h>
 
-#include <hardware/copybit.h>
-
 #include "context.h"
 #include "state.h"
 #include "texture.h"
@@ -238,7 +236,6 @@ private:
     android_native_buffer_t*   buffer;
     android_native_buffer_t*   previousBuffer;
     gralloc_module_t const*    module;
-    copybit_device_t*          blitengine;
     int width;
     int height;
     void* bits;
@@ -324,24 +321,6 @@ private:
         ssize_t count;
     };
     
-    struct region_iterator : public copybit_region_t {
-        region_iterator(const Region& region)
-            : b(region.begin()), e(region.end()) {
-            this->next = iterate;
-        }
-    private:
-        static int iterate(copybit_region_t const * self, copybit_rect_t* rect) {
-            region_iterator const* me = static_cast<region_iterator const*>(self);
-            if (me->b != me->e) {
-                *reinterpret_cast<Rect*>(rect) = *me->b++;
-                return 1;
-            }
-            return 0;
-        }
-        mutable Region::const_iterator b;
-        Region::const_iterator const e;
-    };
-
     void copyBlt(
             android_native_buffer_t* dst, void* dst_vaddr,
             android_native_buffer_t* src, void const* src_vaddr,
@@ -357,16 +336,8 @@ egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
         ANativeWindow* window)
     : egl_surface_t(dpy, config, depthFormat), 
     nativeWindow(window), buffer(0), previousBuffer(0), module(0),
-    blitengine(0), bits(NULL)
+    bits(NULL)
 {
-    hw_module_t const* pModule;
-    hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &pModule);
-    module = reinterpret_cast<gralloc_module_t const*>(pModule);
-
-    if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &pModule) == 0) {
-        copybit_open(pModule, &blitengine);
-    }
-
     pixelFormatTable = gglGetPixelFormatTable();
     
     // keep a reference on the window
@@ -383,9 +354,6 @@ egl_window_surface_v2_t::~egl_window_surface_v2_t() {
         previousBuffer->common.decRef(&previousBuffer->common); 
     }
     nativeWindow->common.decRef(&nativeWindow->common);
-    if (blitengine) {
-        copybit_close(blitengine);
-    }
 }
 
 EGLBoolean egl_window_surface_v2_t::connect() 
@@ -475,60 +443,33 @@ void egl_window_surface_v2_t::copyBlt(
     // FIXME: use copybit if possible
     // NOTE: dst and src must be the same format
     
-    status_t err = NO_ERROR;
-    copybit_device_t* const copybit = blitengine;
-    if (copybit)  {
-        copybit_image_t simg;
-        simg.w = src->stride;
-        simg.h = src->height;
-        simg.format = src->format;
-        simg.handle = const_cast<native_handle_t*>(src->handle);
+    Region::const_iterator cur = clip.begin();
+    Region::const_iterator end = clip.end();
 
-        copybit_image_t dimg;
-        dimg.w = dst->stride;
-        dimg.h = dst->height;
-        dimg.format = dst->format;
-        dimg.handle = const_cast<native_handle_t*>(dst->handle);
-        
-        copybit->set_parameter(copybit, COPYBIT_TRANSFORM, 0);
-        copybit->set_parameter(copybit, COPYBIT_PLANE_ALPHA, 255);
-        copybit->set_parameter(copybit, COPYBIT_DITHER, COPYBIT_DISABLE);
-        region_iterator it(clip);
-        err = copybit->blit(copybit, &dimg, &simg, &it);
-        if (err != NO_ERROR) {
-            LOGE("copybit failed (%s)", strerror(err));
+    const size_t bpp = pixelFormatTable[src->format].size;
+    const size_t dbpr = dst->stride * bpp;
+    const size_t sbpr = src->stride * bpp;
+
+    uint8_t const * const src_bits = (uint8_t const *)src_vaddr;
+    uint8_t       * const dst_bits = (uint8_t       *)dst_vaddr;
+
+    while (cur != end) {
+        const Rect& r(*cur++);
+        ssize_t w = r.right - r.left;
+        ssize_t h = r.bottom - r.top;
+        if (w <= 0 || h<=0) continue;
+        size_t size = w * bpp;
+        uint8_t const * s = src_bits + (r.left + src->stride * r.top) * bpp;
+        uint8_t       * d = dst_bits + (r.left + dst->stride * r.top) * bpp;
+        if (dbpr==sbpr && size==sbpr) {
+            size *= h;
+            h = 1;
         }
-    }
-
-    if (!copybit || err) {
-        Region::const_iterator cur = clip.begin();
-        Region::const_iterator end = clip.end();
-        
-        const size_t bpp = pixelFormatTable[src->format].size;
-        const size_t dbpr = dst->stride * bpp;
-        const size_t sbpr = src->stride * bpp;
-
-        uint8_t const * const src_bits = (uint8_t const *)src_vaddr;
-        uint8_t       * const dst_bits = (uint8_t       *)dst_vaddr;
-
-        while (cur != end) {
-            const Rect& r(*cur++);
-            ssize_t w = r.right - r.left;
-            ssize_t h = r.bottom - r.top;
-            if (w <= 0 || h<=0) continue;
-            size_t size = w * bpp;
-            uint8_t const * s = src_bits + (r.left + src->stride * r.top) * bpp;
-            uint8_t       * d = dst_bits + (r.left + dst->stride * r.top) * bpp;
-            if (dbpr==sbpr && size==sbpr) {
-                size *= h;
-                h = 1;
-            }
-            do {
-                memcpy(d, s, size);
-                d += dbpr;
-                s += sbpr;
-            } while (--h > 0);
-        }
+        do {
+            memcpy(d, s, size);
+            d += dbpr;
+            s += sbpr;
+        } while (--h > 0);
     }
 }
 
