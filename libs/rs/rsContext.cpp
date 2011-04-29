@@ -598,7 +598,7 @@ RsMessageToClientType Context::getMessageToClient(void *data, size_t *receiveLen
     *subID = d[0];
 
     //LOGE("getMessageToClient  %i %i", commandID, *subID);
-    if (bufferLen >= bytesData) {
+    if (bufferLen >= (*receiveLen)) {
         memcpy(data, d+1, *receiveLen);
         mIO.mToClient.next();
         return (RsMessageToClientType)commandID;
