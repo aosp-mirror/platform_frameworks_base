@@ -47,7 +47,6 @@ import android.util.Log;
  *      private Camera mCamera;
  *      private TextureView mTextureView;
  *
- *      @Override
  *      protected void onCreate(Bundle savedInstanceState) {
  *          super.onCreate(savedInstanceState);
  *
@@ -57,7 +56,6 @@ import android.util.Log;
  *          setContentView(mTextureView);
  *      }
  *
- *      @Override
  *      protected void onDestroy() {
  *          super.onDestroy();
  *
@@ -65,7 +63,6 @@ import android.util.Log;
  *          mCamera.release();
  *      }
  *
- *      @Override
  *      public void onSurfaceTextureAvailable(SurfaceTexture surface) {
  *          mCamera = Camera.open();
  *
