@@ -740,25 +740,21 @@ void rsi_ContextDestroyWorker(Context *rsc) {
     rsc->destroyWorkerThreadResources();;
 }
 
-}
-}
-
-void rsContextDestroy(RsContext vcon) {
-    LOGV("rsContextDestroy %p", vcon);
-    Context *rsc = static_cast<Context *>(vcon);
+void rsi_ContextDestroy(Context *rsc) {
+    LOGV("rsContextDestroy %p", rsc);
     rsContextDestroyWorker(rsc);
     delete rsc;
-    LOGV("rsContextDestroy 2 %p", vcon);
+    LOGV("rsContextDestroy 2 %p", rsc);
 }
 
-RsContext rsContextCreate(RsDevice vdev, uint32_t version) {
+RsContext rsi_ContextCreate(RsDevice vdev, uint32_t version) {
     LOGV("rsContextCreate %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
     Context *rsc = Context::createContext(dev, NULL);
     return rsc;
 }
 
-RsContext rsContextCreateGL(RsDevice vdev, uint32_t version,
+RsContext rsi_ContextCreateGL(RsDevice vdev, uint32_t version,
                             RsSurfaceConfig sc, uint32_t dpi) {
     LOGV("rsContextCreateGL %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
@@ -768,30 +764,29 @@ RsContext rsContextCreateGL(RsDevice vdev, uint32_t version,
     return rsc;
 }
 
-RsMessageToClientType rsContextPeekMessage(RsContext vrsc,
+RsMessageToClientType rsi_ContextPeekMessage(Context *rsc,
                                            size_t * receiveLen, size_t receiveLen_length,
                                            uint32_t * subID, size_t subID_length, bool wait) {
-    Context * rsc = static_cast<Context *>(vrsc);
     return rsc->peekMessageToClient(receiveLen, subID, wait);
 }
 
-RsMessageToClientType rsContextGetMessage(RsContext vrsc, void * data, size_t data_length,
+RsMessageToClientType rsi_ContextGetMessage(Context *rsc, void * data, size_t data_length,
                                           size_t * receiveLen, size_t receiveLen_length,
                                           uint32_t * subID, size_t subID_length, bool wait) {
-    Context * rsc = static_cast<Context *>(vrsc);
     rsAssert(subID_length == sizeof(uint32_t));
     rsAssert(receiveLen_length == sizeof(size_t));
     return rsc->getMessageToClient(data, receiveLen, subID, data_length, wait);
 }
 
-void rsContextInitToClient(RsContext vrsc) {
-    Context * rsc = static_cast<Context *>(vrsc);
+void rsi_ContextInitToClient(Context *rsc) {
     rsc->initToClient();
 }
 
-void rsContextDeinitToClient(RsContext vrsc) {
-    Context * rsc = static_cast<Context *>(vrsc);
+void rsi_ContextDeinitToClient(Context *rsc) {
     rsc->deinitToClient();
+}
+
+}
 }
 
 // Only to be called at a3d load time, before object is visible to user

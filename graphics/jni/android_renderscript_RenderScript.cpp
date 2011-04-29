@@ -381,7 +381,7 @@ nTypeCreate(JNIEnv *_env, jobject _this, RsContext con, RsElement eid,
     LOG_API("nTypeCreate, con(%p) eid(%p), x(%i), y(%i), z(%i), mips(%i), faces(%i)",
             con, eid, dimx, dimy, dimz, mips, faces);
 
-    jint id = (jint)rsaTypeCreate(con, (RsElement)eid, dimx, dimy, dimz, mips, faces);
+    jint id = (jint)rsTypeCreate(con, (RsElement)eid, dimx, dimy, dimz, mips, faces);
     return (jint)id;
 }
 
@@ -409,7 +409,7 @@ static jint
 nAllocationCreateTyped(JNIEnv *_env, jobject _this, RsContext con, jint type, jint mips, jint usage)
 {
     LOG_API("nAllocationCreateTyped, con(%p), type(%p), mip(%i), usage(%i)", con, (RsElement)type, mips, usage);
-    return (jint) rsaAllocationCreateTyped(con, (RsType)type, (RsAllocationMipmapControl)mips, (uint32_t)usage);
+    return (jint) rsAllocationCreateTyped(con, (RsType)type, (RsAllocationMipmapControl)mips, (uint32_t)usage);
 }
 
 static void
@@ -435,7 +435,7 @@ nAllocationCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint typ
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
-    jint id = (jint)rsaAllocationCreateFromBitmap(con,
+    jint id = (jint)rsAllocationCreateFromBitmap(con,
                                                   (RsType)type, (RsAllocationMipmapControl)mip,
                                                   ptr, bitmap.getSize(), usage);
     bitmap.unlockPixels();
@@ -451,7 +451,7 @@ nAllocationCubeCreateFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint
 
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
-    jint id = (jint)rsaAllocationCubeCreateFromBitmap(con,
+    jint id = (jint)rsAllocationCubeCreateFromBitmap(con,
                                                       (RsType)type, (RsAllocationMipmapControl)mip,
                                                       ptr, bitmap.getSize(), usage);
     bitmap.unlockPixels();

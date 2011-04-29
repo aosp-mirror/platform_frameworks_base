@@ -274,15 +274,14 @@ Type * Type::cloneAndResize2D(Context *rsc,
 namespace android {
 namespace renderscript {
 
-}
-}
-
-RsType rsaTypeCreate(RsContext con, RsElement _e, uint32_t dimX,
+RsType rsi_TypeCreate(Context *rsc, RsElement _e, uint32_t dimX,
                      uint32_t dimY, uint32_t dimZ, bool mips, bool faces) {
-    Context *rsc = static_cast<Context *>(con);
     Element *e = static_cast<Element *>(_e);
 
     return Type::getType(rsc, e, dimX, dimY, dimZ, mips, faces);
+}
+
+}
 }
 
 void rsaTypeGetNativeData(RsContext con, RsType type, uint32_t *typeData, uint32_t typeDataSize) {

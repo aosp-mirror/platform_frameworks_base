@@ -649,10 +649,11 @@ void Allocation::resize2D(Context *rsc, uint32_t dimX, uint32_t dimY) {
 //
 #ifndef ANDROID_RS_SERIALIZE
 
-static void rsaAllocationGenerateScriptMips(RsContext con, RsAllocation va);
 
 namespace android {
 namespace renderscript {
+
+static void AllocationGenerateScriptMips(RsContext con, RsAllocation va);
 
 void rsi_AllocationUploadToTexture(Context *rsc, RsAllocation va, bool genmip, uint32_t baseMipLevel) {
     Allocation *alloc = static_cast<Allocation *>(va);
@@ -740,7 +741,7 @@ void rsi_AllocationSyncAll(Context *rsc, RsAllocation va, RsAllocationUsageType 
 
 void rsi_AllocationGenerateMipmaps(Context *rsc, RsAllocation va) {
     Allocation *texAlloc = static_cast<Allocation *>(va);
-    rsaAllocationGenerateScriptMips(rsc, texAlloc);
+    AllocationGenerateScriptMips(rsc, texAlloc);
 }
 
 void rsi_AllocationCopyToBitmap(Context *rsc, RsAllocation va, void *data, size_t dataLen) {
@@ -795,10 +796,7 @@ void rsi_AllocationResize2D(Context *rsc, RsAllocation va, uint32_t dimX, uint32
     a->resize2D(rsc, dimX, dimY);
 }
 
-}
-}
-
-static void rsaAllocationGenerateScriptMips(RsContext con, RsAllocation va) {
+static void AllocationGenerateScriptMips(RsContext con, RsAllocation va) {
     Context *rsc = static_cast<Context *>(con);
     Allocation *texAlloc = static_cast<Allocation *>(va);
     uint32_t numFaces = texAlloc->getType()->getDimFaces() ? 6 : 1;
@@ -815,29 +813,20 @@ static void rsaAllocationGenerateScriptMips(RsContext con, RsAllocation va) {
     }
 }
 
-const void * rsaAllocationGetType(RsContext con, RsAllocation va) {
-    Allocation *a = static_cast<Allocation *>(va);
-    a->getType()->incUserRef();
-
-    return a->getType();
-}
-
-RsAllocation rsaAllocationCreateTyped(RsContext con, RsType vtype,
-                                      RsAllocationMipmapControl mips,
-                                      uint32_t usages) {
-    Context *rsc = static_cast<Context *>(con);
+RsAllocation rsi_AllocationCreateTyped(Context *rsc, RsType vtype,
+                                       RsAllocationMipmapControl mips,
+                                       uint32_t usages) {
     Allocation * alloc = new Allocation(rsc, static_cast<Type *>(vtype), usages, mips);
     alloc->incUserRef();
     return alloc;
 }
 
-RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
-                                           RsAllocationMipmapControl mips,
-                                           const void *data, size_t data_length, uint32_t usages) {
-    Context *rsc = static_cast<Context *>(con);
+RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, RsType vtype,
+                                            RsAllocationMipmapControl mips,
+                                            const void *data, size_t data_length, uint32_t usages) {
     Type *t = static_cast<Type *>(vtype);
 
-    RsAllocation vTexAlloc = rsaAllocationCreateTyped(rsc, vtype, mips, usages);
+    RsAllocation vTexAlloc = rsi_AllocationCreateTyped(rsc, vtype, mips, usages);
     Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
     if (texAlloc == NULL) {
         LOGE("Memory allocation failure");
@@ -846,23 +835,22 @@ RsAllocation rsaAllocationCreateFromBitmap(RsContext con, RsType vtype,
 
     memcpy(texAlloc->getPtr(), data, t->getDimX() * t->getDimY() * t->getElementSizeBytes());
     if (mips == RS_ALLOCATION_MIPMAP_FULL) {
-        rsaAllocationGenerateScriptMips(rsc, texAlloc);
+        AllocationGenerateScriptMips(rsc, texAlloc);
     }
 
     texAlloc->deferredUploadToTexture(rsc);
     return texAlloc;
 }
 
-RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
-                                               RsAllocationMipmapControl mips,
-                                               const void *data, size_t data_length, uint32_t usages) {
-    Context *rsc = static_cast<Context *>(con);
+RsAllocation rsi_AllocationCubeCreateFromBitmap(Context *rsc, RsType vtype,
+                                                RsAllocationMipmapControl mips,
+                                                const void *data, size_t data_length, uint32_t usages) {
     Type *t = static_cast<Type *>(vtype);
 
     // Cubemap allocation's faces should be Width by Width each.
     // Source data should have 6 * Width by Width pixels
     // Error checking is done in the java layer
-    RsAllocation vTexAlloc = rsaAllocationCreateTyped(rsc, t, mips, usages);
+    RsAllocation vTexAlloc = rsi_AllocationCreateTyped(rsc, vtype, mips, usages);
     Allocation *texAlloc = static_cast<Allocation *>(vTexAlloc);
     if (texAlloc == NULL) {
         LOGE("Memory allocation failure");
@@ -887,11 +875,21 @@ RsAllocation rsaAllocationCubeCreateFromBitmap(RsContext con, RsType vtype,
     }
 
     if (mips == RS_ALLOCATION_MIPMAP_FULL) {
-        rsaAllocationGenerateScriptMips(rsc, texAlloc);
+        AllocationGenerateScriptMips(rsc, texAlloc);
     }
 
     texAlloc->deferredUploadToTexture(rsc);
     return texAlloc;
+}
+
+}
+}
+
+const void * rsaAllocationGetType(RsContext con, RsAllocation va) {
+    Allocation *a = static_cast<Allocation *>(va);
+    a->getType()->incUserRef();
+
+    return a->getType();
 }
 
 #endif //ANDROID_RS_SERIALIZE

@@ -97,9 +97,20 @@ void printStructures(FILE *f) {
     }
 }
 
-void printFuncDecl(FILE *f, const ApiEntry *api, const char *prefix, int addContext) {
+void printFuncDecl(FILE *f, const ApiEntry *api, const char *prefix, int addContext, int isFnPtr) {
     printVarTypeAndName(f, &api->ret);
-    fprintf(f, " %s%s (", prefix, api->name);
+    if (isFnPtr) {
+        char t[1024];
+        strcpy(t, api->name);
+        if (strlen(prefix) == 0) {
+            if (t[0] > 'A' && t[0] < 'Z') {
+                t[0] -= 'A' - 'a';
+            }
+        }
+        fprintf(f, " (* %s%s) (", prefix, api->name);
+    } else {
+        fprintf(f, " %s%s (", prefix, api->name);
+    }
     if (!api->nocontext) {
         if (addContext) {
             fprintf(f, "Context *");
@@ -114,10 +125,22 @@ void printFuncDecl(FILE *f, const ApiEntry *api, const char *prefix, int addCont
 void printFuncDecls(FILE *f, const char *prefix, int addContext) {
     int ct;
     for (ct=0; ct < apiCount; ct++) {
-        printFuncDecl(f, &apis[ct], prefix, addContext);
+        printFuncDecl(f, &apis[ct], prefix, addContext, 0);
         fprintf(f, ";\n");
     }
     fprintf(f, "\n\n");
+}
+
+void printFuncPointers(FILE *f, int addContext) {
+    fprintf(f, "\n");
+    fprintf(f, "typedef struct RsApiEntrypoints {\n");
+    int ct;
+    for (ct=0; ct < apiCount; ct++) {
+        fprintf(f, "    ");
+        printFuncDecl(f, &apis[ct], "", addContext, 1);
+        fprintf(f, ";\n");
+    }
+    fprintf(f, "} RsApiEntrypoints_t;\n\n");
 }
 
 void printPlaybackFuncs(FILE *f, const char *prefix) {
@@ -172,21 +195,35 @@ void printApiCpp(FILE *f) {
     fprintf(f, "#include \"rsHandcode.h\"\n");
     fprintf(f, "\n");
 
+    printFuncPointers(f, 0);
+
+    // Generate RS funcs for local fifo
     for (ct=0; ct < apiCount; ct++) {
         int needFlush = 0;
         const ApiEntry * api = &apis[ct];
 
-        if (api->direct) {
-            continue;
-        }
-
-        printFuncDecl(f, api, "rs", 0);
+        fprintf(f, "static ");
+        printFuncDecl(f, api, "LF_", 0, 0);
         fprintf(f, "\n{\n");
-        if (api->handcodeApi) {
-            fprintf(f, "    rsHCAPI_%s(rsc", api->name);
+        if (api->handcodeApi || api->direct) {
+            if (api->handcodeApi) {
+                fprintf(f, "    rsHCAPI_%s(rsc", api->name);
+            } else {
+                fprintf(f, "    ");
+                if (api->ret.typeName[0]) {
+                    fprintf(f, "return ");
+                }
+                fprintf(f, "rsi_%s(", api->name);
+                if (!api->nocontext) {
+                    fprintf(f, "(Context *)rsc");
+                }
+            }
             for (ct2=0; ct2 < api->paramCount; ct2++) {
                 const VarType *vt = &api->params[ct2];
-                fprintf(f, ", %s", vt->name);
+                if (ct2 > 0 || !api->nocontext) {
+                    fprintf(f, ", ");
+                }
+                fprintf(f, "%s", vt->name);
             }
             fprintf(f, ");\n");
         } else {
@@ -252,6 +289,43 @@ void printApiCpp(FILE *f) {
         }
         fprintf(f, "};\n\n");
     }
+
+    fprintf(f, "\n");
+    fprintf(f, "static RsApiEntrypoints_t s_LocalTable = {\n");
+    for (ct=0; ct < apiCount; ct++) {
+        fprintf(f, "    LF_%s,\n", apis[ct].name);
+    }
+    fprintf(f, "};\n");
+
+    fprintf(f, "static RsApiEntrypoints_t *s_CurrentTable = &s_LocalTable;\n\n");
+
+    for (ct=0; ct < apiCount; ct++) {
+        int needFlush = 0;
+        const ApiEntry * api = &apis[ct];
+
+        printFuncDecl(f, api, "rs", 0, 0);
+        fprintf(f, "\n{\n");
+        fprintf(f, "    ");
+        if (api->ret.typeName[0]) {
+            fprintf(f, "return ");
+        }
+        fprintf(f, "s_CurrentTable->%s(", api->name);
+
+        if (!api->nocontext) {
+            fprintf(f, "(Context *)rsc");
+        }
+
+        for (ct2=0; ct2 < api->paramCount; ct2++) {
+            const VarType *vt = &api->params[ct2];
+            if (ct2 > 0 || !api->nocontext) {
+                fprintf(f, ", ");
+            }
+            fprintf(f, "%s", vt->name);
+        }
+        fprintf(f, ");\n");
+        fprintf(f, "}\n\n");
+    }
+
 }
 
 void printPlaybackCpp(FILE *f) {
@@ -368,6 +442,19 @@ int main(int argc, char **argv) {
         break;
 
         case '3': // rsgApiReplay.cpp
+        {
+            printFileHeader(f);
+            printPlaybackCpp(f);
+        }
+        break;
+
+        case '4': // rsgApiStream.cpp
+        {
+            printFileHeader(f);
+            printPlaybackCpp(f);
+        }
+
+        case '5': // rsgApiStreamReplay.cpp
         {
             printFileHeader(f);
             printPlaybackCpp(f);
