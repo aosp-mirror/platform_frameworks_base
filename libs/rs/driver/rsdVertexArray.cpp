@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,28 +14,32 @@
  * limitations under the License.
  */
 
-#include "rsContext.h"
-#ifndef ANDROID_RS_SERIALIZE
+#include <rs_hal.h>
+#include <rsContext.h>
+
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
-#endif
+
+#include "rsdCore.h"
+#include "rsdVertexArray.h"
+#include "rsdShaderCache.h"
 
 using namespace android;
 using namespace android::renderscript;
 
-VertexArray::VertexArray(const Attrib *attribs, uint32_t numAttribs) {
+RsdVertexArray::RsdVertexArray(const Attrib *attribs, uint32_t numAttribs) {
     mAttribs = attribs;
     mCount = numAttribs;
 }
 
-VertexArray::~VertexArray() {
+RsdVertexArray::~RsdVertexArray() {
 }
 
-VertexArray::Attrib::Attrib() {
+RsdVertexArray::Attrib::Attrib() {
     clear();
 }
 
-void VertexArray::Attrib::clear() {
+void RsdVertexArray::Attrib::clear() {
     buffer = 0;
     offset = 0;
     type = 0;
@@ -46,7 +50,7 @@ void VertexArray::Attrib::clear() {
     name.setTo("");
 }
 
-void VertexArray::Attrib::set(uint32_t type, uint32_t size, uint32_t stride,
+void RsdVertexArray::Attrib::set(uint32_t type, uint32_t size, uint32_t stride,
                               bool normalized, uint32_t offset,
                               const char *name) {
     clear();
@@ -58,7 +62,7 @@ void VertexArray::Attrib::set(uint32_t type, uint32_t size, uint32_t stride,
     this->name.setTo(name);
 }
 
-void VertexArray::logAttrib(uint32_t idx, uint32_t slot) const {
+void RsdVertexArray::logAttrib(uint32_t idx, uint32_t slot) const {
     if (idx == 0) {
         LOGV("Starting vertex attribute binding");
     }
@@ -74,11 +78,15 @@ void VertexArray::logAttrib(uint32_t idx, uint32_t slot) const {
          mAttribs[idx].offset);
 }
 
-void VertexArray::setupGL2(const Context *rsc,
-                           class VertexArrayState *state,
-                           ShaderCache *sc) const {
-    rsc->checkError("VertexArray::setupGL2 start");
+void RsdVertexArray::setupGL2(const Context *rsc) const {
+
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
+    RsdVertexArrayState *state = dc->gl.vertexArrayState;
+    RsdShaderCache *sc = dc->gl.shaderCache;
+
+    rsc->checkError("RsdVertexArray::setupGL2 start");
     uint32_t maxAttrs = state->mAttrsEnabledSize;
+
     for (uint32_t ct=1; ct < maxAttrs; ct++) {
         if(state->mAttrsEnabled[ct]) {
             glDisableVertexAttribArray(ct);
@@ -86,7 +94,7 @@ void VertexArray::setupGL2(const Context *rsc,
         }
     }
 
-    rsc->checkError("VertexArray::setupGL2 disabled");
+    rsc->checkError("RsdVertexArray::setupGL2 disabled");
     for (uint32_t ct=0; ct < mCount; ct++) {
         int32_t slot = sc->vtxAttribSlot(mAttribs[ct].name);
         if (rsc->props.mLogShadersAttr) {
@@ -105,22 +113,22 @@ void VertexArray::setupGL2(const Context *rsc,
                               mAttribs[ct].stride,
                               mAttribs[ct].ptr + mAttribs[ct].offset);
     }
-    rsc->checkError("VertexArray::setupGL2 done");
+    rsc->checkError("RsdVertexArray::setupGL2 done");
 }
 ////////////////////////////////////////////
-VertexArrayState::VertexArrayState() {
+RsdVertexArrayState::RsdVertexArrayState() {
     mAttrsEnabled = NULL;
     mAttrsEnabledSize = 0;
 }
 
-VertexArrayState::~VertexArrayState() {
+RsdVertexArrayState::~RsdVertexArrayState() {
     if (mAttrsEnabled) {
         delete[] mAttrsEnabled;
         mAttrsEnabled = NULL;
     }
 }
-void VertexArrayState::init(Context *rsc) {
-    mAttrsEnabledSize = rsc->getMaxVertexAttributes();
+void RsdVertexArrayState::init(uint32_t maxAttrs) {
+    mAttrsEnabledSize = maxAttrs;
     mAttrsEnabled = new bool[mAttrsEnabledSize];
     for (uint32_t ct = 0; ct < mAttrsEnabledSize; ct++) {
         mAttrsEnabled[ct] = false;

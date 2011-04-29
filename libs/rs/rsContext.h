@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +37,7 @@
 #include "rsProgramStore.h"
 #include "rsProgramRaster.h"
 #include "rsProgramVertex.h"
-#include "rsShaderCache.h"
 #include "rsFBOCache.h"
-#include "rsVertexArray.h"
 
 #include "rsgApiStructs.h"
 #include "rsLocklessFifo.h"
@@ -111,11 +109,9 @@ public:
     ProgramStoreState mStateFragmentStore;
     ProgramRasterState mStateRaster;
     ProgramVertexState mStateVertex;
-    VertexArrayState mStateVertexArray;
     FontState mStateFont;
 
     ScriptCState mScriptC;
-    ShaderCache mShaderCache;
     FBOCache mFBOCache;
 
     void swapBuffers();

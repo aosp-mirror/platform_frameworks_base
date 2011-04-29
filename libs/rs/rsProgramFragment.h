@@ -32,11 +32,8 @@ public:
                              uint32_t paramLength);
     virtual ~ProgramFragment();
 
-    virtual void setupGL2(Context *, ProgramFragmentState *, ShaderCache *sc);
+    virtual void setupGL2(Context *, ProgramFragmentState *);
 
-    virtual void createShader();
-    virtual void loadShader(Context *rsc);
-    virtual void init(Context *rsc);
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_FRAGMENT; }
     static ProgramFragment *createFromStream(Context *rsc, IStream *stream);

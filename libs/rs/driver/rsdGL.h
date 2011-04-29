@@ -19,7 +19,8 @@
 
 #include <rs_hal.h>
 
-
+class RsdShaderCache;
+class RsdVertexArrayState;
 
 typedef void (* InvokeFunc_t)(void);
 typedef void (*WorkerCallback_t)(void *usr, uint32_t idx);
@@ -64,6 +65,8 @@ typedef struct RsdGLRec {
     ANativeWindow *wndSurface;
     uint32_t width;
     uint32_t height;
+    RsdShaderCache *shaderCache;
+    RsdVertexArrayState *vertexArrayState;
 } RsdGL;
 
 

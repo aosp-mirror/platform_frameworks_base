@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,38 +14,59 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_SHADER_CACHE_H
-#define ANDROID_SHADER_CACHE_H
+#ifndef ANDROID_RSD_SHADER_CACHE_H
+#define ANDROID_RSD_SHADER_CACHE_H
 
-
-#include "rsObjectBase.h"
-#include "rsVertexArray.h"
-
-// ---------------------------------------------------------------------------
 namespace android {
 namespace renderscript {
 
+class Context;
+
+}
+}
+
+#include <utils/String8.h>
+#include <utils/Vector.h>
+class RsdShader;
+
+// ---------------------------------------------------------------------------
 
 // An element is a group of Components that occupies one cell in a structure.
-class ShaderCache {
+class RsdShaderCache {
 public:
-    ShaderCache();
-    virtual ~ShaderCache();
+    RsdShaderCache();
+    virtual ~RsdShaderCache();
 
-    bool lookup(Context *rsc, ProgramVertex *, ProgramFragment *);
+    void setActiveVertex(RsdShader *pv) {
+        mVertexDirty = true;
+        mVertex = pv;
+    }
+
+    void setActiveFragment(RsdShader *pf) {
+        mFragmentDirty = true;
+        mFragment = pf;
+    }
+
+    bool setup(const android::renderscript::Context *rsc);
 
     void cleanupVertex(uint32_t id);
     void cleanupFragment(uint32_t id);
 
     void cleanupAll();
 
-    int32_t vtxAttribSlot(const String8 &attrName) const;
+    int32_t vtxAttribSlot(const android::String8 &attrName) const;
     int32_t vtxUniformSlot(uint32_t a) const {return mCurrent->vtxUniforms[a].slot;}
     uint32_t vtxUniformSize(uint32_t a) const {return mCurrent->vtxUniforms[a].arraySize;}
     int32_t fragUniformSlot(uint32_t a) const {return mCurrent->fragUniforms[a].slot;}
     uint32_t fragUniformSize(uint32_t a) const {return mCurrent->fragUniforms[a].arraySize;}
 
 protected:
+    bool link(const android::renderscript::Context *rsc);
+    bool mFragmentDirty;
+    bool mVertexDirty;
+    RsdShader *mVertex;
+    RsdShader *mFragment;
+
     struct UniformQueryData {
         char *name;
         uint32_t nameLength;
@@ -111,21 +132,19 @@ protected:
         UniformData *vtxUniforms;
         UniformData *fragUniforms;
     };
-    Vector<ProgramEntry*> mEntries;
+    android::Vector<ProgramEntry*> mEntries;
     ProgramEntry *mCurrent;
 
-    bool hasArrayUniforms(ProgramVertex *vtx, ProgramFragment *frag);
-    void populateUniformData(Program *prog, uint32_t linkedID, UniformData *data);
-    void updateUniformArrayData(Context *rsc, Program *prog, uint32_t linkedID,
+    bool hasArrayUniforms(RsdShader *vtx, RsdShader *frag);
+    void populateUniformData(RsdShader *prog, uint32_t linkedID, UniformData *data);
+    void updateUniformArrayData(const android::renderscript::Context *rsc,
+                                RsdShader *prog, uint32_t linkedID,
                                 UniformData *data, const char* logTag,
                                 UniformQueryData **uniformList, uint32_t uniListSize);
 };
 
 
-
-}
-}
-#endif //ANDROID_SHADER_CACHE_H
+#endif //ANDROID_RSD_SHADER_CACHE_H
 
 
 

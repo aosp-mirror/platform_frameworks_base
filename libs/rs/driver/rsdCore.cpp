@@ -19,6 +19,9 @@
 #include "rsdGL.h"
 #include "rsdProgramStore.h"
 #include "rsdProgramRaster.h"
+#include "rsdProgramVertex.h"
+#include "rsdProgramFragment.h"
+#include "rsdMesh.h"
 
 #include <malloc.h>
 #include "rsContext.h"
@@ -69,6 +72,24 @@ static RsdHalFunctions FunctionTable = {
         rsdProgramRasterInit,
         rsdProgramRasterSetActive,
         rsdProgramRasterDestroy
+    },
+
+    {
+        rsdProgramVertexInit,
+        rsdProgramVertexSetActive,
+        rsdProgramVertexDestroy
+    },
+
+    {
+        rsdProgramFragmentInit,
+        rsdProgramFragmentSetActive,
+        rsdProgramFragmentDestroy
+    },
+
+    {
+        rsdMeshInit,
+        rsdMeshDraw,
+        rsdMeshDestroy
     }
 
 };

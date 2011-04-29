@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,30 @@
  * limitations under the License.
  */
 
-#include "rsContext.h"
-#ifndef ANDROID_RS_SERIALIZE
+#include <rs_hal.h>
+#include <rsContext.h>
+
+#include "rsdShader.h"
+#include "rsdShaderCache.h"
+
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
-#endif //ANDROID_RS_SERIALIZE
 
 using namespace android;
 using namespace android::renderscript;
 
 
-ShaderCache::ShaderCache() {
+RsdShaderCache::RsdShaderCache() {
     mEntries.setCapacity(16);
+    mVertexDirty = true;
+    mFragmentDirty = true;
 }
 
-ShaderCache::~ShaderCache() {
+RsdShaderCache::~RsdShaderCache() {
     cleanupAll();
 }
 
-void ShaderCache::updateUniformArrayData(Context *rsc, Program *prog, uint32_t linkedID,
+void RsdShaderCache::updateUniformArrayData(const Context *rsc, RsdShader *prog, uint32_t linkedID,
                                          UniformData *data, const char* logTag,
                                          UniformQueryData **uniformList, uint32_t uniListSize) {
 
@@ -54,14 +59,14 @@ void ShaderCache::updateUniformArrayData(Context *rsc, Program *prog, uint32_t l
     }
 }
 
-void ShaderCache::populateUniformData(Program *prog, uint32_t linkedID, UniformData *data) {
+void RsdShaderCache::populateUniformData(RsdShader *prog, uint32_t linkedID, UniformData *data) {
     for (uint32_t ct=0; ct < prog->getUniformCount(); ct++) {
        data[ct].slot = glGetUniformLocation(linkedID, prog->getUniformName(ct));
        data[ct].arraySize = prog->getUniformArraySize(ct);
     }
 }
 
-bool ShaderCache::hasArrayUniforms(ProgramVertex *vtx, ProgramFragment *frag) {
+bool RsdShaderCache::hasArrayUniforms(RsdShader *vtx, RsdShader *frag) {
     UniformData *data = mCurrent->vtxUniforms;
     for (uint32_t ct=0; ct < vtx->getUniformCount(); ct++) {
         if (data[ct].slot >= 0 && data[ct].arraySize > 1) {
@@ -77,7 +82,31 @@ bool ShaderCache::hasArrayUniforms(ProgramVertex *vtx, ProgramFragment *frag) {
     return false;
 }
 
-bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag) {
+bool RsdShaderCache::setup(const Context *rsc) {
+    if (!mVertexDirty && !mFragmentDirty) {
+        return true;
+    }
+
+    if (!link(rsc)) {
+        return false;
+    }
+
+    if (mFragmentDirty) {
+        mFragment->setup(rsc, this);
+        mFragmentDirty = false;
+    }
+    if (mVertexDirty) {
+        mVertex->setup(rsc, this);
+        mVertexDirty = false;
+    }
+
+    return true;
+}
+
+bool RsdShaderCache::link(const Context *rsc) {
+
+    RsdShader *vtx = mVertex;
+    RsdShader *frag = mFragment;
     if (!vtx->getShaderID()) {
         vtx->loadShader(rsc);
     }
@@ -89,7 +118,7 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
     if (!vtx->getShaderID() || !frag->getShaderID()) {
         return false;
     }
-    //LOGV("ShaderCache lookup  vtx %i, frag %i", vtx->getShaderID(), frag->getShaderID());
+    //LOGV("rsdShaderCache lookup  vtx %i, frag %i", vtx->getShaderID(), frag->getShaderID());
     uint32_t entryCount = mEntries.size();
     for (uint32_t ct = 0; ct < entryCount; ct ++) {
         if ((mEntries[ct]->vtx == vtx->getShaderID()) &&
@@ -98,13 +127,13 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
             //LOGV("SC using program %i", mEntries[ct]->program);
             glUseProgram(mEntries[ct]->program);
             mCurrent = mEntries[ct];
-            //LOGV("ShaderCache hit, using %i", ct);
-            rsc->checkError("ShaderCache::lookup (hit)");
+            //LOGV("RsdShaderCache hit, using %i", ct);
+            rsc->checkError("RsdShaderCache::link (hit)");
             return true;
         }
     }
 
-    //LOGV("ShaderCache miss");
+    //LOGV("RsdShaderCache miss");
     //LOGE("e0 %x", glGetError());
     ProgramEntry *e = new ProgramEntry(vtx->getAttribCount(),
                                        vtx->getUniformCount(),
@@ -120,12 +149,10 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
         //LOGE("e1 %x", glGetError());
         glAttachShader(pgm, frag->getShaderID());
 
-        if (!vtx->isUserProgram()) {
-            glBindAttribLocation(pgm, 0, "ATTRIB_position");
-            glBindAttribLocation(pgm, 1, "ATTRIB_color");
-            glBindAttribLocation(pgm, 2, "ATTRIB_normal");
-            glBindAttribLocation(pgm, 3, "ATTRIB_texture0");
-        }
+        glBindAttribLocation(pgm, 0, "ATTRIB_position");
+        glBindAttribLocation(pgm, 1, "ATTRIB_color");
+        glBindAttribLocation(pgm, 2, "ATTRIB_normal");
+        glBindAttribLocation(pgm, 3, "ATTRIB_texture0");
 
         //LOGE("e2 %x", glGetError());
         glLinkProgram(pgm);
@@ -203,11 +230,12 @@ bool ShaderCache::lookup(Context *rsc, ProgramVertex *vtx, ProgramFragment *frag
 
     //LOGV("SC made program %i", e->program);
     glUseProgram(e->program);
-    rsc->checkError("ShaderCache::lookup (miss)");
+    rsc->checkError("RsdShaderCache::link (miss)");
+
     return true;
 }
 
-int32_t ShaderCache::vtxAttribSlot(const String8 &attrName) const {
+int32_t RsdShaderCache::vtxAttribSlot(const String8 &attrName) const {
     for (uint32_t ct=0; ct < mCurrent->vtxAttrCount; ct++) {
         if (attrName == mCurrent->vtxAttrs[ct].name) {
             return mCurrent->vtxAttrs[ct].slot;
@@ -216,7 +244,7 @@ int32_t ShaderCache::vtxAttribSlot(const String8 &attrName) const {
     return -1;
 }
 
-void ShaderCache::cleanupVertex(uint32_t id) {
+void RsdShaderCache::cleanupVertex(uint32_t id) {
     int32_t numEntries = (int32_t)mEntries.size();
     for (int32_t ct = 0; ct < numEntries; ct ++) {
         if (mEntries[ct]->vtx == id) {
@@ -230,7 +258,7 @@ void ShaderCache::cleanupVertex(uint32_t id) {
     }
 }
 
-void ShaderCache::cleanupFragment(uint32_t id) {
+void RsdShaderCache::cleanupFragment(uint32_t id) {
     int32_t numEntries = (int32_t)mEntries.size();
     for (int32_t ct = 0; ct < numEntries; ct ++) {
         if (mEntries[ct]->frag == id) {
@@ -244,7 +272,7 @@ void ShaderCache::cleanupFragment(uint32_t id) {
     }
 }
 
-void ShaderCache::cleanupAll() {
+void RsdShaderCache::cleanupAll() {
     for (uint32_t ct=0; ct < mEntries.size(); ct++) {
         glDeleteProgram(mEntries[ct]->program);
         free(mEntries[ct]);

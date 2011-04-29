@@ -110,20 +110,23 @@ LOCAL_SRC_FILES:= \
 	rsScriptC.cpp \
 	rsScriptC_Lib.cpp \
 	rsScriptC_LibGL.cpp \
-	rsShaderCache.cpp \
 	rsSignal.cpp \
 	rsStream.cpp \
 	rsThreadIO.cpp \
 	rsType.cpp \
-	rsVertexArray.cpp \
 	driver/rsdBcc.cpp \
 	driver/rsdCore.cpp \
 	driver/rsdGL.cpp \
+	driver/rsdMesh.cpp \
+	driver/rsdMeshObj.cpp \
+	driver/rsdProgram.cpp \
 	driver/rsdProgramRaster.cpp \
 	driver/rsdProgramStore.cpp \
 	driver/rsdRuntimeMath.cpp \
-	driver/rsdRuntimeStubs.cpp
-
+	driver/rsdRuntimeStubs.cpp \
+	driver/rsdShader.cpp \
+	driver/rsdShaderCache.cpp \
+	driver/rsdVertexArray.cpp
 
 LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc
 
