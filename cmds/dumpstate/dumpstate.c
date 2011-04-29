@@ -109,7 +109,10 @@ static void dumpstate() {
 
     run_command("NETWORK INTERFACES", 10, "su", "root", "netcfg", NULL);
     dump_file("NETWORK ROUTES", "/proc/net/route");
+    dump_file("NETWORK ROUTES IPV6", "/proc/net/ipv6_route");
     dump_file("ARP CACHE", "/proc/net/arp");
+    run_command("IPTABLES", 10, "su", "root", "iptables", "-L", NULL);
+    run_command("IPTABLE NAT", 10, "su", "root", "iptables", "-t", "nat", "-L", NULL);
 
     run_command("WIFI NETWORKS", 20,
             "su", "root", "wpa_cli", "list_networks", NULL);
