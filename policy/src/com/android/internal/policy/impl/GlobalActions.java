@@ -316,9 +316,10 @@ class GlobalActions implements DialogInterface.OnDismissListener, DialogInterfac
                 filteredPos++;
             }
 
-            throw new IllegalArgumentException("position " + position + " out of "
-                    + "range of showable actions, filtered count = "
-                    + "= " + getCount() + ", keyguardshowing=" + mKeyguardShowing
+            throw new IllegalArgumentException("position " + position
+                    + " out of range of showable actions"
+                    + ", filtered count=" + getCount()
+                    + ", keyguardshowing=" + mKeyguardShowing
                     + ", provisioned=" + mDeviceProvisioned);
         }
 
