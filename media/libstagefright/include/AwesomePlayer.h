@@ -88,6 +88,9 @@ struct AwesomePlayer {
     status_t getDuration(int64_t *durationUs);
     status_t getPosition(int64_t *positionUs);
 
+    status_t setParameter(int key, const Parcel &request);
+    status_t getParameter(int key, Parcel *reply);
+
     status_t seekTo(int64_t timeUs);
 
     // This is a mask of MediaExtractor::Flags.

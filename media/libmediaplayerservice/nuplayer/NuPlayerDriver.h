@@ -52,6 +52,8 @@ struct NuPlayerDriver : public MediaPlayerInterface {
     virtual player_type playerType();
     virtual status_t invoke(const Parcel &request, Parcel *reply);
     virtual void setAudioSink(const sp<AudioSink> &audioSink);
+    virtual status_t setParameter(int key, const Parcel &request);
+    virtual status_t getParameter(int key, Parcel *reply);
 
     virtual status_t getMetadata(
             const media::Metadata::Filter& ids, Parcel *records);

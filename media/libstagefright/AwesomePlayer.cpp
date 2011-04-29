@@ -1905,4 +1905,11 @@ void AwesomePlayer::postAudioSeekComplete() {
     postCheckAudioStatusEvent_l(0 /* delayUs */);
 }
 
+status_t AwesomePlayer::setParameter(int key, const Parcel &request) {
+    return OK;
+}
+
+status_t AwesomePlayer::getParameter(int key, Parcel *reply) {
+    return OK;
+}
 }  // namespace android

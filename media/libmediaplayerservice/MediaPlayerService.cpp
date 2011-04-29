@@ -1024,6 +1024,20 @@ status_t MediaPlayerService::Client::attachAuxEffect(int effectId)
     return NO_ERROR;
 }
 
+status_t MediaPlayerService::Client::setParameter(int key, const Parcel &request) {
+    LOGV("[%d] setParameter(%d)", mConnId, key);
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == 0) return UNKNOWN_ERROR;
+    return p->setParameter(key, request);
+}
+
+status_t MediaPlayerService::Client::getParameter(int key, Parcel *reply) {
+    LOGV("[%d] getParameter(%d)", mConnId, key);
+    sp<MediaPlayerBase> p = getPlayer();
+    if (p == 0) return UNKNOWN_ERROR;
+    return p->getParameter(key, reply);
+}
+
 void MediaPlayerService::Client::notify(
         void* cookie, int msg, int ext1, int ext2, const Parcel *obj)
 {

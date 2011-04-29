@@ -177,6 +177,16 @@ void StagefrightPlayer::setAudioSink(const sp<AudioSink> &audioSink) {
     mPlayer->setAudioSink(audioSink);
 }
 
+status_t StagefrightPlayer::setParameter(int key, const Parcel &request) {
+    LOGV("setParameter");
+    return mPlayer->setParameter(key, request);
+}
+
+status_t StagefrightPlayer::getParameter(int key, Parcel *reply) {
+    LOGV("getParameter");
+    return mPlayer->getParameter(key, reply);
+}
+
 status_t StagefrightPlayer::getMetadata(
         const media::Metadata::Filter& ids, Parcel *records) {
     using media::Metadata;
