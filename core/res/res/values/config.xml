@@ -549,10 +549,10 @@
     <string name="gsm_alphabet_default_charset"></string>
 
     <!-- Enables SIP on WIFI only -->
-    <bool name="config_sip_wifi_only">true</bool>
+    <bool name="config_sip_wifi_only">false</bool>
 
     <!-- Enables built-in SIP phone capability -->
-    <bool name="config_built_in_sip_phone">false</bool>
+    <bool name="config_built_in_sip_phone">true</bool>
 
     <!-- Boolean indicating if restoring network selection should be skipped -->
     <!-- The restoring is handled by modem if it is true-->
