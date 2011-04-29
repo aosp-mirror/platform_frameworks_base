@@ -44,22 +44,14 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
     CDMALTEPhone mCdmaLtePhone;
 
-    private int gprsState = ServiceState.STATE_OUT_OF_SERVICE;
-
-    private int newGPRSState = ServiceState.STATE_OUT_OF_SERVICE;
+    private ServiceState  mLteSS;  // The last LTE state from Voice Registration
 
     public CdmaLteServiceStateTracker(CDMALTEPhone phone) {
         super(phone);
         mCdmaLtePhone = phone;
-        if (DBG) log("CdmaLteServiceStateTracker Constructors");
-    }
 
-    /**
-     * @return The current GPRS state. IN_SERVICE is the same as "attached" and
-     *         OUT_OF_SERVICE is the same as detached.
-     */
-    public int getCurrentDataConnectionState() {
-        return gprsState;
+        mLteSS = new ServiceState();
+        if (DBG) log("CdmaLteServiceStateTracker Constructors");
     }
 
     @Override
@@ -77,11 +69,13 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
     }
 
     /**
-     * The LTE data connection state, only return true here
+     * Set the cdmaSS for EVENT_POLL_STATE_REGISTRATION_CDMA
      */
     @Override
-    protected boolean checkAdditionalDataAvaiable() {
-        return newGPRSState != ServiceState.STATE_IN_SERVICE;
+    protected void setCdmaTechnology(int radioTechnology) {
+        // Called on voice registration state response.
+        // Just record new CDMA radio technology
+        newSS.setRadioTechnology(radioTechnology);
     }
 
     /**
@@ -109,14 +103,10 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 }
             }
 
-            newGPRSState = regCodeToServiceState(regState);
             // Not sure if this is needed in CDMALTE phone.
             // mDataRoaming = regCodeIsRoaming(regState);
-            if (newGPRSState == ServiceState.STATE_IN_SERVICE) {
-                this.newCdmaDataConnectionState = newGPRSState;
-                newNetworkType = type;
-                newSS.setRadioTechnology(type);
-            }
+            mLteSS.setRadioTechnology(type);
+            mLteSS.setState(regCodeToServiceState(regState));
         } else {
             super.handlePollStateResultMessage(what, ar);
         }
@@ -216,6 +206,21 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
     @Override
     protected void pollStateDone() {
+        // determine data NetworkType from both LET and CDMA SS
+        if (mLteSS.getState() == ServiceState.STATE_IN_SERVICE) {
+            //in LTE service
+            newNetworkType = mLteSS.getRadioTechnology();
+            mNewDataConnectionState = mLteSS.getState();
+            newSS.setRadioTechnology(newNetworkType);
+            log("pollStateDone LTE/eHRPD STATE_IN_SERVICE newNetworkType = " + newNetworkType);
+        } else {
+            // LTE out of service, get CDMA Service State
+            newNetworkType = newSS.getRadioTechnology();
+            mNewDataConnectionState = radioTechnologyToDataServiceState(newNetworkType);
+            log("pollStateDone CDMA STATE_IN_SERVICE newNetworkType = " + newNetworkType +
+                " mNewDataConnectionState = " + mNewDataConnectionState);
+        }
+
         if (DBG) log("pollStateDone: oldSS=[" + ss + "] newSS=[" + newSS + "]");
 
         boolean hasRegistered = ss.getState() != ServiceState.STATE_IN_SERVICE
@@ -225,15 +230,15 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 && newSS.getState() != ServiceState.STATE_IN_SERVICE;
 
         boolean hasCdmaDataConnectionAttached =
-            this.cdmaDataConnectionState != ServiceState.STATE_IN_SERVICE
-                && this.newCdmaDataConnectionState == ServiceState.STATE_IN_SERVICE;
+            mDataConnectionState != ServiceState.STATE_IN_SERVICE
+                && mNewDataConnectionState == ServiceState.STATE_IN_SERVICE;
 
         boolean hasCdmaDataConnectionDetached =
-            this.cdmaDataConnectionState == ServiceState.STATE_IN_SERVICE
-                && this.newCdmaDataConnectionState != ServiceState.STATE_IN_SERVICE;
+            mDataConnectionState == ServiceState.STATE_IN_SERVICE
+                && mNewDataConnectionState != ServiceState.STATE_IN_SERVICE;
 
         boolean hasCdmaDataConnectionChanged =
-            cdmaDataConnectionState != newCdmaDataConnectionState;
+            mDataConnectionState != mNewDataConnectionState;
 
         boolean hasNetworkTypeChanged = networkType != newNetworkType;
 
@@ -272,9 +277,9 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         }
         // Add an event log when connection state changes
         if (ss.getState() != newSS.getState()
-                || cdmaDataConnectionState != newCdmaDataConnectionState) {
+                || mDataConnectionState != mNewDataConnectionState) {
             EventLog.writeEvent(EventLogTags.CDMA_SERVICE_STATE_CHANGE, ss.getState(),
-                    cdmaDataConnectionState, newSS.getState(), newCdmaDataConnectionState);
+                    mDataConnectionState, newSS.getState(), mNewDataConnectionState);
         }
 
         ServiceState tss;
@@ -283,6 +288,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         newSS = tss;
         // clean slate for next time
         newSS.setStateOutOfService();
+        mLteSS.setStateOutOfService();
 
         // TODO: 4G Tech Handoff
         // if (has4gHandoff) {
@@ -309,10 +315,8 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         cellLoc = newCellLoc;
         newCellLoc = tcl;
 
-        cdmaDataConnectionState = newCdmaDataConnectionState;
+        mDataConnectionState = mNewDataConnectionState;
         networkType = newNetworkType;
-
-        gprsState = newCdmaDataConnectionState;
 
         newSS.setStateOutOfService(); // clean slate for next time
 
