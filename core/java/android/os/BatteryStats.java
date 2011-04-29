@@ -1891,7 +1891,6 @@ public abstract class BatteryStats implements Parcelable {
         final int NU = uidStats.size();
         boolean didPid = false;
         long nowRealtime = SystemClock.elapsedRealtime();
-        StringBuilder sb = new StringBuilder(64);
         for (int i=0; i<NU; i++) {
             Uid uid = uidStats.valueAt(i);
             SparseArray<? extends Uid.Pid> pids = uid.getPidStats();
