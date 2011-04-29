@@ -2009,16 +2009,12 @@ public class ListView extends AbsListView {
         ListAdapter adapter = getAdapter();
         if (adapter != null) {
             final int count = adapter.getCount();
-            if (count < 15) {
-                for (int i = 0; i < count; i++) {
-                    if (adapter.isEnabled(i)) {
-                        itemCount++;
-                    } else if (i <= currentItemIndex) {
-                        currentItemIndex--;
-                    }
+            for (int i = 0; i < count; i++) {
+                if (adapter.isEnabled(i)) {
+                    itemCount++;
+                } else if (i <= currentItemIndex) {
+                    currentItemIndex--;
                 }
-            } else {
-                itemCount = count;
             }
         }
 

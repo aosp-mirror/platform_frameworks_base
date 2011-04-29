@@ -39,7 +39,7 @@ public class AccessibilityRecord {
     private static final int PROPERTY_FULL_SCREEN = 0x00000080;
 
     private static final int MAX_POOL_SIZE = 10;
-    private static final Object mPoolLock = new Object();
+    private static final Object sPoolLock = new Object();
     private static AccessibilityRecord sPool;
     private static int sPoolSize;
 
@@ -342,7 +342,7 @@ public class AccessibilityRecord {
      * @return An instance.
      */
     protected static AccessibilityRecord obtain() {
-        synchronized (mPoolLock) {
+        synchronized (sPoolLock) {
             if (sPool != null) {
                 AccessibilityRecord record = sPool;
                 sPool = sPool.mNext;
@@ -359,13 +359,15 @@ public class AccessibilityRecord {
      * Return an instance back to be reused.
      * <p>
      * <b>Note: You must not touch the object after calling this function.</b>
+     *
+     * @throws IllegalStateException If the record is already recycled.
      */
     public void recycle() {
         if (mIsInPool) {
-            return;
+            throw new IllegalStateException("Record already recycled!");
         }
         clear();
-        synchronized (mPoolLock) {
+        synchronized (sPoolLock) {
             if (sPoolSize <= MAX_POOL_SIZE) {
                 mNext = sPool;
                 sPool = this;
