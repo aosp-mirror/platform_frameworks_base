@@ -336,6 +336,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     // Set when this TextView gained focus with some text selected. Will start selection mode.
     private boolean mCreatedWithASelection = false;
 
+    private WordIterator mWordIterator;
+
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
      * initializing freetype for our default font only once).
@@ -7754,78 +7756,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 type == Character.DECIMAL_DIGIT_NUMBER);
     }
 
-    /**
-     * Returns the offsets delimiting the 'word' located at position offset.
-     *
-     * @param offset An offset in the text.
-     * @return The offsets for the start and end of the word located at <code>offset</code>.
-     * The two ints offsets are packed in a long using {@link #packRangeInLong(int, int)}.
-     * Returns -1 if no valid word was found.
-     */
-    private long getWordLimitsAt(int offset) {
-        int klass = mInputType & InputType.TYPE_MASK_CLASS;
-        int variation = mInputType & InputType.TYPE_MASK_VARIATION;
-
-        // Text selection is not permitted in password fields
-        if (hasPasswordTransformationMethod()) {
-            return -1;
-        }
-
-        final int len = mText.length();
-
-        // Specific text fields: always select the entire text
-        if (klass == InputType.TYPE_CLASS_NUMBER ||
-                klass == InputType.TYPE_CLASS_PHONE ||
-                klass == InputType.TYPE_CLASS_DATETIME ||
-                variation == InputType.TYPE_TEXT_VARIATION_URI ||
-                variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
-                variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS ||
-                variation == InputType.TYPE_TEXT_VARIATION_FILTER) {
-            return len > 0 ? packRangeInLong(0, len) : -1;
-        }
-
-        int end = Math.min(offset, len);
-        if (end < 0) {
-            return -1;
-        }
-
-        final int MAX_LENGTH = 48;
-        int start = end;
-
-        for (; start > 0; start--) {
-            final char c = mTransformed.charAt(start - 1);
-            final int type = Character.getType(c);
-            if (start == end && type == Character.OTHER_PUNCTUATION) { 
-                // Cases where the text ends with a '.' and we select from the end of the line
-                // (right after the dot), or when we select from the space character in "aaa, bbb".
-                continue;
-            }
-            if (type == Character.SURROGATE) { // Two Character codepoint
-                end = start - 1; // Recheck as a pair when scanning forward
-                continue;
-            }
-            if (!isWordCharacter(c, type)) break;
-            if ((end - start) > MAX_LENGTH) return -1;
-        }
-
-        for (; end < len; end++) {
-            final int c = Character.codePointAt(mTransformed, end);
-            final int type = Character.getType(c);
-            if (!isWordCharacter(c, type)) break;
-            if ((end - start) > MAX_LENGTH) return -1;
-            if (c > 0xFFFF) { // Two Character codepoint
-                end++;
-            }
-        }
-
-        if (start == end) {
-            return -1;
-        }
-
-        // Two ints packed in a long
-        return packRangeInLong(start, end);
-    }
-
     private static long packRangeInLong(int start, int end) {
         return (((long) start) << 32) | end;
     }
@@ -7838,21 +7768,40 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return (int) (range & 0x00000000FFFFFFFFL);
     }
 
-    private void selectAll() {
-        Selection.setSelection((Spannable) mText, 0, mText.length());
+    private boolean selectAll() {
+        final int length = mText.length();
+        Selection.setSelection((Spannable) mText, 0, length);
+        return length > 0;
     }
 
-    private void selectCurrentWord() {
+    /**
+     * Adjusts selection to the word under last touch offset.
+     * Return true if the operation was successfully performed.
+     */
+    private boolean selectCurrentWord() {
         if (!canSelectText()) {
-            return;
+            return false;
         }
 
         if (hasPasswordTransformationMethod()) {
             // Always select all on a password field.
             // Cut/copy menu entries are not available for passwords, but being able to select all
             // is however useful to delete or paste to replace the entire content.
-            selectAll();
-            return;
+            return selectAll();
+        }
+
+        int klass = mInputType & InputType.TYPE_MASK_CLASS;
+        int variation = mInputType & InputType.TYPE_MASK_VARIATION;
+
+        // Specific text field types: select the entire text for these
+        if (klass == InputType.TYPE_CLASS_NUMBER ||
+                klass == InputType.TYPE_CLASS_PHONE ||
+                klass == InputType.TYPE_CLASS_DATETIME ||
+                variation == InputType.TYPE_TEXT_VARIATION_URI ||
+                variation == InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS ||
+                variation == InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS ||
+                variation == InputType.TYPE_TEXT_VARIATION_FILTER) {
+            return selectAll();
         }
 
         long lastTouchOffsets = getLastTouchOffsets();
@@ -7868,22 +7817,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selectionStart = ((Spanned) mText).getSpanStart(url);
             selectionEnd = ((Spanned) mText).getSpanEnd(url);
         } else {
-            long wordLimits = getWordLimitsAt(minOffset);
-            if (wordLimits >= 0) {
-                selectionStart = extractRangeStartFromLong(wordLimits);
-            } else {
-                selectionStart = Math.max(minOffset - 5, 0);
+            if (mWordIterator == null) {
+                mWordIterator = new WordIterator();
             }
+            // WordIerator handles text changes, this is a no-op if text in unchanged.
+            mWordIterator.setCharSequence(mText);
 
-            wordLimits = getWordLimitsAt(maxOffset);
-            if (wordLimits >= 0) {
-                selectionEnd = extractRangeEndFromLong(wordLimits);
-            } else {
-                selectionEnd = Math.min(maxOffset + 5, mText.length());
-            }
+            selectionStart = mWordIterator.getBeginning(minOffset);
+            if (selectionStart == BreakIterator.DONE) return false;
+
+            selectionEnd = mWordIterator.getEnd(maxOffset);
+            if (selectionEnd == BreakIterator.DONE) return false;
         }
 
         Selection.setSelection((Spannable) mText, selectionStart, selectionEnd);
+        return true;
     }
 
     private long getLastTouchOffsets() {
@@ -8007,6 +7955,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * this will be {@link android.R.id#copyUrl}, {@link android.R.id#selectTextMode},
      * {@link android.R.id#selectAll}, {@link android.R.id#paste}, {@link android.R.id#cut}
      * or {@link android.R.id#copy}.
+     *
+     * @return true if the context menu item action was performed.
      */
     public boolean onTextContextMenuItem(int id) {
         int min = 0;
@@ -8051,7 +8001,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case ID_SELECT_ALL:
                 // This does not enter text selection mode. Text is highlighted, so that it can be
-                // bulk edited, like selectAllOnFocus does.
+                // bulk edited, like selectAllOnFocus does. Returns true even if text is empty.
                 selectAll();
                 return true;
 
@@ -8662,9 +8612,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        if (!hasSelection()) {
-            // If selection mode is started after a device rotation, there is already a selection.
-            selectCurrentWord();
+        boolean currentWordSelected = selectCurrentWord();
+        if (!currentWordSelected) {
+            // No word found under cursor or text selection not permitted.
+            return false;
         }
 
         ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
