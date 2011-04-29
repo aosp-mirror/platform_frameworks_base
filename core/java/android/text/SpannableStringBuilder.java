@@ -20,6 +20,7 @@ import com.android.internal.util.ArrayUtils;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.text.style.SuggestionSpan;
 
 import java.lang.reflect.Array;
 
@@ -277,8 +278,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
         TextWatcher[] recipients = null;
 
         if (notify)
-            recipients = sendTextWillChange(start, end - start,
-                                            tbend - tbstart);
+            recipients = sendTextWillChange(start, end - start, tbend - tbstart);
 
         for (int i = mSpanCount - 1; i >= 0; i--) {
             if ((mSpanFlags[i] & SPAN_PARAGRAPH) == SPAN_PARAGRAPH) {
@@ -353,6 +353,7 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
         // no need for span fixup on pure insertion
         if (tbend > tbstart && end - start == 0) {
             if (notify) {
+                removeSuggestionSpans(start, end);
                 sendTextChange(recipients, start, end - start, tbend - tbstart);
                 sendTextHasChanged(recipients);
             }
@@ -384,20 +385,10 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
             }
 
             // remove 0-length SPAN_EXCLUSIVE_EXCLUSIVE
-            // XXX send notification on removal
-
             if (mSpanEnds[i] < mSpanStarts[i]) {
-                System.arraycopy(mSpans, i + 1,
-                                 mSpans, i, mSpanCount - (i + 1));
-                System.arraycopy(mSpanStarts, i + 1,
-                                 mSpanStarts, i, mSpanCount - (i + 1));
-                System.arraycopy(mSpanEnds, i + 1,
-                                 mSpanEnds, i, mSpanCount - (i + 1));
-                System.arraycopy(mSpanFlags, i + 1,
-                                 mSpanFlags, i, mSpanCount - (i + 1));
-
-                mSpanCount--;
+                removeSpan(i);
             }
+            removeSuggestionSpans(start, end);
         }
 
         if (notify) {
@@ -406,6 +397,32 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
         }
 
         return ret;
+    }
+
+    /**
+     * Removes the SuggestionSpan that overlap the [start, end] range, and that would
+     * not make sense anymore after the change.
+     */
+    private void removeSuggestionSpans(int start, int end) {
+        for (int i = mSpanCount - 1; i >= 0; i--) {
+            final int spanEnd = mSpanEnds[i];
+            final int spanSpart = mSpanStarts[i];
+            if ((mSpans[i] instanceof SuggestionSpan) && (
+                    (spanSpart < start && spanEnd > start) ||
+                    (spanSpart < end && spanEnd > end))) {
+                removeSpan(i);
+            }
+        }
+    }
+
+    private void removeSpan(int i) {
+        // XXX send notification on removal
+        System.arraycopy(mSpans, i + 1, mSpans, i, mSpanCount - (i + 1));
+        System.arraycopy(mSpanStarts, i + 1, mSpanStarts, i, mSpanCount - (i + 1));
+        System.arraycopy(mSpanEnds, i + 1, mSpanEnds, i, mSpanCount - (i + 1));
+        System.arraycopy(mSpanFlags, i + 1, mSpanFlags, i, mSpanCount - (i + 1));
+
+        mSpanCount--;
     }
 
     // Documentation from interface
@@ -465,16 +482,15 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
             mGapStart++;
             mGapLength--;
 
-            if (mGapLength < 1)
+            if (mGapLength < 1) {
                 new Exception("mGapLength < 1").printStackTrace();
+            }
 
             int oldlen = (end + 1) - start;
 
-            int inserted = change(false, start + 1, start + 1,
-                                  tb, tbstart, tbend);
+            int inserted = change(false, start + 1, start + 1, tb, tbstart, tbend);
             change(false, start, start + 1, "", 0, 0);
-            change(false, start + inserted, start + inserted + oldlen - 1,
-                   "", 0, 0);
+            change(false, start + inserted, start + inserted + oldlen - 1, "", 0, 0);
 
             /*
              * Special case to keep the cursor in the same position
@@ -1274,7 +1290,6 @@ implements CharSequence, GetChars, Spannable, Editable, Appendable,
     private int[] mSpanFlags;
     private int mSpanCount;
 
-    private static final int MARK = 1;
     private static final int POINT = 2;
     private static final int PARAGRAPH = 3;
 

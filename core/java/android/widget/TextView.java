@@ -8177,7 +8177,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mInsertionControllerEnabled) {
             final int offset = getOffset(mLastDownPositionX, mLastDownPositionY);
             stopSelectionActionMode();
-            Selection.setSelection((Spannable)mText, offset);
+            Selection.setSelection((Spannable) mText, offset);
             getInsertionController().showWithPaste();
             handled = true;
         }
@@ -8695,16 +8695,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             (ClipboardManager) getContext().getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = clipboard.getPrimaryClip();
         if (clip != null) {
-            boolean didfirst = false;
+            boolean didFirst = false;
             for (int i=0; i<clip.getItemCount(); i++) {
                 CharSequence paste = clip.getItemAt(i).coerceToText(getContext());
                 if (paste != null) {
-                    if (!didfirst) {
+                    if (!didFirst) {
                         long minMax = prepareSpacesAroundPaste(min, max, paste);
                         min = extractRangeStartFromLong(minMax);
                         max = extractRangeEndFromLong(minMax);
                         Selection.setSelection((Spannable) mText, max);
                         ((Editable) mText).replace(min, max, paste);
+                        didFirst = true;
                     } else {
                         ((Editable) mText).insert(getSelectionEnd(), "\n");
                         ((Editable) mText).insert(getSelectionEnd(), paste);
