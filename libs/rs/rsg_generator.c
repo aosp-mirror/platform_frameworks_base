@@ -240,9 +240,11 @@ void printApiCpp(FILE *f) {
             }
 
             //fprintf(f, "    LOGE(\"add command %s\\n\");\n", api->name);
-            fprintf(f, "    RS_CMD_%s *cmd = static_cast<RS_CMD_%s *>(io->mToCore.reserve(sizeof(RS_CMD_%s)));\n", api->name, api->name, api->name);
             if (hasInlineDataPointers(api)) {
+                fprintf(f, "    RS_CMD_%s *cmd = static_cast<RS_CMD_%s *>(io->mToCore.reserve(dataSize + sizeof(RS_CMD_%s)));\n", api->name, api->name, api->name);
                 fprintf(f, "    uint8_t *payload = (uint8_t *)&cmd[1];\n");
+            } else {
+                fprintf(f, "    RS_CMD_%s *cmd = static_cast<RS_CMD_%s *>(io->mToCore.reserve(sizeof(RS_CMD_%s)));\n", api->name, api->name, api->name);
             }
 
             for (ct2=0; ct2 < api->paramCount; ct2++) {
