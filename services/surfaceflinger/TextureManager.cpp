@@ -186,7 +186,7 @@ status_t TextureManager::loadTexture(Texture* texture,
     if (texture->name == -1UL) {
         status_t err = initTexture(texture);
         LOGE_IF(err, "loadTexture failed in initTexture (%s)", strerror(err));
-        return err;
+        if (err != NO_ERROR) return err;
     }
 
     if (texture->target != Texture::TEXTURE_2D)
