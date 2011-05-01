@@ -276,6 +276,21 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                             setDetailedState(DetailedState.CONNECTED, reason, apnName);
                             break;
                     }
+                } else {
+                    // There was no state change. Check if LinkProperties has been updated.
+                    if (TextUtils.equals(reason, Phone.REASON_LINK_PROPERTIES_CHANGED)) {
+                        mLinkProperties = intent.getParcelableExtra(Phone.DATA_LINK_PROPERTIES_KEY);
+                        if (mLinkProperties == null) {
+                            log("No link property in LINK_PROPERTIES change event.");
+                            mLinkProperties = new LinkProperties();
+                        }
+                        // Just update reason field in this NetworkInfo
+                        mNetworkInfo.setDetailedState(mNetworkInfo.getDetailedState(), reason,
+                                                      mNetworkInfo.getExtraInfo());
+                        Message msg = mTarget.obtainMessage(EVENT_CONFIGURATION_CHANGED,
+                                                            mNetworkInfo);
+                        msg.sendToTarget();
+                    }
                 }
             } else if (intent.getAction().
                     equals(TelephonyIntents.ACTION_DATA_CONNECTION_FAILED)) {

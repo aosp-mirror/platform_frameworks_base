@@ -509,22 +509,56 @@ public abstract class DataConnection extends StateMachine {
             result.mFailCause = FailCause.fromInt(response.status);
         } else {
             log("onSetupConnectionCompleted received DataCallState: " + response);
-
-            // Check if system property dns usable
-            boolean okToUseSystemPropertyDns = false;
             cid = response.cid;
-            String propertyPrefix = "net." + response.ifname + ".";
-            String dnsServers[] = new String[2];
-            dnsServers[0] = SystemProperties.get(propertyPrefix + "dns1");
-            dnsServers[1] = SystemProperties.get(propertyPrefix + "dns2");
-            okToUseSystemPropertyDns = isDnsOk(dnsServers);
-
             // set link properties based on data call response
             result = response.setLinkProperties(mLinkProperties,
-                    okToUseSystemPropertyDns);
+                                                isOkToUseSystemPropertyDns(response));
         }
 
         return result;
+    }
+
+    private boolean isOkToUseSystemPropertyDns(DataCallState response) {
+        // Check if system property dns usable
+        boolean okToUseSystemPropertyDns = false;
+        String propertyPrefix = "net." + response.ifname + ".";
+        String dnsServers[] = new String[2];
+        dnsServers[0] = SystemProperties.get(propertyPrefix + "dns1");
+        dnsServers[1] = SystemProperties.get(propertyPrefix + "dns2");
+        okToUseSystemPropertyDns = isDnsOk(dnsServers);
+        return okToUseSystemPropertyDns;
+    }
+
+    private boolean updateLinkProperty(DataCallState newState) {
+        boolean changed = false;
+
+        if (newState == null) return changed;
+
+        DataCallState.SetupResult result;
+        LinkProperties linkProperties = new LinkProperties();
+
+        // set link properties based on data call response
+        result = newState.setLinkProperties(linkProperties,
+                                            isOkToUseSystemPropertyDns(newState));
+
+        if (result != DataCallState.SetupResult.SUCCESS) {
+            log("updateLinkProperty failed : " + result);
+            return changed;
+        }
+
+        if (mLinkProperties != null) {
+            // Before comparison, copy HTTP proxy from the original
+            // as it is not part DataCallState.
+            linkProperties.setHttpProxy(mLinkProperties.getHttpProxy());
+            if (!mLinkProperties.equals(linkProperties)) {
+                mLinkProperties = linkProperties;
+                changed = true;
+            }
+        } else {
+            mLinkProperties = linkProperties;
+            changed = true;
+        }
+        return changed;
     }
 
     /**
@@ -597,15 +631,22 @@ public abstract class DataConnection extends StateMachine {
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_SET_LINK_PROPERTIES_HTTP_PROXY);
                     break;
                 }
+                case DataConnectionAc.REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE: {
+                    DataCallState newState = (DataCallState) msg.obj;
+                    int updated = updateLinkProperty(newState) ? 1 : 0;
+                    if (DBG) {
+                        log("REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE updated=" + updated +
+                            " newState=" + newState);
+                    }
+                    mAc.replyToMessage(msg,
+                                   DataConnectionAc.RSP_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE,
+                                   updated);
+                    break;
+                }
                 case DataConnectionAc.REQ_GET_LINK_CAPABILITIES: {
                     LinkCapabilities lc = new LinkCapabilities(mCapabilities);
                     log("REQ_GET_LINK_CAPABILITIES linkCapabilities" + lc);
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_LINK_CAPABILITIES, lc);
-                    break;
-                }
-                case DataConnectionAc.REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE: {
-                    Bundle data = msg.getData();
-                    mLinkProperties = (LinkProperties) data.get("linkProperties");
                     break;
                 }
                 case DataConnectionAc.REQ_RESET:
