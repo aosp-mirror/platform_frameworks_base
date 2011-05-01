@@ -53,7 +53,7 @@ int main(int argc, char** argv)
     printf("window=%p\n", window);
 
     int err = native_window_set_buffer_count(window, 8);
-    android_native_buffer_t* buffer;
+    ANativeWindowBuffer* buffer;
 
     for (int i=0 ; i<8 ; i++) {
         window->dequeueBuffer(window, &buffer);

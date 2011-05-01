@@ -84,7 +84,7 @@ struct UseAndroidNativeBufferParams {
     OMX_U32 nPortIndex;
     OMX_PTR pAppPrivate;
     OMX_BUFFERHEADERTYPE **bufferHeader;
-    const sp<android_native_buffer_t>& nativeBuffer;
+    const sp<ANativeWindowBuffer>& nativeBuffer;
 };
 
 // A pointer to this struct is passed to OMX_GetParameter when the extension

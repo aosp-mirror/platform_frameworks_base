@@ -33,7 +33,7 @@
 namespace android {
 
 // ===========================================================================
-// Buffer and implementation of android_native_buffer_t
+// Buffer and implementation of ANativeWindowBuffer
 // ===========================================================================
 
 GraphicBuffer::GraphicBuffer()
@@ -77,7 +77,7 @@ GraphicBuffer::GraphicBuffer(uint32_t w, uint32_t h,
     handle = inHandle;
 }
 
-GraphicBuffer::GraphicBuffer(android_native_buffer_t* buffer, bool keepOwnership)
+GraphicBuffer::GraphicBuffer(ANativeWindowBuffer* buffer, bool keepOwnership)
     : BASE(), mOwner(keepOwnership ? ownHandle : ownNone),
       mBufferMapper(GraphicBufferMapper::get()),
       mInitCheck(NO_ERROR), mIndex(-1), mWrappedBuffer(buffer)
@@ -119,9 +119,9 @@ void GraphicBuffer::dumpAllocationsToSystemLog()
     GraphicBufferAllocator::dumpToSystemLog();
 }
 
-android_native_buffer_t* GraphicBuffer::getNativeBuffer() const
+ANativeWindowBuffer* GraphicBuffer::getNativeBuffer() const
 {
-    return static_cast<android_native_buffer_t*>(
+    return static_cast<ANativeWindowBuffer*>(
             const_cast<GraphicBuffer*>(this));
 }
 

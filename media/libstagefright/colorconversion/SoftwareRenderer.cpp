@@ -108,7 +108,7 @@ SoftwareRenderer::~SoftwareRenderer() {
 
 void SoftwareRenderer::render(
         const void *data, size_t size, void *platformPrivate) {
-    android_native_buffer_t *buf;
+    ANativeWindowBuffer *buf;
     int err;
     if ((err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf)) != 0) {
         LOGW("Surface::dequeueBuffer returned error %d", err);

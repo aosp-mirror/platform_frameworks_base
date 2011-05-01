@@ -26,7 +26,7 @@
 #include <utils/Flattenable.h>
 #include <pixelflinger/pixelflinger.h>
 
-struct android_native_buffer_t;
+struct ANativeWindowBuffer;
 
 namespace android {
 
@@ -38,7 +38,7 @@ class GraphicBufferMapper;
 
 class GraphicBuffer
     : public EGLNativeBase<
-        android_native_buffer_t, 
+        ANativeWindowBuffer,
         GraphicBuffer, 
         LightRefBase<GraphicBuffer> >, public Flattenable
 {
@@ -74,8 +74,8 @@ public:
     GraphicBuffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t usage,
             uint32_t stride, native_handle_t* handle, bool keepOwnership);
 
-    // create a buffer from an existing android_native_buffer_t
-    GraphicBuffer(android_native_buffer_t* buffer, bool keepOwnership);
+    // create a buffer from an existing ANativeWindowBuffer
+    GraphicBuffer(ANativeWindowBuffer* buffer, bool keepOwnership);
 
     // return status
     status_t initCheck() const;
@@ -94,7 +94,7 @@ public:
     status_t lock(GGLSurface* surface, uint32_t usage);
     status_t unlock();
 
-    android_native_buffer_t* getNativeBuffer() const;
+    ANativeWindowBuffer* getNativeBuffer() const;
     
     void setIndex(int index);
     int getIndex() const;
@@ -149,7 +149,7 @@ private:
 
     // If we're wrapping another buffer then this reference will make sure it
     // doesn't get freed.
-    sp<android_native_buffer_t> mWrappedBuffer;
+    sp<ANativeWindowBuffer> mWrappedBuffer;
 };
 
 }; // namespace android

@@ -93,7 +93,7 @@ TEST_F(SurfaceTest, ScreenshotsOfProtectedBuffersFail) {
     ASSERT_EQ(NO_ERROR, native_window_set_usage(anw.get(),
             GRALLOC_USAGE_PROTECTED));
     ASSERT_EQ(NO_ERROR, native_window_set_buffer_count(anw.get(), 3));
-    android_native_buffer_t* buf = 0;
+    ANativeWindowBuffer* buf = 0;
     for (int i = 0; i < 4; i++) {
         // Loop to make sure SurfaceFlinger has retired a protected buffer.
         ASSERT_EQ(NO_ERROR, anw->dequeueBuffer(anw.get(), &buf));

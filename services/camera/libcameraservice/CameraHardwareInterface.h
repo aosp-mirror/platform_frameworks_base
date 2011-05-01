@@ -504,7 +504,7 @@ private:
     {
         int rc;
         ANativeWindow *a = anw(w);
-        struct android_native_buffer_t* anb;
+        ANativeWindowBuffer* anb;
         rc = a->dequeueBuffer(a, &anb);
         if (!rc) {
             rc = a->lockBuffer(a, anb);
@@ -527,7 +527,7 @@ private:
     {
         ANativeWindow *a = anw(w);
         return a->queueBuffer(a,
-                  container_of(buffer, android_native_buffer_t, handle));
+                  container_of(buffer, ANativeWindowBuffer, handle));
     }
 
     static int __cancel_buffer(struct preview_stream_ops* w,
@@ -535,20 +535,20 @@ private:
     {
         ANativeWindow *a = anw(w);
         return a->cancelBuffer(a,
-                  container_of(buffer, android_native_buffer_t, handle));
+                  container_of(buffer, ANativeWindowBuffer, handle));
     }
 
     static int __set_buffer_count(struct preview_stream_ops* w, int count)
     {
         ANativeWindow *a = anw(w);
-        return a->perform(a, NATIVE_WINDOW_SET_BUFFER_COUNT, count);
+	return native_window_set_buffer_count(a, count);
     }
 
     static int __set_buffers_geometry(struct preview_stream_ops* w,
                       int width, int height, int format)
     {
         ANativeWindow *a = anw(w);
-        return a->perform(a, NATIVE_WINDOW_SET_BUFFERS_GEOMETRY,
+        return native_window_set_buffers_geometry(a,
                           width, height, format);
     }
 
@@ -561,13 +561,13 @@ private:
         crop.top = top;
         crop.right = right;
         crop.bottom = bottom;
-        return a->perform(a, NATIVE_WINDOW_SET_CROP, &crop);
+        return native_window_set_crop(a, &crop);
     }
 
     static int __set_usage(struct preview_stream_ops* w, int usage)
     {
         ANativeWindow *a = anw(w);
-        return a->perform(a, NATIVE_WINDOW_SET_USAGE, usage);
+        return native_window_set_usage(a, usage);
     }
 
     static int __set_swap_interval(struct preview_stream_ops *w, int interval)

@@ -113,7 +113,7 @@ TEST_F(SurfaceTextureClientTest, BufferGeometryInvalidSizesFail) {
 
 TEST_F(SurfaceTextureClientTest, DefaultGeometryValues) {
     sp<ANativeWindow> anw(mSTC);
-    android_native_buffer_t* buf;
+    ANativeWindowBuffer* buf;
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
     EXPECT_EQ(1, buf->width);
     EXPECT_EQ(1, buf->height);
@@ -123,7 +123,7 @@ TEST_F(SurfaceTextureClientTest, DefaultGeometryValues) {
 
 TEST_F(SurfaceTextureClientTest, BufferGeometryCanBeSet) {
     sp<ANativeWindow> anw(mSTC);
-    android_native_buffer_t* buf;
+    ANativeWindowBuffer* buf;
     EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 16, 8, PIXEL_FORMAT_RGB_565));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
     EXPECT_EQ(16, buf->width);
@@ -134,7 +134,7 @@ TEST_F(SurfaceTextureClientTest, BufferGeometryCanBeSet) {
 
 TEST_F(SurfaceTextureClientTest, BufferGeometryDefaultSizeSetFormat) {
     sp<ANativeWindow> anw(mSTC);
-    android_native_buffer_t* buf;
+    ANativeWindowBuffer* buf;
     EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 0, 0, PIXEL_FORMAT_RGB_565));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
     EXPECT_EQ(1, buf->width);
@@ -145,7 +145,7 @@ TEST_F(SurfaceTextureClientTest, BufferGeometryDefaultSizeSetFormat) {
 
 TEST_F(SurfaceTextureClientTest, BufferGeometrySetSizeDefaultFormat) {
     sp<ANativeWindow> anw(mSTC);
-    android_native_buffer_t* buf;
+    ANativeWindowBuffer* buf;
     EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 16, 8, 0));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
     EXPECT_EQ(16, buf->width);
@@ -156,7 +156,7 @@ TEST_F(SurfaceTextureClientTest, BufferGeometrySetSizeDefaultFormat) {
 
 TEST_F(SurfaceTextureClientTest, BufferGeometrySizeCanBeUnset) {
     sp<ANativeWindow> anw(mSTC);
-    android_native_buffer_t* buf;
+    ANativeWindowBuffer* buf;
     EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 16, 8, 0));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
     EXPECT_EQ(16, buf->width);
@@ -173,7 +173,7 @@ TEST_F(SurfaceTextureClientTest, BufferGeometrySizeCanBeUnset) {
 
 TEST_F(SurfaceTextureClientTest, BufferGeometrySizeCanBeChangedWithoutFormat) {
     sp<ANativeWindow> anw(mSTC);
-    android_native_buffer_t* buf;
+    ANativeWindowBuffer* buf;
     EXPECT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 0, 0, PIXEL_FORMAT_RGB_565));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
     EXPECT_EQ(1, buf->width);
@@ -191,7 +191,7 @@ TEST_F(SurfaceTextureClientTest, BufferGeometrySizeCanBeChangedWithoutFormat) {
 TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSize) {
     sp<ANativeWindow> anw(mSTC);
     sp<SurfaceTexture> st(mST);
-    android_native_buffer_t* buf;
+    ANativeWindowBuffer* buf;
     EXPECT_EQ(OK, st->setDefaultBufferSize(16, 8));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf));
     EXPECT_EQ(16, buf->width);
@@ -203,7 +203,7 @@ TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSize) {
 TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSizeAfterDequeue) {
     sp<ANativeWindow> anw(mSTC);
     sp<SurfaceTexture> st(mST);
-    android_native_buffer_t* buf[2];
+    ANativeWindowBuffer* buf[2];
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
     EXPECT_NE(buf[0], buf[1]);
@@ -224,7 +224,7 @@ TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSizeAfterDequeue) {
 TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSizeVsGeometry) {
     sp<ANativeWindow> anw(mSTC);
     sp<SurfaceTexture> st(mST);
-    android_native_buffer_t* buf[2];
+    ANativeWindowBuffer* buf[2];
     EXPECT_EQ(OK, st->setDefaultBufferSize(16, 8));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));

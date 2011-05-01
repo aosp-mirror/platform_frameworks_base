@@ -145,7 +145,7 @@ status_t EGLTextureObject::setSurface(GGLSurface const* s)
     return NO_ERROR;
 }
 
-status_t EGLTextureObject::setImage(android_native_buffer_t* native_buffer)
+status_t EGLTextureObject::setImage(ANativeWindowBuffer* native_buffer)
 {
     GGLSurface sur;
     sur.version = sizeof(GGLSurface);

@@ -476,7 +476,7 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferNpot) {
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
 
-    android_native_buffer_t* anb;
+    ANativeWindowBuffer* anb;
     ASSERT_EQ(NO_ERROR, mANW->dequeueBuffer(mANW.get(), &anb));
     ASSERT_TRUE(anb != NULL);
 
@@ -524,7 +524,7 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledYV12BufferPow2) {
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
 
-    android_native_buffer_t* anb;
+    ANativeWindowBuffer* anb;
     ASSERT_EQ(NO_ERROR, mANW->dequeueBuffer(mANW.get(), &anb));
     ASSERT_TRUE(anb != NULL);
 
@@ -583,7 +583,7 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferWithCrop) {
 
         ASSERT_EQ(NO_ERROR, native_window_set_crop(mANW.get(), &crop));
 
-        android_native_buffer_t* anb;
+        ANativeWindowBuffer* anb;
         ASSERT_EQ(NO_ERROR, mANW->dequeueBuffer(mANW.get(), &anb));
         ASSERT_TRUE(anb != NULL);
 

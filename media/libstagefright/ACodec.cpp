@@ -505,7 +505,7 @@ status_t ACodec::allocateOutputBuffersFromNativeWindow() {
 
     // Dequeue buffers and send them to OMX
     for (OMX_U32 i = 0; i < def.nBufferCountActual; i++) {
-        android_native_buffer_t *buf;
+        ANativeWindowBuffer *buf;
         err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf);
         if (err != 0) {
             LOGE("dequeueBuffer failed: %s (%d)", strerror(-err), -err);
@@ -574,7 +574,7 @@ status_t ACodec::cancelBufferToNativeWindow(BufferInfo *info) {
 }
 
 ACodec::BufferInfo *ACodec::dequeueBufferFromNativeWindow() {
-    android_native_buffer_t *buf;
+    ANativeWindowBuffer *buf;
     CHECK_EQ(mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf), 0);
 
     for (size_t i = mBuffers[kPortIndexOutput].size(); i-- > 0;) {

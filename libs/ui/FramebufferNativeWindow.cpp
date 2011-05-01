@@ -47,16 +47,16 @@ namespace android {
 
 class NativeBuffer 
     : public EGLNativeBase<
-        android_native_buffer_t, 
+        ANativeWindowBuffer, 
         NativeBuffer, 
         LightRefBase<NativeBuffer> >
 {
 public:
     NativeBuffer(int w, int h, int f, int u) : BASE() {
-        android_native_buffer_t::width  = w;
-        android_native_buffer_t::height = h;
-        android_native_buffer_t::format = f;
-        android_native_buffer_t::usage  = u;
+        ANativeWindowBuffer::width  = w;
+        ANativeWindowBuffer::height = h;
+        ANativeWindowBuffer::format = f;
+        ANativeWindowBuffer::usage  = u;
     }
 private:
     friend class LightRefBase<NativeBuffer>;    
@@ -201,7 +201,7 @@ int FramebufferNativeWindow::getCurrentBufferIndex() const
 }
 
 int FramebufferNativeWindow::dequeueBuffer(ANativeWindow* window, 
-        android_native_buffer_t** buffer)
+        ANativeWindowBuffer** buffer)
 {
     FramebufferNativeWindow* self = getSelf(window);
     Mutex::Autolock _l(self->mutex);
@@ -229,7 +229,7 @@ int FramebufferNativeWindow::dequeueBuffer(ANativeWindow* window,
 }
 
 int FramebufferNativeWindow::lockBuffer(ANativeWindow* window, 
-        android_native_buffer_t* buffer)
+        ANativeWindowBuffer* buffer)
 {
     FramebufferNativeWindow* self = getSelf(window);
     Mutex::Autolock _l(self->mutex);
@@ -249,7 +249,7 @@ int FramebufferNativeWindow::lockBuffer(ANativeWindow* window,
 }
 
 int FramebufferNativeWindow::queueBuffer(ANativeWindow* window, 
-        android_native_buffer_t* buffer)
+        ANativeWindowBuffer* buffer)
 {
     FramebufferNativeWindow* self = getSelf(window);
     Mutex::Autolock _l(self->mutex);

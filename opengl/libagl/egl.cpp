@@ -230,11 +230,11 @@ struct egl_window_surface_v2_t : public egl_surface_t
     virtual     EGLBoolean  setSwapRectangle(EGLint l, EGLint t, EGLint w, EGLint h);
     
 private:
-    status_t lock(android_native_buffer_t* buf, int usage, void** vaddr);
-    status_t unlock(android_native_buffer_t* buf);
+    status_t lock(ANativeWindowBuffer* buf, int usage, void** vaddr);
+    status_t unlock(ANativeWindowBuffer* buf);
     ANativeWindow*   nativeWindow;
-    android_native_buffer_t*   buffer;
-    android_native_buffer_t*   previousBuffer;
+    ANativeWindowBuffer*   buffer;
+    ANativeWindowBuffer*   previousBuffer;
     gralloc_module_t const*    module;
     int width;
     int height;
@@ -322,8 +322,8 @@ private:
     };
     
     void copyBlt(
-            android_native_buffer_t* dst, void* dst_vaddr,
-            android_native_buffer_t* src, void const* src_vaddr,
+            ANativeWindowBuffer* dst, void* dst_vaddr,
+            ANativeWindowBuffer* src, void const* src_vaddr,
             const Region& clip);
 
     Rect dirtyRegion;
@@ -415,7 +415,7 @@ void egl_window_surface_v2_t::disconnect()
 }
 
 status_t egl_window_surface_v2_t::lock(
-        android_native_buffer_t* buf, int usage, void** vaddr)
+        ANativeWindowBuffer* buf, int usage, void** vaddr)
 {
     int err;
 
@@ -425,7 +425,7 @@ status_t egl_window_surface_v2_t::lock(
     return err;
 }
 
-status_t egl_window_surface_v2_t::unlock(android_native_buffer_t* buf)
+status_t egl_window_surface_v2_t::unlock(ANativeWindowBuffer* buf)
 {
     if (!buf) return BAD_VALUE;
     int err = NO_ERROR;
@@ -436,8 +436,8 @@ status_t egl_window_surface_v2_t::unlock(android_native_buffer_t* buf)
 }
 
 void egl_window_surface_v2_t::copyBlt(
-        android_native_buffer_t* dst, void* dst_vaddr,
-        android_native_buffer_t* src, void const* src_vaddr,
+        ANativeWindowBuffer* dst, void* dst_vaddr,
+        ANativeWindowBuffer* src, void const* src_vaddr,
         const Region& clip)
 {
     // NOTE: dst and src must be the same format
@@ -2003,12 +2003,12 @@ EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target,
         return setError(EGL_BAD_PARAMETER, EGL_NO_IMAGE_KHR);
     }
 
-    android_native_buffer_t* native_buffer = (android_native_buffer_t*)buffer;
+    ANativeWindowBuffer* native_buffer = (ANativeWindowBuffer*)buffer;
 
     if (native_buffer->common.magic != ANDROID_NATIVE_BUFFER_MAGIC)
         return setError(EGL_BAD_PARAMETER, EGL_NO_IMAGE_KHR);
 
-    if (native_buffer->common.version != sizeof(android_native_buffer_t))
+    if (native_buffer->common.version != sizeof(ANativeWindowBuffer))
         return setError(EGL_BAD_PARAMETER, EGL_NO_IMAGE_KHR);
 
     switch (native_buffer->format) {
@@ -2034,12 +2034,12 @@ EGLBoolean eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR img)
         return setError(EGL_BAD_DISPLAY, EGL_FALSE);
     }
 
-    android_native_buffer_t* native_buffer = (android_native_buffer_t*)img;
+    ANativeWindowBuffer* native_buffer = (ANativeWindowBuffer*)img;
 
     if (native_buffer->common.magic != ANDROID_NATIVE_BUFFER_MAGIC)
         return setError(EGL_BAD_PARAMETER, EGL_FALSE);
 
-    if (native_buffer->common.version != sizeof(android_native_buffer_t))
+    if (native_buffer->common.version != sizeof(ANativeWindowBuffer))
         return setError(EGL_BAD_PARAMETER, EGL_FALSE);
 
     native_buffer->common.decRef(&native_buffer->common);

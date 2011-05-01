@@ -45,20 +45,20 @@ private:
     SurfaceTextureClient(const SurfaceTextureClient& rhs);
 
     // ANativeWindow hooks
-    static int cancelBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
-    static int dequeueBuffer(ANativeWindow* window, android_native_buffer_t** buffer);
-    static int lockBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
+    static int cancelBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer);
+    static int dequeueBuffer(ANativeWindow* window, ANativeWindowBuffer** buffer);
+    static int lockBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer);
     static int perform(ANativeWindow* window, int operation, ...);
     static int query(const ANativeWindow* window, int what, int* value);
-    static int queueBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
+    static int queueBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer);
     static int setSwapInterval(ANativeWindow* window, int interval);
 
-    int cancelBuffer(android_native_buffer_t* buffer);
-    int dequeueBuffer(android_native_buffer_t** buffer);
-    int lockBuffer(android_native_buffer_t* buffer);
+    int cancelBuffer(ANativeWindowBuffer* buffer);
+    int dequeueBuffer(ANativeWindowBuffer** buffer);
+    int lockBuffer(ANativeWindowBuffer* buffer);
     int perform(int operation, va_list args);
     int query(int what, int* value) const;
-    int queueBuffer(android_native_buffer_t* buffer);
+    int queueBuffer(ANativeWindowBuffer* buffer);
     int setSwapInterval(int interval);
 
     int dispatchConnect(va_list args);

@@ -1830,7 +1830,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
 
     // Dequeue buffers and send them to OMX
     for (OMX_U32 i = 0; i < def.nBufferCountActual; i++) {
-        android_native_buffer_t* buf;
+        ANativeWindowBuffer* buf;
         err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf);
         if (err != 0) {
             LOGE("dequeueBuffer failed: %s (%d)", strerror(-err), -err);
@@ -1900,7 +1900,7 @@ status_t OMXCodec::cancelBufferToNativeWindow(BufferInfo *info) {
 
 OMXCodec::BufferInfo* OMXCodec::dequeueBufferFromNativeWindow() {
     // Dequeue the next buffer from the native window.
-    android_native_buffer_t* buf;
+    ANativeWindowBuffer* buf;
     int err = mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf);
     if (err != 0) {
       CODEC_LOGE("dequeueBuffer failed w/ error 0x%08x", err);

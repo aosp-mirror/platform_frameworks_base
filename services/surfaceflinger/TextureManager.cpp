@@ -144,7 +144,7 @@ status_t TextureManager::initEglImage(Image* pImage,
     }
 
     // construct an EGL_NATIVE_BUFFER_ANDROID
-    android_native_buffer_t* clientBuf = buffer->getNativeBuffer();
+    ANativeWindowBuffer* clientBuf = buffer->getNativeBuffer();
 
     // create the new EGLImageKHR
     const EGLint attrs[] = {

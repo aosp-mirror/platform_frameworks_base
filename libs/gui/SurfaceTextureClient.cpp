@@ -53,25 +53,25 @@ int SurfaceTextureClient::setSwapInterval(ANativeWindow* window, int interval) {
 }
 
 int SurfaceTextureClient::dequeueBuffer(ANativeWindow* window,
-        android_native_buffer_t** buffer) {
+        ANativeWindowBuffer** buffer) {
     SurfaceTextureClient* c = getSelf(window);
     return c->dequeueBuffer(buffer);
 }
 
 int SurfaceTextureClient::cancelBuffer(ANativeWindow* window,
-        android_native_buffer_t* buffer) {
+        ANativeWindowBuffer* buffer) {
     SurfaceTextureClient* c = getSelf(window);
     return c->cancelBuffer(buffer);
 }
 
 int SurfaceTextureClient::lockBuffer(ANativeWindow* window,
-        android_native_buffer_t* buffer) {
+        ANativeWindowBuffer* buffer) {
     SurfaceTextureClient* c = getSelf(window);
     return c->lockBuffer(buffer);
 }
 
 int SurfaceTextureClient::queueBuffer(ANativeWindow* window,
-        android_native_buffer_t* buffer) {
+        ANativeWindowBuffer* buffer) {
     SurfaceTextureClient* c = getSelf(window);
     return c->queueBuffer(buffer);
 }

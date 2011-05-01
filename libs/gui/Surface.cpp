@@ -513,25 +513,25 @@ int Surface::setSwapInterval(ANativeWindow* window, int interval) {
 }
 
 int Surface::dequeueBuffer(ANativeWindow* window, 
-        android_native_buffer_t** buffer) {
+        ANativeWindowBuffer** buffer) {
     Surface* self = getSelf(window);
     return self->dequeueBuffer(buffer);
 }
 
 int Surface::cancelBuffer(ANativeWindow* window,
-        android_native_buffer_t* buffer) {
+        ANativeWindowBuffer* buffer) {
     Surface* self = getSelf(window);
     return self->cancelBuffer(buffer);
 }
 
 int Surface::lockBuffer(ANativeWindow* window, 
-        android_native_buffer_t* buffer) {
+        ANativeWindowBuffer* buffer) {
     Surface* self = getSelf(window);
     return self->lockBuffer(buffer);
 }
 
 int Surface::queueBuffer(ANativeWindow* window, 
-        android_native_buffer_t* buffer) {
+        ANativeWindowBuffer* buffer) {
     Surface* self = getSelf(window);
     return self->queueBuffer(buffer);
 }
@@ -570,7 +570,7 @@ bool Surface::needNewBuffer(int bufIdx,
     return newNeewBuffer;
 }
 
-int Surface::dequeueBuffer(android_native_buffer_t** buffer)
+int Surface::dequeueBuffer(ANativeWindowBuffer** buffer)
 {
     status_t err = validate();
     if (err != NO_ERROR)
@@ -624,7 +624,7 @@ int Surface::dequeueBuffer(android_native_buffer_t** buffer)
     return err;
 }
 
-int Surface::cancelBuffer(android_native_buffer_t* buffer)
+int Surface::cancelBuffer(ANativeWindowBuffer* buffer)
 {
     status_t err = validate(true);
     switch (err) {
@@ -651,7 +651,7 @@ int Surface::cancelBuffer(android_native_buffer_t* buffer)
 }
 
 
-int Surface::lockBuffer(android_native_buffer_t* buffer)
+int Surface::lockBuffer(ANativeWindowBuffer* buffer)
 {
     status_t err = validate();
     if (err != NO_ERROR)
@@ -670,7 +670,7 @@ int Surface::lockBuffer(android_native_buffer_t* buffer)
     return err;
 }
 
-int Surface::queueBuffer(android_native_buffer_t* buffer)
+int Surface::queueBuffer(ANativeWindowBuffer* buffer)
 {
     status_t err = validate();
     if (err != NO_ERROR)
@@ -969,7 +969,7 @@ status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking)
     // we're intending to do software rendering from this point
     setUsage(GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
 
-    android_native_buffer_t* out;
+    ANativeWindowBuffer* out;
     status_t err = dequeueBuffer(&out);
     LOGE_IF(err, "dequeueBuffer failed (%s)", strerror(-err));
     if (err == NO_ERROR) {
@@ -1063,7 +1063,7 @@ int Surface::getBufferIndex(const sp<GraphicBuffer>& buffer) const
     if (idx < 0) {
         // The buffer doesn't have an index set.  See if the handle the same as
         // one of the buffers for which we do know the index.  This can happen
-        // e.g. if GraphicBuffer is used to wrap an android_native_buffer_t that
+        // e.g. if GraphicBuffer is used to wrap an ANativeWindowBuffer that
         // was dequeued from an ANativeWindow.
         for (size_t i = 0; i < mBuffers.size(); i++) {
             if (mBuffers[i] != 0 && buffer->handle == mBuffers[i]->handle) {
