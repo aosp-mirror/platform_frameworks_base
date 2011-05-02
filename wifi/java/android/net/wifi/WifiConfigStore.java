@@ -23,6 +23,7 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
 import android.net.ProxyProperties;
+import android.net.RouteInfo;
 import android.net.wifi.WifiConfiguration.IpAssignment;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.ProxySettings;
@@ -120,7 +121,7 @@ class WifiConfigStore {
     private static final String ipConfigFile = Environment.getDataDirectory() +
             "/misc/wifi/ipconfig.txt";
 
-    private static final int IPCONFIG_FILE_VERSION = 1;
+    private static final int IPCONFIG_FILE_VERSION = 2;
 
     /* IP and proxy configuration keys */
     private static final String ID_KEY = "id";
@@ -445,9 +446,8 @@ class WifiConfigStore {
             if (iter.hasNext()) {
                 LinkAddress linkAddress = iter.next();
                 dhcpInfoInternal.ipAddress = linkAddress.getAddress().getHostAddress();
-                Iterator<InetAddress>gateways = linkProperties.getGateways().iterator();
-                if (gateways.hasNext()) {
-                    dhcpInfoInternal.gateway = gateways.next().getHostAddress();
+                for (RouteInfo route : linkProperties.getRoutes()) {
+                    dhcpInfoInternal.addRoute(route);
                 }
                 dhcpInfoInternal.prefixLength = linkAddress.getNetworkPrefixLength();
                 Iterator<InetAddress> dnsIterator = linkProperties.getDnses().iterator();
@@ -604,9 +604,22 @@ class WifiConfigStore {
                                     out.writeUTF(linkAddr.getAddress().getHostAddress());
                                     out.writeInt(linkAddr.getNetworkPrefixLength());
                                 }
-                                for (InetAddress gateway : linkProperties.getGateways()) {
+                                for (RouteInfo route : linkProperties.getRoutes()) {
                                     out.writeUTF(GATEWAY_KEY);
-                                    out.writeUTF(gateway.getHostAddress());
+                                    LinkAddress dest = route.getDestination();
+                                    if (dest != null) {
+                                        out.writeInt(1);
+                                        out.writeUTF(dest.getAddress().getHostAddress());
+                                        out.writeInt(dest.getNetworkPrefixLength());
+                                    } else {
+                                        out.writeInt(0);
+                                    }
+                                    if (route.getGateway() != null) {
+                                        out.writeInt(1);
+                                        out.writeUTF(route.getGateway().getHostAddress());
+                                    } else {
+                                        out.writeInt(0);
+                                    }
                                 }
                                 for (InetAddress inetAddr : linkProperties.getDnses()) {
                                     out.writeUTF(DNS_KEY);
@@ -682,7 +695,8 @@ class WifiConfigStore {
             in = new DataInputStream(new BufferedInputStream(new FileInputStream(
                     ipConfigFile)));
 
-            if (in.readInt() != IPCONFIG_FILE_VERSION) {
+            int version = in.readInt();
+            if (version != 2 && version != 1) {
                 Log.e(TAG, "Bad version on IP configuration file, ignore read");
                 return;
             }
@@ -709,8 +723,22 @@ class WifiConfigStore {
                                     NetworkUtils.numericToInetAddress(in.readUTF()), in.readInt());
                             linkProperties.addLinkAddress(linkAddr);
                         } else if (key.equals(GATEWAY_KEY)) {
-                            linkProperties.addGateway(
-                                    NetworkUtils.numericToInetAddress(in.readUTF()));
+                            LinkAddress dest = null;
+                            InetAddress gateway = null;
+                            if (version == 1) {
+                                // only supported default gateways - leave the dest/prefix empty
+                                gateway = NetworkUtils.numericToInetAddress(in.readUTF());
+                            } else {
+                                if (in.readInt() == 1) {
+                                    dest = new LinkAddress(
+                                            NetworkUtils.numericToInetAddress(in.readUTF()),
+                                            in.readInt());
+                                }
+                                if (in.readInt() == 1) {
+                                    gateway = NetworkUtils.numericToInetAddress(in.readUTF());
+                                }
+                            }
+                            linkProperties.addRoute(new RouteInfo(dest, gateway));
                         } else if (key.equals(DNS_KEY)) {
                             linkProperties.addDns(
                                     NetworkUtils.numericToInetAddress(in.readUTF()));
@@ -1022,22 +1050,21 @@ class WifiConfigStore {
                         .getLinkAddresses();
                 Collection<InetAddress> currentDnses = currentConfig.linkProperties.getDnses();
                 Collection<InetAddress> newDnses = newConfig.linkProperties.getDnses();
-                Collection<InetAddress> currentGateways =
-                        currentConfig.linkProperties.getGateways();
-                Collection<InetAddress> newGateways = newConfig.linkProperties.getGateways();
+                Collection<RouteInfo> currentRoutes = currentConfig.linkProperties.getRoutes();
+                Collection<RouteInfo> newRoutes = newConfig.linkProperties.getRoutes();
 
                 boolean linkAddressesDiffer =
                         (currentLinkAddresses.size() != newLinkAddresses.size()) ||
                         !currentLinkAddresses.containsAll(newLinkAddresses);
                 boolean dnsesDiffer = (currentDnses.size() != newDnses.size()) ||
                         !currentDnses.containsAll(newDnses);
-                boolean gatewaysDiffer = (currentGateways.size() != newGateways.size()) ||
-                        !currentGateways.containsAll(newGateways);
+                boolean routesDiffer = (currentRoutes.size() != newRoutes.size()) ||
+                        !currentRoutes.containsAll(newRoutes);
 
                 if ((currentConfig.ipAssignment != newConfig.ipAssignment) ||
                         linkAddressesDiffer ||
                         dnsesDiffer ||
-                        gatewaysDiffer) {
+                        routesDiffer) {
                     ipChanged = true;
                 }
                 break;
@@ -1112,8 +1139,8 @@ class WifiConfigStore {
         for (LinkAddress linkAddr : config.linkProperties.getLinkAddresses()) {
             linkProperties.addLinkAddress(linkAddr);
         }
-        for (InetAddress gateway : config.linkProperties.getGateways()) {
-            linkProperties.addGateway(gateway);
+        for (RouteInfo route : config.linkProperties.getRoutes()) {
+            linkProperties.addRoute(route);
         }
         for (InetAddress dns : config.linkProperties.getDnses()) {
             linkProperties.addDns(dns);
