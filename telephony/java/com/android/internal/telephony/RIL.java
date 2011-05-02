@@ -3025,7 +3025,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             dataCall.active = p.readInt();
             dataCall.type = p.readString();
             String addresses = p.readString();
-            if (TextUtils.isEmpty(addresses)) {
+            if (!TextUtils.isEmpty(addresses)) {
                 dataCall.addresses = addresses.split(" ");
             }
         } else {
@@ -3034,7 +3034,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             dataCall.active = p.readInt();
             dataCall.type = p.readString();
             dataCall.ifname = p.readString();
-            if (TextUtils.isEmpty(dataCall.ifname)) {
+            if ((dataCall.status == DataConnection.FailCause.NONE.getErrorCode()) &&
+                    TextUtils.isEmpty(dataCall.ifname)) {
               throw new RuntimeException("getDataCallState, no ifname");
             }
             String addresses = p.readString();
