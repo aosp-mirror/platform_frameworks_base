@@ -28,6 +28,7 @@ import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -508,6 +509,7 @@ public class WifiWatchdogService {
             // This access point does not require a watchdog, so queue idle on the main thread
             mHandler.idle();
         }
+        mHandler.checkWalledGarden(ssid);
     }
     
     /**
@@ -1002,6 +1004,8 @@ public class WifiWatchdogService {
          * The object will be an {@link AccessPoint}.
          */
         static final int ACTION_BACKGROUND_CHECK_AP = 3;
+        /** Check whether the connection is a walled garden */
+        static final int ACTION_CHECK_WALLED_GARDEN = 4;
 
         /**
          * Go to sleep for the current network. We are conservative with making
@@ -1022,7 +1026,16 @@ public class WifiWatchdogService {
         static final int MESSAGE_DISCONNECTED = 104;
         /** Performs a hard-reset on the watchdog state. */
         static final int MESSAGE_RESET = 105;
-        
+
+        /* Walled garden detection */
+        private String mLastSsid;
+        private long mLastTime;
+        private final long MIN_WALLED_GARDEN_TEST_INTERVAL = 15 * 60 * 1000; //15 minutes
+
+        void checkWalledGarden(String ssid) {
+            sendMessage(obtainMessage(ACTION_CHECK_WALLED_GARDEN, ssid));
+        }
+
         void checkAp(AccessPoint ap) {
             removeAllActions();
             sendMessage(obtainMessage(ACTION_CHECK_AP, ap));
@@ -1084,6 +1097,9 @@ public class WifiWatchdogService {
                 case ACTION_BACKGROUND_CHECK_AP:
                     handleBackgroundCheckAp((AccessPoint) msg.obj);
                     break;
+                case ACTION_CHECK_WALLED_GARDEN:
+                    handleWalledGardenCheck((String) msg.obj);
+                    break;
                 case MESSAGE_SLEEP:
                     handleSleep((String) msg.obj);
                     break;
@@ -1099,6 +1115,43 @@ public class WifiWatchdogService {
                 case MESSAGE_RESET:
                     handleReset();
                     break;
+            }
+        }
+
+        private boolean isWalledGardenConnection() {
+            //One way to detect a walled garden is to see if multiple DNS queries
+            //resolve to the same IP address
+            try {
+                String host1 = "www.google.com";
+                String host2 = "www.android.com";
+                String address1 = InetAddress.getByName(host1).getHostAddress();
+                String address2 = InetAddress.getByName(host2).getHostAddress();
+                if (address1.equals(address2)) return true;
+            } catch (UnknownHostException e) {
+                return false;
+            }
+            return false;
+        }
+
+        private void handleWalledGardenCheck(String ssid) {
+            long currentTime = System.currentTimeMillis();
+            //Avoid a walled garden test on the same network if one was already done
+            //within MIN_WALLED_GARDEN_TEST_INTERVAL. This will handle scenarios where
+            //there are frequent network disconnections
+            if (ssid.equals(mLastSsid) &&
+                    (currentTime - mLastTime) < MIN_WALLED_GARDEN_TEST_INTERVAL) {
+                return;
+            }
+
+            mLastTime = currentTime;
+            mLastSsid = ssid;
+
+            if (isWalledGardenConnection()) {
+                Uri uri = Uri.parse("http://www.google.com");
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT |
+                        Intent.FLAG_ACTIVITY_NEW_TASK);
+                mContext.startActivity(intent);
             }
         }
     }
