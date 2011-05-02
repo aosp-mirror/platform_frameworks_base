@@ -135,20 +135,21 @@ status_t MediaScanner::doProcessDirectory(
         }
         if (type == DT_REG || type == DT_DIR) {
             if (type == DT_DIR) {
+                bool childNoMedia = noMedia;
                 // set noMedia flag on directories with a name that starts with '.'
                 // for example, the Mac ".Trashes" directory
                 if (name[0] == '.')
-                    noMedia = true;
+                    childNoMedia = true;
 
                 // report the directory to the client
                 if (stat(path, &statbuf) == 0) {
-                    client.scanFile(path, statbuf.st_mtime, 0, true, noMedia);
+                    client.scanFile(path, statbuf.st_mtime, 0, true, childNoMedia);
                 }
 
                 // and now process its contents
                 strcat(fileSpot, "/");
                 int err = doProcessDirectory(path, pathRemaining - nameLength - 1, client,
-                        noMedia, exceptionCheck, exceptionEnv);
+                        childNoMedia, exceptionCheck, exceptionEnv);
                 if (err) {
                     // pass exceptions up - ignore other errors
                     if (exceptionCheck && exceptionCheck(exceptionEnv)) goto failure;
