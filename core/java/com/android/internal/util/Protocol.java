@@ -29,9 +29,17 @@ package com.android.internal.util;
  * {@hide}
  */
 public class Protocol {
-    public static final int MAX_MESSAGE     =  0x0000FFFF;
+    public static final int MAX_MESSAGE                                             = 0x0000FFFF;
 
-    public static final int BASE_WIFI       =  0x00010000;
-    public static final int BASE_DHCP       =  0x00020000;
+    /** Base reserved for system */
+    public static final int BASE_SYSTEM_RESERVED                                    = 0x00010000;
+    public static final int BASE_SYSTEM_ASYNC_CHANNEL                               = 0x00011000;
+
+    /** Non system protocols */
+    public static final int BASE_WIFI                                               = 0x00020000;
+    public static final int BASE_DHCP                                               = 0x00030000;
+    public static final int BASE_DATA_CONNECTION                                    = 0x00040000;
+    public static final int BASE_DATA_CONNECTION_TRACKER                            = 0x00050000;
+
     //TODO: define all used protocols
 }
