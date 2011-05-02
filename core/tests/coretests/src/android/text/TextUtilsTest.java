@@ -19,6 +19,7 @@ package android.text;
 import com.google.android.collect.Lists;
 
 import android.test.MoreAsserts;
+import android.os.Parcel;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.style.StyleSpan;
@@ -342,6 +343,51 @@ public class TextUtilsTest extends TestCase {
         assertTrue(TextUtils.delimitedStringContains("network,mock,gpsx,gps", ',', "gps"));
         // Not present (but with a false match)
         assertFalse(TextUtils.delimitedStringContains("network,mock,gpsx", ',', "gps"));
+    }
+
+    @SmallTest
+    public void testCharSequenceCreator() {
+        Parcel p = Parcel.obtain();
+        TextUtils.writeToParcel(null, p, 0);
+        CharSequence text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
+        assertNull("null CharSequence should generate null from parcel", text);
+        p = Parcel.obtain();
+        TextUtils.writeToParcel("test", p, 0);
+        text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
+        assertEquals("conversion to/from parcel failed", "test", text);
+    }
+
+    @SmallTest
+    public void testCharSequenceCreatorNull() {
+        Parcel p;
+        CharSequence text;
+        p = Parcel.obtain();
+        TextUtils.writeToParcel(null, p, 0);
+        p.setDataPosition(0);
+        text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
+        assertNull("null CharSequence should generate null from parcel", text);
+    }
+
+    @SmallTest
+    public void testCharSequenceCreatorSpannable() {
+        Parcel p;
+        CharSequence text;
+        p = Parcel.obtain();
+        TextUtils.writeToParcel(new SpannableString("test"), p, 0);
+        p.setDataPosition(0);
+        text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
+        assertEquals("conversion to/from parcel failed", "test", text.toString());
+    }
+
+    @SmallTest
+    public void testCharSequenceCreatorString() {
+        Parcel p;
+        CharSequence text;
+        p = Parcel.obtain();
+        TextUtils.writeToParcel("test", p, 0);
+        p.setDataPosition(0);
+        text = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(p);
+        assertEquals("conversion to/from parcel failed", "test", text.toString());
     }
 
     /**
