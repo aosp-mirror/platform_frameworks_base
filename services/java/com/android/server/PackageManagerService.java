@@ -9031,6 +9031,19 @@ class PackageManagerService extends IPackageManager.Stub {
             }
             mPendingPackages.clear();
 
+            /*
+             * Make sure all the updated system packages have their shared users
+             * associated with them.
+             */
+            final Iterator<PackageSetting> disabledIt = mDisabledSysPackages.values().iterator();
+            while (disabledIt.hasNext()) {
+                final PackageSetting disabledPs = disabledIt.next();
+                final Object id = getUserIdLP(disabledPs.userId);
+                if (id != null && id instanceof SharedUserSetting) {
+                  disabledPs.sharedUser = (SharedUserSetting) id;
+                }
+            }
+
             mReadMessages.append("Read completed successfully: "
                     + mPackages.size() + " packages, "
                     + mSharedUsers.size() + " shared uids\n");
