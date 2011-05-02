@@ -86,6 +86,14 @@ public class Lines2Activity extends Activity {
             canvas.drawLines(copyPoints, 0, 12, p);
         }
 
+        private void drawVerticalLine(Canvas canvas, Paint p, float length, float x, float y) {
+            canvas.drawLine(x, y, x, y + length, p);
+        }
+
+        private void drawDiagonalLine(Canvas canvas, Paint p, float length, float x, float y) {
+            canvas.drawLine(x, y, x + length, y + length, p);
+        }
+
         @Override
         protected void onDraw(Canvas canvas) {
             super.onDraw(canvas);
@@ -145,6 +153,99 @@ public class Lines2Activity extends Activity {
             canvas.translate(60, 0);
             drawLines(canvas, p, mOffset/2, yOffset/2);
             canvas.restore();
+
+            yOffset += 100;
+            canvas.save();
+            p.setStrokeWidth(1);
+            float x = 10 + mOffset;
+            for (float length = 1; length <= 10; length +=1 ) {
+                p.setAntiAlias(false);
+                drawVerticalLine(canvas, p, length, x, yOffset);
+                x += 5;
+                p.setAntiAlias(true);
+                drawVerticalLine(canvas, p, length, x, yOffset);
+                x += 5;
+            }
+            p.setStrokeWidth(5);
+            for (float length = 1; length <= 10; length +=1 ) {
+                p.setAntiAlias(false);
+                drawVerticalLine(canvas, p, length, x, yOffset);
+                x += 10;
+                p.setAntiAlias(true);
+                drawVerticalLine(canvas, p, length, x, yOffset);
+                x += 10;
+            }
+            canvas.restore();
+
+            yOffset += 20;
+            canvas.save();
+            p.setStrokeWidth(1);
+            x = 10 + mOffset;
+            for (float length = 1; length <= 10; length +=1 ) {
+                p.setAntiAlias(false);
+                drawDiagonalLine(canvas, p, length, x, yOffset);
+                x += 5;
+                p.setAntiAlias(true);
+                drawDiagonalLine(canvas, p, length, x, yOffset);
+                x += 5;
+            }
+            p.setStrokeWidth(2);
+            for (float length = 1; length <= 10; length +=1 ) {
+                p.setAntiAlias(false);
+                drawDiagonalLine(canvas, p, length, x, yOffset);
+                x += 10;
+                p.setAntiAlias(true);
+                drawDiagonalLine(canvas, p, length, x, yOffset);
+                x += 10;
+            }
+            canvas.restore();
+
+            yOffset += 20;
+            canvas.save();
+            p.setStrokeWidth(1);
+            x = 10 + mOffset;
+            for (float length = 1; length <= 10; length +=1 ) {
+                p.setAntiAlias(false);
+                canvas.drawLine(x, yOffset, x + 1, yOffset + length, p);
+                x += 5;
+                p.setAntiAlias(true);
+                canvas.drawLine(x, yOffset, x + 1, yOffset + length, p);
+                x += 5;
+            }
+            p.setStrokeWidth(2);
+            for (float length = 1; length <= 10; length +=1 ) {
+                p.setAntiAlias(false);
+                canvas.drawLine(x, yOffset, x + 1, yOffset + length, p);
+                x += 10;
+                p.setAntiAlias(true);
+                canvas.drawLine(x, yOffset, x + 1, yOffset + length, p);
+                x += 10;
+            }
+            canvas.restore();
+
+            yOffset += 20;
+            canvas.save();
+            p.setStrokeWidth(1);
+            x = 10 + mOffset;
+            for (float length = 1; length <= 10; length +=1 ) {
+                p.setAntiAlias(false);
+                canvas.drawLine(x, yOffset, x + length, yOffset + 1, p);
+                x += 5;
+                p.setAntiAlias(true);
+                canvas.drawLine(x, yOffset, x + length, yOffset + 1, p);
+                x += 5;
+            }
+            p.setStrokeWidth(2);
+            for (float length = 1; length <= 10; length +=1 ) {
+                p.setAntiAlias(false);
+                canvas.drawLine(x, yOffset, x + length, yOffset + 1, p);
+                x += 10;
+                p.setAntiAlias(true);
+                canvas.drawLine(x, yOffset, x + length, yOffset + 1, p);
+                x += 10;
+            }
+            canvas.restore();
+
         }
     }
 }

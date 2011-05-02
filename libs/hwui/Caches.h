@@ -62,8 +62,10 @@ static const TextureVertex gMeshVertices[] = {
 static const GLsizei gMeshStride = sizeof(TextureVertex);
 static const GLsizei gVertexStride = sizeof(Vertex);
 static const GLsizei gAlphaVertexStride = sizeof(AlphaVertex);
+static const GLsizei gAAVertexStride = sizeof(AAVertex);
 static const GLsizei gMeshTextureOffset = 2 * sizeof(float);
-static const GLsizei gVertexAlphaOffset = 2 * sizeof(float);
+static const GLsizei gVertexAAWidthOffset = 2 * sizeof(float);
+static const GLsizei gVertexAALengthOffset = 3 * sizeof(float);
 static const GLsizei gMeshCount = 4;
 
 ///////////////////////////////////////////////////////////////////////////////

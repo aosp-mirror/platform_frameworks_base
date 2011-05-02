@@ -468,7 +468,8 @@ private:
     void setupDrawTextureTransform(mat4& transform);
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
     void setupDrawVertices(GLvoid* vertices);
-    void setupDrawAALine(GLvoid* vertices, GLvoid* distanceCoords, float strokeWidth);
+    void setupDrawAALine(GLvoid* vertices, GLvoid* distanceCoords, GLvoid* lengthCoords,
+            float strokeWidth);
     void finishDrawTexture();
 
     void drawRegionRects(const Region& region);
