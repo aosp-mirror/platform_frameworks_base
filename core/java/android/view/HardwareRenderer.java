@@ -289,9 +289,10 @@ public abstract class HardwareRenderer {
     @SuppressWarnings({"deprecation"})
     static abstract class GlRenderer extends HardwareRenderer {
         // These values are not exposed in our EGL APIs
-        private static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
-        private static final int EGL_SURFACE_TYPE = 0x3033;
-        private static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400;
+        static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
+        static final int EGL_SURFACE_TYPE = 0x3033;
+        static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400;
+        static final int EGL_OPENGL_ES2_BIT = 4;
 
         private static final int SURFACE_STATE_ERROR = 0;
         private static final int SURFACE_STATE_SUCCESS = 1;
@@ -459,13 +460,12 @@ public abstract class HardwareRenderer {
                         getEGLErrorString(sEgl.eglGetError()));
             }
 
-            sEglConfig = getConfigChooser(mGlVersion).chooseConfig(sEgl, sEglDisplay);
+            sEglConfig = chooseEglConfig();
             if (sEglConfig == null) {
                 // We tried to use EGL_SWAP_BEHAVIOR_PRESERVED_BIT, try again without
                 if (mDirtyRegions) {
                     mDirtyRegions = false;
-
-                    sEglConfig = getConfigChooser(mGlVersion).chooseConfig(sEgl, sEglDisplay);
+                    sEglConfig = chooseEglConfig();
                     if (sEglConfig == null) {
                         throw new RuntimeException("eglConfig not initialized");
                     }
@@ -480,6 +480,21 @@ public abstract class HardwareRenderer {
             */
             sEglContext = createContext(sEgl, sEglDisplay, sEglConfig);
         }
+
+        private EGLConfig chooseEglConfig() {
+            int[] configsCount = new int[1];
+            EGLConfig[] configs = new EGLConfig[1];
+            int[] configSpec = getConfig(mDirtyRegions);
+            if (!sEgl.eglChooseConfig(sEglDisplay, configSpec, configs, 1, configsCount)) {
+                throw new IllegalArgumentException("eglChooseConfig failed " +
+                        getEGLErrorString(sEgl.eglGetError()));
+            } else if (configsCount[0] > 0) {
+                return configs[0];
+            }
+            return null;
+        }
+
+        abstract int[] getConfig(boolean dirtyRegions);
 
         GL createEglSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException {
             // Check preconditions.
@@ -591,15 +606,6 @@ public abstract class HardwareRenderer {
         }
 
         void onPostDraw() {
-        }
-        
-        /**
-         * Defines the EGL configuration for this renderer.
-         * 
-         * @return An {@link android.view.HardwareRenderer.GlRenderer.EglConfigChooser}.
-         */
-        EglConfigChooser getConfigChooser(int glVersion) {
-            return new ComponentSizeChooser(glVersion, 8, 8, 8, 8, 0, 0, mDirtyRegions);
         }
 
         @Override
@@ -713,134 +719,6 @@ public abstract class HardwareRenderer {
             }
             return SURFACE_STATE_SUCCESS;
         }
-
-        static abstract class EglConfigChooser {
-            final int[] mConfigSpec;
-            private final int mGlVersion;
-
-            EglConfigChooser(int glVersion, int[] configSpec) {
-                mGlVersion = glVersion;
-                mConfigSpec = filterConfigSpec(configSpec);
-            }
-
-            EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
-                int[] index = new int[1];
-                if (!egl.eglChooseConfig(display, mConfigSpec, null, 0, index)) {
-                    throw new IllegalArgumentException("eglChooseConfig failed "
-                            + getEGLErrorString(egl.eglGetError()));
-                }
-
-                int numConfigs = index[0];
-                if (numConfigs <= 0) {
-                    throw new IllegalArgumentException("No configs match configSpec");
-                }
-
-                EGLConfig[] configs = new EGLConfig[numConfigs];
-                if (!egl.eglChooseConfig(display, mConfigSpec, configs, numConfigs, index)) {
-                    throw new IllegalArgumentException("eglChooseConfig failed "
-                            + getEGLErrorString(egl.eglGetError()));
-                }
-
-                EGLConfig config = chooseConfig(egl, display, configs);
-                if (config == null) {
-                    throw new IllegalArgumentException("No config chosen");
-                }
-
-                return config;
-            }
-
-            abstract EGLConfig chooseConfig(EGL10 egl, EGLDisplay display, EGLConfig[] configs);
-
-            private int[] filterConfigSpec(int[] configSpec) {
-                if (mGlVersion != 2) {
-                    return configSpec;
-                }
-                /* We know none of the subclasses define EGL_RENDERABLE_TYPE.
-                 * And we know the configSpec is well formed.
-                 */
-                int len = configSpec.length;
-                int[] newConfigSpec = new int[len + 2];
-                System.arraycopy(configSpec, 0, newConfigSpec, 0, len - 1);
-                newConfigSpec[len - 1] = EGL10.EGL_RENDERABLE_TYPE;
-                newConfigSpec[len] = 4; /* EGL_OPENGL_ES2_BIT */
-                newConfigSpec[len + 1] = EGL10.EGL_NONE;
-                return newConfigSpec;
-            }
-        }
-
-        /**
-         * Choose a configuration with exactly the specified r,g,b,a sizes,
-         * and at least the specified depth and stencil sizes.
-         */
-        static class ComponentSizeChooser extends EglConfigChooser {
-            private int[] mValue;
-
-            private final int mRedSize;
-            private final int mGreenSize;
-            private final int mBlueSize;
-            private final int mAlphaSize;
-            private final int mDepthSize;
-            private final int mStencilSize;
-            private final boolean mDirtyRegions;
-
-            ComponentSizeChooser(int glVersion, int redSize, int greenSize, int blueSize,
-                    int alphaSize, int depthSize, int stencilSize, boolean dirtyRegions) {
-                super(glVersion, new int[] {
-                        EGL10.EGL_RED_SIZE, redSize,
-                        EGL10.EGL_GREEN_SIZE, greenSize,
-                        EGL10.EGL_BLUE_SIZE, blueSize,
-                        EGL10.EGL_ALPHA_SIZE, alphaSize,
-                        EGL10.EGL_DEPTH_SIZE, depthSize,
-                        EGL10.EGL_STENCIL_SIZE, stencilSize,
-                        EGL_SURFACE_TYPE, EGL10.EGL_WINDOW_BIT |
-                                (dirtyRegions ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0),
-                        EGL10.EGL_NONE });
-                mValue = new int[1];
-                mRedSize = redSize;
-                mGreenSize = greenSize;
-                mBlueSize = blueSize;
-                mAlphaSize = alphaSize;
-                mDepthSize = depthSize;
-                mStencilSize = stencilSize;
-                mDirtyRegions = dirtyRegions;
-            }
-
-            @Override
-            EGLConfig chooseConfig(EGL10 egl, EGLDisplay display, EGLConfig[] configs) {
-                for (EGLConfig config : configs) {
-                    int d = findConfigAttrib(egl, display, config, EGL10.EGL_DEPTH_SIZE, 0);
-                    int s = findConfigAttrib(egl, display, config, EGL10.EGL_STENCIL_SIZE, 0);
-                    if (d >= mDepthSize && s >= mStencilSize) {
-                        int r = findConfigAttrib(egl, display, config, EGL10.EGL_RED_SIZE, 0);
-                        int g = findConfigAttrib(egl, display, config, EGL10.EGL_GREEN_SIZE, 0);
-                        int b = findConfigAttrib(egl, display, config, EGL10.EGL_BLUE_SIZE, 0);
-                        int a = findConfigAttrib(egl, display, config, EGL10.EGL_ALPHA_SIZE, 0);
-                        boolean backBuffer;
-                        if (mDirtyRegions) {
-                            int surfaceType = findConfigAttrib(egl, display, config,
-                                    EGL_SURFACE_TYPE, 0);
-                            backBuffer = (surfaceType & EGL_SWAP_BEHAVIOR_PRESERVED_BIT) != 0;
-                        } else {
-                            backBuffer = true;
-                        }
-                        if (r >= mRedSize && g >= mGreenSize && b >= mBlueSize && a >= mAlphaSize
-                                && backBuffer) {
-                            return config;
-                        }
-                    }
-                }
-                return null;
-            }
-
-            private int findConfigAttrib(EGL10 egl, EGLDisplay display, EGLConfig config,
-                    int attribute, int defaultValue) {
-                if (egl.eglGetConfigAttrib(display, config, attribute, mValue)) {
-                    return mValue[0];
-                }
-
-                return defaultValue;
-            }
-        }
     }
 
     /**
@@ -857,7 +735,23 @@ public abstract class HardwareRenderer {
         GLES20Canvas createCanvas() {
             return mGlCanvas = new GLES20Canvas(mTranslucent);
         }
-        
+
+        @Override
+        int[] getConfig(boolean dirtyRegions) {
+            return new int[] {
+                    EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                    EGL10.EGL_RED_SIZE, 8,
+                    EGL10.EGL_GREEN_SIZE, 8,
+                    EGL10.EGL_BLUE_SIZE, 8,
+                    EGL10.EGL_ALPHA_SIZE, 8,
+                    EGL10.EGL_DEPTH_SIZE, 0,
+                    EGL10.EGL_STENCIL_SIZE, 0,
+                    EGL_SURFACE_TYPE, EGL10.EGL_WINDOW_BIT |
+                            (dirtyRegions ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0),
+                    EGL10.EGL_NONE
+            };
+        }
+
         @Override
         boolean canDraw() {
             return super.canDraw() && mGlCanvas != null;
