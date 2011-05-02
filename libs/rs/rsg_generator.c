@@ -157,7 +157,8 @@ void printPlaybackFuncs(FILE *f, const char *prefix) {
 static int hasInlineDataPointers(const ApiEntry * api) {
     int ret = 0;
     int ct;
-    if (api->sync || api->ret.typeName[0]) {
+    // Temporarly disable inbanding while we sort though the bugs.
+    if (1|| api->sync || api->ret.typeName[0]) {
         return 0;
     }
     for (ct=0; ct < api->paramCount; ct++) {
