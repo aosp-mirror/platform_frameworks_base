@@ -915,7 +915,7 @@ void OpenGLRenderer::setupDrawWithExternalTexture() {
 }
 
 void OpenGLRenderer::setupDrawAALine() {
-    mDescription.hasWidth = true;
+    mDescription.isAA = true;
 }
 
 void OpenGLRenderer::setupDrawPoint(float pointSize) {
@@ -1121,25 +1121,30 @@ void OpenGLRenderer::setupDrawVertices(GLvoid* vertices) {
 
 /**
  * Sets up the shader to draw an AA line. We draw AA lines with quads, where there is an
- * outer boundary that fades out to 0. The variables set in the shader define the width of the
- * core line primitive ("width") and the width of the fading boundary ("boundaryWidth"). The
- * "vtxDistance" attribute (one per vertex) is a value from zero to one that tells the fragment
- * shader where the fragment is in relation to the line width overall; this value is then used
- * to compute the proper color, based on whether the fragment lies in the fading AA region of
- * the line.
+ * outer boundary that fades out to 0. The variables set in the shader define the proportion of
+ * the width and length of the primitive occupied by the AA region. The vtxWidth and vtxLength
+ * attributes (one per vertex) are values from zero to one that tells the fragment
+ * shader where the fragment is in relation to the line width/length overall; these values are
+ * then used to compute the proper color, based on whether the fragment lies in the fading AA
+ * region of the line.
+ * Note that we only pass down the width values in this setup function. The length coordinates
+ * are set up for each individual segment.
  */
-void OpenGLRenderer::setupDrawAALine(GLvoid* vertices, GLvoid* distanceCoords, float strokeWidth) {
+void OpenGLRenderer::setupDrawAALine(GLvoid* vertices, GLvoid* widthCoords,
+        GLvoid* lengthCoords, float strokeWidth) {
     mCaches.unbindMeshBuffer();
     glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
-            gAlphaVertexStride, vertices);
-    int distanceSlot = mCaches.currentProgram->getAttrib("vtxDistance");
-    glEnableVertexAttribArray(distanceSlot);
-    glVertexAttribPointer(distanceSlot, 1, GL_FLOAT, GL_FALSE, gAlphaVertexStride, distanceCoords);
-    int widthSlot = mCaches.currentProgram->getUniform("width");
+            gAAVertexStride, vertices);
+    int widthSlot = mCaches.currentProgram->getAttrib("vtxWidth");
+    glEnableVertexAttribArray(widthSlot);
+    glVertexAttribPointer(widthSlot, 1, GL_FLOAT, GL_FALSE, gAAVertexStride, widthCoords);
+    int lengthSlot = mCaches.currentProgram->getAttrib("vtxLength");
+    glEnableVertexAttribArray(lengthSlot);
+    glVertexAttribPointer(lengthSlot, 1, GL_FLOAT, GL_FALSE, gAAVertexStride, lengthCoords);
     int boundaryWidthSlot = mCaches.currentProgram->getUniform("boundaryWidth");
+    // Setting the inverse value saves computations per-fragment in the shader
     int inverseBoundaryWidthSlot = mCaches.currentProgram->getUniform("inverseBoundaryWidth");
     float boundaryWidth = (1 - strokeWidth) / 2;
-    glUniform1f(widthSlot, strokeWidth);
     glUniform1f(boundaryWidthSlot, boundaryWidth);
     glUniform1f(inverseBoundaryWidthSlot, (1 / boundaryWidth));
 }
@@ -1480,20 +1485,21 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     }
     Vertex lines[verticesCount];
     Vertex* vertices = &lines[0];
-    AlphaVertex wLines[verticesCount];
-    AlphaVertex* aaVertices = &wLines[0];
+    AAVertex wLines[verticesCount];
+    AAVertex* aaVertices = &wLines[0];
     if (!isAA) {
         setupDrawVertices(vertices);
     } else {
-        void* alphaCoords = ((GLbyte*) aaVertices) + gVertexAlphaOffset;
+        void* widthCoords = ((GLbyte*) aaVertices) + gVertexAAWidthOffset;
+        void* lengthCoords = ((GLbyte*) aaVertices) + gVertexAALengthOffset;
         // innerProportion is the ratio of the inner (non-AA) port of the line to the total
         // AA stroke width (the base stroke width expanded by a half pixel on either side).
         // This value is used in the fragment shader to determine how to fill fragments.
         float innerProportion = fmax(strokeWidth - 1.0f, 0) / (strokeWidth + .5f);
-        setupDrawAALine((void*) aaVertices, alphaCoords, innerProportion);
+        setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords, innerProportion);
     }
 
-    AlphaVertex *prevAAVertex = NULL;
+    AAVertex *prevAAVertex = NULL;
     Vertex *prevVertex = NULL;
     float inverseScaleX = 1.0f;
     float inverseScaleY = 1.0f;
@@ -1516,15 +1522,17 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
         }
     }
 
+    int boundaryLengthSlot = -1;
+    int inverseBoundaryLengthSlot = -1;
     for (int i = 0; i < count; i += 4) {
         // a = start point, b = end point
         vec2 a(points[i], points[i + 1]);
         vec2 b(points[i + 2], points[i + 3]);
+        float length = 0;
 
         // Find the normal to the line
         vec2 n = (b - a).copyNormalized() * strokeWidth;
         if (isHairLine) {
-            n *= inverseScaleX;
             if (isAA) {
                 float wideningFactor;
                 if (fabs(n.x) >= fabs(n.y)) {
@@ -1534,10 +1542,21 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
                 }
                 n *= wideningFactor;
             }
+            n.x *= inverseScaleX;
+            n.y *= inverseScaleY;
         }
         float x = n.x;
         n.x = -n.y;
         n.y = x;
+
+        // aa lines expand the endpoint vertices to encompass the AA boundary
+        if (isAA) {
+            vec2 abVector = (b - a);
+            length = abVector.length();
+            abVector.normalize();
+            a -= abVector;
+            b += abVector;
+        }
 
         // Four corners of the rectangle defining a thick line
         vec2 p1 = a - n;
@@ -1545,16 +1564,13 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
         vec2 p3 = b + n;
         vec2 p4 = b - n;
 
+
         const float left = fmin(p1.x, fmin(p2.x, fmin(p3.x, p4.x)));
         const float right = fmax(p1.x, fmax(p2.x, fmax(p3.x, p4.x)));
         const float top = fmin(p1.y, fmin(p2.y, fmin(p3.y, p4.y)));
         const float bottom = fmax(p1.y, fmax(p2.y, fmax(p3.y, p4.y)));
 
         if (!quickReject(left, top, right, bottom)) {
-            // Draw the line as 2 triangles, could be optimized
-            // by using only 4 vertices and the correct indices
-            // Also we should probably used non textured vertices
-            // when line AA is disabled to save on bandwidth
             if (!isAA) {
                 if (prevVertex != NULL) {
                     // Issue two repeat vertices to create degenerate triangles to bridge
@@ -1572,24 +1588,36 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
                 prevVertex = vertices - 1;
                 generatedVerticesCount += 4;
             } else {
+                if (boundaryLengthSlot < 0) {
+                    boundaryLengthSlot = mCaches.currentProgram->getUniform("boundaryLength");
+                    inverseBoundaryLengthSlot =
+                            mCaches.currentProgram->getUniform("inverseBoundaryLength");
+                }
+                float innerProportion = (length) / (length + 2);
+                float boundaryLength = (1 - innerProportion) / 2;
+                glUniform1f(boundaryLengthSlot, boundaryLength);
+                glUniform1f(inverseBoundaryLengthSlot, (1 / boundaryLength));
+
                 if (prevAAVertex != NULL) {
                     // Issue two repeat vertices to create degenerate triangles to bridge
                     // between the previous line and the new one. This is necessary because
                     // we are creating a single triangle_strip which will contain
                     // potentially discontinuous line segments.
-                    AlphaVertex::set(aaVertices++,prevAAVertex->position[0],
-                            prevAAVertex->position[1], prevAAVertex->alpha);
-                    AlphaVertex::set(aaVertices++, p4.x, p4.y, 1);
+                    AAVertex::set(aaVertices++,prevAAVertex->position[0],
+                            prevAAVertex->position[1], prevAAVertex->width, prevAAVertex->length);
+                    AAVertex::set(aaVertices++, p4.x, p4.y, 1, 1);
                     generatedVerticesCount += 2;
                 }
-                AlphaVertex::set(aaVertices++, p4.x, p4.y, 1);
-                AlphaVertex::set(aaVertices++, p1.x, p1.y, 1);
-                AlphaVertex::set(aaVertices++, p3.x, p3.y, 0);
-                AlphaVertex::set(aaVertices++, p2.x, p2.y, 0);
+                AAVertex::set(aaVertices++, p4.x, p4.y, 1, 1);
+                AAVertex::set(aaVertices++, p1.x, p1.y, 1, 0);
+                AAVertex::set(aaVertices++, p3.x, p3.y, 0, 1);
+                AAVertex::set(aaVertices++, p2.x, p2.y, 0, 0);
                 prevAAVertex = aaVertices - 1;
                 generatedVerticesCount += 4;
             }
-            dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+            dirtyLayer(a.x == b.x ? left - 1 : left, a.y == b.y ? top - 1 : top,
+                    a.x == b.x ? right: right, a.y == b.y ? bottom: bottom,
+                    *mSnapshot->transform);
         }
     }
     if (generatedVerticesCount > 0) {

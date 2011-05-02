@@ -75,7 +75,7 @@ namespace uirenderer {
 
 #define PROGRAM_IS_POINT_SHIFT 36
 
-#define PROGRAM_HAS_WIDTH_SHIFT 37
+#define PROGRAM_HAS_AA_SHIFT 37
 
 #define PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT 38
 
@@ -124,7 +124,7 @@ struct ProgramDescription {
     bool hasBitmap;
     bool isBitmapNpot;
 
-    bool hasWidth;
+    bool isAA;
 
     bool hasGradient;
     Gradient gradientType;
@@ -156,7 +156,7 @@ struct ProgramDescription {
         hasAlpha8Texture = false;
         hasExternalTexture = false;
 
-        hasWidth = false;
+        isAA = false;
 
         modulate = false;
 
@@ -243,7 +243,7 @@ struct ProgramDescription {
         if (swapSrcDst) key |= PROGRAM_KEY_SWAP_SRC_DST;
         if (modulate) key |= programid(0x1) << PROGRAM_MODULATE_SHIFT;
         if (isPoint) key |= programid(0x1) << PROGRAM_IS_POINT_SHIFT;
-        if (hasWidth) key |= programid(0x1) << PROGRAM_HAS_WIDTH_SHIFT;
+        if (isAA) key |= programid(0x1) << PROGRAM_HAS_AA_SHIFT;
         if (hasExternalTexture) key |= programid(0x1) << PROGRAM_HAS_EXTERNAL_TEXTURE_SHIFT;
         return key;
     }

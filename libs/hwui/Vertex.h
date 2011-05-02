@@ -68,6 +68,25 @@ struct AlphaVertex : Vertex {
     }
 }; // struct AlphaVertex
 
+/**
+ * Simple structure to describe a vertex with a position and an alpha value.
+ */
+struct AAVertex : Vertex {
+    float width;
+    float length;
+
+    static inline void set(AAVertex* vertex, float x, float y, float width, float length) {
+        Vertex::set(vertex, x, y);
+        vertex[0].width = width;
+        vertex[0].length = length;
+    }
+
+    static inline void setColor(AAVertex* vertex, float width, float length) {
+        vertex[0].width = width;
+        vertex[0].length = length;
+    }
+}; // struct AlphaVertex
+
 }; // namespace uirenderer
 }; // namespace android
 
