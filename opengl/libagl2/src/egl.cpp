@@ -432,7 +432,6 @@ void egl_window_surface_v2_t::copyBlt(
         android_native_buffer_t* src, void const* src_vaddr,
         const Region& clip)
 {
-    // FIXME: use copybit if possible
     // NOTE: dst and src must be the same format
 
     Region::const_iterator cur = clip.begin();

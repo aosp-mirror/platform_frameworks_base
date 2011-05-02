@@ -31,8 +31,6 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
-struct android_native_buffer_t;
-
 namespace android {
 
 
@@ -603,13 +601,6 @@ struct prims_t {
     void (*renderTriangle)(GL, vertex_t*, vertex_t*, vertex_t*);
 };
 
-struct copybits_context_t {
-    // A handle to the blit engine, if it exists, else NULL.
-    int32_t                 minScale;
-    int32_t                 maxScale;
-    android_native_buffer_t* drawSurfaceBuffer;
-};
-
 struct ogles_context_t {
     context_t               rasterizer;
     array_machine_t         arrays         __attribute__((aligned(32)));
@@ -633,13 +624,6 @@ struct ogles_context_t {
     uint32_t                transformTextures : 1;
     EGLSurfaceManager*      surfaceManager;
     EGLBufferObjectManager* bufferObjectManager;
-
-    // copybits is only used if LIBAGL_USE_GRALLOC_COPYBITS is
-    // defined, but it is always present because ogles_context_t is a public
-    // struct that is used by clients of libagl. We want the size and offsets
-    // to stay the same, whether or not LIBAGL_USE_GRALLOC_COPYBITS is defined.
-
-    copybits_context_t      copybits;
 
     GLenum                  error;
 
