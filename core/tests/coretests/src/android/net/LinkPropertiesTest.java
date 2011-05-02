@@ -17,6 +17,7 @@
 package android.net;
 
 import android.net.LinkProperties;
+import android.net.RouteInfo;
 import android.test.suitebuilder.annotation.SmallTest;
 import junit.framework.TestCase;
 
@@ -55,8 +56,8 @@ public class LinkPropertiesTest extends TestCase {
             source.addDns(NetworkUtils.numericToInetAddress(DNS1));
             source.addDns(NetworkUtils.numericToInetAddress(DNS2));
             // set 2 gateways
-            source.addGateway(NetworkUtils.numericToInetAddress(GATEWAY1));
-            source.addGateway(NetworkUtils.numericToInetAddress(GATEWAY2));
+            source.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY1)));
+            source.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY2)));
 
             LinkProperties target = new LinkProperties();
 
@@ -68,8 +69,8 @@ public class LinkPropertiesTest extends TestCase {
                     NetworkUtils.numericToInetAddress(ADDRV6), 128));
             target.addDns(NetworkUtils.numericToInetAddress(DNS1));
             target.addDns(NetworkUtils.numericToInetAddress(DNS2));
-            target.addGateway(NetworkUtils.numericToInetAddress(GATEWAY1));
-            target.addGateway(NetworkUtils.numericToInetAddress(GATEWAY2));
+            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY1)));
+            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY2)));
 
             assertTrue(source.equals(target));
             assertTrue(source.hashCode() == target.hashCode());
@@ -83,8 +84,8 @@ public class LinkPropertiesTest extends TestCase {
                     NetworkUtils.numericToInetAddress(ADDRV6), 128));
             target.addDns(NetworkUtils.numericToInetAddress(DNS1));
             target.addDns(NetworkUtils.numericToInetAddress(DNS2));
-            target.addGateway(NetworkUtils.numericToInetAddress(GATEWAY1));
-            target.addGateway(NetworkUtils.numericToInetAddress(GATEWAY2));
+            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY1)));
+            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY2)));
             assertFalse(source.equals(target));
 
             target.clear();
@@ -96,8 +97,8 @@ public class LinkPropertiesTest extends TestCase {
                     NetworkUtils.numericToInetAddress(ADDRV6), 128));
             target.addDns(NetworkUtils.numericToInetAddress(DNS1));
             target.addDns(NetworkUtils.numericToInetAddress(DNS2));
-            target.addGateway(NetworkUtils.numericToInetAddress(GATEWAY1));
-            target.addGateway(NetworkUtils.numericToInetAddress(GATEWAY2));
+            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY1)));
+            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY2)));
             assertFalse(source.equals(target));
 
             target.clear();
@@ -109,8 +110,8 @@ public class LinkPropertiesTest extends TestCase {
             // change dnses
             target.addDns(NetworkUtils.numericToInetAddress("75.208.7.2"));
             target.addDns(NetworkUtils.numericToInetAddress(DNS2));
-            target.addGateway(NetworkUtils.numericToInetAddress(GATEWAY1));
-            target.addGateway(NetworkUtils.numericToInetAddress(GATEWAY2));
+            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY1)));
+            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY2)));
             assertFalse(source.equals(target));
 
             target.clear();
@@ -122,8 +123,8 @@ public class LinkPropertiesTest extends TestCase {
             target.addDns(NetworkUtils.numericToInetAddress(DNS1));
             target.addDns(NetworkUtils.numericToInetAddress(DNS2));
             // change gateway
-            target.addGateway(NetworkUtils.numericToInetAddress("75.208.8.2"));
-            target.addGateway(NetworkUtils.numericToInetAddress(GATEWAY2));
+            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress("75.208.8.2")));
+            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY2)));
             assertFalse(source.equals(target));
 
         } catch (Exception e) {
@@ -146,8 +147,8 @@ public class LinkPropertiesTest extends TestCase {
             source.addDns(NetworkUtils.numericToInetAddress(DNS1));
             source.addDns(NetworkUtils.numericToInetAddress(DNS2));
             // set 2 gateways
-            source.addGateway(NetworkUtils.numericToInetAddress(GATEWAY1));
-            source.addGateway(NetworkUtils.numericToInetAddress(GATEWAY2));
+            source.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY1)));
+            source.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY2)));
 
             LinkProperties target = new LinkProperties();
             // Exchange order
@@ -158,8 +159,8 @@ public class LinkPropertiesTest extends TestCase {
                     NetworkUtils.numericToInetAddress(ADDRV4), 32));
             target.addDns(NetworkUtils.numericToInetAddress(DNS2));
             target.addDns(NetworkUtils.numericToInetAddress(DNS1));
-            target.addGateway(NetworkUtils.numericToInetAddress(GATEWAY2));
-            target.addGateway(NetworkUtils.numericToInetAddress(GATEWAY1));
+            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY2)));
+            target.addRoute(new RouteInfo(NetworkUtils.numericToInetAddress(GATEWAY1)));
 
             assertTrue(source.equals(target));
             assertTrue(source.hashCode() == target.hashCode());

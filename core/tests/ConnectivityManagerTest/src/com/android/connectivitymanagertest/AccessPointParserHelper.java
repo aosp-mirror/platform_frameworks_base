@@ -30,6 +30,7 @@ import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.net.wifi.WifiConfiguration.ProxySettings;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
+import android.net.RouteInfo;
 import android.util.Log;
 
 import java.io.InputStream;
@@ -301,7 +302,7 @@ public class AccessPointParserHelper {
                     if (!InetAddress.isNumeric(gwAddr)) {
                         throw new SAXException();
                     }
-                    mLinkProperties.addGateway(InetAddress.getByName(gwAddr));
+                    mLinkProperties.addRoute(new RouteInfo(InetAddress.getByName(gwAddr)));
                 } catch (UnknownHostException e) {
                     throw new SAXException();
                 }
