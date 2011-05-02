@@ -44,16 +44,16 @@ import java.util.Stack;
  * In this usage model there is no need for the destination to
  * use the connect methods. The typical sequence of operations is:</p>
  *<ol>
- *   <li>Client calls AsyncChannel#connect</li>
- *   <li>Client receives CMD_CHANNEL_HALF_CONNECTED from AsyncChannel</li>
+ *   <li>Client calls AsyncChannel#connectSync or Asynchronously:</li>
+ *      <ol>For an asynchronous half connection client calls AsyncChannel#connect.</ol>
+ *          <li>Client receives CMD_CHANNEL_HALF_CONNECTED from AsyncChannel</li>
+ *      </ol>
  *   <li><code>comm-loop:</code></li>
- *   <li>Client calls AsyncChannel#sendMessage(msgX)</li>
- *   <li>Server receives and processes msgX</li>
- *   <li>Server optionally calls AsyncChannel#replyToMessage(msgY)
- *       and if sent Client receives and processes msgY</li>
+ *   <li>Client calls AsyncChannel#sendMessage</li>
+ *   <li>Server processes messages and optionally replies using AsyncChannel#replyToMessage
  *   <li>Loop to <code>comm-loop</code> until done</li>
- *   <li>When done Client calls {@link AsyncChannel#disconnect(int)}</li>
- *   <li>Client receives CMD_CHANNEL_DISCONNECTED from AsyncChannel</li>
+ *   <li>When done Client calls {@link AsyncChannel#disconnect}</li>
+ *   <li>Client/Server receives CMD_CHANNEL_DISCONNECTED from AsyncChannel</li>
  *</ol>
  *<br/>
  * <p>A second usage model is where the server/destination needs to know
@@ -62,21 +62,26 @@ import java.util.Stack;
  * different state for each client. In this model the server will also
  * use the connect methods. The typical sequence of operation is:</p>
  *<ol>
- *   <li>Client calls AsyncChannel#connect</li>
- *   <li>Client receives CMD_CHANNEL_HALF_CONNECTED from AsyncChannel</li>
- *   <li>Client calls AsyncChannel#sendMessage(CMD_CHANNEL_FULL_CONNECTION)</li>
+ *   <li>Client calls AsyncChannel#fullyConnectSync or Asynchronously:<li>
+ *      <ol>For an asynchronous full connection it calls AsyncChannel#connect</li>
+ *          <li>Client receives CMD_CHANNEL_HALF_CONNECTED from AsyncChannel</li>
+ *          <li>Client calls AsyncChannel#sendMessage(CMD_CHANNEL_FULL_CONNECTION)</li>
+ *      </ol>
  *   <li>Server receives CMD_CHANNEL_FULL_CONNECTION</li>
- *   <li>Server calls AsyncChannel#connect</li>
- *   <li>Server receives CMD_CHANNEL_HALF_CONNECTED from AsyncChannel</li>
+ *   <li>Server calls AsyncChannel#connected</li>
  *   <li>Server sends AsyncChannel#sendMessage(CMD_CHANNEL_FULLY_CONNECTED)</li>
  *   <li>Client receives CMD_CHANNEL_FULLY_CONNECTED</li>
  *   <li><code>comm-loop:</code></li>
  *   <li>Client/Server uses AsyncChannel#sendMessage/replyToMessage
  *       to communicate and perform work</li>
  *   <li>Loop to <code>comm-loop</code> until done</li>
- *   <li>When done Client/Server calls {@link AsyncChannel#disconnect(int)}</li>
+ *   <li>When done Client/Server calls {@link AsyncChannel#disconnect}</li>
  *   <li>Client/Server receives CMD_CHANNEL_DISCONNECTED from AsyncChannel</li>
  *</ol>
+ *
+ * TODO: Consider simplifying where we have connect and fullyConnect with only one response
+ * message RSP_CHANNEL_CONNECT instead of two, CMD_CHANNEL_HALF_CONNECTED and
+ * CMD_CHANNEL_FULLY_CONNECTED. We'd also change CMD_CHANNEL_FULL_CONNECTION to REQ_CHANNEL_CONNECT.
  */
 public class AsyncChannel {
     /** Log tag */
@@ -84,6 +89,8 @@ public class AsyncChannel {
 
     /** Enable to turn on debugging */
     private static final boolean DBG = false;
+
+    private static final int BASE = Protocol.BASE_SYSTEM_ASYNC_CHANNEL;
 
     /**
      * Command sent when the channel is half connected. Half connected
@@ -98,7 +105,7 @@ public class AsyncChannel {
      * msg.obj  == the AsyncChannel
      * msg.replyTo == dstMessenger if successful
      */
-    public static final int CMD_CHANNEL_HALF_CONNECTED = -1;
+    public static final int CMD_CHANNEL_HALF_CONNECTED = BASE + 0;
 
     /**
      * Command typically sent when after receiving the CMD_CHANNEL_HALF_CONNECTED.
@@ -107,7 +114,7 @@ public class AsyncChannel {
      *
      * msg.replyTo = srcMessenger.
      */
-    public static final int CMD_CHANNEL_FULL_CONNECTION = -2;
+    public static final int CMD_CHANNEL_FULL_CONNECTION = BASE + 1;
 
     /**
      * Command typically sent after the destination receives a CMD_CHANNEL_FULL_CONNECTION.
@@ -115,20 +122,20 @@ public class AsyncChannel {
      *
      * msg.arg1 == 0 : Accept connection
      *               : All other values signify the destination rejected the connection
-     *                 and {@link AsyncChannel#disconnect(int)} would typically be called.
+     *                 and {@link AsyncChannel#disconnect} would typically be called.
      */
-    public static final int CMD_CHANNEL_FULLY_CONNECTED = -3;
+    public static final int CMD_CHANNEL_FULLY_CONNECTED = BASE + 2;
 
     /**
      * Command sent when one side or the other wishes to disconnect. The sender
      * may or may not be able to receive a reply depending upon the protocol and
-     * the state of the connection. The receiver should call {@link AsyncChannel#disconnect(int)}
+     * the state of the connection. The receiver should call {@link AsyncChannel#disconnect}
      * to close its side of the channel and it will receive a CMD_CHANNEL_DISCONNECTED
      * when the channel is closed.
      *
      * msg.replyTo = messenger that is disconnecting
      */
-    public static final int CMD_CHANNEL_DISCONNECT = -4;
+    public static final int CMD_CHANNEL_DISCONNECT = BASE + 3;
 
     /**
      * Command sent when the channel becomes disconnected. This is sent when the
@@ -141,7 +148,7 @@ public class AsyncChannel {
      * msg.obj  == the AsyncChannel
      * msg.replyTo = messenger disconnecting or null if it was never connected.
      */
-    public static final int CMD_CHANNEL_DISCONNECTED = -5;
+    public static final int CMD_CHANNEL_DISCONNECTED = BASE + 4;
 
     /** Successful status always 0, !0 is an unsuccessful status */
     public static final int STATUS_SUCCESSFUL = 0;
@@ -151,6 +158,9 @@ public class AsyncChannel {
 
     /** Error attempting to send a message */
     public static final int STATUS_SEND_UNSUCCESSFUL = 2;
+
+    /** CMD_FULLY_CONNECTED refused because a connection already exists*/
+    public static final int STATUS_FULL_CONNECTION_REFUSED_ALREADY_CONNECTED = 3;
 
     /** Service connection */
     private AsyncChannelConnection mConnection;
@@ -174,9 +184,7 @@ public class AsyncChannel {
     }
 
     /**
-     * Connect handler to named package/class.
-     *
-     * Sends a CMD_CHANNEL_HALF_CONNECTED message to srcHandler when complete.
+     * Connect handler to named package/class synchronously.
      *
      * @param srcContext is the context of the source
      * @param srcHandler is the hander to receive CONNECTED & DISCONNECTED
@@ -184,8 +192,10 @@ public class AsyncChannel {
      * @param dstPackageName is the destination package name
      * @param dstClassName is the fully qualified class name (i.e. contains
      *            package name)
+     *
+     * @return STATUS_SUCCESSFUL on success any other value is an error.
      */
-    private void connectSrcHandlerToPackage(
+    public int connectSrcHandlerToPackageSync(
             Context srcContext, Handler srcHandler, String dstPackageName, String dstClassName) {
         if (DBG) log("connect srcHandler to dst Package & class E");
 
@@ -207,11 +217,61 @@ public class AsyncChannel {
         Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.setClassName(dstPackageName, dstClassName);
         boolean result = srcContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        if (!result) {
-            replyHalfConnected(STATUS_BINDING_UNSUCCESSFUL);
-        }
-
         if (DBG) log("connect srcHandler to dst Package & class X result=" + result);
+        return result ? STATUS_SUCCESSFUL : STATUS_BINDING_UNSUCCESSFUL;
+    }
+
+    /**
+     * Connect a handler to Messenger synchronously.
+     *
+     * @param srcContext is the context of the source
+     * @param srcHandler is the hander to receive CONNECTED & DISCONNECTED
+     *            messages
+     * @param dstMessenger is the hander to send messages to.
+     *
+     * @return STATUS_SUCCESSFUL on success any other value is an error.
+     */
+    public int connectSync(Context srcContext, Handler srcHandler, Messenger dstMessenger) {
+        if (DBG) log("halfConnectSync srcHandler to the dstMessenger  E");
+
+        // We are connected
+        connected(srcContext, srcHandler, dstMessenger);
+
+        if (DBG) log("halfConnectSync srcHandler to the dstMessenger X");
+        return STATUS_SUCCESSFUL;
+    }
+
+    /**
+     * connect two local Handlers synchronously.
+     *
+     * @param srcContext is the context of the source
+     * @param srcHandler is the hander to receive CONNECTED & DISCONNECTED
+     *            messages
+     * @param dstHandler is the hander to send messages to.
+     *
+     * @return STATUS_SUCCESSFUL on success any other value is an error.
+     */
+    public int connectSync(Context srcContext, Handler srcHandler, Handler dstHandler) {
+        return connectSync(srcContext, srcHandler, new Messenger(dstHandler));
+    }
+
+    /**
+     * Fully connect two local Handlers synchronously.
+     *
+     * @param srcContext is the context of the source
+     * @param srcHandler is the hander to receive CONNECTED & DISCONNECTED
+     *            messages
+     * @param dstHandler is the hander to send messages to.
+     *
+     * @return STATUS_SUCCESSFUL on success any other value is an error.
+     */
+    public int fullyConnectSync(Context srcContext, Handler srcHandler, Handler dstHandler) {
+        int status = connectSync(srcContext, srcHandler, dstHandler);
+        if (status == STATUS_SUCCESSFUL) {
+            Message response = sendMessageSynchronously(CMD_CHANNEL_FULL_CONNECTION);
+            status = response.arg1;
+        }
+        return status;
     }
 
     /**
@@ -246,8 +306,11 @@ public class AsyncChannel {
                 mDstClassName = dstClassName;
             }
 
+            @Override
             public void run() {
-                connectSrcHandlerToPackage(mSrcCtx, mSrcHdlr, mDstPackageName, mDstClassName);
+                int result = connectSrcHandlerToPackageSync(mSrcCtx, mSrcHdlr, mDstPackageName,
+                        mDstClassName);
+                replyHalfConnected(result);
             }
         }
 
@@ -286,15 +349,8 @@ public class AsyncChannel {
     public void connect(Context srcContext, Handler srcHandler, Messenger dstMessenger) {
         if (DBG) log("connect srcHandler to the dstMessenger  E");
 
-        // Initialize source fields
-        mSrcContext = srcContext;
-        mSrcHandler = srcHandler;
-        mSrcMessenger = new Messenger(mSrcHandler);
-
-        // Initialize destination fields
-        mDstMessenger = dstMessenger;
-
-        if (DBG) log("tell source we are half connected");
+        // We are connected
+        connected(srcContext, srcHandler, dstMessenger);
 
         // Tell source we are half connected
         replyHalfConnected(STATUS_SUCCESSFUL);
@@ -303,11 +359,31 @@ public class AsyncChannel {
     }
 
     /**
-     * Connect two local Handlers.
+     * Connect handler to messenger. This method is typically called
+     * when a server receives a CMD_CHANNEL_FULL_CONNECTION request
+     * and initializes the internal instance variables to allow communication
+     * with the dstMessenger.
      *
-     * Sends a CMD_CHANNEL_HALF_CONNECTED message to srcHandler when complete.
-     *      msg.arg1 = status
-     *      msg.obj = the AsyncChannel
+     * @param srcContext
+     * @param srcHandler
+     * @param dstMessenger
+     */
+    public void connected(Context srcContext, Handler srcHandler, Messenger dstMessenger) {
+        if (DBG) log("connected srcHandler to the dstMessenger  E");
+
+        // Initialize source fields
+        mSrcContext = srcContext;
+        mSrcHandler = srcHandler;
+        mSrcMessenger = new Messenger(mSrcHandler);
+
+        // Initialize destination fields
+        mDstMessenger = dstMessenger;
+
+        if (DBG) log("connected srcHandler to the dstMessenger X");
+    }
+
+    /**
+     * Connect two local Handlers.
      *
      * @param srcContext is the context of the source
      * @param srcHandler is the hander to receive CONNECTED & DISCONNECTED
@@ -336,6 +412,7 @@ public class AsyncChannel {
      * To close the connection call when handler receives CMD_CHANNEL_DISCONNECTED
      */
     public void disconnected() {
+        mSrcContext = null;
         mSrcHandler = null;
         mSrcMessenger = null;
         mDstMessenger = null;
@@ -346,7 +423,7 @@ public class AsyncChannel {
      * Disconnect
      */
     public void disconnect() {
-        if (mConnection != null) {
+        if ((mConnection != null) && (mSrcContext != null)) {
             mSrcContext.unbindService(mConnection);
         }
         if (mSrcHandler != null) {
@@ -445,6 +522,7 @@ public class AsyncChannel {
      */
     public void replyToMessage(Message srcMsg, Message dstMsg) {
         try {
+            dstMsg.replyTo = mSrcMessenger;
             srcMsg.replyTo.send(dstMsg);
         } catch (RemoteException e) {
             log("TODO: handle replyToMessage RemoteException" + e);
@@ -695,10 +773,14 @@ public class AsyncChannel {
         private static Message sendMessageSynchronously(Messenger dstMessenger, Message msg) {
             SyncMessenger sm = SyncMessenger.obtain();
             try {
-                msg.replyTo = sm.mMessenger;
-                dstMessenger.send(msg);
-                synchronized (sm.mHandler.mLockObject) {
-                    sm.mHandler.mLockObject.wait();
+                if (dstMessenger != null && msg != null) {
+                    msg.replyTo = sm.mMessenger;
+                    synchronized (sm.mHandler.mLockObject) {
+                        dstMessenger.send(msg);
+                        sm.mHandler.mLockObject.wait();
+                    }
+                } else {
+                    sm.mHandler.mResultMsg = null;
                 }
             } catch (InterruptedException e) {
                 sm.mHandler.mResultMsg = null;
@@ -747,11 +829,13 @@ public class AsyncChannel {
         AsyncChannelConnection() {
         }
 
+        @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             mDstMessenger = new Messenger(service);
             replyHalfConnected(STATUS_SUCCESSFUL);
         }
 
+        @Override
         public void onServiceDisconnected(ComponentName className) {
             replyDisconnected(STATUS_SUCCESSFUL);
         }
