@@ -68,7 +68,6 @@ static struct fieldIds {
     jclass dhcpInfoInternalClass;
     jmethodID constructorId;
     jfieldID ipaddress;
-    jfieldID gateway;
     jfieldID prefixLength;
     jfieldID dns1;
     jfieldID dns2;
@@ -182,7 +181,30 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
     env->ReleaseStringUTFChars(ifname, nameStr);
     if (result == 0 && dhcpInfoInternalFieldIds.dhcpInfoInternalClass != NULL) {
         env->SetObjectField(info, dhcpInfoInternalFieldIds.ipaddress, env->NewStringUTF(ipaddr));
-        env->SetObjectField(info, dhcpInfoInternalFieldIds.gateway, env->NewStringUTF(gateway));
+
+        // set the gateway
+        jclass cls = env->FindClass("java/net/InetAddress");
+        jmethodID method = env->GetStaticMethodID(cls, "getByName",
+                "(Ljava/lang/String;)Ljava/net/InetAddress;");
+        jvalue args[1];
+        args[0].l = env->NewStringUTF(gateway);
+        jobject inetAddressObject = env->CallStaticObjectMethodA(cls, method, args);
+
+        if (!env->ExceptionOccurred()) {
+            cls = env->FindClass("android/net/RouteInfo");
+            method = env->GetMethodID(cls, "<init>", "(Ljava/net/InetAddress;)V");
+            args[0].l = inetAddressObject;
+            jobject routeInfoObject = env->NewObjectA(cls, method, args);
+
+            cls = env->FindClass("android/net/DhcpInfoInternal");
+            method = env->GetMethodID(cls, "addRoute", "(Landroid/net/RouteInfo;)V");
+            args[0].l = routeInfoObject;
+            env->CallVoidMethodA(info, method, args);
+        } else {
+            // if we have an exception (host not found perhaps), just don't add the route
+            env->ExceptionClear();
+        }
+
         env->SetIntField(info, dhcpInfoInternalFieldIds.prefixLength, prefixLength);
         env->SetObjectField(info, dhcpInfoInternalFieldIds.dns1, env->NewStringUTF(dns1));
         env->SetObjectField(info, dhcpInfoInternalFieldIds.dns2, env->NewStringUTF(dns2));
@@ -262,7 +284,6 @@ int register_android_net_NetworkUtils(JNIEnv* env)
     if (dhcpInfoInternalFieldIds.dhcpInfoInternalClass != NULL) {
         dhcpInfoInternalFieldIds.constructorId = env->GetMethodID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "<init>", "()V");
         dhcpInfoInternalFieldIds.ipaddress = env->GetFieldID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "ipAddress", "Ljava/lang/String;");
-        dhcpInfoInternalFieldIds.gateway = env->GetFieldID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "gateway", "Ljava/lang/String;");
         dhcpInfoInternalFieldIds.prefixLength = env->GetFieldID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "prefixLength", "I");
         dhcpInfoInternalFieldIds.dns1 = env->GetFieldID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "dns1", "Ljava/lang/String;");
         dhcpInfoInternalFieldIds.dns2 = env->GetFieldID(dhcpInfoInternalFieldIds.dhcpInfoInternalClass, "dns2", "Ljava/lang/String;");

@@ -20,6 +20,7 @@ package com.android.internal.telephony;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkUtils;
+import android.net.RouteInfo;
 import android.os.SystemProperties;
 import android.util.Log;
 
@@ -196,7 +197,7 @@ public class DataCallState {
                     } catch (IllegalArgumentException e) {
                         throw new UnknownHostException("Non-numeric gateway addr=" + addr);
                     }
-                    linkProperties.addGateway(ia);
+                    linkProperties.addRoute(new RouteInfo(ia));
                 }
 
                 result = SetupResult.SUCCESS;
@@ -223,5 +224,3 @@ public class DataCallState {
         return result;
     }
 }
-
-

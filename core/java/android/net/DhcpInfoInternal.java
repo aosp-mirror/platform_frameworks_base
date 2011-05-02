@@ -22,6 +22,8 @@ import android.util.Log;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * A simple object for retrieving the results of a DHCP request.
@@ -31,7 +33,6 @@ import java.net.UnknownHostException;
 public class DhcpInfoInternal {
     private final static String TAG = "DhcpInfoInternal";
     public String ipAddress;
-    public String gateway;
     public int prefixLength;
 
     public String dns1;
@@ -40,7 +41,14 @@ public class DhcpInfoInternal {
     public String serverAddress;
     public int leaseDuration;
 
+    private Collection<RouteInfo> routes;
+
     public DhcpInfoInternal() {
+        routes = new ArrayList<RouteInfo>();
+    }
+
+    public void addRoute(RouteInfo routeInfo) {
+        routes.add(routeInfo);
     }
 
     private int convertToInt(String addr) {
@@ -58,7 +66,12 @@ public class DhcpInfoInternal {
     public DhcpInfo makeDhcpInfo() {
         DhcpInfo info = new DhcpInfo();
         info.ipAddress = convertToInt(ipAddress);
-        info.gateway = convertToInt(gateway);
+        for (RouteInfo route : routes) {
+            if (route.isDefaultRoute()) {
+                info.gateway = convertToInt(route.getGateway().getHostAddress());
+                break;
+            }
+        }
         try {
             InetAddress inetAddress = NetworkUtils.numericToInetAddress(ipAddress);
             info.netmask = NetworkUtils.prefixLengthToNetmaskInt(prefixLength);
@@ -81,8 +94,8 @@ public class DhcpInfoInternal {
     public LinkProperties makeLinkProperties() {
         LinkProperties p = new LinkProperties();
         p.addLinkAddress(makeLinkAddress());
-        if (TextUtils.isEmpty(gateway) == false) {
-            p.addGateway(NetworkUtils.numericToInetAddress(gateway));
+        for (RouteInfo route : routes) {
+            p.addRoute(route);
         }
         if (TextUtils.isEmpty(dns1) == false) {
             p.addDns(NetworkUtils.numericToInetAddress(dns1));
@@ -98,8 +111,10 @@ public class DhcpInfoInternal {
     }
 
     public String toString() {
+        String routeString = "";
+        for (RouteInfo route : routes) routeString += route.toString() + " | ";
         return "addr: " + ipAddress + "/" + prefixLength +
-                " gateway: " + gateway +
+                " routes: " + routeString +
                 " dns: " + dns1 + "," + dns2 +
                 " dhcpServer: " + serverAddress +
                 " leaseDuration: " + leaseDuration;
