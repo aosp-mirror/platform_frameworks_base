@@ -112,6 +112,10 @@ static jobject movie_decodeByteArray(JNIEnv* env, jobject clazz,
     return create_jmovie(env, moov);
 }
 
+static void movie_destructor(JNIEnv* env, jobject, SkMovie* movie) {
+    delete movie;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <android_runtime/AndroidRuntime.h>
@@ -126,6 +130,7 @@ static JNINativeMethod gMethods[] = {
                             (void*)movie_draw  },
     { "decodeStream", "(Ljava/io/InputStream;)Landroid/graphics/Movie;",
                             (void*)movie_decodeStream },
+    { "nativeDestructor","(I)V", (void*)movie_destructor },
     { "decodeByteArray", "([BII)Landroid/graphics/Movie;",
                             (void*)movie_decodeByteArray },
 };
