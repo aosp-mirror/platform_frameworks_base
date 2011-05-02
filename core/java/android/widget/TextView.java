@@ -7260,9 +7260,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mInputContentType.enterDown = false;
             }
             hideControllers();
+            removeAllSuggestionSpans();
         }
 
         startStopMarquee(hasWindowFocus);
+    }
+
+    private void removeAllSuggestionSpans() {
+        if (mText instanceof Editable) {
+            Editable editable = ((Editable) mText);
+            SuggestionSpan[] spans = editable.getSpans(0, mText.length(), SuggestionSpan.class);
+            final int length = spans.length;
+            for (int i = 0; i < length; i++) {
+                editable.removeSpan(spans[i]);
+            }
+        }
     }
 
     @Override
