@@ -204,8 +204,8 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Permite aplicaţiei să regăsească informaţii despre activităţile rulate curent şi recent. Poate permite aplicaţiilor rău-intenţionate să descopere informaţii confidenţiale despre alte aplicaţii."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"reordonare aplicaţii aflate în derulare"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Permite unei aplicaţii să mute activităţile în prim-plan şi în fundal. Aplicaţiile rău-intenţionate ar putea să apară forţat în prim-plan, fără ca dvs. să puteţi controla acest lucru."</string>
-    <string name="permlab_removeTasks" msgid="4802740047161700683">"opriţi aplicaţiile care rulează"</string>
-    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Permite unei aplicaţii să elimine sarcinile şi să închidă aplicaţiile corespunzătoare acestora. Aplicaţiile rău intenţionate pot perturba comportamentul altor aplicaţii."</string>
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"oprirea aplicaţiilor care rulează"</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Permite unei aplicaţii să elimine sarcini şi să închidă aplicaţiile corespunzătoare acestora. Aplicaţiile rău intenţionate pot perturba comportamentul altor aplicaţii."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"activare depanare aplicaţie"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Permite unei aplicaţii să activeze depanarea pentru o altă aplicaţie. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a închide alte aplicaţii."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"modificare setări UI"</string>
