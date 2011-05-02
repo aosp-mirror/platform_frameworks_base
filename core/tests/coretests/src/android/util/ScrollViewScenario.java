@@ -61,6 +61,7 @@ public abstract class ScrollViewScenario extends Activity {
 
     /**
      * Partially implement ViewFactory given a height ratio.
+     * A negative height ratio means that WRAP_CONTENT will be used as height
      */
     private static abstract class ViewFactoryBase implements ViewFactory {
 
@@ -86,6 +87,9 @@ public abstract class ScrollViewScenario extends Activity {
     public static class Params {
 
         List<ViewFactory> mViewFactories = Lists.newArrayList();
+
+        int mTopPadding = 0;
+        int mBottomPadding = 0;
 
         /**
          * Add a text view.
@@ -186,6 +190,13 @@ public abstract class ScrollViewScenario extends Activity {
             });
             return this;
         }
+
+        public Params addPaddingToScrollView(int topPadding, int bottomPadding) {
+            mTopPadding = topPadding;
+            mBottomPadding = bottomPadding;
+
+            return this;
+        }
     }
 
     /**
@@ -239,13 +250,17 @@ public abstract class ScrollViewScenario extends Activity {
 
         // create views specified by params
         for (ViewFactory viewFactory : params.mViewFactories) {
+            int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+            if (viewFactory.getHeightRatio() >= 0) {
+                height = (int) (viewFactory.getHeightRatio() * screenHeight);
+            }
             final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    (int) (viewFactory.getHeightRatio() * screenHeight));
+                    ViewGroup.LayoutParams.MATCH_PARENT, height);
             mLinearLayout.addView(viewFactory.create(this), lp);
         }
 
         mScrollView = createScrollView();
+        mScrollView.setPadding(0, params.mTopPadding, 0, params.mBottomPadding);
         mScrollView.addView(mLinearLayout, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
