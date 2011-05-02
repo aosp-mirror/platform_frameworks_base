@@ -32,6 +32,9 @@ class Script;
 class ScriptC;
 class ProgramStore;
 class ProgramRaster;
+class ProgramVertex;
+class ProgramFragment;
+class Mesh;
 
 typedef void *(*RsHalSymbolLookupFunc)(void *usrptr, char const *symbolName);
 
@@ -98,6 +101,25 @@ typedef struct {
         void (*destroy)(const Context *rsc, const ProgramRaster *ps);
     } raster;
 
+    struct {
+        bool (*init)(const Context *rsc, const ProgramVertex *pv,
+                     const char* shader, uint32_t shaderLen);
+        void (*setActive)(const Context *rsc, const ProgramVertex *pv);
+        void (*destroy)(const Context *rsc, const ProgramVertex *pv);
+    } vertex;
+
+    struct {
+        bool (*init)(const Context *rsc, const ProgramFragment *pf,
+                     const char* shader, uint32_t shaderLen);
+        void (*setActive)(const Context *rsc, const ProgramFragment *pf);
+        void (*destroy)(const Context *rsc, const ProgramFragment *pf);
+    } fragment;
+
+    struct {
+        bool (*init)(const Context *rsc, const Mesh *m);
+        void (*draw)(const Context *rsc, const Mesh *m, uint32_t primIndex, uint32_t start, uint32_t len);
+        void (*destroy)(const Context *rsc, const Mesh *m);
+    } mesh;
 
 } RsdHalFunctions;
 

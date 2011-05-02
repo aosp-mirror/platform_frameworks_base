@@ -31,7 +31,7 @@ public:
                   const uint32_t * params, uint32_t paramLength);
     virtual ~ProgramVertex();
 
-    virtual void setupGL2(Context *rsc, ProgramVertexState *state, ShaderCache *sc);
+    virtual void setupGL2(Context *rsc, ProgramVertexState *state);
 
     void setProjectionMatrix(Context *, const rsc_Matrix *) const;
     void getProjectionMatrix(Context *, rsc_Matrix *) const;
@@ -39,10 +39,6 @@ public:
     void setTextureMatrix(Context *, const rsc_Matrix *) const;
 
     void transformToScreen(Context *, float *v4out, const float *v3in) const;
-
-    virtual void createShader(Context *);
-    virtual void loadShader(Context *);
-    virtual void init(Context *);
 
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_VERTEX; }

@@ -230,9 +230,7 @@ protected:
     uint32_t mMaxNumberOfQuads;
 
     void initVertexArrayBuffers();
-    ObjectBaseRef<Allocation> mIndexBuffer;
-    ObjectBaseRef<Allocation> mVertexArray;
-
+    ObjectBaseRef<Mesh> mMesh;
 
     bool mInitialized;
 

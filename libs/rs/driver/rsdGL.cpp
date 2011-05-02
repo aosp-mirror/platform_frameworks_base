@@ -40,6 +40,8 @@
 
 #include <malloc.h>
 #include "rsContext.h"
+#include "rsdShaderCache.h"
+#include "rsdVertexArray.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -127,6 +129,11 @@ static void DumpDebug(RsdHal *dc) {
 
 void rsdGLShutdown(const Context *rsc) {
     RsdHal *dc = (RsdHal *)rsc->mHal.drv;
+
+    dc->gl.shaderCache->cleanupAll();
+    delete dc->gl.shaderCache;
+
+    delete dc->gl.vertexArrayState;
 
     LOGV("%p, deinitEGL", rsc);
 
@@ -286,6 +293,10 @@ bool rsdGLInit(const Context *rsc) {
     if (0) {
         DumpDebug(dc);
     }
+
+    dc->gl.shaderCache = new RsdShaderCache();
+    dc->gl.vertexArrayState = new RsdVertexArrayState();
+    dc->gl.vertexArrayState->init(dc->gl.gl.maxVertexAttribs);
 
     LOGV("initGLThread end %p", rsc);
     return true;

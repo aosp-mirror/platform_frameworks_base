@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@
 #include "rsMatrix2x2.h"
 
 #include "utils/Timers.h"
+#include "driver/rsdVertexArray.h"
+#include "driver/rsdShaderCache.h"
+#include "driver/rsdCore.h"
 
 #define GL_GLEXT_PROTOTYPES
 
@@ -134,6 +137,11 @@ void rsrDrawQuadTexCoords(Context *rsc, Script *sc,
         return;
     }
 
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
+    if (!dc->gl.shaderCache->setup(rsc)) {
+        return;
+    }
+
     //LOGE("Quad");
     //LOGE("%4.2f, %4.2f, %4.2f", x1, y1, z1);
     //LOGE("%4.2f, %4.2f, %4.2f", x2, y2, z2);
@@ -143,12 +151,12 @@ void rsrDrawQuadTexCoords(Context *rsc, Script *sc,
     float vtx[] = {x1,y1,z1, x2,y2,z2, x3,y3,z3, x4,y4,z4};
     const float tex[] = {u1,v1, u2,v2, u3,v3, u4,v4};
 
-    VertexArray::Attrib attribs[2];
+    RsdVertexArray::Attrib attribs[2];
     attribs[0].set(GL_FLOAT, 3, 12, false, (uint32_t)vtx, "ATTRIB_position");
     attribs[1].set(GL_FLOAT, 2, 8, false, (uint32_t)tex, "ATTRIB_texture0");
 
-    VertexArray va(attribs, 2);
-    va.setupGL2(rsc, &rsc->mStateVertexArray, &rsc->mShaderCache);
+    RsdVertexArray va(attribs, 2);
+    va.setupGL2(rsc);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }

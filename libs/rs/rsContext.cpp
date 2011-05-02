@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,15 +215,11 @@ void Context::timerPrint() {
 }
 
 bool Context::setupCheck() {
-    if (!mShaderCache.lookup(this, mVertex.get(), mFragment.get())) {
-        LOGE("Context::setupCheck() 1 fail");
-        return false;
-    }
 
     mFragmentStore->setup(this, &mStateFragmentStore);
-    mFragment->setupGL2(this, &mStateFragment, &mShaderCache);
+    mFragment->setupGL2(this, &mStateFragment);
     mRaster->setup(this, &mStateRaster);
-    mVertex->setupGL2(this, &mStateVertex, &mShaderCache);
+    mVertex->setupGL2(this, &mStateVertex);
     mFBOCache.setupGL2(this);
     return true;
 }
@@ -295,7 +291,6 @@ void * Context::threadProc(void *vrsc) {
         rsc->setProgramStore(NULL);
         rsc->mStateFont.init(rsc);
         rsc->setFont(NULL);
-        rsc->mStateVertexArray.init(rsc);
     }
 
     rsc->mRunning = true;
@@ -356,7 +351,6 @@ void Context::destroyWorkerThreadResources() {
          mStateFragment.deinit(this);
          mStateFragmentStore.deinit(this);
          mStateFont.deinit(this);
-         mShaderCache.cleanupAll();
     }
     //LOGV("destroyWorkerThreadResources 2");
     mExit = true;

@@ -25,11 +25,6 @@
 #include FT_FREETYPE_H
 #include FT_BITMAP_H
 
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-
 using namespace android;
 using namespace android::renderscript;
 
@@ -457,7 +452,7 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
 
     // This will dirty the texture and the shader so next time
     // we draw it will upload the data
-    mTextTexture->syncAll(mRSC, RS_ALLOCATION_USAGE_SCRIPT);
+    mTextTexture->deferredUploadToTexture(mRSC);
     mFontShaderF->bindTexture(mRSC, 0, mTextTexture.get());
 
     // Some debug code
@@ -568,7 +563,6 @@ void FontState::initVertexArrayBuffers() {
     }
 
     indexAlloc->deferredUploadToBufferObject(mRSC);
-    mIndexBuffer.set(indexAlloc);
 
     const Element *posElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 3);
     const Element *texElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 2);
@@ -585,7 +579,10 @@ void FontState::initVertexArrayBuffers() {
     Allocation *vertexAlloc = new Allocation(mRSC, vertexDataType, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_VERTEX);
     mTextMeshPtr = (float*)vertexAlloc->getPtr();
 
-    mVertexArray.set(vertexAlloc);
+    mMesh.set(new Mesh(mRSC, 1, 1));
+    mMesh->setVertexBuffer(vertexAlloc, 0);
+    mMesh->setPrimitive(indexAlloc, RS_PRIMITIVE_TRIANGLE, 0);
+    mMesh->init();
 }
 
 // We don't want to allocate anything unless we actually draw text
@@ -625,18 +622,7 @@ void FontState::issueDrawCommand() {
         return;
     }
 
-    float *vtx = (float*)mVertexArray->getPtr();
-    float *tex = vtx + 3;
-
-    VertexArray::Attrib attribs[2];
-    attribs[0].set(GL_FLOAT, 3, 20, false, (uint32_t)vtx, "ATTRIB_position");
-    attribs[1].set(GL_FLOAT, 2, 20, false, (uint32_t)tex, "ATTRIB_texture0");
-    VertexArray va(attribs, 2);
-    va.setupGL2(mRSC, &mRSC->mStateVertexArray, &mRSC->mShaderCache);
-
-    mIndexBuffer->uploadCheck(mRSC);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer->getBufferObjectID());
-    glDrawElements(GL_TRIANGLES, mCurrentQuadIndex * 6, GL_UNSIGNED_SHORT, (uint16_t *)(0));
+    mMesh->renderPrimitiveRange(mRSC, 0, 0, mCurrentQuadIndex * 6);
 }
 
 void FontState::appendMeshQuad(float x1, float y1, float z1,
@@ -787,8 +773,7 @@ void FontState::deinit(Context *rsc) {
 
     mFontShaderFConstant.clear();
 
-    mIndexBuffer.clear();
-    mVertexArray.clear();
+    mMesh.clear();
 
     mFontShaderF.clear();
     mFontSampler.clear();

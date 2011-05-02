@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_VERTEX_ARRAY_H
-#define ANDROID_VERTEX_ARRAY_H
+#ifndef ANDROID_RSD_VERTEX_ARRAY_H
+#define ANDROID_RSD_VERTEX_ARRAY_H
 
-
-#include "rsObjectBase.h"
-
-// ---------------------------------------------------------------------------
 namespace android {
 namespace renderscript {
 
-class ShaderCache;
+class Context;
+
+}
+}
+
+#include <utils/String8.h>
 
 // An element is a group of Components that occupies one cell in a structure.
-class VertexArray {
+class RsdVertexArray {
 public:
     class Attrib {
     public:
@@ -38,17 +39,17 @@ public:
         uint32_t size;
         uint32_t stride;
         bool normalized;
-        String8 name;
+        android::String8 name;
 
         Attrib();
         void clear();
         void set(uint32_t type, uint32_t size, uint32_t stride, bool normalized, uint32_t offset, const char *name);
     };
 
-    VertexArray(const Attrib *attribs, uint32_t numAttribs);
-    virtual ~VertexArray();
+    RsdVertexArray(const Attrib *attribs, uint32_t numAttribs);
+    virtual ~RsdVertexArray();
 
-    void setupGL2(const Context *rsc, class VertexArrayState *, ShaderCache *) const;
+    void setupGL2(const android::renderscript::Context *rsc) const;
     void logAttrib(uint32_t idx, uint32_t slot) const;
 
 protected:
@@ -61,20 +62,18 @@ protected:
 };
 
 
-class VertexArrayState {
+class RsdVertexArrayState {
 public:
-    VertexArrayState();
-    ~VertexArrayState();
-    void init(Context *);
+    RsdVertexArrayState();
+    ~RsdVertexArrayState();
+    void init(uint32_t maxAttrs);
 
     bool *mAttrsEnabled;
     uint32_t mAttrsEnabledSize;
 };
 
 
-}
-}
-#endif //ANDROID_VERTEX_ARRAY_H
+#endif //ANDROID_RSD_VERTEX_ARRAY_H
 
 
 

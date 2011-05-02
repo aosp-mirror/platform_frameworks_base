@@ -15,13 +15,6 @@
  */
 
 #include "rsContext.h"
-#ifndef ANDROID_RS_SERIALIZE
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#endif //ANDROID_RS_SERIALIZE
-
 #include "rsProgramFragment.h"
 
 using namespace android;
@@ -31,19 +24,16 @@ ProgramFragment::ProgramFragment(Context *rsc, const char * shaderText,
                                  uint32_t shaderLength, const uint32_t * params,
                                  uint32_t paramLength)
     : Program(rsc, shaderText, shaderLength, params, paramLength) {
-
     mConstantColor[0] = 1.f;
     mConstantColor[1] = 1.f;
     mConstantColor[2] = 1.f;
     mConstantColor[3] = 1.f;
 
-    init(rsc);
+    mRSC->mHal.funcs.fragment.init(mRSC, this, mUserShader.string(), mUserShader.length());
 }
 
 ProgramFragment::~ProgramFragment() {
-    if (mShaderID) {
-        mRSC->mShaderCache.cleanupFragment(mShaderID);
-    }
+    mRSC->mHal.funcs.fragment.destroy(mRSC, this);
 }
 
 void ProgramFragment::setConstantColor(Context *rsc, float r, float g, float b, float a) {
@@ -52,7 +42,7 @@ void ProgramFragment::setConstantColor(Context *rsc, float r, float g, float b, 
         rsc->setError(RS_ERROR_BAD_SHADER, "Cannot  set fixed function emulation color on user program");
         return;
     }
-    if (mConstants[0].get() == NULL) {
+    if (mHal.state.constants[0].get() == NULL) {
         LOGE("Unable to set fixed function emulation color because allocation is missing");
         rsc->setError(RS_ERROR_BAD_SHADER, "Unable to set fixed function emulation color because allocation is missing");
         return;
@@ -61,11 +51,11 @@ void ProgramFragment::setConstantColor(Context *rsc, float r, float g, float b, 
     mConstantColor[1] = g;
     mConstantColor[2] = b;
     mConstantColor[3] = a;
-    memcpy(mConstants[0]->getPtr(), mConstantColor, 4*sizeof(float));
+    memcpy(mHal.state.constants[0]->getPtr(), mConstantColor, 4*sizeof(float));
     mDirty = true;
 }
 
-void ProgramFragment::setupGL2(Context *rsc, ProgramFragmentState *state, ShaderCache *sc) {
+void ProgramFragment::setupGL2(Context *rsc, ProgramFragmentState *state) {
     //LOGE("sgl2 frag1 %x", glGetError());
     if ((state->mLast.get() == this) && !mDirty) {
         return;
@@ -74,94 +64,16 @@ void ProgramFragment::setupGL2(Context *rsc, ProgramFragmentState *state, Shader
 
     rsc->checkError("ProgramFragment::setupGL2 start");
 
-    rsc->checkError("ProgramFragment::setupGL2 begin uniforms");
-    setupUserConstants(rsc, sc, true);
-
-    uint32_t numTexturesToBind = mTextureCount;
-    uint32_t numTexturesAvailable = rsc->getMaxFragmentTextures();
-    if (numTexturesToBind >= numTexturesAvailable) {
-        LOGE("Attempting to bind %u textures on shader id %u, but only %u are available",
-             mTextureCount, (uint32_t)this, numTexturesAvailable);
-        rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind more textuers than available");
-        numTexturesToBind = numTexturesAvailable;
-    }
-
-    for (uint32_t ct=0; ct < numTexturesToBind; ct++) {
-        glActiveTexture(GL_TEXTURE0 + ct);
-        if (!mTextures[ct].get()) {
+    for (uint32_t ct=0; ct < mHal.state.texturesCount; ct++) {
+        if (!mHal.state.textures[ct].get()) {
             LOGE("No texture bound for shader id %u, texture unit %u", (uint)this, ct);
             rsc->setError(RS_ERROR_BAD_SHADER, "No texture bound");
             continue;
         }
-
-        mTextures[ct]->uploadCheck(rsc);
-        GLenum target = (GLenum)mTextures[ct]->getGLTarget();
-        if (target != GL_TEXTURE_2D && target != GL_TEXTURE_CUBE_MAP) {
-            LOGE("Attempting to bind unknown texture to shader id %u, texture unit %u", (uint)this, ct);
-            rsc->setError(RS_ERROR_BAD_SHADER, "Non-texture allocation bound to a shader");
-        }
-        glBindTexture(target, mTextures[ct]->getTextureID());
-        rsc->checkError("ProgramFragment::setupGL2 tex bind");
-        if (mSamplers[ct].get()) {
-            mSamplers[ct]->setupGL(rsc, mTextures[ct].get());
-        } else {
-            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            rsc->checkError("ProgramFragment::setupGL2 tex env");
-        }
-
-        glUniform1i(sc->fragUniformSlot(mTextureUniformIndexStart + ct), ct);
-        rsc->checkError("ProgramFragment::setupGL2 uniforms");
+        mHal.state.textures[ct]->uploadCheck(rsc);
     }
 
-    glActiveTexture(GL_TEXTURE0);
-    mDirty = false;
-    rsc->checkError("ProgramFragment::setupGL2");
-}
-
-void ProgramFragment::loadShader(Context *rsc) {
-    Program::loadShader(rsc, GL_FRAGMENT_SHADER);
-}
-
-void ProgramFragment::createShader() {
-    if (mUserShader.length() > 1) {
-        mShader.append("precision mediump float;\n");
-        appendUserConstants();
-        char buf[256];
-        for (uint32_t ct=0; ct < mTextureCount; ct++) {
-            if (mTextureTargets[ct] == RS_TEXTURE_2D) {
-                snprintf(buf, sizeof(buf), "uniform sampler2D UNI_Tex%i;\n", ct);
-            } else {
-                snprintf(buf, sizeof(buf), "uniform samplerCube UNI_Tex%i;\n", ct);
-            }
-            mShader.append(buf);
-        }
-        mShader.append(mUserShader);
-    } else {
-        LOGE("ProgramFragment::createShader cannot create program, shader code not defined");
-        rsAssert(0);
-    }
-}
-
-void ProgramFragment::init(Context *rsc) {
-    uint32_t uniformIndex = 0;
-    if (mUserShader.size() > 0) {
-        for (uint32_t ct=0; ct < mConstantCount; ct++) {
-            initAddUserElement(mConstantTypes[ct]->getElement(), mUniformNames, mUniformArraySizes, &uniformIndex, RS_SHADER_UNI);
-        }
-    }
-    mTextureUniformIndexStart = uniformIndex;
-    char buf[256];
-    for (uint32_t ct=0; ct < mTextureCount; ct++) {
-        snprintf(buf, sizeof(buf), "UNI_Tex%i", ct);
-        mUniformNames[uniformIndex].setTo(buf);
-        mUniformArraySizes[uniformIndex] = 1;
-        uniformIndex++;
-    }
-
-    createShader();
+    rsc->mHal.funcs.fragment.setActive(rsc, this);
 }
 
 void ProgramFragment::serialize(OStream *stream) const {
