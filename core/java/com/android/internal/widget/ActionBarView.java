@@ -587,6 +587,10 @@ public class ActionBarView extends AbsActionBarView {
         }
     }
 
+    public void updateTab(int position) {
+        ((TabView) mTabLayout.getChildAt(position)).update();
+    }
+
     public void removeTabAt(int position) {
         if (mTabLayout != null) {
             mTabLayout.removeViewAt(position);
@@ -929,46 +933,76 @@ public class ActionBarView extends AbsActionBarView {
 
     private static class TabView extends LinearLayout {
         private ActionBar.Tab mTab;
+        private TextView mTextView;
+        private ImageView mIconView;
+        private View mCustomView;
 
         public TabView(Context context, ActionBar.Tab tab) {
             super(context, null, com.android.internal.R.attr.actionBarTabStyle);
             mTab = tab;
 
+            update();
+
+            setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+                    LayoutParams.MATCH_PARENT, 1));
+        }
+
+        public void update() {
+            final ActionBar.Tab tab = mTab;
             final View custom = tab.getCustomView();
             if (custom != null) {
                 addView(custom);
+                mCustomView = custom;
+                if (mTextView != null) mTextView.setVisibility(GONE);
+                if (mIconView != null) {
+                    mIconView.setVisibility(GONE);
+                    mIconView.setImageDrawable(null);
+                }
             } else {
-                // TODO Style tabs based on the theme
+                if (mCustomView != null) {
+                    removeView(mCustomView);
+                    mCustomView = null;
+                }
 
                 final Drawable icon = tab.getIcon();
                 final CharSequence text = tab.getText();
 
                 if (icon != null) {
-                    ImageView iconView = new ImageView(context);
-                    iconView.setImageDrawable(icon);
-                    LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-                            LayoutParams.WRAP_CONTENT);
-                    lp.gravity = Gravity.CENTER_VERTICAL;
-                    iconView.setLayoutParams(lp);
-                    addView(iconView);
+                    if (mIconView == null) {
+                        ImageView iconView = new ImageView(getContext());
+                        LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                                LayoutParams.WRAP_CONTENT);
+                        lp.gravity = Gravity.CENTER_VERTICAL;
+                        iconView.setLayoutParams(lp);
+                        addView(iconView, 0);
+                        mIconView = iconView;
+                    }
+                    mIconView.setImageDrawable(icon);
+                    mIconView.setVisibility(VISIBLE);
+                } else if (mIconView != null) {
+                    mIconView.setVisibility(GONE);
+                    mIconView.setImageDrawable(null);
                 }
 
                 if (text != null) {
-                    TextView textView = new TextView(context, null,
-                            com.android.internal.R.attr.actionBarTabTextStyle);
-                    textView.setText(text);
-                    textView.setSingleLine();
-                    textView.setEllipsize(TruncateAt.END);
-                    LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-                            LayoutParams.WRAP_CONTENT);
-                    lp.gravity = Gravity.CENTER_VERTICAL;
-                    textView.setLayoutParams(lp);
-                    addView(textView);
+                    if (mTextView == null) {
+                        TextView textView = new TextView(getContext(), null,
+                                com.android.internal.R.attr.actionBarTabTextStyle);
+                        textView.setSingleLine();
+                        textView.setEllipsize(TruncateAt.END);
+                        LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                                LayoutParams.WRAP_CONTENT);
+                        lp.gravity = Gravity.CENTER_VERTICAL;
+                        textView.setLayoutParams(lp);
+                        addView(textView);
+                        mTextView = textView;
+                    }
+                    mTextView.setText(text);
+                    mTextView.setVisibility(VISIBLE);
+                } else {
+                    mTextView.setVisibility(GONE);
                 }
             }
-
-            setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.MATCH_PARENT, 1));
         }
 
         public ActionBar.Tab getTab() {
