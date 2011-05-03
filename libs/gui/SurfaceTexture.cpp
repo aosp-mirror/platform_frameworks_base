@@ -81,7 +81,9 @@ SurfaceTexture::SurfaceTexture(GLuint tex) :
     mDefaultWidth(1),
     mDefaultHeight(1),
     mPixelFormat(PIXEL_FORMAT_RGBA_8888),
-    mBufferCount(MIN_BUFFER_SLOTS),
+    mBufferCount(MIN_ASYNC_BUFFER_SLOTS),
+    mClientBufferCount(0),
+    mServerBufferCount(MIN_ASYNC_BUFFER_SLOTS),
     mCurrentTexture(INVALID_BUFFER_SLOT),
     mCurrentTextureTarget(GL_TEXTURE_EXTERNAL_OES),
     mCurrentTransform(0),
@@ -100,22 +102,79 @@ SurfaceTexture::~SurfaceTexture() {
     freeAllBuffers();
 }
 
+status_t SurfaceTexture::setBufferCountServerLocked(int bufferCount) {
+    if (bufferCount > NUM_BUFFER_SLOTS)
+        return BAD_VALUE;
+
+    // special-case, nothing to do
+    if (bufferCount == mBufferCount)
+        return OK;
+
+    if (!mClientBufferCount &&
+        bufferCount >= mBufferCount) {
+        // easy, we just have more buffers
+        mBufferCount = bufferCount;
+        mServerBufferCount = bufferCount;
+        mDequeueCondition.signal();
+    } else {
+        // we're here because we're either
+        // - reducing the number of available buffers
+        // - or there is a client-buffer-count in effect
+
+        // less than 2 buffers is never allowed
+        if (bufferCount < 2)
+            return BAD_VALUE;
+
+        // when there is non client-buffer-count in effect, the client is not
+        // allowed to dequeue more than one buffer at a time,
+        // so the next time they dequeue a buffer, we know that they don't
+        // own one. the actual resizing will happen during the next
+        // dequeueBuffer.
+
+        mServerBufferCount = bufferCount;
+    }
+    return OK;
+}
+
+status_t SurfaceTexture::setBufferCountServer(int bufferCount) {
+    Mutex::Autolock lock(mMutex);
+    return setBufferCountServerLocked(bufferCount);
+}
+
 status_t SurfaceTexture::setBufferCount(int bufferCount) {
     LOGV("SurfaceTexture::setBufferCount");
     Mutex::Autolock lock(mMutex);
 
-    const int minBufferSlots = mSynchronousMode ?
-            MIN_BUFFER_SLOTS-1 : MIN_BUFFER_SLOTS;
+    // Error out if the user has dequeued buffers
+    for (int i=0 ; i<mBufferCount ; i++) {
+        if (mSlots[i].mBufferState == BufferSlot::DEQUEUED) {
+            LOGE("setBufferCount: client owns some buffers");
+            return -EINVAL;
+        }
+    }
 
-    if (bufferCount < minBufferSlots) {
+    if (bufferCount == 0) {
+        const int minBufferSlots = mSynchronousMode ?
+                MIN_SYNC_BUFFER_SLOTS : MIN_ASYNC_BUFFER_SLOTS;
+        mClientBufferCount = 0;
+        bufferCount = (mServerBufferCount >= minBufferSlots) ?
+                mServerBufferCount : minBufferSlots;
+        return setBufferCountServerLocked(bufferCount);
+    }
+
+    // We don't allow the client to set a buffer-count less than
+    // MIN_ASYNC_BUFFER_SLOTS (3), there is no reason for it.
+    if (bufferCount < MIN_ASYNC_BUFFER_SLOTS) {
         return BAD_VALUE;
     }
 
+    // here we're guaranteed that the client doesn't have dequeued buffers
+    // and will release all of its buffer references.
     freeAllBuffers();
     mBufferCount = bufferCount;
+    mClientBufferCount = bufferCount;
     mCurrentTexture = INVALID_BUFFER_SLOT;
     mQueue.clear();
-    mQueue.reserve(mSynchronousMode ? mBufferCount : 1);
     mDequeueCondition.signal();
     return OK;
 }
@@ -152,10 +211,56 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
     }
 
     Mutex::Autolock lock(mMutex);
+
+    status_t returnFlags(OK);
+
     int found, foundSync;
     int dequeuedCount = 0;
     bool tryAgain = true;
     while (tryAgain) {
+        // We need to wait for the FIFO to drain if the number of buffer
+        // needs to change.
+        //
+        // The condition "number of buffer needs to change" is true if
+        // - the client doesn't care about how many buffers there are
+        // - AND the actual number of buffer is different from what was
+        //   set in the last setBufferCountServer()
+        //                         - OR -
+        //   setBufferCountServer() was set to a value incompatible with
+        //   the synchronization mode (for instance because the sync mode
+        //   changed since)
+        //
+        // As long as this condition is true AND the FIFO is not empty, we
+        // wait on mDequeueCondition.
+
+        int minBufferCountNeeded = mSynchronousMode ?
+                MIN_SYNC_BUFFER_SLOTS : MIN_ASYNC_BUFFER_SLOTS;
+
+        if (!mClientBufferCount &&
+                ((mServerBufferCount != mBufferCount) ||
+                        (mServerBufferCount < minBufferCountNeeded))) {
+            // wait for the FIFO to drain
+            while (!mQueue.isEmpty()) {
+                mDequeueCondition.wait(mMutex);
+            }
+            minBufferCountNeeded = mSynchronousMode ?
+                    MIN_SYNC_BUFFER_SLOTS : MIN_ASYNC_BUFFER_SLOTS;
+        }
+
+
+        if (!mClientBufferCount &&
+                ((mServerBufferCount != mBufferCount) ||
+                        (mServerBufferCount < minBufferCountNeeded))) {
+            // here we're guaranteed that mQueue is empty
+            freeAllBuffers();
+            mBufferCount = mServerBufferCount;
+            if (mBufferCount < minBufferCountNeeded)
+                mBufferCount = minBufferCountNeeded;
+            mCurrentTexture = INVALID_BUFFER_SLOT;
+            returnFlags |= ISurfaceTexture::RELEASE_ALL_BUFFERS;
+        }
+
+        // look for a free buffer to give to the client
         found = INVALID_BUFFER_SLOT;
         foundSync = INVALID_BUFFER_SLOT;
         dequeuedCount = 0;
@@ -172,22 +277,34 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
                 }
             }
         }
+
+        // clients are not allowed to dequeue more than one buffer
+        // if they didn't set a buffer count.
+        if (!mClientBufferCount && dequeuedCount) {
+            return -EINVAL;
+        }
+
+        // make sure the client is not trying to dequeue more buffers
+        // than allowed.
+        const int avail = mBufferCount - (dequeuedCount+1);
+        if (avail < (MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode))) {
+            LOGE("dequeueBuffer: MIN_UNDEQUEUED_BUFFERS=%d exceeded (dequeued=%d)",
+                    MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode),
+                    dequeuedCount);
+            return -EBUSY;
+        }
+
         // we're in synchronous mode and didn't find a buffer, we need to wait
+        // for for some buffers to be consumed
         tryAgain = mSynchronousMode && (foundSync == INVALID_BUFFER_SLOT);
         if (tryAgain) {
             mDequeueCondition.wait(mMutex);
         }
     }
 
-    if (mSynchronousMode) {
-        // we're dequeuing more buffers than allowed in synchronous mode
-        if ((mBufferCount - (dequeuedCount+1)) < MIN_UNDEQUEUED_BUFFERS-1)
-            return -EBUSY;
-
-        if (found == INVALID_BUFFER_SLOT) {
-            // foundSync guaranteed to be != INVALID_BUFFER_SLOT
-            found = foundSync;
-        }
+    if (mSynchronousMode && found == INVALID_BUFFER_SLOT) {
+        // foundSync guaranteed to be != INVALID_BUFFER_SLOT
+        found = foundSync;
     }
 
     if (found == INVALID_BUFFER_SLOT) {
@@ -238,22 +355,31 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             mSlots[buf].mEglImage = EGL_NO_IMAGE_KHR;
             mSlots[buf].mEglDisplay = EGL_NO_DISPLAY;
         }
-        return ISurfaceTexture::BUFFER_NEEDS_REALLOCATION;
+        returnFlags |= ISurfaceTexture::BUFFER_NEEDS_REALLOCATION;
     }
-    return OK;
+    return returnFlags;
 }
 
 status_t SurfaceTexture::setSynchronousMode(bool enabled) {
     Mutex::Autolock lock(mMutex);
+
+    status_t err = OK;
+    if (!enabled) {
+        // going to asynchronous mode, drain the queue
+        while (mSynchronousMode != enabled && !mQueue.isEmpty()) {
+            mDequeueCondition.wait(mMutex);
+        }
+    }
+
     if (mSynchronousMode != enabled) {
+        // - if we're going to asynchronous mode, the queue is guaranteed to be
+        // empty here
+        // - if the client set the number of buffers, we're guaranteed that
+        // we have at least 3 (because we don't allow less)
         mSynchronousMode = enabled;
-        freeAllBuffers();
-        mCurrentTexture = INVALID_BUFFER_SLOT;
-        mQueue.clear();
-        mQueue.reserve(mSynchronousMode ? mBufferCount : 1);
         mDequeueCondition.signal();
     }
-    return NO_ERROR;
+    return err;
 }
 
 status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp) {
@@ -266,6 +392,9 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp) {
     } else if (mSlots[buf].mBufferState != BufferSlot::DEQUEUED) {
         LOGE("queueBuffer: slot %d is not owned by the client (state=%d)",
                 buf, mSlots[buf].mBufferState);
+        return -EINVAL;
+    } else if (buf == mCurrentTexture) {
+        LOGE("queueBuffer: slot %d is current!", buf);
         return -EINVAL;
     } else if (!mSlots[buf].mRequestBufferCalled) {
         LOGE("queueBuffer: slot %d was enqueued without requesting a buffer",
@@ -342,6 +471,9 @@ status_t SurfaceTexture::updateTexImage() {
         Fifo::iterator front(mQueue.begin());
         buf = *front;
         mQueue.erase(front);
+        if (mQueue.isEmpty()) {
+            mDequeueCondition.signal();
+        }
     }
 
     // Initially both mCurrentTexture and buf are INVALID_BUFFER_SLOT,

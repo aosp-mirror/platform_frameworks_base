@@ -39,6 +39,9 @@ SurfaceTextureClient::SurfaceTextureClient(
     ANativeWindow::query            = query;
     ANativeWindow::perform          = perform;
 
+    const_cast<int&>(ANativeWindow::minSwapInterval) = 0;
+    const_cast<int&>(ANativeWindow::maxSwapInterval) = 1;
+
     // Get a reference to the allocator.
     mAllocator = mSurfaceTexture->getAllocator();
 }
@@ -90,22 +93,39 @@ int SurfaceTextureClient::perform(ANativeWindow* window, int operation, ...) {
 }
 
 int SurfaceTextureClient::setSwapInterval(int interval) {
-    return INVALID_OPERATION;
+    // EGL specification states:
+    //  interval is silently clamped to minimum and maximum implementation
+    //  dependent values before being stored.
+    // Although we don't have to, we apply the same logic here.
+
+    if (interval < minSwapInterval)
+        interval = minSwapInterval;
+
+    if (interval > maxSwapInterval)
+        interval = maxSwapInterval;
+
+    status_t res = mSurfaceTexture->setSynchronousMode(interval ? true : false);
+
+    return res;
 }
 
 int SurfaceTextureClient::dequeueBuffer(android_native_buffer_t** buffer) {
     LOGV("SurfaceTextureClient::dequeueBuffer");
     Mutex::Autolock lock(mMutex);
     int buf = -1;
-    status_t err = mSurfaceTexture->dequeueBuffer(&buf, mReqWidth, mReqHeight,
+    status_t result = mSurfaceTexture->dequeueBuffer(&buf, mReqWidth, mReqHeight,
             mReqFormat, mReqUsage);
-    if (err < 0) {
+    if (result < 0) {
         LOGV("dequeueBuffer: ISurfaceTexture::dequeueBuffer(%d, %d, %d, %d)"
-             "failed: %d", err, mReqWidth, mReqHeight, mReqFormat, mReqUsage);
-        return err;
+             "failed: %d", result, mReqWidth, mReqHeight, mReqFormat, mReqUsage);
+        return result;
     }
     sp<GraphicBuffer>& gbuf(mSlots[buf]);
-    if (err == ISurfaceTexture::BUFFER_NEEDS_REALLOCATION || gbuf == 0) {
+    if (result & ISurfaceTexture::RELEASE_ALL_BUFFERS) {
+        freeAllBuffers();
+    }
+
+    if ((result & ISurfaceTexture::BUFFER_NEEDS_REALLOCATION) || gbuf == 0) {
         gbuf = mSurfaceTexture->requestBuffer(buf);
         if (gbuf == 0) {
             LOGE("dequeueBuffer: ISurfaceTexture::requestBuffer failed");

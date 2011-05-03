@@ -41,7 +41,10 @@ public:
 protected:
     friend class SurfaceTextureClient;
 
-    enum { BUFFER_NEEDS_REALLOCATION = 1 };
+    enum {
+        BUFFER_NEEDS_REALLOCATION = 0x1,
+        RELEASE_ALL_BUFFERS       = 0x2,
+    };
 
     // requestBuffer requests a new buffer for the given index. The server (i.e.
     // the ISurfaceTexture implementation) assigns the newly created buffer to
@@ -94,6 +97,13 @@ protected:
     // query retrieves some information for this surface
     // 'what' tokens allowed are that of android_natives.h
     virtual int query(int what, int* value) = 0;
+
+    // setSynchronousMode set whether dequeueBuffer is synchronous or
+    // asynchronous. In synchronous mode, dequeueBuffer blocks until
+    // a buffer is available, the currently bound buffer can be dequeued and
+    // queued buffers will be retired in order.
+    // The default mode is asynchronous.
+    virtual status_t setSynchronousMode(bool enabled) = 0;
 };
 
 // ----------------------------------------------------------------------------

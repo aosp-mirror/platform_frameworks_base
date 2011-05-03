@@ -38,7 +38,10 @@ class IGraphicBufferAlloc;
 class SurfaceTexture : public BnSurfaceTexture {
 public:
     enum { MIN_UNDEQUEUED_BUFFERS = 2 };
-    enum { MIN_BUFFER_SLOTS = MIN_UNDEQUEUED_BUFFERS + 1 };
+    enum {
+        MIN_ASYNC_BUFFER_SLOTS = MIN_UNDEQUEUED_BUFFERS + 1,
+        MIN_SYNC_BUFFER_SLOTS  = MIN_UNDEQUEUED_BUFFERS
+    };
     enum { NUM_BUFFER_SLOTS = 32 };
 
     struct FrameAvailableListener : public virtual RefBase {
@@ -78,12 +81,24 @@ public:
 
     virtual int query(int what, int* value);
 
+    // setSynchronousMode set whether dequeueBuffer is synchronous or
+    // asynchronous. In synchronous mode, dequeueBuffer blocks until
+    // a buffer is available, the currently bound buffer can be dequeued and
+    // queued buffers will be retired in order.
+    // The default mode is asynchronous.
+    virtual status_t setSynchronousMode(bool enabled);
+
     // updateTexImage sets the image contents of the target texture to that of
     // the most recently queued buffer.
     //
     // This call may only be made while the OpenGL ES context to which the
     // target texture belongs is bound to the calling thread.
     status_t updateTexImage();
+
+    // setBufferCountServer set the buffer count. If the client has requested
+    // a buffer count using setBufferCount, the server-buffer count will
+    // take effect once the client sets the count back to zero.
+    status_t setBufferCountServer(int bufferCount);
 
     // getTransformMatrix retrieves the 4x4 texture coordinate transform matrix
     // associated with the texture image set by the most recent call to
@@ -142,13 +157,6 @@ public:
     // getCurrentTransform returns the transform of the current buffer
     uint32_t getCurrentTransform() const;
 
-    // setSynchronousMode set whether dequeueBuffer is synchronous or
-    // asynchronous. In synchronous mode, dequeueBuffer blocks until
-    // a buffer is available, the currently bound buffer can be dequeued and
-    // queued buffers will be retired in order.
-    // The default mode is asynchronous.
-    status_t setSynchronousMode(bool enabled);
-
 protected:
 
     // freeAllBuffers frees the resources (both GraphicBuffer and EGLImage) for
@@ -162,6 +170,8 @@ private:
     // createImage creates a new EGLImage from a GraphicBuffer.
     EGLImageKHR createImage(EGLDisplay dpy,
             const sp<GraphicBuffer>& graphicBuffer);
+
+    status_t setBufferCountServerLocked(int bufferCount);
 
     enum { INVALID_BUFFER_SLOT = -1 };
 
@@ -234,9 +244,17 @@ private:
     uint32_t mPixelFormat;
 
     // mBufferCount is the number of buffer slots that the client and server
-    // must maintain. It defaults to MIN_BUFFER_SLOTS and can be changed by
-    // calling setBufferCount.
+    // must maintain. It defaults to MIN_ASYNC_BUFFER_SLOTS and can be changed
+    // by calling setBufferCount or setBufferCountServer
     int mBufferCount;
+
+    // mRequestedBufferCount is the number of buffer slots requested by the
+    // client. The default is zero, which means the client doesn't care how
+    // many buffers there is.
+    int mClientBufferCount;
+
+    // mServerBufferCount buffer count requested by the server-side
+    int mServerBufferCount;
 
     // mCurrentTexture is the buffer slot index of the buffer that is currently
     // bound to the OpenGL texture. It is initialized to INVALID_BUFFER_SLOT,

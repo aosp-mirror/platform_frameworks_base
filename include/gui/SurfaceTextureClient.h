@@ -84,7 +84,6 @@ private:
     int getConnectedApi() const;
 
     enum { MIN_UNDEQUEUED_BUFFERS = SurfaceTexture::MIN_UNDEQUEUED_BUFFERS };
-    enum { MIN_BUFFER_SLOTS = SurfaceTexture::MIN_BUFFER_SLOTS };
     enum { NUM_BUFFER_SLOTS = SurfaceTexture::NUM_BUFFER_SLOTS };
     enum { DEFAULT_FORMAT = PIXEL_FORMAT_RGBA_8888 };
 

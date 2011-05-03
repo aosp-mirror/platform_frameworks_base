@@ -40,6 +40,7 @@ enum {
     SET_TRANSFORM,
     GET_ALLOCATOR,
     QUERY,
+    SET_SYNCHRONOUS_MODE,
 };
 
 
@@ -144,6 +145,16 @@ public:
         return result;
     }
 
+    virtual status_t setSynchronousMode(bool enabled) {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
+        data.writeInt32(enabled);
+        remote()->transact(SET_SYNCHRONOUS_MODE, data, &reply);
+        status_t result = reply.readInt32();
+        return result;
+    }
+
+
 };
 
 IMPLEMENT_META_INTERFACE(SurfaceTexture, "android.gui.SurfaceTexture");
@@ -227,6 +238,13 @@ status_t BnSurfaceTexture::onTransact(
             int what = data.readInt32();
             int res = query(what, &value);
             reply->writeInt32(value);
+            reply->writeInt32(res);
+            return NO_ERROR;
+        } break;
+        case SET_SYNCHRONOUS_MODE: {
+            CHECK_INTERFACE(ISurfaceTexture, data, reply);
+            bool enabled = data.readInt32();
+            status_t res = setSynchronousMode(enabled);
             reply->writeInt32(res);
             return NO_ERROR;
         } break;

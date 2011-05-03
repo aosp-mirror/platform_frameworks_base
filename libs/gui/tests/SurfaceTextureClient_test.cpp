@@ -259,6 +259,7 @@ TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSizeAfterDequeue) {
     sp<ANativeWindow> anw(mSTC);
     sp<SurfaceTexture> st(mST);
     ANativeWindowBuffer* buf[2];
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
     EXPECT_NE(buf[0], buf[1]);
@@ -280,6 +281,7 @@ TEST_F(SurfaceTextureClientTest, SurfaceTextureSetDefaultSizeVsGeometry) {
     sp<ANativeWindow> anw(mSTC);
     sp<SurfaceTexture> st(mST);
     ANativeWindowBuffer* buf[2];
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
     EXPECT_EQ(OK, st->setDefaultBufferSize(16, 8));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
@@ -307,7 +309,7 @@ TEST_F(SurfaceTextureClientTest, SurfaceTextureTooManyUpdateTexImage) {
     sp<SurfaceTexture> st(mST);
     android_native_buffer_t* buf[3];
     ASSERT_EQ(OK, st->setSynchronousMode(false));
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
 
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
     ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
@@ -315,7 +317,7 @@ TEST_F(SurfaceTextureClientTest, SurfaceTextureTooManyUpdateTexImage) {
     EXPECT_EQ(OK, st->updateTexImage());
 
     ASSERT_EQ(OK, st->setSynchronousMode(true));
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 2));
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
 
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
     ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
@@ -421,15 +423,6 @@ TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeDequeueCurrent) {
     EXPECT_EQ(firstBuf, buf[2]);
 }
 
-TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeTwoBuffers) {
-    sp<ANativeWindow> anw(mSTC);
-    sp<SurfaceTexture> st(mST);
-    ASSERT_EQ(OK, st->setSynchronousMode(true));
-    EXPECT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
-    EXPECT_EQ(OK, native_window_set_buffer_count(anw.get(), 2));
-    EXPECT_NE(OK, native_window_set_buffer_count(anw.get(), 1));
-}
-
 TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeMinUndequeued) {
     sp<ANativeWindow> anw(mSTC);
     sp<SurfaceTexture> st(mST);
@@ -490,7 +483,7 @@ TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeWaitRetire) {
 
     android_native_buffer_t* buf[3];
     ASSERT_EQ(OK, st->setSynchronousMode(true));
-    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 2));
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
     // dequeue/queue/update so we have a current buffer
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
     ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
