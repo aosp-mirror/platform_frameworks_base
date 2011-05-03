@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.net.IConnectivityManager;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
@@ -32,7 +31,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
-import android.os.ServiceManager;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -40,6 +38,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.util.AsyncChannel;
+import com.android.internal.util.Protocol;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -91,38 +91,39 @@ public abstract class DataConnectionTracker extends Handler {
     public static String EXTRA_MESSENGER = "EXTRA_MESSENGER";
 
     /***** Event Codes *****/
-    protected static final int EVENT_DATA_SETUP_COMPLETE = 1;
-    protected static final int EVENT_RADIO_AVAILABLE = 3;
-    protected static final int EVENT_RECORDS_LOADED = 4;
-    protected static final int EVENT_TRY_SETUP_DATA = 5;
-    protected static final int EVENT_DATA_STATE_CHANGED = 6;
-    protected static final int EVENT_POLL_PDP = 7;
-    protected static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = 12;
-    protected static final int EVENT_VOICE_CALL_STARTED = 14;
-    protected static final int EVENT_VOICE_CALL_ENDED = 15;
-    protected static final int EVENT_DATA_CONNECTION_DETACHED = 19;
-    protected static final int EVENT_LINK_STATE_CHANGED = 20;
-    protected static final int EVENT_ROAMING_ON = 21;
-    protected static final int EVENT_ROAMING_OFF = 22;
-    protected static final int EVENT_ENABLE_NEW_APN = 23;
-    protected static final int EVENT_RESTORE_DEFAULT_APN = 24;
-    protected static final int EVENT_DISCONNECT_DONE = 25;
-    protected static final int EVENT_DATA_CONNECTION_ATTACHED = 26;
-    protected static final int EVENT_START_NETSTAT_POLL = 27;
-    protected static final int EVENT_START_RECOVERY = 28;
-    protected static final int EVENT_APN_CHANGED = 29;
-    protected static final int EVENT_CDMA_DATA_DETACHED = 30;
-    protected static final int EVENT_NV_READY = 31;
-    protected static final int EVENT_PS_RESTRICT_ENABLED = 32;
-    protected static final int EVENT_PS_RESTRICT_DISABLED = 33;
-    public static final int EVENT_CLEAN_UP_CONNECTION = 34;
-    protected static final int EVENT_CDMA_OTA_PROVISION = 35;
-    protected static final int EVENT_RESTART_RADIO = 36;
-    protected static final int EVENT_SET_INTERNAL_DATA_ENABLE = 37;
-    protected static final int EVENT_RESET_DONE = 38;
-    public static final int CMD_SET_DATA_ENABLE = 39;
-    public static final int EVENT_CLEAN_UP_ALL_CONNECTIONS = 40;
-    public static final int CMD_SET_DEPENDENCY_MET = 41;
+    protected static final int BASE = Protocol.BASE_DATA_CONNECTION_TRACKER;
+    protected static final int EVENT_DATA_SETUP_COMPLETE = BASE + 0;
+    protected static final int EVENT_RADIO_AVAILABLE = BASE + 1;
+    protected static final int EVENT_RECORDS_LOADED = BASE + 2;
+    protected static final int EVENT_TRY_SETUP_DATA = BASE + 3;
+    protected static final int EVENT_DATA_STATE_CHANGED = BASE + 4;
+    protected static final int EVENT_POLL_PDP = BASE + 5;
+    protected static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = BASE + 6;
+    protected static final int EVENT_VOICE_CALL_STARTED = BASE + 7;
+    protected static final int EVENT_VOICE_CALL_ENDED = BASE + 8;
+    protected static final int EVENT_DATA_CONNECTION_DETACHED = BASE + 9;
+    protected static final int EVENT_LINK_STATE_CHANGED = BASE + 10;
+    protected static final int EVENT_ROAMING_ON = BASE + 11;
+    protected static final int EVENT_ROAMING_OFF = BASE + 12;
+    protected static final int EVENT_ENABLE_NEW_APN = BASE + 13;
+    protected static final int EVENT_RESTORE_DEFAULT_APN = BASE + 14;
+    protected static final int EVENT_DISCONNECT_DONE = BASE + 15;
+    protected static final int EVENT_DATA_CONNECTION_ATTACHED = BASE + 16;
+    protected static final int EVENT_START_NETSTAT_POLL = BASE + 17;
+    protected static final int EVENT_START_RECOVERY = BASE + 18;
+    protected static final int EVENT_APN_CHANGED = BASE + 19;
+    protected static final int EVENT_CDMA_DATA_DETACHED = BASE + 20;
+    protected static final int EVENT_NV_READY = BASE + 21;
+    protected static final int EVENT_PS_RESTRICT_ENABLED = BASE + 22;
+    protected static final int EVENT_PS_RESTRICT_DISABLED = BASE + 23;
+    public static final int EVENT_CLEAN_UP_CONNECTION = BASE + 24;
+    protected static final int EVENT_CDMA_OTA_PROVISION = BASE + 25;
+    protected static final int EVENT_RESTART_RADIO = BASE + 26;
+    protected static final int EVENT_SET_INTERNAL_DATA_ENABLE = BASE + 27;
+    protected static final int EVENT_RESET_DONE = BASE + 28;
+    public static final int CMD_SET_DATA_ENABLE = BASE + 29;
+    public static final int EVENT_CLEAN_UP_ALL_CONNECTIONS = BASE + 30;
+    public static final int CMD_SET_DEPENDENCY_MET = BASE + 31;
 
     /***** Constants *****/
 
@@ -227,7 +228,7 @@ public abstract class DataConnectionTracker extends Handler {
     /** indication of our availability (preconditions to trysetupData are met) **/
     protected boolean mAvailability = false;
 
-    // When false we will not auto attach and manully attaching is required.
+    // When false we will not auto attach and manually attaching is required.
     protected boolean mAutoAttachOnCreation = false;
 
     // State of screen
@@ -235,18 +236,16 @@ public abstract class DataConnectionTracker extends Handler {
     //        really a lower power mode")
     protected boolean mIsScreenOn = true;
 
-    /** The link properties (dns, gateway, ip, etc) */
-    protected LinkProperties mLinkProperties = new LinkProperties();
-
-    /** The link capabilities */
-    protected LinkCapabilities mLinkCapabilities = new LinkCapabilities();
-
     /** Allows the generation of unique Id's for DataConnection objects */
     protected AtomicInteger mUniqueIdGenerator = new AtomicInteger(0);
 
     /** The data connections. */
     protected HashMap<Integer, DataConnection> mDataConnections =
         new HashMap<Integer, DataConnection>();
+
+    /** The data connection async channels */
+    protected HashMap<Integer, DataConnectionAc> mDataConnectionAsyncChannels =
+        new HashMap<Integer, DataConnectionAc>();
 
     /** Convert an ApnType string to Id (TODO: Use "enumeration" instead of String for ApnType) */
     protected HashMap<String, Integer> mApnToDataConnectionId =
@@ -266,7 +265,6 @@ public abstract class DataConnectionTracker extends Handler {
 
     /** Is packet service restricted by network */
     protected boolean mIsPsRestricted = false;
-
 
     /* Once disposed dont handle any messages */
     protected boolean mIsDisposed = false;
@@ -351,6 +349,10 @@ public abstract class DataConnectionTracker extends Handler {
     }
 
     public void dispose() {
+        for (DataConnectionAc dcac : mDataConnectionAsyncChannels.values()) {
+            dcac.disconnect();
+        }
+        mDataConnectionAsyncChannels.clear();
         mIsDisposed = true;
         mPhone.getContext().unregisterReceiver(this.mIntentReceiver);
     }
@@ -463,7 +465,13 @@ public abstract class DataConnectionTracker extends Handler {
     @Override
     public void handleMessage(Message msg) {
         switch (msg.what) {
-
+            case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
+                log("DISCONNECTED_CONNECTED: msg=" + msg);
+                DataConnectionAc dcac = (DataConnectionAc) msg.obj;
+                mDataConnectionAsyncChannels.remove(dcac.dataConnection.getDataConnectionId());
+                dcac.disconnected();
+                break;
+            }
             case EVENT_ENABLE_NEW_APN:
                 onEnableApn(msg.arg1, msg.arg2);
                 break;
@@ -528,19 +536,20 @@ public abstract class DataConnectionTracker extends Handler {
                 break;
             }
             case EVENT_RESET_DONE: {
+                if (DBG) log("EVENT_RESET_DONE");
                 onResetDone((AsyncResult) msg.obj);
                 break;
             }
             case CMD_SET_DATA_ENABLE: {
-                log("CMD_SET_DATA_ENABLE msg=" + msg);
                 boolean enabled = (msg.arg1 == ENABLED) ? true : false;
+                if (DBG) log("CMD_SET_DATA_ENABLE enabled=" + enabled);
                 onSetDataEnabled(enabled);
                 break;
             }
 
             case CMD_SET_DEPENDENCY_MET: {
-                log("CMD_SET_DEPENDENCY_MET msg=" + msg);
                 boolean met = (msg.arg1 == ENABLED) ? true : false;
+                if (DBG) log("CMD_SET_DEPENDENCY_MET met=" + met);
                 Bundle bundle = msg.getData();
                 if (bundle != null) {
                     String apnType = (String)bundle.get(APN_TYPE_KEY);
@@ -552,7 +561,7 @@ public abstract class DataConnectionTracker extends Handler {
             }
 
             default:
-                Log.e("DATA", "Unidentified event = " + msg.what);
+                Log.e("DATA", "Unidentified event msg=" + msg);
                 break;
         }
     }
@@ -618,7 +627,8 @@ public abstract class DataConnectionTracker extends Handler {
     protected LinkProperties getLinkProperties(String apnType) {
         int id = apnTypeToId(apnType);
         if (isApnIdEnabled(id)) {
-            return new LinkProperties(mLinkProperties);
+            DataConnectionAc dcac = mDataConnectionAsyncChannels.get(id);
+            return dcac.getLinkPropertiesSync();
         } else {
             return new LinkProperties();
         }
@@ -627,31 +637,11 @@ public abstract class DataConnectionTracker extends Handler {
     protected LinkCapabilities getLinkCapabilities(String apnType) {
         int id = apnTypeToId(apnType);
         if (isApnIdEnabled(id)) {
-            return new LinkCapabilities(mLinkCapabilities);
+            DataConnectionAc dcac = mDataConnectionAsyncChannels.get(id);
+            return dcac.getLinkCapabilitiesSync();
         } else {
             return new LinkCapabilities();
         }
-    }
-
-    /**
-     * Return the LinkProperties for the connection.
-     *
-     * @param connection
-     * @return a copy of the LinkProperties, is never null.
-     */
-    protected LinkProperties getLinkProperties(DataConnection connection) {
-        return connection.getLinkProperties();
-    }
-
-    /**
-     * A capability is an Integer/String pair, the capabilities
-     * are defined in the class LinkSocket#Key.
-     *
-     * @param connection
-     * @return a copy of this connections capabilities, may be empty but never null.
-     */
-    protected LinkCapabilities getLinkCapabilities(DataConnection connection) {
-        return connection.getLinkCapabilities();
     }
 
     // tell all active apns of the current condition
