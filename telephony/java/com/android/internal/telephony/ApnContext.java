@@ -51,6 +51,8 @@ public class ApnContext {
 
     DataConnection mDataConnection;
 
+    DataConnectionAc mDataConnectionAc;
+
     String mReason;
 
     PendingIntent mReconnectIntent;
@@ -94,6 +96,17 @@ public class ApnContext {
 
     public synchronized void setDataConnection(DataConnection dataConnection) {
         mDataConnection = dataConnection;
+    }
+
+
+    public synchronized DataConnectionAc getDataConnectionAc() {
+        log("getDataConnectionAc dcac=" + mDataConnectionAc);
+        return mDataConnectionAc;
+    }
+
+    public synchronized void setDataConnectionAc(DataConnectionAc dcac) {
+        log("setDataConnectionAc dcac=" + dcac);
+        mDataConnectionAc = dcac;
     }
 
     public synchronized ApnSetting getApnSetting() {
@@ -204,6 +217,11 @@ public class ApnContext {
 
     public boolean getDependencyMet() {
        return mDependencyMet.get();
+    }
+
+    @Override
+    public String toString() {
+        return "state=" + getState() + " apnType=" + mApnType;
     }
 
     protected void log(String s) {

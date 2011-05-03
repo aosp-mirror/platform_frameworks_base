@@ -20,7 +20,6 @@ import android.os.Message;
 import android.util.Log;
 
 import com.android.internal.telephony.DataConnection;
-import com.android.internal.telephony.DataConnection.FailCause;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.RetryManager;

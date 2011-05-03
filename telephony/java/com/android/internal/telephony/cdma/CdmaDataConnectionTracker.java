@@ -37,10 +37,12 @@ import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.DataCallState;
 import com.android.internal.telephony.DataConnection.FailCause;
 import com.android.internal.telephony.DataConnection;
+import com.android.internal.telephony.DataConnectionAc;
 import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.RetryManager;
 import com.android.internal.telephony.Phone;
+import com.android.internal.util.AsyncChannel;
 
 import java.util.ArrayList;
 
@@ -297,14 +299,18 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         boolean notificationDeferred = false;
         for (DataConnection conn : mDataConnections.values()) {
             if(conn != null) {
+                DataConnectionAc dcac =
+                    mDataConnectionAsyncChannels.get(conn.getDataConnectionId());
                 if (tearDown) {
                     if (DBG) log("cleanUpConnection: teardown, call conn.disconnect");
-                    conn.disconnect(reason, obtainMessage(EVENT_DISCONNECT_DONE,
+                    conn.tearDown(reason, obtainMessage(EVENT_DISCONNECT_DONE,
                             conn.getDataConnectionId(), 0, reason));
                     notificationDeferred = true;
                 } else {
                     if (DBG) log("cleanUpConnection: !tearDown, call conn.resetSynchronously");
-                    conn.resetSynchronously();
+                    if (dcac != null) {
+                        dcac.resetSync();
+                    }
                     notificationDeferred = false;
                 }
             }
@@ -319,11 +325,13 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
     }
 
     private CdmaDataConnection findFreeDataConnection() {
-        for (DataConnection dc : mDataConnections.values()) {
-            if (dc.isInactive()) {
-                return (CdmaDataConnection) dc;
+        for (DataConnectionAc dcac : mDataConnectionAsyncChannels.values()) {
+            if (dcac.isInactiveSync()) {
+                log("found free GsmDataConnection");
+                return (CdmaDataConnection) dcac.dataConnection;
             }
         }
+        log("NO free CdmaDataConnection");
         return null;
     }
 
@@ -349,12 +357,12 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
         mActiveApn = new ApnSetting(apnId, "", "", "", "", "", "", "", "", "",
                                     "", 0, types, "IP", "IP");
-        if (DBG) log("setupData: mActiveApn=" + mActiveApn);
+        if (DBG) log("call conn.bringUp mActiveApn=" + mActiveApn);
 
         Message msg = obtainMessage();
         msg.what = EVENT_DATA_SETUP_COMPLETE;
         msg.obj = reason;
-        conn.connect(msg, mActiveApn);
+        conn.bringUp(msg, mActiveApn);
 
         setState(State.INITING);
         notifyDataConnection(reason);
@@ -653,11 +661,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (ar.exception == null) {
-            // TODO: We should clear LinkProperties/Capabilities when torn down or disconnected
-            mLinkProperties = getLinkProperties(mPendingDataConnection);
-            mLinkCapabilities = getLinkCapabilities(mPendingDataConnection);
-
-            // everything is setup
+            // Everything is setup
             notifyDefaultData(reason);
         } else {
             FailCause cause = (FailCause) (ar.result);
@@ -767,6 +771,16 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             int id = mUniqueIdGenerator.getAndIncrement();
             dataConn = CdmaDataConnection.makeDataConnection(mCdmaPhone, id, rm);
             mDataConnections.put(id, dataConn);
+            DataConnectionAc dcac = new DataConnectionAc(dataConn, LOG_TAG);
+            int status = dcac.fullyConnectSync(mPhone.getContext(), this, dataConn.getHandler());
+            if (status == AsyncChannel.STATUS_SUCCESSFUL) {
+                log("Fully connected");
+                mDataConnectionAsyncChannels.put(dcac.dataConnection.getDataConnectionId(), dcac);
+            } else {
+                log("Could not connect to dcac.dataConnection=" + dcac.dataConnection +
+                        " status=" + status);
+            }
+
         }
     }
 
@@ -897,6 +911,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     public void handleMessage (Message msg) {
+        if (DBG) log("CdmaDCT handleMessage msg=" + msg);
 
         if (!mPhone.mIsTheCurrentActivePhone || mIsDisposed) {
             log("Ignore CDMA msgs since CDMA phone is inactive");

@@ -17,22 +17,24 @@
 package com.android.internal.telephony;
 
 
+import com.android.internal.util.AsyncChannel;
+import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
-import android.net.LinkAddress;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
-import android.net.NetworkUtils;
+import android.net.ProxyProperties;
 import android.os.AsyncResult;
+import android.os.Bundle;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 
-import java.net.InetAddress;
-import java.net.Inet4Address;
-import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@hide}
@@ -60,6 +62,8 @@ public abstract class DataConnection extends StateMachine {
 
     protected static Object mCountLock = new Object();
     protected static int mCount;
+    protected AsyncChannel mAc;
+
 
     /**
      * Used internally for saving connecting parameters.
@@ -76,13 +80,6 @@ public abstract class DataConnection extends StateMachine {
     }
 
     /**
-     * An instance used for notification of blockingReset.
-     * TODO: Remove when blockingReset is removed.
-     */
-    class ResetSynchronouslyLock {
-    }
-
-    /**
      * Used internally for saving disconnecting parameters.
      */
     protected static class DisconnectParams {
@@ -90,15 +87,9 @@ public abstract class DataConnection extends StateMachine {
             this.reason = reason;
             this.onCompletedMsg = onCompletedMsg;
         }
-        public DisconnectParams(ResetSynchronouslyLock lockObj) {
-            this.reason = null;
-            this.lockObj = lockObj;
-        }
-
         public int tag;
         public String reason;
         public Message onCompletedMsg;
-        public ResetSynchronouslyLock lockObj;
     }
 
     /**
@@ -188,13 +179,13 @@ public abstract class DataConnection extends StateMachine {
     }
 
     // ***** Event codes for driving the state machine
-    protected static final int EVENT_RESET = 1;
-    protected static final int EVENT_CONNECT = 2;
-    protected static final int EVENT_SETUP_DATA_CONNECTION_DONE = 3;
-    protected static final int EVENT_GET_LAST_FAIL_DONE = 4;
-    protected static final int EVENT_DEACTIVATE_DONE = 5;
-    protected static final int EVENT_DISCONNECT = 6;
-    protected static final int EVENT_RIL_CONNECTED = 7;
+    protected static final int BASE = Protocol.BASE_DATA_CONNECTION;
+    protected static final int EVENT_CONNECT = BASE + 0;
+    protected static final int EVENT_SETUP_DATA_CONNECTION_DONE = BASE + 1;
+    protected static final int EVENT_GET_LAST_FAIL_DONE = BASE + 2;
+    protected static final int EVENT_DEACTIVATE_DONE = BASE + 3;
+    protected static final int EVENT_DISCONNECT = BASE + 4;
+    protected static final int EVENT_RIL_CONNECTED = BASE + 5;
 
     //***** Tag IDs for EventLog
     protected static final int EVENT_LOG_BAD_DNS_ADDRESS = 50100;
@@ -313,13 +304,8 @@ public abstract class DataConnection extends StateMachine {
             AsyncResult.forMessage(msg);
             msg.sendToTarget();
         }
-        if (dp.lockObj != null) {
-            synchronized(dp.lockObj) {
-                dp.lockObj.notify();
-            }
-        }
-
         clearSettings();
+        if (DBG) log("NotifyDisconnectCompleted DisconnectParams=" + dp);
     }
 
     protected int getRadioTechnology(int defaultRadioTechnology) {
@@ -406,6 +392,49 @@ public abstract class DataConnection extends StateMachine {
      */
     public boolean isRetryForever() {
         return mRetryMgr.isRetryForever();
+    }
+
+    private AtomicInteger mRefCount = new AtomicInteger(0);
+
+    /**
+     * Set refCount.
+     *
+     * @param val is new refCount
+     */
+    public void setRefCount(int val) {
+        mRefCount.set(val);
+    }
+
+    /**
+     * Get refCount
+     *
+     * @return refCount
+     */
+    public int getRefCount() {
+        return mRefCount.get();
+    }
+
+    /**
+     * @return decrement and return refCount
+     *
+     * TODO: Consider using the refCount for defining the
+     * life time of a connection. When this goes zero the
+     * DataConnection could tear itself down.
+     */
+    public int decAndGetRefCount() {
+        int v = mRefCount.decrementAndGet();
+        if (v < 0) {
+            log("BUG: decAndGetRefCount caused refCount to be < 0");
+            mRefCount.set(0);
+        }
+        return v;
+     }
+
+    /**
+     * @return increment and return refCount
+     */
+    public int incAndGetRefCount() {
+        return mRefCount.incrementAndGet();
     }
 
     /*
@@ -498,12 +527,74 @@ public abstract class DataConnection extends StateMachine {
             AsyncResult ar;
 
             switch (msg.what) {
-                case EVENT_RESET:
-                    if (DBG) log("DcDefaultState: msg.what=EVENT_RESET");
-                    clearSettings();
-                    if (msg.obj != null) {
-                        notifyDisconnectCompleted((DisconnectParams) msg.obj);
+                case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
+                    if (mAc != null) {
+                        log("Disconnecting to previous connection mAc=" + mAc);
+                        mAc.replyToMessage(msg, AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED,
+                                AsyncChannel.STATUS_FULL_CONNECTION_REFUSED_ALREADY_CONNECTED);
+                    } else {
+                        mAc = new AsyncChannel();
+                        mAc.connected(null, getHandler(), msg.replyTo);
+                        log("DcDefaultState: FULL_CONNECTION reply connected");
+                        mAc.replyToMessage(msg, AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED,
+                                AsyncChannel.STATUS_SUCCESSFUL, mId, "hi");
                     }
+                    break;
+                }
+                case AsyncChannel.CMD_CHANNEL_DISCONNECT: {
+                    log("CMD_CHANNEL_DISCONNECT");
+                    mAc.disconnect();
+                    break;
+                }
+                case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
+                    log("CMD_CHANNEL_DISCONNECTED");
+                    mAc = null;
+                    break;
+                }
+                case DataConnectionAc.REQ_IS_INACTIVE: {
+                    boolean val = getCurrentState() == mInactiveState;
+                    log("REQ_IS_INACTIVE  isInactive=" + val);
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_IS_INACTIVE, val ? 1 : 0);
+                    break;
+                }
+                case DataConnectionAc.REQ_GET_CID: {
+                    log("REQ_GET_CID  cid=" + cid);
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_CID, cid);
+                    break;
+                }
+                case DataConnectionAc.REQ_GET_APNSETTING: {
+                    log("REQ_GET_APNSETTING  apnSetting=" + mApn);
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_APNSETTING, mApn);
+                    break;
+                }
+                case DataConnectionAc.REQ_GET_LINK_PROPERTIES: {
+                    LinkProperties lp = new LinkProperties(mLinkProperties);
+                    log("REQ_GET_LINK_PROPERTIES linkProperties" + lp);
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_LINK_PROPERTIES, lp);
+                    break;
+                }
+                case DataConnectionAc.REQ_SET_LINK_PROPERTIES_HTTP_PROXY: {
+                    ProxyProperties proxy = (ProxyProperties) msg.obj;
+                    log("REQ_SET_LINK_PROPERTIES_HTTP_PROXY proxy=" + proxy);
+                    mLinkProperties.setHttpProxy(proxy);
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_SET_LINK_PROPERTIES_HTTP_PROXY);
+                    break;
+                }
+                case DataConnectionAc.REQ_GET_LINK_CAPABILITIES: {
+                    LinkCapabilities lc = new LinkCapabilities(mCapabilities);
+                    log("REQ_GET_LINK_CAPABILITIES linkCapabilities" + lc);
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_LINK_CAPABILITIES, lc);
+                    break;
+                }
+                case DataConnectionAc.REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE: {
+                    Bundle data = msg.getData();
+                    mLinkProperties = (LinkProperties) data.get("linkProperties");
+                    break;
+                }
+                case DataConnectionAc.REQ_RESET:
+                    if (DBG) log("DcDefaultState: msg.what=REQ_RESET");
+                    clearSettings();
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_RESET);
                     transitionTo(mInactiveState);
                     break;
 
@@ -539,7 +630,7 @@ public abstract class DataConnection extends StateMachine {
                     break;
             }
 
-            return true;
+            return HANDLED;
         }
     }
     private DcDefaultState mDefaultState = new DcDefaultState();
@@ -597,14 +688,12 @@ public abstract class DataConnection extends StateMachine {
             boolean retVal;
 
             switch (msg.what) {
-                case EVENT_RESET:
+                case DataConnectionAc.REQ_RESET:
                     if (DBG) {
-                        log("DcInactiveState: msg.what=EVENT_RESET, ignore we're already reset");
+                        log("DcInactiveState: msg.what=RSP_RESET, ignore we're already reset");
                     }
-                    if (msg.obj != null) {
-                        notifyDisconnectCompleted((DisconnectParams) msg.obj);
-                    }
-                    retVal = true;
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_RESET);
+                    retVal = HANDLED;
                     break;
 
                 case EVENT_CONNECT:
@@ -613,12 +702,12 @@ public abstract class DataConnection extends StateMachine {
                     cp.tag = mTag;
                     onConnect(cp);
                     transitionTo(mActivatingState);
-                    retVal = true;
+                    retVal = HANDLED;
                     break;
 
                 default:
                     if (DBG) log("DcInactiveState nothandled msg.what=" + msg.what);
-                    retVal = false;
+                    retVal = NOT_HANDLED;
                     break;
             }
             return retVal;
@@ -640,7 +729,7 @@ public abstract class DataConnection extends StateMachine {
                 case EVENT_DISCONNECT:
                     if (DBG) log("DcActivatingState deferring msg.what=EVENT_DISCONNECT");
                     deferMessage(msg);
-                    retVal = true;
+                    retVal = HANDLED;
                     break;
 
                 case EVENT_SETUP_DATA_CONNECTION_DONE:
@@ -685,7 +774,7 @@ public abstract class DataConnection extends StateMachine {
                         default:
                             throw new RuntimeException("Unknown SetupResult, should not happen");
                     }
-                    retVal = true;
+                    retVal = HANDLED;
                     break;
 
                 case EVENT_GET_LAST_FAIL_DONE:
@@ -710,12 +799,12 @@ public abstract class DataConnection extends StateMachine {
                         }
                     }
 
-                    retVal = true;
+                    retVal = HANDLED;
                     break;
 
                 default:
                     if (DBG) log("DcActivatingState not handled msg.what=" + msg.what);
-                    retVal = false;
+                    retVal = NOT_HANDLED;
                     break;
             }
             return retVal;
@@ -768,12 +857,12 @@ public abstract class DataConnection extends StateMachine {
                     dp.tag = mTag;
                     tearDownData(dp);
                     transitionTo(mDisconnectingState);
-                    retVal = true;
+                    retVal = HANDLED;
                     break;
 
                 default:
                     if (DBG) log("DcActiveState nothandled msg.what=" + msg.what);
-                    retVal = false;
+                    retVal = NOT_HANDLED;
                     break;
             }
             return retVal;
@@ -803,12 +892,12 @@ public abstract class DataConnection extends StateMachine {
                         if (DBG) log("DcDisconnectState EVENT_DEACTIVATE_DONE stale dp.tag="
                                 + dp.tag + " mTag=" + mTag);
                     }
-                    retVal = true;
+                    retVal = HANDLED;
                     break;
 
                 default:
                     if (DBG) log("DcDisconnectingState not handled msg.what=" + msg.what);
-                    retVal = false;
+                    retVal = NOT_HANDLED;
                     break;
             }
             return retVal;
@@ -845,7 +934,7 @@ public abstract class DataConnection extends StateMachine {
                                     " stale dp.tag=" + cp.tag + ", mTag=" + mTag);
                         }
                     }
-                    retVal = true;
+                    retVal = HANDLED;
                     break;
 
                 default:
@@ -853,7 +942,7 @@ public abstract class DataConnection extends StateMachine {
                         log("DcDisconnectionErrorCreatingConnection not handled msg.what="
                                 + msg.what);
                     }
-                    retVal = false;
+                    retVal = NOT_HANDLED;
                     break;
             }
             return retVal;
@@ -865,147 +954,26 @@ public abstract class DataConnection extends StateMachine {
     // ******* public interface
 
     /**
-     * Disconnect from the network.
-     *
-     * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
-     *        With AsyncResult.userObj set to the original msg.obj.
-     */
-    public void reset(Message onCompletedMsg) {
-        sendMessage(obtainMessage(EVENT_RESET, new DisconnectParams(null, onCompletedMsg)));
-    }
-
-    /**
-     * Reset the connection and wait for it to complete.
-     * TODO: Remove when all callers only need the asynchronous
-     * reset defined above.
-     */
-    public void resetSynchronously() {
-        ResetSynchronouslyLock lockObj = new ResetSynchronouslyLock();
-        synchronized(lockObj) {
-            sendMessage(obtainMessage(EVENT_RESET, new DisconnectParams(lockObj)));
-            try {
-                lockObj.wait();
-            } catch (InterruptedException e) {
-                log("blockingReset: unexpected interrupted of wait()");
-            }
-        }
-    }
-
-    /**
-     * Connect to the apn and return an AsyncResult in onCompletedMsg.
+     * Bring up a connection to the apn and return an AsyncResult in onCompletedMsg.
      * Used for cellular networks that use Acesss Point Names (APN) such
      * as GSM networks.
      *
      * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
      *        With AsyncResult.userObj set to the original msg.obj,
      *        AsyncResult.result = FailCause and AsyncResult.exception = Exception().
-     * @param apn is the Access Point Name to connect to
+     * @param apn is the Access Point Name to bring up a connection to
      */
-    public void connect(Message onCompletedMsg, ApnSetting apn) {
+    public void bringUp(Message onCompletedMsg, ApnSetting apn) {
         sendMessage(obtainMessage(EVENT_CONNECT, new ConnectionParams(apn, onCompletedMsg)));
     }
 
     /**
-     * Connect to the apn and return an AsyncResult in onCompletedMsg.
-     *
-     * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
-     *        With AsyncResult.userObj set to the original msg.obj,
-     *        AsyncResult.result = FailCause and AsyncResult.exception = Exception().
-     */
-    public void connect(Message onCompletedMsg) {
-        sendMessage(obtainMessage(EVENT_CONNECT, new ConnectionParams(null, onCompletedMsg)));
-    }
-
-    /**
-     * Disconnect from the network.
+     * Tear down the connection through the apn on the network.
      *
      * @param onCompletedMsg is sent with its msg.obj as an AsyncResult object.
      *        With AsyncResult.userObj set to the original msg.obj.
      */
-    public void disconnect(String reason, Message onCompletedMsg) {
+    public void tearDown(String reason, Message onCompletedMsg) {
         sendMessage(obtainMessage(EVENT_DISCONNECT, new DisconnectParams(reason, onCompletedMsg)));
-    }
-
-    // ****** The following are used for debugging.
-
-    /**
-     * TODO: This should be an asynchronous call and we wouldn't
-     * have to use handle the notification in the DcInactiveState.enter.
-     *
-     * @return true if the state machine is in the inactive state.
-     */
-    public boolean isInactive() {
-        boolean retVal = getCurrentState() == mInactiveState;
-        return retVal;
-    }
-
-    /**
-     * TODO: This should be an asynchronous call and we wouldn't
-     * have to use handle the notification in the DcActiveState.enter.
-     *
-     * @return true if the state machine is in the active state.
-     */
-    public boolean isActive() {
-        boolean retVal = getCurrentState() == mActiveState;
-        return retVal;
-    }
-
-    /**
-     * Return the LinkProperties for the connection.
-     *
-     * @return a copy of the LinkProperties, is never null.
-     */
-    public LinkProperties getLinkProperties() {
-        return new LinkProperties(mLinkProperties);
-    }
-
-    /**
-     * A capability is an Integer/String pair, the capabilities
-     * are defined in the class LinkSocket#Key.
-     *
-     * @return a copy of this connections capabilities, may be empty but never null.
-     */
-    public LinkCapabilities getLinkCapabilities() {
-        return new LinkCapabilities(mCapabilities);
-    }
-
-    /**
-     * @return the current state as a string.
-     */
-    public String getStateAsString() {
-        String retVal = getCurrentState().getName();
-        return retVal;
-    }
-
-    /**
-     * @return the time of when this connection was created.
-     */
-    public long getConnectionTime() {
-        return createTime;
-    }
-
-    /**
-     * @return the time of the last failure.
-     */
-    public long getLastFailTime() {
-        return lastFailTime;
-    }
-
-    /**
-     * @return the last cause of failure.
-     */
-    public FailCause getLastFailCause() {
-        return lastFailCause;
-    }
-
-    /**
-     * @return the current ApnSetting
-     */
-    public ApnSetting getApn() {
-        return mApn;
-    }
-
-    public int getCid() {
-        return cid;
     }
 }

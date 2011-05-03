@@ -21,7 +21,6 @@ import android.util.Log;
 import android.util.Patterns;
 import android.text.TextUtils;
 
-import com.android.internal.telephony.ApnSetting;
 import com.android.internal.telephony.DataConnection;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneBase;
