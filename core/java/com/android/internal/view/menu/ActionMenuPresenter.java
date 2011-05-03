@@ -21,7 +21,6 @@ import com.android.internal.view.menu.ActionMenuView.ActionMenuChildView;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.MenuItem;
 import android.view.SoundEffectConstants;
@@ -195,7 +194,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
     public boolean showOverflowMenu() {
         if (mReserveOverflow && !isOverflowMenuShowing() && mMenuView != null &&
                 mPostedOpenRunnable == null) {
-            Log.d("ActionMenuPresenter", "showOverflowMenu");
             OverflowPopup popup = new OverflowPopup(mContext, mMenu, mOverflowButton, true);
             mPostedOpenRunnable = new OpenOverflowRunnable(popup);
             // Post this for later; we might still need a layout for the anchor to be right.
@@ -314,8 +312,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
                 v.measure(querySpec, querySpec);
                 final int measuredWidth = v.getMeasuredWidth();
                 widthLimit -= measuredWidth;
-                Log.d(TAG, "flagActionItems required item " + i + " measured width " +
-                        measuredWidth + " - " + widthLimit + " left");
                 if (firstActionWidth == 0) {
                     firstActionWidth = measuredWidth;
                 }
@@ -342,19 +338,15 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
                     v.measure(querySpec, querySpec);
                     final int measuredWidth = v.getMeasuredWidth();
                     widthLimit -= measuredWidth;
-                    Log.d(TAG, "flagActionItems requested item " + i + " measured width " +
-                            measuredWidth + " - " + widthLimit + " left");
                     if (firstActionWidth == 0) {
                         firstActionWidth = measuredWidth;
                     }
 
                     if (mStrictWidthLimit) {
                         isAction = widthLimit >= 0;
-                        Log.d(TAG, " --> strict width limit: isAction? " + isAction);
                     } else {
                         // Did this push the entire first item past the limit?
                         isAction = widthLimit + firstActionWidth > 0;
-                        Log.d(TAG, " --> normal width limit: isAction? " + isAction);
                     }
                 }
 
