@@ -65,7 +65,7 @@ public:
     status_t initCheck() const;
 
     // protected by SurfaceFlinger::mStateLock
-    ssize_t attachLayer(const sp<LayerBaseClient>& layer);
+    size_t attachLayer(const sp<LayerBaseClient>& layer);
     void detachLayer(const LayerBaseClient* layer);
     sp<LayerBaseClient> getLayerUser(int32_t i) const;
 
@@ -81,9 +81,15 @@ private:
     virtual status_t destroySurface(SurfaceID surfaceId);
     virtual status_t setState(int32_t count, const layer_state_t* states);
 
-    DefaultKeyedVector< size_t, wp<LayerBaseClient> > mLayers;
+    // constant
     sp<SurfaceFlinger> mFlinger;
-    int32_t mNameGenerator;
+
+    // protected by mLock
+    DefaultKeyedVector< size_t, wp<LayerBaseClient> > mLayers;
+    size_t mNameGenerator;
+
+    // thread-safe
+    mutable Mutex mLock;
 };
 
 class UserClient : public BnSurfaceComposerClient
