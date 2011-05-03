@@ -637,7 +637,12 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     float alpha = layer->alpha / 255.0f;
 
     setupDraw();
-    setupDrawWithExternalTexture();
+    if (layer->renderTarget == GL_TEXTURE_2D) {
+        setupDrawWithTexture();
+    } else {
+        setupDrawWithExternalTexture();
+    }
+    setupDrawTextureTransform();
     setupDrawColor(alpha, alpha, alpha, alpha);
     setupDrawColorFilter();
     setupDrawBlending(layer->blend, layer->mode);
@@ -645,8 +650,12 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     setupDrawModelView(rect.left, rect.top, rect.right, rect.bottom);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
-    setupDrawExternalTexture(layer->texture);
-    setupDrawTextureTransform(layer->texTransform);
+    if (layer->renderTarget == GL_TEXTURE_2D) {
+        setupDrawTexture(layer->texture);
+    } else {
+        setupDrawExternalTexture(layer->texture);
+    }
+    setupDrawTextureTransformUniforms(layer->texTransform);
     setupDrawMesh(&mMeshVertices[0].position[0], &mMeshVertices[0].texture[0]);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
@@ -1095,7 +1104,11 @@ void OpenGLRenderer::setupDrawExternalTexture(GLuint texture) {
     glEnableVertexAttribArray(mTexCoordsSlot);
 }
 
-void OpenGLRenderer::setupDrawTextureTransform(mat4& transform) {
+void OpenGLRenderer::setupDrawTextureTransform() {
+    mDescription.hasTextureTransform = true;
+}
+
+void OpenGLRenderer::setupDrawTextureTransformUniforms(mat4& transform) {
     glUniformMatrix4fv(mCaches.currentProgram->getUniform("mainTextureTransform"), 1,
             GL_FALSE, &transform.data[0]);
 }

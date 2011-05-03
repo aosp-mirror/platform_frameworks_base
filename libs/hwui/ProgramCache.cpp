@@ -394,7 +394,7 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
     }
     // Uniforms
     shader.append(gVS_Header_Uniforms);
-    if (description.hasExternalTexture) {
+    if (description.hasTextureTransform) {
         shader.append(gVS_Header_Uniforms_TextureTransform);
     }
     if (description.hasGradient) {
@@ -424,11 +424,10 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
 
     // Begin the shader
     shader.append(gVS_Main); {
-        if (description.hasTexture) {
-            shader.append(gVS_Main_OutTexCoords);
-        }
-        if (description.hasExternalTexture) {
+        if (description.hasTextureTransform) {
             shader.append(gVS_Main_OutTransformedTexCoords);
+        } else if (description.hasTexture || description.hasExternalTexture) {
+            shader.append(gVS_Main_OutTexCoords);
         }
         if (description.isAA) {
             shader.append(gVS_Main_AA);
@@ -496,8 +495,7 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
     }
     if (description.hasTexture) {
         shader.append(gFS_Uniforms_TextureSampler);
-    }
-    if (description.hasExternalTexture) {
+    } else if (description.hasExternalTexture) {
         shader.append(gFS_Uniforms_ExternalTextureSampler);
     }
     if (description.isAA) {

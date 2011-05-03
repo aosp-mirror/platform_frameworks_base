@@ -84,4 +84,9 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
         animator.setDuration(4000);
         animator.start();
     }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+        // Ignored, the Camera does all the work for us
+    }
 }

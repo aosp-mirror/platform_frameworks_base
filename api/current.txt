@@ -21025,6 +21025,7 @@ package android.view {
 
   public static abstract interface TextureView.SurfaceTextureListener {
     method public abstract void onSurfaceTextureAvailable(android.graphics.SurfaceTexture);
+    method public abstract void onSurfaceTextureSizeChanged(android.graphics.SurfaceTexture, int, int);
   }
 
   public class TouchDelegate {

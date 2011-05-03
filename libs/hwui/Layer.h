@@ -47,6 +47,7 @@ struct Layer {
         meshElementCount = 0;
         isCacheable = true;
         isTextureLayer = false;
+        renderTarget = GL_TEXTURE_2D;
     }
 
     ~Layer() {
@@ -155,6 +156,11 @@ struct Layer {
      * Optional texture coordinates transform.
      */
     mat4 texTransform;
+
+    /**
+     * Indicates the render target.
+     */
+    GLenum renderTarget;
 }; // struct Layer
 
 }; // namespace uirenderer
