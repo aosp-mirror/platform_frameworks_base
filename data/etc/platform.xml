@@ -66,6 +66,10 @@
         <group gid="mtp" />
     </permission>
 
+    <permission name="android.permission.NET_ADMIN" >
+        <group gid="net_admin" />
+    </permission>
+
     <!-- The group that /cache belongs to, linked to the permission
          set on the applications that can access /cache -->
     <permission name="android.permission.ACCESS_CACHE_FILESYSTEM" >

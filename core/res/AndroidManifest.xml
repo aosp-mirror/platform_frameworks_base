@@ -496,6 +496,12 @@
         android:label="@string/permlab_hardware_test"
         android:description="@string/permdesc_hardware_test" />
 
+    <!-- Allows access to configure network interfaces, configure/use IPSec, etc.
+         @hide -->
+    <permission android:name="android.permission.NET_ADMIN"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="signature" />
+
     <!-- =========================================== -->
     <!-- Permissions associated with telephony state -->
     <!-- =========================================== -->
