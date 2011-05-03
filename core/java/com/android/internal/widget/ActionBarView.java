@@ -38,7 +38,6 @@ import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -59,7 +58,7 @@ import android.widget.TextView;
 /**
  * @hide
  */
-public class ActionBarView extends ViewGroup {
+public class ActionBarView extends AbsActionBarView {
     private static final String TAG = "ActionBarView";
 
     /**
@@ -115,11 +114,8 @@ public class ActionBarView extends ViewGroup {
     private boolean mIncludeTabs;
 
     private MenuBuilder mOptionsMenu;
-    private ActionMenuView mMenuView;
-    private ActionMenuPresenter mActionMenuPresenter;
     
     private ActionBarContextView mContextView;
-    private ViewGroup mSplitView;
 
     private ActionMenuItem mLogoNavItem;
 
@@ -274,12 +270,6 @@ public class ActionBarView extends ViewGroup {
         mTabLayout = tabLayout;
     }
 
-    @Override
-    public ActionMode startActionModeForChild(View child, ActionMode.Callback callback) {
-        // No starting an action mode for an action bar child! (Where would it go?)
-        return null;
-    }
-
     public void setCallback(OnNavigationListener callback) {
         mCallback = callback;
     }
@@ -288,7 +278,7 @@ public class ActionBarView extends ViewGroup {
         if (menu == mOptionsMenu) return;
 
         if (mOptionsMenu != null) {
-            mOptionsMenu.removeMenuPresenter(mActionMenuPresenter);
+            mOptionsMenu.removeMenuPresenter(mMenuPresenter);
         }
 
         MenuBuilder builder = (MenuBuilder) menu;
@@ -296,12 +286,12 @@ public class ActionBarView extends ViewGroup {
         if (mMenuView != null) {
             removeView(mMenuView);
         }
-        if (mActionMenuPresenter == null) {
-            mActionMenuPresenter = new ActionMenuPresenter();
-            mActionMenuPresenter.setCallback(cb);
-            builder.addMenuPresenter(mActionMenuPresenter);
+        if (mMenuPresenter == null) {
+            mMenuPresenter = new ActionMenuPresenter();
+            mMenuPresenter.setCallback(cb);
+            builder.addMenuPresenter(mMenuPresenter);
         }
-        final ActionMenuView menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
+        final ActionMenuView menuView = (ActionMenuView) mMenuPresenter.getMenuView(this);
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
         menuView.setLayoutParams(layoutParams);
@@ -309,68 +299,17 @@ public class ActionBarView extends ViewGroup {
             addView(menuView);
         } else {
             // Allow full screen width in split mode.
-            mActionMenuPresenter.setWidthLimit(
-                    getContext().getResources().getDisplayMetrics().widthPixels);
+            mMenuPresenter.setWidthLimit(
+                    getContext().getResources().getDisplayMetrics().widthPixels, true);
             // No limit to the item count; use whatever will fit.
-            mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
+            mMenuPresenter.setItemLimit(Integer.MAX_VALUE);
+            // Span the whole width
+            layoutParams.width = LayoutParams.MATCH_PARENT;
             if (mSplitView != null) {
                 mSplitView.addView(menuView);
             } // We'll add this later if we missed it this time.
         }
         mMenuView = menuView;
-    }
-
-    public void setSplitView(ViewGroup splitView) {
-        mSplitView = splitView;
-        splitView.setVisibility(VISIBLE);
-        if (mMenuView != null) {
-            splitView.addView(mMenuView);
-        }
-    }
-
-    public boolean showOverflowMenu() {
-        if (mActionMenuPresenter != null) {
-            return mActionMenuPresenter.showOverflowMenu();
-        }
-        return false;
-    }
-
-    public void openOverflowMenu() {
-        if (mActionMenuPresenter != null) {
-            showOverflowMenu();
-        }
-    }
-
-    public void postShowOverflowMenu() {
-        post(new Runnable() {
-            public void run() {
-                showOverflowMenu();
-            }
-        });
-    }
-
-    public boolean hideOverflowMenu() {
-        if (mActionMenuPresenter != null) {
-            return mActionMenuPresenter.hideOverflowMenu();
-        }
-        return false;
-    }
-
-    public boolean isOverflowMenuShowing() {
-        if (mActionMenuPresenter != null) {
-            return mActionMenuPresenter.isOverflowMenuShowing();
-        }
-        return false;
-    }
-
-    public boolean isOverflowReserved() {
-        return mActionMenuPresenter != null && mActionMenuPresenter.isOverflowReserved();
-    }
-
-    public void dismissPopupMenus() {
-        if (mActionMenuPresenter != null) {
-            mActionMenuPresenter.dismissPopupMenus();
-        }
     }
 
     public void setCustomNavigationView(View view) {
@@ -876,16 +815,6 @@ public class ActionBarView extends ViewGroup {
         }
     }
 
-    private int measureChildView(View child, int availableWidth, int childSpecHeight, int spacing) {
-        child.measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
-                childSpecHeight);
-
-        availableWidth -= child.getMeasuredWidth();
-        availableWidth -= spacing;
-
-        return availableWidth;
-    }
-
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         int x = getPaddingLeft();
@@ -996,26 +925,6 @@ public class ActionBarView extends ViewGroup {
             mProgressView.layout(mProgressBarPadding, -halfProgressHeight,
                     mProgressBarPadding + mProgressView.getMeasuredWidth(), halfProgressHeight);
         }
-    }
-
-    private int positionChild(View child, int x, int y, int contentHeight) {
-        int childWidth = child.getMeasuredWidth();
-        int childHeight = child.getMeasuredHeight();
-        int childTop = y + (contentHeight - childHeight) / 2;
-
-        child.layout(x, childTop, x + childWidth, childTop + childHeight);
-
-        return childWidth;
-    }
-    
-    private int positionChildInverse(View child, int x, int y, int contentHeight) {
-        int childWidth = child.getMeasuredWidth();
-        int childHeight = child.getMeasuredHeight();
-        int childTop = y + (contentHeight - childHeight) / 2;
-
-        child.layout(x - childWidth, childTop, x, childTop + childHeight);
-
-        return childWidth;
     }
 
     private static class TabView extends LinearLayout {

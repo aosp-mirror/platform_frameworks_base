@@ -19,6 +19,7 @@ package com.android.internal.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.view.ActionMode;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -82,6 +83,12 @@ public class ActionBarContainer extends FrameLayout {
 
     public View getTabContainer() {
         return mTabContainer;
+    }
+
+    @Override
+    public ActionMode startActionModeForChild(View child, ActionMode.Callback callback) {
+        // No starting an action mode for an action bar child! (Where would it go?)
+        return null;
     }
 
     @Override

@@ -254,6 +254,15 @@ public class LinearLayout extends ViewGroup {
         return mDividerPadding;
     }
 
+    /**
+     * Get the width of the current divider drawable.
+     *
+     * @hide Used internally by framework.
+     */
+    public int getDividerWidth() {
+        return mDividerWidth;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         if (mDivider == null) {

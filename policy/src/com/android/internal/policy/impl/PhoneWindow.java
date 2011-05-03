@@ -28,17 +28,15 @@ import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 
 import com.android.internal.view.RootViewSurfaceTaker;
 import com.android.internal.view.StandaloneActionMode;
-import com.android.internal.view.menu.ActionMenuView;
 import com.android.internal.view.menu.ContextMenuBuilder;
-import com.android.internal.view.menu.ListMenuPresenter;
 import com.android.internal.view.menu.IconMenuPresenter;
+import com.android.internal.view.menu.ListMenuPresenter;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuDialogHelper;
-import com.android.internal.view.menu.MenuItemImpl;
-import com.android.internal.view.menu.MenuPopupHelper;
-import com.android.internal.view.menu.MenuView;
 import com.android.internal.view.menu.MenuPresenter;
+import com.android.internal.view.menu.MenuView;
 import com.android.internal.view.menu.SubMenuBuilder;
+import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarView;
 
@@ -625,7 +623,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
     }
 
-    private void checkCloseActionMenu(Menu menu) {
+    void checkCloseActionMenu(Menu menu) {
         if (mClosingActionMenu) {
             return;
         }
@@ -882,7 +880,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, true);
                     if (cb.onPreparePanel(FEATURE_OPTIONS_PANEL, st.createdPanelView, st.menu)) {
                         cb.onMenuOpened(FEATURE_ACTION_BAR, st.menu);
-                        mActionBar.openOverflowMenu();
+                        mActionBar.showOverflowMenu();
                     }
                 }
             } else {
@@ -2591,11 +2589,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     final boolean splitActionBar = getWindowStyle().getBoolean(
                             com.android.internal.R.styleable.Window_windowSplitActionBar, false);
                     if (splitActionBar) {
-                        final ViewGroup splitView = (ViewGroup) findViewById(
-                                com.android.internal.R.id.lower_action_context_bar);
+                        final ActionBarContainer splitView = (ActionBarContainer) findViewById(
+                                com.android.internal.R.id.split_action_bar);
                         if (splitView != null) {
                             mActionBar.setSplitActionBar(splitActionBar);
                             mActionBar.setSplitView(splitView);
+
+                            final ActionBarContextView cab = (ActionBarContextView) findViewById(
+                                    com.android.internal.R.id.action_context_bar);
+                            cab.setSplitView(splitView);
                         } else {
                             Log.e(TAG, "Window style requested split action bar with " +
                                     "incompatible window decor! Ignoring request.");

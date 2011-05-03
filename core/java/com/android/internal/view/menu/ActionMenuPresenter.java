@@ -36,11 +36,14 @@ import java.util.ArrayList;
  * MenuPresenter for building action menus as seen in the action bar and action modes.
  */
 public class ActionMenuPresenter extends BaseMenuPresenter {
+    private static final String TAG = "ActionMenuPresenter";
+
     private View mOverflowButton;
     private boolean mReserveOverflow;
     private int mWidthLimit;
     private int mActionItemWidthLimit;
     private int mMaxItems;
+    private boolean mStrictWidthLimit;
 
     // Group IDs that have been added as actions - used temporarily, allocated here for reuse.
     private final SparseBooleanArray mActionButtonGroups = new SparseBooleanArray();
@@ -89,11 +92,12 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         mScrapActionButtonView = null;
     }
 
-    public void setWidthLimit(int width) {
+    public void setWidthLimit(int width, boolean strict) {
         if (mReserveOverflow) {
             width -= mOverflowButton.getMeasuredWidth();
         }
         mActionItemWidthLimit = width;
+        mStrictWidthLimit = strict;
     }
 
     public void setItemLimit(int itemCount) {
@@ -131,6 +135,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         if (mReserveOverflow && mMenu.getNonActionItems().size() > 0) {
             if (mOverflowButton == null) {
                 mOverflowButton = new OverflowMenuButton(mContext);
+                mOverflowButton.setLayoutParams(
+                        ((ActionMenuView) mMenuView).generateOverflowButtonLayoutParams());
             }
             ViewGroup parent = (ViewGroup) mOverflowButton.getParent();
             if (parent != mMenuView) {
@@ -308,6 +314,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
                 v.measure(querySpec, querySpec);
                 final int measuredWidth = v.getMeasuredWidth();
                 widthLimit -= measuredWidth;
+                Log.d(TAG, "flagActionItems required item " + i + " measured width " +
+                        measuredWidth + " - " + widthLimit + " left");
                 if (firstActionWidth == 0) {
                     firstActionWidth = measuredWidth;
                 }
@@ -334,13 +342,19 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
                     v.measure(querySpec, querySpec);
                     final int measuredWidth = v.getMeasuredWidth();
                     widthLimit -= measuredWidth;
+                    Log.d(TAG, "flagActionItems requested item " + i + " measured width " +
+                            measuredWidth + " - " + widthLimit + " left");
                     if (firstActionWidth == 0) {
                         firstActionWidth = measuredWidth;
                     }
 
-                    // Did this push the entire first item past halfway?
-                    if (widthLimit + firstActionWidth <= 0) {
-                        isAction = false;
+                    if (mStrictWidthLimit) {
+                        isAction = widthLimit >= 0;
+                        Log.d(TAG, " --> strict width limit: isAction? " + isAction);
+                    } else {
+                        // Did this push the entire first item past the limit?
+                        isAction = widthLimit + firstActionWidth > 0;
+                        Log.d(TAG, " --> normal width limit: isAction? " + isAction);
                     }
                 }
 

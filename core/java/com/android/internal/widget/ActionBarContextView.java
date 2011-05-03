@@ -30,7 +30,7 @@ import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -38,7 +38,7 @@ import android.widget.TextView;
 /**
  * @hide
  */
-public class ActionBarContextView extends ViewGroup implements AnimatorListener {
+public class ActionBarContextView extends AbsActionBarView implements AnimatorListener {
     private static final String TAG = "ActionBarContextView";
 
     private int mContentHeight;
@@ -53,8 +53,6 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
     private TextView mSubtitleView;
     private int mTitleStyleRes;
     private int mSubtitleStyleRes;
-    private ActionMenuView mMenuView;
-    private ActionMenuPresenter mPresenter;
 
     private Animator mCurrentAnimation;
     private boolean mAnimateInOnLayout;
@@ -86,12 +84,6 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
         mContentHeight = a.getLayoutDimension(
                 com.android.internal.R.styleable.ActionMode_height, 0);
         a.recycle();
-    }
-    
-    @Override
-    public ActionMode startActionModeForChild(View child, ActionMode.Callback callback) {
-        // No starting an action mode for an existing action mode UI child! (Where would it go?)
-        return null;
     }
 
     public void setHeight(int height) {
@@ -178,10 +170,25 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
         });
 
         final MenuBuilder menu = (MenuBuilder) mode.getMenu();
-        mPresenter = new ActionMenuPresenter();
-        menu.addMenuPresenter(mPresenter);
-        mMenuView = (ActionMenuView) mPresenter.getMenuView(this);
-        addView(mMenuView);
+        mMenuPresenter = new ActionMenuPresenter();
+        menu.addMenuPresenter(mMenuPresenter);
+        mMenuView = (ActionMenuView) mMenuPresenter.getMenuView(this);
+
+        final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.MATCH_PARENT);
+        mMenuView.setLayoutParams(layoutParams);
+        if (mSplitView == null) {
+            addView(mMenuView);
+        } else {
+            // Allow full screen width in split mode.
+            mMenuPresenter.setWidthLimit(
+                    getContext().getResources().getDisplayMetrics().widthPixels, true);
+            // No limit to the item count; use whatever will fit.
+            mMenuPresenter.setItemLimit(Integer.MAX_VALUE);
+            // Span the whole width
+            layoutParams.width = LayoutParams.MATCH_PARENT;
+            mSplitView.addView(mMenuView);
+        }
 
         mAnimateInOnLayout = true;
     }
@@ -213,28 +220,31 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
     public void killMode() {
         finishAnimation();
         removeAllViews();
+        if (mSplitView != null) {
+            mSplitView.removeView(mMenuView);
+        }
         mCustomView = null;
         mMenuView = null;
         mAnimateInOnLayout = false;
     }
 
     public boolean showOverflowMenu() {
-        if (mPresenter != null) {
-            return mPresenter.showOverflowMenu();
+        if (mMenuPresenter != null) {
+            return mMenuPresenter.showOverflowMenu();
         }
         return false;
     }
 
     public boolean hideOverflowMenu() {
-        if (mPresenter != null) {
-            return mPresenter.hideOverflowMenu();
+        if (mMenuPresenter != null) {
+            return mMenuPresenter.hideOverflowMenu();
         }
         return false;
     }
 
     public boolean isOverflowMenuShowing() {
-        if (mPresenter != null) {
-            return mPresenter.isOverflowMenuShowing();
+        if (mMenuPresenter != null) {
+            return mMenuPresenter.isOverflowMenuShowing();
         }
         return false;
     }
@@ -342,7 +352,7 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
 
     private Animator makeOutAnimation() {
         ObjectAnimator buttonAnimator = ObjectAnimator.ofFloat(mClose, "translationX",
-                0, -mClose.getWidth());
+                -mClose.getWidth());
         buttonAnimator.setDuration(200);
         buttonAnimator.addListener(this);
         buttonAnimator.setInterpolator(new DecelerateInterpolator());
@@ -356,7 +366,7 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
                 for (int i = 0; i < 0; i++) {
                     View child = mMenuView.getChildAt(i);
                     child.setScaleY(0);
-                    ObjectAnimator a = ObjectAnimator.ofFloat(child, "scaleY", 1, 0);
+                    ObjectAnimator a = ObjectAnimator.ofFloat(child, "scaleY", 0);
                     a.setDuration(100);
                     a.setStartDelay(i * 70);
                     b.with(a);
@@ -383,7 +393,7 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
                 mAnimateInOnLayout = false;
             }
         }
-        
+
         if (mTitleLayout != null && mCustomView == null) {
             x += positionChild(mTitleLayout, x, y, contentHeight);
         }
@@ -397,36 +407,6 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
         if (mMenuView != null) {
             x -= positionChildInverse(mMenuView, x, y, contentHeight);
         }
-    }
-
-    private int measureChildView(View child, int availableWidth, int childSpecHeight, int spacing) {
-        child.measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
-                childSpecHeight);
-
-        availableWidth -= child.getMeasuredWidth();
-        availableWidth -= spacing;
-
-        return availableWidth;
-    }
-    
-    private int positionChild(View child, int x, int y, int contentHeight) {
-        int childWidth = child.getMeasuredWidth();
-        int childHeight = child.getMeasuredHeight();
-        int childTop = y + (contentHeight - childHeight) / 2;
-
-        child.layout(x, childTop, x + childWidth, childTop + childHeight);
-
-        return childWidth;
-    }
-    
-    private int positionChildInverse(View child, int x, int y, int contentHeight) {
-        int childWidth = child.getMeasuredWidth();
-        int childHeight = child.getMeasuredHeight();
-        int childTop = y + (contentHeight - childHeight) / 2;
-
-        child.layout(x - childWidth, childTop, x, childTop + childHeight);
-
-        return childWidth;
     }
 
     @Override

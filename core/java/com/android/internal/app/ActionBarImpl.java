@@ -19,6 +19,7 @@ package com.android.internal.app;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.SubMenuBuilder;
+import com.android.internal.widget.AbsActionBarView;
 import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarView;
@@ -46,7 +47,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.HorizontalScrollView;
-import android.widget.LinearLayout;
 import android.widget.SpinnerAdapter;
 
 import java.lang.ref.WeakReference;
@@ -61,8 +61,6 @@ import java.util.ArrayList;
  */
 public class ActionBarImpl extends ActionBar {
     private static final String TAG = "ActionBarImpl";
-    private static final int NORMAL_VIEW = 0;
-    private static final int CONTEXT_VIEW = 1;
 
     private Context mContext;
     private Activity mActivity;
@@ -70,8 +68,8 @@ public class ActionBarImpl extends ActionBar {
 
     private ActionBarContainer mContainerView;
     private ActionBarView mActionView;
-    private ActionBarContextView mUpperContextView;
-    private LinearLayout mLowerView;
+    private ActionBarContextView mContextView;
+    private ActionBarContainer mSplitView;
     private View mContentView;
     private ViewGroup mExternalTabView;
 
@@ -101,26 +99,6 @@ public class ActionBarImpl extends ActionBar {
     boolean mWasHiddenBeforeMode;
 
     private static final TimeInterpolator sFadeOutInterpolator = new DecelerateInterpolator();
-
-    final AnimatorListener[] mAfterAnimation = new AnimatorListener[] {
-            new AnimatorListenerAdapter() { // NORMAL_VIEW
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (mLowerView != null) {
-                        mLowerView.removeAllViews();
-                    }
-                    mCurrentModeAnim = null;
-                    hideAllExcept(NORMAL_VIEW);
-                }
-            },
-            new AnimatorListenerAdapter() { // CONTEXT_VIEW
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mCurrentModeAnim = null;
-                    hideAllExcept(CONTEXT_VIEW);
-                }
-            }
-    };
 
     final AnimatorListener mHideListener = new AnimatorListenerAdapter() {
         @Override
@@ -160,19 +138,19 @@ public class ActionBarImpl extends ActionBar {
     private void init(View decor) {
         mContext = decor.getContext();
         mActionView = (ActionBarView) decor.findViewById(com.android.internal.R.id.action_bar);
-        mUpperContextView = (ActionBarContextView) decor.findViewById(
+        mContextView = (ActionBarContextView) decor.findViewById(
                 com.android.internal.R.id.action_context_bar);
-        mLowerView = (LinearLayout) decor.findViewById(
-                com.android.internal.R.id.lower_action_context_bar);
         mContainerView = (ActionBarContainer) decor.findViewById(
                 com.android.internal.R.id.action_bar_container);
+        mSplitView = (ActionBarContainer) decor.findViewById(
+                com.android.internal.R.id.split_action_bar);
 
-        if (mActionView == null || mUpperContextView == null || mContainerView == null) {
+        if (mActionView == null || mContextView == null || mContainerView == null) {
             throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
                     "with a compatible window decor layout");
         }
 
-        mActionView.setContextView(mUpperContextView);
+        mActionView.setContextView(mContextView);
         mContextDisplayMode = mActionView.isSplitActionBar() ?
                 CONTEXT_DISPLAY_SPLIT : CONTEXT_DISPLAY_NORMAL;
 
@@ -341,16 +319,16 @@ public class ActionBarImpl extends ActionBar {
             mActionMode.finish();
         }
 
-        mUpperContextView.killMode();
+        mContextView.killMode();
         ActionMode mode = new ActionModeImpl(callback);
         if (callback.onCreateActionMode(mode, mode.getMenu())) {
             mWasHiddenBeforeMode = !isShowing();
             mode.invalidate();
-            mUpperContextView.initForMode(mode);
-            animateTo(CONTEXT_VIEW);
-            if (mLowerView != null) {
+            mContextView.initForMode(mode);
+            animateToMode(true);
+            if (mSplitView != null) {
                 // TODO animate this
-                mLowerView.setVisibility(View.VISIBLE);
+                mSplitView.setVisibility(View.VISIBLE);
             }
             mActionMode = mode;
             return mode;
@@ -495,6 +473,10 @@ public class ActionBarImpl extends ActionBar {
                 mContainerView.setTranslationY(-mContainerView.getHeight());
                 b.with(ObjectAnimator.ofFloat(mContainerView, "translationY", 0));
             }
+            if (mSplitView != null) {
+                mSplitView.setAlpha(0);
+                b.with(ObjectAnimator.ofFloat(mSplitView, "alpha", 1));
+            }
             anim.addListener(mShowListener);
             mCurrentShowAnim = anim;
             anim.start();
@@ -525,6 +507,10 @@ public class ActionBarImpl extends ActionBar {
                 b.with(ObjectAnimator.ofFloat(mContainerView, "translationY",
                         -mContainerView.getHeight()));
             }
+            if (mSplitView != null) {
+                mSplitView.setAlpha(1);
+                b.with(ObjectAnimator.ofFloat(mSplitView, "alpha", 0));
+            }
             anim.addListener(mHideListener);
             mCurrentShowAnim = anim;
             anim.start();
@@ -537,45 +523,14 @@ public class ActionBarImpl extends ActionBar {
         return mContainerView.getVisibility() == View.VISIBLE;
     }
 
-    long animateTo(int viewIndex) {
+    void animateToMode(boolean toActionMode) {
         show(false);
         if (mCurrentModeAnim != null) {
             mCurrentModeAnim.end();
         }
 
-        AnimatorSet set = new AnimatorSet();
-
-        final View targetChild = mContainerView.getChildAt(viewIndex);
-        targetChild.setVisibility(View.VISIBLE);
-        targetChild.setAlpha(0);
-        AnimatorSet.Builder b = set.play(ObjectAnimator.ofFloat(targetChild, "alpha", 1));
-
-        final int count = mContainerView.getChildCount();
-        for (int i = 0; i < count; i++) {
-            final View child = mContainerView.getChildAt(i);
-            if (i == viewIndex || child == mContainerView.getTabContainer()) {
-                continue;
-            }
-
-            if (child.getVisibility() != View.GONE) {
-                Animator a = ObjectAnimator.ofFloat(child, "alpha", 0);
-                a.setInterpolator(sFadeOutInterpolator);
-                b.with(a);
-            }
-        }
-
-        set.addListener(mAfterAnimation[viewIndex]);
-
-        mCurrentModeAnim = set;
-        set.start();
-        return set.getDuration();
-    }
-
-    private void hideAllExcept(int viewIndex) {
-        final int count = mContainerView.getChildCount();
-        for (int i = 0; i < count; i++) {
-            mContainerView.getChildAt(i).setVisibility(i == viewIndex ? View.VISIBLE : View.GONE);
-        }
+        mActionView.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
+        mContextView.animateToVisibility(toActionMode ? View.VISIBLE : View.GONE);
     }
 
     /**
@@ -612,14 +567,10 @@ public class ActionBarImpl extends ActionBar {
 
             mCallback.onDestroyActionMode(this);
             mCallback = null;
-            animateTo(NORMAL_VIEW);
+            animateToMode(false);
 
             // Clear out the context mode views after the animation finishes
-            mUpperContextView.closeMode();
-            if (mLowerView != null && mLowerView.getVisibility() != View.GONE) {
-                // TODO Animate this
-                mLowerView.setVisibility(View.GONE);
-            }
+            mContextView.closeMode();
             mActionMode = null;
 
             if (mWasHiddenBeforeMode) {
@@ -636,18 +587,18 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public void setCustomView(View view) {
-            mUpperContextView.setCustomView(view);
+            mContextView.setCustomView(view);
             mCustomView = new WeakReference<View>(view);
         }
 
         @Override
         public void setSubtitle(CharSequence subtitle) {
-            mUpperContextView.setSubtitle(subtitle);
+            mContextView.setSubtitle(subtitle);
         }
 
         @Override
         public void setTitle(CharSequence title) {
-            mUpperContextView.setTitle(title);
+            mContextView.setTitle(title);
         }
 
         @Override
@@ -662,12 +613,12 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public CharSequence getTitle() {
-            return mUpperContextView.getTitle();
+            return mContextView.getTitle();
         }
 
         @Override
         public CharSequence getSubtitle() {
-            return mUpperContextView.getSubtitle();
+            return mContextView.getSubtitle();
         }
         
         @Override
@@ -707,7 +658,7 @@ public class ActionBarImpl extends ActionBar {
                 return;
             }
             invalidate();
-            mUpperContextView.showOverflowMenu();
+            mContextView.showOverflowMenu();
         }
     }
 
