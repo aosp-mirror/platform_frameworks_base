@@ -204,6 +204,12 @@ public class SensorEvent {
      * values[0]: Ambient light level in SI lux units
      * </ul>
      * 
+     * <h4>{@link android.hardware.Sensor#TYPE_PRESSURE Sensor.TYPE_PRESSURE}:</h4>
+     * <ul>
+     * <p>
+     * values[0]: Atmospheric pressure in hPa (millibar)
+     * </ul>
+     *
      * <h4>{@link android.hardware.Sensor#TYPE_PROXIMITY Sensor.TYPE_PROXIMITY}:
      * </h4>
      * 
