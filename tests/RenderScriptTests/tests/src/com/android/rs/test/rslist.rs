@@ -47,7 +47,7 @@ int root(void) {
     rsgBindFont(gFont);
 
     rs_allocation listAlloc;
-    rsSetObject(&listAlloc, rsGetAllocation(gList));
+    listAlloc = rsGetAllocation(gList);
     int allocSize = rsAllocationGetDimX(listAlloc);
 
     int width = rsgGetWidth();
