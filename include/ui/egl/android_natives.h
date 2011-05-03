@@ -249,7 +249,7 @@ struct ANativeWindow
      * 
      * Returns 0 on success or -errno on error.
      */
-    int     (*query)(struct ANativeWindow* window,
+    int     (*query)(const struct ANativeWindow* window,
                 int what, int* value);
     
     /*

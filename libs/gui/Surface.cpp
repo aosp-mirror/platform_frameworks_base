@@ -536,9 +536,9 @@ int Surface::queueBuffer(ANativeWindow* window,
     return self->queueBuffer(buffer);
 }
 
-int Surface::query(ANativeWindow* window, 
+int Surface::query(const ANativeWindow* window,
         int what, int* value) {
-    Surface* self = getSelf(window);
+    const Surface* self = getSelf(window);
     return self->query(what, value);
 }
 
@@ -697,7 +697,7 @@ int Surface::queueBuffer(android_native_buffer_t* buffer)
     return err;
 }
 
-int Surface::query(int what, int* value)
+int Surface::query(int what, int* value) const
 {
     switch (what) {
     case NATIVE_WINDOW_WIDTH:

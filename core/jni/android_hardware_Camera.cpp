@@ -218,7 +218,7 @@ void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int 
 
                         if (mCallbackBuffers.isEmpty()) {
                             LOGV("Out of buffers, clearing callback!");
-                            mCamera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_NOOP);
+                            mCamera->setPreviewCallbackFlags(CAMERA_FRAME_CALLBACK_FLAG_NOOP);
                             mManualCameraCallbackSet = false;
 
                             if (obj == NULL) {
@@ -305,22 +305,22 @@ void JNICameraContext::setCallbackMode(JNIEnv *env, bool installed, bool manualM
     mManualCameraCallbackSet = false;
 
     // In order to limit the over usage of binder threads, all non-manual buffer
-    // callbacks use FRAME_CALLBACK_FLAG_BARCODE_SCANNER mode now.
+    // callbacks use CAMERA_FRAME_CALLBACK_FLAG_BARCODE_SCANNER mode now.
     //
     // Continuous callbacks will have the callback re-registered from handleMessage.
     // Manual buffer mode will operate as fast as possible, relying on the finite supply
     // of buffers for throttling.
 
     if (!installed) {
-        mCamera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_NOOP);
+        mCamera->setPreviewCallbackFlags(CAMERA_FRAME_CALLBACK_FLAG_NOOP);
         clearCallbackBuffers_l(env, &mCallbackBuffers);
     } else if (mManualBufferMode) {
         if (!mCallbackBuffers.isEmpty()) {
-            mCamera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_CAMERA);
+            mCamera->setPreviewCallbackFlags(CAMERA_FRAME_CALLBACK_FLAG_CAMERA);
             mManualCameraCallbackSet = true;
         }
     } else {
-        mCamera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_BARCODE_SCANNER);
+        mCamera->setPreviewCallbackFlags(CAMERA_FRAME_CALLBACK_FLAG_BARCODE_SCANNER);
         clearCallbackBuffers_l(env, &mCallbackBuffers);
     }
 }
@@ -343,7 +343,7 @@ void JNICameraContext::addCallbackBuffer(
                 // next frame. This may have come unset had we not had a
                 // callbackbuffer ready for it last time.
                 if (mManualBufferMode && !mManualCameraCallbackSet) {
-                    mCamera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_CAMERA);
+                    mCamera->setPreviewCallbackFlags(CAMERA_FRAME_CALLBACK_FLAG_CAMERA);
                     mManualCameraCallbackSet = true;
                 }
                 break;
@@ -456,7 +456,7 @@ static void android_hardware_Camera_release(JNIEnv *env, jobject thiz)
 
         // clear callbacks
         if (camera != NULL) {
-            camera->setPreviewCallbackFlags(FRAME_CALLBACK_FLAG_NOOP);
+            camera->setPreviewCallbackFlags(CAMERA_FRAME_CALLBACK_FLAG_NOOP);
             camera->disconnect();
         }
 

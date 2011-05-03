@@ -830,10 +830,10 @@ public:
             ASSERT(c->previewEnabled() == true);
             sleep(2);
             c->stopPreview();
-            if ((v & FRAME_CALLBACK_FLAG_ENABLE_MASK) == 0) {
+            if ((v & CAMERA_FRAME_CALLBACK_FLAG_ENABLE_MASK) == 0) {
                 cc->assertData(CAMERA_MSG_PREVIEW_FRAME, MCameraClient::EQ, 0);
             } else {
-                if ((v & FRAME_CALLBACK_FLAG_ONE_SHOT_MASK) == 0) {
+                if ((v & CAMERA_FRAME_CALLBACK_FLAG_ONE_SHOT_MASK) == 0) {
                     cc->assertData(CAMERA_MSG_PREVIEW_FRAME, MCameraClient::GE, 10);
                 } else {
                     cc->assertData(CAMERA_MSG_PREVIEW_FRAME, MCameraClient::EQ, 1);
@@ -849,7 +849,7 @@ public:
         ASSERT(c->recordingEnabled() == false);
         sp<MSurface> surface = new MSurface();
         ASSERT(c->setPreviewDisplay(surface) == NO_ERROR);
-        c->setPreviewCallbackFlag(FRAME_CALLBACK_FLAG_ENABLE_MASK);
+        c->setPreviewCallbackFlag(CAMERA_FRAME_CALLBACK_FLAG_ENABLE_MASK);
         cc->setReleaser(c.get());
         c->startRecording();
         ASSERT(c->recordingEnabled() == true);
@@ -870,7 +870,7 @@ public:
 
         CameraParameters param(c->getParameters());
         param.setPreviewSize(w, h);
-        c->setPreviewCallbackFlag(FRAME_CALLBACK_FLAG_ENABLE_MASK);
+        c->setPreviewCallbackFlag(CAMERA_FRAME_CALLBACK_FLAG_ENABLE_MASK);
         c->setParameters(param.flatten());
 
         c->startPreview();

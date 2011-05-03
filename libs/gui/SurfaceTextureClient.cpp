@@ -76,8 +76,9 @@ int SurfaceTextureClient::queueBuffer(ANativeWindow* window,
     return c->queueBuffer(buffer);
 }
 
-int SurfaceTextureClient::query(ANativeWindow* window, int what, int* value) {
-    SurfaceTextureClient* c = getSelf(window);
+int SurfaceTextureClient::query(const ANativeWindow* window,
+                                int what, int* value) {
+    const SurfaceTextureClient* c = getSelf(window);
     return c->query(what, value);
 }
 
@@ -160,7 +161,7 @@ int SurfaceTextureClient::queueBuffer(android_native_buffer_t* buffer) {
     return BAD_VALUE;
 }
 
-int SurfaceTextureClient::query(int what, int* value) {
+int SurfaceTextureClient::query(int what, int* value) const {
     LOGV("SurfaceTextureClient::query");
     Mutex::Autolock lock(mMutex);
     switch (what) {

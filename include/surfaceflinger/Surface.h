@@ -206,14 +206,14 @@ private:
     static int cancelBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
     static int lockBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
     static int queueBuffer(ANativeWindow* window, android_native_buffer_t* buffer);
-    static int query(ANativeWindow* window, int what, int* value);
+    static int query(const ANativeWindow* window, int what, int* value);
     static int perform(ANativeWindow* window, int operation, ...);
 
     int dequeueBuffer(android_native_buffer_t** buffer);
     int lockBuffer(android_native_buffer_t* buffer);
     int queueBuffer(android_native_buffer_t* buffer);
     int cancelBuffer(android_native_buffer_t* buffer);
-    int query(int what, int* value);
+    int query(int what, int* value) const;
     int perform(int operation, va_list args);
 
     void dispatch_setUsage(va_list args);

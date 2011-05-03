@@ -19,9 +19,8 @@
 #define ANDROID_SERVERS_CAMERA_CAMERASERVICE_H
 
 #include <binder/BinderService.h>
-
 #include <camera/ICameraService.h>
-#include <camera/CameraHardwareInterface.h>
+#include <hardware/camera.h>
 
 /* This needs to be increased if we can have more cameras */
 #define MAX_CAMERAS 2
@@ -30,6 +29,7 @@ namespace android {
 
 class MemoryHeapBase;
 class MediaPlayer;
+class CameraHardwareInterface;
 
 class CameraService :
     public BinderService<CameraService>,
@@ -53,6 +53,7 @@ public:
     virtual status_t    dump(int fd, const Vector<String16>& args);
     virtual status_t    onTransact(uint32_t code, const Parcel& data,
                                    Parcel* reply, uint32_t flags);
+    virtual void onFirstRef();
 
     enum sound_kind {
         SOUND_SHUTTER = 0,
@@ -199,6 +200,8 @@ private:
         // is found to be disabled. It returns true if mLock is grabbed.
         bool                    lockIfMessageWanted(int32_t msgType);
     };
+
+    camera_module_t *mModule;
 };
 
 } // namespace android
