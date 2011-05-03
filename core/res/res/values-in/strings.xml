@@ -204,7 +204,7 @@
     <string name="permdesc_getTasks" msgid="7048711358713443341">"Mengizinkan aplikasi mengambil informasi tentang tugas yang sedang dan baru saja dijalankan. Aplikasi hasad dapat menemukan informasi bajakan tentang aplikasi lain."</string>
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"atur urutan aplikasi yang berjalan"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Mengizinkan aplikasi memindah tugas ke latar depan dan latar belakang. Aplikasi hasad dapat memaksa dirinya ke latar depan tanpa sepengetahuan Anda."</string>
-    <string name="permlab_removeTasks" msgid="4802740047161700683">"berhenti menjalankan aplikasi"</string>
+    <string name="permlab_removeTasks" msgid="4802740047161700683">"menghentikan aplikasi yang berjalan"</string>
     <string name="permdesc_removeTasks" msgid="2000332928514575461">"Memungkinkan aplikasi menghapus tugas dan menghentikan aplikasinya. Aplikasi jahat dapat mengganggu perilaku aplikasi lain."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"aktifkan debugging aplikasi"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Mengizinkan aplikasi menghidupkan debug untuk aplikasi lain. Aplikasi hasad dapat menggunakan ini untuk menghentikan aplikasi penting lainnya."</string>

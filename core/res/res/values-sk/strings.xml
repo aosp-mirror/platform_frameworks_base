@@ -205,7 +205,7 @@
     <string name="permlab_reorderTasks" msgid="5669588525059921549">"zmena usporiadania spustených aplikácií"</string>
     <string name="permdesc_reorderTasks" msgid="126252774270522835">"Umožňuje aplikácii presúvať úlohy do popredia alebo pozadia. Škodlivé aplikácie môžu vynútiť svoje presunutia do popredia bez vášho pričinenia."</string>
     <string name="permlab_removeTasks" msgid="4802740047161700683">"zastavenie činnosti aplikácií"</string>
-    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Umožňuje aplikácii odstraňovať úlohy a ukončiť čínnosť súvisiacich aplikácií. Škodlivé aplikácie môžu narušovať správanie iných aplikácií."</string>
+    <string name="permdesc_removeTasks" msgid="2000332928514575461">"Umožňuje aplikácii odstraňovať úlohy a ukončiť činnosť súvisiacich aplikácií. Škodlivé aplikácie môžu narušovať správanie iných aplikácií."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"povoliť ladenie aplikácií"</string>
     <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Umožňuje aplikácii povoliť ladenie inej aplikácie. Škodlivé aplikácie môžu pomocou tohto nastavenia ukončiť iné aplikácie."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"zmeny vašich nastavení používateľského rozhrania"</string>
