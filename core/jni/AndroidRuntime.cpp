@@ -118,6 +118,7 @@ extern int register_com_android_internal_graphics_NativeUtils(JNIEnv *env);
 extern int register_android_view_Display(JNIEnv* env);
 extern int register_android_view_GLES20Canvas(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
+extern int register_android_view_TextureView(JNIEnv* env);
 extern int register_android_view_ViewRoot(JNIEnv* env);
 extern int register_android_database_CursorWindow(JNIEnv* env);
 extern int register_android_database_SQLiteCompiledSql(JNIEnv* env);
@@ -1122,6 +1123,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_Graphics),
     REG_JNI(register_android_view_GLES20Canvas),
     REG_JNI(register_android_view_Surface),
+    REG_JNI(register_android_view_TextureView),
     REG_JNI(register_android_view_ViewRoot),
     REG_JNI(register_com_google_android_gles_jni_EGLImpl),
     REG_JNI(register_com_google_android_gles_jni_GLImpl),

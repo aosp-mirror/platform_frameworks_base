@@ -185,17 +185,7 @@ Layer* LayerRenderer::createTextureLayer() {
     layer->region.clear();
 
     glActiveTexture(GL_TEXTURE0);
-
     glGenTextures(1, &layer->texture);
-    glBindTexture(GL_TEXTURE_EXTERNAL_OES, layer->texture);
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
-    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     return layer;
 }
@@ -280,7 +270,7 @@ bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
 }
 
 void LayerRenderer::updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
-        float* transform) {
+        GLenum renderTarget, float* transform) {
     if (layer) {
         layer->width = width;
         layer->height = height;
@@ -288,6 +278,15 @@ void LayerRenderer::updateTextureLayer(Layer* layer, uint32_t width, uint32_t he
         layer->region.set(width, height);
         layer->regionRect.set(0.0f, 0.0f, width, height);
         layer->texTransform.load(transform);
+        layer->renderTarget = renderTarget;
+
+        glBindTexture(layer->renderTarget, layer->texture);
+
+        glTexParameteri(layer->renderTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(layer->renderTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glTexParameteri(layer->renderTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(layer->renderTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 }
 

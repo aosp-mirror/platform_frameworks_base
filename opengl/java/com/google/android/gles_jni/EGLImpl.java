@@ -18,10 +18,10 @@ package com.google.android.gles_jni;
 
 import javax.microedition.khronos.egl.*;
 
+import android.graphics.SurfaceTexture;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder;
-import android.view.View;
 
 public class EGLImpl implements EGL10 {
     private EGLContextImpl mContext = new EGLContextImpl(-1);
@@ -71,19 +71,28 @@ public class EGLImpl implements EGL10 {
     }
 
     public EGLSurface eglCreateWindowSurface(EGLDisplay display, EGLConfig config, Object native_window, int[] attrib_list) {
-        Surface sur;
+        Surface sur = null;
         if (native_window instanceof SurfaceView) {
             SurfaceView surfaceView = (SurfaceView)native_window;
             sur = surfaceView.getHolder().getSurface();
         } else if (native_window instanceof SurfaceHolder) {
             SurfaceHolder holder = (SurfaceHolder)native_window;
             sur = holder.getSurface();
+        }
+
+        int eglSurfaceId;
+        if (sur != null) {
+            eglSurfaceId = _eglCreateWindowSurface(display, config, sur, attrib_list);
+        } else if (native_window instanceof SurfaceTexture) {
+            eglSurfaceId = _eglCreateWindowSurfaceTexture(display, config,
+                    ((SurfaceTexture) native_window).mSurfaceTexture, attrib_list);
         } else {
             throw new java.lang.UnsupportedOperationException(
                 "eglCreateWindowSurface() can only be called with an instance of " +
-                "SurfaceView or SurfaceHolder at the moment, this will be fixed later.");
+                "SurfaceView, SurfaceHolder or SurfaceTexture at the moment, " + 
+                "this will be fixed later.");
         }
-        int eglSurfaceId = _eglCreateWindowSurface(display, config, sur, attrib_list);
+
         if (eglSurfaceId == 0) {
             return EGL10.EGL_NO_SURFACE;
         }
@@ -134,6 +143,7 @@ public class EGLImpl implements EGL10 {
     private native int _eglCreatePbufferSurface(EGLDisplay display, EGLConfig config, int[] attrib_list);
     private native void _eglCreatePixmapSurface(EGLSurface sur, EGLDisplay display, EGLConfig config, Object native_pixmap, int[] attrib_list);
     private native int _eglCreateWindowSurface(EGLDisplay display, EGLConfig config, Object native_window, int[] attrib_list);
+    private native int _eglCreateWindowSurfaceTexture(EGLDisplay display, EGLConfig config, int native_window, int[] attrib_list);
     private native int _eglGetDisplay(Object native_display);
     private native int _eglGetCurrentContext();
     private native int _eglGetCurrentDisplay();

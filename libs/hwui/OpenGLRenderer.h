@@ -465,7 +465,8 @@ private:
     void setupDrawSimpleMesh();
     void setupDrawTexture(GLuint texture);
     void setupDrawExternalTexture(GLuint texture);
-    void setupDrawTextureTransform(mat4& transform);
+    void setupDrawTextureTransform();
+    void setupDrawTextureTransformUniforms(mat4& transform);
     void setupDrawMesh(GLvoid* vertices, GLvoid* texCoords = NULL, GLuint vbo = 0);
     void setupDrawVertices(GLvoid* vertices);
     void setupDrawAALine(GLvoid* vertices, GLvoid* distanceCoords, float strokeWidth);

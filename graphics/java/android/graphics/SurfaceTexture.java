@@ -34,8 +34,9 @@ import android.os.Message;
  * the stream to be skipped.
  *
  * <p>When sampling from the texture one should first transform the texture coordinates using the
- * matrix queried via {@link #getTransformMatrix}.  The transform matrix may change each time {@link
- * #updateTexImage} is called, so it should be re-queried each time the texture image is updated.
+ * matrix queried via {@link #getTransformMatrix(float[])}.  The transform matrix may change each
+ * time {@link #updateTexImage} is called, so it should be re-queried each time the texture image
+ * is updated.
  * This matrix transforms traditional 2D OpenGL ES texture coordinate column vectors of the form (s,
  * t, 0, 1) where s and t are on the inclusive interval [0, 1] to the proper sampling location in
  * the streamed texture.  This transform compensates for any properties of the image stream source
@@ -63,8 +64,13 @@ public class SurfaceTexture {
     private EventHandler mEventHandler;
     private OnFrameAvailableListener mOnFrameAvailableListener;
 
-    @SuppressWarnings("unused")
-    private int mSurfaceTexture;
+    /**
+     * This field is used by native code, do not access or modify.
+     * 
+     * @hide
+     */
+    @SuppressWarnings({"UnusedDeclaration"})
+    public int mSurfaceTexture;
 
     /**
      * Callback interface for being notified that a new stream frame is available.
@@ -176,10 +182,13 @@ public class SurfaceTexture {
             if (mOnFrameAvailableListener != null) {
                 mOnFrameAvailableListener.onFrameAvailable(SurfaceTexture.this);
             }
-            return;
         }
     }
 
+    /**
+     * This method is invoked from native code only.
+     */
+    @SuppressWarnings({"UnusedDeclaration"})
     private static void postEventFromNative(Object selfRef) {
         WeakReference weakSelf = (WeakReference)selfRef;
         SurfaceTexture st = (SurfaceTexture)weakSelf.get();

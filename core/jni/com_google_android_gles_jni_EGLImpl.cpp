@@ -27,6 +27,9 @@
 #include <SkBitmap.h>
 #include <SkPixelRef.h>
 
+#include <gui/SurfaceTexture.h>
+#include <gui/SurfaceTextureClient.h>
+
 namespace android {
 
 static jclass gConfig_class;
@@ -319,6 +322,35 @@ not_valid_surface:
     return (jint)sur;
 }
 
+static jint jni_eglCreateWindowSurfaceTexture(JNIEnv *_env, jobject _this, jobject display,
+        jobject config, jint native_window, jintArray attrib_list) {
+    if (display == NULL || config == NULL
+        || !validAttribList(_env, attrib_list)) {
+        jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
+        return JNI_FALSE;
+    }
+    EGLDisplay dpy = getDisplay(_env, display);
+    EGLContext cnf = getConfig(_env, config);
+    sp<ANativeWindow> window;
+    if (native_window == 0) {
+not_valid_surface:
+        jniThrowException(_env, "java/lang/IllegalArgumentException",
+                "Make sure the SurfaceTexture is valid");
+        return 0;
+    }
+    
+    sp<SurfaceTexture> surfaceTexture = reinterpret_cast<SurfaceTexture*>(native_window);
+
+    window = new SurfaceTextureClient(surfaceTexture);
+    if (window == NULL)
+        goto not_valid_surface;
+
+    jint* base = beginNativeAttribList(_env, attrib_list);
+    EGLSurface sur = eglCreateWindowSurface(dpy, cnf, window.get(), base);
+    endNativeAttributeList(_env, attrib_list, base);
+    return (jint)sur;
+}
+
 static jboolean jni_eglGetConfigAttrib(JNIEnv *_env, jobject _this, jobject display,
         jobject config, jint attribute, jintArray value) {
     if (display == NULL || config == NULL
@@ -508,6 +540,7 @@ static JNINativeMethod methods[] = {
 {"_eglCreatePbufferSurface","(" DISPLAY CONFIG "[I)I", (void*)jni_eglCreatePbufferSurface },
 {"_eglCreatePixmapSurface", "(" SURFACE DISPLAY CONFIG OBJECT "[I)V", (void*)jni_eglCreatePixmapSurface },
 {"_eglCreateWindowSurface", "(" DISPLAY CONFIG OBJECT "[I)I", (void*)jni_eglCreateWindowSurface },
+{"_eglCreateWindowSurfaceTexture", "(" DISPLAY CONFIG "I[I)I", (void*)jni_eglCreateWindowSurfaceTexture },
 {"eglDestroyContext",      "(" DISPLAY CONTEXT ")Z", (void*)jni_eglDestroyContext },
 {"eglDestroySurface",      "(" DISPLAY SURFACE ")Z", (void*)jni_eglDestroySurface },
 {"eglMakeCurrent",         "(" DISPLAY SURFACE SURFACE CONTEXT")Z", (void*)jni_eglMakeCurrent },

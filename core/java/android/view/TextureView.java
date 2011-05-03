@@ -73,6 +73,10 @@ import android.util.Log;
  *              // Something bad happened
  *          }
  *      }
+ *      
+ *      public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+ *          // Ignored, Camera does all the work for us
+ *      }
  *  }
  * </pre>
  * 
@@ -90,8 +94,6 @@ public class TextureView extends View {
     private HardwareLayer mLayer;
     private SurfaceTexture mSurface;
     private SurfaceTextureListener mListener;
-    
-    private final float[] mTextureTransform = new float[16];
 
     private final Runnable mUpdateLayerAction = new Runnable() {
         @Override
@@ -99,6 +101,7 @@ public class TextureView extends View {
             updateLayer();
         }
     };
+    private SurfaceTexture.OnFrameAvailableListener mUpdateListener;
 
     /**
      * Creates a new TextureView.
@@ -210,6 +213,14 @@ public class TextureView extends View {
     }
 
     @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        if (mSurface != null) {
+            nSetDefaultBufferSize(mSurface.mSurfaceTexture, getWidth(), getHeight());
+        }
+    }
+
+    @Override
     HardwareLayer getHardwareLayer() {
         if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
             return null;
@@ -218,15 +229,17 @@ public class TextureView extends View {
         if (mLayer == null) {
             mLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer();
             mSurface = mAttachInfo.mHardwareRenderer.createSuraceTexture(mLayer);
+            nSetDefaultBufferSize(mSurface.mSurfaceTexture, getWidth(), getHeight());
 
-            mSurface.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
+            mUpdateListener = new SurfaceTexture.OnFrameAvailableListener() {
                 @Override
                 public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                     // Per SurfaceTexture's documentation, the callback may be invoked
                     // from an arbitrary thread
                     post(mUpdateLayerAction);
                 }
-            });
+            };
+            mSurface.setOnFrameAvailableListener(mUpdateListener);
 
             if (mListener != null) {
                 mListener.onSurfaceTextureAvailable(mSurface);
@@ -236,16 +249,29 @@ public class TextureView extends View {
         return mLayer;
     }
 
+    @Override
+    protected void onVisibilityChanged(View changedView, int visibility) {
+        super.onVisibilityChanged(changedView, visibility);
+
+        if (mSurface != null) {
+            // When the view becomes invisible, stop updating it, it's a waste of CPU
+            // To cancel updates, the easiest thing to do is simply to remove the
+            // updates listener
+            if (visibility == VISIBLE) {
+                mSurface.setOnFrameAvailableListener(mUpdateListener);
+                updateLayer();
+            } else {
+                mSurface.setOnFrameAvailableListener(null);
+            }
+        }
+    }
+
     private void updateLayer() {
         if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
             return;
         }
 
-        mSurface.updateTexImage();
-        mSurface.getTransformMatrix(mTextureTransform);
-
-        mAttachInfo.mHardwareRenderer.updateTextureLayer(mLayer, getWidth(), getHeight(),
-                mTextureTransform);
+        mAttachInfo.mHardwareRenderer.updateTextureLayer(mLayer, getWidth(), getHeight(), mSurface);
 
         invalidate();
     }
@@ -292,5 +318,17 @@ public class TextureView extends View {
          *                {@link android.view.TextureView#getSurfaceTexture()}
          */
         public void onSurfaceTextureAvailable(SurfaceTexture surface);
+
+        /**
+         * Invoked when the {@link SurfaceTexture}'s buffers size changed.
+         * 
+         * @param surface The surface returned by
+         *                {@link android.view.TextureView#getSurfaceTexture()}
+         * @param width The new width of the surface
+         * @param height The new height of the surface
+         */
+        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height);
     }
+
+    private static native void nSetDefaultBufferSize(int surfaceTexture, int width, int height);
 }

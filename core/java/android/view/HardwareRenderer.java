@@ -202,11 +202,10 @@ public abstract class HardwareRenderer {
      * @param layer The hardware layer to update
      * @param width The layer's width
      * @param height The layer's height
-     * @param textureTransform A 4x4 column-first transform matrix to apply to
-     *        texture coordinates
+     * @param surface The surface to update
      */
     abstract void updateTextureLayer(HardwareLayer layer, int width, int height,
-            float[] textureTransform);    
+            SurfaceTexture surface);    
     
     /**
      * Initializes the hardware renderer for the specified surface and setup the
@@ -906,8 +905,8 @@ public abstract class HardwareRenderer {
 
         @Override
         void updateTextureLayer(HardwareLayer layer, int width, int height,
-                float[] textureTransform) {
-            ((GLES20TextureLayer) layer).update(width, height, textureTransform);
+                SurfaceTexture surface) {
+            ((GLES20TextureLayer) layer).update(width, height, surface.mSurfaceTexture);
         }
 
         static HardwareRenderer create(boolean translucent) {
