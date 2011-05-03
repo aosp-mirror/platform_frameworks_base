@@ -157,8 +157,7 @@ void printPlaybackFuncs(FILE *f, const char *prefix) {
 static int hasInlineDataPointers(const ApiEntry * api) {
     int ret = 0;
     int ct;
-    // Temporarly disable inbanding while we sort though the bugs.
-    if (1|| api->sync || api->ret.typeName[0]) {
+    if (api->sync || api->ret.typeName[0]) {
         return 0;
     }
     for (ct=0; ct < api->paramCount; ct++) {
@@ -229,7 +228,7 @@ void printApiCpp(FILE *f) {
             fprintf(f, ");\n");
         } else {
             fprintf(f, "    ThreadIO *io = &((Context *)rsc)->mIO;\n");
-            fprintf(f, "    uint32_t size = sizeof(RS_CMD_%s);\n", api->name);
+            fprintf(f, "    const uint32_t size = sizeof(RS_CMD_%s);\n", api->name);
             if (hasInlineDataPointers(api)) {
                 fprintf(f, "    uint32_t dataSize = 0;\n");
                 for (ct2=0; ct2 < api->paramCount; ct2++) {
@@ -242,10 +241,15 @@ void printApiCpp(FILE *f) {
 
             //fprintf(f, "    LOGE(\"add command %s\\n\");\n", api->name);
             if (hasInlineDataPointers(api)) {
-                fprintf(f, "    RS_CMD_%s *cmd = static_cast<RS_CMD_%s *>(io->mToCore.reserve(dataSize + sizeof(RS_CMD_%s)));\n", api->name, api->name, api->name);
+                fprintf(f, "    RS_CMD_%s *cmd = NULL;\n", api->name);
+                fprintf(f, "    if (dataSize < 1024) {;\n");
+                fprintf(f, "        cmd = static_cast<RS_CMD_%s *>(io->mToCore.reserve(dataSize + size));\n", api->name);
+                fprintf(f, "    } else {\n");
+                fprintf(f, "        cmd = static_cast<RS_CMD_%s *>(io->mToCore.reserve(size));\n", api->name);
+                fprintf(f, "    }\n");
                 fprintf(f, "    uint8_t *payload = (uint8_t *)&cmd[1];\n");
             } else {
-                fprintf(f, "    RS_CMD_%s *cmd = static_cast<RS_CMD_%s *>(io->mToCore.reserve(sizeof(RS_CMD_%s)));\n", api->name, api->name, api->name);
+                fprintf(f, "    RS_CMD_%s *cmd = static_cast<RS_CMD_%s *>(io->mToCore.reserve(size));\n", api->name, api->name);
             }
 
             for (ct2=0; ct2 < api->paramCount; ct2++) {
