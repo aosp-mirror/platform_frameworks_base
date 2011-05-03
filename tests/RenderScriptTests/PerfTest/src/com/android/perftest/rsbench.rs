@@ -109,11 +109,11 @@ static void setupOffscreenTarget() {
 static void displayFontSamples(int fillNum) {
 
     rs_font fonts[5];
-    rsSetObject(&fonts[0], gFontSans);
-    rsSetObject(&fonts[1], gFontSerif);
-    rsSetObject(&fonts[2], gFontSerifBold);
-    rsSetObject(&fonts[3], gFontSerifBoldItalic);
-    rsSetObject(&fonts[4], gFontSans);
+    fonts[0] = gFontSans;
+    fonts[1] = gFontSerif;
+    fonts[2] = gFontSerifBold;
+    fonts[3] = gFontSerifBoldItalic;
+    fonts[4] = gFontSans;
 
     uint width = gRenderSurfaceW;
     uint height = gRenderSurfaceH;
@@ -139,10 +139,6 @@ static void displayFontSamples(int fillNum) {
                 yPos += textHeight;
             }
         }
-    }
-
-    for (int i = 0; i < 5; i ++) {
-        rsClearObject(&fonts[i]);
     }
 }
 

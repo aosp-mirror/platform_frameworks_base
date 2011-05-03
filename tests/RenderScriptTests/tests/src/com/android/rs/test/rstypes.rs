@@ -48,17 +48,17 @@ static bool basic_test(uint32_t index) {
 
     struct my_struct structTest;
 
-    rsSetObject(&fontTestLocal, fontTest);
+    fontTestLocal = fontTest;
     //allocationTestLocal = allocationTest;
 
-    rsSetObject(&fontTest, fontTestLocal);
+    fontTest = fontTestLocal;
     //allocationTest = allocationTestLocal;
 
     /*for (int i = 0; i < 4; i++) {
-        rsSetObject(&fontTestLocalArray[i], fontTestLocal);
+        fontTestLocalArray[i] = fontTestLocal;
     }*/
 
-    /*rsSetObject(&fontTest, fontTestLocalArray[3]);*/
+    /*fontTest = fontTestLocalArray[3];*/
 
     return failed;
 }
