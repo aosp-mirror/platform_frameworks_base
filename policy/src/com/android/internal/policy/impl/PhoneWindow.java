@@ -2592,6 +2592,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         final ActionBarContainer splitView = (ActionBarContainer) findViewById(
                                 com.android.internal.R.id.split_action_bar);
                         if (splitView != null) {
+                            splitView.setVisibility(View.VISIBLE);
                             mActionBar.setSplitActionBar(splitActionBar);
                             mActionBar.setSplitView(splitView);
 

@@ -396,7 +396,10 @@ public class ActionBarImpl extends ActionBar {
         int selectedTabPosition = mSelectedTab != null
                 ? mSelectedTab.getPosition() : mSavedTabPosition;
         mActionView.removeTabAt(position);
-        mTabs.remove(position);
+        TabImpl removedTab = mTabs.remove(position);
+        if (removedTab != null) {
+            removedTab.setPosition(-1);
+        }
 
         final int newTabCount = mTabs.size();
         for (int i = position; i < newTabCount; i++) {
@@ -670,7 +673,7 @@ public class ActionBarImpl extends ActionBar {
         private Object mTag;
         private Drawable mIcon;
         private CharSequence mText;
-        private int mPosition;
+        private int mPosition = -1;
         private View mCustomView;
 
         @Override
@@ -702,6 +705,7 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public Tab setCustomView(View view) {
             mCustomView = view;
+            if (mPosition >= 0) mActionView.updateTab(mPosition);
             return this;
         }
 
@@ -732,6 +736,7 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public Tab setIcon(Drawable icon) {
             mIcon = icon;
+            if (mPosition >= 0) mActionView.updateTab(mPosition);
             return this;
         }
 
@@ -743,6 +748,7 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public Tab setText(CharSequence text) {
             mText = text;
+            if (mPosition >= 0) mActionView.updateTab(mPosition);
             return this;
         }
 
