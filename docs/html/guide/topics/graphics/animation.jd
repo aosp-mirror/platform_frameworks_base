@@ -903,7 +903,7 @@ For more information on creating animators, see the sections on animating with
     <code>"floatType"</code> unless you specify something else or if the <code>valuesFrom</code>
     and <code>valuesTo</code> values are colors.</dd>
 
-    <dt><code>android:startDelay</code></dt>
+    <dt><code>android:startOffset</code></dt>
 
     <dd>The delay, in milliseconds, before the animation begins playing (after calling {@link
     android.animation.ValueAnimator#start start()}).</dd>
