@@ -432,5 +432,12 @@ public class MediaMetadataRetriever
      * This key retrieves the average bitrate (in bits/sec), if available.
      */
     public static final int METADATA_KEY_BITRATE         = 20;
+    /**
+     * This key retrieves the language code of text tracks, if available.
+     * If multiple text tracks present, the return value will look like:
+     * "eng:chi"
+     * @hide
+     */
+    public static final int METADATA_KEY_TIMED_TEXT_LANGUAGES      = 21;
     // Add more here...
 }

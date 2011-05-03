@@ -44,6 +44,8 @@ struct ARTSPController;
 class DrmManagerClinet;
 class DecryptHandle;
 
+class TimedTextPlayer;
+
 struct AwesomeRenderer : public RefBase {
     AwesomeRenderer() {}
 
@@ -99,36 +101,41 @@ struct AwesomePlayer {
     void postAudioEOS(int64_t delayUs = 0ll);
     void postAudioSeekComplete();
 
+    status_t setTimedTextTrackIndex(int32_t index);
+
 private:
     friend struct AwesomeEvent;
     friend struct PreviewPlayer;
 
     enum {
-        PLAYING             = 1,
-        LOOPING             = 2,
-        FIRST_FRAME         = 4,
-        PREPARING           = 8,
-        PREPARED            = 16,
-        AT_EOS              = 32,
-        PREPARE_CANCELLED   = 64,
-        CACHE_UNDERRUN      = 128,
-        AUDIO_AT_EOS        = 256,
-        VIDEO_AT_EOS        = 512,
-        AUTO_LOOPING        = 1024,
+        PLAYING             = 0x01,
+        LOOPING             = 0x02,
+        FIRST_FRAME         = 0x04,
+        PREPARING           = 0x08,
+        PREPARED            = 0x10,
+        AT_EOS              = 0x20,
+        PREPARE_CANCELLED   = 0x40,
+        CACHE_UNDERRUN      = 0x80,
+        AUDIO_AT_EOS        = 0x0100,
+        VIDEO_AT_EOS        = 0x0200,
+        AUTO_LOOPING        = 0x0400,
 
         // We are basically done preparing but are currently buffering
         // sufficient data to begin playback and finish the preparation phase
         // for good.
-        PREPARING_CONNECTED = 2048,
+        PREPARING_CONNECTED = 0x0800,
 
         // We're triggering a single video event to display the first frame
         // after the seekpoint.
-        SEEK_PREVIEW        = 4096,
+        SEEK_PREVIEW        = 0x1000,
 
-        AUDIO_RUNNING       = 8192,
-        AUDIOPLAYER_STARTED = 16384,
+        AUDIO_RUNNING       = 0x2000,
+        AUDIOPLAYER_STARTED = 0x4000,
 
-        INCOGNITO           = 32768,
+        INCOGNITO           = 0x8000,
+
+        TEXT_RUNNING        = 0x10000,
+        TEXTPLAYER_STARTED  = 0x20000,
     };
 
     mutable Mutex mLock;
@@ -222,6 +229,7 @@ private:
     sp<DecryptHandle> mDecryptHandle;
 
     int64_t mLastVideoTimeUs;
+    TimedTextPlayer *mTextPlayer;
 
     status_t setDataSource_l(
             const char *uri,
@@ -243,6 +251,8 @@ private:
 
     void setVideoSource(sp<MediaSource> source);
     status_t initVideoDecoder(uint32_t flags = 0);
+
+    void addTextSource(sp<MediaSource> source);
 
     void onStreamDone();
 

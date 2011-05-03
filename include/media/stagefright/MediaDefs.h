@@ -49,6 +49,8 @@ extern const char *MEDIA_MIMETYPE_CONTAINER_AVI;
 
 extern const char *MEDIA_MIMETYPE_CONTAINER_WVM;
 
+extern const char *MEDIA_MIMETYPE_TEXT_3GPP;
+
 }  // namespace android
 
 #endif  // MEDIA_DEFS_H_

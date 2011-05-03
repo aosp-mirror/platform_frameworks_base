@@ -1227,6 +1227,15 @@ public class MediaPlayer
      */
     public native void attachAuxEffect(int effectId);
 
+    /* Do not change these values without updating their counterparts
+     * in include/media/mediaplayer.h!
+     */
+    /**
+     * Key used in setParameter method.
+     * Indicates the index of the timed text track to be enabled/disabled
+     */
+    private static final int KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX = 1000;
+
     /**
      * Sets the parameter indicated by key.
      * @param key key indicates the parameter to be set.
@@ -1358,6 +1367,36 @@ public class MediaPlayer
     private static native final void native_init();
     private native final void native_setup(Object mediaplayer_this);
     private native final void native_finalize();
+
+    /**
+     * @param index The index of the text track to be turned on.
+     * @return true if the text track is enabled successfully.
+     * {@hide}
+     */
+    public boolean enableTimedTextTrackIndex(int index) {
+        if (index < 0) {
+            return false;
+        }
+        return setParameter(KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX, index);
+    }
+
+    /**
+     * Enables the first timed text track if any.
+     * @return true if the text track is enabled successfully
+     * {@hide}
+     */
+    public boolean enableTimedText() {
+        return enableTimedTextTrackIndex(0);
+    }
+
+    /**
+     * Disables timed text display.
+     * @return true if the text track is disabled successfully.
+     * {@hide}
+     */
+    public boolean disableTimedText() {
+        return setParameter(KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX, -1);
+    }
 
     /**
      * @param reply Parcel with audio/video duration info for battery

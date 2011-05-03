@@ -48,6 +48,7 @@ LOCAL_SRC_FILES:=                         \
         ThrottledSource.cpp               \
         TimeSource.cpp                    \
         TimedEventQueue.cpp               \
+        TimedTextPlayer.cpp               \
         Utils.cpp                         \
         VBRISeeker.cpp                    \
         WAVExtractor.cpp                  \

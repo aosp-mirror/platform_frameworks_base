@@ -52,6 +52,7 @@ enum {
     METADATA_KEY_VIDEO_WIDTH     = 18,
     METADATA_KEY_VIDEO_HEIGHT    = 19,
     METADATA_KEY_BITRATE         = 20,
+    METADATA_KEY_TIMED_TEXT_LANGUAGES      = 21,
 
     // Add more here...
 };

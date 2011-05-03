@@ -47,4 +47,6 @@ const char *MEDIA_MIMETYPE_CONTAINER_AVI = "video/avi";
 
 const char *MEDIA_MIMETYPE_CONTAINER_WVM = "video/wvm";
 
+const char *MEDIA_MIMETYPE_TEXT_3GPP = "text/3gpp-tt";
+
 }  // namespace android
