@@ -84,6 +84,16 @@
         <group gid="diag" />
     </permission>
 
+    <!-- Group that can read detailed network usage statistics -->
+    <permission name="android.permission.READ_NETWORK_USAGE_HISTORY">
+        <group gid="net_bw_stats" />
+    </permission>
+
+    <!-- Group that can modify how network statistics are accounted -->
+    <permission name="android.permission.MODIFY_NETWORK_ACCOUNTING">
+        <group gid="net_bw_acct" />
+    </permission>
+
     <!-- ================================================================== -->
     <!-- ================================================================== -->
     <!-- ================================================================== -->
