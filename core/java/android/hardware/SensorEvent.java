@@ -253,6 +253,23 @@ public class SensorEvent {
      *  <p>Elements of the rotation vector are unitless.
      *  The x,y, and z axis are defined in the same way as the acceleration
      *  sensor.</p>
+     *  The reference coordinate system is defined as a direct orthonormal basis,
+     *  where:
+     * </p>
+     *
+     * <ul>
+     * <li>X is defined as the vector product <b>Y.Z</b> (It is tangential to
+     * the ground at the device's current location and roughly points East).</li>
+     * <li>Y is tangential to the ground at the device's current location and
+     * points towards the magnetic North Pole.</li>
+     * <li>Z points towards the sky and is perpendicular to the ground.</li>
+     * </ul>
+     *
+     * <p>
+     * <center><img src="../../../images/axis_globe.png"
+     * alt="World coordinate-system diagram." border="0" /></center>
+     * </p>
+     *
      * <ul>
      * <p>
      * values[0]: x*sin(&#952/2)
