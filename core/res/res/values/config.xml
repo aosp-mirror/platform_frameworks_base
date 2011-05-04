@@ -144,17 +144,20 @@
          attributes.  This is used by the connectivity manager to decide which networks can coexist
          based on the hardware -->
     <!-- An Array of "[Connection name],[ConnectivityManager connection type],
-         [associated radio-type],[priority],[dependencyMet]  -->
-    <!-- the 5th element indicates boot-time dependency-met value. -->
+         [associated radio-type],[priority],[restoral-timer(ms)],[dependencyMet]  -->
+    <!-- the 5th element "resore-time" indicates the number of milliseconds to delay
+         before automatically restore the default connection.  Set -1 if the connection
+         does not require auto-restore. -->
+    <!-- the 6th element indicates boot-time dependency-met value. -->
     <string-array translatable="false" name="networkAttributes">
         <item>"wifi,1,1,1,true"</item>
         <item>"mobile,0,0,0,true"</item>
-        <item>"mobile_mms,2,0,2,true"</item>
-        <item>"mobile_supl,3,0,2,true"</item>
-        <item>"mobile_hipri,5,0,3,true"</item>
-        <item>"mobile_fota,10,0,2,true"</item>
-        <item>"mobile_ims,11,0,2,true"</item>
-        <item>"mobile_cbs,12,0,2,true"</item>
+        <item>"mobile_mms,2,0,2,60000,true"</item>
+        <item>"mobile_supl,3,0,2,60000,true"</item>
+        <item>"mobile_hipri,5,0,3,60000,true"</item>
+        <item>"mobile_fota,10,0,2,60000,true"</item>
+        <item>"mobile_ims,11,0,2,60000,true"</item>
+        <item>"mobile_cbs,12,0,2,60000,true"</item>
     </string-array>
 
     <!-- This string array should be overridden by the device to present a list of radio
