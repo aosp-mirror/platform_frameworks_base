@@ -52,7 +52,7 @@ Android Market within a 14-day period ending on the data collection date noted b
 <div class="dashboard-panel">
 
 <img alt="" height="250" width="460"
-src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:2.7,3.5,27.2,63.9,0.8,1.7,0.2&chl=Android%201.5|Android%201.6|Android%202.1|Android%202.2|Android%202.3|Android%202.3.3|Android%203.0&chco=c4df9b,6fad0c" />
+src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:2.3,3.0,24.5,65.9,1.0,3.0,0.3&chl=Android%201.5|Android%201.6|Android%202.1|Android%202.2|Android%202.3|Android%202.3.3|Android%203.0&chco=c4df9b,6fad0c" />
 
 <table>
 <tr>
@@ -60,16 +60,16 @@ src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:2.7,3.5,27.2,63
   <th>API Level</th>
   <th>Distribution</th>
 </tr>
-<tr><td>Android 1.5</td><td>3</td><td>2.7%</td></tr> 
-<tr><td>Android 1.6</td><td>4</td><td>3.5%</td></tr> 
-<tr><td>Android 2.1</td><td>7</td><td>27.2%</td></tr> 
-<tr><td>Android 2.2</td><td>8</td><td>63.9%</td></tr> 
-<tr><td>Android 2.3</td><td>9</td><td>0.8%</td></tr> 
-<tr><td>Android 2.3.3</td><td>10</td><td>1.7%</td></tr> 
-<tr><td>Android 3.0</td><td>11</td><td>0.2%</td></tr> 
+<tr><td>Android 1.5</td><td>3</td><td>2.3%</td></tr> 
+<tr><td>Android 1.6</td><td>4</td><td>3.0%</td></tr> 
+<tr><td>Android 2.1</td><td>7</td><td>24.5%</td></tr> 
+<tr><td>Android 2.2</td><td>8</td><td>65.9%</td></tr> 
+<tr><td>Android 2.3</td><td>9</td><td>1.0%</td></tr> 
+<tr><td>Android 2.3.3</td><td>10</td><td>3.0%</td></tr> 
+<tr><td>Android 3.0</td><td>11</td><td>0.3%</td></tr> 
 </table>
 
-<p><em>Data collected during two weeks ending on April 1, 2011</em></p>
+<p><em>Data collected during two weeks ending on May 2, 2011</em></p>
 <!--
 <p style="font-size:.9em">* <em>Other: 0.1% of devices running obsolete versions</em></p>
 -->
@@ -98,9 +98,9 @@ Android Market within a 14-day period ending on the date indicated on the x-axis
 <div class="dashboard-panel">
 
 <img alt="" height="250" width="660" style="padding:5px;background:#fff"
-src="http://chart.apis.google.com/chart?&cht=lc&chs=660x250&chxt=x,x,y,r&chxr=0,0,12|1,0,12|2,0,100|3,0,100&chxl=0%3A%7C10/01%7C10/15%7C11/01%7C11/15%7C12/01%7C12/15%7C01/01%7C01/15%7C02/01%7C02/15%7C03/01%7C03/15%7C04/01%7C1%3A%7C2010%7C%7C%7C%7C%7C%7C2011%7C%7C%7C%7C%7C%7C2011%7C2%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25%7C3%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25&chxp=0,0,1,2,3,4,5,6,7,8,9,10,11,12&chxtc=0,5&chd=t:99.9,99.9,100.0,99.9,99.8,99.7,100.0,99.9,99.9,99.9,100.0,99.8,99.7|90.2,91.1,92.0,92.7,93.4,94.1,95.2,95.6,96.0,96.3,96.7,96.8,97.0|73.8,75.3,77.4,79.6,82.2,84.4,87.2,88.3,89.7,90.5,91.5,92.0,93.5|33.4,34.5,37.1,40.5,44.3,47.7,51.8,54.3,58.3,59.7,61.5,63.0,66.3|0.0,0.0,0.0,0.0,0.0,0.0,0.4,0.6,0.7,0.8,1.1,1.7,2.5|0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.7&chm=b,c3df9b,0,1,0|tAndroid 1.6,689326,1,0,15,,t::-5|b,b4db77,1,2,0|tAndroid 2.1,547a19,2,0,15,,t::-5|b,a5db51,2,3,0|tAndroid 2.2,3f5e0e,3,0,15,,t::-5|b,96dd28,3,4,0|b,83c916,4,5,0|B,6fad0c,5,6,0&chg=7,25&chdl=Android 1.5|Android 1.6|Android 2.1|Android 2.2|Android 2.3|Android 2.3.3&chco=add274,9dd14f,8ece2a,7ab61c,659b11,507d08" />
+src="http://chart.apis.google.com/chart?&cht=lc&chs=660x250&chxt=x,x,y,r&chxr=0,0,12|1,0,12|2,0,100|3,0,100&chxl=0%3A%7C11/01%7C11/15%7C12/01%7C12/15%7C01/01%7C01/15%7C02/01%7C02/15%7C03/01%7C03/15%7C04/01%7C04/15%7C05/01%7C1%3A%7C2010%7C%7C%7C%7C2011%7C%7C%7C%7C%7C%7C%7C%7C2011%7C2%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25%7C3%3A%7C0%25%7C25%25%7C50%25%7C75%25%7C100%25&chxp=0,0,1,2,3,4,5,6,7,8,9,10,11,12&chxtc=0,5&chd=t:100.0,99.9,99.8,99.7,100.0,99.9,99.9,99.9,100.0,99.8,99.7,99.6,99.6|92.0,92.7,93.4,94.1,95.2,95.6,96.0,96.3,96.7,96.8,97.0,97.1,97.3|77.4,79.6,82.2,84.4,87.2,88.3,89.7,90.5,91.5,92.0,93.5,93.9,94.3|37.1,40.5,44.3,47.7,51.8,54.3,58.3,59.7,61.5,63.0,66.4,68.0,69.8|0.0,0.0,0.0,0.0,0.4,0.6,0.7,0.8,1.1,1.7,2.5,3.1,4.0|0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1.0,1.7,2.2,3.0&chm=b,c3df9b,0,1,0|tAndroid 1.6,689326,1,0,15,,t::-5|b,b4db77,1,2,0|tAndroid 2.1,547a19,2,0,15,,t::-5|b,a5db51,2,3,0|tAndroid 2.2,3f5e0e,3,0,15,,t::-5|b,96dd28,3,4,0|b,83c916,4,5,0|B,6fad0c,5,6,0&chg=7,25&chdl=Android 1.5|Android 1.6|Android 2.1|Android 2.2|Android 2.3|Android 2.3.3&chco=add274,9dd14f,8ece2a,7ab61c,659b11,507d08" />
 
-<p><em>Last historical dataset collected during two weeks ending on April 1, 2011</em></p>
+<p><em>Last historical dataset collected during two weeks ending on May 2, 2011</em></p>
 
 
 </div><!-- end dashboard-panel -->
