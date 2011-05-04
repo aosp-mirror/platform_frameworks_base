@@ -50,6 +50,13 @@ public class NetworkConfig {
     public boolean dependencyMet;
 
     /**
+     * indicates the default restoral timer in seconds
+     * if the network is used as a special network feature
+     * -1 indicates no restoration of default
+     */
+    public int restoreTime;
+
+    /**
      * input string from config.xml resource.  Uses the form:
      * [Connection name],[ConnectivityManager connection type],
      * [associated radio-type],[priority],[dependencyMet]
@@ -60,7 +67,8 @@ public class NetworkConfig {
         type = Integer.parseInt(fragments[1]);
         radio = Integer.parseInt(fragments[2]);
         priority = Integer.parseInt(fragments[3]);
-        dependencyMet = Boolean.parseBoolean(fragments[4]);
+        restoreTime = Integer.parseInt(fragments[4]);
+        dependencyMet = Boolean.parseBoolean(fragments[5]);
     }
 
     /**
