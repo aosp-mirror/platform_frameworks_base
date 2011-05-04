@@ -21,9 +21,8 @@ package android.media;
  */
 public interface MediaScannerClient
 {    
-    public void scanFile(String path, long lastModified, long fileSize, boolean isDirectory);
-
-    public void addNoMediaFolder(String path);
+    public void scanFile(String path, long lastModified, long fileSize,
+            boolean isDirectory, boolean noMedia);
 
     /**
      * Called by native code to return metadata extracted from media files.
