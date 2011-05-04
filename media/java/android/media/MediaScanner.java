@@ -347,7 +347,6 @@ public class MediaScanner
     private BitmapFactory.Options mBitmapOptions = new BitmapFactory.Options();
 
     private static class FileCacheEntry {
-        Uri mTableUri;
         long mRowId;
         String mPath;
         long mLastModified;
@@ -355,8 +354,7 @@ public class MediaScanner
         boolean mSeenInFileSystem;
         boolean mLastModifiedChanged;
 
-        FileCacheEntry(Uri tableUri, long rowId, String path, long lastModified, int format) {
-            mTableUri = tableUri;
+        FileCacheEntry(long rowId, String path, long lastModified, int format) {
             mRowId = rowId;
             mPath = path;
             mLastModified = lastModified;
@@ -367,7 +365,7 @@ public class MediaScanner
 
         @Override
         public String toString() {
-            return mPath + " mTableUri: " + mTableUri + " mRowId: " + mRowId;
+            return mPath + " mRowId: " + mRowId;
         }
     }
 
@@ -491,23 +489,10 @@ public class MediaScanner
             long delta = (entry != null) ? (lastModified - entry.mLastModified) : 0;
             boolean wasModified = delta > 1 || delta < -1;
             if (entry == null || wasModified) {
-                Uri tableUri;
-                if (isDirectory) {
-                    tableUri = mFilesUri;
-                } else if (MediaFile.isVideoFileType(mFileType)) {
-                    tableUri = mVideoUri;
-                } else if (MediaFile.isImageFileType(mFileType)) {
-                    tableUri = mImagesUri;
-                } else if (MediaFile.isAudioFileType(mFileType)) {
-                    tableUri = mAudioUri;
-                } else {
-                    tableUri = mFilesUri;
-                }
                 if (wasModified) {
                     entry.mLastModified = lastModified;
-                    entry.mTableUri = tableUri;
                 } else {
-                    entry = new FileCacheEntry(tableUri, 0, path, lastModified,
+                    entry = new FileCacheEntry(0, path, lastModified,
                             (isDirectory ? MtpConstants.FORMAT_ASSOCIATION : 0));
                     mFileCache.put(key, entry);
                 }
@@ -829,7 +814,14 @@ public class MediaScanner
                 }
             }
 
-            Uri tableUri = entry.mTableUri;
+            Uri tableUri = mFilesUri;
+            if (MediaFile.isVideoFileType(mFileType)) {
+                tableUri = mVideoUri;
+            } else if (MediaFile.isImageFileType(mFileType)) {
+                tableUri = mImagesUri;
+            } else if (MediaFile.isAudioFileType(mFileType)) {
+                tableUri = mAudioUri;
+            }
             Uri result = null;
             if (rowId == 0) {
                 if (mMtpObjectHandle != 0) {
@@ -1021,13 +1013,13 @@ public class MediaScanner
                         // Only consider entries with absolute path names.
                         // This allows storing URIs in the database without the
                         // media scanner removing them.
-                        if (path.startsWith("/")) {
+                        if (path != null && path.startsWith("/")) {
                             String key = path;
                             if (mCaseInsensitivePaths) {
                                 key = path.toLowerCase();
                             }
 
-                            FileCacheEntry entry = new FileCacheEntry(mFilesUri, rowId, path,
+                            FileCacheEntry entry = new FileCacheEntry(rowId, path,
                                     lastModified, format);
                             mFileCache.put(key, entry);
                         }
