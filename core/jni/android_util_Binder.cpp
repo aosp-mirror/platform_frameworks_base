@@ -282,6 +282,16 @@ protected:
             code, (int32_t)&data, (int32_t)reply, flags);
         jthrowable excep = env->ExceptionOccurred();
 
+        if (excep) {
+            report_exception(env, excep,
+                "*** Uncaught remote exception!  "
+                "(Exceptions are not yet supported across processes.)");
+            res = JNI_FALSE;
+
+            /* clean up JNI local ref -- we don't return to Java code */
+            env->DeleteLocalRef(excep);
+        }
+
         // Restore the Java binder thread's state if it changed while
         // processing a call (as it would if the Parcel's header had a
         // new policy mask and Parcel.enforceInterface() changed
@@ -294,14 +304,12 @@ protected:
             set_dalvik_blockguard_policy(env, strict_policy_before);
         }
 
-        if (excep) {
-            report_exception(env, excep,
-                "*** Uncaught remote exception!  "
-                "(Exceptions are not yet supported across processes.)");
-            res = JNI_FALSE;
-
+        jthrowable excep2 = env->ExceptionOccurred();
+        if (excep2) {
+            report_exception(env, excep2,
+                "*** Uncaught exception in onBinderStrictModePolicyChange");
             /* clean up JNI local ref -- we don't return to Java code */
-            env->DeleteLocalRef(excep);
+            env->DeleteLocalRef(excep2);
         }
 
         //aout << "onTransact to Java code; result=" << res << endl
