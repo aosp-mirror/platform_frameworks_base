@@ -45,7 +45,8 @@ public class NtpTrustedTime implements TrustedTime {
     /** {@inheritDoc} */
     public boolean forceRefresh() {
         if (mNtpServer == null) {
-            throw new IllegalStateException("Missing NTP server");
+            // missing server, so no trusted time available
+            return false;
         }
 
         final SntpClient client = new SntpClient();
