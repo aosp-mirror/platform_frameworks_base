@@ -17,7 +17,14 @@
 package com.android.perftest;
 
 import java.io.Writer;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 
+import android.os.Environment;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -36,9 +43,15 @@ import android.util.Log;
 
 public class RsBenchRS {
 
+    private static final String TAG = "RsBenchRS";
+
     int mWidth;
     int mHeight;
     int mLoops;
+    int mCurrentLoop;
+
+    int mBenchmarkDimX;
+    int mBenchmarkDimY;
 
     public RsBenchRS() {
     }
@@ -53,6 +66,9 @@ public class RsBenchRS {
         mMode = 0;
         mMaxModes = 0;
         mLoops = loops;
+        mCurrentLoop = 0;
+        mBenchmarkDimX = 1280;
+        mBenchmarkDimY = 720;
         initRS();
     }
 
@@ -120,10 +136,40 @@ public class RsBenchRS {
     int mMode;
     int mMaxModes;
 
+    String[] mTestNames;
+    float[] mLocalTestResults;
+
     public void onActionDown(int x, int y) {
         mMode ++;
         mMode = mMode % mMaxModes;
         mScript.set_gDisplayMode(mMode);
+    }
+
+    private void saveTestResults() {
+        String state = Environment.getExternalStorageState();
+        if (!Environment.MEDIA_MOUNTED.equals(state)) {
+            Log.v(TAG, "sdcard is read only");
+            return;
+        }
+        File sdCard = Environment.getExternalStorageDirectory();
+        if (!sdCard.canWrite()) {
+            Log.v(TAG, "ssdcard is read only");
+            return;
+        }
+
+        File resultFile = new File(sdCard, "rsbench_result" + mCurrentLoop + ".csv");
+        resultFile.setWritable(true, false);
+
+        try {
+            BufferedWriter results = new BufferedWriter(new FileWriter(resultFile));
+            for (int i = 0; i < mLocalTestResults.length; i ++) {
+                results.write(mTestNames[i] + ", " + mLocalTestResults[i] + ",\n");
+            }
+            results.close();
+            Log.v(TAG, "Saved results in: " + resultFile.getAbsolutePath());
+        } catch (IOException e) {
+            Log.v(TAG, "Unable to write result file " + e.getMessage());
+        }
     }
 
     /**
@@ -131,14 +177,25 @@ public class RsBenchRS {
      */
     protected RSMessageHandler mRsMessage = new RSMessageHandler() {
         public void run() {
-            if (mID == mScript.get_RS_MSG_TEST_DONE()) {
+            if (mID == mScript.get_RS_MSG_RESULTS_READY()) {
+                for (int i = 0; i < mLocalTestResults.length; i ++) {
+                    mLocalTestResults[i] = Float.intBitsToFloat(mData[i]);
+                }
+                saveTestResults();
+                if (mLoops > 0) {
+                    mCurrentLoop ++;
+                    mCurrentLoop = mCurrentLoop % mLoops;
+                }
+                return;
+
+            } else if (mID == mScript.get_RS_MSG_TEST_DONE()) {
                 synchronized(this) {
                     stopTest = true;
                     this.notifyAll();
                 }
                 return;
             } else {
-                Log.v("RsBenchRS", "Perf test got unexpected message");
+                Log.v(TAG, "Perf test got unexpected message");
                 return;
             }
         }
@@ -247,7 +304,7 @@ public class RsBenchRS {
         mPVA = new ProgramVertexFixedFunction.Constants(mRS);
         ((ProgramVertexFixedFunction)mProgVertex).bindConstants(mPVA);
         Matrix4f proj = new Matrix4f();
-        proj.loadOrthoWindow(mWidth, mHeight);
+        proj.loadOrthoWindow(mBenchmarkDimX, mBenchmarkDimY);
         mPVA.setProjection(proj);
 
         mScript.set_gProgVertex(mProgVertex);
@@ -370,11 +427,11 @@ public class RsBenchRS {
     }
 
     private void initMesh() {
-        m10by10Mesh = getMbyNMesh(mWidth, mHeight, 10, 10);
+        m10by10Mesh = getMbyNMesh(mBenchmarkDimX, mBenchmarkDimY, 10, 10);
         mScript.set_g10by10Mesh(m10by10Mesh);
-        m100by100Mesh = getMbyNMesh(mWidth, mHeight, 100, 100);
+        m100by100Mesh = getMbyNMesh(mBenchmarkDimX, mBenchmarkDimY, 100, 100);
         mScript.set_g100by100Mesh(m100by100Mesh);
-        mWbyHMesh= getMbyNMesh(mWidth, mHeight, mWidth/4, mHeight/4);
+        mWbyHMesh= getMbyNMesh(mBenchmarkDimX, mBenchmarkDimY, mBenchmarkDimX/4, mBenchmarkDimY/4);
         mScript.set_gWbyHMesh(mWbyHMesh);
 
         FileA3D model = FileA3D.createFromResource(mRS, mRes, R.raw.torus);
@@ -427,6 +484,29 @@ public class RsBenchRS {
         mScript.set_gCullNone(mCullNone);
     }
 
+    private int strlen(byte[] array) {
+        int count = 0;
+        while(count < array.length && array[count] != 0) {
+            count ++;
+        }
+        return count;
+    }
+
+    private void prepareTestData() {
+        mTestNames = new String[mMaxModes];
+        mLocalTestResults = new float[mMaxModes];
+        int scratchSize = 1024;
+        Allocation scratch = Allocation.createSized(mRS, Element.U8(mRS), scratchSize);
+        byte[] tmp = new byte[scratchSize];
+        mScript.bind_gStringBuffer(scratch);
+        for (int i = 0; i < mMaxModes; i ++) {
+            mScript.invoke_getTestName(i);
+            scratch.copyTo(tmp);
+            int len = strlen(tmp);
+            mTestNames[i] = new String(tmp, 0, len);
+        }
+    }
+
     private void initRS() {
 
         mScript = new ScriptC_rsbench(mRS, mRes, R.raw.rsbench);
@@ -434,6 +514,8 @@ public class RsBenchRS {
 
         mMaxModes = mScript.get_gMaxModes();
         mScript.set_gMaxLoops(mLoops);
+
+        prepareTestData();
 
         initSamplers();
         initProgramStore();
@@ -446,7 +528,7 @@ public class RsBenchRS {
         initCustomShaders();
 
         Type.Builder b = new Type.Builder(mRS, Element.RGBA_8888(mRS));
-        b.setX(1280).setY(720);
+        b.setX(mBenchmarkDimX).setY(mBenchmarkDimY);
         Allocation offscreen = Allocation.createTyped(mRS,
                                                       b.create(),
                                                       Allocation.USAGE_GRAPHICS_TEXTURE |
@@ -456,7 +538,7 @@ public class RsBenchRS {
         b = new Type.Builder(mRS,
                              Element.createPixel(mRS, DataType.UNSIGNED_16,
                              DataKind.PIXEL_DEPTH));
-        b.setX(1280).setY(720);
+        b.setX(mBenchmarkDimX).setY(mBenchmarkDimY);
         offscreen = Allocation.createTyped(mRS,
                                            b.create(),
                                            Allocation.USAGE_GRAPHICS_RENDER_TARGET);
