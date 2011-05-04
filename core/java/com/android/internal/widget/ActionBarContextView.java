@@ -448,4 +448,9 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
     @Override
     public void onAnimationRepeat(Animator animation) {
     }
+
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return false;
+    }
 }

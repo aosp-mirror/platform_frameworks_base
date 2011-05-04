@@ -186,6 +186,11 @@ public class RelativeLayout extends ViewGroup {
         a.recycle();
     }
 
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return false;
+    }
+
     /**
      * Defines which View is ignored when the gravity is applied. This setting has no
      * effect if the gravity is <code>Gravity.LEFT | Gravity.TOP</code>.

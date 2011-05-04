@@ -21724,6 +21724,7 @@ package android.view {
     method public void setOnHierarchyChangeListener(android.view.ViewGroup.OnHierarchyChangeListener);
     method public void setPersistentDrawingCache(int);
     method protected void setStaticTransformationsEnabled(boolean);
+    method public boolean shouldDelayChildPressedState();
     method public boolean showContextMenuForChild(android.view.View);
     method public android.view.ActionMode startActionModeForChild(android.view.View, android.view.ActionMode.Callback);
     method public void startLayoutAnimation();

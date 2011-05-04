@@ -5138,9 +5138,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                         (mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) &&
                         (event.getRepeatCount() == 0)) {
                     setPressed(true);
-                    if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) {
-                        postCheckForLongClick(0);
-                    }
+                    checkForLongClick(0);
                     return true;
                 }
                 break;
@@ -5535,12 +5533,33 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                     break;
 
                 case MotionEvent.ACTION_DOWN:
-                    if (mPendingCheckForTap == null) {
-                        mPendingCheckForTap = new CheckForTap();
-                    }
-                    mPrivateFlags |= PREPRESSED;
                     mHasPerformedLongPress = false;
-                    postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
+
+                    // Walk up the hierarchy to determine if we're inside a scrolling container.
+                    boolean isInScrollingContainer = false;
+                    ViewParent p = getParent();
+                    while (p != null && p instanceof ViewGroup) {
+                        if (((ViewGroup) p).shouldDelayChildPressedState()) {
+                            isInScrollingContainer = true;
+                            break;
+                        }
+                        p = p.getParent();
+                    }
+
+                    // For views inside a scrolling container, delay the pressed feedback for
+                    // a short period in case this is a scroll.
+                    if (isInScrollingContainer) {
+                        mPrivateFlags |= PREPRESSED;
+                        if (mPendingCheckForTap == null) {
+                            mPendingCheckForTap = new CheckForTap();
+                        }
+                        postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
+                    } else {
+                        // Not inside a scrolling container, so show the feedback right away
+                        mPrivateFlags |= PRESSED;
+                        refreshDrawableState();
+                        checkForLongClick(0);
+                    }
                     break;
 
                 case MotionEvent.ACTION_CANCEL:
@@ -11846,15 +11865,17 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         }
     }
 
-    private void postCheckForLongClick(int delayOffset) {
-        mHasPerformedLongPress = false;
+    private void checkForLongClick(int delayOffset) {
+        if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) {
+            mHasPerformedLongPress = false;
 
-        if (mPendingCheckForLongPress == null) {
-            mPendingCheckForLongPress = new CheckForLongPress();
+            if (mPendingCheckForLongPress == null) {
+                mPendingCheckForLongPress = new CheckForLongPress();
+            }
+            mPendingCheckForLongPress.rememberWindowAttachCount();
+            postDelayed(mPendingCheckForLongPress,
+                    ViewConfiguration.getLongPressTimeout() - delayOffset);
         }
-        mPendingCheckForLongPress.rememberWindowAttachCount();
-        postDelayed(mPendingCheckForLongPress,
-                ViewConfiguration.getLongPressTimeout() - delayOffset);
     }
 
     /**
@@ -12166,9 +12187,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mPrivateFlags &= ~PREPRESSED;
             mPrivateFlags |= PRESSED;
             refreshDrawableState();
-            if ((mViewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) {
-                postCheckForLongClick(ViewConfiguration.getTapTimeout());
-            }
+            checkForLongClick(ViewConfiguration.getTapTimeout());
         }
     }
 

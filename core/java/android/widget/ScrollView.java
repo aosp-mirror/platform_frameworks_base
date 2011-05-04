@@ -162,6 +162,11 @@ public class ScrollView extends FrameLayout {
     }
 
     @Override
+    public boolean shouldDelayChildPressedState() {
+        return true;
+    }
+
+    @Override
     protected float getTopFadingEdgeStrength() {
         if (getChildCount() == 0) {
             return 0.0f;

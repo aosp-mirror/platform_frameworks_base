@@ -141,6 +141,11 @@ public class AbsoluteLayout extends ViewGroup {
         return new LayoutParams(p);
     }
 
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return false;
+    }
+
     /**
      * Per-child layout information associated with AbsoluteLayout.
      * See

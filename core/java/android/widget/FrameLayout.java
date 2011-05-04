@@ -485,6 +485,11 @@ public class FrameLayout extends ViewGroup {
         return new FrameLayout.LayoutParams(getContext(), attrs);        
     }
 
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return false;
+    }
+
     /**
      * {@inheritDoc}
      */
