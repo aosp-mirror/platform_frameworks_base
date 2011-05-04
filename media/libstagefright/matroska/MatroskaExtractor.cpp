@@ -660,13 +660,19 @@ static void addESDSFromAudioSpecificInfo(
         // AudioSpecificInfo (with size prefix) follows
     };
 
-    CHECK(asiSize < 128);
+    // Make sure all sizes can be coded in a single byte.
+    CHECK(asiSize + 22 - 2 < 128);
     size_t esdsSize = sizeof(kStaticESDS) + asiSize + 1;
     uint8_t *esds = new uint8_t[esdsSize];
     memcpy(esds, kStaticESDS, sizeof(kStaticESDS));
     uint8_t *ptr = esds + sizeof(kStaticESDS);
     *ptr++ = asiSize;
     memcpy(ptr, asi, asiSize);
+
+    // Increment by codecPrivateSize less 2 bytes that are accounted for
+    // already in lengths of 22/17
+    esds[1] += asiSize - 2;
+    esds[6] += asiSize - 2;
 
     meta->setData(kKeyESDS, 0, esds, esdsSize);
 
