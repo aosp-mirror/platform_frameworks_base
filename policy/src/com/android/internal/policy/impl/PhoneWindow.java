@@ -1524,6 +1524,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             st.onRestoreInstanceState(icicles.get(curFeatureId));
+            invalidatePanelMenu(curFeatureId);
         }
 
         /*
@@ -3115,9 +3116,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
              * The first time the menu is being shown after restoring, the
              * Activity.onCreateOptionsMenu should be called. But, if it is the
              * same instance then menu != null and we won't call that method.
-             * So, clear this.  Also clear any cached views.
+             * We clear any cached views here. The caller should invalidatePanelMenu.
              */
-            menu = null;
             createdPanelView = null;
             shownPanelView = null;
             decorView = null;
