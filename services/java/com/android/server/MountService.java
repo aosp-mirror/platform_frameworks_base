@@ -444,31 +444,46 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                  * to make the media scanner run.
                  */
                 if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
-                    notifyVolumeStateChange(null, "/sdcard", VolumeState.NoMedia, VolumeState.Mounted);
+                    notifyVolumeStateChange(null, "/sdcard", VolumeState.NoMedia,
+                            VolumeState.Mounted);
                     return;
                 }
                 new Thread() {
                     @Override
                     public void run() {
                         try {
+                            // it is not safe to call vold with mVolumeStates locked
+                            // so we make a copy of the paths and states and process them
+                            // outside the lock
+                            String[] paths, states;
+                            int count;
                             synchronized (mVolumeStates) {
-                                for (String path : mVolumeStates.keySet()) {
-                                    String state = mVolumeStates.get(path);
+                                Set<String> keys = mVolumeStates.keySet();
+                                count = keys.size();
+                                paths = (String[])keys.toArray(new String[count]);
+                                states = new String[count];
+                                for (int i = 0; i < count; i++) {
+                                    states[i] = mVolumeStates.get(paths[i]);
+                                }
+                            }
 
-                                    if (state.equals(Environment.MEDIA_UNMOUNTED)) {
-                                        int rc = doMountVolume(path);
-                                        if (rc != StorageResultCode.OperationSucceeded) {
-                                            Slog.e(TAG, String.format("Boot-time mount failed (%d)",
-                                                    rc));
-                                        }
-                                    } else if (state.equals(Environment.MEDIA_SHARED)) {
-                                        /*
-                                         * Bootstrap UMS enabled state since vold indicates
-                                         * the volume is shared (runtime restart while ums enabled)
-                                         */
-                                        notifyVolumeStateChange(null, path, VolumeState.NoMedia,
-                                                VolumeState.Shared);
+                            for (int i = 0; i < count; i++) {
+                                String path = paths[i];
+                                String state = states[i];
+
+                                if (state.equals(Environment.MEDIA_UNMOUNTED)) {
+                                    int rc = doMountVolume(path);
+                                    if (rc != StorageResultCode.OperationSucceeded) {
+                                        Slog.e(TAG, String.format("Boot-time mount failed (%d)",
+                                                rc));
                                     }
+                                } else if (state.equals(Environment.MEDIA_SHARED)) {
+                                    /*
+                                     * Bootstrap UMS enabled state since vold indicates
+                                     * the volume is shared (runtime restart while ums enabled)
+                                     */
+                                    notifyVolumeStateChange(null, path, VolumeState.NoMedia,
+                                            VolumeState.Shared);
                                 }
                             }
 
