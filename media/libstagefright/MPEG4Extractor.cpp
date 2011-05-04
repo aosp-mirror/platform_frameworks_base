@@ -19,6 +19,8 @@
 
 #include "include/MPEG4Extractor.h"
 #include "include/SampleTable.h"
+#include "include/ESDS.h"
+#include "include/TimedTextPlayer.h"
 
 #include <arpa/inet.h>
 
@@ -29,7 +31,6 @@
 
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/DataSource.h>
-#include "include/ESDS.h"
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaBufferGroup.h>
 #include <media/stagefright/MediaDefs.h>
@@ -832,6 +833,33 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
             mLastTrack->meta->setInt64(
                     kKeyDuration, (duration * 1000000) / mLastTrack->timescale);
 
+            uint8_t lang[2];
+            off64_t lang_offset;
+            if (version == 1) {
+                lang_offset = timescale_offset + 4 + 8;
+            } else if (version == 0) {
+                lang_offset = timescale_offset + 4 + 4;
+            } else {
+                return ERROR_IO;
+            }
+
+            if (mDataSource->readAt(lang_offset, &lang, sizeof(lang))
+                    < (ssize_t)sizeof(lang)) {
+                return ERROR_IO;
+            }
+
+            // To get the ISO-639-2/T three character language code
+            // 1 bit pad followed by 3 5-bits characters. Each character
+            // is packed as the difference between its ASCII value and 0x60.
+            char lang_code[4];
+            lang_code[0] = ((lang[0] >> 2) & 0x1f) + 0x60;
+            lang_code[1] = ((lang[0] & 0x3) << 3 | (lang[1] >> 5)) + 0x60;
+            lang_code[2] = (lang[1] & 0x1f) + 0x60;
+            lang_code[3] = '\0';
+
+            mLastTrack->meta->setCString(
+                    kKeyMediaLanguage, lang_code);
+
             *offset += chunk_size;
             break;
         }
@@ -1293,6 +1321,14 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
             }
 
             return parseDrmSINF(offset, data_offset);
+        }
+
+        case FOURCC('t', 'x', '3', 'g'):
+        {
+            mLastTrack->meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_TEXT_3GPP);
+
+            *offset += chunk_size;
+            break;
         }
 
         default:

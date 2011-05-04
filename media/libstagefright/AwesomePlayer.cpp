@@ -28,6 +28,7 @@
 #include "include/NuCachedSource2.h"
 #include "include/ThrottledSource.h"
 #include "include/MPEG2TSExtractor.h"
+#include "include/TimedTextPlayer.h"
 
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
@@ -185,7 +186,8 @@ AwesomePlayer::AwesomePlayer()
       mExtractorFlags(0),
       mVideoBuffer(NULL),
       mDecryptHandle(NULL),
-      mLastVideoTimeUs(-1) {
+      mLastVideoTimeUs(-1),
+      mTextPlayer(NULL) {
     CHECK_EQ(mClient.connect(), (status_t)OK);
 
     DataSource::RegisterDefaultSniffers();
@@ -381,10 +383,8 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
                     mFlags |= AUTO_LOOPING;
                 }
             }
-        }
-
-        if (haveAudio && haveVideo) {
-            break;
+        } else if (!strcasecmp(mime, MEDIA_MIMETYPE_TEXT_3GPP)) {
+            addTextSource(extractor->getTrack(i));
         }
     }
 
@@ -468,6 +468,11 @@ void AwesomePlayer::reset_l() {
 
     delete mAudioPlayer;
     mAudioPlayer = NULL;
+
+    if (mTextPlayer != NULL) {
+        delete mTextPlayer;
+        mTextPlayer = NULL;
+    }
 
     mVideoRenderer.clear();
 
@@ -971,6 +976,11 @@ status_t AwesomePlayer::pause_l(bool at_eos) {
         mFlags &= ~AUDIO_RUNNING;
     }
 
+    if (mFlags & TEXTPLAYER_STARTED) {
+        mTextPlayer->pause();
+        mFlags &= ~TEXT_RUNNING;
+    }
+
     mFlags &= ~PLAYING;
 
     if (mDecryptHandle != NULL) {
@@ -1119,6 +1129,32 @@ status_t AwesomePlayer::seekTo(int64_t timeUs) {
     return OK;
 }
 
+status_t AwesomePlayer::setTimedTextTrackIndex(int32_t index) {
+    if (mTextPlayer != NULL) {
+        if (index >= 0) { // to turn on a text track
+            status_t err = mTextPlayer->setTimedTextTrackIndex(index);
+            if (err != OK) {
+                return err;
+            }
+
+            mFlags |= TEXT_RUNNING;
+            mFlags |= TEXTPLAYER_STARTED;
+            return OK;
+        } else { // to turn off the text track display
+            if (mFlags  & TEXT_RUNNING) {
+                mFlags &= ~TEXT_RUNNING;
+            }
+            if (mFlags  & TEXTPLAYER_STARTED) {
+                mFlags &= ~TEXTPLAYER_STARTED;
+            }
+
+            return mTextPlayer->setTimedTextTrackIndex(index);
+        }
+    } else {
+        return INVALID_OPERATION;
+    }
+}
+
 // static
 void AwesomePlayer::OnRTSPSeekDoneWrapper(void *cookie) {
     static_cast<AwesomePlayer *>(cookie)->onRTSPSeekDone();
@@ -1154,6 +1190,10 @@ status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
     mFlags &= ~(AT_EOS | AUDIO_AT_EOS | VIDEO_AT_EOS);
 
     seekAudioIfNecessary_l();
+
+    if (mFlags & TEXTPLAYER_STARTED) {
+        mTextPlayer->seekTo(mSeekTimeUs);
+    }
 
     if (!(mFlags & PLAYING)) {
         LOGV("seeking while paused, sending SEEK_COMPLETE notification"
@@ -1191,6 +1231,16 @@ void AwesomePlayer::setAudioSource(sp<MediaSource> source) {
     CHECK(source != NULL);
 
     mAudioTrack = source;
+}
+
+void AwesomePlayer::addTextSource(sp<MediaSource> source) {
+    CHECK(source != NULL);
+
+    if (mTextPlayer == NULL) {
+        mTextPlayer = new TimedTextPlayer(this, mListener, &mQueue);
+    }
+
+    mTextPlayer->addTextSource(source);
 }
 
 status_t AwesomePlayer::initAudioDecoder() {
@@ -1470,6 +1520,11 @@ void AwesomePlayer::onVideoEvent() {
             LOGE("Startung the audio player failed w/ err %d", err);
             return;
         }
+    }
+
+    if ((mFlags & TEXTPLAYER_STARTED) && !(mFlags & (TEXT_RUNNING | SEEK_PREVIEW))) {
+        mTextPlayer->resume();
+        mFlags |= TEXT_RUNNING;
     }
 
     TimeSource *ts = (mFlags & AUDIO_AT_EOS) ? &mSystemTimeSource : mTimeSource;
@@ -1906,7 +1961,10 @@ void AwesomePlayer::postAudioSeekComplete() {
 }
 
 status_t AwesomePlayer::setParameter(int key, const Parcel &request) {
-    return OK;
+    if (key == KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX) {
+        return setTimedTextTrackIndex(request.readInt32());
+    }
+    return ERROR_UNSUPPORTED;
 }
 
 status_t AwesomePlayer::getParameter(int key, Parcel *reply) {

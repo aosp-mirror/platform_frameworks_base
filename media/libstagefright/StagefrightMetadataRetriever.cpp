@@ -27,6 +27,7 @@
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXCodec.h>
+#include <media/stagefright/MediaDefs.h>
 
 namespace android {
 
@@ -429,6 +430,7 @@ void StagefrightMetadataRetriever::parseMetaData() {
 
     // The overall duration is the duration of the longest track.
     int64_t maxDurationUs = 0;
+    String8 timedTextLang;
     for (size_t i = 0; i < numTracks; ++i) {
         sp<MetaData> trackMeta = mExtractor->getTrackMetaData(i);
 
@@ -452,8 +454,20 @@ void StagefrightMetadataRetriever::parseMetaData() {
 
                 CHECK(trackMeta->findInt32(kKeyWidth, &videoWidth));
                 CHECK(trackMeta->findInt32(kKeyHeight, &videoHeight));
+            } else if (!strcasecmp(mime, MEDIA_MIMETYPE_TEXT_3GPP)) {
+                const char *lang;
+                trackMeta->findCString(kKeyMediaLanguage, &lang);
+                timedTextLang.append(String8(lang));
+                timedTextLang.append(String8(":"));
             }
         }
+    }
+
+    // To save the language codes for all timed text tracks
+    // If multiple text tracks present, the format will look
+    // like "eng:chi"
+    if (!timedTextLang.isEmpty()) {
+        mMetaData.add(METADATA_KEY_TIMED_TEXT_LANGUAGES, timedTextLang);
     }
 
     // The duration value is a string representing the duration in ms.

@@ -125,6 +125,9 @@ enum media_player_states {
     MEDIA_PLAYER_PLAYBACK_COMPLETE  = 1 << 7
 };
 
+enum media_set_parameter_keys {
+    KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX = 1000,
+};
 // ----------------------------------------------------------------------------
 // ref-counted object for callbacks
 class MediaPlayerListener: virtual public RefBase
