@@ -1962,8 +1962,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 mContextMenu.clearAll();
             }
 
-            mContextMenuHelper = mContextMenu.show(originalView, originalView.getWindowToken());
-            return mContextMenuHelper != null;
+            final MenuDialogHelper helper = mContextMenu.show(originalView,
+                    originalView.getWindowToken());
+            if (helper != null) {
+                helper.setPresenterCallback(mContextMenuCallback);
+            }
+            mContextMenuHelper = helper;
+            return helper != null;
         }
 
         @Override
@@ -3171,7 +3176,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
      * <li> Calls back to the callback's onMenuItemSelected when an item is
      * selected.
      */
-    private final class DialogMenuCallback implements MenuBuilder.Callback {
+    private final class DialogMenuCallback implements MenuBuilder.Callback, MenuPresenter.Callback {
         private int mFeatureId;
         private MenuDialogHelper mSubMenuHelper;
 
@@ -3180,6 +3185,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
+            if (menu.getRootMenu() != menu) {
+                onCloseSubMenu(menu);
+            }
+
             if (allMenusAreClosing) {
                 Callback callback = getCallback();
                 if (callback != null && !isDestroyed()) {
@@ -3198,7 +3207,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        public void onCloseSubMenu(SubMenuBuilder menu) {
+        public void onCloseSubMenu(MenuBuilder menu) {
             Callback callback = getCallback();
             if (callback != null && !isDestroyed()) {
                 callback.onPanelClosed(mFeatureId, menu.getRootMenu());
@@ -3214,7 +3223,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         public void onMenuModeChange(MenuBuilder menu) {
         }
 
-        public boolean onSubMenuSelected(SubMenuBuilder subMenu) {
+        public boolean onOpenSubMenu(MenuBuilder subMenu) {
             // Set a simple callback for the submenu
             subMenu.setCallback(this);
 
