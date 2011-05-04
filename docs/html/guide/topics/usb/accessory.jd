@@ -50,9 +50,9 @@ page.title=USB Accessory
     </div>
   </div>
 
-  <p><a href="http://accessories.android.com/demokit">USB accessory mode allows users to connect
+  <p>USB accessory mode allows users to connect
   USB host hardware specifically designed for Android-powered devices. The accessories must adhere
-  to the Android accessory protocol outlined in</a> <a href=
+  to the Android accessory protocol outlined in the <a href=
   "http://accessories.android.com/demokit">Android Accessory Development Kit</a> documentation.
   This allows Android-powered devices that cannot act as a USB host to still interact with USB
   hardware. When an Android-powered device is in USB accessory mode, the attached Android USB
@@ -445,7 +445,7 @@ BroadcastReceiver mUsbReceiver = new BroadcastReceiver() {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction(); 
 
-      if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
+        if (UsbManager.ACTION_USB_ACCESSORY_DETACHED.equals(action)) {
             UsbAccessory accessory = (UsbAccessory)intent.getParcelableExtra(UsbManager.EXTRA_ACCESSORY);
             if (accessory != null) {
                 // call your method that cleans up and closes communication with the accessory
