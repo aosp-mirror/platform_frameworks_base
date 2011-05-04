@@ -839,6 +839,9 @@ public class RenderScript {
 
         rs.mDev = rs.nDeviceCreate();
         rs.mContext = rs.nContextCreate(rs.mDev, 0);
+        if (rs.mContext == 0) {
+            throw new RSDriverException("Failed to create RS context.");
+        }
         rs.mMessageThread = new MessageThread(rs);
         rs.mMessageThread.start();
         return rs;

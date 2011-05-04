@@ -270,17 +270,18 @@ void * Context::threadProc(void *vrsc) {
     rsc->props.mLogVisual = getProp("debug.rs.visual");
 
     if (!rsdHalInit(rsc, 0, 0)) {
+        rsc->setError(RS_ERROR_FATAL_DRIVER, "Failed initializing GL");
         LOGE("Hal init failed");
         return NULL;
     }
     rsc->mHal.funcs.setPriority(rsc, rsc->mThreadPriority);
 
-    if (!rsc->initGLThread()) {
-        rsc->setError(RS_ERROR_OUT_OF_MEMORY, "Failed initializing GL");
-        return NULL;
-    }
-
     if (rsc->mIsGraphicsContext) {
+        if (!rsc->initGLThread()) {
+            rsc->setError(RS_ERROR_OUT_OF_MEMORY, "Failed initializing GL");
+            return NULL;
+        }
+
         rsc->mStateRaster.init(rsc);
         rsc->setProgramRaster(NULL);
         rsc->mStateVertex.init(rsc);
