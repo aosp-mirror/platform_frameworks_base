@@ -234,6 +234,23 @@ status_t AACDecoder::read(
             mConfig->aacPlusUpsamplingFactor, mConfig->desiredChannels);
 
         CHECK(mNumDecodedBuffers > 0);
+
+        if (decoderErr != MP4AUDEC_SUCCESS) {
+            // If decoding fails this early, the fields in mConfig may
+            // not be valid and we cannot recover.
+
+            LOGE("Unable to decode aac content, decoder returned error %d",
+                 decoderErr);
+
+            buffer->release();
+            buffer = NULL;
+
+            mInputBuffer->release();
+            mInputBuffer = NULL;
+
+            return ERROR_UNSUPPORTED;
+        }
+
         if (mNumDecodedBuffers == 1) {
             mUpsamplingFactor = mConfig->aacPlusUpsamplingFactor;
             // Check on the sampling rate to see whether it is changed.
