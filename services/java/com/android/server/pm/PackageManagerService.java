@@ -92,6 +92,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.UserId;
 import android.security.SystemKeyStore;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -1743,12 +1744,16 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public ActivityInfo getActivityInfo(ComponentName component, int flags) {
+        return getActivityInfo(component, flags, Binder.getOrigCallingUser());
+    }
+
+    ActivityInfo getActivityInfo(ComponentName component, int flags, int userId) {
         synchronized (mPackages) {
             PackageParser.Activity a = mActivities.mActivities.get(component);
 
             if (DEBUG_PACKAGE_INFO) Log.v(TAG, "getActivityInfo " + component + ": " + a);
             if (a != null && mSettings.isEnabledLPr(a.info, flags)) {
-                return PackageParser.generateActivityInfo(a, flags);
+                return PackageParser.generateActivityInfo(a, flags, userId);
             }
             if (mResolveComponentName.equals(component)) {
                 return mResolveActivity;
@@ -1758,36 +1763,48 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public ActivityInfo getReceiverInfo(ComponentName component, int flags) {
+        return getReceiverInfo(component, flags, Binder.getOrigCallingUser());
+    }
+
+    ActivityInfo getReceiverInfo(ComponentName component, int flags, int userId) {
         synchronized (mPackages) {
             PackageParser.Activity a = mReceivers.mActivities.get(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
                 TAG, "getReceiverInfo " + component + ": " + a);
             if (a != null && mSettings.isEnabledLPr(a.info, flags)) {
-                return PackageParser.generateActivityInfo(a, flags);
+                return PackageParser.generateActivityInfo(a, flags, userId);
             }
         }
         return null;
     }
 
     public ServiceInfo getServiceInfo(ComponentName component, int flags) {
+        return getServiceInfo(component, flags, Binder.getOrigCallingUser());
+    }
+
+    ServiceInfo getServiceInfo(ComponentName component, int flags, int userId) {
         synchronized (mPackages) {
             PackageParser.Service s = mServices.mServices.get(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
                 TAG, "getServiceInfo " + component + ": " + s);
             if (s != null && mSettings.isEnabledLPr(s.info, flags)) {
-                return PackageParser.generateServiceInfo(s, flags);
+                return PackageParser.generateServiceInfo(s, flags, userId);
             }
         }
         return null;
     }
 
     public ProviderInfo getProviderInfo(ComponentName component, int flags) {
+        return getProviderInfo(component, flags, UserId.getUserId(Binder.getCallingUid()));
+    }
+
+    ProviderInfo getProviderInfo(ComponentName component, int flags, int userId) {
         synchronized (mPackages) {
             PackageParser.Provider p = mProvidersByComponent.get(component);
             if (DEBUG_PACKAGE_INFO) Log.v(
                 TAG, "getProviderInfo " + component + ": " + p);
             if (p != null && mSettings.isEnabledLPr(p.info, flags)) {
-                return PackageParser.generateProviderInfo(p, flags);
+                return PackageParser.generateProviderInfo(p, flags, userId);
             }
         }
         return null;
@@ -1850,7 +1867,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     public int checkUidPermission(String permName, int uid) {
         synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(uid);
+            Object obj = mSettings.getUserIdLPr(UserId.getAppId(uid));
             if (obj != null) {
                 GrantedPermissions gp = (GrantedPermissions)obj;
                 if (gp.grantedPermissions.contains(permName)) {
@@ -1881,7 +1898,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (permName != null) {
             BasePermission bp = findPermissionTreeLP(permName);
             if (bp != null) {
-                if (bp.uid == Binder.getCallingUid()) {
+                if (bp.uid == UserId.getAppId(Binder.getCallingUid())) {
                     return bp;
                 }
                 throw new SecurityException("Calling uid "
@@ -2010,6 +2027,9 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public int checkUidSignatures(int uid1, int uid2) {
+        // Map to base uids.
+        uid1 = UserId.getAppId(uid1);
+        uid2 = UserId.getAppId(uid2);
         // reader
         synchronized (mPackages) {
             Signature[] s1;
@@ -2067,6 +2087,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public String[] getPackagesForUid(int uid) {
+        uid = UserId.getAppId(uid);
         // reader
         synchronized (mPackages) {
             Object obj = mSettings.getUserIdLPr(uid);
@@ -2091,7 +2112,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     public String getNameForUid(int uid) {
         // reader
         synchronized (mPackages) {
-            Object obj = mSettings.getUserIdLPr(uid);
+            Object obj = mSettings.getUserIdLPr(UserId.getAppId(uid));
             if (obj instanceof SharedUserSetting) {
                 final SharedUserSetting sus = (SharedUserSetting) obj;
                 return sus.name + ":" + sus.userId;
@@ -2110,7 +2131,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // reader
         synchronized (mPackages) {
             final SharedUserSetting suid = mSettings.getSharedUserLPw(sharedUserName, 0, false);
-            if(suid == null) {
+            if (suid == null) {
                 return -1;
             }
             return suid.userId;
@@ -2252,6 +2273,9 @@ public class PackageManagerService extends IPackageManager.Stub {
                 comp = intent.getComponent();
             }
         }
+
+        final int userId = UserId.getUserId(Binder.getCallingUid());
+
         if (comp != null) {
             final List<ResolveInfo> list = new ArrayList<ResolveInfo>(1);
             final ActivityInfo ai = getActivityInfo(comp, flags);
@@ -2603,6 +2627,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             Arrays.sort(keys);
             int i = getContinuationPoint(keys, lastRead);
             final int N = keys.length;
+            final int userId = UserId.getUserId(Binder.getCallingUid());
 
             while (i < N) {
                 final String packageName = keys[i++];
@@ -2616,7 +2641,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } else {
                     final PackageParser.Package p = mPackages.get(packageName);
                     if (p != null) {
-                        ai = PackageParser.generateApplicationInfo(p, flags);
+                        ai = PackageParser.generateApplicationInfo(p, flags, userId);
                     }
                 }
 
@@ -2639,12 +2664,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         // reader
         synchronized (mPackages) {
             final Iterator<PackageParser.Package> i = mPackages.values().iterator();
+            final int userId = UserId.getUserId(Binder.getCallingUid());
             while (i.hasNext()) {
                 final PackageParser.Package p = i.next();
                 if (p.applicationInfo != null
                         && (p.applicationInfo.flags&ApplicationInfo.FLAG_PERSISTENT) != 0
                         && (!mSafeMode || isSystemApp(p))) {
-                    finalList.add(PackageParser.generateApplicationInfo(p, flags));
+                    finalList.add(PackageParser.generateApplicationInfo(p, flags, userId));
                 }
             }
         }
@@ -2660,7 +2686,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     && mSettings.isEnabledLPr(provider.info, flags)
                     && (!mSafeMode || (provider.info.applicationInfo.flags
                             &ApplicationInfo.FLAG_SYSTEM) != 0)
-                    ? PackageParser.generateProviderInfo(provider, flags)
+                    ? PackageParser.generateProviderInfo(provider, flags,
+                            UserId.getUserId(Binder.getCallingUid()))
                     : null;
         }
     }
@@ -2674,7 +2701,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             final Iterator<Map.Entry<String, PackageParser.Provider>> i = mProviders.entrySet()
                     .iterator();
-
+            final int userId = UserId.getUserId(Binder.getCallingUid());
             while (i.hasNext()) {
                 Map.Entry<String, PackageParser.Provider> entry = i.next();
                 PackageParser.Provider p = entry.getValue();
@@ -2683,7 +2710,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         && (!mSafeMode || (p.info.applicationInfo.flags
                                 &ApplicationInfo.FLAG_SYSTEM) != 0)) {
                     outNames.add(entry.getKey());
-                    outInfo.add(PackageParser.generateProviderInfo(p, 0));
+                    outInfo.add(PackageParser.generateProviderInfo(p, 0, userId));
                 }
             }
         }
@@ -2696,19 +2723,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         // reader
         synchronized (mPackages) {
             final Iterator<PackageParser.Provider> i = mProvidersByComponent.values().iterator();
+            final int userId = UserId.getUserId(Binder.getCallingUid());
             while (i.hasNext()) {
                 final PackageParser.Provider p = i.next();
                 if (p.info.authority != null
                         && (processName == null
                                 || (p.info.processName.equals(processName)
-                                        && p.info.applicationInfo.uid == uid))
+                                        && UserId.getAppId(p.info.applicationInfo.uid)
+                                            == UserId.getAppId(uid)))
                         && mSettings.isEnabledLPr(p.info, flags)
                         && (!mSafeMode
                                 || (p.info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)) {
                     if (finalList == null) {
                         finalList = new ArrayList<ProviderInfo>(3);
                     }
-                    finalList.add(PackageParser.generateProviderInfo(p, flags));
+                    finalList.add(PackageParser.generateProviderInfo(p, flags, userId));
                 }
             }
         }
@@ -4461,8 +4490,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return null;
             }
             final ResolveInfo res = new ResolveInfo();
-            res.activityInfo = PackageParser.generateActivityInfo(activity,
-                    mFlags);
+            res.activityInfo = PackageParser.generateActivityInfo(activity, mFlags,
+                    Binder.getOrigCallingUser());
             if ((mFlags&PackageManager.GET_RESOLVED_FILTER) != 0) {
                 res.filter = info;
             }
@@ -4637,8 +4666,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return null;
             }
             final ResolveInfo res = new ResolveInfo();
-            res.serviceInfo = PackageParser.generateServiceInfo(service,
-                    mFlags);
+            res.serviceInfo = PackageParser.generateServiceInfo(service, mFlags,
+                    Binder.getOrigCallingUser());
             if ((mFlags&PackageManager.GET_RESOLVED_FILTER) != 0) {
                 res.filter = filter;
             }
@@ -4742,8 +4771,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                     intent.setPackage(targetPkg);
                 }
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+                // TODO: Fix the userId argument
                 am.broadcastIntent(null, intent, null, finishedReceiver,
-                        0, null, null, null, finishedReceiver != null, false);
+                        0, null, null, null, finishedReceiver != null, false,
+                        Binder.getOrigCallingUser());
             } catch (RemoteException ex) {
             }
         }
@@ -7584,7 +7615,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         "Unknown component: " + packageName
                         + "/" + className);
             }
-            if (!allowedByPermission && (uid != pkgSetting.userId)) {
+            if (!allowedByPermission && (!UserId.isSameApp(uid, pkgSetting.userId))) {
                 throw new SecurityException(
                         "Permission Denial: attempt to change component state from pid="
                         + Binder.getCallingPid()
@@ -8672,5 +8703,9 @@ public class PackageManagerService extends IPackageManager.Stub {
         synchronized (mPackages) {
             return mSettings.getVerifierDeviceIdentityLPw();
         }
+    }
+
+    public List<UserInfo> getUsers() {
+        return mUserManager.getUsers();
     }
 }

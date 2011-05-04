@@ -24,18 +24,17 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
+import android.os.UserId;
 import android.util.AttributeSet;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Slog;
 import android.util.TypedValue;
-import com.android.internal.util.XmlUtils;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -58,6 +57,11 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+
+import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Package archive parsing
@@ -209,6 +213,8 @@ public class PackageParser {
     public static PackageInfo generatePackageInfo(PackageParser.Package p,
             int gids[], int flags, long firstInstallTime, long lastUpdateTime) {
 
+        final int userId = Binder.getOrigCallingUser();
+
         PackageInfo pi = new PackageInfo();
         pi.packageName = p.packageName;
         pi.versionCode = p.mVersionCode;
@@ -250,7 +256,8 @@ public class PackageParser {
                     final Activity activity = p.activities.get(i);
                     if (activity.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.activities[j++] = generateActivityInfo(p.activities.get(i), flags);
+                        pi.activities[j++] = generateActivityInfo(p.activities.get(i), flags,
+                                userId);
                     }
                 }
             }
@@ -271,7 +278,7 @@ public class PackageParser {
                     final Activity activity = p.receivers.get(i);
                     if (activity.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.receivers[j++] = generateActivityInfo(p.receivers.get(i), flags);
+                        pi.receivers[j++] = generateActivityInfo(p.receivers.get(i), flags, userId);
                     }
                 }
             }
@@ -292,7 +299,7 @@ public class PackageParser {
                     final Service service = p.services.get(i);
                     if (service.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.services[j++] = generateServiceInfo(p.services.get(i), flags);
+                        pi.services[j++] = generateServiceInfo(p.services.get(i), flags, userId);
                     }
                 }
             }
@@ -313,7 +320,7 @@ public class PackageParser {
                     final Provider provider = p.providers.get(i);
                     if (provider.info.enabled
                         || (flags&PackageManager.GET_DISABLED_COMPONENTS) != 0) {
-                        pi.providers[j++] = generateProviderInfo(p.providers.get(i), flags);
+                        pi.providers[j++] = generateProviderInfo(p.providers.get(i), flags, userId);
                     }
                 }
             }
@@ -3241,8 +3248,12 @@ public class PackageParser {
     }
 
     public static ApplicationInfo generateApplicationInfo(Package p, int flags) {
+        return generateApplicationInfo(p, flags, UserId.getUserId(Binder.getCallingUid()));
+    }
+
+    public static ApplicationInfo generateApplicationInfo(Package p, int flags, int userId) {
         if (p == null) return null;
-        if (!copyNeeded(flags, p, null)) {
+        if (!copyNeeded(flags, p, null) && userId == 0) {
             // CompatibilityMode is global state. It's safe to modify the instance
             // of the package.
             if (!sCompatibilityModeEnabled) {
@@ -3258,6 +3269,10 @@ public class PackageParser {
 
         // Make shallow copy so we can store the metadata/libraries safely
         ApplicationInfo ai = new ApplicationInfo(p.applicationInfo);
+        if (userId != 0) {
+            ai.uid = UserId.getUid(userId, ai.uid);
+            ai.dataDir = PackageManager.getDataDirForUser(userId, ai.packageName);
+        }
         if ((flags & PackageManager.GET_META_DATA) != 0) {
             ai.metaData = p.mAppMetaData;
         }
@@ -3325,16 +3340,15 @@ public class PackageParser {
         }
     }
 
-    public static final ActivityInfo generateActivityInfo(Activity a,
-            int flags) {
+    public static final ActivityInfo generateActivityInfo(Activity a, int flags, int userId) {
         if (a == null) return null;
-        if (!copyNeeded(flags, a.owner, a.metaData)) {
+        if (!copyNeeded(flags, a.owner, a.metaData) && userId == 0) {
             return a.info;
         }
         // Make shallow copies so we can store the metadata safely
         ActivityInfo ai = new ActivityInfo(a.info);
         ai.metaData = a.metaData;
-        ai.applicationInfo = generateApplicationInfo(a.owner, flags);
+        ai.applicationInfo = generateApplicationInfo(a.owner, flags, userId);
         return ai;
     }
 
@@ -3359,15 +3373,15 @@ public class PackageParser {
         }
     }
 
-    public static final ServiceInfo generateServiceInfo(Service s, int flags) {
+    public static final ServiceInfo generateServiceInfo(Service s, int flags, int userId) {
         if (s == null) return null;
-        if (!copyNeeded(flags, s.owner, s.metaData)) {
+        if (!copyNeeded(flags, s.owner, s.metaData) && userId == 0) {
             return s.info;
         }
         // Make shallow copies so we can store the metadata safely
         ServiceInfo si = new ServiceInfo(s.info);
         si.metaData = s.metaData;
-        si.applicationInfo = generateApplicationInfo(s.owner, flags);
+        si.applicationInfo = generateApplicationInfo(s.owner, flags, userId);
         return si;
     }
 
@@ -3400,12 +3414,12 @@ public class PackageParser {
         }
     }
 
-    public static final ProviderInfo generateProviderInfo(Provider p,
-            int flags) {
+    public static final ProviderInfo generateProviderInfo(Provider p, int flags, int userId) {
         if (p == null) return null;
         if (!copyNeeded(flags, p.owner, p.metaData)
                 && ((flags & PackageManager.GET_URI_PERMISSION_PATTERNS) != 0
-                        || p.info.uriPermissionPatterns == null)) {
+                        || p.info.uriPermissionPatterns == null)
+                && userId == 0) {
             return p.info;
         }
         // Make shallow copies so we can store the metadata safely
@@ -3414,7 +3428,7 @@ public class PackageParser {
         if ((flags & PackageManager.GET_URI_PERMISSION_PATTERNS) == 0) {
             pi.uriPermissionPatterns = null;
         }
-        pi.applicationInfo = generateApplicationInfo(p.owner, flags);
+        pi.applicationInfo = generateApplicationInfo(p.owner, flags, userId);
         return pi;
     }
 

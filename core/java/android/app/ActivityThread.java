@@ -47,6 +47,7 @@ import android.net.Proxy;
 import android.net.ProxyProperties;
 import android.opengl.GLUtils;
 import android.os.AsyncTask;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
@@ -60,6 +61,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.os.UserId;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -132,6 +134,7 @@ public final class ActivityThread {
     private static final boolean DEBUG_RESULTS = false;
     private static final boolean DEBUG_BACKUP = true;
     private static final boolean DEBUG_CONFIGURATION = false;
+    private static final boolean DEBUG_SERVICE = true;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     private static final Pattern PATTERN_SEMICOLON = Pattern.compile(";");
     private static final int SQLITE_MEM_RELEASED_EVENT_LOG_TAG = 75003;
@@ -635,6 +638,9 @@ public final class ActivityThread {
             s.intent = intent;
             s.rebind = rebind;
 
+            if (DEBUG_SERVICE)
+                Slog.v(TAG, "scheduleBindService token=" + token + " intent=" + intent + " uid="
+                        + Binder.getCallingUid() + " pid=" + Binder.getCallingPid());
             queueOrSendMessage(H.BIND_SERVICE, s);
         }
 
@@ -1592,7 +1598,8 @@ public final class ActivityThread {
         boolean includeCode = (flags&Context.CONTEXT_INCLUDE_CODE) != 0;
         boolean securityViolation = includeCode && ai.uid != 0
                 && ai.uid != Process.SYSTEM_UID && (mBoundApplication != null
-                        ? ai.uid != mBoundApplication.appInfo.uid : true);
+                        ? !UserId.isSameApp(ai.uid, mBoundApplication.appInfo.uid)
+                        : true);
         if ((flags&(Context.CONTEXT_INCLUDE_CODE
                 |Context.CONTEXT_IGNORE_SECURITY))
                 == Context.CONTEXT_INCLUDE_CODE) {
@@ -2294,6 +2301,8 @@ public final class ActivityThread {
 
     private void handleBindService(BindServiceData data) {
         Service s = mServices.get(data.token);
+        if (DEBUG_SERVICE)
+            Slog.v(TAG, "handleBindService s=" + s + " rebind=" + data.rebind);
         if (s != null) {
             try {
                 data.intent.setExtrasClassLoader(s.getClassLoader());

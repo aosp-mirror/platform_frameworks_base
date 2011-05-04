@@ -36,6 +36,7 @@ import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.StrictMode;
+import android.os.UserId;
 import android.util.AndroidRuntimeException;
 import android.util.Slog;
 import android.view.CompatibilityInfoHolder;
@@ -66,6 +67,8 @@ final class ServiceConnectionLeaked extends AndroidRuntimeException {
  * @hide
  */
 public final class LoadedApk {
+
+    private static final String TAG = "LoadedApk";
 
     private final ActivityThread mActivityThread;
     private final ApplicationInfo mApplicationInfo;
@@ -113,8 +116,13 @@ public final class LoadedApk {
         mApplicationInfo = aInfo;
         mPackageName = aInfo.packageName;
         mAppDir = aInfo.sourceDir;
-        mResDir = aInfo.uid == Process.myUid() ? aInfo.sourceDir
+        final int myUid = Process.myUid();
+        mResDir = aInfo.uid == myUid ? aInfo.sourceDir
                 : aInfo.publicSourceDir;
+        if (!UserId.isSameUser(aInfo.uid, myUid)) {
+            aInfo.dataDir = PackageManager.getDataDirForUser(UserId.getUserId(myUid),
+                    mPackageName);
+        }
         mSharedLibraries = aInfo.sharedLibraryFiles;
         mDataDir = aInfo.dataDir;
         mDataDirFile = mDataDir != null ? new File(mDataDir) : null;

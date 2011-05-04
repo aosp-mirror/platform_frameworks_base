@@ -45,6 +45,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserId;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -1034,7 +1035,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         try {
             ApplicationInfo ai = mContext.getPackageManager().getApplicationInfo(
                     pkg, 0);
-            if (ai.uid != uid) {
+            if (!UserId.isSameApp(ai.uid, uid)) {
                 throw new SecurityException("Calling uid " + uid + " gave package"
                         + pkg + " which is owned by uid " + ai.uid);
             }

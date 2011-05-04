@@ -72,6 +72,9 @@
 #define PKG_NAME_MAX  128   /* largest allowed package name */
 #define PKG_PATH_MAX  256   /* max size of any path we use */
 
+#define PER_USER_RANGE ((uid_t)100000)   /* range of uids per user
+                                            uid = persona * PER_USER_RANGE + appid */
+
 /* data structures */
 
 typedef struct {
@@ -143,6 +146,7 @@ int renamepkg(const char *oldpkgname, const char *newpkgname);
 int delete_user_data(const char *pkgname, uid_t persona);
 int make_user_data(const char *pkgname, uid_t uid, uid_t persona);
 int delete_persona(uid_t persona);
+int clone_persona_data(uid_t src_persona, uid_t target_persona, int copy);
 int delete_cache(const char *pkgname);
 int move_dex(const char *src, const char *dst);
 int rm_dex(const char *path);
