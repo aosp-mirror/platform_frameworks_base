@@ -65,6 +65,17 @@ private:
 
     Mutex               mMutex;
 
+    // represents an MTP object that is being edited using the android extensions
+    // for direct editing (BeginEditObject, SendPartialObject, TruncateObject and EndEditObject)
+    struct ObjectEdit {
+        MtpObjectHandle     handle;
+        MtpString           path;
+        uint64_t            size;
+        MtpObjectFormat     format;
+        int                 fd;
+    };
+    Vector<ObjectEdit*>  mObjectEditList;
+
 public:
                         MtpServer(int fd, MtpDatabase* database,
                                     int fileGroup, int filePerm, int directoryPerm);
@@ -86,6 +97,12 @@ private:
     void                sendStoreRemoved(MtpStorageID id);
     void                sendEvent(MtpEventCode code, uint32_t param1);
 
+    void                addEditObject(MtpObjectHandle handle, MtpString& path,
+                                uint64_t size, MtpObjectFormat format, int fd);
+    ObjectEdit*         getEditObject(MtpObjectHandle handle);
+    void                removeEditObject(MtpObjectHandle handle);
+    void                commitEdit(ObjectEdit* edit);
+
     bool                handleRequest();
 
     MtpResponseCode     doGetDeviceInfo();
@@ -106,12 +123,16 @@ private:
     MtpResponseCode     doGetObjectPropList();
     MtpResponseCode     doGetObjectInfo();
     MtpResponseCode     doGetObject();
-    MtpResponseCode     doGetPartialObject();
+    MtpResponseCode     doGetPartialObject(MtpOperationCode operation);
     MtpResponseCode     doSendObjectInfo();
     MtpResponseCode     doSendObject();
     MtpResponseCode     doDeleteObject();
     MtpResponseCode     doGetObjectPropDesc();
     MtpResponseCode     doGetDevicePropDesc();
+    MtpResponseCode     doSendPartialObject();
+    MtpResponseCode     doTruncateObject();
+    MtpResponseCode     doBeginEditObject();
+    MtpResponseCode     doEndEditObject();
 };
 
 }; // namespace android
