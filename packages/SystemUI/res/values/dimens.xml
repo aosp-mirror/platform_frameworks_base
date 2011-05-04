@@ -31,5 +31,7 @@
     <!-- Width of scrollable area in recents -->
     <dimen name="status_bar_recents_width">356dp</dimen>
 
+    <!-- thickness (height) of the navigation bar on phones that require it -->
+    <dimen name="navigation_bar_size">42dp</dimen>
 </resources>
 
