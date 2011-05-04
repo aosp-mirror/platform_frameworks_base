@@ -301,6 +301,17 @@
       <li><a href="<?cs var:toroot?>guide/topics/nfc/index.html">
             <span class="en">Near Field Communication</span></a>
             <span class="new">new!</span></li>
+      <li class="toggle-list">
+          <div><a href="<?cs var:toroot?>guide/topics/usb/index.html">
+            <span class="en">USB</span></a>
+            <span class="new">new!</span>
+          </div>
+            <ul>
+              <li><a href="<?cs var:toroot ?>guide/topics/usb/accessory.html">Accessory</a></li>
+              <li><a href="<?cs var:toroot ?>guide/topics/usb/host.html">Host</a></li>
+            </ul>
+          </li>
+
        <li><a href="<?cs var:toroot?>guide/topics/network/sip.html">
             <span class="en">Session Initiation Protocol</span></a>
             <span class="new">new!</span>
@@ -347,7 +358,6 @@
                 <a href="<?cs var:toroot ?>guide/topics/testing/what_to_test.html">
                 <span class="en">What To Test</span></a>
               </li>
-
            </ul>
       </li>
     </ul>
