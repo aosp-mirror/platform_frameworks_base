@@ -37,6 +37,7 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener,
     private MenuBuilder mMenu;
     private AlertDialog mDialog;
     ListMenuPresenter mPresenter;
+    private MenuPresenter.Callback mPresenterCallback;
     
     public MenuDialogHelper(MenuBuilder menu) {
         mMenu = menu;
@@ -124,6 +125,10 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener,
 
     }
 
+    public void setPresenterCallback(MenuPresenter.Callback cb) {
+        mPresenterCallback = cb;
+    }
+
     /**
      * Dismisses the menu's dialog.
      * 
@@ -145,10 +150,16 @@ public class MenuDialogHelper implements DialogInterface.OnKeyListener,
         if (allMenusAreClosing || menu == mMenu) {
             dismiss();
         }
+        if (mPresenterCallback != null) {
+            mPresenterCallback.onCloseMenu(menu, allMenusAreClosing);
+        }
     }
 
     @Override
     public boolean onOpenSubMenu(MenuBuilder subMenu) {
+        if (mPresenterCallback != null) {
+            return mPresenterCallback.onOpenSubMenu(subMenu);
+        }
         return false;
     }
 
