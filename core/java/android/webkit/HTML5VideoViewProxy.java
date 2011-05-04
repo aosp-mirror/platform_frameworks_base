@@ -65,6 +65,7 @@ class HTML5VideoViewProxy extends Handler
     private static final int ENDED             = 201;
     private static final int POSTER_FETCHED    = 202;
     private static final int PAUSED            = 203;
+    private static final int STOPFULLSCREEN    = 204;
 
     // Timer thread -> UI thread
     private static final int TIMEUPDATE = 300;
@@ -287,8 +288,13 @@ class HTML5VideoViewProxy extends Handler
     }
 
     public void dispatchOnPaused() {
-      Message msg = Message.obtain(mWebCoreHandler, PAUSED);
-      mWebCoreHandler.sendMessage(msg);
+        Message msg = Message.obtain(mWebCoreHandler, PAUSED);
+        mWebCoreHandler.sendMessage(msg);
+    }
+
+    public void dispatchOnStopFullScreen() {
+        Message msg = Message.obtain(mWebCoreHandler, STOPFULLSCREEN);
+        mWebCoreHandler.sendMessage(msg);
     }
 
     public void onTimeupdate() {
@@ -560,6 +566,9 @@ class HTML5VideoViewProxy extends Handler
                     case TIMEUPDATE:
                         nativeOnTimeupdate(msg.arg1, mNativePointer);
                         break;
+                    case STOPFULLSCREEN:
+                        nativeOnStopFullscreen(mNativePointer);
+                        break;
                 }
             }
         };
@@ -686,6 +695,7 @@ class HTML5VideoViewProxy extends Handler
     private native void nativeOnPaused(int nativePointer);
     private native void nativeOnPosterFetched(Bitmap poster, int nativePointer);
     private native void nativeOnTimeupdate(int position, int nativePointer);
+    private native void nativeOnStopFullscreen(int nativePointer);
     private native static boolean nativeSendSurfaceTexture(SurfaceTexture texture,
             int baseLayer, int videoLayerId, int textureName,
             int playerState);

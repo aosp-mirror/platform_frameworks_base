@@ -208,7 +208,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
                 // view. This happens in the WebChromeClient before this method
                 // is invoked.
                 pauseAndDispatch(mProxy);
-
+                mProxy.dispatchOnStopFullScreen();
                 mLayout.removeView(getSurfaceView());
 
                 if (mProgressView != null) {
@@ -253,7 +253,8 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         client.onShowCustomView(mLayout, mCallback);
         // Plugins like Flash will draw over the video so hide
         // them while we're playing.
-        mProxy.getWebView().getViewManager().hideAll();
+        if (webView.getViewManager() != null)
+            webView.getViewManager().hideAll();
 
         mProgressView = client.getVideoLoadingProgressView();
         if (mProgressView != null) {
