@@ -799,8 +799,23 @@ public class MediaPlayer
      * @throws IllegalStateException if it is called in an invalid state
      * @hide pending API council
      */
-    public native void setDataSource(String path,  Map<String, String> headers)
-            throws IOException, IllegalArgumentException, IllegalStateException;
+    public void setDataSource(String path, Map<String, String> headers)
+            throws IOException, IllegalArgumentException, IllegalStateException
+    {
+        int i = 0;
+        String[] keys = new String[headers.size()];
+        String[] values = new String[headers.size()];
+        for (Map.Entry<String, String> entry: headers.entrySet()) {
+            keys[i] = entry.getKey();
+            values[i] = entry.getValue();
+            ++i;
+        }
+        _setDataSource(path, keys, values);
+    }
+
+    private native void _setDataSource(
+        String path, String[] keys, String[] values)
+        throws IOException, IllegalArgumentException, IllegalStateException;
 
     /**
      * Sets the data source (FileDescriptor) to use. It is the caller's responsibility

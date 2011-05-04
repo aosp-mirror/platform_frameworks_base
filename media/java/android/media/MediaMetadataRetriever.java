@@ -68,7 +68,21 @@ public class MediaMetadataRetriever
      * @param headers the headers to be sent together with the request for the data
      * @throws IllegalArgumentException If the URI is invalid.
      */
-    public native void setDataSource(String uri, Map<String, String> headers)
+    public void setDataSource(String uri,  Map<String, String> headers)
+            throws IllegalArgumentException {
+        int i = 0;
+        String[] keys = new String[headers.size()];
+        String[] values = new String[headers.size()];
+        for (Map.Entry<String, String> entry: headers.entrySet()) {
+            keys[i] = entry.getKey();
+            values[i] = entry.getValue();
+            ++i;
+        }
+        _setDataSource(uri, keys, values);
+    }
+
+    private native void _setDataSource(
+        String uri, String[] keys, String[] values)
         throws IllegalArgumentException;
 
     /**
