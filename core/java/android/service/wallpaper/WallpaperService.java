@@ -51,7 +51,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewRoot;
+import android.view.ViewAncestor;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
@@ -650,7 +650,7 @@ public abstract class WallpaperService extends Service {
             mWindowToken = wrapper.mWindowToken;
             mSurfaceHolder.setSizeFromLayout();
             mInitializing = true;
-            mSession = ViewRoot.getWindowSession(getMainLooper());
+            mSession = ViewAncestor.getWindowSession(getMainLooper());
             
             mWindow.setSession(mSession);
             

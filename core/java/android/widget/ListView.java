@@ -1568,7 +1568,7 @@ public class ListView extends AbsListView {
 
             // take focus back to us temporarily to avoid the eventual
             // call to clear focus when removing the focused child below
-            // from messing things up when ViewRoot assigns focus back
+            // from messing things up when ViewAncestor assigns focus back
             // to someone else
             final View focusedChild = getFocusedChild();
             if (focusedChild != null) {

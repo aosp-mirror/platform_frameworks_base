@@ -113,7 +113,7 @@ import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
-import android.view.ViewRoot;
+import android.view.ViewAncestor;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -3373,13 +3373,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Handler h = getHandler();
         if (h != null) {
             long eventTime = SystemClock.uptimeMillis();
-            h.sendMessage(h.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
+            h.sendMessage(h.obtainMessage(ViewAncestor.DISPATCH_KEY_FROM_IME,
                     new KeyEvent(eventTime, eventTime,
                     KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER, 0, 0,
                     KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                     KeyEvent.FLAG_SOFT_KEYBOARD | KeyEvent.FLAG_KEEP_TOUCH_MODE
                     | KeyEvent.FLAG_EDITOR_ACTION)));
-            h.sendMessage(h.obtainMessage(ViewRoot.DISPATCH_KEY_FROM_IME,
+            h.sendMessage(h.obtainMessage(ViewAncestor.DISPATCH_KEY_FROM_IME,
                     new KeyEvent(SystemClock.uptimeMillis(), eventTime,
                     KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER, 0, 0,
                     KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
@@ -7152,7 +7152,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 // The DecorView does not have focus when the 'Done' ExtractEditText button is
-                // pressed. Since it is the ViewRoot's mView, it requests focus before
+                // pressed. Since it is the ViewAncestor's mView, it requests focus before
                 // ExtractEditText clears focus, which gives focus to the ExtractEditText.
                 // This special case ensure that we keep current selection in that case.
                 // It would be better to know why the DecorView does not have focus at that time.

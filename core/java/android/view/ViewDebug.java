@@ -395,7 +395,7 @@ public class ViewDebug {
     }
 
     private static BufferedWriter sHierarchyTraces;
-    private static ViewRoot sHierarhcyRoot;
+    private static ViewAncestor sHierarhcyRoot;
     private static String sHierarchyTracePrefix;
 
     /**
@@ -434,7 +434,7 @@ public class ViewDebug {
     }
 
     private static BufferedWriter sMotionEventTraces;
-    private static ViewRoot sMotionEventRoot;
+    private static ViewAncestor sMotionEventRoot;
     private static String sMotionEventTracePrefix;
 
     /**
@@ -449,14 +449,14 @@ public class ViewDebug {
     }
 
     /**
-     * Returns the number of instanciated ViewRoots.
+     * Returns the number of instanciated ViewAncestors.
      *
-     * @return The number of ViewRoots instanciated in the current process.
+     * @return The number of ViewAncestors instanciated in the current process.
      *
      * @hide
      */
-    public static long getViewRootInstanceCount() {
-        return Debug.countInstancesOfClass(ViewRoot.class);
+    public static long getViewAncestorInstanceCount() {
+        return Debug.countInstancesOfClass(ViewAncestor.class);
     }
 
     /**
@@ -670,7 +670,7 @@ public class ViewDebug {
             return;
         }
 
-        sHierarhcyRoot = (ViewRoot) view.getRootView().getParent();
+        sHierarhcyRoot = (ViewAncestor) view.getRootView().getParent();
     }
 
     /**
@@ -808,7 +808,7 @@ public class ViewDebug {
             return;
         }
 
-        sMotionEventRoot = (ViewRoot) view.getRootView().getParent();
+        sMotionEventRoot = (ViewAncestor) view.getRootView().getParent();
     }
 
     /**

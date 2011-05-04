@@ -88,7 +88,7 @@ public class ListViewHeight extends Activity {
 
         // Clicking this button will remove the list adapter and hide the outer enclosing view.
         // We have to climb all the way to the top because the bug (not checking visibility)
-        // only occurs at the very outer loop of ViewRoot.performTraversals and in the case of
+        // only occurs at the very outer loop of ViewAncestor.performTraversals and in the case of
         // an Activity, this means you have to crawl all the way out to the root view.
         // In the search manager, it's sufficient to simply show/hide the outer search manager
         // view to trigger the same bug.

@@ -82,9 +82,9 @@ import java.util.ArrayList;
  * {@hide}
  */
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
-public final class ViewRoot extends Handler implements ViewParent,
+public final class ViewAncestor extends Handler implements ViewParent,
         View.AttachInfo.Callbacks, HardwareRenderer.HardwareDrawCallbacks {
-    private static final String TAG = "ViewRoot";
+    private static final String TAG = "ViewAncestor";
     private static final boolean DBG = false;
     private static final boolean SHOW_FPS = false;
     private static final boolean LOCAL_LOGV = false;
@@ -273,7 +273,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
     }
     
-    public ViewRoot(Context context) {
+    public ViewAncestor(Context context) {
         super();
 
         if (MEASURE_LATENCY) {
@@ -515,7 +515,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             }
 
             // Only enable hardware acceleration if we are not in the system process
-            // The window manager creates ViewRoots to display animated preview windows
+            // The window manager creates ViewAncestors to display animated preview windows
             // of launching apps and we don't want those to be hardware accelerated
 
             final boolean systemHwAccelerated =
@@ -2038,7 +2038,7 @@ public final class ViewRoot extends Handler implements ViewParent,
             break;
         case DO_TRAVERSAL:
             if (mProfile) {
-                Debug.startMethodTracing("ViewRoot");
+                Debug.startMethodTracing("ViewAncestor");
             }
 
             final long traversalStartTime;
@@ -3546,7 +3546,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-        // ViewRoot never intercepts touch event, so this can be a no-op
+        // ViewAncestor never intercepts touch event, so this can be a no-op
     }
 
     public boolean requestChildRectangleOnScreen(View child, Rect rectangle,
@@ -3595,14 +3595,14 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
     
     static class InputMethodCallback extends IInputMethodCallback.Stub {
-        private WeakReference<ViewRoot> mViewRoot;
+        private WeakReference<ViewAncestor> mViewAncestor;
 
-        public InputMethodCallback(ViewRoot viewRoot) {
-            mViewRoot = new WeakReference<ViewRoot>(viewRoot);
+        public InputMethodCallback(ViewAncestor viewRoot) {
+            mViewAncestor = new WeakReference<ViewAncestor>(viewRoot);
         }
 
         public void finishedEvent(int seq, boolean handled) {
-            final ViewRoot viewRoot = mViewRoot.get();
+            final ViewAncestor viewRoot = mViewAncestor.get();
             if (viewRoot != null) {
                 viewRoot.dispatchFinishedEvent(seq, handled);
             }
@@ -3614,36 +3614,36 @@ public final class ViewRoot extends Handler implements ViewParent,
     }
 
     static class W extends IWindow.Stub {
-        private final WeakReference<ViewRoot> mViewRoot;
+        private final WeakReference<ViewAncestor> mViewAncestor;
 
-        W(ViewRoot viewRoot) {
-            mViewRoot = new WeakReference<ViewRoot>(viewRoot);
+        W(ViewAncestor viewRoot) {
+            mViewAncestor = new WeakReference<ViewAncestor>(viewRoot);
         }
 
         public void resized(int w, int h, Rect coveredInsets, Rect visibleInsets,
                 boolean reportDraw, Configuration newConfig) {
-            final ViewRoot viewRoot = mViewRoot.get();
+            final ViewAncestor viewRoot = mViewAncestor.get();
             if (viewRoot != null) {
                 viewRoot.dispatchResized(w, h, coveredInsets, visibleInsets, reportDraw, newConfig);
             }
         }
 
         public void dispatchAppVisibility(boolean visible) {
-            final ViewRoot viewRoot = mViewRoot.get();
+            final ViewAncestor viewRoot = mViewAncestor.get();
             if (viewRoot != null) {
                 viewRoot.dispatchAppVisibility(visible);
             }
         }
 
         public void dispatchGetNewSurface() {
-            final ViewRoot viewRoot = mViewRoot.get();
+            final ViewAncestor viewRoot = mViewAncestor.get();
             if (viewRoot != null) {
                 viewRoot.dispatchGetNewSurface();
             }
         }
 
         public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {
-            final ViewRoot viewRoot = mViewRoot.get();
+            final ViewAncestor viewRoot = mViewAncestor.get();
             if (viewRoot != null) {
                 viewRoot.windowFocusChanged(hasFocus, inTouchMode);
             }
@@ -3663,7 +3663,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
 
         public void executeCommand(String command, String parameters, ParcelFileDescriptor out) {
-            final ViewRoot viewRoot = mViewRoot.get();
+            final ViewAncestor viewRoot = mViewAncestor.get();
             if (viewRoot != null) {
                 final View view = viewRoot.mView;
                 if (view != null) {
@@ -3694,7 +3694,7 @@ public final class ViewRoot extends Handler implements ViewParent,
         }
         
         public void closeSystemDialogs(String reason) {
-            final ViewRoot viewRoot = mViewRoot.get();
+            final ViewAncestor viewRoot = mViewAncestor.get();
             if (viewRoot != null) {
                 viewRoot.dispatchCloseSystemDialogs(reason);
             }
@@ -3722,7 +3722,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         /* Drag/drop */
         public void dispatchDragEvent(DragEvent event) {
-            final ViewRoot viewRoot = mViewRoot.get();
+            final ViewAncestor viewRoot = mViewAncestor.get();
             if (viewRoot != null) {
                 viewRoot.dispatchDragEvent(event);
             }
@@ -3730,7 +3730,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
         @Override
         public void dispatchSystemUiVisibilityChanged(int visibility) {
-            final ViewRoot viewRoot = mViewRoot.get();
+            final ViewAncestor viewRoot = mViewAncestor.get();
             if (viewRoot != null) {
                 viewRoot.dispatchSystemUiVisibilityChanged(visibility);
             }

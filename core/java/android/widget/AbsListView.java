@@ -2818,7 +2818,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         if (ev.getEdgeFlags() != 0 && motionPosition < 0) {
                             // If we couldn't find a view to click on, but the down event
                             // was touching the edge, we will bail out and try again.
-                            // This allows the edge correcting code in ViewRoot to try to
+                            // This allows the edge correcting code in ViewAncestor to try to
                             // find a nearby view to select
                             return false;
                         }
@@ -5021,7 +5021,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     public boolean sendKeyEvent(KeyEvent event) {
                         // Use our own input connection, since the filter
                         // text view may not be shown in a window so has
-                        // no ViewRoot to dispatch events with.
+                        // no ViewAncestor to dispatch events with.
                         return mDefInputConnection.sendKeyEvent(event);
                     }
                 };
