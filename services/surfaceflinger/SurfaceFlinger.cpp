@@ -395,7 +395,7 @@ bool SurfaceFlinger::threadLoop()
     if (LIKELY(mTransactionCount == 0)) {
         // if we're in a global transaction, don't do anything.
         const uint32_t mask = eTransactionNeeded | eTraversalNeeded;
-        uint32_t transactionFlags = getTransactionFlags(mask);
+        uint32_t transactionFlags = peekTransactionFlags(mask);
         if (LIKELY(transactionFlags)) {
             handleTransaction(transactionFlags);
         }
@@ -490,7 +490,17 @@ void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
         Mutex::Autolock _l(mStateLock);
         const nsecs_t now = systemTime();
         mDebugInTransaction = now;
+
+        // Here we're guaranteed that some transaction flags are set
+        // so we can call handleTransactionLocked() unconditionally.
+        // We call getTransactionFlags(), which will also clear the flags,
+        // with mStateLock held to guarantee that mCurrentState won't change
+        // until the transaction is commited.
+
+        const uint32_t mask = eTransactionNeeded | eTraversalNeeded;
+        transactionFlags = getTransactionFlags(mask);
         handleTransactionLocked(transactionFlags, ditchedLayers);
+
         mLastTransactionTime = systemTime() - now;
         mDebugInTransaction = 0;
         invalidateHwcGeometry();
@@ -1151,6 +1161,11 @@ status_t SurfaceFlinger::invalidateLayerVisibility(const sp<LayerBase>& layer)
     layer->forceVisibilityTransaction();
     setTransactionFlags(eTraversalNeeded);
     return NO_ERROR;
+}
+
+uint32_t SurfaceFlinger::peekTransactionFlags(uint32_t flags)
+{
+    return android_atomic_release_load(&mTransactionFlags);
 }
 
 uint32_t SurfaceFlinger::getTransactionFlags(uint32_t flags)
