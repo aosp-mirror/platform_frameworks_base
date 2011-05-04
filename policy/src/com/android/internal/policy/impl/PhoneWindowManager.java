@@ -2217,11 +2217,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void initializeHdmiState() {
+        boolean plugged = false;
         // watch for HDMI plug messages if the hdmi switch exists
         if (new File("/sys/devices/virtual/switch/hdmi/state").exists()) {
             mHDMIObserver.startObserving("DEVPATH=/devices/virtual/switch/hdmi");
 
-            boolean plugged = false;
             final String filename = "/sys/class/switch/hdmi/state";
             FileReader reader = null;
             try {
@@ -2243,11 +2243,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             }
-
-            // This dance forces the code in setHdmiPlugged to run.
-            mHdmiPlugged = !plugged;
-            setHdmiPlugged(!mHdmiPlugged);
         }
+        // This dance forces the code in setHdmiPlugged to run.
+        // Always do this so the sticky intent is stuck (to false) if there is no hdmi.
+        mHdmiPlugged = !plugged;
+        setHdmiPlugged(!mHdmiPlugged);
     }
 
     /**
