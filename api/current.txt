@@ -4098,6 +4098,7 @@ package android.bluetooth {
     method public java.io.InputStream getInputStream() throws java.io.IOException;
     method public java.io.OutputStream getOutputStream() throws java.io.IOException;
     method public android.bluetooth.BluetoothDevice getRemoteDevice();
+    method public boolean isConnected();
   }
 
 }

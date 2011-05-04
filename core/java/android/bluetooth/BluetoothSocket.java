@@ -94,10 +94,16 @@ public final class BluetoothSocket implements Closeable {
 
     private int mPort;  /* RFCOMM channel or L2CAP psm */
 
-    /** prevents all native calls after destroyNative() */
-    private boolean mClosed;
+    private enum SocketState {
+        INIT,
+        CONNECTED,
+        CLOSED
+    }
 
-    /** protects mClosed */
+    /** prevents all native calls after destroyNative() */
+    private SocketState mSocketState;
+
+    /** protects mSocketState */
     private final ReentrantReadWriteLock mLock;
 
     /** used by native code only */
@@ -145,7 +151,7 @@ public final class BluetoothSocket implements Closeable {
         }
         mInputStream = new BluetoothInputStream(this);
         mOutputStream = new BluetoothOutputStream(this);
-        mClosed = false;
+        mSocketState = SocketState.INIT;
         mLock = new ReentrantReadWriteLock();
     }
 
@@ -195,13 +201,14 @@ public final class BluetoothSocket implements Closeable {
     public void connect() throws IOException {
         mLock.readLock().lock();
         try {
-            if (mClosed) throw new IOException("socket closed");
+            if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
 
             if (mSdp != null) {
                 mPort = mSdp.doSdp();  // blocks
             }
 
             connectNative();  // blocks
+            mSocketState = SocketState.CONNECTED;
         } finally {
             mLock.readLock().unlock();
         }
@@ -216,7 +223,7 @@ public final class BluetoothSocket implements Closeable {
         // abort blocking operations on the socket
         mLock.readLock().lock();
         try {
-            if (mClosed) return;
+            if (mSocketState == SocketState.CLOSED) return;
             if (mSdp != null) {
                 mSdp.cancel();
             }
@@ -229,7 +236,7 @@ public final class BluetoothSocket implements Closeable {
         // abortNative(), so this lock should immediately acquire
         mLock.writeLock().lock();
         try {
-            mClosed = true;
+            mSocketState = SocketState.CLOSED;
             destroyNative();
         } finally {
             mLock.writeLock().unlock();
@@ -267,13 +274,23 @@ public final class BluetoothSocket implements Closeable {
     }
 
     /**
+     * Get the connection status of this socket, ie, whether there is an active connection with
+     * remote device.
+     * @return true if connected
+     *         false if not connected
+     */
+    public boolean isConnected() {
+        return (mSocketState == SocketState.CONNECTED);
+    }
+
+    /**
      * Currently returns unix errno instead of throwing IOException,
      * so that BluetoothAdapter can check the error code for EADDRINUSE
      */
     /*package*/ int bindListen() {
         mLock.readLock().lock();
         try {
-            if (mClosed) return EBADFD;
+            if (mSocketState == SocketState.CLOSED) return EBADFD;
             return bindListenNative();
         } finally {
             mLock.readLock().unlock();
@@ -283,8 +300,11 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ BluetoothSocket accept(int timeout) throws IOException {
         mLock.readLock().lock();
         try {
-            if (mClosed) throw new IOException("socket closed");
-            return acceptNative(timeout);
+            if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
+
+            BluetoothSocket acceptedSocket = acceptNative(timeout);
+            mSocketState = SocketState.CONNECTED;
+            return acceptedSocket;
         } finally {
             mLock.readLock().unlock();
         }
@@ -293,7 +313,7 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ int available() throws IOException {
         mLock.readLock().lock();
         try {
-            if (mClosed) throw new IOException("socket closed");
+            if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
             return availableNative();
         } finally {
             mLock.readLock().unlock();
@@ -303,7 +323,7 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ int read(byte[] b, int offset, int length) throws IOException {
         mLock.readLock().lock();
         try {
-            if (mClosed) throw new IOException("socket closed");
+            if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
             return readNative(b, offset, length);
         } finally {
             mLock.readLock().unlock();
@@ -313,7 +333,7 @@ public final class BluetoothSocket implements Closeable {
     /*package*/ int write(byte[] b, int offset, int length) throws IOException {
         mLock.readLock().lock();
         try {
-            if (mClosed) throw new IOException("socket closed");
+            if (mSocketState == SocketState.CLOSED) throw new IOException("socket closed");
             return writeNative(b, offset, length);
         } finally {
             mLock.readLock().unlock();
