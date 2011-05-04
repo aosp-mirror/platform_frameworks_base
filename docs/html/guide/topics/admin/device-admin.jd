@@ -128,6 +128,60 @@ can require PIN or passwords to have at least six characters. </td> </tr>
 combination of letters and numbers. They may include symbolic characters.
     </td>
   </tr>
+  
+  <tr>
+    <td>Complex password required</td>
+    <td>Requires that passwords must contain at least a letter, a numerical digit, and a special symbol. Introduced in Android 3.0.
+    </td>
+  </tr>
+  
+<tr> 
+  <td>Minimum letters required in password</td> <td>The minimum number of
+letters required in the password for all admins or a particular one. Introduced in Android 3.0.</td> 
+</tr>
+  
+  
+  <tr> 
+  <td>Minimum lowercase letters required in password</td> 
+  <td>The minimum number of lowercase 
+letters required in the password for all admins or a particular one. Introduced in Android 3.0.</td> 
+</tr>
+  
+  <tr> 
+  <td>Minimum non-letter characters required in password</td> 
+  <td>The minimum number of
+non-letter characters required in the password for all admins or a particular one. Introduced in Android 3.0.</td> 
+</tr>
+  
+<tr> 
+  <td>Minimum numerical digits required in password</td> 
+  <td>The minimum number of numerical digits required in the password for all admins or a particular one. Introduced in Android 3.0.</td> 
+</tr>
+
+<tr> 
+  <td>Minimum symbols required in password</td> 
+  <td>The minimum number of symbols required in the password for all admins or a particular one. Introduced in Android 3.0.</td> 
+</tr>
+
+<tr> 
+  <td>Minimum uppercase letters required in password</td> 
+  <td>The minimum number of uppercase letters required in the password for all admins or a particular one. Introduced in Android 3.0.</td> 
+</tr>
+
+<tr> 
+  <td>Password expiration timeout</td> 
+  <td>When the password will expire, expressed as a delta in milliseconds from when a device admin sets the expiration timeout. Introduced in Android 3.0.</td> 
+</tr>
+
+<tr> 
+  <td>Password history restriction</td> 
+  <td>This policy prevents users from reusing the last <em>n</em> unique passwords.
+ This policy is typically used in conjunction with
+{@link android.app.admin.DevicePolicyManager#setPasswordExpirationTimeout(android.content.ComponentName,long) setPasswordExpirationTimeout()}, which forces
+users to update their passwords after a specified amount of time has elapsed.
+Introduced in Android 3.0.</td> 
+</tr>
+  
   <tr>
     <td>Maximum failed password attempts </td>
     <td>Specifies how many times a user can enter the wrong password before the
@@ -141,6 +195,12 @@ device is lost or stolen.</td>
 pressed a button before the device locks the screen. When this happens, users
 need to enter their PIN or passwords again before they can use their devices and
 access data.  The value can be between 1 and 60 minutes.</td> </tr>
+
+<tr> 
+<td>Require storage encryption</td> 
+<td>Specifies that the storage area should be encrypted, if the device supports it. 
+Introduced in Android 3.0.</td> </tr>
+
 </table>
 
 <h4>Other features</h4>
@@ -172,18 +232,28 @@ they've enabled the application, they can use the buttons in the user interface
 to do the following:</p>
 <ul>
   <li>Set password quality.</li>
-  <li>Specify the minimum length for the user's password.</li>
+  <li>Specify requirements for the user's password, such as minimum length, the minimum number of
+  numeric characters it must contain, and so on.</li>
   <li>Set the password. If the password does not conform to the specified
 policies, the system  returns an error.</li>
   <li>Set how many failed password attempts can occur before the device is wiped
 (that is, restored to factory settings).</li>
+<li>Set how long from now the password will expire.</li>
+<li>Set the password history length (<em>length</em> refers to number of old passwords stored in the history). 
+This prevents users from reusing 
+one of the last <em>n</em> passwords they previously used.</li>
+<li>Specify that the storage area should be encrypted, if the device supports it.</li>
   <li>Set the maximum amount of inactive time that can elapse before the device
 locks.</li>
   <li>Make the device lock immediately.</li>
   <li>Wipe the device's data (that is, restore factory settings).</li>
+  
 </ul>
 
+
+
 <img src="{@docRoot}images/admin/device-admin-app.png"/>
+
 <p class="img-caption"><strong>Figure 1.</strong> Screenshot of the Sample Application</p>
 
 
@@ -469,7 +539,13 @@ password containing at least <em>both</em> numeric <em>and</em> alphabetic (or
 other symbol) characters.</dd>
   <dt>{@link android.app.admin.DevicePolicyManager#PASSWORD_QUALITY_NUMERIC}</dt><dd>The user must enter a   password
 containing at least numeric characters.</dd>
-  <dt>{@link android.app.admin.DevicePolicyManager#PASSWORD_QUALITY_SOMETHING}</dt><dd>The policy requires some kind
+<dt>{@link
+android.app.admin.DevicePolicyManager#PASSWORD_QUALITY_COMPLEX}</dt><dd>The user
+must have entered a password containing at least a letter, a numerical digit and
+a special symbol.</dd> 
+<dt>{@link
+android.app.admin.DevicePolicyManager#PASSWORD_QUALITY_SOMETHING}</dt><dd>The
+policy requires some kind
 of password, but doesn't care what it is.</dd>
   <dt>{@link android.app.admin.DevicePolicyManager#PASSWORD_QUALITY_UNSPECIFIED}</dt><dd>
   The policy has no requirements   for the password. </dd>
@@ -481,6 +557,36 @@ ComponentName mDeviceAdminSample;
 ...
 mDPM.setPasswordQuality(mDeviceAdminSample, DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC);
 </pre>
+
+<h5>Set password content requirements</h5>
+
+<p>Beginning with Android 3.0, the {@link android.app.admin.DevicePolicyManager} class
+includes methods that let you fine-tune the contents of the password. For
+example, you could set a policy that states that passwords must contain at least
+<em>n</em> uppercase letters. Here are the methods for fine-tuning a password's
+contents:</p>
+<ul>
+
+<li>{@link android.app.admin.DevicePolicyManager#setPasswordMinimumLetters(android.content.ComponentName,int) setPasswordMinimumLetters()}</li> 
+
+<li>{@link android.app.admin.DevicePolicyManager#setPasswordMinimumLowerCase(android.content.ComponentName,int) setPasswordMinimumLowerCase()}</li>
+
+<li>{@link android.app.admin.DevicePolicyManager#setPasswordMinimumUpperCase(android.content.ComponentName,int) setPasswordMinimumUpperCase()}</li>
+
+<li>{@link android.app.admin.DevicePolicyManager#setPasswordMinimumNonLetter(android.content.ComponentName,int) setPasswordMinimumNonLetter()}</li>
+
+<li>{@link android.app.admin.DevicePolicyManager#setPasswordMinimumNumeric(android.content.ComponentName,int) setPasswordMinimumNumeric()}</li>
+
+<li>{@link android.app.admin.DevicePolicyManager#setPasswordMinimumSymbols(android.content.ComponentName,int) setPasswordMinimumSymbols()}</li>
+</ul>
+<p>For example, this snippet states that the password must have at least 2 uppercase letters:</p>
+<pre>
+DevicePolicyManager mDPM;
+ComponentName mDeviceAdminSample;
+int pwMinUppercase = 2;
+...
+mDPM.setPasswordMinimumUpperCase(mDeviceAdminSample, pwMinUppercase);</pre>
+
 
 <h5>Set the minimum password length</h5>
 <p>You can specify that a password must be at least the specified minimum
@@ -501,7 +607,86 @@ int maxFailedPw;
  ...
 mDPM.setMaximumFailedPasswordsForWipe(mDeviceAdminSample, maxFailedPw);</pre>
 
-<h4 id="lock">Set  device lock</h4>
+<h5 id="expiration">Set password expiration timeout</h5>
+<p>Beginning with Android 3.0, you can use the 
+{@link android.app.admin.DevicePolicyManager#setPasswordExpirationTimeout(android.content.ComponentName,long) setPasswordExpirationTimeout()} 
+method to set when a password will expire, expressed as a delta in milliseconds from when a device admin sets the expiration timeout. For example:</p>
+
+<pre>DevicePolicyManager mDPM;
+ComponentName mDeviceAdminSample;
+long pwExpiration;
+...
+mDPM.setPasswordExpirationTimeout(mDeviceAdminSample, pwExpiration);
+</pre>
+
+<p>From the <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/
+DeviceAdminSample.html"> Device Administration API sample</a>, here is the code
+that updates the password expiration status:</p>
+
+<pre>
+DevicePolicyManager mDPM;
+ComponentName mDeviceAdminSample;
+private TextView mPasswordExpirationStatus;
+...
+void updatePasswordExpirationStatus() {
+    boolean active = mDPM.isAdminActive(mDeviceAdminSample);
+    String statusText;
+    if (active) {
+        long now = System.currentTimeMillis();
+        // Query the DevicePolicyManager twice - first for the expiration values
+        // set by the sample app, and later, for the system values (which may be different
+        // if there is another administrator active.)
+        long expirationDate = mDPM.getPasswordExpiration(mDeviceAdminSample);
+        long mSecUntilExpiration = expirationDate - now;
+        if (mSecUntilExpiration &gt;= 0) {
+            statusText = &quot;Expiration in &quot; + countdownString(mSecUntilExpiration);
+        } else {
+            statusText = &quot;Expired &quot; + countdownString(-mSecUntilExpiration) + &quot; ago&quot;;
+        }
+
+        // expirationTimeout is the cycle time between required password refresh
+        long expirationTimeout = mDPM.getPasswordExpirationTimeout(mDeviceAdminSample);
+        statusText += &quot; / timeout period &quot; + countdownString(expirationTimeout);
+
+        // Now report the aggregate (global) expiration time
+        statusText += &quot; / Aggregate &quot;;
+        expirationDate = mDPM.getPasswordExpiration(null);
+        mSecUntilExpiration = expirationDate - now;
+        if (mSecUntilExpiration &gt;= 0) {
+            statusText += &quot;expiration in &quot; + countdownString(mSecUntilExpiration);
+        } else {
+            statusText += &quot;expired &quot; + countdownString(-mSecUntilExpiration) + &quot; ago&quot;;
+        }
+    } else {
+        statusText = &quot;&lt;inactive&gt;&quot;;
+    }
+    mPasswordExpirationStatus.setText(statusText);</pre>
+    
+<h5 id="history">Restrict password based on history</h5>
+
+<p>Beginning with Android 3.0, you can use the 
+{@link android.app.admin.DevicePolicyManager#setPasswordHistoryLength(android.content.ComponentName,int) setPasswordHistoryLength()} 
+method to limit users'
+ability to reuse old passwords. This method takes a <em>length</em>
+parameter, which specifies how many old
+passwords are stored. When this policy is active, users cannot enter a new
+password that matches the last <em>n</em> passwords. This prevents
+users from using the same password over and over. This policy is typically used
+in conjunction with 
+{@link android.app.admin.DevicePolicyManager#setPasswordExpirationTimeout(android.content.ComponentName,long) setPasswordExpirationTimeout()},
+which forces users
+to update their passwords after a specified amount of time has elapsed. </p>
+
+<p>For example, this snippet prohibits users from reusing any of their last 5 passwords:</p>
+
+<pre>DevicePolicyManager mDPM;
+ComponentName mDeviceAdminSample;
+int pwHistoryLength = 5;
+...
+mDPM.setPasswordHistoryLength(mDeviceAdminSample, pwHistoryLength);
+</pre>
+
+<h4 id="lock">Set device lock</h4>
 <p>You can set the maximum period of user inactivity that can occur before the
 device locks. For example:</p>
 <pre>
@@ -515,6 +700,8 @@ mDPM.setMaximumTimeToLock(mDeviceAdminSample, timeMs);
 <pre>
 DevicePolicyManager mDPM;
 mDPM.lockNow();</pre>
+
+
 
 <h4 id="wipe">Perform data wipe</h4>
 
@@ -530,3 +717,20 @@ DevicePolicyManager mDPM;
 mDPM.wipeData(0);</pre>
 <p>The {@link android.app.admin.DevicePolicyManager#wipeData wipeData()} method takes as its parameter a bit mask of
 additional options. Currently the value must be 0. </p>
+
+<h4 id=storage">Storage encryption</h4>
+<p>Beginning with Android 3.0, you can use the 
+{@link android.app.admin.DevicePolicyManager#setStorageEncryption(android.content.ComponentName,boolean) setStorageEncryption()} 
+method to set a policy requiring encryption of the storage area, where supported.</p>
+
+<p>For example:</p>
+
+<pre>
+DevicePolicyManager mDPM;
+ComponentName mDeviceAdminSample;
+...
+mDPM.setStorageEncryption(mDeviceAdminSample, true);
+</pre>
+<p>
+See the <a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/app/DeviceAdminSample.html"> Device Administration API sample</a> for a complete
+example of how to enable storage encryption.</p>
