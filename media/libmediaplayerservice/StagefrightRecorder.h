@@ -69,6 +69,7 @@ private:
     sp<Surface> mPreviewSurface;
     sp<IMediaRecorderClient> mListener;
     sp<MediaWriter> mWriter, mWriterAux;
+    int mOutputFd, mOutputFdAux;
     sp<AudioSource> mAudioSourceNode;
 
     audio_source_t mAudioSource;
@@ -104,7 +105,6 @@ private:
     sp<CameraSourceTimeLapse> mCameraSourceTimeLapse;
 
     String8 mParams;
-    int mOutputFd, mOutputFdAux;
 
     bool mIsMetaDataStoredInVideoBuffers;
     MediaProfiles *mEncoderProfiles;
@@ -123,6 +123,7 @@ private:
     status_t startMPEG4Recording();
     status_t startAMRRecording();
     status_t startAACRecording();
+    status_t startRawAudioRecording();
     status_t startRTPRecording();
     status_t startMPEG2TSRecording();
     sp<MediaSource> createAudioSource();

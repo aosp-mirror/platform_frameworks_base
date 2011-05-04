@@ -6,6 +6,7 @@ include frameworks/base/media/libstagefright/codecs/common/Config.mk
 LOCAL_SRC_FILES:=                         \
         ACodec.cpp                        \
         AACExtractor.cpp                  \
+        AACWriter.cpp                     \
         AMRExtractor.cpp                  \
         AMRWriter.cpp                     \
         AVIExtractor.cpp                  \

@@ -84,7 +84,7 @@ status_t AACEncoder::initCheck() {
     params.sampleRate = mSampleRate;
     params.bitRate = mBitRate;
     params.nChannels = mChannels;
-    params.adtsUsed = 0;  // For MP4 file, don't use adts format$
+    params.adtsUsed = 0;  // We add adts header in the file writer if needed.
     if (VO_ERR_NONE != mApiHandle->SetParam(mEncoderHandle, VO_PID_AAC_ENCPARAM,  &params)) {
         LOGE("Failed to set AAC encoder parameters");
         return UNKNOWN_ERROR;
