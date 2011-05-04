@@ -54,9 +54,6 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     private CDMAPhone mCdmaPhone;
 
-    //useful for debugging
-    boolean mFailNextConnect = false;
-
     /** The DataConnection being setup */
     private CdmaDataConnection mPendingDataConnection;
 
@@ -660,7 +657,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             reason = (String) ar.userObj;
         }
 
-        if (ar.exception == null) {
+        if (isDataSetupCompleteOk(ar)) {
             // Everything is setup
             notifyDefaultData(reason);
         } else {
