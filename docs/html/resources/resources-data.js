@@ -606,6 +606,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'new', 'newfeature'],
+    path: 'samples/USB/index.html',
+    title: {
+      en: 'USB'
+    },
+    description: {
+      en: 'A set of samples that demonstrate how to use various features of the USB APIs.'
+    }
+  },
+  {
     tags: ['sample', 'ui', 'widgets'],
     path: 'samples/Wiktionary/index.html',
     title: {
