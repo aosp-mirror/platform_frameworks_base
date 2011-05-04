@@ -26,11 +26,12 @@
     android:paddingRight="0px"
     >
 
-    <com.android.systemui.statusbar.phone.TrackingPatternView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        />
+    <View
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:layout_weight="1"
+         android:background="#ff000000"
+         />
 
     <com.android.systemui.statusbar.phone.CloseDragHandle android:id="@+id/close"
         android:layout_width="match_parent"
@@ -42,7 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:scaleType="fitXY"
-            android:src="@drawable/shade_handlebar"
+            android:src="@drawable/status_bar_close_on"
             />
 
     </com.android.systemui.statusbar.phone.CloseDragHandle>
