@@ -718,9 +718,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         mNetRequestersPids[usedNetworkType].add(currentPid);
                     }
                 }
-                mHandler.sendMessageDelayed(mHandler.obtainMessage(EVENT_RESTORE_DEFAULT_NETWORK,
-                        f), getRestoreDefaultNetworkDelay());
 
+                int restoreTimer = getRestoreDefaultNetworkDelay(usedNetworkType);
+
+                if (restoreTimer >= 0) {
+                    mHandler.sendMessageDelayed(
+                            mHandler.obtainMessage(EVENT_RESTORE_DEFAULT_NETWORK, f), restoreTimer);
+                }
 
                 if ((ni.isConnectedOrConnecting() == true) &&
                         !network.isTeardownRequested()) {
@@ -1652,7 +1656,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private int getRestoreDefaultNetworkDelay() {
+    private int getRestoreDefaultNetworkDelay(int networkType) {
         String restoreDefaultNetworkDelayStr = SystemProperties.get(
                 NETWORK_RESTORE_DELAY_PROP_NAME);
         if(restoreDefaultNetworkDelayStr != null &&
@@ -1662,7 +1666,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             } catch (NumberFormatException e) {
             }
         }
-        return RESTORE_DEFAULT_NETWORK_DELAY;
+        // if the system property isn't set, use the value for the apn type
+        int ret = RESTORE_DEFAULT_NETWORK_DELAY;
+
+        if ((networkType <= ConnectivityManager.MAX_NETWORK_TYPE) &&
+                (mNetConfigs[networkType] != null)) {
+            ret = mNetConfigs[networkType].restoreTime;
+        }
+        return ret;
     }
 
     @Override
