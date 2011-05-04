@@ -511,6 +511,38 @@ public class PhoneStatusBar extends StatusBar {
                 Context.LAYOUT_INFLATER_SERVICE);
         View row = inflater.inflate(R.layout.status_bar_notification_row, parent, false);
 
+        // wire up the veto button
+        View vetoButton = row.findViewById(R.id.veto);
+        if (notification.isClearable()) {
+            final String _pkg = notification.pkg;
+            final String _tag = notification.tag;
+            final int _id = notification.id;
+            vetoButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        try {
+                            mBarService.onNotificationClear(_pkg, _tag, _id);
+                        } catch (RemoteException ex) {
+                            // system process is dead if we're here.
+                        }
+                    }
+                });
+        } else {
+            if ((notification.notification.flags & Notification.FLAG_ONGOING_EVENT) == 0) {
+                vetoButton.setVisibility(View.INVISIBLE);
+            } else {
+                vetoButton.setVisibility(View.GONE);
+            }
+        }
+
+        // the large icon
+        ImageView largeIcon = (ImageView)row.findViewById(R.id.large_icon);
+        if (notification.notification.largeIcon != null) {
+            largeIcon.setImageBitmap(notification.notification.largeIcon);
+        } else {
+            largeIcon.getLayoutParams().width = 0;
+            largeIcon.setVisibility(View.INVISIBLE);
+        }
+
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(R.id.content);
         content.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);

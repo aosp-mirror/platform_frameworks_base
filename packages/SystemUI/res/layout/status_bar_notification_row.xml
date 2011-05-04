@@ -1,24 +1,45 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="65sp"
-    android:orientation="vertical"
+    android:layout_height="65dp"
     >
 
+    <ImageButton
+        android:id="@+id/veto"
+        android:layout_width="48dp"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:src="@drawable/status_bar_veto"
+        android:scaleType="center"
+        android:background="@null"
+        android:paddingRight="8dp"
+        android:paddingLeft="8dp"
+        />
+
+    <ImageView
+        android:id="@+id/large_icon"
+        android:layout_width="@android:dimen/notification_large_icon_width"
+        android:layout_height="@android:dimen/notification_large_icon_height"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:scaleType="center"
+        />
+
     <com.android.systemui.statusbar.LatestItemView android:id="@+id/content"
-            android:layout_width="match_parent"
-            android:layout_height="64sp"
-            android:background="@android:drawable/status_bar_item_background"
-            android:focusable="true"
-            android:clickable="true"
-            android:paddingRight="6sp"
-            >
-    </com.android.systemui.statusbar.LatestItemView>
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@id/large_icon"
+        android:layout_toLeftOf="@id/veto"
+        android:focusable="true"
+        android:clickable="true"
+        />
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="1sp"
-        android:background="@android:drawable/divider_horizontal_bright"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:background="@android:drawable/divider_horizontal_dark"
         />
 
-</LinearLayout>
-
+</RelativeLayout>
