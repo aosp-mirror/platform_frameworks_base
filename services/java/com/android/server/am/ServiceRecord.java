@@ -202,7 +202,9 @@ class ServiceRecord extends Binder {
         long now = SystemClock.uptimeMillis();
         long nowReal = SystemClock.elapsedRealtime();
         pw.print(prefix); pw.print("baseDir="); pw.println(baseDir);
-        if (!resDir.equals(baseDir)) pw.print(prefix); pw.print("resDir="); pw.println(resDir);
+        if (!resDir.equals(baseDir)) {
+            pw.print(prefix); pw.print("resDir="); pw.println(resDir);
+        }
         pw.print(prefix); pw.print("dataDir="); pw.println(dataDir);
         pw.print(prefix); pw.print("app="); pw.println(app);
         if (isForeground || foregroundId != 0) {
