@@ -8290,7 +8290,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     suggestionInfo.spanEnd = spanEnd;
 
                     totalNbSuggestions++;
-                    if (totalNbSuggestions > MAX_NUMBER_SUGGESTIONS) {
+                    if (totalNbSuggestions == MAX_NUMBER_SUGGESTIONS) {
                         // Also end outer for loop
                         spanIndex = nbSpans;
                         break;
