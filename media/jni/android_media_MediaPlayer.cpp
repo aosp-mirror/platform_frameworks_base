@@ -186,7 +186,9 @@ static void process_media_player_call(JNIEnv *env, jobject thiz, status_t opStat
 
 static void
 android_media_MediaPlayer_setDataSourceAndHeaders(
-        JNIEnv *env, jobject thiz, jstring path, jobject headers) {
+        JNIEnv *env, jobject thiz, jstring path,
+        jobjectArray keys, jobjectArray values) {
+
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
@@ -207,112 +209,46 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
     env->ReleaseStringUTFChars(path, tmp);
     tmp = NULL;
 
-    // headers is a Map<String, String>.
-    // We build a similar KeyedVector out of it.
+    int nKeyValuePairs = env->GetArrayLength(keys);
+    if (nKeyValuePairs != env->GetArrayLength(values)) {
+        LOGE("keys and values have different length: %d <-> %d",
+            nKeyValuePairs, env->GetArrayLength(values));
+        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
+
+    // We build a KeyedVector out of the key and val arrays
     KeyedVector<String8, String8> headersVector;
-    if (headers) {
-        // Get the Map's entry Set.
-        jclass mapClass = env->FindClass("java/util/Map");
-        if (mapClass == NULL) {
+    for (int i = 0; i < nKeyValuePairs; ++i) {
+        // No need to check ArrayIndexOutOfBoundsException, since we
+        // know it won't happen here.
+        jstring key = (jstring) env->GetObjectArrayElement(keys, i);
+        jstring val = (jstring) env->GetObjectArrayElement(values, i);
+
+        const char* keyStr = env->GetStringUTFChars(key, NULL);
+        if (!keyStr) {  // OutOfMemoryError
             return;
         }
 
-        jmethodID entrySet =
-            env->GetMethodID(mapClass, "entrySet", "()Ljava/util/Set;");
-        if (entrySet == NULL) {
-            return;
-        }
-
-        jobject set = env->CallObjectMethod(headers, entrySet);
-        if (set == NULL) {
-            return;
-        }
-
-        // Obtain an iterator over the Set
-        jclass setClass = env->FindClass("java/util/Set");
-        if (setClass == NULL) {
-            return;
-        }
-
-        jmethodID iterator =
-            env->GetMethodID(setClass, "iterator", "()Ljava/util/Iterator;");
-        if (iterator == NULL) {
-            return;
-        }
-
-        jobject iter = env->CallObjectMethod(set, iterator);
-        if (iter == NULL) {
-            return;
-        }
-
-        // Get the Iterator method IDs
-        jclass iteratorClass = env->FindClass("java/util/Iterator");
-        if (iteratorClass == NULL) {
-            return;
-        }
-
-        jmethodID hasNext = env->GetMethodID(iteratorClass, "hasNext", "()Z");
-        if (hasNext == NULL) {
-            return;
-        }
-
-        jmethodID next =
-            env->GetMethodID(iteratorClass, "next", "()Ljava/lang/Object;");
-        if (next == NULL) {
-            return;
-        }
-
-        // Get the Entry class method IDs
-        jclass entryClass = env->FindClass("java/util/Map$Entry");
-        if (entryClass == NULL) {
-            return;
-        }
-
-        jmethodID getKey =
-            env->GetMethodID(entryClass, "getKey", "()Ljava/lang/Object;");
-        if (getKey == NULL) {
-            return;
-        }
-
-        jmethodID getValue =
-            env->GetMethodID(entryClass, "getValue", "()Ljava/lang/Object;");
-        if (getValue == NULL) {
-            return;
-        }
-
-        // Iterate over the entry Set
-        while (env->CallBooleanMethod(iter, hasNext)) {
-            jobject entry = env->CallObjectMethod(iter, next);
-            jstring key = (jstring) env->CallObjectMethod(entry, getKey);
-            jstring value = (jstring) env->CallObjectMethod(entry, getValue);
-
-            const char* keyStr = env->GetStringUTFChars(key, NULL);
-            if (!keyStr) {  // Out of memory
-                return;
-            }
-
-            const char* valueStr = env->GetStringUTFChars(value, NULL);
-            if (!valueStr) {  // Out of memory
-                env->ReleaseStringUTFChars(key, keyStr);
-                return;
-            }
-
-            headersVector.add(String8(keyStr), String8(valueStr));
-
-            env->DeleteLocalRef(entry);
+        const char* valueStr = env->GetStringUTFChars(val, NULL);
+        if (!valueStr) {  // OutOfMemoryError
             env->ReleaseStringUTFChars(key, keyStr);
-            env->DeleteLocalRef(key);
-            env->ReleaseStringUTFChars(value, valueStr);
-            env->DeleteLocalRef(value);
+            return;
         }
 
+        headersVector.add(String8(keyStr), String8(valueStr));
+
+        env->ReleaseStringUTFChars(key, keyStr);
+        env->ReleaseStringUTFChars(val, valueStr);
+        env->DeleteLocalRef(key);
+        env->DeleteLocalRef(val);
     }
 
     LOGV("setDataSource: path %s", pathStr);
     status_t opStatus =
         mp->setDataSource(
                 pathStr,
-                headers ? &headersVector : NULL);
+                nKeyValuePairs > 0? &headersVector : NULL);
 
     process_media_player_call(
             env, thiz, opStatus, "java/io/IOException",
@@ -322,7 +258,7 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
 static void
 android_media_MediaPlayer_setDataSource(JNIEnv *env, jobject thiz, jstring path)
 {
-    android_media_MediaPlayer_setDataSourceAndHeaders(env, thiz, path, 0);
+    android_media_MediaPlayer_setDataSourceAndHeaders(env, thiz, path, NULL, NULL);
 }
 
 static void
@@ -851,7 +787,13 @@ android_media_MediaPlayer_getParameter(JNIEnv *env, jobject thiz, jint key, jobj
 
 static JNINativeMethod gMethods[] = {
     {"setDataSource",       "(Ljava/lang/String;)V",            (void *)android_media_MediaPlayer_setDataSource},
-    {"setDataSource",       "(Ljava/lang/String;Ljava/util/Map;)V",(void *)android_media_MediaPlayer_setDataSourceAndHeaders},
+
+    {
+        "_setDataSource",
+        "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
+        (void *)android_media_MediaPlayer_setDataSourceAndHeaders
+    },
+
     {"setDataSource",       "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
     {"_setVideoSurfaceOrSurfaceTexture", "()V",                 (void *)android_media_MediaPlayer_setVideoSurfaceOrSurfaceTexture},
     {"prepare",             "()V",                              (void *)android_media_MediaPlayer_prepare},

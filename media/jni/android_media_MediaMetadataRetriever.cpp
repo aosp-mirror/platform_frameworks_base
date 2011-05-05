@@ -79,7 +79,9 @@ static void setRetriever(JNIEnv* env, jobject thiz, int retriever)
 
 static void
 android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
-        JNIEnv *env, jobject thiz, jstring path, jobject headers) {
+        JNIEnv *env, jobject thiz, jstring path,
+        jobjectArray keys, jobjectArray values) {
+
     LOGV("setDataSource");
     MediaMetadataRetriever* retriever = getRetriever(env, thiz);
     if (retriever == 0) {
@@ -103,10 +105,17 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
     }
 
     String8 pathStr(tmp);
-
     env->ReleaseStringUTFChars(path, tmp);
     tmp = NULL;
 
+    int nKeyValuePairs = env->GetArrayLength(keys);
+    if (nKeyValuePairs != env->GetArrayLength(values)) {
+        LOGE("keys and values have different length: %d <--> %d",
+            nKeyValuePairs, env->GetArrayLength(values));
+        jniThrowException(
+                env, "java/lang/IllegalArgumentException", NULL);
+        return;
+    }
     // Don't let somebody trick us in to reading some random block of memory
     if (strncmp("mem://", pathStr.string(), 6) == 0) {
         jniThrowException(
@@ -114,110 +123,38 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
         return;
     }
 
-    // headers is a Map<String, String>.
     // We build a similar KeyedVector out of it.
     KeyedVector<String8, String8> headersVector;
-    if (headers) {
-        // Get the Map's entry Set.
-        jclass mapClass = env->FindClass("java/util/Map");
-        if (mapClass == NULL) {
+    for (int i = 0; i < nKeyValuePairs; ++i) {
+        // No need to check on the ArrayIndexOutOfBoundsException, since
+        // it won't happen here.
+        jstring key = (jstring) env->GetObjectArrayElement(keys, i);
+        jstring value = (jstring) env->GetObjectArrayElement(values, i);
+
+        const char* keyStr = env->GetStringUTFChars(key, NULL);
+        if (!keyStr) {  // OutOfMemoryError
             return;
         }
 
-        jmethodID entrySet =
-            env->GetMethodID(mapClass, "entrySet", "()Ljava/util/Set;");
-        if (entrySet == NULL) {
-            return;
-        }
-
-        jobject set = env->CallObjectMethod(headers, entrySet);
-        if (set == NULL) {
-            return;
-        }
-
-        // Obtain an iterator over the Set
-        jclass setClass = env->FindClass("java/util/Set");
-        if (setClass == NULL) {
-            return;
-        }
-
-        jmethodID iterator =
-            env->GetMethodID(setClass, "iterator", "()Ljava/util/Iterator;");
-        if (iterator == NULL) {
-            return;
-        }
-
-        jobject iter = env->CallObjectMethod(set, iterator);
-        if (iter == NULL) {
-            return;
-        }
-
-        // Get the Iterator method IDs
-        jclass iteratorClass = env->FindClass("java/util/Iterator");
-        if (iteratorClass == NULL) {
-            return;
-        }
-        jmethodID hasNext = env->GetMethodID(iteratorClass, "hasNext", "()Z");
-        if (hasNext == NULL) {
-            return;
-        }
-
-        jmethodID next =
-            env->GetMethodID(iteratorClass, "next", "()Ljava/lang/Object;");
-        if (next == NULL) {
-            return;
-        }
-
-        // Get the Entry class method IDs
-        jclass entryClass = env->FindClass("java/util/Map$Entry");
-        if (entryClass == NULL) {
-            return;
-        }
-
-        jmethodID getKey =
-            env->GetMethodID(entryClass, "getKey", "()Ljava/lang/Object;");
-        if (getKey == NULL) {
-            return;
-        }
-
-        jmethodID getValue =
-            env->GetMethodID(entryClass, "getValue", "()Ljava/lang/Object;");
-        if (getValue == NULL) {
-            return;
-        }
-
-        // Iterate over the entry Set
-        while (env->CallBooleanMethod(iter, hasNext)) {
-            jobject entry = env->CallObjectMethod(iter, next);
-            jstring key = (jstring) env->CallObjectMethod(entry, getKey);
-            jstring value = (jstring) env->CallObjectMethod(entry, getValue);
-
-            const char* keyStr = env->GetStringUTFChars(key, NULL);
-            if (!keyStr) {  // Out of memory
-                return;
-            }
-
-            const char* valueStr = env->GetStringUTFChars(value, NULL);
-            if (!valueStr) {  // Out of memory
-                env->ReleaseStringUTFChars(key, keyStr);
-                return;
-            }
-
-            headersVector.add(String8(keyStr), String8(valueStr));
-
-            env->DeleteLocalRef(entry);
+        const char* valueStr = env->GetStringUTFChars(value, NULL);
+        if (!valueStr) {  // OutOfMemoryError
             env->ReleaseStringUTFChars(key, keyStr);
-            env->DeleteLocalRef(key);
-            env->ReleaseStringUTFChars(value, valueStr);
-            env->DeleteLocalRef(value);
+            return;
         }
+
+        headersVector.add(String8(keyStr), String8(valueStr));
+
+        env->ReleaseStringUTFChars(key, keyStr);
+        env->ReleaseStringUTFChars(value, valueStr);
+        env->DeleteLocalRef(key);
+        env->DeleteLocalRef(value);
 
     }
 
     process_media_retriever_call(
             env,
             retriever->setDataSource(
-                pathStr.string(), headers ? &headersVector : NULL),
+                pathStr.string(), nKeyValuePairs > 0 ? &headersVector : NULL),
 
             "java/lang/RuntimeException",
             "setDataSource failed");
@@ -226,7 +163,7 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
 static void android_media_MediaMetadataRetriever_setDataSource(
         JNIEnv *env, jobject thiz, jstring path) {
     android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
-            env, thiz, path, NULL);
+            env, thiz, path, NULL, NULL);
 }
 
 static void android_media_MediaMetadataRetriever_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length)
@@ -539,7 +476,13 @@ static void android_media_MediaMetadataRetriever_native_setup(JNIEnv *env, jobje
 // JNI mapping between Java methods and native methods
 static JNINativeMethod nativeMethods[] = {
         {"setDataSource",   "(Ljava/lang/String;)V", (void *)android_media_MediaMetadataRetriever_setDataSource},
-        {"setDataSource",   "(Ljava/lang/String;Ljava/util/Map;)V", (void *)android_media_MediaMetadataRetriever_setDataSourceAndHeaders},
+
+        {
+            "_setDataSource",
+            "(Ljava/lang/String;[Ljava/lang/String;[Ljava/lang/String;)V",
+            (void *)android_media_MediaMetadataRetriever_setDataSourceAndHeaders
+        },
+
         {"setDataSource",   "(Ljava/io/FileDescriptor;JJ)V", (void *)android_media_MediaMetadataRetriever_setDataSourceFD},
         {"_getFrameAtTime", "(JI)Landroid/graphics/Bitmap;", (void *)android_media_MediaMetadataRetriever_getFrameAtTime},
         {"extractMetadata", "(I)Ljava/lang/String;", (void *)android_media_MediaMetadataRetriever_extractMetadata},
