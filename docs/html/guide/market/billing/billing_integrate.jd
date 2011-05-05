@@ -299,7 +299,9 @@ onto a device to run it. To run the sample application, do the following:</p>
     purchases will show up as actual payouts to your merchant account.</p>
 </ol>
 
-<p class="note"><strong>Note</strong>: Debug log messages are turned off by default in the sample application. You can turn them on by setting the variable <code>DEBUG</code> to <code>true</code> in the <code>Consts.java</code> file.</p>
+<p class="note"><strong>Note</strong>: Debug log messages are turned off by default in the
+sample application. You can turn them on by setting the variable <code>DEBUG</code>
+to <code>true</code> in the <code>Consts.java</code> file.</p>
 
 <h2 id="billing-add-aidl">Adding the AIDL file to your project</h2>
 
@@ -598,7 +600,7 @@ to the Bundle prior to invoking the <code>sendBillingRequest()</code> method.</p
 <code>PURCHASE_INTENT</code> key provides you with a {@link android.app.PendingIntent}, which you
 can use to launch the checkout UI.</p>
 
-<h5>Launching the pending intent</h5>
+<h5>Using the pending intent</h5>
 
 <p>How you use the pending intent depends on which version of Android a device is running. On
 Android 1.6, you must use the pending intent to launch the checkout UI in its own separate task
@@ -649,15 +651,57 @@ application.</p>
 
 <p>A <code>REQUEST_PURCHASE</code> request also triggers two asynchronous responses (broadcast
 intents). First, the Android Market application sends a <code>RESPONSE_CODE</code> broadcast intent,
-which provides error information about the request. Next, if the request was successful, the Android
-Market application sends an <code>IN_APP_NOTIFY</code> broadcast intent. This message contains a
-notification ID, which you can use to retrieve the transaction details for the
-<code>REQUEST_PURCHASE</code> request.</p>
+which provides error information about the request. If the request does not generate an
+error, the <code>RESPONSE_CODE</code> broadcast intent returns <code>RESULT_OK</code>, which
+indicates that the request was successfully sent. (To be clear, a <code>RESULT_OK</code> response
+does not indicate that the requested purchase was successful; it indicates that the request was sent
+successfully to Android Market.)</p>
 
-<p>Keep in mind, the Android Market application also sends an <code>IN_APP_NOTIFY</code> for
-refunds. For more information, see <a
+<p>Next, when the requested transaction changes state (for example, the purchase is successfully
+charged to a credit card or the user cancels the purchase), the Android Market application sends an
+<code>IN_APP_NOTIFY</code> broadcast intent. This message contains a notification ID, which you can
+use to retrieve the transaction details for the <code>REQUEST_PURCHASE</code> request.</p>
+
+<p class="note"><strong>Note:</strong> The Android Market application also sends
+an <code>IN_APP_NOTIFY</code> for refunds. For more information, see <a
 href="{@docRoot}guide/market/billing/billing_overview.html#billing-action-notify">Handling
 IN_APP_NOTIFY messages</a>.</p>
+
+<p>Because the purchase process is not instantaneous and can take several seconds (or more), you
+must assume that a purchase request is pending from the time you receive a <code>RESULT_OK</code>
+message until you receive an <code>IN_APP_NOTIFY</code> message for the transaction. While the
+transaction is pending, the Android Market checkout UI displays an "Authorizing purchase..."
+notification; however, this notification is dismissed after 60 seconds and you should not rely on
+this notification as your primary means of conveying transaction status to users. Instead, we
+recommend that you do the following:</p>
+
+<ul>
+  <li>Add an {@link android.app.Activity} to your application that shows users the status of pending
+and completed in-app purchases.</li>
+  <li>Use a <a href="{@docRoot}guide/topics/ui/notifiers/notifications.html">status
+bar notification</a> to keep users informed about the progress of a purchase.</li>
+</ul>
+
+<p>To use these two UI elements, you could invoke a status bar notification with a ticker-text
+message that says "Purchase pending" when your application receives a <code>RESULT_OK</code>
+message. Then, when your application receives an <code>IN_APP_NOTIFY</code> message, you could
+update the notification with a new message that says "Purchase succeeded" or "Purchase failed." When
+a user touches the expanded status bar notification, you could launch the activity that shows the
+status of pending and completed in-app purchases.</p>
+
+<p>If you use some other UI technique to inform users about the state of a pending transaction,
+be sure that your pending status UI does not block your application. For example, you should avoid
+using a hovering progress wheel to convey the status of a pending transaction because a pending
+transaction could last a long time, particularly if a device loses network connectivity and cannot
+receive transaction updates from Android Market.</p>
+
+<p class="caution"><strong>Important:</strong> If a user purchases a managed item, you must prevent
+the user from purchasing the item again while the original transaction is pending. If a user
+attempts to purchase a managed item twice, and the first transaction is still pending, Android
+Market will display an error to the user; however, Android Market will not send an error to your
+application notifying you that the second purchase request was canceled. This might cause your
+application to get stuck in a pending state while it waits for an <code>IN_APP_NOTIFY</code> message
+for the second purchase request.</p>
 
 <h4>Retrieving transaction information for a purchase or refund (GET_PURCHASE_INFORMATION)</h4>
 
