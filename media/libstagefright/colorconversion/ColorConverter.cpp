@@ -187,8 +187,7 @@ status_t ColorConverter::convertCbYCrY(
 
 status_t ColorConverter::convertYUV420Planar(
         const BitmapParams &src, const BitmapParams &dst) {
-    if (!((dst.mWidth & 1) == 0
-            && (src.mCropLeft & 1) == 0
+    if (!((src.mCropLeft & 1) == 0
             && src.cropWidth() == dst.cropWidth()
             && src.cropHeight() == dst.cropHeight())) {
         return ERROR_UNSUPPORTED;
@@ -196,8 +195,8 @@ status_t ColorConverter::convertYUV420Planar(
 
     uint8_t *kAdjustedClip = initClip();
 
-    uint32_t *dst_ptr = (uint32_t *)dst.mBits
-        + (dst.mCropTop * dst.mWidth + dst.mCropLeft) / 2;
+    uint16_t *dst_ptr = (uint16_t *)dst.mBits
+        + dst.mCropTop * dst.mWidth + dst.mCropLeft;
 
     const uint8_t *src_y =
         (const uint8_t *)src.mBits + src.mCropTop * src.mWidth + src.mCropLeft;
@@ -260,7 +259,11 @@ status_t ColorConverter::convertYUV420Planar(
                 | ((kAdjustedClip[g2] >> 2) << 5)
                 | (kAdjustedClip[b2] >> 3);
 
-            dst_ptr[x / 2] = (rgb2 << 16) | rgb1;
+            if (x + 1 < src.cropWidth()) {
+                *(uint32_t *)(&dst_ptr[x]) = (rgb2 << 16) | rgb1;
+            } else {
+                dst_ptr[x] = rgb1;
+            }
         }
 
         src_y += src.mWidth;
@@ -270,7 +273,7 @@ status_t ColorConverter::convertYUV420Planar(
             src_v += src.mWidth / 2;
         }
 
-        dst_ptr += dst.mWidth / 2;
+        dst_ptr += dst.mWidth;
     }
 
     return OK;
