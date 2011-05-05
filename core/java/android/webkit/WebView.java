@@ -1194,6 +1194,11 @@ public class WebView extends AbsoluteLayout
         mHTML5VideoViewProxy = null ;
     }
 
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return true;
+    }
+
     /**
      * Adds accessibility APIs to JavaScript.
      *

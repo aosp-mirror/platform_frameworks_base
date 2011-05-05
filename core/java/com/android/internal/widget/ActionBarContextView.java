@@ -428,4 +428,9 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     @Override
     public void onAnimationRepeat(Animator animation) {
     }
+
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return false;
+    }
 }

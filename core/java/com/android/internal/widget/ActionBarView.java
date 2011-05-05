@@ -228,6 +228,11 @@ public class ActionBarView extends AbsActionBarView {
         mHomeLayout.setFocusable(true);
     }
 
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return false;
+    }
+
     public void initProgress() {
         mProgressView = new ProgressBar(mContext, null, 0, mProgressStyle);
         mProgressView.setId(R.id.progress_horizontal);

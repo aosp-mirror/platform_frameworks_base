@@ -201,6 +201,11 @@ public class LinearLayout extends ViewGroup {
         mShowDividers = showDividers;
     }
 
+    @Override
+    public boolean shouldDelayChildPressedState() {
+        return false;
+    }
+
     /**
      * @return A flag set indicating how dividers should be shown around items.
      * @see #setShowDividers(int)

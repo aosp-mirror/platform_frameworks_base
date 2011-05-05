@@ -4973,6 +4973,19 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * Return true if the pressed state should be delayed for children or descendants of this
+     * ViewGroup. Generally, this should be done for containers that can scroll, such as a List.
+     * This prevents the pressed state from appearing when the user is actually trying to scroll
+     * the content.
+     *
+     * The default implementation returns true for compatibility reasons. Subclasses that do
+     * not scroll should generally override this method and return false.
+     */
+    public boolean shouldDelayChildPressedState() {
+        return true;
+    }
+
+    /**
      * LayoutParams are used by views to tell their parents how they want to be
      * laid out. See
      * {@link android.R.styleable#ViewGroup_Layout ViewGroup Layout Attributes}
