@@ -28,6 +28,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "android_media_Utils.h"
 
 
 using namespace android;
@@ -108,14 +109,6 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
     env->ReleaseStringUTFChars(path, tmp);
     tmp = NULL;
 
-    int nKeyValuePairs = env->GetArrayLength(keys);
-    if (nKeyValuePairs != env->GetArrayLength(values)) {
-        LOGE("keys and values have different length: %d <--> %d",
-            nKeyValuePairs, env->GetArrayLength(values));
-        jniThrowException(
-                env, "java/lang/IllegalArgumentException", NULL);
-        return;
-    }
     // Don't let somebody trick us in to reading some random block of memory
     if (strncmp("mem://", pathStr.string(), 6) == 0) {
         jniThrowException(
@@ -125,40 +118,19 @@ android_media_MediaMetadataRetriever_setDataSourceAndHeaders(
 
     // We build a similar KeyedVector out of it.
     KeyedVector<String8, String8> headersVector;
-    for (int i = 0; i < nKeyValuePairs; ++i) {
-        // No need to check on the ArrayIndexOutOfBoundsException, since
-        // it won't happen here.
-        jstring key = (jstring) env->GetObjectArrayElement(keys, i);
-        jstring value = (jstring) env->GetObjectArrayElement(values, i);
-
-        const char* keyStr = env->GetStringUTFChars(key, NULL);
-        if (!keyStr) {  // OutOfMemoryError
-            return;
-        }
-
-        const char* valueStr = env->GetStringUTFChars(value, NULL);
-        if (!valueStr) {  // OutOfMemoryError
-            env->ReleaseStringUTFChars(key, keyStr);
-            return;
-        }
-
-        headersVector.add(String8(keyStr), String8(valueStr));
-
-        env->ReleaseStringUTFChars(key, keyStr);
-        env->ReleaseStringUTFChars(value, valueStr);
-        env->DeleteLocalRef(key);
-        env->DeleteLocalRef(value);
-
+    if (!ConvertKeyValueArraysToKeyedVector(
+            env, keys, values, &headersVector)) {
+        return;
     }
-
     process_media_retriever_call(
             env,
             retriever->setDataSource(
-                pathStr.string(), nKeyValuePairs > 0 ? &headersVector : NULL),
+                pathStr.string(), headersVector.size() > 0 ? &headersVector : NULL),
 
             "java/lang/RuntimeException",
             "setDataSource failed");
 }
+
 
 static void android_media_MediaMetadataRetriever_setDataSource(
         JNIEnv *env, jobject thiz, jstring path) {
