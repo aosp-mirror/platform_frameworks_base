@@ -69,9 +69,8 @@ final class GsmSMSDispatcher extends SMSDispatcher {
         String pduString = (String) ar.result;
         SmsMessage sms = SmsMessage.newFromCDS(pduString);
 
-        int tpStatus = sms.getStatus();
-
         if (sms != null) {
+            int tpStatus = sms.getStatus();
             int messageRef = sms.messageRef;
             for (int i = 0, count = deliveryPendingList.size(); i < count; i++) {
                 SmsTracker tracker = deliveryPendingList.get(i);
@@ -190,6 +189,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
         mRemainingMessages = msgCount;
 
+        TextEncodingDetails[] encodingForParts = new TextEncodingDetails[msgCount];
         for (int i = 0; i < msgCount; i++) {
             TextEncodingDetails details = SmsMessage.calculateLength(parts.get(i), false);
             if (encoding != details.codeUnitSize
@@ -197,6 +197,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
                             || encoding == android.telephony.SmsMessage.ENCODING_7BIT)) {
                 encoding = details.codeUnitSize;
             }
+            encodingForParts[i] = details;
         }
 
         for (int i = 0; i < msgCount; i++) {
@@ -213,6 +214,10 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             concatRef.isEightBits = true;
             SmsHeader smsHeader = new SmsHeader();
             smsHeader.concatRef = concatRef;
+            if (encoding == android.telephony.SmsMessage.ENCODING_7BIT) {
+                smsHeader.languageTable = encodingForParts[i].languageTable;
+                smsHeader.languageShiftTable = encodingForParts[i].languageShiftTable;
+            }
 
             PendingIntent sentIntent = null;
             if (sentIntents != null && sentIntents.size() > i) {
@@ -226,7 +231,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
             SmsMessage.SubmitPdu pdus = SmsMessage.getSubmitPdu(scAddress, destinationAddress,
                     parts.get(i), deliveryIntent != null, SmsHeader.toByteArray(smsHeader),
-                    encoding);
+                    encoding, smsHeader.languageTable, smsHeader.languageShiftTable);
 
             sendRawPdu(pdus.encodedScAddress, pdus.encodedMessage, sentIntent, deliveryIntent);
         }
@@ -281,6 +286,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
         mRemainingMessages = msgCount;
 
+        TextEncodingDetails[] encodingForParts = new TextEncodingDetails[msgCount];
         for (int i = 0; i < msgCount; i++) {
             TextEncodingDetails details = SmsMessage.calculateLength(parts.get(i), false);
             if (encoding != details.codeUnitSize
@@ -288,6 +294,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
                             || encoding == android.telephony.SmsMessage.ENCODING_7BIT)) {
                 encoding = details.codeUnitSize;
             }
+            encodingForParts[i] = details;
         }
 
         for (int i = 0; i < msgCount; i++) {
@@ -298,6 +305,10 @@ final class GsmSMSDispatcher extends SMSDispatcher {
             concatRef.isEightBits = false;
             SmsHeader smsHeader = new SmsHeader();
             smsHeader.concatRef = concatRef;
+            if (encoding == android.telephony.SmsMessage.ENCODING_7BIT) {
+                smsHeader.languageTable = encodingForParts[i].languageTable;
+                smsHeader.languageShiftTable = encodingForParts[i].languageShiftTable;
+            }
 
             PendingIntent sentIntent = null;
             if (sentIntents != null && sentIntents.size() > i) {
@@ -311,7 +322,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
 
             SmsMessage.SubmitPdu pdus = SmsMessage.getSubmitPdu(scAddress, destinationAddress,
                     parts.get(i), deliveryIntent != null, SmsHeader.toByteArray(smsHeader),
-                    encoding);
+                    encoding, smsHeader.languageTable, smsHeader.languageShiftTable);
 
             HashMap<String, Object> map = new HashMap<String, Object>();
             map.put("smsc", pdus.encodedScAddress);
