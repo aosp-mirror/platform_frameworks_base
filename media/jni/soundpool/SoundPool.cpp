@@ -682,14 +682,14 @@ void SoundChannel::nextEvent()
     play(sample, nextChannelID, leftVolume, rightVolume, priority, loop, rate);
 }
 
-void SoundChannel::callback(int event, void* user, void *info)
+void SoundChannel::callback(AudioTrack::event_type event, void* user, void *info)
 {
     SoundChannel* channel = static_cast<SoundChannel*>((void *)((unsigned long)user & ~1));
     
     channel->process(event, info, (unsigned long)user & 1);
 }
 
-void SoundChannel::process(int event, void *info, unsigned long toggle)
+void SoundChannel::process(AudioTrack::event_type event, void *info, unsigned long toggle)
 {
     //LOGV("process(%d)", mChannelID);
 

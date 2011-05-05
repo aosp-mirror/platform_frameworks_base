@@ -103,7 +103,7 @@ class MediaPlayerService : public BnMediaPlayerService
     private:
         static void             setMinBufferCount();
         static void             CallbackWrapper(
-                int event, void *me, void *info);
+                AudioTrack::event_type event, void *me, void *info);
 
         AudioTrack*             mTrack;
         AudioCallback           mCallback;
