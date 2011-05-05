@@ -101,8 +101,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     // call reRegisterNetwork, or pingTest succeeds.
     private int mPdpResetCount = 0;
 
-    /** Delay between APN attempts */
-    protected static final int APN_DELAY_MILLIS = 5000;
 
     //***** Constants
 

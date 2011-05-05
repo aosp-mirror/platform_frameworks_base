@@ -701,7 +701,8 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         notifyDataConnection(reason);
         mActiveApn = null;
         if (retryAfterDisconnected(reason)) {
-          trySetupData(reason);
+          // Wait a bit before trying, so we're not tying up RIL command channel.
+          sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason), APN_DELAY_MILLIS);
       }
     }
 
