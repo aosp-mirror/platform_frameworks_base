@@ -16,15 +16,11 @@
 
 package com.android.internal.telephony;
 
-import com.android.internal.telephony.GsmAlphabet;
-import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.gsm.SmsMessage;
 import com.android.internal.util.HexDump;
 
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
-
-import android.util.Log;
 
 public class GsmSmsTest extends AndroidTestCase {
 
@@ -211,8 +207,38 @@ public class GsmSmsTest extends AndroidTestCase {
                 sms.getMessageBody());
     }
 
+    // GSM 7 bit tables in String form, Escape (0x1B) replaced with '@'
+    private static final String[] sBasicTables = {
+        // GSM 7 bit default alphabet
+        "@\u00a3$\u00a5\u00e8\u00e9\u00f9\u00ec\u00f2\u00c7\n\u00d8\u00f8\r\u00c5\u00e5\u0394_"
+            + "\u03a6\u0393\u039b\u03a9\u03a0\u03a8\u03a3\u0398\u039e@\u00c6\u00e6\u00df\u00c9"
+            + " !\"#\u00a4%&'()*+,-./0123456789:;<=>?\u00a1ABCDEFGHIJKLMNOPQRSTUVWXYZ\u00c4\u00d6"
+            + "\u00d1\u00dc\u00a7\u00bfabcdefghijklmnopqrstuvwxyz\u00e4\u00f6\u00f1\u00fc\u00e0",
+
+        // Turkish locking shift table
+        "@\u00a3$\u00a5\u20ac\u00e9\u00f9\u0131\u00f2\u00c7\n\u011e\u011f\r\u00c5\u00e5\u0394_"
+            + "\u03a6\u0393\u039b\u03a9\u03a0\u03a8\u03a3\u0398\u039e@\u015e\u015f\u00df\u00c9"
+            + " !\"#\u00a4%&'()*+,-./0123456789:;<=>?\u0130ABCDEFGHIJKLMNOPQRSTUVWXYZ\u00c4\u00d6"
+            + "\u00d1\u00dc\u00a7\u00e7abcdefghijklmnopqrstuvwxyz\u00e4\u00f6\u00f1\u00fc\u00e0",
+
+        // no locking shift table defined for Spanish
+        "",
+
+        // Portuguese locking shift table
+        "@\u00a3$\u00a5\u00ea\u00e9\u00fa\u00ed\u00f3\u00e7\n\u00d4\u00f4\r\u00c1\u00e1\u0394_"
+            + "\u00aa\u00c7\u00c0\u221e^\\\u20ac\u00d3|@\u00c2\u00e2\u00ca\u00c9 !\"#\u00ba%&'()"
+            + "*+,-./0123456789:;<=>?\u00cdABCDEFGHIJKLMNOPQRSTUVWXYZ\u00c3\u00d5\u00da\u00dc"
+            + "\u00a7~abcdefghijklmnopqrstuvwxyz\u00e3\u00f5`\u00fc\u00e0"
+    };
+
     @SmallTest
     public void testDecode() throws Exception {
+        decodeSingle(0);    // default table
+        decodeSingle(1);    // Turkish locking shift table
+        decodeSingle(3);    // Portuguese locking shift table
+    }
+
+    private void decodeSingle(int language) throws Exception {
         byte[] septets = new byte[(7 * 128 + 7) / 8];
 
         int bitOffset = 0;
@@ -238,15 +264,168 @@ public class GsmSmsTest extends AndroidTestCase {
             bitOffset += 7;
         }
 
-        String decoded = GsmAlphabet.gsm7BitPackedToString(septets, 0, 128);
-        byte[] reEncoded = GsmAlphabet.stringToGsm7BitPacked(decoded);
+        String decoded = GsmAlphabet.gsm7BitPackedToString(septets, 0, 128, 0, language, 0);
+        byte[] reEncoded = GsmAlphabet.stringToGsm7BitPacked(decoded, language, 0);
+
+        assertEquals(sBasicTables[language], decoded);
 
         // reEncoded has the count septets byte at the front
-        assertEquals(reEncoded.length, septets.length + 1);
+        assertEquals(septets.length + 1, reEncoded.length);
 
         for (int i = 0; i < septets.length; i++) {
-            assertEquals(reEncoded[i + 1], septets[i]);
+            assertEquals(septets[i], reEncoded[i + 1]);
         }
     }
 
+    private static final int GSM_ESCAPE_CHARACTER = 0x1b;
+
+    private static final String[] sExtendedTables = {
+        // GSM 7 bit default alphabet extension table
+        "\f^{}\\[~]|\u20ac",
+
+        // Turkish single shift extension table
+        "\f^{}\\[~]|\u011e\u0130\u015e\u00e7\u20ac\u011f\u0131\u015f",
+
+        // Spanish single shift extension table
+        "\u00e7\f^{}\\[~]|\u00c1\u00cd\u00d3\u00da\u00e1\u20ac\u00ed\u00f3\u00fa",
+
+        // Portuguese single shift extension table
+        "\u00ea\u00e7\f\u00d4\u00f4\u00c1\u00e1\u03a6\u0393^\u03a9\u03a0\u03a8\u03a3\u0398\u00ca"
+            + "{}\\[~]|\u00c0\u00cd\u00d3\u00da\u00c3\u00d5\u00c2\u20ac\u00ed\u00f3\u00fa\u00e3"
+            + "\u00f5\u00e2"
+    };
+
+    private static final int[][] sExtendedTableIndexes = {
+        {0x0a, 0x14, 0x28, 0x29, 0x2f, 0x3c, 0x3d, 0x3e, 0x40, 0x65},
+        {0x0a, 0x14, 0x28, 0x29, 0x2f, 0x3c, 0x3d, 0x3e, 0x40, 0x47, 0x49, 0x53, 0x63,
+                0x65, 0x67, 0x69, 0x73},
+        {0x09, 0x0a, 0x14, 0x28, 0x29, 0x2f, 0x3c, 0x3d, 0x3e, 0x40, 0x41, 0x49, 0x4f,
+                0x55, 0x61, 0x65, 0x69, 0x6f, 0x75},
+        {0x05, 0x09, 0x0a, 0x0b, 0x0c, 0x0e, 0x0f, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
+                0x18, 0x19, 0x1f, 0x28, 0x29, 0x2f, 0x3c, 0x3d, 0x3e, 0x40, 0x41, 0x49,
+                0x4f, 0x55, 0x5b, 0x5c, 0x61, 0x65, 0x69, 0x6f, 0x75, 0x7b, 0x7c, 0x7f}
+    };
+
+    @SmallTest
+    public void testDecodeExtended() throws Exception {
+        for (int language = 0; language < 3; language++) {
+            int[] tableIndex = sExtendedTableIndexes[language];
+            int numSeptets = tableIndex.length * 2;  // two septets per extended char
+            byte[] septets = new byte[(7 * numSeptets + 7) / 8];
+
+            int bitOffset = 0;
+
+            for (int v : tableIndex) {
+                // escape character
+                int byteOffset = bitOffset / 8;
+                int shift = bitOffset % 8;
+
+                septets[byteOffset] |= GSM_ESCAPE_CHARACTER << shift;
+
+                if (shift > 1) {
+                    septets[byteOffset + 1] = (byte) (GSM_ESCAPE_CHARACTER >> (8 - shift));
+                }
+
+                bitOffset += 7;
+
+                // extended table index
+                byteOffset = bitOffset / 8;
+                shift = bitOffset % 8;
+
+                septets[byteOffset] |= v << shift;
+
+                if (shift > 1) {
+                    septets[byteOffset + 1] = (byte) (v >> (8 - shift));
+                }
+
+                bitOffset += 7;
+            }
+
+            String decoded = GsmAlphabet.gsm7BitPackedToString(septets, 0, numSeptets, 0,
+                    0, language);
+            byte[] reEncoded = GsmAlphabet.stringToGsm7BitPacked(decoded, 0, language);
+
+            assertEquals(sExtendedTables[language], decoded);
+
+            // reEncoded has the count septets byte at the front
+            assertEquals(septets.length + 1, reEncoded.length);
+
+            for (int i = 0; i < septets.length; i++) {
+                assertEquals(septets[i], reEncoded[i + 1]);
+            }
+        }
+    }
+
+    @SmallTest
+    public void testDecodeExtendedFallback() throws Exception {
+        // verify that unmapped characters in extension table fall back to locking shift table
+        for (int language = 0; language < 3; language++) {
+            int[] tableIndex = sExtendedTableIndexes[language];
+            int numChars = 128 - tableIndex.length;
+            int numSeptets = numChars * 2;  // two septets per extended char
+            byte[] septets = new byte[(7 * numSeptets + 7) / 8];
+
+            int tableOffset = 0;
+            int bitOffset = 0;
+
+            StringBuilder defaultTable = new StringBuilder(128);
+            StringBuilder turkishTable = new StringBuilder(128);
+            StringBuilder portugueseTable = new StringBuilder(128);
+
+            for (char c = 0; c < 128; c++) {
+                // skip characters that are present in the current extension table
+                if (tableOffset < tableIndex.length && tableIndex[tableOffset] == c) {
+                    tableOffset++;
+                    continue;
+                }
+
+                // escape character
+                int byteOffset = bitOffset / 8;
+                int shift = bitOffset % 8;
+
+                septets[byteOffset] |= GSM_ESCAPE_CHARACTER << shift;
+
+                if (shift > 1) {
+                    septets[byteOffset + 1] = (byte) (GSM_ESCAPE_CHARACTER >> (8 - shift));
+                }
+
+                bitOffset += 7;
+
+                // extended table index
+                byteOffset = bitOffset / 8;
+                shift = bitOffset % 8;
+
+                septets[byteOffset] |= c << shift;
+
+                if (shift > 1) {
+                    septets[byteOffset + 1] = (byte) (c >> (8 - shift));
+                }
+
+                bitOffset += 7;
+
+                if (c == GsmAlphabet.GSM_EXTENDED_ESCAPE) {
+                    // double Escape maps to space character
+                    defaultTable.append(' ');
+                    turkishTable.append(' ');
+                    portugueseTable.append(' ');
+                } else {
+                    // other unmapped chars map to the default or locking shift table
+                    defaultTable.append(sBasicTables[0].charAt(c));
+                    turkishTable.append(sBasicTables[1].charAt(c));
+                    portugueseTable.append(sBasicTables[3].charAt(c));
+                }
+            }
+
+            String decoded = GsmAlphabet.gsm7BitPackedToString(septets, 0, numSeptets, 0,
+                    0, language);
+
+            assertEquals(defaultTable.toString(), decoded);
+
+            decoded = GsmAlphabet.gsm7BitPackedToString(septets, 0, numSeptets, 0, 1, language);
+            assertEquals(turkishTable.toString(), decoded);
+
+            decoded = GsmAlphabet.gsm7BitPackedToString(septets, 0, numSeptets, 0, 3, language);
+            assertEquals(portugueseTable.toString(), decoded);
+        }
+    }
 }
