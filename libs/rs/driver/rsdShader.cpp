@@ -21,6 +21,7 @@
 #include <rsContext.h>
 #include <rsProgram.h>
 
+#include "rsdCore.h"
 #include "rsdShader.h"
 #include "rsdShaderCache.h"
 
@@ -315,6 +316,70 @@ void RsdShader::setUniform(const Context *rsc, const Element *field, const float
     }
 }
 
+void RsdShader::setupSampler(const Context *rsc, const Sampler *s, const Allocation *tex) {
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
+
+    GLenum trans[] = {
+        GL_NEAREST, //RS_SAMPLER_NEAREST,
+        GL_LINEAR, //RS_SAMPLER_LINEAR,
+        GL_LINEAR_MIPMAP_LINEAR, //RS_SAMPLER_LINEAR_MIP_LINEAR,
+        GL_REPEAT, //RS_SAMPLER_WRAP,
+        GL_CLAMP_TO_EDGE, //RS_SAMPLER_CLAMP
+        GL_LINEAR_MIPMAP_NEAREST, //RS_SAMPLER_LINEAR_MIP_NEAREST
+    };
+
+    GLenum transNP[] = {
+        GL_NEAREST, //RS_SAMPLER_NEAREST,
+        GL_LINEAR, //RS_SAMPLER_LINEAR,
+        GL_LINEAR, //RS_SAMPLER_LINEAR_MIP_LINEAR,
+        GL_CLAMP_TO_EDGE, //RS_SAMPLER_WRAP,
+        GL_CLAMP_TO_EDGE, //RS_SAMPLER_CLAMP
+        GL_LINEAR, //RS_SAMPLER_LINEAR_MIP_NEAREST,
+    };
+
+    // This tells us the correct texture type
+    GLenum target = (GLenum)tex->getGLTarget();
+
+    if (!dc->gl.gl.OES_texture_npot && tex->getType()->getIsNp2()) {
+        if (tex->getHasGraphicsMipmaps() &&
+            (dc->gl.gl.GL_NV_texture_npot_2D_mipmap || dc->gl.gl.GL_IMG_texture_npot)) {
+            if (dc->gl.gl.GL_NV_texture_npot_2D_mipmap) {
+                glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[s->mHal.state.minFilter]);
+            } else {
+                switch (trans[s->mHal.state.minFilter]) {
+                case GL_LINEAR_MIPMAP_LINEAR:
+                    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+                    break;
+                default:
+                    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[s->mHal.state.minFilter]);
+                    break;
+                }
+            }
+        } else {
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, transNP[s->mHal.state.minFilter]);
+        }
+        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, transNP[s->mHal.state.magFilter]);
+        glTexParameteri(target, GL_TEXTURE_WRAP_S, transNP[s->mHal.state.wrapS]);
+        glTexParameteri(target, GL_TEXTURE_WRAP_T, transNP[s->mHal.state.wrapT]);
+    } else {
+        if (tex->getHasGraphicsMipmaps()) {
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[s->mHal.state.minFilter]);
+        } else {
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, transNP[s->mHal.state.minFilter]);
+        }
+        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, trans[s->mHal.state.magFilter]);
+        glTexParameteri(target, GL_TEXTURE_WRAP_S, trans[s->mHal.state.wrapS]);
+        glTexParameteri(target, GL_TEXTURE_WRAP_T, trans[s->mHal.state.wrapT]);
+    }
+
+    float anisoValue = rsMin(dc->gl.gl.EXT_texture_max_aniso, s->mHal.state.aniso);
+    if (dc->gl.gl.EXT_texture_max_aniso > 1.0f) {
+        glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoValue);
+    }
+
+    rsc->checkError("Sampler::setupGL2 tex env");
+}
+
 void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
     if (mRSProgram->mHal.state.texturesCount == 0) {
         return;
@@ -345,7 +410,7 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
         glBindTexture(target, mRSProgram->mHal.state.textures[ct]->getTextureID());
         rsc->checkError("ProgramFragment::setupGL2 tex bind");
         if (mRSProgram->mHal.state.samplers[ct].get()) {
-            mRSProgram->mHal.state.samplers[ct]->setupGL(rsc, mRSProgram->mHal.state.textures[ct].get());
+            setupSampler(rsc, mRSProgram->mHal.state.samplers[ct].get(), mRSProgram->mHal.state.textures[ct].get());
         } else {
             glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

@@ -24,7 +24,7 @@ using namespace android::renderscript;
 ProgramRaster::ProgramRaster(Context *rsc, bool pointSmooth,
                              bool lineSmooth, bool pointSprite,
                              float lineWidth, RsCullMode cull)
-    : Program(rsc) {
+    : ProgramBase(rsc) {
 
     memset(&mHal, 0, sizeof(mHal));
 

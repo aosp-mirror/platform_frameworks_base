@@ -70,6 +70,7 @@ protected:
     void setupUserConstants(const android::renderscript::Context *rsc, RsdShaderCache *sc, bool isFragment);
     void initAddUserElement(const android::renderscript::Element *e, android::String8 *names, uint32_t *arrayLengths, uint32_t *count, const char *prefix);
     void setupTextures(const android::renderscript::Context *rsc, RsdShaderCache *sc);
+    void setupSampler(const android::renderscript::Context *rsc, const android::renderscript::Sampler *s, const android::renderscript::Allocation *tex);
 
     void appendAttributes();
     void appendTextures();

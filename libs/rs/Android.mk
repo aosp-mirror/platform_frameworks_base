@@ -124,6 +124,7 @@ LOCAL_SRC_FILES:= \
 	driver/rsdProgramStore.cpp \
 	driver/rsdRuntimeMath.cpp \
 	driver/rsdRuntimeStubs.cpp \
+	driver/rsdSampler.cpp \
 	driver/rsdShader.cpp \
 	driver/rsdShaderCache.cpp \
 	driver/rsdVertexArray.cpp

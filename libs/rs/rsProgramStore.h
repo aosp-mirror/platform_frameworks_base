@@ -17,7 +17,7 @@
 #ifndef ANDROID_RS_PROGRAM_FRAGMENT_STORE_H
 #define ANDROID_RS_PROGRAM_FRAGMENT_STORE_H
 
-#include "rsProgram.h"
+#include "rsProgramBase.h"
 #include "rsStream.h"
 
 // ---------------------------------------------------------------------------
@@ -26,7 +26,7 @@ namespace renderscript {
 
 class ProgramStoreState;
 
-class ProgramStore : public Program {
+class ProgramStore : public ProgramBase {
 public:
     ProgramStore(Context *,
                  bool colorMaskR, bool colorMaskG, bool colorMaskB, bool colorMaskA,

@@ -20,13 +20,9 @@
 using namespace android;
 using namespace android::renderscript;
 
-Program::Program(Context *rsc) : ObjectBase(rsc) {
-   initMemberVars();
-}
-
 Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
                  const uint32_t * params, uint32_t paramLength)
-    : ObjectBase(rsc) {
+    : ProgramBase(rsc) {
 
     initMemberVars();
     for (uint32_t ct=0; ct < paramLength; ct+=2) {

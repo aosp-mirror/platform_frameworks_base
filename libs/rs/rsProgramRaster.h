@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2009-2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #ifndef ANDROID_RS_PROGRAM_RASTER_H
 #define ANDROID_RS_PROGRAM_RASTER_H
 
-#include "rsProgram.h"
+#include "rsProgramBase.h"
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -25,7 +25,7 @@ namespace renderscript {
 
 class ProgramRasterState;
 
-class ProgramRaster : public Program {
+class ProgramRaster : public ProgramBase {
 public:
     ProgramRaster(Context *rsc,
                   bool pointSmooth,
