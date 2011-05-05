@@ -37,8 +37,6 @@ void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state) {
         return;
     }
 
-    rsc->checkError("ProgramVertex::setupGL2 start");
-
     if (!isUserProgram()) {
         if (mHal.state.constants[0].get() == NULL) {
             rsc->setError(RS_ERROR_FATAL_UNKNOWN,
@@ -59,8 +57,6 @@ void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state) {
     state->mLast.set(this);
 
     rsc->mHal.funcs.vertex.setActive(rsc, this);
-
-    rsc->checkError("ProgramVertex::setupGL2");
 }
 
 void ProgramVertex::setProjectionMatrix(Context *rsc, const rsc_Matrix *m) const {

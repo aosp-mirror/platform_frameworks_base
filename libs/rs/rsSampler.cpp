@@ -39,12 +39,12 @@ Sampler::Sampler(Context *rsc,
                  RsSamplerValue wrapT,
                  RsSamplerValue wrapR,
                  float aniso) : ObjectBase(rsc) {
-    mMagFilter = magFilter;
-    mMinFilter = minFilter;
-    mWrapS = wrapS;
-    mWrapT = wrapT;
-    mWrapR = wrapR;
-    mAniso = aniso;
+    mHal.state.magFilter = magFilter;
+    mHal.state.minFilter = minFilter;
+    mHal.state.wrapS = wrapS;
+    mHal.state.wrapT = wrapT;
+    mHal.state.wrapR = wrapR;
+    mHal.state.aniso = aniso;
 }
 
 Sampler::~Sampler() {
@@ -76,35 +76,35 @@ void Sampler::setupGL(const Context *rsc, const Allocation *tex) {
         if (tex->getHasGraphicsMipmaps() &&
             (rsc->ext_GL_NV_texture_npot_2D_mipmap() || rsc->ext_GL_IMG_texture_npot())) {
             if (rsc->ext_GL_NV_texture_npot_2D_mipmap()) {
-                glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+                glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[mHal.state.minFilter]);
             } else {
-                switch (trans[mMinFilter]) {
+                switch (trans[mHal.state.minFilter]) {
                 case GL_LINEAR_MIPMAP_LINEAR:
                     glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
                     break;
                 default:
-                    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+                    glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[mHal.state.minFilter]);
                     break;
                 }
             }
         } else {
-            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, transNP[mMinFilter]);
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, transNP[mHal.state.minFilter]);
         }
-        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, transNP[mMagFilter]);
-        glTexParameteri(target, GL_TEXTURE_WRAP_S, transNP[mWrapS]);
-        glTexParameteri(target, GL_TEXTURE_WRAP_T, transNP[mWrapT]);
+        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, transNP[mHal.state.magFilter]);
+        glTexParameteri(target, GL_TEXTURE_WRAP_S, transNP[mHal.state.wrapS]);
+        glTexParameteri(target, GL_TEXTURE_WRAP_T, transNP[mHal.state.wrapT]);
     } else {
         if (tex->getHasGraphicsMipmaps()) {
-            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[mMinFilter]);
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, trans[mHal.state.minFilter]);
         } else {
-            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, transNP[mMinFilter]);
+            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, transNP[mHal.state.minFilter]);
         }
-        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, trans[mMagFilter]);
-        glTexParameteri(target, GL_TEXTURE_WRAP_S, trans[mWrapS]);
-        glTexParameteri(target, GL_TEXTURE_WRAP_T, trans[mWrapT]);
+        glTexParameteri(target, GL_TEXTURE_MAG_FILTER, trans[mHal.state.magFilter]);
+        glTexParameteri(target, GL_TEXTURE_WRAP_S, trans[mHal.state.wrapS]);
+        glTexParameteri(target, GL_TEXTURE_WRAP_T, trans[mHal.state.wrapT]);
     }
 
-    float anisoValue = rsMin(rsc->ext_texture_max_aniso(), mAniso);
+    float anisoValue = rsMin(rsc->ext_texture_max_aniso(), mHal.state.aniso);
     if (rsc->ext_texture_max_aniso() > 1.0f) {
         glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoValue);
     }
@@ -135,66 +135,14 @@ Sampler *Sampler::createFromStream(Context *rsc, IStream *stream) {
 namespace android {
 namespace renderscript {
 
-
-void rsi_SamplerBegin(Context *rsc) {
-    SamplerState * ss = &rsc->mStateSampler;
-
-    ss->mMagFilter = RS_SAMPLER_LINEAR;
-    ss->mMinFilter = RS_SAMPLER_LINEAR;
-    ss->mWrapS = RS_SAMPLER_WRAP;
-    ss->mWrapT = RS_SAMPLER_WRAP;
-    ss->mWrapR = RS_SAMPLER_WRAP;
-    ss->mAniso = 1.0f;
-}
-
-void rsi_SamplerSet(Context *rsc, RsSamplerParam param, RsSamplerValue value) {
-    SamplerState * ss = &rsc->mStateSampler;
-
-    switch (param) {
-    case RS_SAMPLER_MAG_FILTER:
-        ss->mMagFilter = value;
-        break;
-    case RS_SAMPLER_MIN_FILTER:
-        ss->mMinFilter = value;
-        break;
-    case RS_SAMPLER_WRAP_S:
-        ss->mWrapS = value;
-        break;
-    case RS_SAMPLER_WRAP_T:
-        ss->mWrapT = value;
-        break;
-    case RS_SAMPLER_WRAP_R:
-        ss->mWrapR = value;
-        break;
-    default:
-        LOGE("Attempting to set invalid value on sampler");
-        break;
-    }
-}
-
-void rsi_SamplerSet2(Context *rsc, RsSamplerParam param, float value) {
-    SamplerState * ss = &rsc->mStateSampler;
-
-    switch (param) {
-    case RS_SAMPLER_ANISO:
-        ss->mAniso = value;
-        break;
-    default:
-        LOGE("Attempting to set invalid value on sampler");
-        break;
-    }
-}
-
-RsSampler rsi_SamplerCreate(Context *rsc) {
-    SamplerState * ss = &rsc->mStateSampler;
-
-    Sampler * s = new Sampler(rsc,
-                              ss->mMagFilter,
-                              ss->mMinFilter,
-                              ss->mWrapS,
-                              ss->mWrapT,
-                              ss->mWrapR,
-                              ss->mAniso);
+RsSampler rsi_SamplerCreate(Context * rsc,
+                            RsSamplerValue magFilter,
+                            RsSamplerValue minFilter,
+                            RsSamplerValue wrapS,
+                            RsSamplerValue wrapT,
+                            RsSamplerValue wrapR,
+                            float aniso) {
+    Sampler * s = new Sampler(rsc, magFilter, minFilter, wrapS, wrapT, wrapR, aniso);
     s->incUserRef();
     return s;
 }

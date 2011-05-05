@@ -250,24 +250,15 @@ AllocationResize2D {
 	param uint32_t dimY
 	}
 
-SamplerBegin {
-	}
-
-SamplerSet {
-	param RsSamplerParam p
-	param RsSamplerValue value
-	}
-
-SamplerSet2 {
-	param RsSamplerParam p
-	param float value
-	}
-
 SamplerCreate {
-	ret RsSampler
-	}
-
-
+    param RsSamplerValue magFilter
+    param RsSamplerValue minFilter
+    param RsSamplerValue wrapS
+    param RsSamplerValue wrapT
+    param RsSamplerValue wrapR
+    param float mAniso
+    ret RsSampler
+}
 
 ScriptBindAllocation {
 	param RsScript vtm
@@ -275,12 +266,10 @@ ScriptBindAllocation {
 	param uint32_t slot
 	}
 
-
 ScriptSetTimeZone {
 	param RsScript s
 	param const char * timeZone
 	}
-
 
 ScriptInvoke {
 	param RsScript s
@@ -293,7 +282,7 @@ ScriptInvokeV {
 	param const void * data
 	}
 
-ScriptForEach { 
+ScriptForEach {
     param RsScript s
     param uint32_t slot
     param RsAllocation ain

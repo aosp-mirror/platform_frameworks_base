@@ -50,14 +50,22 @@ public:
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_SAMPLER; }
     static Sampler *createFromStream(Context *rsc, IStream *stream);
 
-protected:
-    RsSamplerValue mMagFilter;
-    RsSamplerValue mMinFilter;
-    RsSamplerValue mWrapS;
-    RsSamplerValue mWrapT;
-    RsSamplerValue mWrapR;
-    float mAniso;
+    struct Hal {
+        mutable void *drv;
 
+        struct State {
+            RsSamplerValue magFilter;
+            RsSamplerValue minFilter;
+            RsSamplerValue wrapS;
+            RsSamplerValue wrapT;
+            RsSamplerValue wrapR;
+            float aniso;
+        };
+        State state;
+    };
+    Hal mHal;
+
+protected:
     int32_t mBoundSlot;
 
 private:
@@ -67,13 +75,6 @@ private:
 
 class SamplerState {
 public:
-    RsSamplerValue mMagFilter;
-    RsSamplerValue mMinFilter;
-    RsSamplerValue mWrapS;
-    RsSamplerValue mWrapT;
-    RsSamplerValue mWrapR;
-    float mAniso;
-
     ObjectBaseRef<Sampler> mSamplers[RS_MAX_SAMPLER_SLOT];
 };
 

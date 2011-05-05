@@ -56,7 +56,6 @@ void ProgramFragment::setConstantColor(Context *rsc, float r, float g, float b, 
 }
 
 void ProgramFragment::setupGL2(Context *rsc, ProgramFragmentState *state) {
-    //LOGE("sgl2 frag1 %x", glGetError());
     if ((state->mLast.get() == this) && !mDirty) {
         return;
     }
