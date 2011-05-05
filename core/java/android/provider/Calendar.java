@@ -110,13 +110,13 @@ public final class Calendar {
          * The account that was used to sync the entry to the device.
          * <P>Type: TEXT</P>
          */
-        public static final String _SYNC_ACCOUNT = "_sync_account";
+        public static final String ACCOUNT_NAME = "account_name";
 
         /**
          * The type of the account that was used to sync the entry to the device.
          * <P>Type: TEXT</P>
          */
-        public static final String _SYNC_ACCOUNT_TYPE = "_sync_account_type";
+        public static final String ACCOUNT_TYPE = "account_type";
 
         /**
          * The unique ID for a row assigned by the sync source. NULL if the row has never been synced.
@@ -146,27 +146,8 @@ public final class Calendar {
          * Used to indicate that local, unsynced, changes are present.
          * <P>Type: INTEGER (long)</P>
          */
-        public static final String _SYNC_DIRTY = "_sync_dirty";
+        public static final String DIRTY = "dirty";
 
-    }
-
-    /**
-     * Columns from the Account information used by Calendars and Events tables.
-     */
-    public interface AccountColumns {
-        /**
-         * The name of the account instance to which this row belongs, which when paired with
-         * {@link #ACCOUNT_TYPE} identifies a specific account.
-         * <P>Type: TEXT</P>
-         */
-        public static final String ACCOUNT_NAME = "account_name";
-
-        /**
-         * The type of account to which this row belongs, which when paired with
-         * {@link #ACCOUNT_NAME} identifies a specific account.
-         * <P>Type: TEXT</P>
-         */
-        public static final String ACCOUNT_TYPE = "account_type";
     }
 
     /**
@@ -177,7 +158,7 @@ public final class Calendar {
          * The color of the calendar
          * <P>Type: INTEGER (color value)</P>
          */
-        public static final String COLOR = "color";
+        public static final String CALENDAR_COLOR = "calendar_color";
 
         /**
          * The level of access that the user has for the calendar
@@ -211,7 +192,7 @@ public final class Calendar {
          * The timezone the calendar's events occurs in
          * <P>Type: TEXT</P>
          */
-        public static final String TIMEZONE = "timezone";
+        public static final String CALENDAR_TIMEZONE = "calendar_timezone";
 
         /**
          * If this calendar is in the list of calendars that are selected for
@@ -275,13 +256,13 @@ public final class Calendar {
                 ContentValues cv = new ContentValues();
                 cv.put(_ID, calendarId);
 
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ACCOUNT);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ACCOUNT_TYPE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ACCOUNT_NAME);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ACCOUNT_TYPE);
 
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_TIME);
-                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
 
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC1);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC2);
@@ -293,12 +274,13 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.NAME);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
                         Calendars.DISPLAY_NAME);
-                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, Calendars.COLOR);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, Calendars.CALENDAR_COLOR);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, ACCESS_LEVEL);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, VISIBLE);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, SYNC_EVENTS);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.LOCATION);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, TIMEZONE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
+                        Calendars.CALENDAR_LOCATION);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CALENDAR_TIMEZONE);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
                         Calendars.OWNER_ACCOUNT);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv,
@@ -325,11 +307,12 @@ public final class Calendar {
     /**
      * Contains a list of available calendars.
      */
-    public static class Calendars implements BaseColumns, SyncColumns, AccountColumns,
+    public static class Calendars implements BaseColumns, SyncColumns,
             CalendarsColumns
     {
-        private static final String WHERE_DELETE_FOR_ACCOUNT = Calendars._SYNC_ACCOUNT + "=?"
-                + " AND " + Calendars._SYNC_ACCOUNT_TYPE + "=?";
+        private static final String WHERE_DELETE_FOR_ACCOUNT = Calendars.ACCOUNT_NAME + "=?"
+                + " AND "
+                + Calendars.ACCOUNT_TYPE + "=?";
 
         public static final Cursor query(ContentResolver cr, String[] projection,
                                        String where, String orderBy)
@@ -414,7 +397,7 @@ public final class Calendar {
          * The location the of the events in the calendar
          * <P>Type: TEXT</P>
          */
-        public static final String LOCATION = "location";
+        public static final String CALENDAR_LOCATION = "calendar_location";
 
         /**
          * The owner account for this calendar, based on the calendar feed.
@@ -443,23 +426,31 @@ public final class Calendar {
         public static final String MAX_REMINDERS = "maxReminders";
 
         /**
+         * The maximum number of reminders allowed for an event.
+         * <P>
+         * Type: INTEGER
+         * </P>
+         */
+        public static final String ALLOWED_REMINDERS = "allowedReminders";
+
+        /**
          * These fields are only writable by a sync adapter. To modify them the
          * caller must include CALLER_IS_SYNCADAPTER, _SYNC_ACCOUNT, and
          * _SYNC_ACCOUNT_TYPE in the query parameters.
          */
         public static final String[] SYNC_WRITABLE_COLUMNS = new String[] {
-            _SYNC_ACCOUNT,
-            _SYNC_ACCOUNT_TYPE,
+            ACCOUNT_NAME,
+            ACCOUNT_TYPE,
             _SYNC_ID,
             _SYNC_TIME,
             _SYNC_VERSION,
-            _SYNC_DIRTY,
+            DIRTY,
             OWNER_ACCOUNT,
             MAX_REMINDERS,
             CAN_MODIFY_TIME_ZONE,
             CAN_ORGANIZER_RESPOND,
-            LOCATION,
-            TIMEZONE,
+            CALENDAR_LOCATION,
+            CALENDAR_TIMEZONE,
             ACCESS_LEVEL,
             DELETED,
             SYNC1,
@@ -604,7 +595,7 @@ public final class Calendar {
          * This column is available for use by sync adapters
          * <P>Type: TEXT</P>
          */
-        public static final String SYNC_ADAPTER_DATA = "syncAdapterData";
+        public static final String SYNC_DATA1 = "sync_data1";
 
         /**
          * The comments feed uri.
@@ -652,7 +643,7 @@ public final class Calendar {
          * The timezone for the event, allDay events will have a local tz instead of UTC
          * <P>Type: TEXT
          */
-        public static final String EVENT_TIMEZONE2 = "eventTimezone2";
+        public static final String EVENT_END_TIMEZONE = "eventEndTimezone";
 
         /**
          * Whether the event lasts all day or not
@@ -661,25 +652,49 @@ public final class Calendar {
         public static final String ALL_DAY = "allDay";
 
         /**
-         * Visibility for the event.
+         * Defines how the event shows up for others when the calendar is
+         * shared.
          * <P>Type: INTEGER</P>
          */
-        public static final String VISIBILITY = "visibility";
-
-        public static final int VISIBILITY_DEFAULT = 0;
-        public static final int VISIBILITY_CONFIDENTIAL = 1;
-        public static final int VISIBILITY_PRIVATE = 2;
-        public static final int VISIBILITY_PUBLIC = 3;
+        public static final String ACCESS_LEVEL = "accessLevel";
 
         /**
-         * Transparency for the event -- does the event consume time on the calendar?
+         * Default access is controlled by the server and will be treated as
+         * public on the device.
+         */
+        public static final int ACCESS_DEFAULT = 0;
+        /**
+         * Confidential is not used by the app.
+         */
+        public static final int ACCESS_CONFIDENTIAL = 1;
+        /**
+         * Private assumes the event appears as a free/busy slot with no
+         * details.
+         */
+        public static final int ACCESS_PRIVATE = 2;
+        /**
+         * Public assumes the contents are visible to anyone with access to the
+         * calendar.
+         */
+        public static final int ACCESS_PUBLIC = 3;
+
+        /**
+         * If this event counts as busy time or is still free time that can be
+         * scheduled over.
          * <P>Type: INTEGER</P>
          */
-        public static final String TRANSPARENCY = "transparency";
+        public static final String AVAILABILITY = "availability";
 
-        public static final int TRANSPARENCY_OPAQUE = 0;
-
-        public static final int TRANSPARENCY_TRANSPARENT = 1;
+        /**
+         * Indicates that this event takes up time and will conflict with other
+         * events.
+         */
+        public static final int AVAILABILITY_BUSY = 0;
+        /**
+         * Indicates that this event is free time and will not conflict with
+         * other events.
+         */
+        public static final int AVAILABILITY_FREE = 1;
 
         /**
          * Whether the event has an alarm or not
@@ -723,7 +738,7 @@ public final class Calendar {
          * an exception.
          * <P>Type: TEXT</P>
          */
-        public static final String ORIGINAL_EVENT = "originalEvent";
+        public static final String ORIGINAL_SYNC_ID = "original_sync_id";
 
         /**
          * The original instance time of the recurring event for which this
@@ -801,10 +816,10 @@ public final class Calendar {
     }
 
     /**
-     * Contains one entry per calendar event. Recurring events show up as a single entry.
+     * Contains one entry per calendar event. Recurring events show up as a
+     * single entry.
      */
-    public static final class EventsEntity implements BaseColumns, SyncColumns, AccountColumns,
-            EventsColumns {
+    public static final class EventsEntity implements BaseColumns, SyncColumns, EventsColumns {
         /**
          * The content:// style URL for this table
          */
@@ -885,8 +900,8 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, DURATION);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, EVENT_TIMEZONE);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ALL_DAY);
-                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, VISIBILITY);
-                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, TRANSPARENCY);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, ACCESS_LEVEL);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, AVAILABILITY);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, HAS_ALARM);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
                         HAS_EXTENDED_PROPERTIES);
@@ -894,7 +909,7 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, RDATE);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, EXRULE);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, EXDATE);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORIGINAL_EVENT);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORIGINAL_SYNC_ID);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv,
                         ORIGINAL_INSTANCE_TIME);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, ORIGINAL_ALL_DAY);
@@ -907,12 +922,12 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORGANIZER);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_DATA);
-                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, _SYNC_DIRTY);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, EventsColumns.DELETED);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC1);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
-                        Events.SYNC_ADAPTER_DATA);
+                        Events.SYNC_DATA1);
 
                 Entity entity = new Entity(cv);
                 Cursor subCursor;
@@ -1003,11 +1018,10 @@ public final class Calendar {
     /**
      * Contains one entry per calendar event. Recurring events show up as a single entry.
      */
-    public static final class Events implements BaseColumns, SyncColumns, AccountColumns,
-            EventsColumns {
+    public static final class Events implements BaseColumns, SyncColumns, EventsColumns {
 
         private static final String[] FETCH_ENTRY_COLUMNS =
-                new String[] { Events._SYNC_ACCOUNT, Events._SYNC_ID };
+                new String[] { Events.ACCOUNT_NAME, Events._SYNC_ID };
 
         private static final String[] ATTENDEES_COLUMNS =
                 new String[] { AttendeesColumns.ATTENDEE_NAME,
@@ -1049,6 +1063,29 @@ public final class Calendar {
          * The default sort order for this table
          */
         public static final String DEFAULT_SORT_ORDER = "";
+
+        /**
+         * These are columns that should only ever be updated by the provider,
+         * either because they are views mapped to another table or because they
+         * are used for provider only functionality.
+         */
+        public static String[] PROVIDER_WRITABLE_COLUMNS = new String[] {
+                ACCOUNT_NAME,
+                ACCOUNT_TYPE
+        };
+
+        /**
+         * These fields are only writable by a sync adapter. To modify them the
+         * caller must include CALLER_IS_SYNCADAPTER, _SYNC_ACCOUNT, and
+         * _SYNC_ACCOUNT_TYPE in the query parameters.
+         */
+        public static final String[] SYNC_WRITABLE_COLUMNS = new String[] {
+            _SYNC_ID,
+            _SYNC_TIME,
+            _SYNC_VERSION,
+            DIRTY,
+            SYNC_DATA1
+        };
     }
 
     /**
