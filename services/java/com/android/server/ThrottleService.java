@@ -33,6 +33,7 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.INetworkManagementEventObserver;
 import android.net.IThrottleManager;
+import android.net.NetworkStats;
 import android.net.ThrottleManager;
 import android.os.Binder;
 import android.os.Environment;
@@ -531,8 +532,17 @@ public class ThrottleService extends IThrottleManager.Stub {
             long incRead = 0;
             long incWrite = 0;
             try {
-                incRead = mNMService.getInterfaceRxCounter(mIface) - mLastRead;
-                incWrite = mNMService.getInterfaceTxCounter(mIface) - mLastWrite;
+                final NetworkStats stats = mNMService.getNetworkStatsSummary();
+                final int index = stats.findIndex(mIface, NetworkStats.UID_ALL);
+
+                if (index != -1) {
+                    incRead = stats.rx[index] - mLastRead;
+                    incWrite = stats.tx[index] - mLastWrite;
+                } else {
+                    // missing iface, assume stats are 0
+                    Slog.w(TAG, "unable to find stats for iface " + mIface);
+                }
+
                 // handle iface resets - on some device the 3g iface comes and goes and gets
                 // totals reset to 0.  Deal with it
                 if ((incRead < 0) || (incWrite < 0)) {

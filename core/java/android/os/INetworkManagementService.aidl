@@ -19,6 +19,7 @@ package android.os;
 
 import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
+import android.net.NetworkStats;
 import android.net.wifi.WifiConfiguration;
 
 /**
@@ -64,7 +65,6 @@ interface INetworkManagementService
     /**
      ** TETHERING RELATED
      **/
-
 
     /**
      * Returns true if IP forwarding is enabled
@@ -181,17 +181,23 @@ interface INetworkManagementService
     void setAccessPoint(in WifiConfiguration wifiConfig, String wlanIface, String softapIface);
 
     /**
-     * Read number of bytes sent over an interface
-     */
-    long getInterfaceTxCounter(String iface);
+     ** DATA USAGE RELATED
+     **/
 
     /**
-     * Read number of bytes received over an interface
+     * Return global network statistics summarized at an interface level,
+     * without any UID-level granularity.
      */
-    long getInterfaceRxCounter(String iface);
+    NetworkStats getNetworkStatsSummary();
 
     /**
-     * Configures bandwidth throttling on an interface
+     * Return detailed network statistics with UID-level granularity,
+     * including interface and tag details.
+     */
+    NetworkStats getNetworkStatsDetail();
+
+    /**
+     * Configures bandwidth throttling on an interface.
      */
     void setInterfaceThrottle(String iface, int rxKbps, int txKbps);
 

@@ -34,11 +34,17 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.INetworkManagementEventObserver;
+import android.net.NetworkStats;
 import android.net.ThrottleManager;
+import android.os.IBinder;
 import android.os.INetworkManagementService;
+import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.Suppress;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.util.TrustedTime;
 
 import java.util.Iterator;
@@ -222,6 +228,16 @@ public class ThrottleServiceTest extends AndroidTestCase {
         verify(mMockTime, mMockNMService);
     }
 
+    @Suppress
+    public void testReturnStats() throws Exception {
+        final IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+        final INetworkManagementService nmService = INetworkManagementService.Stub.asInterface(b);
+
+        // test is currently no-op, just exercises stats apis
+        Log.d(TAG, nmService.getNetworkStatsSummary().toString());
+        Log.d(TAG, nmService.getNetworkStatsDetail().toString());
+    }
+
     /**
      * Persist the given {@link ThrottleService} policy into {@link Settings}.
      */
@@ -272,12 +288,16 @@ public class ThrottleServiceTest extends AndroidTestCase {
     }
 
     /**
-     * Expect {@link NetworkManagementService#getInterfaceRxCounter} mock calls,
-     * responding with the given counter values.
+     * Expect {@link NetworkManagementService#getNetworkStatsSummary()} mock
+     * calls, responding with the given counter values.
      */
     public void expectGetInterfaceCounter(long rx, long tx) throws Exception {
-        expect(mMockNMService.getInterfaceRxCounter(isA(String.class))).andReturn(rx).atLeastOnce();
-        expect(mMockNMService.getInterfaceTxCounter(isA(String.class))).andReturn(tx).atLeastOnce();
+        // TODO: provide elapsedRealtime mock to match TimeAuthority
+        final NetworkStats.Builder stats = new NetworkStats.Builder(
+                SystemClock.elapsedRealtime(), 1);
+        stats.addEntry(TEST_IFACE, NetworkStats.UID_ALL, rx, tx);
+
+        expect(mMockNMService.getNetworkStatsSummary()).andReturn(stats.build()).atLeastOnce();
     }
 
     /**

@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.content.pm.PackageManager;
+import android.net.NetworkStats;
 import android.net.Uri;
 import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
@@ -32,6 +33,8 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.os.INetworkManagementService;
 import android.os.Handler;
+import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
@@ -44,12 +47,20 @@ import android.content.ContentResolver;
 import android.database.ContentObserver;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
+import java.io.Reader;
 import java.lang.IllegalStateException;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
+
+import libcore.io.IoUtils;
 
 /**
  * @hide
@@ -716,12 +727,47 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         return -1;
     }
 
-    public long getInterfaceRxCounter(String iface) {
-        return getInterfaceCounter(iface, true);
+    /** {@inheritDoc} */
+    public NetworkStats getNetworkStatsSummary() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+
+        final String[] ifaces = listInterfaces();
+        final NetworkStats.Builder stats = new NetworkStats.Builder(
+                SystemClock.elapsedRealtime(), ifaces.length);
+
+        for (String iface : ifaces) {
+            final long rx = getInterfaceCounter(iface, true);
+            final long tx = getInterfaceCounter(iface, false);
+            stats.addEntry(iface, NetworkStats.UID_ALL, rx, tx);
+        }
+
+        return stats.build();
     }
 
-    public long getInterfaceTxCounter(String iface) {
-        return getInterfaceCounter(iface, false);
+    /** {@inheritDoc} */
+    public NetworkStats getNetworkStatsDetail() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+
+        final File procPath = new File("/proc/uid_stat");
+        final String[] knownUids = procPath.list();
+        final NetworkStats.Builder stats = new NetworkStats.Builder(
+                SystemClock.elapsedRealtime(), knownUids.length);
+
+        // TODO: kernel module will provide interface-level stats in future
+        // TODO: migrate these stats to come across netd in bulk, instead of all
+        // these individual file reads.
+        for (String uid : knownUids) {
+            final File uidPath = new File(procPath, uid);
+            final int rx = readSingleIntFromFile(new File(uidPath, "tcp_rcv"));
+            final int tx = readSingleIntFromFile(new File(uidPath, "tcp_snd"));
+
+            final int uidInt = Integer.parseInt(uid);
+            stats.addEntry(NetworkStats.IFACE_ALL, uidInt, rx, tx);
+        }
+
+        return stats.build();
     }
 
     public void setInterfaceThrottle(String iface, int rxKbps, int txKbps) {
@@ -781,5 +827,25 @@ class NetworkManagementService extends INetworkManagementService.Stub {
 
     public int getInterfaceTxThrottle(String iface) {
         return getInterfaceThrottle(iface, false);
+    }
+
+    /**
+     * Utility method to read a single plain-text {@link Integer} from the given
+     * {@link File}, usually from a {@code /proc/} filesystem.
+     */
+    private static int readSingleIntFromFile(File file) {
+        RandomAccessFile f = null;
+        try {
+            f = new RandomAccessFile(file, "r");
+            byte[] buffer = new byte[(int) f.length()];
+            f.readFully(buffer);
+            return Integer.parseInt(new String(buffer).trim());
+        } catch (NumberFormatException e) {
+            return -1;
+        } catch (IOException e) {
+            return -1;
+        } finally {
+            IoUtils.closeQuietly(f);
+        }
     }
 }
