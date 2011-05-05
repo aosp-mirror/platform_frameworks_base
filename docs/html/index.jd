@@ -129,17 +129,20 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"Android 3.0",
+      'name':"Android 3.1",
       'img':"honeycomb-android.png",
-      'title':"Android 3.0 is here!",
-      'desc': "<p>Android 3.0 is now available for the Android SDK. It offers a redesigned UI and "
-+ "all new developer APIs for an optimized experience on tablets and similar devices. "
-+ "For more information about what's in Android 3.0, read the "
-+ "<a href='{@docRoot}sdk/android-3.0.html'>version notes</a>.</p>"
+      'title':"Android 3.1 now available!",
+      'desc': "<p>Android 3.1 includes new developer features such as APIs for USB "
++ "accessories, MTP/PTP, and RTP, as well as new input events from mice, trackballs, joysticks, "
++ "and more.</p>"
++ "<p>For more information about all the new APIs in Android 3.1, read the "
++ "<a href='{@docRoot}sdk/android-3.1.html'>version notes</a>.</p>"
+/*
 + "<p>If you have an existing SDK, add Android 3.0 as an "
 + "<a href='{@docRoot}sdk/adding-components.html'>SDK "
 + "component</a>. If you're new to Android, install the "
 + "<a href='{@docRoot}sdk/index.html'>SDK starter package</a>."
+*/
     },
 
     'tv': {
@@ -152,8 +155,7 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
                + "for television built on Android. Google "
                + "has partnered with Sony and Logitech to integrate "
                + "this platform into TVs, blu-ray players, and companion "
-               + "boxes. An add-on for the Android SDK will be "
-               + "available early next year. </p>"
+               + "boxes. </p>"
                + "<p><a href='http://www.google.com/tv/'>Learn more about "
                + "Google TV &raquo;</a></p>"
     },
