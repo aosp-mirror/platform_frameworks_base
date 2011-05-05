@@ -680,6 +680,9 @@ const ResTable* AssetManager::getResTable(bool required) const
                 delete ass;
             }
         }
+        if (idmap != NULL) {
+            delete idmap;
+        }
     }
 
     if (required && !rt) LOGW("Unable to find resources file resources.arsc");
