@@ -261,16 +261,10 @@ public class PowerManager
         public void acquire()
         {
             synchronized (mToken) {
-                if (!mRefCounted || mCount++ == 0) {
-                    try {
-                        mService.acquireWakeLock(mFlags, mToken, mTag, mWorkSource);
-                    } catch (RemoteException e) {
-                    }
-                    mHeld = true;
-                }
+                acquireLocked();
             }
         }
-        
+
         /**
          * Makes sure the device is on at the level you asked when you created
          * the wake lock. The lock will be released after the given timeout.
@@ -278,10 +272,22 @@ public class PowerManager
          * @param timeout Release the lock after the give timeout in milliseconds.
          */
         public void acquire(long timeout) {
-            acquire();
-            mHandler.postDelayed(mReleaser, timeout);
+            synchronized (mToken) {
+                acquireLocked();
+                mHandler.postDelayed(mReleaser, timeout);
+            }
         }
         
+        private void acquireLocked() {
+            if (!mRefCounted || mCount++ == 0) {
+                mHandler.removeCallbacks(mReleaser);
+                try {
+                    mService.acquireWakeLock(mFlags, mToken, mTag, mWorkSource);
+                } catch (RemoteException e) {
+                }
+                mHeld = true;
+            }
+        }
 
         /**
          * Release your claim to the CPU or screen being on.
@@ -290,8 +296,7 @@ public class PowerManager
          * It may turn off shortly after you release it, or it may not if there
          * are other wake locks held.
          */
-        public void release()
-        {
+        public void release() {
             release(0);
         }
 
@@ -306,9 +311,9 @@ public class PowerManager
          *
          * {@hide}
          */
-        public void release(int flags)
-        {
+        public void release(int flags) {
             synchronized (mToken) {
+                mHandler.removeCallbacks(mReleaser);
                 if (!mRefCounted || --mCount == 0) {
                     try {
                         mService.releaseWakeLock(mToken, flags);
