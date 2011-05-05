@@ -104,9 +104,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     /** Delay between APN attempts */
     protected static final int APN_DELAY_MILLIS = 5000;
 
-    //useful for debugging
-    boolean mFailNextConnect = false;
-
     //***** Constants
 
     private static final int POLL_PDP_MILLIS = 5 * 1000;
@@ -1574,13 +1571,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         } else {
             throw new RuntimeException("onDataSetupComplete: No apnContext");
         }
-        DataConnectionAc dcac = apnContext.getDataConnectionAc();
-        if (dcac == null) {
-            throw new RuntimeException("onDataSetupCompete: No dcac");
-        }
-        DataConnection dc = apnContext.getDataConnection();
 
-        if (ar.exception == null) {
+        if (isDataSetupCompleteOk(ar)) {
+            DataConnectionAc dcac = apnContext.getDataConnectionAc();
+            if (dcac == null) {
+                throw new RuntimeException("onDataSetupCompete: No dcac");
+            }
+            DataConnection dc = apnContext.getDataConnection();
+
             if (DBG) {
                 log(String.format("onDataSetupComplete: success apn=%s",
                     apnContext.getWaitingApns().get(0).apn) + " refCount=" + dc.getRefCount());
@@ -1612,16 +1610,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
             notifyDefaultData(apnContext);
         } else {
-            int refCount = releaseApnContext(apnContext, false);
-            if (DBG) {
-                log(String.format("onDataSetupComplete: error apn=%s",
-                    apnContext.getWaitingApns().get(0).apn) + " refCount=" + refCount);
-            }
+            String apnString;
+            DataConnection.FailCause cause;
 
-            GsmDataConnection.FailCause cause;
-            cause = (GsmDataConnection.FailCause) (ar.result);
+            cause = (DataConnection.FailCause) (ar.result);
             if (DBG) {
-                String apnString;
                 try {
                     apnString = apnContext.getWaitingApns().get(0).apn;
                 } catch (Exception e) {
@@ -1666,6 +1659,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 // we're not tying up the RIL command channel
                 sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, apnContext),
                         APN_DELAY_MILLIS);
+            }
+
+            int refCount = releaseApnContext(apnContext, false);
+            if (DBG) {
+                log("onDataSetupComplete: error apn=%s" + apnString + " refCount=" + refCount);
             }
         }
     }
