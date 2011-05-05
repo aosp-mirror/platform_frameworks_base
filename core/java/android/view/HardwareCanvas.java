@@ -64,6 +64,14 @@ public abstract class HardwareCanvas extends Canvas {
     abstract boolean drawDisplayList(DisplayList displayList, int width, int height, Rect dirty);
 
     /**
+     * Outputs the specified display list to the log. This method exists for use by
+     * tools to output display lists for selected nodes to the log.
+     *
+     * @param displayList The display list to be logged.
+     */
+    abstract void outputDisplayList(DisplayList displayList);
+
+    /**
      * Draws the specified layer onto this canvas.
      *
      * @param layer The layer to composite on this canvas

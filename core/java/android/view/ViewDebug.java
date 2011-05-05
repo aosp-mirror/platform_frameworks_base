@@ -375,6 +375,7 @@ public class ViewDebug {
     private static final String REMOTE_COMMAND_REQUEST_LAYOUT = "REQUEST_LAYOUT";
     private static final String REMOTE_PROFILE = "PROFILE";
     private static final String REMOTE_COMMAND_CAPTURE_LAYERS = "CAPTURE_LAYERS";
+    private static final String REMOTE_COMMAND_OUTPUT_DISPLAYLIST = "OUTPUT_DISPLAYLIST";
 
     private static HashMap<Class<?>, Field[]> sFieldsForClasses;
     private static HashMap<Class<?>, Method[]> sMethodsForClasses;
@@ -885,6 +886,8 @@ public class ViewDebug {
             final String[] params = parameters.split(" ");
             if (REMOTE_COMMAND_CAPTURE.equalsIgnoreCase(command)) {
                 capture(view, clientStream, params[0]);
+            } else if (REMOTE_COMMAND_OUTPUT_DISPLAYLIST.equalsIgnoreCase(command)) {
+                outputDisplayList(view, params[0]);
             } else if (REMOTE_COMMAND_INVALIDATE.equalsIgnoreCase(command)) {
                 invalidate(view, params[0]);
             } else if (REMOTE_COMMAND_REQUEST_LAYOUT.equalsIgnoreCase(command)) {
@@ -1154,6 +1157,11 @@ public class ViewDebug {
                 captureViewLayer(group.getChildAt(i), clientStream, localVisible);
             }
         }
+    }
+
+    private static void outputDisplayList(View root, String parameter) throws IOException {
+        final View view = findView(root, parameter);
+        view.getViewRoot().outputDisplayList(view);
     }
 
     private static void capture(View root, final OutputStream clientStream, String parameter)
