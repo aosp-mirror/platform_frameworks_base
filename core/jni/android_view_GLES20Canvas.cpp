@@ -519,11 +519,6 @@ static bool android_view_GLES20Canvas_drawDisplayList(JNIEnv* env,
     return redraw;
 }
 
-static void android_view_GLES20Canvas_outputDisplayList(JNIEnv* env,
-        jobject clazz, OpenGLRenderer* renderer, DisplayList* displayList) {
-    renderer->outputDisplayList(displayList);
-}
-
 // ----------------------------------------------------------------------------
 // Layers
 // ----------------------------------------------------------------------------
@@ -719,7 +714,7 @@ static JNINativeMethod gMethods[] = {
     { "nGetDisplayListRenderer", "(I)I",       (void*) android_view_GLES20Canvas_getDisplayListRenderer },
     { "nDrawDisplayList",        "(IIIILandroid/graphics/Rect;)Z",
                                                (void*) android_view_GLES20Canvas_drawDisplayList },
-    { "nOutputDisplayList",      "(II)V",      (void*) android_view_GLES20Canvas_outputDisplayList },
+
     { "nInterrupt",              "(I)V",       (void*) android_view_GLES20Canvas_interrupt },
     { "nResume",                 "(I)V",       (void*) android_view_GLES20Canvas_resume },
 

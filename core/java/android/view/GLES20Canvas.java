@@ -261,13 +261,6 @@ class GLES20Canvas extends HardwareCanvas {
     private static native boolean nDrawDisplayList(int renderer, int displayList,
             int width, int height, Rect dirty);
 
-    @Override
-    void outputDisplayList(DisplayList displayList) {
-        nOutputDisplayList(mRenderer, ((GLES20DisplayList) displayList).mNativeDisplayList);
-    }
-
-    private static native void nOutputDisplayList(int renderer, int displayList);
-
     ///////////////////////////////////////////////////////////////////////////
     // Hardware layer
     ///////////////////////////////////////////////////////////////////////////

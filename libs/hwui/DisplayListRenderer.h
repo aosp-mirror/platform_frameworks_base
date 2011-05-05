@@ -107,8 +107,6 @@ public:
 
     bool replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level = 0);
 
-    void output(OpenGLRenderer& renderer, uint32_t level = 0);
-
     static void outputLogBuffer(int fd);
 
 private:
