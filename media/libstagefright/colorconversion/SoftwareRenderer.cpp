@@ -56,9 +56,21 @@ SoftwareRenderer::SoftwareRenderer(
     }
 
     int halFormat;
+    size_t bufWidth, bufHeight;
+
     switch (mColorFormat) {
+        case OMX_COLOR_FormatYUV420Planar:
+        {
+            halFormat = HAL_PIXEL_FORMAT_YV12;
+            bufWidth = (mWidth + 1) & ~1;
+            bufHeight = (mHeight + 1) & ~1;
+            break;
+        }
+
         default:
             halFormat = HAL_PIXEL_FORMAT_RGB_565;
+            bufWidth = mWidth;
+            bufHeight = mHeight;
 
             mConverter = new ColorConverter(
                     mColorFormat, OMX_COLOR_Format16bitRGB565);
@@ -82,8 +94,8 @@ SoftwareRenderer::SoftwareRenderer(
     // Width must be multiple of 32???
     CHECK_EQ(0, native_window_set_buffers_geometry(
                 mNativeWindow.get(),
-                mCropRight - mCropLeft + 1,
-                mCropBottom - mCropTop + 1,
+                bufWidth,
+                bufHeight,
                 halFormat));
 
     uint32_t transform;
@@ -99,11 +111,24 @@ SoftwareRenderer::SoftwareRenderer(
         CHECK_EQ(0, native_window_set_buffers_transform(
                     mNativeWindow.get(), transform));
     }
+
+    android_native_rect_t crop;
+    crop.left = mCropLeft;
+    crop.top = mCropTop;
+    crop.right = mCropRight + 1;
+    crop.bottom = mCropBottom + 1;
+
+    CHECK_EQ(0, native_window_set_crop(mNativeWindow.get(), &crop));
 }
 
 SoftwareRenderer::~SoftwareRenderer() {
     delete mConverter;
     mConverter = NULL;
+}
+
+static int ALIGN(int x, int y) {
+    // y must be a power of 2.
+    return (x + y - 1) & ~(y - 1);
 }
 
 void SoftwareRenderer::render(
@@ -129,14 +154,40 @@ void SoftwareRenderer::render(
         mConverter->convert(
                 data,
                 mWidth, mHeight,
-                mCropLeft, mCropTop, mCropRight, mCropBottom,
+                0, 0, mWidth - 1, mHeight - 1,
                 dst,
                 buf->stride, buf->height,
-                0, 0,
-                mCropRight - mCropLeft,
-                mCropBottom - mCropTop);
+                0, 0, mWidth - 1, mHeight - 1);
     } else {
-        TRESPASS();
+        CHECK_EQ(mColorFormat, OMX_COLOR_FormatYUV420Planar);
+
+        const uint8_t *src_y = (const uint8_t *)data;
+        const uint8_t *src_u = (const uint8_t *)data + mWidth * mHeight;
+        const uint8_t *src_v = src_u + (mWidth / 2 * mHeight / 2);
+
+        uint8_t *dst_y = (uint8_t *)dst;
+        size_t dst_y_size = buf->stride * buf->height;
+        size_t dst_c_stride = ALIGN(buf->stride / 2, 16);
+        size_t dst_c_size = dst_c_stride * buf->height / 2;
+        uint8_t *dst_v = dst_y + dst_y_size;
+        uint8_t *dst_u = dst_v + dst_c_size;
+
+        for (int y = 0; y < mHeight; ++y) {
+            memcpy(dst_y, src_y, mWidth);
+
+            src_y += mWidth;
+            dst_y += buf->stride;
+        }
+
+        for (int y = 0; y < (mHeight + 1) / 2; ++y) {
+            memcpy(dst_u, src_u, (mWidth + 1) / 2);
+            memcpy(dst_v, src_v, (mWidth + 1) / 2);
+
+            src_u += mWidth / 2;
+            src_v += mWidth / 2;
+            dst_u += dst_c_stride;
+            dst_v += dst_c_stride;
+        }
     }
 
     CHECK_EQ(0, mapper.unlock(buf->handle));
