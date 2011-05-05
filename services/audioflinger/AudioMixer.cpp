@@ -48,6 +48,8 @@ static inline int16_t clamp16(int32_t sample)
 AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
     :   mActiveTrack(0), mTrackNames(0), mSampleRate(sampleRate)
 {
+    // AudioMixer is not yet capable of multi-channel beyond stereo
+    assert(2 == MAX_NUM_CHANNELS);
     mState.enabledTracks= 0;
     mState.needsChanged = 0;
     mState.frameCount   = frameCount;
@@ -170,68 +172,73 @@ void AudioMixer::setActiveTrack(int track)
     mActiveTrack = track;
 }
 
-status_t AudioMixer::setParameter(int target, int name, void *value)
+void AudioMixer::setParameter(int target, int name, void *value)
 {
     int valueInt = (int)value;
     int32_t *valueBuf = (int32_t *)value;
 
     switch (target) {
+
     case TRACK:
-        if (name == CHANNEL_MASK) {
+        switch (name) {
+        case CHANNEL_MASK: {
             uint32_t mask = (uint32_t)value;
             if (mState.tracks[ mActiveTrack ].channelMask != mask) {
                 uint8_t channelCount = popcount(mask);
-                if ((channelCount <= MAX_NUM_CHANNELS) && (channelCount)) {
-                    mState.tracks[ mActiveTrack ].channelMask = mask;
-                    mState.tracks[ mActiveTrack ].channelCount = channelCount;
-                    ALOGV("setParameter(TRACK, CHANNEL_MASK, %x)", mask);
-                    invalidateState(1<<mActiveTrack);
-                    return NO_ERROR;
-                }
-            } else {
-                return NO_ERROR;
+                assert((channelCount <= MAX_NUM_CHANNELS) && (channelCount));
+                mState.tracks[ mActiveTrack ].channelMask = mask;
+                mState.tracks[ mActiveTrack ].channelCount = channelCount;
+                ALOGV("setParameter(TRACK, CHANNEL_MASK, %x)", mask);
+                invalidateState(1<<mActiveTrack);
             }
-        }
-        if (name == MAIN_BUFFER) {
+            } break;
+        case MAIN_BUFFER:
             if (mState.tracks[ mActiveTrack ].mainBuffer != valueBuf) {
                 mState.tracks[ mActiveTrack ].mainBuffer = valueBuf;
                 ALOGV("setParameter(TRACK, MAIN_BUFFER, %p)", valueBuf);
                 invalidateState(1<<mActiveTrack);
             }
-            return NO_ERROR;
-        }
-        if (name == AUX_BUFFER) {
+            break;
+        case AUX_BUFFER:
             if (mState.tracks[ mActiveTrack ].auxBuffer != valueBuf) {
                 mState.tracks[ mActiveTrack ].auxBuffer = valueBuf;
                 ALOGV("setParameter(TRACK, AUX_BUFFER, %p)", valueBuf);
                 invalidateState(1<<mActiveTrack);
             }
-            return NO_ERROR;
+            break;
+        default:
+            // bad name
+            assert(false);
         }
-
         break;
+
     case RESAMPLE:
-        if (name == SAMPLE_RATE) {
-            if (valueInt > 0) {
-                track_t& track = mState.tracks[ mActiveTrack ];
-                if (track.setResampler(uint32_t(valueInt), mSampleRate)) {
-                    ALOGV("setParameter(RESAMPLE, SAMPLE_RATE, %u)",
-                            uint32_t(valueInt));
-                    invalidateState(1<<mActiveTrack);
-                }
-                return NO_ERROR;
+        switch (name) {
+        case SAMPLE_RATE: {
+            assert(valueInt > 0);
+            track_t& track = mState.tracks[ mActiveTrack ];
+            if (track.setResampler(uint32_t(valueInt), mSampleRate)) {
+                ALOGV("setParameter(RESAMPLE, SAMPLE_RATE, %u)",
+                        uint32_t(valueInt));
+                invalidateState(1<<mActiveTrack);
             }
-        }
-        if (name == RESET) {
+            } break;
+        case RESET: {
             track_t& track = mState.tracks[ mActiveTrack ];
             track.resetResampler();
             invalidateState(1<<mActiveTrack);
-            return NO_ERROR;
+            } break;
+        default:
+            // bad name
+            assert(false);
         }
         break;
+
     case RAMP_VOLUME:
     case VOLUME:
-        if ((uint32_t(name-VOLUME0) < MAX_NUM_CHANNELS)) {
+        switch (name) {
+        case VOLUME0:
+        case VOLUME1: {
             track_t& track = mState.tracks[ mActiveTrack ];
             if (track.volume[name-VOLUME0] != valueInt) {
                 ALOGV("setParameter(VOLUME, VOLUME0/1: %04x)", valueInt);
@@ -250,8 +257,8 @@ status_t AudioMixer::setParameter(int target, int name, void *value)
                 }
                 invalidateState(1<<mActiveTrack);
             }
-            return NO_ERROR;
-        } else if (name == AUXLEVEL) {
+            } break;
+        case AUXLEVEL: {
             track_t& track = mState.tracks[ mActiveTrack ];
             if (track.auxLevel != valueInt) {
                 ALOGV("setParameter(VOLUME, AUXLEVEL: %04x)", valueInt);
@@ -270,11 +277,17 @@ status_t AudioMixer::setParameter(int target, int name, void *value)
                 }
                 invalidateState(1<<mActiveTrack);
             }
-            return NO_ERROR;
+            } break;
+        default:
+            // bad name
+            assert(false);
         }
         break;
+
+    default:
+        // bad target
+        assert(false);
     }
-    return BAD_VALUE;
 }
 
 bool AudioMixer::track_t::setResampler(uint32_t value, uint32_t devSampleRate)
