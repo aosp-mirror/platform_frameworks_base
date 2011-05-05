@@ -23,13 +23,6 @@
 #include <media/JetPlayer.h>
 
 
-#ifdef HAVE_GETTID
-static pid_t myTid() { return gettid(); }
-#else
-static pid_t myTid() { return getpid(); }
-#endif
-
-
 namespace android
 {
 
@@ -188,7 +181,7 @@ int JetPlayer::render() {
     // signal main thread that we started
     {
         Mutex::Autolock l(mMutex);
-        mTid = myTid();
+        mTid = gettid();
         LOGV("JetPlayer::render(): render thread(%d) signal", mTid);
         mCondition.signal();
     }

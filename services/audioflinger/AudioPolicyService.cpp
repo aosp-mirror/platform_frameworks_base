@@ -39,13 +39,6 @@
 #include <hardware/audio_policy.h>
 #include <hardware/audio_policy_hal.h>
 
-// ----------------------------------------------------------------------------
-// the sim build doesn't have gettid
-
-#ifndef HAVE_GETTID
-# define gettid getpid
-#endif
-
 namespace android {
 
 static const char *kDeadlockedString = "AudioPolicyService may be deadlocked\n";

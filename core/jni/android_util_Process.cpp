@@ -38,18 +38,7 @@
 #include <grp.h>
 #include <pwd.h>
 #include <signal.h>
-
-/* desktop Linux needs a little help with gettid() */
-#if defined(HAVE_GETTID) && !defined(HAVE_ANDROID_OS)
-#define __KERNEL__
-# include <linux/unistd.h>
-#ifdef _syscall0
-_syscall0(pid_t,gettid)
-#else
-pid_t gettid() { return syscall(__NR_gettid);}
-#endif
-#undef __KERNEL__
-#endif
+#include <unistd.h>
 
 #define POLICY_DEBUG 0
 #define GUARD_THREAD_PRIORITY 0
