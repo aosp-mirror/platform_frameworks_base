@@ -505,11 +505,11 @@ TEST_F(SurfaceTextureClientTest, DISABLED_SurfaceTextureSyncModeWaitRetire) {
 
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
     ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    thread->run();
     ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
     ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
-    thread->run();
-    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
-    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[2]));
+    //ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+    //ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[2]));
     thread->bufferDequeued();
     thread->requestExitAndWait();
 }
