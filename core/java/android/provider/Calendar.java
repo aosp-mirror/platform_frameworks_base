@@ -441,6 +441,35 @@ public final class Calendar {
          * <P>Type: INTEGER</P>
          */
         public static final String MAX_REMINDERS = "maxReminders";
+
+        /**
+         * These fields are only writable by a sync adapter. To modify them the
+         * caller must include CALLER_IS_SYNCADAPTER, _SYNC_ACCOUNT, and
+         * _SYNC_ACCOUNT_TYPE in the query parameters.
+         */
+        public static final String[] SYNC_WRITABLE_COLUMNS = new String[] {
+            _SYNC_ACCOUNT,
+            _SYNC_ACCOUNT_TYPE,
+            _SYNC_ID,
+            _SYNC_TIME,
+            _SYNC_VERSION,
+            _SYNC_DIRTY,
+            OWNER_ACCOUNT,
+            MAX_REMINDERS,
+            CAN_MODIFY_TIME_ZONE,
+            CAN_ORGANIZER_RESPOND,
+            LOCATION,
+            TIMEZONE,
+            ACCESS_LEVEL,
+            DELETED,
+            SYNC1,
+            SYNC2,
+            SYNC3,
+            SYNC4,
+            SYNC5,
+            SYNC6,
+            SYNC_STATE,
+        };
     }
 
     /**
