@@ -144,6 +144,9 @@ public abstract class DataConnectionTracker extends Handler {
 
     public static final String APN_TYPE_KEY = "apnType";
 
+    /** Delay between APN attempts */
+    protected static final int APN_DELAY_MILLIS = 5000;
+
     // responds to the setInternalDataEnabled call - used internally to turn off data
     // for example during emergency calls
     protected boolean mInternalDataEnabled = true;
