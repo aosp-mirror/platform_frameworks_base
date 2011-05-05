@@ -490,6 +490,9 @@ public abstract class DataConnection extends StateMachine {
                 log("BUG: onSetupConnectionCompleted is stale cp.tag=" + cp.tag + ", mtag=" + mTag);
             }
             result = DataCallState.SetupResult.ERR_Stale;
+        } else if (response.status != 0) {
+            result = DataCallState.SetupResult.ERR_RilError;
+            result.mFailCause = FailCause.fromInt(response.status);
         } else {
             log("onSetupConnectionCompleted received DataCallState: " + response);
 
