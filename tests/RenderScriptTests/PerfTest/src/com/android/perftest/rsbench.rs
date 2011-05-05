@@ -21,9 +21,15 @@
 
 /* Message sent from script to renderscript */
 const int RS_MSG_TEST_DONE = 100;
+const int RS_MSG_RESULTS_READY = 101;
 
-const int gMaxModes = 26;
+const int gMaxModes = 25;
 int gMaxLoops;
+
+// Allocation to send test names back to java
+char *gStringBuffer = 0;
+// Allocation to write the results into
+static float gResultBuffer[gMaxModes];
 
 rs_program_vertex gProgVertex;
 rs_program_fragment gProgFragmentColor;
@@ -168,7 +174,7 @@ static void displaySingletexFill(bool blend, int quadCount) {
     rsgBindTexture(gProgFragmentTexture, 0, gTexOpaque);
 
     for (int i = 0; i < quadCount; i ++) {
-        float startX = 10 * i, startY = 10 * i;
+        float startX = 5 * i, startY = 5 * i;
         float width = gRenderSurfaceW - startX, height = gRenderSurfaceH - startY;
         rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
                              startX, startY + height, 0, 0, 1,
@@ -638,34 +644,45 @@ static int runningLoops = 0;
 static bool sendMsgFlag = false;
 
 static const char *testNames[] = {
-    "Finished text fill 1,",
-    "Finished text fill 2,",
-    "Finished text fill 3,",
-    "Finished text fill 4,",
-    "Finished text fill 5,",
-    "Finished 25.6k geo flat color,",
-    "Finished 51.2k geo flat color,",
-    "Finished 204.8k geo raster load flat color,",
-    "Finished 25.6k geo texture,",
-    "Finished 51.2k geo texture,",
-    "Finished 204.8k geo raster load texture,",
-    "Finished full screen mesh 10 by 10,",
-    "Finished full screen mesh 100 by 100,",
-    "Finished full screen mesh W / 4 by H / 4,",
-    "Finished 25.6k geo heavy vertex,",
-    "Finished 51.2k geo heavy vertex,",
-    "Finished 204.8k geo raster load heavy vertex,",
-    "Finished singletexture 5x fill,",
-    "Finished 3tex multitexture 5x fill,",
-    "Finished blend singletexture 5x fill,",
-    "Finished blend 3tex multitexture 5x fill,",
-    "Finished 25.6k geo heavy fragment,",
-    "Finished 51.2k geo heavy fragment,",
-    "Finished 204.8k geo raster load heavy fragment,",
-    "Finished 25.6k geo heavy fragment heavy vertex,",
-    "Finished 51.2k geo heavy fragment heavy vertex,",
-    "Finished 204.8k geo raster load heavy fragment heavy vertex,",
+    "Fill screen with text 1 time",
+    "Fill screen with text 3 times",
+    "Fill screen with text 5 times",
+    "Geo test 25.6k flat color",
+    "Geo test 51.2k flat color",
+    "Geo test 204.8k small tries flat color",
+    "Geo test 25.6k single texture",
+    "Geo test 51.2k single texture",
+    "Geo test 204.8k small tries single texture",
+    "Full screen mesh 10 by 10",
+    "Full screen mesh 100 by 100",
+    "Full screen mesh W / 4 by H / 4",
+    "Geo test 25.6k geo heavy vertex",
+    "Geo test 51.2k geo heavy vertex",
+    "Geo test 204.8k geo raster load heavy vertex",
+    "Fill screen 10x singletexture",
+    "Fill screen 10x 3tex multitexture",
+    "Fill screen 10x blended singletexture",
+    "Fill screen 10x blended 3tex multitexture",
+    "Geo test 25.6k heavy fragment",
+    "Geo test 51.2k heavy fragment",
+    "Geo test 204.8k small tries heavy fragment",
+    "Geo test 25.6k heavy fragment heavy vertex",
+    "Geo test 51.2k heavy fragment heavy vertex",
+    "Geo test 204.8k small tries heavy fragment heavy vertex",
 };
+
+void getTestName(int testIndex) {
+    int bufferLen = rsAllocationGetDimX(rsGetAllocation(gStringBuffer));
+    if (testIndex >= gMaxModes) {
+        return;
+    }
+    uint charIndex = 0;
+    while (testNames[testIndex][charIndex] != '\0' && charIndex < bufferLen) {
+        gStringBuffer[charIndex] = testNames[testIndex][charIndex];
+        charIndex ++;
+    }
+    gStringBuffer[charIndex] = '\0';
+}
 
 static void runTest(int index) {
     switch (index) {
@@ -673,81 +690,75 @@ static void runTest(int index) {
         displayFontSamples(1);
         break;
     case 1:
-        displayFontSamples(2);
-        break;
-    case 2:
         displayFontSamples(3);
         break;
-    case 3:
-        displayFontSamples(4);
-        break;
-    case 4:
+    case 2:
         displayFontSamples(5);
         break;
-    case 5:
+    case 3:
         displaySimpleGeoSamples(false, 1);
         break;
-    case 6:
+    case 4:
         displaySimpleGeoSamples(false, 2);
         break;
-    case 7:
+    case 5:
         displaySimpleGeoSamples(false, 8);
         break;
-    case 8:
+    case 6:
         displaySimpleGeoSamples(true, 1);
         break;
-    case 9:
+    case 7:
         displaySimpleGeoSamples(true, 2);
         break;
-    case 10:
+    case 8:
         displaySimpleGeoSamples(true, 8);
         break;
-    case 11:
+    case 9:
         displayMeshSamples(0);
         break;
-    case 12:
+    case 10:
         displayMeshSamples(1);
         break;
-    case 13:
+    case 11:
         displayMeshSamples(2);
         break;
-    case 14:
+    case 12:
         displayCustomShaderSamples(1);
         break;
-    case 15:
+    case 13:
         displayCustomShaderSamples(2);
         break;
+    case 14:
+        displayCustomShaderSamples(10);
+        break;
+    case 15:
+        displaySingletexFill(false, 10);
+        break;
     case 16:
-        displayCustomShaderSamples(8);
+        displayMultitextureSample(false, 10);
         break;
     case 17:
-        displaySingletexFill(false, 5);
+        displaySingletexFill(true, 10);
         break;
     case 18:
-        displayMultitextureSample(false, 5);
+        displayMultitextureSample(true, 8);
         break;
     case 19:
-        displaySingletexFill(true, 5);
-        break;
-    case 20:
-        displayMultitextureSample(true, 5);
-        break;
-    case 21:
         displayPixelLightSamples(1, false);
         break;
-    case 22:
+    case 20:
         displayPixelLightSamples(2, false);
         break;
-    case 23:
+    case 21:
         displayPixelLightSamples(8, false);
         break;
-    case 24:
+    case 22:
         displayPixelLightSamples(1, true);
         break;
-    case 25:
+    case 23:
         displayPixelLightSamples(2, true);
         break;
-    case 26:
+    case 24:
         displayPixelLightSamples(8, true);
         break;
     }
@@ -782,9 +793,10 @@ int root(void) {
         return 1;
     }
 
+    gDt = 1.0f / 60.0f;
+
     rsgFinish();
     int64_t start = rsUptimeMillis();
-    rsGetDt();
 
     int drawPos = 0;
     int frameCount = 100;
@@ -801,7 +813,6 @@ int root(void) {
         gRenderSurfaceH = rsgGetHeight();
         int size = 8;
         drawOffscreenResult((drawPos+=size)%gRenderSurfaceW, (gRenderSurfaceH * 3) / 4, size, size);
-        gDt = rsGetDt();
     }
 
     rsgFinish();
@@ -809,6 +820,7 @@ int root(void) {
     int64_t end = rsUptimeMillis();
     float fps = (float)(frameCount) / ((float)(end - start)*0.001f);
     rsDebug(testNames[benchMode], fps);
+    gResultBuffer[benchMode] = fps;
 
     drawOffscreenResult(0, 0,
                         gRenderSurfaceW / 2,
@@ -828,7 +840,8 @@ int root(void) {
 
     gTorusRotation = 0;
 
-    if (benchMode > gMaxModes) {
+    if (benchMode == gMaxModes) {
+        rsSendToClientBlocking(RS_MSG_RESULTS_READY, gResultBuffer, gMaxModes*sizeof(float));
         benchMode = 0;
         runningLoops++;
         if ((gMaxLoops > 0) && (runningLoops > gMaxLoops) && !sendMsgFlag) {
