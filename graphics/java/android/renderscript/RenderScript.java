@@ -473,25 +473,12 @@ public class RenderScript {
         return rsnScriptCCreate(mContext, resName, cacheDir, script, length);
     }
 
-    native void rsnSamplerBegin(int con);
-    synchronized void nSamplerBegin() {
+    native int  rsnSamplerCreate(int con, int magFilter, int minFilter,
+                                 int wrapS, int wrapT, int wrapR, float aniso);
+    synchronized int nSamplerCreate(int magFilter, int minFilter,
+                                 int wrapS, int wrapT, int wrapR, float aniso) {
         validate();
-        rsnSamplerBegin(mContext);
-    }
-    native void rsnSamplerSet(int con, int param, int value);
-    synchronized void nSamplerSet(int param, int value) {
-        validate();
-        rsnSamplerSet(mContext, param, value);
-    }
-    native void rsnSamplerSet2(int con, int param, float value);
-    synchronized void nSamplerSet2(int param, float value) {
-        validate();
-        rsnSamplerSet2(mContext, param, value);
-    }
-    native int  rsnSamplerCreate(int con);
-    synchronized int nSamplerCreate() {
-        validate();
-        return rsnSamplerCreate(mContext);
+        return rsnSamplerCreate(mContext, magFilter, minFilter, wrapS, wrapT, wrapR, aniso);
     }
 
     native int  rsnProgramStoreCreate(int con, boolean r, boolean g, boolean b, boolean a,

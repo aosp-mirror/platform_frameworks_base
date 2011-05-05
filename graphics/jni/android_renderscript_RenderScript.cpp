@@ -1059,32 +1059,18 @@ nContextBindProgramRaster(JNIEnv *_env, jobject _this, RsContext con, jint pf)
 
 // ---------------------------------------------------------------------------
 
-static void
-nSamplerBegin(JNIEnv *_env, jobject _this, RsContext con)
-{
-    LOG_API("nSamplerBegin, con(%p)", con);
-    rsSamplerBegin(con);
-}
-
-static void
-nSamplerSet(JNIEnv *_env, jobject _this, RsContext con, jint p, jint v)
-{
-    LOG_API("nSamplerSet, con(%p), param(%i), value(%i)", con, p, v);
-    rsSamplerSet(con, (RsSamplerParam)p, (RsSamplerValue)v);
-}
-
-static void
-nSamplerSet2(JNIEnv *_env, jobject _this, RsContext con, jint p, jfloat v)
-{
-    LOG_API("nSamplerSet2, con(%p), param(%i), value(%f)", con, p, v);
-    rsSamplerSet2(con, (RsSamplerParam)p, v);
-}
-
 static jint
-nSamplerCreate(JNIEnv *_env, jobject _this, RsContext con)
+nSamplerCreate(JNIEnv *_env, jobject _this, RsContext con, jint magFilter, jint minFilter,
+               jint wrapS, jint wrapT, jint wrapR, jfloat aniso)
 {
     LOG_API("nSamplerCreate, con(%p)", con);
-    return (jint)rsSamplerCreate(con);
+    return (jint)rsSamplerCreate(con,
+                                 (RsSamplerValue)magFilter,
+                                 (RsSamplerValue)minFilter,
+                                 (RsSamplerValue)wrapS,
+                                 (RsSamplerValue)wrapT,
+                                 (RsSamplerValue)wrapR,
+                                 aniso);
 }
 
 // ---------------------------------------------------------------------------
@@ -1280,10 +1266,7 @@ static JNINativeMethod methods[] = {
 {"rsnContextBindProgramVertex",      "(II)V",                                 (void*)nContextBindProgramVertex },
 {"rsnContextBindProgramRaster",      "(II)V",                                 (void*)nContextBindProgramRaster },
 
-{"rsnSamplerBegin",                  "(I)V",                                  (void*)nSamplerBegin },
-{"rsnSamplerSet",                    "(III)V",                                (void*)nSamplerSet },
-{"rsnSamplerSet2",                   "(IIF)V",                                (void*)nSamplerSet2 },
-{"rsnSamplerCreate",                 "(I)I",                                  (void*)nSamplerCreate },
+{"rsnSamplerCreate",                 "(IIIIIIF)I",                            (void*)nSamplerCreate },
 
 {"rsnMeshCreate",                    "(III)I",                                (void*)nMeshCreate },
 {"rsnMeshBindVertex",                "(IIII)V",                               (void*)nMeshBindVertex },

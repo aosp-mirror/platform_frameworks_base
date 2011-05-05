@@ -49,7 +49,6 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
     mHal.state.constants = new ObjectBaseRef<Allocation>[mHal.state.constantsCount];
 
     uint32_t input = 0;
-    uint32_t output = 0;
     uint32_t constant = 0;
     uint32_t texture = 0;
     for (uint32_t ct=0; ct < paramLength; ct+=2) {
@@ -154,7 +153,6 @@ void Program::bindTexture(Context *rsc, uint32_t slot, Allocation *a) {
         return;
     }
 
-    //LOGE("bindtex %i %p", slot, a);
     mHal.state.textures[slot].set(a);
     mDirty = true;
 }
@@ -168,10 +166,6 @@ void Program::bindSampler(Context *rsc, uint32_t slot, Sampler *s) {
 
     mHal.state.samplers[slot].set(s);
     mDirty = true;
-}
-
-void Program::setShader(const char *txt, uint32_t len) {
-    mUserShader.setTo(txt, len);
 }
 
 namespace android {

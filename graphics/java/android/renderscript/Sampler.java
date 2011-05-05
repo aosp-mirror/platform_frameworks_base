@@ -239,21 +239,10 @@ public class Sampler extends BaseObj {
             }
         }
 
-        static synchronized Sampler internalCreate(RenderScript rs, Builder b) {
-            rs.nSamplerBegin();
-            rs.nSamplerSet(0, b.mMin.mID);
-            rs.nSamplerSet(1, b.mMag.mID);
-            rs.nSamplerSet(2, b.mWrapS.mID);
-            rs.nSamplerSet(3, b.mWrapT.mID);
-            rs.nSamplerSet(4, b.mWrapR.mID);
-            rs.nSamplerSet2(5, b.mAniso);
-            int id = rs.nSamplerCreate();
-            return new Sampler(id, rs);
-        }
-
         public Sampler create() {
             mRS.validate();
-            return internalCreate(mRS, this);
+            int id = mRS.nSamplerCreate(mMag.mID, mMin.mID, mWrapS.mID, mWrapT.mID, mWrapR.mID, mAniso);
+            return new Sampler(id, mRS);
         }
     }
 

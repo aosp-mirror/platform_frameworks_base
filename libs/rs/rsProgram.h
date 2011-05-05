@@ -43,8 +43,6 @@ public:
     void bindTexture(Context *, uint32_t slot, Allocation *);
     void bindSampler(Context *, uint32_t slot, Sampler *);
 
-    void setShader(const char *, uint32_t len);
-
     void forceDirty() const {mDirty = true;}
 
     struct Hal {
