@@ -21,15 +21,26 @@ ID       [a-zA-Z_][a-zA-Z0-9_]*
    int typeNextState;
 
    void checkPointerType() {
-       VarType *lastType = currType;
-       if (lastType->ptrLevel) {
+       VarType *baseType = currType;
+       int curPtrLevel = 0;
+       while (curPtrLevel < baseType->ptrLevel) {
            currType = &apis[apiCount].params[apis[apiCount].paramCount];
            currType->type = 4;
+           currType->ptrLevel = curPtrLevel;
+           if (currType->ptrLevel > 0) {
+              currType->isConst = 1;
+           }
            sprintf(currType->typeName, "%s", "size_t");
-           if (lastType->name[0]) {
-               sprintf(currType->name, "%s_length", lastType->name);
+           switch(baseType->ptrLevel - curPtrLevel) {
+           case 1:
+              sprintf(currType->name, "%s_length", baseType->name);
+              break;
+           case 2:
+              sprintf(currType->name, "%s_length_length", baseType->name);
+              break;
            }
            apis[apiCount].paramCount++;
+           curPtrLevel ++;
        }
    }
 

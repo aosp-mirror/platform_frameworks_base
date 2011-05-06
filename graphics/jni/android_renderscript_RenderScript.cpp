@@ -320,8 +320,7 @@ nElementCreate2(JNIEnv *_env, jobject _this, RsContext con, jintArray _ids, jobj
     }
     jint id = (jint)rsElementCreate2(con,
                                      (RsElement *)ids, fieldCount,
-                                     nameArray, fieldCount,
-                                     sizeArray, fieldCount,
+                                     nameArray, fieldCount * sizeof(size_t),  sizeArray,
                                      (const uint32_t *)arraySizes, fieldCount);
     for (int ct=0; ct < fieldCount; ct++) {
         jstring s = (jstring)_env->GetObjectArrayElement(_names, ct);
