@@ -84,6 +84,7 @@ private:
     bool mIsMPEG4;
     int32_t mTrackId;
     int64_t mTrackDurationUs;
+    int64_t mMaxChunkDurationUs;
 
     // For realtime applications, we need to adjust the media clock
     // for video track based on the audio media clock
@@ -211,6 +212,7 @@ private:
     void addOneStscTableEntry(size_t chunkId, size_t sampleId);
     void addOneStssTableEntry(size_t sampleId);
     void addOneSttsTableEntry(size_t sampleCount, int64_t durationUs);
+    void sendTrackSummary(bool hasMultipleTracks);
 
     // Write the boxes
     void writeStcoBox(bool use32BitOffset);
@@ -1359,6 +1361,7 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
     mPrevMediaTimeAdjustSample = 0;
     mTotalDriftTimeToAdjustUs = 0;
     mPrevTotalAccumDriftTimeUs = 0;
+    mMaxChunkDurationUs = 0;
 
     pthread_create(&mThread, &attr, ThreadWrapper, this);
     pthread_attr_destroy(&attr);
@@ -1796,6 +1799,7 @@ void MPEG4Writer::Track::updateDriftTime(const sp<MetaData>& meta) {
 status_t MPEG4Writer::Track::threadEntry() {
     int32_t count = 0;
     const int64_t interleaveDurationUs = mOwner->interleaveDuration();
+    const bool hasMultipleTracks = (mOwner->numTracks() > 1);
     int64_t chunkTimestampUs = 0;
     int32_t nChunks = 0;
     int32_t nZeroLengthFrames = 0;
@@ -2028,7 +2032,7 @@ status_t MPEG4Writer::Track::threadEntry() {
             }
             trackProgressStatus(timestampUs);
         }
-        if (mOwner->numTracks() == 1) {
+        if (!hasMultipleTracks) {
             off64_t offset = mIsAvc? mOwner->addLengthPrefixedSample_l(copy)
                                  : mOwner->addSample_l(copy);
             if (mChunkOffsets.empty()) {
@@ -2047,7 +2051,11 @@ status_t MPEG4Writer::Track::threadEntry() {
             if (chunkTimestampUs == 0) {
                 chunkTimestampUs = timestampUs;
             } else {
-                if (timestampUs - chunkTimestampUs > interleaveDurationUs) {
+                int64_t chunkDurationUs = timestampUs - chunkTimestampUs;
+                if (chunkDurationUs > interleaveDurationUs) {
+                    if (chunkDurationUs > mMaxChunkDurationUs) {
+                        mMaxChunkDurationUs = chunkDurationUs;
+                    }
                     ++nChunks;
                     if (nChunks == 1 ||  // First chunk
                         (--(mStscTableEntries.end()))->samplesPerChunk !=
@@ -2070,7 +2078,7 @@ status_t MPEG4Writer::Track::threadEntry() {
     mOwner->trackProgressStatus(mTrackId, -1, err);
 
     // Last chunk
-    if (mOwner->numTracks() == 1) {
+    if (!hasMultipleTracks) {
         addOneStscTableEntry(1, mNumSamples);
     } else if (!mChunkSamples.empty()) {
         addOneStscTableEntry(++nChunks, mChunkSamples.size());
@@ -2097,6 +2105,9 @@ status_t MPEG4Writer::Track::threadEntry() {
 
     mTrackDurationUs += lastDurationUs;
     mReachedEOS = true;
+
+    sendTrackSummary(hasMultipleTracks);
+
     LOGI("Received total/0-length (%d/%d) buffers and encoded %d frames. - %s",
             count, nZeroLengthFrames, mNumSamples, mIsAudio? "audio": "video");
     if (mIsAudio) {
@@ -2107,6 +2118,28 @@ status_t MPEG4Writer::Track::threadEntry() {
         return OK;
     }
     return err;
+}
+
+void MPEG4Writer::Track::sendTrackSummary(bool hasMultipleTracks) {
+    int trackNum = (mTrackId << 28);
+
+    mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
+                    trackNum | MEDIA_RECORDER_TRACK_INFO_TYPE,
+                    mIsAudio? 0: 1);
+
+    mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
+                    trackNum | MEDIA_RECORDER_TRACK_INFO_DURATION_MS,
+                    mTrackDurationUs / 1000);
+
+    mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
+                    trackNum | MEDIA_RECORDER_TRACK_INFO_ENCODED_FRAMES,
+                    mNumSamples);
+
+    if (hasMultipleTracks) {
+        mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
+                    trackNum | MEDIA_RECORDER_TRACK_INFO_MAX_CHUNK_DUR_MS,
+                    mMaxChunkDurationUs / 1000);
+    }
 }
 
 void MPEG4Writer::Track::trackProgressStatus(int64_t timeUs, status_t err) {
