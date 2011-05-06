@@ -113,7 +113,8 @@ class="new">new!</span></li>
       </li>
     </ul>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r10</a> <span class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r11</a> <span
+class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">Google USB Driver, r4</a></li>
     </ul>
   </li>
@@ -137,7 +138,7 @@ class="new">new!</span></li>
       <span style="display:none" class="ja"></span>
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span></a>
-      <span class="new">new!</span></li>
+     <!-- <span class="new">new!</span> --></li>
     </ul>
   </li>
   <li>
