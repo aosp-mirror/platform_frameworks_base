@@ -1568,7 +1568,9 @@ public class Camera {
         }
 
         /**
-         * Sets the dimensions for preview pictures.
+         * Sets the dimensions for preview pictures. If the preview has already
+         * started, applications should stop the preview first before changing
+         * preview size.
          *
          * The sides of width and height are based on camera orientation. That
          * is, the preview size is the size before it is rotated by display
