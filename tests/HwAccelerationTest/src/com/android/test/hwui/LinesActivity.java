@@ -150,7 +150,7 @@ public class LinesActivity extends Activity {
             canvas.save();
             canvas.scale(10.0f, 10.0f);
             canvas.drawLine(50.0f, 40.0f, 10.0f, 40.0f, mSmallPaint);
-            canvas.drawLine(10.0f, 50.0f, 50.0f, 50.0f, mSmallPaint);
+            canvas.drawLine(10.0f, 45.0f, 20.0f, 55.0f, mSmallPaint);
             canvas.drawLine(10.0f, 60.0f, 50.0f, 60.0f, mHairLinePaint);
             canvas.restore();
         }

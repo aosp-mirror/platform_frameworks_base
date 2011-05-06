@@ -1144,7 +1144,7 @@ void OpenGLRenderer::setupDrawVertices(GLvoid* vertices) {
  * are set up for each individual segment.
  */
 void OpenGLRenderer::setupDrawAALine(GLvoid* vertices, GLvoid* widthCoords,
-        GLvoid* lengthCoords, float strokeWidth) {
+        GLvoid* lengthCoords, float boundaryWidthProportion) {
     mCaches.unbindMeshBuffer();
     glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
             gAAVertexStride, vertices);
@@ -1155,11 +1155,10 @@ void OpenGLRenderer::setupDrawAALine(GLvoid* vertices, GLvoid* widthCoords,
     glEnableVertexAttribArray(lengthSlot);
     glVertexAttribPointer(lengthSlot, 1, GL_FLOAT, GL_FALSE, gAAVertexStride, lengthCoords);
     int boundaryWidthSlot = mCaches.currentProgram->getUniform("boundaryWidth");
+    glUniform1f(boundaryWidthSlot, boundaryWidthProportion);
     // Setting the inverse value saves computations per-fragment in the shader
     int inverseBoundaryWidthSlot = mCaches.currentProgram->getUniform("inverseBoundaryWidth");
-    float boundaryWidth = (1 - strokeWidth) / 2;
-    glUniform1f(boundaryWidthSlot, boundaryWidth);
-    glUniform1f(inverseBoundaryWidthSlot, (1 / boundaryWidth));
+    glUniform1f(inverseBoundaryWidthSlot, (1 / boundaryWidthProportion));
 }
 
 void OpenGLRenderer::finishDrawTexture() {
@@ -1452,21 +1451,66 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     }
 }
 
+/**
+ * We draw lines as quads (tristrips). Using GL_LINES can be difficult because the rasterization
+ * rules for those lines produces some unexpected results, and may vary between hardware devices.
+ * The basics of lines-as-quads is easy; we simply find the normal to the line and position the
+ * corners of the quads on either side of each line endpoint, separated by the strokeWidth
+ * of the line. Hairlines are more involved because we need to account for transform scaling
+ * to end up with a one-pixel-wide line in screen space..
+ * Anti-aliased lines add another factor to the approach. We use a specialized fragment shader
+ * in combination with values that we calculate and pass down in this method. The basic approach
+ * is that the quad we create contains both the core line area plus a bounding area in which
+ * the translucent/AA pixels are drawn. The values we calculate tell the shader what
+ * proportion of the width and the length of a given segment is represented by the boundary
+ * region. The quad ends up being exactly .5 pixel larger in all directions than the non-AA quad.
+ * The bounding region is actually 1 pixel wide on all sides (half pixel on the outside, half pixel
+ * on the inside). This ends up giving the result we want, with pixels that are completely
+ * 'inside' the line area being filled opaquely and the other pixels being filled according to
+ * how far into the boundary region they are, which is determined by shader interpolation.
+ */
 void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 
     const bool isAA = paint->isAntiAlias();
-    float strokeWidth = paint->getStrokeWidth() * 0.5f;
+    // We use half the stroke width here because we're going to position the quad
+    // corner vertices half of the width away from the line endpoints
+    float halfStrokeWidth = paint->getStrokeWidth() * 0.5f;
     // A stroke width of 0 has a special meaning in Skia:
     // it draws a line 1 px wide regardless of current transform
     bool isHairLine = paint->getStrokeWidth() == 0.0f;
+    float inverseScaleX = 1.0f;
+    float inverseScaleY = 1.0f;
+    bool scaled = false;
     int alpha;
     SkXfermode::Mode mode;
     int generatedVerticesCount = 0;
     int verticesCount = count;
     if (count > 4) {
         // Polyline: account for extra vertices needed for continous tri-strip
-        verticesCount += (count -4);
+        verticesCount += (count - 4);
+    }
+
+    if (isHairLine || isAA) {
+        // The quad that we use for AA and hairlines needs to account for scaling. For hairlines
+        // the line on the screen should always be one pixel wide regardless of scale. For
+        // AA lines, we only want one pixel of translucent boundary around the quad.
+        if (!mSnapshot->transform->isPureTranslate()) {
+            Matrix4 *mat = mSnapshot->transform;
+            float m00 = mat->data[Matrix4::kScaleX];
+            float m01 = mat->data[Matrix4::kSkewY];
+            float m02 = mat->data[2];
+            float m10 = mat->data[Matrix4::kSkewX];
+            float m11 = mat->data[Matrix4::kScaleX];
+            float m12 = mat->data[6];
+            float scaleX = sqrt(m00*m00 + m01*m01);
+            float scaleY = sqrt(m10*m10 + m11*m11);
+            inverseScaleX = (scaleX != 0) ? (inverseScaleX / scaleX) : 0;
+            inverseScaleY = (scaleY != 0) ? (inverseScaleY / scaleY) : 0;
+            if (inverseScaleX != 1.0f || inverseScaleY != 1.0f) {
+                scaled = true;
+            }
+        }
     }
 
     getAlphaAndMode(paint, &alpha, &mode);
@@ -1490,11 +1534,10 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
 
     if (isHairLine) {
         // Set a real stroke width to be used in quad construction
-        strokeWidth = .5;
-    }
-    if (isAA) {
+        halfStrokeWidth = isAA? 1 : .5;
+    } else if (isAA && !scaled) {
         // Expand boundary to enable AA calculations on the quad border
-        strokeWidth += .5f;
+        halfStrokeWidth += .5f;
     }
     Vertex lines[verticesCount];
     Vertex* vertices = &lines[0];
@@ -1505,46 +1548,32 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     } else {
         void* widthCoords = ((GLbyte*) aaVertices) + gVertexAAWidthOffset;
         void* lengthCoords = ((GLbyte*) aaVertices) + gVertexAALengthOffset;
-        // innerProportion is the ratio of the inner (non-AA) port of the line to the total
+        // innerProportion is the ratio of the inner (non-AA) part of the line to the total
         // AA stroke width (the base stroke width expanded by a half pixel on either side).
         // This value is used in the fragment shader to determine how to fill fragments.
-        float innerProportion = fmax(strokeWidth - 1.0f, 0) / (strokeWidth + .5f);
-        setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords, innerProportion);
+        // We will need to calculate the actual width proportion on each segment for
+        // scaled non-hairlines, since the boundary proportion may differ per-axis when scaled.
+        float boundaryWidthProportion = 1 / (2 * halfStrokeWidth);
+        setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords, boundaryWidthProportion);
     }
 
-    AAVertex *prevAAVertex = NULL;
-    Vertex *prevVertex = NULL;
-    float inverseScaleX = 1.0f;
-    float inverseScaleY = 1.0f;
-
-    if (isHairLine) {
-        // The quad that we use for AA hairlines needs to account for scaling because the line
-        // should always be one pixel wide regardless of scale.
-        if (!mSnapshot->transform->isPureTranslate()) {
-            Matrix4 *mat = mSnapshot->transform;
-            float m00 = mat->data[Matrix4::kScaleX];
-            float m01 = mat->data[Matrix4::kSkewY];
-            float m02 = mat->data[2];
-            float m10 = mat->data[Matrix4::kSkewX];
-            float m11 = mat->data[Matrix4::kScaleX];
-            float m12 = mat->data[6];
-            float scaleX = sqrt(m00*m00 + m01*m01);
-            float scaleY = sqrt(m10*m10 + m11*m11);
-            inverseScaleX = (scaleX != 0) ? (inverseScaleX / scaleX) : 0;
-            inverseScaleY = (scaleY != 0) ? (inverseScaleY / scaleY) : 0;
-        }
-    }
+    AAVertex* prevAAVertex = NULL;
+    Vertex* prevVertex = NULL;
 
     int boundaryLengthSlot = -1;
     int inverseBoundaryLengthSlot = -1;
+    int boundaryWidthSlot = -1;
+    int inverseBoundaryWidthSlot = -1;
     for (int i = 0; i < count; i += 4) {
         // a = start point, b = end point
         vec2 a(points[i], points[i + 1]);
         vec2 b(points[i + 2], points[i + 3]);
         float length = 0;
+        float boundaryLengthProportion = 0;
+        float boundaryWidthProportion = 0;
 
         // Find the normal to the line
-        vec2 n = (b - a).copyNormalized() * strokeWidth;
+        vec2 n = (b - a).copyNormalized() * halfStrokeWidth;
         if (isHairLine) {
             if (isAA) {
                 float wideningFactor;
@@ -1555,8 +1584,20 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
                 }
                 n *= wideningFactor;
             }
-            n.x *= inverseScaleX;
-            n.y *= inverseScaleY;
+            if (scaled) {
+                n.x *= inverseScaleX;
+                n.y *= inverseScaleY;
+            }
+        } else if (scaled) {
+            // Extend n by .5 pixel on each side, post-transform
+            vec2 extendedN = n.copyNormalized();
+            extendedN /= 2;
+            extendedN.x *= inverseScaleX;
+            extendedN.y *= inverseScaleY;
+            float extendedNLength = extendedN.length();
+            // We need to set this value on the shader prior to drawing
+            boundaryWidthProportion = extendedNLength / (halfStrokeWidth + extendedNLength);
+            n += extendedN;
         }
         float x = n.x;
         n.x = -n.y;
@@ -1567,6 +1608,15 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
             vec2 abVector = (b - a);
             length = abVector.length();
             abVector.normalize();
+            if (scaled) {
+                abVector.x *= inverseScaleX;
+                abVector.y *= inverseScaleY;
+                float abLength = abVector.length();
+                boundaryLengthProportion = abLength / (length + abLength);
+            } else {
+                boundaryLengthProportion = .5 / (length + 1);
+            }
+            abVector /= 2;
             a -= abVector;
             b += abVector;
         }
@@ -1601,15 +1651,25 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
                 prevVertex = vertices - 1;
                 generatedVerticesCount += 4;
             } else {
+                if (!isHairLine && scaled) {
+                    // Must set width proportions per-segment for scaled non-hairlines to use the
+                    // correct AA boundary dimensions
+                    if (boundaryWidthSlot < 0) {
+                        boundaryWidthSlot =
+                                mCaches.currentProgram->getUniform("boundaryWidth");
+                        inverseBoundaryWidthSlot =
+                                mCaches.currentProgram->getUniform("inverseBoundaryWidth");
+                    }
+                    glUniform1f(boundaryWidthSlot, boundaryWidthProportion);
+                    glUniform1f(inverseBoundaryWidthSlot, (1 / boundaryWidthProportion));
+                }
                 if (boundaryLengthSlot < 0) {
                     boundaryLengthSlot = mCaches.currentProgram->getUniform("boundaryLength");
                     inverseBoundaryLengthSlot =
                             mCaches.currentProgram->getUniform("inverseBoundaryLength");
                 }
-                float innerProportion = (length) / (length + 2);
-                float boundaryLength = (1 - innerProportion) / 2;
-                glUniform1f(boundaryLengthSlot, boundaryLength);
-                glUniform1f(inverseBoundaryLengthSlot, (1 / boundaryLength));
+                glUniform1f(boundaryLengthSlot, boundaryLengthProportion);
+                glUniform1f(inverseBoundaryLengthSlot, (1 / boundaryLengthProportion));
 
                 if (prevAAVertex != NULL) {
                     // Issue two repeat vertices to create degenerate triangles to bridge
