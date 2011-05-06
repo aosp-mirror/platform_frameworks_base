@@ -15558,7 +15558,6 @@ package android.provider {
 
   public static abstract interface MediaStore.Audio.AudioColumns implements android.provider.MediaStore.MediaColumns {
     field public static final java.lang.String ALBUM = "album";
-    field public static final java.lang.String ALBUM_ART = "album_art";
     field public static final java.lang.String ALBUM_ID = "album_id";
     field public static final java.lang.String ALBUM_KEY = "album_key";
     field public static final java.lang.String ARTIST = "artist";

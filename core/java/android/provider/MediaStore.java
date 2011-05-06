@@ -1096,12 +1096,6 @@ public final class MediaStore {
             public static final String ALBUM_KEY = "album_key";
 
             /**
-             * A URI to the album art, if any
-             * <P>Type: TEXT</P>
-             */
-            public static final String ALBUM_ART = "album_art";
-
-            /**
              * The track number of this song on the album, if any.
              * This number encodes both the track number and the
              * disc number. For multi-disc sets, this number will
