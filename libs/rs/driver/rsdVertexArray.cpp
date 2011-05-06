@@ -20,6 +20,7 @@
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 
+#include "rsdGL.h"
 #include "rsdCore.h"
 #include "rsdVertexArray.h"
 #include "rsdShaderCache.h"
@@ -78,13 +79,13 @@ void RsdVertexArray::logAttrib(uint32_t idx, uint32_t slot) const {
          mAttribs[idx].offset);
 }
 
-void RsdVertexArray::setupGL2(const Context *rsc) const {
+void RsdVertexArray::setup(const Context *rsc) const {
 
     RsdHal *dc = (RsdHal *)rsc->mHal.drv;
     RsdVertexArrayState *state = dc->gl.vertexArrayState;
     RsdShaderCache *sc = dc->gl.shaderCache;
 
-    rsc->checkError("RsdVertexArray::setupGL2 start");
+    rsdGLCheckError(rsc, "RsdVertexArray::setup start");
     uint32_t maxAttrs = state->mAttrsEnabledSize;
 
     for (uint32_t ct=1; ct < maxAttrs; ct++) {
@@ -94,7 +95,7 @@ void RsdVertexArray::setupGL2(const Context *rsc) const {
         }
     }
 
-    rsc->checkError("RsdVertexArray::setupGL2 disabled");
+    rsdGLCheckError(rsc, "RsdVertexArray::setup disabled");
     for (uint32_t ct=0; ct < mCount; ct++) {
         int32_t slot = sc->vtxAttribSlot(mAttribs[ct].name);
         if (rsc->props.mLogShadersAttr) {
@@ -113,7 +114,7 @@ void RsdVertexArray::setupGL2(const Context *rsc) const {
                               mAttribs[ct].stride,
                               mAttribs[ct].ptr + mAttribs[ct].offset);
     }
-    rsc->checkError("RsdVertexArray::setupGL2 done");
+    rsdGLCheckError(rsc, "RsdVertexArray::setup done");
 }
 ////////////////////////////////////////////
 RsdVertexArrayState::RsdVertexArrayState() {

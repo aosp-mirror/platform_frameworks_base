@@ -30,10 +30,7 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
-//#include <cutils/sched_policy.h>
-//#include <sys/syscall.h>
 #include <string.h>
-
 
 #include "rsdCore.h"
 #include "rsdGL.h"
@@ -346,3 +343,27 @@ void rsdGLSwap(const android::renderscript::Context *rsc) {
     eglSwapBuffers(dc->gl.egl.display, dc->gl.egl.surface);
 }
 
+void rsdGLCheckError(const android::renderscript::Context *rsc,
+                     const char *msg, bool isFatal) {
+    GLenum err = glGetError();
+    if (err != GL_NO_ERROR) {
+        char buf[1024];
+        snprintf(buf, sizeof(buf), "GL Error = 0x%08x, from: %s", err, msg);
+
+        if (isFatal) {
+            rsc->setError(RS_ERROR_FATAL_DRIVER, buf);
+        } else {
+            switch (err) {
+            case GL_OUT_OF_MEMORY:
+                rsc->setError(RS_ERROR_OUT_OF_MEMORY, buf);
+                break;
+            default:
+                rsc->setError(RS_ERROR_DRIVER, buf);
+                break;
+            }
+        }
+
+        LOGE("%p, %s", rsc, buf);
+    }
+
+}

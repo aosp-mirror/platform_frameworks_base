@@ -199,10 +199,8 @@ void Mesh::renderPrimitiveRange(Context *rsc, uint32_t primIndex, uint32_t start
     if (prim->mIndexBuffer.get()) {
         prim->mIndexBuffer->uploadCheck(rsc);
     }
-    rsc->checkError("Mesh::renderPrimitiveRange upload check");
 
     mRSC->mHal.funcs.mesh.draw(mRSC, this, primIndex, start, len);
-    rsc->checkError("Mesh::renderPrimitiveRange draw");
 }
 
 void Mesh::uploadAll(Context *rsc) {

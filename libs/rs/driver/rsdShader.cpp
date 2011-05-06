@@ -377,7 +377,7 @@ void RsdShader::setupSampler(const Context *rsc, const Sampler *s, const Allocat
         glTexParameterf(target, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisoValue);
     }
 
-    rsc->checkError("Sampler::setupGL2 tex env");
+    rsdGLCheckError(rsc, "Sampler::setup tex env");
 }
 
 void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
@@ -385,8 +385,10 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
         return;
     }
 
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
+
     uint32_t numTexturesToBind = mRSProgram->mHal.state.texturesCount;
-    uint32_t numTexturesAvailable = rsc->getMaxFragmentTextures();
+    uint32_t numTexturesAvailable = dc->gl.gl.maxFragmentTextureImageUnits;
     if (numTexturesToBind >= numTexturesAvailable) {
         LOGE("Attempting to bind %u textures on shader id %u, but only %u are available",
              mRSProgram->mHal.state.texturesCount, (uint32_t)this, numTexturesAvailable);
@@ -408,7 +410,7 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
             rsc->setError(RS_ERROR_BAD_SHADER, "Non-texture allocation bound to a shader");
         }
         glBindTexture(target, mRSProgram->mHal.state.textures[ct]->getTextureID());
-        rsc->checkError("ProgramFragment::setupGL2 tex bind");
+        rsdGLCheckError(rsc, "ProgramFragment::setup tex bind");
         if (mRSProgram->mHal.state.samplers[ct].get()) {
             setupSampler(rsc, mRSProgram->mHal.state.samplers[ct].get(), mRSProgram->mHal.state.textures[ct].get());
         } else {
@@ -416,16 +418,16 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
             glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            rsc->checkError("ProgramFragment::setupGL2 tex env");
+            rsdGLCheckError(rsc, "ProgramFragment::setup tex env");
         }
 
         glUniform1i(sc->fragUniformSlot(mTextureUniformIndexStart + ct), ct);
-        rsc->checkError("ProgramFragment::setupGL2 uniforms");
+        rsdGLCheckError(rsc, "ProgramFragment::setup uniforms");
     }
 
     glActiveTexture(GL_TEXTURE0);
     mDirty = false;
-    rsc->checkError("ProgramFragment::setupGL2");
+    rsdGLCheckError(rsc, "ProgramFragment::setup");
 }
 
 void RsdShader::setupUserConstants(const Context *rsc, RsdShaderCache *sc, bool isFragment) {

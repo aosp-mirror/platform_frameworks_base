@@ -32,7 +32,7 @@ ProgramVertex::~ProgramVertex() {
     mRSC->mHal.funcs.vertex.destroy(mRSC, this);
 }
 
-void ProgramVertex::setupGL2(Context *rsc, ProgramVertexState *state) {
+void ProgramVertex::setup(Context *rsc, ProgramVertexState *state) {
     if ((state->mLast.get() == this) && !mDirty) {
         return;
     }

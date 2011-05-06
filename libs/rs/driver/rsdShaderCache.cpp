@@ -19,6 +19,7 @@
 
 #include "rsdShader.h"
 #include "rsdShaderCache.h"
+#include "rsdGL.h"
 
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
@@ -128,7 +129,7 @@ bool RsdShaderCache::link(const Context *rsc) {
             glUseProgram(mEntries[ct]->program);
             mCurrent = mEntries[ct];
             //LOGV("RsdShaderCache hit, using %i", ct);
-            rsc->checkError("RsdShaderCache::link (hit)");
+            rsdGLCheckError(rsc, "RsdShaderCache::link (hit)");
             return true;
         }
     }
@@ -230,7 +231,7 @@ bool RsdShaderCache::link(const Context *rsc) {
 
     //LOGV("SC made program %i", e->program);
     glUseProgram(e->program);
-    rsc->checkError("RsdShaderCache::link (miss)");
+    rsdGLCheckError(rsc, "RsdShaderCache::link (miss)");
 
     return true;
 }

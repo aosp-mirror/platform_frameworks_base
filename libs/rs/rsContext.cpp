@@ -27,11 +27,6 @@
 
 #include <cutils/properties.h>
 
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-
 #include <cutils/sched_policy.h>
 #include <sys/syscall.h>
 #include <string.h>
@@ -52,28 +47,6 @@ bool Context::initGLThread() {
         return false;
     }
 
-    const char * ext = (const char *)glGetString(GL_EXTENSIONS);
-
-    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &mGL.mMaxVertexAttribs);
-    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, &mGL.mMaxVertexUniformVectors);
-    glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &mGL.mMaxVertexTextureUnits);
-
-    glGetIntegerv(GL_MAX_VARYING_VECTORS, &mGL.mMaxVaryingVectors);
-    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &mGL.mMaxTextureImageUnits);
-
-    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &mGL.mMaxFragmentTextureImageUnits);
-    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, &mGL.mMaxFragmentUniformVectors);
-
-    mGL.OES_texture_npot = NULL != strstr(ext, "GL_OES_texture_npot");
-    mGL.GL_IMG_texture_npot = NULL != strstr(ext, "GL_IMG_texture_npot");
-    mGL.GL_NV_texture_npot_2D_mipmap = NULL != strstr(ext, "GL_NV_texture_npot_2D_mipmap");
-    mGL.EXT_texture_max_aniso = 1.0f;
-    bool hasAniso = NULL != strstr(ext, "GL_EXT_texture_filter_anisotropic");
-    if (hasAniso) {
-        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &mGL.EXT_texture_max_aniso);
-    }
-
-    LOGV("initGLThread end %p", this);
     pthread_mutex_unlock(&gInitMutex);
     return true;
 }
@@ -112,38 +85,11 @@ uint32_t Context::runScript(Script *s) {
     return ret;
 }
 
-void Context::checkError(const char *msg, bool isFatal) const {
-
-    GLenum err = glGetError();
-    if (err != GL_NO_ERROR) {
-        char buf[1024];
-        snprintf(buf, sizeof(buf), "GL Error = 0x%08x, from: %s", err, msg);
-
-        if (isFatal) {
-            setError(RS_ERROR_FATAL_DRIVER, buf);
-        } else {
-            switch (err) {
-            case GL_OUT_OF_MEMORY:
-                setError(RS_ERROR_OUT_OF_MEMORY, buf);
-                break;
-            default:
-                setError(RS_ERROR_DRIVER, buf);
-                break;
-            }
-        }
-
-        LOGE("%p, %s", this, buf);
-    }
-}
-
 uint32_t Context::runRootScript() {
-    glViewport(0, 0, mWidth, mHeight);
-
     timerSet(RS_TIMER_SCRIPT);
     mStateFragmentStore.mLast.clear();
     uint32_t ret = runScript(mRootScript.get());
 
-    checkError("runRootScript");
     return ret;
 }
 
@@ -217,10 +163,10 @@ void Context::timerPrint() {
 bool Context::setupCheck() {
 
     mFragmentStore->setup(this, &mStateFragmentStore);
-    mFragment->setupGL2(this, &mStateFragment);
+    mFragment->setup(this, &mStateFragment);
     mRaster->setup(this, &mStateRaster);
-    mVertex->setupGL2(this, &mStateVertex);
-    mFBOCache.setupGL2(this);
+    mVertex->setup(this, &mStateVertex);
+    mFBOCache.setup(this);
     return true;
 }
 
@@ -406,7 +352,6 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
         memset(&mUserSurfaceConfig, 0, sizeof(mUserSurfaceConfig));
     }
 
-    memset(&mGL, 0, sizeof(mGL));
     mIsGraphicsContext = sc != NULL;
 
     int status;

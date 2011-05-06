@@ -209,7 +209,7 @@ void Allocation::uploadToTexture(const Context *rsc) {
         freeScriptMemory();
     }
 
-    rsc->checkError("Allocation::uploadToTexture");
+    //rsc->checkError("Allocation::uploadToTexture");
 #endif //ANDROID_RS_SERIALIZE
 }
 
@@ -334,7 +334,7 @@ void Allocation::uploadToBufferObject(const Context *rsc) {
     glBindBuffer(target, mBufferID);
     glBufferData(target, mHal.state.type->getSizeBytes(), getPtr(), GL_DYNAMIC_DRAW);
     glBindBuffer(target, 0);
-    rsc->checkError("Allocation::uploadToBufferObject");
+    //rsc->checkError("Allocation::uploadToBufferObject");
 #endif //ANDROID_RS_SERIALIZE
 }
 
