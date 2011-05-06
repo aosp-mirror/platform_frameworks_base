@@ -161,8 +161,24 @@ enum media_recorder_info_type {
     MEDIA_RECORDER_TRACK_INFO_PROGRESS_IN_TIME     = 1001,
     MEDIA_RECORDER_TRACK_INFO_TYPE                 = 1002,
     MEDIA_RECORDER_TRACK_INFO_DURATION_MS          = 1003,
+
+    // The time to measure the max chunk duration
     MEDIA_RECORDER_TRACK_INFO_MAX_CHUNK_DUR_MS     = 1004,
+
     MEDIA_RECORDER_TRACK_INFO_ENCODED_FRAMES       = 1005,
+
+    // The time to measure how well the audio and video
+    // track data is interleaved.
+    MEDIA_RECORDER_TRACK_INTER_CHUNK_TIME_MS       = 1006,
+
+    // The time to measure system response. Note that
+    // the delay does not include the intentional delay
+    // we use to eliminate the recording sound.
+    MEDIA_RECORDER_TRACK_INFO_INITIAL_DELAY_MS     = 1007,
+
+    // The time used to compensate for initial A/V sync.
+    MEDIA_RECORDER_TRACK_INFO_START_OFFSET_MS      = 1008,
+
     MEDIA_RECORDER_TRACK_INFO_LIST_END             = 2000,
 };
 
