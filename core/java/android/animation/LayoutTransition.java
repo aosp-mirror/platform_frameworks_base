@@ -48,6 +48,18 @@ import java.util.List;
  * with setting up the basic properties of the animations used in these four situations,
  * or with setting up custom animations for any or all of the four.</p>
  *
+ * <p>By default, the DISAPPEARING animation begins immediately, as does the CHANGE_APPEARING
+ * animation. The other animations begin after a delay that is set to the default duration
+ * of the animations. This behavior facilitates a sequence of animations in transitions as
+ * follows: when an item is being added to a layout, the other children of that container will
+ * move first (thus creating space for the new item), then the appearing animation will run to
+ * animate the item being added. Conversely, when an item is removed from a container, the
+ * animation to remove it will run first, then the animations of the other children in the
+ * layout will run (closing the gap created in the layout when the item was removed). If this
+ * default choreography behavior is not desired, the {@link #setDuration(int, long)} and
+ * {@link #setStartDelay(int, long)} of any or all of the animations can be changed as
+ * appropriate.</p>
+ *
  * <p>The animations specified for the transition, both the defaults and any custom animations
  * set on the transition object, are templates only. That is, these animations exist to hold the
  * basic animation properties, such as the duration, start delay, and properties being animated.

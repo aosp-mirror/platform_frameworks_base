@@ -1493,7 +1493,7 @@ void OpenGLRenderer::drawLines(float* points, int count, SkPaint* paint) {
     int generatedVerticesCount = 0;
     int verticesCount = count;
     if (count > 4) {
-        // Polyline: account for extra vertices needed for continous tri-strip
+        // Polyline: account for extra vertices needed for continuous tri-strip
         verticesCount += (count - 4);
     }
 
