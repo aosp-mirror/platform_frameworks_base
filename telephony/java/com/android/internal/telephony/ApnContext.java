@@ -28,13 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ApnContext {
 
-    public static final int PENDING_ACTION_NONE = 1;
-    public static final int PENDING_ACTION_RECONNECT = 2;
-    public static final int PENDING_ACTION_APN_DISABLE = 3;
-
     public final String LOG_TAG;
-
-    private AtomicInteger mPendingAction;
 
     protected static final boolean DBG = true;
 
@@ -71,19 +65,10 @@ public class ApnContext {
         mApnType = apnType;
         mState = DataConnectionTracker.State.IDLE;
         setReason(Phone.REASON_DATA_ENABLED);
-        mPendingAction = new AtomicInteger(PENDING_ACTION_NONE);
         mDataEnabled = new AtomicBoolean(false);
         mDependencyMet = new AtomicBoolean(true);
         mWaitingApnsPermanentFailureCountDown = new AtomicInteger(0);
         LOG_TAG = logTag;
-    }
-
-    public int getPendingAction() {
-        return mPendingAction.get();
-    }
-
-    public void setPendingAction(int pa) {
-        mPendingAction.set(pa);
     }
 
     public String getApnType() {
