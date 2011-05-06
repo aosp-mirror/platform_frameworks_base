@@ -63,7 +63,7 @@ public:
 
     int64_t getDurationUs() const;
     int64_t getEstimatedTrackSizeBytes() const;
-    void writeTrackHeader(int32_t trackID, bool use32BitOffset = true);
+    void writeTrackHeader(bool use32BitOffset = true);
     void bufferChunk(int64_t timestampUs);
     bool isAvc() const { return mIsAvc; }
     bool isAudio() const { return mIsAudio; }
@@ -187,12 +187,9 @@ private:
     const uint8_t *parseParamSet(
         const uint8_t *data, size_t length, int type, size_t *paramSetLen);
 
-    status_t makeAVCCodecSpecificData(
-            const uint8_t *data, size_t size);
-    status_t copyAVCCodecSpecificData(
-            const uint8_t *data, size_t size);
-    status_t parseAVCCodecSpecificData(
-            const uint8_t *data, size_t size);
+    status_t makeAVCCodecSpecificData(const uint8_t *data, size_t size);
+    status_t copyAVCCodecSpecificData(const uint8_t *data, size_t size);
+    status_t parseAVCCodecSpecificData(const uint8_t *data, size_t size);
 
     // Track authoring progress status
     void trackProgressStatus(int64_t timeUs, status_t err = OK);
@@ -214,6 +211,30 @@ private:
     void addOneStscTableEntry(size_t chunkId, size_t sampleId);
     void addOneStssTableEntry(size_t sampleId);
     void addOneSttsTableEntry(size_t sampleCount, int64_t durationUs);
+
+    // Write the boxes
+    void writeStcoBox(bool use32BitOffset);
+    void writeStscBox();
+    void writeStszBox();
+    void writeStssBox();
+    void writeSttsBox();
+    void writeD263Box();
+    void writePaspBox();
+    void writeAvccBox();
+    void writeUrlBox();
+    void writeDrefBox();
+    void writeDinfBox();
+    void writeDamrBox();
+    void writeMdhdBox(time_t now);
+    void writeSmhdBox();
+    void writeVmhdBox();
+    void writeHdlrBox();
+    void writeTkhdBox(time_t now);
+    void writeMp4aEsdsBox();
+    void writeMp4vEsdsBox();
+    void writeAudioFourCCBox();
+    void writeVideoFourCCBox();
+    void writeStblBox(bool use32BitOffset);
 
     Track(const Track &);
     Track &operator=(const Track &);
@@ -450,20 +471,7 @@ status_t MPEG4Writer::start(MetaData *param) {
     mMoovBoxBuffer = NULL;
     mMoovBoxBufferOffset = 0;
 
-    beginBox("ftyp");
-      {
-        int32_t fileType;
-        if (param && param->findInt32(kKeyFileType, &fileType) &&
-            fileType != OUTPUT_FORMAT_MPEG_4) {
-            writeFourcc("3gp4");
-        } else {
-            writeFourcc("isom");
-        }
-      }
-      writeInt32(0);
-      writeFourcc("isom");
-      writeFourcc("3gp4");
-    endBox();
+    writeFtypBox(param);
 
     mFreeBoxOffset = mOffset;
 
@@ -643,43 +651,12 @@ status_t MPEG4Writer::stop() {
     }
     lseek64(mFd, mOffset, SEEK_SET);
 
-    time_t now = time(NULL);
     const off64_t moovOffset = mOffset;
     mWriteMoovBoxToMemory = true;
     mMoovBoxBuffer = (uint8_t *) malloc(mEstimatedMoovBoxSize);
     mMoovBoxBufferOffset = 0;
     CHECK(mMoovBoxBuffer != NULL);
-    int32_t duration = (maxDurationUs * mTimeScale + 5E5) / 1E6;
-
-    beginBox("moov");
-
-      beginBox("mvhd");
-        writeInt32(0);             // version=0, flags=0
-        writeInt32(now);           // creation time
-        writeInt32(now);           // modification time
-        writeInt32(mTimeScale);    // mvhd timescale
-        writeInt32(duration);
-        writeInt32(0x10000);       // rate: 1.0
-        writeInt16(0x100);         // volume
-        writeInt16(0);             // reserved
-        writeInt32(0);             // reserved
-        writeInt32(0);             // reserved
-        writeCompositionMatrix(0); // matrix
-        writeInt32(0);             // predefined
-        writeInt32(0);             // predefined
-        writeInt32(0);             // predefined
-        writeInt32(0);             // predefined
-        writeInt32(0);             // predefined
-        writeInt32(0);             // predefined
-        writeInt32(mTracks.size() + 1);  // nextTrackID
-      endBox();  // mvhd
-
-      int32_t id = 1;
-      for (List<Track *>::iterator it = mTracks.begin();
-           it != mTracks.end(); ++it, ++id) {
-          (*it)->writeTrackHeader(id, mUse32BitOffset);
-      }
-    endBox();  // moov
+    writeMoovBox(maxDurationUs);
 
     mWriteMoovBoxToMemory = false;
     if (mStreamableFile) {
@@ -710,6 +687,59 @@ status_t MPEG4Writer::stop() {
     mInitCheck = NO_INIT;
     mStarted = false;
     return err;
+}
+
+void MPEG4Writer::writeMvhdBox(int64_t durationUs) {
+    time_t now = time(NULL);
+    beginBox("mvhd");
+    writeInt32(0);             // version=0, flags=0
+    writeInt32(now);           // creation time
+    writeInt32(now);           // modification time
+    writeInt32(mTimeScale);    // mvhd timescale
+    int32_t duration = (durationUs * mTimeScale + 5E5) / 1E6;
+    writeInt32(duration);
+    writeInt32(0x10000);       // rate: 1.0
+    writeInt16(0x100);         // volume
+    writeInt16(0);             // reserved
+    writeInt32(0);             // reserved
+    writeInt32(0);             // reserved
+    writeCompositionMatrix(0); // matrix
+    writeInt32(0);             // predefined
+    writeInt32(0);             // predefined
+    writeInt32(0);             // predefined
+    writeInt32(0);             // predefined
+    writeInt32(0);             // predefined
+    writeInt32(0);             // predefined
+    writeInt32(mTracks.size() + 1);  // nextTrackID
+    endBox();  // mvhd
+}
+
+void MPEG4Writer::writeMoovBox(int64_t durationUs) {
+    beginBox("moov");
+    writeMvhdBox(durationUs);
+    int32_t id = 1;
+    for (List<Track *>::iterator it = mTracks.begin();
+        it != mTracks.end(); ++it, ++id) {
+        (*it)->writeTrackHeader(mUse32BitOffset);
+    }
+    endBox();  // moov
+}
+
+void MPEG4Writer::writeFtypBox(MetaData *param) {
+    beginBox("ftyp");
+
+    int32_t fileType;
+    if (param && param->findInt32(kKeyFileType, &fileType) &&
+        fileType != OUTPUT_FORMAT_MPEG_4) {
+        writeFourcc("3gp4");
+    } else {
+        writeFourcc("isom");
+    }
+
+    writeInt32(0);
+    writeFourcc("isom");
+    writeFourcc("3gp4");
+    endBox();
 }
 
 status_t MPEG4Writer::setInterleaveDuration(uint32_t durationUs) {
@@ -2169,388 +2199,458 @@ status_t MPEG4Writer::Track::checkCodecSpecificData() const {
     return OK;
 }
 
-void MPEG4Writer::Track::writeTrackHeader(
-        int32_t trackID, bool use32BitOffset) {
-    const char *mime;
-    bool success = mMeta->findCString(kKeyMIMEType, &mime);
-    CHECK(success);
+void MPEG4Writer::Track::writeTrackHeader(bool use32BitOffset) {
 
     LOGV("%s track time scale: %d",
         mIsAudio? "Audio": "Video", mTimeScale);
 
     time_t now = time(NULL);
-    int32_t mvhdTimeScale = mOwner->getTimeScale();
-    int64_t trakDurationUs = getDurationUs();
+    mOwner->beginBox("trak");
+        writeTkhdBox(now);
+        mOwner->beginBox("mdia");
+            writeMdhdBox(now);
+            writeHdlrBox();
+            mOwner->beginBox("minf");
+                if (mIsAudio) {
+                    writeSmhdBox();
+                } else {
+                    writeVmhdBox();
+                }
+                writeDinfBox();
+                writeStblBox(use32BitOffset);
+            mOwner->endBox();  // minf
+        mOwner->endBox();  // mdia
+    mOwner->endBox();  // trak
+}
 
+void MPEG4Writer::Track::writeStblBox(bool use32BitOffset) {
+    mOwner->beginBox("stbl");
+    mOwner->beginBox("stsd");
+    mOwner->writeInt32(0);               // version=0, flags=0
+    mOwner->writeInt32(1);               // entry count
+    if (mIsAudio) {
+        writeAudioFourCCBox();
+    } else {
+        writeVideoFourCCBox();
+    }
+    mOwner->endBox();  // stsd
+    writeSttsBox();
+    if (!mIsAudio) {
+        writeStssBox();
+    }
+    writeStszBox();
+    writeStscBox();
+    writeStcoBox(use32BitOffset);
+    mOwner->endBox();  // stbl
+}
+
+void MPEG4Writer::Track::writeVideoFourCCBox() {
+    const char *mime;
+    bool success = mMeta->findCString(kKeyMIMEType, &mime);
+    CHECK(success);
+    if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime)) {
+        mOwner->beginBox("mp4v");
+    } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_H263, mime)) {
+        mOwner->beginBox("s263");
+    } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
+        mOwner->beginBox("avc1");
+    } else {
+        LOGE("Unknown mime type '%s'.", mime);
+        CHECK(!"should not be here, unknown mime type.");
+    }
+
+    mOwner->writeInt32(0);           // reserved
+    mOwner->writeInt16(0);           // reserved
+    mOwner->writeInt16(1);           // data ref index
+    mOwner->writeInt16(0);           // predefined
+    mOwner->writeInt16(0);           // reserved
+    mOwner->writeInt32(0);           // predefined
+    mOwner->writeInt32(0);           // predefined
+    mOwner->writeInt32(0);           // predefined
+
+    int32_t width, height;
+    success = mMeta->findInt32(kKeyWidth, &width);
+    success = success && mMeta->findInt32(kKeyHeight, &height);
+    CHECK(success);
+
+    mOwner->writeInt16(width);
+    mOwner->writeInt16(height);
+    mOwner->writeInt32(0x480000);    // horiz resolution
+    mOwner->writeInt32(0x480000);    // vert resolution
+    mOwner->writeInt32(0);           // reserved
+    mOwner->writeInt16(1);           // frame count
+    mOwner->write("                                ", 32);
+    mOwner->writeInt16(0x18);        // depth
+    mOwner->writeInt16(-1);          // predefined
+
+    CHECK(23 + mCodecSpecificDataSize < 128);
+
+    if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime)) {
+        writeMp4vEsdsBox();
+    } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_H263, mime)) {
+        writeD263Box();
+    } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
+        writeAvccBox();
+    }
+
+    writePaspBox();
+    mOwner->endBox();  // mp4v, s263 or avc1
+}
+
+void MPEG4Writer::Track::writeAudioFourCCBox() {
+    const char *mime;
+    bool success = mMeta->findCString(kKeyMIMEType, &mime);
+    CHECK(success);
+    const char *fourcc = NULL;
+    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mime)) {
+        fourcc = "samr";
+    } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mime)) {
+        fourcc = "sawb";
+    } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime)) {
+        fourcc = "mp4a";
+    } else {
+        LOGE("Unknown mime type '%s'.", mime);
+        CHECK(!"should not be here, unknown mime type.");
+    }
+
+    mOwner->beginBox(fourcc);        // audio format
+    mOwner->writeInt32(0);           // reserved
+    mOwner->writeInt16(0);           // reserved
+    mOwner->writeInt16(0x1);         // data ref index
+    mOwner->writeInt32(0);           // reserved
+    mOwner->writeInt32(0);           // reserved
+    int32_t nChannels;
+    CHECK_EQ(true, mMeta->findInt32(kKeyChannelCount, &nChannels));
+    mOwner->writeInt16(nChannels);   // channel count
+    mOwner->writeInt16(16);          // sample size
+    mOwner->writeInt16(0);           // predefined
+    mOwner->writeInt16(0);           // reserved
+
+    int32_t samplerate;
+    success = mMeta->findInt32(kKeySampleRate, &samplerate);
+    CHECK(success);
+    mOwner->writeInt32(samplerate << 16);
+    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime)) {
+        writeMp4aEsdsBox();
+    } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mime) ||
+               !strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mime)) {
+        writeDamrBox();
+    }
+    mOwner->endBox();
+}
+
+void MPEG4Writer::Track::writeMp4aEsdsBox() {
+    mOwner->beginBox("esds");
+    CHECK(mCodecSpecificData);
+    CHECK(mCodecSpecificDataSize > 0);
+
+    // Make sure all sizes encode to a single byte.
+    CHECK(mCodecSpecificDataSize + 23 < 128);
+
+    mOwner->writeInt32(0);     // version=0, flags=0
+    mOwner->writeInt8(0x03);   // ES_DescrTag
+    mOwner->writeInt8(23 + mCodecSpecificDataSize);
+    mOwner->writeInt16(0x0000);// ES_ID
+    mOwner->writeInt8(0x00);
+
+    mOwner->writeInt8(0x04);   // DecoderConfigDescrTag
+    mOwner->writeInt8(15 + mCodecSpecificDataSize);
+    mOwner->writeInt8(0x40);   // objectTypeIndication ISO/IEC 14492-2
+    mOwner->writeInt8(0x15);   // streamType AudioStream
+
+    mOwner->writeInt16(0x03);  // XXX
+    mOwner->writeInt8(0x00);   // buffer size 24-bit
+    mOwner->writeInt32(96000); // max bit rate
+    mOwner->writeInt32(96000); // avg bit rate
+
+    mOwner->writeInt8(0x05);   // DecoderSpecificInfoTag
+    mOwner->writeInt8(mCodecSpecificDataSize);
+    mOwner->write(mCodecSpecificData, mCodecSpecificDataSize);
+
+    static const uint8_t kData2[] = {
+        0x06,  // SLConfigDescriptorTag
+        0x01,
+        0x02
+    };
+    mOwner->write(kData2, sizeof(kData2));
+
+    mOwner->endBox();  // esds
+}
+
+void MPEG4Writer::Track::writeMp4vEsdsBox() {
+    CHECK(mCodecSpecificData);
+    CHECK(mCodecSpecificDataSize > 0);
+    mOwner->beginBox("esds");
+
+    mOwner->writeInt32(0);    // version=0, flags=0
+
+    mOwner->writeInt8(0x03);  // ES_DescrTag
+    mOwner->writeInt8(23 + mCodecSpecificDataSize);
+    mOwner->writeInt16(0x0000);  // ES_ID
+    mOwner->writeInt8(0x1f);
+
+    mOwner->writeInt8(0x04);  // DecoderConfigDescrTag
+    mOwner->writeInt8(15 + mCodecSpecificDataSize);
+    mOwner->writeInt8(0x20);  // objectTypeIndication ISO/IEC 14492-2
+    mOwner->writeInt8(0x11);  // streamType VisualStream
+
+    static const uint8_t kData[] = {
+        0x01, 0x77, 0x00,
+        0x00, 0x03, 0xe8, 0x00,
+        0x00, 0x03, 0xe8, 0x00
+    };
+    mOwner->write(kData, sizeof(kData));
+
+    mOwner->writeInt8(0x05);  // DecoderSpecificInfoTag
+
+    mOwner->writeInt8(mCodecSpecificDataSize);
+    mOwner->write(mCodecSpecificData, mCodecSpecificDataSize);
+
+    static const uint8_t kData2[] = {
+        0x06,  // SLConfigDescriptorTag
+        0x01,
+        0x02
+    };
+    mOwner->write(kData2, sizeof(kData2));
+
+    mOwner->endBox();  // esds
+}
+
+void MPEG4Writer::Track::writeTkhdBox(time_t now) {
+    mOwner->beginBox("tkhd");
+    // Flags = 7 to indicate that the track is enabled, and
+    // part of the presentation
+    mOwner->writeInt32(0x07);          // version=0, flags=7
+    mOwner->writeInt32(now);           // creation time
+    mOwner->writeInt32(now);           // modification time
+    mOwner->writeInt32(mTrackId);
+    mOwner->writeInt32(0);             // reserved
+    int64_t trakDurationUs = getDurationUs();
+    int32_t mvhdTimeScale = mOwner->getTimeScale();
+    int32_t tkhdDuration =
+        (trakDurationUs * mvhdTimeScale + 5E5) / 1E6;
+    mOwner->writeInt32(tkhdDuration);  // in mvhd timescale
+    mOwner->writeInt32(0);             // reserved
+    mOwner->writeInt32(0);             // reserved
+    mOwner->writeInt16(0);             // layer
+    mOwner->writeInt16(0);             // alternate group
+    mOwner->writeInt16(mIsAudio ? 0x100 : 0);  // volume
+    mOwner->writeInt16(0);             // reserved
+
+    mOwner->writeCompositionMatrix(mRotation);       // matrix
+
+    if (mIsAudio) {
+        mOwner->writeInt32(0);
+        mOwner->writeInt32(0);
+    } else {
+        int32_t width, height;
+        bool success = mMeta->findInt32(kKeyWidth, &width);
+        success = success && mMeta->findInt32(kKeyHeight, &height);
+        CHECK(success);
+
+        mOwner->writeInt32(width << 16);   // 32-bit fixed-point value
+        mOwner->writeInt32(height << 16);  // 32-bit fixed-point value
+    }
+    mOwner->endBox();  // tkhd
+}
+
+void MPEG4Writer::Track::writeVmhdBox() {
+    mOwner->beginBox("vmhd");
+    mOwner->writeInt32(0x01);        // version=0, flags=1
+    mOwner->writeInt16(0);           // graphics mode
+    mOwner->writeInt16(0);           // opcolor
+    mOwner->writeInt16(0);
+    mOwner->writeInt16(0);
+    mOwner->endBox();
+}
+
+void MPEG4Writer::Track::writeSmhdBox() {
+    mOwner->beginBox("smhd");
+    mOwner->writeInt32(0);           // version=0, flags=0
+    mOwner->writeInt16(0);           // balance
+    mOwner->writeInt16(0);           // reserved
+    mOwner->endBox();
+}
+
+void MPEG4Writer::Track::writeHdlrBox() {
+    mOwner->beginBox("hdlr");
+    mOwner->writeInt32(0);             // version=0, flags=0
+    mOwner->writeInt32(0);             // component type: should be mhlr
+    mOwner->writeFourcc(mIsAudio ? "soun" : "vide");  // component subtype
+    mOwner->writeInt32(0);             // reserved
+    mOwner->writeInt32(0);             // reserved
+    mOwner->writeInt32(0);             // reserved
+    // Removing "r" for the name string just makes the string 4 byte aligned
+    mOwner->writeCString(mIsAudio ? "SoundHandle": "VideoHandle");  // name
+    mOwner->endBox();
+}
+
+void MPEG4Writer::Track::writeMdhdBox(time_t now) {
+    int64_t trakDurationUs = getDurationUs();
+    mOwner->beginBox("mdhd");
+    mOwner->writeInt32(0);             // version=0, flags=0
+    mOwner->writeInt32(now);           // creation time
+    mOwner->writeInt32(now);           // modification time
+    mOwner->writeInt32(mTimeScale);    // media timescale
+    int32_t mdhdDuration = (trakDurationUs * mTimeScale + 5E5) / 1E6;
+    mOwner->writeInt32(mdhdDuration);  // use media timescale
+    // Language follows the three letter standard ISO-639-2/T
+    // 'e', 'n', 'g' for "English", for instance.
+    // Each character is packed as the difference between its ASCII value and 0x60.
+    // For "English", these are 00101, 01110, 00111.
+    // XXX: Where is the padding bit located: 0x15C7?
+    mOwner->writeInt16(0);             // language code
+    mOwner->writeInt16(0);             // predefined
+    mOwner->endBox();
+}
+
+void MPEG4Writer::Track::writeDamrBox() {
+    // 3gpp2 Spec AMRSampleEntry fields
+    mOwner->beginBox("damr");
+    mOwner->writeCString("   ");  // vendor: 4 bytes
+    mOwner->writeInt8(0);         // decoder version
+    mOwner->writeInt16(0x83FF);   // mode set: all enabled
+    mOwner->writeInt8(0);         // mode change period
+    mOwner->writeInt8(1);         // frames per sample
+    mOwner->endBox();
+}
+
+void MPEG4Writer::Track::writeUrlBox() {
+    // The table index here refers to the sample description index
+    // in the sample table entries.
+    mOwner->beginBox("url ");
+    mOwner->writeInt32(1);  // version=0, flags=1 (self-contained)
+    mOwner->endBox();  // url
+}
+
+void MPEG4Writer::Track::writeDrefBox() {
+    mOwner->beginBox("dref");
+    mOwner->writeInt32(0);  // version=0, flags=0
+    mOwner->writeInt32(1);  // entry count (either url or urn)
+    writeUrlBox();
+    mOwner->endBox();  // dref
+}
+
+void MPEG4Writer::Track::writeDinfBox() {
+    mOwner->beginBox("dinf");
+    writeDrefBox();
+    mOwner->endBox();  // dinf
+}
+
+void MPEG4Writer::Track::writeAvccBox() {
+    CHECK(mCodecSpecificData);
+    CHECK(mCodecSpecificDataSize >= 5);
+
+    // Patch avcc's lengthSize field to match the number
+    // of bytes we use to indicate the size of a nal unit.
+    uint8_t *ptr = (uint8_t *)mCodecSpecificData;
+    ptr[4] = (ptr[4] & 0xfc) | (mOwner->useNalLengthFour() ? 3 : 1);
+    mOwner->beginBox("avcC");
+    mOwner->write(mCodecSpecificData, mCodecSpecificDataSize);
+    mOwner->endBox();  // avcC
+}
+
+void MPEG4Writer::Track::writeD263Box() {
+    mOwner->beginBox("d263");
+    mOwner->writeInt32(0);  // vendor
+    mOwner->writeInt8(0);   // decoder version
+    mOwner->writeInt8(10);  // level: 10
+    mOwner->writeInt8(0);   // profile: 0
+    mOwner->endBox();  // d263
+}
+
+// This is useful if the pixel is not square
+void MPEG4Writer::Track::writePaspBox() {
+    mOwner->beginBox("pasp");
+    mOwner->writeInt32(1 << 16);  // hspacing
+    mOwner->writeInt32(1 << 16);  // vspacing
+    mOwner->endBox();  // pasp
+}
+
+void MPEG4Writer::Track::writeSttsBox() {
+    mOwner->beginBox("stts");
+    mOwner->writeInt32(0);  // version=0, flags=0
+    mOwner->writeInt32(mNumSttsTableEntries);
     // Compensate for small start time difference from different media tracks
     int64_t trackStartTimeOffsetUs = 0;
+    int64_t moovStartTimeUs = mOwner->getStartTimestampUs();
+    if (mStartTimestampUs != moovStartTimeUs) {
+        CHECK(mStartTimestampUs > moovStartTimeUs);
+        trackStartTimeOffsetUs = mStartTimestampUs - moovStartTimeUs;
+    }
+    int64_t prevTimestampUs = trackStartTimeOffsetUs;
+    for (List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
+        it != mSttsTableEntries.end(); ++it) {
+        mOwner->writeInt32(it->sampleCount);
 
-    mOwner->beginBox("trak");
+        // Make sure that we are calculating the sample duration the exactly
+        // same way as we made decision on how to create stts entries.
+        int64_t currTimestampUs = prevTimestampUs + it->sampleDurationUs;
+        int32_t dur = ((currTimestampUs * mTimeScale + 500000LL) / 1000000LL -
+            (prevTimestampUs * mTimeScale + 500000LL) / 1000000LL);
+        prevTimestampUs += (it->sampleCount * it->sampleDurationUs);
 
-      mOwner->beginBox("tkhd");
-        // Flags = 7 to indicate that the track is enabled, and
-        // part of the presentation
-        mOwner->writeInt32(0x07);          // version=0, flags=7
-        mOwner->writeInt32(now);           // creation time
-        mOwner->writeInt32(now);           // modification time
-        mOwner->writeInt32(trackID);
-        mOwner->writeInt32(0);             // reserved
-        int32_t tkhdDuration =
-            (trakDurationUs * mvhdTimeScale + 5E5) / 1E6;
-        mOwner->writeInt32(tkhdDuration);  // in mvhd timescale
-        mOwner->writeInt32(0);             // reserved
-        mOwner->writeInt32(0);             // reserved
-        mOwner->writeInt16(0);             // layer
-        mOwner->writeInt16(0);             // alternate group
-        mOwner->writeInt16(mIsAudio ? 0x100 : 0);  // volume
-        mOwner->writeInt16(0);             // reserved
+        mOwner->writeInt32(dur);
+    }
+    mOwner->endBox();  // stts
+}
 
-        mOwner->writeCompositionMatrix(mRotation);       // matrix
+void MPEG4Writer::Track::writeStssBox() {
+    mOwner->beginBox("stss");
+    mOwner->writeInt32(0);  // version=0, flags=0
+    mOwner->writeInt32(mNumStssTableEntries);  // number of sync frames
+    for (List<int32_t>::iterator it = mStssTableEntries.begin();
+        it != mStssTableEntries.end(); ++it) {
+        mOwner->writeInt32(*it);
+    }
+    mOwner->endBox();  // stss
+}
 
-        if (mIsAudio) {
-            mOwner->writeInt32(0);
-            mOwner->writeInt32(0);
-        } else {
-            int32_t width, height;
-            bool success = mMeta->findInt32(kKeyWidth, &width);
-            success = success && mMeta->findInt32(kKeyHeight, &height);
-            CHECK(success);
-
-            mOwner->writeInt32(width << 16);   // 32-bit fixed-point value
-            mOwner->writeInt32(height << 16);  // 32-bit fixed-point value
+void MPEG4Writer::Track::writeStszBox() {
+    mOwner->beginBox("stsz");
+    mOwner->writeInt32(0);  // version=0, flags=0
+    if (mSamplesHaveSameSize) {
+        List<size_t>::iterator it = mSampleSizes.begin();
+        mOwner->writeInt32(*it);  // default sample size
+    } else {
+        mOwner->writeInt32(0);
+    }
+    mOwner->writeInt32(mNumSamples);
+    if (!mSamplesHaveSameSize) {
+        for (List<size_t>::iterator it = mSampleSizes.begin();
+            it != mSampleSizes.end(); ++it) {
+            mOwner->writeInt32(*it);
         }
-      mOwner->endBox();  // tkhd
+    }
+    mOwner->endBox();  // stsz
+}
 
-      int64_t moovStartTimeUs = mOwner->getStartTimestampUs();
-      if (mStartTimestampUs != moovStartTimeUs) {
-          CHECK(mStartTimestampUs > moovStartTimeUs);
-          trackStartTimeOffsetUs = mStartTimestampUs - moovStartTimeUs;
-      }
+void MPEG4Writer::Track::writeStscBox() {
+    mOwner->beginBox("stsc");
+    mOwner->writeInt32(0);  // version=0, flags=0
+    mOwner->writeInt32(mNumStscTableEntries);
+    for (List<StscTableEntry>::iterator it = mStscTableEntries.begin();
+        it != mStscTableEntries.end(); ++it) {
+        mOwner->writeInt32(it->firstChunk);
+        mOwner->writeInt32(it->samplesPerChunk);
+        mOwner->writeInt32(it->sampleDescriptionId);
+    }
+    mOwner->endBox();  // stsc
+}
 
-      mOwner->beginBox("mdia");
-
-        mOwner->beginBox("mdhd");
-          mOwner->writeInt32(0);             // version=0, flags=0
-          mOwner->writeInt32(now);           // creation time
-          mOwner->writeInt32(now);           // modification time
-          mOwner->writeInt32(mTimeScale);    // media timescale
-          int32_t mdhdDuration = (trakDurationUs * mTimeScale + 5E5) / 1E6;
-          mOwner->writeInt32(mdhdDuration);  // use media timescale
-          // Language follows the three letter standard ISO-639-2/T
-          // 'e', 'n', 'g' for "English", for instance.
-          // Each character is packed as the difference between its ASCII value and 0x60.
-          // For "English", these are 00101, 01110, 00111.
-          // XXX: Where is the padding bit located: 0x15C7?
-          mOwner->writeInt16(0);             // language code
-          mOwner->writeInt16(0);             // predefined
-        mOwner->endBox();
-
-        mOwner->beginBox("hdlr");
-          mOwner->writeInt32(0);             // version=0, flags=0
-          mOwner->writeInt32(0);             // component type: should be mhlr
-          mOwner->writeFourcc(mIsAudio ? "soun" : "vide");  // component subtype
-          mOwner->writeInt32(0);             // reserved
-          mOwner->writeInt32(0);             // reserved
-          mOwner->writeInt32(0);             // reserved
-          // Removing "r" for the name string just makes the string 4 byte aligned
-          mOwner->writeCString(mIsAudio ? "SoundHandle": "VideoHandle");  // name
-        mOwner->endBox();
-
-        mOwner->beginBox("minf");
-          if (mIsAudio) {
-              mOwner->beginBox("smhd");
-              mOwner->writeInt32(0);           // version=0, flags=0
-              mOwner->writeInt16(0);           // balance
-              mOwner->writeInt16(0);           // reserved
-              mOwner->endBox();
-          } else {
-              mOwner->beginBox("vmhd");
-              mOwner->writeInt32(0x01);        // version=0, flags=1
-              mOwner->writeInt16(0);           // graphics mode
-              mOwner->writeInt16(0);           // opcolor
-              mOwner->writeInt16(0);
-              mOwner->writeInt16(0);
-              mOwner->endBox();
-          }
-
-          mOwner->beginBox("dinf");
-            mOwner->beginBox("dref");
-              mOwner->writeInt32(0);  // version=0, flags=0
-              mOwner->writeInt32(1);  // entry count (either url or urn)
-              // The table index here refers to the sample description index
-              // in the sample table entries.
-              mOwner->beginBox("url ");
-                mOwner->writeInt32(1);  // version=0, flags=1 (self-contained)
-              mOwner->endBox();  // url
-            mOwner->endBox();  // dref
-          mOwner->endBox();  // dinf
-
-        mOwner->beginBox("stbl");
-
-          mOwner->beginBox("stsd");
-            mOwner->writeInt32(0);               // version=0, flags=0
-            mOwner->writeInt32(1);               // entry count
-            if (mIsAudio) {
-                const char *fourcc = NULL;
-                if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mime)) {
-                    fourcc = "samr";
-                } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mime)) {
-                    fourcc = "sawb";
-                } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime)) {
-                    fourcc = "mp4a";
-                } else {
-                    LOGE("Unknown mime type '%s'.", mime);
-                    CHECK(!"should not be here, unknown mime type.");
-                }
-
-                mOwner->beginBox(fourcc);          // audio format
-                  mOwner->writeInt32(0);           // reserved
-                  mOwner->writeInt16(0);           // reserved
-                  mOwner->writeInt16(0x1);         // data ref index
-                  mOwner->writeInt32(0);           // reserved
-                  mOwner->writeInt32(0);           // reserved
-                  int32_t nChannels;
-                  CHECK_EQ(true, mMeta->findInt32(kKeyChannelCount, &nChannels));
-                  mOwner->writeInt16(nChannels);   // channel count
-                  mOwner->writeInt16(16);          // sample size
-                  mOwner->writeInt16(0);           // predefined
-                  mOwner->writeInt16(0);           // reserved
-
-                  int32_t samplerate;
-                  bool success = mMeta->findInt32(kKeySampleRate, &samplerate);
-                  CHECK(success);
-                  mOwner->writeInt32(samplerate << 16);
-                  if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mime)) {
-                    mOwner->beginBox("esds");
-                        CHECK(mCodecSpecificData);
-                        CHECK(mCodecSpecificDataSize > 0);
-
-                        // Make sure all sizes encode to a single byte.
-                        CHECK(mCodecSpecificDataSize + 23 < 128);
-
-                        mOwner->writeInt32(0);     // version=0, flags=0
-                        mOwner->writeInt8(0x03);   // ES_DescrTag
-                        mOwner->writeInt8(23 + mCodecSpecificDataSize);
-                        mOwner->writeInt16(0x0000);// ES_ID
-                        mOwner->writeInt8(0x00);
-
-                        mOwner->writeInt8(0x04);   // DecoderConfigDescrTag
-                        mOwner->writeInt8(15 + mCodecSpecificDataSize);
-                        mOwner->writeInt8(0x40);   // objectTypeIndication ISO/IEC 14492-2
-                        mOwner->writeInt8(0x15);   // streamType AudioStream
-
-                        mOwner->writeInt16(0x03);  // XXX
-                        mOwner->writeInt8(0x00);   // buffer size 24-bit
-                        mOwner->writeInt32(96000); // max bit rate
-                        mOwner->writeInt32(96000); // avg bit rate
-
-                        mOwner->writeInt8(0x05);   // DecoderSpecificInfoTag
-                        mOwner->writeInt8(mCodecSpecificDataSize);
-                        mOwner->write(mCodecSpecificData, mCodecSpecificDataSize);
-
-                        static const uint8_t kData2[] = {
-                            0x06,  // SLConfigDescriptorTag
-                            0x01,
-                            0x02
-                        };
-                        mOwner->write(kData2, sizeof(kData2));
-
-                    mOwner->endBox();  // esds
-                  } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mime) ||
-                             !strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mime)) {
-                    // 3gpp2 Spec AMRSampleEntry fields
-                    mOwner->beginBox("damr");
-                      mOwner->writeCString("   ");  // vendor: 4 bytes
-                      mOwner->writeInt8(0);         // decoder version
-                      mOwner->writeInt16(0x83FF);   // mode set: all enabled
-                      mOwner->writeInt8(0);         // mode change period
-                      mOwner->writeInt8(1);         // frames per sample
-                    mOwner->endBox();
-                  }
-                mOwner->endBox();
-            } else {
-                if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime)) {
-                    mOwner->beginBox("mp4v");
-                } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_H263, mime)) {
-                    mOwner->beginBox("s263");
-                } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
-                    mOwner->beginBox("avc1");
-                } else {
-                    LOGE("Unknown mime type '%s'.", mime);
-                    CHECK(!"should not be here, unknown mime type.");
-                }
-
-                  mOwner->writeInt32(0);           // reserved
-                  mOwner->writeInt16(0);           // reserved
-                  mOwner->writeInt16(1);           // data ref index
-                  mOwner->writeInt16(0);           // predefined
-                  mOwner->writeInt16(0);           // reserved
-                  mOwner->writeInt32(0);           // predefined
-                  mOwner->writeInt32(0);           // predefined
-                  mOwner->writeInt32(0);           // predefined
-
-                  int32_t width, height;
-                  bool success = mMeta->findInt32(kKeyWidth, &width);
-                  success = success && mMeta->findInt32(kKeyHeight, &height);
-                  CHECK(success);
-
-                  mOwner->writeInt16(width);
-                  mOwner->writeInt16(height);
-                  mOwner->writeInt32(0x480000);    // horiz resolution
-                  mOwner->writeInt32(0x480000);    // vert resolution
-                  mOwner->writeInt32(0);           // reserved
-                  mOwner->writeInt16(1);           // frame count
-                  mOwner->write("                                ", 32);
-                  mOwner->writeInt16(0x18);        // depth
-                  mOwner->writeInt16(-1);          // predefined
-
-                  CHECK(23 + mCodecSpecificDataSize < 128);
-
-                  if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG4, mime)) {
-                      CHECK(mCodecSpecificData);
-                      CHECK(mCodecSpecificDataSize > 0);
-                      mOwner->beginBox("esds");
-
-                        mOwner->writeInt32(0);           // version=0, flags=0
-
-                        mOwner->writeInt8(0x03);  // ES_DescrTag
-                        mOwner->writeInt8(23 + mCodecSpecificDataSize);
-                        mOwner->writeInt16(0x0000);  // ES_ID
-                        mOwner->writeInt8(0x1f);
-
-                        mOwner->writeInt8(0x04);  // DecoderConfigDescrTag
-                        mOwner->writeInt8(15 + mCodecSpecificDataSize);
-                        mOwner->writeInt8(0x20);  // objectTypeIndication ISO/IEC 14492-2
-                        mOwner->writeInt8(0x11);  // streamType VisualStream
-
-                        static const uint8_t kData[] = {
-                            0x01, 0x77, 0x00,
-                            0x00, 0x03, 0xe8, 0x00,
-                            0x00, 0x03, 0xe8, 0x00
-                        };
-                        mOwner->write(kData, sizeof(kData));
-
-                        mOwner->writeInt8(0x05);  // DecoderSpecificInfoTag
-
-                        mOwner->writeInt8(mCodecSpecificDataSize);
-                        mOwner->write(mCodecSpecificData, mCodecSpecificDataSize);
-
-                        static const uint8_t kData2[] = {
-                            0x06,  // SLConfigDescriptorTag
-                            0x01,
-                            0x02
-                        };
-                        mOwner->write(kData2, sizeof(kData2));
-
-                      mOwner->endBox();  // esds
-                  } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_H263, mime)) {
-                      mOwner->beginBox("d263");
-
-                          mOwner->writeInt32(0);  // vendor
-                          mOwner->writeInt8(0);   // decoder version
-                          mOwner->writeInt8(10);  // level: 10
-                          mOwner->writeInt8(0);   // profile: 0
-
-                      mOwner->endBox();  // d263
-                  } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_AVC, mime)) {
-                      CHECK(mCodecSpecificData);
-                      CHECK(mCodecSpecificDataSize >= 5);
-
-                      // Patch avcc's lengthSize field to match the number
-                      // of bytes we use to indicate the size of a nal unit.
-                      uint8_t *ptr = (uint8_t *)mCodecSpecificData;
-                      ptr[4] =
-                          (ptr[4] & 0xfc)
-                            | (mOwner->useNalLengthFour() ? 3 : 1);
-
-                      mOwner->beginBox("avcC");
-                        mOwner->write(mCodecSpecificData, mCodecSpecificDataSize);
-                      mOwner->endBox();  // avcC
-                  }
-
-                  mOwner->beginBox("pasp");
-                    // This is useful if the pixel is not square
-                    mOwner->writeInt32(1 << 16);  // hspacing
-                    mOwner->writeInt32(1 << 16);  // vspacing
-                  mOwner->endBox();  // pasp
-                mOwner->endBox();  // mp4v, s263 or avc1
-            }
-          mOwner->endBox();  // stsd
-
-          mOwner->beginBox("stts");
-            mOwner->writeInt32(0);  // version=0, flags=0
-            mOwner->writeInt32(mNumSttsTableEntries);
-            int64_t prevTimestampUs = trackStartTimeOffsetUs;
-            for (List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
-                 it != mSttsTableEntries.end(); ++it) {
-                mOwner->writeInt32(it->sampleCount);
-
-                // Make sure that we are calculating the sample duration the exactly
-                // same way as we made decision on how to create stts entries.
-                int64_t currTimestampUs = prevTimestampUs + it->sampleDurationUs;
-                int32_t dur = ((currTimestampUs * mTimeScale + 500000LL) / 1000000LL -
-                               (prevTimestampUs * mTimeScale + 500000LL) / 1000000LL);
-                prevTimestampUs += (it->sampleCount * it->sampleDurationUs);
-
-                mOwner->writeInt32(dur);
-            }
-          mOwner->endBox();  // stts
-
-          if (!mIsAudio) {
-            mOwner->beginBox("stss");
-              mOwner->writeInt32(0);  // version=0, flags=0
-              mOwner->writeInt32(mNumStssTableEntries);  // number of sync frames
-              for (List<int32_t>::iterator it = mStssTableEntries.begin();
-                   it != mStssTableEntries.end(); ++it) {
-                  mOwner->writeInt32(*it);
-              }
-            mOwner->endBox();  // stss
-          }
-
-          mOwner->beginBox("stsz");
-            mOwner->writeInt32(0);  // version=0, flags=0
-            if (mSamplesHaveSameSize) {
-                List<size_t>::iterator it = mSampleSizes.begin();
-                mOwner->writeInt32(*it);  // default sample size
-            } else {
-                mOwner->writeInt32(0);
-            }
-            mOwner->writeInt32(mNumSamples);
-            if (!mSamplesHaveSameSize) {
-                for (List<size_t>::iterator it = mSampleSizes.begin();
-                     it != mSampleSizes.end(); ++it) {
-                    mOwner->writeInt32(*it);
-                }
-            }
-          mOwner->endBox();  // stsz
-
-          mOwner->beginBox("stsc");
-            mOwner->writeInt32(0);  // version=0, flags=0
-            mOwner->writeInt32(mNumStscTableEntries);
-            for (List<StscTableEntry>::iterator it = mStscTableEntries.begin();
-                 it != mStscTableEntries.end(); ++it) {
-                mOwner->writeInt32(it->firstChunk);
-                mOwner->writeInt32(it->samplesPerChunk);
-                mOwner->writeInt32(it->sampleDescriptionId);
-            }
-          mOwner->endBox();  // stsc
-          mOwner->beginBox(use32BitOffset? "stco": "co64");
-            mOwner->writeInt32(0);  // version=0, flags=0
-            mOwner->writeInt32(mNumStcoTableEntries);
-            for (List<off64_t>::iterator it = mChunkOffsets.begin();
-                 it != mChunkOffsets.end(); ++it) {
-                if (use32BitOffset) {
-                    mOwner->writeInt32(static_cast<int32_t>(*it));
-                } else {
-                    mOwner->writeInt64((*it));
-                }
-            }
-          mOwner->endBox();  // stco or co64
-
-        mOwner->endBox();  // stbl
-       mOwner->endBox();  // minf
-      mOwner->endBox();  // mdia
-    mOwner->endBox();  // trak
+void MPEG4Writer::Track::writeStcoBox(bool use32BitOffset) {
+    mOwner->beginBox(use32BitOffset? "stco": "co64");
+    mOwner->writeInt32(0);  // version=0, flags=0
+    mOwner->writeInt32(mNumStcoTableEntries);
+    for (List<off64_t>::iterator it = mChunkOffsets.begin();
+        it != mChunkOffsets.end(); ++it) {
+        if (use32BitOffset) {
+            mOwner->writeInt32(static_cast<int32_t>(*it));
+        } else {
+            mOwner->writeInt64((*it));
+        }
+    }
+    mOwner->endBox();  // stco or co64
 }
 
 }  // namespace android
