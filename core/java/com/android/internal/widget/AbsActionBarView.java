@@ -76,6 +76,7 @@ public abstract class AbsActionBarView extends ViewGroup {
                 splitAnim.setDuration(FADE_DURATION);
                 set.addListener(mVisAnimListener.withFinalVisibility(visibility));
                 set.play(anim).with(splitAnim);
+                set.start();
             } else {
                 anim.addListener(mVisAnimListener.withFinalVisibility(visibility));
                 anim.start();
@@ -90,6 +91,7 @@ public abstract class AbsActionBarView extends ViewGroup {
                 splitAnim.setDuration(FADE_DURATION);
                 set.addListener(mVisAnimListener.withFinalVisibility(visibility));
                 set.play(anim).with(splitAnim);
+                set.start();
             } else {
                 anim.addListener(mVisAnimListener.withFinalVisibility(visibility));
                 anim.start();
