@@ -462,20 +462,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         // If already active, return
         if (DBG) log("enableApnType: " + apnType + " mState(" + apnContext.getState() + ")");
 
-        if (apnContext.getState() == State.INITING) {
-            if (DBG) log("enableApnType: return APN_REQUEST_STARTED");
-            return Phone.APN_REQUEST_STARTED;
-        }
-        else if (apnContext.getState() == State.CONNECTED) {
+        if (apnContext.getState() == State.CONNECTED) {
             if (DBG) log("enableApnType: return APN_ALREADY_ACTIVE");
             return Phone.APN_ALREADY_ACTIVE;
         }
-        else if (apnContext.getState() == State.DISCONNECTING) {
-            if (DBG) log("enableApnType: while disconnecting, return APN_REQUEST_STARTED");
-            apnContext.setPendingAction(ApnContext.PENDING_ACTION_RECONNECT);
-            return Phone.APN_REQUEST_STARTED;
-        }
-
         setEnabled(apnTypeToId(apnType), true);
         if (DBG) {
             log("enableApnType: new apn request for type " + apnType +
@@ -509,21 +499,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         ApnContext apnContext = mApnContexts.get(type);
 
         if (apnContext != null) {
+            setEnabled(apnTypeToId(type), false);
             if (apnContext.getState() != State.IDLE && apnContext.getState() != State.FAILED) {
-                apnContext.setPendingAction(ApnContext.PENDING_ACTION_APN_DISABLE);
-                Message msg = obtainMessage(EVENT_CLEAN_UP_CONNECTION);
-                msg.arg1 = 1; // tearDown is true;
-                // TODO - don't set things on apnContext from public functions.
-                // Maybe pass reason as arg2?
-                apnContext.setReason(Phone.REASON_DATA_DISABLED);
-                msg.obj = apnContext;
-                sendMessage(msg);
                 if (DBG) log("diableApnType: return APN_REQUEST_STARTED");
                 return Phone.APN_REQUEST_STARTED;
             } else {
                 if (DBG) log("disableApnType: return APN_ALREADY_INACTIVE");
-                apnContext.setEnabled(false);
-                apnContext.setDataConnection(null);
                 return Phone.APN_ALREADY_INACTIVE;
             }
 
@@ -570,10 +551,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     private boolean isDataAllowed(ApnContext apnContext) {
-        if(apnContext.getState() == State.DISCONNECTING
-                && apnContext.getPendingAction() == ApnContext.PENDING_ACTION_APN_DISABLE) {
-            return false;
-        }
         return apnContext.isReady() && isDataAllowed();
     }
 
@@ -1332,7 +1309,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (apnContext.getState() == State.FAILED) {
             if (!apnContext.getDataConnection().isRetryNeeded()) {
                 if (!apnContext.getApnType().equals(Phone.APN_TYPE_DEFAULT)) {
-                    notifyDataConnection(Phone.REASON_APN_FAILED);
+                    mPhone.notifyDataConnection(Phone.REASON_APN_FAILED, apnContext.getApnType());
                     return;
                 }
                 if (mReregisterOnReconnectFailure) {
@@ -1654,7 +1631,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         log("onDataSetupComplete: All APN's had permanent failures, stop retrying");
                     }
                     apnContext.setState(State.FAILED);
-                    notifyDataConnection(Phone.REASON_APN_FAILED);
+                    mPhone.notifyDataConnection(Phone.REASON_APN_FAILED, apnContext.getApnType());
                 } else {
                     if (DBG) log("onDataSetupComplete: Not all permanent failures, retry");
                     startDelayedRetry(cause, apnContext);
@@ -1688,10 +1665,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         apnContext.setState(State.IDLE);
         apnContext.setApnSetting(null);
 
-        // Check if APN disabled.
-        if (apnContext.getPendingAction() == ApnContext.PENDING_ACTION_APN_DISABLE) {
-           apnContext.setPendingAction(ApnContext.PENDING_ACTION_NONE);
-        }
         mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
 
         // if all data connection are gone, check whether Airplane mode request was
@@ -1705,10 +1678,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         // If APN is still enabled, try to bring it back up automatically
         if (apnContext.isReady() && retryAfterDisconnected(apnContext.getReason())) {
-            SystemProperties.set("gsm.defaultpdpcontext.active", "false");
-            if (apnContext.getPendingAction() == ApnContext.PENDING_ACTION_RECONNECT) {
-                apnContext.setPendingAction(ApnContext.PENDING_ACTION_NONE);
-            }
+            SystemProperties.set("gsm.defaultpdpcontext.active", "false");  // TODO - what the heck?  This shoudld go
             // Wait a bit before trying the next APN, so that
             // we're not tying up the RIL command channel.
             // This also helps in any external dependency to turn off the context.
