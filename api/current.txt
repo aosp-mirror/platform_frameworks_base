@@ -22794,6 +22794,7 @@ package android.view.inputmethod {
     method public java.lang.String getLocale();
     method public java.lang.String getMode();
     method public int getNameResId();
+    method public boolean isAuxiliary();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }

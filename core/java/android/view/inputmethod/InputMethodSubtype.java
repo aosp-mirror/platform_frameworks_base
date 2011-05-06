@@ -38,12 +38,13 @@ public final class InputMethodSubtype implements Parcelable {
     private static final String EXTRA_VALUE_PAIR_SEPARATOR = ",";
     private static final String EXTRA_VALUE_KEY_VALUE_SEPARATOR = "=";
 
-    private final int mSubtypeNameResId;
+    private final boolean mIsAuxiliary;
+    private final int mSubtypeHashCode;
     private final int mSubtypeIconResId;
+    private final int mSubtypeNameResId;
     private final String mSubtypeLocale;
     private final String mSubtypeMode;
     private final String mSubtypeExtraValue;
-    private final int mSubtypeHashCode;
     private HashMap<String, String> mExtraValueHashMapCache;
 
     /**
@@ -55,12 +56,27 @@ public final class InputMethodSubtype implements Parcelable {
      * @param extraValue The extra value of the subtype
      */
     InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue) {
+        this(nameId, iconId, locale, mode, extraValue, false);
+    }
+
+    /**
+     * Constructor
+     * @param nameId The name of the subtype
+     * @param iconId The icon of the subtype
+     * @param locale The locale supported by the subtype
+     * @param modeId The mode supported by the subtype
+     * @param extraValue The extra value of the subtype
+     * @param isAuxiliary true when this subtype is one shot subtype.
+     */
+    InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
+            boolean isAuxiliary) {
         mSubtypeNameResId = nameId;
         mSubtypeIconResId = iconId;
         mSubtypeLocale = locale != null ? locale : "";
         mSubtypeMode = mode != null ? mode : "";
         mSubtypeExtraValue = extraValue != null ? extraValue : "";
         mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeMode, mSubtypeExtraValue);
+        mIsAuxiliary = isAuxiliary;
     }
 
     InputMethodSubtype(Parcel source) {
@@ -74,6 +90,7 @@ public final class InputMethodSubtype implements Parcelable {
         s = source.readString();
         mSubtypeExtraValue = s != null ? s : "";
         mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeMode, mSubtypeExtraValue);
+        mIsAuxiliary = (source.readInt() == 1);
     }
 
     /**
@@ -109,6 +126,15 @@ public final class InputMethodSubtype implements Parcelable {
      */
     public String getExtraValue() {
         return mSubtypeExtraValue;
+    }
+
+    /**
+     * @return true if this subtype is one shot subtype. One shot subtype will not be shown in the
+     * ime switch list when this subtype is implicitly enabled. The framework will never
+     * switch the current ime to this subtype by switchToLastInputMethod in InputMethodManager.
+     */
+    public boolean isAuxiliary() {
+        return mIsAuxiliary;
     }
 
     private HashMap<String, String> getExtraValueHashMap() {
@@ -170,24 +196,29 @@ public final class InputMethodSubtype implements Parcelable {
         return false;
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
+    @Override
     public void writeToParcel(Parcel dest, int parcelableFlags) {
         dest.writeInt(mSubtypeNameResId);
         dest.writeInt(mSubtypeIconResId);
         dest.writeString(mSubtypeLocale);
         dest.writeString(mSubtypeMode);
         dest.writeString(mSubtypeExtraValue);
+        dest.writeInt(mIsAuxiliary ? 1 : 0);
     }
 
     public static final Parcelable.Creator<InputMethodSubtype> CREATOR
             = new Parcelable.Creator<InputMethodSubtype>() {
+        @Override
         public InputMethodSubtype createFromParcel(Parcel source) {
             return new InputMethodSubtype(source);
         }
 
+        @Override
         public InputMethodSubtype[] newArray(int size) {
             return new InputMethodSubtype[size];
         }
