@@ -60,14 +60,14 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/fundamentals/activities.html">
           <span class="en">Activities</span>
-        </a> <span class="new-child">new!</span></div>
+        </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/fragments.html">
             <span class="en">Fragments</span>
-          </a> <span class="new">new!</span></li>
+          </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/loaders.html">
             <span class="en">Loaders</span>
-          </a> <span class="new">new!</span></li>
+          </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/fundamentals/tasks-and-back-stack.html">
             <span class="en">Tasks and Back Stack</span></a></li>
         </ul>
@@ -98,8 +98,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/ui/index.html">
             <span class="en">User Interface</span>
-          </a>
-          <span class="new-child">new!</span></div>
+          </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/declaring-layout.html">
                <span class="en">Declaring Layout</span>
@@ -109,7 +108,7 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/actionbar.html">
                <span class="en">Using the Action Bar</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/dialogs.html">
                 <span class="en">Creating Dialogs</span>
               </a></li>
@@ -131,8 +130,7 @@
           </li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/drag-drop.html">
                 <span class="en">Dragging and Dropping</span>
-              </a> <span class="new">new!</span>
-          </li>
+              </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/ui/themes.html">
                 <span class="en">Applying Styles and Themes</span>
               </a></li>
@@ -238,8 +236,7 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">
             <span class="en">Graphics</span>
-          </a>
-          <span class="new-child">new!</span></div>
+          </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/2d-graphics.html">
                 <span class="en">2D Graphics</span>
@@ -249,10 +246,10 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/renderscript.html">
                 <span class="en">3D with Renderscript</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/animation.html">
                 <span class="en">Property Animation</span>
-              </a> <span class="new">new!</span></li>
+              </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/view-animation.html">
                 <span class="en">View Animation</span>
               </a></li>
@@ -264,9 +261,7 @@
       <li>
         <a href="<?cs var:toroot ?>guide/topics/clipboard/copy-paste.html">
             <span class="en">Copy and Paste</span>
-        </a>
-        <span class="new">new!</span>
-      </li>
+        </a></li>
   <!--<li class="toggle-list">
         <div><a style="color:gray;">Sensors</a></div>
           <ul>
@@ -299,8 +294,8 @@
             <span class="en">Bluetooth</span>
           </a></li>
       <li><a href="<?cs var:toroot?>guide/topics/nfc/index.html">
-            <span class="en">Near Field Communication</span></a>
-            <span class="new">new!</span></li>
+            <span class="en">Near Field Communication</span>
+          </a></li>
       <li class="toggle-list">
           <div><a href="<?cs var:toroot?>guide/topics/usb/index.html">
             <span class="en">USB</span></a>
@@ -313,9 +308,8 @@
           </li>
 
        <li><a href="<?cs var:toroot?>guide/topics/network/sip.html">
-            <span class="en">Session Initiation Protocol</span></a>
-            <span class="new">new!</span>
-          </li>
+            <span class="en">Session Initiation Protocol</span>
+          </a></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot?>guide/topics/search/index.html">
             <span class="en">Search</span>
@@ -374,7 +368,6 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot?>guide/market/billing/index.html">
             <span class="en">In-app Billing</span></a>
-          <span class="new">updated</span>
         </div>
         <ul>
           <li><a href="<?cs var:toroot?>guide/market/billing/billing_about.html">
@@ -664,7 +657,7 @@
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/practices/optimizing-for-3.0.html">
             <span class="en">Optimizing Apps for Android 3.0</span>
-          </a> <span class="new">new!</span></li>
+          </a></li>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/ui_guidelines/index.html">
                <span class="en">UI Guidelines</span>
@@ -710,7 +703,7 @@
       <ul>
       <li><a href="<?cs var:toroot ?>guide/practices/design/accessibility.html">
             <span class="en">Designing for Accessibility</span>
-          </a> <span class="new">new!</span></li>
+          </a></li>
       <li><a href="<?cs var:toroot ?>guide/practices/design/performance.html">
             <span class="en">Designing for Performance</span>
           </a></li>
@@ -764,7 +757,7 @@
           </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/media-formats.html">
             <span class="en">Supported Media Formats</span>
-          </a> <span class="new">updated</span></li>
+          </a></li>
       <li><a href="<?cs var:toroot ?>guide/appendix/g-app-intents.html">
             <span class="en">Intents List: Google Apps</span>
           </a></li>
