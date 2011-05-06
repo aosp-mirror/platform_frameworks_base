@@ -9,13 +9,20 @@ parent.link=index.html
 
       <ol>
         <li><a href="#CreatingAProject">Creating an Android Project</a></li>
-
         <li><a href="#UpdatingAProject">Updating a Project</a></li>
-
-        <li><a href="#SettingUpLibraryProject">Setting up a Library Project</a></li>
-
-        <li><a href="#ReferencingLibraryProject">Referencing a Library Project from an
-        Application</a></li>
+        <li><a href="#SettingUpLibraryProject">Setting up a Library Project</a>
+          <ol>
+            <li><a href="#CreatingManifestFile">Creating the manifest file</a></li>
+            <li><a href="#UpdatingLibraryProject">Updating a library project</a></li>
+          </ol>
+        </li>
+        <li><a href="#ReferencingLibraryProject">Referencing a Library Project</a>
+          <ol>
+            <li><a href="#DeclaringLibrary">Declaring library components in the manifest
+file</a></li>
+            <li><a href="#depAppBuild">Building a dependent application</a></li>
+          </ol>
+        </li>
       </ol>
 
       <h2>See also</h2>
@@ -108,7 +115,7 @@ android create project \
   SDK directory, because this will break the build scripts. (They will need to be manually updated
   to reflect the new SDK location before they will work again.)</p>
 
-  <h2 id="UpdatingAProject">Updating a project</h2>
+  <h2 id="UpdatingAProject">Updating a Project</h2>
 
   <p>If you're upgrading a project from an older version of the Android SDK or want to create a new
   project from existing code, use the <code>android update project</code> command to update the
@@ -142,7 +149,7 @@ android update project --name &lt;project_name&gt; --target &lt;target_ID&gt;
 android update project --name MyApp --target 2 --path ./MyAppProject
 </pre>
 
-  <h2 id="SettingUpLibraryProject">Setting up a library project</h2>
+  <h2 id="SettingUpLibraryProject">Setting up a Library Project</h2>
 
   <p>A library project is a standard Android project, so you can create a new one in the same way
   as you would a new application project. Specifically, you can use the <code>android</code> tool
@@ -171,7 +178,7 @@ android.library=true
   applications can use it, you can do so by adding a the <code>android.library=true</code> property
   to the application's <code>default.properties</code> file.</p>
 
-  <h4>Creating the manifest file</h4>
+  <h3 id="CreatingManifestFile">Creating the manifest file</h3>
 
   <p>A library project's manifest file must declare all of the shared components that it includes,
   just as would a standard Android application. For more information, see the documentation for
@@ -191,7 +198,7 @@ android.library=true
 &lt;/manifest&gt;
 </pre>
 
-  <h4>Updating a library project</h4>
+  <h3 id="UpdatingLibraryProject">Updating a library project</h3>
 
   <p>If you want to update the build properties (build target, location) of the library project,
   use this command:</p>
@@ -249,7 +256,7 @@ android.library.reference.1=path/to/library_projectC
   that, at build time, libraries are not merged with each other before being merged with the
   application.</p>
 
-  <h3>Declaring library components in the the manifest file</h3>
+  <h3 id="DeclaringLibrary">Declaring library components in the manifest file</h3>
 
   <p>In the manifest file of the application project, you must add declarations of all components
   that the application will use that are imported from a library project. For example, you must
