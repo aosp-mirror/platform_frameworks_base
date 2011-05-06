@@ -1,0 +1,79 @@
+page.title=OpenGL ES Versions
+@jd:body
+
+<style type="text/css">
+
+div.dashboard-panel {
+  max-width:1000px;
+  margin:0 0 2em 0;
+  padding:20px 20px 0 20px;
+  border:1px solid #d3ecf5;
+  border-radius:7px;
+  -moz-border-radius:7px;
+  -webkit-border-radius:7px;
+  background-color: #DAF3FC;
+  box-shadow:2px 3px 1px #eee;
+  -moz-box-shadow:2px 3px 1px #eee;
+  -webkit-box-shadow:2px 3px 1px #eee;
+  overflow:hidden;
+}
+#jd-content div.dashboard-panel img {
+  margin:0 20px 20px 0;
+  padding:0;
+  border:1px solid #ccc;
+  float:left;
+}
+#jd-content div.dashboard-panel table {
+  margin:0 0 20px 0;
+  float:left;
+  background-color:#fff;
+}
+div.dashboard-panel p {
+  clear:left;
+}
+div.dashboard-panel th {
+  white-space:nowrap;
+}
+</style>
+
+<p>This page provides data about the relative number of active devices that support a particular
+version of OpenGL ES. Note that support for one particular version of OpenGL ES also implies
+support for any lower version (for example, support for version 2.0 also implies support for
+1.1).</p>
+
+<p>To declare which version of OpenGL ES your application requires, you should use the {@code
+android:glEsVersion} attribute of the <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+element. You can also use the <a
+href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
+&lt;supports-gl-texture&gt;}</a> element to declare the GL compression formats that your application
+uses.</p>
+
+<p class="note"><strong>Note:</strong> This data is based on the number
+of Android devices that have accessed Android Market within a 7-day period
+ending on the data collection date noted below.</p>
+
+
+<div class="dashboard-panel">
+
+<img alt="" width="400" height="250"
+src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=GL%20ES%201.1|GL%20ES%202.0&chd=t%3A8.9,91.1" />
+
+<table>
+<tr>
+<th scope="col">OpenGL ES Version</th>
+<th scope="col">Distribution</th>
+</tr>
+<tr>
+<td>1.1</th>
+<td>8.9%</td>
+</tr>
+<tr>
+<td>2.0</th>
+<td>91.1%</td>
+</tr>
+</table>
+
+<p><em>Data collected during a 7-day period ending on May 6, 2011</em></p>
+</div>
+
