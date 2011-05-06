@@ -671,8 +671,10 @@ public abstract class DataConnectionTracker extends Handler {
 
     protected LinkProperties getLinkProperties(String apnType) {
         int id = apnTypeToId(apnType);
+
         if (isApnIdEnabled(id)) {
-            DataConnectionAc dcac = mDataConnectionAsyncChannels.get(id);
+            // TODO - remove this cdma-only hack and support multiple DCs.
+            DataConnectionAc dcac = mDataConnectionAsyncChannels.get(0);
             return dcac.getLinkPropertiesSync();
         } else {
             return new LinkProperties();
@@ -682,7 +684,8 @@ public abstract class DataConnectionTracker extends Handler {
     protected LinkCapabilities getLinkCapabilities(String apnType) {
         int id = apnTypeToId(apnType);
         if (isApnIdEnabled(id)) {
-            DataConnectionAc dcac = mDataConnectionAsyncChannels.get(id);
+            // TODO - remove this cdma-only hack and support multiple DCs.
+            DataConnectionAc dcac = mDataConnectionAsyncChannels.get(0);
             return dcac.getLinkCapabilitiesSync();
         } else {
             return new LinkCapabilities();
