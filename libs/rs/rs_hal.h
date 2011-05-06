@@ -30,11 +30,13 @@ class Type;
 class Allocation;
 class Script;
 class ScriptC;
+class Program;
 class ProgramStore;
 class ProgramRaster;
 class ProgramVertex;
 class ProgramFragment;
 class Mesh;
+class Sampler;
 
 typedef void *(*RsHalSymbolLookupFunc)(void *usrptr, char const *symbolName);
 
@@ -120,6 +122,11 @@ typedef struct {
         void (*draw)(const Context *rsc, const Mesh *m, uint32_t primIndex, uint32_t start, uint32_t len);
         void (*destroy)(const Context *rsc, const Mesh *m);
     } mesh;
+
+    struct {
+        bool (*init)(const Context *rsc, const Sampler *m);
+        void (*destroy)(const Context *rsc, const Sampler *m);
+    } sampler;
 
 } RsdHalFunctions;
 

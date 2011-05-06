@@ -22,6 +22,7 @@
 #include "rsdProgramVertex.h"
 #include "rsdProgramFragment.h"
 #include "rsdMesh.h"
+#include "rsdSampler.h"
 
 #include <malloc.h>
 #include "rsContext.h"
@@ -90,7 +91,12 @@ static RsdHalFunctions FunctionTable = {
         rsdMeshInit,
         rsdMeshDraw,
         rsdMeshDestroy
-    }
+    },
+
+    {
+        rsdSamplerInit,
+        rsdSamplerDestroy
+    },
 
 };
 

@@ -17,7 +17,7 @@
 #ifndef ANDROID_RS_PROGRAM_H
 #define ANDROID_RS_PROGRAM_H
 
-#include "rsObjectBase.h"
+#include "rsProgramBase.h"
 #include "rsElement.h"
 
 // ---------------------------------------------------------------------------
@@ -28,10 +28,9 @@ namespace renderscript {
 #define RS_SHADER_ATTR "ATTRIB_"
 #define RS_SHADER_UNI "UNI_"
 
-class Program : public ObjectBase {
+class Program : public ProgramBase {
 public:
 
-    Program(Context *);
     Program(Context *, const char * shaderText, uint32_t shaderLength,
                        const uint32_t * params, uint32_t paramLength);
     virtual ~Program();
@@ -42,8 +41,6 @@ public:
 
     void bindTexture(Context *, uint32_t slot, Allocation *);
     void bindSampler(Context *, uint32_t slot, Sampler *);
-
-    void forceDirty() const {mDirty = true;}
 
     struct Hal {
         mutable void *drv;
@@ -75,18 +72,13 @@ public:
 
 protected:
     bool mIsInternal;
-
-    mutable bool mDirty;
     String8 mUserShader;
-
-    void logUniform(const Element *field, const float *fd, uint32_t arraySize );
-    void setUniform(Context *rsc, const Element *field, const float *fd, int32_t slot, uint32_t arraySize );
     void initMemberVars();
 };
 
 }
 }
-#endif
+#endif // ANDROID_RS_PROGRAM_H
 
 
 

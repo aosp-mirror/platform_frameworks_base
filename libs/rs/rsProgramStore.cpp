@@ -25,7 +25,7 @@ ProgramStore::ProgramStore(Context *rsc,
                            bool colorMaskR, bool colorMaskG, bool colorMaskB, bool colorMaskA,
                            bool depthMask, bool ditherEnable,
                            RsBlendSrcFunc srcFunc, RsBlendDstFunc destFunc,
-                           RsDepthFunc depthFunc) : Program(rsc) {
+                           RsDepthFunc depthFunc) : ProgramBase(rsc) {
     memset(&mHal, 0, sizeof(mHal));
 
     mHal.state.ditherEnable = ditherEnable;
