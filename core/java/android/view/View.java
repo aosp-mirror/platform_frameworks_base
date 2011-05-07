@@ -3173,12 +3173,43 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Performs button-related actions during a touch down event.
+     *
+     * @param event The event.
+     * @return True if the down was consumed.
+     *
+     * @hide
+     */
+    protected boolean performButtonActionOnTouchDown(MotionEvent event) {
+        if ((event.getButtonState() & MotionEvent.BUTTON_SECONDARY) != 0) {
+            if (showContextMenu(event.getX(), event.getY(), event.getMetaState())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Bring up the context menu for this view.
      *
      * @return Whether a context menu was displayed.
      */
     public boolean showContextMenu() {
         return getParent().showContextMenuForChild(this);
+    }
+
+    /**
+     * Bring up the context menu for this view, referring to the item under the specified point.
+     *
+     * @param x The referenced x coordinate.
+     * @param y The referenced y coordinate.
+     * @param metaState The keyboard modifiers that were pressed.
+     * @return Whether a context menu was displayed.
+     *
+     * @hide
+     */
+    public boolean showContextMenu(float x, float y, int metaState) {
+        return showContextMenu();
     }
 
     /**
@@ -5534,6 +5565,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
                 case MotionEvent.ACTION_DOWN:
                     mHasPerformedLongPress = false;
+
+                    if (performButtonActionOnTouchDown(event)) {
+                        break;
+                    }
 
                     // Walk up the hierarchy to determine if we're inside a scrolling container.
                     boolean isInScrollingContainer = false;

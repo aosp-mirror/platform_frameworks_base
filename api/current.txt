@@ -20158,6 +20158,7 @@ package android.view {
     field public static final int SOURCE_JOYSTICK = 16777232; // 0x1000010
     field public static final int SOURCE_KEYBOARD = 257; // 0x101
     field public static final int SOURCE_MOUSE = 8194; // 0x2002
+    field public static final int SOURCE_STYLUS = 16386; // 0x4002
     field public static final int SOURCE_TOUCHPAD = 1048584; // 0x100008
     field public static final int SOURCE_TOUCHSCREEN = 4098; // 0x1002
     field public static final int SOURCE_TRACKBALL = 65540; // 0x10004
@@ -20690,6 +20691,7 @@ package android.view {
     method public final int getActionMasked();
     method public final float getAxisValue(int);
     method public final float getAxisValue(int, int);
+    method public final int getButtonState();
     method public final int getDeviceId();
     method public final long getDownTime();
     method public final int getEdgeFlags();
@@ -20724,6 +20726,7 @@ package android.view {
     method public final void getPointerCoords(int, android.view.MotionEvent.PointerCoords);
     method public final int getPointerCount();
     method public final int getPointerId(int);
+    method public final void getPointerProperties(int, android.view.MotionEvent.PointerProperties);
     method public final float getPressure();
     method public final float getPressure(int);
     method public final float getRawX();
@@ -20735,6 +20738,7 @@ package android.view {
     method public final float getToolMajor(int);
     method public final float getToolMinor();
     method public final float getToolMinor(int);
+    method public final int getToolType(int);
     method public final float getTouchMajor();
     method public final float getTouchMajor(int);
     method public final float getTouchMinor();
@@ -20745,7 +20749,8 @@ package android.view {
     method public final float getY();
     method public final float getY(int);
     method public final float getYPrecision();
-    method public static android.view.MotionEvent obtain(long, long, int, int, int[], android.view.MotionEvent.PointerCoords[], int, float, float, int, int, int, int);
+    method public static android.view.MotionEvent obtain(long, long, int, int, android.view.MotionEvent.PointerProperties[], android.view.MotionEvent.PointerCoords[], int, int, float, float, int, int, int, int);
+    method public static deprecated android.view.MotionEvent obtain(long, long, int, int, int[], android.view.MotionEvent.PointerCoords[], int, float, float, int, int, int, int);
     method public static android.view.MotionEvent obtain(long, long, int, float, float, float, float, int, float, float, int, int);
     method public static deprecated android.view.MotionEvent obtain(long, long, int, int, float, float, float, float, int, float, float, int, int);
     method public static android.view.MotionEvent obtain(long, long, int, float, float, int);
@@ -20782,6 +20787,7 @@ package android.view {
     field public static final int ACTION_SCROLL = 8; // 0x8
     field public static final int ACTION_UP = 1; // 0x1
     field public static final int AXIS_BRAKE = 23; // 0x17
+    field public static final int AXIS_DISTANCE = 24; // 0x18
     field public static final int AXIS_GAS = 22; // 0x16
     field public static final int AXIS_GENERIC_1 = 32; // 0x20
     field public static final int AXIS_GENERIC_10 = 41; // 0x29
@@ -20821,12 +20827,25 @@ package android.view {
     field public static final int AXIS_X = 0; // 0x0
     field public static final int AXIS_Y = 1; // 0x1
     field public static final int AXIS_Z = 11; // 0xb
+    field public static final int BUTTON_BACK = 8; // 0x8
+    field public static final int BUTTON_ERASER = 32; // 0x20
+    field public static final int BUTTON_FORWARD = 16; // 0x10
+    field public static final int BUTTON_PRIMARY = 1; // 0x1
+    field public static final int BUTTON_SECONDARY = 2; // 0x2
+    field public static final int BUTTON_TERTIARY = 4; // 0x4
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int EDGE_BOTTOM = 2; // 0x2
     field public static final int EDGE_LEFT = 4; // 0x4
     field public static final int EDGE_RIGHT = 8; // 0x8
     field public static final int EDGE_TOP = 1; // 0x1
     field public static final int FLAG_WINDOW_IS_OBSCURED = 1; // 0x1
+    field public static final int INVALID_POINTER_ID = -1; // 0xffffffff
+    field public static final int TOOL_TYPE_FINGER = 1; // 0x1
+    field public static final int TOOL_TYPE_INDIRECT_FINGER = 4; // 0x4
+    field public static final int TOOL_TYPE_INDIRECT_STYLUS = 5; // 0x5
+    field public static final int TOOL_TYPE_MOUSE = 3; // 0x3
+    field public static final int TOOL_TYPE_STYLUS = 2; // 0x2
+    field public static final int TOOL_TYPE_UNKNOWN = 0; // 0x0
   }
 
   public static final class MotionEvent.PointerCoords {
@@ -20845,6 +20864,15 @@ package android.view {
     field public float touchMinor;
     field public float x;
     field public float y;
+  }
+
+  public static final class MotionEvent.PointerProperties {
+    ctor public MotionEvent.PointerProperties();
+    ctor public MotionEvent.PointerProperties(android.view.MotionEvent.PointerProperties);
+    method public void clear();
+    method public void copyFrom(android.view.MotionEvent.PointerProperties);
+    field public int id;
+    field public int toolType;
   }
 
   public abstract class OrientationEventListener {

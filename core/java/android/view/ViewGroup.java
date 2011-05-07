@@ -129,11 +129,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     // First touch target in the linked list of touch targets.
     private TouchTarget mFirstTouchTarget;
 
-    // Temporary arrays for splitting pointers.
-    private int[] mTmpPointerIndexMap;
-    private int[] mTmpPointerIds;
-    private MotionEvent.PointerCoords[] mTmpPointerCoords;
-
     // For debugging only.  You can see these in hierarchyviewer.
     @SuppressWarnings({"FieldCanBeLocal", "UnusedDeclaration"})
     @ViewDebug.ExportedProperty(category = "events")
@@ -1723,141 +1718,38 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         // Calculate the number of pointers to deliver.
-        final int oldPointerCount = event.getPointerCount();
-        int newPointerCount = 0;
-        if (desiredPointerIdBits == TouchTarget.ALL_POINTER_IDS) {
-            newPointerCount = oldPointerCount;
-        } else {
-            for (int i = 0; i < oldPointerCount; i++) {
-                final int pointerId = event.getPointerId(i);
-                final int pointerIdBit = 1 << pointerId;
-                if ((pointerIdBit & desiredPointerIdBits) != 0) {
-                    newPointerCount += 1;
-                }
-            }
-        }
+        final int oldPointerIdBits = event.getPointerIdBits();
+        final int newPointerIdBits = oldPointerIdBits & desiredPointerIdBits;
 
         // If for some reason we ended up in an inconsistent state where it looks like we
         // might produce a motion event with no pointers in it, then drop the event.
-        if (newPointerCount == 0) {
+        if (newPointerIdBits == 0) {
             return false;
         }
 
         // If the number of pointers is the same and we don't need to perform any fancy
         // irreversible transformations, then we can reuse the motion event for this
         // dispatch as long as we are careful to revert any changes we make.
-        final boolean reuse = newPointerCount == oldPointerCount
-                && (child == null || child.hasIdentityMatrix());
-        if (reuse) {
-            if (child == null) {
-                handled = super.dispatchTouchEvent(event);
-            } else {
-                final float offsetX = mScrollX - child.mLeft;
-                final float offsetY = mScrollY - child.mTop;
-                event.offsetLocation(offsetX, offsetY);
+        // Otherwise we need to make a copy.
+        final MotionEvent transformedEvent;
+        if (newPointerIdBits == oldPointerIdBits) {
+            if (child == null || child.hasIdentityMatrix()) {
+                if (child == null) {
+                    handled = super.dispatchTouchEvent(event);
+                } else {
+                    final float offsetX = mScrollX - child.mLeft;
+                    final float offsetY = mScrollY - child.mTop;
+                    event.offsetLocation(offsetX, offsetY);
 
-                handled = child.dispatchTouchEvent(event);
+                    handled = child.dispatchTouchEvent(event);
 
-                event.offsetLocation(-offsetX, -offsetY);
+                    event.offsetLocation(-offsetX, -offsetY);
+                }
+                return handled;
             }
-            return handled;
-        }
-
-        // Make a copy of the event.
-        // If the number of pointers is different, then we need to filter out irrelevant pointers
-        // as we make a copy of the motion event.
-        MotionEvent transformedEvent;
-        if (newPointerCount == oldPointerCount) {
             transformedEvent = MotionEvent.obtain(event);
         } else {
-            growTmpPointerArrays(newPointerCount);
-            final int[] newPointerIndexMap = mTmpPointerIndexMap;
-            final int[] newPointerIds = mTmpPointerIds;
-            final MotionEvent.PointerCoords[] newPointerCoords = mTmpPointerCoords;
-
-            int newPointerIndex = 0;
-            int oldPointerIndex = 0;
-            while (newPointerIndex < newPointerCount) {
-                final int pointerId = event.getPointerId(oldPointerIndex);
-                final int pointerIdBits = 1 << pointerId;
-                if ((pointerIdBits & desiredPointerIdBits) != 0) {
-                    newPointerIndexMap[newPointerIndex] = oldPointerIndex;
-                    newPointerIds[newPointerIndex] = pointerId;
-                    if (newPointerCoords[newPointerIndex] == null) {
-                        newPointerCoords[newPointerIndex] = new MotionEvent.PointerCoords();
-                    }
-
-                    newPointerIndex += 1;
-                }
-                oldPointerIndex += 1;
-            }
-
-            final int newAction;
-            if (cancel) {
-                newAction = MotionEvent.ACTION_CANCEL;
-            } else {
-                final int oldMaskedAction = oldAction & MotionEvent.ACTION_MASK;
-                if (oldMaskedAction == MotionEvent.ACTION_POINTER_DOWN
-                        || oldMaskedAction == MotionEvent.ACTION_POINTER_UP) {
-                    final int changedPointerId = event.getPointerId(
-                            (oldAction & MotionEvent.ACTION_POINTER_INDEX_MASK)
-                                    >> MotionEvent.ACTION_POINTER_INDEX_SHIFT);
-                    final int changedPointerIdBits = 1 << changedPointerId;
-                    if ((changedPointerIdBits & desiredPointerIdBits) != 0) {
-                        if (newPointerCount == 1) {
-                            // The first/last pointer went down/up.
-                            newAction = oldMaskedAction == MotionEvent.ACTION_POINTER_DOWN
-                                    ? MotionEvent.ACTION_DOWN : MotionEvent.ACTION_UP;
-                        } else {
-                            // A secondary pointer went down/up.
-                            int newChangedPointerIndex = 0;
-                            while (newPointerIds[newChangedPointerIndex] != changedPointerId) {
-                                newChangedPointerIndex += 1;
-                            }
-                            newAction = oldMaskedAction | (newChangedPointerIndex
-                                    << MotionEvent.ACTION_POINTER_INDEX_SHIFT);
-                        }
-                    } else {
-                        // An unrelated pointer changed.
-                        newAction = MotionEvent.ACTION_MOVE;
-                    }
-                } else {
-                    // Simple up/down/cancel/move motion action.
-                    newAction = oldMaskedAction;
-                }
-            }
-
-            transformedEvent = null;
-            final int historySize = event.getHistorySize();
-            for (int historyIndex = 0; historyIndex <= historySize; historyIndex++) {
-                for (newPointerIndex = 0; newPointerIndex < newPointerCount; newPointerIndex++) {
-                    final MotionEvent.PointerCoords c = newPointerCoords[newPointerIndex];
-                    oldPointerIndex = newPointerIndexMap[newPointerIndex];
-                    if (historyIndex != historySize) {
-                        event.getHistoricalPointerCoords(oldPointerIndex, historyIndex, c);
-                    } else {
-                        event.getPointerCoords(oldPointerIndex, c);
-                    }
-                }
-
-                final long eventTime;
-                if (historyIndex != historySize) {
-                    eventTime = event.getHistoricalEventTime(historyIndex);
-                } else {
-                    eventTime = event.getEventTime();
-                }
-
-                if (transformedEvent == null) {
-                    transformedEvent = MotionEvent.obtain(
-                            event.getDownTime(), eventTime, newAction,
-                            newPointerCount, newPointerIds, newPointerCoords,
-                            event.getMetaState(), event.getXPrecision(), event.getYPrecision(),
-                            event.getDeviceId(), event.getEdgeFlags(), event.getSource(),
-                            event.getFlags());
-                } else {
-                    transformedEvent.addBatch(eventTime, newPointerCoords, 0);
-                }
-            }
+            transformedEvent = event.split(newPointerIdBits);
         }
 
         // Perform any necessary transformations and dispatch.
@@ -1877,36 +1769,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // Done.
         transformedEvent.recycle();
         return handled;
-    }
-
-    /**
-     * Enlarge the temporary pointer arrays for splitting pointers.
-     * May discard contents (but keeps PointerCoords objects to avoid reallocating them).
-     */
-    private void growTmpPointerArrays(int desiredCapacity) {
-        final MotionEvent.PointerCoords[] oldTmpPointerCoords = mTmpPointerCoords;
-        int capacity;
-        if (oldTmpPointerCoords != null) {
-            capacity = oldTmpPointerCoords.length;
-            if (desiredCapacity <= capacity) {
-                return;
-            }
-        } else {
-            capacity = 4;
-        }
-
-        while (capacity < desiredCapacity) {
-            capacity *= 2;
-        }
-
-        mTmpPointerIndexMap = new int[capacity];
-        mTmpPointerIds = new int[capacity];
-        mTmpPointerCoords = new MotionEvent.PointerCoords[capacity];
-
-        if (oldTmpPointerCoords != null) {
-            System.arraycopy(oldTmpPointerCoords, 0, mTmpPointerCoords, 0,
-                    oldTmpPointerCoords.length);
-        }
     }
 
     /**

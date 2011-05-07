@@ -157,14 +157,6 @@ enum {
 };
 
 /*
- * Button state.
- */
-enum {
-    // Primary button pressed (left mouse button).
-    BUTTON_STATE_PRIMARY = 1 << 0,
-};
-
-/*
  * Describes the basic configuration of input devices that are present.
  */
 struct InputConfiguration {
@@ -232,6 +224,29 @@ struct PointerCoords {
 
 private:
     void tooManyAxes(int axis);
+};
+
+/*
+ * Pointer property data.
+ */
+struct PointerProperties {
+    // The id of the pointer.
+    int32_t id;
+
+    // The pointer tool type.
+    int32_t toolType;
+
+    inline void clear() {
+        id = -1;
+        toolType = 0;
+    }
+
+    bool operator==(const PointerProperties& other) const;
+    inline bool operator!=(const PointerProperties& other) const {
+        return !(*this == other);
+    }
+
+    void copyFrom(const PointerProperties& other);
 };
 
 /*
@@ -346,6 +361,8 @@ public:
 
     inline void setMetaState(int32_t metaState) { mMetaState = metaState; }
 
+    inline int32_t getButtonState() const { return mButtonState; }
+
     inline float getXOffset() const { return mXOffset; }
 
     inline float getYOffset() const { return mYOffset; }
@@ -356,9 +373,21 @@ public:
 
     inline nsecs_t getDownTime() const { return mDownTime; }
 
-    inline size_t getPointerCount() const { return mPointerIds.size(); }
+    inline void setDownTime(nsecs_t downTime) { mDownTime = downTime; }
 
-    inline int32_t getPointerId(size_t pointerIndex) const { return mPointerIds[pointerIndex]; }
+    inline size_t getPointerCount() const { return mPointerProperties.size(); }
+
+    inline const PointerProperties* getPointerProperties(size_t pointerIndex) const {
+        return &mPointerProperties[pointerIndex];
+    }
+
+    inline int32_t getPointerId(size_t pointerIndex) const {
+        return mPointerProperties[pointerIndex].id;
+    }
+
+    inline int32_t getToolType(size_t pointerIndex) const {
+        return mPointerProperties[pointerIndex].toolType;
+    }
 
     inline nsecs_t getEventTime() const { return mSampleEventTimes[getHistorySize()]; }
 
@@ -490,6 +519,7 @@ public:
             int32_t flags,
             int32_t edgeFlags,
             int32_t metaState,
+            int32_t buttonState,
             float xOffset,
             float yOffset,
             float xPrecision,
@@ -497,7 +527,7 @@ public:
             nsecs_t downTime,
             nsecs_t eventTime,
             size_t pointerCount,
-            const int32_t* pointerIds,
+            const PointerProperties* pointerProperties,
             const PointerCoords* pointerCoords);
 
     void copyFrom(const MotionEvent* other, bool keepHistory);
@@ -523,7 +553,9 @@ public:
     }
 
     // Low-level accessors.
-    inline const int32_t* getPointerIds() const { return mPointerIds.array(); }
+    inline const PointerProperties* getPointerProperties() const {
+        return mPointerProperties.array();
+    }
     inline const nsecs_t* getSampleEventTimes() const { return mSampleEventTimes.array(); }
     inline const PointerCoords* getSamplePointerCoords() const {
             return mSamplePointerCoords.array();
@@ -534,12 +566,13 @@ protected:
     int32_t mFlags;
     int32_t mEdgeFlags;
     int32_t mMetaState;
+    int32_t mButtonState;
     float mXOffset;
     float mYOffset;
     float mXPrecision;
     float mYPrecision;
     nsecs_t mDownTime;
-    Vector<int32_t> mPointerIds;
+    Vector<PointerProperties> mPointerProperties;
     Vector<nsecs_t> mSampleEventTimes;
     Vector<PointerCoords> mSamplePointerCoords;
 };

@@ -153,7 +153,14 @@ public final class InputDevice implements Parcelable {
      * @see #SOURCE_CLASS_POINTER
      */
     public static final int SOURCE_MOUSE = 0x00002000 | SOURCE_CLASS_POINTER;
-    
+
+    /**
+     * The input source is a stylus pointing device.
+     *
+     * @see #SOURCE_CLASS_POINTER
+     */
+    public static final int SOURCE_STYLUS = 0x00004000 | SOURCE_CLASS_POINTER;
+
     /**
      * The input source is a trackball.
      * 
@@ -585,6 +592,7 @@ public final class InputDevice implements Parcelable {
         appendSourceDescriptionIfApplicable(description, SOURCE_DPAD, "dpad");
         appendSourceDescriptionIfApplicable(description, SOURCE_TOUCHSCREEN, "touchscreen");
         appendSourceDescriptionIfApplicable(description, SOURCE_MOUSE, "mouse");
+        appendSourceDescriptionIfApplicable(description, SOURCE_STYLUS, "stylus");
         appendSourceDescriptionIfApplicable(description, SOURCE_TRACKBALL, "trackball");
         appendSourceDescriptionIfApplicable(description, SOURCE_TOUCHPAD, "touchpad");
         appendSourceDescriptionIfApplicable(description, SOURCE_JOYSTICK, "joystick");

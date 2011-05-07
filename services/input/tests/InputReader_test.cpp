@@ -77,10 +77,10 @@ private:
     virtual void move(float deltaX, float deltaY) {
     }
 
-    virtual void setButtonState(uint32_t buttonState) {
+    virtual void setButtonState(int32_t buttonState) {
     }
 
-    virtual uint32_t getButtonState() const {
+    virtual int32_t getButtonState() const {
         return 0;
     }
 
@@ -236,9 +236,10 @@ public:
         int32_t action;
         int32_t flags;
         int32_t metaState;
+        int32_t buttonState;
         int32_t edgeFlags;
         uint32_t pointerCount;
-        Vector<int32_t> pointerIds;
+        Vector<PointerProperties> pointerProperties;
         Vector<PointerCoords> pointerCoords;
         float xPrecision;
         float yPrecision;
@@ -337,8 +338,9 @@ private:
 
     virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags,
-            int32_t metaState, int32_t edgeFlags,
-            uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
+            int32_t metaState, int32_t buttonState, int32_t edgeFlags,
+            uint32_t pointerCount, const PointerProperties* pointerProperties,
+            const PointerCoords* pointerCoords,
             float xPrecision, float yPrecision, nsecs_t downTime) {
         NotifyMotionArgs args;
         args.eventTime = eventTime;
@@ -348,10 +350,11 @@ private:
         args.action = action;
         args.flags = flags;
         args.metaState = metaState;
+        args.buttonState = buttonState;
         args.edgeFlags = edgeFlags;
         args.pointerCount = pointerCount;
-        args.pointerIds.clear();
-        args.pointerIds.appendArray(pointerIds, pointerCount);
+        args.pointerProperties.clear();
+        args.pointerProperties.appendArray(pointerProperties, pointerCount);
         args.pointerCoords.clear();
         args.pointerCoords.appendArray(pointerCoords, pointerCount);
         args.xPrecision = xPrecision;
@@ -2104,9 +2107,11 @@ TEST_F(CursorInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaStat
     ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, args.action);
     ASSERT_EQ(0, args.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, args.metaState);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_PRIMARY, args.buttonState);
     ASSERT_EQ(0, args.edgeFlags);
     ASSERT_EQ(uint32_t(1), args.pointerCount);
-    ASSERT_EQ(0, args.pointerIds[0]);
+    ASSERT_EQ(0, args.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_MOUSE, args.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
             0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
     ASSERT_EQ(TRACKBALL_MOVEMENT_THRESHOLD, args.xPrecision);
@@ -2123,9 +2128,11 @@ TEST_F(CursorInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaStat
     ASSERT_EQ(AMOTION_EVENT_ACTION_UP, args.action);
     ASSERT_EQ(0, args.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, args.metaState);
+    ASSERT_EQ(0, args.buttonState);
     ASSERT_EQ(0, args.edgeFlags);
     ASSERT_EQ(uint32_t(1), args.pointerCount);
-    ASSERT_EQ(0, args.pointerIds[0]);
+    ASSERT_EQ(0, args.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_MOUSE, args.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
             0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
     ASSERT_EQ(TRACKBALL_MOVEMENT_THRESHOLD, args.xPrecision);
@@ -2756,9 +2763,11 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
     ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -2778,9 +2787,11 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -2799,9 +2810,11 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
     ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -2847,9 +2860,11 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMoves
     ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -2868,9 +2883,11 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMoves
     ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -2908,9 +2925,11 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -2931,9 +2950,11 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -2952,9 +2973,11 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -3215,9 +3238,11 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -3233,10 +3258,13 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
             motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
-    ASSERT_EQ(1, motionArgs.pointerIds[1]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
@@ -3261,10 +3289,13 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
-    ASSERT_EQ(1, motionArgs.pointerIds[1]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
@@ -3288,10 +3319,13 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
             motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
-    ASSERT_EQ(1, motionArgs.pointerIds[1]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
@@ -3308,9 +3342,11 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(1, motionArgs.pointerIds[0]);
+    ASSERT_EQ(1, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -3331,9 +3367,11 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(1, motionArgs.pointerIds[0]);
+    ASSERT_EQ(1, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -3357,10 +3395,13 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
             motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
-    ASSERT_EQ(1, motionArgs.pointerIds[1]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
@@ -3384,10 +3425,13 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
             motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
-    ASSERT_EQ(1, motionArgs.pointerIds[1]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
@@ -3404,9 +3448,11 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -3425,9 +3471,11 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
     ASSERT_EQ(0, motionArgs.flags);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, motionArgs.metaState);
+    ASSERT_EQ(0, motionArgs.buttonState);
     ASSERT_EQ(0, motionArgs.edgeFlags);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(0, motionArgs.pointerIds[0]);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
@@ -3464,7 +3512,8 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(1, motionArgs.pointerIds[0]);
+    ASSERT_EQ(1, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
 
@@ -3472,8 +3521,10 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_DOWN | (1 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
             motionArgs.action);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
-    ASSERT_EQ(1, motionArgs.pointerIds[0]);
-    ASSERT_EQ(2, motionArgs.pointerIds[1]);
+    ASSERT_EQ(1, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(2, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
@@ -3492,8 +3543,10 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
-    ASSERT_EQ(1, motionArgs.pointerIds[0]);
-    ASSERT_EQ(2, motionArgs.pointerIds[1]);
+    ASSERT_EQ(1, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(2, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
@@ -3510,8 +3563,10 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_UP | (0 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
             motionArgs.action);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
-    ASSERT_EQ(1, motionArgs.pointerIds[0]);
-    ASSERT_EQ(2, motionArgs.pointerIds[1]);
+    ASSERT_EQ(1, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(2, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
@@ -3520,7 +3575,8 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(2, motionArgs.pointerIds[0]);
+    ASSERT_EQ(2, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
 
@@ -3534,7 +3590,8 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(2, motionArgs.pointerIds[0]);
+    ASSERT_EQ(2, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
 
@@ -3552,8 +3609,10 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_DOWN | (1 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
             motionArgs.action);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
-    ASSERT_EQ(2, motionArgs.pointerIds[0]);
-    ASSERT_EQ(3, motionArgs.pointerIds[1]);
+    ASSERT_EQ(2, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(3, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
@@ -3570,8 +3629,10 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_UP | (0 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
             motionArgs.action);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
-    ASSERT_EQ(2, motionArgs.pointerIds[0]);
-    ASSERT_EQ(3, motionArgs.pointerIds[1]);
+    ASSERT_EQ(2, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(3, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
@@ -3580,7 +3641,8 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(3, motionArgs.pointerIds[0]);
+    ASSERT_EQ(3, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
 
@@ -3591,7 +3653,8 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
-    ASSERT_EQ(3, motionArgs.pointerIds[0]);
+    ASSERT_EQ(3, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
             toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
 
@@ -3641,7 +3704,7 @@ TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
 
     FakeInputDispatcher::NotifyMotionArgs args;
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
-    ASSERT_EQ(id, args.pointerIds[0]);
+    ASSERT_EQ(id, args.pointerProperties[0].id);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
             x, y, pressure, size, touchMajor, touchMinor, toolMajor, toolMinor, orientation));
 }

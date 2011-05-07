@@ -142,17 +142,19 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesKeyEvents) {
 
 TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
     MotionEvent event;
-    int32_t pointerIds[MAX_POINTERS + 1];
+    PointerProperties pointerProperties[MAX_POINTERS + 1];
     PointerCoords pointerCoords[MAX_POINTERS + 1];
     for (int i = 0; i <= MAX_POINTERS; i++) {
-        pointerIds[i] = i;
+        pointerProperties[i].clear();
+        pointerProperties[i].id = i;
+        pointerCoords[i].clear();
     }
 
     // Rejects undefined motion actions.
     event.initialize(DEVICE_ID, AINPUT_SOURCE_TOUCHSCREEN,
-            /*action*/ -1, 0, 0, AMETA_NONE, 0, 0, 0, 0,
+            /*action*/ -1, 0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
-            /*pointerCount*/ 1, pointerIds, pointerCoords);
+            /*pointerCount*/ 1, pointerProperties, pointerCoords);
     ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with undefined action.";
@@ -160,18 +162,18 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
     // Rejects pointer down with invalid index.
     event.initialize(DEVICE_ID, AINPUT_SOURCE_TOUCHSCREEN,
             AMOTION_EVENT_ACTION_POINTER_DOWN | (1 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
-            0, 0, AMETA_NONE, 0, 0, 0, 0,
+            0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
-            /*pointerCount*/ 1, pointerIds, pointerCoords);
+            /*pointerCount*/ 1, pointerProperties, pointerCoords);
     ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with pointer down index too large.";
 
     event.initialize(DEVICE_ID, AINPUT_SOURCE_TOUCHSCREEN,
             AMOTION_EVENT_ACTION_POINTER_DOWN | (-1 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
-            0, 0, AMETA_NONE, 0, 0, 0, 0,
+            0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
-            /*pointerCount*/ 1, pointerIds, pointerCoords);
+            /*pointerCount*/ 1, pointerProperties, pointerCoords);
     ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with pointer down index too small.";
@@ -179,65 +181,65 @@ TEST_F(InputDispatcherTest, InjectInputEvent_ValidatesMotionEvents) {
     // Rejects pointer up with invalid index.
     event.initialize(DEVICE_ID, AINPUT_SOURCE_TOUCHSCREEN,
             AMOTION_EVENT_ACTION_POINTER_UP | (1 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
-            0, 0, AMETA_NONE, 0, 0, 0, 0,
+            0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
-            /*pointerCount*/ 1, pointerIds, pointerCoords);
+            /*pointerCount*/ 1, pointerProperties, pointerCoords);
     ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with pointer up index too large.";
 
     event.initialize(DEVICE_ID, AINPUT_SOURCE_TOUCHSCREEN,
             AMOTION_EVENT_ACTION_POINTER_UP | (-1 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
-            0, 0, AMETA_NONE, 0, 0, 0, 0,
+            0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
-            /*pointerCount*/ 1, pointerIds, pointerCoords);
+            /*pointerCount*/ 1, pointerProperties, pointerCoords);
     ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with pointer up index too small.";
 
     // Rejects motion events with invalid number of pointers.
     event.initialize(DEVICE_ID, AINPUT_SOURCE_TOUCHSCREEN,
-            AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0,
+            AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
-            /*pointerCount*/ 0, pointerIds, pointerCoords);
+            /*pointerCount*/ 0, pointerProperties, pointerCoords);
     ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with 0 pointers.";
 
     event.initialize(DEVICE_ID, AINPUT_SOURCE_TOUCHSCREEN,
-            AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0,
+            AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
-            /*pointerCount*/ MAX_POINTERS + 1, pointerIds, pointerCoords);
+            /*pointerCount*/ MAX_POINTERS + 1, pointerProperties, pointerCoords);
     ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with more than MAX_POINTERS pointers.";
 
     // Rejects motion events with invalid pointer ids.
-    pointerIds[0] = -1;
+    pointerProperties[0].id = -1;
     event.initialize(DEVICE_ID, AINPUT_SOURCE_TOUCHSCREEN,
-            AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0,
+            AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
-            /*pointerCount*/ 1, pointerIds, pointerCoords);
+            /*pointerCount*/ 1, pointerProperties, pointerCoords);
     ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with pointer ids less than 0.";
 
-    pointerIds[0] = MAX_POINTER_ID + 1;
+    pointerProperties[0].id = MAX_POINTER_ID + 1;
     event.initialize(DEVICE_ID, AINPUT_SOURCE_TOUCHSCREEN,
-            AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0,
+            AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
-            /*pointerCount*/ 1, pointerIds, pointerCoords);
+            /*pointerCount*/ 1, pointerProperties, pointerCoords);
     ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with pointer ids greater than MAX_POINTER_ID.";
 
     // Rejects motion events with duplicate pointer ids.
-    pointerIds[0] = 1;
-    pointerIds[1] = 1;
+    pointerProperties[0].id = 1;
+    pointerProperties[1].id = 1;
     event.initialize(DEVICE_ID, AINPUT_SOURCE_TOUCHSCREEN,
-            AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0,
+            AMOTION_EVENT_ACTION_DOWN, 0, 0, AMETA_NONE, 0, 0, 0, 0, 0,
             ARBITRARY_TIME, ARBITRARY_TIME,
-            /*pointerCount*/ 2, pointerIds, pointerCoords);
+            /*pointerCount*/ 2, pointerProperties, pointerCoords);
     ASSERT_EQ(INPUT_EVENT_INJECTION_FAILED, mDispatcher->injectInputEvent(&event,
             INJECTOR_PID, INJECTOR_UID, INPUT_EVENT_INJECTION_SYNC_NONE, 0, 0))
             << "Should reject motion events with duplicate pointer ids.";

@@ -232,7 +232,14 @@ const float MotionEventTest::X_OFFSET = 1.0f;
 const float MotionEventTest::Y_OFFSET = 1.1f;
 
 void MotionEventTest::initializeEventWithHistory(MotionEvent* event) {
-    int32_t pointerIds[] = { 1, 2 };
+    PointerProperties pointerProperties[2];
+    pointerProperties[0].clear();
+    pointerProperties[0].id = 1;
+    pointerProperties[0].toolType = AMOTION_EVENT_TOOL_TYPE_FINGER;
+    pointerProperties[1].clear();
+    pointerProperties[1].id = 2;
+    pointerProperties[1].toolType = AMOTION_EVENT_TOOL_TYPE_STYLUS;
+
     PointerCoords pointerCoords[2];
     pointerCoords[0].clear();
     pointerCoords[0].setAxisValue(AMOTION_EVENT_AXIS_X, 10);
@@ -256,10 +263,10 @@ void MotionEventTest::initializeEventWithHistory(MotionEvent* event) {
     pointerCoords[1].setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION, 28);
     event->initialize(2, AINPUT_SOURCE_TOUCHSCREEN, AMOTION_EVENT_ACTION_MOVE,
             AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED,
-            AMOTION_EVENT_EDGE_FLAG_TOP, AMETA_ALT_ON,
+            AMOTION_EVENT_EDGE_FLAG_TOP, AMETA_ALT_ON, AMOTION_EVENT_BUTTON_PRIMARY,
             X_OFFSET, Y_OFFSET, 2.0f, 2.1f,
             ARBITRARY_DOWN_TIME, ARBITRARY_EVENT_TIME,
-            2, pointerIds, pointerCoords);
+            2, pointerProperties, pointerCoords);
 
     pointerCoords[0].setAxisValue(AMOTION_EVENT_AXIS_X, 110);
     pointerCoords[0].setAxisValue(AMOTION_EVENT_AXIS_Y, 111);
@@ -311,6 +318,7 @@ void MotionEventTest::assertEqualsEventWithHistory(const MotionEvent* event) {
     ASSERT_EQ(AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED, event->getFlags());
     ASSERT_EQ(AMOTION_EVENT_EDGE_FLAG_TOP, event->getEdgeFlags());
     ASSERT_EQ(AMETA_ALT_ON, event->getMetaState());
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_PRIMARY, event->getButtonState());
     ASSERT_EQ(X_OFFSET, event->getXOffset());
     ASSERT_EQ(Y_OFFSET, event->getYOffset());
     ASSERT_EQ(2.0f, event->getXPrecision());
@@ -319,7 +327,9 @@ void MotionEventTest::assertEqualsEventWithHistory(const MotionEvent* event) {
 
     ASSERT_EQ(2U, event->getPointerCount());
     ASSERT_EQ(1, event->getPointerId(0));
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, event->getToolType(0));
     ASSERT_EQ(2, event->getPointerId(1));
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_STYLUS, event->getToolType(1));
 
     ASSERT_EQ(2U, event->getHistorySize());
 
@@ -534,19 +544,20 @@ TEST_F(MotionEventTest, Transform) {
     const float ROTATION = ARC * 2;
 
     const size_t pointerCount = 11;
-    int pointerIds[pointerCount];
+    PointerProperties pointerProperties[pointerCount];
     PointerCoords pointerCoords[pointerCount];
     for (size_t i = 0; i < pointerCount; i++) {
         float angle = float(i * ARC * PI_180);
-        pointerIds[i] = i;
+        pointerProperties[i].clear();
+        pointerProperties[i].id = i;
         pointerCoords[i].clear();
         pointerCoords[i].setAxisValue(AMOTION_EVENT_AXIS_X, sinf(angle) * RADIUS + 3);
         pointerCoords[i].setAxisValue(AMOTION_EVENT_AXIS_Y, -cosf(angle) * RADIUS + 2);
         pointerCoords[i].setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION, angle);
     }
     MotionEvent event;
-    event.initialize(0, 0, AMOTION_EVENT_ACTION_MOVE, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, pointerCount, pointerIds, pointerCoords);
+    event.initialize(0, 0, AMOTION_EVENT_ACTION_MOVE, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, pointerCount, pointerProperties, pointerCoords);
     float originalRawX = 0 + 3;
     float originalRawY = -RADIUS + 2;
 

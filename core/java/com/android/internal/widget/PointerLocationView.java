@@ -320,7 +320,8 @@ public class PointerLocationView extends View {
         }
     }
     
-    private void logPointerCoords(int action, int index, MotionEvent.PointerCoords coords, int id) {
+    private void logPointerCoords(int action, int index, MotionEvent.PointerCoords coords, int id,
+            int toolType, int buttonState) {
         final String prefix;
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
@@ -386,26 +387,16 @@ public class PointerLocationView extends View {
                 .append("deg")
                 .append(" VScroll=").append(coords.getAxisValue(MotionEvent.AXIS_VSCROLL), 1)
                 .append(" HScroll=").append(coords.getAxisValue(MotionEvent.AXIS_HSCROLL), 1)
+                .append(" ToolType=").append(MotionEvent.toolTypeToString(toolType))
+                .append(" ButtonState=").append(MotionEvent.buttonStateToString(buttonState))
                 .toString());
     }
 
     public void addPointerEvent(MotionEvent event) {
         synchronized (mPointers) {
-            int action = event.getAction();
-            
-            //Log.i(TAG, "Motion: action=0x" + Integer.toHexString(action)
-            //        + " pointers=" + event.getPointerCount());
-            
+            final int action = event.getAction();
             int NP = mPointers.size();
-            
-            //mRect.set(0, 0, getWidth(), mHeaderBottom+1);
-            //invalidate(mRect);
-            //if (mCurDown) {
-            //    mRect.set(mCurX-mCurWidth-3, mCurY-mCurWidth-3,
-            //            mCurX+mCurWidth+3, mCurY+mCurWidth+3);
-            //} else {
-            //    mRect.setEmpty();
-            //}
+
             if (action == MotionEvent.ACTION_DOWN
                     || (action & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_DOWN) {
                 final int index = (action & MotionEvent.ACTION_POINTER_INDEX_MASK)
@@ -456,7 +447,8 @@ public class PointerLocationView extends View {
                     final PointerCoords coords = ps != null ? ps.mCoords : mHoverCoords;
                     event.getHistoricalPointerCoords(i, historyPos, coords);
                     if (mPrintCoords) {
-                        logPointerCoords(action, i, coords, id);
+                        logPointerCoords(action, i, coords, id,
+                                event.getToolType(i), event.getButtonState());
                     }
                     if (ps != null) {
                         ps.addTrace(coords.x, coords.y);
@@ -469,7 +461,8 @@ public class PointerLocationView extends View {
                 final PointerCoords coords = ps != null ? ps.mCoords : mHoverCoords;
                 event.getPointerCoords(i, coords);
                 if (mPrintCoords) {
-                    logPointerCoords(action, i, coords, id);
+                    logPointerCoords(action, i, coords, id,
+                            event.getToolType(i), event.getButtonState());
                 }
                 if (ps != null) {
                     ps.addTrace(coords.x, coords.y);
@@ -500,12 +493,7 @@ public class PointerLocationView extends View {
                     ps.addTrace(Float.NaN, Float.NaN);
                 }
             }
-            
-            //if (mCurDown) {
-            //    mRect.union(mCurX-mCurWidth-3, mCurY-mCurWidth-3,
-            //            mCurX+mCurWidth+3, mCurY+mCurWidth+3);
-            //}
-            //invalidate(mRect);
+
             postInvalidate();
         }
     }

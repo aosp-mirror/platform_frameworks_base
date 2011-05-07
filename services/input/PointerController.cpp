@@ -137,7 +137,7 @@ void PointerController::move(float deltaX, float deltaY) {
     setPositionLocked(mLocked.pointerX + deltaX, mLocked.pointerY + deltaY);
 }
 
-void PointerController::setButtonState(uint32_t buttonState) {
+void PointerController::setButtonState(int32_t buttonState) {
 #if DEBUG_POINTER_UPDATES
     LOGD("Set button state 0x%08x", buttonState);
 #endif
@@ -148,7 +148,7 @@ void PointerController::setButtonState(uint32_t buttonState) {
     }
 }
 
-uint32_t PointerController::getButtonState() const {
+int32_t PointerController::getButtonState() const {
     AutoMutex _l(mLock);
 
     return mLocked.buttonState;
