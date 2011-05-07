@@ -36,46 +36,66 @@ div.dashboard-panel th {
 }
 </style>
 
-<p>This page provides data about the relative number of active devices
-using a particular type of screen, including the screen size and density. For information about how
-your application can support multiple screen types, see <a
-href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
+<p> This page provides data about the relative number of active devices that have a particular
+screen configuration, defined by a combination of screen size and density. To simplify the way that
+you design your user interfaces for different screen configurations, Android divides the range of
+actual screen sizes and densities into:</p> 
+ 
+<ul> 
+<li>A set of four generalized <strong>sizes</strong>: <em>small</em>, <em>normal</em>,
+<em>large</em>, and <em>xlarge</em></em></li>
+<li>A set of four generalized <strong>densities</strong>: <em>ldpi</em> (low), <em>mdpi</em>
+(medium), <em>hdpi</em> (high), and <em>xhdpi</em> (extra high)</li>
+</ul> 
+
+<p>For information about how you can support multiple screen configurations in your
+application, see <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>
 
 <p class="note"><strong>Note:</strong> This data is based on the number
-of Android devices that have accessed Android Market within a 14-day period
+of Android devices that have accessed Android Market within a 7-day period
 ending on the data collection date noted below.</p>
 
 
 <div class="dashboard-panel">
 
-<img alt="" width="460" height="250"
-src="http://chart.apis.google.com/chart?&cht=p&chs=460x250&chd=t:2.3,0.4,45.9,51.2&chl=Small%20/%
-20ldpi|Normal%20/%20ldpi|Normal%20/%20mdpi|Normal%20/%20hdpi&chco=c4df9b,6fad0c" />
+<img alt="" width="400" height="250"
+src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=xlarge%20/%20mdpi|large%20/%20mdpi|normal%20/%20hdpi|normal%20/%20ldpi|normal%20/%20mdpi|small%20/%20hdpi&chd=t%3A0.5,2.6,75.5,1.2,17.1,3.2" />
 
 <table>
 <tr>
 <th></th>
-<th scope="col">Low Density</th>
-<th scope="col">Medium Density</th>
-<th scope="col">High Density</th>
+<th scope="col">ldpi</th>
+<th scope="col">mdpi</th>
+<th scope="col">hdpi</th>
+<th scope="col">xhdpi</th>
 </tr>
-<tr><th scope="row">Small</th> 
-<td class='cent hi'>2.3%</td> 
-<td></td> 
-<td></td> 
+<tr><th scope="row">small</th> 
+<td></td> <!-- ldpi -->
+<td></td> <!-- mdpi -->
+<td>3.2%</td> <!-- hdpi -->
+<td></td> <!-- xhdpi -->
 </tr> 
-<tr><th scope="row">Normal</th> 
-<td class='cent '>0.4%</td> 
-<td class='cent hi'>45.9%</td> 
-<td class='cent hi'>51.2%</td> 
+<tr><th scope="row">normal</th> 
+<td>1.2%</td> <!-- ldpi -->
+<td>17.1%</td> <!-- mdpi -->
+<td>75.5%</td> <!-- hdpi -->
+<td></td> <!-- xhdpi -->
 </tr> 
-<tr><th scope="row">Large</th> 
-<td></td> 
-<td></td> 
-<td></td> 
+<tr><th scope="row">large</th> 
+<td></td> <!-- ldpi -->
+<td>2.6%</td> <!-- mdpi -->
+<td></td> <!-- hdpi -->
+<td></td> <!-- xhdpi -->
+</tr> 
+<tr><th scope="row">xlarge</th> 
+<td></td> <!-- ldpi -->
+<td>0.5%</td> <!-- mdpi -->
+<td></td> <!-- hdpi -->
+<td></td> <!-- xhdpi -->
 </tr> 
 </table>
 
-<p><em>Data collected during two weeks ending on August 2, 2010</em></p>
+<p><em>Data collected during a 7-day period ending on May 6, 2011</em></p>
 </div>
 
