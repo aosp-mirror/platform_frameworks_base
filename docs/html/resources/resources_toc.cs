@@ -81,6 +81,9 @@
       <li><a href="<?cs var:toroot ?>resources/dashboard/screens.html">
             <span class="en">Screen Sizes &amp; Densities</span>
           </a></li>
+      <li><a href="<?cs var:toroot ?>resources/dashboard/opengl.html">
+            <span class="en">OpenGL ES Versions</span>
+          </a></li>
     </ul>
   </li><?cs
   /if
