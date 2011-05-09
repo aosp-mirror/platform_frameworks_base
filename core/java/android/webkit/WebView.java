@@ -822,6 +822,8 @@ public class WebView extends AbsoluteLayout
 
     private WebViewCore.AutoFillData mAutoFillData;
 
+    private static boolean sNotificationsEnabled = true;
+
     /**
      * URI scheme for telephone number
      */
@@ -1024,22 +1026,36 @@ public class WebView extends AbsoluteLayout
     }
 
     /*
-     * A variable to track if there is a receiver added for PROXY_CHANGE_ACTION
+     * Receiver for PROXY_CHANGE_ACTION, will be null when it is not added handling broadcasts.
      */
-    private static boolean sProxyReceiverAdded;
+    private static ProxyReceiver sProxyReceiver;
 
+    /*
+     * @param context This method expects this to be a valid context
+     */
     private static synchronized void setupProxyListener(Context context) {
-        if (sProxyReceiverAdded) {
+        if (sProxyReceiver != null || sNotificationsEnabled == false) {
             return;
         }
         IntentFilter filter = new IntentFilter();
         filter.addAction(Proxy.PROXY_CHANGE_ACTION);
+        sProxyReceiver = new ProxyReceiver();
         Intent currentProxy = context.getApplicationContext().registerReceiver(
-                new ProxyReceiver(), filter);
-        sProxyReceiverAdded = true;
+                sProxyReceiver, filter);
         if (currentProxy != null) {
             handleProxyBroadcast(currentProxy);
         }
+    }
+
+    /*
+     * @param context This method expects this to be a valid context
+     */
+    private static synchronized void disableProxyListener(Context context) {
+        if (sProxyReceiver == null)
+            return;
+
+        context.getApplicationContext().unregisterReceiver(sProxyReceiver);
+        sProxyReceiver = null;
     }
 
     private static void handleProxyBroadcast(Intent intent) {
@@ -1530,19 +1546,32 @@ public class WebView extends AbsoluteLayout
 
     /**
      * Enables platform notifications of data state and proxy changes.
+     * Notifications are enabled by default.
      */
     public static void enablePlatformNotifications() {
         checkThread();
-        Network.enablePlatformNotifications();
+        synchronized (WebView.class) {
+            Network.enablePlatformNotifications();
+            sNotificationsEnabled = true;
+            Context context = JniUtil.getContext();
+            if (context != null)
+                setupProxyListener(context);
+        }
     }
 
     /**
-     * If platform notifications are enabled, this should be called
-     * from the Activity's onPause() or onStop().
+     * Disables platform notifications of data state and proxy changes.
+     * Notifications are enabled by default.
      */
     public static void disablePlatformNotifications() {
         checkThread();
-        Network.disablePlatformNotifications();
+        synchronized (WebView.class) {
+            Network.disablePlatformNotifications();
+            sNotificationsEnabled = false;
+            Context context = JniUtil.getContext();
+            if (context != null)
+                disableProxyListener(context);
+        }
     }
 
     /**

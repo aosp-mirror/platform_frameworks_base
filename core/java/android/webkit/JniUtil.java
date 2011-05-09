@@ -48,6 +48,12 @@ class JniUtil {
         initialized = true;
     }
 
+    protected static synchronized Context getContext() {
+        if (!initialized)
+            return null;
+        return sContext;
+    }
+
     /**
      * Called by JNI. Gets the application's database directory, excluding the trailing slash.
      * @return String The application's database directory
