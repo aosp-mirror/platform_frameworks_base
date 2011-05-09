@@ -352,14 +352,13 @@ public interface CommandsInterface {
 
     /**
      * Sets the handler for SIM Refresh notifications.
-     * Unlike the register* methods, there's only one notification handler
      *
      * @param h Handler for notification message.
      * @param what User-defined message code.
      * @param obj User object.
      */
-    void setOnIccRefresh(Handler h, int what, Object obj);
-    void unSetOnIccRefresh(Handler h);
+    void registerForIccRefresh(Handler h, int what, Object obj);
+    void unregisterForIccRefresh(Handler h);
 
     /**
      * Sets the handler for RING notifications.

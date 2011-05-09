@@ -2602,8 +2602,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_UNSOL_SIM_REFRESH:
                 if (RILJ_LOGD) unsljLogRet(response, ret);
 
-                if (mIccRefreshRegistrant != null) {
-                    mIccRefreshRegistrant.notifyRegistrant(
+                if (mIccRefreshRegistrants != null) {
+                    mIccRefreshRegistrants.notifyRegistrants(
                             new AsyncResult (null, ret, null));
                 }
                 break;
