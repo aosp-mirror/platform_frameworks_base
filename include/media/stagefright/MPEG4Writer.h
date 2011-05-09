@@ -159,6 +159,9 @@ private:
     bool isFileStreamable() const;
     void trackProgressStatus(size_t trackId, int64_t timeUs, status_t err = OK);
     void writeCompositionMatrix(int32_t degrees);
+    void writeMvhdBox(int64_t durationUs);
+    void writeMoovBox(int64_t durationUs);
+    void writeFtypBox(MetaData *param);
 
     MPEG4Writer(const MPEG4Writer &);
     MPEG4Writer &operator=(const MPEG4Writer &);
