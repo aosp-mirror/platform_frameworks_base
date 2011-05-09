@@ -22,7 +22,10 @@ import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
 /**
- * This class represents an MTP or PTP device connected on the USB host bus.
+ * This class represents an MTP or PTP device connected on the USB host bus. An application can
+ * instantiate an object of this type, by referencing an attached {@link
+ * android.hardware.usb.UsbDevice} and then use methods in this class to get information about the
+ * device and objects stored on it, as well as open the connection and transfer data.
  */
 public final class MtpDevice {
 

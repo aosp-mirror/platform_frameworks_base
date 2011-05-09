@@ -438,6 +438,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/TicTacToeLib "TicTacToeLib" \
 		-samplecode $(sample_dir)/TicTacToeMain \
 		            resources/samples/TicTacToeMain "TicTacToeMain" \
+		-samplecode $(sample_dir)/USB \
+		            resources/samples/USB "USB" \
 		-samplecode $(sample_dir)/WeatherListWidget \
 		            resources/samples/WeatherListWidget "Weather List Widget" \
 		-samplecode $(sample_dir)/Wiktionary \
@@ -451,7 +453,7 @@ web_docs_sample_code_flags := \
 
 ## SDK version identifiers used in the published docs
   # major[.minor] version for current SDK. (full releases only)
-framework_docs_SDK_VERSION:=3.0
+framework_docs_SDK_VERSION:=3.1
   # release version (ie "Release x")  (full releases only)
 framework_docs_SDK_REL_ID:=1
 

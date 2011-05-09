@@ -49,14 +49,14 @@ In XML: <code>@[<em>package</em>:]menu.<em>filename</em></code>
           android:alphabeticShortcut="<em>string</em>"
           android:numericShortcut="<em>string</em>"
           android:checkable=["true" | "false"]
-          android:visible=["visible" | "invisible" | "gone"]
-          android:enabled=["enabled" | "disabled"]
+          android:visible=["true" | "false"]
+          android:enabled=["true" | "false"]
           android:menuCategory=["container" | "system" | "secondary" | "alternative"]
           android:orderInCategory="<em>integer</em>" /&gt;
     &lt;<a href="#group-element">group</a> android:id="@[+][<em>package</em>:]id/<em>resource name</em>"
            android:checkableBehavior=["none" | "all" | "single"]
-           android:visible=["visible" | "invisible" | "gone"]
-           android:enabled=["enabled" | "disabled"]
+           android:visible=["true" | "false"]
+           android:enabled=["true" | "false"]
            android:menuCategory=["container" | "system" | "secondary" | "alternative"]
            android:orderInCategory="<em>integer</em>" &gt;
         &lt;<a href="#item-element">item</a> /&gt;
