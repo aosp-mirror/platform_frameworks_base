@@ -951,7 +951,7 @@
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"ikke valgt"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Ett eller flere av de følgende programmene ber om tillatelse til å få tilgang til kontoen din fra nå av."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Vil du tillate dette?"</string>
-    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Få tilgang til forespørsler"</string>
+    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Forespørsel om tilgang"</string>
     <string name="allow" msgid="7225948811296386551">"Tillat"</string>
     <string name="deny" msgid="2081879885755434506">"Avslå"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Tillatelse forespurt"</string>
