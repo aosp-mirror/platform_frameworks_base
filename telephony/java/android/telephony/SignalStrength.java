@@ -556,10 +556,7 @@ public class SignalStrength implements Parcelable {
      * @hide
      */
     public int getLteDbm() {
-        log("TODO: teach getLteDbm to compute dBm properly");
-        int level = -1;
-        if (DBG) log("getLteDbm=" + level);
-        return level;
+        return mLteRsrp;
     }
 
     /**
@@ -568,22 +565,33 @@ public class SignalStrength implements Parcelable {
      * @hide
      */
     public int getLteLevel() {
-        log("TODO: teach getLteLevel to compute Level properly");
-        int level = SIGNAL_STRENGTH_MODERATE;
-        if (DBG) log("getLteLevel=" + level);
-        return level;
+        int levelLteRsrp = 0;
+
+        if (mLteRsrp == -1) levelLteRsrp = 0;
+        else if (mLteRsrp >= -85) levelLteRsrp = SIGNAL_STRENGTH_GREAT;
+        else if (mLteRsrp >= -95) levelLteRsrp = SIGNAL_STRENGTH_GOOD;
+        else if (mLteRsrp >= -105) levelLteRsrp = SIGNAL_STRENGTH_MODERATE;
+        else if (mLteRsrp >= -115) levelLteRsrp = SIGNAL_STRENGTH_POOR;
+        else levelLteRsrp = 0;
+
+        if (DBG) log("Lte level: "+levelLteRsrp);
+        return levelLteRsrp;
     }
 
     /**
-     * Get the LTE signal level as an asu value between 0..31, 99 is unknown
+     * Get the LTE signal level as an asu value between 0..97, 99 is unknown
+     * Asu is calculated based on 3GPP RSRP. Refer to 3GPP 27.007 (Ver 10.3.0) Sec 8.69
      *
      * @hide
      */
     public int getLteAsuLevel() {
-        log("TODO: teach getLteAsuLevel to compute asu Level properly");
-        int level = 4;
-        if (DBG) log("getLteAsuLevel=" + level);
-        return level;
+        int lteAsuLevel = 99;
+        int lteDbm = getLteDbm();
+        if (lteDbm <= -140) lteAsuLevel = 0;
+        else if (lteDbm >= -43) lteAsuLevel = 97;
+        else lteAsuLevel = lteDbm + 140;
+        if (DBG) log("Lte Asu level: "+lteAsuLevel);
+        return lteAsuLevel;
     }
 
     /**
