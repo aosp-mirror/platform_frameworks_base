@@ -684,6 +684,7 @@ private:
 
         status_t    addTrack_l(const sp<Track>& track);
         void        destroyTrack_l(const sp<Track>& track);
+        void        removeTrack_l(const sp<Track>& track);
 
         void        readOutputParameters();
 
@@ -1134,9 +1135,13 @@ private:
             return mOutBuffer;
         }
 
-        void startTrack() {mActiveTrackCnt++;}
-        void stopTrack() {mActiveTrackCnt--;}
-        int activeTracks() { return mActiveTrackCnt;}
+        void incTrackCnt() { android_atomic_inc(&mTrackCnt); }
+        void decTrackCnt() { android_atomic_dec(&mTrackCnt); }
+        int32_t trackCnt() { return mTrackCnt;}
+
+        void incActiveTrackCnt() { android_atomic_inc(&mActiveTrackCnt); }
+        void decActiveTrackCnt() { android_atomic_dec(&mActiveTrackCnt); }
+        int32_t activeTrackCnt() { return mActiveTrackCnt;}
 
         uint32_t strategy() { return mStrategy; }
         void setStrategy(uint32_t strategy)
@@ -1155,7 +1160,8 @@ private:
         int mSessionId;             // audio session ID
         int16_t *mInBuffer;         // chain input buffer
         int16_t *mOutBuffer;        // chain output buffer
-        int mActiveTrackCnt;        // number of active tracks connected
+        volatile int32_t mActiveTrackCnt;  // number of active tracks connected
+        volatile int32_t mTrackCnt;        // number of tracks connected
         bool mOwnInBuffer;          // true if the chain owns its input buffer
         int mVolumeCtrlIdx;         // index of insert effect having control over volume
         uint32_t mLeftVolume;       // previous volume on left channel
