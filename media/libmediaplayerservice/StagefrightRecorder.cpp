@@ -1453,6 +1453,12 @@ status_t StagefrightRecorder::setupMPEG4Recording(
         writer->setMaxFileSize(mMaxFileSizeBytes);
     }
 
+    mStartTimeOffsetMs = mEncoderProfiles->getStartTimeOffsetMs(mCameraId);
+    if (mStartTimeOffsetMs > 0) {
+        reinterpret_cast<MPEG4Writer *>(writer.get())->
+            setStartTimeOffsetMs(mStartTimeOffsetMs);
+    }
+
     writer->setListener(mListener);
     *mediaWriter = writer;
     return OK;
@@ -1659,6 +1665,7 @@ status_t StagefrightRecorder::reset() {
     mAudioTimeScale  = -1;
     mVideoTimeScale  = -1;
     mCameraId        = 0;
+    mStartTimeOffsetMs = -1;
     mVideoEncoderProfile = -1;
     mVideoEncoderLevel   = -1;
     mMaxFileDurationUs = 0;
@@ -1746,6 +1753,8 @@ status_t StagefrightRecorder::dump(
     snprintf(buffer, SIZE, "     Source: %d\n", mVideoSource);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Camera Id: %d\n", mCameraId);
+    result.append(buffer);
+    snprintf(buffer, SIZE, "     Start time offset (ms): %d\n", mStartTimeOffsetMs);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Encoder: %d\n", mVideoEncoder);
     result.append(buffer);
