@@ -3577,6 +3577,7 @@ package android.app.admin {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int USES_ENCRYPTED_STORAGE = 7; // 0x7
+    field public static final int USES_POLICY_DISABLE_CAMERA = 8; // 0x8
     field public static final int USES_POLICY_EXPIRE_PASSWORD = 6; // 0x6
     field public static final int USES_POLICY_FORCE_LOCK = 3; // 0x3
     field public static final int USES_POLICY_LIMIT_PASSWORD = 0; // 0x0
@@ -3610,6 +3611,7 @@ package android.app.admin {
 
   public class DevicePolicyManager {
     method public java.util.List<android.content.ComponentName> getActiveAdmins();
+    method public boolean getCameraDisabled(android.content.ComponentName);
     method public int getCurrentFailedPasswordAttempts();
     method public int getMaximumFailedPasswordsForWipe(android.content.ComponentName);
     method public long getMaximumTimeToLock(android.content.ComponentName);
@@ -3633,6 +3635,7 @@ package android.app.admin {
     method public void lockNow();
     method public void removeActiveAdmin(android.content.ComponentName);
     method public boolean resetPassword(java.lang.String, int);
+    method public void setCameraDisabled(android.content.ComponentName, boolean);
     method public void setMaximumFailedPasswordsForWipe(android.content.ComponentName, int);
     method public void setMaximumTimeToLock(android.content.ComponentName, long);
     method public void setPasswordExpirationTimeout(android.content.ComponentName, long);

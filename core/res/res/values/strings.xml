@@ -1479,6 +1479,10 @@
     <!-- Description of policy access to require encrypted storage [CHAR LIMIT=110]-->
     <string name="policydesc_encryptedStorage">Require that stored application data be encrypted
         </string>
+    <!-- Title of policy access to disable all device cameras [CHAR LIMIT=30]-->
+    <string name="policylab_disableCamera">Disable cameras</string>
+    <!-- Description of policy access to disable all device cameras [CHAR LIMIT=110]-->
+    <string name="policydesc_disableCamera">Prevent use of all device cameras</string>
 
     <!-- The order of these is important, don't reorder without changing Contacts.java --> <skip />
     <!-- Phone number types from android.provider.Contacts. This could be used when adding a new phone number for a contact, for example. -->
