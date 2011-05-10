@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="status_bar_background">#000000</drawable>
+    <drawable name="notification_icon_area_smoke">#aa000000</drawable>
+</resources>
+
