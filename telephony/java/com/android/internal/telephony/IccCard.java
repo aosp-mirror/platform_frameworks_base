@@ -18,19 +18,28 @@ package com.android.internal.telephony;
 
 import static android.Manifest.permission.READ_PHONE_STATE;
 import android.app.ActivityManagerNative;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.AsyncResult;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Power;
+import android.os.PowerManager;
 import android.os.Registrant;
 import android.os.RegistrantList;
 import android.util.Log;
+import android.view.WindowManager;
 
 import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.CommandsInterface.RadioState;
 import com.android.internal.telephony.gsm.SIMRecords;
 
 import android.os.SystemProperties;
+
+import com.android.internal.R;
 
 /**
  * {@hide}
@@ -88,6 +97,12 @@ public abstract class IccCard {
     private static final int EVENT_QUERY_FACILITY_FDN_DONE = 10;
     private static final int EVENT_CHANGE_FACILITY_FDN_DONE = 11;
     private static final int EVENT_ICC_STATUS_CHANGED = 12;
+    private static final int EVENT_CARD_REMOVED = 13;
+    private static final int EVENT_CARD_ADDED = 14;
+
+
+    static final boolean LTE_AVAILABLE_ON_CDMA =
+            SystemProperties.getBoolean(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA, false);
 
     /*
       UNKNOWN is a transient state, for example, after uesr inputs ICC pin under
@@ -105,6 +120,11 @@ public abstract class IccCard {
 
         public boolean isPinLocked() {
             return ((this == PIN_REQUIRED) || (this == PUK_REQUIRED));
+        }
+
+        public boolean iccCardExist() {
+            return ((this == PIN_REQUIRED) || (this == PUK_REQUIRED)
+                    || (this == NETWORK_LOCKED) || (this == READY));
         }
     }
 
@@ -400,6 +420,8 @@ public abstract class IccCard {
         boolean transitionedIntoPinLocked;
         boolean transitionedIntoAbsent;
         boolean transitionedIntoNetworkLocked;
+        boolean isIccCardRemoved;
+        boolean isIccCardAdded;
 
         State oldState, newState;
 
@@ -416,23 +438,35 @@ public abstract class IccCard {
         transitionedIntoAbsent = (oldState != State.ABSENT && newState == State.ABSENT);
         transitionedIntoNetworkLocked = (oldState != State.NETWORK_LOCKED
                 && newState == State.NETWORK_LOCKED);
+        isIccCardRemoved = (oldState != null &&
+                        oldState.iccCardExist() && newState == State.ABSENT);
+        isIccCardAdded = (oldState == State.ABSENT &&
+                        newState != null && newState.iccCardExist());
 
         if (transitionedIntoPinLocked) {
-            if(mDbg) log("Notify SIM pin or puk locked.");
+            if (mDbg) log("Notify SIM pin or puk locked.");
             mPinLockedRegistrants.notifyRegistrants();
             broadcastIccStateChangedIntent(INTENT_VALUE_ICC_LOCKED,
                     (newState == State.PIN_REQUIRED) ?
                        INTENT_VALUE_LOCKED_ON_PIN : INTENT_VALUE_LOCKED_ON_PUK);
         } else if (transitionedIntoAbsent) {
-            if(mDbg) log("Notify SIM missing.");
+            if (mDbg) log("Notify SIM missing.");
             mAbsentRegistrants.notifyRegistrants();
             broadcastIccStateChangedIntent(INTENT_VALUE_ICC_ABSENT, null);
         } else if (transitionedIntoNetworkLocked) {
-            if(mDbg) log("Notify SIM network locked.");
+            if (mDbg) log("Notify SIM network locked.");
             mNetworkLockedRegistrants.notifyRegistrants();
             broadcastIccStateChangedIntent(INTENT_VALUE_ICC_LOCKED,
                   INTENT_VALUE_LOCKED_NETWORK);
         }
+
+        if (isIccCardRemoved) {
+            mHandler.sendMessage(mHandler.obtainMessage(EVENT_CARD_REMOVED, null));
+        } else if (isIccCardAdded) {
+            mHandler.sendMessage(mHandler.obtainMessage(EVENT_CARD_ADDED, null));
+        }
+
+
 
         /*
          * TODO: We need to try to remove this, maybe if the RIL sends up a RIL_UNSOL_SIM_REFRESH?
@@ -443,6 +477,48 @@ public abstract class IccCard {
                 ((SIMRecords)mPhone.mIccRecords).onSimReady();
             }
         }
+
+    }
+
+    private void onIccSwap(boolean isAdded) {
+        // TODO: Here we assume the device can't handle SIM hot-swap
+        //      and has to reboot. We may want to add a property,
+        //      e.g. REBOOT_ON_SIM_SWAP, to indicate if modem support
+        //      hot-swap.
+        DialogInterface.OnClickListener listener = null;
+
+
+        // TODO: SimRecords is not reset while SIM ABSENT (only reset while
+        //       Radio_off_or_not_available). Have to reset in both both
+        //       added or removed situation.
+        listener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (which == DialogInterface.BUTTON_POSITIVE) {
+                    if (mDbg) log("Reboot due to SIM swap");
+                    PowerManager pm = (PowerManager) mPhone.getContext()
+                    .getSystemService(Context.POWER_SERVICE);
+                    pm.reboot("SIM is added.");
+                }
+            }
+
+        };
+
+        Resources r = Resources.getSystem();
+
+        String title = (isAdded) ? r.getString(R.string.sim_added_title) :
+            r.getString(R.string.sim_removed_title);
+        String message = (isAdded) ? r.getString(R.string.sim_added_message) :
+            r.getString(R.string.sim_removed_message);
+        String buttonTxt = r.getString(R.string.sim_restart_button);
+
+        AlertDialog dialog = new AlertDialog.Builder(mPhone.getContext())
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(buttonTxt, listener)
+            .create();
+        dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        dialog.show();
     }
 
     /**
@@ -608,6 +684,12 @@ public abstract class IccCard {
                 case EVENT_ICC_STATUS_CHANGED:
                     Log.d(mLogTag, "Received Event EVENT_ICC_STATUS_CHANGED");
                     mPhone.mCM.getIccCardStatus(obtainMessage(EVENT_GET_ICC_STATUS_DONE));
+                    break;
+                case EVENT_CARD_REMOVED:
+                    onIccSwap(false);
+                    break;
+                case EVENT_CARD_ADDED:
+                    onIccSwap(true);
                     break;
                 default:
                     Log.e(mLogTag, "[IccCard] Unknown Event " + msg.what);

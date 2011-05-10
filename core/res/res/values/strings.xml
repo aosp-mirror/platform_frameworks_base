@@ -2429,6 +2429,20 @@
     <!-- See SMS_DIALOG.  This is a button choice to disallow sending the SMSes.. -->
     <string name="sms_control_no">Cancel</string>
 
+    <!-- SIM swap and device reboot Dialog --> <skip />
+    <!-- See SIM_REMOVED_DIALOG.  This is the title of that dialog. -->
+    <string name="sim_removed_title">SIM card removed</string>
+    <!-- See SIM_REMOVED_DIALOG.  This is the message of that dialog. -->
+    <string name="sim_removed_message">The mobile network will be unavailable until you replace the SIM card.</string>
+    <!-- See SIM_REMOVED_DIALOG.  This is the button of that dialog. -->
+    <string name="sim_done_button">Done</string>
+    <!-- See SIM_ADDED_DIALOG.  This is the title of that dialog. -->
+    <string name="sim_added_title">SIM card added</string>
+    <!-- See SIM_ADDED_DIALOG.  This is the message of that dialog. -->
+    <string name="sim_added_message">You must restart your device to access the mobile network.</string>
+    <!-- See SIM_ADDED_DIALOG.  This is the button of that dialog. -->
+    <string name="sim_restart_button">Restart</string>
+
     <!-- Date/Time picker dialogs strings -->
 
     <!-- The title of the time picker dialog. [CHAR LIMIT=NONE] -->
