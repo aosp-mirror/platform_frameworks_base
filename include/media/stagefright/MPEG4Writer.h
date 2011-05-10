@@ -108,6 +108,13 @@ private:
     struct ChunkInfo {
         Track               *mTrack;        // Owner
         List<Chunk>         mChunks;        // Remaining chunks to be written
+
+        // Previous chunk timestamp that has been written
+        int64_t mPrevChunkTimestampUs;
+
+        // Max time interval between neighboring chunks
+        int64_t mMaxInterChunkDurUs;
+
     };
 
     bool            mIsFirstChunk;
@@ -162,6 +169,7 @@ private:
     void writeMvhdBox(int64_t durationUs);
     void writeMoovBox(int64_t durationUs);
     void writeFtypBox(const MetaData *param);
+    void sendSessionSummary();
 
     MPEG4Writer(const MPEG4Writer &);
     MPEG4Writer &operator=(const MPEG4Writer &);

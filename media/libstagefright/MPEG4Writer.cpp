@@ -45,6 +45,7 @@ namespace android {
 static const int64_t kMax32BitFileSize = 0x007fffffffLL;
 static const uint8_t kNalUnitTypeSeqParamSet = 0x07;
 static const uint8_t kNalUnitTypePicParamSet = 0x08;
+static const int64_t kInitialDelayTimeUs     = 700000LL;
 
 // Using longer adjustment period to suppress fluctuations in
 // the audio encoding paths
@@ -69,6 +70,7 @@ public:
     bool isAudio() const { return mIsAudio; }
     bool isMPEG4() const { return mIsMPEG4; }
     void addChunkOffset(off64_t offset);
+    int32_t getTrackId() const { return mTrackId; }
     status_t dump(int fd, const Vector<String16>& args) const;
 
 private:
@@ -157,6 +159,8 @@ private:
 
     bool mReachedEOS;
     int64_t mStartTimestampUs;
+    int64_t mStartTimeRealUs;
+    int64_t mFirstSampleTimeRealUs;
     int64_t mPreviousTrackTimeUs;
     int64_t mTrackEveryTimeDurationUs;
 
@@ -688,6 +692,7 @@ status_t MPEG4Writer::stop() {
     mFd = -1;
     mInitCheck = NO_INIT;
     mStarted = false;
+
     return err;
 }
 
@@ -742,6 +747,16 @@ void MPEG4Writer::writeFtypBox(const MetaData *param) {
     writeFourcc("isom");
     writeFourcc("3gp4");
     endBox();
+}
+
+void MPEG4Writer::sendSessionSummary() {
+    for (List<ChunkInfo>::iterator it = mChunkInfos.begin();
+         it != mChunkInfos.end(); ++it) {
+        int trackNum = it->mTrack->getTrackId() << 28;
+        notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
+                trackNum | MEDIA_RECORDER_TRACK_INTER_CHUNK_TIME_MS,
+                it->mMaxInterChunkDurUs);
+    }
 }
 
 status_t MPEG4Writer::setInterleaveDuration(uint32_t durationUs) {
@@ -1188,18 +1203,13 @@ void MPEG4Writer::writeChunkToFile(Chunk* chunk) {
 void MPEG4Writer::writeAllChunks() {
     LOGV("writeAllChunks");
     size_t outstandingChunks = 0;
-    while (!mChunkInfos.empty()) {
-        List<ChunkInfo>::iterator it = mChunkInfos.begin();
-        while (!it->mChunks.empty()) {
-            Chunk chunk;
-            if (findChunkToWrite(&chunk)) {
-                writeChunkToFile(&chunk);
-                ++outstandingChunks;
-            }
-        }
-        it->mTrack = NULL;
-        mChunkInfos.erase(it);
+    Chunk chunk;
+    while (findChunkToWrite(&chunk)) {
+        ++outstandingChunks;
     }
+
+    sendSessionSummary();
+
     mChunkInfos.clear();
     LOGD("%d chunks are written in the last batch", outstandingChunks);
 }
@@ -1207,8 +1217,6 @@ void MPEG4Writer::writeAllChunks() {
 bool MPEG4Writer::findChunkToWrite(Chunk *chunk) {
     LOGV("findChunkToWrite");
 
-    // Find the smallest timestamp, and write that chunk out
-    // XXX: What if some track is just too slow?
     int64_t minTimestampUs = 0x7FFFFFFFFFFFFFFFLL;
     Track *track = NULL;
     for (List<ChunkInfo>::iterator it = mChunkInfos.begin();
@@ -1237,6 +1245,13 @@ bool MPEG4Writer::findChunkToWrite(Chunk *chunk) {
             *chunk = *(it->mChunks.begin());
             it->mChunks.erase(it->mChunks.begin());
             CHECK_EQ(chunk->mTrack, track);
+
+            int64_t interChunkTimeUs =
+                chunk->mTimeStampUs - it->mPrevChunkTimestampUs;
+            if (interChunkTimeUs > it->mPrevChunkTimestampUs) {
+                it->mMaxInterChunkDurUs = interChunkTimeUs;
+            }
+
             return true;
         }
     }
@@ -1280,6 +1295,8 @@ status_t MPEG4Writer::startWriterThread() {
          it != mTracks.end(); ++it) {
         ChunkInfo info;
         info.mTrack = *it;
+        info.mPrevChunkTimestampUs = 0;
+        info.mMaxInterChunkDurUs = 0;
         mChunkInfos.push_back(info);
     }
 
@@ -1303,6 +1320,7 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
     if (params == NULL || !params->findInt64(kKeyTime, &startTimeUs)) {
         startTimeUs = 0;
     }
+    mStartTimeRealUs = startTimeUs;
 
     int32_t rotationDegrees;
     if (!mIsAudio && params && params->findInt32(kKeyRotation, &rotationDegrees)) {
@@ -1330,7 +1348,7 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
          * Ideally, this platform-specific value should be defined
          * in media_profiles.xml file
          */
-        startTimeUs += 700000;
+        startTimeUs += kInitialDelayTimeUs;
     }
 
     meta->setInt64(kKeyTime, startTimeUs);
@@ -1937,7 +1955,8 @@ status_t MPEG4Writer::Track::threadEntry() {
         LOGV("%s timestampUs: %lld", mIsAudio? "Audio": "Video", timestampUs);
 
 ////////////////////////////////////////////////////////////////////////////////
-        if (mSampleSizes.empty()) {
+        if (mNumSamples == 0) {
+            mFirstSampleTimeRealUs = systemTime() / 1000;
             mStartTimestampUs = timestampUs;
             mOwner->setStartTimestampUs(mStartTimestampUs);
             previousPausedDurationUs = mStartTimestampUs;
@@ -2135,10 +2154,26 @@ void MPEG4Writer::Track::sendTrackSummary(bool hasMultipleTracks) {
                     trackNum | MEDIA_RECORDER_TRACK_INFO_ENCODED_FRAMES,
                     mNumSamples);
 
+    // The system delay time excluding the requested initial delay that
+    // is used to eliminate the recording sound.
+    int64_t initialDelayUs =
+        mFirstSampleTimeRealUs - mStartTimeRealUs - kInitialDelayTimeUs;
+    mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
+                    trackNum | MEDIA_RECORDER_TRACK_INFO_INITIAL_DELAY_MS,
+                    (initialDelayUs) / 1000);
+
     if (hasMultipleTracks) {
         mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
                     trackNum | MEDIA_RECORDER_TRACK_INFO_MAX_CHUNK_DUR_MS,
                     mMaxChunkDurationUs / 1000);
+
+        int64_t moovStartTimeUs = mOwner->getStartTimestampUs();
+        if (mStartTimestampUs != moovStartTimeUs) {
+            int64_t startTimeOffsetUs = mStartTimestampUs - moovStartTimeUs;
+            mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
+                    trackNum | MEDIA_RECORDER_TRACK_INFO_START_OFFSET_MS,
+                    startTimeOffsetUs / 1000);
+        }
     }
 }
 
@@ -2604,6 +2639,7 @@ void MPEG4Writer::Track::writeSttsBox() {
     mOwner->beginBox("stts");
     mOwner->writeInt32(0);  // version=0, flags=0
     mOwner->writeInt32(mNumSttsTableEntries);
+
     // Compensate for small start time difference from different media tracks
     int64_t trackStartTimeOffsetUs = 0;
     int64_t moovStartTimeUs = mOwner->getStartTimestampUs();
