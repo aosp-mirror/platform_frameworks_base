@@ -77,37 +77,59 @@ class="new">new!</span></li>
     </ul>
     <ul>
       <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>sdk/android-3.1.html">
+        <span class="en">Android 3.1 Platform</span></a> <span class="new">new!</span></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>sdk/android-3.1-highlights.html">Platform Highlights</a></li> 
+          <li><a href="<?cs var:toroot ?>sdk/api_diff/12/changes.html">API Differences Report &raquo;</a></li>
+        </ul>
+      </li>
+      <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>sdk/android-3.0.html">
-        <span class="en">Android 3.0 Platform</span></a> <span class="new">new!</span></div>
+        <span class="en">Android 3.0 Platform</span></a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>sdk/android-3.0-highlights.html">Platform Highlights</a></li> 
           <li><a href="<?cs var:toroot ?>sdk/api_diff/11/changes.html">API Differences Report &raquo;</a></li>
         </ul>
       </li>
+      <li><a href="<?cs var:toroot ?>sdk/android-2.3.4.html">Android 2.3.4 Platform</span></a> <span class="new">new!</span></li>
       <li class="toggle-list">
       <div><a href="<?cs var:toroot ?>sdk/android-2.3.3.html">
-      <span class="en">Android 2.3.3 Platform</span></a> <span class="new">new!</span></div>
+      <span class="en">Android 2.3.3 Platform</span></a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>sdk/api_diff/10/changes.html">API Differences Report &raquo;</a></li> 
         </ul>
       </li>
       <li class="toggle-list">
-      <div><a href="<?cs var:toroot ?>sdk/android-2.3.html">
-      <span class="en">Android 2.3 Platform</span></a></div>
+        <div><a href="<?cs var:toroot ?>sdk/android-2.2.html">
+        <span class="en">Android 2.2 Platform</span></a></div>
         <ul>
-          <li><a href="<?cs var:toroot ?>sdk/android-2.3-highlights.html">Platform Highlights</a></li> 
-          <li><a href="<?cs var:toroot ?>sdk/api_diff/9/changes.html">API Differences Report &raquo;</a></li> 
+          <li><a href="<?cs var:toroot ?>sdk/android-2.2-highlights.html">Platform Highlights</a></li> 
+          <li><a href="<?cs var:toroot ?>sdk/api_diff/8/changes.html">API Differences Report &raquo;</a></li>
         </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>sdk/android-2.2.html">Android 2.2 Platform</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/android-2.1.html">Android 2.1 Platform</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/android-1.6.html">Android 1.6 Platform</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/android-1.5.html">Android 1.5 Platform</a></li>
       <li class="toggle-list">
-        <div><a href="#" onclick="toggle(this.parentNode.parentNode,true); return false;">Older Platforms</a></div>
+        <div><a href="<?cs var:toroot ?>sdk/android-2.1.html">
+        <span class="en">Android 2.1 Platform</span></a></div>
         <ul>
+          <li><a href="<?cs var:toroot ?>sdk/api_diff/7/changes.html">API Differences Report &raquo;</a></li>
+        </ul>
+      </li>
+      <li class="toggle-list">
+        <div><a href="#" onclick="toggle(this.parentNode.parentNode,true); return false;">Other Platforms</a></div>
+        <ul>
+          <li class="toggle-list">
+            <div><a href="<?cs var:toroot ?>sdk/android-2.3.html">
+            <span class="en">Android 2.3 Platform</span></a></div>
+              <ul>
+                <li><a href="<?cs var:toroot ?>sdk/android-2.3-highlights.html">Platform Highlights</a></li> 
+                <li><a href="<?cs var:toroot ?>sdk/api_diff/9/changes.html">API Differences Report &raquo;</a></li> 
+              </ul>
+          </li>
           <li><a href="<?cs var:toroot ?>sdk/android-2.0.1.html">Android 2.0.1 Platform</a></li>
           <li><a href="<?cs var:toroot ?>sdk/android-2.0.html">Android 2.0 Platform</a></li>
+          <li><a href="<?cs var:toroot ?>sdk/android-1.6.html">Android 1.6 Platform</a></li>
+          <li><a href="<?cs var:toroot ?>sdk/android-1.5.html">Android 1.5 Platform</a></li>
           <li><a href="<?cs var:toroot ?>sdk/android-1.1.html">Android 1.1 Platform</a></li>
         </ul>
       </li>
