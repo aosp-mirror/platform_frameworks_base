@@ -39,10 +39,6 @@ page.title=Android 3.0 Platform Highlights
 </style>
 
 
-
-
-
-
 <p>Welcome to Android 3.0!</p>
 
 <p>The Android 3.0 platform introduces many new and exciting features for users and developers. 
@@ -265,5 +261,3 @@ allowscriptaccess="always" allowfullscreen="true" width="278" height="180"></emb
 href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform</a> document.</p>
 
 <p>For a video overview of platform features, see the Android 3.0 Sneak Peek. </p>
-
-
