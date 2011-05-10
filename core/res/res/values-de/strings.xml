@@ -151,7 +151,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Flugmodus"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Flugmodus ist AN."</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Flugmodus ist AUS."</string>
-    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100 +"</string>
+    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"Mehr als 100"</string>
     <string name="safeMode" msgid="2788228061547930246">"Abgesicherter Modus"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-System"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Kostenpflichtige Dienste"</string>
@@ -161,7 +161,7 @@
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Ihre persönlichen Informationen"</string>
     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Direkter Zugriff auf die Kontakte und den Kalender Ihres Tablets"</string>
     <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Direkter Zugriff auf die Kontakte und den Kalender Ihres Telefons"</string>
-    <string name="permgrouplab_location" msgid="635149742436692049">"Ihren Standort"</string>
+    <string name="permgrouplab_location" msgid="635149742436692049">"Meinen Standort"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Ihren physischen Standort überwachen"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netzwerkkommunikation"</string>
     <string name="permgroupdesc_network" msgid="5035763698958415998">"Ermöglicht Anwendungen den Zugriff auf verschiedene Netzwerkfunktionen"</string>
@@ -465,7 +465,7 @@
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Ermöglicht der Anwendung Schreiben in USB-Speicher"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Ermöglicht einer Anwendung, auf die SD-Karte zu schreiben"</string>
     <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Intern. Mediensp. änd./löschen"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Ermöglicht es einer Anwendung, den Inhalt des internen Medienspeichers zu ändern"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Ermöglicht einer Anwendung, den Inhalt des internen Medienspeichers zu ändern"</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"Zugriff auf das Cache-Dateisystem"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Gewährt einer Anwendung Lese- und Schreibzugriff auf das Cache-Dateisystem."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"Internetanrufe tätigen/annehmen"</string>
@@ -966,7 +966,7 @@
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec-VPN mit vorinstalliertem Schlüssel"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec-VPN mit Zertifikat"</string>
     <string name="upload_file" msgid="2897957172366730416">"Datei auswählen"</string>
-    <string name="no_file_chosen" msgid="6363648562170759465">"Keine Datei ausgewählt"</string>
+    <string name="no_file_chosen" msgid="6363648562170759465">"Keine ausgewählt"</string>
     <string name="reset" msgid="2448168080964209908">"Zurücksetzen"</string>
     <string name="submit" msgid="1602335572089911941">"Senden"</string>
     <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Automodus aktiviert"</string>
