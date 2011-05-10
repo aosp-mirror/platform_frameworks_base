@@ -99,6 +99,7 @@ final class LoadedApk {
     }
 
     public LoadedApk(ActivityThread activityThread, ApplicationInfo aInfo,
+            CompatibilityInfo compatInfo,
             ActivityThread mainThread, ClassLoader baseLoader,
             boolean securityViolation, boolean includeCode) {
         mActivityThread = activityThread;
@@ -114,7 +115,7 @@ final class LoadedApk {
         mBaseClassLoader = baseLoader;
         mSecurityViolation = securityViolation;
         mIncludeCode = includeCode;
-        mCompatibilityInfo = new CompatibilityInfo(aInfo);
+        mCompatibilityInfo = compatInfo;
 
         if (mAppDir == null) {
             if (ActivityThread.mSystemContext == null) {
@@ -122,7 +123,8 @@ final class LoadedApk {
                     ContextImpl.createSystemContext(mainThread);
                 ActivityThread.mSystemContext.getResources().updateConfiguration(
                          mainThread.getConfiguration(),
-                         mainThread.getDisplayMetricsLocked(false));
+                         mainThread.getDisplayMetricsLocked(false),
+                         compatInfo);
                 //Slog.i(TAG, "Created system resources "
                 //        + mSystemContext.getResources() + ": "
                 //        + mSystemContext.getResources().getConfiguration());
@@ -133,7 +135,7 @@ final class LoadedApk {
     }
 
     public LoadedApk(ActivityThread activityThread, String name,
-            Context systemContext, ApplicationInfo info) {
+            Context systemContext, ApplicationInfo info, CompatibilityInfo compatInfo) {
         mActivityThread = activityThread;
         mApplicationInfo = info != null ? info : new ApplicationInfo();
         mApplicationInfo.packageName = name;
@@ -149,7 +151,7 @@ final class LoadedApk {
         mIncludeCode = true;
         mClassLoader = systemContext.getClassLoader();
         mResources = systemContext.getResources();
-        mCompatibilityInfo = new CompatibilityInfo(mApplicationInfo);
+        mCompatibilityInfo = compatInfo;
     }
 
     public String getPackageName() {

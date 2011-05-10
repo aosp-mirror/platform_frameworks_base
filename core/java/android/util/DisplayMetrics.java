@@ -16,9 +16,7 @@
 
 package android.util;
 
-import android.content.res.CompatibilityInfo;
-import android.content.res.Configuration;
-import android.os.*;
+import android.os.SystemProperties;
 
 
 /**
@@ -107,6 +105,11 @@ public class DisplayMetrics {
      */
     public float ydpi;
 
+    /** @hide */
+    public int realWidthPixels;
+    /** @hide */
+    public int realHeightPixels;
+
     public DisplayMetrics() {
     }
     
@@ -118,6 +121,8 @@ public class DisplayMetrics {
         scaledDensity = o.scaledDensity;
         xdpi = o.xdpi;
         ydpi = o.ydpi;
+        realWidthPixels = o.realWidthPixels;
+        realHeightPixels = o.realHeightPixels;
     }
     
     public void setToDefaults() {
@@ -128,101 +133,8 @@ public class DisplayMetrics {
         scaledDensity = density;
         xdpi = DENSITY_DEVICE;
         ydpi = DENSITY_DEVICE;
-    }
-
-    /**
-     * Update the display metrics based on the compatibility info and orientation
-     * NOTE: DO NOT EXPOSE THIS API!  It is introducing a circular dependency
-     * with the higher-level android.res package.
-     * {@hide}
-     */
-    public void updateMetrics(CompatibilityInfo compatibilityInfo, int orientation,
-            int screenLayout) {
-        boolean expandable = compatibilityInfo.isConfiguredExpandable();
-        boolean largeScreens = compatibilityInfo.isConfiguredLargeScreens();
-        boolean xlargeScreens = compatibilityInfo.isConfiguredXLargeScreens();
-        
-        // Note: this assume that configuration is updated before calling
-        // updateMetrics method.
-        if (!expandable) {
-            if ((screenLayout&Configuration.SCREENLAYOUT_COMPAT_NEEDED) == 0) {
-                expandable = true;
-                // the current screen size is compatible with non-resizing apps.
-                compatibilityInfo.setExpandable(true);
-            } else {
-                compatibilityInfo.setExpandable(false);
-            }
-        }
-        if (!largeScreens) {
-            if ((screenLayout&Configuration.SCREENLAYOUT_SIZE_MASK)
-                    != Configuration.SCREENLAYOUT_SIZE_LARGE) {
-                largeScreens = true;
-                // the current screen size is not large.
-                compatibilityInfo.setLargeScreens(true);
-            } else {
-                compatibilityInfo.setLargeScreens(false);
-            }
-        }
-        if (!xlargeScreens) {
-            if ((screenLayout&Configuration.SCREENLAYOUT_SIZE_MASK)
-                    != Configuration.SCREENLAYOUT_SIZE_XLARGE) {
-                xlargeScreens = true;
-                // the current screen size is not large.
-                compatibilityInfo.setXLargeScreens(true);
-            } else {
-                compatibilityInfo.setXLargeScreens(false);
-            }
-        }
-        
-        if (!expandable || (!largeScreens && !xlargeScreens)) {
-            // This is a larger screen device and the app is not 
-            // compatible with large screens, so diddle it.
-            
-            // Figure out the compatibility width and height of the screen.
-            int defaultWidth;
-            int defaultHeight;
-            switch (orientation) {
-                case Configuration.ORIENTATION_LANDSCAPE: {
-                    defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density +
-                            0.5f);
-                    defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density +
-                            0.5f);
-                    break;
-                }
-                case Configuration.ORIENTATION_PORTRAIT:
-                case Configuration.ORIENTATION_SQUARE:
-                default: {
-                    defaultWidth = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_WIDTH * density +
-                            0.5f);
-                    defaultHeight = (int)(CompatibilityInfo.DEFAULT_PORTRAIT_HEIGHT * density +
-                            0.5f);
-                    break;
-                }
-                case Configuration.ORIENTATION_UNDEFINED: {
-                    // don't change
-                    return;
-                }
-            }
-            
-            if (defaultWidth < widthPixels) {
-                // content/window's x offset in original pixels
-                widthPixels = defaultWidth;
-            }
-            if (defaultHeight < heightPixels) {
-                heightPixels = defaultHeight;
-            }
-        }
-        
-        if (compatibilityInfo.isScalingRequired()) {
-            float invertedRatio = compatibilityInfo.applicationInvertedScale;
-            density *= invertedRatio;
-            densityDpi = (int)((density*DisplayMetrics.DENSITY_DEFAULT)+.5f);
-            scaledDensity *= invertedRatio;
-            xdpi *= invertedRatio;
-            ydpi *= invertedRatio;
-            widthPixels = (int) (widthPixels * invertedRatio + 0.5f);
-            heightPixels = (int) (heightPixels * invertedRatio + 0.5f);
-        }
+        realWidthPixels = 0;
+        realHeightPixels = 0;
     }
 
     @Override

@@ -131,6 +131,7 @@ struct InputWindow {
     int32_t frameTop;
     int32_t frameRight;
     int32_t frameBottom;
+    float scaleFactor;
     SkRegion touchableRegion;
     bool visible;
     bool canReceiveKeys;
@@ -143,6 +144,11 @@ struct InputWindow {
 
     bool touchableRegionContainsPoint(int32_t x, int32_t y) const;
     bool frameContainsPoint(int32_t x, int32_t y) const;
+
+    /* These use the globalScale to convert a given screen offset to the
+     * corresponding location within the window.
+     */
+    int32_t displayToWindowX(int32_t x) const;
 
     /* Returns true if the window is of a trusted type that is allowed to silently
      * overlay other windows for the purpose of implementing the secure views feature.

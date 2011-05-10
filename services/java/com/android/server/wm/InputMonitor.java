@@ -205,11 +205,20 @@ final class InputMonitor {
             inputWindow.ownerPid = child.mSession.mPid;
             inputWindow.ownerUid = child.mSession.mUid;
             
-            final Rect frame = child.mFrame;
+            final Rect frame = child.mScaledFrame;
             inputWindow.frameLeft = frame.left;
             inputWindow.frameTop = frame.top;
             inputWindow.frameRight = frame.right;
             inputWindow.frameBottom = frame.bottom;
+
+            if (child.mGlobalScale != 1) {
+                // If we are scaling the window, input coordinates need
+                // to be inversely scaled to map from what is on screen
+                // to what is actually being touched in the UI.
+                inputWindow.scaleFactor = 1.0f/child.mGlobalScale;
+            } else {
+                inputWindow.scaleFactor = 1;
+            }
 
             child.getTouchableRegion(inputWindow.touchableRegion);
         }
