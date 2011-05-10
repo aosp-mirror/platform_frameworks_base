@@ -464,7 +464,7 @@
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"modificar/eliminar contenido de la tarjeta SD"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Permite escribir en USB"</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Permite que una aplicación escriba en la tarjeta SD."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"Cambiar/borrar almac interno"</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"modificar o eliminar el contenido del almacenamiento de medios interno"</string>
     <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Permite que una aplicación modifique el contenido del almacenamiento interno de medios."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"acceder al sistema de archivos almacenado en caché"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permite que una aplicación lea y escriba el sistema de archivos almacenado en caché."</string>
