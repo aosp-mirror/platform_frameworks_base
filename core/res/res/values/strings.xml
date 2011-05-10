@@ -2808,4 +2808,12 @@
     <!-- Description of the button to decrement the NumberPicker value. [CHAR LIMIT=NONE] -->
     <string name="number_picker_decrement_button">Decrement</string>
 
+    <!-- Storage description for internal storage. [CHAR LIMIT=NONE] -->
+    <string name="storage_internal">Internal Storage</string>
+
+    <!-- Storage description for the SD card. [CHAR LIMIT=NONE] -->
+    <string name="storage_sd_card">SD Card</string>
+
+    <!-- Storage description for USB storage. [CHAR LIMIT=NONE] -->
+    <string name="storage_usb">USB storage</string>
 </resources>

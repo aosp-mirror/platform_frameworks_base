@@ -19,6 +19,7 @@ package android.os.storage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
@@ -545,12 +546,34 @@ public class StorageManager
      * Returns list of all mountable volumes.
      * @hide
      */
-    public String[] getVolumeList() {
+    public StorageVolume[] getVolumeList() {
         try {
-            return mMountService.getVolumeList();
+            Parcelable[] list = mMountService.getVolumeList();
+            if (list == null) return new StorageVolume[0];
+            int length = list.length;
+            StorageVolume[] result = new StorageVolume[length];
+            for (int i = 0; i < length; i++) {
+                result[i] = (StorageVolume)list[i];
+            }
+            return result;
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to get volume list", e);
             return null;
         }
+    }
+
+    /**
+     * Returns list of paths for all mountable volumes.
+     * @hide
+     */
+    public String[] getVolumePaths() {
+        StorageVolume[] volumes = getVolumeList();
+        if (volumes == null) return null;
+        int count = volumes.length;
+        String[] paths = new String[count];
+        for (int i = 0; i < count; i++) {
+            paths[i] = volumes[i].getPath();
+        }
+        return paths;
     }
 }

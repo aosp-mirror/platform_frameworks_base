@@ -89,52 +89,10 @@
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>
 
-    <!-- Set to true if the location returned Environment.getExternalStorageDirectory()
-         is actually a subdirectory of the internal storage.
-         If this is set then Environment.getExternalStorageState() will always return
-         MEDIA_MOUNTED and Intent.ACTION_MEDIA_MOUNTED will be broadcast at boot time
-         for backward compatibility with apps that require external storage. -->
-    <bool name="config_emulateExternalStorage">false</bool>
-
-    <!-- Set to true if external storage is case sensitive.
-         Typically external storage is FAT, which is case insensitive. -->
-    <bool name="config_caseSensitiveExternalStorage">false</bool>
-    
-    <!-- A product with no SD card == not removable. -->
-    <bool name="config_externalStorageRemovable" product="nosdcard">false</bool>
-    <!-- Configures whether the primary external storage device is
-         removable.  For example, if external storage is on an SD card,
-         it is removable; if it is built in to the device, it is not removable.
-         The default product has external storage on an SD card, which is
-         removable. -->
-    <bool name="config_externalStorageRemovable" product="default">true</bool>
-
-    <!-- List of mount points for external storage devices.
-         The first item on the list should be the primary external storage and should match the
-         value returned by Environment.getExternalStorageDirectory (/mnt/sdcard).
-         MTP storage IDs will be generated based on the position of the mountpoint in this list:
-            0x00010001 - ID for primary external storage (/mnt/sdcard)
-            0x00020001 - ID for first secondary external storage
-            0x00030001 - ID for second secondary external storage
-         etc. -->
-    <string-array translatable="false" name="config_externalStoragePaths">
-        <item>"/mnt/sdcard"</item>
-    </string-array>
-
-    <!-- User visible descriptions of the volumes in the config_externalStoragePaths array. -->
-    <string-array translatable="true" name="config_externalStorageDescriptions">
-        <item>"SD card"</item>
-    </string-array>
-
-    <!-- Number of megabytes of space to leave unallocated by MTP.
-         MTP will subtract this value from the free space it reports back
-         to the host via GetStorageInfo, and will not allow new files to
-         be added via MTP if there is less than this amount left free in the storage.
-         If MTP has dedicated storage this value should be zero, but if MTP is
-         sharing storage with the rest of the system, set this to a positive value
-         to ensure that MTP activity does not result in the storage being
-         too close to full. -->
-    <integer name="config_mtpReserveSpaceMegabytes">0</integer>
+    <!-- Storage lists for default and nosdcard products.
+         Both have a single SD card storage, but the storage is not removable in the nosdcard case -->
+    <integer name="config_storageListId" product="nosdcard">@xml/storage_list_nosdcard</integer>
+    <integer name="config_storageListId" product="default">@xml/storage_list</integer>
 
     <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else. -->
