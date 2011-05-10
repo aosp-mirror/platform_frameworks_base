@@ -461,8 +461,8 @@ Level 8</em></li>
 to match the device density.</li>
         </ul>
         <p><em>Added in API Level 4.</em></p>
-        <p>There is thus a 3:4:6 scaling ratio between the three densities, so a 9x9 bitmap
-         in ldpi is 12x12 in mdpi and 18x18 in hdpi.</p>
+        <p>There is thus a 3:4:6:8 scaling ratio between the four densities, so a 9x9 bitmap
+         in ldpi is 12x12 in mdpi, 18x18 in hdpi and 24x24 in xhdpi.</p>
         <p>When Android selects which resource files to use,
          it handles screen density differently than the other qualifiers.
          In step 1 of <a href="#BestMatch">How Android finds the best
