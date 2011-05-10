@@ -49,6 +49,7 @@ import com.android.internal.telephony.CommandException;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Connection;
 import com.android.internal.telephony.DataConnection;
+import com.android.internal.telephony.IccRecords;
 import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.IccCard;
 import com.android.internal.telephony.IccException;
@@ -99,8 +100,6 @@ public class CDMAPhone extends PhoneBase {
     // Instance Variables
     CdmaCallTracker mCT;
     CdmaServiceStateTracker mSST;
-    RuimRecords mRuimRecords;
-    RuimCard mRuimCard;
     ArrayList <CdmaMmiCode> mPendingMmis = new ArrayList<CdmaMmiCode>();
     RuimPhoneBookInterfaceManager mRuimPhoneBookInterfaceManager;
     RuimSmsInterfaceManager mRuimSmsInterfaceManager;
@@ -142,19 +141,21 @@ public class CDMAPhone extends PhoneBase {
     // Constructors
     public CDMAPhone(Context context, CommandsInterface ci, PhoneNotifier notifier) {
         super(notifier, context, ci, false);
-        initSST();
+        initSstIcc();
         init(context, notifier);
     }
 
     public CDMAPhone(Context context, CommandsInterface ci, PhoneNotifier notifier,
             boolean unitTestMode) {
         super(notifier, context, ci, unitTestMode);
-        initSST();
+        initSstIcc();
         init(context, notifier);
     }
 
-    protected void initSST() {
+    protected void initSstIcc() {
         mSST = new CdmaServiceStateTracker(this);
+        mIccRecords = new RuimRecords(this);
+        mIccCard = new RuimCard(this, LOG_TAG, DBG);
     }
 
     protected void init(Context context, PhoneNotifier notifier) {
@@ -162,18 +163,16 @@ public class CDMAPhone extends PhoneBase {
         mCT = new CdmaCallTracker(this);
         mSMS = new CdmaSMSDispatcher(this);
         mIccFileHandler = new RuimFileHandler(this);
-        mRuimRecords = new RuimRecords(this);
         mDataConnectionTracker = new CdmaDataConnectionTracker (this);
-        mRuimCard = new RuimCard(this);
         mRuimPhoneBookInterfaceManager = new RuimPhoneBookInterfaceManager(this);
         mRuimSmsInterfaceManager = new RuimSmsInterfaceManager(this, mSMS);
         mSubInfo = new PhoneSubInfo(this);
         mEriManager = new EriManager(this, context, EriManager.ERI_FROM_XML);
-        mCcatService = CatService.getInstance(mCM, mRuimRecords, mContext,
-                mIccFileHandler, mRuimCard);
+        mCcatService = CatService.getInstance(mCM, mIccRecords, mContext,
+                mIccFileHandler, mIccCard);
 
         mCM.registerForAvailable(this, EVENT_RADIO_AVAILABLE, null);
-        mRuimRecords.registerForRecordsLoaded(this, EVENT_RUIM_RECORDS_LOADED, null);
+        mIccRecords.registerForRecordsLoaded(this, EVENT_RUIM_RECORDS_LOADED, null);
         mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         mCM.registerForOn(this, EVENT_RADIO_ON, null);
         mCM.setOnSuppServiceNotification(this, EVENT_SSN, null);
@@ -222,9 +221,10 @@ public class CDMAPhone extends PhoneBase {
     public void dispose() {
         synchronized(PhoneProxy.lockForRadioTechnologyChange) {
             super.dispose();
+            log("dispose");
 
             //Unregister from all former registered events
-            mRuimRecords.unregisterForRecordsLoaded(this); //EVENT_RUIM_RECORDS_LOADED
+            mIccRecords.unregisterForRecordsLoaded(this); //EVENT_RUIM_RECORDS_LOADED
             mCM.unregisterForAvailable(this); //EVENT_RADIO_AVAILABLE
             mCM.unregisterForOffOrNotAvailable(this); //EVENT_RADIO_OFF_OR_NOT_AVAILABLE
             mCM.unregisterForOn(this); //EVENT_RADIO_ON
@@ -241,8 +241,8 @@ public class CDMAPhone extends PhoneBase {
             mSST.dispose();
             mSMS.dispose();
             mIccFileHandler.dispose(); // instance of RuimFileHandler
-            mRuimRecords.dispose();
-            mRuimCard.dispose();
+            mIccRecords.dispose();
+            mIccCard.dispose();
             mRuimPhoneBookInterfaceManager.dispose();
             mRuimSmsInterfaceManager.dispose();
             mSubInfo.dispose();
@@ -252,13 +252,14 @@ public class CDMAPhone extends PhoneBase {
     }
 
     public void removeReferences() {
+            log("removeReferences");
             this.mRuimPhoneBookInterfaceManager = null;
             this.mRuimSmsInterfaceManager = null;
             this.mSMS = null;
             this.mSubInfo = null;
-            this.mRuimRecords = null;
+            this.mIccRecords = null;
             this.mIccFileHandler = null;
-            this.mRuimCard = null;
+            this.mIccCard = null;
             this.mDataConnectionTracker = null;
             this.mCT = null;
             this.mSST = null;
@@ -547,14 +548,6 @@ public class CDMAPhone extends PhoneBase {
         Log.e(LOG_TAG, "setLine1Number: not possible in CDMA");
     }
 
-    public IccCard getIccCard() {
-        return mRuimCard;
-    }
-
-    public String getIccSerialNumber() {
-        return mRuimRecords.iccid;
-    }
-
     public void setCallWaiting(boolean enable, Message onComplete) {
         Log.e(LOG_TAG, "method setCallWaiting is NOT supported in CDMA!");
     }
@@ -657,6 +650,7 @@ public class CDMAPhone extends PhoneBase {
             }
         }
 
+        log("getDataConnectionState apnType=" + apnType + " ret=" + ret);
         return ret;
     }
 
@@ -733,7 +727,7 @@ public class CDMAPhone extends PhoneBase {
         Message resp;
         mVmNumber = voiceMailNumber;
         resp = obtainMessage(EVENT_SET_VM_NUMBER_DONE, 0, 0, onComplete);
-        mRuimRecords.setVoiceMailNumber(alphaTag, mVmNumber, resp);
+        mIccRecords.setVoiceMailNumber(alphaTag, mVmNumber, resp);
     }
 
     public String getVoiceMailNumber() {
@@ -755,7 +749,7 @@ public class CDMAPhone extends PhoneBase {
      * @hide
      */
     public int getVoiceMessageCount() {
-        int voicemailCount =  mRuimRecords.getVoiceMessageCount();
+        int voicemailCount =  mIccRecords.getVoiceMessageCount();
         // If mRuimRecords.getVoiceMessageCount returns zero, then there is possibility
         // that phone was power cycled and would have lost the voicemail count.
         // So get the count from preferences.
@@ -778,10 +772,6 @@ public class CDMAPhone extends PhoneBase {
         }
 
         return ret;
-    }
-
-    public boolean getIccRecordsLoaded() {
-        return mRuimRecords.getRecordsLoaded();
     }
 
     public void getCallForwardingOption(int commandInterfaceCFReason, Message onComplete) {
@@ -864,13 +854,13 @@ public class CDMAPhone extends PhoneBase {
     /*package*/ void
     updateMessageWaitingIndicator(boolean mwi) {
         // this also calls notifyMessageWaitingIndicator()
-        mRuimRecords.setVoiceMessageWaiting(1, mwi ? -1 : 0);
+        mIccRecords.setVoiceMessageWaiting(1, mwi ? -1 : 0);
     }
 
     /* This function is overloaded to send number of voicemails instead of sending true/false */
     /*package*/ void
     updateMessageWaitingIndicator(int mwi) {
-        mRuimRecords.setVoiceMessageWaiting(1, mwi);
+        mIccRecords.setVoiceMessageWaiting(1, mwi);
     }
 
     @Override
@@ -1417,6 +1407,7 @@ public class CDMAPhone extends PhoneBase {
                 Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
                 ContentValues map = new ContentValues();
                 map.put(Telephony.Carriers.NUMERIC, operatorNumeric);
+                log("updateCurrentCarrierInProvider insert uri=" + uri);
                 getContext().getContentResolver().insert(uri, map);
 
                 // Updates MCC MNC device configuration information
@@ -1428,5 +1419,10 @@ public class CDMAPhone extends PhoneBase {
             }
         }
         return false;
+    }
+
+    protected void log(String s) {
+        if (DBG)
+            Log.d(LOG_TAG, "[CDMAPhone] " + s);
     }
 }

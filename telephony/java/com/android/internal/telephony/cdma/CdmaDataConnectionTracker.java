@@ -98,7 +98,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
         p.mCM.registerForAvailable (this, EVENT_RADIO_AVAILABLE, null);
         p.mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
-        p.mRuimRecords.registerForRecordsLoaded(this, EVENT_RECORDS_LOADED, null);
+        p.mIccRecords.registerForRecordsLoaded(this, EVENT_RECORDS_LOADED, null);
         p.mCM.registerForNVReady(this, EVENT_NV_READY, null);
         p.mCM.registerForDataNetworkStateChanged (this, EVENT_DATA_STATE_CHANGED, null);
         p.mCT.registerForVoiceCallEnded (this, EVENT_VOICE_CALL_ENDED, null);
@@ -124,7 +124,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         // Unregister from all events
         mPhone.mCM.unregisterForAvailable(this);
         mPhone.mCM.unregisterForOffOrNotAvailable(this);
-        mCdmaPhone.mRuimRecords.unregisterForRecordsLoaded(this);
+        mCdmaPhone.mIccRecords.unregisterForRecordsLoaded(this);
         mPhone.mCM.unregisterForNVReady(this);
         mPhone.mCM.unregisterForDataNetworkStateChanged(this);
         mCdmaPhone.mCT.unregisterForVoiceCallEnded(this);
@@ -183,7 +183,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                     (psState == ServiceState.STATE_IN_SERVICE ||
                             mAutoAttachOnCreation) &&
                     (mPhone.mCM.getNvState() == CommandsInterface.RadioState.NV_READY ||
-                            mCdmaPhone.mRuimRecords.getRecordsLoaded()) &&
+                            mCdmaPhone.mIccRecords.getRecordsLoaded()) &&
                     (mCdmaPhone.mSST.isConcurrentVoiceAndDataAllowed() ||
                             mPhone.getState() == Phone.State.IDLE) &&
                     !roaming &&
@@ -197,7 +197,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 reason += " - psState= " + psState;
             }
             if (!(mPhone.mCM.getNvState() == CommandsInterface.RadioState.NV_READY ||
-                    mCdmaPhone.mRuimRecords.getRecordsLoaded())) {
+                    mCdmaPhone.mIccRecords.getRecordsLoaded())) {
                 reason += " - radioState= " + mPhone.mCM.getNvState() + " - RUIM not loaded";
             }
             if (!(mCdmaPhone.mSST.isConcurrentVoiceAndDataAllowed() ||

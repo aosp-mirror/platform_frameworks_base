@@ -765,7 +765,7 @@ public final class GsmMmiCode extends Handler implements MmiCode {
                         // invalid length
                         handlePasswordError(com.android.internal.R.string.invalidPin);
                     } else if (sc.equals(SC_PIN) &&
-                               phone.mSimCard.getState() == SimCard.State.PUK_REQUIRED ) {
+                               phone.mIccCard.getState() == SimCard.State.PUK_REQUIRED ) {
                         // Sim is puk-locked
                         handlePasswordError(com.android.internal.R.string.needPuk);
                     } else {
@@ -885,7 +885,7 @@ public final class GsmMmiCode extends Handler implements MmiCode {
                 */
                 if ((ar.exception == null) && (msg.arg1 == 1)) {
                     boolean cffEnabled = (msg.arg2 == 1);
-                    phone.mSIMRecords.setVoiceCallForwardingFlag(1, cffEnabled);
+                    phone.mIccRecords.setVoiceCallForwardingFlag(1, cffEnabled);
                 }
 
                 onSetComplete(ar);
@@ -1203,7 +1203,7 @@ public final class GsmMmiCode extends Handler implements MmiCode {
                 (info.serviceClass & serviceClassMask)
                         == CommandsInterface.SERVICE_CLASS_VOICE) {
             boolean cffEnabled = (info.status == 1);
-            phone.mSIMRecords.setVoiceCallForwardingFlag(1, cffEnabled);
+            phone.mIccRecords.setVoiceCallForwardingFlag(1, cffEnabled);
         }
 
         return TextUtils.replace(template, sources, destinations);
@@ -1228,7 +1228,7 @@ public final class GsmMmiCode extends Handler implements MmiCode {
                 sb.append(context.getText(com.android.internal.R.string.serviceDisabled));
 
                 // Set unconditional CFF in SIM to false
-                phone.mSIMRecords.setVoiceCallForwardingFlag(1, false);
+                phone.mIccRecords.setVoiceCallForwardingFlag(1, false);
             } else {
 
                 SpannableStringBuilder tb = new SpannableStringBuilder();

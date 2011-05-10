@@ -25,8 +25,8 @@ import com.android.internal.telephony.IccCard;
  */
 public final class RuimCard extends IccCard {
 
-    RuimCard(CDMAPhone phone) {
-        super(phone, "CDMA", true);
+    RuimCard(CDMAPhone phone, String LOG_TAG, boolean dbg) {
+        super(phone, LOG_TAG, dbg);
         mPhone.mCM.registerForRUIMLockedOrAbsent(mHandler, EVENT_ICC_LOCKED_OR_ABSENT, null);
         mPhone.mCM.registerForOffOrNotAvailable(mHandler, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         mPhone.mCM.registerForRUIMReady(mHandler, EVENT_ICC_READY, null);
@@ -43,7 +43,7 @@ public final class RuimCard extends IccCard {
 
     @Override
     public String getServiceProviderName () {
-        return ((CDMAPhone)mPhone).mRuimRecords.getServiceProviderName();
+        return mPhone.mIccRecords.getServiceProviderName();
     }
  }
 
