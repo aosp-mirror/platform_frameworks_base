@@ -23,6 +23,9 @@ import java.net.UnknownHostException;
 import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+
+import java.util.Collection;
+
 /**
  * A simple container for route information.
  *
@@ -44,39 +47,30 @@ public class RouteInfo implements Parcelable {
     public RouteInfo(LinkAddress destination, InetAddress gateway) {
         if (destination == null) {
             try {
-                if ((gateway != null) && (gateway instanceof Inet4Address)) {
-                    destination = new LinkAddress(InetAddress.getByName("0.0.0.0"), 32);
+                if ((gateway != null) || (gateway instanceof Inet4Address)) {
+                    destination = new LinkAddress(Inet4Address.ANY, 0);
                 } else {
-                    destination = new LinkAddress(InetAddress.getByName("::0"), 128);
+                    destination = new LinkAddress(Inet6Address.ANY, 0);
                 }
             } catch (Exception e) {}
         }
-        mDestination = destination;
+        mDestination = new LinkAddress(NetworkUtils.getNetworkPart(destination.getAddress(),
+                destination.getNetworkPrefixLength()), destination.getNetworkPrefixLength());
         mGateway = gateway;
         mIsDefault = isDefault();
     }
 
     public RouteInfo(InetAddress gateway) {
-        LinkAddress destination = null;
-        try {
-            if ((gateway != null) && (gateway instanceof Inet4Address)) {
-                destination = new LinkAddress(InetAddress.getByName("0.0.0.0"), 32);
-            } else {
-                destination = new LinkAddress(InetAddress.getByName("::0"), 128);
-            }
-        } catch (Exception e) {}
-        mDestination = destination;
-        mGateway = gateway;
-        mIsDefault = isDefault();
+        this(null, gateway);
     }
 
     private boolean isDefault() {
         boolean val = false;
         if (mGateway != null) {
             if (mGateway instanceof Inet4Address) {
-                val = (mDestination == null || mDestination.getNetworkPrefixLength() == 32);
+                val = (mDestination == null || mDestination.getNetworkPrefixLength() == 0);
             } else {
-                val = (mDestination == null || mDestination.getNetworkPrefixLength() == 128);
+                val = (mDestination == null || mDestination.getNetworkPrefixLength() == 0);
             }
         }
         return val;
@@ -159,4 +153,43 @@ public class RouteInfo implements Parcelable {
             return new RouteInfo[size];
         }
     };
+
+    private boolean matches(InetAddress destination) {
+        if (destination == null) return false;
+
+        // if the destination is present and the route is default.
+        // return true
+        if (isDefault()) return true;
+
+        // match the route destination and destination with prefix length
+        InetAddress dstNet = NetworkUtils.getNetworkPart(destination,
+                mDestination.getNetworkPrefixLength());
+
+        return mDestination.getAddress().equals(dstNet);
+    }
+
+    /**
+     * Find the route from a Collection of routes that best matches a given address.
+     * May return null if no routes are applicable.
+     * @param routes a Collection of RouteInfos to chose from
+     * @param dest the InetAddress your trying to get to
+     * @return the RouteInfo from the Collection that best fits the given address
+     */
+    public static RouteInfo selectBestRoute(Collection<RouteInfo> routes, InetAddress dest) {
+        if ((routes == null) || (dest == null)) return null;
+
+        RouteInfo bestRoute = null;
+        // pick a longest prefix match under same address type
+        for (RouteInfo route : routes) {
+            if (NetworkUtils.addressTypeMatches(route.mDestination.getAddress(), dest)) {
+                if ((bestRoute != null) &&
+                        (bestRoute.mDestination.getNetworkPrefixLength() >=
+                        route.mDestination.getNetworkPrefixLength())) {
+                    continue;
+                }
+                if (route.matches(dest)) bestRoute = route;
+            }
+        }
+        return bestRoute;
+    }
 }

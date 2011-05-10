@@ -81,6 +81,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final String NETWORK_RESTORE_DELAY_PROP_NAME =
             "android.telephony.apn-restore";
 
+    // used in recursive route setting to add gateways for the host for which
+    // a host route was requested.
+    private static final int MAX_HOSTROUTE_CYCLE_COUNT = 10;
+
     private Tethering mTethering;
     private boolean mTetheringConfigValid = false;
 
@@ -921,7 +925,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         try {
             InetAddress addr = InetAddress.getByAddress(hostAddress);
-            return addHostRoute(tracker, addr);
+            return addHostRoute(tracker, addr, 0);
         } catch (UnknownHostException e) {}
         return false;
     }
@@ -934,24 +938,45 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * TODO - deprecate
      * @return {@code true} on success, {@code false} on failure
      */
-    private boolean addHostRoute(NetworkStateTracker nt, InetAddress hostAddress) {
+    private boolean addHostRoute(NetworkStateTracker nt, InetAddress hostAddress, int cycleCount) {
         if (nt.getNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI) {
             return false;
         }
 
-        LinkProperties p = nt.getLinkProperties();
-        if (p == null) return false;
-        String interfaceName = p.getInterfaceName();
+        LinkProperties lp = nt.getLinkProperties();
+        if ((lp == null) || (hostAddress == null)) return false;
 
+        String interfaceName = lp.getInterfaceName();
         if (DBG) {
-            log("Requested host route to " + hostAddress + "(" + interfaceName + ")");
+            log("Requested host route to " + hostAddress + "(" + interfaceName + "), cycleCount=" +
+                    cycleCount);
         }
-        if (interfaceName != null) {
-            return NetworkUtils.addHostRoute(interfaceName, hostAddress, null);
-        } else {
+        if (interfaceName == null) {
             if (DBG) loge("addHostRoute failed due to null interface name");
             return false;
         }
+
+        RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getRoutes(), hostAddress);
+        InetAddress gateway = null;
+        if (bestRoute != null) {
+            gateway = bestRoute.getGateway();
+            // if the best route is ourself, don't relf-reference, just add the host route
+            if (hostAddress.equals(gateway)) gateway = null;
+        }
+        if (gateway != null) {
+            if (cycleCount > MAX_HOSTROUTE_CYCLE_COUNT) {
+                loge("Error adding hostroute - too much recursion");
+                return false;
+            }
+            if (!addHostRoute(nt, gateway, cycleCount+1)) return false;
+        }
+        return NetworkUtils.addHostRoute(interfaceName, hostAddress, gateway);
+    }
+
+    // TODO support the removal of single host routes.  Keep a ref count of them so we
+    // aren't over-zealous
+    private boolean removeHostRoute(NetworkStateTracker nt, InetAddress hostAddress) {
+        return false;
     }
 
     /**
@@ -1389,7 +1414,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             Collection<InetAddress> dnsList = p.getDnses();
             for (InetAddress dns : dnsList) {
                 if (DBG) log("  adding " + dns);
-                NetworkUtils.addHostRoute(interfaceName, dns, null);
+                addHostRoute(nt, dns, 0);
             }
             nt.privateDnsRouteSet(true);
         }
@@ -1423,7 +1448,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             //TODO - handle non-default routes
             if (route.isDefaultRoute()) {
                 InetAddress gateway = route.getGateway();
-                if (NetworkUtils.addHostRoute(interfaceName, gateway, null) &&
+                if (addHostRoute(nt, gateway, 0) &&
                         NetworkUtils.addDefaultRoute(interfaceName, gateway)) {
                     if (DBG) {
                         NetworkInfo networkInfo = nt.getNetworkInfo();
