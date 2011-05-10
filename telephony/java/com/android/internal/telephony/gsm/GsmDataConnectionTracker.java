@@ -143,7 +143,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         p.mCM.registerForAvailable (this, EVENT_RADIO_AVAILABLE, null);
         p.mCM.registerForOffOrNotAvailable(this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
-        p.mSIMRecords.registerForRecordsLoaded(this, EVENT_RECORDS_LOADED, null);
+        p.mIccRecords.registerForRecordsLoaded(this, EVENT_RECORDS_LOADED, null);
         p.mCM.registerForDataNetworkStateChanged (this, EVENT_DATA_STATE_CHANGED, null);
         p.getCallTracker().registerForVoiceCallEnded (this, EVENT_VOICE_CALL_ENDED, null);
         p.getCallTracker().registerForVoiceCallStarted (this, EVENT_VOICE_CALL_STARTED, null);
@@ -179,7 +179,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         //Unregister for all events
         mPhone.mCM.unregisterForAvailable(this);
         mPhone.mCM.unregisterForOffOrNotAvailable(this);
-        mPhone.mSIMRecords.unregisterForRecordsLoaded(this);
+        mPhone.mIccRecords.unregisterForRecordsLoaded(this);
         mPhone.mCM.unregisterForDataNetworkStateChanged(this);
         mPhone.getCallTracker().unregisterForVoiceCallEnded(this);
         mPhone.getCallTracker().unregisterForVoiceCallStarted(this);
@@ -582,7 +582,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         boolean allowed =
                     gprsState == ServiceState.STATE_IN_SERVICE &&
-                    mPhone.mSIMRecords.getRecordsLoaded() &&
+                    mPhone.mIccRecords.getRecordsLoaded() &&
                     mPhone.getState() == Phone.State.IDLE &&
                     mInternalDataEnabled &&
                     (!mPhone.getServiceState().getRoaming() || getDataOnRoamingEnabled()) &&
@@ -593,7 +593,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (!(gprsState == ServiceState.STATE_IN_SERVICE)) {
                 reason += " - gprs= " + gprsState;
             }
-            if (!mPhone.mSIMRecords.getRecordsLoaded()) reason += " - SIM not loaded";
+            if (!mPhone.mIccRecords.getRecordsLoaded()) reason += " - SIM not loaded";
             if (mPhone.getState() != Phone.State.IDLE) {
                 reason += " - PhoneState= " + mPhone.getState();
             }
@@ -1505,7 +1505,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             log("onRadioAvailable: We're on the simulator; assuming data is connected");
         }
 
-        if (mPhone.mSIMRecords.getRecordsLoaded()) {
+        if (mPhone.mIccRecords.getRecordsLoaded()) {
             notifyDataAvailability(null);
         }
 
@@ -1752,7 +1752,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      */
     private void createAllApnList() {
         mAllApns = new ArrayList<ApnSetting>();
-        String operator = mPhone.mSIMRecords.getSIMOperatorNumeric();
+        String operator = mPhone.mIccRecords.getOperatorNumeric();
         if (operator != null) {
             String selection = "numeric = '" + operator + "'";
             if (DBG) log("createAllApnList: selection=" + selection);
@@ -1852,7 +1852,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return apnList;
         }
 
-        String operator = mPhone.mSIMRecords.getSIMOperatorNumeric();
+        String operator = mPhone.mIccRecords.getOperatorNumeric();
         if (requestedApnType.equals(Phone.APN_TYPE_DEFAULT)) {
             if (canSetPreferApn && mPreferredApn != null) {
                 if (DBG) {

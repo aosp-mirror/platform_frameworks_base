@@ -32,7 +32,7 @@ public class SimPhoneBookInterfaceManager extends IccPhoneBookInterfaceManager {
 
     public SimPhoneBookInterfaceManager(GSMPhone phone) {
         super(phone);
-        adnCache = phone.mSIMRecords.getAdnCache();
+        adnCache = phone.mIccRecords.getAdnCache();
         //NOTE service "simphonebook" added by IccSmsInterfaceManagerProxy
     }
 

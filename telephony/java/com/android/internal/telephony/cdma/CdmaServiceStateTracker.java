@@ -214,7 +214,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         cm.unregisterForNVReady(this);
         cm.unregisterForCdmaOtaProvision(this);
         phone.unregisterForEriFileLoaded(this);
-        phone.mRuimRecords.unregisterForRecordsLoaded(this);
+        phone.mIccRecords.unregisterForRecordsLoaded(this);
         cm.unSetOnSignalStrengthUpdate(this);
         cm.unSetOnNITZTime(this);
         cr.unregisterContentObserver(mAutoTimeObserver);
@@ -260,7 +260,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             // unlocked. At this stage, the radio is already powered on.
             isSubscriptionFromRuim = true;
             if (mNeedToRegForRuimLoaded) {
-                phone.mRuimRecords.registerForRecordsLoaded(this,
+                phone.mIccRecords.registerForRecordsLoaded(this,
                         EVENT_RUIM_RECORDS_LOADED, null);
                 mNeedToRegForRuimLoaded = false;
             }

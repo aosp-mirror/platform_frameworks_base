@@ -59,8 +59,8 @@ public final class SIMRecords extends IccRecords {
 
     // ***** Cached SIM State; cleared on channel close
 
-    String imsi;
-    boolean callForwardingEnabled;
+    private String imsi;
+    private boolean callForwardingEnabled;
 
 
     /**
@@ -191,6 +191,7 @@ public final class SIMRecords extends IccRecords {
 
     }
 
+    @Override
     public void dispose() {
         //Unregister for all events
         phone.mCM.unregisterForSIMReady(this);
@@ -231,7 +232,10 @@ public final class SIMRecords extends IccRecords {
 
     //***** Public Methods
 
-    /** Returns null if SIM is not yet ready */
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public String getIMSI() {
         return imsi;
     }
@@ -404,10 +408,18 @@ public final class SIMRecords extends IccRecords {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean getVoiceCallForwardingFlag() {
         return callForwardingEnabled;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void setVoiceCallForwardingFlag(int line, boolean enable) {
 
         if (line != 1) return; // only line 1 is supported
@@ -468,12 +480,13 @@ public final class SIMRecords extends IccRecords {
         }
     }
 
-    /** Returns the 5 or 6 digit MCC/MNC of the operator that
-     *  provided the SIM card. Returns null of SIM is not yet ready
+    /**
+     * {@inheritDoc}
      */
-    public String getSIMOperatorNumeric() {
+    @Override
+    public String getOperatorNumeric() {
         if (imsi == null) {
-            Log.d(LOG_TAG, "getSIMOperatorNumeric: IMSI == null");
+            Log.d(LOG_TAG, "getOperatorNumeric: IMSI == null");
             return null;
         }
         if (mncLength == UNINITIALIZED || mncLength == UNKNOWN) {
@@ -484,7 +497,7 @@ public final class SIMRecords extends IccRecords {
         // STOPSHIP: to be removed
         if (SystemProperties.getInt(com.android.internal.telephony.TelephonyProperties
                 .PROPERTY_NETWORK_LTE_ON_CDMA, 0) == 1) {
-            Log.e(LOG_TAG, "getSIMOperatorNumeric: STOPSHIP bad numeric operators in lte");
+            Log.e(LOG_TAG, "getOperatorNumeric: STOPSHIP bad numeric operators in lte");
             return SystemProperties.get("ro.cdma.home.operator.numeric", "310004");
         }
         // Length = length of MCC + length of MNC
@@ -559,7 +572,7 @@ public final class SIMRecords extends IccRecords {
                     // finally have both the imsi and the mncLength and can parse the imsi properly
                     MccTable.updateMccMncConfiguration(phone, imsi.substring(0, 3 + mncLength));
                 }
-                phone.mSimCard.broadcastIccStateChangedIntent(
+                phone.mIccCard.broadcastIccStateChangedIntent(
                         SimCard.INTENT_VALUE_ICC_IMSI, null);
             break;
 
@@ -1221,7 +1234,7 @@ public final class SIMRecords extends IccRecords {
     protected void onAllRecordsLoaded() {
         Log.d(LOG_TAG, "SIMRecords: record load complete");
 
-        String operator = getSIMOperatorNumeric();
+        String operator = getOperatorNumeric();
 
         // Some fields require more than one SIM record to set
 
@@ -1240,7 +1253,7 @@ public final class SIMRecords extends IccRecords {
 
         recordsLoadedRegistrants.notifyRegistrants(
             new AsyncResult(null, null, null));
-        phone.mSimCard.broadcastIccStateChangedIntent(
+        phone.mIccCard.broadcastIccStateChangedIntent(
                 SimCard.INTENT_VALUE_ICC_LOADED, null);
     }
 
@@ -1265,7 +1278,7 @@ public final class SIMRecords extends IccRecords {
         /* broadcast intent SIM_READY here so that we can make sure
           READY is sent before IMSI ready
         */
-        phone.mSimCard.broadcastIccStateChangedIntent(
+        phone.mIccCard.broadcastIccStateChangedIntent(
                 SimCard.INTENT_VALUE_ICC_READY, null);
 
         fetchSimRecords();
@@ -1362,7 +1375,8 @@ public final class SIMRecords extends IccRecords {
      *
      * If the SPN is not found on the SIM, the rule is always PLMN_ONLY.
      */
-    protected int getDisplayRule(String plmn) {
+    @Override
+    public int getDisplayRule(String plmn) {
         int rule;
         if (spn == null || spnDisplayCondition == -1) {
             // EF_SPN was not found on the SIM, or not yet loaded.  Just show ONS.
@@ -1389,7 +1403,7 @@ public final class SIMRecords extends IccRecords {
     private boolean isOnMatchingPlmn(String plmn) {
         if (plmn == null) return false;
 
-        if (plmn.equals(getSIMOperatorNumeric())) {
+        if (plmn.equals(getOperatorNumeric())) {
             return true;
         }
 
