@@ -87,7 +87,7 @@ interface IWifiManager
 
     void releaseMulticastLock();
 
-    boolean setWifiApEnabled(in WifiConfiguration wifiConfig, boolean enable);
+    void setWifiApEnabled(in WifiConfiguration wifiConfig, boolean enable);
 
     int getWifiApEnabledState();
 

@@ -898,7 +898,8 @@ public class WifiManager {
      */
     public boolean setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
         try {
-            return mService.setWifiApEnabled(wifiConfig, enabled);
+            mService.setWifiApEnabled(wifiConfig, enabled);
+            return true;
         } catch (RemoteException e) {
             return false;
         }
