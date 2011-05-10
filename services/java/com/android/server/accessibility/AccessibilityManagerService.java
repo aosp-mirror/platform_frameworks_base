@@ -41,7 +41,6 @@ import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
-import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -59,7 +58,6 @@ import android.view.accessibility.IAccessibilityManagerClient;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -107,15 +105,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final SimpleStringSplitter mStringColonSplitter = new SimpleStringSplitter(':');
 
-    private final SparseArray<List<AccessibilityServiceInfo>> mFeedbackTypeToEnabledServicesMap =
-        new SparseArray<List<AccessibilityServiceInfo>>();
-
     private PackageManager mPackageManager;
 
     private int mHandledFeedbackTypes = 0;
 
     private boolean mIsEnabled;
+
     private AccessibilityInputFilter mInputFilter;
+
+    private final List<AccessibilityServiceInfo> mEnabledServicesForFeedbackTempList = new ArrayList<AccessibilityServiceInfo>();
+
+    private boolean mHasInputFilter;
 
     /**
      * Handler for delayed event dispatch.
@@ -259,6 +259,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             unbindAllServicesLocked();
                         }
                         updateClientsLocked();
+                        updateInputFilterLocked();
                     }
                 }
             });
@@ -278,9 +279,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             });
     }
 
-    public boolean addClient(IAccessibilityManagerClient client) {
+    public boolean addClient(IAccessibilityManagerClient client) throws RemoteException {
         synchronized (mLock) {
-            mClients.add(client);
+            final IAccessibilityManagerClient addedClient = client;
+            mClients.add(addedClient);
+            // Clients are registered all the time until their process is
+            // killed, therefore we do not have a corresponding unlinkToDeath.
+            client.asBinder().linkToDeath(new DeathRecipient() {
+                public void binderDied() {
+                    synchronized (mLock) {
+                        mClients.remove(addedClient);
+                    }
+                }
+            }, 0);
             return mIsEnabled;
         }
     }
@@ -307,21 +318,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType) {
-        SparseArray<List<AccessibilityServiceInfo>> feedbackTypeToEnabledServicesMap =
-            mFeedbackTypeToEnabledServicesMap;
-        List<AccessibilityServiceInfo> enabledServices = new ArrayList<AccessibilityServiceInfo>();
+        List<AccessibilityServiceInfo> result = mEnabledServicesForFeedbackTempList;
+        List<Service> services = mServices;
         synchronized (mLock) {
             while (feedbackType != 0) {
                 final int feedbackTypeBit = (1 << Integer.numberOfTrailingZeros(feedbackType));
                 feedbackType &= ~feedbackTypeBit;
-                List<AccessibilityServiceInfo> perFeedbackType =
-                    feedbackTypeToEnabledServicesMap.get(feedbackTypeBit);
-                if (perFeedbackType != null) {
-                    enabledServices.addAll(perFeedbackType);
+                final int serviceCount = services.size();
+                for (int i = 0; i < serviceCount; i++) {
+                    Service service = services.get(i);
+                    if (service.mFeedbackType == feedbackType) {
+                        result.add(service.mAccessibilityServiceInfo);
+                    }
                 }
             }
         }
-        return enabledServices;
+        return result;
     }
 
     public void interrupt() {
@@ -331,16 +343,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 try {
                     service.mServiceInterface.onInterrupt();
                 } catch (RemoteException re) {
-                    if (re instanceof DeadObjectException) {
-                        Slog.w(LOG_TAG, "Dead " + service.mService + ". Cleaning up.");
-                        if (removeDeadServiceLocked(service)) {
-                            count--;
-                            i--;
-                        }
-                    } else {
-                        Slog.e(LOG_TAG, "Error during sending interrupt request to "
-                                + service.mService, re);
-                    }
+                    Slog.e(LOG_TAG, "Error during sending interrupt request to "
+                        + service.mService, re);
                 }
             }
         }
@@ -364,8 +368,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         service.setAccessibilityServiceInfo(oldInfo);
                     } else {
                         service.setAccessibilityServiceInfo(info);
+                        tryAddServiceLocked(service);
                     }
-                    updateStateOnEnabledService(service);
+
+                    updateInputFilterLocked();
                 }
                 return;
             default:
@@ -490,28 +496,45 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 Slog.i(LOG_TAG, "Event " + event + " sent to " + listener);
             }
         } catch (RemoteException re) {
-            if (re instanceof DeadObjectException) {
-                Slog.w(LOG_TAG, "Dead " + service.mService + ". Cleaning up.");
-                removeDeadServiceLocked(service);
-            } else {
-                Slog.e(LOG_TAG, "Error during sending " + event + " to " + service.mService, re);
-            }
+            Slog.e(LOG_TAG, "Error during sending " + event + " to " + service.mService, re);
         }
     }
 
     /**
-     * Removes a dead service.
+     * Adds a service.
+     *
+     * @param service The service to add.
+     */
+    private void tryAddServiceLocked(Service service) {
+        try {
+            if (mServices.contains(service) || !service.isConfigured()) {
+                return;
+            }
+            service.linkToOwnDeath();
+            mServices.add(service);
+            mComponentNameToServiceMap.put(service.mComponentName, service);
+            updateInputFilterLocked();
+        } catch (RemoteException e) {
+            /* do nothing */
+        }
+    }
+
+    /**
+     * Removes a service.
      *
      * @param service The service.
      * @return True if the service was removed, false otherwise.
      */
-    private boolean removeDeadServiceLocked(Service service) {
-        if (DEBUG) {
-            Slog.i(LOG_TAG, "Dead service " + service.mService + " removed");
+    private boolean tryRemoveServiceLocked(Service service) {
+        final boolean removed = mServices.remove(service);
+        if (!removed) {
+            return false;
         }
+        mComponentNameToServiceMap.remove(service.mComponentName);
         mHandler.removeMessages(service.mId);
-        updateStateOnDisabledService(service);
-        return mServices.remove(service);
+        service.unlinkToOwnDeath();
+        updateInputFilterLocked();
+        return removed;
     }
 
     /**
@@ -531,11 +554,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             int handledFeedbackTypes) {
 
         if (!service.isConfigured()) {
-            return false;
-        }
-
-        if (!service.mService.isBinderAlive()) {
-            removeDeadServiceLocked(service);
             return false;
         }
 
@@ -663,65 +681,36 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
-     * Sets the input filter state. If the filter is in enabled it is registered
-     * in the window manager, otherwise the filter is removed from the latter.
-     *
-     * @param enabled Whether the input filter is enabled.
+     * Updates the input filter state. The filter is enabled if accessibility
+     * is enabled and there is at least one accessibility service providing
+     * spoken feedback.
      */
-    private void setInputFilterEnabledLocked(boolean enabled) {
+    private void updateInputFilterLocked() {
         WindowManagerService wm = (WindowManagerService)ServiceManager.getService(
                 Context.WINDOW_SERVICE);
-        if (wm != null) {
-            if (enabled) {
+        if (mIsEnabled) {
+            final boolean hasSpokenFeedbackServices = !getEnabledAccessibilityServiceList(
+                    AccessibilityServiceInfo.FEEDBACK_SPOKEN).isEmpty();
+            if (hasSpokenFeedbackServices) {
+                if (mHasInputFilter) {
+                    return;
+                }
                 if (mInputFilter == null) {
                     mInputFilter = new AccessibilityInputFilter(mContext);
                 }
                 wm.setInputFilter(mInputFilter);
+                mHasInputFilter = true;
             } else {
-                wm.setInputFilter(null);
+                if (mHasInputFilter) {
+                    wm.setInputFilter(null);
+                    mHasInputFilter = false;
+                }
             }
-        }
-    }
-
-    /**
-     * Updates the set of enabled services for a given feedback type and
-     * if more than one of them provides spoken feedback enables touch
-     * exploration.
-     *
-     * @param service An enable service.
-     */
-    private void updateStateOnEnabledService(Service service) {
-        int feedbackType = service.mFeedbackType;
-        List<AccessibilityServiceInfo> enabledServices =
-            mFeedbackTypeToEnabledServicesMap.get(feedbackType);
-        if (enabledServices == null) {
-            enabledServices = new ArrayList<AccessibilityServiceInfo>();
-            mFeedbackTypeToEnabledServicesMap.put(feedbackType, enabledServices);
-        }
-        enabledServices.add(service.mAccessibilityServiceInfo);
-
-        // We enable touch exploration if at least one
-        // enabled service provides spoken feedback.
-        if (enabledServices.size() > 0
-                && service.mFeedbackType == AccessibilityServiceInfo.FEEDBACK_SPOKEN) {
-            updateClientsLocked();
-            setInputFilterEnabledLocked(true);
-        }
-    }
-
-    private void updateStateOnDisabledService(Service service) {
-        List<AccessibilityServiceInfo> enabledServices =
-            mFeedbackTypeToEnabledServicesMap.get(service.mFeedbackType);
-        if (enabledServices == null) {
-            return;
-        }
-        enabledServices.remove(service.mAccessibilityServiceInfo);
-        // We disable touch exploration if no
-        // enabled service provides spoken feedback.
-        if (enabledServices.isEmpty()
-                && service.mFeedbackType == AccessibilityServiceInfo.FEEDBACK_SPOKEN) {
-            updateClientsLocked();
-            setInputFilterEnabledLocked(false);
+        } else {
+            if (mHasInputFilter) {
+                wm.setInputFilter(null);
+                mHasInputFilter = false;
+            }
         }
     }
 
@@ -733,7 +722,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * passed to the service it represents as soon it is bound. It also serves as the
      * connection for the service.
      */
-    class Service extends IAccessibilityServiceConnection.Stub implements ServiceConnection {
+    class Service extends IAccessibilityServiceConnection.Stub
+            implements ServiceConnection, DeathRecipient {
         int mId = 0;
 
         AccessibilityServiceInfo mAccessibilityServiceInfo;
@@ -751,8 +741,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         boolean mIsDefault;
 
         long mNotificationTimeout;
-
-        boolean mIsActive;
 
         ComponentName mComponentName;
 
@@ -806,11 +794,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
          */
         public boolean unbind() {
             if (mService != null) {
-                mService = null;
+                tryRemoveServiceLocked(this);
                 mContext.unbindService(this);
-                mComponentNameToServiceMap.remove(mComponentName);
-                mServices.remove(this);
-                updateStateOnDisabledService(this);
+                mService = null;
                 return true;
             }
             return false;
@@ -833,17 +819,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mService = service;
             mServiceInterface = IEventListener.Stub.asInterface(service);
-
             try {
                 mServiceInterface.setConnection(this);
                 synchronized (mLock) {
-                    if (!mServices.contains(this)) {
-                        mServices.add(this);
-                        mComponentNameToServiceMap.put(componentName, this);
-                        if (isConfigured()) {
-                            updateStateOnEnabledService(this);
-                        }
-                    }
+                    tryAddServiceLocked(this);
                 }
             } catch (RemoteException re) {
                 Slog.w(LOG_TAG, "Error while setting Controller for service: " + service, re);
@@ -851,9 +830,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         public void onServiceDisconnected(ComponentName componentName) {
+            /* do nothing - #binderDied takes care */
+        }
+
+        public void linkToOwnDeath() throws RemoteException {
+            mService.linkToDeath(this, 0);
+        }
+
+        public void unlinkToOwnDeath() {
+            mService.unlinkToDeath(this, 0);
+        }
+
+        public void binderDied() {
             synchronized (mLock) {
-                Service service = mComponentNameToServiceMap.remove(componentName);
-                mServices.remove(service);
+                tryRemoveServiceLocked(this);
             }
         }
     }
