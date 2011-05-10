@@ -1888,6 +1888,14 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
         // Append additional motion samples.
         MotionSample* nextMotionSample = firstMotionSample->next;
         for (; nextMotionSample != NULL; nextMotionSample = nextMotionSample->next) {
+            if ((motionEntry->source & AINPUT_SOURCE_CLASS_POINTER) != 0 && scaleFactor != 1.0f) {
+                for (size_t i = 0; i < motionEntry->pointerCount; i++) {
+                    scaledCoords[i] = nextMotionSample->pointerCoords[i];
+                    scaledCoords[i].scale(scaleFactor);
+                }
+            } else {
+                usingCoords = nextMotionSample->pointerCoords;
+            }
             status = connection->inputPublisher.appendMotionSample(
                     nextMotionSample->eventTime, usingCoords);
             if (status == NO_MEMORY) {
