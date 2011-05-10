@@ -84,7 +84,13 @@ status_t AudioPlayer::start(bool sourceAlreadyStarted) {
 
     CHECK(mFirstBuffer == NULL);
 
-    mFirstBufferResult = mSource->read(&mFirstBuffer);
+    MediaSource::ReadOptions options;
+    if (mSeeking) {
+        options.setSeekTo(mSeekTimeUs);
+        mSeeking = false;
+    }
+
+    mFirstBufferResult = mSource->read(&mFirstBuffer, &options);
     if (mFirstBufferResult == INFO_FORMAT_CHANGED) {
         LOGV("INFO_FORMAT_CHANGED!!!");
 

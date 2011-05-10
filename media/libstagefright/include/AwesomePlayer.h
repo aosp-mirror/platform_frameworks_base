@@ -281,6 +281,7 @@ private:
     void ensureCacheIsFetching_l();
 
     status_t startAudioPlayer_l();
+    void postAudioSeekComplete_l();
 
     void shutdownVideoDecoder_l();
     void setNativeWindow_l(const sp<ANativeWindow> &native);
