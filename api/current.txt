@@ -22991,7 +22991,7 @@ package android.webkit {
 
   public class WebHistoryItem implements java.lang.Cloneable {
     method public android.graphics.Bitmap getFavicon();
-    method public int getId();
+    method public deprecated int getId();
     method public java.lang.String getOriginalUrl();
     method public java.lang.String getTitle();
     method public java.lang.String getUrl();
@@ -23042,13 +23042,13 @@ package android.webkit {
     method public synchronized java.lang.String getFixedFontFamily();
     method public synchronized boolean getJavaScriptCanOpenWindowsAutomatically();
     method public synchronized boolean getJavaScriptEnabled();
-    method public synchronized android.webkit.WebSettings.LayoutAlgorithm getLayoutAlgorithm();
+    method public deprecated synchronized android.webkit.WebSettings.LayoutAlgorithm getLayoutAlgorithm();
     method public boolean getLightTouchEnabled();
     method public boolean getLoadWithOverviewMode();
     method public synchronized boolean getLoadsImagesAutomatically();
     method public synchronized int getMinimumFontSize();
     method public synchronized int getMinimumLogicalFontSize();
-    method public boolean getNavDump();
+    method public deprecated boolean getNavDump();
     method public synchronized android.webkit.WebSettings.PluginState getPluginState();
     method public deprecated synchronized boolean getPluginsEnabled();
     method public deprecated synchronized java.lang.String getPluginsPath();
@@ -23059,7 +23059,7 @@ package android.webkit {
     method public synchronized java.lang.String getStandardFontFamily();
     method public synchronized android.webkit.WebSettings.TextSize getTextSize();
     method public deprecated synchronized boolean getUseDoubleTree();
-    method public boolean getUseWebViewBackgroundForOverscrollBackground();
+    method public deprecated boolean getUseWebViewBackgroundForOverscrollBackground();
     method public synchronized boolean getUseWideViewPort();
     method public deprecated synchronized int getUserAgent();
     method public synchronized java.lang.String getUserAgentString();
@@ -23088,13 +23088,13 @@ package android.webkit {
     method public synchronized void setGeolocationEnabled(boolean);
     method public synchronized void setJavaScriptCanOpenWindowsAutomatically(boolean);
     method public synchronized void setJavaScriptEnabled(boolean);
-    method public synchronized void setLayoutAlgorithm(android.webkit.WebSettings.LayoutAlgorithm);
+    method public deprecated synchronized void setLayoutAlgorithm(android.webkit.WebSettings.LayoutAlgorithm);
     method public void setLightTouchEnabled(boolean);
     method public void setLoadWithOverviewMode(boolean);
     method public synchronized void setLoadsImagesAutomatically(boolean);
     method public synchronized void setMinimumFontSize(int);
     method public synchronized void setMinimumLogicalFontSize(int);
-    method public void setNavDump(boolean);
+    method public deprecated void setNavDump(boolean);
     method public void setNeedInitialFocus(boolean);
     method public synchronized void setPluginState(android.webkit.WebSettings.PluginState);
     method public deprecated synchronized void setPluginsEnabled(boolean);
@@ -23109,7 +23109,7 @@ package android.webkit {
     method public void setSupportZoom(boolean);
     method public synchronized void setTextSize(android.webkit.WebSettings.TextSize);
     method public deprecated synchronized void setUseDoubleTree(boolean);
-    method public void setUseWebViewBackgroundForOverscrollBackground(boolean);
+    method public deprecated void setUseWebViewBackgroundForOverscrollBackground(boolean);
     method public synchronized void setUseWideViewPort(boolean);
     method public deprecated synchronized void setUserAgent(int);
     method public synchronized void setUserAgentString(java.lang.String);
@@ -23122,7 +23122,7 @@ package android.webkit {
     field public static final int LOAD_NO_CACHE = 2; // 0x2
   }
 
-  public static final class WebSettings.LayoutAlgorithm extends java.lang.Enum {
+  public static final deprecated class WebSettings.LayoutAlgorithm extends java.lang.Enum {
     method public static android.webkit.WebSettings.LayoutAlgorithm valueOf(java.lang.String);
     method public static final android.webkit.WebSettings.LayoutAlgorithm[] values();
   }
@@ -23200,12 +23200,12 @@ package android.webkit {
     method public void clearSslPreferences();
     method public void clearView();
     method public android.webkit.WebBackForwardList copyBackForwardList();
-    method public void debugDump();
+    method public deprecated void debugDump();
     method public void destroy();
-    method public static void disablePlatformNotifications();
+    method public static deprecated void disablePlatformNotifications();
     method public void documentHasImages(android.os.Message);
-    method public void emulateShiftHeld();
-    method public static void enablePlatformNotifications();
+    method public deprecated void emulateShiftHeld();
+    method public static deprecated void enablePlatformNotifications();
     method public static java.lang.String findAddress(java.lang.String);
     method public int findAll(java.lang.String);
     method public void findNext(boolean);
@@ -23248,11 +23248,11 @@ package android.webkit {
     method public void removeJavascriptInterface(java.lang.String);
     method public void requestFocusNodeHref(android.os.Message);
     method public void requestImageRef(android.os.Message);
-    method public boolean restorePicture(android.os.Bundle, java.io.File);
+    method public deprecated boolean restorePicture(android.os.Bundle, java.io.File);
     method public android.webkit.WebBackForwardList restoreState(android.os.Bundle);
     method public void resumeTimers();
     method public void savePassword(java.lang.String, java.lang.String, java.lang.String);
-    method public boolean savePicture(android.os.Bundle, java.io.File);
+    method public deprecated boolean savePicture(android.os.Bundle, java.io.File);
     method public android.webkit.WebBackForwardList saveState(android.os.Bundle);
     method public void saveWebArchive(java.lang.String);
     method public void saveWebArchive(java.lang.String, boolean, android.webkit.ValueCallback<java.lang.String>);
@@ -23263,7 +23263,7 @@ package android.webkit {
     method public void setInitialScale(int);
     method public void setMapTrackballToArrowKeys(boolean);
     method public void setNetworkAvailable(boolean);
-    method public void setPictureListener(android.webkit.WebView.PictureListener);
+    method public deprecated void setPictureListener(android.webkit.WebView.PictureListener);
     method public void setVerticalScrollbarOverlay(boolean);
     method public void setWebChromeClient(android.webkit.WebChromeClient);
     method public void setWebViewClient(android.webkit.WebViewClient);
@@ -23291,8 +23291,8 @@ package android.webkit {
     field public static final int UNKNOWN_TYPE = 0; // 0x0
   }
 
-  public static abstract interface WebView.PictureListener {
-    method public abstract void onNewPicture(android.webkit.WebView, android.graphics.Picture);
+  public static abstract deprecated interface WebView.PictureListener {
+    method public abstract deprecated void onNewPicture(android.webkit.WebView, android.graphics.Picture);
   }
 
   public class WebView.WebViewTransport {
