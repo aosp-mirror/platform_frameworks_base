@@ -458,6 +458,9 @@ public abstract class BaseCommands implements CommandsInterface {
         Registrant r = new Registrant (h, what, obj);
         mIccRefreshRegistrants.add(r);
     }
+    public void setOnIccRefresh(Handler h, int what, Object obj) {
+        registerForIccRefresh(h, what, obj);
+    }
 
     public void setEmergencyCallbackMode(Handler h, int what, Object obj) {
         mEmergencyCallbackModeRegistrant = new Registrant (h, what, obj);
@@ -465,6 +468,9 @@ public abstract class BaseCommands implements CommandsInterface {
 
     public void unregisterForIccRefresh(Handler h) {
         mIccRefreshRegistrants.remove(h);
+    }
+    public void unsetOnIccRefresh(Handler h) {
+        unregisterForIccRefresh(h);
     }
 
     public void setOnCallRing(Handler h, int what, Object obj) {
