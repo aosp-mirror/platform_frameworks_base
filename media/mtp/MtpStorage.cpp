@@ -33,12 +33,13 @@
 namespace android {
 
 MtpStorage::MtpStorage(MtpStorageID id, const char* filePath,
-        const char* description, uint64_t reserveSpace)
+        const char* description, uint64_t reserveSpace, bool removable)
     :   mStorageID(id),
         mFilePath(filePath),
         mDescription(description),
         mMaxCapacity(0),
-        mReserveSpace(reserveSpace)
+        mReserveSpace(reserveSpace),
+        mRemovable(removable)
 {
     LOGV("MtpStorage id: %d path: %s\n", id, filePath);
 }
@@ -47,7 +48,7 @@ MtpStorage::~MtpStorage() {
 }
 
 int MtpStorage::getType() const {
-    return MTP_STORAGE_FIXED_RAM;
+    return (mRemovable ? MTP_STORAGE_REMOVABLE_RAM :  MTP_STORAGE_FIXED_RAM);
 }
 
 int MtpStorage::getFileSystemType() const {
