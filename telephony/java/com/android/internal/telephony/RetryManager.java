@@ -308,12 +308,10 @@ public class RetryManager {
     }
 
     /**
-     * Reset network re-registration indicator and clear the data-retry counter
-     * and turns off retrying forever.
+     * Clear the data-retry counter
      */
     public void resetRetryCount() {
         mRetryCount = 0;
-        mRetryForever = false;
         if (DBG) log("resetRetryCount: " + mRetryCount);
     }
 
