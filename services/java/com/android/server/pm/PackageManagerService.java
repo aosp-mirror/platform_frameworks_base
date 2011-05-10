@@ -2855,8 +2855,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private File getDataPathForPackage(String packageName, int userId) {
-        return new File(mUserAppDataDir.getAbsolutePath() + File.separator
-                    + userId + File.separator + packageName);
+        return new File(mUserAppDataDir.getAbsolutePath() + File.separator + userId
+                + File.separator + packageName);
     }
 
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
@@ -3319,36 +3319,42 @@ public class PackageManagerService extends IPackageManager.Stub {
              *        only for non-system apps and system app upgrades.
              */
             if (pkg.applicationInfo.nativeLibraryDir != null) {
-                final File nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
-                final String dataPathString = dataPath.getPath();
+                try {
+                    final File nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
+                    final String dataPathString = dataPath.getCanonicalFile().getPath();
 
-                if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
-                    /*
-                     * Upgrading from a previous version of the OS sometimes
-                     * leaves native libraries in the /data/data/<app>/lib
-                     * directory for system apps even when they shouldn't be.
-                     * Recent changes in the JNI library search path
-                     * necessitates we remove those to match previous behavior.
-                     */
-                    if (NativeLibraryHelper.removeNativeBinariesFromDirLI(nativeLibraryDir)) {
-                        Log.i(TAG, "removed obsolete native libraries for system package " + path);
+                    if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
+                        /*
+                         * Upgrading from a previous version of the OS sometimes
+                         * leaves native libraries in the /data/data/<app>/lib
+                         * directory for system apps even when they shouldn't be.
+                         * Recent changes in the JNI library search path
+                         * necessitates we remove those to match previous behavior.
+                         */
+                        if (NativeLibraryHelper.removeNativeBinariesFromDirLI(nativeLibraryDir)) {
+                            Log.i(TAG, "removed obsolete native libraries for system package "
+                                    + path);
+                        }
+                    } else if (nativeLibraryDir.getCanonicalFile().getParent()
+                            .equals(dataPathString)) {
+                        /*
+                         * If this is an internal application or our
+                         * nativeLibraryPath points to our data directory, unpack
+                         * the libraries. The native library path pointing to the
+                         * data directory for an application in an ASEC container
+                         * can happen for older apps that existed before an OTA to
+                         * Gingerbread.
+                         */
+                        Slog.i(TAG, "Unpacking native libraries for " + path);
+                        mInstaller.unlinkNativeLibraryDirectory(dataPathString);
+                        NativeLibraryHelper.copyNativeBinariesLI(scanFile, nativeLibraryDir);
+                    } else {
+                        Slog.i(TAG, "Linking native library dir for " + path);
+                        mInstaller.linkNativeLibraryDirectory(dataPathString,
+                                pkg.applicationInfo.nativeLibraryDir);
                     }
-                } else if (nativeLibraryDir.getParent().equals(dataPathString)) {
-                    /*
-                     * If this is an internal application or our
-                     * nativeLibraryPath points to our data directory, unpack
-                     * the libraries. The native library path pointing to the
-                     * data directory for an application in an ASEC container
-                     * can happen for older apps that existed before an OTA to
-                     * Gingerbread.
-                     */
-                    Slog.i(TAG, "Unpacking native libraries for " + path);
-                    mInstaller.unlinkNativeLibraryDirectory(dataPathString);
-                    NativeLibraryHelper.copyNativeBinariesLI(scanFile, nativeLibraryDir);
-                } else {
-                    Slog.i(TAG, "Linking native library dir for " + path);
-                    mInstaller.linkNativeLibraryDirectory(dataPathString,
-                            pkg.applicationInfo.nativeLibraryDir);
+                } catch (IOException ioe) {
+                    Log.e(TAG, "Unable to get canonical file " + ioe.toString());
                 }
             }
             pkg.mScanPath = path;
