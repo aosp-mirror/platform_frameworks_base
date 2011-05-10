@@ -46,18 +46,16 @@ public class RouteInfo implements Parcelable {
 
     public RouteInfo(LinkAddress destination, InetAddress gateway) {
         if (destination == null) {
-            try {
-                if (gateway != null) {
-                    if (gateway instanceof Inet4Address) {
-                        destination = new LinkAddress(Inet4Address.ANY, 0);
-                    } else {
-                        destination = new LinkAddress(Inet6Address.ANY, 0);
-                    }
+            if (gateway != null) {
+                if (gateway instanceof Inet4Address) {
+                    destination = new LinkAddress(Inet4Address.ANY, 0);
                 } else {
-                    // no destination, no gateway. invalid.
-                    throw new RuntimeException("Invalid arguments passed in.");
+                    destination = new LinkAddress(Inet6Address.ANY, 0);
                 }
-            } catch (Exception e) {}
+            } else {
+                // no destination, no gateway. invalid.
+                throw new RuntimeException("Invalid arguments passed in.");
+            }
         }
         if (gateway == null) {
             if (destination.getAddress() instanceof Inet4Address) {
@@ -74,6 +72,20 @@ public class RouteInfo implements Parcelable {
 
     public RouteInfo(InetAddress gateway) {
         this(null, gateway);
+    }
+
+    public static RouteInfo makeHostRoute(InetAddress host) {
+        return makeHostRoute(host, null);
+    }
+
+    public static RouteInfo makeHostRoute(InetAddress host, InetAddress gateway) {
+        if (host == null) return null;
+
+        if (host instanceof Inet4Address) {
+            return new RouteInfo(new LinkAddress(host, 32), gateway);
+        } else {
+            return new RouteInfo(new LinkAddress(host, 128), gateway);
+        }
     }
 
     private boolean isDefault() {
