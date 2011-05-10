@@ -360,6 +360,9 @@ public interface CommandsInterface {
     void registerForIccRefresh(Handler h, int what, Object obj);
     void unregisterForIccRefresh(Handler h);
 
+    void setOnIccRefresh(Handler h, int what, Object obj);
+    void unsetOnIccRefresh(Handler h);
+
     /**
      * Sets the handler for RING notifications.
      * Unlike the register* methods, there's only one notification handler
