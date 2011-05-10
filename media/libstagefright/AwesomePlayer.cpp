@@ -831,6 +831,8 @@ status_t AwesomePlayer::startAudioPlayer_l() {
     if (!(mFlags & AUDIOPLAYER_STARTED)) {
         mFlags |= AUDIOPLAYER_STARTED;
 
+        bool wasSeeking = mAudioPlayer->isSeeking();
+
         // We've already started the MediaSource in order to enable
         // the prefetcher to read its data.
         status_t err = mAudioPlayer->start(
@@ -839,6 +841,13 @@ status_t AwesomePlayer::startAudioPlayer_l() {
         if (err != OK) {
             notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, err);
             return err;
+        }
+
+        if (wasSeeking) {
+            CHECK(!mAudioPlayer->isSeeking());
+
+            // We will have finished the seek while starting the audio player.
+            postAudioSeekComplete_l();
         }
     } else {
         mAudioPlayer->resume();
@@ -1957,6 +1966,10 @@ void AwesomePlayer::postAudioEOS(int64_t delayUs) {
 
 void AwesomePlayer::postAudioSeekComplete() {
     Mutex::Autolock autoLock(mLock);
+    postAudioSeekComplete_l();
+}
+
+void AwesomePlayer::postAudioSeekComplete_l() {
     postCheckAudioStatusEvent_l(0 /* delayUs */);
 }
 
