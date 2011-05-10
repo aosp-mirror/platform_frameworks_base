@@ -46,6 +46,10 @@ public final class InputWindow {
     public int frameRight;
     public int frameBottom;
 
+    // Global scaling factor applied to touch events when they are dispatched
+    // to the window
+    public float scaleFactor;
+
     // Window touchable region.
     public final Region touchableRegion = new Region();
 

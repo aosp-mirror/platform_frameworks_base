@@ -1372,7 +1372,7 @@ class ContextImpl extends Context {
         }
 
         LoadedApk pi =
-            mMainThread.getPackageInfo(packageName, flags);
+            mMainThread.getPackageInfo(packageName, mResources.getCompatibilityInfo(), flags);
         if (pi != null) {
             ContextImpl c = new ContextImpl();
             c.mRestricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
@@ -1454,7 +1454,7 @@ class ContextImpl extends Context {
                         " compatiblity info:" + container.getDisplayMetrics());
             }
             mResources = mainThread.getTopLevelResources(
-                    mPackageInfo.getResDir(), container.getCompatibilityInfo().copy());
+                    mPackageInfo.getResDir(), container.getCompatibilityInfo());
         }
         mMainThread = mainThread;
         mContentResolver = new ApplicationContentResolver(this, mainThread);
