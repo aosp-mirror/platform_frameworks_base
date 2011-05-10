@@ -540,9 +540,11 @@ final class ActivityStack {
             }
             mService.ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             r.sleeping = false;
+            r.forceNewConfig = false;
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
                     System.identityHashCode(r),
-                    r.info, r.icicle, results, newIntents, !andResume,
+                    r.info, mService.compatibilityInfoForPackageLocked(r.info.applicationInfo),
+                    r.icicle, results, newIntents, !andResume,
                     mService.isNextTransitionForward());
             
             if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
@@ -3856,7 +3858,7 @@ final class ActivityStack {
         // Short circuit: if the two configurations are the exact same
         // object (the common case), then there is nothing to do.
         Configuration newConfig = mService.mConfiguration;
-        if (r.configuration == newConfig) {
+        if (r.configuration == newConfig && !r.forceNewConfig) {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
                     "Configuration unchanged in " + r);
             return true;
@@ -3881,6 +3883,7 @@ final class ActivityStack {
             if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
                     "Configuration doesn't matter not running " + r);
             r.stopFreezingScreenLocked(false);
+            r.forceNewConfig = false;
             return true;
         }
         
@@ -3892,10 +3895,11 @@ final class ActivityStack {
                     + Integer.toHexString(r.info.configChanges)
                     + ", newConfig=" + newConfig);
         }
-        if ((changes&(~r.info.configChanges)) != 0) {
+        if ((changes&(~r.info.configChanges)) != 0 || r.forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
             r.configChangeFlags |= changes;
             r.startFreezingScreenLocked(r.app, globalChanges);
+            r.forceNewConfig = false;
             if (r.app == null || r.app.thread == null) {
                 if (DEBUG_SWITCH || DEBUG_CONFIGURATION) Slog.v(TAG,
                         "Switch is destroying non-running " + r);
@@ -3966,6 +3970,7 @@ final class ActivityStack {
         
         try {
             if (DEBUG_SWITCH) Slog.i(TAG, "Switch is restarting resumed " + r);
+            r.forceNewConfig = false;
             r.app.thread.scheduleRelaunchActivity(r, results, newIntents,
                     changes, !andResume, mService.mConfiguration);
             // Note: don't need to call pauseIfSleepingLocked() here, because

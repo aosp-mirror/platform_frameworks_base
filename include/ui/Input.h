@@ -216,6 +216,8 @@ struct PointerCoords {
     status_t setAxisValue(int32_t axis, float value);
     float* editAxisValue(int32_t axis);
 
+    void scale(float scale);
+
 #ifdef HAVE_ANDROID_OS
     status_t readFromParcel(Parcel* parcel);
     status_t writeToParcel(Parcel* parcel) const;

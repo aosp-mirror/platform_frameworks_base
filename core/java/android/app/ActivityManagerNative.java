@@ -1397,6 +1397,16 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case SET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            String pkg = data.readString();
+            boolean enabled = data.readInt() != 0;
+            setPackageScreenCompatMode(pkg, enabled);
+            reply.writeNoException();
+            return true;
+        }
+        
         case SWITCH_USER_TRANSACTION: {
             data.enforceInterface(IActivityManager.descriptor);
             int userid = data.readInt();
@@ -3170,6 +3180,19 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         data.recycle();
         return result;
+    }
+
+    public void setPackageScreenCompatMode(String packageName, boolean compatEnabled)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(packageName);
+        data.writeInt(compatEnabled ? 1 : 0);
+        mRemote.transact(SET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
     }
 
     public boolean switchUser(int userid) throws RemoteException {

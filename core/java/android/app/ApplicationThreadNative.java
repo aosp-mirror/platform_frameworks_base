@@ -23,6 +23,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Bundle;
@@ -131,12 +132,13 @@ public abstract class ApplicationThreadNative extends Binder
             IBinder b = data.readStrongBinder();
             int ident = data.readInt();
             ActivityInfo info = ActivityInfo.CREATOR.createFromParcel(data);
+            CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
             Bundle state = data.readBundle();
             List<ResultInfo> ri = data.createTypedArrayList(ResultInfo.CREATOR);
             List<Intent> pi = data.createTypedArrayList(Intent.CREATOR);
             boolean notResumed = data.readInt() != 0;
             boolean isForward = data.readInt() != 0;
-            scheduleLaunchActivity(intent, b, ident, info, state, ri, pi,
+            scheduleLaunchActivity(intent, b, ident, info, compatInfo, state, ri, pi,
                     notResumed, isForward);
             return true;
         }
@@ -181,11 +183,12 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             Intent intent = Intent.CREATOR.createFromParcel(data);
             ActivityInfo info = ActivityInfo.CREATOR.createFromParcel(data);
+            CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
             int resultCode = data.readInt();
             String resultData = data.readString();
             Bundle resultExtras = data.readBundle();
             boolean sync = data.readInt() != 0;
-            scheduleReceiver(intent, info, resultCode, resultData,
+            scheduleReceiver(intent, info, compatInfo, resultCode, resultData,
                     resultExtras, sync);
             return true;
         }
@@ -194,7 +197,8 @@ public abstract class ApplicationThreadNative extends Binder
             data.enforceInterface(IApplicationThread.descriptor);
             IBinder token = data.readStrongBinder();
             ServiceInfo info = ServiceInfo.CREATOR.createFromParcel(data);
-            scheduleCreateService(token, info);
+            CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
+            scheduleCreateService(token, info, compatInfo);
             return true;
         }
 
@@ -257,12 +261,13 @@ public abstract class ApplicationThreadNative extends Binder
             int testMode = data.readInt();
             boolean restrictedBackupMode = (data.readInt() != 0);
             Configuration config = Configuration.CREATOR.createFromParcel(data);
+            CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
             HashMap<String, IBinder> services = data.readHashMap(null);
             Bundle coreSettings = data.readBundle();
             bindApplication(packageName, info,
                             providers, testName, profileName,
                             testArgs, testWatcher, testMode, restrictedBackupMode,
-                            config, services, coreSettings);
+                            config, compatInfo, services, coreSettings);
             return true;
         }
         
@@ -390,8 +395,9 @@ public abstract class ApplicationThreadNative extends Binder
         {
             data.enforceInterface(IApplicationThread.descriptor);
             ApplicationInfo appInfo = ApplicationInfo.CREATOR.createFromParcel(data);
+            CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
             int backupMode = data.readInt();
-            scheduleCreateBackupAgent(appInfo, backupMode);
+            scheduleCreateBackupAgent(appInfo, compatInfo, backupMode);
             return true;
         }
 
@@ -399,7 +405,8 @@ public abstract class ApplicationThreadNative extends Binder
         {
             data.enforceInterface(IApplicationThread.descriptor);
             ApplicationInfo appInfo = ApplicationInfo.CREATOR.createFromParcel(data);
-            scheduleDestroyBackupAgent(appInfo);
+            CompatibilityInfo compatInfo = CompatibilityInfo.CREATOR.createFromParcel(data);
+            scheduleDestroyBackupAgent(appInfo, compatInfo);
             return true;
         }
 
@@ -457,10 +464,18 @@ public abstract class ApplicationThreadNative extends Binder
             return true;
         }
 
-        case SET_CORE_SETTINGS: {
+        case SET_CORE_SETTINGS_TRANSACTION: {
             data.enforceInterface(IApplicationThread.descriptor);
             Bundle settings = data.readBundle();
             setCoreSettings(settings);
+            return true;
+        }
+
+        case UPDATE_PACKAGE_COMPATIBILITY_INFO_TRANSACTION: {
+            data.enforceInterface(IApplicationThread.descriptor);
+            String pkg = data.readString();
+            CompatibilityInfo compat = CompatibilityInfo.CREATOR.createFromParcel(data);
+            updatePackageCompatibilityInfo(pkg, compat);
             return true;
         }
         }
@@ -555,7 +570,8 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
-            ActivityInfo info, Bundle state, List<ResultInfo> pendingResults,
+            ActivityInfo info, CompatibilityInfo compatInfo, Bundle state,
+            List<ResultInfo> pendingResults,
     		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward)
     		throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -564,6 +580,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeStrongBinder(token);
         data.writeInt(ident);
         info.writeToParcel(data, 0);
+        compatInfo.writeToParcel(data, 0);
         data.writeBundle(state);
         data.writeTypedList(pendingResults);
         data.writeTypedList(pendingNewIntents);
@@ -620,12 +637,13 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
     
     public final void scheduleReceiver(Intent intent, ActivityInfo info,
-            int resultCode, String resultData,
+            CompatibilityInfo compatInfo, int resultCode, String resultData,
             Bundle map, boolean sync) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         intent.writeToParcel(data, 0);
         info.writeToParcel(data, 0);
+        compatInfo.writeToParcel(data, 0);
         data.writeInt(resultCode);
         data.writeString(resultData);
         data.writeBundle(map);
@@ -635,32 +653,36 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.recycle();
     }
 
-    public final void scheduleCreateBackupAgent(ApplicationInfo app, int backupMode)
-            throws RemoteException {
+    public final void scheduleCreateBackupAgent(ApplicationInfo app,
+            CompatibilityInfo compatInfo, int backupMode) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         app.writeToParcel(data, 0);
+        compatInfo.writeToParcel(data, 0);
         data.writeInt(backupMode);
         mRemote.transact(SCHEDULE_CREATE_BACKUP_AGENT_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
 
-    public final void scheduleDestroyBackupAgent(ApplicationInfo app) throws RemoteException {
+    public final void scheduleDestroyBackupAgent(ApplicationInfo app,
+            CompatibilityInfo compatInfo) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         app.writeToParcel(data, 0);
+        compatInfo.writeToParcel(data, 0);
         mRemote.transact(SCHEDULE_DESTROY_BACKUP_AGENT_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
     }
     
-    public final void scheduleCreateService(IBinder token, ServiceInfo info)
-            throws RemoteException {
+    public final void scheduleCreateService(IBinder token, ServiceInfo info,
+            CompatibilityInfo compatInfo) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeStrongBinder(token);
         info.writeToParcel(data, 0);
+        compatInfo.writeToParcel(data, 0);
         mRemote.transact(SCHEDULE_CREATE_SERVICE_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
@@ -721,7 +743,7 @@ class ApplicationThreadProxy implements IApplicationThread {
     public final void bindApplication(String packageName, ApplicationInfo info,
             List<ProviderInfo> providers, ComponentName testName,
             String profileName, Bundle testArgs, IInstrumentationWatcher testWatcher, int debugMode,
-            boolean restrictedBackupMode, Configuration config,
+            boolean restrictedBackupMode, Configuration config, CompatibilityInfo compatInfo,
             Map<String, IBinder> services, Bundle coreSettings) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -740,6 +762,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeInt(debugMode);
         data.writeInt(restrictedBackupMode ? 1 : 0);
         config.writeToParcel(data, 0);
+        compatInfo.writeToParcel(data, 0);
         data.writeMap(services);
         data.writeBundle(coreSettings);
         mRemote.transact(BIND_APPLICATION_TRANSACTION, data, null,
@@ -954,6 +977,16 @@ class ApplicationThreadProxy implements IApplicationThread {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeBundle(coreSettings);
-        mRemote.transact(SET_CORE_SETTINGS, data, null, IBinder.FLAG_ONEWAY);
+        mRemote.transact(SET_CORE_SETTINGS_TRANSACTION, data, null, IBinder.FLAG_ONEWAY);
+    }
+
+    public void updatePackageCompatibilityInfo(String pkg, CompatibilityInfo info)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeString(pkg);
+        info.writeToParcel(data, 0);
+        mRemote.transact(UPDATE_PACKAGE_COMPATIBILITY_INFO_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
     }
 }

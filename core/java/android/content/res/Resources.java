@@ -92,6 +92,7 @@ public class Resources {
     private static boolean mPreloaded;
 
     /*package*/ final TypedValue mTmpValue = new TypedValue();
+    /*package*/ final Configuration mTmpConfig = new Configuration();
 
     // These are protected by the mTmpValue lock.
     private final LongSparseArray<WeakReference<Drawable.ConstantState> > mDrawableCache
@@ -1401,10 +1402,23 @@ public class Resources {
      */
     public void updateConfiguration(Configuration config,
             DisplayMetrics metrics) {
+        updateConfiguration(config, metrics, null);
+    }
+
+    /**
+     * @hide
+     */
+    public void updateConfiguration(Configuration config,
+            DisplayMetrics metrics, CompatibilityInfo compat) {
         synchronized (mTmpValue) {
+            if (compat != null) {
+                mCompatibilityInfo = compat;
+            }
             int configChanges = 0xfffffff;
             if (config != null) {
-                configChanges = mConfiguration.updateFrom(config);
+                mTmpConfig.setTo(config);
+                mCompatibilityInfo.applyToConfiguration(mTmpConfig);
+                configChanges = mConfiguration.updateFrom(mTmpConfig);
                 configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
             }
             if (mConfiguration.locale == null) {
@@ -1412,8 +1426,7 @@ public class Resources {
             }
             if (metrics != null) {
                 mMetrics.setTo(metrics);
-                mMetrics.updateMetrics(mCompatibilityInfo,
-                        mConfiguration.orientation, mConfiguration.screenLayout);
+                mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
             }
             mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
 
@@ -1503,14 +1516,22 @@ public class Resources {
      *
      * @hide
      */
-    public static void updateSystemConfiguration(Configuration config, DisplayMetrics metrics) {
+    public static void updateSystemConfiguration(Configuration config, DisplayMetrics metrics,
+            CompatibilityInfo compat) {
         if (mSystem != null) {
-            mSystem.updateConfiguration(config, metrics);
+            mSystem.updateConfiguration(config, metrics, compat);
             //Log.i(TAG, "Updated system resources " + mSystem
             //        + ": " + mSystem.getConfiguration());
         }
     }
 
+    /**
+     * @hide
+     */
+    public static void updateSystemConfiguration(Configuration config, DisplayMetrics metrics) {
+        updateSystemConfiguration(config, metrics, null);
+    }
+    
     /**
      * Return the current display metrics that are in effect for this resource 
      * object.  The returned object should be treated as read-only.

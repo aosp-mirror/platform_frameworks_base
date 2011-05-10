@@ -106,6 +106,8 @@ public class Am {
             runDumpHeap();
         } else if (op.equals("monitor")) {
             runMonitor();
+        } else if (op.equals("screen-compat")) {
+            runScreenCompat();
         } else {
             throw new IllegalArgumentException("Unknown command: " + op);
         }
@@ -776,6 +778,29 @@ public class Am {
         controller.run();
     }
 
+    private void runScreenCompat() throws Exception {
+        String mode = nextArgRequired();
+        boolean enabled;
+        if ("on".equals(mode)) {
+            enabled = true;
+        } else if ("off".equals(mode)) {
+            enabled = false;
+        } else {
+            System.err.println("Error: enabled mode must be 'on' or 'off' at " + mode);
+            showUsage();
+            return;
+        }
+
+        String packageName = nextArgRequired();
+        do {
+            try {
+                mAm.setPackageScreenCompatMode(packageName, enabled);
+            } catch (RemoteException e) {
+            }
+            packageName = nextArg();
+        } while (packageName != null);
+    }
+
     private class IntentReceiver extends IIntentReceiver.Stub {
         private boolean mFinished = false;
 
@@ -955,6 +980,8 @@ public class Am {
                 "\n" +
                 "    start monitoring: am monitor [--gdb <port>]\n" +
                 "        --gdb: start gdbserv on the given port at crash/ANR\n" +
+                "\n" +
+                "    control screen compatibility: am screen-compat [on|off] [package]\n" +
                 "\n" +
                 "    <INTENT> specifications include these flags:\n" +
                 "        [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +

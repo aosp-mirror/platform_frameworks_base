@@ -24,6 +24,7 @@ import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
 import android.content.ComponentName;
 import android.content.pm.ApplicationInfo;
+import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;

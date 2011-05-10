@@ -342,6 +342,9 @@ public interface IActivityManager extends IInterface {
     public int startActivitiesInPackage(int uid,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo) throws RemoteException;
 
+    public void setPackageScreenCompatMode(String packageName, boolean compatEnabled)
+            throws RemoteException;
+    
     // Multi-user APIs
     public boolean switchUser(int userid) throws RemoteException;
     
@@ -564,7 +567,8 @@ public interface IActivityManager extends IInterface {
     int START_ACTIVITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+120;
     int START_ACTIVITIES_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+121;
     int ACTIVITY_SLEPT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+122;
-    int SWITCH_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+123;
-    int REMOVE_SUB_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+124;
-    int REMOVE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+125;
+    int SET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+123;
+    int SWITCH_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+124;
+    int REMOVE_SUB_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+125;
+    int REMOVE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+126;
 }
