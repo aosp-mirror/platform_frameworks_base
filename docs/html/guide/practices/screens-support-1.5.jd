@@ -1,0 +1,186 @@
+page.title=Strategies for Android 1.5
+parent.title=Supporting Multiple Screens
+parent.link=screens_support.html
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Quickview</h2>
+  <ul>
+    <li>Apps developed for Android 1.5 and below support only the baseline screen
+configuration, by default</li>
+    <li>There are some simple steps you should take to enable support for multiple screens in
+an application designed for Android 1.5</li>
+  </ul>
+
+  <h2>In this document</h2>
+  <ol>
+    <li><a href="#strategies">Adding Multiple Screens Support</a></li>
+    <li><a href="#CompatMode">Compatibility Mode</a></li>
+  </ol>
+
+  <h2>See also</h2>
+  <ol>
+    <li><a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
+  </ol>
+
+</div>
+</div>
+
+
+<p>All applications written for Android 1.5 or earlier, by default, support only the
+baseline HVGA screen used on the T-Mobile G1 and similar devices, which is <em>normal</em> screen
+size and medium density (<em>mdpi</em>). Android 1.6 introduced support for different screen
+configurations and added APIs that allow applications to control how they operate on different
+screens, using alternative resources for different screen configurations.</p>
+
+<p>If your manifest file includes the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element,
+with the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
+attribute set to {@code "3"} or lower, and does <em>not</em> include the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> set to {@code "4"} or higher, then this document is for you. By
+default, an application written for Android 1.5 or below that does not set the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> set to {@code "4"} or higher runs in <a
+href="#CompatMode">compatibility mode</a> when on a device with a screen larger than the
+<em>normal</em> screen size (basically, the system displays the application in a small window
+that is roughly the size of the normal screen size).</p>
+
+<p>This document describes how to get your application out of <a href="#CompatMode">compatibility
+mode</a> and instead support multiple screens, but also maintain compatibility with Android 1.5 and
+below.</p>
+
+<p class="note"><strong>Note:</strong> Before you begin, you should first decide whether it's even
+necessary to support Android 1.5. To see the relative number of devices that are still running
+Android 1.5, see the <a
+href="http://developer.android.com/resources/dashboard/platform-versions.html">Platform Versions
+Dashboard</a>.</p>
+
+
+
+
+<h2 id="strategies">Adding Multiple Screens Support</h2>
+
+<p>If you have already developed and published an Android application based on
+Android 1.5 or earlier platform version, and want to maintain compatibility with Android 1.5, you
+need to make some changes to your application in order for it to properly run on newer devices with
+different screen configurations. You should be able to make these changes to your application such
+that you can distribute a single {@code .apk} to all devices.</p>
+
+<p>The recommended strategy is to develop your application against Android 1.6 (because it's the
+lowest version that includes support for multiple screens) and test your application on each
+platform version your application supports (especially the minimum platform, such as Android 1.5).
+Here's how to do that:</p>
+
+<ol>
+  <li>Maintain compatibility with existing devices by leaving your application's <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
+attribute as it is. You <em>do not</em> need to increment the value of the attribute to support new
+devices and multiple screens. </li>
+  <li>Extend compatibility for Android 1.6 (and higher) devices by adding <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> to the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element.
+Set the value of <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> to <code>"4"</code>. This allows your application to "inherit" the
+platform's multiple screens support, even though it is technically using an earlier version of the
+API.
+  <p>Adding this attribute will cause an error in the compiler, because the attribute is unknown to
+Android 1.5. You'll fix this next.</p></li>
+  <li>Change your application's build properties, such that it compiles against the Android 1.6 (API
+Level 4) library, rather than against the Android 1.5 (or earlier) library. You must do this in
+order for your application to successfully compile when using the new manifest attributes. Older
+versions of the platform simply ignore the attributes they don't know, so your application still
+runs fine on them, as long as you don't use APIs in your application code from Android 1.6. </li>
+</ol>
+
+<p>Your application is now prepared to run on multiple screens, while maintaining support for
+Android 1.5 or lower.</p>
+
+<p>Here's how you should begin testing your application:</p>
+
+<ol>
+  <li>Set up AVDs for testing your application on Android 1.6 and some new versions. Create AVDs
+that use the screen sizes and densities that you want to support. When you create the AVDs, make
+sure to select the Android 1.6 or higher platform as the system image to use. For more information,
+see <a href="{@docRoot}guide/practices/screens_support.html#testing">How to Test Your Application on
+Multiple Screens</a>.</li>
+  <li>Set up AVDs for testing your application on older versions of the platform, as low as the
+version declared by your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>.
+You need AVDs running the older platforms you are targeting, so that you can ensure there are
+no functional regressions.</li>
+  <li>Compile your application against the Android 1.6 library and run it on the AVDs you created.
+Observe the way your application looks and runs, and test all of the user interactions.</li>
+  <li>Debug any display or functional issues. For issues that you resolve in
+your application code, <span style="color:red">make certain not to use any APIs
+introduced later than the version declared by your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+android:minSdkVersion}</a></span>. If you
+are in doubt, refer to SDK reference documentation and look for the API Level specifier for the API
+you want to use. Using newer APIs not supported by your minimum version will mean that your
+application will no longer be compatible with devices running on that version.</li>
+</ol>
+
+<p>In particular, remember to test your application on an AVD that emulates a small-screen device.
+Users of devices with QVGA resolution at low density may want to download your application, so you
+should understand how your application will look and function on a small-screen device. In some
+cases, the reduced screen area and density mean that you need to make tradeoffs in design on those
+devices.</p>
+
+<p>Also give extra attention to testing your application on an AVD that emulates an <em>xlarge</em>
+screen. Devices with extra large screens are tablet-sized or larger, so you should pay close
+attention to how usable your application is on such screens. You might want to design new layouts
+specifically for extra large screens, to address usability aspects such as the location and size of
+buttons in your UI. To test your application on an extra large screen, create an AVD targeted to
+Android 3.0 and use the WXGA emulator skin.</p>
+
+<p>Once you've completed the procedures above, you should follow the recommendations in <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a> to add
+complete support for different screen configurations.</p>
+
+
+<h2 id="CompatMode">Compatibility Mode</h2>
+
+<div class="figure" style="width:450px;margin:0">
+<img src="{@docRoot}images/screens_support/compat-mode-on.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> An application running in compatibility mode
+on an extra large screen.</p>
+</div>
+
+<p>To allow applications to run on larger screens without stretching the UI, Android provides a
+compatibility mode that draws an application's UI in a "postage stamp" window when on larger
+screens. That is, the system displays the application at the baseline size (<em>normal</em>) and
+density (<em>mdpi</em>), with a black border that fills the rest of the screen.</p>
+
+<p>Compatibility mode exists primarily to support application's developed for Android 1.5 (or lower)
+when running on larger screens, because multiple screen support was not added until Android 1.6,
+older applications were not designed to support different screen configurations.</p>
+
+<p>As such, if you've set your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+android:minSdkVersion}</a> to {@code "3"} or lower and have <em>not</em> set the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> to {@code "4"} or higher, then compatibility mode is enabled and
+the system will not scale your application, because your application implicitly declares that it
+only supports the baseline screen configuration (normal screen size and medium density).</p>
+
+<p>To disable compatibility mode, set either <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+android:minSdkVersion}</a> or <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> to {@code "4"} or higher. For more information, see the previous
+section about <a href="#strategies">Adding Multiple Screens Support</a>.</p>
+
+<p>You can also affect whether compatibility mode is enabled by using the <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens>}</a> element (you can enable it by setting {@code android:resizeable} or
+specific screen sizes to {@code "false"}). However, you should not explicitly enable compatibility
+mode for your application, but should instead apply the necessary techniques to <a
+href="{@docRoot}guide/practices/screens_support.html">supporting multiple screens</a> and allow your
+application to properly fit the screen on all screen sizes.</p>
