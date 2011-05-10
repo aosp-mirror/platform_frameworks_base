@@ -34,6 +34,7 @@
 #include <surfaceflinger/IGraphicBufferAlloc.h>
 
 #include <utils/Log.h>
+#include <utils/String8.h>
 
 namespace android {
 
@@ -753,6 +754,70 @@ int SurfaceTexture::query(int what, int* outValue)
     }
     outValue[0] = value;
     return NO_ERROR;
+}
+
+void SurfaceTexture::dump(String8& result) const
+{
+    char buffer[1024];
+    dump(result, "", buffer, 1024);
+}
+
+void SurfaceTexture::dump(String8& result, const char* prefix,
+        char* buffer, size_t SIZE) const
+{
+    Mutex::Autolock _l(mMutex);
+    snprintf(buffer, SIZE,
+            "%smBufferCount=%d, mSynchronousMode=%d, default-size=[%dx%d], "
+            "mPixelFormat=%d, mTexName=%d\n",
+            prefix, mBufferCount, mSynchronousMode, mDefaultWidth, mDefaultHeight,
+            mPixelFormat, mTexName);
+    result.append(buffer);
+
+    String8 fifo;
+    int fifoSize = 0;
+    Fifo::const_iterator i(mQueue.begin());
+    while (i != mQueue.end()) {
+        snprintf(buffer, SIZE, "%02d ", *i++);
+        fifoSize++;
+        fifo.append(buffer);
+    }
+
+    snprintf(buffer, SIZE,
+            "%scurrent: {crop=[%d,%d,%d,%d], transform=0x%02x, current=%d, target=0x%04x}\n"
+            "%snext   : {crop=[%d,%d,%d,%d], transform=0x%02x, FIFO(%d)={%s}}\n"
+            ,
+            prefix, mCurrentCrop.left,
+            mCurrentCrop.top, mCurrentCrop.right, mCurrentCrop.bottom,
+            mCurrentTransform, mCurrentTexture, mCurrentTextureTarget,
+            prefix, mNextCrop.left, mNextCrop.top, mNextCrop.right, mNextCrop.bottom,
+            mCurrentTransform, fifoSize, fifo.string()
+    );
+    result.append(buffer);
+
+    struct {
+        const char * operator()(int state) const {
+            switch (state) {
+                case BufferSlot::DEQUEUED: return "DEQUEUED";
+                case BufferSlot::QUEUED: return "QUEUED";
+                case BufferSlot::FREE: return "FREE";
+                default: return "Unknown";
+            }
+        }
+    } stateName;
+
+    for (int i=0 ; i<mBufferCount ; i++) {
+        const BufferSlot& slot(mSlots[i]);
+        snprintf(buffer, SIZE,
+                "%s%s[%02d] state=%-8s, crop=[%d,%d,%d,%d], transform=0x%02x, "
+                "timestamp=%lld\n"
+                ,
+                prefix, (i==mCurrentTexture)?">":" ", i, stateName(slot.mBufferState),
+                slot.mLastQueuedCrop.left, slot.mLastQueuedCrop.top,
+                slot.mLastQueuedCrop.right, slot.mLastQueuedCrop.bottom,
+                slot.mLastQueuedTransform, slot.mLastQueuedTimestamp
+        );
+        result.append(buffer);
+    }
 }
 
 static void mtxMul(float out[16], const float a[16], const float b[16]) {

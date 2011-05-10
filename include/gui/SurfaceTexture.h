@@ -34,6 +34,7 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 class IGraphicBufferAlloc;
+class String8;
 
 class SurfaceTexture : public BnSurfaceTexture {
 public:
@@ -156,6 +157,10 @@ public:
 
     // getCurrentTransform returns the transform of the current buffer
     uint32_t getCurrentTransform() const;
+
+    // dump our state in a String
+    void dump(String8& result) const;
+    void dump(String8& result, const char* prefix, char* buffer, size_t SIZE) const;
 
 protected:
 
