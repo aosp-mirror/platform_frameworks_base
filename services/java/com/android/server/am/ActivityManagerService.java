@@ -75,6 +75,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Proxy;
@@ -147,7 +148,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         implements Watchdog.Monitor, BatteryStatsImpl.BatteryCallback {
     static final String TAG = "ActivityManager";
     static final boolean DEBUG = false;
-    static final boolean localLOGV = false;
+    static final boolean localLOGV = DEBUG;
     static final boolean DEBUG_SWITCH = localLOGV || false;
     static final boolean DEBUG_TASKS = localLOGV || false;
     static final boolean DEBUG_PAUSE = localLOGV || false;
@@ -543,6 +544,12 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     ProcessRecord mHomeProcess;
     
+    /**
+     * Packages that the user has asked to have run in screen size
+     * compatibility mode instead of filling the screen.
+     */
+    final HashSet<String> mScreenCompatPackages = new HashSet<String>();
+
     /**
      * Set of PendingResultRecord objects that are currently active.
      */
@@ -2074,6 +2081,74 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
     
+    CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
+        return new CompatibilityInfo(ai, mConfiguration.screenLayout,
+                mScreenCompatPackages.contains(ai.packageName));
+    }
+
+    public void setPackageScreenCompatMode(String packageName, boolean compatEnabled) {
+        synchronized (this) {
+            ApplicationInfo ai = null;
+            try {
+                ai = AppGlobals.getPackageManager().
+                        getApplicationInfo(packageName, STOCK_PM_FLAGS);
+            } catch (RemoteException e) {
+            }
+            if (ai == null) {
+                Slog.w(TAG, "setPackageScreenCompatMode failed: unknown package " + packageName);
+                return;
+            }
+            boolean changed = false;
+            if (compatEnabled) {
+                if (!mScreenCompatPackages.contains(packageName)) {
+                    changed = true;
+                    mScreenCompatPackages.add(packageName);
+                }
+            } else {
+                if (mScreenCompatPackages.contains(packageName)) {
+                    changed = true;
+                    mScreenCompatPackages.remove(packageName);
+                }
+            }
+            if (changed) {
+                CompatibilityInfo ci = compatibilityInfoForPackageLocked(ai);
+
+                // Tell all processes that loaded this package about the change.
+                for (int i=mLruProcesses.size()-1; i>=0; i--) {
+                    ProcessRecord app = mLruProcesses.get(i);
+                    if (!app.pkgList.contains(packageName)) {
+                        continue;
+                    }
+                    try {
+                        if (app.thread != null) {
+                            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending to proc "
+                                    + app.processName + " new compat " + ci);
+                            app.thread.updatePackageCompatibilityInfo(packageName, ci);
+                        }
+                    } catch (Exception e) {
+                    }
+                }
+
+                // All activities that came from the packge must be
+                // restarted as if there was a config change.
+                for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
+                    ActivityRecord a = (ActivityRecord)mMainStack.mHistory.get(i);
+                    if (a.info.packageName.equals(packageName)) {
+                        a.forceNewConfig = true;
+                    }
+                }
+
+                ActivityRecord starting = mMainStack.topRunningActivityLocked(null);
+                if (starting != null) {
+                    mMainStack.ensureActivityConfigurationLocked(starting, 0);
+                    // And we need to make sure at this point that all other activities
+                    // are made visible with the correct configuration.
+                    mMainStack.ensureActivitiesVisibleLocked(starting, 0);
+                }
+            }
+        }
+    }
+
     void reportResumedActivityLocked(ActivityRecord r) {
         //Slog.i(TAG, "**** REPORT RESUME: " + r);
         
@@ -3576,12 +3651,14 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (DEBUG_CONFIGURATION) Slog.v(TAG, "Binding proc "
                     + processName + " with config " + mConfiguration);
-            thread.bindApplication(processName, app.instrumentationInfo != null
-                    ? app.instrumentationInfo : app.info, providers,
+            ApplicationInfo appInfo = app.instrumentationInfo != null
+                    ? app.instrumentationInfo : app.info;
+            thread.bindApplication(processName, appInfo, providers,
                     app.instrumentationClass, app.instrumentationProfileFile,
                     app.instrumentationArguments, app.instrumentationWatcher, testMode, 
                     isRestrictedBackupMode || !normalMode,
-                    mConfiguration, getCommonServicesLocked(),
+                    mConfiguration, compatibilityInfoForPackageLocked(appInfo),
+                    getCommonServicesLocked(),
                     mCoreSettingsObserver.getCoreSettingsLocked());
             updateLruProcessLocked(app, false, true);
             app.lastRequestedGc = app.lastLowMemory = SystemClock.uptimeMillis();
@@ -3672,7 +3749,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (DEBUG_BACKUP) Slog.v(TAG, "New app is backup target, launching agent for " + app);
             ensurePackageDexOpt(mBackupTarget.appInfo.packageName);
             try {
-                thread.scheduleCreateBackupAgent(mBackupTarget.appInfo, mBackupTarget.backupMode);
+                thread.scheduleCreateBackupAgent(mBackupTarget.appInfo,
+                        compatibilityInfoForPackageLocked(mBackupTarget.appInfo),
+                        mBackupTarget.backupMode);
             } catch (Exception e) {
                 Slog.w(TAG, "Exception scheduling backup agent creation: ");
                 e.printStackTrace();
@@ -7866,6 +7945,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         pw.println("  mConfiguration: " + mConfiguration);
         if (dumpAll) {
             pw.println("  mConfigWillChange: " + mMainStack.mConfigWillChange);
+            if (mScreenCompatPackages.size() > 0) {
+                pw.print("  mScreenCompatPackages=");
+                pw.println(mScreenCompatPackages);
+            }
         }
         pw.println("  mSleeping=" + mSleeping + " mShuttingDown=" + mShuttingDown);
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
@@ -9560,7 +9643,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 r.stats.startLaunchedLocked();
             }
             ensurePackageDexOpt(r.serviceInfo.packageName);
-            app.thread.scheduleCreateService(r, r.serviceInfo);
+            app.thread.scheduleCreateService(r, r.serviceInfo,
+                    compatibilityInfoForPackageLocked(r.serviceInfo.applicationInfo));
             r.postNotification();
             created = true;
         } finally {
@@ -10670,7 +10754,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (proc.thread != null) {
                 if (DEBUG_BACKUP) Slog.v(TAG, "Agent proc already running: " + proc);
                 try {
-                    proc.thread.scheduleCreateBackupAgent(app, backupMode);
+                    proc.thread.scheduleCreateBackupAgent(app,
+                            compatibilityInfoForPackageLocked(app), backupMode);
                 } catch (RemoteException e) {
                     // Will time out on the backup manager side
                 }
@@ -10742,7 +10827,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             // If the app crashed during backup, 'thread' will be null here
             if (proc.thread != null) {
                 try {
-                    proc.thread.scheduleDestroyBackupAgent(appInfo);
+                    proc.thread.scheduleDestroyBackupAgent(appInfo,
+                            compatibilityInfoForPackageLocked(appInfo));
                 } catch (Exception e) {
                     Slog.e(TAG, "Exception when unbinding backup agent:");
                     e.printStackTrace();
@@ -11589,6 +11675,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + ": " + r);
             ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             app.thread.scheduleReceiver(new Intent(r.intent), r.curReceiver,
+                    compatibilityInfoForPackageLocked(r.curReceiver.applicationInfo),
                     r.resultCode, r.resultData, r.resultExtras, r.ordered);
             if (DEBUG_BROADCAST)  Slog.v(TAG,
                     "Process cur broadcast " + r + " DELIVERED for app " + app);

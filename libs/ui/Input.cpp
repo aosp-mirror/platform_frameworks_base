@@ -302,6 +302,24 @@ float* PointerCoords::editAxisValue(int32_t axis) {
     return &values[index];
 }
 
+static inline void scaleAxisValue(PointerCoords& c, int axis, float scaleFactor) {
+    float* value = c.editAxisValue(axis);
+    if (value) {
+        *value *= scaleFactor;
+    }
+}
+
+void PointerCoords::scale(float scaleFactor) {
+    // No need to scale pressure or size since they are normalized.
+    // No need to scale orientation since it is meaningless to do so.
+    scaleAxisValue(*this, AMOTION_EVENT_AXIS_X, scaleFactor);
+    scaleAxisValue(*this, AMOTION_EVENT_AXIS_Y, scaleFactor);
+    scaleAxisValue(*this, AMOTION_EVENT_AXIS_TOUCH_MAJOR, scaleFactor);
+    scaleAxisValue(*this, AMOTION_EVENT_AXIS_TOUCH_MINOR, scaleFactor);
+    scaleAxisValue(*this, AMOTION_EVENT_AXIS_TOOL_MAJOR, scaleFactor);
+    scaleAxisValue(*this, AMOTION_EVENT_AXIS_TOOL_MINOR, scaleFactor);
+}
+
 #ifdef HAVE_ANDROID_OS
 status_t PointerCoords::readFromParcel(Parcel* parcel) {
     bits = parcel->readInt64();
@@ -436,11 +454,9 @@ float MotionEvent::getAxisValue(int32_t axis, size_t pointerIndex) const {
     float value = getRawPointerCoords(pointerIndex)->getAxisValue(axis);
     switch (axis) {
     case AMOTION_EVENT_AXIS_X:
-        value += mXOffset;
-        break;
+        return value + mXOffset;
     case AMOTION_EVENT_AXIS_Y:
-        value += mYOffset;
-        break;
+        return value + mYOffset;
     }
     return value;
 }
@@ -460,11 +476,9 @@ float MotionEvent::getHistoricalAxisValue(int32_t axis, size_t pointerIndex,
     float value = getHistoricalRawPointerCoords(pointerIndex, historicalIndex)->getAxisValue(axis);
     switch (axis) {
     case AMOTION_EVENT_AXIS_X:
-        value += mXOffset;
-        break;
+        return value + mXOffset;
     case AMOTION_EVENT_AXIS_Y:
-        value += mYOffset;
-        break;
+        return value + mYOffset;
     }
     return value;
 }
@@ -484,13 +498,6 @@ void MotionEvent::offsetLocation(float xOffset, float yOffset) {
     mYOffset += yOffset;
 }
 
-static inline void scaleAxisValue(PointerCoords& c, int axis, float scaleFactor) {
-    float* value = c.editAxisValue(axis);
-    if (value) {
-        *value *= scaleFactor;
-    }
-}
-
 void MotionEvent::scale(float scaleFactor) {
     mXOffset *= scaleFactor;
     mYOffset *= scaleFactor;
@@ -499,15 +506,7 @@ void MotionEvent::scale(float scaleFactor) {
 
     size_t numSamples = mSamplePointerCoords.size();
     for (size_t i = 0; i < numSamples; i++) {
-        PointerCoords& c = mSamplePointerCoords.editItemAt(i);
-        // No need to scale pressure or size since they are normalized.
-        // No need to scale orientation since it is meaningless to do so.
-        scaleAxisValue(c, AMOTION_EVENT_AXIS_X, scaleFactor);
-        scaleAxisValue(c, AMOTION_EVENT_AXIS_Y, scaleFactor);
-        scaleAxisValue(c, AMOTION_EVENT_AXIS_TOUCH_MAJOR, scaleFactor);
-        scaleAxisValue(c, AMOTION_EVENT_AXIS_TOUCH_MINOR, scaleFactor);
-        scaleAxisValue(c, AMOTION_EVENT_AXIS_TOOL_MAJOR, scaleFactor);
-        scaleAxisValue(c, AMOTION_EVENT_AXIS_TOOL_MINOR, scaleFactor);
+        mSamplePointerCoords.editItemAt(i).scale(scaleFactor);
     }
 }
 

@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
-import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -589,6 +588,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // The frame use to limit the size of the app running in compatibility mode.
     Rect mCompatibleScreenFrame = new Rect();
+    float mCompatibleScreenScale;
     // The surface used to fill the outer rim of the app running in compatibility mode.
     Surface mBackgroundFillerSurface = null;
     WindowState mBackgroundFillerTarget = null;
@@ -1760,7 +1760,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean rawChanged = false;
         float wpx = mLastWallpaperX >= 0 ? mLastWallpaperX : 0.5f;
         float wpxs = mLastWallpaperXStep >= 0 ? mLastWallpaperXStep : -1.0f;
-        int availw = wallpaperWin.mFrame.right-wallpaperWin.mFrame.left-dw;
+        int availw = wallpaperWin.mScaledFrame.right-wallpaperWin.mScaledFrame.left-dw;
         int offset = availw > 0 ? -(int)(availw*wpx+.5f) : 0;
         changed = wallpaperWin.mXOffset != offset;
         if (changed) {
@@ -2889,14 +2889,14 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private boolean applyAnimationLocked(AppWindowToken wtoken,
-            WindowManager.LayoutParams lp, int transit, boolean enter) {
+            WindowManager.LayoutParams lp, int transit, boolean enter, boolean bgFiller) {
         // Only apply an animation if the display isn't frozen.  If it is
         // frozen, there is no reason to animate and it can cause strange
         // artifacts when we unfreeze the display if some different animation
         // is running.
         if (!mDisplayFrozen && mPolicy.isScreenOn()) {
             Animation a;
-            if (lp != null && (lp.flags & FLAG_COMPATIBLE_WINDOW) != 0) {
+            if (bgFiller) {
                 a = new FadeInOutAnimation(enter);
                 if (DEBUG_ANIM) Slog.v(TAG,
                         "applying FadeInOutAnimation for a window in compatibility mode");
@@ -3682,7 +3682,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean setTokenVisibilityLocked(AppWindowToken wtoken, WindowManager.LayoutParams lp,
-            boolean visible, int transit, boolean performLayout) {
+            boolean visible, int transit, boolean performLayout, boolean bgFiller) {
         boolean delayed = false;
 
         if (wtoken.clientHidden == visible) {
@@ -3704,7 +3704,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (wtoken.animation == sDummyAnimation) {
                     wtoken.animation = null;
                 }
-                applyAnimationLocked(wtoken, lp, transit, visible);
+                applyAnimationLocked(wtoken, lp, transit, visible, bgFiller);
                 changed = true;
                 if (wtoken.animation != null) {
                     delayed = runningAppAnimation = true;
@@ -3857,7 +3857,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             final long origId = Binder.clearCallingIdentity();
-            setTokenVisibilityLocked(wtoken, null, visible, WindowManagerPolicy.TRANSIT_UNSET, true);
+            setTokenVisibilityLocked(wtoken, null, visible, WindowManagerPolicy.TRANSIT_UNSET,
+                    true, false);
             wtoken.updateReportedVisibilityLocked();
             Binder.restoreCallingIdentity(origId);
         }
@@ -3983,7 +3984,8 @@ public class WindowManagerService extends IWindowManager.Stub
             WindowToken basewtoken = mTokenMap.remove(token);
             if (basewtoken != null && (wtoken=basewtoken.appWindowToken) != null) {
                 if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Removing app token: " + wtoken);
-                delayed = setTokenVisibilityLocked(wtoken, null, false, WindowManagerPolicy.TRANSIT_UNSET, true);
+                delayed = setTokenVisibilityLocked(wtoken, null, false,
+                        WindowManagerPolicy.TRANSIT_UNSET, true, false);
                 wtoken.inPendingTransaction = false;
                 mOpeningApps.remove(wtoken);
                 wtoken.waitingToShow = false;
@@ -4759,8 +4761,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             long ident = Binder.clearCallingIdentity();
 
-            dw = mCurDisplayWidth;
-            dh = mCurDisplayHeight;
+            dw = mPolicy.getNonDecorDisplayWidth(mCurDisplayWidth);
+            dh = mPolicy.getNonDecorDisplayHeight(mCurDisplayHeight);
 
             int aboveAppLayer = mPolicy.windowTypeToLayerLw(
                     WindowManager.LayoutParams.TYPE_APPLICATION) * TYPE_LAYER_MULTIPLIER
@@ -4808,7 +4810,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 
                 // Don't include wallpaper in bounds calculation
                 if (!ws.mIsWallpaper) {
-                    final Rect wf = ws.mFrame;
+                    final Rect wf = ws.mScaledFrame;
                     final Rect cr = ws.mContentInsets;
                     int left = wf.left + cr.left;
                     int top = wf.top + cr.top;
@@ -5526,10 +5528,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Override display width and height with what we are computing,
         // to be sure they remain consistent.
-        dm.widthPixels = dw;
-        dm.heightPixels = dh;
+        dm.widthPixels = mPolicy.getNonDecorDisplayWidth(dw);
+        dm.heightPixels = mPolicy.getNonDecorDisplayHeight(dh);
 
-        CompatibilityInfo.updateCompatibleScreenFrame(dm, orientation, mCompatibleScreenFrame);
+        mCompatibleScreenScale = CompatibilityInfo.updateCompatibleScreenFrame(
+                dm, mCompatibleScreenFrame, null);
 
         config.screenWidthDp = (int)(dm.widthPixels / dm.density);
         config.screenHeightDp = (int)(dm.heightPixels / dm.density);
@@ -6680,6 +6683,9 @@ public class WindowManagerService extends IWindowManager.Stub
         final int dw = mCurDisplayWidth;
         final int dh = mCurDisplayHeight;
 
+        final int innerDw = mPolicy.getNonDecorDisplayWidth(dw);
+        final int innerDh = mPolicy.getNonDecorDisplayHeight(dh);
+
         final int N = mWindows.size();
         int i;
 
@@ -6732,7 +6738,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
                         win.mContentChanged = false;
                     }
+                    win.prelayout();
                     mPolicy.layoutWindowLw(win, win.mAttrs, null);
+                    win.evalNeedsBackgroundFiller(innerDw, innerDh);
                     win.mLayoutSeq = seq;
                     if (DEBUG_LAYOUT) Slog.v(TAG, "-> mFrame="
                             + win.mFrame + " mContainingFrame="
@@ -6767,7 +6775,9 @@ public class WindowManagerService extends IWindowManager.Stub
                         //Slog.i(TAG, "Window " + this + " clearing mContentChanged - initial");
                         win.mContentChanged = false;
                     }
+                    win.prelayout();
                     mPolicy.layoutWindowLw(win, win.mAttrs, win.mAttachedWindow);
+                    win.evalNeedsBackgroundFiller(innerDw, innerDh);
                     win.mLayoutSeq = seq;
                     if (DEBUG_LAYOUT) Slog.v(TAG, "-> mFrame="
                             + win.mFrame + " mContainingFrame="
@@ -6797,6 +6807,9 @@ public class WindowManagerService extends IWindowManager.Stub
         final long currentTime = SystemClock.uptimeMillis();
         final int dw = mCurDisplayWidth;
         final int dh = mCurDisplayHeight;
+
+        final int innerDw = mPolicy.getNonDecorDisplayWidth(dw);
+        final int innerDh = mPolicy.getNonDecorDisplayHeight(dh);
 
         int i;
 
@@ -6897,13 +6910,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 boolean tokensAnimating = false;
                 final int NAT = mAppTokens.size();
                 for (i=0; i<NAT; i++) {
-                    if (mAppTokens.get(i).stepAnimationLocked(currentTime, dw, dh)) {
+                    if (mAppTokens.get(i).stepAnimationLocked(currentTime,
+                            innerDw, innerDh)) {
                         tokensAnimating = true;
                     }
                 }
                 final int NEAT = mExitingAppTokens.size();
                 for (i=0; i<NEAT; i++) {
-                    if (mExitingAppTokens.get(i).stepAnimationLocked(currentTime, dw, dh)) {
+                    if (mExitingAppTokens.get(i).stepAnimationLocked(currentTime,
+                            innerDw, innerDh)) {
                         tokensAnimating = true;
                     }
                 }
@@ -6956,8 +6971,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
                         final boolean wasAnimating = w.mAnimating;
 
-                        int animDw = dw;
-                        int animDh = dh;
+                        int animDw = innerDw;
+                        int animDh = innerDh;
 
                         // If the window has moved due to its containing
                         // content frame changing, then we'd like to animate
@@ -7214,6 +7229,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         LayoutParams animLp = null;
                         int bestAnimLayer = -1;
                         boolean fullscreenAnim = false;
+                        boolean needBgFiller = false;
 
                         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
                                 "New wallpaper target=" + mWallpaperTarget
@@ -7253,9 +7269,10 @@ public class WindowManagerService extends IWindowManager.Stub
                                 if (ws != null) {
                                     // If this is a compatibility mode
                                     // window, we will always use its anim.
-                                    if ((ws.mAttrs.flags&FLAG_COMPATIBLE_WINDOW) != 0) {
+                                    if (ws.mNeedsBackgroundFiller) {
                                         animLp = ws.mAttrs;
                                         bestAnimLayer = Integer.MAX_VALUE;
+                                        needBgFiller = true;
                                     } else if (!fullscreenAnim || ws.mLayer > bestAnimLayer) {
                                         animLp = ws.mAttrs;
                                         bestAnimLayer = ws.mLayer;
@@ -7320,7 +7337,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             wtoken.reportedVisible = false;
                             wtoken.inPendingTransaction = false;
                             wtoken.animation = null;
-                            setTokenVisibilityLocked(wtoken, animLp, true, transit, false);
+                            setTokenVisibilityLocked(wtoken, animLp, true,
+                                    transit, false, needBgFiller);
                             wtoken.updateReportedVisibilityLocked();
                             wtoken.waitingToShow = false;
                             wtoken.showAllWindowsLocked();
@@ -7332,7 +7350,8 @@ public class WindowManagerService extends IWindowManager.Stub
                                     "Now closing app" + wtoken);
                             wtoken.inPendingTransaction = false;
                             wtoken.animation = null;
-                            setTokenVisibilityLocked(wtoken, animLp, false, transit, false);
+                            setTokenVisibilityLocked(wtoken, animLp, false,
+                                    transit, false, needBgFiller);
                             wtoken.updateReportedVisibilityLocked();
                             wtoken.waitingToHide = false;
                             // Force the allDrawn flag, because we want to start
@@ -7835,12 +7854,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     boolean opaqueDrawn = canBeSeen && w.isOpaqueDrawn();
-                    if (opaqueDrawn && w.isFullscreen(dw, dh)) {
+                    if (opaqueDrawn && w.isFullscreen(innerDw, innerDh)) {
                         // This window completely covers everything behind it,
                         // so we want to leave all of them as unblurred (for
                         // performance reasons).
                         obscured = true;
-                    } else if (w.needsBackgroundFiller(dw, dh) && (canBeSeen || w.isAnimating())) {
+                    } else if (w.mNeedsBackgroundFiller && w.mHasDrawn
+                            && w.mViewVisibility == View.VISIBLE
+                            && (canBeSeen || w.isAnimating())) {
                         // This window is in compatibility mode, and needs background filler.
                         obscured = true;
                         mBackgroundFillerTarget = w;

@@ -29,8 +29,7 @@ bool InputWindow::touchableRegionContainsPoint(int32_t x, int32_t y) const {
 }
 
 bool InputWindow::frameContainsPoint(int32_t x, int32_t y) const {
-    return x >= frameLeft && x <= frameRight
-            && y >= frameTop && y <= frameBottom;
+    return x <= frameRight || y <= frameBottom;
 }
 
 bool InputWindow::isTrustedOverlay() const {

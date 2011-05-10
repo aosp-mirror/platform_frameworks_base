@@ -132,6 +132,10 @@ struct InputTarget {
     // (ignored for KeyEvents)
     float xOffset, yOffset;
 
+    // Scaling factor to apply to MotionEvent as it is delivered.
+    // (ignored for KeyEvents)
+    float scaleFactor;
+
     // The subset of pointer ids to include in motion events dispatched to this input target
     // if FLAG_SPLIT is set.
     BitSet32 pointerIds;
@@ -474,6 +478,7 @@ private:
         int32_t targetFlags;
         float xOffset;
         float yOffset;
+        float scaleFactor;
 
         // True if dispatch has started.
         bool inProgress;
@@ -602,7 +607,7 @@ private:
                 nsecs_t downTime, uint32_t pointerCount,
                 const int32_t* pointerIds, const PointerCoords* pointerCoords);
         DispatchEntry* obtainDispatchEntry(EventEntry* eventEntry,
-                int32_t targetFlags, float xOffset, float yOffset);
+                int32_t targetFlags, float xOffset, float yOffset, float scaleFactor);
         CommandEntry* obtainCommandEntry(Command command);
 
         void releaseInjectionState(InjectionState* injectionState);

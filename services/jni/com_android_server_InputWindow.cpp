@@ -38,6 +38,7 @@ static struct {
     jfieldID frameTop;
     jfieldID frameRight;
     jfieldID frameBottom;
+    jfieldID scaleFactor;
     jfieldID touchableRegion;
     jfieldID visible;
     jfieldID canReceiveKeys;
@@ -100,6 +101,8 @@ void android_server_InputWindow_toNative(
             gInputWindowClassInfo.frameRight);
     outInputWindow->frameBottom = env->GetIntField(inputWindowObj,
             gInputWindowClassInfo.frameBottom);
+    outInputWindow->scaleFactor = env->GetFloatField(inputWindowObj,
+            gInputWindowClassInfo.scaleFactor);
 
     jobject regionObj = env->GetObjectField(inputWindowObj,
             gInputWindowClassInfo.touchableRegion);
@@ -173,6 +176,9 @@ int register_android_server_InputWindow(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowClassInfo.frameBottom, clazz,
             "frameBottom", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.scaleFactor, clazz,
+            "scaleFactor", "F");
 
     GET_FIELD_ID(gInputWindowClassInfo.touchableRegion, clazz,
             "touchableRegion", "Landroid/graphics/Region;");
