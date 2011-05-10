@@ -559,7 +559,7 @@ menu.</p></li>
     <p>Provides a search box that you can configure to deliver search queries to a specified
 activity and display search suggestions (in the same manner as the traditional search dialog). This
 widget is particularly useful for offering a search widget in the Action Bar. For more information,
-see <a href="{@docRoot}guide/topics/search/search-dialog.html">Creating a Search Interface</p>.</li>
+see <a href="{@docRoot}guide/topics/search/search-dialog.html">Creating a Search Interface.</p></li>
     
     <li>{@link android.widget.StackView}
     <p>A view that displays its children in a 3D stack and allows users to swipe through
