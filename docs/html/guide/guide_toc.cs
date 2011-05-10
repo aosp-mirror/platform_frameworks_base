@@ -653,9 +653,19 @@
       <li><a href="<?cs var:toroot ?>guide/practices/compatibility.html">
             <span class="en">Compatibility</span>
           </a></li>
-      <li><a href="<?cs var:toroot ?>guide/practices/screens_support.html">
-            <span class="en">Supporting Multiple Screens</span>
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>guide/practices/screens_support.html">
+          <span class="en">Supporting Multiple Screens</span>
+        </a></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/practices/screens-distribution.html">
+            <span class="en">Distributing to Specific Screens</span>
           </a></li>
+          <li><a href="<?cs var:toroot ?>guide/practices/screens-support-1.5.html">
+            <span class="en">Strategies for Android 1.5</span>
+          </a></li>
+        </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>guide/practices/optimizing-for-3.0.html">
             <span class="en">Optimizing Apps for Android 3.0</span>
           </a></li>
