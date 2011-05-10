@@ -71,6 +71,7 @@ public abstract class BaseCommands implements CommandsInterface {
     protected RegistrantList mCdmaPrlChangedRegistrants = new RegistrantList();
     protected RegistrantList mExitEmergencyCallbackModeRegistrants = new RegistrantList();
     protected RegistrantList mRilConnectedRegistrants = new RegistrantList();
+    protected RegistrantList mIccRefreshRegistrants = new RegistrantList();
 
     protected Registrant mSMSRegistrant;
     protected Registrant mNITZTimeRegistrant;
@@ -85,7 +86,6 @@ public abstract class BaseCommands implements CommandsInterface {
     protected Registrant mCatCallSetUpRegistrant;
     protected Registrant mIccSmsFullRegistrant;
     protected Registrant mEmergencyCallbackModeRegistrant;
-    protected Registrant mIccRefreshRegistrant;
     protected Registrant mRingRegistrant;
     protected Registrant mRestrictedStateRegistrant;
     protected Registrant mGsmBroadcastSmsRegistrant;
@@ -454,16 +454,17 @@ public abstract class BaseCommands implements CommandsInterface {
         mIccSmsFullRegistrant.clear();
     }
 
-    public void setOnIccRefresh(Handler h, int what, Object obj) {
-        mIccRefreshRegistrant = new Registrant (h, what, obj);
+    public void registerForIccRefresh(Handler h, int what, Object obj) {
+        Registrant r = new Registrant (h, what, obj);
+        mIccRefreshRegistrants.add(r);
     }
 
     public void setEmergencyCallbackMode(Handler h, int what, Object obj) {
         mEmergencyCallbackModeRegistrant = new Registrant (h, what, obj);
     }
 
-    public void unSetOnIccRefresh(Handler h) {
-        mIccRefreshRegistrant.clear();
+    public void unregisterForIccRefresh(Handler h) {
+        mIccRefreshRegistrants.remove(h);
     }
 
     public void setOnCallRing(Handler h, int what, Object obj) {

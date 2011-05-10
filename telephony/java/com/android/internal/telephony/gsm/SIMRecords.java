@@ -184,7 +184,7 @@ public final class SIMRecords extends IccRecords {
         p.mCM.registerForOffOrNotAvailable(
                         this, EVENT_RADIO_OFF_OR_NOT_AVAILABLE, null);
         p.mCM.setOnSmsOnSim(this, EVENT_SMS_ON_SIM, null);
-        p.mCM.setOnIccRefresh(this, EVENT_SIM_REFRESH, null);
+        p.mCM.registerForIccRefresh(this, EVENT_SIM_REFRESH, null);
 
         // Start off by setting empty state
         onRadioOffOrNotAvailable();
@@ -195,7 +195,7 @@ public final class SIMRecords extends IccRecords {
         //Unregister for all events
         phone.mCM.unregisterForSIMReady(this);
         phone.mCM.unregisterForOffOrNotAvailable( this);
-        phone.mCM.unSetOnIccRefresh(this);
+        phone.mCM.unregisterForIccRefresh(this);
     }
 
     protected void finalize() {
