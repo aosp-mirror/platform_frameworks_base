@@ -23,6 +23,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Debug;
@@ -52,7 +53,8 @@ public interface IApplicationThread extends IInterface {
     void scheduleResumeActivity(IBinder token, boolean isForward) throws RemoteException;
     void scheduleSendResult(IBinder token, List<ResultInfo> results) throws RemoteException;
     void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
-            ActivityInfo info, Bundle state, List<ResultInfo> pendingResults,
+            ActivityInfo info, CompatibilityInfo compatInfo, Bundle state,
+            List<ResultInfo> pendingResults,
     		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward)
     		throws RemoteException;
     void scheduleRelaunchActivity(IBinder token, List<ResultInfo> pendingResults,
@@ -61,14 +63,17 @@ public interface IApplicationThread extends IInterface {
     void scheduleNewIntent(List<Intent> intent, IBinder token) throws RemoteException;
     void scheduleDestroyActivity(IBinder token, boolean finished,
             int configChanges) throws RemoteException;
-    void scheduleReceiver(Intent intent, ActivityInfo info, int resultCode,
-            String data, Bundle extras, boolean sync) throws RemoteException;
+    void scheduleReceiver(Intent intent, ActivityInfo info, CompatibilityInfo compatInfo,
+            int resultCode, String data, Bundle extras, boolean sync) throws RemoteException;
     static final int BACKUP_MODE_INCREMENTAL = 0;
     static final int BACKUP_MODE_FULL = 1;
     static final int BACKUP_MODE_RESTORE = 2;
-    void scheduleCreateBackupAgent(ApplicationInfo app, int backupMode) throws RemoteException;
-    void scheduleDestroyBackupAgent(ApplicationInfo app) throws RemoteException;
-    void scheduleCreateService(IBinder token, ServiceInfo info) throws RemoteException;
+    void scheduleCreateBackupAgent(ApplicationInfo app, CompatibilityInfo compatInfo,
+            int backupMode) throws RemoteException;
+    void scheduleDestroyBackupAgent(ApplicationInfo app, CompatibilityInfo compatInfo)
+            throws RemoteException;
+    void scheduleCreateService(IBinder token, ServiceInfo info,
+            CompatibilityInfo compatInfo) throws RemoteException;
     void scheduleBindService(IBinder token,
             Intent intent, boolean rebind) throws RemoteException;
     void scheduleUnbindService(IBinder token,
@@ -82,7 +87,7 @@ public interface IApplicationThread extends IInterface {
     void bindApplication(String packageName, ApplicationInfo info, List<ProviderInfo> providers,
             ComponentName testName, String profileName, Bundle testArguments, 
             IInstrumentationWatcher testWatcher, int debugMode, boolean restrictedBackupMode,
-            Configuration config, Map<String, IBinder> services,
+            Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
             Bundle coreSettings) throws RemoteException;
     void scheduleExit() throws RemoteException;
     void scheduleSuicide() throws RemoteException;
@@ -112,6 +117,7 @@ public interface IApplicationThread extends IInterface {
     void dumpActivity(FileDescriptor fd, IBinder servicetoken, String prefix, String[] args)
             throws RemoteException;
     void setCoreSettings(Bundle coreSettings) throws RemoteException;
+    void updatePackageCompatibilityInfo(String pkg, CompatibilityInfo info) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
 
@@ -153,5 +159,6 @@ public interface IApplicationThread extends IInterface {
     int DUMP_ACTIVITY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+36;
     int CLEAR_DNS_CACHE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+37;
     int SET_HTTP_PROXY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+38;
-    int SET_CORE_SETTINGS = IBinder.FIRST_CALL_TRANSACTION+39;
+    int SET_CORE_SETTINGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+39;
+    int UPDATE_PACKAGE_COMPATIBILITY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+40;
 }

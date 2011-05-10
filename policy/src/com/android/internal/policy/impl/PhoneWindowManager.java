@@ -35,7 +35,6 @@ import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocalPowerManager;
@@ -56,7 +55,6 @@ import com.android.internal.telephony.ITelephony;
 import com.android.internal.view.BaseInputHandler;
 import com.android.internal.widget.PointerLocationView;
 
-import android.telephony.TelephonyManager;
 import android.util.Config;
 import android.util.EventLog;
 import android.util.Log;
@@ -231,6 +229,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mSafeMode;
     WindowState mStatusBar = null;
     boolean mStatusBarCanHide;
+    int mScreenMarginBottom;
     final ArrayList<WindowState> mStatusBarPanels = new ArrayList<WindowState>();
     WindowState mKeyguard = null;
     KeyguardViewMediator mKeyguardMediator;
@@ -1032,6 +1031,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return STATUS_BAR_LAYER;
     }
 
+    public int getNonDecorDisplayWidth(int fullWidth) {
+        return fullWidth;
+    }
+
+    public int getNonDecorDisplayHeight(int fullHeight) {
+        return fullHeight - mScreenMarginBottom;
+    }
+
     public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs) {
         return attrs.type == WindowManager.LayoutParams.TYPE_KEYGUARD;
     }
@@ -1181,6 +1188,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // The Configuration will be stable by now, so we can load this
                 mStatusBarCanHide = mContext.getResources().getBoolean(
                         com.android.internal.R.bool.config_statusBarCanHide);
+                mScreenMarginBottom = mContext.getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.screen_margin_bottom);
 
                 break;
             case TYPE_STATUS_BAR_PANEL:

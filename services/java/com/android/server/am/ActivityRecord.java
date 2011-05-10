@@ -111,6 +111,7 @@ class ActivityRecord extends IApplicationToken.Stub {
     boolean hasBeenLaunched;// has this activity ever been launched?
     boolean frozenBeforeDestroy;// has been frozen but not yet destroyed.
     boolean immersive;      // immersive mode (don't interrupt if possible)
+    boolean forceNewConfig; // force re-create with new config next time
 
     String stringName;      // for caching of toString().
     
@@ -174,7 +175,8 @@ class ActivityRecord extends IApplicationToken.Stub {
                 pw.print(" immersive="); pw.print(immersive);
                 pw.print(" launchMode="); pw.println(launchMode);
         pw.print(prefix); pw.print("frozenBeforeDestroy="); pw.print(frozenBeforeDestroy);
-                pw.print(" thumbnailNeeded="); pw.println(thumbnailNeeded);
+                pw.print(" thumbnailNeeded="); pw.print(thumbnailNeeded);
+                pw.print(" forceNewConfig="); pw.println(forceNewConfig);
         if (launchTime != 0 || startTime != 0) {
             pw.print(prefix); pw.print("launchTime=");
                     TimeUtils.formatDuration(launchTime, pw); pw.print(" startTime=");

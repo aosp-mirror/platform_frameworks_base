@@ -703,11 +703,20 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     }
     
     public int hashCode() {
-        return ((int)this.fontScale) + this.mcc + this.mnc
-                + (this.locale != null ? this.locale.hashCode() : 0)
-                + this.touchscreen
-                + this.keyboard + this.keyboardHidden + this.hardKeyboardHidden
-                + this.navigation + this.navigationHidden
-                + this.orientation + this.screenLayout + this.uiMode;
+        int result = 17;
+        result = 31 * result + Float.floatToIntBits(fontScale);
+        result = 31 * result + mcc;
+        result = 31 * result + mnc;
+        result = 31 * result + (locale != null ? locale.hashCode() : 0);
+        result = 31 * result + touchscreen;
+        result = 31 * result + keyboard;
+        result = 31 * result + keyboardHidden;
+        result = 31 * result + hardKeyboardHidden;
+        result = 31 * result + navigation;
+        result = 31 * result + navigationHidden;
+        result = 31 * result + orientation;
+        result = 31 * result + screenLayout;
+        result = 31 * result + uiMode;
+        return result;
     }
 }

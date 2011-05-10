@@ -62,7 +62,8 @@ public class DpiTestActivity extends Activity {
                     | ApplicationInfo.FLAG_SUPPORTS_SMALL_SCREENS
                     | ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS
                     | ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES;
-                app.getResources().setCompatibilityInfo(new CompatibilityInfo(ai));
+                app.getResources().setCompatibilityInfo(new CompatibilityInfo(ai,
+                        getResources().getConfiguration().screenLayout, false));
             }
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException("ouch", e);

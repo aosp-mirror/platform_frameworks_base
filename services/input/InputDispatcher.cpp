@@ -156,6 +156,14 @@ static bool validateMotionEvent(int32_t action, size_t pointerCount,
     return true;
 }
 
+static void scalePointerCoords(const PointerCoords* inCoords, size_t count, float scaleFactor,
+        PointerCoords* outCoords) {
+   for (size_t i = 0; i < count; i++) {
+       outCoords[i] = inCoords[i];
+       outCoords[i].scale(scaleFactor);
+   }
+}
+
 static void dumpRegion(String8& dump, const SkRegion& region) {
     if (region.isEmpty()) {
         dump.append("<empty>");
@@ -1494,6 +1502,7 @@ void InputDispatcher::addWindowTargetLocked(const InputWindow* window, int32_t t
     target.flags = targetFlags;
     target.xOffset = - window->frameLeft;
     target.yOffset = - window->frameTop;
+    target.scaleFactor = window->scaleFactor;
     target.pointerIds = pointerIds;
 }
 
@@ -1506,6 +1515,7 @@ void InputDispatcher::addMonitoringTargetsLocked() {
         target.flags = 0;
         target.xOffset = 0;
         target.yOffset = 0;
+        target.scaleFactor = 1.0f;
     }
 }
 
@@ -1607,12 +1617,12 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
         bool resumeWithAppendedMotionSample) {
 #if DEBUG_DISPATCH_CYCLE
     LOGD("channel '%s' ~ prepareDispatchCycle - flags=%d, "
-            "xOffset=%f, yOffset=%f, "
+            "xOffset=%f, yOffset=%f, scaleFactor=%f"
             "pointerIds=0x%x, "
             "resumeWithAppendedMotionSample=%s",
             connection->getInputChannelName(), inputTarget->flags,
             inputTarget->xOffset, inputTarget->yOffset,
-            inputTarget->pointerIds.value,
+            inputTarget->scaleFactor, inputTarget->pointerIds.value,
             toString(resumeWithAppendedMotionSample));
 #endif
 
@@ -1693,8 +1703,19 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
             // consumed the motion event (or if the channel is broken).
             MotionEntry* motionEntry = static_cast<MotionEntry*>(eventEntry);
             MotionSample* appendedMotionSample = motionEntry->lastSample;
-            status_t status = connection->inputPublisher.appendMotionSample(
-                    appendedMotionSample->eventTime, appendedMotionSample->pointerCoords);
+            status_t status;
+            if (motionEventDispatchEntry->scaleFactor == 1.0f) {
+                status = connection->inputPublisher.appendMotionSample(
+                        appendedMotionSample->eventTime, appendedMotionSample->pointerCoords);
+            } else {
+                PointerCoords scaledCoords[MAX_POINTERS];
+                for (size_t i = 0; i < motionEntry->pointerCount; i++) {
+                    scaledCoords[i] = appendedMotionSample->pointerCoords[i];
+                    scaledCoords[i].scale(motionEventDispatchEntry->scaleFactor);
+                }
+                status = connection->inputPublisher.appendMotionSample(
+                        appendedMotionSample->eventTime, scaledCoords);
+            }
             if (status == OK) {
 #if DEBUG_BATCHING
                 LOGD("channel '%s' ~ Successfully streamed new motion sample.",
@@ -1731,7 +1752,8 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
     // This is a new event.
     // Enqueue a new dispatch entry onto the outbound queue for this connection.
     DispatchEntry* dispatchEntry = mAllocator.obtainDispatchEntry(eventEntry, // increments ref
-            inputTarget->flags, inputTarget->xOffset, inputTarget->yOffset);
+            inputTarget->flags, inputTarget->xOffset, inputTarget->yOffset,
+            inputTarget->scaleFactor);
     if (dispatchEntry->hasForegroundTarget()) {
         incrementPendingForegroundDispatchesLocked(eventEntry);
     }
@@ -1827,24 +1849,34 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             firstMotionSample = & motionEntry->firstSample;
         }
 
+        PointerCoords scaledCoords[MAX_POINTERS];
+        const PointerCoords* usingCoords = firstMotionSample->pointerCoords;
+
         // Set the X and Y offset depending on the input source.
-        float xOffset, yOffset;
+        float xOffset, yOffset, scaleFactor;
         if (motionEntry->source & AINPUT_SOURCE_CLASS_POINTER) {
-            xOffset = dispatchEntry->xOffset;
-            yOffset = dispatchEntry->yOffset;
+            scaleFactor = dispatchEntry->scaleFactor;
+            xOffset = dispatchEntry->xOffset * scaleFactor;
+            yOffset = dispatchEntry->yOffset * scaleFactor;
+            if (scaleFactor != 1.0f) {
+                for (size_t i = 0; i < motionEntry->pointerCount; i++) {
+                    scaledCoords[i] = firstMotionSample->pointerCoords[i];
+                    scaledCoords[i].scale(scaleFactor);
+                }
+                usingCoords = scaledCoords;
+            }
         } else {
             xOffset = 0.0f;
             yOffset = 0.0f;
+            scaleFactor = 1.0f;
         }
 
         // Publish the motion event and the first motion sample.
         status = connection->inputPublisher.publishMotionEvent(motionEntry->deviceId,
                 motionEntry->source, action, flags, motionEntry->edgeFlags, motionEntry->metaState,
-                xOffset, yOffset,
-                motionEntry->xPrecision, motionEntry->yPrecision,
+                xOffset, yOffset, motionEntry->xPrecision, motionEntry->yPrecision,
                 motionEntry->downTime, firstMotionSample->eventTime,
-                motionEntry->pointerCount, motionEntry->pointerIds,
-                firstMotionSample->pointerCoords);
+                motionEntry->pointerCount, motionEntry->pointerIds, usingCoords);
 
         if (status) {
             LOGE("channel '%s' ~ Could not publish motion event, "
@@ -1857,7 +1889,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
         MotionSample* nextMotionSample = firstMotionSample->next;
         for (; nextMotionSample != NULL; nextMotionSample = nextMotionSample->next) {
             status = connection->inputPublisher.appendMotionSample(
-                    nextMotionSample->eventTime, nextMotionSample->pointerCoords);
+                    nextMotionSample->eventTime, usingCoords);
             if (status == NO_MEMORY) {
 #if DEBUG_DISPATCH_CYCLE
                     LOGD("channel '%s' ~ Shared memory buffer full.  Some motion samples will "
@@ -2095,18 +2127,21 @@ void InputDispatcher::synthesizeCancelationEventsForConnectionLocked(
             }
 
             int32_t xOffset, yOffset;
+            float scaleFactor;
             const InputWindow* window = getWindowLocked(connection->inputChannel);
             if (window) {
                 xOffset = -window->frameLeft;
                 yOffset = -window->frameTop;
+                scaleFactor = window->scaleFactor;
             } else {
                 xOffset = 0;
                 yOffset = 0;
+                scaleFactor = 1.0f;
             }
 
             DispatchEntry* cancelationDispatchEntry =
                     mAllocator.obtainDispatchEntry(cancelationEventEntry, // increments ref
-                    0, xOffset, yOffset);
+                    0, xOffset, yOffset, scaleFactor);
             connection->outboundQueue.enqueueAtTail(cancelationDispatchEntry);
 
             mAllocator.releaseEventEntry(cancelationEventEntry);
@@ -2957,7 +2992,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
             const InputWindow& window = mWindows[i];
             dump.appendFormat(INDENT2 "%d: name='%s', paused=%s, hasFocus=%s, hasWallpaper=%s, "
                     "visible=%s, canReceiveKeys=%s, flags=0x%08x, type=0x%08x, layer=%d, "
-                    "frame=[%d,%d][%d,%d], "
+                    "frame=[%d,%d][%d,%d], scale=%f, "
                     "touchableRegion=",
                     i, window.name.string(),
                     toString(window.paused),
@@ -2968,7 +3003,8 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
                     window.layoutParamsFlags, window.layoutParamsType,
                     window.layer,
                     window.frameLeft, window.frameTop,
-                    window.frameRight, window.frameBottom);
+                    window.frameRight, window.frameBottom,
+                    window.scaleFactor);
             dumpRegion(dump, window.touchableRegion);
             dump.appendFormat(", ownerPid=%d, ownerUid=%d, dispatchingTimeout=%0.3fms\n",
                     window.ownerPid, window.ownerUid,
@@ -3460,13 +3496,14 @@ InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsec
 
 InputDispatcher::DispatchEntry* InputDispatcher::Allocator::obtainDispatchEntry(
         EventEntry* eventEntry,
-        int32_t targetFlags, float xOffset, float yOffset) {
+        int32_t targetFlags, float xOffset, float yOffset, float scaleFactor) {
     DispatchEntry* entry = mDispatchEntryPool.alloc();
     entry->eventEntry = eventEntry;
     eventEntry->refCount += 1;
     entry->targetFlags = targetFlags;
     entry->xOffset = xOffset;
     entry->yOffset = yOffset;
+    entry->scaleFactor = scaleFactor;
     entry->inProgress = false;
     entry->headMotionSample = NULL;
     entry->tailMotionSample = NULL;
