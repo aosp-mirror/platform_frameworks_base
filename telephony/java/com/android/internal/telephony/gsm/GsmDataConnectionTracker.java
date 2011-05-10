@@ -935,7 +935,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         if (dc == null) {
-            dc = createDataConnection(apnContext.getApnType());
+            dc = createDataConnection();
         }
 
         if (dc == null) {
@@ -947,6 +947,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         dc.setActiveApnType(apnContext.getApnType());
         int refCount = dc.incAndGetRefCount();
         if (DBG) log("setupData: init dc and apnContext refCount=" + refCount);
+
+        // configure retry count if no other Apn is using the same connection.
+        if (refCount == 1) {
+            configureRetry(dc, apnContext.getApnType());
+        }
         DataConnectionAc dcac = mDataConnectionAsyncChannels.get(dc.getDataConnectionId());
         apnContext.setDataConnectionAc(mDataConnectionAsyncChannels.get(dc.getDataConnectionId()));
         apnContext.setApnSetting(apn);
@@ -1785,33 +1790,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     /** Return the id for a new data connection */
-    private GsmDataConnection createDataConnection(String apnType) {
-        if (DBG) log("createDataConnection(" + apnType + ") E");
+    private GsmDataConnection createDataConnection() {
+        if (DBG) log("createDataConnection E");
+
         RetryManager rm = new RetryManager();
-
-        if (apnType.equals(Phone.APN_TYPE_DEFAULT)) {
-            if (!rm.configure(SystemProperties.get("ro.gsm.data_retry_config"))) {
-                if (!rm.configure(DEFAULT_DATA_RETRY_CONFIG)) {
-                    // Should never happen, log an error and default to a simple linear sequence.
-                    loge("createDataConnection: Could not configure using " +
-                            "DEFAULT_DATA_RETRY_CONFIG=" + DEFAULT_DATA_RETRY_CONFIG);
-                    rm.configure(20, 2000, 1000);
-                }
-            }
-        } else {
-            if (!rm.configure(SystemProperties.get("ro.gsm.2nd_data_retry_config"))) {
-                if (!rm.configure(SECONDARY_DATA_RETRY_CONFIG)) {
-                    // Should never happen, log an error and default to a simple sequence.
-                    loge("createDataConnection: Could note configure using " +
-                            "SECONDARY_DATA_RETRY_CONFIG=" + SECONDARY_DATA_RETRY_CONFIG);
-                    rm.configure("max_retries=3, 333, 333, 333");
-                }
-            }
-        }
-
         int id = mUniqueIdGenerator.getAndIncrement();
         GsmDataConnection conn = GsmDataConnection.makeDataConnection(mPhone, id, rm);
-        conn.resetRetryCount();
         mDataConnections.put(id, conn);
         DataConnectionAc dcac = new DataConnectionAc(conn, LOG_TAG);
         int status = dcac.fullyConnectSync(mPhone.getContext(), this, conn.getHandler());
@@ -1822,8 +1806,32 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     " status=" + status);
         }
 
-        if (DBG) log("createDataConnection(" + apnType + ") X id=" + id);
+        if (DBG) log("createDataConnection() X id=" + id);
         return conn;
+    }
+
+    private void configureRetry(DataConnection dc, String apnType) {
+        if ((dc == null) || (apnType == null)) return;
+
+        if (apnType.equals(Phone.APN_TYPE_DEFAULT)) {
+            if (!dc.configureRetry(SystemProperties.get("ro.gsm.data_retry_config"))) {
+                if (!dc.configureRetry(DEFAULT_DATA_RETRY_CONFIG)) {
+                    // Should never happen, log an error and default to a simple linear sequence.
+                    loge("createDataConnection: Could not configure using " +
+                            "DEFAULT_DATA_RETRY_CONFIG=" + DEFAULT_DATA_RETRY_CONFIG);
+                    dc.configureRetry(20, 2000, 1000);
+                }
+            }
+        } else {
+            if (!dc.configureRetry(SystemProperties.get("ro.gsm.2nd_data_retry_config"))) {
+                if (!dc.configureRetry(SECONDARY_DATA_RETRY_CONFIG)) {
+                    // Should never happen, log an error and default to a simple sequence.
+                    loge("createDataConnection: Could note configure using " +
+                            "SECONDARY_DATA_RETRY_CONFIG=" + SECONDARY_DATA_RETRY_CONFIG);
+                    dc.configureRetry("max_retries=3, 333, 333, 333");
+                }
+            }
+        }
     }
 
     private void destroyDataConnections() {

@@ -394,6 +394,20 @@ public abstract class DataConnection extends StateMachine {
         return mRetryMgr.isRetryForever();
     }
 
+    /**
+     * @return whether the retry config is set successfully or not
+     */
+    public boolean configureRetry(int maxRetryCount, int retryTime, int randomizationTime) {
+        return mRetryMgr.configure(maxRetryCount, retryTime, randomizationTime);
+    }
+
+    /**
+     * @return whether the retry config is set successfully or not
+     */
+    public boolean configureRetry(String configStr) {
+        return mRetryMgr.configure(configStr);
+    }
+
     private AtomicInteger mRefCount = new AtomicInteger(0);
 
     /**
