@@ -62,7 +62,7 @@ public final class SimCard extends IccCard {
 
     @Override
     public String getServiceProviderName () {
-        return ((GSMPhone)mPhone).mSIMRecords.getServiceProviderName();
+        return mPhone.mIccRecords.getServiceProviderName();
     }
 
 }

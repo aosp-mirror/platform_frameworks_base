@@ -118,8 +118,8 @@ public abstract class PhoneBase extends Handler implements Phone {
     int mCallRingDelay;
     public boolean mIsTheCurrentActivePhone = true;
     boolean mIsVoiceCapable = true;
-    public SIMRecords mSIMRecords;
-    public SimCard mSimCard;
+    public IccRecords mIccRecords;
+    public IccCard mIccCard;
     public SMSDispatcher mSMS;
 
     /**
@@ -679,6 +679,31 @@ public abstract class PhoneBase extends Handler implements Phone {
     */
     public CallTracker getCallTracker() {
         return null;
+    }
+
+    @Override
+    public IccCard getIccCard() {
+        return mIccCard;
+    }
+
+    @Override
+    public String getIccSerialNumber() {
+        return mIccRecords.iccid;
+    }
+
+    @Override
+    public boolean getIccRecordsLoaded() {
+        return mIccRecords.getRecordsLoaded();
+    }
+
+    @Override
+    public boolean getMessageWaitingIndicator() {
+        return mIccRecords.getVoiceMessageWaiting();
+    }
+
+    @Override
+    public boolean getCallForwardingIndicator() {
+        return mIccRecords.getVoiceCallForwardingFlag();
     }
 
     /**

@@ -21,9 +21,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Registrant;
 import android.os.RegistrantList;
-import android.util.Log;
-
-import java.util.ArrayList;
 
 /**
  * {@hide}
@@ -79,6 +76,11 @@ public abstract class IccRecords extends Handler implements IccConstants {
         this.phone = p;
     }
 
+    /**
+     * Call when the IccRecords object is no longer going to be used.
+     */
+    public abstract void dispose();
+
     protected abstract void onRadioOffOrNotAvailable();
 
     //***** Public Methods
@@ -97,6 +99,17 @@ public abstract class IccRecords extends Handler implements IccConstants {
 
     public void unregisterForRecordsLoaded(Handler h) {
         recordsLoadedRegistrants.remove(h);
+    }
+
+    /**
+     * Get the International Mobile Subscriber ID (IMSI) on a SIM
+     * for GSM, UMTS and like networks. Default is null if IMSI is
+     * not supported or unavailable.
+     *
+     * @return null if SIM is not yet ready or unavailable
+     */
+    public String getIMSI() {
+        return null;
     }
 
     public String getMsisdnNumber() {
@@ -220,6 +233,7 @@ public abstract class IccRecords extends Handler implements IccConstants {
     }
 
     //***** Overridden from Handler
+    @Override
     public abstract void handleMessage(Message msg);
 
     protected abstract void onRecordLoaded();
@@ -232,8 +246,51 @@ public abstract class IccRecords extends Handler implements IccConstants {
      * and TS 51.011 10.3.11 for details.
      *
      * If the SPN is not found on the SIM, the rule is always PLMN_ONLY.
+     * Generally used for GSM/UMTS and the like SIMs.
      */
-    protected abstract int getDisplayRule(String plmn);
+    public abstract int getDisplayRule(String plmn);
 
+    /**
+     * Return true if "Restriction of menu options for manual PLMN selection"
+     * bit is set or EF_CSP data is unavailable, return false otherwise.
+     * Generally used for GSM/UMTS and the like SIMs.
+     */
+    public boolean isCspPlmnEnabled() {
+        return false;
+    }
+
+    /**
+     * Returns the 5 or 6 digit MCC/MNC of the operator that
+     * provided the SIM card. Returns null of SIM is not yet ready
+     * or is not valid for the type of IccCard. Generally used for
+     * GSM/UMTS and the like SIMS
+     */
+    public String getOperatorNumeric() {
+        return null;
+    }
+
+    /**
+     * Get the current Voice call forwarding flag for GSM/UMTS and the like SIMs
+     *
+     * @return true if enabled
+     */
+    public boolean getVoiceCallForwardingFlag() {
+        return false;
+    }
+
+    /**
+     * Set the voice call forwarding flag for GSM/UMTS and the like SIMs
+     *
+     * @param line to enable/disable
+     * @param enable
+     */
+    public void setVoiceCallForwardingFlag(int line, boolean enable) {
+    }
+
+    /**
+     * Write string to log file
+     *
+     * @param s is the string to write
+     */
     protected abstract void log(String s);
 }
