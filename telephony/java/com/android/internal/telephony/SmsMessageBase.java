@@ -117,6 +117,16 @@ public abstract class SmsMessageBase {
          */
         public int codeUnitSize;
 
+        /**
+         * The GSM national language table to use, or 0 for the default 7-bit alphabet.
+         */
+        public int languageTable;
+
+        /**
+         * The GSM national language shift table to use, or 0 for the default 7-bit extension table.
+         */
+        public int languageShiftTable;
+
         @Override
         public String toString() {
             return "TextEncodingDetails " +
@@ -124,6 +134,8 @@ public abstract class SmsMessageBase {
                     ", codeUnitCount=" + codeUnitCount +
                     ", codeUnitsRemaining=" + codeUnitsRemaining +
                     ", codeUnitSize=" + codeUnitSize +
+                    ", languageTable=" + languageTable +
+                    ", languageShiftTable=" + languageShiftTable +
                     " }";
         }
     }

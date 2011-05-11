@@ -501,7 +501,7 @@ public final class BearerData {
              * stringToGsm7BitPacked, and potentially directly support
              * access to the main bitwise stream from encode/decode.
              */
-            byte[] fullData = GsmAlphabet.stringToGsm7BitPacked(msg, septetOffset, !force);
+            byte[] fullData = GsmAlphabet.stringToGsm7BitPacked(msg, septetOffset, !force, 0, 0);
             Gsm7bitCodingResult result = new Gsm7bitCodingResult();
             result.data = new byte[fullData.length - 1];
             System.arraycopy(fullData, 1, result.data, 0, fullData.length - 1);
@@ -976,7 +976,8 @@ public final class BearerData {
         int offsetSeptets = (offsetBits + 6) / 7;
         numFields -= offsetSeptets;
         int paddingBits = (offsetSeptets * 7) - offsetBits;
-        String result = GsmAlphabet.gsm7BitPackedToString(data, offset, numFields, paddingBits);
+        String result = GsmAlphabet.gsm7BitPackedToString(data, offset, numFields, paddingBits,
+                0, 0);
         if (result == null) {
             throw new CodingException("7bit GSM decoding failed");
         }
