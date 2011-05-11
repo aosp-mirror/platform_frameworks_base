@@ -84,6 +84,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private String[] mTetherableBluetoothRegexs;
     private String[] mUpstreamIfaceRegexs;
 
+    private INetworkManagementService mNMService;
     private Looper mLooper;
     private HandlerThread mThread;
 
@@ -100,21 +101,12 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     // with 255.255.255.0
 
     private String[] mDhcpRange;
-    private static final String DHCP_DEFAULT_RANGE1_START = "192.168.42.2";
-    private static final String DHCP_DEFAULT_RANGE1_STOP  = "192.168.42.254";
-    private static final String DHCP_DEFAULT_RANGE2_START = "192.168.43.2";
-    private static final String DHCP_DEFAULT_RANGE2_STOP  = "192.168.43.254";
-    private static final String DHCP_DEFAULT_RANGE3_START = "192.168.44.2";
-    private static final String DHCP_DEFAULT_RANGE3_STOP  = "192.168.44.254";
-    private static final String DHCP_DEFAULT_RANGE4_START = "192.168.45.2";
-    private static final String DHCP_DEFAULT_RANGE4_STOP  = "192.168.45.254";
-    private static final String DHCP_DEFAULT_RANGE5_START = "192.168.46.2";
-    private static final String DHCP_DEFAULT_RANGE5_STOP  = "192.168.46.254";
-    private static final String DHCP_DEFAULT_RANGE6_START = "192.168.47.2";
-    private static final String DHCP_DEFAULT_RANGE6_STOP  = "192.168.47.254";
-    private static final String DHCP_DEFAULT_RANGE7_START = "192.168.48.2";
-    private static final String DHCP_DEFAULT_RANGE7_STOP  = "192.168.48.254";
-
+    private static final String[] DHCP_DEFAULT_RANGE = {
+        "192.168.42.2", "192.168.42.254", "192.168.43.2", "192.168.43.254",
+        "192.168.44.2", "192.168.44.254", "192.168.45.2", "192.168.45.254",
+        "192.168.46.2", "192.168.46.254", "192.168.47.2", "192.168.47.254",
+        "192.168.48.2", "192.168.48.254",
+    };
 
     private String[] mDnsServers;
     private static final String DNS_DEFAULT_SERVER1 = "8.8.8.8";
@@ -132,15 +124,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private boolean mUsbMassStorageOff;  // track the status of USB Mass Storage
     private boolean mUsbConnected;       // track the status of USB connection
 
-    public Tethering(Context context, Looper looper) {
+    public Tethering(Context context, INetworkManagementService nmService, Looper looper) {
         mContext = context;
+        mNMService = nmService;
         mLooper = looper;
 
         // register for notifications from NetworkManagement Service
-        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
         try {
-            service.registerObserver(this);
+            mNMService.registerObserver(this);
         } catch (RemoteException e) {
             Log.e(TAG, "Error registering observer :" + e);
         }
@@ -173,21 +164,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         mDhcpRange = context.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_dhcp_range);
         if ((mDhcpRange.length == 0) || (mDhcpRange.length % 2 ==1)) {
-            mDhcpRange = new String[14];
-            mDhcpRange[0] = DHCP_DEFAULT_RANGE1_START;
-            mDhcpRange[1] = DHCP_DEFAULT_RANGE1_STOP;
-            mDhcpRange[2] = DHCP_DEFAULT_RANGE2_START;
-            mDhcpRange[3] = DHCP_DEFAULT_RANGE2_STOP;
-            mDhcpRange[4] = DHCP_DEFAULT_RANGE3_START;
-            mDhcpRange[5] = DHCP_DEFAULT_RANGE3_STOP;
-            mDhcpRange[6] = DHCP_DEFAULT_RANGE4_START;
-            mDhcpRange[7] = DHCP_DEFAULT_RANGE4_STOP;
-            mDhcpRange[8] = DHCP_DEFAULT_RANGE5_START;
-            mDhcpRange[9] = DHCP_DEFAULT_RANGE5_STOP;
-            mDhcpRange[10] = DHCP_DEFAULT_RANGE6_START;
-            mDhcpRange[11] = DHCP_DEFAULT_RANGE6_STOP;
-            mDhcpRange[12] = DHCP_DEFAULT_RANGE7_START;
-            mDhcpRange[13] = DHCP_DEFAULT_RANGE7_STOP;
+            mDhcpRange = DHCP_DEFAULT_RANGE;
         }
         mDunRequired = false; // resample when we turn on
 
@@ -258,8 +235,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         return false;
     }
     public void interfaceAdded(String iface) {
-        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
         boolean found = false;
         boolean usb = false;
         if (isWifi(iface)) {
@@ -354,9 +329,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     private void sendTetherStateChangedBroadcast() {
         IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-        IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
+        IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
         try {
-            if (!service.isTetheringSupported()) return;
+            if (!cm.isTetheringSupported()) return;
         } catch (RemoteException e) {
             return;
         }
@@ -503,11 +478,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     // used on cable insert/remove
     private void enableUsbIfaces(boolean enable) {
-        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
         String[] ifaces = new String[0];
         try {
-            ifaces = service.listInterfaces();
+            ifaces = mNMService.listInterfaces();
         } catch (Exception e) {
             Log.e(TAG, "Error listing Interfaces :" + e);
             return;
@@ -526,19 +499,17 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     // toggled when we enter/leave the fully tethered state
     private boolean enableUsbRndis(boolean enabled) {
         if (DEBUG) Log.d(TAG, "enableUsbRndis(" + enabled + ")");
-        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-                INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
 
         try {
             if (enabled) {
                 synchronized (this) {
-                    if (!service.isUsbRNDISStarted()) {
-                        service.startUsbRNDIS();
+                    if (!mNMService.isUsbRNDISStarted()) {
+                        mNMService.startUsbRNDIS();
                     }
                 }
             } else {
-                if (service.isUsbRNDISStarted()) {
-                    service.stopUsbRNDIS();
+                if (mNMService.isUsbRNDISStarted()) {
+                    mNMService.stopUsbRNDIS();
                 }
             }
         } catch (Exception e) {
@@ -552,13 +523,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private boolean configureUsbIface(boolean enabled) {
         if (DEBUG) Log.d(TAG, "configureUsbIface(" + enabled + ")");
 
-        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
-
         // bring toggle the interfaces
         String[] ifaces = new String[0];
         try {
-            ifaces = service.listInterfaces();
+            ifaces = mNMService.listInterfaces();
         } catch (Exception e) {
             Log.e(TAG, "Error listing Interfaces :" + e);
             return false;
@@ -567,7 +535,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             if (isUsb(iface)) {
                 InterfaceConfiguration ifcg = null;
                 try {
-                    ifcg = service.getInterfaceConfig(iface);
+                    ifcg = mNMService.getInterfaceConfig(iface);
                     if (ifcg != null) {
                         InetAddress addr = NetworkUtils.numericToInetAddress(USB_NEAR_IFACE_ADDR);
                         ifcg.addr = new LinkAddress(addr, USB_PREFIX_LENGTH);
@@ -578,7 +546,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         }
                         ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
                         ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
-                        service.setInterfaceConfig(iface, ifcg);
+                        mNMService.setInterfaceConfig(iface, ifcg);
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Error configuring interface " + iface + ", :" + e);
@@ -874,11 +842,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         class TetheredState extends State {
             @Override
             public void enter() {
-                IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-                INetworkManagementService service =
-                        INetworkManagementService.Stub.asInterface(b);
                 try {
-                    service.tetherInterface(mIfaceName);
+                    mNMService.tetherInterface(mIfaceName);
                 } catch (Exception e) {
                     setLastError(ConnectivityManager.TETHER_ERROR_TETHER_IFACE_ERROR);
 
@@ -903,16 +868,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 switch (message.what) {
                     case CMD_TETHER_UNREQUESTED:
                     case CMD_INTERFACE_DOWN:
-                        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-                        INetworkManagementService service =
-                                INetworkManagementService.Stub.asInterface(b);
                         if (mMyUpstreamIfaceName != null) {
                             try {
-                                service.disableNat(mIfaceName, mMyUpstreamIfaceName);
+                                mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
                                 mMyUpstreamIfaceName = null;
                             } catch (Exception e) {
                                 try {
-                                    service.untetherInterface(mIfaceName);
+                                    mNMService.untetherInterface(mIfaceName);
                                 } catch (Exception ee) {}
 
                                 setLastErrorAndTransitionToInitialState(
@@ -921,7 +883,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                             }
                         }
                         try {
-                            service.untetherInterface(mIfaceName);
+                            mNMService.untetherInterface(mIfaceName);
                         } catch (Exception e) {
                             setLastErrorAndTransitionToInitialState(
                                     ConnectivityManager.TETHER_ERROR_UNTETHER_IFACE_ERROR);
@@ -944,8 +906,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         break;
                     case CMD_TETHER_CONNECTION_CHANGED:
                         String newUpstreamIfaceName = (String)(message.obj);
-                        b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-                        service = INetworkManagementService.Stub.asInterface(b);
                         if ((mMyUpstreamIfaceName == null && newUpstreamIfaceName == null) ||
                                 (mMyUpstreamIfaceName != null &&
                                 mMyUpstreamIfaceName.equals(newUpstreamIfaceName))) {
@@ -954,11 +914,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         }
                         if (mMyUpstreamIfaceName != null) {
                             try {
-                                service.disableNat(mIfaceName, mMyUpstreamIfaceName);
+                                mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
                                 mMyUpstreamIfaceName = null;
                             } catch (Exception e) {
                                 try {
-                                    service.untetherInterface(mIfaceName);
+                                    mNMService.untetherInterface(mIfaceName);
                                 } catch (Exception ee) {}
 
                                 setLastErrorAndTransitionToInitialState(
@@ -968,10 +928,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         }
                         if (newUpstreamIfaceName != null) {
                             try {
-                                service.enableNat(mIfaceName, newUpstreamIfaceName);
+                                mNMService.enableNat(mIfaceName, newUpstreamIfaceName);
                             } catch (Exception e) {
                                 try {
-                                    service.untetherInterface(mIfaceName);
+                                    mNMService.untetherInterface(mIfaceName);
                                 } catch (Exception ee) {}
 
                                 setLastError(ConnectivityManager.TETHER_ERROR_ENABLE_NAT_ERROR);
@@ -990,15 +950,13 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                         error = true;
                         // fall through
                     case CMD_TETHER_MODE_DEAD:
-                        b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-                        service = INetworkManagementService.Stub.asInterface(b);
                         if (mMyUpstreamIfaceName != null) {
                             try {
-                                service.disableNat(mIfaceName, mMyUpstreamIfaceName);
+                                mNMService.disableNat(mIfaceName, mMyUpstreamIfaceName);
                                 mMyUpstreamIfaceName = null;
                             } catch (Exception e) {
                                 try {
-                                    service.untetherInterface(mIfaceName);
+                                    mNMService.untetherInterface(mIfaceName);
                                 } catch (Exception ee) {}
 
                                 setLastErrorAndTransitionToInitialState(
@@ -1007,7 +965,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                             }
                         }
                         try {
-                            service.untetherInterface(mIfaceName);
+                            mNMService.untetherInterface(mIfaceName);
                         } catch (Exception e) {
                             setLastErrorAndTransitionToInitialState(
                                     ConnectivityManager.TETHER_ERROR_UNTETHER_IFACE_ERROR);
@@ -1138,10 +1096,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 boolean retValue = true;
                 if (mMobileReserved) return retValue;
                 IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-                IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
+                IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
                 int result = Phone.APN_REQUEST_FAILED;
                 try {
-                    result = service.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
+                    result = cm.startUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
                             (mDunRequired ? Phone.FEATURE_ENABLE_DUN_ALWAYS :
                             Phone.FEATURE_ENABLE_HIPRI), new Binder());
                 } catch (Exception e) {
@@ -1165,10 +1123,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             protected boolean turnOffMobileConnection() {
                 if (mMobileReserved) {
                     IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-                    IConnectivityManager service =
-                            IConnectivityManager.Stub.asInterface(b);
+                    IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
                     try {
-                        service.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
+                        cm.stopUsingNetworkFeature(ConnectivityManager.TYPE_MOBILE,
                                 (mDunRequired? Phone.FEATURE_ENABLE_DUN_ALWAYS :
                                              Phone.FEATURE_ENABLE_HIPRI));
                     } catch (Exception e) {
@@ -1179,28 +1136,25 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 return true;
             }
             protected boolean turnOnMasterTetherSettings() {
-                IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-                INetworkManagementService service =
-                        INetworkManagementService.Stub.asInterface(b);
                 try {
-                    service.setIpForwardingEnabled(true);
+                    mNMService.setIpForwardingEnabled(true);
                 } catch (Exception e) {
                     transitionTo(mSetIpForwardingEnabledErrorState);
                     return false;
                 }
                 try {
-                    service.startTethering(mDhcpRange);
+                    mNMService.startTethering(mDhcpRange);
                 } catch (Exception e) {
                     try {
-                        service.stopTethering();
-                        service.startTethering(mDhcpRange);
+                        mNMService.stopTethering();
+                        mNMService.startTethering(mDhcpRange);
                     } catch (Exception ee) {
                         transitionTo(mStartTetheringErrorState);
                         return false;
                     }
                 }
                 try {
-                    service.setDnsForwarders(mDnsServers);
+                    mNMService.setDnsForwarders(mDnsServers);
                 } catch (Exception e) {
                     transitionTo(mSetDnsForwardersErrorState);
                     return false;
@@ -1208,17 +1162,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 return true;
             }
             protected boolean turnOffMasterTetherSettings() {
-                IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-                INetworkManagementService service =
-                        INetworkManagementService.Stub.asInterface(b);
                 try {
-                    service.stopTethering();
+                    mNMService.stopTethering();
                 } catch (Exception e) {
                     transitionTo(mStopTetheringErrorState);
                     return false;
                 }
                 try {
-                    service.setIpForwardingEnabled(false);
+                    mNMService.setIpForwardingEnabled(false);
                 } catch (Exception e) {
                     transitionTo(mSetIpForwardingDisabledErrorState);
                     return false;
@@ -1241,12 +1192,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     }
                 } catch (RemoteException e) { }
 
-                b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-                INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
-
                 String[] ifaces = new String[0];
                 try {
-                    ifaces = service.listInterfaces();
+                    ifaces = mNMService.listInterfaces();
                 } catch (Exception e) {
                     Log.e(TAG, "Error listing Interfaces :" + e);
                     return null;
@@ -1258,7 +1206,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                             // verify it is active
                             InterfaceConfiguration ifcg = null;
                             try {
-                                ifcg = service.getInterfaceConfig(iface);
+                                ifcg = mNMService.getInterfaceConfig(iface);
                                 if (ifcg.isActive()) {
                                     return iface;
                                 }
@@ -1486,11 +1434,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             public void enter() {
                 Log.e(TAG, "Error in startTethering");
                 notify(TetherInterfaceSM.CMD_START_TETHERING_ERROR);
-                IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-                INetworkManagementService service =
-                        INetworkManagementService.Stub.asInterface(b);
                 try {
-                    service.setIpForwardingEnabled(false);
+                    mNMService.setIpForwardingEnabled(false);
                 } catch (Exception e) {}
             }
         }
@@ -1500,11 +1445,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             public void enter() {
                 Log.e(TAG, "Error in stopTethering");
                 notify(TetherInterfaceSM.CMD_STOP_TETHERING_ERROR);
-                IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-                INetworkManagementService service =
-                         INetworkManagementService.Stub.asInterface(b);
                 try {
-                    service.setIpForwardingEnabled(false);
+                    mNMService.setIpForwardingEnabled(false);
                 } catch (Exception e) {}
             }
         }
@@ -1514,14 +1456,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             public void enter() {
                 Log.e(TAG, "Error in setDnsForwarders");
                 notify(TetherInterfaceSM.CMD_SET_DNS_FORWARDERS_ERROR);
-                IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-                INetworkManagementService service =
-                        INetworkManagementService.Stub.asInterface(b);
                 try {
-                    service.stopTethering();
+                    mNMService.stopTethering();
                 } catch (Exception e) {}
                 try {
-                    service.setIpForwardingEnabled(false);
+                    mNMService.setIpForwardingEnabled(false);
                 } catch (Exception e) {}
             }
         }
