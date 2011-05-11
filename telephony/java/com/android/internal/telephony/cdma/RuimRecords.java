@@ -98,6 +98,7 @@ public final class RuimRecords extends IccRecords {
 
     }
 
+    @Override
     public void dispose() {
         //Unregister for all events
         phone.mCM.unregisterForRUIMReady(this);
@@ -334,7 +335,7 @@ public final class RuimRecords extends IccRecords {
         }
         recordsLoadedRegistrants.notifyRegistrants(
             new AsyncResult(null, null, null));
-        ((CDMAPhone) phone).mRuimCard.broadcastIccStateChangedIntent(
+        phone.mIccCard.broadcastIccStateChangedIntent(
                 RuimCard.INTENT_VALUE_ICC_LOADED, null);
     }
 
@@ -343,7 +344,7 @@ public final class RuimRecords extends IccRecords {
           READY is sent before IMSI ready
         */
 
-        ((CDMAPhone) phone).mRuimCard.broadcastIccStateChangedIntent(
+        phone.mIccCard.broadcastIccStateChangedIntent(
                 RuimCard.INTENT_VALUE_ICC_READY, null);
 
         fetchRuimRecords();
@@ -368,8 +369,13 @@ public final class RuimRecords extends IccRecords {
         // Further records that can be inserted are Operator/OEM dependent
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * No Display rule for RUIMs yet.
+     */
     @Override
-    protected int getDisplayRule(String plmn) {
+    public int getDisplayRule(String plmn) {
         // TODO together with spn
         return 0;
     }

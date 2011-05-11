@@ -28,6 +28,8 @@ import android.util.Log;
 
 import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.CommandsInterface.RadioState;
+import com.android.internal.telephony.gsm.SIMRecords;
+
 import android.os.SystemProperties;
 
 /**
@@ -430,8 +432,14 @@ public abstract class IccCard {
             broadcastIccStateChangedIntent(INTENT_VALUE_ICC_LOCKED,
                   INTENT_VALUE_LOCKED_NETWORK);
         }
+
+        /*
+         * TODO: We need to try to remove this, maybe if the RIL sends up a RIL_UNSOL_SIM_REFRESH?
+         */
         if (oldState != State.READY && newState == State.READY && LTE_AVAILABLE_ON_CDMA) {
-            mPhone.mSIMRecords.onSimReady();
+            if (mPhone.mIccRecords instanceof SIMRecords) {
+                ((SIMRecords)mPhone.mIccRecords).onSimReady();
+            }
         }
     }
 

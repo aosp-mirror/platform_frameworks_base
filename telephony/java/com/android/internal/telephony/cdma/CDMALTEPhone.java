@@ -48,58 +48,30 @@ public class CDMALTEPhone extends CDMAPhone {
     // Constructors
     public CDMALTEPhone(Context context, CommandsInterface ci, PhoneNotifier notifier) {
         this(context, ci, notifier, false);
-        log("CDMALTEPhone Constructors");
     }
 
     public CDMALTEPhone(Context context, CommandsInterface ci, PhoneNotifier notifier,
             boolean unitTestMode) {
         super(context, ci, notifier, false);
-
-        mSIMRecords = new SIMRecords(this);
-        mSimCard = new SimCard(this, LOG_TAG, DBG);
     }
 
     @Override
-    protected void initSST() {
+    protected void initSstIcc() {
         mSST = new CdmaLteServiceStateTracker(this);
-    }
-
-    public void dispose() {
-        synchronized (PhoneProxy.lockForRadioTechnologyChange) {
-            super.dispose();
-            mSIMRecords.dispose();
-            mSimCard.dispose();
-        }
-    }
-
-    @Override
-    public void removeReferences() {
-        super.removeReferences();
-        this.mSIMRecords = null;
-        this.mSimCard = null;
-    }
-
-    @Override
-    public ServiceStateTracker getServiceStateTracker() {
-        return mSST;
-    }
-
-    public IccCard getIccCard() {
-        return mSimCard;
-    }
-
-    @Override
-    public String getIccSerialNumber() {
-        return mSIMRecords.iccid;
+        mIccRecords = new SIMRecords(this);
+        mIccCard = new SimCard(this, LOG_TAG, DBG);
     }
 
     @Override
     public DataState getDataConnectionState(String apnType) {
+        // TODO: Remove instanceof if possible.
         boolean isCdmaDataConnectionTracker = false;
         if (mDataConnectionTracker instanceof CdmaDataConnectionTracker) {
+            log("getDataConnectionState isCdmaDataConnectionTracker");
             isCdmaDataConnectionTracker = true;
+        } else {
+            log("getDataConnectionState NOT CdmaDataConnectionTracker");
         }
-        log("getDataConnectionState");
         DataState ret = DataState.DISCONNECTED;
 
         if (!isCdmaDataConnectionTracker && (SystemProperties.get("adb.connected", "").length()
@@ -145,28 +117,29 @@ public class CDMALTEPhone extends CDMAPhone {
             }
         }
 
+        log("getDataConnectionState apnType=" + apnType + " ret=" + ret);
         return ret;
     }
 
     public boolean updateCurrentCarrierInProvider() {
-        if (mSIMRecords != null) {
+        if (mIccRecords != null) {
             try {
                 Uri uri = Uri.withAppendedPath(Telephony.Carriers.CONTENT_URI, "current");
                 ContentValues map = new ContentValues();
-                map.put(Telephony.Carriers.NUMERIC, mSIMRecords.getSIMOperatorNumeric());
+                map.put(Telephony.Carriers.NUMERIC, mIccRecords.getOperatorNumeric());
+                log("updateCurrentCarrierInProvider insert uri=" + uri);
                 mContext.getContentResolver().insert(uri, map);
                 return true;
             } catch (SQLException e) {
-                Log.e(LOG_TAG, "[CDMALTEPhone] Can't store current operator", e);
+                Log.e(LOG_TAG, "[CDMALTEPhone] Can't store current operator ret false", e);
             }
+        } else {
+            log("updateCurrentCarrierInProvider mIccRecords == null ret false");
         }
         return false;
     }
 
-    public String getActiveApn(String apnType) {
-        return mDataConnectionTracker.getActiveApnString(apnType);
-    }
-
+    @Override
     protected void log(String s) {
         if (DBG)
             Log.d(LOG_TAG, "[CDMALTEPhone] " + s);

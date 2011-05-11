@@ -246,7 +246,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         cm.unregisterForVoiceNetworkStateChanged(this);
         cm.unregisterForSIMReady(this);
 
-        phone.mSIMRecords.unregisterForRecordsLoaded(this);
+        phone.mIccRecords.unregisterForRecordsLoaded(this);
         cm.unSetOnSignalStrengthUpdate(this);
         cm.unSetOnRestrictedStateChanged(this);
         cm.unSetOnNITZTime(this);
@@ -280,7 +280,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 // it has been unlocked. At this stage, the radio is already
                 // powered on.
                 if (mNeedToRegForSimLoaded) {
-                    phone.mSIMRecords.registerForRecordsLoaded(this,
+                    phone.mIccRecords.registerForRecordsLoaded(this,
                             EVENT_SIM_RECORDS_LOADED, null);
                     mNeedToRegForSimLoaded = false;
                 }
@@ -486,8 +486,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     }
 
     protected void updateSpnDisplay() {
-        int rule = phone.mSIMRecords.getDisplayRule(ss.getOperatorNumeric());
-        String spn = phone.mSIMRecords.getServiceProviderName();
+        int rule = phone.mIccRecords.getDisplayRule(ss.getOperatorNumeric());
+        String spn = phone.mIccRecords.getServiceProviderName();
         String plmn = ss.getOperatorAlphaLong();
 
         // For emergency calls only, pass the EmergencyCallsOnly string via EXTRA_PLMN

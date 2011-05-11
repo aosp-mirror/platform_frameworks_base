@@ -32,7 +32,7 @@ public class RuimPhoneBookInterfaceManager extends IccPhoneBookInterfaceManager 
 
     public RuimPhoneBookInterfaceManager(CDMAPhone phone) {
         super(phone);
-        adnCache = phone.mRuimRecords.getAdnCache();
+        adnCache = phone.mIccRecords.getAdnCache();
         //NOTE service "simphonebook" added by IccSmsInterfaceManagerProxy
     }
 
