@@ -77,7 +77,6 @@ static void android_view_ViewRoot_showFPS(JNIEnv* env, jobject, jobject jcanvas,
 }
 
 static void android_view_ViewRoot_abandonGlCaches(JNIEnv* env, jobject) {
-    SkGLCanvas::AbandonAllTextures();
 }
 
 

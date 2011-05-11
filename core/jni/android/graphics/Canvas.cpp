@@ -61,12 +61,11 @@ public:
     }
     
     static SkCanvas* initGL(JNIEnv* env, jobject) {
-        return new SkGLCanvas;
+        return 0;
     }
     
     static void freeCaches(JNIEnv* env, jobject) {
         // these are called in no particular order
-        SkGLCanvas::DeleteAllTextures();
         SkImageRef_GlobalPool::SetRAMUsed(0);
         SkGraphics::SetFontCacheUsed(0);
     }
