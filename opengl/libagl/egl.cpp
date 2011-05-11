@@ -338,6 +338,10 @@ egl_window_surface_v2_t::egl_window_surface_v2_t(EGLDisplay dpy,
     nativeWindow(window), buffer(0), previousBuffer(0), module(0),
     bits(NULL)
 {
+    hw_module_t const* pModule;
+    hw_get_module(GRALLOC_HARDWARE_MODULE_ID, &pModule);
+    module = reinterpret_cast<gralloc_module_t const*>(pModule);
+
     pixelFormatTable = gglGetPixelFormatTable();
     
     // keep a reference on the window
