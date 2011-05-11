@@ -902,6 +902,20 @@
         applications can use this to erase or modify your contact data.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_readProfile">read profile data</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_readProfile" product="default">Allows an application to read all
+        of your personal profile information. Malicious applications can use this to identify
+        you and send your personal information to other people.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_writeProfile">write profile data</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_writeProfile" product="default">Allows an application to modify
+        your personal profile information. Malicious applications can use this to erase or
+        modify your profile data.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">read calendar events</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_readCalendar" product="tablet">Allows an application to read all

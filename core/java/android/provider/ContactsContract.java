@@ -122,6 +122,17 @@ public final class ContactsContract {
     public static final String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
 
     /**
+     * An optional URI parameter for selection queries that instructs the
+     * provider to include the user's personal profile contact entry (if any)
+     * in the contact results.  If present, the user's profile will always be
+     * the first entry returned.  The default value is false.
+     *
+     * Specifying this parameter will result in a security error if the calling
+     * application does not have android.permission.READ_PROFILE permission.
+     */
+    public static final String INCLUDE_PROFILE = "include_profile";
+
+    /**
      * A query parameter key used to specify the package that is requesting a query.
      * This is used for restricting data based on package name.
      *
@@ -763,10 +774,16 @@ public final class ContactsContract {
         public static final String PHOTO_THUMBNAIL_URI = "photo_thumb_uri";
 
         /**
-         * Lookup value that reflects the {@link Groups#GROUP_VISIBLE} state of
-         * any {@link CommonDataKinds.GroupMembership} for this contact.
+         * Flag that reflects the {@link Groups#GROUP_VISIBLE} state of any
+         * {@link CommonDataKinds.GroupMembership} for this contact.
          */
         public static final String IN_VISIBLE_GROUP = "in_visible_group";
+
+        /**
+         * Flag that reflects whether this contact represents the user's
+         * personal profile entry.
+         */
+        public static final String IS_USER_PROFILE = "is_user_profile";
 
         /**
          * An indicator of whether this contact has at least one phone number. "1" if there is
@@ -1285,7 +1302,7 @@ public final class ContactsContract {
          * Base {@link Uri} for referencing multiple {@link Contacts} entry,
          * created by appending {@link #LOOKUP_KEY} using
          * {@link Uri#withAppendedPath(Uri, String)}. The lookup keys have to be
-         * encoded and joined with the colon (":") seperator. The resulting string
+         * encoded and joined with the colon (":") separator. The resulting string
          * has to be encoded again. Provides
          * {@link OpenableColumns} columns when queried, or returns the
          * referenced contact formatted as a vCard when opened through
@@ -1738,6 +1755,88 @@ public final class ContactsContract {
         }
     }
 
+    /**
+     * <p>
+     * Constants for the user's profile data, which is represented as a single contact on
+     * the device that represents the user.  The profile contact is not aggregated
+     * together automatically in the same way that normal contacts are; instead, each
+     * account on the device may contribute a single raw contact representing the user's
+     * personal profile data from that source.
+     * </p>
+     * <p>
+     * Access to the profile entry through these URIs (or incidental access to parts of
+     * the profile if retrieved directly via ID) requires additional permissions beyond
+     * the read/write contact permissions required by the provider.  Querying for profile
+     * data requires android.permission.READ_PROFILE permission, and inserting or
+     * updating profile data requires android.permission.WRITE_PROFILE permission.
+     * </p>
+     * <h3>Operations</h3>
+     * <dl>
+     * <dt><b>Insert</b></dt>
+     * <dd>The user's profile entry cannot be created explicitly (attempting to do so
+     * will throw an exception). When a raw contact is inserted into the profile, the
+     * provider will check for the existence of a profile on the device.  If one is
+     * found, the raw contact's {@link RawContacts#CONTACT_ID} column gets the _ID of
+     * the profile Contact. If no match is found, the profile Contact is created and
+     * its _ID is put into the {@link RawContacts#CONTACT_ID} column of the newly
+     * inserted raw contact.</dd>
+     * <dt><b>Update</b></dt>
+     * <dd>The profile Contact has the same update restrictions as Contacts in general,
+     * but requires the android.permission.WRITE_PROFILE permission.</dd>
+     * <dt><b>Delete</b></dt>
+     * <dd>The profile Contact cannot be explicitly deleted.  It will be removed
+     * automatically if all of its constituent raw contact entries are deleted.</dd>
+     * <dt><b>Query</b></dt>
+     * <dd>
+     * <ul>
+     * <li>The {@link #CONTENT_URI} for profiles behaves in much the same way as
+     * retrieving a contact by ID, except that it will only ever return the user's
+     * profile contact.
+     * </li>
+     * <li>
+     * The profile contact supports all of the same sub-paths as an individual contact
+     * does - the content of the profile contact can be retrieved as entities or
+     * data rows.  Similarly, specific raw contact entries can be retrieved by appending
+     * the desired raw contact ID within the profile.
+     * </li>
+     * </ul>
+     * </dd>
+     * </dl>
+     */
+    public static final class Profile implements BaseColumns, ContactsColumns,
+            ContactOptionsColumns, ContactNameColumns, ContactStatusColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Profile() {
+        }
+
+        /**
+         * The content:// style URI for this table, which requests the contact entry
+         * representing the user's personal profile data.
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "profile");
+
+        /**
+         * {@link Uri} for referencing the user's profile {@link Contacts} entry,
+         * Provides {@link OpenableColumns} columns when queried, or returns the
+         * user's profile contact formatted as a vCard when opened through
+         * {@link ContentResolver#openAssetFileDescriptor(Uri, String)}.
+         */
+        public static final Uri CONTENT_VCARD_URI = Uri.withAppendedPath(CONTENT_URI,
+                "as_vcard");
+
+        /**
+         * {@link Uri} for referencing the raw contacts that make up the user's profile
+         * {@link Contacts} entry.  An individual raw contact entry within the profile
+         * can be addressed by appending the raw contact ID.  The entities or data within
+         * that specific raw contact can be requested by appending the entity or data
+         * path as well.
+         */
+        public static final Uri CONTENT_RAW_CONTACTS_URI = Uri.withAppendedPath(CONTENT_URI,
+                "raw_contacts");
+    }
+
     protected interface RawContactsColumns {
         /**
          * A reference to the {@link ContactsContract.Contacts#_ID} that this
@@ -1806,6 +1905,12 @@ public final class ContactsContract {
          * <P>Type: INTEGER</P>
          */
         public static final String RAW_CONTACT_IS_READ_ONLY = "raw_contact_is_read_only";
+
+        /**
+         * Flag that reflects whether this raw contact belongs to the user's
+         * personal profile entry.
+         */
+        public static final String RAW_CONTACT_IS_USER_PROFILE = "raw_contact_is_user_profile";
     }
 
     /**

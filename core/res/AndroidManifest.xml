@@ -217,6 +217,22 @@
         android:label="@string/permlab_writeContacts"
         android:description="@string/permdesc_writeContacts" />
 
+
+    <!-- Allows an application to read the user's personal profile data. -->
+    <permission android:name="android.permission.READ_PROFILE"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_readProfile"
+        android:description="@string/permdesc_readProfile" />
+
+    <!-- Allows an application to write (but not read) the user's
+         personal profile data. -->
+    <permission android:name="android.permission.WRITE_PROFILE"
+        android:permissionGroup="android.permission-group.PERSONAL_INFO"
+        android:protectionLevel="dangerous"
+        android:label="@string/permlab_writeProfile"
+        android:description="@string/permdesc_writeProfile" />
+
     <!-- Allows an application to read the user's calendar data. -->
     <permission android:name="android.permission.READ_CALENDAR"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
