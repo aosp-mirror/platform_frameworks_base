@@ -332,6 +332,13 @@ public class BrowserContract {
          * <P>Type: TEXT</P>
          */
         public static final String ACCOUNT_TYPE = "account_type";
+
+        /**
+         * The ID of the account's root folder. This will be the ID of the folder
+         * returned when querying {@link Bookmarks#CONTENT_URI_DEFAULT_FOLDER}.
+         * <P>Type: INTEGER</P>
+         */
+        public static final String ROOT_ID = "root_id";
     }
 
     /**
