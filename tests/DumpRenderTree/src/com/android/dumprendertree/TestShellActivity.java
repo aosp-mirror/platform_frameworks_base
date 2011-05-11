@@ -125,6 +125,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     }
 
     private void setDumpTimeout(long timeout) {
+        Log.v(LOGTAG, "setting dump timeout at " + timeout);
         Message msg = mHandler.obtainMessage(MSG_DUMP_TIMEOUT);
         mHandler.sendMessageDelayed(msg, timeout);
     }
