@@ -20,7 +20,7 @@
 #include "include/MPEG4Extractor.h"
 #include "include/SampleTable.h"
 #include "include/ESDS.h"
-#include "include/TimedTextPlayer.h"
+#include "timedtext/TimedTextPlayer.h"
 
 #include <arpa/inet.h>
 

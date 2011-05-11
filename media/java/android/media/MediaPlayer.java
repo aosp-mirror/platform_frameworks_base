@@ -1253,14 +1253,26 @@ public class MediaPlayer
      */
     public native void attachAuxEffect(int effectId);
 
-    /* Do not change these values without updating their counterparts
-     * in include/media/mediaplayer.h!
+    /* Do not change these values (starting with KEY_PARAMETER) without updating
+     * their counterparts in include/media/mediaplayer.h!
      */
-    /**
+    /*
      * Key used in setParameter method.
-     * Indicates the index of the timed text track to be enabled/disabled
+     * Indicates the index of the timed text track to be enabled/disabled.
+     * The index includes both the in-band and out-of-band timed text.
+     * The index should start from in-band text if any. Application can retrieve the number
+     * of in-band text tracks by using MediaMetadataRetriever::extractMetadata().
+     * Note it might take a few hundred ms to scan an out-of-band text file
+     * before displaying it.
      */
     private static final int KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX = 1000;
+    /*
+     * Key used in setParameter method.
+     * Used to add out-of-band timed text source path.
+     * Application can add multiple text sources by calling setParameter() with
+     * KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE multiple times.
+     */
+    private static final int KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE = 1001;
 
     /**
      * Sets the parameter indicated by key.

@@ -20,8 +20,10 @@
 
 #include <media/MediaPlayerInterface.h>
 #include <media/stagefright/foundation/ABase.h>
+#include <media/stagefright/foundation/AString.h>
 
 #include "include/TimedEventQueue.h"
+#include "TimedTextParser.h"
 
 namespace android {
 
@@ -50,11 +52,19 @@ public:
     void addTextSource(sp<MediaSource> source);
 
     status_t setTimedTextTrackIndex(int32_t index);
+    status_t setParameter(int key, const Parcel &request);
 
 private:
+    enum TextType {
+        kNoText        = 0,
+        kInBandText    = 1,
+        kOutOfBandText = 2,
+    };
+
     Mutex mLock;
 
     sp<MediaSource> mSource;
+    sp<DataSource> mOutOfBandSource;
 
     bool mSeeking;
     int64_t mSeekTimeUs;
@@ -72,7 +82,20 @@ private:
     MediaBuffer *mTextBuffer;
     Parcel mData;
 
+    // for in-band timed text
     Vector<sp<MediaSource> > mTextTrackVector;
+
+    // for out-of-band timed text
+    struct OutOfBandText {
+        TimedTextParser::FileType type;
+        sp<DataSource> source;
+    };
+    Vector<OutOfBandText > mTextOutOfBandVector;
+
+    sp<TimedTextParser> mTextParser;
+    AString mText;
+
+    TextType mTextType;
 
     void reset();
 
