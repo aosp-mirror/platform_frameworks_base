@@ -46,6 +46,11 @@ public:
     enum { NUM_BUFFER_SLOTS = 32 };
 
     struct FrameAvailableListener : public virtual RefBase {
+        // onFrameAvailable() is called from queueBuffer() is the FIFO is
+        // empty. You can use SurfaceTexture::getQueuedCount() to
+        // figure out if there are more frames waiting.
+        // This is called without any lock held can be called concurrently by
+        // multiple threads.
         virtual void onFrameAvailable() = 0;
     };
 
@@ -95,6 +100,11 @@ public:
     // This call may only be made while the OpenGL ES context to which the
     // target texture belongs is bound to the calling thread.
     status_t updateTexImage();
+
+    // getqueuedCount returns the number of queued frames waiting in the
+    // FIFO. In asynchronous mode, this always returns 0 or 1 since
+    // frames are not accumulating in the FIFO.
+    size_t getQueuedCount() const;
 
     // setBufferCountServer set the buffer count. If the client has requested
     // a buffer count using setBufferCount, the server-buffer count will

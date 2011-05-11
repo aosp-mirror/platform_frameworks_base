@@ -385,6 +385,10 @@ status_t SurfaceTexture::setSynchronousMode(bool enabled) {
 
 status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp) {
     LOGV("SurfaceTexture::queueBuffer");
+
+    sp<FrameAvailableListener> listener;
+
+    { // scope for the lock
     Mutex::Autolock lock(mMutex);
     if (buf < 0 || buf >= mBufferCount) {
         LOGE("queueBuffer: slot index out of range [0, %d]: %d",
@@ -401,6 +405,10 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp) {
         LOGE("queueBuffer: slot %d was enqueued without requesting a buffer",
                 buf);
         return -EINVAL;
+    }
+
+    if (mQueue.empty()) {
+        listener = mFrameAvailableListener;
     }
 
     if (mSynchronousMode) {
@@ -423,11 +431,13 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp) {
     mSlots[buf].mLastQueuedCrop = mNextCrop;
     mSlots[buf].mLastQueuedTransform = mNextTransform;
     mSlots[buf].mLastQueuedTimestamp = timestamp;
-
-    if (mFrameAvailableListener != 0) {
-        mFrameAvailableListener->onFrameAvailable();
-    }
     mDequeueCondition.signal();
+    } // scope for the lock
+
+    // call back without lock held
+    if (listener != 0) {
+        listener->onFrameAvailable();
+    }
     return OK;
 }
 
@@ -463,6 +473,7 @@ status_t SurfaceTexture::setTransform(uint32_t transform) {
 
 status_t SurfaceTexture::updateTexImage() {
     LOGV("SurfaceTexture::updateTexImage");
+
     Mutex::Autolock lock(mMutex);
 
     int buf = mCurrentTexture;
@@ -496,7 +507,7 @@ status_t SurfaceTexture::updateTexImage() {
 
         GLint error;
         while ((error = glGetError()) != GL_NO_ERROR) {
-            LOGE("GL error cleared before updating SurfaceTexture: %#04x", error);
+            LOGW("updateTexImage: clearing GL error: %#04x", error);
         }
 
         GLenum target = getTextureTarget(mSlots[buf].mGraphicBuffer->format);
@@ -537,6 +548,11 @@ status_t SurfaceTexture::updateTexImage() {
         glBindTexture(mCurrentTextureTarget, mTexName);
     }
     return OK;
+}
+
+size_t SurfaceTexture::getQueuedCount() const {
+    Mutex::Autolock lock(mMutex);
+    return mQueue.size();
 }
 
 bool SurfaceTexture::isExternalFormat(uint32_t format)
