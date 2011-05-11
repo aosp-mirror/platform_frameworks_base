@@ -2600,27 +2600,6 @@ public final class Settings {
         public static final String WIFI_SAVED_STATE = "wifi_saved_state";
 
         /**
-         * AP SSID
-         *
-         * @hide
-         */
-        public static final String WIFI_AP_SSID = "wifi_ap_ssid";
-
-        /**
-         * AP security
-         *
-         * @hide
-         */
-        public static final String WIFI_AP_SECURITY = "wifi_ap_security";
-
-        /**
-         * AP passphrase
-         *
-         * @hide
-         */
-        public static final String WIFI_AP_PASSWD = "wifi_ap_passwd";
-
-        /**
          * The acceptable packet loss percentage (range 0 - 100) before trying
          * another AP on the same network.
          */
