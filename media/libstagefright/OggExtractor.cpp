@@ -378,12 +378,19 @@ status_t MyVorbisExtractor::seekToOffset(off64_t offset) {
 
 ssize_t MyVorbisExtractor::readPage(off64_t offset, Page *page) {
     uint8_t header[27];
-    if (mSource->readAt(offset, header, sizeof(header))
+    ssize_t n;
+    if ((n = mSource->readAt(offset, header, sizeof(header)))
             < (ssize_t)sizeof(header)) {
-        LOGV("failed to read %d bytes at offset 0x%016llx",
-             sizeof(header), offset);
+        LOGV("failed to read %d bytes at offset 0x%016llx, got %ld bytes",
+             sizeof(header), offset, n);
 
-        return ERROR_IO;
+        if (n < 0) {
+            return n;
+        } else if (n == 0) {
+            return ERROR_END_OF_STREAM;
+        } else {
+            return ERROR_IO;
+        }
     }
 
     if (memcmp(header, "OggS", 4)) {
@@ -498,8 +505,8 @@ status_t MyVorbisExtractor::readNextPacket(MediaBuffer **out) {
                     packetSize);
 
             if (n < (ssize_t)packetSize) {
-                LOGV("failed to read %d bytes at 0x%016llx",
-                     packetSize, dataOffset);
+                LOGV("failed to read %d bytes at 0x%016llx, got %ld bytes",
+                     packetSize, dataOffset, n);
                 return ERROR_IO;
             }
 
