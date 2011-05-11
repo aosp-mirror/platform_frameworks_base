@@ -767,6 +767,71 @@ public class MediaRecorder
      */
     public static final int MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED = 801;
 
+    /** informational events for individual tracks, for testing purpose.
+     * The track informational event usually contains two parts in the ext1
+     * arg of the onInfo() callback: bit 31-28 contains the track id; and
+     * the rest of the 28 bits contains the informational event defined here.
+     * For example, ext1 = (1 << 28 | MEDIA_RECORDER_TRACK_INFO_TYPE) if the
+     * track id is 1 for informational event MEDIA_RECORDER_TRACK_INFO_TYPE;
+     * while ext1 = (0 << 28 | MEDIA_RECORDER_TRACK_INFO_TYPE) if the track
+     * id is 0 for informational event MEDIA_RECORDER_TRACK_INFO_TYPE. The
+     * application should extract the track id and the type of informational
+     * event from ext1, accordingly.
+     *
+     * FIXME:
+     * Please update the comment for onInfo also when these
+     * events are unhidden so that application knows how to extract the track
+     * id and the informational event type from onInfo callback.
+     *
+     * {@hide}
+     */
+    public static final int MEDIA_RECORDER_TRACK_INFO_LIST_START        = 1000;
+    /** Signal the completion of the track for the recording session.
+     * {@hide}
+     */
+    public static final int MEDIA_RECORDER_TRACK_INFO_COMPLETION_STATUS = 1000;
+    /** Indicate the recording progress in time (ms) during recording.
+     * {@hide}
+     */
+    public static final int MEDIA_RECORDER_TRACK_INFO_PROGRESS_IN_TIME  = 1001;
+    /** Indicate the track type: 0 for Audio and 1 for Video.
+     * {@hide}
+     */
+    public static final int MEDIA_RECORDER_TRACK_INFO_TYPE              = 1002;
+    /** Provide the track duration information.
+     * {@hide}
+     */
+    public static final int MEDIA_RECORDER_TRACK_INFO_DURATION_MS       = 1003;
+    /** Provide the max chunk duration in time (ms) for the given track.
+     * {@hide}
+     */
+    public static final int MEDIA_RECORDER_TRACK_INFO_MAX_CHUNK_DUR_MS  = 1004;
+    /** Provide the total number of recordd frames.
+     * {@hide}
+     */
+    public static final int MEDIA_RECORDER_TRACK_INFO_ENCODED_FRAMES    = 1005;
+    /** Provide the max spacing between neighboring chunks for the given track.
+     * {@hide}
+     */
+    public static final int MEDIA_RECORDER_TRACK_INTER_CHUNK_TIME_MS    = 1006;
+    /** Provide the elapsed time measuring from the start of the recording
+     * till the first output frame of the given track is received, excluding
+     * any intentional start time offset of a recording session for the
+     * purpose of eliminating the recording sound in the recorded file.
+     * {@hide}
+     */
+    public static final int MEDIA_RECORDER_TRACK_INFO_INITIAL_DELAY_MS  = 1007;
+    /** Provide the start time difference (delay) betweeen this track and
+     * the start of the movie.
+     * {@hide}
+     */
+    public static final int MEDIA_RECORDER_TRACK_INFO_START_OFFSET_MS   = 1008;
+    /**
+     * {@hide}
+     */
+    public static final int MEDIA_RECORDER_TRACK_INFO_LIST_END          = 2000;
+
+
     /**
      * Interface definition for a callback to be invoked when an error
      * occurs while recording.
@@ -811,8 +876,17 @@ public class MediaRecorder
         /* Do not change these values without updating their counterparts
          * in include/media/mediarecorder.h!
          */
-        private static final int MEDIA_RECORDER_EVENT_ERROR = 1;
-        private static final int MEDIA_RECORDER_EVENT_INFO  = 2;
+        private static final int MEDIA_RECORDER_EVENT_LIST_START = 1;
+        private static final int MEDIA_RECORDER_EVENT_ERROR      = 1;
+        private static final int MEDIA_RECORDER_EVENT_INFO       = 2;
+        private static final int MEDIA_RECORDER_EVENT_LIST_END   = 99;
+
+        /* Events related to individual tracks */
+        private static final int MEDIA_RECORDER_TRACK_EVENT_LIST_START = 100;
+        private static final int MEDIA_RECORDER_TRACK_EVENT_ERROR      = 100;
+        private static final int MEDIA_RECORDER_TRACK_EVENT_INFO       = 101;
+        private static final int MEDIA_RECORDER_TRACK_EVENT_LIST_END   = 1000;
+
 
         @Override
         public void handleMessage(Message msg) {
@@ -822,12 +896,14 @@ public class MediaRecorder
             }
             switch(msg.what) {
             case MEDIA_RECORDER_EVENT_ERROR:
+            case MEDIA_RECORDER_TRACK_EVENT_ERROR:
                 if (mOnErrorListener != null)
                     mOnErrorListener.onError(mMediaRecorder, msg.arg1, msg.arg2);
 
                 return;
 
             case MEDIA_RECORDER_EVENT_INFO:
+            case MEDIA_RECORDER_TRACK_EVENT_INFO:
                 if (mOnInfoListener != null)
                     mOnInfoListener.onInfo(mMediaRecorder, msg.arg1, msg.arg2);
 
