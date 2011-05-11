@@ -30,7 +30,7 @@ import android.widget.MultiAutoCompleteTextView.Tokenizer;
  * can show completion suggestions for the substring of the text where
  * the user is typing instead of necessarily for the entire thing.
  * <p>
- * You must must provide a {@link Tokenizer} to distinguish the
+ * You must provide a {@link Tokenizer} to distinguish the
  * various substrings.
  *
  * <p>The following code snippet shows how to create a text view which suggests
@@ -41,7 +41,7 @@ import android.widget.MultiAutoCompleteTextView.Tokenizer;
  *     protected void onCreate(Bundle savedInstanceState) {
  *         super.onCreate(savedInstanceState);
  *         setContentView(R.layout.autocomplete_7);
- * 
+ *
  *         ArrayAdapter&lt;String&gt; adapter = new ArrayAdapter&lt;String&gt;(this,
  *                 android.R.layout.simple_dropdown_item_1line, COUNTRIES);
  *         MultiAutoCompleteTextView textView = (MultiAutoCompleteTextView) findViewById(R.id.edit);
@@ -132,7 +132,7 @@ public class MultiAutoCompleteTextView extends AutoCompleteTextView {
      * Instead of validating the entire text, this subclass method validates
      * each token of the text individually.  Empty tokens are removed.
      */
-    @Override 
+    @Override
     public void performValidation() {
         Validator v = getValidator();
 
