@@ -25,7 +25,7 @@
 
 #include <media/IAudioPolicyService.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 namespace android {
 

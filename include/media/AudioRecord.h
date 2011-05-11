@@ -30,7 +30,7 @@
 #include <binder/IMemory.h>
 #include <utils/threads.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 namespace android {
 

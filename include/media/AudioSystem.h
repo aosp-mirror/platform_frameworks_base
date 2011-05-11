@@ -21,7 +21,7 @@
 #include <utils/threads.h>
 #include <media/IAudioFlinger.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 #include <hardware/audio_policy.h>
 
 /* XXX: Should be include by all the users instead */

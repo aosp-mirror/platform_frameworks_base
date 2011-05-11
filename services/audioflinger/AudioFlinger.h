@@ -38,7 +38,7 @@
 #include <binder/BinderService.h>
 #include <binder/MemoryDealer.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 #include <hardware/audio_hal.h>
 
 #include "AudioBufferProvider.h"

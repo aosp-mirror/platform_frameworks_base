@@ -47,7 +47,7 @@
 #include <ctype.h>
 #include <unistd.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 #include "ARTPWriter.h"
 

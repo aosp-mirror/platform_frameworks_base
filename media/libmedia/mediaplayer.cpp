@@ -37,7 +37,7 @@
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 namespace android {
 

@@ -53,7 +53,7 @@
 #include <media/AudioTrack.h>
 #include <media/MemoryLeakTrackUtil.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 #include <private/android_filesystem_config.h>
 

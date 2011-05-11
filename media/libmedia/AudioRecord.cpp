@@ -37,7 +37,7 @@
 #include <utils/Timers.h>
 #include <utils/Atomic.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 #include <cutils/bitops.h>
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))

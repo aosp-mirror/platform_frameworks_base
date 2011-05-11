@@ -23,7 +23,7 @@
 #include <media/IAudioPolicyService.h>
 #include <math.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 // ----------------------------------------------------------------------------
 // the sim build doesn't have gettid
