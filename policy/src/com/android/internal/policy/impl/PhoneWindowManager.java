@@ -2870,9 +2870,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        try {
-            mStatusBarService.userActivity();
-        } catch (RemoteException ex) {}
+        if (mStatusBarService != null) {
+            try {
+                mStatusBarService.userActivity();
+            } catch (RemoteException ex) {}
+        }
     }
 
     Runnable mScreenLockTimeout = new Runnable() {

@@ -38,5 +38,9 @@
     <!-- Whether or not we show the number in the bar. -->
     <bool name="config_statusBarShowNumber">true</bool>
 
+    <!-- Whether a software navigation bar should be shown. NOTE: in the future this may be
+         autodetected from the Configuration. -->
+    <bool name="config_showNavigationBar">true</bool>
+
 </resources>
 

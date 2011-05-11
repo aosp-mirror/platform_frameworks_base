@@ -147,7 +147,7 @@ public class PhoneStatusBar extends StatusBar {
     private View mIntruderAlertView;
 
     // on-screen navigation buttons
-    private NavigationBarView mNavigationBarView;
+    private NavigationBarView mNavigationBarView = null;
 
     // the tracker view
     TrackingView mTrackingView;
@@ -236,8 +236,15 @@ public class PhoneStatusBar extends StatusBar {
         mIntruderAlertView.setVisibility(View.GONE);
         mIntruderAlertView.setClickable(true);
 
-        mNavigationBarView = 
-            (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+        try {
+            boolean showNav = res.getBoolean(R.bool.config_showNavigationBar);
+            if (showNav) {
+                mNavigationBarView = 
+                    (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+            }
+        } catch (Resources.NotFoundException ex) {
+            // no nav bar for you
+        }
 
         PhoneStatusBarView sb = (PhoneStatusBarView)View.inflate(context,
                 R.layout.status_bar, null);
@@ -310,12 +317,16 @@ public class PhoneStatusBar extends StatusBar {
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons
     private void addNavigationBar() {
+        if (mNavigationBarView == null) return;
+        
         mNavigationBarView.reorient();
         WindowManagerImpl.getDefault().addView(
                 mNavigationBarView, getNavigationBarLayoutParams());
     }
 
     private void repositionNavigationBar() {
+        if (mNavigationBarView == null) return;
+        
         mNavigationBarView.reorient();
         WindowManagerImpl.getDefault().updateViewLayout(
                 mNavigationBarView, getNavigationBarLayoutParams());
