@@ -35,28 +35,33 @@ import com.android.internal.statusbar.StatusBarNotification;
 public class CommandQueue extends IStatusBar.Stub {
     private static final String TAG = "StatusBar.CommandQueue";
 
-    private static final int MSG_MASK = 0xffff0000;
-    private static final int INDEX_MASK = 0x0000ffff;
+    private static final int INDEX_MASK = 0xffff;
+    private static final int MSG_SHIFT  = 16;
+    private static final int MSG_MASK   = 0xffff << MSG_SHIFT;
 
-    private static final int MSG_ICON = 0x00010000;
-    private static final int OP_SET_ICON = 1;
+
+    private static final int MSG_ICON                   = 1 << MSG_SHIFT;
+    private static final int OP_SET_ICON    = 1;
     private static final int OP_REMOVE_ICON = 2;
 
-    private static final int MSG_ADD_NOTIFICATION = 0x00020000;
-    private static final int MSG_UPDATE_NOTIFICATION = 0x00030000;
-    private static final int MSG_REMOVE_NOTIFICATION = 0x00040000;
+    private static final int MSG_ADD_NOTIFICATION       = 2 << MSG_SHIFT;
+    private static final int MSG_UPDATE_NOTIFICATION    = 3 << MSG_SHIFT;
+    private static final int MSG_REMOVE_NOTIFICATION    = 4 << MSG_SHIFT;
 
-    private static final int MSG_DISABLE = 0x00050000;
+    private static final int MSG_DISABLE                = 5 << MSG_SHIFT;
 
-    private static final int MSG_SET_VISIBILITY = 0x00060000;
-    private static final int OP_EXPAND = 1;
-    private static final int OP_COLLAPSE = 2;
+    private static final int MSG_SET_VISIBILITY         = 6 << MSG_SHIFT;
+    private static final int OP_EXPAND      = 1;
+    private static final int OP_COLLAPSE    = 2;
 
-    private static final int MSG_SET_LIGHTS_ON = 0x00070000;
+    private static final int MSG_SET_LIGHTS_ON          = 7 << MSG_SHIFT;
 
-    private static final int MSG_SHOW_MENU = 0x00080000;
-    private static final int MSG_SHOW_IME_BUTTON = 0x00090000;
-    private static final int MSG_SET_HARD_KEYBOARD_STATUS = 0x000a0000;
+    private static final int MSG_SHOW_MENU              = 8 << MSG_SHIFT;
+    private static final int MSG_SHOW_IME_BUTTON        = 9 << MSG_SHIFT;
+    private static final int MSG_SET_HARD_KEYBOARD_STATUS = 10 << MSG_SHIFT;
+    
+    private static final int MSG_USER_ACTIVITY          = 11 << MSG_SHIFT;
+
 
     private StatusBarIconList mList;
     private Callbacks mCallbacks;
@@ -85,6 +90,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void setMenuKeyVisible(boolean visible);
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition);
         public void setHardKeyboardStatus(boolean available, boolean enabled);
+        public void userActivity();
     }
 
     public CommandQueue(Callbacks callbacks, StatusBarIconList list) {
@@ -183,6 +189,13 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
+    public void userActivity() {
+        synchronized (mList) {
+            mHandler.removeMessages(MSG_USER_ACTIVITY);
+            mHandler.obtainMessage(MSG_USER_ACTIVITY, 0, 0, null).sendToTarget();
+        }
+    }
+
     private final class H extends Handler {
         public void handleMessage(Message msg) {
             final int what = msg.what & MSG_MASK;
@@ -248,6 +261,9 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_SET_HARD_KEYBOARD_STATUS:
                     mCallbacks.setHardKeyboardStatus(msg.arg1 != 0, msg.arg2 != 0);
+                    break;
+                case MSG_USER_ACTIVITY:
+                    mCallbacks.userActivity();
                     break;
             }
         }

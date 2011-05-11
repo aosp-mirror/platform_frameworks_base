@@ -36,12 +36,14 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Handler;
 import android.os.Message;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.IWindowManager;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -101,6 +103,8 @@ public class PhoneStatusBar extends StatusBar {
     int mIconSize;
     Display mDisplay;
 
+    IWindowManager mWindowManager;
+
     PhoneStatusBarView mStatusBarView;
     int mPixelFormat;
     H mHandler = new H();
@@ -143,7 +147,7 @@ public class PhoneStatusBar extends StatusBar {
     private View mIntruderAlertView;
 
     // on-screen navigation buttons
-    private NavigationBarView mNavigationBarView;
+    private NavigationBarView mNavigationBarView = null;
 
     // the tracker view
     TrackingView mTrackingView;
@@ -201,6 +205,9 @@ public class PhoneStatusBar extends StatusBar {
         mDisplay = ((WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE))
                 .getDefaultDisplay();
 
+        mWindowManager = IWindowManager.Stub.asInterface(
+                ServiceManager.getService(Context.WINDOW_SERVICE));
+
         super.start();
 
         addNavigationBar();
@@ -229,8 +236,15 @@ public class PhoneStatusBar extends StatusBar {
         mIntruderAlertView.setVisibility(View.GONE);
         mIntruderAlertView.setClickable(true);
 
-        mNavigationBarView = 
-            (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+        try {
+            boolean showNav = res.getBoolean(R.bool.config_showNavigationBar);
+            if (showNav) {
+                mNavigationBarView = 
+                    (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+            }
+        } catch (Resources.NotFoundException ex) {
+            // no nav bar for you
+        }
 
         PhoneStatusBarView sb = (PhoneStatusBarView)View.inflate(context,
                 R.layout.status_bar, null);
@@ -303,12 +317,16 @@ public class PhoneStatusBar extends StatusBar {
 
     // For small-screen devices (read: phones) that lack hardware navigation buttons
     private void addNavigationBar() {
+        if (mNavigationBarView == null) return;
+        
         mNavigationBarView.reorient();
         WindowManagerImpl.getDefault().addView(
                 mNavigationBarView, getNavigationBarLayoutParams());
     }
 
     private void repositionNavigationBar() {
+        if (mNavigationBarView == null) return;
+        
         mNavigationBarView.reorient();
         WindowManagerImpl.getDefault().updateViewLayout(
                 mNavigationBarView, getNavigationBarLayoutParams());
@@ -1103,11 +1121,22 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     public void setLightsOn(boolean on) {
+        Log.v(TAG, "lights " + (on ? "on" : "off"));
         if (!on) {
             // All we do for "lights out" mode on a phone is hide the status bar,
             // which the window manager does.  But we do need to hide the windowshade
             // on our own.
             animateCollapse();
+        }
+        notifyLightsChanged(on);
+    }
+
+    private void notifyLightsChanged(boolean shown) {
+        try {
+            Slog.d(TAG, "lights " + (shown?"on":"out"));
+            mWindowManager.statusBarVisibilityChanged(
+                    shown ? View.STATUS_BAR_VISIBLE : View.STATUS_BAR_HIDDEN);
+        } catch (RemoteException ex) {
         }
     }
 
@@ -1517,6 +1546,12 @@ public class PhoneStatusBar extends StatusBar {
             mExpandedParams.height = getExpandedHeight();
             mExpandedDialog.getWindow().setAttributes(mExpandedParams);
         }
+    }
+
+    public void userActivity() {
+        try {
+            mBarService.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
+        } catch (RemoteException ex) { }
     }
 
     /**

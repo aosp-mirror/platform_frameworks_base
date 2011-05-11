@@ -79,15 +79,22 @@ public class StatusBarTest extends TestActivity
         new Test("STATUS_BAR_HIDDEN") {
             public void run() {
                 View v = findViewById(android.R.id.list);
-                v.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
                 v.setOnSystemUiVisibilityChangeListener(mOnSystemUiVisibilityChangeListener);
+                v.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
+            }
+        },
+        new Test("STATUS_BAR_VISIBLE") {
+            public void run() {
+                View v = findViewById(android.R.id.list);
+                v.setOnSystemUiVisibilityChangeListener(mOnSystemUiVisibilityChangeListener);
+                v.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
             }
         },
         new Test("no setSystemUiVisibility") {
             public void run() {
                 View v = findViewById(android.R.id.list);
-                v.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
                 v.setOnSystemUiVisibilityChangeListener(null);
+                v.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
             }
         },
         new Test("Double Remove") {

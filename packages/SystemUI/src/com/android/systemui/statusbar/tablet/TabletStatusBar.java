@@ -1565,6 +1565,9 @@ public class TabletStatusBar extends StatusBar implements
         return true;
     }
 
+    public void userActivity() {
+    }
+
     public class TouchOutsideListener implements View.OnTouchListener {
         private int mMsg;
         private StatusBarPanel mPanel;

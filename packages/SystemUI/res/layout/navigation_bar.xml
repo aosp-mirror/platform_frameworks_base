@@ -25,100 +25,106 @@
     android:layout_width="match_parent"
     >
 
-    <LinearLayout android:id="@+id/rot0"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:paddingLeft="8dip"
-        android:paddingRight="8dip"
-        android:background="#FF000000"
-        android:orientation="horizontal"
-        >
-
-        <!-- navigation controls -->
-        <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_sysbar_back"
-            systemui:keyCode="4"
-            android:layout_weight="1"
-            />
-        <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_sysbar_home"
-            systemui:keyCode="3"
-            android:layout_weight="1"
-            />
-        <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@drawable/ic_sysbar_menu"
-            systemui:keyCode="82"
-            android:layout_weight="1"
-            />
-    </LinearLayout>
-
-    <LinearLayout android:id="@+id/rot90"
+    <FrameLayout
+        android:id="@+id/background"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:background="#FF000000"
-        android:orientation="vertical"
-        android:visibility="gone"
         >
 
-        <!-- navigation controls -->
-        <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
+        <LinearLayout android:id="@+id/rot0"
+            android:layout_height="match_parent"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_sysbar_menu"
-            systemui:keyCode="82"
-            android:layout_weight="1"
-            />
-        <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_sysbar_home"
-            systemui:keyCode="3"
-            android:layout_weight="1"
-            />
-        <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_sysbar_back"
-            systemui:keyCode="4"
-            android:layout_weight="1"
-            />
-    </LinearLayout>
+            android:paddingLeft="8dip"
+            android:paddingRight="8dip"
+            android:orientation="horizontal"
+            >
 
-    <LinearLayout android:id="@+id/rot270"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:background="#FF000000"
-        android:orientation="vertical"
-        android:visibility="gone"
-        >
+            <!-- navigation controls -->
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_sysbar_back"
+                systemui:keyCode="4"
+                android:layout_weight="1"
+                />
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_sysbar_home"
+                systemui:keyCode="3"
+                android:layout_weight="1"
+                />
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_sysbar_menu"
+                systemui:keyCode="82"
+                android:layout_weight="1"
+                />
+        </LinearLayout>
 
-        <!-- navigation controls -->
-        <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
+        <LinearLayout android:id="@+id/rot90"
+            android:layout_height="match_parent"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_sysbar_back"
-            systemui:keyCode="4"
-            android:layout_weight="1"
-            />
-        <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
+            android:orientation="vertical"
+            android:visibility="gone"
+            >
+
+            <!-- navigation controls -->
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_menu"
+                systemui:keyCode="82"
+                android:layout_weight="1"
+                />
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_home"
+                systemui:keyCode="3"
+                android:layout_weight="1"
+                />
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_back"
+                systemui:keyCode="4"
+                android:layout_weight="1"
+                />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/rot270"
+            android:layout_height="match_parent"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_sysbar_home"
-            systemui:keyCode="3"
-            android:layout_weight="1"
-            />
-        <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_sysbar_menu"
-            systemui:keyCode="82"
-            android:layout_weight="1"
-            />
-    </LinearLayout>
+            android:orientation="vertical"
+            android:visibility="gone"
+            >
+
+            <!-- navigation controls -->
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_back"
+                systemui:keyCode="4"
+                android:layout_weight="1"
+                />
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_home"
+                systemui:keyCode="3"
+                android:layout_weight="1"
+                />
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_sysbar_menu"
+                systemui:keyCode="82"
+                android:layout_weight="1"
+                />
+        </LinearLayout>
+    
+    </FrameLayout>
 </com.android.systemui.statusbar.phone.NavigationBarView>

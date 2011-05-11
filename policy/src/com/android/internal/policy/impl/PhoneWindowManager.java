@@ -2880,6 +2880,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mHandler.postDelayed(mScreenLockTimeout, mLockScreenTimeout);
             }
         }
+
+        if (mStatusBarService != null) {
+            try {
+                mStatusBarService.userActivity();
+            } catch (RemoteException ex) {}
+        }
     }
 
     Runnable mScreenLockTimeout = new Runnable() {

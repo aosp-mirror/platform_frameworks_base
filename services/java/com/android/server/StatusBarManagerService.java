@@ -122,6 +122,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     // ================================================================================
     // From IStatusBarService
     // ================================================================================
+    public void userActivity() {
+        if (mBar != null) try {
+            mBar.userActivity();
+        } catch (RemoteException ex) {}
+    }
     public void expand() {
         enforceExpandStatusBar();
 
