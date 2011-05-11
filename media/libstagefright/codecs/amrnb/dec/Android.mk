@@ -52,3 +52,33 @@ LOCAL_CFLAGS := \
 LOCAL_MODULE := libstagefright_amrnbdec
 
 include $(BUILD_STATIC_LIBRARY)
+
+################################################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+        SoftAMR.cpp
+
+LOCAL_C_INCLUDES := \
+        frameworks/base/media/libstagefright/include \
+        frameworks/base/include/media/stagefright/openmax \
+        $(LOCAL_PATH)/src \
+        $(LOCAL_PATH)/include \
+        $(LOCAL_PATH)/../common/include \
+        $(LOCAL_PATH)/../common \
+        frameworks/base/media/libstagefright/codecs/amrwb/src \
+
+LOCAL_CFLAGS := -DOSCL_IMPORT_REF=
+
+LOCAL_STATIC_LIBRARIES := \
+        libstagefright_amrnbdec libstagefright_amrwbdec
+
+LOCAL_SHARED_LIBRARIES := \
+        libstagefright_omx libstagefright_foundation libutils \
+        libstagefright_amrnb_common
+
+LOCAL_MODULE := libstagefright_soft_amrdec
+LOCAL_MODULE_TAGS := eng
+
+include $(BUILD_SHARED_LIBRARY)

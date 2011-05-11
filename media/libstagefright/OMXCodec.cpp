@@ -53,7 +53,10 @@
 #include <OMX_Audio.h>
 #include <OMX_Component.h>
 
+#if HAVE_SOFTWARE_DECODERS
 #include "include/ThreadedSource.h"
+#endif
+
 #include "include/avc_utils.h"
 
 namespace android {
@@ -65,11 +68,6 @@ struct CodecInfo {
     const char *codec;
 };
 
-#define FACTORY_CREATE(name) \
-static sp<MediaSource> Make##name(const sp<MediaSource> &source) { \
-    return new name(source); \
-}
-
 #define FACTORY_CREATE_ENCODER(name) \
 static sp<MediaSource> Make##name(const sp<MediaSource> &source, const sp<MetaData> &meta) { \
     return new name(source, meta); \
@@ -77,20 +75,29 @@ static sp<MediaSource> Make##name(const sp<MediaSource> &source, const sp<MetaDa
 
 #define FACTORY_REF(name) { #name, Make##name },
 
-FACTORY_CREATE(MP3Decoder)
-FACTORY_CREATE(AMRNBDecoder)
-FACTORY_CREATE(AMRWBDecoder)
-FACTORY_CREATE(AACDecoder)
-FACTORY_CREATE(AVCDecoder)
-FACTORY_CREATE(G711Decoder)
-FACTORY_CREATE(M4vH263Decoder)
-FACTORY_CREATE(VorbisDecoder)
-FACTORY_CREATE(VPXDecoder)
 FACTORY_CREATE_ENCODER(AMRNBEncoder)
 FACTORY_CREATE_ENCODER(AMRWBEncoder)
 FACTORY_CREATE_ENCODER(AACEncoder)
 FACTORY_CREATE_ENCODER(AVCEncoder)
 FACTORY_CREATE_ENCODER(M4vH263Encoder)
+
+#if HAVE_SOFTWARE_DECODERS
+
+#define FACTORY_CREATE(name) \
+static sp<MediaSource> Make##name(const sp<MediaSource> &source) { \
+    return new name(source); \
+}
+
+FACTORY_CREATE(AMRNBDecoder)
+FACTORY_CREATE(AMRWBDecoder)
+FACTORY_CREATE(AACDecoder)
+FACTORY_CREATE(AVCDecoder)
+FACTORY_CREATE(G711Decoder)
+FACTORY_CREATE(MP3Decoder)
+FACTORY_CREATE(M4vH263Decoder)
+FACTORY_CREATE(VorbisDecoder)
+FACTORY_CREATE(VPXDecoder)
+#endif
 
 static sp<MediaSource> InstantiateSoftwareEncoder(
         const char *name, const sp<MediaSource> &source,
@@ -119,18 +126,19 @@ static sp<MediaSource> InstantiateSoftwareEncoder(
 
 static sp<MediaSource> InstantiateSoftwareCodec(
         const char *name, const sp<MediaSource> &source) {
+#if HAVE_SOFTWARE_DECODERS
     struct FactoryInfo {
         const char *name;
         sp<MediaSource> (*CreateFunc)(const sp<MediaSource> &);
     };
 
     static const FactoryInfo kFactoryInfo[] = {
-        FACTORY_REF(MP3Decoder)
         FACTORY_REF(AMRNBDecoder)
         FACTORY_REF(AMRWBDecoder)
         FACTORY_REF(AACDecoder)
         FACTORY_REF(AVCDecoder)
         FACTORY_REF(G711Decoder)
+        FACTORY_REF(MP3Decoder)
         FACTORY_REF(M4vH263Decoder)
         FACTORY_REF(VorbisDecoder)
         FACTORY_REF(VPXDecoder)
@@ -145,6 +153,7 @@ static sp<MediaSource> InstantiateSoftwareCodec(
             return (*kFactoryInfo[i].CreateFunc)(source);
         }
     }
+#endif
 
     return NULL;
 }
@@ -156,36 +165,47 @@ static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_IMAGE_JPEG, "OMX.TI.JPEG.decode" },
 //    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.Nvidia.mp3.decoder" },
 //    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.TI.MP3.decode" },
+    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.google.mp3.decoder" },
     { MEDIA_MIMETYPE_AUDIO_MPEG, "MP3Decoder" },
 //    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.decode" },
 //    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.Nvidia.amr.decoder" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.google.amrnb.decoder" },
     { MEDIA_MIMETYPE_AUDIO_AMR_NB, "AMRNBDecoder" },
 //    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.Nvidia.amrwb.decoder" },
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.decode" },
+    { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.google.amrwb.decoder" },
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "AMRWBDecoder" },
 //    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.Nvidia.aac.decoder" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.decode" },
+    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.google.aac.decoder" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "AACDecoder" },
+    { MEDIA_MIMETYPE_AUDIO_G711_ALAW, "OMX.google.g711.alaw.decoder" },
     { MEDIA_MIMETYPE_AUDIO_G711_ALAW, "G711Decoder" },
+    { MEDIA_MIMETYPE_AUDIO_G711_MLAW, "OMX.google.g711.mlaw.decoder" },
     { MEDIA_MIMETYPE_AUDIO_G711_MLAW, "G711Decoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.Nvidia.mp4.decode" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.7x30.video.decoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.video.decoder.mpeg4" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.SEC.MPEG4.Decoder" },
+    { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.google.mpeg4.decoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "M4vH263Decoder" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.Nvidia.h263.decode" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.7x30.video.decoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.decoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.SEC.H263.Decoder" },
+    { MEDIA_MIMETYPE_VIDEO_H263, "OMX.google.h263.decoder" },
     { MEDIA_MIMETYPE_VIDEO_H263, "M4vH263Decoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.Nvidia.h264.decode" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.7x30.video.decoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.video.decoder.avc" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.Video.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.SEC.AVC.Decoder" },
+    { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.google.avc.decoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "AVCDecoder" },
+    { MEDIA_MIMETYPE_AUDIO_VORBIS, "OMX.google.vorbis.decoder" },
     { MEDIA_MIMETYPE_AUDIO_VORBIS, "VorbisDecoder" },
+    { MEDIA_MIMETYPE_VIDEO_VPX, "OMX.google.vpx.decoder" },
     { MEDIA_MIMETYPE_VIDEO_VPX, "VPXDecoder" },
 };
 
@@ -277,6 +297,10 @@ static void InitOMXParams(T *params) {
 }
 
 static bool IsSoftwareCodec(const char *componentName) {
+    if (!strncmp("OMX.google.", componentName, 11)) {
+        return true;
+    }
+
     if (!strncmp("OMX.", componentName, 4)) {
         return false;
     }
@@ -284,26 +308,29 @@ static bool IsSoftwareCodec(const char *componentName) {
     return true;
 }
 
-// A sort order in which non-OMX components are first,
-// followed by software codecs, and followed by all the others.
+// A sort order in which OMX software codecs are first, followed
+// by other (non-OMX) software codecs, followed by everything else.
 static int CompareSoftwareCodecsFirst(
         const String8 *elem1, const String8 *elem2) {
-    bool isNotOMX1 = strncmp(elem1->string(), "OMX.", 4);
-    bool isNotOMX2 = strncmp(elem2->string(), "OMX.", 4);
-
-    if (isNotOMX1) {
-        if (isNotOMX2) { return 0; }
-        return -1;
-    }
-    if (isNotOMX2) {
-        return 1;
-    }
+    bool isOMX1 = !strncmp(elem1->string(), "OMX.", 4);
+    bool isOMX2 = !strncmp(elem2->string(), "OMX.", 4);
 
     bool isSoftwareCodec1 = IsSoftwareCodec(elem1->string());
     bool isSoftwareCodec2 = IsSoftwareCodec(elem2->string());
 
     if (isSoftwareCodec1) {
-        if (isSoftwareCodec2) { return 0; }
+        if (!isSoftwareCodec2) { return -1; }
+
+        if (isOMX1) {
+            if (isOMX2) { return 0; }
+
+            return -1;
+        } else {
+            if (isOMX2) { return 0; }
+
+            return 1;
+        }
+
         return -1;
     }
 
@@ -622,6 +649,11 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
                 LOGE("Profile and/or level exceed the decoder's capabilities.");
                 return ERROR_UNSUPPORTED;
             }
+        } else if (meta->findData(kKeyVorbisInfo, &type, &data, &size)) {
+            addCodecSpecificData(data, size);
+
+            CHECK(meta->findData(kKeyVorbisBooks, &type, &data, &size));
+            addCodecSpecificData(data, size);
         }
     }
 
@@ -631,16 +663,23 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
     }
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mMIME)) {
         setAMRFormat(false /* isWAMR */, bitRate);
-    }
-    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mMIME)) {
+    } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_WB, mMIME)) {
         setAMRFormat(true /* isWAMR */, bitRate);
-    }
-    if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mMIME)) {
+    } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mMIME)) {
         int32_t numChannels, sampleRate;
         CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
 
         setAACFormat(numChannels, sampleRate, bitRate);
+    } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_G711_ALAW, mMIME)
+            || !strcasecmp(MEDIA_MIMETYPE_AUDIO_G711_MLAW, mMIME)) {
+        // These are PCM-like formats with a fixed sample rate but
+        // a variable number of channels.
+
+        int32_t numChannels;
+        CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+
+        setG711Format(numChannels);
     }
 
     if (!strncasecmp(mMIME, "video/", 6)) {
@@ -1316,6 +1355,8 @@ status_t OMXCodec::setVideoOutputFormat(
         compressionFormat = OMX_VIDEO_CodingMPEG4;
     } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_H263, mime)) {
         compressionFormat = OMX_VIDEO_CodingH263;
+    } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_VPX, mime)) {
+        compressionFormat = OMX_VIDEO_CodingVPX;
     } else {
         LOGE("Not a supported video mime type: %s", mime);
         CHECK(!"Should not be here. Not a supported video mime type.");
@@ -1443,7 +1484,8 @@ OMXCodec::OMXCodec(
       mOutputPortSettingsChangedPending(false),
       mLeftOverBuffer(NULL),
       mPaused(false),
-      mNativeWindow(nativeWindow) {
+      mNativeWindow(!strncmp(componentName, "OMX.google.", 11)
+                        ? NULL : nativeWindow) {
     mPortStatus[kPortIndexInput] = ENABLED;
     mPortStatus[kPortIndexOutput] = ENABLED;
 
@@ -2899,6 +2941,23 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
 
         offset += srcBuffer->range_length();
 
+        if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_VORBIS, mMIME)) {
+            CHECK(!(mQuirks & kSupportsMultipleFramesPerInputBuffer));
+            CHECK_GE(info->mSize, offset + sizeof(int32_t));
+
+            int32_t numPageSamples;
+            if (!srcBuffer->meta_data()->findInt32(
+                        kKeyValidSamples, &numPageSamples)) {
+                numPageSamples = -1;
+            }
+
+            memcpy((uint8_t *)info->mData + offset,
+                   &numPageSamples,
+                   sizeof(numPageSamples));
+
+            offset += sizeof(numPageSamples);
+        }
+
         if (releaseBuffer) {
             srcBuffer->release();
             srcBuffer = NULL;
@@ -3222,6 +3281,11 @@ void OMXCodec::setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t bit
                 mNode, OMX_IndexParamAudioAac, &profile, sizeof(profile));
         CHECK_EQ(err, (status_t)OK);
     }
+}
+
+void OMXCodec::setG711Format(int32_t numChannels) {
+    CHECK(!mIsEncoder);
+    setRawAudioFormat(kPortIndexInput, 8000, numChannels);
 }
 
 void OMXCodec::setImageOutputFormat(
@@ -4013,6 +4077,13 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                          numChannels, params.nChannels);
                 }
 
+                if (sampleRate != params.nSamplingRate) {
+                    LOGW("Codec outputs at different sampling rate than "
+                         "what the input stream contains (contains data at "
+                         "%d Hz, codec outputs %d Hz)",
+                         sampleRate, params.nSamplingRate);
+                }
+
                 mOutputFormat->setCString(
                         kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_RAW);
 
@@ -4025,8 +4096,7 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                         (mQuirks & kDecoderLiesAboutNumberOfChannels)
                             ? numChannels : params.nChannels);
 
-                // The codec-reported sampleRate is not reliable...
-                mOutputFormat->setInt32(kKeySampleRate, sampleRate);
+                mOutputFormat->setInt32(kKeySampleRate, params.nSamplingRate);
             } else if (audio_def->eEncoding == OMX_AUDIO_CodingAMR) {
                 OMX_AUDIO_PARAM_AMRTYPE amr;
                 InitOMXParams(&amr);

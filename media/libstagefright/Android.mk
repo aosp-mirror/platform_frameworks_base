@@ -3,6 +3,8 @@ include $(CLEAR_VARS)
 
 include frameworks/base/media/libstagefright/codecs/common/Config.mk
 
+BUILD_WITH_SOFTWARE_DECODERS := true
+
 LOCAL_SRC_FILES:=                         \
         ACodec.cpp                        \
         AACExtractor.cpp                  \
@@ -45,7 +47,6 @@ LOCAL_SRC_FILES:=                         \
         ShoutcastSource.cpp               \
         StagefrightMediaScanner.cpp       \
         StagefrightMetadataRetriever.cpp  \
-        ThreadedSource.cpp                \
         ThrottledSource.cpp               \
         TimeSource.cpp                    \
         TimedEventQueue.cpp               \
@@ -82,27 +83,38 @@ LOCAL_SHARED_LIBRARIES := \
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_color_conversion \
-        libstagefright_aacdec \
         libstagefright_aacenc \
-        libstagefright_amrnbdec \
         libstagefright_amrnbenc \
-        libstagefright_amrwbdec \
         libstagefright_amrwbenc \
-        libstagefright_avcdec \
         libstagefright_avcenc \
-        libstagefright_m4vh263dec \
         libstagefright_m4vh263enc \
-        libstagefright_mp3dec \
-        libstagefright_vorbisdec \
         libstagefright_matroska \
-        libstagefright_vpxdec \
         libvpx \
         libstagefright_mpeg2ts \
         libstagefright_httplive \
         libstagefright_rtsp \
         libstagefright_id3 \
-        libstagefright_g711dec \
         libFLAC \
+
+ifeq ($(BUILD_WITH_SOFTWARE_DECODERS),true)
+
+LOCAL_SRC_FILES += \
+        ThreadedSource.cpp                \
+
+LOCAL_STATIC_LIBRARIES += \
+        libstagefright_aacdec \
+        libstagefright_amrnbdec \
+        libstagefright_amrwbdec \
+        libstagefright_avcdec \
+        libstagefright_g711dec \
+        libstagefright_mp3dec \
+        libstagefright_m4vh263dec \
+        libstagefright_vorbisdec \
+        libstagefright_vpxdec \
+        libvpx \
+
+endif
+
 
 ################################################################################
 
@@ -179,6 +191,10 @@ ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
 endif
 
 LOCAL_CFLAGS += -Wno-multichar
+
+ifeq ($(BUILD_WITH_SOFTWARE_DECODERS),true)
+    LOCAL_CFLAGS += -DHAVE_SOFTWARE_DECODERS
+endif
 
 LOCAL_MODULE:= libstagefright
 

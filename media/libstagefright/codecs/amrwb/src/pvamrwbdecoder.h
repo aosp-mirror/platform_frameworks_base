@@ -101,7 +101,7 @@ typedef struct
 {
     int16 prev_ft;
     int16 prev_mode;
-} RX_State;
+} RX_State_wb;
 
     /*----------------------------------------------------------------------------
     ; ENUMERATED TYPEDEF'S
@@ -141,7 +141,7 @@ typedef struct
                         int16 *frame_type,
                         int16 *mode,
                         uint8 q,
-                        RX_State *st);
+                        RX_State_wb *st);
 
 
     /*----------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef OMX_PV_CODECS_PLUGIN_H_
+#ifndef SOFT_OMX_PLUGIN_H_
 
-#define OMX_PV_CODECS_PLUGIN_H_
+#define SOFT_OMX_PLUGIN_H_
 
+#include <media/stagefright/foundation/ABase.h>
 #include <media/stagefright/OMXPluginBase.h>
 
 namespace android {
 
-struct OMXPVCodecsPlugin : public OMXPluginBase {
-    OMXPVCodecsPlugin();
-    virtual ~OMXPVCodecsPlugin();
+struct SoftOMXPlugin : public OMXPluginBase {
+    SoftOMXPlugin();
 
     virtual OMX_ERRORTYPE makeComponentInstance(
             const char *name,
@@ -45,10 +45,9 @@ struct OMXPVCodecsPlugin : public OMXPluginBase {
             Vector<String8> *roles);
 
 private:
-    OMXPVCodecsPlugin(const OMXPVCodecsPlugin &);
-    OMXPVCodecsPlugin &operator=(const OMXPVCodecsPlugin &);
+    DISALLOW_EVIL_CONSTRUCTORS(SoftOMXPlugin);
 };
 
 }  // namespace android
 
-#endif  // OMX_PV_CODECS_PLUGIN_H_
+#endif  // SOFT_OMX_PLUGIN_H_

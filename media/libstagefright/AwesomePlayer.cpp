@@ -942,7 +942,9 @@ void AwesomePlayer::initRenderer_l() {
     // before creating a new one.
     IPCThreadState::self()->flushCommands();
 
-    if (USE_SURFACE_ALLOC && strncmp(component, "OMX.", 4) == 0) {
+    if (USE_SURFACE_ALLOC
+            && !strncmp(component, "OMX.", 4)
+            && strncmp(component, "OMX.google.", 11)) {
         // Hardware decoders avoid the CPU color conversion by decoding
         // directly to ANativeBuffers, so we must use a renderer that
         // just pushes those buffers to the ANativeWindow.

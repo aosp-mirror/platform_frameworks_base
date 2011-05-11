@@ -58,6 +58,7 @@ private:
     void *mVendorLibHandle;
 
     void addVendorPlugin();
+    void addPlugin(const char *libname);
     void addPlugin(OMXPluginBase *plugin);
     void clearPlugins();
 

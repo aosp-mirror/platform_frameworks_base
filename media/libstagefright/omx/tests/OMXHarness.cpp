@@ -29,6 +29,7 @@
 #include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MediaSource.h>
@@ -454,6 +455,7 @@ static const char *GetMimeFromComponentRole(const char *componentRole) {
         { "video_decoder.avc", "video/avc" },
         { "video_decoder.mpeg4", "video/mp4v-es" },
         { "video_decoder.h263", "video/3gpp" },
+        { "video_decoder.vpx", "video/x-vnd.on2.vp8" },
 
         // we appear to use this as a synonym to amrnb.
         { "audio_decoder.amr", "audio/3gpp" },
@@ -461,7 +463,10 @@ static const char *GetMimeFromComponentRole(const char *componentRole) {
         { "audio_decoder.amrnb", "audio/3gpp" },
         { "audio_decoder.amrwb", "audio/amr-wb" },
         { "audio_decoder.aac", "audio/mp4a-latm" },
-        { "audio_decoder.mp3", "audio/mpeg" }
+        { "audio_decoder.mp3", "audio/mpeg" },
+        { "audio_decoder.vorbis", "audio/vorbis" },
+        { "audio_decoder.g711alaw", MEDIA_MIMETYPE_AUDIO_G711_ALAW },
+        { "audio_decoder.g711mlaw", MEDIA_MIMETYPE_AUDIO_G711_MLAW },
     };
 
     for (size_t i = 0; i < sizeof(kRoleToMime) / sizeof(kRoleToMime[0]); ++i) {
@@ -492,7 +497,15 @@ static const char *GetURLForMime(const char *mime) {
         { "audio/mp4a-latm",
           "file:///sdcard/media_api/video/H264_AAC.3gp" },
         { "audio/mpeg",
-          "file:///sdcard/media_api/music/MP3CBR.mp3" }
+          "file:///sdcard/media_api/music/MP3CBR.mp3" },
+        { "audio/vorbis",
+          "file:///sdcard/media_api/metaDataTestMedias/OGG/"
+          "When You Say Nothing At All.ogg" },
+        { "video/x-vnd.on2.vp8",
+          "file:///sdcard/media_api/webm/big-buck-bunny_trailer.webm" },
+        { MEDIA_MIMETYPE_AUDIO_G711_ALAW, "file:///sdcard/M1F1-Alaw-AFsp.wav" },
+        { MEDIA_MIMETYPE_AUDIO_G711_MLAW,
+          "file:///sdcard/M1F1-mulaw-AFsp.wav" },
     };
 
     for (size_t i = 0; i < sizeof(kMimeToURL) / sizeof(kMimeToURL[0]); ++i) {
@@ -745,6 +758,10 @@ status_t Harness::testAll() {
          it != componentInfos.end(); ++it) {
         const IOMX::ComponentInfo &info = *it;
         const char *componentName = info.mName.string();
+
+        if (strncmp(componentName, "OMX.google.", 11)) {
+            continue;
+        }
 
         for (List<String8>::const_iterator role_it = info.mRoles.begin();
              role_it != info.mRoles.end(); ++role_it) {

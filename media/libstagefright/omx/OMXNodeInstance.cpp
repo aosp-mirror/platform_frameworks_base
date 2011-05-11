@@ -234,6 +234,7 @@ status_t OMXNodeInstance::getParameter(
     Mutex::Autolock autoLock(mLock);
 
     OMX_ERRORTYPE err = OMX_GetParameter(mHandle, index, params);
+
     return StatusFromOMXError(err);
 }
 

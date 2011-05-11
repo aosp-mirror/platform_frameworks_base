@@ -57,3 +57,26 @@ LOCAL_ARM_MODE := arm
 
 include $(BUILD_STATIC_LIBRARY)
 
+################################################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+        SoftMP3.cpp
+
+LOCAL_C_INCLUDES := \
+        frameworks/base/media/libstagefright/include \
+        frameworks/base/include/media/stagefright/openmax \
+        $(LOCAL_PATH)/src \
+        $(LOCAL_PATH)/include
+
+LOCAL_SHARED_LIBRARIES := \
+        libstagefright libstagefright_omx libstagefright_foundation libutils
+
+LOCAL_STATIC_LIBRARIES := \
+        libstagefright_mp3dec
+
+LOCAL_MODULE := libstagefright_soft_mp3dec
+LOCAL_MODULE_TAGS := eng
+
+include $(BUILD_SHARED_LIBRARY)

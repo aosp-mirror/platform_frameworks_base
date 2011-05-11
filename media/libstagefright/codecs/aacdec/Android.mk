@@ -143,14 +143,39 @@ LOCAL_SRC_FILES := \
  	unpack_idx.cpp \
  	window_tables_fxp.cpp \
  	pvmp4setaudioconfig.cpp \
-        AACDecoder.cpp
+        AACDecoder.cpp \
 
 LOCAL_CFLAGS := -DAAC_PLUS -DHQ_SBR -DPARAMETRICSTEREO -DOSCL_IMPORT_REF= -DOSCL_EXPORT_REF= -DOSCL_UNUSED_ARG=
 
-LOCAL_C_INCLUDES := frameworks/base/media/libstagefright/include
+LOCAL_C_INCLUDES := \
+        frameworks/base/media/libstagefright/include \
 
 LOCAL_ARM_MODE := arm
 
 LOCAL_MODULE := libstagefright_aacdec
 
 include $(BUILD_STATIC_LIBRARY)
+
+################################################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+        SoftAAC.cpp
+
+LOCAL_C_INCLUDES := \
+        frameworks/base/media/libstagefright/include \
+        frameworks/base/include/media/stagefright/openmax \
+
+LOCAL_CFLAGS := -DOSCL_IMPORT_REF=
+
+LOCAL_STATIC_LIBRARIES := \
+        libstagefright_aacdec
+
+LOCAL_SHARED_LIBRARIES := \
+        libstagefright_omx libstagefright_foundation libutils
+
+LOCAL_MODULE := libstagefright_soft_aacdec
+LOCAL_MODULE_TAGS := eng
+
+include $(BUILD_SHARED_LIBRARY)

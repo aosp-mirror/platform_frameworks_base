@@ -1,41 +1,28 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-ifneq ($(BUILD_WITHOUT_PV),true)
-# Set up the OpenCore variables.
-include external/opencore/Config.mk
-LOCAL_C_INCLUDES := $(PV_INCLUDES)
-LOCAL_CFLAGS := $(PV_CFLAGS_MINUS_VISIBILITY)
-endif
-
 LOCAL_C_INCLUDES += $(JNI_H_INCLUDE)
 
 LOCAL_SRC_FILES:=                     \
-	OMX.cpp                       \
+        OMX.cpp                       \
         OMXComponentBase.cpp          \
+        OMXMaster.cpp                 \
         OMXNodeInstance.cpp           \
-        OMXMaster.cpp
+        SimpleSoftOMXComponent.cpp    \
+        SoftOMXComponent.cpp          \
+        SoftOMXPlugin.cpp             \
 
-ifneq ($(BUILD_WITHOUT_PV),true)
-LOCAL_SRC_FILES += \
-        OMXPVCodecsPlugin.cpp
-else
-LOCAL_CFLAGS += -DNO_OPENCORE
-endif
+LOCAL_C_INCLUDES += \
+        frameworks/base/media/libstagefright \
+        $(TOP)/frameworks/base/include/media/stagefright/openmax
 
-LOCAL_C_INCLUDES += $(TOP)/frameworks/base/include/media/stagefright/openmax
-
-LOCAL_SHARED_LIBRARIES :=       \
-        libbinder               \
-        libmedia                \
-        libutils                \
-        libui                   \
-        libcutils               \
-
-ifneq ($(BUILD_WITHOUT_PV),true)
-LOCAL_SHARED_LIBRARIES += \
-        libopencore_common
-endif
+LOCAL_SHARED_LIBRARIES :=               \
+        libbinder                       \
+        libmedia                        \
+        libutils                        \
+        libui                           \
+        libcutils                       \
+        libstagefright_foundation       \
 
 ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
         LOCAL_LDLIBS += -lpthread -ldl
@@ -49,5 +36,6 @@ LOCAL_MODULE:= libstagefright_omx
 
 include $(BUILD_SHARED_LIBRARY)
 
-include $(call all-makefiles-under,$(LOCAL_PATH))
+################################################################################
 
+include $(call all-makefiles-under,$(LOCAL_PATH))
