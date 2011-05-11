@@ -22,4 +22,13 @@
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <!-- see comment in values/config.xml -->
     <dimen name="config_prefDialogWidth">440dp</dimen>
+
+    <bool name="config_statusBarCanHide">false</bool>
+
+    <!-- see comment in values/config.xml -->
+    <integer name="config_longPressOnPowerBehavior">2</integer>
+
+    <!-- see comment in values/config.xml -->
+    <integer name="config_longPressOnHomeBehavior">0</integer>
+
 </resources>
