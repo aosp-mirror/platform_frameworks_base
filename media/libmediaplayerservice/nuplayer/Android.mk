@@ -8,7 +8,6 @@ LOCAL_SRC_FILES:=                       \
         NuPlayerDriver.cpp              \
         NuPlayerRenderer.cpp            \
         NuPlayerStreamListener.cpp      \
-        DecoderWrapper.cpp              \
         StreamingSource.cpp             \
 
 LOCAL_C_INCLUDES := \

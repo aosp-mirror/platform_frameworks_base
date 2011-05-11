@@ -20,7 +20,6 @@
 
 #include "NuPlayerDecoder.h"
 
-#include "DecoderWrapper.h"
 #include "ESDS.h"
 
 #include <media/stagefright/foundation/ABuffer.h>
@@ -47,7 +46,6 @@ NuPlayer::Decoder::~Decoder() {
 
 void NuPlayer::Decoder::configure(const sp<MetaData> &meta) {
     CHECK(mCodec == NULL);
-    CHECK(mWrapper == NULL);
 
     const char *mime;
     CHECK(meta->findCString(kKeyMIMEType, &mime));
@@ -61,19 +59,11 @@ void NuPlayer::Decoder::configure(const sp<MetaData> &meta) {
         format->setObject("native-window", mNativeWindow);
     }
 
-    if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC)) {
-        mWrapper = new DecoderWrapper;
-        looper()->registerHandler(mWrapper);
+    mCodec = new ACodec;
+    looper()->registerHandler(mCodec);
 
-        mWrapper->setNotificationMessage(notifyMsg);
-        mWrapper->initiateSetup(format);
-    } else {
-        mCodec = new ACodec;
-        looper()->registerHandler(mCodec);
-
-        mCodec->setNotificationMessage(notifyMsg);
-        mCodec->initiateSetup(format);
-    }
+    mCodec->setNotificationMessage(notifyMsg);
+    mCodec->initiateSetup(format);
 }
 
 void NuPlayer::Decoder::onMessageReceived(const sp<AMessage> &msg) {
@@ -214,7 +204,6 @@ sp<AMessage> NuPlayer::Decoder::makeFormat(const sp<MetaData> &meta) {
 
         msg->setObject("csd", buffer);
     } else if (meta->findData(kKeyESDS, &type, &data, &size)) {
-#if 0
         ESDS esds((const char *)data, size);
         CHECK_EQ(esds.InitCheck(), (status_t)OK);
 
@@ -230,12 +219,6 @@ sp<AMessage> NuPlayer::Decoder::makeFormat(const sp<MetaData> &meta) {
 
         buffer->meta()->setInt32("csd", true);
         mCSD.push(buffer);
-#else
-        sp<ABuffer> buffer = new ABuffer(size);
-        memcpy(buffer->data(), data, size);
-
-        msg->setObject("esds", buffer);
-#endif
     }
 
     return msg;
@@ -270,27 +253,18 @@ void NuPlayer::Decoder::onFillThisBuffer(const sp<AMessage> &msg) {
 void NuPlayer::Decoder::signalFlush() {
     if (mCodec != NULL) {
         mCodec->signalFlush();
-    } else {
-        CHECK(mWrapper != NULL);
-        mWrapper->signalFlush();
     }
 }
 
 void NuPlayer::Decoder::signalResume() {
     if (mCodec != NULL) {
         mCodec->signalResume();
-    } else {
-        CHECK(mWrapper != NULL);
-        mWrapper->signalResume();
     }
 }
 
 void NuPlayer::Decoder::initiateShutdown() {
     if (mCodec != NULL) {
         mCodec->initiateShutdown();
-    } else {
-        CHECK(mWrapper != NULL);
-        mWrapper->initiateShutdown();
     }
 }
 
