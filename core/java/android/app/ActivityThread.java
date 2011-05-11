@@ -129,7 +129,7 @@ public final class ActivityThread {
     /** @hide */
     public static final boolean DEBUG_BROADCAST = false;
     private static final boolean DEBUG_RESULTS = false;
-    private static final boolean DEBUG_BACKUP = false;
+    private static final boolean DEBUG_BACKUP = true;
     private static final boolean DEBUG_CONFIGURATION = false;
     private static final long MIN_TIME_BETWEEN_GCS = 5*1000;
     private static final Pattern PATTERN_SEMICOLON = Pattern.compile(";");
@@ -1979,24 +1979,26 @@ public final class ActivityThread {
 
         BackupAgent agent = null;
         String classname = data.appInfo.backupAgentName;
-        if (classname == null) {
-            if (data.backupMode == IApplicationThread.BACKUP_MODE_INCREMENTAL) {
-                Slog.e(TAG, "Attempted incremental backup but no defined agent for "
-                        + packageName);
-                return;
+
+        if (data.backupMode == IApplicationThread.BACKUP_MODE_FULL) {
+            classname = "android.app.backup.FullBackupAgent";
+            if ((data.appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                // system packages can supply their own full-backup agent
+                if (data.appInfo.fullBackupAgentName != null) {
+                    classname = data.appInfo.fullBackupAgentName;
+                }
             }
-            classname = "android.app.FullBackupAgent";
         }
+
         try {
             IBinder binder = null;
             try {
+                if (DEBUG_BACKUP) Slog.v(TAG, "Initializing agent class " + classname);
+
                 java.lang.ClassLoader cl = packageInfo.getClassLoader();
-                agent = (BackupAgent) cl.loadClass(data.appInfo.backupAgentName).newInstance();
+                agent = (BackupAgent) cl.loadClass(classname).newInstance();
 
                 // set up the agent's context
-                if (DEBUG_BACKUP) Slog.v(TAG, "Initializing BackupAgent "
-                        + data.appInfo.backupAgentName);
-
                 ContextImpl context = new ContextImpl();
                 context.init(packageInfo, null, this);
                 context.setOuterContext(agent);
@@ -2023,7 +2025,7 @@ public final class ActivityThread {
             }
         } catch (Exception e) {
             throw new RuntimeException("Unable to create BackupAgent "
-                    + data.appInfo.backupAgentName + ": " + e.toString(), e);
+                    + classname + ": " + e.toString(), e);
         }
     }
 

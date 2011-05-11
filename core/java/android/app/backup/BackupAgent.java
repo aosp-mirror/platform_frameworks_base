@@ -85,7 +85,7 @@ import java.io.IOException;
  */
 public abstract class BackupAgent extends ContextWrapper {
     private static final String TAG = "BackupAgent";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = true;
 
     public BackupAgent() {
         super(null);
@@ -172,11 +172,18 @@ public abstract class BackupAgent extends ContextWrapper {
      * @param newState An open, read/write ParcelFileDescriptor pointing to an
      *            empty file. The application should record the final backup
      *            state here after restoring its data from the <code>data</code> stream.
+     *            When a full-backup dataset is being restored, this will be <code>null</code>.
      */
     public abstract void onRestore(BackupDataInput data, int appVersionCode,
             ParcelFileDescriptor newState)
             throws IOException;
 
+    /**
+     * Package-private, used only for dispatching an extra step during full backup
+     */
+    void onSaveApk(BackupDataOutput data) {
+        if (DEBUG) Log.v(TAG, "--- base onSaveApk() ---");
+    }
 
     // ----- Core implementation -----
 
@@ -199,12 +206,18 @@ public abstract class BackupAgent extends ContextWrapper {
         public void doBackup(ParcelFileDescriptor oldState,
                 ParcelFileDescriptor data,
                 ParcelFileDescriptor newState,
+                boolean storeApk,
                 int token, IBackupManager callbackBinder) throws RemoteException {
             // Ensure that we're running with the app's normal permission level
             long ident = Binder.clearCallingIdentity();
 
             if (DEBUG) Log.v(TAG, "doBackup() invoked");
             BackupDataOutput output = new BackupDataOutput(data.getFileDescriptor());
+
+            if (storeApk) {
+                onSaveApk(output);
+            }
+
             try {
                 BackupAgent.this.onBackup(oldState, output, newState);
             } catch (IOException ex) {

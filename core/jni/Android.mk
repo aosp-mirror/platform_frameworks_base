@@ -151,6 +151,7 @@ LOCAL_SRC_FILES:= \
 	android_backup_BackupDataOutput.cpp \
 	android_backup_FileBackupHelperBase.cpp \
 	android_backup_BackupHelperDispatcher.cpp \
+	android_app_backup_FullBackup.cpp \
 	android_content_res_ObbScanner.cpp \
 	android_content_res_Configuration.cpp \
     android_animation_PropertyValuesHolder.cpp

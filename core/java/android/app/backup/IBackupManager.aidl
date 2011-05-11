@@ -16,7 +16,9 @@
 
 package android.app.backup;
 
+import android.app.backup.IFullBackupRestoreObserver;
 import android.app.backup.IRestoreSession;
+import android.os.ParcelFileDescriptor;
 import android.content.Intent;
 
 /**
@@ -119,6 +121,42 @@ interface IBackupManager {
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
      */
     void backupNow();
+
+    /**
+     * Write a full backup of the given package to the supplied file descriptor.
+     * The fd may be a socket or other non-seekable destination.  If no package names
+     * are supplied, then every application on the device will be backed up to the output.
+     *
+     * <p>This method is <i>synchronous</i> -- it does not return until the backup has
+     * completed.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @param fd The file descriptor to which a 'tar' file stream is to be written
+     * @param includeApks If <code>true</code>, the resulting tar stream will include the
+     *     application .apk files themselves as well as their data.
+     * @param includeShared If <code>true</code>, the resulting tar stream will include
+     *     the contents of the device's shared storage (SD card or equivalent).
+     * @param allApps If <code>true</code>, the resulting tar stream will include all
+     *     installed applications' data, not just those named in the <code>packageNames</code>
+     *     parameter.
+     * @param packageNames The package names of the apps whose data (and optionally .apk files)
+     *     are to be backed up.  The <code>allApps</code> parameter supersedes this.
+     */
+    void fullBackup(in ParcelFileDescriptor fd, boolean includeApks, boolean includeShared,
+            boolean allApps, in String[] packageNames);
+
+    /**
+     * Confirm that the requested full backup/restore operation can proceed.  The system will
+     * not actually perform the operation described to fullBackup() / fullRestore() unless the
+     * UI calls back into the Backup Manager to confirm, passing the correct token.  At
+     * the same time, the UI supplies a callback Binder for progress notifications during
+     * the operation.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    void acknowledgeFullBackupOrRestore(int token, boolean allow,
+            IFullBackupRestoreObserver observer);
 
     /**
      * Identify the currently selected transport.  Callers must hold the

@@ -685,6 +685,13 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="restoreAnyVersion" format="boolean" />
 
+    <!-- The agent to use for a *full* backup of the package.  Only system applications
+         can use this to override the ordinary FullBackupAgent with a custom implementation.
+         It's needed strictly for packages with strongly device-specific data, such as the
+         Settings provider.
+         -->
+    <attr name="fullBackupAgent" format="string" />
+
     <!-- The default install location defined by an application. -->
     <attr name="installLocation">
         <!-- Let the system decide ideal install location -->
@@ -782,6 +789,7 @@
         <attr name="killAfterRestore" />
         <attr name="restoreNeedsApplication" />
         <attr name="restoreAnyVersion" />
+        <attr name="fullBackupAgent" />
         <attr name="neverEncrypt" />
         <!-- Request that your application's processes be created with
              a large Dalvik heap.  This applies to <em>all</em> processes
@@ -790,7 +798,7 @@
              to allow multiple applications to use a process, they all must
              use this option consistently or will get unpredictable results. -->
         <attr name="largeHeap" format="boolean" />
-        <!-- Declare that this applicationn can't participate in the normal
+        <!-- Declare that this application can't participate in the normal
              state save/restore mechanism.  Since it is not able to save and
              restore its state on demand,
              it can not participate in the normal activity lifecycle.  It will

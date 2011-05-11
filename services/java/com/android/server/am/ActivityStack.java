@@ -73,7 +73,7 @@ import java.util.List;
  */
 final class ActivityStack {
     static final String TAG = ActivityManagerService.TAG;
-    static final boolean localLOGV = ActivityManagerService.localLOGV;
+    static final boolean localLOGV = ActivityManagerService.localLOGV || true;
     static final boolean DEBUG_SWITCH = ActivityManagerService.DEBUG_SWITCH;
     static final boolean DEBUG_PAUSE = ActivityManagerService.DEBUG_PAUSE;
     static final boolean DEBUG_VISBILITY = ActivityManagerService.DEBUG_VISBILITY;

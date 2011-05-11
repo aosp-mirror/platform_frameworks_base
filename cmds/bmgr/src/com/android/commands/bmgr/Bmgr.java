@@ -150,20 +150,13 @@ public final class Bmgr {
     }
 
     private void doBackup() {
-        boolean isFull = false;
         String pkg = nextArg();
-        if ("-f".equals(pkg)) {
-            isFull = true;
-            pkg = nextArg();
-        }
-
-        if (pkg == null || pkg.startsWith("-")) {
+        if (pkg == null) {
             showUsage();
             return;
         }
 
         try {
-            // !!! TODO: handle full backup
             mBmgr.dataChanged(pkg);
         } catch (RemoteException e) {
             System.err.println(e.toString());

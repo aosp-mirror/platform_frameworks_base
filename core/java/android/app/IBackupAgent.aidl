@@ -51,6 +51,7 @@ oneway interface IBackupAgent {
     void doBackup(in ParcelFileDescriptor oldState,
             in ParcelFileDescriptor data,
             in ParcelFileDescriptor newState,
+            boolean storeApk,
             int token, IBackupManager callbackBinder);
 
     /**

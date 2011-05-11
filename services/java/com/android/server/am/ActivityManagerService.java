@@ -164,7 +164,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final boolean DEBUG_URI_PERMISSION = localLOGV || false;
     static final boolean DEBUG_USER_LEAVING = localLOGV || false;
     static final boolean DEBUG_RESULTS = localLOGV || false;
-    static final boolean DEBUG_BACKUP = localLOGV || false;
+    static final boolean DEBUG_BACKUP = localLOGV || true;
     static final boolean DEBUG_CONFIGURATION = localLOGV || false;
     static final boolean DEBUG_POWER = localLOGV || false;
     static final boolean DEBUG_POWER_QUICK = DEBUG_POWER || false;
@@ -3308,7 +3308,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (callerUid == Process.SYSTEM_UID) {
             synchronized (this) {
                 ProcessRecord app = getProcessRecordLocked(processName, uid);
-                if (app != null) {
+                if (app != null && app.thread != null) {
                     try {
                         app.thread.scheduleSuicide();
                     } catch (RemoteException e) {
@@ -10733,7 +10733,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             BackupRecord r = new BackupRecord(ss, app, backupMode);
-            ComponentName hostingName = new ComponentName(app.packageName, app.backupAgentName);
+            ComponentName hostingName = (backupMode == IApplicationThread.BACKUP_MODE_INCREMENTAL)
+                    ? new ComponentName(app.packageName, app.backupAgentName)
+                    : new ComponentName("android", "FullBackupAgent");
             // startProcessLocked() returns existing proc's record if it's already running
             ProcessRecord proc = startProcessLocked(app.processName, app,
                     false, 0, "backup", hostingName, false);
