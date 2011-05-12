@@ -86,6 +86,10 @@ public interface RILConstants {
     int CDMA_PHONE = 2;
     int SIP_PHONE  = 3;
 
+    int LTE_ON_CDMA_UNKNOWN = -1;
+    int LTE_ON_CDMA_FALSE = 0;
+    int LTE_ON_CDMA_TRUE = 1;
+
     int CDM_TTY_MODE_DISABLED = 0;
     int CDM_TTY_MODE_ENABLED = 1;
 

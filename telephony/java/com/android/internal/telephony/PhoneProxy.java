@@ -836,4 +836,12 @@ public class PhoneProxy extends Handler implements Phone {
     public boolean isCspPlmnEnabled() {
         return mActivePhone.isCspPlmnEnabled();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getLteOnCdmaMode() {
+        return mActivePhone.getLteOnCdmaMode();
+    }
 }
