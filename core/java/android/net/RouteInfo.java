@@ -47,12 +47,24 @@ public class RouteInfo implements Parcelable {
     public RouteInfo(LinkAddress destination, InetAddress gateway) {
         if (destination == null) {
             try {
-                if ((gateway != null) || (gateway instanceof Inet4Address)) {
-                    destination = new LinkAddress(Inet4Address.ANY, 0);
+                if (gateway != null) {
+                    if (gateway instanceof Inet4Address) {
+                        destination = new LinkAddress(Inet4Address.ANY, 0);
+                    } else {
+                        destination = new LinkAddress(Inet6Address.ANY, 0);
+                    }
                 } else {
-                    destination = new LinkAddress(Inet6Address.ANY, 0);
+                    // no destination, no gateway. invalid.
+                    throw new RuntimeException("Invalid arguments passed in.");
                 }
             } catch (Exception e) {}
+        }
+        if (gateway == null) {
+            if (destination.getAddress() instanceof Inet4Address) {
+                gateway = Inet4Address.ANY;
+            } else {
+                gateway = Inet6Address.ANY;
+            }
         }
         mDestination = new LinkAddress(NetworkUtils.getNetworkPart(destination.getAddress(),
                 destination.getNetworkPrefixLength()), destination.getNetworkPrefixLength());
