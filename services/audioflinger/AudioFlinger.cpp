@@ -5808,10 +5808,10 @@ uint32_t AudioFlinger::EffectModule::deviceAudioSystemToEffectApi(uint32_t devic
 
 // update this table when AudioSystem::audio_mode or audio_mode_e (in EffectApi.h) are modified
 const uint32_t AudioFlinger::EffectModule::sModeConvTable[] = {
-    AUDIO_MODE_NORMAL,   // AudioSystem::MODE_NORMAL
-    AUDIO_MODE_RINGTONE, // AudioSystem::MODE_RINGTONE
-    AUDIO_MODE_IN_CALL,  // AudioSystem::MODE_IN_CALL
-    AUDIO_MODE_IN_CALL   // AudioSystem::MODE_IN_COMMUNICATION, same conversion as for MODE_IN_CALL
+    AUDIO_EFFECT_MODE_NORMAL,   // AudioSystem::MODE_NORMAL
+    AUDIO_EFFECT_MODE_RINGTONE, // AudioSystem::MODE_RINGTONE
+    AUDIO_EFFECT_MODE_IN_CALL,  // AudioSystem::MODE_IN_CALL
+    AUDIO_EFFECT_MODE_IN_CALL   // AudioSystem::MODE_IN_COMMUNICATION, same conversion as for MODE_IN_CALL
 };
 
 int AudioFlinger::EffectModule::modeAudioSystemToEffectApi(uint32_t mode)

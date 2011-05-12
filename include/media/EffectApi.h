@@ -602,9 +602,9 @@ enum audio_device_e {
 
 // Audio mode
 enum audio_mode_e {
-    AUDIO_MODE_NORMAL,      // device idle
-    AUDIO_MODE_RINGTONE,    // device ringing
-    AUDIO_MODE_IN_CALL      // audio call connected (VoIP or telephony)
+    AUDIO_EFFECT_MODE_NORMAL,   // device idle
+    AUDIO_EFFECT_MODE_RINGTONE, // device ringing
+    AUDIO_EFFECT_MODE_IN_CALL   // audio call connected (VoIP or telephony)
 };
 
 // Values for "accessMode" field of buffer_config_t:
