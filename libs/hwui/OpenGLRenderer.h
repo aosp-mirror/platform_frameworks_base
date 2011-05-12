@@ -285,6 +285,9 @@ private:
 
     void drawAlphaBitmap(Texture* texture, float left, float top, SkPaint* paint);
 
+    void drawAARect(float left, float top, float right, float bottom,
+            int color, SkXfermode::Mode mode);
+
     /**
      * Draws a textured rectangle with the specified texture. The specified coordinates
      * are transformed by the current snapshot's transform matrix.
