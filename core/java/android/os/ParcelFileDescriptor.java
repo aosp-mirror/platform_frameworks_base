@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.Socket;
 
 /**
@@ -138,6 +139,20 @@ public class ParcelFileDescriptor implements Parcelable {
      */
     public static ParcelFileDescriptor fromSocket(Socket socket) {
         FileDescriptor fd = socket.getFileDescriptor$();
+        return fd != null ? new ParcelFileDescriptor(fd) : null;
+    }
+
+    /**
+     * Create a new ParcelFileDescriptor from the specified DatagramSocket.
+     *
+     * @param datagramSocket The DatagramSocket whose FileDescriptor is used
+     *               to create a new ParcelFileDescriptor.
+     *
+     * @return A new ParcelFileDescriptor with the FileDescriptor of the
+     *         specified DatagramSocket.
+     */
+    public static ParcelFileDescriptor fromDatagramSocket(DatagramSocket datagramSocket) {
+        FileDescriptor fd = datagramSocket.getFileDescriptor$();
         return fd != null ? new ParcelFileDescriptor(fd) : null;
     }
 
