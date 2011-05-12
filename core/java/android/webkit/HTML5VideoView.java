@@ -3,6 +3,7 @@ package android.webkit;
 
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.webkit.HTML5VideoViewProxy;
@@ -55,7 +56,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
     protected boolean mAutostart;
 
     // We need to save such info.
-    protected String mUri;
+    protected Uri mUri;
     protected Map<String, String> mHeaders;
 
     // The timer for timeupate events.
@@ -172,7 +173,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
 
     public void setVideoURI(String uri, HTML5VideoViewProxy proxy) {
         // When switching players, surface texture will be reused.
-        mUri = uri;
+        mUri = Uri.parse(uri);
         mHeaders = generateHeaders(uri, proxy);
     }
 
@@ -207,7 +208,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
         // When there is exception, we could just bail out silently.
         // No Video will be played though. Write the stack for debug
         try {
-            mPlayer.setDataSource(mUri, mHeaders);
+            mPlayer.setDataSource(mProxy.getContext(), mUri, mHeaders);
             mPlayer.prepareAsync();
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
