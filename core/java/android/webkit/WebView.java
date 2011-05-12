@@ -4380,12 +4380,17 @@ public class WebView extends AbsoluteLayout
     }
 
     WebViewCore.CursorData cursorData() {
-        WebViewCore.CursorData result = new WebViewCore.CursorData();
-        result.mMoveGeneration = nativeMoveGeneration();
-        result.mFrame = nativeCursorFramePointer();
+        WebViewCore.CursorData result = cursorDataNoPosition();
         Point position = nativeCursorPosition();
         result.mX = position.x;
         result.mY = position.y;
+        return result;
+    }
+
+    WebViewCore.CursorData cursorDataNoPosition() {
+        WebViewCore.CursorData result = new WebViewCore.CursorData();
+        result.mMoveGeneration = nativeMoveGeneration();
+        result.mFrame = nativeCursorFramePointer();
         return result;
     }
 
@@ -5586,6 +5591,18 @@ public class WebView extends AbsoluteLayout
     // The distance between two points reported in onTouchEvent scaled by the
     // density of the screen.
     private static final int DRAG_LAYER_FINGER_DISTANCE = 20000;
+
+    @Override
+    public boolean onHoverEvent(MotionEvent event) {
+        if (mNativeClass == 0) {
+            return false;
+        }
+        WebViewCore.CursorData data = cursorDataNoPosition();
+        data.mX = viewToContentX((int) event.getX());
+        data.mY = viewToContentY((int) event.getY());
+        mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
+        return true;
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
