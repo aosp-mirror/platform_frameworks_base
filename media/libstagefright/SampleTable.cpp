@@ -220,7 +220,7 @@ status_t SampleTable::setSampleSizeParams(
             return ERROR_MALFORMED;
         }
 
-        mSampleSizeFieldSize = mDefaultSampleSize & 0xf;
+        mSampleSizeFieldSize = mDefaultSampleSize & 0xff;
         mDefaultSampleSize = 0;
 
         if (mSampleSizeFieldSize != 4 && mSampleSizeFieldSize != 8
