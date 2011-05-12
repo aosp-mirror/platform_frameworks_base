@@ -41,6 +41,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
@@ -425,7 +426,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
-        mTethering = new Tethering(mContext, mHandler.getLooper());
+        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+        INetworkManagementService nmService = INetworkManagementService.Stub.asInterface(b);
+
+        mTethering = new Tethering(mContext, nmService, mHandler.getLooper());
         mTetheringConfigValid = (((mNetTrackers[ConnectivityManager.TYPE_MOBILE_DUN] != null) ||
                                   !mTethering.isDunRequired()) &&
                                  (mTethering.getTetherableUsbRegexs().length != 0 ||
