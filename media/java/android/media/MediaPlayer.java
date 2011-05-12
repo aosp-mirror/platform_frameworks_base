@@ -802,13 +802,19 @@ public class MediaPlayer
     public void setDataSource(String path, Map<String, String> headers)
             throws IOException, IllegalArgumentException, IllegalStateException
     {
-        int i = 0;
-        String[] keys = new String[headers.size()];
-        String[] values = new String[headers.size()];
-        for (Map.Entry<String, String> entry: headers.entrySet()) {
-            keys[i] = entry.getKey();
-            values[i] = entry.getValue();
-            ++i;
+        String[] keys = null;
+        String[] values = null;
+
+        if (headers != null) {
+            keys = new String[headers.size()];
+            values = new String[headers.size()];
+
+            int i = 0;
+            for (Map.Entry<String, String> entry: headers.entrySet()) {
+                keys[i] = entry.getKey();
+                values[i] = entry.getValue();
+                ++i;
+            }
         }
         _setDataSource(path, keys, values);
     }
