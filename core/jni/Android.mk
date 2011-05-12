@@ -96,6 +96,7 @@ LOCAL_SRC_FILES:= \
 	android/graphics/Movie.cpp \
 	android/graphics/NinePatch.cpp \
 	android/graphics/NinePatchImpl.cpp \
+	android/graphics/NinePatchPeeker.cpp \
 	android/graphics/Paint.cpp \
 	android/graphics/Path.cpp \
 	android/graphics/PathMeasure.cpp \
