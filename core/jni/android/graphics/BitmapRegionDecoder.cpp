@@ -94,7 +94,7 @@ static jobject doBuildTileIndex(JNIEnv* env, SkStream* stream) {
         return nullObjectReturn("decoder->buildTileIndex returned false");
     }
 
-    SkBitmapRegionDecoder *bm = new SkBitmapRegionDecoder(decoder, width, height);
+    SkBitmapRegionDecoder *bm = new SkBitmapRegionDecoder(decoder, stream, width, height);
 
     return GraphicsJNI::createBitmapRegionDecoder(env, bm);
 }

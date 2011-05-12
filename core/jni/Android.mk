@@ -177,7 +177,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libgui \
 	libsurfaceflinger_client \
 	libcamera_client \
-	libskiagl \
 	libskia \
 	libsqlite \
 	libdvm \
