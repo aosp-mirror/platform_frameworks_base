@@ -30,7 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 #include "MidiFile.h"
 

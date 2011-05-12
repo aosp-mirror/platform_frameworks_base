@@ -11,7 +11,7 @@
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 using namespace android;
 

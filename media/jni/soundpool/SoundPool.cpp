@@ -27,7 +27,7 @@
 #include <media/AudioTrack.h>
 #include <media/mediaplayer.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 #include "SoundPool.h"
 #include "SoundPoolThread.h"

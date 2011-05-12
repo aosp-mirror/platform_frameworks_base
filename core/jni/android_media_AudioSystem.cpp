@@ -30,7 +30,7 @@
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 #include <hardware/audio_policy.h>
 
 // ----------------------------------------------------------------------------

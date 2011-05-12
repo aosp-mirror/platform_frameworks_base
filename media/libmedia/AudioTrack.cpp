@@ -39,7 +39,7 @@
 
 #include <cutils/bitops.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 #include <hardware/audio_policy.h>
 
 #define LIKELY( exp )       (__builtin_expect( (exp) != 0, true  ))

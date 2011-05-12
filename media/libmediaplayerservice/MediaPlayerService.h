@@ -30,7 +30,7 @@
 #include <media/MediaPlayerInterface.h>
 #include <media/Metadata.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 namespace android {
 

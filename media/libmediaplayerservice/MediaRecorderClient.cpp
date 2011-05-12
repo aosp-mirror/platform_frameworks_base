@@ -35,7 +35,7 @@
 
 #include <media/AudioTrack.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 #include "MediaRecorderClient.h"
 #include "MediaPlayerService.h"

@@ -43,7 +43,7 @@
 #include <private/media/AudioTrackShared.h>
 #include <private/media/AudioEffectShared.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 #include <hardware/audio_hal.h>
 
 #include "AudioMixer.h"

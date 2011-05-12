@@ -22,7 +22,7 @@
 #include <utils/Vector.h>
 #include <binder/BinderService.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 #include <hardware/audio_policy.h>
 #include <hardware/audio_policy_hal.h>
 

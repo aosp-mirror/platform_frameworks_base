@@ -33,7 +33,7 @@
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 // ----------------------------------------------------------------------------
 

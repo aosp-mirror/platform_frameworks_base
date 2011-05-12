@@ -33,7 +33,7 @@
 
 #include <cutils/bitops.h>
 
-#include <hardware/audio.h>
+#include <system/audio.h>
 
 // ----------------------------------------------------------------------------
 
