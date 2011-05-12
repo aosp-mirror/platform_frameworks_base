@@ -1458,6 +1458,79 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
 }
 
 /**
+ * This function uses a similar approach to that of AA lines in the drawLines() function.
+ * We expand the rectangle by a half pixel in screen space on all sides, and use a fragment
+ * shader to compute the translucency of the color, determined by whether a given pixel is
+ * within that boundary region and how far into the region it is.
+ */
+void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom,
+        int color, SkXfermode::Mode mode)
+{
+    float inverseScaleX = 1.0f;
+    float inverseScaleY = 1.0f;
+    // The quad that we use needs to account for scaling.
+    if (!mSnapshot->transform->isPureTranslate()) {
+        Matrix4 *mat = mSnapshot->transform;
+        float m00 = mat->data[Matrix4::kScaleX];
+        float m01 = mat->data[Matrix4::kSkewY];
+        float m02 = mat->data[2];
+        float m10 = mat->data[Matrix4::kSkewX];
+        float m11 = mat->data[Matrix4::kScaleX];
+        float m12 = mat->data[6];
+        float scaleX = sqrt(m00 * m00 + m01 * m01);
+        float scaleY = sqrt(m10 * m10 + m11 * m11);
+        inverseScaleX = (scaleX != 0) ? (inverseScaleX / scaleX) : 0;
+        inverseScaleY = (scaleY != 0) ? (inverseScaleY / scaleY) : 0;
+    }
+
+    setupDraw();
+    setupDrawAALine();
+    setupDrawColor(color);
+    setupDrawColorFilter();
+    setupDrawShader();
+    setupDrawBlending(true, mode);
+    setupDrawProgram();
+    setupDrawModelViewIdentity(true);
+    setupDrawColorUniforms();
+    setupDrawColorFilterUniforms();
+    setupDrawShaderIdentityUniforms();
+
+    AAVertex rects[4];
+    AAVertex* aaVertices = &rects[0];
+    void* widthCoords = ((GLbyte*) aaVertices) + gVertexAAWidthOffset;
+    void* lengthCoords = ((GLbyte*) aaVertices) + gVertexAALengthOffset;
+
+    float boundarySizeX = .5 * inverseScaleX;
+    float boundarySizeY = .5 * inverseScaleY;
+
+    // Adjust the rect by the AA boundary padding
+    left -= boundarySizeX;
+    right += boundarySizeX;
+    top -= boundarySizeY;
+    bottom += boundarySizeY;
+
+    float width = right - left;
+    float height = bottom - top;
+
+    float boundaryWidthProportion = (width != 0) ? (2 * boundarySizeX) / width : 0;
+    float boundaryHeightProportion = (height != 0) ? (2 * boundarySizeY) / height : 0;
+    setupDrawAALine((void*) aaVertices, widthCoords, lengthCoords, boundaryWidthProportion);
+    int boundaryLengthSlot = mCaches.currentProgram->getUniform("boundaryLength");
+    int inverseBoundaryLengthSlot = mCaches.currentProgram->getUniform("inverseBoundaryLength");
+    glUniform1f(boundaryLengthSlot, boundaryHeightProportion);
+    glUniform1f(inverseBoundaryLengthSlot, (1 / boundaryHeightProportion));
+
+    if (!quickReject(left, top, right, bottom)) {
+        AAVertex::set(aaVertices++, left, bottom, 1, 1);
+        AAVertex::set(aaVertices++, left, top, 1, 0);
+        AAVertex::set(aaVertices++, right, bottom, 0, 1);
+        AAVertex::set(aaVertices++, right, top, 0, 0);
+        dirtyLayer(left, top, right, bottom, *mSnapshot->transform);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
+}
+
+/**
  * We draw lines as quads (tristrips). Using GL_LINES can be difficult because the rasterization
  * rules for those lines produces some unexpected results, and may vary between hardware devices.
  * The basics of lines-as-quads is easy; we simply find the normal to the line and position the
@@ -1848,7 +1921,11 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     }
 
     int color = p->getColor();
-    drawColorRect(left, top, right, bottom, color, mode);
+    if (p->isAntiAlias()) {
+        drawAARect(left, top, right, bottom, color, mode);
+    } else {
+        drawColorRect(left, top, right, bottom, color, mode);
+    }
 }
 
 void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,

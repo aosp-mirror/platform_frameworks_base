@@ -93,6 +93,15 @@
         </activity>
         
         <activity
+                android:name="ColoredRectsActivity"
+                android:label="_Rects">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="SimplePatchActivity"
                 android:label="_SimplePatch"
                 android:theme="@android:style/Theme.Translucent.NoTitleBar">
