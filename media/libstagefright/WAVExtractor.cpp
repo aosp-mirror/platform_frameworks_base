@@ -264,6 +264,8 @@ WAVSource::WAVSource(
       mGroup(NULL) {
     CHECK(mMeta->findInt32(kKeySampleRate, &mSampleRate));
     CHECK(mMeta->findInt32(kKeyChannelCount, &mNumChannels));
+
+    mMeta->setInt32(kKeyMaxInputSize, kMaxFrameSize);
 }
 
 WAVSource::~WAVSource() {

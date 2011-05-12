@@ -48,3 +48,29 @@ LOCAL_C_INCLUDES := \
 LOCAL_CFLAGS := -DOSCL_EXPORT_REF= -DOSCL_IMPORT_REF=
 
 include $(BUILD_STATIC_LIBRARY)
+
+################################################################################
+
+include $(CLEAR_VARS)
+
+LOCAL_SRC_FILES := \
+        SoftMPEG4.cpp
+
+LOCAL_C_INCLUDES := \
+	$(LOCAL_PATH)/src \
+	$(LOCAL_PATH)/include \
+        frameworks/base/media/libstagefright/include \
+        frameworks/base/include/media/stagefright/openmax \
+
+LOCAL_CFLAGS := -DOSCL_EXPORT_REF= -DOSCL_IMPORT_REF=
+
+LOCAL_STATIC_LIBRARIES := \
+        libstagefright_m4vh263dec
+
+LOCAL_SHARED_LIBRARIES := \
+        libstagefright libstagefright_omx libstagefright_foundation libutils
+
+LOCAL_MODULE := libstagefright_soft_mpeg4dec
+LOCAL_MODULE_TAGS := eng
+
+include $(BUILD_SHARED_LIBRARY)

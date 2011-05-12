@@ -214,6 +214,7 @@ private:
 
     void setAMRFormat(bool isWAMR, int32_t bitRate);
     void setAACFormat(int32_t numChannels, int32_t sampleRate, int32_t bitRate);
+    void setG711Format(int32_t numChannels);
 
     status_t setVideoPortFormatType(
             OMX_U32 portIndex,

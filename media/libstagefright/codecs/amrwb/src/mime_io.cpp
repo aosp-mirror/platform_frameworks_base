@@ -531,7 +531,7 @@ void mime_unsorting(uint8 unsorted_bits[],
                     int16 * frame_type,
                     int16 * mode,
                     uint8 quality,
-                    RX_State *st)
+                    RX_State_wb *st)
 {
 
     int16 i;

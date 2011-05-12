@@ -177,7 +177,7 @@ status_t AMRWBDecoder::read(
     CHECK(mInputBuffer->range_length() >= frameSize);
 
     int16 frameType;
-    RX_State rx_state;
+    RX_State_wb rx_state;
     mime_unsorting(
             const_cast<uint8_t *>(&inputPtr[1]),
             mInputSampleBuffer,

@@ -20,23 +20,18 @@
 
 #include "OMXMaster.h"
 
+#include "SoftOMXPlugin.h"
+
 #include <dlfcn.h>
 
 #include <media/stagefright/MediaDebug.h>
-
-#ifndef NO_OPENCORE
-#include "OMXPVCodecsPlugin.h"
-#endif
 
 namespace android {
 
 OMXMaster::OMXMaster()
     : mVendorLibHandle(NULL) {
     addVendorPlugin();
-
-#ifndef NO_OPENCORE
-    addPlugin(new OMXPVCodecsPlugin);
-#endif
+    addPlugin(new SoftOMXPlugin);
 }
 
 OMXMaster::~OMXMaster() {
@@ -49,7 +44,11 @@ OMXMaster::~OMXMaster() {
 }
 
 void OMXMaster::addVendorPlugin() {
-    mVendorLibHandle = dlopen("libstagefrighthw.so", RTLD_NOW);
+    addPlugin("libstagefrighthw.so");
+}
+
+void OMXMaster::addPlugin(const char *libname) {
+    mVendorLibHandle = dlopen(libname, RTLD_NOW);
 
     if (mVendorLibHandle == NULL) {
         return;

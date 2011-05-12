@@ -1644,7 +1644,7 @@ void ACodec::UninitializedState::onSetup(
     if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_VIDEO_AVC)) {
         componentName = "OMX.Nvidia.h264.decode";
     } else if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_AUDIO_AAC)) {
-        componentName = "OMX.Nvidia.aac.decoder";
+        componentName = "OMX.google.aac.decoder";
     } else if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_AUDIO_MPEG)) {
         componentName = "OMX.Nvidia.mp3.decoder";
     } else {
