@@ -24,11 +24,23 @@
     android:layout_height="match_parent"
     android:layout_width="wrap_content">
 
+    <CheckBox android:id="@+id/recents_compat_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="16dp"
+        android:layout_marginBottom="@*android:dimen/status_bar_height"
+        android:background="@drawable/hd"
+        android:button="@null"
+    />
+
     <FrameLayout
         android:id="@+id/recents_bg_protect"
         android:background="@drawable/recents_bg_protect_tile"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:layout_toLeftOf="@id/recents_compat_mode"
         android:layout_alignParentBottom="true"
         android:paddingBottom="@*android:dimen/status_bar_height"
         android:clipToPadding="false">

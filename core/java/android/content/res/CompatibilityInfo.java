@@ -81,9 +81,19 @@ public class CompatibilityInfo implements Parcelable {
     private static final int XLARGE_SCREENS = 32;
     
     /**
+     * Application must always run in compatibility mode?
+     */
+    private static final int ALWAYS_COMPAT = 64;
+
+    /**
+     * Application never should run in compatibility mode?
+     */
+    private static final int NEVER_COMPAT = 128;
+
+    /**
      * Set if the application needs to run in screen size compatibility mode.
      */
-    private static final int NEEDS_SCREEN_COMPAT = 128;
+    private static final int NEEDS_SCREEN_COMPAT = 256;
 
     /**
      * The effective screen density we have selected for this application.
@@ -131,10 +141,16 @@ public class CompatibilityInfo implements Parcelable {
                 if ((compatFlags&XLARGE_SCREENS) != 0) {
                     supportsScreen = true;
                 }
+                if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
+                    compatFlags |= NEVER_COMPAT;
+                }
                 break;
             case Configuration.SCREENLAYOUT_SIZE_LARGE:
                 if ((compatFlags&LARGE_SCREENS) != 0) {
                     supportsScreen = true;
+                }
+                if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
+                    compatFlags |= NEVER_COMPAT;
                 }
                 break;
         }
@@ -142,6 +158,10 @@ public class CompatibilityInfo implements Parcelable {
         if ((screenLayout&Configuration.SCREENLAYOUT_COMPAT_NEEDED) == 0) {
             if ((compatFlags&EXPANDABLE) != 0) {
                 supportsScreen = true;
+            }
+            if ((compatFlags&EXPANDABLE) == 0 &&
+                    (appInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) == 0) {
+                compatFlags |= ALWAYS_COMPAT;
             }
         }
 
@@ -192,6 +212,14 @@ public class CompatibilityInfo implements Parcelable {
         return (mCompatibilityFlags&NEEDS_SCREEN_COMPAT) == 0;
     }
     
+    public boolean neverSupportsScreen() {
+        return (mCompatibilityFlags&NEVER_COMPAT) != 0;
+    }
+
+    public boolean alwaysSupportsScreen() {
+        return (mCompatibilityFlags&ALWAYS_COMPAT) != 0;
+    }
+
     @Override
     public String toString() {
         return "CompatibilityInfo{scale=" + applicationScale + "}";

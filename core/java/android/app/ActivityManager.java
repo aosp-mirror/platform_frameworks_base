@@ -59,6 +59,82 @@ public class ActivityManager {
     }
 
     /**
+     * Screen compatibility mode: the application most always run in
+     * compatibility mode.
+     * @hide
+     */
+    public static final int COMPAT_MODE_ALWAYS = -1;
+
+    /**
+     * Screen compatibility mode: the application can never run in
+     * compatibility mode.
+     * @hide
+     */
+    public static final int COMPAT_MODE_NEVER = -2;
+
+    /**
+     * Screen compatibility mode: unknown.
+     * @hide
+     */
+    public static final int COMPAT_MODE_UNKNOWN = -3;
+
+    /**
+     * Screen compatibility mode: the application currently has compatibility
+     * mode disabled.
+     * @hide
+     */
+    public static final int COMPAT_MODE_DISABLED = 0;
+
+    /**
+     * Screen compatibility mode: the application currently has compatibility
+     * mode enabled.
+     * @hide
+     */
+    public static final int COMPAT_MODE_ENABLED = 1;
+
+    /**
+     * Screen compatibility mode: request to toggle the application's
+     * compatibility mode.
+     * @hide
+     */
+    public static final int COMPAT_MODE_TOGGLE = 2;
+
+    /** @hide */
+    public int getFrontActivityScreenCompatMode() {
+        try {
+            return ActivityManagerNative.getDefault().getFrontActivityScreenCompatMode();
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+            return 0;
+        }
+    }
+
+    public void setFrontActivityScreenCompatMode(int mode) {
+        try {
+            ActivityManagerNative.getDefault().setFrontActivityScreenCompatMode(mode);
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+        }
+    }
+
+    public int getPackageScreenCompatMode(String packageName) {
+        try {
+            return ActivityManagerNative.getDefault().getPackageScreenCompatMode(packageName);
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+            return 0;
+        }
+    }
+
+    public void setPackageScreenCompatMode(String packageName, int mode) {
+        try {
+            ActivityManagerNative.getDefault().setPackageScreenCompatMode(packageName, mode);
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+        }
+    }
+
+    /**
      * Return the approximate per-application memory class of the current
      * device.  This gives you an idea of how hard a memory limit you should
      * impose on your application to let the overall system work best.  The

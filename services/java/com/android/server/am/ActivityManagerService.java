@@ -550,7 +550,7 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Packages that the user has asked to have run in screen size
      * compatibility mode instead of filling the screen.
      */
-    final HashSet<String> mScreenCompatPackages = new HashSet<String>();
+    final CompatModePackages mCompatModePackages;
 
     /**
      * Set of PendingResultRecord objects that are currently active.
@@ -1485,6 +1485,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         mConfiguration.locale = Locale.getDefault();
         mProcessStats.init();
         
+        mCompatModePackages = new CompatModePackages(this, systemDir);
+
         // Add ourself to the Watchdog monitors.
         Watchdog.getInstance().addMonitor(this);
 
@@ -2099,70 +2101,30 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
     
     CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
-        return new CompatibilityInfo(ai, mConfiguration.screenLayout,
-                mScreenCompatPackages.contains(ai.packageName));
+        return mCompatModePackages.compatibilityInfoForPackageLocked(ai);
     }
 
-    public void setPackageScreenCompatMode(String packageName, boolean compatEnabled) {
+    public int getFrontActivityScreenCompatMode() {
         synchronized (this) {
-            ApplicationInfo ai = null;
-            try {
-                ai = AppGlobals.getPackageManager().
-                        getApplicationInfo(packageName, STOCK_PM_FLAGS);
-            } catch (RemoteException e) {
-            }
-            if (ai == null) {
-                Slog.w(TAG, "setPackageScreenCompatMode failed: unknown package " + packageName);
-                return;
-            }
-            boolean changed = false;
-            if (compatEnabled) {
-                if (!mScreenCompatPackages.contains(packageName)) {
-                    changed = true;
-                    mScreenCompatPackages.add(packageName);
-                }
-            } else {
-                if (mScreenCompatPackages.contains(packageName)) {
-                    changed = true;
-                    mScreenCompatPackages.remove(packageName);
-                }
-            }
-            if (changed) {
-                CompatibilityInfo ci = compatibilityInfoForPackageLocked(ai);
+            return mCompatModePackages.getFrontActivityScreenCompatModeLocked();
+        }
+    }
 
-                // Tell all processes that loaded this package about the change.
-                for (int i=mLruProcesses.size()-1; i>=0; i--) {
-                    ProcessRecord app = mLruProcesses.get(i);
-                    if (!app.pkgList.contains(packageName)) {
-                        continue;
-                    }
-                    try {
-                        if (app.thread != null) {
-                            if (DEBUG_CONFIGURATION) Slog.v(TAG, "Sending to proc "
-                                    + app.processName + " new compat " + ci);
-                            app.thread.updatePackageCompatibilityInfo(packageName, ci);
-                        }
-                    } catch (Exception e) {
-                    }
-                }
+    public void setFrontActivityScreenCompatMode(int mode) {
+        synchronized (this) {
+            mCompatModePackages.setFrontActivityScreenCompatModeLocked(mode);
+        }
+    }
 
-                // All activities that came from the packge must be
-                // restarted as if there was a config change.
-                for (int i=mMainStack.mHistory.size()-1; i>=0; i--) {
-                    ActivityRecord a = (ActivityRecord)mMainStack.mHistory.get(i);
-                    if (a.info.packageName.equals(packageName)) {
-                        a.forceNewConfig = true;
-                    }
-                }
+    public int getPackageScreenCompatMode(String packageName) {
+        synchronized (this) {
+            return mCompatModePackages.getPackageScreenCompatModeLocked(packageName);
+        }
+    }
 
-                ActivityRecord starting = mMainStack.topRunningActivityLocked(null);
-                if (starting != null) {
-                    mMainStack.ensureActivityConfigurationLocked(starting, 0);
-                    // And we need to make sure at this point that all other activities
-                    // are made visible with the correct configuration.
-                    mMainStack.ensureActivitiesVisibleLocked(starting, 0);
-                }
-            }
+    public void setPackageScreenCompatMode(String packageName, int mode) {
+        synchronized (this) {
+            mCompatModePackages.setPackageScreenCompatModeLocked(packageName, mode);
         }
     }
 
@@ -7855,9 +7817,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         pw.println("  mConfiguration: " + mConfiguration);
         pw.println("  mConfigWillChange: " + mMainStack.mConfigWillChange);
-        if (mScreenCompatPackages.size() > 0) {
+        if (mCompatModePackages.getPackages().size() > 0) {
             pw.print("  mScreenCompatPackages=");
-            pw.println(mScreenCompatPackages);
+            pw.println(mCompatModePackages.getPackages());
         }
         pw.println("  mSleeping=" + mSleeping + " mShuttingDown=" + mShuttingDown);
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
@@ -10706,10 +10668,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Handle special intents: if this broadcast is from the package
         // manager about a package being removed, we need to remove all of
         // its activities from the history stack.
-        final boolean uidRemoved = intent.ACTION_UID_REMOVED.equals(
+        final boolean uidRemoved = Intent.ACTION_UID_REMOVED.equals(
                 intent.getAction());
-        if (intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())
-                || intent.ACTION_PACKAGE_CHANGED.equals(intent.getAction())
+        if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())
+                || Intent.ACTION_PACKAGE_CHANGED.equals(intent.getAction())
                 || Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(intent.getAction())
                 || uidRemoved) {
             if (checkComponentPermission(
@@ -10746,7 +10708,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 forceStopPackageLocked(ssp,
                                         intent.getIntExtra(Intent.EXTRA_UID, -1), false, true, true);
                             }
-                            if (intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
+                            if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
                                 sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REMOVED,
                                         new String[] {ssp});
                             }
@@ -10761,6 +10723,18 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + android.Manifest.permission.BROADCAST_PACKAGE_REMOVED;
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
+            }
+
+        // Special case for adding a package: by default turn on compatibility
+        // mode.
+        } else if (Intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())) {
+            if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                Uri data = intent.getData();
+                String ssp;
+                if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
+                    mCompatModePackages.setPackageScreenCompatModeLocked(ssp,
+                            ActivityManager.COMPAT_MODE_ENABLED);
+                }
             }
         }
 
@@ -10920,9 +10894,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             // broadcast or such for apps, but we'd like to deliberately make
             // this decision.
             String skipPackages[] = null;
-            if (intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())
-                    || intent.ACTION_PACKAGE_RESTARTED.equals(intent.getAction())
-                    || intent.ACTION_PACKAGE_DATA_CLEARED.equals(intent.getAction())) {
+            if (Intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())
+                    || Intent.ACTION_PACKAGE_RESTARTED.equals(intent.getAction())
+                    || Intent.ACTION_PACKAGE_DATA_CLEARED.equals(intent.getAction())) {
                 Uri data = intent.getData();
                 if (data != null) {
                     String pkgName = data.getSchemeSpecificPart();
@@ -10930,7 +10904,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         skipPackages = new String[] { pkgName };
                     }
                 }
-            } else if (intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(intent.getAction())) {
+            } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(intent.getAction())) {
                 skipPackages = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             }
             if (skipPackages != null && (skipPackages.length > 0)) {
