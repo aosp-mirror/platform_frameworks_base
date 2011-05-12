@@ -680,7 +680,7 @@ public:
         }
         SkShader* shader = SkShader::CreateBitmapShader(*bitmap,
                         SkShader::kClamp_TileMode, SkShader::kClamp_TileMode);
-        tmpPaint.setShader(shader)->safeUnref();
+        SkSafeUnref(tmpPaint.setShader(shader));
 
         canvas->drawVertices(SkCanvas::kTriangles_VertexMode, ptCount, verts,
                              texs, (const SkColor*)colorA.ptr(), NULL, indices,

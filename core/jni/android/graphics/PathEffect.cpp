@@ -12,7 +12,7 @@ class SkPathEffectGlue {
 public:
 
     static void destructor(JNIEnv* env, jobject, SkPathEffect* effect) {
-        effect->safeUnref();
+        SkSafeUnref(effect);
     }
 
     static SkPathEffect* Compose_constructor(JNIEnv* env, jobject,
