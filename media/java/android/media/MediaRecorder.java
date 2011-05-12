@@ -347,6 +347,40 @@ public class MediaRecorder
     }
 
     /**
+     * Store the geodata (latitude and longitude) in the output file.
+     * This method should be called before prepare(). The geodata is
+     * stored in udta box if the output format is OutputFormat.THREE_GPP
+     * or OutputFormat.MPEG_4, and is ignored for other output formats.
+     * The geodata is stored according to ISO-6709 standard.
+     *
+     * @param latitude latitude in degrees. Its value must be in the
+     * range [-90, 90].
+     * @param longitude longitude in degrees. Its value must be in the
+     * range [-180, 180].
+     *
+     * @throws IllegalArgumentException if the given latitude or
+     * longitude is out of range.
+     *
+     * {@hide}
+     */
+    public void setGeoData(float latitude, float longitude) {
+        int latitudex10000  = (int) (latitude * 10000 + 0.5);
+        int longitudex10000 = (int) (longitude * 10000 + 0.5);
+
+        if (latitudex10000 > 900000 || latitudex10000 < -900000) {
+            String msg = "Unsupported latitude: " + latitude;
+            throw new IllegalArgumentException(msg);
+        }
+        if (longitudex10000 > 1800000 || longitudex10000 < -1800000) {
+            String msg = "Unsupported longitude: " + longitude;
+            throw new IllegalArgumentException(msg);
+        }
+
+        setParameter("param-geotag-latitude=" + latitudex10000);
+        setParameter("param-geotag-longitude=" + longitudex10000);
+    }
+
+    /**
      * Sets the format of the output file produced during recording. Call this
      * after setAudioSource()/setVideoSource() but before prepare().
      *

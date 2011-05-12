@@ -257,7 +257,10 @@ MPEG4Writer::MPEG4Writer(const char *filename)
       mOffset(0),
       mMdatOffset(0),
       mEstimatedMoovBoxSize(0),
-      mInterleaveDurationUs(1000000) {
+      mInterleaveDurationUs(1000000),
+      mLatitudex10000(0),
+      mLongitudex10000(0),
+      mAreGeoTagsAvailable(false) {
 
     mFd = open(filename, O_CREAT | O_LARGEFILE | O_TRUNC | O_RDWR);
     if (mFd >= 0) {
@@ -276,7 +279,10 @@ MPEG4Writer::MPEG4Writer(int fd)
       mOffset(0),
       mMdatOffset(0),
       mEstimatedMoovBoxSize(0),
-      mInterleaveDurationUs(1000000) {
+      mInterleaveDurationUs(1000000),
+      mLatitudex10000(0),
+      mLongitudex10000(0),
+      mAreGeoTagsAvailable(false) {
 }
 
 MPEG4Writer::~MPEG4Writer() {
@@ -724,6 +730,9 @@ void MPEG4Writer::writeMvhdBox(int64_t durationUs) {
 void MPEG4Writer::writeMoovBox(int64_t durationUs) {
     beginBox("moov");
     writeMvhdBox(durationUs);
+    if (mAreGeoTagsAvailable) {
+        writeUdtaBox();
+    }
     int32_t id = 1;
     for (List<Track *>::iterator it = mTracks.begin();
         it != mTracks.end(); ++it, ++id) {
@@ -919,6 +928,77 @@ void MPEG4Writer::writeCString(const char *s) {
 void MPEG4Writer::writeFourcc(const char *s) {
     CHECK_EQ(strlen(s), 4);
     write(s, 1, 4);
+}
+
+
+// Written in +/-DD.DDDD format
+void MPEG4Writer::writeLatitude(int degreex10000) {
+    bool isNegative = (degreex10000 < 0);
+    char sign = isNegative? '-': '+';
+
+    // Handle the whole part
+    char str[9];
+    int wholePart = degreex10000 / 10000;
+    if (wholePart == 0) {
+        snprintf(str, 5, "%c%.2d.", sign, wholePart);
+    } else {
+        snprintf(str, 5, "%+.2d.", wholePart);
+    }
+
+    // Handle the fractional part
+    int fractionalPart = degreex10000 - (wholePart * 10000);
+    if (fractionalPart < 0) {
+        fractionalPart = -fractionalPart;
+    }
+    snprintf(&str[4], 5, "%.4d", fractionalPart);
+
+    // Do not write the null terminator
+    write(str, 1, 8);
+}
+
+// Written in +/- DDD.DDDD format
+void MPEG4Writer::writeLongitude(int degreex10000) {
+    bool isNegative = (degreex10000 < 0);
+    char sign = isNegative? '-': '+';
+
+    // Handle the whole part
+    char str[10];
+    int wholePart = degreex10000 / 10000;
+    if (wholePart == 0) {
+        snprintf(str, 6, "%c%.3d.", sign, wholePart);
+    } else {
+        snprintf(str, 6, "%+.3d.", wholePart);
+    }
+
+    // Handle the fractional part
+    int fractionalPart = degreex10000 - (wholePart * 10000);
+    if (fractionalPart < 0) {
+        fractionalPart = -fractionalPart;
+    }
+    snprintf(&str[5], 5, "%.4d", fractionalPart);
+
+    // Do not write the null terminator
+    write(str, 1, 9);
+}
+
+/*
+ * Geodata is stored according to ISO-6709 standard.
+ * latitudex10000 is latitude in degrees times 10000, and
+ * longitudex10000 is longitude in degrees times 10000.
+ * The range for the latitude is in [-90, +90], and
+ * The range for the longitude is in [-180, +180]
+ */
+status_t MPEG4Writer::setGeoData(int latitudex10000, int longitudex10000) {
+    // Is latitude or longitude out of range?
+    if (latitudex10000 < -900000 || latitudex10000 > 900000 ||
+        longitudex10000 < -1800000 || longitudex10000 > 1800000) {
+        return BAD_VALUE;
+    }
+
+    mLatitudex10000 = latitudex10000;
+    mLongitudex10000 = longitudex10000;
+    mAreGeoTagsAvailable = true;
+    return OK;
 }
 
 void MPEG4Writer::write(const void *data, size_t size) {
@@ -2720,6 +2800,31 @@ void MPEG4Writer::Track::writeStcoBox(bool use32BitOffset) {
         }
     }
     mOwner->endBox();  // stco or co64
+}
+
+void MPEG4Writer::writeUdtaBox() {
+    beginBox("udta");
+    writeGeoDataBox();
+    endBox();
+}
+
+/*
+ * Geodata is stored according to ISO-6709 standard.
+ */
+void MPEG4Writer::writeGeoDataBox() {
+    beginBox("\xA9xyz");
+    /*
+     * For historical reasons, any user data start
+     * with "\0xA9", must be followed by its assoicated
+     * language code.
+     * 0x0012: locale en
+     * 0x15c7: language 5575
+     */
+    writeInt32(0x001215c7);
+    writeLatitude(mLatitudex10000);
+    writeLongitude(mLongitudex10000);
+    writeInt8(0x2F);
+    endBox();
 }
 
 }  // namespace android
