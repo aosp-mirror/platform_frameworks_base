@@ -34,7 +34,7 @@ public:
     void bindDepthTarget(Context *, Allocation *a);
     void resetAll(Context *);
 
-    void setupGL2(Context *);
+    void setup(Context *);
 
 protected:
 

@@ -32,7 +32,7 @@ public:
                              uint32_t paramLength);
     virtual ~ProgramFragment();
 
-    virtual void setupGL2(Context *, ProgramFragmentState *);
+    virtual void setup(Context *, ProgramFragmentState *);
 
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_FRAGMENT; }

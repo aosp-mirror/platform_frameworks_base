@@ -156,7 +156,7 @@ void rsrDrawQuadTexCoords(Context *rsc, Script *sc,
     attribs[1].set(GL_FLOAT, 2, 8, false, (uint32_t)tex, "ATTRIB_texture0");
 
     RsdVertexArray va(attribs, 2);
-    va.setupGL2(rsc);
+    va.setup(rsc);
 
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
@@ -250,7 +250,7 @@ void rsrFinish(Context *rsc, Script *sc) {
 
 
 void rsrClearColor(Context *rsc, Script *sc, float r, float g, float b, float a) {
-    rsc->mFBOCache.setupGL2(rsc);
+    rsc->mFBOCache.setup(rsc);
     rsc->setupProgramStore();
 
     glClearColor(r, g, b, a);
@@ -258,7 +258,7 @@ void rsrClearColor(Context *rsc, Script *sc, float r, float g, float b, float a)
 }
 
 void rsrClearDepth(Context *rsc, Script *sc, float v) {
-    rsc->mFBOCache.setupGL2(rsc);
+    rsc->mFBOCache.setup(rsc);
     rsc->setupProgramStore();
 
     glClearDepthf(v);

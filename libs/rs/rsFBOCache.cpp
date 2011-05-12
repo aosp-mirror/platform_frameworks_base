@@ -30,7 +30,7 @@ using namespace android::renderscript;
 
 FBOCache::FBOCache() {
     mFBOId = 0;
-    mDirty = false;
+    mDirty = true;
     mMaxTargets = 1;
     mColorTargets = new ObjectBaseRef<Allocation>[mMaxTargets];
 }
@@ -180,7 +180,7 @@ void FBOCache::setColorAttachment(Context *rsc) {
 #endif //ANDROID_RS_SERIALIZE
 }
 
-void FBOCache::setupGL2(Context *rsc) {
+void FBOCache::setup(Context *rsc) {
 #ifndef ANDROID_RS_SERIALIZE
     if (!mDirty) {
         return;
@@ -205,5 +205,6 @@ void FBOCache::setupGL2(Context *rsc) {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glViewport(0, 0, rsc->getWidth(), rsc->getHeight());
     }
+    mDirty = false;
 #endif //ANDROID_RS_SERIALIZE
 }

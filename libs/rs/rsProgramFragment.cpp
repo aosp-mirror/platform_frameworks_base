@@ -55,13 +55,11 @@ void ProgramFragment::setConstantColor(Context *rsc, float r, float g, float b, 
     mDirty = true;
 }
 
-void ProgramFragment::setupGL2(Context *rsc, ProgramFragmentState *state) {
+void ProgramFragment::setup(Context *rsc, ProgramFragmentState *state) {
     if ((state->mLast.get() == this) && !mDirty) {
         return;
     }
     state->mLast.set(this);
-
-    rsc->checkError("ProgramFragment::setupGL2 start");
 
     for (uint32_t ct=0; ct < mHal.state.texturesCount; ct++) {
         if (!mHal.state.textures[ct].get()) {

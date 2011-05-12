@@ -31,7 +31,7 @@ public:
                   const uint32_t * params, uint32_t paramLength);
     virtual ~ProgramVertex();
 
-    virtual void setupGL2(Context *rsc, ProgramVertexState *state);
+    virtual void setup(Context *rsc, ProgramVertexState *state);
 
     void setProjectionMatrix(Context *, const rsc_Matrix *) const;
     void getProjectionMatrix(Context *, rsc_Matrix *) const;

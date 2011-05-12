@@ -76,6 +76,8 @@ void rsdGLShutdown(const android::renderscript::Context *rsc);
 bool rsdGLSetSurface(const android::renderscript::Context *rsc,
                      uint32_t w, uint32_t h, ANativeWindow *sur);
 void rsdGLSwap(const android::renderscript::Context *rsc);
+void rsdGLCheckError(const android::renderscript::Context *rsc,
+                     const char *msg, bool isFatal = false);
 
 #endif
 

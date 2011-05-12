@@ -23,6 +23,7 @@
 #include <rsMesh.h>
 
 #include "rsdMeshObj.h"
+#include "rsdGL.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -134,7 +135,7 @@ void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex, ui
         return;
     }
 
-    rsc->checkError("Mesh::renderPrimitiveRange 1");
+    rsdGLCheckError(rsc, "Mesh::renderPrimitiveRange 1");
     // update attributes with either buffer information or data ptr based on their current state
     for (uint32_t ct=0; ct < mAttribCount; ct++) {
         uint32_t allocIndex = mAttribAllocationIndex[ct];
@@ -149,9 +150,9 @@ void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex, ui
     }
 
     RsdVertexArray va(mAttribs, mAttribCount);
-    va.setupGL2(rsc);
+    va.setup(rsc);
 
-    rsc->checkError("Mesh::renderPrimitiveRange 2");
+    rsdGLCheckError(rsc, "Mesh::renderPrimitiveRange 2");
     Mesh::Primitive_t *prim = mRSMesh->mHal.state.primitives[primIndex];
     if (prim->mIndexBuffer.get()) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prim->mIndexBuffer->getBufferObjectID());
@@ -160,7 +161,7 @@ void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex, ui
         glDrawArrays(mGLPrimitives[primIndex], start, len);
     }
 
-    rsc->checkError("Mesh::renderPrimitiveRange");
+    rsdGLCheckError(rsc, "Mesh::renderPrimitiveRange");
 }
 
 void RsdMeshObj::updateGLPrimitives() {

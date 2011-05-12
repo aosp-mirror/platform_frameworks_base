@@ -42,8 +42,9 @@
 #include "rsgApiStructs.h"
 #include "rsLocklessFifo.h"
 
-#include <ui/egl/android_natives.h>
 #endif // ANDROID_RS_SERIALIZE
+
+class ANativeWindow;
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -197,42 +198,15 @@ public:
     } props;
 
     void dumpDebug() const;
-    void checkError(const char *, bool isFatal = false) const;
     void setError(RsError e, const char *msg = NULL) const;
 
     mutable const ObjectBase * mObjHead;
-
-    bool ext_OES_texture_npot() const {return mGL.OES_texture_npot;}
-    bool ext_GL_IMG_texture_npot() const {return mGL.GL_IMG_texture_npot;}
-    bool ext_GL_NV_texture_npot_2D_mipmap() const {return mGL.GL_NV_texture_npot_2D_mipmap;}
-    float ext_texture_max_aniso() const {return mGL.EXT_texture_max_aniso; }
-    uint32_t getMaxFragmentTextures() const {return mGL.mMaxFragmentTextureImageUnits;}
-    uint32_t getMaxFragmentUniformVectors() const {return mGL.mMaxFragmentUniformVectors;}
-    uint32_t getMaxVertexUniformVectors() const {return mGL.mMaxVertexUniformVectors;}
-    uint32_t getMaxVertexAttributes() const {return mGL.mMaxVertexAttribs;}
 
     uint32_t getDPI() const {return mDPI;}
     void setDPI(uint32_t dpi) {mDPI = dpi;}
 
     Device *mDev;
 protected:
-
-    struct {
-        int32_t mMaxVaryingVectors;
-        int32_t mMaxTextureImageUnits;
-
-        int32_t mMaxFragmentTextureImageUnits;
-        int32_t mMaxFragmentUniformVectors;
-
-        int32_t mMaxVertexAttribs;
-        int32_t mMaxVertexUniformVectors;
-        int32_t mMaxVertexTextureUnits;
-
-        bool OES_texture_npot;
-        bool GL_IMG_texture_npot;
-        bool GL_NV_texture_npot_2D_mipmap;
-        float EXT_texture_max_aniso;
-    } mGL;
 
     uint32_t mDPI;
     uint32_t mWidth;

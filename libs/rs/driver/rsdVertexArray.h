@@ -49,7 +49,7 @@ public:
     RsdVertexArray(const Attrib *attribs, uint32_t numAttribs);
     virtual ~RsdVertexArray();
 
-    void setupGL2(const android::renderscript::Context *rsc) const;
+    void setup(const android::renderscript::Context *rsc) const;
     void logAttrib(uint32_t idx, uint32_t slot) const;
 
 protected:
