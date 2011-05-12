@@ -1075,34 +1075,27 @@ nSamplerCreate(JNIEnv *_env, jobject _this, RsContext con, jint magFilter, jint 
 // ---------------------------------------------------------------------------
 
 static jint
-nMeshCreate(JNIEnv *_env, jobject _this, RsContext con, jint vtxCount, jint idxCount)
+nMeshCreate(JNIEnv *_env, jobject _this, RsContext con, jintArray _vtx, jintArray _idx, jintArray _prim)
 {
-    LOG_API("nMeshCreate, con(%p), vtxCount(%i), idxCount(%i)", con, vtxCount, idxCount);
-    int id = (int)rsMeshCreate(con, vtxCount, idxCount);
+    LOG_API("nMeshCreate, con(%p)", con);
+
+    jint vtxLen = _env->GetArrayLength(_vtx);
+    jint *vtxPtr = _env->GetIntArrayElements(_vtx, NULL);
+    jint idxLen = _env->GetArrayLength(_idx);
+    jint *idxPtr = _env->GetIntArrayElements(_idx, NULL);
+    jint primLen = _env->GetArrayLength(_prim);
+    jint *primPtr = _env->GetIntArrayElements(_prim, NULL);
+
+    int id = (int)rsMeshCreate(con,
+                               (RsAllocation *)vtxPtr, vtxLen,
+                               (RsAllocation *)idxPtr, idxLen,
+                               (uint32_t *)primPtr, primLen);
+
+    _env->ReleaseIntArrayElements(_vtx, vtxPtr, 0);
+    _env->ReleaseIntArrayElements(_idx, idxPtr, 0);
+    _env->ReleaseIntArrayElements(_prim, primPtr, 0);
     return id;
 }
-
-static void
-nMeshBindVertex(JNIEnv *_env, jobject _this, RsContext con, jint mesh, jint alloc, jint slot)
-{
-    LOG_API("nMeshBindVertex, con(%p), Mesh(%p), Alloc(%p), slot(%i)", con, (RsMesh)mesh, (RsAllocation)alloc, slot);
-    rsMeshBindVertex(con, (RsMesh)mesh, (RsAllocation)alloc, slot);
-}
-
-static void
-nMeshBindIndex(JNIEnv *_env, jobject _this, RsContext con, jint mesh, jint alloc, jint primID, jint slot)
-{
-    LOG_API("nMeshBindIndex, con(%p), Mesh(%p), Alloc(%p)", con, (RsMesh)mesh, (RsAllocation)alloc);
-    rsMeshBindIndex(con, (RsMesh)mesh, (RsAllocation)alloc, primID, slot);
-}
-
-static void
-nMeshInitVertexAttribs(JNIEnv *_env, jobject _this, RsContext con, jint mesh)
-{
-    LOG_API("nMeshInitVertexAttribs, con(%p), Mesh(%p)", con, (RsMesh)mesh);
-    rsMeshInitVertexAttribs(con, (RsMesh)mesh);
-}
-
 
 static jint
 nMeshGetVertexBufferCount(JNIEnv *_env, jobject _this, RsContext con, jint mesh)
@@ -1267,10 +1260,7 @@ static JNINativeMethod methods[] = {
 
 {"rsnSamplerCreate",                 "(IIIIIIF)I",                            (void*)nSamplerCreate },
 
-{"rsnMeshCreate",                    "(III)I",                                (void*)nMeshCreate },
-{"rsnMeshBindVertex",                "(IIII)V",                               (void*)nMeshBindVertex },
-{"rsnMeshBindIndex",                 "(IIIII)V",                              (void*)nMeshBindIndex },
-{"rsnMeshInitVertexAttribs",         "(II)V",                                 (void*)nMeshInitVertexAttribs },
+{"rsnMeshCreate",                    "(I[I[I[I)I",                            (void*)nMeshCreate },
 
 {"rsnMeshGetVertexBufferCount",      "(II)I",                                 (void*)nMeshGetVertexBufferCount },
 {"rsnMeshGetIndexCount",             "(II)I",                                 (void*)nMeshGetIndexCount },

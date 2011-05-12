@@ -403,25 +403,8 @@ FontCreateFromMemory {
 	}
 
 MeshCreate {
+	param RsAllocation *vtx
+	param RsAllocation *idx
+	param uint32_t *primType
 	ret RsMesh
-	param uint32_t vtxCount
-	param uint32_t idxCount
 	}
-
-MeshBindIndex {
-	param RsMesh mesh
-	param RsAllocation idx
-	param uint32_t primType
-	param uint32_t slot
-	}
-
-MeshBindVertex {
-	param RsMesh mesh
-	param RsAllocation vtx
-	param uint32_t slot
-	}
-
-MeshInitVertexAttribs {
-	param RsMesh mesh
-	}
-

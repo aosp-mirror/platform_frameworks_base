@@ -39,13 +39,6 @@ public:
         RsPrimitive mPrimitive;
     };
 
-    // compatibility to not break the build
-    ObjectBaseRef<Allocation> *mVertexBuffers;
-    uint32_t mVertexBufferCount;
-    Primitive_t ** mPrimitives;
-    uint32_t mPrimitivesCount;
-    // end compatibility
-
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_MESH; }
     static Mesh *createFromStream(Context *rsc, IStream *stream);

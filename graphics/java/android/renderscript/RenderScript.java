@@ -527,25 +527,10 @@ public class RenderScript {
         return rsnProgramVertexCreate(mContext, shader, params);
     }
 
-    native int  rsnMeshCreate(int con, int vtxCount, int indexCount);
-    synchronized int nMeshCreate(int vtxCount, int indexCount) {
+    native int  rsnMeshCreate(int con, int[] vtx, int[] idx, int[] prim);
+    synchronized int nMeshCreate(int[] vtx, int[] idx, int[] prim) {
         validate();
-        return rsnMeshCreate(mContext, vtxCount, indexCount);
-    }
-    native void rsnMeshBindVertex(int con, int id, int alloc, int slot);
-    synchronized void nMeshBindVertex(int id, int alloc, int slot) {
-        validate();
-        rsnMeshBindVertex(mContext, id, alloc, slot);
-    }
-    native void rsnMeshBindIndex(int con, int id, int alloc, int prim, int slot);
-    synchronized void nMeshBindIndex(int id, int alloc, int prim, int slot) {
-        validate();
-        rsnMeshBindIndex(mContext, id, alloc, prim, slot);
-    }
-    native void rsnMeshInitVertexAttribs(int con, int id);
-    synchronized void nMeshInitVertexAttribs(int id) {
-        validate();
-        rsnMeshInitVertexAttribs(mContext, id);
+        return rsnMeshCreate(mContext, vtx, idx, prim);
     }
     native int  rsnMeshGetVertexBufferCount(int con, int id);
     synchronized int nMeshGetVertexBufferCount(int id) {

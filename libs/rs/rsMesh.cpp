@@ -263,30 +263,25 @@ void Mesh::computeBBox() {
 namespace android {
 namespace renderscript {
 
-RsMesh rsi_MeshCreate(Context *rsc, uint32_t vtxCount, uint32_t idxCount) {
+RsMesh rsi_MeshCreate(Context *rsc,
+                      RsAllocation *vtx, uint32_t vtxCount,
+                      RsAllocation *idx, uint32_t idxCount,
+                      uint32_t *primType, uint32_t primTypeCount) {
+    rsAssert(idxCount == primTypeCount);
     Mesh *sm = new Mesh(rsc, vtxCount, idxCount);
     sm->incUserRef();
 
-    return sm;
-}
+    for (uint32_t i = 0; i < vtxCount; i ++) {
+        sm->setVertexBuffer((Allocation*)vtx[i], i);
+    }
 
-void rsi_MeshBindVertex(Context *rsc, RsMesh mv, RsAllocation va, uint32_t slot) {
-    Mesh *sm = static_cast<Mesh *>(mv);
-    rsAssert(slot < sm->mHal.state.vertexBuffersCount);
+    for (uint32_t i = 0; i < idxCount; i ++) {
+        sm->setPrimitive((Allocation*)idx[i], (RsPrimitive)primType[i], i);
+    }
 
-    sm->setVertexBuffer((Allocation *)va, slot);
-}
-
-void rsi_MeshBindIndex(Context *rsc, RsMesh mv, RsAllocation va, uint32_t primType, uint32_t slot) {
-    Mesh *sm = static_cast<Mesh *>(mv);
-    rsAssert(slot < sm->mHal.state.primitivesCount);
-
-    sm->setPrimitive((Allocation *)va, (RsPrimitive)primType, slot);
-}
-
-void rsi_MeshInitVertexAttribs(Context *rsc, RsMesh mv) {
-    Mesh *sm = static_cast<Mesh *>(mv);
     sm->init();
+
+    return sm;
 }
 
 }}
