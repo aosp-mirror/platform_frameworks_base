@@ -1397,12 +1397,41 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_FRONT_ACTIVITY_SCREEN_COMPAT_MODE_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            int mode = getFrontActivityScreenCompatMode();
+            reply.writeNoException();
+            reply.writeInt(mode);
+            return true;
+        }
+
+        case SET_FRONT_ACTIVITY_SCREEN_COMPAT_MODE_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            int mode = data.readInt();
+            setFrontActivityScreenCompatMode(mode);
+            reply.writeNoException();
+            reply.writeInt(mode);
+            return true;
+        }
+
+        case GET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            String pkg = data.readString();
+            int mode = getPackageScreenCompatMode(pkg);
+            reply.writeNoException();
+            reply.writeInt(mode);
+            return true;
+        }
+
         case SET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION:
         {
             data.enforceInterface(IActivityManager.descriptor);
             String pkg = data.readString();
-            boolean enabled = data.readInt() != 0;
-            setPackageScreenCompatMode(pkg, enabled);
+            int mode = data.readInt();
+            setPackageScreenCompatMode(pkg, mode);
             reply.writeNoException();
             return true;
         }
@@ -3182,13 +3211,48 @@ class ActivityManagerProxy implements IActivityManager
         return result;
     }
 
-    public void setPackageScreenCompatMode(String packageName, boolean compatEnabled)
+    public int getFrontActivityScreenCompatMode() throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(GET_FRONT_ACTIVITY_SCREEN_COMPAT_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int mode = reply.readInt();
+        reply.recycle();
+        data.recycle();
+        return mode;
+    }
+
+    public void setFrontActivityScreenCompatMode(int mode) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeInt(mode);
+        mRemote.transact(SET_FRONT_ACTIVITY_SCREEN_COMPAT_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
+    }
+
+    public int getPackageScreenCompatMode(String packageName) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        mRemote.transact(SET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        int mode = reply.readInt();
+        reply.recycle();
+        data.recycle();
+        return mode;
+    }
+
+    public void setPackageScreenCompatMode(String packageName, int mode)
             throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
         data.writeString(packageName);
-        data.writeInt(compatEnabled ? 1 : 0);
+        data.writeInt(mode);
         mRemote.transact(SET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION, data, reply, 0);
         reply.readException();
         reply.recycle();

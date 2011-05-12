@@ -142,15 +142,8 @@ final class Settings {
     Settings() {
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
-        // TODO(oam): This secure dir creation needs to be moved somewhere else (later)
-        File systemSecureDir = new File(dataDir, "secure/system");
         systemDir.mkdirs();
-        systemSecureDir.mkdirs();
         FileUtils.setPermissions(systemDir.toString(),
-                FileUtils.S_IRWXU|FileUtils.S_IRWXG
-                |FileUtils.S_IROTH|FileUtils.S_IXOTH,
-                -1, -1);
-        FileUtils.setPermissions(systemSecureDir.toString(),
                 FileUtils.S_IRWXU|FileUtils.S_IRWXG
                 |FileUtils.S_IROTH|FileUtils.S_IXOTH,
                 -1, -1);

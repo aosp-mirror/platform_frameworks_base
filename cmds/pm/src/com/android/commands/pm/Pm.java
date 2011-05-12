@@ -204,6 +204,7 @@ public final class Pm {
     private void runListPackages(boolean showApplicationPackage) {
         int getFlags = 0;
         boolean listDisabled = false, listEnabled = false;
+        boolean listSystem = false, listThirdParty = false;
         try {
             String opt;
             while ((opt=nextOption()) != null) {
@@ -217,6 +218,10 @@ public final class Pm {
                     listDisabled = true;
                 } else if (opt.equals("-e")) {
                     listEnabled = true;
+                } else if (opt.equals("-s")) {
+                    listSystem = true;
+                } else if (opt.equals("-3")) {
+                    listThirdParty = true;
                 } else if (opt.equals("-u")) {
                     getFlags |= PackageManager.GET_UNINSTALLED_PACKAGES;
                 } else {
@@ -242,8 +247,12 @@ public final class Pm {
                 if (filter != null && !info.packageName.contains(filter)) {
                     continue;
                 }
+                final boolean isSystem =
+                        (info.applicationInfo.flags&ApplicationInfo.FLAG_SYSTEM) != 0;
                 if ((!listDisabled || !info.applicationInfo.enabled) &&
-                        (!listEnabled || info.applicationInfo.enabled)) {
+                        (!listEnabled || info.applicationInfo.enabled) &&
+                        (!listSystem || isSystem) &&
+                        (!listThirdParty || !isSystem)) {
                     System.out.print("package:");
                     if (showApplicationPackage) {
                         System.out.print(info.applicationInfo.sourceDir);
@@ -1061,7 +1070,7 @@ public final class Pm {
 
     private static void showUsage() {
         System.err.println("usage: pm [list|path|install|uninstall]");
-        System.err.println("       pm list packages [-f] [-d] [-e] [-u] [FILTER]");
+        System.err.println("       pm list packages [-f] [-d] [-e] [-s] [-e] [-u] [FILTER]");
         System.err.println("       pm list permission-groups");
         System.err.println("       pm list permissions [-g] [-f] [-d] [-u] [GROUP]");
         System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");
@@ -1080,8 +1089,10 @@ public final class Pm {
         System.err.println("The list packages command prints all packages, optionally only");
         System.err.println("those whose package name contains the text in FILTER.  Options:");
         System.err.println("  -f: see their associated file.");
-        System.err.println("  -d: filter to include disbled packages.");
-        System.err.println("  -e: filter to include enabled packages.");
+        System.err.println("  -d: filter to only show disbled packages.");
+        System.err.println("  -e: filter to only show enabled packages.");
+        System.err.println("  -s: filter to only show system packages.");
+        System.err.println("  -3: filter to only show third party packages.");
         System.err.println("  -u: also include uninstalled packages.");
         System.err.println("");
         System.err.println("The list permission-groups command prints all known");
