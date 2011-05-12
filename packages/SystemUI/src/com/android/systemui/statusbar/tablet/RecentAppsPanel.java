@@ -50,6 +50,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -69,6 +70,7 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
     private View mRecentsScrim;
     private View mRecentsGlowView;
     private ListView mRecentsContainer;
+    private CheckBox mCompatMode;
     private Bitmap mGlowBitmap;
     private boolean mShowing;
     private Choreographer mChoreo;
@@ -356,6 +358,15 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
         mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         mRecentsContainer = (ListView) findViewById(R.id.recents_container);
+        mCompatMode = (CheckBox) findViewById(R.id.recents_compat_mode);
+        mCompatMode.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                final ActivityManager am = (ActivityManager)
+                        mContext.getSystemService(Context.ACTIVITY_SERVICE);
+                am.setFrontActivityScreenCompatMode(ActivityManager.COMPAT_MODE_TOGGLE);
+                hide(true);
+            }
+        });
         View footer = inflater.inflate(R.layout.status_bar_recent_panel_footer,
                 mRecentsContainer, false);
         mRecentsContainer.setScrollbarFadingEnabled(true);
@@ -492,12 +503,32 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
         return desc;
     }
 
+    private void updateShownCompatMode() {
+        final ActivityManager am = (ActivityManager)
+                mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        int mode = am.getFrontActivityScreenCompatMode();
+        switch (mode) {
+            case ActivityManager.COMPAT_MODE_DISABLED:
+                mCompatMode.setVisibility(View.VISIBLE);
+                mCompatMode.setChecked(true);
+                break;
+            case ActivityManager.COMPAT_MODE_ENABLED:
+                mCompatMode.setVisibility(View.VISIBLE);
+                mCompatMode.setChecked(false);
+                break;
+            default:
+                mCompatMode.setVisibility(View.GONE);
+                break;
+        }
+    }
+
     private void refreshApplicationList() {
         mActivityDescriptions = getRecentTasks();
         mListAdapter.notifyDataSetInvalidated();
         if (mActivityDescriptions.size() > 0) {
             mLastVisibleItem = mActivityDescriptions.size() - 1; // scroll to bottom after reloading
             updateUiElements(getResources().getConfiguration());
+            updateShownCompatMode();
         } else {
             // Immediately hide this panel
             hide(false);

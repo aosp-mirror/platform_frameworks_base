@@ -342,7 +342,10 @@ public interface IActivityManager extends IInterface {
     public int startActivitiesInPackage(int uid,
             Intent[] intents, String[] resolvedTypes, IBinder resultTo) throws RemoteException;
 
-    public void setPackageScreenCompatMode(String packageName, boolean compatEnabled)
+    public int getFrontActivityScreenCompatMode() throws RemoteException;
+    public void setFrontActivityScreenCompatMode(int mode) throws RemoteException;
+    public int getPackageScreenCompatMode(String packageName) throws RemoteException;
+    public void setPackageScreenCompatMode(String packageName, int mode)
             throws RemoteException;
 
     /*
@@ -560,5 +563,8 @@ public interface IActivityManager extends IInterface {
     int START_ACTIVITIES_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+120;
     int START_ACTIVITIES_IN_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+121;
     int ACTIVITY_SLEPT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+122;
-    int SET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+123;
+    int GET_FRONT_ACTIVITY_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+123;
+    int SET_FRONT_ACTIVITY_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+124;
+    int GET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+125;
+    int SET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+126;
 }

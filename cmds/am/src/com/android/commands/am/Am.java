@@ -18,6 +18,7 @@
 
 package com.android.commands.am;
 
+import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
 import android.app.IActivityController;
 import android.app.IActivityManager;
@@ -794,7 +795,9 @@ public class Am {
         String packageName = nextArgRequired();
         do {
             try {
-                mAm.setPackageScreenCompatMode(packageName, enabled);
+                mAm.setPackageScreenCompatMode(packageName, enabled
+                        ? ActivityManager.COMPAT_MODE_ENABLED
+                        : ActivityManager.COMPAT_MODE_DISABLED);
             } catch (RemoteException e) {
             }
             packageName = nextArg();
