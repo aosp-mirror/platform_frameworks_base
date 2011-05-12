@@ -75,6 +75,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.HierarchicalState;
 import com.android.internal.util.HierarchicalStateMachine;
+import com.android.internal.util.Protocol;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -165,95 +166,97 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private static final int EVENTLOG_WIFI_EVENT_HANDLED        = 50022;
     private static final int EVENTLOG_SUPPLICANT_STATE_CHANGED  = 50023;
 
+    /* The base for wifi message types */
+    static final int BASE = Protocol.BASE_WIFI;
     /* Load the driver */
-    static final int CMD_LOAD_DRIVER                      = 1;
+    static final int CMD_LOAD_DRIVER                      = BASE + 1;
     /* Unload the driver */
-    static final int CMD_UNLOAD_DRIVER                    = 2;
+    static final int CMD_UNLOAD_DRIVER                    = BASE + 2;
     /* Indicates driver load succeeded */
-    static final int CMD_LOAD_DRIVER_SUCCESS              = 3;
+    static final int CMD_LOAD_DRIVER_SUCCESS              = BASE + 3;
     /* Indicates driver load failed */
-    static final int CMD_LOAD_DRIVER_FAILURE              = 4;
+    static final int CMD_LOAD_DRIVER_FAILURE              = BASE + 4;
     /* Indicates driver unload succeeded */
-    static final int CMD_UNLOAD_DRIVER_SUCCESS            = 5;
+    static final int CMD_UNLOAD_DRIVER_SUCCESS            = BASE + 5;
     /* Indicates driver unload failed */
-    static final int CMD_UNLOAD_DRIVER_FAILURE            = 6;
+    static final int CMD_UNLOAD_DRIVER_FAILURE            = BASE + 6;
 
     /* Start the supplicant */
-    static final int CMD_START_SUPPLICANT                 = 11;
+    static final int CMD_START_SUPPLICANT                 = BASE + 11;
     /* Stop the supplicant */
-    static final int CMD_STOP_SUPPLICANT                  = 12;
+    static final int CMD_STOP_SUPPLICANT                  = BASE + 12;
     /* Start the driver */
-    static final int CMD_START_DRIVER                     = 13;
+    static final int CMD_START_DRIVER                     = BASE + 13;
     /* Start the driver */
-    static final int CMD_STOP_DRIVER                      = 14;
+    static final int CMD_STOP_DRIVER                      = BASE + 14;
     /* Indicates DHCP succeded */
-    static final int CMD_IP_CONFIG_SUCCESS                = 15;
+    static final int CMD_IP_CONFIG_SUCCESS                = BASE + 15;
     /* Indicates DHCP failed */
-    static final int CMD_IP_CONFIG_FAILURE                = 16;
+    static final int CMD_IP_CONFIG_FAILURE                = BASE + 16;
 
     /* Start the soft access point */
-    static final int CMD_START_AP                         = 21;
+    static final int CMD_START_AP                         = BASE + 21;
     /* Stop the soft access point */
-    static final int CMD_STOP_AP                          = 22;
+    static final int CMD_STOP_AP                          = BASE + 22;
 
-    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = 23;
+    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = BASE + 23;
 
     /* Supplicant events */
     /* Connection to supplicant established */
-    static final int SUP_CONNECTION_EVENT                 = 31;
+    static final int SUP_CONNECTION_EVENT                 = BASE + 31;
     /* Connection to supplicant lost */
-    static final int SUP_DISCONNECTION_EVENT              = 32;
+    static final int SUP_DISCONNECTION_EVENT              = BASE + 32;
     /* Driver start completed */
-    static final int DRIVER_START_EVENT                   = 33;
+    static final int DRIVER_START_EVENT                   = BASE + 33;
     /* Driver stop completed */
-    static final int DRIVER_STOP_EVENT                    = 34;
+    static final int DRIVER_STOP_EVENT                    = BASE + 34;
     /* Network connection completed */
-    static final int NETWORK_CONNECTION_EVENT             = 36;
+    static final int NETWORK_CONNECTION_EVENT             = BASE + 36;
     /* Network disconnection completed */
-    static final int NETWORK_DISCONNECTION_EVENT          = 37;
+    static final int NETWORK_DISCONNECTION_EVENT          = BASE + 37;
     /* Scan results are available */
-    static final int SCAN_RESULTS_EVENT                   = 38;
+    static final int SCAN_RESULTS_EVENT                   = BASE + 38;
     /* Supplicate state changed */
-    static final int SUPPLICANT_STATE_CHANGE_EVENT        = 39;
+    static final int SUPPLICANT_STATE_CHANGE_EVENT        = BASE + 39;
     /* Password failure and EAP authentication failure */
-    static final int AUTHENTICATION_FAILURE_EVENT         = 40;
+    static final int AUTHENTICATION_FAILURE_EVENT         = BASE + 40;
     /* WPS overlap detected */
-    static final int WPS_OVERLAP_EVENT                    = 41;
+    static final int WPS_OVERLAP_EVENT                    = BASE + 41;
 
 
     /* Supplicant commands */
     /* Is supplicant alive ? */
-    static final int CMD_PING_SUPPLICANT                  = 51;
+    static final int CMD_PING_SUPPLICANT                  = BASE + 51;
     /* Add/update a network configuration */
-    static final int CMD_ADD_OR_UPDATE_NETWORK            = 52;
+    static final int CMD_ADD_OR_UPDATE_NETWORK            = BASE + 52;
     /* Delete a network */
-    static final int CMD_REMOVE_NETWORK                   = 53;
+    static final int CMD_REMOVE_NETWORK                   = BASE + 53;
     /* Enable a network. The device will attempt a connection to the given network. */
-    static final int CMD_ENABLE_NETWORK                   = 54;
+    static final int CMD_ENABLE_NETWORK                   = BASE + 54;
     /* Enable all networks */
-    static final int CMD_ENABLE_ALL_NETWORKS              = 55;
+    static final int CMD_ENABLE_ALL_NETWORKS              = BASE + 55;
     /* Disable a network. The device does not attempt a connection to the given network. */
-    static final int CMD_DISABLE_NETWORK                  = 56;
+    static final int CMD_DISABLE_NETWORK                  = BASE + 56;
     /* Blacklist network. De-prioritizes the given BSSID for connection. */
-    static final int CMD_BLACKLIST_NETWORK                = 57;
+    static final int CMD_BLACKLIST_NETWORK                = BASE + 57;
     /* Clear the blacklist network list */
-    static final int CMD_CLEAR_BLACKLIST                  = 58;
+    static final int CMD_CLEAR_BLACKLIST                  = BASE + 58;
     /* Save configuration */
-    static final int CMD_SAVE_CONFIG                      = 59;
+    static final int CMD_SAVE_CONFIG                      = BASE + 59;
 
     /* Supplicant commands after driver start*/
     /* Initiate a scan */
-    static final int CMD_START_SCAN                       = 71;
+    static final int CMD_START_SCAN                       = BASE + 71;
     /* Set scan mode. CONNECT_MODE or SCAN_ONLY_MODE */
-    static final int CMD_SET_SCAN_MODE                    = 72;
+    static final int CMD_SET_SCAN_MODE                    = BASE + 72;
     /* Set scan type. SCAN_ACTIVE or SCAN_PASSIVE */
-    static final int CMD_SET_SCAN_TYPE                    = 73;
+    static final int CMD_SET_SCAN_TYPE                    = BASE + 73;
     /* Disconnect from a network */
-    static final int CMD_DISCONNECT                       = 74;
+    static final int CMD_DISCONNECT                       = BASE + 74;
     /* Reconnect to a network */
-    static final int CMD_RECONNECT                        = 75;
+    static final int CMD_RECONNECT                        = BASE + 75;
     /* Reassociate to a network */
-    static final int CMD_REASSOCIATE                      = 76;
+    static final int CMD_REASSOCIATE                      = BASE + 76;
     /* Controls power mode and suspend mode optimizations
      *
      * When high perf mode is enabled, power mode is set to
@@ -267,19 +270,19 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * - turn off roaming
      * - DTIM wake up settings
      */
-    static final int CMD_SET_HIGH_PERF_MODE               = 77;
+    static final int CMD_SET_HIGH_PERF_MODE               = BASE + 77;
     /* Set the country code */
-    static final int CMD_SET_COUNTRY_CODE                 = 80;
+    static final int CMD_SET_COUNTRY_CODE                 = BASE + 80;
     /* Request connectivity manager wake lock before driver stop */
-    static final int CMD_REQUEST_CM_WAKELOCK              = 81;
+    static final int CMD_REQUEST_CM_WAKELOCK              = BASE + 81;
     /* Enables RSSI poll */
-    static final int CMD_ENABLE_RSSI_POLL                 = 82;
+    static final int CMD_ENABLE_RSSI_POLL                 = BASE + 82;
     /* RSSI poll */
-    static final int CMD_RSSI_POLL                        = 83;
+    static final int CMD_RSSI_POLL                        = BASE + 83;
     /* Set up packet filtering */
-    static final int CMD_START_PACKET_FILTERING           = 84;
+    static final int CMD_START_PACKET_FILTERING           = BASE + 84;
     /* Clear packet filter */
-    static final int CMD_STOP_PACKET_FILTERING            = 85;
+    static final int CMD_STOP_PACKET_FILTERING            = BASE + 85;
     /* Connect to a specified network (network id
      * or WifiConfiguration) This involves increasing
      * the priority of the network, enabling the network
@@ -288,33 +291,33 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      * an existing network. All the networks get enabled
      * upon a successful connection or a failure.
      */
-    static final int CMD_CONNECT_NETWORK                  = 86;
+    static final int CMD_CONNECT_NETWORK                  = BASE + 86;
     /* Save the specified network. This involves adding
      * an enabled network (if new) and updating the
      * config and issuing a save on supplicant config.
      */
-    static final int CMD_SAVE_NETWORK                     = 87;
+    static final int CMD_SAVE_NETWORK                     = BASE + 87;
     /* Delete the specified network. This involves
      * removing the network and issuing a save on
      * supplicant config.
      */
-    static final int CMD_FORGET_NETWORK                   = 88;
+    static final int CMD_FORGET_NETWORK                   = BASE + 88;
     /* Start Wi-Fi protected setup */
-    static final int CMD_START_WPS                        = 89;
+    static final int CMD_START_WPS                        = BASE + 89;
     /* Set the frequency band */
-    static final int CMD_SET_FREQUENCY_BAND               = 90;
+    static final int CMD_SET_FREQUENCY_BAND               = BASE + 90;
     /* Enable background scan for configured networks */
-    static final int CMD_ENABLE_BACKGROUND_SCAN           = 91;
+    static final int CMD_ENABLE_BACKGROUND_SCAN           = BASE + 91;
 
     /* Commands from/to the SupplicantStateTracker */
     /* Reset the supplicant state tracker */
-    static final int CMD_RESET_SUPPLICANT_STATE           = 111;
+    static final int CMD_RESET_SUPPLICANT_STATE           = BASE + 111;
 
     /* Commands/events reported by WpsStateMachine */
     /* Indicates the completion of WPS activity */
-    static final int WPS_COMPLETED_EVENT                  = 121;
+    static final int WPS_COMPLETED_EVENT                  = BASE + 121;
     /* Reset the WPS state machine */
-    static final int CMD_RESET_WPS_STATE                  = 122;
+    static final int CMD_RESET_WPS_STATE                  = BASE + 122;
 
     private static final int CONNECT_MODE   = 1;
     private static final int SCAN_ONLY_MODE = 2;
