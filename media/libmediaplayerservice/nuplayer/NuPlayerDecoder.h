@@ -25,7 +25,6 @@
 namespace android {
 
 struct ABuffer;
-struct DecoderWrapper;
 
 struct NuPlayer::Decoder : public AHandler {
     Decoder(const sp<AMessage> &notify,
@@ -51,7 +50,6 @@ private:
     sp<NativeWindowWrapper> mNativeWindow;
 
     sp<ACodec> mCodec;
-    sp<DecoderWrapper> mWrapper;
 
     Vector<sp<ABuffer> > mCSD;
     size_t mCSDIndex;

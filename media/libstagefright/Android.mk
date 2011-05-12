@@ -3,7 +3,7 @@ include $(CLEAR_VARS)
 
 include frameworks/base/media/libstagefright/codecs/common/Config.mk
 
-BUILD_WITH_SOFTWARE_DECODERS := true
+BUILD_WITH_SOFTWARE_DECODERS := false
 
 LOCAL_SRC_FILES:=                         \
         ACodec.cpp                        \
