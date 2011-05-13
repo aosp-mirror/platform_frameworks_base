@@ -591,7 +591,7 @@
              going in or out of car mode, night mode changing, etc. -->
         <flag name="uiMode" value="0x0200" />
         <!-- The physical screen size has changed.  If applications don't
-             target at least {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}
+             target at least {@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2}
              then the activity will always handle this itself (the change
              will not result in a restart). -->
         <flag name="screenSize" value="0x0400" />
