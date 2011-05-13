@@ -764,13 +764,6 @@ public:
         env->ReleaseStringChars(text, textArray);
     }
 
-    static void logGlyphs(sp<TextLayoutCacheValue> value) {
-        LOGD("drawTextWithGlyphs -- got glyphs - count=%d", value->getGlyphsCount());
-        for (size_t i = 0; i < value->getGlyphsCount(); i++) {
-            LOGD("                          glyphs[%d]=%d", i, value->getGlyphs()[i]);
-        }
-    }
-
     static void drawTextWithGlyphs(SkCanvas* canvas, const jchar* textArray,
             int start, int end,
             jfloat x, jfloat y, int flags, SkPaint* paint) {
@@ -779,7 +772,7 @@ public:
         sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
                 paint, textArray, start, count, count, flags);
         if (value == NULL) {
-            LOGE("drawTextWithGlyphs -- cannot get Cache value");
+            LOGE("Cannot get TextLayoutCache value");
             return ;
         }
 #if DEBUG_GLYPHS
@@ -796,7 +789,7 @@ public:
         sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
                 paint, textArray, start, count, contextCount, flags);
         if (value == NULL) {
-            LOGE("drawTextWithGlyphs -- cannot get Cache value");
+            LOGE("Cannot get TextLayoutCache value");
             return ;
         }
 #if DEBUG_GLYPHS

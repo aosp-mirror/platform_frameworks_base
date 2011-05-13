@@ -419,6 +419,20 @@ static void android_view_GLES20Canvas_setupShadow(JNIEnv* env, jobject clazz,
 
 static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
+#if 0 // TODO: replace "0" by "RTL_USE_HARFBUZZ" when renderer->drawGlyphs() is implemented
+    sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
+            paint, text, 0, count, count, flags);
+    if (value == NULL) {
+        LOGE("Cannot get TextLayoutCache value");
+        return ;
+    }
+#if DEBUG_GLYPHS
+    logGlyphs(value);
+#endif
+    const jchar* glyphArray = value->getGlyphs();
+    int glyphCount = value->getGlyphsCount();
+    renderer->drawGlyphs((const char*) glyphArray, 0, glyphCount << 1, x, y, paint);
+#else
     const jchar *workText;
     jchar* buffer = NULL;
     int32_t workBytes;
@@ -426,11 +440,26 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
         renderer->drawText((const char*) workText, workBytes, count, x, y, paint);
         free(buffer);
     }
+#endif
 }
 
 static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
         jint start, jint count, jint contextCount, jfloat x, jfloat y,
         int flags, SkPaint* paint) {
+#if 0 // TODO: replace "0" by "RTL_USE_HARFBUZZ" when renderer->drawGlyphs() is implemented
+    sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
+            paint, text, start, count, contextCount, flags);
+    if (value == NULL) {
+        LOGE("Cannot get TextLayoutCache value");
+        return ;
+    }
+#if DEBUG_GLYPHS
+    logGlyphs(value);
+#endif
+    const jchar* glyphArray = value->getGlyphs();
+    int glyphCount = value->getGlyphsCount();
+    renderer->drawGlyphs((const char*) glyphArray, 0, glyphCount << 1, x, y, paint);
+#else
     uint8_t rtl = flags & 0x1;
     if (rtl) {
         SkAutoSTMalloc<80, jchar> buffer(contextCount);
@@ -443,6 +472,7 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
     } else {
         renderer->drawText((const char*) (text + start), count << 1, count, x, y, paint);
     }
+#endif
 }
 
 static void android_view_GLES20Canvas_drawTextArray(JNIEnv* env, jobject clazz,
