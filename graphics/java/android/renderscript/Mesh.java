@@ -320,53 +320,55 @@ public class Mesh extends BaseObj {
             return tb.create();
         }
 
-        static synchronized Mesh internalCreate(RenderScript rs, Builder b) {
-
-            int id = rs.nMeshCreate(b.mVertexTypeCount, b.mIndexTypes.size());
-            Mesh newMesh = new Mesh(id, rs);
-            newMesh.mIndexBuffers = new Allocation[b.mIndexTypes.size()];
-            newMesh.mPrimitives = new Primitive[b.mIndexTypes.size()];
-            newMesh.mVertexBuffers = new Allocation[b.mVertexTypeCount];
-
-            for(int ct = 0; ct < b.mIndexTypes.size(); ct ++) {
-                Allocation alloc = null;
-                Entry entry = (Entry)b.mIndexTypes.elementAt(ct);
-                if (entry.t != null) {
-                    alloc = Allocation.createTyped(rs, entry.t, b.mUsage);
-                }
-                else if(entry.e != null) {
-                    alloc = Allocation.createSized(rs, entry.e, entry.size, b.mUsage);
-                }
-                int allocID = (alloc == null) ? 0 : alloc.getID();
-                rs.nMeshBindIndex(id, allocID, entry.prim.mID, ct);
-                newMesh.mIndexBuffers[ct] = alloc;
-                newMesh.mPrimitives[ct] = entry.prim;
-            }
-
-            for(int ct = 0; ct < b.mVertexTypeCount; ct ++) {
-                Allocation alloc = null;
-                Entry entry = b.mVertexTypes[ct];
-                if (entry.t != null) {
-                    alloc = Allocation.createTyped(rs, entry.t, b.mUsage);
-                } else if(entry.e != null) {
-                    alloc = Allocation.createSized(rs, entry.e, entry.size, b.mUsage);
-                }
-                rs.nMeshBindVertex(id, alloc.getID(), ct);
-                newMesh.mVertexBuffers[ct] = alloc;
-            }
-            rs.nMeshInitVertexAttribs(id);
-
-            return newMesh;
-        }
-
         /**
         * Create a Mesh object from the current state of the builder
         *
         **/
         public Mesh create() {
             mRS.validate();
-            Mesh sm = internalCreate(mRS, this);
-            return sm;
+            int[] vtx = new int[mVertexTypeCount];
+            int[] idx = new int[mIndexTypes.size()];
+            int[] prim = new int[mIndexTypes.size()];
+
+            Allocation[] vertexBuffers = new Allocation[mVertexTypeCount];
+            Allocation[] indexBuffers = new Allocation[mIndexTypes.size()];
+            Primitive[] primitives = new Primitive[mIndexTypes.size()];
+
+            for(int ct = 0; ct < mVertexTypeCount; ct ++) {
+                Allocation alloc = null;
+                Entry entry = mVertexTypes[ct];
+                if (entry.t != null) {
+                    alloc = Allocation.createTyped(mRS, entry.t, mUsage);
+                } else if(entry.e != null) {
+                    alloc = Allocation.createSized(mRS, entry.e, entry.size, mUsage);
+                }
+                vertexBuffers[ct] = alloc;
+                vtx[ct] = alloc.getID();
+            }
+
+            for(int ct = 0; ct < mIndexTypes.size(); ct ++) {
+                Allocation alloc = null;
+                Entry entry = (Entry)mIndexTypes.elementAt(ct);
+                if (entry.t != null) {
+                    alloc = Allocation.createTyped(mRS, entry.t, mUsage);
+                } else if(entry.e != null) {
+                    alloc = Allocation.createSized(mRS, entry.e, entry.size, mUsage);
+                }
+                int allocID = (alloc == null) ? 0 : alloc.getID();
+                indexBuffers[ct] = alloc;
+                primitives[ct] = entry.prim;
+
+                idx[ct] = allocID;
+                prim[ct] = entry.prim.mID;
+            }
+
+            int id = mRS.nMeshCreate(vtx, idx, prim);
+            Mesh newMesh = new Mesh(id, mRS);
+            newMesh.mVertexBuffers = vertexBuffers;
+            newMesh.mIndexBuffers = indexBuffers;
+            newMesh.mPrimitives = primitives;
+
+            return newMesh;
         }
     }
 
@@ -463,40 +465,44 @@ public class Mesh extends BaseObj {
             return this;
         }
 
-        static synchronized Mesh internalCreate(RenderScript rs, AllocationBuilder b) {
-
-            int id = rs.nMeshCreate(b.mVertexTypeCount, b.mIndexTypes.size());
-            Mesh newMesh = new Mesh(id, rs);
-            newMesh.mIndexBuffers = new Allocation[b.mIndexTypes.size()];
-            newMesh.mPrimitives = new Primitive[b.mIndexTypes.size()];
-            newMesh.mVertexBuffers = new Allocation[b.mVertexTypeCount];
-
-            for(int ct = 0; ct < b.mIndexTypes.size(); ct ++) {
-                Entry entry = (Entry)b.mIndexTypes.elementAt(ct);
-                int allocID = (entry.a == null) ? 0 : entry.a.getID();
-                rs.nMeshBindIndex(id, allocID, entry.prim.mID, ct);
-                newMesh.mIndexBuffers[ct] = entry.a;
-                newMesh.mPrimitives[ct] = entry.prim;
-            }
-
-            for(int ct = 0; ct < b.mVertexTypeCount; ct ++) {
-                Entry entry = b.mVertexTypes[ct];
-                rs.nMeshBindVertex(id, entry.a.getID(), ct);
-                newMesh.mVertexBuffers[ct] = entry.a;
-            }
-            rs.nMeshInitVertexAttribs(id);
-
-            return newMesh;
-        }
-
         /**
         * Create a Mesh object from the current state of the builder
         *
         **/
         public Mesh create() {
             mRS.validate();
-            Mesh sm = internalCreate(mRS, this);
-            return sm;
+
+            int[] vtx = new int[mVertexTypeCount];
+            int[] idx = new int[mIndexTypes.size()];
+            int[] prim = new int[mIndexTypes.size()];
+
+            Allocation[] indexBuffers = new Allocation[mIndexTypes.size()];
+            Primitive[] primitives = new Primitive[mIndexTypes.size()];
+            Allocation[] vertexBuffers = new Allocation[mVertexTypeCount];
+
+            for(int ct = 0; ct < mVertexTypeCount; ct ++) {
+                Entry entry = mVertexTypes[ct];
+                vertexBuffers[ct] = entry.a;
+                vtx[ct] = entry.a.getID();
+            }
+
+            for(int ct = 0; ct < mIndexTypes.size(); ct ++) {
+                Entry entry = (Entry)mIndexTypes.elementAt(ct);
+                int allocID = (entry.a == null) ? 0 : entry.a.getID();
+                indexBuffers[ct] = entry.a;
+                primitives[ct] = entry.prim;
+
+                idx[ct] = allocID;
+                prim[ct] = entry.prim.mID;
+            }
+
+            int id = mRS.nMeshCreate(vtx, idx, prim);
+            Mesh newMesh = new Mesh(id, mRS);
+            newMesh.mVertexBuffers = vertexBuffers;
+            newMesh.mIndexBuffers = indexBuffers;
+            newMesh.mPrimitives = primitives;
+
+            return newMesh;
         }
     }
 
