@@ -1982,6 +1982,11 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     drawTextDecorations(text, bytesCount, length, oldX, oldY, paint);
 }
 
+void OpenGLRenderer::drawGlyphs(const char* glyphs, int index, int count, float x, float y,
+        SkPaint* paint) {
+    // TODO
+}
+
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 
