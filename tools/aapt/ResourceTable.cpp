@@ -2607,6 +2607,15 @@ ResourceFilter::match(const ResTable_config& config) const
     if (!match(AXIS_SCREENSIZE, config.screenSize)) {
         return false;
     }
+    if (!match(AXIS_SCREENWIDTHDP, config.screenWidthDp)) {
+        return false;
+    }
+    if (!match(AXIS_SCREENHEIGHTDP, config.screenHeightDp)) {
+        return false;
+    }
+    if (!match(AXIS_SCREENLAYOUTSIZE, config.screenLayout&ResTable_config::MASK_SCREENSIZE)) {
+        return false;
+    }
     if (!match(AXIS_VERSION, config.version)) {
         return false;
     }
@@ -2800,7 +2809,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 ConfigDescription config = t->getUniqueConfigs().itemAt(ci);
 
                 NOISY(printf("Writing config %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d w:%d h:%d\n",
+                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d %ddp x %ddp\n",
                       ti+1,
                       config.mcc, config.mnc,
                       config.language[0] ? config.language[0] : '-',
@@ -2815,7 +2824,9 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       config.inputFlags,
                       config.navigation,
                       config.screenWidth,
-                      config.screenHeight));
+                      config.screenHeight,
+                      config.screenWidthDp,
+                      config.screenHeightDp));
                       
                 if (filterable && !filter.match(config)) {
                     continue;
@@ -2838,7 +2849,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 tHeader->entriesStart = htodl(typeSize);
                 tHeader->config = config;
                 NOISY(printf("Writing type %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d w:%d h:%d\n",
+                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d %ddp x %ddp\n",
                       ti+1,
                       tHeader->config.mcc, tHeader->config.mnc,
                       tHeader->config.language[0] ? tHeader->config.language[0] : '-',
@@ -2853,7 +2864,9 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       tHeader->config.inputFlags,
                       tHeader->config.navigation,
                       tHeader->config.screenWidth,
-                      tHeader->config.screenHeight));
+                      tHeader->config.screenHeight,
+                      tHeader->config.screenWidthDp,
+                      tHeader->config.screenHeightDp));
                 tHeader->config.swapHtoD();
 
                 // Build the entries inside of this type.
@@ -3435,7 +3448,7 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
     if (e == NULL) {
         if (config != NULL) {
             NOISY(printf("New entry at %s:%d: imsi:%d/%d lang:%c%c cnt:%c%c "
-                    "orien:%d touch:%d density:%d key:%d inp:%d nav:%d w:%d h:%d\n",
+                    "orien:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d %ddp x %ddp\n",
                       sourcePos.file.string(), sourcePos.line,
                       config->mcc, config->mnc,
                       config->language[0] ? config->language[0] : '-',
@@ -3449,7 +3462,9 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
                       config->inputFlags,
                       config->navigation,
                       config->screenWidth,
-                      config->screenHeight));
+                      config->screenHeight,
+                      config->screenWidthDp,
+                      config->screenHeightDp));
         } else {
             NOISY(printf("New entry at %s:%d: NULL config\n",
                       sourcePos.file.string(), sourcePos.line));
