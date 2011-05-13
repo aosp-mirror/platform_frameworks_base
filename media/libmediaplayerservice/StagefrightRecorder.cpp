@@ -593,6 +593,26 @@ status_t StagefrightRecorder::setParamAuxVideoEncodingBitRate(int32_t bitRate) {
     return OK;
 }
 
+status_t StagefrightRecorder::setParamGeoDataLongitude(
+    int32_t longitudex10000) {
+
+    if (longitudex10000 > 1800000 || longitudex10000 < -1800000) {
+        return BAD_VALUE;
+    }
+    mLongitudex10000 = longitudex10000;
+    return OK;
+}
+
+status_t StagefrightRecorder::setParamGeoDataLatitude(
+    int32_t latitudex10000) {
+
+    if (latitudex10000 > 900000 || latitudex10000 < -900000) {
+        return BAD_VALUE;
+    }
+    mLatitudex10000 = latitudex10000;
+    return OK;
+}
+
 status_t StagefrightRecorder::setParameter(
         const String8 &key, const String8 &value) {
     LOGV("setParameter: key (%s) => value (%s)", key.string(), value.string());
@@ -620,6 +640,16 @@ status_t StagefrightRecorder::setParameter(
         int32_t use64BitOffset;
         if (safe_strtoi32(value.string(), &use64BitOffset)) {
             return setParam64BitFileOffset(use64BitOffset != 0);
+        }
+    } else if (key == "param-geotag-longitude") {
+        int32_t longitudex10000;
+        if (safe_strtoi32(value.string(), &longitudex10000)) {
+            return setParamGeoDataLongitude(longitudex10000);
+        }
+    } else if (key == "param-geotag-latitude") {
+        int32_t latitudex10000;
+        if (safe_strtoi32(value.string(), &latitudex10000)) {
+            return setParamGeoDataLatitude(latitudex10000);
         }
     } else if (key == "param-track-time-status") {
         int64_t timeDurationUs;
@@ -1412,6 +1442,10 @@ status_t StagefrightRecorder::setupMPEG4Recording(
         reinterpret_cast<MPEG4Writer *>(writer.get())->
             setInterleaveDuration(mInterleaveDurationUs);
     }
+    if (mLongitudex10000 > -3600000 && mLatitudex10000 > -3600000) {
+        reinterpret_cast<MPEG4Writer *>(writer.get())->
+            setGeoData(mLatitudex10000, mLongitudex10000);
+    }
     if (mMaxFileDurationUs != 0) {
         writer->setMaxFileDuration(mMaxFileDurationUs);
     }
@@ -1638,6 +1672,8 @@ status_t StagefrightRecorder::reset() {
     mIsMetaDataStoredInVideoBuffers = false;
     mEncoderProfiles = MediaProfiles::getInstance();
     mRotationDegrees = 0;
+    mLatitudex10000 = -3600000;
+    mLongitudex10000 = -3600000;
 
     mOutputFd = -1;
     mOutputFdAux = -1;

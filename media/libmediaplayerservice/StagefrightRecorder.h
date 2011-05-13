@@ -97,6 +97,8 @@ private:
     int64_t mMaxFileDurationUs;
     int64_t mTrackEveryTimeDurationUs;
     int32_t mRotationDegrees;  // Clockwise
+    int32_t mLatitudex10000;
+    int32_t mLongitudex10000;
 
     bool mCaptureTimeLapse;
     int64_t mTimeBetweenTimeLapseFrameCaptureUs;
@@ -160,6 +162,8 @@ private:
     status_t setParamMaxFileDurationUs(int64_t timeUs);
     status_t setParamMaxFileSizeBytes(int64_t bytes);
     status_t setParamMovieTimeScale(int32_t timeScale);
+    status_t setParamGeoDataLongitude(int32_t longitudex10000);
+    status_t setParamGeoDataLatitude(int32_t latitudex10000);
     void clipVideoBitRate();
     void clipVideoFrameRate();
     void clipVideoFrameWidth();

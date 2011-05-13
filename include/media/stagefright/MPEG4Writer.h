@@ -55,6 +55,8 @@ public:
     status_t setInterleaveDuration(uint32_t duration);
     int32_t getTimeScale() const { return mTimeScale; }
 
+    status_t setGeoData(int latitudex10000, int longitudex10000);
+
 protected:
     virtual ~MPEG4Writer();
 
@@ -79,6 +81,9 @@ private:
     uint32_t mInterleaveDurationUs;
     int32_t mTimeScale;
     int64_t mStartTimestampUs;
+    int mLatitudex10000;
+    int mLongitudex10000;
+    bool mAreGeoTagsAvailable;
 
     Mutex mLock;
 
@@ -169,6 +174,10 @@ private:
     void writeMvhdBox(int64_t durationUs);
     void writeMoovBox(int64_t durationUs);
     void writeFtypBox(const MetaData *param);
+    void writeUdtaBox();
+    void writeGeoDataBox();
+    void writeLatitude(int degreex10000);
+    void writeLongitude(int degreex10000);
     void sendSessionSummary();
 
     MPEG4Writer(const MPEG4Writer &);
