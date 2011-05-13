@@ -77,7 +77,7 @@ private:
 
 struct ChromiumHTTPDataSource;
 
-struct SfDelegate : public URLRequest::Delegate {
+struct SfDelegate : public net::URLRequest::Delegate {
     SfDelegate();
     virtual ~SfDelegate();
 
@@ -92,35 +92,35 @@ struct SfDelegate : public URLRequest::Delegate {
     void setOwner(ChromiumHTTPDataSource *mOwner);
 
     virtual void OnReceivedRedirect(
-            URLRequest *request, const GURL &new_url, bool *defer_redirect);
+            net::URLRequest *request, const GURL &new_url, bool *defer_redirect);
 
     virtual void OnAuthRequired(
-            URLRequest *request, net::AuthChallengeInfo *auth_info);
+            net::URLRequest *request, net::AuthChallengeInfo *auth_info);
 
     virtual void OnCertificateRequested(
-            URLRequest *request, net::SSLCertRequestInfo *cert_request_info);
+            net::URLRequest *request, net::SSLCertRequestInfo *cert_request_info);
 
     virtual void OnSSLCertificateError(
-            URLRequest *request, int cert_error, net::X509Certificate *cert);
+            net::URLRequest *request, int cert_error, net::X509Certificate *cert);
 
-    virtual void OnGetCookies(URLRequest *request, bool blocked_by_policy);
+    virtual void OnGetCookies(net::URLRequest *request, bool blocked_by_policy);
 
     virtual void OnSetCookie(
-            URLRequest *request,
+            net::URLRequest *request,
             const std::string &cookie_line,
             const net::CookieOptions &options,
             bool blocked_by_policy);
 
-    virtual void OnResponseStarted(URLRequest *request);
+    virtual void OnResponseStarted(net::URLRequest *request);
 
-    virtual void OnReadCompleted(URLRequest *request, int bytes_read);
+    virtual void OnReadCompleted(net::URLRequest *request, int bytes_read);
 
 private:
     typedef Delegate inherited;
 
     ChromiumHTTPDataSource *mOwner;
 
-    URLRequest *mURLRequest;
+    net::URLRequest *mURLRequest;
     scoped_refptr<net::IOBufferWithSize> mReadBuffer;
 
     size_t mNumBytesRead;
@@ -130,7 +130,7 @@ private:
     bool mRangeRequested;
     bool mAtEOS;
 
-    void readMore(URLRequest *request);
+    void readMore(net::URLRequest *request);
 
     static void OnInitiateConnectionWrapper(
             SfDelegate *me,

@@ -24,6 +24,7 @@
 
 #include "android/net/android_network_library_impl.h"
 #include "base/thread.h"
+#include "net/base/cert_verifier.h"
 #include "net/base/host_resolver.h"
 #include "net/base/ssl_config_service.h"
 #include "net/http/http_auth_handler_factory.h"
@@ -127,6 +128,7 @@ SfRequestContext::SfRequestContext() {
 
     http_transaction_factory_ = new net::HttpCache(
             host_resolver_,
+            new net::CertVerifier(),
             dnsrr_resolver_,
             dns_cert_checker_.get(),
             proxy_service_.get(),
@@ -174,44 +176,44 @@ void SfDelegate::setOwner(ChromiumHTTPDataSource *owner) {
 }
 
 void SfDelegate::OnReceivedRedirect(
-            URLRequest *request, const GURL &new_url, bool *defer_redirect) {
+            net::URLRequest *request, const GURL &new_url, bool *defer_redirect) {
     MY_LOGI("OnReceivedRedirect");
 }
 
 void SfDelegate::OnAuthRequired(
-            URLRequest *request, net::AuthChallengeInfo *auth_info) {
+            net::URLRequest *request, net::AuthChallengeInfo *auth_info) {
     MY_LOGI("OnAuthRequired");
 
     inherited::OnAuthRequired(request, auth_info);
 }
 
 void SfDelegate::OnCertificateRequested(
-            URLRequest *request, net::SSLCertRequestInfo *cert_request_info) {
+            net::URLRequest *request, net::SSLCertRequestInfo *cert_request_info) {
     MY_LOGI("OnCertificateRequested");
 
     inherited::OnCertificateRequested(request, cert_request_info);
 }
 
 void SfDelegate::OnSSLCertificateError(
-            URLRequest *request, int cert_error, net::X509Certificate *cert) {
+            net::URLRequest *request, int cert_error, net::X509Certificate *cert) {
     fprintf(stderr, "OnSSLCertificateError cert_error=%d\n", cert_error);
 
     inherited::OnSSLCertificateError(request, cert_error, cert);
 }
 
-void SfDelegate::OnGetCookies(URLRequest *request, bool blocked_by_policy) {
+void SfDelegate::OnGetCookies(net::URLRequest *request, bool blocked_by_policy) {
     MY_LOGI("OnGetCookies");
 }
 
 void SfDelegate::OnSetCookie(
-        URLRequest *request,
+        net::URLRequest *request,
         const std::string &cookie_line,
         const net::CookieOptions &options,
         bool blocked_by_policy) {
     MY_LOGI("OnSetCookie");
 }
 
-void SfDelegate::OnResponseStarted(URLRequest *request) {
+void SfDelegate::OnResponseStarted(net::URLRequest *request) {
     if (request->status().status() != URLRequestStatus::SUCCESS) {
         MY_LOGI(StringPrintf(
                     "Request failed with status %d and os_error %d",
@@ -260,7 +262,7 @@ void SfDelegate::OnResponseStarted(URLRequest *request) {
             request->GetExpectedContentSize(), contentType.c_str());
 }
 
-void SfDelegate::OnReadCompleted(URLRequest *request, int bytes_read) {
+void SfDelegate::OnReadCompleted(net::URLRequest *request, int bytes_read) {
     if (bytes_read == -1) {
         MY_LOGI(StringPrintf(
                     "OnReadCompleted, read failed, status %d",
@@ -297,7 +299,7 @@ void SfDelegate::OnReadCompleted(URLRequest *request, int bytes_read) {
     readMore(request);
 }
 
-void SfDelegate::readMore(URLRequest *request) {
+void SfDelegate::readMore(net::URLRequest *request) {
     while (mNumBytesRead < mNumBytesTotal) {
         size_t copy = mNumBytesTotal - mNumBytesRead;
         if (copy > mReadBuffer->size()) {
@@ -371,7 +373,7 @@ void SfDelegate::onInitiateConnection(
         off64_t offset) {
     CHECK(mURLRequest == NULL);
 
-    mURLRequest = new URLRequest(url, this);
+    mURLRequest = new net::URLRequest(url, this);
     mAtEOS = false;
 
     mRangeRequested = false;
