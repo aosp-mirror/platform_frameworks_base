@@ -30,24 +30,33 @@ public:
     FBOCache();
     ~FBOCache();
 
+    void init(Context *rsc);
+    void deinit(Context *rsc);
+
     void bindColorTarget(Context *rsc, Allocation *a, uint32_t slot);
     void bindDepthTarget(Context *, Allocation *a);
     void resetAll(Context *);
 
     void setup(Context *);
 
-protected:
+    struct Hal {
+        mutable void *drv;
 
+        struct State {
+            ObjectBaseRef<Allocation> *colorTargets;
+            uint32_t colorTargetsCount;
+            ObjectBaseRef<Allocation> depthTarget;
+        };
+        State state;
+    };
+    Hal mHal;
+
+protected:
     bool mDirty;
-    uint32_t mMaxTargets;
     void checkError(Context *);
     void setColorAttachment(Context *rsc);
     void setDepthAttachment(Context *rsc);
     bool renderToFramebuffer();
-    ObjectBaseRef<Allocation> *mColorTargets;
-    ObjectBaseRef<Allocation> mDepthTarget;
-
-    uint32_t mFBOId;
 
 };
 

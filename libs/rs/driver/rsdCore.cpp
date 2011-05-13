@@ -23,6 +23,7 @@
 #include "rsdProgramFragment.h"
 #include "rsdMesh.h"
 #include "rsdSampler.h"
+#include "rsdFrameBuffer.h"
 
 #include <malloc.h>
 #include "rsContext.h"
@@ -96,6 +97,12 @@ static RsdHalFunctions FunctionTable = {
     {
         rsdSamplerInit,
         rsdSamplerDestroy
+    },
+
+    {
+        rsdFrameBufferInit,
+        rsdFrameBufferSetActive,
+        rsdFrameBufferDestroy
     },
 
 };
