@@ -1257,6 +1257,7 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
             LOGV("createTrack_l() setting main buffer %p", chain->inBuffer());
             track->setMainBuffer(chain->inBuffer());
             chain->setStrategy(AudioSystem::getStrategyForStream((audio_stream_type_t)track->type()));
+            chain->incTrackCnt();
         }
     }
     lStatus = NO_ERROR;
@@ -1340,7 +1341,7 @@ status_t AudioFlinger::PlaybackThread::addTrack_l(const sp<Track>& track)
             sp<EffectChain> chain = getEffectChain_l(track->sessionId());
             if (chain != 0) {
                 LOGV("addTrack_l() starting track on chain %p for session %d", chain.get(), track->sessionId());
-                chain->startTrack();
+                chain->incActiveTrackCnt();
             }
         }
 
@@ -1358,8 +1359,17 @@ void AudioFlinger::PlaybackThread::destroyTrack_l(const sp<Track>& track)
 {
     track->mState = TrackBase::TERMINATED;
     if (mActiveTracks.indexOf(track) < 0) {
-        mTracks.remove(track);
-        deleteTrackName_l(track->name());
+        removeTrack_l(track);
+    }
+}
+
+void AudioFlinger::PlaybackThread::removeTrack_l(const sp<Track>& track)
+{
+    mTracks.remove(track);
+    deleteTrackName_l(track->name());
+    sp<EffectChain> chain = getEffectChain_l(track->sessionId());
+    if (chain != 0) {
+        chain->decTrackCnt();
     }
 }
 
@@ -1865,12 +1875,11 @@ uint32_t AudioFlinger::MixerThread::prepareTracks_l(const SortedVector< wp<Track
                 chain = getEffectChain_l(track->sessionId());
                 if (chain != 0) {
                     LOGV("stopping track on chain %p for session Id: %d", chain.get(), track->sessionId());
-                    chain->stopTrack();
+                    chain->decActiveTrackCnt();
                 }
             }
             if (track->isTerminated()) {
-                mTracks.remove(track);
-                deleteTrackName_l(track->mName);
+                removeTrack_l(track);
             }
         }
     }
@@ -1956,7 +1965,7 @@ bool AudioFlinger::MixerThread::checkForNewParameters_l()
         if (param.getInt(String8(AudioParameter::keyRouting), value) == NO_ERROR) {
             // when changing the audio output device, call addBatteryData to notify
             // the change
-            if (mDevice != value) {
+            if ((int)mDevice != value) {
                 uint32_t params = 0;
                 // check whether speaker is on
                 if (value & AUDIO_DEVICE_OUT_SPEAKER) {
@@ -2348,11 +2357,10 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
                 if (!effectChains.isEmpty()) {
                     LOGV("stopping track on chain %p for session Id: %d", effectChains[0].get(),
                             trackToRemove->sessionId());
-                    effectChains[0]->stopTrack();
+                    effectChains[0]->decActiveTrackCnt();
                 }
                 if (trackToRemove->isTerminated()) {
-                    mTracks.remove(trackToRemove);
-                    deleteTrackName_l(trackToRemove->mName);
+                    removeTrack_l(trackToRemove);
                 }
             }
 
@@ -5150,6 +5158,7 @@ status_t AudioFlinger::PlaybackThread::addEffectChain_l(const sp<EffectChain>& c
             if (session == track->sessionId()) {
                 LOGV("addEffectChain_l() track->setMainBuffer track %p buffer %p", track.get(), buffer);
                 track->setMainBuffer(buffer);
+                chain->incTrackCnt();
             }
         }
 
@@ -5159,7 +5168,7 @@ status_t AudioFlinger::PlaybackThread::addEffectChain_l(const sp<EffectChain>& c
             if (track == 0) continue;
             if (session == track->sessionId()) {
                 LOGV("addEffectChain_l() activating track %p on session %d", track.get(), session);
-                chain->startTrack();
+                chain->incActiveTrackCnt();
             }
         }
     }
@@ -5195,11 +5204,23 @@ size_t AudioFlinger::PlaybackThread::removeEffectChain_l(const sp<EffectChain>& 
     for (size_t i = 0; i < mEffectChains.size(); i++) {
         if (chain == mEffectChains[i]) {
             mEffectChains.removeAt(i);
+            // detach all active tracks from the chain
+            for (size_t i = 0 ; i < mActiveTracks.size() ; ++i) {
+                sp<Track> track = mActiveTracks[i].promote();
+                if (track == 0) continue;
+                if (session == track->sessionId()) {
+                    LOGV("removeEffectChain_l(): stopping track on chain %p for session Id: %d",
+                            chain.get(), session);
+                    chain->decActiveTrackCnt();
+                }
+            }
+
             // detach all tracks with same session ID from this chain
             for (size_t i = 0; i < mTracks.size(); ++i) {
                 sp<Track> track = mTracks[i];
                 if (session == track->sessionId()) {
                     track->setMainBuffer(mMixBuffer);
+                    chain->decTrackCnt();
                 }
             }
             break;
@@ -5481,7 +5502,7 @@ void AudioFlinger::EffectModule::process()
         // If an insert effect is idle and input buffer is different from output buffer,
         // accumulate input onto output
         sp<EffectChain> chain = mChain.promote();
-        if (chain != 0 && chain->activeTracks() != 0) {
+        if (chain != 0 && chain->activeTrackCnt() != 0) {
             size_t frameCnt = mConfig.inputCfg.buffer.frameCount * 2;  //always stereo here
             int16_t *in = mConfig.inputCfg.buffer.s16;
             int16_t *out = mConfig.outputCfg.buffer.s16;
@@ -6157,9 +6178,9 @@ void AudioFlinger::EffectHandle::dump(char* buffer, size_t size)
 
 AudioFlinger::EffectChain::EffectChain(const wp<ThreadBase>& wThread,
                                         int sessionId)
-    : mThread(wThread), mSessionId(sessionId), mActiveTrackCnt(0), mOwnInBuffer(false),
-            mVolumeCtrlIdx(-1), mLeftVolume(UINT_MAX), mRightVolume(UINT_MAX),
-            mNewLeftVolume(UINT_MAX), mNewRightVolume(UINT_MAX)
+    : mThread(wThread), mSessionId(sessionId), mActiveTrackCnt(0), mTrackCnt(0),
+      mOwnInBuffer(false), mVolumeCtrlIdx(-1), mLeftVolume(UINT_MAX), mRightVolume(UINT_MAX),
+      mNewLeftVolume(UINT_MAX), mNewRightVolume(UINT_MAX)
 {
     mStrategy = AudioSystem::getStrategyForStream(AUDIO_STREAM_MUSIC);
 }
@@ -6216,8 +6237,15 @@ void AudioFlinger::EffectChain::process_l()
             (mSessionId == AUDIO_SESSION_OUTPUT_STAGE);
     bool tracksOnSession = false;
     if (!isGlobalSession) {
-        tracksOnSession =
-                playbackThread->hasAudioSession(mSessionId) & PlaybackThread::TRACK_SESSION;
+        tracksOnSession = (trackCnt() != 0);
+    }
+
+    // if no track is active, input buffer must be cleared here as the mixer process
+    // will not do it
+    if (tracksOnSession &&
+            activeTrackCnt() == 0) {
+        size_t numSamples = playbackThread->frameCount() * playbackThread->channelCount();
+        memset(mInBuffer, 0, numSamples * sizeof(int16_t));
     }
 
     size_t size = mEffects.size();
@@ -6229,13 +6257,6 @@ void AudioFlinger::EffectChain::process_l()
     }
     for (size_t i = 0; i < size; i++) {
         mEffects[i]->updateState();
-    }
-    // if no track is active, input buffer must be cleared here as the mixer process
-    // will not do it
-    if (tracksOnSession &&
-        activeTracks() == 0) {
-        size_t numSamples = playbackThread->frameCount() * playbackThread->channelCount();
-        memset(mInBuffer, 0, numSamples * sizeof(int16_t));
     }
 }
 
