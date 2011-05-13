@@ -62,7 +62,7 @@ $(window).history(function(e, hash) {
  */
 function loadVideo(id, title, autoplay) {
   if($("." + id).hasClass("noplay")) {
-  	console.log("noplay");
+  	//console.log("noplay");
   	autoplay = false;
   	$("." + id).removeClass("noplay");
   }
@@ -255,42 +255,59 @@ var clickVideoAttempts = 0; // Used with clickVideo()
  * @param videoId  The ID of the video to click
  */
 function clickVideo(videoId) {
+  if (!isAlphaNumeric(videoId)) {
+    clickDefaultVideo();
+    return;
+  }
+  
   if ($("." + videoId).length != 0) {  // if we find the video, click it and return
-   $("." + videoId).addClass("noplay"); // add class to indicate we should NOT autoplay (class removed by loadVideo)
-  	$("." + videoId + ":first").click();
-	 return;
+    $("." + videoId).addClass("noplay"); // add class to indicate we should NOT autoplay (class removed by loadVideo)
+    $("." + videoId + ":first").click();
+    return;
   } else { // if we don't find it, increment clickVideoAttempts
-	 console.log("video NOT found: " + videoId);
-	 clickVideoAttempts++;
+    console.log("video NOT found: " + videoId);
+    clickVideoAttempts++;
   }
 
   // if we don't find it after 20 attempts (2 seconds), click the first feature video
   if (clickVideoAttempts > 10) {
-	 console.log("video never found, clicking default...");
+    console.log("video never found, clicking default...");
     clickVideoAttempts = 0;
     clickDefaultVideo();
   } else { // try again after 100 milliseconds
-	 setTimeout('clickVideo("'+videoId+'")', 100);
+    setTimeout('clickVideo("' + videoId + '")', 100);
+  }
+}
+
+/* returns true if the provided text is alphanumeric, false otherwise 
+   TODO: move this to the dev site js library */
+function isAlphaNumeric(text){
+  var regex=/^[0-9A-Za-z]+$/; //^[a-zA-z]+$/
+  if(regex.test(text)){
+    return true;
+  } else {
+    console.log("Bogus video ID");
+    return false;
   }
 }
 
 /* Click the default video that should be loaded on page load (the first video in the featured list) */
 function clickDefaultVideo() {
-	if ($("#mainBodyRight .videoPreviews a:first").length != 0) {
-  	var videoId = $("#mainBodyRight .videoPreviews a:first").attr("class");
+  if ($("#mainBodyRight .videoPreviews a:first").length != 0) {
+    var videoId = $("#mainBodyRight .videoPreviews a:first").attr("class");
     $("." + videoId).addClass("noplay"); // add class to indicate we should NOT autoplay (class removed by loadVideo)
-  	$("." + videoId + ":first").click();
-  	return;
+    $("." + videoId + ":first").click();
+    return;
   } else { // if we don't find it, increment clickVideoAttempts
-	 console.log("default video NOT found");
-	 clickVideoAttempts++;
+    console.log("default video NOT found");
+    clickVideoAttempts++;
   }
 
   // if we don't find it after 50 attempts (5 seconds), just fail
   if (clickVideoAttempts > 50) {
-	  console.log("default video never found...");
+    console.log("default video never found...");
   } else { // try again after 100 milliseconds
-	 	setTimeout('clickDefaultVideo()', 100);
+    setTimeout('clickDefaultVideo()', 100);
   }
 }
 </script>
