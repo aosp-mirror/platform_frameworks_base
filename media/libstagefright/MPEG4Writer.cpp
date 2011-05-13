@@ -2491,7 +2491,7 @@ void MPEG4Writer::Track::writeTkhdBox(time_t now) {
     mOwner->writeInt32(0x07);          // version=0, flags=7
     mOwner->writeInt32(now);           // creation time
     mOwner->writeInt32(now);           // modification time
-    mOwner->writeInt32(mTrackId);
+    mOwner->writeInt32(mTrackId + 1);  // track id starts with 1
     mOwner->writeInt32(0);             // reserved
     int64_t trakDurationUs = getDurationUs();
     int32_t mvhdTimeScale = mOwner->getTimeScale();
