@@ -309,25 +309,54 @@ public:
     // 0.3333, EV is -2.
     // Example value: "0.333333333" or "0.5". Read only.
     static const char KEY_EXPOSURE_COMPENSATION_STEP[];
-    // The state of the auto-exposure lock. "true" means that auto-exposure is
-    // locked to its current value and will not change. "false" means the
-    // auto-exposure routine is free to change exposure settings. Changing
-    // exposure compensation settings will still affect the exposure settings
-    // while auto-exposure is locked. Stopping preview or taking a still image
-    // will release the lock. However, the lock can be re-enabled prior to
-    // preview being re-started, to keep the exposure values from the previous
-    // lock. In conjunction with exposure compensation, this allows for
-    // capturing multi-exposure brackets with known relative exposure
-    // values. Locking auto-exposure after open but before the first cal to
-    // startPreview may result in severly over- or under-exposed images.  The
-    // driver may independently enable the AE lock after auto-focus
-    // completes. If it does so, this key must have its value updated to reflect
-    // the lock's existence. Applications are free to release such a lock, to
-    // re-enable AE without restarting preview.
+    // The state of the auto-exposure lock. "true" means that
+    // auto-exposure is locked to its current value and will not
+    // change. "false" means the auto-exposure routine is free to
+    // change exposure values. If auto-exposure is already locked,
+    // setting this to true again has no effect (the driver will not
+    // recalculate exposure values). Changing exposure compensation
+    // settings will still affect the exposure settings while
+    // auto-exposure is locked. Stopping preview or taking a still
+    // image will release the lock. However, the lock can be
+    // re-enabled prior to preview being re-started, to keep the
+    // exposure values from the previous lock. In conjunction with
+    // exposure compensation, this allows for capturing multi-exposure
+    // brackets with known relative exposure values. Locking
+    // auto-exposure after open but before the first call to
+    // startPreview may result in severely over- or under-exposed
+    // images.  The driver may independently enable the AE lock after
+    // auto-focus completes. If it does so, this key must have its
+    // value updated to reflect the lock's existence. Applications are
+    // free to release such a lock, to re-enable AE without restarting
+    // preview.
     static const char KEY_AUTO_EXPOSURE_LOCK[];
     // Whether locking the auto-exposure is supported. "true" means it is, and
     // "false" or this key not existing means it is not supported.
     static const char KEY_AUTO_EXPOSURE_LOCK_SUPPORTED[];
+    // The state of the auto-white balance lock. "true" means that
+    // auto-white balance is locked to its current value and will not
+    // change. "false" means the auto-white balance routine is free to
+    // change white balance values. If auto-white balance is already
+    // locked, setting this to true again has no effect (the driver
+    // will not recalculate white balance values). Stopping preview or
+    // taking a still image will release the lock. However, the lock
+    // can be re-enabled prior to preview being re-started, to keep
+    // the white balance values from the previous lock. In conjunction
+    // with exposure compensation, this allows for capturing
+    // multi-exposure brackets with fixed white balance. Locking
+    // auto-white balance after open but before the first call to
+    // startPreview may result in severely incorrect color.  The
+    // driver may independently enable the AWB lock after auto-focus
+    // completes. If it does so, this key must have its value updated
+    // to reflect the lock's existence. Applications are free to
+    // release such a lock, to re-enable AWB without restarting
+    // preview.
+    static const char KEY_AUTO_WHITEBALANCE_LOCK[];
+    // Whether locking the auto-white balance is supported. "true"
+    // means it is, and "false" or this key not existing means it is
+    // not supported.
+    static const char KEY_AUTO_WHITEBALANCE_LOCK_SUPPORTED[];
+
     // The maximum number of metering areas supported. This is the maximum
     // length of KEY_METERING_AREAS.
     // Example value: "0" or "2". Read only.
