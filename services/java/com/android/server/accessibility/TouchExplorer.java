@@ -31,6 +31,7 @@ import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicy;
 import android.view.MotionEvent.PointerCoords;
+import android.view.MotionEvent.PointerProperties;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
@@ -112,8 +113,13 @@ public class TouchExplorer implements Explorer {
     // Temporary array for mapping new to old pointer IDs while filtering inactive pointers.
     private final int [] mTempNewToOldPointerIndexMap = new int[MAX_POINTER_COUNT];
 
+    // Temporary array for storing PointerProperties
+    private final PointerProperties[] mTempPointerProperties =
+            PointerProperties.createArray(MAX_POINTER_COUNT);
+
     // Temporary array for storing PointerCoords
-    private final PointerCoords[] mTempPointerCoords= new PointerCoords[MAX_POINTER_COUNT];
+    private final PointerCoords[] mTempPointerCoords =
+            PointerCoords.createArray(MAX_POINTER_COUNT);
 
     // The maximal distance between two pointers so they are
     // considered to be performing a drag operation.
@@ -172,11 +178,6 @@ public class TouchExplorer implements Explorer {
         mHandler = new Handler(context.getMainLooper());
         mSendHoverDelayed = new SendHoverDelayed();
         mAccessibilityManager = AccessibilityManager.getInstance(context);
-
-        // Populate the temporary array with PointerCorrds to be reused.
-        for (int i = 0, count = mTempPointerCoords.length; i < count; i++) {
-            mTempPointerCoords[i] = new PointerCoords();
-        }
     }
 
     public void clear(MotionEvent event, int policyFlags) {
@@ -574,9 +575,9 @@ public class TouchExplorer implements Explorer {
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendDownForAllActiveNotInjectedPointers(MotionEvent prototype, int policyFlags) {
-        PointerCoords[] pointerCoords = mTempPointerCoords;
-        PointerTracker pointerTracker = mPointerTracker;
-        int[] pointerIds = mTempPointerIds;
+        final PointerProperties[] pointerProperties = mTempPointerProperties;
+        final PointerCoords[] pointerCoords = mTempPointerCoords;
+        final PointerTracker pointerTracker = mPointerTracker;
         int pointerDataIndex = 0;
 
         final int pinterCount = prototype.getPointerCount();
@@ -593,7 +594,7 @@ public class TouchExplorer implements Explorer {
             }
 
             // Populate and inject an event for the current pointer.
-            pointerIds[pointerDataIndex] = pointerId;
+            prototype.getPointerProperties(i, pointerProperties[pointerDataIndex]);
             prototype.getPointerCoords(i, pointerCoords[pointerDataIndex]);
 
             final long downTime = pointerTracker.getLastInjectedDownEventTime();
@@ -602,7 +603,8 @@ public class TouchExplorer implements Explorer {
             final long pointerDownTime = SystemClock.uptimeMillis();
 
             MotionEvent event = MotionEvent.obtain(downTime, pointerDownTime,
-                    action, pointerCount, pointerIds, pointerCoords, prototype.getMetaState(),
+                    action, pointerCount, pointerProperties, pointerCoords,
+                    prototype.getMetaState(), prototype.getButtonState(),
                     prototype.getXPrecision(), prototype.getYPrecision(), prototype.getDeviceId(),
                     prototype.getEdgeFlags(), prototype.getSource(), prototype.getFlags());
             sendMotionEvent(event, policyFlags);
@@ -620,9 +622,9 @@ public class TouchExplorer implements Explorer {
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendUpForInjectedDownPointers(MotionEvent prototype, int policyFlags) {
-        PointerTracker pointerTracker = mPointerTracker;
-        PointerCoords[] pointerCoords = mTempPointerCoords;
-        int[] pointerIds = mTempPointerIds;
+        final PointerTracker pointerTracker = mPointerTracker;
+        final PointerProperties[] pointerProperties = mTempPointerProperties;
+        final PointerCoords[] pointerCoords = mTempPointerCoords;
         int pointerDataIndex = 0;
 
         final int pointerCount = prototype.getPointerCount(); 
@@ -635,7 +637,7 @@ public class TouchExplorer implements Explorer {
             }
 
             // Populate and inject event.
-            pointerIds[pointerDataIndex] = pointerId;
+            prototype.getPointerProperties(i, pointerProperties[pointerDataIndex]);
             prototype.getPointerCoords(i, pointerCoords[pointerDataIndex]);
 
             final long downTime = pointerTracker.getLastInjectedDownEventTime();
@@ -644,7 +646,8 @@ public class TouchExplorer implements Explorer {
             final long eventTime = SystemClock.uptimeMillis();
 
             MotionEvent event = MotionEvent.obtain(downTime, eventTime, action,
-                    newPointerCount, pointerIds, pointerCoords, prototype.getMetaState(),
+                    newPointerCount, pointerProperties, pointerCoords,
+                    prototype.getMetaState(), prototype.getButtonState(),
                     prototype.getXPrecision(), prototype.getYPrecision(), prototype.getDeviceId(),
                     prototype.getEdgeFlags(), prototype.getSource(), prototype.getFlags());
 
@@ -678,8 +681,8 @@ public class TouchExplorer implements Explorer {
         }
 
         // Filter out inactive pointers from the event and inject it.
-        PointerCoords[] pointerCoords = mTempPointerCoords;
-        int[] pointerIds = mTempPointerIds;
+        final PointerProperties[] pointerProperties = mTempPointerProperties;
+        final PointerCoords[] pointerCoords = mTempPointerCoords;
         int [] newToOldPointerIndexMap = mTempNewToOldPointerIndexMap;
         int newPointerIndex = 0;
         int actionIndex = prototype.getActionIndex();
@@ -698,7 +701,7 @@ public class TouchExplorer implements Explorer {
             }
 
             newToOldPointerIndexMap[newPointerIndex] = oldPointerIndex;
-            pointerIds[newPointerIndex] = pointerId;
+            prototype.getPointerProperties(oldPointerIndex, pointerProperties[newPointerIndex]);
             prototype.getPointerCoords(oldPointerIndex, pointerCoords[newPointerIndex]);
 
             newPointerIndex++;
@@ -714,7 +717,8 @@ public class TouchExplorer implements Explorer {
         final int action = computeInjectionAction(prototype.getActionMasked(), actionIndex);
         final int newPointerCount = newPointerIndex;
         MotionEvent prunedEvent = MotionEvent.obtain(downTime, prototype.getEventTime(), action,
-                newPointerCount, pointerIds, pointerCoords, prototype.getMetaState(),
+                newPointerCount, pointerProperties, pointerCoords,
+                prototype.getMetaState(), prototype.getButtonState(),
                 prototype.getXPrecision(), prototype.getYPrecision(), prototype.getDeviceId(),
                 prototype.getEdgeFlags(), prototype.getSource(),prototype.getFlags());
 
@@ -743,18 +747,19 @@ public class TouchExplorer implements Explorer {
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendDragEvent(MotionEvent prototype, int action, int policyFlags) {
-        PointerCoords[] pointerCoords = mTempPointerCoords;
-        int[] pointerIds = mTempPointerIds;
+        final PointerProperties[] pointerProperties = mTempPointerProperties;
+        final PointerCoords[] pointerCoords = mTempPointerCoords;
         final int pointerId = mDraggingPointerId;
         final int pointerIndex = prototype.findPointerIndex(pointerId);
 
         // Populate the event with the date of the dragging pointer and inject it.
-        pointerIds[0] = pointerId;
+        prototype.getPointerProperties(pointerIndex, pointerProperties[0]);
         prototype.getPointerCoords(pointerIndex, pointerCoords[0]);
 
         MotionEvent event = MotionEvent.obtain(prototype.getDownTime(),
-                prototype.getEventTime(), action, 1, pointerIds, pointerCoords,
-                prototype.getMetaState(), prototype.getXPrecision(), prototype.getYPrecision(),
+                prototype.getEventTime(), action, 1, pointerProperties, pointerCoords,
+                prototype.getMetaState(), prototype.getButtonState(),
+                prototype.getXPrecision(), prototype.getYPrecision(),
                 prototype.getDeviceId(), prototype.getEdgeFlags(), prototype.getSource(),
                 prototype.getFlags());
 
@@ -769,32 +774,27 @@ public class TouchExplorer implements Explorer {
      * @param policyFlags The policy flags associated with the event.
      */
     private void sendActionDownAndUp(MotionEvent prototype, int policyFlags) {
-        PointerCoords[] pointerCoords = mTempPointerCoords;
-        int[] pointerIds = mTempPointerIds;
+        final PointerProperties[] pointerProperties = mTempPointerProperties;
+        final PointerCoords[] pointerCoords = mTempPointerCoords;
         final int pointerId = mPointerTracker.getLastReceivedUpPointerId();
         final int pointerIndex = prototype.findPointerIndex(pointerId);
 
         // Send down.
-        pointerIds[0] = pointerId;
+        prototype.getPointerProperties(pointerIndex, pointerProperties[0]);
         prototype.getPointerCoords(pointerIndex, pointerCoords[0]);
 
         final long downTime = SystemClock.uptimeMillis();
-
-        MotionEvent downEvent = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN,
-                1, mTempPointerIds, mTempPointerCoords, prototype.getMetaState(),
+        MotionEvent event = MotionEvent.obtain(downTime, downTime, MotionEvent.ACTION_DOWN,
+                1, pointerProperties, pointerCoords,
+                prototype.getMetaState(), prototype.getButtonState(),
                 prototype.getXPrecision(), prototype.getYPrecision(), prototype.getDeviceId(),
                 prototype.getEdgeFlags(), prototype.getSource(), prototype.getFlags());
-
-        // Clone the down event before recycling it.
-        MotionEvent upEvent = MotionEvent.obtain(downEvent);
-
-        sendMotionEvent(downEvent, policyFlags);
-        downEvent.recycle();
+        sendMotionEvent(event, policyFlags);
 
         // Send up.
-        upEvent.setAction(MotionEvent.ACTION_UP);
-        sendMotionEvent(upEvent, policyFlags);
-        upEvent.recycle();
+        event.setAction(MotionEvent.ACTION_UP);
+        sendMotionEvent(event, policyFlags);
+        event.recycle();
     }
 
     /**
@@ -807,21 +807,20 @@ public class TouchExplorer implements Explorer {
      */
     private void sendHoverEvent(MotionEvent prototype, int action, int pointerIndex, int
             policyFlags) {
-        PointerCoords[] pointerCoords = mTempPointerCoords;
-        int[] pointerIds = mTempPointerIds;
+        final PointerProperties[] pointerProperties = mTempPointerProperties;
+        final PointerCoords[] pointerCoords = mTempPointerCoords;
 
-        // Keep only data relevant to a hover event.
-        pointerIds[0] = prototype.getPointerId(pointerIndex);
-        pointerCoords[0].clear();
-        pointerCoords[0].x = prototype.getX(pointerIndex);
-        pointerCoords[0].y = prototype.getY(pointerIndex);
+        prototype.getPointerProperties(pointerIndex, pointerProperties[0]);
+        prototype.getPointerCoords(pointerIndex, pointerCoords[0]);
 
         final long downTime = mPointerTracker.getLastInjectedDownEventTime();
 
         // Populate and inject a hover event.
         MotionEvent hoverEvent = MotionEvent.obtain(downTime, prototype.getEventTime(), action,
-                1, pointerIds, pointerCoords, 0, 0, 0, prototype.getDeviceId(), 0,
-                prototype.getSource(), 0);
+                1, pointerProperties, pointerCoords,
+                prototype.getMetaState(), prototype.getButtonState(),
+                prototype.getXPrecision(), prototype.getYPrecision(), prototype.getDeviceId(),
+                prototype.getEdgeFlags(), prototype.getSource(), prototype.getFlags());
 
         sendMotionEvent(hoverEvent, policyFlags);
         hoverEvent.recycle();

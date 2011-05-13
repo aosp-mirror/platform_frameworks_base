@@ -366,6 +366,7 @@ status_t InputPublisher::publishMotionEvent(
         int32_t flags,
         int32_t edgeFlags,
         int32_t metaState,
+        int32_t buttonState,
         float xOffset,
         float yOffset,
         float xPrecision,
@@ -373,16 +374,17 @@ status_t InputPublisher::publishMotionEvent(
         nsecs_t downTime,
         nsecs_t eventTime,
         size_t pointerCount,
-        const int32_t* pointerIds,
+        const PointerProperties* pointerProperties,
         const PointerCoords* pointerCoords) {
 #if DEBUG_TRANSPORT_ACTIONS
     LOGD("channel '%s' publisher ~ publishMotionEvent: deviceId=%d, source=0x%x, "
-            "action=0x%x, flags=0x%x, edgeFlags=0x%x, metaState=0x%x, xOffset=%f, yOffset=%f, "
+            "action=0x%x, flags=0x%x, edgeFlags=0x%x, metaState=0x%x, buttonState=0x%x, "
+            "xOffset=%f, yOffset=%f, "
             "xPrecision=%f, yPrecision=%f, downTime=%lld, eventTime=%lld, "
             "pointerCount=%d",
             mChannel->getName().string(),
-            deviceId, source, action, flags, edgeFlags, metaState, xOffset, yOffset,
-            xPrecision, yPrecision, downTime, eventTime, pointerCount);
+            deviceId, source, action, flags, edgeFlags, metaState, buttonState,
+            xOffset, yOffset, xPrecision, yPrecision, downTime, eventTime, pointerCount);
 #endif
 
     if (pointerCount > MAX_POINTERS || pointerCount < 1) {
@@ -400,6 +402,7 @@ status_t InputPublisher::publishMotionEvent(
     mSharedMessage->motion.flags = flags;
     mSharedMessage->motion.edgeFlags = edgeFlags;
     mSharedMessage->motion.metaState = metaState;
+    mSharedMessage->motion.buttonState = buttonState;
     mSharedMessage->motion.xOffset = xOffset;
     mSharedMessage->motion.yOffset = yOffset;
     mSharedMessage->motion.xPrecision = xPrecision;
@@ -411,7 +414,7 @@ status_t InputPublisher::publishMotionEvent(
     mSharedMessage->motion.sampleData[0].eventTime = eventTime;
 
     for (size_t i = 0; i < pointerCount; i++) {
-        mSharedMessage->motion.pointerIds[i] = pointerIds[i];
+        mSharedMessage->motion.pointerProperties[i].copyFrom(pointerProperties[i]);
         mSharedMessage->motion.sampleData[0].coords[i].copyFrom(pointerCoords[i]);
     }
 
@@ -694,6 +697,7 @@ void InputConsumer::populateMotionEvent(MotionEvent* motionEvent) const {
             mSharedMessage->motion.flags,
             mSharedMessage->motion.edgeFlags,
             mSharedMessage->motion.metaState,
+            mSharedMessage->motion.buttonState,
             mSharedMessage->motion.xOffset,
             mSharedMessage->motion.yOffset,
             mSharedMessage->motion.xPrecision,
@@ -701,7 +705,7 @@ void InputConsumer::populateMotionEvent(MotionEvent* motionEvent) const {
             mSharedMessage->motion.downTime,
             mSharedMessage->motion.sampleData[0].eventTime,
             mSharedMessage->motion.pointerCount,
-            mSharedMessage->motion.pointerIds,
+            mSharedMessage->motion.pointerProperties,
             mSharedMessage->motion.sampleData[0].coords);
 
     size_t sampleCount = mSharedMessage->motion.sampleCount;

@@ -73,8 +73,17 @@ class SoftInputWindow extends Dialog {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         getWindow().getDecorView().getHitRect(mBounds);
-        final MotionEvent event = clipMotionEvent(ev, mBounds);
-        return super.dispatchTouchEvent(event);
+
+        if (ev.isWithinBoundsNoHistory(mBounds.left, mBounds.top,
+                mBounds.right - 1, mBounds.bottom - 1)) {
+            return super.dispatchTouchEvent(ev);
+        } else {
+            MotionEvent temp = ev.clampNoHistory(mBounds.left, mBounds.top,
+                    mBounds.right - 1, mBounds.bottom - 1);
+            boolean handled = super.dispatchTouchEvent(temp);
+            temp.recycle();
+            return handled;
+        }
     }
 
     /**
@@ -162,49 +171,5 @@ class SoftInputWindow extends Dialog {
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
                 WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-    }
-
-    private static MotionEvent clipMotionEvent(MotionEvent me, Rect bounds) {
-        final int pointerCount = me.getPointerCount();
-        boolean shouldClip = false;
-        for (int pointerIndex = 0; pointerIndex < pointerCount; pointerIndex++) {
-            final int x = (int)me.getX(pointerIndex);
-            final int y = (int)me.getY(pointerIndex);
-            if (!bounds.contains(x, y)) {
-                shouldClip = true;
-                break;
-            }
-        }
-        if (!shouldClip)
-            return me;
-
-        if (pointerCount == 1) {
-            final int x = (int)me.getX();
-            final int y = (int)me.getY();
-            me.setLocation(
-                    Math.max(bounds.left, Math.min(x, bounds.right - 1)),
-                    Math.max(bounds.top, Math.min(y, bounds.bottom - 1)));
-            return me;
-        }
-
-        final int[] pointerIds = new int[pointerCount];
-        final MotionEvent.PointerCoords[] pointerCoords =
-            new MotionEvent.PointerCoords[pointerCount];
-        for (int pointerIndex = 0; pointerIndex < pointerCount; pointerIndex++) {
-            pointerIds[pointerIndex] = me.getPointerId(pointerIndex);
-            final MotionEvent.PointerCoords coords = new MotionEvent.PointerCoords();
-            me.getPointerCoords(pointerIndex, coords);
-            pointerCoords[pointerIndex] = coords;
-            final int x = (int)coords.x;
-            final int y = (int)coords.y;
-            if (!bounds.contains(x, y)) {
-                coords.x = Math.max(bounds.left, Math.min(x, bounds.right - 1));
-                coords.y = Math.max(bounds.top, Math.min(y, bounds.bottom - 1));
-            }
-        }
-        return MotionEvent.obtain(
-                me.getDownTime(), me.getEventTime(), me.getAction(), pointerCount, pointerIds,
-                pointerCoords, me.getMetaState(), me.getXPrecision(), me.getYPrecision(),
-                me.getDeviceId(), me.getEdgeFlags(), me.getSource(), me.getFlags());
     }
 }

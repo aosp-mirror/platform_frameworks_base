@@ -53,10 +53,10 @@ public:
     virtual void move(float deltaX, float deltaY) = 0;
 
     /* Sets a mask that indicates which buttons are pressed. */
-    virtual void setButtonState(uint32_t buttonState) = 0;
+    virtual void setButtonState(int32_t buttonState) = 0;
 
     /* Gets a mask that indicates which buttons are pressed. */
-    virtual uint32_t getButtonState() const = 0;
+    virtual int32_t getButtonState() const = 0;
 
     /* Sets the absolute location of the pointer. */
     virtual void setPosition(float x, float y) = 0;
@@ -183,8 +183,8 @@ public:
     virtual bool getBounds(float* outMinX, float* outMinY,
             float* outMaxX, float* outMaxY) const;
     virtual void move(float deltaX, float deltaY);
-    virtual void setButtonState(uint32_t buttonState);
-    virtual uint32_t getButtonState() const;
+    virtual void setButtonState(int32_t buttonState);
+    virtual int32_t getButtonState() const;
     virtual void setPosition(float x, float y);
     virtual void getPosition(float* outX, float* outY) const;
     virtual void fade();
@@ -258,7 +258,7 @@ private:
         SpriteIcon pointerIcon;
         bool pointerIconChanged;
 
-        uint32_t buttonState;
+        int32_t buttonState;
 
         Vector<Spot*> spots;
         Vector<sp<Sprite> > recycledSprites;

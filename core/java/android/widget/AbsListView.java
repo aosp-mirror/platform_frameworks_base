@@ -2533,6 +2533,21 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         return mContextMenuInfo;
     }
 
+    /** @hide */
+    @Override
+    public boolean showContextMenu(float x, float y, int metaState) {
+        final int position = pointToPosition((int)x, (int)y);
+        if (position != INVALID_POSITION) {
+            final long id = mAdapter.getItemId(position);
+            View child = getChildAt(position - mFirstPosition);
+            if (child != null) {
+                mContextMenuInfo = createContextMenuInfo(child, position, id);
+                return super.showContextMenuForChild(AbsListView.this);
+            }
+        }
+        return super.showContextMenu(x, y, metaState);
+    }
+
     @Override
     public boolean showContextMenuForChild(View originalView) {
         final int longPressPosition = getPositionForView(originalView);
@@ -2845,6 +2860,12 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 mLastY = Integer.MIN_VALUE;
                 break;
             }
+            }
+
+            if (performButtonActionOnTouchDown(ev)) {
+                if (mTouchMode == TOUCH_MODE_DOWN) {
+                    removeCallbacks(mPendingCheckForTap);
+                }
             }
             break;
         }

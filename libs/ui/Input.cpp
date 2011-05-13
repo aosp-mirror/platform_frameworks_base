@@ -373,6 +373,19 @@ void PointerCoords::copyFrom(const PointerCoords& other) {
 }
 
 
+// --- PointerProperties ---
+
+bool PointerProperties::operator==(const PointerProperties& other) const {
+    return id == other.id
+            && toolType == other.toolType;
+}
+
+void PointerProperties::copyFrom(const PointerProperties& other) {
+    id = other.id;
+    toolType = other.toolType;
+}
+
+
 // --- MotionEvent ---
 
 void MotionEvent::initialize(
@@ -382,6 +395,7 @@ void MotionEvent::initialize(
         int32_t flags,
         int32_t edgeFlags,
         int32_t metaState,
+        int32_t buttonState,
         float xOffset,
         float yOffset,
         float xPrecision,
@@ -389,20 +403,21 @@ void MotionEvent::initialize(
         nsecs_t downTime,
         nsecs_t eventTime,
         size_t pointerCount,
-        const int32_t* pointerIds,
+        const PointerProperties* pointerProperties,
         const PointerCoords* pointerCoords) {
     InputEvent::initialize(deviceId, source);
     mAction = action;
     mFlags = flags;
     mEdgeFlags = edgeFlags;
     mMetaState = metaState;
+    mButtonState = buttonState;
     mXOffset = xOffset;
     mYOffset = yOffset;
     mXPrecision = xPrecision;
     mYPrecision = yPrecision;
     mDownTime = downTime;
-    mPointerIds.clear();
-    mPointerIds.appendArray(pointerIds, pointerCount);
+    mPointerProperties.clear();
+    mPointerProperties.appendArray(pointerProperties, pointerCount);
     mSampleEventTimes.clear();
     mSamplePointerCoords.clear();
     addSample(eventTime, pointerCoords);
@@ -414,12 +429,13 @@ void MotionEvent::copyFrom(const MotionEvent* other, bool keepHistory) {
     mFlags = other->mFlags;
     mEdgeFlags = other->mEdgeFlags;
     mMetaState = other->mMetaState;
+    mButtonState = other->mButtonState;
     mXOffset = other->mXOffset;
     mYOffset = other->mYOffset;
     mXPrecision = other->mXPrecision;
     mYPrecision = other->mYPrecision;
     mDownTime = other->mDownTime;
-    mPointerIds = other->mPointerIds;
+    mPointerProperties = other->mPointerProperties;
 
     if (keepHistory) {
         mSampleEventTimes = other->mSampleEventTimes;
@@ -484,9 +500,9 @@ float MotionEvent::getHistoricalAxisValue(int32_t axis, size_t pointerIndex,
 }
 
 ssize_t MotionEvent::findPointerIndex(int32_t pointerId) const {
-    size_t pointerCount = mPointerIds.size();
+    size_t pointerCount = mPointerProperties.size();
     for (size_t i = 0; i < pointerCount; i++) {
-        if (mPointerIds.itemAt(i) == pointerId) {
+        if (mPointerProperties.itemAt(i).id == pointerId) {
             return i;
         }
     }
@@ -583,21 +599,25 @@ status_t MotionEvent::readFromParcel(Parcel* parcel) {
     mFlags = parcel->readInt32();
     mEdgeFlags = parcel->readInt32();
     mMetaState = parcel->readInt32();
+    mButtonState = parcel->readInt32();
     mXOffset = parcel->readFloat();
     mYOffset = parcel->readFloat();
     mXPrecision = parcel->readFloat();
     mYPrecision = parcel->readFloat();
     mDownTime = parcel->readInt64();
 
-    mPointerIds.clear();
-    mPointerIds.setCapacity(pointerCount);
+    mPointerProperties.clear();
+    mPointerProperties.setCapacity(pointerCount);
     mSampleEventTimes.clear();
     mSampleEventTimes.setCapacity(sampleCount);
     mSamplePointerCoords.clear();
     mSamplePointerCoords.setCapacity(sampleCount * pointerCount);
 
     for (size_t i = 0; i < pointerCount; i++) {
-        mPointerIds.push(parcel->readInt32());
+        mPointerProperties.push();
+        PointerProperties& properties = mPointerProperties.editTop();
+        properties.id = parcel->readInt32();
+        properties.toolType = parcel->readInt32();
     }
 
     while (sampleCount-- > 0) {
@@ -614,7 +634,7 @@ status_t MotionEvent::readFromParcel(Parcel* parcel) {
 }
 
 status_t MotionEvent::writeToParcel(Parcel* parcel) const {
-    size_t pointerCount = mPointerIds.size();
+    size_t pointerCount = mPointerProperties.size();
     size_t sampleCount = mSampleEventTimes.size();
 
     parcel->writeInt32(pointerCount);
@@ -626,6 +646,7 @@ status_t MotionEvent::writeToParcel(Parcel* parcel) const {
     parcel->writeInt32(mFlags);
     parcel->writeInt32(mEdgeFlags);
     parcel->writeInt32(mMetaState);
+    parcel->writeInt32(mButtonState);
     parcel->writeFloat(mXOffset);
     parcel->writeFloat(mYOffset);
     parcel->writeFloat(mXPrecision);
@@ -633,7 +654,9 @@ status_t MotionEvent::writeToParcel(Parcel* parcel) const {
     parcel->writeInt64(mDownTime);
 
     for (size_t i = 0; i < pointerCount; i++) {
-        parcel->writeInt32(mPointerIds.itemAt(i));
+        const PointerProperties& properties = mPointerProperties.itemAt(i);
+        parcel->writeInt32(properties.id);
+        parcel->writeInt32(properties.toolType);
     }
 
     const PointerCoords* pc = mSamplePointerCoords.array();

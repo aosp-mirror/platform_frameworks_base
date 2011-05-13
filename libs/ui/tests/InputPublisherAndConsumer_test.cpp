@@ -156,13 +156,19 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
     const int32_t flags = AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED;
     const int32_t edgeFlags = AMOTION_EVENT_EDGE_FLAG_TOP;
     const int32_t metaState = AMETA_ALT_LEFT_ON | AMETA_ALT_ON;
+    const int32_t buttonState = AMOTION_EVENT_BUTTON_PRIMARY;
     const float xOffset = -10;
     const float yOffset = -20;
     const float xPrecision = 0.25;
     const float yPrecision = 0.5;
     const nsecs_t downTime = 3;
     const size_t pointerCount = 3;
-    const int32_t pointerIds[pointerCount] = { 2, 0, 1 };
+    PointerProperties pointerProperties[pointerCount];
+    for (size_t i = 0; i < pointerCount; i++) {
+        pointerProperties[i].clear();
+        pointerProperties[i].id = (i + 2) % pointerCount;
+        pointerProperties[i].toolType = AMOTION_EVENT_TOOL_TYPE_FINGER;
+    }
 
     Vector<nsecs_t> sampleEventTimes;
     Vector<PointerCoords> samplePointerCoords;
@@ -186,8 +192,9 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
     }
 
     status = mPublisher->publishMotionEvent(deviceId, source, action, flags, edgeFlags,
-            metaState, xOffset, yOffset, xPrecision, yPrecision,
-            downTime, sampleEventTimes[0], pointerCount, pointerIds, samplePointerCoords.array());
+            metaState, buttonState, xOffset, yOffset, xPrecision, yPrecision,
+            downTime, sampleEventTimes[0], pointerCount,
+            pointerProperties, samplePointerCoords.array());
     ASSERT_EQ(OK, status)
             << "publisher publishMotionEvent should return OK";
 
@@ -234,6 +241,7 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
     EXPECT_EQ(flags, motionEvent->getFlags());
     EXPECT_EQ(edgeFlags, motionEvent->getEdgeFlags());
     EXPECT_EQ(metaState, motionEvent->getMetaState());
+    EXPECT_EQ(buttonState, motionEvent->getButtonState());
     EXPECT_EQ(xPrecision, motionEvent->getXPrecision());
     EXPECT_EQ(yPrecision, motionEvent->getYPrecision());
     EXPECT_EQ(downTime, motionEvent->getDownTime());
@@ -243,7 +251,8 @@ void InputPublisherAndConsumerTest::PublishAndConsumeMotionEvent(
 
     for (size_t i = 0; i < pointerCount; i++) {
         SCOPED_TRACE(i);
-        EXPECT_EQ(pointerIds[i], motionEvent->getPointerId(i));
+        EXPECT_EQ(pointerProperties[i].id, motionEvent->getPointerId(i));
+        EXPECT_EQ(pointerProperties[i].toolType, motionEvent->getToolType(i));
     }
 
     for (size_t sampleIndex = 0; sampleIndex < lastSampleIndex; sampleIndex++) {
@@ -352,17 +361,20 @@ TEST_F(InputPublisherAndConsumerTest, PublishMotionEvent_WhenNotReset_ReturnsErr
     ASSERT_NO_FATAL_FAILURE(Initialize());
 
     const size_t pointerCount = 1;
-    int32_t pointerIds[pointerCount] = { 0 };
+    PointerProperties pointerProperties[pointerCount];
     PointerCoords pointerCoords[pointerCount];
-    pointerCoords[0].clear();
+    for (size_t i = 0; i < pointerCount; i++) {
+        pointerProperties[i].clear();
+        pointerCoords[i].clear();
+    }
 
-    status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            pointerCount, pointerIds, pointerCoords);
+    status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            pointerCount, pointerProperties, pointerCoords);
     ASSERT_EQ(OK, status)
             << "publisher publishMotionEvent should return OK";
 
-    status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            pointerCount, pointerIds, pointerCoords);
+    status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            pointerCount, pointerProperties, pointerCoords);
     ASSERT_EQ(INVALID_OPERATION, status)
             << "publisher publishMotionEvent should return INVALID_OPERATION because ";
                     "the publisher was not reset";
@@ -373,11 +385,11 @@ TEST_F(InputPublisherAndConsumerTest, PublishMotionEvent_WhenPointerCountLessTha
     ASSERT_NO_FATAL_FAILURE(Initialize());
 
     const size_t pointerCount = 0;
-    int32_t pointerIds[pointerCount];
+    PointerProperties pointerProperties[pointerCount];
     PointerCoords pointerCoords[pointerCount];
 
-    status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            pointerCount, pointerIds, pointerCoords);
+    status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            pointerCount, pointerProperties, pointerCoords);
     ASSERT_EQ(BAD_VALUE, status)
             << "publisher publishMotionEvent should return BAD_VALUE";
 }
@@ -387,11 +399,15 @@ TEST_F(InputPublisherAndConsumerTest, PublishMotionEvent_WhenPointerCountGreater
     ASSERT_NO_FATAL_FAILURE(Initialize());
 
     const size_t pointerCount = MAX_POINTERS + 1;
-    int32_t pointerIds[pointerCount];
+    PointerProperties pointerProperties[pointerCount];
     PointerCoords pointerCoords[pointerCount];
+    for (size_t i = 0; i < pointerCount; i++) {
+        pointerProperties[i].clear();
+        pointerCoords[i].clear();
+    }
 
-    status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            pointerCount, pointerIds, pointerCoords);
+    status = mPublisher->publishMotionEvent(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            pointerCount, pointerProperties, pointerCoords);
     ASSERT_EQ(BAD_VALUE, status)
             << "publisher publishMotionEvent should return BAD_VALUE";
 }
@@ -432,11 +448,15 @@ TEST_F(InputPublisherAndConsumerTest, AppendMotionSample_WhenPublishedMotionEven
     ASSERT_NO_FATAL_FAILURE(Initialize());
 
     const size_t pointerCount = MAX_POINTERS;
-    int32_t pointerIds[pointerCount];
+    PointerProperties pointerProperties[pointerCount];
     PointerCoords pointerCoords[pointerCount];
+    for (size_t i = 0; i < pointerCount; i++) {
+        pointerProperties[i].clear();
+        pointerCoords[i].clear();
+    }
 
     status = mPublisher->publishMotionEvent(0, 0, AMOTION_EVENT_ACTION_DOWN,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, pointerCount, pointerIds, pointerCoords);
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pointerCount, pointerProperties, pointerCoords);
     ASSERT_EQ(OK, status);
 
     status = mPublisher->appendMotionSample(0, pointerCoords);
@@ -449,11 +469,15 @@ TEST_F(InputPublisherAndConsumerTest, AppendMotionSample_WhenAlreadyConsumed_Ret
     ASSERT_NO_FATAL_FAILURE(Initialize());
 
     const size_t pointerCount = MAX_POINTERS;
-    int32_t pointerIds[pointerCount];
+    PointerProperties pointerProperties[pointerCount];
     PointerCoords pointerCoords[pointerCount];
+    for (size_t i = 0; i < pointerCount; i++) {
+        pointerProperties[i].clear();
+        pointerCoords[i].clear();
+    }
 
     status = mPublisher->publishMotionEvent(0, 0, AMOTION_EVENT_ACTION_MOVE,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, pointerCount, pointerIds, pointerCoords);
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pointerCount, pointerProperties, pointerCoords);
     ASSERT_EQ(OK, status);
 
     status = mPublisher->sendDispatchSignal();
@@ -476,11 +500,15 @@ TEST_F(InputPublisherAndConsumerTest, AppendMotionSample_WhenBufferFull_ReturnsE
     ASSERT_NO_FATAL_FAILURE(Initialize());
 
     const size_t pointerCount = MAX_POINTERS;
-    int32_t pointerIds[pointerCount];
+    PointerProperties pointerProperties[pointerCount];
     PointerCoords pointerCoords[pointerCount];
+    for (size_t i = 0; i < pointerCount; i++) {
+        pointerProperties[i].clear();
+        pointerCoords[i].clear();
+    }
 
     status = mPublisher->publishMotionEvent(0, 0, AMOTION_EVENT_ACTION_MOVE,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, pointerCount, pointerIds, pointerCoords);
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, pointerCount, pointerProperties, pointerCoords);
     ASSERT_EQ(OK, status);
 
     for (int count = 1;; count++) {

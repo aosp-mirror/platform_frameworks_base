@@ -55,6 +55,11 @@ static struct {
     jfieldID orientation;
 } gPointerCoordsClassInfo;
 
+static struct {
+    jfieldID id;
+    jfieldID toolType;
+} gPointerPropertiesClassInfo;
+
 // ----------------------------------------------------------------------------
 
 MotionEvent* android_view_MotionEvent_getNativePtr(JNIEnv* env, jobject eventObj) {
@@ -115,17 +120,17 @@ static bool validatePointerCount(JNIEnv* env, jint pointerCount) {
     return true;
 }
 
-static bool validatePointerIdsArray(JNIEnv* env, jintArray pointerIdsArray,
+static bool validatePointerPropertiesArray(JNIEnv* env, jobjectArray pointerPropertiesObjArray,
         size_t pointerCount) {
-    if (!pointerIdsArray) {
+    if (!pointerPropertiesObjArray) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
-                "pointerIds array must not be null");
+                "pointerProperties array must not be null");
         return false;
     }
-    size_t length = size_t(env->GetArrayLength(pointerIdsArray));
+    size_t length = size_t(env->GetArrayLength(pointerPropertiesObjArray));
     if (length < pointerCount) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
-                "pointerIds array must be large enough to hold all pointers");
+                "pointerProperties array must be large enough to hold all pointers");
         return false;
     }
     return true;
@@ -169,6 +174,15 @@ static bool validatePointerCoords(JNIEnv* env, jobject pointerCoordsObj) {
     if (!pointerCoordsObj) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
                 "pointerCoords must not be null");
+        return false;
+    }
+    return true;
+}
+
+static bool validatePointerProperties(JNIEnv* env, jobject pointerPropertiesObj) {
+    if (!pointerPropertiesObj) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "pointerProperties must not be null");
         return false;
     }
     return true;
@@ -300,17 +314,36 @@ static void pointerCoordsFromNative(JNIEnv* env, const PointerCoords* rawPointer
     env->SetLongField(outPointerCoordsObj, gPointerCoordsClassInfo.mPackedAxisBits, outBits);
 }
 
+static void pointerPropertiesToNative(JNIEnv* env, jobject pointerPropertiesObj,
+        PointerProperties* outPointerProperties) {
+    outPointerProperties->clear();
+    outPointerProperties->id = env->GetIntField(pointerPropertiesObj,
+            gPointerPropertiesClassInfo.id);
+    outPointerProperties->toolType = env->GetIntField(pointerPropertiesObj,
+            gPointerPropertiesClassInfo.toolType);
+}
+
+static void pointerPropertiesFromNative(JNIEnv* env, const PointerProperties* pointerProperties,
+        jobject outPointerPropertiesObj) {
+    env->SetIntField(outPointerPropertiesObj, gPointerPropertiesClassInfo.id,
+            pointerProperties->id);
+    env->SetIntField(outPointerPropertiesObj, gPointerPropertiesClassInfo.toolType,
+            pointerProperties->toolType);
+}
+
 
 // ----------------------------------------------------------------------------
 
 static jint android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz,
         jint nativePtr,
-        jint deviceId, jint source, jint action, jint flags, jint edgeFlags, jint metaState,
+        jint deviceId, jint source, jint action, jint flags, jint edgeFlags,
+        jint metaState, jint buttonState,
         jfloat xOffset, jfloat yOffset, jfloat xPrecision, jfloat yPrecision,
         jlong downTimeNanos, jlong eventTimeNanos,
-        jint pointerCount, jintArray pointerIdsArray, jobjectArray pointerCoordsObjArray) {
+        jint pointerCount, jobjectArray pointerPropertiesObjArray,
+        jobjectArray pointerCoordsObjArray) {
     if (!validatePointerCount(env, pointerCount)
-            || !validatePointerIdsArray(env, pointerIdsArray, pointerCount)
+            || !validatePointerPropertiesArray(env, pointerPropertiesObjArray, pointerCount)
             || !validatePointerCoordsObjArray(env, pointerCoordsObjArray, pointerCount)) {
         return 0;
     }
@@ -320,29 +353,37 @@ static jint android_view_MotionEvent_nativeInitialize(JNIEnv* env, jclass clazz,
         event = new MotionEvent();
     }
 
+    PointerProperties pointerProperties[pointerCount];
     PointerCoords rawPointerCoords[pointerCount];
 
     for (jint i = 0; i < pointerCount; i++) {
+        jobject pointerPropertiesObj = env->GetObjectArrayElement(pointerPropertiesObjArray, i);
+        if (!pointerPropertiesObj) {
+            goto Error;
+        }
+        pointerPropertiesToNative(env, pointerPropertiesObj, &pointerProperties[i]);
+        env->DeleteLocalRef(pointerPropertiesObj);
+
         jobject pointerCoordsObj = env->GetObjectArrayElement(pointerCoordsObjArray, i);
         if (!pointerCoordsObj) {
             jniThrowNullPointerException(env, "pointerCoords");
-            if (!nativePtr) {
-                delete event;
-            }
-            return 0;
+            goto Error;
         }
         pointerCoordsToNative(env, pointerCoordsObj, xOffset, yOffset, &rawPointerCoords[i]);
         env->DeleteLocalRef(pointerCoordsObj);
     }
 
-    int* pointerIds = static_cast<int*>(env->GetPrimitiveArrayCritical(pointerIdsArray, NULL));
-
-    event->initialize(deviceId, source, action, flags, edgeFlags, metaState,
+    event->initialize(deviceId, source, action, flags, edgeFlags, metaState, buttonState,
             xOffset, yOffset, xPrecision, yPrecision,
-            downTimeNanos, eventTimeNanos, pointerCount, pointerIds, rawPointerCoords);
+            downTimeNanos, eventTimeNanos, pointerCount, pointerProperties, rawPointerCoords);
 
-    env->ReleasePrimitiveArrayCritical(pointerIdsArray, pointerIds, JNI_ABORT);
     return reinterpret_cast<jint>(event);
+
+Error:
+    if (!nativePtr) {
+        delete event;
+    }
+    return 0;
 }
 
 static jint android_view_MotionEvent_nativeCopy(JNIEnv* env, jclass clazz,
@@ -454,10 +495,28 @@ static jint android_view_MotionEvent_nativeGetMetaState(JNIEnv* env, jclass claz
     return event->getMetaState();
 }
 
+static jint android_view_MotionEvent_nativeGetButtonState(JNIEnv* env, jclass clazz,
+        jint nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getButtonState();
+}
+
 static void android_view_MotionEvent_nativeOffsetLocation(JNIEnv* env, jclass clazz,
         jint nativePtr, jfloat deltaX, jfloat deltaY) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
     return event->offsetLocation(deltaX, deltaY);
+}
+
+static jfloat android_view_MotionEvent_nativeGetXOffset(JNIEnv* env, jclass clazz,
+        jint nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getXOffset();
+}
+
+static jfloat android_view_MotionEvent_nativeGetYOffset(JNIEnv* env, jclass clazz,
+        jint nativePtr) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    return event->getYOffset();
 }
 
 static jfloat android_view_MotionEvent_nativeGetXPrecision(JNIEnv* env, jclass clazz,
@@ -478,6 +537,12 @@ static jlong android_view_MotionEvent_nativeGetDownTimeNanos(JNIEnv* env, jclass
     return event->getDownTime();
 }
 
+static void android_view_MotionEvent_nativeSetDownTimeNanos(JNIEnv* env, jclass clazz,
+        jint nativePtr, jlong downTimeNanos) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    event->setDownTime(downTimeNanos);
+}
+
 static jint android_view_MotionEvent_nativeGetPointerCount(JNIEnv* env, jclass clazz,
         jint nativePtr) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
@@ -492,6 +557,16 @@ static jint android_view_MotionEvent_nativeGetPointerId(JNIEnv* env, jclass claz
         return -1;
     }
     return event->getPointerId(pointerIndex);
+}
+
+static jint android_view_MotionEvent_nativeGetToolType(JNIEnv* env, jclass clazz,
+        jint nativePtr, jint pointerIndex) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    size_t pointerCount = event->getPointerCount();
+    if (!validatePointerIndex(env, pointerIndex, pointerCount)) {
+        return -1;
+    }
+    return event->getToolType(pointerIndex);
 }
 
 static jint android_view_MotionEvent_nativeFindPointerIndex(JNIEnv* env, jclass clazz,
@@ -581,6 +656,19 @@ static void android_view_MotionEvent_nativeGetPointerCoords(JNIEnv* env, jclass 
             outPointerCoordsObj);
 }
 
+static void android_view_MotionEvent_nativeGetPointerProperties(JNIEnv* env, jclass clazz,
+        jint nativePtr, jint pointerIndex, jobject outPointerPropertiesObj) {
+    MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
+    size_t pointerCount = event->getPointerCount();
+    if (!validatePointerIndex(env, pointerIndex, pointerCount)
+            || !validatePointerProperties(env, outPointerPropertiesObj)) {
+        return;
+    }
+
+    const PointerProperties* pointerProperties = event->getPointerProperties(pointerIndex);
+    pointerPropertiesFromNative(env, pointerProperties, outPointerPropertiesObj);
+}
+
 static void android_view_MotionEvent_nativeScale(JNIEnv* env, jclass clazz,
         jint nativePtr, jfloat scale) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
@@ -630,7 +718,8 @@ static void android_view_MotionEvent_nativeWriteToParcel(JNIEnv* env, jclass cla
 static JNINativeMethod gMotionEventMethods[] = {
     /* name, signature, funcPtr */
     { "nativeInitialize",
-            "(IIIIIIIFFFFJJI[I[Landroid/view/MotionEvent$PointerCoords;)I",
+            "(IIIIIIIIFFFFJJI[Landroid/view/MotionEvent$PointerProperties;"
+                    "[Landroid/view/MotionEvent$PointerCoords;)I",
             (void*)android_view_MotionEvent_nativeInitialize },
     { "nativeCopy",
             "(IIZ)I",
@@ -674,9 +763,18 @@ static JNINativeMethod gMotionEventMethods[] = {
     { "nativeGetMetaState",
             "(I)I",
             (void*)android_view_MotionEvent_nativeGetMetaState },
+    { "nativeGetButtonState",
+            "(I)I",
+            (void*)android_view_MotionEvent_nativeGetButtonState },
     { "nativeOffsetLocation",
             "(IFF)V",
             (void*)android_view_MotionEvent_nativeOffsetLocation },
+    { "nativeGetXOffset",
+            "(I)F",
+            (void*)android_view_MotionEvent_nativeGetXOffset },
+    { "nativeGetYOffset",
+            "(I)F",
+            (void*)android_view_MotionEvent_nativeGetYOffset },
     { "nativeGetXPrecision",
             "(I)F",
             (void*)android_view_MotionEvent_nativeGetXPrecision },
@@ -686,12 +784,18 @@ static JNINativeMethod gMotionEventMethods[] = {
     { "nativeGetDownTimeNanos",
             "(I)J",
             (void*)android_view_MotionEvent_nativeGetDownTimeNanos },
+    { "nativeSetDownTimeNanos",
+            "(IJ)V",
+            (void*)android_view_MotionEvent_nativeSetDownTimeNanos },
     { "nativeGetPointerCount",
             "(I)I",
             (void*)android_view_MotionEvent_nativeGetPointerCount },
     { "nativeGetPointerId",
             "(II)I",
             (void*)android_view_MotionEvent_nativeGetPointerId },
+    { "nativeGetToolType",
+            "(II)I",
+            (void*)android_view_MotionEvent_nativeGetToolType },
     { "nativeFindPointerIndex",
             "(II)I",
             (void*)android_view_MotionEvent_nativeFindPointerIndex },
@@ -710,6 +814,9 @@ static JNINativeMethod gMotionEventMethods[] = {
     { "nativeGetPointerCoords",
             "(IIILandroid/view/MotionEvent$PointerCoords;)V",
             (void*)android_view_MotionEvent_nativeGetPointerCoords },
+    { "nativeGetPointerProperties",
+            "(IILandroid/view/MotionEvent$PointerProperties;)V",
+            (void*)android_view_MotionEvent_nativeGetPointerProperties },
     { "nativeScale",
             "(IF)V",
             (void*)android_view_MotionEvent_nativeScale },
@@ -780,6 +887,13 @@ int register_android_view_MotionEvent(JNIEnv* env) {
             "toolMinor", "F");
     GET_FIELD_ID(gPointerCoordsClassInfo.orientation, clazz,
             "orientation", "F");
+
+    FIND_CLASS(clazz, "android/view/MotionEvent$PointerProperties");
+
+    GET_FIELD_ID(gPointerPropertiesClassInfo.id, clazz,
+            "id", "I");
+    GET_FIELD_ID(gPointerPropertiesClassInfo.toolType, clazz,
+            "toolType", "I");
 
     return 0;
 }

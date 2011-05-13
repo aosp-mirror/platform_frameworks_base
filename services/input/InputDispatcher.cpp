@@ -150,7 +150,7 @@ static bool isValidMotionAction(int32_t action, size_t pointerCount) {
 }
 
 static bool validateMotionEvent(int32_t action, size_t pointerCount,
-        const int32_t* pointerIds) {
+        const PointerProperties* pointerProperties) {
     if (! isValidMotionAction(action, pointerCount)) {
         LOGE("Motion event has invalid action code 0x%x", action);
         return false;
@@ -162,7 +162,7 @@ static bool validateMotionEvent(int32_t action, size_t pointerCount,
     }
     BitSet32 pointerIdBits;
     for (size_t i = 0; i < pointerCount; i++) {
-        int32_t id = pointerIds[i];
+        int32_t id = pointerProperties[i].id;
         if (id < 0 || id > MAX_POINTER_ID) {
             LOGE("Motion event has invalid pointer id %d; value must be between 0 and %d",
                     id, MAX_POINTER_ID);
@@ -899,9 +899,10 @@ bool InputDispatcher::dispatchMotionLocked(
             MotionSample* nextSample = splitBatchAfterSample->next;
             MotionEntry* nextEntry = mAllocator.obtainMotionEntry(nextSample->eventTime,
                     entry->deviceId, entry->source, entry->policyFlags,
-                    entry->action, entry->flags, entry->metaState, entry->edgeFlags,
+                    entry->action, entry->flags,
+                    entry->metaState, entry->buttonState, entry->edgeFlags,
                     entry->xPrecision, entry->yPrecision, entry->downTime,
-                    entry->pointerCount, entry->pointerIds, nextSample->pointerCoords);
+                    entry->pointerCount, entry->pointerProperties, nextSample->pointerCoords);
             if (nextSample != entry->lastSample) {
                 nextEntry->firstSample.next = nextSample->next;
                 nextEntry->lastSample = entry->lastSample;
@@ -941,11 +942,13 @@ void InputDispatcher::logOutboundMotionDetailsLocked(const char* prefix, const M
 #if DEBUG_OUTBOUND_EVENT_DETAILS
     LOGD("%seventTime=%lld, deviceId=%d, source=0x%x, policyFlags=0x%x, "
             "action=0x%x, flags=0x%x, "
-            "metaState=0x%x, edgeFlags=0x%x, xPrecision=%f, yPrecision=%f, downTime=%lld",
+            "metaState=0x%x, buttonState=0x%x, "
+            "edgeFlags=0x%x, xPrecision=%f, yPrecision=%f, downTime=%lld",
             prefix,
             entry->eventTime, entry->deviceId, entry->source, entry->policyFlags,
             entry->action, entry->flags,
-            entry->metaState, entry->edgeFlags, entry->xPrecision, entry->yPrecision,
+            entry->metaState, entry->buttonState,
+            entry->edgeFlags, entry->xPrecision, entry->yPrecision,
             entry->downTime);
 
     // Print the most recent sample that we have available, this may change due to batching.
@@ -955,10 +958,12 @@ void InputDispatcher::logOutboundMotionDetailsLocked(const char* prefix, const M
         sampleCount += 1;
     }
     for (uint32_t i = 0; i < entry->pointerCount; i++) {
-        LOGD("  Pointer %d: id=%d, x=%f, y=%f, pressure=%f, size=%f, "
+        LOGD("  Pointer %d: id=%d, toolType=%d, "
+                "x=%f, y=%f, pressure=%f, size=%f, "
                 "touchMajor=%f, touchMinor=%f, toolMajor=%f, toolMinor=%f, "
                 "orientation=%f",
-                i, entry->pointerIds[i],
+                i, entry->pointerProperties[i].id,
+                entry->pointerProperties[i].toolType,
                 sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_X),
                 sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_Y),
                 sample->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_PRESSURE),
@@ -1397,7 +1402,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         // Update the temporary touch state.
         BitSet32 pointerIds;
         if (isSplit) {
-            uint32_t pointerId = entry->pointerIds[pointerIndex];
+            uint32_t pointerId = entry->pointerProperties[pointerIndex].id;
             pointerIds.markBit(pointerId);
         }
         mTempTouchState.addOrUpdateWindow(newTouchedWindow, targetFlags, pointerIds);
@@ -1556,7 +1561,7 @@ Failed:
                 // One pointer went up.
                 if (isSplit) {
                     int32_t pointerIndex = getMotionEventActionPointerIndex(action);
-                    uint32_t pointerId = entry->pointerIds[pointerIndex];
+                    uint32_t pointerId = entry->pointerProperties[pointerIndex].id;
 
                     for (size_t i = 0; i < mTempTouchState.windows.size(); ) {
                         TouchedWindow& touchedWindow = mTempTouchState.windows.editItemAt(i);
@@ -2010,10 +2015,13 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
 
         // Publish the motion event and the first motion sample.
         status = connection->inputPublisher.publishMotionEvent(motionEntry->deviceId,
-                motionEntry->source, action, flags, motionEntry->edgeFlags, motionEntry->metaState,
-                xOffset, yOffset, motionEntry->xPrecision, motionEntry->yPrecision,
+                motionEntry->source, action, flags, motionEntry->edgeFlags,
+                motionEntry->metaState, motionEntry->buttonState,
+                xOffset, yOffset,
+                motionEntry->xPrecision, motionEntry->yPrecision,
                 motionEntry->downTime, firstMotionSample->eventTime,
-                motionEntry->pointerCount, motionEntry->pointerIds, usingCoords);
+                motionEntry->pointerCount, motionEntry->pointerProperties,
+                usingCoords);
 
         if (status) {
             LOGE("channel '%s' ~ Could not publish motion event, "
@@ -2027,7 +2035,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             // Append additional motion samples.
             MotionSample* nextMotionSample = firstMotionSample->next;
             for (; nextMotionSample != NULL; nextMotionSample = nextMotionSample->next) {
-                if ((motionEntry->source & AINPUT_SOURCE_CLASS_POINTER) != 0 && scaleFactor != 1.0f) {
+                if (usingCoords == scaledCoords) {
                     for (size_t i = 0; i < motionEntry->pointerCount; i++) {
                         scaledCoords[i] = nextMotionSample->pointerCoords[i];
                         scaledCoords[i].scale(scaleFactor);
@@ -2305,7 +2313,7 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
     LOG_ASSERT(pointerIds.value != 0);
 
     uint32_t splitPointerIndexMap[MAX_POINTERS];
-    int32_t splitPointerIds[MAX_POINTERS];
+    PointerProperties splitPointerProperties[MAX_POINTERS];
     PointerCoords splitPointerCoords[MAX_POINTERS];
 
     uint32_t originalPointerCount = originalMotionEntry->pointerCount;
@@ -2313,10 +2321,12 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
 
     for (uint32_t originalPointerIndex = 0; originalPointerIndex < originalPointerCount;
             originalPointerIndex++) {
-        int32_t pointerId = uint32_t(originalMotionEntry->pointerIds[originalPointerIndex]);
+        const PointerProperties& pointerProperties =
+                originalMotionEntry->pointerProperties[originalPointerIndex];
+        uint32_t pointerId = uint32_t(pointerProperties.id);
         if (pointerIds.hasBit(pointerId)) {
             splitPointerIndexMap[splitPointerCount] = originalPointerIndex;
-            splitPointerIds[splitPointerCount] = pointerId;
+            splitPointerProperties[splitPointerCount].copyFrom(pointerProperties);
             splitPointerCoords[splitPointerCount].copyFrom(
                     originalMotionEntry->firstSample.pointerCoords[originalPointerIndex]);
             splitPointerCount += 1;
@@ -2341,7 +2351,9 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
     if (maskedAction == AMOTION_EVENT_ACTION_POINTER_DOWN
             || maskedAction == AMOTION_EVENT_ACTION_POINTER_UP) {
         int32_t originalPointerIndex = getMotionEventActionPointerIndex(action);
-        int32_t pointerId = originalMotionEntry->pointerIds[originalPointerIndex];
+        const PointerProperties& pointerProperties =
+                originalMotionEntry->pointerProperties[originalPointerIndex];
+        uint32_t pointerId = uint32_t(pointerProperties.id);
         if (pointerIds.hasBit(pointerId)) {
             if (pointerIds.count() == 1) {
                 // The first/last pointer went down/up.
@@ -2350,7 +2362,7 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
             } else {
                 // A secondary pointer went down/up.
                 uint32_t splitPointerIndex = 0;
-                while (pointerId != splitPointerIds[splitPointerIndex]) {
+                while (pointerId != uint32_t(splitPointerProperties[splitPointerIndex].id)) {
                     splitPointerIndex += 1;
                 }
                 action = maskedAction | (splitPointerIndex
@@ -2370,11 +2382,12 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
             action,
             originalMotionEntry->flags,
             originalMotionEntry->metaState,
+            originalMotionEntry->buttonState,
             originalMotionEntry->edgeFlags,
             originalMotionEntry->xPrecision,
             originalMotionEntry->yPrecision,
             originalMotionEntry->downTime,
-            splitPointerCount, splitPointerIds, splitPointerCoords);
+            splitPointerCount, splitPointerProperties, splitPointerCoords);
 
     for (MotionSample* originalMotionSample = originalMotionEntry->firstSample.next;
             originalMotionSample != NULL; originalMotionSample = originalMotionSample->next) {
@@ -2490,20 +2503,25 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t so
 }
 
 void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t source,
-        uint32_t policyFlags, int32_t action, int32_t flags, int32_t metaState, int32_t edgeFlags,
-        uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
+        uint32_t policyFlags, int32_t action, int32_t flags,
+        int32_t metaState, int32_t buttonState, int32_t edgeFlags,
+        uint32_t pointerCount, const PointerProperties* pointerProperties,
+        const PointerCoords* pointerCoords,
         float xPrecision, float yPrecision, nsecs_t downTime) {
 #if DEBUG_INBOUND_EVENT_DETAILS
     LOGD("notifyMotion - eventTime=%lld, deviceId=%d, source=0x%x, policyFlags=0x%x, "
-            "action=0x%x, flags=0x%x, metaState=0x%x, edgeFlags=0x%x, "
+            "action=0x%x, flags=0x%x, metaState=0x%x, buttonState=0x%x, edgeFlags=0x%x, "
             "xPrecision=%f, yPrecision=%f, downTime=%lld",
-            eventTime, deviceId, source, policyFlags, action, flags, metaState, edgeFlags,
+            eventTime, deviceId, source, policyFlags, action, flags,
+            metaState, buttonState, edgeFlags,
             xPrecision, yPrecision, downTime);
     for (uint32_t i = 0; i < pointerCount; i++) {
-        LOGD("  Pointer %d: id=%d, x=%f, y=%f, pressure=%f, size=%f, "
+        LOGD("  Pointer %d: id=%d, toolType=%d, "
+                "x=%f, y=%f, pressure=%f, size=%f, "
                 "touchMajor=%f, touchMinor=%f, toolMajor=%f, toolMinor=%f, "
                 "orientation=%f",
-                i, pointerIds[i],
+                i, pointerProperties[i].id,
+                pointerProperties[i].toolType,
                 pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_X),
                 pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_Y),
                 pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_PRESSURE),
@@ -2515,7 +2533,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                 pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION));
     }
 #endif
-    if (! validateMotionEvent(action, pointerCount, pointerIds)) {
+    if (! validateMotionEvent(action, pointerCount, pointerProperties)) {
         return;
     }
 
@@ -2530,9 +2548,10 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
             mLock.unlock();
 
             MotionEvent event;
-            event.initialize(deviceId, source, action, flags, edgeFlags, metaState, 0, 0,
+            event.initialize(deviceId, source, action, flags, edgeFlags, metaState,
+                    buttonState, 0, 0,
                     xPrecision, yPrecision, downTime, eventTime,
-                    pointerCount, pointerIds, pointerCoords);
+                    pointerCount, pointerProperties, pointerCoords);
 
             policyFlags |= POLICY_FLAG_FILTERED;
             if (!mPolicy->filterInputEvent(&event, policyFlags)) {
@@ -2564,7 +2583,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                     continue;
                 }
 
-                if (!motionEntry->canAppendSamples(action, pointerCount, pointerIds)) {
+                if (!motionEntry->canAppendSamples(action, pointerCount, pointerProperties)) {
                     // Last motion event in the queue for this device and source is
                     // not compatible for appending new samples.  Stop here.
                     goto NoBatchingOrStreaming;
@@ -2587,7 +2606,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                     && mPendingEvent->type == EventEntry::TYPE_MOTION) {
                 MotionEntry* motionEntry = static_cast<MotionEntry*>(mPendingEvent);
                 if (motionEntry->deviceId == deviceId && motionEntry->source == source) {
-                    if (!motionEntry->canAppendSamples(action, pointerCount, pointerIds)) {
+                    if (!motionEntry->canAppendSamples(action, pointerCount, pointerProperties)) {
                         // Pending motion event is for this device and source but it is
                         // not compatible for appending new samples.  Stop here.
                         goto NoBatchingOrStreaming;
@@ -2696,9 +2715,9 @@ NoBatchingOrStreaming:;
 
         // Just enqueue a new motion event.
         MotionEntry* newEntry = mAllocator.obtainMotionEntry(eventTime,
-                deviceId, source, policyFlags, action, flags, metaState, edgeFlags,
+                deviceId, source, policyFlags, action, flags, metaState, buttonState, edgeFlags,
                 xPrecision, yPrecision, downTime,
-                pointerCount, pointerIds, pointerCoords);
+                pointerCount, pointerProperties, pointerCoords);
 
         needWake = enqueueInboundEventLocked(newEntry);
         mLock.unlock();
@@ -2801,8 +2820,8 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         const MotionEvent* motionEvent = static_cast<const MotionEvent*>(event);
         int32_t action = motionEvent->getAction();
         size_t pointerCount = motionEvent->getPointerCount();
-        const int32_t* pointerIds = motionEvent->getPointerIds();
-        if (! validateMotionEvent(action, pointerCount, pointerIds)) {
+        const PointerProperties* pointerProperties = motionEvent->getPointerProperties();
+        if (! validateMotionEvent(action, pointerCount, pointerProperties)) {
             return INPUT_EVENT_INJECTION_FAILED;
         }
 
@@ -2817,10 +2836,11 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         MotionEntry* motionEntry = mAllocator.obtainMotionEntry(*sampleEventTimes,
                 motionEvent->getDeviceId(), motionEvent->getSource(), policyFlags,
                 action, motionEvent->getFlags(),
-                motionEvent->getMetaState(), motionEvent->getEdgeFlags(),
+                motionEvent->getMetaState(), motionEvent->getButtonState(),
+                motionEvent->getEdgeFlags(),
                 motionEvent->getXPrecision(), motionEvent->getYPrecision(),
                 motionEvent->getDownTime(), uint32_t(pointerCount),
-                pointerIds, samplePointerCoords);
+                pointerProperties, samplePointerCoords);
         for (size_t i = motionEvent->getHistorySize(); i > 0; i--) {
             sampleEventTimes += 1;
             samplePointerCoords += pointerCount;
@@ -3553,167 +3573,186 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
     sp<Connection> connection = commandEntry->connection;
     bool handled = commandEntry->handled;
 
+    bool skipNext = false;
     if (!connection->outboundQueue.isEmpty()) {
         DispatchEntry* dispatchEntry = connection->outboundQueue.headSentinel.next;
-        if (dispatchEntry->inProgress
-                && dispatchEntry->eventEntry->type == EventEntry::TYPE_KEY) {
-            KeyEntry* keyEntry = static_cast<KeyEntry*>(dispatchEntry->eventEntry);
-            if (!(keyEntry->flags & AKEY_EVENT_FLAG_FALLBACK)) {
-                // Get the fallback key state.
-                // Clear it out after dispatching the UP.
-                int32_t originalKeyCode = keyEntry->keyCode;
-                int32_t fallbackKeyCode = connection->inputState.getFallbackKey(originalKeyCode);
-                if (keyEntry->action == AKEY_EVENT_ACTION_UP) {
-                    connection->inputState.removeFallbackKey(originalKeyCode);
-                }
-
-                if (handled || !dispatchEntry->hasForegroundTarget()) {
-                    // If the application handles the original key for which we previously
-                    // generated a fallback or if the window is not a foreground window,
-                    // then cancel the associated fallback key, if any.
-                    if (fallbackKeyCode != -1) {
-                        if (fallbackKeyCode != AKEYCODE_UNKNOWN) {
-                            CancelationOptions options(CancelationOptions::CANCEL_FALLBACK_EVENTS,
-                                    "application handled the original non-fallback key "
-                                    "or is no longer a foreground target, "
-                                    "canceling previously dispatched fallback key");
-                            options.keyCode = fallbackKeyCode;
-                            synthesizeCancelationEventsForConnectionLocked(connection, options);
-                        }
-                        connection->inputState.removeFallbackKey(originalKeyCode);
-                    }
-                } else {
-                    // If the application did not handle a non-fallback key, first check
-                    // that we are in a good state to perform unhandled key event processing
-                    // Then ask the policy what to do with it.
-                    bool initialDown = keyEntry->action == AKEY_EVENT_ACTION_DOWN
-                            && keyEntry->repeatCount == 0;
-                    if (fallbackKeyCode == -1 && !initialDown) {
-#if DEBUG_OUTBOUND_EVENT_DETAILS
-                        LOGD("Unhandled key event: Skipping unhandled key event processing "
-                                "since this is not an initial down.  "
-                                "keyCode=%d, action=%d, repeatCount=%d",
-                                originalKeyCode, keyEntry->action, keyEntry->repeatCount);
-#endif
-                        goto SkipFallback;
-                    }
-
-                    // Dispatch the unhandled key to the policy.
-#if DEBUG_OUTBOUND_EVENT_DETAILS
-                    LOGD("Unhandled key event: Asking policy to perform fallback action.  "
-                            "keyCode=%d, action=%d, repeatCount=%d",
-                            keyEntry->keyCode, keyEntry->action, keyEntry->repeatCount);
-#endif
-                    KeyEvent event;
-                    initializeKeyEvent(&event, keyEntry);
-
-                    mLock.unlock();
-
-                    bool fallback = mPolicy->dispatchUnhandledKey(connection->inputWindowHandle,
-                            &event, keyEntry->policyFlags, &event);
-
-                    mLock.lock();
-
-                    if (connection->status != Connection::STATUS_NORMAL) {
-                        connection->inputState.removeFallbackKey(originalKeyCode);
-                        return;
-                    }
-
-                    LOG_ASSERT(connection->outboundQueue.headSentinel.next == dispatchEntry);
-
-                    // Latch the fallback keycode for this key on an initial down.
-                    // The fallback keycode cannot change at any other point in the lifecycle.
-                    if (initialDown) {
-                        if (fallback) {
-                            fallbackKeyCode = event.getKeyCode();
-                        } else {
-                            fallbackKeyCode = AKEYCODE_UNKNOWN;
-                        }
-                        connection->inputState.setFallbackKey(originalKeyCode, fallbackKeyCode);
-                    }
-
-                    LOG_ASSERT(fallbackKeyCode != -1);
-
-                    // Cancel the fallback key if the policy decides not to send it anymore.
-                    // We will continue to dispatch the key to the policy but we will no
-                    // longer dispatch a fallback key to the application.
-                    if (fallbackKeyCode != AKEYCODE_UNKNOWN
-                            && (!fallback || fallbackKeyCode != event.getKeyCode())) {
-#if DEBUG_OUTBOUND_EVENT_DETAILS
-                        if (fallback) {
-                            LOGD("Unhandled key event: Policy requested to send key %d"
-                                    "as a fallback for %d, but on the DOWN it had requested "
-                                    "to send %d instead.  Fallback canceled.",
-                                    event.getKeyCode(), originalKeyCode, fallbackKeyCode);
-                        } else {
-                            LOGD("Unhandled key event: Policy did not request fallback for %d,"
-                                    "but on the DOWN it had requested to send %d.  "
-                                    "Fallback canceled.",
-                                    originalKeyCode, fallbackKeyCode);
-                        }
-#endif
-
-                        CancelationOptions options(CancelationOptions::CANCEL_FALLBACK_EVENTS,
-                                "canceling fallback, policy no longer desires it");
-                        options.keyCode = fallbackKeyCode;
-                        synthesizeCancelationEventsForConnectionLocked(connection, options);
-
-                        fallback = false;
-                        fallbackKeyCode = AKEYCODE_UNKNOWN;
-                        if (keyEntry->action != AKEY_EVENT_ACTION_UP) {
-                            connection->inputState.setFallbackKey(originalKeyCode,
-                                    fallbackKeyCode);
-                        }
-                    }
-
-#if DEBUG_OUTBOUND_EVENT_DETAILS
-                    {
-                        String8 msg;
-                        const KeyedVector<int32_t, int32_t>& fallbackKeys =
-                                connection->inputState.getFallbackKeys();
-                        for (size_t i = 0; i < fallbackKeys.size(); i++) {
-                            msg.appendFormat(", %d->%d", fallbackKeys.keyAt(i),
-                                    fallbackKeys.valueAt(i));
-                        }
-                        LOGD("Unhandled key event: %d currently tracked fallback keys%s.",
-                                fallbackKeys.size(), msg.string());
-                    }
-#endif
-
-                    if (fallback) {
-                        // Restart the dispatch cycle using the fallback key.
-                        keyEntry->eventTime = event.getEventTime();
-                        keyEntry->deviceId = event.getDeviceId();
-                        keyEntry->source = event.getSource();
-                        keyEntry->flags = event.getFlags() | AKEY_EVENT_FLAG_FALLBACK;
-                        keyEntry->keyCode = fallbackKeyCode;
-                        keyEntry->scanCode = event.getScanCode();
-                        keyEntry->metaState = event.getMetaState();
-                        keyEntry->repeatCount = event.getRepeatCount();
-                        keyEntry->downTime = event.getDownTime();
-                        keyEntry->syntheticRepeat = false;
-
-#if DEBUG_OUTBOUND_EVENT_DETAILS
-                        LOGD("Unhandled key event: Dispatching fallback key.  "
-                                "originalKeyCode=%d, fallbackKeyCode=%d, fallbackMetaState=%08x",
-                                originalKeyCode, fallbackKeyCode, keyEntry->metaState);
-#endif
-
-                        dispatchEntry->inProgress = false;
-                        startDispatchCycleLocked(now(), connection);
-                        return;
-                    } else {
-#if DEBUG_OUTBOUND_EVENT_DETAILS
-                        LOGD("Unhandled key event: No fallback key.");
-#endif
-                    }
-                }
+        if (dispatchEntry->inProgress) {
+            if (dispatchEntry->eventEntry->type == EventEntry::TYPE_KEY) {
+                KeyEntry* keyEntry = static_cast<KeyEntry*>(dispatchEntry->eventEntry);
+                skipNext = afterKeyEventLockedInterruptible(connection,
+                        dispatchEntry, keyEntry, handled);
+            } else if (dispatchEntry->eventEntry->type == EventEntry::TYPE_MOTION) {
+                MotionEntry* motionEntry = static_cast<MotionEntry*>(dispatchEntry->eventEntry);
+                skipNext = afterMotionEventLockedInterruptible(connection,
+                        dispatchEntry, motionEntry, handled);
             }
         }
     }
 
-SkipFallback:
-    startNextDispatchCycleLocked(now(), connection);
+    if (!skipNext) {
+        startNextDispatchCycleLocked(now(), connection);
+    }
+}
+
+bool InputDispatcher::afterKeyEventLockedInterruptible(const sp<Connection>& connection,
+        DispatchEntry* dispatchEntry, KeyEntry* keyEntry, bool handled) {
+    if (!(keyEntry->flags & AKEY_EVENT_FLAG_FALLBACK)) {
+        // Get the fallback key state.
+        // Clear it out after dispatching the UP.
+        int32_t originalKeyCode = keyEntry->keyCode;
+        int32_t fallbackKeyCode = connection->inputState.getFallbackKey(originalKeyCode);
+        if (keyEntry->action == AKEY_EVENT_ACTION_UP) {
+            connection->inputState.removeFallbackKey(originalKeyCode);
+        }
+
+        if (handled || !dispatchEntry->hasForegroundTarget()) {
+            // If the application handles the original key for which we previously
+            // generated a fallback or if the window is not a foreground window,
+            // then cancel the associated fallback key, if any.
+            if (fallbackKeyCode != -1) {
+                if (fallbackKeyCode != AKEYCODE_UNKNOWN) {
+                    CancelationOptions options(CancelationOptions::CANCEL_FALLBACK_EVENTS,
+                            "application handled the original non-fallback key "
+                            "or is no longer a foreground target, "
+                            "canceling previously dispatched fallback key");
+                    options.keyCode = fallbackKeyCode;
+                    synthesizeCancelationEventsForConnectionLocked(connection, options);
+                }
+                connection->inputState.removeFallbackKey(originalKeyCode);
+            }
+        } else {
+            // If the application did not handle a non-fallback key, first check
+            // that we are in a good state to perform unhandled key event processing
+            // Then ask the policy what to do with it.
+            bool initialDown = keyEntry->action == AKEY_EVENT_ACTION_DOWN
+                    && keyEntry->repeatCount == 0;
+            if (fallbackKeyCode == -1 && !initialDown) {
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+                LOGD("Unhandled key event: Skipping unhandled key event processing "
+                        "since this is not an initial down.  "
+                        "keyCode=%d, action=%d, repeatCount=%d",
+                        originalKeyCode, keyEntry->action, keyEntry->repeatCount);
+#endif
+                return false;
+            }
+
+            // Dispatch the unhandled key to the policy.
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+            LOGD("Unhandled key event: Asking policy to perform fallback action.  "
+                    "keyCode=%d, action=%d, repeatCount=%d",
+                    keyEntry->keyCode, keyEntry->action, keyEntry->repeatCount);
+#endif
+            KeyEvent event;
+            initializeKeyEvent(&event, keyEntry);
+
+            mLock.unlock();
+
+            bool fallback = mPolicy->dispatchUnhandledKey(connection->inputWindowHandle,
+                    &event, keyEntry->policyFlags, &event);
+
+            mLock.lock();
+
+            if (connection->status != Connection::STATUS_NORMAL) {
+                connection->inputState.removeFallbackKey(originalKeyCode);
+                return true; // skip next cycle
+            }
+
+            LOG_ASSERT(connection->outboundQueue.headSentinel.next == dispatchEntry);
+
+            // Latch the fallback keycode for this key on an initial down.
+            // The fallback keycode cannot change at any other point in the lifecycle.
+            if (initialDown) {
+                if (fallback) {
+                    fallbackKeyCode = event.getKeyCode();
+                } else {
+                    fallbackKeyCode = AKEYCODE_UNKNOWN;
+                }
+                connection->inputState.setFallbackKey(originalKeyCode, fallbackKeyCode);
+            }
+
+            LOG_ASSERT(fallbackKeyCode != -1);
+
+            // Cancel the fallback key if the policy decides not to send it anymore.
+            // We will continue to dispatch the key to the policy but we will no
+            // longer dispatch a fallback key to the application.
+            if (fallbackKeyCode != AKEYCODE_UNKNOWN
+                    && (!fallback || fallbackKeyCode != event.getKeyCode())) {
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+                if (fallback) {
+                    LOGD("Unhandled key event: Policy requested to send key %d"
+                            "as a fallback for %d, but on the DOWN it had requested "
+                            "to send %d instead.  Fallback canceled.",
+                            event.getKeyCode(), originalKeyCode, fallbackKeyCode);
+                } else {
+                    LOGD("Unhandled key event: Policy did not request fallback for %d,"
+                            "but on the DOWN it had requested to send %d.  "
+                            "Fallback canceled.",
+                            originalKeyCode, fallbackKeyCode);
+                }
+#endif
+
+                CancelationOptions options(CancelationOptions::CANCEL_FALLBACK_EVENTS,
+                        "canceling fallback, policy no longer desires it");
+                options.keyCode = fallbackKeyCode;
+                synthesizeCancelationEventsForConnectionLocked(connection, options);
+
+                fallback = false;
+                fallbackKeyCode = AKEYCODE_UNKNOWN;
+                if (keyEntry->action != AKEY_EVENT_ACTION_UP) {
+                    connection->inputState.setFallbackKey(originalKeyCode,
+                            fallbackKeyCode);
+                }
+            }
+
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+            {
+                String8 msg;
+                const KeyedVector<int32_t, int32_t>& fallbackKeys =
+                        connection->inputState.getFallbackKeys();
+                for (size_t i = 0; i < fallbackKeys.size(); i++) {
+                    msg.appendFormat(", %d->%d", fallbackKeys.keyAt(i),
+                            fallbackKeys.valueAt(i));
+                }
+                LOGD("Unhandled key event: %d currently tracked fallback keys%s.",
+                        fallbackKeys.size(), msg.string());
+            }
+#endif
+
+            if (fallback) {
+                // Restart the dispatch cycle using the fallback key.
+                keyEntry->eventTime = event.getEventTime();
+                keyEntry->deviceId = event.getDeviceId();
+                keyEntry->source = event.getSource();
+                keyEntry->flags = event.getFlags() | AKEY_EVENT_FLAG_FALLBACK;
+                keyEntry->keyCode = fallbackKeyCode;
+                keyEntry->scanCode = event.getScanCode();
+                keyEntry->metaState = event.getMetaState();
+                keyEntry->repeatCount = event.getRepeatCount();
+                keyEntry->downTime = event.getDownTime();
+                keyEntry->syntheticRepeat = false;
+
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+                LOGD("Unhandled key event: Dispatching fallback key.  "
+                        "originalKeyCode=%d, fallbackKeyCode=%d, fallbackMetaState=%08x",
+                        originalKeyCode, fallbackKeyCode, keyEntry->metaState);
+#endif
+
+                dispatchEntry->inProgress = false;
+                startDispatchCycleLocked(now(), connection);
+                return true; // already started next cycle
+            } else {
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+                LOGD("Unhandled key event: No fallback key.");
+#endif
+            }
+        }
+    }
+    return false;
+}
+
+bool InputDispatcher::afterMotionEventLockedInterruptible(const sp<Connection>& connection,
+        DispatchEntry* dispatchEntry, MotionEntry* motionEntry, bool handled) {
+    return false;
 }
 
 void InputDispatcher::doPokeUserActivityLockedInterruptible(CommandEntry* commandEntry) {
@@ -3817,9 +3856,10 @@ InputDispatcher::KeyEntry* InputDispatcher::Allocator::obtainKeyEntry(nsecs_t ev
 
 InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsecs_t eventTime,
         int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action, int32_t flags,
-        int32_t metaState, int32_t edgeFlags, float xPrecision, float yPrecision,
+        int32_t metaState, int32_t buttonState,
+        int32_t edgeFlags, float xPrecision, float yPrecision,
         nsecs_t downTime, uint32_t pointerCount,
-        const int32_t* pointerIds, const PointerCoords* pointerCoords) {
+        const PointerProperties* pointerProperties, const PointerCoords* pointerCoords) {
     MotionEntry* entry = mMotionEntryPool.alloc();
     initializeEventEntry(entry, EventEntry::TYPE_MOTION, eventTime, policyFlags);
 
@@ -3829,6 +3869,7 @@ InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsec
     entry->action = action;
     entry->flags = flags;
     entry->metaState = metaState;
+    entry->buttonState = buttonState;
     entry->edgeFlags = edgeFlags;
     entry->xPrecision = xPrecision;
     entry->yPrecision = yPrecision;
@@ -3839,7 +3880,7 @@ InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsec
     entry->firstSample.next = NULL;
     entry->lastSample = & entry->firstSample;
     for (uint32_t i = 0; i < pointerCount; i++) {
-        entry->pointerIds[i] = pointerIds[i];
+        entry->pointerProperties[i].copyFrom(pointerProperties[i]);
         entry->firstSample.pointerCoords[i].copyFrom(pointerCoords[i]);
     }
     return entry;
@@ -3977,14 +4018,14 @@ uint32_t InputDispatcher::MotionEntry::countSamples() const {
 }
 
 bool InputDispatcher::MotionEntry::canAppendSamples(int32_t action, uint32_t pointerCount,
-        const int32_t* pointerIds) const {
+        const PointerProperties* pointerProperties) const {
     if (this->action != action
             || this->pointerCount != pointerCount
             || this->isInjected()) {
         return false;
     }
     for (uint32_t i = 0; i < pointerCount; i++) {
-        if (this->pointerIds[i] != pointerIds[i]) {
+        if (this->pointerProperties[i] != pointerProperties[i]) {
             return false;
         }
     }
@@ -4114,7 +4155,7 @@ Found:
 void InputDispatcher::InputState::MotionMemento::setPointers(const MotionEntry* entry) {
     pointerCount = entry->pointerCount;
     for (uint32_t i = 0; i < entry->pointerCount; i++) {
-        pointerIds[i] = entry->pointerIds[i];
+        pointerProperties[i].copyFrom(entry->pointerProperties[i]);
         pointerCoords[i].copyFrom(entry->lastSample->pointerCoords[i]);
     }
 }
@@ -4143,9 +4184,9 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
                     memento.hovering
                             ? AMOTION_EVENT_ACTION_HOVER_EXIT
                             : AMOTION_EVENT_ACTION_CANCEL,
-                    0, 0, 0,
+                    0, 0, 0, 0,
                     memento.xPrecision, memento.yPrecision, memento.downTime,
-                    memento.pointerCount, memento.pointerIds, memento.pointerCoords));
+                    memento.pointerCount, memento.pointerProperties, memento.pointerCoords));
             mMotionMementos.removeAt(i);
         } else {
             i += 1;

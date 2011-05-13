@@ -540,7 +540,7 @@ private:
     sp<PointerControllerInterface> mPointerController;
 
     struct LockedState {
-        uint32_t buttonState;
+        int32_t buttonState;
         nsecs_t downTime;
     } mLocked;
 
@@ -602,6 +602,7 @@ protected:
         int32_t toolMajor;
         int32_t toolMinor;
         int32_t orientation;
+        bool isStylus;
 
         inline bool operator== (const PointerData& other) const {
             return id == other.id
@@ -625,7 +626,7 @@ protected:
         PointerData pointers[MAX_POINTERS];
         BitSet32 idBits;
         uint32_t idToIndex[MAX_POINTER_ID + 1];
-        uint32_t buttonState;
+        int32_t buttonState;
 
         void copyFrom(const TouchData& other) {
             pointerCount = other.pointerCount;
@@ -774,9 +775,11 @@ protected:
 
     // Current and previous touch sample data.
     TouchData mCurrentTouch;
+    PointerProperties mCurrentTouchProperties[MAX_POINTERS];
     PointerCoords mCurrentTouchCoords[MAX_POINTERS];
 
     TouchData mLastTouch;
+    PointerProperties mLastTouchProperties[MAX_POINTERS];
     PointerCoords mLastTouchCoords[MAX_POINTERS];
 
     // The time the primary pointer last went down.
@@ -987,11 +990,13 @@ private:
         Mode currentGestureMode;
         BitSet32 currentGestureIdBits;
         uint32_t currentGestureIdToIndex[MAX_POINTER_ID + 1];
+        PointerProperties currentGestureProperties[MAX_POINTERS];
         PointerCoords currentGestureCoords[MAX_POINTERS];
 
         Mode lastGestureMode;
         BitSet32 lastGestureIdBits;
         uint32_t lastGestureIdToIndex[MAX_POINTER_ID + 1];
+        PointerProperties lastGestureProperties[MAX_POINTERS];
         PointerCoords lastGestureCoords[MAX_POINTERS];
 
         // Pointer coords and ids for the current spots.
@@ -1068,17 +1073,22 @@ private:
     // method will take care of setting the index and transmuting the action to DOWN or UP
     // it is the first / last pointer to go down / up.
     void dispatchMotion(nsecs_t when, uint32_t policyFlags, uint32_t source,
-            int32_t action, int32_t flags, uint32_t metaState, int32_t edgeFlags,
-            const PointerCoords* coords, const uint32_t* idToIndex, BitSet32 idBits,
+            int32_t action, int32_t flags, int32_t metaState, int32_t buttonState,
+            int32_t edgeFlags,
+            const PointerProperties* properties, const PointerCoords* coords,
+            const uint32_t* idToIndex, BitSet32 idBits,
             int32_t changedId, float xPrecision, float yPrecision, nsecs_t downTime);
 
-    // Updates pointer coords for pointers with specified ids that have moved.
+    // Updates pointer coords and properties for pointers with specified ids that have moved.
     // Returns true if any of them changed.
-    bool updateMovedPointerCoords(const PointerCoords* inCoords, const uint32_t* inIdToIndex,
-            PointerCoords* outCoords, const uint32_t* outIdToIndex, BitSet32 idBits) const;
+    bool updateMovedPointers(const PointerProperties* inProperties,
+            const PointerCoords* inCoords, const uint32_t* inIdToIndex,
+            PointerProperties* outProperties, PointerCoords* outCoords,
+            const uint32_t* outIdToIndex, BitSet32 idBits) const;
 
     void suppressSwipeOntoVirtualKeys(nsecs_t when);
 
+    int32_t getTouchToolType(bool isStylus) const;
     bool isPointInsideSurfaceLocked(int32_t x, int32_t y);
     const VirtualKey* findVirtualKeyHitLocked(int32_t x, int32_t y);
 
@@ -1134,7 +1144,7 @@ private:
     int32_t mY;
     int32_t mPressure;
     int32_t mToolWidth;
-    uint32_t mButtonState;
+    int32_t mButtonState;
 
     void initialize();
 
@@ -1198,7 +1208,7 @@ private:
         }
     } mAccumulator;
 
-    uint32_t mButtonState;
+    int32_t mButtonState;
 
     void initialize();
 

@@ -263,8 +263,9 @@ public:
             int32_t scanCode, int32_t metaState, nsecs_t downTime) = 0;
     virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags,
-            int32_t metaState, int32_t edgeFlags,
-            uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
+            int32_t metaState, int32_t buttonState, int32_t edgeFlags,
+            uint32_t pointerCount, const PointerProperties* pointerProperties,
+            const PointerCoords* pointerCoords,
             float xPrecision, float yPrecision, nsecs_t downTime) = 0;
     virtual void notifySwitch(nsecs_t when,
             int32_t switchCode, int32_t switchValue, uint32_t policyFlags) = 0;
@@ -358,8 +359,9 @@ public:
             int32_t scanCode, int32_t metaState, nsecs_t downTime);
     virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t source,
             uint32_t policyFlags, int32_t action, int32_t flags,
-            int32_t metaState, int32_t edgeFlags,
-            uint32_t pointerCount, const int32_t* pointerIds, const PointerCoords* pointerCoords,
+            int32_t metaState, int32_t buttonState, int32_t edgeFlags,
+            uint32_t pointerCount, const PointerProperties* pointerProperties,
+            const PointerCoords* pointerCoords,
             float xPrecision, float yPrecision, nsecs_t downTime);
     virtual void notifySwitch(nsecs_t when,
             int32_t switchCode, int32_t switchValue, uint32_t policyFlags) ;
@@ -454,12 +456,13 @@ private:
         int32_t action;
         int32_t flags;
         int32_t metaState;
+        int32_t buttonState;
         int32_t edgeFlags;
         float xPrecision;
         float yPrecision;
         nsecs_t downTime;
         uint32_t pointerCount;
-        int32_t pointerIds[MAX_POINTERS];
+        PointerProperties pointerProperties[MAX_POINTERS];
 
         // Linked list of motion samples associated with this motion event.
         MotionSample firstSample;
@@ -469,7 +472,7 @@ private:
 
         // Checks whether we can append samples, assuming the device id and source are the same.
         bool canAppendSamples(int32_t action, uint32_t pointerCount,
-                const int32_t* pointerIds) const;
+                const PointerProperties* pointerProperties) const;
     };
 
     // Tracks the progress of dispatching a particular event to a particular connection.
@@ -602,10 +605,10 @@ private:
                 int32_t repeatCount, nsecs_t downTime);
         MotionEntry* obtainMotionEntry(nsecs_t eventTime,
                 int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,
-                int32_t flags, int32_t metaState, int32_t edgeFlags,
+                int32_t flags, int32_t metaState, int32_t buttonState, int32_t edgeFlags,
                 float xPrecision, float yPrecision,
                 nsecs_t downTime, uint32_t pointerCount,
-                const int32_t* pointerIds, const PointerCoords* pointerCoords);
+                const PointerProperties* pointerProperties, const PointerCoords* pointerCoords);
         DispatchEntry* obtainDispatchEntry(EventEntry* eventEntry,
                 int32_t targetFlags, float xOffset, float yOffset, float scaleFactor);
         CommandEntry* obtainCommandEntry(Command command);
@@ -721,7 +724,7 @@ private:
             float yPrecision;
             nsecs_t downTime;
             uint32_t pointerCount;
-            int32_t pointerIds[MAX_POINTERS];
+            PointerProperties pointerProperties[MAX_POINTERS];
             PointerCoords pointerCoords[MAX_POINTERS];
             bool hovering;
 
@@ -1053,6 +1056,10 @@ private:
     void doNotifyANRLockedInterruptible(CommandEntry* commandEntry);
     void doInterceptKeyBeforeDispatchingLockedInterruptible(CommandEntry* commandEntry);
     void doDispatchCycleFinishedLockedInterruptible(CommandEntry* commandEntry);
+    bool afterKeyEventLockedInterruptible(const sp<Connection>& connection,
+            DispatchEntry* dispatchEntry, KeyEntry* keyEntry, bool handled);
+    bool afterMotionEventLockedInterruptible(const sp<Connection>& connection,
+            DispatchEntry* dispatchEntry, MotionEntry* motionEntry, bool handled);
     void doPokeUserActivityLockedInterruptible(CommandEntry* commandEntry);
     void initializeKeyEvent(KeyEvent* event, const KeyEntry* entry);
 
