@@ -4574,18 +4574,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * capture information of this view for later analysis: developement only
-     * check dynamic switch to make sure we only dump view
-     * when ViewDebug.SYSTEM_PROPERTY_CAPTURE_VIEW) is set
-     */
-    private static void captureViewInfo(String subTag, View v) {
-        if (v == null || SystemProperties.getInt(ViewDebug.SYSTEM_PROPERTY_CAPTURE_VIEW, 0) == 0) {
-            return;
-        }
-        ViewDebug.dumpCapturedView(subTag, v);
-    }
-
-    /**
      * Return the global {@link KeyEvent.DispatcherState KeyEvent.DispatcherState}
      * for this view's window.  Returns null if the view is not currently attached
      * to the window.  Normally you will not need to use this directly, but
