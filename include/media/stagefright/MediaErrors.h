@@ -52,6 +52,7 @@ enum {
     ERROR_DRM_DECRYPT_UNIT_NOT_INITIALIZED  = DRM_ERROR_BASE - 4,
     ERROR_DRM_DECRYPT                       = DRM_ERROR_BASE - 5,
     ERROR_DRM_CANNOT_HANDLE                 = DRM_ERROR_BASE - 6,
+    ERROR_DRM_TAMPER_DETECTED               = DRM_ERROR_BASE - 7,
 
     // Heartbeat Error Codes
     HEARTBEAT_ERROR_BASE = -3000,
