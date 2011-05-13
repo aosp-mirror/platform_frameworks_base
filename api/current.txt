@@ -8938,6 +8938,8 @@ package android.hardware {
     method public java.lang.String flatten();
     method public java.lang.String get(java.lang.String);
     method public java.lang.String getAntibanding();
+    method public boolean getAutoExposureLock();
+    method public boolean getAutoWhiteBalanceLock();
     method public java.lang.String getColorEffect();
     method public int getExposureCompensation();
     method public float getExposureCompensationStep();
@@ -8983,6 +8985,8 @@ package android.hardware {
     method public java.lang.String getWhiteBalance();
     method public int getZoom();
     method public java.util.List<java.lang.Integer> getZoomRatios();
+    method public boolean isAutoExposureLockSupported();
+    method public boolean isAutoWhiteBalanceLockSupported();
     method public boolean isSmoothZoomSupported();
     method public boolean isZoomSupported();
     method public void remove(java.lang.String);
@@ -8990,6 +8994,8 @@ package android.hardware {
     method public void set(java.lang.String, java.lang.String);
     method public void set(java.lang.String, int);
     method public void setAntibanding(java.lang.String);
+    method public void setAutoExposureLock(boolean);
+    method public void setAutoWhiteBalanceLock(boolean);
     method public void setColorEffect(java.lang.String);
     method public void setExposureCompensation(int);
     method public void setFlashMode(java.lang.String);
