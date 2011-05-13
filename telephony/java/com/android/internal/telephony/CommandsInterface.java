@@ -27,8 +27,6 @@ import android.os.SystemProperties;
  * {@hide}
  */
 public interface CommandsInterface {
-    static final boolean LTE_AVAILABLE_ON_CDMA =
-        SystemProperties.getBoolean(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA, false);
     enum RadioState {
         RADIO_OFF(0),         /* Radio explictly powered off (eg CFUN=0) */
         RADIO_UNAVAILABLE(0), /* Radio unavailable (eg, resetting or not booted) */
@@ -79,7 +77,7 @@ public interface CommandsInterface {
         }
 
         public boolean isGsm() {
-            if (LTE_AVAILABLE_ON_CDMA) {
+            if (BaseCommands.getLteOnCdmaModeStatic() == Phone.LTE_ON_CDMA_TRUE) {
                 return false;
             } else {
                 return this == SIM_NOT_READY
@@ -89,7 +87,7 @@ public interface CommandsInterface {
         }
 
         public boolean isCdma() {
-            if (LTE_AVAILABLE_ON_CDMA) {
+            if (BaseCommands.getLteOnCdmaModeStatic() == Phone.LTE_ON_CDMA_TRUE) {
                 return true;
             } else {
                 return this ==  RUIM_NOT_READY
@@ -1572,4 +1570,14 @@ public interface CommandsInterface {
      *          Callback message containing {@link IccCardStatus} structure for the card.
      */
     public void getIccCardStatus(Message result);
+
+    /**
+     * Return if the current radio is LTE on CDMA. This
+     * is a tri-state return value as for a period of time
+     * the mode may be unknown.
+     *
+     * @return {@link Phone#LTE_ON_CDMA_UNKNOWN}, {@link Phone#LTE_ON_CDMA_FALSE}
+     * or {@link Phone#LTE_ON_CDMA_TRUE}
+     */
+    public int getLteOnCdmaMode();
 }

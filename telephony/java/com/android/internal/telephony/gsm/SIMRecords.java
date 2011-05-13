@@ -28,6 +28,7 @@ import android.util.Log;
 import com.android.internal.telephony.AdnRecord;
 import com.android.internal.telephony.AdnRecordCache;
 import com.android.internal.telephony.AdnRecordLoader;
+import com.android.internal.telephony.BaseCommands;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccRecords;
@@ -35,6 +36,7 @@ import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.IccVmFixedException;
 import com.android.internal.telephony.IccVmNotSupportedException;
 import com.android.internal.telephony.MccTable;
+import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneBase;
 
 import java.util.ArrayList;
@@ -495,8 +497,7 @@ public final class SIMRecords extends IccRecords {
         }
 
         // STOPSHIP: to be removed
-        if (SystemProperties.getInt(com.android.internal.telephony.TelephonyProperties
-                .PROPERTY_NETWORK_LTE_ON_CDMA, 0) == 1) {
+        if (BaseCommands.getLteOnCdmaModeStatic() == Phone.LTE_ON_CDMA_TRUE) {
             Log.e(LOG_TAG, "getOperatorNumeric: STOPSHIP bad numeric operators in lte");
             return SystemProperties.get("ro.cdma.home.operator.numeric", "310004");
         }

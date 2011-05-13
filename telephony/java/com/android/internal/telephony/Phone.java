@@ -21,6 +21,7 @@ import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemProperties;
 import android.telephony.CellLocation;
 import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
@@ -192,6 +193,11 @@ public interface Phone {
     static final int PHONE_TYPE_GSM = RILConstants.GSM_PHONE;
     static final int PHONE_TYPE_CDMA = RILConstants.CDMA_PHONE;
     static final int PHONE_TYPE_SIP = RILConstants.SIP_PHONE;
+
+    // Modes for LTE_ON_CDMA
+    static final int LTE_ON_CDMA_UNKNOWN = RILConstants.LTE_ON_CDMA_UNKNOWN;
+    static final int LTE_ON_CDMA_FALSE = RILConstants.LTE_ON_CDMA_FALSE;
+    static final int LTE_ON_CDMA_TRUE = RILConstants.LTE_ON_CDMA_TRUE;
 
     // Used for preferred network type
     // Note NT_* substitute RILConstants.NETWORK_MODE_* above the Phone
@@ -1698,6 +1704,14 @@ public interface Phone {
      */
     void unsetOnEcbModeExitResponse(Handler h);
 
+    /**
+     * Return if the current radio is LTE on CDMA. This
+     * is a tri-state return value as for a period of time
+     * the mode may be unknown.
+     *
+     * @return {@link #LTE_ON_CDMA_UNKNOWN}, {@link #LTE_ON_CDMA_FALSE} or {@link #LTE_ON_CDMA_TRUE}
+     */
+    public int getLteOnCdmaMode();
 
     /**
      * TODO: Adding a function for each property is not good.
