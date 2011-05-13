@@ -89,6 +89,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
                 }
                 return;
             } else if (msg.what == MSG_WEBKIT_DATA) {
+                Log.v(LOGTAG, "Received WebView dump data");
                 mHandler.removeMessages(MSG_DUMP_TIMEOUT);
                 TestShellActivity.this.dump(mTimedOut, (String)msg.obj);
                 return;
