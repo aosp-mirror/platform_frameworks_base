@@ -42,6 +42,7 @@ enum {
     DRM_ERROR_DECRYPT_UNIT_NOT_INITIALIZED  = ERROR_BASE - 4,
     DRM_ERROR_DECRYPT                       = ERROR_BASE - 5,
     DRM_ERROR_CANNOT_HANDLE                 = ERROR_BASE - 6,
+    DRM_ERROR_TAMPER_DETECTED               = ERROR_BASE - 7,
 
     DRM_NO_ERROR                            = NO_ERROR
 };
