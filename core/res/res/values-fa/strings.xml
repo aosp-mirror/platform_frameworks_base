@@ -949,8 +949,6 @@
     <string name="ime_action_default" msgid="2840921885558045721">"اجرا کردن"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"شماره گیری "\n"با استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"ایجاد مخاطب"\n"با استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"علامت زده شد"</string>
-    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"بدون علامت"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"یک یا چند برنامه زیر برای دسترسی به حساب شما در زمان حال و آینده درخواست کرده اند."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"می خواهید به این درخواست اجازه دهید؟"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"درخواست دسترسی"</string>

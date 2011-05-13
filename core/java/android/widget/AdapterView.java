@@ -898,8 +898,8 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     }
 
     @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        super.onPopulateAccessibilityEvent(event);
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
 
         View selectedView = getSelectedView();
         if (selectedView != null) {

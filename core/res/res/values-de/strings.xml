@@ -949,8 +949,6 @@
     <string name="ime_action_default" msgid="2840921885558045721">"Ausführen"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Nummer"\n"mit <xliff:g id="NUMBER">%s</xliff:g> wählen"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Neuer Kontakt"\n"mit <xliff:g id="NUMBER">%s</xliff:g> erstellen"</string>
-    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"aktiviert"</string>
-    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"nicht aktiviert"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Die folgenden Anwendungen benötigen die Berechtigung zum aktuellen und zukünftigen Zugriff auf Ihr Konto."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Möchten Sie diese Anfrage zulassen?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"Zugriffsanfrage"</string>

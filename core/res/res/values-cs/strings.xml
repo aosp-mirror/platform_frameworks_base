@@ -949,8 +949,6 @@
     <string name="ime_action_default" msgid="2840921885558045721">"Spustit"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Vytočit číslo"\n" <xliff:g id="NUMBER">%s</xliff:g>."</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Vytvořit kontakt"\n"pro <xliff:g id="NUMBER">%s</xliff:g>."</string>
-    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"Zaškrtnuto"</string>
-    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"Nezaškrtnuto"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Následující aplikace požadují oprávnění k přístupu do vašeho účtu (nyní i v budoucnu)."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Chcete tento požadavek povolit?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"Požadavek na přístup"</string>

@@ -949,8 +949,6 @@
     <string name="ime_action_default" msgid="2840921885558045721">"בצע"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"חייג למספר"\n"באמצעות <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"צור איש קשר"\n"באמצעות <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"נבדק"</string>
-    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"לא נבדק"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"היישומים הבאים מבקשים הרשאה לגשת לחשבונך, כעת ובעתיד."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"האם ברצונך לאפשר בקשה זו?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"בקשת גישה"</string>

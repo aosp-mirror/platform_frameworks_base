@@ -949,8 +949,6 @@
     <string name="ime_action_default" msgid="2840921885558045721">"執行"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"使用 <xliff:g id="NUMBER">%s</xliff:g>"\n"撥號"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"建立手機號碼為 <xliff:g id="NUMBER">%s</xliff:g>"\n"的聯絡人"</string>
-    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"已勾選"</string>
-    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"未勾選"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"下列一或多個應用程式要求現在及將來的帳戶存取權限。"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"您確定要允許這個要求嗎？"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"存取要求"</string>

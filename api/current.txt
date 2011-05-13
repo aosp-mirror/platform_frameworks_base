@@ -21273,6 +21273,7 @@ package android.view {
     method protected void onFocusChanged(boolean, int, android.graphics.Rect);
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
     method public boolean onHoverEvent(android.view.MotionEvent);
+    method public void onInitializeAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method public boolean onKeyDown(int, android.view.KeyEvent);
     method public boolean onKeyLongPress(int, android.view.KeyEvent);
     method public boolean onKeyMultiple(int, int, android.view.KeyEvent);

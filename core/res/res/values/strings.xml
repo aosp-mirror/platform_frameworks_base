@@ -2653,12 +2653,6 @@
     <string-array translatable="false" name="carrier_properties">
     </string-array>
 
-    <!-- Title for the selected state of a CompoundButton. -->
-    <string name="accessibility_compound_button_selected">checked</string>
-
-    <!-- Title for the unselected state of a CompoundButton. -->
-    <string name="accessibility_compound_button_unselected">not checked</string>
-
     <string name="grant_credentials_permission_message_header">The following one or more applications request permission to access your account, now and in the future.</string>
     <string name="grant_credentials_permission_message_footer">Do you want to allow this request?</string>
     <string name="grant_permissions_header_text">Access Request</string>

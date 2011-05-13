@@ -1998,8 +1998,8 @@ public class ListView extends AbsListView {
     }
 
     @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        super.onPopulateAccessibilityEvent(event);
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
 
         // If the item count is less than 15 then subtract disabled items from the count and
         // position. Otherwise ignore disabled items.

@@ -949,8 +949,6 @@
     <string name="ime_action_default" msgid="2840921885558045721">"تنفيذ"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"طلب رقم"\n"باستخدام <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"إنشاء جهة اتصال"\n"باستخدام <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"محدد"</string>
-    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"لم يتم التحديد"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"يطلب التطبيق أو التطبيقات التالية الإذن للدخول إلى حسابك، الآن وفي المستقبل."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"هل تريد السماح بذلك الطلب؟"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"طلب الدخول"</string>

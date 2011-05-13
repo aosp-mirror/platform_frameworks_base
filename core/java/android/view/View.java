@@ -50,6 +50,7 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pool;
@@ -3440,7 +3441,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * {@inheritDoc}
+     * Sends an accessibility event of the given type. If accessiiblity is
+     * not enabled this method has no effect. The default implementation calls
+     * {@link #onInitializeAccessibilityEvent(AccessibilityEvent)} first
+     * to populate information about the event source (this View), then calls
+     * {@link #dispatchPopulateAccessibilityEvent(AccessibilityEvent)} to
+     * populate the text content of the event source including its descendants,
+     * and last calls
+     * {@link ViewParent#requestSendAccessibilityEvent(View, AccessibilityEvent)}
+     * on its parent to resuest sending of the event to interested parties.
+     *
+     * @param eventType The type of the event to send.
+     *
+     * @see #onInitializeAccessibilityEvent(AccessibilityEvent)
+     * @see #dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+     * @see ViewParent#requestSendAccessibilityEvent(View, AccessibilityEvent)
      */
     public void sendAccessibilityEvent(int eventType) {
         if (AccessibilityManager.getInstance(mContext).isEnabled()) {
@@ -3449,41 +3464,35 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * {@inheritDoc}
+     * This method behaves exactly as {@link #sendAccessibilityEvent(int)} but
+     * takes as an argument an empty {@link AccessibilityEvent} and does not
+     * perfrom a check whether accessibility is enabled.
+     *
+     * @param event The event to send.
+     *
+     * @see #sendAccessibilityEvent(int)
      */
     public void sendAccessibilityEventUnchecked(AccessibilityEvent event) {
         if (!isShown()) {
             return;
         }
-
-        // Populate these here since they are related to the View that
-        // sends the event and should not be modified while dispatching
-        // to descendants.
-        event.setClassName(getClass().getName());
-        event.setPackageName(getContext().getPackageName());
-        event.setEnabled(isEnabled());
-        event.setContentDescription(mContentDescription);
-
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED && mAttachInfo != null) {
-            ArrayList<View> focusablesTempList = mAttachInfo.mFocusablesTempList;
-            getRootView().addFocusables(focusablesTempList, View.FOCUS_FORWARD, FOCUSABLES_ALL);
-            event.setItemCount(focusablesTempList.size());
-            event.setCurrentItemIndex(focusablesTempList.indexOf(this));
-            focusablesTempList.clear();
-        }
-
+        onInitializeAccessibilityEvent(event);
         dispatchPopulateAccessibilityEvent(event);
-
         // In the beginning we called #isShown(), so we know that getParent() is not null.
         getParent().requestSendAccessibilityEvent(this, event);
     }
 
     /**
-     * Dispatches an {@link AccessibilityEvent} to the {@link View} children to be populated.
-     * This method first calls {@link #onPopulateAccessibilityEvent(AccessibilityEvent)}
-     * on this view allowing it to populate information about itself and also decide
-     * whether to intercept the population i.e. to prevent its children from populating
-     * the event.
+     * Dispatches an {@link AccessibilityEvent} to the {@link View} first and then
+     * to its children for adding their text content to the event. Note that the
+     * event text is populated in a separate dispatch path since we add to the
+     * event not only the text of the source but also the text of all its descendants.
+     * </p>
+     * A typical implementation will call
+     * {@link #onPopulateAccessibilityEvent(AccessibilityEvent)} on the this view
+     * and then call the {@link #dispatchPopulateAccessibilityEvent(AccessibilityEvent)}
+     * on each child. Override this method if custom population of the event text
+     * content is required.
      *
      * @param event The event.
      *
@@ -3496,13 +3505,66 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Called from {@link #dispatchPopulateAccessibilityEvent(AccessibilityEvent)}
-     * giving a chance to this View to populate the accessibility evnet with
-     * information about itself.
+     * giving a chance to this View to populate the accessibility event with its
+     * text content. While the implementation is free to modify other event
+     * attributes this should be performed in
+     * {@link #onInitializeAccessibilityEvent(AccessibilityEvent)}.
+     * <p>
+     * Example: Adding formatted date string to an accessibility event in addition
+     *          to the text added by the super implementation.
+     * </p><p><pre><code>
+     * @Override
+     * public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+     *     super.onPopulateAccessibilityEvent(event);
+     *     final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY;
+     *     String selectedDateUtterance = DateUtils.formatDateTime(mContext,
+     *         mCurrentDate.getTimeInMillis(), flags);
+     *     event.getText().add(selectedDateUtterance);
+     * }
+     * </code></pre></p>
      *
      * @param event The accessibility event which to populate.
+     *
+     * @see #sendAccessibilityEvent(int)
+     * @see #dispatchPopulateAccessibilityEvent(AccessibilityEvent)
      */
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
 
+    }
+
+    /**
+     * Initializes an {@link AccessibilityEvent} with information about the
+     * the type of the event and this View which is the event source. In other
+     * words, the source of an accessibility event is the view whose state
+     * change triggered firing the event.
+     * <p>
+     * Example: Setting the password property of an event in addition
+     *          to properties set by the super implementation.
+     * </p><p><pre><code>
+     * @Override
+     * public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+     *    super.onInitializeAccessibilityEvent(event);
+     *    event.setPassword(true);
+     * }
+     * </code></pre></p>
+     * @param event The event to initialeze.
+     *
+     * @see #sendAccessibilityEvent(int)
+     * @see #dispatchPopulateAccessibilityEvent(AccessibilityEvent)
+     */
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        event.setClassName(getClass().getName());
+        event.setPackageName(getContext().getPackageName());
+        event.setEnabled(isEnabled());
+        event.setContentDescription(mContentDescription);
+
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED && mAttachInfo != null) {
+            ArrayList<View> focusablesTempList = mAttachInfo.mFocusablesTempList;
+            getRootView().addFocusables(focusablesTempList, View.FOCUS_FORWARD, FOCUSABLES_ALL);
+            event.setItemCount(focusablesTempList.size());
+            event.setCurrentItemIndex(focusablesTempList.indexOf(this));
+            focusablesTempList.clear();
+        }
     }
 
     /**
