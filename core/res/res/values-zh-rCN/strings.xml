@@ -949,8 +949,6 @@
     <string name="ime_action_default" msgid="2840921885558045721">"执行"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"拨打电话"\n"<xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"创建电话号码为"\n"<xliff:g id="NUMBER">%s</xliff:g> 的联系人"</string>
-    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"已选中"</string>
-    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"未选中"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"以下一个或多个应用程序请求获得在目前和将来访问您帐户的权限。"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"您是否同意此请求？"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"访问请求"</string>

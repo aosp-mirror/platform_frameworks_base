@@ -1089,8 +1089,8 @@ public class ProgressBar extends View {
     }
 
     @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        super.onPopulateAccessibilityEvent(event);
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
         event.setItemCount(mMax);
         event.setCurrentItemIndex(mProgress);
     }

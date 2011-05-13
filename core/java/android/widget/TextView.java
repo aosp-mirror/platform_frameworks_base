@@ -7865,12 +7865,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
         super.onPopulateAccessibilityEvent(event);
 
-        if (!isShown()) {
-            return;
-        }
-
         final boolean isPassword = hasPasswordTransformationMethod();
-
         if (!isPassword) {
             CharSequence text = getText();
             if (TextUtils.isEmpty(text)) {
@@ -7879,9 +7874,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (!TextUtils.isEmpty(text)) {
                 event.getText().add(text);
             }
-        } else {
-            event.setPassword(isPassword);
         }
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+
+        final boolean isPassword = hasPasswordTransformationMethod();
+        event.setPassword(isPassword);
     }
 
     void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,

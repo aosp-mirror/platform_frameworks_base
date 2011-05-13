@@ -949,8 +949,6 @@
     <string name="ime_action_default" msgid="2840921885558045721">"ปฏิบัติ"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"หมุนหมายเลข "\n" โดยใช้ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"สร้างที่อยู่ติดต่อ "\n"โดยใช้ <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"เลือกไว้"</string>
-    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"ไม่ได้ตรวจสอบ"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"แอปพลิเคชันต่อไปนี้ตั้งแต่หนึ่งอย่างขึ้นไปขอให้มีการอนุญาตให้เข้าถึงบัญชีของคุณในขณะนี้และในอนาคต"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"คุณต้องการอนุญาตหรือไม่"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"คำขอเข้าถึง"</string>

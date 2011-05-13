@@ -949,8 +949,6 @@
     <string name="ime_action_default" msgid="2840921885558045721">"Запустити"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"Набр. номер"\n", викор. <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"Створ. контакт"\n", викор. <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"перевірено"</string>
-    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"не перевірено"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Ця чи більше програм запитують дозвіл на отримання доступу до вашого облік. запису зараз і в майбутньому."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Дозволити цей запит?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"Запит на доступ"</string>

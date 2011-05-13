@@ -949,8 +949,6 @@
     <string name="ime_action_default" msgid="2840921885558045721">"実行"</string>
     <string name="dial_number_using" msgid="5789176425167573586">"<xliff:g id="NUMBER">%s</xliff:g>を使って"\n"発信"</string>
     <string name="create_contact_using" msgid="4947405226788104538">"<xliff:g id="NUMBER">%s</xliff:g>を使って"\n"連絡先を新規登録"</string>
-    <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"オン"</string>
-    <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"オフ"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"下記のアプリケーションが、アカウントへのアクセスを今後も許可するようにリクエストしています。"</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"このリクエストを許可してもよろしいですか？"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"アクセスリクエスト"</string>

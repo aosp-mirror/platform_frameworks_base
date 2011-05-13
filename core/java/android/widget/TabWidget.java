@@ -436,8 +436,8 @@ public class TabWidget extends LinearLayout implements OnFocusChangeListener {
     }
 
     @Override
-    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-        super.onPopulateAccessibilityEvent(event);
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
         event.setItemCount(getTabCount());
         event.setCurrentItemIndex(mSelectedTab);
     }
