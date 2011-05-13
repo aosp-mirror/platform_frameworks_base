@@ -613,35 +613,13 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
     public RIL(Context context, int networkMode, int cdmaSubscription) {
         super(context);
+        if (RILJ_LOGD) {
+            riljLog("RIL(context, networkMode=" + networkMode +
+                    " cdmaSubscription=" + cdmaSubscription + ")");
+        }
         mCdmaSubscription  = cdmaSubscription;
         mNetworkMode = networkMode;
-        //At startup mPhoneType is first set from networkMode
-        switch(networkMode) {
-            case RILConstants.NETWORK_MODE_WCDMA_PREF:
-            case RILConstants.NETWORK_MODE_GSM_ONLY:
-            case RILConstants.NETWORK_MODE_WCDMA_ONLY:
-            case RILConstants.NETWORK_MODE_GSM_UMTS:
-                mPhoneType = RILConstants.GSM_PHONE;
-                break;
-            case RILConstants.NETWORK_MODE_CDMA:
-            case RILConstants.NETWORK_MODE_CDMA_NO_EVDO:
-            case RILConstants.NETWORK_MODE_EVDO_NO_CDMA:
-                mPhoneType = RILConstants.CDMA_PHONE;
-                break;
-            case RILConstants.NETWORK_MODE_GLOBAL:
-                mPhoneType = RILConstants.CDMA_PHONE;
-                break;
-            case RILConstants.NETWORK_MODE_LTE_ONLY:
-                if (SystemProperties.getBoolean(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA,
-                        false)) {
-                    mPhoneType = RILConstants.CDMA_PHONE;
-                } else {
-                    mPhoneType = RILConstants.GSM_PHONE;
-                }
-                break;
-            default:
-                mPhoneType = RILConstants.CDMA_PHONE;
-        }
+        mPhoneType = RILConstants.NO_PHONE;
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOG_TAG);
@@ -3564,7 +3542,9 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         send(rr);
     }
 
-    public void setPhoneType(int phoneType) { //Set by CDMAPhone and GSMPhone constructor
+    @Override
+    public void setPhoneType(int phoneType) { // Called by CDMAPhone and GSMPhone constructor
+        if (RILJ_LOGD) riljLog("setPhoneType=" + phoneType + " old value=" + mPhoneType);
         mPhoneType = phoneType;
     }
 

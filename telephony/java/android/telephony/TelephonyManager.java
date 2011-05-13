@@ -30,7 +30,6 @@ import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
 import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.PhoneFactory;
-import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.TelephonyProperties;
 
 import java.util.List;
@@ -627,6 +626,28 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
             // This could happen before phone restarts due to crashing
             return null;
+        }
+    }
+
+    /**
+     * Return if the current radio is LTE on CDMA. This
+     * is a tri-state return value as for a period of time
+     * the mode may be unknown.
+     *
+     * @return {@link Phone#LTE_ON_CDMA_UNKNOWN}, {@link Phone#LTE_ON_CDMA_FALSE}
+     * or {@link Phone#LTE_ON_CDMA_TRUE}
+     *
+     * @hide
+     */
+    public int getLteOnCdmaMode() {
+        try {
+            return getITelephony().getLteOnCdmaMode();
+        } catch (RemoteException ex) {
+            // Assume no ICC card if remote exception which shouldn't happen
+            return Phone.LTE_ON_CDMA_UNKNOWN;
+        } catch (NullPointerException ex) {
+            // This could happen before phone restarts due to crashing
+            return Phone.LTE_ON_CDMA_UNKNOWN;
         }
     }
 
