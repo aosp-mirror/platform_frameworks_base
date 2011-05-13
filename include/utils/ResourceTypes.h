@@ -972,6 +972,14 @@ struct ResTable_config
         uint32_t screenConfig;
     };
     
+    union {
+        struct {
+            uint16_t screenWidthDp;
+            uint16_t screenHeightDp;
+        };
+        uint32_t screenSizeDp;
+    };
+
     inline void copyFromDeviceNoSwap(const ResTable_config& o) {
         const size_t size = dtohl(o.size);
         if (size >= sizeof(ResTable_config)) {
@@ -992,6 +1000,8 @@ struct ResTable_config
         screenHeight = dtohs(screenHeight);
         sdkVersion = dtohs(sdkVersion);
         minorVersion = dtohs(minorVersion);
+        screenWidthDp = dtohs(screenWidthDp);
+        screenHeightDp = dtohs(screenHeightDp);
     }
     
     inline void swapHtoD() {
@@ -1003,6 +1013,8 @@ struct ResTable_config
         screenHeight = htods(screenHeight);
         sdkVersion = htods(sdkVersion);
         minorVersion = htods(minorVersion);
+        screenWidthDp = htods(screenWidthDp);
+        screenHeightDp = htods(screenHeightDp);
     }
     
     inline int compare(const ResTable_config& o) const {
@@ -1021,6 +1033,8 @@ struct ResTable_config
         diff = (int32_t)(screenLayout - o.screenLayout);
         if (diff != 0) return diff;
         diff = (int32_t)(uiMode - o.uiMode);
+        if (diff != 0) return diff;
+        diff = (int32_t)(screenSizeDp - o.screenSizeDp);
         return (int)diff;
     }
     
@@ -1061,6 +1075,7 @@ struct ResTable_config
         if (version != o.version) diffs |= CONFIG_VERSION;
         if (screenLayout != o.screenLayout) diffs |= CONFIG_SCREEN_LAYOUT;
         if (uiMode != o.uiMode) diffs |= CONFIG_UI_MODE;
+        if (screenSizeDp != o.screenSizeDp) diffs |= CONFIG_SCREEN_SIZE;
         return diffs;
     }
     
@@ -1102,6 +1117,18 @@ struct ResTable_config
             if (((screenLayout^o.screenLayout) & MASK_SCREENLONG) != 0) {
                 if (!(screenLayout & MASK_SCREENLONG)) return false;
                 if (!(o.screenLayout & MASK_SCREENLONG)) return true;
+            }
+        }
+
+        if (screenSizeDp || o.screenSizeDp) {
+            if (screenWidthDp != o.screenWidthDp) {
+                if (!screenWidthDp) return false;
+                if (!o.screenWidthDp) return true;
+            }
+
+            if (screenHeightDp != o.screenHeightDp) {
+                if (!screenHeightDp) return false;
+                if (!o.screenHeightDp) return true;
             }
         }
 
@@ -1241,6 +1268,30 @@ struct ResTable_config
                         && (requested->screenLayout & MASK_SCREENLONG)) {
                     return (screenLayout & MASK_SCREENLONG);
                 }
+            }
+
+            if (screenSizeDp || o.screenSizeDp) {
+                // Better is based on the sum of the difference between both
+                // width and height from the requested dimensions.  We are
+                // assuming the invalid configs (with smaller dimens) have
+                // already been filtered.  Note that if a particular dimension
+                // is unspecified, we will end up with a large value (the
+                // difference between 0 and the requested dimension), which is
+                // good since we will prefer a config that has specified a
+                // dimension value.
+                int myDelta = 0, otherDelta = 0;
+                if (requested->screenWidthDp) {
+                    myDelta += requested->screenWidthDp - screenWidthDp;
+                    otherDelta += requested->screenWidthDp - o.screenWidthDp;
+                }
+                if (requested->screenHeightDp) {
+                    myDelta += requested->screenHeightDp - screenHeightDp;
+                    otherDelta += requested->screenHeightDp - o.screenHeightDp;
+                }
+                //LOGI("Comparing this %dx%d to other %dx%d in %dx%d: myDelta=%d otherDelta=%d",
+                //    screenWidthDp, screenHeightDp, o.screenWidthDp, o.screenHeightDp,
+                //    requested->screenWidthDp, requested->screenHeightDp, myDelta, otherDelta);
+                return (myDelta <= otherDelta);
             }
 
             if ((orientation != o.orientation) && requested->orientation) {
@@ -1426,6 +1477,18 @@ struct ResTable_config
                 return false;
             }
         }
+        if (screenSizeDp != 0) {
+            if (settings.screenWidthDp != 0 && screenWidthDp != 0
+                && screenWidthDp > settings.screenWidthDp) {
+                //LOGI("Filtering out width %d in requested %d", screenWidthDp, settings.screenWidthDp);
+                return false;
+            }
+            if (settings.screenHeightDp != 0 && screenHeightDp != 0
+                && screenHeightDp > settings.screenHeightDp) {
+                //LOGI("Filtering out height %d in requested %d", screenHeightDp, settings.screenHeightDp);
+                return false;
+            }
+        }
         if (screenType != 0) {
             if (settings.orientation != 0 && orientation != 0
                 && orientation != settings.orientation) {
@@ -1505,13 +1568,13 @@ struct ResTable_config
     String8 toString() const {
         char buf[200];
         sprintf(buf, "imsi=%d/%d lang=%c%c reg=%c%c orient=%d touch=%d dens=%d "
-                "kbd=%d nav=%d input=%d scrnW=%d scrnH=%d sz=%d long=%d "
+                "kbd=%d nav=%d input=%d ssz=%dx%d %ddp x %ddp sz=%d long=%d "
                 "ui=%d night=%d vers=%d.%d",
                 mcc, mnc,
                 language[0] ? language[0] : '-', language[1] ? language[1] : '-',
                 country[0] ? country[0] : '-', country[1] ? country[1] : '-',
                 orientation, touchscreen, density, keyboard, navigation, inputFlags,
-                screenWidth, screenHeight,
+                screenWidth, screenHeight, screenWidthDp, screenHeightDp,
                 screenLayout&MASK_SCREENSIZE, screenLayout&MASK_SCREENLONG,
                 uiMode&MASK_UI_MODE_TYPE, uiMode&MASK_UI_MODE_NIGHT,
                 sdkVersion, minorVersion);

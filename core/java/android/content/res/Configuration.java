@@ -245,6 +245,20 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int uiMode;
 
+    public static final int SCREEN_WIDTH_DP_UNDEFINED = 0;
+
+    /**
+     * The current width of the available screen space, in dp units.
+     */
+    public int screenWidthDp;
+
+    public static final int SCREEN_HEIGHT_DP_UNDEFINED = 0;
+
+    /**
+     * The current height of the available screen space, in dp units.
+     */
+    public int screenHeightDp;
+
     /**
      * @hide Internal book-keeping.
      */
@@ -282,6 +296,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         orientation = o.orientation;
         screenLayout = o.screenLayout;
         uiMode = o.uiMode;
+        screenWidthDp = o.screenWidthDp;
+        screenHeightDp = o.screenHeightDp;
         seq = o.seq;
     }
     
@@ -320,6 +336,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         sb.append(java.lang.Integer.toHexString(screenLayout));
         sb.append(" uiMode=0x");
         sb.append(java.lang.Integer.toHexString(uiMode));
+        sb.append(" wdp=");
+        sb.append(screenWidthDp);
+        sb.append(" hdp=");
+        sb.append(screenHeightDp);
         if (seq != 0) {
             sb.append(" seq=");
             sb.append(seq);
@@ -345,6 +365,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         orientation = ORIENTATION_UNDEFINED;
         screenLayout = SCREENLAYOUT_SIZE_UNDEFINED;
         uiMode = UI_MODE_TYPE_UNDEFINED;
+        screenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
+        screenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
         seq = 0;
     }
 
@@ -438,6 +460,16 @@ public final class Configuration implements Parcelable, Comparable<Configuration
                         | (delta.uiMode&UI_MODE_NIGHT_MASK);
             }
         }
+        if (delta.screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED
+                && screenWidthDp != delta.screenWidthDp) {
+            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
+            screenWidthDp = delta.screenWidthDp;
+        }
+        if (delta.screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED
+                && screenHeightDp != delta.screenHeightDp) {
+            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
+            screenHeightDp = delta.screenHeightDp;
+        }
         
         if (delta.seq != 0) {
             seq = delta.seq;
@@ -467,9 +499,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * {@link android.content.pm.ActivityInfo#CONFIG_NAVIGATION
      * PackageManager.ActivityInfo.CONFIG_NAVIGATION},
      * {@link android.content.pm.ActivityInfo#CONFIG_ORIENTATION
-     * PackageManager.ActivityInfo.CONFIG_ORIENTATION}, or
+     * PackageManager.ActivityInfo.CONFIG_ORIENTATION},
      * {@link android.content.pm.ActivityInfo#CONFIG_SCREEN_LAYOUT
-     * PackageManager.ActivityInfo.CONFIG_SCREEN_LAYOUT}.
+     * PackageManager.ActivityInfo.CONFIG_SCREEN_LAYOUT}, or
+     * {@link android.content.pm.ActivityInfo#CONFIG_SCREEN_SIZE
+     * PackageManager.ActivityInfo.CONFIG_SCREEN_SIZE}.
      */
     public int diff(Configuration delta) {
         int changed = 0;
@@ -521,6 +555,14 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (delta.uiMode != (UI_MODE_TYPE_UNDEFINED|UI_MODE_NIGHT_UNDEFINED)
                 && uiMode != delta.uiMode) {
             changed |= ActivityInfo.CONFIG_UI_MODE;
+        }
+        if (delta.screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED
+                && screenWidthDp != delta.screenWidthDp) {
+            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
+        }
+        if (delta.screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED
+                && screenHeightDp != delta.screenHeightDp) {
+            changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
         }
         
         return changed;
@@ -603,6 +645,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(orientation);
         dest.writeInt(screenLayout);
         dest.writeInt(uiMode);
+        dest.writeInt(screenWidthDp);
+        dest.writeInt(screenHeightDp);
         dest.writeInt(seq);
     }
 
@@ -624,6 +668,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         orientation = source.readInt();
         screenLayout = source.readInt();
         uiMode = source.readInt();
+        screenWidthDp = source.readInt();
+        screenHeightDp = source.readInt();
         seq = source.readInt();
     }
     
@@ -684,6 +730,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         n = this.screenLayout - that.screenLayout;
         if (n != 0) return n;
         n = this.uiMode - that.uiMode;
+        if (n != 0) return n;
+        n = this.screenWidthDp - that.screenWidthDp;
+        if (n != 0) return n;
+        n = this.screenHeightDp - that.screenHeightDp;
         //if (n != 0) return n;
         return n;
     }
@@ -717,6 +767,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         result = 31 * result + orientation;
         result = 31 * result + screenLayout;
         result = 31 * result + uiMode;
+        result = 31 * result + screenWidthDp;
+        result = 31 * result + screenHeightDp;
         return result;
     }
 }

@@ -21,6 +21,7 @@ import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.content.pm.ActivityInfo;
 import android.graphics.Movie;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ColorDrawable;
@@ -1418,6 +1419,7 @@ public class Resources {
                 mTmpConfig.setTo(config);
                 mCompatibilityInfo.applyToConfiguration(mTmpConfig);
                 configChanges = mConfiguration.updateFrom(mTmpConfig);
+                configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
             }
             if (mConfiguration.locale == null) {
                 mConfiguration.locale = Locale.getDefault();
@@ -1456,6 +1458,7 @@ public class Resources {
                     mConfiguration.touchscreen,
                     (int)(mMetrics.density*160), mConfiguration.keyboard,
                     keyboardHidden, mConfiguration.navigation, width, height,
+                    mConfiguration.screenWidthDp, mConfiguration.screenHeightDp,
                     mConfiguration.screenLayout, mConfiguration.uiMode,
                     Build.VERSION.RESOURCES_SDK_INT);
 
