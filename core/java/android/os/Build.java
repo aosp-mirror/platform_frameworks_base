@@ -227,9 +227,14 @@ public class Build {
         public static final int HONEYCOMB = 11;
         
         /**
-         * Newest version of Android, version 3.1.
+         * May 2011: Android 3.1.
          */
         public static final int HONEYCOMB_MR1 = 12;
+        
+        /**
+         * Current development version.
+         */
+        public static final int HONEYCOMB_MR2 = CUR_DEVELOPMENT;
     }
     
     /** The type of build, like "user" or "eng". */
