@@ -128,11 +128,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * that will be notified when something interesting happens to the view. For
  * example, all views will let you set a listener to be notified when the view
  * gains or loses focus. You can register such a listener using
- * {@link #setOnFocusChangeListener}. Other view subclasses offer more
- * specialized listeners. For example, a Button exposes a listener to notify
- * clients when the button is clicked.</li>
+ * {@link #setOnFocusChangeListener(android.view.View.OnFocusChangeListener)}.
+ * Other view subclasses offer more specialized listeners. For example, a Button 
+ * exposes a listener to notify clients when the button is clicked.</li>
  * <li><strong>Set visibility:</strong> You can hide or show views using
- * {@link #setVisibility}.</li>
+ * {@link #setVisibility(int)}.</li>
  * </ul>
  * </p>
  * <p><em>
@@ -173,61 +173,61 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  *     <tr>
  *         <td rowspan="3">Layout</td>
- *         <td><code>{@link #onMeasure}</code></td>
+ *         <td><code>{@link #onMeasure(int, int)}</code></td>
  *         <td>Called to determine the size requirements for this view and all
  *         of its children.
  *         </td>
  *     </tr>
  *     <tr>
- *         <td><code>{@link #onLayout}</code></td>
+ *         <td><code>{@link #onLayout(boolean, int, int, int, int)}</code></td>
  *         <td>Called when this view should assign a size and position to all
  *         of its children.
  *         </td>
  *     </tr>
  *     <tr>
- *         <td><code>{@link #onSizeChanged}</code></td>
+ *         <td><code>{@link #onSizeChanged(int, int, int, int)}</code></td>
  *         <td>Called when the size of this view has changed.
  *         </td>
  *     </tr>
  *
  *     <tr>
  *         <td>Drawing</td>
- *         <td><code>{@link #onDraw}</code></td>
+ *         <td><code>{@link #onDraw(android.graphics.Canvas)}</code></td>
  *         <td>Called when the view should render its content.
  *         </td>
  *     </tr>
  *
  *     <tr>
  *         <td rowspan="4">Event processing</td>
- *         <td><code>{@link #onKeyDown}</code></td>
+ *         <td><code>{@link #onKeyDown(int, KeyEvent)}</code></td>
  *         <td>Called when a new key event occurs.
  *         </td>
  *     </tr>
  *     <tr>
- *         <td><code>{@link #onKeyUp}</code></td>
+ *         <td><code>{@link #onKeyUp(int, KeyEvent)}</code></td>
  *         <td>Called when a key up event occurs.
  *         </td>
  *     </tr>
  *     <tr>
- *         <td><code>{@link #onTrackballEvent}</code></td>
+ *         <td><code>{@link #onTrackballEvent(MotionEvent)}</code></td>
  *         <td>Called when a trackball motion event occurs.
  *         </td>
  *     </tr>
  *     <tr>
- *         <td><code>{@link #onTouchEvent}</code></td>
+ *         <td><code>{@link #onTouchEvent(MotionEvent)}</code></td>
  *         <td>Called when a touch screen motion event occurs.
  *         </td>
  *     </tr>
  *
  *     <tr>
  *         <td rowspan="2">Focus</td>
- *         <td><code>{@link #onFocusChanged}</code></td>
+ *         <td><code>{@link #onFocusChanged(boolean, int, android.graphics.Rect)}</code></td>
  *         <td>Called when the view gains or loses focus.
  *         </td>
  *     </tr>
  *
  *     <tr>
- *         <td><code>{@link #onWindowFocusChanged}</code></td>
+ *         <td><code>{@link #onWindowFocusChanged(boolean)}</code></td>
  *         <td>Called when the window containing the view gains or loses focus.
  *         </td>
  *     </tr>
@@ -246,7 +246,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *     </tr>
  *
  *     <tr>
- *         <td><code>{@link #onWindowVisibilityChanged}</code></td>
+ *         <td><code>{@link #onWindowVisibilityChanged(int)}</code></td>
  *         <td>Called when the visibility of the window containing the view
  *         has changed.
  *         </td>
@@ -562,15 +562,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * As a remedy, the framework offers a touch filtering mechanism that can be used to
  * improve the security of views that provide access to sensitive functionality.
  * </p><p>
- * To enable touch filtering, call {@link #setFilterTouchesWhenObscured} or set the
+ * To enable touch filtering, call {@link #setFilterTouchesWhenObscured(boolean)} or set the
  * android:filterTouchesWhenObscured layout attribute to true.  When enabled, the framework
  * will discard touches that are received whenever the view's window is obscured by
  * another visible window.  As a result, the view will not receive touches whenever a
  * toast, dialog or other window appears above the view's window.
  * </p><p>
  * For more fine-grained control over security, consider overriding the
- * {@link #onFilterTouchEventForSecurity} method to implement your own security policy.
- * See also {@link MotionEvent#FLAG_WINDOW_IS_OBSCURED}.
+ * {@link #onFilterTouchEventForSecurity(MotionEvent)} method to implement your own
+ * security policy. See also {@link MotionEvent#FLAG_WINDOW_IS_OBSCURED}.
  * </p>
  *
  * @attr ref android.R.styleable#View_alpha
@@ -668,19 +668,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     private static final int FITS_SYSTEM_WINDOWS = 0x00000002;
 
     /**
-     * This view is visible.  Use with {@link #setVisibility}.
+     * This view is visible.  Use with {@link #setVisibility(int)}.
      */
     public static final int VISIBLE = 0x00000000;
 
     /**
      * This view is invisible, but it still takes up space for layout purposes.
-     * Use with {@link #setVisibility}.
+     * Use with {@link #setVisibility(int)}.
      */
     public static final int INVISIBLE = 0x00000004;
 
     /**
      * This view is invisible, and it doesn't take any space for layout
-     * purposes. Use with {@link #setVisibility}.
+     * purposes. Use with {@link #setVisibility(int)}.
      */
     public static final int GONE = 0x00000008;
 
@@ -714,10 +714,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     static final int ENABLED_MASK = 0x00000020;
 
     /**
-     * This view won't draw. {@link #onDraw} won't be called and further
-     * optimizations
-     * will be performed. It is okay to have this flag set and a background.
-     * Use with DRAW_MASK when calling setFlags.
+     * This view won't draw. {@link #onDraw(android.graphics.Canvas)} won't be
+     * called and further optimizations will be performed. It is okay to have
+     * this flag set and a background. Use with DRAW_MASK when calling setFlags.
      * {@hide}
      */
     static final int WILL_NOT_DRAW = 0x00000080;
@@ -963,34 +962,34 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public static final int FOCUSABLES_TOUCH_MODE = 0x00000001;
 
     /**
-     * Use with {@link #focusSearch}. Move focus to the previous selectable
+     * Use with {@link #focusSearch(int)}. Move focus to the previous selectable
      * item.
      */
     public static final int FOCUS_BACKWARD = 0x00000001;
 
     /**
-     * Use with {@link #focusSearch}. Move focus to the next selectable
+     * Use with {@link #focusSearch(int)}. Move focus to the next selectable
      * item.
      */
     public static final int FOCUS_FORWARD = 0x00000002;
 
     /**
-     * Use with {@link #focusSearch}. Move focus to the left.
+     * Use with {@link #focusSearch(int)}. Move focus to the left.
      */
     public static final int FOCUS_LEFT = 0x00000011;
 
     /**
-     * Use with {@link #focusSearch}. Move focus up.
+     * Use with {@link #focusSearch(int)}. Move focus up.
      */
     public static final int FOCUS_UP = 0x00000021;
 
     /**
-     * Use with {@link #focusSearch}. Move focus to the right.
+     * Use with {@link #focusSearch(int)}. Move focus to the right.
      */
     public static final int FOCUS_RIGHT = 0x00000042;
 
     /**
-     * Use with {@link #focusSearch}. Move focus down.
+     * Use with {@link #focusSearch(int)}. Move focus down.
      */
     public static final int FOCUS_DOWN = 0x00000082;
 
@@ -2835,8 +2834,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Set the size of the faded edge used to indicate that more content in this
      * view is available.  Will not change whether the fading edge is enabled; use
-     * {@link #setVerticalFadingEdgeEnabled} or {@link #setHorizontalFadingEdgeEnabled}
-     * to enable the fading edge for the vertical or horizontal fading edges.
+     * {@link #setVerticalFadingEdgeEnabled(boolean)} or
+     * {@link #setHorizontalFadingEdgeEnabled(boolean)} to enable the fading edge
+     * for the vertical or horizontal fading edges.
      *
      * @param length The size in pixels of the faded edge used to indicate that more
      *        content in this view is visible.
@@ -3229,7 +3229,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Give this view focus. This will cause {@link #onFocusChanged} to be called.
+     * Give this view focus. This will cause
+     * {@link #onFocusChanged(boolean, int, android.graphics.Rect)} to be called.
      *
      * Note: this does not check whether this {@link View} should get focus, it just
      * gives it focus no matter what.  It should only be called internally by framework
@@ -3314,7 +3315,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Called when this view wants to give up focus. This will cause
-     * {@link #onFocusChanged} to be called.
+     * {@link #onFocusChanged(boolean, int, android.graphics.Rect)} to be called.
      */
     public void clearFocus() {
         if (DBG) {
@@ -3984,7 +3985,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * allow further optimizations. By default, this flag is not set on
      * View, but could be set on some View subclasses such as ViewGroup.
      *
-     * Typically, if you override {@link #onDraw} you should clear this flag.
+     * Typically, if you override {@link #onDraw(android.graphics.Canvas)}
+     * you should clear this flag.
      *
      * @param willNotDraw whether or not this View draw on its own
      */
@@ -4113,7 +4115,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * {@link #setPressed(boolean)} is explicitly called, only clickable views can enter
      * the pressed state.
      *
-     * @see #setPressed
+     * @see #setPressed(boolean) 
      * @see #isClickable()
      * @see #setClickable(boolean)
      *
@@ -4140,7 +4142,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Controls whether the saving of this view's state is
      * enabled (that is, whether its {@link #onSaveInstanceState} method
      * will be called).  Note that even if freezing is enabled, the
-     * view still must have an id assigned to it (via {@link #setId setId()})
+     * view still must have an id assigned to it (via {@link #setId(int)})
      * for its state to be saved.  This flag can only disable the
      * saving of this view; any child views may still have their state saved.
      *
@@ -4411,7 +4413,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * false), or if it is focusable and it is not focusable in touch mode
      * ({@link #isFocusableInTouchMode}) while the device is in touch mode.
      *
-     * See also {@link #focusSearch}, which is what you call to say that you
+     * See also {@link #focusSearch(int)}, which is what you call to say that you
      * have focus, and you want your parent to look for the next one.
      *
      * This is equivalent to calling {@link #requestFocus(int, Rect)} with arguments
@@ -4432,7 +4434,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * false), or if it is focusable and it is not focusable in touch mode
      * ({@link #isFocusableInTouchMode}) while the device is in touch mode.
      *
-     * See also {@link #focusSearch}, which is what you call to say that you
+     * See also {@link #focusSearch(int)}, which is what you call to say that you
      * have focus, and you want your parent to look for the next one.
      *
      * This is equivalent to calling {@link #requestFocus(int, Rect)} with
@@ -4462,7 +4464,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * {@link android.view.ViewGroup#getDescendantFocusability()} equal to
      * {@link ViewGroup#FOCUS_BLOCK_DESCENDANTS}.
      *
-     * See also {@link #focusSearch}, which is what you call to say that you
+     * See also {@link #focusSearch(int)}, which is what you call to say that you
      * have focus, and you want your parent to look for the next one.
      *
      * You may wish to override this method if your custom {@link View} has an internal
@@ -4587,7 +4589,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Return the global {@link KeyEvent.DispatcherState KeyEvent.DispatcherState}
      * for this view's window.  Returns null if the view is not currently attached
      * to the window.  Normally you will not need to use this directly, but
-     * just use the standard high-level event callbacks like {@link #onKeyDown}.
+     * just use the standard high-level event callbacks like
+     * {@link #onKeyDown(int, KeyEvent)}.
      */
     public KeyEvent.DispatcherState getKeyDispatcherState() {
         return mAttachInfo != null ? mAttachInfo.mKeyDispatchState : null;
@@ -4620,11 +4623,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onKeyEvent(event, 0);
-        }
-
-        //noinspection SimplifiableIfStatement,deprecation
-        if (false) {
-            captureViewInfo("captureViewKeyEvent", this);
         }
 
         // Give any attached key listener a first crack at the event.
@@ -4731,7 +4729,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Generic motion events with source class {@link InputDevice#SOURCE_CLASS_POINTER}
      * are delivered to the view under the pointer.  All other generic motion events are
      * delivered to the focused view.  Hover events are handled specially and are delivered
-     * to {@link #onHoverEvent}.
+     * to {@link #onHoverEvent(MotionEvent)}.
      * </p>
      *
      * @param event The motion event to be dispatched.
@@ -4777,7 +4775,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Dispatch a hover event.
      * <p>
-     * Do not call this method directly.  Call {@link #dispatchGenericMotionEvent} instead.
+     * Do not call this method directly. 
+     * Call {@link #dispatchGenericMotionEvent(MotionEvent)} instead.
      * </p>
      *
      * @param event The motion event to be dispatched.
@@ -4791,7 +4790,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Dispatch a generic motion event to the view under the first pointer.
      * <p>
-     * Do not call this method directly.  Call {@link #dispatchGenericMotionEvent} instead.
+     * Do not call this method directly.
+     * Call {@link #dispatchGenericMotionEvent(MotionEvent)} instead.
      * </p>
      *
      * @param event The motion event to be dispatched.
@@ -4805,7 +4805,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Dispatch a generic motion event to the currently focused view.
      * <p>
-     * Do not call this method directly.  Call {@link #dispatchGenericMotionEvent} instead.
+     * Do not call this method directly.
+     * Call {@link #dispatchGenericMotionEvent(MotionEvent)} instead.
      * </p>
      *
      * @param event The motion event to be dispatched.
@@ -4819,9 +4820,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Dispatch a pointer event.
      * <p>
-     * Dispatches touch related pointer events to {@link #onTouchEvent} and all
-     * other events to {@link #onGenericMotionEvent}.  This separation of concerns
-     * reinforces the invariant that {@link #onTouchEvent} is really about touches
+     * Dispatches touch related pointer events to {@link #onTouchEvent(MotionEvent)} and all
+     * other events to {@link #onGenericMotionEvent(MotionEvent)}.  This separation of concerns
+     * reinforces the invariant that {@link #onTouchEvent(MotionEvent)} is really about touches
      * and should not be expected to handle other pointing device features.
      * </p>
      *
@@ -4946,7 +4947,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @param visibility The new visibility of the window.
      *
-     * @see #onWindowVisibilityChanged
+     * @see #onWindowVisibilityChanged(int) 
      */
     public void dispatchWindowVisibilityChanged(int visibility) {
         onWindowVisibilityChanged(visibility);
@@ -5022,7 +5023,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @param newConfig The new resource configuration.
      *
-     * @see #onConfigurationChanged
+     * @see #onConfigurationChanged(android.content.res.Configuration) 
      */
     public void dispatchConfigurationChanged(Configuration newConfig) {
         onConfigurationChanged(newConfig);
@@ -5392,7 +5393,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * </p><p>
      * The view receives hover enter as the pointer enters the bounds of the view and hover
      * exit as the pointer exits the bound of the view or just before the pointer goes down
-     * (which implies that {@link #onTouchEvent} will be called soon).
+     * (which implies that {@link #onTouchEvent(MotionEvent)} will be called soon).
      * </p><p>
      * If the view would like to handle the hover event itself and prevent its children
      * from receiving hover, it should return true from this method.  If this method returns
@@ -5945,7 +5946,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Return the full width measurement information for this view as computed
-     * by the most recent call to {@link #measure}.  This result is a bit mask
+     * by the most recent call to {@link #measure(int, int)}.  This result is a bit mask
      * as defined by {@link #MEASURED_SIZE_MASK} and {@link #MEASURED_STATE_TOO_SMALL}.
      * This should be used during measurement and layout calculations only. Use
      * {@link #getWidth()} to see how wide a view is after layout.
@@ -5969,7 +5970,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Return the full height measurement information for this view as computed
-     * by the most recent call to {@link #measure}.  This result is a bit mask
+     * by the most recent call to {@link #measure(int, int)}.  This result is a bit mask
      * as defined by {@link #MEASURED_SIZE_MASK} and {@link #MEASURED_STATE_TOO_SMALL}.
      * This should be used during measurement and layout calculations only. Use
      * {@link #getHeight()} to see how wide a view is after layout.
@@ -6938,9 +6939,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * When a view has focus and the user navigates away from it, the next view is searched for
      * starting from the rectangle filled in by this method.
      *
-     * By default, the rectange is the {@link #getDrawingRect})of the view.  However, if your
-     * view maintains some idea of internal selection, such as a cursor, or a selected row
-     * or column, you should override this method and fill in a more specific rectangle.
+     * By default, the rectange is the {@link #getDrawingRect(android.graphics.Rect)})
+     * of the view.  However, if your view maintains some idea of internal selection,
+     * such as a cursor, or a selected row or column, you should override this method and
+     * fill in a more specific rectangle.
      *
      * @param r The rectangle to fill in, in this view's coordinates.
      */
@@ -7307,9 +7309,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Mark the the area defined by dirty as needing to be drawn. If the view is
-     * visible, {@link #onDraw} will be called at some point in the future.
-     * This must be called from a UI thread. To call from a non-UI thread, call
-     * {@link #postInvalidate()}.
+     * visible, {@link #onDraw(android.graphics.Canvas)} will be called at some point
+     * in the future. This must be called from a UI thread. To call from a non-UI
+     * thread, call {@link #postInvalidate()}.
      *
      * WARNING: This method is destructive to dirty.
      * @param dirty the rectangle representing the bounds of the dirty region
@@ -7349,9 +7351,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Mark the the area defined by the rect (l,t,r,b) as needing to be drawn.
      * The coordinates of the dirty rect are relative to the view.
-     * If the view is visible, {@link #onDraw} will be called at some point
-     * in the future. This must be called from a UI thread. To call
-     * from a non-UI thread, call {@link #postInvalidate()}.
+     * If the view is visible, {@link #onDraw(android.graphics.Canvas)}
+     * will be called at some point in the future. This must be called from
+     * a UI thread. To call from a non-UI thread, call {@link #postInvalidate()}.
      * @param l the left position of the dirty region
      * @param t the top position of the dirty region
      * @param r the right position of the dirty region
@@ -7389,9 +7391,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
-     * Invalidate the whole view. If the view is visible, {@link #onDraw} will
-     * be called at some point in the future. This must be called from a
-     * UI thread. To call from a non-UI thread, call {@link #postInvalidate()}.
+     * Invalidate the whole view. If the view is visible,
+     * {@link #onDraw(android.graphics.Canvas)} will be called at some point in
+     * the future. This must be called from a UI thread. To call from a non-UI thread,
+     * call {@link #postInvalidate()}.
      */
     public void invalidate() {
         invalidate(true);
@@ -8304,9 +8307,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * This is called when the view is attached to a window.  At this point it
      * has a Surface and will start drawing.  Note that this function is
-     * guaranteed to be called before {@link #onDraw}, however it may be called
-     * any time before the first onDraw -- including before or after
-     * {@link #onMeasure}.
+     * guaranteed to be called before {@link #onDraw(android.graphics.Canvas)},
+     * however it may be called any time before the first onDraw -- including
+     * before or after {@link #onMeasure(int, int)}.
      *
      * @see #onDetachedFromWindow()
      */
@@ -8479,24 +8482,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @param container The SparseArray in which to save the view's state.
      *
-     * @see #restoreHierarchyState
-     * @see #dispatchSaveInstanceState
-     * @see #onSaveInstanceState
+     * @see #restoreHierarchyState(android.util.SparseArray) 
+     * @see #dispatchSaveInstanceState(android.util.SparseArray) 
+     * @see #onSaveInstanceState() 
      */
     public void saveHierarchyState(SparseArray<Parcelable> container) {
         dispatchSaveInstanceState(container);
     }
 
     /**
-     * Called by {@link #saveHierarchyState} to store the state for this view and its children.
-     * May be overridden to modify how freezing happens to a view's children; for example, some
-     * views may want to not store state for their children.
+     * Called by {@link #saveHierarchyState(android.util.SparseArray)} to store the state for
+     * this view and its children. May be overridden to modify how freezing happens to a
+     * view's children; for example, some views may want to not store state for their children.
      *
      * @param container The SparseArray in which to save the view's state.
      *
-     * @see #dispatchRestoreInstanceState
-     * @see #saveHierarchyState
-     * @see #onSaveInstanceState
+     * @see #dispatchRestoreInstanceState(android.util.SparseArray) 
+     * @see #saveHierarchyState(android.util.SparseArray) 
+     * @see #onSaveInstanceState() 
      */
     protected void dispatchSaveInstanceState(SparseArray<Parcelable> container) {
         if (mID != NO_ID && (mViewFlags & SAVE_DISABLED_MASK) == 0) {
@@ -8530,9 +8533,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return Returns a Parcelable object containing the view's current dynamic
      *         state, or null if there is nothing interesting to save. The
      *         default implementation returns null.
-     * @see #onRestoreInstanceState
-     * @see #saveHierarchyState
-     * @see #dispatchSaveInstanceState
+     * @see #onRestoreInstanceState(android.os.Parcelable) 
+     * @see #saveHierarchyState(android.util.SparseArray) 
+     * @see #dispatchSaveInstanceState(android.util.SparseArray) 
      * @see #setSaveEnabled(boolean)
      */
     protected Parcelable onSaveInstanceState() {
@@ -8545,24 +8548,25 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @param container The SparseArray which holds previously frozen states.
      *
-     * @see #saveHierarchyState
-     * @see #dispatchRestoreInstanceState
-     * @see #onRestoreInstanceState
+     * @see #saveHierarchyState(android.util.SparseArray) 
+     * @see #dispatchRestoreInstanceState(android.util.SparseArray) 
+     * @see #onRestoreInstanceState(android.os.Parcelable) 
      */
     public void restoreHierarchyState(SparseArray<Parcelable> container) {
         dispatchRestoreInstanceState(container);
     }
 
     /**
-     * Called by {@link #restoreHierarchyState} to retrieve the state for this view and its
-     * children. May be overridden to modify how restoreing happens to a view's children; for
-     * example, some views may want to not store state for their children.
+     * Called by {@link #restoreHierarchyState(android.util.SparseArray)} to retrieve the
+     * state for this view and its children. May be overridden to modify how restoring
+     * happens to a view's children; for example, some views may want to not store state
+     * for their children.
      *
      * @param container The SparseArray which holds previously saved state.
      *
-     * @see #dispatchSaveInstanceState
-     * @see #restoreHierarchyState
-     * @see #onRestoreInstanceState
+     * @see #dispatchSaveInstanceState(android.util.SparseArray) 
+     * @see #restoreHierarchyState(android.util.SparseArray) 
+     * @see #onRestoreInstanceState(android.os.Parcelable) 
      */
     protected void dispatchRestoreInstanceState(SparseArray<Parcelable> container) {
         if (mID != NO_ID) {
@@ -8588,9 +8592,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @param state The frozen state that had previously been returned by
      *        {@link #onSaveInstanceState}.
      *
-     * @see #onSaveInstanceState
-     * @see #restoreHierarchyState
-     * @see #dispatchRestoreInstanceState
+     * @see #onSaveInstanceState() 
+     * @see #restoreHierarchyState(android.util.SparseArray) 
+     * @see #dispatchRestoreInstanceState(android.util.SparseArray) 
      */
     protected void onRestoreInstanceState(Parcelable state) {
         mPrivateFlags |= SAVE_STATE_CALLED;
@@ -9476,9 +9480,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Manually render this view (and all of its children) to the given Canvas.
      * The view must have already done a full layout before this function is
-     * called.  When implementing a view, implement {@link #onDraw} instead of
-     * overriding this method. If you do need to override this method, call
-     * the superclass version.
+     * called.  When implementing a view, implement
+     * {@link #onDraw(android.graphics.Canvas)} instead of overriding this method.
+     * If you do need to override this method, call the superclass version.
      *
      * @param canvas The Canvas to which the View is rendered.
      */
@@ -9691,8 +9695,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * optimize the drawing of the fading edges. If you do return a non-zero color, the alpha
      * should be set to 0xFF.
      *
-     * @see #setVerticalFadingEdgeEnabled
-     * @see #setHorizontalFadingEdgeEnabled
+     * @see #setVerticalFadingEdgeEnabled(boolean) 
+     * @see #setHorizontalFadingEdgeEnabled(boolean) 
      *
      * @return The known solid color background for this view, or 0 if the color may vary
      */
@@ -10032,8 +10036,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return boolean If true than the Drawable is being displayed in the
      *         view; else false and it is not allowed to animate.
      *
-     * @see #unscheduleDrawable
-     * @see #drawableStateChanged
+     * @see #unscheduleDrawable(android.graphics.drawable.Drawable) 
+     * @see #drawableStateChanged() 
      */
     protected boolean verifyDrawable(Drawable who) {
         return who == mBGDrawable;
@@ -10046,7 +10050,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * <p>Be sure to call through to the superclass when overriding this
      * function.
      *
-     * @see Drawable#setState
+     * @see Drawable#setState(int[]) 
      */
     protected void drawableStateChanged() {
         Drawable d = mBGDrawable;
@@ -10079,9 +10083,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      *
      * @return The current drawable state
      *
-     * @see Drawable#setState
-     * @see #drawableStateChanged
-     * @see #onCreateDrawableState
+     * @see Drawable#setState(int[]) 
+     * @see #drawableStateChanged() 
+     * @see #onCreateDrawableState(int) 
      */
     public final int[] getDrawableState() {
         if ((mDrawableState != null) && ((mPrivateFlags & DRAWABLE_STATE_DIRTY) == 0)) {
@@ -10106,7 +10110,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return Returns an array holding the current {@link Drawable} state of
      * the view.
      *
-     * @see #mergeDrawableStates
+     * @see #mergeDrawableStates(int[], int[]) 
      */
     protected int[] onCreateDrawableState(int extraSpace) {
         if ((mViewFlags & DUPLICATE_PARENT_STATE) == DUPLICATE_PARENT_STATE &&
@@ -10170,10 +10174,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     /**
      * Merge your own state values in <var>additionalState</var> into the base
      * state values <var>baseState</var> that were returned by
-     * {@link #onCreateDrawableState}.
+     * {@link #onCreateDrawableState(int)}.
      *
      * @param baseState The base state values returned by
-     * {@link #onCreateDrawableState}, which will be modified to also hold your
+     * {@link #onCreateDrawableState(int)}, which will be modified to also hold your
      * own additional state values.
      *
      * @param additionalState The additional state values you would like
@@ -10182,7 +10186,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return As a convenience, the <var>baseState</var> array you originally
      * passed into the function is returned.
      *
-     * @see #onCreateDrawableState
+     * @see #onCreateDrawableState(int) 
      */
     protected static int[] mergeDrawableStates(int[] baseState, int[] additionalState) {
         final int N = baseState.length;
@@ -10701,8 +10705,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * number.
      *
      * @see #NO_ID
-     * @see #getId
-     * @see #findViewById
+     * @see #getId() 
+     * @see #findViewById(int) 
      *
      * @param id a number used to identify the view
      *
@@ -10741,8 +10745,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * @return a positive integer used to identify the view or {@link #NO_ID}
      *         if the view has no ID
      *
-     * @see #setId
-     * @see #findViewById
+     * @see #setId(int) 
+     * @see #findViewById(int) 
      * @attr ref android.R.styleable#View_id
      */
     @ViewDebug.CapturedViewProperty
@@ -11605,6 +11609,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
          *
          * @return The View object associate with this builder object.
          */
+        @SuppressWarnings({"JavadocReference"})
         final public View getView() {
             return mView.get();
         }
@@ -11818,7 +11823,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Given a Drawable whose bounds have been set to draw into this view,
-     * update a Region being computed for {@link #gatherTransparentRegion} so
+     * update a Region being computed for
+     * {@link #gatherTransparentRegion(android.graphics.Region)} so
      * that any non-transparent parts of the Drawable are removed from the
      * given transparent region.
      *
@@ -12352,12 +12358,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Interface definition for a callback to be invoked when the status bar changes
      * visibility.
      *
-     * @see #setOnSystemUiVisibilityChangeListener
+     * @see View#setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener) 
      */
     public interface OnSystemUiVisibilityChangeListener {
         /**
          * Called when the status bar changes visibility because of a call to
-         * {@link #setSystemUiVisibility}.
+         * {@link View#setSystemUiVisibility(int)}.
          *
          * @param visibility {@link #STATUS_BAR_VISIBLE} or {@link #STATUS_BAR_HIDDEN}.
          */
