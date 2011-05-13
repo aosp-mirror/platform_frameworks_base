@@ -108,12 +108,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewAncestor;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
-import android.view.ViewAncestor;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -8224,6 +8224,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private class SuggestionInfo {
             int suggestionStart, suggestionEnd; // range of suggestion item with replacement text
             int spanStart, spanEnd; // range in TextView where text should be inserted
+            SuggestionSpan suggestionSpan; // the SuggestionSpan that this TextView represents
+            int suggestionIndex; // the index of the suggestion inside suggestionSpan
         }
 
         private ViewGroup getViewGroup(boolean under) {
@@ -8300,6 +8302,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
                     suggestionInfo.spanStart = spanStart;
                     suggestionInfo.spanEnd = spanEnd;
+                    suggestionInfo.suggestionSpan = suggestionSpan;
+                    suggestionInfo.suggestionIndex = suggestionIndex;
 
                     totalNbSuggestions++;
                     if (totalNbSuggestions == MAX_NUMBER_SUGGESTIONS) {
@@ -8413,7 +8417,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 words[i] = text.substring(wordStart, wordEnd);
             }
 
-            // Highlighted word algorithm is bases on word matching between source and text
+            // Highlighted word algorithm is based on word matching between source and text
             // Matching words are found from left to right. TODO: change for RTL languages
             // Characters between matching words are highlighted
             int previousCommonWordIndex = -1;
@@ -8501,11 +8505,45 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final int spanStart = suggestionInfo.spanStart;
                 final int spanEnd = suggestionInfo.spanEnd;
                 if (spanStart != NO_SUGGESTIONS) {
+                    // SuggestionSpans are removed by replace: save them before
+                    Editable editable = ((Editable) mText);
+                    SuggestionSpan[] suggestionSpans = editable.getSpans(spanStart, spanEnd,
+                            SuggestionSpan.class);
+                    final int length = suggestionSpans.length;
+                    int[] suggestionSpansStarts = new int[length];
+                    int[] suggestionSpansEnds = new int[length];
+                    int[] suggestionSpansFlags = new int[length];
+                    for (int i = 0; i < length; i++) {
+                        final SuggestionSpan suggestionSpan = suggestionSpans[i];
+                        suggestionSpansStarts[i] = editable.getSpanStart(suggestionSpan);
+                        suggestionSpansEnds[i] = editable.getSpanEnd(suggestionSpan);
+                        suggestionSpansFlags[i] = editable.getSpanFlags(suggestionSpan);
+                    }
+
                     final int suggestionStart = suggestionInfo.suggestionStart;
                     final int suggestionEnd = suggestionInfo.suggestionEnd;
                     final String suggestion = textView.getText().subSequence(
                             suggestionStart, suggestionEnd).toString();
+                    final String originalText = mText.subSequence(spanStart, spanEnd).toString();
                     ((Editable) mText).replace(spanStart, spanEnd, suggestion);
+
+                    // Swap text content between actual text and Suggestion span
+                    String[] suggestions = suggestionInfo.suggestionSpan.getSuggestions();
+                    suggestions[suggestionInfo.suggestionIndex] = originalText;
+
+                    // Restore previous SuggestionSpans
+                    final int lengthDifference = suggestion.length() - (spanEnd - spanStart);
+                    for (int i = 0; i < length; i++) {
+                        // Only spans that include the modified region make sense after replacement
+                        // Spans partially included in the replaced region are removed, there is no
+                        // way to assign them a valid range after replacement
+                        if (suggestionSpansStarts[i] <= spanStart &&
+                                suggestionSpansEnds[i] >= spanEnd) {
+                            editable.setSpan(suggestionSpans[i], suggestionSpansStarts[i],
+                                    suggestionSpansEnds[i] + lengthDifference,
+                                    suggestionSpansFlags[i]);
+                        }
+                    }
                 }
             }
             hide();

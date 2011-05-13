@@ -103,7 +103,7 @@ public class SuggestionSpan implements ParcelableSpan {
      * @return suggestions
      */
     public String[] getSuggestions() {
-        return Arrays.copyOf(mSuggestions, mSuggestions.length);
+        return mSuggestions;
     }
 
     /**
