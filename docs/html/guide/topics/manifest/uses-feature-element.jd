@@ -3,6 +3,32 @@ parent.title=The AndroidManifest.xml File
 parent.link=manifest-intro.html
 @jd:body
 
+<div id="qv-wrapper">
+<div id="qv">
+
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#market-feature-filtering">Android Market and Feature-Based Filtering</a>
+    <ol>
+      <li><a href="#declared">Filtering based on explicitly declared features</a></li>
+      <li><a href="#implicit">Filtering based on implicit features</a></li>
+      <li><a href="#bt-permission-handling">Special handling for Bluetooth feature</a></li>
+      <li><a href="#testing">Testing the features required by your application</a></li>
+    </ol>
+  </li>
+  <li><a href="#features-reference">Features Reference</a>
+    <ol>
+      <li><a href="#hw-features">Hardware features</a></li>
+      <li><a href="#sw-features">Software features</a></li>
+      <li><a href="#permissions">Permissions that Imply Feature Requirements</a></li>
+    </ol>
+  </li>
+</ol>
+</div>
+</div>
+
+
 <dl class="xml">
 
 <dt>syntax:</dt>
@@ -452,7 +478,7 @@ feature support, for all devices.</dd>
 
 
 
-<h3>Testing the features required by your application</h3>
+<h3 id="testing">Testing the features required by your application</h3>
 
 <p>You can use the <code>aapt</code> tool, included in the Android SDK, to
 determine how Android Market will filter your application, based on its declared
@@ -516,7 +542,7 @@ in a separate <code>&lt;uses-feature&gt;</code> element. </p>
     <tr>
        <th>Feature Type</th>
        <th>Feature Descriptor</th>
-       <th>Description</th>
+       <th style="min-width:170px">Description</th>
        <th>Comments</th>
     </tr>
     <tr>
@@ -545,9 +571,9 @@ is sensitive to delays or lag in sound input or output.</td>
 <tr>
   <td><code>android.hardware.camera.autofocus</code></td>
   <td>Subfeature. The application uses the device camera's autofocus capability.</td>
-  <td rowspan="3">If declared with the <code>"android:required="true"</code>
-attribute, these subfeatures implicitly declare the
-<code>android.hardware.camera</code> parent feature. </td>
+  <td rowspan="3">These subfeatures implicitly declare the
+<code>android.hardware.camera</code> parent feature, unless declared with
+<code>android:required="false"</code>.</td>
 </tr>
 <tr>
   <td><code>android.hardware.camera.flash</code></td>
@@ -569,9 +595,9 @@ location, such as GPS location, network location, or cell location.</td>
   <td><code>android.hardware.location.network</code></td>
   <td>Subfeature. The application uses coarse location coordinates obtained from
 a network-based geolocation system supported on the device.</td>
-  <td rowspan="2">If declared with the <code>"android:required="true"</code>
-attribute, these subfeatures implicitly declare the
-<code>android.hardware.location</code> parent feature. </td>
+  <td rowspan="2">These subfeatures implicitly declare the
+<code>android.hardware.location</code> parent feature, unless declared with
+<code>android:required="false"</code>. </td>
 </tr>
 <tr>
   <td><code>android.hardware.location.gps</code></td>
@@ -586,9 +612,9 @@ from a Global Positioning System receiver on the device. </td>
   <td></td>
 </tr>
 <tr>
-  <td>Near Field Communications</td>
+  <td>NFC</td>
   <td><code>android.hardware.nfc</td>
-  <td>The application uses NFC radio features in the device.</td>
+  <td>The application uses Near Field Communications radio features in the device.</td>
   <td></td>
 </tr>
 <tr>
@@ -635,9 +661,9 @@ radio with data communication services.</td>
   <td><code>android.hardware.telephony.cdma</code></td>
   <td>Subfeature. The application uses CDMA telephony radio features on the
 device. </td>
-  <td rowspan="2">If declared with the <code>"android:required="true"</code>
-attribute, these subfeatures implicitly declare the
-<code>android.hardware.telephony</code> parent feature. </td>
+  <td rowspan="2">These subfeatures implicitly declare the
+<code>android.hardware.telephony</code> parent feature, unless declared with
+<code>android:required="false"</code>. </td>
 </tr>
 <tr>
   <td><code>android.hardware.telephony.gsm</code></td>
@@ -654,38 +680,54 @@ up", and drag.</td>
 emulated touchscreen (or better). A device that offers an emulated touchscreen provides a user input
 system that can emulate a subset of touchscreen capabilities. An example of such an input system is
 a mouse or remote control that drives an on-screen cursor. If your application does not require
-complicated gestures and you want your application available to devices with an emulated
-touchscreen, you should declare this feature.</td>
+complicated gestures and you want your application available to devices that use an on-screen
+cursor to emulate touch events, you should declare this feature.</td>
 </tr>
 <tr>
   <td><code>android.hardware.touchscreen</code></td>
   <td>The application uses touchscreen capabilities, for gestures more interactive
 than basic touches, such as a fling. This is a superset of the faketouch features.</td>
-  <td></td>
+  <td>By default, this is assumed to be required, unless you declare
+<code>android.hardware.faketouch</code> (the subset touch mode). As such, your application is
+<em>not</em> available to devices that provide only an emulated touch interface ("fake touch") by
+default.</td>
 </tr>
 <tr>
   <td><code>android.hardware.touchscreen.multitouch</code></td>
   <td>The application uses basic two-point multitouch capabilities on the device
 screen, such as for pinch gestures, but does not need to track touches independently. This
 is a superset of touchscreen features.</td>
-  <td>If declared with the <code>"android:required="true"</code> attribute, this
-implicitly declares the <code>android.hardware.touchscreen</code>
-parent feature. </td>
+  <td>This implicitly declares the <code>android.hardware.touchscreen</code> parent feature, unless
+declared with <code>android:required="false"</code>. </td>
 </tr>
 <tr>
   <td><code>android.hardware.touchscreen.multitouch.distinct</code></td>
   <td>Subfeature. The application uses advanced multipoint multitouch
 capabilities on the device screen, such as for tracking two or more points fully
 independently. This is a superset of multitouch features.</td>
-  <td rowspan="2">If declared with the <code>"android:required="true"</code> attribute, this
-implicitly declares the
-<code>android.hardware.touchscreen.multitouch</code> parent feature. </td>
+  <td rowspan="2">This implicitly declares the <code>android.hardware.touchscreen.multitouch</code>
+parent feature, unless declared with <code>android:required="false"</code>. </td>
 </tr>
 <tr>
   <td><code>android.hardware.touchscreen.multitouch.jazzhand</code></td>
   <td>The application uses advanced multipoint multitouch
 capabilities on the device screen, for tracking up to five points fully
 independently. This is a superset of distinct multitouch features.</td>
+</tr>
+
+<tr>
+  <td rowspan="2">USB</td>
+  <td><code>android.hardware.usb.host</code></td>
+  <td>The application uses USB host mode features (behaves as the host and connects to USB
+devices).</td>
+  <td></td>
+</tr>
+
+<tr>
+  <td><code>android.hardware.usb.accessory</code></td>
+  <td>The application uses USB accessory features (behaves as the USB device and connects to USB
+hosts).</td>
+  <td></td>
 </tr>
 
 <tr>
@@ -729,9 +771,8 @@ in a separate <code>&lt;uses-feature&gt;</code> element. </p>
   <td><code>android.software.sip.voip</code></td>
   <td>Subfeature. The application uses SIP-based VOIP service on the device.
   </td>
-  <td>If declared with the <code>"android:required="true"</code> attribute, this
-subfeature implicitly declares the <code>android.software.sip</code>
-parent feature.</td>
+  <td>This subfeature implicitly declares the <code>android.software.sip</code> parent feature,
+unless declared with <code>android:required="false"</code>.</td>
 </tr>
   </table>
 
