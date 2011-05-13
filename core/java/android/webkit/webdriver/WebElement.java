@@ -16,9 +16,13 @@
 
 package android.webkit.webdriver;
 
+import android.graphics.Point;
+import android.view.KeyEvent;
+
 import com.android.internal.R;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents an HTML element. Typically most interactions with a web page
@@ -158,6 +162,124 @@ public class WebElement {
         return (Boolean) executeAtom(toggle, this);
     }
 
+    /**
+     * Sends the KeyEvents for the given sequence of characters to the
+     * WebElement to simulate typing. The KeyEvents are generated using the
+     * device's {@link android.view.KeyCharacterMap.VIRTUAL_KEYBOARD}.
+     *
+     * @param keys The keys to send to this WebElement
+     */
+    public void sendKeys(CharSequence... keys) {
+        if (keys == null || keys.length == 0) {
+            return;
+        }
+        click();
+        mDriver.moveCursorToRightMostPosition(getAttribute("value"));
+        mDriver.sendKeys(keys);
+    }
+
+    /**
+     * Use this to send one of the key code constants defined in
+     * {@link android.view.KeyEvent}
+     *
+     * @param keys
+     */
+    public void sendKeyCodes(int... keys) {
+        if (keys == null || keys.length == 0) {
+            return;
+        }
+        click();
+        mDriver.moveCursorToRightMostPosition(getAttribute("value"));
+        mDriver.sendKeyCodes(keys);
+    }
+
+    /**
+     * Sends a touch event to the center coordinates of this WebElement.
+     */
+    public void click() {
+        Point topLeft = getLocation();
+        Point size = getSize();
+        int jsX = topLeft.x + size.x/2;
+        int jsY = topLeft.y + size.y/2;
+        Point center = new Point(jsX, jsY);
+        mDriver.sendTouchScreen(center);
+    }
+
+    /**
+     * Submits the form containing this WebElement.
+     */
+    public void submit() {
+        mDriver.resetPageLoadState();
+        String submit = mDriver.getResourceAsString(R.raw.submit_android);
+        executeAtom(submit, this);
+        mDriver.waitForPageLoadIfNeeded();
+    }
+
+    /**
+     * Clears the text value if this is a text entry element. Does nothing
+     * otherwise.
+     */
+    public void clear() {
+        String value = getAttribute("value");
+        if (value == null || value.equals("")) {
+            return;
+        }
+        int length = value.length();
+        int[] keys = new int[length];
+        for (int i = 0; i < length; i++) {
+            keys[i] = KeyEvent.KEYCODE_DEL;
+        }
+        sendKeyCodes(keys);
+    }
+
+    /**
+     * @return the value of the given CSS property if found, null otherwise.
+     */
+    public String getCssValue(String cssProperty) {
+        String getCssProp = mDriver.getResourceAsString(
+                R.raw.get_value_of_css_property_android);
+        return (String) executeAtom(getCssProp, this, cssProperty);
+    }
+
+    /**
+     * Gets the width and height of the rendered element.
+     *
+     * @return a {@link android.graphics.Point}, where Point.x represents the
+     * width, and Point.y represents the height of the element.
+     */
+    public Point getSize() {
+        String getSize = mDriver.getResourceAsString(R.raw.get_size_android);
+        Map<String, Long> map = (Map<String, Long>) executeAtom(getSize, this);
+        return new Point(map.get("width").intValue(),
+                map.get("height").intValue());
+    }
+
+    /**
+     * Gets the location of the top left corner of this element on the screen.
+     * If the element is not visisble, this will scroll to get the element into
+     * the visisble screen.
+     *
+     * @return a {@link android.graphics.Point} containing the x and y
+     * coordinates of the top left corner of this element.
+     */
+    public Point getLocation() {
+        String getLocation = mDriver.getResourceAsString(
+                R.raw.get_top_left_coordinates_android);
+        Map<String,Long> map = (Map<String, Long>)  executeAtom(getLocation,
+                this);
+        return new Point(map.get("x").intValue(), map.get("y").intValue());
+    }
+
+    /**
+     * @return True if the WebElement is displayed on the screen,
+     * false otherwise.
+     */
+    public boolean isDisplayed() {
+        String isDisplayed = mDriver.getResourceAsString(
+                R.raw.is_displayed_android);
+        return (Boolean) executeAtom(isDisplayed, this);
+    }
+
     /*package*/ String getId() {
         return mId;
     }
@@ -237,15 +359,26 @@ public class WebElement {
     private List<WebElement> findElements(String strategy, String locator) {
         String findElements = mDriver.getResourceAsString(
                 R.raw.find_elements_android);
-        return (List<WebElement>) executeAtom(findElements,
-                strategy, locator, this);
+        if (mId.equals("")) {
+            return (List<WebElement>) executeAtom(findElements,
+                    strategy, locator);
+        } else {
+            return (List<WebElement>) executeAtom(findElements,
+                    strategy, locator, this);
+        }
     }
 
     private WebElement findElement(String strategy, String locator) {
         String findElement = mDriver.getResourceAsString(
                 R.raw.find_element_android);
-        WebElement el = (WebElement) executeAtom(findElement,
-                strategy, locator, this);
+        WebElement el;
+        if (mId.equals("")) {
+            el = (WebElement) executeAtom(findElement,
+                    strategy, locator);
+        } else {
+            el = (WebElement) executeAtom(findElement,
+                    strategy, locator, this);
+        }
         if (el == null) {
             throw new WebElementNotFoundException("Could not find element "
                     + "with " + strategy + ": " + locator);

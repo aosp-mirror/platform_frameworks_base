@@ -29,12 +29,12 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebStorage;
 import android.webkit.WebView;
 
-/* package */ class WebchromeClientWrapper extends WebChromeClient {
+/* package */ class WebChromeClientWrapper extends WebChromeClient {
 
     private final WebChromeClient mDelegate;
     private final WebDriver mDriver;
 
-    public WebchromeClientWrapper(WebChromeClient delegate, WebDriver driver) {
+    public WebChromeClientWrapper(WebChromeClient delegate, WebDriver driver) {
         if (delegate == null) {
             this.mDelegate = new WebChromeClient();
         } else {
@@ -46,7 +46,7 @@ import android.webkit.WebView;
     @Override
     public void onProgressChanged(WebView view, int newProgress) {
         if (newProgress == 100) {
-            mDriver.notifyCommandDone();
+            mDriver.notifyPageFinishedLoading();
         }
         mDelegate.onProgressChanged(view, newProgress);
     }
