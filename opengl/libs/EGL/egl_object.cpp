@@ -14,40 +14,36 @@
  ** limitations under the License.
  */
 
-#ifndef ANDROID_EGL_IMPL_H
-#define ANDROID_EGL_IMPL_H
-
 #include <ctype.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <EGL/eglplatform.h>
+#include <GLES/gl.h>
+#include <GLES/glext.h>
 
-#include "hooks.h"
+#include <utils/threads.h>
 
-#define VERSION_MAJOR 1
-#define VERSION_MINOR 4
+#include "egl_object.h"
 
 // ----------------------------------------------------------------------------
 namespace android {
 // ----------------------------------------------------------------------------
 
-struct egl_connection_t
-{
-    inline egl_connection_t() : dso(0) { }
-    void *              dso;
-    gl_hooks_t *        hooks[2];
-    EGLint              major;
-    EGLint              minor;
-    egl_t               egl;
-};
+egl_object_t::egl_object_t(egl_display_t* disp) :
+    display(disp), terminated(0), count(1) {
+    display->addObject(this);
+}
 
-EGLAPI EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image);
+bool egl_object_t::get() {
+    return display->getObject(this);
+}
 
-extern egl_connection_t gEGLImpl[IMPL_NUM_IMPLEMENTATIONS];
+bool egl_object_t::put() {
+    return display->removeObject(this);
+}
 
 // ----------------------------------------------------------------------------
 }; // namespace android
 // ----------------------------------------------------------------------------
-
-#endif /* ANDROID_EGL_IMPL_H */

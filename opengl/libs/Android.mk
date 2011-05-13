@@ -7,7 +7,11 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= 	       \
+	EGL/egl_tls.cpp        \
+	EGL/egl_display.cpp    \
+	EGL/egl_object.cpp     \
 	EGL/egl.cpp 	       \
+	EGL/eglApi.cpp 	       \
 	EGL/trace.cpp              \
 	EGL/getProcAddress.cpp.arm \
 	EGL/hooks.cpp 	       \
