@@ -1710,8 +1710,7 @@ class BackupManagerService extends IBackupManager.Stub {
                             IApplicationThread.BACKUP_MODE_FULL);
                     if (agent != null) {
                         try {
-                            ApplicationInfo app = mPackageManager.getApplicationInfo(
-                                    pkg.packageName, 0);
+                            ApplicationInfo app = pkg.applicationInfo;
                             boolean sendApk = mIncludeApks
                                     && ((app.flags & ApplicationInfo.FLAG_FORWARD_LOCK) == 0)
                                     && ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
@@ -1742,9 +1741,6 @@ class BackupManagerService extends IBackupManager.Stub {
                             } else {
                                 if (DEBUG) Slog.d(TAG, "Full backup success: " + pkg.packageName);
                             }
-                        } catch (NameNotFoundException e) {
-                            Slog.e(TAG, "Package exists but not app info; skipping: "
-                                    + pkg.packageName);
                         } catch (IOException e) {
                             Slog.e(TAG, "Error backing up " + pkg.packageName, e);
                         }
@@ -1816,8 +1812,11 @@ class BackupManagerService extends IBackupManager.Stub {
                 // unbind and tidy up even on timeout or failure, just in case
                 mActivityManager.unbindBackupAgent(app);
 
-                // The agent was running with a stub Application object, so shut it down
-                if (app.uid != Process.SYSTEM_UID) {
+                // The agent was running with a stub Application object, so shut it down.
+                // !!! We hardcode the confirmation UI's package name here rather than use a
+                //     manifest flag!  TODO something less direct.
+                if (app.uid != Process.SYSTEM_UID
+                        && !pkg.packageName.equals("com.android.backupconfirm")) {
                     if (DEBUG) Slog.d(TAG, "Backup complete, killing host process");
                     mActivityManager.killApplicationProcess(app.processName, app.uid);
                 } else {

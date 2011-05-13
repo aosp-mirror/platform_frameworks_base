@@ -468,6 +468,19 @@ static void calc_tar_checksum(char* buf) {
     sprintf(buf + 148, "%06o", sum); // the trailing space is already in place
 }
 
+// Returns number of bytes written
+static int write_pax_header_entry(char* buf, const char* key, const char* value) {
+    // start with the size of "1 key=value\n"
+    int len = strlen(key) + strlen(value) + 4;
+    if (len > 9) len++;
+    if (len > 99) len++;
+    if (len > 999) len++;
+    // since PATH_MAX is 4096 we don't expect to have to generate any single
+    // header entry longer than 9999 characters
+
+    return sprintf(buf, "%d %s=%s\n", len, key, value);
+}
+
 int write_tarfile(const String8& packageName, const String8& domain,
         const String8& rootpath, const String8& filepath, BackupDataWriter* writer)
 {
@@ -525,8 +538,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
     }
 
     // Good to go -- first construct the standard tar header at the start of the buffer
-    memset(buf, 0, 512);    // tar header is 512 bytes
-    memset(paxHeader, 0, 512);
+    memset(buf, 0, BUFSIZE);
 
     // Magic fields for the ustar file format
     strcat(buf + 257, "ustar");
@@ -602,24 +614,20 @@ int write_tarfile(const String8& packageName, const String8& domain,
     // If we're using a pax extended header, build & write that here; lengths are
     // already preflighted
     if (needExtended) {
+        char sizeStr[32];   // big enough for a 64-bit unsigned value in decimal
+        char* p = paxData;
+
         // construct the pax extended header data block
         memset(paxData, 0, BUFSIZE - (paxData - buf));
-        char* p = paxData;
         int len;
 
         // size header -- calc len in digits by actually rendering the number
         // to a string - brute force but simple
-        len = sprintf(p, "%lld", s.st_size) + 8;  // 8 for "1 size=" and final LF
-        if (len >= 10) len++;
-
-        memset(p, 0, 512);
-        p += sprintf(p, "%d size=%lld\n", len, s.st_size);
+        snprintf(sizeStr, sizeof(sizeStr), "%lld", s.st_size);
+        p += write_pax_header_entry(p, "size", sizeStr);
 
         // fullname was generated above with the ustar paths
-        len = fullname.length() + 8;        // 8 for "1 path=" and final LF
-        if (len >= 10) len++;
-        if (len >= 100) len++;
-        p += sprintf(p, "%d path=%s\n", len, fullname.string());
+        p += write_pax_header_entry(p, "path", fullname.string());
 
         // Now we know how big the pax data is
         int paxLen = p - paxData;

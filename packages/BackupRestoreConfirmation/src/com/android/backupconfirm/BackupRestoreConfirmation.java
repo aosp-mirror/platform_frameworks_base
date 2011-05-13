@@ -24,7 +24,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -77,7 +76,7 @@ public class BackupRestoreConfirmation extends Activity {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_START_BACKUP: {
-                    Toast.makeText(mContext, "!!! Backup starting !!!", Toast.LENGTH_LONG);
+                    Toast.makeText(mContext, "!!! Backup starting !!!", Toast.LENGTH_LONG).show();
                 }
                 break;
 
@@ -88,12 +87,13 @@ public class BackupRestoreConfirmation extends Activity {
                 break;
 
                 case MSG_END_BACKUP: {
-                    Toast.makeText(mContext, "!!! Backup ended !!!", Toast.LENGTH_SHORT);
+                    Toast.makeText(mContext, "!!! Backup ended !!!", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
                 break;
 
                 case MSG_START_RESTORE: {
-                    Toast.makeText(mContext, "!!! Restore starting !!!", Toast.LENGTH_LONG);
+                    Toast.makeText(mContext, "!!! Restore starting !!!", Toast.LENGTH_LONG).show();
                 }
                 break;
 
@@ -102,11 +102,13 @@ public class BackupRestoreConfirmation extends Activity {
                 break;
 
                 case MSG_END_RESTORE: {
-                    Toast.makeText(mContext, "!!! Restore ended !!!", Toast.LENGTH_SHORT);
+                    Toast.makeText(mContext, "!!! Restore ended !!!", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
                 break;
 
                 case MSG_TIMEOUT: {
+                    Toast.makeText(mContext, "!!! TIMED OUT !!!", Toast.LENGTH_LONG).show();
                 }
                 break;
             }
