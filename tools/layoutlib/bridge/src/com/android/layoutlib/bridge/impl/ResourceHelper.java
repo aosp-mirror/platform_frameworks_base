@@ -115,7 +115,7 @@ public final class ResourceHelper {
 
     public static ColorStateList getColorStateList(ResourceValue resValue, BridgeContext context) {
         String value = resValue.getValue();
-        if (value != null) {
+        if (value != null && RenderResources.REFERENCE_NULL.equals(value) == false) {
             // first check if the value is a file (xml most likely)
             File f = new File(value);
             if (f.isFile()) {
