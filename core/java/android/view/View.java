@@ -3545,7 +3545,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Example: Adding formatted date string to an accessibility event in addition
      *          to the text added by the super implementation.
      * </p><p><pre><code>
-     * @Override
      * public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
      *     super.onPopulateAccessibilityEvent(event);
      *     final int flags = DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_SHOW_WEEKDAY;
@@ -3573,7 +3572,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      * Example: Setting the password property of an event in addition
      *          to properties set by the super implementation.
      * </p><p><pre><code>
-     * @Override
      * public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
      *    super.onInitializeAccessibilityEvent(event);
      *    event.setPassword(true);
