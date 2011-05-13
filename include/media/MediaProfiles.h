@@ -150,6 +150,12 @@ public:
      */
     Vector<int> getImageEncodingQualityLevels(int cameraId) const;
 
+    /**
+     * Returns the start time offset (in ms) for the given camera Id.
+     * If the given camera Id does not exist, -1 will be returned.
+     */
+    int getStartTimeOffsetMs(int cameraId) const;
+
 private:
     enum {
         // Camcorder profiles (high/low) and timelapse profiles (high/low)
@@ -332,6 +338,8 @@ private:
 
     static int getCameraId(const char **atts);
 
+    void addStartTimeOffset(int cameraId, const char **atts);
+
     ImageEncodingQualityLevels* findImageEncodingQualityLevels(int cameraId) const;
     void addImageEncodingQualityLevel(int cameraId, const char** atts);
 
@@ -408,6 +416,7 @@ private:
     Vector<VideoDecoderCap*>  mVideoDecoders;
     Vector<output_format>     mEncoderOutputFileFormats;
     Vector<ImageEncodingQualityLevels *>  mImageEncodingQualityLevels;
+    KeyedVector<int, int> mStartTimeOffsets;
 
     typedef struct {
         bool mHasRefProfile;      // Refers to an existing profile

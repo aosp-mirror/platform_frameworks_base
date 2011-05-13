@@ -356,6 +356,18 @@ MediaProfiles::getCameraId(const char** atts)
     return atoi(atts[1]);
 }
 
+void MediaProfiles::addStartTimeOffset(int cameraId, const char** atts)
+{
+    int offsetTimeMs = 700;
+    if (atts[2]) {
+        CHECK(!strcmp("startOffsetMs", atts[2]));
+        offsetTimeMs = atoi(atts[3]);
+    }
+
+    LOGV("%s: cameraId=%d, offset=%d ms", __func__, cameraId, offsetTimeMs);
+    mStartTimeOffsets.replaceValueFor(cameraId, offsetTimeMs);
+}
+
 /*static*/ void
 MediaProfiles::startElementHandler(void *userData, const char *name, const char **atts)
 {
@@ -380,6 +392,7 @@ MediaProfiles::startElementHandler(void *userData, const char *name, const char 
         profiles->mEncoderOutputFileFormats.add(createEncoderOutputFileFormat(atts));
     } else if (strcmp("CamcorderProfiles", name) == 0) {
         profiles->mCurrentCameraId = getCameraId(atts);
+        profiles->addStartTimeOffset(profiles->mCurrentCameraId, atts);
     } else if (strcmp("EncoderProfile", name) == 0) {
         profiles->mCamcorderProfiles.add(
             createCamcorderProfile(profiles->mCurrentCameraId, atts, profiles->mCameraIds));
@@ -995,6 +1008,16 @@ Vector<int> MediaProfiles::getImageEncodingQualityLevels(int cameraId) const
         result = levels->mLevels;  // copy out
     }
     return result;
+}
+
+int MediaProfiles::getStartTimeOffsetMs(int cameraId) const {
+    int offsetTimeMs = -1;
+    ssize_t index = mStartTimeOffsets.indexOfKey(cameraId);
+    if (index >= 0) {
+        offsetTimeMs = mStartTimeOffsets.valueFor(cameraId);
+    }
+    LOGV("%s: offsetTime=%d ms and cameraId=%d", offsetTimeMs, cameraId);
+    return offsetTimeMs;
 }
 
 MediaProfiles::~MediaProfiles()
