@@ -195,11 +195,11 @@ public class ListFragment extends Fragment {
     }
 
     /**
-     * Attach to list view once Fragment is ready to run.
+     * Attach to list view once the view hierarchy has been created.
      */
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         ensureList();
     }
 
