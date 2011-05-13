@@ -69,14 +69,6 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
         return mPlatformFile;
     }
 
-    public ILayoutPullParser getParser(String layoutName) {
-        if (mParser instanceof ILayoutPullParser) {
-            return ((ILayoutPullParser)mParser).getParser(layoutName);
-        }
-
-        return null;
-    }
-
     public Object getViewCookie() {
         if (mParser instanceof ILayoutPullParser) {
             return ((ILayoutPullParser)mParser).getViewCookie();
