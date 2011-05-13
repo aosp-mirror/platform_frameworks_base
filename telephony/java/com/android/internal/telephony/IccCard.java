@@ -88,9 +88,6 @@ public abstract class IccCard {
     private static final int EVENT_QUERY_FACILITY_FDN_DONE = 10;
     private static final int EVENT_CHANGE_FACILITY_FDN_DONE = 11;
 
-    static final boolean LTE_AVAILABLE_ON_CDMA =
-            SystemProperties.getBoolean(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA, false);
-
     /*
       UNKNOWN is a transient state, for example, after uesr inputs ICC pin under
       PIN_REQUIRED state, the query for ICC status returns UNKNOWN before it
@@ -436,7 +433,8 @@ public abstract class IccCard {
         /*
          * TODO: We need to try to remove this, maybe if the RIL sends up a RIL_UNSOL_SIM_REFRESH?
          */
-        if (oldState != State.READY && newState == State.READY && LTE_AVAILABLE_ON_CDMA) {
+        if (oldState != State.READY && newState == State.READY &&
+                mPhone.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE) {
             if (mPhone.mIccRecords instanceof SIMRecords) {
                 ((SIMRecords)mPhone.mIccRecords).onSimReady();
             }
@@ -627,7 +625,8 @@ public abstract class IccCard {
             currentRadioState == RadioState.SIM_NOT_READY     ||
             currentRadioState == RadioState.RUIM_NOT_READY    ||
             currentRadioState == RadioState.NV_NOT_READY      ||
-            (currentRadioState == RadioState.NV_READY && !LTE_AVAILABLE_ON_CDMA)) {
+            (currentRadioState == RadioState.NV_READY &&
+                    (mPhone.getLteOnCdmaMode() != Phone.LTE_ON_CDMA_TRUE))) {
             return IccCard.State.NOT_READY;
         }
 
@@ -635,9 +634,8 @@ public abstract class IccCard {
             currentRadioState == RadioState.SIM_READY             ||
             currentRadioState == RadioState.RUIM_LOCKED_OR_ABSENT ||
             currentRadioState == RadioState.RUIM_READY ||
-            (currentRadioState == RadioState.NV_READY && LTE_AVAILABLE_ON_CDMA)) {
-
-
+            (currentRadioState == RadioState.NV_READY &&
+                    (mPhone.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE))) {
             int index;
 
             // check for CDMA radio technology

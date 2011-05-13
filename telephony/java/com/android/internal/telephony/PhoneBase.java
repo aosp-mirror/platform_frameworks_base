@@ -1140,4 +1140,12 @@ public abstract class PhoneBase extends Handler implements Phone {
     public void notifyDataConnectionFailed(String reason, String apnType) {
         mNotifier.notifyDataConnectionFailed(this, reason, apnType);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getLteOnCdmaMode() {
+        return mCM.getLteOnCdmaMode();
+    }
 }

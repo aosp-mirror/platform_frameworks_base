@@ -22,6 +22,7 @@ import android.os.RegistrantList;
 import android.os.Registrant;
 import android.os.Handler;
 import android.os.AsyncResult;
+import android.os.SystemProperties;
 import android.util.Config;
 import android.util.Log;
 
@@ -791,5 +792,28 @@ public abstract class BaseCommands implements CommandsInterface {
     }
 
     protected void onRadioAvailable() {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getLteOnCdmaMode() {
+        return getLteOnCdmaModeStatic();
+    }
+
+    /**
+     * Return if the current radio is LTE on CDMA. This
+     * is a tri-state return value as for a period of time
+     * the mode may be unknown.
+     *
+     * @return {@link Phone#LTE_ON_CDMA_UNKNOWN}, {@link Phone#LTE_ON_CDMA_FALSE}
+     * or {@link Phone#LTE_ON_CDMA_TRUE}
+     */
+    public static int getLteOnCdmaModeStatic() {
+        int retVal = SystemProperties.getInt(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA,
+                Phone.LTE_ON_CDMA_FALSE);
+        Log.d(LOG_TAG, "getLteOnCdmaMode=" + retVal);
+        return retVal;
     }
 }
