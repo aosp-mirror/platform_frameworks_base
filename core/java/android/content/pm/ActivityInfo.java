@@ -334,6 +334,12 @@ public class ActivityInfo extends ComponentInfo
     public static final int CONFIG_UI_MODE = 0x0200;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle the screen size. Set from the
+     * {@link android.R.attr#configChanges} attribute.
+     */
+    public static final int CONFIG_SCREEN_SIZE = 0x0400;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle changes to the font scaling factor.  Set from the
      * {@link android.R.attr#configChanges} attribute.  This is
      * not a core resource configutation, but a higher-level value, so its
@@ -341,6 +347,37 @@ public class ActivityInfo extends ComponentInfo
      */
     public static final int CONFIG_FONT_SCALE = 0x40000000;
     
+    /** @hide
+     * Unfortunately the constants for config changes in native code are
+     * different from ActivityInfo. :(  Here are the values we should use for the
+     * native side given the bit we have assigned in ActivityInfo.
+     */
+    public static int[] CONFIG_NATIVE_BITS = new int[] {
+        0x0001, // MNC
+        0x0002, // MCC
+        0x0004, // LOCALE
+        0x0008, // TOUCH SCREEN
+        0x0010, // KEYBOARD
+        0x0020, // KEYBOARD HIDDEN
+        0x0040, // NAVIGATION
+        0x0080, // ORIENTATION
+        0x0800, // SCREEN LAYOUT
+        0x1000, // UI MODE
+        0x0200, // SCREEN SIZE
+    };
+    /** @hide
+     * Convert Java change bits to native.
+     */
+    public static int activityInfoConfigToNative(int input) {
+        int output = 0;
+        for (int i=0; i<CONFIG_NATIVE_BITS.length; i++) {
+            if ((input&(1<<i)) != 0) {
+                output |= CONFIG_NATIVE_BITS[i];
+            }
+        }
+        return output;
+    }
+
     /**
      * Bit mask of kinds of configuration changes that this activity
      * can handle itself (without being restarted by the system).
