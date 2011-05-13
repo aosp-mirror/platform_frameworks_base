@@ -454,6 +454,20 @@ static char* strcpy_ptr(char* dest, const char* str) {
     return dest;
 }
 
+static void calc_tar_checksum(char* buf) {
+    // [ 148 :   8 ] checksum -- to be calculated with this field as space chars
+    memset(buf + 148, ' ', 8);
+
+    uint16_t sum = 0;
+    for (uint8_t* p = (uint8_t*) buf; p < ((uint8_t*)buf) + 512; p++) {
+        sum += *p;
+    }
+
+    // Now write the real checksum value:
+    // [ 148 :   8 ]  checksum: 6 octal digits [leading zeroes], NUL, SPC
+    sprintf(buf + 148, "%06o", sum); // the trailing space is already in place
+}
+
 int write_tarfile(const String8& packageName, const String8& domain,
         const String8& rootpath, const String8& filepath, BackupDataWriter* writer)
 {
@@ -462,12 +476,18 @@ int write_tarfile(const String8& packageName, const String8& domain,
     if (*relstart == '/') relstart++;     // won't be true when path == rootpath
     String8 relpath(relstart);
 
+    // If relpath is empty, it means this is the top of one of the standard named
+    // domain directories, so we should just skip it
+    if (relpath.length() == 0) {
+        return 0;
+    }
+
     // Too long a name for the ustar format?
     //    "apps/" + packagename + '/' + domainpath < 155 chars
     //    relpath < 100 chars
+    bool needExtended = false;
     if ((5 + packageName.length() + 1 + domain.length() >= 155) || (relpath.length() >= 100)) {
-        LOGE("Filename [%s] too long, skipping", relpath.string());
-        return -1;
+        needExtended = true;
     }
 
     int err = 0;
@@ -477,6 +497,9 @@ int write_tarfile(const String8& packageName, const String8& domain,
         LOGE("Error %d (%s) from lstat64(%s)", err, strerror(err), filepath.string());
         return err;
     }
+
+    String8 fullname;   // for pax later on
+    String8 prefix;
 
     const int isdir = S_ISDIR(s.st_mode);
 
@@ -491,48 +514,29 @@ int write_tarfile(const String8& packageName, const String8& domain,
 
     // read/write up to this much at a time.
     const size_t BUFSIZE = 32 * 1024;
-
     char* buf = new char[BUFSIZE];
+    char* paxHeader = buf + 512;    // use a different chunk of it as separate scratch
+    char* paxData = buf + 1024;
+
     if (buf == NULL) {
         LOGE("Out of mem allocating transfer buffer");
         err = ENOMEM;
-        goto done;
+        goto cleanup;
     }
 
     // Good to go -- first construct the standard tar header at the start of the buffer
     memset(buf, 0, 512);    // tar header is 512 bytes
+    memset(paxHeader, 0, 512);
 
     // Magic fields for the ustar file format
     strcat(buf + 257, "ustar");
     strcat(buf + 263, "00");
 
-    {
-        // Prefix and main relative path.  Path lengths have been preflighted.
-
-        // [ 345 : 155 ] filename path prefix [ustar]
-        //
-        // packagename and domain can each be empty.
-        char* cp = buf + 345;
-        if (packageName.length() > 0) {
-            // it's an app; so prefix with "apps/packagename/"
-            cp = strcpy_ptr(cp, "apps/");
-            cp = strcpy_ptr(cp, packageName.string());
-        }
-
-        if (domain.length() > 0) {
-            // only need a / if there was a package name
-            if (packageName.length() > 0) *cp++ = '/';
-            cp = strcpy_ptr(cp, domain.string());
-        }
-
-        // [   0 : 100 ]; file name/path
-        strncpy(buf, relpath.string(), 100);
-
-        LOGI("   Name: %s/%s", buf + 345, buf);
-    }
+    // [ 265 : 32 ] user name, ignored on restore
+    // [ 297 : 32 ] group name, ignored on restore
 
     // [ 100 :   8 ] file mode
-    snprintf(buf + 100, 8, "0%o", s.st_mode);
+    snprintf(buf + 100, 8, "%06o ", s.st_mode & ~S_IFMT);
 
     // [ 108 :   8 ] uid -- ignored in Android format; uids are remapped at restore time
     // [ 116 :   8 ] gid -- ignored in Android format
@@ -540,13 +544,14 @@ int write_tarfile(const String8& packageName, const String8& domain,
     snprintf(buf + 116, 8, "0%lo", s.st_gid);
 
     // [ 124 :  12 ] file size in bytes
-    snprintf(buf + 124, 12, "0%llo", s.st_size);
+    if (s.st_size > 077777777777LL) {
+        // very large files need a pax extended size header
+        needExtended = true;
+    }
+    snprintf(buf + 124, 12, "%011llo", (isdir) ? 0LL : s.st_size);
 
     // [ 136 :  12 ] last mod time as a UTC time_t
     snprintf(buf + 136, 12, "%0lo", s.st_mtime);
-
-    // [ 148 :   8 ] checksum -- to be calculated with this field as space chars
-    memset(buf + 148, ' ', 8);
 
     // [ 156 :   1 ] link/file type
     uint8_t type;
@@ -562,19 +567,89 @@ int write_tarfile(const String8& packageName, const String8& domain,
 
     // [ 157 : 100 ] name of linked file [not implemented]
 
-    // Now go back and calculate the header checksum
     {
-        uint16_t sum = 0;
-        for (uint8_t* p = (uint8_t*) buf; p < ((uint8_t*)buf) + 512; p++) {
-            sum += *p;
+        // Prefix and main relative path.  Path lengths have been preflighted.
+        if (packageName.length() > 0) {
+            prefix = "apps/";
+            prefix += packageName;
+        }
+        if (domain.length() > 0) {
+            prefix.appendPath(domain);
         }
 
-        // Now write the real checksum value:
-        // [ 148 :   8 ]  checksum: 6 octal digits [leading zeroes], NUL, SPC
-        sprintf(buf + 148, "%06o", sum); // the trailing space is already in place
+        // pax extended means we don't put in a prefix field, and put a different
+        // string in the basic name field.  We can also construct the full path name
+        // out of the substrings we've now built.
+        fullname = prefix;
+        fullname.appendPath(relpath);
+
+        // ustar:
+        //    [   0 : 100 ]; file name/path
+        //    [ 345 : 155 ] filename path prefix
+        // We only use the prefix area if fullname won't fit in the path
+        if (fullname.length() > 100) {
+            strncpy(buf, relpath.string(), 100);
+            strncpy(buf + 345, prefix.string(), 155);
+        } else {
+            strncpy(buf, fullname.string(), 100);
+        }
     }
 
-    // Write the 512-byte tar file header block to the output
+    // [ 329 : 8 ] and [ 337 : 8 ] devmajor/devminor, not used
+
+    LOGI("   Name: %s", fullname.string());
+
+    // If we're using a pax extended header, build & write that here; lengths are
+    // already preflighted
+    if (needExtended) {
+        // construct the pax extended header data block
+        memset(paxData, 0, BUFSIZE - (paxData - buf));
+        char* p = paxData;
+        int len;
+
+        // size header -- calc len in digits by actually rendering the number
+        // to a string - brute force but simple
+        len = sprintf(p, "%lld", s.st_size) + 8;  // 8 for "1 size=" and final LF
+        if (len >= 10) len++;
+
+        memset(p, 0, 512);
+        p += sprintf(p, "%d size=%lld\n", len, s.st_size);
+
+        // fullname was generated above with the ustar paths
+        len = fullname.length() + 8;        // 8 for "1 path=" and final LF
+        if (len >= 10) len++;
+        if (len >= 100) len++;
+        p += sprintf(p, "%d path=%s\n", len, fullname.string());
+
+        // Now we know how big the pax data is
+        int paxLen = p - paxData;
+
+        // Now build the pax *header* templated on the ustar header
+        memcpy(paxHeader, buf, 512);
+
+        String8 leaf = fullname.getPathLeaf();
+        memset(paxHeader, 0, 100);                  // rewrite the name area
+        snprintf(paxHeader, 100, "PaxHeader/%s", leaf.string());
+        memset(paxHeader + 345, 0, 155);            // rewrite the prefix area
+        strncpy(paxHeader + 345, prefix.string(), 155);
+
+        paxHeader[156] = 'x';                       // mark it as a pax extended header
+
+        // [ 124 :  12 ] size of pax extended header data
+        memset(paxHeader + 124, 0, 12);
+        snprintf(paxHeader + 124, 12, "%011o", p - paxData);
+
+        // Checksum and write the pax block header
+        calc_tar_checksum(paxHeader);
+        writer->WriteEntityData(paxHeader, 512);
+
+        // Now write the pax data itself
+        int paxblocks = (paxLen + 511) / 512;
+        writer->WriteEntityData(paxData, 512 * paxblocks);
+    }
+
+    // Checksum and write the 512-byte ustar file header block to the output
+    calc_tar_checksum(buf);
     writer->WriteEntityData(buf, 512);
 
     // Now write the file data itself, for real files.  We honor tar's convention that
