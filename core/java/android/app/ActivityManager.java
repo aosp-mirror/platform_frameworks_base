@@ -109,6 +109,7 @@ public class ActivityManager {
         }
     }
 
+    /** @hide */
     public void setFrontActivityScreenCompatMode(int mode) {
         try {
             ActivityManagerNative.getDefault().setFrontActivityScreenCompatMode(mode);
@@ -117,6 +118,7 @@ public class ActivityManager {
         }
     }
 
+    /** @hide */
     public int getPackageScreenCompatMode(String packageName) {
         try {
             return ActivityManagerNative.getDefault().getPackageScreenCompatMode(packageName);
@@ -126,6 +128,7 @@ public class ActivityManager {
         }
     }
 
+    /** @hide */
     public void setPackageScreenCompatMode(String packageName, int mode) {
         try {
             ActivityManagerNative.getDefault().setPackageScreenCompatMode(packageName, mode);
