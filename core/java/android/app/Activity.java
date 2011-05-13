@@ -1760,6 +1760,11 @@ public class Activity extends ContextThemeWrapper
      */
     private void initActionBar() {
         Window window = getWindow();
+
+        // Initializing the window decor can change window feature flags.
+        // Make sure that we have the correct set before performing the test below.
+        window.getDecorView();
+
         if (isChild() || !window.hasFeature(Window.FEATURE_ACTION_BAR) || mActionBar != null) {
             return;
         }
