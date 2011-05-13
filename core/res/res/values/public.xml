@@ -1672,4 +1672,17 @@
   <public type="attr" name="fullBackupAgent" />
   <public type="attr" name="suggestionsEnabled" />
 
+  <public type="attr" name="rowCount" />
+  <public type="attr" name="rowOrderPreserved" />
+  <public type="attr" name="columnCount" />
+  <public type="attr" name="columnOrderPreserved" />
+  <public type="attr" name="useDefaultMargins" />
+
+  <public type="attr" name="layout_row" />
+  <public type="attr" name="layout_rowSpan" />
+
+  <public type="attr" name="layout_rowWeight" />
+  <public type="attr" name="layout_columnSpan" />
+  <public type="attr" name="layout_columnWeight" />
+
 </resources>

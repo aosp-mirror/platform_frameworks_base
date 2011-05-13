@@ -301,7 +301,9 @@ package android {
     field public static final int colorBackgroundCacheHint = 16843435; // 0x10102ab
     field public static final int colorForeground = 16842800; // 0x1010030
     field public static final int colorForegroundInverse = 16843270; // 0x1010206
+    field public static final int columnCount = 16843633; // 0x1010371
     field public static final int columnDelay = 16843215; // 0x10101cf
+    field public static final int columnOrderPreserved = 16843634; // 0x1010372
     field public static final int columnWidth = 16843031; // 0x1010117
     field public static final int completionHint = 16843122; // 0x1010172
     field public static final int completionHintView = 16843123; // 0x1010173
@@ -575,6 +577,8 @@ package android {
     field public static final int layout_centerInParent = 16843151; // 0x101018f
     field public static final int layout_centerVertical = 16843153; // 0x1010191
     field public static final int layout_column = 16843084; // 0x101014c
+    field public static final int layout_columnSpan = 16843639; // 0x1010377
+    field public static final int layout_columnWeight = 16843640; // 0x1010378
     field public static final int layout_gravity = 16842931; // 0x10100b3
     field public static final int layout_height = 16842997; // 0x10100f5
     field public static final int layout_margin = 16842998; // 0x10100f6
@@ -582,6 +586,9 @@ package android {
     field public static final int layout_marginLeft = 16842999; // 0x10100f7
     field public static final int layout_marginRight = 16843001; // 0x10100f9
     field public static final int layout_marginTop = 16843000; // 0x10100f8
+    field public static final int layout_row = 16843636; // 0x1010374
+    field public static final int layout_rowSpan = 16843637; // 0x1010375
+    field public static final int layout_rowWeight = 16843638; // 0x1010376
     field public static final int layout_scale = 16843155; // 0x1010193
     field public static final int layout_span = 16843085; // 0x101014d
     field public static final int layout_toLeftOf = 16843138; // 0x1010182
@@ -751,9 +758,11 @@ package android {
     field public static final int rotation = 16843558; // 0x1010326
     field public static final int rotationX = 16843559; // 0x1010327
     field public static final int rotationY = 16843560; // 0x1010328
+    field public static final int rowCount = 16843631; // 0x101036f
     field public static final int rowDelay = 16843216; // 0x10101d0
     field public static final int rowEdgeFlags = 16843329; // 0x1010241
     field public static final int rowHeight = 16843058; // 0x1010132
+    field public static final int rowOrderPreserved = 16843632; // 0x1010370
     field public static final int saveEnabled = 16842983; // 0x10100e7
     field public static final int scaleGravity = 16843262; // 0x10101fe
     field public static final int scaleHeight = 16843261; // 0x10101fd
@@ -984,6 +993,7 @@ package android {
     field public static final int unfocusedMonthDateColor = 16843588; // 0x1010344
     field public static final int unselectedAlpha = 16843278; // 0x101020e
     field public static final int updatePeriodMillis = 16843344; // 0x1010250
+    field public static final int useDefaultMargins = 16843635; // 0x1010373
     field public static final int useIntrinsicSizeAsMinimum = 16843536; // 0x1010310
     field public static final int useLevel = 16843167; // 0x101019f
     field public static final int userVisible = 16843409; // 0x1010291
@@ -24167,6 +24177,67 @@ package android.widget {
     ctor public Gallery.LayoutParams(android.view.ViewGroup.LayoutParams);
   }
 
+  public class GridLayout extends android.view.ViewGroup {
+    ctor public GridLayout(android.content.Context);
+    ctor public GridLayout(android.content.Context, android.util.AttributeSet, int);
+    ctor public GridLayout(android.content.Context, android.util.AttributeSet);
+    method public int getColumnCount();
+    method public int getOrientation();
+    method public int getRowCount();
+    method public boolean getUseDefaultMargins();
+    method public boolean isColumnOrderPreserved();
+    method public boolean isRowOrderPreserved();
+    method protected void onLayout(boolean, int, int, int, int);
+    method public void setColumnCount(int);
+    method public void setColumnOrderPreserved(boolean);
+    method public void setOrientation(int);
+    method public void setRowCount(int);
+    method public void setRowOrderPreserved(boolean);
+    method public void setUseDefaultMargins(boolean);
+    field public static final android.widget.GridLayout.Alignment BASELINE;
+    field public static final android.widget.GridLayout.Alignment BOTTOM;
+    field public static final android.widget.GridLayout.Alignment CENTER;
+    field public static final android.widget.GridLayout.Alignment FILL;
+    field public static final int HORIZONTAL = 0; // 0x0
+    field public static final android.widget.GridLayout.Alignment LEFT;
+    field public static final android.widget.GridLayout.Alignment RIGHT;
+    field public static final android.widget.GridLayout.Alignment TOP;
+    field public static final int VERTICAL = 1; // 0x1
+  }
+
+  public static abstract interface GridLayout.Alignment {
+    method public abstract int getAlignmentValue(android.view.View, int);
+    method public abstract int getSizeInCell(android.view.View, int, int);
+  }
+
+  public static class GridLayout.Group {
+    ctor public GridLayout.Group(android.widget.GridLayout.Interval, android.widget.GridLayout.Alignment);
+    ctor public GridLayout.Group(int, int, android.widget.GridLayout.Alignment);
+    ctor public GridLayout.Group(int, android.widget.GridLayout.Alignment);
+    field public final android.widget.GridLayout.Alignment alignment;
+    field public final android.widget.GridLayout.Interval span;
+  }
+
+  public static class GridLayout.Interval {
+    ctor public GridLayout.Interval(int, int);
+    field public final int max;
+    field public final int min;
+  }
+
+  public static class GridLayout.LayoutParams extends android.view.ViewGroup.MarginLayoutParams {
+    ctor public GridLayout.LayoutParams(android.widget.GridLayout.Group, android.widget.GridLayout.Group);
+    ctor public GridLayout.LayoutParams();
+    ctor public GridLayout.LayoutParams(android.view.ViewGroup.LayoutParams);
+    ctor public GridLayout.LayoutParams(android.view.ViewGroup.MarginLayoutParams);
+    ctor public GridLayout.LayoutParams(android.widget.GridLayout.LayoutParams);
+    ctor public GridLayout.LayoutParams(android.content.Context, android.util.AttributeSet);
+    method public void setGravity(int);
+    field public android.widget.GridLayout.Group columnGroup;
+    field public float columnWeight;
+    field public android.widget.GridLayout.Group rowGroup;
+    field public float rowWeight;
+  }
+
   public class GridView extends android.widget.AbsListView {
     ctor public GridView(android.content.Context);
     ctor public GridView(android.content.Context, android.util.AttributeSet);
@@ -25047,6 +25118,12 @@ package android.widget {
   public static abstract interface SlidingDrawer.OnDrawerScrollListener {
     method public abstract void onScrollEnded();
     method public abstract void onScrollStarted();
+  }
+
+  public final class Space extends android.view.View {
+    ctor public Space(android.content.Context, android.util.AttributeSet, int);
+    ctor public Space(android.content.Context, android.util.AttributeSet);
+    ctor public Space(android.content.Context);
   }
 
   public class Spinner extends android.widget.AbsSpinner implements android.content.DialogInterface.OnClickListener {
