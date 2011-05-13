@@ -379,6 +379,12 @@ public class VibratorService extends IVibratorService.Stub {
             if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
                 synchronized (mVibrations) {
                     doCancelVibrateLocked();
+
+                    int size = mVibrations.size();
+                    for(int i = 0; i < size; i++) {
+                        unlinkVibration(mVibrations.get(i));
+                    }
+
                     mVibrations.clear();
                 }
             }
