@@ -101,6 +101,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     // call reRegisterNetwork, or pingTest succeeds.
     private int mPdpResetCount = 0;
 
+    // Recovery action taken in case of data stall
+    enum RecoveryAction {REREGISTER, RADIO_RESTART, RADIO_RESET};
+    private RecoveryAction mRecoveryAction = RecoveryAction.REREGISTER;
+
 
     //***** Constants
 
@@ -1132,12 +1136,40 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 cleanUpAllConnections(true, Phone.REASON_PDP_RESET);
             } else {
                 mPdpResetCount = 0;
-                EventLog.writeEvent(EventLogTags.PDP_REREGISTER_NETWORK, mSentSinceLastRecv);
-                if (DBG) log("doRecovery() re-register getting preferred network type");
-                mPhone.getServiceStateTracker().reRegisterNetwork(null);
+                switch (mRecoveryAction) {
+                case REREGISTER:
+                    EventLog.writeEvent(EventLogTags.PDP_REREGISTER_NETWORK, mSentSinceLastRecv);
+                    if (DBG) log("doRecovery() re-register getting preferred network type");
+                    mPhone.getServiceStateTracker().reRegisterNetwork(null);
+                    mRecoveryAction = RecoveryAction.RADIO_RESTART;
+                    break;
+                case RADIO_RESTART:
+                    EventLog.writeEvent(EventLogTags.PDP_RADIO_RESET, mSentSinceLastRecv);
+                    if (DBG) log("restarting radio");
+                    mRecoveryAction = RecoveryAction.RADIO_RESET;
+                    restartRadio();
+                    break;
+                case RADIO_RESET:
+                    // This is in case radio restart has not recovered the data.
+                    // It will set an additional "gsm.radioreset" property to tell
+                    // RIL or system to take further action.
+                    // The implementation of hard reset recovery action is up to OEM product.
+                    // Once gsm.radioreset property is consumed, it is expected to set back
+                    // to false by RIL.
+                    EventLog.writeEvent(EventLogTags.PDP_RADIO_RESET, -1);
+                    if (DBG) log("restarting radio with reset indication");
+                    SystemProperties.set("gsm.radioreset", "true");
+                    // give 1 sec so property change can be notified.
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {}
+                    restartRadio();
+                    break;
+                default:
+                    throw new RuntimeException("doRecovery: Invalid mRecoveryAction " +
+                        mRecoveryAction);
+                }
             }
-            // TODO: Add increasingly drastic recovery steps, eg,
-            // reset the radio, reset the device.
         } else {
             if (DBG) log("doRecovery(): ignore, we're not connected");
         }
@@ -1202,6 +1234,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     mSentSinceLastRecv = 0;
                     newActivity = Activity.DATAINANDOUT;
                     mPdpResetCount = 0;
+                    mRecoveryAction = RecoveryAction.REREGISTER;
                 } else if (sent > 0 && received == 0) {
                     if (mPhone.getState() == Phone.State.IDLE) {
                         mSentSinceLastRecv += sent;
@@ -1213,6 +1246,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     mSentSinceLastRecv = 0;
                     newActivity = Activity.DATAIN;
                     mPdpResetCount = 0;
+                    mRecoveryAction = RecoveryAction.REREGISTER;
                 } else if (sent == 0 && received == 0) {
                     newActivity = Activity.NONE;
                 } else {
@@ -1255,7 +1289,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 } else {
                     if (DBG) log("Polling: Sent " + String.valueOf(mSentSinceLastRecv) +
                                         " pkts since last received start recovery process");
-                    stopNetStatPoll();
+                    mNoRecvPollCount = 0;
                     sendMessage(obtainMessage(EVENT_START_RECOVERY));
                 }
             } else {
