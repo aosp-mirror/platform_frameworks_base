@@ -130,14 +130,25 @@ public class PowerManager
     /**
      * Wake lock that ensures that the screen and keyboard are on at
      * full brightness.
+     *
+     * <p class="note">Most applications should strongly consider using
+     * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON}.
+     * This window flag will be correctly managed by the platform
+     * as the user moves between applications and doesn't require a special permission.</p>
      */
     public static final int FULL_WAKE_LOCK = WAKE_BIT_CPU_WEAK | WAKE_BIT_SCREEN_BRIGHT 
                                             | WAKE_BIT_KEYBOARD_BRIGHT;
 
     /**
+     * @deprecated Most applications should use
+     * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} instead
+     * of this type of wake lock, as it will be correctly managed by the platform
+     * as the user moves between applications and doesn't require a special permission.
+     *
      * Wake lock that ensures that the screen is on at full brightness;
      * the keyboard backlight will be allowed to go off.
      */
+    @Deprecated
     public static final int SCREEN_BRIGHT_WAKE_LOCK = WAKE_BIT_CPU_WEAK | WAKE_BIT_SCREEN_BRIGHT;
 
     /**
@@ -379,6 +390,11 @@ public class PowerManager
      * // ...
      *wl.release();
      * }
+     *
+     * <p class="note">If using this to keep the screen on, you should strongly consider using
+     * {@link android.view.WindowManager.LayoutParams#FLAG_KEEP_SCREEN_ON} instead.
+     * This window flag will be correctly managed by the platform
+     * as the user moves between applications and doesn't require a special permission.</p>
      *
      * @param flags Combination of flag values defining the requested behavior of the WakeLock.
      * @param tag Your class name (or other tag) for debugging purposes.
