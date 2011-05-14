@@ -335,8 +335,8 @@ public:
         const jchar* textArray = env->GetCharArrayElements(text, NULL);
         jfloat result = 0;
 #if RTL_USE_HARFBUZZ
-        TextLayout::getTextRunAdvances(paint, textArray, index, count, count, paint->getFlags(),
-                NULL /* dont need all advances */, result);
+        TextLayout::getTextRunAdvances(paint, textArray, index, count, textLength,
+                paint->getFlags(), NULL /* dont need all advances */, result);
 #else
         // we double count, since measureText wants a byteLength
         SkScalar width = paint->measureText(textArray + index, count << 1);
@@ -362,8 +362,8 @@ public:
         jfloat width = 0;
 
 #if RTL_USE_HARFBUZZ
-        TextLayout::getTextRunAdvances(paint, textArray, 0, count, count, paint->getFlags(),
-                NULL /* dont need all advances */, width);
+        TextLayout::getTextRunAdvances(paint, textArray, start, count, end,
+                paint->getFlags(), NULL /* dont need all advances */, width);
 #else
 
         width = SkScalarToFloat(paint->measureText(textArray + start, count << 1));
@@ -381,8 +381,8 @@ public:
         size_t textLength = env->GetStringLength(text);
         jfloat width = 0;
 #if RTL_USE_HARFBUZZ
-        TextLayout::getTextRunAdvances(paint, textArray, 0, textLength, textLength, paint->getFlags(),
-                NULL /* dont need all advances */, width);
+        TextLayout::getTextRunAdvances(paint, textArray, 0, textLength, textLength,
+                paint->getFlags(), NULL /* dont need all advances */, width);
 #else
         width = SkScalarToFloat(paint->measureText(textArray, textLength << 1));
 #endif
@@ -396,8 +396,8 @@ public:
 #if RTL_USE_HARFBUZZ
         jfloat totalAdvance;
 
-        TextLayout::getTextRunAdvances(paint, text, 0, count, count, paint->getFlags(),
-                widthsArray, totalAdvance);
+        TextLayout::getTextRunAdvances(paint, text, 0, count, count,
+                paint->getFlags(), widthsArray, totalAdvance);
 #else
         SkScalar* scalarArray = (SkScalar*)widthsArray;
 
