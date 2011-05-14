@@ -179,6 +179,9 @@ enum media_recorder_info_type {
     // The time used to compensate for initial A/V sync.
     MEDIA_RECORDER_TRACK_INFO_START_OFFSET_MS      = 1008,
 
+    // Total number of bytes of the media data.
+    MEDIA_RECORDER_TRACK_INFO_DATA_KBYTES          = 1009,
+
     MEDIA_RECORDER_TRACK_INFO_LIST_END             = 2000,
 };
 

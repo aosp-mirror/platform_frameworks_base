@@ -33,6 +33,7 @@
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/Utils.h>
 #include <media/mediarecorder.h>
+#include <cutils/properties.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -760,7 +761,27 @@ void MPEG4Writer::writeFtypBox(const MetaData *param) {
     endBox();
 }
 
+static bool isTestModeEnabled() {
+#if (PROPERTY_VALUE_MAX < 5)
+#error "PROPERTY_VALUE_MAX must be at least 5"
+#endif
+
+    // Test mode is enabled only if rw.media.record.test system
+    // property is enabled.
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("rw.media.record.test", value, NULL) &&
+        (!strcasecmp(value, "true") || !strcasecmp(value, "1"))) {
+        return true;
+    }
+    return false;
+}
+
 void MPEG4Writer::sendSessionSummary() {
+    // Send session summary only if test mode is enabled
+    if (!isTestModeEnabled()) {
+        return;
+    }
+
     for (List<ChunkInfo>::iterator it = mChunkInfos.begin();
          it != mChunkInfos.end(); ++it) {
         int trackNum = it->mTrack->getTrackId() << 28;
@@ -2227,6 +2248,12 @@ status_t MPEG4Writer::Track::threadEntry() {
 }
 
 void MPEG4Writer::Track::sendTrackSummary(bool hasMultipleTracks) {
+
+    // Send track summary only if test mode is enabled.
+    if (!isTestModeEnabled()) {
+        return;
+    }
+
     int trackNum = (mTrackId << 28);
 
     mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
@@ -2255,6 +2282,10 @@ void MPEG4Writer::Track::sendTrackSummary(bool hasMultipleTracks) {
                     trackNum | MEDIA_RECORDER_TRACK_INFO_INITIAL_DELAY_MS,
                     (initialDelayUs) / 1000);
     }
+
+    mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
+                    trackNum | MEDIA_RECORDER_TRACK_INFO_DATA_KBYTES,
+                    mMdatSizeBytes / 1024);
 
     if (hasMultipleTracks) {
         mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,

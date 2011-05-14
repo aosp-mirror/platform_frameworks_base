@@ -860,6 +860,10 @@ public class MediaRecorder
      * {@hide}
      */
     public static final int MEDIA_RECORDER_TRACK_INFO_START_OFFSET_MS   = 1008;
+    /** Provide the total number of data (in kilo-bytes) encoded.
+     * {@hide}
+     */
+    public static final int MEDIA_RECORDER_TRACK_INFO_DATA_KBYTES       = 1009;
     /**
      * {@hide}
      */
