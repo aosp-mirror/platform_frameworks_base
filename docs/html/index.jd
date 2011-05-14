@@ -15,10 +15,11 @@ home=true
 alt="Android at Google IO 2011" width="200px"
 style="padding-left:22px;padding-bottom:15px;padding-top:15px;"/>
                                   <div id="announcement" style="width:275px">
-    <p>Google I/O is a two-day developer event that will take place May 10-11 at Moscone Center, San
-Francisco. The agenda includes several sessions about Android, presented by Android engineers and
-other team members.</p><p><a href="http://www.google.com/events/io/2011/sessions.html">Learn
-more &raquo;</a></p>
+    <p>Thanks to everybody who joined us at Google I/O! If you couldn't make it or would like to
+review any of the Android sessions, they're now available on YouTube at the <a
+href="http://www.youtube.com/googledevelopers">Google Developers</a> channel, along with the keynote
+and other developer sessions. You can also find all the Google I/O Android sessions on this site, on
+the <a href="{@docRoot}videos/index.html">Videos</a> page.</p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->
                         </div><!-- end topAnnouncement -->
