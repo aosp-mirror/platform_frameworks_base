@@ -87,6 +87,7 @@ public abstract class IccCard {
     private static final int EVENT_CHANGE_ICC_PASSWORD_DONE = 9;
     private static final int EVENT_QUERY_FACILITY_FDN_DONE = 10;
     private static final int EVENT_CHANGE_FACILITY_FDN_DONE = 11;
+    private static final int EVENT_ICC_STATUS_CHANGED = 12;
 
     /*
       UNKNOWN is a transient state, for example, after uesr inputs ICC pin under
@@ -140,11 +141,14 @@ public abstract class IccCard {
 
     public IccCard(PhoneBase phone, String logTag, Boolean dbg) {
         mPhone = phone;
+        mPhone.mCM.registerForIccStatusChanged(mHandler, EVENT_ICC_STATUS_CHANGED, null);
         mLogTag = logTag;
         mDbg = dbg;
     }
 
-    abstract public void dispose();
+    public void dispose() {
+        mPhone.mCM.unregisterForIccStatusChanged(mHandler);
+    }
 
     protected void finalize() {
         if(mDbg) Log.d(mLogTag, "IccCard finalized");
@@ -600,6 +604,10 @@ public abstract class IccCard {
                     AsyncResult.forMessage(((Message)ar.userObj)).exception
                                                         = ar.exception;
                     ((Message)ar.userObj).sendToTarget();
+                    break;
+                case EVENT_ICC_STATUS_CHANGED:
+                    Log.d(mLogTag, "Received Event EVENT_ICC_STATUS_CHANGED");
+                    mPhone.mCM.getIccCardStatus(obtainMessage(EVENT_GET_ICC_STATUS_DONE));
                     break;
                 default:
                     Log.e(mLogTag, "[IccCard] Unknown Event " + msg.what);

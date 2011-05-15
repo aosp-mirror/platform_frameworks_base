@@ -35,6 +35,7 @@ public final class RuimCard extends IccCard {
 
     @Override
     public void dispose() {
+        super.dispose();
         //Unregister for all events
         mPhone.mCM.unregisterForRUIMLockedOrAbsent(mHandler);
         mPhone.mCM.unregisterForOffOrNotAvailable(mHandler);
