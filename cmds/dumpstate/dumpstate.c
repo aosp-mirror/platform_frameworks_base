@@ -133,6 +133,13 @@ static void dumpstate() {
             "su", "root", "wlutil", "counters", NULL);
 #endif
 
+    char ril_dumpstate_timeout[PROPERTY_VALUE_MAX] = {0};
+    property_get("ril.dumpstate.timeout", ril_dumpstate_timeout, "30");
+    if (strlen(ril_dumpstate_timeout) > 0) {
+        run_command("DUMP VENDOR RIL LOGS", atoi(ril_dumpstate_timeout),
+                "su", "root", "vril-dump", NULL);
+    }
+
     print_properties();
 
     run_command("KERNEL LOG", 20, "dmesg", NULL);
