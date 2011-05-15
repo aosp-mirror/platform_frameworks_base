@@ -234,6 +234,9 @@ public interface CommandsInterface {
     void registerForSIMLockedOrAbsent(Handler h, int what, Object obj);
     void unregisterForSIMLockedOrAbsent(Handler h);
 
+    void registerForIccStatusChanged(Handler h, int what, Object obj);
+    void unregisterForIccStatusChanged(Handler h);
+
     void registerForCallStateChanged(Handler h, int what, Object obj);
     void unregisterForCallStateChanged(Handler h);
     void registerForVoiceNetworkStateChanged(Handler h, int what, Object obj);

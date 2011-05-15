@@ -55,6 +55,7 @@ public final class SimCard extends IccCard {
 
     @Override
     public void dispose() {
+        super.dispose();
         //Unregister for all events
         mPhone.mCM.unregisterForSIMLockedOrAbsent(mHandler);
         mPhone.mCM.unregisterForOffOrNotAvailable(mHandler);
