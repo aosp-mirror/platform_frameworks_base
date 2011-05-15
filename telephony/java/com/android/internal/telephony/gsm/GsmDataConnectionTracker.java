@@ -513,8 +513,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected boolean isApnTypeAvailable(String type) {
-        if (type.equals(Phone.APN_TYPE_DUN)) {
-            return (fetchDunApn() != null);
+        if (type.equals(Phone.APN_TYPE_DUN) && fetchDunApn() != null) {
+            return true;
         }
 
         if (mAllApns != null) {
@@ -1855,9 +1855,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         if (requestedApnType.equals(Phone.APN_TYPE_DUN)) {
             ApnSetting dun = fetchDunApn();
-            if (dun != null) apnList.add(dun);
-            if (DBG) log("buildWaitingApns: X added APN_TYPE_DUN apnList=" + apnList);
-            return apnList;
+            if (dun != null) {
+                apnList.add(dun);
+                if (DBG) log("buildWaitingApns: X added APN_TYPE_DUN apnList=" + apnList);
+                return apnList;
+            }
         }
 
         String operator = mPhone.mIccRecords.getOperatorNumeric();
