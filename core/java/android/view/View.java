@@ -4855,7 +4855,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             return;
         }
         Display d = WindowManagerImpl.getDefault().getDefaultDisplay();
-        outRect.set(0, 0, d.getWidth(), d.getHeight());
+        d.getRectSize(outRect);
     }
 
     /**
