@@ -27,10 +27,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public final class Backup {
-    static final String TAG = "Backup";
+    static final String TAG = "bu";
 
-    private static String[] mArgs;
-    private int mNextArg;
+    static String[] mArgs;
+    int mNextArg;
+    IBackupManager mBackupManager;
 
     public static void main(String[] args) {
         mArgs = args;
@@ -43,12 +44,23 @@ public final class Backup {
     }
 
     public void run() {
-        IBackupManager bmgr = IBackupManager.Stub.asInterface(ServiceManager.getService("backup"));
-        if (bmgr == null) {
+        mBackupManager = IBackupManager.Stub.asInterface(ServiceManager.getService("backup"));
+        if (mBackupManager == null) {
             System.err.println("ERROR: could not contact backup manager");
             return;
         }
 
+        String arg = nextArg();
+        if (arg.equals("backup")) {
+            doFullBackup();
+        } else if (arg.equals("restore")) {
+            doFullRestore();
+        } else {
+            System.err.println("ERROR: invalid operation '" + arg + "'");
+        }
+    }
+
+    private void doFullBackup() {
         ArrayList<String> packages = new ArrayList<String>();
         boolean saveApks = false;
         boolean saveShared = false;
@@ -56,7 +68,6 @@ public final class Backup {
 
         String arg;
         while ((arg = nextArg()) != null) {
-            
             if (arg.startsWith("-")) {
                 if ("-apk".equals(arg)) {
                     saveApks = true;
@@ -69,8 +80,9 @@ public final class Backup {
                 } else if ("-all".equals(arg)) {
                     doEverything = true;
                 } else {
-                    System.err.println("ERROR: unknown flag " + arg);
-                    return;
+                    System.err.println("WARNING: unknown backup flag " + arg);
+                    Log.w(TAG, "Unknown backup flag " + arg);
+                    continue;
                 }
             } else {
                 // Not a flag; treat as a package name
@@ -79,24 +91,30 @@ public final class Backup {
         }
 
         if (doEverything && packages.size() > 0) {
-            System.err.println("ERROR: -all used with specific package set");
-            return;
+            System.err.println("WARNING: -all used with explicit backup package set");
+            Log.w(TAG, "-all passed for backup along with specific package names");
         }
 
-        if (!doEverything && packages.size() == 0) {
-            System.err.println("ERROR: no packages supplied and -all not used");
+        if (!doEverything && !saveShared && packages.size() == 0) {
+            System.err.println(
+                    "ERROR: no packages supplied for backup and neither -shared nor -all given");
+            Log.e(TAG, "no backup packages supplied and neither -shared nor -all given");
             return;
         }
 
         try {
             ParcelFileDescriptor fd = ParcelFileDescriptor.dup(FileDescriptor.out);
             String[] packArray = new String[packages.size()];
-            bmgr.fullBackup(fd, saveApks, saveShared, doEverything, packages.toArray(packArray));
+            mBackupManager.fullBackup(fd, saveApks, saveShared, doEverything,
+                    packages.toArray(packArray));
         } catch (IOException e) {
             System.err.println("ERROR: cannot dup System.out");
         } catch (RemoteException e) {
             System.err.println("ERROR: unable to invoke backup manager service");
         }
+    }
+
+    private void doFullRestore() {
     }
 
     private String nextArg() {
