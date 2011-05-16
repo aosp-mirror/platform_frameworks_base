@@ -47,6 +47,7 @@ static jfieldID field_MtpStorage_storageId;
 static jfieldID field_MtpStorage_path;
 static jfieldID field_MtpStorage_description;
 static jfieldID field_MtpStorage_reserveSpace;
+static jfieldID field_MtpStorage_removable;
 
 static Mutex sMutex;
 
@@ -245,12 +246,13 @@ android_mtp_MtpServer_add_storage(JNIEnv *env, jobject thiz, jobject jstorage)
         jstring path = (jstring)env->GetObjectField(jstorage, field_MtpStorage_path);
         jstring description = (jstring)env->GetObjectField(jstorage, field_MtpStorage_description);
         jlong reserveSpace = env->GetLongField(jstorage, field_MtpStorage_reserveSpace);
+        jboolean removable = env->GetBooleanField(jstorage, field_MtpStorage_removable);
 
         const char *pathStr = env->GetStringUTFChars(path, NULL);
         if (pathStr != NULL) {
             const char *descriptionStr = env->GetStringUTFChars(description, NULL);
             if (descriptionStr != NULL) {
-                MtpStorage* storage = new MtpStorage(storageID, pathStr, descriptionStr, reserveSpace);
+                MtpStorage* storage = new MtpStorage(storageID, pathStr, descriptionStr, reserveSpace, removable);
                 thread->addStorage(storage);
                 env->ReleaseStringUTFChars(path, pathStr);
                 env->ReleaseStringUTFChars(description, descriptionStr);
@@ -322,7 +324,12 @@ int register_android_mtp_MtpServer(JNIEnv *env)
     }
     field_MtpStorage_reserveSpace = env->GetFieldID(clazz, "mReserveSpace", "J");
     if (field_MtpStorage_reserveSpace == NULL) {
-        LOGE("Can't find MtpStorage.mStorageId");
+        LOGE("Can't find MtpStorage.mReserveSpace");
+        return -1;
+    }
+    field_MtpStorage_removable = env->GetFieldID(clazz, "mRemovable", "Z");
+    if (field_MtpStorage_removable == NULL) {
+        LOGE("Can't find MtpStorage.mRemovable");
         return -1;
     }
     clazz_MtpStorage = (jclass)env->NewGlobalRef(clazz);
