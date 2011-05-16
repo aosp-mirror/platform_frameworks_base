@@ -770,7 +770,7 @@ public:
 
         jint count = end - start;
         sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
-                paint, textArray, start, count, count, flags);
+                paint, textArray, start, count, end, flags);
         if (value == NULL) {
             LOGE("Cannot get TextLayoutCache value");
             return ;
