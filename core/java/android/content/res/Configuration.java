@@ -303,45 +303,106 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
-        sb.append("{ scale=");
+        sb.append("{ fnt=");
         sb.append(fontScale);
         sb.append(" imsi=");
         sb.append(mcc);
         sb.append("/");
         sb.append(mnc);
-        sb.append(" loc=");
-        sb.append(locale);
-        sb.append(" touch=");
-        sb.append(touchscreen);
-        sb.append(" keys=");
-        sb.append(keyboard);
-        sb.append("/");
-        sb.append(keyboardHidden);
-        sb.append("/");
-        sb.append(hardKeyboardHidden);
-        sb.append(" nav=");
-        sb.append(navigation);
-        sb.append("/");
-        sb.append(navigationHidden);
-        sb.append(" orien=");
-        switch(orientation) {
-            case ORIENTATION_LANDSCAPE:
-                sb.append("L"); break;
-            case ORIENTATION_PORTRAIT:
-                sb.append("P"); break;
-            default:
-                sb.append(orientation);
+        if (locale != null) {
+            sb.append(" ");
+            sb.append(locale);
+        } else {
+            sb.append(" (no locale)");
         }
-        sb.append(" layout=0x");
-        sb.append(java.lang.Integer.toHexString(screenLayout));
-        sb.append(" uiMode=0x");
-        sb.append(java.lang.Integer.toHexString(uiMode));
-        sb.append(" wdp=");
-        sb.append(screenWidthDp);
-        sb.append(" hdp=");
-        sb.append(screenHeightDp);
+        switch (touchscreen) {
+            case TOUCHSCREEN_UNDEFINED: sb.append(" ?touch"); break;
+            case TOUCHSCREEN_NOTOUCH: sb.append(" -touch"); break;
+            case TOUCHSCREEN_STYLUS: sb.append(" stylus"); break;
+            case TOUCHSCREEN_FINGER: sb.append(" finger"); break;
+            default: sb.append(" touch="); sb.append(touchscreen); break;
+        }
+        switch (keyboard) {
+            case KEYBOARD_UNDEFINED: sb.append(" ?keyb"); break;
+            case KEYBOARD_NOKEYS: sb.append(" -keyb"); break;
+            case KEYBOARD_QWERTY: sb.append(" qwerty"); break;
+            case KEYBOARD_12KEY: sb.append(" 12key"); break;
+            default: sb.append(" keys="); sb.append(keyboard); break;
+        }
+        switch (keyboardHidden) {
+            case KEYBOARDHIDDEN_UNDEFINED: sb.append("/?"); break;
+            case KEYBOARDHIDDEN_NO: sb.append("/v"); break;
+            case KEYBOARDHIDDEN_YES: sb.append("/h"); break;
+            case KEYBOARDHIDDEN_SOFT: sb.append("/s"); break;
+            default: sb.append("/"); sb.append(keyboardHidden); break;
+        }
+        switch (hardKeyboardHidden) {
+            case HARDKEYBOARDHIDDEN_UNDEFINED: sb.append("/?"); break;
+            case HARDKEYBOARDHIDDEN_NO: sb.append("/v"); break;
+            case HARDKEYBOARDHIDDEN_YES: sb.append("/h"); break;
+            default: sb.append("/"); sb.append(hardKeyboardHidden); break;
+        }
+        switch (navigation) {
+            case NAVIGATION_UNDEFINED: sb.append(" ?nav"); break;
+            case NAVIGATION_NONAV: sb.append(" -nav"); break;
+            case NAVIGATION_DPAD: sb.append(" dpad"); break;
+            case NAVIGATION_TRACKBALL: sb.append(" tball"); break;
+            case NAVIGATION_WHEEL: sb.append(" wheel"); break;
+            default: sb.append(" nav="); sb.append(navigation); break;
+        }
+        switch (navigationHidden) {
+            case NAVIGATIONHIDDEN_UNDEFINED: sb.append("/?"); break;
+            case NAVIGATIONHIDDEN_NO: sb.append("/v"); break;
+            case NAVIGATIONHIDDEN_YES: sb.append("/h"); break;
+            default: sb.append("/"); sb.append(navigationHidden); break;
+        }
+        switch (orientation) {
+            case ORIENTATION_UNDEFINED: sb.append(" ?orien"); break;
+            case ORIENTATION_LANDSCAPE: sb.append(" land"); break;
+            case ORIENTATION_PORTRAIT: sb.append(" port"); break;
+            default: sb.append(" orien="); sb.append(orientation); break;
+        }
+        switch ((screenLayout&SCREENLAYOUT_SIZE_MASK)) {
+            case SCREENLAYOUT_SIZE_UNDEFINED: sb.append(" ?lsize"); break;
+            case SCREENLAYOUT_SIZE_SMALL: sb.append(" smll"); break;
+            case SCREENLAYOUT_SIZE_NORMAL: sb.append(" nrml"); break;
+            case SCREENLAYOUT_SIZE_LARGE: sb.append(" lrg"); break;
+            case SCREENLAYOUT_SIZE_XLARGE: sb.append(" xlrg"); break;
+            default: sb.append(" layoutSize=");
+                    sb.append(screenLayout&SCREENLAYOUT_SIZE_MASK); break;
+        }
+        switch ((screenLayout&SCREENLAYOUT_LONG_MASK)) {
+            case SCREENLAYOUT_LONG_UNDEFINED: sb.append(" ?long"); break;
+            case SCREENLAYOUT_LONG_NO: /* not-long is not interesting to print */ break;
+            case SCREENLAYOUT_LONG_YES: sb.append(" long"); break;
+            default: sb.append(" layoutLong=");
+                    sb.append(screenLayout&SCREENLAYOUT_LONG_MASK); break;
+        }
+        switch ((uiMode&UI_MODE_TYPE_MASK)) {
+            case UI_MODE_TYPE_UNDEFINED: sb.append(" ?uimode"); break;
+            case UI_MODE_TYPE_NORMAL: /* normal is not interesting to print */ break;
+            case UI_MODE_TYPE_DESK: sb.append(" desk"); break;
+            case UI_MODE_TYPE_CAR: sb.append(" car"); break;
+            default: sb.append(" uimode="); sb.append(uiMode&UI_MODE_TYPE_MASK); break;
+        }
+        switch ((uiMode&UI_MODE_NIGHT_MASK)) {
+            case UI_MODE_NIGHT_UNDEFINED: sb.append(" ?night"); break;
+            case UI_MODE_NIGHT_NO: /* not-night is not interesting to print */ break;
+            case UI_MODE_NIGHT_YES: sb.append(" night"); break;
+            default: sb.append(" night="); sb.append(uiMode&UI_MODE_NIGHT_MASK); break;
+        }
+        if (screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED) {
+            sb.append(" w"); sb.append(screenWidthDp); sb.append("dp");
+        } else {
+            sb.append("?wdp");
+        }
+        if (screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED) {
+            sb.append(" h"); sb.append(screenHeightDp); sb.append("dp");
+        } else {
+            sb.append("?hdp");
+        }
         if (seq != 0) {
-            sb.append(" seq=");
+            sb.append(" s.");
             sb.append(seq);
         }
         sb.append('}');
