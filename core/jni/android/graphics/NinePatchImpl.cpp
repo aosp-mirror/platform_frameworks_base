@@ -116,9 +116,9 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
         paint = &defaultPaint;
     }
     
-    // if our canvas is GL, draw this as a mesh, which will be faster than
-    // in parts (which is faster for raster)
-    if (canvas && canvas->getViewport(NULL)) {
+    // if our SkCanvas were back by GL we should enable this and draw this as
+    // a mesh, which will be faster in most cases.
+    if (false) {
         SkNinePatch::DrawMesh(canvas, bounds, bitmap,
                               chunk.xDivs, chunk.numXDivs,
                               chunk.yDivs, chunk.numYDivs,
