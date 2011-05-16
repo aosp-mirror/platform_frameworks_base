@@ -33,10 +33,12 @@ private:
     uint64_t                mMaxCapacity;
     // amount of free space to leave unallocated
     uint64_t                mReserveSpace;
+    bool                    mRemovable;
 
 public:
                             MtpStorage(MtpStorageID id, const char* filePath,
-                                    const char* description, uint64_t reserveSpace);
+                                    const char* description, uint64_t reserveSpace,
+                                    bool removable);
     virtual                 ~MtpStorage();
 
     inline MtpStorageID     getStorageID() const { return mStorageID; }
@@ -47,6 +49,7 @@ public:
     uint64_t                getFreeSpace();
     const char*             getDescription() const;
     inline const char*      getPath() const { return (const char *)mFilePath; }
+    inline bool             isRemovable() const { return mRemovable; }
 };
 
 }; // namespace android
