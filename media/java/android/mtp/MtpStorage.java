@@ -29,12 +29,15 @@ public class MtpStorage {
     private final String mPath;
     private final String mDescription;
     private final long mReserveSpace;
+    private final boolean mRemovable;
 
-    public MtpStorage(int id, String path, String description, long reserveSpace) {
+    public MtpStorage(int id, String path, String description,
+            long reserveSpace, boolean removable) {
         mStorageId = id;
         mPath = path;
         mDescription = description;
         mReserveSpace = reserveSpace;
+        mRemovable = removable;
     }
 
     /**
@@ -86,4 +89,12 @@ public class MtpStorage {
         return mReserveSpace;
     }
 
+   /**
+     * Returns true if the storage is removable.
+     *
+     * @return is removable
+     */
+    public final boolean isRemovable() {
+        return mRemovable;
+    }
 }
