@@ -211,7 +211,7 @@ class ServiceRecord extends Binder {
                 pw.print(" lastActivity=");
                 TimeUtils.formatDuration(lastActivity, now, pw);
                 pw.println("");
-        pw.print(prefix); pw.print(" executingStart=");
+        pw.print(prefix); pw.print("executingStart=");
                 TimeUtils.formatDuration(executingStart, now, pw);
                 pw.print(" restartTime=");
                 TimeUtils.formatDuration(restartTime, now, pw);
