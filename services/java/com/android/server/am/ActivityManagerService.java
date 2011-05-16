@@ -90,6 +90,7 @@ import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.IInterface;
 import android.os.IPermissionController;
 import android.os.Looper;
 import android.os.Message;
@@ -1404,35 +1405,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            ActivityManagerService service = mActivityManagerService;
-            ArrayList<ProcessRecord> procs;
-            synchronized (mActivityManagerService) {
-                if (args != null && args.length > 0
-                        && args[0].charAt(0) != '-') {
-                    procs = new ArrayList<ProcessRecord>();
-                    int pid = -1;
-                    try {
-                        pid = Integer.parseInt(args[0]);
-                    } catch (NumberFormatException e) {
-                        
-                    }
-                    for (int i=service.mLruProcesses.size()-1; i>=0; i--) {
-                        ProcessRecord proc = service.mLruProcesses.get(i);
-                        if (proc.pid == pid) {
-                            procs.add(proc);
-                        } else if (proc.processName.equals(args[0])) {
-                            procs.add(proc);
-                        }
-                    }
-                    if (procs.size() <= 0) {
-                        pw.println("No process found for: " + args[0]);
-                        return;
-                    }
-                } else {
-                    procs = new ArrayList<ProcessRecord>(service.mLruProcesses);
-                }
-            }
-            dumpApplicationMemoryUsage(fd, pw, procs, "  ", args);
+            mActivityManagerService.dumpApplicationMemoryUsage(fd, pw, "  ", args);
         }
     }
 
@@ -7502,6 +7475,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         
         boolean dumpAll = false;
+        boolean dumpClient = false;
         
         int opti = 0;
         while (opti < args.length) {
@@ -7512,9 +7486,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             opti++;
             if ("-a".equals(opt)) {
                 dumpAll = true;
+            } else if ("-c".equals(opt)) {
+                dumpClient = true;
             } else if ("-h".equals(opt)) {
                 pw.println("Activity manager dump options:");
-                pw.println("  [-a] [-h] [cmd] ...");
+                pw.println("  [-a] [-c] [-h] [cmd] ...");
                 pw.println("  cmd may be one of:");
                 pw.println("    a[ctivities]: activity stack state");
                 pw.println("    b[roadcasts]: broadcast state");
@@ -7523,10 +7499,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("    o[om]: out of memory management");
                 pw.println("    prov[iders]: content provider state");
                 pw.println("    s[ervices]: service state");
-                pw.println("    service [name]: service client-side state");
-                pw.println("  cmd may also be a component name (com.foo/.myApp),");
-                pw.println("    a partial substring in a component name, or an");
-                pw.println("    ActivityRecord hex object identifier.");
+                pw.println("    service [COMP_SPEC]: service client-side state");
+                pw.println("  cmd may also be a COMP_SPEC to dump activities.");
+                pw.println("  COMP_SPEC may also be a component name (com.foo/.myApp),");
+                pw.println("    a partial substring in a component name, an");
+                pw.println("    ActivityRecord hex object identifier, or");
+                pw.println("    \"all\" for all objects");
+                pw.println("  -a: include all available server state.");
+                pw.println("  -c: include client state.");
                 return;
             } else {
                 pw.println("Unknown argument: " + opt + "; use -h for help");
@@ -7539,7 +7519,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             opti++;
             if ("activities".equals(cmd) || "a".equals(cmd)) {
                 synchronized (this) {
-                    dumpActivitiesLocked(fd, pw, args, opti, true, true);
+                    dumpActivitiesLocked(fd, pw, args, opti, true, dumpClient);
                 }
                 return;
             } else if ("broadcasts".equals(cmd) || "b".equals(cmd)) {
@@ -7568,20 +7548,33 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 return;
             } else if ("service".equals(cmd)) {
-                dumpService(fd, pw, args, opti);
+                String[] newArgs;
+                String name;
+                if (opti >= args.length) {
+                    name = null;
+                    newArgs = EMPTY_STRING_ARRAY;
+                } else {
+                    name = args[opti];
+                    opti++;
+                    newArgs = new String[args.length - opti];
+                    if (args.length > 2) System.arraycopy(args, opti, newArgs, 0, args.length - opti);
+                }
+                if (!dumpService(fd, pw, name, newArgs, 0, dumpAll)) {
+                    pw.println("No services match: " + name);
+                    pw.println("Use -h for help.");
+                }
                 return;
             } else if ("services".equals(cmd) || "s".equals(cmd)) {
                 synchronized (this) {
-                    dumpServicesLocked(fd, pw, args, opti, true);
+                    dumpServicesLocked(fd, pw, args, opti, true, dumpClient);
                 }
                 return;
             } else {
                 // Dumping a single activity?
-                if (dumpActivity(fd, pw, cmd, args, opti, dumpAll)) {
-                    return;
+                if (!dumpActivity(fd, pw, cmd, args, opti, dumpAll)) {
+                    pw.println("Bad activity command, or no activities match: " + cmd);
+                    pw.println("Use -h for help.");
                 }
-                pw.println("Bad activity command, or no activities match: " + cmd);
-                pw.println("Use -h for help.");
                 return;
             }
         }
@@ -7589,16 +7582,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         // No piece of data specified, dump everything.
         synchronized (this) {
             boolean needSep;
-            if (dumpAll) {
-                pw.println("Providers in Current Activity Manager State:");
-            }
-            needSep = dumpProvidersLocked(fd, pw, args, opti, dumpAll);
+            needSep = dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll);
             if (needSep) {
                 pw.println(" ");
             }
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
-                pw.println("Broadcasts in Current Activity Manager State:");
             }
             needSep = dumpBroadcastsLocked(fd, pw, args, opti, dumpAll);
             if (needSep) {
@@ -7606,88 +7595,95 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
-                pw.println("Services in Current Activity Manager State:");
             }
-            needSep = dumpServicesLocked(fd, pw, args, opti, dumpAll);
+            needSep = dumpProvidersLocked(fd, pw, args, opti, dumpAll);
             if (needSep) {
                 pw.println(" ");
             }
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
-                pw.println("PendingIntents in Current Activity Manager State:");
             }
-            needSep = dumpPendingIntentsLocked(fd, pw, args, opti, dumpAll);
+            needSep = dumpServicesLocked(fd, pw, args, opti, dumpAll, dumpClient);
             if (needSep) {
                 pw.println(" ");
             }
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
-                pw.println("Activities in Current Activity Manager State:");
             }
-            needSep = dumpActivitiesLocked(fd, pw, args, opti, dumpAll, !dumpAll);
+            needSep = dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient);
             if (needSep) {
                 pw.println(" ");
             }
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
-                pw.println("Processes in Current Activity Manager State:");
             }
             dumpProcessesLocked(fd, pw, args, opti, dumpAll);
         }
     }
     
     boolean dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll, boolean needHeader) {
-        if (needHeader) {
-            pw.println("  Activity stack:");
-        }
-        dumpHistoryList(pw, mMainStack.mHistory, "  ", "Hist", true);
+            int opti, boolean dumpAll, boolean dumpClient) {
+        pw.println("ACTIVITY MANAGER ACTIVITIES (dumpsys activity activities)");
+        pw.println("  Main stack:");
+        dumpHistoryList(fd, pw, mMainStack.mHistory, "  ", "Hist", true, !dumpAll, dumpClient);
         pw.println(" ");
         pw.println("  Running activities (most recent first):");
-        dumpHistoryList(pw, mMainStack.mLRUActivities, "  ", "Run", false);
+        dumpHistoryList(fd, pw, mMainStack.mLRUActivities, "  ", "Run", false, !dumpAll, false);
         if (mMainStack.mWaitingVisibleActivities.size() > 0) {
             pw.println(" ");
             pw.println("  Activities waiting for another to become visible:");
-            dumpHistoryList(pw, mMainStack.mWaitingVisibleActivities, "  ", "Wait", false);
+            dumpHistoryList(fd, pw, mMainStack.mWaitingVisibleActivities, "  ", "Wait", false,
+                    !dumpAll, false);
         }
         if (mMainStack.mStoppingActivities.size() > 0) {
             pw.println(" ");
             pw.println("  Activities waiting to stop:");
-            dumpHistoryList(pw, mMainStack.mStoppingActivities, "  ", "Stop", false);
+            dumpHistoryList(fd, pw, mMainStack.mStoppingActivities, "  ", "Stop", false,
+                    !dumpAll, false);
         }
         if (mMainStack.mGoingToSleepActivities.size() > 0) {
             pw.println(" ");
             pw.println("  Activities waiting to sleep:");
-            dumpHistoryList(pw, mMainStack.mGoingToSleepActivities, "  ", "Sleep", false);
+            dumpHistoryList(fd, pw, mMainStack.mGoingToSleepActivities, "  ", "Sleep", false,
+                    !dumpAll, false);
         }
         if (mMainStack.mFinishingActivities.size() > 0) {
             pw.println(" ");
             pw.println("  Activities waiting to finish:");
-            dumpHistoryList(pw, mMainStack.mFinishingActivities, "  ", "Fin", false);
+            dumpHistoryList(fd, pw, mMainStack.mFinishingActivities, "  ", "Fin", false,
+                    !dumpAll, false);
         }
 
         pw.println(" ");
-        pw.println("  mPausingActivity: " + mMainStack.mPausingActivity);
+        if (mMainStack.mPausingActivity != null) {
+            pw.println("  mPausingActivity: " + mMainStack.mPausingActivity);
+        }
         pw.println("  mResumedActivity: " + mMainStack.mResumedActivity);
         pw.println("  mFocusedActivity: " + mFocusedActivity);
-        pw.println("  mLastPausedActivity: " + mMainStack.mLastPausedActivity);
-        pw.println("  mSleepTimeout: " + mMainStack.mSleepTimeout);
+        if (dumpAll) {
+            pw.println("  mLastPausedActivity: " + mMainStack.mLastPausedActivity);
+            pw.println("  mSleepTimeout: " + mMainStack.mSleepTimeout);
+        }
 
-        if (dumpAll && mRecentTasks.size() > 0) {
-            pw.println(" ");
-            pw.println("Recent tasks in Current Activity Manager State:");
+        if (mRecentTasks.size() > 0) {
+            pw.println();
+            pw.println("  Recent tasks:");
 
             final int N = mRecentTasks.size();
             for (int i=0; i<N; i++) {
                 TaskRecord tr = mRecentTasks.get(i);
                 pw.print("  * Recent #"); pw.print(i); pw.print(": ");
                         pw.println(tr);
-                mRecentTasks.get(i).dump(pw, "    ");
+                if (dumpAll) {
+                    mRecentTasks.get(i).dump(pw, "    ");
+                }
             }
         }
         
-        pw.println(" ");
-        pw.println("  mCurTask: " + mCurTask);
+        if (dumpAll) {
+            pw.println(" ");
+            pw.println("  mCurTask: " + mCurTask);
+        }
         
         return true;
     }
@@ -7696,6 +7692,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             int opti, boolean dumpAll) {
         boolean needSep = false;
         int numPers = 0;
+
+        pw.println("ACTIVITY MANAGER RUNNING PROCESSES (dumpsys activity processes)");
 
         if (dumpAll) {
             for (SparseArray<ProcessRecord> procs : mProcessNames.getMap().values()) {
@@ -7720,20 +7718,22 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (mLruProcesses.size() > 0) {
             if (needSep) pw.println(" ");
             needSep = true;
-            pw.println("  Running processes (most recent first):");
+            pw.println("  Process LRU list (most recent first):");
             dumpProcessOomList(pw, this, mLruProcesses, "    ",
                     "Proc", "PERS", false);
             needSep = true;
         }
 
-        synchronized (mPidsSelfLocked) {
-            if (mPidsSelfLocked.size() > 0) {
-                if (needSep) pw.println(" ");
-                needSep = true;
-                pw.println("  PID mappings:");
-                for (int i=0; i<mPidsSelfLocked.size(); i++) {
-                    pw.print("    PID #"); pw.print(mPidsSelfLocked.keyAt(i));
-                        pw.print(": "); pw.println(mPidsSelfLocked.valueAt(i));
+        if (dumpAll) {
+            synchronized (mPidsSelfLocked) {
+                if (mPidsSelfLocked.size() > 0) {
+                    if (needSep) pw.println(" ");
+                    needSep = true;
+                    pw.println("  PID mappings:");
+                    for (int i=0; i<mPidsSelfLocked.size(); i++) {
+                        pw.print("    PID #"); pw.print(mPidsSelfLocked.keyAt(i));
+                            pw.print(": "); pw.println(mPidsSelfLocked.valueAt(i));
+                    }
                 }
             }
         }
@@ -7818,16 +7818,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        pw.println(" ");
+        pw.println();
         pw.println("  mHomeProcess: " + mHomeProcess);
         if (mHeavyWeightProcess != null) {
             pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
         }
         pw.println("  mConfiguration: " + mConfiguration);
-        pw.println("  mConfigWillChange: " + mMainStack.mConfigWillChange);
-        if (mCompatModePackages.getPackages().size() > 0) {
-            pw.print("  mScreenCompatPackages=");
-            pw.println(mCompatModePackages.getPackages());
+        if (dumpAll) {
+            pw.println("  mConfigWillChange: " + mMainStack.mConfigWillChange);
+            if (mCompatModePackages.getPackages().size() > 0) {
+                pw.print("  mScreenCompatPackages=");
+                pw.println(mCompatModePackages.getPackages());
+            }
         }
         pw.println("  mSleeping=" + mSleeping + " mShuttingDown=" + mShuttingDown);
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
@@ -7922,7 +7924,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         needSep = dumpProcessesToGc(fd, pw, args, opti, needSep, dumpAll);
 
-        pw.println(" ");
+        pw.println();
         pw.println("  mHomeProcess: " + mHomeProcess);
         if (mHeavyWeightProcess != null) {
             pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
@@ -7939,61 +7941,96 @@ public final class ActivityManagerService extends ActivityManagerNative
      *  - the first arg isn't the flattened component name of an existing service:
      *    dump all services whose component contains the first arg as a substring
      */
-    protected void dumpService(FileDescriptor fd, PrintWriter pw, String[] args, int opti) {
-        String[] newArgs;
-        String componentNameString;
-        ServiceRecord r;
-        if (opti >= args.length) {
-            componentNameString = null;
-            newArgs = EMPTY_STRING_ARRAY;
-            r = null;
-        } else {
-            componentNameString = args[opti];
-            opti++;
-            ComponentName componentName = ComponentName.unflattenFromString(componentNameString);
-            synchronized (this) {
-                r = componentName != null ? mServices.get(componentName) : null;
-            }
-            newArgs = new String[args.length - opti];
-            if (args.length > 2) System.arraycopy(args, opti, newArgs, 0, args.length - opti);
-        }
+    protected boolean dumpService(FileDescriptor fd, PrintWriter pw, String name, String[] args,
+            int opti, boolean dumpAll) {
+        ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
 
-        if (r != null) {
-            dumpService(fd, pw, r, newArgs);
-        } else {
-            ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
+        if ("all".equals(name)) {
             synchronized (this) {
                 for (ServiceRecord r1 : mServices.values()) {
-                    if (componentNameString == null
-                            || r1.name.flattenToString().contains(componentNameString)) {
+                    services.add(r1);
+                }
+            }
+        } else {
+            ComponentName componentName = name != null
+                    ? ComponentName.unflattenFromString(name) : null;
+            int objectId = 0;
+            if (componentName == null) {
+                // Not a '/' separated full component name; maybe an object ID?
+                try {
+                    objectId = Integer.parseInt(name, 16);
+                    name = null;
+                    componentName = null;
+                } catch (RuntimeException e) {
+                }
+            }
+
+            synchronized (this) {
+                for (ServiceRecord r1 : mServices.values()) {
+                    if (componentName != null) {
+                        if (r1.name.equals(componentName)) {
+                            services.add(r1);
+                        }
+                    } else if (name != null) {
+                        if (r1.name.flattenToString().contains(name)) {
+                            services.add(r1);
+                        }
+                    } else if (System.identityHashCode(r1) == objectId) {
                         services.add(r1);
                     }
                 }
             }
-            for (int i=0; i<services.size(); i++) {
-                dumpService(fd, pw, services.get(i), newArgs);
-            }
         }
+
+        if (services.size() <= 0) {
+            return false;
+        }
+
+        boolean needSep = false;
+        for (int i=0; i<services.size(); i++) {
+            if (needSep) {
+                pw.println();
+            }
+            needSep = true;
+            dumpService("", fd, pw, services.get(i), args, dumpAll);
+        }
+        return true;
     }
 
     /**
      * Invokes IApplicationThread.dumpService() on the thread of the specified service if
      * there is a thread associated with the service.
      */
-    private void dumpService(FileDescriptor fd, PrintWriter pw, ServiceRecord r, String[] args) {
-        pw.println("------------------------------------------------------------"
-                + "-------------------");
-        pw.println("APP SERVICE: " + r.name.flattenToString());
+    private void dumpService(String prefix, FileDescriptor fd, PrintWriter pw,
+            final ServiceRecord r, String[] args, boolean dumpAll) {
+        String innerPrefix = prefix + "  ";
+        synchronized (this) {
+            pw.print(prefix); pw.print("SERVICE ");
+                    pw.print(r.shortName); pw.print(" ");
+                    pw.print(Integer.toHexString(System.identityHashCode(r)));
+                    pw.print(" pid=");
+                    if (r.app != null) pw.println(r.app.pid);
+                    else pw.println("(not running)");
+            if (dumpAll) {
+                r.dump(pw, innerPrefix);
+            }
+        }
         if (r.app != null && r.app.thread != null) {
+            pw.print(prefix); pw.println("  Client:");
+            pw.flush();
             try {
-                // flush anything that is already in the PrintWriter since the thread is going
-                // to write to the file descriptor directly
-                pw.flush();
-                r.app.thread.dumpService(fd, r, args);
-                pw.print("\n");
-                pw.flush();
+                TransferPipe tp = new TransferPipe();
+                try {
+                    r.app.thread.dumpService(tp.getWriteFd().getFileDescriptor(), r, args);
+                    tp.setBufferPrefix(prefix + "    ");
+                    tp.go(fd);
+                } finally {
+                    tp.kill();
+                }
+            } catch (IOException e) {
+                pw.println(prefix + "    Failure while dumping the service: " + e);
             } catch (RemoteException e) {
-                pw.println("got a RemoteException while dumping the service");
+                pw.println(prefix + "    Got a RemoteException while dumping the service");
             }
         }
     }
@@ -8007,34 +8044,40 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     protected boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name, String[] args,
             int opti, boolean dumpAll) {
-        String[] newArgs;
-        ComponentName componentName = ComponentName.unflattenFromString(name);
-        int objectId = 0;
-        if (componentName == null) {
-            // Not a '/' separated full component name; maybe an object ID?
-            try {
-                objectId = Integer.parseInt(name, 16);
-                name = null;
-                componentName = null;
-            } catch (RuntimeException e) {
-            }
-        }
-        newArgs = new String[args.length - opti];
-        if (args.length > 2) System.arraycopy(args, opti, newArgs, 0, args.length - opti);
-
         ArrayList<ActivityRecord> activities = new ArrayList<ActivityRecord>();
-        synchronized (this) {
-            for (ActivityRecord r1 : (ArrayList<ActivityRecord>)mMainStack.mHistory) {
-                if (componentName != null) {
-                    if (r1.intent.getComponent().equals(componentName)) {
-                        activities.add(r1);
-                    }
-                } else if (name != null) {
-                    if (r1.intent.getComponent().flattenToString().contains(name)) {
-                        activities.add(r1);
-                    }
-                } else if (System.identityHashCode(r1) == objectId) {
+
+        if ("all".equals(name)) {
+            synchronized (this) {
+                for (ActivityRecord r1 : (ArrayList<ActivityRecord>)mMainStack.mHistory) {
                     activities.add(r1);
+                }
+            }
+        } else {
+            ComponentName componentName = ComponentName.unflattenFromString(name);
+            int objectId = 0;
+            if (componentName == null) {
+                // Not a '/' separated full component name; maybe an object ID?
+                try {
+                    objectId = Integer.parseInt(name, 16);
+                    name = null;
+                    componentName = null;
+                } catch (RuntimeException e) {
+                }
+            }
+
+            synchronized (this) {
+                for (ActivityRecord r1 : (ArrayList<ActivityRecord>)mMainStack.mHistory) {
+                    if (componentName != null) {
+                        if (r1.intent.getComponent().equals(componentName)) {
+                            activities.add(r1);
+                        }
+                    } else if (name != null) {
+                        if (r1.intent.getComponent().flattenToString().contains(name)) {
+                            activities.add(r1);
+                        }
+                    } else if (System.identityHashCode(r1) == objectId) {
+                        activities.add(r1);
+                    }
                 }
             }
         }
@@ -8043,15 +8086,25 @@ public final class ActivityManagerService extends ActivityManagerNative
             return false;
         }
 
+        String[] newArgs = new String[args.length - opti];
+        if (args.length > 2) System.arraycopy(args, opti, newArgs, 0, args.length - opti);
+
         TaskRecord lastTask = null;
+        boolean needSep = false;
         for (int i=activities.size()-1; i>=0; i--) {
             ActivityRecord r = (ActivityRecord)activities.get(i);
-            if (lastTask != r.task) {
-                lastTask = r.task;
-                pw.print("* Task "); pw.print(lastTask.affinity);
-                        pw.print(" id="); pw.println(lastTask.taskId);
-                if (dumpAll) {
-                    lastTask.dump(pw, "  ");
+            if (needSep) {
+                pw.println();
+            }
+            needSep = true;
+            synchronized (this) {
+                if (lastTask != r.task) {
+                    lastTask = r.task;
+                    pw.print("TASK "); pw.print(lastTask.affinity);
+                            pw.print(" id="); pw.println(lastTask.taskId);
+                    if (dumpAll) {
+                        lastTask.dump(pw, "  ");
+                    }
                 }
             }
             dumpActivity("  ", fd, pw, activities.get(i), newArgs, dumpAll);
@@ -8064,26 +8117,35 @@ public final class ActivityManagerService extends ActivityManagerNative
      * there is a thread associated with the activity.
      */
     private void dumpActivity(String prefix, FileDescriptor fd, PrintWriter pw,
-            ActivityRecord r, String[] args, boolean dumpAll) {
+            final ActivityRecord r, String[] args, boolean dumpAll) {
+        String innerPrefix = prefix + "  ";
         synchronized (this) {
-            pw.print(prefix); pw.print("* Activity ");
-                    pw.print(Integer.toHexString(System.identityHashCode(r)));
-                    pw.print(" "); pw.print(r.shortComponentName); pw.print(" pid=");
+            pw.print(prefix); pw.print("ACTIVITY "); pw.print(r.shortComponentName);
+                    pw.print(" "); pw.print(Integer.toHexString(System.identityHashCode(r)));
+                    pw.print(" pid=");
                     if (r.app != null) pw.println(r.app.pid);
                     else pw.println("(not running)");
             if (dumpAll) {
-                r.dump(pw, prefix + "  ");
+                r.dump(pw, innerPrefix);
             }
         }
         if (r.app != null && r.app.thread != null) {
+            // flush anything that is already in the PrintWriter since the thread is going
+            // to write to the file descriptor directly
+            pw.flush();
             try {
-                // flush anything that is already in the PrintWriter since the thread is going
-                // to write to the file descriptor directly
-                pw.flush();
-                r.app.thread.dumpActivity(fd, r, prefix + "  ", args);
-                pw.flush();
+                TransferPipe tp = new TransferPipe();
+                try {
+                    r.app.thread.dumpActivity(tp.getWriteFd().getFileDescriptor(), r,
+                            innerPrefix, args);
+                    tp.go(fd);
+                } finally {
+                    tp.kill();
+                }
+            } catch (IOException e) {
+                pw.println(innerPrefix + "Failure while dumping the activity: " + e);
             } catch (RemoteException e) {
-                pw.println("got a RemoteException while dumping the activity");
+                pw.println(innerPrefix + "Got a RemoteException while dumping the activity");
             }
         }
     }
@@ -8092,9 +8154,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             int opti, boolean dumpAll) {
         boolean needSep = false;
         
+        pw.println("ACTIVITY MANAGER BROADCAST STATE (dumpsys activity broadcasts)");
         if (dumpAll) {
             if (mRegisteredReceivers.size() > 0) {
-                pw.println(" ");
                 pw.println("  Registered Receivers:");
                 Iterator it = mRegisteredReceivers.values().iterator();
                 while (it.hasNext()) {
@@ -8104,16 +8166,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
     
-            pw.println(" ");
-            pw.println("Receiver Resolver Table:");
-            mReceiverResolver.dump(pw, null, "  ", null, false);
+            pw.println();
+            pw.println("  Receiver Resolver Table:");
+            mReceiverResolver.dump(pw, null, "    ", null, false);
             needSep = true;
         }
         
         if (mParallelBroadcasts.size() > 0 || mOrderedBroadcasts.size() > 0
                 || mPendingBroadcast != null) {
             if (mParallelBroadcasts.size() > 0) {
-                pw.println(" ");
+                pw.println();
                 pw.println("  Active broadcasts:");
             }
             for (int i=mParallelBroadcasts.size()-1; i>=0; i--) {
@@ -8121,14 +8183,14 @@ public final class ActivityManagerService extends ActivityManagerNative
                 mParallelBroadcasts.get(i).dump(pw, "    ");
             }
             if (mOrderedBroadcasts.size() > 0) {
-                pw.println(" ");
+                pw.println();
                 pw.println("  Active ordered broadcasts:");
             }
             for (int i=mOrderedBroadcasts.size()-1; i>=0; i--) {
                 pw.println("  Serialized Broadcast #" + i + ":");
                 mOrderedBroadcasts.get(i).dump(pw, "    ");
             }
-            pw.println(" ");
+            pw.println();
             pw.println("  Pending broadcast:");
             if (mPendingBroadcast != null) {
                 mPendingBroadcast.dump(pw, "    ");
@@ -8138,47 +8200,59 @@ public final class ActivityManagerService extends ActivityManagerNative
             needSep = true;
         }
 
-        if (dumpAll) {
-            pw.println(" ");
-            pw.println("  Historical broadcasts:");
-            for (int i=0; i<MAX_BROADCAST_HISTORY; i++) {
-                BroadcastRecord r = mBroadcastHistory[i];
-                if (r == null) {
+        if (needSep) {
+            pw.println();
+        }
+        pw.println("  Historical broadcasts:");
+        for (int i=0; i<MAX_BROADCAST_HISTORY; i++) {
+            BroadcastRecord r = mBroadcastHistory[i];
+            if (r == null) {
+                break;
+            }
+            if (dumpAll) {
+                pw.print("  Historical Broadcast #"); pw.print(i); pw.println(":");
+                r.dump(pw, "    ");
+            } else {
+                if (i >= 50) {
+                    pw.println("  ...");
                     break;
                 }
-                pw.println("  Historical Broadcast #" + i + ":");
-                r.dump(pw, "    ");
+                pw.print("  #"); pw.print(i); pw.print(": "); pw.println(r);
             }
-            needSep = true;
         }
+        needSep = true;
         
         if (mStickyBroadcasts != null) {
-            pw.println(" ");
+            pw.println();
             pw.println("  Sticky broadcasts:");
             StringBuilder sb = new StringBuilder(128);
             for (Map.Entry<String, ArrayList<Intent>> ent
                     : mStickyBroadcasts.entrySet()) {
                 pw.print("  * Sticky action "); pw.print(ent.getKey());
-                        pw.println(":");
-                ArrayList<Intent> intents = ent.getValue();
-                final int N = intents.size();
-                for (int i=0; i<N; i++) {
-                    sb.setLength(0);
-                    sb.append("    Intent: ");
-                    intents.get(i).toShortString(sb, true, false);
-                    pw.println(sb.toString());
-                    Bundle bundle = intents.get(i).getExtras();
-                    if (bundle != null) {
-                        pw.print("      ");
-                        pw.println(bundle.toString());
+                if (dumpAll) {
+                    pw.println(":");
+                    ArrayList<Intent> intents = ent.getValue();
+                    final int N = intents.size();
+                    for (int i=0; i<N; i++) {
+                        sb.setLength(0);
+                        sb.append("    Intent: ");
+                        intents.get(i).toShortString(sb, true, false);
+                        pw.println(sb.toString());
+                        Bundle bundle = intents.get(i).getExtras();
+                        if (bundle != null) {
+                            pw.print("      ");
+                            pw.println(bundle.toString());
+                        }
                     }
+                } else {
+                    pw.println("");
                 }
             }
             needSep = true;
         }
         
         if (dumpAll) {
-            pw.println(" ");
+            pw.println();
             pw.println("  mBroadcastsScheduled=" + mBroadcastsScheduled);
             pw.println("  mHandler:");
             mHandler.dump(new PrintWriterPrinter(pw), "    ");
@@ -8189,20 +8263,55 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     boolean dumpServicesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll) {
+            int opti, boolean dumpAll, boolean dumpClient) {
         boolean needSep = false;
 
-        if (dumpAll) {
-            if (mServices.size() > 0) {
-                pw.println("  Active services:");
-                Iterator<ServiceRecord> it = mServices.values().iterator();
-                while (it.hasNext()) {
-                    ServiceRecord r = it.next();
-                    pw.print("  * "); pw.println(r);
-                    r.dump(pw, "    ");
+        pw.println("ACTIVITY MANAGER SERVICES (dumpsys activity services)");
+        if (mServices.size() > 0) {
+            pw.println("  Active services:");
+            long nowReal = SystemClock.elapsedRealtime();
+            Iterator<ServiceRecord> it = mServices.values().iterator();
+            needSep = false;
+            while (it.hasNext()) {
+                ServiceRecord r = it.next();
+                if (needSep) {
+                    pw.println();
                 }
-                needSep = true;
+                pw.print("  * "); pw.println(r);
+                if (dumpAll) {
+                    r.dump(pw, "    ");
+                    needSep = true;
+                } else {
+                    pw.print("    app="); pw.println(r.app);
+                    pw.print("    created=");
+                        TimeUtils.formatDuration(r.createTime, nowReal, pw);
+                        pw.print(" started="); pw.print(r.startRequested);
+                        pw.print(" connections="); pw.println(r.connections.size());
+                }
+                if (dumpClient && r.app != null && r.app.thread != null) {
+                    pw.println("    Client:");
+                    pw.flush();
+                    try {
+                        TransferPipe tp = new TransferPipe();
+                        try {
+                            r.app.thread.dumpService(
+                                    tp.getWriteFd().getFileDescriptor(), r, args);
+                            tp.setBufferPrefix("      ");
+                            // Short timeout, since blocking here can
+                            // deadlock with the application.
+                            tp.go(fd, 2000);
+                        } finally {
+                            tp.kill();
+                        }
+                    } catch (IOException e) {
+                        pw.println("      Failure while dumping the service: " + e);
+                    } catch (RemoteException e) {
+                        pw.println("      Got a RemoteException while dumping the service");
+                    }
+                    needSep = true;
+                }
             }
+            needSep = true;
         }
 
         if (mPendingServices.size() > 0) {
@@ -8262,21 +8371,32 @@ public final class ActivityManagerService extends ActivityManagerNative
             int opti, boolean dumpAll) {
         boolean needSep = false;
 
-        if (dumpAll) {
-            if (mProvidersByClass.size() > 0) {
-                if (needSep) pw.println(" ");
-                pw.println("  Published content providers (by class):");
-                Iterator<Map.Entry<String, ContentProviderRecord>> it
-                        = mProvidersByClass.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<String, ContentProviderRecord> e = it.next();
-                    ContentProviderRecord r = e.getValue();
+        pw.println("ACTIVITY MANAGER CONTENT PROVIDERS (dumpsys activity providers)");
+        if (mProvidersByClass.size() > 0) {
+            if (needSep) pw.println(" ");
+            pw.println("  Published content providers (by class):");
+            Iterator<Map.Entry<String, ContentProviderRecord>> it
+                    = mProvidersByClass.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, ContentProviderRecord> e = it.next();
+                ContentProviderRecord r = e.getValue();
+                if (dumpAll) {
                     pw.print("  * "); pw.println(r);
                     r.dump(pw, "    ");
+                } else {
+                    pw.print("  * "); pw.print(r.name.toShortString());
+                    if (r.app != null) {
+                        pw.println(":");
+                        pw.print("      "); pw.println(r.app);
+                    } else {
+                        pw.println();
+                    }
                 }
-                needSep = true;
             }
+            needSep = true;
+        }
     
+        if (dumpAll) {
             if (mProvidersByName.size() > 0) {
                 pw.println(" ");
                 pw.println("  Authority to provider mappings:");
@@ -8313,7 +8433,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                         pw.println(" holds:");
                 for (UriPermission perm : perms.values()) {
                     pw.print("    "); pw.println(perm);
-                    perm.dump(pw, "      ");
+                    if (dumpAll) {
+                        perm.dump(pw, "      ");
+                    }
                 }
             }
             needSep = true;
@@ -8326,20 +8448,21 @@ public final class ActivityManagerService extends ActivityManagerNative
             int opti, boolean dumpAll) {
         boolean needSep = false;
         
-        if (dumpAll) {
-            if (this.mIntentSenderRecords.size() > 0) {
-                Iterator<WeakReference<PendingIntentRecord>> it
-                        = mIntentSenderRecords.values().iterator();
-                while (it.hasNext()) {
-                    WeakReference<PendingIntentRecord> ref = it.next();
-                    PendingIntentRecord rec = ref != null ? ref.get(): null;
-                    needSep = true;
-                    if (rec != null) {
-                        pw.print("  * "); pw.println(rec);
+        if (this.mIntentSenderRecords.size() > 0) {
+            pw.println("ACTIVITY MANAGER PENDING INTENTS (dumpsys activity intents)");
+            Iterator<WeakReference<PendingIntentRecord>> it
+                    = mIntentSenderRecords.values().iterator();
+            while (it.hasNext()) {
+                WeakReference<PendingIntentRecord> ref = it.next();
+                PendingIntentRecord rec = ref != null ? ref.get(): null;
+                needSep = true;
+                if (rec != null) {
+                    pw.print("  * "); pw.println(rec);
+                    if (dumpAll) {
                         rec.dump(pw, "    ");
-                    } else {
-                        pw.print("  * "); pw.print(ref);
                     }
+                } else {
+                    pw.print("  * "); pw.println(ref);
                 }
             }
         }
@@ -8347,12 +8470,19 @@ public final class ActivityManagerService extends ActivityManagerNative
         return needSep;
     }
 
-    private static final void dumpHistoryList(PrintWriter pw, List list,
-            String prefix, String label, boolean complete) {
+    private static final void dumpHistoryList(FileDescriptor fd, PrintWriter pw, List list,
+            String prefix, String label, boolean complete, boolean brief, boolean client) {
         TaskRecord lastTask = null;
+        boolean needNL = false;
+        final String innerPrefix = prefix + "      ";
+        final String[] args = new String[0];
         for (int i=list.size()-1; i>=0; i--) {
-            ActivityRecord r = (ActivityRecord)list.get(i);
-            final boolean full = complete || !r.inHistory;
+            final ActivityRecord r = (ActivityRecord)list.get(i);
+            final boolean full = !brief && (complete || !r.inHistory);
+            if (needNL) {
+                pw.println(" ");
+                needNL = false;
+            }
             if (lastTask != r.task) {
                 lastTask = r.task;
                 pw.print(prefix);
@@ -8360,13 +8490,46 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println(lastTask);
                 if (full) {
                     lastTask.dump(pw, prefix + "  ");
+                } else if (complete) {
+                    // Complete + brief == give a summary.  Isn't that obvious?!?
+                    if (lastTask.intent != null) {
+                        pw.print(prefix); pw.print("  "); pw.println(lastTask.intent);
+                    }
                 }
             }
             pw.print(prefix); pw.print(full ? "  * " : "    "); pw.print(label);
             pw.print(" #"); pw.print(i); pw.print(": ");
             pw.println(r);
             if (full) {
-                r.dump(pw, prefix + "      ");
+                r.dump(pw, innerPrefix);
+            } else if (complete) {
+                // Complete + brief == give a summary.  Isn't that obvious?!?
+                pw.print(innerPrefix); pw.println(r.intent);
+                if (r.app != null) {
+                    pw.print(innerPrefix); pw.println(r.app);
+                }
+            }
+            if (client && r.app != null && r.app.thread != null) {
+                // flush anything that is already in the PrintWriter since the thread is going
+                // to write to the file descriptor directly
+                pw.flush();
+                try {
+                    TransferPipe tp = new TransferPipe();
+                    try {
+                        r.app.thread.dumpActivity(tp.getWriteFd().getFileDescriptor(), r,
+                                innerPrefix, args);
+                        // Short timeout, since blocking here can
+                        // deadlock with the application.
+                        tp.go(fd, 2000);
+                    } finally {
+                        tp.kill();
+                    }
+                } catch (IOException e) {
+                    pw.println(innerPrefix + "Failure while dumping the activity: " + e);
+                } catch (RemoteException e) {
+                    pw.println(innerPrefix + "Got a RemoteException while dumping the activity");
+                }
+                needNL = true;
             }
         }
     }
@@ -8452,7 +8615,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     N-i, oomAdj, schedGroup, r.toShortString(), r.adjType));
             if (r.adjSource != null || r.adjTarget != null) {
                 pw.print(prefix);
-                pw.print("          ");
+                pw.print("    ");
                 if (r.adjTarget instanceof ComponentName) {
                     pw.print(((ComponentName)r.adjTarget).flattenToShortString());
                 } else if (r.adjTarget != null) {
@@ -8522,8 +8685,44 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    static final void dumpApplicationMemoryUsage(FileDescriptor fd,
-            PrintWriter pw, List list, String prefix, String[] args) {
+    ArrayList<ProcessRecord> collectProcesses(PrintWriter pw, String[] args) {
+        ArrayList<ProcessRecord> procs;
+        synchronized (this) {
+            if (args != null && args.length > 0
+                    && args[0].charAt(0) != '-') {
+                procs = new ArrayList<ProcessRecord>();
+                int pid = -1;
+                try {
+                    pid = Integer.parseInt(args[0]);
+                } catch (NumberFormatException e) {
+
+                }
+                for (int i=mLruProcesses.size()-1; i>=0; i--) {
+                    ProcessRecord proc = mLruProcesses.get(i);
+                    if (proc.pid == pid) {
+                        procs.add(proc);
+                    } else if (proc.processName.equals(args[0])) {
+                        procs.add(proc);
+                    }
+                }
+                if (procs.size() <= 0) {
+                    pw.println("No process found for: " + args[0]);
+                    return null;
+                }
+            } else {
+                procs = new ArrayList<ProcessRecord>(mLruProcesses);
+            }
+        }
+        return procs;
+    }
+
+    final void dumpApplicationMemoryUsage(FileDescriptor fd,
+            PrintWriter pw, String prefix, String[] args) {
+        ArrayList<ProcessRecord> procs = collectProcesses(pw, args);
+        if (procs == null) {
+            return;
+        }
+
         final boolean isCheckinRequest = scanArgs(args, "--checkin");
         long uptime = SystemClock.uptimeMillis();
         long realtime = SystemClock.elapsedRealtime();
@@ -8536,15 +8735,18 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("Applications Memory Usage (kB):");
             pw.println("Uptime: " + uptime + " Realtime: " + realtime);
         }
-        for (int i = list.size() - 1 ; i >= 0 ; i--) {
-            ProcessRecord r = (ProcessRecord)list.get(i);
+        for (int i = procs.size() - 1 ; i >= 0 ; i--) {
+            ProcessRecord r = procs.get(i);
             if (r.thread != null) {
                 if (!isCheckinRequest) {
                     pw.println("\n** MEMINFO in pid " + r.pid + " [" + r.processName + "] **");
                     pw.flush();
                 }
                 try {
-                    r.thread.asBinder().dump(fd, args);
+                    TransferPipe.goDump(r.thread.asBinder(), fd, args);
+                } catch (IOException e) {
+                    pw.println("Failure: " + e);
+                    pw.flush();
                 } catch (RemoteException e) {
                     if (!isCheckinRequest) {
                         pw.println("Got RemoteException!");
