@@ -101,6 +101,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
     }
 
     public void requestWebKitData() {
+        setDumpTimeout(DUMP_TIMEOUT_MS);
         Message callback = mHandler.obtainMessage(MSG_WEBKIT_DATA);
 
         if (mRequestedWebKitData)
@@ -112,12 +113,10 @@ public class TestShellActivity extends Activity implements LayoutTestController 
             case DUMP_AS_TEXT:
                 callback.arg1 = mDumpTopFrameAsText ? 1 : 0;
                 callback.arg2 = mDumpChildFramesAsText ? 1 : 0;
-                setDumpTimeout(DUMP_TIMEOUT_MS);
                 mWebView.documentAsText(callback);
                 break;
             case EXT_REPR:
                 mWebView.externalRepresentation(callback);
-                setDumpTimeout(DUMP_TIMEOUT_MS);
                 break;
             default:
                 finished();
