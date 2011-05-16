@@ -819,18 +819,6 @@ public class Activity extends ContextThemeWrapper
         return mWindow != null ? mWindow.getCurrentFocus() : null;
     }
 
-    @Override
-    public int getWallpaperDesiredMinimumWidth() {
-        int width = super.getWallpaperDesiredMinimumWidth();
-        return width <= 0 ? getWindowManager().getDefaultDisplay().getWidth() : width;
-    }
-
-    @Override
-    public int getWallpaperDesiredMinimumHeight() {
-        int height = super.getWallpaperDesiredMinimumHeight();
-        return height <= 0 ? getWindowManager().getDefaultDisplay().getHeight() : height;
-    }
-
     /**
      * Called when the activity is starting.  This is where most initialization
      * should go: calling {@link #setContentView(int)} to inflate the
