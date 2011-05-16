@@ -290,13 +290,6 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         newSS.setStateOutOfService();
         mLteSS.setStateOutOfService();
 
-        // TODO: 4G Tech Handoff
-        // if (has4gHandoff) {
-        // Message msg = phone.mDataConnectionTracker.obtainMessage(
-        // DataConnectionTracker.EVENT_4G_TECHNOLOGY_CHANGE);
-        // phone.mDataConnectionTracker.sendMessage(msg);
-        // }
-
         if ((hasMultiApnSupport)
                 && (phone.mDataConnectionTracker instanceof CdmaDataConnectionTracker)) {
             if (DBG) log("GsmDataConnectionTracker Created");
@@ -390,8 +383,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             mDetachedRegistrants.notifyRegistrants();
         }
 
-        if ((hasCdmaDataConnectionChanged || hasNetworkTypeChanged)
-                && (phone.mDataConnectionTracker instanceof CdmaDataConnectionTracker)) {
+        if ((hasCdmaDataConnectionChanged || hasNetworkTypeChanged)) {
             phone.notifyDataConnection();
         }
 
