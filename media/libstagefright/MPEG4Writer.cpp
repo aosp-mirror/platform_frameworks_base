@@ -260,7 +260,8 @@ MPEG4Writer::MPEG4Writer(const char *filename)
       mInterleaveDurationUs(1000000),
       mLatitudex10000(0),
       mLongitudex10000(0),
-      mAreGeoTagsAvailable(false) {
+      mAreGeoTagsAvailable(false),
+      mStartTimeOffsetMs(-1) {
 
     mFd = open(filename, O_CREAT | O_LARGEFILE | O_TRUNC | O_RDWR);
     if (mFd >= 0) {
@@ -282,7 +283,8 @@ MPEG4Writer::MPEG4Writer(int fd)
       mInterleaveDurationUs(1000000),
       mLatitudex10000(0),
       mLongitudex10000(0),
-      mAreGeoTagsAvailable(false) {
+      mAreGeoTagsAvailable(false),
+      mStartTimeOffsetMs(-1) {
 }
 
 MPEG4Writer::~MPEG4Writer() {
@@ -1425,10 +1427,15 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
          * session, and it also helps eliminate the "recording" sound for
          * camcorder applications.
          *
-         * Ideally, this platform-specific value should be defined
-         * in media_profiles.xml file
+         * If client does not set the start time offset, we fall back to
+         * use the default initial delay value.
          */
-        startTimeUs += kInitialDelayTimeUs;
+        int64_t startTimeOffsetUs = mOwner->getStartTimeOffsetMs() * 1000LL;
+        if (startTimeOffsetUs < 0) {  // Start time offset was not set
+            startTimeOffsetUs = kInitialDelayTimeUs;
+        }
+        startTimeUs += startTimeOffsetUs;
+        LOGI("Start time offset: %lld us", startTimeOffsetUs);
     }
 
     meta->setInt64(kKeyTime, startTimeUs);
@@ -2234,13 +2241,20 @@ void MPEG4Writer::Track::sendTrackSummary(bool hasMultipleTracks) {
                     trackNum | MEDIA_RECORDER_TRACK_INFO_ENCODED_FRAMES,
                     mNumSamples);
 
-    // The system delay time excluding the requested initial delay that
-    // is used to eliminate the recording sound.
-    int64_t initialDelayUs =
-        mFirstSampleTimeRealUs - mStartTimeRealUs - kInitialDelayTimeUs;
-    mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
+    {
+        // The system delay time excluding the requested initial delay that
+        // is used to eliminate the recording sound.
+        int64_t startTimeOffsetUs = mOwner->getStartTimeOffsetMs() * 1000LL;
+        if (startTimeOffsetUs < 0) {  // Start time offset was not set
+            startTimeOffsetUs = kInitialDelayTimeUs;
+        }
+        int64_t initialDelayUs =
+            mFirstSampleTimeRealUs - mStartTimeRealUs - startTimeOffsetUs;
+
+        mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,
                     trackNum | MEDIA_RECORDER_TRACK_INFO_INITIAL_DELAY_MS,
                     (initialDelayUs) / 1000);
+    }
 
     if (hasMultipleTracks) {
         mOwner->notify(MEDIA_RECORDER_TRACK_EVENT_INFO,

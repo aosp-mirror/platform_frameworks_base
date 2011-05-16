@@ -99,6 +99,7 @@ private:
     int32_t mRotationDegrees;  // Clockwise
     int32_t mLatitudex10000;
     int32_t mLongitudex10000;
+    int32_t mStartTimeOffsetMs;
 
     bool mCaptureTimeLapse;
     int64_t mTimeBetweenTimeLapseFrameCaptureUs;
