@@ -587,6 +587,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return false;
         }
         final boolean propagate = onRequestSendAccessibilityEvent(child, event);
+        //noinspection SimplifiableIfStatement
         if (!propagate) {
             return false;
         }
@@ -1243,6 +1244,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 mHoveredChild = null;
             } else {
                 // Pointer is still within the child.
+                //noinspection ConstantConditions
                 handled |= dispatchTransformedGenericPointerEvent(event, mHoveredChild);
             }
         }
@@ -1306,6 +1308,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         // Handle the event only if leaf. This guarantees that
         // the leafs (or any custom class that returns true from
         // this method) will get a change to process the hover.
+        //noinspection SimplifiableIfStatement
         if (getChildCount() == 0) {
             return super.onHoverEvent(event);
         }
@@ -1879,7 +1882,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @see #FOCUS_BEFORE_DESCENDANTS
      * @see #FOCUS_AFTER_DESCENDANTS
      * @see #FOCUS_BLOCK_DESCENDANTS
-     * @see #onRequestFocusInDescendants
+     * @see #onRequestFocusInDescendants(int, android.graphics.Rect) 
      */
     @Override
     public boolean requestFocus(int direction, Rect previouslyFocusedRect) {
@@ -2093,10 +2096,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Perform dispatching of a {@link #restoreHierarchyState thaw()} to only this view,
-     * not to its children.  For use when overriding
-     * {@link #dispatchRestoreInstanceState dispatchThaw()} to allow subclasses to thaw
-     * their own state but not the state of their children.
+     * Perform dispatching of a {@link #restoreHierarchyState(android.util.SparseArray)}
+     * to only this view, not to its children.  For use when overriding
+     * {@link #dispatchRestoreInstanceState(android.util.SparseArray)} to allow
+     * subclasses to thaw their own state but not the state of their children.
      *
      * @param container the container
      */
