@@ -574,12 +574,12 @@
 
     <style name="Widget.ScrollView">
         <item name="android:scrollbars">vertical</item>
-        <item name="android:fadingEdge">none</item>
+        <item name="android:fadingEdge">vertical</item>
     </style>
 
     <style name="Widget.HorizontalScrollView">
         <item name="android:scrollbars">horizontal</item>
-        <item name="android:fadingEdge">none</item>
+        <item name="android:fadingEdge">horizontal</item>
     </style>
 
     <style name="Widget.ListView" parent="Widget.AbsListView">
