@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
@@ -219,6 +220,8 @@ public abstract class DataConnectionTracker extends Handler {
     protected static final String FAIL_DATA_SETUP_FAIL_CAUSE = "fail_data_setup_fail_cause";
     protected FailCause mFailDataSetupFailCause = FailCause.ERROR_UNSPECIFIED;
 
+    protected static final String DEFALUT_DATA_ON_BOOT_PROP = "net.def_data_on_boot";
+
     // member variables
     protected PhoneBase mPhone;
     protected Activity mActivity = Activity.NONE;
@@ -384,13 +387,15 @@ public abstract class DataConnectionTracker extends Handler {
 
         // This preference tells us 1) initial condition for "dataEnabled",
         // and 2) whether the RIL will setup the baseband to auto-PS attach.
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mPhone.getContext());
-        dataEnabled[APN_DEFAULT_ID] =
-                !sp.getBoolean(PhoneBase.DATA_DISABLED_ON_BOOT_KEY, false);
+
+        dataEnabled[APN_DEFAULT_ID] = SystemProperties.getBoolean(DEFALUT_DATA_ON_BOOT_PROP,
+                                                                  true);
         if (dataEnabled[APN_DEFAULT_ID]) {
             enabledCount++;
         }
-        mAutoAttachOnCreation = dataEnabled[APN_DEFAULT_ID];
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mPhone.getContext());
+        mAutoAttachOnCreation = sp.getBoolean(PhoneBase.DATA_DISABLED_ON_BOOT_KEY, false);
     }
 
     public void dispose() {
