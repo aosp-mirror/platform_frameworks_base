@@ -37,12 +37,12 @@ var playlistsWithTitleInDescription = "734A052F802C96B9";
  * Each playlist ID is paired with a custom video description.
  */
 var featured = {
-// Android UI design patterns
-  'M1ZBjlCRfz0' : "The Android user experience team provides suggestions for how to make your applications more useable and engaging.",
-// The world of ListView
-  'wDBM6wVEO70' : "ListView is a common widget that's customizable, but can be tricky to polish, so this talk shows how you can provide the best performance.",
-// Debugging Arts of the Ninja Masters
-  'Dgnx0E7m1GQ' : "The Android SDK includes tools to debug your apps like a ninja. Enter the dojo and become a master at debugging your apps."
+// Android Development Tools
+  'Oq05KqjXTvs' : "The team behind the Android Development Tools demonstrate several powerful features for app development, including new capabilities in the Eclipse layout editor.",
+// Android UIs for phones and tablets
+  'WGIU2JX1U5Y' : "This talk from the Android UI team explains several design patterns that the team recommends you use when designing your application for screens of all sizes.",
+// Android Protips
+  'twmuBbC_oB8' : "In this talk, you'll learn how to create a well polished app that abides by several key virtues, using advanced development techniques and some lesser known APIs."
 };
 
 /* When an event on the browser history occurs (back, forward, load),
@@ -177,7 +177,7 @@ function showPlaylists() {
     for (var i in ids) {
       var script = "<script type='text/javascript' src='http://gdata.youtube.com/feeds/api/playlists/"
       				  + ids[i] +
-      				  "?v=2&alt=json-in-script&callback=renderPlaylist'><\/script>";
+      				  "?v=2&alt=json-in-script&max-results=50&callback=renderPlaylist'><\/script>";
     	$("body").append(script);
     }
   }
