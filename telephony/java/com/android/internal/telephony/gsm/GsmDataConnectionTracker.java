@@ -22,7 +22,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -270,8 +269,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     protected void initApnContextsAndDataConnection() {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mPhone.getContext());
-        boolean defaultEnabled = !sp.getBoolean(PhoneBase.DATA_DISABLED_ON_BOOT_KEY, false);
+        boolean defaultEnabled = SystemProperties.getBoolean(DEFALUT_DATA_ON_BOOT_PROP, true);
         // Load device network attributes from resources
         String[] networkConfigStrings = mPhone.getContext().getResources().getStringArray(
                 com.android.internal.R.array.networkAttributes);
@@ -585,7 +583,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         boolean desiredPowerState = mPhone.getServiceStateTracker().getDesiredPowerState();
 
         boolean allowed =
-                    gprsState == ServiceState.STATE_IN_SERVICE &&
+                    (gprsState == ServiceState.STATE_IN_SERVICE || mAutoAttachOnCreation) &&
                     mPhone.mIccRecords.getRecordsLoaded() &&
                     mPhone.getState() == Phone.State.IDLE &&
                     mInternalDataEnabled &&
@@ -594,7 +592,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     desiredPowerState;
         if (!allowed && DBG) {
             String reason = "";
-            if (!(gprsState == ServiceState.STATE_IN_SERVICE)) {
+            if (!((gprsState == ServiceState.STATE_IN_SERVICE) || mAutoAttachOnCreation)) {
                 reason += " - gprs= " + gprsState;
             }
             if (!mPhone.mIccRecords.getRecordsLoaded()) reason += " - SIM not loaded";
