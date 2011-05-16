@@ -107,8 +107,8 @@ discover, communicate with, and manage a variety of device types connected over
 USB. </p>
 
 <p>The stack and APIs distinguish two basic types of USB hardware, based on
-whether the platform iself is acting as host or the external hardware is acting
-as host: </p>
+whether the Android-powered device is acting as host or the external hardware
+is acting as host: </p>
 
 <ul>
 <li>A <em>USB device</em> is a piece of connected hardware that depends on the
