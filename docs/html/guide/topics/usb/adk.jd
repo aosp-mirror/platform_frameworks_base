@@ -6,7 +6,9 @@ page.title=Android Open Accessory Development Kit
       <h2>In this document</h2>
 
       <ol>
+        <li><a href="#components">ADK Components</a></li>
         <li>
+
           <a href="#getting-started">Getting Started with the ADK</a>
 
           <ol>
@@ -54,16 +56,28 @@ page.title=Android Open Accessory Development Kit
         </li>
       </ol>
 
-      <h2>Where to Buy</h2>
+      
+
+      <h2>See also</h2>
+
+      <ol>
+        <li><a href="http://www.youtube.com/watch?v=s7szcpXf2rE">Google I/O Session Video</a></li>
+        <li><a href="{@docRoot}guide/topics/usb/accessory.html">USB Accessory Dev Guide</a></li>
+      </ol>
+      
+      <h2>Where to buy</h2>
 
       <ol>
         <li><a href=
-        "http://www.rt-shop.sakura.ne.jp/rt-shop/index.php?main_page=product_info&amp;products_id=2731&language=en">
+        "http://www.rt-net.jp/shop/index.php?main_page=product_info&cPath=3_4&products_id=1">
         RT Corp</a></li>
 
         <li><a href=
         "http://www.microchip.com/android">
         Microchip</a></li>
+
+        <li><a href="https://store.diydrones.com/ProductDetails.asp?ProductCode=BR-PhoneDrone">
+        DIY Drones</a></li>
       </ol>
     </div>
   </div>
@@ -79,7 +93,7 @@ page.title=Android Open Accessory Development Kit
   released Android-powered devices are only capable of acting as a USB device and cannot initiate
   connections with external USB devices. Android Open Accessory support overcomes this limitation
   and allows you to build accessories that can interact with an assortment of Android-powered
-  devices by allowing the accessory initiate the connection.</p>
+  devices by allowing the accessory to initiate the connection.</p>
 
   <p class="note"><strong>Note:</strong> Accessory mode is ultimately dependent on the device's
   hardware and not all devices will support accessory mode. Devices that support accessory mode can
@@ -87,20 +101,29 @@ page.title=Android Open Accessory Development Kit
   Android manifest. For more information, see the <a href=
   "{@docRoot}guide/topics/usb/accessory.html#manifest">USB Accessory</a> Developer Guide.</p>
 
+  <p>The following list of distributers are currently producing Android Open Accessory compatible
+  development boards:</p>
+
+  <ul>
+    <li><a href="http://www.rt-net.jp/shop/index.php?main_page=product_info&cPath=3_4&products_id=1">
+    RT Corp</a> provides an Arduino-compatible board based on the Android ADK board design.</li>
+    <li><a href="http://www.microchip.com/android">Microchip</a> provides a A PIC based USB
+    microcontroller board.</li>
+    <li><a href="https://store.diydrones.com/ProductDetails.asp?ProductCode=BR-PhoneDrone">DIY
+    Drones</a> provides an Arduino-compatible board geared towards RC (radio controlled) and UAV
+    (unmanned aerial vehicle) enthusiasts.</li>
+  </ul>
+
+  <p>We expect more hardware distributers to create a variety of kits, so please stay tuned for
+  further developments.</p>
+
+  <h2 id="components">ADK Components</h2>
   <p>The Android Open Accessory Development Kit (ADK) provides an implementation of an Android USB
   accessory that is based on the <a href="http://www.arduino.cc/">Arduino open source electronics
   prototyping platform</a>, the accessory's hardware design files, code that implements the
   accessory's firmware, and the Android application that interacts with the accessory. The hardware
-  design files and code are contained in the <a href=
-  "https://dl-ssl.google.com/android/adk/adk_release_0506.zip">ADK package download</a>. You can
-  <a href=
-  "http://www.rt-shop.sakura.ne.jp/rt-shop/index.php?main_page=product_info&amp;products_id=2731&language=en">buy
-  the hardware components</a> of the ADK if you do not already have them. There is also a <a href=
-  "http://www.microchip.com/android">
-  PIC based USB microcontroller</a> that is not based on the ADK design, but that you can still use
-  to create your own Android open accessories. We expect more hardware distributers to create a
-  variety of kits, so please stay tuned for further developments.</p>
-
+  design files and firmware code are contained in the <a href=
+  "https://dl-ssl.google.com/android/adk/adk_release_0512.zip">ADK package download</a>.</p>
   <p>The main hardware and software components of the ADK include:</p>
 
   <ul>
@@ -138,7 +161,6 @@ page.title=Android Open Accessory Development Kit
     how to setup communication with the device.</li>
 
     <li>Other third party libraries to support the ADK board's functionality:
-
       <ul>
         <li><a href="http://www.arduino.cc/playground/Main/CapSense">CapSense library</a></li>
 
@@ -150,11 +172,12 @@ page.title=Android Open Accessory Development Kit
         <li><a href="http://www.arduino.cc/playground/Code/Spi">Spi library</a></li>
 
         <li><a href="http://www.arduino.cc/en/Reference/Wire">Wire library</a></li>
+
+        <li>An Android application, DemoKit, that communicates with the ADK board and shield. The
+        source for this project is in the <code>app/</code> directory.</li>
       </ul>
     </li>
 
-    <li>An Android application, DemoKit, that communicates with the ADK board and shield. The
-    source for this project is in the <code>app/</code> directory.</li>
   </ul>
 
   <h2 id="getting-started">Getting Started with the ADK</h2>
@@ -172,7 +195,7 @@ page.title=Android Open Accessory Development Kit
     libraries to sense human capacitance. This is needed for the capacative button that is located
     on the ADK shield.</li>
 
-    <li><a href="">The ADK package</a>: contains the firmware for the ADK board and hardware design
+    <li><a href="https://dl-ssl.google.com/android/adk/adk_release_0512.zip">The ADK package</a>: contains the firmware for the ADK board and hardware design
     files for the ADK board and shield.</li>
   </ul>
 
@@ -190,7 +213,7 @@ page.title=Android Open Accessory Development Kit
       otherwise.</p>
     </li>
 
-    <li><a href="https://dl-ssl.google.com/android/adk/adk_release_0506.zip">Download</a> and
+    <li><a href="https://dl-ssl.google.com/android/adk/adk_release_0512.zip">Download</a> and
     extract the ADK package to a directory of your choice. You should have an <code>app</code>,
     <code>firmware</code>, and <code>hardware</code> directories.</li>
 
@@ -419,7 +442,7 @@ page.title=Android Open Accessory Development Kit
   mode, the accessory cannot discern whether the device supports accessory mode and is not in that
   state, or if the device does not support accessory mode at all. This is because devices that
   support accessory mode but aren't in it initially report the device's manufacturer vendor ID and
-  product ID, and not the special Google ones. In either case, the accessory should try to start
+  product ID, and not the special Android Open Accessory ones. In either case, the accessory should try to start
   the device into accessory mode to figure out if the device supports it. The following steps
   explain how to do this:</p>
 
