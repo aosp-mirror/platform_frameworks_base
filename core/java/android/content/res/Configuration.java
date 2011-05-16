@@ -303,9 +303,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     
     public String toString() {
         StringBuilder sb = new StringBuilder(128);
-        sb.append("{ fnt=");
+        sb.append("{");
         sb.append(fontScale);
-        sb.append(" imsi=");
+        sb.append("x imsi=");
         sb.append(mcc);
         sb.append("/");
         sb.append(mnc);
