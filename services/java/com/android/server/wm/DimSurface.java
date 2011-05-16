@@ -89,7 +89,7 @@ class DimSurface {
     public void printTo(String prefix, PrintWriter pw) {
         pw.print(prefix); pw.print("mDimSurface="); pw.println(mDimSurface);
         pw.print(prefix); pw.print("mDimShown="); pw.print(mDimShown);
-                pw.print(" mLayer="); pw.println(mLayer);
+                pw.print(" mLayer="); pw.print(mLayer);
                 pw.print(" mDimColor=0x"); pw.println(Integer.toHexString(mDimColor));
         pw.print(prefix); pw.print("mLastDimWidth="); pw.print(mLastDimWidth);
                 pw.print(" mLastDimWidth="); pw.println(mLastDimWidth);
