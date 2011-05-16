@@ -176,6 +176,6 @@ LOCAL_SHARED_LIBRARIES := \
         libstagefright_omx libstagefright_foundation libutils
 
 LOCAL_MODULE := libstagefright_soft_aacdec
-LOCAL_MODULE_TAGS := eng
+LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)

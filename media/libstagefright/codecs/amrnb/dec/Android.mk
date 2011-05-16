@@ -79,6 +79,6 @@ LOCAL_SHARED_LIBRARIES := \
         libstagefright_amrnb_common
 
 LOCAL_MODULE := libstagefright_soft_amrdec
-LOCAL_MODULE_TAGS := eng
+LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
