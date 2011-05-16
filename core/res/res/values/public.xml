@@ -1667,6 +1667,7 @@
   <public type="attr" name="textEditSuggestionsBottomWindowLayout" />
   <public type="attr" name="textEditSuggestionsTopWindowLayout" />
   <public type="attr" name="textEditSuggestionItemLayout" />
+  <public type="attr" name="horizontalDirection" />
 
   <public type="attr" name="fullBackupAgent" />
 

@@ -1913,6 +1913,22 @@
                  more information. -->
             <enum name="hardware" value="2" />
         </attr>
+
+        <!-- Defines the direction of layout drawing. This typically is associated with writing
+             direction of the language script used. The possible values are Left-to-Right,
+             Right-to-Left, Locale and Inherit from parent view. If there is nothing to inherit,
+             Locale is used. Locale fallsback to 'en-US'. Left-to-Right is the direction used in
+             'en-US'. The default for this attribute is 'inherit'. -->
+        <attr name="horizontalDirection">
+            <!-- Left-to-Right -->
+            <enum name="ltr" value="0" />
+            <!-- Right-to-Left -->
+            <enum name="rtl" value="1" />
+            <!-- Inherit from parent -->
+            <enum name="inherit" value="2" />
+            <!-- Locale -->
+            <enum name="locale" value="3" />
+        </attr>
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any

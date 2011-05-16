@@ -476,6 +476,7 @@ package android {
     field public static final int hint = 16843088; // 0x1010150
     field public static final int homeAsUpIndicator = 16843531; // 0x101030b
     field public static final int homeLayout = 16843549; // 0x101031d
+    field public static final int horizontalDirection = 16843628; // 0x101036c
     field public static final int horizontalDivider = 16843053; // 0x101012d
     field public static final int horizontalGap = 16843327; // 0x101023f
     field public static final int horizontalScrollViewStyle = 16843603; // 0x1010353
