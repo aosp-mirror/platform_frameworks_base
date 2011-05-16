@@ -322,7 +322,7 @@ public final class MccTable
                 table.add(new MccEntry(289,"ge",2));    //Abkhazia (Georgia)
 		table.add(new MccEntry(290,"gl",2));	//Greenland (Denmark)
 		table.add(new MccEntry(292,"sm",2));	//San Marino (Republic of)
-		table.add(new MccEntry(293,"sl",2));	//Slovenia (Republic of)
+		table.add(new MccEntry(293,"si",2));	//Slovenia (Republic of)
                 table.add(new MccEntry(294,"mk",2));   //The Former Yugoslav Republic of Macedonia
 		table.add(new MccEntry(295,"li",2));	//Liechtenstein (Principality of)
                 table.add(new MccEntry(297,"me",2));    //Montenegro (Republic of)
