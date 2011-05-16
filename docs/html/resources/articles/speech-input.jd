@@ -8,8 +8,9 @@ are.  That means not just talking, but e-mailing, texting, microblogging, and so
 on. </p>
 
 <p>Speech input adds another dimension to staying in touch.
-Google's Voice Search application, which is pre-installed on many Android devices,
-provides powerful features like "search by voice" and voice shortcuts like "Navigate to." Further
+Google's Voice Search application, which is pre-installed on many Android devices
+and available in Android Market, provides powerful features like "search by voice"
+and Voice Actions like "Navigate to." Further
 enhancing the voice experience, Android 2.1 introduces a <a
 href="http://www.youtube.com/watch?v=laOlkD8LmZw">
 voice-enabled keyboard</a>, which makes it even easier
@@ -66,9 +67,7 @@ many Android devices, responds to a <em>RecognizerIntent</em> by displaying the
 "Speak
 now" dialog and streaming audio to Google's servers -- the same servers used
 when a user taps the microphone button on the search widget or the voice-enabled
-keyboard. Voice Search is installed on all the major
-US devices, and it's also available on Market. You can check whether Voice
-Search is installed in 
+keyboard. You can check whether Voice Search is installed in 
 <strong>Settings > Applications > Manage applications</strong>. </p>
 
 <p> One important tip: for speech input to be as accurate as possible, it's
@@ -84,7 +83,10 @@ web_search} for shorter, search-like phrases.  We developed the "free form"
 model to improve dictation accuracy for the voice keyboard,
 while the "web search" model is used when users want to search by voice. </p> 
 
-<p> Google's servers currently support English, Mandarin Chinese, and Japanese. 
+<p> Google's servers support many languages for voice input, with more arriving
+regularly. You can use the
+{@link android.speech.RecognizerIntent#ACTION_GET_LANGUAGE_DETAILS}
+broadcast intent to query for the list of supported languages.
 The web search model is available in all three languages, while free-form has
 primarily been optimized for English. As we work hard to support more models in
 more languages, and to improve the accuracy of the speech recognition technology
