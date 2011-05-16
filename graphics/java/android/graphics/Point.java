@@ -16,11 +16,14 @@
 
 package android.graphics;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 
 /**
  * Point holds two integer coordinates
  */
-public class Point {
+public class Point implements Parcelable {
     public int x;
     public int y;
 
@@ -81,5 +84,53 @@ public class Point {
 
     @Override public String toString() {
         return "Point(" + x + ", " + y+ ")";
+    }
+
+    /**
+     * Parcelable interface methods
+     */
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    /**
+     * Write this point to the specified parcel. To restore a point from
+     * a parcel, use readFromParcel()
+     * @param out The parcel to write the point's coordinates into
+     */
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(x);
+        out.writeInt(y);
+    }
+
+    public static final Parcelable.Creator<Point> CREATOR = new Parcelable.Creator<Point>() {
+        /**
+         * Return a new point from the data in the specified parcel.
+         */
+        public Point createFromParcel(Parcel in) {
+            Point r = new Point();
+            r.readFromParcel(in);
+            return r;
+        }
+
+        /**
+         * Return an array of rectangles of the specified size.
+         */
+        public Point[] newArray(int size) {
+            return new Point[size];
+        }
+    };
+
+    /**
+     * Set the point's coordinates from the data stored in the specified
+     * parcel. To write a point to a parcel, call writeToParcel().
+     *
+     * @param in The parcel to read the point's coordinates from
+     */
+    public void readFromParcel(Parcel in) {
+        x = in.readInt();
+        y = in.readInt();
     }
 }
