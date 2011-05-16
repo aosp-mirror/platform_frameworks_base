@@ -338,6 +338,12 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
 
     @Override
     public Cursor swapCursor(Cursor c) {
+        // super.swapCursor() will notify observers before we have
+        // a valid mapping, make sure we have a mapping before this
+        // happens
+        if (mFrom == null) {
+            findColumns(mOriginalFrom);
+        }
         Cursor res = super.swapCursor(c);
         // rescan columns in case cursor layout is different
         findColumns(mOriginalFrom);
@@ -358,7 +364,13 @@ public class SimpleCursorAdapter extends ResourceCursorAdapter {
     public void changeCursorAndColumns(Cursor c, String[] from, int[] to) {
         mOriginalFrom = from;
         mTo = to;
-        super.changeCursor(c);        
+        // super.changeCursor() will notify observers before we have
+        // a valid mapping, make sure we have a mapping before this
+        // happens
+        if (mFrom == null) {
+            findColumns(mOriginalFrom);
+        }
+        super.changeCursor(c);
         findColumns(mOriginalFrom);
     }
 
