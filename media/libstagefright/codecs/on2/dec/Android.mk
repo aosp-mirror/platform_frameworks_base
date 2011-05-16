@@ -37,7 +37,7 @@ LOCAL_SHARED_LIBRARIES := \
         libstagefright libstagefright_omx libstagefright_foundation libutils
 
 LOCAL_MODULE := libstagefright_soft_vpxdec
-LOCAL_MODULE_TAGS := eng
+LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
 
