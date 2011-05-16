@@ -18,6 +18,7 @@ package android.os;
 
 import android.content.res.Resources;
 import android.os.storage.IMountService;
+import android.os.storage.StorageVolume;
 import android.util.Log;
 
 import java.io.File;
@@ -35,7 +36,25 @@ public class Environment {
 
     private static final Object mLock = new Object();
 
-    private volatile static Boolean mIsExternalStorageEmulated = null;
+    private volatile static StorageVolume mPrimaryVolume = null;
+
+    private static StorageVolume getPrimaryVolume() {
+        if (mPrimaryVolume == null) {
+            synchronized (mLock) {
+                if (mPrimaryVolume == null) {
+                    try {
+                        IMountService mountService = IMountService.Stub.asInterface(ServiceManager
+                                .getService("mount"));
+                        Parcelable[] volumes = mountService.getVolumeList();
+                        mPrimaryVolume = (StorageVolume)volumes[0];
+                    } catch (Exception e) {
+                        Log.e(TAG, "couldn't talk to MountService", e);
+                    }
+                }
+            }
+        }
+        return mPrimaryVolume;
+    }
 
     /**
      * Gets the Android root directory.
@@ -416,9 +435,8 @@ public class Environment {
      * <p>See {@link #getExternalStorageDirectory()} for more information.
      */
     public static boolean isExternalStorageRemovable() {
-        if (isExternalStorageEmulated()) return false;
-        return Resources.getSystem().getBoolean(
-                com.android.internal.R.bool.config_externalStorageRemovable);
+        StorageVolume volume = getPrimaryVolume();
+        return (volume != null && volume.isRemovable());
     }
 
     /**
@@ -435,23 +453,8 @@ public class Environment {
      * android.content.ComponentName, boolean)} for additional details.
      */
     public static boolean isExternalStorageEmulated() {
-        if (mIsExternalStorageEmulated == null) {
-            synchronized (mLock) {
-                if (mIsExternalStorageEmulated == null) {
-                    boolean externalStorageEmulated;
-                    try {
-                        IMountService mountService = IMountService.Stub.asInterface(ServiceManager
-                                .getService("mount"));
-                        externalStorageEmulated = mountService.isExternalStorageEmulated();
-                        mIsExternalStorageEmulated = Boolean.valueOf(externalStorageEmulated);
-                    } catch (Exception e) {
-                        Log.e(TAG, "couldn't talk to MountService", e);
-                        return false;
-                    }
-                }
-            }
-        }
-        return mIsExternalStorageEmulated;
+        StorageVolume volume = getPrimaryVolume();
+        return (volume != null && volume.isEmulated());
     }
 
     static File getDirectory(String variableName, String defaultPath) {

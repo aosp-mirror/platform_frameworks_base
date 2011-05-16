@@ -4956,4 +4956,21 @@
         <!-- Y coordinate of the icon hot spot. -->
         <attr name="hotSpotY" format="float" />
     </declare-styleable>
+
+    <declare-styleable name="Storage">
+        <!-- path to mount point for the storage --> 
+        <attr name="mountPoint" format="string" />
+        <!-- user visible description of the storage -->
+        <attr name="storageDescription" format="string" />
+        <!-- true if the storage is the primary external storage -->
+        <attr name="primary" format="boolean" />
+        <!-- true if the storage is removable -->
+        <attr name="removable" format="boolean" />
+        <!-- true if the storage is emulated via the FUSE sdcard daemon -->
+        <attr name="emulated" format="boolean" />
+        <!-- number of megabytes of storage MTP should reserve for free storage
+             (used for emulated storage that is shared with system's data partition) -->
+        <attr name="mtpReserve" format="integer" />
+    </declare-styleable>
+
 </resources>

@@ -17,6 +17,7 @@
 package com.android.server;
 
 import com.android.internal.app.IMediaContainerService;
+import com.android.internal.util.XmlUtils;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.pm.PackageManagerService;
 
@@ -29,6 +30,9 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.ObbInfo;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
@@ -37,6 +41,7 @@ import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -47,8 +52,14 @@ import android.os.storage.IMountShutdownObserver;
 import android.os.storage.IObbActionListener;
 import android.os.storage.OnObbStateChangeListener;
 import android.os.storage.StorageResultCode;
+import android.os.storage.StorageVolume;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.util.Slog;
+import android.util.Xml;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -149,6 +160,8 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
 
     private Context                               mContext;
     private NativeDaemonConnector                 mConnector;
+    private final ArrayList<StorageVolume>        mVolumes = new ArrayList<StorageVolume>();
+    private StorageVolume                         mPrimaryVolume;
     private final HashMap<String, String>         mVolumeStates = new HashMap<String, String>();
     private String                                mExternalStoragePath;
     private PackageManagerService                 mPms;
@@ -1071,6 +1084,74 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         }
     }
 
+    // Storage list XML tags
+    private static final String TAG_STORAGE_LIST = "StorageList";
+    private static final String TAG_STORAGE = "storage";
+
+    private void readStorageList(Resources resources) {
+        int id = com.android.internal.R.xml.storage_list;
+        XmlResourceParser parser = resources.getXml(id);
+        AttributeSet attrs = Xml.asAttributeSet(parser);
+
+        try {
+            XmlUtils.beginDocument(parser, TAG_STORAGE_LIST);
+            while (true) {
+                XmlUtils.nextElement(parser);
+
+                String element = parser.getName();
+                if (element == null) break;
+
+                if (TAG_STORAGE.equals(element)) {
+                    TypedArray a = resources.obtainAttributes(attrs,
+                            com.android.internal.R.styleable.Storage);
+
+                    CharSequence path = a.getText(
+                            com.android.internal.R.styleable.Storage_mountPoint);
+                    CharSequence description = a.getText(
+                            com.android.internal.R.styleable.Storage_storageDescription);
+                    boolean primary = a.getBoolean(
+                            com.android.internal.R.styleable.Storage_primary, false);
+                    boolean removable = a.getBoolean(
+                            com.android.internal.R.styleable.Storage_removable, false);
+                    boolean emulated = a.getBoolean(
+                            com.android.internal.R.styleable.Storage_emulated, false);
+                    int mtpReserve = a.getInt(
+                            com.android.internal.R.styleable.Storage_mtpReserve, 0);
+
+                    Slog.d(TAG, "got storage path: " + path + " description: " + description +
+                            " primary: " + primary + " removable: " + removable +
+                            " emulated: " + emulated +  " mtpReserve: " + mtpReserve);
+                    if (path == null || description == null) {
+                        Slog.e(TAG, "path or description is null in readStorageList");
+                    } else {
+                        StorageVolume volume = new StorageVolume(path.toString(),
+                                description.toString(), removable, emulated, mtpReserve);
+                        if (primary) {
+                            if (mPrimaryVolume == null) {
+                                mPrimaryVolume = volume;
+                            } else {
+                                Slog.e(TAG, "multiple primary volumes in storage list");
+                            }
+                        }
+                        if (mPrimaryVolume == volume) {
+                            // primay volume must be first
+                            mVolumes.add(0, volume);
+                        } else {
+                            mVolumes.add(volume);
+                        }
+                    }
+                    a.recycle();
+                }
+            }
+        } catch (XmlPullParserException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            parser.close();
+        }
+    }
+
     /**
      * Constructs a new MountService instance
      *
@@ -1078,13 +1159,16 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
      */
     public MountService(Context context) {
         mContext = context;
+        Resources resources = context.getResources();
+        readStorageList(resources);
 
-        mExternalStoragePath = Environment.getExternalStorageDirectory().getPath();
-        mEmulateExternalStorage = context.getResources().getBoolean(
-                com.android.internal.R.bool.config_emulateExternalStorage);
-        if (mEmulateExternalStorage) {
-            Slog.d(TAG, "using emulated external storage");
-            mVolumeStates.put(mExternalStoragePath, Environment.MEDIA_MOUNTED);
+        if (mPrimaryVolume != null) {
+            mExternalStoragePath = mPrimaryVolume.getPath();
+            mEmulateExternalStorage = mPrimaryVolume.isEmulated();
+            if (mEmulateExternalStorage) {
+                Slog.d(TAG, "using emulated external storage");
+                mVolumeStates.put(mExternalStoragePath, Environment.MEDIA_MOUNTED);
+            }
         }
 
         // XXX: This will go away soon in favor of IMountServiceObserver
@@ -1756,13 +1840,12 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         }
     }
 
-    public String[] getVolumeList() {
-        synchronized(mVolumeStates) {
-            Set<String> volumes = mVolumeStates.keySet();
-            String[] result = new String[volumes.size()];
-            int i = 0;
-            for (String volume : volumes) {
-                result[i++] = volume;
+    public Parcelable[] getVolumeList() {
+        synchronized(mVolumes) {
+            int size = mVolumes.size();
+            Parcelable[] result = new Parcelable[size];
+            for (int i = 0; i < size; i++) {
+                result[i] = mVolumes.get(i);
             }
             return result;
         }

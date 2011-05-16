@@ -20,7 +20,9 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
+import android.os.storage.StorageVolume;
 
 /**
  * WARNING! Update IMountService.h and IMountService.cpp if you change this
@@ -638,15 +640,15 @@ public interface IMountService extends IInterface {
                 return _result;
             }
 
-            public String[] getVolumeList() throws RemoteException {
+            public Parcelable[] getVolumeList() throws RemoteException {
                 Parcel _data = Parcel.obtain();
                 Parcel _reply = Parcel.obtain();
-                String[] _result;
+                Parcelable[] _result;
                 try {
                     _data.writeInterfaceToken(DESCRIPTOR);
                     mRemote.transact(Stub.TRANSACTION_getVolumeList, _data, _reply, 0);
                     _reply.readException();
-                    _result = _reply.readStringArray();
+                    _result = _reply.readParcelableArray(StorageVolume.class.getClassLoader());
                 } finally {
                     _reply.recycle();
                     _data.recycle();
@@ -1024,9 +1026,9 @@ public interface IMountService extends IInterface {
                 }
                 case TRANSACTION_getVolumeList: {
                     data.enforceInterface(DESCRIPTOR);
-                    String[] result = getVolumeList();
+                    Parcelable[] result = getVolumeList();
                     reply.writeNoException();
-                    reply.writeStringArray(result);
+                    reply.writeParcelableArray(result, 0);
                     return true;
                 }
             }
@@ -1207,5 +1209,5 @@ public interface IMountService extends IInterface {
     /**
      * Returns list of all mountable volumes.
      */
-    public String[] getVolumeList() throws RemoteException;
+    public Parcelable[] getVolumeList() throws RemoteException;
 }

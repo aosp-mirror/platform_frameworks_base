@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+**
+** Copyright 2011, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License")
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+-->
+
+<!-- The <device> element should contain one or more <storage> elements.
+     Exactly one of these should have the attribute primary="true".
+     This storage will be the primary external storage and should have mountPoint="/mnt/sdcard".
+     Each storage should have both a mountPoint and storageDescription attribute.
+     The following attributes are optional:
+
+        primary:    (boolean) this storage is the primary external storage
+        removable:  (boolean) this is removable storage (for example, a real SD card)
+        emulated:   (boolean) the storage is emulated via the FUSE sdcard daemon
+        mtpReserve: (integer) number of megabytes of storage MTP should reserve for free storage
+                     (used for emulated storage that is shared with system's data partition)
+
+      A storage should not have both emulated and removable set to true
+-->
+
+<StorageList xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- removable is not set in nosdcard product -->
+    <storage android:mountPoint="/mnt/sdcard"
+    		 android:storageDescription="@string/storage_usb"
+    		 android:primary="true" />
+</StorageList>

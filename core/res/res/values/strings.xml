@@ -2820,4 +2820,13 @@
     <string name="action_bar_up_description">Navigate up</string>
     <!-- Content description for the action menu overflow button. [CHAR LIMIT=NONE] -->
     <string name="action_menu_overflow_description">More options</string>
+
+    <!-- Storage description for internal storage. [CHAR LIMIT=NONE] -->
+    <string name="storage_internal">Internal Storage</string>
+
+    <!-- Storage description for the SD card. [CHAR LIMIT=NONE] -->
+    <string name="storage_sd_card">SD Card</string>
+
+    <!-- Storage description for USB storage. [CHAR LIMIT=NONE] -->
+    <string name="storage_usb">USB storage</string>
 </resources>
