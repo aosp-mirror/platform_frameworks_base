@@ -392,11 +392,11 @@ public class PopupWindow {
 
         mContentView = contentView;
 
-        if (mContext == null) {
+        if (mContext == null && mContentView != null) {
             mContext = mContentView.getContext();
         }
 
-        if (mWindowManager == null) {
+        if (mWindowManager == null && mContentView != null) {
             mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         }
     }
@@ -939,7 +939,9 @@ public class PopupWindow {
      * @param p the layout parameters of the popup's content view
      */
     private void invokePopup(WindowManager.LayoutParams p) {
-        p.packageName = mContext.getPackageName();
+        if (mContext != null) {
+            p.packageName = mContext.getPackageName();
+        }
         mWindowManager.addView(mPopupView, p);
     }
 
