@@ -231,6 +231,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['article', 'input', 'search', 'ui'],
+    path: 'articles/speech-input.html',
+    title: {
+      en: 'Speech Input'
+    },
+    description: {
+      en: 'This articles describes the basics of integrating speech recognition into Android applications.'
+    }
+  },
+  {
     tags: ['article', 'ui'],
     path: 'articles/touch-mode.html',
     title: {
