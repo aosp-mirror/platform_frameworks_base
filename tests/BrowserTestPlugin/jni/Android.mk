@@ -40,7 +40,7 @@ LOCAL_C_INCLUDES += \
 	$(WEBCORE_PATH)/bridge \
 	$(WEBCORE_PATH)/plugins \
 	$(WEBCORE_PATH)/platform/android/JavaVM \
-	external/webkit/WebKit/android/plugins
+	external/webkit/Source/WebKit/android/plugins
 
 LOCAL_CFLAGS += -fvisibility=hidden 
 
