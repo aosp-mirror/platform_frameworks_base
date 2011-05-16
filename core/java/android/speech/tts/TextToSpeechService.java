@@ -318,7 +318,7 @@ public abstract class TextToSpeechService extends Service {
      */
     private static abstract class SpeechItem {
         private final String mCallingApp;
-        private final Bundle mParams;
+        protected final Bundle mParams;
         private boolean mStarted = false;
         private boolean mStopped = false;
 
@@ -443,7 +443,8 @@ public abstract class TextToSpeechService extends Service {
         }
 
         protected SynthesisRequest createSynthesisRequest() {
-            return new PlaybackSynthesisRequest(mText, getStreamType(), getVolume(), getPan());
+            return new PlaybackSynthesisRequest(mText, mParams,
+                    getStreamType(), getVolume(), getPan());
         }
 
         private void setRequestParams(SynthesisRequest request) {
@@ -513,7 +514,7 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected SynthesisRequest createSynthesisRequest() {
-            return new FileSynthesisRequest(getText(), mFile);
+            return new FileSynthesisRequest(getText(), mParams, mFile);
         }
 
         /**

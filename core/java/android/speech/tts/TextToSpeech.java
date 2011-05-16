@@ -80,13 +80,13 @@ public class TextToSpeech {
     public static final int LANG_COUNTRY_VAR_AVAILABLE = 2;
 
     /**
-     * Denotes the language is available for the language and country specified 
+     * Denotes the language is available for the language and country specified
      * by the locale, but not the variant.
      */
     public static final int LANG_COUNTRY_AVAILABLE = 1;
 
     /**
-     * Denotes the language is available for the language by the locale, 
+     * Denotes the language is available for the language by the locale,
      * but not the country and variant.
      */
     public static final int LANG_AVAILABLE = 0;
@@ -424,6 +424,7 @@ public class TextToSpeech {
     private final Map<String, Uri> mEarcons;
     private final Map<String, Uri> mUtterances;
     private final Bundle mParams = new Bundle();
+    private String mCurrentEngine = null;
 
     /**
      * The constructor for the TextToSpeech class, using the default TTS engine.
@@ -524,6 +525,7 @@ public class TextToSpeech {
             dispatchOnInit(ERROR);
             return false;
         } else {
+            mCurrentEngine = engine;
             return true;
         }
     }
@@ -685,6 +687,10 @@ public class TextToSpeech {
      *            {@link Engine#KEY_PARAM_UTTERANCE_ID},
      *            {@link Engine#KEY_PARAM_VOLUME},
      *            {@link Engine#KEY_PARAM_PAN}.
+     *            Engine specific parameters may be passed in but the parameter keys
+     *            must be prefixed by the name of the engine they are intended for. For example
+     *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
+     *            engine named "com.svox.pico" if it is being used.
      *
      * @return {@link #ERROR} or {@link #SUCCESS}.
      */
@@ -714,6 +720,10 @@ public class TextToSpeech {
      *            Supported parameter names:
      *            {@link Engine#KEY_PARAM_STREAM},
      *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
+     *            Engine specific parameters may be passed in but the parameter keys
+     *            must be prefixed by the name of the engine they are intended for. For example
+     *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
+     *            engine named "com.svox.pico" if it is being used.
      *
      * @return {@link #ERROR} or {@link #SUCCESS}.
      */
@@ -741,6 +751,10 @@ public class TextToSpeech {
      * @param params Parameters for the request. Can be null.
      *            Supported parameter names:
      *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
+     *            Engine specific parameters may be passed in but the parameter keys
+     *            must be prefixed by the name of the engine they are intended for. For example
+     *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
+     *            engine named "com.svox.pico" if it is being used.
      *
      * @return {@link #ERROR} or {@link #SUCCESS}.
      */
@@ -922,6 +936,10 @@ public class TextToSpeech {
      * @param params Parameters for the request. Can be null.
      *            Supported parameter names:
      *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
+     *            Engine specific parameters may be passed in but the parameter keys
+     *            must be prefixed by the name of the engine they are intended for. For example
+     *            the keys "com.svox.pico_foo" and "com.svox.pico:bar" will be passed to the
+     *            engine named "com.svox.pico" if it is being used.
      * @param filename Absolute file filename to write the generated audio data to.It should be
      *            something like "/sdcard/myappsounds/mysound.wav".
      *
@@ -945,6 +963,19 @@ public class TextToSpeech {
             copyStringParam(bundle, params, Engine.KEY_PARAM_UTTERANCE_ID);
             copyFloatParam(bundle, params, Engine.KEY_PARAM_VOLUME);
             copyFloatParam(bundle, params, Engine.KEY_PARAM_PAN);
+
+            // Copy over all parameters that start with the name of the
+            // engine that we are currently connected to. The engine is
+            // free to interpret them as it chooses.
+            if (!TextUtils.isEmpty(mCurrentEngine)) {
+                for (Map.Entry<String, String> entry : params.entrySet()) {
+                    final String key = entry.getKey();
+                    if (key != null && key.startsWith(mCurrentEngine)) {
+                        bundle.putString(key, entry.getValue());
+                    }
+                }
+            }
+
             return bundle;
         } else {
             return mParams;

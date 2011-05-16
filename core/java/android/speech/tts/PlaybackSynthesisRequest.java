@@ -17,6 +17,7 @@ package android.speech.tts;
 
 import android.media.AudioFormat;
 import android.media.AudioTrack;
+import android.os.Bundle;
 import android.util.Log;
 
 /**
@@ -52,8 +53,9 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
     private boolean mStopped = false;
     private boolean mDone = false;
 
-    PlaybackSynthesisRequest(String text, int streamType, float volume, float pan) {
-        super(text);
+    PlaybackSynthesisRequest(String text, Bundle params,
+            int streamType, float volume, float pan) {
+        super(text, params);
         mStreamType = streamType;
         mVolume = volume;
         mPan = pan;

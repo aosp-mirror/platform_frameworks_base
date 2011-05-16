@@ -16,6 +16,7 @@
 package android.speech.tts;
 
 import android.media.AudioFormat;
+import android.os.Bundle;
 import android.util.Log;
 
 import java.io.File;
@@ -47,8 +48,8 @@ class FileSynthesisRequest extends SynthesisRequest {
     private boolean mStopped = false;
     private boolean mDone = false;
 
-    FileSynthesisRequest(String text, File fileName) {
-        super(text);
+    FileSynthesisRequest(String text, Bundle params, File fileName) {
+        super(text, params);
         mFileName = fileName;
     }
 

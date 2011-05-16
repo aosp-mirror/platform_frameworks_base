@@ -17137,7 +17137,7 @@ package android.speech {
 package android.speech.tts {
 
   public abstract class SynthesisRequest {
-    ctor public SynthesisRequest(java.lang.String);
+    ctor public SynthesisRequest(java.lang.String, android.os.Bundle);
     method public abstract int audioAvailable(byte[], int, int);
     method public abstract int completeAudioAvailable(int, int, int, byte[], int, int);
     method public abstract int done();
@@ -17145,6 +17145,7 @@ package android.speech.tts {
     method public java.lang.String getCountry();
     method public java.lang.String getLanguage();
     method public abstract int getMaxBufferSize();
+    method public android.os.Bundle getParams();
     method public int getPitch();
     method public int getSpeechRate();
     method public java.lang.String getText();

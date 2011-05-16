@@ -15,6 +15,8 @@
  */
 package android.speech.tts;
 
+import android.os.Bundle;
+
 /**
  * A request for speech synthesis given to a TTS engine for processing.
  *
@@ -28,14 +30,16 @@ package android.speech.tts;
 public abstract class SynthesisRequest {
 
     private final String mText;
+    private final Bundle mParams;
     private String mLanguage;
     private String mCountry;
     private String mVariant;
     private int mSpeechRate;
     private int mPitch;
 
-    public SynthesisRequest(String text) {
+    public SynthesisRequest(String text, Bundle params) {
         mText = text;
+        mParams = new Bundle(params);
     }
 
     /**
@@ -101,6 +105,13 @@ public abstract class SynthesisRequest {
      */
     public int getPitch() {
         return mPitch;
+    }
+
+    /**
+     * Gets the additional params, if any.
+     */
+    public Bundle getParams() {
+        return mParams;
     }
 
     /**
