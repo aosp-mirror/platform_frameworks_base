@@ -16,11 +16,11 @@
 
 package android.os;
 
-import java.io.File;
-
 import android.content.res.Resources;
 import android.os.storage.IMountService;
 import android.util.Log;
+
+import java.io.File;
 
 /**
  * Provides access to environment variables.
@@ -338,54 +338,54 @@ public class Environment {
     }
 
     /**
-     * getExternalStorageState() returns MEDIA_REMOVED if the media is not present. 
+     * {@link #getExternalStorageState()} returns MEDIA_REMOVED if the media is not present.
      */
     public static final String MEDIA_REMOVED = "removed";
      
     /**
-     * getExternalStorageState() returns MEDIA_UNMOUNTED if the media is present
+     * {@link #getExternalStorageState()} returns MEDIA_UNMOUNTED if the media is present
      * but not mounted. 
      */
     public static final String MEDIA_UNMOUNTED = "unmounted";
 
     /**
-     * getExternalStorageState() returns MEDIA_CHECKING if the media is present
+     * {@link #getExternalStorageState()} returns MEDIA_CHECKING if the media is present
      * and being disk-checked
      */
     public static final String MEDIA_CHECKING = "checking";
 
     /**
-     * getExternalStorageState() returns MEDIA_NOFS if the media is present
+     * {@link #getExternalStorageState()} returns MEDIA_NOFS if the media is present
      * but is blank or is using an unsupported filesystem
      */
     public static final String MEDIA_NOFS = "nofs";
 
     /**
-     * getExternalStorageState() returns MEDIA_MOUNTED if the media is present
+     * {@link #getExternalStorageState()} returns MEDIA_MOUNTED if the media is present
      * and mounted at its mount point with read/write access. 
      */
     public static final String MEDIA_MOUNTED = "mounted";
 
     /**
-     * getExternalStorageState() returns MEDIA_MOUNTED_READ_ONLY if the media is present
+     * {@link #getExternalStorageState()} returns MEDIA_MOUNTED_READ_ONLY if the media is present
      * and mounted at its mount point with read only access. 
      */
     public static final String MEDIA_MOUNTED_READ_ONLY = "mounted_ro";
 
     /**
-     * getExternalStorageState() returns MEDIA_SHARED if the media is present
+     * {@link #getExternalStorageState()} returns MEDIA_SHARED if the media is present
      * not mounted, and shared via USB mass storage. 
      */
     public static final String MEDIA_SHARED = "shared";
 
     /**
-     * getExternalStorageState() returns MEDIA_BAD_REMOVAL if the media was
+     * {@link #getExternalStorageState()} returns MEDIA_BAD_REMOVAL if the media was
      * removed before it was unmounted. 
      */
     public static final String MEDIA_BAD_REMOVAL = "bad_removal";
 
     /**
-     * getExternalStorageState() returns MEDIA_UNMOUNTABLE if the media is present
+     * {@link #getExternalStorageState()} returns MEDIA_UNMOUNTABLE if the media is present
      * but cannot be mounted.  Typically this happens if the file system on the
      * media is corrupted. 
      */
