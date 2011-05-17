@@ -410,7 +410,7 @@ public class ActionBarContextView extends ViewGroup implements AnimatorListener 
         availableWidth -= child.getMeasuredWidth();
         availableWidth -= spacing;
 
-        return availableWidth;
+        return Math.max(0, availableWidth);
     }
     
     private int positionChild(View child, int x, int y, int contentHeight) {
