@@ -663,8 +663,9 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 
         // update the layer size and release freeze-lock
         const Layer::State& front(drawingState());
-        if (newFrontBuffer->getWidth()  == front.requested_w &&
-            newFrontBuffer->getHeight() == front.requested_h)
+        if ((newFrontBuffer->getWidth()  == front.requested_w &&
+            newFrontBuffer->getHeight() == front.requested_h) ||
+            isFixedSize())
         {
             if ((front.w != front.requested_w) ||
                 (front.h != front.requested_h))
