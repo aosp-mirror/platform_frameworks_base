@@ -19,7 +19,6 @@ package com.android.server.wm;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -41,46 +40,10 @@ class ScreenRotationAnimation {
 
     static final int FREEZE_LAYER = WindowManagerService.TYPE_LAYER_MULTIPLIER * 200;
 
-    class BlackSurface {
-        final int left;
-        final int top;
-        final Surface surface;
-
-        BlackSurface(SurfaceSession session, int layer, int l, int t, int w, int h)
-                throws Surface.OutOfResourcesException {
-            left = l;
-            top = t;
-            surface = new Surface(session, 0, "BlackSurface",
-                    -1, w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
-            surface.setAlpha(1.0f);
-            surface.setLayer(FREEZE_LAYER);
-        }
-
-        void setMatrix(Matrix matrix) {
-            mTmpMatrix.setTranslate(left, top);
-            mTmpMatrix.postConcat(matrix);
-            mTmpMatrix.getValues(mTmpFloats);
-            surface.setPosition((int)mTmpFloats[Matrix.MTRANS_X],
-                    (int)mTmpFloats[Matrix.MTRANS_Y]);
-            surface.setMatrix(
-                    mTmpFloats[Matrix.MSCALE_X], mTmpFloats[Matrix.MSKEW_Y],
-                    mTmpFloats[Matrix.MSKEW_X], mTmpFloats[Matrix.MSCALE_Y]);
-            if (false) {
-                Slog.i(TAG, "Black Surface @ (" + left + "," + top + "): ("
-                        + mTmpFloats[Matrix.MTRANS_X] + ","
-                        + mTmpFloats[Matrix.MTRANS_Y] + ") matrix=["
-                        + mTmpFloats[Matrix.MSCALE_X] + ","
-                        + mTmpFloats[Matrix.MSCALE_Y] + "]["
-                        + mTmpFloats[Matrix.MSKEW_X] + ","
-                        + mTmpFloats[Matrix.MSKEW_Y] + "]");
-            }
-        }
-    }
-
     final Context mContext;
     final Display mDisplay;
     Surface mSurface;
-    BlackSurface[] mBlackSurfaces;
+    BlackFrame mBlackFrame;
     int mWidth, mHeight;
 
     int mSnapshotRotation;
@@ -302,14 +265,12 @@ class ScreenRotationAnimation {
                 ">>> OPEN TRANSACTION ScreenRotationAnimation.dismiss");
         Surface.openTransaction();
 
-        mBlackSurfaces = new BlackSurface[4];
         try {
             final int w = mDisplayMetrics.widthPixels;
             final int h = mDisplayMetrics.heightPixels;
-            mBlackSurfaces[0] = new BlackSurface(session, FREEZE_LAYER, -w, -h, w, h*2);
-            mBlackSurfaces[1] = new BlackSurface(session, FREEZE_LAYER, 0, -h, w*2, h);
-            mBlackSurfaces[2] = new BlackSurface(session, FREEZE_LAYER, w, 0, w, h*2);
-            mBlackSurfaces[3] = new BlackSurface(session, FREEZE_LAYER, -w, h, w*2, h);
+            Rect outer = new Rect(-w, -h, w*2, h*2);
+            Rect inner = new Rect(0, 0, w, h);
+            mBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER);
         } catch (Surface.OutOfResourcesException e) {
             Slog.w(TAG, "Unable to allocate black surface", e);
         } finally {
@@ -326,13 +287,8 @@ class ScreenRotationAnimation {
             mSurface.destroy();
             mSurface = null;
         }
-        if (mBlackSurfaces != null) {
-            for (int i=0; i<mBlackSurfaces.length; i++) {
-                if (mBlackSurfaces[i] != null) {
-                    mBlackSurfaces[i].surface.destroy();
-                }
-            }
-            mBlackSurfaces = null;
+        if (mBlackFrame != null) {
+            mBlackFrame.kill();
         }
         if (mExitAnimation != null) {
             mExitAnimation.cancel();
@@ -383,20 +339,12 @@ class ScreenRotationAnimation {
                 mEnterAnimation.cancel();
                 mEnterAnimation = null;
                 mEnterTransformation.clear();
-                if (mBlackSurfaces != null) {
-                    for (int i=0; i<mBlackSurfaces.length; i++) {
-                        if (mBlackSurfaces[i] != null) {
-                            mBlackSurfaces[i].surface.hide();
-                        }
-                    }
+                if (mBlackFrame != null) {
+                    mBlackFrame.hide();
                 }
             } else {
-                if (mBlackSurfaces != null) {
-                    for (int i=0; i<mBlackSurfaces.length; i++) {
-                        if (mBlackSurfaces[i] != null) {
-                            mBlackSurfaces[i].setMatrix(mEnterTransformation.getMatrix());
-                        }
-                    }
+                if (mBlackFrame != null) {
+                    mBlackFrame.setMatrix(mEnterTransformation.getMatrix());
                 }
             }
         }
