@@ -21271,6 +21271,7 @@ package android.view {
     method public boolean isInEditMode();
     method public boolean isInTouchMode();
     method public boolean isLayoutRequested();
+    method public boolean isLayoutRtl();
     method public boolean isLongClickable();
     method public boolean isOpaque();
     method protected boolean isPaddingOffsetRequired();

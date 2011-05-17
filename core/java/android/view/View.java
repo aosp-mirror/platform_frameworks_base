@@ -1709,6 +1709,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     static final int DRAG_HOVERED                 = 0x00000002;
 
+    /**
+     * Indicates whether the view is drawn in right-to-left direction.
+     *
+     * @hide
+     */
+    static final int RESOLVED_LAYOUT_RTL          = 0x00000004;
+
     /* End of masks for mPrivateFlags2 */
 
     static final int DRAG_MASK = DRAG_CAN_ACCEPT | DRAG_HOVERED;
@@ -8488,6 +8495,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
             mPrivateFlags &= ~AWAKEN_SCROLL_BARS_ON_ATTACH;
         }
         jumpDrawablesToCurrentState();
+
+        // Resolving the layout direction. LTR is set initially.
+        mPrivateFlags2 &= ~RESOLVED_LAYOUT_RTL;
+        switch (getHorizontalDirection()) {
+            case HORIZONTAL_DIRECTION_INHERIT:
+                // If this is root view, no need to look at parent's layout dir.
+                if (mParent != null && mParent instanceof ViewGroup &&
+                        ((ViewGroup) mParent).isLayoutRtl()) {
+                    mPrivateFlags2 |= RESOLVED_LAYOUT_RTL;
+                }
+                break;
+            case HORIZONTAL_DIRECTION_RTL:
+                mPrivateFlags2 |= RESOLVED_LAYOUT_RTL;
+                break;
+        }
     }
 
     /**
@@ -9972,6 +9994,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
      */
     public boolean isLayoutRequested() {
         return (mPrivateFlags & FORCE_LAYOUT) == FORCE_LAYOUT;
+    }
+
+    /**
+     * <p>Indicates whether or not this view's layout is right-to-left. This is resolved from
+     * layout attribute and/or the inherited value from the parent.</p>
+     *
+     * @return true if the layout is right-to-left.
+     */
+    public boolean isLayoutRtl() {
+        return (mPrivateFlags2 & RESOLVED_LAYOUT_RTL) == RESOLVED_LAYOUT_RTL;
     }
 
     /**
