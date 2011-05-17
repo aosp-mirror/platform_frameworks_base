@@ -74,6 +74,7 @@ class ProcessRecord {
     IInstrumentationWatcher instrumentationWatcher; // who is waiting
     Bundle instrumentationArguments;// as given to us
     ComponentName instrumentationResultClass;// copy of instrumentationClass
+    boolean usingWrapper;       // Set to true when process was launched with a wrapper attached
     BroadcastRecord curReceiver;// receiver currently running in the app
     long lastWakeTime;          // How long proc held wake lock at last check
     long lastCpuTime;           // How long proc has run CPU at last check
