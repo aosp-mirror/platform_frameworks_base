@@ -205,6 +205,7 @@ public abstract class DataConnection extends StateMachine {
     protected long lastFailTime;
     protected FailCause lastFailCause;
     protected static final String NULL_IP = "0.0.0.0";
+    private int mRefCount;
     Object userData;
 
     //***** Abstract methods
@@ -413,49 +414,6 @@ public abstract class DataConnection extends StateMachine {
         return mRetryMgr.configure(configStr);
     }
 
-    private AtomicInteger mRefCount = new AtomicInteger(0);
-
-    /**
-     * Set refCount.
-     *
-     * @param val is new refCount
-     */
-    public void setRefCount(int val) {
-        mRefCount.set(val);
-    }
-
-    /**
-     * Get refCount
-     *
-     * @return refCount
-     */
-    public int getRefCount() {
-        return mRefCount.get();
-    }
-
-    /**
-     * @return decrement and return refCount
-     *
-     * TODO: Consider using the refCount for defining the
-     * life time of a connection. When this goes zero the
-     * DataConnection could tear itself down.
-     */
-    public int decAndGetRefCount() {
-        int v = mRefCount.decrementAndGet();
-        if (v < 0) {
-            log("BUG: decAndGetRefCount caused refCount to be < 0");
-            mRefCount.set(0);
-        }
-        return v;
-     }
-
-    /**
-     * @return increment and return refCount
-     */
-    public int incAndGetRefCount() {
-        return mRefCount.incrementAndGet();
-    }
-
     /*
      * **************************************************************************
      * End members owned by DataConnectionTracker
@@ -471,6 +429,7 @@ public abstract class DataConnection extends StateMachine {
         createTime = -1;
         lastFailTime = -1;
         lastFailCause = FailCause.NONE;
+        mRefCount = 0;
 
         mLinkProperties = new LinkProperties();
         mApn = null;
@@ -674,6 +633,11 @@ public abstract class DataConnection extends StateMachine {
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_RESET);
                     transitionTo(mInactiveState);
                     break;
+                case DataConnectionAc.REQ_GET_REFCOUNT: {
+                    log("REQ_GET_REFCOUNT  refCount=" + mRefCount);
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_REFCOUNT, mRefCount);
+                    break;
+                }
 
                 case EVENT_CONNECT:
                     if (DBG) log("DcDefaultState: msg.what=EVENT_CONNECT, fail not expected");
@@ -774,9 +738,13 @@ public abstract class DataConnection extends StateMachine {
                     break;
 
                 case EVENT_CONNECT:
-                    if (DBG) log("DcInactiveState msg.what=EVENT_CONNECT");
                     ConnectionParams cp = (ConnectionParams) msg.obj;
                     cp.tag = mTag;
+                    if (DBG) {
+                        log("DcInactiveState msg.what=EVENT_CONNECT." + "RefCount = "
+                                + mRefCount);
+                    }
+                    mRefCount = 1;
                     onConnect(cp);
                     transitionTo(mActivatingState);
                     retVal = HANDLED;
@@ -804,7 +772,15 @@ public abstract class DataConnection extends StateMachine {
 
             switch (msg.what) {
                 case EVENT_DISCONNECT:
-                    if (DBG) log("DcActivatingState deferring msg.what=EVENT_DISCONNECT");
+                    if (DBG) log("DcActivatingState deferring msg.what=EVENT_DISCONNECT"
+                            + mRefCount);
+                    deferMessage(msg);
+                    retVal = HANDLED;
+                    break;
+
+                case EVENT_CONNECT:
+                    if (DBG) log("DcActivatingState deferring msg.what=EVENT_CONNECT refCount = "
+                            + mRefCount);
                     deferMessage(msg);
                     retVal = HANDLED;
                     break;
@@ -928,12 +904,28 @@ public abstract class DataConnection extends StateMachine {
             boolean retVal;
 
             switch (msg.what) {
+                case EVENT_CONNECT:
+                    mRefCount++;
+                    if (DBG) log("DcActiveState msg.what=EVENT_CONNECT RefCount=" + mRefCount);
+                    if (msg.obj != null) {
+                        notifyConnectCompleted((ConnectionParams) msg.obj, FailCause.NONE);
+                    }
+                    retVal = HANDLED;
+                    break;
                 case EVENT_DISCONNECT:
-                    if (DBG) log("DcActiveState msg.what=EVENT_DISCONNECT");
-                    DisconnectParams dp = (DisconnectParams) msg.obj;
-                    dp.tag = mTag;
-                    tearDownData(dp);
-                    transitionTo(mDisconnectingState);
+                    mRefCount--;
+                    if (DBG) log("DcActiveState msg.what=EVENT_DISCONNECT RefCount=" + mRefCount);
+                    if (mRefCount == 0)
+                    {
+                        DisconnectParams dp = (DisconnectParams) msg.obj;
+                        dp.tag = mTag;
+                        tearDownData(dp);
+                        transitionTo(mDisconnectingState);
+                    } else {
+                        if (msg.obj != null) {
+                            notifyDisconnectCompleted((DisconnectParams) msg.obj);
+                        }
+                    }
                     retVal = HANDLED;
                     break;
 
@@ -956,6 +948,13 @@ public abstract class DataConnection extends StateMachine {
             boolean retVal;
 
             switch (msg.what) {
+                case EVENT_CONNECT:
+                    if (DBG) log("DcDisconnectingState msg.what=EVENT_CONNECT. Defer. RefCount = "
+                            + mRefCount);
+                    deferMessage(msg);
+                    retVal = HANDLED;
+                    break;
+
                 case EVENT_DEACTIVATE_DONE:
                     if (DBG) log("DcDisconnectingState msg.what=EVENT_DEACTIVATE_DONE");
                     AsyncResult ar = (AsyncResult) msg.obj;

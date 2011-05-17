@@ -612,28 +612,26 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
      *
      * @param apnContext
      * @param tearDown
-     * @return refCount
+     * @return none
      */
-    private int releaseApnContext(ApnContext apnContext, boolean tearDown) {
+    private void releaseApnContext(ApnContext apnContext, boolean tearDown) {
         if (apnContext == null) {
             if (DBG) loge("releaseApnContext: apnContext null should not happen, ignore");
-            return -1;
+            return;
         }
         DataConnection dc = apnContext.getDataConnection();
         if (dc == null) {
             if (DBG) loge("releaseApnContext: apnContext dc == null should not happen, ignore");
-            return -1;
+            return;
         }
-        int refCount = dc.decAndGetRefCount();
-        if (DBG) log("releaseApnContext: dec refCount=" + refCount + " tearDown=" + tearDown);
-        if (tearDown && (refCount == 0)) {
+        if (tearDown) {
             if (DBG) log("releaseApnContext: tearing down");
             Message msg = obtainMessage(EVENT_DISCONNECT_DONE, apnContext);
             apnContext.getDataConnection().tearDown(apnContext.getReason(), msg);
         }
         apnContext.setDataConnection(null);
         apnContext.setDataConnectionAc(null);
-        return refCount;
+        return;
     }
 
     private void setupDataOnReadyApns(String reason) {
@@ -809,12 +807,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 apnContext.setState(State.DISCONNECTING);
                 releaseApnContext(apnContext, tearDown);
             } else {
-                // STOPSHIP: Reference counting logic in GDCT still have issue.
-                //           Need to be cleaned up in later patch
                 dcac.resetSync();
-                if (apnContext.getDataConnection() != null) {
-                    apnContext.getDataConnection().setRefCount(0);
-                }
                 apnContext.setState(State.IDLE);
                 mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
                 apnContext.setDataConnection(null);
@@ -946,7 +939,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         dc = (GsmDataConnection)apnContext.getDataConnection();
 
         if (dc == null) {
-            dc = findReadyDataConnection(apn);
+
+            dc = (GsmDataConnection) checkForConnectionForApnContext(apnContext);
+
+            if (dc == null) {
+                dc = findReadyDataConnection(apn);
+            }
 
             if (dc == null) {
                 if (DBG) log("setupData: No ready GsmDataConnection found!");
@@ -964,16 +962,16 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 return false;
             }
 
+            DataConnectionAc dcac = mDataConnectionAsyncChannels.get(dc.getDataConnectionId());
             dc.setProfileId( profileId );
             dc.setActiveApnType(apnContext.getApnType());
-            int refCount = dc.incAndGetRefCount();
+            int refCount = dcac.getRefCountSync();
             if (DBG) log("setupData: init dc and apnContext refCount=" + refCount);
 
             // configure retry count if no other Apn is using the same connection.
-            if (refCount == 1) {
+            if (refCount == 0) {
                 configureRetry(dc, apnContext.getApnType());
             }
-            DataConnectionAc dcac = mDataConnectionAsyncChannels.get(dc.getDataConnectionId());
             apnContext.setDataConnectionAc(mDataConnectionAsyncChannels.get(dc.getDataConnectionId()));
             apnContext.setApnSetting(apn);
             apnContext.setDataConnection(dc);
@@ -1490,23 +1488,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 } else {
                     apnContext.setReason(Phone.REASON_DATA_ENABLED);
                 }
-                DataConnection conn = checkForConnectionForApnContext(apnContext);
-                if (conn == null) {
-                    if (apnContext.getState() == State.FAILED) {
-                        apnContext.setState(State.IDLE);
-                    }
-                    trySetup = true;
-                } else {
-                    int refCount = conn.incAndGetRefCount();
-                    apnContext.setDataConnection(conn);
-                    apnContext.setDataConnectionAc(
-                            mDataConnectionAsyncChannels.get(conn.getDataConnectionId()));
-                    if (DBG) {
-                        log("applyNewState: Found existing connection for " +
-                                apnContext.getApnType() + " inc refCount=" + refCount +
-                                " conn=" + conn);
-                    }
+                if (apnContext.getState() == State.FAILED) {
+                    apnContext.setState(State.IDLE);
                 }
+                trySetup = true;
             }
         }
         apnContext.setEnabled(enabled);
@@ -1641,7 +1626,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
             if (DBG) {
                 log(String.format("onDataSetupComplete: success apn=%s",
-                    apnContext.getWaitingApns().get(0).apn) + " refCount=" + dc.getRefCount());
+                    apnContext.getWaitingApns().get(0).apn));
             }
             ApnSetting apn = apnContext.getApnSetting();
             if (apn.proxy != null && apn.proxy.length() != 0) {
@@ -1709,10 +1694,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     apnContext.setState(State.FAILED);
                     mPhone.notifyDataConnection(Phone.REASON_APN_FAILED, apnContext.getApnType());
 
-                    int refCount = releaseApnContext(apnContext, false);
+                    releaseApnContext(apnContext, false);
                     if (DBG) {
-                        log("onDataSetupComplete: permanent error apn=%s" + apnString +
-                                                                            " refCount=" + refCount);
+                        log("onDataSetupComplete: permanent error apn=%s" + apnString );
                     }
                 } else {
                     if (DBG) log("onDataSetupComplete: Not all permanent failures, retry");
@@ -1807,7 +1791,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     protected void onCleanUpConnection(boolean tearDown, int apnId, String reason) {
         if (DBG) log("onCleanUpConnection");
         ApnContext apnContext = mApnContexts.get(apnIdToType(apnId));
-        cleanUpConnection(tearDown, apnContext);
+        if (apnContext != null) {
+            apnContext.setReason(reason);
+            cleanUpConnection(tearDown, apnContext);
+        }
     }
 
     protected boolean isConnected() {
