@@ -73,20 +73,6 @@ public:
     static jboolean isOpaque(JNIEnv* env, jobject jcanvas) {
         NPE_CHECK_RETURN_ZERO(env, jcanvas);
         SkCanvas* canvas = GraphicsJNI::getNativeCanvas(env, jcanvas);
-
-        /*
-            Currently we cannot support transparency in GL-based canvas' at
-            the view level. Therefore we cannot base our answer on the device's
-            bitmap, but need to hard-code the answer. If we relax this
-            limitation in views, we can simplify the following code as well.
-         
-            Use the getViewport() call to find out if we're gl-based...
-        */
-        if (canvas->getViewport(NULL)) {
-            return true;
-        }
-        
-        // normal technique, rely on the device's bitmap for the answer
         return canvas->getDevice()->accessBitmap(false).isOpaque();
     }
     
