@@ -2171,6 +2171,9 @@ static bool isCompatibleBrand(uint32_t fourcc) {
         // Just give these file types a chance.
         FOURCC('q', 't', ' ', ' '),  // Apple's QuickTime
         FOURCC('M', 'S', 'N', 'V'),  // Sony's PSP
+
+        FOURCC('3', 'g', '2', 'a'),  // 3GPP2
+        FOURCC('3', 'g', '2', 'b'),
     };
 
     for (size_t i = 0;
