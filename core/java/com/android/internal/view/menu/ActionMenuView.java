@@ -88,9 +88,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         mMaxItems = getMaxActionButtons();
 
         // TODO There has to be a better way to indicate that we don't have a hard menu key.
-        final int screen = res.getConfiguration().screenLayout;
-        mReserveOverflow = (screen & Configuration.SCREENLAYOUT_SIZE_MASK) ==
-                Configuration.SCREENLAYOUT_SIZE_XLARGE;
+        final Configuration config = res.getConfiguration();
+        mReserveOverflow = config.isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_LARGE);
         mWidthLimit = res.getDisplayMetrics().widthPixels / 2;
         
         TypedArray a = context.obtainStyledAttributes(com.android.internal.R.styleable.Theme);

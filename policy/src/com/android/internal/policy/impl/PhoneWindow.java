@@ -450,12 +450,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (st.featureId == FEATURE_OPTIONS_PANEL) {
             Context context = getContext();
             Configuration config = context.getResources().getConfiguration();
-            boolean isXLarge = (config.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) ==
-                    Configuration.SCREENLAYOUT_SIZE_XLARGE;
             boolean isHoneycombApp = context.getApplicationInfo().targetSdkVersion >=
                     android.os.Build.VERSION_CODES.HONEYCOMB;
 
-            if (isXLarge && isHoneycombApp) {
+            if (isHoneycombApp &&
+                    config.isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_LARGE)) {
                 return;
             }
         }
