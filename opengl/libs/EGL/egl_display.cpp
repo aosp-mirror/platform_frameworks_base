@@ -55,19 +55,15 @@ void egl_display_t::addObject(egl_object_t* object) {
     objects.add(object);
 }
 
+void egl_display_t::removeObject(egl_object_t* object) {
+    Mutex::Autolock _l(lock);
+    objects.remove(object);
+}
+
 bool egl_display_t::getObject(egl_object_t* object) {
     Mutex::Autolock _l(lock);
     if (objects.indexOf(object) >= 0) {
         object->incRef();
-        return true;
-    }
-    return false;
-}
-
-bool egl_display_t::removeObject(egl_object_t* object) {
-    Mutex::Autolock _l(lock);
-    if (object->decRef() == 1) {
-        objects.remove(object);
         return true;
     }
     return false;
@@ -255,7 +251,18 @@ EGLBoolean egl_display_t::terminate() {
         }
     }
 
-    // TODO: all egl_object_t should be marked for termination
+    // Mark all objects remaining in the list as terminated, unless
+    // there are no reference to them, it which case, we're free to
+    // delete them.
+    size_t count = objects.size();
+    LOGW_IF(count, "eglTerminate() called w/ %d objects remaining", count);
+    for (size_t i=0 ; i<count ; i++) {
+        egl_object_t* o = objects.itemAt(i);
+        o->destroy();
+    }
+
+    // this marks all object handles are "terminated"
+    objects.clear();
 
     refs--;
     numTotalConfigs = 0;

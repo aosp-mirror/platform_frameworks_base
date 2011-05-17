@@ -431,10 +431,8 @@ EGLBoolean eglDestroySurface(EGLDisplay dpy, EGLSurface surface)
     if (!dp) return EGL_FALSE;
 
     SurfaceRef _s(surface);
-    if (!_s.get()) return setError(EGL_BAD_SURFACE, EGL_FALSE);
-
-    if (!validate_display_surface(dpy, surface))
-        return EGL_FALSE;    
+    if (!_s.get())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
 
     egl_surface_t * const s = get_surface(surface);
     EGLBoolean result = s->cnx->egl.eglDestroySurface(
@@ -457,12 +455,10 @@ EGLBoolean eglQuerySurface( EGLDisplay dpy, EGLSurface surface,
     if (!dp) return EGL_FALSE;
 
     SurfaceRef _s(surface);
-    if (!_s.get()) return setError(EGL_BAD_SURFACE, EGL_FALSE);
+    if (!_s.get())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
 
-    if (!validate_display_surface(dpy, surface))
-        return EGL_FALSE;    
     egl_surface_t const * const s = get_surface(surface);
-
     EGLBoolean result(EGL_TRUE);
     if (attribute == EGL_CONFIG_ID) {
         // We need to remap EGL_CONFIG_IDs
@@ -524,13 +520,13 @@ EGLBoolean eglDestroyContext(EGLDisplay dpy, EGLContext ctx)
     clearError();
 
     egl_display_t const * const dp = validate_display(dpy);
-    if (!dp) return EGL_FALSE;
+    if (!dp)
+        return EGL_FALSE;
 
     ContextRef _c(ctx);
-    if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_FALSE);
+    if (!_c.get())
+        return setError(EGL_BAD_CONTEXT, EGL_FALSE);
     
-    if (!validate_display_context(dpy, ctx))
-        return EGL_FALSE;
     egl_context_t * const c = get_context(ctx);
     EGLBoolean result = c->cnx->egl.eglDestroyContext(
             dp->disp[c->impl].dpy, c->context);
@@ -569,9 +565,9 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
     egl_display_t const * const dp = get_display(dpy);
     if (!dp) return setError(EGL_BAD_DISPLAY, EGL_FALSE);
 
-    /* If ctx is not EGL_NO_CONTEXT, read is not EGL_NO_SURFACE, or draw is not
-       EGL_NO_SURFACE, then an EGL_NOT_INITIALIZED error is generated if dpy is
-       a valid but uninitialized display. */
+    // If ctx is not EGL_NO_CONTEXT, read is not EGL_NO_SURFACE, or draw is not
+    // EGL_NO_SURFACE, then an EGL_NOT_INITIALIZED error is generated if dpy is
+    // a valid but uninitialized display.
     if ( (ctx != EGL_NO_CONTEXT) || (read != EGL_NO_SURFACE) ||
          (draw != EGL_NO_SURFACE) ) {
         if (!dp->isReady()) return setError(EGL_NOT_INITIALIZED, EGL_FALSE);
@@ -583,7 +579,7 @@ EGLBoolean eglMakeCurrent(  EGLDisplay dpy, EGLSurface draw,
     SurfaceRef _r(read);
 
     // validate the context (if not EGL_NO_CONTEXT)
-    if ((ctx != EGL_NO_CONTEXT) && (!validate_display_context(dpy, ctx))) {
+    if ((ctx != EGL_NO_CONTEXT) && !_c.get()) {
         // EGL_NO_CONTEXT is valid
         return EGL_FALSE;
     }
@@ -682,9 +678,6 @@ EGLBoolean eglQueryContext( EGLDisplay dpy, EGLContext ctx,
     ContextRef _c(ctx);
     if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_FALSE);
 
-    if (!validate_display_context(dpy, ctx))
-        return EGL_FALSE;    
-    
     egl_context_t * const c = get_context(ctx);
 
     EGLBoolean result(EGL_TRUE);
@@ -924,10 +917,9 @@ EGLBoolean eglSwapBuffers(EGLDisplay dpy, EGLSurface draw)
     if (!dp) return EGL_FALSE;
 
     SurfaceRef _s(draw);
-    if (!_s.get()) return setError(EGL_BAD_SURFACE, EGL_FALSE);
+    if (!_s.get())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
 
-    if (!validate_display_surface(dpy, draw))
-        return EGL_FALSE;    
     egl_surface_t const * const s = get_surface(draw);
     return s->cnx->egl.eglSwapBuffers(dp->disp[s->impl].dpy, s->surface);
 }
@@ -941,10 +933,9 @@ EGLBoolean eglCopyBuffers(  EGLDisplay dpy, EGLSurface surface,
     if (!dp) return EGL_FALSE;
 
     SurfaceRef _s(surface);
-    if (!_s.get()) return setError(EGL_BAD_SURFACE, EGL_FALSE);
+    if (!_s.get())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
 
-    if (!validate_display_surface(dpy, surface))
-        return EGL_FALSE;    
     egl_surface_t const * const s = get_surface(surface);
     return s->cnx->egl.eglCopyBuffers(
             dp->disp[s->impl].dpy, s->surface, target);
@@ -984,10 +975,9 @@ EGLBoolean eglSurfaceAttrib(
     if (!dp) return EGL_FALSE;
 
     SurfaceRef _s(surface);
-    if (!_s.get()) return setError(EGL_BAD_SURFACE, EGL_FALSE);
+    if (!_s.get())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
 
-    if (!validate_display_surface(dpy, surface))
-        return EGL_FALSE;    
     egl_surface_t const * const s = get_surface(surface);
     if (s->cnx->egl.eglSurfaceAttrib) {
         return s->cnx->egl.eglSurfaceAttrib(
@@ -1005,10 +995,9 @@ EGLBoolean eglBindTexImage(
     if (!dp) return EGL_FALSE;
 
     SurfaceRef _s(surface);
-    if (!_s.get()) return setError(EGL_BAD_SURFACE, EGL_FALSE);
+    if (!_s.get())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
 
-    if (!validate_display_surface(dpy, surface))
-        return EGL_FALSE;    
     egl_surface_t const * const s = get_surface(surface);
     if (s->cnx->egl.eglBindTexImage) {
         return s->cnx->egl.eglBindTexImage(
@@ -1026,10 +1015,9 @@ EGLBoolean eglReleaseTexImage(
     if (!dp) return EGL_FALSE;
 
     SurfaceRef _s(surface);
-    if (!_s.get()) return setError(EGL_BAD_SURFACE, EGL_FALSE);
+    if (!_s.get())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
 
-    if (!validate_display_surface(dpy, surface))
-        return EGL_FALSE;    
     egl_surface_t const * const s = get_surface(surface);
     if (s->cnx->egl.eglReleaseTexImage) {
         return s->cnx->egl.eglReleaseTexImage(
@@ -1186,13 +1174,10 @@ EGLBoolean eglLockSurfaceKHR(EGLDisplay dpy, EGLSurface surface,
     if (!dp) return EGL_FALSE;
 
     SurfaceRef _s(surface);
-    if (!_s.get()) return setError(EGL_BAD_SURFACE, EGL_FALSE);
-
-    if (!validate_display_surface(dpy, surface))
-        return EGL_FALSE;
+    if (!_s.get())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
 
     egl_surface_t const * const s = get_surface(surface);
-
     if (s->cnx->egl.eglLockSurfaceKHR) {
         return s->cnx->egl.eglLockSurfaceKHR(
                 dp->disp[s->impl].dpy, s->surface, attrib_list);
@@ -1208,13 +1193,10 @@ EGLBoolean eglUnlockSurfaceKHR(EGLDisplay dpy, EGLSurface surface)
     if (!dp) return EGL_FALSE;
 
     SurfaceRef _s(surface);
-    if (!_s.get()) return setError(EGL_BAD_SURFACE, EGL_FALSE);
-
-    if (!validate_display_surface(dpy, surface))
-        return EGL_FALSE;
+    if (!_s.get())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
 
     egl_surface_t const * const s = get_surface(surface);
-
     if (s->cnx->egl.eglUnlockSurfaceKHR) {
         return s->cnx->egl.eglUnlockSurfaceKHR(
                 dp->disp[s->impl].dpy, s->surface);
@@ -1232,9 +1214,8 @@ EGLImageKHR eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target,
 
     if (ctx != EGL_NO_CONTEXT) {
         ContextRef _c(ctx);
-        if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_NO_IMAGE_KHR);
-        if (!validate_display_context(dpy, ctx))
-            return EGL_NO_IMAGE_KHR;
+        if (!_c.get())
+            return setError(EGL_BAD_CONTEXT, EGL_NO_IMAGE_KHR);
         egl_context_t * const c = get_context(ctx);
         // since we have an EGLContext, we know which implementation to use
         EGLImageKHR image = c->cnx->egl.eglCreateImageKHR(
@@ -1341,9 +1322,9 @@ EGLSyncKHR eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_l
 
     EGLContext ctx = eglGetCurrentContext();
     ContextRef _c(ctx);
-    if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_NO_SYNC_KHR);
-    if (!validate_display_context(dpy, ctx))
-        return EGL_NO_SYNC_KHR;
+    if (!_c.get())
+        return setError(EGL_BAD_CONTEXT, EGL_NO_SYNC_KHR);
+
     egl_context_t * const c = get_context(ctx);
     EGLSyncKHR result = EGL_NO_SYNC_KHR;
     if (c->cnx->egl.eglCreateSyncKHR) {
@@ -1369,9 +1350,8 @@ EGLBoolean eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
 
     EGLContext ctx = syncObject->context;
     ContextRef _c(ctx);
-    if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_FALSE);
-    if (!validate_display_context(dpy, ctx))
-        return EGL_FALSE;
+    if (!_c.get())
+        return setError(EGL_BAD_CONTEXT, EGL_FALSE);
 
     EGLBoolean result = EGL_FALSE;
     egl_context_t * const c = get_context(ctx);
@@ -1397,12 +1377,10 @@ EGLint eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTi
 
     EGLContext ctx = syncObject->context;
     ContextRef _c(ctx);
-    if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_FALSE);
-    if (!validate_display_context(dpy, ctx))
-        return EGL_FALSE;
+    if (!_c.get())
+        return setError(EGL_BAD_CONTEXT, EGL_FALSE);
 
     egl_context_t * const c = get_context(ctx);
-
     if (c->cnx->egl.eglClientWaitSyncKHR) {
         return c->cnx->egl.eglClientWaitSyncKHR(
                 dp->disp[c->impl].dpy, syncObject->sync, flags, timeout);
@@ -1419,17 +1397,16 @@ EGLBoolean eglGetSyncAttribKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint attribute
     if (!dp) return EGL_FALSE;
 
     SyncRef _s(sync);
-    if (!_s.get()) return setError(EGL_BAD_PARAMETER, EGL_FALSE);
-    egl_sync_t* syncObject = get_sync(sync);
+    if (!_s.get())
+        return setError(EGL_BAD_PARAMETER, EGL_FALSE);
 
+    egl_sync_t* syncObject = get_sync(sync);
     EGLContext ctx = syncObject->context;
     ContextRef _c(ctx);
-    if (!_c.get()) return setError(EGL_BAD_CONTEXT, EGL_FALSE);
-    if (!validate_display_context(dpy, ctx))
-        return EGL_FALSE;
+    if (!_c.get())
+        return setError(EGL_BAD_CONTEXT, EGL_FALSE);
 
     egl_context_t * const c = get_context(ctx);
-
     if (c->cnx->egl.eglGetSyncAttribKHR) {
         return c->cnx->egl.eglGetSyncAttribKHR(
                 dp->disp[c->impl].dpy, syncObject->sync, attribute, value);
@@ -1451,10 +1428,9 @@ EGLBoolean eglSetSwapRectangleANDROID(EGLDisplay dpy, EGLSurface draw,
     if (!dp) return EGL_FALSE;
 
     SurfaceRef _s(draw);
-    if (!_s.get()) return setError(EGL_BAD_SURFACE, EGL_FALSE);
+    if (!_s.get())
+        return setError(EGL_BAD_SURFACE, EGL_FALSE);
 
-    if (!validate_display_surface(dpy, draw))
-        return EGL_FALSE;    
     egl_surface_t const * const s = get_surface(draw);
     if (s->cnx->egl.eglSetSwapRectangleANDROID) {
         return s->cnx->egl.eglSetSwapRectangleANDROID(

@@ -173,21 +173,21 @@ static int sEarlyInitState = pthread_once(&once_control, &early_egl_init);
 
 // ----------------------------------------------------------------------------
 
-egl_display_t* validate_display(EGLDisplay dpy)
-{
+egl_display_t* validate_display(EGLDisplay dpy) {
     egl_display_t * const dp = get_display(dpy);
-    if (!dp) return setError(EGL_BAD_DISPLAY, (egl_display_t*)NULL);
-    if (!dp->isReady()) return setError(EGL_NOT_INITIALIZED, (egl_display_t*)NULL);
+    if (!dp)
+        return setError(EGL_BAD_DISPLAY, (egl_display_t*)NULL);
+    if (!dp->isReady())
+        return setError(EGL_NOT_INITIALIZED, (egl_display_t*)NULL);
 
     return dp;
 }
 
-egl_connection_t* validate_display_config(
-        EGLDisplay dpy, EGLConfig config,
-        egl_display_t const*& dp)
-{
+egl_connection_t* validate_display_config(EGLDisplay dpy, EGLConfig config,
+        egl_display_t const*& dp) {
     dp = validate_display(dpy);
-    if (!dp) return (egl_connection_t*) NULL;
+    if (!dp)
+        return (egl_connection_t*) NULL;
 
     if (intptr_t(config) >= dp->numTotalConfigs) {
         return setError(EGL_BAD_CONFIG, (egl_connection_t*)NULL);
@@ -199,42 +199,25 @@ egl_connection_t* validate_display_config(
     return cnx;
 }
 
-EGLBoolean validate_display_context(EGLDisplay dpy, EGLContext ctx)
-{
-    egl_display_t const * const dp = validate_display(dpy);
-    if (!dp) return EGL_FALSE;
-    if (!dp->isAlive())
-        return setError(EGL_BAD_DISPLAY, EGL_FALSE);
-    if (!get_context(ctx)->isAlive())
-        return setError(EGL_BAD_CONTEXT, EGL_FALSE);
-    return EGL_TRUE;
-}
-
-EGLBoolean validate_display_surface(EGLDisplay dpy, EGLSurface surface)
-{
-    egl_display_t const * const dp = validate_display(dpy);
-    if (!dp) return EGL_FALSE;
-    if (!dp->isAlive())
-        return setError(EGL_BAD_DISPLAY, EGL_FALSE);
-    if (!get_surface(surface)->isAlive())
-        return setError(EGL_BAD_SURFACE, EGL_FALSE);
-    return EGL_TRUE;
-}
-
 // ----------------------------------------------------------------------------
 
 EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image)
 {
     ImageRef _i(image);
-    if (!_i.get()) return EGL_NO_IMAGE_KHR;
-    
+    if (!_i.get())
+        return EGL_NO_IMAGE_KHR;
+
     EGLContext context = egl_tls_t::getContext();
     if (context == EGL_NO_CONTEXT || image == EGL_NO_IMAGE_KHR)
         return EGL_NO_IMAGE_KHR;
-    
+
     egl_context_t const * const c = get_context(context);
-    if (!c->isAlive())
+    if (c == NULL) // this should never happen
         return EGL_NO_IMAGE_KHR;
+
+    // here we don't validate the context because if it's been marked for
+    // termination, this call should still succeed since it's internal to
+    // EGL.
 
     egl_image_t const * const i = get_image(image);
     return i->images[c->impl];

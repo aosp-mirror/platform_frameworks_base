@@ -77,11 +77,11 @@ public:
 
     // add object to this display's list
     void addObject(egl_object_t* object);
-    // remove object from this display's list if it has no reference.
-    // returns true if object was removed.
-    bool removeObject(egl_object_t* object);
+    // remove object from this display's list
+    void removeObject(egl_object_t* object);
     // add reference to this object. returns true if this is a valid object.
     bool getObject(egl_object_t* object);
+
 
     static egl_display_t* get(EGLDisplay dpy);
     static EGLDisplay getFromNativeDisplay(EGLNativeDisplayType disp);
