@@ -50,6 +50,8 @@ typedef void * RsProgramFragment;
 typedef void * RsProgramStore;
 typedef void * RsProgramRaster;
 
+typedef void * RsNativeWindow;
+
 typedef void (* RsBitmapCallback_t)(void *);
 
 typedef struct {

@@ -300,7 +300,7 @@ bool rsdGLInit(const Context *rsc) {
 }
 
 
-bool rsdGLSetSurface(const Context *rsc, uint32_t w, uint32_t h, ANativeWindow *sur) {
+bool rsdGLSetSurface(const Context *rsc, uint32_t w, uint32_t h, RsNativeWindow sur) {
     RsdHal *dc = (RsdHal *)rsc->mHal.drv;
 
     EGLBoolean ret;
@@ -319,7 +319,7 @@ bool rsdGLSetSurface(const Context *rsc, uint32_t w, uint32_t h, ANativeWindow *
         dc->gl.height = 1;
     }
 
-    dc->gl.wndSurface = sur;
+    dc->gl.wndSurface = (ANativeWindow *)sur;
     if (dc->gl.wndSurface != NULL) {
         dc->gl.width = w;
         dc->gl.height = h;

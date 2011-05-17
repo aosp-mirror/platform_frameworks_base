@@ -47,7 +47,7 @@ typedef void *(*RsHalSymbolLookupFunc)(void *usrptr, char const *symbolName);
 typedef struct {
     bool (*initGraphics)(const Context *);
     void (*shutdownGraphics)(const Context *);
-    bool (*setSurface)(const Context *, uint32_t w, uint32_t h, ANativeWindow *);
+    bool (*setSurface)(const Context *, uint32_t w, uint32_t h, RsNativeWindow);
     void (*swap)(const Context *);
 
     void (*shutdownDriver)(Context *);

@@ -18,8 +18,6 @@
 #include "rsContext.h"
 #include "rsThreadIO.h"
 #include <ui/FramebufferNativeWindow.h>
-#include <ui/PixelFormat.h>
-#include <ui/egl/android_natives.h>
 
 #include <sys/types.h>
 #include <sys/resource.h>
@@ -246,7 +244,7 @@ void * Context::threadProc(void *vrsc) {
     while (!rsc->mExit) {
         mDraw |= rsc->mIO.playCoreCommands(rsc, !mDraw);
         mDraw &= (rsc->mRootScript.get() != NULL);
-        mDraw &= (rsc->mWndSurface != NULL);
+        mDraw &= rsc->mHasSurface;
 
         uint32_t targetTime = 0;
         if (mDraw && rsc->mIsGraphicsContext) {
@@ -371,7 +369,7 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
         return false;
     }
 
-    mWndSurface = NULL;
+    mHasSurface = false;
 
     timerInit();
     timerSet(RS_TIMER_INTERNAL);
@@ -406,7 +404,6 @@ Context::~Context() {
     mIO.shutdown();
     int status = pthread_join(mThreadId, &res);
 
-
     if (mHal.funcs.shutdownDriver) {
         mHal.funcs.shutdownDriver(this);
     }
@@ -421,11 +418,11 @@ Context::~Context() {
     LOGV("Context::~Context done");
 }
 
-void Context::setSurface(uint32_t w, uint32_t h, ANativeWindow *sur) {
+void Context::setSurface(uint32_t w, uint32_t h, RsNativeWindow sur) {
     rsAssert(mIsGraphicsContext);
     mHal.funcs.setSurface(this, w, h, sur);
 
-    mWndSurface = sur;
+    mHasSurface = sur != NULL;
     mWidth = w;
     mHeight = h;
 
@@ -617,7 +614,7 @@ void rsi_ContextResume(Context *rsc) {
     rsc->resume();
 }
 
-void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, ANativeWindow *sur, size_t sur_length) {
+void rsi_ContextSetSurface(Context *rsc, uint32_t w, uint32_t h, RsNativeWindow sur) {
     rsc->setSurface(w, h, sur);
 }
 
