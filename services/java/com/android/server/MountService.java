@@ -1145,6 +1145,11 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
+            // compute storage ID for each volume
+            int length = mVolumes.size();
+            for (int i = 0; i < length; i++) {
+                mVolumes.get(i).setStorageId(i);
+            }
             parser.close();
         }
     }

@@ -34,15 +34,26 @@ public class StorageVolume implements Parcelable {
     private final boolean mRemovable;
     private final boolean mEmulated;
     private final int mMtpReserveSpace;
+    private int mStorageId;
 
     public StorageVolume(String path, String description,
-            boolean removable, boolean emulated,
-            int mtpReserveSpace) {
+            boolean removable, boolean emulated, int mtpReserveSpace) {
         mPath = path;
         mDescription = description;
         mRemovable = removable;
         mEmulated = emulated;
         mMtpReserveSpace = mtpReserveSpace;
+    }
+
+    // for parcelling only
+    private StorageVolume(String path, String description,
+            boolean removable, boolean emulated, int mtpReserveSpace, int storageId) {
+        mPath = path;
+        mDescription = description;
+        mRemovable = removable;
+        mEmulated = emulated;
+        mMtpReserveSpace = mtpReserveSpace;
+        mStorageId = storageId;
     }
 
     /**
@@ -79,6 +90,25 @@ public class StorageVolume implements Parcelable {
      */
     public boolean isEmulated() {
         return mEmulated;
+    }
+
+    /**
+     * Returns the MTP storage ID for the volume.
+     * this is also used for the storage_id column in the media provider.
+     *
+     * @return MTP storage ID
+     */
+    public int getStorageId() {
+        return mStorageId;
+    }
+
+    /**
+     * Do not call this unless you are MountService
+     */
+    public void setStorageId(int index) {
+        // storage ID is 0x00010001 for primary storage,
+        // then 0x00020001, 0x00030001, etc. for secondary storages
+        mStorageId = ((index + 1) << 16) + 1;
     }
 
     /**
@@ -123,9 +153,11 @@ public class StorageVolume implements Parcelable {
             String description = in.readString();
             int removable = in.readInt();
             int emulated = in.readInt();
+            int storageId = in.readInt();
             int mtpReserveSpace = in.readInt();
             return new StorageVolume(path, description,
-                    removable == 1, emulated == 1, mtpReserveSpace);
+                    removable == 1, emulated == 1,
+                    mtpReserveSpace, storageId);
         }
 
         public StorageVolume[] newArray(int size) {
@@ -142,6 +174,7 @@ public class StorageVolume implements Parcelable {
         parcel.writeString(mDescription);
         parcel.writeInt(mRemovable ? 1 : 0);
         parcel.writeInt(mEmulated ? 1 : 0);
+        parcel.writeInt(mStorageId);
         parcel.writeInt(mMtpReserveSpace);
     }
 }
