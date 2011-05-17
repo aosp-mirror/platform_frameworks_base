@@ -16,6 +16,8 @@
 
 package android.mtp;
 
+import android.os.storage.StorageVolume;
+
 /**
  * This class represents a storage unit on an MTP device.
  * Used only for MTP support in USB responder mode.
@@ -31,13 +33,12 @@ public class MtpStorage {
     private final long mReserveSpace;
     private final boolean mRemovable;
 
-    public MtpStorage(int id, String path, String description,
-            long reserveSpace, boolean removable) {
-        mStorageId = id;
-        mPath = path;
-        mDescription = description;
-        mReserveSpace = reserveSpace;
-        mRemovable = removable;
+    public MtpStorage(StorageVolume volume) {
+        mStorageId = volume.getStorageId();
+        mPath = volume.getPath();
+        mDescription = volume.getDescription();
+        mReserveSpace = volume.getMtpReserveSpace();
+        mRemovable = volume.isRemovable();
     }
 
     /**
