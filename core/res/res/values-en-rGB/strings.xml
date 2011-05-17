@@ -1019,4 +1019,10 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Select an account"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Increment"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Decrement"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>
