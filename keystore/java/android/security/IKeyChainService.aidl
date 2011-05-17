@@ -25,10 +25,8 @@ import android.os.Bundle;
  */
 interface IKeyChainService {
     // APIs used by KeyChain
-    byte[] getPrivate(String alias, String authToken);
+    byte[] getPrivateKey(String alias, String authToken);
     byte[] getCertificate(String alias, String authToken);
-    byte[] getCaCertificate(String alias, String authToken);
-    String findIssuer(in Bundle cert);
 
     // APIs used by CertInstaller
     void installCaCertificate(in byte[] caCertificate);
