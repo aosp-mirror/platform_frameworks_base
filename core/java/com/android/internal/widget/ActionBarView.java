@@ -713,48 +713,48 @@ public class ActionBarView extends AbsActionBarView {
             mHomeLayout.measure(MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
             final int homeWidth = mHomeLayout.getMeasuredWidth();
-            availableWidth -= homeWidth;
-            leftOfCenter -= homeWidth;
+            availableWidth = Math.max(0, availableWidth - homeWidth);
+            leftOfCenter = Math.max(0, availableWidth - homeWidth);
         }
         
         if (mMenuView != null && mMenuView.getParent() == this) {
             availableWidth = measureChildView(mMenuView, availableWidth,
                     childSpecHeight, 0);
-            rightOfCenter -= mMenuView.getMeasuredWidth();
+            rightOfCenter = Math.max(0, rightOfCenter - mMenuView.getMeasuredWidth());
         }
 
         boolean showTitle = mTitleLayout != null && mTitleLayout.getVisibility() != GONE &&
                 (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
         if (showTitle) {
             availableWidth = measureChildView(mTitleLayout, availableWidth, childSpecHeight, 0);
-            leftOfCenter -= mTitleLayout.getMeasuredWidth();
+            leftOfCenter = Math.max(0, leftOfCenter - mTitleLayout.getMeasuredWidth());
         }
 
         switch (mNavigationMode) {
         case ActionBar.NAVIGATION_MODE_LIST:
             if (mListNavLayout != null) {
                 final int itemPaddingSize = showTitle ? mItemPadding * 2 : mItemPadding;
-                availableWidth -= itemPaddingSize;
-                leftOfCenter -= itemPaddingSize;
+                availableWidth = Math.max(0, availableWidth - itemPaddingSize);
+                leftOfCenter = Math.max(0, leftOfCenter - itemPaddingSize);
                 mListNavLayout.measure(
                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
                 final int listNavWidth = mListNavLayout.getMeasuredWidth();
-                availableWidth -= listNavWidth;
-                leftOfCenter -= listNavWidth;
+                availableWidth = Math.max(0, availableWidth - listNavWidth);
+                leftOfCenter = Math.max(0, leftOfCenter - listNavWidth);
             }
             break;
         case ActionBar.NAVIGATION_MODE_TABS:
             if (mTabScrollView != null) {
                 final int itemPaddingSize = showTitle ? mItemPadding * 2 : mItemPadding;
-                availableWidth -= itemPaddingSize;
-                leftOfCenter -= itemPaddingSize;
+                availableWidth = Math.max(0, availableWidth - itemPaddingSize);
+                leftOfCenter = Math.max(0, leftOfCenter - itemPaddingSize);
                 mTabScrollView.measure(
                         MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
                         MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
                 final int tabWidth = mTabScrollView.getMeasuredWidth();
-                availableWidth -= tabWidth;
-                leftOfCenter -= tabWidth;
+                availableWidth = Math.max(0, availableWidth - tabWidth);
+                leftOfCenter = Math.max(0, leftOfCenter - tabWidth);
             }
             break;
         }
@@ -763,7 +763,8 @@ public class ActionBarView extends AbsActionBarView {
                 mIndeterminateProgressView.getVisibility() != GONE) {
             availableWidth = measureChildView(mIndeterminateProgressView, availableWidth,
                     childSpecHeight, 0);
-            rightOfCenter -= mIndeterminateProgressView.getMeasuredWidth();
+            rightOfCenter = Math.max(0,
+                    rightOfCenter - mIndeterminateProgressView.getMeasuredWidth());
         }
 
         if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0 && mCustomNavView != null) {
