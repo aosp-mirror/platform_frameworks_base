@@ -154,7 +154,7 @@ public abstract class AbsActionBarView extends ViewGroup {
         availableWidth -= child.getMeasuredWidth();
         availableWidth -= spacing;
 
-        return availableWidth;
+        return Math.max(0, availableWidth);
     }
 
     protected int positionChild(View child, int x, int y, int contentHeight) {
