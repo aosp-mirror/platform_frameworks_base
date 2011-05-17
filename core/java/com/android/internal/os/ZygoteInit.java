@@ -23,6 +23,7 @@ import android.graphics.drawable.Drawable;
 import android.net.LocalServerSocket;
 import android.os.Debug;
 import android.os.FileUtils;
+import android.os.Process;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.EventLog;
@@ -68,7 +69,7 @@ public class ZygoteInit {
     private static final int PRELOAD_GC_THRESHOLD = 50000;
 
     public static final String USAGE_STRING =
-            " <\"true\"|\"false\" for startSystemServer>";
+            " <\"start-system-server\"|\"\" for startSystemServer>";
 
     private static LocalServerSocket sServerSocket;
 
@@ -441,11 +442,20 @@ public class ZygoteInit {
         // set umask to 0077 so new files and directories will default to owner-only permissions.
         FileUtils.setUMask(FileUtils.S_IRWXG | FileUtils.S_IRWXO);
 
-        /*
-         * Pass the remaining arguments to SystemServer.
-         * "--nice-name=system_server com.android.server.SystemServer"
-         */
-        RuntimeInit.zygoteInit(parsedArgs.remainingArgs);
+        if (parsedArgs.niceName != null) {
+            Process.setArgV0(parsedArgs.niceName);
+        }
+
+        if (parsedArgs.invokeWith != null) {
+            WrapperInit.execApplication(parsedArgs.invokeWith,
+                    parsedArgs.niceName, null, parsedArgs.remainingArgs);
+        } else {
+            /*
+             * Pass the remaining arguments to SystemServer.
+             */
+            RuntimeInit.zygoteInit(parsedArgs.remainingArgs);
+        }
+
         /* should never reach here */
     }
 
@@ -470,20 +480,13 @@ public class ZygoteInit {
 
         try {
             parsedArgs = new ZygoteConnection.Arguments(args);
-
-            /*
-             * Enable debugging of the system process if *either* the command line flags
-             * indicate it should be debuggable or the ro.debuggable system property
-             * is set to "1"
-             */
-            int debugFlags = parsedArgs.debugFlags;
-            if ("1".equals(SystemProperties.get("ro.debuggable")))
-                debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
+            ZygoteConnection.applyDebuggerSystemProperty(parsedArgs);
+            ZygoteConnection.applyInvokeWithSystemProperty(parsedArgs);
 
             /* Request to fork the system server process */
             pid = Zygote.forkSystemServer(
                     parsedArgs.uid, parsedArgs.gid,
-                    parsedArgs.gids, debugFlags, null,
+                    parsedArgs.gids, parsedArgs.debugFlags, null,
                     parsedArgs.permittedCapabilities,
                     parsedArgs.effectiveCapabilities);
         } catch (IllegalArgumentException ex) {
@@ -522,9 +525,9 @@ public class ZygoteInit {
                 throw new RuntimeException(argv[0] + USAGE_STRING);
             }
 
-            if (argv[1].equals("true")) {
+            if (argv[1].equals("start-system-server")) {
                 startSystemServer();
-            } else if (!argv[1].equals("false")) {
+            } else if (!argv[1].equals("")) {
                 throw new RuntimeException(argv[0] + USAGE_STRING);
             }
 
@@ -694,15 +697,6 @@ public class ZygoteInit {
      */
     static native void reopenStdio(FileDescriptor in,
             FileDescriptor out, FileDescriptor err) throws IOException;
-
-    /**
-     * Calls close() on a file descriptor
-     *
-     * @param fd descriptor to close
-     * @throws IOException
-     */
-    static native void closeDescriptor(FileDescriptor fd)
-            throws IOException;
 
     /**
      * Toggles the close-on-exec flag for the specified file descriptor.
