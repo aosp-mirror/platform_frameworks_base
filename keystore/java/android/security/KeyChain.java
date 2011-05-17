@@ -29,6 +29,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -72,34 +73,11 @@ public final class KeyChain {
      */
     public static KeyChainResult get(Context context, String alias)
             throws InterruptedException, RemoteException {
-        if (context == null) {
-            throw new NullPointerException("context == null");
-        }
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
-        ensureNotOnMainThread(context);
-        final BlockingQueue<IKeyChainService> q = new LinkedBlockingQueue<IKeyChainService>(1);
-        ServiceConnection keyChainServiceConnection = new ServiceConnection() {
-            @Override public void onServiceConnected(ComponentName name, IBinder service) {
-                try {
-                    q.put(IKeyChainService.Stub.asInterface(service));
-                } catch (InterruptedException e) {
-                    throw new AssertionError(e);
-                }
-            }
-            @Override public void onServiceDisconnected(ComponentName name) {}
-        };
-        boolean isBound = context.bindService(new Intent(IKeyChainService.class.getName()),
-                                              keyChainServiceConnection,
-                                              Context.BIND_AUTO_CREATE);
-        if (!isBound) {
-            throw new AssertionError("could not bind to KeyChainService");
-        }
-        IKeyChainService keyChainService;
+        KeyChainConnection keyChainConnection = bind(context);
         try {
-            keyChainService = q.take();
-
             // Account is created if necessary during binding of the IKeyChainService
             AccountManager accountManager = AccountManager.get(context);
             Account account = accountManager.getAccountsByType(ACCOUNT_TYPE)[0];
@@ -131,12 +109,13 @@ public final class KeyChain {
             if (authToken == null) {
                 throw new AssertionError("Invalid authtoken");
             }
+            IKeyChainService keyChainService = keyChainConnection.getService();
             byte[] privateKeyBytes = keyChainService.getPrivateKey(alias, authToken);
             byte[] certificateBytes = keyChainService.getCertificate(alias, authToken);
             return new KeyChainResult(toPrivateKey(privateKeyBytes),
                                       toCertificate(certificateBytes));
         } finally {
-            context.unbindService(keyChainServiceConnection);
+            keyChainConnection.close();
         }
     }
 
@@ -165,6 +144,59 @@ public final class KeyChain {
         } catch (CertificateException e) {
             throw new AssertionError(e);
         }
+    }
+
+    /**
+     * @hide for reuse by CertInstaller and Settings.
+     * @see KeyChain#bind
+     */
+    public final static class KeyChainConnection implements Closeable {
+        private final Context context;
+        private final ServiceConnection serviceConnection;
+        private final IKeyChainService service;
+        private KeyChainConnection(Context context,
+                                   ServiceConnection serviceConnection,
+                                   IKeyChainService service) {
+            this.context = context;
+            this.serviceConnection = serviceConnection;
+            this.service = service;
+        }
+        @Override public void close() {
+            context.unbindService(serviceConnection);
+        }
+        public IKeyChainService getService() {
+            return service;
+        }
+    }
+
+    /**
+     * @hide for reuse by CertInstaller and Settings.
+     *
+     * Caller should call unbindService on the result when finished.
+     */
+    public static KeyChainConnection bind(Context context) throws InterruptedException {
+        if (context == null) {
+            throw new NullPointerException("context == null");
+        }
+        ensureNotOnMainThread(context);
+        final BlockingQueue<IKeyChainService> q = new LinkedBlockingQueue<IKeyChainService>(1);
+        ServiceConnection keyChainServiceConnection = new ServiceConnection() {
+            @Override public void onServiceConnected(ComponentName name, IBinder service) {
+                try {
+                    q.put(IKeyChainService.Stub.asInterface(service));
+                } catch (InterruptedException e) {
+                    throw new AssertionError(e);
+                }
+            }
+            @Override public void onServiceDisconnected(ComponentName name) {}
+        };
+        boolean isBound = context.bindService(new Intent(IKeyChainService.class.getName()),
+                                              keyChainServiceConnection,
+                                              Context.BIND_AUTO_CREATE);
+        if (!isBound) {
+            throw new AssertionError("could not bind to KeyChainService");
+        }
+        return new KeyChainConnection(context, keyChainServiceConnection, q.take());
     }
 
     private static void ensureNotOnMainThread(Context context) {
