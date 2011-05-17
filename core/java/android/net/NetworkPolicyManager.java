@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.content.Context;
 import android.os.RemoteException;
 
 /**
@@ -41,6 +42,10 @@ public class NetworkPolicyManager {
             throw new IllegalArgumentException("missing INetworkPolicyManager");
         }
         mService = service;
+    }
+
+    public static NetworkPolicyManager getSystemService(Context context) {
+        return (NetworkPolicyManager) context.getSystemService(Context.NETWORK_POLICY_SERVICE);
     }
 
     /**

@@ -16,51 +16,34 @@
 
 package com.android.server;
 
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.content.pm.PackageManager;
-import android.net.NetworkStats;
-import android.net.Uri;
-import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
+import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
+import android.net.NetworkStats;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
+import android.os.Binder;
 import android.os.INetworkManagementService;
-import android.os.Handler;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
-import java.util.ArrayList;
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
-import android.provider.Settings;
-import android.content.ContentResolver;
-import android.database.ContentObserver;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
-import java.io.Reader;
-import java.lang.IllegalStateException;
-import java.net.InetAddress;
 import java.net.Inet4Address;
-import java.net.UnknownHostException;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
 
 import libcore.io.IoUtils;
@@ -69,13 +52,15 @@ import libcore.io.IoUtils;
  * @hide
  */
 class NetworkManagementService extends INetworkManagementService.Stub {
-
-    private static final String TAG = "NetworkManagmentService";
+    private static final String TAG = "NetworkManagementService";
     private static final boolean DBG = false;
     private static final String NETD_TAG = "NetdConnector";
 
     private static final int ADD = 1;
     private static final int REMOVE = 2;
+
+    /** Base path to UID-granularity network statistics. */
+    private static final File PATH_PROC_UID_STAT = new File("/proc/uid_stat");
 
     class NetdResponseCode {
         public static final int InterfaceListResult       = 110;
@@ -891,7 +876,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         return -1;
     }
 
-    /** {@inheritDoc} */
+    @Override
     public NetworkStats getNetworkStatsSummary() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
@@ -909,29 +894,44 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         return stats.build();
     }
 
-    /** {@inheritDoc} */
+    @Override
     public NetworkStats getNetworkStatsDetail() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
 
-        final File procPath = new File("/proc/uid_stat");
-        final String[] knownUids = procPath.list();
+        final String[] knownUids = PATH_PROC_UID_STAT.list();
         final NetworkStats.Builder stats = new NetworkStats.Builder(
                 SystemClock.elapsedRealtime(), knownUids.length);
 
-        // TODO: kernel module will provide interface-level stats in future
-        // TODO: migrate these stats to come across netd in bulk, instead of all
-        // these individual file reads.
         for (String uid : knownUids) {
-            final File uidPath = new File(procPath, uid);
-            final int rx = readSingleIntFromFile(new File(uidPath, "tcp_rcv"));
-            final int tx = readSingleIntFromFile(new File(uidPath, "tcp_snd"));
-
             final int uidInt = Integer.parseInt(uid);
-            stats.addEntry(NetworkStats.IFACE_ALL, uidInt, rx, tx);
+            collectNetworkStatsDetail(stats, uidInt);
         }
 
         return stats.build();
+    }
+
+    @Override
+    public NetworkStats getNetworkStatsUidDetail(int uid) {
+        if (Binder.getCallingUid() != uid) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
+        }
+
+        final NetworkStats.Builder stats = new NetworkStats.Builder(
+                SystemClock.elapsedRealtime(), 1);
+        collectNetworkStatsDetail(stats, uid);
+        return stats.build();
+    }
+
+    private void collectNetworkStatsDetail(NetworkStats.Builder stats, int uid) {
+        // TODO: kernel module will provide interface-level stats in future
+        // TODO: migrate these stats to come across netd in bulk, instead of all
+        // these individual file reads.
+        final File uidPath = new File(PATH_PROC_UID_STAT, Integer.toString(uid));
+        final long rx = readSingleLongFromFile(new File(uidPath, "tcp_rcv"));
+        final long tx = readSingleLongFromFile(new File(uidPath, "tcp_snd"));
+        stats.addEntry(NetworkStats.IFACE_ALL, uid, rx, tx);
     }
 
     public void setInterfaceThrottle(String iface, int rxKbps, int txKbps) {
@@ -994,22 +994,17 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     /**
-     * Utility method to read a single plain-text {@link Integer} from the given
+     * Utility method to read a single plain-text {@link Long} from the given
      * {@link File}, usually from a {@code /proc/} filesystem.
      */
-    private static int readSingleIntFromFile(File file) {
-        RandomAccessFile f = null;
+    private static long readSingleLongFromFile(File file) {
         try {
-            f = new RandomAccessFile(file, "r");
-            byte[] buffer = new byte[(int) f.length()];
-            f.readFully(buffer);
-            return Integer.parseInt(new String(buffer).trim());
+            final byte[] buffer = IoUtils.readFileAsByteArray(file.toString());
+            return Long.parseLong(new String(buffer).trim());
         } catch (NumberFormatException e) {
             return -1;
         } catch (IOException e) {
             return -1;
-        } finally {
-            IoUtils.closeQuietly(f);
         }
     }
 }

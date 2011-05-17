@@ -1544,6 +1544,9 @@ public abstract class Context {
      */
     public static final String NETWORKMANAGEMENT_SERVICE = "network_management";
 
+    /** {@hide} */
+    public static final String NETWORK_POLICY_SERVICE = "netpolicy";
+
     /**
      * Use with {@link #getSystemService} to retrieve a {@link
      * android.net.wifi.WifiManager} for handling management of

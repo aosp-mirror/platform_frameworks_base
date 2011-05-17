@@ -16,6 +16,12 @@
 
 package android.net;
 
+import android.content.Context;
+import android.os.IBinder;
+import android.os.INetworkManagementService;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+
 import dalvik.system.BlockGuard;
 
 import java.net.Socket;
@@ -34,6 +40,17 @@ public class TrafficStats {
      * The return value to indicate that the device does not support the statistic.
      */
     public final static int UNSUPPORTED = -1;
+
+    /**
+     * Snapshot of {@link NetworkStats} when the currently active profiling
+     * session started, or {@code null} if no session active.
+     *
+     * @see #startDataProfiling(Context)
+     * @see #stopDataProfiling(Context)
+     */
+    private static NetworkStats sActiveProfilingStart;
+
+    private static Object sProfilingLock = new Object();
 
     /**
      * Set active tag to use when accounting {@link Socket} traffic originating
@@ -90,6 +107,44 @@ public class TrafficStats {
      */
     public static void untagSocket(Socket socket) throws SocketException {
         BlockGuard.untagSocketFd(socket.getFileDescriptor$());
+    }
+
+    /**
+     * Start profiling data usage for current UID. Only one profiling session
+     * can be active at a time.
+     *
+     * @hide
+     */
+    public static void startDataProfiling(Context context) {
+        synchronized (sProfilingLock) {
+            if (sActiveProfilingStart != null) {
+                throw new IllegalStateException("already profiling data");
+            }
+
+            // take snapshot in time; we calculate delta later
+            sActiveProfilingStart = getNetworkStatsForUid(context);
+        }
+    }
+
+    /**
+     * Stop profiling data usage for current UID.
+     *
+     * @return Detailed {@link NetworkStats} of data that occurred since last
+     *         {@link #startDataProfiling(Context)} call.
+     * @hide
+     */
+    public static NetworkStats stopDataProfiling(Context context) {
+        synchronized (sProfilingLock) {
+            if (sActiveProfilingStart == null) {
+                throw new IllegalStateException("not profiling data");
+            }
+
+            // subtract starting values and return delta
+            final NetworkStats profilingStop = getNetworkStatsForUid(context);
+            final NetworkStats profilingDelta = profilingStop.subtract(sActiveProfilingStart);
+            sActiveProfilingStart = null;
+            return profilingDelta;
+        }
     }
 
     /**
@@ -350,4 +405,21 @@ public class TrafficStats {
      * {@link #UNSUPPORTED} will be returned.
      */
     public static native long getUidUdpRxPackets(int uid);
+
+    /**
+     * Return detailed {@link NetworkStats} for the current UID. Requires no
+     * special permission.
+     */
+    private static NetworkStats getNetworkStatsForUid(Context context) {
+        final IBinder binder = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+        final INetworkManagementService service = INetworkManagementService.Stub.asInterface(
+                binder);
+
+        final int uid = android.os.Process.myUid();
+        try {
+            return service.getNetworkStatsUidDetail(uid);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
