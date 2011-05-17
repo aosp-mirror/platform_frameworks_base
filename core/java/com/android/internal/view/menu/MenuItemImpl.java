@@ -19,6 +19,7 @@ package com.android.internal.view.menu;
 import com.android.internal.view.menu.MenuView.ItemView;
 
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -28,6 +29,7 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewDebug;
+import android.widget.LinearLayout;
 
 /**
  * @hide
@@ -554,9 +556,9 @@ public final class MenuItemImpl implements MenuItem {
     }
 
     public MenuItem setActionView(int resId) {
-        LayoutInflater inflater = LayoutInflater.from(mMenu.getContext());
-        // TODO - Fix for proper parent. Lazily inflate in the presenter.
-        setActionView(inflater.inflate(resId, null));
+        final Context context = mMenu.getContext();
+        final LayoutInflater inflater = LayoutInflater.from(context);
+        setActionView(inflater.inflate(resId, new LinearLayout(context)));
         return this;
     }
 
