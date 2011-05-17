@@ -25,6 +25,7 @@ import com.android.server.ProcessStats;
 import com.android.server.SystemServer;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
+import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.Zygote;
@@ -751,6 +752,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     final UsageStatsService mUsageStatsService;
 
+    final NetworkPolicyManagerService mNetworkPolicyService;
+
     /**
      * Current configuration information.  HistoryRecord objects are given
      * a reference to this object to indicate which configuration they are
@@ -971,6 +974,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int CHECK_EXCESSIVE_WAKE_LOCKS_MSG = 27;
     static final int CLEAR_DNS_CACHE = 28;
     static final int UPDATE_HTTP_PROXY = 29;
+    static final int DISPATCH_FOREGROUND_ACTIVITIES_CHANGED = 30;
+    static final int DISPATCH_PROCESS_DIED = 31;
 
     AlertDialog mUidAlert;
 
@@ -1271,6 +1276,19 @@ public final class ActivityManagerService extends ActivityManagerNative
                     sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
                 }
             } break;
+            case DISPATCH_FOREGROUND_ACTIVITIES_CHANGED: {
+                // Flag might have changed during dispatch, but it's always
+                // consistent since we dispatch for every change.
+                final ProcessRecord app = (ProcessRecord) msg.obj;
+                mNetworkPolicyService.onForegroundActivitiesChanged(
+                        app.info.uid, app.pid, app.foregroundActivities);
+                break;
+            }
+            case DISPATCH_PROCESS_DIED: {
+                final ProcessRecord app = (ProcessRecord) msg.obj;
+                mNetworkPolicyService.onProcessDied(app.info.uid, app.pid);
+                break;
+            }
             }
         }
     };
@@ -1340,6 +1358,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         m.mBatteryStatsService.publish(context);
         m.mUsageStatsService.publish(context);
+        m.mNetworkPolicyService.publish(context);
         
         synchronized (thr) {
             thr.mReady = true;
@@ -1460,6 +1479,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         mUsageStatsService = new UsageStatsService(new File(
                 systemDir, "usagestats").toString());
+
+        mNetworkPolicyService = new NetworkPolicyManagerService();
 
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
@@ -1743,7 +1764,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mLruSeq++;
         updateLruProcessInternalLocked(app, oomAdj, updateActivityTime, 0);
     }
-    
+
     final ProcessRecord getProcessRecordLocked(
             String processName, int uid) {
         if (uid == Process.SYSTEM_UID) {
@@ -3339,7 +3360,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     private final boolean forceStopPackageLocked(String name, int uid,
             boolean callerWillRestart, boolean purgeCache, boolean doit) {
-        int i, N;
+        int i;
+        int N;
 
         if (uid < 0) {
             try {
@@ -6062,6 +6084,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         mUsageStatsService.shutdown();
         mBatteryStatsService.shutdown();
+        mNetworkPolicyService.shutdown();
         
         return timedout;
     }
@@ -8691,9 +8714,17 @@ public final class ActivityManagerService extends ActivityManagerNative
                     schedGroup = Integer.toString(r.setSchedGroup);
                     break;
             }
-            pw.println(String.format("%s%s #%2d: adj=%s/%s %s (%s)",
+            String foreground;
+            if (r.foregroundActivities) {
+                foreground = "A";
+            } else if (r.foregroundServices) {
+                foreground = "S";
+            } else {
+                foreground = " ";
+            }
+            pw.println(String.format("%s%s #%2d: adj=%s/%s%s %s (%s)",
                     prefix, (r.persistent ? persistentLabel : normalLabel),
-                    N-i, oomAdj, schedGroup, r.toShortString(), r.adjType));
+                    N-i, oomAdj, schedGroup, foreground, r.toShortString(), r.adjType));
             if (r.adjSource != null || r.adjTarget != null) {
                 pw.print(prefix);
                 pw.print("    ");
@@ -9069,6 +9100,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.thread = null;
         app.forcingToForeground = null;
         app.foregroundServices = false;
+        app.foregroundActivities = false;
 
         killServicesLocked(app, true);
 
@@ -9161,6 +9193,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // can't happen; backup manager is local
             }
         }
+
+        mHandler.obtainMessage(DISPATCH_PROCESS_DIED, app).sendToTarget();
 
         // If the caller is restarting this app, then leave it in its
         // current lists and let the caller take care of it.
@@ -12400,25 +12434,30 @@ public final class ActivityManagerService extends ActivityManagerNative
             app.keeping = true;
             app.curSchedGroup = Process.THREAD_GROUP_DEFAULT;
             return (app.curAdj=app.maxAdj);
-       }
-        
+        }
+
+        final boolean hadForegroundActivities = app.foregroundActivities;
+
         app.adjTypeCode = ActivityManager.RunningAppProcessInfo.REASON_UNKNOWN;
         app.adjSource = null;
         app.adjTarget = null;
         app.keeping = false;
         app.empty = false;
         app.hidden = false;
+        app.foregroundActivities = false;
+
+        final int activitiesSize = app.activities.size();
 
         // Determine the importance of the process, starting with most
         // important to least, and assign an appropriate OOM adjustment.
         int adj;
         int schedGroup;
-        int N;
         if (app == TOP_APP) {
             // The last app on the list is the foreground app.
             adj = FOREGROUND_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "top-activity";
+            app.foregroundActivities = true;
         } else if (app.instrumentationClass != null) {
             // Don't want to kill running instrumentation.
             adj = FOREGROUND_APP_ADJ;
@@ -12437,54 +12476,64 @@ public final class ActivityManagerService extends ActivityManagerNative
             adj = FOREGROUND_APP_ADJ;
             schedGroup = Process.THREAD_GROUP_DEFAULT;
             app.adjType = "exec-service";
-        } else if ((N=app.activities.size()) != 0) {
+        } else if (activitiesSize > 0) {
             // This app is in the background with paused activities.
-            app.hidden = true;
+            // We inspect activities to potentially upgrade adjustment further below.
             adj = hiddenAdj;
             schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
+            app.hidden = true;
             app.adjType = "bg-activities";
-            N = app.activities.size();
-            for (int j=0; j<N; j++) {
-                ActivityRecord r = app.activities.get(j);
-                if (r.visible) {
-                    // This app has a visible activity!
-                    app.hidden = false;
-                    adj = VISIBLE_APP_ADJ;
-                    schedGroup = Process.THREAD_GROUP_DEFAULT;
-                    app.adjType = "visible";
-                    break;
-                } else if (r.state == ActivityState.PAUSING
-                        || r.state == ActivityState.PAUSED
-                        || r.state == ActivityState.STOPPING) {
-                    adj = PERCEPTIBLE_APP_ADJ;
-                    app.adjType = "stopping";
-                }
-            }
         } else {
             // A very not-needed process.  If this is lower in the lru list,
             // we will push it in to the empty bucket.
+            adj = hiddenAdj;
+            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
             app.hidden = true;
             app.empty = true;
-            schedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
-            adj = hiddenAdj;
             app.adjType = "bg-empty";
         }
-        
+
+        // Examine all activities if not already foreground.
+        if (!app.foregroundActivities && activitiesSize > 0) {
+            for (int j = 0; j < activitiesSize; j++) {
+                final ActivityRecord r = app.activities.get(j);
+                if (r.visible) {
+                    // App has a visible activity; only upgrade adjustment.
+                    if (adj > VISIBLE_APP_ADJ) {
+                        adj = VISIBLE_APP_ADJ;
+                        app.adjType = "visible";
+                    }
+                    schedGroup = Process.THREAD_GROUP_DEFAULT;
+                    app.hidden = false;
+                    app.foregroundActivities = true;
+                    break;
+                } else if (r.state == ActivityState.PAUSING || r.state == ActivityState.PAUSED
+                        || r.state == ActivityState.STOPPING) {
+                    // Only upgrade adjustment.
+                    if (adj > PERCEPTIBLE_APP_ADJ) {
+                        adj = PERCEPTIBLE_APP_ADJ;
+                        app.adjType = "stopping";
+                    }
+                    app.foregroundActivities = true;
+                }
+            }
+        }
+
         if (adj > PERCEPTIBLE_APP_ADJ) {
             if (app.foregroundServices) {
                 // The user is aware of this app, so make it visible.
                 adj = PERCEPTIBLE_APP_ADJ;
-                schedGroup = Process.THREAD_GROUP_DEFAULT;
                 app.adjType = "foreground-service";
+                schedGroup = Process.THREAD_GROUP_DEFAULT;
             } else if (app.forcingToForeground != null) {
                 // The user is aware of this app, so make it visible.
                 adj = PERCEPTIBLE_APP_ADJ;
-                schedGroup = Process.THREAD_GROUP_DEFAULT;
                 app.adjType = "force-foreground";
                 app.adjSource = app.forcingToForeground;
+                schedGroup = Process.THREAD_GROUP_DEFAULT;
             }
         }
-        
+
         if (adj > HEAVY_WEIGHT_APP_ADJ && app == mHeavyWeightProcess) {
             // We don't want to kill the current heavy-weight process.
             adj = HEAVY_WEIGHT_APP_ADJ;
@@ -12704,7 +12753,11 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         app.curAdj = adj;
         app.curSchedGroup = schedGroup;
-        
+
+        if (hadForegroundActivities != app.foregroundActivities) {
+            mHandler.obtainMessage(DISPATCH_FOREGROUND_ACTIVITIES_CHANGED, app).sendToTarget();
+        }
+
         return adj;
     }
 
@@ -12937,12 +12990,14 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final boolean updateOomAdjLocked(
-        ProcessRecord app, int hiddenAdj, ProcessRecord TOP_APP) {
+            ProcessRecord app, int hiddenAdj, ProcessRecord TOP_APP) {
         app.hiddenAdj = hiddenAdj;
 
         if (app.thread == null) {
             return true;
         }
+
+        boolean success = true;
 
         final boolean wasKeeping = app.keeping;
 
@@ -12983,7 +13038,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         " oom adj to " + adj);
                     app.setAdj = adj;
                 } else {
-                    return false;
+                    success = false;
                 }
             }
             if (app.setSchedGroup != app.curSchedGroup) {
@@ -13022,7 +13077,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        return true;
+        return success;
     }
 
     private final ActivityRecord resumedAppLocked() {

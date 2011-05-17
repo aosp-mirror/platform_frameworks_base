@@ -64,6 +64,7 @@ class ProcessRecord {
     boolean keeping;            // Actively running code so don't kill due to that?
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean foregroundServices; // Running any services that are foreground?
+    boolean foregroundActivities; // Running any activities that are foreground?
     boolean bad;                // True if disabled in the bad process list
     boolean killedBackground;   // True when proc has been killed due to too many bg
     String waitingToKill;       // Process is waiting to be killed when in the bg; reason
