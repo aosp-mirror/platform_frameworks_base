@@ -37,6 +37,7 @@ class ProgramVertex;
 class ProgramFragment;
 class Mesh;
 class Sampler;
+class FBOCache;
 
 typedef void *(*RsHalSymbolLookupFunc)(void *usrptr, char const *symbolName);
 
@@ -127,6 +128,12 @@ typedef struct {
         bool (*init)(const Context *rsc, const Sampler *m);
         void (*destroy)(const Context *rsc, const Sampler *m);
     } sampler;
+
+    struct {
+        bool (*init)(const Context *rsc, const FBOCache *fb);
+        void (*setActive)(const Context *rsc, const FBOCache *fb);
+        void (*destroy)(const Context *rsc, const FBOCache *fb);
+    } framebuffer;
 
 } RsdHalFunctions;
 

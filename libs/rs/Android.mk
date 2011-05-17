@@ -117,6 +117,7 @@ LOCAL_SRC_FILES:= \
 	rsType.cpp \
 	driver/rsdBcc.cpp \
 	driver/rsdCore.cpp \
+	driver/rsdFrameBuffer.cpp \
 	driver/rsdGL.cpp \
 	driver/rsdMesh.cpp \
 	driver/rsdMeshObj.cpp \

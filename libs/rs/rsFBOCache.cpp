@@ -19,33 +19,30 @@
 #include "rsContext.h"
 #include "rsAllocation.h"
 
-#ifndef ANDROID_RS_SERIALIZE
-#include <GLES/gl.h>
-#include <GLES2/gl2.h>
-#endif //ANDROID_RS_SERIALIZE
-
 using namespace android;
 using namespace android::renderscript;
 
 
 FBOCache::FBOCache() {
-    mFBOId = 0;
     mDirty = true;
-    mMaxTargets = 1;
-    mColorTargets = new ObjectBaseRef<Allocation>[mMaxTargets];
+    mHal.state.colorTargetsCount = 1;
+    mHal.state.colorTargets = new ObjectBaseRef<Allocation>[mHal.state.colorTargetsCount];
 }
 
 FBOCache::~FBOCache() {
-    delete[] mColorTargets;
-#ifndef ANDROID_RS_SERIALIZE
-    if(mFBOId != 0) {
-        glDeleteFramebuffers(1, &mFBOId);
-    }
-#endif //ANDROID_RS_SERIALIZE
+    delete[] mHal.state.colorTargets;
+}
+
+void FBOCache::init(Context *rsc) {
+    rsc->mHal.funcs.framebuffer.init(rsc, this);
+}
+
+void FBOCache::deinit(Context *rsc) {
+    rsc->mHal.funcs.framebuffer.destroy(rsc, this);
 }
 
 void FBOCache::bindColorTarget(Context *rsc, Allocation *a, uint32_t slot) {
-    if (slot >= mMaxTargets) {
+    if (slot >= mHal.state.colorTargetsCount) {
         LOGE("Invalid render target index");
         return;
     }
@@ -62,7 +59,7 @@ void FBOCache::bindColorTarget(Context *rsc, Allocation *a, uint32_t slot) {
             a->deferredAllocateRenderTarget(rsc);
         }
     }
-    mColorTargets[slot].set(a);
+    mHal.state.colorTargets[slot].set(a);
     mDirty = true;
 }
 
@@ -80,131 +77,34 @@ void FBOCache::bindDepthTarget(Context *rsc, Allocation *a) {
             a->deferredAllocateRenderTarget(rsc);
         }
     }
-    mDepthTarget.set(a);
+    mHal.state.depthTarget.set(a);
     mDirty = true;
 }
 
 void FBOCache::resetAll(Context *) {
-    for (uint32_t i = 0; i < mMaxTargets; i ++) {
-        mColorTargets[i].set(NULL);
+    for (uint32_t i = 0; i < mHal.state.colorTargetsCount; i ++) {
+        mHal.state.colorTargets[i].set(NULL);
     }
-    mDepthTarget.set(NULL);
+    mHal.state.depthTarget.set(NULL);
     mDirty = true;
 }
 
-bool FBOCache::renderToFramebuffer() {
-    if (mDepthTarget.get() != NULL) {
-        return false;
-    }
-
-    for (uint32_t i = 0; i < mMaxTargets; i ++) {
-        if (mColorTargets[i].get() != NULL) {
-            return false;
-        }
-    }
-    return true;
-}
-
-void FBOCache::checkError(Context *rsc) {
-    GLenum status;
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    switch (status) {
-    case GL_FRAMEBUFFER_COMPLETE:
-        break;
-    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-        rsc->setError(RS_ERROR_BAD_VALUE,
-                      "Unable to set up render Target: RFRAMEBUFFER_INCOMPLETE_ATTACHMENT");
-        break;
-    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-        rsc->setError(RS_ERROR_BAD_VALUE,
-                      "Unable to set up render Target: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
-        break;
-    case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-        rsc->setError(RS_ERROR_BAD_VALUE,
-                      "Unable to set up render Target: GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
-        break;
-    case GL_FRAMEBUFFER_UNSUPPORTED:
-        rsc->setError(RS_ERROR_BAD_VALUE,
-                      "Unable to set up render Target: GL_FRAMEBUFFER_UNSUPPORTED");
-        break;
-    }
-}
-
-void FBOCache::setDepthAttachment(Context *rsc) {
-#ifndef ANDROID_RS_SERIALIZE
-    if (mDepthTarget.get() != NULL) {
-        mDepthTarget->uploadCheck(rsc);
-        if (mDepthTarget->getIsTexture()) {
-            uint32_t texID = mDepthTarget->getTextureID();
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                   GL_TEXTURE_2D, texID, 0);
-        } else {
-            uint32_t texID = mDepthTarget->getRenderTargetID();
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                      GL_RENDERBUFFER, texID);
-        }
-    } else {
-        // Reset last attachment
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                  GL_RENDERBUFFER, 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                               GL_TEXTURE_2D, 0, 0);
-    }
-#endif //ANDROID_RS_SERIALIZE
-}
-
-void FBOCache::setColorAttachment(Context *rsc) {
-#ifndef ANDROID_RS_SERIALIZE
-    // Now attach color targets
-    for (uint32_t i = 0; i < mMaxTargets; i ++) {
-        uint32_t texID = 0;
-        if (mColorTargets[i].get() != NULL) {
-            mColorTargets[i]->uploadCheck(rsc);
-            if (mColorTargets[i]->getIsTexture()) {
-                uint32_t texID = mColorTargets[i]->getTextureID();
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                                       GL_TEXTURE_2D, texID, 0);
-            } else {
-                uint32_t texID = mDepthTarget->getRenderTargetID();
-                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                                          GL_RENDERBUFFER, texID);
-            }
-        } else {
-            // Reset last attachment
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                                      GL_RENDERBUFFER, 0);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                                   GL_TEXTURE_2D, 0, 0);
-        }
-    }
-#endif //ANDROID_RS_SERIALIZE
-}
-
 void FBOCache::setup(Context *rsc) {
-#ifndef ANDROID_RS_SERIALIZE
     if (!mDirty) {
         return;
     }
 
-    bool framebuffer = renderToFramebuffer();
-
-    if (!framebuffer) {
-        if(mFBOId == 0) {
-            glGenFramebuffers(1, &mFBOId);
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, mFBOId);
-
-        setDepthAttachment(rsc);
-        setColorAttachment(rsc);
-
-        glViewport(0, 0, mColorTargets[0]->getType()->getDimX(),
-                         mColorTargets[0]->getType()->getDimY());
-
-        checkError(rsc);
-    } else {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, rsc->getWidth(), rsc->getHeight());
+    if (mHal.state.depthTarget.get() != NULL) {
+        mHal.state.depthTarget->uploadCheck(rsc);
     }
+
+    for (uint32_t i = 0; i < mHal.state.colorTargetsCount; i ++) {
+        if (mHal.state.colorTargets[i].get() != NULL) {
+            mHal.state.colorTargets[i]->uploadCheck(rsc);
+        }
+    }
+
+    rsc->mHal.funcs.framebuffer.setActive(rsc, this);
+
     mDirty = false;
-#endif //ANDROID_RS_SERIALIZE
 }
