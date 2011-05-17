@@ -8876,6 +8876,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
         // Destroy any previous software drawing cache if needed
         switch (mLayerType) {
+            case LAYER_TYPE_HARDWARE:
+                if (mHardwareLayer != null) {
+                    mHardwareLayer.destroy();
+                    mHardwareLayer = null;
+                }
+                // fall through - unaccelerated views may use software layer mechanism instead
             case LAYER_TYPE_SOFTWARE:
                 if (mDrawingCache != null) {
                     mDrawingCache.recycle();
@@ -8885,12 +8891,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
                 if (mUnscaledDrawingCache != null) {
                     mUnscaledDrawingCache.recycle();
                     mUnscaledDrawingCache = null;
-                }
-                break;
-            case LAYER_TYPE_HARDWARE:
-                if (mHardwareLayer != null) {
-                    mHardwareLayer.destroy();
-                    mHardwareLayer = null;
                 }
                 break;
             default:
