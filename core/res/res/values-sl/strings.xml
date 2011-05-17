@@ -240,6 +240,10 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Dovoljuje spreminjanje zbranih statističnih podatkov baterije. Ni za uporabo z navadnimi programi."</string>
     <string name="permlab_backup" msgid="470013022865453920">"nadzor varnostnega kopiranja sistema in obnovitev"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Programu dovoljuje nadzor mehanizma za varnostno kopiranje in obnovitev sistema. Ni za uporabo z navadnimi programi."</string>
+    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
+    <skip />
+    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <skip />
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"prikazovanje nepooblaščenih oken"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Dovoljuje ustvarjanje oken, ki jih bo uporabljal uporabniški vmesnik notranjega sistema. Ni za uporabo z navadnimi programi."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"prikaz opozoril na ravni sistema"</string>
@@ -446,6 +450,10 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Programom dovoljuje ogled konfiguracije lokalnega telefona Bluetooth ter ustvarjanje in sprejemanje povezave s povezanimi napravami."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"nadzor nad komunikacijo s tehnologijo bližnjega polja"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Podpira komunikacijo med računalnikom in oznakami, karticami in bralniki komunikacije s tehnologijo bližnjega polja."</string>
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"onemogočanje zaklepa tipkovnice"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Dovoljuje, da program onemogoči zaklep tipk in morebitno povezano varnostno geslo. Legitimen primer je onemogočenje zaklepa tipkovnice pri dohodnem klicu ter vnovičnem omogočanju zaklepa, ko je klic dokončan."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"branje nastavitev sinhronizacije"</string>
@@ -1019,4 +1027,13 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Izberite račun"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Povečaj"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Zmanjšaj"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"Krmarjenje domov"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"Krmarjenje navzgor"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Več možnosti"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>

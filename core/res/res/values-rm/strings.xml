@@ -246,6 +246,10 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Permetta da modifitgar las datas statisticas da l\'accu. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_backup" msgid="470013022865453920">"controllar las copias da segirezza e la restauraziun dal sistem"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Permetta a l\'applicaziun da controllar il mecanissem da copias da segirezza e da restauraziun dal sistem. Betg previs per applicaziuns normalas."</string>
+    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
+    <skip />
+    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <skip />
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"mussar fanestras betg autorisadas"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Permetta da crear fanestras destinadas per l\'utilisaziun da l\'interfatscha d\'utilisader interna dal sistem. Questa funcziun n\'è betg previsa per applicaziuns normalas."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"mussar avertiments dal sistem"</string>
@@ -459,6 +463,10 @@
     <!-- no translation found for permlab_nfc (4423351274757876953) -->
     <skip />
     <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <skip />
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
     <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"deactivar la bloccaziun da la tastatura"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permetta ad ina applicaziun da deactivar la bloccaziun da la tastatura e la protecziun cun il pled-clav associada. In exempel dad ina utilisaziun legitima: La bloccaziun da la tastatura vegn deactivada sche Vus retschavais in clom ed ella vegn reactivada sche Vus finis il telefon."</string>
@@ -1114,5 +1122,17 @@
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
+    <skip />
+    <!-- no translation found for action_bar_home_description (5293600496601490216) -->
+    <skip />
+    <!-- no translation found for action_bar_up_description (2237496562952152589) -->
+    <skip />
+    <!-- no translation found for action_menu_overflow_description (2295659037509008453) -->
+    <skip />
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
     <skip />
 </resources>

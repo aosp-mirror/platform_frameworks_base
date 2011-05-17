@@ -240,6 +240,10 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Permite la modificación de estadísticas recopiladas sobre la batería. No está destinado al uso por parte de aplicaciones normales."</string>
     <string name="permlab_backup" msgid="470013022865453920">"controlar las copias de seguridad y las restauraciones del sistema"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Permite que la aplicación controle el mecanismo de copia de seguridad y restauración del sistema. Este permiso no está destinado a aplicaciones normales."</string>
+    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
+    <skip />
+    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <skip />
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"mostrar ventanas no autorizadas"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Permite la creación de ventanas destinadas al uso por parte de la interfaz de usuario interna del sistema. No está destinado al uso por parte de aplicaciones normales."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"mostrar alertas de nivel del sistema"</string>
@@ -446,6 +450,10 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Permite que una aplicación vea la configuración del teléfono Bluetooth local, y cree y acepte conexiones con los dispositivos sincronizados."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlar Comunicación de campo cercano (NFC)"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Permite que la aplicación se comunique con lectores, tarjetas y etiquetas de Comunicación de campo cercano (NFC)."</string>
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"inhabilitar bloqueo del teclado"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permite que una aplicación inhabilite el bloqueo del teclado y cualquier protección con contraseña asociada. Un ejemplo legítimo de este permiso es la inhabilitación por parte del teléfono del bloqueo del teclado cuando recibe una llamada telefónica entrante y su posterior habilitación cuando finaliza la llamada."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leer la configuración de sincronización"</string>
@@ -1019,4 +1027,13 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Seleccionar una cuenta"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Aumentar"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Disminuir"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"Ir al escritorio"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"Desplazarse hacia arriba"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Más opciones"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>

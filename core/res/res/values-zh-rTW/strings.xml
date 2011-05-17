@@ -240,6 +240,10 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"允修改收集到的電池用量統計資料。一般應用程式不應使用這項功能。"</string>
     <string name="permlab_backup" msgid="470013022865453920">"控制系統備份與還原"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"允許應用程式控制系統的備份與還原機制。一般應用程式不應使用這項功能。"</string>
+    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
+    <skip />
+    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <skip />
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"顯示未授權視窗"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"允許內部系統使用介面建立視窗。一般應用程式不會使用此功能。"</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"顯示系統警示"</string>
@@ -446,6 +450,10 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"允許應用程式檢視本機藍牙電話設定，並與其他配對裝置連線。"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"控制近距離無線通訊"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"允許應用程式使用近距離無線通訊 (NFC) 標記、卡片及讀取程式進行通訊。"</string>
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"停用按鍵鎖定"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"允許應用程式停用按鍵鎖定以及其他相關的密碼安全性。例如：收到來電時解除按鍵鎖定，通話結束後重新啟動按鍵鎖定。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"讀取同步處理設定"</string>
@@ -1019,4 +1027,13 @@
     <string name="choose_account_label" msgid="4191313562041125787">"選取帳戶"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"增加"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"減少"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"瀏覽首頁"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"向上瀏覽"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"更多選項"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>

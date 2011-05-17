@@ -240,6 +240,10 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"امکان تغییر اطلاعات جمع آوری شده مربوط به باتری را فراهم می آورد. برای استفاده با برنامه های معمولی در نظر گرفته نشده است."</string>
     <string name="permlab_backup" msgid="470013022865453920">"کنترل نسخه پشتیبان سیستم و بازیابی"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"به برنامه کاربردی اجازه می دهد نسخه پشتیبان سیستم را کنترل کرده و مکانیسم آن را بازیابی کند. برای استفاده با برنامه های معمولی در نظر گرفته نشده است."</string>
+    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
+    <skip />
+    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <skip />
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"نمایش پنجره های غیرمجاز"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"اجازه می دهد پنجره هایی ایجاد شوند که برای استفاده توسط رابط کاربر سیستم داخلی در نظر گرفته شده است. برای استفاده با برنامه های معمولی در نظر گرفته نشده است."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"هشدارهای سطح سیستم نمایش"</string>
@@ -446,6 +450,10 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"به یک برنامه کاربردی اجازه می دهد تا پیکربندی تلفن بلوتوث محلی را مشاهده کند، اتصال ها را با دستگاه های جفت شده برقرار کرده، آنها را بپذیرد."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"کنترل ارتباط راه نزدیک"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"به یک برنامه کاربردی برای ارتباط با برچسب های ارتباط راه نزدیک (NFC)، کارت ها و خواننده ها اجازه می دهد."</string>
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"غیرفعال کردن قفل کلید"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"به یک برنامه کاربردی اجازه می دهد قفل کلید و حفاظت رمز ورود همراه با کلیه کلیدها را غیرفعال کند. یک نمونه قانونی از این مورد، غیرفعال شدن قفل کلید در هنگام دریافت تماس تلفنی و سپس فعال کردن قفل کلید پس از پایان تماس است."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"خواندن تنظیمات همگام سازی"</string>
@@ -1019,4 +1027,13 @@
     <string name="choose_account_label" msgid="4191313562041125787">"انتخاب یک حساب"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"افزایش"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"کاهش"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"رفتن به صفحه اصلی"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"حرکت به بالا"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"سایر گزینه ها"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>

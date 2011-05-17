@@ -240,6 +240,10 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Umožňuje změnu shromážděných statistických údajů o baterii. Není určeno pro běžné aplikace."</string>
     <string name="permlab_backup" msgid="470013022865453920">"ovládání zálohování a obnovy systému"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Umožňuje aplikaci ovládat systémový mechanizmus pro zálohování a obnovu dat. Není určeno pro běžné aplikace."</string>
+    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
+    <skip />
+    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <skip />
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"zobrazení nepovolených oken"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Umožňuje vytvoření oken, která mají být použita interním systémem uživatelského rozhraní. Běžné aplikace toto nastavení nepoužívají."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"zobrazení upozornění systémové úrovně"</string>
@@ -446,6 +450,10 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Umožňuje aplikaci zobrazit konfiguraci místního telefonu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ovládat technologii NFC"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Umožňuje aplikaci komunikovat se štítky, kartami a čtečkami s podporou technologie NFC."</string>
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"vypnutí zámku kláves"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Umožňuje aplikaci vypnout zámek kláves a související zabezpečení heslem. Příkladem oprávněného použití této funkce je vypnutí zámku klávesnice při příchozím hovoru a jeho opětovné zapnutí po skončení hovoru."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čtení nastavení synchronizace"</string>
@@ -1019,4 +1027,13 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Vybrat účet"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Zvýšení"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Snížení"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"Přejít na plochu"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"Přejít nahoru"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Další možnosti"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>
