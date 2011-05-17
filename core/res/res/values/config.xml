@@ -89,11 +89,6 @@
          when there's no network connection. If the scan doesn't timeout, use zero -->
     <integer name="config_radioScanningTimeout">0</integer>
 
-    <!-- Storage lists for default and nosdcard products.
-         Both have a single SD card storage, but the storage is not removable in the nosdcard case -->
-    <integer name="config_storageListId" product="nosdcard">@xml/storage_list_nosdcard</integer>
-    <integer name="config_storageListId" product="default">@xml/storage_list</integer>
-
     <!-- XXXXX NOTE THE FOLLOWING RESOURCES USE THE WRONG NAMING CONVENTION.
          Please don't copy them, copy anything else. -->
 
