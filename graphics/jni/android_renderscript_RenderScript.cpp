@@ -240,15 +240,14 @@ nContextGetErrorMessage(JNIEnv *_env, jobject _this, RsContext con)
     int id = rsContextGetMessage(con,
                                  buf, sizeof(buf),
                                  &receiveLen, sizeof(receiveLen),
-                                 &subID, sizeof(subID),
-                                 true);
+                                 &subID, sizeof(subID));
     if (!id && receiveLen) {
         LOGV("message receive buffer too small.  %i", receiveLen);
     }
     return _env->NewStringUTF(buf);
 }
 
-static void
+static jint
 nContextGetUserMessage(JNIEnv *_env, jobject _this, RsContext con, jintArray data)
 {
     jint len = _env->GetArrayLength(data);
@@ -259,23 +258,23 @@ nContextGetUserMessage(JNIEnv *_env, jobject _this, RsContext con, jintArray dat
     int id = rsContextGetMessage(con,
                                  ptr, len * 4,
                                  &receiveLen, sizeof(receiveLen),
-                                 &subID, sizeof(subID),
-                                 true);
+                                 &subID, sizeof(subID));
     if (!id && receiveLen) {
         LOGV("message receive buffer too small.  %i", receiveLen);
     }
     _env->ReleaseIntArrayElements(data, ptr, 0);
+    return id;
 }
 
 static jint
-nContextPeekMessage(JNIEnv *_env, jobject _this, RsContext con, jintArray auxData, jboolean wait)
+nContextPeekMessage(JNIEnv *_env, jobject _this, RsContext con, jintArray auxData)
 {
     LOG_API("nContextPeekMessage, con(%p)", con);
     jint *auxDataPtr = _env->GetIntArrayElements(auxData, NULL);
     size_t receiveLen;
     uint32_t subID;
     int id = rsContextPeekMessage(con, &receiveLen, sizeof(receiveLen),
-                                  &subID, sizeof(subID), wait);
+                                  &subID, sizeof(subID));
     auxDataPtr[0] = (jint)subID;
     auxDataPtr[1] = (jint)receiveLen;
     _env->ReleaseIntArrayElements(auxData, auxDataPtr, 0);
@@ -1160,9 +1159,9 @@ static JNINativeMethod methods[] = {
 {"nDeviceCreate",                  "()I",                                     (void*)nDeviceCreate },
 {"nDeviceDestroy",                 "(I)V",                                    (void*)nDeviceDestroy },
 {"nDeviceSetConfig",               "(III)V",                                  (void*)nDeviceSetConfig },
-{"nContextGetUserMessage",         "(I[I)V",                                  (void*)nContextGetUserMessage },
+{"nContextGetUserMessage",         "(I[I)I",                                  (void*)nContextGetUserMessage },
 {"nContextGetErrorMessage",        "(I)Ljava/lang/String;",                   (void*)nContextGetErrorMessage },
-{"nContextPeekMessage",            "(I[IZ)I",                                 (void*)nContextPeekMessage },
+{"nContextPeekMessage",            "(I[I)I",                                  (void*)nContextPeekMessage },
 
 {"nContextInitToClient",           "(I)V",                                    (void*)nContextInitToClient },
 {"nContextDeinitToClient",         "(I)V",                                    (void*)nContextDeinitToClient },

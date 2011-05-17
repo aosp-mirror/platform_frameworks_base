@@ -68,9 +68,9 @@ public class RenderScript {
     native int  nDeviceCreate();
     native void nDeviceDestroy(int dev);
     native void nDeviceSetConfig(int dev, int param, int value);
-    native void nContextGetUserMessage(int con, int[] data);
+    native int nContextGetUserMessage(int con, int[] data);
     native String nContextGetErrorMessage(int con);
-    native int  nContextPeekMessage(int con, int[] subID, boolean wait);
+    native int  nContextPeekMessage(int con, int[] subID);
     native void nContextInitToClient(int con);
     native void nContextDeinitToClient(int con);
 
@@ -736,7 +736,7 @@ public class RenderScript {
             mRS.nContextInitToClient(mRS.mContext);
             while(mRun) {
                 rbuf[0] = 0;
-                int msg = mRS.nContextPeekMessage(mRS.mContext, mAuxData, true);
+                int msg = mRS.nContextPeekMessage(mRS.mContext, mAuxData);
                 int size = mAuxData[1];
                 int subID = mAuxData[0];
 
@@ -744,7 +744,10 @@ public class RenderScript {
                     if ((size>>2) >= rbuf.length) {
                         rbuf = new int[(size + 3) >> 2];
                     }
-                    mRS.nContextGetUserMessage(mRS.mContext, rbuf);
+                    if (mRS.nContextGetUserMessage(mRS.mContext, rbuf) !=
+                        RS_MESSAGE_TO_CLIENT_USER) {
+                        throw new RSDriverException("Error processing message from Renderscript.");
+                    }
 
                     if(mRS.mMessageCallback != null) {
                         mRS.mMessageCallback.mData = rbuf;
