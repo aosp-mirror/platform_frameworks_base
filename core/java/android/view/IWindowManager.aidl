@@ -56,6 +56,9 @@ interface IWindowManager
     void getDisplaySize(out Point size);
     int getMaximumSizeDimension();
 
+    void setForcedDisplaySize(int longDimen, int shortDimen);
+    void clearForcedDisplaySize();
+
     // These can only be called when injecting events to your own window,
     // or by holding the INJECT_EVENTS permission.  These methods may block
     // until pending input events are finished being dispatched even when 'sync' is false.
