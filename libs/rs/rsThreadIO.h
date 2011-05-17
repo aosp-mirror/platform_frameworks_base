@@ -19,6 +19,7 @@
 
 #include "rsUtils.h"
 #include "rsLocklessFifo.h"
+#include "rsFifoSocket.h"
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -31,17 +32,58 @@ public:
     ThreadIO();
     ~ThreadIO();
 
+    void init(bool useSocket = false);
     void shutdown();
 
     // Plays back commands from the client.
     // Returns true if any commands were processed.
     bool playCoreCommands(Context *con, bool waitForCommand);
 
+    //LocklessCommandFifo mToCore;
 
-    LocklessCommandFifo mToCore;
+
+
+    void coreFlush();
+    void * coreHeader(uint32_t, size_t dataLen);
+    void coreData(const void *data, size_t dataLen);
+    void coreCommit();
+    void coreCommitSync();
+    void coreSetReturn(const void *data, size_t dataLen);
+    void coreGetReturn(void *data, size_t dataLen);
+
+
+    RsMessageToClientType getClientHeader(size_t *receiveLen, uint32_t *usrID);
+    RsMessageToClientType getClientPayload(void *data, size_t *receiveLen, uint32_t *subID, size_t bufferLen);
+    bool sendToClient(RsMessageToClientType cmdID, uint32_t usrID, const void *data, size_t dataLen, bool waitForSpace);
+    void clientShutdown();
+
+
+protected:
+    typedef struct CoreCmdHeaderRec {
+        uint32_t cmdID;
+        uint32_t bytes;
+    } CoreCmdHeader;
+    typedef struct ClientCmdHeaderRec {
+        uint32_t cmdID;
+        uint32_t bytes;
+        uint32_t userID;
+    } ClientCmdHeader;
+    ClientCmdHeader mLastClientHeader;
+
+    size_t mCoreCommandSize;
+    uint32_t mCoreCommandID;
+    uint8_t * mCoreDataPtr;
+    uint8_t * mCoreDataBasePtr;
+
+    bool mUsingSocket;
     LocklessCommandFifo mToClient;
+    LocklessCommandFifo mToCore;
+
+    FifoSocket mToClientSocket;
+    FifoSocket mToCoreSocket;
 
     intptr_t mToCoreRet;
+
 };
 
 

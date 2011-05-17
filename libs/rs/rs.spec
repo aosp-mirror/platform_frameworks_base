@@ -45,16 +45,14 @@ ContextGetMessage {
     direct
     param void *data
     param size_t *receiveLen
-    param uint32_t *subID
-    param bool wait
+    param uint32_t *usrID
     ret RsMessageToClientType
 }
 
 ContextPeekMessage {
     direct
     param size_t *receiveLen
-    param uint32_t *subID
-    param bool wait
+    param uint32_t *usrID
     ret RsMessageToClientType
 }
 
@@ -106,7 +104,7 @@ AllocationCubeCreateFromBitmap {
 
 
 ContextFinish {
-	handcodeApi
+	sync
 	}
 
 ContextBindRootScript {
