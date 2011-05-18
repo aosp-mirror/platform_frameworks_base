@@ -4077,10 +4077,10 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                          numChannels, params.nChannels);
                 }
 
-                if (sampleRate != params.nSamplingRate) {
+                if (sampleRate != (int32_t)params.nSamplingRate) {
                     LOGW("Codec outputs at different sampling rate than "
                          "what the input stream contains (contains data at "
-                         "%d Hz, codec outputs %d Hz)",
+                         "%d Hz, codec outputs %lu Hz)",
                          sampleRate, params.nSamplingRate);
                 }
 
@@ -4202,6 +4202,14 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
             CHECK(!"should not be here, neither audio nor video.");
             break;
         }
+    }
+
+    // If the input format contains rotation information, flag the output
+    // format accordingly.
+
+    int32_t rotationDegrees;
+    if (mSource->getFormat()->findInt32(kKeyRotation, &rotationDegrees)) {
+        mOutputFormat->setInt32(kKeyRotation, rotationDegrees);
     }
 }
 
