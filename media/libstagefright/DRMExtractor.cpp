@@ -146,18 +146,14 @@ status_t DRMSource::read(MediaBuffer **buffer, const ReadOptions *options) {
     DrmBuffer *pDecryptedDrmBuffer = &decryptedDrmBuffer;
 
     if ((err = mDrmManagerClient->decrypt(mDecryptHandle, mTrackId,
-            &encryptedDrmBuffer, &pDecryptedDrmBuffer)) != DRM_NO_ERROR) {
+            &encryptedDrmBuffer, &pDecryptedDrmBuffer)) != NO_ERROR) {
 
         if (decryptedDrmBuffer.data) {
             delete [] decryptedDrmBuffer.data;
             decryptedDrmBuffer.data = NULL;
         }
 
-        if (err == DRM_ERROR_LICENSE_EXPIRED) {
-            return ERROR_NO_LICENSE;
-        } else {
-            return ERROR_IO;
-        }
+        return err;
     }
     CHECK(pDecryptedDrmBuffer == &decryptedDrmBuffer);
 
