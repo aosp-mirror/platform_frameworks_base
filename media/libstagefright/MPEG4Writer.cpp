@@ -744,7 +744,7 @@ void MPEG4Writer::writeMoovBox(int64_t durationUs) {
     endBox();  // moov
 }
 
-void MPEG4Writer::writeFtypBox(const MetaData *param) {
+void MPEG4Writer::writeFtypBox(MetaData *param) {
     beginBox("ftyp");
 
     int32_t fileType;

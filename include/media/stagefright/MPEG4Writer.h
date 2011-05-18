@@ -176,7 +176,7 @@ private:
     void writeCompositionMatrix(int32_t degrees);
     void writeMvhdBox(int64_t durationUs);
     void writeMoovBox(int64_t durationUs);
-    void writeFtypBox(const MetaData *param);
+    void writeFtypBox(MetaData *param);
     void writeUdtaBox();
     void writeGeoDataBox();
     void writeLatitude(int degreex10000);
