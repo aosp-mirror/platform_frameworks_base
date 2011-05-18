@@ -299,7 +299,7 @@ static Word16 Chebps(Word16 x,
     t0 += (Word32) * (p_f) << 13;
 
 
-    if ((UWord32)(t0 - 0xfe000000L) < 0x01ffffffL -  0xfe000000L)
+    if ((UWord32)(t0 - 0xfe000000L) < (UWord32)0x03ffffffL)
     {
         cheb = (Word16)(t0 >> 10);
     }
