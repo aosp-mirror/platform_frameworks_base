@@ -337,6 +337,6 @@ int16 AmrWbInterpol(                      /* return result of interpolation */
 
     L_sum = shl_int32(L_sum, 2);               /* saturation can occur here */
 
-    return ((int16(L_sum >> 16)));
+    return ((int16)(L_sum >> 16));
 }
 
