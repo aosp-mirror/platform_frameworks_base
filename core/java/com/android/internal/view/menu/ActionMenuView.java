@@ -104,9 +104,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        final int screen = newConfig.screenLayout;
-        mReserveOverflow = (screen & Configuration.SCREENLAYOUT_SIZE_MASK) ==
-                Configuration.SCREENLAYOUT_SIZE_XLARGE;
+        mReserveOverflow = newConfig.isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_LARGE);
         mMaxItems = getMaxActionButtons();
         mWidthLimit = getResources().getDisplayMetrics().widthPixels / 2;
         if (mMenu != null) {
