@@ -1459,6 +1459,10 @@
     </style>
 
     <style name="Holo.ButtonBar" parent="ButtonBar">
+        <item name="android:paddingTop">0dip</item>
+        <item name="android:paddingLeft">0dip</item>
+        <item name="android:paddingRight">0dip</item>
+        <item name="android:paddingBottom">0dip</item>
         <item name="divider">?android:attr/dividerVertical</item>
         <item name="showDividers">middle</item>
         <item name="dividerPadding">8dip</item>

@@ -80,6 +80,11 @@
     <!-- Minimum width of the search view text entry area. -->
     <dimen name="search_view_text_min_width">160dip</dimen>
 
+    <!-- Dialog title height -->
+    <dimen name="alert_dialog_title_height">48dip</dimen>
+    <!-- Dialog button bar height -->
+    <dimen name="alert_dialog_button_bar_height">48dip</dimen>
+
     <!-- Default height of an action bar. -->
     <dimen name="action_bar_default_height">48dip</dimen>
     <!-- Vertical padding around action bar icons. -->
