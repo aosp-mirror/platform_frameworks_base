@@ -41,7 +41,18 @@ enum {
     INFO_FORMAT_CHANGED    = MEDIA_ERROR_BASE - 12,
     INFO_DISCONTINUITY     = MEDIA_ERROR_BASE - 13,
 
-    ERROR_NO_LICENSE       = MEDIA_ERROR_BASE - 14,
+    // The following constant values should be in sync with
+    // drm/drm_framework_common.h
+    DRM_ERROR_BASE = -2000,
+
+    ERROR_DRM_UNKNOWN                       = DRM_ERROR_BASE,
+    ERROR_DRM_NO_LICENSE                    = DRM_ERROR_BASE - 1,
+    ERROR_DRM_LICENSE_EXPIRED               = DRM_ERROR_BASE - 2,
+    ERROR_DRM_SESSION_NOT_OPENED            = DRM_ERROR_BASE - 3,
+    ERROR_DRM_DECRYPT_UNIT_NOT_INITIALIZED  = DRM_ERROR_BASE - 4,
+    ERROR_DRM_DECRYPT                       = DRM_ERROR_BASE - 5,
+    ERROR_DRM_CANNOT_HANDLE                 = DRM_ERROR_BASE - 6,
+    ERROR_DRM_TAMPER_DETECTED               = DRM_ERROR_BASE - 7,
 
     // Heartbeat Error Codes
     HEARTBEAT_ERROR_BASE = -3000,
