@@ -128,6 +128,33 @@ public class RouteInfo implements Parcelable {
         }
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+
+        if (!(obj instanceof RouteInfo)) return false;
+
+        RouteInfo target = (RouteInfo) obj;
+
+        boolean sameDestination = ( mDestination == null) ?
+                target.getDestination() == null
+                : mDestination.equals(target.getDestination());
+
+        boolean sameAddress = (mGateway == null) ?
+                target.getGateway() == null
+                : mGateway.equals(target.getGateway());
+
+        return sameDestination && sameAddress
+            && mIsDefault == target.mIsDefault;
+    }
+
+    @Override
+    public int hashCode() {
+        return (mDestination == null ? 0 : mDestination.hashCode())
+            + (mGateway == null ? 0 :mGateway.hashCode())
+            + (mIsDefault ? 3 : 7);
+    }
+
     public static final Creator<RouteInfo> CREATOR =
         new Creator<RouteInfo>() {
         public RouteInfo createFromParcel(Parcel in) {

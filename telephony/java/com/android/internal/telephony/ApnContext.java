@@ -85,12 +85,10 @@ public class ApnContext {
 
 
     public synchronized DataConnectionAc getDataConnectionAc() {
-        log("getDataConnectionAc dcac=" + mDataConnectionAc);
         return mDataConnectionAc;
     }
 
     public synchronized void setDataConnectionAc(DataConnectionAc dcac) {
-        log("setDataConnectionAc dcac=" + dcac);
         mDataConnectionAc = dcac;
     }
 
