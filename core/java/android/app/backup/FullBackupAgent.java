@@ -28,6 +28,9 @@ import libcore.io.OsConstants;
 import libcore.io.StructStat;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
 
@@ -53,8 +56,12 @@ public class FullBackupAgent extends BackupAgent {
     private String mCacheDir;
     private String mLibDir;
 
+    private File NULL_FILE;
+
     @Override
     public void onCreate() {
+        NULL_FILE = new File("/dev/null");
+
         mPm = getPackageManager();
         try {
             ApplicationInfo appInfo = mPm.getApplicationInfo(getPackageName(), 0);
@@ -177,7 +184,40 @@ public class FullBackupAgent extends BackupAgent {
         }
     }
 
+    /**
+     * Dummy -- We're never used for restore of an incremental dataset
+     */
     @Override
-    public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState) {
+    public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
+            throws IOException {
+    }
+
+    /**
+     * Restore the described file from the given pipe.
+     */
+    @Override
+    public void onRestoreFile(ParcelFileDescriptor data, long size,
+            int type, String domain, String relpath, long mode, long mtime) 
+            throws IOException {
+        String basePath = null;
+        File outFile = null;
+
+        if (DEBUG) Log.d(TAG, "onRestoreFile() size=" + size + " type=" + type
+                + " domain=" + domain + " relpath=" + relpath + " mode=" + mode
+                + " mtime=" + mtime);
+
+        // Parse out the semantic domains into the correct physical location
+        if (domain.equals(FullBackup.DATA_TREE_TOKEN)) basePath = mFilesDir;
+        else if (domain.equals(FullBackup.DATABASE_TREE_TOKEN)) basePath = mDatabaseDir;
+        else if (domain.equals(FullBackup.ROOT_TREE_TOKEN)) basePath = mMainDir;
+        else if (domain.equals(FullBackup.SHAREDPREFS_TREE_TOKEN)) basePath = mSharedPrefsDir;
+
+        // Not a supported output location?  We need to consume the data
+        // anyway, so send it to /dev/null
+        outFile = (basePath != null) ? new File(basePath, relpath) : null;
+        if (DEBUG) Log.i(TAG, "[" + domain + " : " + relpath + "] mapped to " + outFile.getPath());
+
+        // Now that we've figured out where the data goes, send it on its way
+        FullBackup.restoreToFile(data, size, type, mode, mtime, outFile);
     }
 }

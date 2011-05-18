@@ -503,6 +503,16 @@ int write_tarfile(const String8& packageName, const String8& domain,
         needExtended = true;
     }
 
+    // Non-7bit-clean path also means needing pax extended format
+    if (!needExtended) {
+        for (size_t i = 0; i < filepath.length(); i++) {
+            if ((filepath[i] & 0x80) != 0) {
+                needExtended = true;
+                break;
+            }
+        }
+    }
+
     int err = 0;
     struct stat64 s;
     if (lstat64(filepath.string(), &s) != 0) {

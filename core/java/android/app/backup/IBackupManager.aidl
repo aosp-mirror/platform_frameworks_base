@@ -147,6 +147,14 @@ interface IBackupManager {
             boolean allApps, in String[] packageNames);
 
     /**
+     * Restore device content from the data stream passed through the given socket.  The
+     * data stream must be in the format emitted by fullBackup().
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    void fullRestore(in ParcelFileDescriptor fd);
+
+    /**
      * Confirm that the requested full backup/restore operation can proceed.  The system will
      * not actually perform the operation described to fullBackup() / fullRestore() unless the
      * UI calls back into the Backup Manager to confirm, passing the correct token.  At

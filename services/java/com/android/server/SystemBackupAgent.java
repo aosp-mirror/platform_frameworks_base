@@ -37,16 +37,25 @@ import java.io.IOException;
 public class SystemBackupAgent extends BackupAgentHelper {
     private static final String TAG = "SystemBackupAgent";
 
-    // These paths must match what the WallpaperManagerService uses
+    // These paths must match what the WallpaperManagerService uses.  The leaf *_FILENAME
+    // are also used in the full-backup file format, so must not change unless steps are
+    // taken to support the legacy backed-up datasets.
+    private static final String WALLPAPER_IMAGE_FILENAME = "wallpaper";
+    private static final String WALLPAPER_INFO_FILENAME = "wallpaper_info.xml";
+
     private static final String WALLPAPER_IMAGE_DIR = "/data/data/com.android.settings/files";
-    private static final String WALLPAPER_IMAGE = WALLPAPER_IMAGE_DIR + "/wallpaper";
+    private static final String WALLPAPER_IMAGE = WALLPAPER_IMAGE_DIR + "/" + WALLPAPER_IMAGE_FILENAME;
+
     private static final String WALLPAPER_INFO_DIR = "/data/system";
-    private static final String WALLPAPER_INFO = WALLPAPER_INFO_DIR + "/wallpaper_info.xml";
+    private static final String WALLPAPER_INFO = WALLPAPER_INFO_DIR + "/" +  WALLPAPER_INFO_FILENAME;
+
 
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) throws IOException {
         if (oldState == null) {
+            // Ah, it's a full backup dataset, being restored piecemeal.  Just
+            // pop over to the full restore handling and we're done.
             runFullBackup(data);
             return;
         }
@@ -66,11 +75,18 @@ public class SystemBackupAgent extends BackupAgentHelper {
     }
 
     private void runFullBackup(BackupDataOutput output) {
-        // Back up the data files directly
-        FullBackup.backupToTar(getPackageName(), null, null,
-                WALLPAPER_IMAGE_DIR, WALLPAPER_IMAGE, output);
-        FullBackup.backupToTar(getPackageName(), null, null,
+        fullWallpaperBackup(output);
+    }
+
+    private void fullWallpaperBackup(BackupDataOutput output) {
+        // Back up the data files directly.  We do them in this specific order --
+        // info file followed by image -- because then we need take no special
+        // steps during restore; the restore will happen properly when the individual
+        // files are restored piecemeal.
+        FullBackup.backupToTar(getPackageName(), FullBackup.ROOT_TREE_TOKEN, null,
                 WALLPAPER_INFO_DIR, WALLPAPER_INFO, output);
+        FullBackup.backupToTar(getPackageName(), FullBackup.ROOT_TREE_TOKEN, null,
+                WALLPAPER_IMAGE_DIR, WALLPAPER_IMAGE, output);
     }
 
     @Override
@@ -94,6 +110,48 @@ public class SystemBackupAgent extends BackupAgentHelper {
             Slog.d(TAG, "restore failed", ex);
             (new File(WALLPAPER_IMAGE)).delete();
             (new File(WALLPAPER_INFO)).delete();
+        }
+    }
+
+    @Override
+    public void onRestoreFile(ParcelFileDescriptor data, long size,
+            int type, String domain, String path, long mode, long mtime)
+            throws IOException {
+        Slog.i(TAG, "Restoring file domain=" + domain + " path=" + path);
+
+        // Bits to indicate postprocessing we may need to perform
+        boolean restoredWallpaper = false;
+
+        File outFile = null;
+        // Various domain+files we understand a priori
+        if (domain.equals(FullBackup.ROOT_TREE_TOKEN)) {
+            if (path.equals(WALLPAPER_INFO_FILENAME)) {
+                outFile = new File(WALLPAPER_INFO);
+                restoredWallpaper = true;
+            } else if (path.equals(WALLPAPER_IMAGE_FILENAME)) {
+                outFile = new File(WALLPAPER_IMAGE);
+                restoredWallpaper = true;
+            }
+        }
+
+        try {
+            if (outFile == null) {
+                Slog.w(TAG, "Skipping unrecognized system file: [ " + domain + " : " + path + " ]");
+            }
+            FullBackup.restoreToFile(data, size, type, mode, mtime, outFile);
+
+            if (restoredWallpaper) {
+                WallpaperManagerService wallpaper =
+                        (WallpaperManagerService)ServiceManager.getService(
+                        Context.WALLPAPER_SERVICE);
+                wallpaper.settingsRestored();
+            }
+        } catch (IOException e) {
+            if (restoredWallpaper) {
+                // Make sure we wind up in a good state
+                (new File(WALLPAPER_IMAGE)).delete();
+                (new File(WALLPAPER_INFO)).delete();
+            }
         }
     }
 }

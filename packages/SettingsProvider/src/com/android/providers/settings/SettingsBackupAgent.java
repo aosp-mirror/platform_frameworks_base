@@ -55,6 +55,7 @@ import android.util.Log;
  */
 public class SettingsBackupAgent extends BackupAgentHelper {
     private static final boolean DEBUG = false;
+    private static final boolean DEBUG_BACKUP = DEBUG || true;
 
     private static final String KEY_SYSTEM = "system";
     private static final String KEY_SECURE = "secure";
@@ -74,6 +75,9 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static final int STATE_WIFI_SUPPLICANT = 3;
     private static final int STATE_WIFI_CONFIG     = 4;
     private static final int STATE_SIZE            = 5; // The number of state items
+
+    // Versioning of the 'full backup' format
+    private static final int FULL_BACKUP_VERSION = 1;
 
     private static String[] sortedSystemKeys = null;
     private static String[] sortedSecureKeys = null;
@@ -109,6 +113,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private static String mWifiConfigFile;
 
     public void onCreate() {
+        if (DEBUG_BACKUP) Log.d(TAG, "onCreate() invoked");
+
         mSettingsHelper = new SettingsHelper(this);
         super.onCreate();
 
@@ -151,26 +157,32 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             // representation of the backed-up settings.
             String root = getFilesDir().getAbsolutePath();
             File stage = new File(root, STAGE_FILE);
-            FileOutputStream filestream = new FileOutputStream(stage);
-            BufferedOutputStream bufstream = new BufferedOutputStream(filestream);
-            DataOutputStream out = new DataOutputStream(bufstream);
+            try {
+                FileOutputStream filestream = new FileOutputStream(stage);
+                BufferedOutputStream bufstream = new BufferedOutputStream(filestream);
+                DataOutputStream out = new DataOutputStream(bufstream);
 
-            out.writeInt(systemSettingsData.length);
-            out.write(systemSettingsData);
-            out.writeInt(secureSettingsData.length);
-            out.write(secureSettingsData);
-            out.writeInt(locale.length);
-            out.write(locale);
-            out.writeInt(wifiSupplicantData.length);
-            out.write(wifiSupplicantData);
-            out.writeInt(wifiConfigData.length);
-            out.write(wifiConfigData);
+                out.writeInt(FULL_BACKUP_VERSION);
 
-            out.flush();    // also flushes downstream
+                out.writeInt(systemSettingsData.length);
+                out.write(systemSettingsData);
+                out.writeInt(secureSettingsData.length);
+                out.write(secureSettingsData);
+                out.writeInt(locale.length);
+                out.write(locale);
+                out.writeInt(wifiSupplicantData.length);
+                out.write(wifiSupplicantData);
+                out.writeInt(wifiConfigData.length);
+                out.write(wifiConfigData);
 
-            // now we're set to emit the tar stream
-            FullBackup.backupToTar(getPackageName(), FullBackup.DATA_TREE_TOKEN, null,
-                    root, stage.getAbsolutePath(), data);
+                out.flush();    // also flushes downstream
+
+                // now we're set to emit the tar stream
+                FullBackup.backupToTar(getPackageName(), FullBackup.DATA_TREE_TOKEN, null,
+                        root, stage.getAbsolutePath(), data);
+            } finally {
+                stage.delete();
+            }
         }
     }
 
@@ -199,12 +211,76 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             } else if (KEY_LOCALE.equals(key)) {
                 byte[] localeData = new byte[size];
                 data.readEntityData(localeData, 0, size);
-                mSettingsHelper.setLocaleData(localeData);
+                mSettingsHelper.setLocaleData(localeData, size);
             } else if (KEY_WIFI_CONFIG.equals(key)) {
                 restoreFileData(mWifiConfigFile, data);
              } else {
                 data.skipEntityData();
             }
+        }
+    }
+
+    @Override
+    public void onRestoreFile(ParcelFileDescriptor data, long size,
+            int type, String domain, String relpath, long mode, long mtime)
+            throws IOException {
+        if (DEBUG_BACKUP) Log.d(TAG, "onRestoreFile() invoked");
+        // Our data is actually a blob of flattened settings data identical to that
+        // produced during incremental backups.  Just unpack and apply it all in
+        // turn.
+        FileInputStream instream = new FileInputStream(data.getFileDescriptor());
+        DataInputStream in = new DataInputStream(instream);
+
+        int version = in.readInt();
+        if (DEBUG_BACKUP) Log.d(TAG, "Flattened data version " + version);
+        if (version == FULL_BACKUP_VERSION) {
+            // system settings data first
+            int nBytes = in.readInt();
+            if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of settings data");
+            byte[] buffer = new byte[nBytes];
+            in.read(buffer, 0, nBytes);
+            restoreSettings(buffer, nBytes, Settings.System.CONTENT_URI);
+
+            // secure settings
+            nBytes = in.readInt();
+            if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of secure settings data");
+            if (nBytes > buffer.length) buffer = new byte[nBytes];
+            in.read(buffer, 0, nBytes);
+            restoreSettings(buffer, nBytes, Settings.Secure.CONTENT_URI);
+
+            // locale
+            nBytes = in.readInt();
+            if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of locale data");
+            if (nBytes > buffer.length) buffer = new byte[nBytes];
+            in.read(buffer, 0, nBytes);
+            mSettingsHelper.setLocaleData(buffer, nBytes);
+
+            // wifi supplicant
+            nBytes = in.readInt();
+            if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of wifi supplicant data");
+            if (nBytes > buffer.length) buffer = new byte[nBytes];
+            in.read(buffer, 0, nBytes);
+            int retainedWifiState = enableWifi(false);
+            restoreWifiSupplicant(FILE_WIFI_SUPPLICANT, buffer, nBytes);
+            FileUtils.setPermissions(FILE_WIFI_SUPPLICANT,
+                    FileUtils.S_IRUSR | FileUtils.S_IWUSR |
+                    FileUtils.S_IRGRP | FileUtils.S_IWGRP,
+                    Process.myUid(), Process.WIFI_UID);
+            // retain the previous WIFI state.
+            enableWifi(retainedWifiState == WifiManager.WIFI_STATE_ENABLED ||
+                    retainedWifiState == WifiManager.WIFI_STATE_ENABLING);
+
+            // wifi config
+            nBytes = in.readInt();
+            if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of wifi config data");
+            if (nBytes > buffer.length) buffer = new byte[nBytes];
+            in.read(buffer, 0, nBytes);
+            restoreFileData(mWifiConfigFile, buffer, nBytes);
+
+            if (DEBUG_BACKUP) Log.d(TAG, "Full restore complete.");
+        } else {
+            data.close();
+            throw new IOException("Invalid file schema");
         }
     }
 
@@ -287,6 +363,17 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     }
 
     private void restoreSettings(BackupDataInput data, Uri contentUri) {
+        byte[] settings = new byte[data.getDataSize()];
+        try {
+            data.readEntityData(settings, 0, settings.length);
+        } catch (IOException ioe) {
+            Log.e(TAG, "Couldn't read entity data");
+            return;
+        }
+        restoreSettings(settings, settings.length, contentUri);
+    }
+
+    private void restoreSettings(byte[] settings, int bytes, Uri contentUri) {
         if (DEBUG) Log.i(TAG, "restoreSettings: " + contentUri);
         String[] whitelist = null;
         if (contentUri.equals(Settings.Secure.CONTENT_URI)) {
@@ -296,15 +383,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         }
 
         ContentValues cv = new ContentValues(2);
-        byte[] settings = new byte[data.getDataSize()];
-        try {
-            data.readEntityData(settings, 0, settings.length);
-        } catch (IOException ioe) {
-            Log.e(TAG, "Couldn't read entity data");
-            return;
-        }
         int pos = 0;
-        while (pos < settings.length) {
+        while (pos < bytes) {
             int length = readInt(settings, pos);
             pos += 4;
             String settingName = length > 0? new String(settings, pos, length) : null;
@@ -451,13 +531,16 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private void restoreFileData(String filename, BackupDataInput data) {
         byte[] bytes = new byte[data.getDataSize()];
         if (bytes.length <= 0) return;
+        restoreFileData(filename, bytes, bytes.length);
+    }
+
+    private void restoreFileData(String filename, byte[] bytes, int size) {
         try {
-            data.readEntityData(bytes, 0, bytes.length);
             File file = new File(filename);
             if (file.exists()) file.delete();
 
             OutputStream os = new BufferedOutputStream(new FileOutputStream(filename, true));
-            os.write(bytes);
+            os.write(bytes, 0, size);
             os.close();
         } catch (IOException ioe) {
             Log.w(TAG, "Couldn't restore " + filename);
@@ -506,15 +589,18 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private void restoreWifiSupplicant(String filename, BackupDataInput data) {
         byte[] bytes = new byte[data.getDataSize()];
         if (bytes.length <= 0) return;
+        restoreWifiSupplicant(filename, bytes, bytes.length);
+    }
+
+    private void restoreWifiSupplicant(String filename, byte[] bytes, int size) {
         try {
-            data.readEntityData(bytes, 0, bytes.length);
             File supplicantFile = new File(FILE_WIFI_SUPPLICANT);
             if (supplicantFile.exists()) supplicantFile.delete();
             copyWifiSupplicantTemplate();
 
             OutputStream os = new BufferedOutputStream(new FileOutputStream(filename, true));
             os.write("\n".getBytes());
-            os.write(bytes);
+            os.write(bytes, 0, size);
             os.close();
         } catch (IOException ioe) {
             Log.w(TAG, "Couldn't restore " + filename);

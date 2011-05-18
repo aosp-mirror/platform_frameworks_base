@@ -179,10 +179,18 @@ public abstract class BackupAgent extends ContextWrapper {
             throws IOException;
 
     /**
+     * @hide
+     */
+    public void onRestoreFile(ParcelFileDescriptor data, long size,
+            int type, String domain, String path, long mode, long mtime)
+            throws IOException {
+        // empty stub implementation
+    }
+
+    /**
      * Package-private, used only for dispatching an extra step during full backup
      */
     void onSaveApk(BackupDataOutput data) {
-        if (DEBUG) Log.v(TAG, "--- base onSaveApk() ---");
     }
 
     // ----- Core implementation -----
@@ -203,6 +211,7 @@ public abstract class BackupAgent extends ContextWrapper {
     private class BackupServiceBinder extends IBackupAgent.Stub {
         private static final String TAG = "BackupServiceBinder";
 
+        @Override
         public void doBackup(ParcelFileDescriptor oldState,
                 ParcelFileDescriptor data,
                 ParcelFileDescriptor newState,
@@ -236,6 +245,7 @@ public abstract class BackupAgent extends ContextWrapper {
             }
         }
 
+        @Override
         public void doRestore(ParcelFileDescriptor data, int appVersionCode,
                 ParcelFileDescriptor newState,
                 int token, IBackupManager callbackBinder) throws RemoteException {
@@ -252,6 +262,26 @@ public abstract class BackupAgent extends ContextWrapper {
             } catch (RuntimeException ex) {
                 Log.d(TAG, "onRestore (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+                try {
+                    callbackBinder.opComplete(token);
+                } catch (RemoteException e) {
+                    // we'll time out anyway, so we're safe
+                }
+            }
+        }
+
+        @Override
+        public void doRestoreFile(ParcelFileDescriptor data, long size,
+                int type, String domain, String path, long mode, long mtime,
+                int token, IBackupManager callbackBinder) throws RemoteException {
+            long ident = Binder.clearCallingIdentity();
+            try {
+Log.d(TAG, "doRestoreFile() => onRestoreFile()");
+                BackupAgent.this.onRestoreFile(data, size, type, domain, path, mode, mtime);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             } finally {
                 Binder.restoreCallingIdentity(ident);
                 try {

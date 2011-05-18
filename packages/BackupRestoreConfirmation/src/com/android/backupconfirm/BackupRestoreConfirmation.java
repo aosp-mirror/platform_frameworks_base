@@ -98,6 +98,8 @@ public class BackupRestoreConfirmation extends Activity {
                 break;
 
                 case MSG_RESTORE_PACKAGE: {
+                    String name = (String) msg.obj;
+                    mStatusView.setText(name);
                 }
                 break;
 

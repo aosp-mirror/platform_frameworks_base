@@ -1980,7 +1980,8 @@ public final class ActivityThread {
         BackupAgent agent = null;
         String classname = data.appInfo.backupAgentName;
 
-        if (data.backupMode == IApplicationThread.BACKUP_MODE_FULL) {
+        if (data.backupMode == IApplicationThread.BACKUP_MODE_FULL
+                || data.backupMode == IApplicationThread.BACKUP_MODE_RESTORE_FULL) {
             classname = "android.app.backup.FullBackupAgent";
             if ((data.appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
                 // system packages can supply their own full-backup agent
@@ -2011,7 +2012,8 @@ public final class ActivityThread {
                 // If this is during restore, fail silently; otherwise go
                 // ahead and let the user see the crash.
                 Slog.e(TAG, "Agent threw during creation: " + e);
-                if (data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE) {
+                if (data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE
+                        && data.backupMode != IApplicationThread.BACKUP_MODE_RESTORE_FULL) {
                     throw e;
                 }
                 // falling through with 'binder' still null
@@ -3658,12 +3660,16 @@ public final class ActivityThread {
         Application app = data.info.makeApplication(data.restrictedBackupMode, null);
         mInitialApplication = app;
 
-        List<ProviderInfo> providers = data.providers;
-        if (providers != null) {
-            installContentProviders(app, providers);
-            // For process that contains content providers, we want to
-            // ensure that the JIT is enabled "at some point".
-            mH.sendEmptyMessageDelayed(H.ENABLE_JIT, 10*1000);
+        // don't bring up providers in restricted mode; they may depend on the
+        // app's custom Application class
+        if (!data.restrictedBackupMode){ 
+            List<ProviderInfo> providers = data.providers;
+            if (providers != null) {
+                installContentProviders(app, providers);
+                // For process that contains content providers, we want to
+                // ensure that the JIT is enabled "at some point".
+                mH.sendEmptyMessageDelayed(H.ENABLE_JIT, 10*1000);
+            }
         }
 
         try {

@@ -3676,6 +3676,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             boolean isRestrictedBackupMode = false;
             if (mBackupTarget != null && mBackupAppName.equals(processName)) {
                 isRestrictedBackupMode = (mBackupTarget.backupMode == BackupRecord.RESTORE)
+                        || (mBackupTarget.backupMode == BackupRecord.RESTORE_FULL)
                         || (mBackupTarget.backupMode == BackupRecord.BACKUP_FULL);
             }
             
