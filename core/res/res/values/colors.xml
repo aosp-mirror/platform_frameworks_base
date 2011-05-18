@@ -77,6 +77,7 @@
     <drawable name="dialog_holo_light_frame">@drawable/dialog_full_holo_light</drawable>
     
     <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
+    <drawable name="input_method_fullscreen_background_holo">@drawable/screen_background_holo_dark</drawable>
 
     <!-- For date picker widget -->
     <drawable name="selected_day_background">#ff0092f4</drawable>
