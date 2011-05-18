@@ -85,6 +85,9 @@ public class SimpleModel extends Activity {
             return true;
         case R.id.display_options:
             return true;
+        case R.id.sensor:
+            mView.toggleSensor();
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }
