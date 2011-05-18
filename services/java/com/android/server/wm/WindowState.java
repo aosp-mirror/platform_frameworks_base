@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -83,23 +82,30 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mAttachedHidden;    // is our parent window hidden?
     boolean mLastHidden;        // was this window last hidden?
     boolean mWallpaperVisible;  // for wallpaper, what was last vis report?
+
+    /**
+     * The window size that was requested by the application.  These are in
+     * the application's coordinate space (without compatibility scale applied).
+     */
     int mRequestedWidth;
     int mRequestedHeight;
-    int mLastRequestedWidth;
-    int mLastRequestedHeight;
+
     int mLayer;
     int mAnimLayer;
     int mLastLayer;
     boolean mHaveFrame;
     boolean mObscured;
-    boolean mNeedsBackgroundFiller;
     boolean mTurnOnScreen;
 
     int mLayoutSeq = -1;
     
     Configuration mConfiguration = null;
     
-    // Actual frame shown on-screen (may be modified by animation)
+    /**
+     * Actual frame shown on-screen (may be modified by animation).  These
+     * are in the screen's coordinate space (WITH the compatibility scale
+     * applied).
+     */
     final Rect mShownFrame = new Rect();
     final Rect mLastShownFrame = new Rect();
 
@@ -110,14 +116,16 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     boolean mSurfaceResized;
     
     /**
-     * Insets that determine the actually visible area
+     * Insets that determine the actually visible area.  These are in the application's
+     * coordinate space (without compatibility scale applied).
      */
     final Rect mVisibleInsets = new Rect();
     final Rect mLastVisibleInsets = new Rect();
     boolean mVisibleInsetsChanged;
 
     /**
-     * Insets that are covered by system windows
+     * Insets that are covered by system windows.  These are in the application's
+     * coordinate space (without compatibility scale applied).
      */
     final Rect mContentInsets = new Rect();
     final Rect mLastContentInsets = new Rect();
@@ -157,16 +165,20 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // Current transformation being applied.
     boolean mHaveMatrix;
     float mGlobalScale=1;
+    float mInvGlobalScale=1;
     float mDsDx=1, mDtDx=0, mDsDy=0, mDtDy=1;
     float mLastDsDx=1, mLastDtDx=0, mLastDsDy=0, mLastDtDy=1;
     float mHScale=1, mVScale=1;
     float mLastHScale=1, mLastVScale=1;
     final Matrix mTmpMatrix = new Matrix();
 
-    // "Real" frame that the application sees.
+    // "Real" frame that the application sees, in display coordinate space.
     final Rect mFrame = new Rect();
     final Rect mLastFrame = new Rect();
-    final Rect mScaledFrame = new Rect();
+    // Frame that is scaled to the application's coordinate space when in
+    // screen size compatibility mode.
+    final Rect mCompatFrame = new Rect();
+    final Rect mLastCompatFrame = new Rect();
 
     final Rect mContainingFrame = new Rect();
     final Rect mDisplayFrame = new Rect();
@@ -346,8 +358,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mSurface = null;
         mRequestedWidth = 0;
         mRequestedHeight = 0;
-        mLastRequestedWidth = 0;
-        mLastRequestedHeight = 0;
         mXOffset = 0;
         mYOffset = 0;
         mLayer = 0;
@@ -373,23 +383,40 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         final Rect display = mDisplayFrame;
         display.set(df);
 
-        if (mEnforceSizeCompat) {
-            container.intersect(mService.mCompatibleScreenFrame);
-            if ((mAttrs.flags & FLAG_LAYOUT_NO_LIMITS) == 0) {
-                display.intersect(mService.mCompatibleScreenFrame);
-            }
-        }
-
         final int pw = container.right - container.left;
         final int ph = container.bottom - container.top;
 
         int w,h;
-        if ((mAttrs.flags & mAttrs.FLAG_SCALED) != 0) {
-            w = mAttrs.width < 0 ? pw : mAttrs.width;
-            h = mAttrs.height< 0 ? ph : mAttrs.height;
+        if ((mAttrs.flags & WindowManager.LayoutParams.FLAG_SCALED) != 0) {
+            if (mAttrs.width < 0) {
+                w = pw;
+            } else if (mEnforceSizeCompat) {
+                w = (int)(mAttrs.width * mGlobalScale + .5f);
+            } else {
+                w = mAttrs.width;
+            }
+            if (mAttrs.height < 0) {
+                h = ph;
+            } else if (mEnforceSizeCompat) {
+                h = (int)(mAttrs.height * mGlobalScale + .5f);
+            } else {
+                h = mAttrs.height;
+            }
         } else {
-            w = mAttrs.width == mAttrs.MATCH_PARENT ? pw : mRequestedWidth;
-            h = mAttrs.height== mAttrs.MATCH_PARENT ? ph : mRequestedHeight;
+            if (mAttrs.width == WindowManager.LayoutParams.MATCH_PARENT) {
+                w = pw;
+            } else if (mEnforceSizeCompat) {
+                w = (int)(mRequestedWidth * mGlobalScale + .5f);
+            } else {
+                w = mRequestedWidth;
+            }
+            if (mAttrs.height == WindowManager.LayoutParams.MATCH_PARENT) {
+                h = ph;
+            } else if (mEnforceSizeCompat) {
+                h = (int)(mRequestedHeight * mGlobalScale + .5f);
+            } else {
+                h = mRequestedHeight;
+            }
         }
 
         if (!mParentFrame.equals(pf)) {
@@ -412,36 +439,23 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         //System.out.println("In: w=" + w + " h=" + h + " container=" +
         //                   container + " x=" + mAttrs.x + " y=" + mAttrs.y);
 
+        float x, y;
+        if (mEnforceSizeCompat) {
+            x = mAttrs.x * mGlobalScale;
+            y = mAttrs.y * mGlobalScale;
+        } else {
+            x = mAttrs.x;
+            y = mAttrs.y;
+        }
+
         Gravity.apply(mAttrs.gravity, w, h, container,
-                (int) (mAttrs.x + mAttrs.horizontalMargin * pw),
-                (int) (mAttrs.y + mAttrs.verticalMargin * ph), frame);
+                (int) (x + mAttrs.horizontalMargin * pw),
+                (int) (y + mAttrs.verticalMargin * ph), frame);
 
         //System.out.println("Out: " + mFrame);
 
         // Now make sure the window fits in the overall display.
         Gravity.applyDisplay(mAttrs.gravity, df, frame);
-
-        int adjRight=0, adjBottom=0;
-
-        if (mEnforceSizeCompat) {
-            // Adjust window offsets by the scaling factor.
-            int xoff = (int)((frame.left-mService.mCompatibleScreenFrame.left)*mGlobalScale)
-                    - (frame.left-mService.mCompatibleScreenFrame.left);
-            int yoff = (int)((frame.top-mService.mCompatibleScreenFrame.top)*mGlobalScale)
-                    - (frame.top-mService.mCompatibleScreenFrame.top);
-            frame.offset(xoff, yoff);
-
-            // We are temporarily going to apply the compatibility scale
-            // to the window so that we can correctly associate it with the
-            // content and visible frame.
-            adjRight = frame.right - frame.left;
-            adjRight = (int)((adjRight)*mGlobalScale + .5f) - adjRight;
-            adjBottom = frame.bottom - frame.top;
-            adjBottom = (int)((adjBottom)*mGlobalScale + .5f) - adjBottom;
-            frame.right += adjRight;
-            frame.bottom += adjBottom;
-        }
-        mScaledFrame.set(frame);
 
         // Make sure the content and visible frames are inside of the
         // final window frame.
@@ -466,20 +480,17 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         visibleInsets.right = frame.right-visible.right;
         visibleInsets.bottom = frame.bottom-visible.bottom;
 
+        mCompatFrame.set(frame);
         if (mEnforceSizeCompat) {
-            // Scale the computed insets back to the window's compatibility
-            // coordinate space, and put frame back to correct size.
-            final float invScale = 1.0f/mGlobalScale;
-            contentInsets.left = (int)(contentInsets.left*invScale);
-            contentInsets.top = (int)(contentInsets.top*invScale);
-            contentInsets.right = (int)(contentInsets.right*invScale);
-            contentInsets.bottom = (int)(contentInsets.bottom*invScale);
-            visibleInsets.left = (int)(visibleInsets.left*invScale);
-            visibleInsets.top = (int)(visibleInsets.top*invScale);
-            visibleInsets.right = (int)(visibleInsets.right*invScale);
-            visibleInsets.bottom = (int)(visibleInsets.bottom*invScale);
-            frame.right -= adjRight;
-            frame.bottom -= adjBottom;
+            // If there is a size compatibility scale being applied to the
+            // window, we need to apply this to its insets so that they are
+            // reported to the app in its coordinate space.
+            contentInsets.scale(mInvGlobalScale);
+            visibleInsets.scale(mInvGlobalScale);
+
+            // Also the scaled frame that we report to the app needs to be
+            // adjusted to be in its coordinate space.
+            mCompatFrame.scale(mInvGlobalScale);
         }
 
         if (mIsWallpaper && (fw != frame.width() || fh != frame.height())) {
@@ -592,12 +603,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(
                 WindowManagerService.TAG, "Creating surface in session "
                 + mSession.mSurfaceSession + " window " + this
-                + " w=" + mFrame.width()
-                + " h=" + mFrame.height() + " format="
+                + " w=" + mCompatFrame.width()
+                + " h=" + mCompatFrame.height() + " format="
                 + mAttrs.format + " flags=" + flags);
 
-            int w = mFrame.width();
-            int h = mFrame.height();
+            int w = mCompatFrame.width();
+            int h = mCompatFrame.height();
             if ((mAttrs.flags & LayoutParams.FLAG_SCALED) != 0) {
                 // for a scaled surface, we always want the requested
                 // size.
@@ -650,8 +661,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 + ", animLayer=" + mAnimLayer);
             if (WindowManagerService.SHOW_TRANSACTIONS) {
                 Slog.i(WindowManagerService.TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
-                WindowManagerService.logSurface(this, "CREATE pos=(" + mFrame.left + "," + mFrame.top + ") (" +
-                        mFrame.width() + "x" + mFrame.height() + "), layer=" +
+                WindowManagerService.logSurface(this, "CREATE pos=(" + mFrame.left
+                        + "," + mFrame.top + ") (" +
+                        mCompatFrame.width() + "x" + mCompatFrame.height() + "), layer=" +
                         mAnimLayer + " HIDE", null);
             }
             Surface.openTransaction();
@@ -862,10 +874,10 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 if (!mLocalAnimating) {
                     if (WindowManagerService.DEBUG_ANIM) Slog.v(
                         WindowManagerService.TAG, "Starting animation in " + this +
-                        " @ " + currentTime + ": ww=" + mScaledFrame.width() +
-                        " wh=" + mScaledFrame.height() +
+                        " @ " + currentTime + ": ww=" + mFrame.width() +
+                        " wh=" + mFrame.height() +
                         " dw=" + dw + " dh=" + dh + " scale=" + mService.mWindowAnimationScale);
-                    mAnimation.initialize(mScaledFrame.width(), mScaledFrame.height(), dw, dh);
+                    mAnimation.initialize(mFrame.width(), mFrame.height(), dw, dh);
                     mAnimation.setStartTime(currentTime);
                     mLocalAnimating = true;
                     mAnimating = true;
@@ -1035,8 +1047,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     void prelayout() {
         if (mEnforceSizeCompat) {
             mGlobalScale = mService.mCompatibleScreenScale;
+            mInvGlobalScale = 1/mGlobalScale;
         } else {
-            mGlobalScale = 1;
+            mGlobalScale = mInvGlobalScale = 1;
         }
     }
 
@@ -1334,35 +1347,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 && mService.mPolicy.isScreenOn();
     }
 
-    void evalNeedsBackgroundFiller(int screenWidth, int screenHeight) {
-        mNeedsBackgroundFiller =
-             // only if the application is requesting compatible window
-             mEnforceSizeCompat &&
-             // only if it's visible
-             mHasDrawn && mViewVisibility == View.VISIBLE &&
-             // not needed if the compat window is actually full screen
-             !isFullscreenIgnoringCompat(screenWidth, screenHeight) &&
-             // and only if the application fills the compatible screen
-             mFrame.left <= mService.mCompatibleScreenFrame.left &&
-             mFrame.top <= mService.mCompatibleScreenFrame.top &&
-             mFrame.right >= mService.mCompatibleScreenFrame.right &&
-             mFrame.bottom >= mService.mCompatibleScreenFrame.bottom;
-    }
-
     boolean isFullscreen(int screenWidth, int screenHeight) {
-        if (mEnforceSizeCompat) {
-            return mFrame.left <= mService.mCompatibleScreenFrame.left &&
-                    mFrame.top <= mService.mCompatibleScreenFrame.top &&
-                    mFrame.right >= mService.mCompatibleScreenFrame.right &&
-                    mFrame.bottom >= mService.mCompatibleScreenFrame.bottom;
-        } else {
-            return isFullscreenIgnoringCompat(screenWidth, screenHeight);
-        }
-    }
-
-    boolean isFullscreenIgnoringCompat(int screenWidth, int screenHeight) {
-        return mScaledFrame.left <= 0 && mScaledFrame.top <= 0 &&
-                mScaledFrame.right >= screenWidth && mScaledFrame.bottom >= screenHeight;
+        return mFrame.left <= 0 && mFrame.top <= 0 &&
+                mFrame.right >= screenWidth && mFrame.bottom >= screenHeight;
     }
 
     void removeLocked() {
@@ -1492,38 +1479,28 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         return true;
     }
 
-    private static void applyScaledInsets(Region outRegion, Rect frame, Rect inset, float scale) {
-        if (scale != 1) {
-            outRegion.set(frame.left + (int)(inset.left*scale),
-                    frame.top + (int)(inset.top*scale),
-                    frame.right - (int)(inset.right*scale),
-                    frame.bottom - (int)(inset.bottom*scale));
-        } else {
-            outRegion.set(
-                    frame.left + inset.left, frame.top + inset.top,
-                    frame.right - inset.right, frame.bottom - inset.bottom);
-        }
+    private static void applyInsets(Region outRegion, Rect frame, Rect inset) {
+        outRegion.set(
+                frame.left + inset.left, frame.top + inset.top,
+                frame.right - inset.right, frame.bottom - inset.bottom);
     }
 
     public void getTouchableRegion(Region outRegion) {
-        final Rect frame = mScaledFrame;
+        final Rect frame = mFrame;
         switch (mTouchableInsets) {
             default:
             case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME:
                 outRegion.set(frame);
                 break;
             case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT:
-                applyScaledInsets(outRegion, frame, mGivenContentInsets, mGlobalScale);
+                applyInsets(outRegion, frame, mGivenContentInsets);
                 break;
             case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE:
-                applyScaledInsets(outRegion, frame, mGivenVisibleInsets, mGlobalScale);
+                applyInsets(outRegion, frame, mGivenVisibleInsets);
                 break;
             case ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION: {
                 final Region givenTouchableRegion = mGivenTouchableRegion;
                 outRegion.set(givenTouchableRegion);
-                if (mGlobalScale != 1) {
-                    outRegion.scale(mGlobalScale);
-                }
                 outRegion.translate(frame.left, frame.top);
                 break;
             }
@@ -1586,8 +1563,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
                 pw.print(" h="); pw.print(mRequestedHeight);
-                pw.print(" mLayoutSeq="); pw.print(mLayoutSeq);
-                pw.print(" mNeedsBackgroundFiller="); pw.println(mNeedsBackgroundFiller);
+                pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
         if (mXOffset != 0 || mYOffset != 0) {
             pw.print(prefix); pw.print("Offsets x="); pw.print(mXOffset);
                     pw.print(" y="); pw.println(mYOffset);
@@ -1608,8 +1584,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 pw.println();
         pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
                 pw.print(" last="); mLastFrame.printShortString(pw);
-                pw.print(" scaled="); mScaledFrame.printShortString(pw);
                 pw.println();
+        if (mEnforceSizeCompat) {
+            pw.print(prefix); pw.print("mCompatFrame="); mCompatFrame.printShortString(pw);
+                    pw.print(" last="); mLastCompatFrame.printShortString(pw);
+                    pw.println();
+        }
         pw.print(prefix); pw.print("mContainingFrame=");
                 mContainingFrame.printShortString(pw);
                 pw.print(" mParentFrame=");

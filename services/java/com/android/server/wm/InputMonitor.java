@@ -205,7 +205,7 @@ final class InputMonitor {
             inputWindow.ownerPid = child.mSession.mPid;
             inputWindow.ownerUid = child.mSession.mUid;
             
-            final Rect frame = child.mScaledFrame;
+            final Rect frame = child.mFrame;
             inputWindow.frameLeft = frame.left;
             inputWindow.frameTop = frame.top;
             inputWindow.frameRight = frame.right;
