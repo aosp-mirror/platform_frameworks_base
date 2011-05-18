@@ -24,10 +24,12 @@
 
 #include "include/ARTSPController.h"
 #include "include/AwesomePlayer.h"
+#include "include/DRMExtractor.h"
 #include "include/SoftwareRenderer.h"
 #include "include/NuCachedSource2.h"
 #include "include/ThrottledSource.h"
 #include "include/MPEG2TSExtractor.h"
+#include "include/WVMExtractor.h"
 
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
@@ -447,6 +449,7 @@ void AwesomePlayer::reset_l() {
 
     cancelPlayerEvents();
 
+    mWVMExtractor.clear();
     mCachedSource.clear();
     mAudioTrack.clear();
     mVideoTrack.clear();
@@ -554,6 +557,11 @@ bool AwesomePlayer::getCachedDuration_l(int64_t *durationUs, bool *eos) {
         *durationUs = cachedDataRemaining * 8000000ll / bitrate;
         *eos = (finalStatus != OK);
         return true;
+    } else if (mWVMExtractor != NULL) {
+        status_t finalStatus;
+        *durationUs = mWVMExtractor->getCachedDurationUs(&finalStatus);
+        *eos = (finalStatus != OK);
+        return true;
     }
 
     return false;
@@ -645,6 +653,30 @@ void AwesomePlayer::onBufferingUpdate() {
                     }
                 }
             }
+        }
+    } else if (mWVMExtractor != NULL) {
+        status_t finalStatus;
+
+        int64_t cachedDurationUs
+            = mWVMExtractor->getCachedDurationUs(&finalStatus);
+
+        bool eos = (finalStatus != OK);
+
+        if (eos) {
+            if (finalStatus == ERROR_END_OF_STREAM) {
+                notifyListener_l(MEDIA_BUFFERING_UPDATE, 100);
+            }
+            if (mFlags & PREPARING) {
+                LOGV("cache has reached EOS, prepare is done.");
+                finishAsyncPrepare_l();
+            }
+        } else {
+            int percentage = 100.0 * (double)cachedDurationUs / mDurationUs;
+            if (percentage > 100) {
+                percentage = 100;
+            }
+
+            notifyListener_l(MEDIA_BUFFERING_UPDATE, percentage);
         }
     }
 
@@ -1320,7 +1352,7 @@ void AwesomePlayer::onVideoEvent() {
             mVideoBuffer = NULL;
         }
 
-        if (mSeeking == SEEK && mCachedSource != NULL && mAudioSource != NULL
+        if (mSeeking == SEEK && isStreamingHTTP() && mAudioSource != NULL
                 && !(mFlags & SEEK_PREVIEW)) {
             // We're going to seek the video source first, followed by
             // the audio source.
@@ -1654,8 +1686,19 @@ status_t AwesomePlayer::prepareAsync_l() {
 status_t AwesomePlayer::finishSetDataSource_l() {
     sp<DataSource> dataSource;
 
+    bool isWidevineStreaming = false;
+    if (!strncasecmp("widevine://", mUri.string(), 11)) {
+        isWidevineStreaming = true;
+
+        String8 newURI = String8("http://");
+        newURI.append(mUri.string() + 11);
+
+        mUri = newURI;
+    }
+
     if (!strncasecmp("http://", mUri.string(), 7)
-            || !strncasecmp("https://", mUri.string(), 8)) {
+            || !strncasecmp("https://", mUri.string(), 8)
+            || isWidevineStreaming) {
         mConnectingDataSource = new NuHTTPDataSource(
                 (mFlags & INCOGNITO) ? NuHTTPDataSource::kFlagIncognito : 0);
 
@@ -1670,39 +1713,48 @@ status_t AwesomePlayer::finishSetDataSource_l() {
             return err;
         }
 
+        if (!isWidevineStreaming) {
+            // The widevine extractor does its own caching.
+
 #if 0
-        mCachedSource = new NuCachedSource2(
-                new ThrottledSource(
-                    mConnectingDataSource, 50 * 1024 /* bytes/sec */));
+            mCachedSource = new NuCachedSource2(
+                    new ThrottledSource(
+                        mConnectingDataSource, 50 * 1024 /* bytes/sec */));
 #else
-        mCachedSource = new NuCachedSource2(mConnectingDataSource);
+            mCachedSource = new NuCachedSource2(mConnectingDataSource);
 #endif
-        mConnectingDataSource.clear();
 
-        dataSource = mCachedSource;
-
-        // We're going to prefill the cache before trying to instantiate
-        // the extractor below, as the latter is an operation that otherwise
-        // could block on the datasource for a significant amount of time.
-        // During that time we'd be unable to abort the preparation phase
-        // without this prefill.
-
-        mLock.unlock();
-
-        for (;;) {
-            status_t finalStatus;
-            size_t cachedDataRemaining =
-                mCachedSource->approxDataRemaining(&finalStatus);
-
-            if (finalStatus != OK || cachedDataRemaining >= kHighWaterMarkBytes
-                    || (mFlags & PREPARE_CANCELLED)) {
-                break;
-            }
-
-            usleep(200000);
+            dataSource = mCachedSource;
+        } else {
+            dataSource = mConnectingDataSource;
         }
 
-        mLock.lock();
+        mConnectingDataSource.clear();
+
+        if (mCachedSource != NULL) {
+            // We're going to prefill the cache before trying to instantiate
+            // the extractor below, as the latter is an operation that otherwise
+            // could block on the datasource for a significant amount of time.
+            // During that time we'd be unable to abort the preparation phase
+            // without this prefill.
+
+            mLock.unlock();
+
+            for (;;) {
+                status_t finalStatus;
+                size_t cachedDataRemaining =
+                    mCachedSource->approxDataRemaining(&finalStatus);
+
+                if (finalStatus != OK || cachedDataRemaining >= kHighWaterMarkBytes
+                        || (mFlags & PREPARE_CANCELLED)) {
+                    break;
+                }
+
+                usleep(200000);
+            }
+
+            mLock.lock();
+        }
 
         if (mFlags & PREPARE_CANCELLED) {
             LOGI("Prepare cancelled while waiting for initial cache fill.");
@@ -1740,10 +1792,29 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         return UNKNOWN_ERROR;
     }
 
-    sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
+    sp<MediaExtractor> extractor;
 
-    if (extractor == NULL) {
-        return UNKNOWN_ERROR;
+    if (isWidevineStreaming) {
+        String8 mimeType;
+        float confidence;
+        sp<AMessage> dummy;
+        bool success = SniffDRM(dataSource, &mimeType, &confidence, &dummy);
+
+        if (!success
+                || strcasecmp(
+                    mimeType.string(), MEDIA_MIMETYPE_CONTAINER_WVM)) {
+            return ERROR_UNSUPPORTED;
+        }
+
+        mWVMExtractor = new WVMExtractor(dataSource);
+        mWVMExtractor->setAdaptiveStreamingMode(true);
+        extractor = mWVMExtractor;
+    } else {
+        extractor = MediaExtractor::Create(dataSource);
+
+        if (extractor == NULL) {
+            return UNKNOWN_ERROR;
+        }
     }
 
     dataSource->getDrmInfo(&mDecryptHandle, &mDrmManagerClient);
@@ -1754,7 +1825,15 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         }
     }
 
-    return setDataSource_l(extractor);
+    status_t err = setDataSource_l(extractor);
+
+    if (err != OK) {
+        mWVMExtractor.clear();
+
+        return err;
+    }
+
+    return OK;
 }
 
 void AwesomePlayer::abortPrepare(status_t err) {
@@ -1815,7 +1894,7 @@ void AwesomePlayer::onPrepareAsyncEvent() {
 
     mFlags |= PREPARING_CONNECTED;
 
-    if (mCachedSource != NULL || mRTSPController != NULL) {
+    if (isStreamingHTTP() || mRTSPController != NULL) {
         postBufferingEvent_l();
     } else {
         finishAsyncPrepare_l();
@@ -1850,6 +1929,10 @@ void AwesomePlayer::postAudioEOS() {
 
 void AwesomePlayer::postAudioSeekComplete() {
     postCheckAudioStatusEvent_l();
+}
+
+bool AwesomePlayer::isStreamingHTTP() const {
+    return mCachedSource != NULL || mWVMExtractor != NULL;
 }
 
 }  // namespace android

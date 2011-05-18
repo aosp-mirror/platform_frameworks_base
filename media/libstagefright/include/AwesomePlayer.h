@@ -44,6 +44,8 @@ struct ARTSPController;
 class DrmManagerClinet;
 class DecryptHandle;
 
+struct WVMExtractor;
+
 struct AwesomeRenderer : public RefBase {
     AwesomeRenderer() {}
 
@@ -219,6 +221,8 @@ private:
     DrmManagerClient *mDrmManagerClient;
     DecryptHandle *mDecryptHandle;
 
+    sp<WVMExtractor> mWVMExtractor;
+
     status_t setDataSource_l(
             const char *uri,
             const KeyedVector<String8, String8> *headers = NULL);
@@ -267,6 +271,8 @@ private:
     void ensureCacheIsFetching_l();
 
     status_t startAudioPlayer_l();
+
+    bool isStreamingHTTP() const;
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);

@@ -45,7 +45,8 @@ namespace android {
 static Mutex gWVMutex;
 
 WVMExtractor::WVMExtractor(const sp<DataSource> &source)
-    : mDataSource(source) {
+    : mDataSource(source),
+      mUseAdaptiveStreaming(false) {
     {
         Mutex::Autolock autoLock(gWVMutex);
         if (gVendorLibHandle == NULL) {
@@ -98,6 +99,22 @@ sp<MetaData> WVMExtractor::getMetaData() {
         return NULL;
     }
     return mImpl->getMetaData();
+}
+
+int64_t WVMExtractor::getCachedDurationUs(status_t *finalStatus) {
+    // TODO: Fill this with life.
+
+    *finalStatus = OK;
+
+    return 0;
+}
+
+void WVMExtractor::setAdaptiveStreamingMode(bool adaptive) {
+    mUseAdaptiveStreaming = adaptive;
+}
+
+bool WVMExtractor::getAdaptiveStreamingMode() const {
+    return mUseAdaptiveStreaming;
 }
 
 } //namespace android
