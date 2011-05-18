@@ -18,6 +18,7 @@
 #define RSD_GL_H
 
 #include <rs_hal.h>
+#include <EGL/egl.h>
 
 class RsdShaderCache;
 class RsdVertexArrayState;
@@ -74,7 +75,7 @@ typedef struct RsdGLRec {
 bool rsdGLInit(const android::renderscript::Context *rsc);
 void rsdGLShutdown(const android::renderscript::Context *rsc);
 bool rsdGLSetSurface(const android::renderscript::Context *rsc,
-                     uint32_t w, uint32_t h, ANativeWindow *sur);
+                     uint32_t w, uint32_t h, RsNativeWindow sur);
 void rsdGLSwap(const android::renderscript::Context *rsc);
 void rsdGLCheckError(const android::renderscript::Context *rsc,
                      const char *msg, bool isFatal = false);

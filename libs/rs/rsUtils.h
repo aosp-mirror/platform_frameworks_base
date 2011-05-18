@@ -32,10 +32,6 @@
 #include <time.h>
 #include <cutils/atomic.h>
 
-#ifndef ANDROID_RS_SERIALIZE
-#include <EGL/egl.h>
-#endif
-
 #include <math.h>
 
 #include "RenderScript.h"

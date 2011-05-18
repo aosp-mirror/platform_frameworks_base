@@ -190,14 +190,14 @@ nContextSetSurface(JNIEnv *_env, jobject _this, RsContext con, jint width, jint 
 {
     LOG_API("nContextSetSurface, con(%p), width(%i), height(%i), surface(%p)", con, width, height, (Surface *)wnd);
 
-    Surface * window = NULL;
+    ANativeWindow * window = NULL;
     if (wnd == NULL) {
 
     } else {
-        window = (Surface*) android_Surface_getNativeWindow(_env, wnd).get();
+        window = android_Surface_getNativeWindow(_env, wnd).get();
     }
 
-    rsContextSetSurface(con, width, height, window, 1);
+    rsContextSetSurface(con, width, height, window);
 }
 
 static void

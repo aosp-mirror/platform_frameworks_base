@@ -44,8 +44,6 @@
 
 #endif // ANDROID_RS_SERIALIZE
 
-class ANativeWindow;
-
 // ---------------------------------------------------------------------------
 namespace android {
 
@@ -136,7 +134,7 @@ public:
 
     void pause();
     void resume();
-    void setSurface(uint32_t w, uint32_t h, ANativeWindow *sur);
+    void setSurface(uint32_t w, uint32_t h, RsNativeWindow sur);
     void setPriority(int32_t p);
     void destroyWorkerThreadResources();
 
@@ -244,7 +242,7 @@ private:
     static void * threadProc(void *);
     static void * helperThreadProc(void *);
 
-    ANativeWindow *mWndSurface;
+    bool mHasSurface;
 
     Vector<ObjectBase *> mNames;
 
