@@ -1395,6 +1395,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
                 addPrivateDnsRoutes(mNetTrackers[netType]);
             }
+
+            /** Notify TetheringService if interface name has been changed. */
+            if (TextUtils.equals(mNetTrackers[netType].getNetworkInfo().getReason(),
+                                 Phone.REASON_LINK_PROPERTIES_CHANGED)) {
+                handleTetherIfaceChange(netType);
+            }
         } else {
             if (mNetConfigs[netType].isDefault()) {
                 removeDefaultRoute(mNetTrackers[netType]);
@@ -2204,6 +2210,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         @Override
         public void onChange(boolean selfChange) {
             mHandler.obtainMessage(mWhat).sendToTarget();
+        }
+    }
+
+    private void handleTetherIfaceChange(int type) {
+        String iface = mNetTrackers[type].getLinkProperties().getInterfaceName();
+
+        if (isTetheringSupported()) {
+            mTethering.handleTetherIfaceChange(iface);
         }
     }
 
