@@ -56,6 +56,7 @@ terms listed above has been obtained from the copyright holder.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
+#include "q_plsf_5_tbl.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus

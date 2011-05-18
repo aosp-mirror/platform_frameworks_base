@@ -54,6 +54,7 @@ terms listed above has been obtained from the copyright holder.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
+#include "log2_norm.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus

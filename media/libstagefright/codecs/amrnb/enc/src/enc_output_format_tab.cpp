@@ -117,6 +117,7 @@ terms listed above has been obtained from the copyright holder.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
+#include "amrencode.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus

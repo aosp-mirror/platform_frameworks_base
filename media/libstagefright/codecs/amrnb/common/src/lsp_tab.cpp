@@ -117,6 +117,7 @@ terms listed above has been obtained from the copyright holder.
 ----------------------------------------------------------------------------*/
 #include    "typedef.h"
 #include    "cnst.h"
+#include    "lsp_tab.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus

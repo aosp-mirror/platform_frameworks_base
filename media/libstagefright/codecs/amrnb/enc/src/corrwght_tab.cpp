@@ -57,6 +57,7 @@ terms listed above has been obtained from the copyright holder.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
+#include "p_ol_wgh.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus

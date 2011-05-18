@@ -123,6 +123,7 @@ terms listed above has been obtained from the copyright holder.
 ; INCLUDES
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
+#include "bitreorder_tab.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus

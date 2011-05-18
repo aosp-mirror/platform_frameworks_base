@@ -54,6 +54,7 @@ terms listed above has been obtained from the copyright holder.
 ----------------------------------------------------------------------------*/
 #include "typedef.h"
 #include "qua_gain.h"
+#include "qua_gain_tbl.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus

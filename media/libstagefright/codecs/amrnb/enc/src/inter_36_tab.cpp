@@ -123,6 +123,7 @@ terms listed above has been obtained from the copyright holder.
 ----------------------------------------------------------------------------*/
 #include    "typedef.h"
 #include    "cnst.h"
+#include    "inter_36_tab.h"
 
 /*--------------------------------------------------------------------------*/
 #ifdef __cplusplus
