@@ -89,6 +89,14 @@ int32_t Sensor::getMinDelay() const {
     return mMinDelay;
 }
 
+nsecs_t Sensor::getMinDelayNs() const {
+    return getMinDelay() * 1000;
+}
+
+int32_t Sensor::getVersion() const {
+    return mVersion;
+}
+
 size_t Sensor::getFlattenedSize() const
 {
     return  sizeof(int32_t) + ((mName.length() + 3) & ~3) +

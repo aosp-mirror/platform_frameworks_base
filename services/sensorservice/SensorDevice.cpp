@@ -251,6 +251,9 @@ status_t SensorDevice::setDelay(void* ident, int handle, int64_t ns)
             }
         }
     }
+
+    //LOGD("setDelay: ident=%p, handle=%d, ns=%lld", ident, handle, ns);
+
     return mSensorDevice->setDelay(mSensorDevice, handle, ns);
 }
 

@@ -26,24 +26,19 @@
 #include "SensorInterface.h"
 #include "SecondOrderLowPassFilter.h"
 
+#include "Fusion.h"
+#include "SensorFusion.h"
+
 // ---------------------------------------------------------------------------
 namespace android {
 // ---------------------------------------------------------------------------
 
 class RotationVectorSensor : public SensorInterface {
     SensorDevice& mSensorDevice;
-    Sensor mAcc;
-    Sensor mMag;
-    float mMagData[3];
-    double mAccTime;
-    double mMagTime;
-    SecondOrderLowPassFilter mALowPass;
-    CascadedBiquadFilter mAX, mAY, mAZ;
-    SecondOrderLowPassFilter mMLowPass;
-    CascadedBiquadFilter mMX, mMY, mMZ;
+    SensorFusion& mSensorFusion;
 
 public:
-    RotationVectorSensor(sensor_t const* list, size_t count);
+    RotationVectorSensor();
     virtual bool process(sensors_event_t* outEvent,
             const sensors_event_t& event);
     virtual status_t activate(void* ident, bool enabled);

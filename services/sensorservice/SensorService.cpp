@@ -35,10 +35,13 @@
 
 #include <hardware/sensors.h>
 
-#include "SensorService.h"
+#include "CorrectedGyroSensor.h"
 #include "GravitySensor.h"
 #include "LinearAccelerationSensor.h"
+#include "OrientationSensor.h"
 #include "RotationVectorSensor.h"
+#include "SensorFusion.h"
+#include "SensorService.h"
 
 namespace android {
 // ---------------------------------------------------------------------------
@@ -74,14 +77,26 @@ void SensorService::onFirstRef()
             }
         }
 
-        if (virtualSensorsNeeds & (1<<SENSOR_TYPE_GRAVITY)) {
-            registerVirtualSensor( new GravitySensor(list, count) );
-        }
-        if (virtualSensorsNeeds & (1<<SENSOR_TYPE_LINEAR_ACCELERATION)) {
-            registerVirtualSensor( new LinearAccelerationSensor(list, count) );
-        }
-        if (virtualSensorsNeeds & (1<<SENSOR_TYPE_ROTATION_VECTOR)) {
-            registerVirtualSensor( new RotationVectorSensor(list, count) );
+        // it's safe to instantiate the SensorFusion object here
+        // (it wants to be instantiated after h/w sensors have been
+        // registered)
+        const SensorFusion& fusion(SensorFusion::getInstance());
+
+        // Always instantiate Android's virtual sensors. Since they are
+        // instantiated behind sensors from the HAL, they won't
+        // interfere with applications, unless they looks specifically
+        // for them (by name).
+
+        registerVirtualSensor( new RotationVectorSensor() );
+        registerVirtualSensor( new GravitySensor(list, count) );
+        registerVirtualSensor( new LinearAccelerationSensor(list, count) );
+
+        // if we have a gyro, we have the option of enabling these
+        // "better" orientation and gyro sensors
+        if (fusion.hasGyro()) {
+            // FIXME: OrientationSensor buggy when not pointing north
+            registerVirtualSensor( new OrientationSensor() );
+            registerVirtualSensor( new CorrectedGyroSensor(list, count) );
         }
 
         run("SensorService", PRIORITY_URGENT_DISPLAY);
@@ -133,7 +148,9 @@ status_t SensorService::dump(int fd, const Vector<String16>& args)
         for (size_t i=0 ; i<mSensorList.size() ; i++) {
             const Sensor& s(mSensorList[i]);
             const sensors_event_t& e(mLastEventSeen.valueFor(s.getHandle()));
-            snprintf(buffer, SIZE, "%-48s| %-32s | 0x%08x | maxRate=%7.2fHz | last=<%5.1f,%5.1f,%5.1f>\n",
+            snprintf(buffer, SIZE,
+                    "%-48s| %-32s | 0x%08x | maxRate=%7.2fHz | "
+                    "last=<%5.1f,%5.1f,%5.1f>\n",
                     s.getName().string(),
                     s.getVendor().string(),
                     s.getHandle(),
@@ -141,6 +158,7 @@ status_t SensorService::dump(int fd, const Vector<String16>& args)
                     e.data[0], e.data[1], e.data[2]);
             result.append(buffer);
         }
+        SensorFusion::getInstance().dump(result, buffer, SIZE);
         SensorDevice::getInstance().dump(result, buffer, SIZE);
 
         snprintf(buffer, SIZE, "%d active connections\n",
@@ -183,13 +201,19 @@ bool SensorService::threadLoop()
 
         // handle virtual sensors
         if (count && vcount) {
+            sensors_event_t const * const event = buffer;
             const DefaultKeyedVector<int, SensorInterface*> virtualSensors(
                     getActiveVirtualSensors());
             const size_t activeVirtualSensorCount = virtualSensors.size();
             if (activeVirtualSensorCount) {
                 size_t k = 0;
+                SensorFusion& fusion(SensorFusion::getInstance());
+                if (fusion.isEnabled()) {
+                    for (size_t i=0 ; i<size_t(count) ; i++) {
+                        fusion.process(event[i]);
+                    }
+                }
                 for (size_t i=0 ; i<size_t(count) ; i++) {
-                    sensors_event_t const * const event = buffer;
                     for (size_t j=0 ; j<activeVirtualSensorCount ; j++) {
                         sensors_event_t out;
                         if (virtualSensors.valueAt(j)->process(&out, event[i])) {

@@ -20,8 +20,6 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Singleton.h>
-
 #include <gui/Sensor.h>
 
 #include "SensorDevice.h"

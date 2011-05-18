@@ -25,12 +25,14 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
+template<typename T>
 class BiquadFilter;
 
 /*
  * State of a 2nd order low-pass IIR filter
  */
 class SecondOrderLowPassFilter {
+    template<typename T>
     friend class BiquadFilter;
     float iQ, fc;
     float K, iD;
@@ -44,27 +46,29 @@ public:
 /*
  * Implements a Biquad IIR filter
  */
+template<typename T>
 class BiquadFilter {
-    float x1, x2;
-    float y1, y2;
+    T x1, x2;
+    T y1, y2;
     const SecondOrderLowPassFilter& s;
 public:
     BiquadFilter(const SecondOrderLowPassFilter& s);
-    float init(float in);
-    float operator()(float in);
+    T init(const T& in);
+    T operator()(const T& in);
 };
 
 /*
  * Two cascaded biquad IIR filters
  * (4-poles IIR)
  */
+template<typename T>
 class CascadedBiquadFilter {
-    BiquadFilter mA;
-    BiquadFilter mB;
+    BiquadFilter<T> mA;
+    BiquadFilter<T> mB;
 public:
     CascadedBiquadFilter(const SecondOrderLowPassFilter& s);
-    float init(float in);
-    float operator()(float in);
+    T init(const T& in);
+    T operator()(const T& in);
 };
 
 // ---------------------------------------------------------------------------

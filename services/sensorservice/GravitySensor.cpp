@@ -23,16 +23,18 @@
 #include <hardware/sensors.h>
 
 #include "GravitySensor.h"
+#include "SensorDevice.h"
+#include "SensorFusion.h"
 
 namespace android {
 // ---------------------------------------------------------------------------
 
 GravitySensor::GravitySensor(sensor_t const* list, size_t count)
     : mSensorDevice(SensorDevice::getInstance()),
+      mSensorFusion(SensorFusion::getInstance()),
       mAccTime(0),
       mLowPass(M_SQRT1_2, 1.5f),
       mX(mLowPass), mY(mLowPass), mZ(mLowPass)
-
 {
     for (size_t i=0 ; i<count ; i++) {
         if (list[i].type == SENSOR_TYPE_ACCELEROMETER) {
@@ -47,35 +49,52 @@ bool GravitySensor::process(sensors_event_t* outEvent,
 {
     const static double NS2S = 1.0 / 1000000000.0;
     if (event.type == SENSOR_TYPE_ACCELEROMETER) {
-        float x, y, z;
-        const double now = event.timestamp * NS2S;
-        if (mAccTime == 0) {
-            x = mX.init(event.acceleration.x);
-            y = mY.init(event.acceleration.y);
-            z = mZ.init(event.acceleration.z);
+        vec3_t g;
+        if (mSensorFusion.hasGyro()) {
+            if (!mSensorFusion.hasEstimate())
+                return false;
+            const mat33_t R(mSensorFusion.getRotationMatrix());
+            // FIXME: we need to estimate the length of gravity because
+            // the accelerometer may have a small scaling error. This
+            // translates to an offset in the linear-acceleration sensor.
+            g = R[2] * GRAVITY_EARTH;
         } else {
-            double dT = now - mAccTime;
-            mLowPass.setSamplingPeriod(dT);
-            x = mX(event.acceleration.x);
-            y = mY(event.acceleration.y);
-            z = mZ(event.acceleration.z);
+            const double now = event.timestamp * NS2S;
+            if (mAccTime == 0) {
+                g.x = mX.init(event.acceleration.x);
+                g.y = mY.init(event.acceleration.y);
+                g.z = mZ.init(event.acceleration.z);
+            } else {
+                double dT = now - mAccTime;
+                mLowPass.setSamplingPeriod(dT);
+                g.x = mX(event.acceleration.x);
+                g.y = mY(event.acceleration.y);
+                g.z = mZ(event.acceleration.z);
+            }
+            g *= (GRAVITY_EARTH / length(g));
+            mAccTime = now;
         }
-        mAccTime = now;
         *outEvent = event;
-        outEvent->data[0] = x;
-        outEvent->data[1] = y;
-        outEvent->data[2] = z;
+        outEvent->data[0] = g.x;
+        outEvent->data[1] = g.y;
+        outEvent->data[2] = g.z;
         outEvent->sensor = '_grv';
         outEvent->type = SENSOR_TYPE_GRAVITY;
         return true;
     }
     return false;
 }
+
 status_t GravitySensor::activate(void* ident, bool enabled) {
-    status_t err = mSensorDevice.activate(this, mAccelerometer.getHandle(), enabled);
-    if (err == NO_ERROR) {
-        if (enabled) {
-            mAccTime = 0;
+    status_t err;
+    if (mSensorFusion.hasGyro()) {
+        err = mSensorFusion.activate(this, enabled);
+    } else {
+        err = mSensorDevice.activate(this, mAccelerometer.getHandle(), enabled);
+        if (err == NO_ERROR) {
+            if (enabled) {
+                mAccTime = 0;
+            }
         }
     }
     return err;
@@ -83,20 +102,26 @@ status_t GravitySensor::activate(void* ident, bool enabled) {
 
 status_t GravitySensor::setDelay(void* ident, int handle, int64_t ns)
 {
-    return mSensorDevice.setDelay(this, mAccelerometer.getHandle(), ns);
+    if (mSensorFusion.hasGyro()) {
+        return mSensorFusion.setDelay(this, ns);
+    } else {
+        return mSensorDevice.setDelay(this, mAccelerometer.getHandle(), ns);
+    }
 }
 
 Sensor GravitySensor::getSensor() const {
     sensor_t hwSensor;
     hwSensor.name       = "Gravity Sensor";
     hwSensor.vendor     = "Google Inc.";
-    hwSensor.version    = 1;
+    hwSensor.version    = mSensorFusion.hasGyro() ? 3 : 2;
     hwSensor.handle     = '_grv';
     hwSensor.type       = SENSOR_TYPE_GRAVITY;
-    hwSensor.maxRange   = mAccelerometer.getMaxValue();
+    hwSensor.maxRange   = GRAVITY_EARTH * 2;
     hwSensor.resolution = mAccelerometer.getResolution();
-    hwSensor.power      = mAccelerometer.getPowerUsage();
-    hwSensor.minDelay   = mAccelerometer.getMinDelay();
+    hwSensor.power      = mSensorFusion.hasGyro() ?
+            mSensorFusion.getPowerUsage() : mAccelerometer.getPowerUsage();
+    hwSensor.minDelay   = mSensorFusion.hasGyro() ?
+            mSensorFusion.getMinDelay() : mAccelerometer.getMinDelay();
     Sensor sensor(&hwSensor);
     return sensor;
 }

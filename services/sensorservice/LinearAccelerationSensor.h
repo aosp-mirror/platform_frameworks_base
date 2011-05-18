@@ -22,19 +22,19 @@
 
 #include <gui/Sensor.h>
 
-#include "SensorDevice.h"
 #include "SensorInterface.h"
 #include "GravitySensor.h"
 
 // ---------------------------------------------------------------------------
-
 namespace android {
 // ---------------------------------------------------------------------------
+
+class SensorDevice;
+class SensorFusion;
 
 class LinearAccelerationSensor : public SensorInterface {
     SensorDevice& mSensorDevice;
     GravitySensor mGravitySensor;
-    float mData[3];
 
     virtual bool process(sensors_event_t* outEvent,
             const sensors_event_t& event);

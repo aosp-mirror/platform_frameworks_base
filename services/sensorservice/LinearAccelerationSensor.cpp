@@ -23,6 +23,8 @@
 #include <hardware/sensors.h>
 
 #include "LinearAccelerationSensor.h"
+#include "SensorDevice.h"
+#include "SensorFusion.h"
 
 namespace android {
 // ---------------------------------------------------------------------------
@@ -31,34 +33,29 @@ LinearAccelerationSensor::LinearAccelerationSensor(sensor_t const* list, size_t 
     : mSensorDevice(SensorDevice::getInstance()),
       mGravitySensor(list, count)
 {
-    mData[0] = mData[1] = mData[2] = 0;
 }
 
 bool LinearAccelerationSensor::process(sensors_event_t* outEvent,
         const sensors_event_t& event)
 {
     bool result = mGravitySensor.process(outEvent, event);
-    if (result) {
-        if (event.type == SENSOR_TYPE_ACCELEROMETER) {
-            mData[0] = event.acceleration.x;
-            mData[1] = event.acceleration.y;
-            mData[2] = event.acceleration.z;
-        }
-        outEvent->data[0] = mData[0] - outEvent->data[0];
-        outEvent->data[1] = mData[1] - outEvent->data[1];
-        outEvent->data[2] = mData[2] - outEvent->data[2];
+    if (result && event.type == SENSOR_TYPE_ACCELEROMETER) {
+        outEvent->data[0] = event.acceleration.x - outEvent->data[0];
+        outEvent->data[1] = event.acceleration.y - outEvent->data[1];
+        outEvent->data[2] = event.acceleration.z - outEvent->data[2];
         outEvent->sensor = '_lin';
         outEvent->type = SENSOR_TYPE_LINEAR_ACCELERATION;
+        return true;
     }
-    return result;
+    return false;
 }
 
 status_t LinearAccelerationSensor::activate(void* ident, bool enabled) {
-    return mGravitySensor.activate(ident, enabled);
+    return mGravitySensor.activate(this, enabled);
 }
 
 status_t LinearAccelerationSensor::setDelay(void* ident, int handle, int64_t ns) {
-    return mGravitySensor.setDelay(ident, handle, ns);
+    return mGravitySensor.setDelay(this, handle, ns);
 }
 
 Sensor LinearAccelerationSensor::getSensor() const {
@@ -66,7 +63,7 @@ Sensor LinearAccelerationSensor::getSensor() const {
     sensor_t hwSensor;
     hwSensor.name       = "Linear Acceleration Sensor";
     hwSensor.vendor     = "Google Inc.";
-    hwSensor.version    = 1;
+    hwSensor.version    = gsensor.getVersion();
     hwSensor.handle     = '_lin';
     hwSensor.type       = SENSOR_TYPE_LINEAR_ACCELERATION;
     hwSensor.maxRange   = gsensor.getMaxValue();

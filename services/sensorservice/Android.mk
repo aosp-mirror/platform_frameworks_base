@@ -2,13 +2,18 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-	GravitySensor.cpp \
-	LinearAccelerationSensor.cpp \
-	RotationVectorSensor.cpp \
-    SensorService.cpp \
-    SensorInterface.cpp \
+	CorrectedGyroSensor.cpp \
+    Fusion.cpp \
+    GravitySensor.cpp \
+    LinearAccelerationSensor.cpp \
+    OrientationSensor.cpp \
+    RotationVectorSensor.cpp \
+    SecondOrderLowPassFilter.cpp \
     SensorDevice.cpp \
-    SecondOrderLowPassFilter.cpp
+    SensorFusion.cpp \
+    SensorInterface.cpp \
+    SensorService.cpp \
+
 
 LOCAL_CFLAGS:= -DLOG_TAG=\"SensorService\"
 

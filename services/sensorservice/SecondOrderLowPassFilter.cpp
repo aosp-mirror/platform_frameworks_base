@@ -21,6 +21,7 @@
 #include <cutils/log.h>
 
 #include "SecondOrderLowPassFilter.h"
+#include "vec.h"
 
 // ---------------------------------------------------------------------------
 
@@ -44,21 +45,24 @@ void SecondOrderLowPassFilter::setSamplingPeriod(float dT)
 
 // ---------------------------------------------------------------------------
 
-BiquadFilter::BiquadFilter(const SecondOrderLowPassFilter& s)
+template<typename T>
+BiquadFilter<T>::BiquadFilter(const SecondOrderLowPassFilter& s)
     : s(s)
 {
 }
 
-float BiquadFilter::init(float x)
+template<typename T>
+T BiquadFilter<T>::init(const T& x)
 {
     x1 = x2 = x;
     y1 = y2 = x;
     return x;
 }
 
-float BiquadFilter::operator()(float x)
+template<typename T>
+T BiquadFilter<T>::operator()(const T& x)
 {
-    float y = (x + x2)*s.a0 + x1*s.a1 - y1*s.b1 - y2*s.b2;
+    T y = (x + x2)*s.a0 + x1*s.a1 - y1*s.b1 - y2*s.b2;
     x2 = x1;
     y2 = y1;
     x1 = x;
@@ -68,22 +72,32 @@ float BiquadFilter::operator()(float x)
 
 // ---------------------------------------------------------------------------
 
-CascadedBiquadFilter::CascadedBiquadFilter(const SecondOrderLowPassFilter& s)
+template<typename T>
+CascadedBiquadFilter<T>::CascadedBiquadFilter(const SecondOrderLowPassFilter& s)
     : mA(s), mB(s)
 {
 }
 
-float CascadedBiquadFilter::init(float x)
+template<typename T>
+T CascadedBiquadFilter<T>::init(const T& x)
 {
     mA.init(x);
     mB.init(x);
     return x;
 }
 
-float CascadedBiquadFilter::operator()(float x)
+template<typename T>
+T CascadedBiquadFilter<T>::operator()(const T& x)
 {
     return mB(mA(x));
 }
+
+// ---------------------------------------------------------------------------
+
+template class BiquadFilter<float>;
+template class CascadedBiquadFilter<float>;
+template class BiquadFilter<vec3_t>;
+template class CascadedBiquadFilter<vec3_t>;
 
 // ---------------------------------------------------------------------------
 }; // namespace android
