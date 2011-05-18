@@ -100,7 +100,7 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
             throw new RuntimeException("No test specified");
         }
 
-        TestShellActivity activity = (TestShellActivity) getActivity();
+        final TestShellActivity activity = (TestShellActivity) getActivity();
 
         Log.v(LOGTAG, "About to run tests, calling gc first...");
         freeMem();
@@ -109,7 +109,13 @@ public class LoadTestsAutoTest extends ActivityInstrumentationTestCase2<TestShel
         runTestAndWaitUntilDone(activity, runner.mTestPath, runner.mTimeoutInMillis,
                 runner.mGetDrawTime, runner.mSaveImagePath);
 
-        activity.clearCache();
+        getInstrumentation().runOnMainSync(new Runnable() {
+
+            @Override
+            public void run() {
+                activity.clearCache();
+            }
+        });
         if (mForwardServer != null) {
             mForwardServer.stop();
             mForwardServer = null;
