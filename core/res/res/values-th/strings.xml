@@ -240,6 +240,10 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"อนุญาตให้แก้ไขสถิติแบตเตอรี่ที่เก็บไว้ ห้ามใช้โดยแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_backup" msgid="470013022865453920">"ควบคุมการสำรองและคืนค่า"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"อนุญาตให้แอปพลิเคชันควบคุมวิธีการสำรองและคืนค่าระบบ ห้ามใช้โดยแอปพลิเคชันทั่วไป"</string>
+    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
+    <skip />
+    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <skip />
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"แสดงหน้าต่างที่ไม่ได้รับอนุญาต"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"อนุญาตให้สร้างหน้าต่างสำหรับใช้โดยส่วนติดต่อผู้ใช้ของระบบภายใน ห้ามใช้โดยแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"แสดงการแจ้งเตือนในระดับระบบ"</string>
@@ -446,6 +450,10 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"อนุญาตให้แอปพลิเคชันดูการกำหนดค่าของโทรศัพท์บลูทูธในพื้นที่ ตลอดจนเชื่อมต่อและยอมรับการเชื่อมต่อด้วยอุปกรณ์ที่จับคู่ไว้"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ควบคุม Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"อนุญาตให้แอปพลิเคชันสื่อสารกับแท็ก Near Field Communication (NFC) การ์ด และโปรแกรมอ่าน"</string>
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"ปิดการใช้งานการล็อกปุ่มกด"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"อนุญาตให้แอปพลิเคชันปิดการใช้งานการล็อกปุ่มและการรักษาความปลอดภัยรหัสผ่านที่เกี่ยวข้องใดๆ ตัวอย่างการใช้งานของกรณีนี้คือ โทรศัพท์ปิดการใช้งานการล็อกปุ่มกดเมื่อมีสายเรียกเข้า จากนั้นจึงเปิดการใช้งานการล็อกปุ่มกดใหม่เมื่อวางสายแล้ว"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"อ่านการตั้งค่าการซิงค์แล้ว"</string>
@@ -1019,4 +1027,13 @@
     <string name="choose_account_label" msgid="4191313562041125787">"เลือกบัญชี"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"การเพิ่ม"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"การลด"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"นำทางไปหน้าแรก"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"นำทางขึ้น"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"ตัวเลือกเพิ่มเติม"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>

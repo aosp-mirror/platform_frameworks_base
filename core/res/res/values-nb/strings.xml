@@ -240,6 +240,10 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Lar applikasjonen endre på innsamlet batteristatistikk. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kontrollere backup og gjenoppretting"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Lar applikasjonen kontrollere systemets backup- og gjenopprettingsmekanisme. Ikke ment for vanlige applikasjoner."</string>
+    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
+    <skip />
+    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <skip />
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"vis uautoriserte vinduer"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Tillater at det opprettes vinduer ment for bruk av systemets interne brukergrensesnitt. Ikke ment for vanlige applikasjoner."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"vise advarsler på systemnivå"</string>
@@ -446,6 +450,10 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Lar applikasjonen se konfigurasjonen til den lokale Bluetooth-telefonen, og å opprette og godta tilkoblinger med parede enheter."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontroller overføring av data med NFC-teknologi"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Tillater programmet å kommunisere data via koder, kort og lesere for NFC-teknologi."</string>
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"slå av tastaturlås"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Lar applikasjonen slå av tastaturlåsen og enhver tilknyttet passordsikkerhet. Et legitimt eksempel på dette er at telefonen slår av tastaturlåsen når den mottar et innkommende anrop, og så slår den på igjen når samtalen er over."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lese synkroniseringsinnstillinger"</string>
@@ -951,7 +959,7 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Lag kontakt"\n"med nummeret <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Ett eller flere av de følgende programmene ber om tillatelse til å få tilgang til kontoen din fra nå av."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Vil du tillate dette?"</string>
-    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Få tilgang til forespørsler"</string>
+    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Forespørsel om tilgang"</string>
     <string name="allow" msgid="7225948811296386551">"Tillat"</string>
     <string name="deny" msgid="2081879885755434506">"Avslå"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Tillatelse forespurt"</string>
@@ -1019,4 +1027,13 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Velg en konto"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Øke"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Senke"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"Gå til startsiden"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"Gå opp"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Flere alternativer"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>

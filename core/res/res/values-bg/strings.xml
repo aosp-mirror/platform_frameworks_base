@@ -240,6 +240,10 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Разрешава промяна на събраните статистически данни за батерията. Не е предназначено за нормални приложения."</string>
     <string name="permlab_backup" msgid="470013022865453920">"контролиране на създаването и възстановяването на резервни копия на системата"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Разрешава на приложението да контролира системния механизъм за създаване и възстановяване на резервни копия. Не е предназначено за нормални приложения."</string>
+    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
+    <skip />
+    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <skip />
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"показване на неупълномощени прозорци"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Разрешава създаването на прозорци, предназначени за употреба от вътрешния системен потребителски интерфейс. Не е предназначено за нормални приложения."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"показване на сигнали на ниво система"</string>
@@ -446,6 +450,10 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Разрешава на приложението да вижда конфигурацията на локалния Bluetooth телефон и да изгражда и приема връзки със сдвоени устройства."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"контролиране на комуникацията в близкото поле"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Разрешава на приложението да комуникира с маркери, карти и четци, ползващи комуникация в близкото поле (NFC)."</string>
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"деактивиране на заключването на клавиатурата"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Разрешава на приложението да деактивира заключването на клавиатурата и свързаната защита с парола. Това е допустимо, когато например телефонът деактивира заключването при получаване на входящо обаждане и после го активира отново, когато обаждането завърши."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"четене на настройките за синхронизиране"</string>
@@ -1019,4 +1027,13 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Избор на профил"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Увеличаване"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Намаляване"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"Придвижване към „Начало“"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"Придвижване нагоре"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Още опции"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>

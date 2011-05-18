@@ -240,6 +240,10 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"수집된 배터리 통계를 수정할 수 있도록 합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
     <string name="permlab_backup" msgid="470013022865453920">"시스템 백업 및 복원 관리"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"애플리케이션이 시스템의 백업 및 복원 매커니즘을 제어할 수 있도록 합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
+    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
+    <skip />
+    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <skip />
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"인증되지 않은 창 표시"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"내부 시스템 사용자 인터페이스에서 사용하는 창을 만들 수 있도록 합니다. 일반 애플리케이션에서는 사용하지 않습니다."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"시스템 수준 경고 표시"</string>
@@ -446,6 +450,10 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"애플리케이션이 로컬 Bluetooth 전화의 구성을 보고 페어링된 장치에 연결하며 연결을 수락할 수 있도록 합니다."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"NFC(Near Field Communication) 제어"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"애플리케이션에서 NFC(Near Field Communication) 태그, 카드 및 리더와 통신할 수 있습니다."</string>
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"키 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"애플리케이션이 키 잠금 및 관련 비밀번호 보안을 사용 중지할 수 있도록 합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용 중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
@@ -1019,4 +1027,13 @@
     <string name="choose_account_label" msgid="4191313562041125787">"계정 선택"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"올리기"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"줄이기"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"홈 탐색"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"위로 탐색"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"옵션 더보기"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>

@@ -240,6 +240,8 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Consente la modifica delle statistiche sulla batteria raccolte. Da non usare per normali applicazioni."</string>
     <string name="permlab_backup" msgid="470013022865453920">"controllo del backup di sistema e ripristino"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Consente all\'applicazione di controllare il meccanismo di backup e ripristino del sistema. Da non usare per normali applicazioni."</string>
+    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"conferma di un\'operazione completa di backup o di ripristino"</string>
+    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"Consente all\'applicazione di lanciare l\'interfaccia utente di conferma del backup completo. Non utilizzabile da qualsiasi applicazione."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"visualizzazione finestre non autorizzate"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Consente la creazione di finestre destinate all\'uso nell\'interfaccia utente di sistema interna. Da non usare per normali applicazioni."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"visualizzazione avvisi di sistema"</string>
@@ -446,6 +448,10 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Consente a un\'applicazione di visualizzare la configurazione del telefono Bluetooth locale e di stabilire e accettare connessioni con dispositivi associati."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controllo Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Consente a un\'applicazione di comunicare con tag, schede e lettori NFC (Near Field Communication)."</string>
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"disattivazione blocco tastiera"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Consente la disattivazione da parte di un\'applicazione del blocco tastiera e di eventuali protezioni tramite password associate. Un valido esempio è la disattivazione da parte del telefono del blocco tastiera quando riceve una telefonata in entrata, e la successiva riattivazione del blocco al termine della chiamata."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lettura impostazioni di sincronizz."</string>
@@ -1019,4 +1025,13 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Seleziona un account"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Aumenta"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Diminuisci"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"Vai alla home page"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"Vai in alto"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Altre opzioni"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>

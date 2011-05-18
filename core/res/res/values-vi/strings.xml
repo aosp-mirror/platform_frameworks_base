@@ -240,6 +240,8 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Cho phép sửa đổi các thống kê pin được thu thập. Không dành cho các ứng dụng thông thường."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kiểm soát sao lưu và khôi phục hệ thống"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Cho phép ứng dụng kiểm soát cơ chế sao lưu và khôi phục hệ thống. Không dành cho các ứng dụng thông thường."</string>
+    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"xác nhận bản sao lưu đầy đủ hoặc khôi phục hoạt động"</string>
+    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"Cho phép ứng dụng khởi chạy toàn bộ Giao diện người dùng xác nhận sao lưu. Không được bất kỳ ứng dụng nào sử dụng."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"hiển thị các cửa sổ trái phép"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Cho phép tạo các cửa sổ được giao diện người dùng hệ thống nội bộ sử dụng. Không dành cho các ứng dụng thông thường."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"hiển thị thông báo cấp hệ thống"</string>
@@ -446,6 +448,10 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Cho phép ứng dụng xem cấu hình của điện thoại Bluetooth nội hạt cũng như tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kiểm soát Liên lạc trường gần"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Cho phép ứng dụng liên lạc với thẻ Liên lạc trường gần (NFC), thẻ và trình đọc."</string>
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"vô hiệu hoá khoá phím"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Cho phép ứng dụng vô hiệu hoá khoá phím và bất kỳ bảo mật mật khẩu được liên kết nào. Ví dụ thích hợp của việc này là điện thoại vô hiệu hoá khoá phím khi nhận được cuộc gọi đến sau đó bật lại khoá phím khi cuộc gọi kết thúc."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"đọc cài đặt đồng bộ hoá"</string>
@@ -1019,4 +1025,13 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Chọn tài khoản"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Tăng dần"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Giảm dần"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"Điều hướng về trang chủ"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"Điều hướng lên trên"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Tùy chọn khác"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>

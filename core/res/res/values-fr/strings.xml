@@ -240,6 +240,10 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Autoriser la modification des statistiques de la batterie. Les applications normales n\'utilisent pas cette fonctionnalité."</string>
     <string name="permlab_backup" msgid="470013022865453920">"contrôler la sauvegarde et la restauration du système"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Autorise l\'application à contrôler le mécanisme de sauvegarde et de restauration du système. Ne pas utiliser pour les applications standard."</string>
+    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
+    <skip />
+    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <skip />
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"Affichage de fenêtres non autorisées"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Permet de créer des fenêtres conçues pour l\'interface utilisateur du système interne. Les applications normales n\'utilisent pas cette fonctionnalité."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"Affichage d\'alertes système"</string>
@@ -446,6 +450,10 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Permet à une application d\'obtenir la configuration du téléphone Bluetooth local, de se connecter à des appareils associés et d\'accepter leur connexion."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"contrôler la communication en champ proche"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Permet à une application de communiquer avec des tags, cartes et lecteurs prenant en charge la communication en champ proche (NFC)."</string>
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"Désactivation du verrouillage des touches"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permet à une application de désactiver le verrouillage des touches et toute sécurité par mot de passe. Exemple : Votre téléphone désactive le verrouillage du clavier lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Lecture des paramètres de synchronisation"</string>
@@ -1019,4 +1027,13 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Sélectionner un compte"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Augmenter"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Diminuer"</string>
+    <string name="action_bar_home_description" msgid="5293600496601490216">"Retour à l\'accueil"</string>
+    <string name="action_bar_up_description" msgid="2237496562952152589">"Revenir en haut de la page"</string>
+    <string name="action_menu_overflow_description" msgid="2295659037509008453">"Plus d\'options"</string>
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
 </resources>
