@@ -156,9 +156,8 @@ class DragState {
         }
 
         if (mDragInProgress && newWin.isPotentialDragTarget()) {
-            DragEvent event = DragEvent.obtain(DragEvent.ACTION_DRAG_STARTED,
-                    touchX - newWin.mFrame.left, touchY - newWin.mFrame.top,
-                    null, desc, null, false);
+            DragEvent event = obtainDragEvent(newWin, DragEvent.ACTION_DRAG_STARTED,
+                    touchX, touchY, null, desc, null, false);
             try {
                 newWin.mClient.dispatchDragEvent(event);
                 // track each window that we've notified that the drag is starting
@@ -267,9 +266,8 @@ class DragState {
                     Slog.d(WindowManagerService.TAG, "sending DRAG_EXITED to " + mTargetWindow);
                 }
                 // force DRAG_EXITED_EVENT if appropriate
-                DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_EXITED,
-                        x - mTargetWindow.mFrame.left, y - mTargetWindow.mFrame.top,
-                        null, null, null, false);
+                DragEvent evt = obtainDragEvent(mTargetWindow, DragEvent.ACTION_DRAG_EXITED,
+                        x, y, null, null, null, false);
                 mTargetWindow.mClient.dispatchDragEvent(evt);
                 if (myPid != mTargetWindow.mSession.mPid) {
                     evt.recycle();
@@ -279,9 +277,8 @@ class DragState {
                 if (false && WindowManagerService.DEBUG_DRAG) {
                     Slog.d(WindowManagerService.TAG, "sending DRAG_LOCATION to " + touchedWin);
                 }
-                DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DRAG_LOCATION,
-                        x - touchedWin.mFrame.left, y - touchedWin.mFrame.top,
-                        null, null, null, false);
+                DragEvent evt = obtainDragEvent(touchedWin, DragEvent.ACTION_DRAG_LOCATION,
+                        x, y, null, null, null, false);
                 touchedWin.mClient.dispatchDragEvent(evt);
                 if (myPid != touchedWin.mSession.mPid) {
                     evt.recycle();
@@ -310,8 +307,7 @@ class DragState {
         }
         final int myPid = Process.myPid();
         final IBinder token = touchedWin.mClient.asBinder();
-        DragEvent evt = DragEvent.obtain(DragEvent.ACTION_DROP,
-                x - touchedWin.mFrame.left, y - touchedWin.mFrame.top,
+        DragEvent evt = obtainDragEvent(touchedWin, DragEvent.ACTION_DROP, x, y,
                 null, null, mData, false);
         try {
             touchedWin.mClient.dispatchDragEvent(evt);
@@ -364,5 +360,17 @@ class DragState {
         }
 
         return touchedWin;
+    }
+
+    private static DragEvent obtainDragEvent(WindowState win, int action,
+            float x, float y, Object localState,
+            ClipDescription description, ClipData data, boolean result) {
+        float winX = x - win.mFrame.left;
+        float winY = y - win.mFrame.top;
+        if (win.mEnforceSizeCompat) {
+            winX *= win.mGlobalScale;
+            winY *= win.mGlobalScale;
+        }
+        return DragEvent.obtain(action, winX, winY, localState, description, data, result);
     }
 }
