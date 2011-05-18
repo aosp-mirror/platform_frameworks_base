@@ -292,7 +292,8 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             LOGE("dequeueBuffer: MIN_UNDEQUEUED_BUFFERS=%d exceeded (dequeued=%d)",
                     MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode),
                     dequeuedCount);
-            return -EBUSY;
+            // TODO: Enable this error report after we fix issue 4435022
+            // return -EBUSY;
         }
 
         // we're in synchronous mode and didn't find a buffer, we need to wait
