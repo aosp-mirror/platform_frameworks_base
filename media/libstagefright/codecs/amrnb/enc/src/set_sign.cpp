@@ -552,10 +552,10 @@ void set_sign12k2(
         else
         {
             *(p_sign--) = -32767;                     /* sign = -1 */
-            cor = - (cor);
+            cor = negate(cor);
 
             /* modify dn[] according to the fixed sign */
-            dn[i] = - val;
+            dn[i] = negate(val);
         }
 
         *(p_en--) = cor;
