@@ -547,6 +547,25 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UC
     LOGD("         -- isDevKernText=%d", paint->isDevKernText());
 #endif
 
+    if (shaperItem.advances == NULL || shaperItem.num_glyphs == 0) {
+#if DEBUG_GLYPHS
+    LOGD("HARFBUZZ -- advances array is empty or num_glypth = 0");
+#endif
+        for (size_t i = 0; i < count; i++) {
+            outAdvances[i] = 0;
+        }
+        *outTotalAdvance = 0;
+
+        if (outGlyphs) {
+            *outGlyphsCount = 0;
+            *outGlyphs = new jchar[0];
+        }
+
+        // Cleaning
+        deleteGlyphArrays(&shaperItem);
+        HB_FreeFace(shaperItem.face);
+        return;
+    }
     // Get Advances and their total
     jfloat totalAdvance = outAdvances[0] = HBFixedToFloat(shaperItem.advances[shaperItem.log_clusters[0]]);
     for (size_t i = 1; i < count; i++) {
