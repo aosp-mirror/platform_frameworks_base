@@ -23,21 +23,22 @@
 #include <new>
 #include <media/EffectVisualizerApi.h>
 
-namespace android {
 
-// effect_interface_t interface implementation for visualizer effect
-extern "C" const struct effect_interface_s gVisualizerInterface;
+extern "C" {
+
+// effect_handle_t interface implementation for visualizer effect
+extern const struct effect_interface_s gVisualizerInterface;
 
 // Google Visualizer UUID: d069d9e0-8329-11df-9168-0002a5d5c51b
 const effect_descriptor_t gVisualizerDescriptor = {
         {0xe46b26a0, 0xdddd, 0x11db, 0x8afd, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}}, // type
         {0xd069d9e0, 0x8329, 0x11df, 0x9168, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}}, // uuid
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         (EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST),
         0, // TODO
         1,
         "Visualizer",
-        "Google Inc.",
+        "The Android Open Source Project",
 };
 
 enum visualizer_state_e {
@@ -90,10 +91,10 @@ int Visualizer_configure(VisualizerContext *pContext, effect_config_t *pConfig)
     if (pConfig->inputCfg.samplingRate != pConfig->outputCfg.samplingRate) return -EINVAL;
     if (pConfig->inputCfg.channels != pConfig->outputCfg.channels) return -EINVAL;
     if (pConfig->inputCfg.format != pConfig->outputCfg.format) return -EINVAL;
-    if (pConfig->inputCfg.channels != CHANNEL_STEREO) return -EINVAL;
+    if (pConfig->inputCfg.channels != AUDIO_CHANNEL_OUT_STEREO) return -EINVAL;
     if (pConfig->outputCfg.accessMode != EFFECT_BUFFER_ACCESS_WRITE &&
             pConfig->outputCfg.accessMode != EFFECT_BUFFER_ACCESS_ACCUMULATE) return -EINVAL;
-    if (pConfig->inputCfg.format != SAMPLE_FORMAT_PCM_S15) return -EINVAL;
+    if (pConfig->inputCfg.format != AUDIO_FORMAT_PCM_16_BIT) return -EINVAL;
 
     memcpy(&pContext->mConfig, pConfig, sizeof(effect_config_t));
 
@@ -118,16 +119,16 @@ int Visualizer_configure(VisualizerContext *pContext, effect_config_t *pConfig)
 int Visualizer_init(VisualizerContext *pContext)
 {
     pContext->mConfig.inputCfg.accessMode = EFFECT_BUFFER_ACCESS_READ;
-    pContext->mConfig.inputCfg.channels = CHANNEL_STEREO;
-    pContext->mConfig.inputCfg.format = SAMPLE_FORMAT_PCM_S15;
+    pContext->mConfig.inputCfg.channels = AUDIO_CHANNEL_OUT_STEREO;
+    pContext->mConfig.inputCfg.format = AUDIO_FORMAT_PCM_16_BIT;
     pContext->mConfig.inputCfg.samplingRate = 44100;
     pContext->mConfig.inputCfg.bufferProvider.getBuffer = NULL;
     pContext->mConfig.inputCfg.bufferProvider.releaseBuffer = NULL;
     pContext->mConfig.inputCfg.bufferProvider.cookie = NULL;
     pContext->mConfig.inputCfg.mask = EFFECT_CONFIG_ALL;
     pContext->mConfig.outputCfg.accessMode = EFFECT_BUFFER_ACCESS_ACCUMULATE;
-    pContext->mConfig.outputCfg.channels = CHANNEL_STEREO;
-    pContext->mConfig.outputCfg.format = SAMPLE_FORMAT_PCM_S15;
+    pContext->mConfig.outputCfg.channels = AUDIO_CHANNEL_OUT_STEREO;
+    pContext->mConfig.outputCfg.format = AUDIO_FORMAT_PCM_16_BIT;
     pContext->mConfig.outputCfg.samplingRate = 44100;
     pContext->mConfig.outputCfg.bufferProvider.getBuffer = NULL;
     pContext->mConfig.outputCfg.bufferProvider.releaseBuffer = NULL;
@@ -145,12 +146,13 @@ int Visualizer_init(VisualizerContext *pContext)
 //--- Effect Library Interface Implementation
 //
 
-extern "C" int EffectQueryNumberEffects(uint32_t *pNumEffects) {
+int VisualizerLib_QueryNumberEffects(uint32_t *pNumEffects) {
     *pNumEffects = 1;
     return 0;
 }
 
-extern "C" int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescriptor) {
+int VisualizerLib_QueryEffect(uint32_t index,
+                              effect_descriptor_t *pDescriptor) {
     if (pDescriptor == NULL) {
         return -EINVAL;
     }
@@ -161,14 +163,14 @@ extern "C" int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescripto
     return 0;
 }
 
-extern "C" int EffectCreate(effect_uuid_t *uuid,
-        int32_t sessionId,
-        int32_t ioId,
-        effect_interface_t *pInterface) {
+int VisualizerLib_Create(effect_uuid_t *uuid,
+                         int32_t sessionId,
+                         int32_t ioId,
+                         effect_handle_t *pHandle) {
     int ret;
     int i;
 
-    if (pInterface == NULL || uuid == NULL) {
+    if (pHandle == NULL || uuid == NULL) {
         return -EINVAL;
     }
 
@@ -183,25 +185,25 @@ extern "C" int EffectCreate(effect_uuid_t *uuid,
 
     ret = Visualizer_init(pContext);
     if (ret < 0) {
-        LOGW("EffectCreate() init failed");
+        LOGW("VisualizerLib_Create() init failed");
         delete pContext;
         return ret;
     }
 
-    *pInterface = (effect_interface_t)pContext;
+    *pHandle = (effect_handle_t)pContext;
 
     pContext->mState = VISUALIZER_STATE_INITIALIZED;
 
-    LOGV("EffectCreate %p", pContext);
+    LOGV("VisualizerLib_Create %p", pContext);
 
     return 0;
 
 }
 
-extern "C" int EffectRelease(effect_interface_t interface) {
-    VisualizerContext * pContext = (VisualizerContext *)interface;
+int VisualizerLib_Release(effect_handle_t handle) {
+    VisualizerContext * pContext = (VisualizerContext *)handle;
 
-    LOGV("EffectRelease %p", interface);
+    LOGV("VisualizerLib_Release %p", handle);
     if (pContext == NULL) {
         return -EINVAL;
     }
@@ -210,6 +212,22 @@ extern "C" int EffectRelease(effect_interface_t interface) {
 
     return 0;
 }
+
+int VisualizerLib_GetDescriptor(effect_uuid_t       *uuid,
+                                effect_descriptor_t *pDescriptor) {
+
+    if (pDescriptor == NULL || uuid == NULL){
+        LOGV("VisualizerLib_GetDescriptor() called with NULL pointer");
+        return -EINVAL;
+    }
+
+    if (memcmp(uuid, &gVisualizerDescriptor.uuid, sizeof(effect_uuid_t)) == 0) {
+        memcpy(pDescriptor, &gVisualizerDescriptor, sizeof(effect_descriptor_t));
+        return 0;
+    }
+
+    return  -EINVAL;
+} /* end VisualizerLib_GetDescriptor */
 
 //
 //--- Effect Control Interface Implementation
@@ -222,10 +240,10 @@ static inline int16_t clamp16(int32_t sample)
     return sample;
 }
 
-extern "C" int Visualizer_process(
-        effect_interface_t self,audio_buffer_t *inBuffer, audio_buffer_t *outBuffer)
+int Visualizer_process(
+        effect_handle_t self,audio_buffer_t *inBuffer, audio_buffer_t *outBuffer)
 {
-    android::VisualizerContext * pContext = (android::VisualizerContext *)self;
+    VisualizerContext * pContext = (VisualizerContext *)self;
 
     if (pContext == NULL) {
         return -EINVAL;
@@ -244,7 +262,7 @@ extern "C" int Visualizer_process(
     // this gives more interesting captures for display.
     int32_t shift = 32;
     int len = inBuffer->frameCount * 2;
-    for (size_t i = 0; i < len; i++) {
+    for (int i = 0; i < len; i++) {
         int32_t smp = inBuffer->s16[i];
         if (smp < 0) smp = -smp - 1; // take care to keep the max negative in range
         int32_t clz = __builtin_clz(smp);
@@ -293,10 +311,10 @@ extern "C" int Visualizer_process(
     return 0;
 }   // end Visualizer_process
 
-extern "C" int Visualizer_command(effect_interface_t self, uint32_t cmdCode, uint32_t cmdSize,
+int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
         void *pCmdData, uint32_t *replySize, void *pReplyData) {
 
-    android::VisualizerContext * pContext = (android::VisualizerContext *)self;
+    VisualizerContext * pContext = (VisualizerContext *)self;
     int retsize;
 
     if (pContext == NULL || pContext->mState == VISUALIZER_STATE_UNINITIALIZED) {
@@ -412,11 +430,40 @@ extern "C" int Visualizer_command(effect_interface_t self, uint32_t cmdCode, uin
     return 0;
 }
 
-// effect_interface_t interface implementation for visualizer effect
+/* Effect Control Interface Implementation: get_descriptor */
+int Visualizer_getDescriptor(effect_handle_t   self,
+                                    effect_descriptor_t *pDescriptor)
+{
+    VisualizerContext * pContext = (VisualizerContext *) self;
+
+    if (pContext == NULL || pDescriptor == NULL) {
+        LOGV("Visualizer_getDescriptor() invalid param");
+        return -EINVAL;
+    }
+
+    memcpy(pDescriptor, &gVisualizerDescriptor, sizeof(effect_descriptor_t));
+
+    return 0;
+}   /* end Visualizer_getDescriptor */
+
+// effect_handle_t interface implementation for visualizer effect
 const struct effect_interface_s gVisualizerInterface = {
         Visualizer_process,
-        Visualizer_command
+        Visualizer_command,
+        Visualizer_getDescriptor
 };
 
-} // namespace
 
+audio_effect_library_t AUDIO_EFFECT_LIBRARY_INFO_SYM = {
+    tag : AUDIO_EFFECT_LIBRARY_TAG,
+    version : EFFECT_LIBRARY_API_VERSION,
+    name : "Visualizer Library",
+    implementor : "The Android Open Source Project",
+    query_num_effects : VisualizerLib_QueryNumberEffects,
+    query_effect : VisualizerLib_QueryEffect,
+    create_effect : VisualizerLib_Create,
+    release_effect : VisualizerLib_Release,
+    get_descriptor : VisualizerLib_GetDescriptor,
+};
+
+}; // extern "C"

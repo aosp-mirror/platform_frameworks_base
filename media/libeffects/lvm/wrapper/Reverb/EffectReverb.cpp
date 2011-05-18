@@ -27,7 +27,7 @@
 #include <EffectReverb.h>
 #include <LVREV.h>
 
-// effect_interface_t interface implementation for reverb
+// effect_handle_t interface implementation for reverb
 extern "C" const struct effect_interface_s gReverbInterface;
 
 #define LVM_ERROR_CHECK(LvmStatus, callingFunc, calledFunc){\
@@ -77,7 +77,7 @@ const static t_reverb_settings sReverbPresets[] = {
 const effect_descriptor_t gAuxEnvReverbDescriptor = {
         { 0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac, { 0x4e, 0x23, 0x4d, 0x06, 0x83, 0x9e } },
         { 0x4a387fc0, 0x8ab3, 0x11df, 0x8bad, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } },
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         EFFECT_FLAG_TYPE_AUXILIARY,
         LVREV_CUP_LOAD_ARM9E,
         LVREV_MEM_USAGE,
@@ -89,7 +89,7 @@ const effect_descriptor_t gAuxEnvReverbDescriptor = {
 static const effect_descriptor_t gInsertEnvReverbDescriptor = {
         {0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac, {0x4e, 0x23, 0x4d, 0x06, 0x83, 0x9e}},
         {0xc7a511a0, 0xa3bb, 0x11df, 0x860e, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST | EFFECT_FLAG_VOLUME_CTRL,
         LVREV_CUP_LOAD_ARM9E,
         LVREV_MEM_USAGE,
@@ -101,7 +101,7 @@ static const effect_descriptor_t gInsertEnvReverbDescriptor = {
 static const effect_descriptor_t gAuxPresetReverbDescriptor = {
         {0x47382d60, 0xddd8, 0x11db, 0xbf3a, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         {0xf29a1400, 0xa3bb, 0x11df, 0x8ddc, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         EFFECT_FLAG_TYPE_AUXILIARY,
         LVREV_CUP_LOAD_ARM9E,
         LVREV_MEM_USAGE,
@@ -113,7 +113,7 @@ static const effect_descriptor_t gAuxPresetReverbDescriptor = {
 static const effect_descriptor_t gInsertPresetReverbDescriptor = {
         {0x47382d60, 0xddd8, 0x11db, 0xbf3a, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         {0x172cdf00, 0xa3bc, 0x11df, 0xa72f, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST | EFFECT_FLAG_VOLUME_CTRL,
         LVREV_CUP_LOAD_ARM9E,
         LVREV_MEM_USAGE,
@@ -192,7 +192,8 @@ extern "C" int EffectQueryNumberEffects(uint32_t *pNumEffects){
     return 0;
 }     /* end EffectQueryNumberEffects */
 
-extern "C" int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescriptor){
+extern "C" int EffectQueryEffect(uint32_t index,
+                                 effect_descriptor_t *pDescriptor){
     LOGV("\n\tEffectQueryEffect start");
     LOGV("\tEffectQueryEffect processing index %d", index);
     if (pDescriptor == NULL){
@@ -211,7 +212,7 @@ extern "C" int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescripto
 extern "C" int EffectCreate(effect_uuid_t       *uuid,
                             int32_t             sessionId,
                             int32_t             ioId,
-                            effect_interface_t  *pInterface){
+                            effect_handle_t  *pHandle){
     int ret;
     int i;
     int length = sizeof(gDescriptors) / sizeof(const effect_descriptor_t *);
@@ -219,7 +220,7 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
 
     LOGV("\t\nEffectCreate start");
 
-    if (pInterface == NULL || uuid == NULL){
+    if (pHandle == NULL || uuid == NULL){
         LOGV("\tLVM_ERROR : EffectCreate() called with NULL pointer");
         return -EINVAL;
     }
@@ -270,7 +271,7 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
         return ret;
     }
 
-    *pInterface = (effect_interface_t)pContext;
+    *pHandle = (effect_handle_t)pContext;
 
     #ifdef LVM_PCM
     pContext->PcmInPtr = NULL;
@@ -295,10 +296,10 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
     return 0;
 } /* end EffectCreate */
 
-extern "C" int EffectRelease(effect_interface_t interface){
-    ReverbContext * pContext = (ReverbContext *)interface;
+extern "C" int EffectRelease(effect_handle_t handle){
+    ReverbContext * pContext = (ReverbContext *)handle;
 
-    LOGV("\tEffectRelease %p", interface);
+    LOGV("\tEffectRelease %p", handle);
     if (pContext == NULL){
         LOGV("\tLVM_ERROR : EffectRelease called with NULL pointer");
         return -EINVAL;
@@ -314,6 +315,28 @@ extern "C" int EffectRelease(effect_interface_t interface){
     delete pContext;
     return 0;
 } /* end EffectRelease */
+
+extern "C" int EffectGetDescriptor(effect_uuid_t       *uuid,
+                                   effect_descriptor_t *pDescriptor) {
+    int i;
+    int length = sizeof(gDescriptors) / sizeof(const effect_descriptor_t *);
+
+    if (pDescriptor == NULL || uuid == NULL){
+        LOGV("EffectGetDescriptor() called with NULL pointer");
+        return -EINVAL;
+    }
+
+    for (i = 0; i < length; i++) {
+        if (memcmp(uuid, &gDescriptors[i]->uuid, sizeof(effect_uuid_t)) == 0) {
+            memcpy(pDescriptor, gDescriptors[i], sizeof(effect_descriptor_t));
+            LOGV("EffectGetDescriptor - UUID matched Reverb type %d, UUID = %x",
+                 i, gDescriptors[i]->uuid.timeLow);
+            return 0;
+        }
+    }
+
+    return -EINVAL;
+} /* end EffectGetDescriptor */
 
 /* local functions */
 #define CHECK_ARG(cond) {                     \
@@ -418,9 +441,9 @@ int process( LVM_INT16     *pIn,
 
 
     // Check that the input is either mono or stereo
-    if (pContext->config.inputCfg.channels == CHANNEL_STEREO) {
+    if (pContext->config.inputCfg.channels == AUDIO_CHANNEL_OUT_STEREO) {
         samplesPerFrame = 2;
-    } else if (pContext->config.inputCfg.channels != CHANNEL_MONO) {
+    } else if (pContext->config.inputCfg.channels != AUDIO_CHANNEL_OUT_MONO) {
         LOGV("\tLVREV_ERROR : process invalid PCM format");
         return -EINVAL;
     }
@@ -608,12 +631,12 @@ int Reverb_configure(ReverbContext *pContext, effect_config_t *pConfig){
 
     CHECK_ARG(pConfig->inputCfg.samplingRate == pConfig->outputCfg.samplingRate);
     CHECK_ARG(pConfig->inputCfg.format == pConfig->outputCfg.format);
-    CHECK_ARG((pContext->auxiliary && pConfig->inputCfg.channels == CHANNEL_MONO) ||
-              ((!pContext->auxiliary) && pConfig->inputCfg.channels == CHANNEL_STEREO));
-    CHECK_ARG(pConfig->outputCfg.channels == CHANNEL_STEREO);
+    CHECK_ARG((pContext->auxiliary && pConfig->inputCfg.channels == AUDIO_CHANNEL_OUT_MONO) ||
+              ((!pContext->auxiliary) && pConfig->inputCfg.channels == AUDIO_CHANNEL_OUT_STEREO));
+    CHECK_ARG(pConfig->outputCfg.channels == AUDIO_CHANNEL_OUT_STEREO);
     CHECK_ARG(pConfig->outputCfg.accessMode == EFFECT_BUFFER_ACCESS_WRITE
               || pConfig->outputCfg.accessMode == EFFECT_BUFFER_ACCESS_ACCUMULATE);
-    CHECK_ARG(pConfig->inputCfg.format == SAMPLE_FORMAT_PCM_S15);
+    CHECK_ARG(pConfig->inputCfg.format == AUDIO_FORMAT_PCM_16_BIT);
 
     if(pConfig->inputCfg.samplingRate != 44100){
         return -EINVAL;
@@ -700,20 +723,20 @@ int Reverb_init(ReverbContext *pContext){
 
     pContext->config.inputCfg.accessMode                    = EFFECT_BUFFER_ACCESS_READ;
     if (pContext->auxiliary) {
-        pContext->config.inputCfg.channels                  = CHANNEL_MONO;
+        pContext->config.inputCfg.channels                  = AUDIO_CHANNEL_OUT_MONO;
     } else {
-        pContext->config.inputCfg.channels                  = CHANNEL_STEREO;
+        pContext->config.inputCfg.channels                  = AUDIO_CHANNEL_OUT_STEREO;
     }
 
-    pContext->config.inputCfg.format                        = SAMPLE_FORMAT_PCM_S15;
+    pContext->config.inputCfg.format                        = AUDIO_FORMAT_PCM_16_BIT;
     pContext->config.inputCfg.samplingRate                  = 44100;
     pContext->config.inputCfg.bufferProvider.getBuffer      = NULL;
     pContext->config.inputCfg.bufferProvider.releaseBuffer  = NULL;
     pContext->config.inputCfg.bufferProvider.cookie         = NULL;
     pContext->config.inputCfg.mask                          = EFFECT_CONFIG_ALL;
     pContext->config.outputCfg.accessMode                   = EFFECT_BUFFER_ACCESS_ACCUMULATE;
-    pContext->config.outputCfg.channels                     = CHANNEL_STEREO;
-    pContext->config.outputCfg.format                       = SAMPLE_FORMAT_PCM_S15;
+    pContext->config.outputCfg.channels                     = AUDIO_CHANNEL_OUT_STEREO;
+    pContext->config.outputCfg.format                       = AUDIO_FORMAT_PCM_16_BIT;
     pContext->config.outputCfg.samplingRate                 = 44100;
     pContext->config.outputCfg.bufferProvider.getBuffer     = NULL;
     pContext->config.outputCfg.bufferProvider.releaseBuffer = NULL;
@@ -800,7 +823,7 @@ int Reverb_init(ReverbContext *pContext){
     params.OperatingMode  = LVM_MODE_ON;
     params.SampleRate     = LVM_FS_44100;
 
-    if(pContext->config.inputCfg.channels == CHANNEL_MONO){
+    if(pContext->config.inputCfg.channels == AUDIO_CHANNEL_OUT_MONO){
         params.SourceFormat   = LVM_MONO;
     } else {
         params.SourceFormat   = LVM_STEREO;
@@ -1832,8 +1855,9 @@ int Reverb_setParameter (ReverbContext *pContext, void *pParam, void *pValue){
 } // namespace
 } // namespace
 
+extern "C" {
 /* Effect Control Interface Implementation: Process */
-extern "C" int Reverb_process(effect_interface_t   self,
+int Reverb_process(effect_handle_t   self,
                                  audio_buffer_t         *inBuffer,
                                  audio_buffer_t         *outBuffer){
     android::ReverbContext * pContext = (android::ReverbContext *) self;
@@ -1868,7 +1892,7 @@ extern "C" int Reverb_process(effect_interface_t   self,
 }   /* end Reverb_process */
 
 /* Effect Control Interface Implementation: Command */
-extern "C" int Reverb_command(effect_interface_t  self,
+int Reverb_command(effect_handle_t  self,
                               uint32_t            cmdCode,
                               uint32_t            cmdSize,
                               void                *pCmdData,
@@ -2075,9 +2099,54 @@ extern "C" int Reverb_command(effect_interface_t  self,
     return 0;
 }    /* end Reverb_command */
 
-// effect_interface_t interface implementation for Reverb effect
+/* Effect Control Interface Implementation: get_descriptor */
+int Reverb_getDescriptor(effect_handle_t   self,
+                                    effect_descriptor_t *pDescriptor)
+{
+    android::ReverbContext * pContext = (android::ReverbContext *)self;
+    const effect_descriptor_t *desc;
+
+    if (pContext == NULL || pDescriptor == NULL) {
+        LOGV("Reverb_getDescriptor() invalid param");
+        return -EINVAL;
+    }
+
+    if (pContext->auxiliary) {
+        if (pContext->preset) {
+            desc = &android::gAuxPresetReverbDescriptor;
+        } else {
+            desc = &android::gAuxEnvReverbDescriptor;
+        }
+    } else {
+        if (pContext->preset) {
+            desc = &android::gInsertPresetReverbDescriptor;
+        } else {
+            desc = &android::gInsertEnvReverbDescriptor;
+        }
+    }
+
+    memcpy(pDescriptor, desc, sizeof(effect_descriptor_t));
+
+    return 0;
+}   /* end Reverb_getDescriptor */
+
+// effect_handle_t interface implementation for Reverb effect
 const struct effect_interface_s gReverbInterface = {
     Reverb_process,
-    Reverb_command
+    Reverb_command,
+    Reverb_getDescriptor
 };    /* end gReverbInterface */
 
+audio_effect_library_t AUDIO_EFFECT_LIBRARY_INFO_SYM = {
+    tag : AUDIO_EFFECT_LIBRARY_TAG,
+    version : EFFECT_LIBRARY_API_VERSION,
+    name : "Reverb Library",
+    implementor : "NXP Software Ltd.",
+    query_num_effects : android::EffectQueryNumberEffects,
+    query_effect : android::EffectQueryEffect,
+    create_effect : android::EffectCreate,
+    release_effect : android::EffectRelease,
+    get_descriptor : android::EffectGetDescriptor,
+};
+
+}

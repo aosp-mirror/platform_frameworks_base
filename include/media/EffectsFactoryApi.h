@@ -20,7 +20,7 @@
 #include <errno.h>
 #include <stdint.h>
 #include <sys/types.h>
-#include <media/EffectApi.h>
+#include <hardware/audio_effect.h>
 
 #if __cplusplus
 extern "C" {
@@ -99,17 +99,17 @@ int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescriptor);
 //              use especially with tunneled HW accelerated effects
 //
 //    Input/Output:
-//          pInterface:    address where to return the effect interface.
+//          pHandle:        address where to return the effect handle.
 //
 //    Output:
 //        returned value:    0          successful operation.
 //                          -ENODEV     factory failed to initialize
-//                          -EINVAL     invalid pEffectUuid or pInterface
+//                          -EINVAL     invalid pEffectUuid or pHandle
 //                          -ENOENT     no effect with this uuid found
-//        *pInterface:     updated with the effect interface.
+//        *pHandle:         updated with the effect handle.
 //
 ////////////////////////////////////////////////////////////////////////////////
-int EffectCreate(effect_uuid_t *pEffectUuid, int32_t sessionId, int32_t ioId, effect_interface_t *pInterface);
+int EffectCreate(effect_uuid_t *pEffectUuid, int32_t sessionId, int32_t ioId, effect_handle_t *pHandle);
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -120,7 +120,7 @@ int EffectCreate(effect_uuid_t *pEffectUuid, int32_t sessionId, int32_t ioId, ef
 //          released.
 //
 //    Input:
-//          interface:    handler on the effect interface to be released.
+//          handle:    handler on the effect interface to be released.
 //
 //    Output:
 //        returned value:    0          successful operation.
@@ -128,7 +128,7 @@ int EffectCreate(effect_uuid_t *pEffectUuid, int32_t sessionId, int32_t ioId, ef
 //                          -EINVAL     invalid interface handler
 //
 ////////////////////////////////////////////////////////////////////////////////
-int EffectRelease(effect_interface_t interface);
+int EffectRelease(effect_handle_t handle);
 
 ////////////////////////////////////////////////////////////////////////////////
 //

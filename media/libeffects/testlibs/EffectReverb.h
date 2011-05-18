@@ -40,7 +40,7 @@ if the buffer size is a power of two.
                                             )
 
 #define NUM_OUTPUT_CHANNELS 2
-#define OUTPUT_CHANNELS CHANNEL_STEREO
+#define OUTPUT_CHANNELS AUDIO_CHANNEL_OUT_STEREO
 
 #define REVERB_BUFFER_SIZE_IN_SAMPLES_MAX   16384
 
@@ -306,19 +306,22 @@ int EffectQueryEffect(uint32_t index,
 int EffectCreate(effect_uuid_t *effectUID,
                  int32_t sessionId,
                  int32_t ioId,
-                 effect_interface_t *pInterface);
-int EffectRelease(effect_interface_t interface);
+                 effect_handle_t *pHandle);
+int EffectRelease(effect_handle_t handle);
+int EffectGetDescriptor(effect_uuid_t       *uuid,
+                        effect_descriptor_t *pDescriptor);
 
-static int Reverb_Process(effect_interface_t self,
+static int Reverb_Process(effect_handle_t self,
                           audio_buffer_t *inBuffer,
                           audio_buffer_t *outBuffer);
-static int Reverb_Command(effect_interface_t self,
+static int Reverb_Command(effect_handle_t self,
                           uint32_t cmdCode,
                           uint32_t cmdSize,
                           void *pCmdData,
                           uint32_t *replySize,
                           void *pReplyData);
-
+static int Reverb_GetDescriptor(effect_handle_t   self,
+                                effect_descriptor_t *pDescriptor);
 
 /*------------------------------------
  * internal functions

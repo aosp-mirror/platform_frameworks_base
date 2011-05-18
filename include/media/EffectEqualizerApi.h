@@ -17,7 +17,7 @@
 #ifndef ANDROID_EFFECTEQUALIZERAPI_H_
 #define ANDROID_EFFECTEQUALIZERAPI_H_
 
-#include <media/EffectApi.h>
+#include <hardware/audio_effect.h>
 
 #ifndef OPENSL_ES_H_
 static const effect_uuid_t SL_IID_EQUALIZER_ = { 0x0bed4300, 0xddd6, 0x11db, 0x8f34, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b } };

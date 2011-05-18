@@ -23,7 +23,7 @@
 #include <media/IAudioFlinger.h>
 #include <media/IEffect.h>
 #include <media/IEffectClient.h>
-#include <media/EffectApi.h>
+#include <hardware/audio_effect.h>
 #include <media/AudioSystem.h>
 
 #include <utils/RefBase.h>
@@ -298,7 +298,7 @@ public:
      */
             int32_t     id() const { return mId; }
 
-    /* Returns a descriptor for the effect (see effect_descriptor_t in EffectApi.h).
+    /* Returns a descriptor for the effect (see effect_descriptor_t in audio_effect.h).
      */
             effect_descriptor_t descriptor() const;
 
@@ -324,7 +324,7 @@ public:
      *
      * Parameters:
      *      param:  pointer to effect_param_t structure containing the parameter
-     *          and its value (See EffectApi.h).
+     *          and its value (See audio_effect.h).
      * Returned status (from utils/Errors.h) can be:
      *  - NO_ERROR: successful operation.
      *  - INVALID_OPERATION: the application does not have control of the effect engine.
@@ -340,7 +340,7 @@ public:
      *
      * Parameters:
      *      param:  pointer to effect_param_t structure containing the parameter
-     *          and its value (See EffectApi.h).
+     *          and its value (See audio_effect.h).
      *
      * Returned status (from utils/Errors.h) can be:
      *  - NO_ERROR: successful operation.
@@ -368,7 +368,7 @@ public:
      *
      * Parameters:
      *      param:  pointer to effect_param_t structure containing the parameter
-     *          and the returned value (See EffectApi.h).
+     *          and the returned value (See audio_effect.h).
      *
      * Returned status (from utils/Errors.h) can be:
      *  - NO_ERROR: successful operation.
@@ -379,7 +379,7 @@ public:
      virtual status_t   getParameter(effect_param_t *param);
 
      /* Sends a command and receives a response to/from effect engine.
-      *     See EffectApi.h for details on effect command() function, valid command codes
+      *     See audio_effect.h for details on effect command() function, valid command codes
       *     and formats.
       */
      virtual status_t command(uint32_t cmdCode,
