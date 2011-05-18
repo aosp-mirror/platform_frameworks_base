@@ -1,0 +1,643 @@
+page.title=Multiple APK Support
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>Quickview</h2>
+  <ul>
+    <li>Simultaneously publish different APKs for different
+device configurations</li>
+    <li>Different APKs are distributed to different devices based on filters declared in the
+manifest file</li>
+    <li>You should publish multiple APKs only when it's not possible or reasonable to
+support all desired devices with a single APK</li>
+  </ul>
+
+  <h2>In this document</h2>
+<ol>
+  <li><a href="#Concepts">Publishing Concepts</a>
+    <ol>
+      <li><a href="#Active">Active APKs</a></li>
+      <li><a href="#SimpleAndAdvanced">Simple mode and advanced mode</a></li>
+    </ol>
+  </li>
+  <li><a href="#HowItWorks">How Multiple APKs Work</a>
+    <ol>
+      <li><a href="#SupportedFilters">Supported filters</a></li>
+      <li><a href="#Rules">Rules for multiple APKs</a></li>
+    </ol>
+  </li>
+  <li><a href="#CreatingApks">Creating Multiple APKs</a>
+    <ol>
+      <li><a href="#VersionCodes">Assigning version codes</a></li>
+    </ol>
+  </li>
+  <li><a href="#SingleAPK">Using a Single APK Instead</a>
+    <ol>
+      <li><a href="#TextureOptions">Supporting multiple GL textures</a></li>
+      <li><a href="#ScreenOptions">Supporting multiple screens</a></li>
+      <li><a href="#ApiLevelOptions">Supporting multiple API levels</a></li>
+    </ol>
+  </li>
+</ol>
+
+  <h2>See also</h2>
+<ol>
+  <li><a href="{@docRoot}guide/appendix/market-filters.html">Market Filters</a></li>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a></li>
+  <li><a href="{@docRoot}sdk/compatibility-library.html">Compatibility
+Package</a></li>
+  <li><a href="{@docRoot}guide/appendix/api-levels.html">Android API Levels</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>Multiple APK support is a feature in Android Market that allows you to publish different APKs
+for your application that are each targeted to different device configurations. Each APK is a
+complete and independent version of your application, but they share the same application listing on
+Android Market and must share the same package name and be signed with the same release key. This
+feature is useful for cases in which your application cannot reach all desired devices with a single
+APK.</p>
+
+<p>Android-powered devices may differ in several ways and it's important
+to the success of your application that you make it available to as many devices as possible.
+Android applications usually run on most compatible devices with a single APK, by supplying
+alternative resources for different configurations (for example, different layouts for different
+screen sizes) and the Android system selects the appropriate resources for the device at runtime. In
+a few cases, however, a single APK is unable to support all device configurations, because
+alternative resources make the APK file too big (greater than 50MB) or other technical challenges
+prevent a single APK from working on all devices.</p>
+
+<p>Although <strong>we encourage you to develop and publish a single APK</strong> that supports as
+many device configurations as possible, doing so is sometimes not possible. To help
+you publish your application for as many devices as possible, Android Market allows you to
+publish multiple APKs under the same application listing. Android Market then supplies each APK to
+the appropriate devices based on configuration support you've declared in the manifest file of each
+APK.</p>
+
+<p>By publishing your application with multiple APKs, you can:</p>
+
+<ul>
+  <li>Support different OpenGL texture compression formats with each APK.</li>
+  <li>Support different screen configurations with each APK.</li>
+  <li>Support different platform versions with each APK.</li>
+</ul>
+
+<p>Currently, these are the only device characteristics that Android Market supports for publishing
+multiple APKs as the same application.</p>
+
+<p class="note"><strong>Note:</strong> You should generally use multiple APKs to support
+different device configurations <strong>only when your APK is too large</strong> (greater than
+50MB). Using a single APK to support different configurations is always the best practice,
+because it makes the path for application updates simple and clear for users (and also makes
+your life simpler by avoiding development and publishing complexity). Read the section below about
+<a href="#SingleAPK">Using a Single APK Instead</a> to
+consider your options before publishing multiple APKs.</p>
+
+
+<h2 id="Concepts">Publishing Concepts</h2>
+
+<p>Before you start publishing multiple APKs on Android Market, you must understand a few
+concepts regarding how the Android Market publisher site works.</p>
+
+<h3 id="Active">Active APKs</h3>
+
+<div class="sidebox-wrapper">
+<div class="sidebox">
+  <h4>The difference between "Publish" and "Save"</h4>
+  <p>When editing your application, there are two buttons on the top-right side of the page. The
+first button is either <strong>Publish</strong> or <strong>Unpublish</strong> and the second
+button is always <strong>Save</strong> (but its behavior changes).</p>
+  <p>When your application is new or you have unpublished it from Market, the first
+button says <strong>Publish</strong>. Clicking it will publish any APKs listed as
+Active, making them available on Android Market. Also while your application is new
+or unpublished, clicking <strong>Save</strong> will save any changes you've made, such
+as information added to the Product details and APKs you've uploaded, but nothing is made visible on
+Android Market&mdash;this allows you to save your changes and sign out of the publisher site before
+deciding to publish.</p>
+ <p>Once you've published your application, the first button changes to
+<strong>Unpublish</strong>. Clicking it in this state unpublishes your application so that none
+of the APKs are available on Android Market. Also while published, the behavior of the
+<strong>Save</strong> button is different. In this state, clicking <strong>Save</strong> not
+only saves all your changes, but also publishes them to Android Market. For example, if you've
+already published your application and then make changes to your product details or activate new
+APKs, clicking <strong>Save</strong> makes all those changes live on Android Market.</p>
+</div>
+</div>
+
+
+<p>Before you can publish your application (whether publishing one or multiple APKs), you
+must "activate" your APK(s) from the <strong>APK files</strong> tab. When you activate an APK, it
+moves into the list of <em>Active</em> APKs. This list allows you to preview which APK(s)
+you're about to publish.</p>
+
+<p>If there are no errors, any "active" APK will be published to
+Android Market when you click the <strong>Publish</strong> button (if the application is
+unpublished) or when you click the <strong>Save</strong> button (if the application is
+already published).</p>
+
+
+<h3 id="SimpleAndAdvanced">Simple mode and advanced mode</h3>
+
+<p>The Android Market publisher site provides two modes for managing the APKs associated with
+your application: <em>simple mode</em> and <em>advanced mode</em>. You can switch between these by
+clicking the
+link at the top-right corner of the <strong>APK files</strong> tab.</p>
+
+<p>Simple mode is the traditional way to publish an application, using one APK at a time. In
+simple mode, only one APK can be activated at a time. If you upload a new APK to update
+the application, clicking "Activate" on the new APK deactivates the currently
+active APK (you must then click <strong>Save</strong> to publish the new APK).</p>
+
+<p>Advanced mode allows you to activate and publish multiple APKs that are each designed for a
+specific set of device configurations. However, there are several rules based on the manifest
+declarations in each APK that determine whether you're allowed to activate each APK along with
+others. When you activate an APK and it violates one of the rules, you will receive an error or
+warning message. If it's an error, you cannot publish until you resolve the problem; if it's a
+warning, you can publish the activated APKs, but there might be unintended consequences as to
+whether your application is available for different devices. These rules are discussed more
+below.</p>
+
+
+<h2 id="HowItWorks">How Multiple APKs Work</h2>
+
+<p>The concept for using multiple APKs on Android Market is that you have just one entry in
+Android Market for your application, but different devices might download a different APK. This
+means that:</p>
+
+<ul>
+  <li>You maintain only one set of product details (app description, icons, screenshots, etc.).
+This also means you <em>cannot</em> charge a different price for different APKs.</li>
+  <li>All users see only one version of your application on Android Market, so they are not
+confused by different versions you may have published that are "for tablets" or
+"for phones."</li>
+  <li>All user reviews are applied to the same application listing, even though users on different
+devices may have different APKs.</li>
+  <li>If you publish different APKs for different versions of Android (for different API levels),
+then when a user's device receives a system update that qualifies them for a different APK you've
+published, Android Market updates the user's application to the APK designed for the higher version
+of Android. Any system data associated with the application is retained (the same as with normal
+application updates when using a single APK).</li>
+</ul>
+
+<p>To publish multiple APKs for the same application, you must enable <strong>Advanced mode</strong>
+in your application's <strong>APK files</strong> tab (as discussed in the previous section). Once
+in advanced mode, you can upload, activate, then publish multiple APKs for the same application. The
+following sections describe more about how it works.</p>
+
+
+<h3 id="SupportedFilters">Supported filters</h3>
+
+<p>Which devices receive each APK is determined by <a
+href="{@docRoot}guide/appendix/market-filters.html">Android Market filters</a> that are specified by
+elements in the manifest file of each APK. However, Android Market allows you to publish multiple
+APKs only when each APK uses filters to support a variation of the following
+device characteristics:</p>
+
+<ul>
+  <li><strong>OpenGL texture compression formats</strong>
+    <p>This is based on your manifest file's <a
+href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
+&lt;supports-gl-texture&gt;}</a> element(s).</p>
+    <p>For example, when developing a game that uses OpenGL ES, you can provide one APK for
+devices that support ATI texture compression and a separate APK for devices
+that support PowerVR compression (among many others).</p>
+  <br/>
+  </li>
+
+  <li><strong>Screen size (and, optionally, screen density)</strong>
+    <p>This is based on your manifest file's <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> <em>or</em> <a
+href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens&gt;}</a> element. You should never use both elements and you should use only
+<a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> when possible.</p>
+    <p>For example, you can provide one APK that supports small and normal size screens and another
+APK that supports large and xlarge screens.</p>
+
+    <p class="note"><strong>Note:</strong> The Android system provides strong support for
+applications to support all screen configurations with a single APK. You should avoid creating
+multiple APKs to support different screens unless absolutely necessary and instead follow the guide
+to <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a> so that your application is flexible and can adapt to all screen configurations
+with a single APK.</p>
+    <p class="caution"><strong>Caution:</strong> By default, all screen size attributes in the <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> element are "true" if you do not declare them otherwise. However,
+because the {@code android:xlargeScreens} attribute was added in Android 2.3 (API level
+9), Android Market will assume that it is "false" if your application does not set either <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+android:minSdkVersion}</a> or <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
+android:targetSdkVersion}</a> to "9" or higher.</p>
+    <p class="caution"><strong>Caution:</strong> You should not combine both <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> and <a
+href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
+&lt;compatible-screens&gt;}</a> elements in your manifest file. Using both increases the chances
+that you'll introduce an error due to conflicts between them. For help deciding which to use, read
+<a href="{@docRoot}guide/practices/screens-distribution.html">Distributing to Specific Screens</a>.
+If you can't avoid using both, be aware that for any conflicts in agreement between a given size,
+"false" will win.</p>
+  <br/>
+  </li>
+
+  <li><strong>API level</strong>
+    <p>This is based on your manifest file's <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html">{@code &lt;uses-sdk&gt;}</a> element.
+You
+can use both the <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+android:minSdkVersion}</a> and <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#max">{@code android:maxSdkVersion}</a>
+attributes to specify support for different API levels.</p>
+    <p>For example, you can publish your application with one APK that supports API levels 4 - 7
+(Android 1.6 - 2.1)&mdash;using only APIs available since API level 4 or lower&mdash;and another
+APK that supports API levels 8 and above (Android 2.2+)&mdash;using APIs available since API level 8
+or lower.</p>
+    <div class="note">
+      <p><strong>Note:</strong></p>
+      <ul>
+        <li>If you use this characteristic as the factor to distinguish multiple APKs, then the APK
+with a higher <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+android:minSdkVersion}</a> value must have a higher <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code android:versionCode}</a>
+value. This is also true if two APKs overlap their device support based on a different supported
+filter. This ensures that when a device receives a system update, Android Market can offer the user
+an update for your application (because updates are based on an increase in the app version code).
+This requirement is described further in the section below about <a href="#Rules">Rules for
+multiple APKs</a>.</li>
+        <li>You should avoid using <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#max">{@code
+android:maxSdkVersion}</a> in general, because as long as you've properly developed your
+application with public APIs, it is always compatible with future versions of Android. If you want
+to publish a different APK for higher API levels, you still do not need to specify the
+maximum version, because if the <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
+android:minSdkVersion}</a> is {@code "4"} in one APK and {@code "8"} in another, devices that
+support API level 8 or higher will always receive the second APK (because it's version code is
+higher, as per the previous note).</li>
+    </ul>
+  </div>
+  </li>
+</ul>
+
+<p>Other manifest elements that enable <a
+href="{@docRoot}guide/appendix/market-filters.html">Android Market filters</a>&mdash;but are not
+listed above&mdash;are still applied for each APK as usual. However, Android Market does not allow
+you to publish multiple APKs based on variations of them. Thus, you cannot publish
+multiple APKs if the above listed filters are the same for each APK (but the APKs differ based on
+other characteristics in the manifest file). For
+example, you cannot provide different APKs that differ purely on the <a
+href="{@docRoot}guide/topics/manifest/uses-configuration-element.html">{@code
+&lt;uses-configuration&gt;}</a> characteristics.</p>
+
+
+
+<h3 id="Rules">Rules for multiple APKs</h3>
+
+<p>Before you enable advanced mode to publish multiple APKs for your application, you need to
+understand the following rules that define how publishing multiple APKs works:</p>
+
+<ul>
+  <li>All APKs you publish for the same application <strong>must have the same package
+name and be signed with the same certificate key</strong>.</li>
+
+  <li>Each APK <strong>must have a different version code</strong>, specified by the
+<a href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code
+android:versionCode}</a> attribute.</li>
+
+  <li>Each APK <strong>must not exactly match the configuration support of another APK</strong>.
+    <p>That is, each APK must declare slightly different support for at least one of
+the <a href="#MarketFiltersSupported">supported Market filters</a> (listed above).</p>
+    <p>Usually, you will differentiate your APKs based on a specific characteristic (such as the
+supported texture compression formats), and thus, each APK will declare support for different
+devices. However, it's OK to publish multiple APKs that overlap their support slightly. When two
+APKs do overlap (they support some of the same device configurations), a device that falls within
+that overlap range will receive the APK with a higher version code (defined by <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code
+android:versionCode}</a>).</p></li>
+
+  <li>You cannot activate a new APK that has a version code lower than that of the APK it's
+replacing. For example, say you have an active APK for screen sizes small - normal with version code
+0400, then try to replace it with an APK for the same screen sizes with version code 0300. This
+raises an error, because it means users of the previous APK will not be able to update the
+application.</li>
+
+  <li>An APK that requires a <strong>higher API level</strong> must have a <strong>higher
+version code</strong>.
+    <p>This is true only when either: the APKs differ based <em>only</em> on the
+supported API levels (no other <a href="#SupportedMarketFilters">supported market filters</a>
+distinguish the APKs from each other) <em>or</em> when the APKs do use another supported filter, but
+there is an overlap between the APKs within that filter.</p>
+    <p>This is important because a user's device receives an application update from
+Android Market only if the version code for the APK on Android Market is higher than the version
+code of the APK currently on the device. This ensures that if a device receives a system update that
+then qualifies it to install the APK for higher API levels, the device receives an application
+update because the version code increases.</p>
+<p class="note"><strong>Note:</strong> The size of the version code increase is irrelevant; it
+simply needs to be larger in the version that supports higher API levels.</p>
+    <p>Here are some examples:</p>
+    <ul>
+      <li>If an APK you've uploaded for API levels 4 and above (Android 1.6+) has a version code of
+{@code 0400}, then an APK for API levels 8 and above (Android 2.2+) must be {@code 0401} or
+greater. In this case, the API level is the only supported filter used, so the version codes
+<strong>must increase</strong> in correlation with the API level support for each APK, so that users
+get an update when they receive a system update.</li>
+      <li>If you have one APK that's for API level 4 (and above) <em>and</em> small -
+large screens, and another APK for API level 8 (and above) <em>and</em> large - xlarge screens, then
+the version codes <strong>must increase</strong>. In this case, the API level filter is used to
+distinguish each APK, but so is the screen size. Because the screen sizes overlap (both APKs
+support large screens), the version codes must still be in order. This ensures that a large screen
+device that receives a system update to API level 8 will receive an update for the second
+APK.</li>
+      <li>If you have one APK that's for API level 4 (and above) <em>and</em> small -
+normal screens, and another APK for API level 8 (and above) <em>and</em> large - xlarge
+screens, then the version codes <strong>do not need to increase</strong> in correlation with the API
+levels. Because there is no overlap within the screen size filter, there are no devices that
+could potentially move between these two APKs, so there's no need for the version codes to
+increase from the lower API level to the higher API level.</li>
+    </ul>
+  </li>
+
+</ul>
+
+<p>Failure to abide by the above rules results in an error on the Android Market publisher site
+when you activate your APKs&mdash;you will be unable to publish your application until you
+resolve the error.</p>
+
+<p>There are other conflicts that might occur when you activate your APKs, but which will result
+in warnings rather than errors. Warnings can be caused by the following:</p>
+
+<ul>
+  <li>When you modify an APK to "shrink" the support for a device's characteristics and no other
+APKs support the devices that then fall outside the supported range. For example, if an APK
+currently supports small and normal size screens and you change it to support only small screens,
+then you have shrunk the pool of supported devices and some devices will no longer see your
+application in Android Market. You can resolve this by adding another APK that supports normal size
+screens so that all previously-supported devices are still supported.</li>
+
+  <li>When there are "overlaps" between two or more APKs. For example, if an APK supports screen
+sizes small, normal, and large, while another APK supports sizes large and xlarge, there is an
+overlap, because both APKs support large screens. If you do not resolve this, then devices that
+qualify for both APKs (large screen devices in the example) will receive whichever APK has the
+highest version code.</li>
+</ul>
+
+<p>When such conflicts occur, you will see a warning message, but you can still publish your
+application.</p>
+
+
+
+<h2 id="CreatingApks">Creating Multiple APKs</h2>
+
+<p>Once you decide to publish multiple APKs, you probably need to create separate
+Android projects for each APK you intend to publish so that you can appropriately develop them
+separately. You can do this by simply duplicating your existing project and give it a new name.
+(Alternatively, you might use a build system that can output different resources&mdash;such
+as textures&mdash;based on the build configuration.)</p>
+
+<p class="note"><strong>Tip:</strong> One way to avoid duplicating large portions of your
+application code is to use a <a
+href="{@docRoot}guide/developing/projects/index.html#LibraryProjects">library project</a>. A library
+project holds shared code and resources, which you can include in your actual application
+projects.</p>
+
+<p>When creating multiple projects for the same application, it's a good practice to identify each
+one with a name that indicates the device restrictions to be placed on the APK, so you can
+easily identify them. For example, "HelloWorld_8" might be a good name for an
+application designed for API level 8 and above.</p>
+
+<p class="note"><strong>Note:</strong> All APKs you publish for the same application
+<strong>must have the same package name and be signed with the same certificate key</strong>. Be
+sure you also understand each of the <a href="#Rules">Rules for multiple APKs</a>.</p>
+
+
+<h3 id="VersionCodes">Assigning version codes</h3>
+
+<p>Each APK for the same application <strong>must have a unique version code</strong>, specified by
+the <a href="{@docRoot}guide/topics/manifest/manifest-element.html#vcode">{@code
+android:versionCode}</a> attribute. You must be careful about assigning version codes when
+publishing multiple APKs, because they must each be different, but in some
+cases, must or should be defined in a specific order, based on the configurations that each APK
+supports.</p>
+
+<h4>Ordering version codes</h4>
+
+<p>An APK that requires a higher API level must usually have a higher version code. For example, if
+you create two APKs to support different API levels, the APK for the higher API levels must have the
+higher version code. This ensures that if a device receives a system update that then qualifies it
+to install the APK for higher API levels, the user receives a notification to update the app. For
+more information about how this requirement applies, see the section above about <a
+href="#Rules">Rules for multiple APKs</a>.</p>
+
+<p>You should also consider how the order of version codes might affect which APK your users
+receive either due to overlap between coverage of different APKs or future changes you might make to
+your APKs.</p>
+
+<p>For example, if you have different APKs based on screen size, such as one for small - normal and
+one for large - xlarge, but foresee a time when you will change the APKs to be one for small and one
+for normal - xlarge, then you should make the version code for the large - xlarge APK be higher.
+That way, a normal size device will receive the appropriate update when you make the change, because
+the version code increases from the existing APK to the new APK that now supports the device. </p>
+
+<p>Also, when creating multiple APKs that differ based on support for different OpenGL texture
+compression formats, be aware that many devices support multiple formats. Because a device
+receives the APK with the highest version code when there is an overlap in coverage between two
+APKs, you should order the version codes among your APKs so that the APK with the
+preferred compression format has the highest version code. For example, you might want to perform
+separate builds for your app using PVRTC, ATITC, and ETC1 compression formats. If you prefer these
+formats in this exact order, then the APK that uses PVRTC should have the highest version code, the
+APK that uses ATITC has a lower version code, and the version with ETC1 has the lowest. Thus, if a
+device supports both PVRTC and ETC1, it receives the APK with PVRTC, because it has the highest
+version code.</p>
+
+
+<h4>Using a version code scheme</h4>
+
+<p>In order to allow different APKs to update their version codes independent of others (for
+example, when you fix a bug in only one APK, so don't need to update all APKs), you should use a
+scheme for your version codes that
+provides sufficient room between each APK so that you can increase the code in one without requiring
+an increase in others. You should also include your actual version name in the code (that is, the
+user visible version assigned to <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vname">{@code android:versionName}</a>),
+so that it's easy for you to associate the version code and version name.</p>
+
+<p class="note"><strong>Note:</strong> When you increase the version code for an APK, Android
+Market will prompt users of the previous version to update the application. Thus, to avoid
+unnecessary updates, you should not increase the version code for APKs that do not actually
+include changes.</p>
+
+<p>We suggest using a version code with at least 7 digits: integers that represent
+the supported configurations are in the higher order bits, and the version name (from <a
+href="{@docRoot}guide/topics/manifest/manifest-element.html#vname">{@code
+android:versionName}</a>) is in the lower order bits. For example, when the application version
+name is 3.1.0, version codes for an API level 4
+APK and an API level 11 APK would be something like 0400310 and 1100310, respectively. The first
+two digits are reserved for the API Level (4 and 11, respectively), the middle two digits are for
+either screen sizes or GL texture formats (not used in these examples), and the last three digits
+are for the application's version name (3.1.0). Figure 1 shows two examples that split based on both
+the platform version (API Level) and screen size.</p>
+
+<img src="{@docRoot}images/market/version-codes.png" alt="" />
+<p class="img-caption"><strong>Figure 1.</strong> A suggested scheme for your version codes,
+using the first two digits for the API Level, the second and third digits for the minimum and
+maximum screen size (1 - 4 indicating each of the four sizes) or to denote the texture formats
+and the last three digits for the app version.</p>
+
+<p>This scheme for version codes is just a suggestion for how you should establish a
+pattern that is scalable as your application evolves. In particular, this scheme doesn't
+demonstrate a solution for identifying different texture compression formats. One option might be
+to define your own table that specifies a different integer to each of the different
+compression formats your application supports (for example, 1 might correspond to ETC1 and 2 is
+ATITC, and so on).</p>
+
+<p>You can use any scheme you want, but you should carefully consider how future versions of your
+application will need to increase their version codes and how devices can receive updates when
+either the device configuration changes (for example, due to a system update) or when you modify the
+configuration support for one or several of the APKs.</p>
+
+
+
+
+<h2 id="SingleAPK">Using a Single APK Instead</h2>
+
+<p><strong>Creating multiple APKs for your application is not the normal procedure</strong> for
+publishing an application on Android Market. In most cases, you should be able to publish your
+application to most users with a single APK and we encourage that you do so. When you encounter
+a situation in which using a single APK becomes difficult, you should carefully consider all your
+options before deciding to publish multiple APKs.</p>
+
+<p>First of all, there are a few key benefits to developing a single APK that supports all
+devices:</p>
+
+<ul>
+  <li><strong>Publishing and managing your application is easier.</strong>
+    <p>With only one APK to worry about at any given time, you're less likely to become confused by
+which APK is what. You also don't have to keep track of multiple version codes for each
+APK&mdash;by using only one APK, you can simply increase the version code with each release and
+be done.</p>  </li>
+  <li><strong>You need to manage only a single code base.</strong>
+    <p>Although you can use a <a
+href="{@docRoot}guide/developing/projects/index.html#LibraryProjects">library project</a>
+to share code between multiple Android projects, it's still likely that you'll reproduce some code
+across each project and this could become difficult to manage, especially when resolving
+bugs.</p></li>
+  <li><strong>Your application can adapt to device configuration changes.</strong>
+    <p>By creating a single APK that contains all the resources for each device configuration, your
+application can adapt to configuration changes that occur at runtime. For example, if the user docks
+or otherwise connects a handset device to a larger screen, there's a chance that this will invoke a
+system configuration change to support the larger screen. If you include all resources for different
+screen configurations in the same APK, then your application will load alternative resources and
+optimize the user experience for the new interface.</p>
+  </li>
+  <li><strong>App restore across devices just works.</strong>
+    <p>If a user has enabled data backup on his or her current device and then buys a new device
+that has a different configuration, then when the user's apps are automatically restored during
+setup, the user receives your application and it runs using the resources optimized for that device.
+For example, on a new tablet, the user receives your application and it runs with your
+tablet-optimized resources. This restore
+process does not work across different APKs, because each APK can potentially have different
+permissions that the user has not agreed to, so Android Market may not restore the application at
+all. (If you use multiple APKs, the user receives either the exact same APK if it's compatible or
+nothing at all and must manually download your application to get the APK designed for the new
+device.)</p></li>
+</ul>
+
+<p>The following sections describe some of the other options you should use to support multiple
+device configurations before deciding to publish multiple APKs.</p>
+
+
+
+<h3 id="TextureOptions">Supporting multiple GL textures</h3>
+
+<p>To support multiple types of GL textures with a single APK, your application should query the GL
+texture formats supported on the device and then use the appropriate resources or download
+them from a web server. For example, in order to keep the size of your APK small, you can query the
+device's support for different GL texture formats when the application starts for the first time and
+then download only the textures you need for that device.</p>
+
+<p>For maximum performance and compatibility, your application should use ETC1 textures wherever it
+doesn't impact the visual quality. However, because ETC1 cannot deal with images that have drastic
+chroma changes, such as line art and (most) text, and doesn't support alpha, it may not the best
+format for all textures.</p>
+
+<p>With a single APK, you should try to use ETC1 textures and uncompressed textures whenever
+reasonable, and consider the use of PVRTC, ATITC, or DXTC as a last resort when ETC1 does not
+suffice.</p>
+
+<p>Here's an example query for supported texture compression formats from inside a
+{@link android.opengl.GLSurfaceView.Renderer GLSurfaceView.Renderer}:</p>
+
+<pre>
+public void onSurfaceChanged(GL10 gl, int w, int h) {
+    String extensions = gl.glGetString(GL10.GL_EXTENSIONS);
+    Log.d("ExampleActivity", extensions);
+}
+</pre>
+
+<p>This returns a string that lists each of the supported compression formats.</p>
+
+
+
+<h3 id="ScreenOptions">Supporting multiple screens</h3>
+
+<p>Unless your APK file exceeds the Android Market size limit of 50MB, supporting multiple screens
+should always be done with a single APK. Since Android 1.6, the Android system manages most of the
+work required for your application to run successfully on a variety of screen sizes and
+densities.</p>
+
+<p>To further optimize your application for different screen sizes and densities, you should provide
+<a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">alternative
+resources</a> such as bitmap drawables at different resolutions and different layout designs for
+different screen sizes.</p>
+
+<p>For more information about how to support multiple screens with a single APK, read <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
+
+<p>Additionally, you should consider using a support library from the <a
+href="{@docRoot}sdk/compatibility-library.html">Compatibility Package</a> so that you can add <a
+href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> to your activity designs
+when running on larger screens such as tablets.</p>
+
+
+
+<h3 id="ApiLevelOptions">Supporting multiple API levels</h3>
+
+<p>If you want to support as many versions of the Android platform as possible, you should use
+only APIs available in the lowest reasonable version. For example, your application may not require
+APIs newer than Android 2.1 (API Level 7), which makes an application available to
+over 95% of Android-powered devices (as indicated by the <a
+href="{@docRoot}resources/dashboard/platform-versions.html">Platform Versions</a> dashboard).</p>
+
+<p>By using a support library from the <a
+href="{@docRoot}sdk/compatibility-library.html">Compatibility Package</a>, you can also use APIs
+from some of the latest versions (such as Android 3.0) while
+still supporting versions as low as Android 1.6. The support library includes APIs for <a
+href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a>, <a
+href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a>, and more. Using the fragment
+APIs is particularly valuable so that you can optimize your user interface for large devices such as
+tablets.</p>
+
+<p>Alternatively, if you want to use some APIs that are available only in newer versions of Android
+(which your application can still function without), then you should consider using reflection. By
+using reflection, you can check whether the current device supports certain APIs. If the APIs are
+not available, your application can gracefully disable and hide the feature.</p>
+
+<p>Another way to use new APIs only when running on a version that supports them is to check the
+API level of the current device. That is, you can query the value of {@link
+android.os.Build.VERSION#SDK_INT} and create different code paths depending on the API level
+supported by the device. For example:</p>
+
+<pre>
+if (android.os.Build.VERSION.SDK_INT >= 11) {
+    // Use APIs supported by API level 11 (Android 3.0) and up
+} else {
+    // Do something different to support older versions
+}
+</pre>
+

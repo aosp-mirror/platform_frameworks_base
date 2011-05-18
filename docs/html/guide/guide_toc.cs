@@ -406,6 +406,10 @@
       <li><a href="<?cs var:toroot ?>guide/appendix/market-filters.html">
           <span class="en">Market Filters</span></a>
       </li>
+      <li><a href="<?cs var:toroot ?>guide/market/publishing/multiple-apks.html">
+          <span class="en">Multiple APK Support</span></a>
+          <span class="new">new!</span>
+      </li>
     </ul>
   </li>
 
