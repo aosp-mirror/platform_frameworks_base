@@ -28,6 +28,7 @@ import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
+import android.net.RouteInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
 import android.os.INetworkManagementService;
@@ -43,11 +44,16 @@ import android.provider.Settings;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
 import java.lang.IllegalStateException;
-
 import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.concurrent.CountDownLatch;
 
@@ -59,6 +65,9 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     private static final String TAG = "NetworkManagmentService";
     private static final boolean DBG = false;
     private static final String NETD_TAG = "NetdConnector";
+
+    private static final int ADD = 1;
+    private static final int REMOVE = 2;
 
     class NetdResponseCode {
         public static final int InterfaceListResult       = 110;
@@ -307,6 +316,164 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             throw new IllegalStateException(
                     "Unable to communicate with native daemon to interface setcfg - " + e);
         }
+    }
+
+    public void addRoute(String interfaceName, RouteInfo route) {
+        modifyRoute(interfaceName, ADD, route);
+    }
+
+    public void removeRoute(String interfaceName, RouteInfo route) {
+        modifyRoute(interfaceName, REMOVE, route);
+    }
+
+    private void modifyRoute(String interfaceName, int action, RouteInfo route) {
+        ArrayList<String> rsp;
+
+        StringBuilder cmd;
+
+        switch (action) {
+            case ADD:
+            {
+                cmd = new StringBuilder("interface route add " + interfaceName);
+                break;
+            }
+            case REMOVE:
+            {
+                cmd = new StringBuilder("interface route remove " + interfaceName);
+                break;
+            }
+            default:
+                throw new IllegalStateException("Unknown action type " + action);
+        }
+
+        // create triplet: dest-ip-addr prefixlength gateway-ip-addr
+        LinkAddress la = route.getDestination();
+        cmd.append(' ');
+        cmd.append(la.getAddress().getHostAddress());
+        cmd.append(' ');
+        cmd.append(la.getNetworkPrefixLength());
+        cmd.append(' ');
+        if (route.getGateway() == null) {
+            if (la.getAddress() instanceof Inet4Address) {
+                cmd.append("0.0.0.0");
+            } else {
+                cmd.append ("::0");
+            }
+        } else {
+            cmd.append(route.getGateway().getHostAddress());
+        }
+        try {
+            rsp = mConnector.doCommand(cmd.toString());
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate with native dameon to add routes - "
+                    + e);
+        }
+
+        for (String line : rsp) {
+            Log.v(TAG, "add route response is " + line);
+        }
+    }
+
+    private ArrayList<String> readRouteList(String filename) {
+        FileInputStream fstream = null;
+        ArrayList<String> list = new ArrayList<String>();
+
+        try {
+            fstream = new FileInputStream(filename);
+            DataInputStream in = new DataInputStream(fstream);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            String s;
+
+            // throw away the title line
+
+            while (((s = br.readLine()) != null) && (s.length() != 0)) {
+                list.add(s);
+            }
+        } catch (IOException ex) {
+            // return current list, possibly empty
+        } finally {
+            if (fstream != null) {
+                try {
+                    fstream.close();
+                } catch (IOException ex) {}
+            }
+        }
+
+        return list;
+    }
+
+    public RouteInfo[] getRoutes(String interfaceName) {
+        ArrayList<RouteInfo> routes = new ArrayList<RouteInfo>();
+
+        // v4 routes listed as:
+        // iface dest-addr gateway-addr flags refcnt use metric netmask mtu window IRTT
+        for (String s : readRouteList("/proc/net/route")) {
+            String[] fields = s.split("\t");
+
+            if (fields.length > 7) {
+                String iface = fields[0];
+
+                if (interfaceName.equals(iface)) {
+                    String dest = fields[1];
+                    String gate = fields[2];
+                    String flags = fields[3]; // future use?
+                    String mask = fields[7];
+                    try {
+                        // address stored as a hex string, ex: 0014A8C0
+                        InetAddress destAddr =
+                                NetworkUtils.intToInetAddress((int)Long.parseLong(dest, 16));
+                        int prefixLength =
+                                NetworkUtils.netmaskIntToPrefixLength(
+                                (int)Long.parseLong(mask, 16));
+                        LinkAddress linkAddress = new LinkAddress(destAddr, prefixLength);
+
+                        // address stored as a hex string, ex 0014A8C0
+                        InetAddress gatewayAddr =
+                                NetworkUtils.intToInetAddress((int)Long.parseLong(gate, 16));
+
+                        RouteInfo route = new RouteInfo(linkAddress, gatewayAddr);
+                        routes.add(route);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing route " + s + " : " + e);
+                        continue;
+                    }
+                }
+            }
+        }
+
+        // v6 routes listed as:
+        // dest-addr prefixlength ?? ?? gateway-addr ?? ?? ?? ?? iface
+        for (String s : readRouteList("/proc/net/ipv6_route")) {
+            String[]fields = s.split("\\s+");
+            if (fields.length > 9) {
+                String iface = fields[9].trim();
+                if (interfaceName.equals(iface)) {
+                    String dest = fields[0];
+                    String prefix = fields[1];
+                    String gate = fields[4];
+
+                    try {
+                        // prefix length stored as a hex string, ex 40
+                        int prefixLength = Integer.parseInt(prefix, 16);
+
+                        // address stored as a 32 char hex string
+                        // ex fe800000000000000000000000000000
+                        InetAddress destAddr = NetworkUtils.hexToInet6Address(dest);
+                        LinkAddress linkAddress = new LinkAddress(destAddr, prefixLength);
+
+                        InetAddress gateAddr = NetworkUtils.hexToInet6Address(gate);
+
+                        RouteInfo route = new RouteInfo(linkAddress, gateAddr);
+                        routes.add(route);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error parsing route " + s + " : " + e);
+                        continue;
+                    }
+                }
+            }
+        }
+        return (RouteInfo[]) routes.toArray(new RouteInfo[0]);
     }
 
     public void shutdown() {
