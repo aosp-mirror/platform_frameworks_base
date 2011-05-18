@@ -152,7 +152,7 @@ extern "C"
     ; Variable declaration - defined here and used outside this module
     ----------------------------------------------------------------------------*/
     /* number of parameters per modes (values must be <= MAX_PRM_SIZE!) */
-    extern const Word16 prmno[N_MODES] =
+    const Word16 prmno[N_MODES] =
     {
         PRMNO_MR475,
         PRMNO_MR515,
@@ -166,7 +166,7 @@ extern "C"
     };
 
     /* number of parameters to first subframe per modes */
-    extern const Word16 prmnofsf[N_MODES - 1] =
+    const Word16 prmnofsf[N_MODES - 1] =
     {
         PRMNOFSF_MR475,
         PRMNOFSF_MR515,
@@ -179,7 +179,7 @@ extern "C"
     };
 
     /* parameter sizes (# of bits), one table per mode */
-    extern const Word16 bitno_MR475[PRMNO_MR475] =
+    const Word16 bitno_MR475[PRMNO_MR475] =
     {
         8, 8, 7,                                 /* LSP VQ          */
         8, 7, 2, 8,                              /* first subframe  */
@@ -188,7 +188,7 @@ extern "C"
         4, 7, 2,                                 /* fourth subframe */
     };
 
-    extern const Word16 bitno_MR515[PRMNO_MR515] =
+    const Word16 bitno_MR515[PRMNO_MR515] =
     {
         8, 8, 7,                                 /* LSP VQ          */
         8, 7, 2, 6,                              /* first subframe  */
@@ -197,7 +197,7 @@ extern "C"
         4, 7, 2, 6,                              /* fourth subframe */
     };
 
-    extern const Word16 bitno_MR59[PRMNO_MR59] =
+    const Word16 bitno_MR59[PRMNO_MR59] =
     {
         8, 9, 9,                                 /* LSP VQ          */
         8, 9, 2, 6,                              /* first subframe  */
@@ -206,7 +206,7 @@ extern "C"
         4, 9, 2, 6,                              /* fourth subframe */
     };
 
-    extern const Word16 bitno_MR67[PRMNO_MR67] =
+    const Word16 bitno_MR67[PRMNO_MR67] =
     {
         8, 9, 9,                                 /* LSP VQ          */
         8, 11, 3, 7,                             /* first subframe  */
@@ -215,7 +215,7 @@ extern "C"
         4, 11, 3, 7,                             /* fourth subframe */
     };
 
-    extern const Word16 bitno_MR74[PRMNO_MR74] =
+    const Word16 bitno_MR74[PRMNO_MR74] =
     {
         8, 9, 9,                                 /* LSP VQ          */
         8, 13, 4, 7,                             /* first subframe  */
@@ -224,7 +224,7 @@ extern "C"
         5, 13, 4, 7,                             /* fourth subframe */
     };
 
-    extern const Word16 bitno_MR795[PRMNO_MR795] =
+    const Word16 bitno_MR795[PRMNO_MR795] =
     {
         9, 9, 9,                                 /* LSP VQ          */
         8, 13, 4, 4, 5,                          /* first subframe  */
@@ -233,7 +233,7 @@ extern "C"
         6, 13, 4, 4, 5,                          /* fourth subframe */
     };
 
-    extern const Word16 bitno_MR102[PRMNO_MR102] =
+    const Word16 bitno_MR102[PRMNO_MR102] =
     {
         8, 9, 9,                                 /* LSP VQ          */
         8, 1, 1, 1, 1, 10, 10, 7, 7,             /* first subframe  */
@@ -242,7 +242,7 @@ extern "C"
         5, 1, 1, 1, 1, 10, 10, 7, 7,             /* fourth subframe */
     };
 
-    extern const Word16 bitno_MR122[PRMNO_MR122] =
+    const Word16 bitno_MR122[PRMNO_MR122] =
     {
         7, 8, 9, 8, 6,                           /* LSP VQ          */
         9, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 5,   /* first subframe  */
@@ -251,7 +251,7 @@ extern "C"
         6, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 5    /* fourth subframe */
     };
 
-    extern const Word16 bitno_MRDTX[PRMNO_MRDTX] =
+    const Word16 bitno_MRDTX[PRMNO_MRDTX] =
     {
         3,
         8, 9, 9,
@@ -259,7 +259,7 @@ extern "C"
     };
 
     /* overall table with all parameter sizes for all modes */
-    extern const Word16 * const bitno[N_MODES] =
+    const Word16 * const bitno[N_MODES] =
     {
         bitno_MR475,
         bitno_MR515,

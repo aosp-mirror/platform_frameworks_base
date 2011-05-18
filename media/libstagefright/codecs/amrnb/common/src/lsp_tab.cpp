@@ -147,7 +147,7 @@ extern "C"
     ; LOCAL STORE/BUFFER/POINTER DEFINITIONS
     ; Variable declaration - defined here and used outside this module
     ----------------------------------------------------------------------------*/
-    extern const Word16 lsp_init_data[M] = {30000, 26000, 21000, 15000, 8000,
+    const Word16 lsp_init_data[M] = {30000, 26000, 21000, 15000, 8000,
         0, -8000, -15000, -21000, -26000
     };
 

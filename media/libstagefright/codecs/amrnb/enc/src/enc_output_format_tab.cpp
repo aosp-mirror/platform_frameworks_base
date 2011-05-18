@@ -151,7 +151,7 @@ extern "C"
     /* for WMF output format.                                       */
     /* Each entry is the sum of the 3GPP frame type byte and the    */
     /* number of packed core AMR data bytes                         */
-    extern const Word16 WmfEncBytesPerFrame[16] =
+    const Word16 WmfEncBytesPerFrame[16] =
     {
         13, /* 4.75 */
         14, /* 5.15 */
@@ -174,7 +174,7 @@ extern "C"
 
     /* Number of data bytes in an encoder frame for each codec mode */
     /* for IF2 output format                                        */
-    extern const Word16 If2EncBytesPerFrame[16] =
+    const Word16 If2EncBytesPerFrame[16] =
     {
         13, /* 4.75 */
         14, /* 5.15 */

@@ -85,7 +85,7 @@ extern "C"
     ; LOCAL VARIABLE DEFINITIONS
     ; [Variable declaration - defined here and used outside this module]
     ----------------------------------------------------------------------------*/
-    extern const Word16 corrweight[251] =
+    const Word16 corrweight[251] =
     {
         20473,  20506,  20539,  20572,  20605,  20644,  20677,
         20716,  20749,  20788,  20821,  20860,  20893,  20932,
