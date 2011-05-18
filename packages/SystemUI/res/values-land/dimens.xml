@@ -18,4 +18,20 @@
 <resources>
     <!-- thickness (width) of the navigation bar on phones that require it -->
     <dimen name="navigation_bar_size">42dp</dimen>
+
+    <!-- Recent Applications parameters -->
+    <!-- Width of a recent app view, including all content -->
+    <dimen name="status_bar_recents_thumbnail_view_width">156dp</dimen>
+    <!-- How far the thumbnail for a recent app appears from left edge -->
+    <dimen name="status_bar_recents_thumbnail_left_margin">0dp</dimen>
+    <!-- Width of scrollable area in recents -->
+    <dimen name="status_bar_recents_width">128dp</dimen>
+    <!-- Thumbnail border width -->
+    <dimen name="status_bar_recents_thumbnail_border_width">8dp</dimen>
+    <!-- Thumbnail border height -->
+    <dimen name="status_bar_recents_thumbnail_border_height">12dp</dimen>
+    <!-- Padding for text descriptions -->
+    <dimen name="status_bar_recents_text_description_padding">8dp</dimen>
+    <!-- Margin between recents container and glow on the right -->
+    <dimen name="status_bar_recents_right_glow_margin">0dip</dimen>
 </resources>
