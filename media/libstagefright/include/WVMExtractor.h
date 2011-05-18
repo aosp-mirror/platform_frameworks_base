@@ -19,6 +19,7 @@
 #define WVM_EXTRACTOR_H_
 
 #include <media/stagefright/MediaExtractor.h>
+#include <utils/Errors.h>
 
 namespace android {
 
@@ -33,12 +34,31 @@ public:
     virtual sp<MetaData> getTrackMetaData(size_t index, uint32_t flags);
     virtual sp<MetaData> getMetaData();
 
+    // Return the amount of data cached from the current
+    // playback positiion (in us).
+    // While more data is still being fetched *finalStatus == OK,
+    // Once fetching is completed (no more data available), *finalStatus != OK
+    // If fetching completed normally (i.e. reached EOS instead of IO error)
+    // *finalStatus == ERROR_END_OF_STREAM
+    int64_t getCachedDurationUs(status_t *finalStatus);
+
+    // Set to use adaptive streaming mode by the WV component.
+    // If adaptive == true, adaptive streaming mode will be used.
+    // Default mode is non-adaptive streaming mode.
+    // Should set to use adaptive streaming mode only if widevine:// protocol
+    // is used.
+    void setAdaptiveStreamingMode(bool adaptive);
+
+    // Retrieve the adaptive streaming mode used by the WV component.
+    bool getAdaptiveStreamingMode() const;
+
 protected:
     virtual ~WVMExtractor();
 
 private:
     sp<DataSource> mDataSource;
     sp<MediaExtractor> mImpl;
+    bool mUseAdaptiveStreaming;
 
     WVMExtractor(const WVMExtractor &);
     WVMExtractor &operator=(const WVMExtractor &);
