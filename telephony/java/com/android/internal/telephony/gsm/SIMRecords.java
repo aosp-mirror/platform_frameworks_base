@@ -496,11 +496,6 @@ public final class SIMRecords extends IccRecords {
             return null;
         }
 
-        // STOPSHIP: to be removed
-        if (BaseCommands.getLteOnCdmaModeStatic() == Phone.LTE_ON_CDMA_TRUE) {
-            Log.e(LOG_TAG, "getOperatorNumeric: STOPSHIP bad numeric operators in lte");
-            return SystemProperties.get("ro.cdma.home.operator.numeric", "310004");
-        }
         // Length = length of MCC + length of MNC
         // length of mcc = 3 (TS 23.003 Section 2.2)
         return imsi.substring(0, 3 + mncLength);
