@@ -45,6 +45,7 @@ class DrmManagerClinet;
 class DecryptHandle;
 
 class TimedTextPlayer;
+struct WVMExtractor;
 
 struct AwesomeRenderer : public RefBase {
     AwesomeRenderer() {}
@@ -231,6 +232,8 @@ private:
     int64_t mLastVideoTimeUs;
     TimedTextPlayer *mTextPlayer;
 
+    sp<WVMExtractor> mWVMExtractor;
+
     status_t setDataSource_l(
             const char *uri,
             const KeyedVector<String8, String8> *headers = NULL);
@@ -285,6 +288,8 @@ private:
 
     void shutdownVideoDecoder_l();
     void setNativeWindow_l(const sp<ANativeWindow> &native);
+
+    bool isStreamingHTTP() const;
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);
