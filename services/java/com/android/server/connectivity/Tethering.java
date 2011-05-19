@@ -636,6 +636,16 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         return retVal;
     }
 
+    public void handleTetherIfaceChange(String iface) {
+        // check if iface is white listed
+        for (String regex : mUpstreamIfaceRegexs) {
+            if (iface.matches(regex)) {
+                if (DEBUG) Log.d(TAG, "Tethering got Interface Change");
+                mTetherMasterSM.sendMessage(TetherMasterSM.CMD_IFACE_CHANGED, iface);
+                break;
+            }
+        }
+    }
 
     class TetherInterfaceSM extends StateMachine {
         // notification from the master SM that it's not in tether mode
@@ -1034,6 +1044,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         static final int CMD_CELL_CONNECTION_RENEW   = 4;
         // we don't have a valid upstream conn, check again after a delay
         static final int CMD_RETRY_UPSTREAM          = 5;
+        // received an indication that upstream interface has changed
+        static final int CMD_IFACE_CHANGED           = 6;
 
         // This indicates what a timeout event relates to.  A state that
         // sends itself a delayed timeout event and handles incoming timeout events
@@ -1377,13 +1389,18 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                             turnOnMobileConnection();
                         }
                         break;
-                   case CMD_RETRY_UPSTREAM:
-                       chooseUpstreamType(mTryCell);
-                       mTryCell = !mTryCell;
-                       break;
-                   default:
-                       retValue = false;
-                       break;
+                    case CMD_RETRY_UPSTREAM:
+                        chooseUpstreamType(mTryCell);
+                        mTryCell = !mTryCell;
+                        break;
+                    case CMD_IFACE_CHANGED:
+                        String iface = (String)message.obj;
+                        if (DEBUG) Log.d(TAG, "Activie upstream interface changed: " + iface);
+                        notifyTetheredOfNewUpstreamIface(iface);
+                        break;
+                    default:
+                        retValue = false;
+                        break;
                 }
                 return retValue;
             }

@@ -226,6 +226,38 @@ public class DataConnectionAc extends AsyncChannel {
     }
 
     /**
+     * Request update LinkProperties from DataCallState
+     * Response {@link #rspUpdateLinkPropertiesDataCallState}
+     */
+    public void reqUpdateLinkPropertiesDataCallState(DataCallState newState) {
+        sendMessage(REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE, newState);
+        if (DBG) log("reqUpdateLinkPropertiesDataCallState");
+    }
+
+    public boolean rspUpdateLinkPropertiesDataCallState(Message response) {
+        boolean retVal = response.arg1 == 1;
+        if (DBG) log("rspUpdateLinkPropertiesState=" + retVal);
+        return retVal;
+    }
+
+    /**
+     * Update link properties in the data connection
+     *
+     * @return true if link property has been updated. false otherwise.
+     */
+    public boolean updateLinkPropertiesDataCallStateSync(DataCallState newState) {
+        Message response =
+            sendMessageSynchronously(REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE, newState);
+        if ((response != null) &&
+            (response.what == RSP_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE)) {
+            return rspUpdateLinkPropertiesDataCallState(response);
+        } else {
+            log("getLinkProperties error response=" + response);
+            return false;
+        }
+    }
+
+    /**
      * Request the connections LinkCapabilities.
      * Response {@link #rspLinkCapabilities}
      */

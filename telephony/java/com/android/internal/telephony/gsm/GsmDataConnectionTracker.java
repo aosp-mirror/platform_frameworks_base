@@ -987,6 +987,15 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return false;
     }
 
+    private DataCallState findDataCallStateByCID (ArrayList<DataCallState> states, int cid) {
+        for (int i = 0, s = states.size() ; i < s ; i++) {
+            if (states.get(i).cid == cid) {
+                return states.get(i);
+            }
+        }
+        return null;
+    }
+
     /**
      * Handles changes to the APN database.
      */
@@ -1090,6 +1099,19 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         TelephonyManager.getDefault().getNetworkType());
 
                 cleanUpConnection(true, apnContext);
+            } else {
+                // Here, data call list has active cid for given ApnContext.
+                // Check if link property has been updated.
+                DataCallState state = findDataCallStateByCID(dataCallStates,
+                                         apnContext.getDataConnectionAc().getCidSync());
+
+                if ((dcac != null) && (state != null)){
+                    if (dcac.updateLinkPropertiesDataCallStateSync(state)) {
+                        // notify data change for this apn
+                        mPhone.notifyDataConnection(Phone.REASON_LINK_PROPERTIES_CHANGED,
+                                                    apnContext.getApnType());
+                    }
+                }
             }
         }
     }
