@@ -400,6 +400,7 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
 }
 
 void AwesomePlayer::reset() {
+    LOGI("reset");
     Mutex::Autolock autoLock(mLock);
     reset_l();
 }
@@ -413,7 +414,9 @@ void AwesomePlayer::reset_l() {
                     Playback::STOP, 0);
             mDecryptHandle = NULL;
             mDrmManagerClient = NULL;
+            LOGI("DRM manager client stopped");
     }
+
 
     if (mFlags & PLAYING) {
         uint32_t params = IMediaPlayerService::kBatteryDataTrackDecoder;
@@ -447,6 +450,7 @@ void AwesomePlayer::reset_l() {
         mPreparedCondition.wait(mLock);
     }
 
+    LOGI("cancel player events");
     cancelPlayerEvents();
 
     mWVMExtractor.clear();
@@ -496,6 +500,7 @@ void AwesomePlayer::reset_l() {
             usleep(1000);
         }
         IPCThreadState::self()->flushCommands();
+        LOGI("video decoder shutdown completed");
     }
 
     mDurationUs = -1;
