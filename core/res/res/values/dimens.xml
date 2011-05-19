@@ -81,4 +81,12 @@
     <dimen name="alert_dialog_title_height">48dip</dimen>
     <!-- Dialog button bar height -->
     <dimen name="alert_dialog_button_bar_height">48dip</dimen>
+
+    <!-- Size of the margin between the 'up' visual and the image in
+         the action bar home section. -->
+    <dimen name="action_bar_home_up_margin">-4dip</dimen>
+    <!-- Size of the padding on either side of the app-supplied image
+         in the action bar home section. -->
+    <dimen name="action_bar_home_image_padding">8dip</dimen>
+
 </resources>
