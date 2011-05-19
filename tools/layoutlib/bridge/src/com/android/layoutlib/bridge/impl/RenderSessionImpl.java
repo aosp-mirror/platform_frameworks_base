@@ -74,6 +74,7 @@ import android.view.ViewGroup;
 import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.AbsListView;
 import android.widget.AbsSpinner;
 import android.widget.AdapterView;
@@ -513,7 +514,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 mViewRoot.draw(mCanvas);
             }
 
-            mViewInfoList = startVisitingViews(mViewRoot, 0);
+            mViewInfoList = startVisitingViews(mViewRoot, 0, params.getExtendedViewInfoMode());
 
             // success!
             return SUCCESS.createResult();
@@ -1255,7 +1256,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         }
     }
 
-    private List<ViewInfo> startVisitingViews(View view, int offset) {
+    private List<ViewInfo> startVisitingViews(View view, int offset, boolean setExtendedInfo) {
         if (view == null) {
             return null;
         }
@@ -1264,7 +1265,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         offset += view.getTop();
 
         if (view == mContentRoot) {
-            return visitAllChildren(mContentRoot, offset);
+            return visitAllChildren(mContentRoot, offset, setExtendedInfo);
         }
 
         // otherwise, look for mContentRoot in the children
@@ -1272,7 +1273,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             ViewGroup group = ((ViewGroup) view);
 
             for (int i = 0; i < group.getChildCount(); i++) {
-                List<ViewInfo> list = startVisitingViews(group.getChildAt(i), offset);
+                List<ViewInfo> list = startVisitingViews(group.getChildAt(i), offset,
+                        setExtendedInfo);
                 if (list != null) {
                     return list;
                 }
@@ -1287,8 +1289,9 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * bounds of all the views.
      * @param view the root View
      * @param offset an offset for the view bounds.
+     * @param setExtendedInfo whether to set the extended view info in the {@link ViewInfo} object.
      */
-    private ViewInfo visit(View view, int offset) {
+    private ViewInfo visit(View view, int offset, boolean setExtendedInfo) {
         if (view == null) {
             return null;
         }
@@ -1298,9 +1301,22 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 view.getLeft(), view.getTop() + offset, view.getRight(), view.getBottom() + offset,
                 view, view.getLayoutParams());
 
+        if (setExtendedInfo) {
+            MarginLayoutParams marginParams = null;
+            LayoutParams params = view.getLayoutParams();
+            if (params instanceof MarginLayoutParams) {
+                marginParams = (MarginLayoutParams) params;
+            }
+            result.setExtendedInfo(view.getBaseline(),
+                    marginParams != null ? marginParams.leftMargin : 0,
+                    marginParams != null ? marginParams.topMargin : 0,
+                    marginParams != null ? marginParams.rightMargin : 0,
+                    marginParams != null ? marginParams.bottomMargin : 0);
+        }
+
         if (view instanceof ViewGroup) {
             ViewGroup group = ((ViewGroup) view);
-            result.setChildren(visitAllChildren(group, 0 /*offset*/));
+            result.setChildren(visitAllChildren(group, 0 /*offset*/, setExtendedInfo));
         }
 
         return result;
@@ -1311,15 +1327,17 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
      * containing the bounds of all the views.
      * @param view the root View
      * @param offset an offset for the view bounds.
+     * @param setExtendedInfo whether to set the extended view info in the {@link ViewInfo} object.
      */
-    private List<ViewInfo> visitAllChildren(ViewGroup viewGroup, int offset) {
+    private List<ViewInfo> visitAllChildren(ViewGroup viewGroup, int offset,
+            boolean setExtendedInfo) {
         if (viewGroup == null) {
             return null;
         }
 
         List<ViewInfo> children = new ArrayList<ViewInfo>();
         for (int i = 0; i < viewGroup.getChildCount(); i++) {
-            children.add(visit(viewGroup.getChildAt(i), offset));
+            children.add(visit(viewGroup.getChildAt(i), offset, setExtendedInfo));
         }
         return children;
     }
