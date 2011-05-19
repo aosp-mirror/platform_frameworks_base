@@ -16,6 +16,9 @@
 
 package com.android.tools.layoutlib.create;
 
+import com.android.tools.layoutlib.annotations.VisibleForTesting;
+import com.android.tools.layoutlib.annotations.VisibleForTesting.Visibility;
+
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -27,11 +30,16 @@ import org.objectweb.asm.Opcodes;
  * Indicates if a class contains any native methods.
  */
 public class ClassHasNativeVisitor implements ClassVisitor {
-    
+
     private boolean mHasNativeMethods = false;
-    
+
     public boolean hasNativeMethods() {
         return mHasNativeMethods;
+    }
+
+    @VisibleForTesting(visibility=Visibility.PRIVATE)
+    protected void setHasNativeMethods(boolean hasNativeMethods, String methodName) {
+        mHasNativeMethods = hasNativeMethods;
     }
 
     public void visit(int version, int access, String name, String signature,
@@ -65,7 +73,9 @@ public class ClassHasNativeVisitor implements ClassVisitor {
 
     public MethodVisitor visitMethod(int access, String name, String desc,
             String signature, String[] exceptions) {
-        mHasNativeMethods |= ((access & Opcodes.ACC_NATIVE) != 0);
+        if ((access & Opcodes.ACC_NATIVE) != 0) {
+            setHasNativeMethods(true, name);
+        }
         return null;
     }
 

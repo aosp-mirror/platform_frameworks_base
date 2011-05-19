@@ -20,8 +20,6 @@ package com.android.tools.layoutlib.create;
 
 import static org.junit.Assert.assertArrayEquals;
 
-import com.android.tools.layoutlib.create.LogTest.MockLog;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,9 +42,9 @@ public class AsmGeneratorTest {
 
     @Before
     public void setUp() throws Exception {
-        mLog = new LogTest.MockLog();
+        mLog = new MockLog();
         URL url = this.getClass().getClassLoader().getResource("data/mock_android.jar");
-        
+
         mOsJarPath = new ArrayList<String>();
         mOsJarPath.add(url.getFile());
 
@@ -65,16 +63,41 @@ public class AsmGeneratorTest {
 
     @Test
     public void testClassRenaming() throws IOException, LogAbortException {
-        
-        AsmGenerator agen = new AsmGenerator(mLog, mOsDestJar,
-            null, // classes to inject in the final JAR
-            null,  // methods to force override
-            new String[] {  // classes to rename (so that we can replace them)
-                "mock_android.view.View", "mock_android.view._Original_View",
-                "not.an.actual.ClassName", "anoter.fake.NewClassName",
-            },
-            null // methods deleted from their return type.
-            );
+
+        ICreateInfo ci = new ICreateInfo() {
+            public Class<?>[] getInjectedClasses() {
+                // classes to inject in the final JAR
+                return new Class<?>[0];
+            }
+
+            public String[] getDelegateMethods() {
+                return new String[0];
+            }
+
+            public String[] getDelegateClassNatives() {
+                return new String[0];
+            }
+
+            public String[] getOverriddenMethods() {
+                // methods to force override
+                return new String[0];
+            }
+
+            public String[] getRenamedClasses() {
+                // classes to rename (so that we can replace them)
+                return new String[] {
+                        "mock_android.view.View", "mock_android.view._Original_View",
+                        "not.an.actual.ClassName", "anoter.fake.NewClassName",
+                };
+            }
+
+            public String[] getDeleteReturns() {
+                 // methods deleted from their return type.
+                return new String[0];
+            }
+        };
+
+        AsmGenerator agen = new AsmGenerator(mLog, mOsDestJar, ci);
 
         AsmAnalyzer aa = new AsmAnalyzer(mLog, mOsJarPath, agen,
                 null,                 // derived from
@@ -83,7 +106,7 @@ public class AsmGeneratorTest {
                 });
         aa.analyze();
         agen.generate();
-        
+
         Set<String> notRenamed = agen.getClassesNotRenamed();
         assertArrayEquals(new String[] { "not/an/actual/ClassName" }, notRenamed.toArray());
     }

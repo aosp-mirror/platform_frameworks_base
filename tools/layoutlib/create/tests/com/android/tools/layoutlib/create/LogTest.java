@@ -24,33 +24,8 @@ import org.junit.Test;
 
 public class LogTest {
 
-    public static class MockLog extends Log {
-        StringBuilder mOut = new StringBuilder();
-        StringBuilder mErr = new StringBuilder();
-        
-        public String getOut() {
-            return mOut.toString();
-        }
-        
-        public String getErr() {
-            return mErr.toString();
-        }
-        
-        @Override
-        protected void outPrintln(String msg) {
-            mOut.append(msg);
-            mOut.append('\n');
-        }
-        
-        @Override
-        protected void errPrintln(String msg) {
-            mErr.append(msg);
-            mErr.append('\n');
-        }
-    }
-
     private MockLog mLog;
-    
+
     @Before
     public void setUp() throws Exception {
         mLog = new MockLog();
