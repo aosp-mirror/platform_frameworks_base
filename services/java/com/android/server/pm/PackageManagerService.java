@@ -59,6 +59,7 @@ import android.content.pm.PackageInfoLite;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageStats;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
@@ -2371,63 +2372,112 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
-    public List<PackageInfo> getInstalledPackages(int flags) {
-        final ArrayList<PackageInfo> finalList = new ArrayList<PackageInfo>();
+    private static final int getContinuationPoint(final String[] keys, final String key) {
+        final int index;
+        if (key == null) {
+            index = 0;
+        } else {
+            final int insertPoint = Arrays.binarySearch(keys, key);
+            if (insertPoint < 0) {
+                index = -insertPoint;
+            } else {
+                index = insertPoint + 1;
+            }
+        }
+        return index;
+    }
+
+    public ParceledListSlice<PackageInfo> getInstalledPackages(int flags, String lastRead) {
+        final ParceledListSlice<PackageInfo> list = new ParceledListSlice<PackageInfo>();
+        final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
+        final String[] keys;
 
         // writer
         synchronized (mPackages) {
-            if((flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0) {
-                final Iterator<PackageSetting> i = mSettings.mPackages.values().iterator();
-                while (i.hasNext()) {
-                    final PackageSetting ps = i.next();
-                    final PackageInfo psPkg = generatePackageInfoFromSettingsLPw(ps.name, flags);
-                    if (psPkg != null) {
-                        finalList.add(psPkg);
+            if (listUninstalled) {
+                keys = mSettings.mPackages.keySet().toArray(new String[mSettings.mPackages.size()]);
+            } else {
+                keys = mPackages.keySet().toArray(new String[mPackages.size()]);
+            }
+
+            Arrays.sort(keys);
+            int i = getContinuationPoint(keys, lastRead);
+            final int N = keys.length;
+
+            while (i < N) {
+                final String packageName = keys[i++];
+
+                PackageInfo pi = null;
+                if (listUninstalled) {
+                    final PackageSetting ps = mSettings.mPackages.get(packageName);
+                    if (ps != null) {
+                        pi = generatePackageInfoFromSettingsLPw(ps.name, flags);
+                    }
+                } else {
+                    final PackageParser.Package p = mPackages.get(packageName);
+                    if (p != null) {
+                        pi = generatePackageInfo(p, flags);
                     }
                 }
-            } else {
-                final Iterator<PackageParser.Package> i = mPackages.values().iterator();
-                while (i.hasNext()) {
-                    final PackageParser.Package p = i.next();
-                    if (p.applicationInfo != null) {
-                        final PackageInfo pi = generatePackageInfo(p, flags);
-                        if (pi != null) {
-                            finalList.add(pi);
-                        }
-                    }
+
+                if (pi != null && !list.append(pi)) {
+                    break;
                 }
             }
+
+            if (i == N) {
+                list.setLastSlice(true);
+            }
         }
-        return finalList;
+
+        return list;
     }
 
-    public List<ApplicationInfo> getInstalledApplications(int flags) {
-        final ArrayList<ApplicationInfo> finalList = new ArrayList<ApplicationInfo>();
+    public ParceledListSlice<ApplicationInfo> getInstalledApplications(int flags,
+            String lastRead) {
+        final ParceledListSlice<ApplicationInfo> list = new ParceledListSlice<ApplicationInfo>();
+        final boolean listUninstalled = (flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0;
+        final String[] keys;
+
         // writer
-        synchronized(mPackages) {
-            if((flags & PackageManager.GET_UNINSTALLED_PACKAGES) != 0) {
-                final Iterator<PackageSetting> i = mSettings.mPackages.values().iterator();
-                while (i.hasNext()) {
-                    final PackageSetting ps = i.next();
-                    ApplicationInfo ai = generateApplicationInfoFromSettingsLPw(ps.name, flags);
-                    if(ai != null) {
-                        finalList.add(ai);
+        synchronized (mPackages) {
+            if (listUninstalled) {
+                keys = mSettings.mPackages.keySet().toArray(new String[mSettings.mPackages.size()]);
+            } else {
+                keys = mPackages.keySet().toArray(new String[mPackages.size()]);
+            }
+
+            Arrays.sort(keys);
+            int i = getContinuationPoint(keys, lastRead);
+            final int N = keys.length;
+
+            while (i < N) {
+                final String packageName = keys[i++];
+
+                ApplicationInfo ai = null;
+                if (listUninstalled) {
+                    final PackageSetting ps = mSettings.mPackages.get(packageName);
+                    if (ps != null) {
+                        ai = generateApplicationInfoFromSettingsLPw(ps.name, flags);
+                    }
+                } else {
+                    final PackageParser.Package p = mPackages.get(packageName);
+                    if (p != null) {
+                        ai = PackageParser.generateApplicationInfo(p, flags);
                     }
                 }
-            } else {
-                final Iterator<PackageParser.Package> i = mPackages.values().iterator();
-                while (i.hasNext()) {
-                    final PackageParser.Package p = i.next();
-                    if (p.applicationInfo != null) {
-                        ApplicationInfo ai = PackageParser.generateApplicationInfo(p, flags);
-                        if(ai != null) {
-                            finalList.add(ai);
-                        }
-                    }
+
+                if (ai != null && !list.append(ai)) {
+                    break;
                 }
             }
+
+            if (i == N) {
+                list.setLastSlice(true);
+            }
         }
-        return finalList;
+
+        return list;
     }
 
     public List<ApplicationInfo> getPersistentApplications(int flags) {
@@ -8052,7 +8102,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public UserInfo createUser(String name, int flags) {
-        UserInfo userInfo = mUserManager.createUser(name, flags, getInstalledApplications(0));
+        // TODO(kroot): fix this API
+        UserInfo userInfo = mUserManager.createUser(name, flags, new ArrayList<ApplicationInfo>());
         return userInfo;
     }
 
