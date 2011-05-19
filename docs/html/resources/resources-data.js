@@ -616,6 +616,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'data', 'new'],
+    path: 'samples/VoicemailProviderDemo/index.html',
+    title: {
+      en: 'Voicemail Provider Demo'
+    },
+    description: {
+      en: 'A sample application to demonstrate how to use voicemail content provider APIs.'
+    }
+  },
+  {
     tags: ['sample', 'ui', 'widgets'],
     path: 'samples/Wiktionary/index.html',
     title: {
