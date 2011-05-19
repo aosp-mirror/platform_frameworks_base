@@ -263,15 +263,15 @@ licensed for all users. If your application is already published as free,
 you won't be able to upload a new version that uses licensing.</li>
 </ul>
 
-<h4>Replacement for copy protection</h4>
+<h4>Replacement for Copy Protection</h4>
 
 <p>Android Market Licensing is a flexible, secure mechanism for controlling
-access to your applications. It effectively replaces the copy-protection
+access to your applications. It effectively replaces the Copy Protection
 mechanism offered on Android Market and gives you wider distribution
 potential for your applications. </p>
 
 <ul>
-<li>A limitation of the legacy copy-protection mechanism on Android Market is
+<li>A limitation of the legacy Copy Protection mechanism on Android Market is
 that applications using it can be installed only on compatible devices that
 provide a secure internal storage environment. For example, a copy-protected
 application cannot be downloaded from Market to a device that provides root

@@ -141,9 +141,14 @@ either internal or external storage through the system settings.</td>
 </tr>
 </table>
 
+<p class="caution"><strong>Caution:</strong> If your application uses the Android Market's Copy 
+  Protection feature, it cannot be installed to a device's SD card. However, if you use Android 
+  Market's <a href="{@docRoot}guide/publishing/licensing.html">Application Licensing</a> instead, 
+  your application <em>can</em> be installed to internal or external storage, including SD cards.</p>
+
 <p class="note"><strong>Note:</strong> By default, your application will be installed on the
-internal storage and cannot be installed on the external storage unless you define this attribute
-to be either "{@code auto}" or "{@code preferExternal}".</p>
+  internal storage and cannot be installed on the external storage unless you define this attribute
+  to be either "{@code auto}" or "{@code preferExternal}".</p>
 
 <p>When an application is installed on the external storage:</p>
 <ul>
