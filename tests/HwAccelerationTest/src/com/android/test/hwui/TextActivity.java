@@ -38,6 +38,7 @@ public class TextActivity extends Activity {
         private final Paint mStrikePaint;
         private final Paint mScaledPaint;
         private final Paint mSkewPaint;
+        private final Paint mHugePaint;
 
         CustomTextView(Context c) {
             super(c);
@@ -64,6 +65,11 @@ public class TextActivity extends Activity {
             mSkewPaint.setAntiAlias(true);
             mSkewPaint.setTextSize(16.0f);
             mSkewPaint.setShadowLayer(3.0f, 3.0f, 3.0f, 0xff000000);
+
+            mHugePaint = new Paint();
+            mHugePaint.setAntiAlias(true);
+            mHugePaint.setColor(0xff000000);
+            mHugePaint.setTextSize(300f);
         }
 
         @Override
@@ -98,7 +104,9 @@ public class TextActivity extends Activity {
             mLargePaint.setAlpha(255);
             mLargePaint.setColor(0xff000000);
             mLargePaint.clearShadowLayer();
-            
+
+            canvas.drawText("Hello!", 500, 600, mHugePaint);
+
             canvas.drawText("Hello OpenGL renderer!", 500, 40, mStrikePaint);
             mStrikePaint.setStrikeThruText(true);
             canvas.drawText("Hello OpenGL renderer!", 500, 70, mStrikePaint);
@@ -106,7 +114,7 @@ public class TextActivity extends Activity {
             canvas.drawText("Hello OpenGL renderer!", 500, 100, mStrikePaint);
             mStrikePaint.setStrikeThruText(false);
             mStrikePaint.setUnderlineText(true);
-            
+
             mSkewPaint.setTextSkewX(-0.25f);
             canvas.drawText("Hello OpenGL renderer!", 980, 200, mSkewPaint);
             mSkewPaint.setTextSkewX(0.5f);
@@ -120,11 +128,12 @@ public class TextActivity extends Activity {
             canvas.drawText("Hello OpenGL renderer!", 500, 230, mScaledPaint);
             mScaledPaint.setTextScaleX(2.0f);
             canvas.drawText("Hello OpenGL renderer!", 500, 260, mScaledPaint);
-            
+
             canvas.save();
             canvas.clipRect(150.0f, 220.0f, 450.0f, 320.0f);
             canvas.drawText("Hello OpenGL renderer!", 100, 300, mLargePaint);
             canvas.restore();
+
         }
     }
 }
