@@ -8839,6 +8839,7 @@ package android.hardware {
     field public static final deprecated int TYPE_ORIENTATION = 3; // 0x3
     field public static final int TYPE_PRESSURE = 6; // 0x6
     field public static final int TYPE_PROXIMITY = 8; // 0x8
+    field public static final int TYPE_RELATIVE_HUMIDITY = 12; // 0xc
     field public static final int TYPE_ROTATION_VECTOR = 11; // 0xb
     field public static final deprecated int TYPE_TEMPERATURE = 7; // 0x7
   }
