@@ -4200,7 +4200,8 @@ status_t ResTable::createIdmap(const ResTable& overlay, uint32_t originalCrc, ui
                 | (0x0000ffff & (entryIndex));
             resource_name resName;
             if (!this->getResourceName(resID, &resName)) {
-                return UNKNOWN_ERROR;
+                LOGW("idmap: resource 0x%08x has spec but lacks values, skipping\n", resID);
+                continue;
             }
 
             const String16 overlayType(resName.type, resName.typeLen);
