@@ -81,8 +81,6 @@ public class RsBenchRS {
     private Sampler mLinearWrap;
     private Sampler mMipLinearWrap;
     private Sampler mNearestClamp;
-    private Sampler mMipLinearAniso8;
-    private Sampler mMipLinearAniso15;
 
     private ProgramStore mProgStoreBlendNoneDepth;
     private ProgramStore mProgStoreBlendNone;
@@ -123,10 +121,6 @@ public class RsBenchRS {
 
     Font mFontSans;
     Font mFontSerif;
-    Font mFontSerifBold;
-    Font mFontSerifItalic;
-    Font mFontSerifBoldItalic;
-    Font mFontMono;
     private Allocation mTextAlloc;
 
     private ScriptC_rsbench mScript;
@@ -410,20 +404,11 @@ public class RsBenchRS {
         mFontSans = Font.create(mRS, mRes, "sans-serif", Font.Style.NORMAL, 8);
         mFontSerif = Font.create(mRS, mRes, "serif", Font.Style.NORMAL, 8);
         // Create fonts by family and style
-        mFontSerifBold = Font.create(mRS, mRes, "serif", Font.Style.BOLD, 8);
-        mFontSerifItalic = Font.create(mRS, mRes, "serif", Font.Style.ITALIC, 8);
-        mFontSerifBoldItalic = Font.create(mRS, mRes, "serif", Font.Style.BOLD_ITALIC, 8);
-        mFontMono = Font.create(mRS, mRes, "mono", Font.Style.NORMAL, 8);
 
         mTextAlloc = Allocation.createFromString(mRS, "String from allocation", Allocation.USAGE_SCRIPT);
 
         mScript.set_gFontSans(mFontSans);
         mScript.set_gFontSerif(mFontSerif);
-        mScript.set_gFontSerifBold(mFontSerifBold);
-        mScript.set_gFontSerifItalic(mFontSerifItalic);
-        mScript.set_gFontSerifBoldItalic(mFontSerifBoldItalic);
-        mScript.set_gFontMono(mFontMono);
-        mScript.set_gTextAlloc(mTextAlloc);
     }
 
     private void initMesh() {
@@ -456,21 +441,9 @@ public class RsBenchRS {
         mNearestClamp = Sampler.CLAMP_NEAREST(mRS);
         mMipLinearWrap = Sampler.WRAP_LINEAR_MIP_LINEAR(mRS);
 
-        bs = new Sampler.Builder(mRS);
-        bs.setMinification(Sampler.Value.LINEAR_MIP_LINEAR);
-        bs.setMagnification(Sampler.Value.LINEAR);
-        bs.setWrapS(Sampler.Value.WRAP);
-        bs.setWrapT(Sampler.Value.WRAP);
-        bs.setAnisotropy(8.0f);
-        mMipLinearAniso8 = bs.create();
-        bs.setAnisotropy(15.0f);
-        mMipLinearAniso15 = bs.create();
-
         mScript.set_gLinearClamp(mLinearClamp);
         mScript.set_gLinearWrap(mLinearWrap);
         mScript.set_gMipLinearWrap(mMipLinearWrap);
-        mScript.set_gMipLinearAniso8(mMipLinearAniso8);
-        mScript.set_gMipLinearAniso15(mMipLinearAniso15);
         mScript.set_gNearestClamp(mNearestClamp);
     }
 
