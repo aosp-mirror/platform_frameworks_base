@@ -9016,6 +9016,7 @@ package android.hardware.usb {
     method public void close();
     method public int controlTransfer(int, int, int, int, byte[], int, int);
     method public int getFileDescriptor();
+    method public byte[] getRawDescriptors();
     method public java.lang.String getSerial();
     method public boolean releaseInterface(android.hardware.usb.UsbInterface);
     method public android.hardware.usb.UsbRequest requestWait();
