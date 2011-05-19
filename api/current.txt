@@ -10115,6 +10115,7 @@ package android.media {
     method public void setAuxiliaryOutputFile(java.lang.String);
     method public void setCamera(android.hardware.Camera);
     method public void setCaptureRate(double);
+    method public void setLocation(float, float);
     method public void setMaxDuration(int) throws java.lang.IllegalArgumentException;
     method public void setMaxFileSize(long) throws java.lang.IllegalArgumentException;
     method public void setOnErrorListener(android.media.MediaRecorder.OnErrorListener);

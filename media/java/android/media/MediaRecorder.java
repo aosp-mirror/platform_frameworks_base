@@ -347,7 +347,7 @@ public class MediaRecorder
     }
 
     /**
-     * Store the geodata (latitude and longitude) in the output file.
+     * Set and store the geodata (latitude and longitude) in the output file.
      * This method should be called before prepare(). The geodata is
      * stored in udta box if the output format is OutputFormat.THREE_GPP
      * or OutputFormat.MPEG_4, and is ignored for other output formats.
@@ -361,18 +361,17 @@ public class MediaRecorder
      * @throws IllegalArgumentException if the given latitude or
      * longitude is out of range.
      *
-     * {@hide}
      */
-    public void setGeoData(float latitude, float longitude) {
+    public void setLocation(float latitude, float longitude) {
         int latitudex10000  = (int) (latitude * 10000 + 0.5);
         int longitudex10000 = (int) (longitude * 10000 + 0.5);
 
         if (latitudex10000 > 900000 || latitudex10000 < -900000) {
-            String msg = "Unsupported latitude: " + latitude;
+            String msg = "Latitude: " + latitude + " out of range.";
             throw new IllegalArgumentException(msg);
         }
         if (longitudex10000 > 1800000 || longitudex10000 < -1800000) {
-            String msg = "Unsupported longitude: " + longitude;
+            String msg = "Longitude: " + longitude + " out of range";
             throw new IllegalArgumentException(msg);
         }
 
