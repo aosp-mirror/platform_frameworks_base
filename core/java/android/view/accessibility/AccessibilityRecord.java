@@ -341,7 +341,7 @@ public class AccessibilityRecord {
      *
      * @return An instance.
      */
-    protected static AccessibilityRecord obtain() {
+    public static AccessibilityRecord obtain() {
         synchronized (sPoolLock) {
             if (sPool != null) {
                 AccessibilityRecord record = sPool;

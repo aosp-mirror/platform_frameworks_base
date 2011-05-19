@@ -22241,7 +22241,7 @@ package android.view.accessibility {
     method public boolean isEnabled();
     method public boolean isFullScreen();
     method public boolean isPassword();
-    method protected static android.view.accessibility.AccessibilityRecord obtain();
+    method public static android.view.accessibility.AccessibilityRecord obtain();
     method public void recycle();
     method public void setAddedCount(int);
     method public void setBeforeText(java.lang.CharSequence);
