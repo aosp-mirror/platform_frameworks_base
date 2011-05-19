@@ -637,22 +637,6 @@ void rsi_ContextDestroy(Context *rsc) {
     LOGV("rsContextDestroy 2 %p", rsc);
 }
 
-RsContext rsi_ContextCreate(RsDevice vdev, uint32_t version) {
-    LOGV("rsContextCreate %p", vdev);
-    Device * dev = static_cast<Device *>(vdev);
-    Context *rsc = Context::createContext(dev, NULL);
-    return rsc;
-}
-
-RsContext rsi_ContextCreateGL(RsDevice vdev, uint32_t version,
-                            RsSurfaceConfig sc, uint32_t dpi) {
-    LOGV("rsContextCreateGL %p", vdev);
-    Device * dev = static_cast<Device *>(vdev);
-    Context *rsc = Context::createContext(dev, &sc);
-    rsc->setDPI(dpi);
-    LOGV("rsContextCreateGL ret %p ", rsc);
-    return rsc;
-}
 
 RsMessageToClientType rsi_ContextPeekMessage(Context *rsc,
                                            size_t * receiveLen, size_t receiveLen_length,
@@ -677,6 +661,23 @@ void rsi_ContextDeinitToClient(Context *rsc) {
 }
 
 }
+}
+
+RsContext rsContextCreate(RsDevice vdev, uint32_t version) {
+    LOGV("rsContextCreate %p", vdev);
+    Device * dev = static_cast<Device *>(vdev);
+    Context *rsc = Context::createContext(dev, NULL);
+    return rsc;
+}
+
+RsContext rsContextCreateGL(RsDevice vdev, uint32_t version,
+                            RsSurfaceConfig sc, uint32_t dpi) {
+    LOGV("rsContextCreateGL %p", vdev);
+    Device * dev = static_cast<Device *>(vdev);
+    Context *rsc = Context::createContext(dev, &sc);
+    rsc->setDPI(dpi);
+    LOGV("rsContextCreateGL ret %p ", rsc);
+    return rsc;
 }
 
 // Only to be called at a3d load time, before object is visible to user

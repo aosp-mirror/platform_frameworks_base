@@ -1,42 +1,4 @@
 
-DeviceCreate {
-    direct
-    nocontext
-    ret RsDevice
-}
-
-DeviceDestroy {
-    direct
-    nocontext
-    param RsDevice dev
-}
-
-DeviceSetConfig {
-    direct
-    nocontext
-    param RsDevice dev
-    param RsDeviceParam p
-    param int32_t value
-}
-
-ContextCreate {
-    direct
-    nocontext
-    param RsDevice dev
-    param uint32_t version
-    ret RsContext
-}
-
-ContextCreateGL {
-    direct
-    nocontext
-    param RsDevice dev
-    param uint32_t version
-    param RsSurfaceConfig sc
-    param uint32_t dpi
-    ret RsContext
-}
-
 ContextDestroy {
     direct
 }
