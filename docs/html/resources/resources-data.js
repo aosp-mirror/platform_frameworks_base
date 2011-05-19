@@ -20,6 +20,7 @@ var ANDROID_TAGS = {
     'intent': 'Intents',
     'layout': 'Layouts/Views',
     'media': 'Multimedia',
+    'multitasking': 'Multi-tasking',
     'newfeature': 'New Features',
     'performance': 'Performance',
     'search': 'Search',
@@ -201,6 +202,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['article', 'bestpractice', 'multitasking'],
+    path: 'articles/multitasking-android-way.html',
+    title: {
+      en: 'Multitasking the Android Way'
+    },
+    description: {
+      en: 'This article describes best practices and user experience guidelines for multi-tasking on Android.'
+    }
+  },
+  {
     tags: ['article', 'input'],
     path: 'articles/on-screen-inputs.html',
     title: {
@@ -238,6 +249,16 @@ var ANDROID_RESOURCES = [
     },
     description: {
       en: 'This articles describes the basics of integrating speech recognition into Android applications.'
+    }
+  },
+  {
+    tags: ['article', 'compatibility', 'multitasking'],
+    path: 'articles/service-api-changes-starting-with.html',
+    title: {
+      en: 'Service API changes starting with Android 2.0'
+    },
+    description: {
+      en: 'This article describes the changes and improvements to services introduced in Android 2.0, as well as strategies for compatibility with older versions of the platform.'
     }
   },
   {
