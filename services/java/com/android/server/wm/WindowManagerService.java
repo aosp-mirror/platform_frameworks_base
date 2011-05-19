@@ -6502,8 +6502,22 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (mBaseDisplayWidth < mInitialDisplayWidth
                     || mBaseDisplayHeight < mInitialDisplayHeight) {
-                Rect outer = new Rect(0, 0, mInitialDisplayWidth, mInitialDisplayHeight);
-                Rect inner = new Rect(0, 0, mBaseDisplayWidth, mBaseDisplayHeight);
+                int initW, initH, baseW, baseH;
+                final boolean rotated = (mRotation == Surface.ROTATION_90
+                        || mRotation == Surface.ROTATION_270);
+                if (rotated) {
+                    initW = mInitialDisplayHeight;
+                    initH = mInitialDisplayWidth;
+                    baseW = mBaseDisplayHeight;
+                    baseH = mBaseDisplayWidth;
+                } else {
+                    initW = mInitialDisplayWidth;
+                    initH = mInitialDisplayHeight;
+                    baseW = mBaseDisplayWidth;
+                    baseH = mBaseDisplayHeight;
+                }
+                Rect outer = new Rect(0, 0, initW, initH);
+                Rect inner = new Rect(0, 0, baseW, baseH);
                 try {
                     mBlackFrame = new BlackFrame(mFxSession, outer, inner, MASK_LAYER);
                 } catch (Surface.OutOfResourcesException e) {
