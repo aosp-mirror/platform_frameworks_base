@@ -15,7 +15,7 @@
  */
 
 
-package com.android.systemui.recent;
+package com.android.systemui.recent.carousel;
 
 import com.android.systemui.R;
 

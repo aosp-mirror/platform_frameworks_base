@@ -71,7 +71,8 @@ import com.android.systemui.statusbar.policy.BluetoothController;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.Prefs;
-import com.android.systemui.recent.RecentApplicationsActivity;
+import com.android.systemui.recent.RecentsPanelView;
+import com.android.systemui.recent.carousel.RecentApplicationsActivity;
 
 public class TabletStatusBar extends StatusBar implements
         HeightReceiver.OnBarHeightChangedListener,
@@ -162,7 +163,7 @@ public class TabletStatusBar extends StatusBar implements
     // for disabling the status bar
     int mDisabled = 0;
 
-    private RecentAppsPanel mRecentsPanel;
+    private RecentsPanelView mRecentsPanel;
     private InputMethodsPanel mInputMethodsPanel;
 
     public Context getContext() { return mContext; }
@@ -253,7 +254,7 @@ public class TabletStatusBar extends StatusBar implements
         WindowManagerImpl.getDefault().addView(mNotificationPeekWindow, lp);
 
         // Recents Panel
-        mRecentsPanel = (RecentAppsPanel) View.inflate(context,
+        mRecentsPanel = (RecentsPanelView) View.inflate(context,
                 R.layout.status_bar_recent_panel, null);
         mRecentsPanel.setVisibility(View.GONE);
         mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
@@ -1195,7 +1196,7 @@ public class TabletStatusBar extends StatusBar implements
                     if (mVT != null) {
                         if (action == MotionEvent.ACTION_UP
                          // was this a sloppy tap?
-                         && Math.abs(event.getX() - mInitialTouchX) < mTouchSlop 
+                         && Math.abs(event.getX() - mInitialTouchX) < mTouchSlop
                          && Math.abs(event.getY() - mInitialTouchY) < (mTouchSlop / 3)
                          // dragging off the bottom doesn't count
                          && (int)event.getY() < v.getBottom()) {
@@ -1298,7 +1299,7 @@ public class TabletStatusBar extends StatusBar implements
                     if (!peeking) {
                         if (action == MotionEvent.ACTION_UP
                                 // was this a sloppy tap?
-                                && Math.abs(event.getX() - mInitialTouchX) < mTouchSlop 
+                                && Math.abs(event.getX() - mInitialTouchX) < mTouchSlop
                                 && Math.abs(event.getY() - mInitialTouchY) < (mTouchSlop / 3)
                                 // dragging off the bottom doesn't count
                                 && (int)event.getY() < v.getBottom()) {

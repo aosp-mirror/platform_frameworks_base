@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recent;
+package com.android.systemui.recent.carousel;
 
 import android.content.Context;
 import android.util.AttributeSet;
