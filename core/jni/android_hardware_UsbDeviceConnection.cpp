@@ -83,6 +83,27 @@ android_hardware_UsbDeviceConnection_get_fd(JNIEnv *env, jobject thiz)
     return usb_device_get_fd(device);
 }
 
+static jbyteArray
+android_hardware_UsbDeviceConnection_get_desc(JNIEnv *env, jobject thiz)
+{
+    char buffer[16384];
+    int fd = android_hardware_UsbDeviceConnection_get_fd(env, thiz);
+    if (fd < 0) return NULL;
+    lseek(fd, 0, SEEK_SET);
+    int length = read(fd, buffer, sizeof(buffer));
+    if (length < 0) return NULL;
+
+    jbyteArray ret = env->NewByteArray(length);
+    if (ret) {
+        jbyte* bytes = (jbyte*)env->GetPrimitiveArrayCritical(ret, 0);
+        if (bytes) {
+            memcpy(bytes, buffer, length);
+            env->ReleasePrimitiveArrayCritical(ret, bytes, 0);
+        }
+    }
+    return ret;
+}
+
 static jboolean
 android_hardware_UsbDeviceConnection_claim_interface(JNIEnv *env, jobject thiz,
         int interfaceID, jboolean force)
@@ -211,6 +232,7 @@ static JNINativeMethod method_table[] = {
                                         (void *)android_hardware_UsbDeviceConnection_open},
     {"native_close",            "()V",  (void *)android_hardware_UsbDeviceConnection_close},
     {"native_get_fd",           "()I",  (void *)android_hardware_UsbDeviceConnection_get_fd},
+    {"native_get_desc",         "()[B", (void *)android_hardware_UsbDeviceConnection_get_desc},
     {"native_claim_interface",  "(IZ)Z",(void *)android_hardware_UsbDeviceConnection_claim_interface},
     {"native_release_interface","(I)Z", (void *)android_hardware_UsbDeviceConnection_release_interface},
     {"native_control_request",  "(IIII[BII)I",
