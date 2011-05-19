@@ -616,10 +616,7 @@ LayerBaseClient::Surface::~Surface()
      */
 
     // destroy client resources
-    sp<LayerBaseClient> layer = getOwner();
-    if (layer != 0) {
-        mFlinger->destroySurface(layer);
-    }
+    mFlinger->destroySurface(mOwner);
 }
 
 sp<LayerBaseClient> LayerBaseClient::Surface::getOwner() const {
