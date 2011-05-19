@@ -44,8 +44,7 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 SensorService::SensorService()
-    : Thread(false),
-      mDump("android.permission.DUMP"),
+    : mDump("android.permission.DUMP"),
       mInitCheck(NO_INIT)
 {
 }
