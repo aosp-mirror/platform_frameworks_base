@@ -197,8 +197,9 @@ private:
               mEglDisplay(EGL_NO_DISPLAY),
               mBufferState(BufferSlot::FREE),
               mRequestBufferCalled(false),
-              mLastQueuedTransform(0),
-              mLastQueuedTimestamp(0) {
+              mTransform(0),
+              mTimestamp(0) {
+            mCrop.makeInvalid();
         }
 
         // mGraphicBuffer points to the buffer allocated for this slot or is NULL
@@ -211,32 +212,56 @@ private:
         // mEglDisplay is the EGLDisplay used to create mEglImage.
         EGLDisplay mEglDisplay;
 
-        // mBufferState indicates whether the slot is currently accessible to a
-        // client and should not be used by the SurfaceTexture object. It gets
-        // set to true when dequeueBuffer returns the slot and is reset to false
-        // when the client calls either queueBuffer or cancelBuffer on the slot.
-        enum { DEQUEUED=-2, FREE=-1, QUEUED=0 };
-        int8_t mBufferState;
+        // BufferState represents the different states in which a buffer slot
+        // can be.
+        enum BufferState {
+            // FREE indicates that the buffer is not currently being used and
+            // will not be used in the future until it gets dequeued and
+            // subseqently queued by the client.
+            FREE = 0,
 
+            // DEQUEUED indicates that the buffer has been dequeued by the
+            // client, but has not yet been queued or canceled. The buffer is
+            // considered 'owned' by the client, and the server should not use
+            // it for anything.
+            //
+            // Note that when in synchronous-mode (mSynchronousMode == true),
+            // the buffer that's currently attached to the texture may be
+            // dequeued by the client.  That means that the current buffer can
+            // be in either the DEQUEUED or QUEUED state.  In asynchronous mode,
+            // however, the current buffer is always in the QUEUED state.
+            DEQUEUED = 1,
+
+            // QUEUED indicates that the buffer has been queued by the client,
+            // and has not since been made available for the client to dequeue.
+            // Attaching the buffer to the texture does NOT transition the
+            // buffer away from the QUEUED state. However, in Synchronous mode
+            // the current buffer may be dequeued by the client under some
+            // circumstances. See the note about the current buffer in the
+            // documentation for DEQUEUED.
+            QUEUED = 2,
+        };
+
+        // mBufferState is the current state of this buffer slot.
+        BufferState mBufferState;
 
         // mRequestBufferCalled is used for validating that the client did
         // call requestBuffer() when told to do so. Technically this is not
         // needed but useful for debugging and catching client bugs.
         bool mRequestBufferCalled;
 
-        // mLastQueuedCrop is the crop rectangle for the buffer that was most
-        // recently queued. This gets set to mNextCrop each time queueBuffer gets
-        // called.
-        Rect mLastQueuedCrop;
+        // mCrop is the current crop rectangle for this buffer slot. This gets
+        // set to mNextCrop each time queueBuffer gets called for this buffer.
+        Rect mCrop;
 
-        // mLastQueuedTransform is the transform identifier for the buffer that was
-        // most recently queued. This gets set to mNextTransform each time
-        // queueBuffer gets called.
-        uint32_t mLastQueuedTransform;
+        // mTransform is the current transform flags for this buffer slot. This
+        // gets set to mNextTransform each time queueBuffer gets called for this
+        // slot.
+        uint32_t mTransform;
 
-        // mLastQueuedTimestamp is the timestamp for the buffer that was most
-        // recently queued. This gets set by queueBuffer.
-        int64_t mLastQueuedTimestamp;
+        // mTimestamp is the current timestamp for this buffer slot. This gets
+        // to set by queueBuffer each time this slot is queued.
+        int64_t mTimestamp;
     };
 
     // mSlots is the array of buffer slots that must be mirrored on the client

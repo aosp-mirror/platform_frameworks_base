@@ -400,7 +400,9 @@ TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeDQQR) {
     EXPECT_EQ(st->getCurrentBuffer().get(), buf[2]);
 }
 
-TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeDequeueCurrent) {
+// XXX: We currently have no hardware that properly handles dequeuing the
+// buffer that is currently bound to the texture.
+TEST_F(SurfaceTextureClientTest, DISABLED_SurfaceTextureSyncModeDequeueCurrent) {
     sp<ANativeWindow> anw(mSTC);
     sp<SurfaceTexture> st(mST);
     android_native_buffer_t* buf[3];
