@@ -218,6 +218,7 @@ public:
     status_t removeLayer(const sp<LayerBase>& layer);
     status_t addLayer(const sp<LayerBase>& layer);
     status_t invalidateLayerVisibility(const sp<LayerBase>& layer);
+    void destroyLayer(LayerBase const* layer);
 
     sp<Layer> getLayer(const sp<ISurface>& sur) const;
 
@@ -255,7 +256,7 @@ private:
             uint32_t w, uint32_t h, uint32_t flags);
 
     status_t removeSurface(const sp<Client>& client, SurfaceID sid);
-    status_t destroySurface(const sp<LayerBaseClient>& layer);
+    status_t destroySurface(const wp<LayerBaseClient>& layer);
     status_t setClientState(const sp<Client>& client,
             int32_t count, const layer_state_t* states);
 
@@ -300,9 +301,8 @@ public:     // hack to work around gcc 4.0.3 bug
 private:
             void        handleConsoleEvents();
             void        handleTransaction(uint32_t transactionFlags);
-            void        handleTransactionLocked(
-                            uint32_t transactionFlags, 
-                            Vector< sp<LayerBase> >& ditchedLayers);
+            void        handleTransactionLocked(uint32_t transactionFlags);
+            void        handleDestroyLayers();
 
             void        computeVisibleRegions(
                             LayerVector& currentLayers,
@@ -421,6 +421,11 @@ private:
 
                 // these are thread safe
     mutable     Barrier                     mReadyToRunBarrier;
+
+
+                // protected by mDestroyedLayerLock;
+    mutable     Mutex                       mDestroyedLayerLock;
+                Vector<LayerBase const *>   mDestroyedLayers;
 
                 // atomic variables
                 enum {
