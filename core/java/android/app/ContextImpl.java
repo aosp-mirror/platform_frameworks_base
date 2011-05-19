@@ -48,6 +48,7 @@ import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
@@ -84,6 +85,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.Looper;
+import android.os.Parcel;
 import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
@@ -2000,19 +2002,41 @@ class ContextImpl extends Context {
             throw new NameNotFoundException("No shared userid for user:"+sharedUserName);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public List<PackageInfo> getInstalledPackages(int flags) {
             try {
-                return mPM.getInstalledPackages(flags);
+                final List<PackageInfo> packageInfos = new ArrayList<PackageInfo>();
+                PackageInfo lastItem = null;
+                ParceledListSlice<PackageInfo> slice;
+
+                do {
+                    final String lastKey = lastItem != null ? lastItem.packageName : null;
+                    slice = mPM.getInstalledPackages(flags, lastKey);
+                    lastItem = slice.populateList(packageInfos, PackageInfo.CREATOR);
+                } while (!slice.isLastSlice());
+
+                return packageInfos;
             } catch (RemoteException e) {
                 throw new RuntimeException("Package manager has died", e);
             }
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public List<ApplicationInfo> getInstalledApplications(int flags) {
             try {
-                return mPM.getInstalledApplications(flags);
+                final List<ApplicationInfo> applicationInfos = new ArrayList<ApplicationInfo>();
+                ApplicationInfo lastItem = null;
+                ParceledListSlice<ApplicationInfo> slice;
+
+                do {
+                    final String lastKey = lastItem != null ? lastItem.packageName : null;
+                    slice = mPM.getInstalledApplications(flags, lastKey);
+                    lastItem = slice.populateList(applicationInfos, ApplicationInfo.CREATOR);
+                } while (!slice.isLastSlice());
+
+                return applicationInfos;
             } catch (RemoteException e) {
                 throw new RuntimeException("Package manager has died", e);
             }
