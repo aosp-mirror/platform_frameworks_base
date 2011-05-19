@@ -14,40 +14,53 @@
  ** limitations under the License.
  */
 
-#ifndef ANDROID_EGL_IMPL_H
-#define ANDROID_EGL_IMPL_H
-
 #include <ctype.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <EGL/eglplatform.h>
+#include <GLES/gl.h>
+#include <GLES/glext.h>
 
-#include "hooks.h"
+#include <utils/threads.h>
 
-#define VERSION_MAJOR 1
-#define VERSION_MINOR 4
+#include "egl_object.h"
 
 // ----------------------------------------------------------------------------
 namespace android {
 // ----------------------------------------------------------------------------
 
-struct egl_connection_t
-{
-    inline egl_connection_t() : dso(0) { }
-    void *              dso;
-    gl_hooks_t *        hooks[2];
-    EGLint              major;
-    EGLint              minor;
-    egl_t               egl;
-};
+egl_object_t::egl_object_t(egl_display_t* disp) :
+    display(disp), count(1) {
+    // NOTE: this does an implicit incRef
+    display->addObject(this);
+}
 
-EGLAPI EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image);
+egl_object_t::~egl_object_t() {
+}
 
-extern egl_connection_t gEGLImpl[IMPL_NUM_IMPLEMENTATIONS];
+void egl_object_t::terminate() {
+    // this marks the object as "terminated"
+    display->removeObject(this);
+    if (decRef() == 1) {
+        // shouldn't happen because this is called from LocalRef
+        LOGE("egl_object_t::terminate() removed the last reference!");
+    }
+}
+
+void egl_object_t::destroy() {
+    if (decRef() == 1) {
+        delete this;
+    }
+}
+
+bool egl_object_t::get() {
+    // used by LocalRef, this does an incRef() atomically with
+    // checking that the object is valid.
+    return display->getObject(this);
+}
 
 // ----------------------------------------------------------------------------
 }; // namespace android
 // ----------------------------------------------------------------------------
-
-#endif /* ANDROID_EGL_IMPL_H */

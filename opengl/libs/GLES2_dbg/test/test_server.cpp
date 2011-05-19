@@ -16,14 +16,12 @@
 
 #include "header.h"
 #include "gtest/gtest.h"
-#include "egl_tls.h"
 #include "hooks.h"
 
 namespace android
 {
 extern FILE * file;
 extern unsigned int MAX_FILE_SIZE;
-extern pthread_key_t dbgEGLThreadLocalStorageKey;
 };
 
 // tmpfile fails, so need to manually make a writable file first
@@ -114,7 +112,7 @@ TEST_F(ServerFileTest, CreateDbgContext)
     };
     hooks.gl.glGetError = HookMock::GetError;
     hooks.gl.glGetIntegerv = HookMock::GetIntegerv;
-    DbgContext * const dbg = CreateDbgContext(-1, 1, &hooks);
+    DbgContext * const dbg = CreateDbgContext(1, &hooks);
     ASSERT_TRUE(dbg != NULL);
     EXPECT_TRUE(dbg->vertexAttribs != NULL);
 
@@ -132,7 +130,7 @@ TEST_F(ServerFileTest, CreateDbgContext)
         EXPECT_EQ(expectedConstant, read.arg1());
     }
     CheckNoAvailable();
-    DestroyDbgContext(dbg);
+    dbgReleaseThread();
 }
 
 void * glNoop()
@@ -143,7 +141,7 @@ void * glNoop()
 class ServerFileContextTest : public ServerFileTest
 {
 protected:
-    tls_t tls;
+    DbgContext* dbg;
     gl_hooks_t hooks;
 
     ServerFileContextTest() { }
@@ -153,12 +151,8 @@ protected:
     virtual void SetUp() {
         ServerFileTest::SetUp();
 
-        if (dbgEGLThreadLocalStorageKey == -1)
-            pthread_key_create(&dbgEGLThreadLocalStorageKey, NULL);
-        ASSERT_NE(-1, dbgEGLThreadLocalStorageKey);
-        tls.dbg = new DbgContext(1, &hooks, 32, GL_RGBA, GL_UNSIGNED_BYTE);
-        ASSERT_NE((void *)NULL, tls.dbg);
-        pthread_setspecific(dbgEGLThreadLocalStorageKey, &tls);
+        dbg = new DbgContext(1, &hooks, 32, GL_RGBA, GL_UNSIGNED_BYTE);
+        ASSERT_NE((void *)NULL, dbg);
         for (unsigned int i = 0; i < sizeof(hooks) / sizeof(void *); i++)
             ((void **)&hooks)[i] = reinterpret_cast<void *>(glNoop);
     }
@@ -183,7 +177,7 @@ TEST_F(ServerFileContextTest, MessageLoop)
             return ret;
         }
     } caller;
-    const int contextId = reinterpret_cast<int>(tls.dbg);
+    const int contextId = reinterpret_cast<int>(dbg);
     glesv2debugger::Message msg, read;
 
     EXPECT_EQ(ret, MessageLoop(caller, msg, msg.glFinish));
@@ -214,25 +208,25 @@ TEST_F(ServerFileContextTest, MessageLoop)
 
 TEST_F(ServerFileContextTest, DisableEnableVertexAttribArray)
 {
-    Debug_glEnableVertexAttribArray(tls.dbg->MAX_VERTEX_ATTRIBS + 2); // should just ignore invalid index
+    Debug_glEnableVertexAttribArray(dbg->MAX_VERTEX_ATTRIBS + 2); // should just ignore invalid index
 
     glesv2debugger::Message read;
     rewind(file);
     Read(read);
     EXPECT_EQ(read.glEnableVertexAttribArray, read.function());
-    EXPECT_EQ(tls.dbg->MAX_VERTEX_ATTRIBS + 2, read.arg0());
+    EXPECT_EQ(dbg->MAX_VERTEX_ATTRIBS + 2, read.arg0());
     Read(read);
 
     rewind(file);
-    Debug_glDisableVertexAttribArray(tls.dbg->MAX_VERTEX_ATTRIBS + 4); // should just ignore invalid index
+    Debug_glDisableVertexAttribArray(dbg->MAX_VERTEX_ATTRIBS + 4); // should just ignore invalid index
     rewind(file);
     Read(read);
     Read(read);
 
-    for (unsigned int i = 0; i < tls.dbg->MAX_VERTEX_ATTRIBS; i += 5) {
+    for (unsigned int i = 0; i < dbg->MAX_VERTEX_ATTRIBS; i += 5) {
         rewind(file);
         Debug_glEnableVertexAttribArray(i);
-        EXPECT_TRUE(tls.dbg->vertexAttribs[i].enabled);
+        EXPECT_TRUE(dbg->vertexAttribs[i].enabled);
         rewind(file);
         Read(read);
         EXPECT_EQ(read.glEnableVertexAttribArray, read.function());
@@ -241,7 +235,7 @@ TEST_F(ServerFileContextTest, DisableEnableVertexAttribArray)
 
         rewind(file);
         Debug_glDisableVertexAttribArray(i);
-        EXPECT_FALSE(tls.dbg->vertexAttribs[i].enabled);
+        EXPECT_FALSE(dbg->vertexAttribs[i].enabled);
         rewind(file);
         Read(read);
         EXPECT_EQ(read.glDisableVertexAttribArray, read.function());

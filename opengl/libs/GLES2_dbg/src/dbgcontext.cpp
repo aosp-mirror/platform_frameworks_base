@@ -15,22 +15,18 @@
  */
 
 #include "header.h"
-#include "egl_tls.h"
 
-extern "C"
-{
+extern "C" {
 #include "liblzf/lzf.h"
 }
 
-namespace android
-{
+namespace android {
 
-pthread_key_t dbgEGLThreadLocalStorageKey = -1;
+static pthread_key_t dbgEGLThreadLocalStorageKey = -1;
+static pthread_mutex_t gThreadLocalStorageKeyMutex = PTHREAD_MUTEX_INITIALIZER;
 
-DbgContext * getDbgContextThreadSpecific()
-{
-    tls_t* tls = (tls_t*)pthread_getspecific(dbgEGLThreadLocalStorageKey);
-    return tls->dbg;
+DbgContext * getDbgContextThreadSpecific() {
+    return (DbgContext*)pthread_getspecific(dbgEGLThreadLocalStorageKey);
 }
 
 DbgContext::DbgContext(const unsigned version, const gl_hooks_t * const hooks,
@@ -60,10 +56,13 @@ DbgContext::~DbgContext()
     free(lzf_ref[1]);
 }
 
-DbgContext * CreateDbgContext(const pthread_key_t EGLThreadLocalStorageKey,
-                              const unsigned version, const gl_hooks_t * const hooks)
+DbgContext* CreateDbgContext(const unsigned version, const gl_hooks_t * const hooks)
 {
-    dbgEGLThreadLocalStorageKey = EGLThreadLocalStorageKey;
+    pthread_mutex_lock(&gThreadLocalStorageKeyMutex);
+    if (dbgEGLThreadLocalStorageKey == -1)
+        pthread_key_create(&dbgEGLThreadLocalStorageKey, NULL);
+    pthread_mutex_unlock(&gThreadLocalStorageKeyMutex);
+
     assert(version < 2);
     assert(GL_NO_ERROR == hooks->gl.glGetError());
     GLint MAX_VERTEX_ATTRIBS = 0;
@@ -71,7 +70,7 @@ DbgContext * CreateDbgContext(const pthread_key_t EGLThreadLocalStorageKey,
     GLint readFormat, readType;
     hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, &readFormat);
     hooks->gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, &readType);
-    DbgContext * const dbg = new DbgContext(version, hooks, MAX_VERTEX_ATTRIBS, readFormat, readType);
+    DbgContext* dbg = new DbgContext(version, hooks, MAX_VERTEX_ATTRIBS, readFormat, readType);
 
     glesv2debugger::Message msg, cmd;
     msg.set_context_id(reinterpret_cast<int>(dbg));
@@ -88,12 +87,13 @@ DbgContext * CreateDbgContext(const pthread_key_t EGLThreadLocalStorageKey,
     msg.set_arg0(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS);
     msg.set_arg1(MAX_COMBINED_TEXTURE_IMAGE_UNITS);
     Send(msg, cmd);
+
+    *(DbgContext **)pthread_getspecific(dbgEGLThreadLocalStorageKey) = dbg;
     return dbg;
 }
 
-void DestroyDbgContext(DbgContext * const dbg)
-{
-    delete dbg;
+void dbgReleaseThread() {
+    delete getDbgContextThreadSpecific();
 }
 
 unsigned GetBytesPerPixel(const GLenum format, const GLenum type)

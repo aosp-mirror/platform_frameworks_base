@@ -23,10 +23,9 @@ namespace android
 {
 struct DbgContext;
 
-DbgContext * CreateDbgContext(const pthread_key_t EGLThreadLocalStorageKey,
-                              const unsigned version, const gl_hooks_t * const hooks);
+DbgContext* CreateDbgContext(const unsigned version, const gl_hooks_t * const hooks);
 
-void DestroyDbgContext(DbgContext * const dbg);
+void dbgReleaseThread();
 
 // create and bind socket if haven't already, if failed to create socket or
 //  forceUseFile, then open /data/local/tmp/dump.gles2dbg, exit when size reached

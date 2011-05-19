@@ -19,13 +19,11 @@
 
 #include "header.h"
 #include "gtest/gtest.h"
-#include "egl_tls.h"
 #include "hooks.h"
 
 namespace android
 {
 extern int serverSock, clientSock;
-extern pthread_key_t dbgEGLThreadLocalStorageKey;
 };
 
 void * glNoop();
@@ -33,7 +31,7 @@ void * glNoop();
 class SocketContextTest : public ::testing::Test
 {
 protected:
-    tls_t tls;
+    DbgContext* dbg;
     gl_hooks_t hooks;
     int sock;
     char * buffer;
@@ -46,12 +44,8 @@ protected:
     }
 
     virtual void SetUp() {
-        if (dbgEGLThreadLocalStorageKey == -1)
-            pthread_key_create(&dbgEGLThreadLocalStorageKey, NULL);
-        ASSERT_NE(-1, dbgEGLThreadLocalStorageKey);
-        tls.dbg = new DbgContext(1, &hooks, 32, GL_RGBA, GL_UNSIGNED_BYTE);
-        ASSERT_TRUE(tls.dbg != NULL);
-        pthread_setspecific(dbgEGLThreadLocalStorageKey, &tls);
+        dbg = new DbgContext(1, &hooks, 32, GL_RGBA, GL_UNSIGNED_BYTE);
+        ASSERT_TRUE(dbg != NULL);
         for (unsigned int i = 0; i < sizeof(hooks) / sizeof(void *); i++)
             ((void **)&hooks)[i] = (void *)glNoop;
 
@@ -73,7 +67,7 @@ protected:
     }
 
     void Write(glesv2debugger::Message & msg) const {
-        msg.set_context_id((int)tls.dbg);
+        msg.set_context_id((int)dbg);
         msg.set_type(msg.Response);
         ASSERT_TRUE(msg.has_context_id());
         ASSERT_TRUE(msg.has_function());
@@ -129,7 +123,7 @@ TEST_F(SocketContextTest, MessageLoopSkip)
         }
     } caller;
     glesv2debugger::Message msg, read, cmd;
-    tls.dbg->expectResponse.Bit(msg.glFinish, true);
+    dbg->expectResponse.Bit(msg.glFinish, true);
 
     cmd.set_function(cmd.SKIP);
     cmd.set_expect_response(false);
@@ -158,7 +152,7 @@ TEST_F(SocketContextTest, MessageLoopContinue)
         }
     } caller;
     glesv2debugger::Message msg, read, cmd;
-    tls.dbg->expectResponse.Bit(msg.glCreateShader, true);
+    dbg->expectResponse.Bit(msg.glCreateShader, true);
 
     cmd.set_function(cmd.CONTINUE);
     cmd.set_expect_response(false); // MessageLoop should automatically skip after continue
@@ -204,7 +198,7 @@ TEST_F(SocketContextTest, MessageLoopGenerateCall)
     glesv2debugger::Message msg, read, cmd;
     hooks.gl.glCreateShader = caller.CreateShader;
     hooks.gl.glCreateProgram = caller.CreateProgram;
-    tls.dbg->expectResponse.Bit(msg.glCreateProgram, true);
+    dbg->expectResponse.Bit(msg.glCreateProgram, true);
 
     cmd.set_function(cmd.glCreateShader);
     cmd.set_arg0(GL_FRAGMENT_SHADER);
@@ -272,7 +266,7 @@ TEST_F(SocketContextTest, MessageLoopSetProp)
     glesv2debugger::Message msg, read, cmd;
     hooks.gl.glCreateShader = caller.CreateShader;
     hooks.gl.glCreateProgram = caller.CreateProgram;
-    tls.dbg->expectResponse.Bit(msg.glCreateProgram, false);
+    dbg->expectResponse.Bit(msg.glCreateProgram, false);
 
     cmd.set_function(cmd.SETPROP);
     cmd.set_prop(cmd.ExpectResponse);
@@ -305,8 +299,8 @@ TEST_F(SocketContextTest, MessageLoopSetProp)
 
     EXPECT_EQ((int *)ret, MessageLoop(caller, msg, msg.glCreateProgram));
 
-    EXPECT_TRUE(tls.dbg->expectResponse.Bit(msg.glCreateProgram));
-    EXPECT_EQ(819, tls.dbg->captureDraw);
+    EXPECT_TRUE(dbg->expectResponse.Bit(msg.glCreateProgram));
+    EXPECT_EQ(819, dbg->captureDraw);
 
     Read(read);
     EXPECT_EQ(read.glCreateProgram, read.function());
@@ -362,7 +356,7 @@ TEST_F(SocketContextTest, TexImage2D)
     } caller;
     glesv2debugger::Message msg, read, cmd;
     hooks.gl.glTexImage2D = caller.TexImage2D;
-    tls.dbg->expectResponse.Bit(msg.glTexImage2D, false);
+    dbg->expectResponse.Bit(msg.glTexImage2D, false);
 
     Debug_glTexImage2D(_target, _level, _internalformat, _width, _height, _border,
                        _format, _type, _pixels);
@@ -382,7 +376,7 @@ TEST_F(SocketContextTest, TexImage2D)
 
     EXPECT_TRUE(read.has_data());
     uint32_t dataLen = 0;
-    const unsigned char * data = tls.dbg->Decompress(read.data().data(),
+    const unsigned char * data = dbg->Decompress(read.data().data(),
                                  read.data().length(), &dataLen);
     EXPECT_EQ(sizeof(_pixels), dataLen);
     if (sizeof(_pixels) == dataLen)
@@ -435,7 +429,7 @@ TEST_F(SocketContextTest, CopyTexImage2D)
     glesv2debugger::Message msg, read, cmd;
     hooks.gl.glCopyTexImage2D = caller.CopyTexImage2D;
     hooks.gl.glReadPixels = caller.ReadPixels;
-    tls.dbg->expectResponse.Bit(msg.glCopyTexImage2D, false);
+    dbg->expectResponse.Bit(msg.glCopyTexImage2D, false);
 
     Debug_glCopyTexImage2D(_target, _level, _internalformat, _x, _y, _width, _height,
                            _border);
@@ -459,7 +453,7 @@ TEST_F(SocketContextTest, CopyTexImage2D)
     EXPECT_EQ(GL_RGBA, read.pixel_format());
     EXPECT_EQ(GL_UNSIGNED_BYTE, read.pixel_type());
     uint32_t dataLen = 0;
-    unsigned char * const data = tls.dbg->Decompress(read.data().data(),
+    unsigned char * const data = dbg->Decompress(read.data().data(),
                                  read.data().length(), &dataLen);
     ASSERT_EQ(sizeof(_pixels), dataLen);
     for (unsigned i = 0; i < sizeof(_pixels) / sizeof(*_pixels); i++)
