@@ -200,8 +200,12 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     static final int CMD_START_AP                         = BASE + 21;
     /* Stop the soft access point */
     static final int CMD_STOP_AP                          = BASE + 22;
+    /* Set the soft access point configuration */
+    static final int CMD_SET_AP_CONFIG                    = BASE + 23;
+    /* Get the soft access point configuration */
+    static final int CMD_GET_AP_CONFIG                    = BASE + 24;
 
-    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = BASE + 23;
+    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = BASE + 25;
 
     /* Supplicant events */
     /* Connection to supplicant established */
@@ -354,6 +358,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
 
     private static final int MIN_RSSI = -200;
     private static final int MAX_RSSI = 256;
+
+    /* Constants to indicate if soft ap is running or stopped */
+    private static final int SOFT_AP_STOPPED = 0;
+    private static final int SOFT_AP_RUNNING = 1;
 
     /* Default parent state */
     private HierarchicalState mDefaultState = new DefaultState();
@@ -591,6 +599,17 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             /* Argument is the state that is entered upon success */
             sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_DISABLED, 0));
         }
+    }
+
+    public void setWifiApConfiguration(WifiConfiguration config) {
+        sendMessage(obtainMessage(CMD_SET_AP_CONFIG, config));
+    }
+
+    public WifiConfiguration syncGetWifiApConfiguration(AsyncChannel channel) {
+        Message resultMsg = channel.sendMessageSynchronously(CMD_GET_AP_CONFIG);
+        WifiConfiguration ret = (WifiConfiguration) resultMsg.obj;
+        resultMsg.recycle();
+        return ret;
     }
 
     /**
@@ -1517,7 +1536,31 @@ public class WifiStateMachine extends HierarchicalStateMachine {
          */
         WifiNative.disconnectCommand();
         WifiNative.reconnectCommand();
+    }
 
+    private boolean startSoftApWithConfig(WifiConfiguration config, int currentStatus) {
+        if (config == null) {
+            config = WifiApConfigStore.getApConfiguration();
+        } else {
+            WifiApConfigStore.setApConfiguration(config);
+        }
+        try {
+            if (currentStatus == SOFT_AP_STOPPED) {
+                nwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
+            } else if (currentStatus == SOFT_AP_RUNNING) {
+                nwService.setAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Exception in softap start " + e);
+            try {
+                nwService.stopAccessPoint();
+                nwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
+            } catch (Exception ee) {
+                Log.e(TAG, "Exception during softap restart : " + ee);
+                return false;
+            }
+        }
+        return true;
     }
 
 
@@ -1655,6 +1698,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_ENABLE_BACKGROUND_SCAN:
                     mEnableBackgroundScan = (message.arg1 == 1);
                     break;
+                case CMD_SET_AP_CONFIG:
+                    WifiApConfigStore.setApConfiguration((WifiConfiguration) message.obj);
+                    break;
+                case CMD_GET_AP_CONFIG:
+                    WifiConfiguration config = WifiApConfigStore.getApConfiguration();
+                    mReplyChannel.replyToMessage(message, message.what, config);
+                    break;
                     /* Discard */
                 case CMD_LOAD_DRIVER:
                 case CMD_UNLOAD_DRIVER:
@@ -1716,6 +1766,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             // [7 - 0] HSM state change
             // 50021 wifi_state_changed (custom|1|5)
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            WifiApConfigStore.initialize(mContext);
 
             if (WifiNative.isDriverLoaded()) {
                 transitionTo(mDriverLoadedState);
@@ -1829,26 +1881,14 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     }
                     break;
                 case CMD_START_AP:
-                    try {
-                        nwService.startAccessPoint((WifiConfiguration) message.obj,
-                                    mInterfaceName,
-                                    SOFTAP_IFACE);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Exception in softap start " + e);
-                        try {
-                            nwService.stopAccessPoint();
-                            nwService.startAccessPoint((WifiConfiguration) message.obj,
-                                    mInterfaceName,
-                                    SOFTAP_IFACE);
-                        } catch (Exception ee) {
-                            Log.e(TAG, "Exception during softap restart : " + ee);
-                            sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
-                            break;
-                        }
+                    if (startSoftApWithConfig((WifiConfiguration) message.obj, SOFT_AP_STOPPED)) {
+                        Log.d(TAG, "Soft AP start successful");
+                        setWifiApState(WIFI_AP_STATE_ENABLED);
+                        transitionTo(mSoftApStartedState);
+                    } else {
+                        Log.d(TAG, "Soft AP start failed");
+                        sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
                     }
-                    Log.d(TAG, "Soft AP start successful");
-                    setWifiApState(WIFI_AP_STATE_ENABLED);
-                    transitionTo(mSoftApStartedState);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2999,21 +3039,13 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                     break;
                 case CMD_START_AP:
                     Log.d(TAG,"SoftAP set on a running access point");
-                    try {
-                        nwService.setAccessPoint((WifiConfiguration) message.obj,
-                                    mInterfaceName,
-                                    SOFTAP_IFACE);
-                    } catch(Exception e) {
-                        Log.e(TAG, "Exception in softap set " + e);
-                        try {
-                            nwService.stopAccessPoint();
-                            nwService.startAccessPoint((WifiConfiguration) message.obj,
-                                    mInterfaceName,
-                                    SOFTAP_IFACE);
-                        } catch (Exception ee) {
-                            Log.e(TAG, "Could not restart softap after set failed " + ee);
-                            sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
-                        }
+                    if (startSoftApWithConfig((WifiConfiguration) message.obj, SOFT_AP_RUNNING)) {
+                        Log.d(TAG, "Soft AP start successful");
+                        setWifiApState(WIFI_AP_STATE_ENABLED);
+                        transitionTo(mSoftApStartedState);
+                    } else {
+                        Log.d(TAG, "Soft AP start failed");
+                        sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
                     }
                     break;
                 /* Fail client mode operation when soft AP is enabled */
