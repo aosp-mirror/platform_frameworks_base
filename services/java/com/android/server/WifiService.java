@@ -568,31 +568,10 @@ public class WifiService extends IWifiManager.Stub {
      * @param wifiConfig SSID, security and channel details as
      *        part of WifiConfiguration
      * @param enabled true to enable and false to disable
-     * @return {@code true} if the start operation was
-     *         started or is already in the queue.
      */
-    public synchronized boolean setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
+    public void setWifiApEnabled(WifiConfiguration wifiConfig, boolean enabled) {
         enforceChangePermission();
-
-        if (enabled) {
-            /* Use default config if there is no existing config */
-            if (wifiConfig == null && ((wifiConfig = getWifiApConfiguration()) == null)) {
-                wifiConfig = new WifiConfiguration();
-                wifiConfig.SSID = mContext.getString(R.string.wifi_tether_configure_ssid_default);
-                wifiConfig.allowedKeyManagement.set(KeyMgmt.NONE);
-            }
-            /*
-             * Caller might not have WRITE_SECURE_SETTINGS,
-             * only CHANGE_WIFI_STATE is enforced
-             */
-            long ident = Binder.clearCallingIdentity();
-            setWifiApConfiguration(wifiConfig);
-            Binder.restoreCallingIdentity(ident);
-        }
-
         mWifiStateMachine.setWifiApEnabled(wifiConfig, enabled);
-
-        return true;
     }
 
     /**
@@ -612,38 +591,20 @@ public class WifiService extends IWifiManager.Stub {
      * see {@link WifiManager#getWifiApConfiguration()}
      * @return soft access point configuration
      */
-    public synchronized WifiConfiguration getWifiApConfiguration() {
-        final ContentResolver cr = mContext.getContentResolver();
-        WifiConfiguration wifiConfig = new WifiConfiguration();
-        int authType;
-        try {
-            wifiConfig.SSID = Settings.Secure.getString(cr, Settings.Secure.WIFI_AP_SSID);
-            if (wifiConfig.SSID == null)
-                return null;
-            authType = Settings.Secure.getInt(cr, Settings.Secure.WIFI_AP_SECURITY);
-            wifiConfig.allowedKeyManagement.set(authType);
-            wifiConfig.preSharedKey = Settings.Secure.getString(cr, Settings.Secure.WIFI_AP_PASSWD);
-            return wifiConfig;
-        } catch (Settings.SettingNotFoundException e) {
-            Slog.e(TAG,"AP settings not found, returning");
-            return null;
-        }
+    public WifiConfiguration getWifiApConfiguration() {
+        enforceAccessPermission();
+        return mWifiStateMachine.syncGetWifiApConfiguration(mWifiStateMachineChannel);
     }
 
     /**
      * see {@link WifiManager#setWifiApConfiguration(WifiConfiguration)}
      * @param wifiConfig WifiConfiguration details for soft access point
      */
-    public synchronized void setWifiApConfiguration(WifiConfiguration wifiConfig) {
+    public void setWifiApConfiguration(WifiConfiguration wifiConfig) {
         enforceChangePermission();
-        final ContentResolver cr = mContext.getContentResolver();
         if (wifiConfig == null)
             return;
-        int authType = wifiConfig.getAuthType();
-        Settings.Secure.putString(cr, Settings.Secure.WIFI_AP_SSID, wifiConfig.SSID);
-        Settings.Secure.putInt(cr, Settings.Secure.WIFI_AP_SECURITY, authType);
-        if (authType != KeyMgmt.NONE)
-            Settings.Secure.putString(cr, Settings.Secure.WIFI_AP_PASSWD, wifiConfig.preSharedKey);
+        mWifiStateMachine.setWifiApConfiguration(wifiConfig);
     }
 
     /**
