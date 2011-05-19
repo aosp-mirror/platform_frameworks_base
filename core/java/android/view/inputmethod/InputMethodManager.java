@@ -35,6 +35,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
+import android.text.style.SuggestionSpan;
 import android.util.Log;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
@@ -550,7 +551,25 @@ public final class InputMethodManager {
     public void setFullscreenMode(boolean fullScreen) {
         mFullscreenMode = fullScreen;
     }
-    
+
+    /** @hide */
+    public void registerSuggestionSpansForNotification(SuggestionSpan[] spans) {
+        try {
+            mService.registerSuggestionSpansForNotification(spans);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /** @hide */
+    public void notifySuggestionPicked(SuggestionSpan span, String originalString, int index) {
+        try {
+            mService.notifySuggestionPicked(span, originalString, index);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Allows you to discover whether the attached input method is running
      * in fullscreen mode.  Return true if it is fullscreen, entirely covering

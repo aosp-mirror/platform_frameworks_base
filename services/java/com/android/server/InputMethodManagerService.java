@@ -64,7 +64,9 @@ import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
+import android.text.style.SuggestionSpan;
 import android.util.EventLog;
+import android.util.LruCache;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.PrintWriterPrinter;
@@ -117,6 +119,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     static final long TIME_TO_RECONNECT = 10*1000;
 
+    static final int SECURE_SUGGESTION_SPANS_MAX_SIZE = 20;
+
     private static final int NOT_A_SUBTYPE_ID = -1;
     private static final String NOT_A_SUBTYPE_ID_STR = String.valueOf(NOT_A_SUBTYPE_ID);
     private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
@@ -141,6 +145,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     // lock for this class.
     final ArrayList<InputMethodInfo> mMethodList = new ArrayList<InputMethodInfo>();
     final HashMap<String, InputMethodInfo> mMethodMap = new HashMap<String, InputMethodInfo>();
+    private final LruCache<SuggestionSpan, InputMethodInfo> mSecureSuggestionSpans =
+            new LruCache<SuggestionSpan, InputMethodInfo>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
 
     class SessionState {
         final ClientState client;
@@ -965,6 +971,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
     public void updateStatusIcon(IBinder token, String packageName, int iconId) {
         int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
@@ -989,6 +996,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
         int uid = Binder.getCallingUid();
         long ident = Binder.clearCallingIdentity();
@@ -1006,6 +1014,41 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
+    }
+
+    public void registerSuggestionSpansForNotification(SuggestionSpan[] spans) {
+        synchronized (mMethodMap) {
+            final InputMethodInfo currentImi = mMethodMap.get(mCurMethodId);
+            for (int i = 0; i < spans.length; ++i) {
+                SuggestionSpan ss = spans[i];
+                if (ss.getNotificationTargetClass() != null) {
+                    mSecureSuggestionSpans.put(ss, currentImi);
+                }
+            }
+        }
+    }
+
+    public boolean notifySuggestionPicked(SuggestionSpan span, String originalString, int index) {
+        synchronized (mMethodMap) {
+            final InputMethodInfo targetImi = mSecureSuggestionSpans.get(span);
+            // TODO: Do not send the intent if the process of the targetImi is already dead.
+            if (targetImi != null) {
+                final String[] suggestions = span.getSuggestions();
+                if (index < 0 || index >= suggestions.length) return false;
+                final Class<?> c = span.getNotificationTargetClass();
+                final Intent intent = new Intent();
+                // Ensures that only a class in the original IME package will receive the
+                // notification.
+                intent.setClassName(targetImi.getPackageName(), c.getCanonicalName());
+                intent.setAction(SuggestionSpan.ACTION_SUGGESTION_PICKED);
+                intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_BEFORE, originalString);
+                intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_AFTER, suggestions[index]);
+                intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_HASHCODE, span.hashCode());
+                mContext.sendBroadcast(intent);
+                return true;
+            }
+        }
+        return false;
     }
 
     void updateFromSettingsLocked() {

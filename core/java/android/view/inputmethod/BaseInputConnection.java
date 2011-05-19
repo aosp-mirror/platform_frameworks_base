@@ -49,8 +49,9 @@ public class BaseInputConnection implements InputConnection {
     private static final boolean DEBUG = false;
     private static final String TAG = "BaseInputConnection";
     static final Object COMPOSING = new ComposingText();
-    
-    final InputMethodManager mIMM;
+
+    /** @hide */
+    protected final InputMethodManager mIMM;
     final View mTargetView;
     final boolean mDummyMode;
     

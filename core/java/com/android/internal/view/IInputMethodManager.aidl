@@ -17,6 +17,7 @@
 package com.android.internal.view;
 
 import android.os.ResultReceiver;
+import android.text.style.SuggestionSpan;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 import android.view.inputmethod.EditorInfo;
@@ -61,6 +62,8 @@ interface IInputMethodManager {
     void showMySoftInput(in IBinder token, int flags);
     void updateStatusIcon(in IBinder token, String packageName, int iconId);
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition);
+    void registerSuggestionSpansForNotification(in SuggestionSpan[] spans);
+    boolean notifySuggestionPicked(in SuggestionSpan span, String originalString, int index);
     InputMethodSubtype getCurrentInputMethodSubtype();
     boolean setCurrentInputMethodSubtype(in InputMethodSubtype subtype);
     boolean switchToLastInputMethod(in IBinder token);

@@ -19,8 +19,10 @@ package android.text.style;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.text.ParcelableSpan;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -29,6 +31,7 @@ import java.util.Locale;
  * Holds suggestion candidates of words under this span.
  */
 public class SuggestionSpan implements ParcelableSpan {
+    private static final String TAG = SuggestionSpan.class.getSimpleName();
 
     /**
      * Flag for indicating that the input is verbatim. TextView refers to this flag to determine
@@ -36,7 +39,12 @@ public class SuggestionSpan implements ParcelableSpan {
      */
     public static final int FLAG_VERBATIM = 0x0001;
 
-    private static final int SUGGESTIONS_MAX_SIZE = 5;
+    public static final String ACTION_SUGGESTION_PICKED = "android.text.style.SUGGESTION_PICKED";
+    public static final String SUGGESTION_SPAN_PICKED_AFTER = "after";
+    public static final String SUGGESTION_SPAN_PICKED_BEFORE = "before";
+    public static final String SUGGESTION_SPAN_PICKED_HASHCODE = "hashcode";
+
+    public static final int SUGGESTIONS_MAX_SIZE = 5;
 
     /*
      * TODO: Needs to check the validity and add a feature that TextView will change
@@ -48,7 +56,9 @@ public class SuggestionSpan implements ParcelableSpan {
     private final int mFlags;
     private final String[] mSuggestions;
     private final String mLocaleString;
-    private final String mOriginalString;
+    private final Class<?> mNotificationTargetClass;
+    private final int mHashCode;
+
     /*
      * TODO: If switching IME is required, needs to add parameters for ids of InputMethodInfo
      * and InputMethodSubtype.
@@ -77,10 +87,11 @@ public class SuggestionSpan implements ParcelableSpan {
      * @param locale locale Locale of the suggestions
      * @param suggestions Suggestions for the string under the span
      * @param flags Additional flags indicating how this span is handled in TextView
-     * @param originalString originalString for suggestions
+     * @param notificationTargetClass if not null, this class will get notified when the user
+     * selects one of the suggestions.
      */
     public SuggestionSpan(Context context, Locale locale, String[] suggestions, int flags,
-            String originalString) {
+            Class<?> notificationTargetClass) {
         final int N = Math.min(SUGGESTIONS_MAX_SIZE, suggestions.length);
         mSuggestions = Arrays.copyOf(suggestions, N);
         mFlags = flags;
@@ -89,14 +100,26 @@ public class SuggestionSpan implements ParcelableSpan {
         } else {
             mLocaleString = locale.toString();
         }
-        mOriginalString = originalString;
+        mNotificationTargetClass = notificationTargetClass;
+        mHashCode = hashCodeInternal(
+                mFlags, mSuggestions, mLocaleString, mNotificationTargetClass);
     }
 
     public SuggestionSpan(Parcel src) {
         mSuggestions = src.readStringArray();
         mFlags = src.readInt();
         mLocaleString = src.readString();
-        mOriginalString = src.readString();
+        Class<?> tempClass = null;
+        try {
+            final String className = src.readString();
+            if (!TextUtils.isEmpty(className)) {
+                tempClass = Class.forName(className);
+            }
+        } catch (ClassNotFoundException e) {
+            Log.i(TAG, "Invalid class name was created.");
+        }
+        mNotificationTargetClass = tempClass;
+        mHashCode = src.readInt();
     }
 
     /**
@@ -114,10 +137,13 @@ public class SuggestionSpan implements ParcelableSpan {
     }
 
     /**
-     * @return original string of suggestions
+     * @return The class to notify. The class of the original IME package will receive
+     * a notification when the user selects one of the suggestions. The notification will include
+     * the original string, the suggested replacement string as well as the hashCode of this span.
+     * The class will get notified by an intent that has those information.
      */
-    public String getOriginalString() {
-        return mOriginalString;
+    public Class<?> getNotificationTargetClass() {
+        return mNotificationTargetClass;
     }
 
     public int getFlags() {
@@ -134,12 +160,29 @@ public class SuggestionSpan implements ParcelableSpan {
         dest.writeStringArray(mSuggestions);
         dest.writeInt(mFlags);
         dest.writeString(mLocaleString);
-        dest.writeString(mOriginalString);
+        dest.writeString(mNotificationTargetClass != null
+                ? mNotificationTargetClass.getCanonicalName()
+                : "");
+        dest.writeInt(mHashCode);
     }
 
     @Override
     public int getSpanTypeId() {
         return TextUtils.SUGGESTION_SPAN;
+    }
+
+    @Override
+    public int hashCode() {
+        return mHashCode;
+    }
+
+    private static int hashCodeInternal(int flags, String[] suggestions,String locale,
+            Class<?> notificationTargetClass) {
+        final String cls = notificationTargetClass != null
+                ? notificationTargetClass.getCanonicalName()
+                : "";
+        return Arrays.hashCode(
+                new Object[] {SystemClock.uptimeMillis(), flags, suggestions, locale, cls});
     }
 
     public static final Parcelable.Creator<SuggestionSpan> CREATOR =
