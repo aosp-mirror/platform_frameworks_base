@@ -73,19 +73,6 @@ class ViewServer implements Runnable {
     private ExecutorService mThreadPool;
 
     /**
-     * Creates a new ViewServer associated with the specified window manager.
-     * The server uses the default port {@link #VIEW_SERVER_DEFAULT_PORT}. The server
-     * is not started by default.
-     *
-     * @param windowManager The window manager used to communicate with the views.
-     *
-     * @see #start()
-     */
-    ViewServer(WindowManagerService windowManager) {
-        this(windowManager, VIEW_SERVER_DEFAULT_PORT);
-    }
-
-    /**
      * Creates a new ViewServer associated with the specified window manager on the
      * specified local port. The server is not started by default.
      *
@@ -177,7 +164,7 @@ class ViewServer implements Runnable {
             // Any uncaught exception will crash the system process
             try {
                 Socket client = mServer.accept();
-                if(mThreadPool != null) {
+                if (mThreadPool != null) {
                     mThreadPool.submit(new ViewServerWorker(client));
                 } else {
                     try {
@@ -220,6 +207,7 @@ class ViewServer implements Runnable {
         private Socket mClient;
         private boolean mNeedWindowListUpdate;
         private boolean mNeedFocusedWindowUpdate;
+
         public ViewServerWorker(Socket client) {
             mClient = client;
             mNeedWindowListUpdate = false;
@@ -255,7 +243,7 @@ class ViewServer implements Runnable {
                     result = mWindowManager.viewServerListWindows(mClient);
                 } else if (COMMAND_WINDOW_MANAGER_GET_FOCUS.equalsIgnoreCase(command)) {
                     result = mWindowManager.viewServerGetFocusedWindow(mClient);
-                } else if(COMMAND_WINDOW_MANAGER_AUTOLIST.equalsIgnoreCase(command)) {
+                } else if (COMMAND_WINDOW_MANAGER_AUTOLIST.equalsIgnoreCase(command)) {
                     result = windowManagerAutolistLoop();
                 } else {
                     result = mWindowManager.viewServerWindowCommand(mClient,
@@ -263,7 +251,7 @@ class ViewServer implements Runnable {
                 }
 
                 if (!result) {
-                    Slog.w(LOG_TAG, "An error occured with the command: " + command);
+                    Slog.w(LOG_TAG, "An error occurred with the command: " + command);
                 }
             } catch(IOException e) {
                 Slog.w(LOG_TAG, "Connection error: ", e);
@@ -321,11 +309,11 @@ class ViewServer implements Runnable {
                             needFocusedWindowUpdate = true;
                         }
                     }
-                    if(needWindowListUpdate) {
+                    if (needWindowListUpdate) {
                         out.write("LIST UPDATE\n");
                         out.flush();
                     }
-                    if(needFocusedWindowUpdate) {
+                    if (needFocusedWindowUpdate) {
                         out.write("FOCUS UPDATE\n");
                         out.flush();
                     }
@@ -337,6 +325,7 @@ class ViewServer implements Runnable {
                     try {
                         out.close();
                     } catch (IOException e) {
+                        // Ignore
                     }
                 }
                 mWindowManager.removeWindowChangeListener(this);
