@@ -599,12 +599,35 @@ public class ExpandableListView extends ListView {
      *         was already expanded, this will return false)
      */
     public boolean expandGroup(int groupPos) {
-        boolean retValue = mConnector.expandGroup(groupPos);
+       return expandGroup(groupPos, false);
+    }
+
+    /**
+     * Expand a group in the grouped list view
+     *
+     * @param groupPos the group to be expanded
+     * @param animate true if the expanding group should be animated in
+     * @return True if the group was expanded, false otherwise (if the group
+     *         was already expanded, this will return false)
+     */
+    public boolean expandGroup(int groupPos, boolean animate) {
+        PositionMetadata pm = mConnector.getFlattenedPos(ExpandableListPosition.obtain(
+                ExpandableListPosition.GROUP, groupPos, -1, -1));
+        boolean retValue = mConnector.expandGroup(pm);
 
         if (mOnGroupExpandListener != null) {
             mOnGroupExpandListener.onGroupExpand(groupPos);
         }
-        
+
+        if (animate) {
+            final int groupFlatPos = pm.position.flatListPos;
+
+            final int shiftedGroupPosition = groupFlatPos + getHeaderViewsCount();
+            smoothScrollToPosition(shiftedGroupPosition + mAdapter.getChildrenCount(groupPos),
+                    shiftedGroupPosition);
+        }
+        pm.recycle();
+
         return retValue;
     }
     

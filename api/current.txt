@@ -24010,6 +24010,7 @@ package android.widget {
     ctor public ExpandableListView(android.content.Context, android.util.AttributeSet, int);
     method public boolean collapseGroup(int);
     method public boolean expandGroup(int);
+    method public boolean expandGroup(int, boolean);
     method public android.widget.ExpandableListAdapter getExpandableListAdapter();
     method public long getExpandableListPosition(int);
     method public int getFlatListPosition(long);
