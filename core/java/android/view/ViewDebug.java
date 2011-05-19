@@ -92,21 +92,6 @@ public class ViewDebug {
     public static final boolean TRACE_RECYCLER = false;
 
     /**
-     * Enables or disables motion events tracing. Any invoker of
-     * {@link #trace(View, MotionEvent, MotionEventTraceType)} should first check
-     * that this value is set to true as not to affect performance.
-     * 
-     * @hide
-     */
-    public static final boolean TRACE_MOTION_EVENTS = false;
-
-    /**
-     * The system property of dynamic switch for capturing view information
-     * when it is set, we dump interested fields and methods for the view on focus
-     */
-    static final String SYSTEM_PROPERTY_CAPTURE_VIEW = "debug.captureview";
-
-    /**
      * The system property of dynamic switch for capturing event information
      * when it is set, we log key events, touch/motion and trackball events
      */
@@ -169,12 +154,6 @@ public class ViewDebug {
      */
     @Debug.DebugProperty
     public static boolean consistencyCheckEnabled = false;
-
-    static {
-        if (false) {        
-	        Debug.setFieldsOn(ViewDebug.class, true);
-	    }
-    }
 
     /**
      * This annotation can be used to mark fields and methods to be dumped by
@@ -424,21 +403,6 @@ public class ViewDebug {
     private static String sRecyclerTracePrefix;
 
     /**
-     * Defines the type of motion events trace to output to the motion events traces file.
-     * 
-     * @hide
-     */
-    public enum MotionEventTraceType {
-        DISPATCH,
-        ON_INTERCEPT,
-        ON_TOUCH
-    }
-
-    private static BufferedWriter sMotionEventTraces;
-    private static ViewAncestor sMotionEventRoot;
-    private static String sMotionEventTracePrefix;
-
-    /**
      * Returns the number of instanciated Views.
      *
      * @return The number of Views instanciated in the current process.
@@ -574,6 +538,7 @@ public class ViewDebug {
         recyclerDump = new File(recyclerDump, sRecyclerTracePrefix + ".traces");
         try {
             if (recyclerDump.exists()) {
+                //noinspection ResultOfMethodCallIgnored
                 recyclerDump.delete();
             }
             final FileOutputStream file = new FileOutputStream(recyclerDump);
@@ -719,146 +684,6 @@ public class ViewDebug {
         }
 
         View view = sHierarhcyRoot.getView();
-        if (view instanceof ViewGroup) {
-            ViewGroup group = (ViewGroup) view;
-            dumpViewHierarchy(group, out, 0);
-            try {
-                out.close();
-            } catch (IOException e) {
-                Log.e("View", "Could not dump view hierarchy");
-            }
-        }
-
-        sHierarhcyRoot = null;
-    }
-
-    /**
-     * Outputs a trace to the currently opened traces file. The trace contains the class name
-     * and instance's hashcode of the specified view as well as the supplied trace type.
-     *
-     * @param view the view to trace
-     * @param event the event of the trace
-     * @param type the type of the trace
-     * 
-     * @hide
-     */
-    public static void trace(View view, MotionEvent event, MotionEventTraceType type) {
-        if (sMotionEventTraces == null) {
-            return;
-        }
-
-        try {
-            sMotionEventTraces.write(type.name());
-            sMotionEventTraces.write(' ');
-            sMotionEventTraces.write(event.getAction());
-            sMotionEventTraces.write(' ');
-            sMotionEventTraces.write(view.getClass().getName());
-            sMotionEventTraces.write('@');
-            sMotionEventTraces.write(Integer.toHexString(view.hashCode()));
-            sHierarchyTraces.newLine();
-        } catch (IOException e) {
-            Log.w("View", "Error while dumping trace of event " + event + " for view " + view);
-        }
-    }
-
-    /**
-     * Starts tracing the motion events for the hierarchy of the specificy view.
-     * The trace is identified by a prefix, used to build the traces files names:
-     * <code>/EXTERNAL/motion-events/PREFIX.traces</code> and
-     * <code>/EXTERNAL/motion-events/PREFIX.tree</code>.
-     *
-     * Only one view hierarchy can be traced at the same time. After calling this method, any
-     * other invocation will result in a <code>IllegalStateException</code> unless
-     * {@link #stopMotionEventTracing()} is invoked before.
-     *
-     * Calling this method creates the file <code>/EXTERNAL/motion-events/PREFIX.traces</code>
-     * containing all the traces (or method calls) relative to the specified view's hierarchy.
-     *
-     * This method will return immediately if TRACE_HIERARCHY is false.
-     *
-     * @param prefix the traces files name prefix
-     * @param view the view whose hierarchy must be traced
-     *
-     * @see #stopMotionEventTracing()
-     * @see #trace(View, MotionEvent, android.view.ViewDebug.MotionEventTraceType)
-     * 
-     * @hide 
-     */
-    public static void startMotionEventTracing(String prefix, View view) {
-        //noinspection PointlessBooleanExpression,ConstantConditions
-        if (!TRACE_MOTION_EVENTS) {
-            return;
-        }
-
-        if (sMotionEventRoot != null) {
-            throw new IllegalStateException("You must call stopMotionEventTracing() before running" +
-                " a new trace!");
-        }
-
-        File hierarchyDump = new File(Environment.getExternalStorageDirectory(), "motion-events/");
-        //noinspection ResultOfMethodCallIgnored
-        hierarchyDump.mkdirs();
-
-        hierarchyDump = new File(hierarchyDump, prefix + ".traces");
-        sMotionEventTracePrefix = prefix;
-
-        try {
-            sMotionEventTraces = new BufferedWriter(new FileWriter(hierarchyDump), 32 * 1024);
-        } catch (IOException e) {
-            Log.e("View", "Could not dump view hierarchy");
-            return;
-        }
-
-        sMotionEventRoot = (ViewAncestor) view.getRootView().getParent();
-    }
-
-    /**
-     * Stops the current motion events tracing. This method closes the file
-     * <code>/EXTERNAL/motion-events/PREFIX.traces</code>.
-     *
-     * Calling this method creates the file <code>/EXTERNAL/motion-events/PREFIX.tree</code>
-     * containing the view hierarchy of the view supplied to
-     * {@link #startMotionEventTracing(String, View)}.
-     *
-     * This method will return immediately if TRACE_HIERARCHY is false.
-     *
-     * @see #startMotionEventTracing(String, View) 
-     * @see #trace(View, MotionEvent, android.view.ViewDebug.MotionEventTraceType) 
-     * 
-     * @hide
-     */
-    public static void stopMotionEventTracing() {
-        //noinspection PointlessBooleanExpression,ConstantConditions
-        if (!TRACE_MOTION_EVENTS) {
-            return;
-        }
-
-        if (sMotionEventRoot == null || sMotionEventTraces == null) {
-            throw new IllegalStateException("You must call startMotionEventTracing() before" +
-                " stopMotionEventTracing()!");
-        }
-
-        try {
-            sMotionEventTraces.close();
-        } catch (IOException e) {
-            Log.e("View", "Could not write view traces");
-        }
-        sMotionEventTraces = null;
-
-        File hierarchyDump = new File(Environment.getExternalStorageDirectory(), "motion-events/");
-        //noinspection ResultOfMethodCallIgnored
-        hierarchyDump.mkdirs();
-        hierarchyDump = new File(hierarchyDump, sMotionEventTracePrefix + ".tree");
-
-        BufferedWriter out;
-        try {
-            out = new BufferedWriter(new FileWriter(hierarchyDump), 8 * 1024);
-        } catch (IOException e) {
-            Log.e("View", "Could not dump view hierarchy");
-            return;
-        }
-
-        View view = sMotionEventRoot.getView();
         if (view instanceof ViewGroup) {
             ViewGroup group = (ViewGroup) view;
             dumpViewHierarchy(group, out, 0);
@@ -1069,8 +894,10 @@ public class ViewDebug {
                 try {
                     T[] data = operation.pre();
                     long start = Debug.threadCpuTimeNanos();
+                    //noinspection unchecked
                     operation.run(data);
                     duration[0] = Debug.threadCpuTimeNanos() - start;
+                    //noinspection unchecked
                     operation.post(data);
                 } finally {
                     latch.countDown();
@@ -1201,12 +1028,7 @@ public class ViewDebug {
                         cache[0] = captureView.createSnapshot(
                                 Bitmap.Config.ARGB_8888, 0, skpiChildren);
                     } catch (OutOfMemoryError e) {
-                        try {
-                            cache[0] = captureView.createSnapshot(
-                                    Bitmap.Config.ARGB_4444, 0, skpiChildren);
-                        } catch (OutOfMemoryError e2) {
-                            Log.w("View", "Out of memory for bitmap");
-                        }
+                        Log.w("View", "Out of memory for bitmap");
                     } finally {
                         latch.countDown();
                     }
@@ -1316,7 +1138,6 @@ public class ViewDebug {
         }
 
         final HashMap<Class<?>, Field[]> map = sFieldsForClasses;
-        final HashMap<AccessibleObject, ExportedProperty> annotations = sAnnotations;
 
         Field[] fields = map.get(klass);
         if (fields != null) {
@@ -1332,7 +1153,7 @@ public class ViewDebug {
             if (field.isAnnotationPresent(ExportedProperty.class)) {
                 field.setAccessible(true);
                 foundFields.add(field);
-                annotations.put(field, field.getAnnotation(ExportedProperty.class));
+                sAnnotations.put(field, field.getAnnotation(ExportedProperty.class));
             }
         }
 
@@ -1351,7 +1172,6 @@ public class ViewDebug {
         }
 
         final HashMap<Class<?>, Method[]> map = sMethodsForClasses;
-        final HashMap<AccessibleObject, ExportedProperty> annotations = sAnnotations;
 
         Method[] methods = map.get(klass);
         if (methods != null) {
@@ -1369,7 +1189,7 @@ public class ViewDebug {
                     method.getReturnType() != Void.class) {
                 method.setAccessible(true);
                 foundMethods.add(method);
-                annotations.put(method, method.getAnnotation(ExportedProperty.class));
+                sAnnotations.put(method, method.getAnnotation(ExportedProperty.class));
             }
         }
 
