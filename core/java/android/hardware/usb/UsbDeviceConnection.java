@@ -69,6 +69,17 @@ public class UsbDeviceConnection {
     }
 
     /**
+     * Returns the raw USB descriptors for the device.
+     * This can be used to access descriptors not supported directly
+     * via the higher level APIs.
+     *
+     * @return raw USB descriptors
+     */
+    public byte[] getRawDescriptors() {
+        return native_get_desc();
+    }
+
+    /**
      * Claims exclusive access to a {@link android.hardware.usb.UsbInterface}.
      * This must be done before sending or receiving data on any
      * {@link android.hardware.usb.UsbEndpoint}s belonging to the interface.
@@ -160,6 +171,7 @@ public class UsbDeviceConnection {
     private native boolean native_open(String deviceName, FileDescriptor pfd);
     private native void native_close();
     private native int native_get_fd();
+    private native byte[] native_get_desc();
     private native boolean native_claim_interface(int interfaceID, boolean force);
     private native boolean native_release_interface(int interfaceID);
     private native int native_control_request(int requestType, int request, int value,
