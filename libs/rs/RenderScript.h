@@ -49,6 +49,12 @@ void rsaTypeGetNativeData(RsContext, RsType, uint32_t *typeData, uint32_t typeDa
 void rsaElementGetNativeData(RsContext, RsElement, uint32_t *elemData, uint32_t elemDataSize);
 void rsaElementGetSubElements(RsContext, RsElement, uint32_t *ids, const char **names, uint32_t dataSize);
 
+RsDevice rsDeviceCreate();
+void rsDeviceDestroy(RsDevice dev);
+void rsDeviceSetConfig(RsDevice dev, RsDeviceParam p, int32_t value);
+RsContext rsContextCreate(RsDevice dev, uint32_t version);
+RsContext rsContextCreateGL(RsDevice dev, uint32_t version, RsSurfaceConfig sc, uint32_t dpi);
+
 
 
 #ifdef ANDROID_RS_SERIALIZE

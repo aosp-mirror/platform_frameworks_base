@@ -40,20 +40,17 @@ void Device::removeContext(Context *rsc) {
     }
 }
 
-namespace android {
-namespace renderscript {
-
-RsDevice rsi_DeviceCreate() {
+RsDevice rsDeviceCreate() {
     Device * d = new Device();
     return d;
 }
 
-void rsi_DeviceDestroy(RsDevice dev) {
+void rsDeviceDestroy(RsDevice dev) {
     Device * d = static_cast<Device *>(dev);
     delete d;
 }
 
-void rsi_DeviceSetConfig(RsDevice dev, RsDeviceParam p, int32_t value) {
+void rsDeviceSetConfig(RsDevice dev, RsDeviceParam p, int32_t value) {
     Device * d = static_cast<Device *>(dev);
     if (p == RS_DEVICE_PARAM_FORCE_SOFTWARE_GL) {
         d->mForceSW = value != 0;
@@ -62,5 +59,3 @@ void rsi_DeviceSetConfig(RsDevice dev, RsDeviceParam p, int32_t value) {
     rsAssert(0);
 }
 
-}
-}
