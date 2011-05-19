@@ -511,14 +511,14 @@ public abstract class DataConnection extends StateMachine {
             log("onSetupConnectionCompleted received DataCallState: " + response);
             cid = response.cid;
             // set link properties based on data call response
-            result = response.setLinkProperties(mLinkProperties,
-                                                isOkToUseSystemPropertyDns(response));
+            result = setLinkProperties(response, mLinkProperties);
         }
 
         return result;
     }
 
-    private boolean isOkToUseSystemPropertyDns(DataCallState response) {
+    private DataCallState.SetupResult setLinkProperties(DataCallState response,
+            LinkProperties lp) {
         // Check if system property dns usable
         boolean okToUseSystemPropertyDns = false;
         String propertyPrefix = "net." + response.ifname + ".";
@@ -526,7 +526,9 @@ public abstract class DataConnection extends StateMachine {
         dnsServers[0] = SystemProperties.get(propertyPrefix + "dns1");
         dnsServers[1] = SystemProperties.get(propertyPrefix + "dns2");
         okToUseSystemPropertyDns = isDnsOk(dnsServers);
-        return okToUseSystemPropertyDns;
+
+        // set link properties based on data call response
+        return response.setLinkProperties(lp, okToUseSystemPropertyDns);
     }
 
     private boolean updateLinkProperty(DataCallState newState) {
@@ -535,29 +537,25 @@ public abstract class DataConnection extends StateMachine {
         if (newState == null) return changed;
 
         DataCallState.SetupResult result;
-        LinkProperties linkProperties = new LinkProperties();
+        LinkProperties newLp = new LinkProperties();
 
         // set link properties based on data call response
-        result = newState.setLinkProperties(linkProperties,
-                                            isOkToUseSystemPropertyDns(newState));
-
+        result = setLinkProperties(newState, newLp);
         if (result != DataCallState.SetupResult.SUCCESS) {
-            log("updateLinkProperty failed : " + result);
+            if (DBG) log("UpdateLinkProperty failed : " + result);
             return changed;
         }
+        // copy HTTP proxy as it is not part DataCallState.
+        newLp.setHttpProxy(mLinkProperties.getHttpProxy());
 
-        if (mLinkProperties != null) {
-            // Before comparison, copy HTTP proxy from the original
-            // as it is not part DataCallState.
-            linkProperties.setHttpProxy(mLinkProperties.getHttpProxy());
-            if (!mLinkProperties.equals(linkProperties)) {
-                mLinkProperties = linkProperties;
-                changed = true;
-            }
-        } else {
-            mLinkProperties = linkProperties;
+        if (DBG) log("old LP=" + mLinkProperties);
+        if (DBG) log("new LP=" + newLp);
+
+        if (mLinkProperties == null || !mLinkProperties.equals(newLp)) {
+            mLinkProperties = newLp;
             changed = true;
         }
+
         return changed;
     }
 
@@ -635,8 +633,9 @@ public abstract class DataConnection extends StateMachine {
                     DataCallState newState = (DataCallState) msg.obj;
                     int updated = updateLinkProperty(newState) ? 1 : 0;
                     if (DBG) {
-                        log("REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE updated=" + updated +
-                            " newState=" + newState);
+                        log("REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE updated="
+                                + (updated == 1)
+                                + " newState=" + newState);
                     }
                     mAc.replyToMessage(msg,
                                    DataConnectionAc.RSP_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE,

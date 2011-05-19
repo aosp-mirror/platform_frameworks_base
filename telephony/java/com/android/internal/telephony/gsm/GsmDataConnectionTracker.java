@@ -970,32 +970,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return true;
     }
 
-    private boolean dataCallStatesHasCID (ArrayList<DataCallState> states, int cid) {
-        for (int i = 0, s = states.size() ; i < s ; i++) {
-            if (states.get(i).cid == cid) return true;
-        }
-        return false;
-    }
-
-    private boolean dataCallStatesHasActiveCID (ArrayList<DataCallState> states, int cid) {
-        for (int i = 0, s = states.size() ; i < s ; i++) {
-            if ((states.get(i).cid == cid) && (states.get(i).active != 0)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private DataCallState findDataCallStateByCID (ArrayList<DataCallState> states, int cid) {
-        for (int i = 0, s = states.size() ; i < s ; i++) {
-            if (states.get(i).cid == cid) {
-                return states.get(i);
-            }
-        }
-        return null;
-    }
-
     /**
      * Handles changes to the APN database.
      */
@@ -1023,15 +997,13 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     /**
-     * @param explicitPoll if true, indicates that *we* polled for this
-     * update while state == CONNECTED rather than having it delivered
-     * via an unsolicited response (which could have happened at any
-     * previous state
+     * @param ar is the result of RIL_REQUEST_DATA_CALL_LIST
+     * or RIL_UNSOL_DATA_CALL_LIST_CHANGED
      */
     private void onDataStateChanged (AsyncResult ar) {
         ArrayList<DataCallState> dataCallStates;
 
-        if (DBG) log("onDataStateChanged(ar) E");
+        if (DBG) log("onDataStateChanged(ar): E");
         dataCallStates = (ArrayList<DataCallState>)(ar.result);
 
         if (ar.exception != null) {
@@ -1042,78 +1014,79 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return;
         }
 
+        // Create a hash map to store the dataCallState of each call id
+        // TODO: Depends on how frequent the DATA_CALL_LIST got updated,
+        //       may cache response to reduce comparison.
+        HashMap<Integer, DataCallState> response;
+        response = new HashMap<Integer, DataCallState>();
+        if (DBG) log("onDataStateChanged(ar): DataCallState size=" + dataCallStates.size());
+        for (DataCallState dc : dataCallStates) {
+            response.put(dc.cid, dc);
+            if (DBG) log("onDataStateChanged(ar): " + dc.cid + ": " + dc.toString());
+        }
+
+        // For each connected apn, check if there is a matched active
+        // data call state, which has the same link properties.
+        if (DBG) log("    ApnContext size=" + mApnContexts.values().size());
         for (ApnContext apnContext : mApnContexts.values()) {
-            onDataStateChanged(dataCallStates, apnContext);
-        }
-        if (DBG) log("onDataStateChanged(ar) X");
-    }
-
-    private void onDataStateChanged (ArrayList<DataCallState> dataCallStates,
-                                     ApnContext apnContext) {
-        if (DBG) log("onDataStateChanged(dataCallState, apnContext):  apnContext=" + apnContext);
-
-        if (apnContext == null) {
-            // Should not happen
-            if (DBG) log("onDataStateChanged(dataCallState, apnContext):  ignore apnContext=null");
-            return;
-        }
-
-        if (apnContext.getState() == State.CONNECTED) {
-            // The way things are supposed to work, the PDP list
-            // should not contain the CID after it disconnects.
-            // However, the way things really work, sometimes the PDP
-            // context is still listed with active = false, which
-            // makes it hard to distinguish an activating context from
-            // an activated-and-then deactivated one.
+            if (DBG){
+                log("onDataStateChanged(ar): " + apnContext.toString());
+                if (apnContext.getDataConnection() != null) {
+                    log("onDataStateChanged(ar): " +  apnContext.getDataConnection().toString());
+                }
+            }
             DataConnectionAc dcac = apnContext.getDataConnectionAc();
             if (dcac == null) {
-                if (DBG) log("onDataStateChanged(dataCallState, apnContext):  dcac==null BAD NEWS");
-                return;
+                continue;
             }
-            int cid = dcac.getCidSync();
-            if (!dataCallStatesHasCID(dataCallStates, cid)) {
-                // It looks like the PDP context has deactivated.
-                // Tear everything down and try to reconnect.
+            int connectionId = dcac.getCidSync();
 
-                if (DBG) {
-                    log("onDataStateChanged(dataCallStates,apnContext) " +
-                        "PDP connection has dropped. Reconnecting");
-                }
-                // Add an event log when the network drops PDP
-                int cellLocationId = getCellLocationId();
-                EventLog.writeEvent(EventLogTags.PDP_NETWORK_DROP, cellLocationId,
-                        TelephonyManager.getDefault().getNetworkType());
-
-                cleanUpConnection(true, apnContext);
-            } else if (!dataCallStatesHasActiveCID(dataCallStates,
-                    apnContext.getDataConnectionAc().getCidSync())) {
-
-                if (DBG) {
-                    log("onDataStateChanged(dataCallStates,apnContext) " +
-                        "PDP connection has dropped (active=false case). Reconnecting");
-                }
-
-                // Log the network drop on the event log.
-                int cellLocationId = getCellLocationId();
-                EventLog.writeEvent(EventLogTags.PDP_NETWORK_DROP, cellLocationId,
-                        TelephonyManager.getDefault().getNetworkType());
-
-                cleanUpConnection(true, apnContext);
-            } else {
-                // Here, data call list has active cid for given ApnContext.
-                // Check if link property has been updated.
-                DataCallState state = findDataCallStateByCID(dataCallStates,
-                                         apnContext.getDataConnectionAc().getCidSync());
-
-                if ((dcac != null) && (state != null)){
-                    if (dcac.updateLinkPropertiesDataCallStateSync(state)) {
-                        // notify data change for this apn
-                        mPhone.notifyDataConnection(Phone.REASON_LINK_PROPERTIES_CHANGED,
-                                                    apnContext.getApnType());
+            if (apnContext.getState() == State.CONNECTED) {
+                // The way things are supposed to work, the PDP list
+                // should not contain the CID after it disconnects.
+                // However, the way things really work, sometimes the PDP
+                // context is still listed with active = false, which
+                // makes it hard to distinguish an activating context from
+                // an activated-and-then de-activated one.
+                if (response.containsKey(connectionId)) {
+                    DataCallState newState = response.get(connectionId);
+                    if (DBG) log("onDataStateChanged(ar): Found ConnId=" + connectionId
+                            + " newState=" + newState.toString());
+                    if (newState.active != 0) {
+                        boolean changed
+                            = dcac.updateLinkPropertiesDataCallStateSync(newState);
+                        if (changed) {
+                            if (DBG) log("onDataStateChanged(ar): Found and changed, notify");
+                            mPhone.notifyDataConnection(Phone.REASON_LINK_PROPERTIES_CHANGED,
+                                    apnContext.getApnType());
+                            // Temporary hack, if false we'll reset connections and at this
+                            // time a transition from CDMA -> Global fails. The DEACTIVATE
+                            // fails with a GENERIC_FAILURE and the VZWINTERNET connection is
+                            // never setup. @see bug/
+                            if (SystemProperties.getBoolean("telephony.ignore-state-changes",
+                                    true)) {
+                                log("onDataStateChanged(ar): STOPSHIP don't reset, continue");
+                                continue;
+                            }
+                        } else {
+                            if (DBG) log("onDataStateChanged(ar): Found but no change, skip");
+                            continue;
+                        }
                     }
                 }
+
+                if (DBG) log("onDataStateChanged(ar): reset connection.");
+
+                // Add an event log when the network drops PDP
+                int cid = getCellLocationId();
+                EventLog.writeEvent(EventLogTags.PDP_NETWORK_DROP, cid,
+                        TelephonyManager.getDefault().getNetworkType());
+
+                cleanUpConnection(true, apnContext);
             }
         }
+
+        if (DBG) log("onDataStateChanged(ar): X");
     }
 
     private void notifyDefaultData(ApnContext apnContext) {
@@ -2143,7 +2116,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected void log(String s) {
-        Log.d(LOG_TAG, "[GsmDCT] " + s);
+        Log.d(LOG_TAG, "[GsmDCT] "+ s);
     }
 
     @Override
