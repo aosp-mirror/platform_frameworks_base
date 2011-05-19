@@ -39,11 +39,6 @@ public:
 
     virtual sp<MetaData> getMetaData();
 
-    static bool get_mp3_frame_size(
-            uint32_t header, size_t *frame_size,
-            int *out_sampling_rate = NULL, int *out_channels = NULL,
-            int *out_bitrate = NULL, int *out_num_samples = NULL);
-
 private:
     status_t mInitCheck;
 

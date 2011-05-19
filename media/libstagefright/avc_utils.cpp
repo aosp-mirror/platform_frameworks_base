@@ -376,5 +376,236 @@ sp<MetaData> MakeAACCodecSpecificData(
     return meta;
 }
 
+bool ExtractDimensionsFromVOLHeader(
+        const uint8_t *data, size_t size, int32_t *width, int32_t *height) {
+    ABitReader br(&data[4], size - 4);
+    br.skipBits(1);  // random_accessible_vol
+    unsigned video_object_type_indication = br.getBits(8);
+
+    CHECK_NE(video_object_type_indication,
+             0x21u /* Fine Granularity Scalable */);
+
+    unsigned video_object_layer_verid;
+    unsigned video_object_layer_priority;
+    if (br.getBits(1)) {
+        video_object_layer_verid = br.getBits(4);
+        video_object_layer_priority = br.getBits(3);
+    }
+    unsigned aspect_ratio_info = br.getBits(4);
+    if (aspect_ratio_info == 0x0f /* extended PAR */) {
+        br.skipBits(8);  // par_width
+        br.skipBits(8);  // par_height
+    }
+    if (br.getBits(1)) {  // vol_control_parameters
+        br.skipBits(2);  // chroma_format
+        br.skipBits(1);  // low_delay
+        if (br.getBits(1)) {  // vbv_parameters
+            br.skipBits(15);  // first_half_bit_rate
+            CHECK(br.getBits(1));  // marker_bit
+            br.skipBits(15);  // latter_half_bit_rate
+            CHECK(br.getBits(1));  // marker_bit
+            br.skipBits(15);  // first_half_vbv_buffer_size
+            CHECK(br.getBits(1));  // marker_bit
+            br.skipBits(3);  // latter_half_vbv_buffer_size
+            br.skipBits(11);  // first_half_vbv_occupancy
+            CHECK(br.getBits(1));  // marker_bit
+            br.skipBits(15);  // latter_half_vbv_occupancy
+            CHECK(br.getBits(1));  // marker_bit
+        }
+    }
+    unsigned video_object_layer_shape = br.getBits(2);
+    CHECK_EQ(video_object_layer_shape, 0x00u /* rectangular */);
+
+    CHECK(br.getBits(1));  // marker_bit
+    unsigned vop_time_increment_resolution = br.getBits(16);
+    CHECK(br.getBits(1));  // marker_bit
+
+    if (br.getBits(1)) {  // fixed_vop_rate
+        // range [0..vop_time_increment_resolution)
+
+        // vop_time_increment_resolution
+        // 2 => 0..1, 1 bit
+        // 3 => 0..2, 2 bits
+        // 4 => 0..3, 2 bits
+        // 5 => 0..4, 3 bits
+        // ...
+
+        CHECK_GT(vop_time_increment_resolution, 0u);
+        --vop_time_increment_resolution;
+
+        unsigned numBits = 0;
+        while (vop_time_increment_resolution > 0) {
+            ++numBits;
+            vop_time_increment_resolution >>= 1;
+        }
+
+        br.skipBits(numBits);  // fixed_vop_time_increment
+    }
+
+    CHECK(br.getBits(1));  // marker_bit
+    unsigned video_object_layer_width = br.getBits(13);
+    CHECK(br.getBits(1));  // marker_bit
+    unsigned video_object_layer_height = br.getBits(13);
+    CHECK(br.getBits(1));  // marker_bit
+
+    unsigned interlaced = br.getBits(1);
+
+    *width = video_object_layer_width;
+    *height = video_object_layer_height;
+
+    return true;
+}
+
+bool GetMPEGAudioFrameSize(
+        uint32_t header, size_t *frame_size,
+        int *out_sampling_rate, int *out_channels,
+        int *out_bitrate, int *out_num_samples) {
+    *frame_size = 0;
+
+    if (out_sampling_rate) {
+        *out_sampling_rate = 0;
+    }
+
+    if (out_channels) {
+        *out_channels = 0;
+    }
+
+    if (out_bitrate) {
+        *out_bitrate = 0;
+    }
+
+    if (out_num_samples) {
+        *out_num_samples = 1152;
+    }
+
+    if ((header & 0xffe00000) != 0xffe00000) {
+        return false;
+    }
+
+    unsigned version = (header >> 19) & 3;
+
+    if (version == 0x01) {
+        return false;
+    }
+
+    unsigned layer = (header >> 17) & 3;
+
+    if (layer == 0x00) {
+        return false;
+    }
+
+    unsigned protection = (header >> 16) & 1;
+
+    unsigned bitrate_index = (header >> 12) & 0x0f;
+
+    if (bitrate_index == 0 || bitrate_index == 0x0f) {
+        // Disallow "free" bitrate.
+        return false;
+    }
+
+    unsigned sampling_rate_index = (header >> 10) & 3;
+
+    if (sampling_rate_index == 3) {
+        return false;
+    }
+
+    static const int kSamplingRateV1[] = { 44100, 48000, 32000 };
+    int sampling_rate = kSamplingRateV1[sampling_rate_index];
+    if (version == 2 /* V2 */) {
+        sampling_rate /= 2;
+    } else if (version == 0 /* V2.5 */) {
+        sampling_rate /= 4;
+    }
+
+    unsigned padding = (header >> 9) & 1;
+
+    if (layer == 3) {
+        // layer I
+
+        static const int kBitrateV1[] = {
+            32, 64, 96, 128, 160, 192, 224, 256,
+            288, 320, 352, 384, 416, 448
+        };
+
+        static const int kBitrateV2[] = {
+            32, 48, 56, 64, 80, 96, 112, 128,
+            144, 160, 176, 192, 224, 256
+        };
+
+        int bitrate =
+            (version == 3 /* V1 */)
+                ? kBitrateV1[bitrate_index - 1]
+                : kBitrateV2[bitrate_index - 1];
+
+        if (out_bitrate) {
+            *out_bitrate = bitrate;
+        }
+
+        *frame_size = (12000 * bitrate / sampling_rate + padding) * 4;
+
+        if (out_num_samples) {
+            *out_num_samples = 384;
+        }
+    } else {
+        // layer II or III
+
+        static const int kBitrateV1L2[] = {
+            32, 48, 56, 64, 80, 96, 112, 128,
+            160, 192, 224, 256, 320, 384
+        };
+
+        static const int kBitrateV1L3[] = {
+            32, 40, 48, 56, 64, 80, 96, 112,
+            128, 160, 192, 224, 256, 320
+        };
+
+        static const int kBitrateV2[] = {
+            8, 16, 24, 32, 40, 48, 56, 64,
+            80, 96, 112, 128, 144, 160
+        };
+
+        int bitrate;
+        if (version == 3 /* V1 */) {
+            bitrate = (layer == 2 /* L2 */)
+                ? kBitrateV1L2[bitrate_index - 1]
+                : kBitrateV1L3[bitrate_index - 1];
+
+            if (out_num_samples) {
+                *out_num_samples = 1152;
+            }
+        } else {
+            // V2 (or 2.5)
+
+            bitrate = kBitrateV2[bitrate_index - 1];
+            if (out_num_samples) {
+                *out_num_samples = 576;
+            }
+        }
+
+        if (out_bitrate) {
+            *out_bitrate = bitrate;
+        }
+
+        if (version == 3 /* V1 */) {
+            *frame_size = 144000 * bitrate / sampling_rate + padding;
+        } else {
+            // V2 or V2.5
+            *frame_size = 72000 * bitrate / sampling_rate + padding;
+        }
+    }
+
+    if (out_sampling_rate) {
+        *out_sampling_rate = sampling_rate;
+    }
+
+    if (out_channels) {
+        int channel_mode = (header >> 6) & 3;
+
+        *out_channels = (channel_mode == 3) ? 1 : 2;
+    }
+
+    return true;
+}
+
 }  // namespace android
 

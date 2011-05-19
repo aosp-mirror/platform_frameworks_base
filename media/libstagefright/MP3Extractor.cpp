@@ -20,6 +20,7 @@
 
 #include "include/MP3Extractor.h"
 
+#include "include/avc_utils.h"
 #include "include/ID3.h"
 #include "include/VBRISeeker.h"
 #include "include/XINGSeeker.h"
@@ -43,158 +44,6 @@ namespace android {
 // copyright bit, original bit and emphasis.
 // Yes ... there are things that must indeed match...
 static const uint32_t kMask = 0xfffe0c00;
-
-// static
-bool MP3Extractor::get_mp3_frame_size(
-        uint32_t header, size_t *frame_size,
-        int *out_sampling_rate, int *out_channels,
-        int *out_bitrate, int *out_num_samples) {
-    *frame_size = 0;
-
-    if (out_sampling_rate) {
-        *out_sampling_rate = 0;
-    }
-
-    if (out_channels) {
-        *out_channels = 0;
-    }
-
-    if (out_bitrate) {
-        *out_bitrate = 0;
-    }
-
-    if (out_num_samples) {
-        *out_num_samples = 1152;
-    }
-
-    if ((header & 0xffe00000) != 0xffe00000) {
-        return false;
-    }
-
-    unsigned version = (header >> 19) & 3;
-
-    if (version == 0x01) {
-        return false;
-    }
-
-    unsigned layer = (header >> 17) & 3;
-
-    if (layer == 0x00) {
-        return false;
-    }
-
-    unsigned protection = (header >> 16) & 1;
-
-    unsigned bitrate_index = (header >> 12) & 0x0f;
-
-    if (bitrate_index == 0 || bitrate_index == 0x0f) {
-        // Disallow "free" bitrate.
-        return false;
-    }
-
-    unsigned sampling_rate_index = (header >> 10) & 3;
-
-    if (sampling_rate_index == 3) {
-        return false;
-    }
-
-    static const int kSamplingRateV1[] = { 44100, 48000, 32000 };
-    int sampling_rate = kSamplingRateV1[sampling_rate_index];
-    if (version == 2 /* V2 */) {
-        sampling_rate /= 2;
-    } else if (version == 0 /* V2.5 */) {
-        sampling_rate /= 4;
-    }
-
-    unsigned padding = (header >> 9) & 1;
-
-    if (layer == 3) {
-        // layer I
-
-        static const int kBitrateV1[] = {
-            32, 64, 96, 128, 160, 192, 224, 256,
-            288, 320, 352, 384, 416, 448
-        };
-
-        static const int kBitrateV2[] = {
-            32, 48, 56, 64, 80, 96, 112, 128,
-            144, 160, 176, 192, 224, 256
-        };
-
-        int bitrate =
-            (version == 3 /* V1 */)
-                ? kBitrateV1[bitrate_index - 1]
-                : kBitrateV2[bitrate_index - 1];
-
-        if (out_bitrate) {
-            *out_bitrate = bitrate;
-        }
-
-        *frame_size = (12000 * bitrate / sampling_rate + padding) * 4;
-
-        if (out_num_samples) {
-            *out_num_samples = 384;
-        }
-    } else {
-        // layer II or III
-
-        static const int kBitrateV1L2[] = {
-            32, 48, 56, 64, 80, 96, 112, 128,
-            160, 192, 224, 256, 320, 384
-        };
-
-        static const int kBitrateV1L3[] = {
-            32, 40, 48, 56, 64, 80, 96, 112,
-            128, 160, 192, 224, 256, 320
-        };
-
-        static const int kBitrateV2[] = {
-            8, 16, 24, 32, 40, 48, 56, 64,
-            80, 96, 112, 128, 144, 160
-        };
-
-        int bitrate;
-        if (version == 3 /* V1 */) {
-            bitrate = (layer == 2 /* L2 */)
-                ? kBitrateV1L2[bitrate_index - 1]
-                : kBitrateV1L3[bitrate_index - 1];
-
-            if (out_num_samples) {
-                *out_num_samples = 1152;
-            }
-        } else {
-            // V2 (or 2.5)
-
-            bitrate = kBitrateV2[bitrate_index - 1];
-            if (out_num_samples) {
-                *out_num_samples = 576;
-            }
-        }
-
-        if (out_bitrate) {
-            *out_bitrate = bitrate;
-        }
-
-        if (version == 3 /* V1 */) {
-            *frame_size = 144000 * bitrate / sampling_rate + padding;
-        } else {
-            // V2 or V2.5
-            *frame_size = 72000 * bitrate / sampling_rate + padding;
-        }
-    }
-
-    if (out_sampling_rate) {
-        *out_sampling_rate = sampling_rate;
-    }
-
-    if (out_channels) {
-        int channel_mode = (header >> 6) & 3;
-
-        *out_channels = (channel_mode == 3) ? 1 : 2;
-    }
-
-    return true;
-}
 
 static bool Resync(
         const sp<DataSource> &source, uint32_t match_header,
@@ -297,7 +146,7 @@ static bool Resync(
 
         size_t frame_size;
         int sample_rate, num_channels, bitrate;
-        if (!MP3Extractor::get_mp3_frame_size(
+        if (!GetMPEGAudioFrameSize(
                     header, &frame_size,
                     &sample_rate, &num_channels, &bitrate)) {
             ++pos;
@@ -331,7 +180,7 @@ static bool Resync(
             }
 
             size_t test_frame_size;
-            if (!MP3Extractor::get_mp3_frame_size(
+            if (!GetMPEGAudioFrameSize(
                         test_header, &test_frame_size)) {
                 valid = false;
                 break;
@@ -437,7 +286,7 @@ MP3Extractor::MP3Extractor(
     int sample_rate;
     int num_channels;
     int bitrate;
-    get_mp3_frame_size(
+    GetMPEGAudioFrameSize(
             header, &frame_size, &sample_rate, &num_channels, &bitrate);
 
     mMeta = new MetaData;
@@ -602,8 +451,9 @@ status_t MP3Source::read(
         uint32_t header = U32_AT((const uint8_t *)buffer->data());
 
         if ((header & kMask) == (mFixedHeader & kMask)
-            && MP3Extractor::get_mp3_frame_size(
-                header, &frame_size, &sample_rate, NULL, &bitrate, &num_samples)) {
+            && GetMPEGAudioFrameSize(
+                header, &frame_size, &sample_rate, NULL,
+                &bitrate, &num_samples)) {
             break;
         }
 

@@ -44,7 +44,7 @@ namespace android {
 static const size_t kTSPacketSize = 188;
 
 struct ATSParser::Program : public RefBase {
-    Program(ATSParser *parser, unsigned programMapPID);
+    Program(ATSParser *parser, unsigned programNumber, unsigned programMapPID);
 
     bool parsePID(
             unsigned pid, unsigned payload_unit_start_indicator,
@@ -63,8 +63,15 @@ struct ATSParser::Program : public RefBase {
         return mFirstPTSValid;
     }
 
+    unsigned number() const { return mProgramNumber; }
+
+    void updateProgramMapPID(unsigned programMapPID) {
+        mProgramMapPID = programMapPID;
+    }
+
 private:
     ATSParser *mParser;
+    unsigned mProgramNumber;
     unsigned mProgramMapPID;
     KeyedVector<unsigned, sp<Stream> > mStreams;
     bool mFirstPTSValid;
@@ -107,7 +114,7 @@ private:
     DiscontinuityType mPendingDiscontinuity;
     sp<AMessage> mPendingDiscontinuityExtra;
 
-    ElementaryStreamQueue mQueue;
+    ElementaryStreamQueue *mQueue;
 
     void flush();
     void parsePES(ABitReader *br);
@@ -126,11 +133,14 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-ATSParser::Program::Program(ATSParser *parser, unsigned programMapPID)
+ATSParser::Program::Program(
+        ATSParser *parser, unsigned programNumber, unsigned programMapPID)
     : mParser(parser),
+      mProgramNumber(programNumber),
       mProgramMapPID(programMapPID),
       mFirstPTSValid(false),
       mFirstPTS(0) {
+    LOGV("new program number %u", programNumber);
 }
 
 bool ATSParser::Program::parsePID(
@@ -299,7 +309,7 @@ void ATSParser::Program::parseProgramMap(ABitReader *br) {
 }
 
 sp<MediaSource> ATSParser::Program::getSource(SourceType type) {
-    size_t index = (type == MPEG2ADTS_AUDIO) ? 0 : 0;
+    size_t index = (type == AUDIO) ? 0 : 0;
 
     for (size_t i = 0; i < mStreams.size(); ++i) {
         sp<MediaSource> source = mStreams.editValueAt(i)->getSource(type);
@@ -338,14 +348,43 @@ ATSParser::Stream::Stream(
       mBuffer(new ABuffer(192 * 1024)),
       mPayloadStarted(false),
       mPendingDiscontinuity(DISCONTINUITY_NONE),
-      mQueue(streamType == 0x1b
-              ? ElementaryStreamQueue::H264 : ElementaryStreamQueue::AAC) {
+      mQueue(NULL) {
     mBuffer->setRange(0, 0);
+
+    switch (mStreamType) {
+        case STREAMTYPE_H264:
+            mQueue = new ElementaryStreamQueue(ElementaryStreamQueue::H264);
+            break;
+        case STREAMTYPE_MPEG2_AUDIO_ATDS:
+            mQueue = new ElementaryStreamQueue(ElementaryStreamQueue::AAC);
+            break;
+        case STREAMTYPE_MPEG1_AUDIO:
+        case STREAMTYPE_MPEG2_AUDIO:
+            mQueue = new ElementaryStreamQueue(
+                    ElementaryStreamQueue::MPEG_AUDIO);
+            break;
+
+        case STREAMTYPE_MPEG1_VIDEO:
+        case STREAMTYPE_MPEG2_VIDEO:
+            mQueue = new ElementaryStreamQueue(
+                    ElementaryStreamQueue::MPEG_VIDEO);
+            break;
+
+        case STREAMTYPE_MPEG4_VIDEO:
+            mQueue = new ElementaryStreamQueue(
+                    ElementaryStreamQueue::MPEG4_VIDEO);
+            break;
+
+        default:
+            break;
+    }
 
     LOGV("new stream PID 0x%02x, type 0x%02x", elementaryPID, streamType);
 }
 
 ATSParser::Stream::~Stream() {
+    delete mQueue;
+    mQueue = NULL;
 }
 
 void ATSParser::Stream::parse(
@@ -397,7 +436,7 @@ void ATSParser::Stream::signalDiscontinuity(
         {
             bool isASeek = (type == DISCONTINUITY_SEEK);
 
-            mQueue.clear(!isASeek);
+            mQueue->clear(!isASeek);
 
             uint64_t resumeAtPTS;
             if (extra != NULL
@@ -443,6 +482,12 @@ void ATSParser::Stream::parsePES(ABitReader *br) {
     unsigned packet_startcode_prefix = br->getBits(24);
 
     LOGV("packet_startcode_prefix = 0x%08x", packet_startcode_prefix);
+
+    if (packet_startcode_prefix != 1) {
+        LOGV("Supposedly payload_unit_start=1 unit does not start "
+             "with startcode.");
+        return;
+    }
 
     CHECK_EQ(packet_startcode_prefix, 0x000001u);
 
@@ -611,22 +656,28 @@ void ATSParser::Stream::onPayloadData(
         const uint8_t *data, size_t size) {
     LOGV("onPayloadData mStreamType=0x%02x", mStreamType);
 
+    if (mQueue == NULL) {
+        return;
+    }
+
     CHECK(PTS_DTS_flags == 2 || PTS_DTS_flags == 3);
     int64_t timeUs = mProgram->convertPTSToTimestamp(PTS);
 
-    status_t err = mQueue.appendData(data, size, timeUs);
+    status_t err = mQueue->appendData(data, size, timeUs);
 
     if (err != OK) {
         return;
     }
 
     sp<ABuffer> accessUnit;
-    while ((accessUnit = mQueue.dequeueAccessUnit()) != NULL) {
+    while ((accessUnit = mQueue->dequeueAccessUnit()) != NULL) {
         if (mSource == NULL) {
-            sp<MetaData> meta = mQueue.getFormat();
+            sp<MetaData> meta = mQueue->getFormat();
 
             if (meta != NULL) {
-                LOGV("created source!");
+                LOGV("Stream PID 0x%08x of type 0x%02x now has data.",
+                     mElementaryPID, mStreamType);
+
                 mSource = new AnotherPacketSource(meta);
 
                 if (mPendingDiscontinuity != DISCONTINUITY_NONE) {
@@ -638,13 +689,13 @@ void ATSParser::Stream::onPayloadData(
 
                 mSource->queueAccessUnit(accessUnit);
             }
-        } else if (mQueue.getFormat() != NULL) {
+        } else if (mQueue->getFormat() != NULL) {
             // After a discontinuity we invalidate the queue's format
             // and won't enqueue any access units to the source until
             // the queue has reestablished the new format.
 
             if (mSource->getFormat() == NULL) {
-                mSource->setFormat(mQueue.getFormat());
+                mSource->setFormat(mQueue->getFormat());
             }
             mSource->queueAccessUnit(accessUnit);
         }
@@ -652,9 +703,30 @@ void ATSParser::Stream::onPayloadData(
 }
 
 sp<MediaSource> ATSParser::Stream::getSource(SourceType type) {
-    if ((type == AVC_VIDEO && mStreamType == 0x1b)
-        || (type == MPEG2ADTS_AUDIO && mStreamType == 0x0f)) {
-        return mSource;
+    switch (type) {
+        case VIDEO:
+        {
+            if (mStreamType == STREAMTYPE_H264
+                    || mStreamType == STREAMTYPE_MPEG1_VIDEO
+                    || mStreamType == STREAMTYPE_MPEG2_VIDEO
+                    || mStreamType == STREAMTYPE_MPEG4_VIDEO) {
+                return mSource;
+            }
+            break;
+        }
+
+        case AUDIO:
+        {
+            if (mStreamType == STREAMTYPE_MPEG1_AUDIO
+                    || mStreamType == STREAMTYPE_MPEG2_AUDIO
+                    || mStreamType == STREAMTYPE_MPEG2_AUDIO_ATDS) {
+                return mSource;
+            }
+            break;
+        }
+
+        default:
+            break;
     }
 
     return NULL;
@@ -729,7 +801,21 @@ void ATSParser::parseProgramAssociationTable(ABitReader *br) {
 
             LOGV("    program_map_PID = 0x%04x", programMapPID);
 
-            mPrograms.push(new Program(this, programMapPID));
+            bool found = false;
+            for (size_t index = 0; index < mPrograms.size(); ++index) {
+                const sp<Program> &program = mPrograms.itemAt(index);
+
+                if (program->number() == program_number) {
+                    program->updateProgramMapPID(programMapPID);
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                mPrograms.push(
+                        new Program(this, program_number, programMapPID));
+            }
         }
     }
 
@@ -805,8 +891,16 @@ void ATSParser::parseTS(ABitReader *br) {
 }
 
 sp<MediaSource> ATSParser::getSource(SourceType type) {
+    int which = -1;  // any
+
     for (size_t i = 0; i < mPrograms.size(); ++i) {
-        sp<MediaSource> source = mPrograms.editItemAt(i)->getSource(type);
+        const sp<Program> &program = mPrograms.editItemAt(i);
+
+        if (which >= 0 && (int)program->number() != which) {
+            continue;
+        }
+
+        sp<MediaSource> source = program->getSource(type);
 
         if (source != NULL) {
             return source;
