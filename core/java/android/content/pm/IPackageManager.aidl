@@ -30,6 +30,7 @@ import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -109,9 +110,21 @@ interface IPackageManager {
     List<ResolveInfo> queryIntentServices(in Intent intent,
             String resolvedType, int flags);
 
-    List<PackageInfo> getInstalledPackages(int flags);
+    /**
+     * This implements getInstalledPackages via a "last returned row"
+     * mechanism that is not exposed in the API. This is to get around the IPC
+     * limit that kicks in when flags are included that bloat up the data
+     * returned.
+     */
+    ParceledListSlice getInstalledPackages(int flags, in String lastRead);
 
-    List<ApplicationInfo> getInstalledApplications(int flags);
+    /**
+     * This implements getInstalledApplications via a "last returned row"
+     * mechanism that is not exposed in the API. This is to get around the IPC
+     * limit that kicks in when flags are included that bloat up the data
+     * returned.
+     */
+    ParceledListSlice getInstalledApplications(int flags, in String lastRead);
 
     /**
      * Retrieve all applications that are marked as persistent.

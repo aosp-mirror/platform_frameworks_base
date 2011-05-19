@@ -30,14 +30,15 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.provider.Settings;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -223,7 +224,7 @@ public final class Pm {
         String filter = nextArg();
 
         try {
-            List<PackageInfo> packages = mPm.getInstalledPackages(getFlags);
+            final List<PackageInfo> packages = getInstalledPackages(mPm, getFlags);
 
             int count = packages.size();
             for (int p = 0 ; p < count ; p++) {
@@ -245,6 +246,22 @@ public final class Pm {
             System.err.println(e.toString());
             System.err.println(PM_NOT_RUNNING_ERR);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<PackageInfo> getInstalledPackages(IPackageManager pm, int flags)
+            throws RemoteException {
+        final List<PackageInfo> packageInfos = new ArrayList<PackageInfo>();
+        PackageInfo lastItem = null;
+        ParceledListSlice<PackageInfo> slice;
+
+        do {
+            final String lastKey = lastItem != null ? lastItem.packageName : null;
+            slice = pm.getInstalledPackages(flags, lastKey);
+            lastItem = slice.populateList(packageInfos, PackageInfo.CREATOR);
+        } while (!slice.isLastSlice());
+
+        return packageInfos;
     }
 
     /**
