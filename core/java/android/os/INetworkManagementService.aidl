@@ -20,6 +20,7 @@ package android.os;
 import android.net.InterfaceConfiguration;
 import android.net.INetworkManagementEventObserver;
 import android.net.NetworkStats;
+import android.net.RouteInfo;
 import android.net.wifi.WifiConfiguration;
 
 /**
@@ -56,6 +57,22 @@ interface INetworkManagementService
      * Sets the configuration of the specified interface
      */
     void setInterfaceConfig(String iface, in InterfaceConfiguration cfg);
+
+    /**
+     * Retrieves the network routes currently configured on the specified
+     * interface
+     */
+    RouteInfo[] getRoutes(String iface);
+
+    /**
+     * Add the specified route to the interface.
+     */
+    void addRoute(String iface, in RouteInfo route);
+
+    /**
+     * Remove the specified route from the interface.
+     */
+    void removeRoute(String iface, in RouteInfo route);
 
     /**
      * Shuts down the service

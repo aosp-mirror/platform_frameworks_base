@@ -26,6 +26,7 @@ import android.net.ConnectivityManager;
 import android.net.DummyDataStateTracker;
 import android.net.EthernetDataTracker;
 import android.net.IConnectivityManager;
+import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkConfig;
@@ -61,6 +62,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -124,6 +126,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static ConnectivityService sServiceInstance;
 
     private AtomicBoolean mBackgroundDataEnabled = new AtomicBoolean(true);
+
+    private INetworkManagementService mNetd;
 
     private static final int ENABLED  = 1;
     private static final int DISABLED = 0;
@@ -933,10 +937,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * @return {@code true} on success, {@code false} on failure
      */
     private boolean addHostRoute(NetworkStateTracker nt, InetAddress hostAddress, int cycleCount) {
-        if (nt.getNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI) {
-            return false;
-        }
-
         LinkProperties lp = nt.getLinkProperties();
         if ((lp == null) || (hostAddress == null)) return false;
 
@@ -951,20 +951,28 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getRoutes(), hostAddress);
-        InetAddress gateway = null;
+        InetAddress gatewayAddress = null;
         if (bestRoute != null) {
-            gateway = bestRoute.getGateway();
+            gatewayAddress = bestRoute.getGateway();
             // if the best route is ourself, don't relf-reference, just add the host route
-            if (hostAddress.equals(gateway)) gateway = null;
+            if (hostAddress.equals(gatewayAddress)) gatewayAddress = null;
         }
-        if (gateway != null) {
+        if (gatewayAddress != null) {
             if (cycleCount > MAX_HOSTROUTE_CYCLE_COUNT) {
                 loge("Error adding hostroute - too much recursion");
                 return false;
             }
-            if (!addHostRoute(nt, gateway, cycleCount+1)) return false;
+            if (!addHostRoute(nt, gatewayAddress, cycleCount+1)) return false;
         }
-        return NetworkUtils.addHostRoute(interfaceName, hostAddress, gateway);
+
+        RouteInfo route = RouteInfo.makeHostRoute(hostAddress, gatewayAddress);
+
+        try {
+            mNetd.addRoute(interfaceName, route);
+            return true;
+        } catch (Exception ex) {
+            return false;
+        }
     }
 
     // TODO support the removal of single host routes.  Keep a ref count of them so we
@@ -1291,6 +1299,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     void systemReady() {
+        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+        mNetd = INetworkManagementService.Stub.asInterface(b);
+
         synchronized(this) {
             mSystemReady = true;
             if (mInitialBroadcast != null) {
@@ -1427,7 +1438,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (interfaceName != null && !privateDnsRouteSet) {
             Collection<InetAddress> dnsList = p.getDnses();
             for (InetAddress dns : dnsList) {
-                if (DBG) log("  adding " + dns);
                 addHostRoute(nt, dns, 0);
             }
             nt.privateDnsRouteSet(true);
@@ -1435,8 +1445,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     private void removePrivateDnsRoutes(NetworkStateTracker nt) {
-        // TODO - we should do this explicitly but the NetUtils api doesnt
-        // support this yet - must remove all.  No worse than before
         LinkProperties p = nt.getLinkProperties();
         if (p == null) return;
         String interfaceName = p.getInterfaceName();
@@ -1446,7 +1454,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 log("removePrivateDnsRoutes for " + nt.getNetworkInfo().getTypeName() +
                         " (" + interfaceName + ")");
             }
-            NetworkUtils.removeHostRoutes(interfaceName);
+
+            Collection<InetAddress> dnsList = p.getDnses();
+            for (InetAddress dns : dnsList) {
+                if (DBG) log("  removing " + dns);
+                RouteInfo route = RouteInfo.makeHostRoute(dns);
+                try {
+                    mNetd.removeRoute(interfaceName, route);
+                } catch (Exception ex) {
+                    loge("error (" + ex + ") removing dns route " + route);
+                }
+            }
             nt.privateDnsRouteSet(false);
         }
     }
@@ -1457,19 +1475,27 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (p == null) return;
         String interfaceName = p.getInterfaceName();
         if (TextUtils.isEmpty(interfaceName)) return;
-        for (RouteInfo route : p.getRoutes()) {
 
+        for (RouteInfo route : p.getRoutes()) {
             //TODO - handle non-default routes
             if (route.isDefaultRoute()) {
+                if (DBG) log("adding default route " + route);
                 InetAddress gateway = route.getGateway();
-                if (addHostRoute(nt, gateway, 0) &&
-                        NetworkUtils.addDefaultRoute(interfaceName, gateway)) {
+                if (addHostRoute(nt, gateway, 0)) {
+                    try {
+                        mNetd.addRoute(interfaceName, route);
+                    } catch (Exception e) {
+                        loge("error adding default route " + route);
+                        continue;
+                    }
                     if (DBG) {
                         NetworkInfo networkInfo = nt.getNetworkInfo();
                         log("addDefaultRoute for " + networkInfo.getTypeName() +
                                 " (" + interfaceName + "), GatewayAddr=" +
                                 gateway.getHostAddress());
                     }
+                } else {
+                    loge("error adding host route for default route " + route);
                 }
             }
         }
@@ -1481,8 +1507,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (p == null) return;
         String interfaceName = p.getInterfaceName();
 
-        if (interfaceName != null) {
-            if (NetworkUtils.removeDefaultRoute(interfaceName) >= 0) {
+        if (interfaceName == null) return;
+
+        for (RouteInfo route : p.getRoutes()) {
+            //TODO - handle non-default routes
+            if (route.isDefaultRoute()) {
+                try {
+                    mNetd.removeRoute(interfaceName, route);
+                } catch (Exception ex) {
+                    loge("error (" + ex + ") removing default route " + route);
+                    continue;
+                }
                 if (DBG) {
                     NetworkInfo networkInfo = nt.getNetworkInfo();
                     log("removeDefaultRoute for " + networkInfo.getTypeName() + " (" +

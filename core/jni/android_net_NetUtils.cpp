@@ -26,10 +26,6 @@
 extern "C" {
 int ifc_enable(const char *ifname);
 int ifc_disable(const char *ifname);
-int ifc_add_route(const char *ifname, const char *destStr, uint32_t prefixLen, const char *gwStr);
-int ifc_remove_host_routes(const char *ifname);
-int ifc_get_default_route(const char *ifname);
-int ifc_remove_default_route(const char *ifname);
 int ifc_reset_connections(const char *ifname);
 
 int dhcp_do_request(const char *ifname,
@@ -90,56 +86,6 @@ static jint android_net_utils_disableInterface(JNIEnv* env, jobject clazz, jstri
 
     const char *nameStr = env->GetStringUTFChars(ifname, NULL);
     result = ::ifc_disable(nameStr);
-    env->ReleaseStringUTFChars(ifname, nameStr);
-    return (jint)result;
-}
-
-static jint android_net_utils_addRoute(JNIEnv* env, jobject clazz, jstring ifname,
-          jstring dst, jint prefixLength, jstring gw)
-{
-    int result;
-
-    const char *nameStr = env->GetStringUTFChars(ifname, NULL);
-    const char *dstStr = env->GetStringUTFChars(dst, NULL);
-    const char *gwStr = NULL;
-    if (gw != NULL) {
-        gwStr = env->GetStringUTFChars(gw, NULL);
-    }
-    result = ::ifc_add_route(nameStr, dstStr, prefixLength, gwStr);
-    env->ReleaseStringUTFChars(ifname, nameStr);
-    env->ReleaseStringUTFChars(dst, dstStr);
-    if (gw != NULL) {
-        env->ReleaseStringUTFChars(gw, gwStr);
-    }
-    return (jint)result;
-}
-
-static jint android_net_utils_removeHostRoutes(JNIEnv* env, jobject clazz, jstring ifname)
-{
-    int result;
-
-    const char *nameStr = env->GetStringUTFChars(ifname, NULL);
-    result = ::ifc_remove_host_routes(nameStr);
-    env->ReleaseStringUTFChars(ifname, nameStr);
-    return (jint)result;
-}
-
-static jint android_net_utils_getDefaultRoute(JNIEnv* env, jobject clazz, jstring ifname)
-{
-    int result;
-
-    const char *nameStr = env->GetStringUTFChars(ifname, NULL);
-    result = ::ifc_get_default_route(nameStr);
-    env->ReleaseStringUTFChars(ifname, nameStr);
-    return (jint)result;
-}
-
-static jint android_net_utils_removeDefaultRoute(JNIEnv* env, jobject clazz, jstring ifname)
-{
-    int result;
-
-    const char *nameStr = env->GetStringUTFChars(ifname, NULL);
-    result = ::ifc_remove_default_route(nameStr);
     env->ReleaseStringUTFChars(ifname, nameStr);
     return (jint)result;
 }
@@ -260,12 +206,6 @@ static JNINativeMethod gNetworkUtilMethods[] = {
 
     { "enableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_enableInterface },
     { "disableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_disableInterface },
-    { "addRoute", "(Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;)I",
-       (void *)android_net_utils_addRoute },
-    { "removeHostRoutes", "(Ljava/lang/String;)I",  (void *)android_net_utils_removeHostRoutes },
-    { "getDefaultRouteNative", "(Ljava/lang/String;)I",
-       (void *)android_net_utils_getDefaultRoute },
-    { "removeDefaultRoute", "(Ljava/lang/String;)I",  (void *)android_net_utils_removeDefaultRoute },
     { "resetConnections", "(Ljava/lang/String;)I",  (void *)android_net_utils_resetConnections },
     { "runDhcp", "(Ljava/lang/String;Landroid/net/DhcpInfoInternal;)Z",  (void *)android_net_utils_runDhcp },
     { "runDhcpRenew", "(Ljava/lang/String;Landroid/net/DhcpInfoInternal;)Z",  (void *)android_net_utils_runDhcpRenew },
