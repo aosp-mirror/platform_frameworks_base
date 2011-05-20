@@ -628,9 +628,11 @@ public class MediaPlayer
      * and cannot be directly compared between different media sources or different
      * instances of the same media source, or across multiple runs of the same
      * program.
-     * @hide
      */
     public void setTexture(SurfaceTexture st) {
+        if (mScreenOnWhilePlaying && st != null && mSurfaceTexture == null) {
+            Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective for SurfaceTexture");
+        }
         mSurfaceHolder = null;
         mSurface = null;
         mSurfaceTexture = st;
@@ -960,6 +962,9 @@ public class MediaPlayer
      */
     public void setScreenOnWhilePlaying(boolean screenOn) {
         if (mScreenOnWhilePlaying != screenOn) {
+            if (screenOn && mSurfaceTexture != null) {
+                Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective for SurfaceTexture");
+            }
             mScreenOnWhilePlaying = screenOn;
             updateSurfaceScreenOn();
         }
