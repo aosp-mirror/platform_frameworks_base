@@ -419,7 +419,8 @@ void RefBase::weakref_type::decWeak(const void* id)
     
     if ((impl->mFlags&OBJECT_LIFETIME_WEAK) != OBJECT_LIFETIME_WEAK) {
         if (impl->mStrong == INITIAL_STRONG_VALUE)
-            delete impl->mBase;
+            if (impl->mBase)
+                impl->mBase->destroy();
         else {
             // LOGV("Freeing refs %p of old RefBase %p\n", this, impl->mBase);
             delete impl;
@@ -427,7 +428,8 @@ void RefBase::weakref_type::decWeak(const void* id)
     } else {
         impl->mBase->onLastWeakRef(id);
         if ((impl->mFlags&OBJECT_LIFETIME_FOREVER) != OBJECT_LIFETIME_FOREVER) {
-            delete impl->mBase;
+            if (impl->mBase)
+                impl->mBase->destroy();
         }
     }
 }
