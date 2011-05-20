@@ -52,6 +52,33 @@ static struct parcel_file_descriptor_offsets_t
     jfieldID mFileDescriptor;
 } gParcelFileDescriptorOffsets;
 
+static jobject android_os_ParcelFileDescriptor_getFileDescriptorFromFd(JNIEnv* env,
+    jobject clazz, jint origfd)
+{
+    int fd = dup(origfd);
+    if (fd < 0) {
+        jniThrowException(env, "java/io/IOException", strerror(errno));
+        return NULL;
+    }
+    jobject fileDescriptorClone = env->NewObject(gFileDescriptorOffsets.mClass,
+        gFileDescriptorOffsets.mConstructor);
+    if (fileDescriptorClone != NULL) {
+        env->SetIntField(fileDescriptorClone, gFileDescriptorOffsets.mDescriptor, fd);
+    }
+    return fileDescriptorClone;
+}
+
+static jobject android_os_ParcelFileDescriptor_getFileDescriptorFromFdNoDup(JNIEnv* env,
+    jobject clazz, jint fd)
+{
+    jobject fileDescriptorClone = env->NewObject(gFileDescriptorOffsets.mClass,
+        gFileDescriptorOffsets.mConstructor);
+    if (fileDescriptorClone != NULL) {
+        env->SetIntField(fileDescriptorClone, gFileDescriptorOffsets.mDescriptor, fd);
+    }
+    return fileDescriptorClone;
+}
+
 static jobject android_os_ParcelFileDescriptor_getFileDescriptorFromSocket(JNIEnv* env,
     jobject clazz, jobject object)
 {
@@ -61,17 +88,20 @@ static jobject android_os_ParcelFileDescriptor_getFileDescriptorFromSocket(JNIEn
     jobject fileDescriptorClone = env->NewObject(gFileDescriptorOffsets.mClass,
         gFileDescriptorOffsets.mConstructor);
     if (fileDescriptorClone != NULL) {
+        // XXXX need to throw an exception if the dup fails!
         env->SetIntField(fileDescriptorClone, gFileDescriptorOffsets.mDescriptor, dup(fd));
     }
     return fileDescriptorClone;
 }
 
-static int android_os_ParcelFileDescriptor_createPipeNative(JNIEnv* env,
+static void android_os_ParcelFileDescriptor_createPipeNative(JNIEnv* env,
     jobject clazz, jobjectArray outFds)
 {
     int fds[2];
     if (pipe(fds) < 0) {
-        return -errno;
+        int therr = errno;
+        jniThrowException(env, "java/io/IOException", strerror(therr));
+        return;
     }
 
     for (int i=0; i<2; i++) {
@@ -82,8 +112,6 @@ static int android_os_ParcelFileDescriptor_createPipeNative(JNIEnv* env,
         }
         env->SetObjectArrayElement(outFds, i, fdObj);
     }
-
-    return 0;
 }
 
 static jint getFd(JNIEnv* env, jobject clazz)
@@ -138,9 +166,13 @@ static jlong android_os_ParcelFileDescriptor_getFdNative(JNIEnv* env, jobject cl
 }
 
 static const JNINativeMethod gParcelFileDescriptorMethods[] = {
+    {"getFileDescriptorFromFd", "(I)Ljava/io/FileDescriptor;",
+        (void*)android_os_ParcelFileDescriptor_getFileDescriptorFromFd},
+    {"getFileDescriptorFromFdNoDup", "(I)Ljava/io/FileDescriptor;",
+        (void*)android_os_ParcelFileDescriptor_getFileDescriptorFromFdNoDup},
     {"getFileDescriptorFromSocket", "(Ljava/net/Socket;)Ljava/io/FileDescriptor;",
         (void*)android_os_ParcelFileDescriptor_getFileDescriptorFromSocket},
-    {"createPipeNative", "([Ljava/io/FileDescriptor;)I",
+    {"createPipeNative", "([Ljava/io/FileDescriptor;)V",
         (void*)android_os_ParcelFileDescriptor_createPipeNative},
     {"getStatSize", "()J",
         (void*)android_os_ParcelFileDescriptor_getStatSize},
