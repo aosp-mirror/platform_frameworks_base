@@ -116,11 +116,11 @@ int register_android_content_res_Configuration(JNIEnv* env)
             "orientation", "I");
     GET_FIELD_ID(gConfigurationClassInfo.uiMode, clazz,
             "uiMode", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.screenWidthDp, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.screenWidthDp, clazz,
             "screenWidthDp", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.screenHeightDp, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.screenHeightDp, clazz,
             "screenHeightDp", "I");
-    GET_FIELD_ID(gConfigurationClassInfo.smallestScreenWidthDp, gConfigurationClassInfo.clazz,
+    GET_FIELD_ID(gConfigurationClassInfo.smallestScreenWidthDp, clazz,
             "smallestScreenWidthDp", "I");
 
     return AndroidRuntime::registerNativeMethods(env, "android/content/res/Configuration", gMethods,
