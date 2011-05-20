@@ -927,37 +927,43 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return false;
         }
 
-        dc = findReadyDataConnection(apn);
+        // First, check to see if ApnContext already has DC.
+        // This could happen if the retries are currently  engaged.
+        dc = (GsmDataConnection)apnContext.getDataConnection();
 
         if (dc == null) {
-            if (DBG) log("setupData: No ready GsmDataConnection found!");
-            // TODO: When allocating you are mapping type to id. If more than 1 free,
-            // then could findFreeDataConnection get the wrong one??
-            dc = findFreeDataConnection();
-        }
+            dc = findReadyDataConnection(apn);
 
-        if (dc == null) {
-            dc = createDataConnection();
-        }
+            if (dc == null) {
+                if (DBG) log("setupData: No ready GsmDataConnection found!");
+                // TODO: When allocating you are mapping type to id. If more than 1 free,
+                // then could findFreeDataConnection get the wrong one??
+                dc = findFreeDataConnection();
+            }
 
-        if (dc == null) {
-            if (DBG) log("setupData: No free GsmDataConnection found!");
-            return false;
-        }
+            if (dc == null) {
+                dc = createDataConnection();
+            }
 
-        dc.setProfileId( profileId );
-        dc.setActiveApnType(apnContext.getApnType());
-        int refCount = dc.incAndGetRefCount();
-        if (DBG) log("setupData: init dc and apnContext refCount=" + refCount);
+            if (dc == null) {
+                if (DBG) log("setupData: No free GsmDataConnection found!");
+                return false;
+            }
 
-        // configure retry count if no other Apn is using the same connection.
-        if (refCount == 1) {
-            configureRetry(dc, apnContext.getApnType());
+            dc.setProfileId( profileId );
+            dc.setActiveApnType(apnContext.getApnType());
+            int refCount = dc.incAndGetRefCount();
+            if (DBG) log("setupData: init dc and apnContext refCount=" + refCount);
+
+            // configure retry count if no other Apn is using the same connection.
+            if (refCount == 1) {
+                configureRetry(dc, apnContext.getApnType());
+            }
+            DataConnectionAc dcac = mDataConnectionAsyncChannels.get(dc.getDataConnectionId());
+            apnContext.setDataConnectionAc(mDataConnectionAsyncChannels.get(dc.getDataConnectionId()));
+            apnContext.setApnSetting(apn);
+            apnContext.setDataConnection(dc);
         }
-        DataConnectionAc dcac = mDataConnectionAsyncChannels.get(dc.getDataConnectionId());
-        apnContext.setDataConnectionAc(mDataConnectionAsyncChannels.get(dc.getDataConnectionId()));
-        apnContext.setApnSetting(apn);
-        apnContext.setDataConnection(dc);
 
         Message msg = obtainMessage();
         msg.what = EVENT_DATA_SETUP_COMPLETE;
@@ -1655,6 +1661,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     }
                     apnContext.setState(State.FAILED);
                     mPhone.notifyDataConnection(Phone.REASON_APN_FAILED, apnContext.getApnType());
+
+                    int refCount = releaseApnContext(apnContext, false);
+                    if (DBG) {
+                        log("onDataSetupComplete: permanent error apn=%s" + apnString +
+                                                                            " refCount=" + refCount);
+                    }
                 } else {
                     if (DBG) log("onDataSetupComplete: Not all permanent failures, retry");
                     startDelayedRetry(cause, apnContext);
@@ -1666,11 +1678,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 // we're not tying up the RIL command channel
                 sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, apnContext),
                         APN_DELAY_MILLIS);
-            }
-
-            int refCount = releaseApnContext(apnContext, false);
-            if (DBG) {
-                log("onDataSetupComplete: error apn=%s" + apnString + " refCount=" + refCount);
             }
         }
     }
