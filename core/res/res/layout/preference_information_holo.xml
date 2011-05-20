@@ -24,13 +24,24 @@
     android:gravity="center_vertical"
     android:paddingRight="?android:attr/scrollbarSize">
 
-    <View
-        android:layout_width="@dimen/preference_widget_width"
-        android:layout_height="match_parent" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:minWidth="@dimen/preference_icon_minWidth"
+        android:gravity="center"
+        android:orientation="horizontal">
+        <ImageView
+            android:id="@+android:id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="16dip"
         android:layout_marginRight="6sp"
         android:layout_marginTop="6sp"
         android:layout_marginBottom="6sp"
