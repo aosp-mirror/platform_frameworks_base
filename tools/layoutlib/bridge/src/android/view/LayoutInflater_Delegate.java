@@ -43,6 +43,8 @@ import java.io.IOException;
  */
 public class LayoutInflater_Delegate {
 
+    public static boolean sIsInInclude = false;
+
     @LayoutlibDelegate
     /*package*/ static void parseInclude(LayoutInflater thisInflater,
             XmlPullParser parser, View parent, AttributeSet attrs)
@@ -109,10 +111,22 @@ public class LayoutInflater_Delegate {
                         // false means we need to rely on the included layout params.
                         ViewGroup.LayoutParams params = null;
                         try {
+                            // ---- START CHANGES
+                            sIsInInclude = true;
+                            // ---- END CHANGES
+
                             params = group.generateLayoutParams(attrs);
                         } catch (RuntimeException e) {
+                            // ---- START CHANGES
+                            sIsInInclude = false;
+                            // ---- END CHANGES
+
                             params = group.generateLayoutParams(childAttrs);
                         } finally {
+                            // ---- START CHANGES
+                            sIsInInclude = false;
+                            // ---- END CHANGES
+
                             if (params != null) {
                                 view.setLayoutParams(params);
                             }
