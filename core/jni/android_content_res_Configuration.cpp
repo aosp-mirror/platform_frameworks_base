@@ -40,6 +40,9 @@ static struct {
     jfieldID navigationHidden;
     jfieldID orientation;
     jfieldID uiMode;
+    jfieldID screenWidthDp;
+    jfieldID screenHeightDp;
+    jfieldID smallestScreenWidthDp;
 } gConfigurationClassInfo;
 
 void android_Configuration_getFromJava(
@@ -62,6 +65,11 @@ void android_Configuration_getFromJava(
 
     out->orientation = env->GetIntField(clazz, gConfigurationClassInfo.orientation);
     out->uiMode = env->GetIntField(clazz, gConfigurationClassInfo.uiMode);
+
+    out->screenWidthDp = env->GetIntField(clazz, gConfigurationClassInfo.screenWidthDp);
+    out->screenHeightDp = env->GetIntField(clazz, gConfigurationClassInfo.screenHeightDp);
+    out->smallestScreenWidthDp = env->GetIntField(clazz,
+            gConfigurationClassInfo.smallestScreenWidthDp);
 }
 
 /*
@@ -110,6 +118,12 @@ int register_android_content_res_Configuration(JNIEnv* env)
             "orientation", "I");
     GET_FIELD_ID(gConfigurationClassInfo.uiMode, gConfigurationClassInfo.clazz,
             "uiMode", "I");
+    GET_FIELD_ID(gConfigurationClassInfo.screenWidthDp, gConfigurationClassInfo.clazz,
+            "screenWidthDp", "I");
+    GET_FIELD_ID(gConfigurationClassInfo.screenHeightDp, gConfigurationClassInfo.clazz,
+            "screenHeightDp", "I");
+    GET_FIELD_ID(gConfigurationClassInfo.smallestScreenWidthDp, gConfigurationClassInfo.clazz,
+            "smallestScreenWidthDp", "I");
 
     return AndroidRuntime::registerNativeMethods(env, "android/content/res/Configuration", gMethods,
             NELEM(gMethods));

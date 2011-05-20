@@ -2588,7 +2588,7 @@ void ResTable::setParameters(const ResTable_config* params)
 {
     mLock.lock();
     TABLE_GETENTRY(LOGI("Setting parameters: imsi:%d/%d lang:%c%c cnt:%c%c "
-                        "orien:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d %ddp x %ddp\n",
+                        "orien:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d sw%ddp w%ddp h%ddp\n",
                        params->mcc, params->mnc,
                        params->language[0] ? params->language[0] : '-',
                        params->language[1] ? params->language[1] : '-',
@@ -2602,6 +2602,7 @@ void ResTable::setParameters(const ResTable_config* params)
                        params->navigation,
                        params->screenWidth,
                        params->screenHeight,
+                       params->smallestScreenWidthDp,
                        params->screenWidthDp,
                        params->screenHeightDp));
     mParams = *params;
@@ -3927,7 +3928,7 @@ ssize_t ResTable::getEntry(
         TABLE_GETENTRY(LOGI("Match entry 0x%x in type 0x%x (sz 0x%x): imsi:%d/%d=%d/%d "
                             "lang:%c%c=%c%c cnt:%c%c=%c%c orien:%d=%d touch:%d=%d "
                             "density:%d=%d key:%d=%d inp:%d=%d nav:%d=%d w:%d=%d h:%d=%d "
-                            "wdp:%d=%d hdp:%d=%d\n",
+                            "swdp:%d=%d wdp:%d=%d hdp:%d=%d\n",
                            entryIndex, typeIndex+1, dtohl(thisType->config.size),
                            thisConfig.mcc, thisConfig.mnc,
                            config ? config->mcc : 0, config ? config->mnc : 0,
@@ -3955,6 +3956,8 @@ ssize_t ResTable::getEntry(
                            config ? config->screenWidth : 0,
                            thisConfig.screenHeight,
                            config ? config->screenHeight : 0,
+                           thisConfig.smallestScreenWidthDp,
+                           config ? config->smallestScreenWidthDp : 0,
                            thisConfig.screenWidthDp,
                            config ? config->screenWidthDp : 0,
                            thisConfig.screenHeightDp,
@@ -4244,7 +4247,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                 thisConfig.copyFromDtoH(type->config);
                 LOGI("Adding config to type %d: imsi:%d/%d lang:%c%c cnt:%c%c "
                      "orien:%d touch:%d density:%d key:%d inp:%d nav:%d w:%d h:%d "
-                     "wdp:%d hdp:%d\n",
+                     "swdp:%d wdp:%d hdp:%d\n",
                       type->id,
                       thisConfig.mcc, thisConfig.mnc,
                       thisConfig.language[0] ? thisConfig.language[0] : '-',
@@ -4259,6 +4262,7 @@ status_t ResTable::parsePackage(const ResTable_package* const pkg,
                       thisConfig.navigation,
                       thisConfig.screenWidth,
                       thisConfig.screenHeight,
+                      thisConfig.smallestScreenWidthDp,
                       thisConfig.screenWidthDp,
                       thisConfig.screenHeightDp));
             t->configs.add(type);
@@ -4752,6 +4756,9 @@ void ResTable::print(bool inclValues) const
                     }
                     if (type->config.screenHeight != 0) {
                         printf(" h=%d", dtohs(type->config.screenHeight));
+                    }
+                    if (type->config.smallestScreenWidthDp != 0) {
+                        printf(" swdp=%d", dtohs(type->config.smallestScreenWidthDp));
                     }
                     if (type->config.screenWidthDp != 0) {
                         printf(" wdp=%d", dtohs(type->config.screenWidthDp));

@@ -259,6 +259,15 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int screenHeightDp;
 
+    public static final int SMALLEST_SCREEN_WIDTH_DP_UNDEFINED = 0;
+
+    /**
+     * The smallest screen size an application will see in normal operation.
+     * This is the smallest value of both screenWidthDp and screenHeightDp
+     * in both portrait and landscape.
+     */
+    public int smallestScreenWidthDp;
+
     /**
      * @hide Internal book-keeping.
      */
@@ -298,6 +307,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         uiMode = o.uiMode;
         screenWidthDp = o.screenWidthDp;
         screenHeightDp = o.screenHeightDp;
+        smallestScreenWidthDp = o.smallestScreenWidthDp;
         seq = o.seq;
     }
     
@@ -314,6 +324,56 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             sb.append(locale);
         } else {
             sb.append(" (no locale)");
+        }
+        if (smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
+            sb.append(" sw"); sb.append(smallestScreenWidthDp); sb.append("dp");
+        } else {
+            sb.append("?swdp");
+        }
+        if (screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED) {
+            sb.append(" w"); sb.append(screenWidthDp); sb.append("dp");
+        } else {
+            sb.append("?wdp");
+        }
+        if (screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED) {
+            sb.append(" h"); sb.append(screenHeightDp); sb.append("dp");
+        } else {
+            sb.append("?hdp");
+        }
+        switch ((screenLayout&SCREENLAYOUT_SIZE_MASK)) {
+            case SCREENLAYOUT_SIZE_UNDEFINED: sb.append(" ?lsize"); break;
+            case SCREENLAYOUT_SIZE_SMALL: sb.append(" smll"); break;
+            case SCREENLAYOUT_SIZE_NORMAL: sb.append(" nrml"); break;
+            case SCREENLAYOUT_SIZE_LARGE: sb.append(" lrg"); break;
+            case SCREENLAYOUT_SIZE_XLARGE: sb.append(" xlrg"); break;
+            default: sb.append(" layoutSize=");
+                    sb.append(screenLayout&SCREENLAYOUT_SIZE_MASK); break;
+        }
+        switch ((screenLayout&SCREENLAYOUT_LONG_MASK)) {
+            case SCREENLAYOUT_LONG_UNDEFINED: sb.append(" ?long"); break;
+            case SCREENLAYOUT_LONG_NO: /* not-long is not interesting to print */ break;
+            case SCREENLAYOUT_LONG_YES: sb.append(" long"); break;
+            default: sb.append(" layoutLong=");
+                    sb.append(screenLayout&SCREENLAYOUT_LONG_MASK); break;
+        }
+        switch (orientation) {
+            case ORIENTATION_UNDEFINED: sb.append(" ?orien"); break;
+            case ORIENTATION_LANDSCAPE: sb.append(" land"); break;
+            case ORIENTATION_PORTRAIT: sb.append(" port"); break;
+            default: sb.append(" orien="); sb.append(orientation); break;
+        }
+        switch ((uiMode&UI_MODE_TYPE_MASK)) {
+            case UI_MODE_TYPE_UNDEFINED: sb.append(" ?uimode"); break;
+            case UI_MODE_TYPE_NORMAL: /* normal is not interesting to print */ break;
+            case UI_MODE_TYPE_DESK: sb.append(" desk"); break;
+            case UI_MODE_TYPE_CAR: sb.append(" car"); break;
+            default: sb.append(" uimode="); sb.append(uiMode&UI_MODE_TYPE_MASK); break;
+        }
+        switch ((uiMode&UI_MODE_NIGHT_MASK)) {
+            case UI_MODE_NIGHT_UNDEFINED: sb.append(" ?night"); break;
+            case UI_MODE_NIGHT_NO: /* not-night is not interesting to print */ break;
+            case UI_MODE_NIGHT_YES: sb.append(" night"); break;
+            default: sb.append(" night="); sb.append(uiMode&UI_MODE_NIGHT_MASK); break;
         }
         switch (touchscreen) {
             case TOUCHSCREEN_UNDEFINED: sb.append(" ?touch"); break;
@@ -356,51 +416,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case NAVIGATIONHIDDEN_YES: sb.append("/h"); break;
             default: sb.append("/"); sb.append(navigationHidden); break;
         }
-        switch (orientation) {
-            case ORIENTATION_UNDEFINED: sb.append(" ?orien"); break;
-            case ORIENTATION_LANDSCAPE: sb.append(" land"); break;
-            case ORIENTATION_PORTRAIT: sb.append(" port"); break;
-            default: sb.append(" orien="); sb.append(orientation); break;
-        }
-        switch ((screenLayout&SCREENLAYOUT_SIZE_MASK)) {
-            case SCREENLAYOUT_SIZE_UNDEFINED: sb.append(" ?lsize"); break;
-            case SCREENLAYOUT_SIZE_SMALL: sb.append(" smll"); break;
-            case SCREENLAYOUT_SIZE_NORMAL: sb.append(" nrml"); break;
-            case SCREENLAYOUT_SIZE_LARGE: sb.append(" lrg"); break;
-            case SCREENLAYOUT_SIZE_XLARGE: sb.append(" xlrg"); break;
-            default: sb.append(" layoutSize=");
-                    sb.append(screenLayout&SCREENLAYOUT_SIZE_MASK); break;
-        }
-        switch ((screenLayout&SCREENLAYOUT_LONG_MASK)) {
-            case SCREENLAYOUT_LONG_UNDEFINED: sb.append(" ?long"); break;
-            case SCREENLAYOUT_LONG_NO: /* not-long is not interesting to print */ break;
-            case SCREENLAYOUT_LONG_YES: sb.append(" long"); break;
-            default: sb.append(" layoutLong=");
-                    sb.append(screenLayout&SCREENLAYOUT_LONG_MASK); break;
-        }
-        switch ((uiMode&UI_MODE_TYPE_MASK)) {
-            case UI_MODE_TYPE_UNDEFINED: sb.append(" ?uimode"); break;
-            case UI_MODE_TYPE_NORMAL: /* normal is not interesting to print */ break;
-            case UI_MODE_TYPE_DESK: sb.append(" desk"); break;
-            case UI_MODE_TYPE_CAR: sb.append(" car"); break;
-            default: sb.append(" uimode="); sb.append(uiMode&UI_MODE_TYPE_MASK); break;
-        }
-        switch ((uiMode&UI_MODE_NIGHT_MASK)) {
-            case UI_MODE_NIGHT_UNDEFINED: sb.append(" ?night"); break;
-            case UI_MODE_NIGHT_NO: /* not-night is not interesting to print */ break;
-            case UI_MODE_NIGHT_YES: sb.append(" night"); break;
-            default: sb.append(" night="); sb.append(uiMode&UI_MODE_NIGHT_MASK); break;
-        }
-        if (screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED) {
-            sb.append(" w"); sb.append(screenWidthDp); sb.append("dp");
-        } else {
-            sb.append("?wdp");
-        }
-        if (screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED) {
-            sb.append(" h"); sb.append(screenHeightDp); sb.append("dp");
-        } else {
-            sb.append("?hdp");
-        }
         if (seq != 0) {
             sb.append(" s.");
             sb.append(seq);
@@ -428,6 +443,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         uiMode = UI_MODE_TYPE_UNDEFINED;
         screenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
         screenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
+        smallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
         seq = 0;
     }
 
@@ -531,6 +547,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
             screenHeightDp = delta.screenHeightDp;
         }
+        if (delta.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED
+                && smallestScreenWidthDp != delta.smallestScreenWidthDp) {
+            changed |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+            smallestScreenWidthDp = delta.smallestScreenWidthDp;
+        }
         
         if (delta.seq != 0) {
             seq = delta.seq;
@@ -564,7 +585,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      * {@link android.content.pm.ActivityInfo#CONFIG_SCREEN_LAYOUT
      * PackageManager.ActivityInfo.CONFIG_SCREEN_LAYOUT}, or
      * {@link android.content.pm.ActivityInfo#CONFIG_SCREEN_SIZE
-     * PackageManager.ActivityInfo.CONFIG_SCREEN_SIZE}.
+     * PackageManager.ActivityInfo.CONFIG_SCREEN_SIZE}, or
+     * {@link android.content.pm.ActivityInfo#CONFIG_SMALLEST_SCREEN_SIZE
+     * PackageManager.ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE}.
      */
     public int diff(Configuration delta) {
         int changed = 0;
@@ -624,6 +647,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (delta.screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED
                 && screenHeightDp != delta.screenHeightDp) {
             changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
+        }
+        if (delta.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED
+                && smallestScreenWidthDp != delta.smallestScreenWidthDp) {
+            changed |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
         }
         
         return changed;
@@ -708,6 +735,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(uiMode);
         dest.writeInt(screenWidthDp);
         dest.writeInt(screenHeightDp);
+        dest.writeInt(smallestScreenWidthDp);
         dest.writeInt(seq);
     }
 
@@ -731,6 +759,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         uiMode = source.readInt();
         screenWidthDp = source.readInt();
         screenHeightDp = source.readInt();
+        smallestScreenWidthDp = source.readInt();
         seq = source.readInt();
     }
     
@@ -795,6 +824,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         n = this.screenWidthDp - that.screenWidthDp;
         if (n != 0) return n;
         n = this.screenHeightDp - that.screenHeightDp;
+        if (n != 0) return n;
+        n = this.smallestScreenWidthDp - that.smallestScreenWidthDp;
         //if (n != 0) return n;
         return n;
     }
@@ -830,6 +861,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         result = 31 * result + uiMode;
         result = 31 * result + screenWidthDp;
         result = 31 * result + screenHeightDp;
+        result = 31 * result + smallestScreenWidthDp;
         return result;
     }
 }

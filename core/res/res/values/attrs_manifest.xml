@@ -590,11 +590,21 @@
         <!-- The global user interface mode has changed.  For example,
              going in or out of car mode, night mode changing, etc. -->
         <flag name="uiMode" value="0x0200" />
+        <!-- The current available screen size has changed.  If applications don't
+             target at least {@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2}
+             then the activity will always handle this itself (the change
+             will not result in a restart).  This represents a change in the
+             currently available size, so will change when the user switches
+             between landscape and portrait. -->
+        <flag name="screenSize" value="0x0400" />
         <!-- The physical screen size has changed.  If applications don't
              target at least {@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2}
              then the activity will always handle this itself (the change
-             will not result in a restart). -->
-        <flag name="screenSize" value="0x0400" />
+             will not result in a restart).  This represents a change in size
+             regardless of orientation, so will only change when the actual
+             physical screen size has changed such as switching to an external
+             display. -->
+        <flag name="smallestScreenSize" value="0x0800" />
         <!-- The font scaling factor has changed, that is the user has
              selected a new global font size. -->
         <flag name="fontScale" value="0x40000000" />
