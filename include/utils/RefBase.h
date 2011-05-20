@@ -51,7 +51,6 @@ inline bool operator _op_ (const U* o) const {                  \
 }
 
 // ---------------------------------------------------------------------------
-
 class ReferenceMover;
 class ReferenceConverterBase {
 public:
@@ -120,7 +119,14 @@ public:
 protected:
                             RefBase();
     virtual                 ~RefBase();
-    
+
+    // called when the last reference goes away. this is responsible for
+    // calling the destructor. The default implementation just does
+    // "delete this;".
+    // Make sure to never acquire a strong reference from this function. The
+    // same restrictions than for destructors apply.
+    virtual void            destroy() const;
+
     //! Flags for extendObjectLifetime()
     enum {
         OBJECT_LIFETIME_WEAK    = 0x0001,
