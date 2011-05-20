@@ -27,6 +27,7 @@
 
     <!-- Show sliding tab before lockscreen -->
     <bool name="config_enableSlidingTabFirst">false</bool>
+
     <!-- Enable lockscreen rotation -->
     <bool name="config_enableLockScreenRotation">true</bool>
 
