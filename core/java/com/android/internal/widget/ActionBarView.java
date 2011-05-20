@@ -28,6 +28,8 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
@@ -977,6 +979,21 @@ public class ActionBarView extends ViewGroup {
         protected void onFinishInflate() {
             mUpView = findViewById(com.android.internal.R.id.up);
             mIconView = (ImageView) findViewById(com.android.internal.R.id.home);
+        }
+
+        @Override
+        public void onConfigurationChanged(Configuration newConfig) {
+            super.onConfigurationChanged(newConfig);
+
+            // Make sure we reload positioning elements that may change with configuration.
+            Resources res = getContext().getResources();
+            final int imagePadding = res.getDimensionPixelSize(
+                    com.android.internal.R.dimen.action_bar_home_image_padding);
+            final int upMargin = res.getDimensionPixelSize(
+                    com.android.internal.R.dimen.action_bar_home_up_margin);
+            mIconView.setPadding(imagePadding, getPaddingTop(), imagePadding, getPaddingBottom());
+            ((LayoutParams) mUpView.getLayoutParams()).rightMargin = upMargin;
+            mUpView.requestLayout();
         }
 
         @Override
