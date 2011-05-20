@@ -35,6 +35,9 @@ namespace uirenderer {
 #define DEFAULT_TEXT_CACHE_WIDTH 1024
 #define DEFAULT_TEXT_CACHE_HEIGHT 256
 
+#define MAX_TEXT_CACHE_WIDTH 2048
+#define MAX_TEXT_CACHE_HEIGHT 2048
+
 ///////////////////////////////////////////////////////////////////////////////
 // Font
 ///////////////////////////////////////////////////////////////////////////////
@@ -386,9 +389,17 @@ void FontRenderer::flushAllAndInvalidate() {
 bool FontRenderer::cacheBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint32_t* retOriginY) {
     // If the glyph is too tall, don't cache it
     if (glyph.fHeight > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
-        LOGE("Font size to large to fit in cache. width, height = %i, %i",
-                (int) glyph.fWidth, (int) glyph.fHeight);
-        return false;
+        if (mCacheHeight < MAX_TEXT_CACHE_HEIGHT) {
+            // Default cache not large enough for large glyphs - resize cache to
+            // max size and try again
+            flushAllAndInvalidate();
+            initTextTexture(true);
+        }
+        if (glyph.fHeight > mCacheLines[mCacheLines.size() - 1]->mMaxHeight) {
+            LOGE("Font size to large to fit in cache. width, height = %i, %i",
+                    (int) glyph.fWidth, (int) glyph.fHeight);
+            return false;
+        }
     }
 
     // Now copy the bitmap into the cache texture
@@ -446,16 +457,25 @@ bool FontRenderer::cacheBitmap(const SkGlyph& glyph, uint32_t* retOriginX, uint3
     return true;
 }
 
-void FontRenderer::initTextTexture() {
+void FontRenderer::initTextTexture(bool largeFonts) {
+    mCacheLines.clear();
+    if (largeFonts) {
+        mCacheWidth = MAX_TEXT_CACHE_WIDTH;
+        mCacheHeight = MAX_TEXT_CACHE_HEIGHT;
+    }
+
     mTextTexture = new uint8_t[mCacheWidth * mCacheHeight];
     memset(mTextTexture, 0, mCacheWidth * mCacheHeight * sizeof(uint8_t));
 
     mUploadTexture = false;
 
+    if (mTextureId != 0) {
+        glDeleteTextures(1, &mTextureId);
+    }
     glGenTextures(1, &mTextureId);
     glBindTexture(GL_TEXTURE_2D, mTextureId);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    // Initialize texture dimentions
+    // Initialize texture dimensions
     glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, mCacheWidth, mCacheHeight, 0,
             GL_ALPHA, GL_UNSIGNED_BYTE, 0);
 
@@ -480,6 +500,15 @@ void FontRenderer::initTextTexture() {
     nextLine += mCacheLines.top()->mMaxHeight;
     mCacheLines.push(new CacheTextureLine(mCacheWidth, 42, nextLine, 0));
     nextLine += mCacheLines.top()->mMaxHeight;
+    if (largeFonts) {
+        int nextSize = 76;
+        // Make several new lines with increasing font sizes
+        while (nextSize < (int)(mCacheHeight - nextLine - (2 * nextSize))) {
+            mCacheLines.push(new CacheTextureLine(mCacheWidth, nextSize, nextLine, 0));
+            nextLine += mCacheLines.top()->mMaxHeight;
+            nextSize += 50;
+        }
+    }
     mCacheLines.push(new CacheTextureLine(mCacheWidth, mCacheHeight - nextLine, nextLine, 0));
 }
 

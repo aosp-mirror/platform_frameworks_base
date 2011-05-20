@@ -229,7 +229,7 @@ protected:
         }
     };
 
-    void initTextTexture();
+    void initTextTexture(bool largeFonts = false);
     bool cacheBitmap(const SkGlyph& glyph, uint32_t *retOriginX, uint32_t *retOriginY);
 
     void flushAllAndInvalidate();
