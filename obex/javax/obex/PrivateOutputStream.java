@@ -107,18 +107,15 @@ public final class PrivateOutputStream extends OutputStream {
 
         ensureOpen();
         mParent.ensureNotDone();
-        if (count < mMaxPacketSize) {
-            mArray.write(buffer, offset, count);
-        } else {
-            while (remainLength >= mMaxPacketSize) {
-                mArray.write(buffer, offset1, mMaxPacketSize);
-                offset1 += mMaxPacketSize;
-                remainLength = count - offset1;
-                mParent.continueOperation(true, false);
-            }
-            if (remainLength > 0) {
-                mArray.write(buffer, offset1, remainLength);
-            }
+        while ((mArray.size() + remainLength) >= mMaxPacketSize) {
+            int bufferLeft = mMaxPacketSize - mArray.size();
+            mArray.write(buffer, offset1, bufferLeft);
+            offset1 += bufferLeft;
+            remainLength -= bufferLeft;
+            mParent.continueOperation(true, false);
+        }
+        if (remainLength > 0) {
+            mArray.write(buffer, offset1, remainLength);
         }
     }
 
