@@ -18,6 +18,7 @@ package com.android.server;
 
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.usb.UsbService;
 import com.android.server.wm.WindowManagerService;
@@ -119,6 +120,7 @@ class ServerThread extends Thread {
         LightsService lights = null;
         PowerManagerService power = null;
         BatteryService battery = null;
+        NetworkPolicyManagerService networkPolicy = null;
         ConnectivityService connectivity = null;
         IPackageManager pm = null;
         Context context = null;
@@ -279,6 +281,15 @@ class ServerThread extends Thread {
                 ServiceManager.addService("netstat", new NetStatService(context));
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting NetStat Service", e);
+            }
+
+            try {
+                Slog.i(TAG, "NetworkPolicy Service");
+                networkPolicy = new NetworkPolicyManagerService(
+                        context, ActivityManagerService.self(), power);
+                ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting Connectivity Service", e);
             }
 
             try {
@@ -528,6 +539,7 @@ class ServerThread extends Thread {
         // These are needed to propagate to the runnable below.
         final Context contextF = context;
         final BatteryService batteryF = battery;
+        final NetworkPolicyManagerService networkPolicyF = networkPolicy;
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;
         final UsbService usbF = usb;
@@ -553,6 +565,7 @@ class ServerThread extends Thread {
 
                 startSystemUi(contextF);
                 if (batteryF != null) batteryF.systemReady();
+                if (networkPolicyF != null) networkPolicyF.systemReady();
                 if (connectivityF != null) connectivityF.systemReady();
                 if (dockF != null) dockF.systemReady();
                 if (usbF != null) usbF.systemReady();

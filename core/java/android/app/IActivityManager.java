@@ -355,6 +355,9 @@ public interface IActivityManager extends IInterface {
 
     public boolean removeTask(int taskId, int flags) throws RemoteException;
 
+    public void registerProcessObserver(IProcessObserver observer) throws RemoteException;
+    public void unregisterProcessObserver(IProcessObserver observer) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -577,4 +580,6 @@ public interface IActivityManager extends IInterface {
     int SWITCH_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+127;
     int REMOVE_SUB_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+128;
     int REMOVE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+129;
+    int REGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+130;
+    int UNREGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+131;
 }

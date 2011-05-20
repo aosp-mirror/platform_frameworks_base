@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package android.net;
+package android.app;
 
-/**
- * Interface that creates and modifies network policy rules.
- *
- * {@hide}
- */
-interface INetworkPolicyManager {
+/** {@hide} */
+oneway interface IProcessObserver {
 
-    void setUidPolicy(int uid, int policy);
-    int getUidPolicy(int uid);
-
-    // TODO: build API to surface stats details for settings UI
+    void onForegroundActivitiesChanged(int pid, int uid, boolean foregroundActivities);
+    void onProcessDied(int pid, int uid);
 
 }

@@ -1467,6 +1467,22 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case REGISTER_PROCESS_OBSERVER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IProcessObserver observer = IProcessObserver.Stub.asInterface(
+                    data.readStrongBinder());
+            registerProcessObserver(observer);
+            return true;
+        }
+
+        case UNREGISTER_PROCESS_OBSERVER_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            IProcessObserver observer = IProcessObserver.Stub.asInterface(
+                    data.readStrongBinder());
+            unregisterProcessObserver(observer);
+            return true;
+        }
+
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -3298,6 +3314,28 @@ class ActivityManagerProxy implements IActivityManager
         reply.recycle();
         data.recycle();
         return result;
+    }
+
+    public void registerProcessObserver(IProcessObserver observer) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(observer != null ? observer.asBinder() : null);
+        mRemote.transact(REGISTER_PROCESS_OBSERVER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
+    }
+
+    public void unregisterProcessObserver(IProcessObserver observer) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeStrongBinder(observer != null ? observer.asBinder() : null);
+        mRemote.transact(UNREGISTER_PROCESS_OBSERVER_TRANSACTION, data, reply, 0);
+        reply.readException();
+        data.recycle();
+        reply.recycle();
     }
 
     private IBinder mRemote;
