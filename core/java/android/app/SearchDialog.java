@@ -29,12 +29,13 @@ import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.speech.RecognizerIntent;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.ActionMode;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -49,9 +50,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.TextView;
-
-import java.util.WeakHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Search dialog. This is controlled by the 
@@ -110,13 +108,20 @@ public class SearchDialog extends Dialog {
         }
     };
 
+    static int resolveDialogTheme(Context context) {
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(com.android.internal.R.attr.searchDialogTheme,
+                outValue, true);
+        return outValue.resourceId;
+    }
+
     /**
      * Constructor - fires it up and makes it look like the search UI.
      * 
      * @param context Application Context we can use for system acess
      */
     public SearchDialog(Context context, SearchManager searchManager) {
-        super(context, com.android.internal.R.style.Theme_SearchBar);
+        super(context, resolveDialogTheme(context));
 
         // Save voice intent for later queries/launching
         mVoiceWebSearchIntent = new Intent(RecognizerIntent.ACTION_WEB_SEARCH);
@@ -641,6 +646,14 @@ public class SearchDialog extends Dialog {
                 }
             }
             return super.dispatchKeyEventPreIme(event);
+        }
+
+        /**
+         * Don't allow action modes in a SearchBar, it looks silly.
+         */
+        @Override
+        public ActionMode startActionModeForChild(View child, ActionMode.Callback callback) {
+            return null;
         }
     }
 
