@@ -5400,6 +5400,7 @@ package android.content.pm {
     field public static final int CONFIG_ORIENTATION = 128; // 0x80
     field public static final int CONFIG_SCREEN_LAYOUT = 256; // 0x100
     field public static final int CONFIG_SCREEN_SIZE = 1024; // 0x400
+    field public static final int CONFIG_SMALLEST_SCREEN_SIZE = 2048; // 0x800
     field public static final int CONFIG_TOUCHSCREEN = 8; // 0x8
     field public static final int CONFIG_UI_MODE = 512; // 0x200
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -5989,6 +5990,7 @@ package android.content.res {
     field public static final int SCREENLAYOUT_SIZE_XLARGE = 4; // 0x4
     field public static final int SCREEN_HEIGHT_DP_UNDEFINED = 0; // 0x0
     field public static final int SCREEN_WIDTH_DP_UNDEFINED = 0; // 0x0
+    field public static final int SMALLEST_SCREEN_WIDTH_DP_UNDEFINED = 0; // 0x0
     field public static final int TOUCHSCREEN_FINGER = 3; // 0x3
     field public static final int TOUCHSCREEN_NOTOUCH = 1; // 0x1
     field public static final int TOUCHSCREEN_STYLUS = 2; // 0x2
@@ -6015,6 +6017,7 @@ package android.content.res {
     field public int screenHeightDp;
     field public int screenLayout;
     field public int screenWidthDp;
+    field public int smallestScreenWidthDp;
     field public int touchscreen;
     field public int uiMode;
   }

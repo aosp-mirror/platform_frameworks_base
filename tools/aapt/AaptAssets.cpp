@@ -142,17 +142,10 @@ AaptGroupEntry::parseNamePart(const String8& part, int* axis, uint32_t* value)
         return 0;
     }
 
-    // screen layout size
-    if (getScreenLayoutSizeName(part.string(), &config)) {
-        *axis = AXIS_SCREENLAYOUTSIZE;
-        *value = (config.screenLayout&ResTable_config::MASK_SCREENSIZE);
-        return 0;
-    }
-
-    // screen layout long
-    if (getScreenLayoutLongName(part.string(), &config)) {
-        *axis = AXIS_SCREENLAYOUTLONG;
-        *value = (config.screenLayout&ResTable_config::MASK_SCREENLONG);
+    // smallest screen dp width
+    if (getSmallestScreenWidthDpName(part.string(), &config)) {
+        *axis = AXIS_SMALLESTSCREENWIDTHDP;
+        *value = config.smallestScreenWidthDp;
         return 0;
     }
 
@@ -167,6 +160,20 @@ AaptGroupEntry::parseNamePart(const String8& part, int* axis, uint32_t* value)
     if (getScreenHeightDpName(part.string(), &config)) {
         *axis = AXIS_SCREENHEIGHTDP;
         *value = config.screenHeightDp;
+        return 0;
+    }
+
+    // screen layout size
+    if (getScreenLayoutSizeName(part.string(), &config)) {
+        *axis = AXIS_SCREENLAYOUTSIZE;
+        *value = (config.screenLayout&ResTable_config::MASK_SCREENSIZE);
+        return 0;
+    }
+
+    // screen layout long
+    if (getScreenLayoutLongName(part.string(), &config)) {
+        *axis = AXIS_SCREENLAYOUTLONG;
+        *value = (config.screenLayout&ResTable_config::MASK_SCREENLONG);
         return 0;
     }
 
@@ -257,7 +264,7 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
 
     String8 mcc, mnc, loc, layoutsize, layoutlong, orient, den;
     String8 touch, key, keysHidden, nav, navHidden, size, vers;
-    String8 uiModeType, uiModeNight, widthdp, heightdp;
+    String8 uiModeType, uiModeNight, smallestwidthdp, widthdp, heightdp;
 
     const char *p = dir;
     const char *q;
@@ -344,8 +351,8 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
         //printf("not region: %s\n", part.string());
     }
 
-    if (getScreenLayoutSizeName(part.string())) {
-        layoutsize = part;
+    if (getSmallestScreenWidthDpName(part.string())) {
+        smallestwidthdp = part;
 
         index++;
         if (index == N) {
@@ -353,19 +360,7 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
         }
         part = parts[index];
     } else {
-        //printf("not screen layout size: %s\n", part.string());
-    }
-
-    if (getScreenLayoutLongName(part.string())) {
-        layoutlong = part;
-
-        index++;
-        if (index == N) {
-            goto success;
-        }
-        part = parts[index];
-    } else {
-        //printf("not screen layout long: %s\n", part.string());
+        //printf("not smallest screen width dp: %s\n", part.string());
     }
 
     if (getScreenWidthDpName(part.string())) {
@@ -390,6 +385,30 @@ AaptGroupEntry::initFromDirName(const char* dir, String8* resType)
         part = parts[index];
     } else {
         //printf("not screen height dp: %s\n", part.string());
+    }
+
+    if (getScreenLayoutSizeName(part.string())) {
+        layoutsize = part;
+
+        index++;
+        if (index == N) {
+            goto success;
+        }
+        part = parts[index];
+    } else {
+        //printf("not screen layout size: %s\n", part.string());
+    }
+
+    if (getScreenLayoutLongName(part.string())) {
+        layoutlong = part;
+
+        index++;
+        if (index == N) {
+            goto success;
+        }
+        part = parts[index];
+    } else {
+        //printf("not screen layout long: %s\n", part.string());
     }
 
     // orientation
@@ -541,6 +560,7 @@ success:
     this->locale = loc;
     this->screenLayoutSize = layoutsize;
     this->screenLayoutLong = layoutlong;
+    this->smallestScreenWidthDp = smallestwidthdp;
     this->screenWidthDp = widthdp;
     this->screenHeightDp = heightdp;
     this->orientation = orient;
@@ -570,13 +590,15 @@ AaptGroupEntry::toString() const
     s += ",";
     s += this->locale;
     s += ",";
-    s += screenLayoutSize;
-    s += ",";
-    s += screenLayoutLong;
+    s += smallestScreenWidthDp;
     s += ",";
     s += screenWidthDp;
     s += ",";
     s += screenHeightDp;
+    s += ",";
+    s += screenLayoutSize;
+    s += ",";
+    s += screenLayoutLong;
     s += ",";
     s += this->orientation;
     s += ",";
@@ -618,13 +640,9 @@ AaptGroupEntry::toDirName(const String8& resType) const
         s += "-";
         s += locale;
     }
-    if (this->screenLayoutSize != "") {
+    if (this->smallestScreenWidthDp != "") {
         s += "-";
-        s += screenLayoutSize;
-    }
-    if (this->screenLayoutLong != "") {
-        s += "-";
-        s += screenLayoutLong;
+        s += smallestScreenWidthDp;
     }
     if (this->screenWidthDp != "") {
         s += "-";
@@ -633,6 +651,14 @@ AaptGroupEntry::toDirName(const String8& resType) const
     if (this->screenHeightDp != "") {
         s += "-";
         s += screenHeightDp;
+    }
+    if (this->screenLayoutSize != "") {
+        s += "-";
+        s += screenLayoutSize;
+    }
+    if (this->screenLayoutLong != "") {
+        s += "-";
+        s += screenLayoutLong;
     }
     if (this->orientation != "") {
         s += "-";
@@ -1126,6 +1152,31 @@ bool AaptGroupEntry::getScreenSizeName(const char* name, ResTable_config* out)
     return true;
 }
 
+bool AaptGroupEntry::getSmallestScreenWidthDpName(const char* name, ResTable_config* out)
+{
+    if (strcmp(name, kWildcardName) == 0) {
+        if (out) {
+            out->smallestScreenWidthDp = out->SCREENWIDTH_ANY;
+        }
+        return true;
+    }
+
+    if (*name != 's') return false;
+    name++;
+    if (*name != 'w') return false;
+    name++;
+    const char* x = name;
+    while (*x >= '0' && *x <= '9') x++;
+    if (x == name || x[0] != 'd' || x[1] != 'p' || x[2] != 0) return false;
+    String8 xName(name, x-name);
+
+    if (out) {
+        out->smallestScreenWidthDp = (uint16_t)atoi(xName.string());
+    }
+
+    return true;
+}
+
 bool AaptGroupEntry::getScreenWidthDpName(const char* name, ResTable_config* out)
 {
     if (strcmp(name, kWildcardName) == 0) {
@@ -1206,10 +1257,11 @@ int AaptGroupEntry::compare(const AaptGroupEntry& o) const
     if (v == 0) v = mnc.compare(o.mnc);
     if (v == 0) v = locale.compare(o.locale);
     if (v == 0) v = vendor.compare(o.vendor);
-    if (v == 0) v = screenLayoutSize.compare(o.screenLayoutSize);
-    if (v == 0) v = screenLayoutLong.compare(o.screenLayoutLong);
+    if (v == 0) v = smallestScreenWidthDp.compare(o.smallestScreenWidthDp);
     if (v == 0) v = screenWidthDp.compare(o.screenWidthDp);
     if (v == 0) v = screenHeightDp.compare(o.screenHeightDp);
+    if (v == 0) v = screenLayoutSize.compare(o.screenLayoutSize);
+    if (v == 0) v = screenLayoutLong.compare(o.screenLayoutLong);
     if (v == 0) v = orientation.compare(o.orientation);
     if (v == 0) v = uiModeType.compare(o.uiModeType);
     if (v == 0) v = uiModeNight.compare(o.uiModeNight);
@@ -1231,10 +1283,11 @@ ResTable_config AaptGroupEntry::toParams() const
     getMccName(mcc.string(), &params);
     getMncName(mnc.string(), &params);
     getLocaleName(locale.string(), &params);
-    getScreenLayoutSizeName(screenLayoutSize.string(), &params);
-    getScreenLayoutLongName(screenLayoutLong.string(), &params);
+    getSmallestScreenWidthDpName(smallestScreenWidthDp.string(), &params);
     getScreenWidthDpName(screenWidthDp.string(), &params);
     getScreenHeightDpName(screenHeightDp.string(), &params);
+    getScreenLayoutSizeName(screenLayoutSize.string(), &params);
+    getScreenLayoutLongName(screenLayoutLong.string(), &params);
     getOrientationName(orientation.string(), &params);
     getUiModeTypeName(uiModeType.string(), &params);
     getUiModeNightName(uiModeNight.string(), &params);
@@ -1249,9 +1302,10 @@ ResTable_config AaptGroupEntry::toParams() const
     
     // Fix up version number based on specified parameters.
     int minSdk = 0;
-    if (params.screenWidthDp != ResTable_config::SCREENWIDTH_ANY
+    if (params.smallestScreenWidthDp != ResTable_config::SCREENWIDTH_ANY
+            || params.screenWidthDp != ResTable_config::SCREENWIDTH_ANY
             || params.screenHeightDp != ResTable_config::SCREENHEIGHT_ANY) {
-        minSdk = SDK_ICS;
+        minSdk = SDK_HONEYCOMB_MR2;
     } else if ((params.uiMode&ResTable_config::MASK_UI_MODE_TYPE)
                 != ResTable_config::UI_MODE_TYPE_ANY
             ||  (params.uiMode&ResTable_config::MASK_UI_MODE_NIGHT)

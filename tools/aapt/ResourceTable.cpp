@@ -2607,6 +2607,9 @@ ResourceFilter::match(const ResTable_config& config) const
     if (!match(AXIS_SCREENSIZE, config.screenSize)) {
         return false;
     }
+    if (!match(AXIS_SMALLESTSCREENWIDTHDP, config.smallestScreenWidthDp)) {
+        return false;
+    }
     if (!match(AXIS_SCREENWIDTHDP, config.screenWidthDp)) {
         return false;
     }
@@ -2809,7 +2812,8 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 ConfigDescription config = t->getUniqueConfigs().itemAt(ci);
 
                 NOISY(printf("Writing config %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d %ddp x %ddp\n",
+                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
+                     "sw%ddp w%ddp h%ddp\n",
                       ti+1,
                       config.mcc, config.mnc,
                       config.language[0] ? config.language[0] : '-',
@@ -2825,6 +2829,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       config.navigation,
                       config.screenWidth,
                       config.screenHeight,
+                      config.smallestScreenWidthDp,
                       config.screenWidthDp,
                       config.screenHeightDp));
                       
@@ -2849,7 +2854,8 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                 tHeader->entriesStart = htodl(typeSize);
                 tHeader->config = config;
                 NOISY(printf("Writing type %d config: imsi:%d/%d lang:%c%c cnt:%c%c "
-                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d %ddp x %ddp\n",
+                     "orien:%d ui:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
+                     "sw%ddp w%ddp h%ddp\n",
                       ti+1,
                       tHeader->config.mcc, tHeader->config.mnc,
                       tHeader->config.language[0] ? tHeader->config.language[0] : '-',
@@ -2865,6 +2871,7 @@ status_t ResourceTable::flatten(Bundle* bundle, const sp<AaptFile>& dest)
                       tHeader->config.navigation,
                       tHeader->config.screenWidth,
                       tHeader->config.screenHeight,
+                      tHeader->config.smallestScreenWidthDp,
                       tHeader->config.screenWidthDp,
                       tHeader->config.screenHeightDp));
                 tHeader->config.swapHtoD();
@@ -3448,7 +3455,8 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
     if (e == NULL) {
         if (config != NULL) {
             NOISY(printf("New entry at %s:%d: imsi:%d/%d lang:%c%c cnt:%c%c "
-                    "orien:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d %ddp x %ddp\n",
+                    "orien:%d touch:%d density:%d key:%d inp:%d nav:%d sz:%dx%d "
+                    "sw%ddp w%ddp h%ddp\n",
                       sourcePos.file.string(), sourcePos.line,
                       config->mcc, config->mnc,
                       config->language[0] ? config->language[0] : '-',
@@ -3463,6 +3471,7 @@ sp<ResourceTable::Entry> ResourceTable::Type::getEntry(const String16& entry,
                       config->navigation,
                       config->screenWidth,
                       config->screenHeight,
+                      config->smallestScreenWidthDp,
                       config->screenWidthDp,
                       config->screenHeightDp));
         } else {

@@ -340,6 +340,12 @@ public class ActivityInfo extends ComponentInfo
     public static final int CONFIG_SCREEN_SIZE = 0x0400;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
+     * can itself handle the smallest screen size. Set from the
+     * {@link android.R.attr#configChanges} attribute.
+     */
+    public static final int CONFIG_SMALLEST_SCREEN_SIZE = 0x0800;
+    /**
+     * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle changes to the font scaling factor.  Set from the
      * {@link android.R.attr#configChanges} attribute.  This is
      * not a core resource configutation, but a higher-level value, so its
@@ -364,6 +370,7 @@ public class ActivityInfo extends ComponentInfo
         0x0800, // SCREEN LAYOUT
         0x1000, // UI MODE
         0x0200, // SCREEN SIZE
+        0x2000, // SMALLEST SCREEN SIZE
     };
     /** @hide
      * Convert Java change bits to native.

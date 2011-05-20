@@ -4783,8 +4783,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             long ident = Binder.clearCallingIdentity();
 
-            dw = mPolicy.getNonDecorDisplayWidth(mCurDisplayWidth);
-            dh = mPolicy.getNonDecorDisplayHeight(mCurDisplayHeight);
+            dw = mPolicy.getNonDecorDisplayWidth(mRotation, mCurDisplayWidth);
+            dh = mPolicy.getNonDecorDisplayHeight(mRotation, mCurDisplayHeight);
 
             int aboveAppLayer = mPolicy.windowTypeToLayerLw(
                     WindowManager.LayoutParams.TYPE_APPLICATION) * TYPE_LAYER_MULTIPLIER
@@ -5501,6 +5501,14 @@ public class WindowManagerService extends IWindowManager.Stub
         return config;
     }
 
+    private int reduceConfigWidthSize(int curSize, int rotation, float density, int dw) {
+        int size = (int)(mPolicy.getConfigDisplayWidth(rotation, dw) / density);
+        if (size < curSize) {
+            curSize = size;
+        }
+        return curSize;
+    }
+
     boolean computeNewConfigurationLocked(Configuration config) {
         if (mDisplay == null) {
             return false;
@@ -5551,14 +5559,37 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Override display width and height with what we are computing,
         // to be sure they remain consistent.
-        dm.widthPixels = dm.realWidthPixels = mPolicy.getNonDecorDisplayWidth(dw);
-        dm.heightPixels = dm.realHeightPixels = mPolicy.getNonDecorDisplayHeight(dh);
+        dm.widthPixels = dm.realWidthPixels = mPolicy.getNonDecorDisplayWidth(
+                mRotation, dw);
+        dm.heightPixels = dm.realHeightPixels = mPolicy.getNonDecorDisplayHeight(
+                mRotation, dh);
 
         mCompatibleScreenScale = CompatibilityInfo.updateCompatibleScreenFrame(
                 dm, mCompatibleScreenFrame, null);
 
-        config.screenWidthDp = (int)(dm.widthPixels / dm.density);
-        config.screenHeightDp = (int)(dm.heightPixels / dm.density);
+        config.screenWidthDp = (int)(mPolicy.getConfigDisplayWidth(mRotation, dw) / dm.density);
+        config.screenHeightDp = (int)(mPolicy.getConfigDisplayHeight(mRotation, dh) / dm.density);
+
+        // We need to determine the smallest width that will occur under normal
+        // operation.  To this, start with the base screen size and compute the
+        // width under the different possible rotations.  We need to un-rotate
+        // the current screen dimensions before doing this.
+        int unrotDw, unrotDh;
+        if (rotated) {
+            unrotDw = dh;
+            unrotDh = dw;
+        } else {
+            unrotDw = dw;
+            unrotDh = dh;
+        }
+        config.smallestScreenWidthDp = reduceConfigWidthSize(unrotDw,
+                Surface.ROTATION_0, dm.density, unrotDw);
+        config.smallestScreenWidthDp = reduceConfigWidthSize(config.smallestScreenWidthDp,
+                Surface.ROTATION_90, dm.density, unrotDh);
+        config.smallestScreenWidthDp = reduceConfigWidthSize(config.smallestScreenWidthDp,
+                Surface.ROTATION_180, dm.density, unrotDw);
+        config.smallestScreenWidthDp = reduceConfigWidthSize(config.smallestScreenWidthDp,
+                Surface.ROTATION_270, dm.density, unrotDh);
 
         // Compute the screen layout size class.
         int screenLayout;
@@ -6810,9 +6841,6 @@ public class WindowManagerService extends IWindowManager.Stub
         final int dw = mCurDisplayWidth;
         final int dh = mCurDisplayHeight;
 
-        final int innerDw = mPolicy.getNonDecorDisplayWidth(dw);
-        final int innerDh = mPolicy.getNonDecorDisplayHeight(dh);
-
         final int N = mWindows.size();
         int i;
 
@@ -6933,8 +6961,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final int dw = mCurDisplayWidth;
         final int dh = mCurDisplayHeight;
 
-        final int innerDw = mPolicy.getNonDecorDisplayWidth(dw);
-        final int innerDh = mPolicy.getNonDecorDisplayHeight(dh);
+        final int innerDw = mPolicy.getNonDecorDisplayWidth(mRotation, dw);
+        final int innerDh = mPolicy.getNonDecorDisplayHeight(mRotation, dh);
 
         int i;
 
