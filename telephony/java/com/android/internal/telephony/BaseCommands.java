@@ -26,6 +26,11 @@ import android.os.SystemProperties;
 import android.util.Config;
 import android.util.Log;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * {@hide}
  */
@@ -795,12 +800,51 @@ public abstract class BaseCommands implements CommandsInterface {
     }
 
     /**
+     * The contents of the /proc/cmdline file
+     */
+    private static String getProcCmdLine()
+    {
+        String cmdline = "";
+        FileInputStream is = null;
+        try {
+            is = new FileInputStream("/proc/cmdline");
+            byte [] buffer = new byte[2048];
+            int count = is.read(buffer);
+            if (count > 0) {
+                cmdline = new String(buffer, 0, count);
+            }
+        } catch (IOException e) {
+            Log.d(LOG_TAG, "No /proc/cmdline exception=" + e);
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+        Log.d(LOG_TAG, "/proc/cmdline=" + cmdline);
+        return cmdline;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public int getLteOnCdmaMode() {
         return getLteOnCdmaModeStatic();
     }
+
+    /** Kernel command line */
+    private static final String sKernelCmdLine = getProcCmdLine();
+
+    /** Pattern for selecting the product type from the kernel command line */
+    private static final Pattern sProductTypePattern =
+        Pattern.compile("\\sproduct_type\\s*=\\s*(\\w+)");
+
+    /** The ProductType used for LTE on CDMA devices */
+    private static final String sLteOnCdmaProductType =
+        SystemProperties.get(TelephonyProperties.PROPERTY_LTE_ON_CDMA_PRODUCT_TYPE, "");
 
     /**
      * Return if the current radio is LTE on CDMA. This
@@ -811,9 +855,24 @@ public abstract class BaseCommands implements CommandsInterface {
      * or {@link Phone#LTE_ON_CDMA_TRUE}
      */
     public static int getLteOnCdmaModeStatic() {
-        int retVal = SystemProperties.getInt(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA,
-                Phone.LTE_ON_CDMA_FALSE);
-        Log.d(LOG_TAG, "getLteOnCdmaMode=" + retVal);
+        int retVal;
+        String productType;
+
+        Matcher matcher = sProductTypePattern.matcher(sKernelCmdLine);
+        if (matcher.find()) {
+            productType = matcher.group(1);
+            if (sLteOnCdmaProductType.equals(productType)) {
+                retVal = Phone.LTE_ON_CDMA_TRUE;
+            } else {
+                retVal = Phone.LTE_ON_CDMA_FALSE;
+            }
+        } else {
+            retVal = Phone.LTE_ON_CDMA_FALSE;
+            productType = "";
+        }
+
+        Log.d(LOG_TAG, "getLteOnCdmaMode=" + retVal + " product_type='" + productType +
+                "' lteOnCdmaProductType='" + sLteOnCdmaProductType + "'");
         return retVal;
     }
 }
