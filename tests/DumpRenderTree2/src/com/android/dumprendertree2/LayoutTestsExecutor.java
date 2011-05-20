@@ -398,11 +398,25 @@ public class LayoutTestsExecutor extends Activity {
     }
 
     private void startTests() {
+        // This is called when the tests are started and after each crash.
+        // We only send the reset message in the former case.
+        if (mCurrentTestIndex <= 0) {
+            sendResetMessage();
+        }
         if (mCurrentTestIndex == 0) {
             sendFirstTestMessage();
         }
 
         runNextTest();
+    }
+
+    private void sendResetMessage() {
+        try {
+            Message serviceMsg = Message.obtain(null, ManagerService.MSG_RESET);
+            mManagerServiceMessenger.send(serviceMsg);
+        } catch (RemoteException e) {
+            Log.e(LOG_TAG, "Error sending message to manager service:", e);
+        }
     }
 
     private void sendFirstTestMessage() {
