@@ -18,6 +18,7 @@ package android.animation;
 
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
@@ -70,8 +71,9 @@ import java.util.List;
  * moving as a result of the layout event) as well as the values that are changing (such as the
  * position and size of that object). The actual values that are pushed to each animation
  * depends on what properties are specified for the animation. For example, the default
- * CHANGE_APPEARING animation animates <code>left</code>, <code>top</code>, <code>right</code>,
- * and <code>bottom</code>. Values for these properties are updated with the pre- and post-layout
+ * CHANGE_APPEARING animation animates the <code>left</code>, <code>top</code>, <code>right</code>,
+ * <code>bottom</code>, <code>scrollX</code>, and <code>scrollY</code> properties.
+ * Values for these properties are updated with the pre- and post-layout
  * values when the transition begins. Custom animations will be similarly populated with
  * the target and values being animated, assuming they use ObjectAnimator objects with
  * property names that are known on the target object.</p>
@@ -210,6 +212,14 @@ public class LayoutTransition {
      */
     private ArrayList<TransitionListener> mListeners;
 
+    /**
+     * Controls whether changing animations automatically animate the parent hierarchy as well.
+     * This behavior prevents artifacts when wrap_content layouts snap to the end state as the
+     * transition begins, causing visual glitches and clipping.
+     * Default value is true.
+     */
+    private boolean mAnimateParentHierarchy = true;
+
 
     /**
      * Constructs a LayoutTransition object. By default, the object will listen to layout
@@ -223,14 +233,17 @@ public class LayoutTransition {
             PropertyValuesHolder pvhTop = PropertyValuesHolder.ofInt("top", 0, 1);
             PropertyValuesHolder pvhRight = PropertyValuesHolder.ofInt("right", 0, 1);
             PropertyValuesHolder pvhBottom = PropertyValuesHolder.ofInt("bottom", 0, 1);
+            PropertyValuesHolder pvhScrollX = PropertyValuesHolder.ofInt("scrollX", 0, 1);
+            PropertyValuesHolder pvhScrollY = PropertyValuesHolder.ofInt("scrollY", 0, 1);
             defaultChangeIn = ObjectAnimator.ofPropertyValuesHolder(this,
-                    pvhLeft, pvhTop, pvhRight, pvhBottom);
+                    pvhLeft, pvhTop, pvhRight, pvhBottom, pvhScrollX, pvhScrollY);
             defaultChangeIn.setDuration(DEFAULT_DURATION);
             defaultChangeIn.setStartDelay(mChangingAppearingDelay);
             defaultChangeIn.setInterpolator(mChangingAppearingInterpolator);
             defaultChangeOut = defaultChangeIn.clone();
             defaultChangeOut.setStartDelay(mChangingDisappearingDelay);
             defaultChangeOut.setInterpolator(mChangingDisappearingInterpolator);
+
             defaultFadeIn = ObjectAnimator.ofFloat(this, "alpha", 0f, 1f);
             defaultFadeIn.setDuration(DEFAULT_DURATION);
             defaultFadeIn.setStartDelay(mAppearingDelay);
@@ -572,122 +585,24 @@ public class LayoutTransition {
 
             // only animate the views not being added or removed
             if (child != newView) {
-
-
-                // Make a copy of the appropriate animation
-                final Animator anim = baseAnimator.clone();
-
-                // Set the target object for the animation
-                anim.setTarget(child);
-
-                // A ObjectAnimator (or AnimatorSet of them) can extract start values from
-                // its target object
-                anim.setupStartValues();
-
-                // If there's an animation running on this view already, cancel it
-                Animator currentAnimation = pendingAnimations.get(child);
-                if (currentAnimation != null) {
-                    currentAnimation.cancel();
-                    pendingAnimations.remove(child);
-                }
-                // Cache the animation in case we need to cancel it later
-                pendingAnimations.put(child, anim);
-
-                // For the animations which don't get started, we have to have a means of
-                // removing them from the cache, lest we leak them and their target objects.
-                // We run an animator for the default duration+100 (an arbitrary time, but one
-                // which should far surpass the delay between setting them up here and
-                // handling layout events which start them.
-                ValueAnimator pendingAnimRemover = ValueAnimator.ofFloat(0f, 1f).
-                        setDuration(duration+100);
-                pendingAnimRemover.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        pendingAnimations.remove(child);
-                    }
-                });
-                pendingAnimRemover.start();
-
-                // Add a listener to track layout changes on this view. If we don't get a callback,
-                // then there's nothing to animate.
-                final View.OnLayoutChangeListener listener = new View.OnLayoutChangeListener() {
-                    public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                            int oldLeft, int oldTop, int oldRight, int oldBottom) {
-
-                        // Tell the animation to extract end values from the changed object
-                        anim.setupEndValues();
-
-                        long startDelay;
-                        if (changeReason == APPEARING) {
-                            startDelay = mChangingAppearingDelay + staggerDelay;
-                            staggerDelay += mChangingAppearingStagger;
-                        } else {
-                            startDelay = mChangingDisappearingDelay + staggerDelay;
-                            staggerDelay += mChangingDisappearingStagger;
-                        }
-                        anim.setStartDelay(startDelay);
-                        anim.setDuration(duration);
-
-                        Animator prevAnimation = currentChangingAnimations.get(child);
-                        if (prevAnimation != null) {
-                            prevAnimation.cancel();
-                        }
-                        Animator pendingAnimation = pendingAnimations.get(child);
-                        if (pendingAnimation != null) {
-                            pendingAnimations.remove(child);
-                        }
-                        // Cache the animation in case we need to cancel it later
-                        currentChangingAnimations.put(child, anim);
-
-                        if (anim instanceof ObjectAnimator) {
-                            ((ObjectAnimator) anim).setCurrentPlayTime(0);
-                        }
-                        anim.start();
-
-                        // this only removes listeners whose views changed - must clear the
-                        // other listeners later
-                        child.removeOnLayoutChangeListener(this);
-                        layoutChangeListenerMap.remove(child);
-                    }
-                };
-                // Remove the animation from the cache when it ends
-                anim.addListener(new AnimatorListenerAdapter() {
-
-                    @Override
-                    public void onAnimationStart(Animator animator) {
-                        if (mListeners != null) {
-                            for (TransitionListener listener : mListeners) {
-                                listener.startTransition(LayoutTransition.this, parent, child,
-                                        changeReason == APPEARING ?
-                                                CHANGE_APPEARING : CHANGE_DISAPPEARING);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onAnimationCancel(Animator animator) {
-                        child.removeOnLayoutChangeListener(listener);
-                        layoutChangeListenerMap.remove(child);
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animator animator) {
-                        currentChangingAnimations.remove(child);
-                        if (mListeners != null) {
-                            for (TransitionListener listener : mListeners) {
-                                listener.endTransition(LayoutTransition.this, parent, child,
-                                        changeReason == APPEARING ?
-                                                CHANGE_APPEARING : CHANGE_DISAPPEARING);
-                            }
-                        }
-                    }
-                });
-
-                child.addOnLayoutChangeListener(listener);
-                // cache the listener for later removal
-                layoutChangeListenerMap.put(child, listener);
+                setupChangeAnimation(parent, changeReason, baseAnimator, duration, child);
             }
         }
+        if (mAnimateParentHierarchy) {
+            ViewGroup tempParent = parent;
+            while (tempParent != null) {
+                ViewParent parentParent = tempParent.getParent();
+                if (parentParent instanceof ViewGroup) {
+                    setupChangeAnimation((ViewGroup)parentParent, changeReason, baseAnimator,
+                            duration, tempParent);
+                    tempParent = (ViewGroup) parentParent;
+                } else {
+                    tempParent = null;
+                }
+
+            }
+        }
+
         // This is the cleanup step. When we get this rendering event, we know that all of
         // the appropriate animations have been set up and run. Now we can clear out the
         // layout listeners.
@@ -703,6 +618,175 @@ public class LayoutTransition {
                 return true;
             }
         });
+    }
+
+    /**
+     * This flag controls whether CHANGE_APPEARING or CHANGE_DISAPPEARING animations will
+     * cause the same changing animation to be run on the parent hierarchy as well. This allows
+     * containers of transitioning views to also transition, which may be necessary in situations
+     * where the containers bounds change between the before/after states and may clip their
+     * children during the transition animations. For example, layouts with wrap_content will
+     * adjust their bounds according to the dimensions of their children.
+     *
+     * @param animateParentHierarchy A boolean value indicating whether the parents of
+     * transitioning views should also be animated during the transition. Default value is true.
+     */
+    public void setAnimateParentHierarchy(boolean animateParentHierarchy) {
+        mAnimateParentHierarchy = animateParentHierarchy;
+    }
+
+    /**
+     * Utility function called by runChangingTransition for both the children and the parent
+     * hierarchy.
+     */
+    private void setupChangeAnimation(final ViewGroup parent, final int changeReason,
+            Animator baseAnimator, final long duration, final View child) {
+        // Make a copy of the appropriate animation
+        final Animator anim = baseAnimator.clone();
+
+        // Set the target object for the animation
+        anim.setTarget(child);
+
+        // A ObjectAnimator (or AnimatorSet of them) can extract start values from
+        // its target object
+        anim.setupStartValues();
+
+        // If there's an animation running on this view already, cancel it
+        Animator currentAnimation = pendingAnimations.get(child);
+        if (currentAnimation != null) {
+            currentAnimation.cancel();
+            pendingAnimations.remove(child);
+        }
+        // Cache the animation in case we need to cancel it later
+        pendingAnimations.put(child, anim);
+
+        // For the animations which don't get started, we have to have a means of
+        // removing them from the cache, lest we leak them and their target objects.
+        // We run an animator for the default duration+100 (an arbitrary time, but one
+        // which should far surpass the delay between setting them up here and
+        // handling layout events which start them.
+        ValueAnimator pendingAnimRemover = ValueAnimator.ofFloat(0f, 1f).
+                setDuration(duration + 100);
+        pendingAnimRemover.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                pendingAnimations.remove(child);
+            }
+        });
+        pendingAnimRemover.start();
+
+        // Add a listener to track layout changes on this view. If we don't get a callback,
+        // then there's nothing to animate.
+        final View.OnLayoutChangeListener listener = new View.OnLayoutChangeListener() {
+            public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                    int oldLeft, int oldTop, int oldRight, int oldBottom) {
+
+                // Tell the animation to extract end values from the changed object
+                anim.setupEndValues();
+                if (anim instanceof ValueAnimator) {
+                    boolean valuesDiffer = false;
+                    ValueAnimator valueAnim = (ValueAnimator)anim;
+                    PropertyValuesHolder[] oldValues = valueAnim.getValues();
+                    for (int i = 0; i < oldValues.length; ++i) {
+                        PropertyValuesHolder pvh = oldValues[i];
+                        KeyframeSet keyframeSet = pvh.mKeyframeSet;
+                        if (keyframeSet.mFirstKeyframe == null ||
+                                keyframeSet.mLastKeyframe == null ||
+                                !keyframeSet.mFirstKeyframe.getValue().equals(
+                                keyframeSet.mLastKeyframe.getValue())) {
+                            valuesDiffer = true;
+                        }
+                    }
+                    if (!valuesDiffer) {
+                        return;
+                    }
+                }
+
+                long startDelay;
+                if (changeReason == APPEARING) {
+                    startDelay = mChangingAppearingDelay + staggerDelay;
+                    staggerDelay += mChangingAppearingStagger;
+                } else {
+                    startDelay = mChangingDisappearingDelay + staggerDelay;
+                    staggerDelay += mChangingDisappearingStagger;
+                }
+                anim.setStartDelay(startDelay);
+                anim.setDuration(duration);
+
+                Animator prevAnimation = currentChangingAnimations.get(child);
+                if (prevAnimation != null) {
+                    prevAnimation.cancel();
+                }
+                Animator pendingAnimation = pendingAnimations.get(child);
+                if (pendingAnimation != null) {
+                    pendingAnimations.remove(child);
+                }
+                // Cache the animation in case we need to cancel it later
+                currentChangingAnimations.put(child, anim);
+
+                parent.requestTransitionStart(LayoutTransition.this);
+
+                // this only removes listeners whose views changed - must clear the
+                // other listeners later
+                child.removeOnLayoutChangeListener(this);
+                layoutChangeListenerMap.remove(child);
+            }
+        };
+        // Remove the animation from the cache when it ends
+        anim.addListener(new AnimatorListenerAdapter() {
+
+            @Override
+            public void onAnimationStart(Animator animator) {
+                if (mListeners != null) {
+                    for (TransitionListener listener : mListeners) {
+                        listener.startTransition(LayoutTransition.this, parent, child,
+                                changeReason == APPEARING ?
+                                        CHANGE_APPEARING : CHANGE_DISAPPEARING);
+                    }
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+                child.removeOnLayoutChangeListener(listener);
+                layoutChangeListenerMap.remove(child);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                currentChangingAnimations.remove(child);
+                if (mListeners != null) {
+                    for (TransitionListener listener : mListeners) {
+                        listener.endTransition(LayoutTransition.this, parent, child,
+                                changeReason == APPEARING ?
+                                        CHANGE_APPEARING : CHANGE_DISAPPEARING);
+                    }
+                }
+            }
+        });
+
+        child.addOnLayoutChangeListener(listener);
+        // cache the listener for later removal
+        layoutChangeListenerMap.put(child, listener);
+    }
+
+    /**
+     * Starts the animations set up for a CHANGING transition. We separate the setup of these
+     * animations from actually starting them, to avoid side-effects that starting the animations
+     * may have on the properties of the affected objects. After setup, we tell the affected parent
+     * that this transition should be started. The parent informs its ViewAncestor, which then
+     * starts the transition after the current layout/measurement phase, just prior to drawing
+     * the view hierarchy.
+     *
+     * @hide
+     */
+    public void startChangingAnimations() {
+        for (Animator anim : currentChangingAnimations.values()) {
+            if (anim instanceof ObjectAnimator) {
+                ((ObjectAnimator) anim).setCurrentPlayTime(0);
+            }
+            anim.start();
+        }
     }
 
     /**

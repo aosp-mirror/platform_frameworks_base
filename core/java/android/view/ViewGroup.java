@@ -4838,6 +4838,20 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * This method is called by LayoutTransition when there are 'changing' animations that need
+     * to start after the layout/setup phase. The request is forwarded to the ViewAncestor, who
+     * starts all pending transitions prior to the drawing phase in the current traversal.
+     *
+     * @param transition The LayoutTransition to be started on the next traversal.
+     *
+     * @hide
+     */
+    public void requestTransitionStart(LayoutTransition transition) {
+        ViewAncestor viewAncestor = getViewAncestor();
+        viewAncestor.requestTransitionStart(transition);
+    }
+
+    /**
      * Return true if the pressed state should be delayed for children or descendants of this
      * ViewGroup. Generally, this should be done for containers that can scroll, such as a List.
      * This prevents the pressed state from appearing when the user is actually trying to scroll

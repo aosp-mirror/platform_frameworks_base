@@ -17,6 +17,7 @@
 package android.view;
 
 import android.Manifest;
+import android.animation.LayoutTransition;
 import android.app.ActivityManagerNative;
 import android.content.ClipDescription;
 import android.content.ComponentCallbacks;
@@ -232,6 +233,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
     long mResizeBitmapStartTime;
     int mResizeBitmapDuration;
     static final Interpolator mResizeInterpolator = new AccelerateDecelerateInterpolator();
+    private ArrayList<LayoutTransition> mPendingTransitions;
 
     final ViewConfiguration mViewConfiguration;
 
@@ -697,6 +699,28 @@ public final class ViewAncestor extends Handler implements ViewParent,
         if (mResizeBitmap != null) {
             mResizeBitmap.recycle();
             mResizeBitmap = null;
+        }
+    }
+
+    /**
+     * Add LayoutTransition to the list of transitions to be started in the next traversal.
+     * This list will be cleared after the transitions on the list are start()'ed. These
+     * transitionsa re added by LayoutTransition itself when it sets up animations. The setup
+     * happens during the layout phase of traversal, which we want to complete before any of the
+     * animations are started (because those animations may side-effect properties that layout
+     * depends upon, like the bounding rectangles of the affected views). So we add the transition
+     * to the list and it is started just prior to starting the drawing phase of traversal.
+     *
+     * @param transition The LayoutTransition to be started on the next traversal.
+     *
+     * @hide
+     */
+    public void requestTransitionStart(LayoutTransition transition) {
+        if (mPendingTransitions == null || !mPendingTransitions.contains(transition)) {
+            if (mPendingTransitions == null) {
+                 mPendingTransitions = new ArrayList<LayoutTransition>();
+            }
+            mPendingTransitions.add(transition);
         }
     }
 
@@ -1395,6 +1419,12 @@ public final class ViewAncestor extends Handler implements ViewParent,
         boolean cancelDraw = attachInfo.mTreeObserver.dispatchOnPreDraw();
 
         if (!cancelDraw && !newSurface) {
+            if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
+                for (int i = 0; i < mPendingTransitions.size(); ++i) {
+                    mPendingTransitions.get(i).startChangingAnimations();
+                }
+                mPendingTransitions.clear();
+            }
             mFullRedrawNeeded = false;
 
             final long drawStartTime;
