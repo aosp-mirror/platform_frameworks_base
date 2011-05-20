@@ -233,7 +233,10 @@
        <item>@drawable/btn_cab_done_focused_holo</item>
        <item>@drawable/btn_cab_done_holo</item>
        <item>@drawable/btn_cab_done_pressed_holo</item>
-       <item>@drawable/cab_background_light</item>
+       <item>@drawable/cab_background_holo_dark</item>
+       <item>@drawable/cab_background_holo_light</item>
+       <item>@drawable/cab_background_opaque_holo_dark</item>
+       <item>@drawable/cab_background_opaque_holo_light</item>
        <item>@drawable/cab_ic_close_focused_holo</item>
        <item>@drawable/cab_ic_close_holo</item>
        <item>@drawable/cab_ic_close_normal_holo</item>

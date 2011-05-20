@@ -752,6 +752,9 @@
         <!-- SearchView text field background for the right section -->
         <attr name="searchViewTextFieldRight" format="reference" />
 
+        <!-- Theme to use for Search Dialogs -->
+        <attr name="searchDialogTheme" format="reference" />
+
         <!-- Specifies a drawable to use for the 'home as up' indicator. -->
         <attr name="homeAsUpIndicator" format="reference" />
 

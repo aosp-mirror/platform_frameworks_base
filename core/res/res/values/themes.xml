@@ -262,7 +262,7 @@
         <item name="actionDropDownStyle">@android:style/Widget.Spinner.DropDown</item>
         <item name="actionButtonStyle">@android:style/Widget.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.ActionButton.Overflow</item>
-        <item name="actionModeBackground">@android:drawable/cab_background_dark</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_dark</item>
         <item name="actionModeCloseDrawable">@android:drawable/ic_menu_close_clear_cancel</item>
         <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_holo_dark</item>
         <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_holo_dark</item>
@@ -297,6 +297,8 @@
         <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search</item>
         <item name="searchViewEditQuery">@android:drawable/ic_commit</item>
         <item name="searchViewEditQueryBackground">?attr/selectableItemBackground</item>
+
+        <item name="searchDialogTheme">@style/Theme.SearchBar</item>
 
         <!-- PreferenceFrameLayout attributes -->
         <item name="preferenceFrameLayoutStyle">@android:style/Widget.PreferenceFrameLayout</item>
@@ -397,7 +399,7 @@
         <item name="actionModeShareDrawable">@android:drawable/ic_menu_share_holo_light</item>
         <item name="actionModeFindDrawable">@android:drawable/ic_menu_find_holo_light</item>
         <item name="actionModeWebSearchDrawable">@android:drawable/ic_menu_search_holo_light</item>
-        <item name="actionModeBackground">@android:drawable/cab_background_light</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_light</item>
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/search_dropdown_light</item>
@@ -687,12 +689,24 @@
     <!-- Theme for the search input bar. -->
     <style name="Theme.SearchBar" parent="Theme.Holo.Light.Panel">
         <item name="windowContentOverlay">@null</item>        
+        <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_light</item>
     </style>
-    
+
+    <style name="Theme.Holo.SearchBar" parent="Theme.Holo.Panel">
+        <item name="windowContentOverlay">@null</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_dark</item>
+    </style>
+
+    <style name="Theme.Holo.Light.SearchBar" parent="Theme.Holo.Light.Panel">
+        <item name="windowContentOverlay">@null</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_light</item>
+    </style>
+
     <!-- Theme for the search input bar when doing global search. The only
          difference from non-global search is that we do not dim the background. -->
     <style name="Theme.GlobalSearchBar" parent="Theme.Panel">
         <item name="windowContentOverlay">@null</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_light</item>
     </style>
 
     <!-- Menu Themes -->
@@ -1028,6 +1042,8 @@
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/search_dropdown_dark</item>
 
+        <item name="searchDialogTheme">@style/Theme.Holo.SearchBar</item>
+
         <!-- PreferenceFrameLayout attributes -->
         <item name="preferenceFrameLayoutStyle">@android:style/Widget.Holo.PreferenceFrameLayout</item>
 
@@ -1312,6 +1328,8 @@
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/search_dropdown_light</item>
+
+        <item name="searchDialogTheme">@style/Theme.Holo.Light.SearchBar</item>
 
         <!-- NumberPicker attributes and styles-->
         <item name="numberPickerUpButtonStyle">@style/Widget.Holo.Light.ImageButton.NumberPickerUpButton</item>
