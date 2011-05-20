@@ -30,15 +30,6 @@ typedef struct VertexShaderConstants_s {
     float light1_CosinePower;
 } VertexShaderConstants;
 
-typedef struct VertexShaderConstants2_s {
-    rs_matrix4x4 model[2];
-    rs_matrix4x4 proj;
-    float4 light_Posision[2];
-    float light_Diffuse[2];
-    float light_Specular[2];
-    float light_CosinePower[2];
-} VertexShaderConstants2;
-
 typedef struct VertexShaderConstants3_s {
     rs_matrix4x4 model;
     rs_matrix4x4 proj;

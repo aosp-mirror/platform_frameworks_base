@@ -52,19 +52,12 @@ rs_mesh gTorusMesh;
 
 rs_font gFontSans;
 rs_font gFontSerif;
-rs_font gFontSerifBold;
-rs_font gFontSerifItalic;
-rs_font gFontSerifBoldItalic;
-rs_font gFontMono;
-rs_allocation gTextAlloc;
 
 int gDisplayMode;
 
 rs_sampler gLinearClamp;
 rs_sampler gLinearWrap;
 rs_sampler gMipLinearWrap;
-rs_sampler gMipLinearAniso8;
-rs_sampler gMipLinearAniso15;
 rs_sampler gNearestClamp;
 
 rs_program_raster gCullBack;
@@ -117,8 +110,8 @@ static void displayFontSamples(int fillNum) {
     rs_font fonts[5];
     fonts[0] = gFontSans;
     fonts[1] = gFontSerif;
-    fonts[2] = gFontSerifBold;
-    fonts[3] = gFontSerifBoldItalic;
+    fonts[2] = gFontSans;
+    fonts[3] = gFontSerif;
     fonts[4] = gFontSans;
 
     uint width = gRenderSurfaceW;
@@ -183,52 +176,6 @@ static void displaySingletexFill(bool blend, int quadCount) {
     }
 }
 
-static void displayBlendingSamples() {
-    int i;
-
-    bindProgramVertexOrtho();
-    rs_matrix4x4 matrix;
-    rsMatrixLoadIdentity(&matrix);
-    rsgProgramVertexLoadModelMatrix(&matrix);
-
-    rsgBindProgramFragment(gProgFragmentColor);
-
-    rsgBindProgramStore(gProgStoreBlendNone);
-    for (i = 0; i < 3; i ++) {
-        float iPlusOne = (float)(i + 1);
-        rsgProgramFragmentConstantColor(gProgFragmentColor,
-                                        0.1f*iPlusOne, 0.2f*iPlusOne, 0.3f*iPlusOne, 1);
-        float yPos = 150 * (float)i;
-        rsgDrawRect(0, yPos, 200, yPos + 200, 0);
-    }
-
-    rsgBindProgramStore(gProgStoreBlendAlpha);
-    for (i = 0; i < 3; i ++) {
-        float iPlusOne = (float)(i + 1);
-        rsgProgramFragmentConstantColor(gProgFragmentColor,
-                                        0.2f*iPlusOne, 0.3f*iPlusOne, 0.1f*iPlusOne, 0.5);
-        float yPos = 150 * (float)i;
-        rsgDrawRect(150, yPos, 350, yPos + 200, 0);
-    }
-
-    rsgBindProgramStore(gProgStoreBlendAdd);
-    for (i = 0; i < 3; i ++) {
-        float iPlusOne = (float)(i + 1);
-        rsgProgramFragmentConstantColor(gProgFragmentColor,
-                                        0.3f*iPlusOne, 0.1f*iPlusOne, 0.2f*iPlusOne, 0.5);
-        float yPos = 150 * (float)i;
-        rsgDrawRect(300, yPos, 500, yPos + 200, 0);
-    }
-
-
-    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
-    rsgBindFont(gFontMono);
-    rsgDrawText("No Blending", 10, 50);
-    rsgDrawText("Alpha Blending", 160, 150);
-    rsgDrawText("Additive Blending", 320, 250);
-
-}
-
 static void displayMeshSamples(int meshNum) {
 
     bindProgramVertexOrtho();
@@ -249,61 +196,6 @@ static void displayMeshSamples(int meshNum) {
     } else if (meshNum == 2) {
         rsgDrawMesh(gWbyHMesh);
     }
-}
-
-static void displayTextureSamplers() {
-
-    bindProgramVertexOrtho();
-    rs_matrix4x4 matrix;
-    rsMatrixLoadIdentity(&matrix);
-    rsgProgramVertexLoadModelMatrix(&matrix);
-
-    // Fragment shader with texture
-    rsgBindProgramStore(gProgStoreBlendNone);
-    rsgBindProgramFragment(gProgFragmentTexture);
-    rsgBindTexture(gProgFragmentTexture, 0, gTexOpaque);
-
-    // Linear clamp
-    rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
-    float startX = 0, startY = 0;
-    float width = 300, height = 300;
-    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
-                         startX, startY + height, 0, 0, 1.1,
-                         startX + width, startY + height, 0, 1.1, 1.1,
-                         startX + width, startY, 0, 1.1, 0);
-
-    // Linear Wrap
-    rsgBindSampler(gProgFragmentTexture, 0, gLinearWrap);
-    startX = 0; startY = 300;
-    width = 300; height = 300;
-    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
-                         startX, startY + height, 0, 0, 1.1,
-                         startX + width, startY + height, 0, 1.1, 1.1,
-                         startX + width, startY, 0, 1.1, 0);
-
-    // Nearest
-    rsgBindSampler(gProgFragmentTexture, 0, gNearestClamp);
-    startX = 300; startY = 0;
-    width = 300; height = 300;
-    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
-                         startX, startY + height, 0, 0, 1.1,
-                         startX + width, startY + height, 0, 1.1, 1.1,
-                         startX + width, startY, 0, 1.1, 0);
-
-    rsgBindSampler(gProgFragmentTexture, 0, gMipLinearWrap);
-    startX = 300; startY = 300;
-    width = 300; height = 300;
-    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
-                         startX, startY + height, 0, 0, 1.5,
-                         startX + width, startY + height, 0, 1.5, 1.5,
-                         startX + width, startY, 0, 1.5, 0);
-
-    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
-    rsgBindFont(gFontMono);
-    rsgDrawText("Filtering: linear clamp", 10, 290);
-    rsgDrawText("Filtering: linear wrap", 10, 590);
-    rsgDrawText("Filtering: nearest clamp", 310, 290);
-    rsgDrawText("Filtering: miplinear wrap", 310, 590);
 }
 
 static float gTorusRotation = 0;
@@ -353,7 +245,6 @@ static void drawToruses(int numMeshes, rs_matrix4x4 *matrix, void *buffer) {
         }
     }
 }
-
 
 // Quick hack to get some geometry numbers
 static void displaySimpleGeoSamples(bool useTexture, int numMeshes) {
@@ -545,66 +436,6 @@ static void displayMultitextureSample(bool blend, int quadCount) {
     }
 }
 
-static float gAnisoTime = 0.0f;
-static uint anisoMode = 0;
-static void displayAnisoSample() {
-
-    gAnisoTime += gDt;
-
-    rsgBindProgramVertex(gProgVertex);
-    float aspect = (float)gRenderSurfaceW / (float)gRenderSurfaceH;
-    rs_matrix4x4 proj;
-    rsMatrixLoadPerspective(&proj, 30.0f, aspect, 0.1f, 100.0f);
-    rsgProgramVertexLoadProjectionMatrix(&proj);
-
-    rs_matrix4x4 matrix;
-    // Fragment shader with texture
-    rsgBindProgramStore(gProgStoreBlendNone);
-    rsgBindProgramFragment(gProgFragmentTexture);
-    rsMatrixLoadTranslate(&matrix, 0.0f, 0.0f, -10.0f);
-    rsMatrixRotate(&matrix, -80, 1.0f, 0.0f, 0.0f);
-    rsgProgramVertexLoadModelMatrix(&matrix);
-
-    rsgBindProgramRaster(gCullNone);
-
-    rsgBindTexture(gProgFragmentTexture, 0, gTexChecker);
-
-    if (gAnisoTime >= 5.0f) {
-        gAnisoTime = 0.0f;
-        anisoMode ++;
-        anisoMode = anisoMode % 3;
-    }
-
-    if (anisoMode == 0) {
-        rsgBindSampler(gProgFragmentTexture, 0, gMipLinearAniso8);
-    } else if (anisoMode == 1) {
-        rsgBindSampler(gProgFragmentTexture, 0, gMipLinearAniso15);
-    } else {
-        rsgBindSampler(gProgFragmentTexture, 0, gMipLinearWrap);
-    }
-
-    float startX = -15;
-    float startY = -15;
-    float width = 30;
-    float height = 30;
-    rsgDrawQuadTexCoords(startX, startY, 0, 0, 0,
-                         startX, startY + height, 0, 0, 10,
-                         startX + width, startY + height, 0, 10, 10,
-                         startX + width, startY, 0, 10, 0);
-
-    rsgBindProgramRaster(gCullBack);
-
-    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
-    rsgBindFont(gFontMono);
-    if (anisoMode == 0) {
-        rsgDrawText("Anisotropic filtering 8", 10, 40);
-    } else if (anisoMode == 1) {
-        rsgDrawText("Anisotropic filtering 15", 10, 40);
-    } else {
-        rsgDrawText("Miplinear filtering", 10, 40);
-    }
-}
-
 static bool checkInit() {
 
     static int countdown = 5;
@@ -613,20 +444,17 @@ static bool checkInit() {
     if(countdown > 1) {
         displayFontSamples(5);
         displaySingletexFill(true, 3);
-        displayBlendingSamples();
         displayMeshSamples(0);
         displayMeshSamples(1);
         displayMeshSamples(2);
-        displayTextureSamplers();
         displayMultitextureSample(true, 5);
-        displayAnisoSample();
         displayPixelLightSamples(1, false);
         displayPixelLightSamples(1, true);
         countdown --;
         rsgClearColor(0.2f, 0.2f, 0.2f, 0.0f);
 
         rsgFontColor(0.9f, 0.9f, 0.95f, 1.0f);
-        rsgBindFont(gFontSerifBoldItalic);
+        rsgBindFont(gFontSerif);
         if (countdown == 1) {
             rsgDrawText("Rendering", 50, 50);
         } else {
@@ -831,7 +659,7 @@ int root(void) {
     uint width = rsgGetWidth();
     uint height = rsgGetHeight();
     rsgFontColor(0.9f, 0.9f, 0.95f, 1.0f);
-    rsgBindFont(gFontSerifBoldItalic);
+    rsgBindFont(gFontSerif);
     rsgMeasureText(text, &left, &right, &top, &bottom);
     rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
     rsgDrawText(text, 2 -left, height - 2 + bottom);
