@@ -1458,6 +1458,7 @@ public class Resources {
                     mConfiguration.touchscreen,
                     (int)(mMetrics.density*160), mConfiguration.keyboard,
                     keyboardHidden, mConfiguration.navigation, width, height,
+                    mConfiguration.smallestScreenWidthDp,
                     mConfiguration.screenWidthDp, mConfiguration.screenHeightDp,
                     mConfiguration.screenLayout, mConfiguration.uiMode,
                     Build.VERSION.RESOURCES_SDK_INT);

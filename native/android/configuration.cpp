@@ -111,6 +111,18 @@ int32_t AConfiguration_getUiModeNight(AConfiguration* config) {
 
 }
 
+int32_t AConfiguration_getScreenWidthDp(AConfiguration* config) {
+    return config->screenWidthDp;
+}
+
+int32_t AConfiguration_getScreenHeightDp(AConfiguration* config) {
+    return config->screenHeightDp;
+}
+
+int32_t AConfiguration_getSmallestScreenWidthDp(AConfiguration* config) {
+    return config->smallestScreenWidthDp;
+}
+
 // ----------------------------------------------------------------------
 
 void AConfiguration_setMcc(AConfiguration* config, int32_t mcc) {
@@ -184,6 +196,18 @@ void AConfiguration_setUiModeNight(AConfiguration* config, int32_t uiModeNight) 
     config->uiMode = (config->uiMode&~ResTable_config::MASK_UI_MODE_NIGHT)
             | ((uiModeNight<<ResTable_config::SHIFT_UI_MODE_NIGHT)&ResTable_config::MASK_UI_MODE_NIGHT);
 
+}
+
+void AConfiguration_setScreenWidthDp(AConfiguration* config, int32_t value) {
+    config->screenWidthDp = value;
+}
+
+void AConfiguration_setScreenHeightDp(AConfiguration* config, int32_t value) {
+    config->screenHeightDp = value;
+}
+
+void AConfiguration_setSmallestScreenWidthDp(AConfiguration* config, int32_t value) {
+    config->smallestScreenWidthDp = value;
 }
 
 // ----------------------------------------------------------------------

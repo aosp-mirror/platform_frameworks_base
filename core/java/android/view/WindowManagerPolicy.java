@@ -464,16 +464,34 @@ public interface WindowManagerPolicy {
     public int getMaxWallpaperLayer();
     
     /**
-     * Return the display width available after excluding the window
-     * decor.
+     * Return the display width available after excluding any screen
+     * decorations that can never be removed.  That is, system bar or
+     * button bar.
      */
-    public int getNonDecorDisplayWidth(int fullWidth);
+    public int getNonDecorDisplayWidth(int rotation, int fullWidth);
 
     /**
-     * Return the display height available after excluding the screen
-     * decor.
+     * Return the display height available after excluding any screen
+     * decorations that can never be removed.  That is, system bar or
+     * button bar.
      */
-    public int getNonDecorDisplayHeight(int fullHeight);
+    public int getNonDecorDisplayHeight(int rotation, int fullHeight);
+
+    /**
+     * Return the available screen width that we should report for the
+     * configuration.  This must be no larger than
+     * {@link #getNonDecorDisplayWidth(int, int)}; it may be smaller than
+     * that to account for more transient decoration like a status bar.
+     */
+    public int getConfigDisplayWidth(int rotation, int fullWidth);
+
+    /**
+     * Return the available screen height that we should report for the
+     * configuration.  This must be no larger than
+     * {@link #getNonDecorDisplayHeight(int, int)}; it may be smaller than
+     * that to account for more transient decoration like a status bar.
+     */
+    public int getConfigDisplayHeight(int rotation, int fullHeight);
 
     /**
      * Return whether the given window should forcibly hide everything
