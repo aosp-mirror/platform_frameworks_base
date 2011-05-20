@@ -47,13 +47,12 @@
     <RelativeLayout
         android:layout_weight="1"
         android:layout_width="0dip"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:gravity="center_vertical|center_horizontal">
 
         <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
             android:layout_width="354dip"
             android:layout_height="354dip"
-            android:layout_marginLeft="143dip"
-            android:layout_marginTop="201dip"
             android:layout_gravity="center_vertical"
         />
 
