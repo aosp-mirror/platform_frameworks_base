@@ -249,6 +249,8 @@ public abstract class DataConnection extends StateMachine {
             Message m = dp.onCompletedMsg;
             if (TextUtils.equals(dp.reason, Phone.REASON_RADIO_TURNED_OFF)) {
                 discReason = RILConstants.DEACTIVATE_REASON_RADIO_OFF;
+            } else if (TextUtils.equals(dp.reason, Phone.REASON_PDP_RESET)) {
+                discReason = RILConstants.DEACTIVATE_REASON_PDP_RESET;
             }
         }
         if (phone.mCM.getRadioState().isOn()) {
