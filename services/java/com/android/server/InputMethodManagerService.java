@@ -1371,31 +1371,70 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
     public boolean switchToLastInputMethod(IBinder token) {
         synchronized (mMethodMap) {
             final Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
-            if (lastIme == null) return false;
-            final InputMethodInfo lastImi = mMethodMap.get(lastIme.first);
-            if (lastImi == null) return false;
-
-            final boolean imiIdIsSame = lastImi.getId().equals(mCurMethodId);
-            final int lastSubtypeHash = Integer.valueOf(lastIme.second);
-            // If the last IME is the same as the current IME and the last subtype is not defined,
-            // there is no need to switch to the last IME.
-            if (imiIdIsSame && lastSubtypeHash == NOT_A_SUBTYPE_ID) return false;
-
-            int currentSubtypeHash = mCurrentSubtype == null ? NOT_A_SUBTYPE_ID
-                    : mCurrentSubtype.hashCode();
-            if (!imiIdIsSame || lastSubtypeHash != currentSubtypeHash) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Switch to: " + lastImi.getId() + ", " + lastIme.second + ", from: "
-                            + mCurMethodId + ", " + currentSubtypeHash);
-                }
-                setInputMethodWithSubtypeId(token, lastIme.first, getSubtypeIdFromHashCode(
-                        lastImi, lastSubtypeHash));
-                return true;
+            final InputMethodInfo lastImi;
+            if (lastIme == null) {
+                lastImi = mMethodMap.get(lastIme.first);
+            } else {
+                lastImi = null;
             }
-            return false;
+            String targetLastImiId = null;
+            int subtypeId = NOT_A_SUBTYPE_ID;
+            if (lastIme != null && lastImi != null) {
+                final boolean imiIdIsSame = lastImi.getId().equals(mCurMethodId);
+                final int lastSubtypeHash = Integer.valueOf(lastIme.second);
+                final int currentSubtypeHash = mCurrentSubtype == null ? NOT_A_SUBTYPE_ID
+                        : mCurrentSubtype.hashCode();
+                // If the last IME is the same as the current IME and the last subtype is not
+                // defined, there is no need to switch to the last IME.
+                if (!imiIdIsSame || lastSubtypeHash != currentSubtypeHash) {
+                    targetLastImiId = lastIme.first;
+                    subtypeId = getSubtypeIdFromHashCode(lastImi, lastSubtypeHash);
+                }
+            }
+
+            if (TextUtils.isEmpty(targetLastImiId) && !canAddToLastInputMethod(mCurrentSubtype)) {
+                // This is a safety net. If the currentSubtype can't be added to the history
+                // and the framework couldn't find the last ime, we will make the last ime be
+                // the most applicable enabled keyboard subtype of the system imes.
+                final List<InputMethodInfo> enabled = mSettings.getEnabledInputMethodListLocked();
+                if (enabled != null) {
+                    final int N = enabled.size();
+                    final String locale = mCurrentSubtype == null
+                            ? mRes.getConfiguration().locale.toString()
+                            : mCurrentSubtype.getLocale();
+                    for (int i = 0; i < N; ++i) {
+                        final InputMethodInfo imi = enabled.get(i);
+                        if (imi.getSubtypeCount() > 0 && isSystemIme(imi)) {
+                            InputMethodSubtype keyboardSubtype =
+                                    findLastResortApplicableSubtypeLocked(mRes, getSubtypes(imi),
+                                            SUBTYPE_MODE_KEYBOARD, locale, true);
+                            if (keyboardSubtype != null) {
+                                targetLastImiId = imi.getId();
+                                subtypeId = getSubtypeIdFromHashCode(
+                                        imi, keyboardSubtype.hashCode());
+                                if(keyboardSubtype.getLocale().equals(locale)) {
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!TextUtils.isEmpty(targetLastImiId)) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Switch to: " + lastImi.getId() + ", " + lastIme.second
+                            + ", from: " + mCurMethodId + ", " + subtypeId);
+                }
+                setInputMethodWithSubtypeId(token, targetLastImiId, subtypeId);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
@@ -2619,7 +2658,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             List<Pair<String, ArrayList<String>>> enabledImes =
                     getEnabledInputMethodsAndSubtypeListLocked();
             List<Pair<String, String>> subtypeHistory = loadInputMethodAndSubtypeHistoryLocked();
-            for (Pair<String, String> imeAndSubtype: subtypeHistory) {
+            for (Pair<String, String> imeAndSubtype : subtypeHistory) {
                 final String imeInTheHistory = imeAndSubtype.first;
                 // If imeId is empty, returns the first IME and subtype in the history
                 if (TextUtils.isEmpty(imeId) || imeInTheHistory.equals(imeId)) {
