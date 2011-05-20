@@ -1376,7 +1376,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             final Pair<String, String> lastIme = mSettings.getLastInputMethodAndSubtypeLocked();
             final InputMethodInfo lastImi;
-            if (lastIme == null) {
+            if (lastIme != null) {
                 lastImi = mMethodMap.get(lastIme.first);
             } else {
                 lastImi = null;
