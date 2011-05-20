@@ -19,8 +19,9 @@ package com.android.server.net;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
-import static android.net.NetworkPolicyManager.POLICY_REJECT_BACKGROUND;
-import static android.net.NetworkPolicyManager.POLICY_REJECT_PAID;
+import static android.net.NetworkPolicyManager.POLICY_REJECT_PAID_BACKGROUND;
+import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
+import static android.net.NetworkPolicyManager.RULE_REJECT_PAID;
 
 import android.app.IActivityManager;
 import android.app.IProcessObserver;
@@ -28,8 +29,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.os.IPowerManager;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Slog;
@@ -40,6 +44,10 @@ import android.util.SparseIntArray;
 /**
  * Service that maintains low-level network policy rules and collects usage
  * statistics to drive those rules.
+ * <p>
+ * Derives active rules by combining a given policy with other system status,
+ * and delivers to listeners, such as {@link ConnectivityManager}, for
+ * enforcement.
  */
 public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String TAG = "NetworkPolicy";
@@ -51,18 +59,26 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private Object mRulesLock = new Object();
 
-    private boolean mScreenOn = false;
+    private boolean mScreenOn;
 
     /** Current network policy for each UID. */
     private SparseIntArray mUidPolicy = new SparseIntArray();
+    /** Current derived network rules for each UID. */
+    private SparseIntArray mUidRules = new SparseIntArray();
 
     /** Foreground at both UID and PID granularity. */
     private SparseBooleanArray mUidForeground = new SparseBooleanArray();
     private SparseArray<SparseBooleanArray> mUidPidForeground = new SparseArray<
             SparseBooleanArray>();
 
+    private final RemoteCallbackList<INetworkPolicyListener> mListeners = new RemoteCallbackList<
+            INetworkPolicyListener>();
+
     // TODO: periodically poll network stats and write to disk
     // TODO: save/restore policy information from disk
+
+    // TODO: keep whitelist of system-critical services that should never have
+    // rules enforced, such as system, phone, and radio UIDs.
 
     public NetworkPolicyManagerService(
             Context context, IActivityManager activityManager, IPowerManager powerManager) {
@@ -158,12 +174,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Override
     public void setUidPolicy(int uid, int policy) {
+        // TODO: create permission for modifying data policy
         mContext.enforceCallingOrSelfPermission(
                 UPDATE_DEVICE_STATS, "requires UPDATE_DEVICE_STATS permission");
 
+        final int oldPolicy;
         synchronized (mRulesLock) {
+            oldPolicy = getUidPolicy(uid);
             mUidPolicy.put(uid, policy);
         }
+
+        // TODO: consider dispatching BACKGROUND_DATA_SETTING broadcast
     }
 
     @Override
@@ -171,6 +192,36 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         synchronized (mRulesLock) {
             return mUidPolicy.get(uid, POLICY_NONE);
         }
+    }
+
+    @Override
+    public void registerListener(INetworkPolicyListener listener) {
+        mListeners.register(listener);
+
+        synchronized (mRulesLock) {
+            // dispatch any existing rules to new listeners
+            final int size = mUidRules.size();
+            for (int i = 0; i < size; i++) {
+                final int uid = mUidRules.keyAt(i);
+                final int uidRules = mUidRules.valueAt(i);
+                if (uidRules != RULE_ALLOW_ALL) {
+                    try {
+                        listener.onRulesChanged(uid, uidRules);
+                    } catch (RemoteException e) {
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void unregisterListener(INetworkPolicyListener listener) {
+        mListeners.unregister(listener);
+    }
+
+    private boolean isUidForegroundL(int uid) {
+        // only really in foreground when screen is also on
+        return mUidForeground.get(uid, false) && mScreenOn;
     }
 
     /**
@@ -223,22 +274,33 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void updateRulesForUidL(int uid) {
-        // only really in foreground when screen on
-        final boolean uidForeground = mUidForeground.get(uid, false) && mScreenOn;
         final int uidPolicy = getUidPolicy(uid);
+        final boolean uidForeground = isUidForegroundL(uid);
 
-        if (LOGD) {
-            Log.d(TAG, "updateRulesForUid(uid=" + uid + ") found foreground=" + uidForeground
-                    + " and policy=" + uidPolicy);
+        // derive active rules based on policy and active state
+        int uidRules = RULE_ALLOW_ALL;
+        if (!uidForeground && (uidPolicy & POLICY_REJECT_PAID_BACKGROUND) != 0) {
+            // uid in background, and policy says to block paid data
+            uidRules = RULE_REJECT_PAID;
         }
 
-        if (!uidForeground && (uidPolicy & POLICY_REJECT_BACKGROUND) != 0) {
-            // TODO: build updated rules and push to NMS
-        } else if ((uidPolicy & POLICY_REJECT_PAID) != 0) {
-            // TODO: build updated rules and push to NMS
-        } else {
-            // TODO: build updated rules and push to NMS
+        // TODO: only dispatch when rules actually change
+
+        // record rule locally to dispatch to new listeners
+        mUidRules.put(uid, uidRules);
+
+        // dispatch changed rule to existing listeners
+        final int length = mListeners.beginBroadcast();
+        for (int i = 0; i < length; i++) {
+            final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
+            if (listener != null) {
+                try {
+                    listener.onRulesChanged(uid, uidRules);
+                } catch (RemoteException e) {
+                }
+            }
         }
+        mListeners.finishBroadcast();
     }
 
     private static <T> T checkNotNull(T value, String message) {

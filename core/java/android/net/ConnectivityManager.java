@@ -22,7 +22,6 @@ import android.os.Binder;
 import android.os.RemoteException;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /**
  * Class that answers queries about the state of network connectivity. It also
@@ -40,8 +39,9 @@ import java.net.UnknownHostException;
  * state of the available networks</li>
  * </ol>
  */
-public class ConnectivityManager
-{
+public class ConnectivityManager {
+    private static final String TAG = "ConnectivityManager";
+
     /**
      * A change in network connectivity has occurred. A connection has either
      * been established or lost. The NetworkInfo for the affected network is
@@ -109,7 +109,7 @@ public class ConnectivityManager
      * The lookup key for an int that provides information about
      * our connection to the internet at large.  0 indicates no connection,
      * 100 indicates a great connection.  Retrieve it with
-     * {@link android.content.Intent@getIntExtra(String)}.
+     * {@link android.content.Intent#getIntExtra(String, int)}.
      * {@hide}
      */
     public static final String EXTRA_INET_CONDITION = "inetCondition";
@@ -120,12 +120,11 @@ public class ConnectivityManager
      * <p>
      * If an application uses the network in the background, it should listen
      * for this broadcast and stop using the background data if the value is
-     * false.
+     * {@code false}.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_BACKGROUND_DATA_SETTING_CHANGED =
             "android.net.conn.BACKGROUND_DATA_SETTING_CHANGED";
-
 
     /**
      * Broadcast Action: The network connection may not be good
@@ -255,7 +254,7 @@ public class ConnectivityManager
 
     public static final int DEFAULT_NETWORK_PREFERENCE = TYPE_WIFI;
 
-    private IConnectivityManager mService;
+    private final IConnectivityManager mService;
 
     static public boolean isNetworkTypeValid(int networkType) {
         return networkType >= 0 && networkType <= MAX_NETWORK_TYPE;
@@ -284,6 +283,15 @@ public class ConnectivityManager
         }
     }
 
+    /** {@hide} */
+    public NetworkInfo getActiveNetworkInfoForUid(int uid) {
+        try {
+            return mService.getActiveNetworkInfoForUid(uid);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     public NetworkInfo getNetworkInfo(int networkType) {
         try {
             return mService.getNetworkInfo(networkType);
@@ -300,7 +308,7 @@ public class ConnectivityManager
         }
     }
 
-    /** @hide */
+    /** {@hide} */
     public LinkProperties getActiveLinkProperties() {
         try {
             return mService.getActiveLinkProperties();
@@ -309,7 +317,7 @@ public class ConnectivityManager
         }
     }
 
-    /** @hide */
+    /** {@hide} */
     public LinkProperties getLinkProperties(int networkType) {
         try {
             return mService.getLinkProperties(networkType);
@@ -479,19 +487,11 @@ public class ConnectivityManager
     }
 
     /**
-     * Don't allow use of default constructor.
-     */
-    @SuppressWarnings({"UnusedDeclaration"})
-    private ConnectivityManager() {
-    }
-
-    /**
      * {@hide}
      */
     public ConnectivityManager(IConnectivityManager service) {
         if (service == null) {
-            throw new IllegalArgumentException(
-                "ConnectivityManager() cannot be constructed with null service");
+            throw new IllegalArgumentException("missing IConnectivityManager");
         }
         mService = service;
     }

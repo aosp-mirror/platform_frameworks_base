@@ -28,12 +28,13 @@ public class NetworkPolicyManager {
 
     /** No specific network policy, use system default. */
     public static final int POLICY_NONE = 0x0;
-    /** Reject network usage when application in background. */
-    public static final int POLICY_REJECT_BACKGROUND = 0x1;
-    /** Reject network usage on paid network connections. */
-    public static final int POLICY_REJECT_PAID = 0x2;
-    /** Application should conserve data. */
-    public static final int POLICY_CONSERVE_DATA = 0x4;
+    /** Reject network usage on paid networks when application in background. */
+    public static final int POLICY_REJECT_PAID_BACKGROUND = 0x1;
+
+    /** All network traffic should be allowed. */
+    public static final int RULE_ALLOW_ALL = 0x0;
+    /** Reject traffic on paid networks. */
+    public static final int RULE_REJECT_PAID = 0x1;
 
     private INetworkPolicyManager mService;
 
@@ -51,9 +52,8 @@ public class NetworkPolicyManager {
     /**
      * Set policy flags for specific UID.
      *
-     * @param policy {@link #POLICY_NONE} or combination of
-     *            {@link #POLICY_REJECT_BACKGROUND}, {@link #POLICY_REJECT_PAID},
-     *            or {@link #POLICY_CONSERVE_DATA}.
+     * @param policy {@link #POLICY_NONE} or combination of flags like
+     *            {@link #POLICY_REJECT_PAID_BACKGROUND}.
      */
     public void setUidPolicy(int uid, int policy) {
         try {
@@ -69,5 +69,4 @@ public class NetworkPolicyManager {
             return POLICY_NONE;
         }
     }
-
 }

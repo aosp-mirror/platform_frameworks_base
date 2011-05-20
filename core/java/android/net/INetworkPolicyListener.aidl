@@ -16,21 +16,9 @@
 
 package android.net;
 
-import android.net.INetworkPolicyListener;
+/** {@hide} */
+oneway interface INetworkPolicyListener {
 
-/**
- * Interface that creates and modifies network policy rules.
- *
- * {@hide}
- */
-interface INetworkPolicyManager {
-
-    void setUidPolicy(int uid, int policy);
-    int getUidPolicy(int uid);
-
-    void registerListener(INetworkPolicyListener listener);
-    void unregisterListener(INetworkPolicyListener listener);
-
-    // TODO: build API to surface stats details for settings UI
+    void onRulesChanged(int uid, int uidRules);
 
 }
