@@ -540,21 +540,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * active
      */
     public NetworkInfo getActiveNetworkInfo() {
-        enforceAccessPermission();
-        for (int type=0; type <= ConnectivityManager.MAX_NETWORK_TYPE; type++) {
-            if (mNetConfigs[type] == null || !mNetConfigs[type].isDefault()) {
-                continue;
-            }
-            NetworkStateTracker t = mNetTrackers[type];
-            NetworkInfo info = t.getNetworkInfo();
-            if (info.isConnected()) {
-                if (DBG && type != mActiveDefaultNetwork) {
-                    loge("connected default network is not mActiveDefaultNetwork!");
-                }
-                return info;
-            }
-        }
-        return null;
+        return getNetworkInfo(mActiveDefaultNetwork);
     }
 
     public NetworkInfo getNetworkInfo(int networkType) {
@@ -586,18 +572,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * none is active
      */
     public LinkProperties getActiveLinkProperties() {
-        enforceAccessPermission();
-        for (int type=0; type <= ConnectivityManager.MAX_NETWORK_TYPE; type++) {
-            if (mNetConfigs[type] == null || !mNetConfigs[type].isDefault()) {
-                continue;
-            }
-            NetworkStateTracker t = mNetTrackers[type];
-            NetworkInfo info = t.getNetworkInfo();
-            if (info.isConnected()) {
-                return t.getLinkProperties();
-            }
-        }
-        return null;
+        return getLinkProperties(mActiveDefaultNetwork);
     }
 
     public LinkProperties getLinkProperties(int networkType) {
