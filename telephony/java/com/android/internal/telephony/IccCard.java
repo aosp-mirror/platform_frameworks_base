@@ -100,10 +100,6 @@ public abstract class IccCard {
     private static final int EVENT_CARD_REMOVED = 13;
     private static final int EVENT_CARD_ADDED = 14;
 
-
-    static final boolean LTE_AVAILABLE_ON_CDMA =
-            SystemProperties.getBoolean(TelephonyProperties.PROPERTY_NETWORK_LTE_ON_CDMA, false);
-
     /*
       UNKNOWN is a transient state, for example, after uesr inputs ICC pin under
       PIN_REQUIRED state, the query for ICC status returns UNKNOWN before it
