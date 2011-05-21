@@ -50,6 +50,7 @@ public final class SimCard extends IccCard {
 
         if(mPhone.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE) {
             mPhone.mCM.registerForNVReady(mHandler, EVENT_ICC_READY, null);
+            mPhone.mCM.registerForIccStatusChanged(mHandler, EVENT_ICC_LOCKED_OR_ABSENT, null);
         }
     }
 
@@ -60,6 +61,11 @@ public final class SimCard extends IccCard {
         mPhone.mCM.unregisterForSIMLockedOrAbsent(mHandler);
         mPhone.mCM.unregisterForOffOrNotAvailable(mHandler);
         mPhone.mCM.unregisterForSIMReady(mHandler);
+
+        if(mPhone.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE) {
+            mPhone.mCM.unregisterForNVReady(mHandler);
+            mPhone.mCM.unregisterForIccStatusChanged(mHandler);
+        }
     }
 
     @Override
