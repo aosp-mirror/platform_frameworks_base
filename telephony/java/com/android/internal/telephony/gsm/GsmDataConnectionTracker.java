@@ -127,10 +127,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (apnContext != null) {
             apnContext.setReason(reason);
             if (apnContext.getState() == State.FAILED) {
-                Message msg = obtainMessage(EVENT_CLEAN_UP_CONNECTION);
-                msg.arg1 = 0; // tearDown is false
-                msg.obj = (ApnContext)apnContext;
-                sendMessage(msg);
+                apnContext.setState(State.IDLE);
             }
             sendMessage(obtainMessage(EVENT_TRY_SETUP_DATA, apnContext));
         }
@@ -644,7 +641,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         for (ApnContext apnContext : mApnContexts.values()) {
             if (apnContext.isReady()) {
                 if (apnContext.getState() == State.FAILED) {
-                    cleanUpConnection(false, apnContext);
+                    cleanApnContextBeforeRestart(apnContext);
                     if (apnContext.getDataConnection() != null) {
                         apnContext.getDataConnection().resetRetryCount();
                     }
@@ -800,6 +797,39 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         if (DBG) {
             log("cleanUpConnection: tearDown=" + tearDown + " reason=" + apnContext.getReason());
         }
+        if (tearDown && cleanApnContextBeforeRestart(apnContext)) {
+            // if the request is tearDown and ApnContext does not hold an active connection,
+            // we're ok to return here.
+            return;
+        }
+
+        DataConnectionAc dcac = apnContext.getDataConnectionAc();
+        if (dcac != null) {
+            if (tearDown) {
+                apnContext.setState(State.DISCONNECTING);
+                releaseApnContext(apnContext, tearDown);
+            } else {
+                // STOPSHIP: Reference counting logic in GDCT still have issue.
+                //           Need to be cleaned up in later patch
+                dcac.resetSync();
+                if (apnContext.getDataConnection() != null) {
+                    apnContext.getDataConnection().setRefCount(0);
+                }
+                apnContext.setState(State.IDLE);
+                mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
+                apnContext.setDataConnection(null);
+                apnContext.setDataConnectionAc(null);
+            }
+        }
+    }
+
+    /**
+     * @param APNContext to clean
+     * @return true if ApnContext is not connected anymore.
+     *         false if ApnContext still holds a connection.
+     */
+    private boolean cleanApnContextBeforeRestart(ApnContext apnContext) {
+        if (apnContext == null) return true;
 
         // Clear the reconnect alarm, if set.
         if (apnContext.getReconnectIntent() != null) {
@@ -811,31 +841,15 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         if (apnContext.getState() == State.IDLE || apnContext.getState() == State.DISCONNECTING) {
             if (DBG) log("cleanUpConnection: state= " + apnContext.getState());
-            return;
+            return true;
         }
 
         if (apnContext.getState() == State.FAILED) {
-            if (DBG) log("cleanUpConnection: state is in FAILED");
             apnContext.setState(State.IDLE);
-            return;
+            return true;
         }
-
-        DataConnection conn = apnContext.getDataConnection();
-        if (conn != null) {
-            DataConnectionAc dcac = mDataConnectionAsyncChannels.get(conn.getDataConnectionId());
-            apnContext.setState(State.DISCONNECTING);
-            if (tearDown) {
-                releaseApnContext(apnContext, tearDown);
-            } else {
-                if (dcac != null) {
-                    dcac.resetSync();
-                }
-                apnContext.setState(State.IDLE);
-                mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
-            }
-        }
+        return false;
     }
-
 
     /**
      * @param types comma delimited list of APN types
@@ -1371,7 +1385,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             loge("reconnectAfterFail: apnContext == null, impossible");
             return;
         }
-        if (apnContext.getState() == State.FAILED) {
+        if ((apnContext.getState() == State.FAILED) &&
+            (apnContext.getDataConnection() != null)) {
             if (!apnContext.getDataConnection().isRetryNeeded()) {
                 if (!apnContext.getApnType().equals(Phone.APN_TYPE_DEFAULT)) {
                     mPhone.notifyDataConnection(Phone.REASON_APN_FAILED, apnContext.getApnType());
