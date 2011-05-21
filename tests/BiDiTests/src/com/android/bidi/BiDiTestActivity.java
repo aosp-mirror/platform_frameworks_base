@@ -16,56 +16,43 @@
 
 package com.android.bidi;
 
-import android.app.Activity;
+import android.app.TabActivity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.SeekBar;
+import android.widget.TabHost;
 
-import static com.android.bidi.BiDiTestConstants.FONT_MIN_SIZE;
-import static com.android.bidi.BiDiTestConstants.FONT_MAX_SIZE;
-
-public class BiDiTestActivity extends Activity {
-
-    static final String TAG = "BiDiTestActivity";
-
-    static final int INIT_TEXT_SIZE = (FONT_MAX_SIZE - FONT_MIN_SIZE) / 2;
-
-    private BiDiTestView textView;
-    private SeekBar textSizeSeekBar;
+public class BiDiTestActivity extends TabActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.biditest_main);
+        setContentView(R.layout.main);
 
-        textView = (BiDiTestView) findViewById(R.id.main);
-        textView.setCurrentTextSize(INIT_TEXT_SIZE);
+        TabHost tabHost = getTabHost();
+        TabHost.TabSpec spec;
+        Intent intent;
 
-        textSizeSeekBar = (SeekBar) findViewById(R.id.seekbar);
-        textSizeSeekBar.setProgress(INIT_TEXT_SIZE);
-        textSizeSeekBar.setMax(FONT_MAX_SIZE - FONT_MIN_SIZE);
+        // Create an Intent to launch an Activity for the tab (to be reused)
+        intent = new Intent().setClass(this, BiDiTestBasicActivity.class);
 
-        textSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                textView.setCurrentTextSize(FONT_MIN_SIZE + progress);
-            }
+        // Initialize a TabSpec for each tab and add it to the TabHost
+        spec = tabHost.newTabSpec("basic").setIndicator("Basic").setContent(intent);
+        tabHost.addTab(spec);
 
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
+        // Do the same for the other tabs
+        intent = new Intent().setClass(this, BiDiTestCanvasActivity.class);
+        spec = tabHost.newTabSpec("canvas").setIndicator("Canvas").setContent(intent);
+        tabHost.addTab(spec);
 
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-        });
-    }
+        intent = new Intent().setClass(this, BiDiTestLinearLayoutLtrActivity.class);
+        spec = tabHost.newTabSpec("layout-ltr").setIndicator("LinearLayout LTR").setContent(intent);
+        tabHost.addTab(spec);
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
+        intent = new Intent().setClass(this, BiDiTestLinearLayoutRtlActivity.class);
+        spec = tabHost.newTabSpec("layout-rtl").setIndicator("LinearLayout RTL").setContent(intent);
+        tabHost.addTab(spec);
 
-    public void onButtonClick(View v) {
-        Log.v(TAG, "onButtonClick");
+        tabHost.setCurrentTab(0);
     }
 }

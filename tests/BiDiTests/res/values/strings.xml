@@ -14,6 +14,9 @@
 -->
 <resources>
     <string name="button_text">Button</string>
+    <string name="button1_text">Button1</string>
+    <string name="button2_text">Button2</string>
+    <string name="button_requestlayout_text">Request Layout</string>
     <string name="textview_text">This is a text for a TextView</string>
     <string name="edittext_text">mmmmmmmmmmmmmmmmmmmmmmmm</string>
     <string name="normal_text">Normal String</string>

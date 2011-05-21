@@ -1331,7 +1331,7 @@ public class LinearLayout extends ViewGroup {
     void layoutVertical() {
         final int paddingLeft = mPaddingLeft;
 
-        int childTop = mPaddingTop;
+        int childTop;
         int childLeft;
         
         // Where right end of child should go
@@ -1346,19 +1346,21 @@ public class LinearLayout extends ViewGroup {
         final int majorGravity = mGravity & Gravity.VERTICAL_GRAVITY_MASK;
         final int minorGravity = mGravity & Gravity.HORIZONTAL_GRAVITY_MASK;
 
-        if (majorGravity != Gravity.TOP) {
-           switch (majorGravity) {
-               case Gravity.BOTTOM:
-                   // mTotalLength contains the padding already, we add the top
-                   // padding to compensate
-                   childTop = mBottom - mTop + mPaddingTop - mTotalLength;
-                   break;
+        switch (majorGravity) {
+           case Gravity.BOTTOM:
+               // mTotalLength contains the padding already
+               childTop = mPaddingTop + mBottom - mTop - mTotalLength;
+               break;
 
-               case Gravity.CENTER_VERTICAL:
-                   childTop += ((mBottom - mTop)  - mTotalLength) / 2;
-                   break;
-           }
-           
+               // mTotalLength contains the padding already
+           case Gravity.CENTER_VERTICAL:
+               childTop = mPaddingTop + (mBottom - mTop - mTotalLength) / 2;
+               break;
+
+           case Gravity.TOP:
+           default:
+               childTop = mPaddingTop;
+               break;
         }
 
         for (int i = 0; i < count; i++) {
@@ -1376,12 +1378,8 @@ public class LinearLayout extends ViewGroup {
                 if (gravity < 0) {
                     gravity = minorGravity;
                 }
-                
-                switch (gravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
-                    case Gravity.LEFT:
-                        childLeft = paddingLeft + lp.leftMargin;
-                        break;
 
+                switch (gravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.CENTER_HORIZONTAL:
                         childLeft = paddingLeft + ((childSpace - childWidth) / 2)
                                 + lp.leftMargin - lp.rightMargin;
@@ -1390,11 +1388,13 @@ public class LinearLayout extends ViewGroup {
                     case Gravity.RIGHT:
                         childLeft = childRight - childWidth - lp.rightMargin;
                         break;
+
+                    case Gravity.LEFT:
                     default:
-                        childLeft = paddingLeft;
+                        childLeft = paddingLeft + lp.leftMargin;
                         break;
                 }
-                
+
                 if (hasDividerBeforeChildAt(i)) {
                     childTop += mDividerHeight;
                 }
@@ -1418,10 +1418,11 @@ public class LinearLayout extends ViewGroup {
      * @see #onLayout(boolean, int, int, int, int)
      */
     void layoutHorizontal() {
+        final boolean isLayoutRtl = isLayoutRtl();
         final int paddingTop = mPaddingTop;
 
         int childTop;
-        int childLeft = mPaddingLeft;
+        int childLeft;
         
         // Where bottom of child should go
         final int height = mBottom - mTop;
@@ -1440,25 +1441,37 @@ public class LinearLayout extends ViewGroup {
         final int[] maxAscent = mMaxAscent;
         final int[] maxDescent = mMaxDescent;
 
-        if (majorGravity != Gravity.LEFT) {
-            switch (majorGravity) {
-                case Gravity.RIGHT:
-                    // mTotalLength contains the padding already, we add the left
-                    // padding to compensate
-                    childLeft = mRight - mLeft + mPaddingLeft - mTotalLength;
-                    break;
+        switch (majorGravity) {
+            case Gravity.RIGHT:
+                // mTotalLength contains the padding already
+                childLeft = mPaddingLeft + mRight - mLeft - mTotalLength;
+                break;
 
-                case Gravity.CENTER_HORIZONTAL:
-                    childLeft += ((mRight - mLeft) - mTotalLength) / 2;
-                    break;
-            }
+            case Gravity.CENTER_HORIZONTAL:
+                // mTotalLength contains the padding already
+                childLeft = mPaddingLeft + (mRight - mLeft - mTotalLength) / 2;
+                break;
+
+            case Gravity.LEFT:
+            default:
+                childLeft = mPaddingLeft;
+                break;
+        }
+
+        int start = 0;
+        int dir = 1;
+        //In case of RTL, start drawing from the last child.
+        if (isLayoutRtl) {
+            start = count - 1;
+            dir = -1;
         }
 
         for (int i = 0; i < count; i++) {
-            final View child = getVirtualChildAt(i);
+            int childIndex = start + dir * i;
+            final View child = getVirtualChildAt(childIndex);
 
             if (child == null) {
-                childLeft += measureNullChild(i);
+                childLeft += measureNullChild(childIndex);
             } else if (child.getVisibility() != GONE) {
                 final int childWidth = child.getMeasuredWidth();
                 final int childHeight = child.getMeasuredHeight();
@@ -1512,7 +1525,7 @@ public class LinearLayout extends ViewGroup {
                         break;
                 }
 
-                if (hasDividerBeforeChildAt(i)) {
+                if (hasDividerBeforeChildAt(childIndex)) {
                     childLeft += mDividerWidth;
                 }
 
@@ -1522,7 +1535,7 @@ public class LinearLayout extends ViewGroup {
                 childLeft += childWidth + lp.rightMargin +
                         getNextLocationOffset(child);
 
-                i += getChildrenSkipCount(child, i);
+                i += getChildrenSkipCount(child, childIndex);
             }
         }
     }
