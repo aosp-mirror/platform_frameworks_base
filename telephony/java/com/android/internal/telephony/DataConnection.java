@@ -22,8 +22,10 @@ import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
+import android.net.LinkAddress;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
+import android.net.NetworkUtils;
 import android.net.ProxyProperties;
 import android.os.AsyncResult;
 import android.os.Bundle;
@@ -33,6 +35,7 @@ import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -533,8 +536,10 @@ public abstract class DataConnection extends StateMachine {
         return response.setLinkProperties(lp, okToUseSystemPropertyDns);
     }
 
-    private boolean updateLinkProperty(DataCallState newState) {
-        boolean changed = false;
+    private DataConnectionAc.LinkPropertyChangeAction updateLinkProperty(
+                                                      DataCallState newState) {
+        DataConnectionAc.LinkPropertyChangeAction changed =
+                        DataConnectionAc.LinkPropertyChangeAction.NONE;
 
         if (newState == null) return changed;
 
@@ -553,9 +558,23 @@ public abstract class DataConnection extends StateMachine {
         if (DBG) log("old LP=" + mLinkProperties);
         if (DBG) log("new LP=" + newLp);
 
+        // Check consistency of link address. Currently we expect
+        // only one "global" address is assigned per each IP type.
+        Collection<LinkAddress> oLinks = mLinkProperties.getLinkAddresses();
+        Collection<LinkAddress> nLinks = newLp.getLinkAddresses();
+        for (LinkAddress oldLink : oLinks) {
+            for (LinkAddress newLink : nLinks) {
+                if ((NetworkUtils.addressTypeMatches(oldLink.getAddress(),
+                                        newLink.getAddress())) &&
+                    (oldLink.equals(newLink) == false)) {
+                    return DataConnectionAc.LinkPropertyChangeAction.RESET;
+                }
+            }
+        }
+
         if (mLinkProperties == null || !mLinkProperties.equals(newLp)) {
             mLinkProperties = newLp;
-            changed = true;
+            changed = DataConnectionAc.LinkPropertyChangeAction.CHANGED;
         }
 
         return changed;
@@ -633,15 +652,14 @@ public abstract class DataConnection extends StateMachine {
                 }
                 case DataConnectionAc.REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE: {
                     DataCallState newState = (DataCallState) msg.obj;
-                    int updated = updateLinkProperty(newState) ? 1 : 0;
+                    DataConnectionAc.LinkPropertyChangeAction action = updateLinkProperty(newState);
                     if (DBG) {
-                        log("REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE updated="
-                                + (updated == 1)
-                                + " newState=" + newState);
+                        log("REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE action="
+                            + action + " newState=" + newState);
                     }
                     mAc.replyToMessage(msg,
                                    DataConnectionAc.RSP_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE,
-                                   updated);
+                                   action.ordinal());
                     break;
                 }
                 case DataConnectionAc.REQ_GET_LINK_CAPABILITIES: {
