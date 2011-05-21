@@ -1232,10 +1232,30 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             preTxPkts = mTxPkts;
             preRxPkts = mRxPkts;
 
-            mTxPkts = TrafficStats.getMobileTxPackets();
-            mRxPkts = TrafficStats.getMobileRxPackets();
+            long txSum = 0, rxSum = 0;
+            for (ApnContext apnContext : mApnContexts.values()) {
+                if (apnContext.getState() == State.CONNECTED) {
+                    DataConnectionAc dcac = apnContext.getDataConnectionAc();
+                    if (dcac == null) continue;
 
-            //log("rx " + String.valueOf(rxPkts) + " tx " + String.valueOf(txPkts));
+                    LinkProperties linkProp = dcac.getLinkPropertiesSync();
+                    if (linkProp == null) continue;
+
+                    String iface = linkProp.getInterfaceName();
+
+                    if (iface != null) {
+                        long stats = TrafficStats.getTxPackets(iface);
+                        if (stats > 0) txSum += stats;
+                        stats = TrafficStats.getRxPackets(iface);
+                        if (stats > 0) rxSum += stats;
+                    }
+                }
+            }
+
+            mTxPkts = txSum;
+            mRxPkts = rxSum;
+
+            // log("tx " + mTxPkts + " rx " + mRxPkts);
 
             if (mNetStatPollEnabled && (preTxPkts > 0 || preRxPkts > 0)) {
                 sent = mTxPkts - preTxPkts;
