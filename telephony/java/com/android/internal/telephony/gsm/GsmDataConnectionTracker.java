@@ -1059,25 +1059,37 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     if (DBG) log("onDataStateChanged(ar): Found ConnId=" + connectionId
                             + " newState=" + newState.toString());
                     if (newState.active != 0) {
-                        boolean changed
-                            = dcac.updateLinkPropertiesDataCallStateSync(newState);
-                        if (changed) {
+                        boolean resetConnection;
+                        switch (dcac.updateLinkPropertiesDataCallStateSync(newState)) {
+                        case NONE:
+                            if (DBG) log("onDataStateChanged(ar): Found but no change, skip");
+                            resetConnection = false;
+                            break;
+                        case CHANGED:
                             if (DBG) log("onDataStateChanged(ar): Found and changed, notify");
                             mPhone.notifyDataConnection(Phone.REASON_LINK_PROPERTIES_CHANGED,
-                                    apnContext.getApnType());
-                            // Temporary hack, if false we'll reset connections and at this
-                            // time a transition from CDMA -> Global fails. The DEACTIVATE
-                            // fails with a GENERIC_FAILURE and the VZWINTERNET connection is
-                            // never setup. @see bug/
+                                                        apnContext.getApnType());
+                            // Temporary hack, at this time a transition from CDMA -> Global
+                            // fails so we'll hope for the best and not reset the connection.
+                            // @see bug/4455071
                             if (SystemProperties.getBoolean("telephony.ignore-state-changes",
-                                    true)) {
+                                                            true)) {
                                 log("onDataStateChanged(ar): STOPSHIP don't reset, continue");
-                                continue;
+                                resetConnection = false;
+                            } else {
+                                // Things changed so reset connection, when hack is removed
+                                // this is the normal path.
+                                log("onDataStateChanged(ar): changed so resetting connection");
+                                resetConnection = true;
                             }
-                        } else {
-                            if (DBG) log("onDataStateChanged(ar): Found but no change, skip");
-                            continue;
+                            break;
+                        case RESET:
+                        default:
+                            if (DBG) log("onDataStateChanged(ar): an error, reset connection");
+                            resetConnection = true;
+                            break;
                         }
+                        if (resetConnection == false) continue;
                     }
                 }
 
