@@ -113,6 +113,7 @@ public interface RILConstants {
     /* Deactivate data call reasons */
     int DEACTIVATE_REASON_NONE = 0;
     int DEACTIVATE_REASON_RADIO_OFF = 1;
+    int DEACTIVATE_REASON_PDP_RESET = 2;
 
 /*
 cat include/telephony/ril.h | \
