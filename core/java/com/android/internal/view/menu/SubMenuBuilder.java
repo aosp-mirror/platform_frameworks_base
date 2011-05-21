@@ -76,6 +76,12 @@ public class SubMenuBuilder extends MenuBuilder implements SubMenu {
         return mParentMenu;
     }
 
+    @Override
+    boolean dispatchMenuItemSelected(MenuBuilder menu, MenuItem item) {
+        return super.dispatchMenuItemSelected(menu, item) ||
+                mParentMenu.dispatchMenuItemSelected(menu, item);
+    }
+
     public SubMenu setIcon(Drawable icon) {
         mItem.setIcon(icon);
         return this;
