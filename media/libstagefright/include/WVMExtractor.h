@@ -25,6 +25,15 @@ namespace android {
 
 class DataSource;
 
+class WVMLoadableExtractor : public MediaExtractor {
+public:
+    WVMLoadableExtractor() {}
+    virtual ~WVMLoadableExtractor() {}
+
+    virtual int64_t getCachedDurationUs(status_t *finalStatus) = 0;
+    virtual void setAdaptiveStreamingMode(bool adaptive) = 0;
+};
+
 class WVMExtractor : public MediaExtractor {
 public:
     WVMExtractor(const sp<DataSource> &source);
@@ -49,20 +58,15 @@ public:
     // is used.
     void setAdaptiveStreamingMode(bool adaptive);
 
-    // Retrieve the adaptive streaming mode used by the WV component.
-    bool getAdaptiveStreamingMode() const;
-
 protected:
     virtual ~WVMExtractor();
 
 private:
     sp<DataSource> mDataSource;
-    sp<MediaExtractor> mImpl;
-    bool mUseAdaptiveStreaming;
+    sp<WVMLoadableExtractor> mImpl;
 
     WVMExtractor(const WVMExtractor &);
     WVMExtractor &operator=(const WVMExtractor &);
-
 };
 
 }  // namespace android
