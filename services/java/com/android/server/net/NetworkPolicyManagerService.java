@@ -16,12 +16,15 @@
 
 package com.android.server.net;
 
+import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_PAID_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_PAID;
+import static android.net.NetworkPolicyManager.dumpPolicy;
+import static android.net.NetworkPolicyManager.dumpRules;
 
 import android.app.IActivityManager;
 import android.app.IProcessObserver;
@@ -40,6 +43,9 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 /**
  * Service that maintains low-level network policy rules and collects usage
@@ -219,6 +225,53 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mListeners.unregister(listener);
     }
 
+    @Override
+    protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
+        mContext.enforceCallingOrSelfPermission(DUMP, "requires DUMP permission");
+
+        synchronized (mRulesLock) {
+            fout.println("Policy status for known UIDs:");
+
+            final SparseBooleanArray knownUids = new SparseBooleanArray();
+            collectKeys(mUidPolicy, knownUids);
+            collectKeys(mUidForeground, knownUids);
+            collectKeys(mUidRules, knownUids);
+
+            final int size = knownUids.size();
+            for (int i = 0; i < size; i++) {
+                final int uid = knownUids.keyAt(i);
+                fout.print("  UID=");
+                fout.print(uid);
+
+                fout.print(" policy=");
+                final int policyIndex = mUidPolicy.indexOfKey(uid);
+                if (policyIndex < 0) {
+                    fout.print("UNKNOWN");
+                } else {
+                    dumpPolicy(fout, mUidPolicy.valueAt(policyIndex));
+                }
+
+                fout.print(" foreground=");
+                final int foregroundIndex = mUidPidForeground.indexOfKey(uid);
+                if (foregroundIndex < 0) {
+                    fout.print("UNKNOWN");
+                } else {
+                    dumpSparseBooleanArray(fout, mUidPidForeground.valueAt(foregroundIndex));
+                }
+
+                fout.print(" rules=");
+                final int rulesIndex = mUidRules.indexOfKey(uid);
+                if (rulesIndex < 0) {
+                    fout.print("UNKNOWN");
+                } else {
+                    dumpRules(fout, mUidRules.valueAt(rulesIndex));
+                }
+
+                fout.println();
+            }
+        }
+    }
+    
     private boolean isUidForegroundL(int uid) {
         // only really in foreground when screen is also on
         return mUidForeground.get(uid, false) && mScreenOn;
@@ -308,5 +361,29 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             throw new NullPointerException(message);
         }
         return value;
+    }
+    
+    private static void collectKeys(SparseIntArray source, SparseBooleanArray target) {
+        final int size = source.size();
+        for (int i = 0; i < size; i++) {
+            target.put(source.keyAt(i), true);
+        }
+    }
+
+    private static void collectKeys(SparseBooleanArray source, SparseBooleanArray target) {
+        final int size = source.size();
+        for (int i = 0; i < size; i++) {
+            target.put(source.keyAt(i), true);
+        }
+    }
+
+    private static void dumpSparseBooleanArray(PrintWriter fout, SparseBooleanArray value) {
+        fout.print("[");
+        final int size = value.size();
+        for (int i = 0; i < size; i++) {
+            fout.print(value.keyAt(i) + "=" + value.valueAt(i));
+            if (i < size - 1) fout.print(",");
+        }
+        fout.print("]");
     }
 }

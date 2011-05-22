@@ -19,6 +19,8 @@ package android.net;
 import android.content.Context;
 import android.os.RemoteException;
 
+import java.io.PrintWriter;
+
 /**
  * Manager for creating and modifying network policy rules.
  *
@@ -69,4 +71,23 @@ public class NetworkPolicyManager {
             return POLICY_NONE;
         }
     }
+    
+    /** {@hide} */
+    public static void dumpPolicy(PrintWriter fout, int policy) {
+        fout.write("[");
+        if ((policy & POLICY_REJECT_PAID_BACKGROUND) != 0) {
+            fout.write("REJECT_PAID_BACKGROUND");
+        }
+        fout.write("]");
+    }
+
+    /** {@hide} */
+    public static void dumpRules(PrintWriter fout, int rules) {
+        fout.write("[");
+        if ((rules & RULE_REJECT_PAID) != 0) {
+            fout.write("REJECT_PAID");
+        }
+        fout.write("]");
+    }
+
 }
