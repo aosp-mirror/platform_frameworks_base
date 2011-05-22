@@ -28,6 +28,8 @@ interface INetworkPolicyManager {
     void setUidPolicy(int uid, int policy);
     int getUidPolicy(int uid);
 
+    boolean isUidForeground(int uid);
+
     void registerListener(INetworkPolicyListener listener);
     void unregisterListener(INetworkPolicyListener listener);
 

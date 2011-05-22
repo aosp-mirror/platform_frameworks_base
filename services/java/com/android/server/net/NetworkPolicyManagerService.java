@@ -188,6 +188,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         synchronized (mRulesLock) {
             oldPolicy = getUidPolicy(uid);
             mUidPolicy.put(uid, policy);
+            updateRulesForUidL(uid);
         }
 
         // TODO: consider dispatching BACKGROUND_DATA_SETTING broadcast
@@ -271,10 +272,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
     }
-    
-    private boolean isUidForegroundL(int uid) {
-        // only really in foreground when screen is also on
-        return mUidForeground.get(uid, false) && mScreenOn;
+
+    @Override
+    public boolean isUidForeground(int uid) {
+        synchronized (mRulesLock) {
+            // only really in foreground when screen is also on
+            return mUidForeground.get(uid, false) && mScreenOn;
+        }
     }
 
     /**
@@ -328,7 +332,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private void updateRulesForUidL(int uid) {
         final int uidPolicy = getUidPolicy(uid);
-        final boolean uidForeground = isUidForegroundL(uid);
+        final boolean uidForeground = isUidForeground(uid);
 
         // derive active rules based on policy and active state
         int uidRules = RULE_ALLOW_ALL;

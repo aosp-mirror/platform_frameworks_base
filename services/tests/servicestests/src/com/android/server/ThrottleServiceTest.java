@@ -25,14 +25,9 @@ import static org.easymock.EasyMock.replay;
 import static org.easymock.EasyMock.reset;
 import static org.easymock.EasyMock.verify;
 
-import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.AbstractFuture;
-
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.net.INetworkManagementEventObserver;
 import android.net.NetworkStats;
 import android.net.ThrottleManager;
@@ -48,8 +43,6 @@ import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.TrustedTime;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.Future;
 
 /**
@@ -66,7 +59,7 @@ public class ThrottleServiceTest extends AndroidTestCase {
 
     private static final String TEST_IFACE = "test0";
 
-    private WatchingContext mWatchingContext;
+    private BroadcastInterceptingContext mWatchingContext;
     private INetworkManagementService mMockNMService;
     private TrustedTime mMockTime;
 
@@ -76,7 +69,7 @@ public class ThrottleServiceTest extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        mWatchingContext = new WatchingContext(getContext());
+        mWatchingContext = new BroadcastInterceptingContext(getContext());
 
         mMockNMService = createMock(INetworkManagementService.class);
         mMockTime = createMock(TrustedTime.class);
@@ -353,70 +346,5 @@ public class ThrottleServiceTest extends AndroidTestCase {
         mThrottleService.dispatchReset();
 
         pollAction.get();
-    }
-
-
-    /**
-     * {@link ContextWrapper} that can attach listeners for upcoming
-     * {@link Context#sendBroadcast(Intent)}.
-     */
-    private static class WatchingContext extends ContextWrapper {
-        private List<LocalBroadcastReceiver> mReceivers = Lists.newArrayList();
-
-        public class LocalBroadcastReceiver extends AbstractFuture<Intent> {
-            private IntentFilter mFilter;
-
-            public LocalBroadcastReceiver(IntentFilter filter) {
-                mFilter = filter;
-            }
-
-            public boolean dispatchBroadcast(Intent intent) {
-                if (mFilter.match(getContentResolver(), intent, false, TAG) > 0) {
-                    set(intent);
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }
-
-        public WatchingContext(Context base) {
-            super(base);
-        }
-
-        public Future<Intent> nextBroadcastIntent(String action) {
-            return nextBroadcastIntent(new IntentFilter(action));
-        }
-
-        public Future<Intent> nextBroadcastIntent(IntentFilter filter) {
-            final LocalBroadcastReceiver receiver = new LocalBroadcastReceiver(filter);
-            synchronized (mReceivers) {
-                mReceivers.add(receiver);
-            }
-            return receiver;
-        }
-
-        @Override
-        public void sendBroadcast(Intent intent) {
-            synchronized (mReceivers) {
-                final Iterator<LocalBroadcastReceiver> i = mReceivers.iterator();
-                while (i.hasNext()) {
-                    final LocalBroadcastReceiver receiver = i.next();
-                    if (receiver.dispatchBroadcast(intent)) {
-                        i.remove();
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void sendStickyBroadcast(Intent intent) {
-            sendBroadcast(intent);
-        }
-
-        @Override
-        public void removeStickyBroadcast(Intent intent) {
-            // ignored
-        }
     }
 }
