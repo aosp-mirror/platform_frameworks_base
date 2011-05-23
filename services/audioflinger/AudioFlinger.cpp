@@ -87,40 +87,20 @@ static const int kDumpLockSleep = 20000;
 static const nsecs_t kWarningThrottle = seconds(5);
 
 
-#define AUDIOFLINGER_SECURITY_ENABLED 1
-
 // ----------------------------------------------------------------------------
 
 static bool recordingAllowed() {
-#ifndef HAVE_ANDROID_OS
-    return true;
-#endif
-#if AUDIOFLINGER_SECURITY_ENABLED
     if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
     bool ok = checkCallingPermission(String16("android.permission.RECORD_AUDIO"));
     if (!ok) LOGE("Request requires android.permission.RECORD_AUDIO");
     return ok;
-#else
-    if (!checkCallingPermission(String16("android.permission.RECORD_AUDIO")))
-        LOGW("WARNING: Need to add android.permission.RECORD_AUDIO to manifest");
-    return true;
-#endif
 }
 
 static bool settingsAllowed() {
-#ifndef HAVE_ANDROID_OS
-    return true;
-#endif
-#if AUDIOFLINGER_SECURITY_ENABLED
     if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
     bool ok = checkCallingPermission(String16("android.permission.MODIFY_AUDIO_SETTINGS"));
     if (!ok) LOGE("Request requires android.permission.MODIFY_AUDIO_SETTINGS");
     return ok;
-#else
-    if (!checkCallingPermission(String16("android.permission.MODIFY_AUDIO_SETTINGS")))
-        LOGW("WARNING: Need to add android.permission.MODIFY_AUDIO_SETTINGS to manifest");
-    return true;
-#endif
 }
 
 // To collect the amplifier usage
