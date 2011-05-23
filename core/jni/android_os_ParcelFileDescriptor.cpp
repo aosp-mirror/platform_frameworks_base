@@ -34,20 +34,37 @@ static struct parcel_file_descriptor_offsets_t
     jfieldID mFileDescriptor;
 } gParcelFileDescriptorOffsets;
 
-static int android_os_ParcelFileDescriptor_createPipeNative(JNIEnv* env,
+static jobject android_os_ParcelFileDescriptor_getFileDescriptorFromFd(JNIEnv* env,
+    jobject clazz, jint origfd)
+{
+    int fd = dup(origfd);
+    if (fd < 0) {
+        jniThrowException(env, "java/io/IOException", strerror(errno));
+        return NULL;
+    }
+    return jniCreateFileDescriptor(env, fd);
+}
+
+static jobject android_os_ParcelFileDescriptor_getFileDescriptorFromFdNoDup(JNIEnv* env,
+    jobject clazz, jint fd)
+{
+    return jniCreateFileDescriptor(env, fd);
+}
+
+static void android_os_ParcelFileDescriptor_createPipeNative(JNIEnv* env,
     jobject clazz, jobjectArray outFds)
 {
     int fds[2];
     if (pipe(fds) < 0) {
-        return -errno;
+        int therr = errno;
+        jniThrowException(env, "java/io/IOException", strerror(therr));
+        return;
     }
 
     for (int i=0; i<2; i++) {
         jobject fdObj = jniCreateFileDescriptor(env, fds[i]);
         env->SetObjectArrayElement(outFds, i, fdObj);
     }
-
-    return 0;
 }
 
 static jint getFd(JNIEnv* env, jobject clazz)
@@ -102,7 +119,11 @@ static jlong android_os_ParcelFileDescriptor_getFdNative(JNIEnv* env, jobject cl
 }
 
 static const JNINativeMethod gParcelFileDescriptorMethods[] = {
-    {"createPipeNative", "([Ljava/io/FileDescriptor;)I",
+    {"getFileDescriptorFromFd", "(I)Ljava/io/FileDescriptor;",
+        (void*)android_os_ParcelFileDescriptor_getFileDescriptorFromFd},
+    {"getFileDescriptorFromFdNoDup", "(I)Ljava/io/FileDescriptor;",
+        (void*)android_os_ParcelFileDescriptor_getFileDescriptorFromFdNoDup},
+    {"createPipeNative", "([Ljava/io/FileDescriptor;)V",
         (void*)android_os_ParcelFileDescriptor_createPipeNative},
     {"getStatSize", "()J",
         (void*)android_os_ParcelFileDescriptor_getStatSize},

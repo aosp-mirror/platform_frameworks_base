@@ -129,7 +129,46 @@ public class ParcelFileDescriptor implements Parcelable {
     }
 
     /**
-     * Create a new ParcelFileDescriptor from the specified Socket.
+     * Create a new ParcelFileDescriptor from a raw native fd.  The new
+     * ParcelFileDescriptor holds a dup of the original fd passed in here,
+     * so you must still close that fd as well as the new ParcelFileDescriptor.
+     *
+     * @param fd The native fd that the ParcelFileDescriptor should dup.
+     *
+     * @return Returns a new ParcelFileDescriptor holding a FileDescriptor
+     * for a dup of the given fd.
+     */
+    public static ParcelFileDescriptor fromFd(int fd) throws IOException {
+        FileDescriptor fdesc = getFileDescriptorFromFd(fd);
+        return new ParcelFileDescriptor(fdesc);
+    }
+
+    // Extracts the file descriptor from the specified socket and returns it untouched
+    private static native FileDescriptor getFileDescriptorFromFd(int fd) throws IOException;
+
+    /**
+     * Take ownership of a raw native fd in to a new ParcelFileDescriptor.
+     * The returned ParcelFileDescriptor now owns the given fd, and will be
+     * responsible for closing it.  You must not close the fd yourself.
+     *
+     * @param fd The native fd that the ParcelFileDescriptor should adopt.
+     *
+     * @return Returns a new ParcelFileDescriptor holding a FileDescriptor
+     * for the given fd.
+     */
+    public static ParcelFileDescriptor adoptFd(int fd) {
+        FileDescriptor fdesc = getFileDescriptorFromFdNoDup(fd);
+        return new ParcelFileDescriptor(fdesc);
+    }
+
+    // Extracts the file descriptor from the specified socket and returns it untouched
+    private static native FileDescriptor getFileDescriptorFromFdNoDup(int fd);
+
+    /**
+     * Create a new ParcelFileDescriptor from the specified Socket.  The new
+     * ParcelFileDescriptor holds a dup of the original FileDescriptor in
+     * the Socket, so you must still close the Socket as well as the new
+     * ParcelFileDescriptor.
      *
      * @param socket The Socket whose FileDescriptor is used to create
      *               a new ParcelFileDescriptor.
@@ -163,17 +202,14 @@ public class ParcelFileDescriptor implements Parcelable {
      */
     public static ParcelFileDescriptor[] createPipe() throws IOException {
         FileDescriptor[] fds = new FileDescriptor[2];
-        int res = createPipeNative(fds);
-        if (res == 0) {
-            ParcelFileDescriptor[] pfds = new ParcelFileDescriptor[2];
-            pfds[0] = new ParcelFileDescriptor(fds[0]);
-            pfds[1] = new ParcelFileDescriptor(fds[1]);
-            return pfds;
-        }
-        throw new IOException("Unable to create pipe: errno=" + -res);
+        createPipeNative(fds);
+        ParcelFileDescriptor[] pfds = new ParcelFileDescriptor[2];
+        pfds[0] = new ParcelFileDescriptor(fds[0]);
+        pfds[1] = new ParcelFileDescriptor(fds[1]);
+        return pfds;
     }
 
-    private static native int createPipeNative(FileDescriptor[] outFds);
+    private static native void createPipeNative(FileDescriptor[] outFds) throws IOException;
 
     /**
      * @hide Please use createPipe() or ContentProvider.openPipeHelper().
