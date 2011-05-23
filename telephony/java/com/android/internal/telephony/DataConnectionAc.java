@@ -59,6 +59,9 @@ public class DataConnectionAc extends AsyncChannel {
     public static final int REQ_RESET = BASE + 14;
     public static final int RSP_RESET = BASE + 15;
 
+    public static final int REQ_GET_REFCOUNT = BASE + 16;
+    public static final int RSP_GET_REFCOUNT = BASE + 17;
+
     /**
      * enum used to notify action taken or necessary to be
      * taken after the link property is changed.
@@ -147,6 +150,40 @@ public class DataConnectionAc extends AsyncChannel {
             return rspCid(response);
         } else {
             log("rspCid error response=" + response);
+            return -1;
+        }
+    }
+
+    /**
+     * Request the Reference Count.
+     * Response {@link #rspRefCount}
+     */
+    public void reqRefCount() {
+        sendMessage(REQ_GET_REFCOUNT);
+        if (DBG) log("reqRefCount");
+    }
+
+    /**
+     * Evaluate a RSP_GET_REFCOUNT message and return the refCount.
+     *
+     * @param response Message
+     * @return ref count or -1 if an error
+     */
+    public int rspRefCount(Message response) {
+        int retVal = response.arg1;
+        if (DBG) log("rspRefCount=" + retVal);
+        return retVal;
+    }
+
+    /**
+     * @return connection id or -1 if an error
+     */
+    public int getRefCountSync() {
+        Message response = sendMessageSynchronously(REQ_GET_REFCOUNT);
+        if ((response != null) && (response.what == RSP_GET_REFCOUNT)) {
+            return rspRefCount(response);
+        } else {
+            log("rspRefCount error response=" + response);
             return -1;
         }
     }
