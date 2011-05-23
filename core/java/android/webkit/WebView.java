@@ -54,7 +54,9 @@ import android.net.http.SslCertificate;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
+import android.os.StrictMode;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.text.Selection;
@@ -8933,15 +8935,14 @@ public class WebView extends AbsoluteLayout
     }
 
     private static void checkThread() {
-        if (!"main".equals(Thread.currentThread().getName())) {
-            try {
-                throw new RuntimeException("A WebView method was called on thread '" +
-                        Thread.currentThread().getName() + "'. " +
-                        "All WebView methods must be called on the UI thread. " +
-                        "Future versions of WebView may not support use on other threads.");
-            } catch (RuntimeException e) {
-                Log.e(LOGTAG, Log.getStackTraceString(e));
-            }
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            RuntimeException exception = new RuntimeException(
+                    "A WebView method was called on thread '" +
+                    Thread.currentThread().getName() + "'. " +
+                    "All WebView methods must be called on the UI thread. " +
+                    "Future versions of WebView may not support use on other threads.");
+            Log.e(LOGTAG, Log.getStackTraceString(exception));
+            StrictMode.onWebViewMethodCalledOnWrongThread(exception);
         }
     }
 

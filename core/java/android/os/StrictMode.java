@@ -1481,6 +1481,13 @@ public final class StrictMode {
         onVmPolicyViolation(message, originStack);
     }
 
+    /**
+     * @hide
+     */
+    public static void onWebViewMethodCalledOnWrongThread(Throwable originStack) {
+        onVmPolicyViolation(null, originStack);
+    }
+
     // Map from VM violation fingerprint to uptime millis.
     private static final HashMap<Integer, Long> sLastVmViolationTime = new HashMap<Integer, Long>();
 
