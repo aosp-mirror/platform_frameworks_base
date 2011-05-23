@@ -1406,23 +1406,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             }
 
             int nextReconnectDelay = apnContext.getDataConnection().getRetryTimer();
-            if (DBG) {
-                log("reconnectAfterFail: activate failed. Scheduling next attempt for "
-                    + (nextReconnectDelay / 1000) + "s");
-            }
-
-            AlarmManager am =
-                (AlarmManager) mPhone.getContext().getSystemService(Context.ALARM_SERVICE);
-            Intent intent = new Intent(INTENT_RECONNECT_ALARM);
-            intent.putExtra(INTENT_RECONNECT_ALARM_EXTRA_REASON, apnContext.getReason());
-            // Should put an extra of apn type?
-            intent.putExtra(INTENT_RECONNECT_ALARM_EXTRA_TYPE, apnContext.getApnType());
-            apnContext.setReconnectIntent(PendingIntent.getBroadcast (
-                    mPhone.getContext(), 0, intent, 0));
-            am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + nextReconnectDelay,
-                    apnContext.getReconnectIntent());
-
+            startAlarmForReconnect(nextReconnectDelay, apnContext);
             apnContext.getDataConnection().increaseRetryCount();
 
             if (!shouldPostNotification(lastFailCauseCode)) {
@@ -1434,6 +1418,25 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 notifyNoData(lastFailCauseCode, apnContext);
             }
         }
+    }
+
+    private void startAlarmForReconnect(int delay, ApnContext apnContext) {
+
+        if (DBG) {
+            log("Schedule alarm for reconnect: activate failed. Scheduling next attempt for "
+                + (delay / 1000) + "s");
+        }
+
+        AlarmManager am =
+            (AlarmManager) mPhone.getContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(INTENT_RECONNECT_ALARM);
+        intent.putExtra(INTENT_RECONNECT_ALARM_EXTRA_REASON, apnContext.getReason());
+        intent.putExtra(INTENT_RECONNECT_ALARM_EXTRA_TYPE, apnContext.getApnType());
+        apnContext.setReconnectIntent(PendingIntent.getBroadcast (
+                mPhone.getContext(), 0, intent, 0));
+        am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + delay, apnContext.getReconnectIntent());
+
     }
 
     private void notifyNoData(GsmDataConnection.FailCause lastFailCauseCode,
@@ -1723,8 +1726,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 apnContext.setState(State.SCANNING);
                 // Wait a bit before trying the next APN, so that
                 // we're not tying up the RIL command channel
-                sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, apnContext),
-                        APN_DELAY_MILLIS);
+                startAlarmForReconnect(APN_DELAY_MILLIS, apnContext);
             }
         }
     }
@@ -1764,7 +1766,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             // Wait a bit before trying the next APN, so that
             // we're not tying up the RIL command channel.
             // This also helps in any external dependency to turn off the context.
-            sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, apnContext),APN_DELAY_MILLIS);
+            startAlarmForReconnect(APN_DELAY_MILLIS, apnContext);
         }
     }
 
