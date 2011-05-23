@@ -987,7 +987,7 @@ public abstract class DataConnectionTracker extends Handler {
                     resetAllRetryCounts();
                     onTrySetupData(Phone.REASON_DATA_ENABLED);
                 } else {
-                    onCleanUpConnection(true, APN_DEFAULT_ID, Phone.REASON_DATA_DISABLED);
+                    onCleanUpAllConnections(Phone.REASON_DATA_DISABLED);
                 }
             }
         }
