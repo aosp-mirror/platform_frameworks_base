@@ -516,9 +516,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("; EventType: " + mEventType);
-        builder.append("; EventTime: " + mEventTime);
-        builder.append("; PackageName: " + mPackageName);
+        builder.append("; EventType: ").append(eventTypeToString(mEventType));
+        builder.append("; EventTime: ").append(mEventTime);
+        builder.append("; PackageName: ").append(mPackageName);
         builder.append(" \n{\n");
         builder.append(super.toString());
         builder.append("\n");
@@ -532,6 +532,42 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         }
         builder.append("}\n");
         return builder.toString();
+    }
+
+    /**
+     * Returns the string representation of an event type. For example,
+     * {@link #TYPE_VIEW_CLICKED} is represented by the string TYPE_VIEW_CLICKED.
+     *
+     * @param feedbackType The event type
+     * @return The string representation.
+     */
+    public static String eventTypeToString(int feedbackType) {
+        switch (feedbackType) {
+            case TYPE_VIEW_CLICKED:
+                return "TYPE_VIEW_CLICKED";
+            case TYPE_VIEW_LONG_CLICKED:
+                return "TYPE_VIEW_LONG_CLICKED";
+            case TYPE_VIEW_SELECTED:
+                return "TYPE_VIEW_SELECTED";
+            case TYPE_VIEW_FOCUSED:
+                return "TYPE_VIEW_FOCUSED";
+            case TYPE_VIEW_TEXT_CHANGED:
+                return "TYPE_VIEW_TEXT_CHANGED";
+            case TYPE_WINDOW_STATE_CHANGED:
+                return "TYPE_WINDOW_STATE_CHANGED";
+            case TYPE_VIEW_HOVER_ENTER:
+                return "TYPE_VIEW_HOVER_ENTER";
+            case TYPE_VIEW_HOVER_EXIT:
+                return "TYPE_VIEW_HOVER_EXIT";
+            case TYPE_NOTIFICATION_STATE_CHANGED:
+                return "TYPE_NOTIFICATION_STATE_CHANGED";  
+            case TYPE_TOUCH_EXPLORATION_GESTURE_START:
+                return "TYPE_TOUCH_EXPLORATION_GESTURE_START";
+            case TYPE_TOUCH_EXPLORATION_GESTURE_END:
+                return "TYPE_TOUCH_EXPLORATION_GESTURE_END";
+            default:
+                return null;
+        }
     }
 
     /**

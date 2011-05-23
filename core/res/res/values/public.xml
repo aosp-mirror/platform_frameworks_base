@@ -1686,4 +1686,12 @@
   <public type="attr" name="layout_columnWeight" />
 
   <public type="attr" name="isAuxiliary" />
+
+  <public type="attr" name="accessibilityEventTypes" />
+  <public type="attr" name="packageNames" />
+  <public type="attr" name="accessibilityFeedbackType" />
+  <public type="attr" name="notificationTimeout" />
+  <public type="attr" name="accessibilityFlags" />
+  <public type="attr" name="canRetrieveWindowContent" />
+
 </resources>

@@ -25,6 +25,7 @@ import static org.easymock.EasyMock.verify;
 
 import org.easymock.IArgumentMatcher;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.pm.ServiceInfo;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -62,20 +63,22 @@ public class AccessibilityManagerTest extends AndroidTestCase {
     @MediumTest
     public void testGetAccessibilityServiceList() throws Exception {
         // create a list of installed accessibility services the mock service returns
-        List<ServiceInfo> expectedServices = new ArrayList<ServiceInfo>();
-        ServiceInfo serviceInfo = new ServiceInfo();
-        serviceInfo.name = "TestServiceInfoName";
-        expectedServices.add(serviceInfo);
+        List<AccessibilityServiceInfo> expectedServices = new ArrayList<AccessibilityServiceInfo>();
+        AccessibilityServiceInfo accessibilityServiceInfo = new AccessibilityServiceInfo();
+        accessibilityServiceInfo.packageNames = new String[] { "foo.bar" };
+        expectedServices.add(accessibilityServiceInfo);
 
         // configure the mock service behavior
         IAccessibilityManager mockServiceInterface = mMockServiceInterface;
         expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient())).andReturn(true);
-        expect(mockServiceInterface.getAccessibilityServiceList()).andReturn(expectedServices);
+        expect(mockServiceInterface.getInstalledAccessibilityServiceList()).andReturn(
+                expectedServices);
         replay(mockServiceInterface);
 
         // invoke the method under test
         AccessibilityManager manager = new AccessibilityManager(mContext, mockServiceInterface);
-        List<ServiceInfo> receivedServices = manager.getAccessibilityServiceList();
+        List<AccessibilityServiceInfo> receivedServices =
+            manager.getInstalledAccessibilityServiceList();
 
         // check expected result (list equals() compares it contents as well)
         assertEquals("All expected services must be returned", receivedServices, expectedServices);

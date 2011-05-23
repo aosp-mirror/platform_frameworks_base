@@ -269,6 +269,7 @@ package android {
     field public static final int cacheColorHint = 16843009; // 0x1010101
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
+    field public static final int canRetrieveWindowContent = 16843646; // 0x101037e
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
     field public static final int centerBright = 16842956; // 0x10100cc
@@ -309,6 +310,7 @@ package android {
     field public static final int completionHintView = 16843123; // 0x1010173
     field public static final int completionThreshold = 16843124; // 0x1010174
     field public static final int configChanges = 16842783; // 0x101001f
+    field public static final int configurationFlags = 16843645; // 0x101037d
     field public static final int configure = 16843357; // 0x101025d
     field public static final int constantSize = 16843158; // 0x1010196
     field public static final int content = 16843355; // 0x101025b
@@ -387,6 +389,7 @@ package android {
     field public static final int enterFadeDuration = 16843532; // 0x101030c
     field public static final int entries = 16842930; // 0x10100b2
     field public static final int entryValues = 16843256; // 0x10101f8
+    field public static final int eventNotificationTimeout = 16843644; // 0x101037c
     field public static final int eventsInterceptionEnabled = 16843389; // 0x101027d
     field public static final int excludeFromRecents = 16842775; // 0x1010017
     field public static final int exitFadeDuration = 16843533; // 0x101030d
@@ -469,6 +472,8 @@ package android {
     field public static final int hand_minute = 16843012; // 0x1010104
     field public static final int handle = 16843354; // 0x101025a
     field public static final int handleProfiling = 16842786; // 0x1010022
+    field public static final int handledEventTypes = 16843641; // 0x1010379
+    field public static final int handledPackageNames = 16843642; // 0x101037a
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
     field public static final int hardwareAccelerated = 16843475; // 0x10102d3
     field public static final int hasCode = 16842764; // 0x101000c
@@ -724,6 +729,7 @@ package android {
     field public static final int prompt = 16843131; // 0x101017b
     field public static final int propertyName = 16843489; // 0x10102e1
     field public static final int protectionLevel = 16842761; // 0x1010009
+    field public static final int providedFeedbackType = 16843643; // 0x101037b
     field public static final int queryActionMsg = 16843227; // 0x10101db
     field public static final int queryAfterZeroResults = 16843394; // 0x1010282
     field public static final int queryHint = 16843608; // 0x1010358
@@ -1693,11 +1699,18 @@ package android.accessibilityservice {
     method protected void onServiceConnected();
     method public final void setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo);
     field public static final java.lang.String SERVICE_INTERFACE = "android.accessibilityservice.AccessibilityService";
+    field public static final java.lang.String SERVICE_META_DATA = "android.accessibilityservice";
   }
 
   public class AccessibilityServiceInfo implements android.os.Parcelable {
     ctor public AccessibilityServiceInfo();
     method public int describeContents();
+    method public static java.lang.String feedbackTypeToString(int);
+    method public static java.lang.String flagToString(int);
+    method public boolean getCanRetrieveWindowContent();
+    method public java.lang.String getId();
+    method public android.content.pm.ResolveInfo getResolveInfo();
+    method public java.lang.String getSettingsActivityName();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int DEFAULT = 1; // 0x1
@@ -22250,6 +22263,7 @@ package android.view.accessibility {
   public final class AccessibilityEvent extends android.view.accessibility.AccessibilityRecord implements android.os.Parcelable {
     method public void appendRecord(android.view.accessibility.AccessibilityRecord);
     method public int describeContents();
+    method public static java.lang.String eventTypeToString(int);
     method public long getEventTime();
     method public int getEventType();
     method public java.lang.CharSequence getPackageName();
@@ -22285,8 +22299,9 @@ package android.view.accessibility {
   }
 
   public final class AccessibilityManager {
-    method public java.util.List<android.content.pm.ServiceInfo> getAccessibilityServiceList();
-    method public java.util.List<android.content.pm.ServiceInfo> getEnabledAccessibilityServiceList(int);
+    method public deprecated java.util.List<android.content.pm.ServiceInfo> getAccessibilityServiceList();
+    method public java.util.List<android.accessibilityservice.AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int);
+    method public java.util.List<android.accessibilityservice.AccessibilityServiceInfo> getInstalledAccessibilityServiceList();
     method public void interrupt();
     method public boolean isEnabled();
     method public void sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
