@@ -24,6 +24,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.media.MediaFile;
+import android.net.ProxyProperties;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -705,7 +706,7 @@ final class WebViewCore {
                                     throw new IllegalStateException(
                                             "No WebView has been created in this process!");
                                 }
-                                BrowserFrame.sJavaBridge.updateProxy((String) msg.obj);
+                                BrowserFrame.sJavaBridge.updateProxy((ProxyProperties)msg.obj);
                                 break;
                         }
                     }
