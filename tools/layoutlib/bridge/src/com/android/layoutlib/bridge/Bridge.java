@@ -199,8 +199,8 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
                 //Capability.LAYOUT_ONLY, // disable to run on ADT 10.0 which doesn't include this.
                 Capability.EMBEDDED_LAYOUT,
                 Capability.VIEW_MANIPULATION,
-                Capability.ADAPTER_BINDING);
-
+                Capability.ADAPTER_BINDING,
+                Capability.EXTENDED_VIEWINFO);
 
         BridgeAssetManager.initSystem();
 
@@ -392,15 +392,6 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
             }
 
             return Status.SUCCESS.createResult();
-        }
-
-        throw new IllegalArgumentException("viewObject is not a View");
-    }
-
-    @Override
-    public int getViewBaseline(Object viewObject) {
-        if (viewObject instanceof View) {
-            return ((View) viewObject).getBaseline();
         }
 
         throw new IllegalArgumentException("viewObject is not a View");
