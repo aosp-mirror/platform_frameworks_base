@@ -25,6 +25,7 @@ import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.SessionParams;
+import com.android.ide.common.rendering.api.Result.Status;
 import com.android.layoutlib.bridge.android.BridgeAssetManager;
 import com.android.layoutlib.bridge.impl.FontLoader;
 import com.android.layoutlib.bridge.impl.RenderDrawable;
@@ -39,6 +40,9 @@ import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.graphics.Typeface_Delegate;
 import android.os.Looper;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewParent;
 
 import java.io.File;
 import java.lang.ref.SoftReference;
@@ -194,7 +198,8 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
                 Capability.RENDER,
                 //Capability.LAYOUT_ONLY, // disable to run on ADT 10.0 which doesn't include this.
                 Capability.EMBEDDED_LAYOUT,
-                Capability.VIEW_MANIPULATION);
+                Capability.VIEW_MANIPULATION,
+                Capability.ADAPTER_BINDING);
 
 
         BridgeAssetManager.initSystem();
@@ -365,6 +370,40 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
             sProjectBitmapCache.remove(projectKey);
             sProject9PatchCache.remove(projectKey);
         }
+    }
+
+    @Override
+    public Result getViewParent(Object viewObject) {
+        if (viewObject instanceof View) {
+            return Status.SUCCESS.createResult(((View)viewObject).getParent());
+        }
+
+        throw new IllegalArgumentException("viewObject is not a View");
+    }
+
+    @Override
+    public Result getViewIndex(Object viewObject) {
+        if (viewObject instanceof View) {
+            View view = (View) viewObject;
+            ViewParent parentView = view.getParent();
+
+            if (parentView instanceof ViewGroup) {
+                Status.SUCCESS.createResult(((ViewGroup) parentView).indexOfChild(view));
+            }
+
+            return Status.SUCCESS.createResult();
+        }
+
+        throw new IllegalArgumentException("viewObject is not a View");
+    }
+
+    @Override
+    public int getViewBaseline(Object viewObject) {
+        if (viewObject instanceof View) {
+            return ((View) viewObject).getBaseline();
+        }
+
+        throw new IllegalArgumentException("viewObject is not a View");
     }
 
     /**
