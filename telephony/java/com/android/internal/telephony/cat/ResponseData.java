@@ -18,6 +18,8 @@ package com.android.internal.telephony.cat;
 
 import com.android.internal.telephony.EncodeException;
 import com.android.internal.telephony.GsmAlphabet;
+import java.util.Calendar;
+import com.android.internal.telephony.cat.AppInterface.CommandType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -147,4 +149,109 @@ class GetInkeyInputResponseData extends ResponseData {
     }
 }
 
+// For "PROVIDE LOCAL INFORMATION" command.
+// See TS 31.111 section 6.4.15/ETSI TS 102 223
+// TS 31.124 section 27.22.4.15 for test spec
+class LanguageResponseData extends ResponseData {
+    private String lang;
+
+    public LanguageResponseData(String lang) {
+        super();
+        this.lang = lang;
+    }
+
+    @Override
+    public void format(ByteArrayOutputStream buf) {
+        if (buf == null) {
+            return;
+        }
+
+        // Text string object
+        int tag = 0x80 | ComprehensionTlvTag.LANGUAGE.value();
+        buf.write(tag); // tag
+
+        byte[] data;
+
+        if (lang != null && lang.length() > 0) {
+            data = GsmAlphabet.stringToGsm8BitPacked(lang);
+        }
+        else {
+            data = new byte[0];
+        }
+
+        buf.write(data.length);
+
+        for (byte b : data) {
+            buf.write(b);
+        }
+    }
+}
+
+// For "PROVIDE LOCAL INFORMATION" command.
+// See TS 31.111 section 6.4.15/ETSI TS 102 223
+// TS 31.124 section 27.22.4.15 for test spec
+class DTTZResponseData extends ResponseData {
+    private Calendar calendar;
+
+    public DTTZResponseData(Calendar cal) {
+        super();
+        calendar = cal;
+    }
+
+    @Override
+    public void format(ByteArrayOutputStream buf) {
+        if (buf == null) {
+            return;
+        }
+
+        // DTTZ object
+        int tag = 0x80 | CommandType.PROVIDE_LOCAL_INFORMATION.value();
+        buf.write(tag); // tag
+
+        byte[] data = new byte[8];
+        byte btmp; // temp variable
+
+        data[0] = 0x07; // Write length of DTTZ data
+
+        if (calendar == null) {
+            calendar = Calendar.getInstance();
+        }
+        // Fill year byte
+        btmp = (byte) (calendar.get(java.util.Calendar.YEAR) % 100);
+        data[1] = (byte) (btmp / 10);
+        data[1] += (byte) ((btmp % 10) << 4);
+
+        // Fill month byte
+        btmp = (byte) (calendar.get(java.util.Calendar.MONTH) + 1);
+        data[2] = (byte) (btmp / 10);
+        data[2] += (byte) ((btmp % 10) << 4);
+
+        // Fill day byte
+        btmp = (byte) (calendar.get(java.util.Calendar.DATE));
+        data[3] = (byte) (btmp / 10);
+        data[3] += (byte) ((btmp % 10) << 4);
+
+        // Fill hour byte
+        btmp = (byte) (calendar.get(java.util.Calendar.HOUR_OF_DAY));
+        data[4] = (byte) (btmp / 10);
+        data[4] += (byte) ((btmp % 10) << 4);
+
+        // Fill minute byte
+        btmp = (byte) (calendar.get(java.util.Calendar.MINUTE));
+        data[5] = (byte) (btmp / 10);
+        data[5] += (byte) ((btmp % 10) << 4);
+
+        // Fill second byte
+        btmp = (byte) (calendar.get(java.util.Calendar.SECOND));
+        data[6] = (byte) (btmp / 10);
+        data[6] += (byte) ((btmp % 10) << 4);
+
+        // No time zone info
+        data[7] = (byte) 0xFF;
+
+        for (byte b : data) {
+            buf.write(b);
+        }
+    }
+}
 
