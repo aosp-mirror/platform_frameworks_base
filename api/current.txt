@@ -866,6 +866,7 @@ package android {
     field public static final int subtitleTextStyle = 16843513; // 0x10102f9
     field public static final int suggestActionMsg = 16843228; // 0x10101dc
     field public static final int suggestActionMsgColumn = 16843229; // 0x10101dd
+    field public static final int suggestionsEnabled = 16843630; // 0x101036e
     field public static final int summary = 16843241; // 0x10101e9
     field public static final int summaryColumn = 16843426; // 0x10102a2
     field public static final int summaryOff = 16843248; // 0x10101f0
@@ -25227,6 +25228,7 @@ package android.widget {
     method public android.text.style.URLSpan[] getUrls();
     method public boolean hasSelection();
     method public boolean isInputMethodTarget();
+    method public boolean isSuggestionsEnabled();
     method public boolean isTextSelectable();
     method public int length();
     method public boolean moveCursorToVisibleOffset();
@@ -25298,6 +25300,7 @@ package android.widget {
     method public void setSingleLine();
     method public void setSingleLine(boolean);
     method public final void setSpannableFactory(android.text.Spannable.Factory);
+    method public void setSuggestionsEnabled(boolean);
     method public final void setText(java.lang.CharSequence);
     method public void setText(java.lang.CharSequence, android.widget.TextView.BufferType);
     method public final void setText(char[], int, int);
