@@ -129,13 +129,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         mNMService = nmService;
         mLooper = looper;
 
-        // register for notifications from NetworkManagement Service
-        try {
-            mNMService.registerObserver(this);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error registering observer :" + e);
-        }
-
         mIfaces = new HashMap<String, TetherInterfaceSM>();
 
         // make our own thread so we don't anr the system

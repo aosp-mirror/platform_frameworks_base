@@ -441,6 +441,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                   mTethering.getTetherableBluetoothRegexs().length != 0) &&
                                  mTethering.getUpstreamIfaceRegexs().length != 0);
 
+        try {
+            nmService.registerObserver(mTethering);
+        } catch (RemoteException e) {
+            loge("Error registering observer :" + e);
+        }
+
         if (DBG) {
             mInetLog = new ArrayList();
         }
