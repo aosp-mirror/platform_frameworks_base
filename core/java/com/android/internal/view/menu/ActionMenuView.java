@@ -89,7 +89,6 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         final int childCount = getChildCount();
         final int midVertical = (top + bottom) / 2;
         final int dividerWidth = getDividerWidth();
-        boolean hasOverflow = false;
         int overflowWidth = 0;
         int nonOverflowWidth = 0;
         int nonOverflowCount = 0;
@@ -102,7 +101,6 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
             LayoutParams p = (LayoutParams) v.getLayoutParams();
             if (p.isOverflowButton) {
-                hasOverflow = true;
                 overflowWidth = v.getMeasuredWidth();
                 if (hasDividerBeforeChildAt(i)) {
                     overflowWidth += dividerWidth;
@@ -125,15 +123,12 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             }
         }
 
-        // Try to center non-overflow items with uniformly spaced padding, including on the edges.
-        // Overflow will always pin to the right edge. If there isn't enough room for that,
-        // center in the remaining space.
+        // Fill action items from the left. Overflow will always pin to the right edge.
         if (nonOverflowWidth <= widthRemaining - overflowWidth) {
             widthRemaining -= overflowWidth;
         }
 
-        final int spacing = (widthRemaining - nonOverflowWidth) / (nonOverflowCount + 1);
-        int startLeft = getPaddingLeft() + overflowWidth + spacing;
+        int startLeft = getPaddingLeft();
         for (int i = 0; i < childCount; i++) {
             final View v = getChildAt(i);
             final LayoutParams lp = (LayoutParams) v.getLayoutParams();
@@ -146,7 +141,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             int height = v.getMeasuredHeight();
             int t = midVertical - (height / 2);
             v.layout(startLeft, t, startLeft + width, t + height);
-            startLeft += width + lp.rightMargin + spacing;
+            startLeft += width + lp.rightMargin;
         }
     }
 
