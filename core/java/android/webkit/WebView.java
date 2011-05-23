@@ -1395,6 +1395,10 @@ public class WebView extends AbsoluteLayout
      */
     public int getVisibleTitleHeight() {
         checkThread();
+        return getVisibleTitleHeightImpl();
+    }
+
+    private int getVisibleTitleHeightImpl() {
         // need to restrict mScrollY due to over scroll
         return Math.max(getTitleHeight() - Math.max(0, mScrollY), 0);
     }
@@ -1405,7 +1409,7 @@ public class WebView extends AbsoluteLayout
      * Note: this can be called from WebCoreThread.
      */
     /* package */ int getViewHeight() {
-        return getViewHeightWithTitle() - getVisibleTitleHeight();
+        return getViewHeightWithTitle() - getVisibleTitleHeightImpl();
     }
 
     private int getViewHeightWithTitle() {
@@ -2711,7 +2715,7 @@ public class WebView extends AbsoluteLayout
         // the visible height back in to account for the fact that if the title
         // bar is partially visible, the part of the visible rect which is
         // displaying our content is displaced by that amount.
-        r.top = viewToContentY(r.top + getVisibleTitleHeight());
+        r.top = viewToContentY(r.top + getVisibleTitleHeightImpl());
         r.right = viewToContentX(r.right);
         r.bottom = viewToContentY(r.bottom);
     }
@@ -2728,7 +2732,7 @@ public class WebView extends AbsoluteLayout
         // the visible height back in to account for the fact that if the title
         // bar is partially visible, the part of the visible rect which is
         // displaying our content is displaced by that amount.
-        r.top = viewToContentYf(ri.top + getVisibleTitleHeight());
+        r.top = viewToContentYf(ri.top + getVisibleTitleHeightImpl());
         r.right = viewToContentXf(ri.right);
         r.bottom = viewToContentYf(ri.bottom);
     }
@@ -2876,7 +2880,7 @@ public class WebView extends AbsoluteLayout
         if (mScrollY < 0) {
             t -= mScrollY;
         }
-        scrollBar.setBounds(l, t + getVisibleTitleHeight(), r, b);
+        scrollBar.setBounds(l, t + getVisibleTitleHeightImpl(), r, b);
         scrollBar.draw(canvas);
     }
 
@@ -5106,7 +5110,7 @@ public class WebView extends AbsoluteLayout
             Rect rect = nativeCursorNodeBounds();
             mSelectX = contentToViewX(rect.left);
             mSelectY = contentToViewY(rect.top);
-        } else if (mLastTouchY > getVisibleTitleHeight()) {
+        } else if (mLastTouchY > getVisibleTitleHeightImpl()) {
             mSelectX = mScrollX + mLastTouchX;
             mSelectY = mScrollY + mLastTouchY;
         } else {
@@ -5424,7 +5428,7 @@ public class WebView extends AbsoluteLayout
             int rootViewHeight = rootView.getHeight();
             mViewRectViewport.set(mGLRectViewport);
             int savedWebViewBottom = mGLRectViewport.bottom;
-            mGLRectViewport.bottom = rootViewHeight - mGLRectViewport.top - getVisibleTitleHeight();
+            mGLRectViewport.bottom = rootViewHeight - mGLRectViewport.top - getVisibleTitleHeightImpl();
             mGLRectViewport.top = rootViewHeight - savedWebViewBottom;
             mGLViewportEmpty = false;
         } else {
@@ -5474,7 +5478,7 @@ public class WebView extends AbsoluteLayout
         if (!mInOverScrollMode) {
             sendOurVisibleRect();
             // update WebKit if visible title bar height changed. The logic is same
-            // as getVisibleTitleHeight.
+            // as getVisibleTitleHeightImpl.
             int titleHeight = getTitleHeight();
             if (Math.max(titleHeight - t, 0) != Math.max(titleHeight - oldt, 0)) {
                 sendViewSizeZoom(false);
@@ -8275,7 +8279,7 @@ public class WebView extends AbsoluteLayout
                             (Math.min(maxHeight, y + viewHeight) - viewHeight));
                     // We need to take into account the visible title height
                     // when scrolling since y is an absolute view position.
-                    y = Math.max(0, y - getVisibleTitleHeight());
+                    y = Math.max(0, y - getVisibleTitleHeightImpl());
                     scrollTo(x, y);
                     }
                     break;
