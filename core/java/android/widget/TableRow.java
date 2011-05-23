@@ -224,7 +224,8 @@ public class TableRow extends LinearLayout {
                 final int childWidth = child.getMeasuredWidth();
                 lp.mOffset[LayoutParams.LOCATION_NEXT] = columnWidth - childWidth;
 
-                switch (gravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
+                final int absoluteGravity = Gravity.getAbsoluteGravity(gravity, isLayoutRtl());
+                switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
                         // don't offset on X axis
                         break;

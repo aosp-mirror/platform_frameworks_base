@@ -115,7 +115,7 @@ public class FrameLayout extends ViewGroup {
     }
 
     /**
-     * Describes how the foreground is positioned. Defaults to FILL.
+     * Describes how the foreground is positioned. Defaults to BEFORE and TOP.
      *
      * @param foregroundGravity See {@link android.view.Gravity}
      *
@@ -124,8 +124,8 @@ public class FrameLayout extends ViewGroup {
     @android.view.RemotableViewMethod
     public void setForegroundGravity(int foregroundGravity) {
         if (mForegroundGravity != foregroundGravity) {
-            if ((foregroundGravity & Gravity.HORIZONTAL_GRAVITY_MASK) == 0) {
-                foregroundGravity |= Gravity.LEFT;
+            if ((foregroundGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) == 0) {
+                foregroundGravity |= Gravity.BEFORE;
             }
 
             if ((foregroundGravity & Gravity.VERTICAL_GRAVITY_MASK) == 0) {
@@ -364,7 +364,7 @@ public class FrameLayout extends ViewGroup {
                     gravity = DEFAULT_CHILD_GRAVITY;
                 }
 
-                final int horizontalGravity = gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+                final int horizontalGravity = Gravity.getAbsoluteGravity(gravity, isLayoutRtl());
                 final int verticalGravity = gravity & Gravity.VERTICAL_GRAVITY_MASK;
 
                 switch (horizontalGravity) {
@@ -436,7 +436,7 @@ public class FrameLayout extends ViewGroup {
                 }
 
                 Gravity.apply(mForegroundGravity, foreground.getIntrinsicWidth(),
-                        foreground.getIntrinsicHeight(), selfBounds, overlayBounds);
+                        foreground.getIntrinsicHeight(), selfBounds, overlayBounds, isLayoutRtl());
                 foreground.setBounds(overlayBounds);
             }
             

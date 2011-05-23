@@ -110,6 +110,8 @@ public class LinearLayout extends ViewGroup {
             @ViewDebug.IntToString(from = Gravity.BOTTOM,            to = "BOTTOM"),
             @ViewDebug.IntToString(from = Gravity.LEFT,              to = "LEFT"),
             @ViewDebug.IntToString(from = Gravity.RIGHT,             to = "RIGHT"),
+            @ViewDebug.IntToString(from = Gravity.BEFORE,            to = "BEFORE"),
+            @ViewDebug.IntToString(from = Gravity.AFTER,             to = "AFTER"),
             @ViewDebug.IntToString(from = Gravity.CENTER_VERTICAL,   to = "CENTER_VERTICAL"),
             @ViewDebug.IntToString(from = Gravity.FILL_VERTICAL,     to = "FILL_VERTICAL"),
             @ViewDebug.IntToString(from = Gravity.CENTER_HORIZONTAL, to = "CENTER_HORIZONTAL"),
@@ -117,7 +119,7 @@ public class LinearLayout extends ViewGroup {
             @ViewDebug.IntToString(from = Gravity.CENTER,            to = "CENTER"),
             @ViewDebug.IntToString(from = Gravity.FILL,              to = "FILL")
         })
-    private int mGravity = Gravity.LEFT | Gravity.TOP;
+    private int mGravity = Gravity.BEFORE | Gravity.TOP;
 
     @ViewDebug.ExportedProperty(category = "measurement")
     private int mTotalLength;
@@ -1344,7 +1346,7 @@ public class LinearLayout extends ViewGroup {
         final int count = getVirtualChildCount();
 
         final int majorGravity = mGravity & Gravity.VERTICAL_GRAVITY_MASK;
-        final int minorGravity = mGravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+        final int minorGravity = mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
 
         switch (majorGravity) {
            case Gravity.BOTTOM:
@@ -1378,7 +1380,7 @@ public class LinearLayout extends ViewGroup {
                 if (gravity < 0) {
                     gravity = minorGravity;
                 }
-
+                gravity = Gravity.getAbsoluteGravity(gravity, isLayoutRtl());
                 switch (gravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.CENTER_HORIZONTAL:
                         childLeft = paddingLeft + ((childSpace - childWidth) / 2)
@@ -1433,7 +1435,7 @@ public class LinearLayout extends ViewGroup {
 
         final int count = getVirtualChildCount();
 
-        final int majorGravity = mGravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+        final int majorGravity = mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
         final int minorGravity = mGravity & Gravity.VERTICAL_GRAVITY_MASK;
 
         final boolean baselineAligned = mBaselineAligned;
@@ -1441,7 +1443,7 @@ public class LinearLayout extends ViewGroup {
         final int[] maxAscent = mMaxAscent;
         final int[] maxDescent = mMaxDescent;
 
-        switch (majorGravity) {
+        switch (Gravity.getAbsoluteGravity(majorGravity, isLayoutRtl())) {
             case Gravity.RIGHT:
                 // mTotalLength contains the padding already
                 childLeft = mPaddingLeft + mRight - mLeft - mTotalLength;
@@ -1580,8 +1582,8 @@ public class LinearLayout extends ViewGroup {
     @android.view.RemotableViewMethod
     public void setGravity(int gravity) {
         if (mGravity != gravity) {
-            if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == 0) {
-                gravity |= Gravity.LEFT;
+            if ((gravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) == 0) {
+                gravity |= Gravity.BEFORE;
             }
 
             if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == 0) {
@@ -1595,9 +1597,9 @@ public class LinearLayout extends ViewGroup {
 
     @android.view.RemotableViewMethod
     public void setHorizontalGravity(int horizontalGravity) {
-        final int gravity = horizontalGravity & Gravity.HORIZONTAL_GRAVITY_MASK;
-        if ((mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != gravity) {
-            mGravity = (mGravity & ~Gravity.HORIZONTAL_GRAVITY_MASK) | gravity;
+        final int gravity = horizontalGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
+        if ((mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) != gravity) {
+            mGravity = (mGravity & ~Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) | gravity;
             requestLayout();
         }
     }
@@ -1674,6 +1676,8 @@ public class LinearLayout extends ViewGroup {
             @ViewDebug.IntToString(from = Gravity.BOTTOM,            to = "BOTTOM"),
             @ViewDebug.IntToString(from = Gravity.LEFT,              to = "LEFT"),
             @ViewDebug.IntToString(from = Gravity.RIGHT,             to = "RIGHT"),
+            @ViewDebug.IntToString(from = Gravity.BEFORE,            to = "BEFORE"),
+            @ViewDebug.IntToString(from = Gravity.AFTER,             to = "AFTER"),
             @ViewDebug.IntToString(from = Gravity.CENTER_VERTICAL,   to = "CENTER_VERTICAL"),
             @ViewDebug.IntToString(from = Gravity.FILL_VERTICAL,     to = "FILL_VERTICAL"),
             @ViewDebug.IntToString(from = Gravity.CENTER_HORIZONTAL, to = "CENTER_HORIZONTAL"),

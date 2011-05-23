@@ -187,6 +187,11 @@ public class ImageView extends View {
     }
 
     @Override
+    public boolean isLayoutRtl(Drawable dr) {
+        return ((dr == mDrawable) && isLayoutRtl()) || super.isLayoutRtl(dr);
+    }
+
+    @Override
     protected boolean onSetAlpha(int alpha) {
         if (getBackground() == null) {
             int scale = alpha + (alpha >> 7);

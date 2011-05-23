@@ -8321,6 +8321,7 @@ package android.graphics.drawable {
     method public android.graphics.Region getTransparentRegion();
     method public void inflate(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public void invalidateSelf();
+    method public boolean isLayoutRtlSelf();
     method public boolean isStateful();
     method public final boolean isVisible();
     method public void jumpToCurrentState();
@@ -8349,6 +8350,10 @@ package android.graphics.drawable {
     method public abstract void invalidateDrawable(android.graphics.drawable.Drawable);
     method public abstract void scheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable, long);
     method public abstract void unscheduleDrawable(android.graphics.drawable.Drawable, java.lang.Runnable);
+  }
+
+  public static abstract interface Drawable.Callback2 implements android.graphics.drawable.Drawable.Callback {
+    method public abstract boolean isLayoutRtl(android.graphics.drawable.Drawable);
   }
 
   public static abstract class Drawable.ConstantState {
@@ -20107,14 +20112,17 @@ package android.view {
     method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect);
     method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect);
     method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect);
+    method public static int getAbsoluteGravity(int, boolean);
     method public static boolean isHorizontal(int);
     method public static boolean isVertical(int);
+    field public static final int AFTER = 8388613; // 0x800005
     field public static final int AXIS_CLIP = 8; // 0x8
     field public static final int AXIS_PULL_AFTER = 4; // 0x4
     field public static final int AXIS_PULL_BEFORE = 2; // 0x2
     field public static final int AXIS_SPECIFIED = 1; // 0x1
     field public static final int AXIS_X_SHIFT = 0; // 0x0
     field public static final int AXIS_Y_SHIFT = 4; // 0x4
+    field public static final int BEFORE = 8388611; // 0x800003
     field public static final int BOTTOM = 80; // 0x50
     field public static final int CENTER = 17; // 0x11
     field public static final int CENTER_HORIZONTAL = 1; // 0x1
@@ -20129,6 +20137,8 @@ package android.view {
     field public static final int HORIZONTAL_GRAVITY_MASK = 7; // 0x7
     field public static final int LEFT = 3; // 0x3
     field public static final int NO_GRAVITY = 0; // 0x0
+    field public static final int RELATIVE_HORIZONTAL_DIRECTION = 8388608; // 0x800000
+    field public static final int RELATIVE_HORIZONTAL_GRAVITY_MASK = 8388615; // 0x800007
     field public static final int RIGHT = 5; // 0x5
     field public static final int TOP = 48; // 0x30
     field public static final int VERTICAL_GRAVITY_MASK = 112; // 0x70
@@ -21107,7 +21117,7 @@ package android.view {
     method public void recycle();
   }
 
-  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback android.view.KeyEvent.Callback {
+  public class View implements android.view.accessibility.AccessibilityEventSource android.graphics.drawable.Drawable.Callback2 android.view.KeyEvent.Callback {
     ctor public View(android.content.Context);
     ctor public View(android.content.Context, android.util.AttributeSet);
     ctor public View(android.content.Context, android.util.AttributeSet, int);
@@ -21293,6 +21303,7 @@ package android.view {
     method public boolean isInTouchMode();
     method public boolean isLayoutRequested();
     method public boolean isLayoutRtl();
+    method public boolean isLayoutRtl(android.graphics.drawable.Drawable);
     method public boolean isLongClickable();
     method public boolean isOpaque();
     method protected boolean isPaddingOffsetRequired();

@@ -1408,19 +1408,20 @@ public class GridView extends AbsListView {
         int childLeft;
         final int childTop = flow ? y : y - h;
 
-        switch (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
-        case Gravity.LEFT:
-            childLeft = childrenLeft;
-            break;
-        case Gravity.CENTER_HORIZONTAL:
-            childLeft = childrenLeft + ((mColumnWidth - w) / 2);
-            break;
-        case Gravity.RIGHT:
-            childLeft = childrenLeft + mColumnWidth - w;
-            break;
-        default:
-            childLeft = childrenLeft;
-            break;
+        final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity,isLayoutRtl());
+        switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
+            case Gravity.LEFT:
+                childLeft = childrenLeft;
+                break;
+            case Gravity.CENTER_HORIZONTAL:
+                childLeft = childrenLeft + ((mColumnWidth - w) / 2);
+                break;
+            case Gravity.RIGHT:
+                childLeft = childrenLeft + mColumnWidth - w;
+                break;
+            default:
+                childLeft = childrenLeft;
+                break;
         }
 
         if (needToMeasure) {

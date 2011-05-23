@@ -2093,8 +2093,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_gravity
      */
     public void setGravity(int gravity) {
-        if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == 0) {
-            gravity |= Gravity.LEFT;
+        if ((gravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) == 0) {
+            gravity |= Gravity.BEFORE;
         }
         if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == 0) {
             gravity |= Gravity.TOP;
@@ -2102,8 +2102,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         boolean newLayout = false;
 
-        if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) !=
-            (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK)) {
+        if ((gravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) !=
+            (mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK)) {
             newLayout = true;
         }
 
@@ -4142,6 +4142,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
+    public boolean isLayoutRtl(Drawable who) {
+        if (who == null) return false;
+        final TextView.Drawables drawables = mDrawables;
+        if (who == drawables.mDrawableLeft || who == drawables.mDrawableRight ||
+            who == drawables.mDrawableTop || who == drawables.mDrawableBottom) {
+            return isLayoutRtl();
+        }
+        return super.isLayoutRtl(who);
+    }
+
+    @Override
     protected boolean onSetAlpha(int alpha) {
         // Alpha is supported if and only if the drawing can be done in one pass.
         // TODO text with spans with a background color currently do not respect this alpha.
@@ -4380,9 +4391,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             canvas.translate(compoundPaddingLeft, extendedPaddingTop + voffsetText);
         }
 
+        final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, isLayoutRtl());
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (!mSingleLine && getLineCount() == 1 && canMarquee() &&
-                    (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != Gravity.LEFT) {
+                    (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != Gravity.LEFT) {
                 canvas.translate(mLayout.getLineRight(0) - (mRight - mLeft -
                         getCompoundPaddingLeft() - getCompoundPaddingRight()), 0.0f);
             }
@@ -5528,7 +5540,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         Layout.Alignment alignment;
-        switch (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
+        final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, isLayoutRtl());
+        switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
             case Gravity.CENTER_HORIZONTAL:
                 alignment = Layout.Alignment.ALIGN_CENTER;
                 break;
@@ -7563,7 +7576,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     return 0.0f;
                 }
             } else if (getLineCount() == 1) {
-                switch (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
+                final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, isLayoutRtl());
+                switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
                         return 0.0f;
                     case Gravity.RIGHT:
@@ -7586,7 +7600,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final Marquee marquee = mMarquee;
                 return (marquee.mMaxFadeScroll - marquee.mScroll) / getHorizontalFadingEdgeLength();
             } else if (getLineCount() == 1) {
-                switch (mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
+                final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, isLayoutRtl());
+                switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
                         final int textWidth = (mRight - mLeft) - getCompoundPaddingLeft() -
                                 getCompoundPaddingRight();
