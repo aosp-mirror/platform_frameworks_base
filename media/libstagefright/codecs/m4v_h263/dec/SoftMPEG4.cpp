@@ -360,10 +360,14 @@ void SoftMPEG4::onQueueFilled(OMX_U32 portIndex) {
             mFramesConfigured = true;
         }
 
-        uint32_t timestamp = 0xFFFFFFFF;
+        uint32_t useExtTimestamp = (inHeader->nOffset == 0);
+
+        // decoder deals in ms, OMX in us.
+        uint32_t timestamp =
+            useExtTimestamp ? (inHeader->nTimeStamp + 500) / 1000 : 0xFFFFFFFF;
+
         int32_t bufferSize = inHeader->nFilledLen;
 
-        uint32_t useExtTimestamp = 0;
         if (PVDecodeVideoFrame(
                     mHandle, &bitstream, &timestamp, &bufferSize,
                     &useExtTimestamp,
@@ -379,13 +383,20 @@ void SoftMPEG4::onQueueFilled(OMX_U32 portIndex) {
             return;
         }
 
-        outHeader->nTimeStamp = inHeader->nTimeStamp;
+        // decoder deals in ms, OMX in us.
+        outHeader->nTimeStamp = timestamp * 1000;
 
-        inInfo->mOwnedByUs = false;
-        inQueue.erase(inQueue.begin());
-        inInfo = NULL;
-        notifyEmptyBufferDone(inHeader);
-        inHeader = NULL;
+        CHECK_LE(bufferSize, inHeader->nFilledLen);
+        inHeader->nOffset += inHeader->nFilledLen - bufferSize;
+        inHeader->nFilledLen = bufferSize;
+
+        if (inHeader->nFilledLen == 0) {
+            inInfo->mOwnedByUs = false;
+            inQueue.erase(inQueue.begin());
+            inInfo = NULL;
+            notifyEmptyBufferDone(inHeader);
+            inHeader = NULL;
+        }
 
         ++mInputBufferCount;
 
