@@ -18,6 +18,7 @@ package android.speech.tts;
 import android.media.AudioFormat;
 import android.media.AudioTrack;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 /**
@@ -49,16 +50,20 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
     private final float mPan;
 
     private final Object mStateLock = new Object();
-    private AudioTrack mAudioTrack = null;
+    private final Handler mAudioTrackHandler;
+    private volatile AudioTrack mAudioTrack = null;
     private boolean mStopped = false;
     private boolean mDone = false;
+    private volatile boolean mWriteErrorOccured;
 
     PlaybackSynthesisRequest(String text, Bundle params,
-            int streamType, float volume, float pan) {
+            int streamType, float volume, float pan, Handler audioTrackHandler) {
         super(text, params);
         mStreamType = streamType;
         mVolume = volume;
         mPan = pan;
+        mAudioTrackHandler = audioTrackHandler;
+        mWriteErrorOccured = false;
     }
 
     @Override
@@ -70,14 +75,28 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
         }
     }
 
+    // Always guarded by mStateLock.
     private void cleanUp() {
         if (DBG) Log.d(TAG, "cleanUp()");
-        if (mAudioTrack != null) {
-            mAudioTrack.flush();
-            mAudioTrack.stop();
-            mAudioTrack.release();
-            mAudioTrack = null;
+        if (mAudioTrack == null) {
+            return;
         }
+
+        final AudioTrack audioTrack = mAudioTrack;
+        mAudioTrack = null;
+
+        // Clean up on the audiotrack handler thread.
+        //
+        // NOTE: It isn't very clear whether AudioTrack is thread safe.
+        // If it is we can clean up on the current (synthesis) thread.
+        mAudioTrackHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                audioTrack.flush();
+                audioTrack.stop();
+                audioTrack.release();
+            }
+        });
     }
 
     @Override
@@ -146,10 +165,15 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
             Log.d(TAG, "audioAvailable(byte[" + buffer.length + "],"
                     + offset + "," + length + ")");
         }
-        if (length > getMaxBufferSize()) {
-            throw new IllegalArgumentException("buffer is too large (" + length + " bytes)");
+        if (length > getMaxBufferSize() || length <= 0) {
+            throw new IllegalArgumentException("buffer is too large or of zero length (" +
+                    + length + " bytes)");
         }
         synchronized (mStateLock) {
+            if (mWriteErrorOccured) {
+                if (DBG) Log.d(TAG, "Error writing to audio track, count < 0");
+                return TextToSpeech.ERROR;
+            }
             if (mStopped) {
                 if (DBG) Log.d(TAG, "Request has been aborted.");
                 return TextToSpeech.ERROR;
@@ -158,22 +182,33 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
                 Log.e(TAG, "audioAvailable(): Not started");
                 return TextToSpeech.ERROR;
             }
-            int playState = mAudioTrack.getPlayState();
-            if (playState == AudioTrack.PLAYSTATE_STOPPED) {
-                if (DBG) Log.d(TAG, "AudioTrack stopped, restarting");
-                mAudioTrack.play();
-            }
-            // TODO: loop until all data is written?
-            if (DBG) Log.d(TAG, "AudioTrack.write()");
-            int count = mAudioTrack.write(buffer, offset, length);
-            if (DBG) Log.d(TAG, "AudioTrack.write() returned " + count);
-            if (count < 0) {
-                Log.e(TAG, "Writing to AudioTrack failed: " + count);
-                cleanUp();
-                return TextToSpeech.ERROR;
-            } else {
-                return TextToSpeech.SUCCESS;
-            }
+            final AudioTrack audioTrack = mAudioTrack;
+            // Sigh, another copy.
+            final byte[] bufferCopy = new byte[length];
+            System.arraycopy(buffer, offset, bufferCopy, 0, length);
+
+            mAudioTrackHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    int playState = audioTrack.getPlayState();
+                    if (playState == AudioTrack.PLAYSTATE_STOPPED) {
+                        if (DBG) Log.d(TAG, "AudioTrack stopped, restarting");
+                        audioTrack.play();
+                    }
+                    // TODO: loop until all data is written?
+                    if (DBG) Log.d(TAG, "AudioTrack.write()");
+                    int count = audioTrack.write(bufferCopy, 0, bufferCopy.length);
+                    // The semantics of this change very slightly. Earlier, we would
+                    // report an error immediately, Now we will return an error on
+                    // the next API call, usually done( ) or another audioAvailable( )
+                    // call.
+                    if (count < 0) {
+                        mWriteErrorOccured = true;
+                    }
+                }
+            });
+
+            return TextToSpeech.SUCCESS;
         }
     }
 
@@ -181,6 +216,10 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
     public int done() {
         if (DBG) Log.d(TAG, "done()");
         synchronized (mStateLock) {
+            if (mWriteErrorOccured) {
+                if (DBG) Log.d(TAG, "Error writing to audio track, count < 0");
+                return TextToSpeech.ERROR;
+            }
             if (mStopped) {
                 if (DBG) Log.d(TAG, "Request has been aborted.");
                 return TextToSpeech.ERROR;
