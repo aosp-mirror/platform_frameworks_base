@@ -234,7 +234,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
             if (action == MotionEvent.ACTION_DOWN) {
               boolean cap = isSelecting(buffer);
               if (cap) {
-                  int offset = widget.getOffset((int) event.getX(), (int) event.getY());
+                  int offset = widget.getOffsetForPosition(event.getX(), event.getY());
 
                   buffer.setSpan(LAST_TAP_DOWN, offset, offset, Spannable.SPAN_POINT_POINT);
 
@@ -259,7 +259,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                     // Update selection as we're moving the selection area.
 
                     // Get the current touch position
-                    int offset = widget.getOffset((int) event.getX(), (int) event.getY());
+                    int offset = widget.getOffsetForPosition(event.getX(), event.getY());
 
                     Selection.extendSelection(buffer, offset);
                     return true;
@@ -275,7 +275,7 @@ public class ArrowKeyMovementMethod extends BaseMovementMethod implements Moveme
                     return true;
                 }
 
-                int offset = widget.getOffset((int) event.getX(), (int) event.getY());
+                int offset = widget.getOffsetForPosition(event.getX(), event.getY());
                 if (isSelecting(buffer)) {
                     buffer.removeSpan(LAST_TAP_DOWN);
                     Selection.extendSelection(buffer, offset);
