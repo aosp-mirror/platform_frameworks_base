@@ -18,6 +18,7 @@ import android.graphics.Bitmap;
 
 /**
  * System private API for retrieving thumbnails
+ * {@hide}
  */
 interface IThumbnailRetriever {
     Bitmap getThumbnail(int index);
