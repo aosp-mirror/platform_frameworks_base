@@ -25,6 +25,7 @@ import android.nfc.TechListParcel;
 import android.nfc.ILlcpSocket;
 import android.nfc.ILlcpServiceSocket;
 import android.nfc.ILlcpConnectionlessSocket;
+import android.nfc.INdefPushCallback;
 import android.nfc.INfcTag;
 import android.nfc.IP2pTarget;
 import android.nfc.IP2pInitiator;
@@ -51,6 +52,7 @@ interface INfcAdapter
             in IntentFilter[] filters, in TechListParcel techLists);
     void disableForegroundDispatch(in ComponentName activity);
     void enableForegroundNdefPush(in ComponentName activity, in NdefMessage msg);
+    void enableForegroundNdefPushWithCallback(in ComponentName activity, in INdefPushCallback callback);
     void disableForegroundNdefPush(in ComponentName activity);
 
     // Non-public methods
