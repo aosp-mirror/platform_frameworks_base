@@ -1,0 +1,52 @@
+/*
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.internal.telephony.cdma;
+
+import android.util.Log;
+import com.android.internal.telephony.IccConstants;
+import com.android.internal.telephony.IccFileHandler;
+
+/**
+ * {@hide}
+ */
+public final class CdmaLteUiccFileHandler extends IccFileHandler {
+    static final String LOG_TAG = "CDMA";
+
+    CdmaLteUiccFileHandler(CDMALTEPhone phone) {
+        super(phone);
+    }
+
+    protected String getEFPath(int efid) {
+        switch(efid) {
+        case EF_CSIM_SPN:
+        case EF_CSIM_LI:
+            return MF_SIM + DF_CDMA;
+        case EF_AD:
+            return MF_SIM + DF_GSM;
+        }
+        return getCommonIccEFPath(efid);
+    }
+
+    protected void logd(String msg) {
+        Log.d(LOG_TAG, "[CdmaLteUiccFileHandler] " + msg);
+    }
+
+    protected void loge(String msg) {
+        Log.e(LOG_TAG, "[CdmaLteUiccFileHandler] " + msg);
+    }
+
+}

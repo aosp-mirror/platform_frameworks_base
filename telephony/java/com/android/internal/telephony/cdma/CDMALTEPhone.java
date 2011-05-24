@@ -58,8 +58,9 @@ public class CDMALTEPhone extends CDMAPhone {
     @Override
     protected void initSstIcc() {
         mSST = new CdmaLteServiceStateTracker(this);
-        mIccRecords = new SIMRecords(this);
+        mIccRecords = new CdmaLteUiccRecords(this);
         mIccCard = new SimCard(this, LOG_TAG, DBG);
+        mIccFileHandler = new CdmaLteUiccFileHandler(this);
     }
 
     @Override
