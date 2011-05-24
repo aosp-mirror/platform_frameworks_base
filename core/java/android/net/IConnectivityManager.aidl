@@ -20,7 +20,9 @@ import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkState;
 import android.net.ProxyProperties;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.os.ParcelFileDescriptor;
 
 /**
  * Interface that answers queries about, and allows changing, the
@@ -95,4 +97,10 @@ interface IConnectivityManager
     ProxyProperties getProxy();
 
     void setDataDependency(int networkType, boolean met);
+
+    void protectVpn(in ParcelFileDescriptor socket);
+
+    String prepareVpn(String packageName);
+
+    ParcelFileDescriptor establishVpn(in Bundle config);
 }

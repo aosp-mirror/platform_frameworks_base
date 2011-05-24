@@ -1330,7 +1330,7 @@
     <string name="permlab_vpn">intercept and modify all network traffic</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_vpn">Allows an application to intercept and
-      inspect all network traffic, for example to establish a VPN connection.
+      inspect all network traffic to establish a VPN connection.
       Malicious applications may monitor, redirect, or modify network packets
       without your knowledge.</string>
 
@@ -2724,6 +2724,13 @@
     <string name="l2tp_vpn_description">Layer 2 Tunneling Protocol</string>
     <string name="l2tp_ipsec_psk_vpn_description">Pre-shared key based L2TP/IPSec VPN</string>
     <string name="l2tp_ipsec_crt_vpn_description">Certificate based L2TP/IPSec VPN</string>
+
+    <!-- Ticker text to show when VPN is active. -->
+    <string name="vpn_ticker">Activating <xliff:g id="app">%s</xliff:g> VPN...</string>
+    <!-- The title of the notification when VPN is active. -->
+    <string name="vpn_title"><xliff:g id="app">%s</xliff:g> VPN is active</string>
+    <!-- The text of the notification when VPN is active. -->
+    <string name="vpn_text">VPN is connected to <xliff:g id="profile">%s</xliff:g>. Tap to manage the network.</string>
 
     <!-- Localized strings for WebView -->
     <!-- Label for button in a WebView that will open a chooser to choose a file to upload -->

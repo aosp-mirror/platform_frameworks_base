@@ -48,6 +48,7 @@ import android.net.RouteInfo;
 import android.net.vpn.VpnManager;
 import android.net.wifi.WifiStateTracker;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -55,6 +56,7 @@ import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -67,6 +69,8 @@ import android.util.SparseIntArray;
 
 import com.android.internal.telephony.Phone;
 import com.android.server.connectivity.Tethering;
+import com.android.server.connectivity.Vpn;
+
 import com.google.android.collect.Lists;
 
 import java.io.FileDescriptor;
@@ -102,6 +106,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private Tethering mTethering;
     private boolean mTetheringConfigValid = false;
+
+    private Vpn mVpn;
 
     /** Currently active network rules by UID. */
     private SparseIntArray mUidRules = new SparseIntArray();
@@ -461,8 +467,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                                   mTethering.getTetherableBluetoothRegexs().length != 0) &&
                                  mTethering.getUpstreamIfaceRegexs().length != 0);
 
+        mVpn = new Vpn(mContext, new VpnCallback());
+
         try {
             nmService.registerObserver(mTethering);
+            nmService.registerObserver(mVpn);
         } catch (RemoteException e) {
             loge("Error registering observer :" + e);
         }
@@ -2358,6 +2367,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private void loge(String s) {
         Slog.e(TAG, s);
     }
+
     int convertFeatureToNetworkType(String feature){
         int networkType = -1;
         if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
@@ -2384,5 +2394,63 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             throw new NullPointerException(message);
         }
         return value;
+    }
+
+    // @see ConnectivityManager#protectVpn(ParcelFileDescriptor)
+    // Permission checks are done in Vpn class.
+    @Override
+    public void protectVpn(ParcelFileDescriptor socket) {
+        mVpn.protect(socket, getDefaultInterface());
+    }
+
+    // @see ConnectivityManager#prepareVpn(String)
+    // Permission checks are done in Vpn class.
+    @Override
+    public String prepareVpn(String packageName) {
+        return mVpn.prepare(packageName);
+    }
+
+    // @see ConnectivityManager#establishVpn(Bundle)
+    // Permission checks are done in Vpn class.
+    @Override
+    public ParcelFileDescriptor establishVpn(Bundle config) {
+        return mVpn.establish(config);
+    }
+
+    private String getDefaultInterface() {
+        if (ConnectivityManager.isNetworkTypeValid(mActiveDefaultNetwork)) {
+            NetworkStateTracker tracker = mNetTrackers[mActiveDefaultNetwork];
+            if (tracker != null) {
+                LinkProperties properties = tracker.getLinkProperties();
+                if (properties != null) {
+                    return properties.getInterfaceName();
+                }
+            }
+        }
+        throw new IllegalStateException("No default interface");
+    }
+
+    /**
+     * Callback for VPN subsystem. Currently VPN is not adapted to the service
+     * through NetworkStateTracker since it works differently. For example, it
+     * needs to override DNS servers but never takes the default routes. It
+     * relies on another data network, and it could keep existing connections
+     * alive after reconnecting, switching between networks, or even resuming
+     * from deep sleep. Calls from applications should be done synchronously
+     * to avoid race conditions. As these are all hidden APIs, refactoring can
+     * be done whenever a better abstraction is developed.
+     */
+    public class VpnCallback {
+
+        private VpnCallback() {
+        }
+
+        public synchronized void override(String[] dnsServers) {
+            // TODO: override DNS servers and http proxy.
+        }
+
+        public synchronized void restore() {
+            // TODO: restore VPN changes.
+        }
     }
 }
