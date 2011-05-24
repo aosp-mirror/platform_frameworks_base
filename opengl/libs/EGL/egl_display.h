@@ -30,6 +30,7 @@
 #include <utils/SortedVector.h>
 #include <utils/threads.h>
 
+#include "egldefs.h"
 #include "hooks.h"
 
 // ----------------------------------------------------------------------------

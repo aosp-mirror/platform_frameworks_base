@@ -26,11 +26,10 @@
 
 #include <EGL/egl.h>
 
-#include "hooks.h"
-#include "egl_impl.h"
-
-#include "Loader.h"
+#include "egldefs.h"
 #include "glesv2dbg.h"
+#include "hooks.h"
+#include "Loader.h"
 
 // ----------------------------------------------------------------------------
 namespace android {
