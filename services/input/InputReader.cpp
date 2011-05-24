@@ -28,7 +28,7 @@
 #define DEBUG_VIRTUAL_KEYS 0
 
 // Log debug messages about pointers.
-#define DEBUG_POINTERS 0
+#define DEBUG_POINTERS 1
 
 // Log debug messages about pointer assignment calculations.
 #define DEBUG_POINTER_ASSIGNMENT 0
@@ -57,6 +57,9 @@
 namespace android {
 
 // --- Constants ---
+
+// Maximum number of slots supported when using the slot-based Multitouch Protocol B.
+static const size_t MAX_SLOTS = 32;
 
 // Quiet time between certain gesture transitions.
 // Time to allow for all fingers or buttons to settle into a stable state before
@@ -809,7 +812,8 @@ bool InputReaderThread::threadLoop() {
 // --- InputDevice ---
 
 InputDevice::InputDevice(InputReaderContext* context, int32_t id, const String8& name) :
-        mContext(context), mId(id), mName(name), mSources(0), mIsExternal(false) {
+        mContext(context), mId(id), mName(name), mSources(0),
+        mIsExternal(false), mDropUntilNextSync(false) {
 }
 
 InputDevice::~InputDevice() {
@@ -898,9 +902,26 @@ void InputDevice::process(const RawEvent* rawEvents, size_t count) {
                 rawEvent->value, rawEvent->flags);
 #endif
 
-        for (size_t i = 0; i < numMappers; i++) {
-            InputMapper* mapper = mMappers[i];
-            mapper->process(rawEvent);
+        if (mDropUntilNextSync) {
+            if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_REPORT) {
+                mDropUntilNextSync = false;
+#if DEBUG_RAW_EVENTS
+                LOGD("Recovered from input event buffer overrun.");
+#endif
+            } else {
+#if DEBUG_RAW_EVENTS
+                LOGD("Dropped input event while waiting for next input sync.");
+#endif
+            }
+        } else if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_DROPPED) {
+            LOGI("Detected input event buffer overrun for device %s.", mName.string());
+            mDropUntilNextSync = true;
+            reset();
+        } else {
+            for (size_t i = 0; i < numMappers; i++) {
+                InputMapper* mapper = mMappers[i];
+                mapper->process(rawEvent);
+            }
         }
     }
 }
@@ -1812,6 +1833,10 @@ void TouchInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
             info->addMotionRange(mLocked.orientedRanges.orientation);
         }
 
+        if (mLocked.orientedRanges.haveDistance) {
+            info->addMotionRange(mLocked.orientedRanges.distance);
+        }
+
         if (mPointerController != NULL) {
             float minX, minY, maxX, maxY;
             if (mPointerController->getBounds(&minX, &minY, &maxX, &maxY)) {
@@ -1849,6 +1874,7 @@ void TouchInputMapper::dump(String8& dump) {
         dump.appendFormat(INDENT4 "PressureScale: %0.3f\n", mLocked.pressureScale);
         dump.appendFormat(INDENT4 "SizeScale: %0.3f\n", mLocked.sizeScale);
         dump.appendFormat(INDENT4 "OrientationScale: %0.3f\n", mLocked.orientationScale);
+        dump.appendFormat(INDENT4 "DistanceScale: %0.3f\n", mLocked.distanceScale);
 
         dump.appendFormat(INDENT3 "Last Touch:\n");
         dump.appendFormat(INDENT4 "Pointer Count: %d\n", mLastTouch.pointerCount);
@@ -1889,6 +1915,7 @@ void TouchInputMapper::initializeLocked() {
     mLocked.orientedRanges.haveTouchSize = false;
     mLocked.orientedRanges.haveToolSize = false;
     mLocked.orientedRanges.haveOrientation = false;
+    mLocked.orientedRanges.haveDistance = false;
 
     mPointerGesture.reset();
 }
@@ -1947,9 +1974,14 @@ void TouchInputMapper::configureParameters() {
         // The device is a cursor device with a touch pad attached.
         // By default don't use the touch pad to move the pointer.
         mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_PAD;
+    } else if (getEventHub()->hasInputProperty(getDeviceId(), INPUT_PROP_POINTER)) {
+        // The device is a pointing device like a track pad.
+        mParameters.deviceType = Parameters::DEVICE_TYPE_POINTER;
+    } else if (getEventHub()->hasInputProperty(getDeviceId(), INPUT_PROP_DIRECT)) {
+        // The device is a touch screen.
+        mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_SCREEN;
     } else {
-        // The device is just a touch pad.
-        // By default use the touch pad to move the pointer and to perform related gestures.
+        // The device is a touch pad of unknown purpose.
         mParameters.deviceType = Parameters::DEVICE_TYPE_POINTER;
     }
 
@@ -2016,6 +2048,9 @@ void TouchInputMapper::configureRawAxes() {
     mRawAxes.toolMajor.clear();
     mRawAxes.toolMinor.clear();
     mRawAxes.orientation.clear();
+    mRawAxes.distance.clear();
+    mRawAxes.trackingId.clear();
+    mRawAxes.slot.clear();
 }
 
 void TouchInputMapper::dumpRawAxes(String8& dump) {
@@ -2028,6 +2063,9 @@ void TouchInputMapper::dumpRawAxes(String8& dump) {
     dumpRawAbsoluteAxisInfo(dump, mRawAxes.toolMajor, "ToolMajor");
     dumpRawAbsoluteAxisInfo(dump, mRawAxes.toolMinor, "ToolMinor");
     dumpRawAbsoluteAxisInfo(dump, mRawAxes.orientation, "Orientation");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.distance, "Distance");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.trackingId, "TrackingId");
+    dumpRawAbsoluteAxisInfo(dump, mRawAxes.slot, "Slot");
 }
 
 bool TouchInputMapper::configureSurfaceLocked() {
@@ -2234,12 +2272,39 @@ bool TouchInputMapper::configureSurfaceLocked() {
                 }
             }
 
+            mLocked.orientedRanges.haveOrientation = true;
+
             mLocked.orientedRanges.orientation.axis = AMOTION_EVENT_AXIS_ORIENTATION;
             mLocked.orientedRanges.orientation.source = mTouchSource;
             mLocked.orientedRanges.orientation.min = - M_PI_2;
             mLocked.orientedRanges.orientation.max = M_PI_2;
             mLocked.orientedRanges.orientation.flat = 0;
             mLocked.orientedRanges.orientation.fuzz = 0;
+        }
+
+        // Distance
+        mLocked.distanceScale = 0;
+        if (mCalibration.distanceCalibration != Calibration::DISTANCE_CALIBRATION_NONE) {
+            if (mCalibration.distanceCalibration
+                    == Calibration::DISTANCE_CALIBRATION_SCALED) {
+                if (mCalibration.haveDistanceScale) {
+                    mLocked.distanceScale = mCalibration.distanceScale;
+                } else {
+                    mLocked.distanceScale = 1.0f;
+                }
+            }
+
+            mLocked.orientedRanges.haveDistance = true;
+
+            mLocked.orientedRanges.distance.axis = AMOTION_EVENT_AXIS_DISTANCE;
+            mLocked.orientedRanges.distance.source = mTouchSource;
+            mLocked.orientedRanges.distance.min =
+                    mRawAxes.distance.minValue * mLocked.distanceScale;
+            mLocked.orientedRanges.distance.max =
+                    mRawAxes.distance.minValue * mLocked.distanceScale;
+            mLocked.orientedRanges.distance.flat = 0;
+            mLocked.orientedRanges.distance.fuzz =
+                    mRawAxes.distance.fuzz * mLocked.distanceScale;
         }
     }
 
@@ -2518,6 +2583,23 @@ void TouchInputMapper::parseCalibration() {
                     orientationCalibrationString.string());
         }
     }
+
+    // Distance
+    out.distanceCalibration = Calibration::DISTANCE_CALIBRATION_DEFAULT;
+    String8 distanceCalibrationString;
+    if (in.tryGetProperty(String8("touch.distance.calibration"), distanceCalibrationString)) {
+        if (distanceCalibrationString == "none") {
+            out.distanceCalibration = Calibration::DISTANCE_CALIBRATION_NONE;
+        } else if (distanceCalibrationString == "scaled") {
+            out.distanceCalibration = Calibration::DISTANCE_CALIBRATION_SCALED;
+        } else if (distanceCalibrationString != "default") {
+            LOGW("Invalid value for touch.distance.calibration: '%s'",
+                    distanceCalibrationString.string());
+        }
+    }
+
+    out.haveDistanceScale = in.tryGetProperty(String8("touch.distance.scale"),
+            out.distanceScale);
 }
 
 void TouchInputMapper::resolveCalibration() {
@@ -2612,6 +2694,20 @@ void TouchInputMapper::resolveCalibration() {
             mCalibration.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_INTERPOLATED;
         } else {
             mCalibration.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_NONE;
+        }
+        break;
+
+    default:
+        break;
+    }
+
+    // Distance
+    switch (mCalibration.distanceCalibration) {
+    case Calibration::DISTANCE_CALIBRATION_DEFAULT:
+        if (mRawAxes.distance.valid) {
+            mCalibration.distanceCalibration = Calibration::DISTANCE_CALIBRATION_SCALED;
+        } else {
+            mCalibration.distanceCalibration = Calibration::DISTANCE_CALIBRATION_NONE;
         }
         break;
 
@@ -2739,6 +2835,23 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
         break;
     default:
         LOG_ASSERT(false);
+    }
+
+    // Distance
+    switch (mCalibration.distanceCalibration) {
+    case Calibration::DISTANCE_CALIBRATION_NONE:
+        dump.append(INDENT4 "touch.distance.calibration: none\n");
+        break;
+    case Calibration::DISTANCE_CALIBRATION_SCALED:
+        dump.append(INDENT4 "touch.distance.calibration: scaled\n");
+        break;
+    default:
+        LOG_ASSERT(false);
+    }
+
+    if (mCalibration.haveDistanceScale) {
+        dump.appendFormat(INDENT4 "touch.distance.scale: %0.3f\n",
+                mCalibration.distanceScale);
     }
 }
 
@@ -3247,6 +3360,16 @@ void TouchInputMapper::prepareTouches(int32_t* outEdgeFlags,
             orientation = 0;
         }
 
+        // Distance
+        float distance;
+        switch (mCalibration.distanceCalibration) {
+        case Calibration::DISTANCE_CALIBRATION_SCALED:
+            distance = in.distance * mLocked.distanceScale;
+            break;
+        default:
+            distance = 0;
+        }
+
         // X and Y
         // Adjust coords for surface orientation.
         float x, y;
@@ -3289,6 +3412,9 @@ void TouchInputMapper::prepareTouches(int32_t* outEdgeFlags,
         out.setAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR, toolMajor);
         out.setAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR, toolMinor);
         out.setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION, orientation);
+        if (distance != 0) {
+            out.setAxisValue(AMOTION_EVENT_AXIS_DISTANCE, distance);
+        }
 
         // Write output properties.
         PointerProperties& properties = mCurrentTouchProperties[i];
@@ -5020,13 +5146,13 @@ bool TouchInputMapper::markSupportedKeyCodes(uint32_t sourceMask, size_t numCode
 
 SingleTouchInputMapper::SingleTouchInputMapper(InputDevice* device) :
         TouchInputMapper(device) {
-    initialize();
+    clearState();
 }
 
 SingleTouchInputMapper::~SingleTouchInputMapper() {
 }
 
-void SingleTouchInputMapper::initialize() {
+void SingleTouchInputMapper::clearState() {
     mAccumulator.clear();
 
     mDown = false;
@@ -5040,7 +5166,7 @@ void SingleTouchInputMapper::initialize() {
 void SingleTouchInputMapper::reset() {
     TouchInputMapper::reset();
 
-    initialize();
+    clearState();
  }
 
 void SingleTouchInputMapper::process(const RawEvent* rawEvent) {
@@ -5144,6 +5270,7 @@ void SingleTouchInputMapper::sync(nsecs_t when) {
         mCurrentTouch.pointers[0].toolMajor = mToolWidth;
         mCurrentTouch.pointers[0].toolMinor = mToolWidth;
         mCurrentTouch.pointers[0].orientation = 0;
+        mCurrentTouch.pointers[0].distance = 0;
         mCurrentTouch.pointers[0].isStylus = false; // TODO: Set stylus
         mCurrentTouch.idToIndex[0] = 0;
         mCurrentTouch.idBits.markBit(0);
@@ -5168,22 +5295,22 @@ void SingleTouchInputMapper::configureRawAxes() {
 // --- MultiTouchInputMapper ---
 
 MultiTouchInputMapper::MultiTouchInputMapper(InputDevice* device) :
-        TouchInputMapper(device) {
-    initialize();
+        TouchInputMapper(device), mSlotCount(0), mUsingSlotsProtocol(false) {
+    clearState();
 }
 
 MultiTouchInputMapper::~MultiTouchInputMapper() {
 }
 
-void MultiTouchInputMapper::initialize() {
-    mAccumulator.clear();
+void MultiTouchInputMapper::clearState() {
+    mAccumulator.clear(mSlotCount);
     mButtonState = 0;
 }
 
 void MultiTouchInputMapper::reset() {
     TouchInputMapper::reset();
 
-    initialize();
+    clearState();
 }
 
 void MultiTouchInputMapper::process(const RawEvent* rawEvent) {
@@ -5203,45 +5330,69 @@ void MultiTouchInputMapper::process(const RawEvent* rawEvent) {
     }
 
     case EV_ABS: {
-        uint32_t pointerIndex = mAccumulator.pointerCount;
-        Accumulator::Pointer* pointer = & mAccumulator.pointers[pointerIndex];
+        bool newSlot = false;
+        if (mUsingSlotsProtocol && rawEvent->scanCode == ABS_MT_SLOT) {
+            mAccumulator.currentSlot = rawEvent->value;
+            newSlot = true;
+        }
+
+        if (mAccumulator.currentSlot < 0 || size_t(mAccumulator.currentSlot) >= mSlotCount) {
+            if (newSlot) {
+#if DEBUG_POINTERS
+                LOGW("MultiTouch device %s emitted invalid slot index %d but it "
+                        "should be between 0 and %d; ignoring this slot.",
+                        getDeviceName().string(), mAccumulator.currentSlot, mSlotCount);
+#endif
+            }
+            break;
+        }
+
+        Accumulator::Slot* slot = &mAccumulator.slots[mAccumulator.currentSlot];
 
         switch (rawEvent->scanCode) {
         case ABS_MT_POSITION_X:
-            pointer->fields |= Accumulator::FIELD_ABS_MT_POSITION_X;
-            pointer->absMTPositionX = rawEvent->value;
+            slot->fields |= Accumulator::FIELD_ABS_MT_POSITION_X;
+            slot->absMTPositionX = rawEvent->value;
             break;
         case ABS_MT_POSITION_Y:
-            pointer->fields |= Accumulator::FIELD_ABS_MT_POSITION_Y;
-            pointer->absMTPositionY = rawEvent->value;
+            slot->fields |= Accumulator::FIELD_ABS_MT_POSITION_Y;
+            slot->absMTPositionY = rawEvent->value;
             break;
         case ABS_MT_TOUCH_MAJOR:
-            pointer->fields |= Accumulator::FIELD_ABS_MT_TOUCH_MAJOR;
-            pointer->absMTTouchMajor = rawEvent->value;
+            slot->fields |= Accumulator::FIELD_ABS_MT_TOUCH_MAJOR;
+            slot->absMTTouchMajor = rawEvent->value;
             break;
         case ABS_MT_TOUCH_MINOR:
-            pointer->fields |= Accumulator::FIELD_ABS_MT_TOUCH_MINOR;
-            pointer->absMTTouchMinor = rawEvent->value;
+            slot->fields |= Accumulator::FIELD_ABS_MT_TOUCH_MINOR;
+            slot->absMTTouchMinor = rawEvent->value;
             break;
         case ABS_MT_WIDTH_MAJOR:
-            pointer->fields |= Accumulator::FIELD_ABS_MT_WIDTH_MAJOR;
-            pointer->absMTWidthMajor = rawEvent->value;
+            slot->fields |= Accumulator::FIELD_ABS_MT_WIDTH_MAJOR;
+            slot->absMTWidthMajor = rawEvent->value;
             break;
         case ABS_MT_WIDTH_MINOR:
-            pointer->fields |= Accumulator::FIELD_ABS_MT_WIDTH_MINOR;
-            pointer->absMTWidthMinor = rawEvent->value;
+            slot->fields |= Accumulator::FIELD_ABS_MT_WIDTH_MINOR;
+            slot->absMTWidthMinor = rawEvent->value;
             break;
         case ABS_MT_ORIENTATION:
-            pointer->fields |= Accumulator::FIELD_ABS_MT_ORIENTATION;
-            pointer->absMTOrientation = rawEvent->value;
+            slot->fields |= Accumulator::FIELD_ABS_MT_ORIENTATION;
+            slot->absMTOrientation = rawEvent->value;
             break;
         case ABS_MT_TRACKING_ID:
-            pointer->fields |= Accumulator::FIELD_ABS_MT_TRACKING_ID;
-            pointer->absMTTrackingId = rawEvent->value;
+            if (mUsingSlotsProtocol && rawEvent->value < 0) {
+                slot->clear();
+            } else {
+                slot->fields |= Accumulator::FIELD_ABS_MT_TRACKING_ID;
+                slot->absMTTrackingId = rawEvent->value;
+            }
             break;
         case ABS_MT_PRESSURE:
-            pointer->fields |= Accumulator::FIELD_ABS_MT_PRESSURE;
-            pointer->absMTPressure = rawEvent->value;
+            slot->fields |= Accumulator::FIELD_ABS_MT_PRESSURE;
+            slot->absMTPressure = rawEvent->value;
+            break;
+        case ABS_MT_TOOL_TYPE:
+            slot->fields |= Accumulator::FIELD_ABS_MT_TOOL_TYPE;
+            slot->absMTToolType = rawEvent->value;
             break;
         }
         break;
@@ -5251,19 +5402,7 @@ void MultiTouchInputMapper::process(const RawEvent* rawEvent) {
         switch (rawEvent->scanCode) {
         case SYN_MT_REPORT: {
             // MultiTouch Sync: The driver has returned all data for *one* of the pointers.
-            uint32_t pointerIndex = mAccumulator.pointerCount;
-
-            if (mAccumulator.pointers[pointerIndex].fields) {
-                if (pointerIndex == MAX_POINTERS) {
-                    LOGW("MultiTouch device driver returned more than maximum of %d pointers.",
-                            MAX_POINTERS);
-                } else {
-                    pointerIndex += 1;
-                    mAccumulator.pointerCount = pointerIndex;
-                }
-            }
-
-            mAccumulator.pointers[pointerIndex].clear();
+            mAccumulator.currentSlot += 1;
             break;
         }
 
@@ -5279,99 +5418,120 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
     static const uint32_t REQUIRED_FIELDS =
             Accumulator::FIELD_ABS_MT_POSITION_X | Accumulator::FIELD_ABS_MT_POSITION_Y;
 
-    uint32_t inCount = mAccumulator.pointerCount;
-    uint32_t outCount = 0;
+    size_t inCount = mSlotCount;
+    size_t outCount = 0;
     bool havePointerIds = true;
 
     mCurrentTouch.clear();
 
-    for (uint32_t inIndex = 0; inIndex < inCount; inIndex++) {
-        const Accumulator::Pointer& inPointer = mAccumulator.pointers[inIndex];
-        uint32_t fields = inPointer.fields;
+    for (size_t inIndex = 0; inIndex < inCount; inIndex++) {
+        const Accumulator::Slot& inSlot = mAccumulator.slots[inIndex];
+        uint32_t fields = inSlot.fields;
 
         if ((fields & REQUIRED_FIELDS) != REQUIRED_FIELDS) {
             // Some drivers send empty MT sync packets without X / Y to indicate a pointer up.
+            // This may also indicate an unused slot.
             // Drop this finger.
             continue;
         }
 
+        if (outCount >= MAX_POINTERS) {
+#if DEBUG_POINTERS
+            LOGD("MultiTouch device %s emitted more than maximum of %d pointers; "
+                    "ignoring the rest.",
+                    getDeviceName().string(), MAX_POINTERS);
+#endif
+            break; // too many fingers!
+        }
+
         PointerData& outPointer = mCurrentTouch.pointers[outCount];
-        outPointer.x = inPointer.absMTPositionX;
-        outPointer.y = inPointer.absMTPositionY;
+        outPointer.x = inSlot.absMTPositionX;
+        outPointer.y = inSlot.absMTPositionY;
 
         if (fields & Accumulator::FIELD_ABS_MT_PRESSURE) {
-            if (inPointer.absMTPressure <= 0) {
-                // Some devices send sync packets with X / Y but with a 0 pressure to indicate
-                // a pointer going up.  Drop this finger.
-                continue;
-            }
-            outPointer.pressure = inPointer.absMTPressure;
+            outPointer.pressure = inSlot.absMTPressure;
         } else {
             // Default pressure to 0 if absent.
             outPointer.pressure = 0;
         }
 
         if (fields & Accumulator::FIELD_ABS_MT_TOUCH_MAJOR) {
-            if (inPointer.absMTTouchMajor <= 0) {
+            if (inSlot.absMTTouchMajor <= 0) {
                 // Some devices send sync packets with X / Y but with a 0 touch major to indicate
                 // a pointer going up.  Drop this finger.
                 continue;
             }
-            outPointer.touchMajor = inPointer.absMTTouchMajor;
+            outPointer.touchMajor = inSlot.absMTTouchMajor;
         } else {
             // Default touch area to 0 if absent.
             outPointer.touchMajor = 0;
         }
 
         if (fields & Accumulator::FIELD_ABS_MT_TOUCH_MINOR) {
-            outPointer.touchMinor = inPointer.absMTTouchMinor;
+            outPointer.touchMinor = inSlot.absMTTouchMinor;
         } else {
             // Assume touch area is circular.
             outPointer.touchMinor = outPointer.touchMajor;
         }
 
         if (fields & Accumulator::FIELD_ABS_MT_WIDTH_MAJOR) {
-            outPointer.toolMajor = inPointer.absMTWidthMajor;
+            outPointer.toolMajor = inSlot.absMTWidthMajor;
         } else {
             // Default tool area to 0 if absent.
             outPointer.toolMajor = 0;
         }
 
         if (fields & Accumulator::FIELD_ABS_MT_WIDTH_MINOR) {
-            outPointer.toolMinor = inPointer.absMTWidthMinor;
+            outPointer.toolMinor = inSlot.absMTWidthMinor;
         } else {
             // Assume tool area is circular.
             outPointer.toolMinor = outPointer.toolMajor;
         }
 
         if (fields & Accumulator::FIELD_ABS_MT_ORIENTATION) {
-            outPointer.orientation = inPointer.absMTOrientation;
+            outPointer.orientation = inSlot.absMTOrientation;
         } else {
             // Default orientation to vertical if absent.
             outPointer.orientation = 0;
         }
 
-        outPointer.isStylus = false; // TODO: Handle stylus
+        if (fields & Accumulator::FIELD_ABS_MT_DISTANCE) {
+            outPointer.distance = inSlot.absMTDistance;
+        } else {
+            // Default distance is 0 (direct contact).
+            outPointer.distance = 0;
+        }
+
+        if (fields & Accumulator::FIELD_ABS_MT_TOOL_TYPE) {
+            outPointer.isStylus = (inSlot.absMTToolType == MT_TOOL_PEN);
+        } else {
+            // Assume this is not a stylus.
+            outPointer.isStylus = false;
+        }
 
         // Assign pointer id using tracking id if available.
         if (havePointerIds) {
-            if (fields & Accumulator::FIELD_ABS_MT_TRACKING_ID) {
-                uint32_t id = uint32_t(inPointer.absMTTrackingId);
+            int32_t id;
+            if (mUsingSlotsProtocol) {
+                id = inIndex;
+            } else if (fields & Accumulator::FIELD_ABS_MT_TRACKING_ID) {
+                id = inSlot.absMTTrackingId;
+            } else {
+                id = -1;
+            }
 
-                if (id > MAX_POINTER_ID) {
+            if (id >= 0 && id <= MAX_POINTER_ID) {
+                outPointer.id = id;
+                mCurrentTouch.idToIndex[id] = outCount;
+                mCurrentTouch.idBits.markBit(id);
+            } else {
+                if (id >= 0) {
 #if DEBUG_POINTERS
-                    LOGD("Pointers: Ignoring driver provided pointer id %d because "
-                            "it is larger than max supported id %d",
+                    LOGD("Pointers: Ignoring driver provided slot index or tracking id %d because "
+                            "it is larger than the maximum supported pointer id %d",
                             id, MAX_POINTER_ID);
 #endif
-                    havePointerIds = false;
                 }
-                else {
-                    outPointer.id = id;
-                    mCurrentTouch.idToIndex[id] = outCount;
-                    mCurrentTouch.idBits.markBit(id);
-                }
-            } else {
                 havePointerIds = false;
             }
         }
@@ -5386,20 +5546,40 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
 
     syncTouch(when, havePointerIds);
 
-    mAccumulator.clear();
+    mAccumulator.clear(mUsingSlotsProtocol ? 0 : mSlotCount);
 }
 
 void MultiTouchInputMapper::configureRawAxes() {
     TouchInputMapper::configureRawAxes();
 
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_POSITION_X, & mRawAxes.x);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_POSITION_Y, & mRawAxes.y);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_TOUCH_MAJOR, & mRawAxes.touchMajor);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_TOUCH_MINOR, & mRawAxes.touchMinor);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_WIDTH_MAJOR, & mRawAxes.toolMajor);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_WIDTH_MINOR, & mRawAxes.toolMinor);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_ORIENTATION, & mRawAxes.orientation);
-    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_PRESSURE, & mRawAxes.pressure);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_POSITION_X, &mRawAxes.x);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_POSITION_Y, &mRawAxes.y);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_TOUCH_MAJOR, &mRawAxes.touchMajor);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_TOUCH_MINOR, &mRawAxes.touchMinor);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_WIDTH_MAJOR, &mRawAxes.toolMajor);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_WIDTH_MINOR, &mRawAxes.toolMinor);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_ORIENTATION, &mRawAxes.orientation);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_PRESSURE, &mRawAxes.pressure);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_DISTANCE, &mRawAxes.distance);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_TRACKING_ID, &mRawAxes.trackingId);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_SLOT, &mRawAxes.slot);
+
+    if (mRawAxes.trackingId.valid
+            && mRawAxes.slot.valid && mRawAxes.slot.minValue == 0 && mRawAxes.slot.maxValue > 0) {
+        mSlotCount = mRawAxes.slot.maxValue + 1;
+        if (mSlotCount > MAX_SLOTS) {
+            LOGW("MultiTouch Device %s reported %d slots but the framework "
+                    "only supports a maximum of %d slots at this time.",
+                    getDeviceName().string(), mSlotCount, MAX_SLOTS);
+            mSlotCount = MAX_SLOTS;
+        }
+        mUsingSlotsProtocol = true;
+    } else {
+        mSlotCount = MAX_POINTERS;
+        mUsingSlotsProtocol = false;
+    }
+
+    mAccumulator.allocateSlots(mSlotCount);
 }
 
 

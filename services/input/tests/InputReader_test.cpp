@@ -613,6 +613,10 @@ private:
         return false;
     }
 
+    virtual bool hasInputProperty(int32_t deviceId, int property) const {
+        return false;
+    }
+
     virtual status_t mapKey(int32_t deviceId, int scancode,
             int32_t* outKeycode, uint32_t* outFlags) const {
         Device* device = getDevice(deviceId);

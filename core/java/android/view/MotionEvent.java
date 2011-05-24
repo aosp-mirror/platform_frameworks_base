@@ -883,8 +883,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * <p>
      * <ul>
      * <li>For a stylus, reports the distance of the stylus from the screen.
-     * The value is normalized to a range from 0.0 (direct contact) to 1.0 (furthest measurable
-     * distance).
+     * The value is nominally measured in millimeters where 0.0 indicates direct contact
+     * and larger values indicate increasing distance from the surface.
      * </ul>
      * </p>
      *

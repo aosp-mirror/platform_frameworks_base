@@ -101,7 +101,7 @@ EventHub::Device::Device(int fd, int32_t id, const String8& path,
         const InputDeviceIdentifier& identifier) :
         next(NULL),
         fd(fd), id(id), path(path), identifier(identifier),
-        classes(0), keyBitmask(NULL), relBitmask(NULL),
+        classes(0), keyBitmask(NULL), relBitmask(NULL), propBitmask(NULL),
         configuration(NULL), virtualKeyMap(NULL) {
 }
 
@@ -109,6 +109,7 @@ EventHub::Device::~Device() {
     close();
     delete[] keyBitmask;
     delete[] relBitmask;
+    delete[] propBitmask;
     delete configuration;
     delete virtualKeyMap;
 }
@@ -200,6 +201,18 @@ bool EventHub::hasRelativeAxis(int32_t deviceId, int axis) const {
         Device* device = getDeviceLocked(deviceId);
         if (device && device->relBitmask) {
             return test_bit(axis, device->relBitmask);
+        }
+    }
+    return false;
+}
+
+bool EventHub::hasInputProperty(int32_t deviceId, int property) const {
+    if (property >= 0 && property <= INPUT_PROP_MAX) {
+        AutoMutex _l(mLock);
+
+        Device* device = getDeviceLocked(deviceId);
+        if (device && device->propBitmask) {
+            return test_bit(property, device->propBitmask);
         }
     }
     return false;
@@ -834,23 +847,23 @@ int EventHub::openDevice(const char *devicePath) {
     memset(sw_bitmask, 0, sizeof(sw_bitmask));
     ioctl(fd, EVIOCGBIT(EV_SW, sizeof(sw_bitmask)), sw_bitmask);
 
+    uint8_t prop_bitmask[sizeof_bit_array(INPUT_PROP_MAX + 1)];
+    memset(prop_bitmask, 0, sizeof(prop_bitmask));
+    ioctl(fd, EVIOCGPROP(sizeof(prop_bitmask)), prop_bitmask);
+
     device->keyBitmask = new uint8_t[sizeof(key_bitmask)];
-    if (device->keyBitmask != NULL) {
-        memcpy(device->keyBitmask, key_bitmask, sizeof(key_bitmask));
-    } else {
+    device->relBitmask = new uint8_t[sizeof(rel_bitmask)];
+    device->propBitmask = new uint8_t[sizeof(prop_bitmask)];
+
+    if (!device->keyBitmask || !device->relBitmask || !device->propBitmask) {
         delete device;
-        LOGE("out of memory allocating key bitmask");
+        LOGE("out of memory allocating bitmasks");
         return -1;
     }
 
-    device->relBitmask = new uint8_t[sizeof(rel_bitmask)];
-    if (device->relBitmask != NULL) {
-        memcpy(device->relBitmask, rel_bitmask, sizeof(rel_bitmask));
-    } else {
-        delete device;
-        LOGE("out of memory allocating rel bitmask");
-        return -1;
-    }
+    memcpy(device->keyBitmask, key_bitmask, sizeof(key_bitmask));
+    memcpy(device->relBitmask, rel_bitmask, sizeof(rel_bitmask));
+    memcpy(device->propBitmask, prop_bitmask, sizeof(prop_bitmask));
 
     // See if this is a keyboard.  Ignore everything in the button range except for
     // joystick and gamepad buttons which are handled like keyboards for the most part.

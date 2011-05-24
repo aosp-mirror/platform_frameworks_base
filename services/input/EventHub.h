@@ -34,25 +34,38 @@
 
 #include <linux/input.h>
 
-/* These constants are not defined in linux/input.h but they are part of the multitouch
- * input protocol. */
+/* These constants are not defined in linux/input.h in the version of the kernel
+ * headers currently provided with Bionic. */
 
-#define ABS_MT_TOUCH_MAJOR 0x30  /* Major axis of touching ellipse */
-#define ABS_MT_TOUCH_MINOR 0x31  /* Minor axis (omit if circular) */
-#define ABS_MT_WIDTH_MAJOR 0x32  /* Major axis of approaching ellipse */
-#define ABS_MT_WIDTH_MINOR 0x33  /* Minor axis (omit if circular) */
-#define ABS_MT_ORIENTATION 0x34  /* Ellipse orientation */
-#define ABS_MT_POSITION_X 0x35   /* Center X ellipse position */
-#define ABS_MT_POSITION_Y 0x36   /* Center Y ellipse position */
-#define ABS_MT_TOOL_TYPE 0x37    /* Type of touching device (finger, pen, ...) */
-#define ABS_MT_BLOB_ID 0x38      /* Group a set of packets as a blob */
-#define ABS_MT_TRACKING_ID 0x39  /* Unique ID of initiated contact */
-#define ABS_MT_PRESSURE 0x3a     /* Pressure on contact area */
+#define EVIOCGPROP(len) _IOC(_IOC_READ, 'E', 0x09, len)
 
-#define MT_TOOL_FINGER 0 /* Identifies a finger */
-#define MT_TOOL_PEN 1    /* Identifies a pen */
+#define INPUT_PROP_POINTER 0x00
+#define INPUT_PROP_DIRECT 0x01
+#define INPUT_PROP_BUTTONPAD 0x02
+#define INPUT_PROP_SEMI_MT 0x03
+#define INPUT_PROP_MAX 0x1f
+#define INPUT_PROP_CNT (INPUT_PROP_MAX + 1)
+
+#define ABS_MT_SLOT 0x2f
+#define ABS_MT_TOUCH_MAJOR 0x30
+#define ABS_MT_TOUCH_MINOR 0x31
+#define ABS_MT_WIDTH_MAJOR 0x32
+#define ABS_MT_WIDTH_MINOR 0x33
+#define ABS_MT_ORIENTATION 0x34
+#define ABS_MT_POSITION_X 0x35
+#define ABS_MT_POSITION_Y 0x36
+#define ABS_MT_TOOL_TYPE 0x37
+#define ABS_MT_BLOB_ID 0x38
+#define ABS_MT_TRACKING_ID 0x39
+#define ABS_MT_PRESSURE 0x3a
+#define ABS_MT_DISTANCE 0x3b
+
+#define MT_TOOL_FINGER 0
+#define MT_TOOL_PEN 1
 
 #define SYN_MT_REPORT 2
+#define SYN_DROPPED 3
+
 
 /* Convenience constants. */
 
@@ -172,6 +185,8 @@ public:
 
     virtual bool hasRelativeAxis(int32_t deviceId, int axis) const = 0;
 
+    virtual bool hasInputProperty(int32_t deviceId, int property) const = 0;
+
     virtual status_t mapKey(int32_t deviceId, int scancode,
             int32_t* outKeycode, uint32_t* outFlags) const = 0;
 
@@ -236,6 +251,8 @@ public:
 
     virtual bool hasRelativeAxis(int32_t deviceId, int axis) const;
 
+    virtual bool hasInputProperty(int32_t deviceId, int property) const;
+
     virtual status_t mapKey(int32_t deviceId, int scancode,
             int32_t* outKeycode, uint32_t* outFlags) const;
 
@@ -286,6 +303,7 @@ private:
         uint32_t classes;
         uint8_t* keyBitmask;
         uint8_t* relBitmask;
+        uint8_t* propBitmask;
         String8 configurationFile;
         PropertyMap* configuration;
         VirtualKeyMap* virtualKeyMap;
