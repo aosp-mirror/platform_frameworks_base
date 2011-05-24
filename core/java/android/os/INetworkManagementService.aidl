@@ -214,6 +214,12 @@ interface INetworkManagementService
     NetworkStats getNetworkStatsDetail();
 
     /**
+     * Return detailed network statistics for the requested UID,
+     * including interface and tag details.
+     */
+    NetworkStats getNetworkStatsUidDetail(int uid);
+
+    /**
      * Configures bandwidth throttling on an interface.
      */
     void setInterfaceThrottle(String iface, int rxKbps, int txKbps);

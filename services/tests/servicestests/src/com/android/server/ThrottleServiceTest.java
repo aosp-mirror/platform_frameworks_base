@@ -42,6 +42,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
+import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
 import android.text.format.DateUtils;
 import android.util.Log;
@@ -54,6 +55,7 @@ import java.util.concurrent.Future;
 /**
  * Tests for {@link ThrottleService}.
  */
+@LargeTest
 public class ThrottleServiceTest extends AndroidTestCase {
     private static final String TAG = "ThrottleServiceTest";
 

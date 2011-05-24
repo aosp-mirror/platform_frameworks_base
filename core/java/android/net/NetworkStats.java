@@ -36,6 +36,9 @@ public class NetworkStats implements Parcelable {
     /** {@link #uid} value when entry is summarized over all UIDs. */
     public static final int UID_ALL = 0;
 
+    // NOTE: data should only be accounted for once in this structure; if data
+    // is broken out, the summarized version should not be included.
+
     /**
      * {@link SystemClock#elapsedRealtime()} timestamp when this data was
      * generated.
@@ -81,12 +84,13 @@ public class NetworkStats implements Parcelable {
             mTx = new long[size];
         }
 
-        public void addEntry(String iface, int uid, long rx, long tx) {
+        public Builder addEntry(String iface, int uid, long rx, long tx) {
             mIface[mIndex] = iface;
             mUid[mIndex] = uid;
             mRx[mIndex] = rx;
             mTx[mIndex] = tx;
             mIndex++;
+            return this;
         }
 
         public NetworkStats build() {
@@ -97,11 +101,17 @@ public class NetworkStats implements Parcelable {
         }
     }
 
+    public int length() {
+        // length is identical for all fields
+        return iface.length;
+    }
+
     /**
      * Find first stats index that matches the requested parameters.
      */
     public int findIndex(String iface, int uid) {
-        for (int i = 0; i < this.iface.length; i++) {
+        final int length = length();
+        for (int i = 0; i < length; i++) {
             if (equal(iface, this.iface[i]) && uid == this.uid[i]) {
                 return i;
             }
@@ -109,13 +119,38 @@ public class NetworkStats implements Parcelable {
         return -1;
     }
 
-    private static boolean equal(Object a, Object b) {
-        return a == b || (a != null && a.equals(b));
+    /**
+     * Subtract the given {@link NetworkStats}, effectively leaving the delta
+     * between two snapshots in time. Assumes that statistics rows collect over
+     * time, and that none of them have disappeared.
+     */
+    public NetworkStats subtract(NetworkStats value) {
+        // result will have our rows, but no meaningful timestamp
+        final int length = length();
+        final NetworkStats.Builder result = new NetworkStats.Builder(-1, length);
+
+        for (int i = 0; i < length; i++) {
+            final String iface = this.iface[i];
+            final int uid = this.uid[i];
+
+            // find remote row that matches, and subtract
+            final int j = value.findIndex(iface, uid);
+            if (j == -1) {
+                // newly appearing row, return entire value
+                result.addEntry(iface, uid, this.rx[i], this.tx[i]);
+            } else {
+                // existing row, subtract remote value
+                final long rx = this.rx[i] - value.rx[j];
+                final long tx = this.tx[i] - value.tx[j];
+                result.addEntry(iface, uid, rx, tx);
+            }
+        }
+
+        return result.build();
     }
 
-    /** {@inheritDoc} */
-    public int describeContents() {
-        return 0;
+    private static boolean equal(Object a, Object b) {
+        return a == b || (a != null && a.equals(b));
     }
 
     public void dump(String prefix, PrintWriter pw) {
@@ -135,6 +170,11 @@ public class NetworkStats implements Parcelable {
         final CharArrayWriter writer = new CharArrayWriter();
         dump("", new PrintWriter(writer));
         return writer.toString();
+    }
+
+    /** {@inheritDoc} */
+    public int describeContents() {
+        return 0;
     }
 
     /** {@inheritDoc} */

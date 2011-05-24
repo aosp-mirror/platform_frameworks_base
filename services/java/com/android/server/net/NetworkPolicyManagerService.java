@@ -38,8 +38,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String TAG = "NetworkPolicy";
     private static final boolean LOGD = true;
 
-    private static final String SERVICE_NAME = "netpolicy";
-
     private Context mContext;
 
     /** Current network policy for each UID. */
@@ -56,7 +54,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     public void publish(Context context) {
         mContext = context;
-        ServiceManager.addService(SERVICE_NAME, asBinder());
+        ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, asBinder());
 
         mUidPolicy = new SparseIntArray();
         mUidForeground = new SparseBooleanArray();
