@@ -360,10 +360,9 @@ public class WebSettings {
     }
 
     // User agent strings.
-    private static final String DESKTOP_USERAGENT =
-            "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_5_7; en-us)"
-            + " AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0"
-            + " Safari/530.17";
+    private static final String DESKTOP_USERAGENT = "Mozilla/5.0 (X11; " +
+        "Linux x86_64) AppleWebKit/534.24 (KHTML, like Gecko) " +
+        "Chrome/11.0.696.34 Safari/534.24";
     private static final String IPHONE_USERAGENT =
             "Mozilla/5.0 (iPhone; U; CPU iPhone OS 3_0 like Mac OS X; en-us)"
             + " AppleWebKit/528.18 (KHTML, like Gecko) Version/4.0"
