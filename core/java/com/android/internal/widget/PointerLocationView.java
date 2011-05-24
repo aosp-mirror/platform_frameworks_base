@@ -385,6 +385,7 @@ public class PointerLocationView extends View {
                 .append(" ToolMinor=").append(coords.toolMinor, 3)
                 .append(" Orientation=").append((float)(coords.orientation * 180 / Math.PI), 1)
                 .append("deg")
+                .append(" Distance=").append(coords.getAxisValue(MotionEvent.AXIS_DISTANCE), 1)
                 .append(" VScroll=").append(coords.getAxisValue(MotionEvent.AXIS_VSCROLL), 1)
                 .append(" HScroll=").append(coords.getAxisValue(MotionEvent.AXIS_HSCROLL), 1)
                 .append(" ToolType=").append(MotionEvent.toolTypeToString(toolType))

@@ -331,6 +331,7 @@ private:
     String8 mName;
     uint32_t mSources;
     bool mIsExternal;
+    bool mDropUntilNextSync;
 
     typedef int32_t (InputMapper::*GetStateFunc)(uint32_t sourceMask, int32_t code);
     int32_t getState(uint32_t sourceMask, int32_t code, GetStateFunc getStateFunc);
@@ -602,6 +603,7 @@ protected:
         int32_t toolMajor;
         int32_t toolMinor;
         int32_t orientation;
+        int32_t distance;
         bool isStylus;
 
         inline bool operator== (const PointerData& other) const {
@@ -613,7 +615,8 @@ protected:
                     && touchMinor == other.touchMinor
                     && toolMajor == other.toolMajor
                     && toolMinor == other.toolMinor
-                    && orientation == other.orientation;
+                    && orientation == other.orientation
+                    && distance == other.distance;
         }
         inline bool operator!= (const PointerData& other) const {
             return !(*this == other);
@@ -759,6 +762,17 @@ protected:
         };
 
         OrientationCalibration orientationCalibration;
+
+        // Distance
+        enum DistanceCalibration {
+            DISTANCE_CALIBRATION_DEFAULT,
+            DISTANCE_CALIBRATION_NONE,
+            DISTANCE_CALIBRATION_SCALED,
+        };
+
+        DistanceCalibration distanceCalibration;
+        bool haveDistanceScale;
+        float distanceScale;
     } mCalibration;
 
     // Raw axis information from the driver.
@@ -771,6 +785,9 @@ protected:
         RawAbsoluteAxisInfo toolMajor;
         RawAbsoluteAxisInfo toolMinor;
         RawAbsoluteAxisInfo orientation;
+        RawAbsoluteAxisInfo distance;
+        RawAbsoluteAxisInfo trackingId;
+        RawAbsoluteAxisInfo slot;
     } mRawAxes;
 
     // Current and previous touch sample data.
@@ -819,6 +836,8 @@ protected:
 
         float orientationScale;
 
+        float distanceScale;
+
         // Oriented motion ranges for input device info.
         struct OrientedRanges {
             InputDeviceInfo::MotionRange x;
@@ -840,6 +859,9 @@ protected:
 
             bool haveOrientation;
             InputDeviceInfo::MotionRange orientation;
+
+            bool haveDistance;
+            InputDeviceInfo::MotionRange distance;
         } orientedRanges;
 
         // Oriented dimensions and precision.
@@ -1146,7 +1168,7 @@ private:
     int32_t mToolWidth;
     int32_t mButtonState;
 
-    void initialize();
+    void clearState();
 
     void sync(nsecs_t when);
 };
@@ -1166,20 +1188,21 @@ protected:
 private:
     struct Accumulator {
         enum {
-            FIELD_ABS_MT_POSITION_X = 1,
-            FIELD_ABS_MT_POSITION_Y = 2,
-            FIELD_ABS_MT_TOUCH_MAJOR = 4,
-            FIELD_ABS_MT_TOUCH_MINOR = 8,
-            FIELD_ABS_MT_WIDTH_MAJOR = 16,
-            FIELD_ABS_MT_WIDTH_MINOR = 32,
-            FIELD_ABS_MT_ORIENTATION = 64,
-            FIELD_ABS_MT_TRACKING_ID = 128,
-            FIELD_ABS_MT_PRESSURE = 256,
+            FIELD_ABS_MT_POSITION_X = 1 << 0,
+            FIELD_ABS_MT_POSITION_Y = 1 << 1,
+            FIELD_ABS_MT_TOUCH_MAJOR = 1 << 2,
+            FIELD_ABS_MT_TOUCH_MINOR = 1 << 3,
+            FIELD_ABS_MT_WIDTH_MAJOR = 1 << 4,
+            FIELD_ABS_MT_WIDTH_MINOR = 1 << 5,
+            FIELD_ABS_MT_ORIENTATION = 1 << 6,
+            FIELD_ABS_MT_TRACKING_ID = 1 << 7,
+            FIELD_ABS_MT_PRESSURE = 1 << 8,
+            FIELD_ABS_MT_TOOL_TYPE = 1 << 9,
+            FIELD_ABS_MT_DISTANCE = 1 << 10,
         };
 
-        uint32_t pointerCount;
-        struct Pointer {
-            uint32_t fields;
+        struct Slot {
+            uint32_t fields; // 0 if slot is unused
 
             int32_t absMTPositionX;
             int32_t absMTPositionY;
@@ -1190,27 +1213,56 @@ private:
             int32_t absMTOrientation;
             int32_t absMTTrackingId;
             int32_t absMTPressure;
+            int32_t absMTToolType;
+            int32_t absMTDistance;
+
+            inline Slot() {
+                clear();
+            }
 
             inline void clear() {
                 fields = 0;
             }
-        } pointers[MAX_POINTERS + 1]; // + 1 to remove the need for extra range checks
+        };
+
+        // Current slot index.
+        int32_t currentSlot;
+
+        // Array of slots.
+        Slot* slots;
 
         // Bitfield of buttons that went down or up.
         uint32_t buttonDown;
         uint32_t buttonUp;
 
-        inline void clear() {
-            pointerCount = 0;
-            pointers[0].clear();
+        Accumulator() : slots(NULL) {
+            clear(false);
+        }
+
+        ~Accumulator() {
+            delete[] slots;
+        }
+
+        void allocateSlots(size_t slotCount) {
+            slots = new Slot[slotCount];
+        }
+
+        void clear(size_t slotCount) {
+            for (size_t i = 0; i < slotCount; i++) {
+                slots[i].clear();
+            }
+            currentSlot = 0;
             buttonDown = 0;
             buttonUp = 0;
         }
     } mAccumulator;
 
+    size_t mSlotCount;
+    bool mUsingSlotsProtocol;
+
     int32_t mButtonState;
 
-    void initialize();
+    void clearState();
 
     void sync(nsecs_t when);
 };
