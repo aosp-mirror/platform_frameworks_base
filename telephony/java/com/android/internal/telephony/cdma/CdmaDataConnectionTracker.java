@@ -521,19 +521,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
              * TODO: Make this configurable?
              */
             int nextReconnectDelay = mDataConnections.get(0).getRetryTimer();
-            log("Data Connection activate failed. Scheduling next attempt for "
-                    + (nextReconnectDelay / 1000) + "s");
-
-            AlarmManager am =
-                (AlarmManager) mPhone.getContext().getSystemService(Context.ALARM_SERVICE);
-            Intent intent = new Intent(INTENT_RECONNECT_ALARM);
-            intent.putExtra(INTENT_RECONNECT_ALARM_EXTRA_REASON, reason);
-            mReconnectIntent = PendingIntent.getBroadcast(
-                    mPhone.getContext(), 0, intent, 0);
-            am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    SystemClock.elapsedRealtime() + nextReconnectDelay,
-                    mReconnectIntent);
-
+            startAlarmForReconnect(nextReconnectDelay, reason);
             mDataConnections.get(0).increaseRetryCount();
 
             if (!shouldPostNotification(lastFailCauseCode)) {
@@ -543,6 +531,22 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
                 notifyNoData(lastFailCauseCode);
             }
         }
+    }
+
+    private void startAlarmForReconnect(int delay, String reason) {
+
+        log("Data Connection activate failed. Scheduling next attempt for "
+                + (delay / 1000) + "s");
+
+        AlarmManager am =
+            (AlarmManager) mPhone.getContext().getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(INTENT_RECONNECT_ALARM);
+        intent.putExtra(INTENT_RECONNECT_ALARM_EXTRA_REASON, reason);
+        mReconnectIntent = PendingIntent.getBroadcast(
+                mPhone.getContext(), 0, intent, 0);
+        am.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                SystemClock.elapsedRealtime() + delay, mReconnectIntent);
+
     }
 
     private void notifyNoData(FailCause lastFailCauseCode) {
@@ -702,7 +706,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
         mActiveApn = null;
         if (retryAfterDisconnected(reason)) {
           // Wait a bit before trying, so we're not tying up RIL command channel.
-          sendMessageDelayed(obtainMessage(EVENT_TRY_SETUP_DATA, reason), APN_DELAY_MILLIS);
+          startAlarmForReconnect(APN_DELAY_MILLIS, reason);
       }
     }
 
