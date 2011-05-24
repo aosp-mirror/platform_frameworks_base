@@ -66,6 +66,7 @@ public class ManagerService extends Service {
     static final int MSG_ALL_TESTS_FINISHED = 1;
     static final int MSG_FIRST_TEST = 2;
     static final int MSG_CURRENT_TEST_CRASHED = 3;
+    static final int MSG_RESET = 4;
 
     /**
      * This handler is purely for IPC. It is used to create mMessenger
@@ -75,8 +76,11 @@ public class ManagerService extends Service {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_FIRST_TEST:
+                case MSG_RESET:
                     mSummarizer.reset();
+                    break;
+
+                case MSG_FIRST_TEST:
                     Bundle bundle = msg.getData();
                     ensureNextTestSetup(bundle.getString("firstTest"), bundle.getInt("index"));
                     break;
