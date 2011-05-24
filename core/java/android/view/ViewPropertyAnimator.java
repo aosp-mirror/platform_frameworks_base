@@ -67,6 +67,19 @@ public class ViewPropertyAnimator {
     private boolean mDurationSet = false;
 
     /**
+     * The startDelay of the underlying Animator object. By default, we don't set the startDelay
+     * on the Animator and just use its default startDelay. If the startDelay is ever set on this
+     * Animator, then we use the startDelay that it was set to.
+     */
+    private long mStartDelay = 0;
+
+    /**
+     * A flag indicating whether the startDelay has been set on this object. If not, we don't set
+     * the startDelay on the underlying Animator, but instead just use its default startDelay.
+     */
+    private boolean mStartDelaySet = false;
+
+    /**
      * The interpolator of the underlying Animator object. By default, we don't set the interpolator
      * on the Animator and just use its default interpolator. If the interpolator is ever set on
      * this Animator, then we use the interpolator that it was set to.
@@ -233,6 +246,60 @@ public class ViewPropertyAnimator {
     }
 
     /**
+     * Returns the current duration of property animations. If the duration was set on this
+     * object, that value is returned. Otherwise, the default value of the underlying Animator
+     * is returned.
+     *
+     * @see #setDuration(long)
+     * @return The duration of animations, in milliseconds.
+     */
+    public long getDuration() {
+        if (mStartDelaySet) {
+            return mStartDelay;
+        } else {
+            // Just return the default from ValueAnimator, since that's what we'd get if
+            // the value has not been set otherwise
+            return new ValueAnimator().getDuration();
+        }
+    }
+
+    /**
+     * Returns the current startDelay of property animations. If the startDelay was set on this
+     * object, that value is returned. Otherwise, the default value of the underlying Animator
+     * is returned.
+     *
+     * @see #setStartDelay(long)
+     * @return The startDelay of animations, in milliseconds.
+     */
+    public long getStartDelay() {
+        if (mStartDelaySet) {
+            return mStartDelay;
+        } else {
+            // Just return the default from ValueAnimator (0), since that's what we'd get if
+            // the value has not been set otherwise
+            return 0;
+        }
+    }
+
+    /**
+     * Sets the startDelay for the underlying animator that animates the requested properties.
+     * By default, the animator uses the default value for ValueAnimator. Calling this method
+     * will cause the declared value to be used instead.
+     * @param startDelay The delay of ensuing property animations, in milliseconds. The value
+     * cannot be negative.
+     * @return This object, allowing calls to methods in this class to be chained.
+     */
+    public ViewPropertyAnimator setStartDelay(long startDelay) {
+        if (startDelay < 0) {
+            throw new IllegalArgumentException("Animators cannot have negative duration: " +
+                    startDelay);
+        }
+        mStartDelaySet = true;
+        mStartDelay = startDelay;
+        return this;
+    }
+
+    /**
      * Sets the interpolator for the underlying animator that animates the requested properties.
      * By default, the animator uses the default interpolator for ValueAnimator. Calling this method
      * will cause the declared object to be used instead.
@@ -256,6 +323,33 @@ public class ViewPropertyAnimator {
     public ViewPropertyAnimator setListener(Animator.AnimatorListener listener) {
         mListener = listener;
         return this;
+    }
+
+    /**
+     * Starts the currently pending property animations immediately. Calling <code>start()</code>
+     * is optional because all animations start automatically at the next opportunity. However,
+     * if the animations are needed to start immediately and synchronously (not at the time when
+     * the next event is processed by the hierarchy, which is when the animations would begin
+     * otherwise), then this method can be used.
+     */
+    public void start() {
+        startAnimation();
+    }
+
+    /**
+     * Cancels all property animations that are currently running or pending.
+     */
+    public void cancel() {
+        if (mAnimatorMap.size() > 0) {
+            HashMap<Animator, PropertyBundle> mAnimatorMapCopy =
+                    (HashMap<Animator, PropertyBundle>)mAnimatorMap.clone();
+            Set<Animator> animatorSet = mAnimatorMapCopy.keySet();
+            for (Animator runningAnim : animatorSet) {
+                runningAnim.cancel();
+            }
+        }
+        mPendingAnimations.clear();
+        mView.getHandler().removeCallbacks(mAnimationStarter);
     }
 
     /**
@@ -598,7 +692,7 @@ public class ViewPropertyAnimator {
                     // on a property will cancel a previous animation on that property, so
                     // there can only ever be one such animation running.
                     if (bundle.mPropertyMask == NONE) {
-                        // the animation is not longer changing anything - cancel it
+                        // the animation is no longer changing anything - cancel it
                         animatorToCancel = runningAnim;
                         break;
                     }
