@@ -183,7 +183,6 @@ public class WebSettings {
     private boolean         mJavaScriptCanOpenWindowsAutomatically = false;
     private boolean         mUseDoubleTree = false;
     private boolean         mUseWideViewport = false;
-    private boolean         mUseFixedViewport = false;
     private boolean         mSupportMultipleWindows = false;
     private boolean         mShrinksStandaloneImagesToFit = false;
     private long            mMaximumDecodedImageSize = 0; // 0 means default
@@ -382,13 +381,6 @@ public class WebSettings {
         mWebView = webview;
         mDefaultTextEncoding = context.getString(com.android.internal.
                                                  R.string.default_text_encoding);
-
-        // Detect tablet device for fixed viewport mode.
-        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        final int landscapeWidth = Math.max(metrics.widthPixels, metrics.heightPixels);
-        final int minTabletWidth = context.getResources().getDimensionPixelSize(
-            com.android.internal.R.dimen.min_xlarge_screen_width);
-        mUseFixedViewport = (metrics.density == 1.0f && landscapeWidth >= minTabletWidth);
 
         if (sLockForLocaleSettings == null) {
             sLockForLocaleSettings = new Object();
@@ -1652,11 +1644,11 @@ public class WebSettings {
     }
 
     /**
-     * Returns whether to use fixed viewport.  Fixed viewport should operate only
-     * when wide viewport is on.
+     * Returns whether to use fixed viewport.  Use fixed viewport
+     * whenever wide viewport is on.
      */
     /* package */ boolean getUseFixedViewport() {
-        return getUseWideViewPort() && mUseFixedViewport;
+        return getUseWideViewPort();
     }
 
     /**
