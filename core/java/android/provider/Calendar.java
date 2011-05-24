@@ -616,18 +616,6 @@ public final class Calendar {
         public static final String DTEND = "dtend";
 
         /**
-         * The time the event starts with allDay events in a local tz
-         * <P>Type: INTEGER (long; millis since epoch)</P>
-         */
-        public static final String DTSTART2 = "dtstart2";
-
-        /**
-         * The time the event ends with allDay events in a local tz
-         * <P>Type: INTEGER (long; millis since epoch)</P>
-         */
-        public static final String DTEND2 = "dtend2";
-
-        /**
          * The duration of the event
          * <P>Type: TEXT (duration in RFC2445 format)</P>
          */
@@ -734,8 +722,16 @@ public final class Calendar {
         public static final String EXDATE = "exdate";
 
         /**
+         * The _id of the original recurring event for which this event is an
+         * exception.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ORIGINAL_ID = "original_id";
+
+        /**
          * The _sync_id of the original recurring event for which this event is
-         * an exception.
+         * an exception. The provider should keep the original_id in sync when
+         * this is updated.
          * <P>Type: TEXT</P>
          */
         public static final String ORIGINAL_SYNC_ID = "original_sync_id";
@@ -899,6 +895,7 @@ public final class Calendar {
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DTEND);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, DURATION);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, EVENT_TIMEZONE);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, EVENT_END_TIMEZONE);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ALL_DAY);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, ACCESS_LEVEL);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, AVAILABILITY);
@@ -910,6 +907,7 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, EXRULE);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, EXDATE);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORIGINAL_SYNC_ID);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORIGINAL_ID);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv,
                         ORIGINAL_INSTANCE_TIME);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, ORIGINAL_ALL_DAY);
@@ -925,7 +923,7 @@ public final class Calendar {
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, EventsColumns.DELETED);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC1);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, SYNC1);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
                         Events.SYNC_DATA1);
 
