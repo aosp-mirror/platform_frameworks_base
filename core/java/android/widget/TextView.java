@@ -9689,14 +9689,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
-     * Get the offset character closest to the specified absolute position.
+     * Get the character offset closest to the specified absolute position. A typical use case is to
+     * pass the result of {@link MotionEvent#getX()} and {@link MotionEvent#getY()} to this method.
      *
      * @param x The horizontal absolute position of a point on screen
      * @param y The vertical absolute position of a point on screen
      * @return the character offset for the character whose position is closest to the specified
      *  position. Returns -1 if there is no layout.
-     *
-     * @hide
      */
     public int getOffsetForPosition(float x, float y) {
         if (getLayout() == null) return -1;
