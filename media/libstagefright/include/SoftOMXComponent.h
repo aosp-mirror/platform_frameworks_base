@@ -38,6 +38,8 @@ struct SoftOMXComponent : public RefBase {
     void setLibHandle(void *libHandle);
     void *libHandle() const;
 
+    virtual void prepareForDestruction() {}
+
 protected:
     virtual ~SoftOMXComponent();
 

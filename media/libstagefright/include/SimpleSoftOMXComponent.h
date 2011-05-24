@@ -36,7 +36,7 @@ struct SimpleSoftOMXComponent : public SoftOMXComponent {
             OMX_PTR appData,
             OMX_COMPONENTTYPE **component);
 
-    virtual ~SimpleSoftOMXComponent();
+    virtual void prepareForDestruction();
 
     void onMessageReceived(const sp<AMessage> &msg);
 

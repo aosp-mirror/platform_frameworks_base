@@ -45,7 +45,11 @@ SimpleSoftOMXComponent::SimpleSoftOMXComponent(
             PRIORITY_AUDIO);
 }
 
-SimpleSoftOMXComponent::~SimpleSoftOMXComponent() {
+void SimpleSoftOMXComponent::prepareForDestruction() {
+    // The looper's queue may still contain messages referencing this
+    // object. Make sure those are flushed before returning so that
+    // a subsequent dlunload() does not pull out the rug from under us.
+
     mLooper->unregisterHandler(mHandler->id());
     mLooper->stop();
 }

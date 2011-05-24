@@ -127,6 +127,8 @@ OMX_ERRORTYPE SoftOMXPlugin::destroyComponentInstance(
         (SoftOMXComponent *)
             ((OMX_COMPONENTTYPE *)component)->pComponentPrivate;
 
+    me->prepareForDestruction();
+
     void *libHandle = me->libHandle();
 
     CHECK_EQ(me->getStrongCount(), 1);
