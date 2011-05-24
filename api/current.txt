@@ -21861,6 +21861,9 @@ package android.view {
   public class ViewPropertyAnimator {
     method public android.view.ViewPropertyAnimator alpha(float);
     method public android.view.ViewPropertyAnimator alphaBy(float);
+    method public void cancel();
+    method public long getDuration();
+    method public long getStartDelay();
     method public android.view.ViewPropertyAnimator rotation(float);
     method public android.view.ViewPropertyAnimator rotationBy(float);
     method public android.view.ViewPropertyAnimator rotationX(float);
@@ -21874,6 +21877,8 @@ package android.view {
     method public android.view.ViewPropertyAnimator setDuration(long);
     method public android.view.ViewPropertyAnimator setInterpolator(android.animation.TimeInterpolator);
     method public android.view.ViewPropertyAnimator setListener(android.animation.Animator.AnimatorListener);
+    method public android.view.ViewPropertyAnimator setStartDelay(long);
+    method public void start();
     method public android.view.ViewPropertyAnimator translationX(float);
     method public android.view.ViewPropertyAnimator translationXBy(float);
     method public android.view.ViewPropertyAnimator translationY(float);
