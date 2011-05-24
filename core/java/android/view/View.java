@@ -6048,6 +6048,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
     }
 
     /**
+     * Set the horizontal scrolled position of your view. This will cause a call to
+     * {@link #onScrollChanged(int, int, int, int)} and the view will be
+     * invalidated.
+     * @param value the x position to scroll to
+     */
+    public void setScrollX(int value) {
+        scrollTo(value, mScrollY);
+    }
+
+    /**
+     * Set the vertical scrolled position of your view. This will cause a call to
+     * {@link #onScrollChanged(int, int, int, int)} and the view will be
+     * invalidated.
+     * @param value the y position to scroll to
+     */
+    public void setScrollY(int value) {
+        scrollTo(mScrollX, value);
+    }
+
+    /**
      * Return the scrolled left position of this view. This is the left edge of
      * the displayed part of your view. You do not need to draw any pixels
      * farther left, since those are outside of the frame of your view on

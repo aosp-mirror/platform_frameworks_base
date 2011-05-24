@@ -1978,6 +1978,7 @@ package android.animation {
     method public boolean isRunning();
     method public void removeChild(android.view.ViewGroup, android.view.View);
     method public void removeTransitionListener(android.animation.LayoutTransition.TransitionListener);
+    method public void setAnimateParentHierarchy(boolean);
     method public void setAnimator(int, android.animation.Animator);
     method public void setDuration(long);
     method public void setDuration(int, long);
@@ -21441,6 +21442,8 @@ package android.view {
     method public void setScaleY(float);
     method public void setScrollBarStyle(int);
     method public void setScrollContainer(boolean);
+    method public void setScrollX(int);
+    method public void setScrollY(int);
     method public void setScrollbarFadingEnabled(boolean);
     method public void setSelected(boolean);
     method public void setSoundEffectsEnabled(boolean);
