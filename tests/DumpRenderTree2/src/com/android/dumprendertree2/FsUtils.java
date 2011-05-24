@@ -63,7 +63,7 @@ public class FsUtils {
     public static final String LOG_TAG = "FsUtils";
 
     private static final String SCRIPT_URL = ForwarderManager.getHostSchemePort(false) +
-            "WebKitTools/DumpRenderTree/android/get_layout_tests_dir_contents.php";
+            "Tools/DumpRenderTree/android/get_layout_tests_dir_contents.php";
 
     private static final int HTTP_TIMEOUT_MS = 5000;
 

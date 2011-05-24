@@ -79,8 +79,8 @@ def main(run_cmd, options):
   # complete set of tests and the required scripts.
   directives += " -c \"DocumentRoot " + os.path.join(layout_tests_path, "http", "tests/") + "\""
   directives += " -c \"Alias /LayoutTests " + layout_tests_path + "\""
-  directives += " -c \"Alias /WebKitTools/DumpRenderTree/android " + \
-    os.path.join(webkit_path, "WebKitTools", "DumpRenderTree", "android") + "\""
+  directives += " -c \"Alias /Tools/DumpRenderTree/android " + \
+    os.path.join(webkit_path, "Tools", "DumpRenderTree", "android") + "\""
   directives += " -c \"Alias /ThirdPartyProject.prop " + \
     os.path.join(webkit_path, "ThirdPartyProject.prop") + "\""
 

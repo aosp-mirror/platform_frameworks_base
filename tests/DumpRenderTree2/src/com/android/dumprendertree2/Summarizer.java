@@ -568,7 +568,7 @@ public class Summarizer {
         URL url = null;
         try {
             url = new URL("http", "localhost", ForwarderManager.HTTP_PORT,
-                    "/WebKitTools/DumpRenderTree/android/view_source.php?src=" +
+                    "/Tools/DumpRenderTree/android/view_source.php?src=" +
                     relativePath);
         } catch (MalformedURLException e) {
             assert false : "relativePath=" + relativePath;
