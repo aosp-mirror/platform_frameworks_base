@@ -45,8 +45,7 @@ namespace android {
 static Mutex gWVMutex;
 
 WVMExtractor::WVMExtractor(const sp<DataSource> &source)
-    : mDataSource(source),
-      mUseAdaptiveStreaming(false) {
+    : mDataSource(source) {
     {
         Mutex::Autolock autoLock(gWVMutex);
         if (gVendorLibHandle == NULL) {
@@ -59,13 +58,12 @@ WVMExtractor::WVMExtractor(const sp<DataSource> &source)
         }
     }
 
-    typedef MediaExtractor *(*GetInstanceFunc)(sp<DataSource>);
+    typedef WVMLoadableExtractor *(*GetInstanceFunc)(sp<DataSource>);
     GetInstanceFunc getInstanceFunc =
         (GetInstanceFunc) dlsym(gVendorLibHandle,
                 "_ZN7android11GetInstanceENS_2spINS_10DataSourceEEE");
 
     if (getInstanceFunc) {
-        LOGD("Calling GetInstanceFunc");
         mImpl = (*getInstanceFunc)(source);
         CHECK(mImpl != NULL);
     } else {
@@ -102,19 +100,17 @@ sp<MetaData> WVMExtractor::getMetaData() {
 }
 
 int64_t WVMExtractor::getCachedDurationUs(status_t *finalStatus) {
-    // TODO: Fill this with life.
+    if (mImpl == NULL) {
+        return 0;
+    }
 
-    *finalStatus = OK;
-
-    return 0;
+    return mImpl->getCachedDurationUs(finalStatus);
 }
 
 void WVMExtractor::setAdaptiveStreamingMode(bool adaptive) {
-    mUseAdaptiveStreaming = adaptive;
-}
-
-bool WVMExtractor::getAdaptiveStreamingMode() const {
-    return mUseAdaptiveStreaming;
+    if (mImpl != NULL) {
+        mImpl->setAdaptiveStreamingMode(adaptive);
+    }
 }
 
 } //namespace android
