@@ -443,7 +443,7 @@ public final class Canvas_Delegate {
         AffineTransform matrixTx = matrixDelegate.getAffineTransform();
 
         // combine them so that the given matrix is applied after.
-        currentTx.preConcatenate(matrixTx);
+        currentTx.concatenate(matrixTx);
 
         // give it to the graphics2D as a new matrix replacing all previous transform
         snapshot.setTransform(currentTx);
