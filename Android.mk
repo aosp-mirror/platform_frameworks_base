@@ -114,6 +114,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/nfc/ILlcpConnectionlessSocket.aidl \
 	core/java/android/nfc/ILlcpServiceSocket.aidl \
 	core/java/android/nfc/ILlcpSocket.aidl \
+	core/java/android/nfc/INdefPushCallback.aidl \
 	core/java/android/nfc/INfcAdapter.aidl \
 	core/java/android/nfc/INfcAdapterExtras.aidl \
 	core/java/android/nfc/INfcTag.aidl \

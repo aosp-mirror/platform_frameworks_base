@@ -124,7 +124,7 @@ public final class NfcAdapter {
      * Intent to start an activity when a tag is discovered.
      *
      * <p>This intent will not be started when a tag is discovered if any activities respond to
-     * {@link #ACTION_NDEF_DISCOVERED} or {@link #ACTION_TECH_DISCOVERED} for the current tag. 
+     * {@link #ACTION_NDEF_DISCOVERED} or {@link #ACTION_TECH_DISCOVERED} for the current tag.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
@@ -235,6 +235,37 @@ public final class NfcAdapter {
      */
     private static final int DISCOVERY_MODE_CARD_EMULATION = 2;
 
+    /**
+     * Callback passed into {@link #enableForegroundNdefPush(Activity,NdefPushCallback)}. This
+     */
+    public interface NdefPushCallback {
+        /**
+         * Called when a P2P connection is created.
+         */
+        NdefMessage createMessage();
+        /**
+         * Called when the message is pushed.
+         */
+        void onMessagePushed();
+    }
+
+    private static class NdefPushCallbackWrapper extends INdefPushCallback.Stub {
+        private NdefPushCallback mCallback;
+
+        public NdefPushCallbackWrapper(NdefPushCallback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public NdefMessage onConnect() {
+            return mCallback.createMessage();
+        }
+
+        @Override
+        public void onMessagePushed() {
+            mCallback.onMessagePushed();
+        }
+    }
 
     // Guarded by NfcAdapter.class
     private static boolean sIsInitialized = false;
@@ -569,6 +600,44 @@ public final class NfcAdapter {
             ActivityThread.currentActivityThread().registerOnActivityPausedListener(activity,
                     mForegroundNdefPushListener);
             sService.enableForegroundNdefPush(activity.getComponentName(), msg);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
+    }
+
+    /**
+     * Enable NDEF message push over P2P while this Activity is in the foreground.
+     *
+     * <p>For this to function properly the other NFC device being scanned must
+     * support the "com.android.npp" NDEF push protocol. Support for this
+     * protocol is currently optional for Android NFC devices.
+     *
+     * <p>This method must be called from the main thread.
+     *
+     * <p class="note"><em>NOTE:</em> While foreground NDEF push is active standard tag dispatch is disabled.
+     * Only the foreground activity may receive tag discovered dispatches via
+     * {@link #enableForegroundDispatch}.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param activity the foreground Activity
+     * @param callback is called on when the P2P connection is established
+     * @throws IllegalStateException if the Activity is not currently in the foreground
+     * @throws OperationNotSupportedException if this Android device does not support NDEF push
+     */
+    public void enableForegroundNdefPush(Activity activity, NdefPushCallback callback) {
+        if (activity == null || callback == null) {
+            throw new NullPointerException();
+        }
+        if (!activity.isResumed()) {
+            throw new IllegalStateException("Foregorund NDEF push can only be enabled " +
+                    "when your activity is resumed");
+        }
+        try {
+            ActivityThread.currentActivityThread().registerOnActivityPausedListener(activity,
+                    mForegroundNdefPushListener);
+            sService.enableForegroundNdefPushWithCallback(activity.getComponentName(),
+                    new NdefPushCallbackWrapper(callback));
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
         }
