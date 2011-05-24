@@ -36,6 +36,11 @@ public class StorageVolume implements Parcelable {
     private final int mMtpReserveSpace;
     private int mStorageId;
 
+    // StorageVolume extra for ACTION_MEDIA_REMOVED, ACTION_MEDIA_UNMOUNTED, ACTION_MEDIA_CHECKING,
+    // ACTION_MEDIA_NOFS, ACTION_MEDIA_MOUNTED, ACTION_MEDIA_SHARED, ACTION_MEDIA_UNSHARED,
+    // ACTION_MEDIA_BAD_REMOVAL, ACTION_MEDIA_UNMOUNTABLE and ACTION_MEDIA_EJECT broadcasts.
+    public static final String EXTRA_STORAGE_VOLUME = "storage_volume";
+
     public StorageVolume(String path, String description,
             boolean removable, boolean emulated, int mtpReserveSpace) {
         mPath = path;
