@@ -2016,7 +2016,8 @@ final class WebViewCore {
         if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw start");
         draw.mBaseLayer = nativeRecordContent(draw.mInvalRegion, draw.mContentSize);
         if (draw.mBaseLayer == 0) {
-            if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw abort");
+            if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw abort, resending draw message");
+            mEventHub.sendMessage(Message.obtain(null, EventHub.WEBKIT_DRAW));
             return;
         }
         webkitDraw(draw);
