@@ -330,7 +330,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Drawable mSelectHandleRight;
     private Drawable mSelectHandleCenter;
 
-    private int mLastDownPositionX, mLastDownPositionY;
+    private float mLastDownPositionX, mLastDownPositionY;
     private Callback mCustomSelectionActionModeCallback;
 
     private final int mSquaredTouchSlopDistance;
@@ -2903,8 +2903,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         setText(mCharWrapper, mBufferType, false, oldlen);
     }
 
-    private static class CharWrapper
-            implements CharSequence, GetChars, GraphicsOperations {
+    private static class CharWrapper implements CharSequence, GetChars, GraphicsOperations {
         private char[] mChars;
         private int mStart, mLength;
 
@@ -7328,8 +7327,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         if (action == MotionEvent.ACTION_DOWN) {
-            mLastDownPositionX = (int) event.getX();
-            mLastDownPositionY = (int) event.getY();
+            mLastDownPositionX = event.getX();
+            mLastDownPositionY = event.getY();
 
             // Reset this state; it will be re-set if super.onTouchEvent
             // causes focus to move to the view.
@@ -7763,16 +7762,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 hasPrimaryClip());
     }
 
-    private boolean isWordCharacter(int c, int type) {
-        return (c == '\'' || c == '"' ||
-                type == Character.UPPERCASE_LETTER ||
-                type == Character.LOWERCASE_LETTER ||
-                type == Character.TITLECASE_LETTER ||
-                type == Character.MODIFIER_LETTER ||
-                type == Character.OTHER_LETTER || // Should handle asian characters
-                type == Character.DECIMAL_DIGIT_NUMBER);
-    }
-
     private static long packRangeInLong(int start, int end) {
         return (((long) start) << 32) | end;
     }
@@ -8145,7 +8134,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Long press in empty space moves cursor and shows the Paste affordance if available.
         if (!isPositionOnText(mLastDownPositionX, mLastDownPositionY) &&
                 mInsertionControllerEnabled) {
-            final int offset = getOffset(mLastDownPositionX, mLastDownPositionY);
+            final int offset = getOffsetForPosition(mLastDownPositionX, mLastDownPositionY);
             stopSelectionActionMode();
             Selection.setSelection((Spannable) mText, offset);
             getInsertionController().showWithPaste();
@@ -8213,7 +8202,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private final ViewGroup[] mSuggestionViews = new ViewGroup[2];
         private final int[] mSuggestionViewLayouts = new int[] {
                 mTextEditSuggestionsBottomWindowLayout, mTextEditSuggestionsTopWindowLayout};
-        private WordIterator mWordIterator;
+        private WordIterator mSuggestionWordIterator;
         private TextAppearanceSpan[] mHighlightSpans = new TextAppearanceSpan[0];
 
         public SuggestionsPopupWindow() {
@@ -8349,26 +8338,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         private long[] getWordLimits(CharSequence text) {
-            if (mWordIterator == null) mWordIterator = new WordIterator(); // TODO locale
-            mWordIterator.setCharSequence(text);
+            // TODO locale for mSuggestionWordIterator
+            if (mSuggestionWordIterator == null) mSuggestionWordIterator = new WordIterator();
+            mSuggestionWordIterator.setCharSequence(text);
 
             // First pass will simply count the number of words to be able to create an array
             // Not too expensive since previous break positions are cached by the BreakIterator
             int nbWords = 0;
-            int position = mWordIterator.following(0);
+            int position = mSuggestionWordIterator.following(0);
             while (position != BreakIterator.DONE) {
                 nbWords++;
-                position = mWordIterator.following(position);
+                position = mSuggestionWordIterator.following(position);
             }
 
             int index = 0;
             long[] result = new long[nbWords];
 
-            position = mWordIterator.following(0);
+            position = mSuggestionWordIterator.following(0);
             while (position != BreakIterator.DONE) {
-                int wordStart = mWordIterator.getBeginning(position);
+                int wordStart = mSuggestionWordIterator.getBeginning(position);
                 result[index++] = packRangeInLong(wordStart, position);
-                position = mWordIterator.following(position);
+                position = mSuggestionWordIterator.following(position);
             }
 
             return result;
@@ -9147,7 +9137,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public abstract void updateOffset(int offset);
 
-        public abstract void updatePosition(int x, int y);
+        public abstract void updatePosition(float x, float y);
 
         protected void positionAtCursorOffset(int offset) {
             addPositionToTouchUpFilter(offset);
@@ -9247,7 +9237,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     final float newPosX = rawX - mTouchToWindowOffsetX + mHotspotX;
                     final float newPosY = rawY - mTouchToWindowOffsetY + mTouchOffsetY;
 
-                    updatePosition(Math.round(newPosX), Math.round(newPosY));
+                    updatePosition(newPosX, newPosY);
                     break;
                 }
 
@@ -9398,8 +9388,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
-        public void updatePosition(int x, int y) {
-            updateOffset(getOffset(x, y));
+        public void updatePosition(float x, float y) {
+            updateOffset(getOffsetForPosition(x, y));
         }
 
         void showPastePopupWindow() {
@@ -9453,11 +9443,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
-        public void updatePosition(int x, int y) {
+        public void updatePosition(float x, float y) {
             final int selectionStart = getSelectionStart();
             final int selectionEnd = getSelectionEnd();
 
-            int offset = getOffset(x, y);
+            int offset = getOffsetForPosition(x, y);
 
             // No need to redraw when the offset is unchanged
             if (offset == selectionStart) return;
@@ -9490,11 +9480,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
-        public void updatePosition(int x, int y) {
+        public void updatePosition(float x, float y) {
             final int selectionStart = getSelectionStart();
             final int selectionEnd = getSelectionEnd();
 
-            int offset = getOffset(x, y);
+            int offset = getOffsetForPosition(x, y);
 
             // No need to redraw when the offset is unchanged
             if (offset == selectionEnd) return;
@@ -9592,7 +9582,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         // Double tap detection
         private long mPreviousTapUpTime = 0;
-        private int mPreviousTapPositionX, mPreviousTapPositionY;
+        private float mPreviousTapPositionX, mPreviousTapPositionY;
 
         SelectionModifierCursorController() {
             resetTouchOffsets();
@@ -9625,19 +9615,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (isTextEditable() || mTextIsSelectable) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        final int x = (int) event.getX();
-                        final int y = (int) event.getY();
+                        final float x = event.getX();
+                        final float y = event.getY();
 
                         // Remember finger down position, to be able to start selection from there
-                        mMinTouchOffset = mMaxTouchOffset = getOffset(x, y);
+                        mMinTouchOffset = mMaxTouchOffset = getOffsetForPosition(x, y);
 
                         // Double tap detection
                         long duration = SystemClock.uptimeMillis() - mPreviousTapUpTime;
                         if (duration <= ViewConfiguration.getDoubleTapTimeout() &&
                                 isPositionOnText(x, y)) {
-                            final int deltaX = x - mPreviousTapPositionX;
-                            final int deltaY = y - mPreviousTapPositionY;
-                            final int distanceSquared = deltaX * deltaX + deltaY * deltaY;
+                            final float deltaX = x - mPreviousTapPositionX;
+                            final float deltaY = y - mPreviousTapPositionY;
+                            final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
                             if (distanceSquared < mSquaredTouchSlopDistance) {
                                 showSuggestions();
                                 mDiscardNextActionUp = true;
@@ -9673,9 +9663,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private void updateMinAndMaxOffsets(MotionEvent event) {
             int pointerCount = event.getPointerCount();
             for (int index = 0; index < pointerCount; index++) {
-                final int x = (int) event.getX(index);
-                final int y = (int) event.getY(index);
-                int offset = getOffset(x, y);
+                int offset = getOffsetForPosition(event.getX(index), event.getY(index));
                 if (offset < mMinTouchOffset) mMinTouchOffset = offset;
                 if (offset > mMaxTouchOffset) mMaxTouchOffset = offset;
             }
@@ -9742,32 +9730,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      *
      * @hide
      */
-    public int getOffset(int x, int y) {
+    public int getOffsetForPosition(float x, float y) {
         if (getLayout() == null) return -1;
         final int line = getLineAtCoordinate(y);
         final int offset = getOffsetAtCoordinate(line, x);
         return offset;
     }
 
-    private int convertToLocalHorizontalCoordinate(int x) {
+    private float convertToLocalHorizontalCoordinate(float x) {
         x -= getTotalPaddingLeft();
         // Clamp the position to inside of the view.
-        x = Math.max(0, x);
+        x = Math.max(0.0f, x);
         x = Math.min(getWidth() - getTotalPaddingRight() - 1, x);
         x += getScrollX();
         return x;
     }
 
-    private int getLineAtCoordinate(int y) {
+    private int getLineAtCoordinate(float y) {
         y -= getTotalPaddingTop();
         // Clamp the position to inside of the view.
-        y = Math.max(0, y);
+        y = Math.max(0.0f, y);
         y = Math.min(getHeight() - getTotalPaddingBottom() - 1, y);
         y += getScrollY();
-        return getLayout().getLineForVertical(y);
+        return getLayout().getLineForVertical((int) y);
     }
 
-    private int getOffsetAtCoordinate(int line, int x) {
+    private int getOffsetAtCoordinate(int line, float x) {
         x = convertToLocalHorizontalCoordinate(x);
         return getLayout().getOffsetForHorizontal(line, x);
     }
@@ -9775,7 +9763,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     /** Returns true if the screen coordinates position (x,y) corresponds to a character displayed
      * in the view. Returns false when the position is in the empty space of left/right of text.
      */
-    private boolean isPositionOnText(int x, int y) {
+    private boolean isPositionOnText(float x, float y) {
         if (getLayout() == null) return false;
 
         final int line = getLineAtCoordinate(y);
@@ -9797,7 +9785,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
 
             case DragEvent.ACTION_DRAG_LOCATION:
-                final int offset = getOffset((int) event.getX(), (int) event.getY());
+                final int offset = getOffsetForPosition(event.getX(), event.getY());
                 Selection.setSelection((Spannable)mText, offset);
                 return true;
 
@@ -9821,7 +9809,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             content.append(item.coerceToText(TextView.this.mContext));
         }
 
-        final int offset = getOffset((int) event.getX(), (int) event.getY());
+        final int offset = getOffsetForPosition(event.getX(), event.getY());
 
         Object localState = event.getLocalState();
         DragLocalState dragLocalState = null;
