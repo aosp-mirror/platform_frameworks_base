@@ -82,8 +82,8 @@ public:
                                 pid_t pid,
                                 int streamType,
                                 uint32_t sampleRate,
-                                int format,
-                                int channelCount,
+                                uint32_t format,
+                                uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
@@ -98,7 +98,7 @@ public:
         data.writeInt32(streamType);
         data.writeInt32(sampleRate);
         data.writeInt32(format);
-        data.writeInt32(channelCount);
+        data.writeInt32(channelMask);
         data.writeInt32(frameCount);
         data.writeInt32(flags);
         data.writeStrongBinder(sharedBuffer->asBinder());
@@ -129,8 +129,8 @@ public:
                                 pid_t pid,
                                 int input,
                                 uint32_t sampleRate,
-                                int format,
-                                int channelCount,
+                                uint32_t format,
+                                uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
                                 int *sessionId,
@@ -143,7 +143,7 @@ public:
         data.writeInt32(input);
         data.writeInt32(sampleRate);
         data.writeInt32(format);
-        data.writeInt32(channelCount);
+        data.writeInt32(channelMask);
         data.writeInt32(frameCount);
         data.writeInt32(flags);
         int lSessionId = 0;
@@ -186,7 +186,7 @@ public:
         return reply.readInt32();
     }
 
-    virtual int format(int output) const
+    virtual uint32_t format(int output) const
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());

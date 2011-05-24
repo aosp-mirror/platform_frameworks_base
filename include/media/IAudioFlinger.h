@@ -48,8 +48,8 @@ public:
                                 pid_t pid,
                                 int streamType,
                                 uint32_t sampleRate,
-                                int format,
-                                int channelCount,
+                                uint32_t format,
+                                uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
@@ -61,8 +61,8 @@ public:
                                 pid_t pid,
                                 int input,
                                 uint32_t sampleRate,
-                                int format,
-                                int channelCount,
+                                uint32_t format,
+                                uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
                                 int *sessionId,
@@ -73,7 +73,7 @@ public:
      */
     virtual     uint32_t    sampleRate(int output) const = 0;
     virtual     int         channelCount(int output) const = 0;
-    virtual     int         format(int output) const = 0;
+    virtual     uint32_t    format(int output) const = 0;
     virtual     size_t      frameCount(int output) const = 0;
     virtual     uint32_t    latency(int output) const = 0;
 

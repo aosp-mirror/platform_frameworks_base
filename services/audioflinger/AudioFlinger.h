@@ -76,8 +76,8 @@ public:
                                 pid_t pid,
                                 int streamType,
                                 uint32_t sampleRate,
-                                int format,
-                                int channelCount,
+                                uint32_t format,
+                                uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
@@ -87,7 +87,7 @@ public:
 
     virtual     uint32_t    sampleRate(int output) const;
     virtual     int         channelCount(int output) const;
-    virtual     int         format(int output) const;
+    virtual     uint32_t    format(int output) const;
     virtual     size_t      frameCount(int output) const;
     virtual     uint32_t    latency(int output) const;
 
@@ -189,8 +189,8 @@ public:
                                 pid_t pid,
                                 int input,
                                 uint32_t sampleRate,
-                                int format,
-                                int channelCount,
+                                uint32_t format,
+                                uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
                                 int *sessionId,
@@ -301,8 +301,8 @@ private:
                                 TrackBase(const wp<ThreadBase>& thread,
                                         const sp<Client>& client,
                                         uint32_t sampleRate,
-                                        int format,
-                                        int channelCount,
+                                        uint32_t format,
+                                        uint32_t channelMask,
                                         int frameCount,
                                         uint32_t flags,
                                         const sp<IMemory>& sharedBuffer,
@@ -329,11 +329,13 @@ private:
             virtual status_t getNextBuffer(AudioBufferProvider::Buffer* buffer) = 0;
             virtual void releaseBuffer(AudioBufferProvider::Buffer* buffer);
 
-            int format() const {
+            uint32_t format() const {
                 return mFormat;
             }
 
             int channelCount() const ;
+
+            uint32_t channelMask() const;
 
             int sampleRate() const;
 
@@ -360,9 +362,11 @@ private:
             // we don't really need a lock for these
             int                 mState;
             int                 mClientTid;
-            uint8_t             mFormat;
+            uint32_t            mFormat;
             uint32_t            mFlags;
             int                 mSessionId;
+            uint8_t             mChannelCount;
+            uint32_t            mChannelMask;
         };
 
         class ConfigEvent {
@@ -375,7 +379,7 @@ private:
 
                     uint32_t    sampleRate() const;
                     int         channelCount() const;
-                    int         format() const;
+                    uint32_t    format() const;
                     size_t      frameCount() const;
                     void        wakeUp()    { mWaitWorkCV.broadcast(); }
                     void        exit();
@@ -406,10 +410,10 @@ private:
                     sp<AudioFlinger>        mAudioFlinger;
                     uint32_t                mSampleRate;
                     size_t                  mFrameCount;
-                    uint32_t                mChannels;
+                    uint32_t                mChannelMask;
                     uint16_t                mChannelCount;
                     uint16_t                mFrameSize;
-                    int                     mFormat;
+                    uint32_t                mFormat;
                     Condition               mParamCond;
                     Vector<String8>         mNewParameters;
                     status_t                mParamStatus;
@@ -442,8 +446,8 @@ private:
                                         const sp<Client>& client,
                                         int streamType,
                                         uint32_t sampleRate,
-                                        int format,
-                                        int channelCount,
+                                        uint32_t format,
+                                        uint32_t channelMask,
                                         int frameCount,
                                         const sp<IMemory>& sharedBuffer,
                                         int sessionId);
@@ -530,8 +534,8 @@ private:
                                 OutputTrack(  const wp<ThreadBase>& thread,
                                         DuplicatingThread *sourceThread,
                                         uint32_t sampleRate,
-                                        int format,
-                                        int channelCount,
+                                        uint32_t format,
+                                        uint32_t channelMask,
                                         int frameCount);
                                 ~OutputTrack();
 
@@ -583,8 +587,8 @@ private:
                                     const sp<AudioFlinger::Client>& client,
                                     int streamType,
                                     uint32_t sampleRate,
-                                    int format,
-                                    int channelCount,
+                                    uint32_t format,
+                                    uint32_t channelMask,
                                     int frameCount,
                                     const sp<IMemory>& sharedBuffer,
                                     int sessionId,
@@ -829,8 +833,8 @@ private:
                                 RecordTrack(const wp<ThreadBase>& thread,
                                         const sp<Client>& client,
                                         uint32_t sampleRate,
-                                        int format,
-                                        int channelCount,
+                                        uint32_t format,
+                                        uint32_t channelMask,
                                         int frameCount,
                                         uint32_t flags,
                                         int sessionId);

@@ -69,8 +69,8 @@ public:
             MUTE    = 0x00000001
         };
         uint32_t    flags;
-        int         channelCount;
         int         format;
+        int         channelCount; // will be removed in the future, do not use
         size_t      frameCount;
         size_t      size;
         union {
@@ -129,7 +129,7 @@ public:
      * sampleRate:         Track sampling rate in Hz.
      * format:             Audio format (e.g AUDIO_FORMAT_PCM_16_BIT for signed
      *                     16 bits per sample).
-     * channels:           Channel mask: see audio_channels_t.
+     * channelMask:        Channel mask: see audio_channels_t.
      * frameCount:         Total size of track PCM buffer in frames. This defines the
      *                     latency of the track.
      * flags:              Reserved for future use.
@@ -143,7 +143,7 @@ public:
                         AudioTrack( int streamType,
                                     uint32_t sampleRate  = 0,
                                     int format           = 0,
-                                    int channels         = 0,
+                                    int channelMask      = 0,
                                     int frameCount       = 0,
                                     uint32_t flags       = 0,
                                     callback_t cbf       = 0,
@@ -163,7 +163,7 @@ public:
                         AudioTrack( int streamType,
                                     uint32_t sampleRate = 0,
                                     int format          = 0,
-                                    int channels        = 0,
+                                    int channelMask     = 0,
                                     const sp<IMemory>& sharedBuffer = 0,
                                     uint32_t flags      = 0,
                                     callback_t cbf      = 0,
@@ -187,7 +187,7 @@ public:
             status_t    set(int streamType      =-1,
                             uint32_t sampleRate = 0,
                             int format          = 0,
-                            int channels        = 0,
+                            int channelMask     = 0,
                             int frameCount      = 0,
                             uint32_t flags      = 0,
                             callback_t cbf      = 0,
@@ -438,8 +438,8 @@ private:
             bool processAudioBuffer(const sp<AudioTrackThread>& thread);
             status_t createTrack_l(int streamType,
                                  uint32_t sampleRate,
-                                 int format,
-                                 int channelCount,
+                                 uint32_t format,
+                                 uint32_t channelMask,
                                  int frameCount,
                                  uint32_t flags,
                                  const sp<IMemory>& sharedBuffer,
@@ -459,11 +459,12 @@ private:
     uint32_t                mFrameCount;
 
     audio_track_cblk_t*     mCblk;
+    uint32_t                mFormat;
     uint8_t                 mStreamType;
-    uint8_t                 mFormat;
     uint8_t                 mChannelCount;
     uint8_t                 mMuted;
-    uint32_t                mChannels;
+    uint8_t                 mReserved;
+    uint32_t                mChannelMask;
     status_t                mStatus;
     uint32_t                mLatency;
 

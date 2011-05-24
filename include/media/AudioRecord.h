@@ -130,7 +130,7 @@ public:
      * sampleRate:         Track sampling rate in Hz.
      * format:             Audio format (e.g AUDIO_FORMAT_PCM_16_BIT for signed
      *                     16 bits per sample).
-     * channels:           Channel mask: see audio_channels_t.
+     * channelMask:        Channel mask: see audio_channels_t.
      * frameCount:         Total size of track PCM buffer in frames. This defines the
      *                     latency of the track.
      * flags:              A bitmask of acoustic values from enum record_flags.  It enables
@@ -151,7 +151,7 @@ public:
                         AudioRecord(int inputSource,
                                     uint32_t sampleRate = 0,
                                     int format          = 0,
-                                    uint32_t channels = AUDIO_CHANNEL_IN_MONO,
+                                    uint32_t channelMask = AUDIO_CHANNEL_IN_MONO,
                                     int frameCount      = 0,
                                     uint32_t flags      = 0,
                                     callback_t cbf = 0,
@@ -177,7 +177,7 @@ public:
             status_t    set(int inputSource     = 0,
                             uint32_t sampleRate = 0,
                             int format          = 0,
-                            uint32_t channels = AUDIO_CHANNEL_IN_MONO,
+                            uint32_t channelMask = AUDIO_CHANNEL_IN_MONO,
                             int frameCount      = 0,
                             uint32_t flags      = 0,
                             callback_t cbf = 0,
@@ -348,8 +348,8 @@ private:
 
             bool processAudioBuffer(const sp<ClientRecordThread>& thread);
             status_t openRecord_l(uint32_t sampleRate,
-                                int format,
-                                int channelCount,
+                                uint32_t format,
+                                uint32_t channelMask,
                                 int frameCount,
                                 uint32_t flags,
                                 audio_io_handle_t input);
@@ -364,10 +364,10 @@ private:
     uint32_t                mFrameCount;
 
     audio_track_cblk_t*     mCblk;
-    uint8_t                 mFormat;
+    uint32_t                mFormat;
     uint8_t                 mChannelCount;
     uint8_t                 mInputSource;
-    uint8_t                 mReserved;
+    uint8_t                 mReserved[2];
     status_t                mStatus;
     uint32_t                mLatency;
 
@@ -382,7 +382,7 @@ private:
     uint32_t                mNewPosition;
     uint32_t                mUpdatePeriod;
     uint32_t                mFlags;
-    uint32_t                mChannels;
+    uint32_t                mChannelMask;
     audio_io_handle_t       mInput;
     int                     mSessionId;
 };

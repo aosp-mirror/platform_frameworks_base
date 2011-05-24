@@ -82,7 +82,7 @@ struct audio_track_cblk_t
                 // 16 bit because data is converted to 16 bit before being stored in buffer
 
                 uint8_t     frameSize;
-                uint8_t     channelCount;
+                uint8_t     pad1;
                 uint16_t    bufferTimeoutMs; // Maximum cumulated timeout before restarting audioflinger
 
                 uint16_t    waitTimeMs;      // Cumulated wait time
@@ -90,6 +90,7 @@ struct audio_track_cblk_t
     volatile    int32_t     flags;
 
                 // Cache line boundary (32 bytes)
+
                             audio_track_cblk_t();
                 uint32_t    stepUser(uint32_t frameCount);
                 bool        stepServer(uint32_t frameCount);

@@ -88,7 +88,7 @@ AudioRecord::AudioRecord(
         int inputSource,
         uint32_t sampleRate,
         int format,
-        uint32_t channels,
+        uint32_t channelMask,
         int frameCount,
         uint32_t flags,
         callback_t cbf,
@@ -97,7 +97,7 @@ AudioRecord::AudioRecord(
         int sessionId)
     : mStatus(NO_INIT), mSessionId(0)
 {
-    mStatus = set(inputSource, sampleRate, format, channels,
+    mStatus = set(inputSource, sampleRate, format, channelMask,
             frameCount, flags, cbf, user, notificationFrames, sessionId);
 }
 
@@ -121,7 +121,7 @@ status_t AudioRecord::set(
         int inputSource,
         uint32_t sampleRate,
         int format,
-        uint32_t channels,
+        uint32_t channelMask,
         int frameCount,
         uint32_t flags,
         callback_t cbf,
@@ -131,7 +131,7 @@ status_t AudioRecord::set(
         int sessionId)
 {
 
-    LOGV("set(): sampleRate %d, channels %d, frameCount %d",sampleRate, channels, frameCount);
+    LOGV("set(): sampleRate %d, channelMask %d, frameCount %d",sampleRate, channelMask, frameCount);
 
     AutoMutex lock(mLock);
 
@@ -156,14 +156,14 @@ status_t AudioRecord::set(
         return BAD_VALUE;
     }
 
-    if (!audio_is_input_channel(channels)) {
+    if (!audio_is_input_channel(channelMask)) {
         return BAD_VALUE;
     }
 
-    int channelCount = popcount(channels);
+    int channelCount = popcount(channelMask);
 
     audio_io_handle_t input = AudioSystem::getInput(inputSource,
-                                    sampleRate, format, channels, (audio_in_acoustics_t)flags);
+                                    sampleRate, format, channelMask, (audio_in_acoustics_t)flags);
     if (input == 0) {
         LOGE("Could not get audio input for record source %d", inputSource);
         return BAD_VALUE;
@@ -190,7 +190,7 @@ status_t AudioRecord::set(
     mSessionId = sessionId;
 
     // create the IAudioRecord
-    status = openRecord_l(sampleRate, format, channelCount,
+    status = openRecord_l(sampleRate, format, channelMask,
                         frameCount, flags, input);
     if (status != NO_ERROR) {
         return status;
@@ -209,7 +209,7 @@ status_t AudioRecord::set(
     // Update buffer size in case it has been limited by AudioFlinger during track creation
     mFrameCount = mCblk->frameCount;
     mChannelCount = (uint8_t)channelCount;
-    mChannels = channels;
+    mChannelMask = channelMask;
     mActive = 0;
     mCbf = cbf;
     mNotificationFrames = notificationFrames;
@@ -437,8 +437,8 @@ unsigned int AudioRecord::getInputFramesLost()
 // must be called with mLock held
 status_t AudioRecord::openRecord_l(
         uint32_t sampleRate,
-        int format,
-        int channelCount,
+        uint32_t format,
+        uint32_t channelMask,
         int frameCount,
         uint32_t flags,
         audio_io_handle_t input)
@@ -451,7 +451,7 @@ status_t AudioRecord::openRecord_l(
 
     sp<IAudioRecord> record = audioFlinger->openRecord(getpid(), input,
                                                        sampleRate, format,
-                                                       channelCount,
+                                                       channelMask,
                                                        frameCount,
                                                        ((uint16_t)flags) << 16,
                                                        &mSessionId,
@@ -589,7 +589,7 @@ audio_io_handle_t AudioRecord::getInput_l()
 {
     mInput = AudioSystem::getInput(mInputSource,
                                 mCblk->sampleRate,
-                                mFormat, mChannels,
+                                mFormat, mChannelMask,
                                 (audio_in_acoustics_t)mFlags);
     return mInput;
 }
@@ -756,7 +756,7 @@ status_t AudioRecord::restoreRecord_l(audio_track_cblk_t*& cblk)
         // if the new IAudioRecord is created, openRecord_l() will modify the
         // following member variables: mAudioRecord, mCblkMemory and mCblk.
         // It will also delete the strong references on previous IAudioRecord and IMemory
-        result = openRecord_l(cblk->sampleRate, mFormat, mChannelCount,
+        result = openRecord_l(cblk->sampleRate, mFormat, mChannelMask,
                 mFrameCount, mFlags, getInput_l());
         if (result == NO_ERROR) {
             result = mAudioRecord->start();

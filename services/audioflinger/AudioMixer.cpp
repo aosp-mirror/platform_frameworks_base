@@ -26,6 +26,10 @@
 #include <utils/Errors.h>
 #include <utils/Log.h>
 
+#include <cutils/bitops.h>
+
+#include <system/audio.h>
+
 #include "AudioMixer.h"
 
 namespace android {
@@ -61,6 +65,7 @@ AudioMixer::AudioMixer(size_t frameCount, uint32_t sampleRate)
         t->channelCount = 2;
         t->enabled = 0;
         t->format = 16;
+        t->channelMask = AUDIO_CHANNEL_OUT_STEREO;
         t->buffer.raw = 0;
         t->bufferProvider = 0;
         t->hook = 0;
@@ -180,13 +185,18 @@ status_t AudioMixer::setParameter(int target, int name, void *value)
 
     switch (target) {
     case TRACK:
-        if (name == CHANNEL_COUNT) {
-            if ((uint32_t(valueInt) <= MAX_NUM_CHANNELS) && (valueInt)) {
-                if (mState.tracks[ mActiveTrack ].channelCount != valueInt) {
-                    mState.tracks[ mActiveTrack ].channelCount = valueInt;
-                    LOGV("setParameter(TRACK, CHANNEL_COUNT, %d)", valueInt);
+        if (name == CHANNEL_MASK) {
+            uint32_t mask = (uint32_t)value;
+            if (mState.tracks[ mActiveTrack ].channelMask != mask) {
+                uint8_t channelCount = popcount(mask);
+                if ((channelCount <= MAX_NUM_CHANNELS) && (channelCount)) {
+                    mState.tracks[ mActiveTrack ].channelMask = mask;
+                    mState.tracks[ mActiveTrack ].channelCount = channelCount;
+                    LOGV("setParameter(TRACK, CHANNEL_MASK, %x)", mask);
                     invalidateState(1<<mActiveTrack);
+                    return NO_ERROR;
                 }
+            } else {
                 return NO_ERROR;
             }
         }
