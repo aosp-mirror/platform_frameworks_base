@@ -21,7 +21,7 @@
 <resources>
     <dimen name="password_keyboard_key_height">47dip</dimen>
     <dimen name="password_keyboard_spacebar_vertical_correction">2dip</dimen>
-    <dimen name="preference_screen_side_margin">96dp</dimen>
-    <dimen name="preference_screen_side_margin_negative">-100dp</dimen>
+    <dimen name="preference_screen_side_margin">16dp</dimen>
+    <dimen name="preference_screen_side_margin_negative">-20dp</dimen>
     <dimen name="preference_widget_width">72dp</dimen>
 </resources>

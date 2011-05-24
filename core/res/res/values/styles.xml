@@ -2183,8 +2183,8 @@
 
     <style name="Widget.Holo.PreferenceFrameLayout">
         <item name="android:borderTop">0dip</item>
-        <item name="android:borderBottom">48dip</item>
-        <item name="android:borderLeft">32dip</item>
-        <item name="android:borderRight">32dip</item>
+        <item name="android:borderBottom">@dimen/preference_fragment_padding_side</item>
+        <item name="android:borderLeft">@dimen/preference_fragment_padding_side</item>
+        <item name="android:borderRight">@dimen/preference_fragment_padding_side</item>
     </style>
 </resources>

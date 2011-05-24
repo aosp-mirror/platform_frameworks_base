@@ -14,9 +14,12 @@
      limitations under the License.
 -->
 
-<!-- Layout used for PreferenceCategory in a PreferenceActivity. -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    style="?android:attr/listSeparatorTextViewStyle"
-    android:id="@+android:id/title"
-    android:paddingLeft="16dp"
-/>
+<resources>
+    <style name="PreferencePanel">
+        <item name="android:layout_marginLeft">@dimen/preference_screen_side_margin</item>
+        <item name="android:layout_marginRight">@dimen/preference_screen_side_margin</item>
+        <item name="android:layout_marginTop">48dip</item>
+        <item name="android:layout_marginBottom">48dip</item>
+        <item name="android:background">?attr/detailsElementBackground</item>
+    </style>
+</resources>

@@ -33,8 +33,8 @@
         android:layout_gravity="center_vertical"
         android:layout_marginBottom="2dip"
         android:drawablePadding="0dip"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="?android:attr/textColorPrimaryInverse"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="?android:attr/textColorPrimary"
         android:visibility="gone"
     />
 

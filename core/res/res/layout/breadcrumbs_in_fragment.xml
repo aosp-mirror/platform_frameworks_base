@@ -13,10 +13,10 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-
-<!-- Layout used for PreferenceCategory in a PreferenceActivity. -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    style="?android:attr/listSeparatorTextViewStyle"
-    android:id="@+android:id/title"
-    android:paddingLeft="16dp"
-/>
+<!-- This layout disables breadcrumbs in the fragment area and causes PreferenceActivity to
+    put the breadcrumbs in the action bar. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_height="@dimen/preference_fragment_padding_side"
+        android:layout_width="match_parent">
+</LinearLayout>
