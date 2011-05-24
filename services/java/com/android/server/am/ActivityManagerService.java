@@ -43,6 +43,7 @@ import android.app.IActivityWatcher;
 import android.app.IApplicationThread;
 import android.app.IInstrumentationWatcher;
 import android.app.INotificationManager;
+import android.app.IProcessObserver;
 import android.app.IServiceConnection;
 import android.app.IThumbnailReceiver;
 import android.app.IThumbnailRetriever;
@@ -752,8 +753,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     final UsageStatsService mUsageStatsService;
 
-    final NetworkPolicyManagerService mNetworkPolicyService;
-
     /**
      * Current configuration information.  HistoryRecord objects are given
      * a reference to this object to indicate which configuration they are
@@ -885,7 +884,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final RemoteCallbackList<IActivityWatcher> mWatchers
             = new RemoteCallbackList<IActivityWatcher>();
-    
+
+    final RemoteCallbackList<IProcessObserver> mProcessObservers
+            = new RemoteCallbackList<IProcessObserver>();
+
     /**
      * Callback of last caller to {@link #requestPss}.
      */
@@ -1277,16 +1279,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             } break;
             case DISPATCH_FOREGROUND_ACTIVITIES_CHANGED: {
-                // Flag might have changed during dispatch, but it's always
-                // consistent since we dispatch for every change.
                 final ProcessRecord app = (ProcessRecord) msg.obj;
-                mNetworkPolicyService.onForegroundActivitiesChanged(
-                        app.info.uid, app.pid, app.foregroundActivities);
+                final boolean foregroundActivities = msg.arg1 != 0;
+                dispatchForegroundActivitiesChanged(
+                        app.pid, app.info.uid, foregroundActivities);
                 break;
             }
             case DISPATCH_PROCESS_DIED: {
                 final ProcessRecord app = (ProcessRecord) msg.obj;
-                mNetworkPolicyService.onProcessDied(app.info.uid, app.pid);
+                dispatchProcessDied(app.pid, app.info.uid);
                 break;
             }
             }
@@ -1358,7 +1359,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         m.mBatteryStatsService.publish(context);
         m.mUsageStatsService.publish(context);
-        m.mNetworkPolicyService.publish(context);
         
         synchronized (thr) {
             thr.mReady = true;
@@ -1479,8 +1479,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         mUsageStatsService = new UsageStatsService(new File(
                 systemDir, "usagestats").toString());
-
-        mNetworkPolicyService = new NetworkPolicyManagerService();
 
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
@@ -2150,6 +2148,36 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         mWatchers.finishBroadcast();
+    }
+
+    private void dispatchForegroundActivitiesChanged(int pid, int uid, boolean foregroundActivities) {
+        int i = mProcessObservers.beginBroadcast();
+        while (i > 0) {
+            i--;
+            final IProcessObserver observer = mProcessObservers.getBroadcastItem(i);
+            if (observer != null) {
+                try {
+                    observer.onForegroundActivitiesChanged(pid, uid, foregroundActivities);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        mProcessObservers.finishBroadcast();
+    }
+
+    private void dispatchProcessDied(int pid, int uid) {
+        int i = mProcessObservers.beginBroadcast();
+        while (i > 0) {
+            i--;
+            final IProcessObserver observer = mProcessObservers.getBroadcastItem(i);
+            if (observer != null) {
+                try {
+                    observer.onProcessDied(pid, uid);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        mProcessObservers.finishBroadcast();
     }
 
     final void doPendingActivityLaunchesLocked(boolean doResume) {
@@ -6084,7 +6112,6 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         mUsageStatsService.shutdown();
         mBatteryStatsService.shutdown();
-        mNetworkPolicyService.shutdown();
         
         return timedout;
     }
@@ -6239,6 +6266,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized (this) {
             mWatchers.unregister(watcher);
         }
+    }
+
+    public void registerProcessObserver(IProcessObserver observer) {
+        mProcessObservers.register(observer);
+    }
+
+    public void unregisterProcessObserver(IProcessObserver observer) {
+        mProcessObservers.unregister(observer);
     }
 
     public void setImmersive(IBinder token, boolean immersive) {
@@ -12755,7 +12790,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.curSchedGroup = schedGroup;
 
         if (hadForegroundActivities != app.foregroundActivities) {
-            mHandler.obtainMessage(DISPATCH_FOREGROUND_ACTIVITIES_CHANGED, app).sendToTarget();
+            mHandler.obtainMessage(DISPATCH_FOREGROUND_ACTIVITIES_CHANGED,
+                    app.foregroundActivities ? 1 : 0, 0, app).sendToTarget();
         }
 
         return adj;
