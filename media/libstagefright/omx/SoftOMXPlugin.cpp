@@ -21,6 +21,7 @@
 #include "SoftOMXPlugin.h"
 #include "include/SoftOMXComponent.h"
 
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AString.h>
 
 #include <dlfcn.h>
@@ -128,6 +129,7 @@ OMX_ERRORTYPE SoftOMXPlugin::destroyComponentInstance(
 
     void *libHandle = me->libHandle();
 
+    CHECK_EQ(me->getStrongCount(), 1);
     me->decStrong(this);
     me = NULL;
 
