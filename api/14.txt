@@ -1921,12 +1921,12 @@ package android.animation {
 
   public class FloatEvaluator implements android.animation.TypeEvaluator {
     ctor public FloatEvaluator();
-    method public java.lang.Object evaluate(float, java.lang.Object, java.lang.Object);
+    method public java.lang.Float evaluate(float, java.lang.Number, java.lang.Number);
   }
 
   public class IntEvaluator implements android.animation.TypeEvaluator {
     ctor public IntEvaluator();
-    method public java.lang.Object evaluate(float, java.lang.Object, java.lang.Object);
+    method public java.lang.Integer evaluate(float, java.lang.Integer, java.lang.Integer);
   }
 
   public abstract class Keyframe implements java.lang.Cloneable {
@@ -2012,7 +2012,7 @@ package android.animation {
   }
 
   public abstract interface TypeEvaluator {
-    method public abstract java.lang.Object evaluate(float, java.lang.Object, java.lang.Object);
+    method public abstract T evaluate(float, T, T);
   }
 
   public class ValueAnimator extends android.animation.Animator {

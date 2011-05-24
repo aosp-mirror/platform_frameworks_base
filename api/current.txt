@@ -1968,12 +1968,12 @@ package android.animation {
 
   public class FloatEvaluator implements android.animation.TypeEvaluator {
     ctor public FloatEvaluator();
-    method public java.lang.Object evaluate(float, java.lang.Object, java.lang.Object);
+    method public java.lang.Float evaluate(float, java.lang.Number, java.lang.Number);
   }
 
   public class IntEvaluator implements android.animation.TypeEvaluator {
     ctor public IntEvaluator();
-    method public java.lang.Object evaluate(float, java.lang.Object, java.lang.Object);
+    method public java.lang.Integer evaluate(float, java.lang.Integer, java.lang.Integer);
   }
 
   public abstract class Keyframe implements java.lang.Cloneable {
@@ -2034,9 +2034,13 @@ package android.animation {
     method public java.lang.String getPropertyName();
     method public java.lang.Object getTarget();
     method public static android.animation.ObjectAnimator ofFloat(java.lang.Object, java.lang.String, float...);
+    method public static android.animation.ObjectAnimator ofFloat(T, android.util.Property<T, java.lang.Float>, float...);
     method public static android.animation.ObjectAnimator ofInt(java.lang.Object, java.lang.String, int...);
+    method public static android.animation.ObjectAnimator ofInt(T, android.util.Property<T, java.lang.Integer>, int...);
     method public static android.animation.ObjectAnimator ofObject(java.lang.Object, java.lang.String, android.animation.TypeEvaluator, java.lang.Object...);
+    method public static android.animation.ObjectAnimator ofObject(T, android.util.Property<T, V>, android.animation.TypeEvaluator<V>, V...);
     method public static android.animation.ObjectAnimator ofPropertyValuesHolder(java.lang.Object, android.animation.PropertyValuesHolder...);
+    method public void setProperty(android.util.Property);
     method public void setPropertyName(java.lang.String);
   }
 
@@ -2044,14 +2048,19 @@ package android.animation {
     method public android.animation.PropertyValuesHolder clone();
     method public java.lang.String getPropertyName();
     method public static android.animation.PropertyValuesHolder ofFloat(java.lang.String, float...);
+    method public static android.animation.PropertyValuesHolder ofFloat(android.util.Property<?, java.lang.Float>, float...);
     method public static android.animation.PropertyValuesHolder ofInt(java.lang.String, int...);
+    method public static android.animation.PropertyValuesHolder ofInt(android.util.Property<?, java.lang.Integer>, int...);
     method public static android.animation.PropertyValuesHolder ofKeyframe(java.lang.String, android.animation.Keyframe...);
+    method public static android.animation.PropertyValuesHolder ofKeyframe(android.util.Property, android.animation.Keyframe...);
     method public static android.animation.PropertyValuesHolder ofObject(java.lang.String, android.animation.TypeEvaluator, java.lang.Object...);
+    method public static android.animation.PropertyValuesHolder ofObject(android.util.Property, android.animation.TypeEvaluator<V>, V...);
     method public void setEvaluator(android.animation.TypeEvaluator);
     method public void setFloatValues(float...);
     method public void setIntValues(int...);
     method public void setKeyframes(android.animation.Keyframe...);
     method public void setObjectValues(java.lang.Object...);
+    method public void setProperty(android.util.Property);
     method public void setPropertyName(java.lang.String);
   }
 
@@ -2060,7 +2069,7 @@ package android.animation {
   }
 
   public abstract interface TypeEvaluator {
-    method public abstract java.lang.Object evaluate(float, java.lang.Object, java.lang.Object);
+    method public abstract T evaluate(float, T, T);
   }
 
   public class ValueAnimator extends android.animation.Animator {
@@ -20096,6 +20105,10 @@ package android.util {
     method public void previousMonth();
   }
 
+  public class NoSuchPropertyException extends java.lang.RuntimeException {
+    ctor public NoSuchPropertyException(java.lang.String);
+  }
+
   public class Pair {
     ctor public Pair(F, S);
     method public static android.util.Pair<A, B> create(A, B);
@@ -20129,6 +20142,16 @@ package android.util {
 
   public abstract interface Printer {
     method public abstract void println(java.lang.String);
+  }
+
+  public abstract class Property {
+    ctor public Property(java.lang.Class<V>, java.lang.String);
+    method public abstract V get(T);
+    method public java.lang.String getName();
+    method public java.lang.Class<V> getType();
+    method public boolean isReadOnly();
+    method public static android.util.Property<T, V> of(java.lang.Class<T>, java.lang.Class<V>, java.lang.String);
+    method public void set(T, V);
   }
 
   public class SparseArray {
@@ -21877,6 +21900,11 @@ package android.view {
     field protected static final int[] PRESSED_SELECTED_STATE_SET;
     field protected static final int[] PRESSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
     field protected static final int[] PRESSED_WINDOW_FOCUSED_STATE_SET;
+    field public static android.util.Property ROTATION;
+    field public static android.util.Property ROTATION_X;
+    field public static android.util.Property ROTATION_Y;
+    field public static android.util.Property SCALE_X;
+    field public static android.util.Property SCALE_Y;
     field public static final int SCROLLBARS_INSIDE_INSET = 16777216; // 0x1000000
     field public static final int SCROLLBARS_INSIDE_OVERLAY = 0; // 0x0
     field public static final int SCROLLBARS_OUTSIDE_INSET = 50331648; // 0x3000000
@@ -21889,9 +21917,13 @@ package android.view {
     field public static final int SOUND_EFFECTS_ENABLED = 134217728; // 0x8000000
     field public static final int STATUS_BAR_HIDDEN = 1; // 0x1
     field public static final int STATUS_BAR_VISIBLE = 0; // 0x0
+    field public static android.util.Property TRANSLATION_X;
+    field public static android.util.Property TRANSLATION_Y;
     field protected static final java.lang.String VIEW_LOG_TAG = "View";
     field public static final int VISIBLE = 0; // 0x0
     field protected static final int[] WINDOW_FOCUSED_STATE_SET;
+    field public static android.util.Property X;
+    field public static android.util.Property Y;
   }
 
   public static class View.BaseSavedState extends android.view.AbsSavedState {

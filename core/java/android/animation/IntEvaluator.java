@@ -19,7 +19,7 @@ package android.animation;
 /**
  * This evaluator can be used to perform type interpolation between <code>int</code> values.
  */
-public class IntEvaluator implements TypeEvaluator {
+public class IntEvaluator implements TypeEvaluator<Integer> {
 
     /**
      * This function returns the result of linearly interpolating the start and end values, with
@@ -35,8 +35,8 @@ public class IntEvaluator implements TypeEvaluator {
      * @return A linear interpolation between the start and end values, given the
      *         <code>fraction</code> parameter.
      */
-    public Object evaluate(float fraction, Object startValue, Object endValue) {
-        int startInt = ((Number) startValue).intValue();
-        return (int) (startInt + fraction * (((Number) endValue).intValue() - startInt));
+    public Integer evaluate(float fraction, Integer startValue, Integer endValue) {
+        int startInt = startValue;
+        return (int)(startInt + fraction * (endValue - startInt));
     }
 }

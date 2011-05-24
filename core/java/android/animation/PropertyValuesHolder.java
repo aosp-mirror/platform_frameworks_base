@@ -16,7 +16,10 @@
 
 package android.animation;
 
+import android.util.FloatProperty;
+import android.util.IntProperty;
 import android.util.Log;
+import android.util.Property;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -37,6 +40,11 @@ public class PropertyValuesHolder implements Cloneable {
      * aniamted values are looked up with getAnimatedValue(String) in ValueAnimator.
      */
     String mPropertyName;
+
+    /**
+     * @hide
+     */
+    protected Property mProperty;
 
     /**
      * The setter function, if needed. ObjectAnimator hands off this functionality to
@@ -124,6 +132,17 @@ public class PropertyValuesHolder implements Cloneable {
     }
 
     /**
+     * Internal utility constructor, used by the factory methods to set the property.
+     * @param property The property for this holder.
+     */
+    private PropertyValuesHolder(Property property) {
+        mProperty = property;
+        if (property != null) {
+            mPropertyName = property.getName();
+        }
+    }
+
+    /**
      * Constructs and returns a PropertyValuesHolder with a given property name and
      * set of int values.
      * @param propertyName The name of the property being animated.
@@ -131,8 +150,18 @@ public class PropertyValuesHolder implements Cloneable {
      * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
      */
     public static PropertyValuesHolder ofInt(String propertyName, int... values) {
-        PropertyValuesHolder pvh = new IntPropertyValuesHolder(propertyName, values);
-        return pvh;
+        return new IntPropertyValuesHolder(propertyName, values);
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property and
+     * set of int values.
+     * @param property The property being animated. Should not be null.
+     * @param values The values that the property will animate between.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     */
+    public static PropertyValuesHolder ofInt(Property<?, Integer> property, int... values) {
+        return new IntPropertyValuesHolder(property, values);
     }
 
     /**
@@ -143,18 +172,28 @@ public class PropertyValuesHolder implements Cloneable {
      * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
      */
     public static PropertyValuesHolder ofFloat(String propertyName, float... values) {
-        PropertyValuesHolder pvh = new FloatPropertyValuesHolder(propertyName, values);
-        return pvh;
+        return new FloatPropertyValuesHolder(propertyName, values);
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property and
+     * set of float values.
+     * @param property The property being animated. Should not be null.
+     * @param values The values that the property will animate between.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     */
+    public static PropertyValuesHolder ofFloat(Property<?, Float> property, float... values) {
+        return new FloatPropertyValuesHolder(property, values);
     }
 
     /**
      * Constructs and returns a PropertyValuesHolder with a given property name and
      * set of Object values. This variant also takes a TypeEvaluator because the system
-     * cannot interpolate between objects of unknown type.
+     * cannot automatically interpolate between objects of unknown type.
      *
      * @param propertyName The name of the property being animated.
      * @param evaluator A TypeEvaluator that will be called on each animation frame to
-     * provide the ncessry interpolation between the Object values to derive the animated
+     * provide the necessary interpolation between the Object values to derive the animated
      * value.
      * @param values The values that the named property will animate between.
      * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
@@ -162,6 +201,26 @@ public class PropertyValuesHolder implements Cloneable {
     public static PropertyValuesHolder ofObject(String propertyName, TypeEvaluator evaluator,
             Object... values) {
         PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
+        pvh.setObjectValues(values);
+        pvh.setEvaluator(evaluator);
+        return pvh;
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder with a given property and
+     * set of Object values. This variant also takes a TypeEvaluator because the system
+     * cannot automatically interpolate between objects of unknown type.
+     *
+     * @param property The property being animated. Should not be null.
+     * @param evaluator A TypeEvaluator that will be called on each animation frame to
+     * provide the necessary interpolation between the Object values to derive the animated
+     * value.
+     * @param values The values that the property will animate between.
+     * @return PropertyValuesHolder The constructed PropertyValuesHolder object.
+     */
+    public static <V> PropertyValuesHolder ofObject(Property property,
+            TypeEvaluator<V> evaluator, V... values) {
+        PropertyValuesHolder pvh = new PropertyValuesHolder(property);
         pvh.setObjectValues(values);
         pvh.setEvaluator(evaluator);
         return pvh;
@@ -195,6 +254,37 @@ public class PropertyValuesHolder implements Cloneable {
         }
         else {
             PropertyValuesHolder pvh = new PropertyValuesHolder(propertyName);
+            pvh.mKeyframeSet = keyframeSet;
+            pvh.mValueType = ((Keyframe)values[0]).getType();
+            return pvh;
+        }
+    }
+
+    /**
+     * Constructs and returns a PropertyValuesHolder object with the specified property and set
+     * of values. These values can be of any type, but the type should be consistent so that
+     * an appropriate {@link android.animation.TypeEvaluator} can be found that matches
+     * the common type.
+     * <p>If there is only one value, it is assumed to be the end value of an animation,
+     * and an initial value will be derived, if possible, by calling the property's
+     * {@link android.util.Property#get(Object)} function.
+     * Also, if any value is null, the value will be filled in when the animation
+     * starts in the same way. This mechanism of automatically getting null values only works
+     * if the PropertyValuesHolder object is used in conjunction with
+     * {@link ObjectAnimator}, since otherwise PropertyValuesHolder has
+     * no way of determining what the value should be.
+     * @param property The property associated with this set of values. Should not be null.
+     * @param values The set of values to animate between.
+     */
+    public static PropertyValuesHolder ofKeyframe(Property property, Keyframe... values) {
+        KeyframeSet keyframeSet = KeyframeSet.ofKeyframe(values);
+        if (keyframeSet instanceof IntKeyframeSet) {
+            return new IntPropertyValuesHolder(property, (IntKeyframeSet) keyframeSet);
+        } else if (keyframeSet instanceof FloatKeyframeSet) {
+            return new FloatPropertyValuesHolder(property, (FloatKeyframeSet) keyframeSet);
+        }
+        else {
+            PropertyValuesHolder pvh = new PropertyValuesHolder(property);
             pvh.mKeyframeSet = keyframeSet;
             pvh.mValueType = ((Keyframe)values[0]).getType();
             return pvh;
@@ -349,7 +439,6 @@ public class PropertyValuesHolder implements Cloneable {
             // Have to lock property map prior to reading it, to guard against
             // another thread putting something in there after we've checked it
             // but before we've added an entry to it
-            // TODO: can we store the setter/getter per Class instead of per Object?
             mPropertyMapLock.writeLock().lock();
             HashMap<String, Method> propertyMap = propertyMapMap.get(targetClass);
             if (propertyMap != null) {
@@ -395,6 +484,22 @@ public class PropertyValuesHolder implements Cloneable {
      * @param target The object on which the setter (and possibly getter) exist.
      */
     void setupSetterAndGetter(Object target) {
+        if (mProperty != null) {
+            // check to make sure that mProperty is on the class of target
+            try {
+                Object testValue = mProperty.get(target);
+                for (Keyframe kf : mKeyframeSet.mKeyframes) {
+                    if (!kf.hasValue()) {
+                        kf.setValue(mProperty.get(target));
+                    }
+                }
+                return;
+            } catch (ClassCastException e) {
+                Log.e("PropertyValuesHolder","No such property (" + mProperty.getName() +
+                        ") on target object " + target + ". Trying reflection instead");
+                mProperty = null;
+            }
+        }
         Class targetClass = target.getClass();
         if (mSetter == null) {
             setupSetter(targetClass);
@@ -423,6 +528,9 @@ public class PropertyValuesHolder implements Cloneable {
      * @param kf The keyframe which holds the property name and value.
      */
     private void setupValue(Object target, Keyframe kf) {
+        if (mProperty != null) {
+            kf.setValue(mProperty.get(target));
+        }
         try {
             if (mGetter == null) {
                 Class targetClass = target.getClass();
@@ -465,6 +573,7 @@ public class PropertyValuesHolder implements Cloneable {
         try {
             PropertyValuesHolder newPVH = (PropertyValuesHolder) super.clone();
             newPVH.mPropertyName = mPropertyName;
+            newPVH.mProperty = mProperty;
             newPVH.mKeyframeSet = mKeyframeSet.clone();
             newPVH.mEvaluator = mEvaluator;
             return newPVH;
@@ -482,6 +591,9 @@ public class PropertyValuesHolder implements Cloneable {
      * @param target The target object on which the value is set
      */
     void setAnimatedValue(Object target) {
+        if (mProperty != null) {
+            mProperty.set(target, getAnimatedValue());
+        }
         if (mSetter != null) {
             try {
                 mTmpValueArray[0] = getAnimatedValue();
@@ -558,6 +670,18 @@ public class PropertyValuesHolder implements Cloneable {
     }
 
     /**
+     * Sets the property that will be animated.
+     *
+     * <p>Note that if this PropertyValuesHolder object is used with ObjectAnimator, the property
+     * must exist on the target object specified in that ObjectAnimator.</p>
+     *
+     * @param property The property being animated.
+     */
+    public void setProperty(Property property) {
+        mProperty = property;
+    }
+
+    /**
      * Gets the name of the property that will be animated. This name will be used to derive
      * a setter function that will be called to set animated values.
      * For example, a property name of <code>foo</code> will result
@@ -597,17 +721,22 @@ public class PropertyValuesHolder implements Cloneable {
      * specified above.
      */
     static String getMethodName(String prefix, String propertyName) {
-        char firstLetter = propertyName.charAt(0);
+        if (propertyName == null || propertyName.length() == 0) {
+            // shouldn't get here
+            return prefix;
+        }
+        char firstLetter = Character.toUpperCase(propertyName.charAt(0));
         String theRest = propertyName.substring(1);
-        firstLetter = Character.toUpperCase(firstLetter);
         return prefix + firstLetter + theRest;
     }
 
     static class IntPropertyValuesHolder extends PropertyValuesHolder {
 
+        // Cache JNI functions to avoid looking them up twice
         private static final HashMap<Class, HashMap<String, Integer>> sJNISetterPropertyMap =
                 new HashMap<Class, HashMap<String, Integer>>();
         int mJniSetter;
+        private IntProperty mIntProperty;
 
         IntKeyframeSet mIntKeyframeSet;
         int mIntAnimatedValue;
@@ -619,9 +748,27 @@ public class PropertyValuesHolder implements Cloneable {
             mIntKeyframeSet = (IntKeyframeSet) mKeyframeSet;
         }
 
+        public IntPropertyValuesHolder(Property property, IntKeyframeSet keyframeSet) {
+            super(property);
+            mValueType = int.class;
+            mKeyframeSet = keyframeSet;
+            mIntKeyframeSet = (IntKeyframeSet) mKeyframeSet;
+            if (property instanceof  IntProperty) {
+                mIntProperty = (IntProperty) mProperty;
+            }
+        }
+
         public IntPropertyValuesHolder(String propertyName, int... values) {
             super(propertyName);
             setIntValues(values);
+        }
+
+        public IntPropertyValuesHolder(Property property, int... values) {
+            super(property);
+            setIntValues(values);
+            if (property instanceof  IntProperty) {
+                mIntProperty = (IntProperty) mProperty;
+            }
         }
 
         @Override
@@ -656,6 +803,14 @@ public class PropertyValuesHolder implements Cloneable {
          */
         @Override
         void setAnimatedValue(Object target) {
+            if (mIntProperty != null) {
+                mIntProperty.setValue(target, mIntAnimatedValue);
+                return;
+            }
+            if (mProperty != null) {
+                mProperty.set(target, mIntAnimatedValue);
+                return;
+            }
             if (mJniSetter != 0) {
                 nCallIntMethod(target, mJniSetter, mIntAnimatedValue);
                 return;
@@ -674,6 +829,9 @@ public class PropertyValuesHolder implements Cloneable {
 
         @Override
         void setupSetter(Class targetClass) {
+            if (mProperty != null) {
+                return;
+            }
             // Check new static hashmap<propName, int> for setter method
             try {
                 mPropertyMapLock.writeLock().lock();
@@ -696,7 +854,8 @@ public class PropertyValuesHolder implements Cloneable {
                     }
                 }
             } catch (NoSuchMethodError e) {
-                // System.out.println("Can't find native method using JNI, use reflection" + e);
+                Log.d("PropertyValuesHolder",
+                        "Can't find native method using JNI, use reflection" + e);
             } finally {
                 mPropertyMapLock.writeLock().unlock();
             }
@@ -709,9 +868,11 @@ public class PropertyValuesHolder implements Cloneable {
 
     static class FloatPropertyValuesHolder extends PropertyValuesHolder {
 
+        // Cache JNI functions to avoid looking them up twice
         private static final HashMap<Class, HashMap<String, Integer>> sJNISetterPropertyMap =
                 new HashMap<Class, HashMap<String, Integer>>();
         int mJniSetter;
+        private FloatProperty mFloatProperty;
 
         FloatKeyframeSet mFloatKeyframeSet;
         float mFloatAnimatedValue;
@@ -723,9 +884,27 @@ public class PropertyValuesHolder implements Cloneable {
             mFloatKeyframeSet = (FloatKeyframeSet) mKeyframeSet;
         }
 
+        public FloatPropertyValuesHolder(Property property, FloatKeyframeSet keyframeSet) {
+            super(property);
+            mValueType = float.class;
+            mKeyframeSet = keyframeSet;
+            mFloatKeyframeSet = (FloatKeyframeSet) mKeyframeSet;
+            if (property instanceof FloatProperty) {
+                mFloatProperty = (FloatProperty) mProperty;
+            }
+        }
+
         public FloatPropertyValuesHolder(String propertyName, float... values) {
             super(propertyName);
             setFloatValues(values);
+        }
+
+        public FloatPropertyValuesHolder(Property property, float... values) {
+            super(property);
+            setFloatValues(values);
+            if (property instanceof  FloatProperty) {
+                mFloatProperty = (FloatProperty) mProperty;
+            }
         }
 
         @Override
@@ -760,6 +939,14 @@ public class PropertyValuesHolder implements Cloneable {
          */
         @Override
         void setAnimatedValue(Object target) {
+            if (mFloatProperty != null) {
+                mFloatProperty.setValue(target, mFloatAnimatedValue);
+                return;
+            }
+            if (mProperty != null) {
+                mProperty.set(target, mFloatAnimatedValue);
+                return;
+            }
             if (mJniSetter != 0) {
                 nCallFloatMethod(target, mJniSetter, mFloatAnimatedValue);
                 return;
@@ -778,6 +965,9 @@ public class PropertyValuesHolder implements Cloneable {
 
         @Override
         void setupSetter(Class targetClass) {
+            if (mProperty != null) {
+                return;
+            }
             // Check new static hashmap<propName, int> for setter method
             try {
                 mPropertyMapLock.writeLock().lock();
@@ -800,7 +990,8 @@ public class PropertyValuesHolder implements Cloneable {
                     }
                 }
             } catch (NoSuchMethodError e) {
-                // System.out.println("Can't find native method using JNI, use reflection" + e);
+                Log.d("PropertyValuesHolder",
+                        "Can't find native method using JNI, use reflection" + e);
             } finally {
                 mPropertyMapLock.writeLock().unlock();
             }

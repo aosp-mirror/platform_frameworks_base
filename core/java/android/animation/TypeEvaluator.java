@@ -24,7 +24,7 @@ package android.animation;
  *
  * @see ValueAnimator#setEvaluator(TypeEvaluator)
  */
-public interface TypeEvaluator {
+public interface TypeEvaluator<T> {
 
     /**
      * This function returns the result of linearly interpolating the start and end values, with
@@ -39,6 +39,6 @@ public interface TypeEvaluator {
      * @return A linear interpolation between the start and end values, given the
      *         <code>fraction</code> parameter.
      */
-    public Object evaluate(float fraction, Object startValue, Object endValue);
+    public T evaluate(float fraction, T startValue, T endValue);
 
 }
