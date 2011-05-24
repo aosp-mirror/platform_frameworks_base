@@ -39,9 +39,6 @@ final class JWebCoreJavaBridge extends Handler {
     // immediately.
     private boolean mHasInstantTimer;
 
-    // Reference count the pause/resume of timers
-    private int mPauseTimerRefCount;
-
     private boolean mTimerPaused;
     private boolean mHasDeferredTimers;
 
@@ -136,7 +133,7 @@ final class JWebCoreJavaBridge extends Handler {
      * Pause all timers.
      */
     public void pause() {
-        if (--mPauseTimerRefCount == 0) {
+        if (!mTimerPaused) {
             mTimerPaused = true;
             mHasDeferredTimers = false;
         }
@@ -146,7 +143,7 @@ final class JWebCoreJavaBridge extends Handler {
      * Resume all timers.
      */
     public void resume() {
-        if (++mPauseTimerRefCount == 1) {
+        if (mTimerPaused) {
            mTimerPaused = false;
            if (mHasDeferredTimers) {
                mHasDeferredTimers = false;
