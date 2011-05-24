@@ -539,7 +539,24 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
                                 (int) iev.time.tv_sec, (int) iev.time.tv_usec,
                                 iev.type, iev.code, iev.value);
 
+#ifdef HAVE_POSIX_CLOCKS
+                        // Use the time specified in the event instead of the current time
+                        // so that downstream code can get more accurate estimates of
+                        // event dispatch latency from the time the event is enqueued onto
+                        // the evdev client buffer.
+                        //
+                        // The event's timestamp fortuitously uses the same monotonic clock
+                        // time base as the rest of Android.  The kernel event device driver
+                        // (drivers/input/evdev.c) obtains timestamps using ktime_get_ts().
+                        // The systemTime(SYSTEM_TIME_MONOTONIC) function we use everywhere
+                        // calls clock_gettime(CLOCK_MONOTONIC) which is implemented as a
+                        // system call that also queries ktime_get_ts().
+                        event->when = nsecs_t(iev.time.tv_sec) * 1000000000LL
+                                + nsecs_t(iev.time.tv_usec) * 1000LL;
+                        LOGV("event time %lld, now %lld", event->when, now);
+#else
                         event->when = now;
+#endif
                         event->deviceId = deviceId;
                         event->type = iev.type;
                         event->scanCode = iev.code;
