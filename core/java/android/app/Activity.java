@@ -1398,6 +1398,10 @@ public class Activity extends ContextThemeWrapper
     public void onConfigurationChanged(Configuration newConfig) {
         mCalled = true;
 
+        if (mActionBar != null) {
+            mActionBar.onConfigurationChanged(newConfig);
+        }
+
         mFragments.dispatchConfigurationChanged(newConfig);
 
         if (mWindow != null) {

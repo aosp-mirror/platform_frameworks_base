@@ -696,7 +696,8 @@ public class LinearLayout extends ViewGroup {
             mTotalLength += mDividerHeight;
         }
 
-        if (useLargestChild && heightMode == MeasureSpec.AT_MOST) {
+        if (useLargestChild &&
+                (heightMode == MeasureSpec.AT_MOST || heightMode == MeasureSpec.UNSPECIFIED)) {
             mTotalLength = 0;
 
             for (int i = 0; i < count; ++i) {
@@ -809,6 +810,31 @@ public class LinearLayout extends ViewGroup {
         } else {
             alternativeMaxWidth = Math.max(alternativeMaxWidth,
                                            weightedMaxWidth);
+
+
+            // We have no limit, so make all weighted views as tall as the largest child.
+            // Children will have already been measured once.
+            if (useLargestChild && widthMode == MeasureSpec.UNSPECIFIED) {
+                for (int i = 0; i < count; i++) {
+                    final View child = getVirtualChildAt(i);
+
+                    if (child == null || child.getVisibility() == View.GONE) {
+                        continue;
+                    }
+
+                    final LinearLayout.LayoutParams lp =
+                            (LinearLayout.LayoutParams) child.getLayoutParams();
+
+                    float childExtra = lp.weight;
+                    if (childExtra > 0) {
+                        child.measure(
+                                MeasureSpec.makeMeasureSpec(child.getMeasuredWidth(),
+                                        MeasureSpec.EXACTLY),
+                                MeasureSpec.makeMeasureSpec(largestChildHeight,
+                                        MeasureSpec.EXACTLY));
+                    }
+                }
+            }
         }
 
         if (!allFillParent && widthMode != MeasureSpec.EXACTLY) {
@@ -1044,7 +1070,8 @@ public class LinearLayout extends ViewGroup {
             maxHeight = Math.max(maxHeight, ascent + descent);
         }
 
-        if (useLargestChild && widthMode == MeasureSpec.AT_MOST) {
+        if (useLargestChild &&
+                (widthMode == MeasureSpec.AT_MOST || widthMode == MeasureSpec.UNSPECIFIED)) {
             mTotalLength = 0;
 
             for (int i = 0; i < count; ++i) {
@@ -1200,6 +1227,29 @@ public class LinearLayout extends ViewGroup {
             }
         } else {
             alternativeMaxHeight = Math.max(alternativeMaxHeight, weightedMaxHeight);
+
+            // We have no limit, so make all weighted views as wide as the largest child.
+            // Children will have already been measured once.
+            if (useLargestChild && widthMode == MeasureSpec.UNSPECIFIED) {
+                for (int i = 0; i < count; i++) {
+                    final View child = getVirtualChildAt(i);
+
+                    if (child == null || child.getVisibility() == View.GONE) {
+                        continue;
+                    }
+
+                    final LinearLayout.LayoutParams lp =
+                            (LinearLayout.LayoutParams) child.getLayoutParams();
+
+                    float childExtra = lp.weight;
+                    if (childExtra > 0) {
+                        child.measure(
+                                MeasureSpec.makeMeasureSpec(largestChildWidth, MeasureSpec.EXACTLY),
+                                MeasureSpec.makeMeasureSpec(child.getMeasuredHeight(),
+                                        MeasureSpec.EXACTLY));
+                    }
+                }
+            }
         }
 
         if (!allFillParent && heightMode != MeasureSpec.EXACTLY) {
