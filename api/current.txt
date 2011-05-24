@@ -25208,6 +25208,7 @@ package android.widget {
     method public final android.content.res.ColorStateList getLinkTextColors();
     method public final boolean getLinksClickable();
     method public final android.text.method.MovementMethod getMovementMethod();
+    method public int getOffsetForPosition(float, float);
     method public android.text.TextPaint getPaint();
     method public int getPaintFlags();
     method public java.lang.String getPrivateImeOptions();
