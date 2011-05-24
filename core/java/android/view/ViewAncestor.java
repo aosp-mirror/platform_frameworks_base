@@ -45,9 +45,7 @@ import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -672,6 +670,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
         if (!mTraversalScheduled) {
             mTraversalScheduled = true;
 
+            //noinspection ConstantConditions
             if (ViewDebug.DEBUG_LATENCY && mLastTraversalFinishedTimeNanos != 0) {
                 final long now = System.nanoTime();
                 Log.d(TAG, "Latency: Scheduled traversal, it has been "
@@ -1909,20 +1908,22 @@ public final class ViewAncestor extends Handler implements ViewParent,
     public void focusableViewAvailable(View v) {
         checkThread();
 
-        if (mView != null && !mView.hasFocus()) {
-            v.requestFocus();
-        } else {
-            // the one case where will transfer focus away from the current one
-            // is if the current view is a view group that prefers to give focus
-            // to its children first AND the view is a descendant of it.
-            mFocusedView = mView.findFocus();
-            boolean descendantsHaveDibsOnFocus =
-                    (mFocusedView instanceof ViewGroup) &&
-                        (((ViewGroup) mFocusedView).getDescendantFocusability() ==
-                                ViewGroup.FOCUS_AFTER_DESCENDANTS);
-            if (descendantsHaveDibsOnFocus && isViewDescendantOf(v, mFocusedView)) {
-                // If a view gets the focus, the listener will be invoked from requestChildFocus()
+        if (mView != null) {
+            if (!mView.hasFocus()) {
                 v.requestFocus();
+            } else {
+                // the one case where will transfer focus away from the current one
+                // is if the current view is a view group that prefers to give focus
+                // to its children first AND the view is a descendant of it.
+                mFocusedView = mView.findFocus();
+                boolean descendantsHaveDibsOnFocus =
+                        (mFocusedView instanceof ViewGroup) &&
+                            (((ViewGroup) mFocusedView).getDescendantFocusability() ==
+                                    ViewGroup.FOCUS_AFTER_DESCENDANTS);
+                if (descendantsHaveDibsOnFocus && isViewDescendantOf(v, mFocusedView)) {
+                    // If a view gets the focus, the listener will be invoked from requestChildFocus()
+                    v.requestFocus();
+                }
             }
         }
     }
@@ -1986,9 +1987,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
             // At this point the resources have been updated to
             // have the most recent config, whatever that is.  Use
             // the on in them which may be newer.
-            if (mView != null) {
-                config = mView.getResources().getConfiguration();
-            }
+            config = mView.getResources().getConfiguration();
             if (force || mLastConfiguration.diff(config) != 0) {
                 mLastConfiguration.setTo(config);
                 mView.dispatchConfigurationChanged(config);
@@ -2207,6 +2206,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
             if ((event.getFlags()&KeyEvent.FLAG_FROM_SYSTEM) != 0) {
                 // The IME is trying to say this event is from the
                 // system!  Bad bad bad!
+                //noinspection UnusedAssignment
                 event = KeyEvent.changeFlags(event, event.getFlags() & ~KeyEvent.FLAG_FROM_SYSTEM);
             }
             deliverKeyEventPostIme((KeyEvent)msg.obj, false);
@@ -2240,7 +2240,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
         }
     }
     
-    private void startInputEvent(InputEvent event, InputQueue.FinishedCallback finishedCallback) {
+    private void startInputEvent(InputQueue.FinishedCallback finishedCallback) {
         if (mFinishedCallback != null) {
             Slog.w(TAG, "Received a new input event from the input queue but there is "
                     + "already an unfinished input event in progress.");
@@ -2454,9 +2454,6 @@ public final class ViewAncestor extends Handler implements ViewParent,
         if (isDown) {
             ensureTouchMode(true);
         }
-        if(false) {
-            captureMotionLog("captureDispatchPointer", event);
-        }
 
         // Offset the scroll position.
         if (mCurScrollY != 0) {
@@ -2534,6 +2531,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
         if (sendDone) {
             finishInputEvent(event, handled);
         }
+        //noinspection ConstantConditions
         if (LOCAL_LOGV || WATCH_POINTER) {
             if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
                 Log.i(TAG, "Done dispatching!");
@@ -2859,52 +2857,6 @@ public final class ViewAncestor extends Handler implements ViewParent,
         return false;
     }
 
-    /**
-     * log motion events
-     */
-    private static void captureMotionLog(String subTag, MotionEvent ev) {
-        //check dynamic switch
-        if (ev == null ||
-                SystemProperties.getInt(ViewDebug.SYSTEM_PROPERTY_CAPTURE_EVENT, 0) == 0) {
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder(subTag + ": ");
-        sb.append(ev.getDownTime()).append(',');
-        sb.append(ev.getEventTime()).append(',');
-        sb.append(ev.getAction()).append(',');
-        sb.append(ev.getX()).append(',');
-        sb.append(ev.getY()).append(',');
-        sb.append(ev.getPressure()).append(',');
-        sb.append(ev.getSize()).append(',');
-        sb.append(ev.getMetaState()).append(',');
-        sb.append(ev.getXPrecision()).append(',');
-        sb.append(ev.getYPrecision()).append(',');
-        sb.append(ev.getDeviceId()).append(',');
-        sb.append(ev.getEdgeFlags());
-        Log.d(TAG, sb.toString());
-    }
-    /**
-     * log motion events
-     */
-    private static void captureKeyLog(String subTag, KeyEvent ev) {
-        //check dynamic switch
-        if (ev == null ||
-                SystemProperties.getInt(ViewDebug.SYSTEM_PROPERTY_CAPTURE_EVENT, 0) == 0) {
-            return;
-        }
-        StringBuilder sb = new StringBuilder(subTag + ": ");
-        sb.append(ev.getDownTime()).append(',');
-        sb.append(ev.getEventTime()).append(',');
-        sb.append(ev.getAction()).append(',');
-        sb.append(ev.getKeyCode()).append(',');
-        sb.append(ev.getRepeatCount()).append(',');
-        sb.append(ev.getMetaState()).append(',');
-        sb.append(ev.getDeviceId()).append(',');
-        sb.append(ev.getScanCode());
-        Log.d(TAG, sb.toString());
-    }
-
     int enqueuePendingEvent(Object event, boolean sendDone) {
         int seq = mPendingEventSeq+1;
         if (seq < 0) seq = 0;
@@ -2991,10 +2943,6 @@ public final class ViewAncestor extends Handler implements ViewParent,
         if (checkForLeavingTouchModeAndConsume(event)) {
             finishKeyEvent(event, sendDone, true);
             return;
-        }
-
-        if (false) {
-            captureKeyLog("captureDispatchKeyEvent", event);
         }
 
         // Make sure the fallback event policy sees all keys that will be delivered to the
@@ -3392,12 +3340,12 @@ public final class ViewAncestor extends Handler implements ViewParent,
     
     private final InputHandler mInputHandler = new InputHandler() {
         public void handleKey(KeyEvent event, InputQueue.FinishedCallback finishedCallback) {
-            startInputEvent(event, finishedCallback);
+            startInputEvent(finishedCallback);
             dispatchKey(event, true);
         }
 
         public void handleMotion(MotionEvent event, InputQueue.FinishedCallback finishedCallback) {
-            startInputEvent(event, finishedCallback);
+            startInputEvent(finishedCallback);
             dispatchMotion(event, true);
         }
     };
@@ -3429,10 +3377,6 @@ public final class ViewAncestor extends Handler implements ViewParent,
         sendMessageAtTime(msg, event.getEventTime());
     }
     
-    public void dispatchMotion(MotionEvent event) {
-        dispatchMotion(event, false);
-    }
-
     private void dispatchMotion(MotionEvent event, boolean sendDone) {
         int source = event.getSource();
         if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
@@ -3444,19 +3388,11 @@ public final class ViewAncestor extends Handler implements ViewParent,
         }
     }
 
-    public void dispatchPointer(MotionEvent event) {
-        dispatchPointer(event, false);
-    }
-
     private void dispatchPointer(MotionEvent event, boolean sendDone) {
         Message msg = obtainMessage(DISPATCH_POINTER);
         msg.obj = event;
         msg.arg1 = sendDone ? 1 : 0;
         sendMessageAtTime(msg, event.getEventTime());
-    }
-
-    public void dispatchTrackball(MotionEvent event) {
-        dispatchTrackball(event, false);
     }
 
     private void dispatchTrackball(MotionEvent event, boolean sendDone) {
