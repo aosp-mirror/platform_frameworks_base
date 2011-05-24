@@ -92,12 +92,6 @@ public class ViewDebug {
     public static final boolean TRACE_RECYCLER = false;
 
     /**
-     * The system property of dynamic switch for capturing event information
-     * when it is set, we log key events, touch/motion and trackball events
-     */
-    static final String SYSTEM_PROPERTY_CAPTURE_EVENT = "debug.captureevent";
-
-    /**
      * Profiles drawing times in the events log.
      *
      * @hide
