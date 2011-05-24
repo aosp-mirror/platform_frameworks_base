@@ -1045,20 +1045,10 @@ public class WebView extends AbsoluteLayout
     private static void handleProxyBroadcast(Intent intent) {
         ProxyProperties proxyProperties = (ProxyProperties)intent.getExtra(Proxy.EXTRA_PROXY_INFO);
         if (proxyProperties == null || proxyProperties.getHost() == null) {
-            WebViewCore.sendStaticMessage(EventHub.PROXY_CHANGED, "");
+            WebViewCore.sendStaticMessage(EventHub.PROXY_CHANGED, null);
             return;
         }
-
-        String host = proxyProperties.getHost();
-        int port = proxyProperties.getPort();
-        if (port != 0)
-            host += ":" + port;
-
-        // TODO: Handle exclusion list
-        // The plan is to make an AndroidProxyResolver, and handle the blacklist
-        // there
-        String exclusionList = proxyProperties.getExclusionList();
-        WebViewCore.sendStaticMessage(EventHub.PROXY_CHANGED, host);
+        WebViewCore.sendStaticMessage(EventHub.PROXY_CHANGED, proxyProperties);
     }
 
     /*
