@@ -634,6 +634,20 @@ public class Process {
     }
 
     /**
+     * Returns the parent process id for a currently running process.
+     * @param pid the process id
+     * @return the parent process id of the process, or -1 if the process is not running.
+     * @hide
+     */
+    public static final int getParentPid(int pid) {
+        String[] procStatusLabels = { "PPid:" };
+        long[] procStatusValues = new long[1];
+        procStatusValues[0] = -1;
+        Process.readProcLines("/proc/" + pid + "/status", procStatusLabels, procStatusValues);
+        return (int) procStatusValues[0];
+    }
+
+    /**
      * Set the priority of a thread, based on Linux priorities.
      * 
      * @param tid The identifier of the thread/process to change.

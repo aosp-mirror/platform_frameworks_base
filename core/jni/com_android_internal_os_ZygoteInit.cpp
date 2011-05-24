@@ -131,28 +131,6 @@ static void com_android_internal_os_ZygoteInit_reopenStdio(JNIEnv* env,
     } while (err < 0 && errno == EINTR);
 }
 
-static void com_android_internal_os_ZygoteInit_closeDescriptor(JNIEnv* env,
-        jobject clazz, jobject descriptor)
-{
-    int fd;
-    int err;
-
-    fd = jniGetFDFromFileDescriptor(env, descriptor);
-
-    if  (env->ExceptionOccurred() != NULL) {
-        return;
-    }
-
-    do {
-        err = close(fd);
-    } while (err < 0 && errno == EINTR);
-
-    if (err < 0) {
-        jniThrowIOException(env, errno);
-        return;
-    }
-}
-
 static void com_android_internal_os_ZygoteInit_setCloseOnExec (JNIEnv *env,
     jobject clazz, jobject descriptor, jboolean flag)
 {
@@ -332,8 +310,6 @@ static JNINativeMethod gMethods[] = {
         "(Ljava/io/FileDescriptor;Ljava/io/FileDescriptor;"
         "Ljava/io/FileDescriptor;)V",
             (void *) com_android_internal_os_ZygoteInit_reopenStdio},
-    { "closeDescriptor", "(Ljava/io/FileDescriptor;)V",
-        (void *) com_android_internal_os_ZygoteInit_closeDescriptor},
     { "setCloseOnExec", "(Ljava/io/FileDescriptor;Z)V",
         (void *)  com_android_internal_os_ZygoteInit_setCloseOnExec},
     { "setCapabilities", "(JJ)V",

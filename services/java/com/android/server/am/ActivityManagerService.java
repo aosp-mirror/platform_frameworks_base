@@ -853,14 +853,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Current sequence id for process LRU updating.
      */
     int mLruSeq = 0;
-    
-    /**
-     * Set to true if the ANDROID_SIMPLE_PROCESS_MANAGEMENT envvar
-     * is set, indicating the user wants processes started in such a way
-     * that they can use ANDROID_PROCESS_WRAPPER and know what will be
-     * running in each process (thus no pre-initialized process, etc).
-     */
-    boolean mSimpleProcessManagement = false;
 
     /**
      * System monitoring: number of processes that died since the last
@@ -1455,15 +1447,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private ActivityManagerService() {
-        String v = System.getenv("ANDROID_SIMPLE_PROCESS_MANAGEMENT");
-        if (v != null && Integer.getInteger(v) != 0) {
-            mSimpleProcessManagement = true;
-        }
-        v = System.getenv("ANDROID_DEBUG_APP");
-        if (v != null) {
-            mSimpleProcessManagement = true;
-        }
-
         Slog.i(TAG, "Memory class: " + ActivityManager.staticGetMemoryClass());
         
         File dataDir = Environment.getDataDirectory();
@@ -1935,8 +1918,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
             int pid = Process.start("android.app.ActivityThread",
-                    mSimpleProcessManagement ? app.processName : null, uid, uid,
-                    gids, debugFlags, null);
+                    app.processName, uid, uid, gids, debugFlags, null);
             BatteryStatsImpl bs = app.batteryStats.getBatteryStats();
             synchronized (bs) {
                 if (bs.isOnBattery()) {
