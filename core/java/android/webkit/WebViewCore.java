@@ -1865,7 +1865,7 @@ public final class WebViewCore {
             Log.w(LOGTAG, "skip viewSizeChanged as w is 0");
             return;
         }
-        int width = calculateWindowWidth(w, textwrapWidth);
+        int width = calculateWindowWidth(w);
         int height = h;
         if (width != w) {
             float heightWidthRatio = data.mHeightWidthRatio;
@@ -1891,41 +1891,18 @@ public final class WebViewCore {
     }
 
     // Calculate width to be used in webkit window.
-    private int calculateWindowWidth(int viewWidth, int textwrapWidth) {
+    private int calculateWindowWidth(int viewWidth) {
         int width = viewWidth;
         if (mSettings.getUseWideViewPort()) {
             if (mViewportWidth == -1) {
-                if (mSettings.getLayoutAlgorithm() ==
-                        WebSettings.LayoutAlgorithm.NORMAL || mSettings.getUseFixedViewport()) {
-                    width = WebView.DEFAULT_VIEWPORT_WIDTH;
-                } else {
-                    /*
-                     * if a page's minimum preferred width is wider than the
-                     * given "w", use it instead to get better layout result. If
-                     * we start a page with MAX_ZOOM_WIDTH, "w" will be always
-                     * wider. If we start a page with screen width, due to the
-                     * delay between {@link #didFirstLayout} and
-                     * {@link #viewSizeChanged},
-                     * {@link #nativeGetContentMinPrefWidth} will return a more
-                     * accurate value than initial 0 to result a better layout.
-                     * In the worse case, the native width will be adjusted when
-                     * next zoom or screen orientation change happens.
-                     */
-                    width = Math.min(WebView.sMaxViewportWidth, Math.max(viewWidth,
-                            Math.max(WebView.DEFAULT_VIEWPORT_WIDTH,
-                                    nativeGetContentMinPrefWidth())));
-                }
+                // Fixed viewport width.
+                width = WebView.DEFAULT_VIEWPORT_WIDTH;
             } else if (mViewportWidth > 0) {
-                if (mSettings.getUseFixedViewport()) {
-                    // Use website specified or desired fixed viewport width.
-                    width = mViewportWidth;
-                } else {
-                    width = Math.max(viewWidth, mViewportWidth);
-                }
-            } else if (mSettings.getUseFixedViewport()) {
-                width = mWebView.getViewWidth();
+                // Use website specified or desired fixed viewport width.
+                width = mViewportWidth;
             } else {
-                width = textwrapWidth;
+                // For mobile web site.
+                width = viewWidth;
             }
         }
         return width;
@@ -2439,8 +2416,7 @@ public final class WebViewCore {
                     // in zoom overview mode.
                     tentativeScale = mInitialViewState.mTextWrapScale;
                     int tentativeViewWidth = Math.round(webViewWidth / tentativeScale);
-                    int windowWidth = calculateWindowWidth(tentativeViewWidth,
-                            tentativeViewWidth);
+                    int windowWidth = calculateWindowWidth(tentativeViewWidth);
                     // In viewport setup time, since no content width is known, we assume
                     // the windowWidth will be the content width, to get a more likely
                     // zoom overview scale.
@@ -2449,8 +2425,7 @@ public final class WebViewCore {
                         // If user choose non-overview mode.
                         data.mScale = Math.max(data.mScale, tentativeScale);
                     }
-                    if (mSettings.isNarrowColumnLayout() &&
-                            mSettings.getUseFixedViewport()) {
+                    if (mSettings.isNarrowColumnLayout()) {
                         // In case of automatic text reflow in fixed view port mode.
                         mInitialViewState.mTextWrapScale =
                                 ZoomManager.computeReadingLevelScale(data.mScale);
