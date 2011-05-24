@@ -59,6 +59,26 @@ public class DataConnectionAc extends AsyncChannel {
     public static final int REQ_RESET = BASE + 14;
     public static final int RSP_RESET = BASE + 15;
 
+    /**
+     * enum used to notify action taken or necessary to be
+     * taken after the link property is changed.
+     */
+    public enum LinkPropertyChangeAction {
+        NONE, CHANGED, RESET;
+
+        public static LinkPropertyChangeAction fromInt(int value) {
+            if (value == NONE.ordinal()) {
+                return NONE;
+            } else if (value == CHANGED.ordinal()) {
+                return CHANGED;
+            } else if (value == RESET.ordinal()) {
+                return RESET;
+            } else {
+                throw new RuntimeException("LinkPropertyChangeAction.fromInt: bad value=" + value);
+            }
+        }
+    }
+
     public DataConnectionAc(DataConnection dc, String logTag) {
         dataConnection = dc;
         mLogTag = logTag;
@@ -234,8 +254,8 @@ public class DataConnectionAc extends AsyncChannel {
         if (DBG) log("reqUpdateLinkPropertiesDataCallState");
     }
 
-    public boolean rspUpdateLinkPropertiesDataCallState(Message response) {
-        boolean retVal = response.arg1 == 1;
+    public LinkPropertyChangeAction rspUpdateLinkPropertiesDataCallState(Message response) {
+        LinkPropertyChangeAction retVal = LinkPropertyChangeAction.fromInt(response.arg1);
         if (DBG) log("rspUpdateLinkPropertiesState=" + retVal);
         return retVal;
     }
@@ -245,7 +265,7 @@ public class DataConnectionAc extends AsyncChannel {
      *
      * @return true if link property has been updated. false otherwise.
      */
-    public boolean updateLinkPropertiesDataCallStateSync(DataCallState newState) {
+    public LinkPropertyChangeAction updateLinkPropertiesDataCallStateSync(DataCallState newState) {
         Message response =
             sendMessageSynchronously(REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE, newState);
         if ((response != null) &&
@@ -253,7 +273,7 @@ public class DataConnectionAc extends AsyncChannel {
             return rspUpdateLinkPropertiesDataCallState(response);
         } else {
             log("getLinkProperties error response=" + response);
-            return false;
+            return LinkPropertyChangeAction.NONE;
         }
     }
 
