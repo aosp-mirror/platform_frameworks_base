@@ -159,6 +159,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
     private final ArrayList<StorageVolume>        mVolumes = new ArrayList<StorageVolume>();
     private StorageVolume                         mPrimaryVolume;
     private final HashMap<String, String>         mVolumeStates = new HashMap<String, String>();
+    private final HashMap<String, StorageVolume>  mVolumeMap = new HashMap<String, StorageVolume>();
     private String                                mExternalStoragePath;
     private PackageManagerService                 mPms;
     private boolean                               mUmsEnabling;
@@ -669,8 +670,6 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
      * Callback from NativeDaemonConnector
      */
     public boolean onEvent(int code, String raw, String[] cooked) {
-        Intent in = null;
-
         if (DEBUG_EVENTS) {
             StringBuilder builder = new StringBuilder();
             builder.append("onEvent::");
@@ -705,6 +704,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
             // FMT: NNN Volume <label> <mountpoint> disk inserted (<major>:<minor>)
             // FMT: NNN Volume <label> <mountpoint> disk removed (<major>:<minor>)
             // FMT: NNN Volume <label> <mountpoint> bad removal (<major>:<minor>)
+            String action = null;
             final String label = cooked[2];
             final String path = cooked[3];
             int major = -1;
@@ -743,32 +743,31 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                 /* Send the media unmounted event first */
                 if (DEBUG_EVENTS) Slog.i(TAG, "Sending unmounted event first");
                 updatePublicVolumeState(path, Environment.MEDIA_UNMOUNTED);
-                in = new Intent(Intent.ACTION_MEDIA_UNMOUNTED, Uri.parse("file://" + path));
-                mContext.sendBroadcast(in);
+                sendStorageIntent(Environment.MEDIA_UNMOUNTED, path);
 
                 if (DEBUG_EVENTS) Slog.i(TAG, "Sending media removed");
                 updatePublicVolumeState(path, Environment.MEDIA_REMOVED);
-                in = new Intent(Intent.ACTION_MEDIA_REMOVED, Uri.parse("file://" + path));
+                action = Intent.ACTION_MEDIA_REMOVED;
             } else if (code == VoldResponseCode.VolumeBadRemoval) {
                 if (DEBUG_EVENTS) Slog.i(TAG, "Sending unmounted event first");
                 /* Send the media unmounted event first */
                 updatePublicVolumeState(path, Environment.MEDIA_UNMOUNTED);
-                in = new Intent(Intent.ACTION_MEDIA_UNMOUNTED, Uri.parse("file://" + path));
-                mContext.sendBroadcast(in);
+                action = Intent.ACTION_MEDIA_UNMOUNTED;
 
                 if (DEBUG_EVENTS) Slog.i(TAG, "Sending media bad removal");
                 updatePublicVolumeState(path, Environment.MEDIA_BAD_REMOVAL);
-                in = new Intent(Intent.ACTION_MEDIA_BAD_REMOVAL, Uri.parse("file://" + path));
+                action = Intent.ACTION_MEDIA_BAD_REMOVAL;
             } else {
                 Slog.e(TAG, String.format("Unknown code {%d}", code));
+            }
+
+            if (action != null) {
+                sendStorageIntent(action, path);
             }
         } else {
             return false;
         }
 
-        if (in != null) {
-            mContext.sendBroadcast(in);
-        }
         return true;
     }
 
@@ -776,12 +775,11 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         String vs = getVolumeState(path);
         if (DEBUG_EVENTS) Slog.i(TAG, "notifyVolumeStateChanged::" + vs);
 
-        Intent in = null;
+        String action = null;
 
         if (oldState == VolumeState.Shared && newState != oldState) {
             if (LOCAL_LOGD) Slog.d(TAG, "Sending ACTION_MEDIA_UNSHARED intent");
-            mContext.sendBroadcast(new Intent(Intent.ACTION_MEDIA_UNSHARED,
-                                                Uri.parse("file://" + path)));
+            sendStorageIntent(Intent.ACTION_MEDIA_UNSHARED,  path);
         }
 
         if (newState == VolumeState.Init) {
@@ -798,31 +796,29 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                                     Environment.MEDIA_UNMOUNTABLE) && !getUmsEnabling()) {
                 if (DEBUG_EVENTS) Slog.i(TAG, "updating volume state for media bad removal nofs and unmountable");
                 updatePublicVolumeState(path, Environment.MEDIA_UNMOUNTED);
-                in = new Intent(Intent.ACTION_MEDIA_UNMOUNTED, Uri.parse("file://" + path));
+                action = Intent.ACTION_MEDIA_UNMOUNTED;
             }
         } else if (newState == VolumeState.Pending) {
         } else if (newState == VolumeState.Checking) {
             if (DEBUG_EVENTS) Slog.i(TAG, "updating volume state checking");
             updatePublicVolumeState(path, Environment.MEDIA_CHECKING);
-            in = new Intent(Intent.ACTION_MEDIA_CHECKING, Uri.parse("file://" + path));
+            action = Intent.ACTION_MEDIA_CHECKING;
         } else if (newState == VolumeState.Mounted) {
             if (DEBUG_EVENTS) Slog.i(TAG, "updating volume state mounted");
             updatePublicVolumeState(path, Environment.MEDIA_MOUNTED);
-            in = new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + path));
-            in.putExtra("read-only", false);
+            action = Intent.ACTION_MEDIA_MOUNTED;
         } else if (newState == VolumeState.Unmounting) {
-            in = new Intent(Intent.ACTION_MEDIA_EJECT, Uri.parse("file://" + path));
+            action = Intent.ACTION_MEDIA_EJECT;
         } else if (newState == VolumeState.Formatting) {
         } else if (newState == VolumeState.Shared) {
             if (DEBUG_EVENTS) Slog.i(TAG, "Updating volume state media mounted");
             /* Send the media unmounted event first */
             updatePublicVolumeState(path, Environment.MEDIA_UNMOUNTED);
-            in = new Intent(Intent.ACTION_MEDIA_UNMOUNTED, Uri.parse("file://" + path));
-            mContext.sendBroadcast(in);
+            sendStorageIntent(Intent.ACTION_MEDIA_UNMOUNTED, path);
 
             if (DEBUG_EVENTS) Slog.i(TAG, "Updating media shared");
             updatePublicVolumeState(path, Environment.MEDIA_SHARED);
-            in = new Intent(Intent.ACTION_MEDIA_SHARED, Uri.parse("file://" + path));
+            action = Intent.ACTION_MEDIA_SHARED;
             if (LOCAL_LOGD) Slog.d(TAG, "Sending ACTION_MEDIA_SHARED intent");
         } else if (newState == VolumeState.SharedMnt) {
             Slog.e(TAG, "Live shared mounts not supported yet!");
@@ -831,8 +827,8 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
             Slog.e(TAG, "Unhandled VolumeState {" + newState + "}");
         }
 
-        if (in != null) {
-            mContext.sendBroadcast(in);
+        if (action != null) {
+            sendStorageIntent(action, path);
         }
     }
 
@@ -882,7 +878,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
             /*
              * Mount failed for some reason
              */
-            Intent in = null;
+            String action = null;
             int code = e.getCode();
             if (code == VoldResponseCode.OpFailedNoMedia) {
                 /*
@@ -895,7 +891,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                  * Media is blank or does not contain a supported filesystem
                  */
                 updatePublicVolumeState(path, Environment.MEDIA_NOFS);
-                in = new Intent(Intent.ACTION_MEDIA_NOFS, Uri.parse("file://" + path));
+                action = Intent.ACTION_MEDIA_NOFS;
                 rc = StorageResultCode.OperationFailedMediaBlank;
             } else if (code == VoldResponseCode.OpFailedMediaCorrupt) {
                 if (DEBUG_EVENTS) Slog.i(TAG, "updating volume state media corrupt");
@@ -903,7 +899,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                  * Volume consistency check failed
                  */
                 updatePublicVolumeState(path, Environment.MEDIA_UNMOUNTABLE);
-                in = new Intent(Intent.ACTION_MEDIA_UNMOUNTABLE, Uri.parse("file://" + path));
+                action = Intent.ACTION_MEDIA_UNMOUNTABLE;
                 rc = StorageResultCode.OperationFailedMediaCorrupt;
             } else {
                 rc = StorageResultCode.OperationFailedInternalError;
@@ -912,8 +908,8 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
             /*
              * Send broadcast intent (if required for the failure)
              */
-            if (in != null) {
-                mContext.sendBroadcast(in);
+            if (action != null) {
+                sendStorageIntent(action, path);
             }
         }
 
@@ -1070,6 +1066,14 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         }
     }
 
+    private void sendStorageIntent(String action, String path) {
+        Intent intent = new Intent(action, Uri.parse("file://" + path));
+        // add StorageVolume extra
+        intent.putExtra(StorageVolume.EXTRA_STORAGE_VOLUME, mVolumeMap.get(path));
+        Slog.d(TAG, "sendStorageIntent " + intent);
+        mContext.sendBroadcast(intent);
+    }
+
     private void sendUmsIntent(boolean c) {
         mContext.sendBroadcast(
                 new Intent((c ? Intent.ACTION_UMS_CONNECTED : Intent.ACTION_UMS_DISCONNECTED)));
@@ -1121,7 +1125,8 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                     if (path == null || description == null) {
                         Slog.e(TAG, "path or description is null in readStorageList");
                     } else {
-                        StorageVolume volume = new StorageVolume(path.toString(),
+                        String pathString = path.toString();
+                        StorageVolume volume = new StorageVolume(pathString,
                                 description.toString(), removable, emulated, mtpReserve);
                         if (primary) {
                             if (mPrimaryVolume == null) {
@@ -1136,6 +1141,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                         } else {
                             mVolumes.add(volume);
                         }
+                        mVolumeMap.put(pathString, volume);
                     }
                     a.recycle();
                 }
