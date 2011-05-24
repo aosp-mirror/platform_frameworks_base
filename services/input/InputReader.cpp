@@ -28,7 +28,7 @@
 #define DEBUG_VIRTUAL_KEYS 0
 
 // Log debug messages about pointers.
-#define DEBUG_POINTERS 1
+#define DEBUG_POINTERS 0
 
 // Log debug messages about pointer assignment calculations.
 #define DEBUG_POINTER_ASSIGNMENT 0
