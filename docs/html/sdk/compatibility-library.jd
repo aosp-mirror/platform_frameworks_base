@@ -1,0 +1,224 @@
+page.title=Compatibility Library
+
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+  
+<h2>In this document</h2>
+<ol>
+  <li><a href="#Notes">Revisions</a></li>
+  <li><a href="#Installing">Installing the Compatibility Library</a></li>
+  <li><a href="#SettingUp">Setting Up a Project to Use the Library</a></li>
+  <li><a href="#Using">Using Some of the Library APIs</a></li>
+  <li><a href="#Samples">Samples</a></li>
+</ol>
+
+<h2>See also</h2>
+<ol>
+  <li><a
+href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for Android 3.0</a></li>
+  <li><a href="http://code.google.com/p/iosched/">Google I/O App source code</a></li>
+</ol>
+
+</div>
+</div>
+
+<p><em>Minimum API level supported:</em> <b>4</b></p>
+
+<p>The Compatibility Library is a static library you can add to your Android application in order to
+use APIs not available in older versions of the Android platform. The primary goal of the library is
+to provide APIs introduced in Andriod 3.0 for older versions of Android so that all applications can
+use them.</p>
+
+<p>If you're not able to use APIs introduced in Android 3.0 directly, because you want to remain
+backward-compatible, the Compatibility Library provides your application access to self-contained
+versions of some of the latest APIs that you can use with older versions of Android. Most
+importantly, the library provides implementations of the {@link android.app.Fragment} and {@link
+android.content.Loader} APIs, so you can use them in a way that's compatible with devices running
+Android 1.6 (API level 4) and higher. Thus, you can more easily create a single APK that supports a
+majority of devices and provide larger devices (such as tablets) a fully optimized experience by
+using <a href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> in your activity
+design.</p>
+
+
+<h2 id="Notes">Revisions</h2>
+
+<p>The sections below provide notes about successive releases of
+the Compatibility Library, as denoted by revision number.</p>
+
+
+<div class="toggle-content open">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" />
+    Compatibility Library, revision 2 (May 2011)
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em"> 
+    <dl>
+    <dt>Changes:</dt>
+    <dd>
+      <ul>
+        <li>Support for fragment animations.</li>
+        <li>Fix {@code Fragment.onActivityResult()} bug.</li>
+      </ul>
+    </dd>
+    </dl>
+  </div>
+
+</div>
+
+
+<div class="toggle-content closed">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" />
+    Compatibility Library, revision 1 (March 2011)
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em"> 
+      <p>Initial release of the library.</p>
+  </div>
+
+</div>
+
+
+
+<h2 id="Installing">Installing the Compatibility Library</h2>
+
+<p>The Compatibility Library is provided as a downloadable package from the Android SDK and AVD
+Manager. To install the library:</p>
+
+<ol>
+  <li>Launch the SDK and AVD Manager. 
+    <p>From Eclipse, you can select <strong>Window</strong>
+&gt; <strong>Android SDK and AVD Manager</strong>. Or, launch {@code SDK Manager.exe} from
+the {@code &lt;sdk&gt;/} directory (on Windows only) or {@code android} from the {@code
+&lt;sdk&gt;/tools/} directory.</p></li>
+  <li>Expand the Android Repository, check <strong>Android Compatibility package</strong>
+and click <strong>Install selected</strong>.</li>
+  <li>Proceed to install the package.</li>
+</ol>
+
+<p>When done, all files (including source code, samples, and the {@code .jar} file) are saved
+into the <code>&lt;sdk&gt;/extras/android/compatibility/</code> directory. The next directory
+name is {@code v4}, which indicates the lowest compatible version for the library within. That
+is, the code in {@code v4/} supports API level 4 and above. (There may be future libraries that
+have a different minimum version, so they will be saved alongside this one.)</p>
+
+
+<h2 id="SettingUp">Setting Up a Project to Use the Library</h2>
+
+<p>To add the Compatibility Library to your Android project:</p>
+<ol>
+  <li>In your Android project, create a directory named {@code libs} at the root of your
+project (next to {@code src/}, {@code res/}, etc.)</li>
+  <li>Navigate to {@code &lt;sdk&gt;/extras/android/compatibility/v4/}.</li>
+  <li>Copy the {@code android-support-v4.jar} file into your project {@code libs/} directory.</li>
+  <li>Add the JAR to your project build path. In Eclipse, right-click the JAR file in the
+Package Explorer, select <strong>Build Path</strong> &gt; <strong>Add to Build Path</strong>.
+You should then see the JAR file appear in a new directory called Referenced Libraries.</li>
+</ol>
+
+<p>Your application is now ready to use fragments, loaders and other APIs from the library. All the
+provided APIs are in the {@code android.support.v4} package.</p>
+
+<p class="warning"><strong>Warning:</strong> Be certain that you not confuse the standard
+{@code android} packages with those in {@code android.support.v4}. Some code completion tools might
+get this wrong, especially if you're building against recent versions of the platform. To be safe,
+keep your build target set to the same version as you have defined for your <a
+href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
+and double check the import statements for classes that are duplicated in the Compatibility
+Library, such as {@code SimpleCursorAdapter}.</p>
+
+
+<h2 id="Using">Using Some of the Library APIs</h2>
+
+<p>The Compatibility Library provides access to several classes introduced with Android 3.0, plus
+some updated version of existing classes. Some of the most useful and notable classes in the
+library are:</p>
+
+<ul>
+  <li>{@link android.app.Fragment}</li>
+  <li>{@link android.app.FragmentManager}</li>
+  <li>{@link android.app.FragmentTransaction}</li>
+  <li>{@link android.app.ListFragment}</li>
+  <li>{@link android.app.DialogFragment}</li>
+  <li>{@link android.app.LoaderManager}</li>
+  <li>{@link android.content.Loader}</li>
+  <li>{@link android.content.AsyncTaskLoader}</li>
+  <li>{@link android.content.CursorLoader}</li>
+</ul>
+
+<p>For each of the classes above (and others not listed), the APIs work almost exactly the same
+as the counterparts in the latest version of the Android platform. Thus, you can usually refer to
+the latest reference documentation for information about the supported APIs. There are some
+differences, however. Most notably:</p>
+
+<ul>
+  <li>When creating an activity to use fragments, you must declare your activity to extend the
+{@code FragmentActivity} class (instead of the traditional {@link android.app.Activity}
+class).</li>
+  <li>To manage your fragments and loaders, you must use the methods {@code
+FragmentActivity.getSupportFragmentManager()} and {@code
+FragmentActivity.getSupportLoaderManager()} (instead of the {@link
+android.app.Activity#getFragmentManager()} and {@link android.app.Activity#getLoaderManager()}
+methods).</li>
+  <li>The {@link android.app.ActionBar} is <strong>not supported</strong> by the library.
+However, when creating your <a href="{@docRoot}guide/topics/ui/menus.html#options-menu">Options
+Menu</a>, you can declare which items should be added to the Action Bar when it's available (on
+Android 3.0 or later). You can do so with the {@code MenuCompat.setShowAsAction()} method. For
+example:
+<pre>
+public boolean onCreateOptionsMenu(Menu menu) {
+    MenuInflater inflater = getMenuInflater();
+    inflater.inflate(R.menu.options, menu);
+    MenuCompat.setShowAsAction(menu.findItem(R.id.action_search), 1);
+    return true;
+}
+</pre>
+</li>
+</ul>
+
+<p>The Compatibility Library currently does not provide reference documentation for the included
+APIs. To generate your own set, using the {@code javadoc} tool, perform the
+following from a command line:</p>
+
+<pre class="no-pretty-print">
+cd &lt;sdk&gt;/extras/android/compatibility/v4/
+mkdir docs
+javadoc -sourcepath src/java/ -subpackages android.support.v4 -d docs
+</pre>
+<p>Open the {@code docs/index.html} file to begin browsing the generated documentation.</p>
+
+
+<div class="note"><p><strong>Tip:</strong> To enable the Holographic theme on devices
+running Android 3.0 or higher, declare in your manifest file that your application targets
+API level 11. For example:</p>
+<pre>
+&lt;uses-sdk android:minSdkVersion="4" android:targetSdkVersion="11" /&gt;
+</pre>
+<p>This way, your application automatically receives the Holographic theme and the Action Bar for 
+each activity when running on Android 3.0 and higher.</p>
+</div>
+
+<p>For more information about how you can optimize your application for the latest
+Android-powered devices, read <a href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing
+Apps for Android 3.0</a>.</p>
+
+
+<h2 id="Samples">Samples</h2>
+
+<p>If you want to see some sample code that uses the Compatibility Library, take a look at the
+<a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/support/index.html">API
+Demos</a> sample code that's included with the Samples package you can download from the AVD and SDK
+Manager.</p>
+
+<p>Additionally, the <a href="http://code.google.com/p/iosched/">Google I/O App</a> is a complete
+application that uses the library to provide a single APK for both handsets and tablets and also
+demonstrates some of Android's best practices in Android UI design.</p>
+
+
+
+
