@@ -31,7 +31,6 @@
             android:gravity="top"
             android:minLines="1"
             android:inputType="text"
-            android:background="@android:drawable/extract_edit_text"
         >
     </android.inputmethodservice.ExtractEditText>
 
