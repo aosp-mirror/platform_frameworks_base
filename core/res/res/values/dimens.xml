@@ -54,9 +54,28 @@
     <dimen name="preference_screen_side_margin">0dp</dimen>
     <!-- Preference activity side margins negative-->
     <dimen name="preference_screen_side_margin_negative">0dp</dimen>
+    <!-- Preference activity top margin -->
+    <dimen name="preference_screen_top_margin">0dp</dimen>
+    <!-- Preference activity bottom margin -->
+    <dimen name="preference_screen_bottom_margin">0dp</dimen>
     <!-- Preference widget area width (to the left of the text) -->
-    <dimen name="preference_widget_width">56dp</dimen>
-
+    <dimen name="preference_widget_width">48dp</dimen>
+    <!-- Preference fragment padding, bottom -->
+    <dimen name="preference_fragment_padding_bottom">0dp</dimen>
+    <!-- Preference fragment padding, sides -->
+    <dimen name="preference_fragment_padding_side">0dp</dimen>
+    <!-- Weight of the left pane in a multi-pane preference layout. -->
+    <integer name="preferences_left_pane_weight">4</integer>
+    <!-- Weight of the right pane in a multi-pane preference layout. So the split is 40:60 -->
+    <integer name="preferences_right_pane_weight">6</integer>
+    <!-- Padding to the left of the preference panel breadcrumb -->
+    <dimen name="preference_breadcrumb_paddingLeft">0dp</dimen>
+    <!-- Padding to the right of the preference panel breadcrumb -->
+    <dimen name="preference_breadcrumb_paddingRight">0dp</dimen>
+    <!-- Minimum space to allocate to the left of a preference item for an icon.
+        This helps in aligning titles when some items have icons and some don't. When space is
+        at a premium, we don't pre-allocate any space. -->
+    <dimen name="preference_icon_minWidth">0dp</dimen>
     <!-- The platform's desired minimum size for a dialog's width when it
          is along the major axis (that is the screen is landscape).  This may
          be either a fraction or a dimension. -->

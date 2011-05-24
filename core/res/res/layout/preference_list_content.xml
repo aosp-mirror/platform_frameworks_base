@@ -27,6 +27,8 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="0px"
+        android:layout_marginTop="@dimen/preference_screen_top_margin"
+        android:layout_marginBottom="@dimen/preference_screen_bottom_margin"
         android:layout_weight="1">
 
         <LinearLayout
@@ -36,14 +38,15 @@
             android:layout_height="match_parent"
             android:layout_marginRight="@dimen/preference_screen_side_margin_negative"
             android:layout_marginLeft="@dimen/preference_screen_side_margin"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="32dp"
-            android:layout_weight="10">
+            android:layout_weight="@integer/preferences_left_pane_weight">
 
             <ListView android:id="@android:id/list"
                 android:layout_width="match_parent"
                 android:layout_height="0px"
                 android:layout_weight="1"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+
                 android:drawSelectorOnTop="false"
                 android:cacheColorHint="@android:color/transparent"
                 android:listPreferredItemHeight="48dp"
@@ -60,39 +63,22 @@
                 android:id="@+id/prefs_frame"
                 android:layout_width="0px"
                 android:layout_height="match_parent"
-                android:layout_weight="20"
+                android:layout_weight="@integer/preferences_right_pane_weight"
                 android:layout_marginLeft="@dimen/preference_screen_side_margin"
                 android:layout_marginRight="@dimen/preference_screen_side_margin"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
                 android:background="?attr/detailsElementBackground"
                 android:orientation="vertical"
                 android:visibility="gone" >
 
-            <!-- Breadcrumb inserted here -->
-            <android.app.FragmentBreadCrumbs
-                android:id="@android:id/title"
-                android:layout_height="72dip"
-                android:layout_width="match_parent"
-                android:paddingTop="16dip"
-                android:paddingBottom="8dip"
-                android:gravity="center_vertical|left"
-                android:layout_marginLeft="48dip"
-                android:layout_marginRight="48dip"
-                />
+            <!-- Breadcrumb inserted here, in certain screen sizes. In others, it will be an
+                empty layout or just padding, and PreferenceActivity will put the breadcrumbs in
+                the action bar. -->
+            <include layout="@layout/breadcrumbs_in_fragment" />
 
-            <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="1dip"
-                    android:paddingLeft="32dip"
-                    android:paddingRight="32dip"
-                    android:src="#404040"
-                />
             <android.preference.PreferenceFrameLayout android:id="@+id/prefs"
                     android:layout_width="match_parent"
                     android:layout_height="0dip"
                     android:layout_weight="1"
-                    android:layout_marginTop="-1dip"
                 />
         </LinearLayout>
     </LinearLayout>

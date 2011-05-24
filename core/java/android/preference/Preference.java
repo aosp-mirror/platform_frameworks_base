@@ -519,6 +519,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
             if (mIcon != null) {
                 imageView.setImageDrawable(mIcon);
             }
+            imageView.setVisibility(mIcon != null ? View.VISIBLE : View.GONE);
         }
         if (mShouldDisableView) {
             setEnabledStateOnViews(view, isEnabled());
@@ -618,6 +619,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     public void setIcon(Drawable icon) {
         if ((icon == null && mIcon != null) || (icon != null && mIcon != icon)) {
             mIcon = icon;
+
             notifyChanged();
         }
     }

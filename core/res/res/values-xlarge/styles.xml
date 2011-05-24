@@ -35,13 +35,5 @@
     <style name="TextAppearance.StatusBar.EventContent.Title">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
-
-    <style name="PreferencePanel">
-        <item name="android:layout_marginLeft">@dimen/preference_screen_side_margin</item>
-        <item name="android:layout_marginRight">@dimen/preference_screen_side_margin</item>
-        <item name="android:layout_marginTop">48dip</item>
-        <item name="android:layout_marginBottom">48dip</item>
-        <item name="android:background">?attr/detailsElementBackground</item>
-    </style>
 </resources>
 
