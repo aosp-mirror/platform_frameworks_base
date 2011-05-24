@@ -14,7 +14,6 @@ LOCAL_SRC_FILES:= 	       \
 	EGL/eglApi.cpp 	       \
 	EGL/trace.cpp              \
 	EGL/getProcAddress.cpp.arm \
-	EGL/hooks.cpp 	       \
 	EGL/Loader.cpp 	       \
 #
 

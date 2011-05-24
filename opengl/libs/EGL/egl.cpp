@@ -33,6 +33,7 @@
 
 #include <utils/String8.h>
 
+#include "egldefs.h"
 #include "egl_impl.h"
 #include "egl_tls.h"
 #include "glesv2dbg.h"
@@ -277,6 +278,71 @@ EGLBoolean egl_init_drivers() {
     pthread_mutex_unlock(&sInitDriverMutex);
     return res;
 }
+
+void gl_unimplemented() {
+    LOGE("called unimplemented OpenGL ES API");
+}
+
+// ----------------------------------------------------------------------------
+
+#if USE_FAST_TLS_KEY
+
+// We have a dedicated TLS slot in bionic
+static inline gl_hooks_t const * volatile * get_tls_hooks() {
+    volatile void *tls_base = __get_tls();
+    gl_hooks_t const * volatile * tls_hooks =
+            reinterpret_cast<gl_hooks_t const * volatile *>(tls_base);
+    return tls_hooks;
+}
+
+void setGlThreadSpecific(gl_hooks_t const *value) {
+    gl_hooks_t const * volatile * tls_hooks = get_tls_hooks();
+    tls_hooks[TLS_SLOT_OPENGL_API] = value;
+}
+
+gl_hooks_t const* getGlThreadSpecific() {
+    gl_hooks_t const * volatile * tls_hooks = get_tls_hooks();
+    gl_hooks_t const* hooks = tls_hooks[TLS_SLOT_OPENGL_API];
+    if (hooks) return hooks;
+    return &gHooksNoContext;
+}
+
+#else
+
+void setGlThreadSpecific(gl_hooks_t const *value) {
+    pthread_setspecific(gGLWrapperKey, value);
+}
+
+gl_hooks_t const* getGlThreadSpecific() {
+    gl_hooks_t const* hooks =  static_cast<gl_hooks_t*>(pthread_getspecific(gGLWrapperKey));
+    if (hooks) return hooks;
+    return &gHooksNoContext;
+}
+
+#endif
+
+// ----------------------------------------------------------------------------
+// GL / EGL hooks
+// ----------------------------------------------------------------------------
+
+#undef GL_ENTRY
+#undef EGL_ENTRY
+#define GL_ENTRY(_r, _api, ...) #_api,
+#define EGL_ENTRY(_r, _api, ...) #_api,
+
+char const * const gl_names[] = {
+    #include "entries.in"
+    NULL
+};
+
+char const * const egl_names[] = {
+    #include "egl_entries.in"
+    NULL
+};
+
+#undef GL_ENTRY
+#undef EGL_ENTRY
+
 
 // ----------------------------------------------------------------------------
 }; // namespace android

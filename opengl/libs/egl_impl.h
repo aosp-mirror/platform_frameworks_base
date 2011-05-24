@@ -25,26 +25,11 @@
 
 #include "hooks.h"
 
-#define VERSION_MAJOR 1
-#define VERSION_MINOR 4
-
 // ----------------------------------------------------------------------------
 namespace android {
 // ----------------------------------------------------------------------------
 
-struct egl_connection_t
-{
-    inline egl_connection_t() : dso(0) { }
-    void *              dso;
-    gl_hooks_t *        hooks[2];
-    EGLint              major;
-    EGLint              minor;
-    egl_t               egl;
-};
-
 EGLAPI EGLImageKHR egl_get_image_for_current_context(EGLImageKHR image);
-
-extern egl_connection_t gEGLImpl[IMPL_NUM_IMPLEMENTATIONS];
 
 // ----------------------------------------------------------------------------
 }; // namespace android

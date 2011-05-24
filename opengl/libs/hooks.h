@@ -54,22 +54,6 @@
 namespace android {
 // ----------------------------------------------------------------------------
 
-//  EGLDisplay are global, not attached to a given thread
-const unsigned int NUM_DISPLAYS = 1;
-
-enum {
-    IMPL_HARDWARE = 0,
-    IMPL_SOFTWARE,
-    IMPL_NUM_IMPLEMENTATIONS
-};
-
-enum {
-    GLESv1_INDEX = 0,
-    GLESv2_INDEX = 1,
-};
-
-// ----------------------------------------------------------------------------
-
 // GL / EGL hooks
 
 #undef GL_ENTRY
@@ -92,60 +76,8 @@ struct gl_hooks_t {
 #undef GL_ENTRY
 #undef EGL_ENTRY
 
-
-// ----------------------------------------------------------------------------
-
-extern gl_hooks_t gHooks[2][IMPL_NUM_IMPLEMENTATIONS];
-extern gl_hooks_t gHooksNoContext;
-extern pthread_key_t gGLWrapperKey;
-extern "C" void gl_unimplemented();
-
-extern char const * const gl_names[];
-extern char const * const egl_names[];
-
-// ----------------------------------------------------------------------------
-
-#if USE_FAST_TLS_KEY
-
-// We have a dedicated TLS slot in bionic
-static inline gl_hooks_t const * volatile * get_tls_hooks() {
-    volatile void *tls_base = __get_tls();
-    gl_hooks_t const * volatile * tls_hooks = 
-            reinterpret_cast<gl_hooks_t const * volatile *>(tls_base);
-    return tls_hooks;
-}
-
-static inline void setGlThreadSpecific(gl_hooks_t const *value) {
-    gl_hooks_t const * volatile * tls_hooks = get_tls_hooks();
-    tls_hooks[TLS_SLOT_OPENGL_API] = value;
-}
-
-static gl_hooks_t const* getGlThreadSpecific() {
-    gl_hooks_t const * volatile * tls_hooks = get_tls_hooks();
-    gl_hooks_t const* hooks = tls_hooks[TLS_SLOT_OPENGL_API];
-    if (hooks) return hooks;
-    return &gHooksNoContext;
-}
-
-#else
-
-static inline void setGlThreadSpecific(gl_hooks_t const *value) {
-    pthread_setspecific(gGLWrapperKey, value);
-}
-
-static gl_hooks_t const* getGlThreadSpecific() {
-    gl_hooks_t const* hooks =  static_cast<gl_hooks_t*>(pthread_getspecific(gGLWrapperKey));
-    if (hooks) return hooks;
-    return &gHooksNoContext;
-}
-
-#endif
-
-#if EGL_TRACE
-
-extern gl_hooks_t const* getGLTraceThreadSpecific();
-
-#endif
+EGLAPI void setGlThreadSpecific(gl_hooks_t const *value);
+EGLAPI gl_hooks_t const* getGlThreadSpecific();
 
 // ----------------------------------------------------------------------------
 }; // namespace android
