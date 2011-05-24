@@ -21,4 +21,18 @@
     <!-- Size of the padding on either side of the app-supplied image
          in the action bar home section. -->
     <dimen name="action_bar_home_image_padding">16dip</dimen>
+    <!-- Preference fragment padding, sides -->
+    <dimen name="preference_fragment_padding_side">32dp</dimen>
+    <!-- Padding to the left of the preference panel breadcrumb -->
+    <dimen name="preference_breadcrumb_paddingLeft">32dp</dimen>
+    <!-- Padding to the right of the preference panel breadcrumb -->
+    <dimen name="preference_breadcrumb_paddingRight">32dp</dimen>
+    <!-- Weight of the left pane in a multi-pane preference layout. -->
+    <integer name="preferences_left_pane_weight">1</integer>
+    <!-- Weight of the right pane in a multi-pane preference layout. So the split is 1:2 -->
+    <integer name="preferences_right_pane_weight">2</integer>
+    <!-- Minimum space to allocate to the left of a preference item for an icon.
+        This helps in aligning titles when some items have icons and some don't. When space is
+        at a premium, we don't pre-allocate any space. -->
+    <dimen name="preference_icon_minWidth">48dp</dimen>
 </resources>
