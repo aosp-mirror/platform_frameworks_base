@@ -285,15 +285,19 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             return -EINVAL;
         }
 
-        // make sure the client is not trying to dequeue more buffers
-        // than allowed.
-        const int avail = mBufferCount - (dequeuedCount+1);
-        if (avail < (MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode))) {
-            LOGE("dequeueBuffer: MIN_UNDEQUEUED_BUFFERS=%d exceeded (dequeued=%d)",
-                    MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode),
-                    dequeuedCount);
-            // TODO: Enable this error report after we fix issue 4435022
-            // return -EBUSY;
+        // See whether a buffer has been queued since the last setBufferCount so
+        // we know whether to perform the MIN_UNDEQUEUED_BUFFERS check below.
+        bool bufferHasBeenQueued = mCurrentTexture != INVALID_BUFFER_SLOT;
+        if (bufferHasBeenQueued) {
+            // make sure the client is not trying to dequeue more buffers
+            // than allowed.
+            const int avail = mBufferCount - (dequeuedCount+1);
+            if (avail < (MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode))) {
+                LOGE("dequeueBuffer: MIN_UNDEQUEUED_BUFFERS=%d exceeded (dequeued=%d)",
+                        MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode),
+                        dequeuedCount);
+                return -EBUSY;
+            }
         }
 
         // we're in synchronous mode and didn't find a buffer, we need to wait

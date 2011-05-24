@@ -431,16 +431,23 @@ TEST_F(SurfaceTextureClientTest, SurfaceTextureSyncModeMinUndequeued) {
     android_native_buffer_t* buf[3];
     ASSERT_EQ(OK, st->setSynchronousMode(true));
     ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 3));
+
+    // We should be able to dequeue all the buffers before we've queued any.
     EXPECT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
     EXPECT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[1]));
-    EXPECT_EQ(-EBUSY, anw->dequeueBuffer(anw.get(), &buf[2]));
+    EXPECT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
 
+    ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[2]));
     ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[1]));
 
     EXPECT_EQ(OK, st->updateTexImage());
     EXPECT_EQ(st->getCurrentBuffer().get(), buf[1]);
 
     EXPECT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[2]));
+
+    // Once we've queued a buffer, however we should not be able to dequeue more
+    // than (buffer-count - MIN_UNDEQUEUED_BUFFERS), which is 2 in this case.
+    EXPECT_EQ(-EBUSY, anw->dequeueBuffer(anw.get(), &buf[1]));
 
     ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[0]));
     ASSERT_EQ(OK, anw->cancelBuffer(anw.get(), buf[2]));
