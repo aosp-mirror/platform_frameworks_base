@@ -16,11 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.util.FastMath;
-import com.android.internal.widget.EditableInputConnection;
-
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.R;
 import android.content.ClipData;
 import android.content.ClipData.Item;
@@ -128,6 +123,11 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RemoteViews.RemoteView;
+
+import com.android.internal.util.FastMath;
+import com.android.internal.widget.EditableInputConnection;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -320,6 +320,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mTextEditSuggestionItemLayout;
     private SuggestionsPopupWindow mSuggestionsPopupWindow;
     private SuggestionRangeSpan mSuggestionRangeSpan;
+    private boolean mSuggestionsEnabled = true;
 
     private int mCursorDrawableRes;
     private final Drawable[] mCursorDrawable = new Drawable[2];
@@ -805,6 +806,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case com.android.internal.R.styleable.TextView_textIsSelectable:
                 mTextIsSelectable = a.getBoolean(attr, false);
+                break;
+
+            case com.android.internal.R.styleable.TextView_suggestionsEnabled:
+                mSuggestionsEnabled = a.getBoolean(attr, true);
                 break;
             }
         }
@@ -8601,6 +8606,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     void showSuggestions() {
+        if (!mSuggestionsEnabled || !isTextEditable()) return;
+
         if (mSuggestionsPopupWindow == null) {
             mSuggestionsPopupWindow = new SuggestionsPopupWindow();
         }
@@ -8612,6 +8619,31 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mSuggestionsPopupWindow != null) {
             mSuggestionsPopupWindow.hide();
         }
+    }
+
+    /**
+     * Some parts of the text can have alternate suggestion text attached. This is typically done by
+     * the IME by adding {@link SuggestionSpan}s to the text.
+     *
+     * When suggestions are enabled (default), this list of suggestions will be displayed when the
+     * user double taps on these parts of the text. No suggestions are displayed when this value is
+     * false. Use {@link #setSuggestionsEnabled(boolean)} to change this value.
+     *
+     * @return true if the suggestions popup window is enabled.
+     *
+     * @attr ref android.R.styleable#TextView_suggestionsEnabled
+     */
+    public boolean isSuggestionsEnabled() {
+        return mSuggestionsEnabled;
+    }
+
+    /**
+     * Enables or disables the suggestion popup. See {@link #isSuggestionsEnabled()}.
+     *
+     * @param enabled Whether or not suggestions are enabled.
+     */
+    public void setSuggestionsEnabled(boolean enabled) {
+        mSuggestionsEnabled = enabled;
     }
 
     /**

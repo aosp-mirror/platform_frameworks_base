@@ -1670,5 +1670,6 @@
   <public type="attr" name="horizontalDirection" />
 
   <public type="attr" name="fullBackupAgent" />
+  <public type="attr" name="suggestionsEnabled" />
 
 </resources>
