@@ -1171,8 +1171,7 @@ public class PopupWindow {
         int bottomEdge = displayFrame.bottom;
         if (ignoreBottomDecorations) {
             Resources res = anchor.getContext().getResources();
-            bottomEdge = res.getDisplayMetrics().heightPixels -
-                    (int) res.getDimension(com.android.internal.R.dimen.screen_margin_bottom);
+            bottomEdge = res.getDisplayMetrics().heightPixels;
         }
         final int distanceToBottom = bottomEdge - (anchorPos[1] + anchor.getHeight()) - yOffset;
         final int distanceToTop = anchorPos[1] - displayFrame.top + yOffset;
