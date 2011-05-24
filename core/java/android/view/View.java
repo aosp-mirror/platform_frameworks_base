@@ -11737,6 +11737,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Request that the visibility of the status bar be changed.
+     * @param visibility  Either {@link #STATUS_BAR_VISIBLE} or {@link #STATUS_BAR_HIDDEN}.
      */
     public void setSystemUiVisibility(int visibility) {
         if (visibility != mSystemUiVisibility) {
@@ -11749,11 +11750,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
 
     /**
      * Returns the status bar visibility that this view has requested.
+     * @return Either {@link #STATUS_BAR_VISIBLE} or {@link #STATUS_BAR_HIDDEN}.
      */
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;
     }
 
+    /**
+     * Set a listener to receive callbacks when the visibility of the system bar changes.
+     * @param l  The {@link OnSystemUiVisibilityChangeListener} to receive callbacks.
+     */
     public void setOnSystemUiVisibilityChangeListener(OnSystemUiVisibilityChangeListener l) {
         mOnSystemUiVisibilityChangeListener = l;
         if (mParent != null && mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
