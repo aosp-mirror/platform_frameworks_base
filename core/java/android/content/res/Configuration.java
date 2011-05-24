@@ -226,6 +226,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public static final int UI_MODE_TYPE_NORMAL = 0x01;
     public static final int UI_MODE_TYPE_DESK = 0x02;
     public static final int UI_MODE_TYPE_CAR = 0x03;
+    public static final int UI_MODE_TYPE_TELEVISION = 0x04;
 
     public static final int UI_MODE_NIGHT_MASK = 0x30;
     public static final int UI_MODE_NIGHT_UNDEFINED = 0x00;
@@ -367,6 +368,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case UI_MODE_TYPE_NORMAL: /* normal is not interesting to print */ break;
             case UI_MODE_TYPE_DESK: sb.append(" desk"); break;
             case UI_MODE_TYPE_CAR: sb.append(" car"); break;
+            case UI_MODE_TYPE_TELEVISION: sb.append(" television"); break;
             default: sb.append(" uimode="); sb.append(uiMode&UI_MODE_TYPE_MASK); break;
         }
         switch ((uiMode&UI_MODE_NIGHT_MASK)) {

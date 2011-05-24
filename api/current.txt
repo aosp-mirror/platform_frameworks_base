@@ -6004,6 +6004,7 @@ package android.content.res {
     field public static final int UI_MODE_TYPE_DESK = 2; // 0x2
     field public static final int UI_MODE_TYPE_MASK = 15; // 0xf
     field public static final int UI_MODE_TYPE_NORMAL = 1; // 0x1
+    field public static final int UI_MODE_TYPE_TELEVISION = 4; // 0x4
     field public static final int UI_MODE_TYPE_UNDEFINED = 0; // 0x0
     field public float fontScale;
     field public int hardKeyboardHidden;
