@@ -24,6 +24,7 @@ import android.os.Message;
 import android.os.ServiceManager;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * SimPhoneBookInterfaceManager to provide an inter-process communication to
@@ -63,14 +64,14 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
                                     " total " + recordSize[1] +
                                     " #record " + recordSize[2]);
                         }
-                        mLock.notifyAll();
+                        notifyPending(ar);
                     }
                     break;
                 case EVENT_UPDATE_DONE:
                     ar = (AsyncResult) msg.obj;
                     synchronized (mLock) {
                         success = (ar.exception == null);
-                        mLock.notifyAll();
+                        notifyPending(ar);
                     }
                     break;
                 case EVENT_LOAD_DONE:
@@ -84,10 +85,19 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
                                 records.clear();
                             }
                         }
-                        mLock.notifyAll();
+                        notifyPending(ar);
                     }
                     break;
             }
+        }
+
+        private void notifyPending(AsyncResult ar) {
+            if (ar.userObj == null) {
+                return;
+            }
+            AtomicBoolean status = (AtomicBoolean) ar.userObj;
+            status.set(true);
+            mLock.notifyAll();
         }
     };
 
@@ -150,15 +160,12 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
         synchronized(mLock) {
             checkThread();
             success = false;
-            Message response = mBaseHandler.obtainMessage(EVENT_UPDATE_DONE);
+            AtomicBoolean status = new AtomicBoolean(false);
+            Message response = mBaseHandler.obtainMessage(EVENT_UPDATE_DONE, status);
             AdnRecord oldAdn = new AdnRecord(oldTag, oldPhoneNumber);
             AdnRecord newAdn = new AdnRecord(newTag, newPhoneNumber);
             adnCache.updateAdnBySearch(efid, oldAdn, newAdn, pin2, response);
-            try {
-                mLock.wait();
-            } catch (InterruptedException e) {
-                logd("interrupted while trying to update by search");
-            }
+            waitForResult(status);
         }
         return success;
     }
@@ -197,14 +204,11 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
         synchronized(mLock) {
             checkThread();
             success = false;
-            Message response = mBaseHandler.obtainMessage(EVENT_UPDATE_DONE);
+            AtomicBoolean status = new AtomicBoolean(false);
+            Message response = mBaseHandler.obtainMessage(EVENT_UPDATE_DONE, status);
             AdnRecord newAdn = new AdnRecord(newTag, newPhoneNumber);
             adnCache.updateAdnByIndex(efid, newAdn, index, pin2, response);
-            try {
-                mLock.wait();
-            } catch (InterruptedException e) {
-                logd("interrupted while trying to update by index");
-            }
+            waitForResult(status);
         }
         return success;
     }
@@ -243,15 +247,12 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
 
         synchronized(mLock) {
             checkThread();
-            Message response = mBaseHandler.obtainMessage(EVENT_LOAD_DONE);
+            AtomicBoolean status = new AtomicBoolean(false);
+            Message response = mBaseHandler.obtainMessage(EVENT_LOAD_DONE, status);
             adnCache.requestLoadAllAdnLike(efid, adnCache.extensionEfForEf(efid), response);
-            try {
-                mLock.wait();
-            } catch (InterruptedException e) {
-                logd("interrupted while trying to load from the SIM");
-            }
+            waitForResult(status);
         }
-            return records;
+        return records;
     }
 
     protected void checkThread() {
@@ -261,6 +262,16 @@ public abstract class IccPhoneBookInterfaceManager extends IIccPhoneBook.Stub {
                 loge("query() called on the main UI thread!");
                 throw new IllegalStateException(
                         "You cannot call query on this provder from the main UI thread.");
+            }
+        }
+    }
+
+    protected void waitForResult(AtomicBoolean status) {
+        while (!status.get()) {
+            try {
+                mLock.wait();
+            } catch (InterruptedException e) {
+                logd("interrupted while trying to update by search");
             }
         }
     }
