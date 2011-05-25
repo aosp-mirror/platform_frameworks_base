@@ -285,15 +285,19 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             return -EINVAL;
         }
 
-        // make sure the client is not trying to dequeue more buffers
-        // than allowed.
-        const int avail = mBufferCount - (dequeuedCount+1);
-        if (avail < (MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode))) {
-            LOGE("dequeueBuffer: MIN_UNDEQUEUED_BUFFERS=%d exceeded (dequeued=%d)",
-                    MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode),
-                    dequeuedCount);
-            // TODO: Enable this error report after we fix issue 4435022
-            // return -EBUSY;
+        // See whether a buffer has been queued since the last setBufferCount so
+        // we know whether to perform the MIN_UNDEQUEUED_BUFFERS check below.
+        bool bufferHasBeenQueued = mCurrentTexture != INVALID_BUFFER_SLOT;
+        if (bufferHasBeenQueued) {
+            // make sure the client is not trying to dequeue more buffers
+            // than allowed.
+            const int avail = mBufferCount - (dequeuedCount+1);
+            if (avail < (MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode))) {
+                LOGE("dequeueBuffer: MIN_UNDEQUEUED_BUFFERS=%d exceeded (dequeued=%d)",
+                        MIN_UNDEQUEUED_BUFFERS-int(mSynchronousMode),
+                        dequeuedCount);
+                return -EBUSY;
+            }
         }
 
         // we're in synchronous mode and didn't find a buffer, we need to wait
@@ -390,49 +394,49 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp) {
     sp<FrameAvailableListener> listener;
 
     { // scope for the lock
-    Mutex::Autolock lock(mMutex);
-    if (buf < 0 || buf >= mBufferCount) {
-        LOGE("queueBuffer: slot index out of range [0, %d]: %d",
-                mBufferCount, buf);
-        return -EINVAL;
-    } else if (mSlots[buf].mBufferState != BufferSlot::DEQUEUED) {
-        LOGE("queueBuffer: slot %d is not owned by the client (state=%d)",
-                buf, mSlots[buf].mBufferState);
-        return -EINVAL;
-    } else if (buf == mCurrentTexture) {
-        LOGE("queueBuffer: slot %d is current!", buf);
-        return -EINVAL;
-    } else if (!mSlots[buf].mRequestBufferCalled) {
-        LOGE("queueBuffer: slot %d was enqueued without requesting a buffer",
-                buf);
-        return -EINVAL;
-    }
+        Mutex::Autolock lock(mMutex);
+        if (buf < 0 || buf >= mBufferCount) {
+            LOGE("queueBuffer: slot index out of range [0, %d]: %d",
+                    mBufferCount, buf);
+            return -EINVAL;
+        } else if (mSlots[buf].mBufferState != BufferSlot::DEQUEUED) {
+            LOGE("queueBuffer: slot %d is not owned by the client (state=%d)",
+                    buf, mSlots[buf].mBufferState);
+            return -EINVAL;
+        } else if (buf == mCurrentTexture) {
+            LOGE("queueBuffer: slot %d is current!", buf);
+            return -EINVAL;
+        } else if (!mSlots[buf].mRequestBufferCalled) {
+            LOGE("queueBuffer: slot %d was enqueued without requesting a "
+                    "buffer", buf);
+            return -EINVAL;
+        }
 
-    if (mQueue.empty()) {
-        listener = mFrameAvailableListener;
-    }
-
-    if (mSynchronousMode) {
-        // in synchronous mode we queue all buffers in a FIFO
-        mQueue.push_back(buf);
-    } else {
-        // in asynchronous mode we only keep the most recent buffer
         if (mQueue.empty()) {
+            listener = mFrameAvailableListener;
+        }
+
+        if (mSynchronousMode) {
+            // in synchronous mode we queue all buffers in a FIFO
             mQueue.push_back(buf);
         } else {
-            Fifo::iterator front(mQueue.begin());
-            // buffer currently queued is freed
-            mSlots[*front].mBufferState = BufferSlot::FREE;
-            // and we record the new buffer index in the queued list
-            *front = buf;
+            // in asynchronous mode we only keep the most recent buffer
+            if (mQueue.empty()) {
+                mQueue.push_back(buf);
+            } else {
+                Fifo::iterator front(mQueue.begin());
+                // buffer currently queued is freed
+                mSlots[*front].mBufferState = BufferSlot::FREE;
+                // and we record the new buffer index in the queued list
+                *front = buf;
+            }
         }
-    }
 
-    mSlots[buf].mBufferState = BufferSlot::QUEUED;
-    mSlots[buf].mLastQueuedCrop = mNextCrop;
-    mSlots[buf].mLastQueuedTransform = mNextTransform;
-    mSlots[buf].mLastQueuedTimestamp = timestamp;
-    mDequeueCondition.signal();
+        mSlots[buf].mBufferState = BufferSlot::QUEUED;
+        mSlots[buf].mCrop = mNextCrop;
+        mSlots[buf].mTransform = mNextTransform;
+        mSlots[buf].mTimestamp = timestamp;
+        mDequeueCondition.signal();
     } // scope for the lock
 
     // call back without lock held
@@ -540,9 +544,9 @@ status_t SurfaceTexture::updateTexImage() {
         mCurrentTexture = buf;
         mCurrentTextureTarget = target;
         mCurrentTextureBuf = mSlots[buf].mGraphicBuffer;
-        mCurrentCrop = mSlots[buf].mLastQueuedCrop;
-        mCurrentTransform = mSlots[buf].mLastQueuedTransform;
-        mCurrentTimestamp = mSlots[buf].mLastQueuedTimestamp;
+        mCurrentCrop = mSlots[buf].mCrop;
+        mCurrentTransform = mSlots[buf].mTransform;
+        mCurrentTimestamp = mSlots[buf].mTimestamp;
         mDequeueCondition.signal();
     } else {
         // We always bind the texture even if we don't update its contents.
@@ -826,12 +830,10 @@ void SurfaceTexture::dump(String8& result, const char* prefix,
         const BufferSlot& slot(mSlots[i]);
         snprintf(buffer, SIZE,
                 "%s%s[%02d] state=%-8s, crop=[%d,%d,%d,%d], transform=0x%02x, "
-                "timestamp=%lld\n"
-                ,
+                "timestamp=%lld\n",
                 prefix, (i==mCurrentTexture)?">":" ", i, stateName(slot.mBufferState),
-                slot.mLastQueuedCrop.left, slot.mLastQueuedCrop.top,
-                slot.mLastQueuedCrop.right, slot.mLastQueuedCrop.bottom,
-                slot.mLastQueuedTransform, slot.mLastQueuedTimestamp
+                slot.mCrop.left, slot.mCrop.top, slot.mCrop.right, slot.mCrop.bottom,
+                slot.mTransform, slot.mTimestamp
         );
         result.append(buffer);
     }
