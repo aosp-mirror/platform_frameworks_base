@@ -1998,6 +1998,9 @@
     <!-- Do not translate. Regex used by AutoFill. -->
     <string name="autofill_card_ignored_re">^card</string>
 
+    <!-- Do not translate. Regex used by AutoFill. -->
+    <string name="autofill_fax_re">fax<!-- fr-FR -->|télécopie|telecopie<!-- ja-JP -->|ファックス<!-- ru -->|факс<!-- zh-CN -->|传真<!-- zh-TW -->|傳真</string>
+
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
     <string name="permlab_readHistoryBookmarks">read Browser\'s history and bookmarks</string>

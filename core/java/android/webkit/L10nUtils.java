@@ -69,7 +69,8 @@ public class L10nUtils {
         com.android.internal.R.string.autofill_card_number_re,              // IDS_AUTOFILL_CARD_NUMBER_RE
         com.android.internal.R.string.autofill_expiration_month_re,         // IDS_AUTOFILL_EXPIRATION_MONTH_RE
         com.android.internal.R.string.autofill_expiration_date_re,          // IDS_AUTOFILL_EXPIRATION_DATE_RE
-        com.android.internal.R.string.autofill_card_ignored_re              // IDS_AUTOFILL_CARD_IGNORED_RE
+        com.android.internal.R.string.autofill_card_ignored_re,             // IDS_AUTOFILL_CARD_IGNORED_RE
+        com.android.internal.R.string.autofill_fax_re                       // IDS_AUTOFILL_FAX_RE
     };
 
     private static Context mApplicationContext;
