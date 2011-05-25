@@ -316,10 +316,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         StringBuilder sb = new StringBuilder(128);
         sb.append("{");
         sb.append(fontScale);
-        sb.append("x imsi=");
+        sb.append(" ");
         sb.append(mcc);
-        sb.append("/");
+        sb.append("mcc");
         sb.append(mnc);
+        sb.append("mnc");
         if (locale != null) {
             sb.append(" ");
             sb.append(locale);

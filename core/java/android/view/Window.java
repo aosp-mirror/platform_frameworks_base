@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.Context;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
@@ -462,13 +463,11 @@ public abstract class Window {
         mWindowManager = new LocalWindowManager(wm, hardwareAccelerated);
     }
 
-    private class LocalWindowManager implements WindowManager {
-        private boolean mHardwareAccelerated;
+    private class LocalWindowManager extends WindowManagerImpl.CompatModeWrapper {
+        private final boolean mHardwareAccelerated;
 
         LocalWindowManager(WindowManager wm, boolean hardwareAccelerated) {
-            mWindowManager = wm;
-            mDefaultDisplay = mContext.getResources().getDefaultDisplay(
-                    mWindowManager.getDefaultDisplay());
+            super(wm, mContext.getResources().getCompatibilityInfo());
             mHardwareAccelerated = hardwareAccelerated;
         }
 
@@ -523,28 +522,8 @@ public abstract class Window {
             if (mHardwareAccelerated) {
                 wp.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
-            mWindowManager.addView(view, params);
+            super.addView(view, params);
         }
-
-        public void updateViewLayout(View view, ViewGroup.LayoutParams params) {
-            mWindowManager.updateViewLayout(view, params);
-        }
-
-        public final void removeView(View view) {
-            mWindowManager.removeView(view);
-        }
-
-        public final void removeViewImmediate(View view) {
-            mWindowManager.removeViewImmediate(view);
-        }
-
-        public Display getDefaultDisplay() {
-            return mDefaultDisplay;
-        }
-        
-        private final WindowManager mWindowManager;
-
-        private final Display mDefaultDisplay;
     }
 
     /**

@@ -115,7 +115,6 @@ public class Resources {
     private NativePluralRules mPluralRule;
     
     private CompatibilityInfo mCompatibilityInfo;
-    private Display mDefaultDisplay;
 
     private static final LongSparseArray<Object> EMPTY_ARRAY = new LongSparseArray<Object>(0) {
         @Override
@@ -1426,6 +1425,15 @@ public class Resources {
             }
             if (metrics != null) {
                 mMetrics.setTo(metrics);
+                // NOTE: We should re-arrange this code to create a Display
+                // with the CompatibilityInfo that is used everywhere we deal
+                // with the display in relation to this app, rather than
+                // doing the conversion here.  This impl should be okay because
+                // we make sure to return a compatible display in the places
+                // where there are public APIs to retrieve the display...  but
+                // it would be cleaner and more maintainble to just be
+                // consistently dealing with a compatible display everywhere in
+                // the framework.
                 mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
             }
             mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
@@ -2119,24 +2127,6 @@ public class Resources {
         throw new NotFoundException(
                 "File " + file + " from xml type " + type + " resource ID #0x"
                 + Integer.toHexString(id));
-    }
-
-    /**
-     * Returns the display adjusted for the Resources' metrics.
-     * @hide
-     */
-    public Display getDefaultDisplay(Display defaultDisplay) {
-        if (mDefaultDisplay == null) {
-            if (!mCompatibilityInfo.isScalingRequired() && mCompatibilityInfo.supportsScreen()) {
-                // the app supports the display. just use the default one.
-                mDefaultDisplay = defaultDisplay;
-            } else {
-                // display needs adjustment.
-                mDefaultDisplay = Display.createMetricsBasedDisplay(
-                        defaultDisplay.getDisplayId(), mMetrics);
-            }
-        }
-        return mDefaultDisplay;
     }
 
     private TypedArray getCachedStyledAttributes(int len) {
