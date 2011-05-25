@@ -2460,8 +2460,18 @@ void SingleTouchInputMapperTest::processSync(SingleTouchInputMapper* mapper) {
 }
 
 
-TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsNotSpecified_ReturnsTouchPad) {
+TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsNotSpecifiedAndNotACursor_ReturnsPointer) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    prepareAxes(POSITION);
+    addMapperAndConfigure(mapper);
+
+    ASSERT_EQ(AINPUT_SOURCE_MOUSE | AINPUT_SOURCE_TOUCHPAD, mapper->getSources());
+}
+
+TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsNotSpecifiedAndIsACursor_ReturnsTouchPad) {
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    mFakeEventHub->addRelativeAxis(DEVICE_ID, REL_X);
+    mFakeEventHub->addRelativeAxis(DEVICE_ID, REL_Y);
     prepareAxes(POSITION);
     addMapperAndConfigure(mapper);
 

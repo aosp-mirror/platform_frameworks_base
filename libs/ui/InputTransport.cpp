@@ -406,7 +406,7 @@ status_t InputPublisher::publishMotionEvent(
 
     for (size_t i = 0; i < pointerCount; i++) {
         mSharedMessage->motion.pointerIds[i] = pointerIds[i];
-        mSharedMessage->motion.sampleData[0].coords[i] = pointerCoords[i];
+        mSharedMessage->motion.sampleData[0].coords[i].copyFrom(pointerCoords[i]);
     }
 
     // Cache essential information about the motion event to ensure that a malicious consumer
@@ -475,7 +475,7 @@ status_t InputPublisher::appendMotionSample(
 
     mMotionEventSampleDataTail->eventTime = eventTime;
     for (size_t i = 0; i < mMotionEventPointerCount; i++) {
-        mMotionEventSampleDataTail->coords[i] = pointerCoords[i];
+        mMotionEventSampleDataTail->coords[i].copyFrom(pointerCoords[i]);
     }
     mMotionEventSampleDataTail = newTail;
 
