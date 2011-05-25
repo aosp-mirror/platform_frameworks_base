@@ -51,6 +51,7 @@ public abstract class TextToSpeechService extends Service {
     private static final String SYNTH_THREAD_NAME = "SynthThread";
 
     private SynthHandler mSynthHandler;
+    private Handler mAudioTrackHandler;
 
     private CallbackMap mCallbacks;
 
@@ -62,6 +63,10 @@ public abstract class TextToSpeechService extends Service {
         SynthThread synthThread = new SynthThread();
         synthThread.start();
         mSynthHandler = new SynthHandler(synthThread.getLooper());
+
+        HandlerThread audioTrackThread = new HandlerThread("TTS.audioTrackThread");
+        audioTrackThread.start();
+        mAudioTrackHandler = new Handler(audioTrackThread.getLooper());
 
         mCallbacks = new CallbackMap();
 
@@ -75,6 +80,7 @@ public abstract class TextToSpeechService extends Service {
 
         // Tell the synthesizer to stop
         mSynthHandler.quit();
+        mAudioTrackHandler.getLooper().quit();
 
         // Unregister all callbacks.
         mCallbacks.kill();
@@ -444,7 +450,7 @@ public abstract class TextToSpeechService extends Service {
 
         protected SynthesisRequest createSynthesisRequest() {
             return new PlaybackSynthesisRequest(mText, mParams,
-                    getStreamType(), getVolume(), getPan());
+                    getStreamType(), getVolume(), getPan(), mAudioTrackHandler);
         }
 
         private void setRequestParams(SynthesisRequest request) {
