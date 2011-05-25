@@ -116,7 +116,7 @@ public class StackView extends AdapterViewAnimator {
 
     private static final int MIN_TIME_BETWEEN_INTERACTION_AND_AUTOADVANCE = 5000;
 
-    private static long MIN_TIME_BETWEEN_SCROLLS = 100;
+    private static final long MIN_TIME_BETWEEN_SCROLLS = 100;
 
     /**
      * These variables are all related to the current state of touch interaction
@@ -213,8 +213,7 @@ public class StackView extends AdapterViewAnimator {
      * Animate the views between different relative indexes within the {@link AdapterViewAnimator}
      */
     void transformViewForTransition(int fromIndex, int toIndex, final View view, boolean animate) {
-        ObjectAnimator alphaOa = null;
-        ObjectAnimator oldAlphaOa = null;
+        ObjectAnimator alphaOa;
 
         if (!animate) {
             ((StackFrame) view).cancelSliderAnimator();
@@ -1276,13 +1275,11 @@ public class StackView extends AdapterViewAnimator {
 
             boolean firstPass = true;
             parentRect.set(0, 0, 0, 0);
-            int depth = 0;
             while (p.getParent() != null && p.getParent() instanceof View
                     && !parentRect.contains(globalInvalidateRect)) {
                 if (!firstPass) {
                     globalInvalidateRect.offset(p.getLeft() - p.getScrollX(), p.getTop()
                             - p.getScrollY());
-                    depth++;
                 }
                 firstPass = false;
                 p = (View) p.getParent();
