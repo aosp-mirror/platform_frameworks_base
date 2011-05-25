@@ -36,40 +36,49 @@ namespace android {
 // --- PointerController ---
 
 // Time to wait before starting the fade when the pointer is inactive.
-static const nsecs_t INACTIVITY_FADE_DELAY_TIME_NORMAL = 15 * 1000 * 1000000LL; // 15 seconds
-static const nsecs_t INACTIVITY_FADE_DELAY_TIME_SHORT = 3 * 1000 * 1000000LL; // 3 seconds
+static const nsecs_t INACTIVITY_TIMEOUT_DELAY_TIME_NORMAL = 15 * 1000 * 1000000LL; // 15 seconds
+static const nsecs_t INACTIVITY_TIMEOUT_DELAY_TIME_SHORT = 3 * 1000 * 1000000LL; // 3 seconds
+
+// Time to wait between animation frames.
+static const nsecs_t ANIMATION_FRAME_INTERVAL = 1000000000LL / 60;
+
+// Time to spend fading out the spot completely.
+static const nsecs_t SPOT_FADE_DURATION = 200 * 1000000LL; // 200 ms
 
 // Time to spend fading out the pointer completely.
-static const nsecs_t FADE_DURATION = 500 * 1000000LL; // 500 ms
-
-// Time to wait between frames.
-static const nsecs_t FADE_FRAME_INTERVAL = 1000000000LL / 60;
-
-// Amount to subtract from alpha per frame.
-static const float FADE_DECAY_PER_FRAME = float(FADE_FRAME_INTERVAL) / FADE_DURATION;
+static const nsecs_t POINTER_FADE_DURATION = 500 * 1000000LL; // 500 ms
 
 
-PointerController::PointerController(const sp<Looper>& looper,
-        const sp<SpriteController>& spriteController) :
-        mLooper(looper), mSpriteController(spriteController) {
+// --- PointerController ---
+
+PointerController::PointerController(const sp<PointerControllerPolicyInterface>& policy,
+        const sp<Looper>& looper, const sp<SpriteController>& spriteController) :
+        mPolicy(policy), mLooper(looper), mSpriteController(spriteController) {
     mHandler = new WeakMessageHandler(this);
 
     AutoMutex _l(mLock);
+
+    mLocked.animationPending = false;
 
     mLocked.displayWidth = -1;
     mLocked.displayHeight = -1;
     mLocked.displayOrientation = DISPLAY_ORIENTATION_0;
 
+    mLocked.presentation = PRESENTATION_POINTER;
+    mLocked.presentationChanged = false;
+
+    mLocked.inactivityTimeout = INACTIVITY_TIMEOUT_NORMAL;
+
+    mLocked.pointerIsFading = true; // keep the pointer initially faded
     mLocked.pointerX = 0;
     mLocked.pointerY = 0;
+    mLocked.pointerAlpha = 0.0f;
+    mLocked.pointerSprite = mSpriteController->createSprite();
+    mLocked.pointerIconChanged = false;
+
     mLocked.buttonState = 0;
 
-    mLocked.fadeAlpha = 1;
-    mLocked.inactivityFadeDelay = INACTIVITY_FADE_DELAY_NORMAL;
-
-    mLocked.visible = false;
-
-    mLocked.sprite = mSpriteController->createSprite();
+    loadResources();
 }
 
 PointerController::~PointerController() {
@@ -77,7 +86,13 @@ PointerController::~PointerController() {
 
     AutoMutex _l(mLock);
 
-    mLocked.sprite.clear();
+    mLocked.pointerSprite.clear();
+
+    for (size_t i = 0; i < mLocked.spots.size(); i++) {
+        delete mLocked.spots.itemAt(i);
+    }
+    mLocked.spots.clear();
+    mLocked.recycledSprites.clear();
 }
 
 bool PointerController::getBounds(float* outMinX, float* outMinY,
@@ -130,8 +145,6 @@ void PointerController::setButtonState(uint32_t buttonState) {
 
     if (mLocked.buttonState != buttonState) {
         mLocked.buttonState = buttonState;
-        unfadeBeforeUpdateLocked();
-        updateLocked();
     }
 }
 
@@ -167,8 +180,7 @@ void PointerController::setPositionLocked(float x, float y) {
         } else {
             mLocked.pointerY = y;
         }
-        unfadeBeforeUpdateLocked();
-        updateLocked();
+        updatePointerLocked();
     }
 }
 
@@ -182,32 +194,105 @@ void PointerController::getPosition(float* outX, float* outY) const {
 void PointerController::fade() {
     AutoMutex _l(mLock);
 
-    startFadeLocked();
+    sendImmediateInactivityTimeoutLocked();
 }
 
 void PointerController::unfade() {
     AutoMutex _l(mLock);
 
-    if (unfadeBeforeUpdateLocked()) {
-        updateLocked();
+    // Always reset the inactivity timer.
+    resetInactivityTimeoutLocked();
+
+    // Unfade immediately if needed.
+    if (mLocked.pointerIsFading) {
+        mLocked.pointerIsFading = false;
+        mLocked.pointerAlpha = 1.0f;
+        updatePointerLocked();
     }
 }
 
-void PointerController::setInactivityFadeDelay(InactivityFadeDelay inactivityFadeDelay) {
+void PointerController::setPresentation(Presentation presentation) {
     AutoMutex _l(mLock);
 
-    if (mLocked.inactivityFadeDelay != inactivityFadeDelay) {
-        mLocked.inactivityFadeDelay = inactivityFadeDelay;
-        startInactivityFadeDelayLocked();
+    if (mLocked.presentation != presentation) {
+        mLocked.presentation = presentation;
+        mLocked.presentationChanged = true;
+
+        if (presentation != PRESENTATION_SPOT) {
+            fadeOutAndReleaseAllSpotsLocked();
+        }
+
+        updatePointerLocked();
     }
 }
 
-void PointerController::updateLocked() {
-    mLocked.sprite->openTransaction();
-    mLocked.sprite->setPosition(mLocked.pointerX, mLocked.pointerY);
-    mLocked.sprite->setAlpha(mLocked.fadeAlpha);
-    mLocked.sprite->setVisible(mLocked.visible);
-    mLocked.sprite->closeTransaction();
+void PointerController::setSpots(SpotGesture spotGesture,
+        const PointerCoords* spotCoords, const uint32_t* spotIdToIndex, BitSet32 spotIdBits) {
+#if DEBUG_POINTER_UPDATES
+    LOGD("setSpots: spotGesture=%d", spotGesture);
+    for (BitSet32 idBits(spotIdBits); !idBits.isEmpty(); ) {
+        uint32_t id = idBits.firstMarkedBit();
+        idBits.clearBit(id);
+        const PointerCoords& c = spotCoords[spotIdToIndex[id]];
+        LOGD("  spot %d: position=(%0.3f, %0.3f), pressure=%0.3f", id,
+                c.getAxisValue(AMOTION_EVENT_AXIS_X),
+                c.getAxisValue(AMOTION_EVENT_AXIS_Y),
+                c.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE));
+    }
+#endif
+
+    AutoMutex _l(mLock);
+
+    mSpriteController->openTransaction();
+
+    // Add or move spots for fingers that are down.
+    for (BitSet32 idBits(spotIdBits); !idBits.isEmpty(); ) {
+        uint32_t id = idBits.firstMarkedBit();
+        idBits.clearBit(id);
+
+        const PointerCoords& c = spotCoords[spotIdToIndex[id]];
+        const SpriteIcon& icon = c.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE) > 0
+                ? mResources.spotTouch : mResources.spotHover;
+        float x = c.getAxisValue(AMOTION_EVENT_AXIS_X);
+        float y = c.getAxisValue(AMOTION_EVENT_AXIS_Y);
+
+        Spot* spot = getSpotLocked(id);
+        if (!spot) {
+            spot = createAndAddSpotLocked(id);
+        }
+
+        spot->updateSprite(&icon, x, y);
+    }
+
+    // Remove spots for fingers that went up.
+    for (size_t i = 0; i < mLocked.spots.size(); i++) {
+        Spot* spot = mLocked.spots.itemAt(i);
+        if (spot->id != Spot::INVALID_ID
+                && !spotIdBits.hasBit(spot->id)) {
+            fadeOutAndReleaseSpotLocked(spot);
+        }
+    }
+
+    mSpriteController->closeTransaction();
+}
+
+void PointerController::clearSpots() {
+#if DEBUG_POINTER_UPDATES
+    LOGD("clearSpots");
+#endif
+
+    AutoMutex _l(mLock);
+
+    fadeOutAndReleaseAllSpotsLocked();
+}
+
+void PointerController::setInactivityTimeout(InactivityTimeout inactivityTimeout) {
+    AutoMutex _l(mLock);
+
+    if (mLocked.inactivityTimeout != inactivityTimeout) {
+        mLocked.inactivityTimeout = inactivityTimeout;
+        resetInactivityTimeoutLocked();
+    }
 }
 
 void PointerController::setDisplaySize(int32_t width, int32_t height) {
@@ -226,7 +311,8 @@ void PointerController::setDisplaySize(int32_t width, int32_t height) {
             mLocked.pointerY = 0;
         }
 
-        updateLocked();
+        fadeOutAndReleaseAllSpotsLocked();
+        updatePointerLocked();
     }
 }
 
@@ -283,74 +369,217 @@ void PointerController::setDisplayOrientation(int32_t orientation) {
         mLocked.pointerY = y - 0.5f;
         mLocked.displayOrientation = orientation;
 
-        updateLocked();
+        updatePointerLocked();
     }
 }
 
-void PointerController::setPointerIcon(const SkBitmap* bitmap, float hotSpotX, float hotSpotY) {
+void PointerController::setPointerIcon(const SpriteIcon& icon) {
     AutoMutex _l(mLock);
 
-    mLocked.sprite->setBitmap(bitmap, hotSpotX, hotSpotY);
+    mLocked.pointerIcon = icon.copy();
+    mLocked.pointerIconChanged = true;
+
+    updatePointerLocked();
 }
 
 void PointerController::handleMessage(const Message& message) {
     switch (message.what) {
-    case MSG_FADE_STEP: {
-        AutoMutex _l(mLock);
-        fadeStepLocked();
+    case MSG_ANIMATE:
+        doAnimate();
+        break;
+    case MSG_INACTIVITY_TIMEOUT:
+        doInactivityTimeout();
         break;
     }
-    }
 }
 
-bool PointerController::unfadeBeforeUpdateLocked() {
-    sendFadeStepMessageDelayedLocked(getInactivityFadeDelayTimeLocked());
+void PointerController::doAnimate() {
+    AutoMutex _l(mLock);
 
-    if (isFadingLocked()) {
-        mLocked.visible = true;
-        mLocked.fadeAlpha = 1;
-        return true; // update required to effect the unfade
-    }
-    return false; // update not required
-}
+    bool keepAnimating = false;
+    mLocked.animationPending = false;
+    nsecs_t frameDelay = systemTime(SYSTEM_TIME_MONOTONIC) - mLocked.animationTime;
 
-void PointerController::startFadeLocked() {
-    if (!isFadingLocked()) {
-        sendFadeStepMessageDelayedLocked(0);
-    }
-}
-
-void PointerController::startInactivityFadeDelayLocked() {
-    if (!isFadingLocked()) {
-        sendFadeStepMessageDelayedLocked(getInactivityFadeDelayTimeLocked());
-    }
-}
-
-void PointerController::fadeStepLocked() {
-    if (mLocked.visible) {
-        mLocked.fadeAlpha -= FADE_DECAY_PER_FRAME;
-        if (mLocked.fadeAlpha < 0) {
-            mLocked.fadeAlpha = 0;
-            mLocked.visible = false;
+    // Animate pointer fade.
+    if (mLocked.pointerIsFading) {
+        mLocked.pointerAlpha -= float(frameDelay) / POINTER_FADE_DURATION;
+        if (mLocked.pointerAlpha <= 0) {
+            mLocked.pointerAlpha = 0;
         } else {
-            sendFadeStepMessageDelayedLocked(FADE_FRAME_INTERVAL);
+            keepAnimating = true;
         }
-        updateLocked();
+        updatePointerLocked();
+    }
+
+    // Animate spots that are fading out and being removed.
+    for (size_t i = 0; i < mLocked.spots.size(); i++) {
+        Spot* spot = mLocked.spots.itemAt(i);
+        if (spot->id == Spot::INVALID_ID) {
+            spot->alpha -= float(frameDelay) / SPOT_FADE_DURATION;
+            if (spot->alpha <= 0) {
+                mLocked.spots.removeAt(i--);
+                releaseSpotLocked(spot);
+            } else {
+                spot->sprite->setAlpha(spot->alpha);
+                keepAnimating = true;
+            }
+        }
+    }
+
+    if (keepAnimating) {
+        startAnimationLocked();
     }
 }
 
-bool PointerController::isFadingLocked() {
-    return !mLocked.visible || mLocked.fadeAlpha != 1;
+void PointerController::doInactivityTimeout() {
+    AutoMutex _l(mLock);
+
+    if (!mLocked.pointerIsFading) {
+        mLocked.pointerIsFading = true;
+        startAnimationLocked();
+    }
 }
 
-nsecs_t PointerController::getInactivityFadeDelayTimeLocked() {
-    return mLocked.inactivityFadeDelay == INACTIVITY_FADE_DELAY_SHORT
-            ? INACTIVITY_FADE_DELAY_TIME_SHORT : INACTIVITY_FADE_DELAY_TIME_NORMAL;
+void PointerController::startAnimationLocked() {
+    if (!mLocked.animationPending) {
+        mLocked.animationPending = true;
+        mLocked.animationTime = systemTime(SYSTEM_TIME_MONOTONIC);
+        mLooper->sendMessageDelayed(ANIMATION_FRAME_INTERVAL, mHandler, Message(MSG_ANIMATE));
+    }
 }
 
-void PointerController::sendFadeStepMessageDelayedLocked(nsecs_t delayTime) {
-    mLooper->removeMessages(mHandler, MSG_FADE_STEP);
-    mLooper->sendMessageDelayed(delayTime, mHandler, Message(MSG_FADE_STEP));
+void PointerController::resetInactivityTimeoutLocked() {
+    mLooper->removeMessages(mHandler, MSG_INACTIVITY_TIMEOUT);
+
+    nsecs_t timeout = mLocked.inactivityTimeout == INACTIVITY_TIMEOUT_SHORT
+            ? INACTIVITY_TIMEOUT_DELAY_TIME_SHORT : INACTIVITY_TIMEOUT_DELAY_TIME_NORMAL;
+    mLooper->sendMessageDelayed(timeout, mHandler, MSG_INACTIVITY_TIMEOUT);
+}
+
+void PointerController::sendImmediateInactivityTimeoutLocked() {
+    mLooper->removeMessages(mHandler, MSG_INACTIVITY_TIMEOUT);
+    mLooper->sendMessage(mHandler, MSG_INACTIVITY_TIMEOUT);
+}
+
+void PointerController::updatePointerLocked() {
+    mSpriteController->openTransaction();
+
+    mLocked.pointerSprite->setLayer(Sprite::BASE_LAYER_POINTER);
+    mLocked.pointerSprite->setPosition(mLocked.pointerX, mLocked.pointerY);
+
+    if (mLocked.pointerAlpha > 0) {
+        mLocked.pointerSprite->setAlpha(mLocked.pointerAlpha);
+        mLocked.pointerSprite->setVisible(true);
+    } else {
+        mLocked.pointerSprite->setVisible(false);
+    }
+
+    if (mLocked.pointerIconChanged || mLocked.presentationChanged) {
+        mLocked.pointerSprite->setIcon(mLocked.presentation == PRESENTATION_POINTER
+                ? mLocked.pointerIcon : mResources.spotAnchor);
+        mLocked.pointerIconChanged = false;
+        mLocked.presentationChanged = false;
+    }
+
+    mSpriteController->closeTransaction();
+}
+
+PointerController::Spot* PointerController::getSpotLocked(uint32_t id) {
+    for (size_t i = 0; i < mLocked.spots.size(); i++) {
+        Spot* spot = mLocked.spots.itemAt(i);
+        if (spot->id == id) {
+            return spot;
+        }
+    }
+    return NULL;
+}
+
+PointerController::Spot* PointerController::createAndAddSpotLocked(uint32_t id) {
+    // Remove spots until we have fewer than MAX_SPOTS remaining.
+    while (mLocked.spots.size() >= MAX_SPOTS) {
+        Spot* spot = removeFirstFadingSpotLocked();
+        if (!spot) {
+            spot = mLocked.spots.itemAt(0);
+            mLocked.spots.removeAt(0);
+        }
+        releaseSpotLocked(spot);
+    }
+
+    // Obtain a sprite from the recycled pool.
+    sp<Sprite> sprite;
+    if (! mLocked.recycledSprites.isEmpty()) {
+        sprite = mLocked.recycledSprites.top();
+        mLocked.recycledSprites.pop();
+    } else {
+        sprite = mSpriteController->createSprite();
+    }
+
+    // Return the new spot.
+    Spot* spot = new Spot(id, sprite);
+    mLocked.spots.push(spot);
+    return spot;
+}
+
+PointerController::Spot* PointerController::removeFirstFadingSpotLocked() {
+    for (size_t i = 0; i < mLocked.spots.size(); i++) {
+        Spot* spot = mLocked.spots.itemAt(i);
+        if (spot->id == Spot::INVALID_ID) {
+            mLocked.spots.removeAt(i);
+            return spot;
+        }
+    }
+    return NULL;
+}
+
+void PointerController::releaseSpotLocked(Spot* spot) {
+    spot->sprite->clearIcon();
+
+    if (mLocked.recycledSprites.size() < MAX_RECYCLED_SPRITES) {
+        mLocked.recycledSprites.push(spot->sprite);
+    }
+
+    delete spot;
+}
+
+void PointerController::fadeOutAndReleaseSpotLocked(Spot* spot) {
+    if (spot->id != Spot::INVALID_ID) {
+        spot->id = Spot::INVALID_ID;
+        startAnimationLocked();
+    }
+}
+
+void PointerController::fadeOutAndReleaseAllSpotsLocked() {
+    for (size_t i = 0; i < mLocked.spots.size(); i++) {
+        Spot* spot = mLocked.spots.itemAt(i);
+        fadeOutAndReleaseSpotLocked(spot);
+    }
+}
+
+void PointerController::loadResources() {
+    mPolicy->loadPointerResources(&mResources);
+}
+
+
+// --- PointerController::Spot ---
+
+void PointerController::Spot::updateSprite(const SpriteIcon* icon, float x, float y) {
+    sprite->setLayer(Sprite::BASE_LAYER_SPOT + id);
+    sprite->setAlpha(alpha);
+    sprite->setTransformationMatrix(SpriteTransformationMatrix(scale, 0.0f, 0.0f, scale));
+    sprite->setPosition(x, y);
+
+    this->x = x;
+    this->y = y;
+
+    if (icon != lastIcon) {
+        lastIcon = icon;
+        if (icon) {
+            sprite->setIcon(*icon);
+            sprite->setVisible(true);
+        } else {
+            sprite->setVisible(false);
+        }
+    }
 }
 
 } // namespace android
