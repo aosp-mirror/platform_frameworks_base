@@ -246,15 +246,7 @@ void InputDispatcher::dispatchOnce() {
 
     // Wait for callback or timeout or wake.  (make sure we round up, not down)
     nsecs_t currentTime = now();
-    int32_t timeoutMillis;
-    if (nextWakeupTime > currentTime) {
-        uint64_t timeout = uint64_t(nextWakeupTime - currentTime);
-        timeout = (timeout + 999999LL) / 1000000LL;
-        timeoutMillis = timeout > INT_MAX ? -1 : int32_t(timeout);
-    } else {
-        timeoutMillis = 0;
-    }
-
+    int timeoutMillis = toMillisecondTimeoutDelay(currentTime, nextWakeupTime);
     mLooper->pollOnce(timeoutMillis);
 }
 

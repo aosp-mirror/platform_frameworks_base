@@ -88,6 +88,16 @@ nsecs_t systemTime(int clock = SYSTEM_TIME_MONOTONIC);
 nsecs_t systemTime(int clock);
 #endif // def __cplusplus
 
+/**
+ * Returns the number of milliseconds to wait between the reference time and the timeout time.
+ * If the timeout is in the past relative to the reference time, returns 0.
+ * If the timeout is more than INT_MAX milliseconds in the future relative to the reference time,
+ * such as when timeoutTime == LLONG_MAX, returns -1 to indicate an infinite timeout delay.
+ * Otherwise, returns the difference between the reference time and timeout time
+ * rounded up to the next millisecond.
+ */
+int toMillisecondTimeoutDelay(nsecs_t referenceTime, nsecs_t timeoutTime);
+
 #ifdef __cplusplus
 } // extern "C"
 #endif
