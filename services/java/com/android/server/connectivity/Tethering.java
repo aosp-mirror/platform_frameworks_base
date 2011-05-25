@@ -1170,8 +1170,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     return null;
                 }
 
-                for (String iface : ifaces) {
-                    for (String regex : mUpstreamIfaceRegexs) {
+                for (String regex : mUpstreamIfaceRegexs) {
+                    for (String iface : ifaces) {
                         if (iface.matches(regex)) {
                             // verify it is active
                             InterfaceConfiguration ifcg = null;
