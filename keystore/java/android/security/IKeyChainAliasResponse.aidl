@@ -16,19 +16,11 @@
 package android.security;
 
 /**
- * Caller is required to ensure that {@link KeyStore#unlock
- * KeyStore.unlock} was successful.
+ * Used by the {@code KeyChainActivity} to return alias for {@link KeyStore#chooseAlias}.
  *
  * @hide
  */
-interface IKeyChainService {
-    // APIs used by KeyChain
-    byte[] getPrivateKey(String alias, String authToken);
-    byte[] getCertificate(String alias, String authToken);
+interface IKeyChainAliasResponse {
 
-    // APIs used by CertInstaller
-    void installCaCertificate(in byte[] caCertificate);
-
-    // APIs used by Settings
-    boolean reset();
+    void alias(String alias);
 }
