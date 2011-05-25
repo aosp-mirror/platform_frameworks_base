@@ -445,7 +445,7 @@ EventHub::Device* EventHub::getDeviceLocked(int32_t deviceId) const {
     return NULL;
 }
 
-bool EventHub::getEvent(RawEvent* outEvent) {
+bool EventHub::getEvent(int timeoutMillis, RawEvent* outEvent) {
     outEvent->deviceId = 0;
     outEvent->type = 0;
     outEvent->scanCode = 0;
@@ -598,13 +598,20 @@ bool EventHub::getEvent(RawEvent* outEvent) {
         // when this happens, the EventHub holds onto its own user wake lock while the client
         // is processing events.  Thus the system can only sleep if there are no events
         // pending or currently being processed.
+        //
+        // The timeout is advisory only.  If the device is asleep, it will not wake just to
+        // service the timeout.
         release_wake_lock(WAKE_LOCK_ID);
 
-        int pollResult = poll(mFds.editArray(), mFds.size(), -1);
+        int pollResult = poll(mFds.editArray(), mFds.size(), timeoutMillis);
 
         acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);
 
-        if (pollResult <= 0) {
+        if (pollResult == 0) {
+            // Timed out.
+            return false;
+        }
+        if (pollResult < 0) {
             if (errno != EINTR) {
                 LOGW("poll failed (errno=%d)\n", errno);
                 usleep(100000);

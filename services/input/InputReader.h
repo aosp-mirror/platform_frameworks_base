@@ -159,6 +159,8 @@ public:
 
     virtual void fadePointer() = 0;
 
+    virtual void requestTimeoutAtTime(nsecs_t when) = 0;
+
     virtual InputReaderPolicyInterface* getPolicy() = 0;
     virtual InputDispatcherInterface* getDispatcher() = 0;
     virtual EventHubInterface* getEventHub() = 0;
@@ -233,6 +235,7 @@ private:
     void configureExcludedDevices();
 
     void consumeEvent(const RawEvent* rawEvent);
+    void timeoutExpired(nsecs_t when);
 
     void handleConfigurationChanged(nsecs_t when);
 
@@ -252,6 +255,9 @@ private:
     virtual void disableVirtualKeysUntil(nsecs_t time);
     virtual bool shouldDropVirtualKey(nsecs_t now,
             InputDevice* device, int32_t keyCode, int32_t scanCode);
+
+    nsecs_t mNextTimeout;
+    virtual void requestTimeoutAtTime(nsecs_t when);
 
     // state queries
     typedef int32_t (InputDevice::*GetStateFunc)(uint32_t sourceMask, int32_t code);
@@ -296,6 +302,7 @@ public:
     void configure();
     void reset();
     void process(const RawEvent* rawEvent);
+    void timeoutExpired(nsecs_t when);
 
     void getDeviceInfo(InputDeviceInfo* outDeviceInfo);
     int32_t getKeyCodeState(uint32_t sourceMask, int32_t keyCode);
@@ -352,6 +359,7 @@ public:
     virtual void configure();
     virtual void reset();
     virtual void process(const RawEvent* rawEvent) = 0;
+    virtual void timeoutExpired(nsecs_t when);
 
     virtual int32_t getKeyCodeState(uint32_t sourceMask, int32_t keyCode);
     virtual int32_t getScanCodeState(uint32_t sourceMask, int32_t scanCode);

@@ -186,8 +186,13 @@ public:
      * This ensures that the device will not go to sleep while the event is being processed.
      * If the device needs to remain awake longer than that, then the caller is responsible
      * for taking care of it (say, by poking the power manager user activity timer).
+     *
+     * The timeout is advisory only.  If the device is asleep, it will not wake just to
+     * service the timeout.
+     *
+     * Returns true if an event was obtained, false if the timeout expired.
      */
-    virtual bool getEvent(RawEvent* outEvent) = 0;
+    virtual bool getEvent(int timeoutMillis, RawEvent* outEvent) = 0;
 
     /*
      * Query current input state.
@@ -244,7 +249,7 @@ public:
     virtual bool markSupportedKeyCodes(int32_t deviceId, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags) const;
 
-    virtual bool getEvent(RawEvent* outEvent);
+    virtual bool getEvent(int timeoutMillis, RawEvent* outEvent);
 
     virtual bool hasLed(int32_t deviceId, int32_t led) const;
     virtual void setLedState(int32_t deviceId, int32_t led, bool on);
