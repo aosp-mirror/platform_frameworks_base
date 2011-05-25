@@ -49,8 +49,11 @@ static const nsecs_t FADE_FRAME_INTERVAL = 1000000000LL / 60;
 static const float FADE_DECAY_PER_FRAME = float(FADE_FRAME_INTERVAL) / FADE_DURATION;
 
 
-PointerController::PointerController(const sp<Looper>& looper, int32_t pointerLayer) :
-        mLooper(looper), mPointerLayer(pointerLayer) {
+PointerController::PointerController(const sp<Looper>& looper,
+        const sp<SpriteController>& spriteController) :
+        mLooper(looper), mSpriteController(spriteController) {
+    mHandler = new WeakMessageHandler(this);
+
     AutoMutex _l(mLock);
 
     mLocked.displayWidth = -1;
@@ -61,34 +64,20 @@ PointerController::PointerController(const sp<Looper>& looper, int32_t pointerLa
     mLocked.pointerY = 0;
     mLocked.buttonState = 0;
 
-    mLocked.iconBitmap = NULL;
-    mLocked.iconHotSpotX = 0;
-    mLocked.iconHotSpotY = 0;
-
     mLocked.fadeAlpha = 1;
     mLocked.inactivityFadeDelay = INACTIVITY_FADE_DELAY_NORMAL;
 
-    mLocked.wantVisible = false;
     mLocked.visible = false;
-    mLocked.drawn = false;
 
-    mHandler = new WeakMessageHandler(this);
+    mLocked.sprite = mSpriteController->createSprite();
 }
 
 PointerController::~PointerController() {
     mLooper->removeMessages(mHandler);
 
-    if (mSurfaceControl != NULL) {
-        mSurfaceControl->clear();
-        mSurfaceControl.clear();
-    }
+    AutoMutex _l(mLock);
 
-    if (mSurfaceComposerClient != NULL) {
-        mSurfaceComposerClient->dispose();
-        mSurfaceComposerClient.clear();
-    }
-
-    delete mLocked.iconBitmap;
+    mLocked.sprite.clear();
 }
 
 bool PointerController::getBounds(float* outMinX, float* outMinY,
@@ -214,75 +203,11 @@ void PointerController::setInactivityFadeDelay(InactivityFadeDelay inactivityFad
 }
 
 void PointerController::updateLocked() {
-    bool wantVisibleAndHavePointerIcon = mLocked.wantVisible && mLocked.iconBitmap;
-
-    if (wantVisibleAndHavePointerIcon) {
-        // Want the pointer to be visible.
-        // Ensure the surface is created and drawn.
-        if (!createSurfaceIfNeededLocked() || !drawPointerIfNeededLocked()) {
-            return;
-        }
-    } else {
-        // Don't want the pointer to be visible.
-        // If it is not visible then we are done.
-        if (mSurfaceControl == NULL || !mLocked.visible) {
-            return;
-        }
-    }
-
-    status_t status = mSurfaceComposerClient->openTransaction();
-    if (status) {
-        LOGE("Error opening surface transaction to update pointer surface.");
-        return;
-    }
-
-    if (wantVisibleAndHavePointerIcon) {
-        status = mSurfaceControl->setPosition(
-                mLocked.pointerX - mLocked.iconHotSpotX,
-                mLocked.pointerY - mLocked.iconHotSpotY);
-        if (status) {
-            LOGE("Error %d moving pointer surface.", status);
-            goto CloseTransaction;
-        }
-
-        status = mSurfaceControl->setAlpha(mLocked.fadeAlpha);
-        if (status) {
-            LOGE("Error %d setting pointer surface alpha.", status);
-            goto CloseTransaction;
-        }
-
-        if (!mLocked.visible) {
-            status = mSurfaceControl->setLayer(mPointerLayer);
-            if (status) {
-                LOGE("Error %d setting pointer surface layer.", status);
-                goto CloseTransaction;
-            }
-
-            status = mSurfaceControl->show(mPointerLayer);
-            if (status) {
-                LOGE("Error %d showing pointer surface.", status);
-                goto CloseTransaction;
-            }
-
-            mLocked.visible = true;
-        }
-    } else {
-        if (mLocked.visible) {
-            status = mSurfaceControl->hide();
-            if (status) {
-                LOGE("Error %d hiding pointer surface.", status);
-                goto CloseTransaction;
-            }
-
-            mLocked.visible = false;
-        }
-    }
-
-CloseTransaction:
-    status = mSurfaceComposerClient->closeTransaction();
-    if (status) {
-        LOGE("Error closing surface transaction to update pointer surface.");
-    }
+    mLocked.sprite->openTransaction();
+    mLocked.sprite->setPosition(mLocked.pointerX, mLocked.pointerY);
+    mLocked.sprite->setAlpha(mLocked.fadeAlpha);
+    mLocked.sprite->setVisible(mLocked.visible);
+    mLocked.sprite->closeTransaction();
 }
 
 void PointerController::setDisplaySize(int32_t width, int32_t height) {
@@ -339,7 +264,7 @@ void PointerController::setDisplayOrientation(int32_t orientation) {
         case DISPLAY_ORIENTATION_90:
             temp = x;
             x = y;
-            y = mLocked.displayWidth - x;
+            y = mLocked.displayWidth - temp;
             break;
         case DISPLAY_ORIENTATION_180:
             x = mLocked.displayWidth - x;
@@ -365,106 +290,7 @@ void PointerController::setDisplayOrientation(int32_t orientation) {
 void PointerController::setPointerIcon(const SkBitmap* bitmap, float hotSpotX, float hotSpotY) {
     AutoMutex _l(mLock);
 
-    if (mLocked.iconBitmap) {
-        delete mLocked.iconBitmap;
-        mLocked.iconBitmap = NULL;
-    }
-
-    if (bitmap) {
-        mLocked.iconBitmap = new SkBitmap();
-        bitmap->copyTo(mLocked.iconBitmap, SkBitmap::kARGB_8888_Config);
-    }
-
-    mLocked.iconHotSpotX = hotSpotX;
-    mLocked.iconHotSpotY = hotSpotY;
-    mLocked.drawn = false;
-}
-
-bool PointerController::createSurfaceIfNeededLocked() {
-    if (!mLocked.iconBitmap) {
-        // If we don't have a pointer icon, then no point allocating a surface now.
-        return false;
-    }
-
-    if (mSurfaceComposerClient == NULL) {
-        mSurfaceComposerClient = new SurfaceComposerClient();
-    }
-
-    if (mSurfaceControl == NULL) {
-        mSurfaceControl = mSurfaceComposerClient->createSurface(getpid(),
-                String8("Pointer Icon"), 0,
-                mLocked.iconBitmap->width(), mLocked.iconBitmap->height(),
-                PIXEL_FORMAT_RGBA_8888);
-        if (mSurfaceControl == NULL) {
-            LOGE("Error creating pointer surface.");
-            return false;
-        }
-    }
-    return true;
-}
-
-bool PointerController::drawPointerIfNeededLocked() {
-    if (!mLocked.drawn) {
-        if (!mLocked.iconBitmap) {
-            return false;
-        }
-
-        if (!resizeSurfaceLocked(mLocked.iconBitmap->width(), mLocked.iconBitmap->height())) {
-            return false;
-        }
-
-        sp<Surface> surface = mSurfaceControl->getSurface();
-
-        Surface::SurfaceInfo surfaceInfo;
-        status_t status = surface->lock(&surfaceInfo);
-        if (status) {
-            LOGE("Error %d locking pointer surface before drawing.", status);
-            return false;
-        }
-
-        SkBitmap surfaceBitmap;
-        ssize_t bpr = surfaceInfo.s * bytesPerPixel(surfaceInfo.format);
-        surfaceBitmap.setConfig(SkBitmap::kARGB_8888_Config, surfaceInfo.w, surfaceInfo.h, bpr);
-        surfaceBitmap.setPixels(surfaceInfo.bits);
-
-        SkCanvas surfaceCanvas;
-        surfaceCanvas.setBitmapDevice(surfaceBitmap);
-
-        SkPaint paint;
-        paint.setXfermodeMode(SkXfermode::kSrc_Mode);
-        surfaceCanvas.drawBitmap(*mLocked.iconBitmap, 0, 0, &paint);
-
-        status = surface->unlockAndPost();
-        if (status) {
-            LOGE("Error %d unlocking pointer surface after drawing.", status);
-            return false;
-        }
-    }
-
-    mLocked.drawn = true;
-    return true;
-}
-
-bool PointerController::resizeSurfaceLocked(int32_t width, int32_t height) {
-    status_t status = mSurfaceComposerClient->openTransaction();
-    if (status) {
-        LOGE("Error opening surface transaction to resize pointer surface.");
-        return false;
-    }
-
-    status = mSurfaceControl->setSize(width, height);
-    if (status) {
-        LOGE("Error %d setting pointer surface size.", status);
-        return false;
-    }
-
-    status = mSurfaceComposerClient->closeTransaction();
-    if (status) {
-        LOGE("Error closing surface transaction to resize pointer surface.");
-        return false;
-    }
-
-    return true;
+    mLocked.sprite->setBitmap(bitmap, hotSpotX, hotSpotY);
 }
 
 void PointerController::handleMessage(const Message& message) {
@@ -481,7 +307,7 @@ bool PointerController::unfadeBeforeUpdateLocked() {
     sendFadeStepMessageDelayedLocked(getInactivityFadeDelayTimeLocked());
 
     if (isFadingLocked()) {
-        mLocked.wantVisible = true;
+        mLocked.visible = true;
         mLocked.fadeAlpha = 1;
         return true; // update required to effect the unfade
     }
@@ -501,11 +327,11 @@ void PointerController::startInactivityFadeDelayLocked() {
 }
 
 void PointerController::fadeStepLocked() {
-    if (mLocked.wantVisible) {
+    if (mLocked.visible) {
         mLocked.fadeAlpha -= FADE_DECAY_PER_FRAME;
         if (mLocked.fadeAlpha < 0) {
             mLocked.fadeAlpha = 0;
-            mLocked.wantVisible = false;
+            mLocked.visible = false;
         } else {
             sendFadeStepMessageDelayedLocked(FADE_FRAME_INTERVAL);
         }
@@ -514,7 +340,7 @@ void PointerController::fadeStepLocked() {
 }
 
 bool PointerController::isFadingLocked() {
-    return !mLocked.wantVisible || mLocked.fadeAlpha != 1;
+    return !mLocked.visible || mLocked.fadeAlpha != 1;
 }
 
 nsecs_t PointerController::getInactivityFadeDelayTimeLocked() {
