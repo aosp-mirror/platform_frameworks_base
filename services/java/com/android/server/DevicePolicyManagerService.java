@@ -134,18 +134,43 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final DeviceAdminInfo info;
 
         int passwordQuality = DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
-        int minimumPasswordLength = 0;
-        int passwordHistoryLength = 0;
-        int minimumPasswordUpperCase = 0;
-        int minimumPasswordLowerCase = 0;
-        int minimumPasswordLetters = 1;
-        int minimumPasswordNumeric = 1;
-        int minimumPasswordSymbols = 1;
-        int minimumPasswordNonLetter = 0;
-        long maximumTimeToUnlock = 0;
-        int maximumFailedPasswordsForWipe = 0;
-        long passwordExpirationTimeout = 0L;
-        long passwordExpirationDate = 0L;
+
+        static final int DEF_MINIMUM_PASSWORD_LENGTH = 0;
+        int minimumPasswordLength = DEF_MINIMUM_PASSWORD_LENGTH;
+
+        static final int DEF_PASSWORD_HISTORY_LENGTH = 0;
+        int passwordHistoryLength = DEF_PASSWORD_HISTORY_LENGTH;
+
+        static final int DEF_MINIMUM_PASSWORD_UPPER_CASE = 0;
+        int minimumPasswordUpperCase = DEF_MINIMUM_PASSWORD_UPPER_CASE;
+
+        static final int DEF_MINIMUM_PASSWORD_LOWER_CASE = 0;
+        int minimumPasswordLowerCase = DEF_MINIMUM_PASSWORD_LOWER_CASE;
+
+        static final int DEF_MINIMUM_PASSWORD_LETTERS = 1;
+        int minimumPasswordLetters = DEF_MINIMUM_PASSWORD_LOWER_CASE;
+
+        static final int DEF_MINIMUM_PASSWORD_NUMERIC = 1;
+        int minimumPasswordNumeric = DEF_MINIMUM_PASSWORD_NUMERIC;
+
+        static final int DEF_MINIMUM_PASSWORD_SYMBOLS = 1;
+        int minimumPasswordSymbols = DEF_MINIMUM_PASSWORD_SYMBOLS;
+
+        static final int DEF_MINIMUM_PASSWORD_NON_LETTER = 0;
+        int minimumPasswordNonLetter = DEF_MINIMUM_PASSWORD_NON_LETTER;
+
+        static final long DEF_MAXIMUM_TIME_TO_UNLOCK = 0;
+        long maximumTimeToUnlock = DEF_MAXIMUM_TIME_TO_UNLOCK;
+
+        static final int DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE = 0;
+        int maximumFailedPasswordsForWipe = DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE;
+
+        static final long DEF_PASSWORD_EXPIRATION_TIMEOUT = 0;
+        long passwordExpirationTimeout = DEF_PASSWORD_EXPIRATION_TIMEOUT;
+
+        static final long DEF_PASSWORD_EXPIRATION_DATE = 0;
+        long passwordExpirationDate = DEF_PASSWORD_EXPIRATION_DATE;
+
         boolean encryptionRequested = false;
 
         // TODO: review implementation decisions with frameworks team
@@ -168,53 +193,53 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.startTag(null, "password-quality");
                 out.attribute(null, "value", Integer.toString(passwordQuality));
                 out.endTag(null, "password-quality");
-                if (minimumPasswordLength > 0) {
+                if (minimumPasswordLength != DEF_MINIMUM_PASSWORD_LENGTH) {
                     out.startTag(null, "min-password-length");
                     out.attribute(null, "value", Integer.toString(minimumPasswordLength));
                     out.endTag(null, "min-password-length");
                 }
-                if(passwordHistoryLength > 0) {
+                if(passwordHistoryLength != DEF_PASSWORD_HISTORY_LENGTH) {
                     out.startTag(null, "password-history-length");
                     out.attribute(null, "value", Integer.toString(passwordHistoryLength));
                     out.endTag(null, "password-history-length");
                 }
-                if (minimumPasswordUpperCase > 0) {
+                if (minimumPasswordUpperCase != DEF_MINIMUM_PASSWORD_UPPER_CASE) {
                     out.startTag(null, "min-password-uppercase");
                     out.attribute(null, "value", Integer.toString(minimumPasswordUpperCase));
                     out.endTag(null, "min-password-uppercase");
                 }
-                if (minimumPasswordLowerCase > 0) {
+                if (minimumPasswordLowerCase != DEF_MINIMUM_PASSWORD_LOWER_CASE) {
                     out.startTag(null, "min-password-lowercase");
                     out.attribute(null, "value", Integer.toString(minimumPasswordLowerCase));
                     out.endTag(null, "min-password-lowercase");
                 }
-                if (minimumPasswordLetters > 0) {
+                if (minimumPasswordLetters != DEF_MINIMUM_PASSWORD_LETTERS) {
                     out.startTag(null, "min-password-letters");
                     out.attribute(null, "value", Integer.toString(minimumPasswordLetters));
                     out.endTag(null, "min-password-letters");
                 }
-                if (minimumPasswordNumeric > 0) {
+                if (minimumPasswordNumeric != DEF_MINIMUM_PASSWORD_NUMERIC) {
                     out.startTag(null, "min-password-numeric");
                     out.attribute(null, "value", Integer.toString(minimumPasswordNumeric));
                     out.endTag(null, "min-password-numeric");
                 }
-                if (minimumPasswordSymbols > 0) {
+                if (minimumPasswordSymbols != DEF_MINIMUM_PASSWORD_SYMBOLS) {
                     out.startTag(null, "min-password-symbols");
                     out.attribute(null, "value", Integer.toString(minimumPasswordSymbols));
                     out.endTag(null, "min-password-symbols");
                 }
-                if (minimumPasswordNonLetter > 0) {
+                if (minimumPasswordNonLetter > DEF_MINIMUM_PASSWORD_NON_LETTER) {
                     out.startTag(null, "min-password-nonletter");
                     out.attribute(null, "value", Integer.toString(minimumPasswordNonLetter));
                     out.endTag(null, "min-password-nonletter");
                 }
             }
-            if (maximumTimeToUnlock != 0) {
+            if (maximumTimeToUnlock != DEF_MAXIMUM_TIME_TO_UNLOCK) {
                 out.startTag(null, "max-time-to-unlock");
                 out.attribute(null, "value", Long.toString(maximumTimeToUnlock));
                 out.endTag(null, "max-time-to-unlock");
             }
-            if (maximumFailedPasswordsForWipe != 0) {
+            if (maximumFailedPasswordsForWipe != DEF_MAXIMUM_FAILED_PASSWORDS_FOR_WIPE) {
                 out.startTag(null, "max-failed-password-wipe");
                 out.attribute(null, "value", Integer.toString(maximumFailedPasswordsForWipe));
                 out.endTag(null, "max-failed-password-wipe");
@@ -234,12 +259,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     out.endTag(null, "global-proxy-exclusion-list");
                 }
             }
-            if (passwordExpirationTimeout != 0L) {
+            if (passwordExpirationTimeout != DEF_PASSWORD_EXPIRATION_TIMEOUT) {
                 out.startTag(null, "password-expiration-timeout");
                 out.attribute(null, "value", Long.toString(passwordExpirationTimeout));
                 out.endTag(null, "password-expiration-timeout");
             }
-            if (passwordExpirationDate != 0L) {
+            if (passwordExpirationDate != DEF_PASSWORD_EXPIRATION_DATE) {
                 out.startTag(null, "password-expiration-date");
                 out.attribute(null, "value", Long.toString(passwordExpirationDate));
                 out.endTag(null, "password-expiration-date");
@@ -399,6 +424,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 if (removed) {
                     validatePasswordOwnerLocked();
+                    saveSettingsLocked();
                 }
             }
         }
@@ -509,12 +535,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     void sendAdminCommandLocked(ActiveAdmin admin, String action) {
+        sendAdminCommandLocked(admin, action, null);
+    }
+
+    void sendAdminCommandLocked(ActiveAdmin admin, String action, BroadcastReceiver result) {
         Intent intent = new Intent(action);
         intent.setComponent(admin.info.getComponent());
         if (action.equals(DeviceAdminReceiver.ACTION_PASSWORD_EXPIRING)) {
             intent.putExtra("expiration", admin.passwordExpirationDate);
         }
-        mContext.sendBroadcast(intent);
+        if (result != null) {
+            mContext.sendOrderedBroadcast(intent, null, result, mHandler,
+                    Activity.RESULT_OK, null, null);
+        } else {
+            mContext.sendBroadcast(intent);
+        }
     }
 
     void sendAdminCommandLocked(String action, int reqPolicy) {
@@ -529,20 +564,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
-    void removeActiveAdminLocked(ComponentName adminReceiver) {
-        ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver);
+    void removeActiveAdminLocked(final ComponentName adminReceiver) {
+        final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver);
         if (admin != null) {
-            boolean doProxyCleanup =
-                admin.info.usesPolicy(DeviceAdminInfo.USES_POLICY_SETS_GLOBAL_PROXY);
             sendAdminCommandLocked(admin,
-                    DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED);
-            // XXX need to wait for it to complete.
-            mAdminList.remove(admin);
-            mAdminMap.remove(adminReceiver);
-            validatePasswordOwnerLocked();
-            if (doProxyCleanup) {
-                resetGlobalProxy();
-            }
+                    DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED,
+                    new BroadcastReceiver() {
+                        @Override
+                        public void onReceive(Context context, Intent intent) {
+                            synchronized (this) {
+                                boolean doProxyCleanup = admin.info.usesPolicy(
+                                        DeviceAdminInfo.USES_POLICY_SETS_GLOBAL_PROXY);
+                                mAdminList.remove(admin);
+                                mAdminMap.remove(adminReceiver);
+                                validatePasswordOwnerLocked();
+                                if (doProxyCleanup) {
+                                    resetGlobalProxy();
+                                }
+                                saveSettingsLocked();
+                            }
+                        }
+            });
         }
     }
 
@@ -1749,7 +1791,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
             // Scan through active admins and find if anyone has already
             // set the global proxy.
-            final int N = mAdminList.size();
             Set<ComponentName> compSet = mAdminMap.keySet();
             for  (ComponentName component : compSet) {
                 ActiveAdmin ap = mAdminMap.get(component);
