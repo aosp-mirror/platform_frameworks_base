@@ -59,7 +59,10 @@ static struct {
 
 // ----------------------------------------------------------------------------
 
-static MotionEvent* android_view_MotionEvent_getNativePtr(JNIEnv* env, jobject eventObj) {
+MotionEvent* android_view_MotionEvent_getNativePtr(JNIEnv* env, jobject eventObj) {
+    if (!eventObj) {
+        return NULL;
+    }
     return reinterpret_cast<MotionEvent*>(
             env->GetIntField(eventObj, gMotionEventClassInfo.mNativePtr));
 }
@@ -70,10 +73,10 @@ static void android_view_MotionEvent_setNativePtr(JNIEnv* env, jobject eventObj,
             reinterpret_cast<int>(event));
 }
 
-jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* event) {
+jobject android_view_MotionEvent_obtainAsCopy(JNIEnv* env, const MotionEvent* event) {
     jobject eventObj = env->CallStaticObjectMethod(gMotionEventClassInfo.clazz,
             gMotionEventClassInfo.obtain);
-    if (env->ExceptionCheck()) {
+    if (env->ExceptionCheck() || !eventObj) {
         LOGE("An exception occurred while obtaining a motion event.");
         LOGE_EX(env);
         env->ExceptionClear();
@@ -88,18 +91,6 @@ jobject android_view_MotionEvent_fromNative(JNIEnv* env, const MotionEvent* even
 
     destEvent->copyFrom(event, true);
     return eventObj;
-}
-
-status_t android_view_MotionEvent_toNative(JNIEnv* env, jobject eventObj,
-        MotionEvent* event) {
-    MotionEvent* srcEvent = android_view_MotionEvent_getNativePtr(env, eventObj);
-    if (!srcEvent) {
-        LOGE("MotionEvent was finalized");
-        return BAD_VALUE;
-    }
-
-    event->copyFrom(srcEvent, true);
-    return OK;
 }
 
 status_t android_view_MotionEvent_recycle(JNIEnv* env, jobject eventObj) {
@@ -502,13 +493,7 @@ static jint android_view_MotionEvent_nativeGetPointerId(JNIEnv* env, jclass claz
 static jint android_view_MotionEvent_nativeFindPointerIndex(JNIEnv* env, jclass clazz,
         jint nativePtr, jint pointerId) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
-    size_t pointerCount = event->getPointerCount();
-    for (size_t i = 0; i < pointerCount; i++) {
-        if (event->getPointerId(i) == pointerId) {
-            return i;
-        }
-    }
-    return -1;
+    return jint(event->findPointerIndex(pointerId));
 }
 
 static jint android_view_MotionEvent_nativeGetHistorySize(JNIEnv* env, jclass clazz,

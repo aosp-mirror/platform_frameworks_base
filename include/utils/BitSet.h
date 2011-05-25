@@ -61,6 +61,10 @@ struct BitSet32 {
     // Result is undefined if all bits are marked.
     inline uint32_t firstUnmarkedBit() const { return __builtin_clz(~ value); }
 
+    // Finds the last marked bit in the set.
+    // Result is undefined if all bits are unmarked.
+    inline uint32_t lastMarkedBit() const { return 31 - __builtin_ctz(value); }
+
     // Gets the index of the specified bit in the set, which is the number of
     // marked bits that appear before the specified bit.
     inline uint32_t getIndexOfBit(uint32_t n) const {
