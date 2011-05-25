@@ -1198,7 +1198,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         mTempTouchState.copyFrom(mTouchState);
     }
     if (wrongDevice) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
+#if DEBUG_FOCUS
         LOGD("Dropping event because a pointer for a different device is already down.");
 #endif
         injectionResult = INPUT_EVENT_INJECTION_FAILED;
@@ -1318,7 +1318,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
 
         // If the pointer is not currently down, then ignore the event.
         if (! mTempTouchState.down) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
+#if DEBUG_FOCUS
             LOGD("Dropping event because the pointer is not down or we previously "
                     "dropped the pointer down event.");
 #endif
@@ -1343,7 +1343,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
             }
         }
         if (! haveForegroundWindow) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
+#if DEBUG_FOCUS
             LOGD("Dropping event because there is no touched foreground window to receive it.");
 #endif
             injectionResult = INPUT_EVENT_INJECTION_FAILED;
@@ -1360,7 +1360,7 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         if (touchedWindow.targetFlags & InputTarget::FLAG_FOREGROUND) {
             // If the touched window is paused then keep waiting.
             if (touchedWindow.window->paused) {
-#if DEBUG_INPUT_DISPATCHER_POLICY
+#if DEBUG_FOCUS
                 LOGD("Waiting because touched window is paused.");
 #endif
                 injectionResult = handleTargetsNotReadyLocked(currentTime, entry,
