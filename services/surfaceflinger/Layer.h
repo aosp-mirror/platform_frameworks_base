@@ -78,7 +78,6 @@ public:
     virtual bool needsFiltering() const;
     virtual bool isSecure() const           { return mSecure; }
     virtual sp<Surface> createSurface() const;
-    virtual status_t ditch();
     virtual void onRemoved();
     virtual bool setBypass(bool enable);
 
@@ -95,6 +94,7 @@ public:
         return mFreezeLock; }
 
 protected:
+    virtual void destroy() const;
     virtual void dump(String8& result, char* scratch, size_t size) const;
 
 private:

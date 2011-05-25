@@ -298,6 +298,10 @@ void RefBase::incStrong(const void* id) const
     const_cast<RefBase*>(this)->onFirstRef();
 }
 
+void RefBase::destroy() const {
+    delete this;
+}
+
 void RefBase::decStrong(const void* id) const
 {
     weakref_impl* const refs = mRefs;
@@ -310,7 +314,7 @@ void RefBase::decStrong(const void* id) const
     if (c == 1) {
         const_cast<RefBase*>(this)->onLastStrongRef(id);
         if ((refs->mFlags&OBJECT_LIFETIME_WEAK) != OBJECT_LIFETIME_WEAK) {
-            delete this;
+            destroy();
         }
     }
     refs->removeWeakRef(id);
@@ -370,7 +374,8 @@ void RefBase::weakref_type::decWeak(const void* id)
     
     if ((impl->mFlags&OBJECT_LIFETIME_WEAK) != OBJECT_LIFETIME_WEAK) {
         if (impl->mStrong == INITIAL_STRONG_VALUE)
-            delete impl->mBase;
+            if (impl->mBase)
+                impl->mBase->destroy();
         else {
 //            LOGV("Freeing refs %p of old RefBase %p\n", this, impl->mBase);
             delete impl;
@@ -378,7 +383,8 @@ void RefBase::weakref_type::decWeak(const void* id)
     } else {
         impl->mBase->onLastWeakRef(id);
         if ((impl->mFlags&OBJECT_LIFETIME_FOREVER) != OBJECT_LIFETIME_FOREVER) {
-            delete impl->mBase;
+            if (impl->mBase)
+                impl->mBase->destroy();
         }
     }
 }
