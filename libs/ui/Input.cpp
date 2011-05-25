@@ -7,7 +7,11 @@
 
 //#define LOG_NDEBUG 0
 
+// Log debug messages about keymap probing.
 #define DEBUG_PROBE 0
+
+// Log debug messages about velocity tracking.
+#define DEBUG_VELOCITY 0
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -347,6 +351,27 @@ void PointerCoords::tooManyAxes(int axis) {
             "cannot contain more than %d axis values.", axis, int(MAX_AXES));
 }
 
+bool PointerCoords::operator==(const PointerCoords& other) const {
+    if (bits != other.bits) {
+        return false;
+    }
+    uint32_t count = __builtin_popcountll(bits);
+    for (uint32_t i = 0; i < count; i++) {
+        if (values[i] != other.values[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+void PointerCoords::copyFrom(const PointerCoords& other) {
+    bits = other.bits;
+    uint32_t count = __builtin_popcountll(bits);
+    for (uint32_t i = 0; i < count; i++) {
+        values[i] = other.values[i];
+    }
+}
+
 
 // --- MotionEvent ---
 
@@ -629,6 +654,135 @@ bool MotionEvent::isTouchEvent(int32_t source, int32_t action) {
             return true;
         }
     }
+    return false;
+}
+
+
+// --- VelocityTracker ---
+
+VelocityTracker::VelocityTracker() {
+    clear();
+}
+
+void VelocityTracker::clear() {
+    mIndex = 0;
+    mMovements[0].idBits.clear();
+}
+
+void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Position* positions) {
+    if (++mIndex == HISTORY_SIZE) {
+        mIndex = 0;
+    }
+    Movement& movement = mMovements[mIndex];
+    movement.eventTime = eventTime;
+    movement.idBits = idBits;
+    uint32_t count = idBits.count();
+    for (uint32_t i = 0; i < count; i++) {
+        movement.positions[i] = positions[i];
+    }
+
+#if DEBUG_VELOCITY
+    LOGD("VelocityTracker: addMovement eventTime=%lld, idBits=0x%08x", eventTime, idBits.value);
+    for (BitSet32 iterBits(idBits); !iterBits.isEmpty(); ) {
+        uint32_t id = iterBits.firstMarkedBit();
+        uint32_t index = idBits.getIndexOfBit(id);
+        iterBits.clearBit(id);
+        float vx, vy;
+        bool available = getVelocity(id, &vx, &vy);
+        if (available) {
+            LOGD("  %d: position (%0.3f, %0.3f), velocity (%0.3f, %0.3f), speed %0.3f",
+                    id, positions[index].x, positions[index].y, vx, vy, sqrtf(vx * vx + vy * vy));
+        } else {
+            assert(vx == 0 && vy == 0);
+            LOGD("  %d: position (%0.3f, %0.3f), velocity not available",
+                    id, positions[index].x, positions[index].y);
+        }
+    }
+#endif
+}
+
+bool VelocityTracker::getVelocity(uint32_t id, float* outVx, float* outVy) const {
+    const Movement& newestMovement = mMovements[mIndex];
+    if (newestMovement.idBits.hasBit(id)) {
+        // Find the oldest sample that contains the pointer and that is not older than MAX_AGE.
+        nsecs_t minTime = newestMovement.eventTime - MAX_AGE;
+        uint32_t oldestIndex = mIndex;
+        uint32_t numTouches = 1;
+        do {
+            uint32_t nextOldestIndex = (oldestIndex == 0 ? HISTORY_SIZE : oldestIndex) - 1;
+            const Movement& nextOldestMovement = mMovements[nextOldestIndex];
+            if (!nextOldestMovement.idBits.hasBit(id)
+                    || nextOldestMovement.eventTime < minTime) {
+                break;
+            }
+            oldestIndex = nextOldestIndex;
+        } while (++numTouches < HISTORY_SIZE);
+
+        // If we have a lot of samples, skip the last received sample since it is
+        // probably pretty noisy compared to the sum of all of the traces already acquired.
+        //
+        // NOTE: This condition exists in the android.view.VelocityTracker and imposes a
+        // bias against the most recent data.
+        if (numTouches > 3) {
+            numTouches -= 1;
+        }
+
+        // Calculate an exponentially weighted moving average of the velocity at different
+        // points in time measured relative to the oldest samples.  This is essentially
+        // an IIR filter.
+        //
+        // One problem with this algorithm is that the sample data may be poorly conditioned.
+        // Sometimes samples arrive very close together in time which can cause us to
+        // overestimate the velocity at that time point.  Most samples might be measured
+        // 16ms apart but some consecutive samples could be only 0.5sm apart due to
+        // the way they are reported by the hardware or driver (sometimes in bursts or with
+        // significant jitter).  The instantaneous velocity for those samples 0.5ms apart will
+        // be calculated to be 32 times what it should have been.
+        // To work around this effect, we impose a minimum duration on the samples.
+        //
+        // FIXME: Samples close together in time can have an disproportionately large
+        // impact on the result because all samples are equally weighted.  The average should
+        // instead take the time factor into account.
+        //
+        // FIXME: The minimum duration condition does not exist in
+        // android.view.VelocityTracker yet.  It is less important there because sample times
+        // are truncated to the millisecond so back to back samples will often appear to be
+        // zero milliseconds apart and will be ignored if they are the oldest ones.
+        float accumVx = 0;
+        float accumVy = 0;
+        uint32_t index = oldestIndex;
+        uint32_t samplesUsed = 0;
+        const Movement& oldestMovement = mMovements[oldestIndex];
+        const Position& oldestPosition =
+                oldestMovement.positions[oldestMovement.idBits.getIndexOfBit(id)];
+        while (numTouches-- > 1) {
+            if (++index == HISTORY_SIZE) {
+                index = 0;
+            }
+            const Movement& movement = mMovements[index];
+            nsecs_t duration = movement.eventTime - oldestMovement.eventTime;
+            if (duration > MIN_DURATION) {
+                const Position& position = movement.positions[movement.idBits.getIndexOfBit(id)];
+                float scale = 1000000000.0f / duration; // one over time delta in seconds
+                float vx = (position.x - oldestPosition.x) * scale;
+                float vy = (position.y - oldestPosition.y) * scale;
+                accumVx = accumVx == 0 ? vx : (accumVx + vx) * 0.5f;
+                accumVy = accumVy == 0 ? vy : (accumVy + vy) * 0.5f;
+                samplesUsed += 1;
+            }
+        }
+
+        // Make sure we used at least one sample.
+        if (samplesUsed != 0) {
+            *outVx = accumVx;
+            *outVy = accumVy;
+            return true;
+        }
+    }
+
+    // No data available for this pointer.
+    *outVx = 0;
+    *outVy = 0;
     return false;
 }
 
