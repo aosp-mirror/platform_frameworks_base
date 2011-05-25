@@ -491,7 +491,7 @@ public class WifiStateMachine extends StateMachine {
         mNetworkInfo.setIsAvailable(false);
         mLinkProperties.clear();
         mLastBssid = null;
-        mLastNetworkId = -1;
+        mLastNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
         mLastSignalLevel = -1;
 
         mAlarmManager = (AlarmManager)mContext.getSystemService(Context.ALARM_SERVICE);
@@ -837,11 +837,12 @@ public class WifiStateMachine extends StateMachine {
     }
 
     public void connectNetwork(WifiConfiguration wifiConfig) {
-        /* arg1 is used to indicate netId, force a netId value of -1 when
-         * we are passing a configuration since the default value of
-         * 0 is a valid netId
+        /* arg1 is used to indicate netId, force a netId value of
+         * WifiConfiguration.INVALID_NETWORK_ID when we are passing
+         * a configuration since the default value of 0 is a valid netId
          */
-        sendMessage(obtainMessage(CMD_CONNECT_NETWORK, -1, 0, wifiConfig));
+        sendMessage(obtainMessage(CMD_CONNECT_NETWORK, WifiConfiguration.INVALID_NETWORK_ID,
+                0, wifiConfig));
     }
 
     public void saveNetwork(WifiConfiguration wifiConfig) {
@@ -1445,7 +1446,7 @@ public class WifiStateMachine extends StateMachine {
         mWifiInfo.setInetAddress(null);
         mWifiInfo.setBSSID(null);
         mWifiInfo.setSSID(null);
-        mWifiInfo.setNetworkId(-1);
+        mWifiInfo.setNetworkId(WifiConfiguration.INVALID_NETWORK_ID);
         mWifiInfo.setRssi(MIN_RSSI);
         mWifiInfo.setLinkSpeed(-1);
 
@@ -1457,7 +1458,7 @@ public class WifiStateMachine extends StateMachine {
         mLinkProperties.clear();
 
         mLastBssid= null;
-        mLastNetworkId = -1;
+        mLastNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
 
     }
 
@@ -2050,7 +2051,7 @@ public class WifiStateMachine extends StateMachine {
                     mWpsStateMachine.sendMessage(CMD_RESET_WPS_STATE);
                     /* Initialize data structures */
                     mLastBssid = null;
-                    mLastNetworkId = -1;
+                    mLastNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
                     mLastSignalLevel = -1;
 
                     mWifiInfo.setMacAddress(WifiNative.getMacAddressCommand());
@@ -2545,7 +2546,10 @@ public class WifiStateMachine extends StateMachine {
                     // Network id is only valid when we start connecting
                     if (SupplicantState.isConnecting(state)) {
                         mWifiInfo.setNetworkId(stateChangeResult.networkId);
+                    } else {
+                        mWifiInfo.setNetworkId(WifiConfiguration.INVALID_NETWORK_ID);
                     }
+
                     if (state == SupplicantState.ASSOCIATING) {
                         /* BSSID is valid only in ASSOCIATING state */
                         mWifiInfo.setBSSID(stateChangeResult.BSSID);
