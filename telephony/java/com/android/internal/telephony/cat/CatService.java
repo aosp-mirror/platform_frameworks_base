@@ -32,6 +32,7 @@ import com.android.internal.telephony.IccRecords;
 
 
 import java.io.ByteArrayOutputStream;
+import java.util.Locale;
 
 /**
  * Enumeration for representing the tag value of COMPREHENSION-TLV objects. If
@@ -273,8 +274,20 @@ public class CatService extends Handler implements AppInterface {
                 sendTerminalResponse(cmdParams.cmdDet, ResultCode.OK, false, 0, null);
                 break;
             case PROVIDE_LOCAL_INFORMATION:
-                sendTerminalResponse(cmdParams.cmdDet, ResultCode.OK, false, 0, null);
-                return;
+                ResponseData resp;
+                switch (cmdParams.cmdDet.commandQualifier) {
+                    case CommandParamsFactory.DTTZ_SETTING:
+                        resp = new DTTZResponseData(null);
+                        sendTerminalResponse(cmdParams.cmdDet, ResultCode.OK, false, 0, resp);
+                        break;
+                    case CommandParamsFactory.LANGUAGE_SETTING:
+                        resp = new LanguageResponseData(Locale.getDefault().getLanguage());
+                        sendTerminalResponse(cmdParams.cmdDet, ResultCode.OK, false, 0, resp);
+                        break;
+                    default:
+                        sendTerminalResponse(cmdParams.cmdDet, ResultCode.OK, false, 0, null);
+                        return;
+                }
             case LAUNCH_BROWSER:
             case SELECT_ITEM:
             case GET_INPUT:
