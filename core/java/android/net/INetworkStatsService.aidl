@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package android.os;
+package android.net;
 
-/**
- * Retrieves packet and byte counts for the phone data interface,
- * and for all interfaces.
- * Used for the data activity icon and the phone status in Settings.
- *
- * {@hide}
- */
-interface INetStatService {
-    long getMobileTxPackets();
-    long getMobileRxPackets();
-    long getMobileTxBytes();
-    long getMobileRxBytes();
-    long getTotalTxPackets();
-    long getTotalRxPackets();
-    long getTotalTxBytes();
-    long getTotalRxBytes();
+import android.net.NetworkStatsHistory;
+
+/** {@hide} */
+interface INetworkStatsService {
+
+    NetworkStatsHistory[] getNetworkStatsSummary(int networkType);
+    NetworkStatsHistory getNetworkStatsUid(int uid);
+
 }

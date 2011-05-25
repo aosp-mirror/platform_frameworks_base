@@ -1545,6 +1545,8 @@ public abstract class Context {
     public static final String NETWORKMANAGEMENT_SERVICE = "network_management";
 
     /** {@hide} */
+    public static final String NETWORK_STATS_SERVICE = "netstats";
+    /** {@hide} */
     public static final String NETWORK_POLICY_SERVICE = "netpolicy";
 
     /**

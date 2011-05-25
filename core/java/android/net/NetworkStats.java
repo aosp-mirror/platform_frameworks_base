@@ -22,19 +22,22 @@ import android.os.SystemClock;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
+import java.util.HashSet;
 
 /**
- * Collection of network statistics. Can contain summary details across all
- * interfaces, or details with per-UID granularity. Designed to parcel quickly
- * across process boundaries.
+ * Collection of active network statistics. Can contain summary details across
+ * all interfaces, or details with per-UID granularity. Internally stores data
+ * as a large table, closely matching {@code /proc/} data format. This structure
+ * optimizes for rapid in-memory comparison, but consider using
+ * {@link NetworkStatsHistory} when persisting.
  *
  * @hide
  */
 public class NetworkStats implements Parcelable {
-    /** {@link #iface} value when entry is summarized over all interfaces. */
+    /** {@link #iface} value when interface details unavailable. */
     public static final String IFACE_ALL = null;
-    /** {@link #uid} value when entry is summarized over all UIDs. */
-    public static final int UID_ALL = 0;
+    /** {@link #uid} value when UID details unavailable. */
+    public static final int UID_ALL = -1;
 
     // NOTE: data should only be accounted for once in this structure; if data
     // is broken out, the summarized version should not be included.
@@ -49,7 +52,7 @@ public class NetworkStats implements Parcelable {
     public final long[] rx;
     public final long[] tx;
 
-    // TODO: add fg/bg stats and tag granularity
+    // TODO: add fg/bg stats once reported by kernel
 
     private NetworkStats(long elapsedRealtime, String[] iface, int[] uid, long[] rx, long[] tx) {
         this.elapsedRealtime = elapsedRealtime;
@@ -120,15 +123,35 @@ public class NetworkStats implements Parcelable {
     }
 
     /**
+     * Return list of unique interfaces known by this data structure.
+     */
+    public String[] getKnownIfaces() {
+        final HashSet<String> ifaces = new HashSet<String>();
+        for (String iface : this.iface) {
+            if (iface != IFACE_ALL) {
+                ifaces.add(iface);
+            }
+        }
+        return ifaces.toArray(new String[ifaces.size()]);
+    }
+
+    /**
      * Subtract the given {@link NetworkStats}, effectively leaving the delta
      * between two snapshots in time. Assumes that statistics rows collect over
      * time, and that none of them have disappeared.
+     *
+     * @param enforceMonotonic Validate that incoming value is strictly
+     *            monotonic compared to this object.
      */
-    public NetworkStats subtract(NetworkStats value) {
-        // result will have our rows, but no meaningful timestamp
-        final int length = length();
-        final NetworkStats.Builder result = new NetworkStats.Builder(-1, length);
+    public NetworkStats subtract(NetworkStats value, boolean enforceMonotonic) {
+        final long deltaRealtime = this.elapsedRealtime - value.elapsedRealtime;
+        if (enforceMonotonic && deltaRealtime < 0) {
+            throw new IllegalArgumentException("found non-monotonic realtime");
+        }
 
+        // result will have our rows, and elapsed time between snapshots
+        final int length = length();
+        final NetworkStats.Builder result = new NetworkStats.Builder(deltaRealtime, length);
         for (int i = 0; i < length; i++) {
             final String iface = this.iface[i];
             final int uid = this.uid[i];
@@ -142,6 +165,9 @@ public class NetworkStats implements Parcelable {
                 // existing row, subtract remote value
                 final long rx = this.rx[i] - value.rx[j];
                 final long tx = this.tx[i] - value.tx[j];
+                if (enforceMonotonic && (rx < 0 || tx < 0)) {
+                    throw new IllegalArgumentException("found non-monotonic values");
+                }
                 result.addEntry(iface, uid, rx, tx);
             }
         }
