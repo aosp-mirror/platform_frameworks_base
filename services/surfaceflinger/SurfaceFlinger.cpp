@@ -358,6 +358,9 @@ bool SurfaceFlinger::threadLoop()
 {
     waitForEvent();
 
+    // call Layer's destructor
+    handleDestroyLayers();
+
     // check for transactions
     if (UNLIKELY(mConsoleSignals)) {
         handleConsoleEvents();
@@ -366,7 +369,7 @@ bool SurfaceFlinger::threadLoop()
     if (LIKELY(mTransactionCount == 0)) {
         // if we're in a global transaction, don't do anything.
         const uint32_t mask = eTransactionNeeded | eTraversalNeeded;
-        uint32_t transactionFlags = getTransactionFlags(mask);
+        uint32_t transactionFlags = peekTransactionFlags(mask);
         if (LIKELY(transactionFlags)) {
             handleTransaction(transactionFlags);
         }
@@ -467,37 +470,26 @@ void SurfaceFlinger::handleConsoleEvents()
 
 void SurfaceFlinger::handleTransaction(uint32_t transactionFlags)
 {
-    Vector< sp<LayerBase> > ditchedLayers;
+    Mutex::Autolock _l(mStateLock);
+    const nsecs_t now = systemTime();
+    mDebugInTransaction = now;
 
-    /*
-     * Perform and commit the transaction
-     */
+    // Here we're guaranteed that some transaction flags are set
+    // so we can call handleTransactionLocked() unconditionally.
+    // We call getTransactionFlags(), which will also clear the flags,
+    // with mStateLock held to guarantee that mCurrentState won't change
+    // until the transaction is committed.
 
-    { // scope for the lock
-        Mutex::Autolock _l(mStateLock);
-        const nsecs_t now = systemTime();
-        mDebugInTransaction = now;
-        handleTransactionLocked(transactionFlags, ditchedLayers);
-        mLastTransactionTime = systemTime() - now;
-        mDebugInTransaction = 0;
-        // here the transaction has been committed
-    }
+    const uint32_t mask = eTransactionNeeded | eTraversalNeeded;
+    transactionFlags = getTransactionFlags(mask);
+    handleTransactionLocked(transactionFlags);
 
-    /*
-     * Clean-up all layers that went away
-     * (do this without the lock held)
-     */
-    const size_t count = ditchedLayers.size();
-    for (size_t i=0 ; i<count ; i++) {
-        if (ditchedLayers[i] != 0) {
-            //LOGD("ditching layer %p", ditchedLayers[i].get());
-            ditchedLayers[i]->ditch();
-        }
-    }
+    mLastTransactionTime = systemTime() - now;
+    mDebugInTransaction = 0;
+    // here the transaction has been committed
 }
 
-void SurfaceFlinger::handleTransactionLocked(
-        uint32_t transactionFlags, Vector< sp<LayerBase> >& ditchedLayers)
+void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
 {
     const LayerVector& currentLayers(mCurrentState.layersSortedByZ);
     const size_t count = currentLayers.size();
@@ -569,7 +561,6 @@ void SurfaceFlinger::handleTransactionLocked(
                 const sp<LayerBase>& layer(previousLayers[i]);
                 if (currentLayers.indexOf( layer ) < 0) {
                     // this layer is not visible anymore
-                    ditchedLayers.add(layer);
                     mDirtyRegionRemovedLayer.orSelf(layer->visibleRegionScreen);
                 }
             }
@@ -577,6 +568,31 @@ void SurfaceFlinger::handleTransactionLocked(
     }
 
     commitTransaction();
+}
+
+void SurfaceFlinger::destroyLayer(LayerBase const* layer)
+{
+    Mutex::Autolock _l(mDestroyedLayerLock);
+    mDestroyedLayers.add(layer);
+    signalEvent();
+}
+
+void SurfaceFlinger::handleDestroyLayers()
+{
+    Vector<LayerBase const *> destroyedLayers;
+
+    { // scope for the lock
+        Mutex::Autolock _l(mDestroyedLayerLock);
+        destroyedLayers = mDestroyedLayers;
+        mDestroyedLayers.clear();
+    }
+
+    // call destructors without a lock held
+    const size_t count = destroyedLayers.size();
+    for (size_t i=0 ; i<count ; i++) {
+        //LOGD("destroying %s", destroyedLayers[i]->getName().string());
+        delete destroyedLayers[i];
+    }
 }
 
 sp<FreezeLock> SurfaceFlinger::getFreezeLock() const
@@ -1030,15 +1046,15 @@ status_t SurfaceFlinger::addLayer_l(const sp<LayerBase>& layer)
 ssize_t SurfaceFlinger::addClientLayer(const sp<Client>& client,
         const sp<LayerBaseClient>& lbc)
 {
-    Mutex::Autolock _l(mStateLock);
-
     // attach this layer to the client
-    ssize_t name = client->attachLayer(lbc);
+    size_t name = client->attachLayer(lbc);
+
+    Mutex::Autolock _l(mStateLock);
 
     // add this layer to the current state list
     addLayer_l(lbc);
 
-    return name;
+    return ssize_t(name);
 }
 
 status_t SurfaceFlinger::removeLayer(const sp<LayerBase>& layer)
@@ -1083,6 +1099,11 @@ status_t SurfaceFlinger::invalidateLayerVisibility(const sp<LayerBase>& layer)
     layer->forceVisibilityTransaction();
     setTransactionFlags(eTraversalNeeded);
     return NO_ERROR;
+}
+
+uint32_t SurfaceFlinger::peekTransactionFlags(uint32_t flags)
+{
+    return android_atomic_release_load(&mTransactionFlags);
 }
 
 uint32_t SurfaceFlinger::getTransactionFlags(uint32_t flags)
@@ -1314,38 +1335,18 @@ status_t SurfaceFlinger::removeSurface(const sp<Client>& client, SurfaceID sid)
     return err;
 }
 
-status_t SurfaceFlinger::destroySurface(const sp<LayerBaseClient>& layer)
+status_t SurfaceFlinger::destroySurface(const wp<LayerBaseClient>& layer)
 {
     // called by ~ISurface() when all references are gone
-    
-    class MessageDestroySurface : public MessageBase {
-        SurfaceFlinger* flinger;
-        sp<LayerBaseClient> layer;
-    public:
-        MessageDestroySurface(
-                SurfaceFlinger* flinger, const sp<LayerBaseClient>& layer)
-            : flinger(flinger), layer(layer) { }
-        virtual bool handler() {
-            sp<LayerBaseClient> l(layer);
-            layer.clear(); // clear it outside of the lock;
-            Mutex::Autolock _l(flinger->mStateLock);
-            /*
-             * remove the layer from the current list -- chances are that it's 
-             * not in the list anyway, because it should have been removed 
-             * already upon request of the client (eg: window manager). 
-             * However, a buggy client could have not done that.
-             * Since we know we don't have any more clients, we don't need
-             * to use the purgatory.
-             */
-            status_t err = flinger->removeLayer_l(l);
-            LOGE_IF(err<0 && err != NAME_NOT_FOUND,
-                    "error removing layer=%p (%s)", l.get(), strerror(-err));
-            return true;
-        }
-    };
-
-    postMessageAsync( new MessageDestroySurface(this, layer) );
-    return NO_ERROR;
+    status_t err = NO_ERROR;
+    sp<LayerBaseClient> l(layer.promote());
+    if (l != NULL) {
+        Mutex::Autolock _l(mStateLock);
+        err = removeLayer_l(l);
+        LOGE_IF(err<0 && err != NAME_NOT_FOUND,
+                "error removing layer=%p (%s)", l.get(), strerror(-err));
+    }
+    return err;
 }
 
 status_t SurfaceFlinger::setClientState(
@@ -2253,15 +2254,17 @@ status_t Client::initCheck() const {
     return NO_ERROR;
 }
 
-ssize_t Client::attachLayer(const sp<LayerBaseClient>& layer)
+size_t Client::attachLayer(const sp<LayerBaseClient>& layer)
 {
-    int32_t name = android_atomic_inc(&mNameGenerator);
+    Mutex::Autolock _l(mLock);
+    size_t name = mNameGenerator++;
     mLayers.add(name, layer);
     return name;
 }
 
 void Client::detachLayer(const LayerBaseClient* layer)
 {
+    Mutex::Autolock _l(mLock);
     // we do a linear search here, because this doesn't happen often
     const size_t count = mLayers.size();
     for (size_t i=0 ; i<count ; i++) {
@@ -2271,9 +2274,11 @@ void Client::detachLayer(const LayerBaseClient* layer)
         }
     }
 }
-sp<LayerBaseClient> Client::getLayerUser(int32_t i) const {
+sp<LayerBaseClient> Client::getLayerUser(int32_t i) const
+{
+    Mutex::Autolock _l(mLock);
     sp<LayerBaseClient> lbc;
-    const wp<LayerBaseClient>& layer(mLayers.valueFor(i));
+    wp<LayerBaseClient> layer(mLayers.valueFor(i));
     if (layer != 0) {
         lbc = layer.promote();
         LOGE_IF(lbc==0, "getLayerUser(name=%d) is dead", int(i));
