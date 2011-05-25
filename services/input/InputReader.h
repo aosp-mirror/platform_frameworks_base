@@ -558,6 +558,8 @@ public:
     virtual bool markSupportedKeyCodes(uint32_t sourceMask, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags);
 
+    virtual void fadePointer();
+
 protected:
     Mutex mLock;
 
@@ -611,10 +613,12 @@ protected:
         PointerData pointers[MAX_POINTERS];
         BitSet32 idBits;
         uint32_t idToIndex[MAX_POINTER_ID + 1];
+        uint32_t buttonState;
 
         void copyFrom(const TouchData& other) {
             pointerCount = other.pointerCount;
             idBits = other.idBits;
+            buttonState = other.buttonState;
 
             for (uint32_t i = 0; i < pointerCount; i++) {
                 pointers[i] = other.pointers[i];
@@ -627,17 +631,20 @@ protected:
         inline void clear() {
             pointerCount = 0;
             idBits.clear();
+            buttonState = 0;
         }
     };
 
     // Input sources supported by the device.
     uint32_t mTouchSource; // sources when reporting touch data
+    uint32_t mPointerSource; // sources when reporting pointer gestures
 
     // Immutable configuration parameters.
     struct Parameters {
         enum DeviceType {
             DEVICE_TYPE_TOUCH_SCREEN,
             DEVICE_TYPE_TOUCH_PAD,
+            DEVICE_TYPE_POINTER,
         };
 
         DeviceType deviceType;
@@ -735,10 +742,16 @@ protected:
 
     // Current and previous touch sample data.
     TouchData mCurrentTouch;
+    PointerCoords mCurrentTouchCoords[MAX_POINTERS];
+
     TouchData mLastTouch;
+    PointerCoords mLastTouchCoords[MAX_POINTERS];
 
     // The time the primary pointer last went down.
     nsecs_t mDownTime;
+
+    // The pointer controller, or null if the device is not a pointer.
+    sp<PointerControllerInterface> mPointerController;
 
     struct LockedState {
         Vector<VirtualKey> virtualKeys;
@@ -804,6 +817,17 @@ protected:
             int32_t keyCode;
             int32_t scanCode;
         } currentVirtualKey;
+
+        // Scale factor for gesture based pointer movements.
+        float pointerGestureXMovementScale;
+        float pointerGestureYMovementScale;
+
+        // Scale factor for gesture based zooming and other freeform motions.
+        float pointerGestureXZoomScale;
+        float pointerGestureYZoomScale;
+
+        // The maximum swipe width squared.
+        int32_t pointerGestureMaxSwipeWidthSquared;
     } mLocked;
 
     virtual void configureParameters();
@@ -869,13 +893,148 @@ private:
         uint64_t distance : 48; // squared distance
     };
 
+    struct PointerGesture {
+        enum Mode {
+            // No fingers, button is not pressed.
+            // Nothing happening.
+            NEUTRAL,
+
+            // No fingers, button is not pressed.
+            // Tap detected.
+            // Emits DOWN and UP events at the pointer location.
+            TAP,
+
+            // Button is pressed.
+            // Pointer follows the active finger if there is one.  Other fingers are ignored.
+            // Emits DOWN, MOVE and UP events at the pointer location.
+            CLICK_OR_DRAG,
+
+            // Exactly one finger, button is not pressed.
+            // Pointer follows the active finger.
+            // Emits HOVER_MOVE events at the pointer location.
+            HOVER,
+
+            // More than two fingers involved but they haven't moved enough for us
+            // to figure out what is intended.
+            INDETERMINATE_MULTITOUCH,
+
+            // Exactly two fingers moving in the same direction, button is not pressed.
+            // Pointer does not move.
+            // Emits DOWN, MOVE and UP events with a single pointer coordinate that
+            // follows the midpoint between both fingers.
+            // The centroid is fixed when entering this state.
+            SWIPE,
+
+            // Two or more fingers moving in arbitrary directions, button is not pressed.
+            // Pointer does not move.
+            // Emits DOWN, POINTER_DOWN, MOVE, POINTER_UP and UP events that follow
+            // each finger individually relative to the initial centroid of the finger.
+            // The centroid is fixed when entering this state.
+            FREEFORM,
+
+            // Waiting for quiet time to end before starting the next gesture.
+            QUIET,
+        };
+
+        // The active pointer id from the raw touch data.
+        int32_t activeTouchId; // -1 if none
+
+        // The active pointer id from the gesture last delivered to the application.
+        int32_t activeGestureId; // -1 if none
+
+        // Pointer coords and ids for the current and previous pointer gesture.
+        Mode currentGestureMode;
+        uint32_t currentGesturePointerCount;
+        BitSet32 currentGestureIdBits;
+        uint32_t currentGestureIdToIndex[MAX_POINTER_ID + 1];
+        PointerCoords currentGestureCoords[MAX_POINTERS];
+
+        Mode lastGestureMode;
+        uint32_t lastGesturePointerCount;
+        BitSet32 lastGestureIdBits;
+        uint32_t lastGestureIdToIndex[MAX_POINTER_ID + 1];
+        PointerCoords lastGestureCoords[MAX_POINTERS];
+
+        // Tracks for all pointers originally went down.
+        TouchData touchOrigin;
+
+        // Describes how touch ids are mapped to gesture ids for freeform gestures.
+        uint32_t freeformTouchToGestureIdMap[MAX_POINTER_ID + 1];
+
+        // Initial centroid of the movement.
+        // Used to calculate how far the touch pointers have moved since the gesture started.
+        int32_t initialCentroidX;
+        int32_t initialCentroidY;
+
+        // Initial pointer location.
+        // Used to track where the pointer was when the gesture started.
+        float initialPointerX;
+        float initialPointerY;
+
+        // Time the pointer gesture last went down.
+        nsecs_t downTime;
+
+        // Time we started waiting for a tap gesture.
+        nsecs_t tapTime;
+
+        // Time we started waiting for quiescence.
+        nsecs_t quietTime;
+
+        // A velocity tracker for determining whether to switch active pointers during drags.
+        VelocityTracker velocityTracker;
+
+        void reset() {
+            activeTouchId = -1;
+            activeGestureId = -1;
+            currentGestureMode = NEUTRAL;
+            currentGesturePointerCount = 0;
+            currentGestureIdBits.clear();
+            lastGestureMode = NEUTRAL;
+            lastGesturePointerCount = 0;
+            lastGestureIdBits.clear();
+            touchOrigin.clear();
+            initialCentroidX = 0;
+            initialCentroidY = 0;
+            initialPointerX = 0;
+            initialPointerY = 0;
+            downTime = 0;
+            velocityTracker.clear();
+            resetTapTime();
+            resetQuietTime();
+        }
+
+        void resetTapTime() {
+            tapTime = LLONG_MIN;
+        }
+
+        void resetQuietTime() {
+            quietTime = LLONG_MIN;
+        }
+    } mPointerGesture;
+
     void initializeLocked();
 
     TouchResult consumeOffScreenTouches(nsecs_t when, uint32_t policyFlags);
     void dispatchTouches(nsecs_t when, uint32_t policyFlags);
-    void dispatchTouch(nsecs_t when, uint32_t policyFlags, TouchData* touch,
-            BitSet32 idBits, uint32_t changedId, uint32_t pointerCount,
-            int32_t motionEventAction);
+    void prepareTouches(int32_t* outEdgeFlags, float* outXPrecision, float* outYPrecision);
+    void dispatchPointerGestures(nsecs_t when, uint32_t policyFlags);
+    void preparePointerGestures(nsecs_t when,
+            bool* outCancelPreviousGesture, bool* outFinishPreviousGesture);
+
+    // Dispatches a motion event.
+    // If the changedId is >= 0 and the action is POINTER_DOWN or POINTER_UP, the
+    // method will take care of setting the index and transmuting the action to DOWN or UP
+    // it is the first / last pointer to go down / up.
+    void dispatchMotion(nsecs_t when, uint32_t policyFlags, uint32_t source,
+            int32_t action, int32_t flags, uint32_t metaState, int32_t edgeFlags,
+            const PointerCoords* coords, const uint32_t* idToIndex, BitSet32 idBits,
+            int32_t changedId, float xPrecision, float yPrecision, nsecs_t downTime);
+
+    // Updates pointer coords for pointers with specified ids that have moved.
+    // Returns true if any of them changed.
+    bool updateMovedPointerCoords(const PointerCoords* inCoords, const uint32_t* inIdToIndex,
+            PointerCoords* outCoords, const uint32_t* outIdToIndex, BitSet32 idBits) const;
+
     void suppressSwipeOntoVirtualKeys(nsecs_t when);
 
     bool isPointInsideSurfaceLocked(int32_t x, int32_t y);
@@ -907,6 +1066,7 @@ private:
             FIELD_ABS_Y = 4,
             FIELD_ABS_PRESSURE = 8,
             FIELD_ABS_TOOL_WIDTH = 16,
+            FIELD_BUTTONS = 32,
         };
 
         uint32_t fields;
@@ -917,8 +1077,13 @@ private:
         int32_t absPressure;
         int32_t absToolWidth;
 
+        uint32_t buttonDown;
+        uint32_t buttonUp;
+
         inline void clear() {
             fields = 0;
+            buttonDown = 0;
+            buttonUp = 0;
         }
     } mAccumulator;
 
@@ -927,6 +1092,7 @@ private:
     int32_t mY;
     int32_t mPressure;
     int32_t mToolWidth;
+    uint32_t mButtonState;
 
     void initialize();
 
@@ -978,11 +1144,19 @@ private:
             }
         } pointers[MAX_POINTERS + 1]; // + 1 to remove the need for extra range checks
 
+        // Bitfield of buttons that went down or up.
+        uint32_t buttonDown;
+        uint32_t buttonUp;
+
         inline void clear() {
             pointerCount = 0;
             pointers[0].clear();
+            buttonDown = 0;
+            buttonUp = 0;
         }
     } mAccumulator;
+
+    uint32_t mButtonState;
 
     void initialize();
 
