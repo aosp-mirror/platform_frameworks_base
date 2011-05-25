@@ -141,8 +141,8 @@ to a wider range of standard tag technologies, including:</p>
 <li>NFC-F (JIS 6319-4)</li>
 <li>NFC-V (ISO 15693)</li>
 <li>ISO-DEP (ISO 14443-4)</li>
-<li>Mifare Classic</li>
-<li>Mifare Ultralight</li>
+<li>MIFARE Classic</li>
+<li>MIFARE Ultralight</li>
 <li>NFC Forum NDEF tags</li>
 </ul>
 
