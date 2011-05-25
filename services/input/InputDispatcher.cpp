@@ -565,18 +565,19 @@ void InputDispatcher::dropInboundEventLocked(EventEntry* entry, DropReason dropR
     }
 
     switch (entry->type) {
-    case EventEntry::TYPE_KEY:
-        synthesizeCancelationEventsForAllConnectionsLocked(
-                InputState::CANCEL_NON_POINTER_EVENTS, reason);
+    case EventEntry::TYPE_KEY: {
+        CancelationOptions options(CancelationOptions::CANCEL_NON_POINTER_EVENTS, reason);
+        synthesizeCancelationEventsForAllConnectionsLocked(options);
         break;
+    }
     case EventEntry::TYPE_MOTION: {
         MotionEntry* motionEntry = static_cast<MotionEntry*>(entry);
         if (motionEntry->source & AINPUT_SOURCE_CLASS_POINTER) {
-            synthesizeCancelationEventsForAllConnectionsLocked(
-                    InputState::CANCEL_POINTER_EVENTS, reason);
+            CancelationOptions options(CancelationOptions::CANCEL_POINTER_EVENTS, reason);
+            synthesizeCancelationEventsForAllConnectionsLocked(options);
         } else {
-            synthesizeCancelationEventsForAllConnectionsLocked(
-                    InputState::CANCEL_NON_POINTER_EVENTS, reason);
+            CancelationOptions options(CancelationOptions::CANCEL_NON_POINTER_EVENTS, reason);
+            synthesizeCancelationEventsForAllConnectionsLocked(options);
         }
         break;
     }
@@ -869,8 +870,9 @@ bool InputDispatcher::dispatchMotionLocked(
 
     // Dispatch the motion.
     if (conflictingPointerActions) {
-        synthesizeCancelationEventsForAllConnectionsLocked(
-                InputState::CANCEL_POINTER_EVENTS, "Conflicting pointer actions.");
+        CancelationOptions options(CancelationOptions::CANCEL_POINTER_EVENTS,
+                "conflicting pointer actions");
+        synthesizeCancelationEventsForAllConnectionsLocked(options);
     }
     dispatchEventToCurrentInputTargetsLocked(currentTime, entry, false);
     return true;
@@ -1036,9 +1038,9 @@ void InputDispatcher::resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout
             if (connectionIndex >= 0) {
                 sp<Connection> connection = mConnectionsByReceiveFd.valueAt(connectionIndex);
                 if (connection->status == Connection::STATUS_NORMAL) {
-                    synthesizeCancelationEventsForConnectionLocked(
-                            connection, InputState::CANCEL_ALL_EVENTS,
+                    CancelationOptions options(CancelationOptions::CANCEL_ALL_EVENTS,
                             "application not responding");
+                    synthesizeCancelationEventsForConnectionLocked(connection, options);
                 }
             }
         }
@@ -2080,26 +2082,24 @@ int InputDispatcher::handleReceiveCallback(int receiveFd, int events, void* data
 }
 
 void InputDispatcher::synthesizeCancelationEventsForAllConnectionsLocked(
-        InputState::CancelationOptions options, const char* reason) {
+        const CancelationOptions& options) {
     for (size_t i = 0; i < mConnectionsByReceiveFd.size(); i++) {
         synthesizeCancelationEventsForConnectionLocked(
-                mConnectionsByReceiveFd.valueAt(i), options, reason);
+                mConnectionsByReceiveFd.valueAt(i), options);
     }
 }
 
 void InputDispatcher::synthesizeCancelationEventsForInputChannelLocked(
-        const sp<InputChannel>& channel, InputState::CancelationOptions options,
-        const char* reason) {
+        const sp<InputChannel>& channel, const CancelationOptions& options) {
     ssize_t index = getConnectionIndexLocked(channel);
     if (index >= 0) {
         synthesizeCancelationEventsForConnectionLocked(
-                mConnectionsByReceiveFd.valueAt(index), options, reason);
+                mConnectionsByReceiveFd.valueAt(index), options);
     }
 }
 
 void InputDispatcher::synthesizeCancelationEventsForConnectionLocked(
-        const sp<Connection>& connection, InputState::CancelationOptions options,
-        const char* reason) {
+        const sp<Connection>& connection, const CancelationOptions& options) {
     nsecs_t currentTime = now();
 
     mTempCancelationEvents.clear();
@@ -2110,8 +2110,9 @@ void InputDispatcher::synthesizeCancelationEventsForConnectionLocked(
             && connection->status != Connection::STATUS_BROKEN) {
 #if DEBUG_OUTBOUND_EVENT_DETAILS
         LOGD("channel '%s' ~ Synthesized %d cancelation events to bring channel back in sync "
-                "with reality: %s, options=%d.",
-                connection->getInputChannelName(), mTempCancelationEvents.size(), reason, options);
+                "with reality: %s, mode=%d.",
+                connection->getInputChannelName(), mTempCancelationEvents.size(),
+                options.reason, options.mode);
 #endif
         for (size_t i = 0; i < mTempCancelationEvents.size(); i++) {
             EventEntry* cancelationEventEntry = mTempCancelationEvents.itemAt(i);
@@ -2751,8 +2752,9 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
                 LOGD("Focus left window: %s",
                         oldFocusedWindowChannel->getName().string());
 #endif
-                synthesizeCancelationEventsForInputChannelLocked(oldFocusedWindowChannel,
-                        InputState::CANCEL_NON_POINTER_EVENTS, "focus left window");
+                CancelationOptions options(CancelationOptions::CANCEL_NON_POINTER_EVENTS,
+                        "focus left window");
+                synthesizeCancelationEventsForInputChannelLocked(oldFocusedWindowChannel, options);
                 oldFocusedWindowChannel.clear();
             }
         }
@@ -2773,8 +2775,9 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
 #if DEBUG_FOCUS
                 LOGD("Touched window was removed: %s", touchedWindow.channel->getName().string());
 #endif
-                synthesizeCancelationEventsForInputChannelLocked(touchedWindow.channel,
-                        InputState::CANCEL_POINTER_EVENTS, "touched window was removed");
+                CancelationOptions options(CancelationOptions::CANCEL_POINTER_EVENTS,
+                        "touched window was removed");
+                synthesizeCancelationEventsForInputChannelLocked(touchedWindow.channel, options);
                 mTouchState.windows.removeAt(i);
             }
         }
@@ -2910,9 +2913,9 @@ bool InputDispatcher::transferTouchFocus(const sp<InputChannel>& fromChannel,
             sp<Connection> toConnection = mConnectionsByReceiveFd.valueAt(toConnectionIndex);
 
             fromConnection->inputState.copyPointerStateTo(toConnection->inputState);
-            synthesizeCancelationEventsForConnectionLocked(fromConnection,
-                    InputState::CANCEL_POINTER_EVENTS,
+            CancelationOptions options(CancelationOptions::CANCEL_POINTER_EVENTS,
                     "transferring touch focus from this window to another window");
+            synthesizeCancelationEventsForConnectionLocked(fromConnection, options);
         }
 
 #if DEBUG_FOCUS
@@ -2930,7 +2933,8 @@ void InputDispatcher::resetAndDropEverythingLocked(const char* reason) {
     LOGD("Resetting and dropping all events (%s).", reason);
 #endif
 
-    synthesizeCancelationEventsForAllConnectionsLocked(InputState::CANCEL_ALL_EVENTS, reason);
+    CancelationOptions options(CancelationOptions::CANCEL_ALL_EVENTS, reason);
+    synthesizeCancelationEventsForAllConnectionsLocked(options);
 
     resetKeyRepeatLocked();
     releasePendingEventLocked();
@@ -3261,58 +3265,49 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
     if (!connection->outboundQueue.isEmpty()) {
         DispatchEntry* dispatchEntry = connection->outboundQueue.headSentinel.next;
         if (dispatchEntry->inProgress
-                && dispatchEntry->hasForegroundTarget()
                 && dispatchEntry->eventEntry->type == EventEntry::TYPE_KEY) {
             KeyEntry* keyEntry = static_cast<KeyEntry*>(dispatchEntry->eventEntry);
             if (!(keyEntry->flags & AKEY_EVENT_FLAG_FALLBACK)) {
-                if (handled) {
-                    // If the application handled a non-fallback key, then immediately
-                    // cancel all fallback keys previously dispatched to the application.
-                    // This behavior will prevent chording with fallback keys (so they cannot
-                    // be used as modifiers) but it will ensure that fallback keys do not
-                    // get stuck.  This takes care of the case where the application does not handle
-                    // the original DOWN so we generate a fallback DOWN but it does handle
-                    // the original UP in which case we want to send a fallback CANCEL.
-                    synthesizeCancelationEventsForConnectionLocked(connection,
-                            InputState::CANCEL_FALLBACK_EVENTS,
-                            "application handled a non-fallback event, "
-                            "canceling all fallback events");
-                    connection->originalKeyCodeForFallback = -1;
+                // Get the fallback key state.
+                // Clear it out after dispatching the UP.
+                int32_t originalKeyCode = keyEntry->keyCode;
+                int32_t fallbackKeyCode = connection->inputState.getFallbackKey(originalKeyCode);
+                if (keyEntry->action == AKEY_EVENT_ACTION_UP) {
+                    connection->inputState.removeFallbackKey(originalKeyCode);
+                }
+
+                if (handled || !dispatchEntry->hasForegroundTarget()) {
+                    // If the application handles the original key for which we previously
+                    // generated a fallback or if the window is not a foreground window,
+                    // then cancel the associated fallback key, if any.
+                    if (fallbackKeyCode != -1) {
+                        if (fallbackKeyCode != AKEYCODE_UNKNOWN) {
+                            CancelationOptions options(CancelationOptions::CANCEL_FALLBACK_EVENTS,
+                                    "application handled the original non-fallback key "
+                                    "or is no longer a foreground target, "
+                                    "canceling previously dispatched fallback key");
+                            options.keyCode = fallbackKeyCode;
+                            synthesizeCancelationEventsForConnectionLocked(connection, options);
+                        }
+                        connection->inputState.removeFallbackKey(originalKeyCode);
+                    }
                 } else {
                     // If the application did not handle a non-fallback key, first check
-                    // that we are in a good state to handle the fallback key.  Then ask
-                    // the policy what to do with it.
-                    if (connection->originalKeyCodeForFallback < 0) {
-                        if (keyEntry->action != AKEY_EVENT_ACTION_DOWN
-                                || keyEntry->repeatCount != 0) {
+                    // that we are in a good state to perform unhandled key event processing
+                    // Then ask the policy what to do with it.
+                    bool initialDown = keyEntry->action == AKEY_EVENT_ACTION_DOWN
+                            && keyEntry->repeatCount == 0;
+                    if (fallbackKeyCode == -1 && !initialDown) {
 #if DEBUG_OUTBOUND_EVENT_DETAILS
-                            LOGD("Unhandled key event: Skipping fallback since this "
-                                    "is not an initial down.  "
-                                    "keyCode=%d, action=%d, repeatCount=%d",
-                                    keyEntry->keyCode, keyEntry->action, keyEntry->repeatCount);
+                        LOGD("Unhandled key event: Skipping unhandled key event processing "
+                                "since this is not an initial down.  "
+                                "keyCode=%d, action=%d, repeatCount=%d",
+                                originalKeyCode, keyEntry->action, keyEntry->repeatCount);
 #endif
-                            goto SkipFallback;
-                        }
-
-                        // Start handling the fallback key on DOWN.
-                        connection->originalKeyCodeForFallback = keyEntry->keyCode;
-                    } else {
-                        if (keyEntry->keyCode != connection->originalKeyCodeForFallback) {
-#if DEBUG_OUTBOUND_EVENT_DETAILS
-                            LOGD("Unhandled key event: Skipping fallback since there is "
-                                    "already a different fallback in progress.  "
-                                    "keyCode=%d, originalKeyCodeForFallback=%d",
-                                    keyEntry->keyCode, connection->originalKeyCodeForFallback);
-#endif
-                            goto SkipFallback;
-                        }
-
-                        // Finish handling the fallback key on UP.
-                        if (keyEntry->action == AKEY_EVENT_ACTION_UP) {
-                            connection->originalKeyCodeForFallback = -1;
-                        }
+                        goto SkipFallback;
                     }
 
+                    // Dispatch the unhandled key to the policy.
 #if DEBUG_OUTBOUND_EVENT_DETAILS
                     LOGD("Unhandled key event: Asking policy to perform fallback action.  "
                             "keyCode=%d, action=%d, repeatCount=%d",
@@ -3329,10 +3324,70 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
                     mLock.lock();
 
                     if (connection->status != Connection::STATUS_NORMAL) {
+                        connection->inputState.removeFallbackKey(originalKeyCode);
                         return;
                     }
 
                     assert(connection->outboundQueue.headSentinel.next == dispatchEntry);
+
+                    // Latch the fallback keycode for this key on an initial down.
+                    // The fallback keycode cannot change at any other point in the lifecycle.
+                    if (initialDown) {
+                        if (fallback) {
+                            fallbackKeyCode = event.getKeyCode();
+                        } else {
+                            fallbackKeyCode = AKEYCODE_UNKNOWN;
+                        }
+                        connection->inputState.setFallbackKey(originalKeyCode, fallbackKeyCode);
+                    }
+
+                    assert(fallbackKeyCode != -1);
+
+                    // Cancel the fallback key if the policy decides not to send it anymore.
+                    // We will continue to dispatch the key to the policy but we will no
+                    // longer dispatch a fallback key to the application.
+                    if (fallbackKeyCode != AKEYCODE_UNKNOWN
+                            && (!fallback || fallbackKeyCode != event.getKeyCode())) {
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+                        if (fallback) {
+                            LOGD("Unhandled key event: Policy requested to send key %d"
+                                    "as a fallback for %d, but on the DOWN it had requested "
+                                    "to send %d instead.  Fallback canceled.",
+                                    event.getKeyCode(), originalKeyCode, fallbackKeyCode);
+                        } else {
+                            LOGD("Unhandled key event: Policy did not request fallback for %d,"
+                                    "but on the DOWN it had requested to send %d.  "
+                                    "Fallback canceled.",
+                                    originalKeyCode, fallbackKeyCode);
+                        }
+#endif
+
+                        CancelationOptions options(CancelationOptions::CANCEL_FALLBACK_EVENTS,
+                                "canceling fallback, policy no longer desires it");
+                        options.keyCode = fallbackKeyCode;
+                        synthesizeCancelationEventsForConnectionLocked(connection, options);
+
+                        fallback = false;
+                        fallbackKeyCode = AKEYCODE_UNKNOWN;
+                        if (keyEntry->action != AKEY_EVENT_ACTION_UP) {
+                            connection->inputState.setFallbackKey(originalKeyCode,
+                                    fallbackKeyCode);
+                        }
+                    }
+
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+                    {
+                        String8 msg;
+                        const KeyedVector<int32_t, int32_t>& fallbackKeys =
+                                connection->inputState.getFallbackKeys();
+                        for (size_t i = 0; i < fallbackKeys.size(); i++) {
+                            msg.appendFormat(", %d->%d", fallbackKeys.keyAt(i),
+                                    fallbackKeys.valueAt(i));
+                        }
+                        LOGD("Unhandled key event: %d currently tracked fallback keys%s.",
+                                fallbackKeys.size(), msg.string());
+                    }
+#endif
 
                     if (fallback) {
                         // Restart the dispatch cycle using the fallback key.
@@ -3340,7 +3395,7 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
                         keyEntry->deviceId = event.getDeviceId();
                         keyEntry->source = event.getSource();
                         keyEntry->flags = event.getFlags() | AKEY_EVENT_FLAG_FALLBACK;
-                        keyEntry->keyCode = event.getKeyCode();
+                        keyEntry->keyCode = fallbackKeyCode;
                         keyEntry->scanCode = event.getScanCode();
                         keyEntry->metaState = event.getMetaState();
                         keyEntry->repeatCount = event.getRepeatCount();
@@ -3349,13 +3404,17 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
 
 #if DEBUG_OUTBOUND_EVENT_DETAILS
                         LOGD("Unhandled key event: Dispatching fallback key.  "
-                                "fallbackKeyCode=%d, fallbackMetaState=%08x",
-                                keyEntry->keyCode, keyEntry->metaState);
+                                "originalKeyCode=%d, fallbackKeyCode=%d, fallbackMetaState=%08x",
+                                originalKeyCode, fallbackKeyCode, keyEntry->metaState);
 #endif
 
                         dispatchEntry->inProgress = false;
                         startDispatchCycleLocked(now(), connection);
                         return;
+                    } else {
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+                        LOGD("Unhandled key event: No fallback key.");
+#endif
                     }
                 }
             }
@@ -3649,6 +3708,17 @@ void InputDispatcher::InputState::trackEvent(
 void InputDispatcher::InputState::trackKey(
         const KeyEntry* entry) {
     int32_t action = entry->action;
+    if (action == AKEY_EVENT_ACTION_UP
+            && (entry->flags & AKEY_EVENT_FLAG_FALLBACK)) {
+        for (size_t i = 0; i < mFallbackKeys.size(); ) {
+            if (mFallbackKeys.valueAt(i) == entry->keyCode) {
+                mFallbackKeys.removeItemsAt(i);
+            } else {
+                i += 1;
+            }
+        }
+    }
+
     for (size_t i = 0; i < mKeyMementos.size(); i++) {
         KeyMemento& memento = mKeyMementos.editItemAt(i);
         if (memento.deviceId == entry->deviceId
@@ -3736,7 +3806,7 @@ void InputDispatcher::InputState::MotionMemento::setPointers(const MotionEntry* 
 
 void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTime,
         Allocator* allocator, Vector<EventEntry*>& outEvents,
-        CancelationOptions options) {
+        const CancelationOptions& options) {
     for (size_t i = 0; i < mKeyMementos.size(); ) {
         const KeyMemento& memento = mKeyMementos.itemAt(i);
         if (shouldCancelKey(memento, options)) {
@@ -3768,6 +3838,7 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
 void InputDispatcher::InputState::clear() {
     mKeyMementos.clear();
     mMotionMementos.clear();
+    mFallbackKeys.clear();
 }
 
 void InputDispatcher::InputState::copyPointerStateTo(InputState& other) const {
@@ -3788,13 +3859,36 @@ void InputDispatcher::InputState::copyPointerStateTo(InputState& other) const {
     }
 }
 
+int32_t InputDispatcher::InputState::getFallbackKey(int32_t originalKeyCode) {
+    ssize_t index = mFallbackKeys.indexOfKey(originalKeyCode);
+    return index >= 0 ? mFallbackKeys.valueAt(index) : -1;
+}
+
+void InputDispatcher::InputState::setFallbackKey(int32_t originalKeyCode,
+        int32_t fallbackKeyCode) {
+    ssize_t index = mFallbackKeys.indexOfKey(originalKeyCode);
+    if (index >= 0) {
+        mFallbackKeys.replaceValueAt(index, fallbackKeyCode);
+    } else {
+        mFallbackKeys.add(originalKeyCode, fallbackKeyCode);
+    }
+}
+
+void InputDispatcher::InputState::removeFallbackKey(int32_t originalKeyCode) {
+    mFallbackKeys.removeItem(originalKeyCode);
+}
+
 bool InputDispatcher::InputState::shouldCancelKey(const KeyMemento& memento,
-        CancelationOptions options) {
-    switch (options) {
-    case CANCEL_ALL_EVENTS:
-    case CANCEL_NON_POINTER_EVENTS:
+        const CancelationOptions& options) {
+    if (options.keyCode != -1 && memento.keyCode != options.keyCode) {
+        return false;
+    }
+
+    switch (options.mode) {
+    case CancelationOptions::CANCEL_ALL_EVENTS:
+    case CancelationOptions::CANCEL_NON_POINTER_EVENTS:
         return true;
-    case CANCEL_FALLBACK_EVENTS:
+    case CancelationOptions::CANCEL_FALLBACK_EVENTS:
         return memento.flags & AKEY_EVENT_FLAG_FALLBACK;
     default:
         return false;
@@ -3802,13 +3896,13 @@ bool InputDispatcher::InputState::shouldCancelKey(const KeyMemento& memento,
 }
 
 bool InputDispatcher::InputState::shouldCancelMotion(const MotionMemento& memento,
-        CancelationOptions options) {
-    switch (options) {
-    case CANCEL_ALL_EVENTS:
+        const CancelationOptions& options) {
+    switch (options.mode) {
+    case CancelationOptions::CANCEL_ALL_EVENTS:
         return true;
-    case CANCEL_POINTER_EVENTS:
+    case CancelationOptions::CANCEL_POINTER_EVENTS:
         return memento.source & AINPUT_SOURCE_CLASS_POINTER;
-    case CANCEL_NON_POINTER_EVENTS:
+    case CancelationOptions::CANCEL_NON_POINTER_EVENTS:
         return !(memento.source & AINPUT_SOURCE_CLASS_POINTER);
     default:
         return false;
@@ -3822,8 +3916,7 @@ InputDispatcher::Connection::Connection(const sp<InputChannel>& inputChannel,
         const sp<InputWindowHandle>& inputWindowHandle) :
         status(STATUS_NORMAL), inputChannel(inputChannel), inputWindowHandle(inputWindowHandle),
         inputPublisher(inputChannel),
-        lastEventTime(LONG_LONG_MAX), lastDispatchTime(LONG_LONG_MAX),
-        originalKeyCodeForFallback(-1) {
+        lastEventTime(LONG_LONG_MAX), lastDispatchTime(LONG_LONG_MAX) {
 }
 
 InputDispatcher::Connection::~Connection() {
