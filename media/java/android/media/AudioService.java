@@ -1437,9 +1437,7 @@ public class AudioService extends IAudioService.Stub {
                 if (mBluetoothHeadsetDevice != null) {
                     if (mBluetoothHeadset != null) {
                         if (!mBluetoothHeadset.stopVoiceRecognition(
-                                mBluetoothHeadsetDevice) ||
-                                !mBluetoothHeadset.stopScoUsingVirtualVoiceCall(
-                                        mBluetoothHeadsetDevice)) {
+                                mBluetoothHeadsetDevice)) {
                             sendMsg(mAudioHandler, MSG_BT_HEADSET_CNCT_FAILED, 0,
                                     SENDMSG_REPLACE, 0, 0, null, 0);
                         }
@@ -1506,8 +1504,6 @@ public class AudioService extends IAudioService.Stub {
                             break;
                         case SCO_STATE_DEACTIVATE_EXT_REQ:
                             status = mBluetoothHeadset.stopVoiceRecognition(
-                                    mBluetoothHeadsetDevice) &&
-                                    mBluetoothHeadset.stopScoUsingVirtualVoiceCall(
                                     mBluetoothHeadsetDevice);
                         }
                     }
