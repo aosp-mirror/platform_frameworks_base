@@ -383,13 +383,6 @@ ssize_t NuHTTPDataSource::readAt(off64_t offset, void *data, size_t size) {
 
     Mutex::Autolock autoLock(mLock);
 
-    // if it's a DRM container based streaming, call pread() of the DRM plugin
-    // to get the decrypted data
-    if (mDecryptHandle != NULL && DecryptApiType::CONTAINER_BASED
-            == mDecryptHandle->decryptApiType) {
-        return mDrmManagerClient->pread(mDecryptHandle, data, size, offset);
-    }
-
     if (offset != mOffset) {
         String8 host = mHost;
         String8 path = mPath;
