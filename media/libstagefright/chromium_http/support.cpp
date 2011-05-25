@@ -23,7 +23,7 @@
 #include "support.h"
 
 #include "android/net/android_network_library_impl.h"
-#include "base/thread.h"
+#include "base/threading/thread.h"
 #include "net/base/cert_verifier.h"
 #include "net/base/host_resolver.h"
 #include "net/base/ssl_config_service.h"
