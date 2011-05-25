@@ -27,8 +27,14 @@
 
 namespace android {
 
+#define ROUND_UP(value, boundary) (((value) + (boundary) - 1) & ~((boundary) - 1))
+#define MIN_HISTORY_DEPTH 20
+
 // Must be at least sizeof(InputMessage) + sufficient space for pointer data
-static const int DEFAULT_MESSAGE_BUFFER_SIZE = 16384;
+static const int DEFAULT_MESSAGE_BUFFER_SIZE = ROUND_UP(
+        sizeof(InputMessage) + MIN_HISTORY_DEPTH
+                * (sizeof(InputMessage::SampleData) + MAX_POINTERS * sizeof(PointerCoords)),
+        4096);
 
 // Signal sent by the producer to the consumer to inform it that a new message is
 // available to be consumed in the shared memory buffer.
