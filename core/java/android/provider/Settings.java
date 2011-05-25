@@ -2545,6 +2545,13 @@ public final class Settings {
             "lock_screen_owner_info_enabled";
 
         /**
+         * The saved value for WindowManagerService.setForcedDisplaySize().
+         * Two integers separated by a comma.  If unset, then use the real display size.
+         * @hide
+         */
+        public static final String DISPLAY_SIZE_FORCED = "display_size_forced";
+
+        /**
          * Whether assisted GPS should be enabled or not.
          * @hide
          */
