@@ -14,32 +14,6 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SpotController"
+package android.view;
 
-//#define LOG_NDEBUG 0
-
-// Log debug messages about spot updates
-#define DEBUG_SPOT_UPDATES 0
-
-#include "SpotController.h"
-
-#include <cutils/log.h>
-
-namespace android {
-
-// --- SpotController ---
-
-SpotController::SpotController(const sp<Looper>& looper,
-        const sp<SpriteController>& spriteController) :
-        mLooper(looper), mSpriteController(spriteController) {
-    mHandler = new WeakMessageHandler(this);
-}
-
-SpotController::~SpotController() {
-    mLooper->removeMessages(mHandler);
-}
-
-void SpotController:: handleMessage(const Message& message) {
-}
-
-} // namespace android
+parcelable PointerIcon;

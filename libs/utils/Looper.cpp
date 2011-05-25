@@ -662,7 +662,8 @@ void Looper::wakeAndLock() {
 #endif
 
 void Looper::sendMessage(const sp<MessageHandler>& handler, const Message& message) {
-    sendMessageAtTime(LLONG_MIN, handler, message);
+    nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+    sendMessageAtTime(now, handler, message);
 }
 
 void Looper::sendMessageDelayed(nsecs_t uptimeDelay, const sp<MessageHandler>& handler,

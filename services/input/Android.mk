@@ -23,7 +23,6 @@ LOCAL_SRC_FILES:= \
     InputReader.cpp \
     InputWindow.cpp \
     PointerController.cpp \
-    SpotController.cpp \
     SpriteController.cpp
 
 LOCAL_SHARED_LIBRARIES := \
