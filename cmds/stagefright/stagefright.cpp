@@ -695,12 +695,14 @@ int main(int argc, char **argv) {
         for (int k = 0; k < argc; ++k) {
             const char *filename = argv[k];
 
+            bool failed = true;
             CHECK_EQ(retriever->setDataSource(filename), (status_t)OK);
             sp<IMemory> mem =
                     retriever->getFrameAtTime(-1,
                                     MediaSource::ReadOptions::SEEK_PREVIOUS_SYNC);
 
             if (mem != NULL) {
+                failed = false;
                 printf("getFrameAtTime(%s) => OK\n", filename);
 
                 VideoFrame *frame = (VideoFrame *)mem->pointer();
@@ -715,15 +717,20 @@ int main(int argc, char **argv) {
                             "/sdcard/out.jpg", bitmap,
                             SkImageEncoder::kJPEG_Type,
                             SkImageEncoder::kDefaultQuality));
-            } else {
+            }
+
+            {
                 mem = retriever->extractAlbumArt();
 
                 if (mem != NULL) {
+                    failed = false;
                     printf("extractAlbumArt(%s) => OK\n", filename);
-                } else {
-                    printf("both getFrameAtTime and extractAlbumArt "
-                           "failed on file '%s'.\n", filename);
                 }
+            }
+
+            if (failed) {
+                printf("both getFrameAtTime and extractAlbumArt "
+                    "failed on file '%s'.\n", filename);
             }
         }
 

@@ -272,7 +272,7 @@ public class MediaMetadataRetriever
     
     /**
      * Call this method after setDataSource(). This method finds the optional
-     * graphic or album art associated associated with the data source. If
+     * graphic or album/cover art associated associated with the data source. If
      * there are more than one pictures, (any) one of them is returned.
      * 
      * @return null if no such graphic is found.

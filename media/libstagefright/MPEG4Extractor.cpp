@@ -653,6 +653,7 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
     off64_t chunk_data_size = *offset + chunk_size - data_offset;
 
     if (chunk_type != FOURCC('c', 'p', 'r', 't')
+            && chunk_type != FOURCC('c', 'o', 'v', 'r')
             && mPath.size() == 5 && underMetaDataPath(mPath)) {
         off64_t stop_offset = *offset + chunk_size;
         *offset = data_offset;
@@ -1326,6 +1327,29 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
         case FOURCC('t', 'x', '3', 'g'):
         {
             mLastTrack->meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_TEXT_3GPP);
+
+            *offset += chunk_size;
+            break;
+        }
+
+        case FOURCC('c', 'o', 'v', 'r'):
+        {
+            if (mFileMetaData != NULL) {
+                LOGV("chunk_data_size = %lld and data_offset = %lld",
+                        chunk_data_size, data_offset);
+                uint8_t *buffer = new uint8_t[chunk_data_size + 1];
+                if (mDataSource->readAt(
+                    data_offset, buffer, chunk_data_size) != (ssize_t)chunk_data_size) {
+                    delete[] buffer;
+                    buffer = NULL;
+
+                    return ERROR_IO;
+                }
+                const int kSkipBytesOfDataBox = 16;
+                mFileMetaData->setData(
+                    kKeyAlbumArt, MetaData::TYPE_NONE,
+                    buffer + kSkipBytesOfDataBox, chunk_data_size - kSkipBytesOfDataBox);
+            }
 
             *offset += chunk_size;
             break;
