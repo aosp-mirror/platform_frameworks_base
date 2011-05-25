@@ -9687,7 +9687,8 @@ package android.media {
     method public void unloadSoundEffects();
     method public void unregisterMediaButtonEventReceiver(android.content.ComponentName);
     field public static final java.lang.String ACTION_AUDIO_BECOMING_NOISY = "android.media.AUDIO_BECOMING_NOISY";
-    field public static final java.lang.String ACTION_SCO_AUDIO_STATE_CHANGED = "android.media.SCO_AUDIO_STATE_CHANGED";
+    field public static final deprecated java.lang.String ACTION_SCO_AUDIO_STATE_CHANGED = "android.media.SCO_AUDIO_STATE_CHANGED";
+    field public static final java.lang.String ACTION_SCO_AUDIO_STATE_UPDATED = "android.media.ACTION_SCO_AUDIO_STATE_UPDATED";
     field public static final int ADJUST_LOWER = -1; // 0xffffffff
     field public static final int ADJUST_RAISE = 1; // 0x1
     field public static final int ADJUST_SAME = 0; // 0x0
@@ -9700,6 +9701,7 @@ package android.media {
     field public static final int AUDIOFOCUS_REQUEST_FAILED = 0; // 0x0
     field public static final int AUDIOFOCUS_REQUEST_GRANTED = 1; // 0x1
     field public static final java.lang.String EXTRA_RINGER_MODE = "android.media.EXTRA_RINGER_MODE";
+    field public static final java.lang.String EXTRA_SCO_AUDIO_PREVIOUS_STATE = "android.media.extra.SCO_AUDIO_PREVIOUS_STATE";
     field public static final java.lang.String EXTRA_SCO_AUDIO_STATE = "android.media.extra.SCO_AUDIO_STATE";
     field public static final java.lang.String EXTRA_VIBRATE_SETTING = "android.media.EXTRA_VIBRATE_SETTING";
     field public static final java.lang.String EXTRA_VIBRATE_TYPE = "android.media.EXTRA_VIBRATE_TYPE";
@@ -9736,6 +9738,7 @@ package android.media {
     field public static final deprecated int ROUTE_HEADSET = 8; // 0x8
     field public static final deprecated int ROUTE_SPEAKER = 2; // 0x2
     field public static final int SCO_AUDIO_STATE_CONNECTED = 1; // 0x1
+    field public static final int SCO_AUDIO_STATE_CONNECTING = 2; // 0x2
     field public static final int SCO_AUDIO_STATE_DISCONNECTED = 0; // 0x0
     field public static final int SCO_AUDIO_STATE_ERROR = -1; // 0xffffffff
     field public static final int STREAM_ALARM = 4; // 0x4
