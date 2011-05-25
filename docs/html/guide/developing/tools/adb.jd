@@ -35,45 +35,9 @@ parent.link=index.html
 </div>
 </div>
 
-<!-- 
-<p>Android Debug Bridge (adb) is a versatile tool that </a>. </p>
-
-<p>Some of ways you can use adb include:</p>
-
-<ul>
-
-</ul>
-<p>The sections below introduce adb and describe many of its common uses. </p>
-
-<h2>Contents</h2>
-<dl>
-<dt><a href="#overview">Overview</a></dt>
-<dt><a href="#issuingcommands">Issuing adb Commands</a></dt>
-<dt><a href="#devicestatus">Querying for Emulator/Device Instances</a></dt>
-<dt><a href="#directingcommands">Directing Commands to a Specific Emulator/Device Instance</a></dt>
-<dt><a href="#move">Installing an Application</a></dt>
-<dt><a href="#forwardports">Forwarding Ports</a></dt>
-<dt><a href="#copyfiles">Copying Files to or from an Emulator/Device Instance</a></dt>
-<dt><a href="#commandsummary">Listing of adb Commands </a></dt>
-<dt><a href="#shellcommands">Issuing Shell Commands</a></dt>
-    <dd><a href="#sqlite">Examining sqlite3 Databases from a Remote Shell</a></dd>
-    <dd><a href="#monkey">UI/Application Exerciser Monkey</a></dd>
-	<dd><a href="#othershellcommands">Other Shell Commands</a></dd>
-<dt><a href="#logcat">Enabling logcat Logging</a> </dt>
-	<dd><a href="#usinglogcat">Using logcat Commands</a></dd>
-	<dd><a href="#filteringoutput">Filtering Log Output</a></dd>
-	<dd><a href="#outputformat">Controlling Log Output Format</a></dd>
-	<dd><a href="#alternativebuffers">Viewing Alternative Log Buffers</a></dd>
-	<dd><a href="#stdout">Viewing stdout and stderr</a></dd>
-	<dd><a href="#logcatoptions">Listing of logcat Command Options</a></dd>
-<dt><a href="#stopping">Stopping the adb Server</a> </dt>
-</dl>
-
-<a name="overview"></a>
-
-<h2>Overview</h2>
--->
-<p>Android Debug Bridge (adb) is a versatile tool lets you manage the state of an emulator instance or Android-powered device. It is a client-server program that includes three components: </p>
+<p>Android Debug Bridge (adb) is a versatile command line tool that lets you communicate with an
+emulator instance or connected Android-powered device. It is a client-server program that includes
+three components: </p>
 
 <ul>
   <li>A client, which runs on your development machine. You can invoke a client from a shell by issuing an adb command. Other Android tools such as the ADT plugin and DDMS also create adb clients. </li>
