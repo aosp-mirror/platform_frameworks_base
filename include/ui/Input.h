@@ -313,6 +313,13 @@ public:
 
     inline int32_t getAction() const { return mAction; }
 
+    inline int32_t getActionMasked() const { return mAction & AMOTION_EVENT_ACTION_MASK; }
+
+    inline int32_t getActionIndex() const {
+        return (mAction & AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)
+                >> AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT;
+    }
+
     inline void setAction(int32_t action) { mAction = action; }
 
     inline int32_t getFlags() const { return mFlags; }
@@ -460,6 +467,8 @@ public:
                 AMOTION_EVENT_AXIS_ORIENTATION, pointerIndex, historicalIndex);
     }
 
+    ssize_t findPointerIndex(int32_t pointerId) const;
+
     void initialize(
             int32_t deviceId,
             int32_t source,
@@ -553,8 +562,7 @@ private:
 };
 
 /*
- * Calculates the velocity of pointer motions over time.
- * Uses essentially the same algorithm as android.view.VelocityTracker.
+ * Calculates the velocity of pointer movements over time.
  */
 class VelocityTracker {
 public:
@@ -567,6 +575,11 @@ public:
     // Resets the velocity tracker state.
     void clear();
 
+    // Resets the velocity tracker state for specific pointers.
+    // Call this method when some pointers have changed and may be reusing
+    // an id that was assigned to a different pointer earlier.
+    void clearPointers(BitSet32 idBits);
+
     // Adds movement information for a set of pointers.
     // The idBits bitfield specifies the pointer ids of the pointers whose positions
     // are included in the movement.
@@ -574,10 +587,19 @@ public:
     // increasing id.  Its size should be equal to the number of one bits in idBits.
     void addMovement(nsecs_t eventTime, BitSet32 idBits, const Position* positions);
 
+    // Adds movement information for all pointers in a MotionEvent, including historical samples.
+    void addMovement(const MotionEvent* event);
+
     // Gets the velocity of the specified pointer id in position units per second.
     // Returns false and sets the velocity components to zero if there is no movement
     // information for the pointer.
     bool getVelocity(uint32_t id, float* outVx, float* outVy) const;
+
+    // Gets the active pointer id, or -1 if none.
+    inline int32_t getActivePointerId() const { return mActivePointerId; }
+
+    // Gets a bitset containing all pointer ids from the most recent movement.
+    inline BitSet32 getCurrentPointerIdBits() const { return mMovements[mIndex].idBits; }
 
 private:
     // Number of samples to keep.
@@ -587,7 +609,7 @@ private:
     static const nsecs_t MAX_AGE = 200 * 1000000; // 200 ms
 
     // The minimum duration between samples when estimating velocity.
-    static const nsecs_t MIN_DURATION = 5 * 1000000; // 5 ms
+    static const nsecs_t MIN_DURATION = 10 * 1000000; // 10 ms
 
     struct Movement {
         nsecs_t eventTime;
@@ -597,6 +619,7 @@ private:
 
     uint32_t mIndex;
     Movement mMovements[HISTORY_SIZE];
+    int32_t mActivePointerId;
 };
 
 /*

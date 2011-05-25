@@ -380,7 +380,7 @@ int NativeInputQueue::handleReceiveCallback(int receiveFd, int events, void* dat
 #if DEBUG_DISPATCH_CYCLE
         LOGD("channel '%s' ~ Received motion event.", connection->getInputChannelName());
 #endif
-        inputEventObj = android_view_MotionEvent_fromNative(env,
+        inputEventObj = android_view_MotionEvent_obtainAsCopy(env,
                 static_cast<MotionEvent*>(inputEvent));
         dispatchMethodId = gInputQueueClassInfo.dispatchMotionEvent;
         break;
