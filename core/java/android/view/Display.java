@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.content.res.CompatibilityInfo;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -37,7 +38,7 @@ public class Display {
      * Display gives you access to some information about a particular display
      * connected to the device.
      */
-    Display(int display) {
+    Display(int display, CompatibilityInfo compatInfo) {
         // initalize the statics when this class is first instansiated. This is
         // done here instead of in the static block because Zygote
         synchronized (sStaticInit) {
@@ -45,6 +46,12 @@ public class Display {
                 nativeClassInit();
                 sInitialized = true;
             }
+        }
+        if (compatInfo != null && (compatInfo.isScalingRequired()
+                || !compatInfo.supportsScreen())) {
+            mCompatibilityInfo = compatInfo;
+        } else {
+            mCompatibilityInfo = null;
         }
         mDisplay = display;
         init(display);
@@ -81,6 +88,16 @@ public class Display {
                 // This is just for boot-strapping, initializing the
                 // system process before the window manager is up.
                 outSize.y = getRealHeight();
+            }
+            if (mCompatibilityInfo != null) {
+                synchronized (mTmpMetrics) {
+                    mTmpMetrics.realWidthPixels = outSize.x;
+                    mTmpMetrics.realHeightPixels = outSize.y;
+                    mTmpMetrics.density = mDensity;
+                    mCompatibilityInfo.applyToDisplayMetrics(mTmpMetrics);
+                    outSize.x = mTmpMetrics.widthPixels;
+                    outSize.y = mTmpMetrics.heightPixels;
+                }
             }
         } catch (RemoteException e) {
             Slog.w("Display", "Unable to get display size", e);
@@ -206,6 +223,10 @@ public class Display {
             outMetrics.heightPixels = mTmpPoint.y;
         }
         getNonSizeMetrics(outMetrics);
+
+        if (mCompatibilityInfo != null) {
+            mCompatibilityInfo.applyToDisplayMetrics(outMetrics);
+        }
     }
 
     /**
@@ -249,7 +270,8 @@ public class Display {
     
     private native void init(int display);
 
-    private int         mDisplay;
+    private final CompatibilityInfo mCompatibilityInfo;
+    private final int   mDisplay;
     // Following fields are initialized from native code
     private int         mPixelFormat;
     private float       mRefreshRate;
@@ -258,6 +280,7 @@ public class Display {
     private float       mDpiY;
     
     private final Point mTmpPoint = new Point();
+    private final DisplayMetrics mTmpMetrics = new DisplayMetrics();
     private float mLastGetTime;
 
     private static final Object sStaticInit = new Object();
@@ -268,27 +291,8 @@ public class Display {
      * Returns a display object which uses the metric's width/height instead.
      * @hide
      */
-    public static Display createMetricsBasedDisplay(int displayId, DisplayMetrics metrics) {
-        return new CompatibleDisplay(displayId, metrics);
-    }
-
-    private static class CompatibleDisplay extends Display {
-        private final DisplayMetrics mMetrics;
-
-        private CompatibleDisplay(int displayId, DisplayMetrics metrics) {
-            super(displayId);
-            mMetrics = metrics;
-        }
-
-        @Override
-        public int getWidth() {
-            return mMetrics.widthPixels;
-        }
-
-        @Override
-        public int getHeight() {
-            return mMetrics.heightPixels;
-        }
+    public static Display createCompatibleDisplay(int displayId, CompatibilityInfo compat) {
+        return new Display(displayId, compat);
     }
 }
 

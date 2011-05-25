@@ -16,6 +16,9 @@
 
 package android.view;
 
+import java.util.HashMap;
+
+import android.content.res.CompatibilityInfo;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.AndroidRuntimeException;
@@ -75,9 +78,92 @@ public class WindowManagerImpl implements WindowManager {
     public static final int ADD_MULTIPLE_SINGLETON = -7;
     public static final int ADD_PERMISSION_DENIED = -8;
 
-    public static WindowManagerImpl getDefault()
-    {
-        return mWindowManager;
+    private View[] mViews;
+    private ViewRoot[] mRoots;
+    private WindowManager.LayoutParams[] mParams;
+
+    private final static Object sLock = new Object();
+    private final static WindowManagerImpl sWindowManager = new WindowManagerImpl();
+    private final static HashMap<CompatibilityInfo, WindowManager> sCompatWindowManagers
+            = new HashMap<CompatibilityInfo, WindowManager>();
+
+    static class CompatModeWrapper implements WindowManager {
+        private final WindowManager mWindowManager;
+        private final Display mDefaultDisplay;
+
+        CompatModeWrapper(WindowManager wm, CompatibilityInfo ci) {
+            mWindowManager = wm;
+
+            // Use the original display if there is no compatibility mode
+            // to apply, or the underlying window manager is already a
+            // compatibility mode wrapper.  (We assume that if it is a
+            // wrapper, it is applying the same compatibility mode.)
+            if (ci == null || wm instanceof CompatModeWrapper
+                    || (!ci.isScalingRequired() && ci.supportsScreen())) {
+                mDefaultDisplay = mWindowManager.getDefaultDisplay();
+            } else {
+                //mDefaultDisplay = mWindowManager.getDefaultDisplay();
+                mDefaultDisplay = Display.createCompatibleDisplay(
+                        mWindowManager.getDefaultDisplay().getDisplayId(), ci);
+            }
+        }
+
+        @Override
+        public void addView(View view, android.view.ViewGroup.LayoutParams params) {
+            mWindowManager.addView(view, params);
+        }
+
+        @Override
+        public void updateViewLayout(View view, android.view.ViewGroup.LayoutParams params) {
+            mWindowManager.updateViewLayout(view, params);
+
+        }
+
+        @Override
+        public void removeView(View view) {
+            mWindowManager.removeView(view);
+        }
+
+        @Override
+        public Display getDefaultDisplay() {
+            return mDefaultDisplay;
+        }
+
+        @Override
+        public void removeViewImmediate(View view) {
+            mWindowManager.removeViewImmediate(view);
+        }
+
+        @Override
+        public boolean isHardwareAccelerated() {
+            return mWindowManager.isHardwareAccelerated();
+        }
+
+    }
+
+    public static WindowManagerImpl getDefault() {
+        return sWindowManager;
+    }
+
+    public static WindowManager getDefault(CompatibilityInfo compatInfo) {
+        if (compatInfo == null || (!compatInfo.isScalingRequired()
+                && compatInfo.supportsScreen())) {
+            return sWindowManager;
+        }
+
+        synchronized (sLock) {
+            // NOTE: It would be cleaner to move the implementation of
+            // WindowManagerImpl into a static inner class, and have this
+            // public impl just call into that.  Then we can make multiple
+            // instances of WindowManagerImpl for compat mode rather than
+            // having to make wrappers.
+            WindowManager wm = sCompatWindowManagers.get(compatInfo);
+            if (wm == null) {
+                wm = new CompatModeWrapper(sWindowManager, compatInfo);
+                sCompatWindowManagers.put(compatInfo, wm);
+            }
+            return wm;
+        }
     }
     
     public boolean isHardwareAccelerated() {
@@ -341,12 +427,8 @@ public class WindowManagerImpl implements WindowManager {
     }
     
     public Display getDefaultDisplay() {
-        return new Display(Display.DEFAULT_DISPLAY);
+        return new Display(Display.DEFAULT_DISPLAY, null);
     }
-
-    private View[] mViews;
-    private ViewRoot[] mRoots;
-    private WindowManager.LayoutParams[] mParams;
 
     private static void removeItem(Object[] dst, Object[] src, int index)
     {
@@ -376,6 +458,4 @@ public class WindowManagerImpl implements WindowManager {
             return -1;
         }
     }
-
-    private static WindowManagerImpl mWindowManager = new WindowManagerImpl();
 }

@@ -20,7 +20,6 @@ import android.content.res.CompatibilityInfo.Translator;
 import android.graphics.*;
 import android.os.Parcelable;
 import android.os.Parcel;
-import android.util.DisplayMetrics;
 import android.util.Log;
 
 /**
@@ -174,9 +173,9 @@ public class Surface implements Parcelable {
     private int mSurfaceGenerationId;
     private String mName;
 
-    // The display metrics used to provide the pseudo canvas size for applications
-    // running in compatibility mode. This is set to null for non compatibility mode.
-    private DisplayMetrics mCompatibleDisplayMetrics;
+    // The Translator for density compatibility mode.  This is used for scaling
+    // the canvas to perform the appropriate density transformation.
+    private Translator mCompatibilityTranslator;
 
     // A matrix to scale the matrix set by application. This is set to null for
     // non compatibility mode.
@@ -263,14 +262,20 @@ public class Surface implements Parcelable {
 
         @Override
         public int getWidth() {
-            return mCompatibleDisplayMetrics == null ?
-                    super.getWidth() : mCompatibleDisplayMetrics.widthPixels;
+            int w = super.getWidth();
+            if (mCompatibilityTranslator != null) {
+                w = (int)(w * mCompatibilityTranslator.applicationInvertedScale + .5f);
+            }
+            return w;
         }
 
         @Override
         public int getHeight() {
-            return mCompatibleDisplayMetrics == null ?
-                    super.getHeight() : mCompatibleDisplayMetrics.heightPixels;
+            int h = super.getHeight();
+            if (mCompatibilityTranslator != null) {
+                h = (int)(h * mCompatibilityTranslator.applicationInvertedScale + .5f);
+            }
+            return h;
         }
 
         @Override
@@ -297,10 +302,9 @@ public class Surface implements Parcelable {
     }
 
     /**
-     * Sets the display metrics used to provide canvas's width/height in compatibility mode.
+     * Sets the translator used to scale canvas's width/height in compatibility mode.
      */
-    void setCompatibleDisplayMetrics(DisplayMetrics metrics, Translator translator) {
-        mCompatibleDisplayMetrics = metrics;
+    void setCompatibilityTranslator(Translator translator) {
         if (translator != null) {
             float appScale = translator.applicationScale;
             mCompatibleMatrix = new Matrix();
