@@ -82,12 +82,12 @@ public final class MifareClassic extends BasicTagTechnology {
             {(byte)0xA0,(byte)0xA1,(byte)0xA2,(byte)0xA3,(byte)0xA4,(byte)0xA5};
     /**
      * The well-known key for tags formatted according to the
-     * NDEF on Mifare Classic specification.
+     * NDEF on MIFARE Classic specification.
      */
     public static final byte[] KEY_NFC_FORUM =
             {(byte)0xD3,(byte)0xF7,(byte)0xD3,(byte)0xF7,(byte)0xD3,(byte)0xF7};
 
-    /** A Mifare Classic compatible card of unknown type */
+    /** A MIFARE Classic compatible card of unknown type */
     public static final int TYPE_UNKNOWN = -1;
     /** A MIFARE Classic tag */
     public static final int TYPE_CLASSIC = 0;
@@ -141,7 +141,7 @@ public final class MifareClassic extends BasicTagTechnology {
     public MifareClassic(Tag tag) throws RemoteException {
         super(tag, TagTechnology.MIFARE_CLASSIC);
 
-        NfcA a = NfcA.get(tag);  // Mifare Classic is always based on NFC a
+        NfcA a = NfcA.get(tag);  // MIFARE Classic is always based on NFC a
 
         mIsEmulated = false;
 
@@ -192,7 +192,7 @@ public final class MifareClassic extends BasicTagTechnology {
             // Stack incorrectly reported a MifareClassic. We cannot handle this
             // gracefully - we have no idea of the memory layout. Bail.
             throw new RuntimeException(
-                    "Tag incorrectly enumerated as Mifare Classic, SAK = " + a.getSak());
+                    "Tag incorrectly enumerated as MIFARE Classic, SAK = " + a.getSak());
         }
     }
 
@@ -221,8 +221,8 @@ public final class MifareClassic extends BasicTagTechnology {
 
     /**
      * Return true if the tag is emulated, determined at discovery time.
-     * These are actually smart-cards that emulate a Mifare Classic interface.
-     * They can be treated identically to a Mifare Classic tag.
+     * These are actually smart-cards that emulate a MIFARE Classic interface.
+     * They can be treated identically to a MIFARE Classic tag.
      * @hide
      */
     public boolean isEmulated() {
@@ -571,8 +571,8 @@ public final class MifareClassic extends BasicTagTechnology {
     private static void validateSector(int sector) {
         // Do not be too strict on upper bounds checking, since some cards
         // have more addressable memory than they report. For example,
-        // Mifare Plus 2k cards will appear as Mifare Classic 1k cards when in
-        // Mifare Classic compatibility mode.
+        // MIFARE Plus 2k cards will appear as MIFARE Classic 1k cards when in
+        // MIFARE Classic compatibility mode.
         // Note that issuing a command to an out-of-bounds block is safe - the
         // tag should report error causing IOException. This validation is a
         // helper to guard against obvious programming mistakes.
