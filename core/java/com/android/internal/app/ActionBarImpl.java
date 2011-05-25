@@ -16,25 +16,27 @@
 
 package com.android.internal.app;
 
+import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.SubMenuBuilder;
-import com.android.internal.widget.AbsActionBarView;
 import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarView;
+import com.android.internal.widget.ScrollingTabContainerView;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.TimeInterpolator;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.view.ActionMode;
@@ -43,10 +45,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
-import android.view.animation.DecelerateInterpolator;
-import android.widget.HorizontalScrollView;
 import android.widget.SpinnerAdapter;
 
 import java.lang.ref.WeakReference;
@@ -71,7 +70,7 @@ public class ActionBarImpl extends ActionBar {
     private ActionBarContextView mContextView;
     private ActionBarContainer mSplitView;
     private View mContentView;
-    private ViewGroup mExternalTabView;
+    private ScrollingTabContainerView mTabScrollView;
 
     private ArrayList<TabImpl> mTabs = new ArrayList<TabImpl>();
 
@@ -90,15 +89,16 @@ public class ActionBarImpl extends ActionBar {
     private static final int INVALID_POSITION = -1;
 
     private int mContextDisplayMode;
+    private boolean mHasEmbeddedTabs;
+    private int mContentHeight;
 
     final Handler mHandler = new Handler();
+    Runnable mTabSelector;
 
     private Animator mCurrentShowAnim;
     private Animator mCurrentModeAnim;
     private boolean mShowHideAnimationEnabled;
     boolean mWasHiddenBeforeMode;
-
-    private static final TimeInterpolator sFadeOutInterpolator = new DecelerateInterpolator();
 
     final AnimatorListener mHideListener = new AnimatorListenerAdapter() {
         @Override
@@ -150,21 +150,59 @@ public class ActionBarImpl extends ActionBar {
                     "with a compatible window decor layout");
         }
 
+        mHasEmbeddedTabs = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.action_bar_embed_tabs);
         mActionView.setContextView(mContextView);
         mContextDisplayMode = mActionView.isSplitActionBar() ?
                 CONTEXT_DISPLAY_SPLIT : CONTEXT_DISPLAY_NORMAL;
 
-        if (!mActionView.hasEmbeddedTabs()) {
-            HorizontalScrollView tabScroller = new HorizontalScrollView(mContext);
-            ViewGroup tabContainer = mActionView.createTabContainer();
-            tabScroller.setHorizontalFadingEdgeEnabled(true);
-            tabScroller.addView(tabContainer);
+        TypedArray a = mContext.obtainStyledAttributes(null, R.styleable.ActionBar);
+        mContentHeight = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
+        a.recycle();
+    }
+
+    public void onConfigurationChanged(Configuration newConfig) {
+        mHasEmbeddedTabs = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.action_bar_embed_tabs);
+
+        // Switch tab layout configuration if needed
+        if (!mHasEmbeddedTabs) {
+            mActionView.setEmbeddedTabView(null);
+            mContainerView.setTabContainer(mTabScrollView);
+        } else {
+            mContainerView.setTabContainer(null);
+            if (mTabScrollView != null) {
+                mTabScrollView.setVisibility(View.VISIBLE);
+            }
+            mActionView.setEmbeddedTabView(mTabScrollView);
+        }
+
+        TypedArray a = mContext.obtainStyledAttributes(null, R.styleable.ActionBar);
+        mContentHeight = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
+        a.recycle();
+
+        if (mTabScrollView != null) {
+            mTabScrollView.getLayoutParams().height = mContentHeight;
+            mTabScrollView.requestLayout();
+        }
+    }
+
+    private void ensureTabsExist() {
+        if (mTabScrollView != null) {
+            return;
+        }
+
+        ScrollingTabContainerView tabScroller = mActionView.createTabContainer();
+
+        if (mHasEmbeddedTabs) {
+            tabScroller.setVisibility(View.VISIBLE);
+            mActionView.setEmbeddedTabView(tabScroller);
+        } else {
             tabScroller.setVisibility(getNavigationMode() == NAVIGATION_MODE_TABS ?
                     View.VISIBLE : View.GONE);
-            mActionView.setExternalTabLayout(tabContainer);
             mContainerView.setTabContainer(tabScroller);
-            mExternalTabView = tabScroller;
         }
+        mTabScrollView = tabScroller;
     }
 
     /**
@@ -269,7 +307,7 @@ public class ActionBarImpl extends ActionBar {
             selectTab(null);
         }
         mTabs.clear();
-        mActionView.removeAllTabs();
+        mTabScrollView.removeAllTabs();
         mSavedTabPosition = INVALID_POSITION;
     }
 
@@ -365,7 +403,8 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void addTab(Tab tab, boolean setSelected) {
-        mActionView.addTab(tab, setSelected);
+        ensureTabsExist();
+        mTabScrollView.addTab(tab, setSelected);
         configureTab(tab, mTabs.size());
         if (setSelected) {
             selectTab(tab);
@@ -374,7 +413,8 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void addTab(Tab tab, int position, boolean setSelected) {
-        mActionView.addTab(tab, position, setSelected);
+        ensureTabsExist();
+        mTabScrollView.addTab(tab, position, setSelected);
         configureTab(tab, position);
         if (setSelected) {
             selectTab(tab);
@@ -393,9 +433,14 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void removeTabAt(int position) {
+        if (mTabScrollView == null) {
+            // No tabs around to remove
+            return;
+        }
+
         int selectedTabPosition = mSelectedTab != null
                 ? mSelectedTab.getPosition() : mSavedTabPosition;
-        mActionView.removeTabAt(position);
+        mTabScrollView.removeTabAt(position);
         TabImpl removedTab = mTabs.remove(position);
         if (removedTab != null) {
             removedTab.setPosition(-1);
@@ -424,9 +469,10 @@ public class ActionBarImpl extends ActionBar {
         if (mSelectedTab == tab) {
             if (mSelectedTab != null) {
                 mSelectedTab.getCallback().onTabReselected(mSelectedTab, trans);
+                mTabScrollView.animateToTab(tab.getPosition());
             }
         } else {
-            mActionView.setTabSelected(tab != null ? tab.getPosition() : Tab.INVALID_POSITION);
+            mTabScrollView.setTabSelected(tab != null ? tab.getPosition() : Tab.INVALID_POSITION);
             if (mSelectedTab != null) {
                 mSelectedTab.getCallback().onTabUnselected(mSelectedTab, trans);
             }
@@ -705,7 +751,9 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public Tab setCustomView(View view) {
             mCustomView = view;
-            if (mPosition >= 0) mActionView.updateTab(mPosition);
+            if (mPosition >= 0) {
+                mTabScrollView.updateTab(mPosition);
+            }
             return this;
         }
 
@@ -736,7 +784,9 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public Tab setIcon(Drawable icon) {
             mIcon = icon;
-            if (mPosition >= 0) mActionView.updateTab(mPosition);
+            if (mPosition >= 0) {
+                mTabScrollView.updateTab(mPosition);
+            }
             return this;
         }
 
@@ -748,7 +798,9 @@ public class ActionBarImpl extends ActionBar {
         @Override
         public Tab setText(CharSequence text) {
             mText = text;
-            if (mPosition >= 0) mActionView.updateTab(mPosition);
+            if (mPosition >= 0) {
+                mTabScrollView.updateTab(mPosition);
+            }
             return this;
         }
 
@@ -818,15 +870,16 @@ public class ActionBarImpl extends ActionBar {
                 mSavedTabPosition = getSelectedNavigationIndex();
                 selectTab(null);
                 if (!mActionView.hasEmbeddedTabs()) {
-                    mExternalTabView.setVisibility(View.GONE);
+                    mTabScrollView.setVisibility(View.GONE);
                 }
                 break;
         }
         mActionView.setNavigationMode(mode);
         switch (mode) {
             case NAVIGATION_MODE_TABS:
+                ensureTabsExist();
                 if (!mActionView.hasEmbeddedTabs()) {
-                    mExternalTabView.setVisibility(View.VISIBLE);
+                    mTabScrollView.setVisibility(View.VISIBLE);
                 }
                 if (mSavedTabPosition != INVALID_POSITION) {
                     setSelectedNavigationItem(mSavedTabPosition);

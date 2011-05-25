@@ -78,7 +78,7 @@ public class ActionBarView extends AbsActionBarView {
 
     private static final int DEFAULT_CUSTOM_GRAVITY = Gravity.LEFT | Gravity.CENTER_VERTICAL;
     
-    private final int mContentHeight;
+    private int mContentHeight;
 
     private int mNavigationMode;
     private int mDisplayOptions = ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP;
@@ -95,8 +95,7 @@ public class ActionBarView extends AbsActionBarView {
     private TextView mSubtitleView;
     private Spinner mSpinner;
     private LinearLayout mListNavLayout;
-    private HorizontalScrollView mTabScrollView;
-    private ViewGroup mTabLayout;
+    private ScrollingTabContainerView mTabScrollView;
     private View mCustomNavView;
     private ProgressBar mProgressView;
     private ProgressBar mIndeterminateProgressView;
@@ -121,6 +120,8 @@ public class ActionBarView extends AbsActionBarView {
 
     private SpinnerAdapter mSpinnerAdapter;
     private OnNavigationListener mCallback;
+
+    private Runnable mTabSelector;
 
     private final AdapterView.OnItemSelectedListener mNavItemSelectedListener =
             new AdapterView.OnItemSelectedListener() {
@@ -199,8 +200,6 @@ public class ActionBarView extends AbsActionBarView {
         mProgressBarPadding = a.getDimensionPixelOffset(R.styleable.ActionBar_progressBarPadding, 0);
         mItemPadding = a.getDimensionPixelOffset(R.styleable.ActionBar_itemPadding, 0);
 
-        mIncludeTabs = a.getBoolean(R.styleable.ActionBar_embeddedTabs, true);
-
         setDisplayOptions(a.getInt(R.styleable.ActionBar_displayOptions, DISPLAY_DEFAULT));
 
         final int customNavId = a.getResourceId(R.styleable.ActionBar_customNavigationLayout, 0);
@@ -229,6 +228,12 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        removeCallbacks(mTabSelector);
+    }
+
+    @Override
     public boolean shouldDelayChildPressedState() {
         return false;
     }
@@ -245,6 +250,11 @@ public class ActionBarView extends AbsActionBarView {
                 mIndeterminateProgressStyle);
         mIndeterminateProgressView.setId(R.id.progress_circular);
         addView(mIndeterminateProgressView);
+    }
+
+    public void setContentHeight(int height) {
+        mContentHeight = height;
+        requestLayout();
     }
 
     public void setSplitActionBar(boolean splitActionBar) {
@@ -271,8 +281,9 @@ public class ActionBarView extends AbsActionBarView {
         return mIncludeTabs;
     }
 
-    public void setExternalTabLayout(ViewGroup tabLayout) {
-        mTabLayout = tabLayout;
+    public void setEmbeddedTabView(ScrollingTabContainerView tabs) {
+        mTabScrollView = tabs;
+        mIncludeTabs = tabs != null;
     }
 
     public void setCallback(OnNavigationListener callback) {
@@ -489,7 +500,7 @@ public class ActionBarView extends AbsActionBarView {
                 }
                 break;
             case ActionBar.NAVIGATION_MODE_TABS:
-                if (mTabScrollView != null) {
+                if (mTabScrollView != null && mIncludeTabs) {
                     removeView(mTabScrollView);
                 }
             }
@@ -513,8 +524,7 @@ public class ActionBarView extends AbsActionBarView {
                 addView(mListNavLayout);
                 break;
             case ActionBar.NAVIGATION_MODE_TABS:
-                ensureTabsExist();
-                if (mTabScrollView != null) {
+                if (mTabScrollView != null && mIncludeTabs) {
                     addView(mTabScrollView);
                 }
                 break;
@@ -523,24 +533,17 @@ public class ActionBarView extends AbsActionBarView {
             requestLayout();
         }
     }
-    
-    private void ensureTabsExist() {
-        if (!mIncludeTabs) return;
 
-        if (mTabScrollView == null) {
-            mTabScrollView = new HorizontalScrollView(getContext());
-            mTabScrollView.setHorizontalFadingEdgeEnabled(true);
-            mTabLayout = createTabContainer();
-            mTabScrollView.addView(mTabLayout);
-        }
-    }
-
-    public ViewGroup createTabContainer() {
-        ViewGroup result = new LinearLayout(getContext(), null,
+    public ScrollingTabContainerView createTabContainer() {
+        final LinearLayout tabLayout = new LinearLayout(getContext(), null,
                 com.android.internal.R.attr.actionBarTabBarStyle);
-        result.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,
-                mContentHeight));
-        return result;
+        tabLayout.setMeasureWithLargestChildEnabled(true);
+        tabLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, mContentHeight));
+
+        final ScrollingTabContainerView scroller = new ScrollingTabContainerView(mContext);
+        scroller.setTabLayout(tabLayout);
+        return scroller;
     }
 
     public void setDropdownAdapter(SpinnerAdapter adapter) {
@@ -572,51 +575,6 @@ public class ActionBarView extends AbsActionBarView {
     
     public int getDisplayOptions() {
         return mDisplayOptions;
-    }
-
-    private TabView createTabView(ActionBar.Tab tab) {
-        final TabView tabView = new TabView(getContext(), tab);
-        tabView.setFocusable(true);
-
-        if (mTabClickListener == null) {
-            mTabClickListener = new TabClickListener();
-        }
-        tabView.setOnClickListener(mTabClickListener);
-        return tabView;
-    }
-
-    public void addTab(ActionBar.Tab tab, boolean setSelected) {
-        ensureTabsExist();
-        View tabView = createTabView(tab);
-        mTabLayout.addView(tabView);
-        if (setSelected) {
-            tabView.setSelected(true);
-        }
-    }
-
-    public void addTab(ActionBar.Tab tab, int position, boolean setSelected) {
-        ensureTabsExist();
-        final TabView tabView = createTabView(tab);
-        mTabLayout.addView(tabView, position);
-        if (setSelected) {
-            tabView.setSelected(true);
-        }
-    }
-
-    public void updateTab(int position) {
-        ((TabView) mTabLayout.getChildAt(position)).update();
-    }
-
-    public void removeTabAt(int position) {
-        if (mTabLayout != null) {
-            mTabLayout.removeViewAt(position);
-        }
-    }
-
-    public void removeAllTabs() {
-        if (mTabLayout != null) {
-            mTabLayout.removeAllViews();
-        }
     }
 
     @Override
@@ -665,15 +623,6 @@ public class ActionBarView extends AbsActionBarView {
         }
 
         addView(mTitleLayout);
-    }
-
-    public void setTabSelected(int position) {
-        ensureTabsExist();
-        final int tabCount = mTabLayout.getChildCount();
-        for (int i = 0; i < tabCount; i++) {
-            final View child = mTabLayout.getChildAt(i);
-            child.setSelected(i == position);
-        }
     }
 
     public void setContextView(ActionBarContextView view) {
@@ -945,97 +894,6 @@ public class ActionBarView extends AbsActionBarView {
             final int halfProgressHeight = mProgressView.getMeasuredHeight() / 2;
             mProgressView.layout(mProgressBarPadding, -halfProgressHeight,
                     mProgressBarPadding + mProgressView.getMeasuredWidth(), halfProgressHeight);
-        }
-    }
-
-    private static class TabView extends LinearLayout {
-        private ActionBar.Tab mTab;
-        private TextView mTextView;
-        private ImageView mIconView;
-        private View mCustomView;
-
-        public TabView(Context context, ActionBar.Tab tab) {
-            super(context, null, com.android.internal.R.attr.actionBarTabStyle);
-            mTab = tab;
-
-            update();
-
-            setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                    LayoutParams.MATCH_PARENT, 1));
-        }
-
-        public void update() {
-            final ActionBar.Tab tab = mTab;
-            final View custom = tab.getCustomView();
-            if (custom != null) {
-                addView(custom);
-                mCustomView = custom;
-                if (mTextView != null) mTextView.setVisibility(GONE);
-                if (mIconView != null) {
-                    mIconView.setVisibility(GONE);
-                    mIconView.setImageDrawable(null);
-                }
-            } else {
-                if (mCustomView != null) {
-                    removeView(mCustomView);
-                    mCustomView = null;
-                }
-
-                final Drawable icon = tab.getIcon();
-                final CharSequence text = tab.getText();
-
-                if (icon != null) {
-                    if (mIconView == null) {
-                        ImageView iconView = new ImageView(getContext());
-                        LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-                                LayoutParams.WRAP_CONTENT);
-                        lp.gravity = Gravity.CENTER_VERTICAL;
-                        iconView.setLayoutParams(lp);
-                        addView(iconView, 0);
-                        mIconView = iconView;
-                    }
-                    mIconView.setImageDrawable(icon);
-                    mIconView.setVisibility(VISIBLE);
-                } else if (mIconView != null) {
-                    mIconView.setVisibility(GONE);
-                    mIconView.setImageDrawable(null);
-                }
-
-                if (text != null) {
-                    if (mTextView == null) {
-                        TextView textView = new TextView(getContext(), null,
-                                com.android.internal.R.attr.actionBarTabTextStyle);
-                        textView.setSingleLine();
-                        textView.setEllipsize(TruncateAt.END);
-                        LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
-                                LayoutParams.WRAP_CONTENT);
-                        lp.gravity = Gravity.CENTER_VERTICAL;
-                        textView.setLayoutParams(lp);
-                        addView(textView);
-                        mTextView = textView;
-                    }
-                    mTextView.setText(text);
-                    mTextView.setVisibility(VISIBLE);
-                } else {
-                    mTextView.setVisibility(GONE);
-                }
-            }
-        }
-
-        public ActionBar.Tab getTab() {
-            return mTab;
-        }
-    }
-
-    private class TabClickListener implements OnClickListener {
-        public void onClick(View view) {
-            TabView tabView = (TabView) view;
-            tabView.getTab().select();
-            final int tabCount = mTabLayout.getChildCount();
-            for (int i = 0; i < tabCount; i++) {
-                final View child = mTabLayout.getChildAt(i);
-                child.setSelected(child == view);
-            }
         }
     }
 
