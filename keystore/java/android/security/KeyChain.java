@@ -17,9 +17,11 @@ package android.security;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -56,64 +58,123 @@ public final class KeyChain {
     public static final String ACCOUNT_TYPE = "com.android.keychain";
 
     /**
-     * Returns an {@code Intent} for use with {@link
-     * android.app.Activity#startActivityForResult
-     * startActivityForResult}. The result will be returned via {@link
-     * android.app.Activity#onActivityResult onActivityResult} with
-     * {@link android.app.Activity#RESULT_OK RESULT_OK} and the alias
-     * in the returned {@code Intent}'s extra data with key {@link
-     * android.content.Intent#EXTRA_TEXT Intent.EXTRA_TEXT}.
+     * @hide Also used by KeyChainActivity implementation
      */
-    public static Intent chooseAlias() {
-        return new Intent("com.android.keychain.CHOOSER");
+    public static final String EXTRA_RESPONSE = "response";
+
+    /**
+     * Launches an {@code Activity} for the user to select the alias
+     * for a private key and certificate pair for authentication. The
+     * selected alias or null will be returned via the
+     * IKeyChainAliasResponse callback.
+     */
+    public static void choosePrivateKeyAlias(Activity activity, KeyChainAliasResponse response) {
+        if (activity == null) {
+            throw new NullPointerException("activity == null");
+        }
+        if (response == null) {
+            throw new NullPointerException("response == null");
+        }
+        Intent intent = new Intent("com.android.keychain.CHOOSER");
+        intent.putExtra(EXTRA_RESPONSE, new AliasResponse(activity, response));
+        activity.startActivity(intent);
+    }
+
+    private static class AliasResponse extends IKeyChainAliasResponse.Stub {
+        private final Activity activity;
+        private final KeyChainAliasResponse keyChainAliasResponse;
+        private AliasResponse(Activity activity, KeyChainAliasResponse keyChainAliasResponse) {
+            this.activity = activity;
+            this.keyChainAliasResponse = keyChainAliasResponse;
+        }
+        @Override public void alias(String alias) {
+            if (alias == null) {
+                keyChainAliasResponse.alias(null);
+                return;
+            }
+            AccountManager accountManager = AccountManager.get(activity);
+            accountManager.getAuthToken(getAccount(activity),
+                                        alias,
+                                        null,
+                                        activity,
+                                        new AliasAccountManagerCallback(keyChainAliasResponse,
+                                                                        alias),
+                                        null);
+        }
+    }
+
+    private static class AliasAccountManagerCallback implements AccountManagerCallback<Bundle> {
+        private final KeyChainAliasResponse keyChainAliasResponse;
+        private final String alias;
+        private AliasAccountManagerCallback(KeyChainAliasResponse keyChainAliasResponse,
+                                            String alias) {
+            this.keyChainAliasResponse = keyChainAliasResponse;
+            this.alias = alias;
+        }
+        @Override public void run(AccountManagerFuture<Bundle> future) {
+            Bundle bundle;
+            try {
+                bundle = future.getResult();
+            } catch (OperationCanceledException e) {
+                keyChainAliasResponse.alias(null);
+                return;
+            } catch (IOException e) {
+                keyChainAliasResponse.alias(null);
+                return;
+            } catch (AuthenticatorException e) {
+                keyChainAliasResponse.alias(null);
+                return;
+            }
+            String authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+            if (authToken != null) {
+                keyChainAliasResponse.alias(alias);
+            } else {
+                keyChainAliasResponse.alias(null);
+            }
+        }
     }
 
     /**
-     * Returns a new {@code KeyChainResult} instance.
+     * Returns the {@code PrivateKey} for the requested alias, or null
+     * if no there is no result.
      */
-    public static KeyChainResult get(Context context, String alias)
+    public static PrivateKey getPrivateKey(Context context, String alias)
             throws InterruptedException, RemoteException {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
         KeyChainConnection keyChainConnection = bind(context);
         try {
-            // Account is created if necessary during binding of the IKeyChainService
-            AccountManager accountManager = AccountManager.get(context);
-            Account account = accountManager.getAccountsByType(ACCOUNT_TYPE)[0];
-            AccountManagerFuture<Bundle> future = accountManager.getAuthToken(account,
-                                                                              alias,
-                                                                              false,
-                                                                              null,
-                                                                              null);
-            Bundle bundle;
-            try {
-                bundle = future.getResult();
-            } catch (OperationCanceledException e) {
-                throw new AssertionError(e);
-            } catch (IOException e) {
-                throw new AssertionError(e);
-            } catch (AuthenticatorException e) {
-                throw new AssertionError(e);
-            }
-            Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT);
-            if (intent != null) {
-                Bundle result = new Bundle();
-                // we don't want this Eclair compatability flag,
-                // it will prevent onActivityResult from being called
-                intent.setFlags(intent.getFlags() & ~Intent.FLAG_ACTIVITY_NEW_TASK);
-                return new KeyChainResult(intent);
-            }
-
-            String authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+            String authToken = authToken(context, alias);
             if (authToken == null) {
-                throw new AssertionError("Invalid authtoken");
+                return null;
             }
             IKeyChainService keyChainService = keyChainConnection.getService();
             byte[] privateKeyBytes = keyChainService.getPrivateKey(alias, authToken);
+            return toPrivateKey(privateKeyBytes);
+        } finally {
+            keyChainConnection.close();
+        }
+    }
+
+    /**
+     * Returns the {@code X509Certificate} chain for the requested
+     * alias, or null if no there is no result.
+     */
+    public static X509Certificate[] getCertificateChain(Context context, String alias)
+            throws InterruptedException, RemoteException {
+        if (alias == null) {
+            throw new NullPointerException("alias == null");
+        }
+        KeyChainConnection keyChainConnection = bind(context);
+        try {
+            String authToken = authToken(context, alias);
+            if (authToken == null) {
+                return null;
+            }
+            IKeyChainService keyChainService = keyChainConnection.getService();
             byte[] certificateBytes = keyChainService.getCertificate(alias, authToken);
-            return new KeyChainResult(toPrivateKey(privateKeyBytes),
-                                      toCertificate(certificateBytes));
+            return new X509Certificate[] { toCertificate(certificateBytes) };
         } finally {
             keyChainConnection.close();
         }
@@ -144,6 +205,50 @@ public final class KeyChain {
         } catch (CertificateException e) {
             throw new AssertionError(e);
         }
+    }
+
+    private static String authToken(Context context, String alias) {
+        AccountManager accountManager = AccountManager.get(context);
+        AccountManagerFuture<Bundle> future = accountManager.getAuthToken(getAccount(context),
+                                                                          alias,
+                                                                          false,
+                                                                          null,
+                                                                          null);
+        Bundle bundle;
+        try {
+            bundle = future.getResult();
+        } catch (OperationCanceledException e) {
+            throw new AssertionError(e);
+        } catch (IOException e) {
+            // KeyChainAccountAuthenticator doesn't do I/O
+            throw new AssertionError(e);
+        } catch (AuthenticatorException e) {
+            throw new AssertionError(e);
+        }
+        Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT);
+        if (intent != null) {
+            return null;
+        }
+        String authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
+        if (authToken == null) {
+            throw new AssertionError("Invalid authtoken");
+        }
+        return authToken;
+    }
+
+    private static Account getAccount(Context context) {
+        AccountManager accountManager = AccountManager.get(context);
+        Account[] accounts = accountManager.getAccountsByType(ACCOUNT_TYPE);
+        if (accounts.length == 0) {
+            try {
+                // Account is created if necessary during binding of the IKeyChainService
+                bind(context).close();
+            } catch (InterruptedException e) {
+                throw new AssertionError(e);
+            }
+            accounts = accountManager.getAccountsByType(ACCOUNT_TYPE);
+        }
+        return accounts[0];
     }
 
     /**

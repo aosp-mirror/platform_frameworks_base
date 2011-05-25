@@ -15,20 +15,21 @@
  */
 package android.security;
 
+import android.content.Intent;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+
 /**
- * Caller is required to ensure that {@link KeyStore#unlock
- * KeyStore.unlock} was successful.
+ * The KeyChainAliasResponse is the callback for {@link
+ * KeyChain#chooseAlias}.
  *
  * @hide
  */
-interface IKeyChainService {
-    // APIs used by KeyChain
-    byte[] getPrivateKey(String alias, String authToken);
-    byte[] getCertificate(String alias, String authToken);
+public interface KeyChainAliasResponse {
 
-    // APIs used by CertInstaller
-    void installCaCertificate(in byte[] caCertificate);
-
-    // APIs used by Settings
-    boolean reset();
+    /**
+     * Called with the alias of the certificate chosen by the user, or
+     * null if no value was chosen.
+     */
+    public void alias(String alias);
 }

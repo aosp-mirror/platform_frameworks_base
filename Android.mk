@@ -162,6 +162,7 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/view/IInputMethodSession.aidl \
 	core/java/com/android/internal/widget/IRemoteViewsFactory.aidl \
 	core/java/com/android/internal/widget/IRemoteViewsAdapterConnection.aidl \
+	keystore/java/android/security/IKeyChainAliasResponse.aidl \
 	keystore/java/android/security/IKeyChainService.aidl \
 	location/java/android/location/ICountryDetector.aidl \
 	location/java/android/location/ICountryListener.aidl \
