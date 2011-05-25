@@ -2169,6 +2169,8 @@ bool TouchInputMapper::configureSurfaceLocked() {
                 }
             }
 
+            mLocked.orientedRanges.haveOrientation = true;
+
             mLocked.orientedRanges.orientation.axis = AMOTION_EVENT_AXIS_ORIENTATION;
             mLocked.orientedRanges.orientation.source = mTouchSource;
             mLocked.orientedRanges.orientation.min = - M_PI_2;
