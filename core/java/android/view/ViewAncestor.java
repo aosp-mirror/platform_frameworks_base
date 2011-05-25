@@ -26,7 +26,6 @@ import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -229,9 +228,9 @@ public final class ViewAncestor extends Handler implements ViewParent,
     int mScrollY;
     int mCurScrollY;
     Scroller mScroller;
-    Bitmap mResizeBitmap;
-    long mResizeBitmapStartTime;
-    int mResizeBitmapDuration;
+    HardwareLayer mResizeBuffer;
+    long mResizeBufferStartTime;
+    int mResizeBufferDuration;
     static final Interpolator mResizeInterpolator = new AccelerateDecelerateInterpolator();
     private ArrayList<LayoutTransition> mPendingTransitions;
 
@@ -695,10 +694,10 @@ public final class ViewAncestor extends Handler implements ViewParent,
         return mAppVisible ? mView.getVisibility() : View.GONE;
     }
 
-    void disposeResizeBitmap() {
-        if (mResizeBitmap != null) {
-            mResizeBitmap.recycle();
-            mResizeBitmap = null;
+    void disposeResizeBuffer() {
+        if (mResizeBuffer != null) {
+            mResizeBuffer.destroy();
+            mResizeBuffer = null;
         }
     }
 
@@ -842,15 +841,25 @@ public final class ViewAncestor extends Handler implements ViewParent,
                             mAttachInfo.mHardwareRenderer.isEnabled() &&
                             lp != null && !PixelFormat.formatHasAlpha(lp.format)) {
 
-                        disposeResizeBitmap();
+                        disposeResizeBuffer();
 
                         boolean completed = false;
+                        HardwareCanvas canvas = null;
                         try {
-                            mResizeBitmap = Bitmap.createBitmap(mWidth, mHeight,
-                                    Bitmap.Config.ARGB_8888);
-                            mResizeBitmap.setHasAlpha(false);
-                            Canvas canvas = new Canvas(mResizeBitmap);
+                            if (mResizeBuffer == null) {
+                                mResizeBuffer = mAttachInfo.mHardwareRenderer.createHardwareLayer(
+                                        mWidth, mHeight, false);
+                            } else if (mResizeBuffer.getWidth() != mWidth ||
+                                    mResizeBuffer.getHeight() != mHeight) {
+                                mResizeBuffer.resize(mWidth, mHeight);
+                            }
+                            canvas = mResizeBuffer.start(mAttachInfo.mHardwareCanvas);
+                            canvas.setViewport(mWidth, mHeight);
+                            canvas.onPreDraw(null);
+                            final int restoreCount = canvas.save();
+                            
                             canvas.drawColor(0xff000000, PorterDuff.Mode.SRC);
+
                             int yoff;
                             final boolean scrolling = mScroller != null
                                     && mScroller.computeScrollOffset();
@@ -860,22 +869,32 @@ public final class ViewAncestor extends Handler implements ViewParent,
                             } else {
                                 yoff = mScrollY;
                             }
+
                             canvas.translate(0, -yoff);
                             if (mTranslator != null) {
                                 mTranslator.translateCanvas(canvas);
                             }
-                            canvas.setScreenDensity(mAttachInfo.mScalingRequired
-                                    ? DisplayMetrics.DENSITY_DEVICE : 0);
+
                             mView.draw(canvas);
-                            mResizeBitmapStartTime = SystemClock.uptimeMillis();
-                            mResizeBitmapDuration = mView.getResources().getInteger(
+
+                            mResizeBufferStartTime = SystemClock.uptimeMillis();
+                            mResizeBufferDuration = mView.getResources().getInteger(
                                     com.android.internal.R.integer.config_mediumAnimTime);
                             completed = true;
+
+                            canvas.restoreToCount(restoreCount);
                         } catch (OutOfMemoryError e) {
                             Log.w(TAG, "Not enough memory for content change anim buffer", e);
                         } finally {
-                            if (!completed) {
-                                mResizeBitmap = null;
+                            if (canvas != null) {
+                                canvas.onPostDraw();
+                            }
+                            if (mResizeBuffer != null) {
+                                mResizeBuffer.end(mAttachInfo.mHardwareCanvas);
+                                if (!completed) {
+                                    mResizeBuffer.destroy();
+                                    mResizeBuffer = null;
+                                }
                             }
                         }
                     }
@@ -1137,7 +1156,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
                     if (mScroller != null) {
                         mScroller.abortAnimation();
                     }
-                    disposeResizeBitmap();
+                    disposeResizeBuffer();
                 } else if (surfaceGenerationId != mSurface.getGenerationId() &&
                         mSurfaceHolder == null && mAttachInfo.mHardwareRenderer != null) {
                     fullRedrawNeeded = true;
@@ -1524,15 +1543,14 @@ public final class ViewAncestor extends Handler implements ViewParent,
     int mResizeAlpha;
     final Paint mResizePaint = new Paint();
 
-    public void onHardwarePreDraw(Canvas canvas) {
+    public void onHardwarePreDraw(HardwareCanvas canvas) {
         canvas.translate(0, -mHardwareYOffset);
     }
 
-    public void onHardwarePostDraw(Canvas canvas) {
-        if (mResizeBitmap != null) {
-            canvas.translate(0, mHardwareYOffset);
+    public void onHardwarePostDraw(HardwareCanvas canvas) {
+        if (mResizeBuffer != null) {
             mResizePaint.setAlpha(mResizeAlpha);
-            canvas.drawBitmap(mResizeBitmap, 0, 0, mResizePaint);
+            canvas.drawHardwareLayer(mResizeBuffer, 0.0f, mHardwareYOffset, mResizePaint);
         }
     }
 
@@ -1588,15 +1606,15 @@ public final class ViewAncestor extends Handler implements ViewParent,
         boolean scalingRequired = mAttachInfo.mScalingRequired;
 
         int resizeAlpha = 0;
-        if (mResizeBitmap != null) {
-            long deltaTime = SystemClock.uptimeMillis() - mResizeBitmapStartTime;
-            if (deltaTime < mResizeBitmapDuration) {
-                float amt = deltaTime/(float)mResizeBitmapDuration;
+        if (mResizeBuffer != null) {
+            long deltaTime = SystemClock.uptimeMillis() - mResizeBufferStartTime;
+            if (deltaTime < mResizeBufferDuration) {
+                float amt = deltaTime/(float) mResizeBufferDuration;
                 amt = mResizeInterpolator.getInterpolation(amt);
                 animating = true;
                 resizeAlpha = 255 - (int)(amt*255);
             } else {
-                disposeResizeBitmap();
+                disposeResizeBuffer();
             }
         }
 
@@ -1608,7 +1626,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
                 if (mScroller != null) {
                     mScroller.abortAnimation();
                 }
-                disposeResizeBitmap();
+                disposeResizeBuffer();
             }
             return;
         }
@@ -1892,7 +1910,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
         if (scrollY != mScrollY) {
             if (DEBUG_INPUT_RESIZE) Log.v(TAG, "Pan scroll changed: old="
                     + mScrollY + " , new=" + scrollY);
-            if (!immediate && mResizeBitmap == null) {
+            if (!immediate && mResizeBuffer == null) {
                 if (mScroller == null) {
                     mScroller = new Scroller(mView.getContext());
                 }

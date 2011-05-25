@@ -17,7 +17,6 @@
 
 package android.view;
 
-import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -137,14 +136,14 @@ public abstract class HardwareRenderer {
          * 
          * @param canvas The Canvas used to render the view.
          */
-        void onHardwarePreDraw(Canvas canvas);
+        void onHardwarePreDraw(HardwareCanvas canvas);
 
         /**
          * Invoked after a view is drawn by a hardware renderer.
          * 
          * @param canvas The Canvas used to render the view.
          */
-        void onHardwarePostDraw(Canvas canvas);
+        void onHardwarePostDraw(HardwareCanvas canvas);
     }
 
     /**
