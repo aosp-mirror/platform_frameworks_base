@@ -606,6 +606,7 @@ void NativeInputManager::setFocusedApplication(JNIEnv* env, jobject applicationO
         android_server_InputApplication_toNative(env, applicationObj, &application);
         if (application.inputApplicationHandle != NULL) {
             mInputManager->getDispatcher()->setFocusedApplication(&application);
+            return;
         }
     }
     mInputManager->getDispatcher()->setFocusedApplication(NULL);
