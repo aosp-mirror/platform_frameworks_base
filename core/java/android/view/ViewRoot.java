@@ -373,9 +373,8 @@ public final class ViewRoot extends Handler implements ViewParent,
                 CompatibilityInfo compatibilityInfo = resources.getCompatibilityInfo();
                 mTranslator = compatibilityInfo.getTranslator();
 
-                if (mTranslator != null || !compatibilityInfo.supportsScreen()) {
-                    mSurface.setCompatibleDisplayMetrics(resources.getDisplayMetrics(),
-                            mTranslator);
+                if (mTranslator != null) {
+                    mSurface.setCompatibilityTranslator(mTranslator);
                 }
 
                 boolean restore = false;

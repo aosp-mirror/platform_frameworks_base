@@ -35,6 +35,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Resources;
 import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
@@ -78,6 +79,7 @@ import android.content.ClipboardManager;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
@@ -423,7 +425,11 @@ class ContextImpl extends Context {
 
         registerService(WINDOW_SERVICE, new ServiceFetcher() {
                 public Object getService(ContextImpl ctx) {
-                    return WindowManagerImpl.getDefault();
+                    RuntimeException e = new RuntimeException("foo");
+                    e.fillInStackTrace();
+                    Log.i(TAG, "Getting window manager", e);
+                    CompatibilityInfo ci = ctx.mResources.getCompatibilityInfo();
+                    return WindowManagerImpl.getDefault(ci);
                 }});
     }
 

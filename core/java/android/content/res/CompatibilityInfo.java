@@ -125,14 +125,16 @@ public class CompatibilityInfo implements Parcelable {
         if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
             compatFlags |= XLARGE_SCREENS | EXPANDABLE;
         }
-        if (!forceCompat) {
+        if ((appInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
+            compatFlags |= EXPANDABLE;
+        }
+
+        if (forceCompat) {
             // If we are forcing compatibility mode, then ignore an app that
             // just says it is resizable for screens.  We'll only have it fill
             // the screen if it explicitly says it supports the screen size we
             // are running in.
-            if ((appInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
-                compatFlags |= EXPANDABLE;
-            }
+            compatFlags &= ~EXPANDABLE;
         }
 
         boolean supportsScreen = false;
@@ -155,12 +157,10 @@ public class CompatibilityInfo implements Parcelable {
                 break;
         }
 
-        if ((screenLayout&Configuration.SCREENLAYOUT_COMPAT_NEEDED) == 0) {
+        if ((screenLayout&Configuration.SCREENLAYOUT_COMPAT_NEEDED) != 0) {
             if ((compatFlags&EXPANDABLE) != 0) {
                 supportsScreen = true;
-            }
-            if ((compatFlags&EXPANDABLE) == 0 &&
-                    (appInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) == 0) {
+            } else if ((appInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) == 0) {
                 compatFlags |= ALWAYS_COMPAT;
             }
         }
@@ -382,6 +382,9 @@ public class CompatibilityInfo implements Parcelable {
             // This is a larger screen device and the app is not
             // compatible with large screens, so diddle it.
             CompatibilityInfo.updateCompatibleScreenFrame(inoutDm, null, inoutDm);
+        } else {
+            inoutDm.widthPixels = inoutDm.realWidthPixels;
+            inoutDm.heightPixels = inoutDm.realHeightPixels;
         }
 
         if (isScalingRequired()) {
