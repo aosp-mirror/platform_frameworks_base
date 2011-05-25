@@ -95,7 +95,7 @@ public final class MifareUltralight extends BasicTagTechnology {
     public MifareUltralight(Tag tag) throws RemoteException {
         super(tag, TagTechnology.MIFARE_ULTRALIGHT);
 
-        // Check if this could actually be a Mifare
+        // Check if this could actually be a MIFARE
         NfcA a = NfcA.get(tag);
 
         mType = TYPE_UNKNOWN;
