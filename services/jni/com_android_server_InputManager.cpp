@@ -1024,15 +1024,14 @@ static jint android_server_InputManager_nativeInjectInputEvent(JNIEnv* env, jcla
         return gNativeInputManager->getInputManager()->getDispatcher()->injectInputEvent(
                 & keyEvent, injectorPid, injectorUid, syncMode, timeoutMillis);
     } else if (env->IsInstanceOf(inputEventObj, gMotionEventClassInfo.clazz)) {
-        MotionEvent motionEvent;
-        status_t status = android_view_MotionEvent_toNative(env, inputEventObj, & motionEvent);
-        if (status) {
+        const MotionEvent* motionEvent = android_view_MotionEvent_getNativePtr(env, inputEventObj);
+        if (!motionEvent) {
             jniThrowRuntimeException(env, "Could not read contents of MotionEvent object.");
             return INPUT_EVENT_INJECTION_FAILED;
         }
 
         return gNativeInputManager->getInputManager()->getDispatcher()->injectInputEvent(
-                & motionEvent, injectorPid, injectorUid, syncMode, timeoutMillis);
+                motionEvent, injectorPid, injectorUid, syncMode, timeoutMillis);
     } else {
         jniThrowRuntimeException(env, "Invalid input event type.");
         return INPUT_EVENT_INJECTION_FAILED;
