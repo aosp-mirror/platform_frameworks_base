@@ -64,14 +64,21 @@ public:
     /* Gets the absolute location of the pointer. */
     virtual void getPosition(float* outX, float* outY) const = 0;
 
+    enum Transition {
+        // Fade/unfade immediately.
+        TRANSITION_IMMEDIATE,
+        // Fade/unfade gradually.
+        TRANSITION_GRADUAL,
+    };
+
     /* Fades the pointer out now. */
-    virtual void fade() = 0;
+    virtual void fade(Transition transition) = 0;
 
     /* Makes the pointer visible if it has faded out.
      * The pointer never unfades itself automatically.  This method must be called
      * by the client whenever the pointer is moved or a button is pressed and it
      * wants to ensure that the pointer becomes visible again. */
-    virtual void unfade() = 0;
+    virtual void unfade(Transition transition) = 0;
 
     enum Presentation {
         // Show the mouse pointer.
@@ -187,8 +194,8 @@ public:
     virtual uint32_t getButtonState() const;
     virtual void setPosition(float x, float y);
     virtual void getPosition(float* outX, float* outY) const;
-    virtual void fade();
-    virtual void unfade();
+    virtual void fade(Transition transition);
+    virtual void unfade(Transition transition);
 
     virtual void setPresentation(Presentation presentation);
     virtual void setSpots(SpotGesture spotGesture,
@@ -250,7 +257,7 @@ private:
         Presentation presentation;
         bool presentationChanged;
 
-        bool pointerIsFading;
+        int32_t pointerFadeDirection;
         float pointerX;
         float pointerY;
         float pointerAlpha;
@@ -274,7 +281,7 @@ private:
     void startAnimationLocked();
 
     void resetInactivityTimeoutLocked();
-    void sendImmediateInactivityTimeoutLocked();
+    void removeInactivityTimeoutLocked();
     void updatePointerLocked();
 
     Spot* getSpotLocked(uint32_t id);

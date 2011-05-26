@@ -69,10 +69,10 @@ PointerController::PointerController(const sp<PointerControllerPolicyInterface>&
 
     mLocked.inactivityTimeout = INACTIVITY_TIMEOUT_NORMAL;
 
-    mLocked.pointerIsFading = true; // keep the pointer initially faded
+    mLocked.pointerFadeDirection = 0;
     mLocked.pointerX = 0;
     mLocked.pointerY = 0;
-    mLocked.pointerAlpha = 0.0f;
+    mLocked.pointerAlpha = 0.0f; // pointer is initially faded
     mLocked.pointerSprite = mSpriteController->createSprite();
     mLocked.pointerIconChanged = false;
 
@@ -191,23 +191,37 @@ void PointerController::getPosition(float* outX, float* outY) const {
     *outY = mLocked.pointerY;
 }
 
-void PointerController::fade() {
+void PointerController::fade(Transition transition) {
     AutoMutex _l(mLock);
 
-    sendImmediateInactivityTimeoutLocked();
+    // Remove the inactivity timeout, since we are fading now.
+    removeInactivityTimeoutLocked();
+
+    // Start fading.
+    if (transition == TRANSITION_IMMEDIATE) {
+        mLocked.pointerFadeDirection = 0;
+        mLocked.pointerAlpha = 0.0f;
+        updatePointerLocked();
+    } else {
+        mLocked.pointerFadeDirection = -1;
+        startAnimationLocked();
+    }
 }
 
-void PointerController::unfade() {
+void PointerController::unfade(Transition transition) {
     AutoMutex _l(mLock);
 
     // Always reset the inactivity timer.
     resetInactivityTimeoutLocked();
 
-    // Unfade immediately if needed.
-    if (mLocked.pointerIsFading) {
-        mLocked.pointerIsFading = false;
+    // Start unfading.
+    if (transition == TRANSITION_IMMEDIATE) {
+        mLocked.pointerFadeDirection = 0;
         mLocked.pointerAlpha = 1.0f;
         updatePointerLocked();
+    } else {
+        mLocked.pointerFadeDirection = 1;
+        startAnimationLocked();
     }
 }
 
@@ -401,10 +415,20 @@ void PointerController::doAnimate() {
     nsecs_t frameDelay = systemTime(SYSTEM_TIME_MONOTONIC) - mLocked.animationTime;
 
     // Animate pointer fade.
-    if (mLocked.pointerIsFading) {
+    if (mLocked.pointerFadeDirection < 0) {
         mLocked.pointerAlpha -= float(frameDelay) / POINTER_FADE_DURATION;
-        if (mLocked.pointerAlpha <= 0) {
-            mLocked.pointerAlpha = 0;
+        if (mLocked.pointerAlpha <= 0.0f) {
+            mLocked.pointerAlpha = 0.0f;
+            mLocked.pointerFadeDirection = 0;
+        } else {
+            keepAnimating = true;
+        }
+        updatePointerLocked();
+    } else if (mLocked.pointerFadeDirection > 0) {
+        mLocked.pointerAlpha += float(frameDelay) / POINTER_FADE_DURATION;
+        if (mLocked.pointerAlpha >= 1.0f) {
+            mLocked.pointerAlpha = 1.0f;
+            mLocked.pointerFadeDirection = 0;
         } else {
             keepAnimating = true;
         }
@@ -432,12 +456,7 @@ void PointerController::doAnimate() {
 }
 
 void PointerController::doInactivityTimeout() {
-    AutoMutex _l(mLock);
-
-    if (!mLocked.pointerIsFading) {
-        mLocked.pointerIsFading = true;
-        startAnimationLocked();
-    }
+    fade(TRANSITION_GRADUAL);
 }
 
 void PointerController::startAnimationLocked() {
@@ -456,9 +475,8 @@ void PointerController::resetInactivityTimeoutLocked() {
     mLooper->sendMessageDelayed(timeout, mHandler, MSG_INACTIVITY_TIMEOUT);
 }
 
-void PointerController::sendImmediateInactivityTimeoutLocked() {
+void PointerController::removeInactivityTimeoutLocked() {
     mLooper->removeMessages(mHandler, MSG_INACTIVITY_TIMEOUT);
-    mLooper->sendMessage(mHandler, MSG_INACTIVITY_TIMEOUT);
 }
 
 void PointerController::updatePointerLocked() {
