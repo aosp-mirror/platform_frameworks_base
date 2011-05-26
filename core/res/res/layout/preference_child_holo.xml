@@ -26,7 +26,7 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:minWidth="@dimen/preference_widget_width"
+        android:minWidth="@dimen/preference_icon_minWidth"
         android:gravity="center"
         android:orientation="horizontal">
         <ImageView
@@ -40,6 +40,7 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="32dip"
         android:layout_marginRight="6dip"
         android:layout_marginTop="6dip"
         android:layout_marginBottom="6dip"

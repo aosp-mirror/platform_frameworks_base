@@ -152,14 +152,8 @@ public abstract class PreferenceFragment extends Fragment implements
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        if (getResources().getConfiguration().isLayoutSizeAtLeast(
-                Configuration.SCREENLAYOUT_SIZE_LARGE)) {
-            return inflater.inflate(com.android.internal.R.layout.preference_list_fragment_large,
-                    container, false);
-        } else {
-            return inflater.inflate(com.android.internal.R.layout.preference_list_fragment,
-                    container, false);
-        }
+        return inflater.inflate(com.android.internal.R.layout.preference_list_fragment, container,
+                false);
     }
 
     @Override
