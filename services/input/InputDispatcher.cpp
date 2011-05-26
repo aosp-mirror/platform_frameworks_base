@@ -2432,7 +2432,6 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                     // Do the batching magic.
                     batchMotionLocked(motionEntry, eventTime, metaState, pointerCoords,
                             "pending motion event");
-                    mLock.unlock();
                     return; // done!
                 }
             }
