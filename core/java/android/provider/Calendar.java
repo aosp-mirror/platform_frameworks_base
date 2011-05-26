@@ -89,17 +89,17 @@ public final class Calendar {
     protected interface BaseSyncColumns {
 
         /** Generic column for use by sync adapters. */
-        public static final String SYNC1 = "sync1";
+        public static final String CAL_SYNC1 = "cal_sync1";
         /** Generic column for use by sync adapters. */
-        public static final String SYNC2 = "sync2";
+        public static final String CAL_SYNC2 = "cal_sync2";
         /** Generic column for use by sync adapters. */
-        public static final String SYNC3 = "sync3";
+        public static final String CAL_SYNC3 = "cal_sync3";
         /** Generic column for use by sync adapters. */
-        public static final String SYNC4 = "sync4";
+        public static final String CAL_SYNC4 = "cal_sync4";
         /** Generic column for use by sync adapters. */
-        public static final String SYNC5 = "sync5";
+        public static final String CAL_SYNC5 = "cal_sync5";
         /** Generic column for use by sync adapters. */
-        public static final String SYNC6 = "sync6";
+        public static final String CAL_SYNC6 = "cal_sync6";
     }
 
     /**
@@ -264,12 +264,12 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_TIME);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
 
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC1);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC2);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC3);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC4);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC5);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.SYNC6);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.CAL_SYNC1);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.CAL_SYNC2);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.CAL_SYNC3);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.CAL_SYNC4);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.CAL_SYNC5);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.CAL_SYNC6);
 
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.NAME);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
@@ -453,12 +453,11 @@ public final class Calendar {
             CALENDAR_TIMEZONE,
             ACCESS_LEVEL,
             DELETED,
-            SYNC1,
-            SYNC2,
-            SYNC3,
-            SYNC4,
-            SYNC5,
-            SYNC6,
+            CAL_SYNC1,
+            CAL_SYNC2,
+            CAL_SYNC3,
+            CAL_SYNC4,
+ CAL_SYNC5, CAL_SYNC6,
             SYNC_STATE,
         };
     }
@@ -923,7 +922,12 @@ public final class Calendar {
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, EventsColumns.DELETED);
-                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, SYNC1);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CAL_SYNC1);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CAL_SYNC2);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CAL_SYNC3);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CAL_SYNC4);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CAL_SYNC5);
+                DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CAL_SYNC6);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
                         Events.SYNC_DATA1);
 
