@@ -437,6 +437,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/WiktionarySimple "Wiktionary (Simplified)" \
 		-samplecode $(sample_dir)/VoiceRecognitionService \
 		            resources/samples/VoiceRecognitionService "Voice Recognition Service" \
+		-samplecode $(sample_dir)/VoicemailProviderDemo \
+		            resources/samples/VoicemailProviderDemo "Voicemail Provider Demo" \
 		-samplecode $(sample_dir)/XmlAdapters \
 		            resources/samples/XmlAdapters "XML Adapters"
 
