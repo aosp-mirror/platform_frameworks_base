@@ -1021,8 +1021,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final InputMethodInfo currentImi = mMethodMap.get(mCurMethodId);
             for (int i = 0; i < spans.length; ++i) {
                 SuggestionSpan ss = spans[i];
-                if (ss.getNotificationTargetClass() != null) {
+                if (!TextUtils.isEmpty(ss.getNotificationTargetClassName())) {
                     mSecureSuggestionSpans.put(ss, currentImi);
+                    final InputMethodInfo targetImi = mSecureSuggestionSpans.get(ss);
                 }
             }
         }
@@ -1035,11 +1036,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (targetImi != null) {
                 final String[] suggestions = span.getSuggestions();
                 if (index < 0 || index >= suggestions.length) return false;
-                final Class<?> c = span.getNotificationTargetClass();
+                final String className = span.getNotificationTargetClassName();
                 final Intent intent = new Intent();
                 // Ensures that only a class in the original IME package will receive the
                 // notification.
-                intent.setClassName(targetImi.getPackageName(), c.getCanonicalName());
+                intent.setClassName(targetImi.getPackageName(), className);
                 intent.setAction(SuggestionSpan.ACTION_SUGGESTION_PICKED);
                 intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_BEFORE, originalString);
                 intent.putExtra(SuggestionSpan.SUGGESTION_SPAN_PICKED_AFTER, suggestions[index]);
@@ -1145,6 +1146,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
     public boolean showSoftInput(IInputMethodClient client, int flags,
             ResultReceiver resultReceiver) {
         int uid = Binder.getCallingUid();
@@ -1210,6 +1212,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return res;
     }
 
+    @Override
     public boolean hideSoftInput(IInputMethodClient client, int flags,
             ResultReceiver resultReceiver) {
         int uid = Binder.getCallingUid();
@@ -1272,6 +1275,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return res;
     }
 
+    @Override
     public void windowGainedFocus(IInputMethodClient client, IBinder windowToken,
             boolean viewHasFocus, boolean isTextEditor, int softInputMode,
             boolean first, int windowFlags) {
@@ -1373,6 +1377,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
     public void showInputMethodPickerFromClient(IInputMethodClient client) {
         synchronized (mMethodMap) {
             if (mCurClient == null || client == null
@@ -1387,10 +1392,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
     public void setInputMethod(IBinder token, String id) {
         setInputMethodWithSubtypeId(token, id, NOT_A_SUBTYPE_ID);
     }
 
+    @Override
     public void setInputMethodAndSubtype(IBinder token, String id, InputMethodSubtype subtype) {
         synchronized (mMethodMap) {
             if (subtype != null) {
@@ -1402,6 +1409,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
     public void showInputMethodAndSubtypeEnablerFromClient(
             IInputMethodClient client, String inputMethodId) {
         synchronized (mMethodMap) {
@@ -1524,6 +1532,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
     public void hideMySoftInput(IBinder token, int flags) {
         synchronized (mMethodMap) {
             if (token == null || mCurToken != token) {
@@ -1540,6 +1549,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
     public void showMySoftInput(IBinder token, int flags) {
         synchronized (mMethodMap) {
             if (token == null || mCurToken != token) {
@@ -1576,6 +1586,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
     public boolean handleMessage(Message msg) {
         HandlerCaller.SomeArgs args;
         switch (msg.what) {
@@ -1919,6 +1930,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
 
             AlertDialog.OnClickListener adocl = new AlertDialog.OnClickListener() {
+                @Override
                 public void onClick(DialogInterface dialog, int which) {
                     hideInputMethodMenu();
                 }
@@ -1930,6 +1942,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mDialogBuilder = new AlertDialog.Builder(context)
                     .setTitle(com.android.internal.R.string.select_input_method)
                     .setOnCancelListener(new OnCancelListener() {
+                        @Override
                         public void onCancel(DialogInterface dialog) {
                             hideInputMethodMenu();
                         }
@@ -1940,6 +1953,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
             mDialogBuilder.setSingleChoiceItems(mItems, checkedItem,
                     new AlertDialog.OnClickListener() {
+                        @Override
                         public void onClick(DialogInterface dialog, int which) {
                             synchronized (mMethodMap) {
                                 if (mIms == null || mIms.length <= which
@@ -1964,6 +1978,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mDialogBuilder.setPositiveButton(
                         com.android.internal.R.string.configure_input_methods,
                         new DialogInterface.OnClickListener() {
+                            @Override
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 showConfigureInputMethods();
                             }
@@ -1999,6 +2014,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // ----------------------------------------------------------------------
 
+    @Override
     public boolean setInputMethodEnabled(String id, boolean enabled) {
         synchronized (mMethodMap) {
             if (mContext.checkCallingOrSelfPermission(
@@ -2329,6 +2345,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     /**
      * @return Return the current subtype of this input method.
      */
+    @Override
     public InputMethodSubtype getCurrentInputMethodSubtype() {
         boolean subtypeIsSelected = false;
         try {
@@ -2411,6 +2428,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    @Override
     public boolean setCurrentInputMethodSubtype(InputMethodSubtype subtype) {
         synchronized (mMethodMap) {
             if (subtype != null && mCurMethodId != null) {

@@ -19386,7 +19386,6 @@ package android.text.style {
     method public int describeContents();
     method public int getFlags();
     method public java.lang.String getLocale();
-    method public java.lang.Class<?> getNotificationTargetClass();
     method public int getSpanTypeId();
     method public java.lang.String[] getSuggestions();
     method public void writeToParcel(android.os.Parcel, int);

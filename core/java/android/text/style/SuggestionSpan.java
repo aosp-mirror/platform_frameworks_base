@@ -22,7 +22,6 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.text.ParcelableSpan;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -31,8 +30,6 @@ import java.util.Locale;
  * Holds suggestion candidates of words under this span.
  */
 public class SuggestionSpan implements ParcelableSpan {
-    private static final String TAG = SuggestionSpan.class.getSimpleName();
-
     /**
      * Flag for indicating that the input is verbatim. TextView refers to this flag to determine
      * how it displays a word with SuggestionSpan.
@@ -56,7 +53,7 @@ public class SuggestionSpan implements ParcelableSpan {
     private final int mFlags;
     private final String[] mSuggestions;
     private final String mLocaleString;
-    private final Class<?> mNotificationTargetClass;
+    private final String mNotificationTargetClassName;
     private final int mHashCode;
 
     /*
@@ -100,25 +97,20 @@ public class SuggestionSpan implements ParcelableSpan {
         } else {
             mLocaleString = locale.toString();
         }
-        mNotificationTargetClass = notificationTargetClass;
+        if (notificationTargetClass != null) {
+            mNotificationTargetClassName = notificationTargetClass.getCanonicalName();
+        } else {
+            mNotificationTargetClassName = "";
+        }
         mHashCode = hashCodeInternal(
-                mFlags, mSuggestions, mLocaleString, mNotificationTargetClass);
+                mFlags, mSuggestions, mLocaleString, mNotificationTargetClassName);
     }
 
     public SuggestionSpan(Parcel src) {
         mSuggestions = src.readStringArray();
         mFlags = src.readInt();
         mLocaleString = src.readString();
-        Class<?> tempClass = null;
-        try {
-            final String className = src.readString();
-            if (!TextUtils.isEmpty(className)) {
-                tempClass = Class.forName(className);
-            }
-        } catch (ClassNotFoundException e) {
-            Log.i(TAG, "Invalid class name was created.");
-        }
-        mNotificationTargetClass = tempClass;
+        mNotificationTargetClassName = src.readString();
         mHashCode = src.readInt();
     }
 
@@ -137,13 +129,16 @@ public class SuggestionSpan implements ParcelableSpan {
     }
 
     /**
-     * @return The class to notify. The class of the original IME package will receive
+     * @return The name of the class to notify. The class of the original IME package will receive
      * a notification when the user selects one of the suggestions. The notification will include
      * the original string, the suggested replacement string as well as the hashCode of this span.
      * The class will get notified by an intent that has those information.
+     * This is an internal API because only the framework should know the class name.
+     *
+     * @hide
      */
-    public Class<?> getNotificationTargetClass() {
-        return mNotificationTargetClass;
+    public String getNotificationTargetClassName() {
+        return mNotificationTargetClassName;
     }
 
     public int getFlags() {
@@ -160,9 +155,7 @@ public class SuggestionSpan implements ParcelableSpan {
         dest.writeStringArray(mSuggestions);
         dest.writeInt(mFlags);
         dest.writeString(mLocaleString);
-        dest.writeString(mNotificationTargetClass != null
-                ? mNotificationTargetClass.getCanonicalName()
-                : "");
+        dest.writeString(mNotificationTargetClassName);
         dest.writeInt(mHashCode);
     }
 
@@ -172,17 +165,22 @@ public class SuggestionSpan implements ParcelableSpan {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o instanceof SuggestionSpan) {
+            return ((SuggestionSpan)o).hashCode() == mHashCode;
+        }
+        return false;
+    }
+
+    @Override
     public int hashCode() {
         return mHashCode;
     }
 
     private static int hashCodeInternal(int flags, String[] suggestions,String locale,
-            Class<?> notificationTargetClass) {
-        final String cls = notificationTargetClass != null
-                ? notificationTargetClass.getCanonicalName()
-                : "";
-        return Arrays.hashCode(
-                new Object[] {SystemClock.uptimeMillis(), flags, suggestions, locale, cls});
+            String notificationTargetClassName) {
+        return Arrays.hashCode(new Object[] {SystemClock.uptimeMillis(), flags, suggestions, locale,
+                notificationTargetClassName});
     }
 
     public static final Parcelable.Creator<SuggestionSpan> CREATOR =
