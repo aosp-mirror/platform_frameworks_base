@@ -974,8 +974,10 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final int CHECK_EXCESSIVE_WAKE_LOCKS_MSG = 27;
     static final int CLEAR_DNS_CACHE = 28;
     static final int UPDATE_HTTP_PROXY = 29;
+    static final int SHOW_COMPAT_MODE_DIALOG_MSG = 30;
 
     AlertDialog mUidAlert;
+    CompatModeDialog mCompatModeDialog;
 
     final Handler mHandler = new Handler() {
         //public Handler() {
@@ -1274,6 +1276,33 @@ public final class ActivityManagerService extends ActivityManagerNative
                     sendMessageDelayed(nmsg, POWER_CHECK_DELAY);
                 }
             } break;
+            case SHOW_COMPAT_MODE_DIALOG_MSG: {
+                synchronized (ActivityManagerService.this) {
+                    ActivityRecord ar = (ActivityRecord)msg.obj;
+                    if (mCompatModeDialog != null) {
+                        if (mCompatModeDialog.mAppInfo.packageName.equals(
+                                ar.info.applicationInfo.packageName)) {
+                            return;
+                        }
+                        mCompatModeDialog.dismiss();
+                        mCompatModeDialog = null;
+                    }
+                    if (ar != null) {
+                        if (mCompatModePackages.getPackageAskCompatModeLocked(
+                                ar.packageName)) {
+                            int mode = mCompatModePackages.computeCompatModeLocked(
+                                    ar.info.applicationInfo);
+                            if (mode == ActivityManager.COMPAT_MODE_DISABLED
+                                    || mode == ActivityManager.COMPAT_MODE_ENABLED) {
+                                mCompatModeDialog = new CompatModeDialog(
+                                        ActivityManagerService.this, mContext,
+                                        ar.info.applicationInfo);
+                                mCompatModeDialog.show();
+                            }
+                        }
+                    }
+                }
+            }
             }
         }
     };
@@ -2098,6 +2127,18 @@ public final class ActivityManagerService extends ActivityManagerNative
     public void setPackageScreenCompatMode(String packageName, int mode) {
         synchronized (this) {
             mCompatModePackages.setPackageScreenCompatModeLocked(packageName, mode);
+        }
+    }
+
+    public boolean getPackageAskScreenCompat(String packageName) {
+        synchronized (this) {
+            return mCompatModePackages.getPackageAskCompatModeLocked(packageName);
+        }
+    }
+
+    public void setPackageAskScreenCompat(String packageName, boolean ask) {
+        synchronized (this) {
+            mCompatModePackages.setPackageAskCompatModeLocked(packageName, ask);
         }
     }
 
@@ -7827,8 +7868,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         if (dumpAll) {
             pw.println("  mConfigWillChange: " + mMainStack.mConfigWillChange);
             if (mCompatModePackages.getPackages().size() > 0) {
-                pw.print("  mScreenCompatPackages=");
-                pw.println(mCompatModePackages.getPackages());
+                pw.println("  mScreenCompatPackages:");
+                for (Map.Entry<String, Integer> entry
+                        : mCompatModePackages.getPackages().entrySet()) {
+                    String pkg = entry.getKey();
+                    int mode = entry.getValue();
+                    pw.print("    "); pw.print(pkg); pw.print(": ");
+                            pw.print(mode); pw.println();
+                }
             }
         }
         pw.println("  mSleeping=" + mSleeping + " mShuttingDown=" + mShuttingDown);
