@@ -240,10 +240,8 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Pinapayagan ang pagbabago ng mga nakolektang istatistika ng baterya. Hindi para sa paggamit ng mga normal na application."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kontrolin ang system backup at pagbawi"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Pinapayagan ang application na kontrolin ang mekanismo sa pag-backup at pagbalik ng system. Hindi para sa paggamit ng mga normal na application."</string>
-    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
-    <skip />
-    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
-    <skip />
+    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"Kumpirmahin ang isang buong pagpapatakbo ng pag-backup o pagpapanumbalik"</string>
+    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"Pinapayagan ang application na ilunsad ang buong UI ng pagkumpirma ng pag-backup. Hindi gagamitin ng anumang application."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"ipakita ang mga hindi pinahintulutang window"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Pinapayagan ang paglikha ng mga window na nilayon para sa paggamit ng user interface ng pangloob na system. Hindi para sa paggamit ng mga normal na application."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"ipakita ang mga alerto sa antas ng system"</string>
@@ -450,10 +448,8 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Pinapayagan ang isang application na tingnan ang configuration ng lokal na Bluetooth na telepono, at upang gumawa at tumanggap ng mga koneksyon sa mga nakapares na device."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontrolin ang Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Pinapayagan ang application na makipagkomunika sa mga Near Field Communication (NFC) na tag, card, at reader."</string>
-    <!-- no translation found for permlab_vpn (8345800584532175312) -->
-    <skip />
-    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
-    <skip />
+    <string name="permlab_vpn" msgid="8345800584532175312">"harangin at baguhin ang lahat ng trapiko ng network"</string>
+    <string name="permdesc_vpn" msgid="5617893078989944219">"Pinapayagan ang isang application na harangin at suriin ang lahat ng trapiko ng network, halimbawa ang pagtaguyod ng koneksyon na VPN. Maaaring magsubabay, mag-redirect o magbago ng mga network packet ang mga nakakahamak na application nang hindi mo nalalaman."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"huwag paganahin ang keylock"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Pinapayagan ang isang application na huwag paganahin ang keylock at ang anumang nauugnay na seguridad sa password. Ang isang lehitimong halimbawa nito ay ang hindi pagpapagana ng telepono sa keylock kapag nakakatanggap ng papasok na tawag sa telepono, pagkatapos ay muling pagaganahin ang keylock kapag tapos na ang tawag."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"basahin ang mga setting ng sync"</string>
@@ -879,6 +875,18 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Pinapadala ang malaking bilang ng mga SMS na mensahe. Piliin ang \"OK\" upang magpatuloy, o \"Kanselahin\" upang itigil ang pagpapadala."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Kanselahin"</string>
+    <!-- no translation found for sim_removed_title (6227712319223226185) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (2064255102770489459) -->
+    <skip />
+    <!-- no translation found for sim_done_button (827949989369963775) -->
+    <skip />
+    <!-- no translation found for sim_added_title (3719670512889674693) -->
+    <skip />
+    <!-- no translation found for sim_added_message (1209265974048554242) -->
+    <skip />
+    <!-- no translation found for sim_restart_button (4722407842815232347) -->
+    <skip />
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Magtakda ng oras"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Itakda ang petsa"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Itakda"</string>
@@ -1030,10 +1038,7 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"Magnabiga sa home"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Magnabiga pataas"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Higit pang mga pagpipilian"</string>
-    <!-- no translation found for storage_internal (7556050805474115618) -->
-    <skip />
-    <!-- no translation found for storage_sd_card (8921771478629812343) -->
-    <skip />
-    <!-- no translation found for storage_usb (3017954059538517278) -->
-    <skip />
+    <string name="storage_internal" msgid="7556050805474115618">"Panloob na Storage"</string>
+    <string name="storage_sd_card" msgid="8921771478629812343">"SD Card"</string>
+    <string name="storage_usb" msgid="3017954059538517278">"USB storage"</string>
 </resources>

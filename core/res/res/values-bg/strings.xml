@@ -240,10 +240,8 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Разрешава промяна на събраните статистически данни за батерията. Не е предназначено за нормални приложения."</string>
     <string name="permlab_backup" msgid="470013022865453920">"контролиране на създаването и възстановяването на резервни копия на системата"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Разрешава на приложението да контролира системния механизъм за създаване и възстановяване на резервни копия. Не е предназначено за нормални приложения."</string>
-    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
-    <skip />
-    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
-    <skip />
+    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"потвърждаване на пълно резервно копие или възстановяване на операцията"</string>
+    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"Разрешава на приложението да стартира потребителски интерфейс за потвърждаването на пълно резервно копие. Да не се използва от никое приложение."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"показване на неупълномощени прозорци"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Разрешава създаването на прозорци, предназначени за употреба от вътрешния системен потребителски интерфейс. Не е предназначено за нормални приложения."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"показване на сигнали на ниво система"</string>
@@ -450,10 +448,8 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Разрешава на приложението да вижда конфигурацията на локалния Bluetooth телефон и да изгражда и приема връзки със сдвоени устройства."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"контролиране на комуникацията в близкото поле"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Разрешава на приложението да комуникира с маркери, карти и четци, ползващи комуникация в близкото поле (NFC)."</string>
-    <!-- no translation found for permlab_vpn (8345800584532175312) -->
-    <skip />
-    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
-    <skip />
+    <string name="permlab_vpn" msgid="8345800584532175312">"прехващане и промяна на целия трафик от мрежата"</string>
+    <string name="permdesc_vpn" msgid="5617893078989944219">"Разрешава на приложението да прехваща и проверява целия трафик от мрежата, например, за да установи връзка с VPN. Злонамерените приложения могат да наблюдават, пренасочват или променят пакети от мрежата без ваше знание."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"деактивиране на заключването на клавиатурата"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Разрешава на приложението да деактивира заключването на клавиатурата и свързаната защита с парола. Това е допустимо, когато например телефонът деактивира заключването при получаване на входящо обаждане и после го активира отново, когато обаждането завърши."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"четене на настройките за синхронизиране"</string>
@@ -879,6 +875,18 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Изпращат се голям брой SMS съобщения. Изберете „OK“, за да продължите, или „Отказ“, за да спрете изпращането."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Отказ"</string>
+    <!-- no translation found for sim_removed_title (6227712319223226185) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (2064255102770489459) -->
+    <skip />
+    <!-- no translation found for sim_done_button (827949989369963775) -->
+    <skip />
+    <!-- no translation found for sim_added_title (3719670512889674693) -->
+    <skip />
+    <!-- no translation found for sim_added_message (1209265974048554242) -->
+    <skip />
+    <!-- no translation found for sim_restart_button (4722407842815232347) -->
+    <skip />
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Задаване на часа"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Задаване на дата"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Задаване"</string>
@@ -1030,10 +1038,7 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"Придвижване към „Начало“"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Придвижване нагоре"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Още опции"</string>
-    <!-- no translation found for storage_internal (7556050805474115618) -->
-    <skip />
-    <!-- no translation found for storage_sd_card (8921771478629812343) -->
-    <skip />
-    <!-- no translation found for storage_usb (3017954059538517278) -->
-    <skip />
+    <string name="storage_internal" msgid="7556050805474115618">"Вътрешно хранилище"</string>
+    <string name="storage_sd_card" msgid="8921771478629812343">"SD карта"</string>
+    <string name="storage_usb" msgid="3017954059538517278">"USB хранилище"</string>
 </resources>

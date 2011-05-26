@@ -938,6 +938,18 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Vulais Vus trametter in grond dumber da messadis SMS? Tschernì OK per cuntinuar u Interrumper per annullar la spediziun."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Interrumper"</string>
+    <!-- no translation found for sim_removed_title (6227712319223226185) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (2064255102770489459) -->
+    <skip />
+    <!-- no translation found for sim_done_button (827949989369963775) -->
+    <skip />
+    <!-- no translation found for sim_added_title (3719670512889674693) -->
+    <skip />
+    <!-- no translation found for sim_added_message (1209265974048554242) -->
+    <skip />
+    <!-- no translation found for sim_restart_button (4722407842815232347) -->
+    <skip />
     <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
     <skip />
     <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
