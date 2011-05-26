@@ -78,7 +78,9 @@ public class ActionBarContainer extends FrameLayout {
             removeView(mTabContainer);
         }
         mTabContainer = tabView;
-        addView(tabView);
+        if (tabView != null) {
+            addView(tabView);
+        }
     }
 
     public View getTabContainer() {
