@@ -57,6 +57,16 @@ sp<MetaData> MakeAACCodecSpecificData(
         unsigned profile, unsigned sampling_freq_index,
         unsigned channel_configuration);
 
+// Given an MPEG4 video VOL-header chunk (starting with 0x00 0x00 0x01 0x2?)
+// parse it and fill in dimensions, returns true iff successful.
+bool ExtractDimensionsFromVOLHeader(
+        const uint8_t *data, size_t size, int32_t *width, int32_t *height);
+
+bool GetMPEGAudioFrameSize(
+        uint32_t header, size_t *frame_size,
+        int *out_sampling_rate = NULL, int *out_channels = NULL,
+        int *out_bitrate = NULL, int *out_num_samples = NULL);
+
 }  // namespace android
 
 #endif  // AVC_UTILS_H_

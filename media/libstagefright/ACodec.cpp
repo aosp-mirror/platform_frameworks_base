@@ -909,6 +909,8 @@ status_t ACodec::setupVideoDecoder(
         compressionFormat = OMX_VIDEO_CodingMPEG4;
     } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_H263, mime)) {
         compressionFormat = OMX_VIDEO_CodingH263;
+    } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG2, mime)) {
+        compressionFormat = OMX_VIDEO_CodingMPEG2;
     } else {
         TRESPASS();
     }
@@ -1647,6 +1649,10 @@ void ACodec::UninitializedState::onSetup(
         componentName = "OMX.google.aac.decoder";
     } else if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_AUDIO_MPEG)) {
         componentName = "OMX.Nvidia.mp3.decoder";
+    } else if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_VIDEO_MPEG2)) {
+        componentName = "OMX.Nvidia.mpeg2v.decode";
+    } else if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_VIDEO_MPEG4)) {
+        componentName = "OMX.google.mpeg4.decoder";
     } else {
         TRESPASS();
     }
@@ -1670,7 +1676,8 @@ void ACodec::UninitializedState::onSetup(
     mCodec->configureCodec(mime.c_str(), msg);
 
     sp<RefBase> obj;
-    if (msg->findObject("native-window", &obj)) {
+    if (msg->findObject("native-window", &obj)
+            && strncmp("OMX.google.", componentName.c_str(), 11)) {
         sp<NativeWindowWrapper> nativeWindow(
                 static_cast<NativeWindowWrapper *>(obj.get()));
         CHECK(nativeWindow != NULL);

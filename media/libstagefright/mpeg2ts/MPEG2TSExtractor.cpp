@@ -175,7 +175,7 @@ void MPEG2TSExtractor::init() {
         if (!haveVideo) {
             sp<AnotherPacketSource> impl =
                 (AnotherPacketSource *)mParser->getSource(
-                        ATSParser::AVC_VIDEO).get();
+                        ATSParser::VIDEO).get();
 
             if (impl != NULL) {
                 haveVideo = true;
@@ -186,7 +186,7 @@ void MPEG2TSExtractor::init() {
         if (!haveAudio) {
             sp<AnotherPacketSource> impl =
                 (AnotherPacketSource *)mParser->getSource(
-                        ATSParser::MPEG2ADTS_AUDIO).get();
+                        ATSParser::AUDIO).get();
 
             if (impl != NULL) {
                 haveAudio = true;
@@ -194,7 +194,7 @@ void MPEG2TSExtractor::init() {
             }
         }
 
-        if (++numPacketsParsed > 2500) {
+        if (++numPacketsParsed > 10000) {
             break;
         }
     }

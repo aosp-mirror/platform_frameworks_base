@@ -163,7 +163,6 @@ static sp<MediaSource> InstantiateSoftwareCodec(
 
 static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_IMAGE_JPEG, "OMX.TI.JPEG.decode" },
-//    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.Nvidia.mp3.decoder" },
 //    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.TI.MP3.decode" },
     { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.google.mp3.decoder" },
     { MEDIA_MIMETYPE_AUDIO_MPEG, "MP3Decoder" },
@@ -207,6 +206,7 @@ static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_AUDIO_VORBIS, "VorbisDecoder" },
     { MEDIA_MIMETYPE_VIDEO_VPX, "OMX.google.vpx.decoder" },
     { MEDIA_MIMETYPE_VIDEO_VPX, "VPXDecoder" },
+    { MEDIA_MIMETYPE_VIDEO_MPEG2, "OMX.Nvidia.mpeg2v.decode" },
 };
 
 static const CodecInfo kEncoderInfo[] = {
@@ -534,6 +534,10 @@ sp<MediaSource> OMXCodec::Create(
             err = codec->configureCodec(meta, flags);
 
             if (err == OK) {
+                if (!strcmp("OMX.Nvidia.mpeg2v.decode", componentName)) {
+                    codec->mOnlySubmitOneBufferAtOneTime = true;
+                }
+
                 return codec;
             }
 
@@ -1357,6 +1361,8 @@ status_t OMXCodec::setVideoOutputFormat(
         compressionFormat = OMX_VIDEO_CodingH263;
     } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_VPX, mime)) {
         compressionFormat = OMX_VIDEO_CodingVPX;
+    } else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_MPEG2, mime)) {
+        compressionFormat = OMX_VIDEO_CodingMPEG2;
     } else {
         LOGE("Not a supported video mime type: %s", mime);
         CHECK(!"Should not be here. Not a supported video mime type.");

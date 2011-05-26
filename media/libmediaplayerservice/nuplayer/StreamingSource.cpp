@@ -87,7 +87,7 @@ bool NuPlayer::StreamingSource::feedMoreTSData() {
 
 sp<MetaData> NuPlayer::StreamingSource::getFormat(bool audio) {
     ATSParser::SourceType type =
-        audio ? ATSParser::MPEG2ADTS_AUDIO : ATSParser::AVC_VIDEO;
+        audio ? ATSParser::AUDIO : ATSParser::VIDEO;
 
     sp<AnotherPacketSource> source =
         static_cast<AnotherPacketSource *>(mTSParser->getSource(type).get());
@@ -102,7 +102,7 @@ sp<MetaData> NuPlayer::StreamingSource::getFormat(bool audio) {
 status_t NuPlayer::StreamingSource::dequeueAccessUnit(
         bool audio, sp<ABuffer> *accessUnit) {
     ATSParser::SourceType type =
-        audio ? ATSParser::MPEG2ADTS_AUDIO : ATSParser::AVC_VIDEO;
+        audio ? ATSParser::AUDIO : ATSParser::VIDEO;
 
     sp<AnotherPacketSource> source =
         static_cast<AnotherPacketSource *>(mTSParser->getSource(type).get());

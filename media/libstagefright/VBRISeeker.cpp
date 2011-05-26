@@ -20,6 +20,7 @@
 
 #include "include/VBRISeeker.h"
 
+#include "include/avc_utils.h"
 #include "include/MP3Extractor.h"
 
 #include <media/stagefright/foundation/ADebug.h>
@@ -46,7 +47,7 @@ sp<VBRISeeker> VBRISeeker::CreateFromSource(
     uint32_t tmp = U32_AT(&header[0]);
     size_t frameSize;
     int sampleRate;
-    if (!MP3Extractor::get_mp3_frame_size(tmp, &frameSize, &sampleRate)) {
+    if (!GetMPEGAudioFrameSize(tmp, &frameSize, &sampleRate)) {
         return NULL;
     }
 
