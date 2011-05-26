@@ -664,7 +664,7 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"לנווט מחוץ לדף זה?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"בחר \'אישור\' כדי להמשיך או \'ביטול\' כדי להישאר בדף הנוכחי."</string>
     <string name="save_password_label" msgid="6860261758665825069">"אשר"</string>
-    <string name="double_tap_toast" msgid="1068216937244567247">"טיפש: הקש פעמיים כדי להתקרב ולהתרחק."</string>
+    <string name="double_tap_toast" msgid="1068216937244567247">"טיפ: הקש פעמיים כדי להתקרב ולהתרחק."</string>
     <string name="autofill_this_form" msgid="1272247532604569872">"מילוי אוטומטי"</string>
     <string name="setup_autofill" msgid="8154593408885654044">"התקן \'מילוי אוטומטי\'"</string>
     <string name="autofill_address_name_separator" msgid="2504700673286691795">" "</string>
@@ -1019,10 +1019,7 @@
     <string name="choose_account_label" msgid="4191313562041125787">"בחר חשבון"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"הוספה"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"הפחתה"</string>
-    <!-- no translation found for storage_internal (7556050805474115618) -->
-    <skip />
-    <!-- no translation found for storage_sd_card (8921771478629812343) -->
-    <skip />
-    <!-- no translation found for storage_usb (3017954059538517278) -->
-    <skip />
+    <string name="storage_internal" msgid="7556050805474115618">"אחסון פנימי"</string>
+    <string name="storage_sd_card" msgid="8921771478629812343">"כרטיס SD"</string>
+    <string name="storage_usb" msgid="3017954059538517278">"אמצעי אחסון מסוג USB"</string>
 </resources>
