@@ -6000,8 +6000,12 @@ public class WindowManagerService extends IWindowManager.Stub
             mActivityManager.updateConfiguration(null);
         } catch (RemoteException e) {
         }
-        
+
         mPolicy.systemReady();
+
+        synchronized (mWindowMap) {
+            readForcedDisplaySizeLocked();
+        }
     }
 
     // This is an animation that does nothing: it just immediately finishes
@@ -6517,6 +6521,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         ? shortDimen : mInitialDisplayHeight;
             }
             setForcedDisplaySizeLocked(width, height);
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.DISPLAY_SIZE_FORCED, width + "," + height);
         }
     }
 
@@ -6563,7 +6569,29 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    private void readForcedDisplaySizeLocked() {
+        final String str = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.DISPLAY_SIZE_FORCED);
+        if (str == null || str.length() == 0) {
+            return;
+        }
+        final int pos = str.indexOf(',');
+        if (pos <= 0 || str.lastIndexOf(',') != pos) {
+            return;
+        }
+        int width, height;
+        try {
+            width = Integer.parseInt(str.substring(0, pos));
+            height = Integer.parseInt(str.substring(pos+1));
+        } catch (NumberFormatException ex) {
+            return;
+        }
+        setForcedDisplaySizeLocked(width, height);
+    }
+
     private void setForcedDisplaySizeLocked(int width, int height) {
+        Slog.i(TAG, "Using new display size: " + width + "x" + height);
+
         mBaseDisplayWidth = width;
         mBaseDisplayHeight = height;
         mPolicy.setInitialDisplaySize(mBaseDisplayWidth, mBaseDisplayHeight);
@@ -6593,6 +6621,8 @@ public class WindowManagerService extends IWindowManager.Stub
     public void clearForcedDisplaySize() {
         synchronized(mWindowMap) {
             setForcedDisplaySizeLocked(mInitialDisplayWidth, mInitialDisplayHeight);
+            Settings.Secure.putString(mContext.getContentResolver(),
+                    Settings.Secure.DISPLAY_SIZE_FORCED, "");
         }
     }
 
