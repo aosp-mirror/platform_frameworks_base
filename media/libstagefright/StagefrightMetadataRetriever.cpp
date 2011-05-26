@@ -317,6 +317,17 @@ VideoFrame *StagefrightMetadataRetriever::getFrameAtTime(
         return NULL;
     }
 
+    const void *data;
+    uint32_t type;
+    size_t dataSize;
+    if (mExtractor->getMetaData()->findData(kKeyAlbumArt, &type, &data, &dataSize)
+            && mAlbumArt == NULL) {
+        mAlbumArt = new MediaAlbumArt;
+        mAlbumArt->mSize = dataSize;
+        mAlbumArt->mData = new uint8_t[dataSize];
+        memcpy(mAlbumArt->mData, data, dataSize);
+    }
+
     VideoFrame *frame =
         extractVideoFrameWithCodecFlags(
                 &mClient, trackMeta, source, OMXCodec::kPreferSoftwareCodecs,
@@ -408,7 +419,8 @@ void StagefrightMetadataRetriever::parseMetaData() {
     const void *data;
     uint32_t type;
     size_t dataSize;
-    if (meta->findData(kKeyAlbumArt, &type, &data, &dataSize)) {
+    if (meta->findData(kKeyAlbumArt, &type, &data, &dataSize)
+            && mAlbumArt == NULL) {
         mAlbumArt = new MediaAlbumArt;
         mAlbumArt->mSize = dataSize;
         mAlbumArt->mData = new uint8_t[dataSize];
