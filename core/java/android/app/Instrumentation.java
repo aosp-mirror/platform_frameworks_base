@@ -1044,7 +1044,7 @@ public class Instrumentation {
             }
         }
         
-        activity.onCreate(icicle);
+        activity.performCreate(icicle);
         
         if (mActivityMonitors != null) {
             synchronized (mSync) {
