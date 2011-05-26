@@ -392,8 +392,8 @@ public class CompatibilityInfo implements Parcelable {
             // compatible with large screens, so diddle it.
             CompatibilityInfo.updateCompatibleScreenFrame(inoutDm, null, inoutDm);
         } else {
-            inoutDm.widthPixels = inoutDm.realWidthPixels;
-            inoutDm.heightPixels = inoutDm.realHeightPixels;
+            inoutDm.widthPixels = inoutDm.unscaledWidthPixels;
+            inoutDm.heightPixels = inoutDm.unscaledHeightPixels;
         }
 
         if (isScalingRequired()) {
@@ -429,8 +429,8 @@ public class CompatibilityInfo implements Parcelable {
      */
     public static float updateCompatibleScreenFrame(DisplayMetrics dm,
             Rect outRect, DisplayMetrics outDm) {
-        final int width = dm.realWidthPixels;
-        final int height = dm.realHeightPixels;
+        final int width = dm.unscaledWidthPixels;
+        final int height = dm.unscaledHeightPixels;
         int shortSize, longSize;
         if (width < height) {
             shortSize = width;

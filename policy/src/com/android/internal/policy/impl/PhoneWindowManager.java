@@ -55,6 +55,7 @@ import com.android.internal.telephony.ITelephony;
 import com.android.internal.view.BaseInputHandler;
 import com.android.internal.widget.PointerLocationView;
 
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
@@ -739,13 +740,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         mHdmiPlugged = !readHdmiState();
         setHdmiPlugged(!mHdmiPlugged);
-
-        // Note: the Configuration is not stable here, so we cannot load mStatusBarCanHide from
-        // config_statusBarCanHide because the latter depends on the screen size
     }
 
     public void setInitialDisplaySize(int width, int height) {
+        int shortSize;
         if (width > height) {
+            shortSize = height;
             mLandscapeRotation = Surface.ROTATION_0;
             mSeascapeRotation = Surface.ROTATION_180;
             if (mContext.getResources().getBoolean(
@@ -757,6 +757,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mUpsideDownRotation = Surface.ROTATION_90;
             }
         } else {
+            shortSize = width;
             mPortraitRotation = Surface.ROTATION_0;
             mUpsideDownRotation = Surface.ROTATION_180;
             if (mContext.getResources().getBoolean(
@@ -768,6 +769,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mSeascapeRotation = Surface.ROTATION_270;
             }
         }
+
+        // Determine whether the status bar can hide based on the size
+        // of the screen.  We assume sizes > 600dp are tablets where we
+        // will use the system bar.
+        int shortSizeDp = (shortSize*DisplayMetrics.DENSITY_DEVICE)
+                / DisplayMetrics.DENSITY_DEFAULT;
+        mStatusBarCanHide = shortSizeDp < 600;
+        mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
+                mStatusBarCanHide
+                ? com.android.internal.R.dimen.status_bar_height
+                : com.android.internal.R.dimen.system_bar_height);
     }
 
     public void updateSettings() {
@@ -1068,6 +1080,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return STATUS_BAR_LAYER;
     }
 
+    public boolean canStatusBarHide() {
+        return mStatusBarCanHide;
+    }
+
     public int getNonDecorDisplayWidth(int rotation, int fullWidth) {
         return fullWidth;
     }
@@ -1229,13 +1245,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return WindowManagerImpl.ADD_MULTIPLE_SINGLETON;
                 }
                 mStatusBar = win;
-
-                // The Configuration will be stable by now, so we can load this
-                mStatusBarCanHide = mContext.getResources().getBoolean(
-                        com.android.internal.R.bool.config_statusBarCanHide);
-                mStatusBarHeight = mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.status_bar_height);
-
                 break;
             case TYPE_STATUS_BAR_PANEL:
                 mContext.enforceCallingOrSelfPermission(
