@@ -62,6 +62,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class DataConnection extends StateMachine {
     protected static final boolean DBG = true;
+    protected static final boolean VDBG = false;
 
     protected static Object mCountLock = new Object();
     protected static int mCount;
@@ -290,7 +291,7 @@ public abstract class DataConnection extends StateMachine {
             lastFailTime = timeStamp;
             AsyncResult.forMessage(connectionCompletedMsg, cause, new Exception());
         }
-        if (DBG) log("notifyConnection at " + timeStamp + " cause=" + cause);
+        if (DBG) log("notifyConnectionCompleted at " + timeStamp + " cause=" + cause);
 
         connectionCompletedMsg.sendToTarget();
     }
@@ -301,12 +302,14 @@ public abstract class DataConnection extends StateMachine {
      * @param dp is the DisconnectParams.
      */
     private void notifyDisconnectCompleted(DisconnectParams dp) {
-        if (DBG) log("NotifyDisconnectCompleted");
+        if (VDBG) log("NotifyDisconnectCompleted");
 
         if (dp.onCompletedMsg != null) {
             Message msg = dp.onCompletedMsg;
-            log(String.format("msg=%s msg.obj=%s", msg.toString(),
+            if (VDBG) {
+                log(String.format("msg=%s msg.obj=%s", msg.toString(),
                     ((msg.obj instanceof String) ? (String) msg.obj : "<no-reason>")));
+            }
             AsyncResult.forMessage(msg);
             msg.sendToTarget();
         }
@@ -472,7 +475,7 @@ public abstract class DataConnection extends StateMachine {
             result = DataCallState.SetupResult.ERR_RilError;
             result.mFailCause = FailCause.fromInt(response.status);
         } else {
-            log("onSetupConnectionCompleted received DataCallState: " + response);
+            if (DBG) log("onSetupConnectionCompleted received DataCallState: " + response);
             cid = response.cid;
             // set link properties based on data call response
             result = setLinkProperties(response, mLinkProperties);
@@ -558,53 +561,53 @@ public abstract class DataConnection extends StateMachine {
             switch (msg.what) {
                 case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
                     if (mAc != null) {
-                        log("Disconnecting to previous connection mAc=" + mAc);
+                        if (VDBG) log("Disconnecting to previous connection mAc=" + mAc);
                         mAc.replyToMessage(msg, AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED,
                                 AsyncChannel.STATUS_FULL_CONNECTION_REFUSED_ALREADY_CONNECTED);
                     } else {
                         mAc = new AsyncChannel();
                         mAc.connected(null, getHandler(), msg.replyTo);
-                        log("DcDefaultState: FULL_CONNECTION reply connected");
+                        if (VDBG) log("DcDefaultState: FULL_CONNECTION reply connected");
                         mAc.replyToMessage(msg, AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED,
                                 AsyncChannel.STATUS_SUCCESSFUL, mId, "hi");
                     }
                     break;
                 }
                 case AsyncChannel.CMD_CHANNEL_DISCONNECT: {
-                    log("CMD_CHANNEL_DISCONNECT");
+                    if (VDBG) log("CMD_CHANNEL_DISCONNECT");
                     mAc.disconnect();
                     break;
                 }
                 case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
-                    log("CMD_CHANNEL_DISCONNECTED");
+                    if (VDBG) log("CMD_CHANNEL_DISCONNECTED");
                     mAc = null;
                     break;
                 }
                 case DataConnectionAc.REQ_IS_INACTIVE: {
                     boolean val = getCurrentState() == mInactiveState;
-                    log("REQ_IS_INACTIVE  isInactive=" + val);
+                    if (VDBG) log("REQ_IS_INACTIVE  isInactive=" + val);
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_IS_INACTIVE, val ? 1 : 0);
                     break;
                 }
                 case DataConnectionAc.REQ_GET_CID: {
-                    log("REQ_GET_CID  cid=" + cid);
+                    if (VDBG) log("REQ_GET_CID  cid=" + cid);
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_CID, cid);
                     break;
                 }
                 case DataConnectionAc.REQ_GET_APNSETTING: {
-                    log("REQ_GET_APNSETTING  apnSetting=" + mApn);
+                    if (VDBG) log("REQ_GET_APNSETTING  apnSetting=" + mApn);
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_APNSETTING, mApn);
                     break;
                 }
                 case DataConnectionAc.REQ_GET_LINK_PROPERTIES: {
                     LinkProperties lp = new LinkProperties(mLinkProperties);
-                    log("REQ_GET_LINK_PROPERTIES linkProperties" + lp);
+                    if (VDBG) log("REQ_GET_LINK_PROPERTIES linkProperties" + lp);
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_LINK_PROPERTIES, lp);
                     break;
                 }
                 case DataConnectionAc.REQ_SET_LINK_PROPERTIES_HTTP_PROXY: {
                     ProxyProperties proxy = (ProxyProperties) msg.obj;
-                    log("REQ_SET_LINK_PROPERTIES_HTTP_PROXY proxy=" + proxy);
+                    if (VDBG) log("REQ_SET_LINK_PROPERTIES_HTTP_PROXY proxy=" + proxy);
                     mLinkProperties.setHttpProxy(proxy);
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_SET_LINK_PROPERTIES_HTTP_PROXY);
                     break;
@@ -612,7 +615,7 @@ public abstract class DataConnection extends StateMachine {
                 case DataConnectionAc.REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE: {
                     DataCallState newState = (DataCallState) msg.obj;
                     DataConnectionAc.LinkPropertyChangeAction action = updateLinkProperty(newState);
-                    if (DBG) {
+                    if (VDBG) {
                         log("REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE action="
                             + action + " newState=" + newState);
                     }
@@ -623,18 +626,18 @@ public abstract class DataConnection extends StateMachine {
                 }
                 case DataConnectionAc.REQ_GET_LINK_CAPABILITIES: {
                     LinkCapabilities lc = new LinkCapabilities(mCapabilities);
-                    log("REQ_GET_LINK_CAPABILITIES linkCapabilities" + lc);
+                    if (VDBG) log("REQ_GET_LINK_CAPABILITIES linkCapabilities" + lc);
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_LINK_CAPABILITIES, lc);
                     break;
                 }
                 case DataConnectionAc.REQ_RESET:
-                    if (DBG) log("DcDefaultState: msg.what=REQ_RESET");
+                    if (VDBG) log("DcDefaultState: msg.what=REQ_RESET");
                     clearSettings();
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_RESET);
                     transitionTo(mInactiveState);
                     break;
                 case DataConnectionAc.REQ_GET_REFCOUNT: {
-                    log("REQ_GET_REFCOUNT  refCount=" + mRefCount);
+                    if (VDBG) log("REQ_GET_REFCOUNT  refCount=" + mRefCount);
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_REFCOUNT, mRefCount);
                     break;
                 }
@@ -666,7 +669,8 @@ public abstract class DataConnection extends StateMachine {
 
                 default:
                     if (DBG) {
-                        log("DcDefaultState: shouldn't happen but ignore msg.what=" + msg.what);
+                        log("DcDefaultState: shouldn't happen but ignore msg.what=0x" +
+                                Integer.toHexString(msg.what));
                     }
                     break;
             }
@@ -685,13 +689,13 @@ public abstract class DataConnection extends StateMachine {
         private DisconnectParams mDisconnectParams = null;
 
         public void setEnterNotificationParams(ConnectionParams cp, FailCause cause) {
-            log("DcInactiveState: setEnterNoticationParams cp,cause");
+            if (VDBG) log("DcInactiveState: setEnterNoticationParams cp,cause");
             mConnectionParams = cp;
             mFailCause = cause;
         }
 
         public void setEnterNotificationParams(DisconnectParams dp) {
-          log("DcInactiveState: setEnterNoticationParams dp");
+            if (VDBG) log("DcInactiveState: setEnterNoticationParams dp");
             mDisconnectParams = dp;
         }
 
@@ -707,11 +711,11 @@ public abstract class DataConnection extends StateMachine {
              * call to isInactive.
              */
             if ((mConnectionParams != null) && (mFailCause != null)) {
-                log("DcInactiveState: enter notifyConnectCompleted");
+                if (VDBG) log("DcInactiveState: enter notifyConnectCompleted");
                 notifyConnectCompleted(mConnectionParams, mFailCause);
             }
             if (mDisconnectParams != null) {
-              log("DcInactiveState: enter notifyDisconnectCompleted");
+                if (VDBG) log("DcInactiveState: enter notifyDisconnectCompleted");
                 notifyDisconnectCompleted(mDisconnectParams);
             }
         }
@@ -751,7 +755,10 @@ public abstract class DataConnection extends StateMachine {
                     break;
 
                 default:
-                    if (DBG) log("DcInactiveState nothandled msg.what=" + msg.what);
+                    if (VDBG) {
+                        log("DcInactiveState nothandled msg.what=0x" +
+                                Integer.toHexString(msg.what));
+                    }
                     retVal = NOT_HANDLED;
                     break;
             }
@@ -856,7 +863,10 @@ public abstract class DataConnection extends StateMachine {
                     break;
 
                 default:
-                    if (DBG) log("DcActivatingState not handled msg.what=" + msg.what);
+                    if (VDBG) {
+                        log("DcActivatingState not handled msg.what=0x" +
+                                Integer.toHexString(msg.what));
+                    }
                     retVal = NOT_HANDLED;
                     break;
             }
@@ -873,7 +883,7 @@ public abstract class DataConnection extends StateMachine {
         private FailCause mFailCause = null;
 
         public void setEnterNotificationParams(ConnectionParams cp, FailCause cause) {
-            log("DcInactiveState: setEnterNoticationParams cp,cause");
+            if (VDBG) log("DcInactiveState: setEnterNoticationParams cp,cause");
             mConnectionParams = cp;
             mFailCause = cause;
         }
@@ -887,7 +897,7 @@ public abstract class DataConnection extends StateMachine {
              * call to isActive.
              */
             if ((mConnectionParams != null) && (mFailCause != null)) {
-                log("DcActiveState: enter notifyConnectCompleted");
+                if (VDBG) log("DcActiveState: enter notifyConnectCompleted");
                 notifyConnectCompleted(mConnectionParams, mFailCause);
             }
         }
@@ -930,7 +940,10 @@ public abstract class DataConnection extends StateMachine {
                     break;
 
                 default:
-                    if (DBG) log("DcActiveState nothandled msg.what=" + msg.what);
+                    if (VDBG) {
+                        log("DcActiveState not handled msg.what=0x" +
+                                Integer.toHexString(msg.what));
+                    }
                     retVal = NOT_HANDLED;
                     break;
             }
@@ -972,7 +985,10 @@ public abstract class DataConnection extends StateMachine {
                     break;
 
                 default:
-                    if (DBG) log("DcDisconnectingState not handled msg.what=" + msg.what);
+                    if (VDBG) {
+                        log("DcDisconnectingState not handled msg.what=0x" +
+                                Integer.toHexString(msg.what));
+                    }
                     retVal = NOT_HANDLED;
                     break;
             }
@@ -1014,9 +1030,9 @@ public abstract class DataConnection extends StateMachine {
                     break;
 
                 default:
-                    if (DBG) {
-                        log("DcDisconnectionErrorCreatingConnection not handled msg.what="
-                                + msg.what);
+                    if (VDBG) {
+                        log("DcDisconnectionErrorCreatingConnection not handled msg.what=0x"
+                                + Integer.toHexString(msg.what));
                     }
                     retVal = NOT_HANDLED;
                     break;
