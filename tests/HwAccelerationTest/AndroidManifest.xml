@@ -376,7 +376,7 @@
 
         <activity
                 android:name="ListActivity"
-                android:label="_List">
+                android:label="__List">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
