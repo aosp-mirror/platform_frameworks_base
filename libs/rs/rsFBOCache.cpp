@@ -51,13 +51,6 @@ void FBOCache::bindColorTarget(Context *rsc, Allocation *a, uint32_t slot) {
             LOGE("Invalid Color Target");
             return;
         }
-        if (a->getIsTexture()) {
-            if (a->getTextureID() == 0) {
-                a->deferredUploadToTexture(rsc);
-            }
-        } else if (a->getRenderTargetID() == 0) {
-            a->deferredAllocateRenderTarget(rsc);
-        }
     }
     mHal.state.colorTargets[slot].set(a);
     mDirty = true;
@@ -68,13 +61,6 @@ void FBOCache::bindDepthTarget(Context *rsc, Allocation *a) {
         if (!a->getIsRenderTarget()) {
             LOGE("Invalid Depth Target");
             return;
-        }
-        if (a->getIsTexture()) {
-            if (a->getTextureID() == 0) {
-                a->deferredUploadToTexture(rsc);
-            }
-        } else if (a->getRenderTargetID() == 0) {
-            a->deferredAllocateRenderTarget(rsc);
         }
     }
     mHal.state.depthTarget.set(a);
@@ -95,12 +81,12 @@ void FBOCache::setup(Context *rsc) {
     }
 
     if (mHal.state.depthTarget.get() != NULL) {
-        mHal.state.depthTarget->uploadCheck(rsc);
+        mHal.state.depthTarget->syncAll(rsc, RS_ALLOCATION_USAGE_SCRIPT);
     }
 
     for (uint32_t i = 0; i < mHal.state.colorTargetsCount; i ++) {
         if (mHal.state.colorTargets[i].get() != NULL) {
-            mHal.state.colorTargets[i]->uploadCheck(rsc);
+            mHal.state.colorTargets[i]->syncAll(rsc, RS_ALLOCATION_USAGE_SCRIPT);
         }
     }
 

@@ -270,6 +270,13 @@ public:
         ObjectBase::zeroAllUserRef(this);
     }
 
+    struct Hal {
+        void * drv;
+
+        RsdHalFunctions funcs;
+    };
+    Hal mHal;
+
     ElementState mStateElement;
     TypeState mStateType;
 

@@ -17,6 +17,7 @@
 
 #include "rsdCore.h"
 #include "rsdFrameBuffer.h"
+#include "rsdAllocation.h"
 
 #include "rsContext.h"
 #include "rsFBOCache.h"
@@ -59,21 +60,19 @@ void checkError(const Context *rsc) {
 
 void setDepthAttachment(const Context *rsc, const FBOCache *fb) {
     if (fb->mHal.state.depthTarget.get() != NULL) {
-        if (fb->mHal.state.depthTarget->getIsTexture()) {
-            uint32_t texID = fb->mHal.state.depthTarget->getTextureID();
+        DrvAllocation *drv = (DrvAllocation *)fb->mHal.state.depthTarget->mHal.drv;
+
+        if (drv->textureID) {
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                   GL_TEXTURE_2D, texID, 0);
+                                   GL_TEXTURE_2D, drv->textureID, 0);
         } else {
-            uint32_t texID = fb->mHal.state.depthTarget->getRenderTargetID();
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                      GL_RENDERBUFFER, texID);
+                                      GL_RENDERBUFFER, drv->renderTargetID);
         }
     } else {
         // Reset last attachment
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                  GL_RENDERBUFFER, 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                               GL_TEXTURE_2D, 0, 0);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
     }
 }
 
@@ -82,14 +81,14 @@ void setColorAttachment(const Context *rsc, const FBOCache *fb) {
     for (uint32_t i = 0; i < fb->mHal.state.colorTargetsCount; i ++) {
         uint32_t texID = 0;
         if (fb->mHal.state.colorTargets[i].get() != NULL) {
-            if (fb->mHal.state.colorTargets[i]->getIsTexture()) {
-                uint32_t texID = fb->mHal.state.colorTargets[i]->getTextureID();
+            DrvAllocation *drv = (DrvAllocation *)fb->mHal.state.colorTargets[i]->mHal.drv;
+
+            if (drv->textureID) {
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                                       GL_TEXTURE_2D, texID, 0);
+                                       GL_TEXTURE_2D, drv->textureID, 0);
             } else {
-                uint32_t texID = fb->mHal.state.depthTarget->getRenderTargetID();
                 glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                                          GL_RENDERBUFFER, texID);
+                                          GL_RENDERBUFFER, drv->renderTargetID);
             }
         } else {
             // Reset last attachment

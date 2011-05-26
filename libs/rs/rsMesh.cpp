@@ -191,28 +191,19 @@ void Mesh::renderPrimitiveRange(Context *rsc, uint32_t primIndex, uint32_t start
         return;
     }
 
-    for (uint32_t ct=0; ct < mHal.state.vertexBuffersCount; ct++) {
-        mHal.state.vertexBuffers[ct]->uploadCheck(rsc);
-    }
-
-    Primitive_t *prim = mHal.state.primitives[primIndex];
-    if (prim->mIndexBuffer.get()) {
-        prim->mIndexBuffer->uploadCheck(rsc);
-    }
-
     mRSC->mHal.funcs.mesh.draw(mRSC, this, primIndex, start, len);
 }
 
 void Mesh::uploadAll(Context *rsc) {
     for (uint32_t ct = 0; ct < mHal.state.vertexBuffersCount; ct ++) {
         if (mHal.state.vertexBuffers[ct].get()) {
-            mHal.state.vertexBuffers[ct]->deferredUploadToBufferObject(rsc);
+            rsc->mHal.funcs.allocation.markDirty(rsc, mHal.state.vertexBuffers[ct].get());
         }
     }
 
     for (uint32_t ct = 0; ct < mHal.state.primitivesCount; ct ++) {
         if (mHal.state.primitives[ct]->mIndexBuffer.get()) {
-            mHal.state.primitives[ct]->mIndexBuffer->deferredUploadToBufferObject(rsc);
+            rsc->mHal.funcs.allocation.markDirty(rsc, mHal.state.primitives[ct]->mIndexBuffer.get());
         }
     }
 }

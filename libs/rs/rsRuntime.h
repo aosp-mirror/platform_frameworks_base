@@ -125,6 +125,12 @@ void rsrSetObject(const Context *, const Script *, ObjectBase **dst, ObjectBase 
 void rsrClearObject(const Context *, const Script *, ObjectBase **dst);
 bool rsrIsObject(const Context *, const Script *, const ObjectBase *src);
 
+void rsrAllocationIncRefs(const Context *, const Allocation *, void *ptr,
+                          size_t elementCount, size_t startOffset);
+void rsrAllocationDecRefs(const Context *, const Allocation *, void *ptr,
+                          size_t elementCount, size_t startOffset);
+
+
 uint32_t rsrToClient(Context *, Script *, int cmdID, void *data, int len);
 uint32_t rsrToClientBlocking(Context *, Script *, int cmdID, void *data, int len);
 const Allocation * rsrGetAllocation(Context *, Script *, const void *ptr);

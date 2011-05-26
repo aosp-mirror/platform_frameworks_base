@@ -16,6 +16,7 @@
 
 
 #include "rsdCore.h"
+#include "rsdAllocation.h"
 #include "rsdProgramVertex.h"
 #include "rsdShader.h"
 #include "rsdShaderCache.h"
@@ -40,9 +41,20 @@ bool rsdProgramVertexInit(const Context *rsc, const ProgramVertex *pv,
     return drv->createShader();
 }
 
+static void SyncProgramConstants(const Context *rsc, const Program *p) {
+    for (uint32_t ct=0; ct < p->mHal.state.texturesCount; ct++) {
+        const Allocation *a = p->mHal.state.textures[ct].get();
+        DrvAllocation *drvAlloc = (DrvAllocation *)a->mHal.drv;
+        if (drvAlloc->uploadDeferred) {
+            rsdAllocationSyncAll(rsc, a, RS_ALLOCATION_USAGE_SCRIPT);
+        }
+    }
+}
+
 void rsdProgramVertexSetActive(const Context *rsc, const ProgramVertex *pv) {
     RsdHal *dc = (RsdHal *)rsc->mHal.drv;
 
+    SyncProgramConstants(rsc, pv);
     dc->gl.shaderCache->setActiveVertex((RsdShader*)pv->mHal.drv);
 }
 
@@ -73,6 +85,7 @@ bool rsdProgramFragmentInit(const Context *rsc, const ProgramFragment *pf,
 void rsdProgramFragmentSetActive(const Context *rsc, const ProgramFragment *pf) {
     RsdHal *dc = (RsdHal *)rsc->mHal.drv;
 
+    SyncProgramConstants(rsc, pf);
     dc->gl.shaderCache->setActiveFragment((RsdShader*)pf->mHal.drv);
 }
 

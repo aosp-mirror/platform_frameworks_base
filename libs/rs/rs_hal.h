@@ -93,6 +93,35 @@ typedef struct {
     } script;
 
     struct {
+        bool (*init)(const Context *rsc, Allocation *alloc, bool forceZero);
+        void (*destroy)(const Context *rsc, Allocation *alloc);
+
+        void (*resize)(const Context *rsc, const Allocation *alloc, const Type *newType,
+                       bool zeroNew);
+        void (*syncAll)(const Context *rsc, const Allocation *alloc, RsAllocationUsageType src);
+        void (*markDirty)(const Context *rsc, const Allocation *alloc);
+
+        void (*data1D)(const Context *rsc, const Allocation *alloc,
+                       uint32_t xoff, uint32_t lod, uint32_t count,
+                       const void *data, uint32_t sizeBytes);
+        void (*data2D)(const Context *rsc, const Allocation *alloc,
+                       uint32_t xoff, uint32_t yoff, uint32_t lod,
+                       RsAllocationCubemapFace face, uint32_t w, uint32_t h,
+                       const void *data, uint32_t sizeBytes);
+        void (*data3D)(const Context *rsc, const Allocation *alloc,
+                       uint32_t xoff, uint32_t yoff, uint32_t zoff,
+                       uint32_t lod, RsAllocationCubemapFace face,
+                       uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes);
+
+        void (*elementData1D)(const Context *rsc, const Allocation *alloc, uint32_t x,
+                              const void *data, uint32_t elementOff, uint32_t sizeBytes);
+        void (*elementData2D)(const Context *rsc, const Allocation *alloc, uint32_t x, uint32_t y,
+                              const void *data, uint32_t elementOff, uint32_t sizeBytes);
+
+
+    } allocation;
+
+    struct {
         bool (*init)(const Context *rsc, const ProgramStore *ps);
         void (*setActive)(const Context *rsc, const ProgramStore *ps);
         void (*destroy)(const Context *rsc, const ProgramStore *ps);

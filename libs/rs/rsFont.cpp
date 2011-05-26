@@ -452,7 +452,8 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
 
     // This will dirty the texture and the shader so next time
     // we draw it will upload the data
-    mTextTexture->deferredUploadToTexture(mRSC);
+
+    mTextTexture->sendDirty(mRSC);
     mFontShaderF->bindTexture(mRSC, 0, mTextTexture.get());
 
     // Some debug code
@@ -490,7 +491,7 @@ void FontState::initRenderState() {
     tmp[2] = RS_PROGRAM_PARAM_TEXTURE_TYPE;
     tmp[3] = RS_TEXTURE_2D;
 
-    mFontShaderFConstant.set(new Allocation(mRSC, inputType,
+    mFontShaderFConstant.set(Allocation::createAllocation(mRSC, inputType,
                                             RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS));
     ProgramFragment *pf = new ProgramFragment(mRSC, shaderString.string(),
                                               shaderString.length(), tmp, 4);
@@ -517,7 +518,8 @@ void FontState::initTextTexture() {
     // We will allocate a texture to initially hold 32 character bitmaps
     Type *texType = Type::getType(mRSC, alphaElem, 1024, 256, 0, false, false);
 
-    Allocation *cacheAlloc = new Allocation(mRSC, texType, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE);
+    Allocation *cacheAlloc = Allocation::createAllocation(mRSC, texType,
+                                RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE);
     mTextTexture.set(cacheAlloc);
     mTextTexture->syncAll(mRSC, RS_ALLOCATION_USAGE_SCRIPT);
 
@@ -545,7 +547,9 @@ void FontState::initVertexArrayBuffers() {
     uint32_t numIndicies = mMaxNumberOfQuads * 6;
     Type *indexType = Type::getType(mRSC, indexElem, numIndicies, 0, 0, false, false);
 
-    Allocation *indexAlloc = new Allocation(mRSC, indexType, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_VERTEX);
+    Allocation *indexAlloc = Allocation::createAllocation(mRSC, indexType,
+                                                          RS_ALLOCATION_USAGE_SCRIPT |
+                                                          RS_ALLOCATION_USAGE_GRAPHICS_VERTEX);
     uint16_t *indexPtr = (uint16_t*)indexAlloc->getPtr();
 
     // Four verts, two triangles , six indices per quad
@@ -562,7 +566,7 @@ void FontState::initVertexArrayBuffers() {
         indexPtr[i6 + 5] = i4 + 3;
     }
 
-    indexAlloc->deferredUploadToBufferObject(mRSC);
+    indexAlloc->sendDirty(mRSC);
 
     const Element *posElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 3);
     const Element *texElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 2);
@@ -576,7 +580,8 @@ void FontState::initVertexArrayBuffers() {
                                          mMaxNumberOfQuads * 4,
                                          0, 0, false, false);
 
-    Allocation *vertexAlloc = new Allocation(mRSC, vertexDataType, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_VERTEX);
+    Allocation *vertexAlloc = Allocation::createAllocation(mRSC, vertexDataType,
+                                                           RS_ALLOCATION_USAGE_SCRIPT);
     mTextMeshPtr = (float*)vertexAlloc->getPtr();
 
     mMesh.set(new Mesh(mRSC, 1, 1));

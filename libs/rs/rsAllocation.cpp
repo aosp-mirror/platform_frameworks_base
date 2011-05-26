@@ -15,11 +15,8 @@
  */
 
 #include "rsContext.h"
-#ifndef ANDROID_RS_SERIALIZE
-#include <GLES/gl.h>
-#include <GLES2/gl2.h>
-#include <GLES/glext.h>
-#endif //ANDROID_RS_SERIALIZE
+#include "rs_hal.h"
+
 
 using namespace android;
 using namespace android::renderscript;
@@ -27,43 +24,26 @@ using namespace android::renderscript;
 Allocation::Allocation(Context *rsc, const Type *type, uint32_t usages,
                        RsAllocationMipmapControl mc)
     : ObjectBase(rsc) {
-    init(rsc, type);
 
+    memset(&mHal, 0, sizeof(mHal));
+    mHal.state.mipmapControl = RS_ALLOCATION_MIPMAP_NONE;
     mHal.state.usageFlags = usages;
     mHal.state.mipmapControl = mc;
 
-    allocScriptMemory();
-    if (mHal.state.type->getElement()->getHasReferences()) {
-        memset(mHal.state.mallocPtr, 0, mHal.state.type->getSizeBytes());
-    }
-    if (!mHal.state.mallocPtr) {
-        LOGE("Allocation::Allocation, alloc failure");
-    }
-}
-
-
-void Allocation::init(Context *rsc, const Type *type) {
-    memset(&mHal, 0, sizeof(mHal));
-    mHal.state.mipmapControl = RS_ALLOCATION_MIPMAP_NONE;
-
-    mCpuWrite = false;
-    mCpuRead = false;
-    mGpuWrite = false;
-    mGpuRead = false;
-
-    mReadWriteRatio = 0;
-    mUpdateSize = 0;
-
-    mTextureID = 0;
-    mBufferID = 0;
-    mRenderTargetID = 0;
-    mUploadDeferred = false;
-
-    mUserBitmapCallback = NULL;
-    mUserBitmapCallbackData = NULL;
-
     mHal.state.type.set(type);
     updateCache();
+}
+
+Allocation * Allocation::createAllocation(Context *rsc, const Type *type, uint32_t usages,
+                              RsAllocationMipmapControl mc) {
+    Allocation *a = new Allocation(rsc, type, usages, mc);
+
+    if (!rsc->mHal.funcs.allocation.init(rsc, a, type->getElement()->getHasReferences())) {
+        rsc->setError(RS_ERROR_FATAL_DRIVER, "Allocation::Allocation, alloc failure");
+        delete a;
+        return NULL;
+    }
+    return a;
 }
 
 void Allocation::updateCache() {
@@ -78,304 +58,36 @@ void Allocation::updateCache() {
 }
 
 Allocation::~Allocation() {
-    if (mUserBitmapCallback != NULL) {
-        mUserBitmapCallback(mUserBitmapCallbackData);
-        mHal.state.mallocPtr = NULL;
-    }
-    freeScriptMemory();
-#ifndef ANDROID_RS_SERIALIZE
-    if (mBufferID) {
-        // Causes a SW crash....
-        //LOGV(" mBufferID %i", mBufferID);
-        //glDeleteBuffers(1, &mBufferID);
-        //mBufferID = 0;
-    }
-    if (mTextureID) {
-        glDeleteTextures(1, &mTextureID);
-        mTextureID = 0;
-    }
-    if (mRenderTargetID) {
-        glDeleteRenderbuffers(1, &mRenderTargetID);
-        mRenderTargetID = 0;
-    }
-#endif //ANDROID_RS_SERIALIZE
+    mRSC->mHal.funcs.allocation.destroy(mRSC, this);
 }
-
-void Allocation::setCpuWritable(bool) {
-}
-
-void Allocation::setGpuWritable(bool) {
-}
-
-void Allocation::setCpuReadable(bool) {
-}
-
-void Allocation::setGpuReadable(bool) {
-}
-
-bool Allocation::fixAllocation() {
-    return false;
-}
-
-void Allocation::deferredUploadToTexture(const Context *rsc) {
-    mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
-    mUploadDeferred = true;
-}
-
-void Allocation::deferredAllocateRenderTarget(const Context *rsc) {
-    mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_RENDER_TARGET;
-    mUploadDeferred = true;
-}
-
-uint32_t Allocation::getGLTarget() const {
-#ifndef ANDROID_RS_SERIALIZE
-    if (getIsTexture()) {
-        if (mHal.state.type->getDimFaces()) {
-            return GL_TEXTURE_CUBE_MAP;
-        } else {
-            return GL_TEXTURE_2D;
-        }
-    }
-    if (getIsBufferObject()) {
-        return GL_ARRAY_BUFFER;
-    }
-#endif //ANDROID_RS_SERIALIZE
-    return 0;
-}
-
-void Allocation::allocScriptMemory() {
-    rsAssert(!mHal.state.mallocPtr);
-    mHal.state.mallocPtr = malloc(mHal.state.type->getSizeBytes());
-}
-
-void Allocation::freeScriptMemory() {
-    if (mHal.state.mallocPtr) {
-        free(mHal.state.mallocPtr);
-        mHal.state.mallocPtr = NULL;
-    }
-}
-
 
 void Allocation::syncAll(Context *rsc, RsAllocationUsageType src) {
-    rsAssert(src == RS_ALLOCATION_USAGE_SCRIPT);
-
-    if (getIsTexture()) {
-        uploadToTexture(rsc);
-    }
-    if (getIsBufferObject()) {
-        uploadToBufferObject(rsc);
-    }
-    if (getIsRenderTarget() && !getIsTexture()) {
-        allocateRenderTarget(rsc);
-    }
-
-    mUploadDeferred = false;
-}
-
-void Allocation::uploadToTexture(const Context *rsc) {
-#ifndef ANDROID_RS_SERIALIZE
-    mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE;
-    GLenum type = mHal.state.type->getElement()->getComponent().getGLType();
-    GLenum format = mHal.state.type->getElement()->getComponent().getGLFormat();
-
-    if (!type || !format) {
-        return;
-    }
-
-    if (!mHal.state.mallocPtr) {
-        return;
-    }
-
-    bool isFirstUpload = false;
-
-    if (!mTextureID) {
-        glGenTextures(1, &mTextureID);
-
-        if (!mTextureID) {
-            // This should not happen, however, its likely the cause of the
-            // white sqare bug.
-            // Force a crash to 1: restart the app, 2: make sure we get a bugreport.
-            LOGE("Upload to texture failed to gen mTextureID");
-            rsc->dumpDebug();
-            mUploadDeferred = true;
-            return;
-        }
-        isFirstUpload = true;
-    }
-
-    upload2DTexture(isFirstUpload);
-
-    if (!(mHal.state.usageFlags & RS_ALLOCATION_USAGE_SCRIPT)) {
-        freeScriptMemory();
-    }
-
-    //rsc->checkError("Allocation::uploadToTexture");
-#endif //ANDROID_RS_SERIALIZE
-}
-
-void Allocation::allocateRenderTarget(const Context *rsc) {
-#ifndef ANDROID_RS_SERIALIZE
-    mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_RENDER_TARGET;
-
-    GLenum format = mHal.state.type->getElement()->getComponent().getGLFormat();
-    if (!format) {
-        return;
-    }
-
-    if (!mRenderTargetID) {
-        glGenRenderbuffers(1, &mRenderTargetID);
-
-        if (!mRenderTargetID) {
-            // This should generally not happen
-            LOGE("allocateRenderTarget failed to gen mRenderTargetID");
-            rsc->dumpDebug();
-            return;
-        }
-        glBindRenderbuffer(GL_RENDERBUFFER, mRenderTargetID);
-        glRenderbufferStorage(GL_RENDERBUFFER, format,
-                              mHal.state.type->getDimX(),
-                              mHal.state.type->getDimY());
-    }
-#endif //ANDROID_RS_SERIALIZE
-}
-
-#ifndef ANDROID_RS_SERIALIZE
-const static GLenum gFaceOrder[] = {
-    GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-    GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
-    GL_TEXTURE_CUBE_MAP_POSITIVE_Y,
-    GL_TEXTURE_CUBE_MAP_NEGATIVE_Y,
-    GL_TEXTURE_CUBE_MAP_POSITIVE_Z,
-    GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-};
-#endif //ANDROID_RS_SERIALIZE
-
-void Allocation::update2DTexture(const void *ptr, uint32_t xoff, uint32_t yoff,
-                                 uint32_t lod, RsAllocationCubemapFace face,
-                                 uint32_t w, uint32_t h) {
-#ifndef ANDROID_RS_SERIALIZE
-    GLenum type = mHal.state.type->getElement()->getComponent().getGLType();
-    GLenum format = mHal.state.type->getElement()->getComponent().getGLFormat();
-    GLenum target = (GLenum)getGLTarget();
-    rsAssert(mTextureID);
-    glBindTexture(target, mTextureID);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    GLenum t = GL_TEXTURE_2D;
-    if (mHal.state.hasFaces) {
-        t = gFaceOrder[face];
-    }
-    glTexSubImage2D(t, lod, xoff, yoff, w, h, format, type, ptr);
-#endif //ANDROID_RS_SERIALIZE
-}
-
-void Allocation::upload2DTexture(bool isFirstUpload) {
-#ifndef ANDROID_RS_SERIALIZE
-    GLenum type = mHal.state.type->getElement()->getComponent().getGLType();
-    GLenum format = mHal.state.type->getElement()->getComponent().getGLFormat();
-
-    GLenum target = (GLenum)getGLTarget();
-    glBindTexture(target, mTextureID);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    uint32_t faceCount = 1;
-    if (mHal.state.hasFaces) {
-        faceCount = 6;
-    }
-
-    for (uint32_t face = 0; face < faceCount; face ++) {
-        for (uint32_t lod = 0; lod < mHal.state.type->getLODCount(); lod++) {
-            const uint8_t *p = (const uint8_t *)mHal.state.mallocPtr;
-            p += mHal.state.type->getLODFaceOffset(lod, (RsAllocationCubemapFace)face, 0, 0);
-
-            GLenum t = GL_TEXTURE_2D;
-            if (mHal.state.hasFaces) {
-                t = gFaceOrder[face];
-            }
-
-            if (isFirstUpload) {
-                glTexImage2D(t, lod, format,
-                             mHal.state.type->getLODDimX(lod), mHal.state.type->getLODDimY(lod),
-                             0, format, type, p);
-            } else {
-                glTexSubImage2D(t, lod, 0, 0,
-                                mHal.state.type->getLODDimX(lod), mHal.state.type->getLODDimY(lod),
-                                format, type, p);
-            }
-        }
-    }
-
-    if (mHal.state.mipmapControl == RS_ALLOCATION_MIPMAP_ON_SYNC_TO_TEXTURE) {
-        glGenerateMipmap(target);
-    }
-#endif //ANDROID_RS_SERIALIZE
-}
-
-void Allocation::deferredUploadToBufferObject(const Context *rsc) {
-    mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_VERTEX;
-    mUploadDeferred = true;
-}
-
-void Allocation::uploadToBufferObject(const Context *rsc) {
-#ifndef ANDROID_RS_SERIALIZE
-    rsAssert(!mHal.state.type->getDimY());
-    rsAssert(!mHal.state.type->getDimZ());
-
-    mHal.state.usageFlags |= RS_ALLOCATION_USAGE_GRAPHICS_VERTEX;
-
-    if (!mBufferID) {
-        glGenBuffers(1, &mBufferID);
-    }
-    if (!mBufferID) {
-        LOGE("Upload to buffer object failed");
-        mUploadDeferred = true;
-        return;
-    }
-    GLenum target = (GLenum)getGLTarget();
-    glBindBuffer(target, mBufferID);
-    glBufferData(target, mHal.state.type->getSizeBytes(), getPtr(), GL_DYNAMIC_DRAW);
-    glBindBuffer(target, 0);
-    //rsc->checkError("Allocation::uploadToBufferObject");
-#endif //ANDROID_RS_SERIALIZE
-}
-
-void Allocation::uploadCheck(Context *rsc) {
-    if (mUploadDeferred) {
-        syncAll(rsc, RS_ALLOCATION_USAGE_SCRIPT);
-    }
+    rsc->mHal.funcs.allocation.syncAll(rsc, this, src);
 }
 
 void Allocation::read(void *data) {
-    memcpy(data, mHal.state.mallocPtr, mHal.state.type->getSizeBytes());
+    memcpy(data, getPtr(), mHal.state.type->getSizeBytes());
 }
 
 void Allocation::data(Context *rsc, uint32_t xoff, uint32_t lod,
                          uint32_t count, const void *data, uint32_t sizeBytes) {
-    uint32_t eSize = mHal.state.type->getElementSizeBytes();
-    uint8_t * ptr = static_cast<uint8_t *>(mHal.state.mallocPtr);
-    ptr += eSize * xoff;
-    uint32_t size = count * eSize;
+    const uint32_t eSize = mHal.state.type->getElementSizeBytes();
 
-    if (size != sizeBytes) {
-        LOGE("Allocation::subData called with mismatched size expected %i, got %i", size, sizeBytes);
+    if ((count * eSize) != sizeBytes) {
+        LOGE("Allocation::subData called with mismatched size expected %i, got %i",
+             (count * eSize), sizeBytes);
         mHal.state.type->dumpLOGV("type info");
         return;
     }
 
-    if (mHal.state.hasReferences) {
-        incRefs(data, count);
-        decRefs(ptr, count);
-    }
-
-    memcpy(ptr, data, size);
-    sendDirty();
-    mUploadDeferred = true;
+    rsc->mHal.funcs.allocation.data1D(rsc, this, xoff, lod, count, data, sizeBytes);
+    sendDirty(rsc);
 }
 
 void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, RsAllocationCubemapFace face,
              uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes) {
-    uint32_t eSize = mHal.state.elementSizeBytes;
-    uint32_t lineSize = eSize * w;
-    uint32_t destW = mHal.state.dimensionX;
+    const uint32_t eSize = mHal.state.elementSizeBytes;
+    const uint32_t lineSize = eSize * w;
 
     //LOGE("data2d %p,  %i %i %i %i %i %i %p %i", this, xoff, yoff, lod, face, w, h, data, sizeBytes);
 
@@ -385,26 +97,8 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t lod, 
         return;
     }
 
-    if (mHal.state.mallocPtr) {
-        const uint8_t *src = static_cast<const uint8_t *>(data);
-        uint8_t *dst = static_cast<uint8_t *>(mHal.state.mallocPtr);
-        dst += mHal.state.type->getLODFaceOffset(lod, face, xoff, yoff);
-
-        //LOGE("            %p  %p  %i  ", dst, src, eSize);
-        for (uint32_t line=yoff; line < (yoff+h); line++) {
-            if (mHal.state.hasReferences) {
-                incRefs(src, w);
-                decRefs(dst, w);
-            }
-            memcpy(dst, src, lineSize);
-            src += lineSize;
-            dst += destW * eSize;
-        }
-        sendDirty();
-        mUploadDeferred = true;
-    } else {
-        update2DTexture(data, xoff, yoff, lod, face, w, h);
-    }
+    rsc->mHal.funcs.allocation.data2D(rsc, this, xoff, yoff, lod, face, w, h, data, sizeBytes);
+    sendDirty(rsc);
 }
 
 void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff,
@@ -415,8 +109,6 @@ void Allocation::data(Context *rsc, uint32_t xoff, uint32_t yoff, uint32_t zoff,
 void Allocation::elementData(Context *rsc, uint32_t x, const void *data,
                                 uint32_t cIdx, uint32_t sizeBytes) {
     uint32_t eSize = mHal.state.elementSizeBytes;
-    uint8_t * ptr = static_cast<uint8_t *>(mHal.state.mallocPtr);
-    ptr += eSize * x;
 
     if (cIdx >= mHal.state.type->getElement()->getFieldCount()) {
         LOGE("Error Allocation::subElementData component %i out of range.", cIdx);
@@ -431,29 +123,19 @@ void Allocation::elementData(Context *rsc, uint32_t x, const void *data,
     }
 
     const Element * e = mHal.state.type->getElement()->getField(cIdx);
-    ptr += mHal.state.type->getElement()->getFieldOffsetBytes(cIdx);
-
     if (sizeBytes != e->getSizeBytes()) {
         LOGE("Error Allocation::subElementData data size %i does not match field size %zu.", sizeBytes, e->getSizeBytes());
         rsc->setError(RS_ERROR_BAD_VALUE, "subElementData bad size.");
         return;
     }
 
-    if (e->getHasReferences()) {
-        e->incRefs(data);
-        e->decRefs(ptr);
-    }
-
-    memcpy(ptr, data, sizeBytes);
-    sendDirty();
-    mUploadDeferred = true;
+    rsc->mHal.funcs.allocation.elementData1D(rsc, this, x, data, cIdx, sizeBytes);
+    sendDirty(rsc);
 }
 
 void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
                                 const void *data, uint32_t cIdx, uint32_t sizeBytes) {
     uint32_t eSize = mHal.state.elementSizeBytes;
-    uint8_t * ptr = static_cast<uint8_t *>(mHal.state.mallocPtr);
-    ptr += eSize * (x + y * mHal.state.dimensionX);
 
     if (x >= mHal.state.dimensionX) {
         LOGE("Error Allocation::subElementData X offset %i out of range.", x);
@@ -474,7 +156,6 @@ void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
     }
 
     const Element * e = mHal.state.type->getElement()->getField(cIdx);
-    ptr += mHal.state.type->getElement()->getFieldOffsetBytes(cIdx);
 
     if (sizeBytes != e->getSizeBytes()) {
         LOGE("Error Allocation::subElementData data size %i does not match field size %zu.", sizeBytes, e->getSizeBytes());
@@ -482,14 +163,8 @@ void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
         return;
     }
 
-    if (e->getHasReferences()) {
-        e->incRefs(data);
-        e->decRefs(ptr);
-    }
-
-    memcpy(ptr, data, sizeBytes);
-    sendDirty();
-    mUploadDeferred = true;
+    rsc->mHal.funcs.allocation.elementData2D(rsc, this, x, y, data, cIdx, sizeBytes);
+    sendDirty(rsc);
 }
 
 void Allocation::addProgramToDirty(const Program *p) {
@@ -519,11 +194,8 @@ void Allocation::dumpLOGV(const char *prefix) const {
         mHal.state.type->dumpLOGV(s.string());
     }
 
-    LOGV("%s allocation ptr=%p mCpuWrite=%i, mCpuRead=%i, mGpuWrite=%i, mGpuRead=%i",
-          prefix, mHal.state.mallocPtr, mCpuWrite, mCpuRead, mGpuWrite, mGpuRead);
-
-    LOGV("%s allocation mUsageFlags=0x04%x, mMipmapControl=0x%04x, mTextureID=%i, mBufferID=%i",
-          prefix, mHal.state.usageFlags, mHal.state.mipmapControl, mTextureID, mBufferID);
+    LOGV("%s allocation ptr=%p  mUsageFlags=0x04%x, mMipmapControl=0x%04x",
+         prefix, getPtr(), mHal.state.usageFlags, mHal.state.mipmapControl);
 }
 
 void Allocation::serialize(OStream *stream) const {
@@ -541,7 +213,7 @@ void Allocation::serialize(OStream *stream) const {
     // Write how much data we are storing
     stream->addU32(dataSize);
     // Now write the data
-    stream->addByteArray(mHal.state.mallocPtr, dataSize);
+    stream->addByteArray(getPtr(), dataSize);
 }
 
 Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
@@ -569,7 +241,7 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
         return NULL;
     }
 
-    Allocation *alloc = new Allocation(rsc, type, RS_ALLOCATION_USAGE_SCRIPT);
+    Allocation *alloc = Allocation::createAllocation(rsc, type, RS_ALLOCATION_USAGE_SCRIPT);
     alloc->setName(name.string(), name.size());
 
     uint32_t count = dataSize / type->getElementSizeBytes();
@@ -581,12 +253,13 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
     return alloc;
 }
 
-void Allocation::sendDirty() const {
+void Allocation::sendDirty(const Context *rsc) const {
 #ifndef ANDROID_RS_SERIALIZE
     for (size_t ct=0; ct < mToDirtyList.size(); ct++) {
         mToDirtyList[ct]->forceDirty();
     }
 #endif //ANDROID_RS_SERIALIZE
+    mRSC->mHal.funcs.allocation.markDirty(rsc, this);
 }
 
 void Allocation::incRefs(const void *ptr, size_t ct, size_t startOff) const {
@@ -619,24 +292,16 @@ void Allocation::copyRange1D(Context *rsc, const Allocation *src, int32_t srcOff
 }
 
 void Allocation::resize1D(Context *rsc, uint32_t dimX) {
-    Type *t = mHal.state.type->cloneAndResize1D(rsc, dimX);
-
     uint32_t oldDimX = mHal.state.dimensionX;
     if (dimX == oldDimX) {
         return;
     }
 
+    Type *t = mHal.state.type->cloneAndResize1D(rsc, dimX);
     if (dimX < oldDimX) {
-        decRefs(mHal.state.mallocPtr, oldDimX - dimX, dimX);
+        decRefs(getPtr(), oldDimX - dimX, dimX);
     }
-    mHal.state.mallocPtr = realloc(mHal.state.mallocPtr, t->getSizeBytes());
-
-    if (dimX > oldDimX) {
-        const Element *e = mHal.state.type->getElement();
-        uint32_t stride = e->getSizeBytes();
-        memset(((uint8_t *)mHal.state.mallocPtr) + stride * oldDimX, 0, stride * (dimX - oldDimX));
-    }
-
+    rsc->mHal.funcs.allocation.resize(rsc, this, t, mHal.state.hasReferences);
     mHal.state.type.set(t);
     updateCache();
 }
@@ -654,16 +319,6 @@ namespace android {
 namespace renderscript {
 
 static void AllocationGenerateScriptMips(RsContext con, RsAllocation va);
-
-void rsi_AllocationUploadToTexture(Context *rsc, RsAllocation va, bool genmip, uint32_t baseMipLevel) {
-    Allocation *alloc = static_cast<Allocation *>(va);
-    alloc->deferredUploadToTexture(rsc);
-}
-
-void rsi_AllocationUploadToBufferObject(Context *rsc, RsAllocation va) {
-    Allocation *alloc = static_cast<Allocation *>(va);
-    alloc->deferredUploadToBufferObject(rsc);
-}
 
 static void mip565(const Adapter2D &out, const Adapter2D &in) {
     uint32_t w = out.getDimX();
@@ -735,8 +390,8 @@ static void mip(const Adapter2D &out, const Adapter2D &in) {
 
 void rsi_AllocationSyncAll(Context *rsc, RsAllocation va, RsAllocationUsageType src) {
     Allocation *a = static_cast<Allocation *>(va);
+    a->sendDirty(rsc);
     a->syncAll(rsc, src);
-    a->sendDirty();
 }
 
 void rsi_AllocationGenerateMipmaps(Context *rsc, RsAllocation va) {
@@ -816,7 +471,10 @@ static void AllocationGenerateScriptMips(RsContext con, RsAllocation va) {
 RsAllocation rsi_AllocationCreateTyped(Context *rsc, RsType vtype,
                                        RsAllocationMipmapControl mips,
                                        uint32_t usages) {
-    Allocation * alloc = new Allocation(rsc, static_cast<Type *>(vtype), usages, mips);
+    Allocation * alloc = Allocation::createAllocation(rsc, static_cast<Type *>(vtype), usages, mips);
+    if (!alloc) {
+        return NULL;
+    }
     alloc->incUserRef();
     return alloc;
 }
@@ -838,7 +496,7 @@ RsAllocation rsi_AllocationCreateFromBitmap(Context *rsc, RsType vtype,
         AllocationGenerateScriptMips(rsc, texAlloc);
     }
 
-    texAlloc->deferredUploadToTexture(rsc);
+    texAlloc->sendDirty(rsc);
     return texAlloc;
 }
 
@@ -878,7 +536,7 @@ RsAllocation rsi_AllocationCubeCreateFromBitmap(Context *rsc, RsType vtype,
         AllocationGenerateScriptMips(rsc, texAlloc);
     }
 
-    texAlloc->deferredUploadToTexture(rsc);
+    texAlloc->sendDirty(rsc);
     return texAlloc;
 }
 
