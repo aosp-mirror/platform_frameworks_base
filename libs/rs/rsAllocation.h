@@ -34,7 +34,6 @@ public:
 
         struct State {
             ObjectBaseRef<const Type> type;
-            void * mallocPtr;
 
             uint32_t usageFlags;
             RsAllocationMipmapControl mipmapControl;
@@ -50,40 +49,24 @@ public:
             bool hasReferences;
         };
         State state;
+
+        struct DrvState {
+            void * mallocPtr;
+        } drvState;
+
     };
     Hal mHal;
 
-    Allocation(Context *rsc, const Type *, uint32_t usages,
-               RsAllocationMipmapControl mc = RS_ALLOCATION_MIPMAP_NONE);
+    static Allocation * createAllocation(Context *rsc, const Type *, uint32_t usages,
+                                  RsAllocationMipmapControl mc = RS_ALLOCATION_MIPMAP_NONE);
 
     virtual ~Allocation();
     void updateCache();
 
-    void setCpuWritable(bool);
-    void setGpuWritable(bool);
-    void setCpuReadable(bool);
-    void setGpuReadable(bool);
-
-    bool fixAllocation();
-
-    void * getPtr() const {return mHal.state.mallocPtr;}
+    void * getPtr() const {return mHal.drvState.mallocPtr;}
     const Type * getType() const {return mHal.state.type.get();}
 
     void syncAll(Context *rsc, RsAllocationUsageType src);
-
-    void deferredUploadToTexture(const Context *rsc);
-    void uploadToTexture(const Context *rsc);
-    uint32_t getTextureID() const {return mTextureID;}
-
-    void deferredAllocateRenderTarget(const Context *rsc);
-    void allocateRenderTarget(const Context *rsc);
-    uint32_t getRenderTargetID() const {return mRenderTargetID;}
-
-    uint32_t getGLTarget() const;
-
-    void deferredUploadToBufferObject(const Context *rsc);
-    void uploadToBufferObject(const Context *rsc);
-    uint32_t getBufferObjectID() const {return mBufferID;}
 
     void copyRange1D(Context *rsc, const Allocation *src, int32_t srcOff, int32_t destOff, int32_t len);
 
@@ -103,9 +86,6 @@ public:
 
     void read(void *data);
 
-    void enableGLVertexBuffers() const;
-    void setupGLIndexBuffers() const;
-
     void addProgramToDirty(const Program *);
     void removeProgramToDirty(const Program *);
 
@@ -113,8 +93,6 @@ public:
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_ALLOCATION; }
     static Allocation *createFromStream(Context *rsc, IStream *stream);
-
-    virtual void uploadCheck(Context *rsc);
 
     bool getIsScript() const {
         return (mHal.state.usageFlags & RS_ALLOCATION_USAGE_SCRIPT) != 0;
@@ -132,7 +110,7 @@ public:
     void incRefs(const void *ptr, size_t ct, size_t startOff = 0) const;
     void decRefs(const void *ptr, size_t ct, size_t startOff = 0) const;
 
-    void sendDirty() const;
+    void sendDirty(const Context *rsc) const;
     bool getHasGraphicsMipmaps() const {
         return mHal.state.mipmapControl != RS_ALLOCATION_MIPMAP_NONE;
     }
@@ -141,40 +119,9 @@ public:
 protected:
     Vector<const Program *> mToDirtyList;
 
-    // Is we have a non-null user bitmap callback we do not own the bits and
-    // instead call this function to free the memort when its time.
-    RsBitmapCallback_t mUserBitmapCallback;
-    void *mUserBitmapCallbackData;
-
-    // Usage restrictions
-    bool mCpuWrite;
-    bool mCpuRead;
-    bool mGpuWrite;
-    bool mGpuRead;
-
-    // more usage hint data from the application
-    // which can be used by a driver to pick the best memory type.
-    // Likely ignored for now
-    float mReadWriteRatio;
-    float mUpdateSize;
-
-
-    // Is this a legal structure to be used as a texture source.
-    // Initially this will require 1D or 2D and color data
-    uint32_t mTextureID;
-
-    // Is this a legal structure to be used as a vertex source.
-    // Initially this will require 1D and x(yzw).  Additional per element data
-    // is allowed.
-    uint32_t mBufferID;
-
-    // Is this a legal structure to be used as an FBO render target
-    uint32_t mRenderTargetID;
-
-    bool mUploadDeferred;
-
 private:
-    void init(Context *rsc, const Type *);
+    Allocation(Context *rsc, const Type *, uint32_t usages, RsAllocationMipmapControl mc);
+
     void upload2DTexture(bool isFirstUpload);
     void update2DTexture(const void *ptr, uint32_t xoff, uint32_t yoff,
                          uint32_t lod, RsAllocationCubemapFace face, uint32_t w, uint32_t h);

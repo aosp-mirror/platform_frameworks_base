@@ -15,6 +15,7 @@
  */
 
 #include "rsdCore.h"
+#include "rsdAllocation.h"
 #include "rsdBcc.h"
 #include "rsdGL.h"
 #include "rsdProgramStore.h"
@@ -61,6 +62,19 @@ static RsdHalFunctions FunctionTable = {
         rsdScriptSetGlobalBind,
         rsdScriptSetGlobalObj,
         rsdScriptDestroy
+    },
+
+    {
+        rsdAllocationInit,
+        rsdAllocationDestroy,
+        rsdAllocationResize,
+        rsdAllocationSyncAll,
+        rsdAllocationMarkDirty,
+        rsdAllocationData1D,
+        rsdAllocationData2D,
+        rsdAllocationData3D,
+        rsdAllocationElementData1D,
+        rsdAllocationElementData2D
     },
 
 

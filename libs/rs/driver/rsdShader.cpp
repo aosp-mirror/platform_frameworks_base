@@ -22,6 +22,7 @@
 #include <rsProgram.h>
 
 #include "rsdCore.h"
+#include "rsdAllocation.h"
 #include "rsdShader.h"
 #include "rsdShaderCache.h"
 
@@ -338,7 +339,8 @@ void RsdShader::setupSampler(const Context *rsc, const Sampler *s, const Allocat
     };
 
     // This tells us the correct texture type
-    GLenum target = (GLenum)tex->getGLTarget();
+    DrvAllocation *drvTex = (DrvAllocation *)tex->mHal.drv;
+    const GLenum target = drvTex->glTarget;
 
     if (!dc->gl.gl.OES_texture_npot && tex->getType()->getIsNp2()) {
         if (tex->getHasGraphicsMipmaps() &&
@@ -404,20 +406,20 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
             continue;
         }
 
-        GLenum target = (GLenum)mRSProgram->mHal.state.textures[ct]->getGLTarget();
-        if (target != GL_TEXTURE_2D && target != GL_TEXTURE_CUBE_MAP) {
+        DrvAllocation *drvTex = (DrvAllocation *)mRSProgram->mHal.state.textures[ct]->mHal.drv;
+        if (drvTex->glTarget != GL_TEXTURE_2D && drvTex->glTarget != GL_TEXTURE_CUBE_MAP) {
             LOGE("Attempting to bind unknown texture to shader id %u, texture unit %u", (uint)this, ct);
             rsc->setError(RS_ERROR_BAD_SHADER, "Non-texture allocation bound to a shader");
         }
-        glBindTexture(target, mRSProgram->mHal.state.textures[ct]->getTextureID());
+        glBindTexture(drvTex->glTarget, drvTex->textureID);
         rsdGLCheckError(rsc, "ProgramFragment::setup tex bind");
         if (mRSProgram->mHal.state.samplers[ct].get()) {
             setupSampler(rsc, mRSProgram->mHal.state.samplers[ct].get(), mRSProgram->mHal.state.textures[ct].get());
         } else {
-            glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(drvTex->glTarget, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(drvTex->glTarget, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(drvTex->glTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(drvTex->glTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             rsdGLCheckError(rsc, "ProgramFragment::setup tex env");
         }
 

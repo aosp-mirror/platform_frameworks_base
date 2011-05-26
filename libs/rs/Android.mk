@@ -115,6 +115,7 @@ LOCAL_SRC_FILES:= \
 	rsStream.cpp \
 	rsThreadIO.cpp \
 	rsType.cpp \
+	driver/rsdAllocation.cpp \
 	driver/rsdBcc.cpp \
 	driver/rsdCore.cpp \
 	driver/rsdFrameBuffer.cpp \

@@ -22,6 +22,7 @@
 #include <rsContext.h>
 #include <rsMesh.h>
 
+#include "rsdAllocation.h"
 #include "rsdMeshObj.h"
 #include "rsdGL.h"
 
@@ -135,28 +136,42 @@ void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex, ui
         return;
     }
 
-    rsdGLCheckError(rsc, "Mesh::renderPrimitiveRange 1");
+    for (uint32_t ct=0; ct < mRSMesh->mHal.state.vertexBuffersCount; ct++) {
+        const Allocation *alloc = mRSMesh->mHal.state.vertexBuffers[ct].get();
+        rsdAllocationSyncAll(rsc, alloc, RS_ALLOCATION_USAGE_SCRIPT);
+    }
+
     // update attributes with either buffer information or data ptr based on their current state
     for (uint32_t ct=0; ct < mAttribCount; ct++) {
         uint32_t allocIndex = mAttribAllocationIndex[ct];
         Allocation *alloc = mRSMesh->mHal.state.vertexBuffers[allocIndex].get();
-        if (alloc->getIsBufferObject() && alloc->getBufferObjectID()) {
-            mAttribs[ct].buffer = alloc->getBufferObjectID();
+        DrvAllocation *drvAlloc = (DrvAllocation *)alloc->mHal.drv;
+
+        if (drvAlloc->bufferID) {
+            mAttribs[ct].buffer = drvAlloc->bufferID;
             mAttribs[ct].ptr = NULL;
         } else {
             mAttribs[ct].buffer = 0;
-            mAttribs[ct].ptr = (const uint8_t*)alloc->getPtr();
+            mAttribs[ct].ptr = (const uint8_t*)drvAlloc->mallocPtr;
         }
     }
 
     RsdVertexArray va(mAttribs, mAttribCount);
     va.setup(rsc);
 
-    rsdGLCheckError(rsc, "Mesh::renderPrimitiveRange 2");
     Mesh::Primitive_t *prim = mRSMesh->mHal.state.primitives[primIndex];
-    if (prim->mIndexBuffer.get()) {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prim->mIndexBuffer->getBufferObjectID());
-        glDrawElements(mGLPrimitives[primIndex], len, GL_UNSIGNED_SHORT, (uint16_t *)(start * 2));
+    const Allocation *idxAlloc = prim->mIndexBuffer.get();
+    if (idxAlloc) {
+        DrvAllocation *drvAlloc = (DrvAllocation *)idxAlloc->mHal.drv;
+        rsdAllocationSyncAll(rsc, idxAlloc, RS_ALLOCATION_USAGE_SCRIPT);
+
+        if (drvAlloc->bufferID) {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drvAlloc->bufferID);
+            glDrawElements(mGLPrimitives[primIndex], len, GL_UNSIGNED_SHORT, (uint16_t *)(start * 2));
+        } else {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            glDrawElements(mGLPrimitives[primIndex], len, GL_UNSIGNED_SHORT, drvAlloc->mallocPtr);
+        }
     } else {
         glDrawArrays(mGLPrimitives[primIndex], start, len);
     }

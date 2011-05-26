@@ -67,7 +67,6 @@ void ProgramFragment::setup(Context *rsc, ProgramFragmentState *state) {
             rsc->setError(RS_ERROR_BAD_SHADER, "No texture bound");
             continue;
         }
-        mHal.state.textures[ct]->uploadCheck(rsc);
     }
 
     rsc->mHal.funcs.fragment.setActive(rsc, this);
@@ -109,7 +108,8 @@ void ProgramFragmentState::init(Context *rsc) {
     tmp[0] = RS_PROGRAM_PARAM_CONSTANT;
     tmp[1] = (uint32_t)inputType;
 
-    Allocation *constAlloc = new Allocation(rsc, inputType, RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS);
+    Allocation *constAlloc = Allocation::createAllocation(rsc, inputType,
+                              RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS);
     ProgramFragment *pf = new ProgramFragment(rsc, shaderString.string(),
                                               shaderString.length(), tmp, 2);
     pf->bindAllocation(rsc, constAlloc, 0);
