@@ -63,7 +63,7 @@ struct Blender {
 // In this array, the index of each Blender equals the value of the first
 // entry. For instance, gBlends[1] == gBlends[SkXfermode::kSrc_Mode]
 static const Blender gBlends[] = {
-    { SkXfermode::kClear_Mode,   GL_ZERO,                 GL_ZERO },
+    { SkXfermode::kClear_Mode,   GL_ZERO,                 GL_ONE_MINUS_SRC_ALPHA },
     { SkXfermode::kSrc_Mode,     GL_ONE,                  GL_ZERO },
     { SkXfermode::kDst_Mode,     GL_ZERO,                 GL_ONE },
     { SkXfermode::kSrcOver_Mode, GL_ONE,                  GL_ONE_MINUS_SRC_ALPHA },
@@ -81,7 +81,7 @@ static const Blender gBlends[] = {
 // this array's SrcOver blending mode is actually DstOver. You can refer to
 // createLayer() for more information on the purpose of this array.
 static const Blender gBlendsSwap[] = {
-    { SkXfermode::kClear_Mode,   GL_ZERO,                 GL_ZERO },
+    { SkXfermode::kClear_Mode,   GL_ONE_MINUS_DST_ALPHA,  GL_ZERO },
     { SkXfermode::kSrc_Mode,     GL_ZERO,                 GL_ONE },
     { SkXfermode::kDst_Mode,     GL_ONE,                  GL_ZERO },
     { SkXfermode::kSrcOver_Mode, GL_ONE_MINUS_DST_ALPHA,  GL_ONE },
