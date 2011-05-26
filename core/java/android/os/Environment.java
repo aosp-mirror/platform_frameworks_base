@@ -113,18 +113,18 @@ public class Environment {
             = getDirectory("ANDROID_SECURE_DATA", "/data/secure");
 
     private static final File EXTERNAL_STORAGE_DIRECTORY
-            = getDirectory("EXTERNAL_STORAGE", "/sdcard");
+            = getDirectory("EXTERNAL_STORAGE", "/mnt/sdcard");
 
     private static final File EXTERNAL_STORAGE_ANDROID_DATA_DIRECTORY
-            = new File (new File(getDirectory("EXTERNAL_STORAGE", "/sdcard"),
+            = new File (new File(getDirectory("EXTERNAL_STORAGE", "/mnt/sdcard"),
                     "Android"), "data");
 
     private static final File EXTERNAL_STORAGE_ANDROID_MEDIA_DIRECTORY
-            = new File (new File(getDirectory("EXTERNAL_STORAGE", "/sdcard"),
+            = new File (new File(getDirectory("EXTERNAL_STORAGE", "/mnt/sdcard"),
                     "Android"), "media");
 
     private static final File EXTERNAL_STORAGE_ANDROID_OBB_DIRECTORY
-            = new File (new File(getDirectory("EXTERNAL_STORAGE", "/sdcard"),
+            = new File (new File(getDirectory("EXTERNAL_STORAGE", "/mnt/sdcard"),
                     "Android"), "obb");
 
     private static final File DOWNLOAD_CACHE_DIRECTORY
