@@ -1627,7 +1627,7 @@ void CursorInputMapper::sync(nsecs_t when) {
                     mPointerController->setButtonState(mLocked.buttonState);
                 }
 
-                mPointerController->unfade();
+                mPointerController->unfade(PointerControllerInterface::TRANSITION_IMMEDIATE);
             }
 
             float x, y;
@@ -1686,7 +1686,7 @@ void CursorInputMapper::fadePointer() {
     { // acquire lock
         AutoMutex _l(mLock);
         if (mPointerController != NULL) {
-            mPointerController->fade();
+            mPointerController->fade(PointerControllerInterface::TRANSITION_GRADUAL);
         }
     } // release lock
 }
@@ -1873,9 +1873,21 @@ void TouchInputMapper::configureParameters() {
     mParameters.useJumpyTouchFilter = getPolicy()->filterJumpyTouchEvents();
     mParameters.virtualKeyQuietTime = getPolicy()->getVirtualKeyQuietTime();
 
-    // TODO: Make this configurable.
-    //mParameters.gestureMode = Parameters::GESTURE_MODE_POINTER;
+    // TODO: select the default gesture mode based on whether the device supports
+    // distinct multitouch
     mParameters.gestureMode = Parameters::GESTURE_MODE_SPOTS;
+
+    String8 gestureModeString;
+    if (getDevice()->getConfiguration().tryGetProperty(String8("touch.gestureMode"),
+            gestureModeString)) {
+        if (gestureModeString == "pointer") {
+            mParameters.gestureMode = Parameters::GESTURE_MODE_POINTER;
+        } else if (gestureModeString == "spots") {
+            mParameters.gestureMode = Parameters::GESTURE_MODE_SPOTS;
+        } else if (gestureModeString != "default") {
+            LOGW("Invalid value for touch.gestureMode: '%s'", gestureModeString.string());
+        }
+    }
 
     if (getEventHub()->hasRelativeAxis(getDeviceId(), REL_X)
             || getEventHub()->hasRelativeAxis(getDeviceId(), REL_Y)) {
@@ -1897,7 +1909,7 @@ void TouchInputMapper::configureParameters() {
             mParameters.deviceType = Parameters::DEVICE_TYPE_TOUCH_PAD;
         } else if (deviceTypeString == "pointer") {
             mParameters.deviceType = Parameters::DEVICE_TYPE_POINTER;
-        } else {
+        } else if (deviceTypeString != "default") {
             LOGW("Invalid value for touch.deviceType: '%s'", deviceTypeString.string());
         }
     }
@@ -1914,6 +1926,17 @@ void TouchInputMapper::configureParameters() {
 
 void TouchInputMapper::dumpParameters(String8& dump) {
     dump.append(INDENT3 "Parameters:\n");
+
+    switch (mParameters.gestureMode) {
+    case Parameters::GESTURE_MODE_POINTER:
+        dump.append(INDENT4 "GestureMode: pointer\n");
+        break;
+    case Parameters::GESTURE_MODE_SPOTS:
+        dump.append(INDENT4 "GestureMode: spots\n");
+        break;
+    default:
+        assert(false);
+    }
 
     switch (mParameters.deviceType) {
     case Parameters::DEVICE_TYPE_TOUCH_SCREEN:
@@ -3251,10 +3274,36 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
         return;
     }
 
-    // Show the pointer if needed.
-    if (mPointerGesture.currentGestureMode != PointerGesture::NEUTRAL
-            && mPointerGesture.currentGestureMode != PointerGesture::QUIET) {
-        mPointerController->unfade();
+    // Show or hide the pointer if needed.
+    switch (mPointerGesture.currentGestureMode) {
+    case PointerGesture::NEUTRAL:
+    case PointerGesture::QUIET:
+        if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS
+                && (mPointerGesture.lastGestureMode == PointerGesture::SWIPE
+                        || mPointerGesture.lastGestureMode == PointerGesture::FREEFORM)) {
+            // Remind the user of where the pointer is after finishing a gesture with spots.
+            mPointerController->unfade(PointerControllerInterface::TRANSITION_GRADUAL);
+        }
+        break;
+    case PointerGesture::TAP:
+    case PointerGesture::TAP_DRAG:
+    case PointerGesture::BUTTON_CLICK_OR_DRAG:
+    case PointerGesture::HOVER:
+    case PointerGesture::PRESS:
+        // Unfade the pointer when the current gesture manipulates the
+        // area directly under the pointer.
+        mPointerController->unfade(PointerControllerInterface::TRANSITION_IMMEDIATE);
+        break;
+    case PointerGesture::SWIPE:
+    case PointerGesture::FREEFORM:
+        // Fade the pointer when the current gesture manipulates a different
+        // area and there are spots to guide the user experience.
+        if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
+            mPointerController->fade(PointerControllerInterface::TRANSITION_GRADUAL);
+        } else {
+            mPointerController->unfade(PointerControllerInterface::TRANSITION_IMMEDIATE);
+        }
+        break;
     }
 
     // Send events!
@@ -3808,6 +3857,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             *outFinishPreviousGesture = true;
             mPointerGesture.currentGestureMode = PointerGesture::PRESS;
             mPointerGesture.activeGestureId = 0;
+            mPointerGesture.referenceIdBits.clear();
 
             if (settled && mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS
                     && mLastTouch.idBits.hasBit(mPointerGesture.activeTouchId)) {
@@ -3938,6 +3988,17 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             }
         }
 
+        // Clear the reference deltas for fingers not yet included in the reference calculation.
+        for (BitSet32 idBits(mCurrentTouch.idBits.value & ~mPointerGesture.referenceIdBits.value);
+                !idBits.isEmpty(); ) {
+            uint32_t id = idBits.firstMarkedBit();
+            idBits.clearBit(id);
+
+            mPointerGesture.referenceDeltas[id].dx = 0;
+            mPointerGesture.referenceDeltas[id].dy = 0;
+        }
+        mPointerGesture.referenceIdBits = mCurrentTouch.idBits;
+
         // Move the reference points based on the overall group motion of the fingers.
         // The objective is to calculate a vector delta that is common to the movement
         // of all fingers.
@@ -3951,27 +4012,39 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 
                 const PointerData& cpd = mCurrentTouch.pointers[mCurrentTouch.idToIndex[id]];
                 const PointerData& lpd = mLastTouch.pointers[mLastTouch.idToIndex[id]];
-                float deltaX = cpd.x - lpd.x;
-                float deltaY = cpd.y - lpd.y;
+                PointerGesture::Delta& delta = mPointerGesture.referenceDeltas[id];
+                delta.dx += cpd.x - lpd.x;
+                delta.dy += cpd.y - lpd.y;
 
                 if (first) {
-                    commonDeltaX = deltaX;
-                    commonDeltaY = deltaY;
+                    commonDeltaX = delta.dx;
+                    commonDeltaY = delta.dy;
                 } else {
-                    commonDeltaX = calculateCommonVector(commonDeltaX, deltaX);
-                    commonDeltaY = calculateCommonVector(commonDeltaY, deltaY);
+                    commonDeltaX = calculateCommonVector(commonDeltaX, delta.dx);
+                    commonDeltaY = calculateCommonVector(commonDeltaY, delta.dy);
                 }
             }
 
-            mPointerGesture.referenceTouchX += commonDeltaX;
-            mPointerGesture.referenceTouchY += commonDeltaY;
-            mPointerGesture.referenceGestureX +=
-                    commonDeltaX * mLocked.pointerGestureXMovementScale;
-            mPointerGesture.referenceGestureY +=
-                    commonDeltaY * mLocked.pointerGestureYMovementScale;
-            clampPositionUsingPointerBounds(mPointerController,
-                    &mPointerGesture.referenceGestureX,
-                    &mPointerGesture.referenceGestureY);
+            if (commonDeltaX || commonDeltaY) {
+                for (BitSet32 idBits(commonIdBits); !idBits.isEmpty(); ) {
+                    uint32_t id = idBits.firstMarkedBit();
+                    idBits.clearBit(id);
+
+                    PointerGesture::Delta& delta = mPointerGesture.referenceDeltas[id];
+                    delta.dx = 0;
+                    delta.dy = 0;
+                }
+
+                mPointerGesture.referenceTouchX += commonDeltaX;
+                mPointerGesture.referenceTouchY += commonDeltaY;
+                mPointerGesture.referenceGestureX +=
+                        commonDeltaX * mLocked.pointerGestureXMovementScale;
+                mPointerGesture.referenceGestureY +=
+                        commonDeltaY * mLocked.pointerGestureYMovementScale;
+                clampPositionUsingPointerBounds(mPointerController,
+                        &mPointerGesture.referenceGestureX,
+                        &mPointerGesture.referenceGestureY);
+            }
         }
 
         // Report gestures.
@@ -4255,7 +4328,7 @@ void TouchInputMapper::fadePointer() {
     { // acquire lock
         AutoMutex _l(mLock);
         if (mPointerController != NULL) {
-            mPointerController->fade();
+            mPointerController->fade(PointerControllerInterface::TRANSITION_GRADUAL);
         }
     } // release lock
 }
