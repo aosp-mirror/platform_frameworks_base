@@ -22,6 +22,14 @@ page.title=Optimizing Apps for Android 3.0
 </li>
 </ol>
 
+<h2>See also</h2>
+
+<ol>
+  <li><a
+href="{@docRoot}sdk/compatibility-library.html">Compatibility Library</a></li>
+  <li><a href="http://code.google.com/p/iosched/">Google I/O App source code</a></li>
+</ol>
+
 </div>
 </div>
 
@@ -172,7 +180,8 @@ visual elements. This is the standard theme for applications built for Android 3
 application will look and feel consistent with the system and other applications when it is
 enabled.</p>
     <p>Additionally, when an activity uses the holographic theme, the system enables the <a
-href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> for the activity. The Action Bar
+href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> for the activity and removes the
+Options Menu button in the system bar. The Action Bar
 replaces the traditional title bar at the top of the activity window and provides the user access to
 the activity's Options Menu.</p>
       </li>
@@ -233,27 +242,26 @@ for Screen Independence</a>.</p>
 
 
 
-
-
 <h2 id="Upgrading">Upgrading or Developing a New App for Tablets</h2>
 
 <div class="sidebox-wrapper">
 <div class="sidebox">
-  <h3>Use new APIs and remain backward-compatible</h3>
+  <h3>Use the Compatibility Library to remain backward-compatible</h3>
 <p>It is possible for you to upgrade your application with some new
 APIs <em>and</em> remain compatible with older versions of Android. Usually, this requires that you
 use techniques such as reflection to check for the availability of certain APIs at runtime. However,
 to help you add features from Android 3.0 without requiring you to change your <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
-or build target, we're providing a static library called the "Android Compatibility package"
+or build target, we're providing a static library called the <a
+href="{@docRoot}sdk/compatibility-library.html">Compatibility Library</a>
 (downloadable from the AVD and SDK Manager).</p>
 <p>This library includes APIs for <a
 href="{@docRoot}guide/topics/fundamentals/fragments.html">fragments</a>, <a
 href="{@docRoot}guide/topics/fundamentals/loaders.html">loaders</a>, and some updated classes. By
 simply adding this library to your Android project, you can use these APIs in your application and
-remain compatible with Android 1.6. For more information, see the blog post, <a
-href="http://android-developers.blogspot.com/2011/03/fragments-for-all.html">Fragments for
-All</a>.</p>
+remain compatible with Android 1.6. For information about how to get the library and start
+using it in your application, see the <a
+href="{@docRoot}sdk/compatibility-library.html">Compatibility Library</a> document.</p>
 </div>
 </div>
 
@@ -378,7 +386,6 @@ new graphics engine called Renderscript, and more.</p>
 
 <p>To learn more about the APIs mentioned above and more, see the <a
 href="{@docRoot}sdk/android-3.0.html">Android 3.0 Platform</a> document.</p>
-
 
 
 <h3>Look at some samples</h3>
