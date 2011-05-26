@@ -191,12 +191,12 @@
     <string name="permlab_receiveMms" msgid="8894700916188083287">"MMS empfangen"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Ermöglicht der Anwendung, MMS-Mitteilungen zu empfangen und zu verarbeiten. Schädliche Anwendungen können Ihre Nachrichten möglicherweise überwachen oder löschen, bevor sie angezeigt werden."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"Kurznachrichten senden"</string>
-    <string name="permdesc_sendSms" msgid="1946540351763502120">"Ermöglicht der Anwendung das Senden von SMS-Nachrichten. Bei schädlichen Anwendungen können Kosten entstehen, wenn diese Nachrichten ohne Ihre Zustimmung versenden."</string>
+    <string name="permdesc_sendSms" msgid="1946540351763502120">"Ermöglicht der Anwendung das Senden von SMS. Bei schädlichen Anwendungen können Kosten entstehen, wenn diese Nachrichten ohne Ihre Zustimmung versenden."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMS oder MMS lesen"</string>
-    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Ermöglicht einer Anwendung, auf Ihrem Tablet oder Ihrer SIM-Karte gespeicherte SMS-Nachrichten zu lesen. Schädliche Anwendungen lesen so möglicherweise Ihre vertraulichen Nachrichten."</string>
+    <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Ermöglicht einer Anwendung, auf Ihrem Tablet oder Ihrer SIM-Karte gespeicherte SMS zu lesen. Schädliche Anwendungen lesen so möglicherweise Ihre vertraulichen Nachrichten."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Ermöglicht einer Anwendung, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte Kurznachrichten zu lesen. Schädliche Anwendungen lesen so möglicherweise Ihre  vertraulichen Nachrichten."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"SMS oder MMS bearbeiten"</string>
-    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Ermöglicht einer Anwendung, auf Ihrem Tablet oder Ihrer SIM-Karte gespeicherte SMS-Nachrichten zu bearbeiten. Schädliche Anwendungen löschen möglicherweise Ihre Nachrichten."</string>
+    <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Ermöglicht einer Anwendung, auf Ihrem Tablet oder Ihrer SIM-Karte gespeicherte SMS zu bearbeiten. Schädliche Anwendungen löschen möglicherweise Ihre Nachrichten."</string>
     <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"Ermöglicht einer Anwendung, auf Ihrem Telefon oder Ihrer SIM-Karte gespeicherte Kurznachrichten zu bearbeiten. Schädliche Anwendungen löschen möglicherweise Ihre Nachrichten."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"WAP-Nachrichten empfangen"</string>
     <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Ermöglicht der Anwendung, WAP-Mitteilungen zu empfangen und zu verarbeiten. Schädliche Anwendungen können Ihre Nachrichten möglicherweise überwachen oder löschen, bevor sie angezeigt werden."</string>
@@ -1019,10 +1019,7 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Konto auswählen"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Erhöhen"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Verringern"</string>
-    <!-- no translation found for storage_internal (7556050805474115618) -->
-    <skip />
-    <!-- no translation found for storage_sd_card (8921771478629812343) -->
-    <skip />
-    <!-- no translation found for storage_usb (3017954059538517278) -->
-    <skip />
+    <string name="storage_internal" msgid="7556050805474115618">"Interner Speicher"</string>
+    <string name="storage_sd_card" msgid="8921771478629812343">"SD-Karte"</string>
+    <string name="storage_usb" msgid="3017954059538517278">"USB-Speicher"</string>
 </resources>
