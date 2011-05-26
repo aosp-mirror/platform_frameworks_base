@@ -43,9 +43,4 @@ This is an optimized layout for a screen with the Action Bar enabled.
         android:layout_weight="1"
         android:foregroundGravity="fill_horizontal|top"
         android:foreground="?android:attr/windowContentOverlay" />
-    <LinearLayout android:id="@+id/lower_action_context_bar"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  style="?android:attr/actionBarStyle"
-                  android:visibility="gone" />
 </LinearLayout>
