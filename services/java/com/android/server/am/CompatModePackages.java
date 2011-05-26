@@ -3,8 +3,10 @@ package com.android.server.am;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -31,7 +33,12 @@ public class CompatModePackages {
     private final ActivityManagerService mService;
     private final AtomicFile mFile;
 
-    private final HashSet<String> mPackages = new HashSet<String>();
+    // Compatibility state: no longer ask user to select the mode.
+    public static final int COMPAT_FLAG_DONT_ASK = 1<<0;
+    // Compatibility state: compatibility mode is enabled.
+    public static final int COMPAT_FLAG_ENABLED = 1<<1;
+
+    private final HashMap<String, Integer> mPackages = new HashMap<String, Integer>();
 
     private static final int MSG_WRITE = 1;
 
@@ -71,7 +78,15 @@ public class CompatModePackages {
                             if ("pkg".equals(tagName)) {
                                 String pkg = parser.getAttributeValue(null, "name");
                                 if (pkg != null) {
-                                    mPackages.add(pkg);
+                                    String mode = parser.getAttributeValue(null, "mode");
+                                    int modeInt = 0;
+                                    if (mode != null) {
+                                        try {
+                                            modeInt = Integer.parseInt(mode);
+                                        } catch (NumberFormatException e) {
+                                        }
+                                    }
+                                    mPackages.put(pkg, modeInt);
                                 }
                             }
                         }
@@ -93,17 +108,22 @@ public class CompatModePackages {
         }
     }
 
-    public HashSet<String> getPackages() {
+    public HashMap<String, Integer> getPackages() {
         return mPackages;
+    }
+
+    private int getPackageFlags(String packageName) {
+        Integer flags = mPackages.get(packageName);
+        return flags != null ? flags : 0;
     }
 
     public CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
         return new CompatibilityInfo(ai, mService.mConfiguration.screenLayout,
-                mPackages.contains(ai.packageName));
+                (getPackageFlags(ai.packageName)&COMPAT_FLAG_ENABLED) != 0);
     }
 
-    private int computeCompatModeLocked(ApplicationInfo ai) {
-        boolean enabled = mPackages.contains(ai.packageName);
+    public int computeCompatModeLocked(ApplicationInfo ai) {
+        boolean enabled = (getPackageFlags(ai.packageName)&COMPAT_FLAG_ENABLED) != 0;
         CompatibilityInfo info = new CompatibilityInfo(ai,
                 mService.mConfiguration.screenLayout, enabled);
         if (info.alwaysSupportsScreen()) {
@@ -114,6 +134,40 @@ public class CompatModePackages {
         }
         return enabled ? ActivityManager.COMPAT_MODE_ENABLED
                 : ActivityManager.COMPAT_MODE_DISABLED;
+    }
+
+    public boolean getFrontActivityAskCompatModeLocked() {
+        ActivityRecord r = mService.mMainStack.topRunningActivityLocked(null);
+        if (r == null) {
+            return false;
+        }
+        return getPackageAskCompatModeLocked(r.packageName);
+    }
+
+    public boolean getPackageAskCompatModeLocked(String packageName) {
+        return (getPackageFlags(packageName)&COMPAT_FLAG_DONT_ASK) == 0;
+    }
+
+    public void setFrontActivityAskCompatModeLocked(boolean ask) {
+        ActivityRecord r = mService.mMainStack.topRunningActivityLocked(null);
+        if (r != null) {
+            setPackageAskCompatModeLocked(r.packageName, ask);
+        }
+    }
+
+    public void setPackageAskCompatModeLocked(String packageName, boolean ask) {
+        int curFlags = getPackageFlags(packageName);
+        int newFlags = ask ? (curFlags&~COMPAT_FLAG_DONT_ASK) : (curFlags|COMPAT_FLAG_DONT_ASK);
+        if (curFlags != newFlags) {
+            if (newFlags != 0) {
+                mPackages.put(packageName, newFlags);
+            } else {
+                mPackages.remove(packageName);
+            }
+            mHandler.removeMessages(MSG_WRITE);
+            Message msg = mHandler.obtainMessage(MSG_WRITE);
+            mHandler.sendMessageDelayed(msg, 10000);
+        }
     }
 
     public int getFrontActivityScreenCompatModeLocked() {
@@ -161,7 +215,8 @@ public class CompatModePackages {
     private void setPackageScreenCompatModeLocked(ApplicationInfo ai, int mode) {
         final String packageName = ai.packageName;
 
-        boolean changed = false;
+        int curFlags = getPackageFlags(packageName);
+
         boolean enable;
         switch (mode) {
             case ActivityManager.COMPAT_MODE_DISABLED:
@@ -171,24 +226,26 @@ public class CompatModePackages {
                 enable = true;
                 break;
             case ActivityManager.COMPAT_MODE_TOGGLE:
-                enable = !mPackages.contains(packageName);
+                enable = (curFlags&COMPAT_FLAG_ENABLED) == 0;
                 break;
             default:
                 Slog.w(TAG, "Unknown screen compat mode req #" + mode + "; ignoring");
                 return;
         }
+
+        int newFlags = curFlags;
         if (enable) {
-            if (!mPackages.contains(packageName)) {
-                changed = true;
-                mPackages.add(packageName);
-            }
+            newFlags |= COMPAT_FLAG_ENABLED;
         } else {
-            if (mPackages.contains(packageName)) {
-                changed = true;
+            newFlags &= ~COMPAT_FLAG_ENABLED;
+        }
+
+        if (newFlags != curFlags) {
+            if (newFlags != 0) {
+                mPackages.put(packageName, newFlags);
+            } else {
                 mPackages.remove(packageName);
             }
-        }
-        if (changed) {
             CompatibilityInfo ci = compatibilityInfoForPackageLocked(ai);
             if (ci.alwaysSupportsScreen()) {
                 Slog.w(TAG, "Ignoring compat mode change of " + packageName
@@ -241,9 +298,9 @@ public class CompatModePackages {
     }
 
     void saveCompatModes() {
-        HashSet<String> pkgs;
+        HashMap<String, Integer> pkgs;
         synchronized (mService) {
-            pkgs = new HashSet<String>(mPackages);
+            pkgs = new HashMap<String, Integer>(mPackages);
         }
 
         FileOutputStream fos = null;
@@ -258,9 +315,14 @@ public class CompatModePackages {
 
             final IPackageManager pm = AppGlobals.getPackageManager();
             final int screenLayout = mService.mConfiguration.screenLayout;
-            final Iterator<String> it = pkgs.iterator();
+            final Iterator<Map.Entry<String, Integer>> it = pkgs.entrySet().iterator();
             while (it.hasNext()) {
-                String pkg = it.next();
+                Map.Entry<String, Integer> entry = it.next();
+                String pkg = entry.getKey();
+                int mode = entry.getValue();
+                if (mode == 0) {
+                    continue;
+                }
                 ApplicationInfo ai = null;
                 try {
                     ai = pm.getApplicationInfo(pkg, 0);
@@ -278,6 +340,7 @@ public class CompatModePackages {
                 }
                 out.startTag(null, "pkg");
                 out.attribute(null, "name", pkg);
+                out.attribute(null, "mode", Integer.toString(mode));
                 out.endTag(null, "pkg");
             }
 

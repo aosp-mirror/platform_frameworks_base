@@ -34,6 +34,7 @@ class TaskRecord {
     long lastActiveTime;    // Last time this task was active, including sleep.
     boolean rootWasReset;   // True if the intent at the root of the task had
                             // the FLAG_ACTIVITY_RESET_TASK_IF_NEEDED flag.
+    boolean askedCompatMode;// Have asked the user about compat mode for this task.
     Bitmap lastThumbnail;   // Last thumbnail captured for this task.
     CharSequence lastDescription; // Last description captured for this task.
 
@@ -113,6 +114,9 @@ class TaskRecord {
         if (realActivity != null) {
             pw.print(prefix); pw.print("realActivity=");
             pw.println(realActivity.flattenToShortString());
+        }
+        if (!askedCompatMode) {
+            pw.print(prefix); pw.print("askedCompatMode="); pw.println(askedCompatMode);
         }
         pw.print(prefix); pw.print("lastActiveTime="); pw.print(lastActiveTime);
                 pw.print(" (inactive for ");

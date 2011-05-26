@@ -1437,6 +1437,26 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            String pkg = data.readString();
+            boolean ask = getPackageAskScreenCompat(pkg);
+            reply.writeNoException();
+            reply.writeInt(ask ? 1 : 0);
+            return true;
+        }
+
+        case SET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION:
+        {
+            data.enforceInterface(IActivityManager.descriptor);
+            String pkg = data.readString();
+            boolean ask = data.readInt() != 0;
+            setPackageAskScreenCompat(pkg, ask);
+            reply.writeNoException();
+            return true;
+        }
+
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -3208,7 +3228,8 @@ class ActivityManagerProxy implements IActivityManager
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
-        mRemote.transact(SET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION, data, reply, 0);
+        data.writeString(packageName);
+        mRemote.transact(GET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION, data, reply, 0);
         reply.readException();
         int mode = reply.readInt();
         reply.recycle();
@@ -3224,6 +3245,32 @@ class ActivityManagerProxy implements IActivityManager
         data.writeString(packageName);
         data.writeInt(mode);
         mRemote.transact(SET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION, data, reply, 0);
+        reply.readException();
+        reply.recycle();
+        data.recycle();
+    }
+
+    public boolean getPackageAskScreenCompat(String packageName) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(packageName);
+        mRemote.transact(GET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION, data, reply, 0);
+        reply.readException();
+        boolean ask = reply.readInt() != 0;
+        reply.recycle();
+        data.recycle();
+        return ask;
+    }
+
+    public void setPackageAskScreenCompat(String packageName, boolean ask)
+            throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeString(packageName);
+        data.writeInt(ask ? 1 : 0);
+        mRemote.transact(SET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION, data, reply, 0);
         reply.readException();
         reply.recycle();
         data.recycle();

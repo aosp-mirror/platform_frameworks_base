@@ -483,6 +483,13 @@ public class ActivityStack {
         return null;
     }
 
+    final void showAskCompatModeDialogLocked(ActivityRecord r) {
+        Message msg = Message.obtain();
+        msg.what = ActivityManagerService.SHOW_COMPAT_MODE_DIALOG_MSG;
+        msg.obj = r.task.askedCompatMode ? null : r;
+        mService.mHandler.sendMessage(msg);
+    }
+
     final boolean realStartActivityLocked(ActivityRecord r,
             ProcessRecord app, boolean andResume, boolean checkConfig)
             throws RemoteException {
@@ -538,6 +545,7 @@ public class ActivityStack {
             mService.ensurePackageDexOpt(r.intent.getComponent().getPackageName());
             r.sleeping = false;
             r.forceNewConfig = false;
+            showAskCompatModeDialogLocked(r);
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
                     System.identityHashCode(r),
                     r.info, mService.compatibilityInfoForPackageLocked(r.info.applicationInfo),
@@ -1430,6 +1438,7 @@ public class ActivityStack {
                         next.task.taskId, next.shortComponentName);
                 
                 next.sleeping = false;
+                showAskCompatModeDialogLocked(next);
                 next.app.thread.scheduleResumeActivity(next,
                         mService.isNextTransitionForward());
                 
