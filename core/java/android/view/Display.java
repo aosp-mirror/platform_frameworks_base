@@ -80,24 +80,36 @@ public class Display {
      * adjusted for you based on the current rotation of the display.
      */
     public void getSize(Point outSize) {
+        getSizeInternal(outSize, true);
+    }
+
+    /**
+     * Returns the raw size of the display, in pixels.  Note that this
+     * should <em>not</em> generally be used for computing layouts, since
+     * a device will typically have screen decoration (such as a status bar)
+     * along the edges of the display that reduce the amount of application
+     * space available from the raw size returned here.  This value is
+     * adjusted for you based on the current rotation of the display.
+     */
+    private void getSizeInternal(Point outSize, boolean doCompat) {
         try {
             IWindowManager wm = getWindowManager();
             if (wm != null) {
                 wm.getDisplaySize(outSize);
+                if (doCompat && mCompatibilityInfo != null) {
+                    synchronized (mTmpMetrics) {
+                        mTmpMetrics.unscaledWidthPixels = outSize.x;
+                        mTmpMetrics.unscaledHeightPixels = outSize.y;
+                        mTmpMetrics.density = mDensity;
+                        mCompatibilityInfo.applyToDisplayMetrics(mTmpMetrics);
+                        outSize.x = mTmpMetrics.widthPixels;
+                        outSize.y = mTmpMetrics.heightPixels;
+                    }
+                }
             } else {
                 // This is just for boot-strapping, initializing the
                 // system process before the window manager is up.
                 outSize.y = getRealHeight();
-            }
-            if (mCompatibilityInfo != null) {
-                synchronized (mTmpMetrics) {
-                    mTmpMetrics.realWidthPixels = outSize.x;
-                    mTmpMetrics.realHeightPixels = outSize.y;
-                    mTmpMetrics.density = mDensity;
-                    mCompatibilityInfo.applyToDisplayMetrics(mTmpMetrics);
-                    outSize.x = mTmpMetrics.widthPixels;
-                    outSize.y = mTmpMetrics.heightPixels;
-                }
             }
         } catch (RemoteException e) {
             Slog.w("Display", "Unable to get display size", e);
@@ -109,7 +121,7 @@ public class Display {
      */
     public void getRectSize(Rect outSize) {
         synchronized (mTmpPoint) {
-            getSize(mTmpPoint);
+            getSizeInternal(mTmpPoint, true);
             outSize.set(0, 0, mTmpPoint.x, mTmpPoint.y);
         }
     }
@@ -137,7 +149,7 @@ public class Display {
         synchronized (mTmpPoint) {
             long now = SystemClock.uptimeMillis();
             if (now > (mLastGetTime+20)) {
-                getSize(mTmpPoint);
+                getSizeInternal(mTmpPoint, true);
                 mLastGetTime = now;
             }
             return mTmpPoint.x;
@@ -152,7 +164,7 @@ public class Display {
         synchronized (mTmpPoint) {
             long now = SystemClock.uptimeMillis();
             if (now > (mLastGetTime+20)) {
-                getSize(mTmpPoint);
+                getSizeInternal(mTmpPoint, true);
                 mLastGetTime = now;
             }
             return mTmpPoint.y;
@@ -218,7 +230,7 @@ public class Display {
      */
     public void getMetrics(DisplayMetrics outMetrics) {
         synchronized (mTmpPoint) {
-            getSize(mTmpPoint);
+            getSizeInternal(mTmpPoint, false);
             outMetrics.widthPixels = mTmpPoint.x;
             outMetrics.heightPixels = mTmpPoint.y;
         }
@@ -248,8 +260,8 @@ public class Display {
         outMetrics.xdpi         = mDpiX;
         outMetrics.ydpi         = mDpiY;
 
-        outMetrics.realWidthPixels  = outMetrics.widthPixels;
-        outMetrics.realHeightPixels = outMetrics.heightPixels;
+        outMetrics.unscaledWidthPixels  = outMetrics.widthPixels;
+        outMetrics.unscaledHeightPixels = outMetrics.heightPixels;
     }
 
     static IWindowManager getWindowManager() {

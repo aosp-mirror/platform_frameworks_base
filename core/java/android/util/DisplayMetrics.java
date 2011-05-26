@@ -105,10 +105,18 @@ public class DisplayMetrics {
      */
     public float ydpi;
 
-    /** @hide */
-    public int realWidthPixels;
-    /** @hide */
-    public int realHeightPixels;
+    /**
+     * The reported display width prior to any compatibility mode scaling
+     * being applied.
+     * @hide
+     */
+    public int unscaledWidthPixels;
+    /**
+     * The reported display height prior to any compatibility mode scaling
+     * being applied.
+     * @hide
+     */
+    public int unscaledHeightPixels;
 
     public DisplayMetrics() {
     }
@@ -121,8 +129,8 @@ public class DisplayMetrics {
         scaledDensity = o.scaledDensity;
         xdpi = o.xdpi;
         ydpi = o.ydpi;
-        realWidthPixels = o.realWidthPixels;
-        realHeightPixels = o.realHeightPixels;
+        unscaledWidthPixels = o.unscaledWidthPixels;
+        unscaledHeightPixels = o.unscaledHeightPixels;
     }
     
     public void setToDefaults() {
@@ -133,8 +141,8 @@ public class DisplayMetrics {
         scaledDensity = density;
         xdpi = DENSITY_DEVICE;
         ydpi = DENSITY_DEVICE;
-        realWidthPixels = 0;
-        realHeightPixels = 0;
+        unscaledWidthPixels = 0;
+        unscaledHeightPixels = 0;
     }
 
     @Override
