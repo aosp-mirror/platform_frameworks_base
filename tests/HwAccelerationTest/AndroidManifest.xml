@@ -30,6 +30,15 @@
         android:hardwareAccelerated="true">
 
         <activity
+                android:name="ClearActivity"
+                android:label="_Clear">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="TextureViewActivity"
                 android:label="_TextureView">
             <intent-filter>

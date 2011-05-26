@@ -152,12 +152,12 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
     float previousStepY = 0.0f;
 
     float y1 = 0.0f;
+    float y2 = 0.0f;
     float v1 = 0.0f;
 
     for (uint32_t i = 0; i < mYCount; i++) {
         float stepY = mYDivs[i];
 
-        float y2 = 0.0f;
         if (i & 1) {
             const float segment = stepY - previousStepY;
             y2 = y1 + floorf(segment * stretchY + 0.5f);
@@ -167,8 +167,15 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
         float v2 = fmax(0.0f, stepY - 0.5f) / bitmapHeight;
 
         if (stepY > 0.0f) {
+#if DEBUG_EXPLODE_PATCHES
+            y1 += i * EXPLODE_GAP;
+            y2 += i * EXPLODE_GAP;
+#endif
             generateRow(vertex, y1, y2, v1, v2, stretchX, right - left,
                     bitmapWidth, quadCount);
+#if DEBUG_EXPLODE_PATCHES
+            y2 -= i * EXPLODE_GAP;
+#endif
         }
 
         y1 = y2;
@@ -178,7 +185,12 @@ void Patch::updateVertices(const float bitmapWidth, const float bitmapHeight,
     }
 
     if (previousStepY != bitmapHeight) {
-        generateRow(vertex, y1, bottom - top, v1, 1.0f, stretchX, right - left,
+        y2 = bottom - top;
+#if DEBUG_EXPLODE_PATCHES
+        y1 += mYCount * EXPLODE_GAP;
+        y2 += mYCount * EXPLODE_GAP;
+#endif
+        generateRow(vertex, y1, y2, v1, 1.0f, stretchX, right - left,
                 bitmapWidth, quadCount);
     }
 
@@ -202,13 +214,13 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
     float previousStepX = 0.0f;
 
     float x1 = 0.0f;
+    float x2 = 0.0f;
     float u1 = 0.0f;
 
     // Generate the row quad by quad
     for (uint32_t i = 0; i < mXCount; i++) {
         float stepX = mXDivs[i];
 
-        float x2 = 0.0f;
         if (i & 1) {
             const float segment = stepX - previousStepX;
             x2 = x1 + floorf(segment * stretchX + 0.5f);
@@ -218,7 +230,14 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
         float u2 = fmax(0.0f, stepX - 0.5f) / bitmapWidth;
 
         if (stepX > 0.0f) {
+#if DEBUG_EXPLODE_PATCHES
+            x1 += i * EXPLODE_GAP;
+            x2 += i * EXPLODE_GAP;
+#endif
             generateQuad(vertex, x1, y1, x2, y2, u1, v1, u2, v2, quadCount);
+#if DEBUG_EXPLODE_PATCHES
+            x2 -= i * EXPLODE_GAP;
+#endif
         }
 
         x1 = x2;
@@ -228,7 +247,12 @@ void Patch::generateRow(TextureVertex*& vertex, float y1, float y2, float v1, fl
     }
 
     if (previousStepX != bitmapWidth) {
-        generateQuad(vertex, x1, y1, width, y2, u1, v1, 1.0f, v2, quadCount);
+        x2 = width;
+#if DEBUG_EXPLODE_PATCHES
+        x1 += mXCount * EXPLODE_GAP;
+        x2 += mXCount * EXPLODE_GAP;
+#endif
+        generateQuad(vertex, x1, y1, x2, y2, u1, v1, 1.0f, v2, quadCount);
     }
 }
 
