@@ -8527,6 +8527,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     String[] suggestions = suggestionInfo.suggestionSpan.getSuggestions();
                     suggestions[suggestionInfo.suggestionIndex] = originalText;
 
+                    // Notify source IME of the suggestion pick
+                    if (!TextUtils.isEmpty(
+                            suggestionInfo.suggestionSpan.getNotificationTargetClassName())) {
+                        InputMethodManager imm = InputMethodManager.peekInstance();
+                        imm.notifySuggestionPicked(suggestionInfo.suggestionSpan, originalText,
+                                suggestionInfo.suggestionIndex);
+                    }
+
                     // Restore previous SuggestionSpans
                     final int lengthDifference = suggestion.length() - (spanEnd - spanStart);
                     for (int i = 0; i < length; i++) {
