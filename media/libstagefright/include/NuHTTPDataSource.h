@@ -43,10 +43,6 @@ struct NuHTTPDataSource : public HTTPBase {
     virtual status_t getSize(off64_t *size);
     virtual uint32_t flags();
 
-    // Returns true if bandwidth could successfully be estimated,
-    // false otherwise.
-    virtual bool estimateBandwidth(int32_t *bandwidth_bps);
-
     virtual sp<DecryptHandle> DrmInitialization();
     virtual void getDrmInfo(sp<DecryptHandle> &handle, DrmManagerClient **client);
     virtual String8 getUri();
@@ -61,11 +57,6 @@ private:
         DISCONNECTED,
         CONNECTING,
         CONNECTED
-    };
-
-    struct BandwidthEntry {
-        int64_t mDelayUs;
-        size_t mNumBytes;
     };
 
     Mutex mLock;
@@ -93,11 +84,6 @@ private:
     // chunk header (or -1 if no more chunks).
     ssize_t mChunkDataBytesLeft;
 
-    List<BandwidthEntry> mBandwidthHistory;
-    size_t mNumBandwidthHistoryItems;
-    int64_t mTotalTransferTimeUs;
-    size_t mTotalTransferBytes;
-
     sp<DecryptHandle> mDecryptHandle;
     DrmManagerClient *mDrmManagerClient;
 
@@ -114,7 +100,6 @@ private:
     ssize_t internalRead(void *data, size_t size);
 
     void applyTimeoutResponse();
-    void addBandwidthMeasurement_l(size_t numBytes, int64_t delayUs);
 
     static void MakeFullHeaders(
             const KeyedVector<String8, String8> *overrides,

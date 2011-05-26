@@ -634,6 +634,7 @@ void AwesomePlayer::onBufferingUpdate() {
                     mFlags |= CACHE_UNDERRUN;
                     pause_l();
                     ensureCacheIsFetching_l();
+                    sendCacheStats();
                     notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_START);
                 } else if (eos || cachedDataRemaining > kHighWaterMarkBytes) {
                     if (mFlags & CACHE_UNDERRUN) {
@@ -692,6 +693,7 @@ void AwesomePlayer::onBufferingUpdate() {
             mFlags |= CACHE_UNDERRUN;
             pause_l();
             ensureCacheIsFetching_l();
+            sendCacheStats();
             notifyListener_l(MEDIA_INFO, MEDIA_INFO_BUFFERING_START);
         } else if (eos || cachedDurationUs > highWaterMarkUs) {
             if (mFlags & CACHE_UNDERRUN) {
@@ -709,6 +711,18 @@ void AwesomePlayer::onBufferingUpdate() {
     }
 
     postBufferingEvent_l();
+}
+
+void AwesomePlayer::sendCacheStats() {
+    sp<MediaPlayerBase> listener = mListener.promote();
+    if (listener != NULL) {
+        int32_t kbps = 0;
+        status_t err = mCachedSource->getEstimatedBandwidthKbps(&kbps);
+        if (err == OK) {
+            listener->sendEvent(
+                MEDIA_INFO, MEDIA_INFO_NETWORK_BANDWIDTH, kbps);
+        }
+    }
 }
 
 void AwesomePlayer::onStreamDone() {
@@ -2083,11 +2097,25 @@ status_t AwesomePlayer::setParameter(int key, const Parcel &request) {
 
             return mTextPlayer->setParameter(key, request);
         }
+        case KEY_PARAMETER_CACHE_STAT_COLLECT_FREQ_MS:
+        {
+            return setCacheStatCollectFreq(request);
+        }
         default:
         {
             return ERROR_UNSUPPORTED;
         }
     }
+}
+
+status_t AwesomePlayer::setCacheStatCollectFreq(const Parcel &request) {
+    if (mCachedSource != NULL) {
+        int32_t freqMs = request.readInt32();
+        LOGD("Request to keep cache stats in the past %d ms",
+            freqMs);
+        return mCachedSource->setCacheStatCollectFreq(freqMs);
+    }
+    return ERROR_UNSUPPORTED;
 }
 
 status_t AwesomePlayer::getParameter(int key, Parcel *reply) {

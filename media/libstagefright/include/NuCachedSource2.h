@@ -47,8 +47,10 @@ struct NuCachedSource2 : public DataSource {
 
     size_t cachedSize();
     size_t approxDataRemaining(status_t *finalStatus);
+    status_t setCacheStatCollectFreq(int32_t freqMs);
 
     void resumeFetchingIfNecessary();
+    status_t getEstimatedBandwidthKbps(int32_t *kbps);
 
 protected:
     virtual ~NuCachedSource2();

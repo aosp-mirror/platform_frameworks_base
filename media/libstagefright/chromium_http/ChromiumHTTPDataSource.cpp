@@ -34,9 +34,6 @@ ChromiumHTTPDataSource::ChromiumHTTPDataSource(uint32_t flags)
       mCurrentOffset(0),
       mIOResult(OK),
       mContentSize(-1),
-      mNumBandwidthHistoryItems(0),
-      mTotalTransferTimeUs(0),
-      mTotalTransferBytes(0),
       mDecryptHandle(NULL),
       mDrmManagerClient(NULL) {
     mDelegate->setOwner(this);
@@ -188,7 +185,7 @@ ssize_t ChromiumHTTPDataSource::readAt(off64_t offset, void *data, size_t size) 
 
         // The read operation was successful, mIOResult contains
         // the number of bytes read.
-        addBandwidthMeasurement_l(mIOResult, delayUs);
+        addBandwidthMeasurement(mIOResult, delayUs);
 
         mCurrentOffset += mIOResult;
         return mIOResult;
@@ -244,36 +241,6 @@ void ChromiumHTTPDataSource::onDisconnectComplete() {
     mCondition.broadcast();
 
     clearDRMState_l();
-}
-
-void ChromiumHTTPDataSource::addBandwidthMeasurement_l(
-        size_t numBytes, int64_t delayUs) {
-    BandwidthEntry entry;
-    entry.mDelayUs = delayUs;
-    entry.mNumBytes = numBytes;
-    mTotalTransferTimeUs += delayUs;
-    mTotalTransferBytes += numBytes;
-
-    mBandwidthHistory.push_back(entry);
-    if (++mNumBandwidthHistoryItems > 100) {
-        BandwidthEntry *entry = &*mBandwidthHistory.begin();
-        mTotalTransferTimeUs -= entry->mDelayUs;
-        mTotalTransferBytes -= entry->mNumBytes;
-        mBandwidthHistory.erase(mBandwidthHistory.begin());
-        --mNumBandwidthHistoryItems;
-    }
-}
-
-bool ChromiumHTTPDataSource::estimateBandwidth(int32_t *bandwidth_bps) {
-    Mutex::Autolock autoLock(mLock);
-
-    if (mNumBandwidthHistoryItems < 2) {
-        return false;
-    }
-
-    *bandwidth_bps = ((double)mTotalTransferBytes * 8E6 / mTotalTransferTimeUs);
-
-    return true;
 }
 
 sp<DecryptHandle> ChromiumHTTPDataSource::DrmInitialization() {

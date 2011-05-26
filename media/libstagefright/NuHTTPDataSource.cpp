@@ -97,9 +97,6 @@ NuHTTPDataSource::NuHTTPDataSource(uint32_t flags)
       mContentLengthValid(false),
       mHasChunkedTransferEncoding(false),
       mChunkDataBytesLeft(0),
-      mNumBandwidthHistoryItems(0),
-      mTotalTransferTimeUs(0),
-      mTotalTransferBytes(0),
       mDecryptHandle(NULL),
       mDrmManagerClient(NULL) {
 }
@@ -431,7 +428,7 @@ ssize_t NuHTTPDataSource::readAt(off64_t offset, void *data, size_t size) {
         }
 
         int64_t delayUs = ALooper::GetNowUs() - startTimeUs;
-        addBandwidthMeasurement_l(n, delayUs);
+        addBandwidthMeasurement(n, delayUs);
 
         numBytesRead += (size_t)n;
 
@@ -514,36 +511,6 @@ void NuHTTPDataSource::applyTimeoutResponse() {
 
         LOGI("overriding default timeout, new timeout is %ld seconds", tmp);
         mHTTP.setReceiveTimeout(tmp);
-    }
-}
-
-bool NuHTTPDataSource::estimateBandwidth(int32_t *bandwidth_bps) {
-    Mutex::Autolock autoLock(mLock);
-
-    if (mNumBandwidthHistoryItems < 2) {
-        return false;
-    }
-
-    *bandwidth_bps = ((double)mTotalTransferBytes * 8E6 / mTotalTransferTimeUs);
-
-    return true;
-}
-
-void NuHTTPDataSource::addBandwidthMeasurement_l(
-        size_t numBytes, int64_t delayUs) {
-    BandwidthEntry entry;
-    entry.mDelayUs = delayUs;
-    entry.mNumBytes = numBytes;
-    mTotalTransferTimeUs += delayUs;
-    mTotalTransferBytes += numBytes;
-
-    mBandwidthHistory.push_back(entry);
-    if (++mNumBandwidthHistoryItems > 100) {
-        BandwidthEntry *entry = &*mBandwidthHistory.begin();
-        mTotalTransferTimeUs -= entry->mDelayUs;
-        mTotalTransferBytes -= entry->mNumBytes;
-        mBandwidthHistory.erase(mBandwidthHistory.begin());
-        --mNumBandwidthHistoryItems;
     }
 }
 
