@@ -231,6 +231,7 @@ private:
 
     int64_t mLastVideoTimeUs;
     TimedTextPlayer *mTextPlayer;
+    mutable Mutex mTimedTextLock;
 
     sp<WVMExtractor> mWVMExtractor;
 

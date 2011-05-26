@@ -50,7 +50,6 @@ LOCAL_SRC_FILES:=                         \
         ThrottledSource.cpp               \
         TimeSource.cpp                    \
         TimedEventQueue.cpp               \
-        TimedTextPlayer.cpp               \
         Utils.cpp                         \
         VBRISeeker.cpp                    \
         WAVExtractor.cpp                  \
@@ -89,6 +88,7 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_avcenc \
         libstagefright_m4vh263enc \
         libstagefright_matroska \
+        libstagefright_timedtext \
         libvpx \
         libstagefright_mpeg2ts \
         libstagefright_httplive \

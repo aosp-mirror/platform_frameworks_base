@@ -127,6 +127,7 @@ enum media_player_states {
 
 enum media_set_parameter_keys {
     KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX = 1000,
+    KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE = 1001,
 };
 // ----------------------------------------------------------------------------
 // ref-counted object for callbacks

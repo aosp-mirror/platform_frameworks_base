@@ -29,8 +29,9 @@
 #include "include/NuCachedSource2.h"
 #include "include/ThrottledSource.h"
 #include "include/MPEG2TSExtractor.h"
-#include "include/TimedTextPlayer.h"
 #include "include/WVMExtractor.h"
+
+#include "timedtext/TimedTextPlayer.h"
 
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
@@ -1282,6 +1283,7 @@ void AwesomePlayer::setAudioSource(sp<MediaSource> source) {
 }
 
 void AwesomePlayer::addTextSource(sp<MediaSource> source) {
+    Mutex::Autolock autoLock(mTimedTextLock);
     CHECK(source != NULL);
 
     if (mTextPlayer == NULL) {
@@ -2066,10 +2068,26 @@ void AwesomePlayer::postAudioSeekComplete_l() {
 }
 
 status_t AwesomePlayer::setParameter(int key, const Parcel &request) {
-    if (key == KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX) {
-        return setTimedTextTrackIndex(request.readInt32());
+    switch (key) {
+        case KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX:
+        {
+            Mutex::Autolock autoLock(mTimedTextLock);
+            return setTimedTextTrackIndex(request.readInt32());
+        }
+        case KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE:
+        {
+            Mutex::Autolock autoLock(mTimedTextLock);
+            if (mTextPlayer == NULL) {
+                mTextPlayer = new TimedTextPlayer(this, mListener, &mQueue);
+            }
+
+            return mTextPlayer->setParameter(key, request);
+        }
+        default:
+        {
+            return ERROR_UNSUPPORTED;
+        }
     }
-    return ERROR_UNSUPPORTED;
 }
 
 status_t AwesomePlayer::getParameter(int key, Parcel *reply) {

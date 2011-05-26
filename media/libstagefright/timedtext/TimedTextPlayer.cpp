@@ -25,9 +25,11 @@
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MediaBuffer.h>
+#include <media/stagefright/FileSource.h>
 #include <media/stagefright/Utils.h>
 #include "include/AwesomePlayer.h"
-#include "include/TimedTextPlayer.h"
+#include "TimedTextPlayer.h"
+#include "TimedTextParser.h"
 
 namespace android {
 
@@ -59,13 +61,16 @@ TimedTextPlayer::TimedTextPlayer(
         const wp<MediaPlayerBase> &listener,
         TimedEventQueue *queue)
     : mSource(NULL),
+      mOutOfBandSource(NULL),
       mSeekTimeUs(0),
       mStarted(false),
       mTextEventPending(false),
       mQueue(queue),
       mListener(listener),
       mObserver(observer),
-      mTextBuffer(NULL) {
+      mTextBuffer(NULL),
+      mTextParser(NULL),
+      mTextType(kNoText) {
     mTextEvent = new TimedTextEvent(this, &TimedTextPlayer::onTextEvent);
 }
 
@@ -75,22 +80,43 @@ TimedTextPlayer::~TimedTextPlayer() {
     }
 
     mTextTrackVector.clear();
+    mTextOutOfBandVector.clear();
 }
 
 status_t TimedTextPlayer::start(uint8_t index) {
     CHECK(!mStarted);
 
-    if (index >= mTextTrackVector.size()) {
-        LOGE("Incorrect text track index");
+    if (index >=
+            mTextTrackVector.size() + mTextOutOfBandVector.size()) {
+        LOGE("Incorrect text track index: %d", index);
         return BAD_VALUE;
     }
 
-    mSource = mTextTrackVector.itemAt(index);
+    if (index < mTextTrackVector.size()) { // start an in-band text
+        mSource = mTextTrackVector.itemAt(index);
 
-    status_t err = mSource->start();
+        status_t err = mSource->start();
 
-    if (err != OK) {
-        return err;
+        if (err != OK) {
+            return err;
+        }
+        mTextType = kInBandText;
+    } else { // start an out-of-band text
+        OutOfBandText text =
+            mTextOutOfBandVector.itemAt(index - mTextTrackVector.size());
+
+        mOutOfBandSource = text.source;
+        TimedTextParser::FileType fileType = text.type;
+
+        if (mTextParser == NULL) {
+            mTextParser = new TimedTextParser();
+        }
+
+        status_t err;
+        if ((err = mTextParser->init(mOutOfBandSource, fileType)) != OK) {
+            return err;
+        }
+        mTextType = kOutOfBandText;
     }
 
     int64_t positionUs;
@@ -127,15 +153,26 @@ void TimedTextPlayer::reset() {
     mSeeking = false;
     mStarted = false;
 
-    if (mTextBuffer != NULL) {
-        mTextBuffer->release();
-        mTextBuffer = NULL;
-    }
+    if (mTextType == kInBandText) {
+        if (mTextBuffer != NULL) {
+            mTextBuffer->release();
+            mTextBuffer = NULL;
+        }
 
-    if (mSource != NULL) {
-        mSource->stop();
-        mSource.clear();
-        mSource = NULL;
+        if (mSource != NULL) {
+            mSource->stop();
+            mSource.clear();
+            mSource = NULL;
+        }
+    } else {
+        if (mTextParser != NULL) {
+            mTextParser.clear();
+            mTextParser = NULL;
+        }
+        if (mOutOfBandSource != NULL) {
+            mOutOfBandSource.clear();
+            mOutOfBandSource = NULL;
+        }
     }
 }
 
@@ -145,11 +182,14 @@ status_t TimedTextPlayer::seekTo(int64_t time_us) {
     mSeeking = true;
     mSeekTimeUs = time_us;
 
+    postTextEvent();
+
     return OK;
 }
 
 status_t TimedTextPlayer::setTimedTextTrackIndex(int32_t index) {
-    if (index >= (int)(mTextTrackVector.size())) {
+    if (index >=
+            (int)(mTextTrackVector.size() + mTextOutOfBandVector.size())) {
         return BAD_VALUE;
     }
 
@@ -177,34 +217,54 @@ void TimedTextPlayer::onTextEvent() {
                 MediaSource::ReadOptions::SEEK_PREVIOUS_SYNC);
         mSeeking = false;
 
-        if (mTextBuffer != NULL) {
-            mTextBuffer->release();
-            mTextBuffer = NULL;
+        if (mTextType == kInBandText) {
+            if (mTextBuffer != NULL) {
+                mTextBuffer->release();
+                mTextBuffer = NULL;
+            }
+        } else {
+            mText.clear();
         }
 
         notifyListener(MEDIA_TIMED_TEXT); //empty text to clear the screen
     }
 
-    if (mTextBuffer != NULL) {
-        uint8_t *tmp = (uint8_t *)(mTextBuffer->data());
-        size_t len = (*tmp) << 8 | (*(tmp + 1));
-
-        notifyListener(MEDIA_TIMED_TEXT,
-                       tmp + 2,
-                       len);
-
-        mTextBuffer->release();
-        mTextBuffer = NULL;
-
-    }
-
-    if (mSource->read(&mTextBuffer, &options) != OK) {
-        return;
-    }
-
     int64_t positionUs, timeUs;
     mObserver->getPosition(&positionUs);
-    mTextBuffer->meta_data()->findInt64(kKeyTime, &timeUs);
+
+    if (mTextType == kInBandText) {
+        if (mTextBuffer != NULL) {
+            uint8_t *tmp = (uint8_t *)(mTextBuffer->data());
+            size_t len = (*tmp) << 8 | (*(tmp + 1));
+
+            notifyListener(MEDIA_TIMED_TEXT,
+                           tmp + 2,
+                           len);
+
+            mTextBuffer->release();
+            mTextBuffer = NULL;
+
+        }
+
+        if (mSource->read(&mTextBuffer, &options) != OK) {
+            return;
+        }
+
+        mTextBuffer->meta_data()->findInt64(kKeyTime, &timeUs);
+    } else {
+        if (mText.size() > 0) {
+            notifyListener(MEDIA_TIMED_TEXT,
+                           mText.c_str(),
+                           mText.size());
+            mText.clear();
+        }
+
+        int64_t endTimeUs;
+        if (mTextParser->getText(
+                    &mText, &timeUs, &endTimeUs, &options) != OK) {
+            return;
+        }
+    }
 
     //send the text now
     if (timeUs <= positionUs + 100000ll) {
@@ -229,7 +289,42 @@ void TimedTextPlayer::cancelTextEvent() {
 }
 
 void TimedTextPlayer::addTextSource(sp<MediaSource> source) {
+    Mutex::Autolock autoLock(mLock);
     mTextTrackVector.add(source);
+}
+
+status_t TimedTextPlayer::setParameter(int key, const Parcel &request) {
+    Mutex::Autolock autoLock(mLock);
+
+    if (key == KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE) {
+        String8 uri = request.readString8();
+        KeyedVector<String8, String8> headers;
+
+        // To support local subtitle file only for now
+        if (strncasecmp("file://", uri.string(), 7)) {
+            return INVALID_OPERATION;
+        }
+        sp<DataSource> dataSource =
+            DataSource::CreateFromURI(uri, &headers);
+        status_t err = dataSource->initCheck();
+
+        if (err != OK) {
+            return err;
+        }
+
+        OutOfBandText text;
+        text.source = dataSource;
+        if (uri.getPathExtension() == String8(".srt")) {
+            text.type = TimedTextParser::OUT_OF_BAND_FILE_SRT;
+        } else {
+            return ERROR_UNSUPPORTED;
+        }
+
+        mTextOutOfBandVector.add(text);
+
+        return OK;
+    }
+    return INVALID_OPERATION;
 }
 
 void TimedTextPlayer::notifyListener(
