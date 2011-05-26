@@ -32,8 +32,12 @@
     <dimen name="toast_y_offset">64dip</dimen>
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">25dip</dimen>
-    <!-- Height of the status bar -->
+    <!-- Height of the system bar -->
+    <dimen name="system_bar_height">48dip</dimen>
+    <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">25dip</dimen>
+    <!-- Height of notification icons in the system bar -->
+    <dimen name="system_bar_icon_size">32dip</dimen>
     <!-- Margin at the edge of the screen to ignore touch events for in the windowshade. -->
     <dimen name="status_bar_edge_ignore">5dp</dimen>
     <!-- Size of the fastscroll hint letter -->

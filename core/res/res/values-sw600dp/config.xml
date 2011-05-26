@@ -20,8 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <bool name="config_statusBarCanHide">false</bool>
-
     <!-- see comment in values/config.xml -->
     <integer name="config_longPressOnPowerBehavior">2</integer>
 
