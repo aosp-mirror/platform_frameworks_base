@@ -926,9 +926,12 @@ class ZoomManager {
                 // we always force, in case our height changed, in which case we
                 // still want to send the notification over to webkit.
                 // Keep overview mode unchanged when rotating.
-                final float zoomOverviewScale = getZoomOverviewScale();
-                final float newScale = (mInZoomOverviewBeforeSizeChange) ?
-                    zoomOverviewScale : Math.max(mActualScale, zoomOverviewScale); 
+                float newScale = mActualScale;
+                if (mWebView.getSettings().getUseWideViewPort()) {
+                    final float zoomOverviewScale = getZoomOverviewScale();
+                    newScale = (mInZoomOverviewBeforeSizeChange) ?
+                        zoomOverviewScale : Math.max(mActualScale, zoomOverviewScale);
+                }
                 setZoomScale(newScale, mUpdateTextWrap, true);
                 // update the zoom buttons as the scale can be changed
                 updateZoomPicker();
@@ -1027,7 +1030,7 @@ class ZoomManager {
             }
         } else {
             // If not use wide viewport, use view width as the zoom overview width.
-            newZoomOverviewWidth = viewWidth;
+            newZoomOverviewWidth = Math.round(viewWidth / mDefaultScale);
         }
         if (newZoomOverviewWidth != mZoomOverviewWidth) {
             setZoomOverviewWidth(newZoomOverviewWidth);
