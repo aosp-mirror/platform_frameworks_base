@@ -993,6 +993,13 @@ public class PackageParser {
                 sa = res.obtainAttributes(attrs,
                         com.android.internal.R.styleable.AndroidManifestSupportsScreens);
 
+                pkg.applicationInfo.requiresSmallestWidthDp = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_requiresSmallestWidthDp,
+                        0);
+                pkg.applicationInfo.compatibleWidthLimitDp = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_compatibleWidthLimitDp,
+                        0);
+
                 // This is a trick to get a boolean and still able to detect
                 // if a value was actually set.
                 supportsSmallScreens = sa.getInteger(

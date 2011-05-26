@@ -1643,9 +1643,17 @@
   <public type="mipmap" name="sym_def_app_icon" id="0x010d0000" />
 
 <!-- ===============================================================
-     Resources added in version 12 of the platform (Honeycomb / 3.1)
+     Resources added in version 12 of the platform (Honeycomb MR 1 / 3.1)
      =============================================================== -->
   <eat-comment />
   <public type="attr" name="textCursorDrawable" id="0x01010362" />
-  <public type="attr" name="resizeMode" />
+  <public type="attr" name="resizeMode" id="0x01010363" />
+
+
+<!-- ===============================================================
+     Resources added in version 13 of the platform (Honeycomb MR 2)
+     =============================================================== -->
+  <eat-comment />
+  <public type="attr" name="requiresSmallestWidthDp" id="0x01010364" />
+  <public type="attr" name="compatibleWidthLimitDp" />
 </resources>
