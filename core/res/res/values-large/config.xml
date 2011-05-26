@@ -23,8 +23,6 @@
     <!-- see comment in values/config.xml -->
     <dimen name="config_prefDialogWidth">440dp</dimen>
 
-    <bool name="config_statusBarCanHide">false</bool>
-
     <!-- see comment in values/config.xml -->
     <integer name="config_longPressOnPowerBehavior">2</integer>
 

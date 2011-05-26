@@ -464,6 +464,12 @@ public interface WindowManagerPolicy {
     public int getMaxWallpaperLayer();
     
     /**
+     * Return true if the policy allows the status bar to hide.  Otherwise,
+     * it is a tablet-style system bar.
+     */
+    public boolean canStatusBarHide();
+
+    /**
      * Return the display width available after excluding any screen
      * decorations that can never be removed.  That is, system bar or
      * button bar.

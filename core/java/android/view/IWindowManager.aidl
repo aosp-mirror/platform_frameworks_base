@@ -59,6 +59,9 @@ interface IWindowManager
     void setForcedDisplaySize(int longDimen, int shortDimen);
     void clearForcedDisplaySize();
 
+    // Is device configured with a hideable status bar or a tablet system bar?
+    boolean canStatusBarHide();
+
     // These can only be called when injecting events to your own window,
     // or by holding the INJECT_EVENTS permission.  These methods may block
     // until pending input events are finished being dispatched even when 'sync' is false.
