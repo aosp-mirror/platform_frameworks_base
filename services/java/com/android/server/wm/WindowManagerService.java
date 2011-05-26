@@ -8297,6 +8297,7 @@ public class WindowManagerService extends IWindowManager.Stub
         boolean state = mHoldingScreenWakeLock.isHeld();
         if (holding != state) {
             if (holding) {
+                mPolicy.screenOnStartedLw();
                 mHoldingScreenWakeLock.acquire();
             } else {
                 mPolicy.screenOnStoppedLw();
