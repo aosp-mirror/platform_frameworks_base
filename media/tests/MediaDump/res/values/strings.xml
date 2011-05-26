@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="video_url">Video Url</string>
+    <string name="does_dump">Does Dump?</string>
+    <string name="update_settings">Update Settings</string>
+    <string name="app_name">Media Dump</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+</resources>
