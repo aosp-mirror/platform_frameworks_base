@@ -1737,7 +1737,6 @@ public class BluetoothService extends IBluetooth.Stub {
                 pw.println("Number of connected devices:" + deviceList.size());
                 BluetoothDevice device = deviceList.get(0);
                 pw.println("getConnectedDevices[0] = " + device);
-                pw.println("Priority of Connected device = " + mPan.getPriority(device));
 
                 switch (mPan.getConnectionState(device)) {
                     case BluetoothInputDevice.STATE_CONNECTING:
