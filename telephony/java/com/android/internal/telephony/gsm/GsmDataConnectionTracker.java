@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
@@ -1427,7 +1428,13 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         AlarmManager am =
             (AlarmManager) mPhone.getContext().getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(INTENT_RECONNECT_ALARM);
+
+        // TODO : Register the receiver only once maybe in baseclass.
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(INTENT_RECONNECT_ALARM + '.'+apnContext.getApnType());
+        mPhone.getContext().registerReceiver(mIntentReceiver, filter, null, mPhone);
+
+        Intent intent = new Intent(INTENT_RECONNECT_ALARM + '.' + apnContext.getApnType());
         intent.putExtra(INTENT_RECONNECT_ALARM_EXTRA_REASON, apnContext.getReason());
         intent.putExtra(INTENT_RECONNECT_ALARM_EXTRA_TYPE, apnContext.getApnType());
         apnContext.setReconnectIntent(PendingIntent.getBroadcast (
