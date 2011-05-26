@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/**
+ * Copyright (c) 2009, The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); 
+ * you may not use this file except in compliance with the License. 
+ * You may obtain a copy of the License at 
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0 
+ *
+ * Unless required by applicable law or agreed to in writing, software 
+ * distributed under the License is distributed on an "AS IS" BASIS, 
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+ * See the License for the specific language governing permissions and 
+ * limitations under the License.
+ */
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for app_label (7164937344850004466) -->
+    <skip />
+    <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Futa"</string>
+    <!-- no translation found for status_bar_do_not_disturb_button (5812628897510997853) -->
+    <skip />
+    <!-- no translation found for status_bar_please_disturb_button (3345398298841572813) -->
+    <skip />
+    <!-- no translation found for status_bar_no_notifications_title (4755261167193833213) -->
+    <skip />
+    <!-- no translation found for status_bar_ongoing_events_title (1682504513316879202) -->
+    <skip />
+    <!-- no translation found for status_bar_latest_events_title (6594767438577593172) -->
+    <skip />
+    <!-- no translation found for battery_low_title (7923774589611311406) -->
+    <skip />
+    <!-- no translation found for battery_low_subtitle (1752040062087829196) -->
+    <skip />
+    <!-- no translation found for battery_low_percent_format (1077244949318261761) -->
+    <skip />
+    <!-- no translation found for invalid_charger (4549105996740522523) -->
+    <skip />
+    <string name="battery_low_why" msgid="7279169609518386372">"Utumiaji wa betri"</string>
+    <!-- no translation found for status_bar_settings_settings_button (3023889916699270224) -->
+    <skip />
+    <!-- no translation found for status_bar_settings_wifi_button (1733928151698311923) -->
+    <skip />
+    <!-- no translation found for status_bar_settings_airplane (4879879698500955300) -->
+    <skip />
+    <!-- no translation found for status_bar_settings_auto_rotation (3790482541357798421) -->
+    <skip />
+    <!-- no translation found for status_bar_settings_mute_label (554682549917429396) -->
+    <skip />
+    <!-- no translation found for status_bar_settings_auto_brightness_label (511453614962324674) -->
+    <skip />
+    <!-- no translation found for status_bar_settings_notifications (397146176280905137) -->
+    <skip />
+    <string name="recent_tasks_title" msgid="3691764623638127888">"Za hivi karibuni"</string>
+    <!-- no translation found for recent_tasks_empty (1905484479067697884) -->
+    <skip />
+    <!-- no translation found for recent_tasks_app_label (3796483981246752469) -->
+    <skip />
+    <!-- no translation found for bluetooth_tethered (7094101612161133267) -->
+    <skip />
+    <!-- no translation found for status_bar_input_method_settings_configure_input_methods (737483394044014246) -->
+    <skip />
+    <!-- no translation found for status_bar_use_physical_keyboard (3695516942412442936) -->
+    <skip />
+    <!-- no translation found for usb_device_permission_prompt (3816016361969816903) -->
+    <skip />
+    <!-- no translation found for usb_accessory_permission_prompt (6888598803988889959) -->
+    <skip />
+    <!-- no translation found for usb_device_confirm_prompt (5161205258635253206) -->
+    <skip />
+    <!-- no translation found for usb_accessory_confirm_prompt (3808984931830229888) -->
+    <skip />
+    <!-- no translation found for usb_accessory_uri_prompt (6332150684964235705) -->
+    <skip />
+    <!-- no translation found for title_usb_accessory (4966265263465181372) -->
+    <skip />
+    <!-- no translation found for label_view (6304565553218192990) -->
+    <skip />
+    <!-- no translation found for always_use_device (1450287437017315906) -->
+    <skip />
+    <!-- no translation found for always_use_accessory (1210954576979621596) -->
+    <skip />
+</resources>

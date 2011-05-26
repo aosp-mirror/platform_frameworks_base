@@ -1,0 +1,1426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+/* //device/apps/common/assets/res/any/strings.xml
+**
+** Copyright 2006, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License");
+** you may not use this file except in compliance with the License.
+** You may obtain a copy of the License at
+**
+**     http://www.apache.org/licenses/LICENSE-2.0
+**
+** Unless required by applicable law or agreed to in writing, software
+** distributed under the License is distributed on an "AS IS" BASIS,
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+** See the License for the specific language governing permissions and
+** limitations under the License.
+*/
+ -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <!-- no translation found for byteShort (8340973892742019101) -->
+    <skip />
+    <!-- no translation found for kilobyteShort (5973789783504771878) -->
+    <skip />
+    <!-- no translation found for megabyteShort (6355851576770428922) -->
+    <skip />
+    <!-- no translation found for gigabyteShort (3259882455212193214) -->
+    <skip />
+    <!-- no translation found for terabyteShort (231613018159186962) -->
+    <skip />
+    <!-- no translation found for petabyteShort (5637816680144990219) -->
+    <skip />
+    <string name="fileSizeSuffix" msgid="7670819340156489359">"<xliff:g id="NUMBER">%1$s</xliff:g><xliff:g id="UNIT">%2$s</xliff:g>"</string>
+    <!-- no translation found for untitled (6071602020171759109) -->
+    <skip />
+    <!-- no translation found for ellipsis (7899829516048813237) -->
+    <skip />
+    <!-- no translation found for emptyPhoneNumber (7694063042079676517) -->
+    <skip />
+    <!-- no translation found for unknownName (2277556546742746522) -->
+    <skip />
+    <!-- no translation found for defaultVoiceMailAlphaTag (2660020990097733077) -->
+    <skip />
+    <!-- no translation found for defaultMsisdnAlphaTag (2850889754919584674) -->
+    <skip />
+    <!-- no translation found for mmiError (5154499457739052907) -->
+    <skip />
+    <string name="mmiFdnError" msgid="5224398216385316471">"Umsebenzi uvinjelwe ekudayeleni izinombolo ezingaguquki kuphela."</string>
+    <!-- no translation found for serviceEnabled (8147278346414714315) -->
+    <skip />
+    <!-- no translation found for serviceEnabledFor (6856228140453471041) -->
+    <skip />
+    <!-- no translation found for serviceDisabled (1937553226592516411) -->
+    <skip />
+    <!-- no translation found for serviceRegistered (6275019082598102493) -->
+    <skip />
+    <!-- no translation found for serviceErased (1288584695297200972) -->
+    <skip />
+    <!-- no translation found for passwordIncorrect (7612208839450128715) -->
+    <skip />
+    <!-- no translation found for mmiComplete (8232527495411698359) -->
+    <skip />
+    <!-- no translation found for badPin (5085454289896032547) -->
+    <skip />
+    <!-- no translation found for badPuk (5702522162746042460) -->
+    <skip />
+    <!-- no translation found for mismatchPin (3695902225843339274) -->
+    <skip />
+    <!-- no translation found for invalidPin (3850018445187475377) -->
+    <skip />
+    <string name="needPuk" msgid="919668385956251611">"Ikhadi lakho le-SIM livalwe nge-PUK. Thayipha ikhodi ye-PUK ukulivula."</string>
+    <!-- no translation found for needPuk2 (4526033371987193070) -->
+    <skip />
+    <!-- no translation found for ClipMmi (6952821216480289285) -->
+    <skip />
+    <!-- no translation found for ClirMmi (7784673673446833091) -->
+    <skip />
+    <!-- no translation found for CfMmi (5123218989141573515) -->
+    <skip />
+    <!-- no translation found for CwMmi (9129678056795016867) -->
+    <skip />
+    <!-- no translation found for BaMmi (455193067926770581) -->
+    <skip />
+    <!-- no translation found for PwdMmi (7043715687905254199) -->
+    <skip />
+    <!-- no translation found for PinMmi (3113117780361190304) -->
+    <skip />
+    <string name="CnipMmi" msgid="3110534680557857162">"Ukushayela inombolo kukhona"</string>
+    <string name="CnirMmi" msgid="3062102121430548731">"Ukushayela inombolo kuvinjelwe"</string>
+    <string name="ThreeWCMmi" msgid="9051047170321190368">"Ukushayela kwezindlela ezintathu"</string>
+    <string name="RuacMmi" msgid="7827887459138308886">"Ukwenqabela amakholi acikayo"</string>
+    <string name="CndMmi" msgid="3116446237081575808">"Ishayela ukuthumela inombolo"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Ungaphazamisi"</string>
+    <!-- no translation found for CLIRDefaultOnNextCallOn (429415409145781923) -->
+    <skip />
+    <!-- no translation found for CLIRDefaultOnNextCallOff (3092918006077864624) -->
+    <skip />
+    <!-- no translation found for CLIRDefaultOffNextCallOn (6179425182856418465) -->
+    <skip />
+    <!-- no translation found for CLIRDefaultOffNextCallOff (2567998633124408552) -->
+    <skip />
+    <!-- no translation found for serviceNotProvisioned (8614830180508686666) -->
+    <skip />
+    <!-- no translation found for CLIRPermanent (5460892159398802465) -->
+    <skip />
+    <string name="RestrictedChangedTitle" msgid="5592189398956187498">"Ukufinyelela okuvinjelwe kushintshiwe"</string>
+    <string name="RestrictedOnData" msgid="8653794784690065540">"Insizakalo yedatha ivaliwe."</string>
+    <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Insizakalo ephuthumayo ivimbelwe."</string>
+    <string name="RestrictedOnNormal" msgid="4953867011389750673">"Insizakalo yezwi ivimbelwe."</string>
+    <string name="RestrictedOnAllVoice" msgid="1459318899842232234">"Zonke izinsizakalo Zezwi zivimbelwe."</string>
+    <string name="RestrictedOnSms" msgid="8314352327461638897">"Insizakalo ye-SMS ivaliwe."</string>
+    <string name="RestrictedOnVoiceData" msgid="8244438624660371717">"Izinsizakalo Zezwi/Idatha zivimbelwe."</string>
+    <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Izinsizakalo Zezwi/SMS zivimbelwe."</string>
+    <string name="RestrictedOnAll" msgid="2714924667937117304">"Zonke izinsizakalo Zezwi/Idatha/SMS zivimbelwe."</string>
+    <!-- no translation found for serviceClassVoice (1258393812335258019) -->
+    <skip />
+    <!-- no translation found for serviceClassData (872456782077937893) -->
+    <skip />
+    <!-- no translation found for serviceClassFAX (5566624998840486475) -->
+    <skip />
+    <!-- no translation found for serviceClassSMS (2015460373701527489) -->
+    <skip />
+    <!-- no translation found for serviceClassDataAsync (4523454783498551468) -->
+    <skip />
+    <!-- no translation found for serviceClassDataSync (7530000519646054776) -->
+    <skip />
+    <!-- no translation found for serviceClassPacket (6991006557993423453) -->
+    <skip />
+    <!-- no translation found for serviceClassPAD (3235259085648271037) -->
+    <skip />
+    <string name="roamingText0" msgid="7170335472198694945">"Isikhombisi Sokuzulazula Sivuliwe"</string>
+    <string name="roamingText1" msgid="5314861519752538922">"Isibonisi Sokuzulazula Sivaliwe"</string>
+    <string name="roamingText2" msgid="8969929049081268115">"Isikhombisi Sokuzulazula Siyafulesha"</string>
+    <string name="roamingText3" msgid="5148255027043943317">"Akukona Okwasendaweni"</string>
+    <string name="roamingText4" msgid="8808456682550796530">"Akukho Esakhiweni"</string>
+    <string name="roamingText5" msgid="7604063252850354350">"Iyazulazula - Uhlelo Olukhethwayo"</string>
+    <string name="roamingText6" msgid="2059440825782871513">"Iyazulazula - Uhlelo Olutholakalayo"</string>
+    <string name="roamingText7" msgid="7112078724097233605">"Iyazulazula - Umlingane Osebenzelana Naye"</string>
+    <string name="roamingText8" msgid="5989569778604089291">"Iyazulazula - Umlingane Wokusebenzisa"</string>
+    <string name="roamingText9" msgid="7969296811355152491">"Iyazulazula - Ukusebeza Kwensizakalo Okugcwele"</string>
+    <string name="roamingText10" msgid="3992906999815316417">"Iyazulazula - Isici Sensizakalo Eyingxenye"</string>
+    <string name="roamingText11" msgid="4154476854426920970">"Ibhena Yokuzulazula Ivuliwe"</string>
+    <string name="roamingText12" msgid="1189071119992726320">"Ibhena yokuzulazula ivaliwe"</string>
+    <string name="roamingTextSearching" msgid="8360141885972279963">"Iseshela Izinsizakalo"</string>
+    <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Akudlulisiwe"</string>
+    <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
+    <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> emuva kwamasekhondi angu-<xliff:g id="TIME_DELAY">{2}</xliff:g>"</string>
+    <string name="cfTemplateRegistered" msgid="5073237827620166285">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Akudlulisiwe"</string>
+    <string name="cfTemplateRegisteredTime" msgid="6781621964320635172">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: akudlulisiwe"</string>
+    <string name="fcComplete" msgid="3118848230966886575">"Ikhodi yesici iqedile."</string>
+    <string name="fcError" msgid="3327560126588500777">"Inkinga yoxhumano noma ikhodi yesici engalungile."</string>
+    <!-- no translation found for httpErrorOk (1191919378083472204) -->
+    <skip />
+    <!-- no translation found for httpError (2567300624552921790) -->
+    <skip />
+    <!-- no translation found for httpErrorLookup (4517085806977851374) -->
+    <skip />
+    <!-- no translation found for httpErrorUnsupportedAuthScheme (2781440683514730227) -->
+    <skip />
+    <!-- no translation found for httpErrorAuth (7293960746955020542) -->
+    <skip />
+    <!-- no translation found for httpErrorProxyAuth (1788207010559081331) -->
+    <skip />
+    <!-- no translation found for httpErrorConnect (7623096283505770433) -->
+    <skip />
+    <!-- no translation found for httpErrorIO (5047872902739125260) -->
+    <skip />
+    <!-- no translation found for httpErrorTimeout (4743403703762883954) -->
+    <skip />
+    <!-- no translation found for httpErrorRedirectLoop (8679596090392779516) -->
+    <skip />
+    <!-- no translation found for httpErrorUnsupportedScheme (5257172771607996054) -->
+    <skip />
+    <!-- no translation found for httpErrorFailedSslHandshake (3088290300440289771) -->
+    <skip />
+    <!-- no translation found for httpErrorBadUrl (6088183159988619736) -->
+    <skip />
+    <!-- no translation found for httpErrorFile (8250549644091165175) -->
+    <skip />
+    <!-- no translation found for httpErrorFileNotFound (5588380756326017105) -->
+    <skip />
+    <!-- no translation found for httpErrorTooManyRequests (1235396927087188253) -->
+    <skip />
+    <string name="notification_title" msgid="1259940370369187045">"Iphutha lokungena ngemvume le-<xliff:g id="ACCOUNT">%1$s</xliff:g>"</string>
+    <!-- no translation found for contentServiceSync (8353523060269335667) -->
+    <skip />
+    <!-- no translation found for contentServiceSyncNotificationTitle (397743349191901458) -->
+    <skip />
+    <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Kunokususa <xliff:g id="CONTENT_TYPE">%s</xliff:g> okuningi kakhulu."</string>
+    <!-- no translation found for low_memory (2292820184396262278) -->
+    <skip />
+    <!-- no translation found for low_memory (6632412458436461203) -->
+    <skip />
+    <!-- no translation found for me (6545696007631404292) -->
+    <skip />
+    <!-- no translation found for power_dialog (8545351420865202853) -->
+    <skip />
+    <!-- no translation found for power_dialog (1319919075463988638) -->
+    <skip />
+    <!-- no translation found for silent_mode (7167703389802618663) -->
+    <skip />
+    <!-- no translation found for turn_on_radio (3912793092339962371) -->
+    <skip />
+    <!-- no translation found for turn_off_radio (8198784949987062346) -->
+    <skip />
+    <!-- no translation found for screen_lock (799094655496098153) -->
+    <skip />
+    <!-- no translation found for power_off (4266614107412865048) -->
+    <skip />
+    <!-- no translation found for shutdown_progress (2281079257329981203) -->
+    <skip />
+    <!-- no translation found for shutdown_confirm (3385745179555731470) -->
+    <skip />
+    <!-- no translation found for shutdown_confirm (649792175242821353) -->
+    <skip />
+    <!-- no translation found for shutdown_confirm_question (6656441286856415014) -->
+    <skip />
+    <string name="recent_tasks_title" msgid="3691764623638127888">"Okwakamuva"</string>
+    <!-- no translation found for no_recent_tasks (279702952298056674) -->
+    <skip />
+    <!-- no translation found for global_actions (408477140088053665) -->
+    <skip />
+    <!-- no translation found for global_actions (2406416831541615258) -->
+    <skip />
+    <!-- no translation found for global_action_lock (2844945191792119712) -->
+    <skip />
+    <!-- no translation found for global_action_power_off (4471879440839879722) -->
+    <skip />
+    <!-- no translation found for global_action_toggle_silent_mode (8219525344246810925) -->
+    <skip />
+    <!-- no translation found for global_action_silent_mode_on_status (3289841937003758806) -->
+    <skip />
+    <!-- no translation found for global_action_silent_mode_off_status (1506046579177066419) -->
+    <skip />
+    <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Imodi yendiza"</string>
+    <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Imodi yendiza IVULIWE"</string>
+    <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Imodi yendiza IVALIWE"</string>
+    <!-- no translation found for status_bar_notification_info_overflow (5833510281787786290) -->
+    <skip />
+    <!-- no translation found for safeMode (2788228061547930246) -->
+    <skip />
+    <string name="android_system_label" msgid="6577375335728551336">"Uhlelo lwe-Android"</string>
+    <!-- no translation found for permgrouplab_costMoney (5429808217861460401) -->
+    <skip />
+    <string name="permgroupdesc_costMoney" msgid="8193824940620517189">"Ivumela uhlelo lokusebenza ukwenza izinto ezingakubiza  imali."</string>
+    <!-- no translation found for permgrouplab_messages (7521249148445456662) -->
+    <skip />
+    <string name="permgroupdesc_messages" msgid="7045736972019211994">"Funda futhi ubale i-SMS yakho, i-imeyili, neminye imiyalezo."</string>
+    <!-- no translation found for permgrouplab_personalInfo (3519163141070533474) -->
+    <skip />
+    <!-- outdated translation 5488050357388806068 -->     <string name="permgroupdesc_personalInfo" product="tablet" msgid="6975389054186265786">"Ukufinyelela okuqondile othintana nabo nekhalenda egcinwe efonini yakho."</string>
+    <string name="permgroupdesc_personalInfo" product="default" msgid="5488050357388806068">"Ukufinyelela okuqondile othintana nabo nekhalenda egcinwe efonini yakho."</string>
+    <!-- no translation found for permgrouplab_location (635149742436692049) -->
+    <skip />
+    <!-- no translation found for permgroupdesc_location (2430258821648348660) -->
+    <skip />
+    <!-- no translation found for permgrouplab_network (5808983377727109831) -->
+    <skip />
+    <string name="permgroupdesc_network" msgid="5035763698958415998">"Ivumela izinhlelo zokusebenza ukufinyelela kuzici ezihlukene zenethiwekhi."</string>
+    <string name="permgrouplab_accounts" msgid="3359646291125325519">"Ama-akhawunti akho"</string>
+    <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Finyelela kuma-akhawunti atholakalayo"</string>
+    <!-- no translation found for permgrouplab_hardwareControls (7998214968791599326) -->
+    <skip />
+    <string name="permgroupdesc_hardwareControls" msgid="4357057861225462702">"Ukufinyelela okuqondile ihadiwe nehendsethi."</string>
+    <!-- no translation found for permgrouplab_phoneCalls (9067173988325865923) -->
+    <skip />
+    <string name="permgroupdesc_phoneCalls" msgid="7489701620446183770">"Qapha, bhala, futhi wenze amakholi wefoni."</string>
+    <!-- no translation found for permgrouplab_systemTools (4652191644082714048) -->
+    <skip />
+    <string name="permgroupdesc_systemTools" msgid="8162102602190734305">"Ukufinyelela kwezinga eliphansi nokulawula uhlelo."</string>
+    <!-- no translation found for permgrouplab_developmentTools (3446164584710596513) -->
+    <skip />
+    <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Izici zidingeka kuphela konjiniyela bohlelo lokusebenza."</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Ukugcina"</string>
+    <!-- outdated translation 9203302214915355774 -->     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Finyelela ikhadi le-SD."</string>
+    <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Finyelela ikhadi le-SD."</string>
+    <!-- no translation found for permlab_statusBar (7417192629601890791) -->
+    <skip />
+    <string name="permdesc_statusBar" msgid="1365473595331989732">"Ivumela uhlelo lokusebenza ukuvimbela umudwa ochaza ngesimo noma ukufaka noma ukukhipha izithonjana zohlelo."</string>
+    <string name="permlab_statusBarService" msgid="7247281911387931485">"umudwa ochaza ngesimo"</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Ivumela uhlelo lokusebenza ukuba umudwa ochaza ngesimo."</string>
+    <!-- no translation found for permlab_expandStatusBar (1148198785937489264) -->
+    <skip />
+    <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Ivumela uhlelo lokusebenza ukukhulisa noma ukunciphisa umudwa ochaza ngesimo."</string>
+    <!-- no translation found for permlab_processOutgoingCalls (1136262550878335980) -->
+    <skip />
+    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"Ivumela uhlelo lokusebenza ukwenza izincingo eziphumayo nokushintsha izinombolo okumele zidayelwe. Izinhlelo ezinonya zingase zigade, ziqondise futhi, noma zigweme izincingo eziphumayo"</string>
+    <!-- no translation found for permlab_receiveSms (2697628268086208535) -->
+    <skip />
+    <string name="permdesc_receiveSms" msgid="6298292335965966117">"Ivumela uhlelo lokusebenza ukuthola nokwenza imiyalezo ye-SMS. Izinhlelo zokusebenza ezinonya zingase zigade imiyalezo yakho noma ziyisuse ngaphandle kokukubonisa zona."</string>
+    <!-- no translation found for permlab_receiveMms (8894700916188083287) -->
+    <skip />
+    <string name="permdesc_receiveMms" msgid="4563346832000174373">"Ivumela uhlelo lokusebenza ukuthola nokwenza imiyalezo ye-MMS. Izinhlelo ezinonya zingase zigade imiyalezo yakho noma ziyisuse ngaphandle kokukubonisa yona."</string>
+    <!-- no translation found for permlab_sendSms (5600830612147671529) -->
+    <skip />
+    <string name="permdesc_sendSms" msgid="1946540351763502120">"Ivumela uhlelo lokusebenza ukuthumela imiyalezo ye-SMS. Izinhlelo zokusebenza ezinonya zingakubiza imali ngokukuthumela imiyalezo ngaphandle kwesiqinisekiso."</string>
+    <!-- no translation found for permlab_readSms (4085333708122372256) -->
+    <skip />
+    <!-- outdated translation 3002170087197294591 -->     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Ivumela uhlelo lokusebena ukufunda imiyalezo ye-SMS egcinwe efonini yakho noma ekhadini le-SIM. Izinhlelo ezinonya zingase zifunde imiyalezo eyimfihlo."</string>
+    <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Ivumela uhlelo lokusebena ukufunda imiyalezo ye-SMS egcinwe efonini yakho noma ekhadini le-SIM. Izinhlelo ezinonya zingase zifunde imiyalezo eyimfihlo."</string>
+    <!-- no translation found for permlab_writeSms (6881122575154940744) -->
+    <skip />
+    <!-- outdated translation 6299398896177548095 -->     <string name="permdesc_writeSms" product="tablet" msgid="5332124772918835437">"Ivumela uhlelo lokusebenza ukubhala imiyalezo ye-SMS egcinwe efonini yakho noma ekhadini le-SIM. Izinhlelo ezinonya zingase zisuse imiyalezo yakho."</string>
+    <string name="permdesc_writeSms" product="default" msgid="6299398896177548095">"Ivumela uhlelo lokusebenza ukubhala imiyalezo ye-SMS egcinwe efonini yakho noma ekhadini le-SIM. Izinhlelo ezinonya zingase zisuse imiyalezo yakho."</string>
+    <!-- no translation found for permlab_receiveWapPush (8258226427716551388) -->
+    <skip />
+    <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Ivumela uhlelo lokusebenza ukuthola nokwenza imiyalezo ye-WAP. Uhlelo lokusebenza olunonya lungase lugade imiyalezo yakho noma iyisuse ngaphandle kokukubonisa yona."</string>
+    <!-- no translation found for permlab_getTasks (5005277531132573353) -->
+    <skip />
+    <string name="permdesc_getTasks" msgid="7048711358713443341">"Ivumela uhlelo lokusebenza ukuthola ukwaziswa manyelana nemisebenzi yamanje futhi yamaduze esebenzayo. Ingase ivumele izinhlelo zokusebenza ezinonya ukuthola ulwazi oluyimfihlo mayelana nezinye izinhlelo zokusebenza."</string>
+    <!-- no translation found for permlab_reorderTasks (5669588525059921549) -->
+    <skip />
+    <string name="permdesc_reorderTasks" msgid="126252774270522835">"Ivumela uhlelo lokusebenza ukukhipha imisebenzi phambili nasemuva. Izinhlelo ezinonya zingase ziziphoqelele phambili ngaphandle kokulawula kwakho."</string>
+    <!-- no translation found for permlab_removeTasks (4802740047161700683) -->
+    <skip />
+    <!-- no translation found for permdesc_removeTasks (2000332928514575461) -->
+    <skip />
+    <!-- no translation found for permlab_setDebugApp (4339730312925176742) -->
+    <skip />
+    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Ivumela izinhlelo ukuvula ukulungisa iphutha kolunye uhlelo lokusebenza. Izinhlelo zokusebenza ezinonya zingase zisebenzise lokhu ukubulala ezinye izinhlelo zokusebenza."</string>
+    <!-- no translation found for permlab_changeConfiguration (8214475779521218295) -->
+    <skip />
+    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Ivumela uhlelo lokusebenza ukushintsha ukumisa kwamanje, njengezici zakhona noma usayizi wefonti."</string>
+    <string name="permlab_enableCarMode" msgid="5684504058192921098">"vumela imodi yemoto"</string>
+    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Ivumela uhlelo lokusebenza ukuvumela imodi yemoto."</string>
+    <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"bulala izinqubo zasemuva"</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Ivumela uhlelo lokusebenza ukubulala izinqubo zasemuva zezinye izinhlelo zokusebenza, ngisho noma inkumbulo iphansi kakhulu."</string>
+    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"phoqelela ukumisa ezinye izinhlelo zokusebenza"</string>
+    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Ivumela uhlelo lokusebenza ukumisa ngokuphoqelela ezinye izinhlelo zokusebenza."</string>
+    <!-- no translation found for permlab_forceBack (1804196839880393631) -->
+    <skip />
+    <string name="permdesc_forceBack" msgid="6534109744159919013">"Ivumela uhlelo lokusebenza ukuphoqelela noma yimuphi umsebenzi osemuva ukuba uvale futhi ubuyele emuva. Akusoze kwadingeka izinhlelo zokusebenza ezivamile."</string>
+    <!-- no translation found for permlab_dump (1681799862438954752) -->
+    <skip />
+    <string name="permdesc_dump" msgid="2198776174276275220">"Ivumela uhlelo lokusebenza ukuthola isimo sangaphakathi sohlelo. Izinhlelo zokusebenza ezinonya zingase zithole ukwaziswa okwehlukahlukene okuyimfihlo noma okuphephile lokho ngokuvamile ezingeke zikudinge."</string>
+    <string name="permlab_shutdown" msgid="7185747824038909016">"ukuvala shaqa kwengxenye"</string>
+    <string name="permdesc_shutdown" msgid="7046500838746291775">"Ibeka imeneja yomsebenzi kwisimo sokuvala shaqa. Ayenzi ukuvala shaqa okuphelele."</string>
+    <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"gwema ukushintsha kohlelo lokusebenza"</string>
+    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Igwema umsebenzisi ukuba ashintshele kolunye uhlelo lokusebenza."</string>
+    <!-- no translation found for permlab_runSetActivityWatcher (7811586187574696296) -->
+    <skip />
+    <!-- outdated translation 3228701938345388092 -->     <string name="permdesc_runSetActivityWatcher" msgid="2149363027173451218">"Ivumela uhlelo lokusebenza ukugada nokulawula indlela uhlelo oluqalisa ngayo imisebenzi. Izinhlelo ezinonya zingase zonakalise ngokuphelele uhlelo. Lemvume idingeka kuphela ekuthuthukiseni, hayi ekusebenziseni ifoni okuvamile."</string>
+    <!-- no translation found for permlab_broadcastPackageRemoved (2576333434893532475) -->
+    <skip />
+    <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Ivumela uhlelo lokusebenza ukusakaza isaziso sokuthi iphakheji yohlelo lokusebenza ikhishiwe. Izinhlelo ezinonya zingasebenzisa lokhu ukubulala olunye uhlelo lokusebenza olusebenzayo."</string>
+    <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"thumela umsakazo otholwe nge-SMS"</string>
+    <string name="permdesc_broadcastSmsReceived" msgid="9122419277306740155">"Ivumela uhlelo lokusebenza ukusakaza isaziso sokuthi umyalezo we-SMS utholiwe. Izinhlelo ezinonya zingase zisebenzise lokhu ukukopisha imiyalezo ye-SMS engenayo."</string>
+    <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"thumela umsakazo otholwe nge-WAP-PUSH"</string>
+    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Ivumela uhlelo lokusebenza ukusakaza isaziso sokuthi i-WAP PUSH itholiwe. Izinhlelo ezinonya zingase zisebenzise lokhu ukukophisha ukutholakala komyalezo we-MMS noma ukubuyisela ngokuthulile okuqukethwe kwanoma yiliphi ikhasi lewebhu ngezimo ezahlukeneyo ezinonya."</string>
+    <!-- no translation found for permlab_setProcessLimit (2451873664363662666) -->
+    <skip />
+    <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"Ivumela uhlelo lokusebenza ukulawula inani eliphezulu lwezinqubo ezizosebenza. Aludingwa izinhlelo zokusebenza ezivamile."</string>
+    <!-- no translation found for permlab_setAlwaysFinish (5342837862439543783) -->
+    <skip />
+    <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Ivumela uhlelo lokusebenza ukulawula ukuba imisebenzi iphela njalo yini ngokushesha njengoba ziya emuva. Ayidingeki izinhlelo zokusebenza ezivamile."</string>
+    <!-- no translation found for permlab_batteryStats (7863923071360031652) -->
+    <skip />
+    <string name="permdesc_batteryStats" msgid="5847319823772230560">"Ivumela ukuguqulwa kwezibala zebhethri eziqoqiwe. Hayi ukusebenziswa izinhlelo zokusebenza ezivamile."</string>
+    <string name="permlab_backup" msgid="470013022865453920">"lawula ukusekela ngokulondoloza uhlelo bese ubuyisela esimweni"</string>
+    <string name="permdesc_backup" msgid="4837493065154256525">"Ivumela uhlelo lokusebenza ukulawula ukusekela ngokulondoloza kohlelo nokubuyisela nendlela yokubuyisela. Ayisebenziswa izinhlelo ezivamile."</string>
+    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
+    <skip />
+    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
+    <skip />
+    <!-- no translation found for permlab_internalSystemWindow (2148563628140193231) -->
+    <skip />
+    <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Ivumela ukwenziwa kwemawindi ehloselwe ukusebenziswa uxhumano lomsebenzisi wohlelo lwangaphakathi. Ayisebenziswa izinhlelo zokusebenza ezivamile"</string>
+    <!-- no translation found for permlab_systemAlertWindow (3372321942941168324) -->
+    <skip />
+    <!-- outdated translation 5109622689323490558 -->     <string name="permdesc_systemAlertWindow" msgid="2884149573672821318">"Ivumela uhlelo lokusebenza ukubonisa amawindi okuxwayisa ohlelo. Izinhlelo zokusebenza ezinonya zingase zithathe isikrini sonke sefoni."</string>
+    <!-- no translation found for permlab_setAnimationScale (2805103241153907174) -->
+    <skip />
+    <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Ivumela uhlelo lokusebenza ukushintsha isivinini sokugqwayiza jikelele (ukugqwayiza okusheshayo noma okulengayo) nganoma isiphi isikhathi."</string>
+    <!-- no translation found for permlab_manageAppTokens (17124341698093865) -->
+    <skip />
+    <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Ivumela izinhlelo zokusebenza ukwenza nokuphatha amathokhini awo, ngokudlula ukuhleleka kuka-Z. Akusoze kwadingeka ezinhlelweni ezivamile."</string>
+    <!-- no translation found for permlab_injectEvents (1378746584023586600) -->
+    <skip />
+    <!-- outdated translation 3946098050410874715 -->     <string name="permdesc_injectEvents" product="tablet" msgid="7200014808195664505">"Ivumela uhlelo lokusebenza ukuthumela izenzakalo zawo zokufakwayo (ukucindezela ukhiye, nokunye) kwezinye izihlelo zokusebeza. Izinhlelo ezinonya zingasebenzisa lokhu ukuthatha ifoni."</string>
+    <string name="permdesc_injectEvents" product="default" msgid="3946098050410874715">"Ivumela uhlelo lokusebenza ukuthumela izenzakalo zawo zokufakwayo (ukucindezela ukhiye, nokunye) kwezinye izihlelo zokusebeza. Izinhlelo ezinonya zingasebenzisa lokhu ukuthatha ifoni."</string>
+    <!-- no translation found for permlab_readInputState (469428900041249234) -->
+    <skip />
+    <string name="permdesc_readInputState" msgid="5132879321450325445">"Ivumela izinhlelo zokusebenza ukufunda izinkinobho ozicindezela ngisho noma uxhumana nolunye uhlelo lokusebenza (njengokufaka iphasiwedi). Akusoze kwadingeka ezinhlelweni zokusebenza ezivamile."</string>
+    <string name="permlab_bindInputMethod" msgid="3360064620230515776">"hlanganisa indlela yokufakwayo"</string>
+    <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Ivumela isimeli ukuhlanganisa uxhumano nomsebenzisi wezinga eliphezulu lendlela yokufaka. Ayisoze yadingeka kwizinhlelo ezivamile."</string>
+    <string name="permlab_bindWallpaper" msgid="8716400279937856462">"hlanganisa kwiphephadonga"</string>
+    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Ivumela umbambi ukuhlanganisa uxhumano nomsebenzisi kwezinga eliphezulu lwephephadonga. Akusoze kwadingeka kwezinhlelo zokusebenza ezivamile."</string>
+    <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
+    <skip />
+    <!-- no translation found for permdesc_bindRemoteViews (2930855984822926963) -->
+    <skip />
+    <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"xhumana nomphathi wedivaysi"</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Ivumela umphathi ukuthumela okuqukethwe kumphathi wedivaysi. Akusoze kwadingeka izinhlelo zokusebenza ezivamile."</string>
+    <!-- no translation found for permlab_setOrientation (3365947717163866844) -->
+    <skip />
+    <string name="permdesc_setOrientation" msgid="6335814461615851863">"Ivumela uhlelo lokusebenza ukushintsha ukujikeleleza kwesikrini nganoma isiphi isikhathi. Ayisoze yadingeka izinhlelo zokusebenza ezivamile."</string>
+    <!-- no translation found for permlab_signalPersistentProcesses (4255467255488653854) -->
+    <skip />
+    <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Ivumela uhlelo lokusebenza ukucela ukuthi isiginali enikeziwe ithunyelwe kuzo zonke izinqubo eziphikelelayo"</string>
+    <!-- no translation found for permlab_persistentActivity (8659652042401085862) -->
+    <skip />
+    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Ivumela uhlelo lokusebenza ukwenza izingxenye zayo zibe eziphishelelayo, ukuze isistimu ingakwazi ukuyisebenzisela ezinye iznhlelo zokusebenza."</string>
+    <!-- no translation found for permlab_deletePackages (3343439331576348805) -->
+    <skip />
+    <string name="permdesc_deletePackages" msgid="3634943677518723314">"Ivumela izinhlelo zokusebenza ukususa amaphakheji e-Android. Izinhlelo zokusebenza ezinonya zingase zisebenzise lokhu ukususa izinhlelo zokusebenza ezibalulekile."</string>
+    <string name="permlab_clearAppUserData" msgid="2192134353540277878">"susa enye idatha yezinhlelo zokusebenza"</string>
+    <!-- no translation found for permdesc_clearAppUserData (7546345080434325456) -->
+    <skip />
+    <string name="permlab_deleteCacheFiles" msgid="1518556602634276725">"susa ezinye izilondolozi zesikhashana zezinhlelo zokusebenza"</string>
+    <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"Ivumela uhlelo lokusebenza ukususa amafayela okulondoloza okwesikhashana."</string>
+    <!-- no translation found for permlab_getPackageSize (4799785352306641460) -->
+    <skip />
+    <string name="permdesc_getPackageSize" msgid="5557253039670753437">"Ivume uhlelo lokusebenza ukuthola ikhodi yayo, namasayizi okulondoloza okwesikhashana."</string>
+    <!-- no translation found for permlab_installPackages (335800214119051089) -->
+    <skip />
+    <string name="permdesc_installPackages" msgid="526669220850066132">"Ivumela uhlelo lokusebenza ukufaka amaphakheji amasha noma abuyekeziwe. Izinhlelo ezinonya zingasebenzisa lokhu ukufaka izinhelo zokusebenza ezintsha ngezimvume zomthetho onamandla."</string>
+    <!-- no translation found for permlab_clearAppCache (4747698311163766540) -->
+    <skip />
+    <!-- outdated translation 7740465694193671402 -->     <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Ivumela uhlelo lokusebenza ukukhulula ukugcina kwefoni ngokususa amafayela kwisiqondiso sesilondolozi sesikhashana sohlelo lokusebenza. Ukufinyelele ngokuvamile kuvinjelwe enqubweni yohlelo."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Ivumela uhlelo lokusebenza ukukhulula ukugcina kwefoni ngokususa amafayela kwisiqondiso sesilondolozi sesikhashana sohlelo lokusebenza. Ukufinyelele ngokuvamile kuvinjelwe enqubweni yohlelo."</string>
+    <string name="permlab_movePackage" msgid="728454979946503926">"Hambisa izinsiza zohlelo lokusebenza"</string>
+    <string name="permdesc_movePackage" msgid="6323049291923925277">"Ivumela uhlelo lokusebenza ukukhipha izinsiza zohlelo lokusebenza kwimidiya yangaphakathi iziyisa kweyangaphandle nangokuguquka."</string>
+    <string name="permlab_readLogs" msgid="6615778543198967614">"funda idatha yefayela lokungena ebucayi"</string>
+    <!-- outdated translation 8896449437464867766 -->     <string name="permdesc_readLogs" product="tablet" msgid="4077356893924755294">"Ivumela uhlelo lokusebenza ukufunda kumafayela okungena ahlukene esistimu. Lokhu kuvumela ukuthola ukwaziswa okuvamile mayelana nokuthi wenzani ngefoni, kuhlanganise ukwaziswa komuntu siqu noma kwangasese."</string>
+    <string name="permdesc_readLogs" product="default" msgid="8896449437464867766">"Ivumela uhlelo lokusebenza ukufunda kumafayela okungena ahlukene esistimu. Lokhu kuvumela ukuthola ukwaziswa okuvamile mayelana nokuthi wenzani ngefoni, kuhlanganise ukwaziswa komuntu siqu noma kwangasese."</string>
+    <!-- no translation found for permlab_diagnostic (8076743953908000342) -->
+    <skip />
+    <string name="permdesc_diagnostic" msgid="3121238373951637049">"Ivumela uhlolo lokusebenza ukufunda nokubhala kunoma yimuphi umthombo weqembu ledayegi; ngokwesibonle, amafayela akwi/dev. Lokhu kungase kuthinte kakhulu ukuba nokuphepha kohlelo. Lokhu kumele kusebenziselwe KUPHELA ukuhlola ihadiwe okucacile ngumkhiqizi noma u-opheretha."</string>
+    <!-- no translation found for permlab_changeComponentState (79425198834329406) -->
+    <skip />
+    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="tablet" msgid="4647419365510068321">"Ivumela uhlelo lokusebenza ukushintsha ukuba ingabe ingxenye yolunye uhlelo lokusebenza ivuliwe noma cha. Izinhlelo ezinonya zingase zisebenzise lokhu ukuvimbela amakhono abalulekile efoni. Ukunakekela kumele kusetshenziswe ngemvume, njengoba kungenzeka ukuthola izingxenye zohlelo lokusebenza kusimo esingasebenziseki, esingefani, noma esingahlaliseki."</string>
+    <!-- outdated translation 4569107043246700630 -->     <string name="permdesc_changeComponentState" product="default" msgid="3443473726140080761">"Ivumela uhlelo lokusebenza ukushintsha ukuba ingabe ingxenye yolunye uhlelo lokusebenza ivuliwe noma cha. Izinhlelo ezinonya zingase zisebenzise lokhu ukuvimbela amakhono abalulekile efoni. Ukunakekela kumele kusetshenziswe ngemvume, njengoba kungenzeka ukuthola izingxenye zohlelo lokusebenza kusimo esingasebenziseki, esingefani, noma esingahlaliseki."</string>
+    <!-- no translation found for permlab_setPreferredApplications (3393305202145172005) -->
+    <skip />
+    <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Ivumela uhlelo lokusebenza ukuguqula izinhlelo zakho ezikhethwayo. Lokhu kungavumela izinhlelo ezinonya ukushintsha ngokuthulile izinhlelo zokusebenza ezisebenziswayo, ukushintsha izinhlelo zakho zokusebenza ezikhona kakade ukuqoqa idatha yangasese kuwe."</string>
+    <!-- no translation found for permlab_writeSettings (1365523497395143704) -->
+    <skip />
+    <string name="permdesc_writeSettings" msgid="838789419871034696">"Ivumela uhlelo lokusebenza ukuguqula idatha yezilungiselelo zohlelo. Izinhlelo zokusebenza ezinonya zingase zonakalise ukumiswa kohlelo lwakho."</string>
+    <string name="permlab_writeSecureSettings" msgid="204676251876718288">"guqula izilungiselelo zohlelo oluphephile"</string>
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Ivumela izinhlelo zokusebenza ukuguqula idatha yezilungiselelo eziphephile zohlelo. Akuyona eyokusebenziswa izinhlelo zokusebenza izivamile."</string>
+    <!-- no translation found for permlab_writeGservices (2149426664226152185) -->
+    <skip />
+    <string name="permdesc_writeGservices" msgid="6602362746516676175">"Ivumela uhlelo lokusebenza ukuguqula imephu yezinsizakalo ze-Google. Ayisebenziswa izinhlelo zokusebenza ezivamile."</string>
+    <!-- no translation found for permlab_receiveBootCompleted (7776779842866993377) -->
+    <skip />
+    <!-- outdated translation 698336728415008796 -->     <string name="permdesc_receiveBootCompleted" product="tablet" msgid="7530977064379338199">"Ivumela uhlelo lokusebenza ukuba luziqalele ngokushesha nje emva kokuba uhlelo luqede ukuqala. Lokhu kungenza kuthathe isikhathi ukuqalisa ifoni futhi kuvumele uhlelo lokusebenza ukwehlisa ifoni yonke ngokusebenza njalo."</string>
+    <string name="permdesc_receiveBootCompleted" product="default" msgid="698336728415008796">"Ivumela uhlelo lokusebenza ukuba luziqalele ngokushesha nje emva kokuba uhlelo luqede ukuqala. Lokhu kungenza kuthathe isikhathi ukuqalisa ifoni futhi kuvumele uhlelo lokusebenza ukwehlisa ifoni yonke ngokusebenza njalo."</string>
+    <!-- no translation found for permlab_broadcastSticky (7919126372606881614) -->
+    <skip />
+    <!-- outdated translation 1920045289234052219 -->     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Ivumela uhlelo lokusebenza ukuthumela imisakazo enamathelayo, esala emva kokuba ukusakaza kuphelile. Izinhlelo zokusebenza ezinonya zingenza ifoni ingasheshi futhi ingahlaliseki ngokuyibangela ukuba isebenzise inkumbulo eningi kakhulu."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Ivumela uhlelo lokusebenza ukuthumela imisakazo enamathelayo, esala emva kokuba ukusakaza kuphelile. Izinhlelo zokusebenza ezinonya zingenza ifoni ingasheshi futhi ingahlaliseki ngokuyibangela ukuba isebenzise inkumbulo eningi kakhulu."</string>
+    <!-- no translation found for permlab_readContacts (6219652189510218240) -->
+    <skip />
+    <!-- outdated translation 3371591512896545975 -->     <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Ivumela uhlelo lokusebenza ukufunda yonke idatha yothintana naye (ikheli) egcinwe efonini yakho. Izinhlelo zokusebenza zonya zingase zisebenzise lokhu ukuthumela idatha yakho kwabanye abantu."</string>
+    <string name="permdesc_readContacts" product="default" msgid="3371591512896545975">"Ivumela uhlelo lokusebenza ukufunda yonke idatha yothintana naye (ikheli) egcinwe efonini yakho. Izinhlelo zokusebenza zonya zingase zisebenzise lokhu ukuthumela idatha yakho kwabanye abantu."</string>
+    <!-- no translation found for permlab_writeContacts (644616215860933284) -->
+    <skip />
+    <!-- outdated translation 3924383579108183601 -->     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Ivumela uhlelo lokusebenza ukuguqula idatha yothintana naye (ikheli) egcinwe efonini yakho. Izinhlelo ezinonya zingase zisebenzise lokhu ukusula noma ukuguqula idatha yakho yothintana naye."</string>
+    <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Ivumela uhlelo lokusebenza ukuguqula idatha yothintana naye (ikheli) egcinwe efonini yakho. Izinhlelo ezinonya zingase zisebenzise lokhu ukusula noma ukuguqula idatha yakho yothintana naye."</string>
+    <string name="permlab_readCalendar" msgid="6898987798303840534">"funda izenzakalo zekhalenda"</string>
+    <!-- outdated translation 5533029139652095734 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Ivumela uhlelo lokusebenza ukufunda zonke izenzakalo zekhalenda ezigcinwe efonini yakho. Izinhlelo zokusebenza ezinonya zingase zisebenzise lokhu ukuthumela izenzakalo zakho zekhalenda kwabanye abantu."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Ivumela uhlelo lokusebenza ukufunda zonke izenzakalo zekhalenda ezigcinwe efonini yakho. Izinhlelo zokusebenza ezinonya zingase zisebenzise lokhu ukuthumela izenzakalo zakho zekhalenda kwabanye abantu."</string>
+    <string name="permlab_writeCalendar" msgid="3894879352594904361">"Yengeza noma guqula izenzakalo zekhalenda bese uthumelela izivakashi i-imeyli"</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Ivumela uhlelo lokusebenza ukufaka noma ukushintsha izenzakalo ekhalendeni yakho, okungase kuthumele i-imeyli kubavakashi. Izinhlelo ezinonya zingase zisebenzise lokhu ukusula noma ukuguqula izenzakalo zekhalenda noma ukuthumela abavakashi i-imeyli."</string>
+    <!-- no translation found for permlab_accessMockLocation (8688334974036823330) -->
+    <skip />
+    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Yenza imithombo yendawo ukuhlola. Izinhlelo ezinonya zingase zisebenzise lokhu ukukhipha indawo futhi/noma isimo esibuyiswe imithombo yendawo yangempela njengabahlinzeki be-GPS noma Inethiwekhi."</string>
+    <!-- no translation found for permlab_accessLocationExtraCommands (2836308076720553837) -->
+    <skip />
+    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Finyelela kweminye imiyalo yendawo eyengeziwe. Izinhlelo ezinonya zingase zisebenzise lokhu ukuphazamaisa ukusebenza kwe-GPS noma eminye imithombo yezinye izindawo."</string>
+    <string name="permlab_installLocationProvider" msgid="6578101199825193873">"imvume yokufaka umhlinzeki wendawo"</string>
+    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Yenza imithombo yokudlala ukuhlola. Izinhlelo ezinonya zingase zisebenzise lokhu ukukhipha indawo futhi/noma isimo esibuyiswe imithombo yendawo yangempela njenge-GPS noma abahlinzeki Benethiwekhi noma zigade futhi zibike indawo yakho njengomthombo wangaphandle."</string>
+    <!-- no translation found for permlab_accessFineLocation (8116127007541369477) -->
+    <skip />
+    <!-- outdated translation 7411213317434337331 -->     <string name="permdesc_accessFineLocation" product="tablet" msgid="243973693233359681">"Finyelela kumithombo ecocekile Njegesistimu Yokumisa Jikelele efonini, lapho itholakala. Izinhlelo ezinonya zingasebenzisa lokhu ukuthola ukuthi ukuphi, futhi ingadonsa amandla angeziwe ebhetri."</string>
+    <string name="permdesc_accessFineLocation" product="default" msgid="7411213317434337331">"Finyelela kumithombo ecocekile Njegesistimu Yokumisa Jikelele efonini, lapho itholakala. Izinhlelo ezinonya zingasebenzisa lokhu ukuthola ukuthi ukuphi, futhi ingadonsa amandla angeziwe ebhetri."</string>
+    <!-- no translation found for permlab_accessCoarseLocation (4642255009181975828) -->
+    <skip />
+    <!-- outdated translation 8235655958070862293 -->     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3704633168985466045">"Finyelela kundawo yamaholohola njengesizinda semininingwane somakhalekhukhwini ukuthola indawo elungile yefoni, lapho itholakala khona. Izinhlelo zokusebenza ezinonya zingasebenzisa lokhu ukuthola ukuthi ukuphi."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="8235655958070862293">"Finyelela kundawo yamaholohola njengesizinda semininingwane somakhalekhukhwini ukuthola indawo elungile yefoni, lapho itholakala khona. Izinhlelo zokusebenza ezinonya zingasebenzisa lokhu ukuthola ukuthi ukuphi."</string>
+    <!-- no translation found for permlab_accessSurfaceFlinger (2363969641792388947) -->
+    <skip />
+    <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Ivumela uhlelo lokusebenza ukusebenzisa izici zezinga eliphansi le-SurfaceFlinger"</string>
+    <!-- no translation found for permlab_readFrameBuffer (6690504248178498136) -->
+    <skip />
+    <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"Ivumela uhlelo lokusebenza ukufunda okuqukethwe kwesikhumbulo sesikhashana sendikimba."</string>
+    <!-- no translation found for permlab_modifyAudioSettings (6095859937069146086) -->
+    <skip />
+    <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Ivumela uhlelo lokusebenza ukuguqula izilungiselelo zomsindo jikelele njengevolumu nomzila."</string>
+    <!-- no translation found for permlab_recordAudio (3876049771427466323) -->
+    <skip />
+    <string name="permdesc_recordAudio" msgid="6493228261176552356">"Ivumela uhlelo lokusebenza ukufinyelela indlela yokurekhoda umsindo."</string>
+    <string name="permlab_camera" msgid="3616391919559751192">"thatha izithombe namavidiyo"</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Ivumela uhlelo lokusebenza ukuthatha izithombe ngekhamera. Lokhu kuvumela uhlelo lokusebenza nganoma isiphi isikhathi ukuqoqa imifanekiso leyo ikhamera ezibonayo."</string>
+    <!-- no translation found for permlab_brick (2961292205764488304) -->
+    <skip />
+    <!-- no translation found for permlab_brick (8337817093326370537) -->
+    <skip />
+    <!-- outdated translation 5569526552607599221 -->     <string name="permdesc_brick" product="tablet" msgid="7379164636920817963">"Ivumela uhlelo lokusebenza ukuvimbela yonke ifoni ngokuphelele. Lokhu kuyingozi kakhulu."</string>
+    <string name="permdesc_brick" product="default" msgid="5569526552607599221">"Ivumela uhlelo lokusebenza ukuvimbela yonke ifoni ngokuphelele. Lokhu kuyingozi kakhulu."</string>
+    <!-- no translation found for permlab_reboot (3436634972561795002) -->
+    <skip />
+    <!-- no translation found for permlab_reboot (2898560872462638242) -->
+    <skip />
+    <!-- outdated translation 7914933292815491782 -->     <string name="permdesc_reboot" product="tablet" msgid="4555793623560701557">"Ivumela uhlelo lokusebenza ukuphoqelela ifoni ukuqalisa phansi."</string>
+    <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"Ivumela uhlelo lokusebenza ukuphoqelela ifoni ukuqalisa phansi."</string>
+    <!-- no translation found for permlab_mount_unmount_filesystems (1761023272170956541) -->
+    <skip />
+    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Ivumela izinhlelo ukukhweza nokukwehlisa izinhlelo zefayela zokugcina okukhiphekayo."</string>
+    <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"fometha ukugcina kwangaphandle"</string>
+    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Ivumela uhlelo lokusebenza ukufometha ukugcina okukhiphekayo."</string>
+    <!-- outdated translation 1070364079249834666 -->     <string name="permlab_asec_access" msgid="3411338632002193846">"thola ukwaziswa ngokugcina okuphephile"</string>
+    <!-- outdated translation 7691616292170590244 -->     <string name="permdesc_asec_access" msgid="8820326551687285439">"Ivumela uhlelo lokusebenza ukuthola ukwaziswa ekugcineni okuphephile."</string>
+    <!-- outdated translation 7312078032326928899 -->     <string name="permlab_asec_create" msgid="6414757234789336327">"yenza ukusesha okuphephile"</string>
+    <!-- outdated translation 7041802322759014035 -->     <string name="permdesc_asec_create" msgid="2621346764995731250">"Ivumela uhlelo lokusebenza ukwenza ukugcina okuphephile."</string>
+    <!-- outdated translation 7787322878955261006 -->     <string name="permlab_asec_destroy" msgid="526928328301618022">"yonakalisa ukugcina okuphephile"</string>
+    <!-- outdated translation 5740754114967893169 -->     <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Ivumela uhlelo lokusebenza ukonakalisa ukugcina okuphephile."</string>
+    <!-- outdated translation 7517449694667828592 -->     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"khuphula / yehlisa ukugcina okuphephile"</string>
+    <!-- outdated translation 5438078121718738625 -->     <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Ivumela uhlelo lokusebenza ukukhweza / ukwehlisa ukugcina okuphephile."</string>
+    <!-- outdated translation 5685344390439934495 -->     <string name="permlab_asec_rename" msgid="7496633954080472417">"qamba kabusha ukugcina okuphephile"</string>
+    <!-- outdated translation 1387881770708872470 -->     <string name="permdesc_asec_rename" msgid="2152829985238876790">"Ivumela uhlelo lokusebenza ukuqamba kabusha ukugcina okuphephile."</string>
+    <!-- no translation found for permlab_vibrate (7768356019980849603) -->
+    <skip />
+    <string name="permdesc_vibrate" msgid="2886677177257789187">"Ivumela uhlelo lokusebenza ukulawula isidlidlizi."</string>
+    <!-- no translation found for permlab_flashlight (2155920810121984215) -->
+    <skip />
+    <string name="permdesc_flashlight" msgid="6433045942283802309">"Ivumela uhlelo lokusebenza ukulawula ukukhanya kwefuleshi."</string>
+    <!-- no translation found for permlab_manageUsb (1113453430645402723) -->
+    <skip />
+    <!-- no translation found for permdesc_manageUsb (6148489202092166164) -->
+    <skip />
+    <!-- no translation found for permlab_accessMtp (4953468676795917042) -->
+    <skip />
+    <!-- no translation found for permdesc_accessMtp (6532961200486791570) -->
+    <skip />
+    <!-- no translation found for permlab_hardware_test (4148290860400659146) -->
+    <skip />
+    <string name="permdesc_hardware_test" msgid="3668894686500081699">"Ivumela uhlelo lokusebenza ukulawula okuphathelene nomngcele ngenjongo yokuhlola ihadiwe."</string>
+    <!-- no translation found for permlab_callPhone (3925836347681847954) -->
+    <skip />
+    <string name="permdesc_callPhone" msgid="3369867353692722456">"Ivumela uhlelo lokusebenza ukushayela izinombolo zocingo ngaphandle kokungenela kwakho. Izinhlelo zokusebenza ezinonya zingase zibangele izincingo ezingalindelekile kwibhili yakho yefoni. Qaphela lokhu akuvumeli uhlelo lokusebenza ukushayela izinombolo zocingo."</string>
+    <!-- no translation found for permlab_callPrivileged (4198349211108497879) -->
+    <skip />
+    <string name="permdesc_callPrivileged" msgid="244405067160028452">"Ivumela uhlelo lokusebenza ukushayela noma iyiphi inombolo yocingo, kuhlanganise izinombolo eziphuthumayo, ngaphandle kokungenela kwakho. Izinhlelo zokusebenza ezinonya zingase zenze izincingo ezingadingeki nezingekho ezimthethweni kwizinsizakalo eziphuthumayo."</string>
+    <!-- outdated translation 5604848095315421425 -->     <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"ngokuqondile qalisa ukuhlela ifoni nge-CDMA"</string>
+    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"ngokuqondile qalisa ukuhlela ifoni nge-CDMA"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Ivumela uhlelo lokusebenza ukuqalisa amalungiselelo e-CDMA. Izinhlelo ezinonya ngokungadingekile zingaqalisa amalungiselelo e-CDMA."</string>
+    <!-- no translation found for permlab_locationUpdates (7785408253364335740) -->
+    <skip />
+    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Ivumela ukuvula/ukuvimbela izaziso zesibuyekezo sendawo kusuka emsakazweni. Akumele isebenziswe izinhlelo zokusebenza ezivamile."</string>
+    <!-- no translation found for permlab_checkinProperties (7855259461268734914) -->
+    <skip />
+    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Ivumela ukufinyelela kokufunda/ukubhalela ezicini ezilayishwe insizakalo zokuhlola. Akuyona eyokusebenziswa izinhlelo zokusebenza ezivamile."</string>
+    <string name="permlab_bindGadget" msgid="776905339015863471">"khetha izinqunjwana"</string>
+    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Ivumela uhlelo lokusebenza ukutshela isistimu ukuthi yimaphi amawijethi angasebenziswa yiziphi izinhlelo zokusebenza. Ngalemvume, izinhlelo zokusebenza zinganikeza ukufinyelela idatha yomuntu siqu kwezinye izinhlelo zokusebenza. Ayisebenziswa izinhlelo zokusebenza ezivamile."</string>
+    <!-- no translation found for permlab_modifyPhoneState (8423923777659292228) -->
+    <skip />
+    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Ivumela uhlelo lokusebenza ukulawula izici zefoni zedivaysi. Uhlelo lokusebenza olunalemvume lungashintsha amanethiwekhi, luvule futhi luvale umsakazo wefoni futhi ngaphandle kokukwazisa."</string>
+    <string name="permlab_readPhoneState" msgid="2326172951448691631">"funda isimo sefoni nokuhlonza"</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Ivumela uhlelo lokusebenza ukufinyelela izici zefoni zedivaysi. Uhlelo lokusebenza olunemvume lungathola inombolo yocingo nenombolo yomkhiqizo yalefoni, kungaba ukuthi ucingo luyasebenza, inombolo leyo ucingo oluxhume kuyo ngisho nokufanayo."</string>
+    <!-- no translation found for permlab_wakeLock (1531731435011495015) -->
+    <skip />
+    <!-- no translation found for permlab_wakeLock (573480187941496130) -->
+    <skip />
+    <!-- outdated translation 7584036471227467099 -->     <string name="permdesc_wakeLock" product="tablet" msgid="4032181488045338551">"Ivumela uhlelo lokusebenza ukugwema ifoni ukuba ingalali."</string>
+    <string name="permdesc_wakeLock" product="default" msgid="7584036471227467099">"Ivumela uhlelo lokusebenza ukugwema ifoni ukuba ingalali."</string>
+    <!-- no translation found for permlab_devicePower (2787034722616350417) -->
+    <skip />
+    <!-- no translation found for permlab_devicePower (4928622470980943206) -->
+    <skip />
+    <!-- outdated translation 4577331933252444818 -->     <string name="permdesc_devicePower" product="tablet" msgid="3853773100100451905">"Ivumela uhlelo lokusebenza ukuvula noma ukuvala ifoni."</string>
+    <string name="permdesc_devicePower" product="default" msgid="4577331933252444818">"Ivumela uhlelo lokusebenza ukuvula noma ukuvala ifoni."</string>
+    <!-- no translation found for permlab_factoryTest (3715225492696416187) -->
+    <skip />
+    <!-- outdated translation 8136644990319244802 -->     <string name="permdesc_factoryTest" product="tablet" msgid="3952059318359653091">"Sebenzise njengokuhlola komkhiqizi wezinga eliphansi, uvumela ukufinyelela okugcwele ihadiwe yefoni. Itholakala kuphela lapho ifoni isebenza kwimodi yokuhlola yomkhiqizi."</string>
+    <string name="permdesc_factoryTest" product="default" msgid="8136644990319244802">"Sebenzise njengokuhlola komkhiqizi wezinga eliphansi, uvumela ukufinyelela okugcwele ihadiwe yefoni. Itholakala kuphela lapho ifoni isebenza kwimodi yokuhlola yomkhiqizi."</string>
+    <!-- no translation found for permlab_setWallpaper (6627192333373465143) -->
+    <skip />
+    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Ivumela uhlelo lokusebenza ukuhlela iphephadonga lohlelo."</string>
+    <!-- no translation found for permlab_setWallpaperHints (3600721069353106851) -->
+    <skip />
+    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Ivumela uhlelo lokusebenza ukuhlela izihlawumbisela zosayizi wephephadonga lohlelo."</string>
+    <!-- no translation found for permlab_masterClear (2315750423139697397) -->
+    <skip />
+    <string name="permdesc_masterClear" msgid="5033465107545174514">"Ivumela uhlelo loksuebenza ukuhlela kabusha ngokuphelele isistimu kuzilungiselelo zalo zasembonini, ukusula yonke idatha, ukumisa, nezinhlelo zokusebenza ezifakiwe."</string>
+    <string name="permlab_setTime" msgid="2021614829591775646">"Hlela isikhathi"</string>
+    <!-- outdated translation 667294309287080045 -->     <string name="permdesc_setTime" product="tablet" msgid="209693136361006073">"Ivumela uhlelo lokusebenza ukushintsha isikhathi sewashi sefoni."</string>
+    <string name="permdesc_setTime" product="default" msgid="667294309287080045">"Ivumela uhlelo lokusebenza ukushintsha isikhathi sewashi sefoni."</string>
+    <!-- no translation found for permlab_setTimeZone (2945079801013077340) -->
+    <skip />
+    <!-- outdated translation 1902540227418179364 -->     <string name="permdesc_setTimeZone" product="tablet" msgid="2522877107613885139">"Ivumela uhlelo lokusebenza ukushintsha umkhawulo wesikhathi wefoni."</string>
+    <string name="permdesc_setTimeZone" product="default" msgid="1902540227418179364">"Ivumela uhlelo lokusebenza ukushintsha umkhawulo wesikhathi wefoni."</string>
+    <string name="permlab_accountManagerService" msgid="4829262349691386986">"yenza njenge Nsizakalo Yemeneja ye-Akhawunti"</string>
+    <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Ivumela uhlelo lokusebenza ukwenza amakholi  Kwiziqinisekisi ze-Akhawunti"</string>
+    <!-- no translation found for permlab_getAccounts (4549918644233460103) -->
+    <skip />
+    <!-- outdated translation 6839262446413155394 -->     <string name="permdesc_getAccounts" product="tablet" msgid="857622793935544694">"Ivumela uhlelo lokusebenza ukuthola uhlu lwama-akhawunti aziwa ifoni."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="6839262446413155394">"Ivumela uhlelo lokusebenza ukuthola uhlu lwama-akhawunti aziwa ifoni."</string>
+    <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"izenza umqinisekisi we-akhawunti"</string>
+    <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Ivumela uhlelo lokusebenza ukusebenzisa amakhono okufakazela ubuqiniso e-akhawunti Emeneja ye-Akhawunti, kuhlanganise ukwenza ama-akhaeunti nokuthi ngisho nokumisa amaphasiwedi ayo."</string>
+    <string name="permlab_manageAccounts" msgid="4440380488312204365">"phatha uhlu lwe-akhawunti"</string>
+    <string name="permdesc_manageAccounts" msgid="8804114016661104517">"Ivumela uhlelo lokusebenza ukwenza imisebenzi enjengokufaka, nokukhipha ama-akhawunti nokususa iphasiwedi yawo."</string>
+    <string name="permlab_useCredentials" msgid="6401886092818819856">"sebenzisa iziqinisekiso zokufakazela ubuqiniso ze-akhawunti"</string>
+    <string name="permdesc_useCredentials" msgid="7416570544619546974">"Ivumela uhlelo lokusebenza ukucela amathokhini okuqinisekisa."</string>
+    <!-- no translation found for permlab_accessNetworkState (6865575199464405769) -->
+    <skip />
+    <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Ivumela uhlelo lokusebenza ukubuka isimo sawo wonke amanethiwekhi."</string>
+    <!-- no translation found for permlab_createNetworkSockets (9121633680349549585) -->
+    <skip />
+    <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Ivumela uhlelo lokusebenza ukwenza izimbobo zenethiwekhi."</string>
+    <!-- no translation found for permlab_writeApnSettings (7823599210086622545) -->
+    <skip />
+    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Ivumela uhlelo lokusebenza ukuguqula izilungiselelo ze-APN, njengemmeleli Nembobo yanoma iyiphi i-APN."</string>
+    <!-- no translation found for permlab_changeNetworkState (958884291454327309) -->
+    <skip />
+    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Ivumela uhlelo lokusebenza ukushintsha isimo soxhumano lwenethiwekhi."</string>
+    <string name="permlab_changeTetherState" msgid="2702121155761140799">"Shintsha uxhumano lokusebenzisa njengemodemu"</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Ivumela uhlelo lokusebenza ukushintsha isimo soxhumano lwenethiwekhi lokusebenzisa ifoni njengemodemu."</string>
+    <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"shintsha idatha yasemuva yelungiselelo lokusebenzisa"</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Ivumela uhlelo lokusebenza ukushintsha isilungiselelo lokusebenzisa idatha yasemuva."</string>
+    <!-- no translation found for permlab_accessWifiState (8100926650211034400) -->
+    <skip />
+    <string name="permdesc_accessWifiState" msgid="485796529139236346">"Ivumela uhlelo lokusebenza ukubuka ukwaziswa mayelana nesimo se-Wi-Fi."</string>
+    <!-- no translation found for permlab_changeWifiState (7280632711057112137) -->
+    <skip />
+    <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Ivumela uhlelo lokusebena ukuxhuma futhi ingaxhumeki kumaphoyinti e-Wi-Fi, nokwenza izinguquko kumanethiwekhi e-Wi-Fi amisiwe."</string>
+    <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"ivumela isamukeli se-Wi-Fi Multicast"</string>
+    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Ivumela uhlelo lokusebenza ukuthola amaphakhethe ngokungaqondile angeyona awedivaysi yakho. Lokhu kungaba usizo lapho uthola izinsizakalo ezinikezwa eduze. Kusebenzisa amandla amaninigi kunemodi yokungajikijeli okuningi."</string>
+    <!-- no translation found for permlab_bluetoothAdmin (1092209628459341292) -->
+    <skip />
+    <!-- outdated translation 7256289774667054555 -->     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="3511795757324345837">"Ivumela uhlelo lokusebenza ukumisa ifoni ye-Bluetooth yasendawni, nokuthola nokubhanqanisa namadivaysi okulawula okukude."</string>
+    <string name="permdesc_bluetoothAdmin" product="default" msgid="7256289774667054555">"Ivumela uhlelo lokusebenza ukumisa ifoni ye-Bluetooth yasendawni, nokuthola nokubhanqanisa namadivaysi okulawula okukude."</string>
+    <!-- no translation found for permlab_bluetooth (8361038707857018732) -->
+    <skip />
+    <!-- outdated translation 762515380679392945 -->     <string name="permdesc_bluetooth" product="tablet" msgid="4191941825910543803">"Ivumela uhlelo lokusebenza ukubuka ukumisa ifoni ye-Bluetooth yasendaweni, nokwenza futhi nokwamukela uxhumano ngamadivaysi abhangqene."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Ivumela uhlelo lokusebenza ukubuka ukumisa ifoni ye-Bluetooth yasendaweni, nokwenza futhi nokwamukela uxhumano ngamadivaysi abhangqene."</string>
+    <!-- no translation found for permlab_nfc (4423351274757876953) -->
+    <skip />
+    <!-- no translation found for permdesc_nfc (9171401851954407226) -->
+    <skip />
+    <!-- no translation found for permlab_vpn (8345800584532175312) -->
+    <skip />
+    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
+    <skip />
+    <!-- no translation found for permlab_disableKeyguard (4977406164311535092) -->
+    <skip />
+    <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Ivumela uhlelo lokusebenza ukuvimbela ukuvala ukhiye nanoma yikuphi ukuphepha kwephasiwedi okuhlobene. Isibonelo esisemthethweni salokhu ukuba ifoni ivimbele ukuvala ukhiye laphi ithola ikholi engenayo, bese ivumela futhi ukuvala ukhiye lapho ucingo seluqedile."</string>
+    <!-- no translation found for permlab_readSyncSettings (6201810008230503052) -->
+    <skip />
+    <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Ivumela uhlelo lokusebenza ukufunda izilungiselelo zokuvumelanisa, njengokuthi ingabe ukuvumelanisa kuvulelwe yini Othintana nabo."</string>
+    <!-- no translation found for permlab_writeSyncSettings (6297138566442486462) -->
+    <skip />
+    <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"Ivumela uhlelo lokusebenza ukuguqula izilungiselelo zokuvumelanisa, njengokuthi ingabe ukuvumelanisa kuvunyelwe Othintana nabo."</string>
+    <!-- no translation found for permlab_readSyncStats (7396577451360202448) -->
+    <skip />
+    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Ivumela uhlelo lokusebenza ukufunda izibalo zokuvumelanisa; isb., umlando wokuvumelanisa ovelile."</string>
+    <!-- no translation found for permlab_subscribedFeedsRead (4756609637053353318) -->
+    <skip />
+    <!-- no translation found for permdesc_subscribedFeedsRead (3622200625634207660) -->
+    <skip />
+    <!-- no translation found for permlab_subscribedFeedsWrite (9015246325408209296) -->
+    <skip />
+    <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Ivumela uhlelo lokusebenza ukuguqula izifunzo zakho ezisanda kuvumelaniswa. Lokhu kungase kuvumele uhlelo lokusebenza olunonya ukushintsha izifunzo ezivumelanisiwe."</string>
+    <string name="permlab_readDictionary" msgid="432535716804748781">"funda isichazamazwi ezicacisiwe somsebenzisi"</string>
+    <string name="permdesc_readDictionary" msgid="1082972603576360690">"Ivumela uhlelo lokusebenza ukufunda noma yimaphi amagama ayimfihlo, amagama nemisho leyo umsebenzisi ayigcine kwisichazamazwi somsebenzisi."</string>
+    <string name="permlab_writeDictionary" msgid="6703109511836343341">"bhala kwisichazamazwi esicacisiwe somsebenzisi"</string>
+    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Ivumela uhlelo lokusebenza ukubhala amagama amasha kwisichazamazwi somsebenzisi."</string>
+    <!-- outdated translation 8079403759001777291 -->     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"guqula/susa okuqukethwe kwekhadi le-SD"</string>
+    <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"guqula/susa okuqukethwe kwekhadi le-SD"</string>
+    <!-- outdated translation 6643963204976471878 -->     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Ivumela uhlelo lokusebenza ukubhala ekhadini le-SD."</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Ivumela uhlelo lokusebenza ukubhala ekhadini le-SD."</string>
+    <!-- no translation found for permlab_mediaStorageWrite (6859839199706879015) -->
+    <skip />
+    <!-- no translation found for permdesc_mediaStorageWrite (8232008512478316233) -->
+    <skip />
+    <string name="permlab_cache_filesystem" msgid="5656487264819669824">"finyelela kunqolobane yesistimu yefayela"</string>
+    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Ivumela uhlelo lokusebenza ukufunda nokubhala uhlelo lwesistimu lwenqolobane."</string>
+    <!-- no translation found for permlab_use_sip (5986952362795870502) -->
+    <skip />
+    <!-- no translation found for permdesc_use_sip (6320376185606661843) -->
+    <skip />
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Misa imithetho yephasiwedi"</string>
+    <string name="policydesc_limitPassword" msgid="9083400080861728056">"Lawula ubude nezinhlamvu ezivunyelwe kumaphasiwedi okuvula isikrini"</string>
+    <string name="policylab_watchLogin" msgid="914130646942199503">"Gaka imizamo yokuvula isikrini"</string>
+    <!-- outdated translation 7227578260165172673 -->     <string name="policydesc_watchLogin" product="tablet" msgid="933601759466308092">"Gada inani lamaphasiwedi angalungile afakwe lapho uvula isikrini, bese uvala ifoni noma sula yonke idatha yefoni uma aphasiwedi amaningi kakhulu angalungile efakiwe."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="7227578260165172673">"Gada inani lamaphasiwedi angalungile afakwe lapho uvula isikrini, bese uvala ifoni noma sula yonke idatha yefoni uma aphasiwedi amaningi kakhulu angalungile efakiwe."</string>
+    <string name="policylab_resetPassword" msgid="2620077191242688955">"Shintsha iphasiwedi yokuvula isikrini"</string>
+    <string name="policydesc_resetPassword" msgid="5391240616981297361">"Shintsha iphasiwedi yokuvula isikrini"</string>
+    <string name="policylab_forceLock" msgid="2274085384704248431">"Vala isikrini"</string>
+    <string name="policydesc_forceLock" msgid="5696964126226028442">"Lawula ukuthi isikrini sivala kanjani futhi nini"</string>
+    <string name="policylab_wipeData" msgid="3910545446758639713">"Sula yonke idatha"</string>
+    <!-- outdated translation 7669895333814222586 -->     <string name="policydesc_wipeData" product="tablet" msgid="314455232799486222">"Sula idatha yefoni ngaphandle kwesixwayiso, ngokwenza ukuhlela kabusha idatha yemboni"</string>
+    <string name="policydesc_wipeData" product="default" msgid="7669895333814222586">"Sula idatha yefoni ngaphandle kwesixwayiso, ngokwenza ukuhlela kabusha idatha yemboni"</string>
+    <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Misa ummelelii jikelele yedivaysi"</string>
+    <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Misa iphrokzi jikelele yedivaysi ukusebenzisa ngenkathi inqumbomgomo ivunyelwa. Idivaysi yokuqala kuphela yokuphatha emisa ummeleli jikelele esebenzayo."</string>
+    <!-- no translation found for policylab_expirePassword (885279151847254056) -->
+    <skip />
+    <!-- no translation found for policydesc_expirePassword (4844430354224822074) -->
+    <skip />
+    <!-- no translation found for policylab_encryptedStorage (8901326199909132915) -->
+    <skip />
+    <!-- no translation found for policydesc_encryptedStorage (2504984732631479399) -->
+    <skip />
+  <string-array name="phoneTypes">
+    <item msgid="8901098336658710359">"Ekhaya"</item>
+    <item msgid="869923650527136615">"Iselula"</item>
+    <item msgid="7897544654242874543">"Umsebenzi"</item>
+    <item msgid="1103601433382158155">"Ifeksi Yasemsebenzini"</item>
+    <item msgid="1735177144948329370">"Ifeksi Yasekhaya"</item>
+    <item msgid="603878674477207394">"Isicingo"</item>
+    <item msgid="1650824275177931637">"Okunye"</item>
+    <item msgid="9192514806975898961">"Ngokwezifiso"</item>
+  </string-array>
+  <string-array name="emailAddressTypes">
+    <item msgid="8073994352956129127">"Ekhaya"</item>
+    <item msgid="7084237356602625604">"Umsebenzi"</item>
+    <item msgid="1112044410659011023">"Okunye"</item>
+    <item msgid="2374913952870110618">"Ngokwezifiso"</item>
+  </string-array>
+  <string-array name="postalAddressTypes">
+    <item msgid="6880257626740047286">"Ekhaya"</item>
+    <item msgid="5629153956045109251">"Umsebenzi"</item>
+    <item msgid="4966604264500343469">"Okunye"</item>
+    <item msgid="4932682847595299369">"Ngokwezifiso"</item>
+  </string-array>
+  <string-array name="imAddressTypes">
+    <item msgid="1738585194601476694">"Ekhaya"</item>
+    <item msgid="1359644565647383708">"Umsebenzi"</item>
+    <item msgid="7868549401053615677">"Okunye"</item>
+    <item msgid="3145118944639869809">"Ngokwezifiso"</item>
+  </string-array>
+  <string-array name="organizationTypes">
+    <item msgid="7546335612189115615">"Umsebenzi"</item>
+    <item msgid="4378074129049520373">"Okunye"</item>
+    <item msgid="3455047468583965104">"Ngokwezifiso"</item>
+  </string-array>
+  <string-array name="imProtocols">
+    <item msgid="8595261363518459565">"i-AIM"</item>
+    <item msgid="7390473628275490700">"I-Windows Live"</item>
+    <item msgid="7882877134931458217">"i-Yahoo"</item>
+    <item msgid="5035376313200585242">"i-Skype"</item>
+    <item msgid="7532363178459444943">"i-QQ"</item>
+    <item msgid="3713441034299660749">"Ingxoxo ye-Google"</item>
+    <item msgid="2506857312718630823">"i-ICQ"</item>
+    <item msgid="1648797903785279353">"I-Jabber"</item>
+  </string-array>
+    <string name="phoneTypeCustom" msgid="1644738059053355820">"Ngokwezifiso"</string>
+    <string name="phoneTypeHome" msgid="2570923463033985887">"Ekhaya"</string>
+    <string name="phoneTypeMobile" msgid="6501463557754751037">"Iselula"</string>
+    <string name="phoneTypeWork" msgid="8863939667059911633">"Umsebenzi"</string>
+    <string name="phoneTypeFaxWork" msgid="3517792160008890912">"Ifeksi Yasemsebenzini"</string>
+    <string name="phoneTypeFaxHome" msgid="2067265972322971467">"Ifeksi Yasekhaya"</string>
+    <string name="phoneTypePager" msgid="7582359955394921732">"Isicingo"</string>
+    <string name="phoneTypeOther" msgid="1544425847868765990">"Okunye"</string>
+    <string name="phoneTypeCallback" msgid="2712175203065678206">"Phinda ukushayela"</string>
+    <string name="phoneTypeCar" msgid="8738360689616716982">"Imoto"</string>
+    <string name="phoneTypeCompanyMain" msgid="540434356461478916">"Isisekelo Senkampani"</string>
+    <string name="phoneTypeIsdn" msgid="8022453193171370337">"i-ISDN"</string>
+    <string name="phoneTypeMain" msgid="6766137010628326916">"Isisekelo"</string>
+    <string name="phoneTypeOtherFax" msgid="8587657145072446565">"Enye Ifeksi"</string>
+    <string name="phoneTypeRadio" msgid="4093738079908667513">"Umsakazo"</string>
+    <string name="phoneTypeTelex" msgid="3367879952476250512">"I-Telex"</string>
+    <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"I-TTY TDD"</string>
+    <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"Iselula Yomsebenzi"</string>
+    <string name="phoneTypeWorkPager" msgid="649938731231157056">"Isicingo Somsebenzi"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"Umsizi"</string>
+    <string name="phoneTypeMms" msgid="7254492275502768992">"I-MMS"</string>
+    <!-- no translation found for eventTypeCustom (7837586198458073404) -->
+    <skip />
+    <string name="eventTypeBirthday" msgid="2813379844211390740">"Usuku lokuzalwa"</string>
+    <string name="eventTypeAnniversary" msgid="3876779744518284000">"Usuku olugujwa minyaka yonke"</string>
+    <!-- outdated translation 5834288791948564594 -->     <string name="eventTypeOther" msgid="7388178939010143077">"Isenzakalo"</string>
+    <string name="emailTypeCustom" msgid="8525960257804213846">"Ngokwezifiso"</string>
+    <string name="emailTypeHome" msgid="449227236140433919">"Ekhaya"</string>
+    <string name="emailTypeWork" msgid="3548058059601149973">"Umsebenzi"</string>
+    <string name="emailTypeOther" msgid="2923008695272639549">"Okunye"</string>
+    <string name="emailTypeMobile" msgid="119919005321166205">"Iselula"</string>
+    <string name="postalTypeCustom" msgid="8903206903060479902">"Ngokwezifiso"</string>
+    <string name="postalTypeHome" msgid="8165756977184483097">"Ekhaya"</string>
+    <string name="postalTypeWork" msgid="5268172772387694495">"Umsebenzi"</string>
+    <string name="postalTypeOther" msgid="2726111966623584341">"Okunye"</string>
+    <string name="imTypeCustom" msgid="2074028755527826046">"Ngokwezifiso"</string>
+    <string name="imTypeHome" msgid="6241181032954263892">"Ekhaya"</string>
+    <string name="imTypeWork" msgid="1371489290242433090">"Umsebenzi"</string>
+    <string name="imTypeOther" msgid="5377007495735915478">"Okunye"</string>
+    <string name="imProtocolCustom" msgid="6919453836618749992">"Ngokwezifiso"</string>
+    <string name="imProtocolAim" msgid="7050360612368383417">"I-AIM"</string>
+    <string name="imProtocolMsn" msgid="144556545420769442">"I-Windows Live"</string>
+    <string name="imProtocolYahoo" msgid="8271439408469021273">"i-Yahoo"</string>
+    <string name="imProtocolSkype" msgid="9019296744622832951">"i-Skype"</string>
+    <string name="imProtocolQq" msgid="8887484379494111884">"QQ"</string>
+    <string name="imProtocolGoogleTalk" msgid="3808393979157698766">"Ingxoxo ye-Google"</string>
+    <string name="imProtocolIcq" msgid="1574870433606517315">"i-ICQ"</string>
+    <string name="imProtocolJabber" msgid="2279917630875771722">"i-Jabber"</string>
+    <string name="imProtocolNetMeeting" msgid="8287625655986827971">"Umhlangano we-Net"</string>
+    <string name="orgTypeWork" msgid="29268870505363872">"Umsebenzi"</string>
+    <string name="orgTypeOther" msgid="3951781131570124082">"Okunye"</string>
+    <string name="orgTypeCustom" msgid="225523415372088322">"Ngokwezifiso"</string>
+    <!-- no translation found for relationTypeCustom (3542403679827297300) -->
+    <skip />
+    <!-- no translation found for relationTypeAssistant (6274334825195379076) -->
+    <skip />
+    <!-- no translation found for relationTypeBrother (8757913506784067713) -->
+    <skip />
+    <!-- no translation found for relationTypeChild (1890746277276881626) -->
+    <skip />
+    <!-- no translation found for relationTypeDomesticPartner (6904807112121122133) -->
+    <skip />
+    <!-- no translation found for relationTypeFather (5228034687082050725) -->
+    <skip />
+    <!-- no translation found for relationTypeFriend (7313106762483391262) -->
+    <skip />
+    <!-- no translation found for relationTypeManager (6365677861610137895) -->
+    <skip />
+    <!-- no translation found for relationTypeMother (4578571352962758304) -->
+    <skip />
+    <!-- no translation found for relationTypeParent (4755635567562925226) -->
+    <skip />
+    <!-- no translation found for relationTypePartner (7266490285120262781) -->
+    <skip />
+    <!-- no translation found for relationTypeReferredBy (101573059844135524) -->
+    <skip />
+    <!-- no translation found for relationTypeRelative (1799819930085610271) -->
+    <skip />
+    <!-- no translation found for relationTypeSister (1735983554479076481) -->
+    <skip />
+    <!-- no translation found for relationTypeSpouse (394136939428698117) -->
+    <skip />
+    <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Ngokwezifiso"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Ekhaya"</string>
+    <string name="sipAddressTypeWork" msgid="6920725730797099047">"Umsebenzi"</string>
+    <string name="sipAddressTypeOther" msgid="4408436162950119849">"Okunye"</string>
+    <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Faka ikhodi ye-PIN"</string>
+    <!-- no translation found for keyguard_password_entry_touch_hint (7906561917570259833) -->
+    <skip />
+    <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Faka iphasiwedi ukuvula"</string>
+    <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Faka i-PIN ukuvula"</string>
+    <!-- no translation found for keyguard_password_wrong_pin_code (1295984114338107718) -->
+    <skip />
+    <!-- no translation found for keyguard_label_text (861796461028298424) -->
+    <skip />
+    <!-- no translation found for emergency_call_dialog_number_for_display (696192103195090970) -->
+    <skip />
+    <!-- no translation found for lockscreen_carrier_default (8812714795156374435) -->
+    <skip />
+    <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Isikrini sivaliwe."</string>
+    <!-- no translation found for lockscreen_instructions_when_pattern_enabled (46154051614126049) -->
+    <skip />
+    <!-- no translation found for lockscreen_instructions_when_pattern_disabled (686260028797158364) -->
+    <skip />
+    <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Dweba iphathini ukuvula"</string>
+    <!-- no translation found for lockscreen_emergency_call (5347633784401285225) -->
+    <skip />
+    <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Buyela ekholini"</string>
+    <!-- no translation found for lockscreen_pattern_correct (9039008650362261237) -->
+    <skip />
+    <string name="lockscreen_pattern_wrong" msgid="4817583279053112312">"Uxolo, zama futhi"</string>
+    <string name="lockscreen_password_wrong" msgid="6237443657358168819">"Uxolo, zama futhi"</string>
+    <string name="lockscreen_plugged_in" msgid="613343852842944435">"Iyashaja (<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>)"</string>
+    <string name="lockscreen_charged" msgid="4938930459620989972">"Kushajiwe."</string>
+    <string name="lockscreen_battery_short" msgid="3617549178603354656">"<xliff:g id="NUMBER">%d</xliff:g><xliff:g id="PERCENT">%%</xliff:g>"</string>
+    <!-- no translation found for lockscreen_low_battery (1482873981919249740) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message_short (7381499217732227295) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (151659196095791474) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_message (2186920585695169078) -->
+    <skip />
+    <!-- no translation found for lockscreen_missing_sim_instructions (8874620818937719067) -->
+    <skip />
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Amakholi aphuthumayo kuphela"</string>
+    <!-- no translation found for lockscreen_network_locked_message (143389224986028501) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_puk_locked_message (7441797339976230) -->
+    <skip />
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="635967534992394321">"Sicela ubone Isiqondisi Somsebenzisi noma xhumana Nokunakekela Ikhasimende"</string>
+    <!-- no translation found for lockscreen_sim_locked_message (8066660129206001039) -->
+    <skip />
+    <!-- no translation found for lockscreen_sim_unlock_progress_dialog_message (595323214052881264) -->
+    <skip />
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="3514742106066877476">"Udwebe ngokungalungile iphathini yakho yokuvula izikhathi ezingu- <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Sicela uzame futhi emasekhondini angu-<xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="4906034376425175381">"Ufake ngokungalungile iphasiwedi yakho izikhathi ezingu- <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Sicela uzame futhi emasekhondini angu- <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6827749231465145590">"Ufake ngokungalungile i-PIN yakho izikhathi ezingu- <xliff:g id="NUMBER_0">%d</xliff:g>. "\n\n"Sicela uzame futhi emasekhondini angu- <xliff:g id="NUMBER_1">%d</xliff:g>."</string>
+    <!-- no translation found for lockscreen_failed_attempts_almost_glogin (8687762517114904651) -->
+    <skip />
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="3351013842320127827">"Udwebe ngokungalungile iphathini yakho yokuvula izikhathi ezingu <xliff:g id="NUMBER_0">%d</xliff:g>. Emva <xliff:g id="NUMBER_1">%d</xliff:g>kweminye imizamo engaphumelelanga, uzocelwa ukuvula ifoni yakho usebenzisa ukungena ngemvume e-Google."\n\n" Sicela uzame futhi emasekhondini angu- <xliff:g id="NUMBER_2">%d</xliff:g>."</string>
+    <!-- no translation found for lockscreen_too_many_failed_attempts_countdown (6251480343394389665) -->
+    <skip />
+    <!-- no translation found for lockscreen_forgot_pattern_button_text (2626999449610695930) -->
+    <skip />
+    <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Ukuvulwa kwe-akhawunti"</string>
+    <!-- no translation found for lockscreen_glogin_too_many_attempts (2446246026221678244) -->
+    <skip />
+    <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Ukuvula, ngena ngemvumekwi-akhawunti ye-Google"</string>
+    <!-- no translation found for lockscreen_glogin_username_hint (8846881424106484447) -->
+    <skip />
+    <!-- no translation found for lockscreen_glogin_password_hint (5958028383954738528) -->
+    <skip />
+    <!-- no translation found for lockscreen_glogin_submit_button (7130893694795786300) -->
+    <skip />
+    <!-- no translation found for lockscreen_glogin_invalid_input (1364051473347485908) -->
+    <skip />
+    <!-- no translation found for lockscreen_glogin_account_recovery_hint (8253152905532900548) -->
+    <skip />
+    <string name="lockscreen_glogin_checking_password" msgid="6758890536332363322">"Iyahlola..."</string>
+    <string name="lockscreen_unlock_label" msgid="737440483220667054">"Vula"</string>
+    <string name="lockscreen_sound_on_label" msgid="9068877576513425970">"Umsindo uvuliwe"</string>
+    <string name="lockscreen_sound_off_label" msgid="996822825154319026">"Umsindo uvaliwe"</string>
+    <string name="password_keyboard_label_symbol_key" msgid="992280756256536042">"?123"</string>
+    <string name="password_keyboard_label_alpha_key" msgid="8001096175167485649">"ABC"</string>
+    <string name="password_keyboard_label_alt_key" msgid="1284820942620288678">"ALT"</string>
+    <string name="hour_ampm" msgid="4329881288269772723">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%P</xliff:g>"</string>
+    <string name="hour_cap_ampm" msgid="1829009197680861107">"<xliff:g id="HOUR">%-l</xliff:g><xliff:g id="AMPM">%p</xliff:g>"</string>
+    <!-- no translation found for factorytest_failed (5410270329114212041) -->
+    <skip />
+    <string name="factorytest_not_system" msgid="4435201656767276723">"Isenzo SOKUHLOLA KWASEMBONINI sisekelwa kuphela amaphakheji afakwi kwisistimu/uhlelo."</string>
+    <string name="factorytest_no_action" msgid="872991874799998561">"Ayikho iphakheji etholakele enikeze isenzo SOKUHLOLA KWASEMBONINI."</string>
+    <!-- no translation found for factorytest_reboot (6320168203050791643) -->
+    <skip />
+    <string name="js_dialog_title" msgid="8143918455087008109">"Ikhasi eliku \'<xliff:g id="TITLE">%s</xliff:g>\' lithi:"</string>
+    <string name="js_dialog_title_default" msgid="6961903213729667573">"i-JavaScript"</string>
+    <string name="js_dialog_before_unload" msgid="1901675448179653089">"Phuma kuleli khasi?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"Khetha KULUNGILE ukuqhubeka, noma Khansela ukuhlala kuleli khasi."</string>
+    <!-- no translation found for save_password_label (6860261758665825069) -->
+    <skip />
+    <string name="double_tap_toast" msgid="1068216937244567247">"Ithiphu; thepha kabili ukusondeza ngaphandle nangaphakathi."</string>
+    <!-- no translation found for autofill_this_form (1272247532604569872) -->
+    <skip />
+    <!-- no translation found for setup_autofill (8154593408885654044) -->
+    <skip />
+    <!-- no translation found for autofill_address_name_separator (2504700673286691795) -->
+    <skip />
+    <!-- no translation found for autofill_address_summary_name_format (3268041054899214945) -->
+    <skip />
+    <!-- no translation found for autofill_address_summary_separator (7483307893170324129) -->
+    <skip />
+    <!-- no translation found for autofill_address_summary_format (4874459455786827344) -->
+    <skip />
+    <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"funda umlando Wesiphequluli namabhukimakhi"</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Ivumela uhlelo lokusebenza ukufunda wonke ama-URL lawo Isiphequluli esiwavakashele, ngisho nawo wonke amabhukimakhi Esiphequluli."</string>
+    <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"bhala umlando Wesiphequluli namabhukhimaki"</string>
+    <!-- outdated translation 945571990357114950 -->     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Ivumela izinhlelo zokusebenza ukuguqula umlando Wesiphequluli noma amabhukimakhi agcinwe efonini yakho. Izinhlelo zokusebenza ezinonya zingase zisebenzise lokhu ukwesula noma ukuguqula idatha yakho Yesiphequluli."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Ivumela izinhlelo zokusebenza ukuguqula umlando Wesiphequluli noma amabhukimakhi agcinwe efonini yakho. Izinhlelo zokusebenza ezinonya zingase zisebenzise lokhu ukwesula noma ukuguqula idatha yakho Yesiphequluli."</string>
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"misa i-alamu ewashini le-alamu"</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Ivumela uhlelo lokusebenza ukumisa i-alamu kuhlelo lokusebenza lewashi le-alawmu elifakiwe. Ezinye izinhlelo zokusebenza zewashi le-alamu zingase zingasebenzisi lesi sici."</string>
+    <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Gugula izimvume zendawo Yesiphequluli"</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Ivumela uhlelo lokusebenza ukuguqula izimvume zendawo Yesiphequluli. Izinhlelo ezinonya zingase zisebenzise lokhu ukuvumela ukuthumela ukwaziswa kwendawo kwamanye amasayithi ewebhu."</string>
+    <!-- no translation found for save_password_message (767344687139195790) -->
+    <skip />
+    <!-- no translation found for save_password_notnow (6389675316706699758) -->
+    <skip />
+    <!-- no translation found for save_password_remember (6491879678996749466) -->
+    <skip />
+    <!-- no translation found for save_password_never (8274330296785855105) -->
+    <skip />
+    <!-- no translation found for open_permission_deny (5661861460947222274) -->
+    <skip />
+    <!-- no translation found for text_copied (4985729524670131385) -->
+    <skip />
+    <!-- no translation found for more_item_label (4650918923083320495) -->
+    <skip />
+    <!-- no translation found for prepend_shortcut_label (2572214461676015642) -->
+    <skip />
+    <!-- no translation found for menu_space_shortcut_label (2410328639272162537) -->
+    <skip />
+    <!-- no translation found for menu_enter_shortcut_label (2743362785111309668) -->
+    <skip />
+    <!-- no translation found for menu_delete_shortcut_label (3658178007202748164) -->
+    <skip />
+    <!-- no translation found for search_go (8298016669822141719) -->
+    <skip />
+    <!-- no translation found for oneMonthDurationPast (7396384508953779925) -->
+    <skip />
+    <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Ngaphambi kwenyanga engu-1 edlule"</string>
+  <plurals name="num_seconds_ago">
+    <item quantity="one" msgid="4869870056547896011">"isekhondi elingu-1 eledlule"</item>
+    <item quantity="other" msgid="3903706804349556379">"amasekhondi angu-<xliff:g id="COUNT">%d</xliff:g> edlule."</item>
+  </plurals>
+  <plurals name="num_minutes_ago">
+    <item quantity="one" msgid="3306787433088810191">"iminithi elingu-1 edlule"</item>
+    <item quantity="other" msgid="2176942008915455116">"amaminithi angu-<xliff:g id="COUNT">%d</xliff:g> adlule.."</item>
+  </plurals>
+  <plurals name="num_hours_ago">
+    <item quantity="one" msgid="9150797944610821849">"ihora elingu-1 elidlule"</item>
+    <item quantity="other" msgid="2467273239587587569">"Amahora angu-<xliff:g id="COUNT">%d</xliff:g> edlule."</item>
+  </plurals>
+  <plurals name="last_num_days">
+    <item quantity="other" msgid="3069992808164318268">"Izinsuku zokugcina ezingu- <xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
+    <string name="last_month" msgid="3959346739979055432">"Inyanga edlule"</string>
+    <string name="older" msgid="5211975022815554840">"Okudala kakhulu"</string>
+  <plurals name="num_days_ago">
+    <item quantity="one" msgid="861358534398115820">"Izolo"</item>
+    <item quantity="other" msgid="2479586466153314633">"ezinsukwini ezingu-<xliff:g id="COUNT">%d</xliff:g> ezedlule"</item>
+  </plurals>
+  <plurals name="in_num_seconds">
+    <item quantity="one" msgid="2729745560954905102">"esekhondini elingu-1"</item>
+    <item quantity="other" msgid="1241926116443974687">"emasekhondini angu-<xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
+  <plurals name="in_num_minutes">
+    <item quantity="one" msgid="8793095251325200395">"eminithini engu-1"</item>
+    <item quantity="other" msgid="3330713936399448749">"emaminithini angu-<xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
+  <plurals name="in_num_hours">
+    <item quantity="one" msgid="7164353342477769999">"ehoreni elingu-1"</item>
+    <item quantity="other" msgid="547290677353727389">"emahoreni angu- <xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
+  <plurals name="in_num_days">
+    <item quantity="one" msgid="5413088743009839518">"Kusasa"</item>
+    <item quantity="other" msgid="5109449375100953247">"ezinsukwini ezingu-<xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
+  <plurals name="abbrev_num_seconds_ago">
+    <item quantity="one" msgid="1849036840200069118">"isekhondi elingu-1 edlule"</item>
+    <item quantity="other" msgid="3699169366650930415">"amasekhondi angu-<xliff:g id="COUNT">%d</xliff:g> edlule"</item>
+  </plurals>
+  <plurals name="abbrev_num_minutes_ago">
+    <item quantity="one" msgid="6361490147113871545">"iminithi elingu-1 edlule"</item>
+    <item quantity="other" msgid="851164968597150710">"amaminithi angu-<xliff:g id="COUNT">%d</xliff:g> adlule"</item>
+  </plurals>
+  <plurals name="abbrev_num_hours_ago">
+    <item quantity="one" msgid="4796212039724722116">"ihora elingu-1 elidlule"</item>
+    <item quantity="other" msgid="6889970745748538901">"Amahora angu-<xliff:g id="COUNT">%d</xliff:g> edlule."</item>
+  </plurals>
+  <plurals name="abbrev_num_days_ago">
+    <item quantity="one" msgid="8463161711492680309">"Izolo"</item>
+    <item quantity="other" msgid="3453342639616481191">"ezinsukwini ezingu-<xliff:g id="COUNT">%d</xliff:g> ezedlule"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_seconds">
+    <item quantity="one" msgid="5842225370795066299">"esekhondini elingu-1"</item>
+    <item quantity="other" msgid="5495880108825805108">"emasekhondini angu-<xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_minutes">
+    <item quantity="one" msgid="562786149928284878">"eminithini engu-1"</item>
+    <item quantity="other" msgid="4216113292706568726">"emaminithini angu-<xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_hours">
+    <item quantity="one" msgid="3274708118124045246">"ehoreni elingu-1"</item>
+    <item quantity="other" msgid="3705373766798013406">"emahoreni angu-<xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
+  <plurals name="abbrev_in_num_days">
+    <item quantity="one" msgid="2178576254385739855">"Kusasa"</item>
+    <item quantity="other" msgid="2973062968038355991">"ezinsukwini ezing-<xliff:g id="COUNT">%d</xliff:g>"</item>
+  </plurals>
+    <string name="preposition_for_date" msgid="9093949757757445117">"Ngomhla ka <xliff:g id="DATE">%s</xliff:g>"</string>
+    <string name="preposition_for_time" msgid="5506831244263083793">"e-<xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="preposition_for_year" msgid="5040395640711867177">"phakathi- <xliff:g id="YEAR">%s</xliff:g>"</string>
+    <!-- no translation found for day (8144195776058119424) -->
+    <skip />
+    <!-- no translation found for days (4774547661021344602) -->
+    <skip />
+    <!-- no translation found for hour (2126771916426189481) -->
+    <skip />
+    <!-- no translation found for hours (894424005266852993) -->
+    <skip />
+    <!-- no translation found for minute (9148878657703769868) -->
+    <skip />
+    <!-- no translation found for minutes (5646001005827034509) -->
+    <skip />
+    <!-- no translation found for second (3184235808021478) -->
+    <skip />
+    <!-- no translation found for seconds (3161515347216589235) -->
+    <skip />
+    <!-- no translation found for week (5617961537173061583) -->
+    <skip />
+    <!-- no translation found for weeks (6509623834583944518) -->
+    <skip />
+    <!-- no translation found for year (4001118221013892076) -->
+    <skip />
+    <!-- no translation found for years (6881577717993213522) -->
+    <skip />
+    <!-- no translation found for VideoView_error_title (3359437293118172396) -->
+    <skip />
+    <string name="VideoView_error_text_invalid_progressive_playback" msgid="897920883624437033">"Uxolo, levidiyo ayilungele ukusakaza bukhomo kwale divaysi."</string>
+    <!-- no translation found for VideoView_error_text_unknown (710301040038083944) -->
+    <skip />
+    <!-- no translation found for VideoView_error_button (2822238215100679592) -->
+    <skip />
+    <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="noon" msgid="7245353528818587908">"mini"</string>
+    <string name="Noon" msgid="3342127745230013127">"Emini"</string>
+    <string name="midnight" msgid="7166259508850457595">"ebusuku"</string>
+    <string name="Midnight" msgid="5630806906897892201">"Ebusuku"</string>
+    <string name="elapsed_time_short_format_mm_ss" msgid="4431555943828711473">"<xliff:g id="MINUTES">%1$02d</xliff:g>:<xliff:g id="SECONDS">%2$02d</xliff:g>"</string>
+    <string name="elapsed_time_short_format_h_mm_ss" msgid="1846071997616654124">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
+    <!-- no translation found for selectAll (6876518925844129331) -->
+    <skip />
+    <!-- no translation found for cut (3092569408438626261) -->
+    <skip />
+    <!-- no translation found for copy (2681946229533511987) -->
+    <skip />
+    <!-- no translation found for paste (5629880836805036433) -->
+    <skip />
+    <!-- no translation found for pasteDisabled (7259254654641456570) -->
+    <skip />
+    <!-- no translation found for copyUrl (2538211579596067402) -->
+    <skip />
+    <string name="selectTextMode" msgid="6738556348861347240">"Khetha umbhalo..."</string>
+    <string name="textSelectionCABTitle" msgid="5236850394370820357">"Inketho yombhalo"</string>
+    <string name="inputMethod" msgid="1653630062304567879">"Indlela yokufakwayo"</string>
+    <string name="editTextMenuTitle" msgid="4909135564941815494">"Izenzo zombhalo"</string>
+    <!-- no translation found for low_internal_storage_view_title (1399732408701697546) -->
+    <skip />
+    <!-- no translation found for low_internal_storage_view_text (4231085657068852042) -->
+    <skip />
+    <!-- no translation found for low_internal_storage_view_text (635106544616378836) -->
+    <skip />
+    <!-- no translation found for ok (5970060430562524910) -->
+    <skip />
+    <!-- no translation found for cancel (6442560571259935130) -->
+    <skip />
+    <!-- no translation found for yes (5362982303337969312) -->
+    <skip />
+    <!-- no translation found for no (5141531044935541497) -->
+    <skip />
+    <string name="dialog_alert_title" msgid="2049658708609043103">"Ukunaka"</string>
+    <string name="loading" msgid="1760724998928255250">"Iyalayisha..."</string>
+    <!-- no translation found for capital_on (1544682755514494298) -->
+    <skip />
+    <!-- no translation found for capital_off (6815870386972805832) -->
+    <skip />
+    <!-- no translation found for whichApplication (4533185947064773386) -->
+    <skip />
+    <!-- no translation found for alwaysUse (4583018368000610438) -->
+    <skip />
+    <!-- no translation found for clearDefaultHintMsg (4815455344600932173) -->
+    <skip />
+    <!-- no translation found for chooseActivity (1009246475582238425) -->
+    <skip />
+    <!-- no translation found for chooseUsbActivity (7892597146032121735) -->
+    <skip />
+    <!-- no translation found for noApplications (1691104391758345586) -->
+    <skip />
+    <!-- no translation found for aerr_title (653922989522758100) -->
+    <skip />
+    <string name="aerr_application" msgid="4683614104336409186">"Inqubo yohlelo <xliff:g id="APPLICATION">%1$s</xliff:g> (lokusebenza <xliff:g id="PROCESS">%2$s</xliff:g>) ime ngokungalindelekile. Sicela uzame futhi"</string>
+    <string name="aerr_process" msgid="1551785535966089511">"Inqubo <xliff:g id="PROCESS">%1$s</xliff:g> imiswe ngokungalindelekile. Sicela uzame futhi."</string>
+    <!-- no translation found for anr_title (3100070910664756057) -->
+    <skip />
+    <!-- no translation found for anr_activity_application (3538242413112507636) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (5420826626009561014) -->
+    <skip />
+    <!-- no translation found for anr_application_process (4185842666452210193) -->
+    <skip />
+    <!-- no translation found for anr_process (1246866008169975783) -->
+    <skip />
+    <!-- no translation found for force_close (3653416315450806396) -->
+    <skip />
+    <string name="report" msgid="4060218260984795706">"Umbiko"</string>
+    <!-- no translation found for wait (7147118217226317732) -->
+    <skip />
+    <string name="launch_warning_title" msgid="8323761616052121936">"Uhlelo lokusebenza luqondisiwe futhi"</string>
+    <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> iyasebenza."</string>
+    <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> iqalisiwe."</string>
+    <string name="smv_application" msgid="295583804361236288">"Inqubo <xliff:g id="APPLICATION">%1$s</xliff:g> (yohlelo lokusebenza <xliff:g id="PROCESS">%2$s</xliff:g>) iphule inqubomgomo oziphoqelela yona Yemodi Ebukhali."</string>
+    <string name="smv_process" msgid="5120397012047462446">"Inqubo <xliff:g id="PROCESS">%1$s</xliff:g> yephule inqubomgomo yokuziphoqelela Yemodi Ebukhali."</string>
+    <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> iyasebenza"</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Khetha ukushintshela kuhlelo lokusebenza"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Shintsha izinhlelo zokusebenza?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Olunye uhlelo lokusebenza luvele luyasebenza lokho kumele kumiswe ngaphambi kokuba uqalise olusha."</string>
+    <string name="old_app_action" msgid="493129172238566282">"Buyisela ku:<xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="old_app_description" msgid="942967900237208466">"Ungaqalisi uhlelo lokusebenza olusha."</string>
+    <string name="new_app_action" msgid="5472756926945440706">"Qala <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Misa uhlelo lokusebenza lakudala ngaphadle kokugcina."</string>
+    <!-- no translation found for sendText (5132506121645618310) -->
+    <skip />
+    <!-- no translation found for volume_ringtone (6885421406845734650) -->
+    <skip />
+    <string name="volume_music" msgid="5421651157138628171">"Ivolumu yemidiya"</string>
+    <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Idlala nge-Bluetooth"</string>
+    <string name="volume_music_hint_silent_ringtone_selected" msgid="6158339745293431194">"Iringithoni ethulile ikhethiwe"</string>
+    <!-- no translation found for volume_call (3941680041282788711) -->
+    <skip />
+    <string name="volume_bluetooth_call" msgid="2002891926351151534">"Ivolumu ye-Bluetooth maphakathi nekholi"</string>
+    <!-- no translation found for volume_alarm (1985191616042689100) -->
+    <skip />
+    <string name="volume_notification" msgid="2422265656744276715">"Ivolumu yesaziso"</string>
+    <!-- no translation found for volume_unknown (1400219669770445902) -->
+    <skip />
+    <!-- no translation found for ringtone_default (3789758980357696936) -->
+    <skip />
+    <!-- no translation found for ringtone_default_with_actual (8129563480895990372) -->
+    <skip />
+    <!-- no translation found for ringtone_silent (4440324407807468713) -->
+    <skip />
+    <string name="ringtone_picker_title" msgid="3515143939175119094">"Amaringithoni"</string>
+    <!-- no translation found for ringtone_unknown (5477919988701784788) -->
+    <skip />
+  <plurals name="wifi_available">
+    <item quantity="one" msgid="6654123987418168693">"Inethiwekhi ye-Wi-Fi iyatholakala"</item>
+    <item quantity="other" msgid="4192424489168397386">"Amanethiwekhi e-Wi-Fi ayatholakala"</item>
+  </plurals>
+  <plurals name="wifi_available_detailed">
+    <item quantity="one" msgid="1634101450343277345">"Vula inethiwekhi ye-Wi-Fi etholakalayo"</item>
+    <item quantity="other" msgid="7915895323644292768">"Vula amanethiwekhi we-Wi-Fi atholakalayo"</item>
+  </plurals>
+    <string name="select_character" msgid="3365550120617701745">"Faka uhlamvu"</string>
+    <!-- no translation found for sms_control_default_app_name (7630529934366549163) -->
+    <skip />
+    <!-- no translation found for sms_control_title (7296612781128917719) -->
+    <skip />
+    <string name="sms_control_message" msgid="1289331457999236205">"Inani eliphezulu lwama-SMS liyathunyelwa. Khetha \"OK\" ukuqhubeka, noma \"Khansela\" ukumisa ukuthumela."</string>
+    <!-- no translation found for sms_control_yes (2532062172402615953) -->
+    <skip />
+    <!-- no translation found for sms_control_no (1715320703137199869) -->
+    <skip />
+    <!-- no translation found for sim_removed_title (6227712319223226185) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (2064255102770489459) -->
+    <skip />
+    <!-- no translation found for sim_done_button (827949989369963775) -->
+    <skip />
+    <!-- no translation found for sim_added_title (3719670512889674693) -->
+    <skip />
+    <!-- no translation found for sim_added_message (1209265974048554242) -->
+    <skip />
+    <!-- no translation found for sim_restart_button (4722407842815232347) -->
+    <skip />
+    <!-- no translation found for time_picker_dialog_title (8349362623068819295) -->
+    <skip />
+    <!-- no translation found for date_picker_dialog_title (5879450659453782278) -->
+    <skip />
+    <!-- no translation found for date_time_set (5777075614321087758) -->
+    <skip />
+    <!-- no translation found for default_permission_group (2690160991405646128) -->
+    <skip />
+    <!-- no translation found for no_permissions (7283357728219338112) -->
+    <skip />
+    <string name="perms_hide" msgid="7283915391320676226"><b>"Fihla "</b></string>
+    <string name="perms_show_all" msgid="2671791163933091180"><b>"Bonisa konke"</b></string>
+    <string name="usb_storage_activity_title" msgid="2399289999608900443">"Ukugcina Okukhulu nge-USB"</string>
+    <!-- no translation found for usb_storage_title (5901459041398751495) -->
+    <skip />
+    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Uxhume ifoni yakho ekhompyutheni yakho nge-USB. Khetha inkinobho engenzansi uma ufuna ukukopisha amafayela phakathi kwekhompyutha yakho nekhadi lakho le-Andrdoid SD."</string>
+    <!-- outdated translation 4796759646167247178 -->     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Uxhume ifoni yakho ekhompyutheni yakho nge-USB. Khetha inkinobho engenzansi uma ufuna ukukopisha amafayela phakathi kwekhompyutha yakho nekhadi lakho le-Andrdoid SD."</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Vula ukuginca nge-USB"</string>
+    <!-- no translation found for usb_storage_error_message (3276413764430468454) -->
+    <skip />
+    <!-- no translation found for usb_storage_error_message (120810397713773275) -->
+    <skip />
+    <!-- no translation found for usb_storage_notification_title (8175892554757216525) -->
+    <skip />
+    <!-- no translation found for usb_storage_notification_message (7380082404288219341) -->
+    <skip />
+    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Vala ukugcina nge-USB"</string>
+    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Khetha ukuvala ukugcina nge-USB."</string>
+    <string name="usb_storage_stop_title" msgid="660129851708775853">"Ukugcina nge-USB kuyasebenza"</string>
+    <!-- outdated translation 3613713396426604104 -->     <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Ngaphambi kokuvala ukugcina nge-USB, qiniseka ukuthi wehlise (\"ukhiphe\" ikhadi lakho le-Android SD kwikhompyutha yakho."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Ngaphambi kokuvala ukugcina nge-USB, qiniseka ukuthi wehlise (\"ukhiphe\" ikhadi lakho le-Android SD kwikhompyutha yakho."</string>
+    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Vala ukugcina nge-USB"</string>
+    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Kube nenkinga yokuvala ukugcina nge-USB. Hlola ukuqiniseka ukuthi wehlise isikhungo se-USB, bese uzama futhi."</string>
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Vula ukugcina nge-USB"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Uma uvula ukugcina nge-USB, ezinye izinhlelo zokusebenza ozisebenzisayo zizoma futhi zingase zingatholakali kuze kube yilapho uvala ukugcina nge-USB."</string>
+    <string name="dlg_error_title" msgid="8048999973837339174">"Umsebenzi we-USB wehlulekile"</string>
+    <string name="dlg_ok" msgid="7376953167039865701">"KULUNGILE"</string>
+    <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Fometha ikhadi le=SD"</string>
+    <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Fometha ikhadi le=SD"</string>
+    <!-- outdated translation 3621369962433523619 -->     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Uqinisekile ukuthi ufuna ukufometha ikhadi le-SD? Yonke idatha esekhadini lakho izolahleka."</string>
+    <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Uqinisekile ukuthi ufuna ukufometha ikhadi le-SD? Yonke idatha esekhadini lakho izolahleka."</string>
+    <string name="extmedia_format_button_format" msgid="4131064560127478695">"Ifomethi"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Ukulungisa iphutha le-USB kuxhunyiwe"</string>
+    <string name="adb_active_notification_message" msgid="8470296818270110396">"Khetha ukuvimbela ukulungisa iphutha le-USB."</string>
+    <string name="select_input_method" msgid="6865512749462072765">"Khetha indlela yokufaka"</string>
+    <!-- no translation found for configure_input_methods (6324843080254191535) -->
+    <skip />
+    <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
+    <string name="candidates_style" msgid="4333913089637062257"><u>"abahlanganyeli"</u></string>
+    <!-- outdated translation 5457603418970994050 -->     <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Ilungisa ikhadi le-SD"</string>
+    <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Ilungisa ikhadi le-SD"</string>
+    <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Ihlola amaphutha"</string>
+    <!-- outdated translation 780477838241212997 -->     <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Ikhadi le-SD elingenalutho"</string>
+    <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Ikhadi le-SD elingenalutho"</string>
+    <!-- outdated translation 3817704088027829380 -->     <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Ikhadi le-SD alinalutho noma lunohlelo lwesistimu olungasekelwa."</string>
+    <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"Ikhadi le-SD alinalutho noma lunohlelo lwesistimu olungasekelwa."</string>
+    <!-- outdated translation 6410723906019100189 -->     <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Ikhadi le-SD elonakele"</string>
+    <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Ikhadi le-SD elonakele"</string>
+    <!-- outdated translation 6902531775948238989 -->     <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Ikhadi le-SD lonakele. Kungase kudingeke ukuba uyifomethe futhi."</string>
+    <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Ikhadi le-SD lonakele. Kungase kudingeke ukuba uyifomethe futhi."</string>
+    <!-- outdated translation 6872152882604407837 -->     <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Ikhadi le-SD likhishwe ngokungalindelekile"</string>
+    <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Ikhadi le-SD likhishwe ngokungalindelekile"</string>
+    <!-- outdated translation 7260183293747448241 -->     <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Yehlisa ikhadi le-SD ngaphambi kokukhipha ukugwema ukulahleka kwedatha."</string>
+    <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Yehlisa ikhadi le-SD ngaphambi kokukhipha ukugwema ukulahleka kwedatha."</string>
+    <!-- outdated translation 6729801130790616200 -->     <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Kuphephile ukukhipha ikhadi le-SD"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Kuphephile ukukhipha ikhadi le-SD"</string>
+    <!-- outdated translation 568841278138377604 -->     <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Ungakhipha ngokuphephile ikhadi le-SD."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Ungakhipha ngokuphephile ikhadi le-SD."</string>
+    <!-- outdated translation 8902518030404381318 -->     <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Ikhadi le-SD elikhishiwe"</string>
+    <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Ikhadi le-SD elikhishiwe"</string>
+    <!-- outdated translation 3870120652983659641 -->     <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Ikhadi le-SD likhishiwe. Faka elisha."</string>
+    <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Ikhadi le-SD likhishiwe. Faka elisha."</string>
+    <string name="activity_list_empty" msgid="4168820609403385789">"Ayikho imisebenzi efanayo etholakele"</string>
+    <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"buyekeza izibalo zokusebenzisa ingxenye"</string>
+    <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Ivumela ukuguqula kwezibalo zokusebenzisa zengxenye eqoqiwe. Akumele isebenziswe izinhlelo zokusebenza ezivamile."</string>
+    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Ivumela uhlelo lokusebenza ukucelela insizakalo yesiqukathi esimisiwe ukukopisha kokuqukethwe. Ayisebenziswa izinhlelo zokusebenza ezivamile."</string>
+    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Ivumela ukucelela insizakalo yesiqukathi esimisiwe ukukopisha kokuqukethwe. Ayisebenziselwa izinhlelo zokusebenza ezivamile."</string>
+    <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Thepha kabili ukuthola ukulawula ukusondeza"</string>
+    <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Iphutha lesinqunjwana"</string>
+    <string name="ime_action_go" msgid="8320845651737369027">"Iya"</string>
+    <string name="ime_action_search" msgid="658110271822807811">"Sesha"</string>
+    <string name="ime_action_send" msgid="2316166556349314424">"Thumela"</string>
+    <string name="ime_action_next" msgid="3138843904009813834">"Okulandelayo"</string>
+    <string name="ime_action_done" msgid="8971516117910934605">"Kwenziwe"</string>
+    <!-- no translation found for ime_action_previous (1443550039250105948) -->
+    <skip />
+    <string name="ime_action_default" msgid="2840921885558045721">"Ukwenza"</string>
+    <string name="dial_number_using" msgid="5789176425167573586">"Dayela inombolo"\n"usebenzisa <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="create_contact_using" msgid="4947405226788104538">"Yenza othintana naye"\n" usebenzisa <xliff:g id="NUMBER">%s</xliff:g>"</string>
+    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Izinhlelo zokusebenza ezilandelayo zicela imvume yokufinyelela i-akhawunti yakho, manje ngisho nasesikhathini esizayo."</string>
+    <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Ingabe ufuna ukuvumela lesi sicelo?"</string>
+    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Isicelo Sokufinyelela"</string>
+    <string name="allow" msgid="7225948811296386551">"Vumela"</string>
+    <string name="deny" msgid="2081879885755434506">"Yala"</string>
+    <string name="permission_request_notification_title" msgid="5390555465778213840">"Imvume Iceliwe"</string>
+    <string name="permission_request_notification_with_subtitle" msgid="4325409589686688000">"Imvume Iceliwe"\n" ye-akhawunti <xliff:g id="ACCOUNT">%s</xliff:g>"</string>
+    <string name="input_method_binding_label" msgid="1283557179944992649">"Indlela yokufakwayo"</string>
+    <string name="sync_binding_label" msgid="3687969138375092423">"Vumelanisaa"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Ukufinyeleleka"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Iphepha donga"</string>
+    <string name="chooser_wallpaper" msgid="7873476199295190279">"Shintsha iphephadonga"</string>
+    <string name="pptp_vpn_description" msgid="2688045385181439401">"Umthetho Olandelwayo Wokwenza Umbhoshongo Wephoyinti Ngalinye"</string>
+    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Ingqimbi 2 Yomthetho Olandelwayo Wokwenza Umbhoshongo"</string>
+    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Ukwabelana kwangaphambili kokhiye osekelwe ku-L2TP/IPSec VPN"</string>
+    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Isitifiketi sisekelwe L2TP/IPSec VPN"</string>
+    <string name="upload_file" msgid="2897957172366730416">"Khetha ifayela"</string>
+    <string name="no_file_chosen" msgid="6363648562170759465">"Ayikho ifayela ekhethiwe"</string>
+    <string name="reset" msgid="2448168080964209908">"Setha kabusha"</string>
+    <string name="submit" msgid="1602335572089911941">"Hambisa"</string>
+    <string name="car_mode_disable_notification_title" msgid="3164768212003864316">"Imodi yemoto ivunyelwe"</string>
+    <string name="car_mode_disable_notification_message" msgid="668663626721675614">"Khetha ukuphuma kwimodi yemoto"</string>
+    <string name="tethered_notification_title" msgid="3146694234398202601">"Ukusebenzisa ifoni njengemodemu noma indawo ethakazelisayo kuvuliwe"</string>
+    <string name="tethered_notification_message" msgid="3067108323903048927">"Thinta ukumisa"</string>
+    <string name="back_button_label" msgid="2300470004503343439">"Emuva"</string>
+    <string name="next_button_label" msgid="1080555104677992408">"Okulandelayo"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"Yeqa"</string>
+    <string name="throttle_warning_notification_title" msgid="4890894267454867276">"Ukusebenzisa idatha yefoni okuphezulu"</string>
+    <string name="throttle_warning_notification_message" msgid="2609734763845705708">"Thinta ukufunda okwengeziwe mayelana nokusebenzisa idatha yefoni"</string>
+    <string name="throttled_notification_title" msgid="6269541897729781332">"Umkhawulo wedatha yefoni ufinyelelwe"</string>
+    <string name="throttled_notification_message" msgid="4712369856601275146">"Thinta ukufunda okwengeziwe ngokusebenzisa idatha yefoni"</string>
+    <string name="no_matches" msgid="8129421908915840737">"Akukho okufanayo"</string>
+    <string name="find_on_page" msgid="1946799233822820384">"Thola ekhasini"</string>
+  <plurals name="matches_found">
+    <item quantity="one" msgid="8167147081136579439">"okufanayo okungu-1"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> ku-<xliff:g id="TOTAL">%d</xliff:g>"</item>
+  </plurals>
+    <!-- no translation found for action_mode_done (7217581640461922289) -->
+    <skip />
+    <!-- no translation found for progress_unmounting (535863554318797377) -->
+    <skip />
+    <!-- no translation found for progress_unmounting (5556813978958789471) -->
+    <skip />
+    <!-- no translation found for progress_erasing (4183664626203056915) -->
+    <skip />
+    <!-- no translation found for progress_erasing (2115214724367534095) -->
+    <skip />
+    <!-- no translation found for format_error (4320339096529911637) -->
+    <skip />
+    <!-- no translation found for format_error (1343380371925238343) -->
+    <skip />
+    <!-- no translation found for media_bad_removal (7960864061016603281) -->
+    <skip />
+    <!-- no translation found for media_checking (418188720009569693) -->
+    <skip />
+    <!-- no translation found for media_checking (7334762503904827481) -->
+    <skip />
+    <!-- no translation found for media_removed (7001526905057952097) -->
+    <skip />
+    <!-- no translation found for media_shared (5830814349250834225) -->
+    <skip />
+    <!-- no translation found for media_shared (5706130568133540435) -->
+    <skip />
+    <!-- no translation found for media_unknown_state (729192782197290385) -->
+    <skip />
+    <!-- no translation found for share (1778686618230011964) -->
+    <skip />
+    <!-- no translation found for find (4808270900322985960) -->
+    <skip />
+    <!-- no translation found for websearch (4337157977400211589) -->
+    <skip />
+    <!-- no translation found for gpsNotifTicker (5622683912616496172) -->
+    <skip />
+    <!-- no translation found for gpsNotifTitle (5446858717157416839) -->
+    <skip />
+    <!-- no translation found for gpsNotifMessage (1374718023224000702) -->
+    <skip />
+    <!-- no translation found for gpsVerifYes (2346566072867213563) -->
+    <skip />
+    <!-- no translation found for gpsVerifNo (1146564937346454865) -->
+    <skip />
+    <!-- no translation found for sync_too_many_deletes (5296321850662746890) -->
+    <skip />
+    <!-- no translation found for sync_too_many_deletes_desc (7030265992955132593) -->
+    <skip />
+    <!-- no translation found for sync_really_delete (8933566316059338692) -->
+    <skip />
+    <!-- no translation found for sync_undo_deletes (8610996708225006328) -->
+    <skip />
+    <!-- no translation found for sync_do_nothing (8717589462945226869) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
+    <skip />
+    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
+    <skip />
+    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
+    <skip />
+    <!-- no translation found for choose_account_label (4191313562041125787) -->
+    <skip />
+    <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
+    <skip />
+    <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
+    <skip />
+    <!-- no translation found for action_bar_home_description (5293600496601490216) -->
+    <skip />
+    <!-- no translation found for action_bar_up_description (2237496562952152589) -->
+    <skip />
+    <!-- no translation found for action_menu_overflow_description (2295659037509008453) -->
+    <skip />
+    <!-- no translation found for storage_internal (7556050805474115618) -->
+    <skip />
+    <!-- no translation found for storage_sd_card (8921771478629812343) -->
+    <skip />
+    <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
+</resources>

@@ -240,10 +240,8 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Dovoljuje spreminjanje zbranih statističnih podatkov baterije. Ni za uporabo z navadnimi programi."</string>
     <string name="permlab_backup" msgid="470013022865453920">"nadzor varnostnega kopiranja sistema in obnovitev"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Programu dovoljuje nadzor mehanizma za varnostno kopiranje in obnovitev sistema. Ni za uporabo z navadnimi programi."</string>
-    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
-    <skip />
-    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
-    <skip />
+    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"potrditev popolnega varnostnega kopiranja ali obnovitve"</string>
+    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"Dovoli programu, da zažene uporabniški vmesnik za potrditev popolnega varnostnega kopiranja. Tega ne sme uporabljati noben program."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"prikazovanje nepooblaščenih oken"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Dovoljuje ustvarjanje oken, ki jih bo uporabljal uporabniški vmesnik notranjega sistema. Ni za uporabo z navadnimi programi."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"prikaz opozoril na ravni sistema"</string>
@@ -450,10 +448,8 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Programom dovoljuje ogled konfiguracije lokalnega telefona Bluetooth ter ustvarjanje in sprejemanje povezave s povezanimi napravami."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"nadzor nad komunikacijo s tehnologijo bližnjega polja"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Podpira komunikacijo med računalnikom in oznakami, karticami in bralniki komunikacije s tehnologijo bližnjega polja."</string>
-    <!-- no translation found for permlab_vpn (8345800584532175312) -->
-    <skip />
-    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
-    <skip />
+    <string name="permlab_vpn" msgid="8345800584532175312">"prestrezanje in spreminjanje vsega omrežnega prometa"</string>
+    <string name="permdesc_vpn" msgid="5617893078989944219">"Dovoli programu, da prestreže in pregleda ves omrežni promet, na primer za vzpostavljanje povezave VPN. Zlonamerni programi lahko brez vašega vedenja spremljajo, preusmerjajo ali spreminjajo omrežne pakete."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"onemogočanje zaklepa tipkovnice"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Dovoljuje, da program onemogoči zaklep tipk in morebitno povezano varnostno geslo. Legitimen primer je onemogočenje zaklepa tipkovnice pri dohodnem klicu ter vnovičnem omogočanju zaklepa, ko je klic dokončan."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"branje nastavitev sinhronizacije"</string>
@@ -879,6 +875,18 @@
     <string name="sms_control_message" msgid="1289331457999236205">"V pošiljanju je veliko sporočil SMS. Če želite nadaljevati, izberite »V redu«. Če želite pošiljanje ustaviti, izberite »Prekliči«."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"V redu"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Prekliči"</string>
+    <!-- no translation found for sim_removed_title (6227712319223226185) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (2064255102770489459) -->
+    <skip />
+    <!-- no translation found for sim_done_button (827949989369963775) -->
+    <skip />
+    <!-- no translation found for sim_added_title (3719670512889674693) -->
+    <skip />
+    <!-- no translation found for sim_added_message (1209265974048554242) -->
+    <skip />
+    <!-- no translation found for sim_restart_button (4722407842815232347) -->
+    <skip />
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastavi uro"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Nastavi datum"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Nastavi"</string>
@@ -1030,10 +1038,7 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"Krmarjenje domov"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Krmarjenje navzgor"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Več možnosti"</string>
-    <!-- no translation found for storage_internal (7556050805474115618) -->
-    <skip />
-    <!-- no translation found for storage_sd_card (8921771478629812343) -->
-    <skip />
-    <!-- no translation found for storage_usb (3017954059538517278) -->
-    <skip />
+    <string name="storage_internal" msgid="7556050805474115618">"Notranji pomnilnik"</string>
+    <string name="storage_sd_card" msgid="8921771478629812343">"Kartica SD"</string>
+    <string name="storage_usb" msgid="3017954059538517278">"Pomnilnik USB"</string>
 </resources>

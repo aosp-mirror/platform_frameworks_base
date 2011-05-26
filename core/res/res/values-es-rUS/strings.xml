@@ -240,10 +240,8 @@
     <string name="permdesc_batteryStats" msgid="5847319823772230560">"Admite la modificación de estadísticas recopiladas sobre la batería. Las aplicaciones normales no deben utilizarlo."</string>
     <string name="permlab_backup" msgid="470013022865453920">"copia de seguridad y restauración del sistema de control"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Permite a la aplicación controlar el mecanismo de restauración y copia de seguridad de los sistemas. No es para uso de las aplicaciones normales."</string>
-    <!-- no translation found for permlab_confirm_full_backup (5557071325804469102) -->
-    <skip />
-    <!-- no translation found for permdesc_confirm_full_backup (9005017754175897954) -->
-    <skip />
+    <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"Confirmar una copia completa de seguridad o una operación de restauración"</string>
+    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"Permite que la aplicación lance la IU de confirmación de la copia completa de seguridad. No se puede usar con cualquier aplicación."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"mostrar ventanas no autorizadas"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Permite la creación de ventanas que la interfaz interna del usuario del sistema pretenda utilizar. Las aplicaciones normales no deben utilizarlo."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"mostrar alertas a nivel del sistema"</string>
@@ -450,10 +448,8 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Admite una aplicación que ve la configuración del teléfono Bluetooth local, y realiza y acepta conexiones con dispositivos vinculados."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlar la Transmisión de datos en proximidad"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Permite que una aplicación se comunique con etiquetas, tarjetas y lectores de Transmisión de datos en proximidad (NFC)."</string>
-    <!-- no translation found for permlab_vpn (8345800584532175312) -->
-    <skip />
-    <!-- no translation found for permdesc_vpn (5617893078989944219) -->
-    <skip />
+    <string name="permlab_vpn" msgid="8345800584532175312">"Interceptar y modificar todo el tráfico de red"</string>
+    <string name="permdesc_vpn" msgid="5617893078989944219">"Permite que una aplicación intercepte e inspeccione todo el tráfico de red para, por ejemplo, establecer una conexión VPN. Las aplicaciones maliciosas pueden monitorear, redireccionar o modificar paquetes de red sin que lo sepas."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"desactivar el bloqueo"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Admite una aplicación que desactiva el bloqueo y cualquier seguridad con contraseña relacionada. Un ejemplo legítimo de esto es el bloqueo desactivado por el teléfono cuando recibe una llamada telefónica entrante, y luego la reactivación del bloqueo cuando finaliza la llamada."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leer la configuración de sincronización"</string>
@@ -879,6 +875,18 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Se envía una gran cantidad de mensajes SMS. Selecciona \"Aceptar\" para continuar o \"Cancelar\" para detener el envío."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"Aceptar"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Cancelar"</string>
+    <!-- no translation found for sim_removed_title (6227712319223226185) -->
+    <skip />
+    <!-- no translation found for sim_removed_message (2064255102770489459) -->
+    <skip />
+    <!-- no translation found for sim_done_button (827949989369963775) -->
+    <skip />
+    <!-- no translation found for sim_added_title (3719670512889674693) -->
+    <skip />
+    <!-- no translation found for sim_added_message (1209265974048554242) -->
+    <skip />
+    <!-- no translation found for sim_restart_button (4722407842815232347) -->
+    <skip />
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Configurar hora"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Configurar fecha"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Establecer"</string>
@@ -1030,10 +1038,7 @@
     <string name="action_bar_home_description" msgid="5293600496601490216">"Desplazarse hasta la página principal"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Desplazarse hacia arriba"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Más opciones"</string>
-    <!-- no translation found for storage_internal (7556050805474115618) -->
-    <skip />
-    <!-- no translation found for storage_sd_card (8921771478629812343) -->
-    <skip />
-    <!-- no translation found for storage_usb (3017954059538517278) -->
-    <skip />
+    <string name="storage_internal" msgid="7556050805474115618">"Almacenamiento interno"</string>
+    <string name="storage_sd_card" msgid="8921771478629812343">"Tarjeta SD"</string>
+    <string name="storage_usb" msgid="3017954059538517278">"Almacenamiento USB"</string>
 </resources>
