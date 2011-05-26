@@ -358,15 +358,6 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
         mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         mRecentsContainer = (ListView) findViewById(R.id.recents_container);
-        mCompatMode = (CheckBox) findViewById(R.id.recents_compat_mode);
-        mCompatMode.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                final ActivityManager am = (ActivityManager)
-                        mContext.getSystemService(Context.ACTIVITY_SERVICE);
-                am.setFrontActivityScreenCompatMode(ActivityManager.COMPAT_MODE_TOGGLE);
-                hide(true);
-            }
-        });
         View footer = inflater.inflate(R.layout.status_bar_recent_panel_footer,
                 mRecentsContainer, false);
         mRecentsContainer.setScrollbarFadingEnabled(true);
@@ -504,6 +495,9 @@ public class RecentAppsPanel extends RelativeLayout implements StatusBarPanel, O
     }
 
     private void updateShownCompatMode() {
+        if (mCompatMode == null) {
+            return;
+        }
         final ActivityManager am = (ActivityManager)
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
         int mode = am.getFrontActivityScreenCompatMode();

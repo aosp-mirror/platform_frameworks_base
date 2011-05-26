@@ -347,6 +347,9 @@ public interface IActivityManager extends IInterface {
     public int getPackageScreenCompatMode(String packageName) throws RemoteException;
     public void setPackageScreenCompatMode(String packageName, int mode)
             throws RemoteException;
+    public boolean getPackageAskScreenCompat(String packageName) throws RemoteException;
+    public void setPackageAskScreenCompat(String packageName, boolean ask)
+            throws RemoteException;
 
     /*
      * Private non-Binder interfaces
@@ -567,4 +570,6 @@ public interface IActivityManager extends IInterface {
     int SET_FRONT_ACTIVITY_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+124;
     int GET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+125;
     int SET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+126;
+    int GET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+127;
+    int SET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+128;
 }

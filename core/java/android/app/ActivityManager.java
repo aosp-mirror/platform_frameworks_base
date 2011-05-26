@@ -137,6 +137,25 @@ public class ActivityManager {
         }
     }
 
+    /** @hide */
+    public boolean getPackageAskScreenCompat(String packageName) {
+        try {
+            return ActivityManagerNative.getDefault().getPackageAskScreenCompat(packageName);
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+            return false;
+        }
+    }
+
+    /** @hide */
+    public void setPackageAskScreenCompat(String packageName, boolean ask) {
+        try {
+            ActivityManagerNative.getDefault().setPackageAskScreenCompat(packageName, ask);
+        } catch (RemoteException e) {
+            // System dead, we will be dead too soon!
+        }
+    }
+
     /**
      * Return the approximate per-application memory class of the current
      * device.  This gives you an idea of how hard a memory limit you should

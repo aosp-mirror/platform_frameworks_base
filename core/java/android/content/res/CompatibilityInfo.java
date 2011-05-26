@@ -113,8 +113,13 @@ public class CompatibilityInfo implements Parcelable {
     public CompatibilityInfo(ApplicationInfo appInfo, int screenLayout, boolean forceCompat) {
         int compatFlags = 0;
 
+        // We can't rely on the application always setting
+        // FLAG_RESIZEABLE_FOR_SCREENS so will compute it based on various input.
+        boolean anyResizeable = false;
+
         if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
             compatFlags |= LARGE_SCREENS;
+            anyResizeable = true;
             if (!forceCompat) {
                 // If we aren't forcing the app into compatibility mode, then
                 // assume if it supports large screens that we should allow it
@@ -123,9 +128,13 @@ public class CompatibilityInfo implements Parcelable {
             }
         }
         if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
-            compatFlags |= XLARGE_SCREENS | EXPANDABLE;
+            anyResizeable = true;
+            if (!forceCompat) {
+                compatFlags |= XLARGE_SCREENS | EXPANDABLE;
+            }
         }
         if ((appInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
+            anyResizeable = true;
             compatFlags |= EXPANDABLE;
         }
 
@@ -160,7 +169,7 @@ public class CompatibilityInfo implements Parcelable {
         if ((screenLayout&Configuration.SCREENLAYOUT_COMPAT_NEEDED) != 0) {
             if ((compatFlags&EXPANDABLE) != 0) {
                 supportsScreen = true;
-            } else if ((appInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) == 0) {
+            } else if (!anyResizeable) {
                 compatFlags |= ALWAYS_COMPAT;
             }
         }
