@@ -38,6 +38,15 @@ public class DisplayMetrics {
     public static final int DENSITY_MEDIUM = 160;
 
     /**
+     * Standard quantized DPI for 720p TV screens.  Applications should
+     * generally not worry about this density, instead targeting
+     * {@link #DENSITY_XHIGH} for 1080p TV screens.  For situations where
+     * output is needed for a 720p screen, the UI elements can be scaled
+     * automatically by the platform.
+     */
+    public static final int DENSITY_TV = 213;
+
+    /**
      * Standard quantized DPI for high-density screens.
      */
     public static final int DENSITY_HIGH = 240;
