@@ -18,7 +18,10 @@ package com.android.test.hwui;
 
 import android.app.Activity;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
@@ -42,6 +45,7 @@ public class ThinPatchesActivity extends Activity {
 
     private class PatchView extends View {
         private Drawable mPatch1, mPatch2;
+        private Bitmap mTexture;
 
         public PatchView(Activity activity) {
             super(activity);
@@ -49,6 +53,20 @@ public class ThinPatchesActivity extends Activity {
             final Resources resources = activity.getResources();
             mPatch1 = resources.getDrawable(R.drawable.patch);
             mPatch2 = resources.getDrawable(R.drawable.btn_toggle_on);
+
+            mTexture = Bitmap.createBitmap(4, 3, Bitmap.Config.ARGB_8888);
+            mTexture.setPixel(0, 0, 0xffff0000);
+            mTexture.setPixel(1, 0, 0xffffffff);
+            mTexture.setPixel(2, 0, 0xff000000);
+            mTexture.setPixel(3, 0, 0xffff0000);
+            mTexture.setPixel(0, 1, 0xffff0000);
+            mTexture.setPixel(1, 1, 0xff000000);
+            mTexture.setPixel(2, 1, 0xffffffff);
+            mTexture.setPixel(3, 1, 0xffff0000);
+            mTexture.setPixel(0, 2, 0xffff0000);
+            mTexture.setPixel(1, 2, 0xffff0000);
+            mTexture.setPixel(2, 2, 0xffff0000);
+            mTexture.setPixel(3, 2, 0xffff0000);
         }
 
         @Override
@@ -62,10 +80,17 @@ public class ThinPatchesActivity extends Activity {
             mPatch1.setBounds(left, top, left + width, top + height);
             mPatch1.draw(canvas);
 
+            canvas.save();
             canvas.translate(0.0f, height + 20.0f);
             
             mPatch2.setBounds(left, top, left + width, top + height);
             mPatch2.draw(canvas);
+
+            canvas.restore();
+
+//            Rect src = new Rect(1, 0, 3, 2);
+//            RectF dst = new RectF(0, 0, getWidth(), getHeight());
+//            canvas.drawBitmap(mTexture, src, dst, null);
         }
     }
 }
