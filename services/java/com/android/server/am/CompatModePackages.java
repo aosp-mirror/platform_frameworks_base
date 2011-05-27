@@ -119,13 +119,15 @@ public class CompatModePackages {
 
     public CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
         return new CompatibilityInfo(ai, mService.mConfiguration.screenLayout,
+                mService.mConfiguration.smallestScreenWidthDp,
                 (getPackageFlags(ai.packageName)&COMPAT_FLAG_ENABLED) != 0);
     }
 
     public int computeCompatModeLocked(ApplicationInfo ai) {
         boolean enabled = (getPackageFlags(ai.packageName)&COMPAT_FLAG_ENABLED) != 0;
         CompatibilityInfo info = new CompatibilityInfo(ai,
-                mService.mConfiguration.screenLayout, enabled);
+                mService.mConfiguration.screenLayout,
+                mService.mConfiguration.smallestScreenWidthDp, enabled);
         if (info.alwaysSupportsScreen()) {
             return ActivityManager.COMPAT_MODE_NEVER;
         }
@@ -315,6 +317,7 @@ public class CompatModePackages {
 
             final IPackageManager pm = AppGlobals.getPackageManager();
             final int screenLayout = mService.mConfiguration.screenLayout;
+            final int smallestScreenWidthDp = mService.mConfiguration.smallestScreenWidthDp;
             final Iterator<Map.Entry<String, Integer>> it = pkgs.entrySet().iterator();
             while (it.hasNext()) {
                 Map.Entry<String, Integer> entry = it.next();
@@ -331,7 +334,8 @@ public class CompatModePackages {
                 if (ai == null) {
                     continue;
                 }
-                CompatibilityInfo info = new CompatibilityInfo(ai, screenLayout, false);
+                CompatibilityInfo info = new CompatibilityInfo(ai, screenLayout,
+                        smallestScreenWidthDp, false);
                 if (info.alwaysSupportsScreen()) {
                     continue;
                 }
