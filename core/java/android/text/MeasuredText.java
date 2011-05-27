@@ -16,13 +16,13 @@
 
 package android.text;
 
-import com.android.internal.util.ArrayUtils;
-
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.ReplacementSpan;
 import android.util.Log;
+
+import com.android.internal.util.ArrayUtils;
 
 /**
  * @hide
@@ -187,6 +187,7 @@ class MeasuredText {
             w[mPos] = wid;
             for (int i = mPos + 1, e = mPos + len; i < e; i++)
                 w[i] = 0;
+            mPos += len;
         }
 
         if (fm != null) {
