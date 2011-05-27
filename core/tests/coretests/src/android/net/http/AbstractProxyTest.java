@@ -36,6 +36,7 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import tests.http.MockResponse;
 import tests.http.MockWebServer;
 import tests.http.RecordedRequest;
+import tests.http.SocketPolicy;
 
 public abstract class AbstractProxyTest extends TestCase {
 
@@ -148,10 +149,9 @@ public abstract class AbstractProxyTest extends TestCase {
         TestSSLContext testSSLContext = TestSSLContext.create();
 
         server.useHttps(testSSLContext.serverContext.getSocketFactory(), true);
-        MockResponse connectResponse = new MockResponse()
-                .setResponseCode(200);
-        connectResponse.getHeaders().clear();
-        server.enqueue(connectResponse);
+        server.enqueue(new MockResponse()
+                .setSocketPolicy(SocketPolicy.UPGRADE_TO_SSL_AT_END)
+                .clearHeaders());
         server.enqueue(new MockResponse()
                 .setResponseCode(200)
                 .setBody("this response comes via a secure proxy"));

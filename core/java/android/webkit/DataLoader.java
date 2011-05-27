@@ -22,7 +22,7 @@ import com.android.internal.R;
 
 import java.io.ByteArrayInputStream;
 
-import org.apache.harmony.luni.util.Base64;
+import libcore.io.Base64;
 
 /**
  * This class is a concrete implementation of StreamLoader that uses the

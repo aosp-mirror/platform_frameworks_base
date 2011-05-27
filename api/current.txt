@@ -11164,6 +11164,21 @@ package android.net.http {
     field public static long DEFAULT_SYNC_MIN_GZIP_BYTES;
   }
 
+  public final class HttpResponseCache extends java.net.ResponseCache implements java.io.Closeable {
+    method public void close() throws java.io.IOException;
+    method public void delete() throws java.io.IOException;
+    method public void flush();
+    method public java.net.CacheResponse get(java.net.URI, java.lang.String, java.util.Map<java.lang.String, java.util.List<java.lang.String>>) throws java.io.IOException;
+    method public int getHitCount();
+    method public static android.net.http.HttpResponseCache getInstalled();
+    method public int getNetworkCount();
+    method public int getRequestCount();
+    method public static android.net.http.HttpResponseCache install(java.io.File, long) throws java.io.IOException;
+    method public long maxSize();
+    method public java.net.CacheRequest put(java.net.URI, java.net.URLConnection) throws java.io.IOException;
+    method public long size();
+  }
+
   public class SslCertificate {
     ctor public deprecated SslCertificate(java.lang.String, java.lang.String, java.lang.String, java.lang.String);
     ctor public deprecated SslCertificate(java.lang.String, java.lang.String, java.util.Date, java.util.Date);
