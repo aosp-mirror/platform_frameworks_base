@@ -304,7 +304,7 @@ public abstract class DataConnectionTracker extends Handler {
                 mIsScreenOn = false;
                 stopNetStatPoll();
                 startNetStatPoll();
-            } else if (action.equals(getActionIntentReconnectAlarm())) {
+            } else if (action.startsWith(getActionIntentReconnectAlarm())) {
                 log("Reconnect alarm. Previous state was " + mState);
                 onActionIntentReconnectAlarm(intent);
 
