@@ -188,7 +188,7 @@ public class ImageView extends View {
 
     @Override
     public boolean isLayoutRtl(Drawable dr) {
-        return ((dr == mDrawable) && isLayoutRtl()) || super.isLayoutRtl(dr);
+        return (dr == mDrawable) ? isLayoutRtl() : super.isLayoutRtl(dr);
     }
 
     @Override
