@@ -1466,7 +1466,7 @@
         <item name="divider">?android:attr/dividerVertical</item>
         <item name="showDividers">middle</item>
         <item name="dividerPadding">8dip</item>
-        <item name="background">@android:drawable/btn_group_holo_dark</item>
+        <item name="background">@null</item>
     </style>
 
     <style name="Holo.SegmentedButton" parent="SegmentedButton">
@@ -1875,7 +1875,6 @@
     </style>
 
     <style name="Holo.Light.ButtonBar" parent="Holo.ButtonBar">
-        <item name="android:background">@android:drawable/btn_group_holo_light</item>
     </style>
 
     <style name="Holo.Light.ButtonBar.AlertDialog">
