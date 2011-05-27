@@ -91,7 +91,7 @@ static jint android_nfc_NdefRecord_parseNdefRecord(JNIEnv *e, jobject o,
     jint ret = -1;
     phFriNfc_NdefRecord_t record;
 
-    jfieldID mType, mId, mPayload, mTnf;
+    jfieldID mType, mId, mPayload, mTnf, mFlags;
     jbyteArray type = NULL;
     jbyteArray id = NULL;
     jbyteArray payload = NULL;
@@ -142,9 +142,14 @@ static jint android_nfc_NdefRecord_parseNdefRecord(JNIEnv *e, jobject o,
     if (payload == NULL) {
         goto clean_and_return;
     }
+
     e->SetByteArrayRegion(payload, 0, record.PayloadLength,
             (jbyte *)record.PayloadData);
     e->SetObjectField(o, mPayload, payload);
+
+    /* Set flags field */
+    mFlags = e->GetFieldID(record_cls, "mFlags", "B");
+    e->SetIntField(o, mFlags, record.Flags);
 
     ret = 0;
 
