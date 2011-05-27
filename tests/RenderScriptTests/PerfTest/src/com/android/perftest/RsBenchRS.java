@@ -113,15 +113,19 @@ public class RsBenchRS {
     private Allocation mTexOpaque;
     private Allocation mTexTransparent;
     private Allocation mTexChecker;
+    private Allocation mTexGlobe;
 
     private Mesh m10by10Mesh;
     private Mesh m100by100Mesh;
     private Mesh mWbyHMesh;
     private Mesh mTorus;
+    private Mesh mSingleMesh;
 
     Font mFontSans;
     Font mFontSerif;
     private Allocation mTextAlloc;
+
+    private ScriptField_TexAllocs_s mTextureAllocs;
 
     private ScriptC_rsbench mScript;
 
@@ -250,6 +254,27 @@ public class RsBenchRS {
             }
         }
 
+        return tmb.create(true);
+    }
+
+    /**
+     * Create a mesh with a single quad for the given width and height.
+     */
+    private Mesh getSingleMesh(float width, float height) {
+        Mesh.TriangleMeshBuilder tmb = new Mesh.TriangleMeshBuilder(mRS,
+                                           2, Mesh.TriangleMeshBuilder.TEXTURE_0);
+        float xOffset = width/2;
+        float yOffset = height/2;
+        tmb.setTexture(0, 0);
+        tmb.addVertex(-1.0f * xOffset, -1.0f * yOffset);
+        tmb.setTexture(1, 0);
+        tmb.addVertex(xOffset, -1.0f * yOffset);
+        tmb.setTexture(1, 1);
+        tmb.addVertex(xOffset, yOffset);
+        tmb.setTexture(0, 1);
+        tmb.addVertex(-1.0f * xOffset, yOffset);
+        tmb.addTriangle(0, 3, 1);
+        tmb.addTriangle(1, 3, 2);
         return tmb.create(true);
     }
 
@@ -392,11 +417,13 @@ public class RsBenchRS {
         mTexOpaque = loadTextureRGB(R.drawable.data);
         mTexTransparent = loadTextureARGB(R.drawable.leaf);
         mTexChecker = loadTextureRGB(R.drawable.checker);
+        mTexGlobe = loadTextureRGB(R.drawable.globe);
 
         mScript.set_gTexTorus(mTexTorus);
         mScript.set_gTexOpaque(mTexOpaque);
         mScript.set_gTexTransparent(mTexTransparent);
         mScript.set_gTexChecker(mTexChecker);
+        mScript.set_gTexGlobe(mTexGlobe);
     }
 
     private void initFonts() {
@@ -418,6 +445,8 @@ public class RsBenchRS {
         mScript.set_g100by100Mesh(m100by100Mesh);
         mWbyHMesh= getMbyNMesh(mBenchmarkDimX, mBenchmarkDimY, mBenchmarkDimX/4, mBenchmarkDimY/4);
         mScript.set_gWbyHMesh(mWbyHMesh);
+        mSingleMesh = getSingleMesh(50, 50);
+        mScript.set_gSingleMesh(mSingleMesh);
 
         FileA3D model = FileA3D.createFromResource(mRS, mRes, R.raw.torus);
         FileA3D.IndexEntry entry = model.getIndexEntry(0);
@@ -516,6 +545,16 @@ public class RsBenchRS {
                                            b.create(),
                                            Allocation.USAGE_GRAPHICS_RENDER_TARGET);
         mScript.set_gRenderBufferDepth(offscreen);
+
+
+        mTextureAllocs = new ScriptField_TexAllocs_s(mRS, 100);
+        for (int i = 0; i < 100; i++) {
+            ScriptField_TexAllocs_s.Item texElem = new ScriptField_TexAllocs_s.Item();
+            texElem.texture = loadTextureRGB(R.drawable.globe);
+            mTextureAllocs.set(texElem, i, false);
+        }
+        mTextureAllocs.copyAll();
+        mScript.bind_gTexList100(mTextureAllocs);
 
         mRS.bindRootScript(mScript);
     }

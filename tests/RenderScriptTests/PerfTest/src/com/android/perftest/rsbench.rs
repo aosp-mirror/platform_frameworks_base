@@ -23,7 +23,7 @@
 const int RS_MSG_TEST_DONE = 100;
 const int RS_MSG_RESULTS_READY = 101;
 
-const int gMaxModes = 25;
+const int gMaxModes = 27;
 int gMaxLoops;
 
 // Allocation to send test names back to java
@@ -44,11 +44,19 @@ rs_allocation gTexOpaque;
 rs_allocation gTexTorus;
 rs_allocation gTexTransparent;
 rs_allocation gTexChecker;
+rs_allocation gTexGlobe;
+
+typedef struct TexAllocs_s {
+    rs_allocation texture;
+} TexAllocs;
+
+TexAllocs *gTexList100;
 
 rs_mesh g10by10Mesh;
 rs_mesh g100by100Mesh;
 rs_mesh gWbyHMesh;
 rs_mesh gTorusMesh;
+rs_mesh gSingleMesh;
 
 rs_font gFontSans;
 rs_font gFontSerif;
@@ -142,7 +150,7 @@ static void displayFontSamples(int fillNum) {
 }
 
 static void bindProgramVertexOrtho() {
-    // Default vertex sahder
+    // Default vertex shader
     rsgBindProgramVertex(gProgVertex);
     // Setup the projection matrix
     rs_matrix4x4 proj;
@@ -195,6 +203,33 @@ static void displayMeshSamples(int meshNum) {
         rsgDrawMesh(g100by100Mesh);
     } else if (meshNum == 2) {
         rsgDrawMesh(gWbyHMesh);
+    }
+}
+
+// Display sample images in a mesh with different texture
+static void displayMeshWithMultiTexture(int meshMode) {
+    bindProgramVertexOrtho();
+
+    // Fragment shader with texture
+    rsgBindProgramStore(gProgStoreBlendAlpha);
+    rsgBindProgramFragment(gProgFragmentTexture);
+    rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
+
+    int meshCount = (int)pow(10.0f, (float)(meshMode + 1));
+
+    float yPos = 0;
+    for (int y = 0; y < meshCount; y++) {
+        yPos = (y + 1) * 50;
+        float xPos = 0;
+        for (int x = 0; x < meshCount; x++) {
+            xPos = (x + 1) * 50;
+            rs_matrix4x4 matrix;
+            rsMatrixLoadTranslate(&matrix, xPos, yPos, 0);
+            rsgProgramVertexLoadModelMatrix(&matrix);
+            int i = (x + y * meshCount) % 100;
+            rsgBindTexture(gProgFragmentTexture, 0, gTexList100[i].texture);
+            rsgDrawMesh(gSingleMesh);
+        }
     }
 }
 
@@ -497,6 +532,8 @@ static const char *testNames[] = {
     "Geo test 25.6k heavy fragment heavy vertex",
     "Geo test 51.2k heavy fragment heavy vertex",
     "Geo test 204.8k small tries heavy fragment heavy vertex",
+    "Mesh with 10 by 10 texture",
+    "Mesh with 100 by 100 texture",
 };
 
 void getTestName(int testIndex) {
@@ -588,6 +625,12 @@ static void runTest(int index) {
         break;
     case 24:
         displayPixelLightSamples(8, true);
+        break;
+    case 25:
+        displayMeshWithMultiTexture(0);
+        break;
+    case 26:
+        displayMeshWithMultiTexture(1);
         break;
     }
 }
