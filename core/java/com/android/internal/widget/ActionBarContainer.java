@@ -96,13 +96,26 @@ public class ActionBarContainer extends FrameLayout {
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int nonTabHeight = 0;
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child == mTabContainer) {
+                continue;
+            }
+
+            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            nonTabHeight = Math.max(nonTabHeight,
+                    child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
+        }
+
         if (mTabContainer != null && mTabContainer.getVisibility() != GONE) {
             final int mode = MeasureSpec.getMode(heightMeasureSpec);
             if (mode == MeasureSpec.AT_MOST) {
-                final int measuredHeight = getMeasuredHeight();
                 final int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
                 setMeasuredDimension(getMeasuredWidth(),
-                        Math.min(measuredHeight + mTabContainer.getMeasuredHeight(), maxHeight));
+                        Math.min(nonTabHeight + mTabContainer.getMeasuredHeight(), maxHeight));
             }
         }
     }

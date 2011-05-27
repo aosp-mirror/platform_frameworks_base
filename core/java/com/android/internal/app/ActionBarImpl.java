@@ -176,6 +176,8 @@ public class ActionBarImpl extends ActionBar {
             }
             mActionView.setEmbeddedTabView(mTabScrollView);
         }
+        mActionView.setCollapsable(!mHasEmbeddedTabs &&
+                getNavigationMode() == NAVIGATION_MODE_TABS);
 
         TypedArray a = mContext.obtainStyledAttributes(null, R.styleable.ActionBar);
         mContentHeight = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
@@ -307,7 +309,9 @@ public class ActionBarImpl extends ActionBar {
             selectTab(null);
         }
         mTabs.clear();
-        mTabScrollView.removeAllTabs();
+        if (mTabScrollView != null) {
+            mTabScrollView.removeAllTabs();
+        }
         mSavedTabPosition = INVALID_POSITION;
     }
 
@@ -887,6 +891,7 @@ public class ActionBarImpl extends ActionBar {
                 }
                 break;
         }
+        mActionView.setCollapsable(mode == NAVIGATION_MODE_TABS && !mHasEmbeddedTabs);
     }
 
     @Override
