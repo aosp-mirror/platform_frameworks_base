@@ -427,8 +427,7 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_LTE = 13;
     /** Current network is eHRPD */
     public static final int NETWORK_TYPE_EHRPD = 14;
-    /** Current network is HSPA+
-     * @hide */
+    /** Current network is HSPA+ */
     public static final int NETWORK_TYPE_HSPAP = 15;
 
     /**
@@ -451,6 +450,7 @@ public class TelephonyManager {
      * @see #NETWORK_TYPE_IDEN
      * @see #NETWORK_TYPE_LTE
      * @see #NETWORK_TYPE_EHRPD
+     * @see #NETWORK_TYPE_HSPAP
      */
     public int getNetworkType() {
         try{
@@ -507,6 +507,8 @@ public class TelephonyManager {
                 return "CDMA - eHRPD";
             case NETWORK_TYPE_IDEN:
                 return "iDEN";
+            case NETWORK_TYPE_HSPAP:
+                return "HSPA+";
             default:
                 return "UNKNOWN";
         }
