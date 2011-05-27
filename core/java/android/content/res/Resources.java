@@ -193,11 +193,7 @@ public class Resources {
             Configuration config, CompatibilityInfo compInfo) {
         mAssets = assets;
         mMetrics.setToDefaults();
-        if (compInfo == null) {
-            mCompatibilityInfo = CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
-        } else {
-            mCompatibilityInfo = compInfo;
-        }
+        mCompatibilityInfo = compInfo;
         updateConfiguration(config, metrics);
         assets.ensureStringBlocks();
     }
@@ -1416,7 +1412,9 @@ public class Resources {
             int configChanges = 0xfffffff;
             if (config != null) {
                 mTmpConfig.setTo(config);
-                mCompatibilityInfo.applyToConfiguration(mTmpConfig);
+                if (mCompatibilityInfo != null) {
+                    mCompatibilityInfo.applyToConfiguration(mTmpConfig);
+                }
                 configChanges = mConfiguration.updateFrom(mTmpConfig);
                 configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
             }
@@ -1434,7 +1432,9 @@ public class Resources {
                 // it would be cleaner and more maintainble to just be
                 // consistently dealing with a compatible display everywhere in
                 // the framework.
-                mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
+                if (mCompatibilityInfo != null) {
+                    mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
+                }
             }
             mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
 
@@ -1565,11 +1565,12 @@ public class Resources {
      * Return the compatibility mode information for the application.
      * The returned object should be treated as read-only.
      * 
-     * @return compatibility info. null if the app does not require compatibility mode.
+     * @return compatibility info.
      * @hide
      */
     public CompatibilityInfo getCompatibilityInfo() {
-        return mCompatibilityInfo;
+        return mCompatibilityInfo != null ? mCompatibilityInfo
+                : CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO;
     }
 
     /**
