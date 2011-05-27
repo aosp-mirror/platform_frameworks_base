@@ -472,11 +472,15 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
         
         final View layout = layoutInflater.inflate(mLayoutResId, parent, false); 
         
-        if (mWidgetLayoutResId != 0) {
-            final ViewGroup widgetFrame = (ViewGroup)layout.findViewById(com.android.internal.R.id.widget_frame);
-            layoutInflater.inflate(mWidgetLayoutResId, widgetFrame);
+        final ViewGroup widgetFrame = (ViewGroup) layout
+                .findViewById(com.android.internal.R.id.widget_frame);
+        if (widgetFrame != null) {
+            if (mWidgetLayoutResId != 0) {
+                layoutInflater.inflate(mWidgetLayoutResId, widgetFrame);
+            } else {
+                widgetFrame.setVisibility(View.GONE);
+            }
         }
-
         return layout;
     }
     
@@ -514,14 +518,18 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
         }
         
         ImageView imageView = (ImageView) view.findViewById(com.android.internal.R.id.icon);
-        if (imageView != null && (mIconResId != 0 || mIcon != null)) {
-            if (mIcon == null) {
-                mIcon = getContext().getResources().getDrawable(mIconResId);
+        if (imageView != null) {
+            if (mIconResId != 0 || mIcon != null) {
+                if (mIcon == null) {
+                    mIcon = getContext().getResources().getDrawable(mIconResId);
+                }
+                if (mIcon != null) {
+                    imageView.setImageDrawable(mIcon);
+                }
             }
-            if (mIcon != null) {
-                imageView.setImageDrawable(mIcon);
-            }
+            imageView.setVisibility(mIcon != null ? View.VISIBLE : View.GONE);
         }
+
         if (mShouldDisableView) {
             setEnabledStateOnViews(view, isEnabled());
         }
@@ -633,6 +641,7 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
     public void setIcon(Drawable icon) {
         if ((icon == null && mIcon != null) || (icon != null && mIcon != icon)) {
             mIcon = icon;
+
             notifyChanged();
         }
     }

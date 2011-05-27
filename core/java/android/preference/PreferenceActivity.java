@@ -18,9 +18,6 @@ package android.preference;
 
 import com.android.internal.util.XmlUtils;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentBreadCrumbs;
@@ -44,8 +41,8 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -57,6 +54,9 @@ import android.widget.TextView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * This is the base class for an activity to show a hierarchy of preferences
@@ -503,12 +503,7 @@ public abstract class PreferenceActivity extends ListActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getResources().getConfiguration().isLayoutSizeAtLeast(
-                Configuration.SCREENLAYOUT_SIZE_LARGE)) {
-            setContentView(com.android.internal.R.layout.preference_list_content_large);
-        } else {
-            setContentView(com.android.internal.R.layout.preference_list_content);
-        }
+        setContentView(com.android.internal.R.layout.preference_list_content);
 
         mListFooter = (FrameLayout)findViewById(com.android.internal.R.id.list_footer);
         mPrefsContainer = (ViewGroup) findViewById(com.android.internal.R.id.prefs_frame);
@@ -585,12 +580,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         } else {
             // If there are no headers, we are in the old "just show a screen
             // of preferences" mode.
-            if (getResources().getConfiguration().isLayoutSizeAtLeast(
-                    Configuration.SCREENLAYOUT_SIZE_LARGE)) {
-                setContentView(com.android.internal.R.layout.preference_list_content_single_large);
-            } else {
-                setContentView(com.android.internal.R.layout.preference_list_content_single);
-            }
+            setContentView(com.android.internal.R.layout.preference_list_content_single);
             mListFooter = (FrameLayout) findViewById(com.android.internal.R.id.list_footer);
             mPrefsContainer = (ViewGroup) findViewById(com.android.internal.R.id.prefs);
             mPreferenceManager = new PreferenceManager(this, FIRST_REQUEST_CODE);
@@ -674,17 +664,9 @@ public abstract class PreferenceActivity extends ListActivity implements
      * enough.
      */
     public boolean onIsMultiPane() {
-        Configuration config = getResources().getConfiguration();
-        if ((config.screenLayout&Configuration.SCREENLAYOUT_SIZE_MASK)
-                == Configuration.SCREENLAYOUT_SIZE_XLARGE) {
-            return true;
-        }
-        if ((config.screenLayout&Configuration.SCREENLAYOUT_SIZE_MASK)
-                == Configuration.SCREENLAYOUT_SIZE_LARGE
-                && config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            return true;
-        }
-        return false;
+        boolean preferMultiPane = getResources().getBoolean(
+                com.android.internal.R.bool.preferences_prefer_dual_pane);
+        return preferMultiPane;
     }
 
     /**
