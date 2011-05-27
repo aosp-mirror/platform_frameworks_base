@@ -110,86 +110,112 @@ public class CompatibilityInfo implements Parcelable {
      */
     public final float applicationInvertedScale;
 
-    public CompatibilityInfo(ApplicationInfo appInfo, int screenLayout, boolean forceCompat) {
+    public CompatibilityInfo(ApplicationInfo appInfo, int screenLayout, int sw,
+            boolean forceCompat) {
         int compatFlags = 0;
 
-        // We can't rely on the application always setting
-        // FLAG_RESIZEABLE_FOR_SCREENS so will compute it based on various input.
-        boolean anyResizeable = false;
-
-        if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
-            compatFlags |= LARGE_SCREENS;
-            anyResizeable = true;
-            if (!forceCompat) {
-                // If we aren't forcing the app into compatibility mode, then
-                // assume if it supports large screens that we should allow it
-                // to use the full space of an xlarge screen as well.
-                compatFlags |= XLARGE_SCREENS | EXPANDABLE;
+        if (appInfo.requiresSmallestWidthDp != 0 || appInfo.compatibleWidthLimitDp != 0) {
+            // New style screen requirements spec.
+            int required = appInfo.requiresSmallestWidthDp != 0
+                    ? appInfo.requiresSmallestWidthDp
+                    : appInfo.compatibleWidthLimitDp;
+            int compat = appInfo.compatibleWidthLimitDp != 0
+                    ? appInfo.compatibleWidthLimitDp
+                    : appInfo.requiresSmallestWidthDp;
+            if (compat < required)  {
+                compat = required;
             }
-        }
-        if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
-            anyResizeable = true;
-            if (!forceCompat) {
-                compatFlags |= XLARGE_SCREENS | EXPANDABLE;
+
+            if (compat >= sw) {
+                compatFlags |= NEVER_COMPAT;
+            } else if (forceCompat) {
+                compatFlags |= NEEDS_SCREEN_COMPAT;
             }
-        }
-        if ((appInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
-            anyResizeable = true;
-            compatFlags |= EXPANDABLE;
-        }
 
-        if (forceCompat) {
-            // If we are forcing compatibility mode, then ignore an app that
-            // just says it is resizable for screens.  We'll only have it fill
-            // the screen if it explicitly says it supports the screen size we
-            // are running in.
-            compatFlags &= ~EXPANDABLE;
-        }
-
-        boolean supportsScreen = false;
-        switch (screenLayout&Configuration.SCREENLAYOUT_SIZE_MASK) {
-            case Configuration.SCREENLAYOUT_SIZE_XLARGE:
-                if ((compatFlags&XLARGE_SCREENS) != 0) {
-                    supportsScreen = true;
-                }
-                if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
-                    compatFlags |= NEVER_COMPAT;
-                }
-                break;
-            case Configuration.SCREENLAYOUT_SIZE_LARGE:
-                if ((compatFlags&LARGE_SCREENS) != 0) {
-                    supportsScreen = true;
-                }
-                if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
-                    compatFlags |= NEVER_COMPAT;
-                }
-                break;
-        }
-
-        if ((screenLayout&Configuration.SCREENLAYOUT_COMPAT_NEEDED) != 0) {
-            if ((compatFlags&EXPANDABLE) != 0) {
-                supportsScreen = true;
-            } else if (!anyResizeable) {
-                compatFlags |= ALWAYS_COMPAT;
-            }
-        }
-
-        if (supportsScreen) {
-            compatFlags &= ~NEEDS_SCREEN_COMPAT;
-        } else {
-            compatFlags |= NEEDS_SCREEN_COMPAT;
-        }
-        
-        if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
+            // Modern apps always support densities.
             applicationDensity = DisplayMetrics.DENSITY_DEVICE;
             applicationScale = 1.0f;
             applicationInvertedScale = 1.0f;
+
         } else {
-            applicationDensity = DisplayMetrics.DENSITY_DEFAULT;
-            applicationScale = DisplayMetrics.DENSITY_DEVICE
-                    / (float) DisplayMetrics.DENSITY_DEFAULT;
-            applicationInvertedScale = 1.0f / applicationScale;
-            compatFlags |= SCALING_REQUIRED;
+            // We can't rely on the application always setting
+            // FLAG_RESIZEABLE_FOR_SCREENS so will compute it based on various input.
+            boolean anyResizeable = false;
+
+            if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
+                compatFlags |= LARGE_SCREENS;
+                anyResizeable = true;
+                if (!forceCompat) {
+                    // If we aren't forcing the app into compatibility mode, then
+                    // assume if it supports large screens that we should allow it
+                    // to use the full space of an xlarge screen as well.
+                    compatFlags |= XLARGE_SCREENS | EXPANDABLE;
+                }
+            }
+            if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
+                anyResizeable = true;
+                if (!forceCompat) {
+                    compatFlags |= XLARGE_SCREENS | EXPANDABLE;
+                }
+            }
+            if ((appInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
+                anyResizeable = true;
+                compatFlags |= EXPANDABLE;
+            }
+
+            if (forceCompat) {
+                // If we are forcing compatibility mode, then ignore an app that
+                // just says it is resizable for screens.  We'll only have it fill
+                // the screen if it explicitly says it supports the screen size we
+                // are running in.
+                compatFlags &= ~EXPANDABLE;
+            }
+
+            boolean supportsScreen = false;
+            switch (screenLayout&Configuration.SCREENLAYOUT_SIZE_MASK) {
+                case Configuration.SCREENLAYOUT_SIZE_XLARGE:
+                    if ((compatFlags&XLARGE_SCREENS) != 0) {
+                        supportsScreen = true;
+                    }
+                    if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
+                        compatFlags |= NEVER_COMPAT;
+                    }
+                    break;
+                case Configuration.SCREENLAYOUT_SIZE_LARGE:
+                    if ((compatFlags&LARGE_SCREENS) != 0) {
+                        supportsScreen = true;
+                    }
+                    if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
+                        compatFlags |= NEVER_COMPAT;
+                    }
+                    break;
+            }
+
+            if ((screenLayout&Configuration.SCREENLAYOUT_COMPAT_NEEDED) != 0) {
+                if ((compatFlags&EXPANDABLE) != 0) {
+                    supportsScreen = true;
+                } else if (!anyResizeable) {
+                    compatFlags |= ALWAYS_COMPAT;
+                }
+            }
+
+            if (supportsScreen) {
+                compatFlags &= ~NEEDS_SCREEN_COMPAT;
+            } else {
+                compatFlags |= NEEDS_SCREEN_COMPAT;
+            }
+
+            if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
+                applicationDensity = DisplayMetrics.DENSITY_DEVICE;
+                applicationScale = 1.0f;
+                applicationInvertedScale = 1.0f;
+            } else {
+                applicationDensity = DisplayMetrics.DENSITY_DEFAULT;
+                applicationScale = DisplayMetrics.DENSITY_DEVICE
+                        / (float) DisplayMetrics.DENSITY_DEFAULT;
+                applicationInvertedScale = 1.0f / applicationScale;
+                compatFlags |= SCALING_REQUIRED;
+            }
         }
 
         mCompatibilityFlags = compatFlags;
