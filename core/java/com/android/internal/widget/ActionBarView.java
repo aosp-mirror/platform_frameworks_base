@@ -111,6 +111,7 @@ public class ActionBarView extends AbsActionBarView {
     private boolean mSplitActionBar;
     private boolean mUserTitle;
     private boolean mIncludeTabs;
+    private boolean mIsCollapsable;
 
     private MenuBuilder mOptionsMenu;
     
@@ -629,8 +630,30 @@ public class ActionBarView extends AbsActionBarView {
         mContextView = view;
     }
 
+    public void setCollapsable(boolean collapsable) {
+        mIsCollapsable = collapsable;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final int childCount = getChildCount();
+        if (mIsCollapsable) {
+            int visibleChildren = 0;
+            for (int i = 0; i < childCount; i++) {
+                final View child = getChildAt(i);
+                if (child.getVisibility() != GONE &&
+                        !(child == mMenuView && mMenuView.getChildCount() == 0)) {
+                    visibleChildren++;
+                }
+            }
+
+            if (visibleChildren == 0) {
+                // No size for an empty action bar when collapsable.
+                setMeasuredDimension(0, 0);
+                return;
+            }
+        }
+
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         if (widthMode != MeasureSpec.EXACTLY) {
             throw new IllegalStateException(getClass().getSimpleName() + " can only be used " +
@@ -761,8 +784,7 @@ public class ActionBarView extends AbsActionBarView {
 
         if (mContentHeight <= 0) {
             int measuredHeight = 0;
-            final int count = getChildCount();
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < childCount; i++) {
                 View v = getChildAt(i);
                 int paddedViewHeight = v.getMeasuredHeight() + verticalPadding;
                 if (paddedViewHeight > measuredHeight) {
@@ -790,6 +812,11 @@ public class ActionBarView extends AbsActionBarView {
         int x = getPaddingLeft();
         final int y = getPaddingTop();
         final int contentHeight = b - t - getPaddingTop() - getPaddingBottom();
+
+        if (contentHeight <= 0) {
+            // Nothing to do if we can't see anything.
+            return;
+        }
 
         if (mHomeLayout.getVisibility() != GONE) {
             x += positionChild(mHomeLayout, x, y, contentHeight);
