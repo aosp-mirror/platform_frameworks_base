@@ -29,6 +29,7 @@
 #include <hardware/sensors.h>
 
 #include "SensorDevice.h"
+#include "SensorService.h"
 
 namespace android {
 // ---------------------------------------------------------------------------
@@ -166,17 +167,32 @@ status_t SensorDevice::activate(void* ident, int handle, int enabled)
     bool actuateHardware = false;
 
     Info& info( mActivationCount.editValueFor(handle) );
+
+
+    LOGD_IF(DEBUG_CONNECTIONS,
+            "SensorDevice::activate: ident=%p, handle=0x%08x, enabled=%d, count=%d",
+            ident, handle, enabled, info.rates.size());
+
     if (enabled) {
         Mutex::Autolock _l(mLock);
+        LOGD_IF(DEBUG_CONNECTIONS, "... index=%ld",
+                info.rates.indexOfKey(ident));
+
         if (info.rates.indexOfKey(ident) < 0) {
             info.rates.add(ident, DEFAULT_EVENTS_PERIOD);
-            actuateHardware = true;
+            if (info.rates.size() == 1) {
+                actuateHardware = true;
+            }
         } else {
             // sensor was already activated for this ident
         }
     } else {
         Mutex::Autolock _l(mLock);
-        if (info.rates.removeItem(ident) >= 0) {
+        LOGD_IF(DEBUG_CONNECTIONS, "... index=%ld",
+                info.rates.indexOfKey(ident));
+
+        ssize_t idx = info.rates.removeItem(ident);
+        if (idx >= 0) {
             if (info.rates.size() == 0) {
                 actuateHardware = true;
             }
@@ -186,6 +202,8 @@ status_t SensorDevice::activate(void* ident, int handle, int enabled)
     }
 
     if (actuateHardware) {
+        LOGD_IF(DEBUG_CONNECTIONS, "\t>>> actuating h/w");
+
         err = mSensorDevice->activate(mSensorDevice, handle, enabled);
         if (enabled) {
             LOGE_IF(err, "Error activating sensor %d (%s)", handle, strerror(-err));

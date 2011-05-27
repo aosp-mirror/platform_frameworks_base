@@ -38,6 +38,8 @@
 
 // ---------------------------------------------------------------------------
 
+#define DEBUG_CONNECTIONS   false
+
 struct sensors_poll_device_t;
 struct sensors_module_t;
 
