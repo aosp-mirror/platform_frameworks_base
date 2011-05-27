@@ -41,13 +41,42 @@ const static GLenum gFaceOrder[] = {
 };
 
 
+GLenum rsdTypeToGLType(RsDataType t) {
+    switch (t) {
+    case RS_TYPE_UNSIGNED_5_6_5:    return GL_UNSIGNED_SHORT_5_6_5;
+    case RS_TYPE_UNSIGNED_5_5_5_1:  return GL_UNSIGNED_SHORT_5_5_5_1;
+    case RS_TYPE_UNSIGNED_4_4_4_4:  return GL_UNSIGNED_SHORT_4_4_4_4;
+
+    //case RS_TYPE_FLOAT_16:      return GL_HALF_FLOAT;
+    case RS_TYPE_FLOAT_32:      return GL_FLOAT;
+    case RS_TYPE_UNSIGNED_8:    return GL_UNSIGNED_BYTE;
+    case RS_TYPE_UNSIGNED_16:   return GL_UNSIGNED_SHORT;
+    case RS_TYPE_SIGNED_8:      return GL_BYTE;
+    case RS_TYPE_SIGNED_16:     return GL_SHORT;
+    default:    break;
+    }
+    return 0;
+}
+
+GLenum rsdKindToGLFormat(RsDataKind k) {
+    switch (k) {
+    case RS_KIND_PIXEL_L: return GL_LUMINANCE;
+    case RS_KIND_PIXEL_A: return GL_ALPHA;
+    case RS_KIND_PIXEL_LA: return GL_LUMINANCE_ALPHA;
+    case RS_KIND_PIXEL_RGB: return GL_RGB;
+    case RS_KIND_PIXEL_RGBA: return GL_RGBA;
+    case RS_KIND_PIXEL_DEPTH: return GL_DEPTH_COMPONENT16;
+    default: break;
+    }
+    return 0;
+}
+
+
 static void Update2DTexture(const Allocation *alloc, const void *ptr, uint32_t xoff, uint32_t yoff,
                      uint32_t lod, RsAllocationCubemapFace face,
                      uint32_t w, uint32_t h) {
     DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
 
-    const GLenum type = alloc->mHal.state.type->getElement()->getComponent().getGLType();
-    const GLenum format = alloc->mHal.state.type->getElement()->getComponent().getGLFormat();
     rsAssert(drv->textureID);
     glBindTexture(drv->glTarget, drv->textureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -55,15 +84,12 @@ static void Update2DTexture(const Allocation *alloc, const void *ptr, uint32_t x
     if (alloc->mHal.state.hasFaces) {
         t = gFaceOrder[face];
     }
-    glTexSubImage2D(t, lod, xoff, yoff, w, h, format, type, ptr);
+    glTexSubImage2D(t, lod, xoff, yoff, w, h, drv->glFormat, drv->glType, ptr);
 }
 
 
 static void Upload2DTexture(const Context *rsc, const Allocation *alloc, bool isFirstUpload) {
     DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
-
-    GLenum type = alloc->mHal.state.type->getElement()->getComponent().getGLType();
-    GLenum format = alloc->mHal.state.type->getElement()->getComponent().getGLFormat();
 
     glBindTexture(drv->glTarget, drv->textureID);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -85,15 +111,15 @@ static void Upload2DTexture(const Context *rsc, const Allocation *alloc, bool is
             }
 
             if (isFirstUpload) {
-                glTexImage2D(t, lod, format,
+                glTexImage2D(t, lod, drv->glFormat,
                              alloc->mHal.state.type->getLODDimX(lod),
                              alloc->mHal.state.type->getLODDimY(lod),
-                             0, format, type, p);
+                             0, drv->glFormat, drv->glType, p);
             } else {
                 glTexSubImage2D(t, lod, 0, 0,
                                 alloc->mHal.state.type->getLODDimX(lod),
                                 alloc->mHal.state.type->getLODDimY(lod),
-                                format, type, p);
+                                drv->glFormat, drv->glType, p);
             }
         }
     }
@@ -107,10 +133,7 @@ static void Upload2DTexture(const Context *rsc, const Allocation *alloc, bool is
 static void UploadToTexture(const Context *rsc, const Allocation *alloc) {
     DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
 
-    GLenum type = alloc->mHal.state.type->getElement()->getComponent().getGLType();
-    GLenum format = alloc->mHal.state.type->getElement()->getComponent().getGLFormat();
-
-    if (!type || !format) {
+    if (!drv->glType || !drv->glFormat) {
         return;
     }
 
@@ -139,8 +162,7 @@ static void UploadToTexture(const Context *rsc, const Allocation *alloc) {
 static void AllocateRenderTarget(const Context *rsc, const Allocation *alloc) {
     DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
 
-    GLenum format = alloc->mHal.state.type->getElement()->getComponent().getGLFormat();
-    if (!format) {
+    if (!drv->glFormat) {
         return;
     }
 
@@ -154,7 +176,7 @@ static void AllocateRenderTarget(const Context *rsc, const Allocation *alloc) {
             return;
         }
         glBindRenderbuffer(GL_RENDERBUFFER, drv->renderTargetID);
-        glRenderbufferStorage(GL_RENDERBUFFER, format,
+        glRenderbufferStorage(GL_RENDERBUFFER, drv->glFormat,
                               alloc->mHal.state.dimensionX, alloc->mHal.state.dimensionY);
     }
     rsdGLCheckError(rsc, "AllocateRenderTarget");
@@ -207,6 +229,10 @@ bool rsdAllocationInit(const Context *rsc, Allocation *alloc, bool forceZero) {
             drv->glTarget = GL_ARRAY_BUFFER;
         }
     }
+
+    drv->glType = rsdTypeToGLType(alloc->mHal.state.type->getElement()->getComponent().getType());
+    drv->glFormat = rsdKindToGLFormat(alloc->mHal.state.type->getElement()->getComponent().getKind());
+
 
     alloc->mHal.drvState.mallocPtr = ptr;
     drv->mallocPtr = (uint8_t *)ptr;

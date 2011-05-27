@@ -114,7 +114,7 @@ bool RsdMeshObj::init() {
 
             mAttribs[userNum].size = c.getVectorSize();
             mAttribs[userNum].offset = elem->getFieldOffsetBytes(fieldI);
-            mAttribs[userNum].type = c.getGLType();
+            mAttribs[userNum].type = rsdTypeToGLType(c.getType());
             mAttribs[userNum].normalized = c.getType() != RS_TYPE_FLOAT_32;//c.getIsNormalized();
             mAttribs[userNum].stride = stride;
             String8 tmp(RS_SHADER_ATTR);

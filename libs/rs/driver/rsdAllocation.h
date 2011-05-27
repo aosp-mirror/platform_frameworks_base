@@ -39,9 +39,16 @@ struct DrvAllocation {
     uint8_t * mallocPtr;
 
     GLenum glTarget;
+    GLenum glType;
+    GLenum glFormat;
+
 
     bool uploadDeferred;
 };
+
+GLenum rsdTypeToGLType(RsDataType t);
+GLenum rsdKindToGLFormat(RsDataKind k);
+
 
 bool rsdAllocationInit(const android::renderscript::Context *rsc,
                        android::renderscript::Allocation *alloc,

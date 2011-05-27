@@ -32,8 +32,6 @@ public:
 
     void set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize=1);
 
-    uint32_t getGLType() const;
-    uint32_t getGLFormat() const;
     String8 getGLSLType() const;
     void dumpLOGV(const char *prefix) const;
 
