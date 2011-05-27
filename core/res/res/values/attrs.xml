@@ -1128,6 +1128,10 @@
              The clip will be based on the horizontal gravity: a left gravity will clip the right
              edge, a right gravity will clip the left edge, and neither will clip both edges. -->
         <flag name="clip_horizontal" value="0x08" />
+        <!-- Push object to the beginning of its container, not changing its size. -->
+        <flag name="before" value="0x00800003" />
+        <!-- Push object to the end of its container, not changing its size. -->
+        <flag name="after" value="0x00800005" />
     </attr>
 
     <!-- Controls whether links such as urls and email addresses are
@@ -1184,6 +1188,10 @@
              The clip will be based on the horizontal gravity: a left gravity will clip the right
              edge, a right gravity will clip the left edge, and neither will clip both edges. -->
         <flag name="clip_horizontal" value="0x08" />
+        <!-- Push object to the beginning of its container, not changing its size. -->
+        <flag name="before" value="0x00800003" />
+        <!-- Push object to the end of its container, not changing its size. -->
+        <flag name="after" value="0x00800005" />
     </attr>
 
     <!-- Standard orientation constant. -->

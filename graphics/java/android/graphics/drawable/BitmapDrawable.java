@@ -387,7 +387,7 @@ public class BitmapDrawable extends Drawable {
             if (shader == null) {
                 if (mApplyGravity) {
                     Gravity.apply(state.mGravity, mBitmapWidth, mBitmapHeight,
-                            getBounds(), mDstRect);
+                            getBounds(), mDstRect, isLayoutRtlSelf());
                     mApplyGravity = false;
                 }
                 canvas.drawBitmap(bitmap, null, mDstRect, state.mPaint);

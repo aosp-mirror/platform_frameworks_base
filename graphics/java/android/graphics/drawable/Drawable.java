@@ -288,6 +288,18 @@ public abstract class Drawable {
     }
 
     /**
+     * Implement this interface if you want to create an drawable that is RTL aware
+     */
+    public static interface Callback2 extends Callback {
+        /**
+         * A Drawable can call this to know whether the <var>who</var> is in RTL layout direction.
+         *
+         * @param who The drawable being unscheduled.
+         */
+        public boolean isLayoutRtl(Drawable who);
+    }
+
+    /**
      * Bind a {@link Callback} object to this Drawable.  Required for clients
      * that want to support animated drawables.
      *
@@ -361,6 +373,18 @@ public abstract class Drawable {
         if (callback != null) {
             callback.unscheduleDrawable(this, what);
         }
+    }
+
+    /**
+     * Use the current {@link android.graphics.drawable.Drawable.Callback2} implementation to know
+     * if this Drawable is having a layout in RTL direction.
+     */
+    public boolean isLayoutRtlSelf() {
+        final Callback callback = getCallback();
+        if (callback == null || !(callback instanceof Callback2)) {
+            return false;
+        }
+        return ((Callback2) callback).isLayoutRtl(this);
     }
 
     /**

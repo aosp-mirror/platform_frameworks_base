@@ -916,6 +916,12 @@ public class ProgressBar extends View {
     }
 
     @Override
+    public boolean isLayoutRtl(Drawable who) {
+        return ((who == mProgressDrawable || who == mIndeterminateDrawable) && isLayoutRtl()) ||
+            super.isLayoutRtl(who);
+    }
+
+    @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         updateDrawableBounds(w, h);
     }

@@ -631,7 +631,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @see android.view.ViewGroup
  */
-public class View implements Drawable.Callback, KeyEvent.Callback, AccessibilityEventSource {
+public class View implements Drawable.Callback2, KeyEvent.Callback, AccessibilityEventSource {
     private static final boolean DBG = false;
 
     /**
@@ -10236,6 +10236,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback, Accessibility
         if (mAttachInfo != null) {
             mAttachInfo.mHandler.removeCallbacksAndMessages(who);
         }
+    }
+
+     /**
+     * Check if a given Drawable is in RTL layout direction.
+     *
+     * @param who the recipient of the action
+     */
+    public boolean isLayoutRtl(Drawable who) {
+        return (who == mBGDrawable) && isLayoutRtl();
     }
 
     /**

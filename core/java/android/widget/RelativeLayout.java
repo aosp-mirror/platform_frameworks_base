@@ -16,32 +16,32 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.SparseArray;
-import android.util.Poolable;
 import android.util.Pool;
-import android.util.Pools;
+import android.util.Poolable;
 import android.util.PoolableManager;
-import static android.util.Log.d;
+import android.util.Pools;
+import android.util.SparseArray;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.RemoteViews.RemoteView;
+import com.android.internal.R;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.LinkedList;
-import java.util.HashSet;
-import java.util.ArrayList;
+
+import static android.util.Log.d;
 
 /**
  * A Layout where the positions of the children can be described in relation to each other or to the
@@ -221,8 +221,8 @@ public class RelativeLayout extends ViewGroup {
     @android.view.RemotableViewMethod
     public void setGravity(int gravity) {
         if (mGravity != gravity) {
-            if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == 0) {
-                gravity |= Gravity.LEFT;
+            if ((gravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) == 0) {
+                gravity |= Gravity.BEFORE;
             }
 
             if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == 0) {
@@ -236,9 +236,9 @@ public class RelativeLayout extends ViewGroup {
 
     @android.view.RemotableViewMethod
     public void setHorizontalGravity(int horizontalGravity) {
-        final int gravity = horizontalGravity & Gravity.HORIZONTAL_GRAVITY_MASK;
-        if ((mGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != gravity) {
-            mGravity = (mGravity & ~Gravity.HORIZONTAL_GRAVITY_MASK) | gravity;
+        final int gravity = horizontalGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
+        if ((mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) != gravity) {
+            mGravity = (mGravity & ~Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) | gravity;
             requestLayout();
         }
     }
@@ -339,7 +339,7 @@ public class RelativeLayout extends ViewGroup {
         mHasBaselineAlignedChild = false;
 
         View ignore = null;
-        int gravity = mGravity & Gravity.HORIZONTAL_GRAVITY_MASK;
+        int gravity = mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK;
         final boolean horizontalGravity = gravity != Gravity.LEFT && gravity != 0;
         gravity = mGravity & Gravity.VERTICAL_GRAVITY_MASK;
         final boolean verticalGravity = gravity != Gravity.TOP && gravity != 0;
@@ -494,7 +494,8 @@ public class RelativeLayout extends ViewGroup {
                     height - mPaddingBottom);
 
             final Rect contentBounds = mContentBounds;
-            Gravity.apply(mGravity, right - left, bottom - top, selfBounds, contentBounds);
+            Gravity.apply(mGravity, right - left, bottom - top, selfBounds, contentBounds,
+                    isLayoutRtl());
 
             final int horizontalOffset = contentBounds.left - left;
             final int verticalOffset = contentBounds.top - top;

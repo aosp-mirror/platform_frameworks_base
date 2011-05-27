@@ -86,7 +86,8 @@ public class TextProgressBar extends RelativeLayout implements OnChronometerTick
             
             // Check if Chronometer should move with with ProgressBar 
             mChronometerFollow = (params.width == ViewGroup.LayoutParams.WRAP_CONTENT);
-            mChronometerGravity = (mChronometer.getGravity() & Gravity.HORIZONTAL_GRAVITY_MASK);
+            mChronometerGravity = (mChronometer.getGravity() &
+                    Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK);
             
         } else if (childId == PROGRESSBAR_ID && child instanceof ProgressBar) {
             mProgressBar = (ProgressBar) child;
