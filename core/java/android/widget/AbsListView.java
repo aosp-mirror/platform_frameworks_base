@@ -2572,17 +2572,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     @Override
-    public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
-        // Add a record for ourselves as well.
-        AccessibilityEvent record = AccessibilityEvent.obtain();
-        // Set the class since it is not populated in #dispatchPopulateAccessibilityEvent
-        record.setClassName(getClass().getName());
-        child.dispatchPopulateAccessibilityEvent(record);
-        event.appendRecord(record);
-        return true;
-    }
-
-    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return false;
     }
