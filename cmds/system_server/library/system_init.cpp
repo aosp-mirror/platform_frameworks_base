@@ -70,8 +70,11 @@ extern "C" status_t system_init()
         SurfaceFlinger::instantiate();
     }
 
-    // Start the sensor service
-    SensorService::instantiate();
+    property_get("system_init.startsensorservice", propBuf, "1");
+    if (strcmp(propBuf, "1") == 0) {
+        // Start the sensor service
+        SensorService::instantiate();
+    }
 
     // On the simulator, audioflinger et al don't get started the
     // same way as on the device, and we need to start them here
