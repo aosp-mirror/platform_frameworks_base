@@ -9140,6 +9140,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public abstract void updatePosition(float x, float y);
 
         protected void positionAtCursorOffset(int offset) {
+            // A HandleView relies on the layout, which may be nulled by external methods.
+            if (mLayout == null) {
+                // Will update controllers' state, hiding them and stopping selection mode if needed
+                prepareCursorControllers();
+                return;
+            }
+
             addPositionToTouchUpFilter(offset);
             final int line = mLayout.getLineForOffset(offset);
             final int lineBottom = mLayout.getLineBottom(line);
