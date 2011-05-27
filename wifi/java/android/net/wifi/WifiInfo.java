@@ -41,8 +41,10 @@ public class WifiInfo implements Parcelable {
 
     static {
         stateMap.put(SupplicantState.DISCONNECTED, DetailedState.DISCONNECTED);
+        stateMap.put(SupplicantState.INTERFACE_DISABLED, DetailedState.DISCONNECTED);
         stateMap.put(SupplicantState.INACTIVE, DetailedState.IDLE);
         stateMap.put(SupplicantState.SCANNING, DetailedState.SCANNING);
+        stateMap.put(SupplicantState.AUTHENTICATING, DetailedState.CONNECTING);
         stateMap.put(SupplicantState.ASSOCIATING, DetailedState.CONNECTING);
         stateMap.put(SupplicantState.ASSOCIATED, DetailedState.CONNECTING);
         stateMap.put(SupplicantState.FOUR_WAY_HANDSHAKE, DetailedState.AUTHENTICATING);

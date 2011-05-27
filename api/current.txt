@@ -11596,12 +11596,14 @@ package android.net.wifi {
     method public void writeToParcel(android.os.Parcel, int);
     enum_constant public static final android.net.wifi.SupplicantState ASSOCIATED;
     enum_constant public static final android.net.wifi.SupplicantState ASSOCIATING;
+    enum_constant public static final android.net.wifi.SupplicantState AUTHENTICATING;
     enum_constant public static final android.net.wifi.SupplicantState COMPLETED;
     enum_constant public static final android.net.wifi.SupplicantState DISCONNECTED;
     enum_constant public static final android.net.wifi.SupplicantState DORMANT;
     enum_constant public static final android.net.wifi.SupplicantState FOUR_WAY_HANDSHAKE;
     enum_constant public static final android.net.wifi.SupplicantState GROUP_HANDSHAKE;
     enum_constant public static final android.net.wifi.SupplicantState INACTIVE;
+    enum_constant public static final android.net.wifi.SupplicantState INTERFACE_DISABLED;
     enum_constant public static final android.net.wifi.SupplicantState INVALID;
     enum_constant public static final android.net.wifi.SupplicantState SCANNING;
     enum_constant public static final android.net.wifi.SupplicantState UNINITIALIZED;
