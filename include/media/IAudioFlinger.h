@@ -27,7 +27,7 @@
 #include <media/IAudioTrack.h>
 #include <media/IAudioRecord.h>
 #include <media/IAudioFlingerClient.h>
-#include <media/EffectApi.h>
+#include <hardware/audio_effect.h>
 #include <media/IEffect.h>
 #include <media/IEffectClient.h>
 #include <utils/String8.h>

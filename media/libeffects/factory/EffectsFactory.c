@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <dlfcn.h>
 
+#include <cutils/misc.h>
+#include <cutils/config_utils.h>
 
 static list_elem_t *gEffectList; // list of effect_entry_t: all currently created effects
 static list_elem_t *gLibraryList; // list of lib_entry_t: all currently loaded libraries
@@ -30,30 +32,39 @@ static uint32_t gNumEffects;         // total number number of effects
 static list_elem_t *gCurLib;    // current library in enumeration process
 static list_elem_t *gCurEffect; // current effect in enumeration process
 static uint32_t gCurEffectIdx;       // current effect index in enumeration process
+static lib_entry_t *gCachedLibrary;  // last library accessed by getLibrary()
 
-const char * const gEffectLibPath = "/system/lib/soundfx"; // path to built-in effect libraries
 static int gInitDone; // true is global initialization has been preformed
-static int gNextLibId; // used by loadLibrary() to allocate unique library handles
 static int gCanQueryEffect; // indicates that call to EffectQueryEffect() is valid, i.e. that the list of effects
                           // was not modified since last call to EffectQueryNumberEffects()
+
 
 /////////////////////////////////////////////////
 //      Local functions prototypes
 /////////////////////////////////////////////////
 
 static int init();
-static int loadLibrary(const char *libPath, int *handle);
-static int unloadLibrary(int handle);
+static int loadEffectConfigFile(const char *path);
+static int loadLibraries(cnode *root);
+static int loadLibrary(cnode *root, const char *name);
+static int loadEffects(cnode *root);
+static int loadEffect(cnode *node);
+static lib_entry_t *getLibrary(const char *path);
 static void resetEffectEnumeration();
 static uint32_t updateNumEffects();
-static int findEffect(effect_uuid_t *uuid, lib_entry_t **lib, effect_descriptor_t **desc);
+static int findEffect(effect_uuid_t *type,
+               effect_uuid_t *uuid,
+               lib_entry_t **lib,
+               effect_descriptor_t **desc);
 static void dumpEffectDescriptor(effect_descriptor_t *desc, char *str, size_t len);
+static int stringToUuid(const char *str, effect_uuid_t *uuid);
+static int uuidToString(const effect_uuid_t *uuid, char *str, size_t maxLen);
 
 /////////////////////////////////////////////////
 //      Effect Control Interface functions
 /////////////////////////////////////////////////
 
-int Effect_Process(effect_interface_t self, audio_buffer_t *inBuffer, audio_buffer_t *outBuffer)
+int Effect_Process(effect_handle_t self, audio_buffer_t *inBuffer, audio_buffer_t *outBuffer)
 {
     int ret = init();
     if (ret < 0) {
@@ -73,7 +84,7 @@ int Effect_Process(effect_interface_t self, audio_buffer_t *inBuffer, audio_buff
     return ret;
 }
 
-int Effect_Command(effect_interface_t self,
+int Effect_Command(effect_handle_t self,
                    uint32_t cmdCode,
                    uint32_t cmdSize,
                    void *pCmdData,
@@ -98,9 +109,31 @@ int Effect_Command(effect_interface_t self,
     return ret;
 }
 
+int Effect_GetDescriptor(effect_handle_t self,
+                         effect_descriptor_t *desc)
+{
+    int ret = init();
+    if (ret < 0) {
+        return ret;
+    }
+    effect_entry_t *fx = (effect_entry_t *)self;
+    pthread_mutex_lock(&gLibLock);
+    if (fx->lib == NULL) {
+        pthread_mutex_unlock(&gLibLock);
+        return -EPIPE;
+    }
+    pthread_mutex_lock(&fx->lib->lock);
+    pthread_mutex_unlock(&gLibLock);
+
+    ret = (*fx->subItfe)->get_descriptor(fx->subItfe, desc);
+    pthread_mutex_unlock(&fx->lib->lock);
+    return ret;
+}
+
 const struct effect_interface_s gInterface = {
         Effect_Process,
-        Effect_Command
+        Effect_Command,
+        Effect_GetDescriptor
 };
 
 /////////////////////////////////////////////////
@@ -182,7 +215,7 @@ int EffectGetDescriptor(effect_uuid_t *uuid, effect_descriptor_t *pDescriptor)
         return -EINVAL;
     }
     pthread_mutex_lock(&gLibLock);
-    ret = findEffect(uuid, &l, &d);
+    ret = findEffect(NULL, uuid, &l, &d);
     if (ret == 0) {
         memcpy(pDescriptor, d, sizeof(effect_descriptor_t));
     }
@@ -190,17 +223,17 @@ int EffectGetDescriptor(effect_uuid_t *uuid, effect_descriptor_t *pDescriptor)
     return ret;
 }
 
-int EffectCreate(effect_uuid_t *uuid, int32_t sessionId, int32_t ioId, effect_interface_t *pInterface)
+int EffectCreate(effect_uuid_t *uuid, int32_t sessionId, int32_t ioId, effect_handle_t *pHandle)
 {
     list_elem_t *e = gLibraryList;
     lib_entry_t *l = NULL;
     effect_descriptor_t *d = NULL;
-    effect_interface_t itfe;
+    effect_handle_t itfe;
     effect_entry_t *fx;
     int found = 0;
     int ret;
 
-    if (uuid == NULL || pInterface == NULL) {
+    if (uuid == NULL || pHandle == NULL) {
         return -EINVAL;
     }
 
@@ -218,15 +251,15 @@ int EffectCreate(effect_uuid_t *uuid, int32_t sessionId, int32_t ioId, effect_in
 
     pthread_mutex_lock(&gLibLock);
 
-    ret = findEffect(uuid, &l, &d);
+    ret = findEffect(NULL, uuid, &l, &d);
     if (ret < 0){
         goto exit;
     }
 
     // create effect in library
-    ret = l->createFx(uuid, sessionId, ioId, &itfe);
+    l->desc->create_effect(uuid, sessionId, ioId, &itfe);
     if (ret != 0) {
-        LOGW("EffectCreate() library %s: could not create fx %s, error %d", l->path, d->name, ret);
+        LOGW("EffectCreate() library %s: could not create fx %s, error %d", l->name, d->name, ret);
         goto exit;
     }
 
@@ -241,16 +274,16 @@ int EffectCreate(effect_uuid_t *uuid, int32_t sessionId, int32_t ioId, effect_in
     e->next = gEffectList;
     gEffectList = e;
 
-    *pInterface = (effect_interface_t)fx;
+    *pHandle = (effect_handle_t)fx;
 
-    LOGV("EffectCreate() created entry %p with sub itfe %p in library %s", *pInterface, itfe, l->path);
+    LOGV("EffectCreate() created entry %p with sub itfe %p in library %s", *pHandle, itfe, l->name);
 
 exit:
     pthread_mutex_unlock(&gLibLock);
     return ret;
 }
 
-int EffectRelease(effect_interface_t interface)
+int EffectRelease(effect_handle_t handle)
 {
     effect_entry_t *fx;
     list_elem_t *e1;
@@ -266,7 +299,7 @@ int EffectRelease(effect_interface_t interface)
     e1 = gEffectList;
     e2 = NULL;
     while (e1) {
-        if (e1->object == interface) {
+        if (e1->object == handle) {
             if (e2) {
                 e2->next = e1->next;
             } else {
@@ -286,10 +319,10 @@ int EffectRelease(effect_interface_t interface)
 
     // release effect in library
     if (fx->lib == NULL) {
-        LOGW("EffectRelease() fx %p library already unloaded", interface);
+        LOGW("EffectRelease() fx %p library already unloaded", handle);
     } else {
         pthread_mutex_lock(&fx->lib->lock);
-        fx->lib->releaseFx(fx->subItfe);
+        fx->lib->desc->release_effect(fx->subItfe);
         pthread_mutex_unlock(&fx->lib->lock);
     }
     free(fx);
@@ -301,29 +334,14 @@ exit:
 
 int EffectLoadLibrary(const char *libPath, int *handle)
 {
-    int ret = init();
-    if (ret < 0) {
-        return ret;
-    }
-    if (libPath == NULL) {
-        return -EINVAL;
-    }
-
-    ret = loadLibrary(libPath, handle);
-    updateNumEffects();
-    return ret;
+    // TODO: see if this interface still makes sense with the use of config files
+    return -ENOSYS;
 }
 
 int EffectUnloadLibrary(int handle)
 {
-    int ret = init();
-    if (ret < 0) {
-        return ret;
-    }
-
-    ret = unloadLibrary(handle);
-    updateNumEffects();
-    return ret;
+    // TODO: see if this interface still makes sense with the use of config files
+    return -ENOSYS;
 }
 
 int EffectIsNullUuid(effect_uuid_t *uuid)
@@ -339,9 +357,6 @@ int EffectIsNullUuid(effect_uuid_t *uuid)
 /////////////////////////////////////////////////
 
 int init() {
-    struct dirent *ent;
-    DIR *dir = NULL;
-    char libpath[PATH_MAX];
     int hdl;
 
     if (gInitDone) {
@@ -350,213 +365,209 @@ int init() {
 
     pthread_mutex_init(&gLibLock, NULL);
 
-    // load built-in libraries
-    dir = opendir(gEffectLibPath);
-    if (dir == NULL) {
-        return -ENODEV;
+    if (access(AUDIO_EFFECT_VENDOR_CONFIG_FILE, R_OK) == 0) {
+        loadEffectConfigFile(AUDIO_EFFECT_VENDOR_CONFIG_FILE);
+    } else if (access(AUDIO_EFFECT_DEFAULT_CONFIG_FILE, R_OK) == 0) {
+        loadEffectConfigFile(AUDIO_EFFECT_DEFAULT_CONFIG_FILE);
     }
-    while ((ent = readdir(dir)) != NULL) {
-        LOGV("init() reading file %s", ent->d_name);
-        if ((strlen(ent->d_name) < 3) ||
-            strncmp(ent->d_name, "lib", 3) != 0 ||
-            strncmp(ent->d_name + strlen(ent->d_name) - 3, ".so", 3) != 0) {
-            continue;
-        }
-        strcpy(libpath, gEffectLibPath);
-        strcat(libpath, "/");
-        strcat(libpath, ent->d_name);
-        if (loadLibrary(libpath, &hdl) < 0) {
-            LOGW("init() failed to load library %s",libpath);
-        }
-    }
-    closedir(dir);
+
     updateNumEffects();
     gInitDone = 1;
     LOGV("init() done");
     return 0;
 }
 
-
-int loadLibrary(const char *libPath, int *handle)
+int loadEffectConfigFile(const char *path)
 {
+    cnode *root;
+    char *data;
+
+    data = load_file(path, NULL);
+    if (data == NULL) {
+        return -ENODEV;
+    }
+    root = config_node("", "");
+    config_load(root, data);
+    loadLibraries(root);
+    loadEffects(root);
+    config_free(root);
+    free(root);
+    free(data);
+
+    return 0;
+}
+
+int loadLibraries(cnode *root)
+{
+    cnode *node;
+
+    node = config_find(root, LIBRARIES_TAG);
+    if (node == NULL) {
+        return -ENOENT;
+    }
+    node = node->first_child;
+    while (node) {
+        loadLibrary(node, node->name);
+        node = node->next;
+    }
+    return 0;
+}
+
+int loadLibrary(cnode *root, const char *name)
+{
+    cnode *node;
     void *hdl;
-    effect_QueryNumberEffects_t queryNumFx;
-    effect_QueryEffect_t queryFx;
-    effect_CreateEffect_t createFx;
-    effect_ReleaseEffect_t releaseFx;
-    uint32_t numFx;
-    uint32_t fx;
-    int ret;
-    list_elem_t *e, *descHead = NULL;
+    audio_effect_library_t *desc;
+    list_elem_t *e;
     lib_entry_t *l;
 
-    if (handle == NULL) {
+    node = config_find(root, PATH_TAG);
+    if (node == NULL) {
         return -EINVAL;
     }
 
-    *handle = 0;
-
-    hdl = dlopen(libPath, RTLD_NOW);
-    if (hdl == 0) {
-        LOGW("could open lib %s", libPath);
-        return -ENODEV;
-    }
-
-    // Check functions availability
-    queryNumFx = (effect_QueryNumberEffects_t)dlsym(hdl, "EffectQueryNumberEffects");
-    if (queryNumFx == NULL) {
-        LOGW("could not get EffectQueryNumberEffects from lib %s", libPath);
-        ret = -ENODEV;
-        goto error;
-    }
-    queryFx = (effect_QueryEffect_t)dlsym(hdl, "EffectQueryEffect");
-    if (queryFx == NULL) {
-        LOGW("could not get EffectQueryEffect from lib %s", libPath);
-        ret = -ENODEV;
-        goto error;
-    }
-    createFx = (effect_CreateEffect_t)dlsym(hdl, "EffectCreate");
-    if (createFx == NULL) {
-        LOGW("could not get EffectCreate from lib %s", libPath);
-        ret = -ENODEV;
-        goto error;
-    }
-    releaseFx = (effect_ReleaseEffect_t)dlsym(hdl, "EffectRelease");
-    if (releaseFx == NULL) {
-        LOGW("could not get EffectRelease from lib %s", libPath);
-        ret = -ENODEV;
+    hdl = dlopen(node->value, RTLD_NOW);
+    if (hdl == NULL) {
+        LOGW("loadLibrary() failed to open %s", node->value);
         goto error;
     }
 
-    // load effect descriptors
-    ret = queryNumFx(&numFx);
-    if (ret) {
+    desc = (audio_effect_library_t *)dlsym(hdl, AUDIO_EFFECT_LIBRARY_INFO_SYM_AS_STR);
+    if (desc == NULL) {
+        LOGW("loadLibrary() could not find symbol %s", AUDIO_EFFECT_LIBRARY_INFO_SYM_AS_STR);
         goto error;
     }
 
-    for (fx = 0; fx < numFx; fx++) {
-        effect_descriptor_t *d = malloc(sizeof(effect_descriptor_t));
-        if (d == NULL) {
-            ret = -ENOMEM;
-            goto error;
-        }
-        ret = queryFx(fx, d);
-        if (ret == 0) {
-#if (LOG_NDEBUG==0)
-            char s[256];
-            dumpEffectDescriptor(d, s, 256);
-            LOGV("loadLibrary() read descriptor %p:%s",d, s);
-#endif
-            if (d->apiVersion != EFFECT_API_VERSION) {
-                LOGW("Bad API version %04x on lib %s", d->apiVersion, libPath);
-                free(d);
-                continue;
-            }
-            e = malloc(sizeof(list_elem_t));
-            if (e == NULL) {
-                free(d);
-                ret = -ENOMEM;
-                goto error;
-            }
-            e->object = d;
-            e->next = descHead;
-            descHead = e;
-        } else {
-            LOGW("Error querying effect # %d on lib %s", fx, libPath);
-        }
+    if (AUDIO_EFFECT_LIBRARY_TAG != desc->tag) {
+        LOGW("getLibrary() bad tag %08x in lib info struct", desc->tag);
+        goto error;
     }
 
-    pthread_mutex_lock(&gLibLock);
+    if (EFFECT_API_VERSION_MAJOR(desc->version) !=
+            EFFECT_API_VERSION_MAJOR(EFFECT_LIBRARY_API_VERSION)) {
+        LOGW("loadLibrary() bad lib version %08x", desc->version);
+        goto error;
+    }
 
     // add entry for library in gLibraryList
     l = malloc(sizeof(lib_entry_t));
-    l->id = ++gNextLibId;
+    l->name = strndup(name, PATH_MAX);
+    l->path = strndup(node->value, PATH_MAX);
     l->handle = hdl;
-    strncpy(l->path, libPath, PATH_MAX);
-    l->createFx = createFx;
-    l->releaseFx = releaseFx;
-    l->effects = descHead;
+    l->desc = desc;
+    l->effects = NULL;
     pthread_mutex_init(&l->lock, NULL);
 
     e = malloc(sizeof(list_elem_t));
-    e->next = gLibraryList;
     e->object = l;
+    pthread_mutex_lock(&gLibLock);
+    e->next = gLibraryList;
     gLibraryList = e;
     pthread_mutex_unlock(&gLibLock);
-    LOGV("loadLibrary() linked library %p", l);
-
-    *handle = l->id;
+    LOGV("getLibrary() linked library %p for path %s", l, node->value);
 
     return 0;
 
 error:
-    LOGW("loadLibrary() error: %d on lib: %s", ret, libPath);
-    while (descHead) {
-        free(descHead->object);
-        e = descHead->next;
-        free(descHead);
-        descHead = e;;
+    if (hdl != NULL) {
+        dlclose(hdl);
     }
-    dlclose(hdl);
-    return ret;
+    return -EINVAL;
 }
 
-int unloadLibrary(int handle)
+int loadEffects(cnode *root)
 {
-    void *hdl;
-    int ret;
-    list_elem_t *el1, *el2;
-    lib_entry_t *l;
-    effect_entry_t *fx;
+    cnode *node;
 
-    pthread_mutex_lock(&gLibLock);
-    el1 = gLibraryList;
-    el2 = NULL;
-    while (el1) {
-        l = (lib_entry_t *)el1->object;
-        if (handle == l->id) {
-            if (el2) {
-                el2->next = el1->next;
-            } else {
-                gLibraryList = el1->next;
-            }
-            free(el1);
-            break;
-        }
-        el2 = el1;
-        el1 = el1->next;
-    }
-    pthread_mutex_unlock(&gLibLock);
-    if (el1 == NULL) {
+    node = config_find(root, EFFECTS_TAG);
+    if (node == NULL) {
         return -ENOENT;
     }
-
-    // clear effect descriptor list
-    el1 = l->effects;
-    while (el1) {
-        free(el1->object);
-        el2 = el1->next;
-        free(el1);
-        el1 = el2;
+    node = node->first_child;
+    while (node) {
+        loadEffect(node);
+        node = node->next;
     }
-
-    // disable all effects from this library
-    pthread_mutex_lock(&l->lock);
-
-    el1 = gEffectList;
-    while (el1) {
-        fx = (effect_entry_t *)el1->object;
-        if (fx->lib == l) {
-            fx->lib = NULL;
-        }
-        el1 = el1->next;
-    }
-    pthread_mutex_unlock(&l->lock);
-
-    dlclose(l->handle);
-    free(l);
     return 0;
 }
+
+int loadEffect(cnode *root)
+{
+    cnode *node;
+    effect_uuid_t uuid;
+    lib_entry_t *l;
+    effect_descriptor_t *d;
+    list_elem_t *e;
+
+    node = config_find(root, LIBRARY_TAG);
+    if (node == NULL) {
+        return -EINVAL;
+    }
+
+    l = getLibrary(node->value);
+    if (l == NULL) {
+        LOGW("loadEffect() could not get library %s", node->value);
+        return -EINVAL;
+    }
+
+    node = config_find(root, UUID_TAG);
+    if (node == NULL) {
+        return -EINVAL;
+    }
+    if (stringToUuid(node->value, &uuid) != 0) {
+        LOGW("loadEffect() invalid uuid %s", node->value);
+        return -EINVAL;
+    }
+
+    d = malloc(sizeof(effect_descriptor_t));
+    if (l->desc->get_descriptor(&uuid, d) != 0) {
+        char s[40];
+        uuidToString(&uuid, s, 40);
+        LOGW("Error querying effect %s on lib %s", s, l->name);
+        free(d);
+        return -EINVAL;
+    }
+#if (LOG_NDEBUG==0)
+    char s[256];
+    dumpEffectDescriptor(d, s, 256);
+    LOGV("loadEffect() read descriptor %p:%s",d, s);
+#endif
+    if (EFFECT_API_VERSION_MAJOR(d->apiVersion) !=
+            EFFECT_API_VERSION_MAJOR(EFFECT_CONTROL_API_VERSION)) {
+        LOGW("Bad API version %08x on lib %s", d->apiVersion, l->name);
+        free(d);
+        return -EINVAL;
+    }
+    e = malloc(sizeof(list_elem_t));
+    e->object = d;
+    e->next = l->effects;
+    l->effects = e;
+
+    return 0;
+}
+
+lib_entry_t *getLibrary(const char *name)
+{
+    list_elem_t *e;
+
+    if (gCachedLibrary &&
+            !strncmp(gCachedLibrary->name, name, PATH_MAX)) {
+        return gCachedLibrary;
+    }
+
+    e = gLibraryList;
+    while (e) {
+        lib_entry_t *l = (lib_entry_t *)e->object;
+        if (!strcmp(l->name, name)) {
+            gCachedLibrary = l;
+            return l;
+        }
+        e = e->next;
+    }
+
+    return NULL;
+}
+
 
 void resetEffectEnumeration()
 {
@@ -589,7 +600,10 @@ uint32_t updateNumEffects() {
     return cnt;
 }
 
-int findEffect(effect_uuid_t *uuid, lib_entry_t **lib, effect_descriptor_t **desc)
+int findEffect(effect_uuid_t *type,
+               effect_uuid_t *uuid,
+               lib_entry_t **lib,
+               effect_descriptor_t **desc)
 {
     list_elem_t *e = gLibraryList;
     lib_entry_t *l = NULL;
@@ -602,7 +616,11 @@ int findEffect(effect_uuid_t *uuid, lib_entry_t **lib, effect_descriptor_t **des
         list_elem_t *efx = l->effects;
         while (efx) {
             d = (effect_descriptor_t *)efx->object;
-            if (memcmp(&d->uuid, uuid, sizeof(effect_uuid_t)) == 0) {
+            if (type != NULL && memcmp(&d->type, type, sizeof(effect_uuid_t)) == 0) {
+                found = 1;
+                break;
+            }
+            if (uuid != NULL && memcmp(&d->uuid, uuid, sizeof(effect_uuid_t)) == 0) {
                 found = 1;
                 break;
             }
@@ -614,9 +632,11 @@ int findEffect(effect_uuid_t *uuid, lib_entry_t **lib, effect_descriptor_t **des
         LOGV("findEffect() effect not found");
         ret = -ENOENT;
     } else {
-        LOGV("findEffect() found effect: %s in lib %s", d->name, l->path);
+        LOGV("findEffect() found effect: %s in lib %s", d->name, l->name);
         *lib = l;
-        *desc = d;
+        if (desc) {
+            *desc = d;
+        }
     }
 
     return ret;
@@ -626,22 +646,57 @@ void dumpEffectDescriptor(effect_descriptor_t *desc, char *str, size_t len) {
     char s[256];
 
     snprintf(str, len, "\nEffect Descriptor %p:\n", desc);
-    sprintf(s, "- UUID: %08X-%04X-%04X-%04X-%02X%02X%02X%02X%02X%02X\n",
-            desc->uuid.timeLow, desc->uuid.timeMid, desc->uuid.timeHiAndVersion,
-            desc->uuid.clockSeq, desc->uuid.node[0], desc->uuid.node[1],desc->uuid.node[2],
-            desc->uuid.node[3],desc->uuid.node[4],desc->uuid.node[5]);
-    strncat(str, s, len);
-    sprintf(s, "- TYPE: %08X-%04X-%04X-%04X-%02X%02X%02X%02X%02X%02X\n",
-                desc->type.timeLow, desc->type.timeMid, desc->type.timeHiAndVersion,
-                desc->type.clockSeq, desc->type.node[0], desc->type.node[1],desc->type.node[2],
-                desc->type.node[3],desc->type.node[4],desc->type.node[5]);
-    strncat(str, s, len);
-    sprintf(s, "- apiVersion: %04X\n- flags: %08X\n",
+    strncat(str, "- TYPE: ", len);
+    uuidToString(&desc->uuid, s, 256);
+    snprintf(str, len, "- UUID: %s\n", s);
+    uuidToString(&desc->type, s, 256);
+    snprintf(str, len, "- TYPE: %s\n", s);
+    sprintf(s, "- apiVersion: %08X\n- flags: %08X\n",
             desc->apiVersion, desc->flags);
     strncat(str, s, len);
     sprintf(s, "- name: %s\n", desc->name);
     strncat(str, s, len);
     sprintf(s, "- implementor: %s\n", desc->implementor);
     strncat(str, s, len);
+}
+
+int stringToUuid(const char *str, effect_uuid_t *uuid)
+{
+    int tmp[10];
+
+    if (sscanf(str, "%08x-%04x-%04x-%04x-%02x%02x%02x%02x%02x%02x",
+            tmp, tmp+1, tmp+2, tmp+3, tmp+4, tmp+5, tmp+6, tmp+7, tmp+8, tmp+9) < 10) {
+        return -EINVAL;
+    }
+    uuid->timeLow = (uint32_t)tmp[0];
+    uuid->timeMid = (uint16_t)tmp[1];
+    uuid->timeHiAndVersion = (uint16_t)tmp[2];
+    uuid->clockSeq = (uint16_t)tmp[3];
+    uuid->node[0] = (uint8_t)tmp[4];
+    uuid->node[1] = (uint8_t)tmp[5];
+    uuid->node[2] = (uint8_t)tmp[6];
+    uuid->node[3] = (uint8_t)tmp[7];
+    uuid->node[4] = (uint8_t)tmp[8];
+    uuid->node[5] = (uint8_t)tmp[9];
+
+    return 0;
+}
+
+int uuidToString(const effect_uuid_t *uuid, char *str, size_t maxLen)
+{
+
+    snprintf(str, maxLen, "%08x-%04x-%04x-%04x-%02x%02x%02x%02x%02x%02x",
+            uuid->timeLow,
+            uuid->timeMid,
+            uuid->timeHiAndVersion,
+            uuid->clockSeq,
+            uuid->node[0],
+            uuid->node[1],
+            uuid->node[2],
+            uuid->node[3],
+            uuid->node[4],
+            uuid->node[5]);
+
+    return 0;
 }
 

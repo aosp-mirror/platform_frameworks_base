@@ -61,7 +61,6 @@
 
 // ----------------------------------------------------------------------------
 
-extern const char * const gEffectLibPath;
 
 namespace android {
 
@@ -4622,10 +4621,6 @@ status_t AudioFlinger::loadEffectLibrary(const char *libPath, int *handle)
     if (!settingsAllowed()) {
         return PERMISSION_DENIED;
     }
-    // only allow libraries loaded from /system/lib/soundfx for now
-    if (strncmp(gEffectLibPath, libPath, strlen(gEffectLibPath)) != 0) {
-        return PERMISSION_DENIED;
-    }
 
     Mutex::Autolock _l(mLock);
     return EffectLoadLibrary(libPath, handle);
@@ -4677,7 +4672,6 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
 {
     status_t lStatus = NO_ERROR;
     sp<EffectHandle> handle;
-    effect_interface_t itfe;
     effect_descriptor_t desc;
     sp<Client> client;
     wp<Client> wclient;
@@ -5515,19 +5509,19 @@ status_t AudioFlinger::EffectModule::configure()
 
     // TODO: handle configuration of effects replacing track process
     if (thread->channelCount() == 1) {
-        channels = CHANNEL_MONO;
+        channels = AUDIO_CHANNEL_OUT_MONO;
     } else {
-        channels = CHANNEL_STEREO;
+        channels = AUDIO_CHANNEL_OUT_STEREO;
     }
 
     if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
-        mConfig.inputCfg.channels = CHANNEL_MONO;
+        mConfig.inputCfg.channels = AUDIO_CHANNEL_OUT_MONO;
     } else {
         mConfig.inputCfg.channels = channels;
     }
     mConfig.outputCfg.channels = channels;
-    mConfig.inputCfg.format = SAMPLE_FORMAT_PCM_S15;
-    mConfig.outputCfg.format = SAMPLE_FORMAT_PCM_S15;
+    mConfig.inputCfg.format = AUDIO_FORMAT_PCM_16_BIT;
+    mConfig.outputCfg.format = AUDIO_FORMAT_PCM_16_BIT;
     mConfig.inputCfg.samplingRate = thread->sampleRate();
     mConfig.outputCfg.samplingRate = mConfig.inputCfg.samplingRate;
     mConfig.inputCfg.bufferProvider.cookie = NULL;
@@ -5772,11 +5766,6 @@ status_t AudioFlinger::EffectModule::setDevice(uint32_t device)
     Mutex::Autolock _l(mLock);
     status_t status = NO_ERROR;
     if ((mDescriptor.flags & EFFECT_FLAG_DEVICE_MASK) == EFFECT_FLAG_DEVICE_IND) {
-        // convert device bit field from AudioSystem to EffectApi format.
-        device = deviceAudioSystemToEffectApi(device);
-        if (device == 0) {
-            return BAD_VALUE;
-        }
         status_t cmdStatus;
         uint32_t size = sizeof(status_t);
         status = (*mEffectInterface)->command(mEffectInterface,
@@ -5797,17 +5786,12 @@ status_t AudioFlinger::EffectModule::setMode(uint32_t mode)
     Mutex::Autolock _l(mLock);
     status_t status = NO_ERROR;
     if ((mDescriptor.flags & EFFECT_FLAG_AUDIO_MODE_MASK) == EFFECT_FLAG_AUDIO_MODE_IND) {
-        // convert audio mode from AudioSystem to EffectApi format.
-        int effectMode = modeAudioSystemToEffectApi(mode);
-        if (effectMode < 0) {
-            return BAD_VALUE;
-        }
         status_t cmdStatus;
         uint32_t size = sizeof(status_t);
         status = (*mEffectInterface)->command(mEffectInterface,
                                               EFFECT_CMD_SET_AUDIO_MODE,
                                               sizeof(int),
-                                              &effectMode,
+                                              &mode,
                                               &size,
                                               &cmdStatus);
         if (status == NO_ERROR) {
@@ -5815,53 +5799,6 @@ status_t AudioFlinger::EffectModule::setMode(uint32_t mode)
         }
     }
     return status;
-}
-
-// update this table when AudioSystem::audio_devices or audio_device_e (in EffectApi.h) are modified
-const uint32_t AudioFlinger::EffectModule::sDeviceConvTable[] = {
-    DEVICE_EARPIECE, // AUDIO_DEVICE_OUT_EARPIECE
-    DEVICE_SPEAKER, // AUDIO_DEVICE_OUT_SPEAKER
-    DEVICE_WIRED_HEADSET, // case AUDIO_DEVICE_OUT_WIRED_HEADSET
-    DEVICE_WIRED_HEADPHONE, // AUDIO_DEVICE_OUT_WIRED_HEADPHONE
-    DEVICE_BLUETOOTH_SCO, // AUDIO_DEVICE_OUT_BLUETOOTH_SCO
-    DEVICE_BLUETOOTH_SCO_HEADSET, // AUDIO_DEVICE_OUT_BLUETOOTH_SCO_HEADSET
-    DEVICE_BLUETOOTH_SCO_CARKIT, //  AUDIO_DEVICE_OUT_BLUETOOTH_SCO_CARKIT
-    DEVICE_BLUETOOTH_A2DP, //  AUDIO_DEVICE_OUT_BLUETOOTH_A2DP
-    DEVICE_BLUETOOTH_A2DP_HEADPHONES, // AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES
-    DEVICE_BLUETOOTH_A2DP_SPEAKER, // AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER
-    DEVICE_AUX_DIGITAL // AUDIO_DEVICE_OUT_AUX_DIGITAL
-};
-
-uint32_t AudioFlinger::EffectModule::deviceAudioSystemToEffectApi(uint32_t device)
-{
-    uint32_t deviceOut = 0;
-    while (device) {
-        const uint32_t i = 31 - __builtin_clz(device);
-        device &= ~(1 << i);
-        if (i >= sizeof(sDeviceConvTable)/sizeof(uint32_t)) {
-            LOGE("device conversion error for AudioSystem device 0x%08x", device);
-            return 0;
-        }
-        deviceOut |= (uint32_t)sDeviceConvTable[i];
-    }
-    return deviceOut;
-}
-
-// update this table when AudioSystem::audio_mode or audio_mode_e (in EffectApi.h) are modified
-const uint32_t AudioFlinger::EffectModule::sModeConvTable[] = {
-    AUDIO_EFFECT_MODE_NORMAL,   // AUDIO_MODE_NORMAL
-    AUDIO_EFFECT_MODE_RINGTONE, // AUDIO_MODE_RINGTONE
-    AUDIO_EFFECT_MODE_IN_CALL,  // AUDIO_MODE_IN_CALL
-    AUDIO_EFFECT_MODE_IN_CALL   // AUDIO_MODE_IN_COMMUNICATION, same conversion as for AUDIO_MODE_IN_CALL
-};
-
-int AudioFlinger::EffectModule::modeAudioSystemToEffectApi(uint32_t mode)
-{
-    int modeOut = -1;
-    if (mode < sizeof(sModeConvTable) / sizeof(uint32_t)) {
-        modeOut = (int)sModeConvTable[mode];
-    }
-    return modeOut;
 }
 
 status_t AudioFlinger::EffectModule::dump(int fd, const Vector<String16>& args)
@@ -5895,7 +5832,7 @@ status_t AudioFlinger::EffectModule::dump(int fd, const Vector<String16>& args)
                 mDescriptor.type.clockSeq, mDescriptor.type.node[0], mDescriptor.type.node[1],mDescriptor.type.node[2],
                 mDescriptor.type.node[3],mDescriptor.type.node[4],mDescriptor.type.node[5]);
     result.append(buffer);
-    snprintf(buffer, SIZE, "\t\t- apiVersion: %04X\n\t\t- flags: %08X\n",
+    snprintf(buffer, SIZE, "\t\t- apiVersion: %08X\n\t\t- flags: %08X\n",
             mDescriptor.apiVersion,
             mDescriptor.flags);
     result.append(buffer);

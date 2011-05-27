@@ -1002,14 +1002,6 @@ private:
         status_t start_l();
         status_t stop_l();
 
-        // update this table when AudioSystem::audio_devices or audio_device_e (in EffectApi.h) are modified
-        static const uint32_t sDeviceConvTable[];
-        static uint32_t deviceAudioSystemToEffectApi(uint32_t device);
-
-        // update this table when AudioSystem::audio_mode or audio_mode_e (in EffectApi.h) are modified
-        static const uint32_t sModeConvTable[];
-        static int modeAudioSystemToEffectApi(uint32_t mode);
-
         Mutex               mLock;      // mutex for process, commands and handles list protection
         wp<ThreadBase>      mThread;    // parent thread
         wp<EffectChain>     mChain;     // parent effect chain
@@ -1017,7 +1009,7 @@ private:
         int                 mSessionId; // audio session ID
         effect_descriptor_t mDescriptor;// effect descriptor received from effect engine
         effect_config_t     mConfig;    // input and output audio configuration
-        effect_interface_t  mEffectInterface; // Effect module C API
+        effect_handle_t  mEffectInterface; // Effect module C API
         status_t mStatus;               // initialization status
         uint32_t mState;                // current activation state (effect_state)
         Vector< wp<EffectHandle> > mHandles;    // list of client handles

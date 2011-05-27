@@ -27,7 +27,7 @@
 #include <EffectBundle.h>
 
 
-// effect_interface_t interface implementation for bass boost
+// effect_handle_t interface implementation for bass boost
 extern "C" const struct effect_interface_s gLvmEffectInterface;
 
 #define LVM_ERROR_CHECK(LvmStatus, callingFunc, calledFunc){\
@@ -71,7 +71,7 @@ int SessionIndex[LVM_MAX_SESSIONS];
 const effect_descriptor_t gBassBoostDescriptor = {
         {0x0634f220, 0xddd4, 0x11db, 0xa0fc, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b }},
         {0x8631f300, 0x72e2, 0x11df, 0xb57e, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}}, // uuid
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         (EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_LAST | EFFECT_FLAG_DEVICE_IND
         | EFFECT_FLAG_VOLUME_CTRL),
         BASS_BOOST_CUP_LOAD_ARM9E,
@@ -84,7 +84,7 @@ const effect_descriptor_t gBassBoostDescriptor = {
 const effect_descriptor_t gVirtualizerDescriptor = {
         {0x37cc2c00, 0xdddd, 0x11db, 0x8577, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         {0x1d4033c0, 0x8557, 0x11df, 0x9f2d, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         (EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_LAST | EFFECT_FLAG_DEVICE_IND
         | EFFECT_FLAG_VOLUME_CTRL),
         VIRTUALIZER_CUP_LOAD_ARM9E,
@@ -97,7 +97,7 @@ const effect_descriptor_t gVirtualizerDescriptor = {
 const effect_descriptor_t gEqualizerDescriptor = {
         {0x0bed4300, 0xddd6, 0x11db, 0x8f34, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}}, // type
         {0xce772f20, 0x847d, 0x11df, 0xbb17, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}}, // uuid Eq NXP
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         (EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_LAST | EFFECT_FLAG_VOLUME_CTRL),
         EQUALIZER_CUP_LOAD_ARM9E,
         BUNDLE_MEM_USAGE,
@@ -109,7 +109,7 @@ const effect_descriptor_t gEqualizerDescriptor = {
 const effect_descriptor_t gVolumeDescriptor = {
         {0x09e8ede0, 0xddde, 0x11db, 0xb4f6, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b }},
         {0x119341a0, 0x8469, 0x11df, 0x81f9, { 0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b }}, //uuid VOL NXP
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         (EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_LAST | EFFECT_FLAG_VOLUME_CTRL),
         VOLUME_CUP_LOAD_ARM9E,
         BUNDLE_MEM_USAGE,
@@ -187,7 +187,7 @@ extern "C" int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescripto
 extern "C" int EffectCreate(effect_uuid_t       *uuid,
                             int32_t             sessionId,
                             int32_t             ioId,
-                            effect_interface_t  *pInterface){
+                            effect_handle_t  *pHandle){
     int ret = 0;
     int sessionNo;
     int i;
@@ -197,7 +197,7 @@ extern "C" int EffectCreate(effect_uuid_t       *uuid,
 
     LOGV("\n\tEffectCreate start session %d", sessionId);
 
-    if (pInterface == NULL || uuid == NULL){
+    if (pHandle == NULL || uuid == NULL){
         LOGV("\tLVM_ERROR : EffectCreate() called with NULL pointer");
         ret = -EINVAL;
         goto exit;
@@ -355,19 +355,19 @@ exit:
             }
             delete pContext;
         }
-        *pInterface = (effect_interface_t)NULL;
+        *pHandle = (effect_handle_t)NULL;
     } else {
-        *pInterface = (effect_interface_t)pContext;
+        *pHandle = (effect_handle_t)pContext;
     }
     LOGV("\tEffectCreate end..\n\n");
     return ret;
 } /* end EffectCreate */
 
-extern "C" int EffectRelease(effect_interface_t interface){
-    LOGV("\n\tEffectRelease start %p", interface);
-    EffectContext * pContext = (EffectContext *)interface;
+extern "C" int EffectRelease(effect_handle_t handle){
+    LOGV("\n\tEffectRelease start %p", handle);
+    EffectContext * pContext = (EffectContext *)handle;
 
-    LOGV("\tEffectRelease start interface: %p, context %p", interface, pContext->pBundledContext);
+    LOGV("\tEffectRelease start handle: %p, context %p", handle, pContext->pBundledContext);
     if (pContext == NULL){
         LOGV("\tLVM_ERROR : EffectRelease called with NULL pointer");
         return -EINVAL;
@@ -460,6 +460,34 @@ extern "C" int EffectRelease(effect_interface_t interface){
 
 } /* end EffectRelease */
 
+extern "C" int EffectGetDescriptor(effect_uuid_t       *uuid,
+                                   effect_descriptor_t *pDescriptor) {
+    const effect_descriptor_t *desc = NULL;
+
+    if (pDescriptor == NULL || uuid == NULL){
+        LOGV("EffectGetDescriptor() called with NULL pointer");
+        return -EINVAL;
+    }
+
+    if (memcmp(uuid, &gBassBoostDescriptor.uuid, sizeof(effect_uuid_t)) == 0) {
+        desc = &gBassBoostDescriptor;
+    } else if (memcmp(uuid, &gVirtualizerDescriptor.uuid, sizeof(effect_uuid_t)) == 0) {
+        desc = &gVirtualizerDescriptor;
+    } else if (memcmp(uuid, &gEqualizerDescriptor.uuid, sizeof(effect_uuid_t)) == 0) {
+        desc = &gEqualizerDescriptor;
+    } else if (memcmp(uuid, &gVolumeDescriptor.uuid, sizeof(effect_uuid_t)) == 0) {
+        desc = &gVolumeDescriptor;
+    }
+
+    if (desc == NULL) {
+        return  -EINVAL;
+    }
+
+    memcpy(pDescriptor, desc, sizeof(effect_descriptor_t));
+
+    return 0;
+} /* end EffectGetDescriptor */
+
 void LvmGlobalBundle_init(){
     LOGV("\tLvmGlobalBundle_init start");
     for(int i=0; i<LVM_MAX_SESSIONS; i++){
@@ -493,16 +521,16 @@ int LvmBundle_init(EffectContext *pContext){
     LOGV("\tLvmBundle_init start");
 
     pContext->config.inputCfg.accessMode                    = EFFECT_BUFFER_ACCESS_READ;
-    pContext->config.inputCfg.channels                      = CHANNEL_STEREO;
-    pContext->config.inputCfg.format                        = SAMPLE_FORMAT_PCM_S15;
+    pContext->config.inputCfg.channels                      = AUDIO_CHANNEL_OUT_STEREO;
+    pContext->config.inputCfg.format                        = AUDIO_FORMAT_PCM_16_BIT;
     pContext->config.inputCfg.samplingRate                  = 44100;
     pContext->config.inputCfg.bufferProvider.getBuffer      = NULL;
     pContext->config.inputCfg.bufferProvider.releaseBuffer  = NULL;
     pContext->config.inputCfg.bufferProvider.cookie         = NULL;
     pContext->config.inputCfg.mask                          = EFFECT_CONFIG_ALL;
     pContext->config.outputCfg.accessMode                   = EFFECT_BUFFER_ACCESS_ACCUMULATE;
-    pContext->config.outputCfg.channels                     = CHANNEL_STEREO;
-    pContext->config.outputCfg.format                       = SAMPLE_FORMAT_PCM_S15;
+    pContext->config.outputCfg.channels                     = AUDIO_CHANNEL_OUT_STEREO;
+    pContext->config.outputCfg.format                       = AUDIO_FORMAT_PCM_16_BIT;
     pContext->config.outputCfg.samplingRate                 = 44100;
     pContext->config.outputCfg.bufferProvider.getBuffer     = NULL;
     pContext->config.outputCfg.bufferProvider.releaseBuffer = NULL;
@@ -928,10 +956,10 @@ int Effect_configure(EffectContext *pContext, effect_config_t *pConfig){
     CHECK_ARG(pConfig->inputCfg.samplingRate == pConfig->outputCfg.samplingRate);
     CHECK_ARG(pConfig->inputCfg.channels == pConfig->outputCfg.channels);
     CHECK_ARG(pConfig->inputCfg.format == pConfig->outputCfg.format);
-    CHECK_ARG(pConfig->inputCfg.channels == CHANNEL_STEREO);
+    CHECK_ARG(pConfig->inputCfg.channels == AUDIO_CHANNEL_OUT_STEREO);
     CHECK_ARG(pConfig->outputCfg.accessMode == EFFECT_BUFFER_ACCESS_WRITE
               || pConfig->outputCfg.accessMode == EFFECT_BUFFER_ACCESS_ACCUMULATE);
-    CHECK_ARG(pConfig->inputCfg.format == SAMPLE_FORMAT_PCM_S15);
+    CHECK_ARG(pConfig->inputCfg.format == AUDIO_FORMAT_PCM_16_BIT);
 
     memcpy(&pContext->config, pConfig, sizeof(effect_config_t));
 
@@ -2545,8 +2573,9 @@ int16_t LVC_Convert_VolToDb(uint32_t vol){
 } // namespace
 } // namespace
 
+extern "C" {
 /* Effect Control Interface Implementation: Process */
-extern "C" int Effect_process(effect_interface_t     self,
+int Effect_process(effect_handle_t     self,
                               audio_buffer_t         *inBuffer,
                               audio_buffer_t         *outBuffer){
     EffectContext * pContext = (EffectContext *) self;
@@ -2666,7 +2695,7 @@ extern "C" int Effect_process(effect_interface_t     self,
 }   /* end Effect_process */
 
 /* Effect Control Interface Implementation: Command */
-extern "C" int Effect_command(effect_interface_t  self,
+int Effect_command(effect_handle_t  self,
                               uint32_t            cmdCode,
                               uint32_t            cmdSize,
                               void                *pCmdData,
@@ -3016,11 +3045,11 @@ extern "C" int Effect_command(effect_interface_t  self,
         case EFFECT_CMD_SET_DEVICE:
         {
             LOGV("\tEffect_command cmdCode Case: EFFECT_CMD_SET_DEVICE start");
-            audio_device_e device = *(audio_device_e *)pCmdData;
+            uint32_t device = *(uint32_t *)pCmdData;
 
             if(pContext->EffectType == LVM_BASS_BOOST){
-                if((device == DEVICE_SPEAKER)||(device == DEVICE_BLUETOOTH_SCO_CARKIT)||
-                   (device == DEVICE_BLUETOOTH_A2DP_SPEAKER)){
+                if((device == AUDIO_DEVICE_OUT_SPEAKER)||(device == AUDIO_DEVICE_OUT_BLUETOOTH_SCO_CARKIT)||
+                   (device == AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER)){
                     LOGV("\tEFFECT_CMD_SET_DEVICE device is invalid for LVM_BASS_BOOST %d",
                           *(int32_t *)pCmdData);
                     LOGV("\tEFFECT_CMD_SET_DEVICE temporary disable LVM_BAS_BOOST");
@@ -3051,8 +3080,8 @@ extern "C" int Effect_command(effect_interface_t  self,
                 }
             }
             if(pContext->EffectType == LVM_VIRTUALIZER){
-                if((device == DEVICE_SPEAKER)||(device == DEVICE_BLUETOOTH_SCO_CARKIT)||
-                   (device == DEVICE_BLUETOOTH_A2DP_SPEAKER)){
+                if((device == AUDIO_DEVICE_OUT_SPEAKER)||(device == AUDIO_DEVICE_OUT_BLUETOOTH_SCO_CARKIT)||
+                   (device == AUDIO_DEVICE_OUT_BLUETOOTH_A2DP_SPEAKER)){
                     LOGV("\tEFFECT_CMD_SET_DEVICE device is invalid for LVM_VIRTUALIZER %d",
                           *(int32_t *)pCmdData);
                     LOGV("\tEFFECT_CMD_SET_DEVICE temporary disable LVM_VIRTUALIZER");
@@ -3164,9 +3193,57 @@ extern "C" int Effect_command(effect_interface_t  self,
     return 0;
 }    /* end Effect_command */
 
-// effect_interface_t interface implementation for effect
+/* Effect Control Interface Implementation: get_descriptor */
+int Effect_getDescriptor(effect_handle_t   self,
+                                    effect_descriptor_t *pDescriptor)
+{
+    EffectContext * pContext = (EffectContext *) self;
+    const effect_descriptor_t *desc;
+
+    if (pContext == NULL || pDescriptor == NULL) {
+        LOGV("Effect_getDescriptor() invalid param");
+        return -EINVAL;
+    }
+
+    switch(pContext->EffectType) {
+        case LVM_BASS_BOOST:
+            desc = &android::gBassBoostDescriptor;
+            break;
+        case LVM_VIRTUALIZER:
+            desc = &android::gVirtualizerDescriptor;
+            break;
+        case LVM_EQUALIZER:
+            desc = &android::gEqualizerDescriptor;
+            break;
+        case LVM_VOLUME:
+            desc = &android::gVolumeDescriptor;
+            break;
+        default:
+            return -EINVAL;
+    }
+
+    memcpy(pDescriptor, desc, sizeof(effect_descriptor_t));
+
+    return 0;
+}   /* end Effect_getDescriptor */
+
+// effect_handle_t interface implementation for effect
 const struct effect_interface_s gLvmEffectInterface = {
     Effect_process,
-    Effect_command
+    Effect_command,
+    Effect_getDescriptor
 };    /* end gLvmEffectInterface */
 
+audio_effect_library_t AUDIO_EFFECT_LIBRARY_INFO_SYM = {
+    tag : AUDIO_EFFECT_LIBRARY_TAG,
+    version : EFFECT_LIBRARY_API_VERSION,
+    name : "Effect Bundle Library",
+    implementor : "NXP Software Ltd.",
+    query_num_effects : android::EffectQueryNumberEffects,
+    query_effect : android::EffectQueryEffect,
+    create_effect : android::EffectCreate,
+    release_effect : android::EffectRelease,
+    get_descriptor : android::EffectGetDescriptor,
+};
+
+}

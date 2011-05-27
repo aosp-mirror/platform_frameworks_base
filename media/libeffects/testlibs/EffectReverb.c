@@ -23,59 +23,60 @@
 #include "EffectReverb.h"
 #include "EffectsMath.h"
 
-// effect_interface_t interface implementation for reverb effect
+// effect_handle_t interface implementation for reverb effect
 const struct effect_interface_s gReverbInterface = {
         Reverb_Process,
-        Reverb_Command
+        Reverb_Command,
+        Reverb_GetDescriptor
 };
 
 // Google auxiliary environmental reverb UUID: 1f0ae2e0-4ef7-11df-bc09-0002a5d5c51b
 static const effect_descriptor_t gAuxEnvReverbDescriptor = {
         {0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac, {0x4e, 0x23, 0x4d, 0x06, 0x83, 0x9e}},
         {0x1f0ae2e0, 0x4ef7, 0x11df, 0xbc09, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         // flags other than EFFECT_FLAG_TYPE_AUXILIARY set for test purpose
         EFFECT_FLAG_TYPE_AUXILIARY | EFFECT_FLAG_DEVICE_IND | EFFECT_FLAG_AUDIO_MODE_IND,
         0, // TODO
         33,
         "Aux Environmental Reverb",
-        "Google Inc."
+        "The Android Open Source Project"
 };
 
 // Google insert environmental reverb UUID: aa476040-6342-11df-91a4-0002a5d5c51b
 static const effect_descriptor_t gInsertEnvReverbDescriptor = {
         {0xc2e5d5f0, 0x94bd, 0x4763, 0x9cac, {0x4e, 0x23, 0x4d, 0x06, 0x83, 0x9e}},
         {0xaa476040, 0x6342, 0x11df, 0x91a4, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST,
         0, // TODO
         33,
         "Insert Environmental reverb",
-        "Google Inc."
+        "The Android Open Source Project"
 };
 
 // Google auxiliary preset reverb UUID: 63909320-53a6-11df-bdbd-0002a5d5c51b
 static const effect_descriptor_t gAuxPresetReverbDescriptor = {
         {0x47382d60, 0xddd8, 0x11db, 0xbf3a, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         {0x63909320, 0x53a6, 0x11df, 0xbdbd, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         EFFECT_FLAG_TYPE_AUXILIARY,
         0, // TODO
         33,
         "Aux Preset Reverb",
-        "Google Inc."
+        "The Android Open Source Project"
 };
 
 // Google insert preset reverb UUID: d93dc6a0-6342-11df-b128-0002a5d5c51b
 static const effect_descriptor_t gInsertPresetReverbDescriptor = {
         {0x47382d60, 0xddd8, 0x11db, 0xbf3a, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
         {0xd93dc6a0, 0x6342, 0x11df, 0xb128, {0x00, 0x02, 0xa5, 0xd5, 0xc5, 0x1b}},
-        EFFECT_API_VERSION,
+        EFFECT_CONTROL_API_VERSION,
         EFFECT_FLAG_TYPE_INSERT | EFFECT_FLAG_INSERT_FIRST,
         0, // TODO
         33,
         "Insert Preset Reverb",
-        "Google Inc."
+        "The Android Open Source Project"
 };
 
 // gDescriptors contains pointers to all defined effect descriptor in this library
@@ -112,7 +113,7 @@ int EffectQueryEffect(uint32_t index, effect_descriptor_t *pDescriptor) {
 int EffectCreate(effect_uuid_t *uuid,
         int32_t sessionId,
         int32_t ioId,
-        effect_interface_t *pInterface) {
+        effect_handle_t *pHandle) {
     int ret;
     int i;
     reverb_module_t *module;
@@ -122,7 +123,7 @@ int EffectCreate(effect_uuid_t *uuid,
 
     LOGV("EffectLibCreateEffect start");
 
-    if (pInterface == NULL || uuid == NULL) {
+    if (pHandle == NULL || uuid == NULL) {
         return -EINVAL;
     }
 
@@ -157,7 +158,7 @@ int EffectCreate(effect_uuid_t *uuid,
         return ret;
     }
 
-    *pInterface = (effect_interface_t) module;
+    *pHandle = (effect_handle_t) module;
 
     module->context.mState = REVERB_STATE_INITIALIZED;
 
@@ -166,11 +167,11 @@ int EffectCreate(effect_uuid_t *uuid,
     return 0;
 }
 
-int EffectRelease(effect_interface_t interface) {
-    reverb_module_t *pRvbModule = (reverb_module_t *)interface;
+int EffectRelease(effect_handle_t handle) {
+    reverb_module_t *pRvbModule = (reverb_module_t *)handle;
 
-    LOGV("EffectLibReleaseEffect %p", interface);
-    if (interface == NULL) {
+    LOGV("EffectLibReleaseEffect %p", handle);
+    if (handle == NULL) {
         return -EINVAL;
     }
 
@@ -180,10 +181,31 @@ int EffectRelease(effect_interface_t interface) {
     return 0;
 }
 
+int EffectGetDescriptor(effect_uuid_t       *uuid,
+                        effect_descriptor_t *pDescriptor) {
+    int i;
+    int length = sizeof(gDescriptors) / sizeof(const effect_descriptor_t *);
+
+    if (pDescriptor == NULL || uuid == NULL){
+        LOGV("EffectGetDescriptor() called with NULL pointer");
+        return -EINVAL;
+    }
+
+    for (i = 0; i < length; i++) {
+        if (memcmp(uuid, &gDescriptors[i]->uuid, sizeof(effect_uuid_t)) == 0) {
+            memcpy(pDescriptor, gDescriptors[i], sizeof(effect_descriptor_t));
+            LOGV("EffectGetDescriptor - UUID matched Reverb type %d, UUID = %x",
+                 i, gDescriptors[i]->uuid.timeLow);
+            return 0;
+        }
+    }
+
+    return -EINVAL;
+} /* end EffectGetDescriptor */
 
 /*--- Effect Control Interface Implementation ---*/
 
-static int Reverb_Process(effect_interface_t self, audio_buffer_t *inBuffer, audio_buffer_t *outBuffer) {
+static int Reverb_Process(effect_handle_t self, audio_buffer_t *inBuffer, audio_buffer_t *outBuffer) {
     reverb_object_t *pReverb;
     int16_t *pSrc, *pDst;
     reverb_module_t *pRvbModule = (reverb_module_t *)self;
@@ -270,7 +292,7 @@ static int Reverb_Process(effect_interface_t self, audio_buffer_t *inBuffer, aud
 }
 
 
-static int Reverb_Command(effect_interface_t self, uint32_t cmdCode, uint32_t cmdSize,
+static int Reverb_Command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
         void *pCmdData, uint32_t *replySize, void *pReplyData) {
     reverb_module_t *pRvbModule = (reverb_module_t *) self;
     reverb_object_t *pReverb;
@@ -383,6 +405,38 @@ static int Reverb_Command(effect_interface_t self, uint32_t cmdCode, uint32_t cm
     return 0;
 }
 
+int Reverb_GetDescriptor(effect_handle_t   self,
+                                    effect_descriptor_t *pDescriptor)
+{
+    reverb_module_t *pRvbModule = (reverb_module_t *) self;
+    reverb_object_t *pReverb;
+    const effect_descriptor_t *desc;
+
+    if (pRvbModule == NULL ||
+            pRvbModule->context.mState == REVERB_STATE_UNINITIALIZED) {
+        return -EINVAL;
+    }
+
+    pReverb = (reverb_object_t*) &pRvbModule->context;
+
+    if (pReverb->m_Aux) {
+        if (pReverb->m_Preset) {
+            desc = &gAuxPresetReverbDescriptor;
+        } else {
+            desc = &gAuxEnvReverbDescriptor;
+        }
+    } else {
+        if (pReverb->m_Preset) {
+            desc = &gInsertPresetReverbDescriptor;
+        } else {
+            desc = &gInsertEnvReverbDescriptor;
+        }
+    }
+
+    memcpy(pDescriptor, desc, sizeof(effect_descriptor_t));
+
+    return 0;
+}   /* end Reverb_getDescriptor */
 
 /*----------------------------------------------------------------------------
  * Reverb internal functions
@@ -418,19 +472,19 @@ int Reverb_Init(reverb_module_t *pRvbModule, int aux, int preset) {
 
     pRvbModule->config.inputCfg.samplingRate = 44100;
     if (aux) {
-        pRvbModule->config.inputCfg.channels = CHANNEL_MONO;
+        pRvbModule->config.inputCfg.channels = AUDIO_CHANNEL_OUT_MONO;
     } else {
-        pRvbModule->config.inputCfg.channels = CHANNEL_STEREO;
+        pRvbModule->config.inputCfg.channels = AUDIO_CHANNEL_OUT_STEREO;
     }
-    pRvbModule->config.inputCfg.format = SAMPLE_FORMAT_PCM_S15;
+    pRvbModule->config.inputCfg.format = AUDIO_FORMAT_PCM_16_BIT;
     pRvbModule->config.inputCfg.bufferProvider.getBuffer = NULL;
     pRvbModule->config.inputCfg.bufferProvider.releaseBuffer = NULL;
     pRvbModule->config.inputCfg.bufferProvider.cookie = NULL;
     pRvbModule->config.inputCfg.accessMode = EFFECT_BUFFER_ACCESS_READ;
     pRvbModule->config.inputCfg.mask = EFFECT_CONFIG_ALL;
     pRvbModule->config.outputCfg.samplingRate = 44100;
-    pRvbModule->config.outputCfg.channels = CHANNEL_STEREO;
-    pRvbModule->config.outputCfg.format = SAMPLE_FORMAT_PCM_S15;
+    pRvbModule->config.outputCfg.channels = AUDIO_CHANNEL_OUT_STEREO;
+    pRvbModule->config.outputCfg.format = AUDIO_FORMAT_PCM_16_BIT;
     pRvbModule->config.outputCfg.bufferProvider.getBuffer = NULL;
     pRvbModule->config.outputCfg.bufferProvider.releaseBuffer = NULL;
     pRvbModule->config.outputCfg.bufferProvider.cookie = NULL;
@@ -474,13 +528,13 @@ int Reverb_Configure(reverb_module_t *pRvbModule, effect_config_t *pConfig,
     if (pConfig->inputCfg.samplingRate
         != pConfig->outputCfg.samplingRate
         || pConfig->outputCfg.channels != OUTPUT_CHANNELS
-        || pConfig->inputCfg.format != SAMPLE_FORMAT_PCM_S15
-        || pConfig->outputCfg.format != SAMPLE_FORMAT_PCM_S15) {
+        || pConfig->inputCfg.format != AUDIO_FORMAT_PCM_16_BIT
+        || pConfig->outputCfg.format != AUDIO_FORMAT_PCM_16_BIT) {
         LOGV("Reverb_Configure invalid config");
         return -EINVAL;
     }
-    if ((pReverb->m_Aux && (pConfig->inputCfg.channels != CHANNEL_MONO)) ||
-        (!pReverb->m_Aux && (pConfig->inputCfg.channels != CHANNEL_STEREO))) {
+    if ((pReverb->m_Aux && (pConfig->inputCfg.channels != AUDIO_CHANNEL_OUT_MONO)) ||
+        (!pReverb->m_Aux && (pConfig->inputCfg.channels != AUDIO_CHANNEL_OUT_STEREO))) {
         LOGV("Reverb_Configure invalid config");
         return -EINVAL;
     }
@@ -2133,3 +2187,15 @@ static int ReverbReadInPresets(reverb_object_t *pReverb) {
 
     return 0;
 }
+
+audio_effect_library_t AUDIO_EFFECT_LIBRARY_INFO_SYM = {
+    .tag = AUDIO_EFFECT_LIBRARY_TAG,
+    .version = EFFECT_LIBRARY_API_VERSION,
+    .name = "Test Equalizer Library",
+    .implementor = "The Android Open Source Project",
+    .query_num_effects = EffectQueryNumberEffects,
+    .query_effect = EffectQueryEffect,
+    .create_effect = EffectCreate,
+    .release_effect = EffectRelease,
+    .get_descriptor = EffectGetDescriptor,
+};

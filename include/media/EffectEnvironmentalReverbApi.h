@@ -17,7 +17,7 @@
 #ifndef ANDROID_EFFECTENVIRONMENTALREVERBAPI_H_
 #define ANDROID_EFFECTENVIRONMENTALREVERBAPI_H_
 
-#include <media/EffectApi.h>
+#include <hardware/audio_effect.h>
 
 #if __cplusplus
 extern "C" {
