@@ -43,6 +43,8 @@ import android.util.Log;
  * @hide
  */
 class TextLine {
+    private static final boolean DEBUG = false;
+
     private TextPaint mPaint;
     private CharSequence mText;
     private int mStart;
@@ -56,7 +58,7 @@ class TextLine {
     private Spanned mSpanned;
     private final TextPaint mWorkPaint = new TextPaint();
 
-    private static TextLine[] cached = new TextLine[3];
+    private static final TextLine[] sCached = new TextLine[3];
 
     /**
      * Returns a new TextLine from the shared pool.
@@ -65,17 +67,19 @@ class TextLine {
      */
     static TextLine obtain() {
         TextLine tl;
-        synchronized (cached) {
-            for (int i = cached.length; --i >= 0;) {
-                if (cached[i] != null) {
-                    tl = cached[i];
-                    cached[i] = null;
+        synchronized (sCached) {
+            for (int i = sCached.length; --i >= 0;) {
+                if (sCached[i] != null) {
+                    tl = sCached[i];
+                    sCached[i] = null;
                     return tl;
                 }
             }
         }
         tl = new TextLine();
-        Log.v("TLINE", "new: " + tl);
+        if (DEBUG) {
+            Log.v("TLINE", "new: " + tl);
+        }
         return tl;
     }
 
@@ -90,10 +94,10 @@ class TextLine {
         tl.mText = null;
         tl.mPaint = null;
         tl.mDirections = null;
-        synchronized(cached) {
-            for (int i = 0; i < cached.length; ++i) {
-                if (cached[i] == null) {
-                    cached[i] = tl;
+        synchronized(sCached) {
+            for (int i = 0; i < sCached.length; ++i) {
+                if (sCached[i] == null) {
+                    sCached[i] = tl;
                     break;
                 }
             }
@@ -175,11 +179,11 @@ class TextLine {
     void draw(Canvas c, float x, int top, int y, int bottom) {
         if (!mHasTabs) {
             if (mDirections == Layout.DIRS_ALL_LEFT_TO_RIGHT) {
-                drawRun(c, 0, 0, mLen, false, x, top, y, bottom, false);
+                drawRun(c, 0, mLen, false, x, top, y, bottom, false);
                 return;
             }
             if (mDirections == Layout.DIRS_ALL_RIGHT_TO_LEFT) {
-                drawRun(c, 0, 0, mLen, true, x, top, y, bottom, false);
+                drawRun(c, 0, mLen, true, x, top, y, bottom, false);
                 return;
             }
         }
@@ -216,7 +220,7 @@ class TextLine {
                 }
 
                 if (j == runLimit || codept == '\t' || bm != null) {
-                    h += drawRun(c, i, segstart, j, runIsRtl, x+h, top, y, bottom,
+                    h += drawRun(c, segstart, j, runIsRtl, x+h, top, y, bottom,
                             i != lastRunIndex || j != mLen);
 
                     if (codept == '\t') {
@@ -275,10 +279,10 @@ class TextLine {
 
         if (!mHasTabs) {
             if (mDirections == Layout.DIRS_ALL_LEFT_TO_RIGHT) {
-                return measureRun(0, 0, offset, mLen, false, fmi);
+                return measureRun(0, offset, mLen, false, fmi);
             }
             if (mDirections == Layout.DIRS_ALL_RIGHT_TO_LEFT) {
-                return measureRun(0, 0, offset, mLen, true, fmi);
+                return measureRun(0, offset, mLen, true, fmi);
             }
         }
 
@@ -315,14 +319,14 @@ class TextLine {
 
                     boolean advance = (mDir == Layout.DIR_RIGHT_TO_LEFT) == runIsRtl;
                     if (inSegment && advance) {
-                        return h += measureRun(i, segstart, offset, j, runIsRtl, fmi);
+                        return h += measureRun(segstart, offset, j, runIsRtl, fmi);
                     }
 
-                    float w = measureRun(i, segstart, j, j, runIsRtl, fmi);
+                    float w = measureRun(segstart, j, j, runIsRtl, fmi);
                     h += advance ? w : -w;
 
                     if (inSegment) {
-                        return h += measureRun(i, segstart, offset, j, runIsRtl, null);
+                        return h += measureRun(segstart, offset, j, runIsRtl, null);
                     }
 
                     if (codept == '\t') {
@@ -353,8 +357,8 @@ class TextLine {
     /**
      * Draws a unidirectional (but possibly multi-styled) run of text.
      *
+     *
      * @param c the canvas to draw on
-     * @param runIndex the index of this directional run
      * @param start the line-relative start
      * @param limit the line-relative limit
      * @param runIsRtl true if the run is right-to-left
@@ -366,25 +370,25 @@ class TextLine {
      * @return the signed width of the run, based on the paragraph direction.
      * Only valid if needWidth is true.
      */
-    private float drawRun(Canvas c, int runIndex, int start,
+    private float drawRun(Canvas c, int start,
             int limit, boolean runIsRtl, float x, int top, int y, int bottom,
             boolean needWidth) {
 
         if ((mDir == Layout.DIR_LEFT_TO_RIGHT) == runIsRtl) {
-            float w = -measureRun(runIndex, start, limit, limit, runIsRtl, null);
-            handleRun(runIndex, start, limit, limit, runIsRtl, c, x + w, top,
+            float w = -measureRun(start, limit, limit, runIsRtl, null);
+            handleRun(start, limit, limit, runIsRtl, c, x + w, top,
                     y, bottom, null, false);
             return w;
         }
 
-        return handleRun(runIndex, start, limit, limit, runIsRtl, c, x, top,
+        return handleRun(start, limit, limit, runIsRtl, c, x, top,
                 y, bottom, null, needWidth);
     }
 
     /**
      * Measures a unidirectional (but possibly multi-styled) run of text.
      *
-     * @param runIndex the run index
+     *
      * @param start the line-relative start of the run
      * @param offset the offset to measure to, between start and limit inclusive
      * @param limit the line-relative limit of the run
@@ -394,10 +398,9 @@ class TextLine {
      * @return the signed width from the start of the run to the leading edge
      * of the character at offset, based on the run (not paragraph) direction
      */
-    private float measureRun(int runIndex, int start,
-            int offset, int limit, boolean runIsRtl, FontMetricsInt fmi) {
-        return handleRun(runIndex, start, offset, limit, runIsRtl, null,
-                0, 0, 0, 0, fmi, true);
+    private float measureRun(int start, int offset, int limit, boolean runIsRtl,
+            FontMetricsInt fmi) {
+        return handleRun(start, offset, limit, runIsRtl, null, 0, 0, 0, 0, fmi, true);
     }
 
     /**
@@ -751,9 +754,9 @@ class TextLine {
     /**
      * Utility function for measuring and rendering a replacement.
      *
+     *
      * @param replacement the replacement
      * @param wp the work paint
-     * @param runIndex the run index
      * @param start the start of the run
      * @param limit the limit of the run
      * @param runIsRtl true if the run is right-to-left
@@ -768,7 +771,7 @@ class TextLine {
      * valid if needWidth is true
      */
     private float handleReplacement(ReplacementSpan replacement, TextPaint wp,
-            int runIndex, int start, int limit, boolean runIsRtl, Canvas c,
+            int start, int limit, boolean runIsRtl, Canvas c,
             float x, int top, int y, int bottom, FontMetricsInt fmi,
             boolean needWidth) {
 
@@ -796,7 +799,7 @@ class TextLine {
      * Utility function for handling a unidirectional run.  The run must not
      * contain tabs or emoji but can contain styles.
      *
-     * @param runIndex the run index
+     *
      * @param start the line-relative start of the run
      * @param measureLimit the offset to measure to, between start and limit inclusive
      * @param limit the limit of the run
@@ -811,7 +814,7 @@ class TextLine {
      * @return the signed width of the run based on the run direction; only
      * valid if needWidth is true
      */
-    private float handleRun(int runIndex, int start, int measureLimit,
+    private float handleRun(int start, int measureLimit,
             int limit, boolean runIsRtl, Canvas c, float x, int top, int y,
             int bottom, FontMetricsInt fmi, boolean needWidth) {
 
@@ -859,7 +862,7 @@ class TextLine {
                     }
 
                     if (replacement != null) {
-                        x += handleReplacement(replacement, wp, runIndex, i,
+                        x += handleReplacement(replacement, wp, i,
                                 mlimit, runIsRtl, c, x, top, y, bottom, fmi,
                                 needWidth || mlimit < measureLimit);
                         continue;
