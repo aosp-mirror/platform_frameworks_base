@@ -102,7 +102,7 @@ void Caches::dumpMemoryUsage(String8 &log) {
         const uint32_t size = fontRenderer.getFontRendererSize(i);
         log.appendFormat("  FontRenderer %d       %8d / %8d\n", i, size, size);
     }
-    log.appendFormat("Other:");
+    log.appendFormat("Other:\n");
     log.appendFormat("  FboCache             %8d / %8d\n",
             fboCache.getSize(), fboCache.getMaxSize());
     log.appendFormat("  PatchCache           %8d / %8d\n",
