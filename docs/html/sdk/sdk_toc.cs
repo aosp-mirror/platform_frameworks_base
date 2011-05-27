@@ -1,6 +1,5 @@
 <?cs if:!sdk.redirect ?>
-<ul><?cs
-  if:android.whichdoc == "online" ?>
+<ul>
   <li>
     <h2>
       <span class="en">Android SDK Starter Package</span>
@@ -12,7 +11,8 @@
       <span style="display:none" class="zh-CN">当前的 SDK 版本</span>
       <span style="display:none" class="zh-TW">目前 SDK 發行版本</span>
     </h2>
-    <ul>
+    <ul><?cs
+  if:android.whichdoc == "online" ?>
       <li><a href="<?cs var:toroot ?>sdk/index.html">
           <span class="en">Download</span>
           <span style="display:none" class="de">Herunterladen</span>
@@ -22,7 +22,8 @@
           <span style="display:none" class="ja">ダウンロード</span>
           <span style="display:none" class="zh-CN">下载</span>
           <span style="display:none" class="zh-TW">下載</span>
-        </a></li>
+        </a></li><?cs 
+  /if ?>
       <li><a href="<?cs var:toroot ?>sdk/installing.html">
           <span class="en">Installing the SDK</span>
           <span style="display:none" class="de">Installieren</span>
@@ -33,10 +34,8 @@
           <span style="display:none" class="zh-CN">安装</span>
           <span style="display:none" class="zh-TW">安裝</span>
         </a></li>
-
     </ul>
-  </li>
-  <?cs /if ?><?cs
+  </li><?cs
   if:sdk.preview ?>
   <li><h2>Android 3.0 Preview SDK</h2>
     <ul>
