@@ -3642,12 +3642,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     + processName + " with config " + mConfiguration);
             ApplicationInfo appInfo = app.instrumentationInfo != null
                     ? app.instrumentationInfo : app.info;
+            app.compat = compatibilityInfoForPackageLocked(appInfo);
             thread.bindApplication(processName, appInfo, providers,
                     app.instrumentationClass, app.instrumentationProfileFile,
                     app.instrumentationArguments, app.instrumentationWatcher, testMode, 
                     isRestrictedBackupMode || !normalMode,
-                    mConfiguration, compatibilityInfoForPackageLocked(appInfo),
-                    getCommonServicesLocked(),
+                    mConfiguration, app.compat, getCommonServicesLocked(),
                     mCoreSettingsObserver.getCoreSettingsLocked());
             updateLruProcessLocked(app, false, true);
             app.lastRequestedGc = app.lastLowMemory = SystemClock.uptimeMillis();
@@ -10977,13 +10977,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         // Special case for adding a package: by default turn on compatibility
         // mode.
         } else if (Intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())) {
-            if (!intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
-                Uri data = intent.getData();
-                String ssp;
-                if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
-                    mCompatModePackages.setPackageScreenCompatModeLocked(ssp,
-                            ActivityManager.COMPAT_MODE_ENABLED);
-                }
+            Uri data = intent.getData();
+            String ssp;
+            if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
+                mCompatModePackages.handlePackageAddedLocked(ssp,
+                        intent.getBooleanExtra(Intent.EXTRA_REPLACING, false));
             }
         }
 

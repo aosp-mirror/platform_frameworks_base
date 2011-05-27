@@ -69,6 +69,7 @@ class ProcessRecord {
     IBinder forcingToForeground;// Token that is forcing this process to be foreground
     int adjSeq;                 // Sequence id for identifying oom_adj assignment cycles
     int lruSeq;                 // Sequence id for identifying LRU update cycles
+    CompatibilityInfo compat;   // last used compatibility mode
     ComponentName instrumentationClass;// class installed to instrument app
     ApplicationInfo instrumentationInfo; // the application being instrumented
     String instrumentationProfileFile; // where to save profiling
@@ -145,6 +146,7 @@ class ProcessRecord {
                 pw.print(" publicDir="); pw.print(info.publicSourceDir);
                 pw.print(" data="); pw.println(info.dataDir);
         pw.print(prefix); pw.print("packageList="); pw.println(pkgList);
+        pw.print(prefix); pw.print("compat="); pw.println(compat);
         if (instrumentationClass != null || instrumentationProfileFile != null
                 || instrumentationArguments != null) {
             pw.print(prefix); pw.print("instrumentationClass=");
