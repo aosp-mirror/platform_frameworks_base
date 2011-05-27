@@ -917,8 +917,8 @@ public class ProgressBar extends View {
 
     @Override
     public boolean isLayoutRtl(Drawable who) {
-        return ((who == mProgressDrawable || who == mIndeterminateDrawable) && isLayoutRtl()) ||
-            super.isLayoutRtl(who);
+        return (who == mProgressDrawable || who == mIndeterminateDrawable) ?
+            isLayoutRtl() : super.isLayoutRtl(who);
     }
 
     @Override
