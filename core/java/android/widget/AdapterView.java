@@ -887,14 +887,28 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
         // We first get a chance to populate the event.
         onPopulateAccessibilityEvent(event);
 
+        return false;
+    }
+
+    @Override
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
         // We send selection events only from AdapterView to avoid
         // generation of such event for each child.
         View selectedView = getSelectedView();
         if (selectedView != null) {
-            return selectedView.dispatchPopulateAccessibilityEvent(event);
+            selectedView.dispatchPopulateAccessibilityEvent(event);
         }
+    }
 
-        return false;
+    @Override
+    public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+        // Add a record for ourselves as well.
+        AccessibilityEvent record = AccessibilityEvent.obtain();
+        // Set the class since it is not populated in #dispatchPopulateAccessibilityEvent
+        record.setClassName(getClass().getName());
+        child.dispatchPopulateAccessibilityEvent(record);
+        event.appendRecord(record);
+        return true;
     }
 
     @Override
