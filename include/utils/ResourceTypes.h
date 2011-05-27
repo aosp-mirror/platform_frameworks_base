@@ -1452,24 +1452,20 @@ struct ResTable_config
     // settings is the requested settings
     inline bool match(const ResTable_config& settings) const {
         if (imsi != 0) {
-            if ((settings.mcc != 0 && mcc != 0
-                 && mcc != settings.mcc) || 
-                (settings.mcc == 0 && mcc != 0)) {
+            if (mcc != 0 && mcc != settings.mcc) {
                 return false;
             }
-            if ((settings.mnc != 0 && mnc != 0
-                 && mnc != settings.mnc) ||
-                (settings.mnc == 0 && mnc != 0)) {
+            if (mnc != 0 && mnc != settings.mnc) {
                 return false;
             }
         }
         if (locale != 0) {
-            if (settings.language[0] != 0 && language[0] != 0
+            if (language[0] != 0
                 && (language[0] != settings.language[0]
                     || language[1] != settings.language[1])) {
                 return false;
             }
-            if (settings.country[0] != 0 && country[0] != 0
+            if (country[0] != 0
                 && (country[0] != settings.country[0]
                     || country[1] != settings.country[1])) {
                 return false;
@@ -1480,66 +1476,56 @@ struct ResTable_config
             const int setScreenSize = settings.screenLayout&MASK_SCREENSIZE;
             // Any screen sizes for larger screens than the setting do not
             // match.
-            if ((setScreenSize != 0 && screenSize != 0
-                    && screenSize > setScreenSize) ||
-                    (setScreenSize == 0 && screenSize != 0)) {
+            if (screenSize != 0 && screenSize > setScreenSize) {
                 return false;
             }
             
             const int screenLong = screenLayout&MASK_SCREENLONG;
             const int setScreenLong = settings.screenLayout&MASK_SCREENLONG;
-            if (setScreenLong != 0 && screenLong != 0
-                    && screenLong != setScreenLong) {
+            if (screenLong != 0 && screenLong != setScreenLong) {
                 return false;
             }
 
             const int uiModeType = uiMode&MASK_UI_MODE_TYPE;
             const int setUiModeType = settings.uiMode&MASK_UI_MODE_TYPE;
-            if (setUiModeType != 0 && uiModeType != 0
-                    && uiModeType != setUiModeType) {
+            if (uiModeType != 0 && uiModeType != setUiModeType) {
                 return false;
             }
 
             const int uiModeNight = uiMode&MASK_UI_MODE_NIGHT;
             const int setUiModeNight = settings.uiMode&MASK_UI_MODE_NIGHT;
-            if (setUiModeNight != 0 && uiModeNight != 0
-                    && uiModeNight != setUiModeNight) {
+            if (uiModeNight != 0 && uiModeNight != setUiModeNight) {
                 return false;
             }
 
-            if (settings.smallestScreenWidthDp != 0 && smallestScreenWidthDp != 0
+            if (smallestScreenWidthDp != 0
                     && smallestScreenWidthDp > settings.smallestScreenWidthDp) {
                 return false;
             }
         }
         if (screenSizeDp != 0) {
-            if (settings.screenWidthDp != 0 && screenWidthDp != 0
-                    && screenWidthDp > settings.screenWidthDp) {
+            if (screenWidthDp != 0 && screenWidthDp > settings.screenWidthDp) {
                 //LOGI("Filtering out width %d in requested %d", screenWidthDp, settings.screenWidthDp);
                 return false;
             }
-            if (settings.screenHeightDp != 0 && screenHeightDp != 0
-                    && screenHeightDp > settings.screenHeightDp) {
+            if (screenHeightDp != 0 && screenHeightDp > settings.screenHeightDp) {
                 //LOGI("Filtering out height %d in requested %d", screenHeightDp, settings.screenHeightDp);
                 return false;
             }
         }
         if (screenType != 0) {
-            if (settings.orientation != 0 && orientation != 0
-                && orientation != settings.orientation) {
+            if (orientation != 0 && orientation != settings.orientation) {
                 return false;
             }
             // density always matches - we can scale it.  See isBetterThan
-            if (settings.touchscreen != 0 && touchscreen != 0
-                && touchscreen != settings.touchscreen) {
+            if (touchscreen != 0 && touchscreen != settings.touchscreen) {
                 return false;
             }
         }
         if (input != 0) {
             const int keysHidden = inputFlags&MASK_KEYSHIDDEN;
             const int setKeysHidden = settings.inputFlags&MASK_KEYSHIDDEN;
-            if (setKeysHidden != 0 && keysHidden != 0
-                && keysHidden != setKeysHidden) {
+            if (keysHidden != 0 && keysHidden != setKeysHidden) {
                 // For compatibility, we count a request for KEYSHIDDEN_NO as also
                 // matching the more recent KEYSHIDDEN_SOFT.  Basically
                 // KEYSHIDDEN_NO means there is some kind of keyboard available.
@@ -1551,36 +1537,29 @@ struct ResTable_config
             }
             const int navHidden = inputFlags&MASK_NAVHIDDEN;
             const int setNavHidden = settings.inputFlags&MASK_NAVHIDDEN;
-            if (setNavHidden != 0 && navHidden != 0
-                && navHidden != setNavHidden) {
+            if (navHidden != 0 && navHidden != setNavHidden) {
                 return false;
             }
-            if (settings.keyboard != 0 && keyboard != 0
-                && keyboard != settings.keyboard) {
+            if (keyboard != 0 && keyboard != settings.keyboard) {
                 return false;
             }
-            if (settings.navigation != 0 && navigation != 0
-                && navigation != settings.navigation) {
+            if (navigation != 0 && navigation != settings.navigation) {
                 return false;
             }
         }
         if (screenSize != 0) {
-            if (settings.screenWidth != 0 && screenWidth != 0
-                && screenWidth > settings.screenWidth) {
+            if (screenWidth != 0 && screenWidth > settings.screenWidth) {
                 return false;
             }
-            if (settings.screenHeight != 0 && screenHeight != 0
-                && screenHeight > settings.screenHeight) {
+            if (screenHeight != 0 && screenHeight > settings.screenHeight) {
                 return false;
             }
         }
         if (version != 0) {
-            if (settings.sdkVersion != 0 && sdkVersion != 0
-                && sdkVersion > settings.sdkVersion) {
+            if (sdkVersion != 0 && sdkVersion > settings.sdkVersion) {
                 return false;
             }
-            if (settings.minorVersion != 0 && minorVersion != 0
-                && minorVersion != settings.minorVersion) {
+            if (minorVersion != 0 && minorVersion != settings.minorVersion) {
                 return false;
             }
         }
