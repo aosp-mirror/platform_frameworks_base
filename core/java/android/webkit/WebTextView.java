@@ -1174,7 +1174,7 @@ import junit.framework.Assert;
                 imeOptions |= EditorInfo.IME_ACTION_SEARCH;
                 break;
             case EMAIL:
-                inputType = EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS;
+                inputType |= EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS;
                 imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
             case NUMBER:
