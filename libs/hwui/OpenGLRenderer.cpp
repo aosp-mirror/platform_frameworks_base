@@ -990,12 +990,26 @@ void OpenGLRenderer::setupDrawColorFilter() {
     }
 }
 
+void OpenGLRenderer::accountForClear(SkXfermode::Mode mode) {
+    if (mColorSet && mode == SkXfermode::kClear_Mode) {
+        mColorA = 1.0f;
+        mColorR = mColorG = mColorB = 0.0f;
+        mSetShaderColor = mDescription.setAlpha8Color(mColorR, mColorG, mColorB, mColorA);
+    }
+}
+
 void OpenGLRenderer::setupDrawBlending(SkXfermode::Mode mode, bool swapSrcDst) {
+    // When the blending mode is kClear_Mode, we need to use a modulate color
+    // argb=1,0,0,0
+    accountForClear(mode);
     chooseBlending((mColorSet && mColorA < 1.0f) || (mShader && mShader->blend()), mode,
             mDescription, swapSrcDst);
 }
 
 void OpenGLRenderer::setupDrawBlending(bool blend, SkXfermode::Mode mode, bool swapSrcDst) {
+    // When the blending mode is kClear_Mode, we need to use a modulate color
+    // argb=1,0,0,0
+    accountForClear(mode);
     chooseBlending(blend || (mColorSet && mColorA < 1.0f) || (mShader && mShader->blend()), mode,
             mDescription, swapSrcDst);
 }

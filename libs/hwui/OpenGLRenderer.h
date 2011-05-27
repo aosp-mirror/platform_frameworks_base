@@ -478,6 +478,7 @@ private:
     void setupDrawAALine(GLvoid* vertices, GLvoid* distanceCoords, GLvoid* lengthCoords,
             float strokeWidth);
     void finishDrawTexture();
+    void accountForClear(SkXfermode::Mode mode);
 
     void drawRegionRects(const Region& region);
 
