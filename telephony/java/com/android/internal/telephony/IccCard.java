@@ -722,52 +722,77 @@ public abstract class IccCard {
             currentRadioState == RadioState.RUIM_READY ||
             (currentRadioState == RadioState.NV_READY &&
                     (mPhone.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE))) {
-            int index;
+
+            State csimState =
+                getAppState(mIccCardStatus.getCdmaSubscriptionAppIndex());
+            State usimState =
+                getAppState(mIccCardStatus.getGsmUmtsSubscriptionAppIndex());
+
+            if(mDbg) log("USIM=" + usimState + " CSIM=" + csimState);
+
+            if (mPhone.getLteOnCdmaMode() == Phone.LTE_ON_CDMA_TRUE) {
+                // UICC card contains both USIM and CSIM
+                // Return consolidated status
+                return getConsolidatedState(csimState, usimState, csimState);
+            }
 
             // check for CDMA radio technology
             if (currentRadioState == RadioState.RUIM_LOCKED_OR_ABSENT ||
                 currentRadioState == RadioState.RUIM_READY) {
-                index = mIccCardStatus.getCdmaSubscriptionAppIndex();
+                return csimState;
             }
-            else {
-                index = mIccCardStatus.getGsmUmtsSubscriptionAppIndex();
-            }
-
-            IccCardApplication app;
-            if (index >= 0 && index < IccCardStatus.CARD_MAX_APPS) {
-                app = mIccCardStatus.getApplication(index);
-            } else {
-                Log.e(mLogTag, "[IccCard] Invalid Subscription Application index:" + index);
-                return IccCard.State.ABSENT;
-            }
-
-            if (app == null) {
-                Log.e(mLogTag, "[IccCard] Subscription Application in not present");
-                return IccCard.State.ABSENT;
-            }
-
-            // check if PIN required
-            if (app.app_state.isPinRequired()) {
-                return IccCard.State.PIN_REQUIRED;
-            }
-            if (app.app_state.isPukRequired()) {
-                return IccCard.State.PUK_REQUIRED;
-            }
-            if (app.app_state.isSubscriptionPersoEnabled()) {
-                return IccCard.State.NETWORK_LOCKED;
-            }
-            if (app.app_state.isAppReady()) {
-                return IccCard.State.READY;
-            }
-            if (app.app_state.isAppNotReady()) {
-                return IccCard.State.NOT_READY;
-            }
-            return IccCard.State.NOT_READY;
+            return usimState;
         }
 
         return IccCard.State.ABSENT;
     }
 
+    private State getAppState(int appIndex) {
+        IccCardApplication app;
+        if (appIndex >= 0 && appIndex < IccCardStatus.CARD_MAX_APPS) {
+            app = mIccCardStatus.getApplication(appIndex);
+        } else {
+            Log.e(mLogTag, "[IccCard] Invalid Subscription Application index:" + appIndex);
+            return IccCard.State.ABSENT;
+        }
+
+        if (app == null) {
+            Log.e(mLogTag, "[IccCard] Subscription Application in not present");
+            return IccCard.State.ABSENT;
+        }
+
+        // check if PIN required
+        if (app.app_state.isPinRequired()) {
+            return IccCard.State.PIN_REQUIRED;
+        }
+        if (app.app_state.isPukRequired()) {
+            return IccCard.State.PUK_REQUIRED;
+        }
+        if (app.app_state.isSubscriptionPersoEnabled()) {
+            return IccCard.State.NETWORK_LOCKED;
+        }
+        if (app.app_state.isAppReady()) {
+            return IccCard.State.READY;
+        }
+        if (app.app_state.isAppNotReady()) {
+            return IccCard.State.NOT_READY;
+        }
+        return IccCard.State.NOT_READY;
+    }
+
+    private State getConsolidatedState(State left, State right, State preferredState) {
+        // Check if either is absent.
+        if (right == IccCard.State.ABSENT) return left;
+        if (left == IccCard.State.ABSENT) return right;
+
+        // Disregards if either is NOT_READY
+        if (right == IccCard.State.NOT_READY) return left;
+        if (left == IccCard.State.NOT_READY) return right;
+
+        // At this point, FW currently just assumes the status will be
+        // consistent across the applications...
+        return preferredState;
+    }
 
     public boolean isApplicationOnIcc(IccCardApplication.AppType type) {
         if (mIccCardStatus == null) return false;
