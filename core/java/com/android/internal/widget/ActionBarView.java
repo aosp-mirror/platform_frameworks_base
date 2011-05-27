@@ -306,8 +306,9 @@ public class ActionBarView extends AbsActionBarView {
         if (mMenuPresenter == null) {
             mMenuPresenter = new ActionMenuPresenter();
             mMenuPresenter.setCallback(cb);
-            builder.addMenuPresenter(mMenuPresenter);
         }
+        builder.addMenuPresenter(mMenuPresenter);
+
         final ActionMenuView menuView = (ActionMenuView) mMenuPresenter.getMenuView(this);
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
