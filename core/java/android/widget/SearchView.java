@@ -93,6 +93,7 @@ public class SearchView extends LinearLayout {
     private boolean mClearingFocus;
     private int mMaxWidth;
     private boolean mVoiceButtonEnabled;
+    private CharSequence mUserQuery;
 
     private SearchableInfo mSearchable;
     private Bundle mAppSearchData;
@@ -372,6 +373,7 @@ public class SearchView extends LinearLayout {
         mQueryTextView.setText(query);
         if (query != null) {
             mQueryTextView.setSelection(query.length());
+            mUserQuery = query;
         }
 
         // If the query is not empty and submit is requested, submit the query
@@ -885,6 +887,7 @@ public class SearchView extends LinearLayout {
 
     private void onTextChanged(CharSequence newText) {
         CharSequence text = mQueryTextView.getText();
+        mUserQuery = text;
         boolean hasText = !TextUtils.isEmpty(text);
         if (isSubmitButtonEnabled()) {
             updateSubmitButton(hasText);
@@ -1124,7 +1127,7 @@ public class SearchView extends LinearLayout {
         if (data != null) {
             intent.setData(data);
         }
-        intent.putExtra(SearchManager.USER_QUERY, query);
+        intent.putExtra(SearchManager.USER_QUERY, mUserQuery);
         if (query != null) {
             intent.putExtra(SearchManager.QUERY, query);
         }
