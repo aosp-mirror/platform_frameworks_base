@@ -63,8 +63,6 @@ enum {
     GET_RENDER_POSITION,
     GET_INPUT_FRAMES_LOST,
     NEW_AUDIO_SESSION_ID,
-    LOAD_EFFECT_LIBRARY,
-    UNLOAD_EFFECT_LIBRARY,
     QUERY_NUM_EFFECTS,
     QUERY_EFFECT,
     GET_EFFECT_DESCRIPTOR,
@@ -528,37 +526,6 @@ public:
         return id;
     }
 
-    virtual status_t loadEffectLibrary(const char *libPath, int *handle)
-    {
-        if (libPath == NULL || handle == NULL) {
-            return BAD_VALUE;
-        }
-        *handle = 0;
-        Parcel data, reply;
-        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeCString(libPath);
-        status_t status = remote()->transact(LOAD_EFFECT_LIBRARY, data, &reply);
-        if (status == NO_ERROR) {
-            status = reply.readInt32();
-            if (status == NO_ERROR) {
-                *handle = reply.readInt32();
-            }
-        }
-        return status;
-    }
-
-    virtual status_t unloadEffectLibrary(int handle)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
-        data.writeInt32(handle);
-        status_t status = remote()->transact(UNLOAD_EFFECT_LIBRARY, data, &reply);
-        if (status == NO_ERROR) {
-            status = reply.readInt32();
-        }
-        return status;
-    }
-
     virtual status_t queryNumberEffects(uint32_t *numEffects)
     {
         Parcel data, reply;
@@ -952,21 +919,6 @@ status_t BnAudioFlinger::onTransact(
             reply->writeInt32(newAudioSessionId());
             return NO_ERROR;
         } break;
-        case LOAD_EFFECT_LIBRARY: {
-            CHECK_INTERFACE(IAudioFlinger, data, reply);
-            int handle;
-            status_t status = loadEffectLibrary(data.readCString(), &handle);
-            reply->writeInt32(status);
-            if (status == NO_ERROR) {
-                reply->writeInt32(handle);
-            }
-            return NO_ERROR;
-        }
-        case UNLOAD_EFFECT_LIBRARY: {
-            CHECK_INTERFACE(IAudioFlinger, data, reply);
-            reply->writeInt32(unloadEffectLibrary(data.readInt32()));
-            return NO_ERROR;
-        }
         case QUERY_NUM_EFFECTS: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             uint32_t numEffects;

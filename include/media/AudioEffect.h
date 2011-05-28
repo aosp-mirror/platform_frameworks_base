@@ -44,50 +44,6 @@ class AudioEffect : public RefBase
 public:
 
     /*
-     *  Static methods for effect libraries management.
-     */
-
-    /*
-     *   Loads the effect library which path is given as first argument.
-     *   This must be the full path of a dynamic library (.so) implementing one or
-     *   more effect engines and exposing the effect library interface described in
-     *   EffectApi.h. The function returns a handle on the library for use by
-     *   further call to unloadEffectLibrary() to unload the library.
-     *
-     *   Parameters:
-     *          libPath:    full path of the dynamic library file in the file system.
-     *          handle:     address where to return the library handle
-     *
-     *   Returned status (from utils/Errors.h) can be:
-     *          NO_ERROR    successful operation.
-     *          PERMISSION_DENIED could not get AudioFlinger interface or
-     *                      application does not have permission to configure audio
-     *          NO_INIT     effect factory not initialized or
-     *                      library could not be loaded or
-     *                      library does not implement required functions
-     *          BAD_VALUE   invalid libPath string or handle
-     *
-     *   Returned value:
-     *          *handle updated with library handle
-     */
-    static status_t loadEffectLibrary(const char *libPath, int *handle);
-
-    /*
-     *   Unloads the effect library which handle is given as argument.
-     *
-     *   Parameters:
-     *          handle: library handle
-     *
-     *   Returned status (from utils/Errors.h) can be:
-     *          NO_ERROR    successful operation.
-     *          PERMISSION_DENIED could not get AudioFlinger interface or
-     *                      application does not have permission to configure audio
-     *          NO_INIT     effect factory not initialized
-     *          BAD_VALUE   invalid handle
-     */
-    static status_t unloadEffectLibrary(int handle);
-
-    /*
      *  Static methods for effects enumeration.
      */
 

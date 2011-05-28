@@ -132,50 +132,6 @@ int EffectRelease(effect_handle_t handle);
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-//    Function:       EffectLoadLibrary
-//
-//    Description:    Loads the effect library which path is given as first argument.
-//          This must be the full path of a dynamic library (.so) implementing one or
-//          more effect engines and exposing the effect library interface described in
-//          EffectApi.h. The function returns a handle on the library for used by
-//          further call to EffectUnloadLibrary() to unload the library.
-//
-//    Input:
-//          libPath:    full path of the dynamic library file in the file system.
-//
-//          handle:     address where to return the library handle
-//
-//    Output:
-//        returned value:    0          successful operation.
-//                          -ENODEV     effect factory not initialized or
-//                                      library could not be loaded or
-//                                      library does not implement required functions
-//                          -EINVAL     invalid libPath string or handle
-//
-////////////////////////////////////////////////////////////////////////////////
-int EffectLoadLibrary(const char *libPath, int *handle);
-
-////////////////////////////////////////////////////////////////////////////////
-//
-//    Function:       EffectUnloadLibrary
-//
-//    Description:  Unloads the effect library which handle is given as argument.
-//
-//    Input:
-//          handle: library handle
-//
-//    Output:
-//        returned value:    0          successful operation.
-//                          -ENODEV     effect factory not initialized
-//                          -ENOENT     invalid handle
-//
-////////////////////////////////////////////////////////////////////////////////
-int EffectUnloadLibrary(int handle);
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-//
 //    Function:       EffectGetDescriptor
 //
 //    Description:    Returns the descriptor of the effect which uuid is pointed

@@ -139,10 +139,6 @@ public:
 
     virtual int newAudioSessionId() = 0;
 
-    virtual status_t loadEffectLibrary(const char *libPath, int *handle) = 0;
-
-    virtual status_t unloadEffectLibrary(int handle) = 0;
-
     virtual status_t queryNumberEffects(uint32_t *numEffects) = 0;
 
     virtual status_t queryEffect(uint32_t index, effect_descriptor_t *pDescriptor) = 0;
