@@ -8785,10 +8785,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             TypedArray styledAttributes = mContext.obtainStyledAttributes(R.styleable.Theme);
 
-            mode.setTitle(mContext.getString(com.android.internal.R.string.textSelectionCABTitle));
+            boolean allowText = getContext().getResources().getBoolean(
+                    com.android.internal.R.bool.allow_action_menu_item_text_with_icon);
+
+            mode.setTitle(allowText ? 
+                    mContext.getString(com.android.internal.R.string.textSelectionCABTitle) : null);
             mode.setSubtitle(null);
 
+            int selectAllIconId = 0; // No icon by default
+            if (!allowText) {
+                // Provide an icon, text will not be displayed on smaller screens.
+                selectAllIconId = styledAttributes.getResourceId(
+                        R.styleable.Theme_actionModeSelectAllDrawable, 0);
+            }
+
             menu.add(0, ID_SELECT_ALL, 0, com.android.internal.R.string.selectAll).
+                    setIcon(selectAllIconId).
                     setAlphabeticShortcut('a').
                     setShowAsAction(
                             MenuItem.SHOW_AS_ACTION_ALWAYS | MenuItem.SHOW_AS_ACTION_WITH_TEXT);
