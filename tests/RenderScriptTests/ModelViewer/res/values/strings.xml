@@ -21,4 +21,5 @@
     <skip />
     <string name="load_model">Load Model</string>
     <string name="display_options">Display Options</string>
+    <string name="sensor">Toggle Sensor</string>
 </resources>

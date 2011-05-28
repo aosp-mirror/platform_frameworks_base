@@ -28,6 +28,8 @@ rs_program_store gPFSBackground;
 rs_font gItalic;
 rs_allocation gTextAlloc;
 
+rs_matrix4x4 gPostureMatrix;
+
 typedef struct MeshInfo {
     rs_mesh mMesh;
     int mNumIndexSets;
@@ -89,6 +91,7 @@ void init() {
     gRotateY = 0.0f;
     gZoom = 50.0f;
     gLookAt = 0.0f;
+    rsMatrixLoadIdentity(&gPostureMatrix);
 }
 
 void updateMeshInfo() {
@@ -149,8 +152,10 @@ int root(void) {
     rsMatrixLoadIdentity(&matrix);
     // Position our models on the screen
     rsMatrixTranslate(&matrix, gLookAt.x, gLookAt.y, gLookAt.z - gZoom);
+    rsMatrixMultiply(&matrix, &gPostureMatrix);
     rsMatrixRotate(&matrix, gRotateX, 1.0f, 0.0f, 0.0f);
     rsMatrixRotate(&matrix, gRotateY, 0.0f, 1.0f, 0.0f);
+    
     rsgProgramVertexLoadModelMatrix(&matrix);
 
     renderAllMeshes();

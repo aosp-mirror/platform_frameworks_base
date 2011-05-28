@@ -70,6 +70,10 @@ public class SimpleModelRS {
         mScript.invoke_onActionMove(x, y);
     }
 
+    public void onPostureChanged(Matrix4f posture) {
+        mScript.set_gPostureMatrix(posture);
+    }
+
     private void initPFS() {
         ProgramStore.Builder b = new ProgramStore.Builder(mRS);
 

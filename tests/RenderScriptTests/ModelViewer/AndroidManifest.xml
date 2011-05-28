@@ -3,7 +3,8 @@
     package="com.android.modelviewer">
     <application android:label="ModelViewer">
         <activity android:name="SimpleModel"
-                  android:label="SimpleModel">
+                  android:label="SimpleModel"
+                  android:screenOrientation="nosensor">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

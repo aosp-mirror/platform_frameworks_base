@@ -22,4 +22,6 @@
           android:title="@string/load_model" />
     <item android:id="@+id/display_options"
           android:title="@string/display_options" />
+    <item android:id="@+id/sensor"
+          android:title="@string/sensor" />
 </menu>
