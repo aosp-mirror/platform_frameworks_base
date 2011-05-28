@@ -285,6 +285,9 @@ public class ActionBarView extends AbsActionBarView {
     public void setEmbeddedTabView(ScrollingTabContainerView tabs) {
         mTabScrollView = tabs;
         mIncludeTabs = tabs != null;
+        if (mIncludeTabs) {
+            addView(mTabScrollView);
+        }
     }
 
     public void setCallback(OnNavigationListener callback) {
