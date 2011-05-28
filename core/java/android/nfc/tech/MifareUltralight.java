@@ -18,6 +18,7 @@ package android.nfc.tech;
 
 import android.nfc.Tag;
 import android.nfc.TagLostException;
+import android.os.Bundle;
 import android.os.RemoteException;
 
 import java.io.IOException;
@@ -69,6 +70,9 @@ public final class MifareUltralight extends BasicTagTechnology {
     private static final int NXP_MANUFACTURER_ID = 0x04;
     private static final int MAX_PAGE_COUNT = 256;
 
+    /** @hide */
+    public static final String EXTRA_IS_UL_C = "isulc";
+
     private int mType;
 
     /**
@@ -101,10 +105,12 @@ public final class MifareUltralight extends BasicTagTechnology {
         mType = TYPE_UNKNOWN;
 
         if (a.getSak() == 0x00 && tag.getId()[0] == NXP_MANUFACTURER_ID) {
-            // could be UL or UL-C
-            //TODO: stack should use NXP AN1303 procedure to make a best guess
-            // attempt at classifying Ultralight vs Ultralight C.
-            mType = TYPE_ULTRALIGHT;
+            Bundle extras = tag.getTechExtras(TagTechnology.MIFARE_ULTRALIGHT);
+            if (extras.getBoolean(EXTRA_IS_UL_C)) {
+                mType = TYPE_ULTRALIGHT_C;
+            } else {
+                mType = TYPE_ULTRALIGHT;
+            }
         }
     }
 
