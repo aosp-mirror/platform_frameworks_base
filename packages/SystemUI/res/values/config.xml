@@ -36,5 +36,9 @@
     <!-- Whether or not we show the number in the bar. -->
     <bool name="config_statusBarShowNumber">true</bool>
 
+    <!-- How many icons may be shown at once in the system bar. Includes any
+         slots that may be reused for things like IME control. -->
+    <integer name="config_maxNotificationIcons">5</integer>
+
 </resources>
 

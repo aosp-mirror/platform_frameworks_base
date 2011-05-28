@@ -80,9 +80,6 @@ public class TabletStatusBar extends StatusBar implements
     public static final boolean DEBUG = false;
     public static final String TAG = "TabletStatusBar";
 
-    public static final int MAX_NOTIFICATION_ICONS = 5;
-    // IME switcher icon is big and occupy width of two icons
-    public static final int MAX_NOTIFICATION_ICONS_IME_BUTTON_VISIBLE = MAX_NOTIFICATION_ICONS - 1;
 
     public static final int MSG_OPEN_NOTIFICATION_PANEL = 1000;
     public static final int MSG_CLOSE_NOTIFICATION_PANEL = 1001;
@@ -104,6 +101,7 @@ public class TabletStatusBar extends StatusBar implements
     int mNaturalBarHeight = -1;
     int mIconSize = -1;
     int mIconHPadding = -1;
+    private int mMaxNotificationIcons = 5;
 
     H mHandler = new H();
 
@@ -342,6 +340,13 @@ public class TabletStatusBar extends StatusBar implements
             mIconHPadding = newIconHPadding;
             mIconSize = newIconSize;
             reloadAllNotificationIcons(); // reload the tray
+        }
+
+        final int numIcons = res.getInteger(R.integer.config_maxNotificationIcons);
+        if (numIcons != mMaxNotificationIcons) {
+            mMaxNotificationIcons = numIcons;
+            if (DEBUG) Slog.d(TAG, "max notification icons: " + mMaxNotificationIcons);
+            reloadAllNotificationIcons();
         }
     }
 
@@ -1429,9 +1434,11 @@ public class TabletStatusBar extends StatusBar implements
 
         // When IME button is visible, the number of notification icons should be decremented
         // to fit the upper limit.
+        // IME switcher icon is big and occupy width of one icon
+        final int maxNotificationIconsImeButtonVisible = mMaxNotificationIcons - 1;
         final int maxNotificationIconsCount =
                 (mInputMethodSwitchButton.getVisibility() != View.GONE) ?
-                        MAX_NOTIFICATION_ICONS_IME_BUTTON_VISIBLE : MAX_NOTIFICATION_ICONS;
+                        maxNotificationIconsImeButtonVisible : mMaxNotificationIcons;
         for (int i=0; i< maxNotificationIconsCount; i++) {
             if (i>=N) break;
             toShow.add(mNotificationData.get(N-i-1).icon);
