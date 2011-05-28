@@ -1174,17 +1174,21 @@ import junit.framework.Assert;
                 imeOptions |= EditorInfo.IME_ACTION_SEARCH;
                 break;
             case EMAIL:
-                inputType |= EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS;
+                // inputType needs to be overwritten because of the different text variation.
+                inputType = EditorInfo.TYPE_CLASS_TEXT
+                        | EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS;
                 imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
             case NUMBER:
-                inputType |= EditorInfo.TYPE_CLASS_NUMBER;
+                // inputType needs to be overwritten because of the different class.
+                inputType = EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_NUMBER_VARIATION_NORMAL;
                 // Number and telephone do not have both a Tab key and an
                 // action, so set the action to NEXT
                 imeOptions |= EditorInfo.IME_ACTION_NEXT;
                 break;
             case TELEPHONE:
-                inputType |= EditorInfo.TYPE_CLASS_PHONE;
+                // inputType needs to be overwritten because of the different class.
+                inputType = EditorInfo.TYPE_CLASS_PHONE;
                 imeOptions |= EditorInfo.IME_ACTION_NEXT;
                 break;
             case URL:
