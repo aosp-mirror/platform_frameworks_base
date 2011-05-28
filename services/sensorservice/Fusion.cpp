@@ -24,15 +24,14 @@ namespace android {
 
 // -----------------------------------------------------------------------
 
-template <typename TYPE>
-static inline TYPE sqr(TYPE x) {
-    return x*x;
-}
+static const float gyroSTDEV = 3.16e-4; // rad/s^3/2
+static const float accSTDEV  = 0.05f;   // m/s^2 (measured 0.08 / CDD 0.05)
+static const float magSTDEV  = 0.5f;    // uT    (measured 0.7  / CDD 0.5)
+static const float biasSTDEV = 3.16e-5; // rad/s^1/2 (guessed)
 
-template <typename T>
-static inline T clamp(T v) {
-    return v < 0 ? 0 : v;
-}
+static const float FREE_FALL_THRESHOLD = 0.981f;
+
+// -----------------------------------------------------------------------
 
 template <typename TYPE, size_t C, size_t R>
 static mat<TYPE, R, R> scaleCovariance(
@@ -71,33 +70,6 @@ static mat<TYPE, 3, 3> crossMatrix(const vec<TYPE, 3>& p, OTHER_TYPE diag) {
     return r;
 }
 
-template <typename TYPE>
-static mat<TYPE, 3, 3> MRPsToMatrix(const vec<TYPE, 3>& p) {
-    mat<TYPE, 3, 3> res(1);
-    const mat<TYPE, 3, 3> px(crossMatrix(p, 0));
-    const TYPE ptp(dot_product(p,p));
-    const TYPE t = 4/sqr(1+ptp);
-    res -= t * (1-ptp) * px;
-    res += t * 2 * sqr(px);
-    return res;
-}
-
-template <typename TYPE>
-vec<TYPE, 3> matrixToMRPs(const mat<TYPE, 3, 3>& R) {
-    // matrix to MRPs
-    vec<TYPE, 3> q;
-    const float Hx = R[0].x;
-    const float My = R[1].y;
-    const float Az = R[2].z;
-    const float w = 1 / (1 + sqrtf( clamp( Hx + My + Az + 1) * 0.25f ));
-    q.x = sqrtf( clamp( Hx - My - Az + 1) * 0.25f ) * w;
-    q.y = sqrtf( clamp(-Hx + My - Az + 1) * 0.25f ) * w;
-    q.z = sqrtf( clamp(-Hx - My + Az + 1) * 0.25f ) * w;
-    q.x = copysignf(q.x, R[2].y - R[1].z);
-    q.y = copysignf(q.y, R[0].z - R[2].x);
-    q.z = copysignf(q.z, R[1].x - R[0].y);
-    return q;
-}
 
 template<typename TYPE, size_t SIZE>
 class Covariance {
@@ -128,11 +100,8 @@ public:
 // -----------------------------------------------------------------------
 
 Fusion::Fusion() {
-    // process noise covariance matrix
-    const float w1 = gyroSTDEV;
-    const float w2 = biasSTDEV;
-    Q[0] = w1*w1;
-    Q[1] = w2*w2;
+    Phi[0][1] = 0;
+    Phi[1][1] = 1;
 
     Ba.x = 0;
     Ba.y = 0;
@@ -146,25 +115,46 @@ Fusion::Fusion() {
 }
 
 void Fusion::init() {
-    // initial estimate: E{ x(t0) }
-    x = 0;
-
-    // initial covariance: Var{ x(t0) }
-    P = 0;
-
     mInitState = 0;
+    mGyroRate = 0;
     mCount[0] = 0;
     mCount[1] = 0;
     mCount[2] = 0;
     mData = 0;
 }
 
+void Fusion::initFusion(const vec4_t& q, float dT)
+{
+    // initial estimate: E{ x(t0) }
+    x0 = q;
+    x1 = 0;
+
+    // process noise covariance matrix
+    //  G = | -1 0 |
+    //      |  0 1 |
+
+    const float v = gyroSTDEV;
+    const float u = biasSTDEV;
+    const float q00 = v*v*dT + 0.33333f*(dT*dT*dT)*u*u;
+    const float q10 =              0.5f*(dT*dT)   *u*u;
+    const float q01 = q10;
+    const float q11 = u*u*dT;
+    GQGt[0][0] =  q00;
+    GQGt[1][0] = -q10;
+    GQGt[0][1] = -q01;
+    GQGt[1][1] =  q11;
+
+
+    // initial covariance: Var{ x(t0) }
+    P = 0;
+}
+
 bool Fusion::hasEstimate() const {
     return (mInitState == (MAG|ACC|GYRO));
 }
 
-bool Fusion::checkInitComplete(int what, const vec3_t& d) {
-    if (mInitState == (MAG|ACC|GYRO))
+bool Fusion::checkInitComplete(int what, const vec3_t& d, float dT) {
+    if (hasEstimate())
         return true;
 
     if (what == ACC) {
@@ -176,7 +166,8 @@ bool Fusion::checkInitComplete(int what, const vec3_t& d) {
         mCount[1]++;
         mInitState |= MAG;
     } else if (what == GYRO) {
-        mData[2] += d;
+        mGyroRate = dT;
+        mData[2] += d*dT;
         mCount[2]++;
         if (mCount[2] == 64) {
             // 64 samples is good enough to estimate the gyro drift and
@@ -199,37 +190,29 @@ bool Fusion::checkInitComplete(int what, const vec3_t& d) {
         east *= 1/length(east);
         vec3_t north(cross_product(up, east));
         R << east << north << up;
-        x[0] = matrixToMRPs(R);
+        const vec4_t q = matrixToQuat(R);
 
-        // NOTE: we could try to use the average of the gyro data
-        // to estimate the initial bias, but this only works if
-        // the device is not moving. For now, we don't use that value
-        // and start with a bias of 0.
-        x[1] = 0;
-
-        // initial covariance
-        P = 0;
+        initFusion(q, mGyroRate);
     }
 
     return false;
 }
 
 void Fusion::handleGyro(const vec3_t& w, float dT) {
-    const vec3_t wdT(w * dT);   // rad/s * s -> rad
-    if (!checkInitComplete(GYRO, wdT))
+    if (!checkInitComplete(GYRO, w, dT))
         return;
 
-    predict(wdT);
+    predict(w, dT);
 }
 
 status_t Fusion::handleAcc(const vec3_t& a) {
-    if (length(a) < 0.981f)
+    // ignore acceleration data if we're close to free-fall
+    if (length(a) < FREE_FALL_THRESHOLD)
         return BAD_VALUE;
 
     if (!checkInitComplete(ACC, a))
         return BAD_VALUE;
 
-    // ignore acceleration data if we're close to free-fall
     const float l = 1/length(a);
     update(a*l, Ba, accSTDEV*l);
     return NO_ERROR;
@@ -251,20 +234,6 @@ status_t Fusion::handleMag(const vec3_t& m) {
     const float l = 1 / length(north);
     north *= l;
 
-#if 0
-    // in practice the magnetic-field sensor is so wrong
-    // that there is no point trying to use it to constantly
-    // correct the gyro. instead, we use the mag-sensor only when
-    // the device points north (just to give us a reference).
-    // We're hoping that it'll actually point north, if it doesn't
-    // we'll be offset, but at least the instantaneous posture
-    // of the device will be correct.
-
-    const float cos_30 = 0.8660254f;
-    if (dot_product(north, Bm) < cos_30)
-        return BAD_VALUE;
-#endif
-
     update(north, Bm, magSTDEV*l);
     return NO_ERROR;
 }
@@ -273,7 +242,7 @@ bool Fusion::checkState(const vec3_t& v) {
     if (isnanf(length(v))) {
         LOGW("9-axis fusion diverged. reseting state.");
         P = 0;
-        x[1] = 0;
+        x1 = 0;
         mInitState = 0;
         mCount[0] = 0;
         mCount[1] = 0;
@@ -284,145 +253,89 @@ bool Fusion::checkState(const vec3_t& v) {
     return true;
 }
 
-vec3_t Fusion::getAttitude() const {
-    return x[0];
+vec4_t Fusion::getAttitude() const {
+    return x0;
 }
 
 vec3_t Fusion::getBias() const {
-    return x[1];
+    return x1;
 }
 
 mat33_t Fusion::getRotationMatrix() const {
-    return MRPsToMatrix(x[0]);
+    return quatToMatrix(x0);
 }
 
-mat33_t Fusion::getF(const vec3_t& p) {
-    const float p0 = p.x;
-    const float p1 = p.y;
-    const float p2 = p.z;
-
-    // f(p, w)
-    const float p0p1 = p0*p1;
-    const float p0p2 = p0*p2;
-    const float p1p2 = p1*p2;
-    const float p0p0 = p0*p0;
-    const float p1p1 = p1*p1;
-    const float p2p2 = p2*p2;
-    const float pp = 0.5f * (1 - (p0p0 + p1p1 + p2p2));
-
-    mat33_t F;
-    F[0][0] = 0.5f*(p0p0 + pp);
-    F[0][1] = 0.5f*(p0p1 + p2);
-    F[0][2] = 0.5f*(p0p2 - p1);
-    F[1][0] = 0.5f*(p0p1 - p2);
-    F[1][1] = 0.5f*(p1p1 + pp);
-    F[1][2] = 0.5f*(p1p2 + p0);
-    F[2][0] = 0.5f*(p0p2 + p1);
-    F[2][1] = 0.5f*(p1p2 - p0);
-    F[2][2] = 0.5f*(p2p2 + pp);
+mat34_t Fusion::getF(const vec4_t& q) {
+    mat34_t F;
+    F[0].x = q.w;   F[1].x =-q.z;   F[2].x = q.y;
+    F[0].y = q.z;   F[1].y = q.w;   F[2].y =-q.x;
+    F[0].z =-q.y;   F[1].z = q.x;   F[2].z = q.w;
+    F[0].w =-q.x;   F[1].w =-q.y;   F[2].w =-q.z;
     return F;
 }
 
-mat33_t Fusion::getdFdp(const vec3_t& p, const vec3_t& we) {
+void Fusion::predict(const vec3_t& w, float dT) {
+    const vec4_t q  = x0;
+    const vec3_t b  = x1;
+    const vec3_t we = w - b;
+    const vec4_t dq = getF(q)*((0.5f*dT)*we);
+    x0 = normalize_quat(q + dq);
 
-    // dF = | A = df/dp  -F |
-    //      |   0         0 |
+    // P(k+1) = F*P(k)*Ft + G*Q*Gt
 
-    mat33_t A;
-    A[0][0] = A[1][1] = A[2][2] = 0.5f * (p.x*we.x + p.y*we.y + p.z*we.z);
-    A[0][1] = 0.5f * (p.y*we.x - p.x*we.y - we.z);
-    A[0][2] = 0.5f * (p.z*we.x - p.x*we.z + we.y);
-    A[1][2] = 0.5f * (p.z*we.y - p.y*we.z - we.x);
-    A[1][0] = -A[0][1];
-    A[2][0] = -A[0][2];
-    A[2][1] = -A[1][2];
-    return A;
-}
+    //  Phi = | Phi00 Phi10 |
+    //        |   0     1   |
+    const mat33_t I33(1);
+    const mat33_t I33dT(dT);
+    const mat33_t wx(crossMatrix(we, 0));
+    const mat33_t wx2(wx*wx);
+    const float lwedT = length(we)*dT;
+    const float ilwe = 1/length(we);
+    const float k0 = (1-cosf(lwedT))*(ilwe*ilwe);
+    const float k1 = sinf(lwedT);
 
-void Fusion::predict(const vec3_t& w) {
-    // f(p, w)
-    vec3_t& p(x[0]);
+    Phi[0][0] = I33 - wx*(k1*ilwe) + wx2*k0;
+    Phi[1][0] = wx*k0 - I33dT - wx2*(ilwe*ilwe*ilwe)*(lwedT-k1);
 
-    // There is a discontinuity at 2.pi, to avoid it we need to switch to
-    // the shadow of p when pT.p gets too big.
-    const float ptp(dot_product(p,p));
-    if (ptp >= 2.0f) {
-        p = -p * (1/ptp);
-    }
-
-    const mat33_t F(getF(p));
-
-    // compute w with the bias correction:
-    //  w_estimated = w - b_estimated
-    const vec3_t& b(x[1]);
-    const vec3_t we(w - b);
-
-    // prediction
-    const vec3_t dX(F*we);
-
-    if (!checkState(dX))
-        return;
-
-    p += dX;
-
-    const mat33_t A(getdFdp(p, we));
-
-    // G  = | G0  0 |  =  | -F  0 |
-    //      |  0  1 |     |  0  1 |
-
-    // P += A*P + P*At + F*Q*Ft
-    const mat33_t AP(A*transpose(P[0][0]));
-    const mat33_t PAt(P[0][0]*transpose(A));
-    const mat33_t FPSt(F*transpose(P[1][0]));
-    const mat33_t PSFt(P[1][0]*transpose(F));
-    const mat33_t FQFt(scaleCovariance(F, Q[0]));
-    P[0][0] += AP + PAt - FPSt - PSFt + FQFt;
-    P[1][0] += A*P[1][0] - F*P[1][1];
-    P[1][1] += Q[1];
+    P = Phi*P*transpose(Phi) + GQGt;
 }
 
 void Fusion::update(const vec3_t& z, const vec3_t& Bi, float sigma) {
-    const vec3_t p(x[0]);
+    vec4_t q(x0);
     // measured vector in body space: h(p) = A(p)*Bi
-    const mat33_t A(MRPsToMatrix(p));
+    const mat33_t A(quatToMatrix(q));
     const vec3_t Bb(A*Bi);
 
     // Sensitivity matrix H = dh(p)/dp
     // H = [ L 0 ]
-    const float ptp(dot_product(p,p));
-    const mat33_t px(crossMatrix(p, 0.5f*(ptp-1)));
-    const mat33_t ppt(p*transpose(p));
-    const mat33_t L((8 / sqr(1+ptp))*crossMatrix(Bb, 0)*(ppt-px));
+    const mat33_t L(crossMatrix(Bb, 0));
 
-    // update...
+    // gain...
+    // K = P*Ht / [H*P*Ht + R]
+    vec<mat33_t, 2> K;
     const mat33_t R(sigma*sigma);
     const mat33_t S(scaleCovariance(L, P[0][0]) + R);
     const mat33_t Si(invert(S));
     const mat33_t LtSi(transpose(L)*Si);
-
-    vec<mat33_t, 2> K;
     K[0] = P[0][0] * LtSi;
     K[1] = transpose(P[1][0])*LtSi;
 
-    const vec3_t e(z - Bb);
-    const vec3_t K0e(K[0]*e);
-    const vec3_t K1e(K[1]*e);
-
-    if (!checkState(K0e))
-        return;
-
-    if (!checkState(K1e))
-        return;
-
-    x[0] += K0e;
-    x[1] += K1e;
-
+    // update...
     // P -= K*H*P;
     const mat33_t K0L(K[0] * L);
     const mat33_t K1L(K[1] * L);
     P[0][0] -= K0L*P[0][0];
     P[1][1] -= K1L*P[1][0];
     P[1][0] -= K0L*P[1][0];
+    P[0][1] = transpose(P[1][0]);
+
+    const vec3_t e(z - Bb);
+    const vec3_t dq(K[0]*e);
+    const vec3_t db(K[1]*e);
+
+    q += getF(q)*(0.5f*dq);
+    x0 = normalize_quat(q);
+    x1 += db;
 }
 
 // -----------------------------------------------------------------------

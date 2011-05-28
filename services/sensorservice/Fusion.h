@@ -19,10 +19,13 @@
 
 #include <utils/Errors.h>
 
-#include "vec.h"
+#include "quat.h"
 #include "mat.h"
+#include "vec.h"
 
 namespace android {
+
+typedef mat<float, 3, 4> mat34_t;
 
 class Fusion {
     /*
@@ -30,31 +33,25 @@ class Fusion {
      * - modified Rodrigues parameters
      * - the estimated gyro bias
      */
-    vec<vec3_t, 2> x;
+    quat_t  x0;
+    vec3_t  x1;
 
     /*
      * the predicated covariance matrix is made of 4 3x3 sub-matrices and it
      * semi-definite positive.
      *
      * P = | P00  P10 | = | P00  P10 |
-     *     | P01  P11 |   | P10t  Q1 |
+     *     | P01  P11 |   | P10t P11 |
      *
      * Since P01 = transpose(P10), the code below never calculates or
-     * stores P01. P11 is always equal to Q1, so we don't store it either.
+     * stores P01.
      */
     mat<mat33_t, 2, 2> P;
 
     /*
-     * the process noise covariance matrix is made of 2 3x3 sub-matrices
-     * Q0 encodes the attitude's noise
-     * Q1 encodes the bias' noise
+     * the process noise covariance matrix
      */
-    vec<mat33_t, 2> Q;
-
-    static const float gyroSTDEV = 1.0e-5;  // rad/s (measured 1.2e-5)
-    static const float accSTDEV  = 0.05f;   // m/s^2 (measured 0.08 / CDD 0.05)
-    static const float magSTDEV  = 0.5f;    // uT    (measured 0.7  / CDD 0.5)
-    static const float biasSTDEV = 2e-9;    // rad/s^2 (guessed)
+    mat<mat33_t, 2, 2> GQGt;
 
 public:
     Fusion();
@@ -62,23 +59,25 @@ public:
     void handleGyro(const vec3_t& w, float dT);
     status_t handleAcc(const vec3_t& a);
     status_t handleMag(const vec3_t& m);
-    vec3_t getAttitude() const;
+    vec4_t getAttitude() const;
     vec3_t getBias() const;
     mat33_t getRotationMatrix() const;
     bool hasEstimate() const;
 
 private:
+    mat<mat33_t, 2, 2> Phi;
     vec3_t Ba, Bm;
     uint32_t mInitState;
+    float mGyroRate;
     vec<vec3_t, 3> mData;
     size_t mCount[3];
     enum { ACC=0x1, MAG=0x2, GYRO=0x4 };
-    bool checkInitComplete(int, const vec3_t&);
+    bool checkInitComplete(int, const vec3_t& w, float d = 0);
+    void initFusion(const vec4_t& q0, float dT);
     bool checkState(const vec3_t& v);
-    void predict(const vec3_t& w);
+    void predict(const vec3_t& w, float dT);
     void update(const vec3_t& z, const vec3_t& Bi, float sigma);
-    static mat33_t getF(const vec3_t& p);
-    static mat33_t getdFdp(const vec3_t& p, const vec3_t& we);
+    static mat34_t getF(const vec4_t& p);
 };
 
 }; // namespace android

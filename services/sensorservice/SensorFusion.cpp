@@ -25,9 +25,7 @@ ANDROID_SINGLETON_STATIC_INSTANCE(SensorFusion)
 
 SensorFusion::SensorFusion()
     : mSensorDevice(SensorDevice::getInstance()),
-      mEnabled(false), mHasGyro(false), mGyroTime(0), mRotationMatrix(1),
-      mLowPass(M_SQRT1_2, 1.0f), mAccData(mLowPass),
-      mFilteredMag(0.0f), mFilteredAcc(0.0f)
+      mEnabled(false), mGyroTime(0)
 {
     sensor_t const* list;
     size_t count = mSensorDevice.getSensorList(&list);
@@ -42,55 +40,32 @@ SensorFusion::SensorFusion()
             mGyro = Sensor(list + i);
             // 200 Hz for gyro events is a good compromise between precision
             // and power/cpu usage.
-            mTargetDelayNs = 1000000000LL/200;
-            mGyroRate = 1000000000.0f / mTargetDelayNs;
-            mHasGyro = true;
+            mGyroRate = 200;
+            mTargetDelayNs = 1000000000LL/mGyroRate;
         }
     }
     mFusion.init();
-    mAccData.init(vec3_t(0.0f));
 }
 
 void SensorFusion::process(const sensors_event_t& event) {
-
-    if (event.type == SENSOR_TYPE_GYROSCOPE && mHasGyro) {
+    if (event.type == SENSOR_TYPE_GYROSCOPE) {
         if (mGyroTime != 0) {
             const float dT = (event.timestamp - mGyroTime) / 1000000000.0f;
             const float freq = 1 / dT;
-            const float alpha = 2 / (2 + dT); // 2s time-constant
-            mGyroRate = mGyroRate*alpha +  freq*(1 - alpha);
+            if (freq >= 100 && freq<1000) { // filter values obviously wrong
+                const float alpha = 1 / (1 + dT); // 1s time-constant
+                mGyroRate = freq + (mGyroRate - freq)*alpha;
+            }
         }
         mGyroTime = event.timestamp;
         mFusion.handleGyro(vec3_t(event.data), 1.0f/mGyroRate);
     } else if (event.type == SENSOR_TYPE_MAGNETIC_FIELD) {
         const vec3_t mag(event.data);
-        if (mHasGyro) {
-            mFusion.handleMag(mag);
-        } else {
-            const float l(length(mag));
-            if (l>5 && l<100) {
-                mFilteredMag = mag * (1/l);
-            }
-        }
+        mFusion.handleMag(mag);
     } else if (event.type == SENSOR_TYPE_ACCELEROMETER) {
         const vec3_t acc(event.data);
-        if (mHasGyro) {
-            mFusion.handleAcc(acc);
-            mRotationMatrix = mFusion.getRotationMatrix();
-        } else {
-            const float l(length(acc));
-            if (l > 0.981f) {
-                // remove the linear-acceleration components
-                mFilteredAcc = mAccData(acc * (1/l));
-            }
-            if (length(mFilteredAcc)>0 && length(mFilteredMag)>0) {
-                vec3_t up(mFilteredAcc);
-                vec3_t east(cross_product(mFilteredMag, up));
-                east *= 1/length(east);
-                vec3_t north(cross_product(up, east));
-                mRotationMatrix << east << north << up;
-            }
-        }
+        mFusion.handleAcc(acc);
+        mAttitude = mFusion.getAttitude();
     }
 }
 
@@ -116,40 +91,31 @@ status_t SensorFusion::activate(void* ident, bool enabled) {
 
     mSensorDevice.activate(ident, mAcc.getHandle(), enabled);
     mSensorDevice.activate(ident, mMag.getHandle(), enabled);
-    if (mHasGyro) {
-        mSensorDevice.activate(ident, mGyro.getHandle(), enabled);
-    }
+    mSensorDevice.activate(ident, mGyro.getHandle(), enabled);
 
     const bool newState = mClients.size() != 0;
     if (newState != mEnabled) {
         mEnabled = newState;
         if (newState) {
             mFusion.init();
+            mGyroTime = 0;
         }
     }
     return NO_ERROR;
 }
 
 status_t SensorFusion::setDelay(void* ident, int64_t ns) {
-    if (mHasGyro) {
-        mSensorDevice.setDelay(ident, mAcc.getHandle(), ns);
-        mSensorDevice.setDelay(ident, mMag.getHandle(), ms2ns(20));
-        mSensorDevice.setDelay(ident, mGyro.getHandle(), mTargetDelayNs);
-    } else {
-        const static double NS2S = 1.0 / 1000000000.0;
-        mSensorDevice.setDelay(ident, mAcc.getHandle(), ns);
-        mSensorDevice.setDelay(ident, mMag.getHandle(), max(ns, mMag.getMinDelayNs()));
-        mLowPass.setSamplingPeriod(ns*NS2S);
-    }
+    mSensorDevice.setDelay(ident, mAcc.getHandle(), ns);
+    mSensorDevice.setDelay(ident, mMag.getHandle(), ms2ns(20));
+    mSensorDevice.setDelay(ident, mGyro.getHandle(), mTargetDelayNs);
     return NO_ERROR;
 }
 
 
 float SensorFusion::getPowerUsage() const {
-    float power = mAcc.getPowerUsage() + mMag.getPowerUsage();
-    if (mHasGyro) {
-        power += mGyro.getPowerUsage();
-    }
+    float power =   mAcc.getPowerUsage() +
+                    mMag.getPowerUsage() +
+                    mGyro.getPowerUsage();
     return power;
 }
 
@@ -159,17 +125,17 @@ int32_t SensorFusion::getMinDelay() const {
 
 void SensorFusion::dump(String8& result, char* buffer, size_t SIZE) {
     const Fusion& fusion(mFusion);
-    snprintf(buffer, SIZE, "Fusion (%s) %s (%d clients), gyro-rate=%7.2fHz, "
-            "MRPS=< %g, %g, %g > (%g), "
-            "BIAS=< %g, %g, %g >\n",
-            mHasGyro ? "9-axis" : "6-axis",
+    snprintf(buffer, SIZE, "9-axis fusion %s (%d clients), gyro-rate=%7.2fHz, "
+            "q=< %g, %g, %g, %g > (%g), "
+            "b=< %g, %g, %g >\n",
             mEnabled ? "enabled" : "disabled",
             mClients.size(),
             mGyroRate,
             fusion.getAttitude().x,
             fusion.getAttitude().y,
             fusion.getAttitude().z,
-            dot_product(fusion.getAttitude(), fusion.getAttitude()),
+            fusion.getAttitude().w,
+            length(fusion.getAttitude()),
             fusion.getBias().x,
             fusion.getBias().y,
             fusion.getBias().z);

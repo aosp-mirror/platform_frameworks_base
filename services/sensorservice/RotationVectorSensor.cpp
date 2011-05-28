@@ -27,11 +27,6 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
-template <typename T>
-static inline T clamp(T v) {
-    return v < 0 ? 0 : v;
-}
-
 RotationVectorSensor::RotationVectorSensor()
     : mSensorDevice(SensorDevice::getInstance()),
       mSensorFusion(SensorFusion::getInstance())
@@ -43,29 +38,12 @@ bool RotationVectorSensor::process(sensors_event_t* outEvent,
 {
     if (event.type == SENSOR_TYPE_ACCELEROMETER) {
         if (mSensorFusion.hasEstimate()) {
-            const mat33_t R(mSensorFusion.getRotationMatrix());
-
-            // matrix to rotation vector (normalized quaternion)
-            const float Hx = R[0].x;
-            const float My = R[1].y;
-            const float Az = R[2].z;
-
-            float qw = sqrtf( clamp( Hx + My + Az + 1) * 0.25f );
-            float qx = sqrtf( clamp( Hx - My - Az + 1) * 0.25f );
-            float qy = sqrtf( clamp(-Hx + My - Az + 1) * 0.25f );
-            float qz = sqrtf( clamp(-Hx - My + Az + 1) * 0.25f );
-            qx = copysignf(qx, R[2].y - R[1].z);
-            qy = copysignf(qy, R[0].z - R[2].x);
-            qz = copysignf(qz, R[1].x - R[0].y);
-
-            // this quaternion is guaranteed to be normalized, by construction
-            // of the rotation matrix.
-
+            const vec4_t q(mSensorFusion.getAttitude());
             *outEvent = event;
-            outEvent->data[0] = qx;
-            outEvent->data[1] = qy;
-            outEvent->data[2] = qz;
-            outEvent->data[3] = qw;
+            outEvent->data[0] = q.x;
+            outEvent->data[1] = q.y;
+            outEvent->data[2] = q.z;
+            outEvent->data[3] = q.w;
             outEvent->sensor = '_rov';
             outEvent->type = SENSOR_TYPE_ROTATION_VECTOR;
             return true;
@@ -86,9 +64,58 @@ Sensor RotationVectorSensor::getSensor() const {
     sensor_t hwSensor;
     hwSensor.name       = "Rotation Vector Sensor";
     hwSensor.vendor     = "Google Inc.";
-    hwSensor.version    = mSensorFusion.hasGyro() ? 3 : 2;
+    hwSensor.version    = 3;
     hwSensor.handle     = '_rov';
     hwSensor.type       = SENSOR_TYPE_ROTATION_VECTOR;
+    hwSensor.maxRange   = 1;
+    hwSensor.resolution = 1.0f / (1<<24);
+    hwSensor.power      = mSensorFusion.getPowerUsage();
+    hwSensor.minDelay   = mSensorFusion.getMinDelay();
+    Sensor sensor(&hwSensor);
+    return sensor;
+}
+
+// ---------------------------------------------------------------------------
+
+GyroDriftSensor::GyroDriftSensor()
+    : mSensorDevice(SensorDevice::getInstance()),
+      mSensorFusion(SensorFusion::getInstance())
+{
+}
+
+bool GyroDriftSensor::process(sensors_event_t* outEvent,
+        const sensors_event_t& event)
+{
+    if (event.type == SENSOR_TYPE_ACCELEROMETER) {
+        if (mSensorFusion.hasEstimate()) {
+            const vec3_t b(mSensorFusion.getGyroBias());
+            *outEvent = event;
+            outEvent->data[0] = b.x;
+            outEvent->data[1] = b.y;
+            outEvent->data[2] = b.z;
+            outEvent->sensor = '_gbs';
+            outEvent->type = SENSOR_TYPE_ACCELEROMETER;
+            return true;
+        }
+    }
+    return false;
+}
+
+status_t GyroDriftSensor::activate(void* ident, bool enabled) {
+    return mSensorFusion.activate(this, enabled);
+}
+
+status_t GyroDriftSensor::setDelay(void* ident, int handle, int64_t ns) {
+    return mSensorFusion.setDelay(this, ns);
+}
+
+Sensor GyroDriftSensor::getSensor() const {
+    sensor_t hwSensor;
+    hwSensor.name       = "Gyroscope Bias (debug)";
+    hwSensor.vendor     = "Google Inc.";
+    hwSensor.version    = 1;
+    hwSensor.handle     = '_gbs';
+    hwSensor.type       = SENSOR_TYPE_ACCELEROMETER;
     hwSensor.maxRange   = 1;
     hwSensor.resolution = 1.0f / (1<<24);
     hwSensor.power      = mSensorFusion.getPowerUsage();

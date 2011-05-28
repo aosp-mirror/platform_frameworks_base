@@ -27,7 +27,6 @@
 #include <gui/Sensor.h>
 
 #include "Fusion.h"
-#include "SecondOrderLowPassFilter.h"
 
 // ---------------------------------------------------------------------------
 
@@ -45,15 +44,10 @@ class SensorFusion : public Singleton<SensorFusion> {
     Sensor mGyro;
     Fusion mFusion;
     bool mEnabled;
-    bool mHasGyro;
     float mGyroRate;
     nsecs_t mTargetDelayNs;
     nsecs_t mGyroTime;
-    mat33_t mRotationMatrix;
-    SecondOrderLowPassFilter mLowPass;
-    BiquadFilter<vec3_t> mAccData;
-    vec3_t mFilteredMag;
-    vec3_t mFilteredAcc;
+    vec4_t mAttitude;
     SortedVector<void*> mClients;
 
     SensorFusion();
@@ -62,9 +56,9 @@ public:
     void process(const sensors_event_t& event);
 
     bool isEnabled() const { return mEnabled; }
-    bool hasGyro() const { return mHasGyro; }
-    bool hasEstimate() const { return !mHasGyro || mFusion.hasEstimate(); }
-    mat33_t getRotationMatrix() const { return mRotationMatrix; }
+    bool hasEstimate() const { return mFusion.hasEstimate(); }
+    mat33_t getRotationMatrix() const { return mFusion.getRotationMatrix(); }
+    vec4_t getAttitude() const { return mAttitude; }
     vec3_t getGyroBias() const { return mFusion.getBias(); }
     float getEstimatedRate() const { return mGyroRate; }
 

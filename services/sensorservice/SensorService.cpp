@@ -18,6 +18,8 @@
 #include <math.h>
 #include <sys/types.h>
 
+#include <cutils/properties.h>
+
 #include <utils/SortedVector.h>
 #include <utils/KeyedVector.h>
 #include <utils/threads.h>
@@ -46,6 +48,16 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
+/*
+ * Notes:
+ *
+ * - what about a gyro-corrected magnetic-field sensor?
+ * - option to "hide" the HAL sensors
+ * - run mag sensor from time to time to force calibration
+ * - gravity sensor length is wrong (=> drift in linear-acc sensor)
+ *
+ */
+
 SensorService::SensorService()
     : mDump("android.permission.DUMP"),
       mInitCheck(NO_INIT)
@@ -59,6 +71,7 @@ void SensorService::onFirstRef()
     SensorDevice& dev(SensorDevice::getInstance());
 
     if (dev.initCheck() == NO_ERROR) {
+        bool hasGyro = false;
         uint32_t virtualSensorsNeeds =
                 (1<<SENSOR_TYPE_GRAVITY) |
                 (1<<SENSOR_TYPE_LINEAR_ACCELERATION) |
@@ -69,6 +82,9 @@ void SensorService::onFirstRef()
         for (int i=0 ; i<count ; i++) {
             registerSensor( new HardwareSensor(list[i]) );
             switch (list[i].type) {
+                case SENSOR_TYPE_GYROSCOPE:
+                    hasGyro = true;
+                    break;
                 case SENSOR_TYPE_GRAVITY:
                 case SENSOR_TYPE_LINEAR_ACCELERATION:
                 case SENSOR_TYPE_ROTATION_VECTOR:
@@ -82,21 +98,26 @@ void SensorService::onFirstRef()
         // registered)
         const SensorFusion& fusion(SensorFusion::getInstance());
 
-        // Always instantiate Android's virtual sensors. Since they are
-        // instantiated behind sensors from the HAL, they won't
-        // interfere with applications, unless they looks specifically
-        // for them (by name).
+        if (hasGyro) {
+            // Always instantiate Android's virtual sensors. Since they are
+            // instantiated behind sensors from the HAL, they won't
+            // interfere with applications, unless they looks specifically
+            // for them (by name).
 
-        registerVirtualSensor( new RotationVectorSensor() );
-        registerVirtualSensor( new GravitySensor(list, count) );
-        registerVirtualSensor( new LinearAccelerationSensor(list, count) );
+            registerVirtualSensor( new RotationVectorSensor() );
+            registerVirtualSensor( new GravitySensor(list, count) );
+            registerVirtualSensor( new LinearAccelerationSensor(list, count) );
 
-        // if we have a gyro, we have the option of enabling these
-        // "better" orientation and gyro sensors
-        if (fusion.hasGyro()) {
-            // FIXME: OrientationSensor buggy when not pointing north
+            // these are optional
             registerVirtualSensor( new OrientationSensor() );
             registerVirtualSensor( new CorrectedGyroSensor(list, count) );
+
+            // virtual debugging sensors...
+            char value[PROPERTY_VALUE_MAX];
+            property_get("debug.sensors", value, "0");
+            if (atoi(value)) {
+                registerVirtualSensor( new GyroDriftSensor() );
+            }
         }
 
         run("SensorService", PRIORITY_URGENT_DISPLAY);
