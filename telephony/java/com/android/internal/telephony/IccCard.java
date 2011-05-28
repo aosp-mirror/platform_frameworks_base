@@ -785,7 +785,18 @@ public abstract class IccCard {
         if (right == IccCard.State.ABSENT) return left;
         if (left == IccCard.State.ABSENT) return right;
 
-        // Disregards if either is NOT_READY
+        // Only if both are ready, return ready
+        if ((left == IccCard.State.READY) && (right == IccCard.State.READY)) {
+            return State.READY;
+        }
+
+        // Case one is ready, but the other is not.
+        if (((right == IccCard.State.NOT_READY) && (left == IccCard.State.READY)) ||
+            ((left == IccCard.State.NOT_READY) && (right == IccCard.State.READY))) {
+            return IccCard.State.NOT_READY;
+        }
+
+        // At this point, the other state is assumed to be one of locked state
         if (right == IccCard.State.NOT_READY) return left;
         if (left == IccCard.State.NOT_READY) return right;
 

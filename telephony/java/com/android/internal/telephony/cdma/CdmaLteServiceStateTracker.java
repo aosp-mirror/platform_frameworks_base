@@ -48,10 +48,16 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
     public CdmaLteServiceStateTracker(CDMALTEPhone phone) {
         super(phone);
+        cm.registerForSIMReady(this, EVENT_SIM_READY, null);
         mCdmaLtePhone = phone;
 
         mLteSS = new ServiceState();
         if (DBG) log("CdmaLteServiceStateTracker Constructors");
+    }
+
+    public void dispose() {
+        cm.unregisterForSIMReady(this);
+        super.dispose();
     }
 
     @Override
@@ -59,11 +65,20 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         AsyncResult ar;
         int[] ints;
         String[] strings;
-        if (msg.what == EVENT_POLL_STATE_GPRS) {
+        switch (msg.what) {
+        case EVENT_POLL_STATE_GPRS:
             if (DBG) log("handleMessage EVENT_POLL_STATE_GPRS");
             ar = (AsyncResult)msg.obj;
             handlePollStateResult(msg.what, ar);
-        } else {
+            break;
+        case EVENT_SIM_READY:
+            isSubscriptionFromRuim = false;
+            cm.getCDMASubscription( obtainMessage(EVENT_POLL_STATE_CDMA_SUBSCRIPTION));
+            pollState();
+            // Signal strength polling stops when radio is off.
+            queueNextSignalStrengthPoll();
+            break;
+        default:
             super.handleMessage(msg);
         }
     }

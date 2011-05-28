@@ -137,7 +137,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     private boolean mIsMinInfoReady = false;
 
     private boolean isEriTextLoaded = false;
-    private boolean isSubscriptionFromRuim = false;
+    protected boolean isSubscriptionFromRuim = false;
 
     /* Used only for debugging purposes. */
     private String mRegistrationDeniedReason;
@@ -1120,7 +1120,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
      * This code should probably be hoisted to the base class so
      * the fix, when added, works for both.
      */
-    private void
+    protected void
     queueNextSignalStrengthPoll() {
         if (dontPollSignalStrength || (cm.getRadioState().isGsm())) {
             // The radio is telling us about signal strength changes
