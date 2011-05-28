@@ -29,14 +29,14 @@ public class GravityTest extends AndroidTestCase {
         assertOneGravity(Gravity.RIGHT, Gravity.RIGHT, false);
         assertOneGravity(Gravity.RIGHT, Gravity.RIGHT, true);
 
-        assertOneGravity(Gravity.TOP|Gravity.LEFT, Gravity.TOP, false);
-        assertOneGravity(Gravity.TOP|Gravity.LEFT, Gravity.TOP, true);
+        assertOneGravity(Gravity.TOP, Gravity.TOP, false);
+        assertOneGravity(Gravity.TOP, Gravity.TOP, true);
 
-        assertOneGravity(Gravity.BOTTOM|Gravity.LEFT, Gravity.BOTTOM, false);
-        assertOneGravity(Gravity.BOTTOM|Gravity.LEFT, Gravity.BOTTOM, true);
+        assertOneGravity(Gravity.BOTTOM, Gravity.BOTTOM, false);
+        assertOneGravity(Gravity.BOTTOM, Gravity.BOTTOM, true);
 
-        assertOneGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT, Gravity.CENTER_VERTICAL, false);
-        assertOneGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT, Gravity.CENTER_VERTICAL, true);
+        assertOneGravity(Gravity.CENTER_VERTICAL, Gravity.CENTER_VERTICAL, false);
+        assertOneGravity(Gravity.CENTER_VERTICAL, Gravity.CENTER_VERTICAL, true);
 
         assertOneGravity(Gravity.CENTER_HORIZONTAL, Gravity.CENTER_HORIZONTAL, false);
         assertOneGravity(Gravity.CENTER_HORIZONTAL, Gravity.CENTER_HORIZONTAL, true);
@@ -44,8 +44,8 @@ public class GravityTest extends AndroidTestCase {
         assertOneGravity(Gravity.CENTER, Gravity.CENTER, false);
         assertOneGravity(Gravity.CENTER, Gravity.CENTER, true);
 
-        assertOneGravity(Gravity.FILL_VERTICAL|Gravity.LEFT, Gravity.FILL_VERTICAL, false);
-        assertOneGravity(Gravity.FILL_VERTICAL|Gravity.LEFT, Gravity.FILL_VERTICAL, true);
+        assertOneGravity(Gravity.FILL_VERTICAL, Gravity.FILL_VERTICAL, false);
+        assertOneGravity(Gravity.FILL_VERTICAL, Gravity.FILL_VERTICAL, true);
 
         assertOneGravity(Gravity.FILL_HORIZONTAL, Gravity.FILL_HORIZONTAL, false);
         assertOneGravity(Gravity.FILL_HORIZONTAL, Gravity.FILL_HORIZONTAL, true);
@@ -53,11 +53,11 @@ public class GravityTest extends AndroidTestCase {
         assertOneGravity(Gravity.FILL, Gravity.FILL, false);
         assertOneGravity(Gravity.FILL, Gravity.FILL, true);
 
-        assertOneGravity(Gravity.CLIP_HORIZONTAL|Gravity.LEFT, Gravity.CLIP_HORIZONTAL, false);
-        assertOneGravity(Gravity.CLIP_HORIZONTAL|Gravity.LEFT, Gravity.CLIP_HORIZONTAL, true);
+        assertOneGravity(Gravity.CLIP_HORIZONTAL, Gravity.CLIP_HORIZONTAL, false);
+        assertOneGravity(Gravity.CLIP_HORIZONTAL, Gravity.CLIP_HORIZONTAL, true);
 
-        assertOneGravity(Gravity.CLIP_VERTICAL|Gravity.LEFT, Gravity.CLIP_VERTICAL, false);
-        assertOneGravity(Gravity.CLIP_VERTICAL|Gravity.LEFT, Gravity.CLIP_VERTICAL, true);
+        assertOneGravity(Gravity.CLIP_VERTICAL, Gravity.CLIP_VERTICAL, false);
+        assertOneGravity(Gravity.CLIP_VERTICAL, Gravity.CLIP_VERTICAL, true);
 
         assertOneGravity(Gravity.LEFT, Gravity.BEFORE, false);
         assertOneGravity(Gravity.RIGHT, Gravity.BEFORE, true);
