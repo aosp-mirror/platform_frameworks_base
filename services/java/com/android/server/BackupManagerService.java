@@ -66,8 +66,6 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.StringBuilderPrinter;
 
-import libcore.io.Libcore;
-
 import com.android.internal.backup.BackupConstants;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.LocalTransport;
@@ -1801,7 +1799,6 @@ class BackupManagerService extends IBackupManager.Stub {
             }
 
             FileOutputStream outstream = new FileOutputStream(manifestFile);
-            Libcore.os.ftruncate(outstream.getFD(), 0);
             outstream.write(builder.toString().getBytes());
             outstream.close();
         }
