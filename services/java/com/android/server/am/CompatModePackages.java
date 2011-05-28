@@ -17,6 +17,7 @@ import com.android.internal.util.FastXmlSerializer;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.res.CompatibilityInfo;
@@ -115,6 +116,37 @@ public class CompatModePackages {
     private int getPackageFlags(String packageName) {
         Integer flags = mPackages.get(packageName);
         return flags != null ? flags : 0;
+    }
+
+    public void handlePackageAddedLocked(String packageName, boolean updated) {
+        ApplicationInfo ai = null;
+        try {
+            ai = AppGlobals.getPackageManager().getApplicationInfo(packageName, 0);
+        } catch (RemoteException e) {
+        }
+        if (ai == null) {
+            return;
+        }
+        CompatibilityInfo ci = compatibilityInfoForPackageLocked(ai);
+        final boolean mayCompat = !ci.alwaysSupportsScreen()
+                && !ci.neverSupportsScreen();
+
+        if (!updated) {
+            // First time -- if the app may run in compat mode, enable that
+            // by default.
+            if (mayCompat) {
+                setPackageScreenCompatModeLocked(ai, ActivityManager.COMPAT_MODE_ENABLED);
+            }
+        } else {
+            // Update -- if the app no longer can run in compat mode, clear
+            // any current settings for it.
+            if (!mayCompat && mPackages.containsKey(packageName)) {
+                mPackages.remove(packageName);
+                mHandler.removeMessages(MSG_WRITE);
+                Message msg = mHandler.obtainMessage(MSG_WRITE);
+                mHandler.sendMessageDelayed(msg, 10000);
+            }
+        }
     }
 
     public CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
@@ -242,27 +274,46 @@ public class CompatModePackages {
             newFlags &= ~COMPAT_FLAG_ENABLED;
         }
 
+        CompatibilityInfo ci = compatibilityInfoForPackageLocked(ai);
+        if (ci.alwaysSupportsScreen()) {
+            Slog.w(TAG, "Ignoring compat mode change of " + packageName
+                    + "; compatibility never needed");
+            newFlags = 0;
+        }
+        if (ci.neverSupportsScreen()) {
+            Slog.w(TAG, "Ignoring compat mode change of " + packageName
+                    + "; compatibility always needed");
+            newFlags = 0;
+        }
+
         if (newFlags != curFlags) {
             if (newFlags != 0) {
                 mPackages.put(packageName, newFlags);
             } else {
                 mPackages.remove(packageName);
             }
-            CompatibilityInfo ci = compatibilityInfoForPackageLocked(ai);
-            if (ci.alwaysSupportsScreen()) {
-                Slog.w(TAG, "Ignoring compat mode change of " + packageName
-                        + "; compatibility never needed");
-                return;
-            }
-            if (ci.neverSupportsScreen()) {
-                Slog.w(TAG, "Ignoring compat mode change of " + packageName
-                        + "; compatibility always needed");
-                return;
-            }
+
+            // Need to get compatibility info in new state.
+            ci = compatibilityInfoForPackageLocked(ai);
 
             mHandler.removeMessages(MSG_WRITE);
             Message msg = mHandler.obtainMessage(MSG_WRITE);
             mHandler.sendMessageDelayed(msg, 10000);
+
+            ActivityRecord starting = mService.mMainStack.topRunningActivityLocked(null);
+
+            // All activities that came from the package must be
+            // restarted as if there was a config change.
+            for (int i=mService.mMainStack.mHistory.size()-1; i>=0; i--) {
+                ActivityRecord a = (ActivityRecord)mService.mMainStack.mHistory.get(i);
+                if (a.info.packageName.equals(packageName)) {
+                    a.forceNewConfig = true;
+                    if (starting != null && a == starting && a.visible) {
+                        a.startFreezingScreenLocked(starting.app,
+                                ActivityInfo.CONFIG_SCREEN_LAYOUT);
+                    }
+                }
+            }
 
             // Tell all processes that loaded this package about the change.
             for (int i=mService.mLruProcesses.size()-1; i>=0; i--) {
@@ -280,16 +331,6 @@ public class CompatModePackages {
                 }
             }
 
-            // All activities that came from the packge must be
-            // restarted as if there was a config change.
-            for (int i=mService.mMainStack.mHistory.size()-1; i>=0; i--) {
-                ActivityRecord a = (ActivityRecord)mService.mMainStack.mHistory.get(i);
-                if (a.info.packageName.equals(packageName)) {
-                    a.forceNewConfig = true;
-                }
-            }
-
-            ActivityRecord starting = mService.mMainStack.topRunningActivityLocked(null);
             if (starting != null) {
                 mService.mMainStack.ensureActivityConfigurationLocked(starting, 0);
                 // And we need to make sure at this point that all other activities
