@@ -69,7 +69,7 @@ class ScreenRotationAnimation {
         mContext = context;
         mDisplay = display;
 
-        display.getMetrics(mDisplayMetrics);
+        display.getRealMetrics(mDisplayMetrics);
 
         Bitmap screenshot = Surface.screenshot(0, 0);
 
@@ -244,7 +244,7 @@ class ScreenRotationAnimation {
                 break;
         }
 
-        mDisplay.getMetrics(mDisplayMetrics);
+        mDisplay.getRealMetrics(mDisplayMetrics);
 
         // Initialize the animations.  This is a hack, redefining what "parent"
         // means to allow supplying the last and next size.  In this definition
