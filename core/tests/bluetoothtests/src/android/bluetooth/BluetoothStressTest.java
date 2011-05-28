@@ -120,6 +120,9 @@ public class BluetoothStressTest extends InstrumentationTestCase {
      */
     public void testEnablePan() {
         int iterations = BluetoothTestRunner.sEnablePanIterations;
+        if (iterations == 0) {
+            return;
+        }
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         mTestUtils.disable(adapter);
         mTestUtils.enable(adapter);
@@ -170,6 +173,9 @@ public class BluetoothStressTest extends InstrumentationTestCase {
      */
     public void testAcceptPair() {
         int iterations = BluetoothTestRunner.sPairIterations;
+        if (iterations == 0) {
+            return;
+        }
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         BluetoothDevice device = adapter.getRemoteDevice(BluetoothTestRunner.sDeviceAddress);
         mTestUtils.disable(adapter);
