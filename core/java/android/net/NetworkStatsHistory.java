@@ -40,26 +40,17 @@ import java.util.Arrays;
 public class NetworkStatsHistory implements Parcelable {
     private static final int VERSION = 1;
 
-    /** {@link #uid} value when UID details unavailable. */
-    public static final int UID_ALL = -1;
-
     // TODO: teach about zigzag encoding to use less disk space
     // TODO: teach how to convert between bucket sizes
 
-    public final int networkType;
-    public final String identity;
-    public final int uid;
     public final long bucketDuration;
 
-    int bucketCount;
-    long[] bucketStart;
-    long[] rx;
-    long[] tx;
+    public int bucketCount;
+    public long[] bucketStart;
+    public long[] rx;
+    public long[] tx;
 
-    public NetworkStatsHistory(int networkType, String identity, int uid, long bucketDuration) {
-        this.networkType = networkType;
-        this.identity = identity;
-        this.uid = uid;
+    public NetworkStatsHistory(long bucketDuration) {
         this.bucketDuration = bucketDuration;
         bucketStart = new long[0];
         rx = new long[0];
@@ -68,9 +59,6 @@ public class NetworkStatsHistory implements Parcelable {
     }
 
     public NetworkStatsHistory(Parcel in) {
-        networkType = in.readInt();
-        identity = in.readString();
-        uid = in.readInt();
         bucketDuration = in.readLong();
         bucketStart = readLongArray(in);
         rx = in.createLongArray();
@@ -80,9 +68,6 @@ public class NetworkStatsHistory implements Parcelable {
 
     /** {@inheritDoc} */
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(networkType);
-        out.writeString(identity);
-        out.writeInt(uid);
         out.writeLong(bucketDuration);
         writeLongArray(out, bucketStart, bucketCount);
         writeLongArray(out, rx, bucketCount);
@@ -91,9 +76,6 @@ public class NetworkStatsHistory implements Parcelable {
 
     public NetworkStatsHistory(DataInputStream in) throws IOException {
         final int version = in.readInt();
-        networkType = in.readInt();
-        identity = in.readUTF();
-        uid = in.readInt();
         bucketDuration = in.readLong();
         bucketStart = readLongArray(in);
         rx = readLongArray(in);
@@ -103,9 +85,6 @@ public class NetworkStatsHistory implements Parcelable {
 
     public void writeToStream(DataOutputStream out) throws IOException {
         out.writeInt(VERSION);
-        out.writeInt(networkType);
-        out.writeUTF(identity);
-        out.writeInt(uid);
         out.writeLong(bucketDuration);
         writeLongArray(out, bucketStart, bucketCount);
         writeLongArray(out, rx, bucketCount);
@@ -214,11 +193,8 @@ public class NetworkStatsHistory implements Parcelable {
     }
 
     public void dump(String prefix, PrintWriter pw) {
-        // TODO: consider stripping identity when dumping
         pw.print(prefix);
-        pw.print("NetworkStatsHistory: networkType="); pw.print(networkType);
-        pw.print(" identity="); pw.print(identity);
-        pw.print(" uid="); pw.println(uid);
+        pw.println("NetworkStatsHistory:");
         for (int i = 0; i < bucketCount; i++) {
             pw.print(prefix);
             pw.print("  timestamp="); pw.print(bucketStart[i]);

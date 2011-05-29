@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
@@ -38,6 +39,7 @@ import android.net.MobileDataStateTracker;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkState;
 import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
 import android.net.Proxy;
@@ -65,6 +67,7 @@ import android.util.SparseIntArray;
 
 import com.android.internal.telephony.Phone;
 import com.android.server.connectivity.Tethering;
+import com.google.android.collect.Lists;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -563,25 +566,32 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private boolean isNetworkBlocked(NetworkInfo info, int uid) {
         synchronized (mUidRules) {
-            return isNetworkBlockedLocked(info, uid);
+            // TODO: expand definition of "paid" network to cover tethered or
+            // paid hotspot use cases.
+            final boolean networkIsPaid = info.getType() != ConnectivityManager.TYPE_WIFI;
+            final int uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
+
+            if (networkIsPaid && (uidRules & RULE_REJECT_PAID) != 0) {
+                return true;
+            }
+
+            // no restrictive rules; network is visible
+            return false;
         }
     }
 
     /**
-     * Check if UID is blocked from using the given {@link NetworkInfo}.
+     * Return a filtered version of the given {@link NetworkInfo}, potentially
+     * marked {@link DetailedState#BLOCKED} based on
+     * {@link #isNetworkBlocked(NetworkInfo, int)}.
      */
-    private boolean isNetworkBlockedLocked(NetworkInfo info, int uid) {
-        // TODO: expand definition of "paid" network to cover tethered or paid
-        // hotspot use cases.
-        final boolean networkIsPaid = info.getType() != ConnectivityManager.TYPE_WIFI;
-        final int uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
-
-        if (networkIsPaid && (uidRules & RULE_REJECT_PAID) != 0) {
-            return true;
+    private NetworkInfo filterNetworkInfo(NetworkInfo info, int uid) {
+        if (isNetworkBlocked(info, uid)) {
+            // network is blocked; clone and override state
+            info = new NetworkInfo(info);
+            info.setDetailedState(DetailedState.BLOCKED, null, null);
         }
-
-        // no restrictive rules; network is visible
-        return false;
+        return info;
     }
 
     /**
@@ -616,12 +626,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (isNetworkTypeValid(networkType)) {
             final NetworkStateTracker tracker = mNetTrackers[networkType];
             if (tracker != null) {
-                info = tracker.getNetworkInfo();
-                if (isNetworkBlocked(info, uid)) {
-                    // network is blocked; clone and override state
-                    info = new NetworkInfo(info);
-                    info.setDetailedState(DetailedState.BLOCKED, null, null);
-                }
+                info = filterNetworkInfo(tracker.getNetworkInfo(), uid);
             }
         }
         return info;
@@ -631,22 +636,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public NetworkInfo[] getAllNetworkInfo() {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
-        final NetworkInfo[] result = new NetworkInfo[mNetworksDefined];
-        int i = 0;
+        final ArrayList<NetworkInfo> result = Lists.newArrayList();
         synchronized (mUidRules) {
             for (NetworkStateTracker tracker : mNetTrackers) {
                 if (tracker != null) {
-                    NetworkInfo info = tracker.getNetworkInfo();
-                    if (isNetworkBlockedLocked(info, uid)) {
-                        // network is blocked; clone and override state
-                        info = new NetworkInfo(info);
-                        info.setDetailedState(DetailedState.BLOCKED, null, null);
-                    }
-                    result[i++] = info;
+                    result.add(filterNetworkInfo(tracker.getNetworkInfo(), uid));
                 }
             }
         }
-        return result;
+        return result.toArray(new NetworkInfo[result.size()]);
     }
 
     /**
@@ -672,6 +670,23 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         return null;
+    }
+
+    @Override
+    public NetworkState[] getAllNetworkState() {
+        enforceAccessPermission();
+        final int uid = Binder.getCallingUid();
+        final ArrayList<NetworkState> result = Lists.newArrayList();
+        synchronized (mUidRules) {
+            for (NetworkStateTracker tracker : mNetTrackers) {
+                if (tracker != null) {
+                    final NetworkInfo info = filterNetworkInfo(tracker.getNetworkInfo(), uid);
+                    result.add(new NetworkState(
+                            info, tracker.getLinkProperties(), tracker.getLinkCapabilities()));
+                }
+            }
+        }
+        return result.toArray(new NetworkState[result.size()]);
     }
 
     public boolean setRadios(boolean turnOn) {

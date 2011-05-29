@@ -89,6 +89,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     // TODO: keep record of billing cycle details, and limit rules
     // TODO: keep map of interfaces-to-billing-relationship
 
+    // TODO: dispatch callbacks through handler when locked
+
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             IPowerManager powerManager, INetworkStatsService networkStats) {
         mContext = checkNotNull(context, "missing context");

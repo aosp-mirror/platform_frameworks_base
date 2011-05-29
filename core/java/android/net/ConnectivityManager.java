@@ -256,8 +256,59 @@ public class ConnectivityManager {
 
     private final IConnectivityManager mService;
 
-    static public boolean isNetworkTypeValid(int networkType) {
+    public static boolean isNetworkTypeValid(int networkType) {
         return networkType >= 0 && networkType <= MAX_NETWORK_TYPE;
+    }
+
+    /** {@hide} */
+    public static String getNetworkTypeName(int type) {
+        switch (type) {
+            case TYPE_MOBILE:
+                return "MOBILE";
+            case TYPE_WIFI:
+                return "WIFI";
+            case TYPE_MOBILE_MMS:
+                return "MOBILE_MMS";
+            case TYPE_MOBILE_SUPL:
+                return "MOBILE_SUPL";
+            case TYPE_MOBILE_DUN:
+                return "MOBILE_DUN";
+            case TYPE_MOBILE_HIPRI:
+                return "MOBILE_HIPRI";
+            case TYPE_WIMAX:
+                return "WIMAX";
+            case TYPE_BLUETOOTH:
+                return "BLUETOOTH";
+            case TYPE_DUMMY:
+                return "DUMMY";
+            case TYPE_ETHERNET:
+                return "ETHERNET";
+            case TYPE_MOBILE_FOTA:
+                return "MOBILE_FOTA";
+            case TYPE_MOBILE_IMS:
+                return "MOBILE_IMS";
+            case TYPE_MOBILE_CBS:
+                return "MOBILE_CBS";
+            default:
+                return Integer.toString(type);
+        }
+    }
+
+    /** {@hide} */
+    public static boolean isNetworkTypeMobile(int networkType) {
+        switch (networkType) {
+            case TYPE_MOBILE:
+            case TYPE_MOBILE_MMS:
+            case TYPE_MOBILE_SUPL:
+            case TYPE_MOBILE_DUN:
+            case TYPE_MOBILE_HIPRI:
+            case TYPE_MOBILE_FOTA:
+            case TYPE_MOBILE_IMS:
+            case TYPE_MOBILE_CBS:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public void setNetworkPreference(int preference) {

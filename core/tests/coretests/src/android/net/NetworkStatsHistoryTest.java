@@ -16,8 +16,6 @@
 
 package android.net;
 
-import static android.net.ConnectivityManager.TYPE_MOBILE;
-import static android.net.NetworkStatsHistory.UID_ALL;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
@@ -51,7 +49,7 @@ public class NetworkStatsHistoryTest extends TestCase {
 
     public void testRecordSingleBucket() throws Exception {
         final long BUCKET_SIZE = HOUR_IN_MILLIS;
-        stats = buildStats(BUCKET_SIZE);
+        stats = new NetworkStatsHistory(BUCKET_SIZE);
 
         // record data into narrow window to get single bucket
         stats.recordData(TEST_START, TEST_START + SECOND_IN_MILLIS, 1024L, 2048L);
@@ -62,7 +60,7 @@ public class NetworkStatsHistoryTest extends TestCase {
 
     public void testRecordEqualBuckets() throws Exception {
         final long bucketDuration = HOUR_IN_MILLIS;
-        stats = buildStats(bucketDuration);
+        stats = new NetworkStatsHistory(bucketDuration);
 
         // split equally across two buckets
         final long recordStart = TEST_START + (bucketDuration / 2);
@@ -75,7 +73,7 @@ public class NetworkStatsHistoryTest extends TestCase {
 
     public void testRecordTouchingBuckets() throws Exception {
         final long BUCKET_SIZE = 15 * MINUTE_IN_MILLIS;
-        stats = buildStats(BUCKET_SIZE);
+        stats = new NetworkStatsHistory(BUCKET_SIZE);
 
         // split almost completely into middle bucket, but with a few minutes
         // overlap into neighboring buckets. total record is 20 minutes.
@@ -94,7 +92,7 @@ public class NetworkStatsHistoryTest extends TestCase {
 
     public void testRecordGapBuckets() throws Exception {
         final long BUCKET_SIZE = HOUR_IN_MILLIS;
-        stats = buildStats(BUCKET_SIZE);
+        stats = new NetworkStatsHistory(BUCKET_SIZE);
 
         // record some data today and next week with large gap
         final long firstStart = TEST_START;
@@ -122,7 +120,7 @@ public class NetworkStatsHistoryTest extends TestCase {
 
     public void testRecordOverlapBuckets() throws Exception {
         final long BUCKET_SIZE = HOUR_IN_MILLIS;
-        stats = buildStats(BUCKET_SIZE);
+        stats = new NetworkStatsHistory(BUCKET_SIZE);
 
         // record some data in one bucket, and another overlapping buckets
         stats.recordData(TEST_START, TEST_START + SECOND_IN_MILLIS, 256L, 256L);
@@ -137,7 +135,7 @@ public class NetworkStatsHistoryTest extends TestCase {
 
     public void testRemove() throws Exception {
         final long BUCKET_SIZE = HOUR_IN_MILLIS;
-        stats = buildStats(BUCKET_SIZE);
+        stats = new NetworkStatsHistory(BUCKET_SIZE);
 
         // record some data across 24 buckets
         stats.recordData(TEST_START, TEST_START + DAY_IN_MILLIS, 24L, 24L);
@@ -171,7 +169,7 @@ public class NetworkStatsHistoryTest extends TestCase {
             // fuzzing with random events, looking for crashes
             final Random r = new Random();
             for (int i = 0; i < 500; i++) {
-                stats = buildStats(r.nextLong());
+                stats = new NetworkStatsHistory(r.nextLong());
                 for (int j = 0; j < 10000; j++) {
                     if (r.nextBoolean()) {
                         // add range
@@ -189,10 +187,6 @@ public class NetworkStatsHistoryTest extends TestCase {
             Log.e(TAG, String.valueOf(stats));
             throw new RuntimeException(e);
         }
-    }
-
-    private static NetworkStatsHistory buildStats(long bucketSize) {
-        return new NetworkStatsHistory(TYPE_MOBILE, null, UID_ALL, bucketSize);
     }
 
     private static void assertConsistent(NetworkStatsHistory stats) {

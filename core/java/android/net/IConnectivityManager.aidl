@@ -18,6 +18,7 @@ package android.net;
 
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
+import android.net.NetworkState;
 import android.net.ProxyProperties;
 import android.os.IBinder;
 
@@ -39,6 +40,8 @@ interface IConnectivityManager
 
     LinkProperties getActiveLinkProperties();
     LinkProperties getLinkProperties(int networkType);
+
+    NetworkState[] getAllNetworkState();
 
     boolean setRadios(boolean onOff);
 

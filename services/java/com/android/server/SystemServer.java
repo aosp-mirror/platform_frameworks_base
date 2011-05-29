@@ -305,6 +305,7 @@ class ServerThread extends Thread {
                 Slog.i(TAG, "Connectivity Service");
                 connectivity = new ConnectivityService(context, networkManagement, networkPolicy);
                 ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
+                networkStats.bindConnectivityManager(connectivity);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Connectivity Service", e);
             }
