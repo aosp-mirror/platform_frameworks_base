@@ -25,7 +25,6 @@ import com.android.server.ProcessStats;
 import com.android.server.SystemServer;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
-import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.Zygote;
@@ -1301,15 +1300,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                 break;
             }
             case DISPATCH_FOREGROUND_ACTIVITIES_CHANGED: {
-                final ProcessRecord app = (ProcessRecord) msg.obj;
-                final boolean foregroundActivities = msg.arg1 != 0;
-                dispatchForegroundActivitiesChanged(
-                        app.pid, app.info.uid, foregroundActivities);
+                final int pid = msg.arg1;
+                final int uid = msg.arg2;
+                final boolean foregroundActivities = (Boolean) msg.obj;
+                dispatchForegroundActivitiesChanged(pid, uid, foregroundActivities);
                 break;
             }
             case DISPATCH_PROCESS_DIED: {
-                final ProcessRecord app = (ProcessRecord) msg.obj;
-                dispatchProcessDied(app.pid, app.info.uid);
+                final int pid = msg.arg1;
+                final int uid = msg.arg2;
+                dispatchProcessDied(pid, uid);
                 break;
             }
             }
@@ -9260,7 +9260,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        mHandler.obtainMessage(DISPATCH_PROCESS_DIED, app).sendToTarget();
+        mHandler.obtainMessage(DISPATCH_PROCESS_DIED, app.pid, app.info.uid, null).sendToTarget();
 
         // If the caller is restarting this app, then leave it in its
         // current lists and let the caller take care of it.
@@ -12821,8 +12821,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.curSchedGroup = schedGroup;
 
         if (hadForegroundActivities != app.foregroundActivities) {
-            mHandler.obtainMessage(DISPATCH_FOREGROUND_ACTIVITIES_CHANGED,
-                    app.foregroundActivities ? 1 : 0, 0, app).sendToTarget();
+            mHandler.obtainMessage(DISPATCH_FOREGROUND_ACTIVITIES_CHANGED, app.pid, app.info.uid,
+                    app.foregroundActivities).sendToTarget();
         }
 
         return adj;
