@@ -2137,6 +2137,11 @@
              string will be passed to the IME when the framework calls the IME with the
              subtype.  -->
         <attr name="imeSubtypeMode" format="string" />
+        <!-- Set true if the subtype is auxiliary.  An auxiliary subtype won't be shown in the
+             input method selection list in the settings app.
+             InputMethodManager#switchToLastInputMethod will ignore auxiliary subtypes when it
+             chooses a target subtype. -->
+        <attr name="isAuxiliary" format="boolean" />
         <!-- The extra value of the subtype. This string can be any string and will be passed to
              the IME when the framework calls the IME with the subtype.  -->
         <attr name="imeSubtypeExtraValue" format="string" />

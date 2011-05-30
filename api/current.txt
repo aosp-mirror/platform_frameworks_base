@@ -526,6 +526,7 @@ package android {
     field public static final int installLocation = 16843447; // 0x10102b7
     field public static final int interpolator = 16843073; // 0x1010141
     field public static final int isAlwaysSyncable = 16843571; // 0x1010333
+    field public static final int isAuxiliary = 16843641; // 0x1010379
     field public static final int isDefault = 16843297; // 0x1010221
     field public static final int isIndicator = 16843079; // 0x1010147
     field public static final int isModifier = 16843334; // 0x1010246
