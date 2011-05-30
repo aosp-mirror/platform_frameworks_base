@@ -24,7 +24,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.ProtocolException;
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * Collection of historical network statistics, recorded into equally-sized
@@ -38,7 +40,7 @@ import java.util.Arrays;
  * @hide
  */
 public class NetworkStatsHistory implements Parcelable {
-    private static final int VERSION = 1;
+    private static final int VERSION_CURRENT = 1;
 
     // TODO: teach about zigzag encoding to use less disk space
     // TODO: teach how to convert between bucket sizes
@@ -76,15 +78,23 @@ public class NetworkStatsHistory implements Parcelable {
 
     public NetworkStatsHistory(DataInputStream in) throws IOException {
         final int version = in.readInt();
-        bucketDuration = in.readLong();
-        bucketStart = readLongArray(in);
-        rx = readLongArray(in);
-        tx = readLongArray(in);
-        bucketCount = bucketStart.length;
+        switch (version) {
+            case VERSION_CURRENT: {
+                bucketDuration = in.readLong();
+                bucketStart = readLongArray(in);
+                rx = readLongArray(in);
+                tx = readLongArray(in);
+                bucketCount = bucketStart.length;
+                break;
+            }
+            default: {
+                throw new ProtocolException("unexpected version: " + version);
+            }
+        }
     }
 
     public void writeToStream(DataOutputStream out) throws IOException {
-        out.writeInt(VERSION);
+        out.writeInt(VERSION_CURRENT);
         out.writeLong(bucketDuration);
         writeLongArray(out, bucketStart, bucketCount);
         writeLongArray(out, rx, bucketCount);
@@ -192,12 +202,37 @@ public class NetworkStatsHistory implements Parcelable {
         }
     }
 
+    /**
+     * @deprecated only for temporary testing
+     */
+    @Deprecated
+    public void generateRandom(long start, long end, long rx, long tx) {
+        ensureBuckets(start, end);
+
+        final Random r = new Random();
+        while (rx > 1024 && tx > 1024) {
+            final long curStart = randomLong(r, start, end);
+            final long curEnd = randomLong(r, curStart, end);
+            final long curRx = randomLong(r, 0, rx);
+            final long curTx = randomLong(r, 0, tx);
+
+            recordData(curStart, curEnd, curRx, curTx);
+
+            rx -= curRx;
+            tx -= curTx;
+        }
+    }
+
+    private static long randomLong(Random r, long start, long end) {
+        return (long) (start + (r.nextFloat() * (end - start)));
+    }
+
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
-        pw.println("NetworkStatsHistory:");
+        pw.print("NetworkStatsHistory: bucketDuration="); pw.println(bucketDuration);
         for (int i = 0; i < bucketCount; i++) {
             pw.print(prefix);
-            pw.print("  timestamp="); pw.print(bucketStart[i]);
+            pw.print("  bucketStart="); pw.print(bucketStart[i]);
             pw.print(" rx="); pw.print(rx[i]);
             pw.print(" tx="); pw.println(tx[i]);
         }

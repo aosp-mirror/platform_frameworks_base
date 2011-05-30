@@ -21,7 +21,17 @@ import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.SHUTDOWN;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.UID_ALL;
+import static android.provider.Settings.Secure.NETSTATS_DETAIL_BUCKET_DURATION;
+import static android.provider.Settings.Secure.NETSTATS_DETAIL_MAX_HISTORY;
+import static android.provider.Settings.Secure.NETSTATS_PERSIST_THRESHOLD;
+import static android.provider.Settings.Secure.NETSTATS_POLL_INTERVAL;
+import static android.provider.Settings.Secure.NETSTATS_SUMMARY_BUCKET_DURATION;
+import static android.provider.Settings.Secure.NETSTATS_SUMMARY_MAX_HISTORY;
+import static android.text.format.DateUtils.DAY_IN_MILLIS;
+import static android.text.format.DateUtils.HOUR_IN_MILLIS;
+import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.app.AlarmManager;
@@ -31,6 +41,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
 import android.net.IConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.NetworkInfo;
@@ -42,10 +53,11 @@ import android.os.HandlerThread;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
-import android.text.format.DateUtils;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TrustedTime;
 
 import com.google.android.collect.Lists;
@@ -55,6 +67,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Collect and persist detailed network statistics, and provide this data to
@@ -76,34 +89,42 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private PendingIntent mPollIntent;
 
-    // TODO: move tweakable params to Settings.Secure
     // TODO: listen for kernel push events through netd instead of polling
 
     private static final long KB_IN_BYTES = 1024;
+    private static final long MB_IN_BYTES = 1024 * KB_IN_BYTES;
+    private static final long GB_IN_BYTES = 1024 * MB_IN_BYTES;
 
-    private static final long POLL_INTERVAL = AlarmManager.INTERVAL_FIFTEEN_MINUTES;
-    private static final long SUMMARY_BUCKET_DURATION = 6 * DateUtils.HOUR_IN_MILLIS;
-    private static final long SUMMARY_MAX_HISTORY = 90 * DateUtils.DAY_IN_MILLIS;
+    private LongSecureSetting mPollInterval = new LongSecureSetting(
+            NETSTATS_POLL_INTERVAL, 15 * MINUTE_IN_MILLIS);
+    private LongSecureSetting mPersistThreshold = new LongSecureSetting(
+            NETSTATS_PERSIST_THRESHOLD, 64 * KB_IN_BYTES);
 
-    // TODO: remove these high-frequency testing values
-//    private static final long POLL_INTERVAL = 5 * DateUtils.SECOND_IN_MILLIS;
-//    private static final long SUMMARY_BUCKET_DURATION = 10 * DateUtils.SECOND_IN_MILLIS;
-//    private static final long SUMMARY_MAX_HISTORY = 2 * DateUtils.MINUTE_IN_MILLIS;
+    private LongSecureSetting mSummaryBucketDuration = new LongSecureSetting(
+            NETSTATS_SUMMARY_BUCKET_DURATION, 6 * HOUR_IN_MILLIS);
+    private LongSecureSetting mSummaryMaxHistory = new LongSecureSetting(
+            NETSTATS_SUMMARY_MAX_HISTORY, 90 * DAY_IN_MILLIS);
+    private LongSecureSetting mDetailBucketDuration = new LongSecureSetting(
+            NETSTATS_DETAIL_BUCKET_DURATION, 6 * HOUR_IN_MILLIS);
+    private LongSecureSetting mDetailMaxHistory = new LongSecureSetting(
+            NETSTATS_DETAIL_MAX_HISTORY, 90 * DAY_IN_MILLIS);
 
-    /** Minimum delta required to persist to disk. */
-    private static final long SUMMARY_PERSIST_THRESHOLD = 64 * KB_IN_BYTES;
-
-    private static final long TIME_CACHE_MAX_AGE = DateUtils.DAY_IN_MILLIS;
+    private static final long TIME_CACHE_MAX_AGE = DAY_IN_MILLIS;
 
     private final Object mStatsLock = new Object();
 
     /** Set of active ifaces during this boot. */
     private HashMap<String, InterfaceIdentity> mActiveIface = Maps.newHashMap();
-    /** Set of historical stats for known ifaces. */
-    private HashMap<InterfaceIdentity, NetworkStatsHistory> mStats = Maps.newHashMap();
 
-    private NetworkStats mLastPollStats;
-    private NetworkStats mLastPersistStats;
+    /** Set of historical stats for known ifaces. */
+    private HashMap<InterfaceIdentity, NetworkStatsHistory> mSummaryStats = Maps.newHashMap();
+    /** Set of historical stats for known UIDs. */
+    private SparseArray<NetworkStatsHistory> mDetailStats = new SparseArray<NetworkStatsHistory>();
+
+    private NetworkStats mLastSummaryPoll;
+    private NetworkStats mLastSummaryPersist;
+
+    private NetworkStats mLastDetailPoll;
 
     private final HandlerThread mHandlerThread;
     private final Handler mHandler;
@@ -161,7 +182,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     /**
      * Clear any existing {@link #ACTION_NETWORK_STATS_POLL} alarms, and
-     * reschedule based on current {@link #POLL_INTERVAL} value.
+     * reschedule based on current {@link #mPollInterval} value.
      */
     private void registerPollAlarmLocked() throws RemoteException {
         if (mPollIntent != null) {
@@ -173,7 +194,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         final long currentRealtime = SystemClock.elapsedRealtime();
         mAlarmManager.setInexactRepeating(
-                AlarmManager.ELAPSED_REALTIME, currentRealtime, POLL_INTERVAL, mPollIntent);
+                AlarmManager.ELAPSED_REALTIME, currentRealtime, mPollInterval.get(), mPollIntent);
     }
 
     @Override
@@ -184,9 +205,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         synchronized (mStatsLock) {
             // combine all interfaces that match template
             final String subscriberId = getActiveSubscriberId();
-            final NetworkStatsHistory combined = new NetworkStatsHistory(SUMMARY_BUCKET_DURATION);
-            for (InterfaceIdentity ident : mStats.keySet()) {
-                final NetworkStatsHistory history = mStats.get(ident);
+            final NetworkStatsHistory combined = new NetworkStatsHistory(
+                    mSummaryBucketDuration.get());
+            for (InterfaceIdentity ident : mSummaryStats.keySet()) {
+                final NetworkStatsHistory history = mSummaryStats.get(ident);
                 if (ident.matchesTemplate(networkTemplate, subscriberId)) {
                     // TODO: combine all matching history data into a single history
                 }
@@ -299,59 +321,97 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
                 : System.currentTimeMillis();
 
-        final NetworkStats current;
+        final NetworkStats summary;
+        final NetworkStats detail;
         try {
-            current = mNetworkManager.getNetworkStatsSummary();
+            summary = mNetworkManager.getNetworkStatsSummary();
+            detail = mNetworkManager.getNetworkStatsDetail();
         } catch (RemoteException e) {
             Slog.w(TAG, "problem reading network stats");
             return;
         }
 
+        performSummaryPollLocked(summary, currentTime);
+        performDetailPollLocked(detail, currentTime);
+
+        // decide if enough has changed to trigger persist
+        final NetworkStats persistDelta = computeStatsDelta(mLastSummaryPersist, summary);
+        final long persistThreshold = mPersistThreshold.get();
+        for (String iface : persistDelta.getUniqueIfaces()) {
+            final int index = persistDelta.findIndex(iface, UID_ALL);
+            if (persistDelta.rx[index] > persistThreshold
+                    || persistDelta.tx[index] > persistThreshold) {
+                writeStatsLocked();
+                mLastSummaryPersist = summary;
+                break;
+            }
+        }
+    }
+
+    /**
+     * Update {@link #mSummaryStats} historical usage.
+     */
+    private void performSummaryPollLocked(NetworkStats summary, long currentTime) {
         final ArrayList<String> unknownIface = Lists.newArrayList();
 
-        // update historical usage with delta since last poll
-        final NetworkStats pollDelta = computeStatsDelta(mLastPollStats, current);
-        final long timeStart = currentTime - pollDelta.elapsedRealtime;
-        for (String iface : pollDelta.getKnownIfaces()) {
+        final NetworkStats delta = computeStatsDelta(mLastSummaryPoll, summary);
+        final long timeStart = currentTime - delta.elapsedRealtime;
+        final long maxHistory = mSummaryMaxHistory.get();
+        for (String iface : delta.getUniqueIfaces()) {
             final InterfaceIdentity ident = mActiveIface.get(iface);
             if (ident == null) {
                 unknownIface.add(iface);
                 continue;
             }
 
-            final int index = pollDelta.findIndex(iface, UID_ALL);
-            final long rx = pollDelta.rx[index];
-            final long tx = pollDelta.tx[index];
+            final int index = delta.findIndex(iface, UID_ALL);
+            final long rx = delta.rx[index];
+            final long tx = delta.tx[index];
 
-            final NetworkStatsHistory history = findOrCreateHistoryLocked(ident);
+            final NetworkStatsHistory history = findOrCreateSummaryLocked(ident);
             history.recordData(timeStart, currentTime, rx, tx);
-            history.removeBucketsBefore(currentTime - SUMMARY_MAX_HISTORY);
+            history.removeBucketsBefore(currentTime - maxHistory);
         }
+        mLastSummaryPoll = summary;
 
         if (LOGD && unknownIface.size() > 0) {
             Slog.w(TAG, "unknown interfaces " + unknownIface.toString() + ", ignoring those stats");
         }
-
-        mLastPollStats = current;
-
-        // decide if enough has changed to trigger persist
-        final NetworkStats persistDelta = computeStatsDelta(mLastPersistStats, current);
-        for (String iface : persistDelta.getKnownIfaces()) {
-            final int index = persistDelta.findIndex(iface, UID_ALL);
-            if (persistDelta.rx[index] > SUMMARY_PERSIST_THRESHOLD
-                    || persistDelta.tx[index] > SUMMARY_PERSIST_THRESHOLD) {
-                writeStatsLocked();
-                mLastPersistStats = current;
-                break;
-            }
-        }
     }
 
-    private NetworkStatsHistory findOrCreateHistoryLocked(InterfaceIdentity ident) {
-        NetworkStatsHistory stats = mStats.get(ident);
+    /**
+     * Update {@link #mDetailStats} historical usage.
+     */
+    private void performDetailPollLocked(NetworkStats detail, long currentTime) {
+        final NetworkStats delta = computeStatsDelta(mLastDetailPoll, detail);
+        final long timeStart = currentTime - delta.elapsedRealtime;
+        final long maxHistory = mDetailMaxHistory.get();
+        for (int uid : delta.getUniqueUids()) {
+            final int index = delta.findIndex(IFACE_ALL, uid);
+            final long rx = delta.rx[index];
+            final long tx = delta.tx[index];
+
+            final NetworkStatsHistory history = findOrCreateDetailLocked(uid);
+            history.recordData(timeStart, currentTime, rx, tx);
+            history.removeBucketsBefore(currentTime - maxHistory);
+        }
+        mLastDetailPoll = detail;
+    }
+
+    private NetworkStatsHistory findOrCreateSummaryLocked(InterfaceIdentity ident) {
+        NetworkStatsHistory stats = mSummaryStats.get(ident);
         if (stats == null) {
-            stats = new NetworkStatsHistory(SUMMARY_BUCKET_DURATION);
-            mStats.put(ident, stats);
+            stats = new NetworkStatsHistory(mSummaryBucketDuration.get());
+            mSummaryStats.put(ident, stats);
+        }
+        return stats;
+    }
+
+    private NetworkStatsHistory findOrCreateDetailLocked(int uid) {
+        NetworkStatsHistory stats = mDetailStats.get(uid);
+        if (stats == null) {
+            stats = new NetworkStatsHistory(mDetailBucketDuration.get());
+            mDetailStats.put(uid, stats);
         }
         return stats;
     }
@@ -380,18 +440,89 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         mContext.enforceCallingOrSelfPermission(DUMP, TAG);
 
-        pw.println("Active interfaces:");
-        for (String iface : mActiveIface.keySet()) {
-            final InterfaceIdentity ident = mActiveIface.get(iface);
-            pw.print("  iface="); pw.print(iface);
-            pw.print(" ident="); pw.println(ident.toString());
+        final HashSet<String> argSet = new HashSet<String>();
+        for (String arg : args) {
+            argSet.add(arg);
         }
 
-        pw.println("Known historical stats:");
-        for (InterfaceIdentity ident : mStats.keySet()) {
-            final NetworkStatsHistory stats = mStats.get(ident);
-            pw.print("  ident="); pw.println(ident.toString());
-            stats.dump("    ", pw);
+        synchronized (mStatsLock) {
+            // TODO: remove this testing code, since it corrupts stats
+            if (argSet.contains("generate")) {
+                generateRandomLocked();
+                pw.println("Generated stub stats");
+                return;
+            }
+
+            pw.println("Active interfaces:");
+            for (String iface : mActiveIface.keySet()) {
+                final InterfaceIdentity ident = mActiveIface.get(iface);
+                pw.print("  iface="); pw.print(iface);
+                pw.print(" ident="); pw.println(ident.toString());
+            }
+
+            pw.println("Known historical stats:");
+            for (InterfaceIdentity ident : mSummaryStats.keySet()) {
+                final NetworkStatsHistory stats = mSummaryStats.get(ident);
+                pw.print("  ident="); pw.println(ident.toString());
+                stats.dump("    ", pw);
+            }
+
+            if (argSet.contains("detail")) {
+                pw.println("Known detail stats:");
+                for (int i = 0; i < mDetailStats.size(); i++) {
+                    final int uid = mDetailStats.keyAt(i);
+                    final NetworkStatsHistory stats = mDetailStats.valueAt(i);
+                    pw.print("  UID="); pw.println(uid);
+                    stats.dump("    ", pw);
+                }
+            }
+        }
+    }
+
+    /**
+     * @deprecated only for temporary testing
+     */
+    @Deprecated
+    private void generateRandomLocked() {
+        long end = System.currentTimeMillis();
+        long start = end - mSummaryMaxHistory.get();
+        long rx = 3 * GB_IN_BYTES;
+        long tx = 2 * GB_IN_BYTES;
+
+        mSummaryStats.clear();
+        for (InterfaceIdentity ident : mActiveIface.values()) {
+            final NetworkStatsHistory stats = findOrCreateSummaryLocked(ident);
+            stats.generateRandom(start, end, rx, tx);
+        }
+
+        end = System.currentTimeMillis();
+        start = end - mDetailMaxHistory.get();
+        rx = 500 * MB_IN_BYTES;
+        tx = 100 * MB_IN_BYTES;
+
+        mDetailStats.clear();
+        for (ApplicationInfo info : mContext.getPackageManager().getInstalledApplications(0)) {
+            final int uid = info.uid;
+            final NetworkStatsHistory stats = findOrCreateDetailLocked(uid);
+            stats.generateRandom(start, end, rx, tx);
+        }
+    }
+
+    private class LongSecureSetting {
+        private String mKey;
+        private long mDefaultValue;
+
+        public LongSecureSetting(String key, long defaultValue) {
+            mKey = key;
+            mDefaultValue = defaultValue;
+        }
+
+        public long get() {
+            if (mContext != null) {
+                return Settings.Secure.getLong(mContext.getContentResolver(), mKey, mDefaultValue);
+            } else {
+                return mDefaultValue;
+            }
         }
     }
 

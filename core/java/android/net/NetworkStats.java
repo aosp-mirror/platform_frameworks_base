@@ -19,6 +19,7 @@ package android.net;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.util.SparseBooleanArray;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
@@ -125,7 +126,7 @@ public class NetworkStats implements Parcelable {
     /**
      * Return list of unique interfaces known by this data structure.
      */
-    public String[] getKnownIfaces() {
+    public String[] getUniqueIfaces() {
         final HashSet<String> ifaces = new HashSet<String>();
         for (String iface : this.iface) {
             if (iface != IFACE_ALL) {
@@ -133,6 +134,23 @@ public class NetworkStats implements Parcelable {
             }
         }
         return ifaces.toArray(new String[ifaces.size()]);
+    }
+
+    /**
+     * Return list of unique UIDs known by this data structure.
+     */
+    public int[] getUniqueUids() {
+        final SparseBooleanArray uids = new SparseBooleanArray();
+        for (int uid : this.uid) {
+            uids.put(uid, true);
+        }
+
+        final int size = uids.size();
+        final int[] result = new int[size];
+        for (int i = 0; i < size; i++) {
+            result[i] = uids.keyAt(i);
+        }
+        return result;
     }
 
     /**

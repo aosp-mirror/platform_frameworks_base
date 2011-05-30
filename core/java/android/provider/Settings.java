@@ -3795,6 +3795,19 @@ public final class Settings {
         public static final String DREAM_TIMEOUT =
                 "dream_timeout";
 
+        /** {@hide} */
+        public static final String NETSTATS_POLL_INTERVAL = "netstats_poll_interval";
+        /** {@hide} */
+        public static final String NETSTATS_PERSIST_THRESHOLD = "netstats_persist_threshold";
+        /** {@hide} */
+        public static final String NETSTATS_SUMMARY_BUCKET_DURATION = "netstats_summary_bucket_duration";
+        /** {@hide} */
+        public static final String NETSTATS_SUMMARY_MAX_HISTORY = "netstats_summary_max_history";
+        /** {@hide} */
+        public static final String NETSTATS_DETAIL_BUCKET_DURATION = "netstats_detail_bucket_duration";
+        /** {@hide} */
+        public static final String NETSTATS_DETAIL_MAX_HISTORY = "netstats_detail_max_history";
+
         /**
          * @hide
          */
