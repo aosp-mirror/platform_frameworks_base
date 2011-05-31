@@ -92,10 +92,10 @@ private:
         *outY = 0;
     }
 
-    virtual void fade() {
+    virtual void fade(Transition transition) {
     }
 
-    virtual void unfade() {
+    virtual void unfade(Transition transition) {
     }
 
     virtual void setPresentation(Presentation presentation) {

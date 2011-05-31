@@ -1048,6 +1048,14 @@ private:
         float referenceGestureX;  // reference gesture X/Y coordinates in pixels
         float referenceGestureY;
 
+        // Distance that each pointer has traveled which has not yet been
+        // subsumed into the reference gesture position.
+        BitSet32 referenceIdBits;
+        struct Delta {
+            float dx, dy;
+        };
+        Delta referenceDeltas[MAX_POINTER_ID + 1];
+
         // Describes how touch ids are mapped to gesture ids for freeform gestures.
         uint32_t freeformTouchToGestureIdMap[MAX_POINTER_ID + 1];
 
