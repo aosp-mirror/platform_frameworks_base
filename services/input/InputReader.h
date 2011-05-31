@@ -40,6 +40,109 @@ class InputMapper;
 
 
 /*
+ * Input reader configuration.
+ *
+ * Specifies various options that modify the behavior of the input reader.
+ */
+struct InputReaderConfiguration {
+    // Determines whether to turn on some hacks we have to improve the touch interaction with a
+    // certain device whose screen currently is not all that good.
+    bool filterTouchEvents;
+
+    // Determines whether to turn on some hacks to improve touch interaction with another device
+    // where touch coordinate data can get corrupted.
+    bool filterJumpyTouchEvents;
+
+    // Gets the amount of time to disable virtual keys after the screen is touched
+    // in order to filter out accidental virtual key presses due to swiping gestures
+    // or taps near the edge of the display.  May be 0 to disable the feature.
+    nsecs_t virtualKeyQuietTime;
+
+    // The excluded device names for the platform.
+    // Devices with these names will be ignored.
+    Vector<String8> excludedDeviceNames;
+
+    // Quiet time between certain pointer gesture transitions.
+    // Time to allow for all fingers or buttons to settle into a stable state before
+    // starting a new gesture.
+    nsecs_t pointerGestureQuietInterval;
+
+    // The minimum speed that a pointer must travel for us to consider switching the active
+    // touch pointer to it during a drag.  This threshold is set to avoid switching due
+    // to noise from a finger resting on the touch pad (perhaps just pressing it down).
+    float pointerGestureDragMinSwitchSpeed; // in pixels per second
+
+    // Tap gesture delay time.
+    // The time between down and up must be less than this to be considered a tap.
+    nsecs_t pointerGestureTapInterval;
+
+    // Tap drag gesture delay time.
+    // The time between the previous tap's up and the next down must be less than
+    // this to be considered a drag.  Otherwise, the previous tap is finished and a
+    // new tap begins.
+    //
+    // Note that the previous tap will be held down for this entire duration so this
+    // interval must be shorter than the long press timeout.
+    nsecs_t pointerGestureTapDragInterval;
+
+    // The distance in pixels that the pointer is allowed to move from initial down
+    // to up and still be called a tap.
+    float pointerGestureTapSlop; // in pixels
+
+    // Time after the first touch points go down to settle on an initial centroid.
+    // This is intended to be enough time to handle cases where the user puts down two
+    // fingers at almost but not quite exactly the same time.
+    nsecs_t pointerGestureMultitouchSettleInterval;
+
+    // The transition from PRESS to SWIPE or FREEFORM gesture mode is made when
+    // both of the pointers are moving at least this fast.
+    float pointerGestureMultitouchMinSpeed; // in pixels per second
+
+    // The transition from PRESS to SWIPE gesture mode can only occur when the
+    // cosine of the angle between the two vectors is greater than or equal to than this value
+    // which indicates that the vectors are oriented in the same direction.
+    // When the vectors are oriented in the exactly same direction, the cosine is 1.0.
+    // (In exactly opposite directions, the cosine is -1.0.)
+    float pointerGestureSwipeTransitionAngleCosine;
+
+    // The transition from PRESS to SWIPE gesture mode can only occur when the
+    // fingers are no more than this far apart relative to the diagonal size of
+    // the touch pad.  For example, a ratio of 0.5 means that the fingers must be
+    // no more than half the diagonal size of the touch pad apart.
+    float pointerGestureSwipeMaxWidthRatio;
+
+    // The gesture movement speed factor relative to the size of the display.
+    // Movement speed applies when the fingers are moving in the same direction.
+    // Without acceleration, a full swipe of the touch pad diagonal in movement mode
+    // will cover this portion of the display diagonal.
+    float pointerGestureMovementSpeedRatio;
+
+    // The gesture zoom speed factor relative to the size of the display.
+    // Zoom speed applies when the fingers are mostly moving relative to each other
+    // to execute a scale gesture or similar.
+    // Without acceleration, a full swipe of the touch pad diagonal in zoom mode
+    // will cover this portion of the display diagonal.
+    float pointerGestureZoomSpeedRatio;
+
+    InputReaderConfiguration() :
+            filterTouchEvents(false),
+            filterJumpyTouchEvents(false),
+            virtualKeyQuietTime(0),
+            pointerGestureQuietInterval(100 * 1000000LL), // 100 ms
+            pointerGestureDragMinSwitchSpeed(50), // 50 pixels per second
+            pointerGestureTapInterval(150 * 1000000LL), // 150 ms
+            pointerGestureTapDragInterval(150 * 1000000LL), // 150 ms
+            pointerGestureTapSlop(10.0f), // 10 pixels
+            pointerGestureMultitouchSettleInterval(100 * 1000000LL), // 100 ms
+            pointerGestureMultitouchMinSpeed(150.0f), // 150 pixels per second
+            pointerGestureSwipeTransitionAngleCosine(0.5f), // cosine of 45degrees
+            pointerGestureSwipeMaxWidthRatio(0.333f),
+            pointerGestureMovementSpeedRatio(0.8f),
+            pointerGestureZoomSpeedRatio(0.3f) { }
+};
+
+
+/*
  * Input reader policy interface.
  *
  * The input reader policy is used by the input reader to interact with the Window Manager
@@ -68,24 +171,8 @@ public:
     virtual bool getDisplayInfo(int32_t displayId,
             int32_t* width, int32_t* height, int32_t* orientation) = 0;
 
-    /* Determines whether to turn on some hacks we have to improve the touch interaction with a
-     * certain device whose screen currently is not all that good.
-     */
-    virtual bool filterTouchEvents() = 0;
-
-    /* Determines whether to turn on some hacks to improve touch interaction with another device
-     * where touch coordinate data can get corrupted.
-     */
-    virtual bool filterJumpyTouchEvents() = 0;
-
-    /* Gets the amount of time to disable virtual keys after the screen is touched
-     * in order to filter out accidental virtual key presses due to swiping gestures
-     * or taps near the edge of the display.  May be 0 to disable the feature.
-     */
-    virtual nsecs_t getVirtualKeyQuietTime() = 0;
-
-    /* Gets the excluded device names for the platform. */
-    virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) = 0;
+    /* Gets the input reader configuration. */
+    virtual void getReaderConfiguration(InputReaderConfiguration* outConfig) = 0;
 
     /* Gets a pointer controller associated with the specified cursor device (ie. a mouse). */
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId) = 0;
@@ -162,6 +249,7 @@ public:
     virtual void requestTimeoutAtTime(nsecs_t when) = 0;
 
     virtual InputReaderPolicyInterface* getPolicy() = 0;
+    virtual const InputReaderConfiguration* getConfig() = 0;
     virtual InputDispatcherInterface* getDispatcher() = 0;
     virtual EventHubInterface* getEventHub() = 0;
 };
@@ -212,7 +300,10 @@ private:
     sp<InputReaderPolicyInterface> mPolicy;
     sp<InputDispatcherInterface> mDispatcher;
 
+    InputReaderConfiguration mConfig;
+
     virtual InputReaderPolicyInterface* getPolicy() { return mPolicy.get(); }
+    virtual const InputReaderConfiguration* getConfig() { return &mConfig; }
     virtual InputDispatcherInterface* getDispatcher() { return mDispatcher.get(); }
     virtual EventHubInterface* getEventHub() { return mEventHub.get(); }
 
@@ -353,6 +444,7 @@ public:
     inline const String8 getDeviceName() { return mDevice->getName(); }
     inline InputReaderContext* getContext() { return mContext; }
     inline InputReaderPolicyInterface* getPolicy() { return mContext->getPolicy(); }
+    inline const InputReaderConfiguration* getConfig() { return mContext->getConfig(); }
     inline InputDispatcherInterface* getDispatcher() { return mContext->getDispatcher(); }
     inline EventHubInterface* getEventHub() { return mContext->getEventHub(); }
 
@@ -665,6 +757,9 @@ protected:
     uint32_t mTouchSource; // sources when reporting touch data
     uint32_t mPointerSource; // sources when reporting pointer gestures
 
+    // The reader's configuration.
+    const InputReaderConfiguration* mConfig;
+
     // Immutable configuration parameters.
     struct Parameters {
         enum DeviceType {
@@ -680,7 +775,6 @@ protected:
         bool useBadTouchFilter;
         bool useJumpyTouchFilter;
         bool useAveragingTouchFilter;
-        nsecs_t virtualKeyQuietTime;
 
         enum GestureMode {
             GESTURE_MODE_POINTER,
@@ -939,6 +1033,8 @@ private:
             // Exactly one finger dragging following a tap.
             // Pointer follows the active finger.
             // Emits DOWN, MOVE and UP events at the pointer location.
+            //
+            // Detect double-taps when the finger goes up while in TAP_DRAG mode.
             TAP_DRAG,
 
             // Button is pressed.
@@ -949,6 +1045,8 @@ private:
             // Exactly one finger, button is not pressed.
             // Pointer follows the active finger.
             // Emits HOVER_MOVE events at the pointer location.
+            //
+            // Detect taps when the finger goes up while in HOVER mode.
             HOVER,
 
             // Exactly two fingers but neither have moved enough to clearly indicate
