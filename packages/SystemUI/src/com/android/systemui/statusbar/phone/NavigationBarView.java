@@ -36,6 +36,8 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 
 public class NavigationBarView extends LinearLayout {
+    final static boolean NAVBAR_ALWAYS_AT_RIGHT = true;
+
     protected IStatusBarService mBarService;
     final Display mDisplay;
     View[] mRotatedViews = new View[4];
@@ -88,7 +90,9 @@ public class NavigationBarView extends LinearLayout {
 
         mRotatedViews[Surface.ROTATION_90] = findViewById(R.id.rot90);
         
-        mRotatedViews[Surface.ROTATION_270] = findViewById(R.id.rot270);
+        mRotatedViews[Surface.ROTATION_270] = NAVBAR_ALWAYS_AT_RIGHT
+                                                ? findViewById(R.id.rot90)
+                                                : findViewById(R.id.rot270);
     }
 
     @Override

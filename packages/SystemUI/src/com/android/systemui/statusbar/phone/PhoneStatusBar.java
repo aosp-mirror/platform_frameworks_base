@@ -360,7 +360,9 @@ public class PhoneStatusBar extends StatusBar {
                 break;
             case Surface.ROTATION_270:
                 // device has been turned 90deg clockwise
-                lp.gravity = Gravity.LEFT | Gravity.FILL_VERTICAL;
+                lp.gravity = (NavigationBarView.NAVBAR_ALWAYS_AT_RIGHT ? Gravity.RIGHT
+                                                                       : Gravity.LEFT) 
+                             | Gravity.FILL_VERTICAL;
                 break;
             default:
                 lp.gravity = Gravity.BOTTOM | Gravity.FILL_HORIZONTAL;
