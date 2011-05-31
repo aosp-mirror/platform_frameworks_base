@@ -287,7 +287,7 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
         return false;
     }
 
-    public SurfaceTexture getSurfaceTexture() {
+    public SurfaceTexture getSurfaceTexture(int videoLayerId) {
         return null;
     }
 
@@ -313,6 +313,11 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
 
     protected void switchProgressView(boolean playerBuffering) {
         // Only used in HTML5VideoFullScreen
+    }
+
+    public boolean surfaceTextureDeleted() {
+        // Only meaningful for HTML5VideoInline
+        return false;
     }
 
 }

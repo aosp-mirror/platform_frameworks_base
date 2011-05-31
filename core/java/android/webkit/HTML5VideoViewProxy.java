@@ -106,12 +106,14 @@ class HTML5VideoViewProxy extends Handler
         public static void setBaseLayer(int layer) {
             // Don't do this for full screen mode.
             if (mHTML5VideoView != null
-                    && !mHTML5VideoView.isFullScreenMode()) {
+                && !mHTML5VideoView.isFullScreenMode()
+                && !mHTML5VideoView.surfaceTextureDeleted()) {
                 mBaseLayer = layer;
-                SurfaceTexture surfTexture = mHTML5VideoView.getSurfaceTexture();
-                int textureName = mHTML5VideoView.getTextureName();
 
                 int currentVideoLayerId = mHTML5VideoView.getVideoLayerId();
+                SurfaceTexture surfTexture = mHTML5VideoView.getSurfaceTexture(currentVideoLayerId);
+                int textureName = mHTML5VideoView.getTextureName();
+
                 if (layer != 0 && surfTexture != null && currentVideoLayerId != -1) {
                     int playerState = mHTML5VideoView.getCurrentState();
                     if (mHTML5VideoView.getPlayerBuffering())
@@ -177,8 +179,8 @@ class HTML5VideoViewProxy extends Handler
             }
 
             if (backFromFullScreenMode
-                ||  currentVideoLayerId != videoLayerId
-                || mHTML5VideoView.getSurfaceTexture() == null) {
+                || currentVideoLayerId != videoLayerId
+                || mHTML5VideoView.surfaceTextureDeleted()) {
                 // Here, we handle the case when switching to a new video,
                 // either inside a WebView or across WebViews
                 // For switching videos within a WebView or across the WebView,

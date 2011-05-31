@@ -12,10 +12,15 @@ import android.opengl.GLES20;
  */
 public class HTML5VideoInline extends HTML5VideoView{
 
-    // Due to the fact that SurfaceTexture consume a lot of memory, we make it
-    // as static. m_textureNames is the texture bound with this SurfaceTexture.
+    // Due to the fact that the decoder consume a lot of memory, we make the
+    // surface texture as singleton. But the GL texture (m_textureNames)
+    // associated with the surface texture can be used for showing the screen
+    // shot when paused, so they are not singleton.
     private static SurfaceTexture mSurfaceTexture = null;
-    private static int[] mTextureNames;
+    private int[] mTextureNames;
+    // Every time when the VideoLayer Id change, we need to recreate the
+    // SurfaceTexture in order to delete the old video's decoder memory.
+    private static int mVideoLayerUsingSurfaceTexture = -1;
 
     // Video control FUNCTIONS:
     @Override
@@ -28,11 +33,12 @@ public class HTML5VideoInline extends HTML5VideoView{
     HTML5VideoInline(int videoLayerId, int position,
             boolean autoStart) {
         init(videoLayerId, position, autoStart);
+        mTextureNames = null;
     }
 
     @Override
     public void decideDisplayMode() {
-        mPlayer.setTexture(getSurfaceTextureInstance());
+        mPlayer.setTexture(getSurfaceTexture(getVideoLayerId()));
     }
 
     // Normally called immediately after setVideoURI. But for full screen,
@@ -52,31 +58,38 @@ public class HTML5VideoInline extends HTML5VideoView{
     // Inline Video specific FUNCTIONS:
 
     @Override
-    public SurfaceTexture getSurfaceTexture() {
+    public SurfaceTexture getSurfaceTexture(int videoLayerId) {
+        // Create the surface texture.
+        if (videoLayerId != mVideoLayerUsingSurfaceTexture
+            || mSurfaceTexture == null) {
+            if (mTextureNames == null) {
+                mTextureNames = new int[1];
+                GLES20.glGenTextures(1, mTextureNames, 0);
+            }
+            mSurfaceTexture = new SurfaceTexture(mTextureNames[0]);
+        }
+        mVideoLayerUsingSurfaceTexture = videoLayerId;
         return mSurfaceTexture;
+    }
+
+    public boolean surfaceTextureDeleted() {
+        return (mSurfaceTexture == null);
     }
 
     @Override
     public void deleteSurfaceTexture() {
         mSurfaceTexture = null;
+        mVideoLayerUsingSurfaceTexture = -1;
         return;
-    }
-
-    // SurfaceTexture is a singleton here , too
-    private SurfaceTexture getSurfaceTextureInstance() {
-        // Create the surface texture.
-        if (mSurfaceTexture == null)
-        {
-            mTextureNames = new int[1];
-            GLES20.glGenTextures(1, mTextureNames, 0);
-            mSurfaceTexture = new SurfaceTexture(mTextureNames[0]);
-        }
-        return mSurfaceTexture;
     }
 
     @Override
     public int getTextureName() {
-        return mTextureNames[0];
+        if (mTextureNames != null) {
+            return mTextureNames[0];
+        } else {
+            return 0;
+        }
     }
 
     private void setFrameAvailableListener(SurfaceTexture.OnFrameAvailableListener l) {
