@@ -345,18 +345,12 @@ public class Gravity
      * if horizontal direction is LTR, then BEFORE will set LEFT and AFTER will set RIGHT.
      * if horizontal direction is RTL, then BEFORE will set RIGHT and AFTER will set LEFT.
      *
-     * If no horizontal direction is found, then just add LEFT to the existing gravity
-     *
      * @param gravity The gravity to convert to absolute (horizontal) values.
      * @param isRtl Whether the layout is right-to-left.
      * @return gravity converted to absolute (horizontal) values.
      */
     public static int getAbsoluteGravity(int gravity, boolean isRtl) {
         int result = gravity;
-        // Set default gravity, if no horizontal gravity is specified
-        if ((result & HORIZONTAL_GRAVITY_MASK) == 0) {
-            result |= Gravity.LEFT;
-        }
         // If layout is script specific and gravity is horizontal relative (BEFORE or AFTER)
         if ((result & RELATIVE_HORIZONTAL_DIRECTION) > 0) {
             if ((result & Gravity.BEFORE) == Gravity.BEFORE) {
