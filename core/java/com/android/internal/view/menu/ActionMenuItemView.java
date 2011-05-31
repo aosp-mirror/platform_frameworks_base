@@ -18,6 +18,7 @@ package com.android.internal.view.menu;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.Button;
@@ -103,6 +104,12 @@ public class ActionMenuItemView extends LinearLayout
         // TODO Support checkable action items
     }
 
+    private void updateTextButtonVisibility() {
+        boolean visible = !TextUtils.isEmpty(mTextButton.getText());
+        visible = visible && (mImageButton.getDrawable() == null || mItemData.showsTextAsAction());
+        mTextButton.setVisibility(visible ? VISIBLE : GONE);
+    }
+
     public void setIcon(Drawable icon) {
         mImageButton.setImageDrawable(icon);
         if (icon != null) {
@@ -111,9 +118,9 @@ public class ActionMenuItemView extends LinearLayout
             mImageButton.setVisibility(GONE);
         }
 
-        mTextButton.setVisibility(icon == null || mItemData.showsTextAsAction() ? VISIBLE : GONE);
+        updateTextButtonVisibility();
     }
-    
+
     public boolean hasText() {
         return mTextButton.getVisibility() != GONE;
     }
@@ -128,10 +135,9 @@ public class ActionMenuItemView extends LinearLayout
         // populate accessibility description with title
         setContentDescription(title);
 
-        if (mImageButton.getDrawable() == null || mItemData.showsTextAsAction()) {
-            mTextButton.setText(mTitle);
-            mTextButton.setVisibility(VISIBLE);
-        }
+        mTextButton.setText(mTitle);
+
+        updateTextButtonVisibility();
     }
 
     public boolean showsIcon() {

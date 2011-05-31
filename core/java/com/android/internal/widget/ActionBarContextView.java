@@ -15,25 +15,25 @@
  */
 package com.android.internal.widget;
 
-import com.android.internal.R;
-import com.android.internal.view.menu.ActionMenuPresenter;
-import com.android.internal.view.menu.ActionMenuView;
-import com.android.internal.view.menu.MenuBuilder;
-
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.android.internal.R;
+import com.android.internal.view.menu.ActionMenuPresenter;
+import com.android.internal.view.menu.ActionMenuView;
+import com.android.internal.view.menu.MenuBuilder;
 
 /**
  * @hide
@@ -130,26 +130,23 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
             mTitleLayout = (LinearLayout) getChildAt(getChildCount() - 1);
             mTitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_title);
             mSubtitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_subtitle);
-            if (mTitle != null) {
-                mTitleView.setText(mTitle);
-                if (mTitleStyleRes != 0) {
-                    mTitleView.setTextAppearance(mContext, mTitleStyleRes);
-                }
+            if (mTitleStyleRes != 0) {
+                mTitleView.setTextAppearance(mContext, mTitleStyleRes);
             }
-            if (mSubtitle != null) {
-                mSubtitleView.setText(mSubtitle);
-                if (mSubtitleStyleRes != 0) {
-                    mSubtitleView.setTextAppearance(mContext, mSubtitleStyleRes);
-                }
-                mSubtitleView.setVisibility(VISIBLE);
+            if (mSubtitleStyleRes != 0) {
+                mSubtitleView.setTextAppearance(mContext, mSubtitleStyleRes);
             }
-        } else {
-            mTitleView.setText(mTitle);
-            mSubtitleView.setText(mSubtitle);
-            mSubtitleView.setVisibility(mSubtitle != null ? VISIBLE : GONE);
-            if (mTitleLayout.getParent() == null) {
-                addView(mTitleLayout);
-            }
+        }
+
+        mTitleView.setText(mTitle);
+        mSubtitleView.setText(mSubtitle);
+
+        final boolean hasTitle = !TextUtils.isEmpty(mTitle);
+        final boolean hasSubtitle = !TextUtils.isEmpty(mSubtitle);
+        mSubtitleView.setVisibility(hasSubtitle ? VISIBLE : GONE);
+        mTitleLayout.setVisibility(hasTitle || hasSubtitle ? VISIBLE : GONE);
+        if (mTitleLayout.getParent() == null) {
+            addView(mTitleLayout);
         }
     }
 
@@ -228,6 +225,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         mAnimateInOnLayout = false;
     }
 
+    @Override
     public boolean showOverflowMenu() {
         if (mMenuPresenter != null) {
             return mMenuPresenter.showOverflowMenu();
@@ -235,6 +233,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         return false;
     }
 
+    @Override
     public boolean hideOverflowMenu() {
         if (mMenuPresenter != null) {
             return mMenuPresenter.hideOverflowMenu();
@@ -242,6 +241,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         return false;
     }
 
+    @Override
     public boolean isOverflowMenuShowing() {
         if (mMenuPresenter != null) {
             return mMenuPresenter.isOverflowMenuShowing();
