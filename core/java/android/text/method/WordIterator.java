@@ -213,7 +213,8 @@ public class WordIterator implements Selection.PositionIterator {
 
     private void checkOffsetIsValid(int offset) {
         if (offset < 0 || offset > mCurrent.length()) {
-            final String message = "Valid range is [0, " + mCurrent.length() + "]";
+            final String message = "Invalid offset: " + offset +
+                    ". Valid range is [0, " + mCurrent.length() + "]";
             throw new IllegalArgumentException(message);
         }
     }
