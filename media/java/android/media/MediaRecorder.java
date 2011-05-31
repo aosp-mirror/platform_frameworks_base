@@ -716,6 +716,12 @@ public class MediaRecorder
     /**
      * Stops recording. Call this after start(). Once recording is stopped,
      * you will have to configure it again as if it has just been constructed.
+     * Note that a RuntimeException is intentionally thrown to the
+     * application, if no valid audio/video data has been received when stop()
+     * is called. This happens if stop() is called immediately after
+     * start(). The failure lets the application take action accordingly to
+     * clean up the output file (delete the output file, for instance), since
+     * the output file is not properly constructed when this happens.
      *
      * @throws IllegalStateException if it is called before start()
      */
