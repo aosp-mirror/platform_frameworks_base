@@ -3455,8 +3455,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 mPointerGesture.currentGestureMode = PointerGesture::NEUTRAL;
                 mPointerGesture.currentGestureIdBits.clear();
 
-                mPointerController->setButtonState(0);
-
                 if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
                     mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
                     mPointerGesture.spotIdBits.clear();
@@ -3551,8 +3549,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         mPointerGesture.currentGestureMode = PointerGesture::QUIET;
         mPointerGesture.currentGestureIdBits.clear();
 
-        mPointerController->setButtonState(0);
-
         if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
             mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
             mPointerGesture.spotIdBits.clear();
@@ -3638,8 +3634,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_Y, y);
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
 
-        mPointerController->setButtonState(BUTTON_STATE_PRIMARY);
-
         if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
             if (activeTouchId >= 0) {
                 // Collapse all spots into one point at the pointer location.
@@ -3698,8 +3692,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                     mPointerGesture.currentGestureCoords[0].setAxisValue(
                             AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
 
-                    mPointerController->setButtonState(BUTTON_STATE_PRIMARY);
-
                     if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
                         mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_TAP;
                         mPointerGesture.spotIdBits.clear();
@@ -3732,8 +3724,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             mPointerGesture.activeGestureId = -1;
             mPointerGesture.currentGestureMode = PointerGesture::NEUTRAL;
             mPointerGesture.currentGestureIdBits.clear();
-
-            mPointerController->setButtonState(0);
 
             if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
                 mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
@@ -3814,8 +3804,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_Y, y);
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE,
                 down ? 1.0f : 0.0f);
-
-        mPointerController->setButtonState(down ? BUTTON_STATE_PRIMARY : 0);
 
         if (mLastTouch.pointerCount == 0 && mCurrentTouch.pointerCount != 0) {
             mPointerGesture.resetTap();
@@ -4067,8 +4055,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                     mPointerGesture.referenceGestureY);
             mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
 
-            mPointerController->setButtonState(BUTTON_STATE_PRIMARY);
-
             if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
                 mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_PRESS;
             }
@@ -4090,8 +4076,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_Y,
                     mPointerGesture.referenceGestureY);
             mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
-
-            mPointerController->setButtonState(0); // touch is not actually following the pointer
 
             if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
                 mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_SWIPE;
@@ -4194,8 +4178,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 #endif
             }
 
-            mPointerController->setButtonState(0); // touch is not actually following the pointer
-
             if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
                 mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_FREEFORM;
             }
@@ -4224,6 +4206,8 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             moveSpotsLocked();
         }
     }
+
+    mPointerController->setButtonState(mCurrentTouch.buttonState);
 
 #if DEBUG_GESTURES
     LOGD("Gestures: finishPreviousGesture=%s, cancelPreviousGesture=%s, "
