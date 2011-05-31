@@ -31,10 +31,29 @@ parent.link=index.html
         </li>
         <li><a href="#layoutopt">Optimizing Layouts with <code>layoutopt</code></a></li>
       </ol>
+      <h2>Related videos</h2>
+          <ol>
+              <li>
+<iframe title="Hierarchyviewer" 
+    width="272" height="234" 
+    src="http://www.youtube.com/embed/PAgE7saQUUY?rel=0&amp;hd=1" 
+    frameborder="0" allowfullscreen>
+</iframe>
+              </li>
+              <li>
+<iframe title="Pixel Perfect" 
+    width="272" height="234" 
+    src="http://www.youtube.com/embed/C45bMZGdN7Y?rel=0&amp;hd=1" 
+    frameborder="0" 
+    allowfullscreen>
+</iframe>
+              </li>
+          </ol>
     </div>
   </div>
 
-  <p>Sometimes your application's layout can slow down your application.
+  <p>
+Sometimes your application's layout can slow down your application.
   To help debug issues in your layout, the Android SDK provides the Hierarchy Viewer and
   <code>layoutopt</code> tools.
   </p>
