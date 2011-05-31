@@ -4144,10 +4144,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public boolean isLayoutRtl(Drawable who) {
         if (who == null) return false;
-        final TextView.Drawables drawables = mDrawables;
-        if (who == drawables.mDrawableLeft || who == drawables.mDrawableRight ||
-            who == drawables.mDrawableTop || who == drawables.mDrawableBottom) {
-            return isLayoutRtl();
+        if (mDrawables != null) {
+            final Drawables drawables = mDrawables;
+            if (who == drawables.mDrawableLeft || who == drawables.mDrawableRight ||
+                who == drawables.mDrawableTop || who == drawables.mDrawableBottom) {
+                return isLayoutRtl();
+            }
         }
         return super.isLayoutRtl(who);
     }
