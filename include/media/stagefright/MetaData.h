@@ -118,6 +118,9 @@ enum {
 
     // The language code for this media
     kKeyMediaLanguage     = 'lang',  // cstring
+
+    // To store the timed text format data
+    kKeyTextFormatData    = 'text',  // raw data
 };
 
 enum {

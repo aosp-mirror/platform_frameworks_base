@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include <binder/IPCThreadState.h>
+
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
@@ -27,9 +28,11 @@
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/FileSource.h>
 #include <media/stagefright/Utils.h>
+
 #include "include/AwesomePlayer.h"
 #include "TimedTextPlayer.h"
 #include "TimedTextParser.h"
+#include "TextDescriptions.h"
 
 namespace android {
 
@@ -92,10 +95,11 @@ status_t TimedTextPlayer::start(uint8_t index) {
         return BAD_VALUE;
     }
 
+    status_t err;
     if (index < mTextTrackVector.size()) { // start an in-band text
         mSource = mTextTrackVector.itemAt(index);
 
-        status_t err = mSource->start();
+        err = mSource->start();
 
         if (err != OK) {
             return err;
@@ -112,11 +116,15 @@ status_t TimedTextPlayer::start(uint8_t index) {
             mTextParser = new TimedTextParser();
         }
 
-        status_t err;
         if ((err = mTextParser->init(mOutOfBandSource, fileType)) != OK) {
             return err;
         }
         mTextType = kOutOfBandText;
+    }
+
+    // send sample description format
+    if ((err = extractAndSendGlobalDescriptions()) != OK) {
+        return err;
     }
 
     int64_t positionUs;
@@ -211,20 +219,16 @@ void TimedTextPlayer::onTextEvent() {
     }
     mTextEventPending = false;
 
+    if (mData.dataSize() > 0) {
+        notifyListener(MEDIA_TIMED_TEXT, &mData);
+        mData.freeData();
+    }
+
     MediaSource::ReadOptions options;
     if (mSeeking) {
         options.setSeekTo(mSeekTimeUs,
                 MediaSource::ReadOptions::SEEK_PREVIOUS_SYNC);
         mSeeking = false;
-
-        if (mTextType == kInBandText) {
-            if (mTextBuffer != NULL) {
-                mTextBuffer->release();
-                mTextBuffer = NULL;
-            }
-        } else {
-            mText.clear();
-        }
 
         notifyListener(MEDIA_TIMED_TEXT); //empty text to clear the screen
     }
@@ -233,37 +237,30 @@ void TimedTextPlayer::onTextEvent() {
     mObserver->getPosition(&positionUs);
 
     if (mTextType == kInBandText) {
-        if (mTextBuffer != NULL) {
-            uint8_t *tmp = (uint8_t *)(mTextBuffer->data());
-            size_t len = (*tmp) << 8 | (*(tmp + 1));
-
-            notifyListener(MEDIA_TIMED_TEXT,
-                           tmp + 2,
-                           len);
-
-            mTextBuffer->release();
-            mTextBuffer = NULL;
-
-        }
-
         if (mSource->read(&mTextBuffer, &options) != OK) {
             return;
         }
 
         mTextBuffer->meta_data()->findInt64(kKeyTime, &timeUs);
     } else {
-        if (mText.size() > 0) {
-            notifyListener(MEDIA_TIMED_TEXT,
-                           mText.c_str(),
-                           mText.size());
-            mText.clear();
-        }
-
         int64_t endTimeUs;
         if (mTextParser->getText(
                     &mText, &timeUs, &endTimeUs, &options) != OK) {
             return;
         }
+    }
+
+    if (timeUs > 0) {
+        extractAndAppendLocalDescriptions(timeUs);
+    }
+
+    if (mTextType == kInBandText) {
+        if (mTextBuffer != NULL) {
+            mTextBuffer->release();
+            mTextBuffer = NULL;
+        }
+    } else {
+        mText.clear();
     }
 
     //send the text now
@@ -297,7 +294,8 @@ status_t TimedTextPlayer::setParameter(int key, const Parcel &request) {
     Mutex::Autolock autoLock(mLock);
 
     if (key == KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE) {
-        String8 uri = request.readString8();
+        const String16 uri16 = request.readString16();
+        String8 uri = String8(uri16);
         KeyedVector<String8, String8> headers;
 
         // To support local subtitle file only for now
@@ -327,21 +325,92 @@ status_t TimedTextPlayer::setParameter(int key, const Parcel &request) {
     return INVALID_OPERATION;
 }
 
-void TimedTextPlayer::notifyListener(
-        int msg, const void *data, size_t size) {
+void TimedTextPlayer::notifyListener(int msg, const Parcel *parcel) {
     if (mListener != NULL) {
         sp<MediaPlayerBase> listener = mListener.promote();
 
         if (listener != NULL) {
-            if (size > 0) {
-                mData.freeData();
-                mData.write(data, size);
-
-                listener->sendEvent(msg, 0, 0, &mData);
+            if (parcel && (parcel->dataSize() > 0)) {
+                listener->sendEvent(msg, 0, 0, parcel);
             } else { // send an empty timed text to clear the screen
                 listener->sendEvent(msg);
             }
         }
     }
+}
+
+// Each text sample consists of a string of text, optionally with sample
+// modifier description. The modifier description could specify a new
+// text style for the string of text. These descriptions are present only
+// if they are needed. This method is used to extract the modifier
+// description and append it at the end of the text.
+status_t TimedTextPlayer::extractAndAppendLocalDescriptions(int64_t timeUs) {
+    const void *data;
+    size_t size = 0;
+    int32_t flag = TextDescriptions::LOCAL_DESCRIPTIONS;
+
+    if (mTextType == kInBandText) {
+        const char *mime;
+        CHECK(mSource->getFormat()->findCString(kKeyMIMEType, &mime));
+
+        if (!strcasecmp(mime, MEDIA_MIMETYPE_TEXT_3GPP)) {
+            flag |= TextDescriptions::IN_BAND_TEXT_3GPP;
+            data = mTextBuffer->data();
+            size = mTextBuffer->size();
+        } else {
+            // support 3GPP only for now
+            return ERROR_UNSUPPORTED;
+        }
+    } else {
+        data = mText.c_str();
+        size = mText.size();
+        flag |= TextDescriptions::OUT_OF_BAND_TEXT_SRT;
+    }
+
+    if ((size > 0) && (flag != TextDescriptions::LOCAL_DESCRIPTIONS)) {
+        mData.freeData();
+        return TextDescriptions::getParcelOfDescriptions(
+                (const uint8_t *)data, size, flag, timeUs / 1000, &mData);
+    }
+
+    return OK;
+}
+
+// To extract and send the global text descriptions for all the text samples
+// in the text track or text file.
+status_t TimedTextPlayer::extractAndSendGlobalDescriptions() {
+    const void *data;
+    size_t size = 0;
+    int32_t flag = TextDescriptions::GLOBAL_DESCRIPTIONS;
+
+    if (mTextType == kInBandText) {
+        const char *mime;
+        CHECK(mSource->getFormat()->findCString(kKeyMIMEType, &mime));
+
+        // support 3GPP only for now
+        if (!strcasecmp(mime, MEDIA_MIMETYPE_TEXT_3GPP)) {
+            uint32_t type;
+            // get the 'tx3g' box content. This box contains the text descriptions
+            // used to render the text track
+            if (!mSource->getFormat()->findData(
+                        kKeyTextFormatData, &type, &data, &size)) {
+                return ERROR_MALFORMED;
+            }
+
+            flag |= TextDescriptions::IN_BAND_TEXT_3GPP;
+        }
+    }
+
+    if ((size > 0) && (flag != TextDescriptions::GLOBAL_DESCRIPTIONS)) {
+        Parcel parcel;
+        if (TextDescriptions::getParcelOfDescriptions(
+                (const uint8_t *)data, size, flag, 0, &parcel) == OK) {
+            if (parcel.dataSize() > 0) {
+                notifyListener(MEDIA_TIMED_TEXT, &parcel);
+            }
+        }
+    }
+
+    return OK;
 }
 }
