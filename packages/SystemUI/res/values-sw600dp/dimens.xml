@@ -22,6 +22,9 @@
     <dimen name="status_bar_panel_bottom_offset">36dp</dimen>
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">8dp</dimen>
+    <!-- The width of the notification panel window -->
+    <dimen name="notification_panel_width">512dp</dimen>
+    <!-- The minimum height of the notification panel window -->
+    <dimen name="notification_panel_min_height">770dp</dimen>
 </resources>
-
 

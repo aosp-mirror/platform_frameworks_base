@@ -43,6 +43,7 @@ import android.os.ServiceManager;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
@@ -130,6 +131,7 @@ public class TabletStatusBar extends StatusBar implements
     InputMethodButton mInputMethodSwitchButton;
 
     NotificationPanel mNotificationPanel;
+    WindowManager.LayoutParams mNotificationPanelParams;
     NotificationPeekPanel mNotificationPeekWindow;
     ViewGroup mNotificationPeekRow;
     int mNotificationPeekIndex;
@@ -170,6 +172,7 @@ public class TabletStatusBar extends StatusBar implements
 
     protected void addPanelWindows() {
         final Context context = mContext;
+        final Resources res = mContext.getResources();
 
         // Notification Panel
         mNotificationPanel = (NotificationPanel)View.inflate(context,
@@ -197,11 +200,12 @@ public class TabletStatusBar extends StatusBar implements
 
         mStatusBarView.setIgnoreChildren(0, mNotificationTrigger, mNotificationPanel);
 
-        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                512, // ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
+        WindowManager.LayoutParams lp = mNotificationPanelParams = new WindowManager.LayoutParams(
+                res.getDimensionPixelSize(R.dimen.notification_panel_width),
+                getNotificationPanelHeight(),
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
@@ -303,6 +307,13 @@ public class TabletStatusBar extends StatusBar implements
         WindowManagerImpl.getDefault().addView(mInputMethodsPanel, lp);
     }
 
+    private int getNotificationPanelHeight() {
+        final Resources res = mContext.getResources();
+        final Display d = WindowManagerImpl.getDefault().getDefaultDisplay();
+        return Math.max(res.getDimensionPixelSize(R.dimen.notification_panel_min_height),
+                d.getHeight());
+    }
+
     @Override
     public void start() {
         super.start(); // will add the main bar view
@@ -311,6 +322,9 @@ public class TabletStatusBar extends StatusBar implements
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         loadDimens();
+        mNotificationPanelParams.height = getNotificationPanelHeight();
+        WindowManagerImpl.getDefault().updateViewLayout(mNotificationPanel,
+                mNotificationPanelParams);
     }
 
     protected void loadDimens() {
