@@ -72,6 +72,10 @@ static struct {
     jmethodID getKeyRepeatTimeout;
     jmethodID getKeyRepeatDelay;
     jmethodID getMaxEventsPerSecond;
+    jmethodID getTapTimeout;
+    jmethodID getDoubleTapTimeout;
+    jmethodID getLongPressTimeout;
+    jmethodID getTouchSlop;
     jmethodID getPointerLayer;
     jmethodID getPointerIcon;
 } gCallbacksClassInfo;
@@ -106,6 +110,16 @@ static struct {
 
 
 // --- Global functions ---
+
+template<typename T>
+inline static T min(const T& a, const T& b) {
+    return a < b ? a : b;
+}
+
+template<typename T>
+inline static T max(const T& a, const T& b) {
+    return a > b ? a : b;
+}
 
 static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
         const sp<InputApplicationHandle>& inputApplicationHandle) {
@@ -170,10 +184,7 @@ public:
 
     virtual bool getDisplayInfo(int32_t displayId,
             int32_t* width, int32_t* height, int32_t* orientation);
-    virtual bool filterTouchEvents();
-    virtual bool filterJumpyTouchEvents();
-    virtual nsecs_t getVirtualKeyQuietTime();
-    virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames);
+    virtual void getReaderConfiguration(InputReaderConfiguration* outConfig);
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId);
 
     /* --- InputDispatcherPolicyInterface implementation --- */
@@ -184,9 +195,8 @@ public:
     virtual nsecs_t notifyANR(const sp<InputApplicationHandle>& inputApplicationHandle,
             const sp<InputWindowHandle>& inputWindowHandle);
     virtual void notifyInputChannelBroken(const sp<InputWindowHandle>& inputWindowHandle);
-    virtual nsecs_t getKeyRepeatTimeout();
-    virtual nsecs_t getKeyRepeatDelay();
-    virtual int32_t getMaxEventsPerSecond();
+    virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig);
+    virtual bool isKeyRepeatEnabled();
     virtual void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags);
     virtual void interceptMotionBeforeQueueing(nsecs_t when, uint32_t& policyFlags);
     virtual bool interceptKeyBeforeDispatching(const sp<InputWindowHandle>& inputWindowHandle,
@@ -207,18 +217,6 @@ private:
     jobject mContextObj;
     jobject mCallbacksObj;
     sp<Looper> mLooper;
-
-    // Cached filtering policies.
-    int32_t mFilterTouchEvents;
-    int32_t mFilterJumpyTouchEvents;
-    nsecs_t mVirtualKeyQuietTime;
-
-    // Cached key repeat policy.
-    nsecs_t mKeyRepeatTimeout;
-    nsecs_t mKeyRepeatDelay;
-
-    // Cached throttling policy.
-    int32_t mMaxEventsPerSecond;
 
     Mutex mLock;
     struct Locked {
@@ -255,10 +253,7 @@ private:
 
 NativeInputManager::NativeInputManager(jobject contextObj,
         jobject callbacksObj, const sp<Looper>& looper) :
-        mLooper(looper),
-        mFilterTouchEvents(-1), mFilterJumpyTouchEvents(-1), mVirtualKeyQuietTime(-1),
-        mKeyRepeatTimeout(-1), mKeyRepeatDelay(-1),
-        mMaxEventsPerSecond(-1) {
+        mLooper(looper) {
     JNIEnv* env = jniEnv();
 
     mContextObj = env->NewGlobalRef(contextObj);
@@ -371,73 +366,68 @@ bool NativeInputManager::getDisplayInfo(int32_t displayId,
     return result;
 }
 
-bool NativeInputManager::filterTouchEvents() {
-    if (mFilterTouchEvents < 0) {
-        JNIEnv* env = jniEnv();
-
-        jboolean result = env->CallBooleanMethod(mCallbacksObj,
-                gCallbacksClassInfo.filterTouchEvents);
-        if (checkAndClearExceptionFromCallback(env, "filterTouchEvents")) {
-            result = false;
-        }
-
-        mFilterTouchEvents = result ? 1 : 0;
-    }
-    return mFilterTouchEvents;
-}
-
-bool NativeInputManager::filterJumpyTouchEvents() {
-    if (mFilterJumpyTouchEvents < 0) {
-        JNIEnv* env = jniEnv();
-
-        jboolean result = env->CallBooleanMethod(mCallbacksObj,
-                gCallbacksClassInfo.filterJumpyTouchEvents);
-        if (checkAndClearExceptionFromCallback(env, "filterJumpyTouchEvents")) {
-            result = false;
-        }
-
-        mFilterJumpyTouchEvents = result ? 1 : 0;
-    }
-    return mFilterJumpyTouchEvents;
-}
-
-nsecs_t NativeInputManager::getVirtualKeyQuietTime() {
-    if (mVirtualKeyQuietTime < 0) {
-        JNIEnv* env = jniEnv();
-
-        jint result = env->CallIntMethod(mCallbacksObj,
-                gCallbacksClassInfo.getVirtualKeyQuietTimeMillis);
-        if (checkAndClearExceptionFromCallback(env, "getVirtualKeyQuietTimeMillis")) {
-            result = 0;
-        }
-        if (result < 0) {
-            result = 0;
-        }
-
-        mVirtualKeyQuietTime = milliseconds_to_nanoseconds(result);
-    }
-    return mVirtualKeyQuietTime;
-}
-
-void NativeInputManager::getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) {
-    outExcludedDeviceNames.clear();
-
+void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outConfig) {
     JNIEnv* env = jniEnv();
 
-    jobjectArray result = jobjectArray(env->CallObjectMethod(mCallbacksObj,
+    jboolean filterTouchEvents = env->CallBooleanMethod(mCallbacksObj,
+            gCallbacksClassInfo.filterTouchEvents);
+    if (!checkAndClearExceptionFromCallback(env, "filterTouchEvents")) {
+        outConfig->filterTouchEvents = filterTouchEvents;
+    }
+
+    jboolean filterJumpyTouchEvents = env->CallBooleanMethod(mCallbacksObj,
+            gCallbacksClassInfo.filterJumpyTouchEvents);
+    if (!checkAndClearExceptionFromCallback(env, "filterJumpyTouchEvents")) {
+        outConfig->filterJumpyTouchEvents = filterJumpyTouchEvents;
+    }
+
+    jint virtualKeyQuietTime = env->CallIntMethod(mCallbacksObj,
+            gCallbacksClassInfo.getVirtualKeyQuietTimeMillis);
+    if (!checkAndClearExceptionFromCallback(env, "getVirtualKeyQuietTimeMillis")) {
+        outConfig->virtualKeyQuietTime = milliseconds_to_nanoseconds(virtualKeyQuietTime);
+    }
+
+    outConfig->excludedDeviceNames.clear();
+    jobjectArray excludedDeviceNames = jobjectArray(env->CallObjectMethod(mCallbacksObj,
             gCallbacksClassInfo.getExcludedDeviceNames));
-    if (! checkAndClearExceptionFromCallback(env, "getExcludedDeviceNames") && result) {
-        jsize length = env->GetArrayLength(result);
+    if (!checkAndClearExceptionFromCallback(env, "getExcludedDeviceNames") && excludedDeviceNames) {
+        jsize length = env->GetArrayLength(excludedDeviceNames);
         for (jsize i = 0; i < length; i++) {
-            jstring item = jstring(env->GetObjectArrayElement(result, i));
-
+            jstring item = jstring(env->GetObjectArrayElement(excludedDeviceNames, i));
             const char* deviceNameChars = env->GetStringUTFChars(item, NULL);
-            outExcludedDeviceNames.add(String8(deviceNameChars));
+            outConfig->excludedDeviceNames.add(String8(deviceNameChars));
             env->ReleaseStringUTFChars(item, deviceNameChars);
-
             env->DeleteLocalRef(item);
         }
-        env->DeleteLocalRef(result);
+        env->DeleteLocalRef(excludedDeviceNames);
+    }
+
+    jint tapTimeout = env->CallIntMethod(mCallbacksObj,
+            gCallbacksClassInfo.getTapTimeout);
+    if (!checkAndClearExceptionFromCallback(env, "getTapTimeout")) {
+        jint doubleTapTimeout = env->CallIntMethod(mCallbacksObj,
+                gCallbacksClassInfo.getDoubleTapTimeout);
+        if (!checkAndClearExceptionFromCallback(env, "getDoubleTapTimeout")) {
+            jint longPressTimeout = env->CallIntMethod(mCallbacksObj,
+                    gCallbacksClassInfo.getLongPressTimeout);
+            if (!checkAndClearExceptionFromCallback(env, "getLongPressTimeout")) {
+                outConfig->pointerGestureTapInterval = milliseconds_to_nanoseconds(tapTimeout);
+
+                // We must ensure that the tap-drag interval is significantly shorter than
+                // the long-press timeout because the tap is held down for the entire duration
+                // of the double-tap timeout.
+                jint tapDragInterval = max(min(longPressTimeout - 100,
+                        doubleTapTimeout), tapTimeout);
+                outConfig->pointerGestureTapDragInterval =
+                        milliseconds_to_nanoseconds(tapDragInterval);
+            }
+        }
+    }
+
+    jint touchSlop = env->CallIntMethod(mCallbacksObj,
+            gCallbacksClassInfo.getTouchSlop);
+    if (!checkAndClearExceptionFromCallback(env, "getTouchSlop")) {
+        outConfig->pointerGestureTapSlop = touchSlop;
     }
 }
 
@@ -559,54 +549,31 @@ void NativeInputManager::notifyInputChannelBroken(const sp<InputWindowHandle>& i
     }
 }
 
-nsecs_t NativeInputManager::getKeyRepeatTimeout() {
-    if (! isScreenOn()) {
-        // Disable key repeat when the screen is off.
-        return -1;
-    } else {
-        if (mKeyRepeatTimeout < 0) {
-            JNIEnv* env = jniEnv();
+void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) {
+    JNIEnv* env = jniEnv();
 
-            jint result = env->CallIntMethod(mCallbacksObj,
-                    gCallbacksClassInfo.getKeyRepeatTimeout);
-            if (checkAndClearExceptionFromCallback(env, "getKeyRepeatTimeout")) {
-                result = 500;
-            }
+    jint keyRepeatTimeout = env->CallIntMethod(mCallbacksObj,
+            gCallbacksClassInfo.getKeyRepeatTimeout);
+    if (!checkAndClearExceptionFromCallback(env, "getKeyRepeatTimeout")) {
+        outConfig->keyRepeatTimeout = milliseconds_to_nanoseconds(keyRepeatTimeout);
+    }
 
-            mKeyRepeatTimeout = milliseconds_to_nanoseconds(result);
-        }
-        return mKeyRepeatTimeout;
+    jint keyRepeatDelay = env->CallIntMethod(mCallbacksObj,
+            gCallbacksClassInfo.getKeyRepeatDelay);
+    if (!checkAndClearExceptionFromCallback(env, "getKeyRepeatDelay")) {
+        outConfig->keyRepeatDelay = milliseconds_to_nanoseconds(keyRepeatDelay);
+    }
+
+    jint maxEventsPerSecond = env->CallIntMethod(mCallbacksObj,
+            gCallbacksClassInfo.getMaxEventsPerSecond);
+    if (!checkAndClearExceptionFromCallback(env, "getMaxEventsPerSecond")) {
+        outConfig->maxEventsPerSecond = maxEventsPerSecond;
     }
 }
 
-nsecs_t NativeInputManager::getKeyRepeatDelay() {
-    if (mKeyRepeatDelay < 0) {
-        JNIEnv* env = jniEnv();
-
-        jint result = env->CallIntMethod(mCallbacksObj,
-                gCallbacksClassInfo.getKeyRepeatDelay);
-        if (checkAndClearExceptionFromCallback(env, "getKeyRepeatDelay")) {
-            result = 50;
-        }
-
-        mKeyRepeatDelay = milliseconds_to_nanoseconds(result);
-    }
-    return mKeyRepeatDelay;
-}
-
-int32_t NativeInputManager::getMaxEventsPerSecond() {
-    if (mMaxEventsPerSecond < 0) {
-        JNIEnv* env = jniEnv();
-
-        jint result = env->CallIntMethod(mCallbacksObj,
-                gCallbacksClassInfo.getMaxEventsPerSecond);
-        if (checkAndClearExceptionFromCallback(env, "getMaxEventsPerSecond")) {
-            result = 60;
-        }
-
-        mMaxEventsPerSecond = result;
-    }
-    return mMaxEventsPerSecond;
+bool NativeInputManager::isKeyRepeatEnabled() {
+    // Only enable automatic key repeating when the screen is on.
+    return isScreenOn();
 }
 
 void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowObjArray) {
@@ -1341,6 +1308,18 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gCallbacksClassInfo.getKeyRepeatDelay, gCallbacksClassInfo.clazz,
             "getKeyRepeatDelay", "()I");
+
+    GET_METHOD_ID(gCallbacksClassInfo.getTapTimeout, gCallbacksClassInfo.clazz,
+            "getTapTimeout", "()I");
+
+    GET_METHOD_ID(gCallbacksClassInfo.getDoubleTapTimeout, gCallbacksClassInfo.clazz,
+            "getDoubleTapTimeout", "()I");
+
+    GET_METHOD_ID(gCallbacksClassInfo.getLongPressTimeout, gCallbacksClassInfo.clazz,
+            "getLongPressTimeout", "()I");
+
+    GET_METHOD_ID(gCallbacksClassInfo.getTouchSlop, gCallbacksClassInfo.clazz,
+            "getTouchSlop", "()I");
 
     GET_METHOD_ID(gCallbacksClassInfo.getMaxEventsPerSecond, gCallbacksClassInfo.clazz,
             "getMaxEventsPerSecond", "()I");
