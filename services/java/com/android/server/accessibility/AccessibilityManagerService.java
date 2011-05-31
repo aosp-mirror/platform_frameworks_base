@@ -21,6 +21,8 @@ import com.android.internal.os.HandlerCaller;
 import com.android.internal.os.HandlerCaller.SomeArgs;
 import com.android.server.wm.WindowManagerService;
 
+import org.xmlpull.v1.XmlPullParserException;
+
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceConnection;
@@ -54,6 +56,7 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -96,17 +99,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     final List<IAccessibilityManagerClient> mClients =
         new ArrayList<IAccessibilityManagerClient>();
 
-    final Map<ComponentName, Service> mComponentNameToServiceMap =
-        new HashMap<ComponentName, Service>();
+    final Map<ComponentName, Service> mComponentNameToServiceMap = new HashMap<ComponentName, Service>();
 
-    private final List<ServiceInfo> mInstalledServices = new ArrayList<ServiceInfo>();
+    private final List<AccessibilityServiceInfo> mInstalledServices = new ArrayList<AccessibilityServiceInfo>();
 
     private final Set<ComponentName> mEnabledServices = new HashSet<ComponentName>();
 
     private final SimpleStringSplitter mStringColonSplitter = new SimpleStringSplitter(':');
 
-    private final SparseArray<List<ServiceInfo>> mFeedbackTypeToEnabledServicesMap =
-        new SparseArray<List<ServiceInfo>>();
+    private final SparseArray<List<AccessibilityServiceInfo>> mFeedbackTypeToEnabledServicesMap =
+        new SparseArray<List<AccessibilityServiceInfo>>();
 
     private PackageManager mPackageManager;
 
@@ -298,20 +300,28 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         return (OWN_PROCESS_ID != Binder.getCallingPid());
     }
 
-    public List<ServiceInfo> getAccessibilityServiceList() {
+    public List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList() {
         synchronized (mLock) {
             return mInstalledServices;
         }
     }
 
-    public List<ServiceInfo> getEnabledAccessibilityServiceList(int feedbackType) {
+    public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType) {
+        SparseArray<List<AccessibilityServiceInfo>> feedbackTypeToEnabledServicesMap =
+            mFeedbackTypeToEnabledServicesMap;
+        List<AccessibilityServiceInfo> enabledServices = new ArrayList<AccessibilityServiceInfo>();
         synchronized (mLock) {
-            List<ServiceInfo> enabledServices = mFeedbackTypeToEnabledServicesMap.get(feedbackType);
-            if (enabledServices == null) {
-                return Collections.emptyList();
+            while (feedbackType != 0) {
+                final int feedbackTypeBit = (1 << Integer.numberOfTrailingZeros(feedbackType));
+                feedbackType &= ~feedbackTypeBit;
+                List<AccessibilityServiceInfo> perFeedbackType =
+                    feedbackTypeToEnabledServicesMap.get(feedbackTypeBit);
+                if (perFeedbackType != null) {
+                    enabledServices.addAll(perFeedbackType);
+                }
             }
-            return enabledServices;
         }
+        return enabledServices;
     }
 
     public void interrupt() {
@@ -345,15 +355,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 Service service = (Service) arguments.arg2;
 
                 synchronized (mLock) {
-                    service.mEventTypes = info.eventTypes;
-                    service.mFeedbackType = info.feedbackType;
-                    String[] packageNames = info.packageNames;
-                    if (packageNames != null) {
-                        service.mPackageNames.addAll(Arrays.asList(packageNames));
+                    // If the XML manifest had data to configure the service its info
+                    // should be already set. In such a case update only the dynamically
+                    // configurable properties.
+                    AccessibilityServiceInfo oldInfo = service.mAccessibilityServiceInfo;
+                    if (oldInfo != null) {
+                        oldInfo.updateDynamicallyConfigurableProperties(info);
+                        service.setAccessibilityServiceInfo(oldInfo);
+                    } else {
+                        service.setAccessibilityServiceInfo(info);
                     }
-                    service.mNotificationTimeout = info.notificationTimeout;
-                    service.mIsDefault = (info.flags & AccessibilityServiceInfo.DEFAULT) != 0;
-
                     updateStateOnEnabledService(service);
                 }
                 return;
@@ -369,10 +380,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mInstalledServices.clear();
 
         List<ResolveInfo> installedServices = mPackageManager.queryIntentServices(
-                new Intent(AccessibilityService.SERVICE_INTERFACE), PackageManager.GET_SERVICES);
+                new Intent(AccessibilityService.SERVICE_INTERFACE),
+                PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
 
         for (int i = 0, count = installedServices.size(); i < count; i++) {
-            mInstalledServices.add(installedServices.get(i).serviceInfo);
+            ResolveInfo resolveInfo = installedServices.get(i);
+            AccessibilityServiceInfo accessibilityServiceInfo;
+            try {
+                accessibilityServiceInfo = new AccessibilityServiceInfo(resolveInfo, mContext);
+                mInstalledServices.add(accessibilityServiceInfo);
+            } catch (XmlPullParserException xppe) {
+                Slog.e(LOG_TAG, "Error while initializing AccessibilityServiceInfo", xppe);
+            } catch (IOException ioe) {
+                Slog.e(LOG_TAG, "Error while initializing AccessibilityServiceInfo", ioe);
+            }
         }
     }
 
@@ -595,22 +616,22 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      * @param installedServices All installed {@link AccessibilityService}s.
      * @param enabledServices The {@link ComponentName}s of the enabled services.
      */
-    private void updateServicesStateLocked(List<ServiceInfo> installedServices,
+    private void updateServicesStateLocked(List<AccessibilityServiceInfo> installedServices,
             Set<ComponentName> enabledServices) {
 
         Map<ComponentName, Service> componentNameToServiceMap = mComponentNameToServiceMap;
         boolean isEnabled = mIsEnabled;
 
         for (int i = 0, count = installedServices.size(); i < count; i++) {
-            ServiceInfo intalledService = installedServices.get(i);
-            ComponentName componentName = new ComponentName(intalledService.packageName,
-                    intalledService.name);
+            AccessibilityServiceInfo installedService = installedServices.get(i);
+            ComponentName componentName = ComponentName.unflattenFromString(
+                    installedService.getId());
             Service service = componentNameToServiceMap.get(componentName);
 
             if (isEnabled) {
                 if (enabledServices.contains(componentName)) {
                     if (service == null) {
-                        service = new Service(componentName, intalledService);
+                        service = new Service(installedService);
                     }
                     service.bind();
                 } else if (!enabledServices.contains(componentName)) {
@@ -671,12 +692,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     private void updateStateOnEnabledService(Service service) {
         int feedbackType = service.mFeedbackType;
-        List<ServiceInfo> enabledServices = mFeedbackTypeToEnabledServicesMap.get(feedbackType);
+        List<AccessibilityServiceInfo> enabledServices =
+            mFeedbackTypeToEnabledServicesMap.get(feedbackType);
         if (enabledServices == null) {
-            enabledServices = new ArrayList<ServiceInfo>();
+            enabledServices = new ArrayList<AccessibilityServiceInfo>();
             mFeedbackTypeToEnabledServicesMap.put(feedbackType, enabledServices);
         }
-        enabledServices.add(service.mServiceInfo);
+        enabledServices.add(service.mAccessibilityServiceInfo);
 
         // We enable touch exploration if at least one
         // enabled service provides spoken feedback.
@@ -688,12 +710,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void updateStateOnDisabledService(Service service) {
-        List<ServiceInfo> enabledServices =
+        List<AccessibilityServiceInfo> enabledServices =
             mFeedbackTypeToEnabledServicesMap.get(service.mFeedbackType);
         if (enabledServices == null) {
             return;
         }
-        enabledServices.remove(service.mServiceInfo);
+        enabledServices.remove(service.mAccessibilityServiceInfo);
         // We disable touch exploration if no
         // enabled service provides spoken feedback.
         if (enabledServices.isEmpty()
@@ -714,7 +736,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     class Service extends IAccessibilityServiceConnection.Stub implements ServiceConnection {
         int mId = 0;
 
-        ServiceInfo mServiceInfo;
+        AccessibilityServiceInfo mAccessibilityServiceInfo;
 
         IBinder mService;
 
@@ -740,15 +762,28 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final SparseArray<AccessibilityEvent> mPendingEvents =
             new SparseArray<AccessibilityEvent>();
 
-        Service(ComponentName componentName, ServiceInfo serviceInfo) {
+        Service(AccessibilityServiceInfo accessibilityServiceInfo) {
             mId = sIdCounter++;
-            mComponentName = componentName;
-            mServiceInfo = serviceInfo;
+            setAccessibilityServiceInfo(accessibilityServiceInfo);
             mIntent = new Intent().setComponent(mComponentName);
             mIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
                     com.android.internal.R.string.accessibility_binding_label);
             mIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                     mContext, 0, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 0));
+        }
+
+        public void setAccessibilityServiceInfo(AccessibilityServiceInfo info) {
+            mAccessibilityServiceInfo = info;
+            ServiceInfo serviceInfo = info.getResolveInfo().serviceInfo;
+            mComponentName = new ComponentName(serviceInfo.packageName, serviceInfo.name);
+            mEventTypes = info.eventTypes;
+            mFeedbackType = info.feedbackType;
+            String[] packageNames = info.packageNames;
+            if (packageNames != null) {
+                mPackageNames.addAll(Arrays.asList(packageNames));
+            }
+            mNotificationTimeout = info.notificationTimeout;
+            mIsDefault = (info.flags & AccessibilityServiceInfo.DEFAULT) != 0;
         }
 
         /**
@@ -805,6 +840,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     if (!mServices.contains(this)) {
                         mServices.add(this);
                         mComponentNameToServiceMap.put(componentName, this);
+                        if (isConfigured()) {
+                            updateStateOnEnabledService(this);
+                        }
                     }
                 }
             } catch (RemoteException re) {

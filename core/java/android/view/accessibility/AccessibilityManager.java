@@ -16,7 +16,6 @@
 
 package android.view.accessibility;
 
-import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
@@ -30,6 +29,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -201,11 +201,30 @@ public final class AccessibilityManager {
      * Returns the {@link ServiceInfo}s of the installed accessibility services.
      *
      * @return An unmodifiable list with {@link ServiceInfo}s.
+     *
+     * @deprecated Use {@link #getInstalledAccessibilityServiceList()}
      */
+    @Deprecated
     public List<ServiceInfo> getAccessibilityServiceList() {
-        List<ServiceInfo> services = null;
+        List<AccessibilityServiceInfo> infos = getInstalledAccessibilityServiceList();
+        List<ServiceInfo> services = new ArrayList<ServiceInfo>();
+        final int infoCount = infos.size();
+        for (int i = 0; i < infoCount; i++) {
+            AccessibilityServiceInfo info = infos.get(i);
+            services.add(info.getResolveInfo().serviceInfo);
+        }
+        return Collections.unmodifiableList(services);
+    }
+
+    /**
+     * Returns the {@link AccessibilityServiceInfo}s of the installed accessibility services.
+     *
+     * @return An unmodifiable list with {@link AccessibilityServiceInfo}s.
+     */
+    public List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList() {
+        List<AccessibilityServiceInfo> services = null;
         try {
-            services = mService.getAccessibilityServiceList();
+            services = mService.getInstalledAccessibilityServiceList();
             if (DEBUG) {
                 Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
             }
@@ -216,20 +235,14 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Returns the {@link ServiceInfo}s of the enabled accessibility services
+     * Returns the {@link AccessibilityServiceInfo}s of the enabled accessibility services
      * for a given feedback type.
      *
-     * @param feedbackType The type of feedback.
-     * @return An unmodifiable list with {@link ServiceInfo}s.
-     *
-     * @see AccessibilityServiceInfo#FEEDBACK_AUDIBLE
-     * @see AccessibilityServiceInfo#FEEDBACK_HAPTIC
-     * @see AccessibilityServiceInfo#FEEDBACK_SPOKEN
-     * @see AccessibilityServiceInfo#FEEDBACK_VISUAL
-     * @see AccessibilityServiceInfo#FEEDBACK_GENERIC
+     * @param feedbackType The feedback type (can be bitwise or of multiple types).
+     * @return An unmodifiable list with {@link AccessibilityServiceInfo}s.
      */
-    public List<ServiceInfo> getEnabledAccessibilityServiceList(int feedbackType) {
-        List<ServiceInfo> services = null;
+    public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType) {
+        List<AccessibilityServiceInfo> services = null;
         try {
             services = mService.getEnabledAccessibilityServiceList(feedbackType);
             if (DEBUG) {

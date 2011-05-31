@@ -150,7 +150,8 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         String secondMockServiceClassName = MySecondMockAccessibilityService.class.getName();
 
         // look for the two mock services
-        for (ServiceInfo serviceInfo : mManagerService.getAccessibilityServiceList()) {
+        for (AccessibilityServiceInfo info : mManagerService.getInstalledAccessibilityServiceList()) {
+            ServiceInfo serviceInfo = info.getResolveInfo().serviceInfo;
             if (packageName.equals(serviceInfo.packageName)) {
                 if (firstMockServiceClassName.equals(serviceInfo.name)) {
                     firstMockServiceInstalled = true;

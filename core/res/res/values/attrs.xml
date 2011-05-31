@@ -2147,6 +2147,82 @@
         <attr name="imeSubtypeExtraValue" format="string" />
     </declare-styleable>
 
+    <!-- Use <code>accessibility-service</code> as the root tag of the XML resource that
+         describes an {@link android.accessibilityservice.AccessibilityService} service,
+         which is referenced from its
+         {@link android.accessibilityservice.AccessibilityService#SERVICE_META_DATA}
+         meta-data entry. -->
+    <declare-styleable name="AccessibilityService">
+        <!-- The event types this serivce would like to receive as specified in
+             {@link android.view.accessibility.AccessibilityEvent}. This setting
+             can be changed at runtime by calling
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+        <attr name="accessibilityEventTypes">
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_CLICKED} events.-->
+            <flag name="typeViewClicked" value="0x00000001" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_LONG_CLICKED} events. -->
+            <flag name="typeViewLongClicked" value="0x00000002" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_SELECTED} events. -->
+            <flag name="typeViewSelected" value="0x00000004" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_FOCUSED} events. -->
+            <flag name="typeViewFocused" value="0x00000008" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED} events. -->
+            <flag name="typeViewTextChanged" value="0x00000010" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED} events. -->
+            <flag name="typeWindowStateChanged" value="0x00000020" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_NOTIFICATION_STATE_CHANGED} events. -->
+            <flag name="typeNotificationStateChanged" value="0x00000040" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_HOVER_ENTER} events. -->
+            <flag name="typeViewHoverEnter" value="0x00000080" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_HOVER_EXIT} events. -->
+            <flag name="typeViewHoverExit" value="0x00000100" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_START} events. -->
+            <flag name="typeTouchExplorationGestureStart" value="0x00000200" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END} events. -->
+            <flag name="typeTouchExplorationGestureEnd" value="0x00000400" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPES_ALL_MASK} i.e. all events. -->
+            <flag name="typeAllMask" value="0xffffffff" />
+        </attr>
+        <!-- Comma separated package names from which this serivce would like to receive events (leave out for all packages).
+             This setting can be changed at runtime by calling
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+        <attr name="packageNames" format="string" />
+        <!-- The feedback types this serivce provides as specified in
+             {@link android.accessibilityservice.AccessibilityServiceInfo}. This setting
+             can be changed at runtime by calling
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+        <attr name="accessibilityFeedbackType">
+            <!-- Provides {@link android.accessibilityservice.AccessibilityServiceInfo#FEEDBACK_SPOKEN} feedback. -->
+            <flag name="feedbackSpoken" value="0x00000001" />
+            <!-- Provides {@link android.accessibilityservice.AccessibilityServiceInfo#FEEDBACK_HAPTIC} feedback. -->
+            <flag name="feedbackHaptic" value="0x00000002" />
+            <!-- Provides {@link android.accessibilityservice.AccessibilityServiceInfo#FEEDBACK_AUDIBLE} feedback. -->
+            <flag name="feedbackAudible" value="0x00000004" />
+            <!-- Provides {@link android.accessibilityservice.AccessibilityServiceInfo#FEEDBACK_VISUAL} feedback. -->
+            <flag name="feedbackVisual" value="0x00000008" />
+            <!-- Provides {@link android.accessibilityservice.AccessibilityServiceInfo#FEEDBACK_GENERIC} feedback. -->
+            <flag name="feedbackGeneric" value="0x00000010" />
+        </attr>
+        <!-- The minimal period in milliseconds between two accessibility events are sent
+             to this serivce. This setting can be changed at runtime by calling
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+        <attr name="notificationTimeout" format="integer" />
+        <!-- Additional flags as specified in
+             {@link android.accessibilityservice.AccessibilityServiceInfo}.
+             This setting can be changed at runtime by calling
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+        <attr name="accessibilityFlags">
+            <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#DEFAULT} -->
+            <flag name="flagDefault" value="0x00000001" />
+        </attr>
+        <!-- Component name of an activity that allows the user to modify
+             the settings for this service. This setting cannot be changed at runtime. -->
+        <attr name="settingsActivity" />
+        <!-- Flag whether the accessibility service wants to be able to retrieve the
+             focused window content. This setting cannot be changed at runtime. -->
+        <attr name="canRetrieveWindowContent" format="boolean" />
+    </declare-styleable>
+
     <!-- =============================== -->
     <!-- Widget package class attributes -->
     <!-- =============================== -->

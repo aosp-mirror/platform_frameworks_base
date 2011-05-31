@@ -17,9 +17,9 @@
 
 package android.view.accessibility;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManagerClient;
-import android.content.pm.ServiceInfo;
 
 /**
  * Interface implemented by the AccessibilityManagerService called by
@@ -33,9 +33,9 @@ interface IAccessibilityManager {
 
     boolean sendAccessibilityEvent(in AccessibilityEvent uiEvent);
 
-    List<ServiceInfo> getAccessibilityServiceList();
+    List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList();
 
-    List<ServiceInfo> getEnabledAccessibilityServiceList(int feedbackType);
+    List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType);
 
     void interrupt();
 }

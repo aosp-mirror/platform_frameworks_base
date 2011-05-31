@@ -39,21 +39,57 @@ import android.view.accessibility.AccessibilityEvent;
  * <p>
  * <code>
  * &lt;service android:name=".MyAccessibilityService"&gt;<br>
- *     &lt;intent-filter&gt;<br>
- *         &lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;<br>
- *     &lt;/intent-filter&gt;<br>
+ * &nbsp;&nbsp;&lt;intent-filter&gt;<br>
+ * &nbsp;&nbsp;&nbsp;&nbsp;&lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;<br>
+ * &nbsp;&nbsp;&lt;/intent-filter&gt;<br>
  * &lt;/service&gt;<br>
  * </code>
+ * </p>
  * <p>
  * The lifecycle of an accessibility service is managed exclusively by the system. Starting
  * or stopping an accessibility service is triggered by an explicit user action through
  * enabling or disabling it in the device settings. After the system binds to a service it
  * calls {@link AccessibilityService#onServiceConnected()}. This method can be
- * overriden by clients that want to perform post binding setup. An accessibility service
- * is configured though setting an {@link AccessibilityServiceInfo} by calling
- * {@link AccessibilityService#setServiceInfo(AccessibilityServiceInfo)}. You can call this
- * method any time to change the service configuration but it is good practice to do that
- * in the overriden {@link AccessibilityService#onServiceConnected()}.
+ * overriden by clients that want to perform post binding setup.
+ * <p>
+ * </p>
+ * There are two approaches for configuring an accessibility service:
+ * <ul>
+ *   <li>
+ *     Providing a {@link #SERVICE_META_DATA meta-data} entry in the manifest when declaring
+ *     the service. A service declaration with a meta-data tag is presented below:
+ *     <p>
+ *     <code>
+ *       &lt;service android:name=".MyAccessibilityService"&gt;<br>
+ *       &nbsp;&nbsp;&lt;intent-filter&gt;<br>
+ *       &nbsp;&nbsp;&nbsp;&nbsp;&lt;action android:name="android.accessibilityservice.AccessibilityService" /&gt;<br>
+ *       &nbsp;&nbsp;&lt;/intent-filter&gt;<br>
+ *       &nbsp;&nbsp;&lt;meta-data android:name="android.accessibilityservice.as" android:resource="@xml/accessibilityservice" /&gt;<br>
+ *       &lt;/service&gt;<br>
+ *     </code>
+ *     </p>
+ *     <p>
+ *     <strong>
+ *       This approach enables setting all accessibility service properties.
+ *     </strong>
+ *     </p>
+ *   </li>
+ *   <li>
+ *     Calling {@link AccessibilityService#setServiceInfo(AccessibilityServiceInfo)}. Note
+ *     that this method can be called any time to change the service configuration.<br>
+ *     <p>
+ *     <strong>
+ *       This approach enables setting only dynamically configurable accessibility
+ *       service properties:
+ *       {@link AccessibilityServiceInfo#eventTypes},
+ *       {@link AccessibilityServiceInfo#feedbackType},
+ *       {@link AccessibilityServiceInfo#flags},
+ *       {@link AccessibilityServiceInfo#notificationTimeout},
+ *       {@link AccessibilityServiceInfo#packageNames}
+ *     </strong>
+ *     </p>
+ *   </li>
+ * </ul>
  * <p>
  * An accessibility service can be registered for events in specific packages to provide a
  * specific type of feedback and is notified with a certain timeout after the last event
@@ -104,6 +140,29 @@ public abstract class AccessibilityService extends Service {
      */
     public static final String SERVICE_INTERFACE =
         "android.accessibilityservice.AccessibilityService";
+
+    /**
+     * Name under which an AccessibilityService component publishes information
+     * about itself. This meta-data must reference an XML resource containing
+     * an
+     * <code>&lt;{@link android.R.styleable#AccessibilityService accessibility-service}&gt;</code>
+     * tag. This is a a sample XML file configuring an accessibility service:
+     * <p>
+     * <code>
+     *   &lt;?xml version="1.0" encoding="utf-8"?&gt;<br>
+     *   &lt;accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"<br>
+     *   &nbsp;&nbsp;android:eventTypes="typeViewClicked|typeViewFocused"<br>
+     *   &nbsp;&nbsp;android:packageNames="foo.bar, foo.baz"<br>
+     *   &nbsp;&nbsp;android:feedbackType="feedbackSpoken"<br>
+     *   &nbsp;&nbsp;android:notificationTimeout="100"<br>
+     *   &nbsp;&nbsp;android:flags="flagDefault"<br>
+     *   &nbsp;&nbsp;android:settingsActivity="foo.bar.TestBackActivity"<br>
+     *   &nbsp;&nbsp;. . .<br>
+     *   /&gt;
+     * </code>
+     * </p>
+     */
+    public static final String SERVICE_META_DATA = "android.accessibilityservice";
 
     private static final String LOG_TAG = "AccessibilityService";
 
