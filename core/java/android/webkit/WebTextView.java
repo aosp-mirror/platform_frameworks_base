@@ -34,6 +34,7 @@ import android.text.BoringLayout.Metrics;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.InputFilter;
+import android.text.InputType;
 import android.text.Layout;
 import android.text.Selection;
 import android.text.Spannable;
@@ -853,7 +854,7 @@ import junit.framework.Assert;
     public void setAdapterCustom(AutoCompleteAdapter adapter) {
         if (adapter != null) {
             setInputType(getInputType()
-                    | EditorInfo.TYPE_TEXT_FLAG_AUTO_COMPLETE);
+                    | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE);
             adapter.setTextView(this);
             if (mAutoFillable) {
                 setOnItemClickListener(this);
@@ -934,7 +935,7 @@ import junit.framework.Assert;
      */
     /* package */ void setInPassword(boolean inPassword) {
         if (inPassword) {
-            setInputType(EditorInfo.TYPE_CLASS_TEXT | EditorInfo.
+            setInputType(InputType.TYPE_CLASS_TEXT | EditorInfo.
                 TYPE_TEXT_VARIATION_WEB_PASSWORD);
             createBackground();
         }
@@ -1146,8 +1147,8 @@ import junit.framework.Assert;
         boolean single = true;
         boolean inPassword = false;
         int maxLength = -1;
-        int inputType = EditorInfo.TYPE_CLASS_TEXT
-                | EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
+        int inputType = InputType.TYPE_CLASS_TEXT
+                | InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
         int imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
                 | EditorInfo.IME_FLAG_NO_FULLSCREEN;
         if (TEXT_AREA != type
@@ -1160,9 +1161,9 @@ import junit.framework.Assert;
                 break;
             case TEXT_AREA:
                 single = false;
-                inputType |= EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE
-                        | EditorInfo.TYPE_TEXT_FLAG_CAP_SENTENCES
-                        | EditorInfo.TYPE_TEXT_FLAG_AUTO_CORRECT;
+                inputType |= InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                        | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+                        | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
                 imeOptions |= EditorInfo.IME_ACTION_NONE;
                 break;
             case PASSWORD:
@@ -1173,17 +1174,21 @@ import junit.framework.Assert;
                 imeOptions |= EditorInfo.IME_ACTION_SEARCH;
                 break;
             case EMAIL:
-                inputType |= EditorInfo.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS;
+                // inputType needs to be overwritten because of the different text variation.
+                inputType = InputType.TYPE_CLASS_TEXT
+                        | InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS;
                 imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
             case NUMBER:
-                inputType |= EditorInfo.TYPE_CLASS_NUMBER;
+                // inputType needs to be overwritten because of the different class.
+                inputType = InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
                 // Number and telephone do not have both a Tab key and an
                 // action, so set the action to NEXT
                 imeOptions |= EditorInfo.IME_ACTION_NEXT;
                 break;
             case TELEPHONE:
-                inputType |= EditorInfo.TYPE_CLASS_PHONE;
+                // inputType needs to be overwritten because of the different class.
+                inputType = InputType.TYPE_CLASS_PHONE;
                 imeOptions |= EditorInfo.IME_ACTION_NEXT;
                 break;
             case URL:
