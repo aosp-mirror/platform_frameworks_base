@@ -398,20 +398,6 @@ void AudioEffect::commandExecuted(uint32_t cmdCode,
 
 // -------------------------------------------------------------------------
 
-status_t AudioEffect::loadEffectLibrary(const char *libPath, int *handle)
-{
-    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
-    if (af == 0) return PERMISSION_DENIED;
-    return af->loadEffectLibrary(libPath, handle);
-}
-
-status_t AudioEffect::unloadEffectLibrary(int handle)
-{
-    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
-    if (af == 0) return PERMISSION_DENIED;
-    return af->unloadEffectLibrary(handle);
-}
-
 status_t AudioEffect::queryNumberEffects(uint32_t *numEffects)
 {
     const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();

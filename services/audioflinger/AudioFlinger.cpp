@@ -4615,28 +4615,6 @@ int AudioFlinger::nextUniqueId_l()
 // ----------------------------------------------------------------------------
 
 
-status_t AudioFlinger::loadEffectLibrary(const char *libPath, int *handle)
-{
-    // check calling permissions
-    if (!settingsAllowed()) {
-        return PERMISSION_DENIED;
-    }
-
-    Mutex::Autolock _l(mLock);
-    return EffectLoadLibrary(libPath, handle);
-}
-
-status_t AudioFlinger::unloadEffectLibrary(int handle)
-{
-    // check calling permissions
-    if (!settingsAllowed()) {
-        return PERMISSION_DENIED;
-    }
-
-    Mutex::Autolock _l(mLock);
-    return EffectUnloadLibrary(handle);
-}
-
 status_t AudioFlinger::queryNumberEffects(uint32_t *numEffects)
 {
     Mutex::Autolock _l(mLock);

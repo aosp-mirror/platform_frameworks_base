@@ -332,18 +332,6 @@ exit:
     return ret;
 }
 
-int EffectLoadLibrary(const char *libPath, int *handle)
-{
-    // TODO: see if this interface still makes sense with the use of config files
-    return -ENOSYS;
-}
-
-int EffectUnloadLibrary(int handle)
-{
-    // TODO: see if this interface still makes sense with the use of config files
-    return -ENOSYS;
-}
-
 int EffectIsNullUuid(effect_uuid_t *uuid)
 {
     if (memcmp(uuid, EFFECT_UUID_NULL, sizeof(effect_uuid_t))) {
