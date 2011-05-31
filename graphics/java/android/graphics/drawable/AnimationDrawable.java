@@ -62,7 +62,7 @@ import android.util.AttributeSet;
  * AnimationDrawable frameAnimation = (AnimationDrawable) img.getBackground();
  *
  * // Start the animation (looped playback by default).
- * frameAnimation.start()
+ * frameAnimation.start();
  * </pre>
  * <p>For more information, see the guide to <a
  * href="{@docRoot}guide/topics/resources/animation-resource.html">Animation Resources</a>.</p>
@@ -192,6 +192,9 @@ public class AnimationDrawable extends DrawableContainer implements Runnable, An
      */
     public void addFrame(Drawable frame, int duration) {
         mAnimationState.addFrame(frame, duration);
+        if (mCurFrame < 0) {
+            setFrame(0, true, false);
+        }
     }
     
     private void nextFrame(boolean unschedule) {
