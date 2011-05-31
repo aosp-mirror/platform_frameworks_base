@@ -30,6 +30,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.storage.IMountService;
 import android.provider.Settings;
+import android.security.KeyStore;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -47,7 +48,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Utilities for the lock patten and its settings.
+ * Utilities for the lock pattern and its settings.
  */
 public class LockPatternUtils {
 
@@ -397,6 +398,7 @@ public class LockPatternUtils {
             raf.close();
             DevicePolicyManager dpm = getDevicePolicyManager();
             if (pattern != null) {
+                KeyStore.getInstance().password(patternToString(pattern));
                 setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
                 setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, pattern
@@ -487,6 +489,9 @@ public class LockPatternUtils {
             if (password != null) {
                 // Update the encryption password.
                 updateEncryptionPassword(password);
+
+                // Update the keystore password
+                KeyStore.getInstance().password(password);
 
                 int computedQuality = computePasswordQuality(password);
                 setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality));
@@ -646,7 +651,7 @@ public class LockPatternUtils {
      * @param password the gesture pattern.
      * @return the hash of the pattern in a byte array.
      */
-     public byte[] passwordToHash(String password) {
+    public byte[] passwordToHash(String password) {
         if (password == null) {
             return null;
         }

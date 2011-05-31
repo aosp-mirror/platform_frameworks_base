@@ -27,6 +27,7 @@ import com.android.internal.widget.PasswordEntryKeyboardView;
 
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.security.KeyStore;
 import android.telephony.TelephonyManager;
 import android.text.InputType;
 import android.text.method.DigitsKeyListener;
@@ -231,6 +232,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             mCallback.keyguardDone(true);
             mCallback.reportSuccessfulUnlockAttempt();
             mStatusView.setInstructionText(null);
+            KeyStore.getInstance().password(entry);
         } else if (entry.length() > MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT ) {
             // to avoid accidental lockout, only count attempts that are long enough to be a
             // real password. This may require some tweaking.
