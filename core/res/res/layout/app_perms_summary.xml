@@ -60,10 +60,11 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dip"
-            android:layout_marginBottom="12dip"
-            android:layout_marginLeft="16dip"
-            android:duplicateParentState="true">
+            android:paddingTop="16dip"
+            android:paddingBottom="12dip"
+            android:paddingLeft="16dip"
+            android:duplicateParentState="true"
+            android:background="?android:attr/selectableItemBackground">
 
             <TextView
                 android:id="@+id/show_more_text"
