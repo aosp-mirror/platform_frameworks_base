@@ -39,6 +39,7 @@ import android.net.RouteInfo;
 import android.net.vpn.VpnManager;
 import android.net.wifi.WifiStateTracker;
 import android.os.Binder;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -58,7 +59,6 @@ import com.android.internal.telephony.Phone;
 import com.android.server.connectivity.Tethering;
 
 import java.io.FileDescriptor;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
@@ -1552,12 +1552,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
             if (values.length == 6) {
               final String prefix = "/sys/kernel/ipv4/tcp_";
-                stringToFile(prefix + "rmem_min", values[0]);
-                stringToFile(prefix + "rmem_def", values[1]);
-                stringToFile(prefix + "rmem_max", values[2]);
-                stringToFile(prefix + "wmem_min", values[3]);
-                stringToFile(prefix + "wmem_def", values[4]);
-                stringToFile(prefix + "wmem_max", values[5]);
+                FileUtils.stringToFile(prefix + "rmem_min", values[0]);
+                FileUtils.stringToFile(prefix + "rmem_def", values[1]);
+                FileUtils.stringToFile(prefix + "rmem_max", values[2]);
+                FileUtils.stringToFile(prefix + "wmem_min", values[3]);
+                FileUtils.stringToFile(prefix + "wmem_def", values[4]);
+                FileUtils.stringToFile(prefix + "wmem_max", values[5]);
             } else {
                 loge("Invalid buffersize string: " + bufferSizes);
             }
@@ -1565,23 +1565,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             loge("Can't set tcp buffer sizes:" + e);
         }
     }
-
-   /**
-     * Writes string to file. Basically same as "echo -n $string > $filename"
-     *
-     * @param filename
-     * @param string
-     * @throws IOException
-     */
-    private void stringToFile(String filename, String string) throws IOException {
-        FileWriter out = new FileWriter(filename);
-        try {
-            out.write(string);
-        } finally {
-            out.close();
-        }
-    }
-
 
     /**
      * Adjust the per-process dns entries (net.dns<x>.<pid>) based

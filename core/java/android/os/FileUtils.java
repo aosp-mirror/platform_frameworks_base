@@ -20,6 +20,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -224,6 +225,22 @@ public class FileUtils
             }
         } finally {
             input.close();
+        }
+    }
+
+   /**
+     * Writes string to file. Basically same as "echo -n $string > $filename"
+     *
+     * @param filename
+     * @param string
+     * @throws IOException
+     */
+    public static void stringToFile(String filename, String string) throws IOException {
+        FileWriter out = new FileWriter(filename);
+        try {
+            out.write(string);
+        } finally {
+            out.close();
         }
     }
 }
