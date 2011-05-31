@@ -982,8 +982,19 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      */
     static final int HORIZONTAL_DIRECTION_MASK = 0xC0000000;
 
+    /*
+     * Array of horizontal direction flags for mapping attribute "horizontalDirection" to correct
+     * flag value.
+     * {@hide}
+     */
     private static final int[] HORIZONTAL_DIRECTION_FLAGS = { HORIZONTAL_DIRECTION_LTR,
             HORIZONTAL_DIRECTION_RTL, HORIZONTAL_DIRECTION_INHERIT, HORIZONTAL_DIRECTION_LOCALE};
+
+    /**
+     * Default horizontalDirection.
+     * {@hide}
+     */
+    private static final int HORIZONTAL_DIRECTION_DEFAULT = HORIZONTAL_DIRECTION_INHERIT;
 
     /**
      * View flag indicating whether {@link #addFocusables(ArrayList, int, int)}
@@ -2442,7 +2453,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     public View(Context context) {
         mContext = context;
         mResources = context != null ? context.getResources() : null;
-        mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED;
+        mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED | HORIZONTAL_DIRECTION_INHERIT;
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
     }
@@ -2641,12 +2652,18 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                     }
                     break;
                 case com.android.internal.R.styleable.View_horizontalDirection:
-                  final int layoutDirection = a.getInt(attr, 0);
-                  if (layoutDirection != 0) {
-                      viewFlagValues |= HORIZONTAL_DIRECTION_FLAGS[layoutDirection];
-                      viewFlagMasks |= HORIZONTAL_DIRECTION_MASK;
-                  }
-                  break;
+                    // Clear any HORIZONTAL_DIRECTION flag already set
+                    viewFlagValues &= ~HORIZONTAL_DIRECTION_MASK;
+                    // Set the HORIZONTAL_DIRECTION flags depending on the value of the attribute
+                    final int horizontalDirection = a.getInt(attr, -1);
+                    if (horizontalDirection != -1) {
+                        viewFlagValues |= HORIZONTAL_DIRECTION_FLAGS[horizontalDirection];
+                    } else {
+                        // Set to default (HORIZONTAL_DIRECTION_INHERIT)
+                        viewFlagValues |= HORIZONTAL_DIRECTION_DEFAULT;
+                    }
+                    viewFlagMasks |= HORIZONTAL_DIRECTION_MASK;
+                    break;
                 case com.android.internal.R.styleable.View_drawingCacheQuality:
                     final int cacheQuality = a.getInt(attr, 0);
                     if (cacheQuality != 0) {
@@ -8513,10 +8530,14 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             mPrivateFlags &= ~AWAKEN_SCROLL_BARS_ON_ATTACH;
         }
         jumpDrawablesToCurrentState();
+        resolveHorizontalDirection();
+    }
 
-        // We are supposing here that the parent directionality will be resolved before its children
-        // View horizontalDirection public attribute resolution to an internal var.
-        // Resolving the layout direction. LTR is set initially.
+    /**
+     * Resolving the layout direction. LTR is set initially.
+     * We are supposing here that the parent directionality will be resolved before its children
+     */
+    private void resolveHorizontalDirection() {
         mPrivateFlags2 &= ~RESOLVED_LAYOUT_RTL;
         switch (getHorizontalDirection()) {
             case HORIZONTAL_DIRECTION_INHERIT:
