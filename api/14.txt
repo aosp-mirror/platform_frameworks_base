@@ -6273,6 +6273,9 @@ package android.database {
   public static final class CursorJoiner.Result extends java.lang.Enum {
     method public static android.database.CursorJoiner.Result valueOf(java.lang.String);
     method public static final android.database.CursorJoiner.Result[] values();
+    enum_constant public static final android.database.CursorJoiner.Result BOTH;
+    enum_constant public static final android.database.CursorJoiner.Result LEFT;
+    enum_constant public static final android.database.CursorJoiner.Result RIGHT;
   }
 
   public class CursorWindow extends android.database.sqlite.SQLiteClosable implements android.os.Parcelable {
@@ -7191,6 +7194,8 @@ package android.graphics {
   public static final class AvoidXfermode.Mode extends java.lang.Enum {
     method public static android.graphics.AvoidXfermode.Mode valueOf(java.lang.String);
     method public static final android.graphics.AvoidXfermode.Mode[] values();
+    enum_constant public static final android.graphics.AvoidXfermode.Mode AVOID;
+    enum_constant public static final android.graphics.AvoidXfermode.Mode TARGET;
   }
 
   public final class Bitmap implements android.os.Parcelable {
@@ -7243,11 +7248,17 @@ package android.graphics {
   public static final class Bitmap.CompressFormat extends java.lang.Enum {
     method public static android.graphics.Bitmap.CompressFormat valueOf(java.lang.String);
     method public static final android.graphics.Bitmap.CompressFormat[] values();
+    enum_constant public static final android.graphics.Bitmap.CompressFormat JPEG;
+    enum_constant public static final android.graphics.Bitmap.CompressFormat PNG;
   }
 
   public static final class Bitmap.Config extends java.lang.Enum {
     method public static android.graphics.Bitmap.Config valueOf(java.lang.String);
     method public static final android.graphics.Bitmap.Config[] values();
+    enum_constant public static final android.graphics.Bitmap.Config ALPHA_8;
+    enum_constant public static final deprecated android.graphics.Bitmap.Config ARGB_4444;
+    enum_constant public static final android.graphics.Bitmap.Config ARGB_8888;
+    enum_constant public static final android.graphics.Bitmap.Config RGB_565;
   }
 
   public class BitmapFactory {
@@ -7311,6 +7322,10 @@ package android.graphics {
   public static final class BlurMaskFilter.Blur extends java.lang.Enum {
     method public static android.graphics.BlurMaskFilter.Blur valueOf(java.lang.String);
     method public static final android.graphics.BlurMaskFilter.Blur[] values();
+    enum_constant public static final android.graphics.BlurMaskFilter.Blur INNER;
+    enum_constant public static final android.graphics.BlurMaskFilter.Blur NORMAL;
+    enum_constant public static final android.graphics.BlurMaskFilter.Blur OUTER;
+    enum_constant public static final android.graphics.BlurMaskFilter.Blur SOLID;
   }
 
   public class Camera {
@@ -7424,11 +7439,16 @@ package android.graphics {
   public static final class Canvas.EdgeType extends java.lang.Enum {
     method public static android.graphics.Canvas.EdgeType valueOf(java.lang.String);
     method public static final android.graphics.Canvas.EdgeType[] values();
+    enum_constant public static final android.graphics.Canvas.EdgeType AA;
+    enum_constant public static final android.graphics.Canvas.EdgeType BW;
   }
 
   public static final class Canvas.VertexMode extends java.lang.Enum {
     method public static android.graphics.Canvas.VertexMode valueOf(java.lang.String);
     method public static final android.graphics.Canvas.VertexMode[] values();
+    enum_constant public static final android.graphics.Canvas.VertexMode TRIANGLES;
+    enum_constant public static final android.graphics.Canvas.VertexMode TRIANGLE_FAN;
+    enum_constant public static final android.graphics.Canvas.VertexMode TRIANGLE_STRIP;
   }
 
   public class Color {
@@ -7543,6 +7563,9 @@ package android.graphics {
   public static final class Interpolator.Result extends java.lang.Enum {
     method public static android.graphics.Interpolator.Result valueOf(java.lang.String);
     method public static final android.graphics.Interpolator.Result[] values();
+    enum_constant public static final android.graphics.Interpolator.Result FREEZE_END;
+    enum_constant public static final android.graphics.Interpolator.Result FREEZE_START;
+    enum_constant public static final android.graphics.Interpolator.Result NORMAL;
   }
 
   public class LayerRasterizer extends android.graphics.Rasterizer {
@@ -7626,6 +7649,10 @@ package android.graphics {
   public static final class Matrix.ScaleToFit extends java.lang.Enum {
     method public static android.graphics.Matrix.ScaleToFit valueOf(java.lang.String);
     method public static final android.graphics.Matrix.ScaleToFit[] values();
+    enum_constant public static final android.graphics.Matrix.ScaleToFit CENTER;
+    enum_constant public static final android.graphics.Matrix.ScaleToFit END;
+    enum_constant public static final android.graphics.Matrix.ScaleToFit FILL;
+    enum_constant public static final android.graphics.Matrix.ScaleToFit START;
   }
 
   public class Movie {
@@ -7755,11 +7782,17 @@ package android.graphics {
   public static final class Paint.Align extends java.lang.Enum {
     method public static android.graphics.Paint.Align valueOf(java.lang.String);
     method public static final android.graphics.Paint.Align[] values();
+    enum_constant public static final android.graphics.Paint.Align CENTER;
+    enum_constant public static final android.graphics.Paint.Align LEFT;
+    enum_constant public static final android.graphics.Paint.Align RIGHT;
   }
 
   public static final class Paint.Cap extends java.lang.Enum {
     method public static android.graphics.Paint.Cap valueOf(java.lang.String);
     method public static final android.graphics.Paint.Cap[] values();
+    enum_constant public static final android.graphics.Paint.Cap BUTT;
+    enum_constant public static final android.graphics.Paint.Cap ROUND;
+    enum_constant public static final android.graphics.Paint.Cap SQUARE;
   }
 
   public static class Paint.FontMetrics {
@@ -7783,11 +7816,17 @@ package android.graphics {
   public static final class Paint.Join extends java.lang.Enum {
     method public static android.graphics.Paint.Join valueOf(java.lang.String);
     method public static final android.graphics.Paint.Join[] values();
+    enum_constant public static final android.graphics.Paint.Join BEVEL;
+    enum_constant public static final android.graphics.Paint.Join MITER;
+    enum_constant public static final android.graphics.Paint.Join ROUND;
   }
 
   public static final class Paint.Style extends java.lang.Enum {
     method public static android.graphics.Paint.Style valueOf(java.lang.String);
     method public static final android.graphics.Paint.Style[] values();
+    enum_constant public static final android.graphics.Paint.Style FILL;
+    enum_constant public static final android.graphics.Paint.Style FILL_AND_STROKE;
+    enum_constant public static final android.graphics.Paint.Style STROKE;
   }
 
   public class PaintFlagsDrawFilter extends android.graphics.DrawFilter {
@@ -7839,11 +7878,17 @@ package android.graphics {
   public static final class Path.Direction extends java.lang.Enum {
     method public static android.graphics.Path.Direction valueOf(java.lang.String);
     method public static final android.graphics.Path.Direction[] values();
+    enum_constant public static final android.graphics.Path.Direction CCW;
+    enum_constant public static final android.graphics.Path.Direction CW;
   }
 
   public static final class Path.FillType extends java.lang.Enum {
     method public static android.graphics.Path.FillType valueOf(java.lang.String);
     method public static final android.graphics.Path.FillType[] values();
+    enum_constant public static final android.graphics.Path.FillType EVEN_ODD;
+    enum_constant public static final android.graphics.Path.FillType INVERSE_EVEN_ODD;
+    enum_constant public static final android.graphics.Path.FillType INVERSE_WINDING;
+    enum_constant public static final android.graphics.Path.FillType WINDING;
   }
 
   public class PathDashPathEffect extends android.graphics.PathEffect {
@@ -7853,6 +7898,9 @@ package android.graphics {
   public static final class PathDashPathEffect.Style extends java.lang.Enum {
     method public static android.graphics.PathDashPathEffect.Style valueOf(java.lang.String);
     method public static final android.graphics.PathDashPathEffect.Style[] values();
+    enum_constant public static final android.graphics.PathDashPathEffect.Style MORPH;
+    enum_constant public static final android.graphics.PathDashPathEffect.Style ROTATE;
+    enum_constant public static final android.graphics.PathDashPathEffect.Style TRANSLATE;
   }
 
   public class PathEffect {
@@ -7949,6 +7997,24 @@ package android.graphics {
   public static final class PorterDuff.Mode extends java.lang.Enum {
     method public static android.graphics.PorterDuff.Mode valueOf(java.lang.String);
     method public static final android.graphics.PorterDuff.Mode[] values();
+    enum_constant public static final android.graphics.PorterDuff.Mode ADD;
+    enum_constant public static final android.graphics.PorterDuff.Mode CLEAR;
+    enum_constant public static final android.graphics.PorterDuff.Mode DARKEN;
+    enum_constant public static final android.graphics.PorterDuff.Mode DST;
+    enum_constant public static final android.graphics.PorterDuff.Mode DST_ATOP;
+    enum_constant public static final android.graphics.PorterDuff.Mode DST_IN;
+    enum_constant public static final android.graphics.PorterDuff.Mode DST_OUT;
+    enum_constant public static final android.graphics.PorterDuff.Mode DST_OVER;
+    enum_constant public static final android.graphics.PorterDuff.Mode LIGHTEN;
+    enum_constant public static final android.graphics.PorterDuff.Mode MULTIPLY;
+    enum_constant public static final android.graphics.PorterDuff.Mode OVERLAY;
+    enum_constant public static final android.graphics.PorterDuff.Mode SCREEN;
+    enum_constant public static final android.graphics.PorterDuff.Mode SRC;
+    enum_constant public static final android.graphics.PorterDuff.Mode SRC_ATOP;
+    enum_constant public static final android.graphics.PorterDuff.Mode SRC_IN;
+    enum_constant public static final android.graphics.PorterDuff.Mode SRC_OUT;
+    enum_constant public static final android.graphics.PorterDuff.Mode SRC_OVER;
+    enum_constant public static final android.graphics.PorterDuff.Mode XOR;
   }
 
   public class PorterDuffColorFilter extends android.graphics.ColorFilter {
@@ -8090,6 +8156,12 @@ package android.graphics {
   public static final class Region.Op extends java.lang.Enum {
     method public static android.graphics.Region.Op valueOf(java.lang.String);
     method public static final android.graphics.Region.Op[] values();
+    enum_constant public static final android.graphics.Region.Op DIFFERENCE;
+    enum_constant public static final android.graphics.Region.Op INTERSECT;
+    enum_constant public static final android.graphics.Region.Op REPLACE;
+    enum_constant public static final android.graphics.Region.Op REVERSE_DIFFERENCE;
+    enum_constant public static final android.graphics.Region.Op UNION;
+    enum_constant public static final android.graphics.Region.Op XOR;
   }
 
   public class RegionIterator {
@@ -8106,6 +8178,9 @@ package android.graphics {
   public static final class Shader.TileMode extends java.lang.Enum {
     method public static android.graphics.Shader.TileMode valueOf(java.lang.String);
     method public static final android.graphics.Shader.TileMode[] values();
+    enum_constant public static final android.graphics.Shader.TileMode CLAMP;
+    enum_constant public static final android.graphics.Shader.TileMode MIRROR;
+    enum_constant public static final android.graphics.Shader.TileMode REPEAT;
   }
 
   public class SumPathEffect extends android.graphics.PathEffect {
@@ -8380,6 +8455,14 @@ package android.graphics.drawable {
   public static final class GradientDrawable.Orientation extends java.lang.Enum {
     method public static android.graphics.drawable.GradientDrawable.Orientation valueOf(java.lang.String);
     method public static final android.graphics.drawable.GradientDrawable.Orientation[] values();
+    enum_constant public static final android.graphics.drawable.GradientDrawable.Orientation BL_TR;
+    enum_constant public static final android.graphics.drawable.GradientDrawable.Orientation BOTTOM_TOP;
+    enum_constant public static final android.graphics.drawable.GradientDrawable.Orientation BR_TL;
+    enum_constant public static final android.graphics.drawable.GradientDrawable.Orientation LEFT_RIGHT;
+    enum_constant public static final android.graphics.drawable.GradientDrawable.Orientation RIGHT_LEFT;
+    enum_constant public static final android.graphics.drawable.GradientDrawable.Orientation TL_BR;
+    enum_constant public static final android.graphics.drawable.GradientDrawable.Orientation TOP_BOTTOM;
+    enum_constant public static final android.graphics.drawable.GradientDrawable.Orientation TR_BL;
   }
 
   public class InsetDrawable extends android.graphics.drawable.Drawable implements android.graphics.drawable.Drawable.Callback {
@@ -10812,6 +10895,9 @@ package android.net {
   public static final class LocalSocketAddress.Namespace extends java.lang.Enum {
     method public static android.net.LocalSocketAddress.Namespace valueOf(java.lang.String);
     method public static final android.net.LocalSocketAddress.Namespace[] values();
+    enum_constant public static final android.net.LocalSocketAddress.Namespace ABSTRACT;
+    enum_constant public static final android.net.LocalSocketAddress.Namespace FILESYSTEM;
+    enum_constant public static final android.net.LocalSocketAddress.Namespace RESERVED;
   }
 
   public class MailTo {
@@ -10846,11 +10932,27 @@ package android.net {
   public static final class NetworkInfo.DetailedState extends java.lang.Enum {
     method public static android.net.NetworkInfo.DetailedState valueOf(java.lang.String);
     method public static final android.net.NetworkInfo.DetailedState[] values();
+    enum_constant public static final android.net.NetworkInfo.DetailedState AUTHENTICATING;
+    enum_constant public static final android.net.NetworkInfo.DetailedState CONNECTED;
+    enum_constant public static final android.net.NetworkInfo.DetailedState CONNECTING;
+    enum_constant public static final android.net.NetworkInfo.DetailedState DISCONNECTED;
+    enum_constant public static final android.net.NetworkInfo.DetailedState DISCONNECTING;
+    enum_constant public static final android.net.NetworkInfo.DetailedState FAILED;
+    enum_constant public static final android.net.NetworkInfo.DetailedState IDLE;
+    enum_constant public static final android.net.NetworkInfo.DetailedState OBTAINING_IPADDR;
+    enum_constant public static final android.net.NetworkInfo.DetailedState SCANNING;
+    enum_constant public static final android.net.NetworkInfo.DetailedState SUSPENDED;
   }
 
   public static final class NetworkInfo.State extends java.lang.Enum {
     method public static android.net.NetworkInfo.State valueOf(java.lang.String);
     method public static final android.net.NetworkInfo.State[] values();
+    enum_constant public static final android.net.NetworkInfo.State CONNECTED;
+    enum_constant public static final android.net.NetworkInfo.State CONNECTING;
+    enum_constant public static final android.net.NetworkInfo.State DISCONNECTED;
+    enum_constant public static final android.net.NetworkInfo.State DISCONNECTING;
+    enum_constant public static final android.net.NetworkInfo.State SUSPENDED;
+    enum_constant public static final android.net.NetworkInfo.State UNKNOWN;
   }
 
   public class ParseException extends java.lang.RuntimeException {
@@ -11363,6 +11465,17 @@ package android.net.wifi {
     method public static android.net.wifi.SupplicantState valueOf(java.lang.String);
     method public static final android.net.wifi.SupplicantState[] values();
     method public void writeToParcel(android.os.Parcel, int);
+    enum_constant public static final android.net.wifi.SupplicantState ASSOCIATED;
+    enum_constant public static final android.net.wifi.SupplicantState ASSOCIATING;
+    enum_constant public static final android.net.wifi.SupplicantState COMPLETED;
+    enum_constant public static final android.net.wifi.SupplicantState DISCONNECTED;
+    enum_constant public static final android.net.wifi.SupplicantState DORMANT;
+    enum_constant public static final android.net.wifi.SupplicantState FOUR_WAY_HANDSHAKE;
+    enum_constant public static final android.net.wifi.SupplicantState GROUP_HANDSHAKE;
+    enum_constant public static final android.net.wifi.SupplicantState INACTIVE;
+    enum_constant public static final android.net.wifi.SupplicantState INVALID;
+    enum_constant public static final android.net.wifi.SupplicantState SCANNING;
+    enum_constant public static final android.net.wifi.SupplicantState UNINITIALIZED;
   }
 
   public class WifiConfiguration implements android.os.Parcelable {
@@ -13184,6 +13297,9 @@ package android.os {
   public static final class AsyncTask.Status extends java.lang.Enum {
     method public static android.os.AsyncTask.Status valueOf(java.lang.String);
     method public static final android.os.AsyncTask.Status[] values();
+    enum_constant public static final android.os.AsyncTask.Status FINISHED;
+    enum_constant public static final android.os.AsyncTask.Status PENDING;
+    enum_constant public static final android.os.AsyncTask.Status RUNNING;
   }
 
   public class BadParcelableException extends android.util.AndroidRuntimeException {
@@ -16159,6 +16275,9 @@ package android.renderscript {
   public static final class Allocation.MipmapControl extends java.lang.Enum {
     method public static android.renderscript.Allocation.MipmapControl valueOf(java.lang.String);
     method public static final android.renderscript.Allocation.MipmapControl[] values();
+    enum_constant public static final android.renderscript.Allocation.MipmapControl MIPMAP_FULL;
+    enum_constant public static final android.renderscript.Allocation.MipmapControl MIPMAP_NONE;
+    enum_constant public static final android.renderscript.Allocation.MipmapControl MIPMAP_ON_SYNC_TO_TEXTURE;
   }
 
   public class AllocationAdapter extends android.renderscript.Allocation {
@@ -16256,11 +16375,45 @@ package android.renderscript {
   public static final class Element.DataKind extends java.lang.Enum {
     method public static android.renderscript.Element.DataKind valueOf(java.lang.String);
     method public static final android.renderscript.Element.DataKind[] values();
+    enum_constant public static final android.renderscript.Element.DataKind PIXEL_A;
+    enum_constant public static final android.renderscript.Element.DataKind PIXEL_DEPTH;
+    enum_constant public static final android.renderscript.Element.DataKind PIXEL_L;
+    enum_constant public static final android.renderscript.Element.DataKind PIXEL_LA;
+    enum_constant public static final android.renderscript.Element.DataKind PIXEL_RGB;
+    enum_constant public static final android.renderscript.Element.DataKind PIXEL_RGBA;
+    enum_constant public static final android.renderscript.Element.DataKind USER;
   }
 
   public static final class Element.DataType extends java.lang.Enum {
     method public static android.renderscript.Element.DataType valueOf(java.lang.String);
     method public static final android.renderscript.Element.DataType[] values();
+    enum_constant public static final android.renderscript.Element.DataType BOOLEAN;
+    enum_constant public static final android.renderscript.Element.DataType FLOAT_32;
+    enum_constant public static final android.renderscript.Element.DataType FLOAT_64;
+    enum_constant public static final android.renderscript.Element.DataType MATRIX_2X2;
+    enum_constant public static final android.renderscript.Element.DataType MATRIX_3X3;
+    enum_constant public static final android.renderscript.Element.DataType MATRIX_4X4;
+    enum_constant public static final android.renderscript.Element.DataType RS_ALLOCATION;
+    enum_constant public static final android.renderscript.Element.DataType RS_ELEMENT;
+    enum_constant public static final android.renderscript.Element.DataType RS_MESH;
+    enum_constant public static final android.renderscript.Element.DataType RS_PROGRAM_FRAGMENT;
+    enum_constant public static final android.renderscript.Element.DataType RS_PROGRAM_RASTER;
+    enum_constant public static final android.renderscript.Element.DataType RS_PROGRAM_STORE;
+    enum_constant public static final android.renderscript.Element.DataType RS_PROGRAM_VERTEX;
+    enum_constant public static final android.renderscript.Element.DataType RS_SAMPLER;
+    enum_constant public static final android.renderscript.Element.DataType RS_SCRIPT;
+    enum_constant public static final android.renderscript.Element.DataType RS_TYPE;
+    enum_constant public static final android.renderscript.Element.DataType SIGNED_16;
+    enum_constant public static final android.renderscript.Element.DataType SIGNED_32;
+    enum_constant public static final android.renderscript.Element.DataType SIGNED_64;
+    enum_constant public static final android.renderscript.Element.DataType SIGNED_8;
+    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_16;
+    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_32;
+    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_4_4_4_4;
+    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_5_5_5_1;
+    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_5_6_5;
+    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_64;
+    enum_constant public static final android.renderscript.Element.DataType UNSIGNED_8;
   }
 
   public class FieldPacker {
@@ -16320,6 +16473,8 @@ package android.renderscript {
   public static final class FileA3D.EntryType extends java.lang.Enum {
     method public static android.renderscript.FileA3D.EntryType valueOf(java.lang.String);
     method public static final android.renderscript.FileA3D.EntryType[] values();
+    enum_constant public static final android.renderscript.FileA3D.EntryType MESH;
+    enum_constant public static final android.renderscript.FileA3D.EntryType UNKNOWN;
   }
 
   public static class FileA3D.IndexEntry {
@@ -16364,6 +16519,10 @@ package android.renderscript {
   public static final class Font.Style extends java.lang.Enum {
     method public static android.renderscript.Font.Style valueOf(java.lang.String);
     method public static final android.renderscript.Font.Style[] values();
+    enum_constant public static final android.renderscript.Font.Style BOLD;
+    enum_constant public static final android.renderscript.Font.Style BOLD_ITALIC;
+    enum_constant public static final android.renderscript.Font.Style ITALIC;
+    enum_constant public static final android.renderscript.Font.Style NORMAL;
   }
 
   public class Int2 {
@@ -16507,6 +16666,12 @@ package android.renderscript {
   public static final class Mesh.Primitive extends java.lang.Enum {
     method public static android.renderscript.Mesh.Primitive valueOf(java.lang.String);
     method public static final android.renderscript.Mesh.Primitive[] values();
+    enum_constant public static final android.renderscript.Mesh.Primitive LINE;
+    enum_constant public static final android.renderscript.Mesh.Primitive LINE_STRIP;
+    enum_constant public static final android.renderscript.Mesh.Primitive POINT;
+    enum_constant public static final android.renderscript.Mesh.Primitive TRIANGLE;
+    enum_constant public static final android.renderscript.Mesh.Primitive TRIANGLE_FAN;
+    enum_constant public static final android.renderscript.Mesh.Primitive TRIANGLE_STRIP;
   }
 
   public static class Mesh.TriangleMeshBuilder {
@@ -16543,6 +16708,8 @@ package android.renderscript {
   public static final class Program.TextureType extends java.lang.Enum {
     method public static android.renderscript.Program.TextureType valueOf(java.lang.String);
     method public static final android.renderscript.Program.TextureType[] values();
+    enum_constant public static final android.renderscript.Program.TextureType TEXTURE_2D;
+    enum_constant public static final android.renderscript.Program.TextureType TEXTURE_CUBE;
   }
 
   public class ProgramFragment extends android.renderscript.Program {
@@ -16568,11 +16735,18 @@ package android.renderscript {
   public static final class ProgramFragmentFixedFunction.Builder.EnvMode extends java.lang.Enum {
     method public static android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode valueOf(java.lang.String);
     method public static final android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode[] values();
+    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode DECAL;
+    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode MODULATE;
+    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.EnvMode REPLACE;
   }
 
   public static final class ProgramFragmentFixedFunction.Builder.Format extends java.lang.Enum {
     method public static android.renderscript.ProgramFragmentFixedFunction.Builder.Format valueOf(java.lang.String);
     method public static final android.renderscript.ProgramFragmentFixedFunction.Builder.Format[] values();
+    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.Format ALPHA;
+    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.Format LUMINANCE_ALPHA;
+    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.Format RGB;
+    enum_constant public static final android.renderscript.ProgramFragmentFixedFunction.Builder.Format RGBA;
   }
 
   public class ProgramRaster extends android.renderscript.BaseObj {
@@ -16591,6 +16765,9 @@ package android.renderscript {
   public static final class ProgramRaster.CullMode extends java.lang.Enum {
     method public static android.renderscript.ProgramRaster.CullMode valueOf(java.lang.String);
     method public static final android.renderscript.ProgramRaster.CullMode[] values();
+    enum_constant public static final android.renderscript.ProgramRaster.CullMode BACK;
+    enum_constant public static final android.renderscript.ProgramRaster.CullMode FRONT;
+    enum_constant public static final android.renderscript.ProgramRaster.CullMode NONE;
   }
 
   public class ProgramStore extends android.renderscript.BaseObj {
@@ -16603,11 +16780,28 @@ package android.renderscript {
   public static final class ProgramStore.BlendDstFunc extends java.lang.Enum {
     method public static android.renderscript.ProgramStore.BlendDstFunc valueOf(java.lang.String);
     method public static final android.renderscript.ProgramStore.BlendDstFunc[] values();
+    enum_constant public static final android.renderscript.ProgramStore.BlendDstFunc DST_ALPHA;
+    enum_constant public static final android.renderscript.ProgramStore.BlendDstFunc ONE;
+    enum_constant public static final android.renderscript.ProgramStore.BlendDstFunc ONE_MINUS_DST_ALPHA;
+    enum_constant public static final android.renderscript.ProgramStore.BlendDstFunc ONE_MINUS_SRC_ALPHA;
+    enum_constant public static final android.renderscript.ProgramStore.BlendDstFunc ONE_MINUS_SRC_COLOR;
+    enum_constant public static final android.renderscript.ProgramStore.BlendDstFunc SRC_ALPHA;
+    enum_constant public static final android.renderscript.ProgramStore.BlendDstFunc SRC_COLOR;
+    enum_constant public static final android.renderscript.ProgramStore.BlendDstFunc ZERO;
   }
 
   public static final class ProgramStore.BlendSrcFunc extends java.lang.Enum {
     method public static android.renderscript.ProgramStore.BlendSrcFunc valueOf(java.lang.String);
     method public static final android.renderscript.ProgramStore.BlendSrcFunc[] values();
+    enum_constant public static final android.renderscript.ProgramStore.BlendSrcFunc DST_ALPHA;
+    enum_constant public static final android.renderscript.ProgramStore.BlendSrcFunc DST_COLOR;
+    enum_constant public static final android.renderscript.ProgramStore.BlendSrcFunc ONE;
+    enum_constant public static final android.renderscript.ProgramStore.BlendSrcFunc ONE_MINUS_DST_ALPHA;
+    enum_constant public static final android.renderscript.ProgramStore.BlendSrcFunc ONE_MINUS_DST_COLOR;
+    enum_constant public static final android.renderscript.ProgramStore.BlendSrcFunc ONE_MINUS_SRC_ALPHA;
+    enum_constant public static final android.renderscript.ProgramStore.BlendSrcFunc SRC_ALPHA;
+    enum_constant public static final android.renderscript.ProgramStore.BlendSrcFunc SRC_ALPHA_SATURATE;
+    enum_constant public static final android.renderscript.ProgramStore.BlendSrcFunc ZERO;
   }
 
   public static class ProgramStore.Builder {
@@ -16623,6 +16817,13 @@ package android.renderscript {
   public static final class ProgramStore.DepthFunc extends java.lang.Enum {
     method public static android.renderscript.ProgramStore.DepthFunc valueOf(java.lang.String);
     method public static final android.renderscript.ProgramStore.DepthFunc[] values();
+    enum_constant public static final android.renderscript.ProgramStore.DepthFunc ALWAYS;
+    enum_constant public static final android.renderscript.ProgramStore.DepthFunc EQUAL;
+    enum_constant public static final android.renderscript.ProgramStore.DepthFunc GREATER;
+    enum_constant public static final android.renderscript.ProgramStore.DepthFunc GREATER_OR_EQUAL;
+    enum_constant public static final android.renderscript.ProgramStore.DepthFunc LESS;
+    enum_constant public static final android.renderscript.ProgramStore.DepthFunc LESS_OR_EQUAL;
+    enum_constant public static final android.renderscript.ProgramStore.DepthFunc NOT_EQUAL;
   }
 
   public class ProgramVertex extends android.renderscript.Program {
@@ -16698,6 +16899,8 @@ package android.renderscript {
   public static final class RenderScript.Priority extends java.lang.Enum {
     method public static android.renderscript.RenderScript.Priority valueOf(java.lang.String);
     method public static final android.renderscript.RenderScript.Priority[] values();
+    enum_constant public static final android.renderscript.RenderScript.Priority LOW;
+    enum_constant public static final android.renderscript.RenderScript.Priority NORMAL;
   }
 
   public static class RenderScript.RSErrorHandler implements java.lang.Runnable {
@@ -16760,6 +16963,12 @@ package android.renderscript {
   public static final class Sampler.Value extends java.lang.Enum {
     method public static android.renderscript.Sampler.Value valueOf(java.lang.String);
     method public static final android.renderscript.Sampler.Value[] values();
+    enum_constant public static final android.renderscript.Sampler.Value CLAMP;
+    enum_constant public static final android.renderscript.Sampler.Value LINEAR;
+    enum_constant public static final android.renderscript.Sampler.Value LINEAR_MIP_LINEAR;
+    enum_constant public static final android.renderscript.Sampler.Value LINEAR_MIP_NEAREST;
+    enum_constant public static final android.renderscript.Sampler.Value NEAREST;
+    enum_constant public static final android.renderscript.Sampler.Value WRAP;
   }
 
   public class Script extends android.renderscript.BaseObj {
@@ -16839,6 +17048,12 @@ package android.renderscript {
   public static final class Type.CubemapFace extends java.lang.Enum {
     method public static android.renderscript.Type.CubemapFace valueOf(java.lang.String);
     method public static final android.renderscript.Type.CubemapFace[] values();
+    enum_constant public static final android.renderscript.Type.CubemapFace NEGATIVE_X;
+    enum_constant public static final android.renderscript.Type.CubemapFace NEGATIVE_Y;
+    enum_constant public static final android.renderscript.Type.CubemapFace NEGATIVE_Z;
+    enum_constant public static final android.renderscript.Type.CubemapFace POSITVE_X;
+    enum_constant public static final android.renderscript.Type.CubemapFace POSITVE_Y;
+    enum_constant public static final android.renderscript.Type.CubemapFace POSITVE_Z;
   }
 
 }
@@ -17287,6 +17502,11 @@ package android.telephony {
   public static final class SmsMessage.MessageClass extends java.lang.Enum {
     method public static android.telephony.SmsMessage.MessageClass valueOf(java.lang.String);
     method public static final android.telephony.SmsMessage.MessageClass[] values();
+    enum_constant public static final android.telephony.SmsMessage.MessageClass CLASS_0;
+    enum_constant public static final android.telephony.SmsMessage.MessageClass CLASS_1;
+    enum_constant public static final android.telephony.SmsMessage.MessageClass CLASS_2;
+    enum_constant public static final android.telephony.SmsMessage.MessageClass CLASS_3;
+    enum_constant public static final android.telephony.SmsMessage.MessageClass UNKNOWN;
   }
 
   public static class SmsMessage.SubmitPdu {
@@ -17458,6 +17678,11 @@ package android.telephony.gsm {
   public static final deprecated class SmsMessage.MessageClass extends java.lang.Enum {
     method public static android.telephony.gsm.SmsMessage.MessageClass valueOf(java.lang.String);
     method public static final android.telephony.gsm.SmsMessage.MessageClass[] values();
+    enum_constant public static final android.telephony.gsm.SmsMessage.MessageClass CLASS_0;
+    enum_constant public static final android.telephony.gsm.SmsMessage.MessageClass CLASS_1;
+    enum_constant public static final android.telephony.gsm.SmsMessage.MessageClass CLASS_2;
+    enum_constant public static final android.telephony.gsm.SmsMessage.MessageClass CLASS_3;
+    enum_constant public static final android.telephony.gsm.SmsMessage.MessageClass UNKNOWN;
   }
 
   public static deprecated class SmsMessage.SubmitPdu {
@@ -18292,6 +18517,9 @@ package android.text {
   public static final class Layout.Alignment extends java.lang.Enum {
     method public static android.text.Layout.Alignment valueOf(java.lang.String);
     method public static final android.text.Layout.Alignment[] values();
+    enum_constant public static final android.text.Layout.Alignment ALIGN_CENTER;
+    enum_constant public static final android.text.Layout.Alignment ALIGN_NORMAL;
+    enum_constant public static final android.text.Layout.Alignment ALIGN_OPPOSITE;
   }
 
   public static class Layout.Directions {
@@ -18549,6 +18777,10 @@ package android.text {
   public static final class TextUtils.TruncateAt extends java.lang.Enum {
     method public static android.text.TextUtils.TruncateAt valueOf(java.lang.String);
     method public static final android.text.TextUtils.TruncateAt[] values();
+    enum_constant public static final android.text.TextUtils.TruncateAt END;
+    enum_constant public static final android.text.TextUtils.TruncateAt MARQUEE;
+    enum_constant public static final android.text.TextUtils.TruncateAt MIDDLE;
+    enum_constant public static final android.text.TextUtils.TruncateAt START;
   }
 
   public abstract interface TextWatcher implements android.text.NoCopySpan {
@@ -18934,6 +19166,10 @@ package android.text.method {
   public static final class TextKeyListener.Capitalize extends java.lang.Enum {
     method public static android.text.method.TextKeyListener.Capitalize valueOf(java.lang.String);
     method public static final android.text.method.TextKeyListener.Capitalize[] values();
+    enum_constant public static final android.text.method.TextKeyListener.Capitalize CHARACTERS;
+    enum_constant public static final android.text.method.TextKeyListener.Capitalize NONE;
+    enum_constant public static final android.text.method.TextKeyListener.Capitalize SENTENCES;
+    enum_constant public static final android.text.method.TextKeyListener.Capitalize WORDS;
   }
 
   public class TimeKeyListener extends android.text.method.NumberKeyListener {
@@ -19483,6 +19719,16 @@ package android.util {
   public final class JsonToken extends java.lang.Enum {
     method public static android.util.JsonToken valueOf(java.lang.String);
     method public static final android.util.JsonToken[] values();
+    enum_constant public static final android.util.JsonToken BEGIN_ARRAY;
+    enum_constant public static final android.util.JsonToken BEGIN_OBJECT;
+    enum_constant public static final android.util.JsonToken BOOLEAN;
+    enum_constant public static final android.util.JsonToken END_ARRAY;
+    enum_constant public static final android.util.JsonToken END_DOCUMENT;
+    enum_constant public static final android.util.JsonToken END_OBJECT;
+    enum_constant public static final android.util.JsonToken NAME;
+    enum_constant public static final android.util.JsonToken NULL;
+    enum_constant public static final android.util.JsonToken NUMBER;
+    enum_constant public static final android.util.JsonToken STRING;
   }
 
   public final class JsonWriter implements java.io.Closeable {
@@ -19772,6 +20018,10 @@ package android.util {
   public static final class Xml.Encoding extends java.lang.Enum {
     method public static android.util.Xml.Encoding valueOf(java.lang.String);
     method public static final android.util.Xml.Encoding[] values();
+    enum_constant public static final android.util.Xml.Encoding ISO_8859_1;
+    enum_constant public static final android.util.Xml.Encoding US_ASCII;
+    enum_constant public static final android.util.Xml.Encoding UTF_16;
+    enum_constant public static final android.util.Xml.Encoding UTF_8;
   }
 
 }
@@ -21424,6 +21674,14 @@ package android.view {
   public static final class ViewDebug.HierarchyTraceType extends java.lang.Enum {
     method public static android.view.ViewDebug.HierarchyTraceType valueOf(java.lang.String);
     method public static final android.view.ViewDebug.HierarchyTraceType[] values();
+    enum_constant public static final android.view.ViewDebug.HierarchyTraceType BUILD_CACHE;
+    enum_constant public static final android.view.ViewDebug.HierarchyTraceType DRAW;
+    enum_constant public static final android.view.ViewDebug.HierarchyTraceType INVALIDATE;
+    enum_constant public static final android.view.ViewDebug.HierarchyTraceType INVALIDATE_CHILD;
+    enum_constant public static final android.view.ViewDebug.HierarchyTraceType INVALIDATE_CHILD_IN_PARENT;
+    enum_constant public static final android.view.ViewDebug.HierarchyTraceType ON_LAYOUT;
+    enum_constant public static final android.view.ViewDebug.HierarchyTraceType ON_MEASURE;
+    enum_constant public static final android.view.ViewDebug.HierarchyTraceType REQUEST_LAYOUT;
   }
 
   public static abstract class ViewDebug.IntToString implements java.lang.annotation.Annotation {
@@ -21432,6 +21690,12 @@ package android.view {
   public static final class ViewDebug.RecyclerTraceType extends java.lang.Enum {
     method public static android.view.ViewDebug.RecyclerTraceType valueOf(java.lang.String);
     method public static final android.view.ViewDebug.RecyclerTraceType[] values();
+    enum_constant public static final android.view.ViewDebug.RecyclerTraceType BIND_VIEW;
+    enum_constant public static final android.view.ViewDebug.RecyclerTraceType MOVE_FROM_ACTIVE_TO_SCRAP_HEAP;
+    enum_constant public static final android.view.ViewDebug.RecyclerTraceType MOVE_TO_SCRAP_HEAP;
+    enum_constant public static final android.view.ViewDebug.RecyclerTraceType NEW_VIEW;
+    enum_constant public static final android.view.ViewDebug.RecyclerTraceType RECYCLE_FROM_ACTIVE_HEAP;
+    enum_constant public static final android.view.ViewDebug.RecyclerTraceType RECYCLE_FROM_SCRAP_HEAP;
   }
 
   public abstract class ViewGroup extends android.view.View implements android.view.ViewManager android.view.ViewParent {
@@ -22640,6 +22904,11 @@ package android.webkit {
   public static final class ConsoleMessage.MessageLevel extends java.lang.Enum {
     method public static android.webkit.ConsoleMessage.MessageLevel valueOf(java.lang.String);
     method public static final android.webkit.ConsoleMessage.MessageLevel[] values();
+    enum_constant public static final android.webkit.ConsoleMessage.MessageLevel DEBUG;
+    enum_constant public static final android.webkit.ConsoleMessage.MessageLevel ERROR;
+    enum_constant public static final android.webkit.ConsoleMessage.MessageLevel LOG;
+    enum_constant public static final android.webkit.ConsoleMessage.MessageLevel TIP;
+    enum_constant public static final android.webkit.ConsoleMessage.MessageLevel WARNING;
   }
 
   public final class CookieManager {
@@ -22922,26 +23191,43 @@ package android.webkit {
   public static final deprecated class WebSettings.LayoutAlgorithm extends java.lang.Enum {
     method public static android.webkit.WebSettings.LayoutAlgorithm valueOf(java.lang.String);
     method public static final android.webkit.WebSettings.LayoutAlgorithm[] values();
+    enum_constant public static final android.webkit.WebSettings.LayoutAlgorithm NARROW_COLUMNS;
+    enum_constant public static final android.webkit.WebSettings.LayoutAlgorithm NORMAL;
+    enum_constant public static final android.webkit.WebSettings.LayoutAlgorithm SINGLE_COLUMN;
   }
 
   public static final class WebSettings.PluginState extends java.lang.Enum {
     method public static android.webkit.WebSettings.PluginState valueOf(java.lang.String);
     method public static final android.webkit.WebSettings.PluginState[] values();
+    enum_constant public static final android.webkit.WebSettings.PluginState OFF;
+    enum_constant public static final android.webkit.WebSettings.PluginState ON;
+    enum_constant public static final android.webkit.WebSettings.PluginState ON_DEMAND;
   }
 
   public static final class WebSettings.RenderPriority extends java.lang.Enum {
     method public static android.webkit.WebSettings.RenderPriority valueOf(java.lang.String);
     method public static final android.webkit.WebSettings.RenderPriority[] values();
+    enum_constant public static final android.webkit.WebSettings.RenderPriority HIGH;
+    enum_constant public static final android.webkit.WebSettings.RenderPriority LOW;
+    enum_constant public static final android.webkit.WebSettings.RenderPriority NORMAL;
   }
 
   public static final class WebSettings.TextSize extends java.lang.Enum {
     method public static android.webkit.WebSettings.TextSize valueOf(java.lang.String);
     method public static final android.webkit.WebSettings.TextSize[] values();
+    enum_constant public static final android.webkit.WebSettings.TextSize LARGER;
+    enum_constant public static final android.webkit.WebSettings.TextSize LARGEST;
+    enum_constant public static final android.webkit.WebSettings.TextSize NORMAL;
+    enum_constant public static final android.webkit.WebSettings.TextSize SMALLER;
+    enum_constant public static final android.webkit.WebSettings.TextSize SMALLEST;
   }
 
   public static final class WebSettings.ZoomDensity extends java.lang.Enum {
     method public static android.webkit.WebSettings.ZoomDensity valueOf(java.lang.String);
     method public static final android.webkit.WebSettings.ZoomDensity[] values();
+    enum_constant public static final android.webkit.WebSettings.ZoomDensity CLOSE;
+    enum_constant public static final android.webkit.WebSettings.ZoomDensity FAR;
+    enum_constant public static final android.webkit.WebSettings.ZoomDensity MEDIUM;
   }
 
   public final class WebStorage {
@@ -24008,6 +24294,14 @@ package android.widget {
   public static final class ImageView.ScaleType extends java.lang.Enum {
     method public static android.widget.ImageView.ScaleType valueOf(java.lang.String);
     method public static final android.widget.ImageView.ScaleType[] values();
+    enum_constant public static final android.widget.ImageView.ScaleType CENTER;
+    enum_constant public static final android.widget.ImageView.ScaleType CENTER_CROP;
+    enum_constant public static final android.widget.ImageView.ScaleType CENTER_INSIDE;
+    enum_constant public static final android.widget.ImageView.ScaleType FIT_CENTER;
+    enum_constant public static final android.widget.ImageView.ScaleType FIT_END;
+    enum_constant public static final android.widget.ImageView.ScaleType FIT_START;
+    enum_constant public static final android.widget.ImageView.ScaleType FIT_XY;
+    enum_constant public static final android.widget.ImageView.ScaleType MATRIX;
   }
 
   public class LinearLayout extends android.view.ViewGroup {
@@ -25064,6 +25358,9 @@ package android.widget {
   public static final class TextView.BufferType extends java.lang.Enum {
     method public static android.widget.TextView.BufferType valueOf(java.lang.String);
     method public static final android.widget.TextView.BufferType[] values();
+    enum_constant public static final android.widget.TextView.BufferType EDITABLE;
+    enum_constant public static final android.widget.TextView.BufferType NORMAL;
+    enum_constant public static final android.widget.TextView.BufferType SPANNABLE;
   }
 
   public static abstract interface TextView.OnEditorActionListener {
@@ -28052,6 +28349,12 @@ package java.lang {
   public static final class Thread.State extends java.lang.Enum {
     method public static java.lang.Thread.State valueOf(java.lang.String);
     method public static final java.lang.Thread.State[] values();
+    enum_constant public static final java.lang.Thread.State BLOCKED;
+    enum_constant public static final java.lang.Thread.State NEW;
+    enum_constant public static final java.lang.Thread.State RUNNABLE;
+    enum_constant public static final java.lang.Thread.State TERMINATED;
+    enum_constant public static final java.lang.Thread.State TIMED_WAITING;
+    enum_constant public static final java.lang.Thread.State WAITING;
   }
 
   public static abstract interface Thread.UncaughtExceptionHandler {
@@ -28185,6 +28488,14 @@ package java.lang.annotation {
   public final class ElementType extends java.lang.Enum {
     method public static java.lang.annotation.ElementType valueOf(java.lang.String);
     method public static final java.lang.annotation.ElementType[] values();
+    enum_constant public static final java.lang.annotation.ElementType ANNOTATION_TYPE;
+    enum_constant public static final java.lang.annotation.ElementType CONSTRUCTOR;
+    enum_constant public static final java.lang.annotation.ElementType FIELD;
+    enum_constant public static final java.lang.annotation.ElementType LOCAL_VARIABLE;
+    enum_constant public static final java.lang.annotation.ElementType METHOD;
+    enum_constant public static final java.lang.annotation.ElementType PACKAGE;
+    enum_constant public static final java.lang.annotation.ElementType PARAMETER;
+    enum_constant public static final java.lang.annotation.ElementType TYPE;
   }
 
   public class IncompleteAnnotationException extends java.lang.RuntimeException {
@@ -28202,6 +28513,9 @@ package java.lang.annotation {
   public final class RetentionPolicy extends java.lang.Enum {
     method public static java.lang.annotation.RetentionPolicy valueOf(java.lang.String);
     method public static final java.lang.annotation.RetentionPolicy[] values();
+    enum_constant public static final java.lang.annotation.RetentionPolicy CLASS;
+    enum_constant public static final java.lang.annotation.RetentionPolicy RUNTIME;
+    enum_constant public static final java.lang.annotation.RetentionPolicy SOURCE;
   }
 
   public abstract class Target implements java.lang.annotation.Annotation {
@@ -28615,6 +28929,14 @@ package java.math {
     method public static java.math.RoundingMode valueOf(java.lang.String);
     method public static java.math.RoundingMode valueOf(int);
     method public static final java.math.RoundingMode[] values();
+    enum_constant public static final java.math.RoundingMode CEILING;
+    enum_constant public static final java.math.RoundingMode DOWN;
+    enum_constant public static final java.math.RoundingMode FLOOR;
+    enum_constant public static final java.math.RoundingMode HALF_DOWN;
+    enum_constant public static final java.math.RoundingMode HALF_EVEN;
+    enum_constant public static final java.math.RoundingMode HALF_UP;
+    enum_constant public static final java.math.RoundingMode UNNECESSARY;
+    enum_constant public static final java.math.RoundingMode UP;
   }
 
 }
@@ -28641,6 +28963,8 @@ package java.net {
   public static final class Authenticator.RequestorType extends java.lang.Enum {
     method public static java.net.Authenticator.RequestorType valueOf(java.lang.String);
     method public static final java.net.Authenticator.RequestorType[] values();
+    enum_constant public static final java.net.Authenticator.RequestorType PROXY;
+    enum_constant public static final java.net.Authenticator.RequestorType SERVER;
   }
 
   public class BindException extends java.net.SocketException {
@@ -29055,6 +29379,9 @@ package java.net {
   public static final class Proxy.Type extends java.lang.Enum {
     method public static java.net.Proxy.Type valueOf(java.lang.String);
     method public static final java.net.Proxy.Type[] values();
+    enum_constant public static final java.net.Proxy.Type DIRECT;
+    enum_constant public static final java.net.Proxy.Type HTTP;
+    enum_constant public static final java.net.Proxy.Type SOCKS;
   }
 
   public abstract class ProxySelector {
@@ -30451,6 +30778,9 @@ package java.security {
   public static final class KeyRep.Type extends java.lang.Enum {
     method public static java.security.KeyRep.Type valueOf(java.lang.String);
     method public static final java.security.KeyRep.Type[] values();
+    enum_constant public static final java.security.KeyRep.Type PRIVATE;
+    enum_constant public static final java.security.KeyRep.Type PUBLIC;
+    enum_constant public static final java.security.KeyRep.Type SECRET;
   }
 
   public class KeyStore {
@@ -31824,6 +32154,10 @@ package java.sql {
   public final class ClientInfoStatus extends java.lang.Enum {
     method public static java.sql.ClientInfoStatus valueOf(java.lang.String);
     method public static final java.sql.ClientInfoStatus[] values();
+    enum_constant public static final java.sql.ClientInfoStatus REASON_UNKNOWN;
+    enum_constant public static final java.sql.ClientInfoStatus REASON_UNKNOWN_PROPERTY;
+    enum_constant public static final java.sql.ClientInfoStatus REASON_VALUE_INVALID;
+    enum_constant public static final java.sql.ClientInfoStatus REASON_VALUE_TRUNCATED;
   }
 
   public abstract interface Clob {
@@ -32508,6 +32842,11 @@ package java.sql {
   public final class RowIdLifetime extends java.lang.Enum {
     method public static java.sql.RowIdLifetime valueOf(java.lang.String);
     method public static final java.sql.RowIdLifetime[] values();
+    enum_constant public static final java.sql.RowIdLifetime ROWID_UNSUPPORTED;
+    enum_constant public static final java.sql.RowIdLifetime ROWID_VALID_FOREVER;
+    enum_constant public static final java.sql.RowIdLifetime ROWID_VALID_OTHER;
+    enum_constant public static final java.sql.RowIdLifetime ROWID_VALID_SESSION;
+    enum_constant public static final java.sql.RowIdLifetime ROWID_VALID_TRANSACTION;
   }
 
   public class SQLClientInfoException extends java.sql.SQLException {
@@ -33297,6 +33636,10 @@ package java.text {
   public static final class Normalizer.Form extends java.lang.Enum {
     method public static java.text.Normalizer.Form valueOf(java.lang.String);
     method public static final java.text.Normalizer.Form[] values();
+    enum_constant public static final java.text.Normalizer.Form NFC;
+    enum_constant public static final java.text.Normalizer.Form NFD;
+    enum_constant public static final java.text.Normalizer.Form NFKC;
+    enum_constant public static final java.text.Normalizer.Form NFKD;
   }
 
   public abstract class NumberFormat extends java.text.Format {
@@ -34038,6 +34381,8 @@ package java.util {
   public static final class Formatter.BigDecimalLayoutForm extends java.lang.Enum {
     method public static java.util.Formatter.BigDecimalLayoutForm valueOf(java.lang.String);
     method public static final java.util.Formatter.BigDecimalLayoutForm[] values();
+    enum_constant public static final java.util.Formatter.BigDecimalLayoutForm DECIMAL_FLOAT;
+    enum_constant public static final java.util.Formatter.BigDecimalLayoutForm SCIENTIFIC;
   }
 
   public class FormatterClosedException extends java.lang.IllegalStateException implements java.io.Serializable {
@@ -35484,6 +35829,13 @@ package java.util.concurrent {
     method public long toSeconds(long);
     method public static java.util.concurrent.TimeUnit valueOf(java.lang.String);
     method public static final java.util.concurrent.TimeUnit[] values();
+    enum_constant public static final java.util.concurrent.TimeUnit DAYS;
+    enum_constant public static final java.util.concurrent.TimeUnit HOURS;
+    enum_constant public static final java.util.concurrent.TimeUnit MICROSECONDS;
+    enum_constant public static final java.util.concurrent.TimeUnit MILLISECONDS;
+    enum_constant public static final java.util.concurrent.TimeUnit MINUTES;
+    enum_constant public static final java.util.concurrent.TimeUnit NANOSECONDS;
+    enum_constant public static final java.util.concurrent.TimeUnit SECONDS;
   }
 
   public class TimeoutException extends java.lang.Exception {
@@ -38140,11 +38492,20 @@ package javax.net.ssl {
   public static final class SSLEngineResult.HandshakeStatus extends java.lang.Enum {
     method public static javax.net.ssl.SSLEngineResult.HandshakeStatus valueOf(java.lang.String);
     method public static final javax.net.ssl.SSLEngineResult.HandshakeStatus[] values();
+    enum_constant public static final javax.net.ssl.SSLEngineResult.HandshakeStatus FINISHED;
+    enum_constant public static final javax.net.ssl.SSLEngineResult.HandshakeStatus NEED_TASK;
+    enum_constant public static final javax.net.ssl.SSLEngineResult.HandshakeStatus NEED_UNWRAP;
+    enum_constant public static final javax.net.ssl.SSLEngineResult.HandshakeStatus NEED_WRAP;
+    enum_constant public static final javax.net.ssl.SSLEngineResult.HandshakeStatus NOT_HANDSHAKING;
   }
 
   public static final class SSLEngineResult.Status extends java.lang.Enum {
     method public static javax.net.ssl.SSLEngineResult.Status valueOf(java.lang.String);
     method public static final javax.net.ssl.SSLEngineResult.Status[] values();
+    enum_constant public static final javax.net.ssl.SSLEngineResult.Status BUFFER_OVERFLOW;
+    enum_constant public static final javax.net.ssl.SSLEngineResult.Status BUFFER_UNDERFLOW;
+    enum_constant public static final javax.net.ssl.SSLEngineResult.Status CLOSED;
+    enum_constant public static final javax.net.ssl.SSLEngineResult.Status OK;
   }
 
   public class SSLException extends java.io.IOException {
@@ -40658,11 +41019,15 @@ package org.apache.http.conn.routing {
   public static final class RouteInfo.LayerType extends java.lang.Enum {
     method public static org.apache.http.conn.routing.RouteInfo.LayerType valueOf(java.lang.String);
     method public static final org.apache.http.conn.routing.RouteInfo.LayerType[] values();
+    enum_constant public static final org.apache.http.conn.routing.RouteInfo.LayerType LAYERED;
+    enum_constant public static final org.apache.http.conn.routing.RouteInfo.LayerType PLAIN;
   }
 
   public static final class RouteInfo.TunnelType extends java.lang.Enum {
     method public static org.apache.http.conn.routing.RouteInfo.TunnelType valueOf(java.lang.String);
     method public static final org.apache.http.conn.routing.RouteInfo.TunnelType[] values();
+    enum_constant public static final org.apache.http.conn.routing.RouteInfo.TunnelType PLAIN;
+    enum_constant public static final org.apache.http.conn.routing.RouteInfo.TunnelType TUNNELLED;
   }
 
   public final class RouteTracker implements java.lang.Cloneable org.apache.http.conn.routing.RouteInfo {
