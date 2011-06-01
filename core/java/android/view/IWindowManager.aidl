@@ -19,6 +19,7 @@ package android.view;
 import com.android.internal.view.IInputContext;
 import com.android.internal.view.IInputMethodClient;
 
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Point;
@@ -88,7 +89,7 @@ interface IWindowManager
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim);
     void executeAppTransition();
     void setAppStartingWindow(IBinder token, String pkg, int theme,
-            CharSequence nonLocalizedLabel, int labelRes,
+            in CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
             int icon, int windowFlags, IBinder transferFrom, boolean createIfNeeded);
     void setAppWillBeHidden(IBinder token);
     void setAppVisibility(IBinder token, boolean visible);

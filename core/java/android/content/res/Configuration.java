@@ -330,17 +330,17 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if (smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
             sb.append(" sw"); sb.append(smallestScreenWidthDp); sb.append("dp");
         } else {
-            sb.append("?swdp");
+            sb.append(" ?swdp");
         }
         if (screenWidthDp != SCREEN_WIDTH_DP_UNDEFINED) {
             sb.append(" w"); sb.append(screenWidthDp); sb.append("dp");
         } else {
-            sb.append("?wdp");
+            sb.append(" ?wdp");
         }
         if (screenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED) {
             sb.append(" h"); sb.append(screenHeightDp); sb.append("dp");
         } else {
-            sb.append("?hdp");
+            sb.append(" ?hdp");
         }
         switch ((screenLayout&SCREENLAYOUT_SIZE_MASK)) {
             case SCREENLAYOUT_SIZE_UNDEFINED: sb.append(" ?lsize"); break;
