@@ -1230,9 +1230,4 @@
     <instrumentation android:name="android.test.InstrumentationTestRunner"
             android:targetPackage="com.android.frameworks.coretests"
             android:label="Frameworks Core Tests" />
-
-    <instrumentation android:name="android.bluetooth.BluetoothTestRunner"
-            android:targetPackage="com.android.frameworks.coretests"
-            android:label="Bluetooth Tests" />
-
 </manifest>
