@@ -233,6 +233,16 @@ public class Build {
         
         /**
          * Current development version.
+         *
+         * <p>Update to Honeycomb MR1 to support 7 inch tablets, improve
+         * screen compatibility mode, etc.</p>
+         *
+         * <p>As of this version, applications that don't say whether they
+         * support XLARGE screens will be assumed to do so only if they target
+         * {@link #HONEYCOMB} or later; it had been {@link #GINGERBREAD} or
+         * later.  Applications that don't support a screen size at least as
+         * large as the current screen will provide the user with a UI to
+         * switch them in to screen size compatibility mode.</p>
          */
         public static final int HONEYCOMB_MR2 = CUR_DEVELOPMENT;
     }

@@ -3256,7 +3256,7 @@ public final class ActivityThread {
                 // If this activity doesn't handle any of the config changes
                 // then don't bother calling onConfigurationChanged as we're
                 // going to destroy it.
-                if ((~activity.mActivityInfo.configChanges & diff) == 0) {
+                if ((~activity.mActivityInfo.getRealConfigChanged() & diff) == 0) {
                     shouldChangeConfig = true;
                 }
             }

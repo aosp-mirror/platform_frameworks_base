@@ -3801,10 +3801,10 @@ public class ActivityStack {
         if (DEBUG_SWITCH || DEBUG_CONFIGURATION) {
             Slog.v(TAG, "Checking to restart " + r.info.name + ": changed=0x"
                     + Integer.toHexString(changes) + ", handles=0x"
-                    + Integer.toHexString(r.info.configChanges)
+                    + Integer.toHexString(r.info.getRealConfigChanged())
                     + ", newConfig=" + newConfig);
         }
-        if ((changes&(~r.info.configChanges)) != 0 || r.forceNewConfig) {
+        if ((changes&(~r.info.getRealConfigChanged())) != 0 || r.forceNewConfig) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
             r.configChangeFlags |= changes;
             r.startFreezingScreenLocked(r.app, globalChanges);
