@@ -79,4 +79,23 @@ oneway interface IBackupAgent {
      */
     void doRestore(in ParcelFileDescriptor data, int appVersionCode,
             in ParcelFileDescriptor newState, int token, IBackupManager callbackBinder);
+
+    /**
+     * Restore a single "file" to the application.  The file was typically obtained from
+     * a full-backup dataset.  The agent reads 'size' bytes of file content
+     * from the provided file descriptor.
+     *
+     * @param data Read-only pipe delivering the file content itself.
+     *
+     * @param size Size of the file being restored.
+     * @param type Type of file system entity, e.g. FullBackup.TYPE_DIRECTORY.
+     * @param domain Name of the file's semantic domain to which the 'path' argument is a
+     *        relative path.  e.g. FullBackup.DATABASE_TREE_TOKEN.
+     * @param path Relative path of the file within its semantic domain.
+     * @param mode Access mode of the file system entity, e.g. 0660.
+     * @param mtime Last modification time of the file system entity.
+     */
+    void doRestoreFile(in ParcelFileDescriptor data, long size,
+            int type, String domain, String path, long mode, long mtime,
+            int token, IBackupManager callbackBinder);
 }

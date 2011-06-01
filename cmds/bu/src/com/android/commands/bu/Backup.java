@@ -34,11 +34,12 @@ public final class Backup {
     IBackupManager mBackupManager;
 
     public static void main(String[] args) {
+        Log.d(TAG, "Beginning: " + args[0]);
         mArgs = args;
         try {
             new Backup().run();
         } catch (Exception e) {
-            Log.e(TAG, "Error running backup", e);
+            Log.e(TAG, "Error running backup/restore", e);
         }
         Log.d(TAG, "Finished.");
     }
@@ -46,7 +47,7 @@ public final class Backup {
     public void run() {
         mBackupManager = IBackupManager.Stub.asInterface(ServiceManager.getService("backup"));
         if (mBackupManager == null) {
-            System.err.println("ERROR: could not contact backup manager");
+            Log.e(TAG, "Can't obtain Backup Manager binder");
             return;
         }
 
@@ -56,7 +57,7 @@ public final class Backup {
         } else if (arg.equals("restore")) {
             doFullRestore();
         } else {
-            System.err.println("ERROR: invalid operation '" + arg + "'");
+            Log.e(TAG, "Invalid operation '" + arg + "'");
         }
     }
 
@@ -80,7 +81,6 @@ public final class Backup {
                 } else if ("-all".equals(arg)) {
                     doEverything = true;
                 } else {
-                    System.err.println("WARNING: unknown backup flag " + arg);
                     Log.w(TAG, "Unknown backup flag " + arg);
                     continue;
                 }
@@ -91,13 +91,10 @@ public final class Backup {
         }
 
         if (doEverything && packages.size() > 0) {
-            System.err.println("WARNING: -all used with explicit backup package set");
             Log.w(TAG, "-all passed for backup along with specific package names");
         }
 
         if (!doEverything && !saveShared && packages.size() == 0) {
-            System.err.println(
-                    "ERROR: no packages supplied for backup and neither -shared nor -all given");
             Log.e(TAG, "no backup packages supplied and neither -shared nor -all given");
             return;
         }
@@ -108,13 +105,22 @@ public final class Backup {
             mBackupManager.fullBackup(fd, saveApks, saveShared, doEverything,
                     packages.toArray(packArray));
         } catch (IOException e) {
-            System.err.println("ERROR: cannot dup System.out");
+            Log.e(TAG, "Can't dup out");
         } catch (RemoteException e) {
-            System.err.println("ERROR: unable to invoke backup manager service");
+            Log.e(TAG, "Unable to invoke backup manager for backup");
         }
     }
 
     private void doFullRestore() {
+        // No arguments to restore
+        try {
+            ParcelFileDescriptor fd = ParcelFileDescriptor.dup(FileDescriptor.in);
+            mBackupManager.fullRestore(fd);
+        } catch (IOException e) {
+            Log.e(TAG, "Can't dup System.in");
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to invoke backup manager for restore");
+        }
     }
 
     private String nextArg() {

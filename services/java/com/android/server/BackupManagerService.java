@@ -39,6 +39,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
+import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -46,6 +47,7 @@ import android.content.pm.Signature;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -74,12 +76,16 @@ import com.android.server.PackageManagerBackupAgent.Metadata;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -395,6 +401,13 @@ class BackupManagerService extends IBackupManager.Stub {
                 (new PerformRestoreTask(params.transport, params.observer,
                         params.token, params.pkgInfo, params.pmToken,
                         params.needFullBackup)).run();
+                break;
+            }
+
+            case MSG_RUN_FULL_RESTORE:
+            {
+                FullRestoreParams params = (FullRestoreParams)msg.obj;
+                (new PerformFullRestoreTask(params.fd, params.observer, params.latch)).run();
                 break;
             }
 
@@ -1236,7 +1249,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     Slog.d(TAG, "awaiting agent for " + app);
 
                     // success; wait for the agent to arrive
-                    // only wait 10 seconds for the clear data to happen
+                    // only wait 10 seconds for the bind to happen
                     long timeoutMark = System.currentTimeMillis() + TIMEOUT_INTERVAL;
                     while (mConnecting && mConnectedAgent == null
                             && (System.currentTimeMillis() < timeoutMark)) {
@@ -1677,6 +1690,7 @@ class BackupManagerService extends IBackupManager.Stub {
         public void run() {
             final List<PackageInfo> packagesToBackup;
 
+            Slog.i(TAG, "--- Performing full-dataset restore ---");
             sendStartBackup();
 
             // doAllApps supersedes the package set if any
@@ -1779,7 +1793,9 @@ class BackupManagerService extends IBackupManager.Stub {
             // Version 1:
             //     package name
             //     package's versionCode
-            //     boolean: "1" if archive includes .apk, "0" otherwise
+            //     platform versionCode
+            //     getInstallerPackageName() for this package (maybe empty)
+            //     boolean: "1" if archive includes .apk; any other string means not
             //     number of signatures == N
             // N*:    signature byte array in ascii format per Signature.toCharsString()
             StringBuilder builder = new StringBuilder(4096);
@@ -1788,6 +1804,11 @@ class BackupManagerService extends IBackupManager.Stub {
             printer.println(Integer.toString(BACKUP_MANIFEST_VERSION));
             printer.println(pkg.packageName);
             printer.println(Integer.toString(pkg.versionCode));
+            printer.println(Integer.toString(Build.VERSION.SDK_INT));
+
+            String installerName = mPackageManager.getInstallerPackageName(pkg.packageName);
+            printer.println((installerName != null) ? installerName : "");
+
             printer.println(withApk ? "1" : "0");
             if (pkg.signatures == null) {
                 printer.println("0");
@@ -1860,6 +1881,896 @@ class BackupManagerService extends IBackupManager.Stub {
         }
     }
 
+
+    // ----- Full restore from a file/socket -----
+
+    // Description of a file in the restore datastream
+    static class FileMetadata {
+        String packageName;             // name of the owning app
+        String installerPackageName;    // name of the market-type app that installed the owner
+        int type;                       // e.g. FullBackup.TYPE_DIRECTORY
+        String domain;                  // e.g. FullBackup.DATABASE_TREE_TOKEN
+        String path;                    // subpath within the semantic domain
+        long mode;                      // e.g. 0666 (actually int)
+        long mtime;                     // last mod time, UTC time_t (actually int)
+        long size;                      // bytes of content
+    }
+
+    enum RestorePolicy {
+        IGNORE,
+        ACCEPT,
+        ACCEPT_IF_APK
+    }
+
+    class PerformFullRestoreTask implements Runnable {
+        ParcelFileDescriptor mInputFile;
+        IFullBackupRestoreObserver mObserver;
+        AtomicBoolean mLatchObject;
+        IBackupAgent mAgent;
+        String mAgentPackage;
+        ApplicationInfo mTargetApp;
+        ParcelFileDescriptor[] mPipes = null;
+
+        // possible handling states for a given package in the restore dataset
+        final HashMap<String, RestorePolicy> mPackagePolicies
+                = new HashMap<String, RestorePolicy>();
+
+        // installer package names for each encountered app, derived from the manifests
+        final HashMap<String, String> mPackageInstallers = new HashMap<String, String>();
+
+        // Signatures for a given package found in its manifest file
+        final HashMap<String, Signature[]> mManifestSignatures
+                = new HashMap<String, Signature[]>();
+
+        // Packages we've already wiped data on when restoring their first file
+        final HashSet<String> mClearedPackages = new HashSet<String>();
+
+        PerformFullRestoreTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer,
+                AtomicBoolean latch) {
+            mInputFile = fd;
+            mObserver = observer;
+            mLatchObject = latch;
+            mAgent = null;
+            mAgentPackage = null;
+            mTargetApp = null;
+
+            // Which packages we've already wiped data on.  We prepopulate this
+            // with a whitelist of packages known to be unclearable.
+            mClearedPackages.add("android");
+            mClearedPackages.add("com.android.backupconfirm");
+            mClearedPackages.add("com.android.providers.settings");
+        }
+
+        class RestoreFileRunnable implements Runnable {
+            IBackupAgent mAgent;
+            FileMetadata mInfo;
+            ParcelFileDescriptor mSocket;
+            int mToken;
+
+            RestoreFileRunnable(IBackupAgent agent, FileMetadata info,
+                    ParcelFileDescriptor socket, int token) throws IOException {
+                mAgent = agent;
+                mInfo = info;
+                mToken = token;
+
+                // This class is used strictly for process-local binder invocations.  The
+                // semantics of ParcelFileDescriptor differ in this case; in particular, we
+                // do not automatically get a 'dup'ed descriptor that we can can continue
+                // to use asynchronously from the caller.  So, we make sure to dup it ourselves
+                // before proceeding to do the restore.
+                mSocket = ParcelFileDescriptor.dup(socket.getFileDescriptor());
+            }
+
+            @Override
+            public void run() {
+                try {
+                    mAgent.doRestoreFile(mSocket, mInfo.size, mInfo.type,
+                            mInfo.domain, mInfo.path, mInfo.mode, mInfo.mtime,
+                            mToken, mBackupManagerBinder);
+                } catch (RemoteException e) {
+                    // never happens; this is used strictly for local binder calls
+                }
+            }
+        }
+
+        @Override
+        public void run() {
+            Slog.i(TAG, "--- Performing full-dataset restore ---");
+            sendStartRestore();
+
+            try {
+                byte[] buffer = new byte[32 * 1024];
+                FileInputStream instream = new FileInputStream(mInputFile.getFileDescriptor());
+
+                boolean didRestore;
+                do {
+                    didRestore = restoreOneFile(instream, buffer);
+                } while (didRestore);
+
+                if (DEBUG) Slog.v(TAG, "Done consuming input tarfile");
+            } finally {
+                tearDownPipes();
+                tearDownAgent(mTargetApp);
+
+                try {
+                    mInputFile.close();
+                } catch (IOException e) {
+                    /* nothing we can do about this */
+                }
+                synchronized (mCurrentOpLock) {
+                    mCurrentOperations.clear();
+                }
+                synchronized (mLatchObject) {
+                    mLatchObject.set(true);
+                    mLatchObject.notifyAll();
+                }
+                sendEndRestore();
+                mWakelock.release();
+                if (DEBUG) Slog.d(TAG, "Full restore pass complete.");
+            }
+        }
+
+        boolean restoreOneFile(InputStream instream, byte[] buffer) {
+            FileMetadata info;
+            try {
+                info = readTarHeaders(instream);
+                if (info != null) {
+                    if (DEBUG) {
+                        dumpFileMetadata(info);
+                    }
+
+                    final String pkg = info.packageName;
+                    if (!pkg.equals(mAgentPackage)) {
+                        // okay, change in package; set up our various
+                        // bookkeeping if we haven't seen it yet
+                        if (!mPackagePolicies.containsKey(pkg)) {
+                            mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
+                        }
+
+                        // Clean up the previous agent relationship if necessary,
+                        // and let the observer know we're considering a new app.
+                        if (mAgent != null) {
+                            if (DEBUG) Slog.d(TAG, "Saw new package; tearing down old one");
+                            tearDownPipes();
+                            tearDownAgent(mTargetApp);
+                            mTargetApp = null;
+                            mAgentPackage = null;
+                        }
+                    }
+
+                    if (info.path.equals(BACKUP_MANIFEST_FILENAME)) {
+                        mPackagePolicies.put(pkg, readAppManifest(info, instream));
+                        mPackageInstallers.put(pkg, info.installerPackageName);
+                        // We've read only the manifest content itself at this point,
+                        // so consume the footer before looping around to the next
+                        // input file
+                        skipTarPadding(info.size, instream);
+                        sendOnRestorePackage(pkg);
+                    } else {
+                        // Non-manifest, so it's actual file data.  Is this a package
+                        // we're ignoring?
+                        boolean okay = true;
+                        RestorePolicy policy = mPackagePolicies.get(pkg);
+                        switch (policy) {
+                            case IGNORE:
+                                okay = false;
+                                break;
+
+                            case ACCEPT_IF_APK:
+                                // If we're in accept-if-apk state, then the first file we
+                                // see MUST be the apk.
+                                if (info.domain.equals(FullBackup.APK_TREE_TOKEN)) {
+                                    if (DEBUG) Slog.d(TAG, "APK file; installing");
+                                    // Try to install the app.
+                                    String installerName = mPackageInstallers.get(pkg);
+                                    okay = installApk(info, installerName, instream);
+                                    // good to go; promote to ACCEPT
+                                    mPackagePolicies.put(pkg, (okay)
+                                            ? RestorePolicy.ACCEPT
+                                            : RestorePolicy.IGNORE);
+                                    // At this point we've consumed this file entry
+                                    // ourselves, so just strip the tar footer and
+                                    // go on to the next file in the input stream
+                                    skipTarPadding(info.size, instream);
+                                    return true;
+                                } else {
+                                    // File data before (or without) the apk.  We can't
+                                    // handle it coherently in this case so ignore it.
+                                    mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
+                                    okay = false;
+                                }
+                                break;
+
+                            case ACCEPT:
+                                if (info.domain.equals(FullBackup.APK_TREE_TOKEN)) {
+                                    if (DEBUG) Slog.d(TAG, "apk present but ACCEPT");
+                                    // we can take the data without the apk, so we
+                                    // *want* to do so.  skip the apk by declaring this
+                                    // one file not-okay without changing the restore
+                                    // policy for the package.
+                                    okay = false;
+                                }
+                                break;
+
+                            default:
+                                // Something has gone dreadfully wrong when determining
+                                // the restore policy from the manifest.  Ignore the
+                                // rest of this package's data.
+                                Slog.e(TAG, "Invalid policy from manifest");
+                                okay = false;
+                                mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
+                                break;
+                        }
+
+                        // If the policy is satisfied, go ahead and set up to pipe the
+                        // data to the agent.
+                        if (DEBUG && okay && mAgent != null) {
+                            Slog.i(TAG, "Reusing existing agent instance");
+                        }
+                        if (okay && mAgent == null) {
+                            if (DEBUG) Slog.d(TAG, "Need to launch agent for " + pkg);
+
+                            try {
+                                mTargetApp = mPackageManager.getApplicationInfo(pkg, 0);
+
+                                // If we haven't sent any data to this app yet, we probably
+                                // need to clear it first.  Check that.
+                                if (!mClearedPackages.contains(pkg)) {
+                                    // apps with their own full backup agents are
+                                    // responsible for coherently managing a full
+                                    // restore.
+                                    if (mTargetApp.fullBackupAgentName == null) {
+                                        if (DEBUG) Slog.d(TAG, "Clearing app data preparatory to full restore");
+                                        clearApplicationDataSynchronous(pkg);
+                                    } else {
+                                        if (DEBUG) Slog.d(TAG, "full backup agent ("
+                                                + mTargetApp.fullBackupAgentName + ") => no clear");
+                                    }
+                                    mClearedPackages.add(pkg);
+                                } else {
+                                    if (DEBUG) Slog.d(TAG, "We've initialized this app already; no clear required");
+                                }
+
+                                // All set; now set up the IPC and launch the agent
+                                setUpPipes();
+                                mAgent = bindToAgentSynchronous(mTargetApp,
+                                        IApplicationThread.BACKUP_MODE_RESTORE_FULL);
+                                mAgentPackage = pkg;
+                            } catch (IOException e) {
+                                // fall through to error handling
+                            } catch (NameNotFoundException e) {
+                                // fall through to error handling
+                            }
+
+                            if (mAgent == null) {
+                                if (DEBUG) Slog.d(TAG, "Unable to create agent for " + pkg);
+                                okay = false;
+                                tearDownPipes();
+                                mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
+                            }
+                        }
+
+                        // Sanity check: make sure we never give data to the wrong app.  This
+                        // should never happen but a little paranoia here won't go amiss.
+                        if (okay && !pkg.equals(mAgentPackage)) {
+                            Slog.e(TAG, "Restoring data for " + pkg
+                                    + " but agent is for " + mAgentPackage);
+                            okay = false;
+                        }
+
+                        // At this point we have an agent ready to handle the full
+                        // restore data as well as a pipe for sending data to
+                        // that agent.  Tell the agent to start reading from the
+                        // pipe.
+                        if (okay) {
+                            boolean agentSuccess = true;
+                            long toCopy = info.size;
+                            final int token = generateToken();
+                            try {
+                                if (DEBUG) Slog.d(TAG, "Invoking agent to restore file "
+                                        + info.path);
+                                prepareOperationTimeout(token,
+                                        TIMEOUT_FULL_BACKUP_INTERVAL);
+                                // fire up the app's agent listening on the socket.  If
+                                // the agent is running in the system process we can't
+                                // just invoke it asynchronously, so we provide a thread
+                                // for it here.
+                                if (mTargetApp.processName.equals("system")) {
+                                    Slog.d(TAG, "system process agent - spinning a thread");
+                                    RestoreFileRunnable runner = new RestoreFileRunnable(
+                                            mAgent, info, mPipes[0], token);
+                                    new Thread(runner).start();
+                                } else {
+                                    mAgent.doRestoreFile(mPipes[0], info.size, info.type,
+                                            info.domain, info.path, info.mode, info.mtime,
+                                            token, mBackupManagerBinder);
+                                }
+                            } catch (IOException e) {
+                                // couldn't dup the socket for a process-local restore
+                                Slog.d(TAG, "Couldn't establish restore");
+                                agentSuccess = false;
+                                okay = false;
+                            } catch (RemoteException e) {
+                                // whoops, remote agent went away.  We'll eat the content
+                                // ourselves, then, and not copy it over.
+                                Slog.e(TAG, "Agent crashed during full restore");
+                                agentSuccess = false;
+                                okay = false;
+                            }
+
+                            // Copy over the data if the agent is still good
+                            if (okay) {
+                                boolean pipeOkay = true;
+                                FileOutputStream pipe = new FileOutputStream(
+                                        mPipes[1].getFileDescriptor());
+                                if (DEBUG) Slog.d(TAG, "Piping data to agent");
+                                while (toCopy > 0) {
+                                    int toRead = (toCopy > buffer.length)
+                                    ? buffer.length : (int)toCopy;
+                                    int nRead = instream.read(buffer, 0, toRead);
+                                    if (nRead <= 0) break;
+                                    toCopy -= nRead;
+
+                                    // send it to the output pipe as long as things
+                                    // are still good
+                                    if (pipeOkay) {
+                                        try {
+                                            pipe.write(buffer, 0, nRead);
+                                        } catch (IOException e) {
+                                            Slog.e(TAG,
+                                                    "Failed to write to restore pipe", e);
+                                            pipeOkay = false;
+                                        }
+                                    }
+                                }
+
+                                // done sending that file!  Now we just need to consume
+                                // the delta from info.size to the end of block.
+                                skipTarPadding(info.size, instream);
+
+                                // and now that we've sent it all, wait for the remote
+                                // side to acknowledge receipt
+                                agentSuccess = waitUntilOperationComplete(token);
+                            }
+
+                            // okay, if the remote end failed at any point, deal with
+                            // it by ignoring the rest of the restore on it
+                            if (!agentSuccess) {
+                                mBackupHandler.removeMessages(MSG_TIMEOUT);
+                                tearDownPipes();
+                                tearDownAgent(mTargetApp);
+                                mAgent = null;
+                                mPackagePolicies.put(pkg, RestorePolicy.IGNORE);
+                            }
+                        }
+
+                        // Problems setting up the agent communication, or an already-
+                        // ignored package: skip to the next tar stream entry by
+                        // reading and discarding this file.
+                        if (!okay) {
+                            if (DEBUG) Slog.d(TAG, "[discarding file content]");
+                            long bytesToConsume = (info.size + 511) & ~511;
+                            while (bytesToConsume > 0) {
+                                int toRead = (bytesToConsume > buffer.length)
+                                ? buffer.length : (int)bytesToConsume;
+                                long nRead = instream.read(buffer, 0, toRead);
+                                if (nRead <= 0) break;
+                                bytesToConsume -= nRead;
+                            }
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                Slog.w(TAG, "io exception on restore socket read", e);
+                // treat as EOF
+                info = null;
+            }
+
+            return (info != null);
+        }
+
+        void setUpPipes() throws IOException {
+            mPipes = ParcelFileDescriptor.createPipe();
+        }
+
+        void tearDownPipes() {
+            if (mPipes != null) {
+                if (mPipes[0] != null) {
+                    try {
+                        mPipes[0].close();
+                        mPipes[0] = null;
+                        mPipes[1].close();
+                        mPipes[1] = null;
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Couldn't close agent pipes", e);
+                    }
+                }
+                mPipes = null;
+            }
+        }
+
+        void tearDownAgent(ApplicationInfo app) {
+            if (mAgent != null) {
+                try {
+                    // unbind and tidy up even on timeout or failure, just in case
+                    mActivityManager.unbindBackupAgent(app);
+
+                    // The agent was running with a stub Application object, so shut it down.
+                    // !!! We hardcode the confirmation UI's package name here rather than use a
+                    //     manifest flag!  TODO something less direct.
+                    if (app.uid != Process.SYSTEM_UID
+                            && !app.packageName.equals("com.android.backupconfirm")) {
+                        if (DEBUG) Slog.d(TAG, "Killing host process");
+                        mActivityManager.killApplicationProcess(app.processName, app.uid);
+                    } else {
+                        if (DEBUG) Slog.d(TAG, "Not killing after full restore");
+                    }
+                } catch (RemoteException e) {
+                    Slog.d(TAG, "Lost app trying to shut down");
+                }
+                mAgent = null;
+            }
+        }
+
+        class RestoreInstallObserver extends IPackageInstallObserver.Stub {
+            final AtomicBoolean mDone = new AtomicBoolean();
+            int mResult;
+
+            public void reset() {
+                synchronized (mDone) {
+                    mDone.set(false);
+                }
+            }
+
+            public void waitForCompletion() {
+                synchronized (mDone) {
+                    while (mDone.get() == false) {
+                        try {
+                            mDone.wait();
+                        } catch (InterruptedException e) { }
+                    }
+                }
+            }
+
+            int getResult() {
+                return mResult;
+            }
+
+            @Override
+            public void packageInstalled(String packageName, int returnCode)
+                    throws RemoteException {
+                synchronized (mDone) {
+                    mResult = returnCode;
+                    mDone.set(true);
+                    mDone.notifyAll();
+                }
+            }
+        }
+        final RestoreInstallObserver mInstallObserver = new RestoreInstallObserver();
+
+        boolean installApk(FileMetadata info, String installerPackage, InputStream instream) {
+            boolean okay = true;
+
+            if (DEBUG) Slog.d(TAG, "Installing from backup: " + info.packageName);
+
+            // The file content is an .apk file.  Copy it out to a staging location and
+            // attempt to install it.
+            File apkFile = new File(mDataDir, info.packageName);
+            try {
+                FileOutputStream apkStream = new FileOutputStream(apkFile);
+                byte[] buffer = new byte[32 * 1024];
+                long size = info.size;
+                while (size > 0) {
+                    long toRead = (buffer.length < size) ? buffer.length : size;
+                    int didRead = instream.read(buffer, 0, (int)toRead);
+                    apkStream.write(buffer, 0, didRead);
+                    size -= didRead;
+                }
+                apkStream.close();
+
+                // make sure the installer can read it
+                apkFile.setReadable(true, false);
+
+                // Now install it
+                Uri packageUri = Uri.fromFile(apkFile);
+                mInstallObserver.reset();
+                mPackageManager.installPackage(packageUri, mInstallObserver,
+                        PackageManager.INSTALL_REPLACE_EXISTING, installerPackage);
+                mInstallObserver.waitForCompletion();
+
+                if (mInstallObserver.getResult() != PackageManager.INSTALL_SUCCEEDED) {
+                    // The only time we continue to accept install of data even if the
+                    // apk install failed is if we had already determined that we could
+                    // accept the data regardless.
+                    if (mPackagePolicies.get(info.packageName) != RestorePolicy.ACCEPT) {
+                        okay = false;
+                    }
+                }
+            } catch (IOException e) {
+                Slog.e(TAG, "Unable to transcribe restored apk for install");
+                okay = false;
+            } finally {
+                apkFile.delete();
+            }
+
+            return okay;
+        }
+
+        // Given an actual file content size, consume the post-content padding mandated
+        // by the tar format.
+        void skipTarPadding(long size, InputStream instream) throws IOException {
+            long partial = (size + 512) % 512;
+            if (partial > 0) {
+                byte[] buffer = new byte[512];
+                instream.read(buffer, 0, 512 - (int)partial);
+            }
+        }
+
+        // Returns a policy constant; takes a buffer arg to reduce memory churn
+        RestorePolicy readAppManifest(FileMetadata info, InputStream instream)
+                throws IOException {
+            // Fail on suspiciously large manifest files
+            if (info.size > 64 * 1024) {
+                throw new IOException("Restore manifest too big; corrupt? size=" + info.size);
+            }
+            byte[] buffer = new byte[(int) info.size];
+            int nRead = 0;
+            while (nRead < info.size) {
+                nRead += instream.read(buffer, nRead, (int)info.size - nRead);
+            }
+
+            RestorePolicy policy = RestorePolicy.IGNORE;
+            String[] str = new String[1];
+            int offset = 0;
+
+            try {
+                offset = extractLine(buffer, offset, str);
+                int version = Integer.parseInt(str[0]);
+                if (version == BACKUP_MANIFEST_VERSION) {
+                    offset = extractLine(buffer, offset, str);
+                    String manifestPackage = str[0];
+                    // TODO: handle <original-package>
+                    if (manifestPackage.equals(info.packageName)) {
+                        offset = extractLine(buffer, offset, str);
+                        version = Integer.parseInt(str[0]);  // app version
+                        offset = extractLine(buffer, offset, str);
+                        int platformVersion = Integer.parseInt(str[0]);
+                        offset = extractLine(buffer, offset, str);
+                        info.installerPackageName = (str[0].length() > 0) ? str[0] : null;
+                        offset = extractLine(buffer, offset, str);
+                        boolean hasApk = str[0].equals("1");
+                        offset = extractLine(buffer, offset, str);
+                        int numSigs = Integer.parseInt(str[0]);
+                        Signature[] sigs = null;
+                        if (numSigs > 0) {
+                            sigs = new Signature[numSigs];
+                            for (int i = 0; i < numSigs; i++) {
+                                offset = extractLine(buffer, offset, str);
+                                sigs[i] = new Signature(str[0]);
+                            }
+
+                            // Okay, got the manifest info we need...
+                            try {
+                                // Verify signatures against any installed version; if they
+                                // don't match, then we fall though and ignore the data.  The
+                                // signatureMatch() method explicitly ignores the signature
+                                // check for packages installed on the system partition, because
+                                // such packages are signed with the platform cert instead of
+                                // the app developer's cert, so they're different on every
+                                // device.
+                                PackageInfo pkgInfo = mPackageManager.getPackageInfo(
+                                        info.packageName, PackageManager.GET_SIGNATURES);
+                                if (signaturesMatch(sigs, pkgInfo)) {
+                                    if (pkgInfo.versionCode >= version) {
+                                        Slog.i(TAG, "Sig + version match; taking data");
+                                        policy = RestorePolicy.ACCEPT;
+                                    } else {
+                                        // The data is from a newer version of the app than
+                                        // is presently installed.  That means we can only
+                                        // use it if the matching apk is also supplied.
+                                        Slog.d(TAG, "Data version " + version
+                                                + " is newer than installed version "
+                                                + pkgInfo.versionCode + " - requiring apk");
+                                        policy = RestorePolicy.ACCEPT_IF_APK;
+                                    }
+                                }
+                            } catch (NameNotFoundException e) {
+                                // Okay, the target app isn't installed.  We can process
+                                // the restore properly only if the dataset provides the
+                                // apk file and we can successfully install it.
+                                if (DEBUG) Slog.i(TAG, "Package " + info.packageName
+                                        + " not installed; requiring apk in dataset");
+                                policy = RestorePolicy.ACCEPT_IF_APK;
+                            }
+
+                            if (policy == RestorePolicy.ACCEPT_IF_APK && !hasApk) {
+                                Slog.i(TAG, "Cannot restore package " + info.packageName
+                                        + " without the matching .apk");
+                            }
+                        } else {
+                            Slog.i(TAG, "Missing signature on backed-up package "
+                                    + info.packageName);
+                        }
+                    } else {
+                        Slog.i(TAG, "Expected package " + info.packageName
+                                + " but restore manifest claims " + manifestPackage);
+                    }
+                } else {
+                    Slog.i(TAG, "Unknown restore manifest version " + version
+                            + " for package " + info.packageName);
+                }
+            } catch (NumberFormatException e) {
+                Slog.w(TAG, "Corrupt restore manifest for package " + info.packageName);
+            }
+
+            return policy;
+        }
+
+        // Builds a line from a byte buffer starting at 'offset', and returns
+        // the index of the next unconsumed data in the buffer.
+        int extractLine(byte[] buffer, int offset, String[] outStr) throws IOException {
+            final int end = buffer.length;
+            if (offset >= end) throw new IOException("Incomplete data");
+
+            int pos;
+            for (pos = offset; pos < end; pos++) {
+                byte c = buffer[pos];
+                // at LF we declare end of line, and return the next char as the
+                // starting point for the next time through
+                if (c == '\n') {
+                    break;
+                }
+            }
+            outStr[0] = new String(buffer, offset, pos - offset);
+            pos++;  // may be pointing an extra byte past the end but that's okay
+            return pos;
+        }
+
+        void dumpFileMetadata(FileMetadata info) {
+            if (DEBUG) {
+                StringBuilder b = new StringBuilder(128);
+
+                // mode string
+                b.append((info.type == FullBackup.TYPE_DIRECTORY) ? 'd' : '-');
+                b.append(((info.mode & 0400) != 0) ? 'r' : '-');
+                b.append(((info.mode & 0200) != 0) ? 'w' : '-');
+                b.append(((info.mode & 0100) != 0) ? 'x' : '-');
+                b.append(((info.mode & 0040) != 0) ? 'r' : '-');
+                b.append(((info.mode & 0020) != 0) ? 'w' : '-');
+                b.append(((info.mode & 0010) != 0) ? 'x' : '-');
+                b.append(((info.mode & 0004) != 0) ? 'r' : '-');
+                b.append(((info.mode & 0002) != 0) ? 'w' : '-');
+                b.append(((info.mode & 0001) != 0) ? 'x' : '-');
+                b.append(String.format(" %9d ", info.size));
+
+                Date stamp = new Date(info.mtime);
+                b.append(new SimpleDateFormat("MMM dd kk:mm:ss ").format(stamp));
+
+                b.append(info.packageName);
+                b.append(" :: ");
+                b.append(info.domain);
+                b.append(" :: ");
+                b.append(info.path);
+
+                Slog.i(TAG, b.toString());
+            }
+        }
+        // Consume a tar file header block [sequence] and accumulate the relevant metadata
+        FileMetadata readTarHeaders(InputStream instream) throws IOException {
+            byte[] block = new byte[512];
+            FileMetadata info = null;
+
+            boolean gotHeader = readTarHeader(instream, block);
+            if (gotHeader) {
+                // okay, presume we're okay, and extract the various metadata
+                info = new FileMetadata();
+                info.size = extractRadix(block, 124, 12, 8);
+                info.mtime = extractRadix(block, 136, 12, 8);
+                info.mode = extractRadix(block, 100, 8, 8);
+
+                info.path = extractString(block, 345, 155); // prefix
+                String path = extractString(block, 0, 100);
+                if (path.length() > 0) {
+                    if (info.path.length() > 0) info.path += '/';
+                    info.path += path;
+                }
+
+                // tar link indicator field: 1 byte at offset 156 in the header.
+                int typeChar = block[156];
+                if (typeChar == 'x') {
+                    // pax extended header, so we need to read that
+                    gotHeader = readPaxExtendedHeader(instream, info);
+                    if (gotHeader) {
+                        // and after a pax extended header comes another real header -- read
+                        // that to find the real file type
+                        gotHeader = readTarHeader(instream, block);
+                    }
+                    if (!gotHeader) throw new IOException("Bad or missing pax header");
+
+                    typeChar = block[156];
+                }
+
+                switch (typeChar) {
+                    case '0': info.type = FullBackup.TYPE_FILE; break;
+                    case '5': info.type = FullBackup.TYPE_DIRECTORY; break;
+                    case 0: {
+                        // presume EOF
+                        return null;
+                    }
+                    default: {
+                        Slog.e(TAG, "Unknown tar entity type: " + typeChar);
+                        throw new IOException("Unknown entity type " + typeChar);
+                    }
+                }
+
+                // Parse out the path
+                //
+                // first: apps/shared/unrecognized
+                if (FullBackup.SHARED_PREFIX.regionMatches(0,
+                        info.path, 0, FullBackup.SHARED_PREFIX.length())) {
+                    // File in shared storage.  !!! TODO: implement this.
+                    info.path = info.path.substring(FullBackup.SHARED_PREFIX.length());
+                    info.domain = FullBackup.SHARED_STORAGE_TOKEN;
+                } else if (FullBackup.APPS_PREFIX.regionMatches(0,
+                        info.path, 0, FullBackup.APPS_PREFIX.length())) {
+                    // App content!  Parse out the package name and domain
+
+                    // strip the apps/ prefix
+                    info.path = info.path.substring(FullBackup.APPS_PREFIX.length());
+
+                    // extract the package name
+                    int slash = info.path.indexOf('/');
+                    if (slash < 0) throw new IOException("Illegal semantic path in " + info.path);
+                    info.packageName = info.path.substring(0, slash);
+                    info.path = info.path.substring(slash+1);
+
+                    // if it's a manifest we're done, otherwise parse out the domains
+                    if (!info.path.equals(BACKUP_MANIFEST_FILENAME)) {
+                        slash = info.path.indexOf('/');
+                        if (slash < 0) throw new IOException("Illegal semantic path in non-manifest " + info.path);
+                        info.domain = info.path.substring(0, slash);
+                        // validate that it's one of the domains we understand
+                        if (!info.domain.equals(FullBackup.APK_TREE_TOKEN)
+                                && !info.domain.equals(FullBackup.DATA_TREE_TOKEN)
+                                && !info.domain.equals(FullBackup.DATABASE_TREE_TOKEN)
+                                && !info.domain.equals(FullBackup.ROOT_TREE_TOKEN)
+                                && !info.domain.equals(FullBackup.SHAREDPREFS_TREE_TOKEN)
+                                && !info.domain.equals(FullBackup.OBB_TREE_TOKEN)
+                                && !info.domain.equals(FullBackup.CACHE_TREE_TOKEN)) {
+                            throw new IOException("Unrecognized domain " + info.domain);
+                        }
+
+                        info.path = info.path.substring(slash + 1);
+                    }
+                }
+            }
+            return info;
+        }
+
+        boolean readTarHeader(InputStream instream, byte[] block) throws IOException {
+            int nRead = instream.read(block, 0, 512);
+            if (nRead > 0 && nRead != 512) {
+                // if we read only a partial block, then things are
+                // clearly screwed up.  terminate the restore.
+                throw new IOException("Partial header block: " + nRead);
+            }
+            return (nRead > 0);
+        }
+
+        // overwrites 'info' fields based on the pax extended header
+        boolean readPaxExtendedHeader(InputStream instream, FileMetadata info)
+                throws IOException {
+            // We should never see a pax extended header larger than this
+            if (info.size > 32*1024) {
+                Slog.w(TAG, "Suspiciously large pax header size " + info.size
+                        + " - aborting");
+                throw new IOException("Sanity failure: pax header size " + info.size);
+            }
+
+            // read whole blocks, not just the content size
+            int numBlocks = (int)((info.size + 511) >> 9);
+            byte[] data = new byte[numBlocks * 512];
+            int nRead = instream.read(data);
+            if (nRead != data.length) {
+                return false;
+            }
+
+            final int contentSize = (int) info.size;
+            int offset = 0;
+            do {
+                // extract the line at 'offset'
+                int eol = offset+1;
+                while (eol < contentSize && data[eol] != ' ') eol++;
+                if (eol >= contentSize) {
+                    // error: we just hit EOD looking for the end of the size field
+                    throw new IOException("Invalid pax data");
+                }
+                // eol points to the space between the count and the key
+                int linelen = (int) extractRadix(data, offset, eol - offset, 10);
+                int key = eol + 1;  // start of key=value
+                eol = offset + linelen - 1; // trailing LF
+                int value;
+                for (value = key+1; data[value] != '=' && value <= eol; value++);
+                if (value > eol) {
+                    throw new IOException("Invalid pax declaration");
+                }
+
+                // pax requires that key/value strings be in UTF-8
+                String keyStr = new String(data, key, value-key, "UTF-8");
+                // -1 to strip the trailing LF
+                String valStr = new String(data, value+1, eol-value-1, "UTF-8");
+
+                if ("path".equals(keyStr)) {
+                    info.path = valStr;
+                } else if ("size".equals(keyStr)) {
+                    info.size = Long.parseLong(valStr);
+                } else {
+                    if (DEBUG) Slog.i(TAG, "Unhandled pax key: " + key);
+                }
+
+                offset += linelen;
+            } while (offset < contentSize);
+
+            return true;
+        }
+
+        long extractRadix(byte[] data, int offset, int maxChars, int radix)
+                throws IOException {
+            long value = 0;
+            final int end = offset + maxChars;
+            for (int i = offset; i < end; i++) {
+                final byte b = data[i];
+                if (b == 0 || b == ' ') break;
+                if (b < '0' || b > ('0' + radix - 1)) {
+                    throw new IOException("Invalid number in header");
+                }
+                value = radix * value + (b - '0');
+            }
+            return value;
+        }
+
+        String extractString(byte[] data, int offset, int maxChars) throws IOException {
+            final int end = offset + maxChars;
+            int eos = offset;
+            // tar string fields can end with either NUL or SPC
+            while (eos < end && data[eos] != 0 && data[eos] != ' ') eos++;
+            return new String(data, offset, eos-offset, "US-ASCII");
+        }
+
+        void sendStartRestore() {
+            if (mObserver != null) {
+                try {
+                    mObserver.onStartRestore();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "full restore observer went away: startRestore");
+                    mObserver = null;
+                }
+            }
+        }
+
+        void sendOnRestorePackage(String name) {
+            if (mObserver != null) {
+                try {
+                    // TODO: use a more user-friendly name string
+                    mObserver.onRestorePackage(name);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "full restore observer went away: restorePackage");
+                    mObserver = null;
+                }
+            }
+        }
+
+        void sendEndRestore() {
+            if (mObserver != null) {
+                try {
+                    mObserver.onEndRestore();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "full restore observer went away: endRestore");
+                    mObserver = null;
+                }
+            }
+        }
+    }
 
     // ----- Restore handling -----
 
@@ -2583,41 +3494,95 @@ class BackupManagerService extends IBackupManager.Stub {
                 mFullConfirmations.put(token, params);
             }
 
-            // start up the confirmation UI, making sure the screen lights up
-            if (DEBUG) Slog.d(TAG, "Starting confirmation UI, token=" + token);
-            try {
-                Intent confIntent = new Intent(FullBackup.FULL_BACKUP_INTENT_ACTION);
-                confIntent.setClassName("com.android.backupconfirm",
-                        "com.android.backupconfirm.BackupRestoreConfirmation");
-                confIntent.putExtra(FullBackup.CONF_TOKEN_INTENT_EXTRA, token);
-                confIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(confIntent);
-            } catch (ActivityNotFoundException e) {
-                Slog.e(TAG, "Unable to launch full backup confirmation", e);
+            // start up the confirmation UI
+            if (DEBUG) Slog.d(TAG, "Starting backup confirmation UI, token=" + token);
+            if (!startConfirmationUi(token, FullBackup.FULL_BACKUP_INTENT_ACTION)) {
+                Slog.e(TAG, "Unable to launch full backup confirmation");
                 mFullConfirmations.delete(token);
                 return;
             }
+
+            // make sure the screen is lit for the user interaction
             mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
 
             // start the confirmation countdown
-            if (DEBUG) Slog.d(TAG, "Posting conf timeout msg after "
-                    + TIMEOUT_FULL_CONFIRMATION + " millis");
-            Message msg = mBackupHandler.obtainMessage(MSG_FULL_CONFIRMATION_TIMEOUT,
-                    token, 0, params);
-            mBackupHandler.sendMessageDelayed(msg, TIMEOUT_FULL_CONFIRMATION);
+            startConfirmationTimeout(token, params);
 
             // wait for the backup to be performed
             if (DEBUG) Slog.d(TAG, "Waiting for full backup completion...");
             waitForCompletion(params);
-            if (DEBUG) Slog.d(TAG, "...Full backup operation complete!");
         } finally {
-            Binder.restoreCallingIdentity(oldId);
             try {
                 fd.close();
             } catch (IOException e) {
                 // just eat it
             }
+            Binder.restoreCallingIdentity(oldId);
         }
+        if (DEBUG) Slog.d(TAG, "Full backup done; returning to caller");
+    }
+
+    public void fullRestore(ParcelFileDescriptor fd) {
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullBackup");
+        Slog.i(TAG, "Beginning full restore...");
+
+        long oldId = Binder.clearCallingIdentity();
+
+        try {
+            FullRestoreParams params = new FullRestoreParams(fd);
+            final int token = generateToken();
+            synchronized (mFullConfirmations) {
+                mFullConfirmations.put(token, params);
+            }
+
+            // start up the confirmation UI
+            if (DEBUG) Slog.d(TAG, "Starting restore confirmation UI, token=" + token);
+            if (!startConfirmationUi(token, FullBackup.FULL_RESTORE_INTENT_ACTION)) {
+                Slog.e(TAG, "Unable to launch full restore confirmation");
+                mFullConfirmations.delete(token);
+                return;
+            }
+
+            // make sure the screen is lit for the user interaction
+            mPowerManager.userActivity(SystemClock.uptimeMillis(), false);
+
+            // start the confirmation countdown
+            startConfirmationTimeout(token, params);
+
+            // wait for the restore to be performed
+            if (DEBUG) Slog.d(TAG, "Waiting for full restore completion...");
+            waitForCompletion(params);
+        } finally {
+            try {
+                fd.close();
+            } catch (IOException e) {
+                Slog.w(TAG, "Error trying to close fd after full restore: " + e);
+            }
+            Binder.restoreCallingIdentity(oldId);
+            Slog.i(TAG, "Full restore completed");
+        }
+    }
+
+    boolean startConfirmationUi(int token, String action) {
+        try {
+            Intent confIntent = new Intent(action);
+            confIntent.setClassName("com.android.backupconfirm",
+                    "com.android.backupconfirm.BackupRestoreConfirmation");
+            confIntent.putExtra(FullBackup.CONF_TOKEN_INTENT_EXTRA, token);
+            confIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(confIntent);
+        } catch (ActivityNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
+
+    void startConfirmationTimeout(int token, FullParams params) {
+        if (DEBUG) Slog.d(TAG, "Posting conf timeout msg after "
+                + TIMEOUT_FULL_CONFIRMATION + " millis");
+        Message msg = mBackupHandler.obtainMessage(MSG_FULL_CONFIRMATION_TIMEOUT,
+                token, 0, params);
+        mBackupHandler.sendMessageDelayed(msg, TIMEOUT_FULL_CONFIRMATION);
     }
 
     void waitForCompletion(FullParams params) {
@@ -2661,9 +3626,10 @@ class BackupManagerService extends IBackupManager.Stub {
                     if (allow) {
                         params.observer = observer;
                         final int verb = params instanceof FullBackupParams
-                        ? MSG_RUN_FULL_BACKUP
+                                ? MSG_RUN_FULL_BACKUP
                                 : MSG_RUN_FULL_RESTORE;
 
+                        if (DEBUG) Slog.d(TAG, "Sending conf message with verb " + verb);
                         mWakelock.acquire();
                         Message msg = mBackupHandler.obtainMessage(verb, params);
                         mBackupHandler.sendMessage(msg);

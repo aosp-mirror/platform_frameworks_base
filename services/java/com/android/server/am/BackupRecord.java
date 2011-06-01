@@ -26,6 +26,7 @@ class BackupRecord {
     public static final int BACKUP_NORMAL = 0;
     public static final int BACKUP_FULL = 1;
     public static final int RESTORE = 2;
+    public static final int RESTORE_FULL = 3;
     
     final BatteryStatsImpl.Uid.Pkg.Serv stats;
     String stringName;                     // cached toString() output

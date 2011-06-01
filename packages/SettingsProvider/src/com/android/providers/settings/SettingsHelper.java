@@ -147,7 +147,7 @@ public class SettingsHelper {
      * "ll" is the language code and "cc" is the country code.
      * @param data the locale string in bytes.
      */
-    void setLocaleData(byte[] data) {
+    void setLocaleData(byte[] data, int size) {
         // Check if locale was set by the user:
         Configuration conf = mContext.getResources().getConfiguration();
         Locale loc = conf.locale;
@@ -157,9 +157,9 @@ public class SettingsHelper {
         if (conf.userSetLocale) return; // Don't change if user set it in the SetupWizard
 
         final String[] availableLocales = mContext.getAssets().getLocales();
-        String localeCode = new String(data);
+        String localeCode = new String(data, 0, size);
         String language = new String(data, 0, 2);
-        String country = data.length > 4 ? new String(data, 3, 2) : "";
+        String country = size > 4 ? new String(data, 3, 2) : "";
         loc = null;
         for (int i = 0; i < availableLocales.length; i++) {
             if (availableLocales[i].equals(localeCode)) {

@@ -68,6 +68,7 @@ public interface IApplicationThread extends IInterface {
     static final int BACKUP_MODE_INCREMENTAL = 0;
     static final int BACKUP_MODE_FULL = 1;
     static final int BACKUP_MODE_RESTORE = 2;
+    static final int BACKUP_MODE_RESTORE_FULL = 3;
     void scheduleCreateBackupAgent(ApplicationInfo app, CompatibilityInfo compatInfo,
             int backupMode) throws RemoteException;
     void scheduleDestroyBackupAgent(ApplicationInfo app, CompatibilityInfo compatInfo)
