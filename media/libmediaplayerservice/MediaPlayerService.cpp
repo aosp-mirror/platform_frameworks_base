@@ -1454,7 +1454,7 @@ status_t MediaPlayerService::AudioOutput::attachAuxEffect(int effectId)
 
 // static
 void MediaPlayerService::AudioOutput::CallbackWrapper(
-        int event, void *cookie, void *info) {
+        AudioTrack::event_type event, void *cookie, void *info) {
     //LOGV("callbackwrapper");
     if (event != AudioTrack::EVENT_MORE_DATA) {
         return;

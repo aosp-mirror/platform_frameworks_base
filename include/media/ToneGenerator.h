@@ -270,7 +270,7 @@ private:
     unsigned int mProcessSize;  // Size of audio blocks generated at a time by audioCallback() (in PCM frames).
 
     bool initAudioTrack();
-    static void audioCallback(int event, void* user, void *info);
+    static void audioCallback(AudioTrack::event_type event, void* user, void *info);
     bool prepareWave();
     unsigned int numWaves(unsigned int segmentIdx);
     void clearWaveGens();
