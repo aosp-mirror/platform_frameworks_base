@@ -592,7 +592,42 @@ public class RenderScript {
     Element mElement_FLOAT_2;
     Element mElement_FLOAT_3;
     Element mElement_FLOAT_4;
+
+    Element mElement_DOUBLE_2;
+    Element mElement_DOUBLE_3;
+    Element mElement_DOUBLE_4;
+
+    Element mElement_UCHAR_2;
+    Element mElement_UCHAR_3;
     Element mElement_UCHAR_4;
+
+    Element mElement_CHAR_2;
+    Element mElement_CHAR_3;
+    Element mElement_CHAR_4;
+
+    Element mElement_USHORT_2;
+    Element mElement_USHORT_3;
+    Element mElement_USHORT_4;
+
+    Element mElement_SHORT_2;
+    Element mElement_SHORT_3;
+    Element mElement_SHORT_4;
+
+    Element mElement_UINT_2;
+    Element mElement_UINT_3;
+    Element mElement_UINT_4;
+
+    Element mElement_INT_2;
+    Element mElement_INT_3;
+    Element mElement_INT_4;
+
+    Element mElement_ULONG_2;
+    Element mElement_ULONG_3;
+    Element mElement_ULONG_4;
+
+    Element mElement_LONG_2;
+    Element mElement_LONG_3;
+    Element mElement_LONG_4;
 
     Element mElement_MATRIX_4X4;
     Element mElement_MATRIX_3X3;

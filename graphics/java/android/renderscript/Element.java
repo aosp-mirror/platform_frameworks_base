@@ -383,11 +383,193 @@ public class Element extends BaseObj {
         return rs.mElement_FLOAT_4;
     }
 
+    public static Element F64_2(RenderScript rs) {
+        if(rs.mElement_DOUBLE_2 == null) {
+            rs.mElement_DOUBLE_2 = createVector(rs, DataType.FLOAT_64, 2);
+        }
+        return rs.mElement_DOUBLE_2;
+    }
+
+    public static Element F64_3(RenderScript rs) {
+        if(rs.mElement_DOUBLE_3 == null) {
+            rs.mElement_DOUBLE_3 = createVector(rs, DataType.FLOAT_64, 3);
+        }
+        return rs.mElement_DOUBLE_3;
+    }
+
+    public static Element F64_4(RenderScript rs) {
+        if(rs.mElement_DOUBLE_4 == null) {
+            rs.mElement_DOUBLE_4 = createVector(rs, DataType.FLOAT_64, 4);
+        }
+        return rs.mElement_DOUBLE_4;
+    }
+
+    public static Element U8_2(RenderScript rs) {
+        if(rs.mElement_UCHAR_2 == null) {
+            rs.mElement_UCHAR_2 = createVector(rs, DataType.UNSIGNED_8, 2);
+        }
+        return rs.mElement_UCHAR_2;
+    }
+
+    public static Element U8_3(RenderScript rs) {
+        if(rs.mElement_UCHAR_3 == null) {
+            rs.mElement_UCHAR_3 = createVector(rs, DataType.UNSIGNED_8, 3);
+        }
+        return rs.mElement_UCHAR_3;
+    }
+
     public static Element U8_4(RenderScript rs) {
         if(rs.mElement_UCHAR_4 == null) {
             rs.mElement_UCHAR_4 = createVector(rs, DataType.UNSIGNED_8, 4);
         }
         return rs.mElement_UCHAR_4;
+    }
+
+    public static Element I8_2(RenderScript rs) {
+        if(rs.mElement_CHAR_2 == null) {
+            rs.mElement_CHAR_2 = createVector(rs, DataType.SIGNED_8, 2);
+        }
+        return rs.mElement_CHAR_2;
+    }
+
+    public static Element I8_3(RenderScript rs) {
+        if(rs.mElement_CHAR_3 == null) {
+            rs.mElement_CHAR_3 = createVector(rs, DataType.SIGNED_8, 3);
+        }
+        return rs.mElement_CHAR_3;
+    }
+
+    public static Element I8_4(RenderScript rs) {
+        if(rs.mElement_CHAR_4 == null) {
+            rs.mElement_CHAR_4 = createVector(rs, DataType.SIGNED_8, 4);
+        }
+        return rs.mElement_CHAR_4;
+    }
+
+    public static Element U16_2(RenderScript rs) {
+        if(rs.mElement_USHORT_2 == null) {
+            rs.mElement_USHORT_2 = createVector(rs, DataType.UNSIGNED_16, 2);
+        }
+        return rs.mElement_USHORT_2;
+    }
+
+    public static Element U16_3(RenderScript rs) {
+        if(rs.mElement_USHORT_3 == null) {
+            rs.mElement_USHORT_3 = createVector(rs, DataType.UNSIGNED_16, 3);
+        }
+        return rs.mElement_USHORT_3;
+    }
+
+    public static Element U16_4(RenderScript rs) {
+        if(rs.mElement_USHORT_4 == null) {
+            rs.mElement_USHORT_4 = createVector(rs, DataType.UNSIGNED_16, 4);
+        }
+        return rs.mElement_USHORT_4;
+    }
+
+    public static Element I16_2(RenderScript rs) {
+        if(rs.mElement_SHORT_2 == null) {
+            rs.mElement_SHORT_2 = createVector(rs, DataType.SIGNED_16, 2);
+        }
+        return rs.mElement_SHORT_2;
+    }
+
+    public static Element I16_3(RenderScript rs) {
+        if(rs.mElement_SHORT_3 == null) {
+            rs.mElement_SHORT_3 = createVector(rs, DataType.SIGNED_16, 3);
+        }
+        return rs.mElement_SHORT_3;
+    }
+
+    public static Element I16_4(RenderScript rs) {
+        if(rs.mElement_SHORT_4 == null) {
+            rs.mElement_SHORT_4 = createVector(rs, DataType.SIGNED_16, 4);
+        }
+        return rs.mElement_SHORT_4;
+    }
+
+    public static Element U32_2(RenderScript rs) {
+        if(rs.mElement_UINT_2 == null) {
+            rs.mElement_UINT_2 = createVector(rs, DataType.UNSIGNED_32, 2);
+        }
+        return rs.mElement_UINT_2;
+    }
+
+    public static Element U32_3(RenderScript rs) {
+        if(rs.mElement_UINT_3 == null) {
+            rs.mElement_UINT_3 = createVector(rs, DataType.UNSIGNED_32, 3);
+        }
+        return rs.mElement_UINT_3;
+    }
+
+    public static Element U32_4(RenderScript rs) {
+        if(rs.mElement_UINT_4 == null) {
+            rs.mElement_UINT_4 = createVector(rs, DataType.UNSIGNED_32, 4);
+        }
+        return rs.mElement_UINT_4;
+    }
+
+    public static Element I32_2(RenderScript rs) {
+        if(rs.mElement_INT_2 == null) {
+            rs.mElement_INT_2 = createVector(rs, DataType.SIGNED_32, 2);
+        }
+        return rs.mElement_INT_2;
+    }
+
+    public static Element I32_3(RenderScript rs) {
+        if(rs.mElement_INT_3 == null) {
+            rs.mElement_INT_3 = createVector(rs, DataType.SIGNED_32, 3);
+        }
+        return rs.mElement_INT_3;
+    }
+
+    public static Element I32_4(RenderScript rs) {
+        if(rs.mElement_INT_4 == null) {
+            rs.mElement_INT_4 = createVector(rs, DataType.SIGNED_32, 4);
+        }
+        return rs.mElement_INT_4;
+    }
+
+    public static Element U64_2(RenderScript rs) {
+        if(rs.mElement_ULONG_2 == null) {
+            rs.mElement_ULONG_2 = createVector(rs, DataType.UNSIGNED_64, 2);
+        }
+        return rs.mElement_ULONG_2;
+    }
+
+    public static Element U64_3(RenderScript rs) {
+        if(rs.mElement_ULONG_3 == null) {
+            rs.mElement_ULONG_3 = createVector(rs, DataType.UNSIGNED_64, 3);
+        }
+        return rs.mElement_ULONG_3;
+    }
+
+    public static Element U64_4(RenderScript rs) {
+        if(rs.mElement_ULONG_4 == null) {
+            rs.mElement_ULONG_4 = createVector(rs, DataType.UNSIGNED_64, 4);
+        }
+        return rs.mElement_ULONG_4;
+    }
+
+    public static Element I64_2(RenderScript rs) {
+        if(rs.mElement_LONG_2 == null) {
+            rs.mElement_LONG_2 = createVector(rs, DataType.SIGNED_64, 2);
+        }
+        return rs.mElement_LONG_2;
+    }
+
+    public static Element I64_3(RenderScript rs) {
+        if(rs.mElement_LONG_3 == null) {
+            rs.mElement_LONG_3 = createVector(rs, DataType.SIGNED_64, 3);
+        }
+        return rs.mElement_LONG_3;
+    }
+
+    public static Element I64_4(RenderScript rs) {
+        if(rs.mElement_LONG_4 == null) {
+            rs.mElement_LONG_4 = createVector(rs, DataType.SIGNED_64, 4);
+        }
+        return rs.mElement_LONG_4;
     }
 
     public static Element MATRIX_4X4(RenderScript rs) {

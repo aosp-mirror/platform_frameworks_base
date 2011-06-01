@@ -79,7 +79,7 @@ public class Allocation extends BaseObj {
 
     /**
      * GRAPHICS_TEXTURE The allcation will be used as a texture
-     * source by one or more graphcics programs.
+     * source by one or more graphics programs.
      *
      */
     public static final int USAGE_GRAPHICS_TEXTURE = 0x0002;
