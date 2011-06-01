@@ -175,7 +175,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected boolean isDataAllowed() {
-        int psState = mCdmaPhone.mSST.getCurrentCdmaDataConnectionState();
+        int psState = mCdmaPhone.mSST.getCurrentDataConnectionState();
         boolean roaming = (mPhone.getServiceState().getRoaming() && !getDataOnRoamingEnabled());
         boolean desiredPowerState = mCdmaPhone.mSST.getDesiredPowerState();
 
@@ -258,7 +258,7 @@ public final class CdmaDataConnectionTracker extends DataConnectionTracker {
             return true;
         }
 
-        int psState = mCdmaPhone.mSST.getCurrentCdmaDataConnectionState();
+        int psState = mCdmaPhone.mSST.getCurrentDataConnectionState();
         boolean roaming = mPhone.getServiceState().getRoaming();
         boolean desiredPowerState = mCdmaPhone.mSST.getDesiredPowerState();
 
