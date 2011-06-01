@@ -724,10 +724,17 @@ public final class ViewRoot extends Handler implements ViewParent,
             fullRedrawNeeded = true;
             mLayoutRequested = true;
 
-            DisplayMetrics packageMetrics =
-                mView.getContext().getResources().getDisplayMetrics();
-            desiredWindowWidth = packageMetrics.widthPixels;
-            desiredWindowHeight = packageMetrics.heightPixels;
+            if (lp.type == WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL) {
+                // NOTE -- system code, won't try to do compat mode.
+                Display disp = WindowManagerImpl.getDefault().getDefaultDisplay();
+                desiredWindowWidth = disp.getRealWidth();
+                desiredWindowHeight = disp.getRealHeight();
+            } else {
+                DisplayMetrics packageMetrics =
+                    mView.getContext().getResources().getDisplayMetrics();
+                desiredWindowWidth = packageMetrics.widthPixels;
+                desiredWindowHeight = packageMetrics.heightPixels;
+            }
 
             // For the very first time, tell the view hierarchy that it
             // is attached to the window.  Note that at this point the surface
@@ -851,9 +858,16 @@ public final class ViewRoot extends Handler implements ViewParent,
                         || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
                     windowSizeMayChange = true;
 
-                    DisplayMetrics packageMetrics = res.getDisplayMetrics();
-                    desiredWindowWidth = packageMetrics.widthPixels;
-                    desiredWindowHeight = packageMetrics.heightPixels;
+                    if (lp.type == WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL) {
+                        // NOTE -- system code, won't try to do compat mode.
+                        Display disp = WindowManagerImpl.getDefault().getDefaultDisplay();
+                        desiredWindowWidth = disp.getRealWidth();
+                        desiredWindowHeight = disp.getRealHeight();
+                    } else {
+                        DisplayMetrics packageMetrics = res.getDisplayMetrics();
+                        desiredWindowWidth = packageMetrics.widthPixels;
+                        desiredWindowHeight = packageMetrics.heightPixels;
+                    }
                 }
             }
 
