@@ -34,16 +34,16 @@ import java.util.ArrayList;
 public class KeyStore {
 
     // ResponseCodes
-    private static final int NO_ERROR = 1;
-    private static final int LOCKED = 2;
-    private static final int UNINITIALIZED = 3;
-    private static final int SYSTEM_ERROR = 4;
-    private static final int PROTOCOL_ERROR = 5;
-    private static final int PERMISSION_DENIED = 6;
-    private static final int KEY_NOT_FOUND = 7;
-    private static final int VALUE_CORRUPTED = 8;
-    private static final int UNDEFINED_ACTION = 9;
-    private static final int WRONG_PASSWORD = 10;
+    public static final int NO_ERROR = 1;
+    public static final int LOCKED = 2;
+    public static final int UNINITIALIZED = 3;
+    public static final int SYSTEM_ERROR = 4;
+    public static final int PROTOCOL_ERROR = 5;
+    public static final int PERMISSION_DENIED = 6;
+    public static final int KEY_NOT_FOUND = 7;
+    public static final int VALUE_CORRUPTED = 8;
+    public static final int UNDEFINED_ACTION = 9;
+    public static final int WRONG_PASSWORD = 10;
 
     // States
     public enum State { UNLOCKED, LOCKED, UNINITIALIZED };
