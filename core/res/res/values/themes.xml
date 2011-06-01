@@ -267,6 +267,7 @@
         <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_holo_dark</item>
         <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_holo_dark</item>
         <item name="actionModePasteDrawable">@android:drawable/ic_menu_paste_holo_dark</item>
+        <item name="actionModeSelectAllDrawable">@android:drawable/ic_menu_selectall_holo_dark</item>
         <item name="actionModeShareDrawable">@android:drawable/ic_menu_share_holo_dark</item>
         <item name="actionModeFindDrawable">@android:drawable/ic_menu_find_holo_dark</item>
         <item name="actionModeWebSearchDrawable">@android:drawable/ic_menu_search</item>
@@ -396,6 +397,7 @@
         <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_holo_light</item>
         <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_holo_light</item>
         <item name="actionModePasteDrawable">@android:drawable/ic_menu_paste_holo_light</item>
+        <item name="actionModeSelectAllDrawable">@android:drawable/ic_menu_selectall_holo_light</item>
         <item name="actionModeShareDrawable">@android:drawable/ic_menu_share_holo_light</item>
         <item name="actionModeFindDrawable">@android:drawable/ic_menu_find_holo_light</item>
         <item name="actionModeWebSearchDrawable">@android:drawable/ic_menu_search_holo_light</item>
@@ -1029,6 +1031,7 @@
         <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_holo_dark</item>
         <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_holo_dark</item>
         <item name="actionModePasteDrawable">@android:drawable/ic_menu_paste_holo_dark</item>
+        <item name="actionModeSelectAllDrawable">@android:drawable/ic_menu_selectall_holo_dark</item>
         <item name="actionModeShareDrawable">@android:drawable/ic_menu_share_holo_dark</item>
         <item name="actionModeFindDrawable">@android:drawable/ic_menu_find_holo_dark</item>
         <item name="actionModeWebSearchDrawable">@android:drawable/ic_menu_search_holo_dark</item>
@@ -1316,6 +1319,7 @@
         <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_holo_light</item>
         <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_holo_light</item>
         <item name="actionModePasteDrawable">@android:drawable/ic_menu_paste_holo_light</item>
+        <item name="actionModeSelectAllDrawable">@android:drawable/ic_menu_selectall_holo_light</item>
         <item name="actionModeShareDrawable">@android:drawable/ic_menu_share_holo_light</item>
         <item name="actionModeFindDrawable">@android:drawable/ic_menu_find_holo_light</item>
         <item name="actionModeWebSearchDrawable">@android:drawable/ic_menu_search_holo_light</item>

@@ -1684,6 +1684,7 @@
   <public type="attr" name="layout_rowWeight" />
   <public type="attr" name="layout_columnSpan" />
   <public type="attr" name="layout_columnWeight" />
+  <public type="attr" name="actionModeSelectAllDrawable" />
 
   <public type="attr" name="isAuxiliary" />
 
