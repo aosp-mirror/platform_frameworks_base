@@ -37,6 +37,7 @@
               android:layout_marginBottom="30dp" />
 
     <Button android:id="@+id/button_allow"
+            android:filterTouchesWhenObscured="true"
             android:text="@string/allow_backup_button_label"
             android:layout_below="@id/package_name"
             android:layout_height="wrap_content"
