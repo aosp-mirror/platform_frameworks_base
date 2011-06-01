@@ -1035,12 +1035,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name="android.accessibilityservice.AccessibilityTestService">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-        </service>
-
         <service android:name="android.webkit.AccessibilityInjectorTest$MockAccessibilityService">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
