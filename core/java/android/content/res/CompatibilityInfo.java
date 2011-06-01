@@ -199,6 +199,9 @@ public class CompatibilityInfo implements Parcelable {
                 } else if (!anyResizeable) {
                     compatFlags |= ALWAYS_NEEDS_COMPAT;
                 }
+            } else {
+                compatFlags &= ~NEEDS_SCREEN_COMPAT;
+                compatFlags |= NEVER_NEEDS_COMPAT;
             }
 
             if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
