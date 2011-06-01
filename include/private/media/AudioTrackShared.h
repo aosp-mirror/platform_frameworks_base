@@ -26,7 +26,6 @@ namespace android {
 
 // ----------------------------------------------------------------------------
 
-#define THREAD_PRIORITY_AUDIO_CLIENT (ANDROID_PRIORITY_AUDIO)
 // Maximum cumulated timeout milliseconds before restarting audioflinger thread
 #define MAX_STARTUP_TIMEOUT_MS  3000    // Longer timeout period at startup to cope with A2DP init time
 #define MAX_RUN_TIMEOUT_MS      1000
