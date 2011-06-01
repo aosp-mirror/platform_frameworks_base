@@ -28,14 +28,13 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable.ConstantState;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.LongSparseArray;
-import android.view.Display;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1406,6 +1405,12 @@ public class Resources {
     public void updateConfiguration(Configuration config,
             DisplayMetrics metrics, CompatibilityInfo compat) {
         synchronized (mTmpValue) {
+            if (false) {
+                Slog.i(TAG, "**** Updating config of " + this + ": old config is "
+                        + mConfiguration + " old compat is " + mCompatibilityInfo);
+                Slog.i(TAG, "**** Updating config of " + this + ": new config is "
+                        + config + " new compat is " + compat);
+            }
             if (compat != null) {
                 mCompatibilityInfo = compat;
             }
@@ -1470,6 +1475,11 @@ public class Resources {
                     mConfiguration.screenWidthDp, mConfiguration.screenHeightDp,
                     mConfiguration.screenLayout, mConfiguration.uiMode,
                     Build.VERSION.RESOURCES_SDK_INT);
+
+            if (false) {
+                Slog.i(TAG, "**** Updating config of " + this + ": final config is " + mConfiguration
+                        + " final compat is " + mCompatibilityInfo);
+            }
 
             clearDrawableCache(mDrawableCache, configChanges);
             clearDrawableCache(mColorDrawableCache, configChanges);
