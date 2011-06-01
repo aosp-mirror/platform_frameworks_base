@@ -1151,6 +1151,7 @@ void DisplayListRenderer::drawPoints(float* points, int count, SkPaint* paint) {
 
 void DisplayListRenderer::drawText(const char* text, int bytesCount, int count,
         float x, float y, SkPaint* paint) {
+    if (count <= 0) return;
     addOp(DisplayList::DrawText);
     addText(text, bytesCount);
     addInt(count);

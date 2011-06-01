@@ -27,22 +27,21 @@
        <Button android:id="@+id/button"
                android:layout_height="wrap_content"
                android:layout_width="wrap_content"
-               android:onClick="onButtonClick"
                android:text="@string/button_text"
                android:textSize="32dip"
         />
 
         <TextView android:id="@+id/textview"
-                  android:layout_height="wrap_content"
-                  android:layout_width="wrap_content"
-                  android:textSize="32dip"
-                  android:text="@string/textview_text"
+              android:layout_height="wrap_content"
+              android:layout_width="wrap_content"
+              android:textSize="32dip"
+              android:text="@string/textview_text"
         />
 
         <EditText android:id="@+id/edittext"
-                  android:layout_height="wrap_content"
-                  android:layout_width="match_parent"
-                  android:textSize="32dip"
+              android:layout_height="wrap_content"
+              android:layout_width="match_parent"
+              android:textSize="32dip"
         />
 
     </LinearLayout>

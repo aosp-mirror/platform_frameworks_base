@@ -33,7 +33,31 @@
 namespace android {
 namespace uirenderer {
 
+///////////////////////////////////////////////////////////////////////////////
+// Defines
+///////////////////////////////////////////////////////////////////////////////
+
+#if RENDER_TEXT_AS_GLYPHS
+    typedef uint16_t glyph_t;
+    #define GET_METRICS(paint, glyph) paint->getGlyphMetrics(glyph)
+    #define GET_GLYPH(text) nextGlyph((const uint16_t**) &text)
+    #define IS_END_OF_STRING(glyph) false
+#else
+    typedef SkUnichar glyph_t;
+    #define GET_METRICS(paint, glyph) paint->getUnicharMetrics(glyph)
+    #define GET_GLYPH(text) SkUTF16_NextUnichar((const uint16_t**) &text)
+    #define IS_END_OF_STRING(glyph) glyph < 0
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
+// Declarations
+///////////////////////////////////////////////////////////////////////////////
+
 class FontRenderer;
+
+///////////////////////////////////////////////////////////////////////////////
+// Font
+///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Represents a font, defined by a Skia font id and a font size. A font is used
@@ -51,9 +75,9 @@ public:
      * Renders the specified string of text.
      * If bitmap is specified, it will be used as the render target
      */
-    void renderUTF(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
-                     int numGlyphs, int x, int y,
-                     uint8_t *bitmap = NULL, uint32_t bitmapW = 0, uint32_t bitmapH = 0);
+    void render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
+            int numGlyphs, int x, int y, uint8_t *bitmap = NULL,
+            uint32_t bitmapW = 0, uint32_t bitmapH = 0);
     /**
      * Creates a new font associated with the specified font state.
      */
@@ -69,13 +93,12 @@ protected:
         MEASURE,
     };
 
-    void renderUTF(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
-                     int numGlyphs, int x, int y, RenderMode mode,
-                     uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH,
-                     Rect *bounds);
+    void render(SkPaint* paint, const char *text, uint32_t start, uint32_t len,
+            int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
+            uint32_t bitmapW, uint32_t bitmapH, Rect *bounds);
 
-    void measureUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
-                      int numGlyphs, Rect *bounds);
+    void measure(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+            int numGlyphs, Rect *bounds);
 
     struct CachedGlyphInfo {
         // Has the cache been invalidated?
@@ -107,18 +130,26 @@ protected:
     Font(FontRenderer* state, uint32_t fontId, float fontSize, int flags, uint32_t italicStyle,
             uint32_t scaleX);
 
-    DefaultKeyedVector<int32_t, CachedGlyphInfo*> mCachedGlyphs;
+    // Cache of glyphs
+    DefaultKeyedVector<glyph_t, CachedGlyphInfo*> mCachedGlyphs;
 
     void invalidateTextureCache();
 
-    CachedGlyphInfo* cacheGlyph(SkPaint* paint, int32_t glyph);
+    CachedGlyphInfo* cacheGlyph(SkPaint* paint, glyph_t glyph);
     void updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyphInfo *glyph);
     void measureCachedGlyph(CachedGlyphInfo *glyph, int x, int y, Rect *bounds);
     void drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y);
     void drawCachedGlyph(CachedGlyphInfo *glyph, int x, int y,
-                          uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH);
+            uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH);
 
-    CachedGlyphInfo* getCachedUTFChar(SkPaint* paint, int32_t utfChar);
+    CachedGlyphInfo* getCachedGlyph(SkPaint* paint, glyph_t textUnit);
+
+    static glyph_t nextGlyph(const uint16_t** srcPtr) {
+        const uint16_t* src = *srcPtr;
+        glyph_t g = *src++;
+        *srcPtr = src;
+        return g;
+    }
 
     FontRenderer* mState;
     uint32_t mFontId;
@@ -127,6 +158,10 @@ protected:
     uint32_t mItalicStyle;
     uint32_t mScaleX;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+// Renderer
+///////////////////////////////////////////////////////////////////////////////
 
 class FontRenderer {
 public:

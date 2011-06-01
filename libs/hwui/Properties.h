@@ -28,6 +28,9 @@
 // If turned on, layers drawn inside FBOs are optimized with regions
 #define RENDER_LAYERS_AS_REGIONS 1
 
+// If turned on, text is interpreted as glyphs instead of UTF-16
+#define RENDER_TEXT_AS_GLYPHS 1
+
 /**
  * Debug level for app developers.
  */
