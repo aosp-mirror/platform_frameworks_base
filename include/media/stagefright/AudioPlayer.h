@@ -18,7 +18,6 @@
 
 #define AUDIO_PLAYER_H_
 
-#include <media/AudioTrack.h>
 #include <media/MediaPlayerInterface.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/TimeSource.h>
@@ -96,8 +95,8 @@ private:
     sp<MediaPlayerBase::AudioSink> mAudioSink;
     AwesomePlayer *mObserver;
 
-    static void AudioCallback(AudioTrack::event_type event, void *user, void *info);
-    void AudioCallback(AudioTrack::event_type event, void *info);
+    static void AudioCallback(int event, void *user, void *info);
+    void AudioCallback(int event, void *info);
 
     static size_t AudioSinkCallback(
             MediaPlayerBase::AudioSink *audioSink,

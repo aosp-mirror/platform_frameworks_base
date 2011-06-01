@@ -99,7 +99,7 @@ public:
      *          - EVENT_BUFFER_END: unused.
      */
 
-    typedef void (*callback_t)(event_type event, void* user, void *info);
+    typedef void (*callback_t)(int event, void* user, void *info);
 
     /* Returns the minimum frame count required for the successful creation of
      * an AudioTrack object.

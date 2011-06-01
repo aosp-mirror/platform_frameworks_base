@@ -141,8 +141,8 @@ public:
     void dump();
 
 private:
-    static void callback(AudioTrack::event_type event, void* user, void *info);
-    void process(AudioTrack::event_type event, void *info, unsigned long toggle);
+    static void callback(int event, void* user, void *info);
+    void process(int event, void *info, unsigned long toggle);
     bool doStop_l();
 
     SoundPool*          mSoundPool;

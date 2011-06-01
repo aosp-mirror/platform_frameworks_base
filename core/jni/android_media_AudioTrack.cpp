@@ -127,7 +127,7 @@ jint android_media_translateErrorCode(int code) {
 
 
 // ----------------------------------------------------------------------------
-static void audioCallback(AudioTrack::event_type event, void* user, void *info) {
+static void audioCallback(int event, void* user, void *info) {
     if (event == AudioTrack::EVENT_MORE_DATA) {
         // set size to 0 to signal we're not using the callback to write more data
         AudioTrack::Buffer* pBuff = (AudioTrack::Buffer*)info;
