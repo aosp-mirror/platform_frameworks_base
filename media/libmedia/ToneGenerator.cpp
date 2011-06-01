@@ -1076,7 +1076,7 @@ initAudioTrack_exit:
 //        returned value: always true.
 //
 ////////////////////////////////////////////////////////////////////////////////
-void ToneGenerator::audioCallback(AudioTrack::event_type event, void* user, void *info) {
+void ToneGenerator::audioCallback(int event, void* user, void *info) {
 
     if (event != AudioTrack::EVENT_MORE_DATA) return;
 
