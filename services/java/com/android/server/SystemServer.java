@@ -228,6 +228,7 @@ class ServerThread extends Thread {
         WallpaperManagerService wallpaper = null;
         LocationManagerService location = null;
         CountryDetectorService countryDetector = null;
+        TextServiceManagerService tsms = null;
 
         if (factoryTest != SystemServer.FACTORY_TEST_LOW_LEVEL) {
             try {
@@ -268,6 +269,14 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.NETWORKMANAGEMENT_SERVICE, networkManagement);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting NetworkManagement Service", e);
+            }
+
+            try {
+                Slog.i(TAG, "Text Service Manager Service");
+                tsms = new TextServiceManagerService(context);
+                ServiceManager.addService(Context.TEXT_SERVICE_MANAGER_SERVICE, tsms);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting Text Service Manager Service", e);
             }
 
             try {
@@ -534,6 +543,7 @@ class ServerThread extends Thread {
         final LocationManagerService locationF = location;
         final CountryDetectorService countryDetectorF = countryDetector;
         final NetworkTimeUpdateService networkTimeUpdaterF = networkTimeUpdater;
+        final TextServiceManagerService textServiceManagerServiceF = tsms;
 
         // We now tell the activity manager it is okay to run third party
         // code.  It will call back into us once it has gotten to the state
@@ -566,6 +576,7 @@ class ServerThread extends Thread {
                 if (countryDetectorF != null) countryDetectorF.systemReady();
                 if (throttleF != null) throttleF.systemReady();
                 if (networkTimeUpdaterF != null) networkTimeUpdaterF.systemReady();
+                if (textServiceManagerServiceF != null) textServiceManagerServiceF.systemReady();
             }
         });
 
