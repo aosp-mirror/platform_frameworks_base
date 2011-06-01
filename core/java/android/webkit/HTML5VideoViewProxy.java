@@ -173,9 +173,7 @@ class HTML5VideoViewProxy extends Handler
             boolean backFromFullScreenMode = false;
             if (mHTML5VideoView != null) {
                 currentVideoLayerId = mHTML5VideoView.getVideoLayerId();
-                if (mHTML5VideoView instanceof HTML5VideoFullScreen) {
-                    backFromFullScreenMode = true;
-                }
+                backFromFullScreenMode = mHTML5VideoView.fullScreenExited();
             }
 
             if (backFromFullScreenMode

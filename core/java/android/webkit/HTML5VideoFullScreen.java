@@ -199,6 +199,9 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         mVideoSurfaceView.getHolder().setFixedSize(mVideoWidth, mVideoHeight);
     }
 
+    public boolean fullScreenExited() {
+        return (mLayout == null);
+    }
 
     private final WebChromeClient.CustomViewCallback mCallback =
         new WebChromeClient.CustomViewCallback() {
