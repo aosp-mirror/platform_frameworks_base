@@ -10,7 +10,7 @@ parent.link=activities.html
   <li>All activities belong to a task</li>
   <li>A task contains a collection of activities in the order in which the user interacts with
 them</li>
-  <li>Tasks can move to the background and retain the state of each activity in order for the user
+  <li>Tasks can move to the background and retain the state of each activity in order for users
 to perform other tasks without losing their work</li>
 </ul>
 
@@ -306,7 +306,7 @@ activity at the top of the back stack is <em>not</em> an existing instance of th
 and D on top (the stack is A-B-C-D; D is on top). An intent arrives for an activity of type D.
 If D has the default {@code "standard"} launch mode, a new instance of the class is launched and the
 stack becomes A-B-C-D-D. However, if D's launch mode is {@code "singleTop"}, the existing instance
-of D is deliverd the intent through {@link
+of D receives the intent through {@link
 android.app.Activity#onNewIntent onNewIntent()}, because it's at the top of the stack&mdash;the
 stack remains A-B-C-D. However, if an intent arrives for an activity of type B, then a new
 instance of B is added to the stack, even if its launch mode is {@code "singleTop"}.</p>
@@ -363,7 +363,7 @@ discussed more.</p>
 
 <p class="note"><strong>Note:</strong> The behaviors that you specify for your activity with the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html#lmode">{@code launchMode}</a> attribute
-can be overriden by flags included with the intent that start your activity, as discussed in the
+can be overridden by flags included with the intent that start your activity, as discussed in the
 next section.</p>
 
 
