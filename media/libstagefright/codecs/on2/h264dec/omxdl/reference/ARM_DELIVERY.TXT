@@ -1,0 +1,63 @@
+The contents of this transaction was created by Hedley Francis
+of ARM on 19-Feb-2008.
+
+It contains the ARM data versions listed below.
+
+This data, unless otherwise stated, is ARM Proprietary and access to it
+is subject to the agreements indicated below.
+
+If you experience problems with this data, please contact ARM support
+quoting transaction reference <97412>.
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+- OX000-SW-98010-r0p0-00bet1
+  Video codecs - sample code
+  Sample code release for Hantro (Ver 1.0.2)
+  internal access
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+This transaction contains deliverables which are designated as being of
+beta release status (BET).
+
+Beta release status has a particular meaning to ARM of which the recipient
+must be aware. Beta is a pre-release status indicating that the deliverable
+so described is believed to robustly demonstrate specified behaviour, to be
+consistent across its included aspects and be ready for general deployment.
+But Beta also indicates that pre-release reliability trials are ongoing and
+that it is possible residual defects or errors in operation, consistency
+and documentation may still be encountered. The recipient should consider
+this position when using this Beta material supplied. ARM will normally
+attempt to provide fixes or a work-around for defects identified by the
+recipient, but the provision or timeliness of this support cannot be
+guaranteed. ARM shall not be responsible for direct or consequential
+damages as a result of encountering one or more of these residual defects.
+By accepting a Beta release, the recipient agrees to these constraints and
+to providing reasonable information to ARM to enable the replication of the
+defects identified by the recipient. The specific Beta version supplied
+will not be supported after release of a later or higher status version.
+It should be noted that Support for the Beta release of the deliverable
+will only be provided by ARM to a recipient who has a current support and
+maintenance contract for the deliverable.
+
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+In addition to the data versions listed above, this transaction contains
+two additional files at the top level.
+
+The first is this file, ARM_DELIVERY_97412.TXT, which is the delivery
+note.
+
+The second is ARM_MANIFEST_97412.TXT which contains a manifest of all the
+files included in this transaction, together with their checksums.
+
+The checksums provided are calculated using the RSA Data Security, Inc.
+MD5 Message-Digest Algorithm.
+
+The checksums can be used to verify the integrity of this data using the
+"md5sum" tool (which is part of the GNU "textutils" package) by running:
+
+  % md5sum --check ARM_MANIFEST_97412.TXT
+
