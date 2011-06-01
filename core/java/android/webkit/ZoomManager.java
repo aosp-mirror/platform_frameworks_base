@@ -906,7 +906,7 @@ class ZoomManager {
         // scaleAll(), we need to post a Runnable to ensure requestLayout().
         // Additionally, only update the text wrap scale if the width changed.
         mWebView.post(new PostScale(w != ow &&
-            !mWebView.getSettings().getUseFixedViewport(), mInZoomOverview));
+            !mWebView.getSettings().getUseFixedViewport(), mInZoomOverview, w < ow));
     }
 
     private class PostScale implements Runnable {
@@ -915,10 +915,14 @@ class ZoomManager {
         // it could be changed between the time this callback is initiated and
         // the time it's actually run.
         final boolean mInZoomOverviewBeforeSizeChange;
+        final boolean mInPortraitMode;
 
-        public PostScale(boolean updateTextWrap, boolean inZoomOverview) {
+        public PostScale(boolean updateTextWrap,
+                         boolean inZoomOverview,
+                         boolean inPortraitMode) {
             mUpdateTextWrap = updateTextWrap;
             mInZoomOverviewBeforeSizeChange = inZoomOverview;
+            mInPortraitMode = inPortraitMode;
         }
 
         public void run() {
@@ -927,10 +931,10 @@ class ZoomManager {
                 // still want to send the notification over to webkit.
                 // Keep overview mode unchanged when rotating.
                 float newScale = mActualScale;
-                if (mWebView.getSettings().getUseWideViewPort()) {
-                    final float zoomOverviewScale = getZoomOverviewScale();
-                    newScale = (mInZoomOverviewBeforeSizeChange) ?
-                        zoomOverviewScale : Math.max(mActualScale, zoomOverviewScale);
+                if (mWebView.getSettings().getUseWideViewPort() &&
+                    mInPortraitMode &&
+                    mInZoomOverviewBeforeSizeChange) {
+                    newScale = getZoomOverviewScale();
                 }
                 setZoomScale(newScale, mUpdateTextWrap, true);
                 // update the zoom buttons as the scale can be changed
