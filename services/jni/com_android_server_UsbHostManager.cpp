@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "UsbService"
+#define LOG_TAG "UsbHostManagerJNI"
 #include "utils/Log.h"
 
 #include "jni.h"
@@ -30,9 +30,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <linux/usb/f_accessory.h>
-
-#define DRIVER_NAME "/dev/usb_accessory"
 
 namespace android
 {
@@ -134,7 +131,7 @@ static int usb_device_removed(const char *devname, void* client_data) {
     return 0;
 }
 
-static void android_server_UsbService_monitorUsbHostBus(JNIEnv *env, jobject thiz)
+static void android_server_UsbHostManager_monitorUsbHostBus(JNIEnv *env, jobject thiz)
 {
     struct usb_host_context* context = usb_host_init();
     if (!context) {
@@ -145,7 +142,7 @@ static void android_server_UsbService_monitorUsbHostBus(JNIEnv *env, jobject thi
     usb_host_run(context, usb_device_added, usb_device_removed, NULL, (void *)thiz);
 }
 
-static jobject android_server_UsbService_openDevice(JNIEnv *env, jobject thiz, jstring deviceName)
+static jobject android_server_UsbHostManager_openDevice(JNIEnv *env, jobject thiz, jstring deviceName)
 {
     const char *deviceNameStr = env->GetStringUTFChars(deviceName, NULL);
     struct usb_device* device = usb_device_open(deviceNameStr);
@@ -168,72 +165,17 @@ static jobject android_server_UsbService_openDevice(JNIEnv *env, jobject thiz, j
         gParcelFileDescriptorOffsets.mConstructor, fileDescriptor);
 }
 
-static void set_accessory_string(JNIEnv *env, int fd, int cmd, jobjectArray strArray, int index)
-{
-    char buffer[256];
-
-    buffer[0] = 0;
-    int length = ioctl(fd, cmd, buffer);
-    if (buffer[0]) {
-        jstring obj = env->NewStringUTF(buffer);
-        env->SetObjectArrayElement(strArray, index, obj);
-        env->DeleteLocalRef(obj);
-    }
-}
-
-
-static jobjectArray android_server_UsbService_getAccessoryStrings(JNIEnv *env, jobject thiz)
-{
-    int fd = open(DRIVER_NAME, O_RDWR);
-    if (fd < 0) {
-        LOGE("could not open %s", DRIVER_NAME);
-        return NULL;
-    }
-    jclass stringClass = env->FindClass("java/lang/String");
-    jobjectArray strArray = env->NewObjectArray(6, stringClass, NULL);
-    if (!strArray) goto out;
-    set_accessory_string(env, fd, ACCESSORY_GET_STRING_MANUFACTURER, strArray, 0);
-    set_accessory_string(env, fd, ACCESSORY_GET_STRING_MODEL, strArray, 1);
-    set_accessory_string(env, fd, ACCESSORY_GET_STRING_DESCRIPTION, strArray, 2);
-    set_accessory_string(env, fd, ACCESSORY_GET_STRING_VERSION, strArray, 3);
-    set_accessory_string(env, fd, ACCESSORY_GET_STRING_URI, strArray, 4);
-    set_accessory_string(env, fd, ACCESSORY_GET_STRING_SERIAL, strArray, 5);
-
-out:
-    close(fd);
-    return strArray;
-}
-
-static jobject android_server_UsbService_openAccessory(JNIEnv *env, jobject thiz)
-{
-    int fd = open(DRIVER_NAME, O_RDWR);
-    if (fd < 0) {
-        LOGE("could not open %s", DRIVER_NAME);
-        return NULL;
-    }
-    jobject fileDescriptor = jniCreateFileDescriptor(env, fd);
-    if (fileDescriptor == NULL) {
-        return NULL;
-    }
-    return env->NewObject(gParcelFileDescriptorOffsets.mClass,
-        gParcelFileDescriptorOffsets.mConstructor, fileDescriptor);
-}
-
 static JNINativeMethod method_table[] = {
-    { "monitorUsbHostBus", "()V", (void*)android_server_UsbService_monitorUsbHostBus },
+    { "monitorUsbHostBus", "()V", (void*)android_server_UsbHostManager_monitorUsbHostBus },
     { "nativeOpenDevice",  "(Ljava/lang/String;)Landroid/os/ParcelFileDescriptor;",
-                                  (void*)android_server_UsbService_openDevice },
-    { "nativeGetAccessoryStrings", "()[Ljava/lang/String;",
-                                  (void*)android_server_UsbService_getAccessoryStrings },
-    { "nativeOpenAccessory","()Landroid/os/ParcelFileDescriptor;",
-                                  (void*)android_server_UsbService_openAccessory },
+                                  (void*)android_server_UsbHostManager_openDevice },
 };
 
-int register_android_server_UsbService(JNIEnv *env)
+int register_android_server_UsbHostManager(JNIEnv *env)
 {
-    jclass clazz = env->FindClass("com/android/server/usb/UsbService");
+    jclass clazz = env->FindClass("com/android/server/usb/UsbHostManager");
     if (clazz == NULL) {
-        LOGE("Can't find com/android/server/usb/UsbService");
+        LOGE("Can't find com/android/server/usb/UsbHostManager");
         return -1;
     }
     method_usbDeviceAdded = env->GetMethodID(clazz, "usbDeviceAdded", "(Ljava/lang/String;IIIII[I[I)V");
@@ -254,7 +196,7 @@ int register_android_server_UsbService(JNIEnv *env)
     LOG_FATAL_IF(gParcelFileDescriptorOffsets.mConstructor == NULL,
                  "Unable to find constructor for android.os.ParcelFileDescriptor");
 
-    return jniRegisterNativeMethods(env, "com/android/server/usb/UsbService",
+    return jniRegisterNativeMethods(env, "com/android/server/usb/UsbHostManager",
             method_table, NELEM(method_table));
 }
 

@@ -59,9 +59,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-class UsbDeviceSettingsManager {
+class UsbSettingsManager {
 
-    private static final String TAG = "UsbDeviceSettingsManager";
+    private static final String TAG = "UsbSettingsManager";
     private static final File sSettingsFile = new File("/data/system/usb_device_manager.xml");
 
     private final Context mContext;
@@ -363,7 +363,7 @@ class UsbDeviceSettingsManager {
     }
     MyPackageMonitor mPackageMonitor = new MyPackageMonitor();
 
-    public UsbDeviceSettingsManager(Context context) {
+    public UsbSettingsManager(Context context) {
         mContext = context;
         mPackageManager = context.getPackageManager();
         synchronized (mLock) {
