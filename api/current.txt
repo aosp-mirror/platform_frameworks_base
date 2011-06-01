@@ -6814,6 +6814,7 @@ package android.database.sqlite {
     method public void setCursorFactory(android.database.sqlite.SQLiteDatabase.CursorFactory);
     method public void setDistinct(boolean);
     method public void setProjectionMap(java.util.Map<java.lang.String, java.lang.String>);
+    method public void setStrict(boolean);
     method public void setTables(java.lang.String);
   }
 
