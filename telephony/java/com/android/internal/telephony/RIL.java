@@ -2888,7 +2888,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
         String s = p.readString();
 
-        if (RILJ_LOGD) riljLog("< iccIO: "
+        if (RILJ_LOGV) riljLog("< iccIO: "
                 + " 0x" + Integer.toHexString(sw1)
                 + " 0x" + Integer.toHexString(sw2) + " "
                 + s);
@@ -3051,7 +3051,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
     responseSetupDataCall(Parcel p) {
         int ver = p.readInt();
         int num = p.readInt();
-        if (RILJ_LOGD) riljLog("responseSetupDataCall ver=" + ver + " num=" + num);
+        if (RILJ_LOGV) riljLog("responseSetupDataCall ver=" + ver + " num=" + num);
 
         DataCallState dataCall;
 

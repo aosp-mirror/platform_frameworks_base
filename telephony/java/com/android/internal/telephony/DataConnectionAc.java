@@ -28,7 +28,7 @@ import android.os.Message;
  * AsyncChannel to a DataConnection
  */
 public class DataConnectionAc extends AsyncChannel {
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private String mLogTag;
 
     public DataConnection dataConnection;
@@ -367,7 +367,7 @@ public class DataConnectionAc extends AsyncChannel {
         if ((response != null) && (response.what == RSP_RESET)) {
             if (DBG) log("restSync ok");
         } else {
-            if (DBG) log("restSync error response=" + response);
+            log("restSync error response=" + response);
         }
     }
 
