@@ -24,11 +24,13 @@ namespace android {
 
 class MediaRecorderBase;
 class MediaPlayerService;
+class ICameraRecordingProxy;
 
 class MediaRecorderClient : public BnMediaRecorder
 {
 public:
-    virtual     status_t        setCamera(const sp<ICamera>& camera);
+    virtual     status_t        setCamera(const sp<ICamera>& camera,
+                                          const sp<ICameraRecordingProxy>& proxy);
     virtual     status_t        setPreviewSurface(const sp<Surface>& surface);
     virtual     status_t        setVideoSource(int vs);
     virtual     status_t        setAudioSource(int as);

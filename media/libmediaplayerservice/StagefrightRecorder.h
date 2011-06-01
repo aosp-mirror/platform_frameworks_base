@@ -27,6 +27,7 @@
 namespace android {
 
 class Camera;
+class ICameraRecordingProxy;
 class CameraSource;
 class CameraSourceTimeLapse;
 class MediaSourceSplitter;
@@ -48,7 +49,7 @@ struct StagefrightRecorder : public MediaRecorderBase {
     virtual status_t setVideoEncoder(video_encoder ve);
     virtual status_t setVideoSize(int width, int height);
     virtual status_t setVideoFrameRate(int frames_per_second);
-    virtual status_t setCamera(const sp<ICamera>& camera);
+    virtual status_t setCamera(const sp<ICamera>& camera, const sp<ICameraRecordingProxy>& proxy);
     virtual status_t setPreviewSurface(const sp<Surface>& surface);
     virtual status_t setOutputFile(const char *path);
     virtual status_t setOutputFile(int fd, int64_t offset, int64_t length);
@@ -66,6 +67,7 @@ struct StagefrightRecorder : public MediaRecorderBase {
 
 private:
     sp<ICamera> mCamera;
+    sp<ICameraRecordingProxy> mCameraProxy;
     sp<Surface> mPreviewSurface;
     sp<IMediaRecorderClient> mListener;
     sp<MediaWriter> mWriter, mWriterAux;

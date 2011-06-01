@@ -420,6 +420,10 @@ status_t CameraService::Client::unlock() {
     // allow anyone to use camera (after they lock the camera)
     status_t result = checkPid();
     if (result == NO_ERROR) {
+        if (mHardware->recordingEnabled()) {
+            LOGE("Not allowed to unlock camera during recording.");
+            return INVALID_OPERATION;
+        }
         mClientPid = 0;
         LOG1("clear mCameraClient (pid %d)", callingPid);
         // we need to remove the reference to ICameraClient so that when the app
@@ -755,6 +759,11 @@ status_t CameraService::Client::takePicture(int msgType) {
     Mutex::Autolock lock(mLock);
     status_t result = checkPidAndHardware();
     if (result != NO_ERROR) return result;
+
+    if (mHardware->recordingEnabled()) {
+        LOGE("Cannot take picture during recording.");
+        return INVALID_OPERATION;
+    }
 
     if ((msgType & CAMERA_MSG_RAW_IMAGE) &&
         (msgType & CAMERA_MSG_RAW_IMAGE_NOTIFY)) {

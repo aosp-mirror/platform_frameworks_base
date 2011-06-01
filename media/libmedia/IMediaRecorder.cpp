@@ -60,12 +60,13 @@ public:
     {
     }
 
-    status_t setCamera(const sp<ICamera>& camera)
+    status_t setCamera(const sp<ICamera>& camera, const sp<ICameraRecordingProxy>& proxy)
     {
-        LOGV("setCamera(%p)", camera.get());
+        LOGV("setCamera(%p,%p)", camera.get(), proxy.get());
         Parcel data, reply;
         data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
         data.writeStrongBinder(camera->asBinder());
+        data.writeStrongBinder(proxy->asBinder());
         remote()->transact(SET_CAMERA, data, &reply);
         return reply.readInt32();
     }
@@ -434,7 +435,9 @@ status_t BnMediaRecorder::onTransact(
             LOGV("SET_CAMERA");
             CHECK_INTERFACE(IMediaRecorder, data, reply);
             sp<ICamera> camera = interface_cast<ICamera>(data.readStrongBinder());
-            reply->writeInt32(setCamera(camera));
+            sp<ICameraRecordingProxy> proxy =
+                interface_cast<ICameraRecordingProxy>(data.readStrongBinder());
+            reply->writeInt32(setCamera(camera, proxy));
             return NO_ERROR;
         } break;
         default:

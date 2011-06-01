@@ -19,11 +19,12 @@
 #define LOG_TAG "Camera"
 #include <utils/Log.h>
 #include <utils/threads.h>
-
+#include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/IMemory.h>
 
 #include <camera/Camera.h>
+#include <camera/ICameraRecordingProxyListener.h>
 #include <camera/ICameraService.h>
 
 #include <surfaceflinger/Surface.h>
@@ -236,6 +237,10 @@ void Camera::stopPreview()
 void Camera::stopRecording()
 {
     LOGV("stopRecording");
+    {
+        Mutex::Autolock _l(mLock);
+        mRecordingProxyListener.clear();
+    }
     sp <ICamera> c = mCamera;
     if (c == 0) return;
     c->stopRecording();
@@ -327,6 +332,12 @@ void Camera::setListener(const sp<CameraListener>& listener)
     mListener = listener;
 }
 
+void Camera::setRecordingProxyListener(const sp<ICameraRecordingProxyListener>& listener)
+{
+    Mutex::Autolock _l(mLock);
+    mRecordingProxyListener = listener;
+}
+
 void Camera::setPreviewCallbackFlags(int flag)
 {
     LOGV("setPreviewCallbackFlags");
@@ -364,6 +375,19 @@ void Camera::dataCallback(int32_t msgType, const sp<IMemory>& dataPtr)
 // callback from camera service when timestamped frame is ready
 void Camera::dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr)
 {
+    // If recording proxy listener is registered, forward the frame and return.
+    // The other listener (mListener) is ignored because the receiver needs to
+    // call releaseRecordingFrame.
+    sp<ICameraRecordingProxyListener> proxylistener;
+    {
+        Mutex::Autolock _l(mLock);
+        proxylistener = mRecordingProxyListener;
+    }
+    if (proxylistener != NULL) {
+        proxylistener->dataCallbackTimestamp(timestamp, msgType, dataPtr);
+        return;
+    }
+
     sp<CameraListener> listener;
     {
         Mutex::Autolock _l(mLock);
@@ -387,6 +411,36 @@ void Camera::DeathNotifier::binderDied(const wp<IBinder>& who) {
     Mutex::Autolock _l(Camera::mLock);
     Camera::mCameraService.clear();
     LOGW("Camera server died!");
+}
+
+sp<ICameraRecordingProxy> Camera::getRecordingProxy() {
+    LOGV("getProxy");
+    return new RecordingProxy(this);
+}
+
+status_t Camera::RecordingProxy::startRecording(const sp<ICameraRecordingProxyListener>& listener)
+{
+    LOGV("RecordingProxy::startRecording");
+    mCamera->setRecordingProxyListener(listener);
+    mCamera->reconnect();
+    return mCamera->startRecording();
+}
+
+void Camera::RecordingProxy::stopRecording()
+{
+    LOGV("RecordingProxy::stopRecording");
+    mCamera->stopRecording();
+}
+
+void Camera::RecordingProxy::releaseRecordingFrame(const sp<IMemory>& mem)
+{
+    LOGV("RecordingProxy::releaseRecordingFrame");
+    mCamera->releaseRecordingFrame(mem);
+}
+
+Camera::RecordingProxy::RecordingProxy(const sp<Camera>& camera)
+{
+    mCamera = camera;
 }
 
 }; // namespace android

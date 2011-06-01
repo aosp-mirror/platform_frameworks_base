@@ -39,6 +39,7 @@ namespace android {
 // static
 CameraSourceTimeLapse *CameraSourceTimeLapse::CreateFromCamera(
         const sp<ICamera> &camera,
+        const sp<ICameraRecordingProxy> &proxy,
         int32_t cameraId,
         Size videoSize,
         int32_t videoFrameRate,
@@ -46,7 +47,7 @@ CameraSourceTimeLapse *CameraSourceTimeLapse::CreateFromCamera(
         int64_t timeBetweenTimeLapseFrameCaptureUs) {
 
     CameraSourceTimeLapse *source = new
-            CameraSourceTimeLapse(camera, cameraId,
+            CameraSourceTimeLapse(camera, proxy, cameraId,
                 videoSize, videoFrameRate, surface,
                 timeBetweenTimeLapseFrameCaptureUs);
 
@@ -61,12 +62,13 @@ CameraSourceTimeLapse *CameraSourceTimeLapse::CreateFromCamera(
 
 CameraSourceTimeLapse::CameraSourceTimeLapse(
         const sp<ICamera>& camera,
+        const sp<ICameraRecordingProxy>& proxy,
         int32_t cameraId,
         Size videoSize,
         int32_t videoFrameRate,
         const sp<Surface>& surface,
         int64_t timeBetweenTimeLapseFrameCaptureUs)
-    : CameraSource(camera, cameraId, videoSize, videoFrameRate, surface, true),
+    : CameraSource(camera, proxy, cameraId, videoSize, videoFrameRate, surface, true),
       mTimeBetweenTimeLapseFrameCaptureUs(timeBetweenTimeLapseFrameCaptureUs),
       mTimeBetweenTimeLapseVideoFramesUs(1E6/videoFrameRate),
       mLastTimeLapseFrameRealTimestampUs(0),
@@ -315,7 +317,7 @@ void CameraSourceTimeLapse::startCameraRecording() {
         pthread_attr_destroy(&attr);
     } else {
         LOGV("start time lapse recording using video camera");
-        CHECK_EQ(OK, mCamera->startRecording());
+        CameraSource::startCameraRecording();
     }
 }
 
@@ -337,8 +339,7 @@ void CameraSourceTimeLapse::stopCameraRecording() {
         // play the recording sound.
         mCamera->sendCommand(CAMERA_CMD_PLAY_RECORDING_SOUND, 0, 0);
     } else {
-        mCamera->setListener(NULL);
-        mCamera->stopRecording();
+        CameraSource::stopCameraRecording();
     }
     if (mLastReadBufferCopy) {
         mLastReadBufferCopy->release();
@@ -347,9 +348,8 @@ void CameraSourceTimeLapse::stopCameraRecording() {
 }
 
 void CameraSourceTimeLapse::releaseRecordingFrame(const sp<IMemory>& frame) {
-    if (!mUseStillCameraForTimeLapse &&
-        mCamera != NULL) {
-        mCamera->releaseRecordingFrame(frame);
+    if (!mUseStillCameraForTimeLapse) {
+        CameraSource::releaseRecordingFrame(frame);
     }
 }
 
