@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
+import android.security.KeyStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -407,6 +408,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                 mStatusView.updateStatusLines(true);
                 mCallback.keyguardDone(true);
                 mCallback.reportSuccessfulUnlockAttempt();
+                KeyStore.getInstance().password(LockPatternUtils.patternToString(pattern));
             } else {
                 boolean reportFailedAttempt = false;
                 if (pattern.size() > MIN_PATTERN_BEFORE_POKE_WAKELOCK) {
