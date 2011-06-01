@@ -159,6 +159,14 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
         return false;
     }
 
+    public boolean expandItemActionView(MenuBuilder menu, MenuItemImpl item) {
+        return false;
+    }
+
+    public boolean collapseItemActionView(MenuBuilder menu, MenuItemImpl item) {
+        return false;
+    }
+
     public void saveHierarchyState(Bundle outState) {
         SparseArray<Parcelable> viewStates = new SparseArray<Parcelable>();
         if (mMenuView != null) {

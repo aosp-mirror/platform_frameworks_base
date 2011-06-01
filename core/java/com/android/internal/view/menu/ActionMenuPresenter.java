@@ -112,8 +112,11 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
 
     @Override
     public View getItemView(MenuItemImpl item, View convertView, ViewGroup parent) {
-        final View actionView = item.getActionView();
-        return actionView != null ? actionView : super.getItemView(item, convertView, parent);
+        View actionView = item.getActionView();
+        actionView = actionView != null && !item.hasCollapsibleActionView() ?
+                actionView : super.getItemView(item, convertView, parent);
+        actionView.setVisibility(item.isActionViewExpanded() ? View.GONE : View.VISIBLE);
+        return actionView;
     }
 
     @Override
@@ -303,7 +306,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
 
             if (item.requiresActionButton()) {
                 View v = item.getActionView();
-                if (v == null) {
+                if (v == null || item.hasCollapsibleActionView()) {
                     v = getItemView(item, mScrapActionButtonView, parent);
                     if (mScrapActionButtonView == null) {
                         mScrapActionButtonView = v;
@@ -329,7 +332,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
 
                 if (isAction) {
                     View v = item.getActionView();
-                    if (v == null) {
+                    if (v == null || item.hasCollapsibleActionView()) {
                         v = getItemView(item, mScrapActionButtonView, parent);
                         if (mScrapActionButtonView == null) {
                             mScrapActionButtonView = v;

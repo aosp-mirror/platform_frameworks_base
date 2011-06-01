@@ -20970,6 +20970,8 @@ package android.view {
   }
 
   public abstract interface MenuItem {
+    method public abstract boolean collapseActionView();
+    method public abstract boolean expandActionView();
     method public abstract android.view.View getActionView();
     method public abstract char getAlphabeticShortcut();
     method public abstract int getGroupId();
@@ -20983,6 +20985,7 @@ package android.view {
     method public abstract java.lang.CharSequence getTitle();
     method public abstract java.lang.CharSequence getTitleCondensed();
     method public abstract boolean hasSubMenu();
+    method public abstract boolean isActionViewExpanded();
     method public abstract boolean isCheckable();
     method public abstract boolean isChecked();
     method public abstract boolean isEnabled();
@@ -20997,17 +21000,25 @@ package android.view {
     method public abstract android.view.MenuItem setIcon(int);
     method public abstract android.view.MenuItem setIntent(android.content.Intent);
     method public abstract android.view.MenuItem setNumericShortcut(char);
+    method public abstract android.view.MenuItem setOnActionExpandListener(android.view.MenuItem.OnActionExpandListener);
     method public abstract android.view.MenuItem setOnMenuItemClickListener(android.view.MenuItem.OnMenuItemClickListener);
     method public abstract android.view.MenuItem setShortcut(char, char);
     method public abstract void setShowAsAction(int);
+    method public abstract android.view.MenuItem setShowAsActionFlags(int);
     method public abstract android.view.MenuItem setTitle(java.lang.CharSequence);
     method public abstract android.view.MenuItem setTitle(int);
     method public abstract android.view.MenuItem setTitleCondensed(java.lang.CharSequence);
     method public abstract android.view.MenuItem setVisible(boolean);
     field public static final int SHOW_AS_ACTION_ALWAYS = 2; // 0x2
+    field public static final int SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW = 8; // 0x8
     field public static final int SHOW_AS_ACTION_IF_ROOM = 1; // 0x1
     field public static final int SHOW_AS_ACTION_NEVER = 0; // 0x0
     field public static final int SHOW_AS_ACTION_WITH_TEXT = 4; // 0x4
+  }
+
+  public static abstract interface MenuItem.OnActionExpandListener {
+    method public abstract boolean onMenuItemActionCollapse(android.view.MenuItem);
+    method public abstract boolean onMenuItemActionExpand(android.view.MenuItem);
   }
 
   public static abstract interface MenuItem.OnMenuItemClickListener {

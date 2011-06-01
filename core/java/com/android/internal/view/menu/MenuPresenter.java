@@ -107,4 +107,22 @@ public interface MenuPresenter {
      * @return true if this presenter changed the action status of any items.
      */
     public boolean flagActionItems();
+
+    /**
+     * Called when a menu item with a collapsable action view should expand its action view.
+     *
+     * @param menu Menu containing the item to be expanded
+     * @param item Item to be expanded
+     * @return true if this presenter expanded the action view, false otherwise.
+     */
+    public boolean expandItemActionView(MenuBuilder menu, MenuItemImpl item);
+
+    /**
+     * Called when a menu item with a collapsable action view should collapse its action view.
+     *
+     * @param menu Menu containing the item to be collapsed
+     * @param item Item to be collapsed
+     * @return true if this presenter collapsed the action view, false otherwise.
+     */
+    public boolean collapseItemActionView(MenuBuilder menu, MenuItemImpl item);
 }

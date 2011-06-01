@@ -744,11 +744,14 @@ public class MenuBuilder implements Menu {
         
         if (itemImpl == null || !itemImpl.isEnabled()) {
             return false;
-        }        
+        }
         
         boolean invoked = itemImpl.invoke();
 
-        if (item.hasSubMenu()) {
+        if (itemImpl.hasCollapsibleActionView()) {
+            invoked |= itemImpl.expandActionView();
+            if (invoked) close(true);
+        } else if (item.hasSubMenu()) {
             close(false);
 
             invoked |= dispatchSubMenuSelected((SubMenuBuilder) item.getSubMenu());
@@ -1080,5 +1083,43 @@ public class MenuBuilder implements Menu {
     
     boolean getOptionalIconsVisible() {
         return mOptionalIconsVisible;
+    }
+
+    public boolean expandItemActionView(MenuItemImpl item) {
+        if (mPresenters.isEmpty()) return false;
+
+        boolean expanded = false;
+
+        stopDispatchingItemsChanged();
+        for (WeakReference<MenuPresenter> ref : mPresenters) {
+            final MenuPresenter presenter = ref.get();
+            if (presenter == null) {
+                mPresenters.remove(ref);
+            } else if ((expanded = presenter.expandItemActionView(this, item))) {
+                break;
+            }
+        }
+        startDispatchingItemsChanged();
+
+        return expanded;
+    }
+
+    public boolean collapseItemActionView(MenuItemImpl item) {
+        if (mPresenters.isEmpty()) return false;
+
+        boolean collapsed = false;
+
+        stopDispatchingItemsChanged();
+        for (WeakReference<MenuPresenter> ref : mPresenters) {
+            final MenuPresenter presenter = ref.get();
+            if (presenter == null) {
+                mPresenters.remove(ref);
+            } else if ((collapsed = presenter.collapseItemActionView(this, item))) {
+                break;
+            }
+        }
+        startDispatchingItemsChanged();
+
+        return collapsed;
     }
 }

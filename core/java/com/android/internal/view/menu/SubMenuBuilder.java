@@ -111,4 +111,14 @@ public class SubMenuBuilder extends MenuBuilder implements SubMenu {
     public SubMenu setHeaderView(View view) {
         return (SubMenu) super.setHeaderViewInt(view);
     }
+
+    @Override
+    public boolean expandItemActionView(MenuItemImpl item) {
+        return mParentMenu.expandItemActionView(item);
+    }
+
+    @Override
+    public boolean collapseItemActionView(MenuItemImpl item) {
+        return mParentMenu.collapseItemActionView(item);
+    }
 }
