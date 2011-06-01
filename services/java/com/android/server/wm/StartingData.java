@@ -16,18 +16,23 @@
 
 package com.android.server.wm;
 
+import android.content.res.CompatibilityInfo;
+
 final class StartingData {
     final String pkg;
     final int theme;
+    final CompatibilityInfo compatInfo;
     final CharSequence nonLocalizedLabel;
     final int labelRes;
     final int icon;
     final int windowFlags;
 
-    StartingData(String _pkg, int _theme, CharSequence _nonLocalizedLabel,
+    StartingData(String _pkg, int _theme, CompatibilityInfo _compatInfo,
+            CharSequence _nonLocalizedLabel,
             int _labelRes, int _icon, int _windowFlags) {
         pkg = _pkg;
         theme = _theme;
+        compatInfo = _compatInfo;
         nonLocalizedLabel = _nonLocalizedLabel;
         labelRes = _labelRes;
         icon = _icon;
