@@ -37,20 +37,34 @@ public class BiDiTestActivity extends TabActivity {
         intent = new Intent().setClass(this, BiDiTestBasicActivity.class);
 
         // Initialize a TabSpec for each tab and add it to the TabHost
-        spec = tabHost.newTabSpec("basic").setIndicator("Basic").setContent(intent);
+        spec = tabHost.newTabSpec("basic").setIndicator("Basic").
+            setContent(intent);
         tabHost.addTab(spec);
 
         // Do the same for the other tabs
         intent = new Intent().setClass(this, BiDiTestCanvasActivity.class);
-        spec = tabHost.newTabSpec("canvas").setIndicator("Canvas").setContent(intent);
+        spec = tabHost.newTabSpec("canvas").setIndicator("Canvas").
+            setContent(intent);
         tabHost.addTab(spec);
 
         intent = new Intent().setClass(this, BiDiTestLinearLayoutLtrActivity.class);
-        spec = tabHost.newTabSpec("layout-ltr").setIndicator("LinearLayout LTR").setContent(intent);
+        spec = tabHost.newTabSpec("linear-layout-ltr").setIndicator("LinearLayout LTR").
+            setContent(intent);
         tabHost.addTab(spec);
 
         intent = new Intent().setClass(this, BiDiTestLinearLayoutRtlActivity.class);
-        spec = tabHost.newTabSpec("layout-rtl").setIndicator("LinearLayout RTL").setContent(intent);
+        spec = tabHost.newTabSpec("linear-layout-rtl").setIndicator("LinearLayout RTL").
+            setContent(intent);
+        tabHost.addTab(spec);
+
+        intent = new Intent().setClass(this, BiDiTestFrameLayoutLtrActivity.class);
+        spec = tabHost.newTabSpec("frame-layout-ltr").setIndicator("FrameLayout LTR").
+            setContent(intent);
+        tabHost.addTab(spec);
+
+        intent = new Intent().setClass(this, BiDiTestFrameLayoutRtlActivity.class);
+        spec = tabHost.newTabSpec("frame-layout-rtl").setIndicator("FrameLayout RTL").
+            setContent(intent);
         tabHost.addTab(spec);
 
         tabHost.setCurrentTab(0);

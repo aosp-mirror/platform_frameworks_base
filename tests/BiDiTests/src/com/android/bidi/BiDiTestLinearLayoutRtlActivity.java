@@ -18,18 +18,13 @@ package com.android.bidi;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.LinearLayout;
 
 public class BiDiTestLinearLayoutRtlActivity extends Activity {
-
-    private LinearLayout layout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.linear_layout_rtl);
-
-        layout = (LinearLayout) findViewById(R.id.layouttest);
     }
 }

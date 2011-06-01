@@ -19,12 +19,13 @@ package com.android.bidi;
 import android.app.Activity;
 import android.os.Bundle;
 
-public class BiDiTestLinearLayoutLtrActivity extends Activity {
+public class BiDiTestFrameLayoutLtrActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.linear_layout_ltr);
+        setContentView(R.layout.frame_layout_ltr);
     }
 }
+
