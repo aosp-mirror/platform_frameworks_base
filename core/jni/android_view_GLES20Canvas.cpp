@@ -42,7 +42,7 @@
 #include <SkiaColorFilter.h>
 #include <Rect.h>
 
-#include "TextLayout.h"
+#include <TextLayout.h>
 
 namespace android {
 
@@ -419,7 +419,7 @@ static void android_view_GLES20Canvas_setupShadow(JNIEnv* env, jobject clazz,
 
 static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
-#if 0 // TODO: replace "0" by "RTL_USE_HARFBUZZ" when renderer->drawGlyphs() is implemented
+#if RTL_USE_HARFBUZZ
     sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
             paint, text, 0, count, count, flags);
     if (value == NULL) {
@@ -431,7 +431,8 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
 #endif
     const jchar* glyphArray = value->getGlyphs();
     int glyphCount = value->getGlyphsCount();
-    renderer->drawGlyphs((const char*) glyphArray, 0, glyphCount << 1, x, y, paint);
+    int bytesCount = glyphCount * sizeof(jchar);
+    renderer->drawText((const char*) glyphArray, bytesCount, glyphCount, x, y, paint);
 #else
     const jchar *workText;
     jchar* buffer = NULL;
@@ -446,7 +447,7 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
 static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
         jint start, jint count, jint contextCount, jfloat x, jfloat y,
         int flags, SkPaint* paint) {
-#if 0 // TODO: replace "0" by "RTL_USE_HARFBUZZ" when renderer->drawGlyphs() is implemented
+#if RTL_USE_HARFBUZZ
     sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
             paint, text, start, count, contextCount, flags);
     if (value == NULL) {
@@ -458,7 +459,8 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
 #endif
     const jchar* glyphArray = value->getGlyphs();
     int glyphCount = value->getGlyphsCount();
-    renderer->drawGlyphs((const char*) glyphArray, 0, glyphCount << 1, x, y, paint);
+    int bytesCount = glyphCount * sizeof(jchar);
+    renderer->drawText((const char*) glyphArray, bytesCount, glyphCount, x, y, paint);
 #else
     uint8_t rtl = flags & 0x1;
     if (rtl) {

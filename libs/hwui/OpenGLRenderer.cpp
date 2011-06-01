@@ -2073,11 +2073,6 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     drawTextDecorations(text, bytesCount, length, oldX, oldY, paint);
 }
 
-void OpenGLRenderer::drawGlyphs(const char* glyphs, int index, int count, float x, float y,
-        SkPaint* paint) {
-    // TODO
-}
-
 void OpenGLRenderer::drawPath(SkPath* path, SkPaint* paint) {
     if (mSnapshot->isIgnored()) return;
 
@@ -2230,14 +2225,19 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
     // Handle underline and strike-through
     uint32_t flags = paint->getFlags();
     if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
+        SkPaint paintCopy(*paint);
+#if RENDER_TEXT_AS_GLYPHS
+        paintCopy.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+#endif
+
         float underlineWidth = length;
         // If length is > 0.0f, we already measured the text for the text alignment
         if (length <= 0.0f) {
-            underlineWidth = paint->measureText(text, bytesCount);
+            underlineWidth = paintCopy.measureText(text, bytesCount);
         }
 
         float offsetX = 0;
-        switch (paint->getTextAlign()) {
+        switch (paintCopy.getTextAlign()) {
             case SkPaint::kCenter_Align:
                 offsetX = underlineWidth * 0.5f;
                 break;
@@ -2249,8 +2249,7 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
         }
 
         if (underlineWidth > 0.0f) {
-            const float textSize = paint->getTextSize();
-            // TODO: Support stroke width < 1.0f when we have AA lines
+            const float textSize = paintCopy.getTextSize();
             const float strokeWidth = fmax(textSize * kStdUnderline_Thickness, 1.0f);
 
             const float left = x - offsetX;
@@ -2280,10 +2279,9 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
                 points[currentPoint++] = top;
             }
 
-            SkPaint linesPaint(*paint);
-            linesPaint.setStrokeWidth(strokeWidth);
+            paintCopy.setStrokeWidth(strokeWidth);
 
-            drawLines(&points[0], pointsCount, &linesPaint);
+            drawLines(&points[0], pointsCount, &paintCopy);
         }
     }
 }

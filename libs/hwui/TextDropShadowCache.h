@@ -73,7 +73,6 @@ struct ShadowText {
         text = str.string();
     }
 
-    // TODO: Should take into account fake bold and text skew
     bool operator<(const ShadowText& rhs) const {
         LTE_INT(len) {
             LTE_INT(radius) {

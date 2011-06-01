@@ -35,6 +35,7 @@ namespace uirenderer {
 #define DEFAULT_TEXT_CACHE_WIDTH 1024
 #define DEFAULT_TEXT_CACHE_HEIGHT 256
 
+// We should query these values from the GL context
 #define MAX_TEXT_CACHE_WIDTH 2048
 #define MAX_TEXT_CACHE_HEIGHT 2048
 
@@ -58,8 +59,7 @@ Font::~Font() {
     }
 
     for (uint32_t i = 0; i < mCachedGlyphs.size(); i++) {
-        CachedGlyphInfo* glyph = mCachedGlyphs.valueAt(i);
-        delete glyph;
+        delete mCachedGlyphs.valueAt(i);
     }
 }
 
@@ -134,48 +134,49 @@ void Font::drawCachedGlyph(CachedGlyphInfo* glyph, int x, int y,
 
 }
 
-Font::CachedGlyphInfo* Font::getCachedUTFChar(SkPaint* paint, int32_t utfChar) {
+Font::CachedGlyphInfo* Font::getCachedGlyph(SkPaint* paint, glyph_t textUnit) {
     CachedGlyphInfo* cachedGlyph = NULL;
-    ssize_t index = mCachedGlyphs.indexOfKey(utfChar);
+    ssize_t index = mCachedGlyphs.indexOfKey(textUnit);
     if (index >= 0) {
         cachedGlyph = mCachedGlyphs.valueAt(index);
     } else {
-        cachedGlyph = cacheGlyph(paint, utfChar);
+        cachedGlyph = cacheGlyph(paint, textUnit);
     }
 
     // Is the glyph still in texture cache?
     if (!cachedGlyph->mIsValid) {
-        const SkGlyph& skiaGlyph = paint->getUnicharMetrics(utfChar);
+        const SkGlyph& skiaGlyph = GET_METRICS(paint, textUnit);
         updateGlyphCache(paint, skiaGlyph, cachedGlyph);
     }
 
     return cachedGlyph;
 }
 
-void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, int x, int y, uint8_t *bitmap, uint32_t bitmapW, uint32_t bitmapH) {
     if (bitmap != NULL && bitmapW > 0 && bitmapH > 0) {
-        renderUTF(paint, text, start, len, numGlyphs, x, y, BITMAP, bitmap,
+        render(paint, text, start, len, numGlyphs, x, y, BITMAP, bitmap,
                 bitmapW, bitmapH, NULL);
     } else {
-        renderUTF(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER, NULL, 0, 0, NULL);
+        render(paint, text, start, len, numGlyphs, x, y, FRAMEBUFFER, NULL,
+                0, 0, NULL);
     }
 
 }
 
-void Font::measureUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+void Font::measure(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, Rect *bounds) {
     if (bounds == NULL) {
         LOGE("No return rectangle provided to measure text");
         return;
     }
     bounds->set(1e6, -1e6, -1e6, 1e6);
-    renderUTF(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds);
+    render(paint, text, start, len, numGlyphs, 0, 0, MEASURE, NULL, 0, 0, bounds);
 }
 
 #define SkAutoKern_AdjustF(prev, next) (((next) - (prev) + 32) >> 6 << 16)
 
-void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
+void Font::render(SkPaint* paint, const char* text, uint32_t start, uint32_t len,
         int numGlyphs, int x, int y, RenderMode mode, uint8_t *bitmap,
         uint32_t bitmapW, uint32_t bitmapH,Rect *bounds) {
     if (numGlyphs == 0 || text == NULL || len == 0) {
@@ -195,14 +196,14 @@ void Font::renderUTF(SkPaint* paint, const char* text, uint32_t start, uint32_t 
     text += start;
 
     while (glyphsLeft > 0) {
-        int32_t utfChar = SkUTF16_NextUnichar((const uint16_t**) &text);
+        glyph_t glyph = GET_GLYPH(text);
 
         // Reached the end of the string
-        if (utfChar < 0) {
+        if (IS_END_OF_STRING(glyph)) {
             break;
         }
 
-        CachedGlyphInfo* cachedGlyph = getCachedUTFChar(paint, utfChar);
+        CachedGlyphInfo* cachedGlyph = getCachedGlyph(paint, glyph);
         penX += SkAutoKern_AdjustF(prevRsbDelta, cachedGlyph->mLsbDelta);
         prevRsbDelta = cachedGlyph->mRsbDelta;
 
@@ -268,11 +269,11 @@ void Font::updateGlyphCache(SkPaint* paint, const SkGlyph& skiaGlyph, CachedGlyp
     mState->mUploadTexture = true;
 }
 
-Font::CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, int32_t glyph) {
+Font::CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph) {
     CachedGlyphInfo* newGlyph = new CachedGlyphInfo();
     mCachedGlyphs.add(glyph, newGlyph);
 
-    const SkGlyph& skiaGlyph = paint->getUnicharMetrics(glyph);
+    const SkGlyph& skiaGlyph = GET_METRICS(paint, glyph);
     newGlyph->mGlyphIndex = skiaGlyph.fID;
     newGlyph->mIsValid = false;
 
@@ -672,7 +673,7 @@ void FontRenderer::precacheLatin(SkPaint* paint) {
     uint32_t remainingCapacity = getRemainingCacheCapacity();
     uint32_t precacheIdx = 0;
     while (remainingCapacity > 25 && precacheIdx < mLatinPrecache.size()) {
-        mCurrentFont->getCachedUTFChar(paint, (int32_t) mLatinPrecache[precacheIdx]);
+        mCurrentFont->getCachedGlyph(paint, (int32_t) mLatinPrecache[precacheIdx]);
         remainingCapacity = getRemainingCacheCapacity();
         precacheIdx ++;
     }
@@ -714,7 +715,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
     }
 
     Rect bounds;
-    mCurrentFont->measureUTF(paint, text, startIndex, len, numGlyphs, &bounds);
+    mCurrentFont->measure(paint, text, startIndex, len, numGlyphs, &bounds);
     uint32_t paddedWidth = (uint32_t) (bounds.right - bounds.left) + 2 * radius;
     uint32_t paddedHeight = (uint32_t) (bounds.top - bounds.bottom) + 2 * radius;
     uint8_t* dataBuffer = new uint8_t[paddedWidth * paddedHeight];
@@ -725,7 +726,7 @@ FontRenderer::DropShadow FontRenderer::renderDropShadow(SkPaint* paint, const ch
     int penX = radius - bounds.left;
     int penY = radius - bounds.bottom;
 
-    mCurrentFont->renderUTF(paint, text, startIndex, len, numGlyphs, penX, penY,
+    mCurrentFont->render(paint, text, startIndex, len, numGlyphs, penX, penY,
             dataBuffer, paddedWidth, paddedHeight);
     blurImage(dataBuffer, paddedWidth, paddedHeight, radius);
 
@@ -755,7 +756,7 @@ bool FontRenderer::renderText(SkPaint* paint, const Rect* clip, const char *text
     mDrawn = false;
     mBounds = bounds;
     mClip = clip;
-    mCurrentFont->renderUTF(paint, text, startIndex, len, numGlyphs, x, y);
+    mCurrentFont->render(paint, text, startIndex, len, numGlyphs, x, y);
     mBounds = NULL;
 
     if (mCurrentQuadIndex != 0) {
