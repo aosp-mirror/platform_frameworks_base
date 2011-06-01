@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include "include/NuCachedSource2.h"
+#include "include/HTTPBase.h"
 
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
@@ -199,6 +200,16 @@ NuCachedSource2::~NuCachedSource2() {
 
     delete mCache;
     mCache = NULL;
+}
+
+status_t NuCachedSource2::getEstimatedBandwidthKbps(int32_t *kbps) {
+    HTTPBase* source = static_cast<HTTPBase *>(mSource.get());
+    return source->getEstimatedBandwidthKbps(kbps);
+}
+
+status_t NuCachedSource2::setCacheStatCollectFreq(int32_t freqMs) {
+    HTTPBase *source = static_cast<HTTPBase *>(mSource.get());
+    return source->setBandwidthStatCollectFreq(freqMs);
 }
 
 status_t NuCachedSource2::initCheck() const {

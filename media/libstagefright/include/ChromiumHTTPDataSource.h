@@ -43,8 +43,6 @@ struct ChromiumHTTPDataSource : public HTTPBase {
     virtual status_t getSize(off64_t *size);
     virtual uint32_t flags();
 
-    virtual bool estimateBandwidth(int32_t *bandwidth_bps);
-
     virtual sp<DecryptHandle> DrmInitialization();
 
     virtual void getDrmInfo(sp<DecryptHandle> &handle, DrmManagerClient **client);
@@ -65,11 +63,6 @@ private:
         CONNECTED,
         READING,
         DISCONNECTING
-    };
-
-    struct BandwidthEntry {
-        int64_t mDelayUs;
-        size_t mNumBytes;
     };
 
     const uint32_t mFlags;
@@ -94,11 +87,6 @@ private:
 
     String8 mContentType;
 
-    List<BandwidthEntry> mBandwidthHistory;
-    size_t mNumBandwidthHistoryItems;
-    int64_t mTotalTransferTimeUs;
-    size_t mTotalTransferBytes;
-
     sp<DecryptHandle> mDecryptHandle;
     DrmManagerClient *mDrmManagerClient;
 
@@ -120,8 +108,6 @@ private:
     void onConnectionFailed(status_t err);
     void onReadCompleted(ssize_t size);
     void onDisconnectComplete();
-
-    void addBandwidthMeasurement_l(size_t numBytes, int64_t delayUs);
 
     void clearDRMState_l();
 

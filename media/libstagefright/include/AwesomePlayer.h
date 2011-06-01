@@ -93,6 +93,7 @@ struct AwesomePlayer {
 
     status_t setParameter(int key, const Parcel &request);
     status_t getParameter(int key, Parcel *reply);
+    status_t setCacheStatCollectFreq(const Parcel &request);
 
     status_t seekTo(int64_t timeUs);
 
@@ -291,6 +292,7 @@ private:
     void setNativeWindow_l(const sp<ANativeWindow> &native);
 
     bool isStreamingHTTP() const;
+    void sendCacheStats();
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);

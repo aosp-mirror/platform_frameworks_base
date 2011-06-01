@@ -100,6 +100,9 @@ enum media_info_type {
     MEDIA_INFO_BUFFERING_START = 701,
     // MediaPlayer is resuming playback after filling buffers.
     MEDIA_INFO_BUFFERING_END = 702,
+    // Bandwidth in recent past
+    MEDIA_INFO_NETWORK_BANDWIDTH = 703,
+
     // 8xx
     // Bad interleaving means that a media has been improperly interleaved or not
     // interleaved at all, e.g has all the video samples first then all the audio
@@ -128,6 +131,9 @@ enum media_player_states {
 enum media_set_parameter_keys {
     KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX = 1000,
     KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE = 1001,
+
+    // Streaming/buffering parameters
+    KEY_PARAMETER_CACHE_STAT_COLLECT_FREQ_MS = 1100,
 };
 // ----------------------------------------------------------------------------
 // ref-counted object for callbacks

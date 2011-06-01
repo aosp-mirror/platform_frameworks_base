@@ -20,6 +20,8 @@
 
 #include <media/stagefright/foundation/ABase.h>
 #include <media/stagefright/DataSource.h>
+#include <media/stagefright/MediaErrors.h>
+#include <utils/threads.h>
 
 namespace android {
 
@@ -40,11 +42,41 @@ struct HTTPBase : public DataSource {
 
     // Returns true if bandwidth could successfully be estimated,
     // false otherwise.
-    virtual bool estimateBandwidth(int32_t *bandwidth_bps) = 0;
+    virtual bool estimateBandwidth(int32_t *bandwidth_bps);
+
+    virtual status_t getEstimatedBandwidthKbps(int32_t *kbps);
+
+    virtual status_t setBandwidthStatCollectFreq(int32_t freqMs);
 
     static sp<HTTPBase> Create(uint32_t flags = 0);
 
+protected:
+    void addBandwidthMeasurement(size_t numBytes, int64_t delayUs);
+
 private:
+
+    struct BandwidthEntry {
+        int64_t mDelayUs;
+        size_t mNumBytes;
+    };
+
+    Mutex mLock;
+
+    List<BandwidthEntry> mBandwidthHistory;
+    size_t mNumBandwidthHistoryItems;
+    int64_t mTotalTransferTimeUs;
+    size_t mTotalTransferBytes;
+
+    enum {
+        kMinBandwidthCollectFreqMs = 1000,   // 1 second
+        kMaxBandwidthCollectFreqMs = 60000,  // one minute
+    };
+
+    int64_t mPrevBandwidthMeasureTimeUs;
+    int32_t mPrevEstimatedBandWidthKbps;
+    int32_t mBandWidthCollectFreqMs;
+
+
     DISALLOW_EVIL_CONSTRUCTORS(HTTPBase);
 };
 
