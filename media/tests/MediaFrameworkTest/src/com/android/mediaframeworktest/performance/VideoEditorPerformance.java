@@ -112,12 +112,11 @@ public class VideoEditorPerformance extends
 
     private final int NUM_OF_ITERATIONS=20;
 
-    private float calculateTimeTaken(long beginTime, int numIterations)
+    private int calculateTimeTaken(long beginTime, int numIterations)
         throws Exception {
         final long duration2 = SystemClock.uptimeMillis();
         final long durationToCreateMediaItem = (duration2 - beginTime);
-        final float timeTaken1 = (float)durationToCreateMediaItem *
-            1.0f/(float)numIterations;
+        final int timeTaken1 = (int)(durationToCreateMediaItem / numIterations);
         return (timeTaken1);
     }
 
@@ -208,7 +207,7 @@ public class VideoEditorPerformance extends
         final String[] loggingInfo = new String[3];
         final MediaVideoItem[] mediaVideoItem =
             new MediaVideoItem[NUM_OF_ITERATIONS];
-        float timeTaken = 0.0f;
+        int timeTaken = 0;
         long startTime = 0;
 
         /** Time Take for creation of Media Video Item */
@@ -251,7 +250,7 @@ public class VideoEditorPerformance extends
         final String[] loggingInfo = new String[3];
         final MediaImageItem[] mediaImageItem =
             new MediaImageItem[NUM_OF_ITERATIONS];
-        float timeTaken = 0.0f;
+        int timeTaken = 0;
 
         long beginTime = SystemClock.uptimeMillis();
         createImageItems(mediaImageItem, imageItemFileName, renderingMode,
@@ -296,7 +295,7 @@ public class VideoEditorPerformance extends
         final int transitionDuration = 5000;
         final int transitionBehavior = Transition.BEHAVIOR_MIDDLE_FAST;
         final String[] loggingInfo = new String[3];
-        float timeTaken = 0.0f;
+        int timeTaken = 0;
 
         final MediaVideoItem[] mediaVideoItem =
             new MediaVideoItem[(NUM_OF_ITERATIONS *10) + 1];
@@ -514,7 +513,7 @@ public class VideoEditorPerformance extends
         /** 18.Enable Looping for Audio Track.
          * */
         audioTrack.enableLoop();
-        float timeTaken = 0.0f;
+        int timeTaken = 0;
         final long beginTime = SystemClock.uptimeMillis();
             try {
                 mVideoEditor.export(outFilename, outHeight, outBitrate,
@@ -557,7 +556,7 @@ public class VideoEditorPerformance extends
         mediaVideoItem.setExtractBoundaries(videoItemStartTime,
             videoItemEndTime);
 
-        float timeTaken = 0.0f;
+        int timeTaken = 0;
         long beginTime = SystemClock.uptimeMillis();
         for (int i = 0; i < NUM_OF_ITERATIONS; i++) {
             mediaVideoItem.getThumbnail(mediaVideoItem.getWidth() / 2,
@@ -603,7 +602,7 @@ public class VideoEditorPerformance extends
         final OverlayFrame overlayFrame[] = new OverlayFrame[NUM_OF_ITERATIONS];
         final Bitmap mBitmap =  mVideoEditorHelper.getBitmap(overlayFilename,
             640, 480);
-        float timeTaken = 0.0f;
+        int timeTaken = 0;
         long beginTime = SystemClock.uptimeMillis();
         for (int i = 0; i < NUM_OF_ITERATIONS; i++) {
             overlayFrame[i] = new OverlayFrame(mediaVideoItem, "overlay" + i,
@@ -647,7 +646,7 @@ public class VideoEditorPerformance extends
         final int videoProfile = MediaProperties.H264_PROFILE_0_LEVEL_1_3;
         final int width = 1080;
         final int height = MediaProperties.HEIGHT_720;
-        float timeTaken = 0.0f;
+        int timeTaken = 0;
         final String[] loggingInfo = new String[1];
         final MediaVideoItem mediaVideoItem = new MediaVideoItem(mVideoEditor,
             "m0", videoItemFileName1, renderingMode);
@@ -1006,7 +1005,7 @@ public class VideoEditorPerformance extends
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
         final int audioVolume = 50;
         final String[] loggingInfo = new String[2];
-        float timeTaken = 0.0f;
+        int timeTaken = 0;
 
         final MediaVideoItem mediaVideoItem = new MediaVideoItem(mVideoEditor,
             "mediaItem1", videoItemFileName1, renderingMode);
@@ -1057,7 +1056,7 @@ public class VideoEditorPerformance extends
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
         final String[] loggingInfo = new String[3];
 
-        float timeTaken = 0.0f;
+        int timeTaken = 0;
 
         final MediaImageItem[] mediaImageItem =
             new MediaImageItem[NUM_OF_ITERATIONS];
