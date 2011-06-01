@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Message;
@@ -75,6 +76,18 @@ public class WebChromeClient {
      */
     public void onShowCustomView(View view, CustomViewCallback callback) {};
 
+    /**
+     * Notify the host application that the current page would
+     * like to show a custom View in a particular orientation.
+     * @param view is the View object to be shown.
+     * @param requestedOrientation An orientation constant as used in
+     * {@link ActivityInfo#screenOrientation ActivityInfo.screenOrientation}.
+     * @param callback is the callback to be invoked if and when the view
+     * is dismissed.
+     */
+    public void onShowCustomView(View view, int requestedOrientation,
+            CustomViewCallback callback) {};
+    
     /**
      * Notify the host application that the current page would
      * like to hide its custom view.

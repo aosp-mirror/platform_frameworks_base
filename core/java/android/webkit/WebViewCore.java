@@ -2623,14 +2623,15 @@ public final class WebViewCore {
 
     // called by JNI. PluginWidget function to launch a full-screen view using a
     // View object provided by the plugin class.
-    private void showFullScreenPlugin(ViewManager.ChildView childView, int npp) {
+    private void showFullScreenPlugin(ViewManager.ChildView childView, int orientation, int npp) {
         if (mWebView == null) {
             return;
         }
 
         Message message = mWebView.mPrivateHandler.obtainMessage(WebView.SHOW_FULLSCREEN);
         message.obj = childView.mView;
-        message.arg1 = npp;
+        message.arg1 = orientation;
+        message.arg2 = npp;
         message.sendToTarget();
     }
 
