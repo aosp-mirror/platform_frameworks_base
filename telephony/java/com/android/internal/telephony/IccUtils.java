@@ -63,6 +63,29 @@ public class IccUtils {
         return ret.toString();
     }
 
+    /**
+     * Decode cdma byte into String.
+     */
+    public static String
+    cdmaBcdToString(byte[] data, int offset, int length) {
+        StringBuilder ret = new StringBuilder(length);
+
+        int count = 0;
+        for (int i = offset; count < length; i++) {
+            int v;
+            v = data[i] & 0xf;
+            if (v > 9)  v = 0;
+            ret.append((char)('0' + v));
+
+            if (++count == length) break;
+
+            v = (data[i] >> 4) & 0xf;
+            if (v > 9)  v = 0;
+            ret.append((char)('0' + v));
+            ++count;
+        }
+        return ret.toString();
+    }
 
     /**
      * Decodes a GSM-style BCD byte, returning an int ranging from 0-99.

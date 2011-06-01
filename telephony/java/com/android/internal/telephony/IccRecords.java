@@ -288,6 +288,16 @@ public abstract class IccRecords extends Handler implements IccConstants {
     }
 
     /**
+     * Indicates wether SIM is in provisioned state or not.
+     * Overridden only if SIM can be dynamically provisioned via OTA.
+     *
+     * @return true if provisioned
+     */
+    public boolean isProvisioned () {
+        return true;
+    }
+
+    /**
      * Write string to log file
      *
      * @param s is the string to write

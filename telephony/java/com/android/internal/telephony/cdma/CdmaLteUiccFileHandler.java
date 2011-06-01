@@ -19,6 +19,7 @@ package com.android.internal.telephony.cdma;
 import android.util.Log;
 import com.android.internal.telephony.IccConstants;
 import com.android.internal.telephony.IccFileHandler;
+import android.os.Message;
 
 /**
  * {@hide}
@@ -34,12 +35,31 @@ public final class CdmaLteUiccFileHandler extends IccFileHandler {
         switch(efid) {
         case EF_CSIM_SPN:
         case EF_CSIM_LI:
+        case EF_CSIM_MDN:
+        case EF_CSIM_IMSIM:
+        case EF_CSIM_CDMAHOME:
+        case EF_CSIM_EPRL:
             return MF_SIM + DF_CDMA;
         case EF_AD:
             return MF_SIM + DF_GSM;
         }
         return getCommonIccEFPath(efid);
     }
+
+    @Override
+    public void loadEFTransparent(int fileid, Message onLoaded) {
+        if (fileid == EF_CSIM_EPRL) {
+            // Entire PRL could be huge. We are only interested in
+            // the first 4 bytes of the record.
+            phone.mCM.iccIO(COMMAND_READ_BINARY, fileid, getEFPath(fileid),
+                            0, 0, 4, null, null,
+                            obtainMessage(EVENT_READ_BINARY_DONE,
+                                          fileid, 0, onLoaded));
+        } else {
+            super.loadEFTransparent(fileid, onLoaded);
+        }
+    }
+
 
     protected void logd(String msg) {
         Log.d(LOG_TAG, "[CdmaLteUiccFileHandler] " + msg);
