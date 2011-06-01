@@ -347,6 +347,9 @@ public interface IActivityManager extends IInterface {
     public int getPackageScreenCompatMode(String packageName) throws RemoteException;
     public void setPackageScreenCompatMode(String packageName, int mode)
             throws RemoteException;
+    public boolean getPackageAskScreenCompat(String packageName) throws RemoteException;
+    public void setPackageAskScreenCompat(String packageName, boolean ask)
+            throws RemoteException;
     
     // Multi-user APIs
     public boolean switchUser(int userid) throws RemoteException;
@@ -577,9 +580,11 @@ public interface IActivityManager extends IInterface {
     int SET_FRONT_ACTIVITY_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+124;
     int GET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+125;
     int SET_PACKAGE_SCREEN_COMPAT_MODE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+126;
-    int SWITCH_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+127;
-    int REMOVE_SUB_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+128;
-    int REMOVE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+129;
-    int REGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+130;
-    int UNREGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+131;
+    int GET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+127;
+    int SET_PACKAGE_ASK_SCREEN_COMPAT_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+128;
+    int SWITCH_USER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+129;
+    int REMOVE_SUB_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+130;
+    int REMOVE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+131;
+    int REGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+132;
+    int UNREGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+133;
 }
