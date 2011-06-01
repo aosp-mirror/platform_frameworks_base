@@ -320,4 +320,9 @@ public class HTML5VideoView implements MediaPlayer.OnPreparedListener {
         return false;
     }
 
+    public boolean fullScreenExited() {
+        // Only meaningful for HTML5VideoFullScreen
+        return false;
+    }
+
 }
