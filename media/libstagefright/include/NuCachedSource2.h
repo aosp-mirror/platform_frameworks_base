@@ -47,10 +47,14 @@ struct NuCachedSource2 : public DataSource {
 
     size_t cachedSize();
     size_t approxDataRemaining(status_t *finalStatus);
-    status_t setCacheStatCollectFreq(int32_t freqMs);
 
     void resumeFetchingIfNecessary();
+
+    // The following methods are supported only if the
+    // data source is HTTP-based; otherwise, ERROR_UNSUPPORTED
+    // is returned.
     status_t getEstimatedBandwidthKbps(int32_t *kbps);
+    status_t setCacheStatCollectFreq(int32_t freqMs);
 
 protected:
     virtual ~NuCachedSource2();
