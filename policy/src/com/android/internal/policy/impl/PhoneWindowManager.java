@@ -1781,21 +1781,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // frame is the same as the one we are attached to.
                     setAttachedWindowFrames(win, fl, sim, attached, true, pf, df, cf, vf);
                 } else {
-                    if (attrs.type == TYPE_STATUS_BAR_PANEL) {
-                        // Status bar panels are the only windows who can go on top of
-                        // the status bar.  They are protected by the STATUS_BAR_SERVICE
-                        // permission, so they have the same privileges as the status
-                        // bar itself.
-                        pf.left = df.left = mUnrestrictedScreenLeft;
-                        pf.top = df.top = mUnrestrictedScreenTop;
-                        pf.right = df.right = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
-                        pf.bottom = df.bottom = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
-                    } else {
-                        pf.left = df.left = mRestrictedScreenLeft;
-                        pf.top = df.top = mRestrictedScreenTop;
-                        pf.right = df.right = mRestrictedScreenLeft+mRestrictedScreenWidth;
-                        pf.bottom = df.bottom = mRestrictedScreenTop+mRestrictedScreenHeight;
-                    }
+                    pf.left = df.left = mRestrictedScreenLeft;
+                    pf.top = df.top = mRestrictedScreenTop;
+                    pf.right = df.right = mRestrictedScreenLeft+mRestrictedScreenWidth;
+                    pf.bottom = df.bottom = mRestrictedScreenTop+mRestrictedScreenHeight;
                     if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
                         cf.left = mDockLeft;
                         cf.top = mDockTop;
@@ -1848,28 +1837,41 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             } else {
                 // Otherwise, a normal window must be placed inside the content
                 // of all screen decorations.
-                pf.left = mContentLeft;
-                pf.top = mContentTop;
-                pf.right = mContentRight;
-                pf.bottom = mContentBottom;
-                if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
-                    df.left = cf.left = mDockLeft;
-                    df.top = cf.top = mDockTop;
-                    df.right = cf.right = mDockRight;
-                    df.bottom = cf.bottom = mDockBottom;
+                if (attrs.type == TYPE_STATUS_BAR_PANEL) {
+                    // Status bar panels are the only windows who can go on top of
+                    // the status bar.  They are protected by the STATUS_BAR_SERVICE
+                    // permission, so they have the same privileges as the status
+                    // bar itself.
+                    pf.left = df.left = cf.left = vf.left = mUnrestrictedScreenLeft;
+                    pf.top = df.top = cf.top = vf.top = mUnrestrictedScreenTop;
+                    pf.right = df.right = cf.right = vf.right
+                            = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
+                    pf.bottom = df.bottom = cf.bottom = vf.bottom
+                            = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
                 } else {
-                    df.left = cf.left = mContentLeft;
-                    df.top = cf.top = mContentTop;
-                    df.right = cf.right = mContentRight;
-                    df.bottom = cf.bottom = mContentBottom;
-                }
-                if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
-                    vf.left = mCurLeft;
-                    vf.top = mCurTop;
-                    vf.right = mCurRight;
-                    vf.bottom = mCurBottom;
-                } else {
-                    vf.set(cf);
+                    pf.left = mContentLeft;
+                    pf.top = mContentTop;
+                    pf.right = mContentRight;
+                    pf.bottom = mContentBottom;
+                    if (adjust != SOFT_INPUT_ADJUST_RESIZE) {
+                        df.left = cf.left = mDockLeft;
+                        df.top = cf.top = mDockTop;
+                        df.right = cf.right = mDockRight;
+                        df.bottom = cf.bottom = mDockBottom;
+                    } else {
+                        df.left = cf.left = mContentLeft;
+                        df.top = cf.top = mContentTop;
+                        df.right = cf.right = mContentRight;
+                        df.bottom = cf.bottom = mContentBottom;
+                    }
+                    if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
+                        vf.left = mCurLeft;
+                        vf.top = mCurTop;
+                        vf.right = mCurRight;
+                        vf.bottom = mCurBottom;
+                    } else {
+                        vf.set(cf);
+                    }
                 }
             }
         }
