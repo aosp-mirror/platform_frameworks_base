@@ -1885,8 +1885,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             int nameResId = subtype.getNameResId();
                             String mode = subtype.getMode();
                             if (nameResId != 0) {
-                                title = TextUtils.concat(pm.getText(imi.getPackageName(),
-                                        nameResId, imi.getServiceInfo().applicationInfo),
+                                title = TextUtils.concat(subtype.getDisplayName(context,
+                                        imi.getPackageName(), imi.getServiceInfo().applicationInfo),
                                         (TextUtils.isEmpty(label) ? "" : " (" + label + ")"));
                             } else {
                                 CharSequence language = subtype.getLocale();

@@ -422,9 +422,8 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
             Log.d(TAG, "Get text from: " + imi.getPackageName() + subtype.getNameResId()
                     + imi.getServiceInfo().applicationInfo);
         }
-        // TODO: Change the language of subtype name according to subtype's locale.
-        return mPackageManager.getText(
-                imi.getPackageName(), subtype.getNameResId(), imi.getServiceInfo().applicationInfo);
+        return subtype.getDisplayName(
+                mContext, imi.getPackageName(), imi.getServiceInfo().applicationInfo);
     }
 
     private Drawable getSubtypeIcon(InputMethodInfo imi, InputMethodSubtype subtype) {
