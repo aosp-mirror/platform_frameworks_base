@@ -1164,7 +1164,7 @@ sp<IMemory> MediaPlayerService::decode(const char* url, uint32_t *pSampleRate, i
     mem = new MemoryBase(cache->getHeap(), 0, cache->size());
     *pSampleRate = cache->sampleRate();
     *pNumChannels = cache->channelCount();
-    *pFormat = cache->format();
+    *pFormat = (int)cache->format();
     LOGV("return memory @ %p, sampleRate=%u, channelCount = %d, format = %d", mem->pointer(), *pSampleRate, *pNumChannels, *pFormat);
 
 Exit:

@@ -61,7 +61,7 @@ public:
 
         // set Parameter names
         // for target TRACK
-        CHANNEL_COUNT   = 0x4000,
+        CHANNEL_MASK    = 0x4000,
         FORMAT          = 0x4001,
         MAIN_BUFFER     = 0x4002,
         AUX_BUFFER      = 0x4003,
@@ -150,6 +150,7 @@ private:
         uint8_t     enabled      : 1;
         uint8_t     reserved0    : 3;
         uint8_t     format;
+        uint32_t    channelMask;
 
         AudioBufferProvider*                bufferProvider;
         mutable AudioBufferProvider::Buffer buffer;

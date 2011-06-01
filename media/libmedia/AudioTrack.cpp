@@ -87,7 +87,7 @@ AudioTrack::AudioTrack(
         int streamType,
         uint32_t sampleRate,
         int format,
-        int channels,
+        int channelMask,
         int frameCount,
         uint32_t flags,
         callback_t cbf,
@@ -96,7 +96,7 @@ AudioTrack::AudioTrack(
         int sessionId)
     : mStatus(NO_INIT)
 {
-    mStatus = set(streamType, sampleRate, format, channels,
+    mStatus = set(streamType, sampleRate, format, channelMask,
             frameCount, flags, cbf, user, notificationFrames,
             0, false, sessionId);
 }
@@ -105,7 +105,7 @@ AudioTrack::AudioTrack(
         int streamType,
         uint32_t sampleRate,
         int format,
-        int channels,
+        int channelMask,
         const sp<IMemory>& sharedBuffer,
         uint32_t flags,
         callback_t cbf,
@@ -114,7 +114,7 @@ AudioTrack::AudioTrack(
         int sessionId)
     : mStatus(NO_INIT)
 {
-    mStatus = set(streamType, sampleRate, format, channels,
+    mStatus = set(streamType, sampleRate, format, channelMask,
             0, flags, cbf, user, notificationFrames,
             sharedBuffer, false, sessionId);
 }
@@ -141,7 +141,7 @@ status_t AudioTrack::set(
         int streamType,
         uint32_t sampleRate,
         int format,
-        int channels,
+        int channelMask,
         int frameCount,
         uint32_t flags,
         callback_t cbf,
@@ -180,8 +180,8 @@ status_t AudioTrack::set(
     if (format == 0) {
         format = AUDIO_FORMAT_PCM_16_BIT;
     }
-    if (channels == 0) {
-        channels = AUDIO_CHANNEL_OUT_STEREO;
+    if (channelMask == 0) {
+        channelMask = AUDIO_CHANNEL_OUT_STEREO;
     }
 
     // validate parameters
@@ -195,15 +195,15 @@ status_t AudioTrack::set(
         flags |= AUDIO_POLICY_OUTPUT_FLAG_DIRECT;
     }
 
-    if (!audio_is_output_channel(channels)) {
+    if (!audio_is_output_channel(channelMask)) {
         LOGE("Invalid channel mask");
         return BAD_VALUE;
     }
-    uint32_t channelCount = popcount(channels);
+    uint32_t channelCount = popcount(channelMask);
 
     audio_io_handle_t output = AudioSystem::getOutput(
                                     (audio_stream_type_t)streamType,
-                                    sampleRate,format, channels,
+                                    sampleRate,format, channelMask,
                                     (audio_policy_output_flags_t)flags);
 
     if (output == 0) {
@@ -222,8 +222,8 @@ status_t AudioTrack::set(
     // create the IAudioTrack
     status_t status = createTrack_l(streamType,
                                   sampleRate,
-                                  format,
-                                  channelCount,
+                                  (uint32_t)format,
+                                  (uint32_t)channelMask,
                                   frameCount,
                                   flags,
                                   sharedBuffer,
@@ -245,8 +245,8 @@ status_t AudioTrack::set(
     mStatus = NO_ERROR;
 
     mStreamType = streamType;
-    mFormat = format;
-    mChannels = channels;
+    mFormat = (uint32_t)format;
+    mChannelMask = (uint32_t)channelMask;
     mChannelCount = channelCount;
     mSharedBuffer = sharedBuffer;
     mMuted = false;
@@ -681,7 +681,7 @@ audio_io_handle_t AudioTrack::getOutput()
 audio_io_handle_t AudioTrack::getOutput_l()
 {
     return AudioSystem::getOutput((audio_stream_type_t)mStreamType,
-            mCblk->sampleRate, mFormat, mChannels, (audio_policy_output_flags_t)mFlags);
+            mCblk->sampleRate, mFormat, mChannelMask, (audio_policy_output_flags_t)mFlags);
 }
 
 int AudioTrack::getSessionId()
@@ -705,8 +705,8 @@ status_t AudioTrack::attachAuxEffect(int effectId)
 status_t AudioTrack::createTrack_l(
         int streamType,
         uint32_t sampleRate,
-        int format,
-        int channelCount,
+        uint32_t format,
+        uint32_t channelMask,
         int frameCount,
         uint32_t flags,
         const sp<IMemory>& sharedBuffer,
@@ -767,6 +767,7 @@ status_t AudioTrack::createTrack_l(
             }
         } else {
             // Ensure that buffer alignment matches channelcount
+            int channelCount = popcount(channelMask);
             if (((uint32_t)sharedBuffer->pointer() & (channelCount | 1)) != 0) {
                 LOGE("Invalid buffer alignement: address %p, channelCount %d", sharedBuffer->pointer(), channelCount);
                 return BAD_VALUE;
@@ -779,7 +780,7 @@ status_t AudioTrack::createTrack_l(
                                                       streamType,
                                                       sampleRate,
                                                       format,
-                                                      channelCount,
+                                                      channelMask,
                                                       frameCount,
                                                       ((uint16_t)flags) << 16,
                                                       sharedBuffer,
@@ -1164,7 +1165,7 @@ status_t AudioTrack::restoreTrack_l(audio_track_cblk_t*& cblk, bool fromStart)
         result = createTrack_l(mStreamType,
                                cblk->sampleRate,
                                mFormat,
-                               mChannelCount,
+                               mChannelMask,
                                mFrameCount,
                                mFlags,
                                mSharedBuffer,
