@@ -98,6 +98,12 @@ final class LoadedApk {
         return mApplication;
     }
 
+    /**
+     * Create information about a new .apk
+     *
+     * NOTE: This constructor is called with ActivityThread's lock held,
+     * so MUST NOT call back out to the activity manager.
+     */
     public LoadedApk(ActivityThread activityThread, ApplicationInfo aInfo,
             CompatibilityInfo compatInfo,
             ActivityThread mainThread, ClassLoader baseLoader,

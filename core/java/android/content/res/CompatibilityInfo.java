@@ -243,11 +243,11 @@ public class CompatibilityInfo implements Parcelable {
     }
     
     public boolean neverSupportsScreen() {
-        return (mCompatibilityFlags&NEVER_NEEDS_COMPAT) != 0;
+        return (mCompatibilityFlags&ALWAYS_NEEDS_COMPAT) != 0;
     }
 
     public boolean alwaysSupportsScreen() {
-        return (mCompatibilityFlags&ALWAYS_NEEDS_COMPAT) != 0;
+        return (mCompatibilityFlags&NEVER_NEEDS_COMPAT) != 0;
     }
 
     /**
@@ -406,7 +406,7 @@ public class CompatibilityInfo implements Parcelable {
         if (!supportsScreen()) {
             // This is a larger screen device and the app is not
             // compatible with large screens, so diddle it.
-            CompatibilityInfo.updateCompatibleScreenFrame(inoutDm, null, inoutDm);
+            CompatibilityInfo.computeCompatibleScaling(inoutDm, inoutDm);
         } else {
             inoutDm.widthPixels = inoutDm.unscaledWidthPixels;
             inoutDm.heightPixels = inoutDm.unscaledHeightPixels;
@@ -443,8 +443,7 @@ public class CompatibilityInfo implements Parcelable {
      * @param outRect the output parameter which will contain the result.
      * @return Returns the scaling factor for the window.
      */
-    public static float updateCompatibleScreenFrame(DisplayMetrics dm,
-            Rect outRect, DisplayMetrics outDm) {
+    public static float computeCompatibleScaling(DisplayMetrics dm, DisplayMetrics outDm) {
         final int width = dm.unscaledWidthPixels;
         final int height = dm.unscaledHeightPixels;
         int shortSize, longSize;
@@ -475,12 +474,6 @@ public class CompatibilityInfo implements Parcelable {
         float scale = sw < sh ? sw : sh;
         if (scale < 1) {
             scale = 1;
-        }
-
-        if (outRect != null) {
-            final int left = (int)((width-(newWidth*scale))/2);
-            final int top = (int)((height-(newHeight*scale))/2);
-            outRect.set(left, top, left+newWidth, top+newHeight);
         }
 
         if (outDm != null) {
