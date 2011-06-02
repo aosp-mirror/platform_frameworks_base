@@ -969,6 +969,11 @@ bool AaptGroupEntry::getDensityName(const char* name,
         return true;
     }
     
+    if (strcmp(name, "tvdpi") == 0) {
+        if (out) out->density = ResTable_config::DENSITY_TV;
+        return true;
+    }
+    
     if (strcmp(name, "hdpi") == 0) {
         if (out) out->density = ResTable_config::DENSITY_HIGH;
         return true;
