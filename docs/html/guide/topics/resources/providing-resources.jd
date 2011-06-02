@@ -88,9 +88,18 @@ supported inside project {@code res/} directory.</p>
   </tr>
 
   <tr>
+    <td><code>animator/</code></td>
+    <td>XML files that define <a href="{@docRoot}guide/topics/graphics/animation.html">property
+animations</a>.</td>
+  </tr>
+
+  <tr>
     <td><code>anim/</code></td>
-    <td>XML files that define tween animations. See <a
-href="animation-resource.html">Animation Resources</a>.</td>
+    <td>XML files that define <a
+href="{@docRoot}guide/topics/graphics/view-animation.html#tween-animation">tween
+animations</a>. (Property animations can also be saved in this directory, but
+the {@code animator/} directory is preferred for property animations to distinguish between the two
+types.)</td>
   </tr>
 
   <tr>
