@@ -4147,7 +4147,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @attr ref android.R.styleable#View_horizontalDirection
      * @hide
      */
-    @ViewDebug.ExportedProperty(mapping = {
+    @ViewDebug.ExportedProperty(category = "layout", mapping = {
         @ViewDebug.IntToString(from = HORIZONTAL_DIRECTION_LTR,     to = "LTR"),
         @ViewDebug.IntToString(from = HORIZONTAL_DIRECTION_RTL,     to = "RTL"),
         @ViewDebug.IntToString(from = HORIZONTAL_DIRECTION_INHERIT, to = "INHERIT"),
@@ -10043,6 +10043,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      *
      * @return true if the layout is right-to-left.
      */
+    @ViewDebug.ExportedProperty(category = "layout")
     public boolean isLayoutRtl() {
         return (mPrivateFlags2 & RESOLVED_LAYOUT_RTL) == RESOLVED_LAYOUT_RTL;
     }

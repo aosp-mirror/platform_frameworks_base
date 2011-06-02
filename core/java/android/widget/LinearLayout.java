@@ -103,21 +103,37 @@ public class LinearLayout extends ViewGroup {
     @ViewDebug.ExportedProperty(category = "measurement")
     private int mOrientation;
 
-    @ViewDebug.ExportedProperty(category = "measurement", mapping = {
-            @ViewDebug.IntToString(from =  -1,                       to = "NONE"),
-            @ViewDebug.IntToString(from = Gravity.NO_GRAVITY,        to = "NONE"),
-            @ViewDebug.IntToString(from = Gravity.TOP,               to = "TOP"),
-            @ViewDebug.IntToString(from = Gravity.BOTTOM,            to = "BOTTOM"),
-            @ViewDebug.IntToString(from = Gravity.LEFT,              to = "LEFT"),
-            @ViewDebug.IntToString(from = Gravity.RIGHT,             to = "RIGHT"),
-            @ViewDebug.IntToString(from = Gravity.BEFORE,            to = "BEFORE"),
-            @ViewDebug.IntToString(from = Gravity.AFTER,             to = "AFTER"),
-            @ViewDebug.IntToString(from = Gravity.CENTER_VERTICAL,   to = "CENTER_VERTICAL"),
-            @ViewDebug.IntToString(from = Gravity.FILL_VERTICAL,     to = "FILL_VERTICAL"),
-            @ViewDebug.IntToString(from = Gravity.CENTER_HORIZONTAL, to = "CENTER_HORIZONTAL"),
-            @ViewDebug.IntToString(from = Gravity.FILL_HORIZONTAL,   to = "FILL_HORIZONTAL"),
-            @ViewDebug.IntToString(from = Gravity.CENTER,            to = "CENTER"),
-            @ViewDebug.IntToString(from = Gravity.FILL,              to = "FILL")
+    @ViewDebug.ExportedProperty(category = "measurement", flagMapping = {
+            @ViewDebug.FlagToString(mask = -1,
+                equals = -1, name = "NONE"),
+            @ViewDebug.FlagToString(mask = Gravity.NO_GRAVITY,
+                equals = Gravity.NO_GRAVITY,name = "NONE"),
+            @ViewDebug.FlagToString(mask = Gravity.TOP,
+                equals = Gravity.TOP, name = "TOP"),
+            @ViewDebug.FlagToString(mask = Gravity.BOTTOM,
+                equals = Gravity.BOTTOM, name = "BOTTOM"),
+            @ViewDebug.FlagToString(mask = Gravity.LEFT,
+                equals = Gravity.LEFT, name = "LEFT"),
+            @ViewDebug.FlagToString(mask = Gravity.RIGHT,
+                equals = Gravity.RIGHT, name = "RIGHT"),
+            @ViewDebug.FlagToString(mask = Gravity.BEFORE,
+                equals = Gravity.BEFORE, name = "BEFORE"),
+            @ViewDebug.FlagToString(mask = Gravity.AFTER,
+                equals = Gravity.AFTER, name = "AFTER"),
+            @ViewDebug.FlagToString(mask = Gravity.CENTER_VERTICAL,
+                equals = Gravity.CENTER_VERTICAL, name = "CENTER_VERTICAL"),
+            @ViewDebug.FlagToString(mask = Gravity.FILL_VERTICAL,
+                equals = Gravity.FILL_VERTICAL, name = "FILL_VERTICAL"),
+            @ViewDebug.FlagToString(mask = Gravity.CENTER_HORIZONTAL,
+                equals = Gravity.CENTER_HORIZONTAL, name = "CENTER_HORIZONTAL"),
+            @ViewDebug.FlagToString(mask = Gravity.FILL_HORIZONTAL,
+                equals = Gravity.FILL_HORIZONTAL, name = "FILL_HORIZONTAL"),
+            @ViewDebug.FlagToString(mask = Gravity.CENTER,
+                equals = Gravity.CENTER, name = "CENTER"),
+            @ViewDebug.FlagToString(mask = Gravity.FILL,
+                equals = Gravity.FILL, name = "FILL"),
+            @ViewDebug.FlagToString(mask = Gravity.RELATIVE_HORIZONTAL_DIRECTION,
+                equals = Gravity.RELATIVE_HORIZONTAL_DIRECTION, name = "RELATIVE")
         })
     private int mGravity = Gravity.BEFORE | Gravity.TOP;
 
