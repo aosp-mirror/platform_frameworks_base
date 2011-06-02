@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Process;
 import android.util.Log;
 import android.view.Surface;
 
@@ -683,9 +684,8 @@ public class RenderScript {
      * processes.
      */
     public enum Priority {
-        // Remap these numbers to opaque...
-        LOW (5),     //ANDROID_PRIORITY_BACKGROUND + 5
-        NORMAL (-4);  //ANDROID_PRIORITY_DISPLAY
+        LOW (Process.THREAD_PRIORITY_BACKGROUND + (5 * Process.THREAD_PRIORITY_LESS_FAVORABLE)),
+        NORMAL (Process.THREAD_PRIORITY_DISPLAY);
 
         int mID;
         Priority(int id) {
