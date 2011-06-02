@@ -1430,8 +1430,8 @@ public class LinearLayout extends ViewGroup {
                 if (gravity < 0) {
                     gravity = minorGravity;
                 }
-                gravity = Gravity.getAbsoluteGravity(gravity, isLayoutRtl());
-                switch (gravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
+                final int absoluteGravity = Gravity.getAbsoluteGravity(gravity, isLayoutRtl());
+                switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.CENTER_HORIZONTAL:
                         childLeft = paddingLeft + ((childSpace - childWidth) / 2)
                                 + lp.leftMargin - lp.rightMargin;

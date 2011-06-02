@@ -57,6 +57,20 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".BiDiTestFrameLayoutLtrActivity"
+                  android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".BiDiTestFrameLayoutRtlActivity"
+                  android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>

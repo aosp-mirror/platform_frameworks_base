@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -23,13 +25,11 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
-import android.view.Gravity;
 import android.widget.RemoteViews.RemoteView;
-
-import java.util.ArrayList;
 
 
 /**
@@ -364,10 +364,10 @@ public class FrameLayout extends ViewGroup {
                     gravity = DEFAULT_CHILD_GRAVITY;
                 }
 
-                final int horizontalGravity = Gravity.getAbsoluteGravity(gravity, isLayoutRtl());
+                final int absoluteGravity = Gravity.getAbsoluteGravity(gravity, isLayoutRtl());
                 final int verticalGravity = gravity & Gravity.VERTICAL_GRAVITY_MASK;
 
-                switch (horizontalGravity) {
+                switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
                         childLeft = parentLeft + lp.leftMargin;
                         break;
