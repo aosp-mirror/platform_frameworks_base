@@ -1,8 +1,8 @@
 page.title=ADT Plugin for Eclipse
-adt.zip.version=10.0.1
-adt.zip.download=ADT-10.0.1.zip
-adt.zip.bytes=5096182
-adt.zip.checksum=e26a77db08377bdd2e62edeb9a3e3701
+adt.zip.version=11.0.0
+adt.zip.download=ADT-11.0.0.zip
+adt.zip.bytes=TODO
+adt.zip.checksum=TODO
 
 @jd:body
 
@@ -99,6 +99,139 @@ padding: .25em 1em;
 <div class="toggleable opened">
   <a href="#" onclick="return toggleDiv(this)">
         <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px"
+width="9px" />
+ADT 11.0.0</a> <em>(June 2011)</em>
+  <dd class="toggleme">
+
+<dl>
+
+<dt>Dependencies:</dt>
+
+<dd>ADT 11.0.0 is designed for use with SDK Tools r11. If you haven't
+already installed SDK Tools r11 into your SDK, use the Android SDK and AVD Manager to do
+so.</dd>
+
+<dt>Visual Refactoring:</dt>
+<dd>
+  <ul>
+    <li>"Extract Style" feature pulls out style-related attributes from your layout and extracts
+them as a new style defined in {@code styles.xml} (<a
+href="http://tools.android.com/recent/extractstylerefactoring">more info</a>).</li>
+    <li>"Wrap in Container" feature lets you select a group of views then surround them
+    in a new layout (a new view group, such as a LinearLayout), and transfers namespace and layout
+    parameters to the new parent (<a
+href="http://tools.android.com/recent/newrefactoringswrapinchangelayoutchangewidget">more
+info</a>).</li>
+    <li>"Change Layout" feature changes layouts from one type
+    to another, and can also flatten a layout hierarchy (<a
+href="http://tools.android.com/recent/newrefactoringswrapinchangelayoutchangewidget">more
+info</a>).</li>
+    <li>"Change Widget Type" feature changes the type of the
+    selected views to a new type. Also, a new selection context menu
+    in the visual layout editor makes it easy to select siblings as
+    well as views anywhere in the layout that have the same type (<a
+href="http://tools.android.com/recent/newrefactoringswrapinchangelayoutchangewidget">more
+info</a>).</li>
+    <li>"Extract as Include" feature finds identical collections of views
+    in other layouts and offers to combine them into a single layout that you can then include in
+ each layout (<a
+href="http://tools.android.com/recent/extractasincludeimprovements">more info</a>).</li>
+    <li>Quick Assistant in Eclipse can be invoked
+    from the XML editor (with Ctrl-1) to apply any of the above
+    refactorings (and Extract String) to the current selection (<a
+href="http://tools.android.com/recent/refactoringquickassistant">more info</a>).</li>
+  </ul>
+</dd>
+
+<dt>Visual Layout Editor:</dt>
+<dd>
+  <ul>
+    <li>This is the update to the layout editor you've been waiting for! It includes (almost) all
+the goodies demonstrated at Google I/O. <a href="http://www.youtube.com/watch?v=Oq05KqjXTvs">Watch
+the video</a> on YouTube.</li>
+    <li>The palette now supports different configurations for supported widgets. That is, a single
+view is presented in various different configurations that you can drag into your layout. For
+example, there is a <em>Text Fields</em> palette category where you can drag an {@link
+android.widget.EditText} widget in as a password field, an e-mail field, a phone field, or other
+types of text boxes. Similarly, {@link android.widget.TextView} widgets are preconfigured
+with large, normal and small theme sizes, and {@link android.widget.LinearLayout} elements are
+preconfigured in horizontal and vertical configurations (<a
+href="http://tools.android.com/recent/multipletextfieldandlayouttypes">more info</a>).</li>
+    <li>The palette supports custom views. You can pick up any custom
+    implementations of the View class you've created in your project or from included libraries and
+drag them into your layout (<a
+href="http://tools.android.com/recent/customviewsinthepalette">more info</a>).</li>
+    <li>Fragments are available in the palette for placement in your layout. In the tool, you can
+choose which layout to show rendered for a given fragment tag. Go to declaration works for fragment
+classes (<a href="http://tools.android.com/recent/fragmentsupport">more info</a>).</li> 
+    <li>The layout editor automatically applies a "zoom to fit" for newly
+    opened files as well as on device size and orientation changes to
+    ensure that large layouts are always fully visible unless you
+    manually zoom in.</li>
+    <li>You can drop in an {@code &lt;include&gt;} element from the palette, which will pop up
+    a layout chooser. When you select the layout to include, it is added with an {@code
+&lt;include&gt;}. Similarly, dropping images or image buttons will pop up image
+    resource choosers (<a
+href="http://tools.android.com/recent/includetagdropsupport">more info</a>).</li>
+    <li>The configuration chooser now applies the "Render Target" and
+    "Locale" settings project wide, making it trivial to check the
+    layouts for different languages or render targets without having
+    to configure these individually for each layout.</li>
+    <li>The layout editor is smarter about picking a default theme to
+    render a layout with, consulting factors like theme registrations
+    in the manifest, the SDK version, and other factors.</li>
+    <li>The layout editor is smarter about picking a default configuration to render a layout
+with, defaulting to the currently visible configuration in the previous file. It also considers the
+SDK target to determine whether to default to a tablet or phone screen size.</li>
+    <li>Basic focus support. The first text field dropped in a layout is assigned focus, and there
+are <strong>Request Focus</strong> and <strong>Clear Focus</strong> context menu items on text
+fields to change the focus.</li>
+  </ul>
+</dd>
+
+<dt>XML editors:</dt>
+<dd>
+<ul>  
+  <li>Code completion has been significantly improved. It now works
+  with {@code &lt;style&gt;} elements, completes dimensional units,
+  sorts resource paths in values based on the attribute name, and more. There are also many fixes to
+handle text replacement (<a
+href="http://tools.android.com/recent/xmlcodecompletionimprovements">more info</a>).</li>
+  <li>AAPT errors are handled better. They are now underlined for the
+  relevant range in the editor, and a new quickfix makes it trivial
+  to create missing resources.</li>
+  <li>Code completion for drawable, animation and color XML files (<a
+href="http://tools.android.com/recent/codecompletionfordrawablescolorsandanimationfiles">more
+info</a>).</li>
+</ul>
+</dd>
+
+<dt>DDMS:</dt>
+<dd>
+<ul>  
+  <li>"New Folder" action in the File Explorer.</li>
+  <li>The screenshot dialog will add timestamps to the filenames and preserve the orientation on
+snapshot refresh.</li>
+</ul>
+</dd>
+
+<dt>General notes:</dt>
+<dd>
+  <ul>
+    <li>TraceView supports zooming with the mouse-wheel in the timeline.</li>
+    <li>The New Android Project wizard now supports Eclipse working sets.</li>
+  </ul>
+</dd>
+</dl>
+<p>More information about tool changes are available on the <a
+href="http://tools.android.com/recent">Android Tools Project Site</a>.</p>
+</div>
+</div>
+
+
+<div class="toggleable closed">
+  <a href="#" onclick="return toggleDiv(this)">
+        <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-img" height="9px"
 width="9px" />
 ADT 10.0.1</a> <em>(March 2011)</em>
   <div class="toggleme">
