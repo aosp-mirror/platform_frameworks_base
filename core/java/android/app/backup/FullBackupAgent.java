@@ -28,8 +28,6 @@ import libcore.io.OsConstants;
 import libcore.io.StructStat;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -84,9 +82,10 @@ public class FullBackupAgent extends BackupAgent {
 
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
-            ParcelFileDescriptor newState) {
+            ParcelFileDescriptor newState) throws IOException {
         // Filters, the scan queue, and the set of resulting entities
         HashSet<String> filterSet = new HashSet<String>();
+        String packageName = getPackageName();
 
         // Okay, start with the app's root tree, but exclude all of the canonical subdirs
         if (mLibDir != null) {
@@ -96,25 +95,28 @@ public class FullBackupAgent extends BackupAgent {
         filterSet.add(mDatabaseDir);
         filterSet.add(mSharedPrefsDir);
         filterSet.add(mFilesDir);
-        processTree(FullBackup.ROOT_TREE_TOKEN, mMainDir, filterSet, data);
+        processTree(packageName, FullBackup.ROOT_TREE_TOKEN, mMainDir, filterSet, data);
 
         // Now do the same for the files dir, db dir, and shared prefs dir
         filterSet.add(mMainDir);
         filterSet.remove(mFilesDir);
-        processTree(FullBackup.DATA_TREE_TOKEN, mFilesDir, filterSet, data);
+        processTree(packageName, FullBackup.DATA_TREE_TOKEN, mFilesDir, filterSet, data);
 
         filterSet.add(mFilesDir);
         filterSet.remove(mDatabaseDir);
-        processTree(FullBackup.DATABASE_TREE_TOKEN, mDatabaseDir, filterSet, data);
+        processTree(packageName, FullBackup.DATABASE_TREE_TOKEN, mDatabaseDir, filterSet, data);
 
         filterSet.add(mDatabaseDir);
         filterSet.remove(mSharedPrefsDir);
-        processTree(FullBackup.SHAREDPREFS_TREE_TOKEN, mSharedPrefsDir, filterSet, data);
+        processTree(packageName, FullBackup.SHAREDPREFS_TREE_TOKEN, mSharedPrefsDir, filterSet, data);
     }
 
-    private void processTree(String domain, String rootPath,
+    // Scan the dir tree (if it actually exists) and process each entry we find.  If the
+    // 'excludes' parameter is non-null, it is consulted each time a new file system entity
+    // is visited to see whether that entity (and its subtree, if appropriate) should be
+    // omitted from the backup process.
+    protected void processTree(String packageName, String domain, String rootPath,
             HashSet<String> excludes, BackupDataOutput data) {
-        // Scan the dir tree (if it actually exists) and process each entry we find
         File rootFile = new File(rootPath);
         if (rootFile.exists()) {
             LinkedList<File> scanQueue = new LinkedList<File>();
@@ -125,7 +127,7 @@ public class FullBackupAgent extends BackupAgent {
                 String filePath = file.getAbsolutePath();
 
                 // prune this subtree?
-                if (excludes.contains(filePath)) {
+                if (excludes != null && excludes.contains(filePath)) {
                     continue;
                 }
 
@@ -149,7 +151,7 @@ public class FullBackupAgent extends BackupAgent {
                 }
 
                 // Finally, back this file up before proceeding
-                FullBackup.backupToTar(getPackageName(), domain, null, rootPath, filePath, data);
+                FullBackup.backupToTar(packageName, domain, null, rootPath, filePath, data);
             }
         }
     }
@@ -218,6 +220,6 @@ public class FullBackupAgent extends BackupAgent {
         if (DEBUG) Log.i(TAG, "[" + domain + " : " + relpath + "] mapped to " + outFile.getPath());
 
         // Now that we've figured out where the data goes, send it on its way
-        FullBackup.restoreToFile(data, size, type, mode, mtime, outFile);
+        FullBackup.restoreToFile(data, size, type, mode, mtime, outFile, true);
     }
 }

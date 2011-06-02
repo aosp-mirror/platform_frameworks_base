@@ -138,7 +138,7 @@ public class SystemBackupAgent extends BackupAgentHelper {
             if (outFile == null) {
                 Slog.w(TAG, "Skipping unrecognized system file: [ " + domain + " : " + path + " ]");
             }
-            FullBackup.restoreToFile(data, size, type, mode, mtime, outFile);
+            FullBackup.restoreToFile(data, size, type, mode, mtime, outFile, true);
 
             if (restoredWallpaper) {
                 WallpaperManagerService wallpaper =

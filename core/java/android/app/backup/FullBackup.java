@@ -46,7 +46,7 @@ public class FullBackup {
     public static final String SHARED_STORAGE_TOKEN = "shared";
 
     public static final String APPS_PREFIX = "apps/";
-    public static final String SHARED_PREFIX = "shared/";
+    public static final String SHARED_PREFIX = SHARED_STORAGE_TOKEN + "/";
 
     public static final String FULL_BACKUP_INTENT_ACTION = "fullback";
     public static final String FULL_RESTORE_INTENT_ACTION = "fullrest";
@@ -61,7 +61,8 @@ public class FullBackup {
             String linkdomain, String rootpath, String path, BackupDataOutput output);
 
     static public void restoreToFile(ParcelFileDescriptor data,
-            long size, int type, long mode, long mtime, File outFile) throws IOException {
+            long size, int type, long mode, long mtime, File outFile,
+            boolean doChmod) throws IOException {
         if (type == FullBackup.TYPE_DIRECTORY) {
             // Canonically a directory has no associated content, so we don't need to read
             // anything from the pipe in this case.  Just create the directory here and
@@ -116,7 +117,7 @@ public class FullBackup {
         }
 
         // Now twiddle the state to match the backup, assuming all went well
-        if (outFile != null) {
+        if (doChmod && outFile != null) {
             try {
                 Libcore.os.chmod(outFile.getPath(), (int)mode);
             } catch (ErrnoException e) {
