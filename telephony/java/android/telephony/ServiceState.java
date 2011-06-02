@@ -551,7 +551,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
-    public void setCdmaEriText(String longName) {
+    public void setOperatorAlphaLong(String longName) {
         mOperatorAlphaLong = longName;
     }
 
