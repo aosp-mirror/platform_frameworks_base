@@ -145,15 +145,6 @@ public class SQLiteQueryBuilder
     }
 
     /**
-     * Need to keep this to not break the build until ContactsProvider2 has been changed to
-     * use the new API
-     * TODO: Remove this
-     * @hide
-     */
-    public void setStrictProjectionMap(boolean flag) {
-    }
-
-    /**
      * When set, the selection is verified against malicious arguments.
      * When using this class to create a statement using
      * {@link #buildQueryString(boolean, String, String[], String, String, String, String, String)},
