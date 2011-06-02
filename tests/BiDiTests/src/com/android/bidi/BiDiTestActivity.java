@@ -67,6 +67,11 @@ public class BiDiTestActivity extends TabActivity {
             setContent(intent);
         tabHost.addTab(spec);
 
+        intent = new Intent().setClass(this, BiDiTestRelativeLayoutLtrActivity.class);
+        spec = tabHost.newTabSpec("relative-layout-rtl").setIndicator("RelativeLayout LTR").
+            setContent(intent);
+        tabHost.addTab(spec);
+
         tabHost.setCurrentTab(0);
     }
 }
