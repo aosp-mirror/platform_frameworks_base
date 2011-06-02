@@ -18,8 +18,10 @@
     <string name="button2_text">Button2</string>
     <string name="button3_text">Button3</string>
     <string name="button4_text">Button4</string>
-    <string name="button5_text">Button5</string>
-    <string name="button6_text">Button6</string>
+    <string name="button_right_text">Right</string>
+    <string name="button_after_text">After</string>
+    <string name="button_left_text">Left</string>
+    <string name="button_before_text">Before</string>
     <string name="button_requestlayout_text">Request Layout</string>
     <string name="textview_text">This is a text for a TextView</string>
     <string name="edittext_text">mmmmmmmmmmmmmmmmmmmmmmmm</string>

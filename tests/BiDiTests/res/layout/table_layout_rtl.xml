@@ -34,13 +34,13 @@
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button2_text"
+                    android:text="@string/button_right_text"
                     android:textSize="24dip"
                     android:gravity="right"
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button3_text"
+                    android:text="@string/button_after_text"
                     android:textSize="24dip"
                     android:gravity="after"
              />
@@ -49,18 +49,18 @@
         <TableRow>
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button4_text"
+                    android:text="@string/button2_text"
                     android:textSize="24dip"
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button5_text"
+                    android:text="@string/button_left_text"
                     android:textSize="24dip"
                     android:gravity="left"
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button6_text"
+                    android:text="@string/button_before_text"
                     android:textSize="24dip"
                     android:gravity="before"
              />
@@ -82,13 +82,13 @@
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button2_text"
+                    android:text="@string/button_right_text"
                     android:textSize="24dip"
                     android:gravity="right"
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button3_text"
+                    android:text="@string/button_after_text"
                     android:textSize="24dip"
                     android:gravity="after"
              />
@@ -97,18 +97,18 @@
         <TableRow>
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button4_text"
+                    android:text="@string/button2_text"
                     android:textSize="24dip"
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button5_text"
+                    android:text="@string/button_left_text"
                     android:textSize="24dip"
                     android:gravity="left"
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button6_text"
+                    android:text="@string/button_before_text"
                     android:textSize="24dip"
                     android:gravity="before"
              />
@@ -130,13 +130,13 @@
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button2_text"
+                    android:text="@string/button_right_text"
                     android:textSize="24dip"
                     android:gravity="right"
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button3_text"
+                    android:text="@string/button_after_text"
                     android:textSize="24dip"
                     android:gravity="after"
              />
@@ -145,18 +145,18 @@
         <TableRow>
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button4_text"
+                    android:text="@string/button2_text"
                     android:textSize="24dip"
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button5_text"
+                    android:text="@string/button_left_text"
                     android:textSize="24dip"
                     android:gravity="left"
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button6_text"
+                    android:text="@string/button_before_text"
                     android:textSize="24dip"
                     android:gravity="before"
              />
@@ -178,13 +178,13 @@
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button2_text"
+                    android:text="@string/button_right_text"
                     android:textSize="24dip"
                     android:gravity="right"
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button3_text"
+                    android:text="@string/button_after_text"
                     android:textSize="24dip"
                     android:gravity="after"
              />
@@ -193,18 +193,18 @@
         <TableRow>
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button4_text"
+                    android:text="@string/button2_text"
                     android:textSize="24dip"
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button5_text"
+                    android:text="@string/button_left_text"
                     android:textSize="24dip"
                     android:gravity="left"
              />
             <Button android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:text="@string/button6_text"
+                    android:text="@string/button_before_text"
                     android:textSize="24dip"
                     android:gravity="before"
              />
