@@ -48,27 +48,42 @@ public class BiDiTestActivity extends TabActivity {
         tabHost.addTab(spec);
 
         intent = new Intent().setClass(this, BiDiTestLinearLayoutLtrActivity.class);
-        spec = tabHost.newTabSpec("linear-layout-ltr").setIndicator("LinearLayout LTR").
+        spec = tabHost.newTabSpec("linear-layout-ltr").setIndicator("Linear LTR").
             setContent(intent);
         tabHost.addTab(spec);
 
         intent = new Intent().setClass(this, BiDiTestLinearLayoutRtlActivity.class);
-        spec = tabHost.newTabSpec("linear-layout-rtl").setIndicator("LinearLayout RTL").
+        spec = tabHost.newTabSpec("linear-layout-rtl").setIndicator("Linear RTL").
             setContent(intent);
         tabHost.addTab(spec);
 
         intent = new Intent().setClass(this, BiDiTestFrameLayoutLtrActivity.class);
-        spec = tabHost.newTabSpec("frame-layout-ltr").setIndicator("FrameLayout LTR").
+        spec = tabHost.newTabSpec("frame-layout-ltr").setIndicator("Frame LTR").
             setContent(intent);
         tabHost.addTab(spec);
 
         intent = new Intent().setClass(this, BiDiTestFrameLayoutRtlActivity.class);
-        spec = tabHost.newTabSpec("frame-layout-rtl").setIndicator("FrameLayout RTL").
+        spec = tabHost.newTabSpec("frame-layout-rtl").setIndicator("Frame RTL").
             setContent(intent);
         tabHost.addTab(spec);
 
         intent = new Intent().setClass(this, BiDiTestRelativeLayoutLtrActivity.class);
-        spec = tabHost.newTabSpec("relative-layout-rtl").setIndicator("RelativeLayout LTR").
+        spec = tabHost.newTabSpec("relative-layout-ltr").setIndicator("Relative LTR").
+            setContent(intent);
+        tabHost.addTab(spec);
+
+        intent = new Intent().setClass(this, BiDiTestRelativeLayoutRtlActivity.class);
+        spec = tabHost.newTabSpec("relative-layout-rtl").setIndicator("Relative RTL").
+            setContent(intent);
+        tabHost.addTab(spec);
+
+        intent = new Intent().setClass(this, BiDiTestRelativeLayoutLtrActivity2.class);
+        spec = tabHost.newTabSpec("relative-layout-ltr-2").setIndicator("Relative2 LTR").
+            setContent(intent);
+        tabHost.addTab(spec);
+
+        intent = new Intent().setClass(this, BiDiTestRelativeLayoutRtlActivity2.class);
+        spec = tabHost.newTabSpec("relative-layout-rtl-2").setIndicator("Relative2 RTL").
             setContent(intent);
         tabHost.addTab(spec);
 

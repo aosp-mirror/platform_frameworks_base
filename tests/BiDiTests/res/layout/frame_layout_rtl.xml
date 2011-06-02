@@ -15,74 +15,74 @@
 -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/frame_layout_rtl"
+    android:id="@+id/frame_layout_ltr"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:horizontalDirection="rtl"
     android:background="#FF000000">
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="right|center_vertical"
             android:background="#FFFF0000">
-        </RelativeLayout>
+        </FrameLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="left|center_vertical"
             android:background="#FF00FF00">
-        </RelativeLayout>
+        </FrameLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="top|center_horizontal"
             android:background="#FF0000FF">
-        </RelativeLayout>
+        </FrameLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="bottom|center_horizontal"
             android:background="#FF00FFFF">
-        </RelativeLayout>
+        </FrameLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="top|before"
             android:background="#FFFFFFFF">
-        </RelativeLayout>
+        </FrameLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="top|after"
             android:background="#FFFFFF00">
-        </RelativeLayout>
+        </FrameLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="bottom|before"
             android:background="#FFFFFFFF">
-        </RelativeLayout>
+        </FrameLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="bottom|after"
             android:background="#FFFFFF00">
-        </RelativeLayout>
+        </FrameLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_gravity="center_horizontal|center_vertical"
             android:background="#FF888888">
-        </RelativeLayout>
+        </FrameLayout>
 
 </FrameLayout>
 
