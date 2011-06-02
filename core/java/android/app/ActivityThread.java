@@ -1534,7 +1534,7 @@ public final class ActivityThread {
         synchronized (this) {
             ContextImpl context = getSystemContext();
             context.init(new LoadedApk(this, "android", context, info,
-                    new CompatibilityInfo(info, 0, false)), null, this);
+                    new CompatibilityInfo(info, 0, 0, false)), null, this);
         }
     }
 
