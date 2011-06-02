@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linear_layout_ltr"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:horizontalDirection="ltr">
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1,2">
+
+        <TableRow>
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button1_text"
+                    android:textSize="24dip"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button2_text"
+                    android:textSize="24dip"
+                    android:gravity="right"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button3_text"
+                    android:textSize="24dip"
+                    android:gravity="after"
+             />
+        </TableRow>
+
+        <TableRow>
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button4_text"
+                    android:textSize="24dip"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button5_text"
+                    android:textSize="24dip"
+                    android:gravity="left"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button6_text"
+                    android:textSize="24dip"
+                    android:gravity="before"
+             />
+        </TableRow>
+
+    </TableLayout>
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1,2"
+        android:horizontalDirection="inherit">
+
+        <TableRow>
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button1_text"
+                    android:textSize="24dip"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button2_text"
+                    android:textSize="24dip"
+                    android:gravity="right"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button3_text"
+                    android:textSize="24dip"
+                    android:gravity="after"
+             />
+        </TableRow>
+
+        <TableRow>
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button4_text"
+                    android:textSize="24dip"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button5_text"
+                    android:textSize="24dip"
+                    android:gravity="left"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button6_text"
+                    android:textSize="24dip"
+                    android:gravity="before"
+             />
+        </TableRow>
+
+    </TableLayout>
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1,2"
+        android:horizontalDirection="ltr">
+
+        <TableRow>
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button1_text"
+                    android:textSize="24dip"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button2_text"
+                    android:textSize="24dip"
+                    android:gravity="right"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button3_text"
+                    android:textSize="24dip"
+                    android:gravity="after"
+             />
+        </TableRow>
+
+        <TableRow>
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button4_text"
+                    android:textSize="24dip"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button5_text"
+                    android:textSize="24dip"
+                    android:gravity="left"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button6_text"
+                    android:textSize="24dip"
+                    android:gravity="before"
+             />
+        </TableRow>
+
+    </TableLayout>
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:stretchColumns="1,2"
+        android:horizontalDirection="rtl">
+
+        <TableRow>
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button1_text"
+                    android:textSize="24dip"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button2_text"
+                    android:textSize="24dip"
+                    android:gravity="right"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button3_text"
+                    android:textSize="24dip"
+                    android:gravity="after"
+             />
+        </TableRow>
+
+        <TableRow>
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button4_text"
+                    android:textSize="24dip"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button5_text"
+                    android:textSize="24dip"
+                    android:gravity="left"
+             />
+            <Button android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="@string/button6_text"
+                    android:textSize="24dip"
+                    android:gravity="before"
+             />
+        </TableRow>
+
+    </TableLayout>
+
+</LinearLayout>

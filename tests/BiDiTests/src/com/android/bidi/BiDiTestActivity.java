@@ -87,6 +87,16 @@ public class BiDiTestActivity extends TabActivity {
             setContent(intent);
         tabHost.addTab(spec);
 
+        intent = new Intent().setClass(this, BiDiTestTableLayoutLtrActivity.class);
+        spec = tabHost.newTabSpec("table-layout-ltr").setIndicator("Table LTR").
+            setContent(intent);
+        tabHost.addTab(spec);
+
+        intent = new Intent().setClass(this, BiDiTestTableLayoutRtlActivity.class);
+        spec = tabHost.newTabSpec("table-layout-rtl").setIndicator("Table RTL").
+            setContent(intent);
+        tabHost.addTab(spec);
+
         tabHost.setCurrentTab(0);
     }
 }
