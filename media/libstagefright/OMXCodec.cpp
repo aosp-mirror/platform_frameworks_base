@@ -4256,9 +4256,11 @@ status_t QueryCodecs(
         if (strncmp(componentName, "OMX.", 4)) {
             // Not an OpenMax component but a software codec.
 
+#if HAVE_SOFTWARE_DECODERS
             results->push();
             CodecCapabilities *caps = &results->editItemAt(results->size() - 1);
             caps->mComponentName = componentName;
+#endif
 
             continue;
         }
