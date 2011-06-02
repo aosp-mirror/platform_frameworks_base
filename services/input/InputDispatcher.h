@@ -96,6 +96,12 @@ struct InputTarget {
         /* This flag indicates that a motion event is being split across multiple windows. */
         FLAG_SPLIT = 1 << 2,
 
+        /* This flag indicates that the pointer coordinates dispatched to the application
+         * will be zeroed out to avoid revealing information to an application. This is
+         * used in conjunction with FLAG_DISPATCH_AS_OUTSIDE to prevent apps not sharing
+         * the same UID from watching all touches. */
+        FLAG_ZERO_COORDS = 1 << 3,
+
         /* This flag indicates that the event should be sent as is.
          * Should always be set unless the event is to be transmuted. */
         FLAG_DISPATCH_AS_IS = 1 << 8,

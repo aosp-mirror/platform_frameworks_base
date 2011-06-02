@@ -1464,6 +1464,23 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
         injectionPermission = INJECTION_PERMISSION_GRANTED;
     }
 
+    // Check whether windows listening for outside touches are owned by the same UID. If it is
+    // set the policy flag that we will not reveal coordinate information to this window.
+    if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
+        const InputWindow* foregroundWindow = mTempTouchState.getFirstForegroundWindow();
+        const int32_t foregroundWindowUid = foregroundWindow->ownerUid;
+        for (size_t i = 0; i < mTempTouchState.windows.size(); i++) {
+            const TouchedWindow& touchedWindow = mTempTouchState.windows[i];
+            if (touchedWindow.targetFlags & InputTarget::FLAG_DISPATCH_AS_OUTSIDE) {
+                const InputWindow* inputWindow = touchedWindow.window;
+                if (inputWindow->ownerUid != foregroundWindowUid) {
+                    mTempTouchState.addOrUpdateWindow(inputWindow,
+                            InputTarget::FLAG_ZERO_COORDS, BitSet32(0));
+                }
+            }
+        }
+    }
+
     // Ensure all touched foreground windows are ready for new input.
     for (size_t i = 0; i < mTempTouchState.windows.size(); i++) {
         const TouchedWindow& touchedWindow = mTempTouchState.windows[i];
@@ -1987,7 +2004,8 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
 
         // Set the X and Y offset depending on the input source.
         float xOffset, yOffset, scaleFactor;
-        if (motionEntry->source & AINPUT_SOURCE_CLASS_POINTER) {
+        if (motionEntry->source & AINPUT_SOURCE_CLASS_POINTER
+                && !(dispatchEntry->targetFlags & InputTarget::FLAG_ZERO_COORDS)) {
             scaleFactor = dispatchEntry->scaleFactor;
             xOffset = dispatchEntry->xOffset * scaleFactor;
             yOffset = dispatchEntry->yOffset * scaleFactor;
@@ -2002,6 +2020,14 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             xOffset = 0.0f;
             yOffset = 0.0f;
             scaleFactor = 1.0f;
+
+            // We don't want the dispatch target to know.
+            if (dispatchEntry->targetFlags & InputTarget::FLAG_ZERO_COORDS) {
+                for (size_t i = 0; i < motionEntry->pointerCount; i++) {
+                    scaledCoords[i].clear();
+                }
+                usingCoords = scaledCoords;
+            }
         }
 
         // Update the connection's input state.
@@ -2030,9 +2056,11 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             MotionSample* nextMotionSample = firstMotionSample->next;
             for (; nextMotionSample != NULL; nextMotionSample = nextMotionSample->next) {
                 if (usingCoords == scaledCoords) {
-                    for (size_t i = 0; i < motionEntry->pointerCount; i++) {
-                        scaledCoords[i] = nextMotionSample->pointerCoords[i];
-                        scaledCoords[i].scale(scaleFactor);
+                    if (!(dispatchEntry->targetFlags & InputTarget::FLAG_ZERO_COORDS)) {
+                        for (size_t i = 0; i < motionEntry->pointerCount; i++) {
+                            scaledCoords[i] = nextMotionSample->pointerCoords[i];
+                            scaledCoords[i].scale(scaleFactor);
+                        }
                     }
                 } else {
                     usingCoords = nextMotionSample->pointerCoords;
