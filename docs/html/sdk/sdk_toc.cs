@@ -138,6 +138,8 @@ class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r11</a> <span
 class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">Google USB Driver, r4</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Compatibility Library, r2</a> <span
+class="new">new!</span></li>
     </ul>
   </li>
   <li>
