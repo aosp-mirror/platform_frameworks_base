@@ -201,6 +201,14 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nSetViewport(int renderer, int width, int height);
 
     /**
+     * Preserves the back buffer of the current surface after a buffer swap.
+     * Calling this method sets the EGL_SWAP_BEHAVIOR attribute of the current
+     * surface to EGL_BUFFER_PRESERVED. Calling this method requires an EGL
+     * config that supports EGL_SWAP_BEHAVIOR_PRESERVED_BIT.
+     * 
+     * @return True if the swap behavior was successfully changed,
+     *         false otherwise.
+     * 
      * @hide
      */
     public static boolean preserveBackBuffer() {
@@ -208,6 +216,21 @@ class GLES20Canvas extends HardwareCanvas {
     }
 
     private static native boolean nPreserveBackBuffer();    
+
+    /**
+     * Indicates whether the current surface preserves its back buffer
+     * after a buffer swap.
+     * 
+     * @return True, if the surface's EGL_SWAP_BEHAVIOR is EGL_BUFFER_PRESERVED,
+     *         false otherwise
+     *         
+     * @hide
+     */
+    public static boolean isBackBufferPreserved() {
+        return nIsBackBufferPreserved();
+    }
+
+    private static native boolean nIsBackBufferPreserved();    
     
     @Override
     void onPreDraw(Rect dirty) {

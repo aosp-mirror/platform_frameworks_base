@@ -311,6 +311,7 @@ public abstract class HardwareRenderer {
         Paint mDebugPaint;
 
         boolean mDirtyRegions;
+        final boolean mDirtyRegionsRequested;
 
         final int mGlVersion;
         final boolean mTranslucent;
@@ -325,6 +326,7 @@ public abstract class HardwareRenderer {
             final String dirtyProperty = SystemProperties.get(RENDER_DIRTY_REGIONS_PROPERTY, "true");
             //noinspection PointlessBooleanExpression,ConstantConditions
             mDirtyRegions = RENDER_DIRTY_REGIONS && "true".equalsIgnoreCase(dirtyProperty);
+            mDirtyRegionsRequested = mDirtyRegions;
         }
 
         /**
@@ -545,11 +547,21 @@ public abstract class HardwareRenderer {
                 throw new Surface.OutOfResourcesException("eglMakeCurrent failed "
                         + getEGLErrorString(sEgl.eglGetError()));
             }
-            
+
+            // If mDirtyRegions is set, this means we have an EGL configuration
+            // with EGL_SWAP_BEHAVIOR_PRESERVED_BIT set
             if (mDirtyRegions) {
                 if (!GLES20Canvas.preserveBackBuffer()) {
                     Log.w(LOG_TAG, "Backbuffer cannot be preserved");
                 }
+            } else if (mDirtyRegionsRequested) {
+                // If mDirtyRegions is not set, our EGL configuration does not
+                // have EGL_SWAP_BEHAVIOR_PRESERVED_BIT; however, the default
+                // swap behavior might be EGL_BUFFER_PRESERVED, which means we
+                // want to set mDirtyRegions. We try to do this only if dirty
+                // regions were initially requested as part of the device
+                // configuration (see RENDER_DIRTY_REGIONS)
+                mDirtyRegions = GLES20Canvas.isBackBufferPreserved();
             }
 
             return sEglContext.getGL();
