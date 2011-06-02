@@ -91,9 +91,27 @@ static jboolean android_view_GLES20Canvas_preserveBackBuffer(JNIEnv* env, jobjec
     eglSurfaceAttrib(display, surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_PRESERVED);
 
     EGLint error = eglGetError();
-    RENDERER_LOGD("Could not enable buffer preserved swap behavior (%x)", error);
+    if (error != EGL_SUCCESS) {
+        RENDERER_LOGD("Could not enable buffer preserved swap behavior (%x)", error);
+    }
 
     return error == EGL_SUCCESS;
+}
+
+static jboolean android_view_GLES20Canvas_isBackBufferPreserved(JNIEnv* env, jobject clazz) {
+    EGLDisplay display = eglGetCurrentDisplay();
+    EGLSurface surface = eglGetCurrentSurface(EGL_DRAW);
+    EGLint value;
+
+    eglGetError();
+    eglQuerySurface(display, surface, EGL_SWAP_BEHAVIOR, &value);
+
+    EGLint error = eglGetError();
+    if (error != EGL_SUCCESS) {
+        RENDERER_LOGD("Could not query buffer preserved swap behavior (%x)", error);
+    }
+
+    return error == EGL_SUCCESS && value == EGL_BUFFER_PRESERVED;
 }
 
 // ----------------------------------------------------------------------------
@@ -676,7 +694,8 @@ static JNINativeMethod gMethods[] = {
     { "nIsAvailable",       "()Z",             (void*) android_view_GLES20Canvas_isAvailable },
 
 #ifdef USE_OPENGL_RENDERER
-    { "nPreserveBackBuffer", "()Z",            (void*) android_view_GLES20Canvas_preserveBackBuffer },
+    { "nIsBackBufferPreserved", "()Z",         (void*) android_view_GLES20Canvas_isBackBufferPreserved },
+    { "nPreserveBackBuffer",    "()Z",         (void*) android_view_GLES20Canvas_preserveBackBuffer },
 
     { "nCreateRenderer",    "()I",             (void*) android_view_GLES20Canvas_createRenderer },
     { "nDestroyRenderer",   "(I)V",            (void*) android_view_GLES20Canvas_destroyRenderer },
