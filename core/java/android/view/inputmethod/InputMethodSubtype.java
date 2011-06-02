@@ -17,8 +17,10 @@
 package android.view.inputmethod;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -135,6 +137,31 @@ public final class InputMethodSubtype implements Parcelable {
      */
     public boolean isAuxiliary() {
         return mIsAuxiliary;
+    }
+
+    /**
+     * @param context Context will be used for getting Locale and PackageManager.
+     * @param packageName The package name of the IME
+     * @param appInfo The application info of the IME
+     * @return a display name for this subtype. The string resource of the label (mSubtypeNameResId)
+     * can have only one %s in it. If there is, the %s part will be replaced with the locale's
+     * display name by the formatter. If there is not, this method simply returns the string
+     * specified by mSubtypeNameResId. If mSubtypeNameResId is not specified (== 0), it's up to the
+     * framework to generate an appropriate display name.
+     */
+    public CharSequence getDisplayName(
+            Context context, String packageName, ApplicationInfo appInfo) {
+        final String locale = context.getResources().getConfiguration().locale.getDisplayName();
+        if (mSubtypeNameResId == 0) {
+            return locale;
+        }
+        final String subtypeName = context.getPackageManager().getText(
+                packageName, mSubtypeNameResId, appInfo).toString();
+        if (!TextUtils.isEmpty(subtypeName)) {
+            return String.format(subtypeName, locale);
+        } else {
+            return locale;
+        }
     }
 
     private HashMap<String, String> getExtraValueHashMap() {

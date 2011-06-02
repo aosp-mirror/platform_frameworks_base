@@ -23190,6 +23190,7 @@ package android.view.inputmethod {
   public final class InputMethodSubtype implements android.os.Parcelable {
     method public boolean containsExtraValueKey(java.lang.String);
     method public int describeContents();
+    method public java.lang.CharSequence getDisplayName(android.content.Context, java.lang.String, android.content.pm.ApplicationInfo);
     method public java.lang.String getExtraValue();
     method public java.lang.String getExtraValueOf(java.lang.String);
     method public int getIconResId();
