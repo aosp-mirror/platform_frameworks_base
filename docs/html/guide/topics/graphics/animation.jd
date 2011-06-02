@@ -868,10 +868,22 @@ ObjectAnimator.ofFloat(myView, "rotation", 0f, 360f);
 For more information on creating animators, see the sections on animating with
 <a href="#value-animator">ValueAnimator</a> and <a href="#object-animator">ObjectAnimator</a>
 
-  <h2 id="declaring-xml">Declaring Animations in XML</h2>
+
+<h2 id="declaring-xml">Declaring Animations in XML</h2>
 
   <p>The property animation system lets you declare property animations with XML instead of doing
-  it programmatically. The following Android classes have XML declaration support with the
+  it programmatically. By defining your animations in XML, you can easily reuse your animations
+in multiple activities and more easily edit the animation sequence.</p>
+  
+<p>To distinguish animation files that use the new property animation APIs from those that use the
+legacy <a href="{@docRoot}guide/topics/graphics/view-animation.html">view animation</a> framework,
+starting with Android 3.1, you should save the XML files for property animations in the {@code
+res/animator/} directory (instead of {@code res/anim/}). Using the {@code animator} directory name
+is optional, but necessary if you want to use the layout editor tools in the Eclipse ADT plugin (ADT
+11.0.0+), because ADT only searches the {@code res/animator/} directory for property animation
+resources.</p>
+
+<p>The following property animation classes have XML declaration support with the
   following XML tags:</p>
 
   <ul>
@@ -924,22 +936,25 @@ For more information on creating animators, see the sections on animating with
     beginning each time.</dd>
   </dl>
 
-  <p>The <code>objectAnimator</code> ({@link android.animation.ObjectAnimator}) element has the
-  additional attribute <code>propertyName</code>, that lets you specify the name of the property
-  being animated. The <code>objectAnimator</code> element does not expose a <code>target</code>
+  <p>The <code>&lt;objectAnimator&gt;</code> ({@link android.animation.ObjectAnimator}) element has the
+  additional attribute <code>android:propertyName</code>, that lets you specify the name of the
+property
+  being animated. The <code>&lt;objectAnimator&gt;</code> element does not expose a <code>target</code>
   attribute, however, so you cannot set the object to animate in the XML declaration. You have to
   inflate the XML resource by calling {@link android.animation.AnimatorInflater#loadAnimator
   loadAnimator()} and call {@link android.animation.ObjectAnimator#setTarget setTarget()} to set
   the target object unlike the underlying {@link android.animation.ObjectAnimator},
   before calling {@link android.animation.ObjectAnimator#start start()}.</p>
 
-  <p>The <code>set</code> element ({@link android.animation.AnimatorSet}) exposes a single
-  attribute, <code>ordering</code>. Set this attribute to <code>together</code> (default) to play
-  all the animations in this set at once. Set this attribute to <code>sequentially</code> to play
+  <p>The <code>&lt;set&gt;</code> element ({@link android.animation.AnimatorSet}) exposes a single
+  attribute, <code>android:ordering</code>. Set this attribute to <code>"together"</code> (default)
+to play
+  all the animations in this set at once. Set this attribute to <code>"sequentially"</code> to play
   the animations in the order they are declared.</p>
 
-  <p>You can specify nested <code>set</code> tags to further group animations together. The
-  animations that you want to group together should be children of the <code>set</code> tag and can
+  <p>You can specify nested <code>&lt;set&gt;</code> elements to further group animations together.
+The
+  animations that you want to group together should be children of the <code>&lt;set&gt;</code> tag and can
   define their own <code>ordering</code> attribute.</p>
 
   <p>As an example, this XML code creates an {@link android.animation.AnimatorSet} object that
@@ -970,3 +985,8 @@ For more information on creating animators, see the sections on animating with
   before starting the animation set. Calling {@link android.animation.AnimatorSet#setTarget
   setTarget()} sets a single target object for all children of the {@link
   android.animation.AnimatorSet}.</p>
+
+<p class="note"><strong>Tip:</strong> To see how the ADT layout editor allows you to develop and
+preview animations in your layout, watch the <a
+href="http://www.youtube.com/watch?v=Oq05KqjXTvs&feature=player_detailpage#t=1709s">Android
+Developer Tools session</a> from Google I/O '11</p>
