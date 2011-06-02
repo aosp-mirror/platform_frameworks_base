@@ -408,6 +408,8 @@ public class WindowManagerService extends IWindowManager.Stub
     int mBaseDisplayHeight = 0;
     int mCurDisplayWidth = 0;
     int mCurDisplayHeight = 0;
+    int mAppDisplayWidth = 0;
+    int mAppDisplayHeight = 0;
     int mRotation = 0;
     int mRequestedRotation = 0;
     int mForcedAppOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -1433,8 +1435,8 @@ public class WindowManagerService extends IWindowManager.Stub
     int adjustWallpaperWindowsLocked() {
         int changed = 0;
 
-        final int dw = mCurDisplayWidth;
-        final int dh = mCurDisplayHeight;
+        final int dw = mAppDisplayWidth;
+        final int dh = mAppDisplayHeight;
 
         // First find top-most window that has asked to be on top of the
         // wallpaper; all wallpapers go behind it.
@@ -1852,8 +1854,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     boolean updateWallpaperOffsetLocked(WindowState changingTarget, boolean sync) {
-        final int dw = mCurDisplayWidth;
-        final int dh = mCurDisplayHeight;
+        final int dw = mAppDisplayWidth;
+        final int dh = mAppDisplayHeight;
 
         boolean changed = false;
 
@@ -1893,8 +1895,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void updateWallpaperVisibilityLocked() {
         final boolean visible = isWallpaperVisible(mWallpaperTarget);
-        final int dw = mCurDisplayWidth;
-        final int dh = mCurDisplayHeight;
+        final int dw = mAppDisplayWidth;
+        final int dh = mAppDisplayHeight;
 
         int curTokenIndex = mWallpaperTokens.size();
         while (curTokenIndex > 0) {
@@ -2701,7 +2703,7 @@ public class WindowManagerService extends IWindowManager.Stub
             configChanged = updateOrientationFromAppTokensLocked(false);
             performLayoutAndPlaceSurfacesLocked();
             if (displayed && win.mIsWallpaper) {
-                updateWallpaperOffsetLocked(win, mCurDisplayWidth, mCurDisplayHeight, false);
+                updateWallpaperOffsetLocked(win, mAppDisplayWidth, mAppDisplayHeight, false);
             }
             if (win.mAppToken != null) {
                 win.mAppToken.updateReportedVisibilityLocked();
@@ -4783,8 +4785,8 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             long ident = Binder.clearCallingIdentity();
 
-            dw = mPolicy.getNonDecorDisplayWidth(mRotation, mCurDisplayWidth);
-            dh = mPolicy.getNonDecorDisplayHeight(mRotation, mCurDisplayHeight);
+            dw = mAppDisplayWidth;
+            dh = mAppDisplayHeight;
 
             int aboveAppLayer = mPolicy.windowTypeToLayerLw(
                     WindowManager.LayoutParams.TYPE_APPLICATION) * TYPE_LAYER_MULTIPLIER
@@ -5559,10 +5561,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Override display width and height with what we are computing,
         // to be sure they remain consistent.
-        dm.widthPixels = dm.realWidthPixels = mPolicy.getNonDecorDisplayWidth(
-                mRotation, dw);
-        dm.heightPixels = dm.realHeightPixels = mPolicy.getNonDecorDisplayHeight(
-                mRotation, dh);
+        dm.widthPixels = dm.unscaledWidthPixels = mAppDisplayWidth
+                = mPolicy.getNonDecorDisplayWidth(mRotation, dw);
+        dm.heightPixels = dm.unscaledHeightPixels = mAppDisplayHeight
+                = mPolicy.getNonDecorDisplayHeight(mRotation, dh);
 
         mCompatibleScreenScale = CompatibilityInfo.updateCompatibleScreenFrame(
                 dm, mCompatibleScreenFrame, null);
@@ -5990,8 +5992,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 mInitialDisplayWidth = mInitialDisplayHeight;
                 mInitialDisplayHeight = tmp;
             }
-            mBaseDisplayWidth = mCurDisplayWidth = mInitialDisplayWidth;
-            mBaseDisplayHeight = mCurDisplayHeight = mInitialDisplayHeight;
+            mBaseDisplayWidth = mCurDisplayWidth = mAppDisplayWidth = mInitialDisplayWidth;
+            mBaseDisplayHeight = mCurDisplayHeight = mAppDisplayHeight = mInitialDisplayHeight;
             mInputManager.setDisplaySize(0, mDisplay.getRawWidth(), mDisplay.getRawHeight());
             mPolicy.setInitialDisplaySize(mInitialDisplayWidth, mInitialDisplayHeight);
         }
@@ -6493,8 +6495,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     public void getDisplaySize(Point size) {
         synchronized(mWindowMap) {
-            size.x = mCurDisplayWidth;
-            size.y = mCurDisplayHeight;
+            size.x = mAppDisplayWidth;
+            size.y = mAppDisplayHeight;
         }
     }
 
@@ -6624,6 +6626,10 @@ public class WindowManagerService extends IWindowManager.Stub
             Settings.Secure.putString(mContext.getContentResolver(),
                     Settings.Secure.DISPLAY_SIZE_FORCED, "");
         }
+    }
+
+    public boolean canStatusBarHide() {
+        return mPolicy.canStatusBarHide();
     }
 
     // -------------------------------------------------------------
@@ -6990,9 +6996,8 @@ public class WindowManagerService extends IWindowManager.Stub
         final long currentTime = SystemClock.uptimeMillis();
         final int dw = mCurDisplayWidth;
         final int dh = mCurDisplayHeight;
-
-        final int innerDw = mPolicy.getNonDecorDisplayWidth(mRotation, dw);
-        final int innerDh = mPolicy.getNonDecorDisplayHeight(mRotation, dh);
+        final int innerDw = mAppDisplayWidth;
+        final int innerDh = mAppDisplayHeight;
 
         int i;
 
@@ -8965,6 +8970,8 @@ public class WindowManagerService extends IWindowManager.Stub
                         pw.print(mBaseDisplayWidth); pw.print("x"); pw.print(mBaseDisplayHeight);
                         pw.print(" cur=");
                         pw.print(mCurDisplayWidth); pw.print("x"); pw.print(mCurDisplayHeight);
+                        pw.print(" app=");
+                        pw.print(mAppDisplayWidth); pw.print("x"); pw.print(mAppDisplayHeight);
                         pw.print(" real="); pw.print(mDisplay.getRealWidth());
                         pw.print("x"); pw.print(mDisplay.getRealHeight());
                         pw.print(" raw="); pw.print(mDisplay.getRawWidth());

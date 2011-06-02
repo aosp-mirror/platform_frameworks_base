@@ -27,7 +27,10 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Slog;
+import android.view.IWindowManager;
 
 public class SystemUIService extends Service {
     static final String TAG = "SystemUIService";
@@ -36,7 +39,7 @@ public class SystemUIService extends Service {
      * The class names of the stuff to start.
      */
     final Object[] SERVICES = new Object[] {
-            R.string.config_statusBarComponent,
+            0, // system bar or status bar, filled in below.
             com.android.systemui.power.PowerUI.class,
         };
 
@@ -62,6 +65,17 @@ public class SystemUIService extends Service {
 
     @Override
     public void onCreate() {
+        // Pick status bar or system bar.
+        IWindowManager wm = IWindowManager.Stub.asInterface(
+                ServiceManager.getService(Context.WINDOW_SERVICE));
+        try {
+            SERVICES[0] = wm.canStatusBarHide()
+                    ? R.string.config_statusBarComponent
+                    : R.string.config_systemBarComponent;
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failing checking whether status bar can hide", e);
+        }
+
         final int N = SERVICES.length;
         mServices = new SystemUI[N];
         for (int i=0; i<N; i++) {
