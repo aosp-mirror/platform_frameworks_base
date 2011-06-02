@@ -16,19 +16,6 @@
 
 package com.android.server;
 
-import com.android.server.accessibility.AccessibilityManagerService;
-import com.android.server.am.ActivityManagerService;
-import com.android.server.net.NetworkPolicyManagerService;
-import com.android.server.pm.PackageManagerService;
-import com.android.server.usb.UsbService;
-import com.android.server.wm.WindowManagerService;
-import com.android.internal.app.ShutdownThread;
-import com.android.internal.os.BinderInternal;
-import com.android.internal.os.SamplingProfilerIntegration;
-
-import dalvik.system.VMRuntime;
-import dalvik.system.Zygote;
-
 import android.accounts.AccountManagerService;
 import android.app.ActivityManagerNative;
 import android.bluetooth.BluetoothAdapter;
@@ -41,24 +28,33 @@ import android.content.pm.IPackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.media.AudioService;
-import android.os.Build;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.provider.Contacts.People;
 import android.provider.Settings;
 import android.server.BluetoothA2dpService;
 import android.server.BluetoothService;
 import android.server.search.SearchManagerService;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
-import android.util.Log;
 import android.util.Slog;
-import android.view.Display;
 import android.view.WindowManager;
+
+import com.android.internal.app.ShutdownThread;
+import com.android.internal.os.BinderInternal;
+import com.android.internal.os.SamplingProfilerIntegration;
+import com.android.server.accessibility.AccessibilityManagerService;
+import com.android.server.am.ActivityManagerService;
+import com.android.server.net.NetworkPolicyManagerService;
+import com.android.server.pm.PackageManagerService;
+import com.android.server.usb.UsbService;
+import com.android.server.wm.WindowManagerService;
+
+import dalvik.system.VMRuntime;
+import dalvik.system.Zygote;
 
 import java.io.File;
 import java.util.Timer;
@@ -120,6 +116,7 @@ class ServerThread extends Thread {
         LightsService lights = null;
         PowerManagerService power = null;
         BatteryService battery = null;
+        NetworkManagementService networkManagement = null;
         NetworkPolicyManagerService networkPolicy = null;
         ConnectivityService connectivity = null;
         IPackageManager pm = null;
@@ -294,16 +291,15 @@ class ServerThread extends Thread {
 
             try {
                 Slog.i(TAG, "NetworkManagement Service");
-                ServiceManager.addService(
-                        Context.NETWORKMANAGEMENT_SERVICE,
-                        NetworkManagementService.create(context));
+                networkManagement = NetworkManagementService.create(context);
+                ServiceManager.addService(Context.NETWORKMANAGEMENT_SERVICE, networkManagement);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting NetworkManagement Service", e);
             }
 
             try {
                 Slog.i(TAG, "Connectivity Service");
-                connectivity = ConnectivityService.getInstance(context);
+                connectivity = new ConnectivityService(context, networkManagement, networkPolicy);
                 ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Connectivity Service", e);

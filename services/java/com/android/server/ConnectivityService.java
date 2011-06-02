@@ -16,6 +16,11 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.UPDATE_DEVICE_STATS;
+import static android.net.ConnectivityManager.isNetworkTypeValid;
+import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
+import static android.net.NetworkPolicyManager.RULE_REJECT_PAID;
+
 import android.bluetooth.BluetoothTetheringDataTracker;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -26,11 +31,13 @@ import android.net.ConnectivityManager;
 import android.net.DummyDataStateTracker;
 import android.net.EthernetDataTracker;
 import android.net.IConnectivityManager;
-import android.net.LinkAddress;
+import android.net.INetworkPolicyListener;
+import android.net.INetworkPolicyManager;
 import android.net.LinkProperties;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
+import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
 import android.net.Proxy;
@@ -54,6 +61,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.SparseIntArray;
 
 import com.android.internal.telephony.Phone;
 import com.android.server.connectivity.Tethering;
@@ -62,13 +70,12 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @hide
@@ -77,6 +84,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private static final boolean DBG = true;
     private static final String TAG = "ConnectivityService";
+
+    private static final boolean LOGD_RULES = false;
 
     // how long to wait before switching back to a radio's default network
     private static final int RESTORE_DEFAULT_NETWORK_DELAY = 1 * 60 * 1000;
@@ -90,6 +99,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private Tethering mTethering;
     private boolean mTetheringConfigValid = false;
+
+    /** Currently active network rules by UID. */
+    private SparseIntArray mUidRules = new SparseIntArray();
 
     /**
      * Sometimes we want to refer to the individual network state
@@ -128,6 +140,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private AtomicBoolean mBackgroundDataEnabled = new AtomicBoolean(true);
 
     private INetworkManagementService mNetd;
+    private INetworkPolicyManager mPolicyManager;
 
     private static final int ENABLED  = 1;
     private static final int DISABLED = 0;
@@ -250,14 +263,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
     RadioAttributes[] mRadioAttributes;
 
-    public static synchronized ConnectivityService getInstance(Context context) {
-        if (sServiceInstance == null) {
-            sServiceInstance = new ConnectivityService(context);
-        }
-        return sServiceInstance;
-    }
-
-    private ConnectivityService(Context context) {
+    public ConnectivityService(
+            Context context, INetworkManagementService netd, INetworkPolicyManager policyManager) {
         if (DBG) log("ConnectivityService starting up");
 
         HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
@@ -290,9 +297,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             loge("Error setting defaultDns using " + dns);
         }
 
-        mContext = context;
+        mContext = checkNotNull(context, "missing Context");
+        mNetd = checkNotNull(netd, "missing INetworkManagementService");
+        mPolicyManager = checkNotNull(policyManager, "missing INetworkPolicyManager");
 
-        PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        try {
+            mPolicyManager.registerListener(mPolicyListener);
+        } catch (RemoteException e) {
+            // ouch, no rules updates means some processes may never get network
+            Slog.e(TAG, "unable to register INetworkPolicyListener", e);
+        }
+
+        final PowerManager powerManager = (PowerManager) context.getSystemService(
+                Context.POWER_SERVICE);
         mNetTransitionWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         mNetTransitionWakeLockTimeout = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_networkTransitionTimeout);
@@ -536,32 +553,92 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     /**
+     * Check if UID is blocked from using the given {@link NetworkInfo}.
+     */
+    private boolean isNetworkBlocked(NetworkInfo info, int uid) {
+        synchronized (mUidRules) {
+            return isNetworkBlockedLocked(info, uid);
+        }
+    }
+
+    /**
+     * Check if UID is blocked from using the given {@link NetworkInfo}.
+     */
+    private boolean isNetworkBlockedLocked(NetworkInfo info, int uid) {
+        // TODO: expand definition of "paid" network to cover tethered or paid
+        // hotspot use cases.
+        final boolean networkIsPaid = info.getType() != ConnectivityManager.TYPE_WIFI;
+        final int uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
+
+        if (networkIsPaid && (uidRules & RULE_REJECT_PAID) != 0) {
+            return true;
+        }
+
+        // no restrictive rules; network is visible
+        return false;
+    }
+
+    /**
      * Return NetworkInfo for the active (i.e., connected) network interface.
      * It is assumed that at most one network is active at a time. If more
      * than one is active, it is indeterminate which will be returned.
      * @return the info for the active network, or {@code null} if none is
      * active
      */
+    @Override
     public NetworkInfo getActiveNetworkInfo() {
-        return getNetworkInfo(mActiveDefaultNetwork);
+        enforceAccessPermission();
+        final int uid = Binder.getCallingUid();
+        return getNetworkInfo(mActiveDefaultNetwork, uid);
     }
 
+    @Override
+    public NetworkInfo getActiveNetworkInfoForUid(int uid) {
+        enforceConnectivityInternalPermission();
+        return getNetworkInfo(mActiveDefaultNetwork, uid);
+    }
+
+    @Override
     public NetworkInfo getNetworkInfo(int networkType) {
         enforceAccessPermission();
-        if (ConnectivityManager.isNetworkTypeValid(networkType)) {
-            NetworkStateTracker t = mNetTrackers[networkType];
-            if (t != null)
-                return t.getNetworkInfo();
-        }
-        return null;
+        final int uid = Binder.getCallingUid();
+        return getNetworkInfo(networkType, uid);
     }
 
+    private NetworkInfo getNetworkInfo(int networkType, int uid) {
+        NetworkInfo info = null;
+        if (isNetworkTypeValid(networkType)) {
+            final NetworkStateTracker tracker = mNetTrackers[networkType];
+            if (tracker != null) {
+                info = tracker.getNetworkInfo();
+                if (isNetworkBlocked(info, uid)) {
+                    // network is blocked; clone and override state
+                    info = new NetworkInfo(info);
+                    info.setDetailedState(DetailedState.BLOCKED, null, null);
+                }
+            }
+        }
+        return info;
+    }
+
+    @Override
     public NetworkInfo[] getAllNetworkInfo() {
         enforceAccessPermission();
-        NetworkInfo[] result = new NetworkInfo[mNetworksDefined];
+        final int uid = Binder.getCallingUid();
+        final NetworkInfo[] result = new NetworkInfo[mNetworksDefined];
         int i = 0;
-        for (NetworkStateTracker t : mNetTrackers) {
-            if(t != null) result[i++] = t.getNetworkInfo();
+        synchronized (mUidRules) {
+            for (NetworkStateTracker tracker : mNetTrackers) {
+                if (tracker != null) {
+                    NetworkInfo info = tracker.getNetworkInfo();
+                    if (isNetworkBlockedLocked(info, uid)) {
+                        // network is blocked; clone and override state
+                        info = new NetworkInfo(info);
+                        info.setDetailedState(DetailedState.BLOCKED, null, null);
+                    }
+                    result[i++] = info;
+                }
+            }
         }
         return result;
     }
@@ -574,15 +651,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * @return the ip properties for the active network, or {@code null} if
      * none is active
      */
+    @Override
     public LinkProperties getActiveLinkProperties() {
         return getLinkProperties(mActiveDefaultNetwork);
     }
 
+    @Override
     public LinkProperties getLinkProperties(int networkType) {
         enforceAccessPermission();
-        if (ConnectivityManager.isNetworkTypeValid(networkType)) {
-            NetworkStateTracker t = mNetTrackers[networkType];
-            if (t != null) return t.getLinkProperties();
+        if (isNetworkTypeValid(networkType)) {
+            final NetworkStateTracker tracker = mNetTrackers[networkType];
+            if (tracker != null) {
+                return tracker.getLinkProperties();
+            }
         }
         return null;
     }
@@ -1027,6 +1108,30 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
+    private INetworkPolicyListener mPolicyListener = new INetworkPolicyListener.Stub() {
+        @Override
+        public void onRulesChanged(int uid, int uidRules) {
+            // only someone like NPMS should only be calling us
+            // TODO: create permission for modifying data policy
+            mContext.enforceCallingOrSelfPermission(UPDATE_DEVICE_STATS, TAG);
+
+            if (LOGD_RULES) {
+                Slog.d(TAG, "onRulesChanged(uid=" + uid + ", uidRules=" + uidRules + ")");
+            }
+
+            synchronized (mUidRules) {
+                // skip update when we've already applied rules
+                final int oldRules = mUidRules.get(uid, RULE_ALLOW_ALL);
+                if (oldRules == uidRules) return;
+
+                mUidRules.put(uid, uidRules);
+            }
+
+            // TODO: dispatch into NMS to push rules towards kernel module
+            // TODO: notify UID when it has requested targeted updates
+        }
+    };
+
     /**
      * @see ConnectivityManager#setMobileDataEnabled(boolean)
      */
@@ -1284,9 +1389,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     void systemReady() {
-        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        mNetd = INetworkManagementService.Stub.asInterface(b);
-
         synchronized(this) {
             mSystemReady = true;
             if (mInitialBroadcast != null) {
@@ -2254,5 +2356,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             networkType = ConnectivityManager.TYPE_MOBILE_CBS;
         }
         return networkType;
+    }
+
+    private static <T> T checkNotNull(T value, String message) {
+        if (value == null) {
+            throw new NullPointerException(message);
+        }
+        return value;
     }
 }

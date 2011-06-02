@@ -74,7 +74,9 @@ public class NetworkInfo implements Parcelable {
         /** IP traffic not available. */
         DISCONNECTED,
         /** Attempt to connect failed. */
-        FAILED
+        FAILED,
+        /** Access to this network is blocked. */
+        BLOCKED
     }
 
     /**
@@ -96,6 +98,7 @@ public class NetworkInfo implements Parcelable {
         stateMap.put(DetailedState.DISCONNECTING, State.DISCONNECTING);
         stateMap.put(DetailedState.DISCONNECTED, State.DISCONNECTED);
         stateMap.put(DetailedState.FAILED, State.DISCONNECTED);
+        stateMap.put(DetailedState.BLOCKED, State.DISCONNECTED);
     }
 
     private int mNetworkType;
@@ -136,6 +139,23 @@ public class NetworkInfo implements Parcelable {
         mState = State.UNKNOWN;
         mIsAvailable = false; // until we're told otherwise, assume unavailable
         mIsRoaming = false;
+    }
+
+    /** {@hide} */
+    public NetworkInfo(NetworkInfo source) {
+        if (source != null) {
+            mNetworkType = source.mNetworkType;
+            mSubtype = source.mSubtype;
+            mTypeName = source.mTypeName;
+            mSubtypeName = source.mSubtypeName;
+            mState = source.mState;
+            mDetailedState = source.mDetailedState;
+            mReason = source.mReason;
+            mExtraInfo = source.mExtraInfo;
+            mIsFailover = source.mIsFailover;
+            mIsRoaming = source.mIsRoaming;
+            mIsAvailable = source.mIsAvailable;
+        }
     }
 
     /**

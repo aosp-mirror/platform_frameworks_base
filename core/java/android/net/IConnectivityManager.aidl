@@ -33,13 +33,11 @@ interface IConnectivityManager
     int getNetworkPreference();
 
     NetworkInfo getActiveNetworkInfo();
-
+    NetworkInfo getActiveNetworkInfoForUid(int uid);
     NetworkInfo getNetworkInfo(int networkType);
-
     NetworkInfo[] getAllNetworkInfo();
 
     LinkProperties getActiveLinkProperties();
-
     LinkProperties getLinkProperties(int networkType);
 
     boolean setRadios(boolean onOff);
