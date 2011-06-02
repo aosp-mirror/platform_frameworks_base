@@ -2860,4 +2860,7 @@
 
     <!-- Storage description for USB storage. [CHAR LIMIT=NONE] -->
     <string name="storage_usb">USB storage</string>
+
+    <!-- Button text for the edit menu in input method extract mode. [CHAR LIMIT=16] -->
+    <string name="extract_edit_menu_button">Edit...</string>
 </resources>

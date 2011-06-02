@@ -18,7 +18,7 @@
 */
 -->
 
-<LinearLayout
+<android.inputmethodservice.ExtractEditLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal">
         
@@ -38,8 +38,8 @@
             android:id="@+id/inputExtractAccessories"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:paddingLeft="10dip"
-            android:paddingRight="10dip"
+            android:paddingLeft="8dip"
+            android:paddingRight="8dip"
             android:background="@android:drawable/keyboard_accessory_bg_landscape"
         >
         
@@ -48,7 +48,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             />
+        <android.inputmethodservice.ExtractButton android:id="@+id/inputExtractEditButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/extract_edit_menu_button"
+            android:visibility="invisible"
+            />
             
     </FrameLayout>
     
-</LinearLayout>
+</android.inputmethodservice.ExtractEditLayout>

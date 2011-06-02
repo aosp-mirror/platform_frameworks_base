@@ -362,8 +362,8 @@ public class ActionBarImpl extends ActionBar {
         }
 
         mContextView.killMode();
-        ActionMode mode = new ActionModeImpl(callback);
-        if (callback.onCreateActionMode(mode, mode.getMenu())) {
+        ActionModeImpl mode = new ActionModeImpl(callback);
+        if (mode.dispatchOnCreate()) {
             mWasHiddenBeforeMode = !isShowing();
             mode.invalidate();
             mContextView.initForMode(mode);
@@ -633,8 +633,20 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public void invalidate() {
-            if (mCallback.onPrepareActionMode(this, mMenu)) {
-                // Refresh content in both context views
+            mMenu.stopDispatchingItemsChanged();
+            try {
+                mCallback.onPrepareActionMode(this, mMenu);
+            } finally {
+                mMenu.startDispatchingItemsChanged();
+            }
+        }
+
+        public boolean dispatchOnCreate() {
+            mMenu.stopDispatchingItemsChanged();
+            try {
+                return mCallback.onCreateActionMode(this, mMenu);
+            } finally {
+                mMenu.startDispatchingItemsChanged();
             }
         }
 
