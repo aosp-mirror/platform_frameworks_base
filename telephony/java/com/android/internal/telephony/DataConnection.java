@@ -142,7 +142,7 @@ public abstract class DataConnection extends StateMachine {
         static {
             sErrorCodeToFailCauseMap = new HashMap<Integer, FailCause>();
             for (FailCause fc : values()) {
-                sErrorCodeToFailCauseMap.put(fc.ordinal(), fc);
+                sErrorCodeToFailCauseMap.put(fc.getErrorCode(), fc);
             }
         }
 
