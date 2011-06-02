@@ -330,6 +330,22 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public int flags = 0;
     
     /**
+     * The required smallest screen width the application can run on.  If 0,
+     * nothing has been specified.  Comes from
+     * {@link android.R.styleable#AndroidManifestSupportsScreens_requiresSmallestWidthDp
+     * android:requiresSmallestWidthDp} attribute of the &lt;supports-screens&gt; tag.
+     */
+    public int requiresSmallestWidthDp = 0;
+
+    /**
+     * The maximum smallest screen width the application is designed for.  If 0,
+     * nothing has been specified.  Comes from
+     * {@link android.R.styleable#AndroidManifestSupportsScreens_compatibleWidthLimitDp
+     * android:compatibleWidthLimitDp} attribute of the &lt;supports-screens&gt; tag.
+     */
+    public int compatibleWidthLimitDp = 0;
+
+    /**
      * Full path to the location of this package.
      */
     public String sourceDir;
@@ -410,6 +426,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         pw.println(prefix + "taskAffinity=" + taskAffinity);
         pw.println(prefix + "uid=" + uid + " flags=0x" + Integer.toHexString(flags)
                 + " theme=0x" + Integer.toHexString(theme));
+        pw.println(prefix + "requiresSmallestWidthDp=" + requiresSmallestWidthDp
+                + " compatibleWidthLimitDp=" + compatibleWidthLimitDp);
         pw.println(prefix + "sourceDir=" + sourceDir);
         if (sourceDir == null) {
             if (publicSourceDir != null) {
@@ -469,6 +487,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         className = orig.className;
         theme = orig.theme;
         flags = orig.flags;
+        requiresSmallestWidthDp = orig.requiresSmallestWidthDp;
+        compatibleWidthLimitDp = orig.compatibleWidthLimitDp;
         sourceDir = orig.sourceDir;
         publicSourceDir = orig.publicSourceDir;
         nativeLibraryDir = orig.nativeLibraryDir;
@@ -502,6 +522,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(className);
         dest.writeInt(theme);
         dest.writeInt(flags);
+        dest.writeInt(requiresSmallestWidthDp);
+        dest.writeInt(compatibleWidthLimitDp);
         dest.writeString(sourceDir);
         dest.writeString(publicSourceDir);
         dest.writeString(nativeLibraryDir);
@@ -536,6 +558,8 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         className = source.readString();
         theme = source.readInt();
         flags = source.readInt();
+        requiresSmallestWidthDp = source.readInt();
+        compatibleWidthLimitDp = source.readInt();
         sourceDir = source.readString();
         publicSourceDir = source.readString();
         nativeLibraryDir = source.readString();

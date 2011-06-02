@@ -1019,6 +1019,30 @@
          <p>This appears as a child tag of the
          {@link #AndroidManifest manifest} tag. -->
     <declare-styleable name="AndroidManifestSupportsScreens" parent="AndroidManifest">
+        <!-- Starting with {@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2},
+             this is the new way to specify the screens an application is
+             compatible with.  This attribute provides the required minimum
+             "smallest screen width" (as per the -swNNNdp resource configuration)
+             that the application can run on.  For example, a typical phone
+             screen is 320, a 7" tablet 600, and a 10" tablet 720.  If the
+             smallest screen width of the device is below the value supplied here,
+             then the application is considered incompatible with that device.
+             If not supplied, then any old smallScreens, normalScreens, largeScreens,
+             or xlargeScreens attributes will be used instead. -->
+        <attr name="requiresSmallestWidthDp" format="integer" />
+        <!-- Starting with {@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2},
+             this is the new way to specify the screens an application is
+             compatible with.  This attribute provides the maximum
+             "smallest screen width" (as per the -swNNNdp resource configuration)
+             that the application is designed for.  If this value is smaller than
+             the "smallest screen width" of the device it is running on, the user
+             will of offered to run it in a compatibility mode that emulates a
+             smaller screen.  Currently the compatibility mode only emulates
+             phone screens, so it will not be used it the application provides
+             a requiresSmallestWidthDp that is larger than 320.  Typical values
+             used with this attribute are 320 for a phone screen, 600 for a
+             7" tablet, and 720 for a 10" tablet. -->
+        <attr name="compatibleWidthLimitDp" format="integer" />
         <!-- Indicates whether the application supports smaller screen form-factors.
              A small screen is defined as one with a smaller aspect ratio than
              the traditional HVGA screen; that is, for a portrait screen, less
