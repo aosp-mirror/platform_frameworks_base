@@ -549,10 +549,10 @@ final class ActivityStack {
             r.sleeping = false;
             r.forceNewConfig = false;
             showAskCompatModeDialogLocked(r);
+            r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
                     System.identityHashCode(r),
-                    r.info, mService.compatibilityInfoForPackageLocked(r.info.applicationInfo),
-                    r.icicle, results, newIntents, !andResume,
+                    r.info, r.compat, r.icicle, results, newIntents, !andResume,
                     mService.isNextTransitionForward());
             
             if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {

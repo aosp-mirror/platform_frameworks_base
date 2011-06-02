@@ -63,37 +63,19 @@ public class CompatibilityInfo implements Parcelable {
     private static final int SCALING_REQUIRED = 1; 
 
     /**
-     * Has the application said that its UI is expandable?  Based on the
-     * <supports-screen> android:expandible in the manifest.
-     */
-    private static final int EXPANDABLE = 2;
-    
-    /**
-     * Has the application said that its UI supports large screens?  Based on the
-     * <supports-screen> android:largeScreens in the manifest.
-     */
-    private static final int LARGE_SCREENS = 8;
-    
-    /**
-     * Has the application said that its UI supports xlarge screens?  Based on the
-     * <supports-screen> android:xlargeScreens in the manifest.
-     */
-    private static final int XLARGE_SCREENS = 32;
-    
-    /**
      * Application must always run in compatibility mode?
      */
-    private static final int ALWAYS_COMPAT = 64;
+    private static final int ALWAYS_NEEDS_COMPAT = 2;
 
     /**
      * Application never should run in compatibility mode?
      */
-    private static final int NEVER_COMPAT = 128;
+    private static final int NEVER_NEEDS_COMPAT = 4;
 
     /**
      * Set if the application needs to run in screen size compatibility mode.
      */
-    private static final int NEEDS_SCREEN_COMPAT = 256;
+    private static final int NEEDS_SCREEN_COMPAT = 8;
 
     /**
      * The effective screen density we have selected for this application.
@@ -127,7 +109,7 @@ public class CompatibilityInfo implements Parcelable {
             }
 
             if (compat >= sw) {
-                compatFlags |= NEVER_COMPAT;
+                compatFlags |= NEVER_NEEDS_COMPAT;
             } else if (forceCompat) {
                 compatFlags |= NEEDS_SCREEN_COMPAT;
             }
@@ -138,29 +120,49 @@ public class CompatibilityInfo implements Parcelable {
             applicationInvertedScale = 1.0f;
 
         } else {
+            /**
+             * Has the application said that its UI is expandable?  Based on the
+             * <supports-screen> android:expandible in the manifest.
+             */
+            final int EXPANDABLE = 2;
+
+            /**
+             * Has the application said that its UI supports large screens?  Based on the
+             * <supports-screen> android:largeScreens in the manifest.
+             */
+            final int LARGE_SCREENS = 8;
+
+            /**
+             * Has the application said that its UI supports xlarge screens?  Based on the
+             * <supports-screen> android:xlargeScreens in the manifest.
+             */
+            final int XLARGE_SCREENS = 32;
+
+            int sizeInfo = 0;
+
             // We can't rely on the application always setting
             // FLAG_RESIZEABLE_FOR_SCREENS so will compute it based on various input.
             boolean anyResizeable = false;
 
             if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
-                compatFlags |= LARGE_SCREENS;
+                sizeInfo |= LARGE_SCREENS;
                 anyResizeable = true;
                 if (!forceCompat) {
                     // If we aren't forcing the app into compatibility mode, then
                     // assume if it supports large screens that we should allow it
                     // to use the full space of an xlarge screen as well.
-                    compatFlags |= XLARGE_SCREENS | EXPANDABLE;
+                    sizeInfo |= XLARGE_SCREENS | EXPANDABLE;
                 }
             }
             if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
                 anyResizeable = true;
                 if (!forceCompat) {
-                    compatFlags |= XLARGE_SCREENS | EXPANDABLE;
+                    sizeInfo |= XLARGE_SCREENS | EXPANDABLE;
                 }
             }
             if ((appInfo.flags & ApplicationInfo.FLAG_RESIZEABLE_FOR_SCREENS) != 0) {
                 anyResizeable = true;
-                compatFlags |= EXPANDABLE;
+                sizeInfo |= EXPANDABLE;
             }
 
             if (forceCompat) {
@@ -168,41 +170,35 @@ public class CompatibilityInfo implements Parcelable {
                 // just says it is resizable for screens.  We'll only have it fill
                 // the screen if it explicitly says it supports the screen size we
                 // are running in.
-                compatFlags &= ~EXPANDABLE;
+                sizeInfo &= ~EXPANDABLE;
             }
 
-            boolean supportsScreen = false;
+            compatFlags |= NEEDS_SCREEN_COMPAT;
             switch (screenLayout&Configuration.SCREENLAYOUT_SIZE_MASK) {
                 case Configuration.SCREENLAYOUT_SIZE_XLARGE:
-                    if ((compatFlags&XLARGE_SCREENS) != 0) {
-                        supportsScreen = true;
+                    if ((sizeInfo&XLARGE_SCREENS) != 0) {
+                        compatFlags &= ~NEEDS_SCREEN_COMPAT;
                     }
                     if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_XLARGE_SCREENS) != 0) {
-                        compatFlags |= NEVER_COMPAT;
+                        compatFlags |= NEVER_NEEDS_COMPAT;
                     }
                     break;
                 case Configuration.SCREENLAYOUT_SIZE_LARGE:
-                    if ((compatFlags&LARGE_SCREENS) != 0) {
-                        supportsScreen = true;
+                    if ((sizeInfo&LARGE_SCREENS) != 0) {
+                        compatFlags &= ~NEEDS_SCREEN_COMPAT;
                     }
                     if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_LARGE_SCREENS) != 0) {
-                        compatFlags |= NEVER_COMPAT;
+                        compatFlags |= NEVER_NEEDS_COMPAT;
                     }
                     break;
             }
 
             if ((screenLayout&Configuration.SCREENLAYOUT_COMPAT_NEEDED) != 0) {
-                if ((compatFlags&EXPANDABLE) != 0) {
-                    supportsScreen = true;
+                if ((sizeInfo&EXPANDABLE) != 0) {
+                    compatFlags &= ~NEEDS_SCREEN_COMPAT;
                 } else if (!anyResizeable) {
-                    compatFlags |= ALWAYS_COMPAT;
+                    compatFlags |= ALWAYS_NEEDS_COMPAT;
                 }
-            }
-
-            if (supportsScreen) {
-                compatFlags &= ~NEEDS_SCREEN_COMPAT;
-            } else {
-                compatFlags |= NEEDS_SCREEN_COMPAT;
             }
 
             if ((appInfo.flags & ApplicationInfo.FLAG_SUPPORTS_SCREEN_DENSITIES) != 0) {
@@ -230,8 +226,7 @@ public class CompatibilityInfo implements Parcelable {
     }
 
     private CompatibilityInfo() {
-        this(XLARGE_SCREENS | LARGE_SCREENS | EXPANDABLE,
-                DisplayMetrics.DENSITY_DEVICE,
+        this(NEVER_NEEDS_COMPAT, DisplayMetrics.DENSITY_DEVICE,
                 1.0f,
                 1.0f);
     }
@@ -240,7 +235,7 @@ public class CompatibilityInfo implements Parcelable {
      * @return true if the scaling is required
      */
     public boolean isScalingRequired() {
-        return (mCompatibilityFlags & SCALING_REQUIRED) != 0;
+        return (mCompatibilityFlags&SCALING_REQUIRED) != 0;
     }
     
     public boolean supportsScreen() {
@@ -248,16 +243,11 @@ public class CompatibilityInfo implements Parcelable {
     }
     
     public boolean neverSupportsScreen() {
-        return (mCompatibilityFlags&NEVER_COMPAT) != 0;
+        return (mCompatibilityFlags&NEVER_NEEDS_COMPAT) != 0;
     }
 
     public boolean alwaysSupportsScreen() {
-        return (mCompatibilityFlags&ALWAYS_COMPAT) != 0;
-    }
-
-    @Override
-    public String toString() {
-        return "CompatibilityInfo{scale=" + applicationScale + "}";
+        return (mCompatibilityFlags&ALWAYS_NEEDS_COMPAT) != 0;
     }
 
     /**
@@ -513,6 +503,28 @@ public class CompatibilityInfo implements Parcelable {
         } catch (ClassCastException e) {
             return false;
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("{");
+        sb.append(applicationDensity);
+        sb.append("dpi");
+        if (isScalingRequired()) {
+            sb.append(" scaling");
+        }
+        if (!supportsScreen()) {
+            sb.append(" resizing");
+        }
+        if (neverSupportsScreen()) {
+            sb.append(" never-compat");
+        }
+        if (alwaysSupportsScreen()) {
+            sb.append(" always-compat");
+        }
+        sb.append("}");
+        return sb.toString();
     }
 
     @Override

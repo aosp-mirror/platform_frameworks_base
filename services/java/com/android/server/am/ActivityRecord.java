@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -79,6 +80,7 @@ final class ActivityRecord extends IApplicationToken.Stub {
     long startTime;         // last time this activity was started
     long cpuTimeAtResume;   // the cpu time of host process at the time of resuming activity
     Configuration configuration; // configuration activity was last running in
+    CompatibilityInfo compat;// last used compatibility mode
     ActivityRecord resultTo; // who started this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
     final int requestCode;  // code given by requester (resultTo)
@@ -137,6 +139,7 @@ final class ActivityRecord extends IApplicationToken.Stub {
                 pw.print(" componentSpecified="); pw.print(componentSpecified);
                 pw.print(" isHomeActivity="); pw.println(isHomeActivity);
         pw.print(prefix); pw.print("config="); pw.println(configuration);
+        pw.print(prefix); pw.print("compat="); pw.println(compat);
         if (resultTo != null || resultWho != null) {
             pw.print(prefix); pw.print("resultTo="); pw.print(resultTo);
                     pw.print(" resultWho="); pw.print(resultWho);
