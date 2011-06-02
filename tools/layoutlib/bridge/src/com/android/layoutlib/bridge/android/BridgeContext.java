@@ -69,7 +69,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -337,7 +336,7 @@ public final class BridgeContext extends Activity {
                 try {
                     KXmlParser parser = new KXmlParser();
                     parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                    parser.setInput(new FileReader(xml));
+                    parser.setInput(new FileInputStream(xml), "UTF-8"); //$NON-NLS-1$);
 
                     // set the resource ref to have correct view cookies
                     mBridgeInflater.setResourceReference(resource);

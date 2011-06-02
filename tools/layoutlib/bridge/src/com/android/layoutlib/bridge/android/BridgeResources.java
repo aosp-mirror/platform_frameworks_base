@@ -46,7 +46,6 @@ import android.view.ViewGroup.LayoutParams;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.InputStream;
 
 /**
@@ -244,7 +243,7 @@ public final class BridgeResources extends Resources {
                         // give that to our XmlBlockParser
                         parser = new KXmlParser();
                         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                        parser.setInput(new FileReader(xml));
+                        parser.setInput(new FileInputStream(xml), "UTF-8"); //$NON-NLS-1$);
                     }
                 }
 
@@ -282,7 +281,7 @@ public final class BridgeResources extends Resources {
                     // give that to our XmlBlockParser
                     parser = new KXmlParser();
                     parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                    parser.setInput(new FileReader(xml));
+                    parser.setInput(new FileInputStream(xml), "UTF-8"); //$NON-NLS-1$);
 
                     return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
                 }
@@ -501,7 +500,7 @@ public final class BridgeResources extends Resources {
                     try {
                         KXmlParser parser = new KXmlParser();
                         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                        parser.setInput(new FileReader(f));
+                        parser.setInput(new FileInputStream(f), "UTF-8"); //$NON-NLS-1$);
 
                         return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
                     } catch (XmlPullParserException e) {
@@ -536,7 +535,7 @@ public final class BridgeResources extends Resources {
         try {
             KXmlParser parser = new KXmlParser();
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-            parser.setInput(new FileReader(f));
+            parser.setInput(new FileInputStream(f), "UTF-8"); //$NON-NLS-1$);
 
             return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
         } catch (XmlPullParserException e) {

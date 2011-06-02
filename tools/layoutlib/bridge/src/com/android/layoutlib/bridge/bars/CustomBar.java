@@ -73,7 +73,7 @@ abstract class CustomBar extends LinearLayout {
         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
         parser.setInput(
                 getClass().getResourceAsStream(layoutPath),
-                "UTF8");
+                "UTF8"); //$NON-NLS-1$
 
         BridgeXmlBlockParser bridgeParser = new BridgeXmlBlockParser(
                 parser, (BridgeContext) context, false /*platformFile*/);

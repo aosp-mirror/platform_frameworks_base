@@ -40,7 +40,7 @@ import android.view.LayoutInflater_Delegate;
 import android.view.ViewGroup.LayoutParams;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -316,7 +316,7 @@ public final class BridgeTypedArray extends TypedArray {
             try {
                 KXmlParser parser = new KXmlParser();
                 parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                parser.setInput(new FileReader(f));
+                parser.setInput(new FileInputStream(f), "UTF-8"); //$NON-NLS-1$);
 
                 BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
                         parser, mContext, resValue.isFramework());
