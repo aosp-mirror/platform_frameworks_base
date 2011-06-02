@@ -315,9 +315,9 @@ status_t AudioRecord::start()
             cblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
             cblk->waitTimeMs = 0;
             if (t != 0) {
-               t->run("ClientRecordThread", THREAD_PRIORITY_AUDIO_CLIENT);
+               t->run("ClientRecordThread", ANDROID_PRIORITY_AUDIO);
             } else {
-                setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
+                setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_AUDIO);
             }
         } else {
             mActive = 0;

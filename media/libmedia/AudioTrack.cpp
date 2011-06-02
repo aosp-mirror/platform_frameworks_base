@@ -342,9 +342,9 @@ void AudioTrack::start()
         cblk->waitTimeMs = 0;
         android_atomic_and(~CBLK_DISABLED_ON, &cblk->flags);
         if (t != 0) {
-           t->run("AudioTrackThread", THREAD_PRIORITY_AUDIO_CLIENT);
+           t->run("AudioTrackThread", ANDROID_PRIORITY_AUDIO);
         } else {
-            setpriority(PRIO_PROCESS, 0, THREAD_PRIORITY_AUDIO_CLIENT);
+            setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_AUDIO);
         }
 
         LOGV("start %p before lock cblk %p", this, mCblk);
