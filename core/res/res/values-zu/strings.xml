@@ -1154,6 +1154,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Uhlelo lokusebenza luqondisiwe futhi"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> iyasebenza."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> iqalisiwe."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Inqubo <xliff:g id="APPLICATION">%1$s</xliff:g> (yohlelo lokusebenza <xliff:g id="PROCESS">%2$s</xliff:g>) iphule inqubomgomo oziphoqelela yona Yemodi Ebukhali."</string>
     <string name="smv_process" msgid="5120397012047462446">"Inqubo <xliff:g id="PROCESS">%1$s</xliff:g> yephule inqubomgomo yokuziphoqelela Yemodi Ebukhali."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> iyasebenza"</string>
@@ -1422,5 +1428,7 @@
     <!-- no translation found for storage_sd_card (8921771478629812343) -->
     <skip />
     <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
+    <!-- no translation found for extract_edit_menu_button (302060189057163906) -->
     <skip />
 </resources>

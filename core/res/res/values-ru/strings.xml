@@ -449,7 +449,7 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"управлять радиосвязью ближнего действия"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Позволяет приложению обмениваться данными с метками, картами и считывателями через радиосвязь ближнего действия (NFC)."</string>
     <string name="permlab_vpn" msgid="8345800584532175312">"перехватывать и изменять сетевой трафик"</string>
-    <string name="permdesc_vpn" msgid="5617893078989944219">"Позволяет приложению перехватывать и проверять весь сетевой трафик, например, чтобы установить соединение VPN. Вредоносное ПО может отслеживать, перенаправлять или изменять сетевые пакеты без вашего ведома."</string>
+    <string name="permdesc_vpn" msgid="5617893078989944219">"Позволяет приложению перехватывать и проверять весь сетевой трафик, например чтобы установить соединение VPN. Вредоносное ПО может отслеживать, перенаправлять или изменять сетевые пакеты без вашего ведома."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"отключать блокировку клавиатуры"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Позволяет приложению отключить блокировку клавиатуры и другие функции защиты паролем. Примером допустимого использования этой функции является отключение блокировки клавиатуры при получении входящего вызова и включение блокировки после завершения разговора."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"считывать настройки синхронизации"</string>
@@ -836,6 +836,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Приложение перенаправлено"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Приложение <xliff:g id="APP_NAME">%1$s</xliff:g> выполняется."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Изначально было запущено приложение <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Приложение <xliff:g id="APPLICATION">%1$s</xliff:g> (процесс <xliff:g id="PROCESS">%2$s</xliff:g>) нарушило собственную политику StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процесс <xliff:g id="PROCESS">%1$s</xliff:g> нарушил собственную политику StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Приложение <xliff:g id="APP">%1$s</xliff:g> запущено"</string>
@@ -1041,4 +1047,6 @@
     <string name="storage_internal" msgid="7556050805474115618">"Внутренняя память"</string>
     <string name="storage_sd_card" msgid="8921771478629812343">"SD-карта"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB-накопитель"</string>
+    <!-- no translation found for extract_edit_menu_button (302060189057163906) -->
+    <skip />
 </resources>
