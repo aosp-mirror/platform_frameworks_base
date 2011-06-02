@@ -1938,11 +1938,6 @@ public class PackageParser {
             a.info.configChanges = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_configChanges,
                     0);
-            if (owner.applicationInfo.targetSdkVersion
-                        < android.os.Build.VERSION_CODES.HONEYCOMB_MR2) {
-                a.info.configChanges |= ActivityInfo.CONFIG_SCREEN_SIZE
-                        | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
-            }
             a.info.softInputMode = sa.getInt(
                     com.android.internal.R.styleable.AndroidManifestActivity_windowSoftInputMode,
                     0);

@@ -335,13 +335,25 @@ public class ActivityInfo extends ComponentInfo
     /**
      * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle the screen size. Set from the
-     * {@link android.R.attr#configChanges} attribute.
+     * {@link android.R.attr#configChanges} attribute.  This will be
+     * set by default for applications that target an earlier version
+     * than {@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2}...
+     * <b>however</b>, you will not see the bit set here becomes some
+     * applications incorrectly compare {@link #configChanges} against
+     * an absolute value rather than correctly masking out the bits
+     * they are interested in.  Please don't do that, thanks.
      */
     public static final int CONFIG_SCREEN_SIZE = 0x0400;
     /**
      * Bit in {@link #configChanges} that indicates that the activity
      * can itself handle the smallest screen size. Set from the
-     * {@link android.R.attr#configChanges} attribute.
+     * {@link android.R.attr#configChanges} attribute.  This will be
+     * set by default for applications that target an earlier version
+     * than {@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2}...
+     * <b>however</b>, you will not see the bit set here becomes some
+     * applications incorrectly compare {@link #configChanges} against
+     * an absolute value rather than correctly masking out the bits
+     * they are interested in.  Please don't do that, thanks.
      */
     public static final int CONFIG_SMALLEST_SCREEN_SIZE = 0x0800;
     /**
@@ -383,6 +395,21 @@ public class ActivityInfo extends ComponentInfo
             }
         }
         return output;
+    }
+
+    /**
+     * @hide
+     * Unfortunately some developers (OpenFeint I am looking at you) have
+     * compared the configChanges bit field against absolute values, so if we
+     * introduce a new bit they break.  To deal with that, we will make sure
+     * the public field will not have a value that breaks them, and let the
+     * framework call here to get the real value.
+     */
+    public int getRealConfigChanged() {
+        return applicationInfo.targetSdkVersion < android.os.Build.VERSION_CODES.HONEYCOMB_MR2
+                ? (configChanges | ActivityInfo.CONFIG_SCREEN_SIZE
+                        | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE)
+                : configChanges;
     }
 
     /**
