@@ -617,8 +617,8 @@ private:
         return NAME_NOT_FOUND;
     }
 
-    virtual void addExcludedDevice(const char* deviceName) {
-        mExcludedDevices.add(String8(deviceName));
+    virtual void setExcludedDevices(const Vector<String8>& devices) {
+        mExcludedDevices = devices;
     }
 
     virtual size_t getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSize) {
@@ -715,6 +715,9 @@ private:
     }
 
     virtual void dump(String8& dump) {
+    }
+
+    virtual void reopenDevices() {
     }
 };
 
