@@ -39,7 +39,7 @@ class StrictModeFlash {
 
     public StrictModeFlash(Display display, SurfaceSession session) {
         final DisplayMetrics dm = new DisplayMetrics();
-        display.getMetrics(dm);
+        display.getRealMetrics(dm);
 
         try {
             mSurface = new Surface(session, 0, "StrictModeFlash", -1, 1, 1, PixelFormat.TRANSLUCENT, 0);
