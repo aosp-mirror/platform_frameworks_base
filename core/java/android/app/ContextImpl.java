@@ -425,9 +425,6 @@ class ContextImpl extends Context {
 
         registerService(WINDOW_SERVICE, new ServiceFetcher() {
                 public Object getService(ContextImpl ctx) {
-                    RuntimeException e = new RuntimeException("foo");
-                    e.fillInStackTrace();
-                    Log.i(TAG, "Getting window manager", e);
                     CompatibilityInfo ci = ctx.mResources.getCompatibilityInfo();
                     return WindowManagerImpl.getDefault(ci);
                 }});
