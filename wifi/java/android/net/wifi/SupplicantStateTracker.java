@@ -98,12 +98,16 @@ class SupplicantStateTracker extends StateMachine {
         if (DBG) Log.d(TAG, "Supplicant state: " + supState.toString() + "\n");
 
         switch (supState) {
-            case DISCONNECTED:
+           case DISCONNECTED:
                 transitionTo(mDisconnectState);
+                break;
+            case INTERFACE_DISABLED:
+                //we should have received a disconnection already, do nothing
                 break;
             case SCANNING:
                 transitionTo(mScanState);
                 break;
+            case AUTHENTICATING:
             case ASSOCIATING:
             case ASSOCIATED:
             case FOUR_WAY_HANDSHAKE:
@@ -250,10 +254,7 @@ class SupplicantStateTracker extends StateMachine {
                 case WifiStateMachine.SUPPLICANT_STATE_CHANGE_EVENT:
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
                     SupplicantState state = stateChangeResult.state;
-                    if (state == SupplicantState.ASSOCIATING ||
-                            state == SupplicantState.ASSOCIATED ||
-                            state == SupplicantState.FOUR_WAY_HANDSHAKE ||
-                            state == SupplicantState.GROUP_HANDSHAKE) {
+                    if (SupplicantState.isHandshakeState(state)) {
                         if (mLoopDetectIndex > state.ordinal()) {
                             mLoopDetectCount++;
                         }
@@ -296,12 +297,11 @@ class SupplicantStateTracker extends StateMachine {
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
                     SupplicantState state = stateChangeResult.state;
                     sendSupplicantStateChangedBroadcast(state, mAuthFailureInSupplicantBroadcast);
-                    /* Ignore a re-auth in completed state */
-                    if (state == SupplicantState.ASSOCIATING ||
-                            state == SupplicantState.ASSOCIATED ||
-                            state == SupplicantState.FOUR_WAY_HANDSHAKE ||
-                            state == SupplicantState.GROUP_HANDSHAKE ||
-                            state == SupplicantState.COMPLETED) {
+                    /* Ignore any connecting state in completed state. Group re-keying
+                     * events and other auth events that do not affect connectivity are
+                     * ignored
+                     */
+                    if (SupplicantState.isConnecting(state)) {
                         break;
                     }
                     transitionOnSupplicantStateChange(stateChangeResult);

@@ -39,6 +39,15 @@ public enum SupplicantState implements Parcelable {
     DISCONNECTED,
 
     /**
+     * Interface is disabled
+     * <p/>
+     * This state is entered if the network interface is disabled.
+     * wpa_supplicant refuses any new operations that would
+     * use the radio until the interface has been enabled.
+     */
+    INTERFACE_DISABLED,
+
+    /**
      * Inactive state (wpa_supplicant disabled).
      * <p/>
      * This state is entered if there are no enabled networks in the
@@ -55,6 +64,15 @@ public enum SupplicantState implements Parcelable {
      * network.
      */
     SCANNING,
+
+    /**
+     * Trying to authenticate with a BSS/SSID
+     * <p/>
+     * This state is entered when wpa_supplicant has found a suitable BSS
+     * to authenticate with and the driver is configured to try to
+     * authenticate with this BSS.
+     */
+    AUTHENTICATING,
 
     /**
      * Trying to associate with a BSS/SSID.
@@ -152,8 +170,33 @@ public enum SupplicantState implements Parcelable {
         return state != UNINITIALIZED && state != INVALID;
     }
 
+
+    /* Supplicant associating or authenticating is considered a handshake state */
+    static boolean isHandshakeState(SupplicantState state) {
+        switch(state) {
+            case AUTHENTICATING:
+            case ASSOCIATING:
+            case ASSOCIATED:
+            case FOUR_WAY_HANDSHAKE:
+            case GROUP_HANDSHAKE:
+                return true;
+            case COMPLETED:
+            case DISCONNECTED:
+            case INTERFACE_DISABLED:
+            case INACTIVE:
+            case SCANNING:
+            case DORMANT:
+            case UNINITIALIZED:
+            case INVALID:
+                return false;
+            default:
+                throw new IllegalArgumentException("Unknown supplicant state");
+        }
+    }
+
     static boolean isConnecting(SupplicantState state) {
         switch(state) {
+            case AUTHENTICATING:
             case ASSOCIATING:
             case ASSOCIATED:
             case FOUR_WAY_HANDSHAKE:
@@ -161,6 +204,7 @@ public enum SupplicantState implements Parcelable {
             case COMPLETED:
                 return true;
             case DISCONNECTED:
+            case INTERFACE_DISABLED:
             case INACTIVE:
             case SCANNING:
             case DORMANT:
