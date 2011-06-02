@@ -24,8 +24,8 @@ import android.util.Log;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -43,7 +43,7 @@ public class SQLiteQueryBuilder
     private StringBuilder mWhereClause = null;  // lazily created
     private boolean mDistinct;
     private SQLiteDatabase.CursorFactory mFactory;
-    private boolean mStrictProjectionMap;
+    private boolean mStrict;
 
     public SQLiteQueryBuilder() {
         mDistinct = false;
@@ -145,10 +145,37 @@ public class SQLiteQueryBuilder
     }
 
     /**
+     * Need to keep this to not break the build until ContactsProvider2 has been changed to
+     * use the new API
+     * TODO: Remove this
      * @hide
      */
     public void setStrictProjectionMap(boolean flag) {
-        mStrictProjectionMap = flag;
+    }
+
+    /**
+     * When set, the selection is verified against malicious arguments.
+     * When using this class to create a statement using
+     * {@link #buildQueryString(boolean, String, String[], String, String, String, String, String)},
+     * non-numeric limits will raise an exception. If a projection map is specified, fields
+     * not in that map will be ignored.
+     * If this class is used to execute the statement directly using
+     * {@link #query(SQLiteDatabase, String[], String, String[], String, String, String)}
+     * or
+     * {@link #query(SQLiteDatabase, String[], String, String[], String, String, String, String)},
+     * additionally also parenthesis escaping selection are caught.
+     *
+     * To summarize: To get maximum protection against malicious third party apps (for example
+     * content provider consumers), make sure to do the following:
+     * <ul>
+     * <li>Set this value to true</li>
+     * <li>Use a projection map</li>
+     * <li>Use one of the query overloads instead of getting the statement as a sql string</li>
+     * </ul>
+     * By default, this value is false.
+     */
+    public void setStrict(boolean flag) {
+        mStrict = flag;
     }
 
     /**
@@ -214,13 +241,6 @@ public class SQLiteQueryBuilder
         if (!TextUtils.isEmpty(clause)) {
             s.append(name);
             s.append(clause);
-        }
-    }
-
-    private static void appendClauseEscapeClause(StringBuilder s, String name, String clause) {
-        if (!TextUtils.isEmpty(clause)) {
-            s.append(name);
-            DatabaseUtils.appendEscapedSQLString(s, clause);
         }
     }
 
@@ -320,6 +340,19 @@ public class SQLiteQueryBuilder
             return null;
         }
 
+        if (mStrict && selection != null && selection.length() > 0) {
+            // Validate the user-supplied selection to detect syntactic anomalies
+            // in the selection string that could indicate a SQL injection attempt.
+            // The idea is to ensure that the selection clause is a valid SQL expression
+            // by compiling it twice: once wrapped in parentheses and once as
+            // originally specified. An attacker cannot create an expression that
+            // would escape the SQL expression while maintaining balanced parentheses
+            // in both the wrapped and original forms.
+            String sqlForValidation = buildQuery(projectionIn, "(" + selection + ")", groupBy,
+                    having, sortOrder, limit);
+            validateSql(db, sqlForValidation); // will throw if query is invalid
+        }
+
         String sql = buildQuery(
                 projectionIn, selection, groupBy, having,
                 sortOrder, limit);
@@ -329,7 +362,20 @@ public class SQLiteQueryBuilder
         }
         return db.rawQueryWithFactory(
                 mFactory, sql, selectionArgs,
-                SQLiteDatabase.findEditTable(mTables));
+                SQLiteDatabase.findEditTable(mTables)); // will throw if query is invalid
+    }
+
+    /**
+     * Verifies that a SQL statement is valid by compiling it.
+     * If the SQL statement is not valid, this method will throw a {@link SQLiteException}.
+     */
+    private void validateSql(SQLiteDatabase db, String sql) {
+        db.lock(sql);
+        try {
+            new SQLiteCompiledSql(db, sql).releaseSqlStatement();
+        } finally {
+            db.unlock();
+        }
     }
 
     /**
@@ -541,7 +587,7 @@ public class SQLiteQueryBuilder
                         continue;
                     }
 
-                    if (!mStrictProjectionMap &&
+                    if (!mStrict &&
                             ( userColumn.contains(" AS ") || userColumn.contains(" as "))) {
                         /* A column alias already exist */
                         projection[i] = userColumn;
