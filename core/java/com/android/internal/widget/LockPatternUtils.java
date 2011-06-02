@@ -397,13 +397,17 @@ public class LockPatternUtils {
             }
             raf.close();
             DevicePolicyManager dpm = getDevicePolicyManager();
+            KeyStore keyStore = KeyStore.getInstance();
             if (pattern != null) {
-                KeyStore.getInstance().password(patternToString(pattern));
+                keyStore.password(patternToString(pattern));
                 setBoolean(PATTERN_EVER_CHOSEN_KEY, true);
                 setLong(PASSWORD_TYPE_KEY, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_SOMETHING, pattern
                         .size(), 0, 0, 0, 0, 0, 0);
             } else {
+                if (keyStore.isEmpty()) {
+                    keyStore.reset();
+                }
                 dpm.setActivePasswordState(DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0,
                         0, 0, 0, 0, 0);
             }
@@ -486,12 +490,13 @@ public class LockPatternUtils {
             }
             raf.close();
             DevicePolicyManager dpm = getDevicePolicyManager();
+            KeyStore keyStore = KeyStore.getInstance();
             if (password != null) {
                 // Update the encryption password.
                 updateEncryptionPassword(password);
 
                 // Update the keystore password
-                KeyStore.getInstance().password(password);
+                keyStore.password(password);
 
                 int computedQuality = computePasswordQuality(password);
                 setLong(PASSWORD_TYPE_KEY, Math.max(quality, computedQuality));
@@ -545,6 +550,11 @@ public class LockPatternUtils {
                 }
                 setString(PASSWORD_HISTORY_KEY, passwordHistory);
             } else {
+                // Conditionally reset the keystore if empty. If
+                // non-empty, we are just switching key guard type
+                if (keyStore.isEmpty()) {
+                    keyStore.reset();
+                }
                 dpm.setActivePasswordState(
                         DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED, 0, 0, 0, 0, 0, 0, 0);
             }

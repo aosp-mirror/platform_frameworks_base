@@ -392,9 +392,7 @@ public:
             return false;
         }
         while ((file = readdir(dir)) != NULL) {
-            if (isKeyFile(file->d_name)) {
-                unlink(file->d_name);
-            }
+            unlink(file->d_name);
         }
         closedir(dir);
         return true;
