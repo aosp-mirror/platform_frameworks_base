@@ -205,28 +205,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return (apnContext.getDataConnection() != null);
     }
 
-    /**
-     * The only circumstances under which we report that data connectivity is not
-     * possible are
-     * <ul>
-     * <li>Data is disallowed (roaming, power state, voice call, etc).</li>
-     * <li>The current data state is {@code DISCONNECTED} for a reason other than
-     * having explicitly disabled connectivity. In other words, data is not available
-     * because the phone is out of coverage or some like reason.</li>
-     * </ul>
-     * @return {@code true} if data connectivity is possible, {@code false} otherwise.
-     * TODO - do per-apn notifications of availability using dependencyMet values.
-     */
-    @Override
-    protected boolean isDataPossible() {
-        boolean possible = (isDataAllowed()
-                && !(getAnyDataEnabled() && (getOverallState() == State.FAILED)));
-        if (!possible && DBG && isDataAllowed()) {
-            if (DBG) log("Data not possible.  No coverage: dataState = " + getOverallState());
-        }
-        return possible;
-    }
-
     @Override
     protected boolean isDataPossible(String apnType) {
         ApnContext apnContext = mApnContexts.get(apnType);
