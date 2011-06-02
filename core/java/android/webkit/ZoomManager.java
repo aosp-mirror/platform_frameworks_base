@@ -1006,8 +1006,9 @@ class ZoomManager {
         boolean mobileSiteInOverview = mInZoomOverview &&
                 !exceedsMinScaleIncrement(newZoomOverviewScale, 1.0f);
         if (!mWebView.drawHistory() &&
-                (mInitialZoomOverview || scaleLessThanOverview || mobileSiteInOverview) &&
-                scaleHasDiff && zoomOverviewWidthChanged) {
+            (scaleLessThanOverview ||
+                ((mInitialZoomOverview || mobileSiteInOverview) &&
+                    scaleHasDiff && zoomOverviewWidthChanged))) {
             mInitialZoomOverview = false;
             setZoomScale(newZoomOverviewScale, !willScaleTriggerZoom(mTextWrapScale) &&
                 !mWebView.getSettings().getUseFixedViewport());
