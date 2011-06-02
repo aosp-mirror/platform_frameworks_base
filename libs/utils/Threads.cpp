@@ -168,6 +168,9 @@ int androidCreateRawThreadEtc(android_thread_func_t entryFunction,
         return 0;
     }
 
+    // Note that *threadID is directly available to the parent only, as it is
+    // assigned after the child starts.  Use memory barrier / lock if the child
+    // or other threads also need access.
     if (threadId != NULL) {
         *threadId = (android_thread_id_t)thread; // XXX: this is not portable
     }
@@ -718,7 +721,6 @@ status_t Thread::run(const char* name, int32_t priority, size_t stack)
         res = androidCreateRawThreadEtc(_threadLoop,
                 this, name, priority, stack, &mThread);
     }
-    // The new thread wakes up at _threadLoop, but immediately blocks on mLock
     
     if (res == false) {
         mStatus = UNKNOWN_ERROR;   // something happened!
@@ -741,11 +743,6 @@ status_t Thread::run(const char* name, int32_t priority, size_t stack)
 int Thread::_threadLoop(void* user)
 {
     Thread* const self = static_cast<Thread*>(user);
-
-    // force a memory barrier before reading any fields, in particular mHoldSelf
-    {
-    Mutex::Autolock _l(self->mLock);
-    }
 
     sp<Thread> strong(self->mHoldSelf);
     wp<Thread> weak(strong);
@@ -816,6 +813,7 @@ void Thread::requestExit()
 
 status_t Thread::requestExitAndWait()
 {
+    Mutex::Autolock _l(mLock);
     if (mThread == getThreadId()) {
         LOGW(
         "Thread (this=%p): don't call waitForExit() from this "
@@ -825,9 +823,8 @@ status_t Thread::requestExitAndWait()
         return WOULD_BLOCK;
     }
     
-    requestExit();
+    mExitPending = true;
 
-    Mutex::Autolock _l(mLock);
     while (mRunning == true) {
         mThreadExitedCondition.wait(mLock);
     }
