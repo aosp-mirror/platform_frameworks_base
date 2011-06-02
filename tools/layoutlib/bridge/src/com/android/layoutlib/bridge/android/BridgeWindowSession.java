@@ -24,7 +24,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.IWindow;
 import android.view.IWindowSession;
-import android.view.InputChannel;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.WindowManager.LayoutParams;
@@ -34,19 +34,6 @@ import android.view.WindowManager.LayoutParams;
  * the {@link SurfaceView}.
  */
 public final class BridgeWindowSession implements IWindowSession {
-
-    public int add(IWindow arg0, LayoutParams arg1, int arg2, Rect arg3,
-            InputChannel outInputchannel)
-            throws RemoteException {
-        // pass for now.
-        return 0;
-    }
-
-    public int addWithoutInputChannel(IWindow arg0, LayoutParams arg1, int arg2, Rect arg3)
-            throws RemoteException {
-        // pass for now.
-        return 0;
-    }
 
     public void finishDrawing(IWindow arg0) throws RemoteException {
         // pass for now.
@@ -112,5 +99,25 @@ public final class BridgeWindowSession implements IWindowSession {
     public void setInsets(IWindow arg0, int arg1, Rect arg2, Rect arg3) throws RemoteException {
         // TODO Auto-generated method stub
 
+    }
+
+    public int add(IWindow arg0, LayoutParams arg1, int arg2, Rect arg3) throws RemoteException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    public void finishKey(IWindow arg0) throws RemoteException {
+        // TODO Auto-generated method stub
+
+    }
+
+    public MotionEvent getPendingPointerMove(IWindow arg0) throws RemoteException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public MotionEvent getPendingTrackballMove(IWindow arg0) throws RemoteException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
