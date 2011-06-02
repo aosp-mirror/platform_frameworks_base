@@ -84,6 +84,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebTextView.AutoCompleteAdapter;
+import android.webkit.WebViewCore.DrawData;
 import android.webkit.WebViewCore.EventHub;
 import android.webkit.WebViewCore.TouchEventData;
 import android.webkit.WebViewCore.TouchHighlightData;
@@ -102,6 +103,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1400,7 +1404,7 @@ public class WebView extends AbsoluteLayout
         return getViewHeightWithTitle() - getVisibleTitleHeight();
     }
 
-    private int getViewHeightWithTitle() {
+    int getViewHeightWithTitle() {
         int height = getHeight();
         if (isHorizontalScrollBarEnabled() && !mOverlayHorizontalScrollbar) {
             height -= getHorizontalScrollbarHeight();
@@ -1783,6 +1787,42 @@ public class WebView extends AbsoluteLayout
             e.printStackTrace();
         }
         return true;
+    }
+
+    /**
+     * Saves the view data to the output stream. The output is highly
+     * version specific, and may not be able to be loaded by newer versions
+     * of WebView.
+     * @param stream The {@link OutputStream} to save to
+     * @return True if saved successfully
+     * @hide
+     */
+    public boolean saveViewState(OutputStream stream) {
+        try {
+            return ViewStateSerializer.serializeViewState(stream, this);
+        } catch (IOException e) {
+            Log.w(LOGTAG, "Failed to saveViewState", e);
+        }
+        return false;
+    }
+
+    /**
+     * Loads the view data from the input stream. See
+     * {@link #saveViewState(OutputStream)} for more information.
+     * @param stream The {@link InputStream} to load from
+     * @return True if loaded successfully
+     * @hide
+     */
+    public boolean loadViewState(InputStream stream) {
+        try {
+            mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
+            DrawData draw = ViewStateSerializer.deserializeViewState(stream, this);
+            setNewPicture(draw);
+            return true;
+        } catch (IOException e) {
+            Log.w(LOGTAG, "Failed to loadViewState", e);
+        }
+        return false;
     }
 
     /**
@@ -4190,6 +4230,10 @@ public class WebView extends AbsoluteLayout
         if (mHTML5VideoViewProxy != null) {
             mHTML5VideoViewProxy.setBaseLayer(layer);
         }
+    }
+
+    int getBaseLayer() {
+        return nativeGetBaseLayer();
     }
 
     private void onZoomAnimationStart() {
@@ -7966,66 +8010,7 @@ public class WebView extends AbsoluteLayout
                 case NEW_PICTURE_MSG_ID: {
                     // called for new content
                     final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
-                    WebViewCore.ViewState viewState = draw.mViewState;
-                    boolean isPictureAfterFirstLayout = viewState != null;
-                    setBaseLayer(draw.mBaseLayer, draw.mInvalRegion,
-                            getSettings().getShowVisualIndicator(),
-                            isPictureAfterFirstLayout);
-                    final Point viewSize = draw.mViewSize;
-                    if (isPictureAfterFirstLayout) {
-                        // Reset the last sent data here since dealing with new page.
-                        mLastWidthSent = 0;
-                        mZoomManager.onFirstLayout(draw);
-                        if (!mDrawHistory) {
-                            // Do not send the scroll event for this particular
-                            // scroll message.  Note that a scroll event may
-                            // still be fired if the user scrolls before the
-                            // message can be handled.
-                            mSendScrollEvent = false;
-                            setContentScrollTo(viewState.mScrollX, viewState.mScrollY);
-                            mSendScrollEvent = true;
-
-                            // As we are on a new page, remove the WebTextView. This
-                            // is necessary for page loads driven by webkit, and in
-                            // particular when the user was on a password field, so
-                            // the WebTextView was visible.
-                            clearTextEntry();
-                        }
-                    }
-
-                    // We update the layout (i.e. request a layout from the
-                    // view system) if the last view size that we sent to
-                    // WebCore matches the view size of the picture we just
-                    // received in the fixed dimension.
-                    final boolean updateLayout = viewSize.x == mLastWidthSent
-                            && viewSize.y == mLastHeightSent;
-                    // Don't send scroll event for picture coming from webkit,
-                    // since the new picture may cause a scroll event to override
-                    // the saved history scroll position.
-                    mSendScrollEvent = false;
-                    recordNewContentSize(draw.mContentSize.x,
-                            draw.mContentSize.y, updateLayout);
-                    mSendScrollEvent = true;
-                    if (DebugFlags.WEB_VIEW) {
-                        Rect b = draw.mInvalRegion.getBounds();
-                        Log.v(LOGTAG, "NEW_PICTURE_MSG_ID {" +
-                                b.left+","+b.top+","+b.right+","+b.bottom+"}");
-                    }
-                    invalidateContentRect(draw.mInvalRegion.getBounds());
-
-                    if (mPictureListener != null) {
-                        mPictureListener.onNewPicture(WebView.this, capturePicture());
-                    }
-
-                    // update the zoom information based on the new picture
-                    mZoomManager.onNewPicture(draw);
-
-                    if (draw.mFocusSizeChanged && inEditingMode()) {
-                        mFocusSizeChanged = true;
-                    }
-                    if (isPictureAfterFirstLayout) {
-                        mViewManager.postReadyToDrawAll();
-                    }
+                    setNewPicture(draw);
                     break;
                 }
                 case WEBCORE_INITIALIZED_MSG_ID:
@@ -8342,6 +8327,69 @@ public class WebView extends AbsoluteLayout
                     super.handleMessage(msg);
                     break;
             }
+        }
+    }
+
+    void setNewPicture(final WebViewCore.DrawData draw) {
+        WebViewCore.ViewState viewState = draw.mViewState;
+        boolean isPictureAfterFirstLayout = viewState != null;
+        setBaseLayer(draw.mBaseLayer, draw.mInvalRegion,
+                getSettings().getShowVisualIndicator(),
+                isPictureAfterFirstLayout);
+        final Point viewSize = draw.mViewSize;
+        if (isPictureAfterFirstLayout) {
+            // Reset the last sent data here since dealing with new page.
+            mLastWidthSent = 0;
+            mZoomManager.onFirstLayout(draw);
+            if (!mDrawHistory) {
+                // Do not send the scroll event for this particular
+                // scroll message.  Note that a scroll event may
+                // still be fired if the user scrolls before the
+                // message can be handled.
+                mSendScrollEvent = false;
+                setContentScrollTo(viewState.mScrollX, viewState.mScrollY);
+                mSendScrollEvent = true;
+
+                // As we are on a new page, remove the WebTextView. This
+                // is necessary for page loads driven by webkit, and in
+                // particular when the user was on a password field, so
+                // the WebTextView was visible.
+                clearTextEntry();
+            }
+        }
+
+        // We update the layout (i.e. request a layout from the
+        // view system) if the last view size that we sent to
+        // WebCore matches the view size of the picture we just
+        // received in the fixed dimension.
+        final boolean updateLayout = viewSize.x == mLastWidthSent
+                && viewSize.y == mLastHeightSent;
+        // Don't send scroll event for picture coming from webkit,
+        // since the new picture may cause a scroll event to override
+        // the saved history scroll position.
+        mSendScrollEvent = false;
+        recordNewContentSize(draw.mContentSize.x,
+                draw.mContentSize.y, updateLayout);
+        mSendScrollEvent = true;
+        if (DebugFlags.WEB_VIEW) {
+            Rect b = draw.mInvalRegion.getBounds();
+            Log.v(LOGTAG, "NEW_PICTURE_MSG_ID {" +
+                    b.left+","+b.top+","+b.right+","+b.bottom+"}");
+        }
+        invalidateContentRect(draw.mInvalRegion.getBounds());
+
+        if (mPictureListener != null) {
+            mPictureListener.onNewPicture(WebView.this, capturePicture());
+        }
+
+        // update the zoom information based on the new picture
+        mZoomManager.onNewPicture(draw);
+
+        if (draw.mFocusSizeChanged && inEditingMode()) {
+            mFocusSizeChanged = true;
+        }
+        if (isPictureAfterFirstLayout) {
+            mViewManager.postReadyToDrawAll();
         }
     }
 
@@ -9047,6 +9095,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native void     nativeSetBaseLayer(int layer, Region invalRegion,
             boolean showVisualIndicator, boolean isPictureAfterFirstLayout);
+    private native int      nativeGetBaseLayer();
     private native void     nativeShowCursorTimed();
     private native void     nativeReplaceBaseContent(int content);
     private native void     nativeCopyBaseContentToPicture(Picture pict);
