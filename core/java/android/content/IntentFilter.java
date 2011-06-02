@@ -16,16 +16,6 @@
 
 package android.content;
 
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
-
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Set;
-
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,6 +25,15 @@ import android.util.Log;
 import android.util.Printer;
 
 import com.android.internal.util.XmlUtils;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Structured description of Intent values to be matched.  An IntentFilter can
@@ -754,7 +753,7 @@ public class IntentFilter implements Parcelable {
     }
 
     /**
-     * Add a new Intent data oath to match against.  The filter must
+     * Add a new Intent data path to match against.  The filter must
      * include one or more schemes (via {@link #addDataScheme}) <em>and</em>
      * one or more authorities (via {@link #addDataAuthority}) for the
      * path to be considered.  If any paths are

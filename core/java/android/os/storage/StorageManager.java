@@ -23,7 +23,6 @@ import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseArray;
 
 import java.lang.ref.WeakReference;
@@ -100,10 +99,11 @@ public class StorageManager
     private final ObbActionListener mObbActionListener = new ObbActionListener();
 
     private class ObbActionListener extends IObbActionListener.Stub {
+        @SuppressWarnings("hiding")
         private SparseArray<ObbListenerDelegate> mListeners = new SparseArray<ObbListenerDelegate>();
 
         @Override
-        public void onObbResult(String filename, int nonce, int status) throws RemoteException {
+        public void onObbResult(String filename, int nonce, int status) {
             final ObbListenerDelegate delegate;
             synchronized (mListeners) {
                 delegate = mListeners.get(nonce);
@@ -147,8 +147,8 @@ public class StorageManager
             mHandler = new Handler(mTgtLooper) {
                 @Override
                 public void handleMessage(Message msg) {
-                    final OnObbStateChangeListener listener = getListener();
-                    if (listener == null) {
+                    final OnObbStateChangeListener changeListener = getListener();
+                    if (changeListener == null) {
                         return;
                     }
 
@@ -156,7 +156,7 @@ public class StorageManager
 
                     if (msg.what == StorageEvent.EVENT_OBB_STATE_CHANGED) {
                         ObbStateChangedStorageEvent ev = (ObbStateChangedStorageEvent) e;
-                        listener.onObbStateChange(ev.path, ev.state);
+                        changeListener.onObbStateChange(ev.path, ev.state);
                     } else {
                         Log.e(TAG, "Unsupported event " + msg.what);
                     }

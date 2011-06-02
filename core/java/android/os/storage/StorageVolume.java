@@ -16,10 +16,8 @@
 
 package android.os.storage;
 
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 /**
  * A class representing a storage volume
@@ -27,7 +25,7 @@ import android.util.Log;
  */
 public class StorageVolume implements Parcelable {
 
-    private static final String TAG = "StorageVolume";
+    //private static final String TAG = "StorageVolume";
 
     private final String mPath;
     private final String mDescription;
