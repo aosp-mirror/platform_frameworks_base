@@ -24,26 +24,52 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:horizontalDirection="inherit">
+        android:layout_height="wrap_content">
 
        <Button android:layout_height="wrap_content"
                android:layout_width="wrap_content"
                android:text="@string/button1_text"
-               android:textSize="32dip"
+               android:textSize="24dip"
         />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
-                  android:textSize="32dip"
+                  android:textSize="24dip"
                   android:text="@string/textview_text"
         />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
-                android:textSize="32dip"
+                android:textSize="24dip"
+         />
+
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:horizontalDirection="inherit">
+
+       <Button android:layout_height="wrap_content"
+               android:layout_width="wrap_content"
+               android:text="@string/button1_text"
+               android:textSize="24dip"
+        />
+
+        <TextView android:id="@+id/textview"
+                  android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:textSize="24dip"
+                  android:text="@string/textview_text"
+        />
+
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/button2_text"
+                android:textSize="24dip"
          />
 
     </LinearLayout>
@@ -57,20 +83,20 @@
        <Button android:layout_height="wrap_content"
                android:layout_width="wrap_content"
                android:text="@string/button1_text"
-               android:textSize="32dip"
+               android:textSize="24dip"
         />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
-                  android:textSize="32dip"
+                  android:textSize="24dip"
                   android:text="@string/textview_text"
         />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
-                android:textSize="32dip"
+                android:textSize="24dip"
          />
 
     </LinearLayout>
@@ -84,20 +110,20 @@
        <Button android:layout_height="wrap_content"
                android:layout_width="wrap_content"
                android:text="@string/button1_text"
-               android:textSize="32dip"
+               android:textSize="24dip"
         />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
-                  android:textSize="32dip"
+                  android:textSize="24dip"
                   android:text="@string/textview_text"
         />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
-                android:textSize="32dip"
+                android:textSize="24dip"
          />
 
     </LinearLayout>
@@ -111,20 +137,20 @@
        <Button android:layout_height="wrap_content"
                android:layout_width="wrap_content"
                android:text="@string/button1_text"
-               android:textSize="32dip"
+               android:textSize="24dip"
         />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
-                  android:textSize="32dip"
+                  android:textSize="24dip"
                   android:text="@string/textview_text"
         />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
-                android:textSize="32dip"
+                android:textSize="24dip"
          />
 
     </LinearLayout>
@@ -138,20 +164,20 @@
        <Button android:layout_height="wrap_content"
                android:layout_width="wrap_content"
                android:text="@string/button1_text"
-               android:textSize="32dip"
+               android:textSize="24dip"
         />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
-                  android:textSize="32dip"
+                  android:textSize="24dip"
                   android:text="@string/textview_text"
         />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
-                android:textSize="32dip"
+                android:textSize="24dip"
          />
 
     </LinearLayout>
@@ -165,20 +191,20 @@
        <Button android:layout_height="wrap_content"
                android:layout_width="wrap_content"
                android:text="@string/button1_text"
-               android:textSize="32dip"
+               android:textSize="24dip"
         />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
-                  android:textSize="32dip"
+                  android:textSize="24dip"
                   android:text="@string/textview_text"
         />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
-                android:textSize="32dip"
+                android:textSize="24dip"
          />
 
     </LinearLayout>

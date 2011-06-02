@@ -99,6 +99,20 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".BiDiTestTableLayoutLtrActivity"
+                  android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".BiDiTestTableLayoutRtlActivity"
+                  android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>
