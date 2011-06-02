@@ -96,21 +96,42 @@ public class CompatibilityInfo implements Parcelable {
             boolean forceCompat) {
         int compatFlags = 0;
 
-        if (appInfo.requiresSmallestWidthDp != 0 || appInfo.compatibleWidthLimitDp != 0) {
+        if (appInfo.requiresSmallestWidthDp != 0 || appInfo.compatibleWidthLimitDp != 0
+                || appInfo.largestWidthLimitDp != 0) {
             // New style screen requirements spec.
             int required = appInfo.requiresSmallestWidthDp != 0
                     ? appInfo.requiresSmallestWidthDp
                     : appInfo.compatibleWidthLimitDp;
+            if (required == 0) {
+                required = appInfo.largestWidthLimitDp;
+            }
             int compat = appInfo.compatibleWidthLimitDp != 0
-                    ? appInfo.compatibleWidthLimitDp
-                    : appInfo.requiresSmallestWidthDp;
+                    ? appInfo.compatibleWidthLimitDp : required;
             if (compat < required)  {
                 compat = required;
             }
+            int largest = appInfo.largestWidthLimitDp;
 
-            if (compat >= sw) {
+            if (required > DEFAULT_NORMAL_SHORT_DIMENSION) {
+                // For now -- if they require a size larger than the only
+                // size we can do in compatibility mode, then don't ever
+                // allow the app to go in to compat mode.  Trying to run
+                // it at a smaller size it can handle will make it far more
+                // broken than running at a larger size than it wants or
+                // thinks it can handle.
+                compatFlags |= NEVER_NEEDS_COMPAT;
+            } else if (largest != 0 && sw > largest) {
+                // If the screen size is larger than the largest size the
+                // app thinks it can work with, then always force it in to
+                // compatibility mode.
+                compatFlags |= NEEDS_SCREEN_COMPAT | ALWAYS_NEEDS_COMPAT;
+            } else if (compat >= sw) {
+                // The screen size is something the app says it was designed
+                // for, so never do compatibility mode.
                 compatFlags |= NEVER_NEEDS_COMPAT;
             } else if (forceCompat) {
+                // The app may work better with or without compatibility mode.
+                // Let the user decide.
                 compatFlags |= NEEDS_SCREEN_COMPAT;
             }
 
