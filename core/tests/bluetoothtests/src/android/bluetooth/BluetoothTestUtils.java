@@ -678,8 +678,7 @@ public class BluetoothTestUtils extends Assert {
         BluetoothReceiver receiver = getBluetoothReceiver(mask);
 
         long start = System.currentTimeMillis();
-        // TODO: put assertTrue() around cancelDiscovery() once it starts returning true.
-        adapter.cancelDiscovery();
+        assertTrue(adapter.cancelDiscovery());
 
         while (System.currentTimeMillis() - start < START_STOP_SCAN_TIMEOUT) {
             if (!adapter.isDiscovering() && ((receiver.getFiredFlags() & mask) == mask)) {
