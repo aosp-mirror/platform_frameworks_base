@@ -128,7 +128,7 @@ function toggleDiv(link) {
 <a href="{@docRoot}sdk/android-2.3.3.html">Android 2.3.3 version notes</a>.</p>
 
 
-<h2 id="openaccessory">Open Accessory Library</h3>
+<h2 id="openaccessory">Open Accessory Library</h2>
 
 <p><em>Open Accessory</em> is a new capability for integrating
 connected peripherals with applications running on the platform. The capability
@@ -241,7 +241,7 @@ built-in applications:</p>
 <li>Camera</li>
 <li>Clock</li>
 <li>Contacts</li>
-<li>Cusom Locale</li>
+<li>Custom Locale</li>
 <li>Dev Tools</li>
 <li>Downloads</li>
 <li>Email</li>
@@ -309,6 +309,7 @@ descriptor).</p>
 </ul>
 </td>
 <td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<ul>
 <li>Croatian, Croatia (hr_HR)</li>
 <li>Hungarian, Hungary (hu_HU)</li>
 <li>Indonesian, Indonesia (id_ID)</li>
@@ -337,6 +338,7 @@ descriptor).</p>
 <li>Vietnamese, Vietnam (vi_VN)</li>
 <li>Chinese, PRC (zh_CN)</li>
 <li>Chinese, Taiwan (zh_TW)</li>
+</ul>
 </td>
 </tr>
 </table>
