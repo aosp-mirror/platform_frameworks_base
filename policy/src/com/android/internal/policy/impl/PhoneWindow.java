@@ -1446,7 +1446,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         if (mActionBar != null) {
-            outState.putBoolean(ACTION_BAR_TAG, mActionBar.isOverflowMenuShowing());
+            SparseArray<Parcelable> actionBarStates = new SparseArray<Parcelable>();
+            mActionBar.saveHierarchyState(actionBarStates);
+            outState.putSparseParcelableArray(ACTION_BAR_TAG, actionBarStates);
         }
 
         return outState;
@@ -1484,8 +1486,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             restorePanelState(panelStates);
         }
 
-        if (mActionBar != null && savedInstanceState.getBoolean(ACTION_BAR_TAG)) {
-            mActionBar.postShowOverflowMenu();
+        if (mActionBar != null) {
+            SparseArray<Parcelable> actionBarStates =
+                    savedInstanceState.getSparseParcelableArray(ACTION_BAR_TAG);
+            mActionBar.restoreHierarchyState(actionBarStates);
         }
     }
 

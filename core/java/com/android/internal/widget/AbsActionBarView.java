@@ -30,7 +30,7 @@ import android.view.animation.DecelerateInterpolator;
 
 public abstract class AbsActionBarView extends ViewGroup {
     protected ActionMenuView mMenuView;
-    protected ActionMenuPresenter mMenuPresenter;
+    protected ActionMenuPresenter mActionMenuPresenter;
     protected ActionBarContainer mSplitView;
 
     protected Animator mVisibilityAnim;
@@ -108,8 +108,8 @@ public abstract class AbsActionBarView extends ViewGroup {
     }
 
     public boolean showOverflowMenu() {
-        if (mMenuPresenter != null) {
-            return mMenuPresenter.showOverflowMenu();
+        if (mActionMenuPresenter != null) {
+            return mActionMenuPresenter.showOverflowMenu();
         }
         return false;
     }
@@ -123,26 +123,26 @@ public abstract class AbsActionBarView extends ViewGroup {
     }
 
     public boolean hideOverflowMenu() {
-        if (mMenuPresenter != null) {
-            return mMenuPresenter.hideOverflowMenu();
+        if (mActionMenuPresenter != null) {
+            return mActionMenuPresenter.hideOverflowMenu();
         }
         return false;
     }
 
     public boolean isOverflowMenuShowing() {
-        if (mMenuPresenter != null) {
-            return mMenuPresenter.isOverflowMenuShowing();
+        if (mActionMenuPresenter != null) {
+            return mActionMenuPresenter.isOverflowMenuShowing();
         }
         return false;
     }
 
     public boolean isOverflowReserved() {
-        return mMenuPresenter != null && mMenuPresenter.isOverflowReserved();
+        return mActionMenuPresenter != null && mActionMenuPresenter.isOverflowReserved();
     }
 
     public void dismissPopupMenus() {
-        if (mMenuPresenter != null) {
-            mMenuPresenter.dismissPopupMenus();
+        if (mActionMenuPresenter != null) {
+            mActionMenuPresenter.dismissPopupMenus();
         }
     }
 

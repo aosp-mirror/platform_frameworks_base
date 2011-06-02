@@ -192,4 +192,12 @@ public abstract class BaseMenuPresenter implements MenuPresenter {
     public boolean flagActionItems() {
         return false;
     }
+
+    public boolean expandItemActionView(MenuBuilder menu, MenuItemImpl item) {
+        return false;
+    }
+
+    public boolean collapseItemActionView(MenuBuilder menu, MenuItemImpl item) {
+        return false;
+    }
 }

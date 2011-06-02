@@ -4482,6 +4482,10 @@
             <!-- When this item is shown as an action in the action bar, show a text
                  label with it even if it has an icon representation. -->
             <flag name="withText" value="4" />
+            <!-- This item's action view collapses to a normal menu
+                 item. When expanded, the action view takes over a
+                 larger segment of its container. -->
+            <flag name="collapseActionView" value="8" />
         </attr>
 
         <!-- An optional layout to be used as an action view.

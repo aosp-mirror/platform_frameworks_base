@@ -167,9 +167,9 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         });
 
         final MenuBuilder menu = (MenuBuilder) mode.getMenu();
-        mMenuPresenter = new ActionMenuPresenter();
-        menu.addMenuPresenter(mMenuPresenter);
-        mMenuView = (ActionMenuView) mMenuPresenter.getMenuView(this);
+        mActionMenuPresenter = new ActionMenuPresenter();
+        menu.addMenuPresenter(mActionMenuPresenter);
+        mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
 
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
@@ -178,10 +178,10 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
             addView(mMenuView);
         } else {
             // Allow full screen width in split mode.
-            mMenuPresenter.setWidthLimit(
+            mActionMenuPresenter.setWidthLimit(
                     getContext().getResources().getDisplayMetrics().widthPixels, true);
             // No limit to the item count; use whatever will fit.
-            mMenuPresenter.setItemLimit(Integer.MAX_VALUE);
+            mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
             // Span the whole width
             layoutParams.width = LayoutParams.MATCH_PARENT;
             mSplitView.addView(mMenuView);
@@ -227,24 +227,24 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
 
     @Override
     public boolean showOverflowMenu() {
-        if (mMenuPresenter != null) {
-            return mMenuPresenter.showOverflowMenu();
+        if (mActionMenuPresenter != null) {
+            return mActionMenuPresenter.showOverflowMenu();
         }
         return false;
     }
 
     @Override
     public boolean hideOverflowMenu() {
-        if (mMenuPresenter != null) {
-            return mMenuPresenter.hideOverflowMenu();
+        if (mActionMenuPresenter != null) {
+            return mActionMenuPresenter.hideOverflowMenu();
         }
         return false;
     }
 
     @Override
     public boolean isOverflowMenuShowing() {
-        if (mMenuPresenter != null) {
-            return mMenuPresenter.isOverflowMenuShowing();
+        if (mActionMenuPresenter != null) {
+            return mActionMenuPresenter.isOverflowMenuShowing();
         }
         return false;
     }

@@ -77,6 +77,8 @@ public final class MenuItemImpl implements MenuItem {
     private int mShowAsAction = SHOW_AS_ACTION_NEVER;
 
     private View mActionView;
+    private OnActionExpandListener mOnActionExpandListener;
+    private boolean mIsActionViewExpanded = false;
 
     /** Used for the icon resource ID if this item does not have an icon */
     static final int NO_ICON = 0;
@@ -560,5 +562,62 @@ public final class MenuItemImpl implements MenuItem {
 
     public View getActionView() {
         return mActionView;
+    }
+
+    @Override
+    public MenuItem setShowAsActionFlags(int actionEnum) {
+        setShowAsAction(actionEnum);
+        return this;
+    }
+
+    @Override
+    public boolean expandActionView() {
+        if ((mShowAsAction & SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW) == 0 || mActionView == null) {
+            return false;
+        }
+
+        if (mOnActionExpandListener == null ||
+                mOnActionExpandListener.onMenuItemActionExpand(this)) {
+            return mMenu.expandItemActionView(this);
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean collapseActionView() {
+        if ((mShowAsAction & SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW) == 0) {
+            return false;
+        }
+        if (mActionView == null) {
+            // We're already collapsed if we have no action view.
+            return true;
+        }
+
+        if (mOnActionExpandListener == null ||
+                mOnActionExpandListener.onMenuItemActionCollapse(this)) {
+            return mMenu.collapseItemActionView(this);
+        }
+
+        return false;
+    }
+
+    @Override
+    public MenuItem setOnActionExpandListener(OnActionExpandListener listener) {
+        mOnActionExpandListener = listener;
+        return this;
+    }
+
+    public boolean hasCollapsibleActionView() {
+        return (mShowAsAction & SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW) != 0 && mActionView != null;
+    }
+
+    public void setActionViewExpanded(boolean isExpanded) {
+        mIsActionViewExpanded = isExpanded;
+        mMenu.onItemsChanged(false);
+    }
+
+    public boolean isActionViewExpanded() {
+        return mIsActionViewExpanded;
     }
 }

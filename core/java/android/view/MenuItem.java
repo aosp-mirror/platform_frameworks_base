@@ -51,6 +51,13 @@ public interface MenuItem {
      * it also has an icon specified.
      */
     public static final int SHOW_AS_ACTION_WITH_TEXT = 4;
+
+    /**
+     * This item's action view collapses to a normal menu item.
+     * When expanded, the action view temporarily takes over
+     * a larger segment of its container.
+     */
+    public static final int SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW = 8;
     
     /**
      * Interface definition for a callback to be invoked when a menu item is
@@ -71,6 +78,34 @@ public interface MenuItem {
          *         executing.
          */
         public boolean onMenuItemClick(MenuItem item);
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when a menu item
+     * marked with {@link MenuItem#SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW} is
+     * expanded or collapsed.
+     *
+     * @see MenuItem#expandActionView()
+     * @see MenuItem#collapseActionView()
+     * @see MenuItem#setShowAsActionFlags(int)
+     * @see MenuItem#
+     */
+    public interface OnActionExpandListener {
+        /**
+         * Called when a menu item with {@link MenuItem#SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW}
+         * is expanded.
+         * @param item Item that was expanded
+         * @return true if the item should expand, false if expansion should be suppressed.
+         */
+        public boolean onMenuItemActionExpand(MenuItem item);
+
+        /**
+         * Called when a menu item with {@link MenuItem#SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW}
+         * is collapsed.
+         * @param item Item that was collapsed
+         * @return true if the item should collapse, false if collapsing should be suppressed.
+         */
+        public boolean onMenuItemActionCollapse(MenuItem item);
     }
 
     /**
@@ -421,6 +456,27 @@ public interface MenuItem {
     public void setShowAsAction(int actionEnum);
 
     /**
+     * Sets how this item should display in the presence of an Action Bar.
+     * The parameter actionEnum is a flag set. One of {@link #SHOW_AS_ACTION_ALWAYS},
+     * {@link #SHOW_AS_ACTION_IF_ROOM}, or {@link #SHOW_AS_ACTION_NEVER} should
+     * be used, and you may optionally OR the value with {@link #SHOW_AS_ACTION_WITH_TEXT}.
+     * SHOW_AS_ACTION_WITH_TEXT requests that when the item is shown as an action,
+     * it should be shown with a text label.
+     *
+     * <p>Note: This method differs from {@link #setShowAsAction(int)} only in that it
+     * returns the current MenuItem instance for call chaining.
+     *
+     * @param actionEnum How the item should display. One of
+     * {@link #SHOW_AS_ACTION_ALWAYS}, {@link #SHOW_AS_ACTION_IF_ROOM}, or
+     * {@link #SHOW_AS_ACTION_NEVER}. SHOW_AS_ACTION_NEVER is the default.
+     *
+     * @see android.app.ActionBar
+     * @see #setActionView(View)
+     * @return This MenuItem instance for call chaining.
+     */
+    public MenuItem setShowAsActionFlags(int actionEnum);
+
+    /**
      * Set an action view for this menu item. An action view will be displayed in place
      * of an automatically generated menu item element in the UI when this item is shown
      * as an action within a parent.
@@ -453,4 +509,52 @@ public interface MenuItem {
      * @see #setShowAsAction(int)
      */
     public View getActionView();
+
+    /**
+     * Expand the action view associated with this menu item.
+     * The menu item must have an action view set, as well as
+     * the showAsAction flag {@link #SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW}.
+     * If a listener has been set using {@link #setOnActionExpandListener(OnActionExpandListener)}
+     * it will have its {@link OnActionExpandListener#onMenuItemActionExpand(MenuItem)}
+     * method invoked. The listener may return false from this method to prevent expanding
+     * the action view.
+     *
+     * @return true if the action view was expanded, false otherwise.
+     */
+    public boolean expandActionView();
+
+    /**
+     * Collapse the action view associated with this menu item.
+     * The menu item must have an action view set, as well as the showAsAction flag
+     * {@link #SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW}. If a listener has been set using
+     * {@link #setOnActionExpandListener(OnActionExpandListener)} it will have its
+     * {@link OnActionExpandListener#onMenuItemActionCollapse(MenuItem)} method invoked.
+     * The listener may return false from this method to prevent collapsing the action view.
+     *
+     * @return true if the action view was collapsed, false otherwise.
+     */
+    public boolean collapseActionView();
+
+    /**
+     * Returns true if this menu item's action view has been expanded.
+     *
+     * @return true if the item's action view is expanded, false otherwise.
+     *
+     * @see #expandActionView()
+     * @see #collapseActionView()
+     * @see #SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW
+     * @see OnActionExpandListener
+     */
+    public boolean isActionViewExpanded();
+
+    /**
+     * Set an {@link OnActionExpandListener} on this menu item to be notified when
+     * the associated action view is expanded or collapsed. The menu item must
+     * be configured to expand or collapse its action view using the flag
+     * {@link #SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW}.
+     *
+     * @param listener Listener that will respond to expand/collapse events
+     * @return This menu item instance for call chaining
+     */
+    public MenuItem setOnActionExpandListener(OnActionExpandListener listener);
 }

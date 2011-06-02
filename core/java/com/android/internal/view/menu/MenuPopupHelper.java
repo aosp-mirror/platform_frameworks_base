@@ -250,6 +250,14 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         return false;
     }
 
+    public boolean expandItemActionView(MenuBuilder menu, MenuItemImpl item) {
+        return false;
+    }
+
+    public boolean collapseItemActionView(MenuBuilder menu, MenuItemImpl item) {
+        return false;
+    }
+
     private class MenuAdapter extends BaseAdapter {
         private MenuBuilder mAdapterMenu;
 
