@@ -2565,6 +2565,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     sp.removeSpan(cw);
                 }
 
+                // hideControllers would do it, but it gets called after this method on rotation
+                sp.removeSpan(mSuggestionRangeSpan);
+
                 ss.text = sp;
             } else {
                 ss.text = mText.toString();
