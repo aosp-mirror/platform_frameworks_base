@@ -112,6 +112,7 @@ LOCAL_SRC_FILES += \
 	core/java/android/net/IThrottleManager.aidl \
 	core/java/android/net/INetworkPolicyListener.aidl \
 	core/java/android/net/INetworkPolicyManager.aidl \
+	core/java/android/net/INetworkStatsService.aidl \
 	core/java/android/nfc/ILlcpConnectionlessSocket.aidl \
 	core/java/android/nfc/ILlcpServiceSocket.aidl \
 	core/java/android/nfc/ILlcpSocket.aidl \
@@ -124,7 +125,6 @@ LOCAL_SRC_FILES += \
 	core/java/android/os/IHardwareService.aidl \
 	core/java/android/os/IMessenger.aidl \
 	core/java/android/os/INetworkManagementService.aidl \
-	core/java/android/os/INetStatService.aidl \
 	core/java/android/os/IPermissionController.aidl \
 	core/java/android/os/IPowerManager.aidl \
     core/java/android/os/IRemoteCallback.aidl \

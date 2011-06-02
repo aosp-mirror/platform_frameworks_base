@@ -35,10 +35,10 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
+import android.net.INetworkStatsService;
 import android.os.IPowerManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -59,11 +59,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String TAG = "NetworkPolicy";
     private static final boolean LOGD = true;
 
-    private Context mContext;
-    private IActivityManager mActivityManager;
-    private IPowerManager mPowerManager;
+    private final Context mContext;
+    private final IActivityManager mActivityManager;
+    private final IPowerManager mPowerManager;
+    private final INetworkStatsService mNetworkStats;
 
-    private Object mRulesLock = new Object();
+    private final Object mRulesLock = new Object();
 
     private boolean mScreenOn;
 
@@ -80,21 +81,24 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final RemoteCallbackList<INetworkPolicyListener> mListeners = new RemoteCallbackList<
             INetworkPolicyListener>();
 
-    // TODO: periodically poll network stats and write to disk
     // TODO: save/restore policy information from disk
 
     // TODO: keep whitelist of system-critical services that should never have
     // rules enforced, such as system, phone, and radio UIDs.
 
-    public NetworkPolicyManagerService(
-            Context context, IActivityManager activityManager, IPowerManager powerManager) {
+    // TODO: keep record of billing cycle details, and limit rules
+    // TODO: keep map of interfaces-to-billing-relationship
+
+    public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
+            IPowerManager powerManager, INetworkStatsService networkStats) {
         mContext = checkNotNull(context, "missing context");
         mActivityManager = checkNotNull(activityManager, "missing activityManager");
         mPowerManager = checkNotNull(powerManager, "missing powerManager");
+        mNetworkStats = checkNotNull(networkStats, "missing networkStats");
     }
 
     public void systemReady() {
-        // TODO: read current policy+stats from disk and generate NMS rules
+        // TODO: read current policy from disk
 
         updateScreenOn();
 
@@ -114,18 +118,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         screenFilter.addAction(Intent.ACTION_SCREEN_OFF);
         mContext.registerReceiver(mScreenReceiver, screenFilter);
 
-        final IntentFilter shutdownFilter = new IntentFilter();
-        shutdownFilter.addAction(Intent.ACTION_SHUTDOWN);
-        mContext.registerReceiver(mShutdownReceiver, shutdownFilter);
-
     }
 
     private IProcessObserver mProcessObserver = new IProcessObserver.Stub() {
         @Override
         public void onForegroundActivitiesChanged(int pid, int uid, boolean foregroundActivities) {
             // only someone like AMS should only be calling us
-            mContext.enforceCallingOrSelfPermission(
-                    MANAGE_APP_TOKENS, "requires MANAGE_APP_TOKENS permission");
+            mContext.enforceCallingOrSelfPermission(MANAGE_APP_TOKENS, TAG);
 
             synchronized (mRulesLock) {
                 // because a uid can have multiple pids running inside, we need to
@@ -145,8 +144,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         @Override
         public void onProcessDied(int pid, int uid) {
             // only someone like AMS should only be calling us
-            mContext.enforceCallingOrSelfPermission(
-                    MANAGE_APP_TOKENS, "requires MANAGE_APP_TOKENS permission");
+            mContext.enforceCallingOrSelfPermission(MANAGE_APP_TOKENS, TAG);
 
             synchronized (mRulesLock) {
                 // clear records and recompute, when they exist
@@ -170,19 +168,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     };
 
-    private BroadcastReceiver mShutdownReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO: persist any pending stats during clean shutdown
-            Log.d(TAG, "persisting stats");
-        }
-    };
-
     @Override
     public void setUidPolicy(int uid, int policy) {
         // TODO: create permission for modifying data policy
-        mContext.enforceCallingOrSelfPermission(
-                UPDATE_DEVICE_STATS, "requires UPDATE_DEVICE_STATS permission");
+        mContext.enforceCallingOrSelfPermission(UPDATE_DEVICE_STATS, TAG);
 
         final int oldPolicy;
         synchronized (mRulesLock) {
@@ -228,7 +217,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
-        mContext.enforceCallingOrSelfPermission(DUMP, "requires DUMP permission");
+        mContext.enforceCallingOrSelfPermission(DUMP, TAG);
 
         synchronized (mRulesLock) {
             fout.println("Policy status for known UIDs:");
@@ -366,7 +355,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
         return value;
     }
-    
+
     private static void collectKeys(SparseIntArray source, SparseBooleanArray target) {
         final int size = source.size();
         for (int i = 0; i < size; i++) {

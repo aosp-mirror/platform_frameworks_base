@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.INetworkPolicyListener;
+import android.net.INetworkStatsService;
 import android.os.Binder;
 import android.os.IPowerManager;
 import android.test.AndroidTestCase;
@@ -57,6 +58,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     private IActivityManager mActivityManager;
     private IPowerManager mPowerManager;
+    private INetworkStatsService mStatsService;
     private INetworkPolicyListener mPolicyListener;
 
     private NetworkPolicyManagerService mService;
@@ -90,10 +92,11 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         mActivityManager = createMock(IActivityManager.class);
         mPowerManager = createMock(IPowerManager.class);
+        mStatsService = createMock(INetworkStatsService.class);
         mPolicyListener = createMock(INetworkPolicyListener.class);
 
         mService = new NetworkPolicyManagerService(
-                mServiceContext, mActivityManager, mPowerManager);
+                mServiceContext, mActivityManager, mPowerManager, mStatsService);
 
         // RemoteCallbackList needs a binder to use as key
         expect(mPolicyListener.asBinder()).andReturn(mStubBinder).atLeastOnce();
@@ -123,6 +126,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         mActivityManager = null;
         mPowerManager = null;
+        mStatsService = null;
         mPolicyListener = null;
 
         mService = null;
@@ -262,11 +266,11 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     }
 
     private void replay() {
-        EasyMock.replay(mActivityManager, mPowerManager, mPolicyListener);
+        EasyMock.replay(mActivityManager, mPowerManager, mStatsService, mPolicyListener);
     }
 
     private void verifyAndReset() {
-        EasyMock.verify(mActivityManager, mPowerManager, mPolicyListener);
-        EasyMock.reset(mActivityManager, mPowerManager, mPolicyListener);
+        EasyMock.verify(mActivityManager, mPowerManager, mStatsService, mPolicyListener);
+        EasyMock.reset(mActivityManager, mPowerManager, mStatsService, mPolicyListener);
     }
 }

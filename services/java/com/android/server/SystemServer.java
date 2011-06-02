@@ -49,6 +49,7 @@ import com.android.internal.os.SamplingProfilerIntegration;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
+import com.android.server.net.NetworkStatsService;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.usb.UsbService;
 import com.android.server.wm.WindowManagerService;
@@ -116,7 +117,9 @@ class ServerThread extends Thread {
         LightsService lights = null;
         PowerManagerService power = null;
         BatteryService battery = null;
+        AlarmManagerService alarm = null;
         NetworkManagementService networkManagement = null;
+        NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
         ConnectivityService connectivity = null;
         IPackageManager pm = null;
@@ -188,7 +191,7 @@ class ServerThread extends Thread {
             power.init(context, lights, ActivityManagerService.getDefault(), battery);
 
             Slog.i(TAG, "Alarm Manager");
-            AlarmManagerService alarm = new AlarmManagerService(context);
+            alarm = new AlarmManagerService(context);
             ServiceManager.addService(Context.ALARM_SERVICE, alarm);
 
             Slog.i(TAG, "Init Watchdog");
@@ -274,27 +277,28 @@ class ServerThread extends Thread {
             }
 
             try {
-                Slog.i(TAG, "NetStat Service");
-                ServiceManager.addService("netstat", new NetStatService(context));
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting NetStat Service", e);
-            }
-
-            try {
-                Slog.i(TAG, "NetworkPolicy Service");
-                networkPolicy = new NetworkPolicyManagerService(
-                        context, ActivityManagerService.self(), power);
-                ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Connectivity Service", e);
-            }
-
-            try {
                 Slog.i(TAG, "NetworkManagement Service");
                 networkManagement = NetworkManagementService.create(context);
                 ServiceManager.addService(Context.NETWORKMANAGEMENT_SERVICE, networkManagement);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting NetworkManagement Service", e);
+            }
+
+            try {
+                Slog.i(TAG, "NetworkStats Service");
+                networkStats = new NetworkStatsService(context, networkManagement, alarm);
+                ServiceManager.addService(Context.NETWORK_STATS_SERVICE, networkStats);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting NetworkStats Service", e);
+            }
+
+            try {
+                Slog.i(TAG, "NetworkPolicy Service");
+                networkPolicy = new NetworkPolicyManagerService(
+                        context, ActivityManagerService.self(), power, networkStats);
+                ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting NetworkPolicy Service", e);
             }
 
             try {
@@ -535,6 +539,7 @@ class ServerThread extends Thread {
         // These are needed to propagate to the runnable below.
         final Context contextF = context;
         final BatteryService batteryF = battery;
+        final NetworkStatsService networkStatsF = networkStats;
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
         final ConnectivityService connectivityF = connectivity;
         final DockObserver dockF = dock;
@@ -561,6 +566,7 @@ class ServerThread extends Thread {
 
                 startSystemUi(contextF);
                 if (batteryF != null) batteryF.systemReady();
+                if (networkStatsF != null) networkStatsF.systemReady();
                 if (networkPolicyF != null) networkPolicyF.systemReady();
                 if (connectivityF != null) connectivityF.systemReady();
                 if (dockF != null) dockF.systemReady();

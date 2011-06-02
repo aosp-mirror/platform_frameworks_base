@@ -141,7 +141,8 @@ public class TrafficStats {
 
             // subtract starting values and return delta
             final NetworkStats profilingStop = getNetworkStatsForUid(context);
-            final NetworkStats profilingDelta = profilingStop.subtract(sActiveProfilingStart);
+            final NetworkStats profilingDelta = profilingStop.subtract(
+                    sActiveProfilingStart, false);
             sActiveProfilingStart = null;
             return profilingDelta;
         }
