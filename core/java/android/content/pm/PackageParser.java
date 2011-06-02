@@ -999,6 +999,9 @@ public class PackageParser {
                 pkg.applicationInfo.compatibleWidthLimitDp = sa.getInteger(
                         com.android.internal.R.styleable.AndroidManifestSupportsScreens_compatibleWidthLimitDp,
                         0);
+                pkg.applicationInfo.largestWidthLimitDp = sa.getInteger(
+                        com.android.internal.R.styleable.AndroidManifestSupportsScreens_largestWidthLimitDp,
+                        0);
 
                 // This is a trick to get a boolean and still able to detect
                 // if a value was actually set.
