@@ -148,7 +148,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int minimumPasswordLowerCase = DEF_MINIMUM_PASSWORD_LOWER_CASE;
 
         static final int DEF_MINIMUM_PASSWORD_LETTERS = 1;
-        int minimumPasswordLetters = DEF_MINIMUM_PASSWORD_LOWER_CASE;
+        int minimumPasswordLetters = DEF_MINIMUM_PASSWORD_LETTERS;
 
         static final int DEF_MINIMUM_PASSWORD_NUMERIC = 1;
         int minimumPasswordNumeric = DEF_MINIMUM_PASSWORD_NUMERIC;
