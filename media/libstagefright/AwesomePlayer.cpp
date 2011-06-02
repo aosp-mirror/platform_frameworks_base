@@ -715,7 +715,7 @@ void AwesomePlayer::onBufferingUpdate() {
 
 void AwesomePlayer::sendCacheStats() {
     sp<MediaPlayerBase> listener = mListener.promote();
-    if (listener != NULL) {
+    if (listener != NULL && mCachedSource != NULL) {
         int32_t kbps = 0;
         status_t err = mCachedSource->getEstimatedBandwidthKbps(&kbps);
         if (err == OK) {

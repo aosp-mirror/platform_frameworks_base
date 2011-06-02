@@ -464,7 +464,7 @@ status_t NuHTTPDataSource::getSize(off64_t *size) {
 }
 
 uint32_t NuHTTPDataSource::flags() {
-    return kWantsPrefetching;
+    return kWantsPrefetching | kIsHTTPBasedSource;
 }
 
 // static

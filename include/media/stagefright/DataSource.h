@@ -38,6 +38,7 @@ public:
         kWantsPrefetching      = 1,
         kStreamedFromLocalHost = 2,
         kIsCachingDataSource   = 4,
+        kIsHTTPBasedSource     = 8,
     };
 
     static sp<DataSource> CreateFromURI(

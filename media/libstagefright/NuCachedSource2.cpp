@@ -203,13 +203,19 @@ NuCachedSource2::~NuCachedSource2() {
 }
 
 status_t NuCachedSource2::getEstimatedBandwidthKbps(int32_t *kbps) {
-    HTTPBase* source = static_cast<HTTPBase *>(mSource.get());
-    return source->getEstimatedBandwidthKbps(kbps);
+    if (mSource->flags() & kIsHTTPBasedSource) {
+        HTTPBase* source = static_cast<HTTPBase *>(mSource.get());
+        return source->getEstimatedBandwidthKbps(kbps);
+    }
+    return ERROR_UNSUPPORTED;
 }
 
 status_t NuCachedSource2::setCacheStatCollectFreq(int32_t freqMs) {
-    HTTPBase *source = static_cast<HTTPBase *>(mSource.get());
-    return source->setBandwidthStatCollectFreq(freqMs);
+    if (mSource->flags() & kIsHTTPBasedSource) {
+        HTTPBase *source = static_cast<HTTPBase *>(mSource.get());
+        return source->setBandwidthStatCollectFreq(freqMs);
+    }
+    return ERROR_UNSUPPORTED;
 }
 
 status_t NuCachedSource2::initCheck() const {
@@ -221,7 +227,9 @@ status_t NuCachedSource2::getSize(off64_t *size) {
 }
 
 uint32_t NuCachedSource2::flags() {
-    return (mSource->flags() & ~kWantsPrefetching) | kIsCachingDataSource;
+    // Remove HTTP related flags since NuCachedSource2 is not HTTP-based.
+    uint32_t flags = mSource->flags() & ~(kWantsPrefetching | kIsHTTPBasedSource);
+    return (flags | kIsCachingDataSource);
 }
 
 void NuCachedSource2::onMessageReceived(const sp<AMessage> &msg) {

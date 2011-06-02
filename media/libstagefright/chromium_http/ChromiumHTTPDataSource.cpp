@@ -218,7 +218,7 @@ status_t ChromiumHTTPDataSource::getSize(off64_t *size) {
 }
 
 uint32_t ChromiumHTTPDataSource::flags() {
-    return kWantsPrefetching;
+    return kWantsPrefetching | kIsHTTPBasedSource;
 }
 
 // static
