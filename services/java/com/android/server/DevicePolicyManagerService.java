@@ -1925,9 +1925,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Check for permissions if a particular caller is specified
             if (who != null) {
                 // When checking for a single caller, status is based on caller's request
-                ActiveAdmin ap = getActiveAdminForCallerLocked(who,
-                        DeviceAdminInfo.USES_ENCRYPTED_STORAGE);
-                return ap.encryptionRequested;
+                ActiveAdmin ap = getActiveAdminUncheckedLocked(who);
+                return ap != null ? ap.encryptionRequested : false;
             }
 
             // If no particular caller is specified, return the aggregate set of requests.
