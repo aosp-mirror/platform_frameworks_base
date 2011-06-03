@@ -602,8 +602,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final Configuration mTempConfiguration = new Configuration();
 
-    // The frame use to limit the size of the app running in compatibility mode.
-    Rect mCompatibleScreenFrame = new Rect();
+    // The desired scaling factor for compatible apps.
     float mCompatibleScreenScale;
 
     public static WindowManagerService main(Context context,
@@ -3526,7 +3525,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void setAppStartingWindow(IBinder token, String pkg,
-            int theme, CharSequence nonLocalizedLabel, int labelRes, int icon,
+            int theme, CompatibilityInfo compatInfo,
+            CharSequence nonLocalizedLabel, int labelRes, int icon,
             int windowFlags, IBinder transferFrom, boolean createIfNeeded) {
         if (!checkCallingPermission(android.Manifest.permission.MANAGE_APP_TOKENS,
                 "setAppStartingIcon()")) {
@@ -3676,8 +3676,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             mStartingIconInTransition = true;
-            wtoken.startingData = new StartingData(
-                    pkg, theme, nonLocalizedLabel,
+            wtoken.startingData = new StartingData(pkg, theme, compatInfo, nonLocalizedLabel,
                     labelRes, icon, windowFlags);
             Message m = mH.obtainMessage(H.ADD_STARTING, wtoken);
             // Note: we really want to do sendMessageAtFrontOfQueue() because we
@@ -5566,8 +5565,7 @@ public class WindowManagerService extends IWindowManager.Stub
         dm.heightPixels = dm.unscaledHeightPixels = mAppDisplayHeight
                 = mPolicy.getNonDecorDisplayHeight(mRotation, dh);
 
-        mCompatibleScreenScale = CompatibilityInfo.updateCompatibleScreenFrame(
-                dm, mCompatibleScreenFrame, null);
+        mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm, null);
 
         config.screenWidthDp = (int)(mPolicy.getConfigDisplayWidth(mRotation, dw) / dm.density);
         config.screenHeightDp = (int)(mPolicy.getConfigDisplayHeight(mRotation, dh) / dm.density);
@@ -6142,9 +6140,8 @@ public class WindowManagerService extends IWindowManager.Stub
                     View view = null;
                     try {
                         view = mPolicy.addStartingWindow(
-                            wtoken.token, sd.pkg,
-                            sd.theme, sd.nonLocalizedLabel, sd.labelRes,
-                            sd.icon, sd.windowFlags);
+                            wtoken.token, sd.pkg, sd.theme, sd.compatInfo,
+                            sd.nonLocalizedLabel, sd.labelRes, sd.icon, sd.windowFlags);
                     } catch (Exception e) {
                         Slog.w(TAG, "Exception when adding starting window", e);
                     }

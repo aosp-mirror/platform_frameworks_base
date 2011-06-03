@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.Context;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -539,7 +540,7 @@ public interface WindowManagerPolicy {
      * @see #removeStartingWindow
      */
     public View addStartingWindow(IBinder appToken, String packageName,
-            int theme, CharSequence nonLocalizedLabel,
+            int theme, CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel,
             int labelRes, int icon, int windowFlags);
 
     /**

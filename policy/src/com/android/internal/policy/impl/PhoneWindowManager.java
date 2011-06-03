@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -1126,9 +1127,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
     
     /** {@inheritDoc} */
-    public View addStartingWindow(IBinder appToken, String packageName,
-                                  int theme, CharSequence nonLocalizedLabel,
-                                  int labelRes, int icon, int windowFlags) {
+    public View addStartingWindow(IBinder appToken, String packageName, int theme,
+            CompatibilityInfo compatInfo, CharSequence nonLocalizedLabel, int labelRes,
+            int icon, int windowFlags) {
         if (!SHOW_STARTING_ANIMATIONS) {
             return null;
         }
@@ -1174,8 +1175,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|
                 WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
     
+            if (!compatInfo.supportsScreen()) {
+                win.addFlags(WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW);
+            }
+
             win.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
-                                WindowManager.LayoutParams.MATCH_PARENT);
+                    WindowManager.LayoutParams.MATCH_PARENT);
     
             final WindowManager.LayoutParams params = win.getAttributes();
             params.token = appToken;

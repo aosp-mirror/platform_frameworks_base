@@ -1455,6 +1455,8 @@ final class ActivityStack {
                     if (SHOW_APP_STARTING_PREVIEW && mMainStack) {
                         mService.mWindowManager.setAppStartingWindow(
                                 next, next.packageName, next.theme,
+                                mService.compatibilityInfoForPackageLocked(
+                                        next.info.applicationInfo),
                                 next.nonLocalizedLabel,
                                 next.labelRes, next.icon, next.windowFlags,
                                 null, true);
@@ -1491,6 +1493,8 @@ final class ActivityStack {
                 if (SHOW_APP_STARTING_PREVIEW) {
                     mService.mWindowManager.setAppStartingWindow(
                             next, next.packageName, next.theme,
+                            mService.compatibilityInfoForPackageLocked(
+                                    next.info.applicationInfo),
                             next.nonLocalizedLabel,
                             next.labelRes, next.icon, next.windowFlags,
                             null, true);
@@ -1615,7 +1619,9 @@ final class ActivityStack {
                     else if (prev.nowVisible) prev = null;
                 }
                 mService.mWindowManager.setAppStartingWindow(
-                        r, r.packageName, r.theme, r.nonLocalizedLabel,
+                        r, r.packageName, r.theme,
+                        mService.compatibilityInfoForPackageLocked(
+                                r.info.applicationInfo), r.nonLocalizedLabel,
                         r.labelRes, r.icon, r.windowFlags, prev, showStartingIcon);
             }
         } else {

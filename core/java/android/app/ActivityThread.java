@@ -172,6 +172,11 @@ public final class ActivityThread {
     // These can be accessed by multiple threads; mPackages is the lock.
     // XXX For now we keep around information about all packages we have
     // seen, not removing entries from this map.
+    // NOTE: The activity manager in its process needs to call in to
+    // ActivityThread to do things like update resource configurations,
+    // which means this lock gets held while the activity manager holds its
+    // own lock.  Thus you MUST NEVER call back into the activity manager
+    // or anything that depends on it while holding this lock.
     final HashMap<String, WeakReference<LoadedApk>> mPackages
             = new HashMap<String, WeakReference<LoadedApk>>();
     final HashMap<String, WeakReference<LoadedApk>> mResourcePackages
@@ -1489,7 +1494,7 @@ public final class ActivityThread {
     }
 
     public Configuration getConfiguration() {
-        return mConfiguration;
+        return mResConfiguration;
     }
 
     public boolean isProfiling() {
@@ -1534,7 +1539,7 @@ public final class ActivityThread {
         synchronized (this) {
             ContextImpl context = getSystemContext();
             context.init(new LoadedApk(this, "android", context, info,
-                    new CompatibilityInfo(info, 0, 0, false)), null, this);
+                    CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO), null, this);
         }
     }
 
@@ -3293,6 +3298,12 @@ public final class ActivityThread {
         }
     }
 
+    public final void applyConfigurationToResources(Configuration config) {
+        synchronized (mPackages) {
+            applyConfigurationToResourcesLocked(config, null);
+        }
+    }
+
     final boolean applyConfigurationToResourcesLocked(Configuration config,
             CompatibilityInfo compat) {
         if (mResConfiguration == null) {
@@ -3518,8 +3529,7 @@ public final class ActivityThread {
          * reflect configuration changes. The configuration object passed
          * in AppBindData can be safely assumed to be up to date
          */
-        Resources.getSystem().updateConfiguration(mConfiguration,
-                Resources.getSystem().getDisplayMetrics(), data.compatInfo);
+        applyConfigurationToResourcesLocked(data.config, data.compatInfo);
 
         data.info = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
 

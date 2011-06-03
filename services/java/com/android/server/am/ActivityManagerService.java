@@ -12398,6 +12398,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ac.updateConfiguration(mConfiguration);
                 }
 
+                // Make sure all resources in our process are updated
+                // right now, so that anyone who is going to retrieve
+                // resource values after we return will be sure to get
+                // the new ones.  This is especially important during
+                // boot, where the first config change needs to guarantee
+                // all resources have that config before following boot
+                // code is executed.
+                mSystemThread.applyConfigurationToResources(newConfig);
+
                 if (Settings.System.hasInterestingConfigurationChanges(changes)) {
                     Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
                     msg.obj = new Configuration(mConfiguration);

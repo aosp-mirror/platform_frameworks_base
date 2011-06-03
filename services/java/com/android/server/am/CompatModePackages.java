@@ -150,9 +150,11 @@ public class CompatModePackages {
     }
 
     public CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
-        return new CompatibilityInfo(ai, mService.mConfiguration.screenLayout,
+        CompatibilityInfo ci = new CompatibilityInfo(ai, mService.mConfiguration.screenLayout,
                 mService.mConfiguration.smallestScreenWidthDp,
                 (getPackageFlags(ai.packageName)&COMPAT_FLAG_ENABLED) != 0);
+        //Slog.i(TAG, "*********** COMPAT FOR PKG " + ai.packageName + ": " + ci);
+        return ci;
     }
 
     public int computeCompatModeLocked(ApplicationInfo ai) {
