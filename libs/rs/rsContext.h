@@ -24,7 +24,6 @@
 
 #include "rs_hal.h"
 
-#ifndef ANDROID_RS_SERIALIZE
 #include "rsMutex.h"
 #include "rsThreadIO.h"
 #include "rsMatrix4x4.h"
@@ -41,8 +40,6 @@
 
 #include "rsgApiStructs.h"
 #include "rsLocklessFifo.h"
-
-#endif // ANDROID_RS_SERIALIZE
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -67,8 +64,6 @@ namespace renderscript {
 #define CHECK_OBJ_OR_NULL(o)
 #endif
 
-#ifndef ANDROID_RS_SERIALIZE
-
 class Context {
 public:
     struct Hal {
@@ -79,6 +74,7 @@ public:
     Hal mHal;
 
     static Context * createContext(Device *, const RsSurfaceConfig *sc);
+    static Context * createContextLite();
     ~Context();
 
     static pthread_mutex_t gInitMutex;
@@ -243,6 +239,7 @@ private:
     static void * helperThreadProc(void *);
 
     bool mHasSurface;
+    bool mIsContextLite;
 
     Vector<ObjectBase *> mNames;
 
@@ -258,46 +255,6 @@ private:
     uint64_t mAverageFPSStartTime;
     uint32_t mAverageFPS;
 };
-
-#else
-
-class Context {
-public:
-    Context() {
-        mObjHead = NULL;
-    }
-    ~Context() {
-        ObjectBase::zeroAllUserRef(this);
-    }
-
-    struct Hal {
-        void * drv;
-
-        RsdHalFunctions funcs;
-    };
-    Hal mHal;
-
-    ElementState mStateElement;
-    TypeState mStateType;
-
-    struct {
-        bool mLogTimes;
-        bool mLogScripts;
-        bool mLogObjects;
-        bool mLogShaders;
-        bool mLogShadersAttr;
-        bool mLogShadersUniforms;
-        bool mLogVisual;
-    } props;
-
-    void setError(RsError e, const char *msg = NULL) {  }
-
-    mutable const ObjectBase * mObjHead;
-
-protected:
-
-};
-#endif //ANDROID_RS_SERIALIZE
 
 } // renderscript
 } // android

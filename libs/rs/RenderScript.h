@@ -55,15 +55,7 @@ void rsDeviceSetConfig(RsDevice dev, RsDeviceParam p, int32_t value);
 RsContext rsContextCreate(RsDevice dev, uint32_t version);
 RsContext rsContextCreateGL(RsDevice dev, uint32_t version, RsSurfaceConfig sc, uint32_t dpi);
 
-
-
-#ifdef ANDROID_RS_SERIALIZE
-#define NO_RS_FUNCS
-#endif
-
-#ifndef NO_RS_FUNCS
 #include "rsgApiFuncDecl.h"
-#endif
 
 #ifdef __cplusplus
 };

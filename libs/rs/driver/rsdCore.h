@@ -18,7 +18,6 @@
 #define RSD_CORE_H
 
 #include <rs_hal.h>
-#include <bcc/bcc.h>
 
 #include "rsMutex.h"
 #include "rsSignal.h"

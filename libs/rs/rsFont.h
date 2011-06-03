@@ -199,8 +199,10 @@ protected:
     float mWhiteThreshold;
 
     // Free type library, we only need one copy
+#ifndef ANDROID_RS_SERIALIZE
     FT_LibraryRec_ *mLibrary;
     FT_LibraryRec_ *getLib();
+#endif //ANDROID_RS_SERIALIZE
     Vector<Font*> mActiveFonts;
 
     // Render state for the font
@@ -217,7 +219,9 @@ protected:
         return (uint8_t*)mTextTexture->getPtr();
     }
 
+#ifndef ANDROID_RS_SERIALIZE
     bool cacheBitmap(FT_Bitmap_ *bitmap, uint32_t *retOriginX, uint32_t *retOriginY);
+#endif //ANDROID_RS_SERIALIZE
     const Type* getCacheTextureType() {
         return mTextTexture->getType();
     }

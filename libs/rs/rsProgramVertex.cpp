@@ -223,8 +223,8 @@ namespace android {
 namespace renderscript {
 
 RsProgramVertex rsi_ProgramVertexCreate(Context *rsc, const char * shaderText,
-                             uint32_t shaderLength, const uint32_t * params,
-                             uint32_t paramLength) {
+                             size_t shaderLength, const uint32_t * params,
+                             size_t paramLength) {
     ProgramVertex *pv = new ProgramVertex(rsc, shaderText, shaderLength, params, paramLength);
     pv->incUserRef();
     return pv;

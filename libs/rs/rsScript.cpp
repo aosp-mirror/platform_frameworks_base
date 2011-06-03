@@ -53,7 +53,7 @@ void Script::setSlot(uint32_t slot, Allocation *a) {
     }
 }
 
-void Script::setVar(uint32_t slot, const void *val, uint32_t len) {
+void Script::setVar(uint32_t slot, const void *val, size_t len) {
     //LOGE("setVar %i %p %i", slot, val, len);
     if (slot >= mHal.info.exportedVariableCount) {
         LOGE("Script::setVar unable to set allocation, invalid slot index");
@@ -82,14 +82,14 @@ void rsi_ScriptBindAllocation(Context * rsc, RsScript vs, RsAllocation va, uint3
     //LOGE("rsi_ScriptBindAllocation %i  %p  %p", slot, a, a->getPtr());
 }
 
-void rsi_ScriptSetTimeZone(Context * rsc, RsScript vs, const char * timeZone, uint32_t length) {
+void rsi_ScriptSetTimeZone(Context * rsc, RsScript vs, const char * timeZone, size_t length) {
     Script *s = static_cast<Script *>(vs);
     s->mEnviroment.mTimeZone = timeZone;
 }
 
 void rsi_ScriptForEach(Context *rsc, RsScript vs, uint32_t slot,
                        RsAllocation vain, RsAllocation vaout,
-                       const void *params, uint32_t paramLen) {
+                       const void *params, size_t paramLen) {
     Script *s = static_cast<Script *>(vs);
     s->runForEach(rsc,
                   static_cast<const Allocation *>(vain), static_cast<Allocation *>(vaout),
@@ -108,7 +108,7 @@ void rsi_ScriptInvokeData(Context *rsc, RsScript vs, uint32_t slot, void *data) 
     s->Invoke(rsc, slot, NULL, 0);
 }
 
-void rsi_ScriptInvokeV(Context *rsc, RsScript vs, uint32_t slot, const void *data, uint32_t len) {
+void rsi_ScriptInvokeV(Context *rsc, RsScript vs, uint32_t slot, const void *data, size_t len) {
     Script *s = static_cast<Script *>(vs);
     s->Invoke(rsc, slot, data, len);
 }
@@ -139,7 +139,7 @@ void rsi_ScriptSetVarD(Context *rsc, RsScript vs, uint32_t slot, double value) {
     s->setVar(slot, &value, sizeof(value));
 }
 
-void rsi_ScriptSetVarV(Context *rsc, RsScript vs, uint32_t slot, const void *data, uint32_t len) {
+void rsi_ScriptSetVarV(Context *rsc, RsScript vs, uint32_t slot, const void *data, size_t len) {
     Script *s = static_cast<Script *>(vs);
     s->setVar(slot, data, len);
 }
