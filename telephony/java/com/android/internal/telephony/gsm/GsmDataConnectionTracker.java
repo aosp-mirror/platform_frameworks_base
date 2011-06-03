@@ -608,33 +608,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return allowed;
     }
 
-    /**
-     * Release the apnContext
-     *
-     * @param apnContext
-     * @param tearDown
-     * @return none
-     */
-    private void releaseApnContext(ApnContext apnContext, boolean tearDown) {
-        if (apnContext == null) {
-            if (DBG) loge("releaseApnContext: apnContext null should not happen, ignore");
-            return;
-        }
-        DataConnection dc = apnContext.getDataConnection();
-        if (dc == null) {
-            if (DBG) loge("releaseApnContext: apnContext dc == null should not happen, ignore");
-            return;
-        }
-        if (tearDown) {
-            if (DBG) log("releaseApnContext: tearing down");
-            Message msg = obtainMessage(EVENT_DISCONNECT_DONE, apnContext);
-            apnContext.getDataConnection().tearDown(apnContext.getReason(), msg);
-        }
-        apnContext.setDataConnection(null);
-        apnContext.setDataConnectionAc(null);
-        return;
-    }
-
     private void setupDataOnReadyApns(String reason) {
         // Only check for default APN state
         for (ApnContext apnContext : mApnContexts.values()) {
@@ -803,17 +776,17 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         }
 
         DataConnectionAc dcac = apnContext.getDataConnectionAc();
-        if (dcac != null) {
-            if (tearDown) {
-                apnContext.setState(State.DISCONNECTING);
-                releaseApnContext(apnContext, tearDown);
-            } else {
-                dcac.resetSync();
-                apnContext.setState(State.IDLE);
-                mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
-                apnContext.setDataConnection(null);
-                apnContext.setDataConnectionAc(null);
-            }
+        if (tearDown && (dcac != null)) {
+            if (DBG) log("cleanUpConnection: tearing down");
+            Message msg = obtainMessage(EVENT_DISCONNECT_DONE, apnContext);
+            apnContext.getDataConnection().tearDown(apnContext.getReason(), msg);
+            apnContext.setState(State.DISCONNECTING);
+        } else {
+            if (dcac != null) dcac.resetSync();
+            apnContext.setState(State.IDLE);
+            mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
+            apnContext.setDataConnection(null);
+            apnContext.setDataConnectionAc(null);
         }
     }
 
@@ -1704,7 +1677,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     apnContext.setState(State.FAILED);
                     mPhone.notifyDataConnection(Phone.REASON_APN_FAILED, apnContext.getApnType());
 
-                    releaseApnContext(apnContext, false);
+                    apnContext.setDataConnection(null);
+                    apnContext.setDataConnectionAc(null);
                     if (DBG) {
                         log("onDataSetupComplete: permanent error apn=%s" + apnString );
                     }
@@ -1739,6 +1713,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
         apnContext.setState(State.IDLE);
         apnContext.setApnSetting(null);
+        apnContext.setDataConnection(null);
+        apnContext.setDataConnectionAc(null);
 
         mPhone.notifyDataConnection(apnContext.getReason(), apnContext.getApnType());
 
