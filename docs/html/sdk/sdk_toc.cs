@@ -153,7 +153,7 @@ class="new">new!</span></li>
       <span style="display:none" class="zh-TW"></span>
       </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 10.0.1
+      <li><a href="<?cs var:toroot ?>sdk/eclipse-adt.html">ADT 11.0.0
       <span style="display:none" class="de"></span>
       <span style="display:none" class="es"></span>
       <span style="display:none" class="fr"></span>
@@ -161,7 +161,7 @@ class="new">new!</span></li>
       <span style="display:none" class="ja"></span>
       <span style="display:none" class="zh-CN"></span>
       <span style="display:none" class="zh-TW"></span></a>
-     <!-- <span class="new">new!</span> --></li>
+      <span class="new">new!</span></li>
     </ul>
   </li>
   <li>
