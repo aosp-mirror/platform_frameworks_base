@@ -620,6 +620,9 @@ public class WebView extends AbsoluteLayout
     // SetBaseLayer time and to pause when WebView paused.
     private HTML5VideoViewProxy mHTML5VideoViewProxy;
 
+    // If we are using a set picture, don't send view updates to webkit
+    private boolean mBlockWebkitViewMessages = false;
+
     /*
      * Private message ids
      */
@@ -1815,14 +1818,24 @@ public class WebView extends AbsoluteLayout
      */
     public boolean loadViewState(InputStream stream) {
         try {
-            mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
             DrawData draw = ViewStateSerializer.deserializeViewState(stream, this);
+            mBlockWebkitViewMessages = true;
             setNewPicture(draw);
             return true;
         } catch (IOException e) {
             Log.w(LOGTAG, "Failed to loadViewState", e);
         }
         return false;
+    }
+
+    /**
+     * Clears the view state set with {@link #loadViewState(InputStream)}.
+     * This WebView will then switch to showing the content from webkit
+     * @hide
+     */
+    public void clearViewState() {
+        mBlockWebkitViewMessages = false;
+        invalidate();
     }
 
     /**
@@ -2704,10 +2717,12 @@ public class WebView extends AbsoluteLayout
         calcOurContentVisibleRect(rect);
         // Rect.equals() checks for null input.
         if (!rect.equals(mLastVisibleRectSent)) {
-            Point pos = new Point(rect.left, rect.top);
-            mWebViewCore.removeMessages(EventHub.SET_SCROLL_OFFSET);
-            mWebViewCore.sendMessage(EventHub.SET_SCROLL_OFFSET,
-                    nativeMoveGeneration(), mSendScrollEvent ? 1 : 0, pos);
+            if (!mBlockWebkitViewMessages) {
+                Point pos = new Point(rect.left, rect.top);
+                mWebViewCore.removeMessages(EventHub.SET_SCROLL_OFFSET);
+                mWebViewCore.sendMessage(EventHub.SET_SCROLL_OFFSET,
+                        nativeMoveGeneration(), mSendScrollEvent ? 1 : 0, pos);
+            }
             mLastVisibleRectSent = rect;
             mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
         }
@@ -2722,7 +2737,9 @@ public class WebView extends AbsoluteLayout
             // TODO: the global offset is only used by windowRect()
             // in ChromeClientAndroid ; other clients such as touch
             // and mouse events could return view + screen relative points.
-            mWebViewCore.sendMessage(EventHub.SET_GLOBAL_BOUNDS, globalRect);
+            if (!mBlockWebkitViewMessages) {
+                mWebViewCore.sendMessage(EventHub.SET_GLOBAL_BOUNDS, globalRect);
+            }
             mLastGlobalRect = globalRect;
         }
         return rect;
@@ -2787,6 +2804,7 @@ public class WebView extends AbsoluteLayout
      * @return true if new values were sent
      */
     boolean sendViewSizeZoom(boolean force) {
+        if (mBlockWebkitViewMessages) return false;
         if (mZoomManager.isPreventingWebkitUpdates()) return false;
 
         int viewWidth = getViewWidth();
@@ -3399,9 +3417,11 @@ public class WebView extends AbsoluteLayout
                 }
                 abortAnimation();
                 mPrivateHandler.removeMessages(RESUME_WEBCORE_PRIORITY);
-                WebViewCore.resumePriority();
-                if (!mSelectingText) {
-                    WebViewCore.resumeUpdatePicture(mWebViewCore);
+                if (!mBlockWebkitViewMessages) {
+                    WebViewCore.resumePriority();
+                    if (!mSelectingText) {
+                        WebViewCore.resumeUpdatePicture(mWebViewCore);
+                    }
                 }
                 if (oldX != mScrollX || oldY != mScrollY) {
                     sendOurVisibleRect();
@@ -4259,7 +4279,7 @@ public class WebView extends AbsoluteLayout
     }
 
     void onFixedLengthZoomAnimationEnd() {
-        if (!mSelectingText) {
+        if (!mBlockWebkitViewMessages && !mSelectingText) {
             WebViewCore.resumeUpdatePicture(mWebViewCore);
         }
         onZoomAnimationEnd();
@@ -4360,7 +4380,7 @@ public class WebView extends AbsoluteLayout
             // synchronization problem with layers.
             int content = nativeDraw(canvas, color, extras, false);
             canvas.setDrawFilter(null);
-            if (content != 0) {
+            if (!mBlockWebkitViewMessages && content != 0) {
                 mWebViewCore.sendMessage(EventHub.SPLIT_PICTURE_SET, content, 0);
             }
         }
@@ -4764,6 +4784,9 @@ public class WebView extends AbsoluteLayout
 
     @Override
     public boolean onKeyMultiple(int keyCode, int repeatCount, KeyEvent event) {
+        if (mBlockWebkitViewMessages) {
+            return false;
+        }
         // send complex characters to webkit for use by JS and plugins
         if (keyCode == KeyEvent.KEYCODE_UNKNOWN && event.getCharacters() != null) {
             // pass the key to DOM
@@ -4787,6 +4810,9 @@ public class WebView extends AbsoluteLayout
             Log.v(LOGTAG, "keyDown at " + System.currentTimeMillis()
                     + "keyCode=" + keyCode
                     + ", " + event + ", unicode=" + event.getUnicodeChar());
+        }
+        if (mBlockWebkitViewMessages) {
+            return false;
         }
 
         // don't implement accelerator keys here; defer to host application
@@ -4990,6 +5016,9 @@ public class WebView extends AbsoluteLayout
         if (DebugFlags.WEB_VIEW) {
             Log.v(LOGTAG, "keyUp at " + System.currentTimeMillis()
                     + ", " + event + ", unicode=" + event.getUnicodeChar());
+        }
+        if (mBlockWebkitViewMessages) {
+            return false;
         }
 
         if (mNativeClass == 0) {
@@ -5575,10 +5604,12 @@ public class WebView extends AbsoluteLayout
     }
 
     private boolean shouldForwardTouchEvent() {
-        return mFullScreenHolder != null || (mForwardTouchEvents
+        if (mFullScreenHolder != null) return true;
+        if (mBlockWebkitViewMessages) return false;
+        return mForwardTouchEvents
                 && !mSelectingText
                 && mPreventDefault != PREVENT_DEFAULT_IGNORE
-                && mPreventDefault != PREVENT_DEFAULT_NO);
+                && mPreventDefault != PREVENT_DEFAULT_NO;
     }
 
     private boolean inFullScreenMode() {
@@ -5709,25 +5740,31 @@ public class WebView extends AbsoluteLayout
                         // commit the short press action for the previous tap
                         doShortPress();
                         mTouchMode = TOUCH_INIT_MODE;
-                        mDeferTouchProcess = (!inFullScreenMode()
-                                && mForwardTouchEvents) ? hitFocusedPlugin(
-                                contentX, contentY) : false;
+                        mDeferTouchProcess = !mBlockWebkitViewMessages
+                                && (!inFullScreenMode() && mForwardTouchEvents)
+                                ? hitFocusedPlugin(contentX, contentY)
+                                : false;
                     }
                 } else { // the normal case
                     mTouchMode = TOUCH_INIT_MODE;
-                    mDeferTouchProcess = (!inFullScreenMode()
-                            && mForwardTouchEvents) ? hitFocusedPlugin(
-                            contentX, contentY) : false;
-                    mWebViewCore.sendMessage(
-                            EventHub.UPDATE_FRAME_CACHE_IF_LOADING);
+                    mDeferTouchProcess = !mBlockWebkitViewMessages
+                            && (!inFullScreenMode() && mForwardTouchEvents)
+                            ? hitFocusedPlugin(contentX, contentY)
+                            : false;
+                    if (!mBlockWebkitViewMessages) {
+                        mWebViewCore.sendMessage(
+                                EventHub.UPDATE_FRAME_CACHE_IF_LOADING);
+                    }
                     if (getSettings().supportTouchOnly()) {
                         TouchHighlightData data = new TouchHighlightData();
                         data.mX = contentX;
                         data.mY = contentY;
                         data.mSlop = viewToContentDimension(mNavSlop);
-                        mWebViewCore.sendMessageDelayed(
-                                EventHub.GET_TOUCH_HIGHLIGHT_RECTS, data,
-                                ViewConfiguration.getTapTimeout());
+                        if (!mBlockWebkitViewMessages) {
+                            mWebViewCore.sendMessageDelayed(
+                                    EventHub.GET_TOUCH_HIGHLIGHT_RECTS, data,
+                                    ViewConfiguration.getTapTimeout());
+                        }
                         if (DEBUG_TOUCH_HIGHLIGHT) {
                             if (getSettings().getNavDump()) {
                                 mTouchHighlightX = (int) x + mScrollX;
@@ -5763,7 +5800,7 @@ public class WebView extends AbsoluteLayout
                             SWITCH_TO_LONGPRESS, LONG_PRESS_TIMEOUT);
                     if (inFullScreenMode() || mDeferTouchProcess) {
                         mPreventDefault = PREVENT_DEFAULT_YES;
-                    } else if (mForwardTouchEvents) {
+                    } else if (!mBlockWebkitViewMessages && mForwardTouchEvents) {
                         mPreventDefault = PREVENT_DEFAULT_MAYBE_YES;
                     } else {
                         mPreventDefault = PREVENT_DEFAULT_NO;
@@ -7873,6 +7910,10 @@ public class WebView extends AbsoluteLayout
             }
             if (mWebViewCore == null) {
                 // after WebView's destroy() is called, skip handling messages.
+                return;
+            }
+            if (mBlockWebkitViewMessages) {
+                // Blocking messages from webkit
                 return;
             }
             switch (msg.what) {

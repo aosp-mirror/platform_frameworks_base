@@ -16,7 +16,6 @@
 package android.webkit;
 
 import android.graphics.Point;
-import android.graphics.Rect;
 import android.graphics.Region;
 import android.webkit.WebViewCore.DrawData;
 
