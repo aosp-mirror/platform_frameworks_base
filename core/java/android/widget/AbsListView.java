@@ -4661,6 +4661,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         selectedPos = lookForSelectablePosition(selectedPos, down);
         if (selectedPos >= firstPosition && selectedPos <= getLastVisiblePosition()) {
             mLayoutMode = LAYOUT_SPECIFIC;
+            updateSelectorState();
             setSelectionInt(selectedPos);
             invokeOnItemScrollListener();
         } else {
