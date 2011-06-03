@@ -5376,7 +5376,8 @@ MultiTouchInputMapper::~MultiTouchInputMapper() {
 }
 
 void MultiTouchInputMapper::clearState() {
-    mAccumulator.clear(mSlotCount);
+    mAccumulator.clearSlots(mSlotCount);
+    mAccumulator.clearButtons();
     mButtonState = 0;
 }
 
@@ -5410,13 +5411,13 @@ void MultiTouchInputMapper::process(const RawEvent* rawEvent) {
         }
 
         if (mAccumulator.currentSlot < 0 || size_t(mAccumulator.currentSlot) >= mSlotCount) {
-            if (newSlot) {
 #if DEBUG_POINTERS
+            if (newSlot) {
                 LOGW("MultiTouch device %s emitted invalid slot index %d but it "
                         "should be between 0 and %d; ignoring this slot.",
                         getDeviceName().string(), mAccumulator.currentSlot, mSlotCount);
-#endif
             }
+#endif
             break;
         }
 
@@ -5619,7 +5620,10 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
 
     syncTouch(when, havePointerIds);
 
-    mAccumulator.clear(mUsingSlotsProtocol ? 0 : mSlotCount);
+    if (!mUsingSlotsProtocol) {
+        mAccumulator.clearSlots(mSlotCount);
+    }
+    mAccumulator.clearButtons();
 }
 
 void MultiTouchInputMapper::configureRawAxes() {

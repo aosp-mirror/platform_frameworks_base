@@ -1243,8 +1243,7 @@ private:
         uint32_t buttonDown;
         uint32_t buttonUp;
 
-        Accumulator() : slots(NULL) {
-            clear(false);
+        Accumulator() : currentSlot(0), slots(NULL), buttonDown(0), buttonUp(0) {
         }
 
         ~Accumulator() {
@@ -1255,11 +1254,14 @@ private:
             slots = new Slot[slotCount];
         }
 
-        void clear(size_t slotCount) {
+        void clearSlots(size_t slotCount) {
             for (size_t i = 0; i < slotCount; i++) {
                 slots[i].clear();
             }
             currentSlot = 0;
+        }
+
+        void clearButtons() {
             buttonDown = 0;
             buttonUp = 0;
         }
