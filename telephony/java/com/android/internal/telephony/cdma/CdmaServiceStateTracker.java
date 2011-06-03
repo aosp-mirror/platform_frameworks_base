@@ -1017,7 +1017,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                     eriText = phone.getContext().getText(
                             com.android.internal.R.string.roamingTextSearching).toString();
                 }
-                ss.setCdmaEriText(eriText);
+                ss.setOperatorAlphaLong(eriText);
             }
 
             String operatorNumeric;

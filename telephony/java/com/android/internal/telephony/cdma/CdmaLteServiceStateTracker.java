@@ -351,7 +351,14 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                     eriText = phone.getContext()
                             .getText(com.android.internal.R.string.roamingTextSearching).toString();
                 }
-                ss.setCdmaEriText(eriText);
+                ss.setOperatorAlphaLong(eriText);
+            }
+            if (cm.getSimState().isSIMReady()) {
+                // SIM is found on the device. Read the operator name from the card.
+                ss.setOperatorAlphaLong(phone.mIccRecords.getServiceProviderName());
+
+                // If SIM card is present, Eri will not be used. Turn it off
+                ss.setCdmaEriIconIndex(EriInfo.ROAMING_INDICATOR_OFF);
             }
 
             String operatorNumeric;
