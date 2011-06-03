@@ -55,6 +55,8 @@ public abstract class TextToSpeechService extends Service {
 
     private CallbackMap mCallbacks;
 
+    private int mDefaultAvailability = TextToSpeech.LANG_NOT_SUPPORTED;
+
     @Override
     public void onCreate() {
         if (DBG) Log.d(TAG, "onCreate()");
@@ -71,7 +73,8 @@ public abstract class TextToSpeechService extends Service {
         mCallbacks = new CallbackMap();
 
         // Load default language
-        onLoadLanguage(getDefaultLanguage(), getDefaultCountry(), getDefaultVariant());
+        mDefaultAvailability = onLoadLanguage(getDefaultLanguage(),
+                getDefaultCountry(), getDefaultVariant());
     }
 
     @Override
@@ -651,16 +654,42 @@ public abstract class TextToSpeechService extends Service {
             return onGetLanguage();
         }
 
+        /*
+         * If defaults are enforced, then no language is "available" except
+         * perhaps the default language selected by the user.
+         */
         public int isLanguageAvailable(String lang, String country, String variant) {
+            if (areDefaultsEnforced()) {
+                if (isDefault(lang, country, variant)) {
+                    return mDefaultAvailability;
+                } else {
+                    return TextToSpeech.LANG_NOT_SUPPORTED;
+                }
+            }
             return onIsLanguageAvailable(lang, country, variant);
         }
 
+        /*
+         * There is no point loading a non default language if defaults
+         * are enforced.
+         */
         public int loadLanguage(String lang, String country, String variant) {
+            if (areDefaultsEnforced()) {
+                if (isDefault(lang, country, variant)) {
+                    return mDefaultAvailability;
+                } else {
+                    return TextToSpeech.LANG_NOT_SUPPORTED;
+                }
+            }
             return onLoadLanguage(lang, country, variant);
         }
 
         public void setCallback(String packageName, ITextToSpeechCallback cb) {
             mCallbacks.setCallback(packageName, cb);
+        }
+
+        private boolean isDefault(String lang, String country, String variant) {
+            return Locale.getDefault().equals(new Locale(lang, country, variant));
         }
     };
 
