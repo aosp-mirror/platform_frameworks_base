@@ -836,6 +836,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"تمت إعادة توجيه التطبيق"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> قيد التشغيل الآن."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"تم تشغيل <xliff:g id="APP_NAME">%1$s</xliff:g> من الأصل."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"انتهك التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> (العملية <xliff:g id="PROCESS">%2$s</xliff:g>) سياسة.StrictMode المفروضة ذاتيًا."</string>
     <string name="smv_process" msgid="5120397012047462446">"انتهكت العملية <xliff:g id="PROCESS">%1$s</xliff:g> سياسة StrictMode المفروضة ذاتيًا."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> يعمل"</string>
@@ -1041,4 +1047,6 @@
     <string name="storage_internal" msgid="7556050805474115618">"وحدة التخزين الداخلية"</string>
     <string name="storage_sd_card" msgid="8921771478629812343">"بطاقة SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"وحدة تخزين USB"</string>
+    <!-- no translation found for extract_edit_menu_button (302060189057163906) -->
+    <skip />
 </resources>

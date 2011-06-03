@@ -241,7 +241,7 @@
     <string name="permlab_backup" msgid="470013022865453920">"controllo del backup di sistema e ripristino"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Consente all\'applicazione di controllare il meccanismo di backup e ripristino del sistema. Da non usare per normali applicazioni."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"conferma di un\'operazione completa di backup o di ripristino"</string>
-    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"Consente all\'applicazione di lanciare l\'interfaccia utente di conferma del backup completo. Non utilizzabile da qualsiasi applicazione."</string>
+    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"Consente all\'applicazione di lanciare l\'interfaccia utente di conferma del backup completo. Non utilizzare per nessuna applicazione."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"visualizzazione finestre non autorizzate"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Consente la creazione di finestre destinate all\'uso nell\'interfaccia utente di sistema interna. Da non usare per normali applicazioni."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"visualizzazione avvisi di sistema"</string>
@@ -836,6 +836,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Applicazione reindirizzata"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> è ora in esecuzione."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> già avviata."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"L\'applicazione <xliff:g id="APPLICATION">%1$s</xliff:g> (processo <xliff:g id="PROCESS">%2$s</xliff:g>) ha violato la norma StrictMode autoimposta."</string>
     <string name="smv_process" msgid="5120397012047462446">"Il processo <xliff:g id="PROCESS">%1$s</xliff:g> ha violato la norma StrictMode autoimposta."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> in esecuzione"</string>
@@ -1041,4 +1047,6 @@
     <string name="storage_internal" msgid="7556050805474115618">"Archivio interno"</string>
     <string name="storage_sd_card" msgid="8921771478629812343">"Scheda SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Archivio USB"</string>
+    <!-- no translation found for extract_edit_menu_button (302060189057163906) -->
+    <skip />
 </resources>

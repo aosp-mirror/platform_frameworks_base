@@ -241,7 +241,7 @@
     <string name="permlab_backup" msgid="470013022865453920">"控制系統備份與還原"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"允許應用程式控制系統的備份與還原機制。一般應用程式不應使用這項功能。"</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"確認完整備份或還原作業"</string>
-    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"允許應用程式啟動完整備份確認使用者界面，任何應用程式均不應使用這項功能。"</string>
+    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"允許應用程式啟動完整備份確認使用者介面，任何應用程式均不應使用這項功能。"</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"顯示未授權視窗"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"允許內部系統使用介面建立視窗。一般應用程式不會使用此功能。"</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"顯示系統警示"</string>
@@ -836,6 +836,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"應用程式已重新導向"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」現在正在執行。"</string>
     <string name="launch_warning_original" msgid="188102023021668683">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」原先已啟動。"</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (處理程序 <xliff:g id="PROCESS">%2$s</xliff:g>) 已違反其自行強制實施的嚴格模式 (StrictMode) 政策。"</string>
     <string name="smv_process" msgid="5120397012047462446">"處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已違反其自行強制實施的嚴格模式 (StrictMode) 政策。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> 執行中"</string>
@@ -1041,4 +1047,6 @@
     <string name="storage_internal" msgid="7556050805474115618">"內部儲存空間"</string>
     <string name="storage_sd_card" msgid="8921771478629812343">"SD 卡"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 儲存裝置"</string>
+    <!-- no translation found for extract_edit_menu_button (302060189057163906) -->
+    <skip />
 </resources>

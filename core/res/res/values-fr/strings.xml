@@ -241,7 +241,7 @@
     <string name="permlab_backup" msgid="470013022865453920">"contrôler la sauvegarde et la restauration du système"</string>
     <string name="permdesc_backup" msgid="4837493065154256525">"Autorise l\'application à contrôler le mécanisme de sauvegarde et de restauration du système. Ne pas utiliser pour les applications standard."</string>
     <string name="permlab_confirm_full_backup" msgid="5557071325804469102">"confirmer une sauvegarde complète ou une restauration"</string>
-    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"Permet à l\'application de lancer l\'interface utilisateur de confirmation de la sauvegarde complète. Seules certaines applications peuvent bénéficier de cette permission."</string>
+    <string name="permdesc_confirm_full_backup" msgid="9005017754175897954">"Permet à l\'application de lancer l\'interface de confirmation de sauvegarde complète. Seules certaines applications peuvent bénéficier de cette permission."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"Affichage de fenêtres non autorisées"</string>
     <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Permet de créer des fenêtres conçues pour l\'interface utilisateur du système interne. Les applications normales n\'utilisent pas cette fonctionnalité."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"Affichage d\'alertes système"</string>
@@ -492,8 +492,8 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Indiquer le proxy global à utiliser pour ce mobile lorsque les règles sont activées. Seul l\'administrateur principal du mobile peut définir le proxy global utilisé."</string>
     <string name="policylab_expirePassword" msgid="885279151847254056">"Définir exp. mot passe verr."</string>
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Contrôler la fréquence de modification du mot de passe de verrouillage de l\'écran"</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Définir cryptage du stockage"</string>
-    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Exiger que les données d\'application stockées soient cryptées"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Définir chiffrement du stockage"</string>
+    <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Exiger que les données d\'application stockées soient chiffrées"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Domicile"</item>
     <item msgid="869923650527136615">"Mobile"</item>
@@ -836,6 +836,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Application redirigée"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> est maintenant lancée."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Application lancée initialement : <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"L\'application <xliff:g id="APPLICATION">%1$s</xliff:g> (processus <xliff:g id="PROCESS">%2$s</xliff:g>) a enfreint ses propres règles du mode strict."</string>
     <string name="smv_process" msgid="5120397012047462446">"Le processus <xliff:g id="PROCESS">%1$s</xliff:g> a enfreint ses propres règles du mode strict."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en cours d\'exécution"</string>
@@ -1041,4 +1047,6 @@
     <string name="storage_internal" msgid="7556050805474115618">"Mémoire de stockage interne"</string>
     <string name="storage_sd_card" msgid="8921771478629812343">"Carte SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Mémoire de stockage USB"</string>
+    <!-- no translation found for extract_edit_menu_button (302060189057163906) -->
+    <skip />
 </resources>

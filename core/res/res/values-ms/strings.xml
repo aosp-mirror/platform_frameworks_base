@@ -1046,6 +1046,12 @@
     <skip />
     <!-- no translation found for launch_warning_original (188102023021668683) -->
     <skip />
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <!-- no translation found for smv_application (295583804361236288) -->
     <skip />
     <!-- no translation found for smv_process (5120397012047462446) -->
@@ -1350,5 +1356,7 @@
     <!-- no translation found for storage_sd_card (8921771478629812343) -->
     <skip />
     <!-- no translation found for storage_usb (3017954059538517278) -->
+    <skip />
+    <!-- no translation found for extract_edit_menu_button (302060189057163906) -->
     <skip />
 </resources>
