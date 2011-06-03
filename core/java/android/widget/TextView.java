@@ -10010,7 +10010,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private boolean                 mSelectAllOnFocus = false;
 
-    private int                     mGravity = Gravity.TOP | Gravity.LEFT;
+    private int                     mGravity = Gravity.TOP | Gravity.BEFORE;
     private boolean                 mHorizontallyScrolling;
 
     private int                     mAutoLinkMask;
