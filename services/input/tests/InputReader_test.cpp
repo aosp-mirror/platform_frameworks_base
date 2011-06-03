@@ -120,17 +120,14 @@ class FakeInputReaderPolicy : public InputReaderPolicyInterface {
     };
 
     KeyedVector<int32_t, DisplayInfo> mDisplayInfos;
-    bool mFilterTouchEvents;
-    bool mFilterJumpyTouchEvents;
-    Vector<String8> mExcludedDeviceNames;
+    InputReaderConfiguration mConfig;
     KeyedVector<int32_t, sp<FakePointerController> > mPointerControllers;
 
 protected:
     virtual ~FakeInputReaderPolicy() { }
 
 public:
-    FakeInputReaderPolicy() :
-            mFilterTouchEvents(false), mFilterJumpyTouchEvents(false) {
+    FakeInputReaderPolicy() {
     }
 
     void removeDisplayInfo(int32_t displayId) {
@@ -148,11 +145,11 @@ public:
     }
 
     void setFilterTouchEvents(bool enabled) {
-        mFilterTouchEvents = enabled;
+        mConfig.filterTouchEvents = enabled;
     }
 
     void setFilterJumpyTouchEvents(bool enabled) {
-        mFilterJumpyTouchEvents = enabled;
+        mConfig.filterJumpyTouchEvents = enabled;
     }
 
     virtual nsecs_t getVirtualKeyQuietTime() {
@@ -160,7 +157,7 @@ public:
     }
 
     void addExcludedDeviceName(const String8& deviceName) {
-        mExcludedDeviceNames.push(deviceName);
+        mConfig.excludedDeviceNames.push(deviceName);
     }
 
     void setPointerController(int32_t deviceId, const sp<FakePointerController>& controller) {
@@ -187,16 +184,8 @@ private:
         return false;
     }
 
-    virtual bool filterTouchEvents() {
-        return mFilterTouchEvents;
-    }
-
-    virtual bool filterJumpyTouchEvents() {
-        return mFilterJumpyTouchEvents;
-    }
-
-    virtual void getExcludedDeviceNames(Vector<String8>& outExcludedDeviceNames) {
-        outExcludedDeviceNames.appendVector(mExcludedDeviceNames);
+    virtual void getReaderConfiguration(InputReaderConfiguration* outConfig) {
+        *outConfig = mConfig;
     }
 
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId) {
@@ -751,6 +740,8 @@ class FakeInputReaderContext : public InputReaderContext {
     int32_t mGlobalMetaState;
     bool mUpdateGlobalMetaStateWasCalled;
 
+    InputReaderConfiguration mConfig;
+
 public:
     FakeInputReaderContext(const sp<EventHubInterface>& eventHub,
             const sp<InputReaderPolicyInterface>& policy,
@@ -786,6 +777,11 @@ private:
 
     virtual InputReaderPolicyInterface* getPolicy() {
         return mPolicy.get();
+    }
+
+    virtual const InputReaderConfiguration* getConfig() {
+        mPolicy->getReaderConfiguration(&mConfig);
+        return &mConfig;
     }
 
     virtual InputDispatcherInterface* getDispatcher() {

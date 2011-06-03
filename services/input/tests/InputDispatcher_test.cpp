@@ -35,6 +35,8 @@ static const int32_t INJECTOR_UID = 1001;
 // --- FakeInputDispatcherPolicy ---
 
 class FakeInputDispatcherPolicy : public InputDispatcherPolicyInterface {
+    InputDispatcherConfiguration mConfig;
+
 protected:
     virtual ~FakeInputDispatcherPolicy() {
     }
@@ -55,16 +57,12 @@ private:
     virtual void notifyInputChannelBroken(const sp<InputWindowHandle>& inputWindowHandle) {
     }
 
-    virtual nsecs_t getKeyRepeatTimeout() {
-        return 500 * 1000000LL;
+    virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) {
+        *outConfig = mConfig;
     }
 
-    virtual nsecs_t getKeyRepeatDelay() {
-        return 50 * 1000000LL;
-    }
-
-    virtual int32_t getMaxEventsPerSecond() {
-        return 60;
+    virtual bool isKeyRepeatEnabled() {
+        return true;
     }
 
     virtual bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) {

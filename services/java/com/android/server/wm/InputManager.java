@@ -573,6 +573,26 @@ public class InputManager {
         }
 
         @SuppressWarnings("unused")
+        public int getTapTimeout() {
+            return ViewConfiguration.getTapTimeout();
+        }
+
+        @SuppressWarnings("unused")
+        public int getDoubleTapTimeout() {
+            return ViewConfiguration.getDoubleTapTimeout();
+        }
+
+        @SuppressWarnings("unused")
+        public int getLongPressTimeout() {
+            return ViewConfiguration.getLongPressTimeout();
+        }
+
+        @SuppressWarnings("unused")
+        public int getTouchSlop() {
+            return ViewConfiguration.get(mContext).getScaledTouchSlop();
+        }
+
+        @SuppressWarnings("unused")
         public int getMaxEventsPerSecond() {
             int result = 0;
             try {

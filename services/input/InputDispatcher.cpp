@@ -228,13 +228,14 @@ InputDispatcher::InputDispatcher(const sp<InputDispatcherPolicyInterface>& polic
 
     mKeyRepeatState.lastKeyEntry = NULL;
 
-    int32_t maxEventsPerSecond = policy->getMaxEventsPerSecond();
-    mThrottleState.minTimeBetweenEvents = 1000000000LL / maxEventsPerSecond;
+    policy->getDispatcherConfiguration(&mConfig);
+
+    mThrottleState.minTimeBetweenEvents = 1000000000LL / mConfig.maxEventsPerSecond;
     mThrottleState.lastDeviceId = -1;
 
 #if DEBUG_THROTTLING
     mThrottleState.originalSampleCount = 0;
-    LOGD("Throttling - Max events per second = %d", maxEventsPerSecond);
+    LOGD("Throttling - Max events per second = %d", mConfig.maxEventsPerSecond);
 #endif
 }
 
@@ -253,13 +254,10 @@ InputDispatcher::~InputDispatcher() {
 }
 
 void InputDispatcher::dispatchOnce() {
-    nsecs_t keyRepeatTimeout = mPolicy->getKeyRepeatTimeout();
-    nsecs_t keyRepeatDelay = mPolicy->getKeyRepeatDelay();
-
     nsecs_t nextWakeupTime = LONG_LONG_MAX;
     { // acquire lock
         AutoMutex _l(mLock);
-        dispatchOnceInnerLocked(keyRepeatTimeout, keyRepeatDelay, & nextWakeupTime);
+        dispatchOnceInnerLocked(&nextWakeupTime);
 
         if (runCommandsLockedInterruptible()) {
             nextWakeupTime = LONG_LONG_MIN;  // force next poll to wake up immediately
@@ -272,14 +270,13 @@ void InputDispatcher::dispatchOnce() {
     mLooper->pollOnce(timeoutMillis);
 }
 
-void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
-        nsecs_t keyRepeatDelay, nsecs_t* nextWakeupTime) {
+void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
     nsecs_t currentTime = now();
 
     // Reset the key repeat timer whenever we disallow key events, even if the next event
     // is not a key.  This is to ensure that we abort a key repeat if the device is just coming
     // out of sleep.
-    if (keyRepeatTimeout < 0) {
+    if (!mPolicy->isKeyRepeatEnabled()) {
         resetKeyRepeatLocked();
     }
 
@@ -313,7 +310,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
             // Synthesize a key repeat if appropriate.
             if (mKeyRepeatState.lastKeyEntry) {
                 if (currentTime >= mKeyRepeatState.nextRepeatTime) {
-                    mPendingEvent = synthesizeKeyRepeatLocked(currentTime, keyRepeatDelay);
+                    mPendingEvent = synthesizeKeyRepeatLocked(currentTime);
                 } else {
                     if (mKeyRepeatState.nextRepeatTime < *nextWakeupTime) {
                         *nextWakeupTime = mKeyRepeatState.nextRepeatTime;
@@ -432,8 +429,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout,
         if (dropReason == DROP_REASON_NOT_DROPPED && mNextUnblockedEvent) {
             dropReason = DROP_REASON_BLOCKED;
         }
-        done = dispatchKeyLocked(currentTime, typedEntry, keyRepeatTimeout,
-                &dropReason, nextWakeupTime);
+        done = dispatchKeyLocked(currentTime, typedEntry, &dropReason, nextWakeupTime);
         break;
     }
 
@@ -692,8 +688,7 @@ void InputDispatcher::resetKeyRepeatLocked() {
     }
 }
 
-InputDispatcher::KeyEntry* InputDispatcher::synthesizeKeyRepeatLocked(
-        nsecs_t currentTime, nsecs_t keyRepeatDelay) {
+InputDispatcher::KeyEntry* InputDispatcher::synthesizeKeyRepeatLocked(nsecs_t currentTime) {
     KeyEntry* entry = mKeyRepeatState.lastKeyEntry;
 
     // Reuse the repeated key entry if it is otherwise unreferenced.
@@ -721,7 +716,7 @@ InputDispatcher::KeyEntry* InputDispatcher::synthesizeKeyRepeatLocked(
     // mKeyRepeatState.lastKeyEntry in addition to the one we return.
     entry->refCount += 1;
 
-    mKeyRepeatState.nextRepeatTime = currentTime + keyRepeatDelay;
+    mKeyRepeatState.nextRepeatTime = currentTime + mConfig.keyRepeatDelay;
     return entry;
 }
 
@@ -741,8 +736,7 @@ bool InputDispatcher::dispatchConfigurationChangedLocked(
     return true;
 }
 
-bool InputDispatcher::dispatchKeyLocked(
-        nsecs_t currentTime, KeyEntry* entry, nsecs_t keyRepeatTimeout,
+bool InputDispatcher::dispatchKeyLocked(nsecs_t currentTime, KeyEntry* entry,
         DropReason* dropReason, nsecs_t* nextWakeupTime) {
     // Preprocessing.
     if (! entry->dispatchInProgress) {
@@ -762,7 +756,7 @@ bool InputDispatcher::dispatchKeyLocked(
             } else {
                 // Not a repeat.  Save key down state in case we do see a repeat later.
                 resetKeyRepeatLocked();
-                mKeyRepeatState.nextRepeatTime = entry->eventTime + keyRepeatTimeout;
+                mKeyRepeatState.nextRepeatTime = entry->eventTime + mConfig.keyRepeatTimeout;
             }
             mKeyRepeatState.lastKeyEntry = entry;
             entry->refCount += 1;
@@ -3777,6 +3771,11 @@ void InputDispatcher::updateDispatchStatisticsLocked(nsecs_t currentTime, const 
 void InputDispatcher::dump(String8& dump) {
     dump.append("Input Dispatcher State:\n");
     dumpDispatchStateLocked(dump);
+
+    dump.append(INDENT "Configuration:\n");
+    dump.appendFormat(INDENT2 "MaxEventsPerSecond: %d\n", mConfig.maxEventsPerSecond);
+    dump.appendFormat(INDENT2 "KeyRepeatDelay: %0.1fms\n", mConfig.keyRepeatDelay * 0.000001f);
+    dump.appendFormat(INDENT2 "KeyRepeatTimeout: %0.1fms\n", mConfig.keyRepeatTimeout * 0.000001f);
 }
 
 

@@ -143,6 +143,30 @@ struct InputTarget {
 
 
 /*
+ * Input dispatcher configuration.
+ *
+ * Specifies various options that modify the behavior of the input dispatcher.
+ */
+struct InputDispatcherConfiguration {
+    // The key repeat initial timeout.
+    nsecs_t keyRepeatTimeout;
+
+    // The key repeat inter-key delay.
+    nsecs_t keyRepeatDelay;
+
+    // The maximum suggested event delivery rate per second.
+    // This value is used to throttle motion event movement actions on a per-device
+    // basis.  It is not intended to be a hard limit.
+    int32_t maxEventsPerSecond;
+
+    InputDispatcherConfiguration() :
+            keyRepeatTimeout(500 * 1000000LL),
+            keyRepeatDelay(50 * 1000000LL),
+            maxEventsPerSecond(60) { }
+};
+
+
+/*
  * Input dispatcher policy interface.
  *
  * The input reader policy is used by the input reader to interact with the Window Manager
@@ -168,17 +192,11 @@ public:
     /* Notifies the system that an input channel is unrecoverably broken. */
     virtual void notifyInputChannelBroken(const sp<InputWindowHandle>& inputWindowHandle) = 0;
 
-    /* Gets the key repeat initial timeout or -1 if automatic key repeating is disabled. */
-    virtual nsecs_t getKeyRepeatTimeout() = 0;
+    /* Gets the input dispatcher configuration. */
+    virtual void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) = 0;
 
-    /* Gets the key repeat inter-key delay. */
-    virtual nsecs_t getKeyRepeatDelay() = 0;
-
-    /* Gets the maximum suggested event delivery rate per second.
-     * This value is used to throttle motion event movement actions on a per-device
-     * basis.  It is not intended to be a hard limit.
-     */
-    virtual int32_t getMaxEventsPerSecond() = 0;
+    /* Returns true if automatic key repeating is enabled. */
+    virtual bool isKeyRepeatEnabled() = 0;
 
     /* Filters an input event.
      * Return true to dispatch the event unmodified, false to consume the event.
@@ -800,6 +818,7 @@ private:
     };
 
     sp<InputDispatcherPolicyInterface> mPolicy;
+    InputDispatcherConfiguration mConfig;
 
     Mutex mLock;
 
@@ -812,8 +831,7 @@ private:
 
     Vector<EventEntry*> mTempCancelationEvents;
 
-    void dispatchOnceInnerLocked(nsecs_t keyRepeatTimeout, nsecs_t keyRepeatDelay,
-            nsecs_t* nextWakeupTime);
+    void dispatchOnceInnerLocked(nsecs_t* nextWakeupTime);
 
     // Batches a new sample onto a motion entry.
     // Assumes that the we have already checked that we can append samples.
@@ -885,7 +903,7 @@ private:
     } mKeyRepeatState;
 
     void resetKeyRepeatLocked();
-    KeyEntry* synthesizeKeyRepeatLocked(nsecs_t currentTime, nsecs_t keyRepeatTimeout);
+    KeyEntry* synthesizeKeyRepeatLocked(nsecs_t currentTime);
 
     // Deferred command processing.
     bool runCommandsLockedInterruptible();
@@ -943,7 +961,7 @@ private:
     bool dispatchConfigurationChangedLocked(
             nsecs_t currentTime, ConfigurationChangedEntry* entry);
     bool dispatchKeyLocked(
-            nsecs_t currentTime, KeyEntry* entry, nsecs_t keyRepeatTimeout,
+            nsecs_t currentTime, KeyEntry* entry,
             DropReason* dropReason, nsecs_t* nextWakeupTime);
     bool dispatchMotionLocked(
             nsecs_t currentTime, MotionEntry* entry,

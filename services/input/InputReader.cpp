@@ -61,65 +61,6 @@ namespace android {
 // Maximum number of slots supported when using the slot-based Multitouch Protocol B.
 static const size_t MAX_SLOTS = 32;
 
-// Quiet time between certain gesture transitions.
-// Time to allow for all fingers or buttons to settle into a stable state before
-// starting a new gesture.
-static const nsecs_t QUIET_INTERVAL = 100 * 1000000; // 100 ms
-
-// The minimum speed that a pointer must travel for us to consider switching the active
-// touch pointer to it during a drag.  This threshold is set to avoid switching due
-// to noise from a finger resting on the touch pad (perhaps just pressing it down).
-static const float DRAG_MIN_SWITCH_SPEED = 50.0f; // pixels per second
-
-// Tap gesture delay time.
-// The time between down and up must be less than this to be considered a tap.
-static const nsecs_t TAP_INTERVAL = 150 * 1000000; // 150 ms
-
-// Tap drag gesture delay time.
-// The time between up and the next up must be greater than this to be considered a
-// drag.  Otherwise, the previous tap is finished and a new tap begins.
-static const nsecs_t TAP_DRAG_INTERVAL = 150 * 1000000; // 150 ms
-
-// The distance in pixels that the pointer is allowed to move from initial down
-// to up and still be called a tap.
-static const float TAP_SLOP = 10.0f; // 10 pixels
-
-// Time after the first touch points go down to settle on an initial centroid.
-// This is intended to be enough time to handle cases where the user puts down two
-// fingers at almost but not quite exactly the same time.
-static const nsecs_t MULTITOUCH_SETTLE_INTERVAL = 100 * 1000000; // 100ms
-
-// The transition from PRESS to SWIPE or FREEFORM gesture mode is made when
-// both of the pointers are moving at least this fast.
-static const float MULTITOUCH_MIN_SPEED = 150.0f; // pixels per second
-
-// The transition from PRESS to SWIPE gesture mode can only occur when the
-// cosine of the angle between the two vectors is greater than or equal to than this value
-// which indicates that the vectors are oriented in the same direction.
-// When the vectors are oriented in the exactly same direction, the cosine is 1.0.
-// (In exactly opposite directions, the cosine is -1.0.)
-static const float SWIPE_TRANSITION_ANGLE_COSINE = 0.5f; // cosine of 45 degrees
-
-// The transition from PRESS to SWIPE gesture mode can only occur when the
-// fingers are no more than this far apart relative to the diagonal size of
-// the touch pad.  For example, a ratio of 0.5 means that the fingers must be
-// no more than half the diagonal size of the touch pad apart.
-static const float SWIPE_MAX_WIDTH_RATIO = 0.333f; // 1/3
-
-// The gesture movement speed factor relative to the size of the display.
-// Movement speed applies when the fingers are moving in the same direction.
-// Without acceleration, a full swipe of the touch pad diagonal in movement mode
-// will cover this portion of the display diagonal.
-static const float GESTURE_MOVEMENT_SPEED_RATIO = 0.8f;
-
-// The gesture zoom speed factor relative to the size of the display.
-// Zoom speed applies when the fingers are mostly moving relative to each other
-// to execute a scale gesture or similar.
-// Without acceleration, a full swipe of the touch pad diagonal in zoom mode
-// will cover this portion of the display diagonal.
-static const float GESTURE_ZOOM_SPEED_RATIO = 0.3f;
-
-
 // --- Static Functions ---
 
 template<typename T>
@@ -320,6 +261,8 @@ InputReader::InputReader(const sp<EventHubInterface>& eventHub,
         const sp<InputDispatcherInterface>& dispatcher) :
         mEventHub(eventHub), mPolicy(policy), mDispatcher(dispatcher),
         mGlobalMetaState(0), mDisableVirtualKeysTimeout(LLONG_MIN), mNextTimeout(LLONG_MAX) {
+    mPolicy->getReaderConfiguration(&mConfig);
+
     configureExcludedDevices();
     updateGlobalMetaState();
     updateInputConfiguration();
@@ -553,11 +496,8 @@ void InputReader::handleConfigurationChanged(nsecs_t when) {
 }
 
 void InputReader::configureExcludedDevices() {
-    Vector<String8> excludedDeviceNames;
-    mPolicy->getExcludedDeviceNames(excludedDeviceNames);
-
-    for (size_t i = 0; i < excludedDeviceNames.size(); i++) {
-        mEventHub->addExcludedDevice(excludedDeviceNames[i]);
+    for (size_t i = 0; i < mConfig.excludedDeviceNames.size(); i++) {
+        mEventHub->addExcludedDevice(mConfig.excludedDeviceNames[i]);
     }
 }
 
@@ -791,6 +731,46 @@ void InputReader::dump(String8& dump) {
             mDevices.valueAt(i)->dump(dump);
         }
     } // release device registy reader lock
+
+    dump.append(INDENT "Configuration:\n");
+    dump.append(INDENT2 "ExcludedDeviceNames: [");
+    for (size_t i = 0; i < mConfig.excludedDeviceNames.size(); i++) {
+        if (i != 0) {
+            dump.append(", ");
+        }
+        dump.append(mConfig.excludedDeviceNames.itemAt(i).string());
+    }
+    dump.append("]\n");
+    dump.appendFormat(INDENT2 "FilterTouchEvents: %s\n",
+            toString(mConfig.filterTouchEvents));
+    dump.appendFormat(INDENT2 "FilterJumpyTouchEvents: %s\n",
+            toString(mConfig.filterJumpyTouchEvents));
+    dump.appendFormat(INDENT2 "VirtualKeyQuietTime: %0.1fms\n",
+            mConfig.virtualKeyQuietTime * 0.000001f);
+
+    dump.appendFormat(INDENT2 "PointerGesture:\n");
+    dump.appendFormat(INDENT3 "QuietInterval: %0.1fms\n",
+            mConfig.pointerGestureQuietInterval * 0.000001f);
+    dump.appendFormat(INDENT3 "DragMinSwitchSpeed: %0.1fpx/s\n",
+            mConfig.pointerGestureDragMinSwitchSpeed);
+    dump.appendFormat(INDENT3 "TapInterval: %0.1fms\n",
+            mConfig.pointerGestureTapInterval * 0.000001f);
+    dump.appendFormat(INDENT3 "TapDragInterval: %0.1fms\n",
+            mConfig.pointerGestureTapDragInterval * 0.000001f);
+    dump.appendFormat(INDENT3 "TapSlop: %0.1fpx\n",
+            mConfig.pointerGestureTapSlop);
+    dump.appendFormat(INDENT3 "MultitouchSettleInterval: %0.1fms\n",
+            mConfig.pointerGestureMultitouchSettleInterval * 0.000001f);
+    dump.appendFormat(INDENT3 "MultitouchMinSpeed: %0.1fpx/s\n",
+            mConfig.pointerGestureMultitouchMinSpeed);
+    dump.appendFormat(INDENT3 "SwipeTransitionAngleCosine: %0.1f\n",
+            mConfig.pointerGestureSwipeTransitionAngleCosine);
+    dump.appendFormat(INDENT3 "SwipeMaxWidthRatio: %0.1f\n",
+            mConfig.pointerGestureSwipeMaxWidthRatio);
+    dump.appendFormat(INDENT3 "MovementSpeedRatio: %0.1f\n",
+            mConfig.pointerGestureMovementSpeedRatio);
+    dump.appendFormat(INDENT3 "ZoomSpeedRatio: %0.1f\n",
+            mConfig.pointerGestureZoomSpeedRatio);
 }
 
 
@@ -1782,6 +1762,8 @@ void CursorInputMapper::fadePointer() {
 
 TouchInputMapper::TouchInputMapper(InputDevice* device) :
         InputMapper(device) {
+    mConfig = getConfig();
+
     mLocked.surfaceOrientation = -1;
     mLocked.surfaceWidth = -1;
     mLocked.surfaceHeight = -1;
@@ -1960,10 +1942,9 @@ void TouchInputMapper::configure() {
 }
 
 void TouchInputMapper::configureParameters() {
-    mParameters.useBadTouchFilter = getPolicy()->filterTouchEvents();
-    mParameters.useAveragingTouchFilter = getPolicy()->filterTouchEvents();
-    mParameters.useJumpyTouchFilter = getPolicy()->filterJumpyTouchEvents();
-    mParameters.virtualKeyQuietTime = getPolicy()->getVirtualKeyQuietTime();
+    mParameters.useBadTouchFilter = mConfig->filterTouchEvents;
+    mParameters.useAveragingTouchFilter = mConfig->filterTouchEvents;
+    mParameters.useJumpyTouchFilter = mConfig->filterJumpyTouchEvents;
 
     // TODO: select the default gesture mode based on whether the device supports
     // distinct multitouch
@@ -2393,21 +2374,22 @@ bool TouchInputMapper::configureSurfaceLocked() {
             // X and Y of the same number of raw units cover the same physical distance.
             const float scaleFactor = 0.8f;
 
-            mLocked.pointerGestureXMovementScale = GESTURE_MOVEMENT_SPEED_RATIO
+            mLocked.pointerGestureXMovementScale = mConfig->pointerGestureMovementSpeedRatio
                     * displayDiagonal / rawDiagonal;
             mLocked.pointerGestureYMovementScale = mLocked.pointerGestureXMovementScale;
 
             // Scale zooms to cover a smaller range of the display than movements do.
             // This value determines the area around the pointer that is affected by freeform
             // pointer gestures.
-            mLocked.pointerGestureXZoomScale = GESTURE_ZOOM_SPEED_RATIO
+            mLocked.pointerGestureXZoomScale = mConfig->pointerGestureZoomSpeedRatio
                     * displayDiagonal / rawDiagonal;
             mLocked.pointerGestureYZoomScale = mLocked.pointerGestureXZoomScale;
 
             // Max width between pointers to detect a swipe gesture is more than some fraction
             // of the diagonal axis of the touch pad.  Touches that are wider than this are
             // translated into freeform gestures.
-            mLocked.pointerGestureMaxSwipeWidth = SWIPE_MAX_WIDTH_RATIO * rawDiagonal;
+            mLocked.pointerGestureMaxSwipeWidth =
+                    mConfig->pointerGestureSwipeMaxWidthRatio * rawDiagonal;
 
             // Reset the current pointer gesture.
             mPointerGesture.reset();
@@ -3130,8 +3112,8 @@ void TouchInputMapper::suppressSwipeOntoVirtualKeys(nsecs_t when) {
     //    area and accidentally triggers a virtual key.  This often happens when virtual keys
     //    are layed out below the screen near to where the on screen keyboard's space bar
     //    is displayed.
-    if (mParameters.virtualKeyQuietTime > 0 && mCurrentTouch.pointerCount != 0) {
-        mContext->disableVirtualKeysUntil(when + mParameters.virtualKeyQuietTime);
+    if (mConfig->virtualKeyQuietTime > 0 && mCurrentTouch.pointerCount != 0) {
+        mContext->disableVirtualKeysUntil(when + mConfig->virtualKeyQuietTime);
     }
 }
 
@@ -3474,12 +3456,6 @@ void TouchInputMapper::prepareTouches(int32_t* outEdgeFlags,
 
 void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlags,
         bool isTimeout) {
-    // Switch pointer presentation.
-    mPointerController->setPresentation(
-            mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS
-                    ? PointerControllerInterface::PRESENTATION_SPOT
-                    : PointerControllerInterface::PRESENTATION_POINTER);
-
     // Update current gesture coordinates.
     bool cancelPreviousGesture, finishPreviousGesture;
     bool sendEvents = preparePointerGestures(when,
@@ -3487,6 +3463,12 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
     if (!sendEvents) {
         return;
     }
+
+    // Switch pointer presentation.
+    mPointerController->setPresentation(
+            mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS
+                    ? PointerControllerInterface::PRESENTATION_SPOT
+                    : PointerControllerInterface::PRESENTATION_POINTER);
 
     // Show or hide the pointer if needed.
     switch (mPointerGesture.currentGestureMode) {
@@ -3669,9 +3651,10 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 #endif
 
         if (mPointerGesture.lastGestureMode == PointerGesture::TAP) {
-            if (when <= mPointerGesture.tapUpTime + TAP_DRAG_INTERVAL) {
+            if (when <= mPointerGesture.tapUpTime + mConfig->pointerGestureTapDragInterval) {
                 // The tap/drag timeout has not yet expired.
-                getContext()->requestTimeoutAtTime(mPointerGesture.tapUpTime + TAP_DRAG_INTERVAL);
+                getContext()->requestTimeoutAtTime(mPointerGesture.tapUpTime
+                        + mConfig->pointerGestureTapDragInterval);
             } else {
                 // The tap is finished.
 #if DEBUG_GESTURES
@@ -3740,7 +3723,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
     if (activeTouchId < 0) {
         mPointerGesture.resetQuietTime();
     } else {
-        isQuietTime = when < mPointerGesture.quietTime + QUIET_INTERVAL;
+        isQuietTime = when < mPointerGesture.quietTime + mConfig->pointerGestureQuietInterval;
         if (!isQuietTime) {
             if ((mPointerGesture.lastGestureMode == PointerGesture::PRESS
                     || mPointerGesture.lastGestureMode == PointerGesture::SWIPE
@@ -3811,7 +3794,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         if (activeTouchId >= 0) {
             if (mCurrentTouch.pointerCount > 1) {
                 int32_t bestId = -1;
-                float bestSpeed = DRAG_MIN_SWITCH_SPEED;
+                float bestSpeed = mConfig->pointerGestureDragMinSwitchSpeed;
                 for (uint32_t i = 0; i < mCurrentTouch.pointerCount; i++) {
                     uint32_t id = mCurrentTouch.pointers[i].id;
                     float vx, vy;
@@ -3893,21 +3876,23 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         *outFinishPreviousGesture = true;
 
         // Watch for taps coming out of HOVER or TAP_DRAG mode.
+        // Checking for taps after TAP_DRAG allows us to detect double-taps.
         bool tapped = false;
         if ((mPointerGesture.lastGestureMode == PointerGesture::HOVER
                 || mPointerGesture.lastGestureMode == PointerGesture::TAP_DRAG)
                 && mLastTouch.pointerCount == 1) {
-            if (when <= mPointerGesture.tapDownTime + TAP_INTERVAL) {
+            if (when <= mPointerGesture.tapDownTime + mConfig->pointerGestureTapInterval) {
                 float x, y;
                 mPointerController->getPosition(&x, &y);
-                if (fabs(x - mPointerGesture.tapX) <= TAP_SLOP
-                        && fabs(y - mPointerGesture.tapY) <= TAP_SLOP) {
+                if (fabs(x - mPointerGesture.tapX) <= mConfig->pointerGestureTapSlop
+                        && fabs(y - mPointerGesture.tapY) <= mConfig->pointerGestureTapSlop) {
 #if DEBUG_GESTURES
                     LOGD("Gestures: TAP");
 #endif
 
                     mPointerGesture.tapUpTime = when;
-                    getContext()->requestTimeoutAtTime(when + TAP_DRAG_INTERVAL);
+                    getContext()->requestTimeoutAtTime(when
+                            + mConfig->pointerGestureTapDragInterval);
 
                     mPointerGesture.activeGestureId = 0;
                     mPointerGesture.currentGestureMode = PointerGesture::TAP;
@@ -3977,11 +3962,11 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 
         mPointerGesture.currentGestureMode = PointerGesture::HOVER;
         if (mPointerGesture.lastGestureMode == PointerGesture::TAP) {
-            if (when <= mPointerGesture.tapUpTime + TAP_DRAG_INTERVAL) {
+            if (when <= mPointerGesture.tapUpTime + mConfig->pointerGestureTapDragInterval) {
                 float x, y;
                 mPointerController->getPosition(&x, &y);
-                if (fabs(x - mPointerGesture.tapX) <= TAP_SLOP
-                        && fabs(y - mPointerGesture.tapY) <= TAP_SLOP) {
+                if (fabs(x - mPointerGesture.tapX) <= mConfig->pointerGestureTapSlop
+                        && fabs(y - mPointerGesture.tapY) <= mConfig->pointerGestureTapSlop) {
                     mPointerGesture.currentGestureMode = PointerGesture::TAP_DRAG;
                 } else {
 #if DEBUG_GESTURES
@@ -4079,7 +4064,8 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         LOG_ASSERT(activeTouchId >= 0);
 
         bool needReference = false;
-        bool settled = when >= mPointerGesture.firstTouchTime + MULTITOUCH_SETTLE_INTERVAL;
+        bool settled = when >= mPointerGesture.firstTouchTime
+                + mConfig->pointerGestureMultitouchSettleInterval;
         if (mPointerGesture.lastGestureMode != PointerGesture::PRESS
                 && mPointerGesture.lastGestureMode != PointerGesture::SWIPE
                 && mPointerGesture.lastGestureMode != PointerGesture::FREEFORM) {
@@ -4173,14 +4159,15 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 
                 float speed1 = hypotf(vx1, vy1);
                 float speed2 = hypotf(vx2, vy2);
-                if (speed1 >= MULTITOUCH_MIN_SPEED && speed2 >= MULTITOUCH_MIN_SPEED) {
+                if (speed1 >= mConfig->pointerGestureMultitouchMinSpeed
+                        && speed2 >= mConfig->pointerGestureMultitouchMinSpeed) {
                     // Calculate the dot product of the velocity vectors.
                     // When the vectors are oriented in approximately the same direction,
                     // the angle betweeen them is near zero and the cosine of the angle
                     // approches 1.0.  Recall that dot(v1, v2) = cos(angle) * mag(v1) * mag(v2).
                     float dot = vx1 * vx2 + vy1 * vy2;
                     float cosine = dot / (speed1 * speed2); // denominator always > 0
-                    if (cosine >= SWIPE_TRANSITION_ANGLE_COSINE) {
+                    if (cosine >= mConfig->pointerGestureSwipeTransitionAngleCosine) {
                         // Pointers are moving in the same direction.  Switch to SWIPE.
 #if DEBUG_GESTURES
                         LOGD("Gestures: PRESS transitioned to SWIPE, "
