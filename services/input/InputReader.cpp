@@ -707,6 +707,20 @@ void InputReader::dump(String8& dump) {
     dump.appendFormat(INDENT2 "VirtualKeyQuietTime: %0.1fms\n",
             mConfig.virtualKeyQuietTime * 0.000001f);
 
+    dump.appendFormat(INDENT2 "PointerVelocityControlParameters: "
+            "scale=%0.3f, lowThreshold=%0.3f, highThreshold=%0.3f, acceleration=%0.3f\n",
+            mConfig.pointerVelocityControlParameters.scale,
+            mConfig.pointerVelocityControlParameters.lowThreshold,
+            mConfig.pointerVelocityControlParameters.highThreshold,
+            mConfig.pointerVelocityControlParameters.acceleration);
+
+    dump.appendFormat(INDENT2 "WheelVelocityControlParameters: "
+            "scale=%0.3f, lowThreshold=%0.3f, highThreshold=%0.3f, acceleration=%0.3f\n",
+            mConfig.wheelVelocityControlParameters.scale,
+            mConfig.wheelVelocityControlParameters.lowThreshold,
+            mConfig.wheelVelocityControlParameters.highThreshold,
+            mConfig.wheelVelocityControlParameters.acceleration);
+
     dump.appendFormat(INDENT2 "PointerGesture:\n");
     dump.appendFormat(INDENT3 "QuietInterval: %0.1fms\n",
             mConfig.pointerGestureQuietInterval * 0.000001f);
@@ -1371,6 +1385,10 @@ void CursorInputMapper::configure() {
 
     mHaveVWheel = getEventHub()->hasRelativeAxis(getDeviceId(), REL_WHEEL);
     mHaveHWheel = getEventHub()->hasRelativeAxis(getDeviceId(), REL_HWHEEL);
+
+    mPointerVelocityControl.setParameters(getConfig()->pointerVelocityControlParameters);
+    mWheelXVelocityControl.setParameters(getConfig()->wheelVelocityControlParameters);
+    mWheelYVelocityControl.setParameters(getConfig()->wheelVelocityControlParameters);
 }
 
 void CursorInputMapper::configureParameters() {
@@ -1431,6 +1449,11 @@ void CursorInputMapper::reset() {
                 break; // done
             }
         } // release lock
+
+        // Reset velocity.
+        mPointerVelocityControl.reset();
+        mWheelXVelocityControl.reset();
+        mWheelYVelocityControl.reset();
 
         // Synthesize button up event on reset.
         nsecs_t when = systemTime(SYSTEM_TIME_MONOTONIC);
@@ -1585,11 +1608,16 @@ void CursorInputMapper::sync(nsecs_t when) {
         } else {
             vscroll = 0;
         }
+        mWheelYVelocityControl.move(when, NULL, &vscroll);
+
         if (mHaveHWheel && (fields & Accumulator::FIELD_REL_HWHEEL)) {
             hscroll = mAccumulator.relHWheel;
         } else {
             hscroll = 0;
         }
+        mWheelXVelocityControl.move(when, &hscroll, NULL);
+
+        mPointerVelocityControl.move(when, &deltaX, &deltaY);
 
         if (mPointerController != NULL) {
             if (deltaX != 0 || deltaY != 0 || vscroll != 0 || hscroll != 0
@@ -1806,6 +1834,7 @@ void TouchInputMapper::initializeLocked() {
     mLocked.orientedRanges.haveOrientation = false;
 
     mPointerGesture.reset();
+    mPointerGesture.pointerVelocityControl.setParameters(mConfig->pointerVelocityControlParameters);
 }
 
 void TouchInputMapper::configure() {
@@ -2239,11 +2268,10 @@ bool TouchInputMapper::configureSurfaceLocked() {
                     mLocked.associatedDisplayHeight);
 
             // Scale movements such that one whole swipe of the touch pad covers a
-            // given area relative to the diagonal size of the display.
+            // given area relative to the diagonal size of the display when no acceleration
+            // is applied.
             // Assume that the touch pad has a square aspect ratio such that movements in
             // X and Y of the same number of raw units cover the same physical distance.
-            const float scaleFactor = 0.8f;
-
             mLocked.pointerGestureXMovementScale = mConfig->pointerGestureMovementSpeedRatio
                     * displayDiagonal / rawDiagonal;
             mLocked.pointerGestureYMovementScale = mLocked.pointerGestureXMovementScale;
@@ -3247,6 +3275,9 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
     if (!sendEvents) {
         return;
     }
+    if (finishPreviousGesture) {
+        cancelPreviousGesture = false;
+    }
 
     // Switch pointer presentation.
     mPointerController->setPresentation(
@@ -3436,6 +3467,8 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 mPointerGesture.currentGestureMode = PointerGesture::NEUTRAL;
                 mPointerGesture.currentGestureIdBits.clear();
 
+                mPointerGesture.pointerVelocityControl.reset();
+
                 if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
                     mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
                     mPointerGesture.spotIdBits.clear();
@@ -3530,6 +3563,8 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         mPointerGesture.currentGestureMode = PointerGesture::QUIET;
         mPointerGesture.currentGestureIdBits.clear();
 
+        mPointerGesture.pointerVelocityControl.reset();
+
         if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
             mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
             mPointerGesture.spotIdBits.clear();
@@ -3561,46 +3596,48 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 
         // Switch pointers if needed.
         // Find the fastest pointer and follow it.
-        if (activeTouchId >= 0) {
-            if (mCurrentTouch.pointerCount > 1) {
-                int32_t bestId = -1;
-                float bestSpeed = mConfig->pointerGestureDragMinSwitchSpeed;
-                for (uint32_t i = 0; i < mCurrentTouch.pointerCount; i++) {
-                    uint32_t id = mCurrentTouch.pointers[i].id;
-                    float vx, vy;
-                    if (mPointerGesture.velocityTracker.getVelocity(id, &vx, &vy)) {
-                        float speed = hypotf(vx, vy);
-                        if (speed > bestSpeed) {
-                            bestId = id;
-                            bestSpeed = speed;
-                        }
+        if (activeTouchId >= 0 && mCurrentTouch.pointerCount > 1) {
+            int32_t bestId = -1;
+            float bestSpeed = mConfig->pointerGestureDragMinSwitchSpeed;
+            for (uint32_t i = 0; i < mCurrentTouch.pointerCount; i++) {
+                uint32_t id = mCurrentTouch.pointers[i].id;
+                float vx, vy;
+                if (mPointerGesture.velocityTracker.getVelocity(id, &vx, &vy)) {
+                    float speed = hypotf(vx, vy);
+                    if (speed > bestSpeed) {
+                        bestId = id;
+                        bestSpeed = speed;
                     }
                 }
-                if (bestId >= 0 && bestId != activeTouchId) {
-                    mPointerGesture.activeTouchId = activeTouchId = bestId;
-                    activeTouchChanged = true;
+            }
+            if (bestId >= 0 && bestId != activeTouchId) {
+                mPointerGesture.activeTouchId = activeTouchId = bestId;
+                activeTouchChanged = true;
 #if DEBUG_GESTURES
-                    LOGD("Gestures: BUTTON_CLICK_OR_DRAG switched pointers, "
-                            "bestId=%d, bestSpeed=%0.3f", bestId, bestSpeed);
+                LOGD("Gestures: BUTTON_CLICK_OR_DRAG switched pointers, "
+                        "bestId=%d, bestSpeed=%0.3f", bestId, bestSpeed);
 #endif
-                }
             }
+        }
 
-            if (mLastTouch.idBits.hasBit(activeTouchId)) {
-                const PointerData& currentPointer =
-                        mCurrentTouch.pointers[mCurrentTouch.idToIndex[activeTouchId]];
-                const PointerData& lastPointer =
-                        mLastTouch.pointers[mLastTouch.idToIndex[activeTouchId]];
-                float deltaX = (currentPointer.x - lastPointer.x)
-                        * mLocked.pointerGestureXMovementScale;
-                float deltaY = (currentPointer.y - lastPointer.y)
-                        * mLocked.pointerGestureYMovementScale;
+        if (activeTouchId >= 0 && mLastTouch.idBits.hasBit(activeTouchId)) {
+            const PointerData& currentPointer =
+                    mCurrentTouch.pointers[mCurrentTouch.idToIndex[activeTouchId]];
+            const PointerData& lastPointer =
+                    mLastTouch.pointers[mLastTouch.idToIndex[activeTouchId]];
+            float deltaX = (currentPointer.x - lastPointer.x)
+                    * mLocked.pointerGestureXMovementScale;
+            float deltaY = (currentPointer.y - lastPointer.y)
+                    * mLocked.pointerGestureYMovementScale;
 
-                // Move the pointer using a relative motion.
-                // When using spots, the click will occur at the position of the anchor
-                // spot and all other spots will move there.
-                mPointerController->move(deltaX, deltaY);
-            }
+            mPointerGesture.pointerVelocityControl.move(when, &deltaX, &deltaY);
+
+            // Move the pointer using a relative motion.
+            // When using spots, the click will occur at the position of the anchor
+            // spot and all other spots will move there.
+            mPointerController->move(deltaX, deltaY);
+        } else {
+            mPointerGesture.pointerVelocityControl.reset();
         }
 
         float x, y;
@@ -3700,6 +3737,8 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             }
         }
 
+        mPointerGesture.pointerVelocityControl.reset();
+
         if (!tapped) {
 #if DEBUG_GESTURES
             LOGD("Gestures: NEUTRAL");
@@ -3756,9 +3795,13 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             float deltaY = (currentPointer.y - lastPointer.y)
                     * mLocked.pointerGestureYMovementScale;
 
+            mPointerGesture.pointerVelocityControl.move(when, &deltaX, &deltaY);
+
             // Move the pointer using a relative motion.
             // When using spots, the hover or drag will occur at the position of the anchor spot.
             mPointerController->move(deltaX, deltaY);
+        } else {
+            mPointerGesture.pointerVelocityControl.reset();
         }
 
         bool down;
@@ -3820,16 +3863,32 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         // a decision to transition into SWIPE or FREEFORM mode accordingly.
         LOG_ASSERT(activeTouchId >= 0);
 
-        bool needReference = false;
         bool settled = when >= mPointerGesture.firstTouchTime
                 + mConfig->pointerGestureMultitouchSettleInterval;
         if (mPointerGesture.lastGestureMode != PointerGesture::PRESS
                 && mPointerGesture.lastGestureMode != PointerGesture::SWIPE
                 && mPointerGesture.lastGestureMode != PointerGesture::FREEFORM) {
             *outFinishPreviousGesture = true;
+        } else if (!settled && mCurrentTouch.pointerCount > mLastTouch.pointerCount) {
+            // Additional pointers have gone down but not yet settled.
+            // Reset the gesture.
+#if DEBUG_GESTURES
+            LOGD("Gestures: Resetting gesture since additional pointers went down for MULTITOUCH, "
+                    "settle time remaining %0.3fms",
+                    (mPointerGesture.firstTouchTime + MULTITOUCH_SETTLE_INTERVAL - when)
+                            * 0.000001f);
+#endif
+            *outCancelPreviousGesture = true;
+        } else {
+            // Continue previous gesture.
+            mPointerGesture.currentGestureMode = mPointerGesture.lastGestureMode;
+        }
+
+        if (*outFinishPreviousGesture || *outCancelPreviousGesture) {
             mPointerGesture.currentGestureMode = PointerGesture::PRESS;
             mPointerGesture.activeGestureId = 0;
             mPointerGesture.referenceIdBits.clear();
+            mPointerGesture.pointerVelocityControl.reset();
 
             if (settled && mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS
                     && mLastTouch.idBits.hasBit(mPointerGesture.activeTouchId)) {
@@ -3850,37 +3909,18 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 mPointerGesture.referenceGestureX = c.getAxisValue(AMOTION_EVENT_AXIS_X);
                 mPointerGesture.referenceGestureY = c.getAxisValue(AMOTION_EVENT_AXIS_Y);
             } else {
+                // Use the centroid and pointer location as the reference points for the gesture.
 #if DEBUG_GESTURES
                 LOGD("Gestures: Using centroid as reference for MULTITOUCH, "
                         "settle time remaining %0.3fms",
                         (mPointerGesture.firstTouchTime + MULTITOUCH_SETTLE_INTERVAL - when)
                                 * 0.000001f);
 #endif
-                needReference = true;
+                mCurrentTouch.getCentroid(&mPointerGesture.referenceTouchX,
+                        &mPointerGesture.referenceTouchY);
+                mPointerController->getPosition(&mPointerGesture.referenceGestureX,
+                        &mPointerGesture.referenceGestureY);
             }
-        } else if (!settled && mCurrentTouch.pointerCount > mLastTouch.pointerCount) {
-            // Additional pointers have gone down but not yet settled.
-            // Reset the gesture.
-#if DEBUG_GESTURES
-            LOGD("Gestures: Resetting gesture since additional pointers went down for MULTITOUCH, "
-                    "settle time remaining %0.3fms",
-                    (mPointerGesture.firstTouchTime + MULTITOUCH_SETTLE_INTERVAL - when)
-                            * 0.000001f);
-#endif
-            *outCancelPreviousGesture = true;
-            mPointerGesture.currentGestureMode = PointerGesture::PRESS;
-            mPointerGesture.activeGestureId = 0;
-        } else {
-            // Continue previous gesture.
-            mPointerGesture.currentGestureMode = mPointerGesture.lastGestureMode;
-        }
-
-        if (needReference) {
-            // Use the centroid and pointer location as the reference points for the gesture.
-            mCurrentTouch.getCentroid(&mPointerGesture.referenceTouchX,
-                    &mPointerGesture.referenceTouchY);
-            mPointerController->getPosition(&mPointerGesture.referenceGestureX,
-                    &mPointerGesture.referenceGestureY);
         }
 
         if (mPointerGesture.currentGestureMode == PointerGesture::PRESS) {
@@ -4010,10 +4050,14 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 
                 mPointerGesture.referenceTouchX += commonDeltaX;
                 mPointerGesture.referenceTouchY += commonDeltaY;
-                mPointerGesture.referenceGestureX +=
-                        commonDeltaX * mLocked.pointerGestureXMovementScale;
-                mPointerGesture.referenceGestureY +=
-                        commonDeltaY * mLocked.pointerGestureYMovementScale;
+
+                commonDeltaX *= mLocked.pointerGestureXMovementScale;
+                commonDeltaY *= mLocked.pointerGestureYMovementScale;
+                mPointerGesture.pointerVelocityControl.move(when, &commonDeltaX, &commonDeltaY);
+
+                mPointerGesture.referenceGestureX += commonDeltaX;
+                mPointerGesture.referenceGestureY += commonDeltaY;
+
                 clampPositionUsingPointerBounds(mPointerController,
                         &mPointerGesture.referenceGestureX,
                         &mPointerGesture.referenceGestureY);
