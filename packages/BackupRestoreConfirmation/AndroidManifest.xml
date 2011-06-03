@@ -21,7 +21,7 @@
     <uses-permission android:name="android.permission.BACKUP" />
 
     <application android:allowClearUserData="false"
-                 android:killAfterRestore="false"
+                 android:allowBackup="false"
                  android:permission="android.permission.CONFIRM_FULL_BACKUP" >
 
         <activity android:name=".BackupRestoreConfirmation" 
