@@ -387,62 +387,77 @@ public class ServiceState implements Parcelable {
                 && mIsEmergencyOnly == s.mIsEmergencyOnly);
     }
 
+    /**
+     * Convert radio technology to String
+     *
+     * @param radioTechnology
+     * @return String representation of the RAT
+     *
+     * @hide
+     */
+    public static String radioTechnologyToString(int rt) {
+        String rtString;
+
+        switch(rt) {
+            case 0:
+                rtString = "Unknown";
+                break;
+            case 1:
+                rtString = "GPRS";
+                break;
+            case 2:
+                rtString = "EDGE";
+                break;
+            case 3:
+                rtString = "UMTS";
+                break;
+            case 4:
+                rtString = "CDMA-IS95A";
+                break;
+            case 5:
+                rtString = "CDMA-IS95B";
+                break;
+            case 6:
+                rtString = "1xRTT";
+                break;
+            case 7:
+                rtString = "EvDo-rev.0";
+                break;
+            case 8:
+                rtString = "EvDo-rev.A";
+                break;
+            case 9:
+                rtString = "HSDPA";
+                break;
+            case 10:
+                rtString = "HSUPA";
+                break;
+            case 11:
+                rtString = "HSPA";
+                break;
+            case 12:
+                rtString = "EvDo-rev.B";
+                break;
+            case 13:
+                rtString = "eHRPD";
+                break;
+            case 14:
+                rtString = "LTE";
+                break;
+            case 15:
+                rtString = "HSPAP";
+                break;
+            default:
+                rtString = "Unexpected";
+                Log.w(LOG_TAG, "Unexpected radioTechnology=" + rt);
+                break;
+        }
+        return rtString + ":" + rt;
+    }
+
     @Override
     public String toString() {
-        String radioTechnology = new String("Error in radioTechnology");
-        switch(this.mRadioTechnology) {
-        case 0:
-            radioTechnology = "Unknown";
-            break;
-        case 1:
-            radioTechnology = "GPRS";
-            break;
-        case 2:
-            radioTechnology = "EDGE";
-            break;
-        case 3:
-            radioTechnology = "UMTS";
-            break;
-        case 4:
-            radioTechnology = "IS95A";
-            break;
-        case 5:
-            radioTechnology = "IS95B";
-            break;
-        case 6:
-            radioTechnology = "1xRTT";
-            break;
-        case 7:
-            radioTechnology = "EvDo rev. 0";
-            break;
-        case 8:
-            radioTechnology = "EvDo rev. A";
-            break;
-        case 9:
-            radioTechnology = "HSDPA";
-            break;
-        case 10:
-            radioTechnology = "HSUPA";
-            break;
-        case 11:
-            radioTechnology = "HSPA";
-            break;
-        case 12:
-            radioTechnology = "EvDo rev. B";
-            break;
-        case 13:
-            radioTechnology = "eHRPD";
-            break;
-        case 14:
-            radioTechnology = "LTE";
-            break;
-        case 15:
-            radioTechnology = "HSPAP";
-            break;
-        default:
-            Log.w(LOG_TAG, "mRadioTechnology variable out of range.");
-        break;
-        }
+        String radioTechnology = radioTechnologyToString(mRadioTechnology);
 
         return (mState + " " + (mRoaming ? "roaming" : "home")
                 + " " + mOperatorAlphaLong

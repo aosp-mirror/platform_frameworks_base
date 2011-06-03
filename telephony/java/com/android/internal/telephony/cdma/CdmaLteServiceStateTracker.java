@@ -32,6 +32,7 @@ import android.os.Registrant;
 import android.os.RegistrantList;
 import android.os.AsyncResult;
 import android.os.Message;
+import android.os.SystemProperties;
 
 import android.util.Log;
 import android.util.EventLog;
@@ -72,6 +73,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             handlePollStateResult(msg.what, ar);
             break;
         case EVENT_SIM_READY:
+            if (DBG) log("handleMessage EVENT_SIM_READY");
             isSubscriptionFromRuim = false;
             cm.getCDMASubscription( obtainMessage(EVENT_POLL_STATE_CDMA_SUBSCRIPTION));
             pollState();
@@ -186,39 +188,6 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         }
     }
 
-    protected static String networkTypeToString(int type) {
-        String ret = "unknown";
-
-        switch (type) {
-            case ServiceState.RADIO_TECHNOLOGY_IS95A:
-            case ServiceState.RADIO_TECHNOLOGY_IS95B:
-                ret = "CDMA";
-                break;
-            case ServiceState.RADIO_TECHNOLOGY_1xRTT:
-                ret = "CDMA - 1xRTT";
-                break;
-            case ServiceState.RADIO_TECHNOLOGY_EVDO_0:
-                ret = "CDMA - EvDo rev. 0";
-                break;
-            case ServiceState.RADIO_TECHNOLOGY_EVDO_A:
-                ret = "CDMA - EvDo rev. A";
-                break;
-            case ServiceState.RADIO_TECHNOLOGY_EVDO_B:
-                ret = "CDMA - EvDo rev. B";
-                break;
-            case ServiceState.RADIO_TECHNOLOGY_LTE:
-                ret = "LTE";
-                break;
-            case ServiceState.RADIO_TECHNOLOGY_EHRPD:
-                ret = "CDMA - eHRPD";
-                break;
-            default:
-                sloge("networkTypeToString: Wrong network, can not return a string.");
-                break;
-        }
-        return ret;
-    }
-
     @Override
     protected void pollStateDone() {
         // determine data NetworkType from both LET and CDMA SS
@@ -282,13 +251,20 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
              (newNetworkType <= ServiceState.RADIO_TECHNOLOGY_EVDO_A));
 
         if (DBG) {
-            log("pollStateDone: hasRegistered = "
-                + hasRegistered + " hasCdmaDataConnectionAttached = "
-                + hasCdmaDataConnectionAttached + " hasCdmaDataConnectionChanged = "
-                + hasCdmaDataConnectionChanged + " hasNetworkTypeChanged = "
-                + hasNetworkTypeChanged + " has4gHandoff = " + has4gHandoff
-                + " hasMultiApnSupport = " + hasMultiApnSupport + " hasLostMultiApnSupport = "
-                + hasLostMultiApnSupport);
+            log("pollStateDone:"
+                + " hasRegistered=" + hasRegistered
+                + " hasDeegistered=" + hasDeregistered
+                + " hasCdmaDataConnectionAttached=" + hasCdmaDataConnectionAttached
+                + " hasCdmaDataConnectionDetached=" + hasCdmaDataConnectionDetached
+                + " hasCdmaDataConnectionChanged=" + hasCdmaDataConnectionChanged
+                + " hasNetworkTypeChanged = " + hasNetworkTypeChanged
+                + " hasChanged=" + hasChanged
+                + " hasRoamingOn=" + hasRoamingOn
+                + " hasRoamingOff=" + hasRoamingOff
+                + " hasLocationChanged=" + hasLocationChanged
+                + " has4gHandoff = " + has4gHandoff
+                + " hasMultiApnSupport=" + hasMultiApnSupport
+                + " hasLostMultiApnSupport=" + hasLostMultiApnSupport);
         }
         // Add an event log when connection state changes
         if (ss.getState() != newSS.getState()
@@ -316,7 +292,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 && (phone.mDataConnectionTracker instanceof GsmDataConnectionTracker)) {
             if (DBG)log("GsmDataConnectionTracker disposed");
             phone.mDataConnectionTracker.dispose();
-            phone.mDataConnectionTracker = new CdmaDataConnectionTracker((CDMAPhone)phone);
+            phone.mDataConnectionTracker = new CdmaDataConnectionTracker(phone);
         }
 
         CdmaCellLocation tcl = cellLoc;
@@ -330,7 +306,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
         if (hasNetworkTypeChanged) {
             phone.setSystemProperty(TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE,
-                    networkTypeToString(networkType));
+                    ServiceState.radioTechnologyToString(networkType));
         }
 
         if (hasRegistered) {
