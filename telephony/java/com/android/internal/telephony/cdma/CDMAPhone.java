@@ -156,13 +156,13 @@ public class CDMAPhone extends PhoneBase {
         mSST = new CdmaServiceStateTracker(this);
         mIccRecords = new RuimRecords(this);
         mIccCard = new RuimCard(this, LOG_TAG, DBG);
+        mIccFileHandler = new RuimFileHandler(this);
     }
 
     protected void init(Context context, PhoneNotifier notifier) {
         mCM.setPhoneType(Phone.PHONE_TYPE_CDMA);
         mCT = new CdmaCallTracker(this);
         mSMS = new CdmaSMSDispatcher(this);
-        mIccFileHandler = new RuimFileHandler(this);
         mDataConnectionTracker = new CdmaDataConnectionTracker (this);
         mRuimPhoneBookInterfaceManager = new RuimPhoneBookInterfaceManager(this);
         mRuimSmsInterfaceManager = new RuimSmsInterfaceManager(this, mSMS);

@@ -45,12 +45,12 @@ import java.util.ArrayList;
 /**
  * {@hide}
  */
-public final class SIMRecords extends IccRecords {
-    static final String LOG_TAG = "GSM";
+public class SIMRecords extends IccRecords {
+    protected static final String LOG_TAG = "GSM";
 
     private static final boolean CRASH_RIL = false;
 
-    private static final boolean DBG = true;
+    protected static final boolean DBG = true;
 
     // ***** Instance Variables
 
@@ -120,13 +120,13 @@ public final class SIMRecords extends IccRecords {
 
     private static final int EVENT_SIM_READY = 1;
     private static final int EVENT_RADIO_OFF_OR_NOT_AVAILABLE = 2;
-    private static final int EVENT_GET_IMSI_DONE = 3;
-    private static final int EVENT_GET_ICCID_DONE = 4;
+    protected static final int EVENT_GET_IMSI_DONE = 3;
+    protected static final int EVENT_GET_ICCID_DONE = 4;
     private static final int EVENT_GET_MBI_DONE = 5;
     private static final int EVENT_GET_MBDN_DONE = 6;
     private static final int EVENT_GET_MWIS_DONE = 7;
     private static final int EVENT_GET_VOICE_MAIL_INDICATOR_CPHS_DONE = 8;
-    private static final int EVENT_GET_AD_DONE = 9; // Admin data on SIM
+    protected static final int EVENT_GET_AD_DONE = 9; // Admin data on SIM
     private static final int EVENT_GET_MSISDN_DONE = 10;
     private static final int EVENT_GET_CPHS_MAILBOX_DONE = 11;
     private static final int EVENT_GET_SPN_DONE = 12;
@@ -146,6 +146,8 @@ public final class SIMRecords extends IccRecords {
     private static final int EVENT_SIM_REFRESH = 31;
     private static final int EVENT_GET_CFIS_DONE = 32;
     private static final int EVENT_GET_CSP_CPHS_DONE = 33;
+
+    protected static final int CSIM_EVENT_BASE = 100;
 
     // Lookup table for carriers known to produce SIMs which incorrectly indicate MNC length.
 
@@ -1285,7 +1287,7 @@ public final class SIMRecords extends IccRecords {
         fetchSimRecords();
     }
 
-    private void fetchSimRecords() {
+    protected void fetchSimRecords() {
         recordsRequested = true;
         IccFileHandler iccFh = phone.getIccFileHandler();
 
