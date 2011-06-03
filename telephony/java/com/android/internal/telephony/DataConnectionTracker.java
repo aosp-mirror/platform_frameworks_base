@@ -509,7 +509,6 @@ public abstract class DataConnectionTracker extends Handler {
     protected abstract void onVoiceCallEnded();
     protected abstract void onCleanUpConnection(boolean tearDown, int apnId, String reason);
     protected abstract void onCleanUpAllConnections(String cause);
-    protected abstract boolean isDataPossible();
     protected abstract boolean isDataPossible(String apnType);
 
     @Override
@@ -752,7 +751,7 @@ public abstract class DataConnectionTracker extends Handler {
     protected void notifyDataAvailability(String reason) {
         // note that we either just turned all off because we lost availability
         // or all were off and could now go on, so only have off apns to worry about
-        notifyOffApnsOfAvailability(reason, isDataPossible());
+        notifyOffApnsOfAvailability(reason, isDataPossible(Phone.APN_TYPE_DEFAULT));
     }
 
     public boolean isApnTypeEnabled(String apnType) {
@@ -968,11 +967,7 @@ public abstract class DataConnectionTracker extends Handler {
         sendMessage(msg);
     }
 
-    public boolean isAnyActiveDataConnections() {
-        // TODO: Remember if there are any connected or
-        // loop asking each DC/APN?
-        return true;
-    }
+    public abstract boolean isAnyActiveDataConnections();
 
     protected void onSetDataEnabled(boolean enable) {
         boolean prevEnabled = getAnyDataEnabled();
