@@ -62,6 +62,12 @@ struct InputReaderConfiguration {
     // Devices with these names will be ignored.
     Vector<String8> excludedDeviceNames;
 
+    // Velocity control parameters for mouse pointer movements.
+    VelocityControlParameters pointerVelocityControlParameters;
+
+    // Velocity control parameters for mouse wheel movements.
+    VelocityControlParameters wheelVelocityControlParameters;
+
     // Quiet time between certain pointer gesture transitions.
     // Time to allow for all fingers or buttons to settle into a stable state before
     // starting a new gesture.
@@ -128,6 +134,8 @@ struct InputReaderConfiguration {
             filterTouchEvents(false),
             filterJumpyTouchEvents(false),
             virtualKeyQuietTime(0),
+            pointerVelocityControlParameters(1.0f, 80.0f, 400.0f, 4.0f),
+            wheelVelocityControlParameters(1.0f, 15.0f, 50.0f, 4.0f),
             pointerGestureQuietInterval(100 * 1000000LL), // 100 ms
             pointerGestureDragMinSwitchSpeed(50), // 50 pixels per second
             pointerGestureTapInterval(150 * 1000000LL), // 150 ms
@@ -137,7 +145,7 @@ struct InputReaderConfiguration {
             pointerGestureMultitouchMinSpeed(150.0f), // 150 pixels per second
             pointerGestureSwipeTransitionAngleCosine(0.5f), // cosine of 45degrees
             pointerGestureSwipeMaxWidthRatio(0.333f),
-            pointerGestureMovementSpeedRatio(0.8f),
+            pointerGestureMovementSpeedRatio(0.5f),
             pointerGestureZoomSpeedRatio(0.3f) { }
 };
 
@@ -629,6 +637,12 @@ private:
     bool mHaveHWheel;
     float mVWheelScale;
     float mHWheelScale;
+
+    // Velocity controls for mouse pointer and wheel movements.
+    // The controls for X and Y wheel movements are separate to keep them decoupled.
+    VelocityControl mPointerVelocityControl;
+    VelocityControl mWheelXVelocityControl;
+    VelocityControl mWheelYVelocityControl;
 
     sp<PointerControllerInterface> mPointerController;
 
@@ -1160,6 +1174,9 @@ private:
         // A velocity tracker for determining whether to switch active pointers during drags.
         VelocityTracker velocityTracker;
 
+        // Velocity control for pointer movements.
+        VelocityControl pointerVelocityControl;
+
         void reset() {
             firstTouchTime = LLONG_MIN;
             activeTouchId = -1;
@@ -1174,6 +1191,7 @@ private:
             velocityTracker.clear();
             resetTap();
             resetQuietTime();
+            pointerVelocityControl.reset();
         }
 
         void resetTap() {
