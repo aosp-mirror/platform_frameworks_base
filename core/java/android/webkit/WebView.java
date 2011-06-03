@@ -5543,7 +5543,7 @@ public class WebView extends AbsoluteLayout
 
     private void dismissFullScreenMode() {
         if (inFullScreenMode()) {
-            mFullScreenHolder.dismiss();
+            mFullScreenHolder.hide();
             mFullScreenHolder = null;
         }
     }
@@ -8198,16 +8198,15 @@ public class WebView extends AbsoluteLayout
 
                 case SHOW_FULLSCREEN: {
                     View view = (View) msg.obj;
-                    int npp = msg.arg1;
+                    int orientation = msg.arg1;
+                    int npp = msg.arg2;
 
                     if (inFullScreenMode()) {
                         Log.w(LOGTAG, "Should not have another full screen.");
                         dismissFullScreenMode();
                     }
-                    mFullScreenHolder = new PluginFullScreenHolder(WebView.this, npp);
+                    mFullScreenHolder = new PluginFullScreenHolder(WebView.this, orientation, npp);
                     mFullScreenHolder.setContentView(view);
-                    mFullScreenHolder.setCancelable(false);
-                    mFullScreenHolder.setCanceledOnTouchOutside(false);
                     mFullScreenHolder.show();
 
                     break;

@@ -24,34 +24,44 @@
  */
 package android.webkit;
 
-import android.app.Dialog;
+import android.content.Context;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
-class PluginFullScreenHolder extends Dialog {
+class PluginFullScreenHolder {
 
     private final WebView mWebView;
     private final int mNpp;
+    private final int mOrientation;
+
+    // The container for the plugin view
+    private static CustomFrameLayout mLayout;
+
     private View mContentView;
 
-    PluginFullScreenHolder(WebView webView, int npp) {
-        super(webView.getContext(), android.R.style.Theme_NoTitleBar_Fullscreen);
+    PluginFullScreenHolder(WebView webView, int orientation, int npp) {
         mWebView = webView;
         mNpp = npp;
+        mOrientation = orientation;
     }
 
-    @Override
     public void setContentView(View contentView) {
-        // as we are sharing the View between full screen and
-        // embedded mode, we have to remove the
-        // AbsoluteLayout.LayoutParams set by embedded mode to
-        // ViewGroup.LayoutParams before adding it to the dialog
-        contentView.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // Create a FrameLayout that will contain the plugin's view
+        mLayout = new CustomFrameLayout(mWebView.getContext());
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            Gravity.CENTER);
+
+        mLayout.addView(contentView, layoutParams);
+        mLayout.setVisibility(View.VISIBLE);
+
         // fixed size is only used either during pinch zoom or surface is too
         // big. Make sure it is not fixed size before setting it to the full
         // screen content view. The SurfaceView will be set to the correct mode
@@ -62,59 +72,79 @@ class PluginFullScreenHolder extends Dialog {
                 sView.getHolder().setSizeFromLayout();
             }
         }
-        super.setContentView(contentView);
+
         mContentView = contentView;
     }
 
-    @Override
-    public void onBackPressed() {
-        mWebView.mPrivateHandler.obtainMessage(WebView.HIDE_FULLSCREEN)
-                .sendToTarget();
+    public void show() {
+        // Other plugins may attempt to draw so hide them while we're active.
+        if (mWebView.getViewManager() != null)
+            mWebView.getViewManager().hideAll();
+
+        WebChromeClient client = mWebView.getWebChromeClient();
+        client.onShowCustomView(mLayout, mOrientation, mCallback);
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (event.isSystem()) {
-            return super.onKeyDown(keyCode, event);
+    public void hide() {
+        WebChromeClient client = mWebView.getWebChromeClient();
+        client.onHideCustomView();
+    }
+
+    private class CustomFrameLayout extends FrameLayout {
+
+        CustomFrameLayout(Context context) {
+            super(context);
         }
-        mWebView.onKeyDown(keyCode, event);
-        // always return true as we are the handler
-        return true;
-    }
 
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (event.isSystem()) {
-            return super.onKeyUp(keyCode, event);
+        @Override
+        public boolean onKeyDown(int keyCode, KeyEvent event) {
+            if (event.isSystem()) {
+                return super.onKeyDown(keyCode, event);
+            }
+            mWebView.onKeyDown(keyCode, event);
+            // always return true as we are the handler
+            return true;
         }
-        mWebView.onKeyUp(keyCode, event);
-        // always return true as we are the handler
-        return true;
-    }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        // always return true as we don't want the event to propagate any further
-        return true;
-    }
-
-    @Override
-    public boolean onTrackballEvent(MotionEvent event) {
-        mWebView.onTrackballEvent(event);
-        // always return true as we are the handler
-        return true;
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // manually remove the contentView's parent since the dialog does not
-        if (mContentView != null && mContentView.getParent() != null) {
-            ViewGroup vg = (ViewGroup) mContentView.getParent();
-            vg.removeView(mContentView);
+        @Override
+        public boolean onKeyUp(int keyCode, KeyEvent event) {
+            if (event.isSystem()) {
+                return super.onKeyUp(keyCode, event);
+            }
+            mWebView.onKeyUp(keyCode, event);
+            // always return true as we are the handler
+            return true;
         }
-        mWebView.getWebViewCore().sendMessage(
-                WebViewCore.EventHub.HIDE_FULLSCREEN, mNpp, 0);
-    }
 
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            // always return true as we don't want the event to propagate any further
+            return true;
+        }
+
+        @Override
+        public boolean onTrackballEvent(MotionEvent event) {
+            mWebView.onTrackballEvent(event);
+            // always return true as we are the handler
+            return true;
+        }
+    }
+    
+    private final WebChromeClient.CustomViewCallback mCallback =
+        new WebChromeClient.CustomViewCallback() {
+            public void onCustomViewHidden() {
+
+                mWebView.mPrivateHandler.obtainMessage(WebView.HIDE_FULLSCREEN)
+                    .sendToTarget();
+
+                mWebView.getWebViewCore().sendMessage(
+                        WebViewCore.EventHub.HIDE_FULLSCREEN, mNpp, 0);
+
+                mLayout.removeView(mContentView);
+                mLayout = null;
+
+                // Re enable plugin views.
+                mWebView.getViewManager().showAll();
+            }
+        };
 }
