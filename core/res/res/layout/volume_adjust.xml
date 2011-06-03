@@ -15,22 +15,21 @@
 -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:gravity="left">
-
+    android:layout_width="480dp"
+    android:layout_height="wrap_content">
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dip"
+        android:layout_marginTop="80dp"
         android:background="@android:drawable/dialog_full_holo_dark"
         android:orientation="horizontal"
         >
 
         <LinearLayout
             android:id="@+id/slider_group"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:orientation="vertical"
             >
             <!-- Sliders go here -->
@@ -56,9 +55,6 @@
             android:background="?attr/selectableItemBackground"
             android:src="@drawable/ic_sysbar_quicksettings"
             />
-        
+
     </LinearLayout>
-
 </FrameLayout>
-
-
