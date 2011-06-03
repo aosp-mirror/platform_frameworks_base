@@ -253,6 +253,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
 
         switch (msg.what) {
         case EVENT_RADIO_AVAILABLE:
+            if (DBG) log("handleMessage: EVENT_RADIO_AVAILABLE");
             break;
 
         case EVENT_RUIM_READY:
@@ -266,7 +267,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             }
 
             cm.getCDMASubscription(obtainMessage(EVENT_POLL_STATE_CDMA_SUBSCRIPTION));
-            if (DBG) log("Receive EVENT_RUIM_READY and Send Request getCDMASubscription.");
+            if (DBG) log("handleMessage: EVENT_RUIM_READY, Send Request getCDMASubscription.");
 
             // Restore the previous network selection.
             pollState();
@@ -280,6 +281,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             // For Non-RUIM phones, the subscription information is stored in
             // Non Volatile. Here when Non-Volatile is ready, we can poll the CDMA
             // subscription info.
+            if (DBG) log("handleMessage: EVENT_NV_READY, Send Request getCDMASubscription.");
             cm.getCDMASubscription( obtainMessage(EVENT_POLL_STATE_CDMA_SUBSCRIPTION));
             pollState();
             // Signal strength polling stops when radio is off.
@@ -871,36 +873,6 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         }
     }
 
-    protected static String networkTypeToString(int type) {
-        String ret = "unknown";
-
-        switch (type) {
-        case ServiceState.RADIO_TECHNOLOGY_IS95A:
-        case ServiceState.RADIO_TECHNOLOGY_IS95B:
-            ret = "CDMA";
-            break;
-        case ServiceState.RADIO_TECHNOLOGY_1xRTT:
-            ret = "CDMA - 1xRTT";
-            break;
-        case ServiceState.RADIO_TECHNOLOGY_EVDO_0:
-            ret = "CDMA - EvDo rev. 0";
-            break;
-        case ServiceState.RADIO_TECHNOLOGY_EVDO_A:
-            ret = "CDMA - EvDo rev. A";
-            break;
-        case ServiceState.RADIO_TECHNOLOGY_EVDO_B:
-            ret = "CDMA - EvDo rev. B";
-            break;
-        default:
-            if (DBG) {
-                slog("Wrong network. Can not return a string.");
-            }
-        break;
-        }
-
-        return ret;
-    }
-
     protected void fixTimeZone(String isoCountryCode) {
         TimeZone zone = null;
         // If the offset is (0, false) and the time zone property
@@ -998,7 +970,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
 
         if (hasNetworkTypeChanged) {
             phone.setSystemProperty(TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE,
-                    networkTypeToString(networkType));
+                    ServiceState.radioTechnologyToString(networkType));
         }
 
         if (hasRegistered) {
