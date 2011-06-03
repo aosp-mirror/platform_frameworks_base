@@ -2893,6 +2893,7 @@ package android.app {
     method public void registerForContextMenu(android.view.View);
     method public void setArguments(android.os.Bundle);
     method public void setHasOptionsMenu(boolean);
+    method public void setInitialSavedState(android.app.Fragment.SavedState);
     method public void setRetainInstance(boolean);
     method public void setTargetFragment(android.app.Fragment, int);
     method public void startActivity(android.content.Intent);
@@ -2902,6 +2903,12 @@ package android.app {
 
   public static class Fragment.InstantiationException extends android.util.AndroidRuntimeException {
     ctor public Fragment.InstantiationException(java.lang.String, java.lang.Exception);
+  }
+
+  public static class Fragment.SavedState implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.ClassLoaderCreator CREATOR;
   }
 
   public class FragmentBreadCrumbs extends android.view.ViewGroup implements android.app.FragmentManager.OnBackStackChangedListener {
@@ -2941,6 +2948,7 @@ package android.app {
     method public abstract boolean popBackStackImmediate(int, int);
     method public abstract void putFragment(android.os.Bundle, java.lang.String, android.app.Fragment);
     method public abstract void removeOnBackStackChangedListener(android.app.FragmentManager.OnBackStackChangedListener);
+    method public abstract android.app.Fragment.SavedState saveFragmentInstanceState(android.app.Fragment);
     field public static final int POP_BACK_STACK_INCLUSIVE = 1; // 0x1
   }
 
@@ -14162,6 +14170,10 @@ package android.os {
     method public abstract void writeToParcel(android.os.Parcel, int);
     field public static final int CONTENTS_FILE_DESCRIPTOR = 1; // 0x1
     field public static final int PARCELABLE_WRITE_RETURN_VALUE = 1; // 0x1
+  }
+
+  public static abstract interface Parcelable.ClassLoaderCreator implements android.os.Parcelable.Creator {
+    method public abstract T createFromParcel(android.os.Parcel, java.lang.ClassLoader);
   }
 
   public static abstract interface Parcelable.Creator {
