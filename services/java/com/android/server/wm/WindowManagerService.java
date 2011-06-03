@@ -5947,6 +5947,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Temporarily set the pointer speed.  Does not save the new setting.
+     * Used by the settings application.
+     */
+    public void setPointerSpeed(int speed) {
+        if (!checkCallingPermission(android.Manifest.permission.SET_POINTER_SPEED,
+                "setPointerSpeed()")) {
+            throw new SecurityException("Requires SET_POINTER_SPEED permission");
+        }
+
+        mInputManager.setPointerSpeed(speed);
+    }
+
     private WindowState getFocusedWindow() {
         synchronized (mWindowMap) {
             return getFocusedWindowLocked();

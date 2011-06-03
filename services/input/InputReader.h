@@ -145,7 +145,7 @@ struct InputReaderConfiguration {
             pointerGestureMultitouchMinSpeed(150.0f), // 150 pixels per second
             pointerGestureSwipeTransitionAngleCosine(0.5f), // cosine of 45degrees
             pointerGestureSwipeMaxWidthRatio(0.333f),
-            pointerGestureMovementSpeedRatio(0.5f),
+            pointerGestureMovementSpeedRatio(0.3f),
             pointerGestureZoomSpeedRatio(0.3f) { }
 };
 
@@ -234,6 +234,9 @@ public:
     /* Determine whether physical keys exist for the given framework-domain key codes. */
     virtual bool hasKeys(int32_t deviceId, uint32_t sourceMask,
             size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) = 0;
+
+    /* Reopens and reconfigures all input devices. */
+    virtual void refreshConfiguration() = 0;
 };
 
 
@@ -298,6 +301,8 @@ public:
     virtual bool hasKeys(int32_t deviceId, uint32_t sourceMask,
             size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags);
 
+    virtual void refreshConfiguration();
+
 protected:
     // These methods are protected virtual so they can be overridden and instrumented
     // by test cases.
@@ -339,18 +344,17 @@ private:
     void timeoutExpired(nsecs_t when);
 
     void handleConfigurationChanged(nsecs_t when);
-    void configureExcludedDevices();
 
     // state management for all devices
     Mutex mStateLock;
 
-    int32_t mGlobalMetaState;
+    int32_t mGlobalMetaState; // guarded by mStateLock
     virtual void updateGlobalMetaState();
     virtual int32_t getGlobalMetaState();
 
     virtual void fadePointer();
 
-    InputConfiguration mInputConfiguration;
+    InputConfiguration mInputConfiguration; // guarded by mStateLock
     void updateInputConfiguration();
 
     nsecs_t mDisableVirtualKeysTimeout; // only accessed by reader thread
@@ -358,8 +362,11 @@ private:
     virtual bool shouldDropVirtualKey(nsecs_t now,
             InputDevice* device, int32_t keyCode, int32_t scanCode);
 
-    nsecs_t mNextTimeout; // only accessed by reader thread
+    nsecs_t mNextTimeout; // only accessed by reader thread, not guarded
     virtual void requestTimeoutAtTime(nsecs_t when);
+
+    volatile int32_t mRefreshConfiguration; // atomic
+    void configure(bool firstTime);
 
     // state queries
     typedef int32_t (InputDevice::*GetStateFunc)(uint32_t sourceMask, int32_t code);
