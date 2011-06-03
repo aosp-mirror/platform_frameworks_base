@@ -1217,18 +1217,6 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         }
     }
 
-    /**
-     * @return The current CDMA data connection state. ServiceState.RADIO_TECHNOLOGY_1xRTT or
-     * ServiceState.RADIO_TECHNOLOGY_EVDO is the same as "attached" and
-     * ServiceState.RADIO_TECHNOLOGY_UNKNOWN is the same as detached.
-     */
-    /*package*/ int getCurrentCdmaDataConnectionState() {
-        return mDataConnectionState;
-    }
-
-    /**
-    * TODO: In the future, we need remove getCurrentCdmaDataConnectionState
-    */
     public int getCurrentDataConnectionState() {
         return mDataConnectionState;
     }
