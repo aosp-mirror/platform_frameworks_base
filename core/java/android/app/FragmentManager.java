@@ -274,6 +274,30 @@ public abstract class FragmentManager {
     public abstract Fragment getFragment(Bundle bundle, String key);
 
     /**
+     * Save the current instance state of the given Fragment.  This can be
+     * used later when creating a new instance of the Fragment and adding
+     * it to the fragment manager, to have it create itself to match the
+     * current state returned here.  Note that there are limits on how
+     * this can be used:
+     *
+     * <ul>
+     * <li>The Fragment must currently be attached to the FragmentManager.
+     * <li>A new Fragment created using this saved state must be the same class
+     * type as the Fragment it was created from.
+     * <li>The saved state can not contain dependencies on other fragments --
+     * that is it can't use {@link #putFragment(Bundle, String, Fragment)} to
+     * store a fragment reference because that reference may not be valid when
+     * this saved state is later used.  Likewise the Fragment's target and
+     * result code are not included in this state.
+     * </ul>
+     *
+     * @param f The Fragment whose state is to be saved.
+     * @return The generated state.  This will be null if there was no
+     * interesting state created by the fragment.
+     */
+    public abstract Fragment.SavedState saveFragmentInstanceState(Fragment f);
+
+    /**
      * Print the FragmentManager's state into the given stream.
      *
      * @param prefix Text to print at the front of each line.
@@ -489,6 +513,19 @@ final class FragmentManagerImpl extends FragmentManager {
                     + key + ": index " + index);
         }
         return f;
+    }
+
+    @Override
+    public Fragment.SavedState saveFragmentInstanceState(Fragment fragment) {
+        if (fragment.mIndex < 0) {
+            throw new IllegalStateException("Fragment " + fragment
+                    + " is not currently in the FragmentManager");
+        }
+        if (fragment.mState > Fragment.INITIALIZING) {
+            Bundle result = saveFragmentBasicState(fragment);
+            return result != null ? new Fragment.SavedState(result) : null;
+        }
+        return null;
     }
 
     @Override
@@ -715,7 +752,6 @@ final class FragmentManagerImpl extends FragmentManager {
                         if (f.mView != null) {
                             f.mView.setSaveFromParentEnabled(false);
                             if (f.mHidden) f.mView.setVisibility(View.GONE);
-                            f.restoreViewState();
                             f.onViewCreated(f.mView, f.mSavedFragmentState);
                         }
                     }
@@ -747,7 +783,6 @@ final class FragmentManagerImpl extends FragmentManager {
                                     container.addView(f.mView);
                                 }
                                 if (f.mHidden) f.mView.setVisibility(View.GONE);
-                                f.restoreViewState();
                                 f.onViewCreated(f.mView, f.mSavedFragmentState);
                             }
                         }
@@ -759,6 +794,7 @@ final class FragmentManagerImpl extends FragmentManager {
                                     + " did not call through to super.onActivityCreated()");
                         }
                         if (f.mView != null) {
+                            f.restoreViewState();
                         }
                         f.mSavedFragmentState = null;
                     }
@@ -1375,6 +1411,8 @@ final class FragmentManagerImpl extends FragmentManager {
         }
         if (mStateArray == null) {
             mStateArray = new SparseArray<Parcelable>();
+        } else {
+            mStateArray.clear();
         }
         f.mView.saveHierarchyState(mStateArray);
         if (mStateArray.size() > 0) {
@@ -1383,6 +1421,32 @@ final class FragmentManagerImpl extends FragmentManager {
         }
     }
     
+    Bundle saveFragmentBasicState(Fragment f) {
+        Bundle result = null;
+
+        if (mStateBundle == null) {
+            mStateBundle = new Bundle();
+        }
+        f.onSaveInstanceState(mStateBundle);
+        if (!mStateBundle.isEmpty()) {
+            result = mStateBundle;
+            mStateBundle = null;
+        }
+
+        if (f.mView != null) {
+            saveFragmentViewState(f);
+            if (f.mSavedViewState != null) {
+                if (result == null) {
+                    result = new Bundle();
+                }
+                result.putSparseParcelableArray(
+                        FragmentManagerImpl.VIEW_STATE_TAG, f.mSavedViewState);
+            }
+        }
+
+        return result;
+    }
+
     Parcelable saveAllState() {
         // Make sure all pending operations have now been executed to get
         // our state update-to-date.
@@ -1407,25 +1471,7 @@ final class FragmentManagerImpl extends FragmentManager {
                 active[i] = fs;
                 
                 if (f.mState > Fragment.INITIALIZING && fs.mSavedFragmentState == null) {
-                    if (mStateBundle == null) {
-                        mStateBundle = new Bundle();
-                    }
-                    f.onSaveInstanceState(mStateBundle);
-                    if (!mStateBundle.isEmpty()) {
-                        fs.mSavedFragmentState = mStateBundle;
-                        mStateBundle = null;
-                    }
-
-                    if (f.mView != null) {
-                        saveFragmentViewState(f);
-                        if (f.mSavedViewState != null) {
-                            if (fs.mSavedFragmentState == null) {
-                                fs.mSavedFragmentState = new Bundle();
-                            }
-                            fs.mSavedFragmentState.putSparseParcelableArray(
-                                    FragmentManagerImpl.VIEW_STATE_TAG, f.mSavedViewState);
-                        }
-                    }
+                    fs.mSavedFragmentState = saveFragmentBasicState(f);
 
                     if (f.mTarget != null) {
                         if (f.mTarget.mIndex < 0) {
