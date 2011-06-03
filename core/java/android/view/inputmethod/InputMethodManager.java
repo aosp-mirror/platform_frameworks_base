@@ -1558,6 +1558,24 @@ public final class InputMethodManager {
         }
     }
 
+    /**
+     * Set additional input method subtypes.
+     * @param imeToken Supplies the identifying token given to an input method.
+     * @param subtypes subtypes will be added as additional subtypes of the current input method.
+     * @return true if the additional input method subtypes are successfully added.
+     */
+    public boolean setAdditionalInputMethodSubtypes(
+            IBinder imeToken, InputMethodSubtype[] subtypes) {
+        synchronized (mH) {
+            try {
+                return mService.setAdditionalInputMethodSubtypes(imeToken, subtypes);
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
+                return false;
+            }
+        }
+    }
+
     public InputMethodSubtype getLastInputMethodSubtype() {
         synchronized (mH) {
             try {

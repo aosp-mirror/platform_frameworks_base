@@ -23,9 +23,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -38,6 +38,8 @@ import android.util.Xml;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class is used to specify meta information of an input method.
@@ -77,12 +79,27 @@ public final class InputMethodInfo implements Parcelable {
 
     /**
      * Constructor.
-     * 
+     *
      * @param context The Context in which we are parsing the input method.
      * @param service The ResolveInfo returned from the package manager about
      * this input method's component.
      */
     public InputMethodInfo(Context context, ResolveInfo service)
+            throws XmlPullParserException, IOException {
+        this(context, service, null);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param context The Context in which we are parsing the input method.
+     * @param service The ResolveInfo returned from the package manager about
+     * this input method's component.
+     * @param additionalSubtypes additional subtypes being added to this InputMethodInfo
+     * @hide
+     */
+    public InputMethodInfo(Context context, ResolveInfo service,
+            Map<String, List<InputMethodSubtype>> additionalSubtypesMap)
             throws XmlPullParserException, IOException {
         mService = service;
         ServiceInfo si = service.serviceInfo;
@@ -156,6 +173,17 @@ public final class InputMethodInfo implements Parcelable {
                     "Unable to create context for: " + si.packageName);
         } finally {
             if (parser != null) parser.close();
+        }
+
+        if (additionalSubtypesMap != null && additionalSubtypesMap.containsKey(mId)) {
+            final List<InputMethodSubtype> additionalSubtypes = additionalSubtypesMap.get(mId);
+            final int N = additionalSubtypes.size();
+            for (int i = 0; i < N; ++i) {
+                final InputMethodSubtype subtype = additionalSubtypes.get(i);
+                if (!mSubtypes.contains(subtype)) {
+                    mSubtypes.add(subtype);
+                }
+            }
         }
         mSettingsActivityName = settingsActivityComponent;
         mIsDefaultResId = isDefaultResId;
