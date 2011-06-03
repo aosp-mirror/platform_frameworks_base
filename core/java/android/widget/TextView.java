@@ -5236,6 +5236,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param text The auto complete text the user has selected.
      */
     public void onCommitCompletion(CompletionInfo text) {
+        // Intentionally empty
     }
 
     /**
@@ -8660,8 +8661,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private boolean mIsActive = false;
         // The insertion handle can have an associated PastePopupMenu
         private boolean mIsInsertionHandle = false;
-        // Used to detect taps on the insertion handle, which will affect the PastePopupMenu
-        private long mTouchTimer;
         private PastePopupMenu mPastePopupWindow;
 
         // Touch-up filter: number of previous positions remembered
@@ -8932,9 +8931,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mLastParentX = coords[0];
                     mLastParentY = coords[1];
                     mIsDragging = true;
-                    if (mIsInsertionHandle) {
-                        mTouchTimer = SystemClock.uptimeMillis();
-                    }
                     break;
                 }
 
@@ -8964,18 +8960,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 case MotionEvent.ACTION_UP:
                     if (mIsInsertionHandle) {
-                        long delay = SystemClock.uptimeMillis() - mTouchTimer;
-                        if (delay < ViewConfiguration.getTapTimeout()) {
-                            final float deltaX = mDownPositionX - ev.getRawX();
-                            final float deltaY = mDownPositionY - ev.getRawY();
-                            final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
-                            if (distanceSquared < mSquaredTouchSlopDistance) {
-                                if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
-                                    // Tapping on the handle dismisses the displayed paste view,
-                                    mPastePopupWindow.hide();
-                                } else {
-                                    ((InsertionPointCursorController) mController).show(0);
-                                }
+                        final float deltaX = mDownPositionX - ev.getRawX();
+                        final float deltaY = mDownPositionY - ev.getRawY();
+                        final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
+                        if (distanceSquared < mSquaredTouchSlopDistance) {
+                            if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
+                                // Tapping on the handle dismisses the displayed paste view,
+                                mPastePopupWindow.hide();
+                            } else {
+                                ((InsertionPointCursorController) mController).show(0);
                             }
                         }
                     }
@@ -9360,7 +9353,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
-        public void onDetached() {}
+        public void onDetached() {
+            // Nothing to do
+        }
     }
 
     private void hideInsertionPointCursorController() {
