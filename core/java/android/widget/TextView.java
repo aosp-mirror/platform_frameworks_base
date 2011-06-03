@@ -8738,10 +8738,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return false;
         }
 
-        boolean currentWordSelected = selectCurrentWord();
-        if (!currentWordSelected) {
-            // No word found under cursor or text selection not permitted.
-            return false;
+        if (!hasSelection()) {
+            // There may already be a selection on device rotation
+            boolean currentWordSelected = selectCurrentWord();
+            if (!currentWordSelected) {
+                // No word found under cursor or text selection not permitted.
+                return false;
+            }
         }
 
         ActionMode.Callback actionModeCallback = new SelectionActionModeCallback();
@@ -9057,6 +9060,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private int mContainerPositionX, mContainerPositionY;
         // Visible or not (scrolled off screen), whether or not this handle should be visible
         private boolean mIsActive = false;
+        // Used to detect that setFrame was called
+        private boolean mNeedsUpdate = true;
 
         public HandleView() {
             super(TextView.this.mContext);
@@ -9072,6 +9077,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int handleHeight = mDrawable.getIntrinsicHeight();
             mTouchOffsetY = -0.3f * handleHeight;
             mIdealVerticalOffset = 0.7f * handleHeight;
+        }
+
+        @Override
+        protected boolean setFrame(int left, int top, int right, int bottom) {
+            boolean changed = super.setFrame(left, top, right, bottom);
+            // onPreDraw is called for PhoneWindow before the layout of this view is
+            // performed. Make sure to update position, even if container didn't move.
+            if (changed) mNeedsUpdate  = true;
+            return changed;
         }
 
         protected abstract void initDrawable();
@@ -9222,7 +9236,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mPositionY += viewportToContentVerticalOffset();
         }
 
-        protected boolean updateContainerPosition() {
+        private void checkForContainerPositionChange() {
             positionAtCursorOffset(getCurrentCursorOffset());
 
             final int previousContainerPositionX = mContainerPositionX;
@@ -9232,12 +9246,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mContainerPositionX = mTempCoords[0] + mPositionX;
             mContainerPositionY = mTempCoords[1] + mPositionY;
 
-            return (previousContainerPositionX != mContainerPositionX ||
-                    previousContainerPositionY != mContainerPositionY);
+            mNeedsUpdate |= previousContainerPositionX != mContainerPositionX;
+            mNeedsUpdate |= previousContainerPositionY != mContainerPositionY;
         }
 
         public boolean onPreDraw() {
-            if (updateContainerPosition()) {
+            checkForContainerPositionChange();
+            if (mNeedsUpdate) {
                 if (mIsDragging) {
                     if (mTempCoords[0] != mLastParentX || mTempCoords[1] != mLastParentY) {
                         mTouchToWindowOffsetX += mTempCoords[0] - mLastParentX;
@@ -9261,6 +9276,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         dismiss();
                     }
                 }
+                mNeedsUpdate = false;
             }
             return true;
         }
