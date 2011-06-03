@@ -84,12 +84,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
     private int mNewReasonDataDenied = -1;
 
     /**
-     *  Values correspond to ServiceState.RADIO_TECHNOLOGY_ definitions.
-     */
-    private int networkType = 0;
-    private int newNetworkType = 0;
-
-    /**
      * GSM roaming status solely based on TS 27.007 7.2 CREG. Only used by
      * handlePollStateResult to store CREG roaming result.
      */
@@ -628,7 +622,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                     }
                     newGPRSState = regCodeToServiceState(regState);
                     mDataRoaming = regCodeIsRoaming(regState);
-                    newNetworkType = type;
+                    mNewRadioTechnology = type;
                     newSS.setRadioTechnology(type);
                 break;
 
@@ -748,37 +742,6 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
     }
 
-    private static String networkTypeToString(int type) {
-        //Network Type from GPRS_REGISTRATION_STATE
-        String ret = "unknown";
-
-        switch (type) {
-            case ServiceState.RADIO_TECHNOLOGY_GPRS:
-                ret = "GPRS";
-                break;
-            case ServiceState.RADIO_TECHNOLOGY_EDGE:
-                ret = "EDGE";
-                break;
-            case ServiceState.RADIO_TECHNOLOGY_UMTS:
-                ret = "UMTS";
-                break;
-            case ServiceState.RADIO_TECHNOLOGY_HSDPA:
-                ret = "HSDPA";
-                break;
-            case ServiceState.RADIO_TECHNOLOGY_HSUPA:
-                ret = "HSUPA";
-                break;
-            case ServiceState.RADIO_TECHNOLOGY_HSPA:
-                ret = "HSPA";
-                break;
-            default:
-                sloge("Wrong network type: " + Integer.toString(type));
-                break;
-        }
-
-        return ret;
-    }
-
     private void pollStateDone() {
         if (DBG) {
             log("Poll ServiceState done: " +
@@ -788,8 +751,8 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 " mNewMaxDataCalls=" + mNewMaxDataCalls +
                 " oldReasonDataDenied=" + mReasonDataDenied +
                 " mNewReasonDataDenied=" + mNewReasonDataDenied +
-                " oldType=" + networkTypeToString(networkType) +
-                " newType=" + networkTypeToString(newNetworkType));
+                " oldType=" + ServiceState.radioTechnologyToString(mRadioTechnology) +
+                " newType=" + ServiceState.radioTechnologyToString(mNewRadioTechnology));
         }
 
         boolean hasRegistered =
@@ -808,7 +771,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
                 gprsState == ServiceState.STATE_IN_SERVICE
                 && newGPRSState != ServiceState.STATE_IN_SERVICE;
 
-        boolean hasNetworkTypeChanged = networkType != newNetworkType;
+        boolean hasRadioTechnologyChanged = mRadioTechnology != mNewRadioTechnology;
 
         boolean hasChanged = !newSS.equals(ss);
 
@@ -838,30 +801,32 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         // Add an event log when network type switched
         // TODO: we may add filtering to reduce the event logged,
         // i.e. check preferred network setting, only switch to 2G, etc
-        if (hasNetworkTypeChanged) {
+        if (hasRadioTechnologyChanged) {
             int cid = -1;
             GsmCellLocation loc = ((GsmCellLocation)phone.getCellLocation());
             if (loc != null) cid = loc.getCid();
-            EventLog.writeEvent(EventLogTags.GSM_RAT_SWITCHED, cid, networkType, newNetworkType);
+            EventLog.writeEvent(EventLogTags.GSM_RAT_SWITCHED, cid, mRadioTechnology,
+                    mNewRadioTechnology);
             if (DBG) {
-                log("RAT switched " + networkTypeToString(networkType) + " -> "
-                    + networkTypeToString(newNetworkType) + " at cell " + cid);
+                log("RAT switched " + ServiceState.radioTechnologyToString(mRadioTechnology) +
+                        " -> " + ServiceState.radioTechnologyToString(mNewRadioTechnology) +
+                        " at cell " + cid);
             }
         }
 
         gprsState = newGPRSState;
         mReasonDataDenied = mNewReasonDataDenied;
         mMaxDataCalls = mNewMaxDataCalls;
-        networkType = newNetworkType;
+        mRadioTechnology = mNewRadioTechnology;
         // this new state has been applied - forget it until we get a new new state
-        newNetworkType = 0;
+        mNewRadioTechnology = 0;
 
 
         newSS.setStateOutOfService(); // clean slate for next time
 
-        if (hasNetworkTypeChanged) {
+        if (hasRadioTechnologyChanged) {
             phone.setSystemProperty(TelephonyProperties.PROPERTY_DATA_NETWORK_TYPE,
-                    networkTypeToString(networkType));
+                    ServiceState.radioTechnologyToString(mRadioTechnology));
         }
 
         if (hasRegistered) {
@@ -949,7 +914,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
             mDetachedRegistrants.notifyRegistrants();
         }
 
-        if (hasNetworkTypeChanged) {
+        if (hasRadioTechnologyChanged) {
             phone.notifyDataConnection(Phone.REASON_NW_TYPE_CHANGED, Phone.APN_TYPE_ALL);
         }
 
@@ -1285,7 +1250,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
      * that could support voice and data simultaneously.
      */
     public boolean isConcurrentVoiceAndDataAllowed() {
-        return (networkType >= ServiceState.RADIO_TECHNOLOGY_UMTS);
+        return (mRadioTechnology >= ServiceState.RADIO_TECHNOLOGY_UMTS);
     }
 
     /**
