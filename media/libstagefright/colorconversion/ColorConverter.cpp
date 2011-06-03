@@ -20,8 +20,6 @@
 
 namespace android {
 
-static const int OMX_QCOM_COLOR_FormatYVU420SemiPlanar = 0x7FA30C00;
-
 ColorConverter::ColorConverter(
         OMX_COLOR_FORMATTYPE from, OMX_COLOR_FORMATTYPE to)
     : mSrcFormat(from),
