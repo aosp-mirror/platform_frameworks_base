@@ -20,6 +20,7 @@ import com.android.internal.R;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.graphics.Canvas;
 import android.util.Log;
@@ -94,6 +95,8 @@ public class KeyguardViewManager implements KeyguardWindowController {
     public synchronized void show() {
         if (DEBUG) Log.d(TAG, "show(); mKeyguardView==" + mKeyguardView);
 
+        Resources res = mContext.getResources();
+        boolean enableScreenRotation = res.getBoolean(R.bool.config_enableLockScreenRotation);
         if (mKeyguardHost == null) {
             if (DEBUG) Log.d(TAG, "keyguard host is null, creating it...");
 
@@ -116,17 +119,21 @@ public class KeyguardViewManager implements KeyguardWindowController {
             lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
             lp.windowAnimations = com.android.internal.R.style.Animation_LockScreen;
 
-            // TODO: Sometimes we get the wrong value for the sensor resource we use to configure
-            // this.  However, the current UI design has LockScreen always respond to orientation so
-            // we don't need this for the time-being.
-            //
-            // For reference, the configuration variable is R.bool.config_enableLockScreenRotation
-            lp.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR;
             lp.setTitle("Keyguard");
             mWindowLayoutParams = lp;
 
             mViewManager.addView(mKeyguardHost, lp);
         }
+
+        if (enableScreenRotation) {
+            Log.d(TAG, "Rotation sensor for lock screen On!");
+            mWindowLayoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR;
+        } else {
+            Log.d(TAG, "Rotation sensor for lock screen Off!");
+            mWindowLayoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
+        }
+
+        mViewManager.updateViewLayout(mKeyguardHost, mWindowLayoutParams);
 
         if (mKeyguardView == null) {
             if (DEBUG) Log.d(TAG, "keyguard view is null, creating it...");
