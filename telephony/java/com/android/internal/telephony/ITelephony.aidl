@@ -145,6 +145,15 @@ interface ITelephony {
     boolean supplyPin(String pin);
 
     /**
+     * Supply puk to unlock the SIM and set SIM pin to new pin.
+     *  Blocks until a result is determined.
+     * @param puk The puk to check.
+     *        pin The new pin to be set in SIM
+     * @return whether the operation was a success.
+     */
+    boolean supplyPuk(String puk, String pin);
+
+    /**
      * Handles PIN MMI commands (PIN/PIN2/PUK/PUK2), which are initiated
      * without SEND (so <code>dial</code> is not appropriate).
      *
@@ -254,7 +263,7 @@ interface ITelephony {
       * Returns the network type
       */
     int getNetworkType();
-    
+
     /**
      * Return true if an ICC card is present
      */
