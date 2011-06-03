@@ -2522,10 +2522,10 @@
     </declare-styleable>
     <declare-styleable name="GridLayout">
         <!-- The orientation property is not used during layout. It is only used to
-        allocate row and column prameters when they are not specified by its children's
+        allocate row and column parameters when they are not specified by its children's
         layout paramters. GridLayout works like LinearLayout in this case;
         putting all the components either in a single row or in a single column -
-        depending on the value of this flag. In the horozintal case, a columnCount
+        depending on the value of this flag. In the horizontal case, a columnCount
         property may be additionally supplied to force new rows to be created when a
         row is full. The rowCount attribute may be used similarly in the vertical case.
         The default is horizontal. -->
@@ -2539,6 +2539,12 @@
         The default value is false.
         See {@link android.widget.GridLayout#setUseDefaultMargins(boolean)}.-->
         <attr name="useDefaultMargins" format="boolean" />
+        <!-- When set to true, causes alignment to take place between the outer
+        boundary of a view, as defined by its margins. When set to false,
+        causes alignment to take place between the edges of the view.
+        The default is true.
+        See {@link android.widget.GridLayout#setMarginsIncludedInAlignment(boolean)}.-->
+        <attr name="marginsIncludedInAlignment" format="boolean" />
         <!-- When set to true, forces row boundaries to appear in the same order
         as row indices.
         The default is false.
@@ -3256,9 +3262,9 @@
         <!-- The row span: the difference between the bottom and top
         boundaries delimiting the group of cells occupied by this view.
         The default is one.
-        See {@link android.widget.GridLayout.Group#span}. -->
+        See {@link android.widget.GridLayout.Group}. -->
         <attr name="layout_rowSpan" format="integer" min="1" />
-        <!-- A number indicating the relative proportion of availible space that
+        <!-- A number indicating the relative proportion of available space that
         should be taken by this group of cells.
         The default is zero.
         See {@link android.widget.GridLayout.LayoutParams#columnWeight}. -->
@@ -3269,9 +3275,9 @@
         <!-- The column span: the difference between the right and left
         boundaries delimiting the group of cells occupied by this view.
         The default is one.
-        See {@link android.widget.GridLayout.Group#span}. -->
+        See {@link android.widget.GridLayout.Group}. -->
         <attr name="layout_columnSpan" format="integer" min="1" />
-        <!-- A number indicating the relative proportion of availible space that
+        <!-- A number indicating the relative proportion of available space that
         should be taken by this group of cells.
         The default is zero.
         See {@link android.widget.GridLayout.LayoutParams#columnWeight}.-->

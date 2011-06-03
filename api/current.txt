@@ -179,9 +179,9 @@ package android {
   public static final class R.attr {
     ctor public R.attr();
     field public static final int absListViewStyle = 16842858; // 0x101006a
-    field public static final int accessibilityEventTypes = 16843645; // 0x101037d
-    field public static final int accessibilityFeedbackType = 16843647; // 0x101037f
-    field public static final int accessibilityFlags = 16843649; // 0x1010381
+    field public static final int accessibilityEventTypes = 16843646; // 0x101037e
+    field public static final int accessibilityFeedbackType = 16843648; // 0x1010380
+    field public static final int accessibilityFlags = 16843650; // 0x1010382
     field public static final int accountPreferences = 16843423; // 0x101029f
     field public static final int accountType = 16843407; // 0x101028f
     field public static final int action = 16842797; // 0x101002d
@@ -201,7 +201,7 @@ package android {
     field public static final int actionModeCopyDrawable = 16843538; // 0x1010312
     field public static final int actionModeCutDrawable = 16843537; // 0x1010311
     field public static final int actionModePasteDrawable = 16843539; // 0x1010313
-    field public static final int actionModeSelectAllDrawable = 16843643; // 0x101037b
+    field public static final int actionModeSelectAllDrawable = 16843644; // 0x101037c
     field public static final int actionOverflowButtonStyle = 16843510; // 0x10102f6
     field public static final int actionViewClass = 16843516; // 0x10102fc
     field public static final int activatedBackgroundIndicator = 16843517; // 0x10102fd
@@ -273,7 +273,7 @@ package android {
     field public static final int cacheColorHint = 16843009; // 0x1010101
     field public static final int calendarViewShown = 16843596; // 0x101034c
     field public static final int calendarViewStyle = 16843613; // 0x101035d
-    field public static final int canRetrieveWindowContent = 16843650; // 0x1010382
+    field public static final int canRetrieveWindowContent = 16843651; // 0x1010383
     field public static final int candidatesTextStyleSpans = 16843312; // 0x1010230
     field public static final deprecated int capitalize = 16843113; // 0x1010169
     field public static final int centerBright = 16842956; // 0x10100cc
@@ -532,7 +532,7 @@ package android {
     field public static final int installLocation = 16843447; // 0x10102b7
     field public static final int interpolator = 16843073; // 0x1010141
     field public static final int isAlwaysSyncable = 16843571; // 0x1010333
-    field public static final int isAuxiliary = 16843644; // 0x101037c
+    field public static final int isAuxiliary = 16843645; // 0x101037d
     field public static final int isDefault = 16843297; // 0x1010221
     field public static final int isIndicator = 16843079; // 0x1010147
     field public static final int isModifier = 16843334; // 0x1010246
@@ -584,8 +584,8 @@ package android {
     field public static final int layout_centerInParent = 16843151; // 0x101018f
     field public static final int layout_centerVertical = 16843153; // 0x1010191
     field public static final int layout_column = 16843084; // 0x101014c
-    field public static final int layout_columnSpan = 16843641; // 0x1010379
-    field public static final int layout_columnWeight = 16843642; // 0x101037a
+    field public static final int layout_columnSpan = 16843642; // 0x101037a
+    field public static final int layout_columnWeight = 16843643; // 0x101037b
     field public static final int layout_gravity = 16842931; // 0x10100b3
     field public static final int layout_height = 16842997; // 0x10100f5
     field public static final int layout_margin = 16842998; // 0x10100f6
@@ -593,9 +593,9 @@ package android {
     field public static final int layout_marginLeft = 16842999; // 0x10100f7
     field public static final int layout_marginRight = 16843001; // 0x10100f9
     field public static final int layout_marginTop = 16843000; // 0x10100f8
-    field public static final int layout_row = 16843638; // 0x1010376
-    field public static final int layout_rowSpan = 16843639; // 0x1010377
-    field public static final int layout_rowWeight = 16843640; // 0x1010378
+    field public static final int layout_row = 16843639; // 0x1010377
+    field public static final int layout_rowSpan = 16843640; // 0x1010378
+    field public static final int layout_rowWeight = 16843641; // 0x1010379
     field public static final int layout_scale = 16843155; // 0x1010193
     field public static final int layout_span = 16843085; // 0x101014d
     field public static final int layout_toLeftOf = 16843138; // 0x1010182
@@ -625,6 +625,7 @@ package android {
     field public static final int loopViews = 16843527; // 0x1010307
     field public static final int manageSpaceActivity = 16842756; // 0x1010004
     field public static final int mapViewStyle = 16842890; // 0x101008a
+    field public static final int marginsIncludedInAlignment = 16843638; // 0x1010376
     field public static final int marqueeRepeatLimit = 16843293; // 0x101021d
     field public static final int max = 16843062; // 0x1010136
     field public static final int maxDate = 16843584; // 0x1010340
@@ -661,7 +662,7 @@ package android {
     field public static final int nextFocusUp = 16842979; // 0x10100e3
     field public static final int noHistory = 16843309; // 0x101022d
     field public static final int normalScreens = 16843397; // 0x1010285
-    field public static final int notificationTimeout = 16843648; // 0x1010380
+    field public static final int notificationTimeout = 16843649; // 0x1010381
     field public static final int numColumns = 16843032; // 0x1010118
     field public static final int numStars = 16843076; // 0x1010144
     field public static final deprecated int numeric = 16843109; // 0x1010165
@@ -678,7 +679,7 @@ package android {
     field public static final int overScrollFooter = 16843459; // 0x10102c3
     field public static final int overScrollHeader = 16843458; // 0x10102c2
     field public static final int overScrollMode = 16843457; // 0x10102c1
-    field public static final int packageNames = 16843646; // 0x101037e
+    field public static final int packageNames = 16843647; // 0x101037f
     field public static final int padding = 16842965; // 0x10100d5
     field public static final int paddingBottom = 16842969; // 0x10100d9
     field public static final int paddingLeft = 16842966; // 0x10100d6
@@ -24534,6 +24535,7 @@ package android.widget {
     ctor public GridLayout(android.content.Context, android.util.AttributeSet, int);
     ctor public GridLayout(android.content.Context, android.util.AttributeSet);
     method public int getColumnCount();
+    method public boolean getMarginsIncludedInAlignment();
     method public int getOrientation();
     method public int getRowCount();
     method public boolean getUseDefaultMargins();
@@ -24542,6 +24544,7 @@ package android.widget {
     method protected void onLayout(boolean, int, int, int, int);
     method public void setColumnCount(int);
     method public void setColumnOrderPreserved(boolean);
+    method public void setMarginsIncludedInAlignment(boolean);
     method public void setOrientation(int);
     method public void setRowCount(int);
     method public void setRowOrderPreserved(boolean);
@@ -24554,6 +24557,7 @@ package android.widget {
     field public static final android.widget.GridLayout.Alignment LEFT;
     field public static final android.widget.GridLayout.Alignment RIGHT;
     field public static final android.widget.GridLayout.Alignment TOP;
+    field public static final int UNDEFINED = -2147483648; // 0x80000000
     field public static final int VERTICAL = 1; // 0x1
   }
 
@@ -24563,17 +24567,9 @@ package android.widget {
   }
 
   public static class GridLayout.Group {
-    ctor public GridLayout.Group(android.widget.GridLayout.Interval, android.widget.GridLayout.Alignment);
     ctor public GridLayout.Group(int, int, android.widget.GridLayout.Alignment);
     ctor public GridLayout.Group(int, android.widget.GridLayout.Alignment);
     field public final android.widget.GridLayout.Alignment alignment;
-    field public final android.widget.GridLayout.Interval span;
-  }
-
-  public static class GridLayout.Interval {
-    ctor public GridLayout.Interval(int, int);
-    field public final int max;
-    field public final int min;
   }
 
   public static class GridLayout.LayoutParams extends android.view.ViewGroup.MarginLayoutParams {
