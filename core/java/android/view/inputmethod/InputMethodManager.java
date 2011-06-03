@@ -998,13 +998,13 @@ public final class InputMethodManager {
                 if (DEBUG) Log.v(TAG, "START INPUT: " + view + " ic="
                         + ic + " tba=" + tba + " initial=" + initial);
                 InputBindResult res = mService.startInput(mClient,
-                        servedContext, tba, initial, mCurMethod == null);
+                        servedContext, tba, initial, true);
                 if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
                 if (res != null) {
                     if (res.id != null) {
                         mBindSequence = res.sequence;
                         mCurMethod = res.method;
-                    } else {
+                    } else if (mCurMethod == null) {
                         // This means there is no input method available.
                         if (DEBUG) Log.v(TAG, "ABORT input: no input method!");
                         return;
