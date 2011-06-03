@@ -38,6 +38,7 @@
 
 #include "InputReader.h"
 
+#include <cutils/atomic.h>
 #include <cutils/log.h>
 #include <ui/Keyboard.h>
 #include <ui/VirtualKeyMap.h>
@@ -260,10 +261,9 @@ InputReader::InputReader(const sp<EventHubInterface>& eventHub,
         const sp<InputReaderPolicyInterface>& policy,
         const sp<InputDispatcherInterface>& dispatcher) :
         mEventHub(eventHub), mPolicy(policy), mDispatcher(dispatcher),
-        mGlobalMetaState(0), mDisableVirtualKeysTimeout(LLONG_MIN), mNextTimeout(LLONG_MAX) {
-    mPolicy->getReaderConfiguration(&mConfig);
-
-    configureExcludedDevices();
+        mGlobalMetaState(0), mDisableVirtualKeysTimeout(LLONG_MIN), mNextTimeout(LLONG_MAX),
+        mRefreshConfiguration(0) {
+    configure(true /*firstTime*/);
     updateGlobalMetaState();
     updateInputConfiguration();
 }
@@ -275,6 +275,11 @@ InputReader::~InputReader() {
 }
 
 void InputReader::loopOnce() {
+    if (android_atomic_acquire_load(&mRefreshConfiguration)) {
+        android_atomic_release_store(0, &mRefreshConfiguration);
+        configure(false /*firstTime*/);
+    }
+
     int32_t timeoutMillis = -1;
     if (mNextTimeout != LLONG_MAX) {
         nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
@@ -495,9 +500,12 @@ void InputReader::handleConfigurationChanged(nsecs_t when) {
     mDispatcher->notifyConfigurationChanged(when);
 }
 
-void InputReader::configureExcludedDevices() {
-    for (size_t i = 0; i < mConfig.excludedDeviceNames.size(); i++) {
-        mEventHub->addExcludedDevice(mConfig.excludedDeviceNames[i]);
+void InputReader::configure(bool firstTime) {
+    mPolicy->getReaderConfiguration(&mConfig);
+    mEventHub->setExcludedDevices(mConfig.excludedDeviceNames);
+
+    if (!firstTime) {
+        mEventHub->reopenDevices();
     }
 }
 
@@ -716,6 +724,10 @@ bool InputReader::markSupportedKeyCodes(int32_t deviceId, uint32_t sourceMask, s
         }
         return result;
     } // release device registy reader lock
+}
+
+void InputReader::refreshConfiguration() {
+    android_atomic_release_store(1, &mRefreshConfiguration);
 }
 
 void InputReader::dump(String8& dump) {
