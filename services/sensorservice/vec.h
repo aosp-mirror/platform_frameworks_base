@@ -208,6 +208,15 @@ TYPE PURE length(const V<TYPE, SIZE>& v) {
 }
 
 template <
+    template<typename T, size_t S> class V,
+    typename TYPE,
+    size_t SIZE
+>
+V<TYPE, SIZE> PURE normalize(const V<TYPE, SIZE>& v) {
+    return v * (1/length(v));
+}
+
+template <
     template<typename T, size_t S> class VLHS,
     template<typename T, size_t S> class VRHS,
     typename TYPE

@@ -8,7 +8,6 @@ LOCAL_SRC_FILES:= \
     LinearAccelerationSensor.cpp \
     OrientationSensor.cpp \
     RotationVectorSensor.cpp \
-    SecondOrderLowPassFilter.cpp \
     SensorDevice.cpp \
     SensorFusion.cpp \
     SensorInterface.cpp \
