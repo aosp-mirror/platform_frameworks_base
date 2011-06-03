@@ -22,18 +22,6 @@ package android.telephony;
  * {@hide}
  */
 public interface SmsCbConstants {
-    /** Cell wide immediate geographical scope */
-    public static final int GEOGRAPHICAL_SCOPE_CELL_WIDE_IMMEDIATE = 0;
-
-    /** PLMN wide geographical scope */
-    public static final int GEOGRAPHICAL_SCOPE_PLMN_WIDE = 1;
-
-    /** Location / service area wide geographical scope */
-    public static final int GEOGRAPHICAL_SCOPE_LA_WIDE = 2;
-
-    /** Cell wide geographical scope */
-    public static final int GEOGRAPHICAL_SCOPE_CELL_WIDE = 3;
-
     /** Start of PWS Message Identifier range (includes ETWS and CMAS). */
     public static final int MESSAGE_ID_PWS_FIRST_IDENTIFIER = 0x1100;
 
@@ -111,4 +99,19 @@ public interface SmsCbConstants {
 
     /** ETWS message code flag to activate the emergency user alert. */
     public static final int MESSAGE_CODE_ETWS_EMERGENCY_USER_ALERT          = 0x200;
+
+    /** ETWS warning type value for earthquake. */
+    public static final int ETWS_WARNING_TYPE_EARTHQUAKE                    = 0x00;
+
+    /** ETWS warning type value for tsunami. */
+    public static final int ETWS_WARNING_TYPE_TSUNAMI                       = 0x01;
+
+    /** ETWS warning type value for earthquake and tsunami. */
+    public static final int ETWS_WARNING_TYPE_EARTHQUAKE_AND_TSUNAMI        = 0x02;
+
+    /** ETWS warning type value for test broadcast. */
+    public static final int ETWS_WARNING_TYPE_TEST                          = 0x03;
+
+    /** ETWS warning type value for other notifications. */
+    public static final int ETWS_WARNING_TYPE_OTHER                         = 0x04;
 }

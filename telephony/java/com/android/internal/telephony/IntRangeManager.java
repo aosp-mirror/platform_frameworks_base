@@ -290,53 +290,52 @@ public abstract class IntRangeManager {
                     return true;
                 } else {
                     // find last range that can coalesce into the new combined range
-                    for (int endIndex = startIndex+1; endIndex < len; endIndex++) {
-                        IntRange endRange = mRanges.get(endIndex);
-                        if ((endId + 1) < endRange.startId) {
-                            // add range from range.endId+1 to endId,
-                            // values from startId to range.endId are already enabled
-                            if (tryAddSingleRange(range.endId + 1, endId, true)) {
-                                range.endId = endId;
-                                // insert new ClientRange in place
-                                range.insert(new ClientRange(startId, endId, client));
-                                // coalesce range with following ranges up to endIndex-1
-                                // remove each range after adding its elements, so the index
-                                // of the next range to join is always startIndex+1.
-                                // i is the index if no elements were removed: we only care
-                                // about the number of loop iterations, not the value of i.
-                                int joinIndex = startIndex + 1;
-                                for (int i = joinIndex; i < endIndex; i++) {
-                                    IntRange joinRange = mRanges.get(joinIndex);
-                                    range.clients.addAll(joinRange.clients);
-                                    mRanges.remove(joinRange);
-                                }
-                                return true;
-                            } else {
-                                return false;   // failed to update radio
-                            }
-                        } else if (endId <= endRange.endId) {
-                            // add range from range.endId+1 to start of last overlapping range,
-                            // values from endRange.startId to endId are already enabled
-                            if (tryAddSingleRange(range.endId + 1, endRange.startId - 1, true)) {
-                                range.endId = endRange.endId;
-                                // insert new ClientRange in place
-                                range.insert(new ClientRange(startId, endId, client));
-                                // coalesce range with following ranges up to endIndex
-                                // remove each range after adding its elements, so the index
-                                // of the next range to join is always startIndex+1.
-                                // i is the index if no elements were removed: we only care
-                                // about the number of loop iterations, not the value of i.
-                                int joinIndex = startIndex + 1;
-                                for (int i = joinIndex; i <= endIndex; i++) {
-                                    IntRange joinRange = mRanges.get(joinIndex);
-                                    range.clients.addAll(joinRange.clients);
-                                    mRanges.remove(joinRange);
-                                }
-                                return true;
-                            } else {
-                                return false;   // failed to update radio
-                            }
+                    int endIndex = startIndex;
+                    for (int testIndex = startIndex+1; testIndex < len; testIndex++) {
+                        IntRange testRange = mRanges.get(testIndex);
+                        if ((endId + 1) < testRange.startId) {
+                            break;
+                        } else {
+                            endIndex = testIndex;
                         }
+                    }
+                    // no adjacent IntRanges to combine
+                    if (endIndex == startIndex) {
+                        // add range from range.endId+1 to endId,
+                        // values from startId to range.endId are already enabled
+                        if (tryAddSingleRange(range.endId + 1, endId, true)) {
+                            range.endId = endId;
+                            range.insert(new ClientRange(startId, endId, client));
+                            return true;
+                        } else {
+                            return false;   // failed to update radio
+                        }
+                    }
+                    // get last range to coalesce into start range
+                    IntRange endRange = mRanges.get(endIndex);
+                    // Values from startId to range.endId have already been enabled.
+                    // if endId > endRange.endId, then enable range from range.endId+1 to endId,
+                    // else enable range from range.endId+1 to endRange.startId-1, because
+                    // values from endRange.startId to endId have already been added.
+                    int newRangeEndId = (endId <= endRange.endId) ? endRange.startId - 1 : endId;
+                    if (tryAddSingleRange(range.endId + 1, newRangeEndId, true)) {
+                        range.endId = endId;
+                        // insert new ClientRange in place
+                        range.insert(new ClientRange(startId, endId, client));
+                        // coalesce range with following ranges up to endIndex-1
+                        // remove each range after adding its elements, so the index
+                        // of the next range to join is always startIndex+1 (joinIndex).
+                        // i is the index if no elements had been removed: we only care
+                        // about the number of loop iterations, not the value of i.
+                        int joinIndex = startIndex + 1;
+                        for (int i = joinIndex; i < endIndex; i++) {
+                            IntRange joinRange = mRanges.get(joinIndex);
+                            range.clients.addAll(joinRange.clients);
+                            mRanges.remove(joinRange);
+                        }
+                        return true;
+                    } else {
+                        return false;   // failed to update radio
                     }
                 }
             }
@@ -435,6 +434,8 @@ public abstract class IntRangeManager {
                                 addRange(range.startId, nextStartId - 1, false);
                                 rangeCopy.startId = nextStartId;
                             }
+                            // init largestEndId
+                            largestEndId = clients.get(1).endId;
                         }
 
                         // go through remaining ClientRanges, creating new IntRanges when
@@ -442,7 +443,6 @@ public abstract class IntRangeManager {
                         // remove the original IntRange and append newRanges to mRanges.
                         // Otherwise, leave the original IntRange in mRanges and return false.
                         ArrayList<IntRange> newRanges = new ArrayList<IntRange>();
-                        newRanges.add(rangeCopy);
 
                         IntRange currentRange = rangeCopy;
                         for (int nextIndex = crIndex + 1; nextIndex < crLength; nextIndex++) {
@@ -454,6 +454,7 @@ public abstract class IntRangeManager {
                                 }
                                 addRange(largestEndId + 1, nextCr.startId - 1, false);
                                 currentRange.endId = largestEndId;
+                                newRanges.add(currentRange);
                                 currentRange = new IntRange(nextCr);
                             } else {
                                 currentRange.clients.add(nextCr);
@@ -463,18 +464,25 @@ public abstract class IntRangeManager {
                             }
                         }
 
-                        if (updateStarted) {
-                            if (!finishUpdate()) {
-                                return false;   // failed to update radio
-                            } else {
-                                // remove the original IntRange and insert newRanges in place.
-                                mRanges.remove(crIndex);
-                                mRanges.addAll(crIndex, newRanges);
-                                return true;
+                        // remove any channels between largestEndId and endId
+                        if (largestEndId < endId) {
+                            if (!updateStarted) {
+                                startUpdate();
+                                updateStarted = true;
                             }
-                        } else {
-                            return true;
+                            addRange(largestEndId + 1, endId, false);
+                            currentRange.endId = largestEndId;
                         }
+                        newRanges.add(currentRange);
+
+                        if (updateStarted && !finishUpdate()) {
+                            return false;   // failed to update radio
+                        }
+
+                        // replace the original IntRange with newRanges
+                        mRanges.remove(i);
+                        mRanges.addAll(i, newRanges);
+                        return true;
                     } else {
                         // not the ClientRange to remove; save highest end ID seen so far
                         if (cr.endId > largestEndId) {
