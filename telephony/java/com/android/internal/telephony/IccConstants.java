@@ -58,6 +58,12 @@ public interface IccConstants {
     static final int EF_CST = 0x6f32;
     static final int EF_RUIM_SPN =0x6F41;
 
+    // ETSI TS.102.221
+    static final int EF_PL = 0x2F05;
+    // 3GPP2 C.S0065
+    static final int EF_CSIM_LI = 0x6F3A;
+    static final int EF_CSIM_SPN =0x6F41;
+
     //ISIM access
     static final int EF_IMPU = 0x6f04;
     static final int EF_IMPI = 0x6f02;
