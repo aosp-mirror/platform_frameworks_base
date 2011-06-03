@@ -33,6 +33,7 @@
 
 #include <hardware_legacy/power.h>
 
+#include <cutils/atomic.h>
 #include <cutils/properties.h>
 #include <utils/Log.h>
 #include <utils/Timers.h>
@@ -128,6 +129,7 @@ EventHub::EventHub(void) :
         mError(NO_INIT), mBuiltInKeyboardId(-1), mNextDeviceId(1),
         mOpeningDevices(0), mClosingDevices(0),
         mOpened(false), mNeedToSendFinishedDeviceScan(false),
+        mNeedToReopenDevices(0), mNeedToScanDevices(false),
         mInputFdIndex(1) {
     acquire_wake_lock(PARTIAL_WAKE_LOCK, WAKE_LOCK_ID);
 
@@ -393,12 +395,10 @@ status_t EventHub::mapAxis(int32_t deviceId, int scancode, AxisInfo* outAxisInfo
     return NAME_NOT_FOUND;
 }
 
-void EventHub::addExcludedDevice(const char* deviceName)
-{
+void EventHub::setExcludedDevices(const Vector<String8>& devices) {
     AutoMutex _l(mLock);
 
-    String8 name(deviceName);
-    mExcludedDevices.push_back(name);
+    mExcludedDevices = devices;
 }
 
 bool EventHub::hasLed(int32_t deviceId, int32_t led) const {
@@ -466,9 +466,11 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
     LOG_ASSERT(bufferSize >= 1);
 
     if (!mOpened) {
+        android_atomic_acquire_store(0, &mNeedToReopenDevices);
+
         mError = openPlatformInput() ? NO_ERROR : UNKNOWN_ERROR;
         mOpened = true;
-        mNeedToSendFinishedDeviceScan = true;
+        mNeedToScanDevices = true;
     }
 
     struct input_event readBuffer[bufferSize];
@@ -477,6 +479,20 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
     size_t capacity = bufferSize;
     for (;;) {
         nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+
+        // Reopen input devices if needed.
+        if (android_atomic_acquire_load(&mNeedToReopenDevices)) {
+            android_atomic_acquire_store(0, &mNeedToReopenDevices);
+
+            LOGI("Reopening all input devices due to a configuration change.");
+
+            AutoMutex _l(mLock);
+            while (mDevices.size() > 1) {
+                closeDeviceAtIndexLocked(mDevices.size() - 1);
+            }
+            mNeedToScanDevices = true;
+            break; // return to the caller before we actually rescan
+        }
 
         // Report any devices that had last been added/removed.
         while (mClosingDevices) {
@@ -493,6 +509,12 @@ size_t EventHub::getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSiz
             if (--capacity == 0) {
                 break;
             }
+        }
+
+        if (mNeedToScanDevices) {
+            mNeedToScanDevices = false;
+            scanDevices();
+            mNeedToSendFinishedDeviceScan = true;
         }
 
         while (mOpeningDevices != NULL) {
@@ -696,13 +718,14 @@ bool EventHub::openPlatformInput(void) {
     pollfd.revents = 0;
     mFds.push(pollfd);
     mDevices.push(NULL);
+    return true;
+}
 
-    res = scanDir(DEVICE_PATH);
+void EventHub::scanDevices() {
+    int res = scanDir(DEVICE_PATH);
     if(res < 0) {
         LOGE("scan dir failed for %s\n", DEVICE_PATH);
     }
-
-    return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -755,12 +778,10 @@ int EventHub::openDevice(const char *devicePath) {
     }
 
     // Check to see if the device is on our excluded list
-    List<String8>::iterator iter = mExcludedDevices.begin();
-    List<String8>::iterator end = mExcludedDevices.end();
-    for ( ; iter != end; iter++) {
-        const char* test = *iter;
-        if (identifier.name == test) {
-            LOGI("ignoring event id %s driver %s\n", devicePath, test);
+    for (size_t i = 0; i < mExcludedDevices.size(); i++) {
+        const String8& item = mExcludedDevices.itemAt(i);
+        if (identifier.name == item) {
+            LOGI("ignoring event id %s driver %s\n", devicePath, item.string());
             close(fd);
             return -1;
         }
@@ -1221,6 +1242,10 @@ int EventHub::scanDir(const char *dirname)
     }
     closedir(dir);
     return 0;
+}
+
+void EventHub::reopenDevices() {
+    android_atomic_release_store(1, &mNeedToReopenDevices);
 }
 
 void EventHub::dump(String8& dump) {

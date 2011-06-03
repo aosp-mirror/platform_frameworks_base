@@ -1809,6 +1809,16 @@ public final class Settings {
         public static final String SIP_ASK_ME_EACH_TIME = "SIP_ASK_ME_EACH_TIME";
 
         /**
+         * Pointer speed setting.
+         * This is an integer value in a range between -7 and +7, so there are 15 possible values.
+         *   -7 = slowest
+         *    0 = default speed
+         *   +7 = fastest
+         * @hide
+         */
+        public static final String POINTER_SPEED = "pointer_speed";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          * @hide
@@ -1872,6 +1882,7 @@ public final class Settings {
             USE_PTP_INTERFACE,
             SIP_CALL_OPTIONS,
             SIP_RECEIVE_CALLS,
+            POINTER_SPEED,
         };
 
         // Settings moved to Settings.Secure

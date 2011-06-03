@@ -53,6 +53,11 @@
 
 namespace android {
 
+// The exponent used to calculate the pointer speed scaling factor.
+// The scaling factor is calculated as 2 ^ (speed * exponent),
+// where the speed ranges from -7 to + 7 and is supplied by the user.
+static const float POINTER_SPEED_EXPONENT = 1.0f / 3;
+
 static struct {
     jmethodID notifyConfigurationChanged;
     jmethodID notifyLidSwitchChanged;
@@ -176,6 +181,7 @@ public:
     void setFocusedApplication(JNIEnv* env, jobject applicationObj);
     void setInputDispatchMode(bool enabled, bool frozen);
     void setSystemUiVisibility(int32_t visibility);
+    void setPointerSpeed(int32_t speed);
 
     /* --- InputReaderPolicyInterface implementation --- */
 
@@ -225,6 +231,9 @@ private:
         // System UI visibility.
         int32_t systemUiVisibility;
 
+        // Pointer speed.
+        int32_t pointerSpeed;
+
         // Sprite controller singleton, created on first use.
         sp<SpriteController> spriteController;
 
@@ -264,6 +273,7 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         mLocked.displayOrientation = ROTATION_0;
 
         mLocked.systemUiVisibility = ASYSTEM_UI_VISIBILITY_STATUS_BAR_VISIBLE;
+        mLocked.pointerSpeed = 0;
     }
 
     sp<EventHub> eventHub = new EventHub();
@@ -427,6 +437,13 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
     if (!checkAndClearExceptionFromCallback(env, "getTouchSlop")) {
         outConfig->pointerGestureTapSlop = touchSlop;
     }
+
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        outConfig->pointerVelocityControlParameters.scale = exp2f(mLocked.pointerSpeed
+                * POINTER_SPEED_EXPONENT);
+    } // release lock
 }
 
 sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32_t deviceId) {
@@ -630,6 +647,17 @@ void NativeInputManager::updateInactivityTimeoutLocked(const sp<PointerControlle
     controller->setInactivityTimeout(lightsOut
             ? PointerController::INACTIVITY_TIMEOUT_SHORT
             : PointerController::INACTIVITY_TIMEOUT_NORMAL);
+}
+
+void NativeInputManager::setPointerSpeed(int32_t speed) {
+    AutoMutex _l(mLock);
+
+    if (mLocked.pointerSpeed != speed) {
+        LOGI("Setting pointer speed to %d.", speed);
+        mLocked.pointerSpeed = speed;
+
+        mInputManager->getReader()->refreshConfiguration();
+    }
 }
 
 bool NativeInputManager::isScreenOn() {
@@ -1221,6 +1249,15 @@ static jboolean android_server_InputManager_nativeTransferTouchFocus(JNIEnv* env
             transferTouchFocus(fromChannel, toChannel);
 }
 
+static void android_server_InputManager_nativeSetPointerSpeed(JNIEnv* env,
+        jclass clazz, jint speed) {
+    if (checkInputManagerUnitialized(env)) {
+        return;
+    }
+
+    gNativeInputManager->setPointerSpeed(speed);
+}
+
 static jstring android_server_InputManager_nativeDump(JNIEnv* env, jclass clazz) {
     if (checkInputManagerUnitialized(env)) {
         return NULL;
@@ -1277,6 +1314,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeGetInputConfiguration },
     { "nativeTransferTouchFocus", "(Landroid/view/InputChannel;Landroid/view/InputChannel;)Z",
             (void*) android_server_InputManager_nativeTransferTouchFocus },
+    { "nativeSetPointerSpeed", "(I)V",
+            (void*) android_server_InputManager_nativeSetPointerSpeed },
     { "nativeDump", "()Ljava/lang/String;",
             (void*) android_server_InputManager_nativeDump },
 };
