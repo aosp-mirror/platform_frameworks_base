@@ -450,6 +450,51 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     boolean mCheckedForLoaderManager;
     
     /**
+     * State information that has been retrieved from a fragment instance
+     * through {@link FragmentManager#saveFragmentInstanceState(Fragment)
+     * FragmentManager.saveFragmentInstanceState}.
+     */
+    public static class SavedState implements Parcelable {
+        final Bundle mState;
+
+        SavedState(Bundle state) {
+            mState = state;
+        }
+
+        SavedState(Parcel in, ClassLoader loader) {
+            mState = in.readBundle();
+            if (loader != null && mState != null) {
+                mState.setClassLoader(loader);
+            }
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeBundle(mState);
+        }
+
+        public static final Parcelable.ClassLoaderCreator<SavedState> CREATOR
+                = new Parcelable.ClassLoaderCreator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in, null);
+            }
+
+            public SavedState createFromParcel(Parcel in, ClassLoader loader) {
+                return new SavedState(in, loader);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
+    /**
      * Thrown by {@link Fragment#instantiate(Context, String, Bundle)} when
      * there is an instantiation failure.
      */
@@ -621,6 +666,22 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      */
     final public Bundle getArguments() {
         return mArguments;
+    }
+
+    /**
+     * Set the initial saved state that this Fragment should restore itself
+     * from when first being constructed, as returned by
+     * {@link FragmentManager#saveFragmentInstanceState(Fragment)
+     * FragmentManager.saveFragmentInstanceState}.
+     *
+     * @param state The state the fragment should be restored from.
+     */
+    public void setInitialSavedState(SavedState state) {
+        if (mIndex >= 0) {
+            throw new IllegalStateException("Fragment already active");
+        }
+        mSavedFragmentState = state != null && state.mState != null
+                ? state.mState : null;
     }
 
     /**

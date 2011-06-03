@@ -113,4 +113,22 @@ public interface Parcelable {
          */
         public T[] newArray(int size);
     }
+
+    /**
+     * Specialization of {@link Creator} that allows you to receive the
+     * ClassLoader the object is being created in.
+     */
+    public interface ClassLoaderCreator<T> extends Creator<T> {
+        /**
+         * Create a new instance of the Parcelable class, instantiating it
+         * from the given Parcel whose data had previously been written by
+         * {@link Parcelable#writeToParcel Parcelable.writeToParcel()} and
+         * using the given ClassLoader.
+         *
+         * @param source The Parcel to read the object's data from.
+         * @param loader The ClassLoader that this object is being created in.
+         * @return Returns a new instance of the Parcelable class.
+         */
+        public T createFromParcel(Parcel source, ClassLoader loader);
+    }
 }

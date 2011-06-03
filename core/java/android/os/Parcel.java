@@ -1980,6 +1980,9 @@ public final class Parcel {
             }
         }
 
+        if (creator instanceof Parcelable.ClassLoaderCreator<?>) {
+            return ((Parcelable.ClassLoaderCreator<T>)creator).createFromParcel(this, loader);
+        }
         return creator.createFromParcel(this);
     }
 

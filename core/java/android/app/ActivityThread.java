@@ -1875,7 +1875,7 @@ public final class ActivityThread {
             }
             deliverNewIntents(r, intents);
             if (resumed) {
-                mInstrumentation.callActivityOnResume(r.activity);
+                r.activity.performResume();
                 r.activity.mTemporaryPause = false;
             }
         }
@@ -2831,7 +2831,7 @@ public final class ActivityThread {
             }
             deliverResults(r, res.results);
             if (resumed) {
-                mInstrumentation.callActivityOnResume(r.activity);
+                r.activity.performResume();
                 r.activity.mTemporaryPause = false;
             }
         }
