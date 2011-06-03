@@ -25,10 +25,15 @@ package android.renderscript;
 public class FieldPacker {
     public FieldPacker(int len) {
         mPos = 0;
+        mLen = len;
         mData = new byte[len];
     }
 
     public void align(int v) {
+        if ((v <= 0) || ((v & (v - 1)) != 0)) {
+            throw new RSIllegalArgumentException("argument must be a non-negative non-zero power of 2: " + v);
+        }
+
         while ((mPos & (v - 1)) != 0) {
             mData[mPos++] = 0;
         }
@@ -38,11 +43,18 @@ public class FieldPacker {
         mPos = 0;
     }
     public void reset(int i) {
+        if ((i < 0) || (i >= mLen)) {
+            throw new RSIllegalArgumentException("out of range argument: " + i);
+        }
         mPos = i;
     }
 
     public void skip(int i) {
-        mPos += i;
+        int res = mPos + i;
+        if ((res < 0) || (res >= mLen)) {
+            throw new RSIllegalArgumentException("out of range argument: " + i);
+        }
+        mPos = res;
     }
 
     public void addI8(byte v) {
@@ -277,6 +289,7 @@ public class FieldPacker {
 
     private final byte mData[];
     private int mPos;
+    private int mLen;
 
 }
 
