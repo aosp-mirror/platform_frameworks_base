@@ -210,7 +210,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             for (InterfaceIdentity ident : mSummaryStats.keySet()) {
                 final NetworkStatsHistory history = mSummaryStats.get(ident);
                 if (ident.matchesTemplate(networkTemplate, subscriberId)) {
-                    // TODO: combine all matching history data into a single history
+                    combined.recordEntireHistory(history);
                 }
             }
             return combined;
@@ -231,8 +231,21 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // TODO: create relaxed permission for reading stats
         mContext.enforceCallingOrSelfPermission(UPDATE_DEVICE_STATS, TAG);
 
-        // TODO: total UID-granularity usage between time range
-        return null;
+        // TODO: apply networktemplate once granular uid stats are stored.
+
+        synchronized (mStatsLock) {
+            final int size = mDetailStats.size();
+            final NetworkStats.Builder stats = new NetworkStats.Builder(end - start, size);
+
+            final long[] total = new long[2];
+            for (int i = 0; i < size; i++) {
+                final int uid = mDetailStats.keyAt(i);
+                final NetworkStatsHistory history = mDetailStats.valueAt(i);
+                history.getTotalData(start, end, total);
+                stats.addEntry(IFACE_ALL, uid, total[0], total[1]);
+            }
+            return stats.build();
+        }
     }
 
     /**

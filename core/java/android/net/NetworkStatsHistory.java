@@ -134,6 +134,18 @@ public class NetworkStatsHistory implements Parcelable {
     }
 
     /**
+     * Record an entire {@link NetworkStatsHistory} into this history. Usually
+     * for combining together stats for external reporting.
+     */
+    public void recordEntireHistory(NetworkStatsHistory input) {
+        for (int i = 0; i < input.bucketCount; i++) {
+            final long start = input.bucketStart[i];
+            final long end = start + input.bucketDuration;
+            recordData(start, end, input.rx[i], input.tx[i]);
+        }
+    }
+
+    /**
      * Ensure that buckets exist for given time range, creating as needed.
      */
     private void ensureBuckets(long start, long end) {
@@ -200,6 +212,34 @@ public class NetworkStatsHistory implements Parcelable {
             tx = Arrays.copyOfRange(tx, i, length);
             bucketCount -= i;
         }
+    }
+
+    /**
+     * Return interpolated data usage across the requested range. Interpolates
+     * across buckets, so values may be rounded slightly.
+     */
+    public void getTotalData(long start, long end, long[] outTotal) {
+        long rx = 0;
+        long tx = 0;
+
+        for (int i = bucketCount - 1; i >= 0; i--) {
+            final long curStart = bucketStart[i];
+            final long curEnd = curStart + bucketDuration;
+
+            // bucket is older than record; we're finished
+            if (curEnd < start) break;
+            // bucket is newer than record; keep looking
+            if (curStart > end) continue;
+
+            final long overlap = Math.min(curEnd, end) - Math.max(curStart, start);
+            if (overlap > 0) {
+                rx += this.rx[i] * overlap / bucketDuration;
+                tx += this.tx[i] * overlap / bucketDuration;
+            }
+        }
+
+        outTotal[0] = rx;
+        outTotal[1] = tx;
     }
 
     /**
