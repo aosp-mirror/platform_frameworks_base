@@ -1655,6 +1655,7 @@
   <eat-comment />
   <public type="attr" name="requiresSmallestWidthDp" id="0x01010364" />
   <public type="attr" name="compatibleWidthLimitDp" />
+  <public type="attr" name="largestWidthLimitDp" />
 
 <!-- ===============================================================
      Resources added in version 13 of the platform (Ice Cream Sandwich)
