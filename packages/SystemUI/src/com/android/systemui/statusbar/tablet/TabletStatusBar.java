@@ -309,7 +309,7 @@ public class TabletStatusBar extends StatusBar implements
         final Resources res = mContext.getResources();
         final Display d = WindowManagerImpl.getDefault().getDefaultDisplay();
         return Math.max(res.getDimensionPixelSize(R.dimen.notification_panel_min_height),
-                d.getHeight());
+                d.getRealHeight());
     }
 
     @Override
