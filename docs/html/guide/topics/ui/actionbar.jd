@@ -184,7 +184,7 @@ href="{@docRoot}guide/topics/resources/menu-resource.html">menu resource</a> fil
 <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 &lt;menu xmlns:android="http://schemas.android.com/apk/res/android">
-    &lt;item android:id="@+id/menu_add"
+    &lt;item android:id="@+id/menu_save"
           android:icon="@drawable/ic_menu_save"
           android:title="@string/menu_save"
           <b>android:showAsAction="ifRoom|withText"</b> /&gt;
