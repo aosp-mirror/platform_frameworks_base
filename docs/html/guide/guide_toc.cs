@@ -302,11 +302,13 @@
       </li> -->
   <!--<li><a style="color:gray;">Localization</a></li>  -->
       <li><a href="<?cs var:toroot ?>guide/topics/appwidgets/index.html">
-            <span class="en">App Widgets</span>
-          </a></li>
+            <span class="en">App Widgets</span></a>
+            <span class="new">updated</span>
+          </li>
       <li><a href="<?cs var:toroot?>guide/topics/wireless/bluetooth.html">
-            <span class="en">Bluetooth</span>
-          </a></li>
+            <span class="en">Bluetooth</span></a>
+            <span class="new">updated</span>
+          </li>
       <li><a href="<?cs var:toroot?>guide/topics/nfc/index.html">
             <span class="en">Near Field Communication</span>
           </a></li>
@@ -337,8 +339,8 @@
           </ul>
       </li>
       <li><a href="<?cs var:toroot?>guide/topics/admin/device-admin.html">
-            <span class="en">Device Administration</span>
-         </a>
+            <span class="en">Device Administration</span></a>
+            <span class="new">updated</span>
       </li>
       <li class="toggle-list">
            <div>
