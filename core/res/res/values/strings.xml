@@ -699,6 +699,13 @@
         the rotation of the screen at any time. Should never be needed for
         normal applications.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=30] -->
+    <string name="permlab_setPointerSpeed">change pointer speed</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_setPointerSpeed">Allows an application to change
+        the mouse or trackpad pointer speed at any time. Should never be needed for
+        normal applications.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_signalPersistentProcesses">send Linux signals to applications</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

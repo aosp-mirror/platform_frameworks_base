@@ -1082,6 +1082,13 @@
         android:description="@string/permdesc_setOrientation"
         android:protectionLevel="signature" />
 
+    <!-- Allows low-level access to setting the pointer speed.
+         Not for use by normal applications. -->
+    <permission android:name="android.permission.SET_POINTER_SPEED"
+        android:label="@string/permlab_setPointerSpeed"
+        android:description="@string/permdesc_setPointerSpeed"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to install packages. -->
     <permission android:name="android.permission.INSTALL_PACKAGES"
         android:label="@string/permlab_installPackages"

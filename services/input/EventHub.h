@@ -178,9 +178,9 @@ public:
     virtual status_t mapAxis(int32_t deviceId, int scancode,
             AxisInfo* outAxisInfo) const = 0;
 
-    // exclude a particular device from opening
-    // this can be used to ignore input devices for sensors
-    virtual void addExcludedDevice(const char* deviceName) = 0;
+    // Sets devices that are excluded from opening.
+    // This can be used to ignore input devices for sensors.
+    virtual void setExcludedDevices(const Vector<String8>& devices) = 0;
 
     /*
      * Wait for events to become available and returns them.
@@ -215,6 +215,8 @@ public:
     virtual void getVirtualKeyDefinitions(int32_t deviceId,
             Vector<VirtualKeyDefinition>& outVirtualKeys) const = 0;
 
+    virtual void reopenDevices() = 0;
+
     virtual void dump(String8& dump) = 0;
 };
 
@@ -242,7 +244,7 @@ public:
     virtual status_t mapAxis(int32_t deviceId, int scancode,
             AxisInfo* outAxisInfo) const;
 
-    virtual void addExcludedDevice(const char* deviceName);
+    virtual void setExcludedDevices(const Vector<String8>& devices);
 
     virtual int32_t getScanCodeState(int32_t deviceId, int32_t scanCode) const;
     virtual int32_t getKeyCodeState(int32_t deviceId, int32_t keyCode) const;
@@ -259,6 +261,8 @@ public:
     virtual void getVirtualKeyDefinitions(int32_t deviceId,
             Vector<VirtualKeyDefinition>& outVirtualKeys) const;
 
+    virtual void reopenDevices();
+
     virtual void dump(String8& dump);
 
 protected:
@@ -271,6 +275,7 @@ private:
     int closeDevice(const char *devicePath);
     int closeDeviceAtIndexLocked(int index);
     int scanDir(const char *dirname);
+    void scanDevices();
     int readNotify(int nfd);
 
     status_t mError;
@@ -333,7 +338,9 @@ private:
 
     bool mOpened;
     bool mNeedToSendFinishedDeviceScan;
-    List<String8> mExcludedDevices;
+    volatile int32_t mNeedToReopenDevices; // must be modified atomically
+    bool mNeedToScanDevices;
+    Vector<String8> mExcludedDevices;
 
     // device ids that report particular switches.
     int32_t mSwitches[SW_MAX + 1];

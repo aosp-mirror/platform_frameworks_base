@@ -205,4 +205,9 @@ interface IWindowManager
      * Called by the status bar to notify Views of changes to System UI visiblity.
      */
     void statusBarVisibilityChanged(int visibility);
+
+    /**
+     * Called by the settings application to temporarily set the pointer speed.
+     */
+    void setPointerSpeed(int speed);
 }

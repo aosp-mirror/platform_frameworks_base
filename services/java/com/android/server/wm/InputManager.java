@@ -23,10 +23,14 @@ import org.xmlpull.v1.XmlPullParser;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.database.ContentObserver;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.SystemProperties;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.InputChannel;
@@ -56,7 +60,7 @@ public class InputManager {
     private final Callbacks mCallbacks;
     private final Context mContext;
     private final WindowManagerService mWindowManagerService;
-    
+
     private static native void nativeInit(Context context,
             Callbacks callbacks, MessageQueue messageQueue);
     private static native void nativeStart();
@@ -85,6 +89,7 @@ public class InputManager {
     private static native int[] nativeGetInputDeviceIds();
     private static native boolean nativeTransferTouchFocus(InputChannel fromChannel,
             InputChannel toChannel);
+    private static native void nativeSetPointerSpeed(int speed);
     private static native String nativeDump();
     
     // Input event injection constants defined in InputDispatcher.h.
@@ -123,10 +128,13 @@ public class InputManager {
         Slog.i(TAG, "Initializing input manager");
         nativeInit(mContext, mCallbacks, looper.getQueue());
     }
-    
+
     public void start() {
         Slog.i(TAG, "Starting input manager");
         nativeStart();
+
+        registerPointerSpeedSettingObserver();
+        updatePointerSpeedFromSettings();
     }
     
     public void setDisplaySize(int displayId, int width, int height) {
@@ -357,6 +365,42 @@ public class InputManager {
             throw new IllegalArgumentException("toChannel must not be null.");
         }
         return nativeTransferTouchFocus(fromChannel, toChannel);
+    }
+
+    /**
+     * Set the pointer speed.
+     * @param speed The pointer speed as a value between -7 (slowest) and 7 (fastest)
+     * where 0 is the default speed.
+     */
+    public void setPointerSpeed(int speed) {
+        speed = Math.min(Math.max(speed, -7), 7);
+        nativeSetPointerSpeed(speed);
+    }
+
+    public void updatePointerSpeedFromSettings() {
+        int speed = getPointerSpeedSetting(0);
+        setPointerSpeed(speed);
+    }
+
+    private void registerPointerSpeedSettingObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.System.getUriFor(Settings.System.POINTER_SPEED), true,
+                new ContentObserver(mWindowManagerService.mH) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updatePointerSpeedFromSettings();
+                    }
+                });
+    }
+
+    private int getPointerSpeedSetting(int defaultValue) {
+        int speed = defaultValue;
+        try {
+            speed = Settings.System.getInt(mContext.getContentResolver(),
+                    Settings.System.POINTER_SPEED);
+        } catch (SettingNotFoundException snfe) {
+        }
+        return speed;
     }
 
     public void dump(PrintWriter pw) {
