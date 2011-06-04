@@ -1987,9 +1987,11 @@ void TouchInputMapper::configureParameters() {
     mParameters.useAveragingTouchFilter = mConfig->filterTouchEvents;
     mParameters.useJumpyTouchFilter = mConfig->filterJumpyTouchEvents;
 
-    // TODO: select the default gesture mode based on whether the device supports
-    // distinct multitouch
-    mParameters.gestureMode = Parameters::GESTURE_MODE_SPOTS;
+    // Use the pointer presentation mode for devices that do not support distinct
+    // multitouch.  The spot-based presentation relies on being able to accurately
+    // locate two or more fingers on the touch pad.
+    mParameters.gestureMode = getEventHub()->hasInputProperty(getDeviceId(), INPUT_PROP_SEMI_MT)
+            ? Parameters::GESTURE_MODE_POINTER : Parameters::GESTURE_MODE_SPOTS;
 
     String8 gestureModeString;
     if (getDevice()->getConfiguration().tryGetProperty(String8("touch.gestureMode"),
