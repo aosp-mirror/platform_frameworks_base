@@ -130,11 +130,11 @@ public class PhoneStatusBar extends StatusBar {
     // ongoing
     NotificationData mOngoing = new NotificationData();
     TextView mOngoingTitle;
-    LinearLayout mOngoingItems;
+    ViewGroup mOngoingItems;
     // latest
     NotificationData mLatest = new NotificationData();
     TextView mLatestTitle;
-    LinearLayout mLatestItems;
+    ViewGroup mLatestItems;
     // position
     int[] mPositionTmp = new int[2];
     boolean mExpanded;
@@ -268,9 +268,9 @@ public class PhoneStatusBar extends StatusBar {
         mExpandedView = expanded;
         mExpandedContents = expanded.findViewById(R.id.notificationLinearLayout);
         mOngoingTitle = (TextView)expanded.findViewById(R.id.ongoingTitle);
-        mOngoingItems = (LinearLayout)expanded.findViewById(R.id.ongoingItems);
+        mOngoingItems = (ViewGroup)expanded.findViewById(R.id.ongoingItems);
         mLatestTitle = (TextView)expanded.findViewById(R.id.latestTitle);
-        mLatestItems = (LinearLayout)expanded.findViewById(R.id.latestItems);
+        mLatestItems = (ViewGroup)expanded.findViewById(R.id.latestItems);
         mNoNotificationsTitle = (TextView)expanded.findViewById(R.id.noNotificationsTitle);
         mClearButton = (TextView)expanded.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);

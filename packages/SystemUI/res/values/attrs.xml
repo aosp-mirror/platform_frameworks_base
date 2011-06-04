@@ -24,5 +24,8 @@
     <declare-styleable name="NotificationLinearLayout">
         <attr name="insetLeft" format="dimension" />
     </declare-styleable>
+    <declare-styleable name="NotificationRowLayout">
+        <attr name="rowHeight" format="dimension" />
+    </declare-styleable>
 </resources>
 
