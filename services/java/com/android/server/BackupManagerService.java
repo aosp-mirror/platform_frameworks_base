@@ -39,6 +39,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageDataObserver;
+import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageInstallObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -1709,6 +1710,16 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             }
 
+            // Cull any packages that have indicated that backups are not permitted.
+            for (int i = 0; i < packagesToBackup.size(); ) {
+                PackageInfo info = packagesToBackup.get(i);
+                if ((info.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
+                    packagesToBackup.remove(i);
+                } else {
+                    i++;
+                }
+            }
+
             // Now back up the app data via the agent mechanism
             PackageInfo pkg = null;
             try {
@@ -1937,7 +1948,6 @@ class BackupManagerService extends IBackupManager.Stub {
             // Which packages we've already wiped data on.  We prepopulate this
             // with a whitelist of packages known to be unclearable.
             mClearedPackages.add("android");
-            mClearedPackages.add("com.android.backupconfirm");
             mClearedPackages.add("com.android.providers.settings");
         }
 
@@ -2314,6 +2324,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         class RestoreInstallObserver extends IPackageInstallObserver.Stub {
             final AtomicBoolean mDone = new AtomicBoolean();
+            String mPackageName;
             int mResult;
 
             public void reset() {
@@ -2341,12 +2352,45 @@ class BackupManagerService extends IBackupManager.Stub {
                     throws RemoteException {
                 synchronized (mDone) {
                     mResult = returnCode;
+                    mPackageName = packageName;
                     mDone.set(true);
                     mDone.notifyAll();
                 }
             }
         }
+
+        class RestoreDeleteObserver extends IPackageDeleteObserver.Stub {
+            final AtomicBoolean mDone = new AtomicBoolean();
+            int mResult;
+
+            public void reset() {
+                synchronized (mDone) {
+                    mDone.set(false);
+                }
+            }
+
+            public void waitForCompletion() {
+                synchronized (mDone) {
+                    while (mDone.get() == false) {
+                        try {
+                            mDone.wait();
+                        } catch (InterruptedException e) { }
+                    }
+                }
+            }
+
+            @Override
+            public void packageDeleted(String packageName, int returnCode) throws RemoteException {
+                synchronized (mDone) {
+                    mResult = returnCode;
+                    mDone.set(true);
+                    mDone.notifyAll();
+                }
+            }
+        }
+
         final RestoreInstallObserver mInstallObserver = new RestoreInstallObserver();
+        final RestoreDeleteObserver mDeleteObserver = new RestoreDeleteObserver();
 
         boolean installApk(FileMetadata info, String installerPackage, InputStream instream) {
             boolean okay = true;
@@ -2384,6 +2428,49 @@ class BackupManagerService extends IBackupManager.Stub {
                     // accept the data regardless.
                     if (mPackagePolicies.get(info.packageName) != RestorePolicy.ACCEPT) {
                         okay = false;
+                    }
+                } else {
+                    // Okay, the install succeeded.  Make sure it was the right app.
+                    boolean uninstall = false;
+                    if (!mInstallObserver.mPackageName.equals(info.packageName)) {
+                        Slog.w(TAG, "Restore stream claimed to include apk for "
+                                + info.packageName + " but apk was really "
+                                + mInstallObserver.mPackageName);
+                        // delete the package we just put in place; it might be fraudulent
+                        okay = false;
+                        uninstall = true;
+                    } else {
+                        try {
+                            PackageInfo pkg = mPackageManager.getPackageInfo(info.packageName,
+                                    PackageManager.GET_SIGNATURES);
+                            if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_BACKUP) == 0) {
+                                Slog.w(TAG, "Restore stream contains apk of package "
+                                        + info.packageName + " but it disallows backup/restore");
+                                okay = false;
+                            } else {
+                                // So far so good -- do the signatures match the manifest?
+                                Signature[] sigs = mManifestSignatures.get(info.packageName);
+                                if (!signaturesMatch(sigs, pkg)) {
+                                    Slog.w(TAG, "Installed app " + info.packageName
+                                            + " signatures do not match restore manifest");
+                                    okay = false;
+                                    uninstall = true;
+                                }
+                            }
+                        } catch (NameNotFoundException e) {
+                            Slog.w(TAG, "Install of package " + info.packageName
+                                    + " succeeded but now not found");
+                            okay = false;
+                        }
+                    }
+
+                    // If we're not okay at this point, we need to delete the package
+                    // that we just installed.
+                    if (uninstall) {
+                        mDeleteObserver.reset();
+                        mPackageManager.deletePackage(mInstallObserver.mPackageName,
+                                mDeleteObserver, 0);
+                        mDeleteObserver.waitForCompletion();
                     }
                 }
             } catch (IOException e) {
@@ -2441,38 +2528,48 @@ class BackupManagerService extends IBackupManager.Stub {
                         boolean hasApk = str[0].equals("1");
                         offset = extractLine(buffer, offset, str);
                         int numSigs = Integer.parseInt(str[0]);
-                        Signature[] sigs = null;
                         if (numSigs > 0) {
-                            sigs = new Signature[numSigs];
+                            Signature[] sigs = new Signature[numSigs];
                             for (int i = 0; i < numSigs; i++) {
                                 offset = extractLine(buffer, offset, str);
                                 sigs[i] = new Signature(str[0]);
                             }
+                            mManifestSignatures.put(info.packageName, sigs);
 
                             // Okay, got the manifest info we need...
                             try {
-                                // Verify signatures against any installed version; if they
-                                // don't match, then we fall though and ignore the data.  The
-                                // signatureMatch() method explicitly ignores the signature
-                                // check for packages installed on the system partition, because
-                                // such packages are signed with the platform cert instead of
-                                // the app developer's cert, so they're different on every
-                                // device.
                                 PackageInfo pkgInfo = mPackageManager.getPackageInfo(
                                         info.packageName, PackageManager.GET_SIGNATURES);
-                                if (signaturesMatch(sigs, pkgInfo)) {
-                                    if (pkgInfo.versionCode >= version) {
-                                        Slog.i(TAG, "Sig + version match; taking data");
-                                        policy = RestorePolicy.ACCEPT;
+                                // Fall through to IGNORE if the app explicitly disallows backup
+                                final int flags = pkgInfo.applicationInfo.flags;
+                                if ((flags & ApplicationInfo.FLAG_ALLOW_BACKUP) != 0) {
+                                    // Verify signatures against any installed version; if they
+                                    // don't match, then we fall though and ignore the data.  The
+                                    // signatureMatch() method explicitly ignores the signature
+                                    // check for packages installed on the system partition, because
+                                    // such packages are signed with the platform cert instead of
+                                    // the app developer's cert, so they're different on every
+                                    // device.
+                                    if (signaturesMatch(sigs, pkgInfo)) {
+                                        if (pkgInfo.versionCode >= version) {
+                                            Slog.i(TAG, "Sig + version match; taking data");
+                                            policy = RestorePolicy.ACCEPT;
+                                        } else {
+                                            // The data is from a newer version of the app than
+                                            // is presently installed.  That means we can only
+                                            // use it if the matching apk is also supplied.
+                                            Slog.d(TAG, "Data version " + version
+                                                    + " is newer than installed version "
+                                                    + pkgInfo.versionCode + " - requiring apk");
+                                            policy = RestorePolicy.ACCEPT_IF_APK;
+                                        }
                                     } else {
-                                        // The data is from a newer version of the app than
-                                        // is presently installed.  That means we can only
-                                        // use it if the matching apk is also supplied.
-                                        Slog.d(TAG, "Data version " + version
-                                                + " is newer than installed version "
-                                                + pkgInfo.versionCode + " - requiring apk");
-                                        policy = RestorePolicy.ACCEPT_IF_APK;
+                                        Slog.w(TAG, "Restore manifest signatures do not match "
+                                                + "installed application for " + info.packageName);
                                     }
+                                } else {
+                                    if (DEBUG) Slog.i(TAG, "Restore manifest from "
+                                            + info.packageName + " but allowBackup=false");
                                 }
                             } catch (NameNotFoundException e) {
                                 // Okay, the target app isn't installed.  We can process
