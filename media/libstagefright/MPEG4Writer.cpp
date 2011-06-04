@@ -2862,8 +2862,8 @@ void MPEG4Writer::writeGeoDataBox() {
      * For historical reasons, any user data start
      * with "\0xA9", must be followed by its assoicated
      * language code.
-     * 0x0012: locale en
-     * 0x15c7: language 5575
+     * 0x0012: text string length
+     * 0x15c7: lang (locale) code: en
      */
     writeInt32(0x001215c7);
     writeLatitude(mLatitudex10000);
