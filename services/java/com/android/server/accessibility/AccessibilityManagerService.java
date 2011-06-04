@@ -259,7 +259,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                             unbindAllServicesLocked();
                         }
                         updateClientsLocked();
-                        updateInputFilterLocked();
                     }
                 }
             });
@@ -319,6 +318,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType) {
         List<AccessibilityServiceInfo> result = mEnabledServicesForFeedbackTempList;
+        result.clear();
         List<Service> services = mServices;
         synchronized (mLock) {
             while (feedbackType != 0) {
@@ -327,7 +327,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 final int serviceCount = services.size();
                 for (int i = 0; i < serviceCount; i++) {
                     Service service = services.get(i);
-                    if (service.mFeedbackType == feedbackType) {
+                    if ((service.mFeedbackType & feedbackTypeBit) != 0) {
                         result.add(service.mAccessibilityServiceInfo);
                     }
                 }
@@ -368,10 +368,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         service.setAccessibilityServiceInfo(oldInfo);
                     } else {
                         service.setAccessibilityServiceInfo(info);
-                        tryAddServiceLocked(service);
                     }
-
-                    updateInputFilterLocked();
                 }
                 return;
             default:
@@ -772,6 +769,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             mNotificationTimeout = info.notificationTimeout;
             mIsDefault = (info.flags & AccessibilityServiceInfo.DEFAULT) != 0;
+
+            synchronized (mLock) {
+                tryAddServiceLocked(this);
+            }
         }
 
         /**
@@ -794,7 +795,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
          */
         public boolean unbind() {
             if (mService != null) {
-                tryRemoveServiceLocked(this);
+                synchronized (mLock) {
+                    tryRemoveServiceLocked(this);
+                }
                 mContext.unbindService(this);
                 mService = null;
                 return true;
@@ -809,7 +812,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
          * @return True if the service is configured, false otherwise.
          */
         public boolean isConfigured() {
-            return (mEventTypes != 0 && mFeedbackType != 0);
+            return (mEventTypes != 0 && mFeedbackType != 0 && mService != null);
         }
 
         public void setServiceInfo(AccessibilityServiceInfo info) {
