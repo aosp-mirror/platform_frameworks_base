@@ -1949,7 +1949,16 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
     }
     if (mSnapshot->isIgnored()) return;
 
+    // TODO: We should probably make a copy of the paint instead of modifying
+    //       it; modifying the paint will change its generationID the first
+    //       time, which might impact caches. More investigation needed to
+    //       see if it matters.
+    //       If we make a copy, then drawTextDecorations() should *not* make
+    //       its own copy as it does right now.
     paint->setAntiAlias(true);
+#if RENDER_TEXT_AS_GLYPHS
+    paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
+#endif
 
     float length = -1.0f;
     switch (paint->getTextAlign()) {
@@ -1983,8 +1992,8 @@ void OpenGLRenderer::drawText(const char* text, int bytesCount, int count,
 
     if (mHasShadow) {
         mCaches.dropShadowCache.setFontRenderer(fontRenderer);
-        const ShadowTexture* shadow = mCaches.dropShadowCache.get(paint, text, bytesCount,
-                count, mShadowRadius);
+        const ShadowTexture* shadow = mCaches.dropShadowCache.get(
+                paint, text, bytesCount, count, mShadowRadius);
         const AutoTexture autoCleanup(shadow);
 
         const float sx = oldX - shadow->left + mShadowDx;
@@ -2226,10 +2235,6 @@ void OpenGLRenderer::drawTextDecorations(const char* text, int bytesCount, float
     uint32_t flags = paint->getFlags();
     if (flags & (SkPaint::kUnderlineText_Flag | SkPaint::kStrikeThruText_Flag)) {
         SkPaint paintCopy(*paint);
-#if RENDER_TEXT_AS_GLYPHS
-        paintCopy.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
-#endif
-
         float underlineWidth = length;
         // If length is > 0.0f, we already measured the text for the text alignment
         if (length <= 0.0f) {
