@@ -1109,7 +1109,6 @@ final class FragmentManagerImpl extends FragmentManager {
                     mNeedMenuInvalidate = true;
                 }
                 fragment.mAdded = false;
-                fragment.mRemoving = true;
                 moveToState(fragment, Fragment.CREATED, transition, transitionStyle);
             }
         }
@@ -1122,7 +1121,6 @@ final class FragmentManagerImpl extends FragmentManager {
             if (!fragment.mAdded) {
                 mAdded.add(fragment);
                 fragment.mAdded = true;
-                fragment.mRemoving = false;
                 if (fragment.mHasMenu) {
                     mNeedMenuInvalidate = true;
                 }
@@ -1435,13 +1433,13 @@ final class FragmentManagerImpl extends FragmentManager {
 
         if (f.mView != null) {
             saveFragmentViewState(f);
-            if (f.mSavedViewState != null) {
-                if (result == null) {
-                    result = new Bundle();
-                }
-                result.putSparseParcelableArray(
-                        FragmentManagerImpl.VIEW_STATE_TAG, f.mSavedViewState);
+        }
+        if (f.mSavedViewState != null) {
+            if (result == null) {
+                result = new Bundle();
             }
+            result.putSparseParcelableArray(
+                    FragmentManagerImpl.VIEW_STATE_TAG, f.mSavedViewState);
         }
 
         return result;
