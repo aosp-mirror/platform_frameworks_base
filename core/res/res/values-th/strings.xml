@@ -261,6 +261,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"อนุญาตให้ผู้ถือส่งเนื้อหาไปยังโปรแกรมควบคุมอุปกรณ์ ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"เปลี่ยนการวางแนวหน้าจอ"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"อนุญาตให้แอปพลิเคชันเปลี่ยนการหมุนหน้าจอได้ตลอดเวลา ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"ส่งสัญญาณ Linux ไปยังแอปพลิเคชัน"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"อนุญาตให้แอปพลิเคชันร้องขอให้ส่งสัญญาณแจ้งไปยังกระบวนการที่ยังทำงานอยู่ทั้งหมด"</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"ทำให้แอปพลิเคชันทำงานตลอดเวลา"</string>
@@ -830,6 +834,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"เปลี่ยนเส้นทางแอปพลิเคชัน"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังทำงานอยู่ในขณะนี้"</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> เปิดใช้ไว้แล้ว"</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"แอปพลิเคชัน <xliff:g id="APPLICATION">%1$s</xliff:g> (กระบวนการ <xliff:g id="PROCESS">%2$s</xliff:g>) ละเมิดนโยบาย StrictMode ที่บังคับใช้ด้วยตัวเอง"</string>
     <string name="smv_process" msgid="5120397012047462446">"กระบวนการ <xliff:g id="PROCESS">%1$s</xliff:g> ละเมิดนโยบาย StrictMode ที่บังคับใช้ด้วยตัวเอง"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> กำลังทำงาน"</string>
