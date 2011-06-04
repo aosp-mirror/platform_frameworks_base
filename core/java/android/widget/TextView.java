@@ -9318,7 +9318,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private static final int RECENT_CUT_COPY_DURATION = 15 * 1000; // seconds
 
         // Used to detect taps on the insertion handle, which will affect the PastePopupWindow
-        private long mTouchTimer;
         private float mDownPositionX, mDownPositionY;
         private PastePopupWindow mPastePopupWindow;
         private Runnable mHider;
@@ -9392,22 +9391,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case MotionEvent.ACTION_DOWN:
                     mDownPositionX = ev.getRawX();
                     mDownPositionY = ev.getRawY();
-                    mTouchTimer = SystemClock.uptimeMillis();
                     break;
 
                 case MotionEvent.ACTION_UP:
-                    long delay = SystemClock.uptimeMillis() - mTouchTimer;
-                    if (delay < ViewConfiguration.getTapTimeout()) {
-                        final float deltaX = mDownPositionX - ev.getRawX();
-                        final float deltaY = mDownPositionY - ev.getRawY();
-                        final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
-                        if (distanceSquared < mSquaredTouchSlopDistance) {
-                            if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
-                                // Tapping on the handle dismisses the displayed paste view,
-                                mPastePopupWindow.hide();
-                            } else {
-                                show(0);
-                            }
+                    final float deltaX = mDownPositionX - ev.getRawX();
+                    final float deltaY = mDownPositionY - ev.getRawY();
+                    final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
+                    if (distanceSquared < mSquaredTouchSlopDistance) {
+                        if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
+                            // Tapping on the handle dismisses the displayed paste view,
+                            mPastePopupWindow.hide();
+                        } else {
+                            show(0);
                         }
                     }
                     hideDelayed();
