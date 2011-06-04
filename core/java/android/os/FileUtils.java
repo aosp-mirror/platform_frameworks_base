@@ -19,20 +19,21 @@ package android.os;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.regex.Pattern;
+import java.util.zip.CRC32;
+import java.util.zip.CheckedInputStream;
 
 
 /**
  * Tools for managing files.  Not for public consumption.
  * @hide
  */
-public class FileUtils
-{
+public class FileUtils {
     public static final int S_IRWXU = 00700;
     public static final int S_IRUSR = 00400;
     public static final int S_IWUSR = 00200;
@@ -95,7 +96,7 @@ public class FileUtils
 
     /** returns the FAT file system volume ID for the volume mounted 
      * at the given mount point, or -1 for failure
-     * @param mount point for FAT volume
+     * @param mountPoint point for FAT volume
      * @return volume ID or -1
      */
     public static native int getFatVolumeId(String mountPoint);
@@ -241,6 +242,34 @@ public class FileUtils
             out.write(string);
         } finally {
             out.close();
+        }
+    }
+
+    /**
+     * Computes the checksum of a file using the CRC32 checksum routine.
+     * The value of the checksum is returned.
+     *
+     * @param file  the file to checksum, must not be null
+     * @return the checksum value or an exception is thrown.
+     */
+    public static long checksumCrc32(File file) throws FileNotFoundException, IOException {
+        CRC32 checkSummer = new CRC32();
+        CheckedInputStream cis = null;
+
+        try {
+            cis = new CheckedInputStream( new FileInputStream(file), checkSummer);
+            byte[] buf = new byte[128];
+            while(cis.read(buf) >= 0) {
+                // Just read for checksum to get calculated.
+            }
+            return checkSummer.getValue();
+        } finally {
+            if (cis != null) {
+                try {
+                    cis.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 }
