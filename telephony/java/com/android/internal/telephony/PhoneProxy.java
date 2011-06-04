@@ -654,7 +654,7 @@ public class PhoneProxy extends Handler implements Phone {
     }
 
     public boolean isDataConnectivityPossible() {
-        return mActivePhone.isDataConnectivityPossible();
+        return mActivePhone.isDataConnectivityPossible(Phone.APN_TYPE_DEFAULT);
     }
 
     public boolean isDataConnectivityPossible(String apnType) {

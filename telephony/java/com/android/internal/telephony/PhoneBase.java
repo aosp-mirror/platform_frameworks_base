@@ -1023,7 +1023,7 @@ public abstract class PhoneBase extends Handler implements Phone {
     }
 
     public boolean isDataConnectivityPossible() {
-        return ((mDataConnectionTracker != null) && (mDataConnectionTracker.isDataPossible()));
+        return isDataConnectivityPossible(Phone.APN_TYPE_DEFAULT);
     }
 
     public boolean isDataConnectivityPossible(String apnType) {
