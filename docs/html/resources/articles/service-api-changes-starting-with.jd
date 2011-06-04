@@ -1,0 +1,177 @@
+page.title=Service API changes starting with Android 2.0
+parent.title=Articles
+parent.link=../browser.html?tag=article
+@jd:body
+
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/fundamentals/services.html">Services</a></li>
+  </ol>
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.app.Service}</li>
+  </ol>
+
+</div>
+</div>
+
+<p>Watching developers use the Android platform the last year has shown a number of trouble areas in the Service API as well as growing issues in the ways services operate. As a result, Android 2.0 introduced a number of changes and improvements in this area for both developers and users.</p>
+<p>The three main changes to be aware of are:</p>
+<ul>
+  <li>Service.setForeground() is now deprecated and in 2.0 does nothing.</li>
+  <li>There were many edge cases in the service lifecycle that made it very easy to accidentally leave a service running; new APIs in 2.0 make this much easier to deal with.</li>
+  <li>Android 2.0 also introduces a new UI for end users to monitor and manage the running services on their device.</li>
+</ul>
+<h3>Background on services</h3>
+<p>Before going into the details of 2.0, it may be useful to go over a quick summary of services. The Service API in Android is one of the key mechanisms for applications to do work in the background. Due to the way Android is designed, once an application is no longer visible to the user it is generally considered expendable and a candidate to be killed by the system if it ever needs memory elsewhere. The main way applications get around this is by starting a Service component, which explicitly tells the system that they are doing some valuable work and would prefer that the system not kill their process if it doesn't truly need to.</p>
+<p>This is a very powerful facility but along with that power comes some responsibility: an actively running service is taking resources away from other things that can run (including inactive processes in the background that don't need to be initialized the next time the user visits them). It is thus important that developers take care when designing their services that they only run when truly needed and avoid any bugs where they may accidentally leave the service running for long durations.</p>
+<h3>Redesigning Service.setForeground()</h3>
+<p>During the final stabilization period of Android 1.6 we started to see more issues due to an increasing number of applications using the Service.setForeground() API when they shouldn't be. This is an API that we haven't advertised much because it should not be used by most applications and can be very hard on the system: it asks that the service's process be treated as in the foreground, essentially making it unkillable and thus more difficult for the system to recover from low memory situations.</p>
+<p>At that point in 1.6 it was too late to make any significant changes to the behavior here, but in 2.0 we have done so: Service.setForeground() now does nothing. The API was always intended to be something a service would do in conjunction with putting up an ongoing notification for the user; by saying you are in the foreground, the user should be "aware" that the service is running in some way and know how to stop it. Thus in place of the old API Andriod 2.0 introduces two new APIs that require a notification go along with being in the foreground:</p>
+<pre class="prettyprint">
+public final void startForeground(int id, Notification notification);
+public final void stopForeground(boolean removeNotification);
+</pre>
+<p>This also not coincidentally makes it much easier to manage the notification state along with the service, since the system can now guarantee that there is always a notification while the service is in the foreground, and that the notification goes away whenever the service does.</p>
+<p>Many developers will want to write a service that works on older platforms as well as 2.0 and later; this can be accomplished by using something like the following code to selectively call the new APIs when they are available.</p>
+<pre class="prettyprint">
+private static final Class[] mStartForegroundSignature = new Class[] {
+    int.class, Notification.class};
+private static final Class[] mStopForegroundSignature = new Class[] {
+    boolean.class};
+
+private NotificationManager mNM;
+private Method mStartForeground;
+private Method mStopForeground;
+private Object[] mStartForegroundArgs = new Object[2];
+private Object[] mStopForegroundArgs = new Object[1];
+
+&#64;Override
+public void onCreate() {
+    mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+    try {
+        mStartForeground = getClass().getMethod("startForeground",
+                mStartForegroundSignature);
+        mStopForeground = getClass().getMethod("stopForeground",
+                mStopForegroundSignature);
+    } catch (NoSuchMethodException e) {
+        // Running on an older platform.
+        mStartForeground = mStopForeground = null;
+    }
+}
+
+/**
+ * This is a wrapper around the new startForeground method, using the older
+ * APIs if it is not available.
+ */
+void startForegroundCompat(int id, Notification notification) {
+    // If we have the new startForeground API, then use it.
+    if (mStartForeground != null) {
+        mStartForegroundArgs[0] = Integer.valueOf(id);
+        mStartForegroundArgs[1] = notification;
+        try {
+            mStartForeground.invoke(this, mStartForegroundArgs);
+        } catch (InvocationTargetException e) {
+            // Should not happen.
+            Log.w("MyApp", "Unable to invoke startForeground", e);
+        } catch (IllegalAccessException e) {
+            // Should not happen.
+            Log.w("MyApp", "Unable to invoke startForeground", e);
+        }
+        return;
+    }
+    
+    // Fall back on the old API.
+    setForeground(true);
+    mNM.notify(id, notification);
+}
+
+/**
+ * This is a wrapper around the new stopForeground method, using the older
+ * APIs if it is not available.
+ */
+void stopForegroundCompat(int id) {
+    // If we have the new stopForeground API, then use it.
+    if (mStopForeground != null) {
+        mStopForegroundArgs[0] = Boolean.TRUE;
+        try {
+            mStopForeground.invoke(this, mStopForegroundArgs);
+        } catch (InvocationTargetException e) {
+            // Should not happen.
+            Log.w("MyApp", "Unable to invoke stopForeground", e);
+        } catch (IllegalAccessException e) {
+            // Should not happen.
+            Log.w("MyApp", "Unable to invoke stopForeground", e);
+        }
+        return;
+    }
+    
+    // Fall back on the old API.  Note to cancel BEFORE changing the
+    // foreground state, since we could be killed at that point.
+    mNM.cancel(id);
+    setForeground(false);
+}
+</pre>
+<h3>Service lifecycle changes</h3>
+<p>Another situation we were increasingly seeing in 1.6 was that, even ignoring the services that inappropriately make themselves foreground, we had a growing number of devices with a large number of services running in the background all fighting each other over the available memory.</p>
+<p>Part of this problem is services that are running more than they should or there simply being too much stuff trying to be done on the device. However, we also found many issues in the interaction between services and the platform that made it easy for an application to leave a service running even when it is trying to do the right thing. Consider this typical scenario:</p>
+<ol>
+  <li>An application calls startService().</li>
+  <li>That service gets onCreate(), onStart(), and then spawns a background thread to do some work.</li>
+  <li>The system is tight on memory, so has to kill the currently running service.</li>
+  <li>Later when memory is free, the service is restarted, and gets onCreate() called but not onStart() because there has not been another call to startService() with a new Intent command to send it.</li>
+</ol>
+<p>Now the service will sit there created, not realizing it used to be doing some work, and so not knowing it should stop itself at some point.</p>
+<p>To address this, in Android 2.0 Service.onStart() as been deprecated (though still exists and operates as it used to in previous versions of the platform). It is replaced with a new {@link android.app.Service#onStartCommand(android.content.Intent, int, int)} callback that allows the service to better control how the system should manage it. The key part here is a new result code returned by the function, telling the system what it should do with the service if its process is killed while it is running:</p>
+<ul>
+  <li>{@link android.app.Service#START_STICKY} is basically the same as the previous behavior, where the service is left "started" and will later be restarted by the system. The only difference from previous versions of the platform is that it if it gets restarted because its process is killed, onStartCommand() will be called on the next instance of the service with a null Intent instead of not being called at all. Services that use this mode should always check for this case and deal with it appropriately.</li>
+  <li>{@link android.app.Service#START_NOT_STICKY} says that, after returning from onStartCreated(), if the process is killed with no remaining start commands to deliver, then the service will be stopped instead of restarted. This makes a lot more sense for services that are intended to only run while executing commands sent to them. For example, a service may be started every 15 minutes from an alarm to poll some network state. If it gets killed while doing that work, it would be best to just let it be stopped and get started the next time the alarm fires.</li>
+  <li>{@link android.app.Service#START_REDELIVER_INTENT} is like START_NOT_STICKY, except if the service's process is killed before it calls stopSelf() for a given intent, that intent will be re-delivered to it until it completes (unless after some number of more tries it still can't complete, at which point the system gives up). This is useful for services that are receiving commands of work to do, and want to make sure they do eventually complete the work for each command sent.</li>
+</ul>
+<p>For compatibility with existing applications, the default return code for applications that are targeting an earlier version of the platform is a special {@link android.app.Service#START_STICKY_COMPATIBILITY} code that provides the old behavior of not calling onStart() with a null intent. Once you start targeting API version 5 or later, the default mode is START_STICKY and you must be prepared to deal with onStart() or onStartCommand() being called with a null Intent.</p>
+<p>You can also easily write a Service that uses both the old and new APIs, depending on the platform. All you need to do is compile against the 2.0 SDK with this code:</p>
+<pre class="prettyprint">
+// This is the old onStart method that will be called on the pre-2.0
+// platform.  On 2.0 or later we override onStartCommand() so this
+// method will not be called.
+&#64;Override
+public void onStart(Intent intent, int startId) {
+    handleStart(intent, startId);
+}
+
+&#64;Override
+public int onStartCommand(Intent intent, int flags, int startId) {
+    handleStart(intent, startId);
+    return START_NOT_STICKY;
+}
+
+void handleStart(Intent intent, int startId) {
+    // do work
+}
+</pre>
+<h3>New "running services" user interface</h3>
+<p>Our final issue to address is the case where there are simply too many service running in the amount of memory available on a device. This may be due to bugs or design flaws in installed applications, or the user simply trying to do too much. Historically users have had no visibility into what is going on at this level in the system, but it has become important to expose this, at least for lower-end devices, as the use of services has had an increasing impact on the user experience.</p>
+<p>To help address this, Android 2.0 introduces a new "Running Services" activity available from the Application system settings. When brought up, it looks something like this:</p>
+<img src="images/service-api-changes-starting-with_runningservices.png" width="192" height="320" alt="Running Services"/>
+<p>The main content is a list of all running services that may be of interest to the user, organized by the processes they run in. In the example here, we see three services:</p>
+<ul>
+  <li><b>GTalkService</b> is part of the standard Google application suit; it is running in Google's "gapps" process, which currently consumes 6.8MB. It has been started for 3 hours 55 minutes, which on this device is the time from when it was first booted.</li>
+  <li><b>ActivityService</b> is part of the Phonebook app, and its process consumes 4MB. This also has been running since boot.</li>
+  <li><b>SoftKeyboard</b> is a third party input method. It has been running since I switched to it, about 4 minutes ago.</li>
+</ul>
+<p>The user can tap on any of these services to control it; for normal services that are running because they were explicitly started, this will present a dialog allowing the user to explicitly stop it:</p>
+<img src="images/service-api-changes-starting-with_stopservice.png" height="320" width="192" alt="Stop Service"/>
+<p>Some other services, like the input method, are running for other reasons. For these, tapping on the service will go to the corresponding UI to manage it (in this case the system's input settings).</p>
+<p>Finally, along the bottom of the screen are some obscure numbers. If you know how to interpret them, this gives you a lot of information on the memory status of your device:</p>
+<ul>
+  <li><b>Avail: 38MB+114MB in 25</b> says that the device has 38MB of completely free (or likely used for unrequired caches) memory, and has another 114MB of available memory in 25 background processes it can kill at any time.</li>
+  <li><b>Other: 32MB in 3</b> says that the device has 32MB of unavailable memory in 3 unkillable processes (that is, processes that are currently considered to be foreground and must be kept running)</li>
+</ul>
+<p>For most users, this new user interface should be a much more effective way to manage the background applications on their device than the existing "task killer" applications. In the vast majority of cases the reason for a slow running device is too many services trying to run. This prevents the system from being able to run any background processes (which speed up app switching), and ultimately can result in thrashing through the services when not even they can all be kept running. The Running Services UI is intended to provide very specific information about the services that are running, to help make a good decision about what should be stopped. It also does not use the API to force stop an application, which can unintentionally break applications in numerous ways.</p>
+<p>For developers, this is an important tool to ensure your services are well behaved. As you develop your app, be sure to keep an eye on Running Services to ensure that you are not accidentally leaving your services running when they shouldn't be. You should also now keep in mind that users may freely stop any of your services as they wish, without your control, and account for that.</p>
+<p>Android's Services are a very powerful tool, but one of the main and subtle ways that application developers can harm the overall experience a user has with their phone.</p>

@@ -1,0 +1,103 @@
+page.title=Multitasking the Android Way
+parent.title=Articles
+parent.link=../browser.html?tag=article
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/fundamentals/tasks-and-back-stack.html">Tasks and Back Stack</a></li>
+    <li><a href="{@docRoot}guide/topics/fundamentals/services.html">Services</a></li>
+  </ol>
+
+  <h2>Key classes</h2>
+  <ol>
+    <li>{@link android.app.Service}</li>
+    <li>{@link android.content.BroadcastReceiver}</li>
+  </ol>
+
+</div>
+</div>
+
+<p>Android is fairly unique in the ways it allows multiple applications to run at the same time.  Developers coming from a different platform may find the way it operates surprising.  Understanding its behavior is important for designing applications that will work well and integrate seamlessly with the rest of the Android platform.  This article covers the reasons for Android's multitasking design, its impact on how applications work, and how you can best take advantage of Android's unique features.</p>
+<h3>Design considerations</h3>
+<p>Mobile devices have technical limitations and user experience requirements not present in desktop or web systems.  Here are the four key constraints we were working under as we designed Android's multitasking:</p>
+<ul>
+  <li>
+    <p>We did not want to require that users close applications when "done" with them.  Such a usage pattern does not work well in a mobile environment, where usage tends to involve repeated brief contact with a wide variety of applications throughout the day.</p>
+  </li>
+  <li>
+    <p>Mobile devices don't have the luxury of swap space, so have fairly hard limits on memory use.  Robert Love has <a href="http://blog.rlove.org/2010/04/why-ipad-and-iphone-dont-support.html">a very good article</a> covering the topic.</p>
+  </li>
+  <li>
+    <p>Application switching on a mobile device is extremely critical; we target significantly less than 1 second to launch a new application.  This is especially important when the user is switching between a few applications, such as switching to look at a new SMS message while watching a video, and then returning to that video.  A noticeable wait in such situations will quickly make users hate you.</p>
+  </li>
+  <li>
+    <p>The available APIs must be sufficient for writing the built-in Google applications, as part of our "all applications are created equal" philosophy.  This means background music playback, data syncing, GPS navigation, and application downloading must be implemented with the same APIs that are available to third party developers.</p>
+  </li>
+</ul>
+<p>The first two requirements highlight an interesting conflict.  We don't want users to worry about closing their apps, but rather make it appear that all of the applications are always running.  At the same time, mobile devices have hard limits on memory use, so that a system will degrade or even start failing very quickly as it needs more RAM than is available; a desktop computer, with swap, in contrast will simply start slowing down as it needs to page RAM to its swap space.  These competing constraints were a key motivation for Android's design.</p>
+<h3>When does an application "stop"?</h3>
+<p>A common misunderstanding about Android multitasking is the difference between a process and an application.  In Android these are not tightly coupled entities: applications may seem present to the user without an actual process currently running the app; multiple applications may share processes, or one application may make use of multiple processes depending on its needs; the process(es) of an application may be kept around by Android even when that application is not actively doing something.</p>
+<p>The fact that you can see an application's process "running" does not mean the application is running or doing anything.  It may simply be there because Android needed it at some point, and has decided that it would be best to keep it around in case it needs it again.  Likewise, you may leave an application for a little bit and return to it from where you left off, and during that time Android may have needed to get rid of the process for other things.</p>
+<p>A key to how Android handles applications in this way is that processes don't shut down cleanly.  When the user leaves an application, its process is kept around in the background, allowing it to continue working (for example downloading web pages) if needed, and come immediately to the foreground if the user returns to it.  If a device never runs out of memory, then Android will keep all of these processes around, truly leaving all applications "running" all of the time.</p>
+<p>Of course, there is a limited amount of memory, and to accommodate this Android must decide when to get rid of processes that are not needed.  This leads to Android's <a href="{@docRoot}guide/topics/fundamentals.html#proclife">process lifecycle</a>, the rules it uses to decide how important each process is and thus the next one that should be dropped.  These rules are based on both how important a process is for the user's current experience, as well as how long it has been since the process was last needed by the user.</p>
+<p>Once Android determines that it needs to remove a process, it does this brutally, simply force-killing it.  The kernel can then immediately reclaim all resources needed by the process, without relying on that application being well written and responsive to a polite request to exit.  Allowing the kernel to immediately reclaim application resources makes it a lot easier to avoid serious out of memory situations.</p>
+<p>If a user later returns to an application that's been killed, Android needs a way to re-launch it in the same state as it was last seen, to preserve the "all applications are running all of the time" experience.  This is done by keeping track of the parts of the application the user is aware of (the Activities), and re-starting them with information about the last state they were seen in.  This last state is generated each time the user leaves that part of the application, not when it is killed, so that the kernel can later freely kill it without depending on the application to respond correctly at that point.</p>
+<p>In some ways, Android's process management can be seen as a form of swap space: application processes represent a certain amount of in-use memory; when memory is low, some processes can be killed (swapped out); when those processes are needed again, they can be re-started from their last saved state (swapped in).</p>
+<h3>Explicitly running in the background</h3>
+<p>So far, we have a way for applications to implicitly do work in the background, as long as the process doesn't get killed by Android as part of its regular memory management.  This is fine for things like loading web pages in the background, but what about features with harder requirements?  Background music playback, data synchronization, location tracking, alarm clocks, etc.</p>
+<p/>
+<p>For these tasks, the application needs a way to tell Android "I would explicitly like to run at this point."  There are two main facilities available to applications for this, represented by two kinds of components they can publish in their manifest: <span style="font-style:italic;">broadcast receivers</span> and <span style="font-style:italic;">services</span>.</p>
+<h4>Broadcast Receivers</h4>
+<p>A BroadcastReceiver allows an application to run, for a brief amount of time, in the background as a result of something else happening.  It can be used in many ways to build higher-level facilities: for example the AlarmManager allows an application to have a broadcast sent at a certain time in the future, and the LocationManager can send a broadcast when it detects interesting changes in location.  Because information about the receiver is part of an application's manifest, Android can find and launch the application even if it isn't running; of course if it already has its process available in the background, the broadcast can very efficiently be directly dispatched to it.</p>
+<p>When handling a broadcast, the application is given a fixed set of time (currently 10 seconds) in which to do its work.  If it doesn't complete in that time, the application is considered to be misbehaving, and its process immediately tossed into the background state to be killed for memory if needed.</p>
+<p>Broadcast receivers are great for doing small pieces of work in response to an external stimulus, such as posting a notification to the user after being sent a new GPS location report.  They are very lightweight, since the application's process only needs to be around while actively receiving the broadcast.  Because they are active for a deterministic amount of time, fairly strong guarantees can be made about not killing their process while running.  However they are not appropriate for anything of indeterminate length, such as networking.</p>
+<h4>Services</h4>
+<p>A Service allows an application to implement longer-running background operations.  There are actually a lot of other functions that services provide, but for the discussion here their fundamental purpose is for an application to say "hey I would like to continue running even while in the background, until I say I am done."  An application controls when its service runs by explicitly starting and stopping the service.</p>
+<p>While services do provide a rich client-server model, its use is optional.  Upon starting an application's services, Android simply instantiates the component in the application's process to provide its context.  How it is used after that is up to the application: it can put all of the needed code inside of the service itself without interacting with other parts of the application, make calls on other singleton objects shared with other parts of the app, directly retrieve the Service instance from elsewhere if needed, or run it in another process and do a full-blown RPC protocol if that is desired.</p>
+<p>Process management for services is different than broadcast receivers, because an unbounded number of services can ask to be running for an unknown amount of time.  There may not be enough RAM to have all of the requesting services run, so as a result no strong guarantees are made about being able to keep them running.</p>
+<p>If there is too little RAM, processes hosting services will be immediately killed like background processes are.  However, if appropriate, Android will remember that these services wish to remain running, and restart their process at a later time when more RAM is available.  For example, if the user goes to a web page that requires large amounts of RAM, Android may kill background service processes like sync until the browser's memory needs go down.</p>
+<p>Services can further negotiate this behavior by requesting they be considered "foreground."  This places the service in a "please don't kill" state, but requires that it include a notification to the user about it actively running.  This is useful for services such as background music playback or car navigation, which the user is actively aware of; when you're playing music and using the browser, you can always see the music-playing glyph in the status bar.  Android won't try to kill these services, but as a trade-off, ensures the user knows about them and is able to explicitly stop them when desired.</p>
+<h3>The value of generic components</h3>
+<p>Android's generic broadcast receiver and service components allow developers to create a wide variety of efficient background operations, including things that were never originally considered.  In Android 1.0 they were used to implement nearly all of the background behavior that the built-in and proprietary Google apps provided:</p>
+<ul>
+  <li>
+    Music playback runs in a service to allow it to continue operating after the user leaves the music application.
+  </li>
+  <li>
+    The alarm clock schedules a broadcast receiver with the alarm manager, to go off at the next set alarm time.
+  </li>
+  <li>
+    The calendar application likewise schedules an alarm to display or update its notification at the appropriate time for the next calendar event.
+  </li>
+  <li>
+    Background file download is implemented a service that runs when there are any downloads to process.
+  </li>
+  <li>
+    The e-mail application schedules an alarm to wake up a service at regular intervals that looks for and retrieves any new mail.
+  </li>
+  <li>
+    The Google applications maintain a service to receive push notifications from the network; it in turn sends broadcasts to individual apps when it is told that they need to do things like synchronize contacts.</p>
+  </li>
+</ul>
+<p>As the platform has evolved, these same basic components have been used to implement many of the major new developer features:
+<ul>
+  <li>
+    Input methods are implemented by developers as a Service component that Android manages and works with to display as the current IME.
+  </li>
+  <li>
+    Application widgets are broadcast receivers that Android sends broadcasts to when it needs to interact with them.  This allows app widgets to be quite lightweight, by not needing their application's process remain running.
+  </li>
+  <li>
+    Accessibility features are implemented as services that Android keeps running while in use and sends appropriate information to about user interactions.
+  </li>
+  <li>
+    Sync adapters introduced in Android 2.0 are services that are run in the background when a particular data sync needs to be performed.
+  </li>
+  <li>
+    Live wallpapers are a service started by Android when selected by the user.
+  </li>
+</ul>

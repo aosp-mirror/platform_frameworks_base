@@ -27,6 +27,11 @@ to perform other tasks without losing their work</li>
 </li>
 </ol>
 
+<h2>Articles</h2>
+<ol>
+  <li><a href="{@docRoot}resources/articles/multitasking-android-way.html">Multitasking the Android Way</a></li>
+</ol>
+
 <h2>See also</h2>
 <ol>
   <li><a><a href="{@docRoot}videos/index.html#v=fL6gSd4ugSI">Application Lifecycle video</a></li>
