@@ -125,8 +125,6 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 }
             }
 
-            // Not sure if this is needed in CDMALTE phone.
-            // mDataRoaming = regCodeIsRoaming(regState);
             mLteSS.setRadioTechnology(type);
             mLteSS.setState(regCodeToServiceState(regState));
         } else {
@@ -211,6 +209,12 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         }
 
         if (DBG) log("pollStateDone: oldSS=[" + ss + "] newSS=[" + newSS + "]");
+
+        if (cm.getSimState().isSIMReady()) {
+            // If CSIM is used, check roaming status according to SID/NID
+            // on EFcdmahome record.
+            newSS.setRoaming(!isInHomeSidNid(newSS.getSystemId(), newSS.getNetworkId()));
+        }
 
         boolean hasRegistered = ss.getState() != ServiceState.STATE_IN_SERVICE
                 && newSS.getState() == ServiceState.STATE_IN_SERVICE;
@@ -462,6 +466,33 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         int provisioningState = OTASP_NOT_NEEDED;
         if (DBG) log("getOtasp: state=" + provisioningState);
         return provisioningState;
+    }
+
+    /**
+     * Check whether the specified SID and NID pair appears in the HOME SID/NID list
+     * read from NV or SIM.
+     *
+     * @return true if provided sid/nid pair belongs to operator's home network.
+     */
+    private boolean isInHomeSidNid(int sid, int nid) {
+        // if SID/NID is not available, do not declare roaming.
+        if (isSidsAllZeros()) return true;
+
+        // length of SID/NID shold be same
+        if (mHomeSystemId.length != mHomeNetworkId.length) return true;
+
+        if (sid == 0) return true;
+
+        for (int i = 0; i < mHomeSystemId.length; i++) {
+            // Use SID only if NID is a reserved value.
+            // SID 0 and NID 0 and 65535 are reserved. (C.0005 2.6.5.2)
+            if ((mHomeSystemId[i] == sid) &&
+                ((mHomeNetworkId[i] == 0) || (mHomeNetworkId[i] == 65535) ||
+                 (nid == 0) || (nid == 65535) || (mHomeNetworkId[i] == nid))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
