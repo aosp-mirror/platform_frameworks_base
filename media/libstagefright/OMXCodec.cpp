@@ -61,8 +61,6 @@
 
 namespace android {
 
-static const int OMX_QCOM_COLOR_FormatYVU420SemiPlanar = 0x7FA30C00;
-
 struct CodecInfo {
     const char *mime;
     const char *codec;
@@ -1388,8 +1386,6 @@ status_t OMXCodec::setVideoOutputFormat(
                 &format, sizeof(format));
         CHECK_EQ(err, (status_t)OK);
         CHECK_EQ((int)format.eCompressionFormat, (int)OMX_VIDEO_CodingUnused);
-
-        static const int OMX_QCOM_COLOR_FormatYVU420SemiPlanar = 0x7FA30C00;
 
         CHECK(format.eColorFormat == OMX_COLOR_FormatYUV420Planar
                || format.eColorFormat == OMX_COLOR_FormatYUV420SemiPlanar
