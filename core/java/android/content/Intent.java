@@ -1160,6 +1160,15 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
 
     /**
+     * Activity Action: Show settings for managing network data usage of a
+     * specific application. Applications should define an activity that offers
+     * options to control data usage.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_NETWORK_USAGE =
+            "android.intent.action.MANAGE_NETWORK_USAGE";
+
+    /**
      * A string associated with a {@link #ACTION_UPGRADE_SETUP} activity
      * describing the last run version of the platform that was setup.
      * @hide
