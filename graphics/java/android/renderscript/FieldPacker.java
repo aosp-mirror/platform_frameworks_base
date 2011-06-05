@@ -51,7 +51,7 @@ public class FieldPacker {
 
     public void skip(int i) {
         int res = mPos + i;
-        if ((res < 0) || (res >= mLen)) {
+        if ((res < 0) || (res > mLen)) {
             throw new RSIllegalArgumentException("out of range argument: " + i);
         }
         mPos = res;
