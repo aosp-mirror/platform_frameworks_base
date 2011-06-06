@@ -235,6 +235,15 @@ public class WifiService extends IWifiManager.Stub {
                     }
                     break;
                 }
+                case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
+                    if (msg.arg1 == AsyncChannel.STATUS_SEND_UNSUCCESSFUL) {
+                        Slog.d(TAG, "Send failed, client connection lost");
+                    } else {
+                        Slog.d(TAG, "Client connection lost with reason: " + msg.arg1);
+                    }
+                    mClients.remove((AsyncChannel) msg.obj);
+                    break;
+                }
                 case AsyncChannel.CMD_CHANNEL_FULL_CONNECTION: {
                     AsyncChannel ac = new AsyncChannel();
                     ac.connect(mContext, this, msg.replyTo);
@@ -310,6 +319,13 @@ public class WifiService extends IWifiManager.Stub {
                         Slog.e(TAG, "WifiStateMachine connection failure, error=" + msg.arg1);
                         mWifiStateMachineChannel = null;
                     }
+                    break;
+                }
+                case AsyncChannel.CMD_CHANNEL_DISCONNECTED: {
+                    Slog.e(TAG, "WifiStateMachine channel lost, msg.arg1 =" + msg.arg1);
+                    mWifiStateMachineChannel = null;
+                    //Re-establish connection to state machine
+                    mWsmChannel.connect(mContext, this, mWifiStateMachine.getHandler());
                     break;
                 }
                 default: {
@@ -584,7 +600,12 @@ public class WifiService extends IWifiManager.Stub {
      */
     public WifiConfiguration getWifiApConfiguration() {
         enforceAccessPermission();
-        return mWifiStateMachine.syncGetWifiApConfiguration(mWifiStateMachineChannel);
+        if (mWifiStateMachineChannel != null) {
+            return mWifiStateMachine.syncGetWifiApConfiguration(mWifiStateMachineChannel);
+        } else {
+            Slog.e(TAG, "mWifiStateMachineChannel is not initialized");
+            return null;
+        }
     }
 
     /**
