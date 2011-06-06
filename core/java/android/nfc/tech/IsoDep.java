@@ -96,16 +96,6 @@ public final class IsoDep extends BasicTagTechnology {
         }
     }
 
-    @Override
-    public void close() throws IOException {
-        try {
-            mTag.getTagService().resetIsoDepTimeout();
-        } catch (RemoteException e) {
-            Log.e(TAG, "NFC service dead", e);
-        }
-        super.close();
-    }
-
     /**
      * Return the ISO-DEP historical bytes for {@link NfcA} tags.
      * <p>Does not cause any RF activity and does not block.
