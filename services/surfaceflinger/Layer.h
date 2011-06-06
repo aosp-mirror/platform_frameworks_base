@@ -82,7 +82,6 @@ public:
     virtual bool isSecure() const           { return mSecure; }
     virtual bool isProtected() const;
     virtual sp<Surface> createSurface() const;
-    virtual status_t ditch();
     virtual void onRemoved();
 
     // only for debugging
@@ -93,6 +92,7 @@ public:
         return mFreezeLock; }
 
 protected:
+    virtual void destroy() const;
     virtual void dump(String8& result, char* scratch, size_t size) const;
 
 private:
