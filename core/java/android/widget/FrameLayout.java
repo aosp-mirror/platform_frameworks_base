@@ -115,7 +115,7 @@ public class FrameLayout extends ViewGroup {
     }
 
     /**
-     * Describes how the foreground is positioned. Defaults to BEFORE and TOP.
+     * Describes how the foreground is positioned. Defaults to START and TOP.
      *
      * @param foregroundGravity See {@link android.view.Gravity}
      *
@@ -125,7 +125,7 @@ public class FrameLayout extends ViewGroup {
     public void setForegroundGravity(int foregroundGravity) {
         if (mForegroundGravity != foregroundGravity) {
             if ((foregroundGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) == 0) {
-                foregroundGravity |= Gravity.BEFORE;
+                foregroundGravity |= Gravity.START;
             }
 
             if ((foregroundGravity & Gravity.VERTICAL_GRAVITY_MASK) == 0) {

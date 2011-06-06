@@ -20436,14 +20436,12 @@ package android.view {
     method public static int getAbsoluteGravity(int, boolean);
     method public static boolean isHorizontal(int);
     method public static boolean isVertical(int);
-    field public static final int AFTER = 8388613; // 0x800005
     field public static final int AXIS_CLIP = 8; // 0x8
     field public static final int AXIS_PULL_AFTER = 4; // 0x4
     field public static final int AXIS_PULL_BEFORE = 2; // 0x2
     field public static final int AXIS_SPECIFIED = 1; // 0x1
     field public static final int AXIS_X_SHIFT = 0; // 0x0
     field public static final int AXIS_Y_SHIFT = 4; // 0x4
-    field public static final int BEFORE = 8388611; // 0x800003
     field public static final int BOTTOM = 80; // 0x50
     field public static final int CENTER = 17; // 0x11
     field public static final int CENTER_HORIZONTAL = 1; // 0x1
@@ -20452,6 +20450,7 @@ package android.view {
     field public static final int CLIP_VERTICAL = 128; // 0x80
     field public static final int DISPLAY_CLIP_HORIZONTAL = 16777216; // 0x1000000
     field public static final int DISPLAY_CLIP_VERTICAL = 268435456; // 0x10000000
+    field public static final int END = 8388613; // 0x800005
     field public static final int FILL = 119; // 0x77
     field public static final int FILL_HORIZONTAL = 7; // 0x7
     field public static final int FILL_VERTICAL = 112; // 0x70
@@ -20461,6 +20460,7 @@ package android.view {
     field public static final int RELATIVE_HORIZONTAL_DIRECTION = 8388608; // 0x800000
     field public static final int RELATIVE_HORIZONTAL_GRAVITY_MASK = 8388615; // 0x800007
     field public static final int RIGHT = 5; // 0x5
+    field public static final int START = 8388611; // 0x800003
     field public static final int TOP = 48; // 0x30
     field public static final int VERTICAL_GRAVITY_MASK = 112; // 0x70
   }

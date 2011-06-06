@@ -59,11 +59,11 @@ public class GravityTest extends AndroidTestCase {
         assertOneGravity(Gravity.CLIP_VERTICAL, Gravity.CLIP_VERTICAL, false);
         assertOneGravity(Gravity.CLIP_VERTICAL, Gravity.CLIP_VERTICAL, true);
 
-        assertOneGravity(Gravity.LEFT, Gravity.BEFORE, false);
-        assertOneGravity(Gravity.RIGHT, Gravity.BEFORE, true);
+        assertOneGravity(Gravity.LEFT, Gravity.START, false);
+        assertOneGravity(Gravity.RIGHT, Gravity.START, true);
 
-        assertOneGravity(Gravity.RIGHT, Gravity.AFTER, false);
-        assertOneGravity(Gravity.LEFT, Gravity.AFTER, true);
+        assertOneGravity(Gravity.RIGHT, Gravity.END, false);
+        assertOneGravity(Gravity.LEFT, Gravity.END, true);
     }
 
     private void assertOneGravity(int expected, int initial, boolean isRtl) {

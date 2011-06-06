@@ -77,8 +77,8 @@ public interface WindowManager extends ViewManager {
             implements Parcelable {
         /**
          * X position for this window.  With the default gravity it is ignored.
-         * When using {@link Gravity#LEFT} or {@link Gravity#BEFORE} or {@link Gravity#RIGHT} or
-         * {@link Gravity#AFTER} it provides an offset from the given edge.
+         * When using {@link Gravity#LEFT} or {@link Gravity#START} or {@link Gravity#RIGHT} or
+         * {@link Gravity#END} it provides an offset from the given edge.
          */
         @ViewDebug.ExportedProperty
         public int x;
