@@ -261,6 +261,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Antaa sovelluksen lähettää kyselyitä laitteen järjestelmänvalvojalle. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"muuta näytön suuntaa"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Antaa sovelluksen vaihtaa näytön suuntaa milloin tahansa. Ei tavallisten sovelluksien käyttöön."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"lähettää sovelluksiin Linux-signaaleja"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Antaa sovelluksen pyytää, että signaali lähetetään kaikille kiinteille prosesseille."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"aseta sovellus olemaan jatkuvasti käynnissä"</string>
@@ -830,6 +834,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Sovellus uudelleenohjasi"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> on nyt käynnissä."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> käynnistettiin alun perin."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Sovellus <xliff:g id="APPLICATION">%1$s</xliff:g> (prosessi <xliff:g id="PROCESS">%2$s</xliff:g>) on rikkonut itse käyttöön ottamaansa StrictMode-käytäntöä."</string>
     <string name="smv_process" msgid="5120397012047462446">"Prosessi <xliff:g id="PROCESS">%1$s</xliff:g> on rikkonut itse käyttöön ottamaansa StrictMode-käytäntöä."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> käynnissä"</string>

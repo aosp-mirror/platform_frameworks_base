@@ -267,6 +267,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permetta al possessur da trametter intenziuns a l\'administratur dal apparat periferic. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"midar l\'orientaziun dal visur"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Permetta a l\'applicaziun da midar da tut temp la orientaziun dal visur. Betg previs per applicaziuns normalas."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"trametter signals Linux a las applicaziuns"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Permetta a l\'applicaziun da pretender ch\'il signal furnì vegnia tramess a tut ils process persistents."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"exequir permanentamain applicaziuns"</string>
@@ -886,6 +890,12 @@
     <!-- no translation found for launch_warning_replace (6202498949970281412) -->
     <skip />
     <!-- no translation found for launch_warning_original (188102023021668683) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
     <skip />
     <string name="smv_application" msgid="295583804361236288">"L\'applicaziun <xliff:g id="APPLICATION">%1$s</xliff:g> (process <xliff:g id="PROCESS">%2$s</xliff:g>) ha violà sia atgna directiva StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Il process <xliff:g id="PROCESS">%1$s</xliff:g> ha violà sia atgna directiva StrictMode."</string>

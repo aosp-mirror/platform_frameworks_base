@@ -261,6 +261,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Zezwala posiadaczowi na wysyłanie informacji o zamiarach do administratora urządzenia. Opcja nie powinna być nigdy potrzebna w przypadku zwykłych aplikacji."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"zmienianie orientacji ekranu"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Pozwala aplikacji na zmianę orientacji ekranu w dowolnym momencie. Nigdy nie powinno być potrzeby stosowania w normalnych aplikacjach."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"wysyłanie sygnałów systemu Linux do aplikacji"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Pozwala aplikacjom żądać, aby dostarczany sygnał był wysyłany do wszystkich trwających procesów."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"sprawianie, że aplikacja jest cały czas uruchomiona"</string>
@@ -830,6 +834,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplikacja przekierowana"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> jest uruchomiona."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została pierwotnie uruchomiona."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) naruszyła wymuszone przez siebie zasady StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> naruszył wymuszone przez siebie zasady StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Działa <xliff:g id="APP">%1$s</xliff:g>"</string>

@@ -261,6 +261,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Cho phép chủ nhân gửi các ý định đến quản trị viên thiết bị. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"thay đổi hướng màn hình"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Cho phép ứng dụng thay đổi việc xoay màn hình bất kỳ khi nào. Không cần thiết cho các ứng dụng thông thường."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"gửi tín hiệu Linux đến ứng dụng"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Cho phép ứng dụng yêu cầu tín hiệu đã cung cấp được gửi đến tất cả các quá trình liên tục."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"đặt ứng dụng luôn chạy"</string>
@@ -830,6 +834,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Ứng dụng đã được chuyển hướng"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> hiện đang chạy."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> được khởi chạy trước tiên."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Ứng dụng <xliff:g id="APPLICATION">%1$s</xliff:g> (quá trình <xliff:g id="PROCESS">%2$s</xliff:g>) đã vi phạm chính sách StrictMode tự thi hành của mình."</string>
     <string name="smv_process" msgid="5120397012047462446">"Quá trình <xliff:g id="PROCESS">%1$s</xliff:g> đã vi phạm chính sách StrictMode tự thi hành của mình."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> đang hoạt động"</string>

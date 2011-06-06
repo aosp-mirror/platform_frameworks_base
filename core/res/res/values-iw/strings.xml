@@ -261,6 +261,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"מאפשר למשתמש לשלוח כוונות למנהל התקן. לא אמור להידרש לעולם ביישומים רגילים."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"שנה את כיוון המסך"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"מאפשר ליישום לשנות את סיבוב המסך בכל עת. לא אמור להידרש לעולם ביישומים רגילים."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"שלח אותות Linux ליישומים"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"מאפשר ליישום לבקש שהאות המסופק יישלח לכל התהליכים המתמשכים."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"הגדר את היישום לפעול תמיד"</string>
@@ -830,6 +834,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"היישום נותב מחדש"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> פועל כעת."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> הופעל במקור."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"היישום <xliff:g id="APPLICATION">%1$s</xliff:g> (תהליך <xliff:g id="PROCESS">%2$s</xliff:g>) הפר את מדיניות StrictMode באכיפה עצמית."</string>
     <string name="smv_process" msgid="5120397012047462446">"התהליך <xliff:g id="PROCESS">%1$s</xliff:g> הפר את מדיניות StrictMode באכיפה עצמית."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> פועל"</string>
