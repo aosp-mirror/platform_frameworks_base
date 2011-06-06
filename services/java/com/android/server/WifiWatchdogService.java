@@ -36,16 +36,21 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 
 /**
  * {@link WifiWatchdogService} monitors the initial connection to a Wi-Fi
@@ -195,6 +200,34 @@ public class WifiWatchdogService {
         return Settings.Secure.getInt(mContentResolver,
             Settings.Secure.WIFI_WATCHDOG_PING_DELAY_MS, 250);
     }
+
+    /**
+     * @see android.provider.Settings.Secure#WIFI_WATCHDOG_WALLED_GARDEN_TEST_ENABLED
+     */
+     private Boolean isWalledGardenTestEnabled() {
+        return Settings.Secure.getInt(mContentResolver,
+                 Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_TEST_ENABLED, 1) == 1;
+     }
+
+    /**
+     * @see android.provider.Settings.Secure#WIFI_WATCHDOG_WALLED_GARDEN_URL
+     */
+     private String getWalledGardenUrl() {
+        String url = Settings.Secure.getString(mContentResolver,
+                 Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_URL);
+        if (TextUtils.isEmpty(url)) return "http://www.google.com/";
+        return url;
+     }
+
+    /**
+     * @see android.provider.Settings.Secure#WIFI_WATCHDOG_WALLED_GARDEN_PATTERN
+     */
+     private String getWalledGardenPattern() {
+        String pattern = Settings.Secure.getString(mContentResolver,
+                 Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_PATTERN);
+        if (TextUtils.isEmpty(pattern)) return "<title>.*Google.*</title>";
+        return pattern;
+     }
     
     /**
      * @see android.provider.Settings.Secure#WIFI_WATCHDOG_ACCEPTABLE_PACKET_LOSS_PERCENTAGE
@@ -509,7 +542,7 @@ public class WifiWatchdogService {
             // This access point does not require a watchdog, so queue idle on the main thread
             mHandler.idle();
         }
-        mHandler.checkWalledGarden(ssid);
+        if (isWalledGardenTestEnabled()) mHandler.checkWalledGarden(ssid);
     }
     
     /**
@@ -1118,19 +1151,35 @@ public class WifiWatchdogService {
             }
         }
 
+        /**
+         * DNS based detection techniques do not work at all hotspots. The one sure way to check
+         * a walled garden is to see if a URL fetch on a known address fetches the data we
+         * expect
+         */
         private boolean isWalledGardenConnection() {
-            //One way to detect a walled garden is to see if multiple DNS queries
-            //resolve to the same IP address
+            InputStream in = null;
+            HttpURLConnection  urlConnection = null;
             try {
-                String host1 = "www.google.com";
-                String host2 = "www.android.com";
-                String address1 = InetAddress.getByName(host1).getHostAddress();
-                String address2 = InetAddress.getByName(host2).getHostAddress();
-                if (address1.equals(address2)) return true;
-            } catch (UnknownHostException e) {
+                URL url = new URL(getWalledGardenUrl());
+                urlConnection = (HttpURLConnection) url.openConnection();
+                in = new BufferedInputStream(urlConnection.getInputStream());
+                Scanner scanner = new Scanner(in);
+                if (scanner.findInLine(getWalledGardenPattern()) != null) {
+                    return false;
+                } else {
+                    return true;
+                }
+            } catch (IOException e) {
                 return false;
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                    }
+                }
+                if (urlConnection != null) urlConnection.disconnect();
             }
-            return false;
         }
 
         private void handleWalledGardenCheck(String ssid) {

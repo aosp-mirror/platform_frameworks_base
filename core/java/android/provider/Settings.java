@@ -2924,6 +2924,30 @@ public final class Settings {
         public static final String WIFI_WATCHDOG_PING_TIMEOUT_MS = "wifi_watchdog_ping_timeout_ms";
 
         /**
+         * Setting to turn off walled garden test on Wi-Fi. Feature is enabled by default and
+         * the setting needs to be set to 0 to disable it.
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_WALLED_GARDEN_TEST_ENABLED =
+                "wifi_watchdog_walled_garden_test_enabled";
+
+        /**
+         * The URL used for walled garden check upon a new conection. WifiWatchdogService
+         * fetches the URL and checks to see if {@link #WIFI_WATCHDOG_WALLED_GARDEN_PATTERN}
+         * is not part of the title string to notify the user on the presence of a walled garden.
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_WALLED_GARDEN_URL =
+                "wifi_watchdog_walled_garden_url";
+
+        /**
+         * The pattern string in the fetched URL used to detect a walled garden
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_WALLED_GARDEN_PATTERN =
+                "wifi_watchdog_walled_garden_pattern";
+
+        /**
          * The maximum number of times we will retry a connection to an access
          * point for which we have failed in acquiring an IP address from DHCP.
          * A value of N means that we will make N+1 connection attempts in all.
