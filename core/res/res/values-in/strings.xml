@@ -261,6 +261,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Mengizinkan pemegang mengirimkan tujuan kepada administrator perangkat. Tidak diperlukan untuk aplikasi normal."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ubah orientasi layar"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Mengizinkan aplikasi mengubah rotasi layar kapan saja. Tidak diperlukan untuk aplikasi normal."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"kirim sinyal Linux ke aplikasi"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Mengizinkan aplikasi meminta sinyal yang diberikan untuk dikirimkan ke semua proses yang ada."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"jadikan aplikasi selalu berjalan"</string>
@@ -830,6 +834,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplikasi dialihkan"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> sedang berjalan."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> telah diluncurkan aslinya."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Aplikasi <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar kebijakan StrictMode yang diberlakukan secara otomatis."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> telah melanggar kebijakan StrictMode yang diberlakukan secara otomatis."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> berjalan"</string>

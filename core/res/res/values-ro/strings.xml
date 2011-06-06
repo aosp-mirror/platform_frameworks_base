@@ -261,6 +261,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permite proprietarului să trimită intenţii către un administrator al dispozitivului. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"modificare orientare ecran"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Permite unei aplicaţii să modifice rotaţia ecranului în orice moment. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"trimitere semnale Linux către aplicaţii"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Permite aplicaţiei să solicite trimiterea semnalului furnizat către toate procesele persistente."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"rulare întotdeauna a aplicaţiei"</string>
@@ -830,6 +834,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplicaţie redirecţionată"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> funcţionează acum."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> a fost lansată iniţial."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Aplicaţia <xliff:g id="APPLICATION">%1$s</xliff:g> (procesul <xliff:g id="PROCESS">%2$s</xliff:g>) a încălcat propria politică StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Procesul <xliff:g id="PROCESS">%1$s</xliff:g> a încălcat propria politică StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Rulează <xliff:g id="APP">%1$s</xliff:g>"</string>
