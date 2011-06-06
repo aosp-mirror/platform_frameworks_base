@@ -48,6 +48,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.INetworkManagementService;
@@ -60,14 +61,25 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TrustedTime;
 
+import com.android.internal.os.AtomicFile;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.ProtocolException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+
+import libcore.io.IoUtils;
 
 /**
  * Collect and persist detailed network statistics, and provide this data to
@@ -77,6 +89,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final String TAG = "NetworkStatsService";
     private static final boolean LOGD = true;
 
+    /** File header magic number: "ANET" */
+    private static final int FILE_MAGIC = 0x414E4554;
+    private static final int VERSION_CURRENT = 1;
+
     private final Context mContext;
     private final INetworkManagementService mNetworkManager;
     private final IAlarmManager mAlarmManager;
@@ -84,7 +100,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private IConnectivityManager mConnManager;
 
-    private static final String ACTION_NETWORK_STATS_POLL =
+    // @VisibleForTesting
+    public static final String ACTION_NETWORK_STATS_POLL =
             "com.android.server.action.NETWORK_STATS_POLL";
 
     private PendingIntent mPollIntent;
@@ -98,14 +115,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private LongSecureSetting mPollInterval = new LongSecureSetting(
             NETSTATS_POLL_INTERVAL, 15 * MINUTE_IN_MILLIS);
     private LongSecureSetting mPersistThreshold = new LongSecureSetting(
-            NETSTATS_PERSIST_THRESHOLD, 64 * KB_IN_BYTES);
+            NETSTATS_PERSIST_THRESHOLD, 16 * KB_IN_BYTES);
 
+    // TODO: adjust these timings for production builds
     private LongSecureSetting mSummaryBucketDuration = new LongSecureSetting(
-            NETSTATS_SUMMARY_BUCKET_DURATION, 6 * HOUR_IN_MILLIS);
+            NETSTATS_SUMMARY_BUCKET_DURATION, 1 * HOUR_IN_MILLIS);
     private LongSecureSetting mSummaryMaxHistory = new LongSecureSetting(
             NETSTATS_SUMMARY_MAX_HISTORY, 90 * DAY_IN_MILLIS);
     private LongSecureSetting mDetailBucketDuration = new LongSecureSetting(
-            NETSTATS_DETAIL_BUCKET_DURATION, 6 * HOUR_IN_MILLIS);
+            NETSTATS_DETAIL_BUCKET_DURATION, 2 * HOUR_IN_MILLIS);
     private LongSecureSetting mDetailMaxHistory = new LongSecureSetting(
             NETSTATS_DETAIL_MAX_HISTORY, 90 * DAY_IN_MILLIS);
 
@@ -129,6 +147,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final HandlerThread mHandlerThread;
     private final Handler mHandler;
 
+    private final AtomicFile mSummaryFile;
+
     // TODO: collect detailed uid stats, storing tag-granularity data until next
     // dropbox, and uid summary for a specific bucket count.
 
@@ -137,11 +157,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     public NetworkStatsService(
             Context context, INetworkManagementService networkManager, IAlarmManager alarmManager) {
         // TODO: move to using cached NtpTrustedTime
-        this(context, networkManager, alarmManager, new NtpTrustedTime());
+        this(context, networkManager, alarmManager, new NtpTrustedTime(), getSystemDir());
+    }
+
+    private static File getSystemDir() {
+        return new File(Environment.getDataDirectory(), "system");
     }
 
     public NetworkStatsService(Context context, INetworkManagementService networkManager,
-            IAlarmManager alarmManager, TrustedTime time) {
+            IAlarmManager alarmManager, TrustedTime time, File systemDir) {
         mContext = checkNotNull(context, "missing Context");
         mNetworkManager = checkNotNull(networkManager, "missing INetworkManagementService");
         mAlarmManager = checkNotNull(alarmManager, "missing IAlarmManager");
@@ -150,11 +174,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
+
+        mSummaryFile = new AtomicFile(new File(systemDir, "netstats.bin"));
     }
 
     public void systemReady() {
-        // read historical stats from disk
-        readStatsLocked();
+        synchronized (mStatsLock) {
+            // read historical stats from disk
+            readStatsLocked();
+        }
 
         // watch other system services that claim interfaces
         final IntentFilter ifaceFilter = new IntentFilter();
@@ -178,6 +206,16 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     public void bindConnectivityManager(IConnectivityManager connManager) {
         mConnManager = checkNotNull(connManager, "missing IConnectivityManager");
+    }
+
+    private void shutdownLocked() {
+        mContext.unregisterReceiver(mIfaceReceiver);
+        mContext.unregisterReceiver(mPollReceiver);
+        mContext.unregisterReceiver(mShutdownReceiver);
+
+        writeStatsLocked();
+        mSummaryStats.clear();
+        mDetailStats.clear();
     }
 
     /**
@@ -227,7 +265,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public NetworkStats getSummaryPerUid(long start, long end, int networkTemplate) {
+    public NetworkStats getSummaryForAllUid(long start, long end, int networkTemplate) {
         // TODO: create relaxed permission for reading stats
         mContext.enforceCallingOrSelfPermission(UPDATE_DEVICE_STATS, TAG);
 
@@ -281,7 +319,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public void onReceive(Context context, Intent intent) {
             // verified SHUTDOWN permission above.
             synchronized (mStatsLock) {
-                writeStatsLocked();
+                shutdownLocked();
             }
         }
     };
@@ -440,13 +478,74 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private void readStatsLocked() {
         if (LOGD) Slog.v(TAG, "readStatsLocked()");
-        // TODO: read historical stats from disk using AtomicFile
+
+        // clear any existing stats and read from disk
+        mSummaryStats.clear();
+
+        FileInputStream fis = null;
+        try {
+            fis = mSummaryFile.openRead();
+            final DataInputStream in = new DataInputStream(fis);
+
+            // verify file magic header intact
+            final int magic = in.readInt();
+            if (magic != FILE_MAGIC) {
+                throw new ProtocolException("unexpected magic: " + magic);
+            }
+
+            final int version = in.readInt();
+            switch (version) {
+                case VERSION_CURRENT: {
+                    // file format is pairs of interfaces and stats:
+                    // summary := size *(InterfaceIdentity NetworkStatsHistory)
+
+                    final int size = in.readInt();
+                    for (int i = 0; i < size; i++) {
+                        final InterfaceIdentity ident = new InterfaceIdentity(in);
+                        final NetworkStatsHistory history = new NetworkStatsHistory(in);
+                        mSummaryStats.put(ident, history);
+                    }
+                    break;
+                }
+                default: {
+                    throw new ProtocolException("unexpected version: " + version);
+                }
+            }
+        } catch (FileNotFoundException e) {
+            // missing stats is okay, probably first boot
+        } catch (IOException e) {
+            Slog.e(TAG, "problem reading network stats", e);
+        } finally {
+            IoUtils.closeQuietly(fis);
+        }
     }
 
     private void writeStatsLocked() {
         if (LOGD) Slog.v(TAG, "writeStatsLocked()");
-        // TODO: persist historical stats to disk using AtomicFile
+
         // TODO: consider duplicating stats and releasing lock while writing
+
+        FileOutputStream fos = null;
+        try {
+            fos = mSummaryFile.startWrite();
+            final DataOutputStream out = new DataOutputStream(fos);
+
+            out.writeInt(FILE_MAGIC);
+            out.writeInt(VERSION_CURRENT);
+
+            out.writeInt(mSummaryStats.size());
+            for (InterfaceIdentity ident : mSummaryStats.keySet()) {
+                final NetworkStatsHistory history = mSummaryStats.get(ident);
+                ident.writeToStream(out);
+                history.writeToStream(out);
+            }
+
+            mSummaryFile.finishWrite(fos);
+        } catch (IOException e) {
+            if (fos != null) {
+                mSummaryFile.failWrite(fos);
+            }
+        }
     }
 
     @Override
@@ -463,6 +562,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             if (argSet.contains("generate")) {
                 generateRandomLocked();
                 pw.println("Generated stub stats");
+                return;
+            }
+
+            if (argSet.contains("poll")) {
+                performPollLocked();
+                pw.println("Forced poll");
                 return;
             }
 
@@ -545,7 +650,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     private static NetworkStats computeStatsDelta(NetworkStats before, NetworkStats current) {
         if (before != null) {
-            return current.subtract(before, false);
+            return current.subtractClamped(before);
         } else {
             return current;
         }

@@ -28,6 +28,6 @@ interface INetworkStatsService {
     NetworkStatsHistory getHistoryForUid(int uid, int networkTemplate);
 
     /** Return usage summary per UID for traffic that matches template. */
-    NetworkStats getSummaryPerUid(long start, long end, int networkTemplate);
+    NetworkStats getSummaryForAllUid(long start, long end, int networkTemplate);
 
 }

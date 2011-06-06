@@ -218,7 +218,7 @@ public class NetworkStatsHistory implements Parcelable {
      * Return interpolated data usage across the requested range. Interpolates
      * across buckets, so values may be rounded slightly.
      */
-    public void getTotalData(long start, long end, long[] outTotal) {
+    public long[] getTotalData(long start, long end, long[] outTotal) {
         long rx = 0;
         long tx = 0;
 
@@ -238,8 +238,12 @@ public class NetworkStatsHistory implements Parcelable {
             }
         }
 
+        if (outTotal == null || outTotal.length != 2) {
+            outTotal = new long[2];
+        }
         outTotal[0] = rx;
         outTotal[1] = tx;
+        return outTotal;
     }
 
     /**
