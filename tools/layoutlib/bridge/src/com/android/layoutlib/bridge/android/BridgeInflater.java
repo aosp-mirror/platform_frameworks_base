@@ -36,7 +36,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 
 /**
  * Custom implementation of {@link LayoutInflater} to handle custom views.
@@ -177,7 +177,7 @@ public final class BridgeInflater extends LayoutInflater {
                     try {
                         KXmlParser parser = new KXmlParser();
                         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                        parser.setInput(new FileReader(f));
+                        parser.setInput(new FileInputStream(f), "UTF-8"); //$NON-NLS-1$
 
                         BridgeXmlBlockParser bridgeParser = new BridgeXmlBlockParser(
                                 parser, bridgeContext, false);
