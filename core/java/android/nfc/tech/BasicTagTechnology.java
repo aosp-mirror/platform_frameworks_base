@@ -77,6 +77,10 @@ import java.io.IOException;
                 // Store this in the tag object
                 mTag.setConnectedTechnology(mSelectedTechnology);
                 mIsConnected = true;
+            } else if (errorCode == ErrorCodes.ERROR_NOT_SUPPORTED) {
+                throw new UnsupportedOperationException("Connecting to " +
+                        "this technology is not supported by the NFC " +
+                        "adapter.");
             } else {
                 throw new IOException();
             }

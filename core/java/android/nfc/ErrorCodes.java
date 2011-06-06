@@ -57,6 +57,7 @@ public class ErrorCodes {
             case ERROR_SE_ALREADY_SELECTED: return "SE_ALREADY_SELECTED";
             case ERROR_SE_CONNECTED: return "SE_CONNECTED";
             case ERROR_NO_SE_CONNECTED: return "NO_SE_CONNECTED";
+            case ERROR_NOT_SUPPORTED: return "NOT_SUPPORTED";
             default: return "UNKNOWN ERROR";
         }
     }
@@ -104,5 +105,7 @@ public class ErrorCodes {
     public static final int ERROR_SE_CONNECTED = -19;
 
     public static final int ERROR_NO_SE_CONNECTED = -20;
+
+    public static final int ERROR_NOT_SUPPORTED = -21;
 
 }
