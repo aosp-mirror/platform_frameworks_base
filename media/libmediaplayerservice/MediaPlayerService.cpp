@@ -68,18 +68,6 @@
 
 #include <OMX.h>
 
-/* desktop Linux needs a little help with gettid() */
-#if defined(HAVE_GETTID) && !defined(HAVE_ANDROID_OS)
-#define __KERNEL__
-# include <linux/unistd.h>
-#ifdef _syscall0
-_syscall0(pid_t,gettid)
-#else
-pid_t gettid() { return syscall(__NR_gettid);}
-#endif
-#undef __KERNEL__
-#endif
-
 namespace {
 using android::media::Metadata;
 using android::status_t;
@@ -387,14 +375,6 @@ status_t MediaPlayerService::Client::dump(int fd, const Vector<String16>& args) 
     return NO_ERROR;
 }
 
-static int myTid() {
-#ifdef HAVE_GETTID
-    return gettid();
-#else
-    return getpid();
-#endif
-}
-
 status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
 {
     const size_t SIZE = 256;
@@ -426,7 +406,7 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
         }
 
         result.append(" Files opened and/or mapped:\n");
-        snprintf(buffer, SIZE, "/proc/%d/maps", myTid());
+        snprintf(buffer, SIZE, "/proc/%d/maps", gettid());
         FILE *f = fopen(buffer, "r");
         if (f) {
             while (!feof(f)) {
@@ -446,13 +426,13 @@ status_t MediaPlayerService::dump(int fd, const Vector<String16>& args)
             result.append("\n");
         }
 
-        snprintf(buffer, SIZE, "/proc/%d/fd", myTid());
+        snprintf(buffer, SIZE, "/proc/%d/fd", gettid());
         DIR *d = opendir(buffer);
         if (d) {
             struct dirent *ent;
             while((ent = readdir(d)) != NULL) {
                 if (strcmp(ent->d_name,".") && strcmp(ent->d_name,"..")) {
-                    snprintf(buffer, SIZE, "/proc/%d/fd/%s", myTid(), ent->d_name);
+                    snprintf(buffer, SIZE, "/proc/%d/fd/%s", gettid(), ent->d_name);
                     struct stat s;
                     if (lstat(buffer, &s) == 0) {
                         if ((s.st_mode & S_IFMT) == S_IFLNK) {

@@ -30,26 +30,6 @@
 // foreground thread.
 #ifndef DISABLE_GROUP_SCHEDULE_HACK
 
-/* desktop Linux needs a little help with gettid() */
-#if defined(HAVE_GETTID) && !defined(HAVE_ANDROID_OS)
-#define __KERNEL__
-# include <linux/unistd.h>
-#ifdef _syscall0
-_syscall0(pid_t,gettid)
-#else
-pid_t gettid() { return syscall(__NR_gettid);}
-#endif
-#undef __KERNEL__
-#endif
-
-static int myTid() {
-#ifdef HAVE_GETTID
-    return gettid();
-#else
-    return getpid();
-#endif
-}
-
 #undef LOG_TAG
 #define LOG_TAG "IMediaMetadataRetriever"
 #include <utils/Log.h>
@@ -60,18 +40,18 @@ namespace android {
 static void sendSchedPolicy(Parcel& data)
 {
     SchedPolicy policy;
-    get_sched_policy(myTid(), &policy);
+    get_sched_policy(gettid(), &policy);
     data.writeInt32(policy);
 }
 
 static void setSchedPolicy(const Parcel& data)
 {
     SchedPolicy policy = (SchedPolicy) data.readInt32();
-    set_sched_policy(myTid(), policy);
+    set_sched_policy(gettid(), policy);
 }
 static void restoreSchedPolicy()
 {
-    set_sched_policy(myTid(), SP_FOREGROUND);
+    set_sched_policy(gettid(), SP_FOREGROUND);
 }
 }; // end namespace android
 #endif

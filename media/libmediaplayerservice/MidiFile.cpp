@@ -29,16 +29,11 @@
 #include <libsonivox/eas_reverb.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <system/audio.h>
 
 #include "MidiFile.h"
-
-#ifdef HAVE_GETTID
-static pid_t myTid() { return gettid(); }
-#else
-static pid_t myTid() { return getpid(); }
-#endif
 
 // ----------------------------------------------------------------------------
 
@@ -455,7 +450,7 @@ int MidiFile::render() {
     // signal main thread that we started
     {
         Mutex::Autolock l(mMutex);
-        mTid = myTid();
+        mTid = gettid();
         LOGV("render thread(%d) signal", mTid);
         mCondition.signal();
     }

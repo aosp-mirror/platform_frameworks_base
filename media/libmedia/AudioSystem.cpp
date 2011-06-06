@@ -26,13 +26,6 @@
 #include <system/audio.h>
 
 // ----------------------------------------------------------------------------
-// the sim build doesn't have gettid
-
-#ifndef HAVE_GETTID
-# define gettid getpid
-#endif
-
-// ----------------------------------------------------------------------------
 
 namespace android {
 
