@@ -16,6 +16,7 @@
 
 package android.provider;
 
+
 import android.accounts.Account;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -32,7 +33,6 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.pim.ICalendar;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
@@ -44,24 +44,30 @@ import android.util.Log;
  * @hide
  */
 public final class Calendar {
-
-    public static final String TAG = "Calendar";
+    private static final String TAG = "Calendar";
 
     /**
-     * Broadcast Action: An event reminder.
+     * Broadcast Action: This is the intent that gets fired when an alarm
+     * notification needs to be posted for a reminder.
      */
     public static final String EVENT_REMINDER_ACTION = "android.intent.action.EVENT_REMINDER";
 
     /**
-     * These are the symbolic names for the keys used in the extra data
-     * passed in the intent for event reminders.
+     * Intent Extras key: The start time of an event or an instance of a
+     * recurring event. (milliseconds since epoch)
      */
     public static final String EVENT_BEGIN_TIME = "beginTime";
+
+    /**
+     * Intent Extras key: The end time of an event or an instance of a recurring
+     * event. (milliseconds since epoch)
+     */
     public static final String EVENT_END_TIME = "endTime";
 
     /**
-     * This must not be changed or horrible, unspeakable things could happen.
-     * For instance, the Calendar app might break. Also, the db might not work.
+     * This authority is used for writing to or querying from the calendar
+     * provider. Note: This is set at first run and cannot be changed without
+     * breaking apps that access the provider.
      */
     public static final String AUTHORITY = "com.android.calendar";
 
@@ -73,20 +79,37 @@ public final class Calendar {
 
     /**
      * An optional insert, update or delete URI parameter that allows the caller
-     * to specify that it is a sync adapter. The default value is false. If true
-     * the dirty flag is not automatically set and the "syncToNetwork" parameter
-     * is set to false when calling
-     * {@link ContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean)}.
+     * to specify that it is a sync adapter. The default value is false. If set
+     * to true, the modified row is not marked as "dirty" (needs to be synced)
+     * and when the provider calls
+     * {@link ContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean)}
+     * , the third parameter "syncToNetwork" is set to false. Furthermore, if
+     * set to true, the caller must also include
+     * {@link SyncColumns#ACCOUNT_NAME} and {@link SyncColumns#ACCOUNT_TYPE} as
+     * query parameters.
+     *
+     * @See Uri.Builder#appendQueryParameter(java.lang.String, java.lang.String)
      */
     public static final String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
 
+    /**
+     * A special account type for calendars not associated with any account.
+     * Normally calendars that do not match an account on the device will be
+     * removed. Setting the account_type on a calendar to this will prevent it
+     * from being wiped if it does not match an existing account.
+     *
+     * @see SyncColumns#ACCOUNT_TYPE
+     */
+    public static final String ACCOUNT_TYPE_LOCAL = "LOCAL";
 
     /**
-     * Generic columns for use by sync adapters. The specific functions of
-     * these columns are private to the sync adapter. Other clients of the API
-     * should not attempt to either read or write this column.
+     * Generic columns for use by sync adapters. The specific functions of these
+     * columns are private to the sync adapter. Other clients of the API should
+     * not attempt to either read or write this column. These columns are
+     * editable as part of the Calendars Uri, but can only be read if accessed
+     * through any other Uri.
      */
-    protected interface BaseSyncColumns {
+    protected interface CalendarSyncColumns {
 
         /** Generic column for use by sync adapters. */
         public static final String CAL_SYNC1 = "cal_sync1";
@@ -103,29 +126,41 @@ public final class Calendar {
     }
 
     /**
-     * Columns for Sync information used by Calendars and Events tables.
+     * Columns for Sync information used by Calendars and Events tables. These
+     * have specific uses which are expected to be consistent by the app and
+     * sync adapter.
+     *
+     * @hide
      */
-    public interface SyncColumns extends BaseSyncColumns {
+    public interface SyncColumns extends CalendarSyncColumns {
         /**
-         * The account that was used to sync the entry to the device.
+         * The account that was used to sync the entry to the device. If the
+         * account_type is not {@link #ACCOUNT_TYPE_LOCAL} then the name and
+         * type must match an account on the device or the calendar will be
+         * deleted.
          * <P>Type: TEXT</P>
          */
         public static final String ACCOUNT_NAME = "account_name";
 
         /**
-         * The type of the account that was used to sync the entry to the device.
+         * The type of the account that was used to sync the entry to the
+         * device. A type of {@link #ACCOUNT_TYPE_LOCAL} will keep this event
+         * form being deleted if there are no matching accounts on the device.
          * <P>Type: TEXT</P>
          */
         public static final String ACCOUNT_TYPE = "account_type";
 
         /**
-         * The unique ID for a row assigned by the sync source. NULL if the row has never been synced.
+         * The unique ID for a row assigned by the sync source. NULL if the row
+         * has never been synced. This is used as a reference id for exceptions
+         * along with {@link BaseColumns#_ID}.
          * <P>Type: TEXT</P>
          */
         public static final String _SYNC_ID = "_sync_id";
 
         /**
-         * The last time, from the sync source's point of view, that this row has been synchronized.
+         * The last time, from the sync source's point of view, that this row
+         * has been synchronized.
          * <P>Type: INTEGER (long)</P>
          */
         public static final String _SYNC_TIME = "_sync_time";
@@ -151,9 +186,9 @@ public final class Calendar {
     }
 
     /**
-     * Columns from the Calendars table that other tables join into themselves.
+     * Columns specific to the Calendars Uri that other Uris can query.
      */
-    public interface CalendarsColumns {
+    private interface CalendarsColumns {
         /**
          * The color of the calendar
          * <P>Type: INTEGER (color value)</P>
@@ -172,10 +207,17 @@ public final class Calendar {
         public static final int FREEBUSY_ACCESS = 100;
         /** Can read all event details */
         public static final int READ_ACCESS = 200;
+        /** Can reply yes/no/maybe to an event */
         public static final int RESPOND_ACCESS = 300;
+        /** not used */
         public static final int OVERRIDE_ACCESS = 400;
-        /** Full access to modify the calendar, but not the access control settings */
+        /** Full access to modify the calendar, but not the access control
+         * settings
+         */
         public static final int CONTRIBUTOR_ACCESS = 500;
+        /** Full access to modify the calendar, but not the access control
+         * settings
+         */
         public static final int EDITOR_ACCESS = 600;
         /** Full access to the calendar */
         public static final int OWNER_ACCESS = 700;
@@ -184,31 +226,35 @@ public final class Calendar {
 
         /**
          * Is the calendar selected to be displayed?
+         * 0 - do not show events associated with this calendar.
+         * 1 - show events associated with this calendar
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String VISIBLE = "visible";
 
         /**
-         * The timezone the calendar's events occurs in
+         * The time zone the calendar is associated with.
          * <P>Type: TEXT</P>
          */
         public static final String CALENDAR_TIMEZONE = "calendar_timezone";
 
         /**
-         * If this calendar is in the list of calendars that are selected for
-         * syncing then "sync_events" is 1, otherwise 0.
+         * Is this calendar synced and are its events stored on the device?
+         * 0 - Do not sync this calendar or store events for this calendar.
+         * 1 - Sync down events for this calendar.
          * <p>Type: INTEGER (boolean)</p>
          */
         public static final String SYNC_EVENTS = "sync_events";
 
         /**
-         * Sync state data.
+         * Sync state data. Usable by the sync adapter.
          * <p>Type: String (blob)</p>
          */
         public static final String SYNC_STATE = "sync_state";
 
         /**
-         * Whether the row has been deleted.  A deleted row should be ignored.
+         * Whether the row has been deleted but not synced to the server. A
+         * deleted row should be ignored.
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String DELETED = "deleted";
@@ -216,35 +262,32 @@ public final class Calendar {
 
     /**
      * Class that represents a Calendar Entity. There is one entry per calendar.
+     * This is a helper class to make batch operations easier.
      */
     public static class CalendarsEntity implements BaseColumns, SyncColumns, CalendarsColumns {
 
+        /**
+         * The default Uri used when creating a new calendar EntityIterator.
+         */
+        @SuppressWarnings("hiding")
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
                 "/calendar_entities");
 
-        public static EntityIterator newEntityIterator(Cursor cursor, ContentResolver resolver) {
-            return new EntityIteratorImpl(cursor, resolver);
-        }
-
-        public static EntityIterator newEntityIterator(Cursor cursor,
-                ContentProviderClient provider) {
-            return new EntityIteratorImpl(cursor, provider);
+        /**
+         * Creates an entity iterator for the given cursor. It assumes the
+         * cursor contains a calendars query.
+         *
+         * @param cursor query on {@link #CONTENT_URI}
+         * @return an EntityIterator of calendars
+         */
+        public static EntityIterator newEntityIterator(Cursor cursor) {
+            return new EntityIteratorImpl(cursor);
         }
 
         private static class EntityIteratorImpl extends CursorEntityIterator {
-            private final ContentResolver mResolver;
-            private final ContentProviderClient mProvider;
 
-            public EntityIteratorImpl(Cursor cursor, ContentResolver resolver) {
+            public EntityIteratorImpl(Cursor cursor) {
                 super(cursor);
-                mResolver = resolver;
-                mProvider = null;
-            }
-
-            public EntityIteratorImpl(Cursor cursor, ContentProviderClient provider) {
-                super(cursor);
-                mResolver = null;
-                mProvider = provider;
             }
 
             @Override
@@ -305,27 +348,40 @@ public final class Calendar {
      }
 
     /**
-     * Contains a list of available calendars.
+     * Fields and helpers for interacting with Calendars.
      */
-    public static class Calendars implements BaseColumns, SyncColumns,
-            CalendarsColumns
-    {
+    public static class Calendars implements BaseColumns, SyncColumns, CalendarsColumns {
         private static final String WHERE_DELETE_FOR_ACCOUNT = Calendars.ACCOUNT_NAME + "=?"
                 + " AND "
                 + Calendars.ACCOUNT_TYPE + "=?";
 
-        public static final Cursor query(ContentResolver cr, String[] projection,
-                                       String where, String orderBy)
-        {
-            return cr.query(CONTENT_URI, projection, where,
-                                         null, orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
+        /**
+         * Helper function for generating a calendars query. This is blocking
+         * and should not be used on the UI thread. See
+         * {@link ContentResolver#query(Uri, String[], String, String[], String)}
+         * for more details about using the parameters.
+         *
+         * @param cr The ContentResolver to query with
+         * @param projection A list of columns to return
+         * @param selection A formatted selection string
+         * @param selectionArgs arguments to the selection string
+         * @param orderBy How to order the returned rows
+         * @return
+         */
+        public static final Cursor query(ContentResolver cr, String[] projection, String selection,
+                String[] selectionArgs, String orderBy) {
+            return cr.query(CONTENT_URI, projection, selection, selectionArgs,
+                    orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
         }
 
         /**
-         * Convenience method perform a delete on the Calendar provider
+         * Convenience method perform a delete on the Calendar provider. This is
+         * a blocking call and should not be used on the UI thread.
          *
          * @param cr the ContentResolver
-         * @param selection the rows to delete
+         * @param selection A filter to apply to rows before deleting, formatted
+         *            as an SQL WHERE clause (excluding the WHERE itself).
+         * @param selectionArgs Fill in the '?'s in the selection
          * @return the count of rows that were deleted
          */
         public static int delete(ContentResolver cr, String selection, String[] selectionArgs)
@@ -335,10 +391,12 @@ public final class Calendar {
 
         /**
          * Convenience method to delete all calendars that match the account.
+         * This is a blocking call and should not be used on the UI thread.
          *
          * @param cr the ContentResolver
-         * @param account the account whose rows should be deleted
-         * @return the count of rows that were deleted
+         * @param account the account whose calendars and events should be
+         *            deleted
+         * @return the count of calendar rows that were deleted
          */
         public static int deleteCalendarsForAccount(ContentResolver cr, Account account) {
             // delete all calendars that match this account
@@ -348,8 +406,9 @@ public final class Calendar {
         }
 
         /**
-         * The content:// style URL for this table
+         * The content:// style URL for accessing Calendars
          */
+        @SuppressWarnings("hiding")
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/calendars");
 
         /**
@@ -358,43 +417,43 @@ public final class Calendar {
         public static final String DEFAULT_SORT_ORDER = "displayName";
 
         /**
-         * The URL to the calendar
+         * The URL to the calendar. Column name.
          * <P>Type: TEXT (URL)</P>
          */
         public static final String URL = "url";
 
         /**
-         * The URL for the calendar itself
+         * The URL for the calendar itself. Column name.
          * <P>Type: TEXT (URL)</P>
          */
         public static final String SELF_URL = "selfUrl";
 
         /**
-         * The URL for the calendar to be edited
+         * The URL for the calendar to be edited. Column name.
          * <P>Type: TEXT (URL)</P>
          */
         public static final String EDIT_URL = "editUrl";
 
         /**
-         * The URL for the calendar events
+         * The URL for the calendar events. Column name.
          * <P>Type: TEXT (URL)</P>
          */
         public static final String EVENTS_URL = "eventsUrl";
 
         /**
-         * The name of the calendar
+         * The name of the calendar. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String NAME = "name";
 
         /**
-         * The display name of the calendar
+         * The display name of the calendar. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String DISPLAY_NAME = "displayName";
 
         /**
-         * The location the of the events in the calendar
+         * The default location for the calendar. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String CALENDAR_LOCATION = "calendar_location";
@@ -402,41 +461,45 @@ public final class Calendar {
         /**
          * The owner account for this calendar, based on the calendar feed.
          * This will be different from the _SYNC_ACCOUNT for delegated calendars.
+         * Column name.
          * <P>Type: String</P>
          */
         public static final String OWNER_ACCOUNT = "ownerAccount";
 
         /**
          * Can the organizer respond to the event?  If no, the status of the
-         * organizer should not be shown by the UI.  Defaults to 1
+         * organizer should not be shown by the UI.  Defaults to 1. Column name.
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String CAN_ORGANIZER_RESPOND = "canOrganizerRespond";
 
         /**
-         * Can the organizer modify the time zone of the event?
+         * Can the organizer modify the time zone of the event? Column name.
          * <P>Type: INTEGER (boolean)</P>
         */
         public static final String CAN_MODIFY_TIME_ZONE = "canModifyTimeZone";
 
         /**
-         * The maximum number of reminders allowed for an event.
+         * The maximum number of reminders allowed for an event. Column name.
          * <P>Type: INTEGER</P>
          */
         public static final String MAX_REMINDERS = "maxReminders";
 
         /**
-         * The maximum number of reminders allowed for an event.
-         * <P>
-         * Type: INTEGER
-         * </P>
+         * A comma separated list of reminder methods supported for this
+         * calendar in the format "#,#,#". Valid types are
+         * {@link Reminders#METHOD_DEFAULT}, {@link Reminders#METHOD_ALERT},
+         * {@link Reminders#METHOD_EMAIL}, {@link Reminders#METHOD_SMS}. Column
+         * name.
+         * <P>Type: TEXT</P>
          */
         public static final String ALLOWED_REMINDERS = "allowedReminders";
 
         /**
          * These fields are only writable by a sync adapter. To modify them the
-         * caller must include CALLER_IS_SYNCADAPTER, _SYNC_ACCOUNT, and
-         * _SYNC_ACCOUNT_TYPE in the query parameters.
+         * caller must include {@link #CALLER_IS_SYNCADAPTER},
+         * {@link #ACCOUNT_NAME}, and {@link #ACCOUNT_TYPE} in the query
+         * parameters.
          */
         public static final String[] SYNC_WRITABLE_COLUMNS = new String[] {
             ACCOUNT_NAME,
@@ -457,7 +520,8 @@ public final class Calendar {
             CAL_SYNC2,
             CAL_SYNC3,
             CAL_SYNC4,
- CAL_SYNC5, CAL_SYNC6,
+            CAL_SYNC5,
+            CAL_SYNC6,
             SYNC_STATE,
         };
     }
@@ -465,29 +529,29 @@ public final class Calendar {
     /**
      * Columns from the Attendees table that other tables join into themselves.
      */
-    public interface AttendeesColumns {
+    private interface AttendeesColumns {
 
         /**
-         * The id of the event.
+         * The id of the event. Column name.
          * <P>Type: INTEGER</P>
          */
         public static final String EVENT_ID = "event_id";
 
         /**
-         * The name of the attendee.
+         * The name of the attendee. Column name.
          * <P>Type: STRING</P>
          */
         public static final String ATTENDEE_NAME = "attendeeName";
 
         /**
-         * The email address of the attendee.
+         * The email address of the attendee. Column name.
          * <P>Type: STRING</P>
          */
         public static final String ATTENDEE_EMAIL = "attendeeEmail";
 
         /**
-         * The relationship of the attendee to the user.
-         * <P>Type: INTEGER (one of {@link #RELATIONSHIP_ATTENDEE}, ...}.
+         * The relationship of the attendee to the user. Column name.
+         * <P>Type: INTEGER (one of {@link #RELATIONSHIP_ATTENDEE}, ...}.</P>
          */
         public static final String ATTENDEE_RELATIONSHIP = "attendeeRelationship";
 
@@ -498,8 +562,8 @@ public final class Calendar {
         public static final int RELATIONSHIP_SPEAKER = 4;
 
         /**
-         * The type of attendee.
-         * <P>Type: Integer (one of {@link #TYPE_REQUIRED}, {@link #TYPE_OPTIONAL})
+         * The type of attendee. Column name.
+         * <P>Type: Integer (one of {@link #TYPE_REQUIRED}, {@link #TYPE_OPTIONAL})</P>
          */
         public static final String ATTENDEE_TYPE = "attendeeType";
 
@@ -508,8 +572,8 @@ public final class Calendar {
         public static final int TYPE_OPTIONAL = 2;
 
         /**
-         * The attendance status of the attendee.
-         * <P>Type: Integer (one of {@link #ATTENDEE_STATUS_ACCEPTED}, ...}.
+         * The attendance status of the attendee. Column name.
+         * <P>Type: Integer (one of {@link #ATTENDEE_STATUS_ACCEPTED}, ...).</P>
          */
         public static final String ATTENDEE_STATUS = "attendeeStatus";
 
@@ -520,59 +584,84 @@ public final class Calendar {
         public static final int ATTENDEE_STATUS_TENTATIVE = 4;
     }
 
+    /**
+     * Fields and helpers for interacting with Attendees.
+     */
     public static final class Attendees implements BaseColumns, AttendeesColumns, EventsColumns {
-        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/attendees");
 
-        // TODO: fill out this class when we actually start utilizing attendees
-        // in the calendar application.
+        /**
+         * The content:// style URL for accessing Attendees data
+         */
+        @SuppressWarnings("hiding")
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/attendees");
+        /**
+         * the projection used by the attendees query
+         */
+        public static final String[] PROJECTION = new String[] {
+                _ID, ATTENDEE_NAME, ATTENDEE_EMAIL, ATTENDEE_RELATIONSHIP, ATTENDEE_STATUS,};
+        private static final String ATTENDEES_WHERE = Attendees.EVENT_ID + "=?";
+
+        /**
+         * Queries all attendees associated with the given event. This is a
+         * blocking call and should not be done on the UI thread.
+         *
+         * @param cr The content resolver to use for the query
+         * @param eventId The id of the event to retrieve attendees for
+         * @return A Cursor containing all attendees for the event
+         */
+        public static final Cursor query(ContentResolver cr, long eventId) {
+            String[] attArgs = {Long.toString(eventId)};
+            return cr.query(CONTENT_URI, PROJECTION, ATTENDEES_WHERE, attArgs /* selection args */,
+                    null /* sort order */);
+        }
     }
 
     /**
      * Columns from the Events table that other tables join into themselves.
      */
-    public interface EventsColumns {
+    private interface EventsColumns {
         /**
-         * For use by sync adapter at its discretion; not modified by CalendarProvider
-         * Note that this column was formerly named _SYNC_LOCAL_ID.  We are using it to avoid a
-         * schema change.
-         * TODO Replace this with something more general in the future.
+         * For use by sync adapter at its discretion. Column name.
+         * TODO change to sync_data2
          * <P>Type: INTEGER (long)</P>
          */
         public static final String _SYNC_DATA = "_sync_local_id";
 
         /**
-         * The calendar the event belongs to
-         * <P>Type: INTEGER (foreign key to the Calendars table)</P>
+         * The {@link Calendars#_ID} of the calendar the event belongs to.
+         * Column name.
+         * <P>Type: INTEGER</P>
          */
         public static final String CALENDAR_ID = "calendar_id";
 
         /**
-         * The URI for an HTML version of this event.
+         * The URI for an HTML version of this event. Column name.
+         * TODO change to sync_data3
          * <P>Type: TEXT</P>
          */
         public static final String HTML_URI = "htmlUri";
 
         /**
-         * The title of the event
+         * The title of the event. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String TITLE = "title";
 
         /**
-         * The description of the event
+         * The description of the event. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String DESCRIPTION = "description";
 
         /**
-         * Where the event takes place.
+         * Where the event takes place. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String EVENT_LOCATION = "eventLocation";
 
         /**
-         * The event status
-         * <P>Type: INTEGER (int)</P>
+         * The event status. Column name.
+         * <P>Type: INTEGER (one of {@link #STATUS_TENTATIVE}...)</P>
          */
         public static final String STATUS = "eventStatus";
 
@@ -584,64 +673,65 @@ public final class Calendar {
          * This is a copy of the attendee status for the owner of this event.
          * This field is copied here so that we can efficiently filter out
          * events that are declined without having to look in the Attendees
-         * table.
+         * table. Column name.
          *
          * <P>Type: INTEGER (int)</P>
          */
         public static final String SELF_ATTENDEE_STATUS = "selfAttendeeStatus";
 
         /**
-         * This column is available for use by sync adapters
+         * This column is available for use by sync adapters. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String SYNC_DATA1 = "sync_data1";
 
         /**
-         * The comments feed uri.
+         * The comments feed uri. Column name.
+         * TODO change to sync_data6
          * <P>Type: TEXT</P>
          */
         public static final String COMMENTS_URI = "commentsUri";
 
         /**
-         * The time the event starts
+         * The time the event starts in UTC millis since epoch. Column name.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String DTSTART = "dtstart";
 
         /**
-         * The time the event ends
+         * The time the event ends in UTC millis since epoch. Column name.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String DTEND = "dtend";
 
         /**
-         * The duration of the event
+         * The duration of the event in RFC2445 format. Column name.
          * <P>Type: TEXT (duration in RFC2445 format)</P>
          */
         public static final String DURATION = "duration";
 
         /**
-         * The timezone for the event.
-         * <P>Type: TEXT
+         * The timezone for the event. Column name.
+         * <P>Type: TEXT</P>
          */
         public static final String EVENT_TIMEZONE = "eventTimezone";
 
         /**
-         * The timezone for the event, allDay events will have a local tz instead of UTC
-         * <P>Type: TEXT
+         * The timezone for the end time of the event. Column name.
+         * <P>Type: TEXT</P>
          */
         public static final String EVENT_END_TIMEZONE = "eventEndTimezone";
 
         /**
-         * Whether the event lasts all day or not
+         * Is the event all day (time zone independent). Column name.
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String ALL_DAY = "allDay";
 
         /**
          * Defines how the event shows up for others when the calendar is
-         * shared.
-         * <P>Type: INTEGER</P>
+         * shared. Column name.
+         * <P>Type: INTEGER (One of {@link #ACCESS_DEFAULT}, ...)</P>
          */
         public static final String ACCESS_LEVEL = "accessLevel";
 
@@ -655,20 +745,20 @@ public final class Calendar {
          */
         public static final int ACCESS_CONFIDENTIAL = 1;
         /**
-         * Private assumes the event appears as a free/busy slot with no
-         * details.
+         * Private shares the event as a free/busy slot with no details.
          */
         public static final int ACCESS_PRIVATE = 2;
         /**
-         * Public assumes the contents are visible to anyone with access to the
+         * Public makes the contents visible to anyone with access to the
          * calendar.
          */
         public static final int ACCESS_PUBLIC = 3;
 
         /**
          * If this event counts as busy time or is still free time that can be
-         * scheduled over.
-         * <P>Type: INTEGER</P>
+         * scheduled over. Column name.
+         * <P>Type: INTEGER (One of {@link #AVAILABILITY_BUSY},
+         * {@link #AVAILABILITY_FREE})</P>
          */
         public static final String AVAILABILITY = "availability";
 
@@ -684,45 +774,44 @@ public final class Calendar {
         public static final int AVAILABILITY_FREE = 1;
 
         /**
-         * Whether the event has an alarm or not
+         * Whether the event has an alarm or not. Column name.
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String HAS_ALARM = "hasAlarm";
 
         /**
-         * Whether the event has extended properties or not
+         * Whether the event has extended properties or not. Column name.
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String HAS_EXTENDED_PROPERTIES = "hasExtendedProperties";
 
         /**
-         * The recurrence rule for the event.
-         * than one.
+         * The recurrence rule for the event. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String RRULE = "rrule";
 
         /**
-         * The recurrence dates for the event.
+         * The recurrence dates for the event. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String RDATE = "rdate";
 
         /**
-         * The recurrence exception rule for the event.
+         * The recurrence exception rule for the event. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String EXRULE = "exrule";
 
         /**
-         * The recurrence exception dates for the event.
+         * The recurrence exception dates for the event. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String EXDATE = "exdate";
 
         /**
-         * The _id of the original recurring event for which this event is an
-         * exception.
+         * The {@link Events#_ID} of the original recurring event for which this
+         * event is an exception. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String ORIGINAL_ID = "original_id";
@@ -730,27 +819,28 @@ public final class Calendar {
         /**
          * The _sync_id of the original recurring event for which this event is
          * an exception. The provider should keep the original_id in sync when
-         * this is updated.
+         * this is updated. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String ORIGINAL_SYNC_ID = "original_sync_id";
 
         /**
          * The original instance time of the recurring event for which this
-         * event is an exception.
+         * event is an exception. Column name.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String ORIGINAL_INSTANCE_TIME = "originalInstanceTime";
 
         /**
          * The allDay status (true or false) of the original recurring event
-         * for which this event is an exception.
+         * for which this event is an exception. Column name.
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String ORIGINAL_ALL_DAY = "originalAllDay";
 
         /**
-         * The last date this event repeats on, or NULL if it never ends
+         * The last date this event repeats on, or NULL if it never ends. Column
+         * name.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String LAST_DATE = "lastDate";
@@ -758,61 +848,66 @@ public final class Calendar {
         /**
          * Whether the event has attendee information.  True if the event
          * has full attendee data, false if the event has information about
-         * self only.
+         * self only. Column name.
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String HAS_ATTENDEE_DATA = "hasAttendeeData";
 
         /**
-         * Whether guests can modify the event.
+         * Whether guests can modify the event. Column name.
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String GUESTS_CAN_MODIFY = "guestsCanModify";
 
         /**
-         * Whether guests can invite other guests.
+         * Whether guests can invite other guests. Column name.
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String GUESTS_CAN_INVITE_OTHERS = "guestsCanInviteOthers";
 
         /**
-         * Whether guests can see the list of attendees.
+         * Whether guests can see the list of attendees. Column name.
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String GUESTS_CAN_SEE_GUESTS = "guestsCanSeeGuests";
 
         /**
-         * Email of the organizer (owner) of the event.
+         * Email of the organizer (owner) of the event. Column name.
          * <P>Type: STRING</P>
          */
         public static final String ORGANIZER = "organizer";
 
         /**
-         * Whether the user can invite others to the event.
-         * The GUESTS_CAN_INVITE_OTHERS is a setting that applies to an arbitrary guest,
-         * while CAN_INVITE_OTHERS indicates if the user can invite others (either through
-         * GUESTS_CAN_INVITE_OTHERS or because the user has modify access to the event).
+         * Whether the user can invite others to the event. The
+         * GUESTS_CAN_INVITE_OTHERS is a setting that applies to an arbitrary
+         * guest, while CAN_INVITE_OTHERS indicates if the user can invite
+         * others (either through GUESTS_CAN_INVITE_OTHERS or because the user
+         * has modify access to the event). Column name.
          * <P>Type: INTEGER (boolean, readonly)</P>
          */
         public static final String CAN_INVITE_OTHERS = "canInviteOthers";
 
         /**
          * The owner account for this calendar, based on the calendar (foreign
-         * key into the calendars table).
+         * key into the calendars table). Column name.
          * <P>Type: String</P>
          */
         public static final String OWNER_ACCOUNT = "ownerAccount";
 
         /**
-         * Whether the row has been deleted.  A deleted row should be ignored.
+         * Whether the row has been deleted. A deleted row should be ignored.
+         * Column name.
          * <P>Type: INTEGER (boolean)</P>
          */
         public static final String DELETED = "deleted";
     }
 
     /**
-     * Contains one entry per calendar event. Recurring events show up as a
-     * single entry.
+     * Class that represents an Event Entity. There is one entry per event.
+     * Recurring events show up as a single entry. This is a helper class to
+     * make batch operations easier. A {@link ContentResolver} or
+     * {@link ContentProviderClient} is required as the helper does additional
+     * queries to add reminders and attendees to each entry.
      */
     public static final class EventsEntity implements BaseColumns, SyncColumns, EventsColumns {
         /**
@@ -821,10 +916,26 @@ public final class Calendar {
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
                 "/event_entities");
 
+        /**
+         * Creates a new iterator for events
+         *
+         * @param cursor An event query
+         * @param resolver For performing additional queries
+         * @return an EntityIterator containing one entity per event in the
+         *         cursor
+         */
         public static EntityIterator newEntityIterator(Cursor cursor, ContentResolver resolver) {
             return new EntityIteratorImpl(cursor, resolver);
         }
 
+        /**
+         * Creates a new iterator for events
+         *
+         * @param cursor An event query
+         * @param provider For performing additional queries
+         * @return an EntityIterator containing one entity per event in the
+         *         cursor
+         */
         public static EntityIterator newEntityIterator(Cursor cursor,
                 ContentProviderClient provider) {
             return new EntityIteratorImpl(cursor, provider);
@@ -921,7 +1032,7 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_DATA);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
-                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, EventsColumns.DELETED);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, DELETED);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CAL_SYNC1);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CAL_SYNC2);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CAL_SYNC3);
@@ -1018,53 +1129,54 @@ public final class Calendar {
     }
 
     /**
-     * Contains one entry per calendar event. Recurring events show up as a single entry.
+     * Fields and helpers for interacting with Events.
      */
     public static final class Events implements BaseColumns, SyncColumns, EventsColumns {
 
-        private static final String[] FETCH_ENTRY_COLUMNS =
-                new String[] { Events.ACCOUNT_NAME, Events._SYNC_ID };
-
-        private static final String[] ATTENDEES_COLUMNS =
-                new String[] { AttendeesColumns.ATTENDEE_NAME,
-                               AttendeesColumns.ATTENDEE_EMAIL,
-                               AttendeesColumns.ATTENDEE_RELATIONSHIP,
-                               AttendeesColumns.ATTENDEE_TYPE,
-                               AttendeesColumns.ATTENDEE_STATUS };
-
+        /**
+         * Queries all events with the given projection. This is a blocking call
+         * and should not be done on the UI thread.
+         *
+         * @param cr The content resolver to use for the query
+         * @param projection The columns to return
+         * @return A Cursor containing all events in the db
+         */
         public static final Cursor query(ContentResolver cr, String[] projection) {
             return cr.query(CONTENT_URI, projection, null, null, DEFAULT_SORT_ORDER);
         }
 
-        public static final Cursor query(ContentResolver cr, String[] projection,
-                                       String where, String orderBy) {
-            return cr.query(CONTENT_URI, projection, where,
-                                         null, orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
-        }
-
-        private static String extractValue(ICalendar.Component component,
-                                           String propertyName) {
-            ICalendar.Property property =
-                    component.getFirstProperty(propertyName);
-            if (property != null) {
-                return property.getValue();
-            }
-            return null;
+        /**
+         * Queries events using the given projection, selection filter, and
+         * ordering. This is a blocking call and should not be done on the UI
+         * thread. For selection and selectionArgs usage see
+         * {@link ContentResolver#query(Uri, String[], String, String[], String)}
+         *
+         * @param cr The content resolver to use for the query
+         * @param projection The columns to return
+         * @param selection Filter on the query as an SQL WHERE statement
+         * @param selectionArgs Args to replace any '?'s in the selection
+         * @param orderBy How to order the rows as an SQL ORDER BY statement
+         * @return A Cursor containing the matching events
+         */
+        public static final Cursor query(ContentResolver cr, String[] projection, String selection,
+                String[] selectionArgs, String orderBy) {
+            return cr.query(CONTENT_URI, projection, selection, null,
+                    orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
         }
 
         /**
-         * The content:// style URL for this table
+         * The content:// style URL for interacting with events. Appending an
+         * event id using {@link ContentUris#withAppendedId(Uri, long)} will
+         * specify a single event.
          */
+        @SuppressWarnings("hiding")
         public static final Uri CONTENT_URI =
                 Uri.parse("content://" + AUTHORITY + "/events");
-
-        public static final Uri DELETED_CONTENT_URI =
-                Uri.parse("content://" + AUTHORITY + "/deleted_events");
 
         /**
          * The default sort order for this table
          */
-        public static final String DEFAULT_SORT_ORDER = "";
+        private static final String DEFAULT_SORT_ORDER = "";
 
         /**
          * These are columns that should only ever be updated by the provider,
@@ -1073,7 +1185,13 @@ public final class Calendar {
          */
         public static String[] PROVIDER_WRITABLE_COLUMNS = new String[] {
                 ACCOUNT_NAME,
-                ACCOUNT_TYPE
+                ACCOUNT_TYPE,
+                CAL_SYNC1,
+                CAL_SYNC2,
+                CAL_SYNC3,
+                CAL_SYNC4,
+                CAL_SYNC5,
+                CAL_SYNC6
         };
 
         /**
@@ -1091,13 +1209,29 @@ public final class Calendar {
     }
 
     /**
-     * Contains one entry per calendar event instance. Recurring events show up every time
-     * they occur.
+     * Fields and helpers for interacting with Instances. An instance is a
+     * single occurrence of an event including time zone specific start and end
+     * days and minutes.
      */
     public static final class Instances implements BaseColumns, EventsColumns, CalendarsColumns {
 
         private static final String WHERE_CALENDARS_SELECTED = Calendars.VISIBLE + "=1";
 
+        /**
+         * Performs a query to return all visible instances in the given range.
+         * This is a blocking function and should not be done on the UI thread.
+         * This will cause an expansion of recurring events to fill this time
+         * range if they are not already expanded and will slow down for larger
+         * time ranges with many recurring events.
+         *
+         * @param cr The ContentResolver to use for the query
+         * @param projection The columns to return
+         * @param begin The start of the time range to query in UTC millis since
+         *            epoch
+         * @param end The end of the time range to query in UTC millis since
+         *            epoch
+         * @return A Cursor containing all instances in the given range
+         */
         public static final Cursor query(ContentResolver cr, String[] projection,
                                          long begin, long end) {
             Uri.Builder builder = CONTENT_URI.buildUpon();
@@ -1107,111 +1241,184 @@ public final class Calendar {
                          null, DEFAULT_SORT_ORDER);
         }
 
+        /**
+         * Performs a query to return all visible instances in the given range
+         * that match the given query. This is a blocking function and should
+         * not be done on the UI thread. This will cause an expansion of
+         * recurring events to fill this time range if they are not already
+         * expanded and will slow down for larger time ranges with many
+         * recurring events.
+         *
+         * @param cr The ContentResolver to use for the query
+         * @param projection The columns to return
+         * @param begin The start of the time range to query in UTC millis since
+         *            epoch
+         * @param end The end of the time range to query in UTC millis since
+         *            epoch
+         * @param searchQuery A string of space separated search terms. Segments
+         *            enclosed by double quotes will be treated as a single
+         *            term.
+         * @return A Cursor of instances matching the search terms in the given
+         *         time range
+         */
         public static final Cursor query(ContentResolver cr, String[] projection,
                                          long begin, long end, String searchQuery) {
             Uri.Builder builder = CONTENT_SEARCH_URI.buildUpon();
             ContentUris.appendId(builder, begin);
             ContentUris.appendId(builder, end);
-            return cr.query(builder.build(), projection, WHERE_CALENDARS_SELECTED,
-                         new String[] { searchQuery }, DEFAULT_SORT_ORDER);
+            builder = builder.appendPath(searchQuery);
+            return cr.query(builder.build(), projection, WHERE_CALENDARS_SELECTED, null,
+                    DEFAULT_SORT_ORDER);
         }
 
-        public static final Cursor query(ContentResolver cr, String[] projection,
-                                         long begin, long end, String where, String orderBy) {
+        /**
+         * Performs a query to return all visible instances in the given range
+         * that match the given selection. This is a blocking function and
+         * should not be done on the UI thread. This will cause an expansion of
+         * recurring events to fill this time range if they are not already
+         * expanded and will slow down for larger time ranges with many
+         * recurring events.
+         *
+         * @param cr The ContentResolver to use for the query
+         * @param projection The columns to return
+         * @param begin The start of the time range to query in UTC millis since
+         *            epoch
+         * @param end The end of the time range to query in UTC millis since
+         *            epoch
+         * @param selection Filter on the query as an SQL WHERE statement
+         * @param selectionArgs Args to replace any '?'s in the selection
+         * @param orderBy How to order the rows as an SQL ORDER BY statement
+         * @return A Cursor of instances matching the selection
+         */
+        public static final Cursor query(ContentResolver cr, String[] projection, long begin,
+                long end, String selection, String[] selectionArgs, String orderBy) {
             Uri.Builder builder = CONTENT_URI.buildUpon();
             ContentUris.appendId(builder, begin);
             ContentUris.appendId(builder, end);
-            if (TextUtils.isEmpty(where)) {
-                where = WHERE_CALENDARS_SELECTED;
+            if (TextUtils.isEmpty(selection)) {
+                selection = WHERE_CALENDARS_SELECTED;
             } else {
-                where = "(" + where + ") AND " + WHERE_CALENDARS_SELECTED;
+                selection = "(" + selection + ") AND " + WHERE_CALENDARS_SELECTED;
             }
-            return cr.query(builder.build(), projection, where,
-                         null, orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
-        }
-
-        public static final Cursor query(ContentResolver cr, String[] projection, long begin,
-                long end, String searchQuery, String where, String orderBy) {
-            Uri.Builder builder = CONTENT_SEARCH_URI.buildUpon();
-            ContentUris.appendId(builder, begin);
-            ContentUris.appendId(builder, end);
-            builder = builder.appendPath(searchQuery);
-            if (TextUtils.isEmpty(where)) {
-                where = WHERE_CALENDARS_SELECTED;
-            } else {
-                where = "(" + where + ") AND " + WHERE_CALENDARS_SELECTED;
-            }
-            return cr.query(builder.build(), projection, where, null,
+            return cr.query(builder.build(), projection, selection, selectionArgs,
                     orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
         }
 
         /**
-         * The content:// style URL for this table
+         * Performs a query to return all visible instances in the given range
+         * that match the given selection. This is a blocking function and
+         * should not be done on the UI thread. This will cause an expansion of
+         * recurring events to fill this time range if they are not already
+         * expanded and will slow down for larger time ranges with many
+         * recurring events.
+         *
+         * @param cr The ContentResolver to use for the query
+         * @param projection The columns to return
+         * @param begin The start of the time range to query in UTC millis since
+         *            epoch
+         * @param end The end of the time range to query in UTC millis since
+         *            epoch
+         * @param searchQuery A string of space separated search terms. Segments
+         *            enclosed by double quotes will be treated as a single
+         *            term.
+         * @param selection Filter on the query as an SQL WHERE statement
+         * @param selectionArgs Args to replace any '?'s in the selection
+         * @param orderBy How to order the rows as an SQL ORDER BY statement
+         * @return A Cursor of instances matching the selection
          */
+        public static final Cursor query(ContentResolver cr, String[] projection, long begin,
+                long end, String searchQuery, String selection, String[] selectionArgs,
+                String orderBy) {
+            Uri.Builder builder = CONTENT_SEARCH_URI.buildUpon();
+            ContentUris.appendId(builder, begin);
+            ContentUris.appendId(builder, end);
+            builder = builder.appendPath(searchQuery);
+            if (TextUtils.isEmpty(selection)) {
+                selection = WHERE_CALENDARS_SELECTED;
+            } else {
+                selection = "(" + selection + ") AND " + WHERE_CALENDARS_SELECTED;
+            }
+            return cr.query(builder.build(), projection, selection, selectionArgs,
+                    orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
+        }
+
+        /**
+         * The content:// style URL for querying an instance range. The begin
+         * and end of the range to query should be added as path segments if
+         * this is used directly.
+         */
+        @SuppressWarnings("hiding")
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
                 "/instances/when");
+        /**
+         * The content:// style URL for querying an instance range by Julian
+         * Day. The start and end day should be added as path segments if this
+         * is used directly.
+         */
         public static final Uri CONTENT_BY_DAY_URI =
             Uri.parse("content://" + AUTHORITY + "/instances/whenbyday");
+        /**
+         * The content:// style URL for querying an instance range with a search
+         * term. The begin, end, and search string should be appended as path
+         * segments if this is used directly.
+         */
         public static final Uri CONTENT_SEARCH_URI = Uri.parse("content://" + AUTHORITY +
                 "/instances/search");
+        /**
+         * The content:// style URL for querying an instance range with a search
+         * term. The start day, end day, and search string should be appended as
+         * path segments if this is used directly.
+         */
         public static final Uri CONTENT_SEARCH_BY_DAY_URI =
             Uri.parse("content://" + AUTHORITY + "/instances/searchbyday");
 
         /**
          * The default sort order for this table.
          */
-        public static final String DEFAULT_SORT_ORDER = "begin ASC";
+        private static final String DEFAULT_SORT_ORDER = "begin ASC";
 
         /**
-         * The sort order is: events with an earlier start time occur
-         * first and if the start times are the same, then events with
-         * a later end time occur first. The later end time is ordered
-         * first so that long-running events in the calendar views appear
-         * first.  If the start and end times of two events are
-         * the same then we sort alphabetically on the title.  This isn't
-         * required for correctness, it just adds a nice touch.
-         */
-        public static final String SORT_CALENDAR_VIEW = "begin ASC, end DESC, title ASC";
-        /**
-         * The beginning time of the instance, in UTC milliseconds
+         * The beginning time of the instance, in UTC milliseconds. Column name.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String BEGIN = "begin";
 
         /**
-         * The ending time of the instance, in UTC milliseconds
+         * The ending time of the instance, in UTC milliseconds. Column name.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String END = "end";
 
         /**
-         * The event for this instance
+         * The _id of the event for this instance. Column name.
          * <P>Type: INTEGER (long, foreign key to the Events table)</P>
          */
         public static final String EVENT_ID = "event_id";
 
         /**
-         * The Julian start day of the instance, relative to the local timezone
+         * The Julian start day of the instance, relative to the local time
+         * zone. Column name.
          * <P>Type: INTEGER (int)</P>
          */
         public static final String START_DAY = "startDay";
 
         /**
-         * The Julian end day of the instance, relative to the local timezone
+         * The Julian end day of the instance, relative to the local time
+         * zone. Column name.
          * <P>Type: INTEGER (int)</P>
          */
         public static final String END_DAY = "endDay";
 
         /**
          * The start minute of the instance measured from midnight in the
-         * local timezone.
+         * local time zone. Column name.
          * <P>Type: INTEGER (int)</P>
          */
         public static final String START_MINUTE = "startMinute";
 
         /**
          * The end minute of the instance measured from midnight in the
-         * local timezone.
+         * local time zone. Column name.
          * <P>Type: INTEGER (int)</P>
          */
         public static final String END_MINUTE = "endMinute";
@@ -1219,14 +1426,12 @@ public final class Calendar {
 
     /**
      * CalendarCache stores some settings for calendar including the current
-     * time zone for the app. These settings are stored using a key/value
+     * time zone for the instaces. These settings are stored using a key/value
      * scheme.
      */
-    public interface CalendarCacheColumns {
+    private interface CalendarCacheColumns {
         /**
-         * The key for the setting. Keys are defined in CalendarChache in the
-         * Calendar provider.
-         * TODO Add keys to this file
+         * The key for the setting. Keys are defined in {@link CalendarCache}.
          */
         public static final String KEY = "key";
 
@@ -1296,7 +1501,7 @@ public final class Calendar {
      * the Instances table and these are all stored in the first (and only)
      * row of the CalendarMetaData table.
      */
-    public interface CalendarMetaDataColumns {
+    private interface CalendarMetaDataColumns {
         /**
          * The local timezone that was used for precomputing the fields
          * in the Instances table.
@@ -1330,34 +1535,51 @@ public final class Calendar {
         public static final String MAX_EVENTDAYS = "maxEventDays";
     }
 
+    /**
+     * @hide
+     */
     public static final class CalendarMetaData implements CalendarMetaDataColumns, BaseColumns {
     }
 
-    public interface EventDaysColumns {
+    private interface EventDaysColumns {
         /**
-         * The Julian starting day number.
+         * The Julian starting day number. Column name.
          * <P>Type: INTEGER (int)</P>
          */
         public static final String STARTDAY = "startDay";
+        /**
+         * The Julian ending day number. Column name.
+         * <P>Type: INTEGER (int)</P>
+         */
         public static final String ENDDAY = "endDay";
 
     }
 
+    /**
+     * Fields and helpers for querying for a list of days that contain events.
+     */
     public static final class EventDays implements EventDaysColumns {
-        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
-                "/instances/groupbyday");
-
-        public static final String[] PROJECTION = { STARTDAY, ENDDAY };
-        public static final String SELECTION = "selected=1";
+        private static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
+                + "/instances/groupbyday");
 
         /**
-         * Retrieves the days with events for the Julian days starting at "startDay"
-         * for "numDays".
+         * The projection used by the EventDays query.
+         */
+        public static final String[] PROJECTION = { STARTDAY, ENDDAY };
+        private static final String SELECTION = "selected=1";
+
+        /**
+         * Retrieves the days with events for the Julian days starting at
+         * "startDay" for "numDays". It returns a cursor containing startday and
+         * endday representing the max range of days for all events beginning on
+         * each startday.This is a blocking function and should not be done on
+         * the UI thread.
          *
          * @param cr the ContentResolver
          * @param startDay the first Julian day in the range
          * @param numDays the number of days to load (must be at least 1)
-         * @return a database cursor
+         * @return a database cursor containing a list of start and end days for
+         *         events
          */
         public static final Cursor query(ContentResolver cr, int startDay, int numDays) {
             if (numDays < 1) {
@@ -1372,9 +1594,9 @@ public final class Calendar {
         }
     }
 
-    public interface RemindersColumns {
+    private interface RemindersColumns {
         /**
-         * The event the reminder belongs to
+         * The event the reminder belongs to. Column name.
          * <P>Type: INTEGER (foreign key to the Events table)</P>
          */
         public static final String EVENT_ID = "event_id";
@@ -1382,17 +1604,24 @@ public final class Calendar {
         /**
          * The minutes prior to the event that the alarm should ring.  -1
          * specifies that we should use the default value for the system.
+         * Column name.
          * <P>Type: INTEGER</P>
          */
         public static final String MINUTES = "minutes";
 
+        /**
+         * Passing this as a minutes value will use the default reminder
+         * minutes.
+         */
         public static final int MINUTES_DEFAULT = -1;
 
         /**
-         * The alarm method, as set on the server.  DEFAULT, ALERT, EMAIL, and
-         * SMS are possible values; the device will only process DEFAULT and
-         * ALERT reminders (the other types are simply stored so we can send the
-         * same reminder info back to the server when we make changes).
+         * The alarm method, as set on the server. {@link #METHOD_DEFAULT},
+         * {@link #METHOD_ALERT}, {@link #METHOD_EMAIL}, and {@link #METHOD_SMS}
+         * are possible values; the device will only process
+         * {@link #METHOD_DEFAULT} and {@link #METHOD_ALERT} reminders (the
+         * other types are simply stored so we can send the same reminder info
+         * back to the server when we make changes).
          */
         public static final String METHOD = "method";
 
@@ -1402,61 +1631,85 @@ public final class Calendar {
         public static final int METHOD_SMS = 3;
     }
 
+    /**
+     * Fields and helpers for accessing reminders for an event.
+     */
     public static final class Reminders implements BaseColumns, RemindersColumns, EventsColumns {
-        public static final String TABLE_NAME = "Reminders";
+        private static final String REMINDERS_WHERE = Calendar.Reminders.EVENT_ID + "=?";
+        /**
+         * The projection used by the reminders query.
+         */
+        public static final String[] PROJECTION = new String[] {
+                _ID, MINUTES, METHOD,};
+        @SuppressWarnings("hiding")
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/reminders");
+
+        /**
+         * Queries all reminders associated with the given event. This is a
+         * blocking call and should not be done on the UI thread.
+         *
+         * @param cr The content resolver to use for the query
+         * @param eventId The id of the event to retrieve reminders for
+         * @return A Cursor containing all reminders for the event
+         */
+        public static final Cursor query(ContentResolver cr, long eventId) {
+            String[] remArgs = {Long.toString(eventId)};
+            return cr.query(CONTENT_URI, PROJECTION, REMINDERS_WHERE, remArgs /* selection args */,
+                    null /* sort order */);
+        }
     }
 
-    public interface CalendarAlertsColumns {
+    private interface CalendarAlertsColumns {
         /**
-         * The event that the alert belongs to
+         * The event that the alert belongs to. Column name.
          * <P>Type: INTEGER (foreign key to the Events table)</P>
          */
         public static final String EVENT_ID = "event_id";
 
         /**
-         * The start time of the event, in UTC
+         * The start time of the event, in UTC. Column name.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String BEGIN = "begin";
 
         /**
-         * The end time of the event, in UTC
+         * The end time of the event, in UTC. Column name.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String END = "end";
 
         /**
-         * The alarm time of the event, in UTC
+         * The alarm time of the event, in UTC. Column name.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String ALARM_TIME = "alarmTime";
 
         /**
          * The creation time of this database entry, in UTC.
-         * (Useful for debugging missed reminders.)
+         * Useful for debugging missed reminders. Column name.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String CREATION_TIME = "creationTime";
 
         /**
          * The time that the alarm broadcast was received by the Calendar app,
-         * in UTC. (Useful for debugging missed reminders.)
+         * in UTC. Useful for debugging missed reminders. Column name.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String RECEIVED_TIME = "receivedTime";
 
         /**
          * The time that the notification was created by the Calendar app,
-         * in UTC. (Useful for debugging missed reminders.)
+         * in UTC. Useful for debugging missed reminders. Column name.
          * <P>Type: INTEGER (long; millis since epoch)</P>
          */
         public static final String NOTIFY_TIME = "notifyTime";
 
         /**
-         * The state of this alert.  It starts out as SCHEDULED, then when
-         * the alarm goes off, it changes to FIRED, and then when the user
-         * dismisses the alarm it changes to DISMISSED.
+         * The state of this alert. It starts out as {@link SCHEDULED}, then
+         * when the alarm goes off, it changes to {@link FIRED}, and then when
+         * the user dismisses the alarm it changes to {@link DISMISSED}. Column
+         * name.
          * <P>Type: INTEGER</P>
          */
         public static final String STATE = "state";
@@ -1466,21 +1719,33 @@ public final class Calendar {
         public static final int DISMISSED = 2;
 
         /**
-         * The number of minutes that this alarm precedes the start time
-         * <P>Type: INTEGER </P>
+         * The number of minutes that this alarm precedes the start time. Column
+         * name.
+         * <P>Type: INTEGER</P>
          */
         public static final String MINUTES = "minutes";
 
         /**
-         * The default sort order for this table
+         * The default sort order for this alerts queries
          */
         public static final String DEFAULT_SORT_ORDER = "begin ASC,title ASC";
     }
 
+    /**
+     * Fields and helpers for accessing calendar alerts information. These
+     * fields are for tracking which alerts have been fired.
+     */
     public static final class CalendarAlerts implements BaseColumns,
             CalendarAlertsColumns, EventsColumns, CalendarsColumns {
 
+        /**
+         * @hide
+         */
         public static final String TABLE_NAME = "CalendarAlerts";
+        /**
+         * The Uri for querying calendar alert information
+         */
+        @SuppressWarnings("hiding")
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
                 "/calendar_alerts");
 
@@ -1507,6 +1772,11 @@ public final class Calendar {
 
         private static final boolean DEBUG = true;
 
+        /**
+         * Helper for inserting an alarm time associated with an event
+         *
+         * @hide
+         */
         public static final Uri insert(ContentResolver cr, long eventId,
                 long begin, long end, long alarmTime, int minutes) {
             ContentValues values = new ContentValues();
@@ -1523,6 +1793,19 @@ public final class Calendar {
             return cr.insert(CONTENT_URI, values);
         }
 
+        /**
+         * Queries alerts info using the given projection, selection filter, and
+         * ordering. This is a blocking call and should not be done on the UI
+         * thread. For selection and selectionArgs usage see
+         * {@link ContentResolver#query(Uri, String[], String, String[], String)}
+         *
+         * @param cr The content resolver to use for the query
+         * @param projection The columns to return
+         * @param selection Filter on the query as an SQL WHERE statement
+         * @param selectionArgs Args to replace any '?'s in the selection
+         * @param sortOrder How to order the rows as an SQL ORDER BY statement
+         * @return A Cursor containing the matching alerts
+         */
         public static final Cursor query(ContentResolver cr, String[] projection,
                 String selection, String[] selectionArgs, String sortOrder) {
             return cr.query(CONTENT_URI, projection, selection, selectionArgs,
@@ -1531,12 +1814,13 @@ public final class Calendar {
 
         /**
          * Finds the next alarm after (or equal to) the given time and returns
-         * the time of that alarm or -1 if no such alarm exists.
+         * the time of that alarm or -1 if no such alarm exists. This is a
+         * blocking call and should not be done on the UI thread.
          *
          * @param cr the ContentResolver
          * @param millis the time in UTC milliseconds
          * @return the next alarm time greater than or equal to "millis", or -1
-         *     if no such alarm exists.
+         *         if no such alarm exists.
          */
         public static final long findNextAlarmTime(ContentResolver cr, long millis) {
             String selection = ALARM_TIME + ">=" + millis;
@@ -1619,6 +1903,17 @@ public final class Calendar {
             }
         }
 
+        /**
+         * Schedules an alarm intent with the system AlarmManager that will
+         * cause the Calendar provider to recheck alarms. This is used to wake
+         * the Calendar alarm handler when an alarm is expected or to do a
+         * periodic refresh of alarm data.
+         *
+         * @param context A context for referencing system resources
+         * @param manager The AlarmManager to use or null
+         * @param alarmTime The time to fire the intent in UTC millis since
+         *            epoch
+         */
         public static void scheduleAlarm(Context context, AlarmManager manager, long alarmTime) {
             if (DEBUG) {
                 Time time = new Time();
@@ -1678,27 +1973,32 @@ public final class Calendar {
         }
     }
 
-    public interface ExtendedPropertiesColumns {
+    private interface ExtendedPropertiesColumns {
         /**
-         * The event the extended property belongs to
+         * The event the extended property belongs to. Column name.
          * <P>Type: INTEGER (foreign key to the Events table)</P>
          */
         public static final String EVENT_ID = "event_id";
 
         /**
          * The name of the extended property.  This is a uri of the form
-         * {scheme}#{local-name} convention.
+         * {scheme}#{local-name} convention. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String NAME = "name";
 
         /**
-         * The value of the extended property.
+         * The value of the extended property. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String VALUE = "value";
     }
 
+    /**
+     * Fields for accessing the Extended Properties. This is a generic set of
+     * name/value pairs for use by sync adapters or apps to add extra
+     * information to events.
+     */
    public static final class ExtendedProperties implements BaseColumns,
             ExtendedPropertiesColumns, EventsColumns {
         public static final Uri CONTENT_URI =
@@ -1719,7 +2019,7 @@ public final class Calendar {
          */
         private SyncState() {}
 
-        public static final String CONTENT_DIRECTORY =
+        private static final String CONTENT_DIRECTORY =
                 SyncStateContract.Constants.CONTENT_DIRECTORY;
 
         /**
@@ -1732,39 +2032,43 @@ public final class Calendar {
     /**
      * Columns from the EventsRawTimes table
      */
-    public interface EventsRawTimesColumns {
+    private interface EventsRawTimesColumns {
         /**
-         * The corresponding event id
+         * The corresponding event id. Column name.
          * <P>Type: INTEGER (long)</P>
          */
         public static final String EVENT_ID = "event_id";
 
         /**
-         * The RFC2445 compliant time the event starts
+         * The RFC2445 compliant time the event starts. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String DTSTART_2445 = "dtstart2445";
 
         /**
-         * The RFC2445 compliant time the event ends
+         * The RFC2445 compliant time the event ends. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String DTEND_2445 = "dtend2445";
 
         /**
-         * The RFC2445 compliant original instance time of the recurring event for which this
-         * event is an exception.
+         * The RFC2445 compliant original instance time of the recurring event
+         * for which this event is an exception. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String ORIGINAL_INSTANCE_TIME_2445 = "originalInstanceTime2445";
 
         /**
-         * The RFC2445 compliant last date this event repeats on, or NULL if it never ends
+         * The RFC2445 compliant last date this event repeats on, or NULL if it
+         * never ends. Column name.
          * <P>Type: TEXT</P>
          */
         public static final String LAST_DATE_2445 = "lastDate2445";
     }
 
+    /**
+     * @hide
+     */
     public static final class EventsRawTimes implements BaseColumns, EventsRawTimesColumns {
     }
 }
