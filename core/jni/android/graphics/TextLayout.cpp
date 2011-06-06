@@ -254,21 +254,21 @@ void TextLayout::drawTextRun(SkPaint* paint, const jchar* chars,
 void TextLayout::getTextRunAdvances(SkPaint* paint, const jchar* chars, jint start,
                                     jint count, jint contextCount, jint dirFlags,
                                     jfloat* resultAdvances, jfloat& resultTotalAdvance) {
+    sp<TextLayoutCacheValue> value;
 #if USE_TEXT_LAYOUT_CACHE
     // Return advances from the cache. Compute them if needed
-    sp<TextLayoutCacheValue> layout = gTextLayoutCache.getValue(
+    value = gTextLayoutCache.getValue(
             paint, chars, start, count, contextCount, dirFlags);
-    if (layout != NULL) {
-        if (resultAdvances != NULL) {
-            memcpy(resultAdvances, layout->getAdvances(), layout->getAdvancesCount() * sizeof(jfloat));
-        }
-        resultTotalAdvance = layout->getTotalAdvance();
-    }
 #else
-    // Compute advances and return them
-    TextLayoutCacheValue::computeValuesWithHarfbuzz(paint, chars, start, count, contextCount,
-            dirFlags, resultAdvances, &resultTotalAdvance, NULL, NULL );
+    value = new TextLayoutCacheValue();
+    value->computeValues(paint, chars, start, count, contextCount, dirFlags);
 #endif
+    if (value != NULL) {
+        if (resultAdvances != NULL) {
+            memcpy(resultAdvances, value->getAdvances(), value->getAdvancesCount() * sizeof(jfloat));
+        }
+        resultTotalAdvance = value->getTotalAdvance();
+    }
 }
 
 void TextLayout::getTextRunAdvancesHB(SkPaint* paint, const jchar* chars, jint start,
