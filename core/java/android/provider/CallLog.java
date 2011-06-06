@@ -77,9 +77,17 @@ public class CallLog {
          */
         public static final String TYPE = "type";
 
+        /** Call log type for incoming calls. */
         public static final int INCOMING_TYPE = 1;
+        /** Call log type for outgoing calls. */
         public static final int OUTGOING_TYPE = 2;
+        /** Call log type for missed calls. */
         public static final int MISSED_TYPE = 3;
+        /**
+         * Call log type for voicemails.
+         * @hide
+         */
+        public static final int VOICEMAIL_TYPE = 4;
 
         /**
          * The phone number as the user entered it.
@@ -141,6 +149,13 @@ public class CallLog {
          * <P>Type: TEXT</P>
          */
         public static final String CACHED_NUMBER_LABEL = "numberlabel";
+
+        /**
+         * URI of the voicemail entry. Populated only for {@link #VOICEMAIL_TYPE}.
+         * <P>Type: TEXT</P>
+         * @hide
+         */
+        public static final String VOICEMAIL_URI = "voicemail_uri";
 
         /**
          * Adds a call to the call log.
