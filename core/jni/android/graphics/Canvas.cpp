@@ -755,32 +755,46 @@ public:
             jfloat x, jfloat y, int flags, SkPaint* paint) {
 
         jint count = end - start;
-        sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
-                paint, textArray, start, count, end, flags);
+        sp<TextLayoutCacheValue> value;
+#if USE_TEXT_LAYOUT_CACHE
+        value = gTextLayoutCache.getValue(paint, textArray, start, count, end, flags);
         if (value == NULL) {
             LOGE("Cannot get TextLayoutCache value");
             return ;
         }
+#else
+        value = new TextLayoutCacheValue();
+        value->computeValues(paint, textArray, start, count, end, flags);
+#endif
+
 #if DEBUG_GLYPHS
         logGlyphs(value);
 #endif
-        doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
-                x, y, flags, paint);
+
+    doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
+            x, y, flags, paint);
     }
 
     static void drawTextWithGlyphs(SkCanvas* canvas, const jchar* textArray,
             int start, int count, int contextCount,
             jfloat x, jfloat y, int flags, SkPaint* paint) {
 
-        sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
-                paint, textArray, start, count, contextCount, flags);
+        sp<TextLayoutCacheValue> value;
+#if USE_TEXT_LAYOUT_CACHE
+        value = gTextLayoutCache.getValue(paint, textArray, start, count, contextCount, flags);
         if (value == NULL) {
             LOGE("Cannot get TextLayoutCache value");
             return ;
         }
+#else
+        value = new TextLayoutCacheValue();
+        value->computeValues(paint, textArray, start, count, contextCount, flags);
+#endif
+
 #if DEBUG_GLYPHS
         logGlyphs(value);
 #endif
+
         doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
                 x, y, flags, paint);
     }

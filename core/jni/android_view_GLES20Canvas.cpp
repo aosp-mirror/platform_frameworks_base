@@ -438,12 +438,17 @@ static void android_view_GLES20Canvas_setupShadow(JNIEnv* env, jobject clazz,
 static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
         jfloat x, jfloat y, int flags, SkPaint* paint) {
 #if RTL_USE_HARFBUZZ
-    sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
-            paint, text, 0, count, count, flags);
+    sp<TextLayoutCacheValue> value;
+#if USE_TEXT_LAYOUT_CACHE
+    value = gTextLayoutCache.getValue(paint, text, 0, count, count, flags);
     if (value == NULL) {
         LOGE("Cannot get TextLayoutCache value");
         return ;
     }
+#else
+    value = new TextLayoutCacheValue();
+    value->computeValues(paint, text, 0, count, count, flags);
+#endif
 #if DEBUG_GLYPHS
     logGlyphs(value);
 #endif
@@ -466,12 +471,17 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
         jint start, jint count, jint contextCount, jfloat x, jfloat y,
         int flags, SkPaint* paint) {
 #if RTL_USE_HARFBUZZ
-    sp<TextLayoutCacheValue> value = gTextLayoutCache.getValue(
-            paint, text, start, count, contextCount, flags);
+    sp<TextLayoutCacheValue> value;
+#if USE_TEXT_LAYOUT_CACHE
+    value = gTextLayoutCache.getValue(paint, text, start, count, contextCount, flags);
     if (value == NULL) {
         LOGE("Cannot get TextLayoutCache value");
         return ;
     }
+#else
+    value = new TextLayoutCacheValue();
+    value->computeValues(paint, text, start, count, contextCount, flags);
+#endif
 #if DEBUG_GLYPHS
     logGlyphs(value);
 #endif
