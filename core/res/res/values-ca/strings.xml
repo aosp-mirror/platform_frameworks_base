@@ -261,6 +261,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permet al titular enviar intencions a un administrador del sistema. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"canviar l\'orientació de la pantalla"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Permet a una aplicació canviar el gir de la pantalla en qualsevol moment. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"enviar senyals Linux a les aplicacions"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Permet a l\'aplicació sol·licitar que el senyal subministrat s\'enviï a tots els processos persistents."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"fer que l\'aplicació s\'executi sempre"</string>
@@ -830,6 +834,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplicació redirigida"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> s\'està executant."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> es va iniciar originalment."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"L\'aplicació <xliff:g id="APPLICATION">%1$s</xliff:g> (procés <xliff:g id="PROCESS">%2$s</xliff:g>) ha incomplert la seva política autoimposada de mode estricte."</string>
     <string name="smv_process" msgid="5120397012047462446">"El procés <xliff:g id="PROCESS">%1$s</xliff:g> ha incomplert la seva política de mode estricte."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> s\'està executant"</string>
