@@ -76,8 +76,9 @@ public class MediaFile {
     public static final int FILE_TYPE_PNG     = 33;
     public static final int FILE_TYPE_BMP     = 34;
     public static final int FILE_TYPE_WBMP    = 35;
+    public static final int FILE_TYPE_WEBP    = 36;
     private static final int FIRST_IMAGE_FILE_TYPE = FILE_TYPE_JPEG;
-    private static final int LAST_IMAGE_FILE_TYPE = FILE_TYPE_WBMP;
+    private static final int LAST_IMAGE_FILE_TYPE = FILE_TYPE_WEBP;
    
     // Playlist file types
     public static final int FILE_TYPE_M3U      = 41;
@@ -213,6 +214,7 @@ public class MediaFile {
         addFileType("PNG", FILE_TYPE_PNG, "image/png", MtpConstants.FORMAT_PNG);
         addFileType("BMP", FILE_TYPE_BMP, "image/x-ms-bmp", MtpConstants.FORMAT_BMP);
         addFileType("WBMP", FILE_TYPE_WBMP, "image/vnd.wap.wbmp");
+        addFileType("WEBP", FILE_TYPE_WBMP, "image/webp");
  
         addFileType("M3U", FILE_TYPE_M3U, "audio/x-mpegurl", MtpConstants.FORMAT_M3U_PLAYLIST);
         addFileType("M3U", FILE_TYPE_M3U, "application/x-mpegurl", MtpConstants.FORMAT_M3U_PLAYLIST);
