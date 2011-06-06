@@ -25,6 +25,8 @@ namespace android {
 
 extern sp<ANativeWindow> android_SurfaceTexture_getNativeWindow(
         JNIEnv* env, jobject thiz);
+extern bool android_SurfaceTexture_isInstanceOf(JNIEnv* env, jobject thiz);
+
 
 } // namespace android
 

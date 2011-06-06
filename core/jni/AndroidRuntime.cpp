@@ -105,6 +105,7 @@ extern int register_android_graphics_ColorFilter(JNIEnv* env);
 extern int register_android_graphics_DrawFilter(JNIEnv* env);
 extern int register_android_graphics_Matrix(JNIEnv* env);
 extern int register_android_graphics_Paint(JNIEnv* env);
+extern int register_android_graphics_ParcelSurfaceTexture(JNIEnv* env);
 extern int register_android_graphics_Path(JNIEnv* env);
 extern int register_android_graphics_PathMeasure(JNIEnv* env);
 extern int register_android_graphics_Picture(JNIEnv*);
@@ -1144,6 +1145,7 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_graphics_Movie),
     REG_JNI(register_android_graphics_NinePatch),
     REG_JNI(register_android_graphics_Paint),
+    REG_JNI(register_android_graphics_ParcelSurfaceTexture),
     REG_JNI(register_android_graphics_Path),
     REG_JNI(register_android_graphics_PathMeasure),
     REG_JNI(register_android_graphics_PathEffect),

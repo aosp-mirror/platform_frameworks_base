@@ -55,6 +55,9 @@ enum {
 static const char* const OutOfResourcesException =
     "android/view/Surface$OutOfResourcesException";
 
+const char* const kSurfaceSessionClassPathName = "android/view/SurfaceSession";
+const char* const kSurfaceClassPathName = "android/view/Surface";
+
 struct sso_t {
     jfieldID client;
 };
@@ -179,6 +182,11 @@ static sp<Surface> getSurface(JNIEnv* env, jobject clazz)
 sp<ANativeWindow> android_Surface_getNativeWindow(
         JNIEnv* env, jobject clazz) {
     return getSurface(env, clazz);
+}
+
+bool android_Surface_isInstanceOf(JNIEnv* env, jobject obj) {
+    jclass surfaceClass = env->FindClass(kSurfaceClassPathName);
+    return env->IsInstanceOf(obj, surfaceClass);
 }
 
 static void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)
@@ -759,8 +767,6 @@ static void Surface_writeToParcel(
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 
-const char* const kSurfaceSessionClassPathName = "android/view/SurfaceSession";
-const char* const kSurfaceClassPathName = "android/view/Surface";
 static void nativeClassInit(JNIEnv* env, jclass clazz);
 
 static JNINativeMethod gSurfaceSessionMethods[] = {

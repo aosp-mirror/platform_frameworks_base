@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef _ANDROID_VIEW_SURFACE_H
-#define _ANDROID_VIEW_SURFACE_H
+#ifndef _ANDROID_GRAPHICS_PARCELSURFACETEXTURE_H
+#define _ANDROID_GRAPHICS_PARCELSURFACETEXTURE_H
 
 #include <android/native_window.h>
 
@@ -23,10 +23,10 @@
 
 namespace android {
 
-extern sp<ANativeWindow> android_Surface_getNativeWindow(
-        JNIEnv* env, jobject clazz);
-extern bool android_Surface_isInstanceOf(JNIEnv* env, jobject obj);
+extern sp<ANativeWindow> android_ParcelSurfaceTexture_getNativeWindow(
+        JNIEnv* env, jobject thiz);
+extern bool android_ParcelSurfaceTexture_isInstanceOf(JNIEnv* env, jobject thiz);
 
 } // namespace android
 
-#endif // _ANDROID_VIEW_SURFACE_H
+#endif // _ANDROID_GRAPHICS_PARCELSURFACETEXTURE_H

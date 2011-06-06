@@ -118,6 +118,16 @@ public class SurfaceTexture {
     }
 
     /**
+     * Set the size of buffers returned by requestBuffers when a width and height
+     * of zero is requested.
+     *
+     * @hide Pending approval by API council.
+     */
+    public void setDefaultBufferSize(int width, int height) {
+        nativeSetDefaultBufferSize(width, height);
+    }
+
+    /**
      * Update the texture image to the most recent frame from the image stream.  This may only be
      * called while the OpenGL ES context that owns the texture is bound to the thread.  It will
      * implicitly bind its texture to the GL_TEXTURE_EXTERNAL_OES texture target.
@@ -206,6 +216,7 @@ public class SurfaceTexture {
     private native void nativeFinalize();
     private native void nativeGetTransformMatrix(float[] mtx);
     private native long nativeGetTimestamp();
+    private native void nativeSetDefaultBufferSize(int width, int height);
     private native void nativeUpdateTexImage();
 
     /*
