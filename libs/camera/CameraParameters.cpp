@@ -146,6 +146,7 @@ const char CameraParameters::PIXEL_FORMAT_YUV420SP[] = "yuv420sp";
 const char CameraParameters::PIXEL_FORMAT_YUV422I[] = "yuv422i-yuyv";
 const char CameraParameters::PIXEL_FORMAT_YUV420P[]  = "yuv420p";
 const char CameraParameters::PIXEL_FORMAT_RGB565[] = "rgb565";
+const char CameraParameters::PIXEL_FORMAT_RGBA8888[] = "rgba8888";
 const char CameraParameters::PIXEL_FORMAT_JPEG[] = "jpeg";
 
 // Values for focus mode settings.
