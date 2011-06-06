@@ -350,6 +350,7 @@ final class GsmSMSDispatcher extends SMSDispatcher {
      *
      * @param tracker holds the multipart Sms tracker ready to be sent
      */
+    @Override
     protected void sendMultipartSms (SmsTracker tracker) {
         ArrayList<String> parts;
         ArrayList<PendingIntent> sentIntents;
@@ -370,32 +371,12 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
     /** {@inheritDoc} */
+    @Override
     protected void acknowledgeLastIncomingSms(boolean success, int result, Message response){
         // FIXME unit test leaves cm == null. this should change
         if (mCm != null) {
             mCm.acknowledgeLastIncomingGsmSms(success, resultToCause(result), response);
         }
-    }
-
-    /** {@inheritDoc} */
-    protected void activateCellBroadcastSms(int activate, Message response) {
-        // Unless CBS is implemented for GSM, this point should be unreachable.
-        Log.e(TAG, "Error! The functionality cell broadcast sms is not implemented for GSM.");
-        response.recycle();
-    }
-
-    /** {@inheritDoc} */
-    protected void getCellBroadcastSmsConfig(Message response){
-        // Unless CBS is implemented for GSM, this point should be unreachable.
-        Log.e(TAG, "Error! The functionality cell broadcast sms is not implemented for GSM.");
-        response.recycle();
-    }
-
-    /** {@inheritDoc} */
-    protected  void setCellBroadcastConfig(int[] configValuesArray, Message response) {
-        // Unless CBS is implemented for GSM, this point should be unreachable.
-        Log.e(TAG, "Error! The functionality cell broadcast sms is not implemented for GSM.");
-        response.recycle();
     }
 
     private int resultToCause(int rc) {
@@ -489,9 +470,10 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
     // This map holds incomplete concatenated messages waiting for assembly
-    private HashMap<SmsCbConcatInfo, byte[][]> mSmsCbPageMap =
+    private final HashMap<SmsCbConcatInfo, byte[][]> mSmsCbPageMap =
             new HashMap<SmsCbConcatInfo, byte[][]>();
 
+    @Override
     protected void handleBroadcastSms(AsyncResult ar) {
         try {
             byte[][] pdus = null;
@@ -503,9 +485,9 @@ final class GsmSMSDispatcher extends SMSDispatcher {
                     for (int j = i; j < i + 8 && j < receivedPdu.length; j++) {
                         int b = receivedPdu[j] & 0xff;
                         if (b < 0x10) {
-                            sb.append("0");
+                            sb.append('0');
                         }
-                        sb.append(Integer.toHexString(b)).append(" ");
+                        sb.append(Integer.toHexString(b)).append(' ');
                     }
                     Log.d(TAG, sb.toString());
                 }
@@ -550,7 +532,8 @@ final class GsmSMSDispatcher extends SMSDispatcher {
                 pdus[0] = receivedPdu;
             }
 
-            dispatchBroadcastPdus(pdus);
+            boolean isEmergencyMessage = SmsCbHeader.isEmergencyMessage(header.messageIdentifier);
+            dispatchBroadcastPdus(pdus, isEmergencyMessage);
 
             // Remove messages that are out of scope to prevent the map from
             // growing indefinitely, containing incomplete messages that were

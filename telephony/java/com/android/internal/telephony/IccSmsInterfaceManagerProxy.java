@@ -76,4 +76,13 @@ public class IccSmsInterfaceManagerProxy extends ISms.Stub {
         return mIccSmsInterfaceManager.disableCellBroadcast(messageIdentifier);
     }
 
+    public boolean enableCellBroadcastRange(int startMessageId, int endMessageId)
+            throws android.os.RemoteException {
+        return mIccSmsInterfaceManager.enableCellBroadcastRange(startMessageId, endMessageId);
+    }
+
+    public boolean disableCellBroadcastRange(int startMessageId, int endMessageId)
+            throws android.os.RemoteException {
+        return mIccSmsInterfaceManager.disableCellBroadcastRange(startMessageId, endMessageId);
+    }
 }

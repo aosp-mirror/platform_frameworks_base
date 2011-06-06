@@ -427,6 +427,13 @@
       your messages or delete them without showing them to you.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_receiveEmergencyBroadcast">receive emergency broadcasts</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_receiveEmergencyBroadcast">Allows application to receive
+      and process emergency broadcast messages. This permission is only available
+      to system applications.</string>
+
+     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_sendSms">send SMS messages</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_sendSms">Allows application to send SMS
