@@ -265,6 +265,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"อนุญาตให้ผู้ถือส่งเนื้อหาไปยังโปรแกรมควบคุมอุปกรณ์ ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"เปลี่ยนการวางแนวหน้าจอ"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"อนุญาตให้แอปพลิเคชันเปลี่ยนการหมุนหน้าจอได้ตลอดเวลา ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"ส่งสัญญาณ Linux ไปยังแอปพลิเคชัน"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"อนุญาตให้แอปพลิเคชันร้องขอให้ส่งสัญญาณแจ้งไปยังกระบวนการที่ยังทำงานอยู่ทั้งหมด"</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"ทำให้แอปพลิเคชันทำงานตลอดเวลา"</string>

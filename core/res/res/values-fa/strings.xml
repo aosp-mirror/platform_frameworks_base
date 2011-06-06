@@ -265,6 +265,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"به نگهدارنده اجازه می دهد مفاد را به یک سرپرست دستگاه ارسال کند. هرگز برای برنامه های معمولی مورد نیاز نیست."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"تغییر جهت صفحه"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"به یک برنامه کاربردی اجازه می دهد چرخش صفحه را در هر زمانی تغییر دهد. هرگز برای برنامه های معمولی مورد نیاز نیست."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"ارسال سیگنال های Linux برای برنامه ها"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"به برنامه کاربردی اجازه می دهد درخواست کند که سیگنال ارائه شده را به تمام فرایندهای ثابت ارسال کند."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"برنامه همیشه اجرا شود"</string>

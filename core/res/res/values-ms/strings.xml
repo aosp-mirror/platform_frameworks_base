@@ -297,6 +297,10 @@
     <skip />
     <string name="permlab_setOrientation" msgid="3365947717163866844">"tukar orientasi skrin"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Membolehkan aplikasi untuk menukar putaran skrin pada bila-bila masa. Tidak seharusnya diperlukan untuk aplikasi biasa."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"hantar isyarat Linux kepada aplikasi"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Membenarkan aplikasi meminta isyarat yang dibekalkan dihantar kepada semua proses gigih."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"buatkan aplikasi sentiasa berjalan"</string>

@@ -265,6 +265,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"允许持有对象将意向发送到设备管理器。普通的应用程序一律无需此权限。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"更改屏幕显示方向"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"允许应用程序随时更改屏幕的旋转方向。普通应用程序从不需要使用此权限。"</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"向应用程序发送 Linux 信号"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"允许应用程序请求将所提供的信号发送给所有持久进程。"</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"让应用程序始终运行"</string>

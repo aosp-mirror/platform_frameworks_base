@@ -265,6 +265,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Ermöglicht dem Halter, Intents an einen Geräteadministrator zu senden. Sollte nie für normale Anwendungen benötigt werden."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"Bildschirmausrichtung ändern"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Ermöglicht der Anwendung, die Bildschirmdrehung jederzeit zu ändern. Sollte nicht für normale Anwendungen benötigt werden."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"Linux-Signale an Anwendungen senden"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Ermöglicht der Anwendung, das Senden des gelieferten Signals an alle anhaltenden Prozesse zu fordern"</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"Anwendungen permanent ausführen"</string>

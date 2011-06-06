@@ -265,6 +265,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Cihazın sahibinin cihaz yöneticisine amaç göndermesine izin verir. Normal uygulamalarda hiçbir zaman gerek duyulmamalıdır."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ekran yönünü değiştir"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Uygulamaların ekran yönünü istedikleri zaman değiştirmesine izin verir. Normal uygulamalarda hiçbir zaman gerekmemelidir."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"uygulamalara Linux sinyalleri gönder"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Uygulamaların, sağlanan sinyalin tüm kalıcı işlemlere gönderilmesini istemesine izin verir."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"uygulamayı her zaman çalıştır"</string>
