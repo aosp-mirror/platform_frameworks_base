@@ -183,6 +183,15 @@ public final class Calendar {
          */
         public static final String DIRTY = "dirty";
 
+        /**
+         * If set to 1 this causes events on this calendar to be duplicated with
+         * {@link EventsColumns#LAST_SYNCED} set to 1 whenever the event transitions from non-dirty
+         * to dirty. The duplicated event will not be expanded in the instances table and will only
+         * show up in sync adapter queries of the events table. It will also be deleted when the
+         * originating event has its dirty flag cleared by the sync adapter.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String CAN_PARTIALLY_UPDATE = "canPartiallyUpdate";
     }
 
     /**
@@ -317,7 +326,8 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, Calendars.NAME);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv,
                         Calendars.DISPLAY_NAME);
-                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, Calendars.CALENDAR_COLOR);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv,
+                        Calendars.CALENDAR_COLOR);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, ACCESS_LEVEL);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, VISIBLE);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, SYNC_EVENTS);
@@ -332,6 +342,8 @@ public final class Calendar {
                         Calendars.CAN_MODIFY_TIME_ZONE);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv,
                         Calendars.MAX_REMINDERS);
+                DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv,
+                        Calendars.CAN_PARTIALLY_UPDATE);
 
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, DELETED);
 
@@ -512,6 +524,7 @@ public final class Calendar {
             MAX_REMINDERS,
             CAN_MODIFY_TIME_ZONE,
             CAN_ORGANIZER_RESPOND,
+            CAN_PARTIALLY_UPDATE,
             CALENDAR_LOCATION,
             CALENDAR_TIMEZONE,
             ACCESS_LEVEL,
@@ -684,6 +697,23 @@ public final class Calendar {
          * <P>Type: TEXT</P>
          */
         public static final String SYNC_DATA1 = "sync_data1";
+
+        /**
+         * This column is available for use by sync adapters
+         * <P>Type: TEXT</P>
+         */
+        public static final String SYNC_DATA7 = "sync_data7";
+
+        /**
+         * Used to indicate that a row is not a real event but an original copy of a locally
+         * modified event. A copy is made when an event changes from non-dirty to dirty and the
+         * event is on a calendar with {@link Calendars#CAN_PARTIALLY_UPDATE} set to 1. This copy
+         * does not get expanded in the instances table and is only visible in queries made by a
+         * sync adapter. The copy gets removed when the event is changed back to non-dirty by a
+         * sync adapter.
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String LAST_SYNCED = "lastSynced";
 
         /**
          * The comments feed uri. Column name.
@@ -1030,7 +1060,9 @@ public final class Calendar {
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, ORGANIZER);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_ID);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_DATA);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, SYNC_DATA7);
                 DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, DIRTY);
+                DatabaseUtils.cursorLongToContentValuesIfPresent(cursor, cv, LAST_SYNCED);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, _SYNC_VERSION);
                 DatabaseUtils.cursorIntToContentValuesIfPresent(cursor, cv, DELETED);
                 DatabaseUtils.cursorStringToContentValuesIfPresent(cursor, cv, CAL_SYNC1);
@@ -1191,7 +1223,8 @@ public final class Calendar {
                 CAL_SYNC3,
                 CAL_SYNC4,
                 CAL_SYNC5,
-                CAL_SYNC6
+                CAL_SYNC6,
+                CAN_PARTIALLY_UPDATE,
         };
 
         /**
@@ -1706,9 +1739,9 @@ public final class Calendar {
         public static final String NOTIFY_TIME = "notifyTime";
 
         /**
-         * The state of this alert. It starts out as {@link SCHEDULED}, then
-         * when the alarm goes off, it changes to {@link FIRED}, and then when
-         * the user dismisses the alarm it changes to {@link DISMISSED}. Column
+         * The state of this alert. It starts out as {@link #SCHEDULED}, then
+         * when the alarm goes off, it changes to {@link #FIRED}, and then when
+         * the user dismisses the alarm it changes to {@link #DISMISSED}. Column
          * name.
          * <P>Type: INTEGER</P>
          */
