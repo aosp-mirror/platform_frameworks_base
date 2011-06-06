@@ -342,6 +342,7 @@ public class WifiService extends IWifiManager.Stub {
      * Protected by mWifiStateTracker lock.
      */
     private final WorkSource mTmpWorkSource = new WorkSource();
+    private WifiWatchdogService mWifiWatchdogService;
 
     WifiService(Context context) {
         mContext = context;
@@ -431,6 +432,9 @@ public class WifiService extends IWifiManager.Stub {
         Slog.i(TAG, "WifiService starting up with Wi-Fi " +
                 (wifiEnabled ? "enabled" : "disabled"));
         setWifiEnabled(wifiEnabled);
+
+        //TODO: as part of WWS refactor, create only when needed
+        mWifiWatchdogService = new WifiWatchdogService(mContext);
     }
 
     private boolean testAndClearWifiSavedState() {
@@ -1155,6 +1159,10 @@ public class WifiService extends IWifiManager.Stub {
         pw.println();
         pw.println("Locks held:");
         mLocks.dump(pw);
+
+        pw.println();
+        pw.println("WifiWatchdogService dump");
+        mWifiWatchdogService.dump(pw);
     }
 
     private class WifiLock extends DeathRecipient {
