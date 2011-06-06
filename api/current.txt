@@ -16416,6 +16416,7 @@ package android.renderscript {
     method public void setFromFieldPacker(int, int, android.renderscript.FieldPacker);
     method public void syncAll(int);
     field public static final int USAGE_GRAPHICS_CONSTANTS = 8; // 0x8
+    field public static final int USAGE_GRAPHICS_RENDER_TARGET = 16; // 0x10
     field public static final int USAGE_GRAPHICS_TEXTURE = 2; // 0x2
     field public static final int USAGE_GRAPHICS_VERTEX = 4; // 0x4
     field public static final int USAGE_SCRIPT = 1; // 0x1

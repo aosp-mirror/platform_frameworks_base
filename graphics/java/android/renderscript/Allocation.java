@@ -100,7 +100,6 @@ public class Allocation extends BaseObj {
     public static final int USAGE_GRAPHICS_CONSTANTS = 0x0008;
 
     /**
-     * @hide
      * USAGE_GRAPHICS_RENDER_TARGET The allcation will be used as a
      * target for offscreen rendering
      *
