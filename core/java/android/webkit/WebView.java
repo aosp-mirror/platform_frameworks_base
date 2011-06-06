@@ -6503,6 +6503,8 @@ public class WebView extends AbsoluteLayout
     // arrow key events, not trackball events, from one child to the next
     private boolean mMapTrackballToArrowKeys = true;
 
+    private DrawData mDelaySetPicture;
+
     public void setMapTrackballToArrowKeys(boolean setMap) {
         checkThread();
         mMapTrackballToArrowKeys = setMap;
@@ -7912,7 +7914,8 @@ public class WebView extends AbsoluteLayout
                 // after WebView's destroy() is called, skip handling messages.
                 return;
             }
-            if (mBlockWebkitViewMessages) {
+            if (mBlockWebkitViewMessages
+                    && msg.what != WEBCORE_INITIALIZED_MSG_ID) {
                 // Blocking messages from webkit
                 return;
             }
@@ -8060,6 +8063,10 @@ public class WebView extends AbsoluteLayout
                             BrowserFrame.DRAWABLEDIR, mContext);
                     AssetManager am = mContext.getAssets();
                     nativeCreate(msg.arg1, drawableDir, am);
+                    if (mDelaySetPicture != null) {
+                        setNewPicture(mDelaySetPicture);
+                        mDelaySetPicture = null;
+                    }
                     break;
                 case UPDATE_TEXTFIELD_TEXT_MSG_ID:
                     // Make sure that the textfield is currently focused
@@ -8371,6 +8378,15 @@ public class WebView extends AbsoluteLayout
     }
 
     void setNewPicture(final WebViewCore.DrawData draw) {
+        if (mNativeClass == 0) {
+            if (mDelaySetPicture != null) {
+                throw new IllegalStateException(
+                        "Tried to setNewPicture with a delay picture already set! (memory leak)");
+            }
+            // Not initialized yet, delay set
+            mDelaySetPicture = draw;
+            return;
+        }
         WebViewCore.ViewState viewState = draw.mViewState;
         boolean isPictureAfterFirstLayout = viewState != null;
         setBaseLayer(draw.mBaseLayer, draw.mInvalRegion,
