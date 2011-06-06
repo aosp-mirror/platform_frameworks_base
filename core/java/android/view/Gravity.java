@@ -109,16 +109,16 @@ public class Gravity
      */
     public static final int DISPLAY_CLIP_HORIZONTAL = 0x01000000;
     
-    /** Push object to x-axis position before its container, not changing its size. */
-    public static final int BEFORE = RELATIVE_HORIZONTAL_DIRECTION | LEFT;
+    /** Push object to x-axis position at the start of its container, not changing its size. */
+    public static final int START = RELATIVE_HORIZONTAL_DIRECTION | LEFT;
 
-    /** Push object to x-axis position after its container, not changing its size. */
-    public static final int AFTER = RELATIVE_HORIZONTAL_DIRECTION | RIGHT;
+    /** Push object to x-axis position at the end of its container, not changing its size. */
+    public static final int END = RELATIVE_HORIZONTAL_DIRECTION | RIGHT;
 
     /**
      * Binary mask for the horizontal gravity and script specific direction bit.
      */
-    public static final int RELATIVE_HORIZONTAL_GRAVITY_MASK = BEFORE | AFTER;
+    public static final int RELATIVE_HORIZONTAL_GRAVITY_MASK = START | END;
 
     /**
      * Apply a gravity constant to an object. This suppose that the layout direction is LTR.
@@ -342,8 +342,8 @@ public class Gravity
     /**
      * <p>Convert script specific gravity to absolute horizontal value.</p>
      *
-     * if horizontal direction is LTR, then BEFORE will set LEFT and AFTER will set RIGHT.
-     * if horizontal direction is RTL, then BEFORE will set RIGHT and AFTER will set LEFT.
+     * if horizontal direction is LTR, then START will set LEFT and END will set RIGHT.
+     * if horizontal direction is RTL, then START will set RIGHT and END will set LEFT.
      *
      * @param gravity The gravity to convert to absolute (horizontal) values.
      * @param isRtl Whether the layout is right-to-left.
@@ -351,11 +351,11 @@ public class Gravity
      */
     public static int getAbsoluteGravity(int gravity, boolean isRtl) {
         int result = gravity;
-        // If layout is script specific and gravity is horizontal relative (BEFORE or AFTER)
+        // If layout is script specific and gravity is horizontal relative (START or END)
         if ((result & RELATIVE_HORIZONTAL_DIRECTION) > 0) {
-            if ((result & Gravity.BEFORE) == Gravity.BEFORE) {
-                // Remove the BEFORE bit
-                result &= ~BEFORE;
+            if ((result & Gravity.START) == Gravity.START) {
+                // Remove the START bit
+                result &= ~START;
                 if (isRtl) {
                     // Set the RIGHT bit
                     result |= RIGHT;
@@ -363,9 +363,9 @@ public class Gravity
                     // Set the LEFT bit
                     result |= LEFT;
                 }
-            } else if ((result & Gravity.AFTER) == Gravity.AFTER) {
-                // Remove the AFTER bit
-                result &= ~AFTER;
+            } else if ((result & Gravity.END) == Gravity.END) {
+                // Remove the END bit
+                result &= ~END;
                 if (isRtl) {
                     // Set the LEFT bit
                     result |= LEFT;

@@ -116,10 +116,10 @@ public class LinearLayout extends ViewGroup {
                 equals = Gravity.LEFT, name = "LEFT"),
             @ViewDebug.FlagToString(mask = Gravity.RIGHT,
                 equals = Gravity.RIGHT, name = "RIGHT"),
-            @ViewDebug.FlagToString(mask = Gravity.BEFORE,
-                equals = Gravity.BEFORE, name = "BEFORE"),
-            @ViewDebug.FlagToString(mask = Gravity.AFTER,
-                equals = Gravity.AFTER, name = "AFTER"),
+            @ViewDebug.FlagToString(mask = Gravity.START,
+                equals = Gravity.START, name = "START"),
+            @ViewDebug.FlagToString(mask = Gravity.END,
+                equals = Gravity.END, name = "END"),
             @ViewDebug.FlagToString(mask = Gravity.CENTER_VERTICAL,
                 equals = Gravity.CENTER_VERTICAL, name = "CENTER_VERTICAL"),
             @ViewDebug.FlagToString(mask = Gravity.FILL_VERTICAL,
@@ -135,7 +135,7 @@ public class LinearLayout extends ViewGroup {
             @ViewDebug.FlagToString(mask = Gravity.RELATIVE_HORIZONTAL_DIRECTION,
                 equals = Gravity.RELATIVE_HORIZONTAL_DIRECTION, name = "RELATIVE")
         })
-    private int mGravity = Gravity.BEFORE | Gravity.TOP;
+    private int mGravity = Gravity.START | Gravity.TOP;
 
     @ViewDebug.ExportedProperty(category = "measurement")
     private int mTotalLength;
@@ -1649,7 +1649,7 @@ public class LinearLayout extends ViewGroup {
     public void setGravity(int gravity) {
         if (mGravity != gravity) {
             if ((gravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) == 0) {
-                gravity |= Gravity.BEFORE;
+                gravity |= Gravity.START;
             }
 
             if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == 0) {
@@ -1742,8 +1742,8 @@ public class LinearLayout extends ViewGroup {
             @ViewDebug.IntToString(from = Gravity.BOTTOM,            to = "BOTTOM"),
             @ViewDebug.IntToString(from = Gravity.LEFT,              to = "LEFT"),
             @ViewDebug.IntToString(from = Gravity.RIGHT,             to = "RIGHT"),
-            @ViewDebug.IntToString(from = Gravity.BEFORE,            to = "BEFORE"),
-            @ViewDebug.IntToString(from = Gravity.AFTER,             to = "AFTER"),
+            @ViewDebug.IntToString(from = Gravity.START,            to = "START"),
+            @ViewDebug.IntToString(from = Gravity.END,             to = "END"),
             @ViewDebug.IntToString(from = Gravity.CENTER_VERTICAL,   to = "CENTER_VERTICAL"),
             @ViewDebug.IntToString(from = Gravity.FILL_VERTICAL,     to = "FILL_VERTICAL"),
             @ViewDebug.IntToString(from = Gravity.CENTER_HORIZONTAL, to = "CENTER_HORIZONTAL"),

@@ -2094,7 +2094,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public void setGravity(int gravity) {
         if ((gravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) == 0) {
-            gravity |= Gravity.BEFORE;
+            gravity |= Gravity.START;
         }
         if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == 0) {
             gravity |= Gravity.TOP;
@@ -10010,7 +10010,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private boolean                 mSelectAllOnFocus = false;
 
-    private int                     mGravity = Gravity.TOP | Gravity.BEFORE;
+    private int                     mGravity = Gravity.TOP | Gravity.START;
     private boolean                 mHorizontallyScrolling;
 
     private int                     mAutoLinkMask;
