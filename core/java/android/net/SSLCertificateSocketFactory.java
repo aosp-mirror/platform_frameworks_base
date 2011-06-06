@@ -28,6 +28,7 @@ import java.security.cert.X509Certificate;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
@@ -86,6 +87,8 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
 
     private SSLSocketFactory mInsecureFactory = null;
     private SSLSocketFactory mSecureFactory = null;
+    private TrustManager[] mTrustManagers = null;
+    private KeyManager[] mKeyManagers = null;
 
     private final int mHandshakeTimeoutMillis;
     private final SSLClientSessionCache mSessionCache;
@@ -197,10 +200,11 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
         }
     }
 
-    private SSLSocketFactory makeSocketFactory(TrustManager[] trustManagers) {
+    private SSLSocketFactory makeSocketFactory(
+            KeyManager[] keyManagers, TrustManager[] trustManagers) {
         try {
             OpenSSLContextImpl sslContext = new OpenSSLContextImpl();
-            sslContext.engineInit(null, trustManagers, null);
+            sslContext.engineInit(keyManagers, trustManagers, null);
             sslContext.engineGetClientSessionContext().setPersistentCache(mSessionCache);
             return sslContext.engineGetSocketFactory();
         } catch (KeyManagementException e) {
@@ -223,16 +227,42 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
                 } else {
                     Log.w(TAG, "Bypassing SSL security checks at caller's request");
                 }
-                mInsecureFactory = makeSocketFactory(INSECURE_TRUST_MANAGER);
+                mInsecureFactory = makeSocketFactory(mKeyManagers, INSECURE_TRUST_MANAGER);
             }
             return mInsecureFactory;
         } else {
             if (mSecureFactory == null) {
-                mSecureFactory = makeSocketFactory(null);
+                mSecureFactory = makeSocketFactory(mKeyManagers, mTrustManagers);
             }
             return mSecureFactory;
         }
     }
+
+    /**
+     * Sets the {@link TrustManager}s to be used for connections made by this factory.
+     * @hide
+     */
+    public void setTrustManagers(TrustManager[] trustManager) {
+        mTrustManagers = trustManager;
+
+        // Clear out all cached secure factories since configurations have changed.
+        mSecureFactory = null;
+        // Note - insecure factories only ever use the INSECURE_TRUST_MANAGER so they need not
+        // be cleared out here.
+    }
+
+    /**
+     * Sets the {@link KeyManager}s to be used for connections made by this factory.
+     * @hide
+     */
+    public void setKeyManagers(KeyManager[] keyManagers) {
+        mKeyManagers = keyManagers;
+
+        // Clear out any existing cached factories since configurations have changed.
+        mSecureFactory = null;
+        mInsecureFactory = null;
+    }
+
 
     /**
      * {@inheritDoc}
