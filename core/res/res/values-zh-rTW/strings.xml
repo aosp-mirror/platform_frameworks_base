@@ -261,6 +261,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"允許應用程式將調用請求 (intent) 傳送至裝置管理員；一般應用程式不需使用此選項。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"變更螢幕顯示方向"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"允許應用程式可隨時變更螢幕旋轉方向。一般應用不應使用這項功能。"</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"傳送 Linux 訊號到應用程式"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"允許應用程式要求將支援的訊號傳送到所有持續的程序。"</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"設定應用程式持續執行"</string>
@@ -830,6 +834,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"應用程式已重新導向"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」現在正在執行。"</string>
     <string name="launch_warning_original" msgid="188102023021668683">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」原先已啟動。"</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"應用程式 <xliff:g id="APPLICATION">%1$s</xliff:g> (處理程序 <xliff:g id="PROCESS">%2$s</xliff:g>) 已違反其自行強制實施的嚴格模式 (StrictMode) 政策。"</string>
     <string name="smv_process" msgid="5120397012047462446">"處理程序 <xliff:g id="PROCESS">%1$s</xliff:g> 已違反其自行強制實施的嚴格模式 (StrictMode) 政策。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> 執行中"</string>

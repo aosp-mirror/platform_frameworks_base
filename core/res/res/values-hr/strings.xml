@@ -261,6 +261,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Nositelju omogućuje slanje namjera administratoru uređaja. Nikad ne bi trebalo koristiti za uobičajene aplikacije."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"promjena orijentacije zaslona"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Aplikaciji omogućuje promjenu rotacije zaslona u svakom trenutku. Nikad ne bi trebalo koristiti za uobičajene aplikacije."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"slanje Linux signala u aplikaciju"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Aplikacijama omogućuje traženje zahtjeva da se dobiveni signal pošalje na sve trajne postupke."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"uvijek pokrenuta aplikacija"</string>
@@ -830,6 +834,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplikacija preusmjerena"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> se izvodi sada."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Aplikacija <xliff:g id="APP_NAME">%1$s</xliff:g> pokrenuta je prva."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Aplikacija <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) prekršila je svoje vlastito pravilo StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> prekršio je svoje vlastito pravilo StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Izvodi se <xliff:g id="APP">%1$s</xliff:g>"</string>

@@ -261,6 +261,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Омогућава власнику да шаље своје намере администратору уређаја. Обичне апликације никада не би требало да је користе."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"промена положаја екрана"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Омогућава да апликација у сваком тренутку промени ротацију екрана. Обичне апликације никада не би требало да је користе."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"слање Linux сигнала апликацијама"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Омогућава да апликација захтева да испоручени сигнал буде послат свим трајним процесима."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"омогућавање непрекидне активности апликације"</string>
@@ -830,6 +834,12 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Апликација је преусмерена"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Апликација <xliff:g id="APP_NAME">%1$s</xliff:g> је сада покренута."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Првобитно је покренута апликација <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
+    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
+    <skip />
+    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
+    <skip />
     <string name="smv_application" msgid="295583804361236288">"Апликација <xliff:g id="APPLICATION">%1$s</xliff:g> (процес <xliff:g id="PROCESS">%2$s</xliff:g>) је прекршила самонаметнуте StrictMode смернице."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> је прекршио самонаметнуте StrictMode смернице."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Апликација <xliff:g id="APP">%1$s</xliff:g> је покренута"</string>
