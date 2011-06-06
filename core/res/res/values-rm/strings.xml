@@ -275,6 +275,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permetta al possessur da trametter intenziuns a l\'administratur dal apparat periferic. Betg previs per applicaziuns normalas."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"midar l\'orientaziun dal visur"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Permetta a l\'applicaziun da midar da tut temp la orientaziun dal visur. Betg previs per applicaziuns normalas."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"trametter signals Linux a las applicaziuns"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Permetta a l\'applicaziun da pretender ch\'il signal furnì vegnia tramess a tut ils process persistents."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"exequir permanentamain applicaziuns"</string>

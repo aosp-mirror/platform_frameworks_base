@@ -265,6 +265,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"للسماح للمالك بإرسال الأهداف إلى أحد مشرفي الجهاز. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"تغيير اتجاه الشاشة"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"للسماح لتطبيق ما بتغيير تدوير الشاشة في أي وقت. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"إرسال إشارات Linux للتطبيقات"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"للسماح للتطبيق بطلب إرسال الإشارة المزوّدة لجميع العمليات المستمرة."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"تشغيل التطبيق دائمًا"</string>

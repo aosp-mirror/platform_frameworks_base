@@ -265,6 +265,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permet à l\'application d\'envoyer des intentions à l\'administrateur de l\'appareil. Les applications standard ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"Changement d\'orientation de l\'écran"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Permet à une application de modifier la rotation de l\'écran à tout moment. Les applications normales ne devraient jamais avoir recours à cette fonctionnalité."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"Envoi de signaux Linux aux applications"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Permet à une application de demander que le signal fourni soit envoyé à tous les processus persistants."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"Exécution de l\'application en continu"</string>
@@ -449,7 +453,7 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"contrôler la communication en champ proche"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Permet à une application de communiquer avec des tags, cartes et lecteurs prenant en charge la communication en champ proche (NFC)."</string>
     <string name="permlab_vpn" msgid="8345800584532175312">"intercepter et modifier l\'ensemble du trafic réseau"</string>
-    <string name="permdesc_vpn" msgid="5617893078989944219">"Permet à une application d\'intercepter et d\'inspecter l\'ensemble du trafic réseau, par exemple pour établir une connexion VPN. Des applications malveillantes sont susceptibles de surveiller, rediriger ou modifier les paquets réseau à votre insu."</string>
+    <string name="permdesc_vpn" msgid="5617893078989944219">"Permet à une application d\'intercepter et de contrôler l\'ensemble du trafic réseau, par exemple pour établir une connexion VPN. Des applications malveillantes sont susceptibles de surveiller, rediriger ou modifier les paquets réseau à votre insu."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"Désactivation du verrouillage des touches"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permet à une application de désactiver le verrouillage des touches et toute sécurité par mot de passe. Exemple : Votre téléphone désactive le verrouillage du clavier lorsque vous recevez un appel, puis le réactive lorsque vous raccrochez."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Lecture des paramètres de synchronisation"</string>

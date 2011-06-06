@@ -265,6 +265,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Lehetővé teszi a használó számára, hogy célokat küldjön egy eszközkezelőnek. A normál alkalmazásoknak erre soha nincs szüksége."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"képernyő irányának módosítása"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Lehetővé teszi egy alkalmazás számára a képernyő elforgatásának módosítását. A normál alkalmazásoknak erre soha nincs szüksége."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"Linux jelek küldése alkalmazásoknak"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Lehetővé teszi az alkalmazás számára, hogy a megadott jelet elküldje az összes állandó folyamatnak."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"alkalmazások folyamatos futtatása"</string>

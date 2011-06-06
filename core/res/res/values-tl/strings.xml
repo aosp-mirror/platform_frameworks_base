@@ -265,6 +265,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Pinapayagan ang holder na magpadala ng mga intensyon sa administrator ng device. Hindi kailanman dapat kailanganin para sa mga normal na application."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"baguhin ang orientation ng screen"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Pinapayagan ang isang application na baguhin ang pag-rotate ng screen anumang oras. Hindi kailanman dapat kailanganin para sa mga normal na application."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"magpadala ng mga Linux signal sa mga application"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Pinapayagan ang application na hilinging ipadala ang na-supply na signal sa lahat ng mga paulit-ulit na proseso."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"palaging patakbuhin ang mga application"</string>

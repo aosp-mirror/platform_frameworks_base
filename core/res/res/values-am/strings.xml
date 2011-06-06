@@ -396,6 +396,10 @@
     <!-- no translation found for permlab_setOrientation (3365947717163866844) -->
     <skip />
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"ትግበራው በማንኛውም ሰዓት የማያንማሽከርከሪያለመለወጥ ይፈቅዳል።ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <!-- no translation found for permlab_signalPersistentProcesses (4255467255488653854) -->
     <skip />
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"ትግበራዎች ለሁሉም ተከታታይ ሂደቶች ልከው የሚያቀርቧቸው ሲግናሎችን ለመጠየቅ ይፈቅዳል።"</string>

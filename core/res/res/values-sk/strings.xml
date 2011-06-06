@@ -265,6 +265,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Umožňuje držiteľovi odosielať informácie správcovi zariadenia. Bežné aplikácie by toto oprávnenie nemali nikdy požadovať."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"zmena orientácie obrazovky"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Umožňuje aplikácii kedykoľvek zmeniť orientáciu obrazovky. Bežné aplikácie by toto nastavenie nemali vôbec využívať."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"odoslanie signálov systému Linux aplikáciám"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Umožňuje aplikácii vyžiadať zaslanie poskytnutého signálu všetkým trvalým procesom."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"trvalé spustenie aplikácie"</string>

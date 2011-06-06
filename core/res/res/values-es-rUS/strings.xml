@@ -265,6 +265,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permite que el propietario envíe sus intentos a un administrador de dispositivos. No se necesita para las aplicaciones normales."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"cambiar la orientación de la pantalla"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Admite una aplicación que cambia la rotación de la pantalla en cualquier momento. Se debe evitar utilizarlo en aplicaciones normales."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"enviar señales de Linux a las aplicaciones"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Admite que la aplicación solicite el envío de la señal suministrada a todos los procesos continuos."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"hacer que siempre se ejecute la aplicación"</string>

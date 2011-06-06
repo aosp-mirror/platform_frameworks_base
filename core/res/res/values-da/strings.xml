@@ -265,6 +265,10 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillader brugeren at sende hensigter til en enhedsadministrator. Bør aldrig være nødvendigt for almindelige programmer."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"skift skærmretning"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Tillader, at et program ændrer rotationen af skærmen når som helst. Bør aldrig være nødvendigt til normale programmer."</string>
+    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
+    <skip />
+    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
+    <skip />
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"send Linux-signaler til programmer"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Tillader, at programmet kan anmode om, at det leverede signal sendes til alle vedholdende processer."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"lad altid programmet køre"</string>
