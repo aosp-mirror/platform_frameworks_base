@@ -35,43 +35,45 @@ class BluetoothDeviceProperties {
         mService = service;
     }
 
-    synchronized Map<String, String> addProperties(String address,
-            String[] properties) {
+    Map<String, String> addProperties(String address, String[] properties) {
         /*
          * We get a DeviceFound signal every time RSSI changes or name changes.
          * Don't create a new Map object every time.
          */
-        Map<String, String> propertyValues = mPropertiesMap.get(address);
-        if (propertyValues == null) {
-            propertyValues = new HashMap<String, String>();
-        }
+        Map<String, String> propertyValues;
+        synchronized(mPropertiesMap) {
+            propertyValues = mPropertiesMap.get(address);
+            if (propertyValues == null) {
+                propertyValues = new HashMap<String, String>();
+            }
 
-        for (int i = 0; i < properties.length; i++) {
-            String name = properties[i];
-            String newValue = null;
-            int len;
-            if (name == null) {
-                Log.e(TAG, "Error: Remote Device Property at index "
+            for (int i = 0; i < properties.length; i++) {
+                String name = properties[i];
+                String newValue = null;
+                int len;
+                if (name == null) {
+                    Log.e(TAG, "Error: Remote Device Property at index "
                         + i + " is null");
-                continue;
-            }
-            if (name.equals("UUIDs") || name.equals("Nodes")) {
-                StringBuilder str = new StringBuilder();
-                len = Integer.valueOf(properties[++i]);
-                for (int j = 0; j < len; j++) {
-                    str.append(properties[++i]);
-                    str.append(",");
+                    continue;
                 }
-                if (len > 0) {
-                    newValue = str.toString();
+                if (name.equals("UUIDs") || name.equals("Nodes")) {
+                    StringBuilder str = new StringBuilder();
+                    len = Integer.valueOf(properties[++i]);
+                    for (int j = 0; j < len; j++) {
+                        str.append(properties[++i]);
+                        str.append(",");
+                    }
+                    if (len > 0) {
+                        newValue = str.toString();
+                    }
+                } else {
+                    newValue = properties[++i];
                 }
-            } else {
-                newValue = properties[++i];
-            }
 
-            propertyValues.put(name, newValue);
+                propertyValues.put(name, newValue);
+            }
+            mPropertiesMap.put(address, propertyValues);
         }
-        mPropertiesMap.put(address, propertyValues);
 
         // We have added a new remote device or updated its properties.
         // Also update the serviceChannel cache.
@@ -79,46 +81,56 @@ class BluetoothDeviceProperties {
         return propertyValues;
     }
 
-    synchronized void setProperty(String address, String name, String value) {
-        Map <String, String> propVal = mPropertiesMap.get(address);
-        if (propVal != null) {
-            propVal.put(name, value);
-            mPropertiesMap.put(address, propVal);
-        } else {
-            Log.e(TAG, "setRemoteDeviceProperty for a device not in cache:" + address);
+    void setProperty(String address, String name, String value) {
+        synchronized(mPropertiesMap) {
+            Map <String, String> propVal = mPropertiesMap.get(address);
+            if (propVal != null) {
+                propVal.put(name, value);
+                mPropertiesMap.put(address, propVal);
+            } else {
+                Log.e(TAG, "setRemoteDeviceProperty for a device not in cache:" + address);
+            }
         }
     }
 
-    synchronized boolean isInCache(String address) {
-        return (mPropertiesMap.get(address) != null);
+    boolean isInCache(String address) {
+        synchronized (mPropertiesMap) {
+            return (mPropertiesMap.get(address) != null);
+        }
     }
 
-    synchronized boolean isEmpty() {
-        return mPropertiesMap.isEmpty();
+    boolean isEmpty() {
+        synchronized (mPropertiesMap) {
+            return mPropertiesMap.isEmpty();
+        }
     }
 
-    synchronized Set<String> keySet() {
-        return mPropertiesMap.keySet();
+    Set<String> keySet() {
+        synchronized (mPropertiesMap) {
+            return mPropertiesMap.keySet();
+        }
     }
 
-    synchronized String getProperty(String address, String property) {
-        Map<String, String> properties = mPropertiesMap.get(address);
-        if (properties != null) {
-            return properties.get(property);
-        } else {
-            // Query for remote device properties, again.
-            // We will need to reload the cache when we switch Bluetooth on / off
-            // or if we crash.
-            properties = updateCache(address);
+    String getProperty(String address, String property) {
+        synchronized(mPropertiesMap) {
+            Map<String, String> properties = mPropertiesMap.get(address);
             if (properties != null) {
                 return properties.get(property);
+            } else {
+                // Query for remote device properties, again.
+                // We will need to reload the cache when we switch Bluetooth on / off
+                // or if we crash.
+                properties = updateCache(address);
+                if (properties != null) {
+                    return properties.get(property);
+                }
             }
         }
         Log.e(TAG, "getRemoteDeviceProperty: " + property + " not present: " + address);
         return null;
     }
 
-    synchronized Map<String, String> updateCache(String address) {
+    Map<String, String> updateCache(String address) {
         String[] propValues = mService.getRemoteDeviceProperties(address);
         if (propValues != null) {
             return addProperties(address, propValues);
