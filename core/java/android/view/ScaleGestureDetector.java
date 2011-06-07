@@ -329,6 +329,15 @@ public class ScaleGestureDetector {
                         // Set focus point to the remaining finger
                         final int index = event.findPointerIndex(actionId == mActiveId0 ?
                                 mActiveId1 : mActiveId0);
+                        if (index < 0) {
+                            mInvalidGesture = true;
+                            Log.e(TAG, "Invalid MotionEvent stream detected.", new Throwable());
+                            if (mGestureInProgress) {
+                                mListener.onScaleEnd(this);
+                            }
+                            return false;
+                        }
+
                         mActiveId0 = event.getPointerId(index);
 
                         mActive0MostRecent = true;
