@@ -1389,6 +1389,14 @@ status_t SurfaceFlinger::destroySurface(const wp<LayerBaseClient>& layer)
     if (l != NULL) {
         Mutex::Autolock _l(mStateLock);
         err = removeLayer_l(l);
+        if (err == NAME_NOT_FOUND) {
+            // The surface wasn't in the current list, which means it was
+            // removed already, which means it is in the purgatory,
+            // and need to be removed from there.
+            ssize_t idx = mLayerPurgatory.remove(l);
+            LOGE_IF(idx < 0,
+                    "layer=%p is not in the purgatory list", l.get());
+        }
         LOGE_IF(err<0 && err != NAME_NOT_FOUND,
                 "error removing layer=%p (%s)", l.get(), strerror(-err));
     }
