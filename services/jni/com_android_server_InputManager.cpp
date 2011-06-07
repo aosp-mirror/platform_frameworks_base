@@ -56,7 +56,7 @@ namespace android {
 // The exponent used to calculate the pointer speed scaling factor.
 // The scaling factor is calculated as 2 ^ (speed * exponent),
 // where the speed ranges from -7 to + 7 and is supplied by the user.
-static const float POINTER_SPEED_EXPONENT = 1.0f / 3;
+static const float POINTER_SPEED_EXPONENT = 1.0f / 4;
 
 static struct {
     jclass clazz;
@@ -77,10 +77,10 @@ static struct {
     jmethodID getKeyRepeatTimeout;
     jmethodID getKeyRepeatDelay;
     jmethodID getMaxEventsPerSecond;
-    jmethodID getTapTimeout;
+    jmethodID getHoverTapTimeout;
+    jmethodID getHoverTapSlop;
     jmethodID getDoubleTapTimeout;
     jmethodID getLongPressTimeout;
-    jmethodID getTouchSlop;
     jmethodID getPointerLayer;
     jmethodID getPointerIcon;
 } gCallbacksClassInfo;
@@ -412,32 +412,32 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         env->DeleteLocalRef(excludedDeviceNames);
     }
 
-    jint tapTimeout = env->CallIntMethod(mCallbacksObj,
-            gCallbacksClassInfo.getTapTimeout);
-    if (!checkAndClearExceptionFromCallback(env, "getTapTimeout")) {
+    jint hoverTapTimeout = env->CallIntMethod(mCallbacksObj,
+            gCallbacksClassInfo.getHoverTapTimeout);
+    if (!checkAndClearExceptionFromCallback(env, "getHoverTapTimeout")) {
         jint doubleTapTimeout = env->CallIntMethod(mCallbacksObj,
                 gCallbacksClassInfo.getDoubleTapTimeout);
         if (!checkAndClearExceptionFromCallback(env, "getDoubleTapTimeout")) {
             jint longPressTimeout = env->CallIntMethod(mCallbacksObj,
                     gCallbacksClassInfo.getLongPressTimeout);
             if (!checkAndClearExceptionFromCallback(env, "getLongPressTimeout")) {
-                outConfig->pointerGestureTapInterval = milliseconds_to_nanoseconds(tapTimeout);
+                outConfig->pointerGestureTapInterval = milliseconds_to_nanoseconds(hoverTapTimeout);
 
                 // We must ensure that the tap-drag interval is significantly shorter than
                 // the long-press timeout because the tap is held down for the entire duration
                 // of the double-tap timeout.
                 jint tapDragInterval = max(min(longPressTimeout - 100,
-                        doubleTapTimeout), tapTimeout);
+                        doubleTapTimeout), hoverTapTimeout);
                 outConfig->pointerGestureTapDragInterval =
                         milliseconds_to_nanoseconds(tapDragInterval);
             }
         }
     }
 
-    jint touchSlop = env->CallIntMethod(mCallbacksObj,
-            gCallbacksClassInfo.getTouchSlop);
-    if (!checkAndClearExceptionFromCallback(env, "getTouchSlop")) {
-        outConfig->pointerGestureTapSlop = touchSlop;
+    jint hoverTapSlop = env->CallIntMethod(mCallbacksObj,
+            gCallbacksClassInfo.getHoverTapSlop);
+    if (!checkAndClearExceptionFromCallback(env, "getHoverTapSlop")) {
+        outConfig->pointerGestureTapSlop = hoverTapSlop;
     }
 
     { // acquire lock
@@ -1348,17 +1348,17 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gCallbacksClassInfo.getKeyRepeatDelay, gCallbacksClassInfo.clazz,
             "getKeyRepeatDelay", "()I");
 
-    GET_METHOD_ID(gCallbacksClassInfo.getTapTimeout, gCallbacksClassInfo.clazz,
-            "getTapTimeout", "()I");
+    GET_METHOD_ID(gCallbacksClassInfo.getHoverTapTimeout, gCallbacksClassInfo.clazz,
+            "getHoverTapTimeout", "()I");
+
+    GET_METHOD_ID(gCallbacksClassInfo.getHoverTapSlop, gCallbacksClassInfo.clazz,
+            "getHoverTapSlop", "()I");
 
     GET_METHOD_ID(gCallbacksClassInfo.getDoubleTapTimeout, gCallbacksClassInfo.clazz,
             "getDoubleTapTimeout", "()I");
 
     GET_METHOD_ID(gCallbacksClassInfo.getLongPressTimeout, gCallbacksClassInfo.clazz,
             "getLongPressTimeout", "()I");
-
-    GET_METHOD_ID(gCallbacksClassInfo.getTouchSlop, gCallbacksClassInfo.clazz,
-            "getTouchSlop", "()I");
 
     GET_METHOD_ID(gCallbacksClassInfo.getMaxEventsPerSecond, gCallbacksClassInfo.clazz,
             "getMaxEventsPerSecond", "()I");
