@@ -214,4 +214,8 @@ status_t StagefrightPlayer::getMetadata(
     return OK;
 }
 
+status_t StagefrightPlayer::dump(int fd, const Vector<String16> &args) const {
+    return mPlayer->dump(fd, args);
+}
+
 }  // namespace android

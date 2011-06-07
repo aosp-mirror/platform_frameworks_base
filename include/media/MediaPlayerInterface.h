@@ -168,6 +168,10 @@ public:
         if (mNotify) mNotify(mCookie, msg, ext1, ext2, obj);
     }
 
+    virtual status_t dump(int fd, const Vector<String16> &args) const {
+        return INVALID_OPERATION;
+    }
+
 private:
     friend class MediaPlayerService;
 

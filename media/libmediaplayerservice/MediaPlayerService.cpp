@@ -368,6 +368,9 @@ status_t MediaPlayerService::Client::dump(int fd, const Vector<String16>& args) 
             mPid, mConnId, mStatus, mLoop?"true": "false");
     result.append(buffer);
     write(fd, result.string(), result.size());
+    if (mPlayer != NULL) {
+        mPlayer->dump(fd, args);
+    }
     if (mAudioOutput != 0) {
         mAudioOutput->dump(fd, args);
     }

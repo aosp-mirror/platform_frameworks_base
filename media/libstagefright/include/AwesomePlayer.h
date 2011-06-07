@@ -105,6 +105,8 @@ struct AwesomePlayer {
 
     status_t setTimedTextTrackIndex(int32_t index);
 
+    status_t dump(int fd, const Vector<String16> &args) const;
+
 private:
     friend struct AwesomeEvent;
     friend struct PreviewPlayer;
@@ -142,6 +144,7 @@ private:
 
     mutable Mutex mLock;
     Mutex mMiscStateLock;
+    mutable Mutex mStatsLock;
 
     OMXClient mClient;
     TimedEventQueue mQueue;
@@ -293,6 +296,33 @@ private:
 
     bool isStreamingHTTP() const;
     void sendCacheStats();
+
+    enum FlagMode {
+        SET,
+        CLEAR,
+        ASSIGN
+    };
+    void modifyFlags(unsigned value, FlagMode mode);
+
+    struct TrackStat {
+        String8 mMIME;
+        String8 mDecoderName;
+    };
+
+    // protected by mStatsLock
+    struct Stats {
+        int mFd;
+        String8 mURI;
+        int64_t mBitrate;
+        ssize_t mAudioTrackIndex;
+        ssize_t mVideoTrackIndex;
+        int64_t mNumVideoFramesDecoded;
+        int64_t mNumVideoFramesDropped;
+        int32_t mVideoWidth;
+        int32_t mVideoHeight;
+        uint32_t mFlags;
+        Vector<TrackStat> mTracks;
+    } mStats;
 
     AwesomePlayer(const AwesomePlayer &);
     AwesomePlayer &operator=(const AwesomePlayer &);
