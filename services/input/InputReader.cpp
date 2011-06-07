@@ -36,12 +36,6 @@
 // Log debug messages about gesture detection.
 #define DEBUG_GESTURES 0
 
-// Specifies whether spots follow fingers or touch points.
-// If 1, show exactly one spot per finger in multitouch gestures.
-// If 0, show exactly one spot per generated touch point in multitouch gestures, so the
-//     spots indicate exactly which points on screen are being touched.
-#define SPOT_FOLLOWS_FINGER 0
-
 #include "InputReader.h"
 
 #include <cutils/atomic.h>
@@ -3286,9 +3280,9 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
         if (finishPreviousGesture || cancelPreviousGesture) {
             mPointerController->clearSpots();
         }
-        mPointerController->setSpots(mPointerGesture.spotGesture,
-                mPointerGesture.spotCoords, mPointerGesture.spotIdToIndex,
-                mPointerGesture.spotIdBits);
+        mPointerController->setSpots(mPointerGesture.currentGestureCoords,
+                mPointerGesture.currentGestureIdToIndex,
+                mPointerGesture.currentGestureIdBits);
     } else {
         mPointerController->setPresentation(PointerControllerInterface::PRESENTATION_POINTER);
     }
@@ -3476,11 +3470,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 mPointerGesture.currentGestureIdBits.clear();
 
                 mPointerGesture.pointerVelocityControl.reset();
-
-                if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
-                    mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
-                    mPointerGesture.spotIdBits.clear();
-                }
                 return true;
             }
         }
@@ -3573,11 +3562,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         mPointerGesture.currentGestureIdBits.clear();
 
         mPointerGesture.pointerVelocityControl.reset();
-
-        if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
-            mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
-            mPointerGesture.spotIdBits.clear();
-        }
     } else if (isPointerDown(mCurrentTouch.buttonState)) {
         // Case 2: Button is pressed. (BUTTON_CLICK_OR_DRAG)
         // The pointer follows the active touch point.
@@ -3659,28 +3643,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_X, x);
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_Y, y);
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
-
-        if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
-            if (activeTouchId >= 0) {
-                // Collapse all spots into one point at the pointer location.
-                mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_BUTTON_DRAG;
-                mPointerGesture.spotIdBits.clear();
-                for (uint32_t i = 0; i < mCurrentTouch.pointerCount; i++) {
-                    uint32_t id = mCurrentTouch.pointers[i].id;
-                    mPointerGesture.spotIdBits.markBit(id);
-                    mPointerGesture.spotIdToIndex[id] = i;
-                    mPointerGesture.spotCoords[i] = mPointerGesture.currentGestureCoords[0];
-                }
-            } else {
-                // No fingers.  Generate a spot at the pointer location so the
-                // anchor appears to be pressed.
-                mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_BUTTON_CLICK;
-                mPointerGesture.spotIdBits.clear();
-                mPointerGesture.spotIdBits.markBit(0);
-                mPointerGesture.spotIdToIndex[0] = 0;
-                mPointerGesture.spotCoords[0] = mPointerGesture.currentGestureCoords[0];
-            }
-        }
     } else if (mCurrentTouch.pointerCount == 0) {
         // Case 3. No fingers down and button is not pressed. (NEUTRAL)
         if (mPointerGesture.lastGestureMode != PointerGesture::NEUTRAL) {
@@ -3721,14 +3683,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                     mPointerGesture.currentGestureCoords[0].setAxisValue(
                             AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
 
-                    if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
-                        mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_TAP;
-                        mPointerGesture.spotIdBits.clear();
-                        mPointerGesture.spotIdBits.markBit(lastActiveTouchId);
-                        mPointerGesture.spotIdToIndex[lastActiveTouchId] = 0;
-                        mPointerGesture.spotCoords[0] = mPointerGesture.currentGestureCoords[0];
-                    }
-
                     tapped = true;
                 } else {
 #if DEBUG_GESTURES
@@ -3754,11 +3708,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             mPointerGesture.activeGestureId = -1;
             mPointerGesture.currentGestureMode = PointerGesture::NEUTRAL;
             mPointerGesture.currentGestureIdBits.clear();
-
-            if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
-                mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
-                mPointerGesture.spotIdBits.clear();
-            }
         }
     } else if (mCurrentTouch.pointerCount == 1) {
         // Case 4. Exactly one finger down, button is not pressed. (HOVER or TAP_DRAG)
@@ -3846,15 +3795,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             mPointerGesture.tapX = x;
             mPointerGesture.tapY = y;
         }
-
-        if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
-            mPointerGesture.spotGesture = down ? PointerControllerInterface::SPOT_GESTURE_DRAG
-                    : PointerControllerInterface::SPOT_GESTURE_HOVER;
-            mPointerGesture.spotIdBits.clear();
-            mPointerGesture.spotIdBits.markBit(activeTouchId);
-            mPointerGesture.spotIdToIndex[activeTouchId] = 0;
-            mPointerGesture.spotCoords[0] = mPointerGesture.currentGestureCoords[0];
-        }
     } else {
         // Case 5. At least two fingers down, button is not pressed. (PRESS, SWIPE or FREEFORM)
         // We need to provide feedback for each finger that goes down so we cannot wait
@@ -3898,37 +3838,17 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             mPointerGesture.referenceIdBits.clear();
             mPointerGesture.pointerVelocityControl.reset();
 
-            if (settled && mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS
-                    && mLastTouch.idBits.hasBit(mPointerGesture.activeTouchId)) {
-                // The spot is already visible and has settled, use it as the reference point
-                // for the gesture.  Other spots will be positioned relative to this one.
+            // Use the centroid and pointer location as the reference points for the gesture.
 #if DEBUG_GESTURES
-                LOGD("Gestures: Using active spot as reference for MULTITOUCH, "
-                        "settle time expired %0.3fms ago", (when - mPointerGesture.firstTouchTime
-                                - mConfig->pointerGestureMultitouchSettleInterval)
-                                * 0.000001f);
+            LOGD("Gestures: Using centroid as reference for MULTITOUCH, "
+                    "settle time remaining %0.3fms", (mPointerGesture.firstTouchTime
+                            + mConfig->pointerGestureMultitouchSettleInterval - when)
+                            * 0.000001f);
 #endif
-                const PointerData& d = mLastTouch.pointers[mLastTouch.idToIndex[
-                        mPointerGesture.activeTouchId]];
-                mPointerGesture.referenceTouchX = d.x;
-                mPointerGesture.referenceTouchY = d.y;
-                const PointerCoords& c = mPointerGesture.spotCoords[mPointerGesture.spotIdToIndex[
-                        mPointerGesture.activeTouchId]];
-                mPointerGesture.referenceGestureX = c.getAxisValue(AMOTION_EVENT_AXIS_X);
-                mPointerGesture.referenceGestureY = c.getAxisValue(AMOTION_EVENT_AXIS_Y);
-            } else {
-                // Use the centroid and pointer location as the reference points for the gesture.
-#if DEBUG_GESTURES
-                LOGD("Gestures: Using centroid as reference for MULTITOUCH, "
-                        "settle time remaining %0.3fms", (mPointerGesture.firstTouchTime
-                                + mConfig->pointerGestureMultitouchSettleInterval - when)
-                                * 0.000001f);
-#endif
-                mCurrentTouch.getCentroid(&mPointerGesture.referenceTouchX,
-                        &mPointerGesture.referenceTouchY);
-                mPointerController->getPosition(&mPointerGesture.referenceGestureX,
-                        &mPointerGesture.referenceGestureY);
-            }
+            mCurrentTouch.getCentroid(&mPointerGesture.referenceTouchX,
+                    &mPointerGesture.referenceTouchY);
+            mPointerController->getPosition(&mPointerGesture.referenceGestureX,
+                    &mPointerGesture.referenceGestureY);
         }
 
         // Clear the reference deltas for fingers not yet included in the reference calculation.
@@ -4105,10 +4025,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_Y,
                     mPointerGesture.referenceGestureY);
             mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
-
-            if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
-                mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_PRESS;
-            }
         } else if (mPointerGesture.currentGestureMode == PointerGesture::SWIPE) {
             // SWIPE mode.
 #if DEBUG_GESTURES
@@ -4127,10 +4043,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_Y,
                     mPointerGesture.referenceGestureY);
             mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
-
-            if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
-                mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_SWIPE;
-            }
         } else if (mPointerGesture.currentGestureMode == PointerGesture::FREEFORM) {
             // FREEFORM mode.
 #if DEBUG_GESTURES
@@ -4228,46 +4140,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                         "activeGestureId=%d", mPointerGesture.activeGestureId);
 #endif
             }
-
-            if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
-                mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_FREEFORM;
-            }
-        }
-
-        // Update spot locations for PRESS, SWIPE and FREEFORM.
-        if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
-#if SPOT_FOLLOWS_FINGER
-            // Use the same calculation as we do to calculate the gesture pointers
-            // for FREEFORM so that the spots smoothly track fingers across gestures.
-            mPointerGesture.spotIdBits.clear();
-            for (uint32_t i = 0; i < mCurrentTouch.pointerCount; i++) {
-                uint32_t id = mCurrentTouch.pointers[i].id;
-                mPointerGesture.spotIdBits.markBit(id);
-                mPointerGesture.spotIdToIndex[id] = i;
-
-                float x = (mCurrentTouch.pointers[i].x - mPointerGesture.referenceTouchX)
-                        * mLocked.pointerGestureXZoomScale + mPointerGesture.referenceGestureX;
-                float y = (mCurrentTouch.pointers[i].y - mPointerGesture.referenceTouchY)
-                        * mLocked.pointerGestureYZoomScale + mPointerGesture.referenceGestureY;
-
-                mPointerGesture.spotCoords[i].clear();
-                mPointerGesture.spotCoords[i].setAxisValue(AMOTION_EVENT_AXIS_X, x);
-                mPointerGesture.spotCoords[i].setAxisValue(AMOTION_EVENT_AXIS_Y, y);
-                mPointerGesture.spotCoords[i].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
-            }
-#else
-            // Show one spot per generated touch point.
-            // This may cause apparent discontinuities in spot motion when transitioning
-            // from PRESS to FREEFORM.
-            mPointerGesture.spotIdBits = mPointerGesture.currentGestureIdBits;
-            for (BitSet32 idBits(mPointerGesture.currentGestureIdBits); !idBits.isEmpty(); ) {
-                uint32_t id = idBits.firstMarkedBit();
-                idBits.clearBit(id);
-                uint32_t index = mPointerGesture.currentGestureIdToIndex[id];
-                mPointerGesture.spotIdToIndex[id] = index;
-                mPointerGesture.spotCoords[index] = mPointerGesture.currentGestureCoords[index];
-            }
-#endif
         }
     }
 
