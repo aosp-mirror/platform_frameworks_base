@@ -98,6 +98,8 @@ public class Am {
             runStart();
         } else if (op.equals("startservice")) {
             runStartService();
+        } else if (op.equals("force-stop")) {
+            runForceStop();
         } else if (op.equals("instrument")) {
             runInstrument();
         } else if (op.equals("broadcast")) {
@@ -363,6 +365,10 @@ public class Am {
             }
             System.out.println("Complete");
         }
+    }
+
+    private void runForceStop() throws Exception {
+        mAm.forceStopPackage(nextArgRequired());
     }
 
     private void sendBroadcast() throws Exception {
@@ -851,7 +857,7 @@ public class Am {
                 wm.clearForcedDisplaySize();
             }
         } catch (RemoteException e) {
-       }
+        }
     }
 
     private class IntentReceiver extends IIntentReceiver.Stub {
@@ -1012,6 +1018,8 @@ public class Am {
                 "        -W: wait for launch to complete\n" +
                 "\n" +
                 "    start a Service: am startservice <INTENT>\n" +
+                "\n" +
+                "    force stop everything associated with a package: force-stop <package>\n" +
                 "\n" +
                 "    send a broadcast Intent: am broadcast <INTENT>\n" +
                 "\n" +
