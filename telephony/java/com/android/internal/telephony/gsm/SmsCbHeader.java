@@ -16,7 +16,9 @@
 
 package com.android.internal.telephony.gsm;
 
-public class SmsCbHeader {
+import android.telephony.SmsCbConstants;
+
+public class SmsCbHeader implements SmsCbConstants {
     /**
      * Length of SMS-CB header
      */
@@ -106,5 +108,73 @@ public class SmsCbHeader {
             pageIndex = 1;
             nrOfPages = 1;
         }
+    }
+
+    /**
+     * Return whether the specified message ID is an emergency (PWS) message type.
+     * This method is static and takes an argument so that it can be used by
+     * CellBroadcastReceiver, which stores message ID's in SQLite rather than PDU.
+     * @param id the message identifier to check
+     * @return true if the message is emergency type; false otherwise
+     */
+    public static boolean isEmergencyMessage(int id) {
+        return id >= MESSAGE_ID_PWS_FIRST_IDENTIFIER && id <= MESSAGE_ID_PWS_LAST_IDENTIFIER;
+    }
+
+    /**
+     * Return whether the specified message ID is an ETWS emergency message type.
+     * This method is static and takes an argument so that it can be used by
+     * CellBroadcastReceiver, which stores message ID's in SQLite rather than PDU.
+     * @param id the message identifier to check
+     * @return true if the message is ETWS emergency type; false otherwise
+     */
+    public static boolean isEtwsMessage(int id) {
+        return (id & MESSAGE_ID_ETWS_TYPE_MASK) == MESSAGE_ID_ETWS_TYPE;
+    }
+
+    /**
+     * Return whether the specified message ID is a CMAS emergency message type.
+     * This method is static and takes an argument so that it can be used by
+     * CellBroadcastReceiver, which stores message ID's in SQLite rather than PDU.
+     * @param id the message identifier to check
+     * @return true if the message is CMAS emergency type; false otherwise
+     */
+    public static boolean isCmasMessage(int id) {
+        return id >= MESSAGE_ID_CMAS_FIRST_IDENTIFIER && id <= MESSAGE_ID_CMAS_LAST_IDENTIFIER;
+    }
+
+    /**
+     * Return whether the specified message code indicates an ETWS popup alert.
+     * This method is static and takes an argument so that it can be used by
+     * CellBroadcastReceiver, which stores message codes in SQLite rather than PDU.
+     * This method assumes that the message ID has already been checked for ETWS type.
+     *
+     * @param messageCode the message code to check
+     * @return true if the message code indicates a popup alert should be displayed
+     */
+    public static boolean isEtwsPopupAlert(int messageCode) {
+        return (messageCode & MESSAGE_CODE_ETWS_ACTIVATE_POPUP) != 0;
+    }
+
+    /**
+     * Return whether the specified message code indicates an ETWS emergency user alert.
+     * This method is static and takes an argument so that it can be used by
+     * CellBroadcastReceiver, which stores message codes in SQLite rather than PDU.
+     * This method assumes that the message ID has already been checked for ETWS type.
+     *
+     * @param messageCode the message code to check
+     * @return true if the message code indicates an emergency user alert
+     */
+    public static boolean isEtwsEmergencyUserAlert(int messageCode) {
+        return (messageCode & MESSAGE_CODE_ETWS_EMERGENCY_USER_ALERT) != 0;
+    }
+
+    @Override
+    public String toString() {
+        return "SmsCbHeader{GS=" + geographicalScope + ", messageCode=0x" +
+                Integer.toHexString(messageCode) + ", updateNumber=" + updateNumber +
+                ", messageIdentifier=0x" + Integer.toHexString(messageIdentifier) +
+                ", DCS=0x" + Integer.toHexString(dataCodingScheme) +
+                ", page " + pageIndex + " of " + nrOfPages + '}';
     }
 }
