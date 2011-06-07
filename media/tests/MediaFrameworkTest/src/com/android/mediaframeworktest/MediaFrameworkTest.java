@@ -123,63 +123,6 @@ public class MediaFrameworkTest extends Activity implements SurfaceHolder.Callba
       intent.setDataAndType(path, mimetype);
       startActivity(intent);
     }
-    
-    @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
-      switch (keyCode) {
-          case KeyEvent.KEYCODE_0:
-            MediaPlayer mp = new MediaPlayer();
-            try{
-              mp.setDataSource(MediaNames.VIDEO_RTSP3GP);
-              Log.v("emily","awb  " + testfilepath);
-              mp.setDisplay(mSurfaceView.getHolder());
-              mp.prepare();
-              mp.start();
-            }catch (Exception e){}
-              break;
-          
-          //start the music player intent with the test URL from PV    
-          case KeyEvent.KEYCODE_1:
-            startPlayback(MediaNames.STREAM_MP3_1);
-            break;
-          
-          case KeyEvent.KEYCODE_2:
-            startPlayback(MediaNames.STREAM_MP3_2);
-            break;
-          
-          case KeyEvent.KEYCODE_3:
-            startPlayback(MediaNames.STREAM_MP3_3);
-            break;
-          
-          case KeyEvent.KEYCODE_4:
-            startPlayback(MediaNames.STREAM_MP3_4);
-            break;
-          
-          case KeyEvent.KEYCODE_5:
-            startPlayback(MediaNames.STREAM_MP3_5);
-            break;
-          
-          case KeyEvent.KEYCODE_6:
-            startPlayback(MediaNames.STREAM_MP3_6);
-            break;
-          
-          case KeyEvent.KEYCODE_7:
-            startPlayback(MediaNames.STREAM_MP3_7);
-            break;
-          
-          case KeyEvent.KEYCODE_8:
-            startPlayback(MediaNames.STREAM_MP3_8);
-            break;
-          
-          case KeyEvent.KEYCODE_9:
-            startPlayback(MediaNames.STREAM_MP3_9);
-            break;
-          
-              
-              
-      }
-      return super.onKeyDown(keyCode, event);
-     
-  }  
 
   public static boolean checkStreamingServer() throws Exception {
       InetAddress address = InetAddress.getByAddress(MediaNames.STREAM_SERVER);
