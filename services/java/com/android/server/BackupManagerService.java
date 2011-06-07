@@ -2859,6 +2859,7 @@ class BackupManagerService extends IBackupManager.Stub {
             final int end = offset + maxChars;
             for (int i = offset; i < end; i++) {
                 final byte b = data[i];
+                // Numeric fields in tar can terminate with either NUL or SPC
                 if (b == 0 || b == ' ') break;
                 if (b < '0' || b > ('0' + radix - 1)) {
                     throw new IOException("Invalid number in header");
@@ -2871,8 +2872,8 @@ class BackupManagerService extends IBackupManager.Stub {
         String extractString(byte[] data, int offset, int maxChars) throws IOException {
             final int end = offset + maxChars;
             int eos = offset;
-            // tar string fields can end with either NUL or SPC
-            while (eos < end && data[eos] != 0 && data[eos] != ' ') eos++;
+            // tar string fields terminate early with a NUL
+            while (eos < end && data[eos] != 0) eos++;
             return new String(data, offset, eos-offset, "US-ASCII");
         }
 
