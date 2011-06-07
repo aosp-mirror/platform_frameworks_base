@@ -18,6 +18,7 @@ package com.android.internal.telephony;
 
 import android.telephony.SmsCbMessage;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 /**
  * Test cases for basic SmsCbMessage operations
@@ -662,5 +663,50 @@ public class GsmSmsCbTest extends AndroidTestCase {
         SmsCbMessage msg = SmsCbMessage.createFromPdu(pdu);
 
         assertEquals("Unexpected update number decoded", 5, msg.getUpdateNumber());
+    }
+
+    /* ETWS Test message including header */
+    private static final byte[] etwsMessageNormal = IccUtils.hexStringToBytes("000011001101" +
+            "0D0A5BAE57CE770C531790E85C716CBF3044573065B930675730" +
+            "9707767A751F30025F37304463FA308C306B5099304830664E0B30553044FF086C178C615E81FF09" +
+            "0000000000000000000000000000");
+
+    private static final byte[] etwsMessageCancel = IccUtils.hexStringToBytes("000011001101" +
+            "0D0A5148307B3069002800310030003A0035" +
+            "00320029306E7DCA602557309707901F5831309253D66D883057307E3059FF086C178C615E81FF09" +
+            "00000000000000000000000000000000000000000000");
+
+    private static final byte[] etwsMessageTest = IccUtils.hexStringToBytes("000011031101" +
+            "0D0A5BAE57CE770C531790E85C716CBF3044" +
+            "573065B9306757309707300263FA308C306B5099304830664E0B30553044FF086C178C615E81FF09" +
+            "00000000000000000000000000000000000000000000");
+
+    // FIXME: add example of ETWS primary notification PDU
+
+    public void testEtwsMessageNormal() {
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(etwsMessageNormal);
+        Log.d("GsmSmsCbTest", msg.toString());
+        assertEquals("GS mismatch", 0, msg.getGeographicalScope());
+        assertEquals("message code mismatch", 0, msg.getMessageCode());
+        assertEquals("update number mismatch", 0, msg.getUpdateNumber());
+        assertEquals("message ID mismatch", 0x1100, msg.getMessageIdentifier());
+    }
+
+    public void testEtwsMessageCancel() {
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(etwsMessageCancel);
+        Log.d("GsmSmsCbTest", msg.toString());
+        assertEquals("GS mismatch", 0, msg.getGeographicalScope());
+        assertEquals("message code mismatch", 0, msg.getMessageCode());
+        assertEquals("update number mismatch", 0, msg.getUpdateNumber());
+        assertEquals("message ID mismatch", 0x1100, msg.getMessageIdentifier());
+    }
+
+    public void testEtwsMessageTest() {
+        SmsCbMessage msg = SmsCbMessage.createFromPdu(etwsMessageTest);
+        Log.d("GsmSmsCbTest", msg.toString());
+        assertEquals("GS mismatch", 0, msg.getGeographicalScope());
+        assertEquals("message code mismatch", 0, msg.getMessageCode());
+        assertEquals("update number mismatch", 0, msg.getUpdateNumber());
+        assertEquals("message ID mismatch", 0x1103, msg.getMessageIdentifier());
     }
 }

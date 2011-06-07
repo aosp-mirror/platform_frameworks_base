@@ -35,6 +35,11 @@ public class SmsCbHeader implements SmsCbConstants {
     public static final int FORMAT_UMTS = 2;
 
     /**
+     * GSM pdu format, as defined in 3gpp TS 23.041, section 9.4.1.3
+     */
+    public static final int FORMAT_ETWS_PRIMARY = 3;
+
+    /**
      * Message type value as defined in 3gpp TS 25.324, section 11.1.
      */
     private static final int MESSAGE_TYPE_CBS_MESSAGE = 1;
@@ -42,7 +47,12 @@ public class SmsCbHeader implements SmsCbConstants {
     /**
      * Length of GSM pdus
      */
-    private static final int PDU_LENGTH_GSM = 88;
+    public static final int PDU_LENGTH_GSM = 88;
+
+    /**
+     * Maximum length of ETWS primary message GSM pdus
+     */
+    public static final int PDU_LENGTH_ETWS = 56;
 
     public final int geographicalScope;
 
@@ -60,12 +70,30 @@ public class SmsCbHeader implements SmsCbConstants {
 
     public final int format;
 
+    public final boolean etwsEmergencyUserAlert;
+
+    public final boolean etwsPopup;
+
+    public final int etwsWarningType;
+
     public SmsCbHeader(byte[] pdu) throws IllegalArgumentException {
         if (pdu == null || pdu.length < PDU_HEADER_LENGTH) {
             throw new IllegalArgumentException("Illegal PDU");
         }
 
-        if (pdu.length <= PDU_LENGTH_GSM) {
+        if (pdu.length <= PDU_LENGTH_ETWS) {
+            format = FORMAT_ETWS_PRIMARY;
+            geographicalScope = -1; //not applicable
+            messageCode = -1;
+            updateNumber = -1;
+            messageIdentifier = ((pdu[2] & 0xff) << 8) | (pdu[3] & 0xff);
+            dataCodingScheme = -1;
+            pageIndex = -1;
+            nrOfPages = -1;
+            etwsEmergencyUserAlert = (pdu[4] & 0x1) != 0;
+            etwsPopup = (pdu[5] & 0x80) != 0;
+            etwsWarningType = (pdu[4] & 0xfe) >> 1;
+        } else if (pdu.length <= PDU_LENGTH_GSM) {
             // GSM pdus are no more than 88 bytes
             format = FORMAT_GSM;
             geographicalScope = (pdu[0] & 0xc0) >> 6;
@@ -85,6 +113,9 @@ public class SmsCbHeader implements SmsCbConstants {
 
             this.pageIndex = pageIndex;
             this.nrOfPages = nrOfPages;
+            etwsEmergencyUserAlert = false;
+            etwsPopup = false;
+            etwsWarningType = -1;
         } else {
             // UMTS pdus are always at least 90 bytes since the payload includes
             // a number-of-pages octet and also one length octet per page
@@ -107,6 +138,9 @@ public class SmsCbHeader implements SmsCbConstants {
             // actual payload may contain several pages.
             pageIndex = 1;
             nrOfPages = 1;
+            etwsEmergencyUserAlert = false;
+            etwsPopup = false;
+            etwsWarningType = -1;
         }
     }
 
