@@ -111,7 +111,21 @@ public class ViewConfiguration {
      * double-tap.
      */
     private static final int DOUBLE_TAP_TIMEOUT = 300;
-    
+
+    /**
+     * Defines the maximum duration in milliseconds between a touch pad
+     * touch and release for a given touch to be considered a tap (click) as
+     * opposed to a hover movement gesture.
+     */
+    private static final int HOVER_TAP_TIMEOUT = 150;
+
+    /**
+     * Defines the maximum distance in pixels that a touch pad touch can move
+     * before being released for it to be considered a tap (click) as opposed
+     * to a hover movement gesture.
+     */
+    private static final int HOVER_TAP_SLOP = 20;
+
     /**
      * Defines the duration in milliseconds we want to display zoom controls in response 
      * to a user panning within an application.
@@ -360,7 +374,7 @@ public class ViewConfiguration {
     public static int getTapTimeout() {
         return TAP_TIMEOUT;
     }
-    
+
     /**
      * @return the duration in milliseconds we will wait to see if a touch event
      * is a jump tap. If the user does not move within this interval, it is
@@ -378,7 +392,27 @@ public class ViewConfiguration {
     public static int getDoubleTapTimeout() {
         return DOUBLE_TAP_TIMEOUT;
     }
-    
+
+    /**
+     * @return the maximum duration in milliseconds between a touch pad
+     * touch and release for a given touch to be considered a tap (click) as
+     * opposed to a hover movement gesture.
+     * @hide
+     */
+    public static int getHoverTapTimeout() {
+        return HOVER_TAP_TIMEOUT;
+    }
+
+    /**
+     * @return the maximum distance in pixels that a touch pad touch can move
+     * before being released for it to be considered a tap (click) as opposed
+     * to a hover movement gesture.
+     * @hide
+     */
+    public static int getHoverTapSlop() {
+        return HOVER_TAP_SLOP;
+    }
+
     /**
      * @return Inset in pixels to look for touchable content when the user touches the edge of the
      *         screen

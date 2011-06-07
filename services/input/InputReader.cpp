@@ -36,6 +36,12 @@
 // Log debug messages about gesture detection.
 #define DEBUG_GESTURES 0
 
+// Specifies whether spots follow fingers or touch points.
+// If 1, show exactly one spot per finger in multitouch gestures.
+// If 0, show exactly one spot per generated touch point in multitouch gestures, so the
+//     spots indicate exactly which points on screen are being touched.
+#define SPOT_FOLLOWS_FINGER 0
+
 #include "InputReader.h"
 
 #include <cutils/atomic.h>
@@ -184,23 +190,6 @@ static int32_t calculateEdgeFlagsUsingPointerBounds(
         }
     }
     return edgeFlags;
-}
-
-static void clampPositionUsingPointerBounds(
-        const sp<PointerControllerInterface>& pointerController, float* x, float* y) {
-    float minX, minY, maxX, maxY;
-    if (pointerController->getBounds(&minX, &minY, &maxX, &maxY)) {
-        if (*x < minX) {
-            *x = minX;
-        } else if (*x > maxX) {
-            *x = maxX;
-        }
-        if (*y < minY) {
-            *y = minY;
-        } else if (*y > maxY) {
-            *y = maxY;
-        }
-    }
 }
 
 static float calculateCommonVector(float a, float b) {
@@ -746,8 +735,8 @@ void InputReader::dump(String8& dump) {
             mConfig.pointerGestureTapSlop);
     dump.appendFormat(INDENT3 "MultitouchSettleInterval: %0.1fms\n",
             mConfig.pointerGestureMultitouchSettleInterval * 0.000001f);
-    dump.appendFormat(INDENT3 "MultitouchMinSpeed: %0.1fpx/s\n",
-            mConfig.pointerGestureMultitouchMinSpeed);
+    dump.appendFormat(INDENT3 "MultitouchMinDistance: %0.1fpx\n",
+            mConfig.pointerGestureMultitouchMinDistance);
     dump.appendFormat(INDENT3 "SwipeTransitionAngleCosine: %0.1f\n",
             mConfig.pointerGestureSwipeTransitionAngleCosine);
     dump.appendFormat(INDENT3 "SwipeMaxWidthRatio: %0.1f\n",
@@ -3291,11 +3280,18 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
         cancelPreviousGesture = false;
     }
 
-    // Switch pointer presentation.
-    mPointerController->setPresentation(
-            mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS
-                    ? PointerControllerInterface::PRESENTATION_SPOT
-                    : PointerControllerInterface::PRESENTATION_POINTER);
+    // Update the pointer presentation and spots.
+    if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
+        mPointerController->setPresentation(PointerControllerInterface::PRESENTATION_SPOT);
+        if (finishPreviousGesture || cancelPreviousGesture) {
+            mPointerController->clearSpots();
+        }
+        mPointerController->setSpots(mPointerGesture.spotGesture,
+                mPointerGesture.spotCoords, mPointerGesture.spotIdToIndex,
+                mPointerGesture.spotIdBits);
+    } else {
+        mPointerController->setPresentation(PointerControllerInterface::PRESENTATION_POINTER);
+    }
 
     // Show or hide the pointer if needed.
     switch (mPointerGesture.currentGestureMode) {
@@ -3484,7 +3480,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
                     mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
                     mPointerGesture.spotIdBits.clear();
-                    moveSpotsLocked();
                 }
                 return true;
             }
@@ -3566,10 +3561,12 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
     if (isQuietTime) {
         // Case 1: Quiet time. (QUIET)
 #if DEBUG_GESTURES
-        LOGD("Gestures: QUIET for next %0.3fms",
-                (mPointerGesture.quietTime + QUIET_INTERVAL - when) * 0.000001f);
+        LOGD("Gestures: QUIET for next %0.3fms", (mPointerGesture.quietTime
+                + mConfig->pointerGestureQuietInterval - when) * 0.000001f);
 #endif
-        *outFinishPreviousGesture = true;
+        if (mPointerGesture.lastGestureMode != PointerGesture::QUIET) {
+            *outFinishPreviousGesture = true;
+        }
 
         mPointerGesture.activeGestureId = -1;
         mPointerGesture.currentGestureMode = PointerGesture::QUIET;
@@ -3580,7 +3577,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
             mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
             mPointerGesture.spotIdBits.clear();
-            moveSpotsLocked();
         }
     } else if (isPointerDown(mCurrentTouch.buttonState)) {
         // Case 2: Button is pressed. (BUTTON_CLICK_OR_DRAG)
@@ -3684,11 +3680,12 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 mPointerGesture.spotIdToIndex[0] = 0;
                 mPointerGesture.spotCoords[0] = mPointerGesture.currentGestureCoords[0];
             }
-            moveSpotsLocked();
         }
     } else if (mCurrentTouch.pointerCount == 0) {
         // Case 3. No fingers down and button is not pressed. (NEUTRAL)
-        *outFinishPreviousGesture = true;
+        if (mPointerGesture.lastGestureMode != PointerGesture::NEUTRAL) {
+            *outFinishPreviousGesture = true;
+        }
 
         // Watch for taps coming out of HOVER or TAP_DRAG mode.
         // Checking for taps after TAP_DRAG allows us to detect double-taps.
@@ -3730,7 +3727,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                         mPointerGesture.spotIdBits.markBit(lastActiveTouchId);
                         mPointerGesture.spotIdToIndex[lastActiveTouchId] = 0;
                         mPointerGesture.spotCoords[0] = mPointerGesture.currentGestureCoords[0];
-                        moveSpotsLocked();
                     }
 
                     tapped = true;
@@ -3762,7 +3758,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
                 mPointerGesture.spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
                 mPointerGesture.spotIdBits.clear();
-                moveSpotsLocked();
             }
         }
     } else if (mCurrentTouch.pointerCount == 1) {
@@ -3826,7 +3821,9 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 #if DEBUG_GESTURES
             LOGD("Gestures: HOVER");
 #endif
-            *outFinishPreviousGesture = true;
+            if (mPointerGesture.lastGestureMode != PointerGesture::HOVER) {
+                *outFinishPreviousGesture = true;
+            }
             mPointerGesture.activeGestureId = 0;
             down = false;
         }
@@ -3857,7 +3854,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             mPointerGesture.spotIdBits.markBit(activeTouchId);
             mPointerGesture.spotIdToIndex[activeTouchId] = 0;
             mPointerGesture.spotCoords[0] = mPointerGesture.currentGestureCoords[0];
-            moveSpotsLocked();
         }
     } else {
         // Case 5. At least two fingers down, button is not pressed. (PRESS, SWIPE or FREEFORM)
@@ -3886,8 +3882,8 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             // Reset the gesture.
 #if DEBUG_GESTURES
             LOGD("Gestures: Resetting gesture since additional pointers went down for MULTITOUCH, "
-                    "settle time remaining %0.3fms",
-                    (mPointerGesture.firstTouchTime + MULTITOUCH_SETTLE_INTERVAL - when)
+                    "settle time remaining %0.3fms", (mPointerGesture.firstTouchTime
+                            + mConfig->pointerGestureMultitouchSettleInterval - when)
                             * 0.000001f);
 #endif
             *outCancelPreviousGesture = true;
@@ -3908,8 +3904,8 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 // for the gesture.  Other spots will be positioned relative to this one.
 #if DEBUG_GESTURES
                 LOGD("Gestures: Using active spot as reference for MULTITOUCH, "
-                        "settle time expired %0.3fms ago",
-                        (when - mPointerGesture.firstTouchTime - MULTITOUCH_SETTLE_INTERVAL)
+                        "settle time expired %0.3fms ago", (when - mPointerGesture.firstTouchTime
+                                - mConfig->pointerGestureMultitouchSettleInterval)
                                 * 0.000001f);
 #endif
                 const PointerData& d = mLastTouch.pointers[mLastTouch.idToIndex[
@@ -3924,8 +3920,8 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 // Use the centroid and pointer location as the reference points for the gesture.
 #if DEBUG_GESTURES
                 LOGD("Gestures: Using centroid as reference for MULTITOUCH, "
-                        "settle time remaining %0.3fms",
-                        (mPointerGesture.firstTouchTime + MULTITOUCH_SETTLE_INTERVAL - when)
+                        "settle time remaining %0.3fms", (mPointerGesture.firstTouchTime
+                                + mConfig->pointerGestureMultitouchSettleInterval - when)
                                 * 0.000001f);
 #endif
                 mCurrentTouch.getCentroid(&mPointerGesture.referenceTouchX,
@@ -3935,68 +3931,121 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             }
         }
 
-        if (mPointerGesture.currentGestureMode == PointerGesture::PRESS) {
-            float d;
-            if (mCurrentTouch.pointerCount > 2) {
-                // There are more than two pointers, switch to FREEFORM.
-#if DEBUG_GESTURES
-                LOGD("Gestures: PRESS transitioned to FREEFORM, number of pointers %d > 2",
-                        mCurrentTouch.pointerCount);
-#endif
-                *outCancelPreviousGesture = true;
-                mPointerGesture.currentGestureMode = PointerGesture::FREEFORM;
-            } else if (((d = distance(
-                    mCurrentTouch.pointers[0].x, mCurrentTouch.pointers[0].y,
-                    mCurrentTouch.pointers[1].x, mCurrentTouch.pointers[1].y))
-                            > mLocked.pointerGestureMaxSwipeWidth)) {
-                // There are two pointers but they are too far apart, switch to FREEFORM.
-#if DEBUG_GESTURES
-                LOGD("Gestures: PRESS transitioned to FREEFORM, distance %0.3f > %0.3f",
-                        d, mLocked.pointerGestureMaxSwipeWidth);
-#endif
-                *outCancelPreviousGesture = true;
-                mPointerGesture.currentGestureMode = PointerGesture::FREEFORM;
+        // Clear the reference deltas for fingers not yet included in the reference calculation.
+        for (BitSet32 idBits(mCurrentTouch.idBits.value & ~mPointerGesture.referenceIdBits.value);
+                !idBits.isEmpty(); ) {
+            uint32_t id = idBits.firstMarkedBit();
+            idBits.clearBit(id);
+
+            mPointerGesture.referenceDeltas[id].dx = 0;
+            mPointerGesture.referenceDeltas[id].dy = 0;
+        }
+        mPointerGesture.referenceIdBits = mCurrentTouch.idBits;
+
+        // Add delta for all fingers and calculate a common movement delta.
+        float commonDeltaX = 0, commonDeltaY = 0;
+        BitSet32 commonIdBits(mLastTouch.idBits.value & mCurrentTouch.idBits.value);
+        for (BitSet32 idBits(commonIdBits); !idBits.isEmpty(); ) {
+            bool first = (idBits == commonIdBits);
+            uint32_t id = idBits.firstMarkedBit();
+            idBits.clearBit(id);
+
+            const PointerData& cpd = mCurrentTouch.pointers[mCurrentTouch.idToIndex[id]];
+            const PointerData& lpd = mLastTouch.pointers[mLastTouch.idToIndex[id]];
+            PointerGesture::Delta& delta = mPointerGesture.referenceDeltas[id];
+            delta.dx += cpd.x - lpd.x;
+            delta.dy += cpd.y - lpd.y;
+
+            if (first) {
+                commonDeltaX = delta.dx;
+                commonDeltaY = delta.dy;
             } else {
-                // There are two pointers.  Wait for both pointers to start moving
-                // before deciding whether this is a SWIPE or FREEFORM gesture.
-                uint32_t id1 = mCurrentTouch.pointers[0].id;
-                uint32_t id2 = mCurrentTouch.pointers[1].id;
+                commonDeltaX = calculateCommonVector(commonDeltaX, delta.dx);
+                commonDeltaY = calculateCommonVector(commonDeltaY, delta.dy);
+            }
+        }
 
-                float vx1, vy1, vx2, vy2;
-                mPointerGesture.velocityTracker.getVelocity(id1, &vx1, &vy1);
-                mPointerGesture.velocityTracker.getVelocity(id2, &vx2, &vy2);
+        // Consider transitions from PRESS to SWIPE or MULTITOUCH.
+        if (mPointerGesture.currentGestureMode == PointerGesture::PRESS) {
+            float dist[MAX_POINTER_ID + 1];
+            int32_t distOverThreshold = 0;
+            for (BitSet32 idBits(mPointerGesture.referenceIdBits); !idBits.isEmpty(); ) {
+                uint32_t id = idBits.firstMarkedBit();
+                idBits.clearBit(id);
 
-                float speed1 = hypotf(vx1, vy1);
-                float speed2 = hypotf(vx2, vy2);
-                if (speed1 >= mConfig->pointerGestureMultitouchMinSpeed
-                        && speed2 >= mConfig->pointerGestureMultitouchMinSpeed) {
-                    // Calculate the dot product of the velocity vectors.
-                    // When the vectors are oriented in approximately the same direction,
-                    // the angle betweeen them is near zero and the cosine of the angle
-                    // approches 1.0.  Recall that dot(v1, v2) = cos(angle) * mag(v1) * mag(v2).
-                    float dot = vx1 * vx2 + vy1 * vy2;
-                    float cosine = dot / (speed1 * speed2); // denominator always > 0
-                    if (cosine >= mConfig->pointerGestureSwipeTransitionAngleCosine) {
-                        // Pointers are moving in the same direction.  Switch to SWIPE.
+                PointerGesture::Delta& delta = mPointerGesture.referenceDeltas[id];
+                dist[id] = hypotf(delta.dx * mLocked.pointerGestureXZoomScale,
+                        delta.dy * mLocked.pointerGestureYZoomScale);
+                if (dist[id] > mConfig->pointerGestureMultitouchMinDistance) {
+                    distOverThreshold += 1;
+                }
+            }
+
+            // Only transition when at least two pointers have moved further than
+            // the minimum distance threshold.
+            if (distOverThreshold >= 2) {
+                float d;
+                if (mCurrentTouch.pointerCount > 2) {
+                    // There are more than two pointers, switch to FREEFORM.
 #if DEBUG_GESTURES
-                        LOGD("Gestures: PRESS transitioned to SWIPE, "
-                                "speed1 %0.3f >= %0.3f, speed2 %0.3f >= %0.3f, "
-                                "cosine %0.3f >= %0.3f",
-                                speed1, MULTITOUCH_MIN_SPEED, speed2, MULTITOUCH_MIN_SPEED,
-                                cosine, SWIPE_TRANSITION_ANGLE_COSINE);
+                    LOGD("Gestures: PRESS transitioned to FREEFORM, number of pointers %d > 2",
+                            mCurrentTouch.pointerCount);
 #endif
-                        mPointerGesture.currentGestureMode = PointerGesture::SWIPE;
-                    } else {
-                        // Pointers are moving in different directions.  Switch to FREEFORM.
+                    *outCancelPreviousGesture = true;
+                    mPointerGesture.currentGestureMode = PointerGesture::FREEFORM;
+                } else if (((d = distance(
+                        mCurrentTouch.pointers[0].x, mCurrentTouch.pointers[0].y,
+                        mCurrentTouch.pointers[1].x, mCurrentTouch.pointers[1].y))
+                                > mLocked.pointerGestureMaxSwipeWidth)) {
+                    // There are two pointers but they are too far apart for a SWIPE,
+                    // switch to FREEFORM.
 #if DEBUG_GESTURES
-                        LOGD("Gestures: PRESS transitioned to FREEFORM, "
-                                "speed1 %0.3f >= %0.3f, speed2 %0.3f >= %0.3f, "
-                                "cosine %0.3f < %0.3f",
-                                speed1, MULTITOUCH_MIN_SPEED, speed2, MULTITOUCH_MIN_SPEED,
-                                cosine, SWIPE_TRANSITION_ANGLE_COSINE);
+                    LOGD("Gestures: PRESS transitioned to FREEFORM, distance %0.3f > %0.3f",
+                            d, mLocked.pointerGestureMaxSwipeWidth);
 #endif
-                        *outCancelPreviousGesture = true;
-                        mPointerGesture.currentGestureMode = PointerGesture::FREEFORM;
+                    *outCancelPreviousGesture = true;
+                    mPointerGesture.currentGestureMode = PointerGesture::FREEFORM;
+                } else {
+                    // There are two pointers.  Wait for both pointers to start moving
+                    // before deciding whether this is a SWIPE or FREEFORM gesture.
+                    uint32_t id1 = mCurrentTouch.pointers[0].id;
+                    uint32_t id2 = mCurrentTouch.pointers[1].id;
+                    float dist1 = dist[id1];
+                    float dist2 = dist[id2];
+                    if (dist1 >= mConfig->pointerGestureMultitouchMinDistance
+                            && dist2 >= mConfig->pointerGestureMultitouchMinDistance) {
+                        // Calculate the dot product of the displacement vectors.
+                        // When the vectors are oriented in approximately the same direction,
+                        // the angle betweeen them is near zero and the cosine of the angle
+                        // approches 1.0.  Recall that dot(v1, v2) = cos(angle) * mag(v1) * mag(v2).
+                        PointerGesture::Delta& delta1 = mPointerGesture.referenceDeltas[id1];
+                        PointerGesture::Delta& delta2 = mPointerGesture.referenceDeltas[id2];
+                        float dot = delta1.dx * delta2.dx + delta1.dy * delta2.dy;
+                        float cosine = dot / (dist1 * dist2); // denominator always > 0
+                        if (cosine >= mConfig->pointerGestureSwipeTransitionAngleCosine) {
+                            // Pointers are moving in the same direction.  Switch to SWIPE.
+#if DEBUG_GESTURES
+                            LOGD("Gestures: PRESS transitioned to SWIPE, "
+                                    "dist1 %0.3f >= %0.3f, dist2 %0.3f >= %0.3f, "
+                                    "cosine %0.3f >= %0.3f",
+                                    dist1, mConfig->pointerGestureMultitouchMinDistance,
+                                    dist2, mConfig->pointerGestureMultitouchMinDistance,
+                                    cosine, mConfig->pointerGestureSwipeTransitionAngleCosine);
+#endif
+                            mPointerGesture.currentGestureMode = PointerGesture::SWIPE;
+                        } else {
+                            // Pointers are moving in different directions.  Switch to FREEFORM.
+#if DEBUG_GESTURES
+                            LOGD("Gestures: PRESS transitioned to FREEFORM, "
+                                    "dist1 %0.3f >= %0.3f, dist2 %0.3f >= %0.3f, "
+                                    "cosine %0.3f < %0.3f",
+                                    dist1, mConfig->pointerGestureMultitouchMinDistance,
+                                    dist2, mConfig->pointerGestureMultitouchMinDistance,
+                                    cosine, mConfig->pointerGestureSwipeTransitionAngleCosine);
+#endif
+                            *outCancelPreviousGesture = true;
+                            mPointerGesture.currentGestureMode = PointerGesture::FREEFORM;
+                        }
                     }
                 }
             }
@@ -4013,67 +4062,28 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             }
         }
 
-        // Clear the reference deltas for fingers not yet included in the reference calculation.
-        for (BitSet32 idBits(mCurrentTouch.idBits.value & ~mPointerGesture.referenceIdBits.value);
-                !idBits.isEmpty(); ) {
-            uint32_t id = idBits.firstMarkedBit();
-            idBits.clearBit(id);
-
-            mPointerGesture.referenceDeltas[id].dx = 0;
-            mPointerGesture.referenceDeltas[id].dy = 0;
-        }
-        mPointerGesture.referenceIdBits = mCurrentTouch.idBits;
-
-        // Move the reference points based on the overall group motion of the fingers.
-        // The objective is to calculate a vector delta that is common to the movement
-        // of all fingers.
-        BitSet32 commonIdBits(mLastTouch.idBits.value & mCurrentTouch.idBits.value);
-        if (!commonIdBits.isEmpty()) {
-            float commonDeltaX = 0, commonDeltaY = 0;
-            for (BitSet32 idBits(commonIdBits); !idBits.isEmpty(); ) {
-                bool first = (idBits == commonIdBits);
+        // Move the reference points based on the overall group motion of the fingers
+        // except in PRESS mode while waiting for a transition to occur.
+        if (mPointerGesture.currentGestureMode != PointerGesture::PRESS
+                && (commonDeltaX || commonDeltaY)) {
+            for (BitSet32 idBits(mPointerGesture.referenceIdBits); !idBits.isEmpty(); ) {
                 uint32_t id = idBits.firstMarkedBit();
                 idBits.clearBit(id);
 
-                const PointerData& cpd = mCurrentTouch.pointers[mCurrentTouch.idToIndex[id]];
-                const PointerData& lpd = mLastTouch.pointers[mLastTouch.idToIndex[id]];
                 PointerGesture::Delta& delta = mPointerGesture.referenceDeltas[id];
-                delta.dx += cpd.x - lpd.x;
-                delta.dy += cpd.y - lpd.y;
-
-                if (first) {
-                    commonDeltaX = delta.dx;
-                    commonDeltaY = delta.dy;
-                } else {
-                    commonDeltaX = calculateCommonVector(commonDeltaX, delta.dx);
-                    commonDeltaY = calculateCommonVector(commonDeltaY, delta.dy);
-                }
+                delta.dx = 0;
+                delta.dy = 0;
             }
 
-            if (commonDeltaX || commonDeltaY) {
-                for (BitSet32 idBits(commonIdBits); !idBits.isEmpty(); ) {
-                    uint32_t id = idBits.firstMarkedBit();
-                    idBits.clearBit(id);
+            mPointerGesture.referenceTouchX += commonDeltaX;
+            mPointerGesture.referenceTouchY += commonDeltaY;
 
-                    PointerGesture::Delta& delta = mPointerGesture.referenceDeltas[id];
-                    delta.dx = 0;
-                    delta.dy = 0;
-                }
+            commonDeltaX *= mLocked.pointerGestureXMovementScale;
+            commonDeltaY *= mLocked.pointerGestureYMovementScale;
+            mPointerGesture.pointerVelocityControl.move(when, &commonDeltaX, &commonDeltaY);
 
-                mPointerGesture.referenceTouchX += commonDeltaX;
-                mPointerGesture.referenceTouchY += commonDeltaY;
-
-                commonDeltaX *= mLocked.pointerGestureXMovementScale;
-                commonDeltaY *= mLocked.pointerGestureYMovementScale;
-                mPointerGesture.pointerVelocityControl.move(when, &commonDeltaX, &commonDeltaY);
-
-                mPointerGesture.referenceGestureX += commonDeltaX;
-                mPointerGesture.referenceGestureY += commonDeltaY;
-
-                clampPositionUsingPointerBounds(mPointerController,
-                        &mPointerGesture.referenceGestureX,
-                        &mPointerGesture.referenceGestureY);
-            }
+            mPointerGesture.referenceGestureX += commonDeltaX;
+            mPointerGesture.referenceGestureY += commonDeltaY;
         }
 
         // Report gestures.
@@ -4225,9 +4235,10 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         }
 
         // Update spot locations for PRESS, SWIPE and FREEFORM.
-        // We use the same calculation as we do to calculate the gesture pointers
-        // for FREEFORM so that the spots smoothly track gestures.
         if (mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
+#if SPOT_FOLLOWS_FINGER
+            // Use the same calculation as we do to calculate the gesture pointers
+            // for FREEFORM so that the spots smoothly track fingers across gestures.
             mPointerGesture.spotIdBits.clear();
             for (uint32_t i = 0; i < mCurrentTouch.pointerCount; i++) {
                 uint32_t id = mCurrentTouch.pointers[i].id;
@@ -4244,7 +4255,19 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 mPointerGesture.spotCoords[i].setAxisValue(AMOTION_EVENT_AXIS_Y, y);
                 mPointerGesture.spotCoords[i].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
             }
-            moveSpotsLocked();
+#else
+            // Show one spot per generated touch point.
+            // This may cause apparent discontinuities in spot motion when transitioning
+            // from PRESS to FREEFORM.
+            mPointerGesture.spotIdBits = mPointerGesture.currentGestureIdBits;
+            for (BitSet32 idBits(mPointerGesture.currentGestureIdBits); !idBits.isEmpty(); ) {
+                uint32_t id = idBits.firstMarkedBit();
+                idBits.clearBit(id);
+                uint32_t index = mPointerGesture.currentGestureIdToIndex[id];
+                mPointerGesture.spotIdToIndex[id] = index;
+                mPointerGesture.spotCoords[index] = mPointerGesture.currentGestureCoords[index];
+            }
+#endif
         }
     }
 
@@ -4279,11 +4302,6 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
     }
 #endif
     return true;
-}
-
-void TouchInputMapper::moveSpotsLocked() {
-    mPointerController->setSpots(mPointerGesture.spotGesture,
-            mPointerGesture.spotCoords, mPointerGesture.spotIdToIndex, mPointerGesture.spotIdBits);
 }
 
 void TouchInputMapper::dispatchMotion(nsecs_t when, uint32_t policyFlags, uint32_t source,
