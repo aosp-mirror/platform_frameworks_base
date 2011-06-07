@@ -16,22 +16,22 @@
 
 package android.hardware;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.io.IOException;
-
-import android.util.Log;
-import android.view.Surface;
-import android.view.SurfaceHolder;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
+import android.view.Surface;
+import android.view.SurfaceHolder;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * The Camera class is used to set image capture settings, start/stop preview,
@@ -834,8 +834,6 @@ public class Camera {
      * @param raw       the callback for raw (uncompressed) image data, or null
      * @param postview  callback with postview image data, may be null
      * @param jpeg      the callback for JPEG image data, or null
-     *
-     * @see #addRawImageCallbackBuffer(byte[])
      */
     public final void takePicture(ShutterCallback shutter, PictureCallback raw,
             PictureCallback postview, PictureCallback jpeg) {
@@ -1084,10 +1082,14 @@ public class Camera {
     };
 
     /**
-     * Area class for focus.
+     * Area class for focus and metering.
      *
-     * @see #setFocusAreas(List)
-     * @see #getFocusAreas()
+     * @see Parameters#setFocusAreas(List)
+     * @see Parameters#getFocusAreas()
+     * @see Parameters#getMaxNumFocusAreas()
+     * @see Parameters#setMeteringAreas(List)
+     * @see Parameters#getMeteringAreas()
+     * @see Parameters#getMaxNumMeteringAreas()
      */
     public static class Area {
         /**
@@ -1121,12 +1123,22 @@ public class Camera {
             return weight == a.weight;
         }
 
-        /** rectangle of the area */
+        /**
+         * Rectangle of the area.
+         *
+         * @see Parameters#getFocusAreas()
+         * @see Parameters#getMeteringAreas()
+         */
         public Rect rect;
 
-        /** weight of the area */
+        /**
+         * Weight of the area.
+         *
+         * @see Parameters#getFocusAreas()
+         * @see Parameters#getMeteringAreas()
+         */
         public int weight;
-    };
+    }
 
     /**
      * Camera service settings.
@@ -2775,7 +2787,7 @@ public class Camera {
          * The direction is not affected by the rotation or mirroring of
          * {@link #setDisplayOrientation(int)}. Coordinates of the rectangle
          * range from -1000 to 1000. (-1000, -1000) is the upper left point.
-         * (1000, 1000) is the lower right point. The length and width of focus
+         * (1000, 1000) is the lower right point. The width and height of focus
          * areas cannot be 0 or negative.
          *
          * The weight must range from 1 to 1000. The weight should be
@@ -2842,7 +2854,7 @@ public class Camera {
          * sensor sees. The direction is not affected by the rotation or
          * mirroring of {@link #setDisplayOrientation(int)}. Coordinates of the
          * rectangle range from -1000 to 1000. (-1000, -1000) is the upper left
-         * point. (1000, 1000) is the lower right point. The length and width of
+         * point. (1000, 1000) is the lower right point. The width and height of
          * metering areas cannot be 0 or negative.
          *
          * The weight must range from 1 to 1000, and represents a weight for
@@ -3033,7 +3045,7 @@ public class Camera {
             if (result.size() == 0) return null;
 
             if (result.size() == 1) {
-                Area area = (Area) result.get(0);
+                Area area = result.get(0);
                 Rect rect = area.rect;
                 if (rect.left == 0 && rect.top == 0 && rect.right == 0
                         && rect.bottom == 0 && area.weight == 0) {
