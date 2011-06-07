@@ -60,6 +60,7 @@ public class BackupRestoreConfirmation extends Activity {
     IBackupManager mBackupManager;
     FullObserver mObserver;
     int mToken;
+    boolean mDidAcknowledge;
 
     TextView mStatusView;
     Button mAllowButton;
@@ -70,6 +71,7 @@ public class BackupRestoreConfirmation extends Activity {
         Context mContext;
         ObserverHandler(Context context) {
             mContext = context;
+            mDidAcknowledge = false;
         }
 
         @Override
@@ -157,11 +159,7 @@ public class BackupRestoreConfirmation extends Activity {
         mAllowButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    mBackupManager.acknowledgeFullBackupOrRestore(mToken, true, mObserver);
-                } catch (RemoteException e) {
-                    // TODO: bail gracefully if we can't contact the backup manager
-                }
+                sendAcknowledgement(mToken, true, mObserver);
                 mAllowButton.setEnabled(false);
                 mDenyButton.setEnabled(false);
             }
@@ -170,11 +168,7 @@ public class BackupRestoreConfirmation extends Activity {
         mDenyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    mBackupManager.acknowledgeFullBackupOrRestore(mToken, false, mObserver);
-                } catch (RemoteException e) {
-                    // TODO: bail gracefully if we can't contact the backup manager
-                }
+                sendAcknowledgement(mToken, false, mObserver);
                 mAllowButton.setEnabled(false);
                 mDenyButton.setEnabled(false);
             }
@@ -187,12 +181,19 @@ public class BackupRestoreConfirmation extends Activity {
 
         // We explicitly equate departure from the UI with refusal.  This includes the
         // implicit configuration-changed stop/restart cycle.
-        try {
-            mBackupManager.acknowledgeFullBackupOrRestore(mToken, false, null);
-        } catch (RemoteException e) {
-            // if this fails we'll still time out with no acknowledgment
-        }
+        sendAcknowledgement(mToken, false, null);
         finish();
+    }
+
+    void sendAcknowledgement(int token, boolean allow, IFullBackupRestoreObserver observer) {
+        if (!mDidAcknowledge) {
+            mDidAcknowledge = true;
+            try {
+                mBackupManager.acknowledgeFullBackupOrRestore(mToken, true, mObserver);
+            } catch (RemoteException e) {
+                // TODO: bail gracefully if we can't contact the backup manager
+            }
+        }
     }
 
     /**
