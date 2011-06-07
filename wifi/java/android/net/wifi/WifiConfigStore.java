@@ -478,6 +478,21 @@ class WifiConfigStore {
         }
     }
 
+    /**
+     * clear IP configuration for a given network id
+     */
+    static void clearIpConfiguration(int netId) {
+        synchronized (sConfiguredNetworks) {
+            WifiConfiguration config = sConfiguredNetworks.get(netId);
+            if (config != null && config.linkProperties != null) {
+                // Clear everything except proxy
+                ProxyProperties proxy = config.linkProperties.getHttpProxy();
+                config.linkProperties.clear();
+                config.linkProperties.setHttpProxy(proxy);
+            }
+        }
+    }
+
 
     /**
      * Fetch the proxy properties for a given network id
