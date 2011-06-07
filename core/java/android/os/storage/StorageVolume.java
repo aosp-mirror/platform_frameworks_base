@@ -32,6 +32,7 @@ public class StorageVolume implements Parcelable {
     private final boolean mRemovable;
     private final boolean mEmulated;
     private final int mMtpReserveSpace;
+    private final boolean mAllowMassStorage;
     private int mStorageId;
 
     // StorageVolume extra for ACTION_MEDIA_REMOVED, ACTION_MEDIA_UNMOUNTED, ACTION_MEDIA_CHECKING,
@@ -39,23 +40,25 @@ public class StorageVolume implements Parcelable {
     // ACTION_MEDIA_BAD_REMOVAL, ACTION_MEDIA_UNMOUNTABLE and ACTION_MEDIA_EJECT broadcasts.
     public static final String EXTRA_STORAGE_VOLUME = "storage_volume";
 
-    public StorageVolume(String path, String description,
-            boolean removable, boolean emulated, int mtpReserveSpace) {
+    public StorageVolume(String path, String description, boolean removable,
+            boolean emulated, int mtpReserveSpace, boolean allowMassStorage) {
         mPath = path;
         mDescription = description;
         mRemovable = removable;
         mEmulated = emulated;
         mMtpReserveSpace = mtpReserveSpace;
+        mAllowMassStorage = allowMassStorage;
     }
 
     // for parcelling only
-    private StorageVolume(String path, String description,
-            boolean removable, boolean emulated, int mtpReserveSpace, int storageId) {
+    private StorageVolume(String path, String description, boolean removable,
+            boolean emulated, int mtpReserveSpace, int storageId, boolean allowMassStorage) {
         mPath = path;
         mDescription = description;
         mRemovable = removable;
         mEmulated = emulated;
         mMtpReserveSpace = mtpReserveSpace;
+        mAllowMassStorage = allowMassStorage;
         mStorageId = storageId;
     }
 
@@ -130,6 +133,15 @@ public class StorageVolume implements Parcelable {
         return mMtpReserveSpace;
     }
 
+    /**
+     * Returns true if this volume can be shared via USB mass storage.
+     *
+     * @return whether mass storage is allowed
+     */
+    public boolean allowMassStorage() {
+        return mAllowMassStorage;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof StorageVolume && mPath != null) {
@@ -158,9 +170,10 @@ public class StorageVolume implements Parcelable {
             int emulated = in.readInt();
             int storageId = in.readInt();
             int mtpReserveSpace = in.readInt();
+            int allowMassStorage = in.readInt();
             return new StorageVolume(path, description,
                     removable == 1, emulated == 1,
-                    mtpReserveSpace, storageId);
+                    mtpReserveSpace, storageId, allowMassStorage == 1);
         }
 
         public StorageVolume[] newArray(int size) {
@@ -179,5 +192,6 @@ public class StorageVolume implements Parcelable {
         parcel.writeInt(mEmulated ? 1 : 0);
         parcel.writeInt(mStorageId);
         parcel.writeInt(mMtpReserveSpace);
+        parcel.writeInt(mAllowMassStorage ? 1 : 0);
     }
 }
