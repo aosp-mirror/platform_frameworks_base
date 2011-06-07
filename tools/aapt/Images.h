@@ -8,11 +8,19 @@
 #define IMAGES_H
 
 #include "ResourceTable.h"
+#include "Bundle.h"
+
+#include <utils/String8.h>
+#include <utils/RefBase.h>
+
+using android::String8;
 
 status_t preProcessImage(Bundle* bundle, const sp<AaptAssets>& assets,
                          const sp<AaptFile>& file, String8* outNewLeafName);
 
+status_t preProcessImageToCache(Bundle* bundle, String8 source, String8 dest);
+
 status_t postProcessImage(const sp<AaptAssets>& assets,
-						  ResourceTable* table, const sp<AaptFile>& file);
+                          ResourceTable* table, const sp<AaptFile>& file);
 
 #endif
