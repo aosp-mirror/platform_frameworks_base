@@ -18,8 +18,8 @@ package com.android.server.net;
 
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
+import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.SHUTDOWN;
-import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.UID_ALL;
@@ -86,7 +86,7 @@ import libcore.io.IoUtils;
  * other system services.
  */
 public class NetworkStatsService extends INetworkStatsService.Stub {
-    private static final String TAG = "NetworkStatsService";
+    private static final String TAG = "NetworkStats";
     private static final boolean LOGD = true;
 
     /** File header magic number: "ANET" */
@@ -178,20 +178,25 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mSummaryFile = new AtomicFile(new File(systemDir, "netstats.bin"));
     }
 
+    public void bindConnectivityManager(IConnectivityManager connManager) {
+        mConnManager = checkNotNull(connManager, "missing IConnectivityManager");
+    }
+
     public void systemReady() {
         synchronized (mStatsLock) {
             // read historical stats from disk
             readStatsLocked();
         }
 
-        // watch other system services that claim interfaces
+        // watch for network interfaces to be claimed
         final IntentFilter ifaceFilter = new IntentFilter();
         ifaceFilter.addAction(CONNECTIVITY_ACTION);
         mContext.registerReceiver(mIfaceReceiver, ifaceFilter, CONNECTIVITY_INTERNAL, mHandler);
 
         // listen for periodic polling events
+        // TODO: switch to stronger internal permission
         final IntentFilter pollFilter = new IntentFilter(ACTION_NETWORK_STATS_POLL);
-        mContext.registerReceiver(mPollReceiver, pollFilter, UPDATE_DEVICE_STATS, mHandler);
+        mContext.registerReceiver(mPollReceiver, pollFilter, READ_NETWORK_USAGE_HISTORY, mHandler);
 
         // persist stats during clean shutdown
         final IntentFilter shutdownFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
@@ -202,10 +207,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } catch (RemoteException e) {
             Slog.w(TAG, "unable to register poll alarm");
         }
-    }
-
-    public void bindConnectivityManager(IConnectivityManager connManager) {
-        mConnManager = checkNotNull(connManager, "missing IConnectivityManager");
     }
 
     private void shutdownLocked() {
@@ -237,8 +238,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public NetworkStatsHistory getHistoryForNetwork(int networkTemplate) {
-        // TODO: create relaxed permission for reading stats
-        mContext.enforceCallingOrSelfPermission(UPDATE_DEVICE_STATS, TAG);
+        mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
 
         synchronized (mStatsLock) {
             // combine all interfaces that match template
@@ -257,17 +257,41 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public NetworkStatsHistory getHistoryForUid(int uid, int networkTemplate) {
-        // TODO: create relaxed permission for reading stats
-        mContext.enforceCallingOrSelfPermission(UPDATE_DEVICE_STATS, TAG);
+        mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
 
         // TODO: return history for requested uid
         return null;
     }
 
     @Override
+    public NetworkStats getSummaryForNetwork(
+            long start, long end, int networkTemplate, String subscriberId) {
+        mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
+
+        synchronized (mStatsLock) {
+            long rx = 0;
+            long tx = 0;
+            long[] networkTotal = new long[2];
+
+            // combine total from all interfaces that match template
+            for (InterfaceIdentity ident : mSummaryStats.keySet()) {
+                final NetworkStatsHistory history = mSummaryStats.get(ident);
+                if (ident.matchesTemplate(networkTemplate, subscriberId)) {
+                    networkTotal = history.getTotalData(start, end, networkTotal);
+                    rx += networkTotal[0];
+                    tx += networkTotal[1];
+                }
+            }
+
+            final NetworkStats.Builder stats = new NetworkStats.Builder(end - start, 1);
+            stats.addEntry(IFACE_ALL, UID_ALL, tx, tx);
+            return stats.build();
+        }
+    }
+
+    @Override
     public NetworkStats getSummaryForAllUid(long start, long end, int networkTemplate) {
-        // TODO: create relaxed permission for reading stats
-        mContext.enforceCallingOrSelfPermission(UPDATE_DEVICE_STATS, TAG);
+        mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
 
         // TODO: apply networktemplate once granular uid stats are stored.
 
@@ -275,11 +299,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             final int size = mDetailStats.size();
             final NetworkStats.Builder stats = new NetworkStats.Builder(end - start, size);
 
-            final long[] total = new long[2];
+            long[] total = new long[2];
             for (int i = 0; i < size; i++) {
                 final int uid = mDetailStats.keyAt(i);
                 final NetworkStatsHistory history = mDetailStats.valueAt(i);
-                history.getTotalData(start, end, total);
+                total = history.getTotalData(start, end, total);
                 stats.addEntry(IFACE_ALL, uid, total[0], total[1]);
             }
             return stats.build();

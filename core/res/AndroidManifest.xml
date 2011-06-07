@@ -1377,6 +1377,19 @@
     <permission android:name="android.permission.CRYPT_KEEPER"
         android:protectionLevel="signatureOrSystem" />
 
+    <!-- Allows an application to read historical network usage for
+         specific networks and applications. @hide -->
+    <permission android:name="android.permission.READ_NETWORK_USAGE_HISTORY"
+        android:label="@string/permlab_readNetworkUsageHistory"
+        android:description="@string/permdesc_readNetworkUsageHistory"
+        android:protectionLevel="signature" />
+
+    <!-- Allows an application to manage network policies (such as warning and disable
+         limits) and to define application-specific rules. @hide -->
+    <permission android:name="android.permission.MANAGE_NETWORK_POLICY"
+        android:label="@string/permlab_manageNetworkPolicy"
+        android:description="@string/permdesc_manageNetworkPolicy"
+        android:protectionLevel="signature" />
 
     <!-- C2DM permission. 
          @hide Used internally.
