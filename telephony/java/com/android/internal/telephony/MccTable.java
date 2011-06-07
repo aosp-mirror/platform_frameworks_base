@@ -234,7 +234,7 @@ public final class MccTable
         String country = MccTable.countryCodeForMcc(mcc);
 
         Log.d(LOG_TAG, "locale set to "+language+"_"+country);
-        phone.setSystemLocale(language, country);
+        phone.setSystemLocale(language, country, true);
     }
 
     /**
