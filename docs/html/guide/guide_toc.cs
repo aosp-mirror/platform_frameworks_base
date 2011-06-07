@@ -256,8 +256,8 @@
         </ul>
       </li>
       <li><a href="<?cs var:toroot ?>guide/topics/media/index.html">
-            <span class="en">Audio and Video</span>
-          </a></li>
+            <span class="en">Media</span>
+          </a><span class="new">updated!</span></li>
       <li>
         <a href="<?cs var:toroot ?>guide/topics/clipboard/copy-paste.html">
             <span class="en">Copy and Paste</span>
