@@ -369,13 +369,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_MP4);
       assertTrue("Local MP4 SeekTo", isSeek);          
     }
-    
-    @LargeTest
-    public void testVideoLong3gpSeekTo() throws Exception {
-      boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_LONG_3GP);
-      assertTrue("Local 3gp SeekTo", isSeek);         
-    }
-   
+
     @LargeTest
     public void testVideoH263AACSeekTo() throws Exception {
       boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_H263_AAC);

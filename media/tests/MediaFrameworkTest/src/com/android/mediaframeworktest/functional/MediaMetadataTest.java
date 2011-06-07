@@ -47,14 +47,8 @@ public class MediaMetadataTest extends AndroidTestCase {
         CORRUPTED_ID3V2_TYER, CORRUPTED_ID3V2_TYER_2, CORRUPTED_ID3V2_TIT
     }
     
-    public static enum NON_MP3_TEST_FILE{
-         THREE3GP, AMRNB, AMRWB, M4A1, M4V, MIDI,
-         H264, OGG1, OGG2, WAV, WMA9, WMA10, WMV9, WMV7
-    }
-    
     public static METADATA_EXPECTEDRESULT meta;
     public static MP3_TEST_FILE mp3_test_file;
-    public static NON_MP3_TEST_FILE non_mp3_test_file;
    
     @MediumTest
     public static void testID3V1V2Metadata() throws Exception {
@@ -116,88 +110,11 @@ public class MediaMetadataTest extends AndroidTestCase {
         validateMetatData(mp3_test_file.CORRUPTED_ID3V2_TIT.ordinal(), MediaNames.META_DATA_MP3);
     }
    
-    @MediumTest
-    public static void test3gp_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.THREE3GP.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    
-    @MediumTest
-    public static void testAmr_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.AMRNB.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    
-    @MediumTest
-    public static void testAmrWb_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.AMRWB.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    
-    @MediumTest
-    public static void testM4A1_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.M4A1.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    
-    @MediumTest
-    public static void testM4v_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.M4V.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    
-    @MediumTest
-    public static void testH264_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.H264.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    //bug# 1440489
-    @Suppress
-    @MediumTest
-    public static void testOgg1_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.OGG1.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    
-    @Suppress
-    @MediumTest
-    public static void testOgg2_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.OGG2.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    
-    @Suppress
-    @MediumTest
-    public static void testMidi_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.MIDI.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    
-    @MediumTest
-    public static void testWav_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.WAV.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    
-    @Suppress
-    @MediumTest
-    public static void testWma9_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.WMA9.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    
-    @Suppress
-    @MediumTest
-    public static void testWma10_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.WMA10.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    
-    @Suppress
-    @MediumTest
-    public static void testWmv9_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.WMV9.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
-    
-    @Suppress
-    @MediumTest
-    public static void testWmv10_Metadata() throws Exception {
-        validateMetatData(non_mp3_test_file.WMV7.ordinal(), MediaNames.META_DATA_OTHERS);
-    }
      
     private static void validateMetatData(int fileIndex, String meta_data_file[][]) {
         Log.v(TAG, "filePath = "+ meta_data_file[fileIndex][0]);
         if ((meta_data_file[fileIndex][0].endsWith("wma") && !MediaProfileReader.getWMAEnable()) ||
             (meta_data_file[fileIndex][0].endsWith("wmv") && !MediaProfileReader.getWMVEnable())) {
-            Log.v(TAG, "Skip test since windows media is not supported");
             return;
         }
         String value = null;
