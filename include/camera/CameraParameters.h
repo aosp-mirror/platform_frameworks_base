@@ -263,7 +263,7 @@ public:
     // direction is not affected by the rotation or mirroring of
     // CAMERA_CMD_SET_DISPLAY_ORIENTATION. Coordinates range from -1000 to 1000.
     // (-1000,-1000) is the upper left point. (1000, 1000) is the lower right
-    // point. The length and width of focus areas cannot be 0 or negative.
+    // point. The width and height of focus areas cannot be 0 or negative.
     //
     // The fifth element is the weight. Values for weight must range from 1 to
     // 1000.  The weight should be interpreted as a per-pixel weight - all
@@ -373,7 +373,7 @@ public:
     // direction is not affected by the rotation or mirroring of
     // CAMERA_CMD_SET_DISPLAY_ORIENTATION. Coordinates of the rectangle range
     // from -1000 to 1000. (-1000, -1000) is the upper left point. (1000, 1000)
-    // is the lower right point. The length and width of metering areas cannot
+    // is the lower right point. The width and height of metering areas cannot
     // be 0 or negative.
     //
     // The fifth element is the weight. Values for weight must range from 1 to
