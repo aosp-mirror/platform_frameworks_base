@@ -16,6 +16,12 @@
 
 package android.net.http;
 
+import com.google.mockwebserver.MockResponse;
+import com.google.mockwebserver.MockWebServer;
+import com.google.mockwebserver.SocketPolicy;
+import static com.google.mockwebserver.SocketPolicy.DISCONNECT_AT_END;
+import static com.google.mockwebserver.SocketPolicy.SHUTDOWN_INPUT_AT_END;
+import static com.google.mockwebserver.SocketPolicy.SHUTDOWN_OUTPUT_AT_END;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -24,12 +30,6 @@ import junit.framework.TestCase;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import tests.http.MockResponse;
-import tests.http.MockWebServer;
-import tests.http.SocketPolicy;
-import static tests.http.SocketPolicy.DISCONNECT_AT_END;
-import static tests.http.SocketPolicy.SHUTDOWN_INPUT_AT_END;
-import static tests.http.SocketPolicy.SHUTDOWN_OUTPUT_AT_END;
 
 public final class DefaultHttpClientTest extends TestCase {
 
