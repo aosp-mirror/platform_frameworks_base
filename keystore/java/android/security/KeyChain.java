@@ -34,6 +34,7 @@ import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.security.KeyFactory;
+import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
@@ -185,11 +186,9 @@ public final class KeyChain {
             throw new IllegalArgumentException("bytes == null");
         }
         try {
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            return keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bytes));
-        } catch (NoSuchAlgorithmException e) {
-            throw new AssertionError(e);
-        } catch (InvalidKeySpecException e) {
+            KeyPair keyPair = (KeyPair) Credentials.convertFromPem(bytes).get(0);
+            return keyPair.getPrivate();
+        } catch (IOException e) {
             throw new AssertionError(e);
         }
     }

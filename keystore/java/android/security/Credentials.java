@@ -20,8 +20,19 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
-
+import com.android.org.bouncycastle.openssl.PEMReader;
+import com.android.org.bouncycastle.openssl.PEMWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.Charsets;
 import java.security.KeyPair;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@hide}
@@ -59,6 +70,40 @@ public class Credentials {
 
     /** Data type for PKCS12. */
     public static final String PKCS12 = "PKCS12";
+
+    /**
+     * Convert objects to a PEM format, which is used for
+     * CA_CERTIFICATE, USER_CERTIFICATE, and USER_PRIVATE_KEY
+     * entries.
+     */
+    public static byte[] convertToPem(Object... objects) throws IOException {
+        ByteArrayOutputStream bao = new ByteArrayOutputStream();
+        Writer writer = new OutputStreamWriter(bao, Charsets.US_ASCII);
+        PEMWriter pw = new PEMWriter(writer);
+        for (Object o : objects) {
+            pw.writeObject(o);
+        }
+        pw.close();
+        return bao.toByteArray();
+    }
+    /**
+     * Convert objects from PEM format, which is used for
+     * CA_CERTIFICATE, USER_CERTIFICATE, and USER_PRIVATE_KEY
+     * entries.
+     */
+    public static List<Object> convertFromPem(byte[] bytes) throws IOException {
+        ByteArrayInputStream bai = new ByteArrayInputStream(bytes);
+        Reader reader = new InputStreamReader(bai, Charsets.US_ASCII);
+        PEMReader pr = new PEMReader(reader);
+
+        List<Object> result = new ArrayList<Object>();
+        Object o;
+        while ((o = pr.readObject()) != null) {
+            result.add(o);
+        }
+        pr.close();
+        return result;
+    }
 
     private static Credentials singleton;
 
