@@ -3940,7 +3940,11 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                         // approches 1.0.  Recall that dot(v1, v2) = cos(angle) * mag(v1) * mag(v2).
                         PointerGesture::Delta& delta1 = mPointerGesture.referenceDeltas[id1];
                         PointerGesture::Delta& delta2 = mPointerGesture.referenceDeltas[id2];
-                        float dot = delta1.dx * delta2.dx + delta1.dy * delta2.dy;
+                        float dx1 = delta1.dx * mLocked.pointerGestureXZoomScale;
+                        float dy1 = delta1.dy * mLocked.pointerGestureYZoomScale;
+                        float dx2 = delta2.dx * mLocked.pointerGestureXZoomScale;
+                        float dy2 = delta2.dy * mLocked.pointerGestureYZoomScale;
+                        float dot = dx1 * dx2 + dy1 * dy2;
                         float cosine = dot / (dist1 * dist2); // denominator always > 0
                         if (cosine >= mConfig->pointerGestureSwipeTransitionAngleCosine) {
                             // Pointers are moving in the same direction.  Switch to SWIPE.
