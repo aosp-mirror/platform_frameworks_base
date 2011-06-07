@@ -90,38 +90,6 @@ public:
     /* Sets the mode of the pointer controller. */
     virtual void setPresentation(Presentation presentation) = 0;
 
-    // Describes the current gesture.
-    enum SpotGesture {
-        // No gesture.
-        // Do not display any spots.
-        SPOT_GESTURE_NEUTRAL,
-        // Tap at current location.
-        // Briefly display one spot at the tapped location.
-        SPOT_GESTURE_TAP,
-        // Drag at current location.
-        // Display spot at pressed location.
-        SPOT_GESTURE_DRAG,
-        // Button pressed but no finger is down.
-        // Display spot at pressed location.
-        SPOT_GESTURE_BUTTON_CLICK,
-        // Button pressed and a finger is down.
-        // Display spot at pressed location.
-        SPOT_GESTURE_BUTTON_DRAG,
-        // One finger down and hovering.
-        // Display spot at the hovered location.
-        SPOT_GESTURE_HOVER,
-        // Two fingers down but not sure in which direction they are moving so we consider
-        // it a press at the pointer location.
-        // Display two spots near the pointer location.
-        SPOT_GESTURE_PRESS,
-        // Two fingers down and moving in same direction.
-        // Display two spots near the pointer location.
-        SPOT_GESTURE_SWIPE,
-        // Two or more fingers down and moving in arbitrary directions.
-        // Display two or more spots near the pointer location, one for each finger.
-        SPOT_GESTURE_FREEFORM,
-    };
-
     /* Sets the spots for the current gesture.
      * The spots are not subject to the inactivity timeout like the pointer
      * itself it since they are expected to remain visible for so long as
@@ -131,8 +99,7 @@ public:
      * For spotCoords, pressure != 0 indicates that the spot's location is being
      * pressed (not hovering).
      */
-    virtual void setSpots(SpotGesture spotGesture,
-            const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
+    virtual void setSpots(const PointerCoords* spotCoords, const uint32_t* spotIdToIndex,
             BitSet32 spotIdBits) = 0;
 
     /* Removes all spots. */
@@ -198,8 +165,8 @@ public:
     virtual void unfade(Transition transition);
 
     virtual void setPresentation(Presentation presentation);
-    virtual void setSpots(SpotGesture spotGesture,
-            const PointerCoords* spotCoords, const uint32_t* spotIdToIndex, BitSet32 spotIdBits);
+    virtual void setSpots(const PointerCoords* spotCoords,
+            const uint32_t* spotIdToIndex, BitSet32 spotIdBits);
     virtual void clearSpots();
 
     void setDisplaySize(int32_t width, int32_t height);

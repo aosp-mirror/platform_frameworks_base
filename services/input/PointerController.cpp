@@ -240,15 +240,15 @@ void PointerController::setPresentation(Presentation presentation) {
     }
 }
 
-void PointerController::setSpots(SpotGesture spotGesture,
-        const PointerCoords* spotCoords, const uint32_t* spotIdToIndex, BitSet32 spotIdBits) {
+void PointerController::setSpots(const PointerCoords* spotCoords,
+        const uint32_t* spotIdToIndex, BitSet32 spotIdBits) {
 #if DEBUG_POINTER_UPDATES
-    LOGD("setSpots: spotGesture=%d", spotGesture);
+    LOGD("setSpots: idBits=%08x", spotIdBits.value);
     for (BitSet32 idBits(spotIdBits); !idBits.isEmpty(); ) {
         uint32_t id = idBits.firstMarkedBit();
         idBits.clearBit(id);
         const PointerCoords& c = spotCoords[spotIdToIndex[id]];
-        LOGD("  spot %d: position=(%0.3f, %0.3f), pressure=%0.3f", id,
+        LOGD(" spot %d: position=(%0.3f, %0.3f), pressure=%0.3f", id,
                 c.getAxisValue(AMOTION_EVENT_AXIS_X),
                 c.getAxisValue(AMOTION_EVENT_AXIS_Y),
                 c.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE));
