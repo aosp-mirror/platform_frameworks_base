@@ -860,7 +860,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
             lp.format = PixelFormat.TRANSLUCENT;
             lp.setTitle("PointerLocation");
-            WindowManagerImpl wm = (WindowManagerImpl)
+            WindowManager wm = (WindowManager)
                     mContext.getSystemService(Context.WINDOW_SERVICE);
             wm.addView(addView, lp);
             
@@ -883,7 +883,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mPointerLocationInputChannel = null;
             }
             
-            WindowManagerImpl wm = (WindowManagerImpl)
+            WindowManager wm = (WindowManager)
                     mContext.getSystemService(Context.WINDOW_SERVICE);
             wm.removeView(removeView);
         }
@@ -1174,8 +1174,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
             params.setTitle("Starting " + packageName);
 
-            WindowManagerImpl wm = (WindowManagerImpl)
-                    context.getSystemService(Context.WINDOW_SERVICE);
+            WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
             View view = win.getDecorView();
 
             if (win.isFloating()) {
@@ -1220,7 +1219,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             TAG, "Removing starting window for " + appToken + ": " + window);
 
         if (window != null) {
-            WindowManagerImpl wm = (WindowManagerImpl) mContext.getSystemService(Context.WINDOW_SERVICE);
+            WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
             wm.removeView(window);
         }
     }

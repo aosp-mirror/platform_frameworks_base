@@ -425,9 +425,17 @@ class ContextImpl extends Context {
 
         registerService(WINDOW_SERVICE, new ServiceFetcher() {
                 public Object getService(ContextImpl ctx) {
-                    CompatibilityInfo ci = ctx.mResources.getCompatibilityInfo();
-                    return WindowManagerImpl.getDefault(ci);
+                    return WindowManagerImpl.getDefault(ctx.mPackageInfo.mCompatibilityInfo);
                 }});
+    }
+
+    static ContextImpl getImpl(Context context) {
+        Context nextContext;
+        while ((context instanceof ContextWrapper) &&
+                (nextContext=((ContextWrapper)context).getBaseContext()) != null) {
+            context = nextContext;
+        }
+        return (ContextImpl)context;
     }
 
     // The system service cache for the system services that are

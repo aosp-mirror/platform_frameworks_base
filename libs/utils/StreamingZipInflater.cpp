@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_NDEBUG 1
+//#define LOG_NDEBUG 0
 #define LOG_TAG "szipinf"
 #include <utils/Log.h>
 
@@ -77,7 +77,7 @@ StreamingZipInflater::~StreamingZipInflater() {
 }
 
 void StreamingZipInflater::initInflateState() {
-    LOGD("Initializing inflate state");
+    LOGV("Initializing inflate state");
 
     memset(&mInflateState, 0, sizeof(mInflateState));
     mInflateState.zalloc = Z_NULL;
@@ -152,13 +152,13 @@ ssize_t StreamingZipInflater::read(void* outBuf, size_t count) {
             mInflateState.avail_out = mOutBufSize;
 
             /*
-            LOGD("Inflating to outbuf: avail_in=%u avail_out=%u next_in=%p next_out=%p",
+            LOGV("Inflating to outbuf: avail_in=%u avail_out=%u next_in=%p next_out=%p",
                     mInflateState.avail_in, mInflateState.avail_out,
                     mInflateState.next_in, mInflateState.next_out);
             */
             int result = Z_OK;
             if (mStreamNeedsInit) {
-                LOGD("Initializing zlib to inflate");
+                LOGV("Initializing zlib to inflate");
                 result = inflateInit2(&mInflateState, -MAX_WBITS);
                 mStreamNeedsInit = false;
             }
@@ -192,7 +192,7 @@ int StreamingZipInflater::readNextChunk() {
         size_t toRead = min_of(mInBufSize, mInTotalSize - mInNextChunkOffset);
         if (toRead > 0) {
             ssize_t didRead = ::read(mFd, mInBuf, toRead);
-            //LOGD("Reading input chunk, size %08x didread %08x", toRead, didRead);
+            //LOGV("Reading input chunk, size %08x didread %08x", toRead, didRead);
             if (didRead < 0) {
                 // TODO: error
                 LOGE("Error reading asset data");

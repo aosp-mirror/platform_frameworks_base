@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
+import static android.view.WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -160,6 +161,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_REORDER = false;
     static final boolean DEBUG_WALLPAPER = false;
     static final boolean DEBUG_DRAG = false;
+    static final boolean SHOW_SURFACE_ALLOC = false;
     static final boolean SHOW_TRANSACTIONS = false;
     static final boolean HIDE_STACK_CRAWLS = true;
 
@@ -462,6 +464,9 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<AppWindowToken> mToBottomApps = new ArrayList<AppWindowToken>();
 
     Display mDisplay;
+
+    final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+    final DisplayMetrics mCompatDisplayMetrics = new DisplayMetrics();
 
     H mH = new H();
 
@@ -2488,6 +2493,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             if (DEBUG_LAYOUT) Slog.v(TAG, "Relayout " + win + ": " + win.mAttrs);
+
+            win.mEnforceSizeCompat = (win.mAttrs.flags & FLAG_COMPATIBLE_WINDOW) != 0;
 
             if ((attrChanges & WindowManager.LayoutParams.ALPHA_CHANGED) != 0) {
                 win.mAlpha = attrs.alpha;
@@ -5052,7 +5059,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mWaitingForConfig = true;
             mLayoutNeeded = true;
             startFreezingDisplayLocked(inTransaction);
-            Slog.i(TAG, "Setting rotation to " + rotation + ", animFlags=" + animFlags);
+            //Slog.i(TAG, "Setting rotation to " + rotation + ", animFlags=" + animFlags);
             mInputManager.setDisplayOrientation(0, rotation);
             if (mDisplayEnabled) {
                 // NOTE: We disable the rotation in the emulator because
@@ -5522,6 +5529,26 @@ public class WindowManagerService extends IWindowManager.Stub
         return curSize;
     }
 
+    private int computeSmallestWidth(boolean rotated, int dw, int dh, float density) {
+        // We need to determine the smallest width that will occur under normal
+        // operation.  To this, start with the base screen size and compute the
+        // width under the different possible rotations.  We need to un-rotate
+        // the current screen dimensions before doing this.
+        int unrotDw, unrotDh;
+        if (rotated) {
+            unrotDw = dh;
+            unrotDh = dw;
+        } else {
+            unrotDw = dw;
+            unrotDh = dh;
+        }
+        int sw = reduceConfigWidthSize(unrotDw, Surface.ROTATION_0, density, unrotDw);
+        sw = reduceConfigWidthSize(sw, Surface.ROTATION_90, density, unrotDh);
+        sw = reduceConfigWidthSize(sw, Surface.ROTATION_180, density, unrotDw);
+        sw = reduceConfigWidthSize(sw, Surface.ROTATION_270, density, unrotDh);
+        return sw;
+    }
+
     boolean computeNewConfigurationLocked(Configuration config) {
         if (mDisplay == null) {
             return false;
@@ -5567,7 +5594,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         config.orientation = orientation;
 
-        DisplayMetrics dm = new DisplayMetrics();
+        DisplayMetrics dm = mDisplayMetrics;
         mDisplay.getRealMetrics(dm);
 
         // Override display width and height with what we are computing,
@@ -5577,10 +5604,17 @@ public class WindowManagerService extends IWindowManager.Stub
         dm.heightPixels = dm.unscaledHeightPixels = mAppDisplayHeight
                 = mPolicy.getNonDecorDisplayHeight(mRotation, dh);
 
-        mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm, null);
+        mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm,
+                mCompatDisplayMetrics);
 
         config.screenWidthDp = (int)(mPolicy.getConfigDisplayWidth(mRotation, dw) / dm.density);
         config.screenHeightDp = (int)(mPolicy.getConfigDisplayHeight(mRotation, dh) / dm.density);
+        config.smallestScreenWidthDp = computeSmallestWidth(rotated, dw, dh, dm.density);
+
+        config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
+        config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
+        config.compatSmallestScreenWidthDp = (int)(config.smallestScreenWidthDp
+                / mCompatibleScreenScale);
 
         // We need to determine the smallest width that will occur under normal
         // operation.  To this, start with the base screen size and compute the
@@ -8446,7 +8480,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // surface and ask the app to request another one.
                 Slog.w(TAG, "Looks like we have reclaimed some memory, clearing surface for retry.");
                 if (surface != null) {
-                    if (SHOW_TRANSACTIONS) logSurface(win, "RECOVER DESTROY", null);
+                    if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) logSurface(win,
+                            "RECOVER DESTROY", null);
                     surface.destroy();
                     win.mSurfaceShown = false;
                     win.mSurface = null;

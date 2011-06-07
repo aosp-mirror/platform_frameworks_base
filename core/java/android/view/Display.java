@@ -26,6 +26,9 @@ import android.util.DisplayMetrics;
 import android.util.Slog;
 
 public class Display {
+    static final String TAG = "Display";
+    static final boolean DEBUG_COMPAT = false;
+
     /**
      * Specify the default Display
      */
@@ -38,7 +41,7 @@ public class Display {
      * Display gives you access to some information about a particular display
      * connected to the device.
      */
-    Display(int display, CompatibilityInfo compatInfo) {
+    Display(int display, CompatibilityInfoHolder compatInfo) {
         // initalize the statics when this class is first instansiated. This is
         // done here instead of in the static block because Zygote
         synchronized (sStaticInit) {
@@ -47,14 +50,19 @@ public class Display {
                 sInitialized = true;
             }
         }
-        if (compatInfo != null && (compatInfo.isScalingRequired()
-                || !compatInfo.supportsScreen())) {
-            mCompatibilityInfo = compatInfo;
-        } else {
-            mCompatibilityInfo = null;
-        }
+        mCompatibilityInfo = compatInfo != null ? compatInfo : new CompatibilityInfoHolder();
         mDisplay = display;
         init(display);
+    }
+
+    /** @hide */
+    public static void setCompatibilityInfo(CompatibilityInfo compatInfo) {
+        if (compatInfo != null && (compatInfo.isScalingRequired()
+                || !compatInfo.supportsScreen())) {
+            sCompatibilityInfo = compatInfo;
+        } else {
+            sCompatibilityInfo = null;
+        }
     }
     
     /**
@@ -96,12 +104,13 @@ public class Display {
             IWindowManager wm = getWindowManager();
             if (wm != null) {
                 wm.getDisplaySize(outSize);
-                if (doCompat && mCompatibilityInfo != null) {
+                CompatibilityInfo ci;
+                if (doCompat && (ci=mCompatibilityInfo.getIfNeeded()) != null) {
                     synchronized (mTmpMetrics) {
                         mTmpMetrics.unscaledWidthPixels = outSize.x;
                         mTmpMetrics.unscaledHeightPixels = outSize.y;
                         mTmpMetrics.density = mDensity;
-                        mCompatibilityInfo.applyToDisplayMetrics(mTmpMetrics);
+                        ci.applyToDisplayMetrics(mTmpMetrics);
                         outSize.x = mTmpMetrics.widthPixels;
                         outSize.y = mTmpMetrics.heightPixels;
                     }
@@ -111,6 +120,7 @@ public class Display {
                 // system process before the window manager is up.
                 outSize.y = getRealHeight();
             }
+            if (DEBUG_COMPAT && doCompat) Slog.v(TAG, "Returning display size: " + outSize);
         } catch (RemoteException e) {
             Slog.w("Display", "Unable to get display size", e);
         }
@@ -236,9 +246,13 @@ public class Display {
         }
         getNonSizeMetrics(outMetrics);
 
-        if (mCompatibilityInfo != null) {
-            mCompatibilityInfo.applyToDisplayMetrics(outMetrics);
+        CompatibilityInfo ci = mCompatibilityInfo.getIfNeeded();
+        if (ci != null) {
+            ci.applyToDisplayMetrics(outMetrics);
         }
+
+        if (DEBUG_COMPAT) Slog.v(TAG, "Returning DisplayMetrics: " + outMetrics.widthPixels
+                + "x" + outMetrics.heightPixels + " " + outMetrics.density);
     }
 
     /**
@@ -282,7 +296,7 @@ public class Display {
     
     private native void init(int display);
 
-    private final CompatibilityInfo mCompatibilityInfo;
+    private final CompatibilityInfoHolder mCompatibilityInfo;
     private final int   mDisplay;
     // Following fields are initialized from native code
     private int         mPixelFormat;
@@ -299,11 +313,13 @@ public class Display {
     private static boolean sInitialized = false;
     private static IWindowManager sWindowManager;
 
+    private static volatile CompatibilityInfo sCompatibilityInfo;
+
     /**
      * Returns a display object which uses the metric's width/height instead.
      * @hide
      */
-    public static Display createCompatibleDisplay(int displayId, CompatibilityInfo compat) {
+    public static Display createCompatibleDisplay(int displayId, CompatibilityInfoHolder compat) {
         return new Display(displayId, compat);
     }
 }
