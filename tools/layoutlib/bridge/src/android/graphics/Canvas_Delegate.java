@@ -425,7 +425,7 @@ public final class Canvas_Delegate {
         AffineTransform matrixTx = matrixDelegate.getAffineTransform();
 
         // combine them so that the given matrix is applied after.
-        currentTx.preConcatenate(matrixTx);
+        currentTx.concatenate(matrixTx);
 
         // give it to the graphics2D as a new matrix replacing all previous transform
         snapshot.setTransform(currentTx);
@@ -717,7 +717,7 @@ public final class Canvas_Delegate {
     /*package*/ static void native_drawCircle(int nativeCanvas,
             float cx, float cy, float radius, int paint) {
         native_drawOval(nativeCanvas,
-                new RectF(cx - radius, cy - radius, radius*2, radius*2),
+                new RectF(cx - radius, cy - radius, radius, radius),
                 paint);
     }
 

@@ -44,7 +44,7 @@ public class BridgeXmlBlockParserTest extends TestCase {
 
         InputStream input = this.getClass().getClassLoader().getResourceAsStream(
             "com/android/layoutlib/testdata/layout1.xml");
-        parser.setInput(input, null /*encoding*/);
+        parser.setInput(input, "UTF-8"); //$NON-NLS-1$
 
         assertEquals(XmlPullParser.START_DOCUMENT, parser.next());
 
