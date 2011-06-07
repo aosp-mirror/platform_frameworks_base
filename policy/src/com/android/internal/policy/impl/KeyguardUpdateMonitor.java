@@ -480,11 +480,11 @@ public class KeyguardUpdateMonitor {
     }
 
     /**
-     * Report that the user succesfully entered the sim pin so we
+     * Report that the user succesfully entered the sim pin or puk so we
      * have the information earlier than waiting for the intent
      * broadcast from the telephony code.
      */
-    public void reportSimPinUnlocked() {
+    public void reportSimUnlocked() {
         mSimState = IccCard.State.READY;
     }
 
