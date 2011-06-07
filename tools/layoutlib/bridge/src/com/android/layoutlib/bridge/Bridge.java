@@ -196,7 +196,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
                 Capability.UNBOUND_RENDERING,
                 Capability.CUSTOM_BACKGROUND_COLOR,
                 Capability.RENDER,
-                //Capability.LAYOUT_ONLY, // disable to run on ADT 10.0 which doesn't include this.
+                Capability.LAYOUT_ONLY,
                 Capability.EMBEDDED_LAYOUT,
                 Capability.VIEW_MANIPULATION,
                 Capability.ADAPTER_BINDING,

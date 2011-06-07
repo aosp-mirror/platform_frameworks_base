@@ -44,7 +44,6 @@ import android.util.TypedValue;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -124,7 +123,7 @@ public final class ResourceHelper {
                     // providing an XmlPullParser
                     KXmlParser parser = new KXmlParser();
                     parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                    parser.setInput(new FileReader(f));
+                    parser.setInput(new FileInputStream(f), "UTF-8"); //$NON-NLS-1$);
 
                     BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
                             parser, context, resValue.isFramework());
@@ -206,7 +205,7 @@ public final class ResourceHelper {
                     // let the framework inflate the Drawable from the XML file.
                     KXmlParser parser = new KXmlParser();
                     parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                    parser.setInput(new FileReader(f));
+                    parser.setInput(new FileInputStream(f), "UTF-8"); //$NON-NLS-1$);
 
                     BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
                             parser, context, value.isFramework());
