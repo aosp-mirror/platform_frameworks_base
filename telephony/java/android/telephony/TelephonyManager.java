@@ -191,6 +191,10 @@ public class TelephonyManager {
      *   {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      */
     public String getDeviceId() {
+        if (!isVoiceCapable()) {
+            return null;
+        }
+
         try {
             return getSubscriberInfo().getDeviceId();
         } catch (RemoteException ex) {
