@@ -131,11 +131,11 @@ private:
     size_t        mNumSttsTableEntries;
     struct SttsTableEntry {
 
-        SttsTableEntry(uint32_t count, uint32_t durationUs)
-            : sampleCount(count), sampleDurationUs(durationUs) {}
+        SttsTableEntry(uint32_t count, uint32_t duration)
+            : sampleCount(count), sampleDuration(duration) {}
 
         uint32_t sampleCount;
-        uint32_t sampleDurationUs;
+        uint32_t sampleDuration;  // time scale based
     };
     List<SttsTableEntry> mSttsTableEntries;
 
@@ -216,7 +216,9 @@ private:
     void updateTrackSizeEstimate();
     void addOneStscTableEntry(size_t chunkId, size_t sampleId);
     void addOneStssTableEntry(size_t sampleId);
-    void addOneSttsTableEntry(size_t sampleCount, int64_t durationUs);
+
+    // Duration is time scale based
+    void addOneSttsTableEntry(size_t sampleCount, int32_t timescaledDur);
     void sendTrackSummary(bool hasMultipleTracks);
 
     // Write the boxes
@@ -1164,9 +1166,9 @@ void MPEG4Writer::Track::addOneStssTableEntry(size_t sampleId) {
 }
 
 void MPEG4Writer::Track::addOneSttsTableEntry(
-        size_t sampleCount, int64_t durationUs) {
+        size_t sampleCount, int32_t duration) {
 
-    SttsTableEntry sttsEntry(sampleCount, durationUs);
+    SttsTableEntry sttsEntry(sampleCount, duration);
     mSttsTableEntries.push_back(sttsEntry);
     ++mNumSttsTableEntries;
 }
@@ -2132,7 +2134,7 @@ status_t MPEG4Writer::Track::threadEntry() {
             if (mNumSamples == 3 || currDurationTicks != lastDurationTicks) {
                 LOGV("%s lastDurationUs: %lld us, currDurationTicks: %lld us",
                         mIsAudio? "Audio": "Video", lastDurationUs, currDurationTicks);
-                addOneSttsTableEntry(sampleCount, lastDurationUs);
+                addOneSttsTableEntry(sampleCount, lastDurationTicks);
                 sampleCount = 1;
             } else {
                 ++sampleCount;
@@ -2218,17 +2220,18 @@ status_t MPEG4Writer::Track::threadEntry() {
     // frame's duration.
     if (mNumSamples == 1) {
         lastDurationUs = 0;  // A single sample's duration
+        lastDurationTicks = 0;
     } else {
         ++sampleCount;  // Count for the last sample
     }
 
     if (mNumSamples <= 2) {
-        addOneSttsTableEntry(1, lastDurationUs);
+        addOneSttsTableEntry(1, lastDurationTicks);
         if (sampleCount - 1 > 0) {
-            addOneSttsTableEntry(sampleCount - 1, lastDurationUs);
+            addOneSttsTableEntry(sampleCount - 1, lastDurationTicks);
         }
     } else {
-        addOneSttsTableEntry(sampleCount, lastDurationUs);
+        addOneSttsTableEntry(sampleCount, lastDurationTicks);
     }
 
     mTrackDurationUs += lastDurationUs;
@@ -2773,19 +2776,15 @@ void MPEG4Writer::Track::writeSttsBox() {
         CHECK(mStartTimestampUs > moovStartTimeUs);
         trackStartTimeOffsetUs = mStartTimestampUs - moovStartTimeUs;
     }
-    int64_t prevTimestampUs = trackStartTimeOffsetUs;
-    for (List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
-        it != mSttsTableEntries.end(); ++it) {
+    List<SttsTableEntry>::iterator it = mSttsTableEntries.begin();
+    CHECK(it != mSttsTableEntries.end() && it->sampleCount == 1);
+    mOwner->writeInt32(it->sampleCount);
+    int32_t dur = (trackStartTimeOffsetUs * mTimeScale + 500000LL) / 1000000LL;
+    mOwner->writeInt32(dur + it->sampleDuration);
+
+    while (++it != mSttsTableEntries.end()) {
         mOwner->writeInt32(it->sampleCount);
-
-        // Make sure that we are calculating the sample duration the exactly
-        // same way as we made decision on how to create stts entries.
-        int64_t currTimestampUs = prevTimestampUs + it->sampleDurationUs;
-        int32_t dur = ((currTimestampUs * mTimeScale + 500000LL) / 1000000LL -
-            (prevTimestampUs * mTimeScale + 500000LL) / 1000000LL);
-        prevTimestampUs += (it->sampleCount * it->sampleDurationUs);
-
-        mOwner->writeInt32(dur);
+        mOwner->writeInt32(it->sampleDuration);
     }
     mOwner->endBox();  // stts
 }
