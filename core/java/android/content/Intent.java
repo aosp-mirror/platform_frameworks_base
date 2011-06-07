@@ -1654,7 +1654,7 @@ public class Intent implements Parcelable, Cloneable {
      * This is used mainly for the USB Settings panel.
      * Apps should listen for ACTION_MEDIA_MOUNTED and ACTION_MEDIA_UNMOUNTED broadcasts to be notified
      * when the SD card file system is mounted or unmounted
-     * @deprecated
+     * @deprecated replaced by android.os.storage.StorageEventListener
      */
     @Deprecated
     public static final String ACTION_UMS_CONNECTED = "android.intent.action.UMS_CONNECTED";
@@ -1664,7 +1664,7 @@ public class Intent implements Parcelable, Cloneable {
      * This is used mainly for the USB Settings panel.
      * Apps should listen for ACTION_MEDIA_MOUNTED and ACTION_MEDIA_UNMOUNTED broadcasts to be notified
      * when the SD card file system is mounted or unmounted
-     * @deprecated
+     * @deprecated replaced by android.os.storage.StorageEventListener
      */
     @Deprecated
     public static final String ACTION_UMS_DISCONNECTED = "android.intent.action.UMS_DISCONNECTED";
