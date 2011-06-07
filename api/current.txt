@@ -5014,8 +5014,8 @@ package android.content {
     field public static final java.lang.String ACTION_TIME_CHANGED = "android.intent.action.TIME_SET";
     field public static final java.lang.String ACTION_TIME_TICK = "android.intent.action.TIME_TICK";
     field public static final java.lang.String ACTION_UID_REMOVED = "android.intent.action.UID_REMOVED";
-    field public static final java.lang.String ACTION_UMS_CONNECTED = "android.intent.action.UMS_CONNECTED";
-    field public static final java.lang.String ACTION_UMS_DISCONNECTED = "android.intent.action.UMS_DISCONNECTED";
+    field public static final deprecated java.lang.String ACTION_UMS_CONNECTED = "android.intent.action.UMS_CONNECTED";
+    field public static final deprecated java.lang.String ACTION_UMS_DISCONNECTED = "android.intent.action.UMS_DISCONNECTED";
     field public static final java.lang.String ACTION_USER_PRESENT = "android.intent.action.USER_PRESENT";
     field public static final java.lang.String ACTION_VIEW = "android.intent.action.VIEW";
     field public static final java.lang.String ACTION_VOICE_COMMAND = "android.intent.action.VOICE_COMMAND";
