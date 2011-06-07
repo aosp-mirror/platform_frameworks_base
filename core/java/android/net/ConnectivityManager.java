@@ -165,14 +165,12 @@ public class ConnectivityManager
 
     /**
      * The Default Mobile data connection.  When active, all data traffic
-     * will use this connection by default.  Should not coexist with other
-     * default connections.
+     * will use this connection by default.
      */
     public static final int TYPE_MOBILE      = 0;
     /**
      * The Default WIFI data connection.  When active, all data traffic
-     * will use this connection by default.  Should not coexist with other
-     * default connections.
+     * will use this connection by default.
      */
     public static final int TYPE_WIFI        = 1;
     /**
@@ -208,21 +206,23 @@ public class ConnectivityManager
     public static final int TYPE_MOBILE_HIPRI = 5;
     /**
      * The Default WiMAX data connection.  When active, all data traffic
-     * will use this connection by default.  Should not coexist with other
-     * default connections.
+     * will use this connection by default.
      */
     public static final int TYPE_WIMAX       = 6;
 
     /**
-     * Bluetooth data connection. This is used for Bluetooth reverse tethering.
-     * @hide
+     * The Default Bluetooth data connection. When active, all data traffic
+     * will use this connection by default.
      */
     public static final int TYPE_BLUETOOTH   = 7;
 
     /** {@hide} */
     public static final int TYPE_DUMMY       = 8;
 
-    /** {@hide} */
+    /**
+     * The Default Ethernet data connection.  When active, all data traffic
+     * will use this connection by default.
+     */
     public static final int TYPE_ETHERNET    = 9;
     /**
      * Over the air Adminstration.
