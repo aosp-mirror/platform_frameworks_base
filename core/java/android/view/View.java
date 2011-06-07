@@ -951,51 +951,51 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
     /**
      * Horizontal direction of this view is from Left to Right.
-     * Use with {@link #setHorizontalDirection}.
+     * Use with {@link #setLayoutDirection}.
      * {@hide}
      */
-    public static final int HORIZONTAL_DIRECTION_LTR = 0x00000000;
+    public static final int LAYOUT_DIRECTION_LTR = 0x00000000;
 
     /**
      * Horizontal direction of this view is from Right to Left.
-     * Use with {@link #setHorizontalDirection}.
+     * Use with {@link #setLayoutDirection}.
      * {@hide}
      */
-    public static final int HORIZONTAL_DIRECTION_RTL = 0x40000000;
+    public static final int LAYOUT_DIRECTION_RTL = 0x40000000;
 
     /**
      * Horizontal direction of this view is inherited from its parent.
-     * Use with {@link #setHorizontalDirection}.
+     * Use with {@link #setLayoutDirection}.
      * {@hide}
      */
-    public static final int HORIZONTAL_DIRECTION_INHERIT = 0x80000000;
+    public static final int LAYOUT_DIRECTION_INHERIT = 0x80000000;
 
     /**
      * Horizontal direction of this view is from deduced from the default language
-     * script for the locale. Use with {@link #setHorizontalDirection}.
+     * script for the locale. Use with {@link #setLayoutDirection}.
      * {@hide}
      */
-    public static final int HORIZONTAL_DIRECTION_LOCALE = 0xC0000000;
+    public static final int LAYOUT_DIRECTION_LOCALE = 0xC0000000;
 
     /**
      * Mask for use with setFlags indicating bits used for horizontalDirection.
      * {@hide}
      */
-    static final int HORIZONTAL_DIRECTION_MASK = 0xC0000000;
+    static final int LAYOUT_DIRECTION_MASK = 0xC0000000;
 
     /*
      * Array of horizontal direction flags for mapping attribute "horizontalDirection" to correct
      * flag value.
      * {@hide}
      */
-    private static final int[] HORIZONTAL_DIRECTION_FLAGS = { HORIZONTAL_DIRECTION_LTR,
-            HORIZONTAL_DIRECTION_RTL, HORIZONTAL_DIRECTION_INHERIT, HORIZONTAL_DIRECTION_LOCALE};
+    private static final int[] LAYOUT_DIRECTION_FLAGS = {LAYOUT_DIRECTION_LTR,
+        LAYOUT_DIRECTION_RTL, LAYOUT_DIRECTION_INHERIT, LAYOUT_DIRECTION_LOCALE};
 
     /**
      * Default horizontalDirection.
      * {@hide}
      */
-    private static final int HORIZONTAL_DIRECTION_DEFAULT = HORIZONTAL_DIRECTION_INHERIT;
+    private static final int LAYOUT_DIRECTION_DEFAULT = LAYOUT_DIRECTION_INHERIT;
 
     /**
      * View flag indicating whether {@link #addFocusables(ArrayList, int, int)}
@@ -2464,7 +2464,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     public View(Context context) {
         mContext = context;
         mResources = context != null ? context.getResources() : null;
-        mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED | HORIZONTAL_DIRECTION_INHERIT;
+        mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED | LAYOUT_DIRECTION_INHERIT;
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
     }
@@ -2662,18 +2662,18 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                         viewFlagMasks |= VISIBILITY_MASK;
                     }
                     break;
-                case com.android.internal.R.styleable.View_horizontalDirection:
+                case com.android.internal.R.styleable.View_layoutDirection:
                     // Clear any HORIZONTAL_DIRECTION flag already set
-                    viewFlagValues &= ~HORIZONTAL_DIRECTION_MASK;
+                    viewFlagValues &= ~LAYOUT_DIRECTION_MASK;
                     // Set the HORIZONTAL_DIRECTION flags depending on the value of the attribute
-                    final int horizontalDirection = a.getInt(attr, -1);
-                    if (horizontalDirection != -1) {
-                        viewFlagValues |= HORIZONTAL_DIRECTION_FLAGS[horizontalDirection];
+                    final int layoutDirection = a.getInt(attr, -1);
+                    if (layoutDirection != -1) {
+                        viewFlagValues |= LAYOUT_DIRECTION_FLAGS[layoutDirection];
                     } else {
-                        // Set to default (HORIZONTAL_DIRECTION_INHERIT)
-                        viewFlagValues |= HORIZONTAL_DIRECTION_DEFAULT;
+                        // Set to default (LAYOUT_DIRECTION_INHERIT)
+                        viewFlagValues |= LAYOUT_DIRECTION_DEFAULT;
                     }
-                    viewFlagMasks |= HORIZONTAL_DIRECTION_MASK;
+                    viewFlagMasks |= LAYOUT_DIRECTION_MASK;
                     break;
                 case com.android.internal.R.styleable.View_drawingCacheQuality:
                     final int cacheQuality = a.getInt(attr, 0);
@@ -4256,38 +4256,38 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
-     * Returns the horizontal direction for this view.
+     * Returns the layout direction for this view.
      *
-     * @return One of {@link #HORIZONTAL_DIRECTION_LTR},
-     *   {@link #HORIZONTAL_DIRECTION_RTL},
-     *   {@link #HORIZONTAL_DIRECTION_INHERIT} or
-     *   {@link #HORIZONTAL_DIRECTION_LOCALE}.
-     * @attr ref android.R.styleable#View_horizontalDirection
+     * @return One of {@link #LAYOUT_DIRECTION_LTR},
+     *   {@link #LAYOUT_DIRECTION_RTL},
+     *   {@link #LAYOUT_DIRECTION_INHERIT} or
+     *   {@link #LAYOUT_DIRECTION_LOCALE}.
+     * @attr ref android.R.styleable#View_layoutDirection
      * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout", mapping = {
-        @ViewDebug.IntToString(from = HORIZONTAL_DIRECTION_LTR,     to = "LTR"),
-        @ViewDebug.IntToString(from = HORIZONTAL_DIRECTION_RTL,     to = "RTL"),
-        @ViewDebug.IntToString(from = HORIZONTAL_DIRECTION_INHERIT, to = "INHERIT"),
-        @ViewDebug.IntToString(from = HORIZONTAL_DIRECTION_LOCALE,  to = "LOCALE")
+        @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LTR,     to = "LTR"),
+        @ViewDebug.IntToString(from = LAYOUT_DIRECTION_RTL,     to = "RTL"),
+        @ViewDebug.IntToString(from = LAYOUT_DIRECTION_INHERIT, to = "INHERIT"),
+        @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LOCALE,  to = "LOCALE")
     })
-    public int getHorizontalDirection() {
-        return mViewFlags & HORIZONTAL_DIRECTION_MASK;
+    public int getLayoutDirection() {
+        return mViewFlags & LAYOUT_DIRECTION_MASK;
     }
 
     /**
-     * Set the horizontal direction for this view.
+     * Set the layout direction for this view.
      *
-     * @param horizontalDirection One of {@link #HORIZONTAL_DIRECTION_LTR},
-     *   {@link #HORIZONTAL_DIRECTION_RTL},
-     *   {@link #HORIZONTAL_DIRECTION_INHERIT} or
-     *   {@link #HORIZONTAL_DIRECTION_LOCALE}.
-     * @attr ref android.R.styleable#View_horizontalDirection
+     * @param layoutDirection One of {@link #LAYOUT_DIRECTION_LTR},
+     *   {@link #LAYOUT_DIRECTION_RTL},
+     *   {@link #LAYOUT_DIRECTION_INHERIT} or
+     *   {@link #LAYOUT_DIRECTION_LOCALE}.
+     * @attr ref android.R.styleable#View_layoutDirection
      * @hide
      */
     @RemotableViewMethod
-    public void setHorizontalDirection(int horizontalDirection) {
-        setFlags(horizontalDirection, HORIZONTAL_DIRECTION_MASK);
+    public void setLayoutDirection(int layoutDirection) {
+        setFlags(layoutDirection, LAYOUT_DIRECTION_MASK);
     }
 
     /**
@@ -6103,7 +6103,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             }
         }
 
-        if ((changed & HORIZONTAL_DIRECTION_MASK) != 0) {
+        if ((changed & LAYOUT_DIRECTION_MASK) != 0) {
             requestLayout();
         }
     }
@@ -8658,24 +8658,24 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             mPrivateFlags &= ~AWAKEN_SCROLL_BARS_ON_ATTACH;
         }
         jumpDrawablesToCurrentState();
-        resolveHorizontalDirection();
+        resolveLayoutDirection();
     }
 
     /**
      * Resolving the layout direction. LTR is set initially.
      * We are supposing here that the parent directionality will be resolved before its children
      */
-    private void resolveHorizontalDirection() {
+    private void resolveLayoutDirection() {
         mPrivateFlags2 &= ~RESOLVED_LAYOUT_RTL;
-        switch (getHorizontalDirection()) {
-            case HORIZONTAL_DIRECTION_INHERIT:
+        switch (getLayoutDirection()) {
+            case LAYOUT_DIRECTION_INHERIT:
                 // If this is root view, no need to look at parent's layout dir.
                 if (mParent != null && mParent instanceof ViewGroup &&
                         ((ViewGroup) mParent).isLayoutRtl()) {
                     mPrivateFlags2 |= RESOLVED_LAYOUT_RTL;
                 }
                 break;
-            case HORIZONTAL_DIRECTION_RTL:
+            case LAYOUT_DIRECTION_RTL:
                 mPrivateFlags2 |= RESOLVED_LAYOUT_RTL;
                 break;
         }

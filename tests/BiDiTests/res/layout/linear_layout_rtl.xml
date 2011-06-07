@@ -19,7 +19,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:horizontalDirection="rtl">
+    android:layoutDirection="rtl">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal"
@@ -51,7 +51,7 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:horizontalDirection="inherit">
+        android:layoutDirection="inherit">
 
        <Button android:layout_height="wrap_content"
                android:layout_width="wrap_content"
@@ -78,7 +78,7 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:horizontalDirection="ltr">
+        android:layoutDirection="ltr">
 
        <Button android:layout_height="wrap_content"
                android:layout_width="wrap_content"
@@ -105,7 +105,7 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:horizontalDirection="rtl">
+        android:layoutDirection="rtl">
 
        <Button android:layout_height="wrap_content"
                android:layout_width="wrap_content"
@@ -132,7 +132,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:horizontalDirection="inherit">
+        android:layoutDirection="inherit">
 
        <Button android:layout_height="wrap_content"
                android:layout_width="wrap_content"
@@ -159,7 +159,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:horizontalDirection="ltr">
+        android:layoutDirection="ltr">
 
        <Button android:layout_height="wrap_content"
                android:layout_width="wrap_content"
@@ -186,7 +186,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:horizontalDirection="rtl">
+        android:layoutDirection="rtl">
 
        <Button android:layout_height="wrap_content"
                android:layout_width="wrap_content"

@@ -18,7 +18,7 @@
     android:id="@+id/frame_layout_rtl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:horizontalDirection="rtl"
+    android:layoutDirection="rtl"
     android:background="#FF000000">
 
         <RelativeLayout
@@ -52,28 +52,28 @@
         <RelativeLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_gravity="top|before"
+            android:layout_gravity="top|start"
             android:background="#FFFFFFFF">
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_gravity="top|after"
+            android:layout_gravity="top|end"
             android:background="#FFFFFF00">
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_gravity="bottom|before"
+            android:layout_gravity="bottom|start"
             android:background="#FFFFFFFF">
         </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:layout_gravity="bottom|after"
+            android:layout_gravity="bottom|end"
             android:background="#FFFFFF00">
         </RelativeLayout>
 

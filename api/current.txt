@@ -486,7 +486,6 @@ package android {
     field public static final int hint = 16843088; // 0x1010150
     field public static final int homeAsUpIndicator = 16843531; // 0x101030b
     field public static final int homeLayout = 16843549; // 0x101031d
-    field public static final int horizontalDirection = 16843631; // 0x101036f
     field public static final int horizontalDivider = 16843053; // 0x101012d
     field public static final int horizontalGap = 16843327; // 0x101023f
     field public static final int horizontalScrollViewStyle = 16843603; // 0x1010353
@@ -571,6 +570,7 @@ package android {
     field public static final int layerType = 16843604; // 0x1010354
     field public static final int layout = 16842994; // 0x10100f2
     field public static final int layoutAnimation = 16842988; // 0x10100ec
+    field public static final int layoutDirection = 16843631; // 0x101036f
     field public static final int layout_above = 16843140; // 0x1010184
     field public static final int layout_alignBaseline = 16843142; // 0x1010186
     field public static final int layout_alignBottom = 16843146; // 0x101018a
@@ -20458,8 +20458,8 @@ package android.view {
     field public static final int HORIZONTAL_GRAVITY_MASK = 7; // 0x7
     field public static final int LEFT = 3; // 0x3
     field public static final int NO_GRAVITY = 0; // 0x0
-    field public static final int RELATIVE_HORIZONTAL_DIRECTION = 8388608; // 0x800000
     field public static final int RELATIVE_HORIZONTAL_GRAVITY_MASK = 8388615; // 0x800007
+    field public static final int RELATIVE_LAYOUT_DIRECTION = 8388608; // 0x800000
     field public static final int RIGHT = 5; // 0x5
     field public static final int START = 8388611; // 0x800003
     field public static final int TOP = 48; // 0x30

@@ -132,8 +132,8 @@ public class LinearLayout extends ViewGroup {
                 equals = Gravity.CENTER, name = "CENTER"),
             @ViewDebug.FlagToString(mask = Gravity.FILL,
                 equals = Gravity.FILL, name = "FILL"),
-            @ViewDebug.FlagToString(mask = Gravity.RELATIVE_HORIZONTAL_DIRECTION,
-                equals = Gravity.RELATIVE_HORIZONTAL_DIRECTION, name = "RELATIVE")
+            @ViewDebug.FlagToString(mask = Gravity.RELATIVE_LAYOUT_DIRECTION,
+                equals = Gravity.RELATIVE_LAYOUT_DIRECTION, name = "RELATIVE")
         })
     private int mGravity = Gravity.START | Gravity.TOP;
 

@@ -19,7 +19,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:horizontalDirection="ltr">
+    android:layoutDirection="ltr">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="fill_parent"
@@ -58,7 +58,7 @@
             android:layout_height="wrap_content"
             android:background="#FF000000"
             android:padding="10px"
-            android:horizontalDirection="ltr">
+            android:layoutDirection="ltr">
 
         <TextView android:id="@+id/label_2"
                 android:layout_width="fill_parent"
@@ -91,7 +91,7 @@
             android:layout_height="wrap_content"
             android:background="#FF000000"
             android:padding="10px"
-            android:horizontalDirection="inherit">
+            android:layoutDirection="inherit">
 
         <TextView android:id="@+id/label_3"
                 android:layout_width="fill_parent"
@@ -124,7 +124,7 @@
             android:layout_height="wrap_content"
             android:background="#FF000000"
             android:padding="10px"
-            android:horizontalDirection="rtl">
+            android:layoutDirection="rtl">
 
         <TextView android:id="@+id/label_4"
                 android:layout_width="fill_parent"

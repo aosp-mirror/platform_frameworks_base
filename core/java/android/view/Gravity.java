@@ -81,8 +81,10 @@ public class Gravity
      *  horizontal axis. */
     public static final int CLIP_HORIZONTAL = AXIS_CLIP<<AXIS_X_SHIFT;
 
-    /** Raw bit controlling whether the horizontal direction is relative (before/after) or not. */
-    public static final int RELATIVE_HORIZONTAL_DIRECTION = 0x00800000;
+    /** Raw bit controlling whether the layout direction is relative or not (START/END instead of
+     * absolute LEFT/RIGHT).
+     */
+    public static final int RELATIVE_LAYOUT_DIRECTION = 0x00800000;
 
     /**
      * Binary mask to get the absolute horizontal gravity of a gravity.
@@ -110,10 +112,10 @@ public class Gravity
     public static final int DISPLAY_CLIP_HORIZONTAL = 0x01000000;
     
     /** Push object to x-axis position at the start of its container, not changing its size. */
-    public static final int START = RELATIVE_HORIZONTAL_DIRECTION | LEFT;
+    public static final int START = RELATIVE_LAYOUT_DIRECTION | LEFT;
 
     /** Push object to x-axis position at the end of its container, not changing its size. */
-    public static final int END = RELATIVE_HORIZONTAL_DIRECTION | RIGHT;
+    public static final int END = RELATIVE_LAYOUT_DIRECTION | RIGHT;
 
     /**
      * Binary mask for the horizontal gravity and script specific direction bit.
@@ -352,7 +354,7 @@ public class Gravity
     public static int getAbsoluteGravity(int gravity, boolean isRtl) {
         int result = gravity;
         // If layout is script specific and gravity is horizontal relative (START or END)
-        if ((result & RELATIVE_HORIZONTAL_DIRECTION) > 0) {
+        if ((result & RELATIVE_LAYOUT_DIRECTION) > 0) {
             if ((result & Gravity.START) == Gravity.START) {
                 // Remove the START bit
                 result &= ~START;
@@ -376,7 +378,7 @@ public class Gravity
             }
             // Don't need the script specific bit any more, so remove it as we are converting to
             // absolute values (LEFT or RIGHT)
-            result &= ~RELATIVE_HORIZONTAL_DIRECTION;
+            result &= ~RELATIVE_LAYOUT_DIRECTION;
         }
         return result;
     }

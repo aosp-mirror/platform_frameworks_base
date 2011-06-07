@@ -1191,9 +1191,9 @@
              edge, a right gravity will clip the left edge, and neither will clip both edges. -->
         <flag name="clip_horizontal" value="0x08" />
         <!-- Push object to the beginning of its container, not changing its size. -->
-        <flag name="before" value="0x00800003" />
+        <flag name="start" value="0x00800003" />
         <!-- Push object to the end of its container, not changing its size. -->
-        <flag name="after" value="0x00800005" />
+        <flag name="end" value="0x00800005" />
     </attr>
 
     <!-- Standard orientation constant. -->
@@ -1932,11 +1932,11 @@
         </attr>
 
         <!-- Defines the direction of layout drawing. This typically is associated with writing
-             direction of the language script used. The possible values are Left-to-Right,
-             Right-to-Left, Locale and Inherit from parent view. If there is nothing to inherit,
-             Locale is used. Locale fallsback to 'en-US'. Left-to-Right is the direction used in
-             'en-US'. The default for this attribute is 'inherit'. -->
-        <attr name="horizontalDirection">
+             direction of the language script used. The possible values are "ltr" for Left-to-Right,
+             "rtl" for Right-to-Left, "locale" and "inherit" from parent view. If there is nothing
+             to inherit, "locale" is used. "locale" falls back to "en-US". "ltr" is the direction
+             used in "en-US". The default for this attribute is "inherit". -->
+        <attr name="layoutDirection">
             <!-- Left-to-Right -->
             <enum name="ltr" value="0" />
             <!-- Right-to-Left -->
