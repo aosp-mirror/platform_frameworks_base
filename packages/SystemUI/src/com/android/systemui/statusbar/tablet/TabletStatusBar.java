@@ -69,6 +69,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.*;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BluetoothController;
+import com.android.systemui.statusbar.policy.CompatModeButton;
 import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.Prefs;
@@ -963,6 +964,10 @@ public class TabletStatusBar extends StatusBar implements
 
         // See above re: lights-out policy for legacy apps.
         if (visible) setLightsOn(true);
+
+        // XXX: HACK: not sure if this is the best way to catch a new activity that might require a
+        // change in compatibility features, but it's a start.
+        ((CompatModeButton) mBarContents.findViewById(R.id.compat_button)).refresh();
     }
 
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
