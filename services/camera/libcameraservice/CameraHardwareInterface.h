@@ -438,18 +438,23 @@ private:
     }
 
     static void __data_cb(int32_t msg_type,
-                          const camera_memory_t *data,
+                          const camera_memory_t *data, unsigned int index,
                           void *user)
     {
         LOGV("%s", __FUNCTION__);
         CameraHardwareInterface *__this =
                 static_cast<CameraHardwareInterface *>(user);
         sp<CameraHeapMemory> mem(static_cast<CameraHeapMemory *>(data->handle));
-        __this->mDataCb(msg_type, mem, __this->mCbUser);
+        if (index >= mem->mNumBufs) {
+            LOGE("%s: invalid buffer index %d, max allowed is %d", __FUNCTION__,
+                 index, mem->mNumBufs);
+            return;
+        }
+        __this->mDataCb(msg_type, mem->mBuffers[index], __this->mCbUser);
     }
 
     static void __data_cb_timestamp(nsecs_t timestamp, int32_t msg_type,
-                             const camera_memory_t *data,
+                             const camera_memory_t *data, unsigned index,
                              void *user)
     {
         LOGV("%s", __FUNCTION__);
@@ -459,36 +464,83 @@ private:
         // drop all references, it will be destroyed (as well as the enclosed
         // MemoryHeapBase.
         sp<CameraHeapMemory> mem(static_cast<CameraHeapMemory *>(data->handle));
-        __this->mDataCbTimestamp(timestamp, msg_type, mem, __this->mCbUser);
+        if (index >= mem->mNumBufs) {
+            LOGE("%s: invalid buffer index %d, max allowed is %d", __FUNCTION__,
+                 index, mem->mNumBufs);
+            return;
+        }
+        __this->mDataCbTimestamp(timestamp, msg_type, mem->mBuffers[index], __this->mCbUser);
     }
 
     // This is a utility class that combines a MemoryHeapBase and a MemoryBase
     // in one.  Since we tend to use them in a one-to-one relationship, this is
     // handy.
 
-    class CameraHeapMemory : public MemoryBase {
+    class CameraHeapMemory : public RefBase {
     public:
-        CameraHeapMemory(size_t size) :
-            MemoryBase(new MemoryHeapBase(size), 0, size)
+        CameraHeapMemory(int fd, size_t buf_size, uint_t num_buffers = 1) :
+                         mBufSize(buf_size),
+                         mNumBufs(num_buffers)
         {
-            handle.data = getHeap()->base();
-            handle.size = size;
-            handle.handle = this;
+            mHeap = new MemoryHeapBase(fd, buf_size * num_buffers);
+            commonInitialization();
         }
+
+        CameraHeapMemory(size_t buf_size, uint_t num_buffers = 1) :
+                         mBufSize(buf_size),
+                         mNumBufs(num_buffers)
+        {
+            mHeap = new MemoryHeapBase(buf_size * num_buffers);
+            commonInitialization();
+        }
+
+        void commonInitialization()
+        {
+            handle.data = mHeap->base();
+            handle.size = mBufSize * mNumBufs;
+            handle.handle = this;
+
+            mBuffers = new sp<MemoryBase>[mNumBufs];
+            for (uint_t i = 0; i < mNumBufs; i++)
+                mBuffers[i] = new MemoryBase(mHeap,
+                                             i * mBufSize,
+                                             mBufSize);
+
+            handle.release = __put_memory;
+        }
+
+        virtual ~CameraHeapMemory()
+        {
+            delete [] mBuffers;
+        }
+
+        size_t mBufSize;
+        uint_t mNumBufs;
+        sp<MemoryHeapBase> mHeap;
+        sp<MemoryBase> *mBuffers;
 
         camera_memory_t handle;
     };
 
-    static camera_memory_t* __get_memory(size_t size,
-                                    void *user __attribute__((unused)))
+    static camera_memory_t* __get_memory(int fd, size_t buf_size, uint_t num_bufs,
+                                         void *user __attribute__((unused)))
     {
-        // We allocate the object here, but we do not assign it to a strong
-        // pointer yet.  The HAL will pass it back to us via the data callback
-        // or the data-timestamp callback, and from there on we will wrap it
-        // within a strong pointer.
-
-        CameraHeapMemory *mem = new CameraHeapMemory(size);
+        CameraHeapMemory *mem;
+        if (fd < 0)
+            mem = new CameraHeapMemory(buf_size, num_bufs);
+        else
+            mem = new CameraHeapMemory(fd, buf_size, num_bufs);
+        mem->incStrong(mem);
         return &mem->handle;
+    }
+
+    static void __put_memory(camera_memory_t *data)
+    {
+        if (!data)
+            return;
+
+        CameraHeapMemory *mem = static_cast<CameraHeapMemory *>(data->handle);
+        mem->decStrong(mem);
     }
 
     static ANativeWindow *__to_anw(void *user)
@@ -541,7 +593,7 @@ private:
     static int __set_buffer_count(struct preview_stream_ops* w, int count)
     {
         ANativeWindow *a = anw(w);
-	return native_window_set_buffer_count(a, count);
+        return native_window_set_buffer_count(a, count);
     }
 
     static int __set_buffers_geometry(struct preview_stream_ops* w,
