@@ -101,8 +101,8 @@ private:
     virtual void setPresentation(Presentation presentation) {
     }
 
-    virtual void setSpots(SpotGesture spotGesture,
-            const PointerCoords* spotCoords, const uint32_t* spotIdToIndex, BitSet32 spotIdBits) {
+    virtual void setSpots(const PointerCoords* spotCoords,
+            const uint32_t* spotIdToIndex, BitSet32 spotIdBits) {
     }
 
     virtual void clearSpots() {
