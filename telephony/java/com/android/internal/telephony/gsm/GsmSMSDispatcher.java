@@ -392,30 +392,6 @@ final class GsmSMSDispatcher extends SMSDispatcher {
         }
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void activateCellBroadcastSms(int activate, Message response) {
-        // Unless CBS is implemented for GSM, this point should be unreachable.
-        Log.e(TAG, "Error! The functionality cell broadcast sms is not implemented for GSM.");
-        response.recycle();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void getCellBroadcastSmsConfig(Message response){
-        // Unless CBS is implemented for GSM, this point should be unreachable.
-        Log.e(TAG, "Error! The functionality cell broadcast sms is not implemented for GSM.");
-        response.recycle();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public  void setCellBroadcastConfig(int[] configValuesArray, Message response) {
-        // Unless CBS is implemented for GSM, this point should be unreachable.
-        Log.e(TAG, "Error! The functionality cell broadcast sms is not implemented for GSM.");
-        response.recycle();
-    }
-
     private int resultToCause(int rc) {
         switch (rc) {
             case Activity.RESULT_OK:
@@ -507,9 +483,10 @@ final class GsmSMSDispatcher extends SMSDispatcher {
     }
 
     // This map holds incomplete concatenated messages waiting for assembly
-    private HashMap<SmsCbConcatInfo, byte[][]> mSmsCbPageMap =
+    private final HashMap<SmsCbConcatInfo, byte[][]> mSmsCbPageMap =
             new HashMap<SmsCbConcatInfo, byte[][]>();
 
+    @Override
     protected void handleBroadcastSms(AsyncResult ar) {
         try {
             byte[][] pdus = null;
@@ -521,9 +498,9 @@ final class GsmSMSDispatcher extends SMSDispatcher {
                     for (int j = i; j < i + 8 && j < receivedPdu.length; j++) {
                         int b = receivedPdu[j] & 0xff;
                         if (b < 0x10) {
-                            sb.append("0");
+                            sb.append('0');
                         }
-                        sb.append(Integer.toHexString(b)).append(" ");
+                        sb.append(Integer.toHexString(b)).append(' ');
                     }
                     Log.d(TAG, sb.toString());
                 }
@@ -568,7 +545,8 @@ final class GsmSMSDispatcher extends SMSDispatcher {
                 pdus[0] = receivedPdu;
             }
 
-            dispatchBroadcastPdus(pdus);
+            boolean isEmergencyMessage = SmsCbHeader.isEmergencyMessage(header.messageIdentifier);
+            dispatchBroadcastPdus(pdus, isEmergencyMessage);
 
             // Remove messages that are out of scope to prevent the map from
             // growing indefinitely, containing incomplete messages that were

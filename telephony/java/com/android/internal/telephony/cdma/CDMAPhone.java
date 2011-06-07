@@ -1121,7 +1121,8 @@ public class CDMAPhone extends PhoneBase {
      * @param response Callback message is empty on completion
      */
     public void activateCellBroadcastSms(int activate, Message response) {
-        mSMS.activateCellBroadcastSms(activate, response);
+        Log.e(LOG_TAG, "[CDMAPhone] activateCellBroadcastSms() is obsolete; use SmsManager");
+        response.sendToTarget();
     }
 
     /**
@@ -1130,7 +1131,8 @@ public class CDMAPhone extends PhoneBase {
      * @param response Callback message is empty on completion
      */
     public void getCellBroadcastSmsConfig(Message response) {
-        mSMS.getCellBroadcastSmsConfig(response);
+        Log.e(LOG_TAG, "[CDMAPhone] getCellBroadcastSmsConfig() is obsolete; use SmsManager");
+        response.sendToTarget();
     }
 
     /**
@@ -1139,7 +1141,8 @@ public class CDMAPhone extends PhoneBase {
      * @param response Callback message is empty on completion
      */
     public void setCellBroadcastSmsConfig(int[] configValuesArray, Message response) {
-        mSMS.setCellBroadcastConfig(configValuesArray, response);
+        Log.e(LOG_TAG, "[CDMAPhone] setCellBroadcastSmsConfig() is obsolete; use SmsManager");
+        response.sendToTarget();
     }
 
     /**

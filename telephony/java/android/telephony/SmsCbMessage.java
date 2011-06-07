@@ -333,4 +333,10 @@ public class SmsCbMessage {
 
         return body;
     }
+
+    @Override
+    public String toString() {
+        return "SmsCbMessage{" + mHeader.toString() + ", language=" + mLanguage +
+                ", body=\"" + mBody + "\"}";
+    }
 }
