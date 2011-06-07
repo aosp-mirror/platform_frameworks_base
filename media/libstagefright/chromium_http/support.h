@@ -50,7 +50,7 @@ private:
     DISALLOW_EVIL_CONSTRUCTORS(SfNetLog);
 };
 
-struct SfRequestContext : public URLRequestContext {
+struct SfRequestContext : public net::URLRequestContext {
     SfRequestContext();
 
     virtual const std::string &GetUserAgent(const GURL &url) const;
