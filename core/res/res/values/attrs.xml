@@ -5156,6 +5156,8 @@
         <!-- number of megabytes of storage MTP should reserve for free storage
              (used for emulated storage that is shared with system's data partition) -->
         <attr name="mtpReserve" format="integer" />
+        <!-- true if the storage can be shared via USB mass storage -->
+        <attr name="allowMassStorage" format="boolean" />
     </declare-styleable>
 
 </resources>
