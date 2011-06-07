@@ -6215,7 +6215,7 @@ public class WebView extends AbsoluteLayout
                     if (hscroll != 0 || vscroll != 0) {
                         final int vdelta = (int) (vscroll * getVerticalScrollFactor());
                         final int hdelta = (int) (hscroll * getHorizontalScrollFactor());
-                        if (pinScrollBy(hdelta, vdelta, true, 0)) {
+                        if (pinScrollBy(hdelta, vdelta, false, 0)) {
                             return true;
                         }
                     }
