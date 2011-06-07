@@ -1517,11 +1517,12 @@ public class PackageParser {
             }
         }
 
+        // fullBackupAgent is explicitly handled even if allowBackup is false
         name = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifestApplication_fullBackupAgent, 0);
         if (name != null) {
             ai.fullBackupAgentName = buildClassName(pkgName, name, outError);
-            if (true) {
+            if (false) {
                 Log.v(TAG, "android:fullBackupAgent=" + ai.fullBackupAgentName
                         + " from " + pkgName + "+" + name);
             }

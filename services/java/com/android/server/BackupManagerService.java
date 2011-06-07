@@ -134,6 +134,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // Timeout intervals for agent backup & restore operations
     static final long TIMEOUT_BACKUP_INTERVAL = 30 * 1000;
     static final long TIMEOUT_FULL_BACKUP_INTERVAL = 5 * 60 * 1000;
+    static final long TIMEOUT_SHARED_BACKUP_INTERVAL = 30 * 60 * 1000;
     static final long TIMEOUT_RESTORE_INTERVAL = 60 * 1000;
 
     // User confirmation timeout for a full backup/restore operation
@@ -1691,7 +1692,7 @@ class BackupManagerService extends IBackupManager.Stub {
         public void run() {
             final List<PackageInfo> packagesToBackup;
 
-            Slog.i(TAG, "--- Performing full-dataset restore ---");
+            Slog.i(TAG, "--- Performing full-dataset backup ---");
             sendStartBackup();
 
             // doAllApps supersedes the package set if any
@@ -1720,64 +1721,23 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             }
 
-            // Now back up the app data via the agent mechanism
             PackageInfo pkg = null;
             try {
+                // Now back up the app data via the agent mechanism
                 int N = packagesToBackup.size();
                 for (int i = 0; i < N; i++) {
                     pkg = packagesToBackup.get(i);
+                    backupOnePackage(pkg);
+                }
 
-                    Slog.d(TAG, "Binding to full backup agent : " + pkg.packageName);
-
-                    IBackupAgent agent = bindToAgentSynchronous(pkg.applicationInfo,
-                            IApplicationThread.BACKUP_MODE_FULL);
-                    if (agent != null) {
-                        try {
-                            ApplicationInfo app = pkg.applicationInfo;
-                            boolean sendApk = mIncludeApks
-                                    && ((app.flags & ApplicationInfo.FLAG_FORWARD_LOCK) == 0)
-                                    && ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
-                                        (app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
-
-                            sendOnBackupPackage(pkg.packageName);
-
-                            {
-                                BackupDataOutput output = new BackupDataOutput(
-                                        mOutputFile.getFileDescriptor());
-
-                                if (DEBUG) Slog.d(TAG, "Writing manifest for " + pkg.packageName);
-                                writeAppManifest(pkg, mManifestFile, sendApk);
-                                FullBackup.backupToTar(pkg.packageName, null, null,
-                                        mFilesDir.getAbsolutePath(),
-                                        mManifestFile.getAbsolutePath(),
-                                        output);
-                            }
-
-                            if (DEBUG) Slog.d(TAG, "Calling doBackup()");
-                            final int token = generateToken();
-                            prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL);
-                            agent.doBackup(null, mOutputFile, null, sendApk,
-                                    token, mBackupManagerBinder);
-                            boolean success = waitUntilOperationComplete(token);
-                            if (!success) {
-                                Slog.d(TAG, "Full backup failed on package " + pkg.packageName);
-                            } else {
-                                if (DEBUG) Slog.d(TAG, "Full backup success: " + pkg.packageName);
-                            }
-                        } catch (IOException e) {
-                            Slog.e(TAG, "Error backing up " + pkg.packageName, e);
-                        }
-                    } else {
-                        Slog.w(TAG, "Unable to bind to full agent for " + pkg.packageName);
-                    }
-                    tearDown(pkg);
+                // Finally, shared storage if requested
+                if (mIncludeShared) {
+                    backupSharedStorage();
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "App died during full backup");
             } finally {
-                if (pkg != null) {
-                    tearDown(pkg);
-                }
+                tearDown(pkg);
                 try {
                     mOutputFile.close();
                 } catch (IOException e) {
@@ -1793,6 +1753,79 @@ class BackupManagerService extends IBackupManager.Stub {
                 sendEndBackup();
                 mWakelock.release();
                 if (DEBUG) Slog.d(TAG, "Full backup pass complete.");
+            }
+        }
+
+        private void backupOnePackage(PackageInfo pkg) throws RemoteException {
+            Slog.d(TAG, "Binding to full backup agent : " + pkg.packageName);
+
+            IBackupAgent agent = bindToAgentSynchronous(pkg.applicationInfo,
+                    IApplicationThread.BACKUP_MODE_FULL);
+            if (agent != null) {
+                try {
+                    ApplicationInfo app = pkg.applicationInfo;
+                    boolean sendApk = mIncludeApks
+                            && ((app.flags & ApplicationInfo.FLAG_FORWARD_LOCK) == 0)
+                            && ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
+                                (app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
+
+                    sendOnBackupPackage(pkg.packageName);
+
+                    {
+                        BackupDataOutput output = new BackupDataOutput(
+                                mOutputFile.getFileDescriptor());
+
+                        if (DEBUG) Slog.d(TAG, "Writing manifest for " + pkg.packageName);
+                        writeAppManifest(pkg, mManifestFile, sendApk);
+                        FullBackup.backupToTar(pkg.packageName, null, null,
+                                mFilesDir.getAbsolutePath(),
+                                mManifestFile.getAbsolutePath(),
+                                output);
+                    }
+
+                    if (DEBUG) Slog.d(TAG, "Calling doBackup()");
+                    final int token = generateToken();
+                    prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL);
+                    agent.doBackup(null, mOutputFile, null, sendApk,
+                            token, mBackupManagerBinder);
+                    if (!waitUntilOperationComplete(token)) {
+                        Slog.e(TAG, "Full backup failed on package " + pkg.packageName);
+                    } else {
+                        if (DEBUG) Slog.d(TAG, "Full backup success: " + pkg.packageName);
+                    }
+                } catch (IOException e) {
+                    Slog.e(TAG, "Error backing up " + pkg.packageName, e);
+                }
+            } else {
+                Slog.w(TAG, "Unable to bind to full agent for " + pkg.packageName);
+            }
+            tearDown(pkg);
+        }
+
+        private void backupSharedStorage() throws RemoteException {
+            PackageInfo pkg = null;
+            try {
+                pkg = mPackageManager.getPackageInfo("com.android.sharedstoragebackup", 0);
+                IBackupAgent agent = bindToAgentSynchronous(pkg.applicationInfo,
+                        IApplicationThread.BACKUP_MODE_FULL);
+                if (agent != null) {
+                    sendOnBackupPackage("Shared storage");
+
+                    final int token = generateToken();
+                    prepareOperationTimeout(token, TIMEOUT_SHARED_BACKUP_INTERVAL);
+                    agent.doBackup(null, mOutputFile, null, false, token, mBackupManagerBinder);
+                    if (!waitUntilOperationComplete(token)) {
+                        Slog.e(TAG, "Full backup failed on shared storage");
+                    } else {
+                        if (DEBUG) Slog.d(TAG, "Full shared storage backup success");
+                    }
+                } else {
+                    Slog.e(TAG, "Could not bind to shared storage backup agent");
+                }
+            } catch (NameNotFoundException e) {
+                Slog.e(TAG, "Shared storage backup package not found");
+            } finally {
+                tearDown(pkg);
             }
         }
 
@@ -1836,23 +1869,24 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         private void tearDown(PackageInfo pkg) {
-            final ApplicationInfo app = pkg.applicationInfo;
-            try {
-                // unbind and tidy up even on timeout or failure, just in case
-                mActivityManager.unbindBackupAgent(app);
+            if (pkg != null) {
+                final ApplicationInfo app = pkg.applicationInfo;
+                if (app != null) {
+                    try {
+                        // unbind and tidy up even on timeout or failure, just in case
+                        mActivityManager.unbindBackupAgent(app);
 
-                // The agent was running with a stub Application object, so shut it down.
-                // !!! We hardcode the confirmation UI's package name here rather than use a
-                //     manifest flag!  TODO something less direct.
-                if (app.uid != Process.SYSTEM_UID
-                        && !pkg.packageName.equals("com.android.backupconfirm")) {
-                    if (DEBUG) Slog.d(TAG, "Backup complete, killing host process");
-                    mActivityManager.killApplicationProcess(app.processName, app.uid);
-                } else {
-                    if (DEBUG) Slog.d(TAG, "Not killing after restore: " + app.processName);
+                        // The agent was running with a stub Application object, so shut it down.
+                        if (app.uid != Process.SYSTEM_UID) {
+                            if (DEBUG) Slog.d(TAG, "Backup complete, killing host process");
+                            mActivityManager.killApplicationProcess(app.processName, app.uid);
+                        } else {
+                            if (DEBUG) Slog.d(TAG, "Not killing after restore: " + app.processName);
+                        }
+                    } catch (RemoteException e) {
+                        Slog.d(TAG, "Lost app trying to shut down");
+                    }
                 }
-            } catch (RemoteException e) {
-                Slog.d(TAG, "Lost app trying to shut down");
             }
         }
 
@@ -1949,6 +1983,7 @@ class BackupManagerService extends IBackupManager.Stub {
             // with a whitelist of packages known to be unclearable.
             mClearedPackages.add("android");
             mClearedPackages.add("com.android.providers.settings");
+
         }
 
         class RestoreFileRunnable implements Runnable {
@@ -1987,6 +2022,11 @@ class BackupManagerService extends IBackupManager.Stub {
         public void run() {
             Slog.i(TAG, "--- Performing full-dataset restore ---");
             sendStartRestore();
+
+            // Are we able to restore shared-storage data?
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                mPackagePolicies.put("com.android.sharedstoragebackup", RestorePolicy.ACCEPT);
+            }
 
             try {
                 byte[] buffer = new byte[32 * 1024];
@@ -2707,7 +2747,9 @@ class BackupManagerService extends IBackupManager.Stub {
                         info.path, 0, FullBackup.SHARED_PREFIX.length())) {
                     // File in shared storage.  !!! TODO: implement this.
                     info.path = info.path.substring(FullBackup.SHARED_PREFIX.length());
+                    info.packageName = "com.android.sharedstoragebackup";
                     info.domain = FullBackup.SHARED_STORAGE_TOKEN;
+                    if (DEBUG) Slog.i(TAG, "File in shared storage: " + info.path);
                 } else if (FullBackup.APPS_PREFIX.regionMatches(0,
                         info.path, 0, FullBackup.APPS_PREFIX.length())) {
                     // App content!  Parse out the package name and domain

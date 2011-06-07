@@ -278,7 +278,6 @@ public abstract class BackupAgent extends ContextWrapper {
                 int token, IBackupManager callbackBinder) throws RemoteException {
             long ident = Binder.clearCallingIdentity();
             try {
-Log.d(TAG, "doRestoreFile() => onRestoreFile()");
                 BackupAgent.this.onRestoreFile(data, size, type, domain, path, mode, mtime);
             } catch (IOException e) {
                 throw new RuntimeException(e);
