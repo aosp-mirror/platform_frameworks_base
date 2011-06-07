@@ -506,6 +506,16 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'new', 'media' ],
+    path: 'samples/RandomMusicPlayer/index.html',
+    title: {
+      en: 'Random Music Player'
+    },
+    description: {
+      en: 'Demonstrates how to write a multimedia application that plays music from the device and from URLs. It manages media playback from a service and can play music in the background, respecting audio focus changes.'
+    }
+  },
+  {
     tags: ['sample', 'new', 'newfeature', 'performance', 'gamedev', 'gl'],
     path: 'samples/RenderScript/index.html',
     title: {
