@@ -90,7 +90,6 @@ import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IInterface;
 import android.os.IPermissionController;
 import android.os.Looper;
 import android.os.Message;

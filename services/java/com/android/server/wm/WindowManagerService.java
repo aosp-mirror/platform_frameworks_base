@@ -153,6 +153,7 @@ public class WindowManagerService extends IWindowManager.Stub
     static final boolean DEBUG_WINDOW_MOVEMENT = false;
     static final boolean DEBUG_TOKEN_MOVEMENT = false;
     static final boolean DEBUG_ORIENTATION = false;
+    static final boolean DEBUG_APP_ORIENTATION = false;
     static final boolean DEBUG_CONFIGURATION = false;
     static final boolean DEBUG_APP_TRANSITIONS = false;
     static final boolean DEBUG_STARTING_WINDOW = false;
@@ -427,6 +428,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mWindowsFreezingScreen = false;
     long mFreezeGcPending = 0;
     int mAppsFreezingScreen = 0;
+    int mLastWindowForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
     int mLayoutSeq = 0;
     
@@ -3187,6 +3189,15 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int getOrientationFromWindowsLocked() {
+        if (mDisplayFrozen || mOpeningApps.size() > 0 || mClosingApps.size() > 0) {
+            // If the display is frozen, some activities may be in the middle
+            // of restarting, and thus have removed their old window.  If the
+            // window has the flag to hide the lock screen, then the lock screen
+            // can re-appear and inflict its own orientation on us.  Keep the
+            // orientation stable until this all settles down.
+            return mLastWindowForcedOrientation;
+        }
+
         int pos = mWindows.size() - 1;
         while (pos >= 0) {
             WindowState wtoken = mWindows.get(pos);
@@ -3194,7 +3205,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (wtoken.mAppToken != null) {
                 // We hit an application window. so the orientation will be determined by the
                 // app window. No point in continuing further.
-                return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+                return (mLastWindowForcedOrientation=ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
             }
             if (!wtoken.isVisibleLw() || !wtoken.mPolicyVisibilityAfterAnim) {
                 continue;
@@ -3204,10 +3215,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     (req == ActivityInfo.SCREEN_ORIENTATION_BEHIND)){
                 continue;
             } else {
-                return req;
+                return (mLastWindowForcedOrientation=req);
             }
         }
-        return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+        return (mLastWindowForcedOrientation=ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
     }
 
     public int getOrientationFromAppTokensLocked() {
@@ -3220,16 +3231,23 @@ public class WindowManagerService extends IWindowManager.Stub
         while (pos >= 0) {
             AppWindowToken wtoken = mAppTokens.get(pos);
             pos--;
+
+            if (DEBUG_APP_ORIENTATION) Slog.v(TAG, "Checking app orientation: " + wtoken);
+
             // if we're about to tear down this window and not seek for
             // the behind activity, don't use it for orientation
             if (!findingBehind
                     && (!wtoken.hidden && wtoken.hiddenRequested)) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + wtoken
+                        + " -- going to hide");
                 continue;
             }
 
             if (!haveGroup) {
                 // We ignore any hidden applications on the top.
                 if (wtoken.hiddenRequested || wtoken.willBeHidden) {
+                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Skipping " + wtoken
+                            + " -- hidden on top");
                     continue;
                 }
                 haveGroup = true;
@@ -3243,6 +3261,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // user's orientation.
                 if (lastOrientation != ActivityInfo.SCREEN_ORIENTATION_BEHIND
                         && lastFullscreen) {
+                    if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + wtoken
+                            + " -- end of group, return " + lastOrientation);
                     return lastOrientation;
                 }
             }
@@ -3253,16 +3273,21 @@ public class WindowManagerService extends IWindowManager.Stub
             lastFullscreen = wtoken.appFullscreen;
             if (lastFullscreen
                     && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + wtoken
+                        + " -- full screen, return " + or);
                 return or;
             }
             // If this application has requested an explicit orientation,
             // then use it.
             if (or != ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
                     && or != ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+                if (DEBUG_ORIENTATION) Slog.v(TAG, "Done at " + wtoken
+                        + " -- explicitly set, return " + or);
                 return or;
             }
             findingBehind |= (or == ActivityInfo.SCREEN_ORIENTATION_BEHIND);
         }
+        if (DEBUG_ORIENTATION) Slog.v(TAG, "No app is requesting an orientation");
         return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     }
 
@@ -3335,15 +3360,6 @@ public class WindowManagerService extends IWindowManager.Stub
      * android.os.IBinder)
      */
     boolean updateOrientationFromAppTokensLocked(boolean inTransaction) {
-        if (mDisplayFrozen || mOpeningApps.size() > 0 || mClosingApps.size() > 0) {
-            // If the display is frozen, some activities may be in the middle
-            // of restarting, and thus have removed their old window.  If the
-            // window has the flag to hide the lock screen, then the lock screen
-            // can re-appear and inflict its own orientation on us.  Keep the
-            // orientation stable until this all settles down.
-            return false;
-        }
-
         boolean changed = false;
         long ident = Binder.clearCallingIdentity();
         try {
@@ -8934,9 +8950,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     pw.print(" mAppsFreezingScreen="); pw.print(mAppsFreezingScreen);
                     pw.print(" mWaitingForConfig="); pw.println(mWaitingForConfig);
             pw.print("  mRotation="); pw.print(mRotation);
-                    pw.print(" mForcedAppOrientation="); pw.print(mForcedAppOrientation);
                     pw.print(" mRequestedRotation="); pw.print(mRequestedRotation);
                     pw.print(" mAltOrientation="); pw.println(mAltOrientation);
+            pw.print("  mLastWindowForcedOrientation"); pw.print(mLastWindowForcedOrientation);
+                    pw.print(" mForcedAppOrientation="); pw.println(mForcedAppOrientation);
             pw.print("  mDeferredRotation="); pw.print(mDeferredRotation);
                     pw.print(", mDeferredRotationAnimFlags="); pw.println(mDeferredRotationAnimFlags);
             pw.print("  mAnimationPending="); pw.print(mAnimationPending);
