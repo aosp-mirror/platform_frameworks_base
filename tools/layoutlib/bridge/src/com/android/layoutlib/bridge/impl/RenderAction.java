@@ -29,6 +29,7 @@ import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.resources.ResourceType;
 
+import android.os.HandlerThread_Delegate;
 import android.util.DisplayMetrics;
 
 import java.util.concurrent.TimeUnit;
@@ -228,6 +229,10 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
     private void tearDown() {
         // Make sure to remove static references, otherwise we could not unload the lib
         mContext.disposeResources();
+
+        // quit HandlerThread created during this session.
+        HandlerThread_Delegate.cleanUp(sCurrentContext);
+
         sCurrentContext = null;
 
         Bridge.setLog(null);
