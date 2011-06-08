@@ -48,11 +48,11 @@ import static java.lang.Math.min;
  * <p>
  * The grid is composed of a set of infinitely thin lines that separate the
  * viewing area into <em>cells</em>. Throughout the API, grid lines are referenced
- * by grid <em>indices</em>. A grid with <code>N</code> columns
- * has <code>N + 1</code> grid indices that run from <code>0</code>
- * through <code>N</code> inclusive. Regardless of how GridLayout is
- * configured, grid index <code>0</code> is fixed to the leading edge of the
- * container and grid index <code>N</code> is fixed to its trailing edge
+ * by grid <em>indices</em>. A grid with {@code N} columns
+ * has {@code N + 1} grid indices that run from {@code 0}
+ * through {@code N} inclusive. Regardless of how GridLayout is
+ * configured, grid index {@code 0} is fixed to the leading edge of the
+ * container and grid index {@code N} is fixed to its trailing edge
  * (after padding is taken into account).
  *
  * <h4>Row and Column Groups</h4>
@@ -231,8 +231,7 @@ public class GridLayout extends ViewGroup {
     /**
      * Returns the current orientation.
      *
-     * @return either {@link #HORIZONTAL} or {@link #VERTICAL}. The default
-     * is {@link #HORIZONTAL}.
+     * @return either {@link #HORIZONTAL} or {@link #VERTICAL}
      *
      * @see #setOrientation(int)
      *
@@ -246,8 +245,10 @@ public class GridLayout extends ViewGroup {
      * The orientation property does not affect layout. Orientation is used
      * only to generate default row/column indices when they are not specified
      * by a component's layout parameters.
+     * <p>
+     * The default value of this property is {@link #HORIZONTAL}.
      *
-     * @param orientation the orientation, either {@link #HORIZONTAL} or {@link #VERTICAL}.
+     * @param orientation either {@link #HORIZONTAL} or {@link #VERTICAL}
      *
      * @see #getOrientation()
      *
@@ -281,7 +282,7 @@ public class GridLayout extends ViewGroup {
      * only to generate default row/column indices when they are not specified
      * by a component's layout parameters.
      *
-     * @param rowCount the number of rows.
+     * @param rowCount the number of rows
      *
      * @see #getRowCount()
      * @see LayoutParams#rowGroup
@@ -328,7 +329,7 @@ public class GridLayout extends ViewGroup {
      * Returns whether or not this GridLayout will allocate default margins when no
      * corresponding layout parameters are defined.
      *
-     * @return true if default margins should be allocated.
+     * @return {@code true} if default margins should be allocated
      *
      * @see #setUseDefaultMargins(boolean)
      *
@@ -339,18 +340,20 @@ public class GridLayout extends ViewGroup {
     }
 
     /**
-     * When true, GridLayout allocates default margins around children
+     * When {@code true}, GridLayout allocates default margins around children
      * based on the child's visual characteristics. Each of the
      * margins so defined may be independently overridden by an assignment
      * to the appropriate layout parameter.
      * <p>
-     * When false, the default value of all margins is zero.
+     * When {@code false}, the default value of all margins is zero.
      * <p>
-     * When setting to true, consider setting the value of the
+     * When setting to {@code true}, consider setting the value of the
      * {@link #setMarginsIncludedInAlignment(boolean) marginsIncludedInAlignment}
-     * property to false.
+     * property to {@code false}.
+     * <p>
+     * The default value of this property is {@code false}.
      *
-     * @param useDefaultMargins use true to make GridLayout allocate default margins
+     * @param useDefaultMargins use {@code true} to make GridLayout allocate default margins
      *
      * @see #getUseDefaultMargins()
      * @see #setMarginsIncludedInAlignment(boolean)
@@ -374,7 +377,7 @@ public class GridLayout extends ViewGroup {
      *
      * @see #setMarginsIncludedInAlignment(boolean)
      *
-     * @return true if alignment is between edges including margins.
+     * @return {@code true} if alignment is between edges including margins
      *
      * @attr ref android.R.styleable#GridLayout_marginsIncludedInAlignment
      */
@@ -383,12 +386,14 @@ public class GridLayout extends ViewGroup {
     }
 
     /**
-     * When true, the bounds of a view are extended outwards according to its
+     * When {@code true}, the bounds of a view are extended outwards according to its
      * margins before the edges of the resulting rectangle are aligned.
-     * When false, alignment occurs between the bounds of the view - i.e.
+     * When {@code false}, alignment occurs between the bounds of the view - i.e.
      * {@link #LEFT} alignment means align the left edges of the view.
+     * <p>
+     * The default value of this property is {@code true}.
      *
-     * @param marginsIncludedInAlignment true if alignment is between edges including margins.
+     * @param marginsIncludedInAlignment {@code true} if alignment between edges includes margins
      *
      * @see #getMarginsIncludedInAlignment()
      *
@@ -402,8 +407,8 @@ public class GridLayout extends ViewGroup {
     /**
      * Returns whether or not row boundaries are ordered by their grid indices.
      *
-     * @return true if row boundaries must appear in the order of their indices, false otherwise.
-     *         The default is false.
+     * @return {@code true} if row boundaries must appear in the order of their indices,
+     *         {@code false} otherwise
      *
      * @see #setRowOrderPreserved(boolean)
      *
@@ -414,23 +419,25 @@ public class GridLayout extends ViewGroup {
     }
 
     /**
-     * When this property is <code>false</code>, the default state, GridLayout
+     * When this property is {@code false}, the default state, GridLayout
      * is at liberty to choose an order that better suits the heights of its children.
      <p>
-     * When this property is <code>true</code>, GridLayout is forced to place the row boundaries
+     * When this property is {@code true}, GridLayout is forced to place the row boundaries
      * so that their associated grid indices are in ascending order in the view.
      * <p>
      * GridLayout implements this specification by creating ordering constraints between
      * the variables that represent the locations of the row boundaries.
      *
-     * When this property is <code>true</code>, constraints are added for each pair of consecutive
-     * indices: i.e. between row boundaries: <code>[0..1], [1..2], [3..4],...</code> etc.
+     * When this property is {@code true}, constraints are added for each pair of consecutive
+     * indices: i.e. between row boundaries: {@code [0..1], [1..2], [2..3],...} etc.
      *
-     * When the property is <code>false</code>, the ordering constraints are placed
+     * When the property is {@code false}, the ordering constraints are placed
      * only between boundaries that separate opposing edges of the layout's children.
-     *
-     * @param rowOrderPreserved use true to force GridLayout to respect the order
-     *        of row boundaries.
+     * <p>
+     * The default value of this property is {@code false}.
+
+     * @param rowOrderPreserved {@code true} to force GridLayout to respect the order
+     *        of row boundaries
      *
      * @see #isRowOrderPreserved()
      *
@@ -445,8 +452,8 @@ public class GridLayout extends ViewGroup {
     /**
      * Returns whether or not column boundaries are ordered by their grid indices.
      *
-     * @return true if column boundaries must appear in the order of their indices, false otherwise.
-     *         The default is false.
+     * @return {@code true} if column boundaries must appear in the order of their indices,
+     *         {@code false} otherwise
      *
      * @see #setColumnOrderPreserved(boolean)
      *
@@ -457,22 +464,24 @@ public class GridLayout extends ViewGroup {
     }
 
     /**
-     * When this property is <code>false</code>, the default state, GridLayout
+     * When this property is {@code false}, the default state, GridLayout
      * is at liberty to choose an order that better suits the widths of its children.
      <p>
-     * When this property is <code>true</code>, GridLayout is forced to place the column boundaries
+     * When this property is {@code true}, GridLayout is forced to place the column boundaries
      * so that their associated grid indices are in ascending order in the view.
      * <p>
      * GridLayout implements this specification by creating ordering constraints between
      * the variables that represent the locations of the column boundaries.
      *
-     * When this property is <code>true</code>, constraints are added for each pair of consecutive
-     * indices: i.e. between column boundaries: <code>[0..1], [1..2], [3..4],...</code> etc.
+     * When this property is {@code true}, constraints are added for each pair of consecutive
+     * indices: i.e. between column boundaries: {@code [0..1], [1..2], [2..3],...} etc.
      *
-     * When the property is <code>false</code>, the ordering constraints are placed
+     * When the property is {@code false}, the ordering constraints are placed
      * only between boundaries that separate opposing edges of the layout's children.
+     * <p>
+     * The default value of this property is {@code false}.
      *
-     * @param columnOrderPreserved use true to force GridLayout to respect the order
+     * @param columnOrderPreserved use {@code true} to force GridLayout to respect the order
      *        of column boundaries.
      *
      * @see #isColumnOrderPreserved()
@@ -767,15 +776,6 @@ public class GridLayout extends ViewGroup {
         return result;
     }
 
-    private int getAlignmentValue(Alignment alignment, View c, int dim, boolean horizontal, View c1) {
-        int result = alignment.getAlignmentValue(c, dim);
-        if (mMarginsIncludedInAlignment) {
-            int leadingMargin = getMargin(c1, true, horizontal);
-            return result + leadingMargin;
-        }
-        return result;
-    }
-
     @Override
     public void requestLayout() {
         super.requestLayout();
@@ -835,18 +835,39 @@ public class GridLayout extends ViewGroup {
 
             int dx, dy;
 
+            Bounds colBounds = mHorizontalAxis.getGroupBounds().getValue(i);
+            Bounds rowBounds = mVerticalAxis.getGroupBounds().getValue(i);
+
+            // Gravity offsets: the location of the alignment group relative to its cell group.
+            int c2ax = protect(hAlignment.getAlignmentValue(null, cellWidth - colBounds.size()));
+            int c2ay = protect(vAlignment.getAlignmentValue(null, cellHeight - rowBounds.size()));
+
             if (mMarginsIncludedInAlignment) {
-                dx = protect(hAlignment.getAlignmentValue(view, cellWidth - pWidth));
-                dy = protect(vAlignment.getAlignmentValue(view, cellHeight - pHeight));
+                int leftMargin = getMargin(view, true, true);
+                int topMargin = getMargin(view, true, false);
+                int rightMargin = getMargin(view, false, true);
+                int bottomMargin = getMargin(view, false, false);
+
+                // Same calculation as getMeasurementIncludingMargin()
+                int measuredWidth = leftMargin + pWidth + rightMargin;
+                int measuredHeight = topMargin + pHeight + bottomMargin;
+
+                // Alignment offsets: the location of the view relative to its alignment group.
+                int a2vx = colBounds.before - hAlignment.getAlignmentValue(view, measuredWidth);
+                int a2vy = rowBounds.before - vAlignment.getAlignmentValue(view, measuredHeight);
+
+                dx = c2ax + a2vx + leftMargin;
+                dy = c2ay + a2vy + topMargin;
+
+                cellWidth -= leftMargin + rightMargin;
+                cellHeight -= topMargin + bottomMargin;
             } else {
-                Bounds colBounds = mHorizontalAxis.getGroupBounds().getValue(i);
-                Bounds rowBounds = mVerticalAxis.getGroupBounds().getValue(i);
+                // Alignment offsets: the location of the view relative to its alignment group.
+                int a2vx = colBounds.before - hAlignment.getAlignmentValue(view, pWidth);
+                int a2vy = rowBounds.before - vAlignment.getAlignmentValue(view, pHeight);
 
-                int mx = protect(hAlignment.getAlignmentValue(null, cellWidth - colBounds.size()));
-                int my = protect(vAlignment.getAlignmentValue(null, cellHeight - rowBounds.size()));
-
-                dx = mx + -colBounds.below - hAlignment.getAlignmentValue(view, pWidth);
-                dy = my + -rowBounds.below - vAlignment.getAlignmentValue(view, pHeight);
+                dx = c2ax + a2vx;
+                dy = c2ay + a2vy;
             }
 
             int width = hAlignment.getSizeInCell(view, pWidth, cellWidth);
@@ -974,8 +995,8 @@ public class GridLayout extends ViewGroup {
 
                 int size = getMeasurementIncludingMargin(c, horizontal, PRF);
                 // todo test this works correctly when the returned value is UNDEFINED
-                int below = getAlignmentValue(g.alignment, c, size, horizontal, c);
-                bounds.include(-below, size - below);
+                int before = g.alignment.getAlignmentValue(c, size);
+                bounds.include(before, size - before);
             }
         }
 
@@ -1332,7 +1353,7 @@ public class GridLayout extends ViewGroup {
             if (!mMarginsIncludedInAlignment) {
                 margin = (leading ? leadingMargins : trailingMargins)[index];
             } else {
-                margin = getMargin(view, leading, horizontal);
+                margin = 0;
             }
             return leading ? (location + margin) : (location - margin);
         }
@@ -1474,26 +1495,26 @@ public class GridLayout extends ViewGroup {
      *     <li>{@link #height} = {@link #WRAP_CONTENT}</li>
      *     <li>{@link #topMargin} = 0 when
      *          {@link GridLayout#setUseDefaultMargins(boolean) useDefaultMargins} is
-     *          <code>false</code>; otherwise {@link #UNDEFINED}, to
+     *          {@code false}; otherwise {@link #UNDEFINED}, to
      *          indicate that a default value should be computed on demand. </li>
      *     <li>{@link #leftMargin} = 0 when
      *          {@link GridLayout#setUseDefaultMargins(boolean) useDefaultMargins} is
-     *          <code>false</code>; otherwise {@link #UNDEFINED}, to
+     *          {@code false}; otherwise {@link #UNDEFINED}, to
      *          indicate that a default value should be computed on demand. </li>
      *     <li>{@link #bottomMargin} = 0 when
      *          {@link GridLayout#setUseDefaultMargins(boolean) useDefaultMargins} is
-     *          <code>false</code>; otherwise {@link #UNDEFINED}, to
+     *          {@code false}; otherwise {@link #UNDEFINED}, to
      *          indicate that a default value should be computed on demand. </li>
      *     <li>{@link #rightMargin} = 0 when
      *          {@link GridLayout#setUseDefaultMargins(boolean) useDefaultMargins} is
-     *          <code>false</code>; otherwise {@link #UNDEFINED}, to
+     *          {@code false}; otherwise {@link #UNDEFINED}, to
      *          indicate that a default value should be computed on demand. </li>
-     *     <li>{@link #rowGroup}<code>.span</code> = <code>[0, 1]</code> </li>
-     *     <li>{@link #rowGroup}<code>.alignment</code> = {@link #BASELINE} </li>
-     *     <li>{@link #columnGroup}<code>.span</code> = <code>[0, 1]</code> </li>
-     *     <li>{@link #columnGroup}<code>.alignment</code> = {@link #LEFT} </li>
-     *     <li>{@link #rowWeight} = <code>0f</code> </li>
-     *     <li>{@link #columnWeight} = <code>0f</code> </li>
+     *     <li>{@link #rowGroup}{@code .span} = {@code [0, 1]} </li>
+     *     <li>{@link #rowGroup}{@code .alignment} = {@link #BASELINE} </li>
+     *     <li>{@link #columnGroup}{@code .span} = {@code [0, 1]} </li>
+     *     <li>{@link #columnGroup}{@code .alignment} = {@link #LEFT} </li>
+     *     <li>{@link #rowWeight} = {@code 0f} </li>
+     *     <li>{@link #columnWeight} = {@code 0f} </li>
      * </ul>
      *
      * @attr ref android.R.styleable#GridLayout_Layout_layout_row
@@ -1739,9 +1760,10 @@ public class GridLayout extends ViewGroup {
         }
 
         /**
-         * Describes how the child views are positioned. Default is <code>LEFT | BASELINE</code>.
+         * Describes how the child views are positioned. Default is {@code LEFT | BASELINE}.
+         * See {@link android.view.Gravity}.
          *
-         * @param gravity the new gravity. See {@link android.view.Gravity}.
+         * @param gravity the new gravity value
          *
          * @attr ref android.R.styleable#GridLayout_Layout_layout_gravity
          */
@@ -1881,7 +1903,7 @@ public class GridLayout extends ViewGroup {
 
     /*
     For each Group (with a given alignment) we need to store the amount of space required
-    above the alignment point and the amount of space required below it. One side of this
+    before the alignment point and the amount of space required after it. One side of this
     calculation is always 0 for LEADING and TRAILING alignments but we don't make use of this.
     For CENTER and BASELINE alignments both sides are needed and in the BASELINE case no
     simple optimisations are possible.
@@ -1891,37 +1913,32 @@ public class GridLayout extends ViewGroup {
     of the values for each View.
     */
     private static class Bounds {
-        public int below;
-        public int above;
-
-        private Bounds(int below, int above) {
-            this.below = below;
-            this.above = above;
-        }
+        public int before;
+        public int after;
 
         private Bounds() {
             reset();
         }
 
         private void reset() {
-            below = Integer.MAX_VALUE;
-            above = Integer.MIN_VALUE;
+            before = Integer.MIN_VALUE;
+            after = Integer.MIN_VALUE;
         }
 
-        private void include(int below, int above) {
-            this.below = min(this.below, below);
-            this.above = max(this.above, above);
+        private void include(int before, int after) {
+            this.before = max(this.before, before);
+            this.after = max(this.after, after);
         }
 
         private int size() {
-            return above - below;
+            return before + after;
         }
 
         @Override
         public String toString() {
             return "Bounds{" +
-                    "below=" + below +
-                    ", above=" + above +
+                    "before=" + before +
+                    ", after=" + after +
                     '}';
         }
     }
@@ -1934,8 +1951,8 @@ public class GridLayout extends ViewGroup {
      * It is not necessary to have multiple instances of Intervals which have the same
      * {@link #min} and {@link #max} values.
      * <p>
-     * Intervals are often written as <code>[min, max]</code> and represent the set of values
-     * <em>x</em> such that <em>min <= x < max</em>.
+     * Intervals are often written as {@code [min, max]} and represent the set of values
+     * {@code x} such that {@code min <= x < max}.
      */
     /* package */ static class Interval {
         /**
@@ -1949,10 +1966,10 @@ public class GridLayout extends ViewGroup {
         public final int max;
 
         /**
-         * Construct a new Interval, <code>interval</code>, where:
+         * Construct a new Interval, {@code interval}, where:
          * <ul>
-         *     <li> <code>interval.min = min</code> </li>
-         *     <li> <code>interval.max = max</code> </li>
+         *     <li> {@code interval.min = min} </li>
+         *     <li> {@code interval.max = max} </li>
          * </ul>
          *
          * @param min the minimum value.
@@ -1972,13 +1989,14 @@ public class GridLayout extends ViewGroup {
         }
 
         /**
-         * Returns true if the {@link #getClass class}, {@link #min} and {@link #max} properties
-         * of this Interval and the supplied parameter are pairwise equal; false otherwise.
+         * Returns {@code true} if the {@link #getClass class},
+         * {@link #min} and {@link #max} properties of this Interval and the
+         * supplied parameter are pairwise equal; {@code false} otherwise.
          *
-         * @param that the object to compare this interval with.
+         * @param that the object to compare this interval with
          *
          * @return {@code true} if the specified object is equal to this
-         *         {@code Interval}; {@code false} otherwise.
+         *         {@code Interval}, {@code false} otherwise.
          */
         @Override
         public boolean equals(Object that) {
@@ -2019,7 +2037,7 @@ public class GridLayout extends ViewGroup {
      * cells.
      * <p>
      * Groups are immutable and so may be shared between views with the same
-     * <code>span</code> and <code>alignment</code>.
+     * {@code span} and {@code alignment}.
      */
     public static class Group {
         /**
@@ -2038,14 +2056,14 @@ public class GridLayout extends ViewGroup {
         public final Alignment alignment;
 
         /**
-         * Construct a new Group, <code>group</code>, where:
+         * Construct a new Group, {@code group}, where:
          * <ul>
-         *     <li> <code>group.span = span</code> </li>
-         *     <li> <code>group.alignment = alignment</code> </li>
+         *     <li> {@code group.span = span} </li>
+         *     <li> {@code group.alignment = alignment} </li>
          * </ul>
          *
-         * @param span      the span.
-         * @param alignment the alignment.
+         * @param span      the span
+         * @param alignment the alignment
          */
         /* package */ Group(Interval span, Alignment alignment) {
             this.span = span;
@@ -2053,29 +2071,29 @@ public class GridLayout extends ViewGroup {
         }
 
         /**
-         * Construct a new Group, <code>group</code>, where:
+         * Construct a new Group, {@code group}, where:
          * <ul>
-         *     <li> <code>group.span = [min, max]</code> </li>
-         *     <li> <code>group.alignment = alignment</code> </li>
+         *     <li> {@code group.span = [min, max]} </li>
+         *     <li> {@code group.alignment = alignment} </li>
          * </ul>
          *
-         * @param min       the minimum.
-         * @param max       the maximum.
-         * @param alignment the alignment.
+         * @param min       the minimum
+         * @param max       the maximum
+         * @param alignment the alignment
          */
         public Group(int min, int max, Alignment alignment) {
             this(new Interval(min, max), alignment);
         }
 
         /**
-         * Construct a new Group, <code>group</code>, where:
+         * Construct a new Group, {@code group}, where:
          * <ul>
-         *     <li> <code>group.span = [min, min + 1]</code> </li>
-         *     <li> <code>group.alignment = alignment</code> </li>
+         *     <li> {@code group.span = [min, min + 1]} </li>
+         *     <li> {@code group.alignment = alignment} </li>
          * </ul>
          *
-         * @param min       the minimum.
-         * @param alignment the alignment.
+         * @param min       the minimum
+         * @param alignment the alignment
          */
         public Group(int min, Alignment alignment) {
             this(min, min + 1, alignment);
@@ -2090,13 +2108,14 @@ public class GridLayout extends ViewGroup {
         }
 
         /**
-         * Returns true if the {@link #getClass class}, {@link #alignment} and <code>span</code>
-         * properties of this Group and the supplied parameter are pairwise equal; false otherwise.
+         * Returns {@code true} if the {@link #getClass class}, {@link #alignment} and {@code span}
+         * properties of this Group and the supplied parameter are pairwise equal,
+         * {@code false} otherwise.
          *
-         * @param that the object to compare this group with.
+         * @param that the object to compare this group with
          *
          * @return {@code true} if the specified object is equal to this
-         *         {@code Group}; {@code false} otherwise.
+         *         {@code Group}; {@code false} otherwise
          */
         @Override
         public boolean equals(Object that) {
@@ -2153,9 +2172,9 @@ public class GridLayout extends ViewGroup {
          * alignment location.
          * For horizontal alignments measurement is made from the left edge of the component.
          *
-         * @param view     the view to which this alignment should be applied.
-         * @param viewSize the measured size of the view.
-         * @return the alignment value.
+         * @param view     the view to which this alignment should be applied
+         * @param viewSize the measured size of the view
+         * @return         the alignment value
          */
         public int getAlignmentValue(View view, int viewSize);
 
@@ -2164,10 +2183,10 @@ public class GridLayout extends ViewGroup {
          * In the case of vertical alignments this method should return a height; for
          * horizontal alignments this method should return the width.
          *
-         * @param view     the view to which this alignment should be applied.
-         * @param viewSize the measured size of the view.
-         * @param cellSize the size of the cell into which this view will be placed.
-         * @return the aligned size.
+         * @param view     the view to which this alignment should be applied
+         * @param viewSize the measured size of the view
+         * @param cellSize the size of the cell into which this view will be placed
+         * @return         the aligned size
          */
         public int getSizeInCell(View view, int viewSize, int cellSize);
     }
@@ -2234,13 +2253,16 @@ public class GridLayout extends ViewGroup {
      * @see View#getBaseline()
      */
     public static final Alignment BASELINE = new AbstractAlignment() {
-        public int getAlignmentValue(View view, int viewSize) {
+        public int getAlignmentValue(View view, int height) {
             if (view == null) {
                 return UNDEFINED;
             }
-            // todo do we need to call measure first?
             int baseline = view.getBaseline();
-            return baseline == -1 ? UNDEFINED : baseline;
+            if (baseline == -1) {
+                return UNDEFINED;
+            } else {
+                return baseline;
+            }
         }
 
     };

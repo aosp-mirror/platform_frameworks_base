@@ -31,10 +31,10 @@ import static android.widget.GridLayout.*;
 
 public class AlignmentTest  extends Activity {
 
-    public static final String[] HORIZONTAL_NAMES = new String[]{"LEFT", "center", "east", "fill"};
-    public static final Alignment[] HORIZONTAL_ALIGNMENTS = new Alignment[]{LEFT, CENTER, RIGHT, FILL};
-    public static final String[] VERTICAL_NAMES = new String[]{"north", "center", "baseline", "south", "fill"};
-    public static final Alignment[] VERTICAL_ALIGNMENTS = new Alignment[]{TOP, CENTER, BASELINE, BOTTOM, FILL};
+    public static final String[] HORIZONTAL_NAMES = {"LEFT", "center", "east", "fill"};
+    public static final Alignment[] HORIZONTAL_ALIGNMENTS = {LEFT, CENTER, RIGHT, FILL};
+    public static final String[] VERTICAL_NAMES = {"north", "center", "baseline", "south", "fill"};
+    public static final Alignment[] VERTICAL_ALIGNMENTS = {TOP, CENTER, BASELINE, BOTTOM, FILL};
     private static Context CONTEXT;
 
     public static interface ViewFactory {
@@ -72,7 +72,8 @@ public class AlignmentTest  extends Activity {
         }
     };
 
-    public static final ViewFactory[] FACTORIES = new ViewFactory[]{BUTTON_FACTORY, LABEL_FACTORY, TEXT_FIELD_FACTORY};
+    public static final ViewFactory[] FACTORIES =
+                            {BUTTON_FACTORY, LABEL_FACTORY, TEXT_FIELD_FACTORY};
 
     public static ViewGroup create(Context context1) {
         CONTEXT = context1;
@@ -86,7 +87,9 @@ public class AlignmentTest  extends Activity {
                 Group rowGroup = new Group(i, va);
                 Group colGroup = new Group(j, ha);
                 LayoutParams layoutParams = new LayoutParams(rowGroup, colGroup);
-                container.addView(FACTORIES[(i + j) % FACTORIES.length].create(VERTICAL_NAMES[i] + "-" + HORIZONTAL_NAMES[j], 20), layoutParams);
+                String name = VERTICAL_NAMES[i] + "-" + HORIZONTAL_NAMES[j];
+                ViewFactory factory = FACTORIES[(i + j) % FACTORIES.length];
+                container.addView(factory.create(name, 20), layoutParams);
             }
         }
 
@@ -105,7 +108,8 @@ public class AlignmentTest  extends Activity {
             GridLayout p = (GridLayout) v.getParent();
             p.layout(0, 0, 1000 + (i % 2), 500 + (i % 2));
         }
-        System.out.println("Time: " + (float) (System.currentTimeMillis() - start) / N * 1000 + "mics");
+        float time = (float) (System.currentTimeMillis() - start) / N * 1000;
+        System.out.println("Time: " + time + "mics");
     }
 
     protected void onCreate(Bundle savedInstanceState) {
