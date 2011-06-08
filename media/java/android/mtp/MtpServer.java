@@ -61,10 +61,6 @@ public class MtpServer {
         native_send_object_removed(handle);
     }
 
-    public void setPtpMode(boolean usePtp) {
-        native_set_ptp_mode(usePtp);
-    }
-
     public void addStorage(MtpStorage storage) {
         native_add_storage(storage);
     }
@@ -78,7 +74,6 @@ public class MtpServer {
     private native final void native_stop();
     private native final void native_send_object_added(int handle);
     private native final void native_send_object_removed(int handle);
-    private native final void native_set_ptp_mode(boolean usePtp);
     private native final void native_add_storage(MtpStorage storage);
     private native final void native_remove_storage(int storageId);
 }
