@@ -17818,6 +17818,7 @@ package android.telephony {
     field public static final int NETWORK_TYPE_GPRS = 1; // 0x1
     field public static final int NETWORK_TYPE_HSDPA = 8; // 0x8
     field public static final int NETWORK_TYPE_HSPA = 10; // 0xa
+    field public static final int NETWORK_TYPE_HSPAP = 15; // 0xf
     field public static final int NETWORK_TYPE_HSUPA = 9; // 0x9
     field public static final int NETWORK_TYPE_IDEN = 11; // 0xb
     field public static final int NETWORK_TYPE_LTE = 13; // 0xd
