@@ -95,7 +95,6 @@ public final class ViewAncestor extends Handler implements ViewParent,
         View.AttachInfo.Callbacks, HardwareRenderer.HardwareDrawCallbacks {
     private static final String TAG = "ViewAncestor";
     private static final boolean DBG = false;
-    private static final boolean SHOW_FPS = false;
     private static final boolean LOCAL_LOGV = false;
     /** @noinspection PointlessBooleanExpression*/
     private static final boolean DEBUG_DRAW = false || LOCAL_LOGV;
@@ -130,8 +129,6 @@ public final class ViewAncestor extends Handler implements ViewParent,
     static final ArrayList<ComponentCallbacks> sConfigCallbacks
             = new ArrayList<ComponentCallbacks>();
     
-    private static int sDrawTime;
-
     long mLastTrackballTime = 0;
     final TrackballAxis mTrackballAxisX = new TrackballAxis();
     final TrackballAxis mTrackballAxisY = new TrackballAxis();
@@ -1811,14 +1808,6 @@ public final class ViewAncestor extends Handler implements ViewParent,
 
                     if (false && ViewDebug.consistencyCheckEnabled) {
                         mView.dispatchConsistencyCheck(ViewDebug.CONSISTENCY_DRAWING);
-                    }
-
-                    if (SHOW_FPS || ViewDebug.DEBUG_SHOW_FPS) {
-                        int now = (int)SystemClock.elapsedRealtime();
-                        if (sDrawTime != 0) {
-                            nativeShowFPS(canvas, now - sDrawTime);
-                        }
-                        sDrawTime = now;
                     }
 
                     if (ViewDebug.DEBUG_PROFILE_DRAWING) {
@@ -4502,6 +4491,4 @@ public final class ViewAncestor extends Handler implements ViewParent,
             }
         }
     }
-
-    private static native void nativeShowFPS(Canvas canvas, int durationMillis);
 }
