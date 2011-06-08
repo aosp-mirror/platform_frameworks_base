@@ -16,7 +16,6 @@
 package android.speech.tts;
 
 import android.media.AudioFormat;
-import android.os.Bundle;
 import android.util.Log;
 
 import java.io.File;
@@ -29,7 +28,7 @@ import java.nio.ByteOrder;
 /**
  * Speech synthesis request that writes the audio to a WAV file.
  */
-class FileSynthesisRequest extends SynthesisRequest {
+class FileSynthesisCallback extends AbstractSynthesisCallback {
 
     private static final String TAG = "FileSynthesisRequest";
     private static final boolean DBG = false;
@@ -48,8 +47,7 @@ class FileSynthesisRequest extends SynthesisRequest {
     private boolean mStopped = false;
     private boolean mDone = false;
 
-    FileSynthesisRequest(String text, Bundle params, File fileName) {
-        super(text, params);
+    FileSynthesisCallback(File fileName) {
         mFileName = fileName;
     }
 

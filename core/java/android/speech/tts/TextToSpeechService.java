@@ -19,7 +19,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -40,8 +39,34 @@ import java.util.Locale;
 
 
 /**
- * Abstract base class for TTS engine implementations.
+ * Abstract base class for TTS engine implementations. The following methods
+ * need to be implemented.
+ *
+ * <ul>
+ *   <li>{@link #onIsLanguageAvailable}</li>
+ *   <li>{@link #onLoadLanguage}</li>
+ *   <li>{@link #onGetLanguage}</li>
+ *   <li>{@link #onSynthesizeText}</li>
+ *   <li>{@link #onStop}</li>
+ * </ul>
+ *
+ * The first three deal primarily with language management, and are used to
+ * query the engine for it's support for a given language and indicate to it
+ * that requests in a given language are imminent.
+ *
+ * {@link #onSynthesizeText} is central to the engine implementation. The
+ * implementation should synthesize text as per the request parameters and
+ * return synthesized data via the supplied callback. This class and its helpers
+ * will then consume that data, which might mean queueing it for playback or writing
+ * it to a file or similar. All calls to this method will be on a single
+ * thread, which will be different from the main thread of the service. Synthesis
+ * must be synchronous which means the engine must NOT hold on the callback or call
+ * any methods on it after the method returns
+ *
+ * {@link #onStop} tells the engine that it should stop all ongoing synthesis, if
+ * any. Any pending data from the current synthesis will be discarded.
  */
+// TODO: Add a link to the sample TTS engine once it's done.
 public abstract class TextToSpeechService extends Service {
 
     private static final boolean DBG = false;
@@ -160,10 +185,12 @@ public abstract class TextToSpeechService extends Service {
      *
      * Called on the synthesis thread.
      *
-     * @param request The synthesis request. The method should use the methods in the request
-     *         object to communicate the results of the synthesis.
+     * @param request The synthesis request.
+     * @param callback The callback the the engine must use to make data available for
+     *         playback or for writing to a file.
      */
-    protected abstract void onSynthesizeText(SynthesisRequest request);
+    protected abstract void onSynthesizeText(SynthesisRequest request,
+            SynthesisCallback callback);
 
     private boolean areDefaultsEnforced() {
         return getSecureSettingInt(Settings.Secure.TTS_USE_DEFAULTS,
@@ -421,11 +448,16 @@ public abstract class TextToSpeechService extends Service {
 
     class SynthesisSpeechItem extends SpeechItem {
         private final String mText;
-        private SynthesisRequest mSynthesisRequest;
+        private final SynthesisRequest mSynthesisRequest;
+        // Non null after synthesis has started, and all accesses
+        // guarded by 'this'.
+        private AbstractSynthesisCallback mSynthesisCallback;
 
         public SynthesisSpeechItem(String callingApp, Bundle params, String text) {
             super(callingApp, params);
             mText = text;
+            mSynthesisRequest = new SynthesisRequest(mText, mParams);
+            setRequestParams(mSynthesisRequest);
         }
 
         public String getText() {
@@ -447,20 +479,18 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected int playImpl() {
-            SynthesisRequest synthesisRequest;
+            AbstractSynthesisCallback synthesisCallback;
             synchronized (this) {
-                mSynthesisRequest = createSynthesisRequest();
-                synthesisRequest = mSynthesisRequest;
+                mSynthesisCallback = createSynthesisCallback();
+                synthesisCallback = mSynthesisCallback;
             }
-            setRequestParams(synthesisRequest);
-            TextToSpeechService.this.onSynthesizeText(synthesisRequest);
-            return synthesisRequest.isDone() ? TextToSpeech.SUCCESS : TextToSpeech.ERROR;
+            TextToSpeechService.this.onSynthesizeText(mSynthesisRequest, synthesisCallback);
+            return synthesisCallback.isDone() ? TextToSpeech.SUCCESS : TextToSpeech.ERROR;
         }
 
-        protected SynthesisRequest createSynthesisRequest() {
-            return new PlaybackSynthesisRequest(mText, mParams,
-                    getStreamType(), getVolume(), getPan(), mAudioPlaybackHandler,
-                    this);
+        protected AbstractSynthesisCallback createSynthesisCallback() {
+            return new PlaybackSynthesisCallback(getStreamType(), getVolume(), getPan(),
+                    mAudioPlaybackHandler, this);
         }
 
         private void setRequestParams(SynthesisRequest request) {
@@ -476,11 +506,11 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected void stopImpl() {
-            SynthesisRequest synthesisRequest;
+            AbstractSynthesisCallback synthesisCallback;
             synchronized (this) {
-                synthesisRequest = mSynthesisRequest;
+                synthesisCallback = mSynthesisCallback;
             }
-            synthesisRequest.stop();
+            synthesisCallback.stop();
             TextToSpeechService.this.onStop();
         }
 
@@ -529,8 +559,8 @@ public abstract class TextToSpeechService extends Service {
         }
 
         @Override
-        protected SynthesisRequest createSynthesisRequest() {
-            return new FileSynthesisRequest(getText(), mParams, mFile);
+        protected AbstractSynthesisCallback createSynthesisCallback() {
+            return new FileSynthesisCallback(mFile);
         }
 
         @Override

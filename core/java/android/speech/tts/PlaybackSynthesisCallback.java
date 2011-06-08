@@ -15,14 +15,13 @@
  */
 package android.speech.tts;
 
-import android.os.Bundle;
 import android.speech.tts.TextToSpeechService.UtteranceCompletedDispatcher;
 import android.util.Log;
 
 /**
  * Speech synthesis request that plays the audio as it is received.
  */
-class PlaybackSynthesisRequest extends SynthesisRequest {
+class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
 
     private static final String TAG = "PlaybackSynthesisRequest";
     private static final boolean DBG = false;
@@ -66,9 +65,9 @@ class PlaybackSynthesisRequest extends SynthesisRequest {
 
     private final UtteranceCompletedDispatcher mDispatcher;
 
-    PlaybackSynthesisRequest(String text, Bundle params, int streamType, float volume, float pan,
-            AudioPlaybackHandler audioTrackHandler, UtteranceCompletedDispatcher dispatcher) {
-        super(text, params);
+    PlaybackSynthesisCallback(int streamType, float volume, float pan,
+            AudioPlaybackHandler audioTrackHandler,
+            UtteranceCompletedDispatcher dispatcher) {
         mStreamType = streamType;
         mVolume = volume;
         mPan = pan;
