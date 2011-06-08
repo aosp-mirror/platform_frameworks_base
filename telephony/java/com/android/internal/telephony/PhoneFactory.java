@@ -47,8 +47,6 @@ public class PhoneFactory {
     static private Looper sLooper;
     static private Context sContext;
 
-    static final int preferredNetworkMode = RILConstants.PREFERRED_NETWORK_MODE;
-
     static final int preferredCdmaSubscription = RILConstants.PREFERRED_CDMA_SUBSCRIPTION;
 
     //***** Class Methods
@@ -99,7 +97,11 @@ public class PhoneFactory {
 
                 sPhoneNotifier = new DefaultPhoneNotifier();
 
-                //Get preferredNetworkMode from Settings.System
+                // Get preferred network mode
+                int preferredNetworkMode = RILConstants.PREFERRED_NETWORK_MODE;
+                if (BaseCommands.getLteOnCdmaModeStatic() == Phone.LTE_ON_CDMA_TRUE) {
+                    preferredNetworkMode = Phone.NT_MODE_GLOBAL;
+                }
                 int networkMode = Settings.Secure.getInt(context.getContentResolver(),
                         Settings.Secure.PREFERRED_NETWORK_MODE, preferredNetworkMode);
                 Log.i(LOG_TAG, "Network Mode set to " + Integer.toString(networkMode));
