@@ -16,7 +16,6 @@
 
 package com.android.internal.telephony.cdma;
 
-import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.EventLogTags;
@@ -26,23 +25,15 @@ import android.telephony.SignalStrength;
 import android.telephony.ServiceState;
 import android.telephony.cdma.CdmaCellLocation;
 import android.os.AsyncResult;
-import android.os.Handler;
 import android.os.Message;
-import android.os.Registrant;
-import android.os.RegistrantList;
-import android.os.AsyncResult;
-import android.os.Message;
-import android.os.SystemProperties;
+
 
 import android.util.Log;
 import android.util.EventLog;
 
-import com.android.internal.telephony.RestrictedState;
 import com.android.internal.telephony.gsm.GsmDataConnectionTracker;
 
 public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
-    static final String LOG_TAG = "CDMA";
-
     CDMALTEPhone mCdmaLtePhone;
 
     private ServiceState  mLteSS;  // The last LTE state from Voice Registration
@@ -56,6 +47,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         if (DBG) log("CdmaLteServiceStateTracker Constructors");
     }
 
+    @Override
     public void dispose() {
         cm.unregisterForSIMReady(this);
         super.dispose();
@@ -398,6 +390,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         }
     }
 
+    @Override
     protected void onSignalStrengthResult(AsyncResult ar) {
         SignalStrength oldSignalStrength = mSignalStrength;
 
@@ -439,12 +432,23 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         }
     }
 
+    @Override
     public boolean isConcurrentVoiceAndDataAllowed() {
         // Note: it needs to be confirmed which CDMA network types
         // can support voice and data calls concurrently.
         // For the time-being, the return value will be false.
         // return (networkType >= ServiceState.RADIO_TECHNOLOGY_LTE);
         return false;
+    }
+
+    /**
+     * Returns OTASP_NOT_NEEDED as its not needed for LTE
+     */
+    @Override
+    int getOtasp() {
+        int provisioningState = OTASP_NOT_NEEDED;
+        if (DBG) log("getOtasp: state=" + provisioningState);
+        return provisioningState;
     }
 
     @Override
@@ -454,10 +458,6 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
 
     @Override
     protected void loge(String s) {
-        Log.e(LOG_TAG, "[CdmaLteSST] " + s);
-    }
-
-    protected static void sloge(String s) {
         Log.e(LOG_TAG, "[CdmaLteSST] " + s);
     }
 }

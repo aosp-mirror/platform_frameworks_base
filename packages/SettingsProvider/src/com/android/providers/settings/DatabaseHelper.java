@@ -17,6 +17,8 @@
 package com.android.providers.settings;
 
 import com.android.internal.content.PackageHelper;
+import com.android.internal.telephony.BaseCommands;
+import com.android.internal.telephony.Phone;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
@@ -1300,8 +1302,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
     
             // Set the preferred network mode to 0 = Global, CDMA default
-            int type = SystemProperties.getInt("ro.telephony.default_network",
-                    RILConstants.PREFERRED_NETWORK_MODE);
+            int type;
+            if (BaseCommands.getLteOnCdmaModeStatic() == Phone.LTE_ON_CDMA_TRUE) {
+                type = Phone.NT_MODE_GLOBAL;
+            } else {
+                type = SystemProperties.getInt("ro.telephony.default_network",
+                        RILConstants.PREFERRED_NETWORK_MODE);
+            }
             loadSetting(stmt, Settings.Secure.PREFERRED_NETWORK_MODE, type);
     
             // Enable or disable Cell Broadcast SMS
