@@ -226,8 +226,9 @@ public class TouchExplorer implements Explorer {
                 // Send a hover for every finger down so the user gets feedback
                 // where she is currently touching.
                 mSendHoverDelayed.forceSendAndRemove();
-                mSendHoverDelayed.post(event, MotionEvent.ACTION_HOVER_ENTER, 1, policyFlags,
-                        DELAY_SEND_HOVER_MOVE);
+                final int pointerIdBits = (1 << event.getActionIndex());
+                mSendHoverDelayed.post(event, MotionEvent.ACTION_HOVER_ENTER, pointerIdBits,
+                        policyFlags, DELAY_SEND_HOVER_MOVE);
             } break;
             case MotionEvent.ACTION_POINTER_DOWN: {
                 switch (activePointerCount) {
@@ -350,11 +351,12 @@ public class TouchExplorer implements Explorer {
                         if (isDraggingGesture(event)) {
                             // Two pointers moving in the same direction within
                             // a given distance perform a drag.
-                            mCurrentState = STATE_DRAGGING;      
+                            mCurrentState = STATE_DRAGGING;
                             if (mTouchExploreGestureInProgress) {
                                 sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
                                 mTouchExploreGestureInProgress = false;
                             }
+                            mLastTouchExploreEvent = null;
                             mDraggingPointerId = pointerId;
                             sendMotionEvent(event, MotionEvent.ACTION_DOWN, pointerIdBits,
                                     policyFlags);
@@ -365,6 +367,7 @@ public class TouchExplorer implements Explorer {
                                 sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
                                 mTouchExploreGestureInProgress = false;
                             }
+                            mLastTouchExploreEvent = null;
                             sendDownForAllActiveNotInjectedPointers(event, policyFlags);
                         }
                     } break;
@@ -382,6 +385,7 @@ public class TouchExplorer implements Explorer {
                             sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
                             mTouchExploreGestureInProgress = false;
                         }
+                        mLastTouchExploreEvent = null;
                         sendDownForAllActiveNotInjectedPointers(event, policyFlags);
                     }
                 }
@@ -728,7 +732,7 @@ public class TouchExplorer implements Explorer {
     /**
      * Sends an event.
      *
-     * @param event The event to send.
+     * @param prototype The prototype from which to create the injected events.
      * @param action The action of the event.
      * @param pointerIdBits The bits of the pointers to send.
      * @param policyFlags The policy flags associated with the event.
@@ -979,7 +983,7 @@ public class TouchExplorer implements Explorer {
                 case MotionEvent.ACTION_DOWN: {
                     // New gesture so restart tracking injected down pointers.
                     mInjectedPointersDown = 0;
-                    handleReceivedPointerDown(0, event);
+                    handleReceivedPointerDown(event.getActionIndex(), event);
                 } break;
                 case MotionEvent.ACTION_POINTER_DOWN: {
                     handleReceivedPointerDown(event.getActionIndex(), event);
@@ -988,7 +992,7 @@ public class TouchExplorer implements Explorer {
                     handleReceivedPointerMove(event);
                 } break;
                 case MotionEvent.ACTION_UP: {
-                    handleReceivedPointerUp(0, event);
+                    handleReceivedPointerUp(event.getActionIndex(), event);
                 } break;
                 case MotionEvent.ACTION_POINTER_UP: {
                     handleReceivedPointerUp(event.getActionIndex(), event);
@@ -1008,13 +1012,13 @@ public class TouchExplorer implements Explorer {
             final int action = event.getActionMasked();
             switch (action) {
                 case MotionEvent.ACTION_DOWN: {
-                    handleInjectedPointerDown(0, event);
+                    handleInjectedPointerDown(event.getActionIndex(), event);
                 } break;
                 case MotionEvent.ACTION_POINTER_DOWN: {
                     handleInjectedPointerDown(event.getActionIndex(), event);
                 } break;
                 case MotionEvent.ACTION_UP: {
-                    handleInjectedPointerUp(0, event);
+                    handleInjectedPointerUp(event.getActionIndex(), event);
                 } break;
                 case MotionEvent.ACTION_POINTER_UP: {
                     handleInjectedPointerUp(event.getActionIndex(), event);
