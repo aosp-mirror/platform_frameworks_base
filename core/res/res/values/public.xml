@@ -1657,6 +1657,9 @@
   <public type="attr" name="compatibleWidthLimitDp" />
   <public type="attr" name="largestWidthLimitDp" />
 
+  <public type="style" name="Theme.Holo.Light.NoActionBar" />
+  <public type="style" name="Theme.Holo.Light.NoActionBar.Fullscreen" />
+
 <!-- ===============================================================
      Resources added in version 13 of the platform (Ice Cream Sandwich)
      =============================================================== -->
@@ -1666,7 +1669,6 @@
   <public type="attr" name="state_drag_hovered" />
   <public type="attr" name="stopWithTask" />
 
-  <public type="style" name="Theme.Holo.Light.NoActionBar" />
   <public type="style" name="TextAppearance.SuggestionHighlight" />
   <public type="style" name="Theme.Holo.SplitActionBarWhenNarrow" />
   <public type="style" name="Theme.Holo.Light.SplitActionBarWhenNarrow" />
@@ -1704,4 +1706,5 @@
   <public type="attr" name="notificationTimeout" />
   <public type="attr" name="accessibilityFlags" />
   <public type="attr" name="canRetrieveWindowContent" />
+
 </resources>
