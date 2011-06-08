@@ -121,11 +121,23 @@ struct InputTarget {
          * The event is transmuted into ACTION_HOVER_ENTER. */
         FLAG_DISPATCH_AS_HOVER_EXIT = 1 << 11,
 
+        /* This flag indicates that the event should be canceled.
+         * It is used to transmute ACTION_MOVE into ACTION_CANCEL when a touch slips
+         * outside of a window. */
+        FLAG_DISPATCH_AS_SLIPPERY_EXIT = 1 << 12,
+
+        /* This flag indicates that the event should be dispatched as an initial down.
+         * It is used to transmute ACTION_MOVE into ACTION_DOWN when a touch slips
+         * into a new window. */
+        FLAG_DISPATCH_AS_SLIPPERY_ENTER = 1 << 13,
+
         /* Mask for all dispatch modes. */
         FLAG_DISPATCH_MASK = FLAG_DISPATCH_AS_IS
                 | FLAG_DISPATCH_AS_OUTSIDE
                 | FLAG_DISPATCH_AS_HOVER_ENTER
-                | FLAG_DISPATCH_AS_HOVER_EXIT,
+                | FLAG_DISPATCH_AS_HOVER_EXIT
+                | FLAG_DISPATCH_AS_SLIPPERY_EXIT
+                | FLAG_DISPATCH_AS_SLIPPERY_ENTER,
     };
 
     // The input channel to be targeted.
@@ -950,9 +962,10 @@ private:
         ~TouchState();
         void reset();
         void copyFrom(const TouchState& other);
-        void addOrUpdateWindow(const InputWindow* window, int32_t targetFlags, BitSet32 pointerIds);
+        void addOrUpdateWindow(const InputWindow* window,int32_t targetFlags, BitSet32 pointerIds);
         void filterNonAsIsTouchWindows();
-        const InputWindow* getFirstForegroundWindow();
+        const InputWindow* getFirstForegroundWindow() const;
+        bool isSlippery() const;
     };
 
     TouchState mTouchState;

@@ -1412,6 +1412,50 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
             injectionResult = INPUT_EVENT_INJECTION_FAILED;
             goto Failed;
         }
+
+        // Check whether touches should slip outside of the current foreground window.
+        if (maskedAction == AMOTION_EVENT_ACTION_MOVE
+                && entry->pointerCount == 1
+                && mTempTouchState.isSlippery()) {
+            const MotionSample* sample = &entry->firstSample;
+            int32_t x = int32_t(sample->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X));
+            int32_t y = int32_t(sample->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y));
+
+            const InputWindow* oldTouchedWindow = mTempTouchState.getFirstForegroundWindow();
+            const InputWindow* newTouchedWindow = findTouchedWindowAtLocked(x, y);
+            if (oldTouchedWindow != newTouchedWindow && newTouchedWindow) {
+#if DEBUG_FOCUS
+                LOGD("Touch is slipping out of window %s into window %s.",
+                        oldTouchedWindow->name.string(), newTouchedWindow->name.string());
+#endif
+                // Make a slippery exit from the old window.
+                mTempTouchState.addOrUpdateWindow(oldTouchedWindow,
+                        InputTarget::FLAG_DISPATCH_AS_SLIPPERY_EXIT, BitSet32(0));
+
+                // Make a slippery entrance into the new window.
+                if (newTouchedWindow->supportsSplitTouch()) {
+                    isSplit = true;
+                }
+
+                int32_t targetFlags = InputTarget::FLAG_FOREGROUND
+                        | InputTarget::FLAG_DISPATCH_AS_SLIPPERY_ENTER;
+                if (isSplit) {
+                    targetFlags |= InputTarget::FLAG_SPLIT;
+                }
+                if (isWindowObscuredAtPointLocked(newTouchedWindow, x, y)) {
+                    targetFlags |= InputTarget::FLAG_WINDOW_IS_OBSCURED;
+                }
+
+                BitSet32 pointerIds;
+                if (isSplit) {
+                    pointerIds.markBit(entry->pointerProperties[0].id);
+                }
+                mTempTouchState.addOrUpdateWindow(newTouchedWindow, targetFlags, pointerIds);
+
+                // Split the batch here so we send exactly one sample.
+                *outSplitBatchAfterSample = &entry->firstSample;
+            }
+        }
     }
 
     if (newHoverWindow != mLastHoverWindow) {
@@ -1884,6 +1928,10 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
             resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_HOVER_ENTER);
     enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
             resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_IS);
+    enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
+            resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_SLIPPERY_EXIT);
+    enqueueDispatchEntryLocked(connection, eventEntry, inputTarget,
+            resumeWithAppendedMotionSample, InputTarget::FLAG_DISPATCH_AS_SLIPPERY_ENTER);
 
     // If the outbound queue was previously empty, start the dispatch cycle going.
     if (wasEmpty && !connection->outboundQueue.isEmpty()) {
@@ -1985,6 +2033,10 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             action = AMOTION_EVENT_ACTION_HOVER_EXIT;
         } else if (dispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_AS_HOVER_ENTER) {
             action = AMOTION_EVENT_ACTION_HOVER_ENTER;
+        } else if (dispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_AS_SLIPPERY_EXIT) {
+            action = AMOTION_EVENT_ACTION_CANCEL;
+        } else if (dispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_AS_SLIPPERY_ENTER) {
+            action = AMOTION_EVENT_ACTION_DOWN;
         }
         if (dispatchEntry->targetFlags & InputTarget::FLAG_WINDOW_IS_OBSCURED) {
             flags |= AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED;
@@ -4386,6 +4438,9 @@ void InputDispatcher::TouchState::addOrUpdateWindow(const InputWindow* window,
         TouchedWindow& touchedWindow = windows.editItemAt(i);
         if (touchedWindow.window == window) {
             touchedWindow.targetFlags |= targetFlags;
+            if (targetFlags & InputTarget::FLAG_DISPATCH_AS_SLIPPERY_EXIT) {
+                touchedWindow.targetFlags &= ~InputTarget::FLAG_DISPATCH_AS_IS;
+            }
             touchedWindow.pointerIds.value |= pointerIds.value;
             return;
         }
@@ -4403,7 +4458,8 @@ void InputDispatcher::TouchState::addOrUpdateWindow(const InputWindow* window,
 void InputDispatcher::TouchState::filterNonAsIsTouchWindows() {
     for (size_t i = 0 ; i < windows.size(); ) {
         TouchedWindow& window = windows.editItemAt(i);
-        if (window.targetFlags & InputTarget::FLAG_DISPATCH_AS_IS) {
+        if (window.targetFlags & (InputTarget::FLAG_DISPATCH_AS_IS
+                | InputTarget::FLAG_DISPATCH_AS_SLIPPERY_ENTER)) {
             window.targetFlags &= ~InputTarget::FLAG_DISPATCH_MASK;
             window.targetFlags |= InputTarget::FLAG_DISPATCH_AS_IS;
             i += 1;
@@ -4413,13 +4469,30 @@ void InputDispatcher::TouchState::filterNonAsIsTouchWindows() {
     }
 }
 
-const InputWindow* InputDispatcher::TouchState::getFirstForegroundWindow() {
+const InputWindow* InputDispatcher::TouchState::getFirstForegroundWindow() const {
     for (size_t i = 0; i < windows.size(); i++) {
-        if (windows[i].targetFlags & InputTarget::FLAG_FOREGROUND) {
-            return windows[i].window;
+        const TouchedWindow& window = windows.itemAt(i);
+        if (window.targetFlags & InputTarget::FLAG_FOREGROUND) {
+            return window.window;
         }
     }
     return NULL;
+}
+
+bool InputDispatcher::TouchState::isSlippery() const {
+    // Must have exactly one foreground window.
+    bool haveSlipperyForegroundWindow = false;
+    for (size_t i = 0; i < windows.size(); i++) {
+        const TouchedWindow& window = windows.itemAt(i);
+        if (window.targetFlags & InputTarget::FLAG_FOREGROUND) {
+            if (haveSlipperyForegroundWindow
+                    || !(window.window->layoutParamsFlags & InputWindow::FLAG_SLIPPERY)) {
+                return false;
+            }
+            haveSlipperyForegroundWindow = true;
+        }
+    }
+    return haveSlipperyForegroundWindow;
 }
 
 

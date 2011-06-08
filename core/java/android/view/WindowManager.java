@@ -685,7 +685,19 @@ public interface WindowManager extends ViewManager {
 
         // ----- HIDDEN FLAGS.
         // These start at the high bit and go down.
-        
+
+        /** Window flag: Enable touches to slide out of a window into neighboring
+         * windows in mid-gesture instead of being captured for the duration of
+         * the gesture.
+         *
+         * This flag changes the behavior of touch focus for this window only.
+         * Touches can slide out of the window but they cannot necessarily slide
+         * back in (unless the other window with touch focus permits it).
+         *
+         * {@hide}
+         */
+        public static final int FLAG_SLIPPERY = 0x04000000;
+
         /**
          * Flag for a window belonging to an activity that responds to {@link KeyEvent#KEYCODE_MENU}
          * and therefore needs a Menu key. For devices where Menu is a physical button this flag is
