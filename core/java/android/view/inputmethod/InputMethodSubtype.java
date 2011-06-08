@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * This class is used to specify meta information of a subtype contained in an input method.
@@ -54,10 +55,11 @@ public final class InputMethodSubtype implements Parcelable {
      * @param nameId The name of the subtype
      * @param iconId The icon of the subtype
      * @param locale The locale supported by the subtype
-     * @param modeId The mode supported by the subtype
+     * @param mode The mode supported by the subtype
      * @param extraValue The extra value of the subtype
      */
-    InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue) {
+    public InputMethodSubtype(
+            int nameId, int iconId, String locale, String mode, String extraValue) {
         this(nameId, iconId, locale, mode, extraValue, false);
     }
 
@@ -66,19 +68,20 @@ public final class InputMethodSubtype implements Parcelable {
      * @param nameId The name of the subtype
      * @param iconId The icon of the subtype
      * @param locale The locale supported by the subtype
-     * @param modeId The mode supported by the subtype
+     * @param mode The mode supported by the subtype
      * @param extraValue The extra value of the subtype
      * @param isAuxiliary true when this subtype is one shot subtype.
      */
-    InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
+    public InputMethodSubtype(int nameId, int iconId, String locale, String mode, String extraValue,
             boolean isAuxiliary) {
         mSubtypeNameResId = nameId;
         mSubtypeIconResId = iconId;
         mSubtypeLocale = locale != null ? locale : "";
         mSubtypeMode = mode != null ? mode : "";
         mSubtypeExtraValue = extraValue != null ? extraValue : "";
-        mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeMode, mSubtypeExtraValue);
         mIsAuxiliary = isAuxiliary;
+        mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeMode, mSubtypeExtraValue,
+                mIsAuxiliary);
     }
 
     InputMethodSubtype(Parcel source) {
@@ -91,8 +94,9 @@ public final class InputMethodSubtype implements Parcelable {
         mSubtypeMode = s != null ? s : "";
         s = source.readString();
         mSubtypeExtraValue = s != null ? s : "";
-        mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeMode, mSubtypeExtraValue);
         mIsAuxiliary = (source.readInt() == 1);
+        mSubtypeHashCode = hashCodeInternal(mSubtypeLocale, mSubtypeMode, mSubtypeExtraValue,
+                mIsAuxiliary);
     }
 
     /**
@@ -151,16 +155,17 @@ public final class InputMethodSubtype implements Parcelable {
      */
     public CharSequence getDisplayName(
             Context context, String packageName, ApplicationInfo appInfo) {
-        final String locale = context.getResources().getConfiguration().locale.getDisplayName();
+        final Locale locale = constructLocaleFromString(mSubtypeLocale);
+        final String localeStr = locale != null ? locale.getDisplayName() : mSubtypeLocale;
         if (mSubtypeNameResId == 0) {
-            return locale;
+            return localeStr;
         }
         final String subtypeName = context.getPackageManager().getText(
                 packageName, mSubtypeNameResId, appInfo).toString();
         if (!TextUtils.isEmpty(subtypeName)) {
-            return String.format(subtypeName, locale);
+            return String.format(subtypeName, localeStr);
         } else {
-            return locale;
+            return localeStr;
         }
     }
 
@@ -218,7 +223,8 @@ public final class InputMethodSubtype implements Parcelable {
                 && (subtype.getMode().equals(getMode()))
                 && (subtype.getIconResId() == getIconResId())
                 && (subtype.getLocale().equals(getLocale()))
-                && (subtype.getExtraValue().equals(getExtraValue()));
+                && (subtype.getExtraValue().equals(getExtraValue()))
+                && (subtype.isAuxiliary() == isAuxiliary());
         }
         return false;
     }
@@ -251,8 +257,25 @@ public final class InputMethodSubtype implements Parcelable {
         }
     };
 
-    private static int hashCodeInternal(String locale, String mode, String extraValue) {
-        return Arrays.hashCode(new Object[] {locale, mode, extraValue});
+    private static Locale constructLocaleFromString(String localeStr) {
+        if (TextUtils.isEmpty(localeStr))
+            return null;
+        String[] localeParams = localeStr.split("_", 3);
+        // The length of localeStr is guaranteed to always return a 1 <= value <= 3
+        // because localeStr is not empty.
+        if (localeParams.length == 1) {
+            return new Locale(localeParams[0]);
+        } else if (localeParams.length == 2) {
+            return new Locale(localeParams[0], localeParams[1]);
+        } else if (localeParams.length == 3) {
+            return new Locale(localeParams[0], localeParams[1], localeParams[2]);
+        }
+        return null;
+    }
+
+    private static int hashCodeInternal(String locale, String mode, String extraValue,
+            boolean isAuxiliary) {
+        return Arrays.hashCode(new Object[] {locale, mode, extraValue, isAuxiliary});
     }
 
     /**
