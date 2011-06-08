@@ -25,7 +25,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
 /**
  * An implementation of a GL canvas that records drawing operations.
@@ -37,7 +37,7 @@ class GLES20RecordingCanvas extends GLES20Canvas {
     // These lists ensure that any Bitmaps recorded by a DisplayList are kept alive as long
     // as the DisplayList is alive.
     @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection"})
-    private final HashSet<Bitmap> mBitmaps = new HashSet<Bitmap>();
+    private final ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(5);
 
     GLES20RecordingCanvas(boolean translucent) {
         super(true, translucent);
