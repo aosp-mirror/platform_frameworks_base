@@ -36,10 +36,11 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.LayoutInflater_Delegate;
 import android.view.ViewGroup.LayoutParams;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -315,7 +316,7 @@ public final class BridgeTypedArray extends TypedArray {
             try {
                 KXmlParser parser = new KXmlParser();
                 parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                parser.setInput(new FileReader(f));
+                parser.setInput(new FileInputStream(f), "UTF-8"); //$NON-NLS-1$);
 
                 BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
                         parser, mContext, resValue.isFramework());
@@ -471,40 +472,23 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public int getDimensionPixelSize(int index, int defValue) {
-        if (mResourceData[index] == null) {
+        try {
+            return getDimension(index);
+        } catch (RuntimeException e) {
+            if (mResourceData[index] != null) {
+                String s = mResourceData[index].getValue();
+
+                if (s != null) {
+                    // looks like we were unable to resolve the dimension value
+                    Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
+                            String.format(
+                                "\"%1$s\" in attribute \"%2$s\" is not a valid format.",
+                                s, mNames[index]), null /*data*/);
+                }
+            }
+
             return defValue;
         }
-
-        String s = mResourceData[index].getValue();
-
-        if (s == null) {
-            return defValue;
-        } else if (s.equals(BridgeConstants.MATCH_PARENT) ||
-                s.equals(BridgeConstants.FILL_PARENT)) {
-            return LayoutParams.MATCH_PARENT;
-        } else if (s.equals(BridgeConstants.WRAP_CONTENT)) {
-            return LayoutParams.WRAP_CONTENT;
-        } else if (RenderResources.REFERENCE_NULL.equals(s)) {
-            return defValue;
-        }
-
-        if (ResourceHelper.stringToFloat(s, mValue)) {
-            float f = mValue.getDimension(mBridgeResources.mMetrics);
-
-            final int res = (int)(f+0.5f);
-            if (res != 0) return res;
-            if (f == 0) return 0;
-            if (f > 0) return 1;
-            return defValue; // this is basically unreachable.
-        }
-
-        // looks like we were unable to resolve the dimension value
-        Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
-                String.format(
-                    "\"%1$s\" in attribute \"%2$s\" is not a valid format.",
-                    s, mNames[index]), null /*data*/);
-
-        return defValue;
     }
 
     /**
@@ -521,12 +505,55 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public int getLayoutDimension(int index, String name) {
-        return getDimensionPixelSize(index, 0);
+        try {
+            // this will throw an exception
+            return getDimension(index);
+        } catch (RuntimeException e) {
+
+            if (LayoutInflater_Delegate.sIsInInclude) {
+                throw new RuntimeException();
+            }
+
+            Bridge.getLog().warning(LayoutLog.TAG_RESOURCES_FORMAT,
+                    "You must supply a " + name + " attribute.", null);
+
+            return 0;
+        }
     }
 
     @Override
     public int getLayoutDimension(int index, int defValue) {
         return getDimensionPixelSize(index, defValue);
+    }
+
+    private int getDimension(int index) {
+        if (mResourceData[index] == null) {
+            throw new RuntimeException();
+        }
+
+        String s = mResourceData[index].getValue();
+
+        if (s == null) {
+            throw new RuntimeException();
+        } else if (s.equals(BridgeConstants.MATCH_PARENT) ||
+                s.equals(BridgeConstants.FILL_PARENT)) {
+            return LayoutParams.MATCH_PARENT;
+        } else if (s.equals(BridgeConstants.WRAP_CONTENT)) {
+            return LayoutParams.WRAP_CONTENT;
+        } else if (RenderResources.REFERENCE_NULL.equals(s)) {
+            throw new RuntimeException();
+        }
+
+        if (ResourceHelper.stringToFloat(s, mValue)) {
+            float f = mValue.getDimension(mBridgeResources.mMetrics);
+
+            final int res = (int)(f+0.5f);
+            if (res != 0) return res;
+            if (f == 0) return 0;
+            if (f > 0) return 1;
+        }
+
+        throw new RuntimeException();
     }
 
     /**
