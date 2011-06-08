@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+
 #include <gtest/gtest.h>
 #include <gui/SurfaceTexture.h>
 #include <gui/SurfaceTextureClient.h>
 #include <ui/GraphicBuffer.h>
 #include <utils/String8.h>
+#include <utils/threads.h>
 
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/Surface.h>
@@ -618,4 +621,269 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferWithCrop) {
     }
 }
 
+/*
+ * This test is for testing GL -> GL texture streaming via SurfaceTexture.  It
+ * contains functionality to create a producer thread that will perform GL
+ * rendering to an ANativeWindow that feeds frames to a SurfaceTexture.
+ * Additionally it supports interlocking the producer and consumer threads so
+ * that a specific sequence of calls can be deterministically created by the
+ * test.
+ *
+ * The intended usage is as follows:
+ *
+ * TEST_F(...) {
+ *     class PT : public ProducerThread {
+ *         virtual void render() {
+ *             ...
+ *             swapBuffers();
+ *         }
+ *     };
+ *
+ *     runProducerThread(new PT());
+ *
+ *     // The order of these calls will vary from test to test and may include
+ *     // multiple frames and additional operations (e.g. GL rendering from the
+ *     // texture).
+ *     fc->waitForFrame();
+ *     mST->updateTexImage();
+ *     fc->finishFrame();
+ * }
+ *
+ */
+class SurfaceTextureGLToGLTest : public SurfaceTextureGLTest {
+protected:
+
+    // ProducerThread is an abstract base class to simplify the creation of
+    // OpenGL ES frame producer threads.
+    class ProducerThread : public Thread {
+    public:
+        virtual ~ProducerThread() {
+        }
+
+        void setEglObjects(EGLDisplay producerEglDisplay,
+                EGLSurface producerEglSurface,
+                EGLContext producerEglContext) {
+            mProducerEglDisplay = producerEglDisplay;
+            mProducerEglSurface = producerEglSurface;
+            mProducerEglContext = producerEglContext;
+        }
+
+        virtual bool threadLoop() {
+            eglMakeCurrent(mProducerEglDisplay, mProducerEglSurface,
+                    mProducerEglSurface, mProducerEglContext);
+            render();
+            eglMakeCurrent(mProducerEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                    EGL_NO_CONTEXT);
+            return false;
+        }
+
+    protected:
+        virtual void render() = 0;
+
+        void swapBuffers() {
+            eglSwapBuffers(mProducerEglDisplay, mProducerEglSurface);
+        }
+
+        EGLDisplay mProducerEglDisplay;
+        EGLSurface mProducerEglSurface;
+        EGLContext mProducerEglContext;
+    };
+
+    // FrameCondition is a utility class for interlocking between the producer
+    // and consumer threads.  The FrameCondition object should be created and
+    // destroyed in the consumer thread only.  The consumer thread should set
+    // the FrameCondition as the FrameAvailableListener of the SurfaceTexture,
+    // and should call both waitForFrame and finishFrame once for each expected
+    // frame.
+    //
+    // This interlocking relies on the fact that onFrameAvailable gets called
+    // synchronously from SurfaceTexture::queueBuffer.
+    class FrameCondition : public SurfaceTexture::FrameAvailableListener {
+    public:
+        // waitForFrame waits for the next frame to arrive.  This should be
+        // called from the consumer thread once for every frame expected by the
+        // test.
+        void waitForFrame() {
+            LOGV("+waitForFrame");
+            Mutex::Autolock lock(mMutex);
+            status_t result = mFrameAvailableCondition.wait(mMutex);
+            LOGV("-waitForFrame");
+        }
+
+        // Allow the producer to return from its swapBuffers call and continue
+        // on to produce the next frame.  This should be called by the consumer
+        // thread once for every frame expected by the test.
+        void finishFrame() {
+            LOGV("+finishFrame");
+            Mutex::Autolock lock(mMutex);
+            mFrameFinishCondition.signal();
+            LOGV("-finishFrame");
+        }
+
+        // This should be called by SurfaceTexture on the producer thread.
+        virtual void onFrameAvailable() {
+            LOGV("+onFrameAvailable");
+            Mutex::Autolock lock(mMutex);
+            mFrameAvailableCondition.signal();
+            mFrameFinishCondition.wait(mMutex);
+            LOGV("-onFrameAvailable");
+        }
+
+    protected:
+        Mutex mMutex;
+        Condition mFrameAvailableCondition;
+        Condition mFrameFinishCondition;
+    };
+
+    SurfaceTextureGLToGLTest():
+            mProducerEglSurface(EGL_NO_SURFACE),
+            mProducerEglContext(EGL_NO_CONTEXT) {
+    }
+
+    virtual void SetUp() {
+        SurfaceTextureGLTest::SetUp();
+
+        EGLConfig myConfig = {0};
+        EGLint numConfigs = 0;
+        EXPECT_TRUE(eglChooseConfig(mEglDisplay, getConfigAttribs(), &myConfig,
+                1, &numConfigs));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+        mProducerEglSurface = eglCreateWindowSurface(mEglDisplay, myConfig,
+                mANW.get(), NULL);
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        ASSERT_NE(EGL_NO_SURFACE, mProducerEglSurface);
+
+        mProducerEglContext = eglCreateContext(mEglDisplay, myConfig,
+                EGL_NO_CONTEXT, getContextAttribs());
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        ASSERT_NE(EGL_NO_CONTEXT, mProducerEglContext);
+
+        mFC = new FrameCondition();
+        mST->setFrameAvailableListener(mFC);
+    }
+
+    virtual void TearDown() {
+        if (mProducerThread != NULL) {
+            mProducerThread->requestExitAndWait();
+        }
+        if (mProducerEglContext != EGL_NO_CONTEXT) {
+            eglDestroyContext(mEglDisplay, mProducerEglContext);
+        }
+        if (mProducerEglSurface != EGL_NO_SURFACE) {
+            eglDestroySurface(mEglDisplay, mProducerEglSurface);
+        }
+        mProducerThread.clear();
+        mFC.clear();
+    }
+
+    void runProducerThread(const sp<ProducerThread> producerThread) {
+        ASSERT_TRUE(mProducerThread == NULL);
+        mProducerThread = producerThread;
+        producerThread->setEglObjects(mEglDisplay, mProducerEglSurface,
+                mProducerEglContext);
+        producerThread->run();
+    }
+
+    EGLSurface mProducerEglSurface;
+    EGLContext mProducerEglContext;
+    sp<ProducerThread> mProducerThread;
+    sp<FrameCondition> mFC;
+};
+
+// XXX: This test is disabled because it causes hangs on some devices.
+TEST_F(SurfaceTextureGLToGLTest, DISABLED_UpdateTexImageBeforeFrameFinishedWorks) {
+    class PT : public ProducerThread {
+        virtual void render() {
+            glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            swapBuffers();
+        }
+    };
+
+    runProducerThread(new PT());
+
+    mFC->waitForFrame();
+    mST->updateTexImage();
+    mFC->finishFrame();
+
+    // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
 }
+
+TEST_F(SurfaceTextureGLToGLTest, UpdateTexImageAfterFrameFinishedWorks) {
+    class PT : public ProducerThread {
+        virtual void render() {
+            glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            swapBuffers();
+        }
+    };
+
+    runProducerThread(new PT());
+
+    mFC->waitForFrame();
+    mFC->finishFrame();
+    mST->updateTexImage();
+
+    // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
+}
+
+// XXX: This test is disabled because it causes hangs on some devices.
+TEST_F(SurfaceTextureGLToGLTest, DISABLED_RepeatedUpdateTexImageBeforeFrameFinishedWorks) {
+    enum { NUM_ITERATIONS = 1024 };
+
+    class PT : public ProducerThread {
+        virtual void render() {
+            for (int i = 0; i < NUM_ITERATIONS; i++) {
+                glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT);
+                LOGV("+swapBuffers");
+                swapBuffers();
+                LOGV("-swapBuffers");
+            }
+        }
+    };
+
+    runProducerThread(new PT());
+
+    for (int i = 0; i < NUM_ITERATIONS; i++) {
+        mFC->waitForFrame();
+        LOGV("+updateTexImage");
+        mST->updateTexImage();
+        LOGV("-updateTexImage");
+        mFC->finishFrame();
+
+        // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
+    }
+}
+
+// XXX: This test is disabled because it causes hangs on some devices.
+TEST_F(SurfaceTextureGLToGLTest, DISABLED_RepeatedUpdateTexImageAfterFrameFinishedWorks) {
+    enum { NUM_ITERATIONS = 1024 };
+
+    class PT : public ProducerThread {
+        virtual void render() {
+            for (int i = 0; i < NUM_ITERATIONS; i++) {
+                glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT);
+                LOGV("+swapBuffers");
+                swapBuffers();
+                LOGV("-swapBuffers");
+            }
+        }
+    };
+
+    runProducerThread(new PT());
+
+    for (int i = 0; i < NUM_ITERATIONS; i++) {
+        mFC->waitForFrame();
+        mFC->finishFrame();
+        LOGV("+updateTexImage");
+        mST->updateTexImage();
+        LOGV("-updateTexImage");
+
+        // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
+    }
+}
+
+} // namespace android
