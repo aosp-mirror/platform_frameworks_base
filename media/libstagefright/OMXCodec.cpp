@@ -1643,23 +1643,24 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         return PERMISSION_DENIED;
     }
 
-    OMX_PARAM_PORTDEFINITIONTYPE def;
-    InitOMXParams(&def);
-    def.nPortIndex = portIndex;
-
-    status_t err = mOMX->getParameter(
-            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
-
-    if (err != OK) {
-        return err;
-    }
-
+    status_t err = OK;
     if (mIsMetaDataStoredInVideoBuffers && portIndex == kPortIndexInput) {
         err = mOMX->storeMetaDataInBuffers(mNode, kPortIndexInput, OMX_TRUE);
         if (err != OK) {
             LOGE("Storing meta data in video buffers is not supported");
             return err;
         }
+    }
+
+    OMX_PARAM_PORTDEFINITIONTYPE def;
+    InitOMXParams(&def);
+    def.nPortIndex = portIndex;
+
+    err = mOMX->getParameter(
+            mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
+
+    if (err != OK) {
+        return err;
     }
 
     CODEC_LOGI("allocating %lu buffers of size %lu on %s port",
