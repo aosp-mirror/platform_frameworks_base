@@ -617,8 +617,13 @@ public class InputManager {
         }
 
         @SuppressWarnings("unused")
-        public int getTapTimeout() {
-            return ViewConfiguration.getTapTimeout();
+        public int getHoverTapTimeout() {
+            return ViewConfiguration.getHoverTapTimeout();
+        }
+
+        @SuppressWarnings("unused")
+        public int getHoverTapSlop() {
+            return ViewConfiguration.getHoverTapSlop();
         }
 
         @SuppressWarnings("unused")
@@ -629,11 +634,6 @@ public class InputManager {
         @SuppressWarnings("unused")
         public int getLongPressTimeout() {
             return ViewConfiguration.getLongPressTimeout();
-        }
-
-        @SuppressWarnings("unused")
-        public int getTouchSlop() {
-            return ViewConfiguration.get(mContext).getScaledTouchSlop();
         }
 
         @SuppressWarnings("unused")

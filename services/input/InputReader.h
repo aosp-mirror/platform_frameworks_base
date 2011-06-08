@@ -101,8 +101,8 @@ struct InputReaderConfiguration {
     nsecs_t pointerGestureMultitouchSettleInterval;
 
     // The transition from PRESS to SWIPE or FREEFORM gesture mode is made when
-    // both of the pointers are moving at least this fast.
-    float pointerGestureMultitouchMinSpeed; // in pixels per second
+    // at least two pointers have moved at least this far from their starting place.
+    float pointerGestureMultitouchMinDistance; // in pixels
 
     // The transition from PRESS to SWIPE gesture mode can only occur when the
     // cosine of the angle between the two vectors is greater than or equal to than this value
@@ -134,7 +134,7 @@ struct InputReaderConfiguration {
             filterTouchEvents(false),
             filterJumpyTouchEvents(false),
             virtualKeyQuietTime(0),
-            pointerVelocityControlParameters(1.0f, 80.0f, 400.0f, 4.0f),
+            pointerVelocityControlParameters(1.0f, 500.0f, 3000.0f, 3.0f),
             wheelVelocityControlParameters(1.0f, 15.0f, 50.0f, 4.0f),
             pointerGestureQuietInterval(100 * 1000000LL), // 100 ms
             pointerGestureDragMinSwitchSpeed(50), // 50 pixels per second
@@ -142,10 +142,10 @@ struct InputReaderConfiguration {
             pointerGestureTapDragInterval(150 * 1000000LL), // 150 ms
             pointerGestureTapSlop(10.0f), // 10 pixels
             pointerGestureMultitouchSettleInterval(100 * 1000000LL), // 100 ms
-            pointerGestureMultitouchMinSpeed(150.0f), // 150 pixels per second
+            pointerGestureMultitouchMinDistance(15), // 15 pixels
             pointerGestureSwipeTransitionAngleCosine(0.5f), // cosine of 45degrees
-            pointerGestureSwipeMaxWidthRatio(0.333f),
-            pointerGestureMovementSpeedRatio(0.3f),
+            pointerGestureSwipeMaxWidthRatio(0.25f),
+            pointerGestureMovementSpeedRatio(0.8f),
             pointerGestureZoomSpeedRatio(0.3f) { }
 };
 
@@ -1219,7 +1219,6 @@ private:
     void dispatchPointerGestures(nsecs_t when, uint32_t policyFlags, bool isTimeout);
     bool preparePointerGestures(nsecs_t when,
             bool* outCancelPreviousGesture, bool* outFinishPreviousGesture, bool isTimeout);
-    void moveSpotsLocked();
 
     // Dispatches a motion event.
     // If the changedId is >= 0 and the action is POINTER_DOWN or POINTER_UP, the
