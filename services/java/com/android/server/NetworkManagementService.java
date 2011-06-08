@@ -78,7 +78,6 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         public static final int IpFwdStatusResult         = 211;
         public static final int InterfaceGetCfgResult     = 213;
         public static final int SoftapStatusResult        = 214;
-        public static final int UsbRNDISStatusResult      = 215;
         public static final int InterfaceRxCounterResult  = 216;
         public static final int InterfaceTxCounterResult  = 217;
         public static final int InterfaceRxThrottleResult = 218;
@@ -716,52 +715,6 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         } catch (NativeDaemonConnectorException e) {
             throw new IllegalStateException("Error communicating to native daemon to detach pppd", e);
         }
-    }
-
-    public void startUsbRNDIS() throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        try {
-            mConnector.doCommand("usb startrndis");
-        } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Error communicating to native daemon for starting RNDIS", e);
-        }
-    }
-
-    public void stopUsbRNDIS() throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
-        try {
-            mConnector.doCommand("usb stoprndis");
-        } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException("Error communicating to native daemon", e);
-        }
-    }
-
-    public boolean isUsbRNDISStarted() throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
-        ArrayList<String> rsp;
-        try {
-            rsp = mConnector.doCommand("usb rndisstatus");
-        } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Error communicating to native daemon to check RNDIS status", e);
-        }
-
-        for (String line : rsp) {
-            String []tok = line.split(" ");
-            int code = Integer.parseInt(tok[0]);
-            if (code == NetdResponseCode.UsbRNDISStatusResult) {
-                if (tok[3].equals("started"))
-                    return true;
-                return false;
-            } else {
-                throw new IllegalStateException(String.format("Unexpected response code %d", code));
-            }
-        }
-        throw new IllegalStateException("Got an empty response");
     }
 
     public void startAccessPoint(WifiConfiguration wifiConfig, String wlanIface, String softapIface)

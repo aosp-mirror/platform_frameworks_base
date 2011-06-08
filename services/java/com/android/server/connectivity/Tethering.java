@@ -471,11 +471,20 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     // used on cable insert/remove
     private void enableUsbIfaces(boolean enable) {
+        // add/remove USB interfaces when USB is connected/disconnected
+        for (String intf : mTetherableUsbRegexs) {
+            if (enable) {
+                interfaceAdded(intf);
+            } else {
+                interfaceRemoved(intf);
+            }
+        }
+
         String[] ifaces = new String[0];
         try {
             ifaces = mNMService.listInterfaces();
         } catch (Exception e) {
-            Log.e(TAG, "Error listing Interfaces :" + e);
+            Log.e(TAG, "Error listing Interfaces", e);
             return;
         }
         for (String iface : ifaces) {
@@ -493,20 +502,19 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private boolean enableUsbRndis(boolean enabled) {
         if (DEBUG) Log.d(TAG, "enableUsbRndis(" + enabled + ")");
 
+        UsbManager usbManager = (UsbManager)mContext.getSystemService(Context.USB_SERVICE);
+        if (usbManager == null) {
+            Log.d(TAG, "could not get UsbManager");
+            return false;
+        }
         try {
             if (enabled) {
-                synchronized (this) {
-                    if (!mNMService.isUsbRNDISStarted()) {
-                        mNMService.startUsbRNDIS();
-                    }
-                }
+                usbManager.setPrimaryFunction(UsbManager.USB_FUNCTION_RNDIS);
             } else {
-                if (mNMService.isUsbRNDISStarted()) {
-                    mNMService.stopUsbRNDIS();
-                }
+                usbManager.setPrimaryFunction(null);
             }
         } catch (Exception e) {
-            Log.e(TAG, "Error toggling usb RNDIS :" + e);
+            Log.e(TAG, "Error toggling usb RNDIS", e);
             return false;
         }
         return true;
@@ -516,35 +524,46 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private boolean configureUsbIface(boolean enabled) {
         if (DEBUG) Log.d(TAG, "configureUsbIface(" + enabled + ")");
 
-        // bring toggle the interfaces
-        String[] ifaces = new String[0];
-        try {
-            ifaces = mNMService.listInterfaces();
-        } catch (Exception e) {
-            Log.e(TAG, "Error listing Interfaces :" + e);
-            return false;
+        if (enabled) {
+            // must enable RNDIS first to create the interface
+            enableUsbRndis(enabled);
         }
-        for (String iface : ifaces) {
-            if (isUsb(iface)) {
-                InterfaceConfiguration ifcg = null;
-                try {
-                    ifcg = mNMService.getInterfaceConfig(iface);
-                    if (ifcg != null) {
-                        InetAddress addr = NetworkUtils.numericToInetAddress(USB_NEAR_IFACE_ADDR);
-                        ifcg.addr = new LinkAddress(addr, USB_PREFIX_LENGTH);
-                        if (enabled) {
-                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
-                        } else {
-                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
+
+        try {
+            // bring toggle the interfaces
+            String[] ifaces = new String[0];
+            try {
+                ifaces = mNMService.listInterfaces();
+            } catch (Exception e) {
+                Log.e(TAG, "Error listing Interfaces", e);
+                return false;
+            }
+            for (String iface : ifaces) {
+                if (isUsb(iface)) {
+                    InterfaceConfiguration ifcg = null;
+                    try {
+                        ifcg = mNMService.getInterfaceConfig(iface);
+                        if (ifcg != null) {
+                            InetAddress addr = NetworkUtils.numericToInetAddress(USB_NEAR_IFACE_ADDR);
+                            ifcg.addr = new LinkAddress(addr, USB_PREFIX_LENGTH);
+                            if (enabled) {
+                                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
+                            } else {
+                                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
+                            }
+                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
+                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
+                            mNMService.setInterfaceConfig(iface, ifcg);
                         }
-                        ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
-                        ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
-                        mNMService.setInterfaceConfig(iface, ifcg);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error configuring interface " + iface, e);
+                        return false;
                     }
-                } catch (Exception e) {
-                    Log.e(TAG, "Error configuring interface " + iface + ", :" + e);
-                    return false;
                 }
+             }
+        } finally {
+            if (!enabled) {
+                enableUsbRndis(false);
             }
         }
 
@@ -853,15 +872,10 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     transitionTo(mInitialState);
                     return;
                 }
-                if (mUsb) Tethering.this.enableUsbRndis(true);
                 if (DEBUG) Log.d(TAG, "Tethered " + mIfaceName);
                 setAvailable(false);
                 setTethered(true);
                 sendTetherStateChangedBroadcast();
-            }
-            @Override
-            public void exit() {
-                if (mUsb) Tethering.this.enableUsbRndis(false);
             }
             @Override
             public boolean processMessage(Message message) {
@@ -1201,7 +1215,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 try {
                     ifaces = mNMService.listInterfaces();
                 } catch (Exception e) {
-                    Log.e(TAG, "Error listing Interfaces :" + e);
+                    Log.e(TAG, "Error listing Interfaces", e);
                     return null;
                 }
 
@@ -1216,7 +1230,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                                     return iface;
                                 }
                             } catch (Exception e) {
-                                Log.e(TAG, "Error getting iface config :" + e);
+                                Log.e(TAG, "Error getting iface config", e);
                                 // ignore - try next
                                 continue;
                             }
@@ -1267,7 +1281,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                             }
                         }
                     } catch (RemoteException e) {
-                        Log.e(TAG, "RemoteException calling ConnectivityManager " + e);
+                        Log.e(TAG, "RemoteException calling ConnectivityManager", e);
                         iface = null;
                     }
                 }
