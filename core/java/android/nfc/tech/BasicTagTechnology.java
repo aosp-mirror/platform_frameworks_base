@@ -119,6 +119,7 @@ import java.io.IOException;
             /* Note that we don't want to physically disconnect the tag,
              * but just reconnect to it to reset its state
              */
+            mTag.getTagService().resetTimeouts();
             mTag.getTagService().reconnect(mTag.getServiceHandle());
         } catch (RemoteException e) {
             Log.e(TAG, "NFC service dead", e);

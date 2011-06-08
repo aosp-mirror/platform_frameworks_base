@@ -19,6 +19,7 @@ package android.nfc.tech;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.io.IOException;
 
@@ -33,6 +34,8 @@ import java.io.IOException;
  * require the {@link android.Manifest.permission#NFC} permission.
  */
 public final class NfcF extends BasicTagTechnology {
+    private static final String TAG = "NFC";
+
     /** @hide */
     public static final String EXTRA_SC = "systemcode";
     /** @hide */
@@ -110,5 +113,27 @@ public final class NfcF extends BasicTagTechnology {
      */
     public byte[] transceive(byte[] data) throws IOException {
         return transceive(data, true);
+    }
+
+    /**
+     * Set the timeout of {@link #transceive} in milliseconds.
+     * <p>The timeout only applies to NfcF {@link #transceive}, and is
+     * reset to a default value when {@link #close} is called.
+     * <p>Setting a longer timeout may be useful when performing
+     * transactions that require a long processing time on the tag
+     * such as key generation.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param timeout timeout value in milliseconds
+     * @hide
+     */
+    // TODO Unhide for ICS
+    public void setTimeout(int timeout) {
+        try {
+            mTag.getTagService().setFelicaTimeout(timeout);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service dead", e);
+        }
     }
 }

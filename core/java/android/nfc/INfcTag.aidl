@@ -42,5 +42,6 @@ interface INfcTag
     int formatNdef(int nativeHandle, in byte[] key);
 
     void setIsoDepTimeout(int timeout);
-    void resetIsoDepTimeout();
+    void setFelicaTimeout(int timeout);
+    void resetTimeouts();
 }
