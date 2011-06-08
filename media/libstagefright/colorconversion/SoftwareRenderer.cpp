@@ -59,7 +59,6 @@ SoftwareRenderer::SoftwareRenderer(
     size_t bufWidth, bufHeight;
 
     switch (mColorFormat) {
-#ifndef THIS_IS_CRESPO
         case OMX_COLOR_FormatYUV420Planar:
         {
             halFormat = HAL_PIXEL_FORMAT_YV12;
@@ -67,7 +66,6 @@ SoftwareRenderer::SoftwareRenderer(
             bufHeight = (mHeight + 1) & ~1;
             break;
         }
-#endif
 
         default:
             halFormat = HAL_PIXEL_FORMAT_RGB_565;
@@ -89,11 +87,7 @@ SoftwareRenderer::SoftwareRenderer(
             native_window_set_usage(
             mNativeWindow.get(),
             GRALLOC_USAGE_SW_READ_NEVER | GRALLOC_USAGE_SW_WRITE_OFTEN
-            | GRALLOC_USAGE_HW_TEXTURE
-#ifndef THIS_IS_CRESPO
-            | GRALLOC_USAGE_EXTERNAL_DISP
-#endif
-            ));
+            | GRALLOC_USAGE_HW_TEXTURE | GRALLOC_USAGE_EXTERNAL_DISP));
 
     // Width must be multiple of 32???
     CHECK_EQ(0, native_window_set_buffers_geometry(
