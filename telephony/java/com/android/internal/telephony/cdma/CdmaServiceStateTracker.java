@@ -129,12 +129,12 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     /** Contains the name of the registered network in CDMA (either ONS or ERI text). */
     private String curPlmn = null;
 
-    private String mMdn;
+    protected String mMdn;
     private int mHomeSystemId[] = null;
     private int mHomeNetworkId[] = null;
-    private String mMin;
-    private String mPrlVersion;
-    private boolean mIsMinInfoReady = false;
+    protected String mMin;
+    protected String mPrlVersion;
+    protected boolean mIsMinInfoReady = false;
 
     private boolean isEriTextLoaded = false;
     protected boolean isSubscriptionFromRuim = false;
@@ -373,53 +373,15 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
                 String cdmaSubscription[] = (String[])ar.result;
                 if (cdmaSubscription != null && cdmaSubscription.length >= 5) {
                     mMdn = cdmaSubscription[0];
-                    if (cdmaSubscription[1] != null) {
-                        String[] sid = cdmaSubscription[1].split(",");
-                        mHomeSystemId = new int[sid.length];
-                        for (int i = 0; i < sid.length; i++) {
-                            try {
-                                mHomeSystemId[i] = Integer.parseInt(sid[i]);
-                            } catch (NumberFormatException ex) {
-                                loge("error parsing system id: " + ex);
-                            }
-                        }
-                    }
-                    if (DBG) log("GET_CDMA_SUBSCRIPTION: SID=" + cdmaSubscription[1] );
+                    parseSidNid(cdmaSubscription[1], cdmaSubscription[2]);
 
-                    if (cdmaSubscription[2] != null) {
-                        String[] nid = cdmaSubscription[2].split(",");
-                        mHomeNetworkId = new int[nid.length];
-                        for (int i = 0; i < nid.length; i++) {
-                            try {
-                                mHomeNetworkId[i] = Integer.parseInt(nid[i]);
-                            } catch (NumberFormatException ex) {
-                                loge("GET_CDMA_SUBSCRIPTION: error parsing network id: " + ex);
-                            }
-                        }
-                    }
-                    if (DBG) log("GET_CDMA_SUBSCRIPTION: NID=" + cdmaSubscription[2]);
                     mMin = cdmaSubscription[3];
                     mPrlVersion = cdmaSubscription[4];
                     if (DBG) log("GET_CDMA_SUBSCRIPTION: MDN=" + mMdn);
 
                     mIsMinInfoReady = true;
 
-                    int otaspMode = getOtasp();
-                    int oldOtaspMode = mCurrentOtaspMode;
-                    mCurrentOtaspMode = otaspMode;
-
-                    // Notify apps subscription info is ready
-                    if (cdmaForSubscriptionInfoReadyRegistrants != null) {
-                        if (DBG) log("GET_CDMA_SUBSCRIPTION: call notifyRegistrants()");
-                        cdmaForSubscriptionInfoReadyRegistrants.notifyRegistrants();
-                    }
-                    if (oldOtaspMode != mCurrentOtaspMode) {
-                        if (DBG) {
-                            log("GET_CDMA_SUBSCRIPTION: call notifyOtaspChanged old otaspMode=" +
-                                oldOtaspMode + " new otaspMode=" + mCurrentOtaspMode);
-                        }
-                        phone.notifyOtaspChanged(mCurrentOtaspMode);
-                    }
+                    updateOtaspState();
                     phone.getIccCard().broadcastIccStateChangedIntent(IccCard.INTENT_VALUE_ICC_IMSI,
                             null);
                 } else {
@@ -1620,6 +1582,53 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         phone.mCT.backgroundCall.hangupIfAlive();
         phone.mCT.foregroundCall.hangupIfAlive();
         cm.setRadioPower(false, null);
+    }
+
+    protected void parseSidNid (String sidStr, String nidStr) {
+        if (sidStr != null) {
+            String[] sid = sidStr.split(",");
+            mHomeSystemId = new int[sid.length];
+            for (int i = 0; i < sid.length; i++) {
+                try {
+                    mHomeSystemId[i] = Integer.parseInt(sid[i]);
+                } catch (NumberFormatException ex) {
+                    loge("error parsing system id: " + ex);
+                }
+            }
+        }
+        if (DBG) log("CDMA_SUBSCRIPTION: SID=" + sidStr);
+
+        if (nidStr != null) {
+            String[] nid = nidStr.split(",");
+            mHomeNetworkId = new int[nid.length];
+            for (int i = 0; i < nid.length; i++) {
+                try {
+                    mHomeNetworkId[i] = Integer.parseInt(nid[i]);
+                } catch (NumberFormatException ex) {
+                    loge("CDMA_SUBSCRIPTION: error parsing network id: " + ex);
+                }
+            }
+        }
+        if (DBG) log("CDMA_SUBSCRIPTION: NID=" + nidStr);
+    }
+
+    protected void updateOtaspState() {
+        int otaspMode = getOtasp();
+        int oldOtaspMode = mCurrentOtaspMode;
+        mCurrentOtaspMode = otaspMode;
+
+        // Notify apps subscription info is ready
+        if (cdmaForSubscriptionInfoReadyRegistrants != null) {
+            if (DBG) log("CDMA_SUBSCRIPTION: call notifyRegistrants()");
+            cdmaForSubscriptionInfoReadyRegistrants.notifyRegistrants();
+        }
+        if (oldOtaspMode != mCurrentOtaspMode) {
+            if (DBG) {
+                log("CDMA_SUBSCRIPTION: call notifyOtaspChanged old otaspMode=" +
+                    oldOtaspMode + " new otaspMode=" + mCurrentOtaspMode);
+            }
+            phone.notifyOtaspChanged(mCurrentOtaspMode);
+        }
     }
 
     @Override
