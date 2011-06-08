@@ -232,7 +232,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
 
         /** {@inheritDoc} */
         public void onGrabbedStateChange(View v, int grabbedState) {
-            if (DBG) Log.v(TAG, "*** LockScreen accel is " 
+            if (DBG) Log.v(TAG, "*** LockScreen accel is "
                     + (mEnergyWave.isHardwareAccelerated() ? "on":"off"));
             // Don't poke the wake lock when returning to a state where the handle is
             // not grabbed since that can happen when the system (instead of the user)
@@ -579,10 +579,16 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
                 mScreenLocked.setText(R.string.lockscreen_sim_puk_locked_instructions);
 
                 // layout
-                mScreenLocked.setVisibility(View.VISIBLE);
-                mEmergencyCallText.setVisibility(View.VISIBLE);
-                mEmergencyCallButton.setVisibility(View.VISIBLE);
-                disableUnlock();
+                if (mLockPatternUtils.isPukUnlockScreenEnable()) {
+                    mScreenLocked.setVisibility(View.INVISIBLE);
+                    mEmergencyCallText.setVisibility(View.GONE);
+                    enableUnlock();
+                } else {
+                    mScreenLocked.setVisibility(View.VISIBLE);
+                    mEmergencyCallText.setVisibility(View.VISIBLE);
+                    mEmergencyCallButton.setVisibility(View.VISIBLE);
+                    disableUnlock();
+                }
                 break;
         }
     }

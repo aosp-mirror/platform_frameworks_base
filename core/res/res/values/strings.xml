@@ -87,6 +87,8 @@
     <string name="mismatchPin">The PINs you entered do not match.</string>
     <!-- Displayed when a SIM PIN password is too long or too short. -->
     <string name="invalidPin">Type a PIN that is 4 to 8 numbers.</string>
+    <!-- Displayed when a SIM PUK password is too short. -->
+    <string name="invalidPuk">Type a PUK that is 8 numbers or longer.</string>
     <!-- Displayed to prompt the user to type the PUK password to unlock
          the SIM card. -->
     <string name="needPuk">Your SIM card is PUK-locked. Type the PUK code to unlock it.</string>
@@ -1670,6 +1672,15 @@
     <!-- Instructions telling the user to enter their SIM PIN to unlock the keyguard.
          Displayed in one line in a large font.  -->
     <string name="keyguard_password_enter_pin_code">Enter PIN code</string>
+
+    <!-- Instructions telling the user to enter their SIM PUK to unlock the keyguard.
+         Displayed in one line in a large font.  -->
+    <string name="keyguard_password_enter_puk_code">Enter PUK and new PIN code</string>
+
+    <!-- Prompt to enter SIM PUK in Edit Text Box in unlock screen -->
+    <string name="keyguard_password_enter_puk_prompt">PUK code</string>
+    <!-- Prompt to enter New SIM PIN in Edit Text Box in unlock screen -->
+    <string name="keyguard_password_enter_pin_prompt">New Pin Code</string>
 
     <!-- Displayed as hint in passwordEntry EditText on PasswordUnlockScreen [CHAR LIMIT=30]-->
     <string name="keyguard_password_entry_touch_hint"><font size="17">Touch to enter password</font></string>
