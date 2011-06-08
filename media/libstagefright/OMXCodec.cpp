@@ -1981,6 +1981,20 @@ OMXCodec::BufferInfo* OMXCodec::dequeueBufferFromNativeWindow() {
     return bufInfo;
 }
 
+int64_t OMXCodec::retrieveDecodingTimeUs(bool isCodecSpecific) {
+    CHECK(mIsEncoder);
+    CHECK(!mDecodingTimeList.empty());
+    List<int64_t>::iterator it = mDecodingTimeList.begin();
+    int64_t timeUs = *it;
+
+    // If the output buffer is codec specific configuration,
+    // do not remove the decoding time from the list.
+    if (!isCodecSpecific) {
+        mDecodingTimeList.erase(it);
+    }
+    return timeUs;
+}
+
 void OMXCodec::on_message(const omx_message &msg) {
     if (mState == ERROR) {
         LOGW("Dropping OMX message - we're in ERROR state.");
@@ -2128,12 +2142,19 @@ void OMXCodec::on_message(const omx_message &msg) {
                 if (msg.u.extended_buffer_data.flags & OMX_BUFFERFLAG_SYNCFRAME) {
                     buffer->meta_data()->setInt32(kKeyIsSyncFrame, true);
                 }
+                bool isCodecSpecific = false;
                 if (msg.u.extended_buffer_data.flags & OMX_BUFFERFLAG_CODECCONFIG) {
                     buffer->meta_data()->setInt32(kKeyIsCodecConfig, true);
+                    isCodecSpecific = true;
                 }
 
                 if (isGraphicBuffer || mQuirks & kOutputBuffersAreUnreadable) {
                     buffer->meta_data()->setInt32(kKeyIsUnreadable, true);
+                }
+
+                if (mIsEncoder) {
+                    int64_t decodingTimeUs = retrieveDecodingTimeUs(isCodecSpecific);
+                    buffer->meta_data()->setInt64(kKeyDecodingTime, decodingTimeUs);
                 }
 
                 buffer->meta_data()->setPointer(
@@ -2938,6 +2959,9 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
         int64_t lastBufferTimeUs;
         CHECK(srcBuffer->meta_data()->findInt64(kKeyTime, &lastBufferTimeUs));
         CHECK(lastBufferTimeUs >= 0);
+        if (mIsEncoder) {
+            mDecodingTimeList.push_back(lastBufferTimeUs);
+        }
 
         if (offset == 0) {
             timestampUs = lastBufferTimeUs;

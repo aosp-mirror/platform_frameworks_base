@@ -202,6 +202,10 @@ private:
     bool mOnlySubmitOneBufferAtOneTime;
     bool mEnableGrallocUsageProtected;
 
+    // Used to record the decoding time for an output picture from
+    // a video encoder.
+    List<int64_t> mDecodingTimeList;
+
     OMXCodec(const sp<IOMX> &omx, IOMX::node_id node, uint32_t quirks,
              bool isEncoder, const char *mime, const char *componentName,
              const sp<MediaSource> &source,
@@ -316,6 +320,8 @@ private:
     void restorePatchedDataPointer(BufferInfo *info);
 
     status_t applyRotation();
+
+    int64_t retrieveDecodingTimeUs(bool isCodecSpecific);
 
     OMXCodec(const OMXCodec &);
     OMXCodec &operator=(const OMXCodec &);
