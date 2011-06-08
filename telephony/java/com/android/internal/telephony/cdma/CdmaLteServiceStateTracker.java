@@ -67,10 +67,23 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         case EVENT_SIM_READY:
             if (DBG) log("handleMessage EVENT_SIM_READY");
             isSubscriptionFromRuim = false;
-            cm.getCDMASubscription( obtainMessage(EVENT_POLL_STATE_CDMA_SUBSCRIPTION));
+            // Register SIM_RECORDS_LOADED dynamically.
+            // This is to avoid confilct with RUIM_READY scenario)
+            phone.mIccRecords.registerForRecordsLoaded(this, EVENT_SIM_RECORDS_LOADED, null);
             pollState();
             // Signal strength polling stops when radio is off.
             queueNextSignalStrengthPoll();
+            break;
+        case EVENT_SIM_RECORDS_LOADED:
+            CdmaLteUiccRecords sim = (CdmaLteUiccRecords)phone.mIccRecords;
+            if ((sim != null) && sim.isProvisioned()) {
+                mMdn = sim.getMdn();
+                mMin = sim.getMin();
+                parseSidNid(sim.getSid(), sim.getNid());
+                mPrlVersion = sim.getPrlVersion();;
+                mIsMinInfoReady = true;
+                updateOtaspState();
+            }
             break;
         default:
             super.handleMessage(msg);
