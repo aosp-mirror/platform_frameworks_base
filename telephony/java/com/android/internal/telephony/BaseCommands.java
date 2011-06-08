@@ -96,8 +96,10 @@ public abstract class BaseCommands implements CommandsInterface {
     protected Registrant mRestrictedStateRegistrant;
     protected Registrant mGsmBroadcastSmsRegistrant;
 
-    // Network Mode received from PhoneFactory
-    protected int mNetworkMode;
+    // Preferred network type received from PhoneFactory.
+    // This is used when establishing a connection to the
+    // vendor ril so it starts up in the correct mode.
+    protected int mPreferredNetworkType;
     // CDMA subscription received from PhoneFactory
     protected int mCdmaSubscription;
     // Type of Phone, GSM or CDMA. Set by CDMAPhone or GSMPhone.

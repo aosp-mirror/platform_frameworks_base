@@ -611,14 +611,14 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
     //***** Constructors
 
-    public RIL(Context context, int networkMode, int cdmaSubscription) {
+    public RIL(Context context, int preferredNetworkType, int cdmaSubscription) {
         super(context);
         if (RILJ_LOGD) {
-            riljLog("RIL(context, networkMode=" + networkMode +
+            riljLog("RIL(context, preferredNetworkType=" + preferredNetworkType +
                     " cdmaSubscription=" + cdmaSubscription + ")");
         }
         mCdmaSubscription  = cdmaSubscription;
-        mNetworkMode = networkMode;
+        mPreferredNetworkType = preferredNetworkType;
         mPhoneType = RILConstants.NO_PHONE;
 
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
@@ -1813,6 +1813,8 @@ public final class RIL extends BaseCommands implements CommandsInterface {
         rr.mp.writeInt(1);
         rr.mp.writeInt(networkType);
 
+        mPreferredNetworkType = networkType;
+
         if (RILJ_LOGD) riljLog(rr.serialString() + "> " + requestToString(rr.mRequest)
                 + " : " + networkType);
 
@@ -2222,7 +2224,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             case RIL_REQUEST_STK_HANDLE_CALL_SETUP_REQUESTED_FROM_SIM: ret =  responseInts(p); break;
             case RIL_REQUEST_EXPLICIT_CALL_TRANSFER: ret =  responseVoid(p); break;
             case RIL_REQUEST_SET_PREFERRED_NETWORK_TYPE: ret =  responseVoid(p); break;
-            case RIL_REQUEST_GET_PREFERRED_NETWORK_TYPE: ret =  responseInts(p); break;
+            case RIL_REQUEST_GET_PREFERRED_NETWORK_TYPE: ret =  responseGetPreferredNetworkType(p); break;
             case RIL_REQUEST_GET_NEIGHBORING_CELL_IDS: ret = responseCellList(p); break;
             case RIL_REQUEST_SET_LOCATION_UPDATES: ret =  responseVoid(p); break;
             case RIL_REQUEST_CDMA_SET_SUBSCRIPTION_SOURCE: ret =  responseVoid(p); break;
@@ -2737,7 +2739,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
 
                 // Initial conditions
                 setRadioPower(false, null);
-                setPreferredNetworkType(mNetworkMode, null);
+                setPreferredNetworkType(mPreferredNetworkType, null);
                 setCdmaSubscriptionSource(mCdmaSubscription, null);
                 notifyRegistrantsRilConnectionChanged(((int[])ret)[0]);
                 break;
@@ -3157,6 +3159,18 @@ public final class RIL extends BaseCommands implements CommandsInterface {
                cell = new NeighboringCellInfo(rssi, location, radioType);
                response.add(cell);
            }
+       }
+       return response;
+    }
+
+    private Object responseGetPreferredNetworkType(Parcel p) {
+       int [] response = (int[]) responseInts(p);
+
+       if (response.length >= 1) {
+           // Since this is the response for getPreferredNetworkType
+           // we'll assume that it should be the value we want the
+           // vendor ril to take if we reestablish a connection to it.
+           mPreferredNetworkType = response[0];
        }
        return response;
     }
