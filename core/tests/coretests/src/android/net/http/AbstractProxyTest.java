@@ -16,6 +16,10 @@
 
 package android.net.http;
 
+import com.google.mockwebserver.MockResponse;
+import com.google.mockwebserver.MockWebServer;
+import com.google.mockwebserver.RecordedRequest;
+import com.google.mockwebserver.SocketPolicy;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -33,10 +37,6 @@ import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import tests.http.MockResponse;
-import tests.http.MockWebServer;
-import tests.http.RecordedRequest;
-import tests.http.SocketPolicy;
 
 public abstract class AbstractProxyTest extends TestCase {
 

@@ -16,6 +16,9 @@
 
 package android.net.http;
 
+import com.google.mockwebserver.MockResponse;
+import com.google.mockwebserver.MockWebServer;
+import com.google.mockwebserver.RecordedRequest;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -30,9 +33,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.impl.client.DefaultHttpClient;
-import tests.http.MockResponse;
-import tests.http.MockWebServer;
-import tests.http.RecordedRequest;
 
 public final class CookiesTest extends TestCase {
 
