@@ -173,16 +173,16 @@ public class Camera {
         public int facing;
 
         /**
-         * The orientation of the camera image. The value is the angle that the
+         * <p>The orientation of the camera image. The value is the angle that the
          * camera image needs to be rotated clockwise so it shows correctly on
-         * the display in its natural orientation. It should be 0, 90, 180, or 270.
+         * the display in its natural orientation. It should be 0, 90, 180, or 270.</p>
          *
-         * For example, suppose a device has a naturally tall screen. The
+         * <p>For example, suppose a device has a naturally tall screen. The
          * back-facing camera sensor is mounted in landscape. You are looking at
          * the screen. If the top side of the camera sensor is aligned with the
          * right edge of the screen in natural orientation, the value should be
          * 90. If the top side of a front-facing camera sensor is aligned with
-         * the right of the screen, the value should be 270.
+         * the right of the screen, the value should be 270.</p>
          *
          * @see #setDisplayOrientation(int)
          * @see Parameters#setRotation(int)
@@ -375,7 +375,7 @@ public class Camera {
      * The preview surface texture may not otherwise change while preview is
      * running.
      *
-     * The timestamps provided by {@link SurfaceTexture#getTimestamp()} for a
+     * <p>The timestamps provided by {@link SurfaceTexture#getTimestamp()} for a
      * SurfaceTexture set as the preview texture have an unspecified zero point,
      * and cannot be directly compared between different cameras or different
      * instances of the same camera, or across multiple runs of the same
@@ -561,12 +561,12 @@ public class Camera {
      * is used while calling {@link #takePicture(Camera.ShutterCallback,
      * Camera.PictureCallback, Camera.PictureCallback, Camera.PictureCallback)}.
      *
-     * Please note that by calling this method, the mode for application-managed
-     * callback buffers is triggered. If this method has never been called,
-     * null will be returned by the raw image callback since there is
-     * no image callback buffer available. Furthermore, When a supplied buffer
-     * is too small to hold the raw image data, raw image callback will return
-     * null and the buffer will be removed from the buffer queue.
+     * <p>Please note that by calling this method, the mode for
+     * application-managed callback buffers is triggered. If this method has
+     * never been called, null will be returned by the raw image callback since
+     * there is no image callback buffer available. Furthermore, When a supplied
+     * buffer is too small to hold the raw image data, raw image callback will
+     * return null and the buffer will be removed from the buffer queue.
      *
      * @param callbackBuffer the buffer to add to the raw image callback buffer
      *     queue. The size should be width * height * (bits per pixel) / 8. An
@@ -1082,7 +1082,28 @@ public class Camera {
     };
 
     /**
-     * Area class for focus and metering.
+     * <p>The Area class is used for choosing specific metering and focus areas for
+     * the camera to use when calculating auto-exposure, auto-white balance, and
+     * auto-focus.</p>
+     *
+     * <p>To find out how many simultaneous areas a given camera supports, use
+     * {@link Parameters#getMaxNumMeteringAreas()} and
+     * {@link Parameters#getMaxNumFocusAreas()}. If metering or focusing area
+     * selection is unsupported, these methods will return 0.</p>
+     *
+     * <p>Each Area consists of a rectangle specifying its bounds, and a weight
+     * that determines its importance. The bounds are relative to the camera's
+     * current field of view. The coordinates are mapped so that (-1000, -1000)
+     * is always the top-left corner of the current field of view, and (1000,
+     * 1000) is always the bottom-right corner of the current field of
+     * view. Setting Areas with bounds outside that range is not allowed. Areas
+     * with zero or negative width or height are not allowed.</p>
+     *
+     * <p>The weight must range from 1 to 1000, and represents a weight for
+     * every pixel in the area. This means that a large metering area with
+     * the same weight as a smaller area will have more effect in the
+     * metering result.  Metering areas can overlap and the driver
+     * will add the weights in the overlap region.</p>
      *
      * @see Parameters#setFocusAreas(List)
      * @see Parameters#getFocusAreas()
@@ -1095,8 +1116,8 @@ public class Camera {
         /**
          * Create an area with specified rectangle and weight.
          *
-         * @param rect the rectangle of the area
-         * @param weight the weight of the area
+         * @param rect the bounds of the area.
+         * @param weight the weight of the area.
          */
         public Area(Rect rect, int weight) {
             this.rect = rect;
@@ -1124,7 +1145,11 @@ public class Camera {
         }
 
         /**
-         * Rectangle of the area.
+         * Bounds of the area. (-1000, -1000) represents the top-left of the
+         * camera field of view, and (1000, 1000) represents the bottom-right of
+         * the field of view. Setting bounds outside that range is not
+         * allowed. Bounds with zero or negative width or height are not
+         * allowed.
          *
          * @see Parameters#getFocusAreas()
          * @see Parameters#getMeteringAreas()
@@ -1132,7 +1157,11 @@ public class Camera {
         public Rect rect;
 
         /**
-         * Weight of the area.
+         * Weight of the area. The weight must range from 1 to 1000, and
+         * represents a weight for every pixel in the area. This means that a
+         * large metering area with the same weight as a smaller area will have
+         * more effect in the metering result.  Metering areas can overlap and
+         * the driver will add the weights in the overlap region.
          *
          * @see Parameters#getFocusAreas()
          * @see Parameters#getMeteringAreas()
@@ -1632,15 +1661,15 @@ public class Camera {
         }
 
         /**
-         * Gets the supported video frame sizes that can be used by
-         * MediaRecorder.
+         * <p>Gets the supported video frame sizes that can be used by
+         * MediaRecorder.</p>
          *
-         * If the returned list is not null, the returned list will contain at
+         * <p>If the returned list is not null, the returned list will contain at
          * least one Size and one of the sizes in the returned list must be
          * passed to MediaRecorder.setVideoSize() for camcorder application if
          * camera is used as the video source. In this case, the size of the
          * preview can be different from the resolution of the recorded video
-         * during video recording.
+         * during video recording.</p>
          *
          * @return a list of Size object if camera has separate preview and
          *         video output; otherwise, null is returned.
@@ -1672,12 +1701,12 @@ public class Camera {
         }
 
         /**
-         * Sets the dimensions for EXIF thumbnail in Jpeg picture. If
+         * <p>Sets the dimensions for EXIF thumbnail in Jpeg picture. If
          * applications set both width and height to 0, EXIF will not contain
-         * thumbnail.
+         * thumbnail.</p>
          *
-         * Applications need to consider the display orientation. See {@link
-         * #setPreviewSize(int,int)} for reference.
+         * <p>Applications need to consider the display orientation. See {@link
+         * #setPreviewSize(int,int)} for reference.</p>
          *
          * @param width  the width of the thumbnail, in pixels
          * @param height the height of the thumbnail, in pixels
@@ -1897,10 +1926,10 @@ public class Camera {
         }
 
         /**
-         * Sets the dimensions for pictures.
+         * <p>Sets the dimensions for pictures.</p>
          *
-         * Applications need to consider the display orientation. See {@link
-         * #setPreviewSize(int,int)} for reference.
+         * <p>Applications need to consider the display orientation. See {@link
+         * #setPreviewSize(int,int)} for reference.</p>
          *
          * @param width  the width for pictures, in pixels
          * @param height the height for pictures, in pixels
@@ -2726,26 +2755,26 @@ public class Camera {
         }
 
         /**
-         * Gets the distances from the camera to where an object appears to be
+         * <p>Gets the distances from the camera to where an object appears to be
          * in focus. The object is sharpest at the optimal focus distance. The
-         * depth of field is the far focus distance minus near focus distance.
+         * depth of field is the far focus distance minus near focus distance.</p>
          *
-         * Focus distances may change after calling {@link
+         * <p>Focus distances may change after calling {@link
          * #autoFocus(AutoFocusCallback)}, {@link #cancelAutoFocus}, or {@link
          * #startPreview()}. Applications can call {@link #getParameters()}
          * and this method anytime to get the latest focus distances. If the
          * focus mode is FOCUS_MODE_CONTINUOUS_VIDEO, focus distances may change
-         * from time to time.
+         * from time to time.</p>
          *
-         * This method is intended to estimate the distance between the camera
+         * <p>This method is intended to estimate the distance between the camera
          * and the subject. After autofocus, the subject distance may be within
          * near and far focus distance. However, the precision depends on the
          * camera hardware, autofocus algorithm, the focus area, and the scene.
-         * The error can be large and it should be only used as a reference.
+         * The error can be large and it should be only used as a reference.</p>
          *
-         * Far focus distance >= optimal focus distance >= near focus distance.
+         * <p>Far focus distance >= optimal focus distance >= near focus distance.
          * If the focus distance is infinity, the value will be
-         * Float.POSITIVE_INFINITY.
+         * {@code Float.POSITIVE_INFINITY}.</p>
          *
          * @param output focus distances in meters. output must be a float
          *        array with three elements. Near focus distance, optimal focus
@@ -2775,42 +2804,43 @@ public class Camera {
         }
 
         /**
-         * Gets the current focus areas. Camera driver uses the areas to decide
-         * focus.
+         * <p>Gets the current focus areas. Camera driver uses the areas to decide
+         * focus.</p>
          *
-         * Before using this API or {@link #setFocusAreas(List)}, apps should
+         * <p>Before using this API or {@link #setFocusAreas(List)}, apps should
          * call {@link #getMaxNumFocusAreas()} to know the maximum number of
-         * focus areas first. If the value is 0, focus area is not supported.
+         * focus areas first. If the value is 0, focus area is not supported.</p>
          *
-         * Each focus area is a rectangle with specified weight. The direction
+         * <p>Each focus area is a rectangle with specified weight. The direction
          * is relative to the sensor orientation, that is, what the sensor sees.
          * The direction is not affected by the rotation or mirroring of
          * {@link #setDisplayOrientation(int)}. Coordinates of the rectangle
          * range from -1000 to 1000. (-1000, -1000) is the upper left point.
          * (1000, 1000) is the lower right point. The width and height of focus
-         * areas cannot be 0 or negative.
+         * areas cannot be 0 or negative.</p>
          *
-         * The weight must range from 1 to 1000. The weight should be
+         * <p>The weight must range from 1 to 1000. The weight should be
          * interpreted as a per-pixel weight - all pixels in the area have the
          * specified weight. This means a small area with the same weight as a
          * larger area will have less influence on the focusing than the larger
          * area. Focus areas can partially overlap and the driver will add the
-         * weights in the overlap region.
+         * weights in the overlap region.</p>
          *
-         * A special case of null focus area means driver to decide the focus
-         * area. For example, the driver may use more signals to decide focus
-         * areas and change them dynamically. Apps can set all-zero if they want
-         * the driver to decide focus areas.
+         * <p>A special case of a {@code null} focus area list means the driver is
+         * free to select focus targets as it wants. For example, the driver may
+         * use more signals to select focus areas and change them
+         * dynamically. Apps can set the focus area list to {@code null} if they
+         * want the driver to completely control focusing.</p>
          *
-         * Focus areas are relative to the current field of view
+         * <p>Focus areas are relative to the current field of view
          * ({@link #getZoom()}). No matter what the zoom level is, (-1000,-1000)
          * represents the top of the currently visible camera frame. The focus
          * area cannot be set to be outside the current field of view, even
-         * when using zoom.
+         * when using zoom.</p>
          *
-         * Focus area only has effect if the current focus mode is
+         * <p>Focus area only has effect if the current focus mode is
          * {@link #FOCUS_MODE_AUTO}, {@link #FOCUS_MODE_MACRO}, or
-         * {@link #FOCUS_MODE_CONTINUOUS_VIDEO}.
+         * {@link #FOCUS_MODE_CONTINUOUS_VIDEO}.</p>
          *
          * @return a list of current focus areas
          */
@@ -2841,41 +2871,42 @@ public class Camera {
         }
 
         /**
-         * Gets the current metering areas. Camera driver uses these areas to
-         * decide exposure.
+         * <p>Gets the current metering areas. Camera driver uses these areas to
+         * decide exposure.</p>
          *
-         * Before using this API or {@link #setMeteringAreas(List)}, apps should
+         * <p>Before using this API or {@link #setMeteringAreas(List)}, apps should
          * call {@link #getMaxNumMeteringAreas()} to know the maximum number of
          * metering areas first. If the value is 0, metering area is not
-         * supported.
+         * supported.</p>
          *
-         * Each metering area is a rectangle with specified weight. The
+         * <p>Each metering area is a rectangle with specified weight. The
          * direction is relative to the sensor orientation, that is, what the
          * sensor sees. The direction is not affected by the rotation or
          * mirroring of {@link #setDisplayOrientation(int)}. Coordinates of the
          * rectangle range from -1000 to 1000. (-1000, -1000) is the upper left
          * point. (1000, 1000) is the lower right point. The width and height of
-         * metering areas cannot be 0 or negative.
+         * metering areas cannot be 0 or negative.</p>
          *
-         * The weight must range from 1 to 1000, and represents a weight for
+         * <p>The weight must range from 1 to 1000, and represents a weight for
          * every pixel in the area. This means that a large metering area with
          * the same weight as a smaller area will have more effect in the
          * metering result.  Metering areas can partially overlap and the driver
-         * will add the weights in the overlap region.
+         * will add the weights in the overlap region.</p>
          *
-         * A special case of null metering area means driver to decide the
-         * metering area. For example, the driver may use more signals to decide
-         * metering areas and change them dynamically. Apps can set all-zero if
-         * they want the driver to decide metering areas.
+         * <p>A special case of a {@code null} metering area list means the driver
+         * is free to meter as it chooses. For example, the driver may use more
+         * signals to select metering areas and change them dynamically. Apps
+         * can set the metering area list to {@code null} if they want the
+         * driver to completely control metering.</p>
          *
-         * Metering areas are relative to the current field of view
+         * <p>Metering areas are relative to the current field of view
          * ({@link #getZoom()}). No matter what the zoom level is, (-1000,-1000)
          * represents the top of the currently visible camera frame. The
          * metering area cannot be set to be outside the current field of view,
-         * even when using zoom.
+         * even when using zoom.</p>
          *
-         * No matter what metering areas are, the final exposure are compensated
-         * by {@link #setExposureCompensation(int)}.
+         * <p>No matter what metering areas are, the final exposure are compensated
+         * by {@link #setExposureCompensation(int)}.</p>
          *
          * @return a list of current metering areas
          */
