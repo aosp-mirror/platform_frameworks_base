@@ -321,18 +321,18 @@ public abstract class WindowOrientationListener {
         private static final float ORIENTATION_ANGLE_CONFIDENCE_SCALE =
                 confidenceScaleFromDelta(30);
 
-        // Transition takes 2x longer when tilt is 45 degrees from vertical.
-        private static final float TILT_ANGLE_CONFIDENCE_SCALE = confidenceScaleFromDelta(45);
+        // Transition takes 2x longer when tilt is 60 degrees from vertical.
+        private static final float TILT_ANGLE_CONFIDENCE_SCALE = confidenceScaleFromDelta(60);
 
-        // Transition takes 2x longer when acceleration is 0.25 Gs.
+        // Transition takes 2x longer when acceleration is 0.5 Gs.
         private static final float MAGNITUDE_CONFIDENCE_SCALE = confidenceScaleFromDelta(
-                SensorManager.STANDARD_GRAVITY * 0.25f);
+                SensorManager.STANDARD_GRAVITY * 0.5f);
 
         // The number of milliseconds for which a new orientation must be stable before
         // we perform an orientation change under ideal conditions.  It will take
         // proportionally longer than this to effect an orientation change when
         // the proposed orientation confidence is low.
-        private static final float ORIENTATION_SETTLE_TIME_MS = 250;
+        private static final float ORIENTATION_SETTLE_TIME_MS = 100;
 
         // The confidence that we have abount effecting each orientation change.
         // When one of these values exceeds 1.0, we have determined our new orientation!
