@@ -70,23 +70,17 @@ private:
     MtpDatabase*    mDatabase;
     MtpServer*      mServer;
     MtpStorageList  mStorageList;
-    bool            mUsePtp;
     int             mFd;
 
 public:
     MtpThread(MtpDatabase* database)
         :   mDatabase(database),
             mServer(NULL),
-            mUsePtp(false),
             mFd(-1)
     {
     }
 
     virtual ~MtpThread() {
-    }
-
-    void setPtpMode(bool usePtp) {
-        mUsePtp = usePtp;
     }
 
     void addStorage(MtpStorage *storage) {
@@ -119,9 +113,6 @@ public:
 
         mFd = open("/dev/mtp_usb", O_RDWR);
         if (mFd >= 0) {
-            ioctl(mFd, MTP_SET_INTERFACE_MODE,
-                    (mUsePtp ? MTP_INTERFACE_MODE_PTP : MTP_INTERFACE_MODE_MTP));
-
             mServer = new MtpServer(mFd, mDatabase, AID_MEDIA_RW, 0664, 0775);
             for (size_t i = 0; i < mStorageList.size(); i++) {
                 mServer->addStorage(mStorageList[i]);
@@ -224,18 +215,6 @@ android_mtp_MtpServer_send_object_removed(JNIEnv *env, jobject thiz, jint handle
 }
 
 static void
-android_mtp_MtpServer_set_ptp_mode(JNIEnv *env, jobject thiz, jboolean usePtp)
-{
-#ifdef HAVE_ANDROID_OS
-    sMutex.lock();
-    MtpThread *thread = sThread.get();
-    if (thread)
-        thread->setPtpMode(usePtp);
-    sMutex.unlock();
-#endif
-}
-
-static void
 android_mtp_MtpServer_add_storage(JNIEnv *env, jobject thiz, jobject jstorage)
 {
 #ifdef HAVE_ANDROID_OS
@@ -290,7 +269,6 @@ static JNINativeMethod gMethods[] = {
     {"native_stop",                 "()V",  (void *)android_mtp_MtpServer_stop},
     {"native_send_object_added",    "(I)V", (void *)android_mtp_MtpServer_send_object_added},
     {"native_send_object_removed",  "(I)V", (void *)android_mtp_MtpServer_send_object_removed},
-    {"native_set_ptp_mode",         "(Z)V", (void *)android_mtp_MtpServer_set_ptp_mode},
     {"native_add_storage",          "(Landroid/mtp/MtpStorage;)V",
                                             (void *)android_mtp_MtpServer_add_storage},
     {"native_remove_storage",       "(I)V", (void *)android_mtp_MtpServer_remove_storage},
