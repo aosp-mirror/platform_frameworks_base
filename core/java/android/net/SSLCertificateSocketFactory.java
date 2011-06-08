@@ -240,7 +240,6 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
 
     /**
      * Sets the {@link TrustManager}s to be used for connections made by this factory.
-     * @hide
      */
     public void setTrustManagers(TrustManager[] trustManager) {
         mTrustManagers = trustManager;
@@ -253,7 +252,6 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
 
     /**
      * Sets the {@link KeyManager}s to be used for connections made by this factory.
-     * @hide
      */
     public void setKeyManagers(KeyManager[] keyManagers) {
         mKeyManagers = keyManagers;
