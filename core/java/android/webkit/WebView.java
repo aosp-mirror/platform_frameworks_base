@@ -1989,13 +1989,9 @@ public class WebView extends AbsoluteLayout
      * that is loaded through this interface. As such, it is used to resolve any
      * relative URLs. The historyUrl is used for the history entry.
      * <p>
-     * Note for post 1.0. Due to the change in the WebKit, the access to asset
-     * files through "file:///android_asset/" for the sub resources is more
-     * restricted. If you provide null or empty string as baseUrl, you won't be
-     * able to access asset files. If the baseUrl is anything other than
-     * http(s)/ftp(s)/about/javascript as scheme, you can access asset files for
-     * sub resources.
-     *
+     * Note that content specified in this way can access local device files
+     * (via 'file' scheme URLs) only if baseUrl specifies a scheme other than
+     * 'http', 'https', 'ftp', 'ftps', 'about' or 'javascript'.
      * @param baseUrl Url to resolve relative paths with, if null defaults to
      *            "about:blank"
      * @param data A String of data in the given encoding.
