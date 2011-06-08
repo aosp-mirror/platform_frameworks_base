@@ -296,12 +296,17 @@ public final class BridgeContext extends Activity {
 
     public Pair<View, Boolean> inflateView(ResourceReference resource, ViewGroup parent,
             boolean attachToRoot, boolean skipCallbackParser) {
-        String layoutName = resource.getName();
         boolean isPlatformLayout = resource.isFramework();
 
         if (isPlatformLayout == false && skipCallbackParser == false) {
             // check if the project callback can provide us with a custom parser.
-            ILayoutPullParser parser = mProjectCallback.getParser(layoutName);
+            ILayoutPullParser parser;
+            if (resource instanceof ResourceValue) {
+                parser = mProjectCallback.getParser((ResourceValue) resource);
+            } else {
+                parser = mProjectCallback.getParser(resource.getName());
+            }
+
             if (parser != null) {
                 BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(parser,
                         this, resource.isFramework());
@@ -369,7 +374,7 @@ public final class BridgeContext extends Activity {
         } else {
             Bridge.getLog().error(LayoutLog.TAG_BROKEN,
                     String.format("Layout %s%s does not exist.", isPlatformLayout ? "android:" : "",
-                            layoutName), null);
+                            resource.getName()), null);
         }
 
         return Pair.of(null, false);
