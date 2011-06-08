@@ -1661,4 +1661,14 @@
   <public type="style" name="Theme.Holo.Light.NoActionBar" />
   <public type="style" name="Theme.Holo.Light.NoActionBar.Fullscreen" />
 
+  <public type="style" name="Widget.ActionBar.TabView" />
+  <public type="style" name="Widget.ActionBar.TabText" />
+  <public type="style" name="Widget.ActionBar.TabBar" />
+  <public type="style" name="Widget.Holo.ActionBar.TabView" />
+  <public type="style" name="Widget.Holo.ActionBar.TabText" />
+  <public type="style" name="Widget.Holo.ActionBar.TabBar" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.TabView" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.TabText" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.TabBar" />
+
 </resources>
