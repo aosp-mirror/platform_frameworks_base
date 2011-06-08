@@ -51,7 +51,10 @@ public abstract class TextToSpeechService extends Service {
     private static final String SYNTH_THREAD_NAME = "SynthThread";
 
     private SynthHandler mSynthHandler;
-    private Handler mAudioTrackHandler;
+    // A thread and it's associated handler for playing back any audio
+    // associated with this TTS engine. Will handle all requests except synthesis
+    // to file requests, which occur on the synthesis thread.
+    private AudioPlaybackHandler mAudioPlaybackHandler;
 
     private CallbackMap mCallbacks;
 
@@ -68,7 +71,7 @@ public abstract class TextToSpeechService extends Service {
 
         HandlerThread audioTrackThread = new HandlerThread("TTS.audioTrackThread");
         audioTrackThread.start();
-        mAudioTrackHandler = new Handler(audioTrackThread.getLooper());
+        mAudioPlaybackHandler = new AudioPlaybackHandler(audioTrackThread.getLooper());
 
         mCallbacks = new CallbackMap();
 
@@ -83,8 +86,8 @@ public abstract class TextToSpeechService extends Service {
 
         // Tell the synthesizer to stop
         mSynthHandler.quit();
-        mAudioTrackHandler.getLooper().quit();
-
+        // Tell the audio playback thread to stop.
+        mAudioPlaybackHandler.quit();
         // Unregister all callbacks.
         mCallbacks.kill();
 
@@ -236,13 +239,6 @@ public abstract class TextToSpeechService extends Service {
             super(looper);
         }
 
-        private void dispatchUtteranceCompleted(SpeechItem item) {
-            String utteranceId = item.getUtteranceId();
-            if (!TextUtils.isEmpty(utteranceId)) {
-                mCallbacks.dispatchUtteranceCompleted(item.getCallingApp(), utteranceId);
-            }
-        }
-
         private synchronized SpeechItem getCurrentSpeechItem() {
             return mCurrentSpeechItem;
         }
@@ -286,9 +282,7 @@ public abstract class TextToSpeechService extends Service {
                 @Override
                 public void run() {
                     setCurrentSpeechItem(speechItem);
-                    if (speechItem.play() == TextToSpeech.SUCCESS) {
-                        dispatchUtteranceCompleted(speechItem);
-                    }
+                    speechItem.play();
                     setCurrentSpeechItem(null);
                 }
             };
@@ -318,14 +312,19 @@ public abstract class TextToSpeechService extends Service {
             if (current != null && TextUtils.equals(callingApp, current.getCallingApp())) {
                 current.stop();
             }
+
             return TextToSpeech.SUCCESS;
         }
+    }
+
+    interface UtteranceCompletedDispatcher {
+        public void dispatchUtteranceCompleted();
     }
 
     /**
      * An item in the synth thread queue.
      */
-    private static abstract class SpeechItem {
+    private abstract class SpeechItem implements UtteranceCompletedDispatcher {
         private final String mCallingApp;
         protected final Bundle mParams;
         private boolean mStarted = false;
@@ -380,6 +379,13 @@ public abstract class TextToSpeechService extends Service {
             stopImpl();
         }
 
+        public void dispatchUtteranceCompleted() {
+            final String utteranceId = getUtteranceId();
+            if (!TextUtils.isEmpty(utteranceId)) {
+                mCallbacks.dispatchUtteranceCompleted(getCallingApp(), utteranceId);
+            }
+        }
+
         protected abstract int playImpl();
 
         protected abstract void stopImpl();
@@ -413,7 +419,7 @@ public abstract class TextToSpeechService extends Service {
         }
     }
 
-    private class SynthesisSpeechItem extends SpeechItem {
+    class SynthesisSpeechItem extends SpeechItem {
         private final String mText;
         private SynthesisRequest mSynthesisRequest;
 
@@ -453,7 +459,8 @@ public abstract class TextToSpeechService extends Service {
 
         protected SynthesisRequest createSynthesisRequest() {
             return new PlaybackSynthesisRequest(mText, mParams,
-                    getStreamType(), getVolume(), getPan(), mAudioTrackHandler);
+                    getStreamType(), getVolume(), getPan(), mAudioPlaybackHandler,
+                    this);
         }
 
         private void setRequestParams(SynthesisRequest request) {
@@ -526,6 +533,15 @@ public abstract class TextToSpeechService extends Service {
             return new FileSynthesisRequest(getText(), mParams, mFile);
         }
 
+        @Override
+        protected int playImpl() {
+            int status = super.playImpl();
+            if (status == TextToSpeech.SUCCESS) {
+                dispatchUtteranceCompleted();
+            }
+            return status;
+        }
+
         /**
          * Checks that the given file can be used for synthesis output.
          */
@@ -557,6 +573,7 @@ public abstract class TextToSpeechService extends Service {
     private class AudioSpeechItem extends SpeechItem {
 
         private final BlockingMediaPlayer mPlayer;
+        private AudioMessageParams mToken;
 
         public AudioSpeechItem(String callingApp, Bundle params, Uri uri) {
             super(callingApp, params);
@@ -570,23 +587,26 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected int playImpl() {
-            return mPlayer.startAndWait() ? TextToSpeech.SUCCESS : TextToSpeech.ERROR;
+            mToken = new AudioMessageParams(this, mPlayer);
+            mAudioPlaybackHandler.enqueueAudio(mToken);
+            return TextToSpeech.SUCCESS;
         }
 
         @Override
         protected void stopImpl() {
-            mPlayer.stop();
+            if (mToken != null) {
+                mAudioPlaybackHandler.stop(mToken);
+            }
         }
     }
 
     private class SilenceSpeechItem extends SpeechItem {
         private final long mDuration;
-        private final ConditionVariable mDone;
+        private SilenceMessageParams mToken;
 
         public SilenceSpeechItem(String callingApp, Bundle params, long duration) {
             super(callingApp, params);
             mDuration = duration;
-            mDone = new ConditionVariable();
         }
 
         @Override
@@ -596,13 +616,16 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected int playImpl() {
-            boolean aborted = mDone.block(mDuration);
-            return aborted ? TextToSpeech.ERROR : TextToSpeech.SUCCESS;
+            mToken = new SilenceMessageParams(this, mDuration);
+            mAudioPlaybackHandler.enqueueSilence(mToken);
+            return TextToSpeech.SUCCESS;
         }
 
         @Override
         protected void stopImpl() {
-            mDone.open();
+            if (mToken != null) {
+                mAudioPlaybackHandler.stop(mToken);
+            }
         }
     }
 
