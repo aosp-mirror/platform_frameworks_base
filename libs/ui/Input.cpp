@@ -700,7 +700,6 @@ bool MotionEvent::isTouchEvent(int32_t source, int32_t action) {
 
 const uint32_t VelocityTracker::HISTORY_SIZE;
 const nsecs_t VelocityTracker::MAX_AGE;
-const nsecs_t VelocityTracker::MIN_WINDOW;
 const nsecs_t VelocityTracker::MIN_DURATION;
 
 VelocityTracker::VelocityTracker() {
@@ -891,14 +890,6 @@ bool VelocityTracker::getVelocity(uint32_t id, float* outVx, float* outVy) const
 
         // Make sure we used at least one sample.
         if (samplesUsed != 0) {
-            // Scale the velocity linearly if the window of samples is small.
-            nsecs_t totalDuration = newestMovement.eventTime - oldestMovement.eventTime;
-            if (totalDuration < MIN_WINDOW) {
-                float scale = float(totalDuration) / float(MIN_WINDOW);
-                accumVx *= scale;
-                accumVy *= scale;
-            }
-
             *outVx = accumVx;
             *outVy = accumVy;
             return true;
