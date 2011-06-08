@@ -50,11 +50,20 @@ public class UsbManager {
      * This is a sticky broadcast for clients that includes USB connected/disconnected state,
      * <ul>
      * <li> {@link #USB_CONNECTED} boolean indicating whether USB is connected or disconnected.
-     * <li> {@link #USB_CONFIGURATION} a Bundle containing name/value pairs where the name
-     * is the name of a USB function and the value is either {@link #USB_FUNCTION_ENABLED}
-     * or {@link #USB_FUNCTION_DISABLED}.  The possible function names include
-     * {@link #USB_FUNCTION_MASS_STORAGE}, {@link #USB_FUNCTION_ADB}, {@link #USB_FUNCTION_RNDIS},
-     * {@link #USB_FUNCTION_MTP} and {@link #USB_FUNCTION_ACCESSORY}.
+     * <li> {@link #USB_CONFIGURATION} integer containing current USB configuration
+     * currently zero if not configured, one for configured.
+     * <li> {@link #USB_FUNCTION_MASS_STORAGE} boolean extra indicating whether the
+     * mass storage function is enabled
+     * <li> {@link #USB_FUNCTION_ADB} boolean extra indicating whether the
+     * adb function is enabled
+     * <li> {@link #USB_FUNCTION_RNDIS} boolean extra indicating whether the
+     * RNDIS ethernet function is enabled
+     * <li> {@link #USB_FUNCTION_MTP} boolean extra indicating whether the
+     * MTP function is enabled
+     * <li> {@link #USB_FUNCTION_PTP} boolean extra indicating whether the
+     * PTP function is enabled
+     * <li> {@link #USB_FUNCTION_PTP} boolean extra indicating whether the
+     * accessory function is enabled
      * </ul>
      *
      * {@hide}
@@ -159,30 +168,20 @@ public class UsbManager {
     public static final String USB_FUNCTION_MTP = "mtp";
 
     /**
+     * Name of the PTP USB function.
+     * Used in extras for the {@link #ACTION_USB_STATE} broadcast
+     *
+     * {@hide}
+     */
+    public static final String USB_FUNCTION_PTP = "ptp";
+
+    /**
      * Name of the Accessory USB function.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast
      *
      * {@hide}
      */
     public static final String USB_FUNCTION_ACCESSORY = "accessory";
-
-    /**
-     * Value indicating that a USB function is enabled.
-     * Used in {@link #USB_CONFIGURATION} extras bundle for the
-     * {@link #ACTION_USB_STATE} broadcast
-     *
-     * {@hide}
-     */
-    public static final String USB_FUNCTION_ENABLED = "enabled";
-
-    /**
-     * Value indicating that a USB function is disabled.
-     * Used in {@link #USB_CONFIGURATION} extras bundle for the
-     * {@link #ACTION_USB_STATE} broadcast
-     *
-     * {@hide}
-     */
-    public static final String USB_FUNCTION_DISABLED = "disabled";
 
     /**
      * Name of extra for {@link #ACTION_USB_DEVICE_ATTACHED} and

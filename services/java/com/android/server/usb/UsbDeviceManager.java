@@ -84,7 +84,6 @@ public class UsbDeviceManager {
 
     // lists of enabled and disabled USB functions
     private final ArrayList<String> mEnabledFunctions = new ArrayList<String>();
-    private final ArrayList<String> mDisabledFunctions = new ArrayList<String>();
 
     private boolean mSystemReady;
 
@@ -120,15 +119,11 @@ public class UsbDeviceManager {
             if (!mEnabledFunctions.contains(function)) {
                 mEnabledFunctions.add(function);
             }
-            mDisabledFunctions.remove(function);
 
             if (UsbManager.USB_FUNCTION_ACCESSORY.equals(function)) {
                 readCurrentAccessoryLocked();
             }
         } else {
-            if (!mDisabledFunctions.contains(function)) {
-                mDisabledFunctions.add(function);
-            }
             mEnabledFunctions.remove(function);
         }
     }
@@ -260,8 +255,6 @@ public class UsbDeviceManager {
                         // so don't treat it as a default function.
                         mDefaultFunctions.add(functionName);
                     }
-                } else {
-                    mDisabledFunctions.add(functionName);
                 }
             }
         } catch (FileNotFoundException e) {
@@ -278,9 +271,9 @@ public class UsbDeviceManager {
             // FIXME - if we booted in accessory mode, then we have no way to figure out
             // which functions are enabled by default.
             // For now, assume that MTP or mass storage are the only possibilities
-            if (mDisabledFunctions.contains(UsbManager.USB_FUNCTION_MTP)) {
+            if (!mEnabledFunctions.contains(UsbManager.USB_FUNCTION_MTP)) {
                 mDefaultFunctions.add(UsbManager.USB_FUNCTION_MTP);
-            } else if (mDisabledFunctions.contains(UsbManager.USB_FUNCTION_MASS_STORAGE)) {
+            } else if (!mEnabledFunctions.contains(UsbManager.USB_FUNCTION_MASS_STORAGE)) {
                 mDefaultFunctions.add(UsbManager.USB_FUNCTION_MASS_STORAGE);
             }
         }
@@ -335,15 +328,6 @@ public class UsbDeviceManager {
      * This handler is for deferred handling of events related to device mode and accessories.
      */
     private final Handler mHandler = new Handler() {
-        private void addEnabledFunctionsLocked(Intent intent) {
-            // include state of all USB functions in our extras
-            for (int i = 0; i < mEnabledFunctions.size(); i++) {
-                intent.putExtra(mEnabledFunctions.get(i), UsbManager.USB_FUNCTION_ENABLED);
-            }
-            for (int i = 0; i < mDisabledFunctions.size(); i++) {
-                intent.putExtra(mDisabledFunctions.get(i), UsbManager.USB_FUNCTION_DISABLED);
-            }
-        }
 
         @Override
         public void handleMessage(Message msg) {
@@ -390,7 +374,9 @@ public class UsbDeviceManager {
                             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
                             intent.putExtra(UsbManager.USB_CONNECTED, mConnected != 0);
                             intent.putExtra(UsbManager.USB_CONFIGURATION, mConfiguration);
-                            addEnabledFunctionsLocked(intent);
+                            for (int i = 0; i < mEnabledFunctions.size(); i++) {
+                                intent.putExtra(mEnabledFunctions.get(i), true);
+                            }
                             mContext.sendStickyBroadcast(intent);
                         }
                         break;
@@ -409,11 +395,6 @@ public class UsbDeviceManager {
             pw.print("    Enabled Functions: ");
             for (int i = 0; i < mEnabledFunctions.size(); i++) {
                 pw.print(mEnabledFunctions.get(i) + " ");
-            }
-            pw.println("");
-            pw.print("    Disabled Functions: ");
-            for (int i = 0; i < mDisabledFunctions.size(); i++) {
-                pw.print(mDisabledFunctions.get(i) + " ");
             }
             pw.println("");
             pw.print("    Default Functions: ");
