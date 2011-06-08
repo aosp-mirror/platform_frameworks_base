@@ -301,6 +301,9 @@ public class GSMPhone extends PhoneBase {
             ret = DataState.DISCONNECTED;
         } else if (mDataConnectionTracker.isApnTypeEnabled(apnType) == false ||
                 mDataConnectionTracker.isApnTypeActive(apnType) == false) {
+            //TODO: isApnTypeActive() is just checking whether ApnContext holds
+            //      Dataconnection or not. Checking each ApnState below should
+            //      provide the same state. Calling isApnTypeActive() can be removed.
             ret = DataState.DISCONNECTED;
         } else { /* mSST.gprsState == ServiceState.STATE_IN_SERVICE */
             switch (mDataConnectionTracker.getState(apnType)) {
