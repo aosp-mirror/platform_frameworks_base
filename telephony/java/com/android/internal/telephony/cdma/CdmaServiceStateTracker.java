@@ -1631,8 +1631,4 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     protected void loge(String s) {
         Log.e(LOG_TAG, "[CdmaSST] " + s);
     }
-
-    private static void slog(String s) {
-        Log.d(LOG_TAG, "[CdmaSST] " + s);
-    }
 }
