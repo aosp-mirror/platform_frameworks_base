@@ -1140,12 +1140,6 @@ private:
         PointerProperties lastGestureProperties[MAX_POINTERS];
         PointerCoords lastGestureCoords[MAX_POINTERS];
 
-        // Pointer coords and ids for the current spots.
-        PointerControllerInterface::SpotGesture spotGesture;
-        BitSet32 spotIdBits; // same set of ids as touch ids
-        uint32_t spotIdToIndex[MAX_POINTER_ID + 1];
-        PointerCoords spotCoords[MAX_POINTERS];
-
         // Time the pointer gesture last went down.
         nsecs_t downTime;
 
@@ -1192,8 +1186,6 @@ private:
             currentGestureIdBits.clear();
             lastGestureMode = NEUTRAL;
             lastGestureIdBits.clear();
-            spotGesture = PointerControllerInterface::SPOT_GESTURE_NEUTRAL;
-            spotIdBits.clear();
             downTime = 0;
             velocityTracker.clear();
             resetTap();
