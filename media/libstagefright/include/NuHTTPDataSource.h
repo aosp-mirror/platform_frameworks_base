@@ -97,7 +97,6 @@ private:
     size_t mNumBandwidthHistoryItems;
     int64_t mTotalTransferTimeUs;
     size_t mTotalTransferBytes;
-    int64_t mPrevBandwidthMeasureTimeUs;
 
     DecryptHandle *mDecryptHandle;
     DrmManagerClient *mDrmManagerClient;
