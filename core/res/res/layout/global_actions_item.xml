@@ -40,7 +40,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
 
-        android:textAppearance="?android:attr/textAppearanceSmallInverse"
+        android:textAppearance="?android:attr/textAppearanceSmall"
         />
 
 
@@ -54,7 +54,7 @@
         android:layout_above="@id/status"
         android:layout_alignWithParentIfMissing="true"
         android:gravity="center_vertical"
-        android:textAppearance="?android:attr/textAppearanceLargeInverse"
+        android:textAppearance="?android:attr/textAppearanceLarge"
         />
 
 
