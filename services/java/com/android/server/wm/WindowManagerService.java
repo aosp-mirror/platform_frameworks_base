@@ -466,6 +466,7 @@ public class WindowManagerService extends IWindowManager.Stub
     Display mDisplay;
 
     final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+    final DisplayMetrics mTmpDisplayMetrics = new DisplayMetrics();
     final DisplayMetrics mCompatDisplayMetrics = new DisplayMetrics();
 
     H mH = new H();
@@ -5549,6 +5550,36 @@ public class WindowManagerService extends IWindowManager.Stub
         return sw;
     }
 
+    private int reduceCompatConfigWidthSize(int curSize, int rotation, DisplayMetrics dm,
+            int dw, int dh) {
+        dm.unscaledWidthPixels = mPolicy.getNonDecorDisplayWidth(rotation, dw);
+        dm.unscaledHeightPixels = mPolicy.getNonDecorDisplayHeight(rotation, dh);
+        float scale = CompatibilityInfo.computeCompatibleScaling(dm, null);
+        int size = (int)(((dm.unscaledWidthPixels / scale) / dm.density) + .5f);
+        if (curSize == 0 || size < curSize) {
+            curSize = size;
+        }
+        return curSize;
+    }
+
+    private int computeCompatSmallestWidth(boolean rotated, DisplayMetrics dm, int dw, int dh) {
+        mTmpDisplayMetrics.setTo(dm);
+        dm = mTmpDisplayMetrics;
+        int unrotDw, unrotDh;
+        if (rotated) {
+            unrotDw = dh;
+            unrotDh = dw;
+        } else {
+            unrotDw = dw;
+            unrotDh = dh;
+        }
+        int sw = reduceCompatConfigWidthSize(0, Surface.ROTATION_0, dm, unrotDw, unrotDh);
+        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_90, dm, unrotDh, unrotDw);
+        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_180, dm, unrotDw, unrotDh);
+        sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_270, dm, unrotDh, unrotDw);
+        return sw;
+    }
+
     boolean computeNewConfigurationLocked(Configuration config) {
         if (mDisplay == null) {
             return false;
@@ -5613,8 +5644,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
         config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
-        config.compatSmallestScreenWidthDp = (int)(config.smallestScreenWidthDp
-                / mCompatibleScreenScale);
+        config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, dm, dw, dh);
 
         // We need to determine the smallest width that will occur under normal
         // operation.  To this, start with the base screen size and compute the
@@ -8091,7 +8121,7 @@ public class WindowManagerService extends IWindowManager.Stub
                                 if (mDimAnimator == null) {
                                     mDimAnimator = new DimAnimator(mFxSession);
                                 }
-                                mDimAnimator.show(dw, dh);
+                                mDimAnimator.show(innerDw, innerDh);
                                 mDimAnimator.updateParameters(mContext.getResources(),
                                         w, currentTime);
                             }
