@@ -1456,10 +1456,13 @@ public class WifiStateMachine extends StateMachine {
 
         /* Clear network properties */
         mLinkProperties.clear();
+        /* Clear IP settings if the network used DHCP */
+        if (!WifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
+            WifiConfigStore.clearIpConfiguration(mLastNetworkId);
+        }
 
         mLastBssid= null;
         mLastNetworkId = WifiConfiguration.INVALID_NETWORK_ID;
-
     }
 
     void handlePreDhcpSetup() {
