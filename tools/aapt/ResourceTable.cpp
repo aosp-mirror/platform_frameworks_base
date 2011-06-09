@@ -1963,10 +1963,11 @@ uint32_t ResourceTable::getResId(const String16& ref,
                                  bool onlyPublic) const
 {
     String16 package, type, name;
+    bool refOnlyPublic = true;
     if (!ResTable::expandResourceRef(
         ref.string(), ref.size(), &package, &type, &name,
         defType, defPackage ? defPackage:&mAssetsPackage,
-        outErrorMsg)) {
+        outErrorMsg, &refOnlyPublic)) {
         NOISY(printf("Expanding resource: ref=%s\n",
                      String8(ref).string()));
         NOISY(printf("Expanding resource: defType=%s\n",
@@ -1979,7 +1980,7 @@ uint32_t ResourceTable::getResId(const String16& ref,
                      String8(name).string()));
         return 0;
     }
-    uint32_t res = getResId(package, type, name, onlyPublic);
+    uint32_t res = getResId(package, type, name, onlyPublic && refOnlyPublic);
     NOISY(printf("Expanded resource: p=%s, t=%s, n=%s, res=%d\n",
                  String8(package).string(), String8(type).string(),
                  String8(name).string(), res));
