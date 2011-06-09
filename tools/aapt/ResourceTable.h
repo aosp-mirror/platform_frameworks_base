@@ -162,13 +162,13 @@ public:
     uint32_t getResId(const String16& package,
                       const String16& type,
                       const String16& name,
-                      bool onlyPublic = false) const;
+                      bool onlyPublic = true) const;
 
     uint32_t getResId(const String16& ref,
                       const String16* defType = NULL,
                       const String16* defPackage = NULL,
                       const char** outErrorMsg = NULL,
-                      bool onlyPublic = false) const;
+                      bool onlyPublic = true) const;
 
     static bool isValidResourceName(const String16& s);
     
