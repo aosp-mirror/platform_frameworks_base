@@ -1439,9 +1439,6 @@ public class WifiStateMachine extends StateMachine {
             mDhcpStateMachine = null;
         }
 
-        /* Disable interface */
-        NetworkUtils.disableInterface(mInterfaceName);
-
         /* Reset data structures */
         mWifiInfo.setInetAddress(null);
         mWifiInfo.setBSSID(null);
