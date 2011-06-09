@@ -2321,20 +2321,28 @@ public final class ViewAncestor extends Handler implements ViewParent,
             handleDispatchSystemUiVisibilityChanged(msg.arg1);
         } break;
         case DO_FIND_ACCESSIBLITY_NODE_INFO_BY_ACCESSIBILITY_ID: {
-            getAccessibilityInteractionController()
-                .findAccessibilityNodeInfoByAccessibilityIdUiThread(msg);
+            if (mView != null) {
+                getAccessibilityInteractionController()
+                    .findAccessibilityNodeInfoByAccessibilityIdUiThread(msg);
+            }
         } break;
         case DO_PERFORM_ACCESSIBILITY_ACTION: {
-            getAccessibilityInteractionController()
-                .perfromAccessibilityActionUiThread(msg);
+            if (mView != null) {
+                getAccessibilityInteractionController()
+                    .perfromAccessibilityActionUiThread(msg);
+            }
         } break;
         case DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_ID: {
-            getAccessibilityInteractionController()
-                .findAccessibilityNodeInfoByViewIdUiThread(msg);
+            if (mView != null) {
+                getAccessibilityInteractionController()
+                    .findAccessibilityNodeInfoByViewIdUiThread(msg);
+            }
         } break;
         case DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_TEXT: {
-            getAccessibilityInteractionController()
-                .findAccessibilityNodeInfosByViewTextUiThread(msg);
+            if (mView != null) {
+                getAccessibilityInteractionController()
+                    .findAccessibilityNodeInfosByViewTextUiThread(msg);
+            }
         } break;
         }
     }
@@ -4149,44 +4157,37 @@ public final class ViewAncestor extends Handler implements ViewParent,
 
         public void findAccessibilityNodeInfoByAccessibilityId(int accessibilityId,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback) {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
-            if (viewAncestor == null) {
-                return;
-            }
-            getAccessibilityInteractionController()
-                .findAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityId,
+            if (mViewAncestor.get() != null) {
+                getAccessibilityInteractionController()
+                    .findAccessibilityNodeInfoByAccessibilityIdClientThread(accessibilityId,
                         interactionId, callback);
+            }
         }
 
         public void performAccessibilityAction(int accessibilityId, int action,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback) {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
-            if (viewAncestor == null) {
-                return;
+            if (mViewAncestor.get() != null) {
+                getAccessibilityInteractionController()
+                    .performAccessibilityActionClientThread(accessibilityId, action, interactionId,
+                            callback);
             }
-            getAccessibilityInteractionController()
-                .performAccessibilityActionClientThread(accessibilityId, action, interactionId,
-                        callback);
         }
 
         public void findAccessibilityNodeInfoByViewId(int viewId,
                 int interactionId, IAccessibilityInteractionConnectionCallback callback) {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
-            if (viewAncestor == null) {
-                return;
+            if (mViewAncestor.get() != null) {
+                getAccessibilityInteractionController()
+                    .findAccessibilityNodeInfoByViewIdClientThread(viewId, interactionId, callback);
             }
-            getAccessibilityInteractionController()
-                .findAccessibilityNodeInfoByViewIdClientThread(viewId, interactionId, callback);
         }
 
         public void findAccessibilityNodeInfosByViewText(String text, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback) {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
-            if (viewAncestor == null) {
-                return;
+            if (mViewAncestor.get() != null) {
+                getAccessibilityInteractionController()
+                    .findAccessibilityNodeInfosByViewTextClientThread(text, interactionId,
+                            callback);
             }
-            getAccessibilityInteractionController()
-                .findAccessibilityNodeInfosByViewTextClientThread(text, interactionId, callback);
         }
     }
 
