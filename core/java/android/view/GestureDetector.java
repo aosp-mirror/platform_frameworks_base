@@ -610,6 +610,8 @@ public class GestureDetector {
         mVelocityTracker = null;
         mIsDoubleTapping = false;
         mStillDown = false;
+        mAlwaysInTapRegion = false;
+        mAlwaysInBiggerTapRegion = false;
         if (mInLongPress) {
             mInLongPress = false;
         }
