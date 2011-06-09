@@ -49,6 +49,8 @@ SoftAVC::SoftAVC(
       mPictureSize(mWidth * mHeight * 3 / 2),
       mCropLeft(0),
       mCropTop(0),
+      mCropWidth(mWidth),
+      mCropHeight(mHeight),
       mFirstPicture(NULL),
       mFirstPictureId(-1),
       mPicId(0),
@@ -230,8 +232,8 @@ OMX_ERRORTYPE SoftAVC::getConfig(
 
             rectParams->nLeft = mCropLeft;
             rectParams->nTop = mCropTop;
-            rectParams->nWidth = mWidth;
-            rectParams->nHeight = mHeight;
+            rectParams->nWidth = mCropWidth;
+            rectParams->nHeight = mCropHeight;
 
             return OMX_ErrorNone;
         }
@@ -367,6 +369,8 @@ bool SoftAVC::handlePortSettingChangeEvent(const H264SwDecInfo *info) {
         mWidth  = info->picWidth;
         mHeight = info->picHeight;
         mPictureSize = mWidth * mHeight * 3 / 2;
+        mCropWidth = mWidth;
+        mCropHeight = mHeight;
         updatePortDefinitions();
         notify(OMX_EventPortSettingsChanged, 1, 0, NULL);
         mOutputPortSettingsChange = AWAITING_DISABLED;
@@ -379,14 +383,12 @@ bool SoftAVC::handlePortSettingChangeEvent(const H264SwDecInfo *info) {
 bool SoftAVC::handleCropRectEvent(const CropParams *crop) {
     if (mCropLeft != crop->cropLeftOffset ||
         mCropTop != crop->cropTopOffset ||
-        mWidth != crop->cropOutWidth ||
-        mHeight != crop->cropOutHeight) {
-
+        mCropWidth != crop->cropOutWidth ||
+        mCropHeight != crop->cropOutHeight) {
         mCropLeft = crop->cropLeftOffset;
         mCropTop = crop->cropTopOffset;
-        mWidth = crop->cropOutWidth;
-        mHeight = crop->cropOutHeight;
-        mPictureSize = mWidth * mHeight * 3 / 2;
+        mCropWidth = crop->cropOutWidth;
+        mCropHeight = crop->cropOutHeight;
 
         notify(OMX_EventPortSettingsChanged, 1,
                 OMX_IndexConfigCommonOutputCrop, NULL);
