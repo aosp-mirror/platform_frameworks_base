@@ -85,10 +85,10 @@ public final class Calendar {
      * {@link ContentResolver#notifyChange(android.net.Uri, android.database.ContentObserver, boolean)}
      * , the third parameter "syncToNetwork" is set to false. Furthermore, if
      * set to true, the caller must also include
-     * {@link SyncColumns#ACCOUNT_NAME} and {@link SyncColumns#ACCOUNT_TYPE} as
+     * {@link Calendars#ACCOUNT_NAME} and {@link Calendars#ACCOUNT_TYPE} as
      * query parameters.
      *
-     * @See Uri.Builder#appendQueryParameter(java.lang.String, java.lang.String)
+     * @see Uri.Builder#appendQueryParameter(java.lang.String, java.lang.String)
      */
     public static final String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
 
@@ -185,7 +185,7 @@ public final class Calendar {
 
         /**
          * If set to 1 this causes events on this calendar to be duplicated with
-         * {@link EventsColumns#LAST_SYNCED} set to 1 whenever the event transitions from non-dirty
+         * {@link Events#LAST_SYNCED} set to 1 whenever the event transitions from non-dirty
          * to dirty. The duplicated event will not be expanded in the instances table and will only
          * show up in sync adapter queries of the events table. It will also be deleted when the
          * originating event has its dirty flag cleared by the sync adapter.
