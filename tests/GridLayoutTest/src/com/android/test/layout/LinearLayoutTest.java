@@ -22,20 +22,19 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import static android.widget.LinearLayout.*;
+import static android.widget.LinearLayout.LayoutParams.*;
 
 public class LinearLayoutTest extends AbstractLayoutTest {
     public ViewGroup create(Context context) {
         LinearLayout container = new LinearLayout(context);
         container.setOrientation(LinearLayout.VERTICAL);
-//        container.setUseDefaultMargins(true);
 
         for (int i = 0; i < VERTICAL_ALIGNMENTS.length; i++) {
             int va = VERTICAL_ALIGNMENTS[i];
             for (int j = 0; j < HORIZONTAL_ALIGNMENTS.length; j++) {
                 int ha = HORIZONTAL_ALIGNMENTS[j];
-                LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                LayoutParams lp = new LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
                 lp.gravity = va | ha;
-//                View v = create(VERTICAL_NAMES[i] + "-" + HORIZONTAL_NAMES[j], 20);
                 View v = create(context, VERTICAL_NAMES[i] + "-" + HORIZONTAL_NAMES[j], 20);
                 container.addView(v, lp);
             }
