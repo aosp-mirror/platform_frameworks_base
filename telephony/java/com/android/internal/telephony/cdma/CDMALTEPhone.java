@@ -65,32 +65,12 @@ public class CDMALTEPhone extends CDMAPhone {
 
     @Override
     public DataState getDataConnectionState(String apnType) {
-        // TODO: Remove instanceof if possible.
-        boolean isCdmaDataConnectionTracker = false;
-        if (mDataConnectionTracker instanceof CdmaDataConnectionTracker) {
-            log("getDataConnectionState isCdmaDataConnectionTracker");
-            isCdmaDataConnectionTracker = true;
-        } else {
-            log("getDataConnectionState NOT CdmaDataConnectionTracker");
-        }
         DataState ret = DataState.DISCONNECTED;
 
-        if (!isCdmaDataConnectionTracker && (SystemProperties.get("adb.connected", "").length()
-                > 0)) {
-            // We're connected to an ADB host and we have USB networking
-            // turned on. No matter what the radio state is,
-            // we report data connected
-
-            ret = DataState.CONNECTED;
-        } else if (mSST == null) {
+        if (mSST == null) {
             // Radio Technology Change is ongoning, dispose() and
-            // removeReferences() have
-            // already been called
+            // removeReferences() have already been called
 
-            ret = DataState.DISCONNECTED;
-        } else if (mSST.getCurrentDataConnectionState() != ServiceState.STATE_IN_SERVICE) {
-            // If we're out of service, open TCP sockets may still work
-            // but no data will flow
             ret = DataState.DISCONNECTED;
         } else if (mDataConnectionTracker.isApnTypeEnabled(apnType) == false) {
             ret = DataState.DISCONNECTED;
