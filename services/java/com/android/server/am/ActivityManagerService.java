@@ -1281,7 +1281,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         mCompatModeDialog.dismiss();
                         mCompatModeDialog = null;
                     }
-                    if (ar != null) {
+                    if (ar != null && false) {
                         if (mCompatModePackages.getPackageAskCompatModeLocked(
                                 ar.packageName)) {
                             int mode = mCompatModePackages.computeCompatModeLocked(
