@@ -16,9 +16,11 @@
 
 package android.nfc.tech;
 
+import android.nfc.ErrorCodes;
 import android.nfc.Tag;
 import android.nfc.TagLostException;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -69,6 +71,8 @@ import java.nio.ByteOrder;
  * require the {@link android.Manifest.permission#NFC} permission.
  */
 public final class MifareClassic extends BasicTagTechnology {
+    private static final String TAG = "NFC";
+
     /**
      * The default factory key.
      */
@@ -566,6 +570,31 @@ public final class MifareClassic extends BasicTagTechnology {
      */
     public byte[] transceive(byte[] data) throws IOException {
         return transceive(data, true);
+    }
+
+    /**
+     * Set the timeout of {@link #transceive} in milliseconds.
+     * <p>The timeout only applies to MifareUltralight {@link #transceive},
+     * and is reset to a default value when {@link #close} is called.
+     * <p>Setting a longer timeout may be useful when performing
+     * transactions that require a long processing time on the tag
+     * such as key generation.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @param timeout timeout value in milliseconds
+     * @hide
+     */
+    // TODO Unhide for ICS
+    public void setTimeout(int timeout) {
+        try {
+            int err = mTag.getTagService().setTimeout(TagTechnology.MIFARE_CLASSIC, timeout);
+            if (err != ErrorCodes.SUCCESS) {
+                throw new IllegalArgumentException("The supplied timeout is not valid");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service dead", e);
+        }
     }
 
     private static void validateSector(int sector) {

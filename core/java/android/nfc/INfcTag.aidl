@@ -43,7 +43,6 @@ interface INfcTag
     int formatNdef(int nativeHandle, in byte[] key);
     Tag rediscover(int nativehandle);
 
-    void setIsoDepTimeout(int timeout);
-    void setFelicaTimeout(int timeout);
+    int setTimeout(int technology, int timeout);
     void resetTimeouts();
 }
