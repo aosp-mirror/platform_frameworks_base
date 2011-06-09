@@ -128,7 +128,7 @@ class ReflectiveProperty<T, V> extends Property<T, V> {
                 throw new AssertionError();
             }
         } else {
-            throw new NoSuchPropertyException("Property is read-only; set() is not implemented");
+            throw new UnsupportedOperationException("Property " + getName() +" is read-only");
         }
     }
 
