@@ -1141,16 +1141,13 @@ public final class WebViewCore {
                             if (baseUrl != null) {
                                 int i = baseUrl.indexOf(':');
                                 if (i > 0) {
-                                    /*
-                                     * In 1.0, {@link
-                                     * WebView#loadDataWithBaseURL} can access
-                                     * local asset files as long as the data is
-                                     * valid. In the new WebKit, the restriction
-                                     * is tightened. To be compatible with 1.0,
-                                     * we automatically add the scheme of the
-                                     * baseUrl for local access as long as it is
-                                     * not http(s)/ftp(s)/about/javascript
-                                     */
+                                    // In 1.0, WebView.loadDataWithBaseURL() could access local
+                                    // asset files using 'file' scheme URLs as long as the data is
+                                    // valid. Later versions of WebKit have tightened the
+                                    // restriction around when pages can access such local URLs.
+                                    // To maintain compatibility with 1.0, we register the scheme of
+                                    // the baseUrl to be considered local, as long as it is not
+                                    // http(s)/ftp(s)/about/javascript.
                                     String scheme = baseUrl.substring(0, i);
                                     if (!scheme.startsWith("http") &&
                                             !scheme.startsWith("ftp") &&
