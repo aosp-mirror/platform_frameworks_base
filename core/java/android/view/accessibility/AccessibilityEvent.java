@@ -264,8 +264,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     private boolean mIsInPool;
 
     private int mEventType;
-    private int mSourceAccessibilityViewId;
-    private int mSourceAccessibilityWindowId;
+    private int mSourceAccessibilityViewId = View.NO_ID;
+    private int mSourceAccessibilityWindowId = View.NO_ID;
     private CharSequence mPackageName;
     private long mEventTime;
 
