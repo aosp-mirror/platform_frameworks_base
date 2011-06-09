@@ -102,6 +102,19 @@ static jint android_nfc_NdefMessage_parseNdefMessage(JNIEnv *e, jobject o,
         }
         TRACE("phFriNfc_NdefRecord_Parse() returned 0x%04x", status);
 
+        // We don't exactly know what *is* a valid length, but a simple
+        // sanity check is to make sure that the length of the header
+        // plus all fields does not exceed raw_msg_size. The min length
+        // of the header is 3 bytes: TNF, Type Length, Payload Length
+        // (ID length field is optional!)
+        uint64_t indicatedMsgLength = 3 + record.TypeLength + record.IdLength +
+                (uint64_t)record.PayloadLength;
+        if (indicatedMsgLength >
+                (uint64_t)raw_msg_size) {
+            LOGE("phFri_NdefRecord_Parse: invalid length field");
+            goto end;
+        }
+
         type = e->NewByteArray(record.TypeLength);
         if (type == NULL) {
             LOGD("NFC_Set Record Type Error\n");
