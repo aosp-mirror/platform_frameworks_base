@@ -1900,7 +1900,7 @@ public final class WebViewCore {
                 width = mViewportWidth;
             } else {
                 // For mobile web site.
-                width = mWebView.getViewWidth();
+                width = Math.round(mWebView.getViewWidth() / mWebView.getDefaultZoomScale());
             }
         }
         return width;
