@@ -1075,10 +1075,13 @@ public class StatusBarPolicy {
         } else {
             iconList = sSignalImages[mInetCondition];
 
+            boolean alwaysUseCdmaRssi = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_alwaysUseCdmaRssi);
             // If 3G(EV) and 1x network are available than 3G should be
             // displayed, displayed RSSI should be from the EV side.
             // If a voice call is made then RSSI should switch to 1x.
-            if ((mPhoneState == TelephonyManager.CALL_STATE_IDLE) && isEvdo()){
+            if ((mPhoneState == TelephonyManager.CALL_STATE_IDLE) && isEvdo()
+                && !alwaysUseCdmaRssi) {
                 iconLevel = getEvdoLevel();
                 if (false) {
                     Slog.d(TAG, "use Evdo level=" + iconLevel + " to replace Cdma Level=" + getCdmaLevel());
