@@ -22,6 +22,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.SlidingTab;
 import com.android.internal.widget.WaveView;
 import com.android.internal.widget.WaveView.OnTriggerListener;
+import com.android.internal.widget.multiwaveview.MultiWaveView;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -91,6 +92,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
     private WaveView mEnergyWave;
     private SlidingTabMethods mSlidingTabMethods;
     private WaveViewMethods mWaveViewMethods;
+    private MultiWaveView mMultiWaveView;
+    private MultiWaveViewMethods mMultiWaveViewMethods;
 
     /**
      * The status of this lock screen.
@@ -166,34 +169,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
             if (whichHandle == SlidingTab.OnTriggerListener.LEFT_HANDLE) {
                 mCallback.goToUnlockScreen();
             } else if (whichHandle == SlidingTab.OnTriggerListener.RIGHT_HANDLE) {
-                // toggle silent mode
-                mSilentMode = !mSilentMode;
-                if (mSilentMode) {
-                    final boolean vibe = (Settings.System.getInt(
-                        getContext().getContentResolver(),
-                        Settings.System.VIBRATE_IN_SILENT, 1) == 1);
-
-                    mAudioManager.setRingerMode(vibe
-                        ? AudioManager.RINGER_MODE_VIBRATE
-                        : AudioManager.RINGER_MODE_SILENT);
-                } else {
-                    mAudioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
-                }
-
+                toggleRingMode();
                 updateRightTabResources();
-
-                String message = mSilentMode ?
-                        getContext().getString(R.string.global_action_silent_mode_on_status) :
-                        getContext().getString(R.string.global_action_silent_mode_off_status);
-
-                final int toastIcon = mSilentMode
-                    ? R.drawable.ic_lock_ringer_off
-                    : R.drawable.ic_lock_ringer_on;
-
-                final int toastColor = mSilentMode
-                    ? getContext().getResources().getColor(R.color.keyguard_text_color_soundoff)
-                    : getContext().getResources().getColor(R.color.keyguard_text_color_soundon);
-                toastMessage(mScreenLocked, message, toastColor, toastIcon);
+                doSilenceRingToast();
                 mCallback.pokeWakelock();
             }
         }
@@ -214,19 +192,14 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
         }
     }
 
-    class WaveViewMethods implements WaveView.OnTriggerListener {
-        private static final int WAIT_FOR_ANIMATION_TIMEOUT = 0;
-        private static final int STAY_ON_WHILE_GRABBED_TIMEOUT = 30000;
+    private static final int WAIT_FOR_ANIMATION_TIMEOUT = 0;
+    private static final int STAY_ON_WHILE_GRABBED_TIMEOUT = 30000;
 
+    class WaveViewMethods implements WaveView.OnTriggerListener {
         /** {@inheritDoc} */
         public void onTrigger(View v, int whichHandle) {
             if (whichHandle == WaveView.OnTriggerListener.CENTER_HANDLE) {
-                // Delay hiding lock screen long enough for animation to finish
-                postDelayed(new Runnable() {
-                    public void run() {
-                        mCallback.goToUnlockScreen();
-                    }
-                }, WAIT_FOR_ANIMATION_TIMEOUT);
+                requestUnlockScreen();
             }
         }
 
@@ -240,6 +213,80 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
             if (grabbedState == WaveView.OnTriggerListener.CENTER_HANDLE) {
                 mCallback.pokeWakelock(STAY_ON_WHILE_GRABBED_TIMEOUT);
             }
+        }
+    }
+
+    class MultiWaveViewMethods implements MultiWaveView.OnTriggerListener {
+        public void onGrabbed(View v, int handle) {
+
+        }
+        public void onReleased(View v, int handle) {
+
+        }
+        public void onTrigger(View v, int target) {
+            if (target == 0) { // TODO: Use resources to determine which handle was used
+                mCallback.goToUnlockScreen();
+            } else if (target == 2) {
+                toggleRingMode();
+                updateResources();
+                doSilenceRingToast();
+                mCallback.pokeWakelock();
+            }
+
+        }
+
+        private void updateResources() {
+            mMultiWaveView.setTargetResources(mSilentMode ? R.array.lockscreen_targets_when_silent
+                    : R.array.lockscreen_targets_when_soundon);
+        }
+
+        public void onGrabbedStateChange(View v, int handle) {
+            // Don't poke the wake lock when returning to a state where the handle is
+            // not grabbed since that can happen when the system (instead of the user)
+            // cancels the grab.
+            if (handle != MultiWaveView.OnTriggerListener.NO_HANDLE) {
+                mCallback.pokeWakelock();
+            }
+        }
+    }
+
+    private void requestUnlockScreen() {
+        // Delay hiding lock screen long enough for animation to finish
+        postDelayed(new Runnable() {
+            public void run() {
+                mCallback.goToUnlockScreen();
+            }
+        }, WAIT_FOR_ANIMATION_TIMEOUT);
+    }
+
+    private void doSilenceRingToast() {
+        String message = mSilentMode ?
+                getContext().getString(R.string.global_action_silent_mode_on_status) :
+                getContext().getString(R.string.global_action_silent_mode_off_status);
+
+        final int toastIcon = mSilentMode
+            ? R.drawable.ic_lock_ringer_off
+            : R.drawable.ic_lock_ringer_on;
+
+        final int toastColor = mSilentMode
+            ? getContext().getResources().getColor(R.color.keyguard_text_color_soundoff)
+            : getContext().getResources().getColor(R.color.keyguard_text_color_soundon);
+        toastMessage(mScreenLocked, message, toastColor, toastIcon);
+    }
+
+    private void toggleRingMode() {
+        // toggle silent mode
+        mSilentMode = !mSilentMode;
+        if (mSilentMode) {
+            final boolean vibe = (Settings.System.getInt(
+                getContext().getContentResolver(),
+                Settings.System.VIBRATE_IN_SILENT, 1) == 1);
+
+            mAudioManager.setRingerMode(vibe
+                ? AudioManager.RINGER_MODE_VIBRATE
+                : AudioManager.RINGER_MODE_SILENT);
+        } else {
+            mAudioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         }
     }
 
@@ -319,9 +366,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
         mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         mSilentMode = isSilentMode();
 
-        mSlidingTab = (SlidingTab) findViewById(R.id.tab_selector);
-        mEnergyWave = (WaveView) findViewById(R.id.wave_view);
-        if (mSlidingTab != null) {
+        View unlockWidget = findViewById(R.id.unlock_widget);
+        if (unlockWidget instanceof SlidingTab) {
+            mSlidingTab = (SlidingTab) unlockWidget;
             mSlidingTab.setHoldAfterTrigger(true, false);
             mSlidingTab.setLeftHintText(R.string.lockscreen_unlock_label);
             mSlidingTab.setLeftTabResources(
@@ -332,11 +379,17 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
             mSlidingTabMethods = new SlidingTabMethods();
             mSlidingTab.setOnTriggerListener(mSlidingTabMethods);
             mSlidingTabMethods.updateRightTabResources();
-        } else if (mEnergyWave != null) {
+        } else if (unlockWidget instanceof WaveView) {
+            mEnergyWave = (WaveView) unlockWidget;
             mWaveViewMethods = new WaveViewMethods();
             mEnergyWave.setOnTriggerListener(mWaveViewMethods);
+        } else if (unlockWidget instanceof MultiWaveView) {
+            mMultiWaveView = (MultiWaveView) unlockWidget;
+            mMultiWaveViewMethods = new MultiWaveViewMethods();
+            mMultiWaveViewMethods.updateResources(); // update silence/ring resources
+            mMultiWaveView.setOnTriggerListener(mMultiWaveViewMethods);
         } else {
-            throw new IllegalStateException("Must have either SlidingTab or WaveView defined");
+            throw new IllegalStateException("Unrecognized unlock widget: " + unlockWidget);
         }
 
         resetStatusInfo(updateMonitor);

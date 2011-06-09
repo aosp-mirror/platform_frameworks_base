@@ -50,7 +50,8 @@
         android:layout_width="0dip"
         android:gravity="center_horizontal|center_vertical">
 
-        <TextView android:id="@+id/screenLocked"
+        <com.android.internal.widget.WaveView
+            android:id="@+id/unlock_widget"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"

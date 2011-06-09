@@ -21,11 +21,11 @@
   state of the device, as well as instructions on how to get past it
   depending on the state of the device.-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tabunlock="http://schemas.android.com/apk/res/com.android.tabunlock"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    android:id="@+id/root">
+    android:id="@+id/root"
+    android:clipChildren="false">
 
     <!-- left side -->
     <RelativeLayout
@@ -164,12 +164,23 @@
     </RelativeLayout>
 
     <!-- right side -->
-    <com.android.internal.widget.SlidingTab
-        android:id="@+id/tab_selector"
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
+    <com.android.internal.widget.multiwaveview.MultiWaveView
+        android:id="@+id/unlock_widget"
+        android:layout_width="300dip"
         android:layout_height="match_parent"
-        android:layout_marginRight="80dip"
+
+        android:targetDrawables="@array/lockscreen_targets_when_silent"
+        android:handleDrawable="@drawable/ic_lockscreen_handle"
+        android:waveDrawable="@drawable/ic_lockscreen_outerring"
+        android:outerRadius="@*android:dimen/multiwaveview_target_placement_radius"
+        android:snapMargin="@*android:dimen/multiwaveview_snap_margin"
+        android:hitRadius="@*android:dimen/multiwaveview_hit_radius"
+        android:vibrationDuration="20"
+        android:leftChevronDrawable="@drawable/ic_lockscreen_chevron_left"
+        android:rightChevronDrawable="@drawable/ic_lockscreen_chevron_right"
+        android:feedbackCount="3"
+        android:horizontalOffset="60dip"
+        android:verticalOffset="0dip"
         />
 
     <!-- emergency call button shown when sim is PUKd and tab_selector is

@@ -425,6 +425,7 @@ package android {
     field public static final int fastScrollTextColor = 16843609; // 0x1010359
     field public static final int fastScrollThumbDrawable = 16843574; // 0x1010336
     field public static final int fastScrollTrackDrawable = 16843577; // 0x1010339
+    field public static final int feedbackCount = 16843665; // 0x1010391
     field public static final int fillAfter = 16843197; // 0x10101bd
     field public static final int fillBefore = 16843196; // 0x10101bc
     field public static final int fillEnabled = 16843343; // 0x101024f
@@ -478,6 +479,7 @@ package android {
     field public static final int hand_hour = 16843011; // 0x1010103
     field public static final int hand_minute = 16843012; // 0x1010104
     field public static final int handle = 16843354; // 0x101025a
+    field public static final int handleDrawable = 16843657; // 0x1010389
     field public static final int handleProfiling = 16842786; // 0x1010022
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
     field public static final int hardwareAccelerated = 16843475; // 0x10102d3
@@ -486,10 +488,12 @@ package android {
     field public static final int headerDividersEnabled = 16843310; // 0x101022e
     field public static final int height = 16843093; // 0x1010155
     field public static final int hint = 16843088; // 0x1010150
+    field public static final int hitRadius = 16843662; // 0x101038e
     field public static final int homeAsUpIndicator = 16843531; // 0x101030b
     field public static final int homeLayout = 16843549; // 0x101031d
     field public static final int horizontalDivider = 16843053; // 0x101012d
     field public static final int horizontalGap = 16843327; // 0x101023f
+    field public static final int horizontalOffset = 16843667; // 0x1010393
     field public static final int horizontalScrollViewStyle = 16843603; // 0x1010353
     field public static final int horizontalSpacing = 16843028; // 0x1010114
     field public static final int host = 16842792; // 0x1010028
@@ -610,6 +614,7 @@ package android {
     field public static final int layout_x = 16843135; // 0x101017f
     field public static final int layout_y = 16843136; // 0x1010180
     field public static final int left = 16843181; // 0x10101ad
+    field public static final int leftChevronDrawable = 16843658; // 0x101038a
     field public static final int lineSpacingExtra = 16843287; // 0x1010217
     field public static final int lineSpacingMultiplier = 16843288; // 0x1010218
     field public static final int lines = 16843092; // 0x1010154
@@ -681,6 +686,7 @@ package android {
     field public static final int orderingFromXml = 16843239; // 0x10101e7
     field public static final int orientation = 16842948; // 0x10100c4
     field public static final int outAnimation = 16843128; // 0x1010178
+    field public static final int outerRadius = 16843661; // 0x101038d
     field public static final int overScrollFooter = 16843459; // 0x10102c3
     field public static final int overScrollHeader = 16843458; // 0x10102c2
     field public static final int overScrollMode = 16843457; // 0x10102c1
@@ -769,6 +775,7 @@ package android {
     field public static final int restoreAnyVersion = 16843450; // 0x10102ba
     field public static final deprecated int restoreNeedsApplication = 16843421; // 0x101029d
     field public static final int right = 16843183; // 0x10101af
+    field public static final int rightChevronDrawable = 16843659; // 0x101038b
     field public static final int ringtonePreferenceStyle = 16842899; // 0x1010093
     field public static final int ringtoneType = 16843257; // 0x10101f9
     field public static final int rotation = 16843558; // 0x1010326
@@ -844,6 +851,7 @@ package android {
     field public static final int smallIcon = 16843422; // 0x101029e
     field public static final int smallScreens = 16843396; // 0x1010284
     field public static final int smoothScrollbar = 16843313; // 0x1010231
+    field public static final int snapMargin = 16843664; // 0x1010390
     field public static final int soundEffectsEnabled = 16843285; // 0x1010215
     field public static final int spacing = 16843027; // 0x1010113
     field public static final int spinnerDropDownItemStyle = 16842887; // 0x1010087
@@ -908,6 +916,7 @@ package android {
     field public static final int tag = 16842961; // 0x10100d1
     field public static final int targetActivity = 16843266; // 0x1010202
     field public static final int targetClass = 16842799; // 0x101002f
+    field public static final int targetDrawables = 16843656; // 0x1010388
     field public static final int targetPackage = 16842785; // 0x1010021
     field public static final int targetSdkVersion = 16843376; // 0x1010270
     field public static final int taskAffinity = 16842770; // 0x1010012
@@ -1026,8 +1035,10 @@ package android {
     field public static final int verticalCorrection = 16843322; // 0x101023a
     field public static final int verticalDivider = 16843054; // 0x101012e
     field public static final int verticalGap = 16843328; // 0x1010240
+    field public static final int verticalOffset = 16843666; // 0x1010392
     field public static final int verticalScrollbarPosition = 16843572; // 0x1010334
     field public static final int verticalSpacing = 16843029; // 0x1010115
+    field public static final int vibrationDuration = 16843663; // 0x101038f
     field public static final int visibility = 16842972; // 0x10100dc
     field public static final int visible = 16843156; // 0x1010194
     field public static final int vmSafeMode = 16843448; // 0x10102b8
@@ -1044,6 +1055,7 @@ package android {
     field public static final int wallpaperIntraOpenExitAnimation = 16843416; // 0x1010298
     field public static final int wallpaperOpenEnterAnimation = 16843411; // 0x1010293
     field public static final int wallpaperOpenExitAnimation = 16843412; // 0x1010294
+    field public static final int waveDrawable = 16843660; // 0x101038c
     field public static final int webTextViewStyle = 16843449; // 0x10102b9
     field public static final int webViewStyle = 16842885; // 0x1010085
     field public static final int weekDayTextAppearance = 16843592; // 0x1010348

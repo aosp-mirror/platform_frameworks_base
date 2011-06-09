@@ -333,4 +333,19 @@
         <item>中文 (繁體)</item>
     </string-array>
 
+    <!-- Resources for MultiWaveView in LockScreen -->
+    <array name="lockscreen_targets_when_silent">
+        <item>@drawable/ic_lockscreen_unlock</item>
+        <item>@null</item>
+        <item>@drawable/ic_lockscreen_soundon</item>
+        <item>@null</item>
+    </array>
+
+    <array name="lockscreen_targets_when_soundon">
+        <item>@drawable/ic_lockscreen_unlock</item>
+        <item>@null</item>
+        <item>@drawable/ic_lockscreen_silent</item>
+        <item>@null</item>"
+    </array>
+
 </resources>

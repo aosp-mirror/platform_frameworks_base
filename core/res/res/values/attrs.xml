@@ -5009,6 +5009,48 @@
     </declare-styleable>
 
     <!-- =============================== -->
+    <!-- MultiWaveView class attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+    <declare-styleable name="MultiWaveView">
+        <!-- Reference to an array resource that be shown as targets around a circle. -->
+        <attr name="targetDrawables" format="reference"/>
+
+        <!-- Sets a drawable as the drag center. -->
+        <attr name="handleDrawable" format="reference" />
+
+        <!-- Drawable to use for chevron animation on the left. -->
+        <attr name="leftChevronDrawable" format="reference" />
+
+        <!-- Drawable to use for chevron animation on the right. -->
+        <attr name="rightChevronDrawable" format="reference" />
+
+        <!-- Drawable to use for wave ripple animation. -->
+        <attr name="waveDrawable" format="reference" />
+
+        <!-- Outer radius of target circle. Icons will be drawn on this circle. -->
+        <attr name="outerRadius" format="dimension" />
+
+        <!-- Size of target radius. Points within this distance of target center is a "hit". -->
+        <attr name="hitRadius" format="dimension" />
+
+        <!-- Tactile feedback duration for actions. Set to '0' for no vibration. -->
+        <attr name="vibrationDuration" format="integer"/>
+
+        <!-- How close we need to be before snapping to a target. -->
+        <attr name="snapMargin" format="dimension" />
+
+        <!-- Number of waves/chevrons to show in animation. -->
+        <attr name="feedbackCount" format="integer" />
+
+        <!-- Used to shift center of pattern vertically. -->
+        <attr name="verticalOffset" format="dimension" />
+
+        <!-- Used to shift center of pattern horizontally. -->
+        <attr name="horizontalOffset" format="dimension" />
+    </declare-styleable>
+
+    <!-- =============================== -->
     <!-- LockPatternView class attributes -->
     <!-- =============================== -->
     <eat-comment />
@@ -5145,7 +5187,7 @@
     </declare-styleable>
 
     <declare-styleable name="Storage">
-        <!-- path to mount point for the storage --> 
+        <!-- path to mount point for the storage -->
         <attr name="mountPoint" format="string" />
         <!-- user visible description of the storage -->
         <attr name="storageDescription" format="string" />
