@@ -121,6 +121,15 @@ public class CDMALTEPhone extends CDMAPhone {
     }
 
     @Override
+    public void setSystemLocale(String language, String country, boolean fromMcc) {
+        // Avoid system locale is set from MCC table if CDMALTEPhone is used.
+        // The locale will be picked up based on EFpl/EFli once CSIM records are loaded.
+        if (fromMcc) return;
+
+        super.setSystemLocale(language, country, false);
+    }
+
+    @Override
     protected void log(String s) {
         if (DBG)
             Log.d(LOG_TAG, "[CDMALTEPhone] " + s);

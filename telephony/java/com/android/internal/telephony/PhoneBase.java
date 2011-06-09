@@ -580,7 +580,7 @@ public abstract class PhoneBase extends Handler implements Phone {
                 if (l.length() >=5) {
                     country = l.substring(3, 5);
                 }
-                setSystemLocale(language, country);
+                setSystemLocale(language, country, false);
 
                 if (!country.isEmpty()) {
                     try {
@@ -602,10 +602,14 @@ public abstract class PhoneBase extends Handler implements Phone {
      * Utility code to set the system locale if it's not set already
      * @param language Two character language code desired
      * @param country Two character country code desired
+     * @param fromMcc Indicating whether the locale is set according to MCC table.
+     *                This flag wil be ignored by default implementation.
+     *                TODO: Use a source enumeration so that source of the locale
+     *                      can be prioritized.
      *
      *  {@hide}
      */
-    public void setSystemLocale(String language, String country) {
+    public void setSystemLocale(String language, String country, boolean fromMcc) {
         String l = SystemProperties.get("persist.sys.language");
         String c = SystemProperties.get("persist.sys.country");
 
