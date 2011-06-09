@@ -82,6 +82,7 @@ public final class SipService extends ISipService.Stub {
     private WifiScanProcess mWifiScanProcess;
     private WifiManager.WifiLock mWifiLock;
     private boolean mWifiOnly;
+    private IntervalMeasurementProcess mIntervalMeasurementProcess;
 
     private MyExecutor mExecutor;
 
@@ -96,6 +97,7 @@ public final class SipService extends ISipService.Stub {
     private ConnectivityReceiver mConnectivityReceiver;
     private boolean mWifiEnabled;
     private SipWakeLock mMyWakeLock;
+    private int mKeepAliveInterval;
 
     /**
      * Starts the SIP service. Do nothing if the SIP API is not supported on the
@@ -441,17 +443,31 @@ public final class SipService extends ISipService.Stub {
 
             if (connected) {
                 mLocalIp = determineLocalIp();
+                mKeepAliveInterval = -1;
                 for (SipSessionGroupExt group : mSipGroups.values()) {
                     group.onConnectivityChanged(true);
                 }
                 if (isWifi && (mWifiLock != null)) stopWifiScanner();
             } else {
                 mMyWakeLock.reset(); // in case there's a leak
+                stopPortMappingMeasurement();
                 if (isWifi && (mWifiLock != null)) startWifiScanner();
             }
         } catch (SipException e) {
             Log.e(TAG, "onConnectivityChanged()", e);
         }
+    }
+
+    private void stopPortMappingMeasurement() {
+        if (mIntervalMeasurementProcess != null) {
+            mIntervalMeasurementProcess.stop();
+            mIntervalMeasurementProcess = null;
+        }
+    }
+
+    private void startPortMappingLifetimeMeasurement(SipSessionGroup group) {
+        mIntervalMeasurementProcess = new IntervalMeasurementProcess(group);
+        mIntervalMeasurementProcess.start();
     }
 
     private synchronized void addPendingSession(ISipSession session) {
@@ -687,6 +703,93 @@ public final class SipService extends ISipService.Stub {
         }
     }
 
+    private class IntervalMeasurementProcess extends SipSessionAdapter
+            implements Runnable {
+        private static final String TAG = "\\INTERVAL/";
+        private static final int MAX_INTERVAL = 120; // seconds
+        private static final int MIN_INTERVAL = SHORT_EXPIRY_TIME;
+        private static final int PASS_THRESHOLD = 6;
+        private SipSessionGroupExt mGroup;
+        private SipSessionGroup.SipSessionImpl mSession;
+        private boolean mRunning;
+        private int mMinInterval = 10;
+        private int mMaxInterval = MAX_INTERVAL;
+        private int mInterval = MAX_INTERVAL / 2;
+        private int mPassCounter = 0;
+        private WakeupTimer mTimer = new WakeupTimer(mContext);
+
+
+        public IntervalMeasurementProcess(SipSessionGroup group) {
+            try {
+                mGroup =  new SipSessionGroupExt(
+                        group.getLocalProfile(), null, null);
+                mSession = (SipSessionGroup.SipSessionImpl)
+                        mGroup.createSession(this);
+            } catch (Exception e) {
+                Log.w(TAG, "start interval measurement error: " + e);
+            }
+        }
+
+        public void start() {
+            if (mRunning) return;
+            mRunning = true;
+            mTimer.set(mInterval * 1000, this);
+            if (DEBUGV) Log.v(TAG, "start interval measurement");
+            run();
+        }
+
+        public void stop() {
+            mRunning = false;
+            mTimer.cancel(this);
+        }
+
+        private void restart() {
+            mTimer.cancel(this);
+            mTimer.set(mInterval * 1000, this);
+        }
+
+        private void calculateNewInterval() {
+            if (!mSession.isReRegisterRequired()) {
+                if (++mPassCounter != PASS_THRESHOLD) return;
+                // update the interval, since the current interval is good to
+                // keep the port mapping.
+                mKeepAliveInterval = mMinInterval = mInterval;
+            } else {
+                // Since the rport is changed, shorten the interval.
+                mSession.clearReRegisterRequired();
+                mMaxInterval = mInterval;
+            }
+            if ((mMaxInterval - mMinInterval) < MIN_INTERVAL) {
+                // update mKeepAliveInterval and stop measurement.
+                stop();
+                mKeepAliveInterval = mMinInterval;
+                if (DEBUGV) Log.v(TAG, "measured interval: " + mKeepAliveInterval);
+            } else {
+                // calculate the new interval and continue.
+                mInterval = (mMaxInterval + mMinInterval) / 2;
+                mPassCounter = 0;
+                if (DEBUGV) {
+                    Log.v(TAG, " current interval: " + mKeepAliveInterval
+                            + "test new interval: " + mInterval);
+                }
+                restart();
+            }
+        }
+
+        public void run() {
+            synchronized (SipService.this) {
+                if (!mRunning) return;
+                try {
+                    mSession.sendKeepAlive();
+                    calculateNewInterval();
+                } catch (Throwable t) {
+                    stop();
+                    Log.w(TAG, "interval measurement error: " + t);
+                }
+            }
+        }
+    }
+
     // KeepAliveProcess is controlled by AutoRegistrationProcess.
     // All methods will be invoked in sync with SipService.this.
     private class KeepAliveProcess implements Runnable {
@@ -694,6 +797,7 @@ public final class SipService extends ISipService.Stub {
         private static final int INTERVAL = 10;
         private SipSessionGroup.SipSessionImpl mSession;
         private boolean mRunning = false;
+        private int mInterval = INTERVAL;
 
         public KeepAliveProcess(SipSessionGroup.SipSessionImpl session) {
             mSession = session;
@@ -703,6 +807,12 @@ public final class SipService extends ISipService.Stub {
             if (mRunning) return;
             mRunning = true;
             mTimer.set(INTERVAL * 1000, this);
+        }
+
+        private void restart(int duration) {
+            if (DEBUG) Log.d(TAG, "Refresh NAT port mapping " + duration + "s later.");
+            mTimer.cancel(this);
+            mTimer.set(duration * 1000, this);
         }
 
         // timeout handler
@@ -720,6 +830,10 @@ public final class SipService extends ISipService.Stub {
                         // lock will be released when registration is complete.
                         mMyWakeLock.acquire(mSession);
                         mSession.register(EXPIRY_TIME);
+                    }
+                    if (mKeepAliveInterval > mInterval) {
+                        mInterval = mKeepAliveInterval;
+                        restart(mInterval);
                     }
                 } catch (Throwable t) {
                     Log.w(TAG, "keepalive error: " + t);
@@ -760,6 +874,17 @@ public final class SipService extends ISipService.Stub {
                         group.createSession(this);
                 // return right away if no active network connection.
                 if (mSession == null) return;
+
+                synchronized (SipService.this) {
+                    if (isBehindNAT(mLocalIp)
+                            && (mIntervalMeasurementProcess == null)
+                            && (mKeepAliveInterval == -1)) {
+                        // Start keep-alive interval measurement, here we allow
+                        // the first profile only as the target service provider
+                        // to measure the life time of NAT port mapping.
+                        startPortMappingLifetimeMeasurement(group);
+                    }
+                }
 
                 // start unregistration to clear up old registration at server
                 // TODO: when rfc5626 is deployed, use reg-id and sip.instance
