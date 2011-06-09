@@ -1132,17 +1132,17 @@
         <item name="android:src">?android:attr/actionModeCloseDrawable</item>
     </style>
 
-    <style name="Widget.ActionBarView_TabView">
+    <style name="Widget.ActionBar.TabView" parent="Widget">
         <item name="android:gravity">center_horizontal</item>
         <item name="android:background">@drawable/minitab_lt</item>
         <item name="android:paddingLeft">4dip</item>
         <item name="android:paddingRight">4dip</item>
     </style>
 
-    <style name="Widget.ActionBarView_TabBar">
+    <style name="Widget.ActionBar.TabBar" parent="Widget">
     </style>
 
-    <style name="Widget.ActionBarView_TabText">
+    <style name="Widget.ActionBar.TabText" parent="Widget">
         <item name="android:textAppearance">@style/TextAppearance.Widget.TextView.PopupMenu</item>
         <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
         <item name="android:textSize">18sp</item>
@@ -1797,22 +1797,22 @@
     <style name="Widget.Holo.ActionButton.TextButton" parent="Widget.Holo.ButtonBar.Button">
     </style>
 
-    <style name="Widget.Holo.ActionBarView_TabView" parent="Widget.ActionBarView_TabView">
+    <style name="Widget.Holo.ActionBar.TabView" parent="Widget.ActionBar.TabView">
         <item name="android:background">@drawable/tab_indicator_holo</item>
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">16dip</item>
     </style>
 
-    <style name="Widget.Holo.Tab" parent="Widget.Holo.ActionBarView_TabView">
+    <style name="Widget.Holo.Tab" parent="Widget.Holo.ActionBar.TabView">
     </style>
 
-    <style name="Widget.Holo.ActionBarView_TabBar" parent="Widget.ActionBarView_TabBar">
+    <style name="Widget.Holo.ActionBar.TabBar" parent="Widget.ActionBar.TabBar">
         <item name="android:divider">?android:attr/dividerVertical</item>
         <item name="android:showDividers">middle</item>
         <item name="android:dividerPadding">8dip</item>
     </style>
 
-    <style name="Widget.Holo.ActionBarView_TabText" parent="Widget.ActionBarView_TabText">
+    <style name="Widget.Holo.ActionBar.TabText" parent="Widget.ActionBar.TabText">
         <item name="android:textAppearance">@style/TextAppearance.Holo.Medium</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">18sp</item>
@@ -2131,16 +2131,16 @@
         <item name="android:contentDescription">@string/action_menu_overflow_description</item>
     </style>
 
-    <style name="Widget.Holo.Light.ActionBarView_TabView" parent="Widget.Holo.ActionBarView_TabView">
+    <style name="Widget.Holo.Light.ActionBar.TabView" parent="Widget.Holo.ActionBar.TabView">
     </style>
 
-    <style name="Widget.Holo.Light.Tab" parent="Widget.Holo.Light.ActionBarView_TabView">
+    <style name="Widget.Holo.Light.Tab" parent="Widget.Holo.Light.ActionBar.TabView">
     </style>
 
-    <style name="Widget.Holo.Light.ActionBarView_TabBar" parent="Widget.Holo.ActionBarView_TabBar">
+    <style name="Widget.Holo.Light.ActionBar.TabBar" parent="Widget.Holo.ActionBar.TabBar">
     </style>
 
-    <style name="Widget.Holo.Light.ActionBarView_TabText" parent="Widget.Holo.ActionBarView_TabText">
+    <style name="Widget.Holo.Light.ActionBar.TabText" parent="Widget.Holo.ActionBar.TabText">
     </style>
 
     <style name="Widget.Holo.Light.ActionMode" parent="Widget.Holo.ActionMode">
