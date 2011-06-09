@@ -134,5 +134,35 @@ public class BaseObj {
         mName = mRS.nGetName(getID());
     }
 
+    /**
+     * Calculates the hash code value for a BaseObj.
+     *
+     * @return int
+     */
+    @Override
+    public int hashCode() {
+        return mID;
+    }
+
+    /**
+     * Compare the current BaseObj with another BaseObj for equality.
+     *
+     * @param obj The object to check equality with.
+     *
+     * @return boolean
+     */
+    @Override
+    public boolean equals(Object obj) {
+        // Early-out check to see if both BaseObjs are actually the same
+        if (this == obj)
+            return true;
+
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+
+        BaseObj b = (BaseObj) obj;
+        return mID == b.mID;
+    }
 }
 
