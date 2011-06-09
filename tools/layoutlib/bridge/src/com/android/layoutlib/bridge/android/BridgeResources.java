@@ -125,8 +125,10 @@ public final class BridgeResources extends Resources {
         mProjectCallback = projectCallback;
     }
 
-    public BridgeTypedArray newTypeArray(int numEntries, boolean platformFile) {
-        return new BridgeTypedArray(this, mContext, numEntries, platformFile);
+    public BridgeTypedArray newTypeArray(int numEntries, boolean platformFile,
+            boolean platformStyleable, String styleableName) {
+        return new BridgeTypedArray(this, mContext, numEntries, platformFile,
+                platformStyleable, styleableName);
     }
 
     private ResourceValue getResourceValue(int id, boolean[] platformResFlag_out) {
@@ -232,7 +234,7 @@ public final class BridgeResources extends Resources {
             try {
                 // check if the current parser can provide us with a custom parser.
                 if (mPlatformResourceFlag[0] == false) {
-                    parser = mProjectCallback.getParser(value.getName());
+                    parser = mProjectCallback.getParser(value);
                 }
 
                 // create a new one manually if needed.
