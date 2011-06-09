@@ -29,7 +29,6 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -305,7 +304,14 @@ public class InterrogationActivityTest
 
             // focus the view
             assertTrue(button.performAction(ACTION_FOCUS));
-            SystemClock.sleep(200);
+
+            synchronized (sConnection) {
+                try {
+                    sConnection.wait(500);
+                } catch (InterruptedException ie) {
+                    /* ignore */
+                }
+            }
 
             // check that last event source
             AccessibilityNodeInfo source = sLastAccessibilityEvent.getSource();
@@ -436,7 +442,10 @@ public class InterrogationActivityTest
                 public void onInterrupt() {}
 
                 public void onAccessibilityEvent(AccessibilityEvent event) {
-                    sLastAccessibilityEvent= AccessibilityEvent.obtain(event);
+                    sLastAccessibilityEvent = AccessibilityEvent.obtain(event);
+                    synchronized (sConnection) {
+                        sConnection.notifyAll();
+                    }
                 }
             };
             IAccessibilityManager manager = IAccessibilityManager.Stub.asInterface(
