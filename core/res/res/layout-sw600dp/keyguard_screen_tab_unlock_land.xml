@@ -44,31 +44,21 @@
     </RelativeLayout>
 
     <!-- right side -->
-    <LinearLayout
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_width="0dip"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal"
-                >
-        <TextView
-                android:id="@+id/screenLocked"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/status2"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:gravity="center"
-                android:layout_marginTop="12dip"
-                android:drawablePadding="4dip"
-                />
+    <RelativeLayout
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:layout_width="0dip"
+        android:gravity="center_horizontal|center_vertical">
 
-        <com.android.internal.widget.WaveView
-            android:id="@+id/wave_view"
+        <TextView android:id="@+id/screenLocked"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginRight="0dip"
-            android:layout_weight="1.0"
-            />
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:gravity="center"
+            android:layout_marginTop="12dip"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:drawablePadding="4dip"/>
 
         <!-- "emergency calls only" shown when sim is missing or PUKd -->
         <TextView
@@ -76,24 +66,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="20dip"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="12dip"
             android:text="@string/emergency_calls_only"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@color/white"
-               />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/white"/>
 
-        <!-- emergency call button shown when sim is PUKd and tab_selector is
-             hidden -->
+
+        <com.android.internal.widget.WaveView
+            android:id="@+id/wave_view"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:layout_marginRight="0dip"
+            android:layout_weight="1.0"/>
+
+
+        <!-- emergency call button shown when sim is PUKd and tab_selector is hidden -->
         <Button
             android:id="@+id/emergencyCallButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="80dip"
+            android:layout_marginBottom="80dip"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
             android:drawableLeft="@drawable/ic_emergency"
             style="@style/Widget.Button.Transparent"
-            android:drawablePadding="8dip"
-            android:layout_marginRight="80dip"
-            android:visibility="gone"
-            />
+            android:drawablePadding="8dip"/>
 
-    </LinearLayout>
+    </RelativeLayout>>
+
 </LinearLayout>
