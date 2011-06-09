@@ -78,6 +78,7 @@ package android {
     field public static final java.lang.String READ_INPUT_STATE = "android.permission.READ_INPUT_STATE";
     field public static final java.lang.String READ_LOGS = "android.permission.READ_LOGS";
     field public static final java.lang.String READ_PHONE_STATE = "android.permission.READ_PHONE_STATE";
+    field public static final java.lang.String READ_PROFILE = "android.permission.READ_PROFILE";
     field public static final java.lang.String READ_SMS = "android.permission.READ_SMS";
     field public static final java.lang.String READ_SYNC_SETTINGS = "android.permission.READ_SYNC_SETTINGS";
     field public static final java.lang.String READ_SYNC_STATS = "android.permission.READ_SYNC_STATS";
@@ -121,6 +122,7 @@ package android {
     field public static final java.lang.String WRITE_EXTERNAL_STORAGE = "android.permission.WRITE_EXTERNAL_STORAGE";
     field public static final java.lang.String WRITE_GSERVICES = "android.permission.WRITE_GSERVICES";
     field public static final java.lang.String WRITE_HISTORY_BOOKMARKS = "com.android.browser.permission.WRITE_HISTORY_BOOKMARKS";
+    field public static final java.lang.String WRITE_PROFILE = "android.permission.WRITE_PROFILE";
     field public static final java.lang.String WRITE_SECURE_SETTINGS = "android.permission.WRITE_SECURE_SETTINGS";
     field public static final java.lang.String WRITE_SETTINGS = "android.permission.WRITE_SETTINGS";
     field public static final java.lang.String WRITE_SMS = "android.permission.WRITE_SMS";
@@ -15195,6 +15197,7 @@ package android.provider {
     field public static final android.net.Uri AUTHORITY_URI;
     field public static final java.lang.String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
     field public static final java.lang.String DIRECTORY_PARAM_KEY = "directory";
+    field public static final java.lang.String INCLUDE_PROFILE = "include_profile";
     field public static final java.lang.String LIMIT_PARAM_KEY = "limit";
   }
 
@@ -15494,6 +15497,7 @@ package android.provider {
     field public static final java.lang.String DISPLAY_NAME = "display_name";
     field public static final java.lang.String HAS_PHONE_NUMBER = "has_phone_number";
     field public static final java.lang.String IN_VISIBLE_GROUP = "in_visible_group";
+    field public static final java.lang.String IS_USER_PROFILE = "is_user_profile";
     field public static final java.lang.String LOOKUP_KEY = "lookup";
     field public static final java.lang.String PHOTO_ID = "photo_id";
     field public static final java.lang.String PHOTO_THUMBNAIL_URI = "photo_thumb_uri";
@@ -15677,6 +15681,12 @@ package android.provider {
     field public static final java.lang.String PROTOCOL = "protocol";
   }
 
+  public static final class ContactsContract.Profile implements android.provider.BaseColumns android.provider.ContactsContract.ContactNameColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactStatusColumns android.provider.ContactsContract.ContactsColumns {
+    field public static final android.net.Uri CONTENT_RAW_CONTACTS_URI;
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final android.net.Uri CONTENT_VCARD_URI;
+  }
+
   public static final class ContactsContract.QuickContact {
     ctor public ContactsContract.QuickContact();
     method public static void showQuickContact(android.content.Context, android.view.View, android.net.Uri, int, java.lang.String[]);
@@ -15712,6 +15722,7 @@ package android.provider {
     field public static final java.lang.String CONTACT_ID = "contact_id";
     field public static final java.lang.String DELETED = "deleted";
     field public static final java.lang.String RAW_CONTACT_IS_READ_ONLY = "raw_contact_is_read_only";
+    field public static final java.lang.String RAW_CONTACT_IS_USER_PROFILE = "raw_contact_is_user_profile";
   }
 
   public static final class ContactsContract.RawContactsEntity implements android.provider.BaseColumns android.provider.ContactsContract.DataColumns android.provider.ContactsContract.RawContactsColumns {
