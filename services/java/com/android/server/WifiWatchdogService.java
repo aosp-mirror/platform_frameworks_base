@@ -78,9 +78,9 @@ import java.util.Scanner;
  */
 public class WifiWatchdogService {
     private static final String TAG = "WifiWatchdogService";
-    private static final boolean V = false || false;
-    private static final boolean D = true || false;
-    
+    private static final boolean V = false;
+    private static final boolean D = true;
+
     private Context mContext;
     private ContentResolver mContentResolver;
     private WifiManager mWifiManager;
@@ -108,17 +108,16 @@ public class WifiWatchdogService {
     private String mSsid;
     /**
      * The number of access points in the current network ({@link #mSsid}) that
-     * have been checked. Only touched in the main thread!
+     * have been checked. Only touched in the main thread, using getter/setter methods.
      */
-    private int mNumApsChecked;
+    private int mBssidCheckCount;
     /** Whether the current AP check should be canceled. */
     private boolean mShouldCancel;
-    
+
     WifiWatchdogService(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        
         createThread();
         
         // The content observer to listen needs a handler, which createThread creates
@@ -410,6 +409,9 @@ public class WifiWatchdogService {
                  * Successful "ignored" pings are *not* ignored (they count in the total number
                  * of pings), but failures are really ignored.
                  */
+
+                // TODO: This is confusing logic and should be rewitten
+                // Here, successful 'ignored' pings are interpreted as a success in the below loop
                 pingCounter++;
                 successCounter++;
             }
@@ -451,6 +453,7 @@ public class WifiWatchdogService {
             }
         }
 
+        //TODO: Integer division might cause problems down the road...
         int packetLossPercentage = 100 * (numPings - successCounter) / numPings;
         if (D) {
             Slog.d(TAG, packetLossPercentage
@@ -470,7 +473,7 @@ public class WifiWatchdogService {
             return false;
         }
 
-        if (false && V) {
+        if (V) {
             myLogV("backgroundCheckDnsConnectivity: Background checking " +
                     dns.getHostAddress() + " for connectivity");
         }
@@ -731,8 +734,8 @@ public class WifiWatchdogService {
          * Checks to make sure we haven't exceeded the max number of checks
          * we're allowed per network
          */
-        mNumApsChecked++;
-        if (mNumApsChecked > getMaxApChecks()) {
+        incrementBssidCheckCount();
+        if (getBssidCheckCount() > getMaxApChecks()) {
             if (V) {
                 Slog.v(TAG, "  Passed the max attempts (" + getMaxApChecks()
                         + "), going to sleep for " + mSsid);
@@ -823,7 +826,7 @@ public class WifiWatchdogService {
         // Reset the cancel state since this is the entry point of this action
         mShouldCancel = false;
         
-        if (false && V) {
+        if (V) {
             myLogV("handleBackgroundCheckAp: AccessPoint: " + ap);
         }
         
@@ -962,7 +965,7 @@ public class WifiWatchdogService {
         if (forceIdleState || (mState != WatchdogState.SLEEP)) {
             mState = WatchdogState.IDLE;
         }
-        mNumApsChecked = 0;
+        resetBssidCheckCount();
     }
 
     /**
@@ -988,6 +991,18 @@ public class WifiWatchdogService {
         CHECKING_AP,
         /** The watchdog is switching to another AP in the network. */
         SWITCHING_AP
+    }
+
+    private int getBssidCheckCount() {
+        return mBssidCheckCount;
+    }
+
+    private void incrementBssidCheckCount() {
+        mBssidCheckCount++;
+    }
+
+    private void resetBssidCheckCount() {
+        this.mBssidCheckCount = 0;
     }
 
     /**
@@ -1120,6 +1135,9 @@ public class WifiWatchdogService {
         
         @Override
         public void handleMessage(Message msg) {
+            if (V) {
+                myLogV("handleMessage: " + msg.what);
+            }
             switch (msg.what) {
                 case MESSAGE_NETWORK_CHANGED:
                     handleNetworkChanged((String) msg.obj);
@@ -1263,34 +1281,36 @@ public class WifiWatchdogService {
 
     /**
      * Describes an access point by its SSID and BSSID.
+     *
      */
     private static class AccessPoint {
         String ssid;
         String bssid;
         
+        /**
+         * @param ssid cannot be null
+         * @param bssid cannot be null
+         */
         AccessPoint(String ssid, String bssid) {
+            if (ssid == null || bssid == null) {
+                Slog.e(TAG, String.format("(%s) INVALID ACCESSPOINT: (%s, %s)",
+                        Thread.currentThread().getName(),ssid,bssid));
+            }
             this.ssid = ssid;
             this.bssid = bssid;
-        }
-
-        private boolean hasNull() {
-            return ssid == null || bssid == null;
         }
         
         @Override
         public boolean equals(Object o) {
             if (!(o instanceof AccessPoint)) return false;
             AccessPoint otherAp = (AccessPoint) o;
-            boolean iHaveNull = hasNull();
+
             // Either we both have a null, or our SSIDs and BSSIDs are equal
-            return (iHaveNull && otherAp.hasNull()) || 
-                    (otherAp.bssid != null && ssid.equals(otherAp.ssid)
-                    && bssid.equals(otherAp.bssid));
+            return ssid.equals(otherAp.ssid) && bssid.equals(otherAp.bssid);
         }
         
         @Override
         public int hashCode() {
-            if (ssid == null || bssid == null) return 0;
             return ssid.hashCode() + bssid.hashCode();
         }
 
@@ -1365,7 +1385,7 @@ public class WifiWatchdogService {
                 return false;
                 
             } catch (Exception e) {
-                if (V || false) {
+                if (V) {
                     Slog.d(TAG, "DnsPinger.isReachable got an unknown exception", e);
                 }
                 return false;
