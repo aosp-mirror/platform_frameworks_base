@@ -1308,6 +1308,7 @@ void MPEG4Writer::writeAllChunks() {
     size_t outstandingChunks = 0;
     Chunk chunk;
     while (findChunkToWrite(&chunk)) {
+        writeChunkToFile(&chunk);
         ++outstandingChunks;
     }
 
