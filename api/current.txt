@@ -17455,21 +17455,23 @@ package android.speech {
 
 package android.speech.tts {
 
-  public abstract class SynthesisRequest {
-    ctor public SynthesisRequest(java.lang.String, android.os.Bundle);
+  public abstract interface SynthesisCallback {
     method public abstract int audioAvailable(byte[], int, int);
     method public abstract int completeAudioAvailable(int, int, int, byte[], int, int);
     method public abstract int done();
     method public abstract void error();
+    method public abstract int getMaxBufferSize();
+    method public abstract int start(int, int, int);
+  }
+
+  public final class SynthesisRequest {
     method public java.lang.String getCountry();
     method public java.lang.String getLanguage();
-    method public abstract int getMaxBufferSize();
     method public android.os.Bundle getParams();
     method public int getPitch();
     method public int getSpeechRate();
     method public java.lang.String getText();
     method public java.lang.String getVariant();
-    method public abstract int start(int, int, int);
   }
 
   public class TextToSpeech {
@@ -17555,7 +17557,7 @@ package android.speech.tts {
     method protected abstract int onIsLanguageAvailable(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract int onLoadLanguage(java.lang.String, java.lang.String, java.lang.String);
     method protected abstract void onStop();
-    method protected abstract void onSynthesizeText(android.speech.tts.SynthesisRequest);
+    method protected abstract void onSynthesizeText(android.speech.tts.SynthesisRequest, android.speech.tts.SynthesisCallback);
   }
 
 }

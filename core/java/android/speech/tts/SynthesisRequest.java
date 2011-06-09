@@ -18,17 +18,22 @@ package android.speech.tts;
 import android.os.Bundle;
 
 /**
- * A request for speech synthesis given to a TTS engine for processing.
+ * Contains data required by engines to synthesize speech. This data is :
+ * <ul>
+ *   <li>The text to synthesize</li>
+ *   <li>The synthesis locale, represented as a language, country and a variant.
+ *   The language is an ISO 639-3 letter language code, and the country is an
+ *   ISO 3166 alpha 3 code. The variant is not specified.</li>
+ *   <li>The synthesis speech rate, with 100 being the normal, and
+ *   higher values representing higher speech rates.</li>
+ *   <li>The voice pitch, with 100 being the default pitch.</li>
+ * </ul>
  *
- * The engine can provide streaming audio by calling
- * {@link #start}, then {@link #audioAvailable} until all audio has been provided, then finally
- * {@link #done}.
- *
- * Alternatively, the engine can provide all the audio at once, by using
- * {@link #completeAudioAvailable}.
+ * Any additional parameters sent to the text to speech service are passed in
+ * uninterpreted, see the @code{params} argument in {@link TextToSpeech#speak}
+ * and {@link TextToSpeech#synthesizeToFile}.
  */
-public abstract class SynthesisRequest {
-
+public final class SynthesisRequest {
     private final String mText;
     private final Bundle mParams;
     private String mLanguage;
@@ -37,32 +42,10 @@ public abstract class SynthesisRequest {
     private int mSpeechRate;
     private int mPitch;
 
-    public SynthesisRequest(String text, Bundle params) {
+    SynthesisRequest(String text, Bundle params) {
         mText = text;
+        // Makes a copy of params.
         mParams = new Bundle(params);
-    }
-
-    /**
-     * Sets the locale for the request.
-     */
-    void setLanguage(String language, String country, String variant) {
-        mLanguage = language;
-        mCountry = country;
-        mVariant = variant;
-    }
-
-    /**
-     * Sets the speech rate.
-     */
-    void setSpeechRate(int speechRate) {
-        mSpeechRate = speechRate;
-    }
-
-    /**
-     * Sets the pitch.
-     */
-    void setPitch(int pitch) {
-        mPitch = pitch;
     }
 
     /**
@@ -115,86 +98,25 @@ public abstract class SynthesisRequest {
     }
 
     /**
-     * Gets the maximum number of bytes that the TTS engine can pass in a single call of
-     * {@link #audioAvailable}. This does not apply to {@link #completeAudioAvailable}.
+     * Sets the locale for the request.
      */
-    public abstract int getMaxBufferSize();
+    void setLanguage(String language, String country, String variant) {
+        mLanguage = language;
+        mCountry = country;
+        mVariant = variant;
+    }
 
     /**
-     * Checks whether the synthesis request completed successfully.
+     * Sets the speech rate.
      */
-    abstract boolean isDone();
+    void setSpeechRate(int speechRate) {
+        mSpeechRate = speechRate;
+    }
 
     /**
-     * Aborts the speech request.
-     *
-     * Can be called from multiple threads.
+     * Sets the pitch.
      */
-    abstract void stop();
-
-    /**
-     * The service should call this when it starts to synthesize audio for this
-     * request.
-     *
-     * This method should only be called on the synthesis thread,
-     * while in {@link TextToSpeechService#onSynthesizeText}.
-     *
-     * @param sampleRateInHz Sample rate in HZ of the generated audio.
-     * @param audioFormat Audio format of the generated audio. Must be one of
-     *         the ENCODING_ constants defined in {@link android.media.AudioFormat}.
-     * @param channelCount The number of channels. Must be {@code 1} or {@code 2}.
-     * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
-     */
-    public abstract int start(int sampleRateInHz, int audioFormat, int channelCount);
-
-    /**
-     * The service should call this method when synthesized audio is ready for consumption.
-     *
-     * This method should only be called on the synthesis thread,
-     * while in {@link TextToSpeechService#onSynthesizeText}.
-     *
-     * @param buffer The generated audio data. This method will not hold on to {@code buffer},
-     *         so the caller is free to modify it after this method returns.
-     * @param offset The offset into {@code buffer} where the audio data starts.
-     * @param length The number of bytes of audio data in {@code buffer}. This must be
-     *         less than or equal to the return value of {@link #getMaxBufferSize}.
-     * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
-     */
-    public abstract int audioAvailable(byte[] buffer, int offset, int length);
-
-    /**
-     * The service should call this method when all the synthesized audio for a request has
-     * been passed to {@link #audioAvailable}.
-     *
-     * This method should only be called on the synthesis thread,
-     * while in {@link TextToSpeechService#onSynthesizeText}.
-     *
-     * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
-     */
-    public abstract int done();
-
-    /**
-     * The service should call this method if the speech synthesis fails.
-     *
-     * This method should only be called on the synthesis thread,
-     * while in {@link TextToSpeechService#onSynthesizeText}.
-     */
-    public abstract void error();
-
-    /**
-     * The service can call this method instead of using {@link #start}, {@link #audioAvailable}
-     * and {@link #done} if all the audio data is available in a single buffer.
-     *
-     * @param sampleRateInHz Sample rate in HZ of the generated audio.
-     * @param audioFormat Audio format of the generated audio. Must be one of
-     *         the ENCODING_ constants defined in {@link android.media.AudioFormat}.
-     * @param channelCount The number of channels. Must be {@code 1} or {@code 2}.
-     * @param buffer The generated audio data. This method will not hold on to {@code buffer},
-     *         so the caller is free to modify it after this method returns.
-     * @param offset The offset into {@code buffer} where the audio data starts.
-     * @param length The number of bytes of audio data in {@code buffer}.
-     * @return {@link TextToSpeech#SUCCESS} or {@link TextToSpeech#ERROR}.
-     */
-    public abstract int completeAudioAvailable(int sampleRateInHz, int audioFormat,
-            int channelCount, byte[] buffer, int offset, int length);
+    void setPitch(int pitch) {
+        mPitch = pitch;
+    }
 }
