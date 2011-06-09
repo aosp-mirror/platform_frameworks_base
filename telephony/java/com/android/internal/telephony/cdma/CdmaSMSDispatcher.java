@@ -273,7 +273,7 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             if (cursorCount != totalSegments - 1) {
                 // We don't have all the parts yet, store this one away
                 ContentValues values = new ContentValues();
-                values.put("date", new Long(0));
+                values.put("date", (long) 0);
                 values.put("pdu", HexDump.toHexString(pdu, index, pdu.length - index));
                 values.put("address", address);
                 values.put("reference_number", referenceNumber);
@@ -480,24 +480,6 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             }
             mLastDispatchedSmsFingerprint = null;
         }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void activateCellBroadcastSms(int activate, Message response) {
-        mCm.setCdmaBroadcastActivation((activate == 0), response);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void getCellBroadcastSmsConfig(Message response) {
-        mCm.getCdmaBroadcastConfig(response);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void setCellBroadcastConfig(int[] configValuesArray, Message response) {
-        mCm.setCdmaBroadcastConfig(configValuesArray, response);
     }
 
     protected void handleBroadcastSms(AsyncResult ar) {

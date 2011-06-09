@@ -32,11 +32,9 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.AsyncResult;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.StatFs;
 import android.os.SystemProperties;
 import android.provider.Telephony;
 import android.provider.Telephony.Sms.Intents;
@@ -908,37 +906,6 @@ public abstract class SMSDispatcher extends Handler {
     protected abstract void sendMultipartSms (SmsTracker tracker);
 
     /**
-     * Activate or deactivate cell broadcast SMS.
-     *
-     * @param activate
-     *            0 = activate, 1 = deactivate
-     * @param response
-     *            Callback message is empty on completion
-     */
-    public abstract void activateCellBroadcastSms(int activate, Message response);
-
-    /**
-     * Query the current configuration of cell broadcast SMS.
-     *
-     * @param response
-     *            Callback message contains the configuration from the modem on completion
-     *            @see #setCellBroadcastConfig
-     */
-    public abstract void getCellBroadcastSmsConfig(Message response);
-
-    /**
-     * Configure cell broadcast SMS.
-     *
-     * @param configValuesArray
-     *          The first element defines the number of triples that follow.
-     *          A triple is made up of the service category, the language identifier
-     *          and a boolean that specifies whether the category is set active.
-     * @param response
-     *            Callback message is empty on completion
-     */
-    public abstract void setCellBroadcastConfig(int[] configValuesArray, Message response);
-
-    /**
      * Send an acknowledge message.
      * @param success indicates that last message was successfully received.
      * @param result result code indicating any error
@@ -1065,14 +1032,17 @@ public abstract class SMSDispatcher extends Handler {
 
     protected abstract void handleBroadcastSms(AsyncResult ar);
 
-    protected void dispatchBroadcastPdus(byte[][] pdus) {
-        Intent intent = new Intent("android.provider.telephony.SMS_CB_RECEIVED");
-        intent.putExtra("pdus", pdus);
-
-        if (false)
+    protected void dispatchBroadcastPdus(byte[][] pdus, boolean isEmergencyMessage) {
+        if (isEmergencyMessage) {
+            Intent intent = new Intent(Intents.SMS_EMERGENCY_CB_RECEIVED_ACTION);
+            intent.putExtra("pdus", pdus);
+            Log.d(TAG, "Dispatching " + pdus.length + " emergency SMS CB pdus");
+            dispatch(intent, "android.permission.RECEIVE_EMERGENCY_BROADCAST");
+        } else {
+            Intent intent = new Intent(Intents.SMS_CB_RECEIVED_ACTION);
+            intent.putExtra("pdus", pdus);
             Log.d(TAG, "Dispatching " + pdus.length + " SMS CB pdus");
-
-        dispatch(intent, "android.permission.RECEIVE_SMS");
+            dispatch(intent, "android.permission.RECEIVE_SMS");
+        }
     }
-
 }
