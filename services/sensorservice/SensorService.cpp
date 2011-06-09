@@ -52,7 +52,6 @@ namespace android {
  * Notes:
  *
  * - what about a gyro-corrected magnetic-field sensor?
- * - option to "hide" the HAL sensors
  * - run mag sensor from time to time to force calibration
  * - gravity sensor length is wrong (=> drift in linear-acc sensor)
  *
@@ -71,6 +70,7 @@ void SensorService::onFirstRef()
     SensorDevice& dev(SensorDevice::getInstance());
 
     if (dev.initCheck() == NO_ERROR) {
+        ssize_t orientationIndex = -1;
         bool hasGyro = false;
         uint32_t virtualSensorsNeeds =
                 (1<<SENSOR_TYPE_GRAVITY) |
@@ -82,6 +82,9 @@ void SensorService::onFirstRef()
         for (int i=0 ; i<count ; i++) {
             registerSensor( new HardwareSensor(list[i]) );
             switch (list[i].type) {
+                case SENSOR_TYPE_ORIENTATION:
+                    orientationIndex = i;
+                    break;
                 case SENSOR_TYPE_GYROSCOPE:
                     hasGyro = true;
                     break;
@@ -117,6 +120,18 @@ void SensorService::onFirstRef()
             property_get("debug.sensors", value, "0");
             if (atoi(value)) {
                 registerVirtualSensor( new GyroDriftSensor() );
+            }
+        }
+
+        // build the sensor list returned to users
+        mUserSensorList = mSensorList;
+        if (hasGyro &&
+                (virtualSensorsNeeds & (1<<SENSOR_TYPE_ROTATION_VECTOR))) {
+            // if we have the fancy sensor fusion, and it's not provided by the
+            // HAL, use our own (fused) orientation sensor by removing the
+            // HAL supplied one form the user list.
+            if (orientationIndex >= 0) {
+                mUserSensorList.removeItemsAt(orientationIndex);
             }
         }
 
@@ -315,9 +330,9 @@ SensorService::getActiveVirtualSensors() const
 }
 
 String8 SensorService::getSensorName(int handle) const {
-    size_t count = mSensorList.size();
+    size_t count = mUserSensorList.size();
     for (size_t i=0 ; i<count ; i++) {
-        const Sensor& sensor(mSensorList[i]);
+        const Sensor& sensor(mUserSensorList[i]);
         if (sensor.getHandle() == handle) {
             return sensor.getName();
         }
@@ -328,7 +343,7 @@ String8 SensorService::getSensorName(int handle) const {
 
 Vector<Sensor> SensorService::getSensorList()
 {
-    return mSensorList;
+    return mUserSensorList;
 }
 
 sp<ISensorEventConnection> SensorService::createSensorEventConnection()
