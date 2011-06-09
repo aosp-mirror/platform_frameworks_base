@@ -22,7 +22,8 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical"
-    android:paddingRight="?android:attr/scrollbarSize">
+    android:paddingRight="?android:attr/scrollbarSize"
+    android:background="?android:attr/selectableItemBackground" >
 
     <ImageView
         android:id="@+android:id/icon"

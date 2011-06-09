@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
@@ -36,6 +34,8 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
+
+import com.android.internal.R;
 
 /**
  * A Switch is a two-state toggle switch widget that can select between two
@@ -84,6 +84,7 @@ public class Switch extends CompoundButton {
     private Layout mOnLayout;
     private Layout mOffLayout;
 
+    @SuppressWarnings("hiding")
     private final Rect mTempRect = new Rect();
 
     private static final int[] CHECKED_STATE_SET = {

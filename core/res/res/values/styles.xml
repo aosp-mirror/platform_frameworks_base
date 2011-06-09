@@ -903,6 +903,12 @@
         <item name="android:widgetLayout">@android:layout/preference_widget_checkbox</item>
     </style>
 
+    <style name="Preference.SwitchPreference">
+        <item name="android:widgetLayout">@android:layout/preference_widget_switch</item>
+        <item name="android:switchTextOn">@android:string/capital_on</item>
+        <item name="android:switchTextOff">@android:string/capital_off</item>
+    </style>
+
     <style name="Preference.PreferenceScreen">
     </style>
 
@@ -945,6 +951,12 @@
 
     <style name="Preference.Holo.CheckBoxPreference">
         <item name="android:widgetLayout">@android:layout/preference_widget_checkbox</item>
+    </style>
+
+    <style name="Preference.Holo.SwitchPreference">
+        <item name="android:widgetLayout">@android:layout/preference_widget_switch</item>
+        <item name="android:switchTextOn">@android:string/capital_on</item>
+        <item name="android:switchTextOff">@android:string/capital_off</item>
     </style>
 
     <style name="Preference.Holo.PreferenceScreen">

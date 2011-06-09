@@ -374,11 +374,11 @@
              pointer will go until that pointers go up thereby enabling touches
              with multiple pointers to be split across multiple windows. -->
         <attr name="windowEnableSplitTouch" format="boolean" />
-        
+
         <!-- Control whether a container should automatically close itself if
              the user touches outside of it.  This only applies to activities
              and dialogs.
-             
+
              <p>Note: this attribute will only be respected for applications
              that are targeting {@link android.os.Build.VERSION_CODES#HONEYCOMB}
              or later. -->
@@ -548,7 +548,7 @@
         <!-- NumberPicker input text style. -->
         <attr name="numberPickerInputTextStyle" format="reference" />
 
-        <!-- The CalndarView style. -->
+        <!-- The CalendarView style. -->
         <attr name="calendarViewStyle" format="reference" />
 
         <!-- The TimePicker style. -->
@@ -658,6 +658,8 @@
         <attr name="preferenceLayoutChild" format="reference" />
         <!-- Preference panel style -->
         <attr name="preferencePanelStyle" format="reference" />
+        <!-- Default style for switch preferences. -->
+        <attr name="switchPreferenceStyle" format="reference" />
 
         <!-- ============================ -->
         <!-- Text selection handle styles -->
@@ -1914,7 +1916,7 @@
             <!-- Place the scroll bar on the right. -->
             <enum name="right" value="2" />
         </attr>
-        
+
         <!-- Specifies the type of layer backing this view. The default value is none.
              Refer to {@link android.view.View#setLayerType(int, android.graphics.Paint)}
              for more information.-->
@@ -4814,7 +4816,7 @@
         <!-- The view id of the AppWidget subview which should be auto-advanced.
              by the widget's host. -->
         <attr name="autoAdvanceViewId" format="reference" />
-        <!-- Optional parameter which indicates if and how this widget can be 
+        <!-- Optional parameter which indicates if and how this widget can be
              resized. -->
         <attr name="resizeMode" format="integer">
             <flag name="none" value="0x0" />
@@ -5158,6 +5160,26 @@
         <attr name="mtpReserve" format="integer" />
         <!-- true if the storage can be shared via USB mass storage -->
         <attr name="allowMassStorage" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="SwitchPreference">
+        <!-- The summary for the Preference in a PreferenceActivity screen when the
+             SwitchPreference is checked. If separate on/off summaries are not
+             needed, the summary attribute can be used instead. -->
+        <attr name="summaryOn" />
+        <!-- The summary for the Preference in a PreferenceActivity screen when the
+             SwitchPreference is unchecked. If separate on/off summaries are not
+             needed, the summary attribute can be used instead. -->
+        <attr name="summaryOff" />
+        <!-- The text used on the switch itself when in the "on" state.
+             This should be a very SHORT string, as it appears in a small space. -->
+        <attr name="switchTextOn" format="string" />
+        <!-- The text used on the switch itself when in the "off" state.
+             This should be a very SHORT string, as it appears in a small space. -->
+        <attr name="switchTextOff" format="string" />
+        <!-- The state (true for on, or false for off) that causes dependents to be disabled. By default,
+             dependents will be disabled when this is unchecked, so the value of this preference is false. -->
+        <attr name="disableDependentsState" />
     </declare-styleable>
 
 </resources>

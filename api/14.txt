@@ -14255,20 +14255,10 @@ package android.os.storage {
 
 package android.preference {
 
-  public class CheckBoxPreference extends android.preference.Preference {
+    public class CheckBoxPreference extends android.preference.TwoStatePreference {
     ctor public CheckBoxPreference(android.content.Context, android.util.AttributeSet, int);
     ctor public CheckBoxPreference(android.content.Context, android.util.AttributeSet);
     ctor public CheckBoxPreference(android.content.Context);
-    method public boolean getDisableDependentsState();
-    method public java.lang.CharSequence getSummaryOff();
-    method public java.lang.CharSequence getSummaryOn();
-    method public boolean isChecked();
-    method public void setChecked(boolean);
-    method public void setDisableDependentsState(boolean);
-    method public void setSummaryOff(java.lang.CharSequence);
-    method public void setSummaryOff(int);
-    method public void setSummaryOn(java.lang.CharSequence);
-    method public void setSummaryOn(int);
   }
 
   public abstract class DialogPreference extends android.preference.Preference implements android.content.DialogInterface.OnClickListener android.content.DialogInterface.OnDismissListener android.preference.PreferenceManager.OnActivityDestroyListener {
