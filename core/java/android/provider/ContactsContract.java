@@ -6156,6 +6156,91 @@ public final class ContactsContract {
     }
 
     /**
+     * <p>
+     * API allowing applications to send usage information for each {@link Data} row to the
+     * Contacts Provider.
+     * </p>
+     * <p>
+     * With the feedback, Contacts Provider may return more contextually appropriate results for
+     * Data listing, typically supplied with
+     * {@link ContactsContract.Contacts#CONTENT_FILTER_URI},
+     * {@link ContactsContract.CommonDataKinds.Email#CONTENT_FILTER_URI},
+     * {@link ContactsContract.CommonDataKinds.Phone#CONTENT_FILTER_URI}, and users can benefit
+     * from better ranked (sorted) lists in applications that show auto-complete list.
+     * </p>
+     * <p>
+     * There is no guarantee for how this feedback is used, or even whether it is used at all.
+     * The ranking algorithm will make best efforts to use the feedback data, but the exact
+     * implementation, the storage data structures as well as the resulting sort order is device
+     * and version specific and can change over time.
+     * </p>
+     * <p>
+     * When updating usage information, users of this API need to use
+     * {@link ContentResolver#update(Uri, ContentValues, String, String[])} with a Uri constructed
+     * from {@link DataUsageFeedback#FEEDBACK_URI}. The Uri must contain one or more data id(s) as
+     * its last path. They also need to append a query parameter to the Uri, to specify the type of
+     * the communication, which enables the Contacts Provider to differentiate between kinds of
+     * interactions using the same contact data field (for example a phone number can be used to
+     * make phone calls or send SMS).
+     * </p>
+     * <p>
+     * Selection and selectionArgs are ignored and must be set to null. To get data ids,
+     * you may need to call {@link ContentResolver#query(Uri, String[], String, String[], String)}
+     * toward {@link Data#CONTENT_URI}.
+     * </p>
+     * <p>
+     * Example:
+     * <pre>
+     * Uri uri = DataUsageFeedback.UPDATE_URI.buildUpon()
+     *         .appendPath(TextUtils.join(",", dataIds))
+     *         .appendQueryParameter(DataUsageFeedback.METHOD, DataUsageFeedback.METHOD_CALL)
+     *         .build();
+     * resolver.update(uri, new ContentValues(), null, null);
+     * </pre>
+     * </p>
+     * @hide
+     */
+    public static final class DataUsageFeedback {
+
+        /**
+         * The content:// style URI for sending usage feedback.
+         * Must be used with {@link ContentResolver#update(Uri, ContentValues, String, String[])}.
+         */
+        public static final Uri FEEDBACK_URI =
+                Uri.withAppendedPath(Data.CONTENT_URI, "usagefeedback");
+
+        /**
+         * <p>
+         * Name for query parameter specifying the type of data usage.
+         * </p>
+         */
+        public static final String USAGE_TYPE = "method";
+
+        /**
+         * <p>
+         * Type of usage for voice interaction, which includes phone call, voice chat, and
+         * video chat.
+         * </p>
+         */
+        public static final String USAGE_TYPE_CALL = "call";
+
+        /**
+         * <p>
+         * Type of usage for text interaction involving longer messages, which includes email.
+         * </p>
+         */
+        public static final String USAGE_TYPE_LONG_TEXT = "long_text";
+
+        /**
+         * <p>
+         * Type of usage for text interaction involving shorter messages, which includes SMS,
+         * text chat with email addresses.
+         * </p>
+         */
+        public static final String USAGE_TYPE_SHORT_TEXT = "short_text";
+    }
+
+    /**
      * Helper methods to display QuickContact dialogs that allow users to pivot on
      * a specific {@link Contacts} entry.
      */
