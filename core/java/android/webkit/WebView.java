@@ -44,7 +44,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
-import android.graphics.SurfaceTexture;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.net.Proxy;
@@ -99,6 +98,8 @@ import android.widget.ListView;
 import android.widget.OverScroller;
 import android.widget.Toast;
 
+import junit.framework.Assert;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -116,8 +117,6 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import junit.framework.Assert;
 
 /**
  * <p>A View that displays web pages. This class is the basis upon which you
@@ -173,7 +172,7 @@ import junit.framework.Assert;
  *
  * // OR, you can also load from an HTML string:
  * String summary = "&lt;html>&lt;body>You scored &lt;b>192&lt;/b> points.&lt;/body>&lt;/html>";
- * webview.loadData(summary, "text/html", "utf-8");
+ * webview.loadData(summary, "text/html", null);
  * // ... although note that there are restrictions on what this HTML can do.
  * // See the JavaDocs for {@link #loadData(String,String,String) loadData()} and {@link
  * #loadDataWithBaseURL(String,String,String,String,String) loadDataWithBaseURL()} for more info.
@@ -1965,14 +1964,17 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Load the given data into the WebView. This will load the data into
-     * WebView using the data: scheme. Content loaded through this mechanism
-     * does not have the ability to load content from the network.
-     * @param data A String of data in the given encoding. The date must
-     * be URI-escaped -- '#', '%', '\', '?' should be replaced by %23, %25,
-     * %27, %3f respectively.
-     * @param mimeType The MIMEType of the data. i.e. text/html, image/jpeg
-     * @param encoding The encoding of the data. i.e. utf-8, base64
+     * Load the given data into the WebView using a 'data' scheme URL. Content
+     * loaded in this way does not have the ability to load content from the
+     * network.
+     * <p>
+     * If the value of the encoding parameter is 'base64', then the data must
+     * be encoded as base64. Otherwise, the data must use ASCII encoding for
+     * octets inside the range of safe URL characters and use the standard %xx
+     * hex encoding of URLs for octets outside that range.
+     * @param data A String of data in the given encoding.
+     * @param mimeType The MIMEType of the data, e.g. 'text/html'.
+     * @param encoding The encoding of the data.
      */
     public void loadData(String data, String mimeType, String encoding) {
         checkThread();
@@ -1980,7 +1982,14 @@ public class WebView extends AbsoluteLayout
     }
 
     private void loadDataImpl(String data, String mimeType, String encoding) {
-        loadUrlImpl("data:" + mimeType + ";" + encoding + "," + data);
+        StringBuilder dataUrl = new StringBuilder("data:");
+        dataUrl.append(mimeType);
+        if ("base64".equals(encoding)) {
+            dataUrl.append(";base64");
+        }
+        dataUrl.append(",");
+        dataUrl.append(data);
+        loadUrlImpl(dataUrl.toString());
     }
 
     /**
