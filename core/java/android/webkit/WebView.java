@@ -7282,7 +7282,6 @@ public class WebView extends AbsoluteLayout
                 if (measuredHeight > heightSize) {
                     measuredHeight = heightSize;
                     mHeightCanMeasure = false;
-                } else if (measuredHeight < heightSize) {
                     measuredHeight |= MEASURED_STATE_TOO_SMALL;
                 }
             }
