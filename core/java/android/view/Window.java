@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -25,6 +26,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 
 /**
@@ -463,11 +465,16 @@ public abstract class Window {
         mWindowManager = new LocalWindowManager(wm, hardwareAccelerated);
     }
 
+    static CompatibilityInfoHolder getCompatInfo(Context context) {
+        Application app = (Application)context.getApplicationContext();
+        return app != null ? app.mLoadedApk.mCompatibilityInfo : new CompatibilityInfoHolder();
+    }
+
     private class LocalWindowManager extends WindowManagerImpl.CompatModeWrapper {
         private final boolean mHardwareAccelerated;
 
         LocalWindowManager(WindowManager wm, boolean hardwareAccelerated) {
-            super(wm, mContext.getResources().getCompatibilityInfo());
+            super(wm, getCompatInfo(mContext));
             mHardwareAccelerated = hardwareAccelerated;
         }
 
