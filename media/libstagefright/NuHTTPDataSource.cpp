@@ -100,7 +100,6 @@ NuHTTPDataSource::NuHTTPDataSource(uint32_t flags)
       mNumBandwidthHistoryItems(0),
       mTotalTransferTimeUs(0),
       mTotalTransferBytes(0),
-      mPrevBandwidthMeasureTimeUs(0),
       mDecryptHandle(NULL),
       mDrmManagerClient(NULL) {
 }
@@ -535,16 +534,6 @@ void NuHTTPDataSource::addBandwidthMeasurement_l(
         mTotalTransferBytes -= entry->mNumBytes;
         mBandwidthHistory.erase(mBandwidthHistory.begin());
         --mNumBandwidthHistoryItems;
-        int64_t timeNowUs = ALooper::GetNowUs();
-        if (timeNowUs - mPrevBandwidthMeasureTimeUs > 2000000LL) {
-            if (mPrevBandwidthMeasureTimeUs != 0) {
-                double estimatedBandwidth =
-                    ((double)mTotalTransferBytes * 8E3 / mTotalTransferTimeUs);
-                LOGI("estimated avg bandwidth is %8.2f kbps in the past %lld us",
-                    estimatedBandwidth, timeNowUs - mPrevBandwidthMeasureTimeUs);
-            }
-            mPrevBandwidthMeasureTimeUs = timeNowUs;
-        }
     }
 }
 
