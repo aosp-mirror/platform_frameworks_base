@@ -17,6 +17,7 @@
 package android.nfc;
 
 import android.nfc.NdefMessage;
+import android.nfc.Tag;
 import android.nfc.TransceiveResult;
 
 /**
@@ -40,6 +41,7 @@ interface INfcTag
     int ndefMakeReadOnly(int nativeHandle);
     boolean ndefIsWritable(int nativeHandle);
     int formatNdef(int nativeHandle, in byte[] key);
+    Tag rediscover(int nativehandle);
 
     void setIsoDepTimeout(int timeout);
     void setFelicaTimeout(int timeout);
