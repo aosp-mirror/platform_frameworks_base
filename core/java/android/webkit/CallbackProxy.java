@@ -118,6 +118,7 @@ class CallbackProxy extends Handler {
     private static final int SET_INSTALLABLE_WEBAPP              = 138;
     private static final int NOTIFY_SEARCHBOX_LISTENERS          = 139;
     private static final int AUTO_LOGIN                          = 140;
+    private static final int CLIENT_CERT_REQUEST                 = 141;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -273,7 +274,7 @@ class CallbackProxy extends Handler {
                     mWebViewClient.onPageFinished(mWebView, finishedUrl);
                 }
                 break;
-                
+
             case RECEIVED_ICON:
                 if (mWebChromeClient != null) {
                     mWebChromeClient.onReceivedIcon(mWebView, (Bitmap) msg.obj);
@@ -340,11 +341,21 @@ class CallbackProxy extends Handler {
 
             case SSL_ERROR:
                 if (mWebViewClient != null) {
-                    HashMap<String, Object> map = 
+                    HashMap<String, Object> map =
                         (HashMap<String, Object>) msg.obj;
                     mWebViewClient.onReceivedSslError(mWebView,
                             (SslErrorHandler) map.get("handler"),
                             (SslError) map.get("error"));
+                }
+                break;
+
+            case CLIENT_CERT_REQUEST:
+                if (mWebViewClient != null) {
+                    HashMap<String, Object> map =
+                        (HashMap<String, Object>) msg.obj;
+                    mWebViewClient.onReceivedClientCertRequest(mWebView,
+                            (ClientCertRequestHandler) map.get("handler"),
+                            (String) map.get("host_and_port"));
                 }
                 break;
 
@@ -543,14 +554,14 @@ class CallbackProxy extends Handler {
                         new AlertDialog.Builder(mContext)
                                 .setTitle(getJsDialogTitle(url))
                                 .setMessage(message)
-                                .setPositiveButton(R.string.ok, 
+                                .setPositiveButton(R.string.ok,
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(
                                                     DialogInterface dialog,
                                                     int which) {
                                                 res.confirm();
                                             }})
-                                .setNegativeButton(R.string.cancel, 
+                                .setNegativeButton(R.string.cancel,
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(
                                                     DialogInterface dialog,
@@ -904,7 +915,7 @@ class CallbackProxy extends Handler {
         if (PERF_PROBE) {
             // un-comment this if PERF_PROBE is true
 //            Looper.myQueue().setWaitCallback(null);
-            Log.d("WebCore", "WebCore thread used " + 
+            Log.d("WebCore", "WebCore thread used " +
                     (SystemClock.currentThreadTimeMillis() - mWebCoreThreadTime)
                     + " ms and idled " + mWebCoreIdleTime + " ms");
             Network.getInstance(mContext).stopTiming();
@@ -934,7 +945,7 @@ class CallbackProxy extends Handler {
         sendMessage(msg);
     }
 
-    public void onFormResubmission(Message dontResend, 
+    public void onFormResubmission(Message dontResend,
             Message resend) {
         // Do an unsynchronized quick check to avoid posting if no callback has
         // been set.
@@ -998,10 +1009,26 @@ class CallbackProxy extends Handler {
             return;
         }
         Message msg = obtainMessage(SSL_ERROR);
-        //, handler);
         HashMap<String, Object> map = new HashMap();
         map.put("handler", handler);
         map.put("error", error);
+        msg.obj = map;
+        sendMessage(msg);
+    }
+    /**
+     * @hide
+     */
+    public void onReceivedClientCertRequest(ClientCertRequestHandler handler, String host_and_port) {
+        // Do an unsynchronized quick check to avoid posting if no callback has
+        // been set.
+        if (mWebViewClient == null) {
+            handler.cancel();
+            return;
+        }
+        Message msg = obtainMessage(CLIENT_CERT_REQUEST);
+        HashMap<String, Object> map = new HashMap();
+        map.put("handler", handler);
+        map.put("host_and_port", host_and_port);
         msg.obj = map;
         sendMessage(msg);
     }
