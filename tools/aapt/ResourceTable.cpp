@@ -3209,7 +3209,7 @@ status_t ResourceTable::Entry::assignResourceIds(ResourceTable* table,
         const String16 id16("id");
         mParentId = 0;
         if (mParent.size() > 0) {
-            mParentId = table->getResId(mParent, &style16, NULL, &errorMsg, false);
+            mParentId = table->getResId(mParent, &style16, NULL, &errorMsg);
             if (mParentId == 0) {
                 mPos.error("Error retrieving parent for item: %s '%s'.\n",
                         errorMsg, String8(mParent).string());
@@ -3221,7 +3221,7 @@ status_t ResourceTable::Entry::assignResourceIds(ResourceTable* table,
             const String16& key = mBag.keyAt(i);
             Item& it = mBag.editValueAt(i);
             it.bagKeyId = table->getResId(key,
-                    it.isId ? &id16 : &attr16, NULL, &errorMsg, false);
+                    it.isId ? &id16 : &attr16, NULL, &errorMsg);
             //printf("Bag key of %s: #%08x\n", String8(key).string(), it.bagKeyId);
             if (it.bagKeyId == 0) {
                 it.sourcePos.error("Error: %s: %s '%s'.\n", errorMsg,
