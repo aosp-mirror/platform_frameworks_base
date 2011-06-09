@@ -479,4 +479,8 @@
     <string name="config_wimaxServiceClassname"></string>
     <!-- Name of the wimax state tracker clas -->
     <string name="config_wimaxStateTrackerClassname"></string>
+
+    <!-- Set to true if the RSSI should always display CDMA signal strength
+         even on EVDO -->
+    <bool name="config_alwaysUseCdmaRssi">false</bool>
 </resources>
