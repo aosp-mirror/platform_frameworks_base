@@ -54,6 +54,10 @@ import java.util.ArrayList;
  * A window in the window manager.
  */
 final class WindowState implements WindowManagerPolicy.WindowState {
+    static final boolean DEBUG_VISIBILITY = WindowManagerService.DEBUG_VISIBILITY;
+    static final boolean SHOW_TRANSACTIONS = WindowManagerService.SHOW_TRANSACTIONS;
+    static final boolean SHOW_SURFACE_ALLOC = WindowManagerService.SHOW_SURFACE_ALLOC;
+
     final WindowManagerService mService;
     final Session mSession;
     final IWindow mClient;
@@ -71,7 +75,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     final boolean mIsImWindow;
     final boolean mIsWallpaper;
     final boolean mIsFloatingLayer;
-    final boolean mEnforceSizeCompat;
+    boolean mEnforceSizeCompat;
     int mViewVisibility;
     boolean mPolicyVisibility = true;
     boolean mPolicyVisibilityAfterAnim = true;
@@ -600,7 +604,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             if ((mAttrs.flags&WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 flags |= Surface.SECURE;
             }
-            if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(
+            if (DEBUG_VISIBILITY) Slog.v(
                 WindowManagerService.TAG, "Creating surface in session "
                 + mSession.mSurfaceSession + " window " + this
                 + " w=" + mCompatFrame.width()
@@ -639,7 +643,8 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                         mSession.mSurfaceSession, mSession.mPid,
                         mAttrs.getTitle().toString(),
                         0, w, h, format, flags);
-                if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  CREATE SURFACE "
+                if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
+                        "  CREATE SURFACE "
                         + mSurface + " IN SESSION "
                         + mSession.mSurfaceSession
                         + ": pid=" + mSession.mPid + " format="
@@ -659,7 +664,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 WindowManagerService.TAG, "Got surface: " + mSurface
                 + ", set left=" + mFrame.left + " top=" + mFrame.top
                 + ", animLayer=" + mAnimLayer);
-            if (WindowManagerService.SHOW_TRANSACTIONS) {
+            if (SHOW_TRANSACTIONS) {
                 Slog.i(WindowManagerService.TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
                 WindowManagerService.logSurface(this, "CREATE pos=(" + mFrame.left
                         + "," + mFrame.top + ") (" +
@@ -677,7 +682,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     mSurfaceShown = false;
                     mSurface.hide();
                     if ((mAttrs.flags&WindowManager.LayoutParams.FLAG_DITHER) != 0) {
-                        if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(this, "DITHER", null);
+                        if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(this, "DITHER", null);
                         mSurface.setFlags(Surface.SURFACE_DITHER,
                                 Surface.SURFACE_DITHER);
                     }
@@ -688,7 +693,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                 mLastHidden = true;
             } finally {
                 Surface.closeTransaction();
-                if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "<<< CLOSE TRANSACTION createSurfaceLocked");
+                if (SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "<<< CLOSE TRANSACTION createSurfaceLocked");
             }
             if (WindowManagerService.localLOGV) Slog.v(
                     WindowManagerService.TAG, "Created surface " + this);
@@ -725,7 +730,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             }
 
             try {
-                if (WindowManagerService.DEBUG_VISIBILITY) {
+                if (DEBUG_VISIBILITY) {
                     RuntimeException e = null;
                     if (!WindowManagerService.HIDE_STACK_CRAWLS) {
                         e = new RuntimeException();
@@ -734,13 +739,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     Slog.w(WindowManagerService.TAG, "Window " + this + " destroying surface "
                             + mSurface + ", session " + mSession, e);
                 }
-                if (WindowManagerService.SHOW_TRANSACTIONS) {
+                if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) {
                     RuntimeException e = null;
                     if (!WindowManagerService.HIDE_STACK_CRAWLS) {
                         e = new RuntimeException();
                         e.fillInStackTrace();
                     }
-                    if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(this, "DESTROY", e);
+                    WindowManagerService.logSurface(this, "DESTROY", e);
                 }
                 mSurface.destroy();
             } catch (RuntimeException e) {
@@ -756,7 +761,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     boolean finishDrawingLocked() {
         if (mDrawPending) {
-            if (WindowManagerService.SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION) Slog.v(
+            if (SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION) Slog.v(
                 WindowManagerService.TAG, "finishDrawingLocked: " + mSurface);
             mCommitDrawPending = true;
             mDrawPending = false;
@@ -783,7 +788,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
 
     // This must be called while inside a transaction.
     boolean performShowLocked() {
-        if (WindowManagerService.DEBUG_VISIBILITY) {
+        if (DEBUG_VISIBILITY) {
             RuntimeException e = null;
             if (!WindowManagerService.HIDE_STACK_CRAWLS) {
                 e = new RuntimeException();
@@ -794,9 +799,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     + " starting=" + (mAttrs.type == TYPE_APPLICATION_STARTING), e);
         }
         if (mReadyToShow && isReadyForDisplay()) {
-            if (WindowManagerService.SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION) WindowManagerService.logSurface(this,
+            if (SHOW_TRANSACTIONS || WindowManagerService.DEBUG_ORIENTATION) WindowManagerService.logSurface(this,
                     "SHOW (performShowLocked)", null);
-            if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Showing " + this
+            if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Showing " + this
                     + " during animation: policyVis=" + mPolicyVisibility
                     + " attHidden=" + mAttachedHidden
                     + " tok.hiddenRequested="
@@ -958,7 +963,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         mHasTransformation = false;
         mHasLocalTransformation = false;
         if (mPolicyVisibility != mPolicyVisibilityAfterAnim) {
-            if (WindowManagerService.DEBUG_VISIBILITY) {
+            if (DEBUG_VISIBILITY) {
                 Slog.v(WindowManagerService.TAG, "Policy visibility changing after anim in " + this + ": "
                         + mPolicyVisibilityAfterAnim);
             }
@@ -1020,7 +1025,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (mSurface != null) {
             mService.mDestroySurface.add(this);
             mDestroying = true;
-            if (WindowManagerService.SHOW_TRANSACTIONS) WindowManagerService.logSurface(this, "HIDE (finishExit)", null);
+            if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(this, "HIDE (finishExit)", null);
             mSurfaceShown = false;
             try {
                 mSurface.hide();
@@ -1414,9 +1419,9 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (mPolicyVisibility && mPolicyVisibilityAfterAnim) {
             return false;
         }
-        if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Policy visibility true: " + this);
+        if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Policy visibility true: " + this);
         if (doAnimation) {
-            if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "doAnimation: mPolicyVisibility="
+            if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "doAnimation: mPolicyVisibility="
                     + mPolicyVisibility + " mAnimation=" + mAnimation);
             if (mService.mDisplayFrozen || !mService.mPolicy.isScreenOn()) {
                 doAnimation = false;
@@ -1462,7 +1467,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (doAnimation) {
             mPolicyVisibilityAfterAnim = false;
         } else {
-            if (WindowManagerService.DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Policy visibility false: " + this);
+            if (DEBUG_VISIBILITY) Slog.v(WindowManagerService.TAG, "Policy visibility false: " + this);
             mPolicyVisibilityAfterAnim = false;
             mPolicyVisibility = false;
             // Window is no longer visible -- make sure if we were waiting

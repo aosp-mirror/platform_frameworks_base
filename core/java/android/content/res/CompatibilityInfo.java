@@ -456,6 +456,9 @@ public class CompatibilityInfo implements Parcelable {
             inoutConfig.screenLayout =
                     (inoutConfig.screenLayout&~Configuration.SCREENLAYOUT_SIZE_MASK)
                     | Configuration.SCREENLAYOUT_SIZE_NORMAL;
+            inoutConfig.screenWidthDp = inoutConfig.compatScreenWidthDp;
+            inoutConfig.screenHeightDp = inoutConfig.compatScreenHeightDp;
+            inoutConfig.smallestScreenWidthDp = inoutConfig.compatSmallestScreenWidthDp;
         }
     }
 

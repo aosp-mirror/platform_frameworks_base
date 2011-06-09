@@ -159,6 +159,8 @@ public final class ViewRoot extends Handler implements ViewParent,
     // so the window should no longer be active.
     boolean mStopped = false;
     
+    boolean mLastInCompatMode = false;
+
     SurfaceHolder.Callback2 mSurfaceHolderCallback;
     BaseSurfaceHolder mSurfaceHolder;
     boolean mIsCreating;
@@ -203,6 +205,8 @@ public final class ViewRoot extends Handler implements ViewParent,
 
     boolean mAdded;
     boolean mAddedTouchMode;
+
+    CompatibilityInfoHolder mCompatibilityInfo;
 
     /*package*/ int mAddNesting;
 
@@ -369,8 +373,7 @@ public final class ViewRoot extends Handler implements ViewParent,
                     enableHardwareAcceleration(attrs);
                 }
 
-                Resources resources = mView.getContext().getResources();
-                CompatibilityInfo compatibilityInfo = resources.getCompatibilityInfo();
+                CompatibilityInfo compatibilityInfo = mCompatibilityInfo.get();
                 mTranslator = compatibilityInfo.getTranslator();
 
                 if (mTranslator != null) {
@@ -387,6 +390,7 @@ public final class ViewRoot extends Handler implements ViewParent,
 
                 if (!compatibilityInfo.supportsScreen()) {
                     attrs.flags |= WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+                    mLastInCompatMode = true;
                 }
 
                 mSoftInputMode = attrs.softInputMode;
@@ -718,6 +722,19 @@ public final class ViewRoot extends Handler implements ViewParent,
             mWindowAttributesChanged = false;
             surfaceChanged = true;
             params = lp;
+        }
+        CompatibilityInfo compatibilityInfo = mCompatibilityInfo.get();
+        if (compatibilityInfo.supportsScreen() == mLastInCompatMode) {
+            params = lp;
+            fullRedrawNeeded = true;
+            mLayoutRequested = true;
+            if (mLastInCompatMode) {
+                params.flags &= ~WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+                mLastInCompatMode = false;
+            } else {
+                params.flags |= WindowManager.LayoutParams.FLAG_COMPATIBLE_WINDOW;
+                mLastInCompatMode = true;
+            }
         }
         Rect frame = mWinFrame;
         if (mFirst) {
@@ -1934,6 +1951,13 @@ public final class ViewRoot extends Handler implements ViewParent,
                 "Applying new config to window "
                 + mWindowAttributes.getTitle()
                 + ": " + config);
+
+        CompatibilityInfo ci = mCompatibilityInfo.getIfNeeded();
+        if (ci != null) {
+            config = new Configuration(config);
+            ci.applyToConfiguration(config);
+        }
+
         synchronized (sConfigCallbacks) {
             for (int i=sConfigCallbacks.size()-1; i>=0; i--) {
                 sConfigCallbacks.get(i).onConfigurationChanged(config);
@@ -1995,6 +2019,7 @@ public final class ViewRoot extends Handler implements ViewParent,
     public final static int DISPATCH_DRAG_LOCATION_EVENT = 1016;
     public final static int DISPATCH_SYSTEM_UI_VISIBILITY = 1017;
     public final static int DISPATCH_GENERIC_MOTION = 1018;
+    public final static int UPDATE_CONFIGURATION = 1019;
 
     @Override
     public void handleMessage(Message msg) {
@@ -2177,6 +2202,13 @@ public final class ViewRoot extends Handler implements ViewParent,
         } break;
         case DISPATCH_SYSTEM_UI_VISIBILITY: {
             handleDispatchSystemUiVisibilityChanged(msg.arg1);
+        } break;
+        case UPDATE_CONFIGURATION: {
+            Configuration config = (Configuration)msg.obj;
+            if (config.isOtherSeqNewer(mLastConfiguration)) {
+                config = mLastConfiguration;
+            }
+            updateConfiguration(config, false);
         } break;
         }
     }
@@ -3203,6 +3235,11 @@ public final class ViewRoot extends Handler implements ViewParent,
                 dispatchDetachedFromWindow();
             }
         }
+    }
+
+    public void requestUpdateConfiguration(Configuration config) {
+        Message msg = obtainMessage(UPDATE_CONFIGURATION, config);
+        sendMessage(msg);
     }
 
     private void destroyHardwareRenderer() {
