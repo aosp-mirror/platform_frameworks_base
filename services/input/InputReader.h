@@ -143,7 +143,7 @@ struct InputReaderConfiguration {
             pointerGestureTapSlop(10.0f), // 10 pixels
             pointerGestureMultitouchSettleInterval(100 * 1000000LL), // 100 ms
             pointerGestureMultitouchMinDistance(15), // 15 pixels
-            pointerGestureSwipeTransitionAngleCosine(0.5f), // cosine of 45degrees
+            pointerGestureSwipeTransitionAngleCosine(0.2588f), // cosine of 75 degrees
             pointerGestureSwipeMaxWidthRatio(0.25f),
             pointerGestureMovementSpeedRatio(0.8f),
             pointerGestureZoomSpeedRatio(0.3f) { }
