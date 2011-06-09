@@ -6843,11 +6843,6 @@ public class WebView extends AbsoluteLayout
                 vx = 0;
             }
         }
-        if (true /* EMG release: make our fling more like Maps' */) {
-            // maps cuts their velocity in half
-            vx = vx * 3 / 4;
-            vy = vy * 3 / 4;
-        }
         if ((maxX == 0 && vy == 0) || (maxY == 0 && vx == 0)) {
             WebViewCore.resumePriority();
             if (!mSelectingText) {
