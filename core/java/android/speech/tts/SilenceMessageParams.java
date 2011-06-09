@@ -22,8 +22,9 @@ class SilenceMessageParams extends MessageParams {
     private final ConditionVariable mCondVar = new ConditionVariable();
     private final long mSilenceDurationMs;
 
-    SilenceMessageParams(UtteranceCompletedDispatcher dispatcher, long silenceDurationMs) {
-        super(dispatcher);
+    SilenceMessageParams(UtteranceCompletedDispatcher dispatcher,
+            String callingApp, long silenceDurationMs) {
+        super(dispatcher, callingApp);
         mSilenceDurationMs = silenceDurationMs;
     }
 

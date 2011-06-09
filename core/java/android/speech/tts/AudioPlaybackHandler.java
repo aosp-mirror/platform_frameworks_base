@@ -17,13 +17,13 @@ package android.speech.tts;
 
 import android.media.AudioFormat;
 import android.media.AudioTrack;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.speech.tts.SynthesisMessageParams.ListEntry;
 import android.util.Log;
 
-class AudioPlaybackHandler extends Handler {
+import java.util.Iterator;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
+
+class AudioPlaybackHandler {
     private static final String TAG = "TTS.AudioPlaybackHandler";
     private static final boolean DBG = false;
 
@@ -37,33 +37,31 @@ class AudioPlaybackHandler extends Handler {
     private static final int PLAY_AUDIO = 5;
     private static final int PLAY_SILENCE = 6;
 
-    // Accessed by multiple threads, synchronized by "this".
-    private MessageParams mCurrentParams;
-    // Used only for book keeping and error detection.
-    private SynthesisMessageParams mLastSynthesisRequest;
+    private static final int SHUTDOWN = -1;
 
-    AudioPlaybackHandler(Looper looper) {
-        super(looper);
+    private static final int DEFAULT_PRIORITY = 1;
+    private static final int HIGH_PRIORITY = 0;
+
+    private final PriorityBlockingQueue<ListEntry> mQueue =
+            new PriorityBlockingQueue<ListEntry>();
+    private final Thread mHandlerThread;
+
+    private final Object mStateLock = new Object();
+
+    // Accessed by multiple threads, synchronized by "mStateLock".
+    private MessageParams mCurrentParams = null;
+    // Used only for book keeping and error detection.
+    private volatile SynthesisMessageParams mLastSynthesisRequest = null;
+    // Used to order incoming messages in our priority queue.
+    private final AtomicLong mSequenceIdCtr = new AtomicLong(0);
+
+
+    AudioPlaybackHandler() {
+        mHandlerThread = new Thread(new MessageLoop(), "TTS.AudioPlaybackThread");
     }
 
-    @Override
-    public synchronized void handleMessage(Message msg) {
-        if (msg.what == SYNTHESIS_START) {
-            mCurrentParams = (SynthesisMessageParams) msg.obj;
-            handleSynthesisStart(msg);
-        } else if (msg.what == SYNTHESIS_DATA_AVAILABLE) {
-            handleSynthesisDataAvailable(msg);
-        } else if (msg.what == SYNTHESIS_DONE) {
-            handleSynthesisDone(msg);
-        } else if (msg.what == SYNTHESIS_COMPLETE_DATA_AVAILABLE) {
-            handleSynthesisCompleteDataAvailable(msg);
-        } else if (msg.what == PLAY_AUDIO) {
-            handleAudio(msg);
-        } else if (msg.what == PLAY_SILENCE) {
-            handleSilence(msg);
-        }
-
-        mCurrentParams = null;
+    public void start() {
+        mHandlerThread.start();
     }
 
     /**
@@ -72,63 +70,232 @@ class AudioPlaybackHandler extends Handler {
      * that is not guaranteed.
      */
     synchronized public void stop(MessageParams token) {
-        removeCallbacksAndMessages(token);
+        if (token == null) {
+            return;
+        }
+
+        removeMessages(token);
 
         if (token.getType() == MessageParams.TYPE_SYNTHESIS) {
-            sendMessageAtFrontOfQueue(obtainMessage(SYNTHESIS_DONE, token));
-        } else if (token == mCurrentParams) {
-            if (token.getType() == MessageParams.TYPE_AUDIO) {
-                ((AudioMessageParams) mCurrentParams).getPlayer().stop();
-            } else if (token.getType() == MessageParams.TYPE_SILENCE) {
-                ((SilenceMessageParams) mCurrentParams).getConditionVariable().open();
+            mQueue.add(new ListEntry(SYNTHESIS_DONE, token, HIGH_PRIORITY));
+        } else  {
+            MessageParams current = getCurrentParams();
+
+            if (current != null) {
+                if (token.getType() == MessageParams.TYPE_AUDIO) {
+                    ((AudioMessageParams) current).getPlayer().stop();
+                } else if (token.getType() == MessageParams.TYPE_SILENCE) {
+                    ((SilenceMessageParams) current).getConditionVariable().open();
+                }
             }
         }
+    }
+
+    synchronized public void removePlaybackItems(String callingApp) {
+        removeMessages(callingApp);
+        stop(getCurrentParams());
+    }
+
+    synchronized public void removeAllItems() {
+        removeAllMessages();
+        stop(getCurrentParams());
     }
 
     /**
      * Shut down the audio playback thread.
      */
     synchronized public void quit() {
-        if (mCurrentParams != null) {
-            stop(mCurrentParams);
-        }
-        getLooper().quit();
+        stop(getCurrentParams());
+        mQueue.add(new ListEntry(SHUTDOWN, null, HIGH_PRIORITY));
     }
 
     void enqueueSynthesisStart(SynthesisMessageParams token) {
-        sendMessage(obtainMessage(SYNTHESIS_START, token));
+        mQueue.add(new ListEntry(SYNTHESIS_START, token));
     }
 
     void enqueueSynthesisDataAvailable(SynthesisMessageParams token) {
-        sendMessage(obtainMessage(SYNTHESIS_DATA_AVAILABLE, token));
+        mQueue.add(new ListEntry(SYNTHESIS_DATA_AVAILABLE, token));
     }
 
     void enqueueSynthesisCompleteDataAvailable(SynthesisMessageParams token) {
-        sendMessage(obtainMessage(SYNTHESIS_COMPLETE_DATA_AVAILABLE, token));
+        mQueue.add(new ListEntry(SYNTHESIS_COMPLETE_DATA_AVAILABLE, token));
     }
 
     void enqueueSynthesisDone(SynthesisMessageParams token) {
-        sendMessage(obtainMessage(SYNTHESIS_DONE, token));
+        mQueue.add(new ListEntry(SYNTHESIS_DONE, token));
     }
 
     void enqueueAudio(AudioMessageParams token) {
-        sendMessage(obtainMessage(PLAY_AUDIO, token));
+        mQueue.add(new ListEntry(PLAY_AUDIO, token));
     }
 
     void enqueueSilence(SilenceMessageParams token) {
-        sendMessage(obtainMessage(PLAY_SILENCE, token));
+        mQueue.add(new ListEntry(PLAY_SILENCE, token));
     }
 
     // -----------------------------------------
     // End of public API methods.
     // -----------------------------------------
 
+    // -----------------------------------------
+    // Methods for managing the message queue.
+    // -----------------------------------------
+
+    /*
+     * The MessageLoop is a handler like implementation that
+     * processes messages from a priority queue.
+     */
+    private final class MessageLoop implements Runnable {
+        @Override
+        public void run() {
+            while (true) {
+                ListEntry entry = null;
+                try {
+                    entry = mQueue.take();
+                } catch (InterruptedException ie) {
+                    return;
+                }
+
+                if (entry.mWhat == SHUTDOWN) {
+                    if (DBG) Log.d(TAG, "MessageLoop : Shutting down");
+                    return;
+                }
+
+                if (DBG) {
+                    Log.d(TAG, "MessageLoop : Handling message :" + entry.mWhat
+                            + " ,seqId : " + entry.mSequenceId);
+                }
+
+                setCurrentParams(entry.mMessage);
+                handleMessage(entry);
+                setCurrentParams(null);
+            }
+        }
+    }
+
+    /*
+     * Remove all messages from the queue that contain the supplied token.
+     * Note that the Iterator is thread safe, and other methods can safely
+     * continue adding to the queue at this point.
+     */
+    synchronized private void removeMessages(MessageParams token) {
+        if (token == null) {
+            return;
+        }
+
+        Iterator<ListEntry> it = mQueue.iterator();
+
+        while (it.hasNext()) {
+            final ListEntry current = it.next();
+            if (current.mMessage == token) {
+                it.remove();
+            }
+        }
+    }
+
+    /*
+     * Atomically clear the queue of all messages.
+     */
+    synchronized private void removeAllMessages() {
+        mQueue.clear();
+    }
+
+    /*
+     * Remove all messages that originate from a given calling app.
+     */
+    synchronized private void removeMessages(String callingApp) {
+        Iterator<ListEntry> it = mQueue.iterator();
+
+        while (it.hasNext()) {
+            final ListEntry current = it.next();
+            // The null check is to prevent us from removing control messages,
+            // such as a shutdown message.
+            if (current.mMessage != null &&
+                    callingApp.equals(current.mMessage.getCallingApp())) {
+                it.remove();
+            }
+        }
+    }
+
+    /*
+     * An element of our priority queue of messages. Each message has a priority,
+     * and a sequence id (defined by the order of enqueue calls). Among messages
+     * with the same priority, messages that were received earlier win out.
+     */
+    private final class ListEntry implements Comparable<ListEntry> {
+        final int mWhat;
+        final MessageParams mMessage;
+        final int mPriority;
+        final long mSequenceId;
+
+        private ListEntry(int what, MessageParams message) {
+            this(what, message, DEFAULT_PRIORITY);
+        }
+
+        private ListEntry(int what, MessageParams message, int priority) {
+            mWhat = what;
+            mMessage = message;
+            mPriority = priority;
+            mSequenceId = mSequenceIdCtr.incrementAndGet();
+        }
+
+        @Override
+        public int compareTo(ListEntry that) {
+            if (that == this) {
+                return 0;
+            }
+
+            // Note that this is always 0, 1 or -1.
+            int priorityDiff = mPriority - that.mPriority;
+            if (priorityDiff == 0) {
+                // The == case cannot occur.
+                return (mSequenceId < that.mSequenceId) ? -1 : 1;
+            }
+
+            return priorityDiff;
+        }
+    }
+
+    private void setCurrentParams(MessageParams p) {
+        synchronized (mStateLock) {
+            mCurrentParams = p;
+        }
+    }
+
+    private MessageParams getCurrentParams() {
+        synchronized (mStateLock) {
+            return mCurrentParams;
+        }
+    }
+
+    // -----------------------------------------
+    // Methods for dealing with individual messages, the methods
+    // below do the actual work.
+    // -----------------------------------------
+
+    private void handleMessage(ListEntry entry) {
+        final MessageParams msg = entry.mMessage;
+        if (entry.mWhat == SYNTHESIS_START) {
+            handleSynthesisStart(msg);
+        } else if (entry.mWhat == SYNTHESIS_DATA_AVAILABLE) {
+            handleSynthesisDataAvailable(msg);
+        } else if (entry.mWhat == SYNTHESIS_DONE) {
+            handleSynthesisDone(msg);
+        } else if (entry.mWhat == SYNTHESIS_COMPLETE_DATA_AVAILABLE) {
+            handleSynthesisCompleteDataAvailable(msg);
+        } else if (entry.mWhat == PLAY_AUDIO) {
+            handleAudio(msg);
+        } else if (entry.mWhat == PLAY_SILENCE) {
+            handleSilence(msg);
+        }
+    }
+
     // Currently implemented as blocking the audio playback thread for the
     // specified duration. If a call to stop() is made, the thread
     // unblocks.
-    private void handleSilence(Message msg) {
+    private void handleSilence(MessageParams msg) {
         if (DBG) Log.d(TAG, "handleSilence()");
-        SilenceMessageParams params = (SilenceMessageParams) msg.obj;
+        SilenceMessageParams params = (SilenceMessageParams) msg;
         if (params.getSilenceDurationMs() > 0) {
             params.getConditionVariable().block(params.getSilenceDurationMs());
         }
@@ -137,9 +304,9 @@ class AudioPlaybackHandler extends Handler {
     }
 
     // Plays back audio from a given URI. No TTS engine involvement here.
-    private void handleAudio(Message msg) {
+    private void handleAudio(MessageParams msg) {
         if (DBG) Log.d(TAG, "handleAudio()");
-        AudioMessageParams params = (AudioMessageParams) msg.obj;
+        AudioMessageParams params = (AudioMessageParams) msg;
         // Note that the BlockingMediaPlayer spawns a separate thread.
         //
         // TODO: This can be avoided.
@@ -157,9 +324,9 @@ class AudioPlaybackHandler extends Handler {
     // handleSynthesisStart -> handleSynthesisDataAvailable(*) -> handleSynthesisDone
     // OR
     // handleSynthesisCompleteDataAvailable.
-    private void handleSynthesisStart(Message msg) {
+    private void handleSynthesisStart(MessageParams msg) {
         if (DBG) Log.d(TAG, "handleSynthesisStart()");
-        final SynthesisMessageParams param = (SynthesisMessageParams) msg.obj;
+        final SynthesisMessageParams param = (SynthesisMessageParams) msg;
 
         // Oops, looks like the engine forgot to call done(). We go through
         // extra trouble to clean the data to prevent the AudioTrack resources
@@ -177,12 +344,14 @@ class AudioPlaybackHandler extends Handler {
                 param.mStreamType, param.mSampleRateInHz, param.mAudioFormat,
                 param.mChannelCount, param.mVolume, param.mPan);
 
+        if (DBG) Log.d(TAG, "Created audio track [" + audioTrack.hashCode() + "]");
+
         param.setAudioTrack(audioTrack);
     }
 
     // More data available to be flushed to the audio track.
-    private void handleSynthesisDataAvailable(Message msg) {
-        final SynthesisMessageParams param = (SynthesisMessageParams) msg.obj;
+    private void handleSynthesisDataAvailable(MessageParams msg) {
+        final SynthesisMessageParams param = (SynthesisMessageParams) msg;
         if (param.getAudioTrack() == null) {
             Log.w(TAG, "Error : null audio track in handleDataAvailable.");
             return;
@@ -194,7 +363,7 @@ class AudioPlaybackHandler extends Handler {
         }
 
         final AudioTrack audioTrack = param.getAudioTrack();
-        final ListEntry bufferCopy = param.getNextBuffer();
+        final SynthesisMessageParams.ListEntry bufferCopy = param.getNextBuffer();
 
         if (bufferCopy == null) {
             Log.e(TAG, "No buffers available to play.");
@@ -218,8 +387,8 @@ class AudioPlaybackHandler extends Handler {
         }
     }
 
-    private void handleSynthesisDone(Message msg) {
-        final SynthesisMessageParams params = (SynthesisMessageParams) msg.obj;
+    private void handleSynthesisDone(MessageParams msg) {
+        final SynthesisMessageParams params = (SynthesisMessageParams) msg;
         handleSynthesisDone(params);
     }
 
@@ -233,6 +402,7 @@ class AudioPlaybackHandler extends Handler {
             if (audioTrack != null) {
                 audioTrack.flush();
                 audioTrack.stop();
+                if (DBG) Log.d(TAG, "Releasing audio track [" + audioTrack.hashCode() + "]");
                 audioTrack.release();
             }
         } finally {
@@ -242,8 +412,8 @@ class AudioPlaybackHandler extends Handler {
         }
     }
 
-    private void handleSynthesisCompleteDataAvailable(Message msg) {
-        final SynthesisMessageParams params = (SynthesisMessageParams) msg.obj;
+    private void handleSynthesisCompleteDataAvailable(MessageParams msg) {
+        final SynthesisMessageParams params = (SynthesisMessageParams) msg;
         if (DBG) Log.d(TAG, "completeAudioAvailable(" + params + ")");
 
         // Channel config and bytes per frame are checked before
@@ -251,7 +421,7 @@ class AudioPlaybackHandler extends Handler {
         int channelConfig = AudioPlaybackHandler.getChannelConfig(params.mChannelCount);
         int bytesPerFrame = AudioPlaybackHandler.getBytesPerFrame(params.mAudioFormat);
 
-        ListEntry entry = params.getNextBuffer();
+        SynthesisMessageParams.ListEntry entry = params.getNextBuffer();
 
         if (entry == null) {
             Log.w(TAG, "completeDataAvailable : No buffers available to play.");
