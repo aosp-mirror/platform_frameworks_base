@@ -701,12 +701,11 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
         return;
     }
 
-    if (mNumFramesReceived > 0 &&
-        timestampUs - mLastFrameTimestampUs > mGlitchDurationThresholdUs) {
-        if (mNumGlitches % 10 == 0) {  // Don't spam the log
-            LOGV("Long delay detected in video recording");
+    if (mNumFramesReceived > 0) {
+        CHECK(timestampUs > mLastFrameTimestampUs);
+        if (timestampUs - mLastFrameTimestampUs > mGlitchDurationThresholdUs) {
+            ++mNumGlitches;
         }
-        ++mNumGlitches;
     }
 
     // May need to skip frame or modify timestamp. Currently implemented
@@ -732,6 +731,7 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
     }
     ++mNumFramesReceived;
 
+    CHECK(data != NULL && data->size() > 0);
     mFramesReceived.push_back(data);
     int64_t timeUs = mStartTimeUs + (timestampUs - mFirstFrameTimeUs);
     mFrameTimes.push_back(timeUs);
