@@ -16,6 +16,7 @@
 
 package com.android.layoutlib.bridge.android;
 
+import com.android.ide.common.rendering.api.DeclareStyleableResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
@@ -49,18 +50,23 @@ import java.util.Map;
  */
 public final class BridgeTypedArray extends TypedArray {
 
-    private BridgeResources mBridgeResources;
-    private BridgeContext mContext;
+    private final BridgeResources mBridgeResources;
+    private final BridgeContext mContext;
+    private final boolean mPlatformFile;
+    private final boolean mPlatformStyleable;
+    private final String mStyleableName;
+
     private ResourceValue[] mResourceData;
     private String[] mNames;
-    private final boolean mPlatformFile;
 
     public BridgeTypedArray(BridgeResources resources, BridgeContext context, int len,
-            boolean platformFile) {
+            boolean platformFile, boolean platformStyleable, String styleableName) {
         super(null, null, null, 0);
         mBridgeResources = resources;
         mContext = context;
         mPlatformFile = platformFile;
+        mPlatformStyleable = platformStyleable;
+        mStyleableName = styleableName;
         mResourceData = new ResourceValue[len];
         mNames = new String[len];
     }
@@ -202,7 +208,18 @@ public final class BridgeTypedArray extends TypedArray {
         // Field is not null and is not an integer.
         // Check for possible constants and try to find them.
         // Get the map of attribute-constant -> IntegerValue
-        Map<String, Integer> map = Bridge.getEnumValues(mNames[index]);
+        Map<String, Integer> map = null;
+        if (mPlatformStyleable) {
+            map = Bridge.getEnumValues(mNames[index]);
+        } else {
+            // get the styleable matching the resolved name
+            RenderResources res = mContext.getRenderResources();
+            ResourceValue styleable = res.getProjectResource(ResourceType.DECLARE_STYLEABLE,
+                    mStyleableName);
+            if (styleable instanceof DeclareStyleableResourceValue) {
+                map = ((DeclareStyleableResourceValue) styleable).getAttributeValues(mNames[index]);
+            }
+        }
 
         if (map != null) {
             // accumulator to store the value of the 1+ constants.
