@@ -1206,6 +1206,14 @@ public final class Calendar {
                 Uri.parse("content://" + AUTHORITY + "/events");
 
         /**
+         * The content:// style URI for recurring event exceptions.  Insertions require an
+         * appended event ID.  Deletion of exceptions requires both the original event ID and
+         * the exception event ID (see {@link Uri.Builder#appendPath}).
+         */
+        public static final Uri EXCEPTION_CONTENT_URI =
+                Uri.parse("content://" + AUTHORITY + "/exception");
+
+        /**
          * The default sort order for this table
          */
         private static final String DEFAULT_SORT_ORDER = "";
