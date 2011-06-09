@@ -158,10 +158,37 @@ public class NetworkStats implements Parcelable {
      * between two snapshots in time. Assumes that statistics rows collect over
      * time, and that none of them have disappeared.
      *
+     * @throws IllegalArgumentException when given {@link NetworkStats} is
+     *             non-monotonic.
+     */
+    public NetworkStats subtract(NetworkStats value) {
+        return subtract(value, true, false);
+    }
+
+    /**
+     * Subtract the given {@link NetworkStats}, effectively leaving the delta
+     * between two snapshots in time. Assumes that statistics rows collect over
+     * time, and that none of them have disappeared.
+     * <p>
+     * Instead of throwing when counters are non-monotonic, this variant clamps
+     * results to never be negative.
+     */
+    public NetworkStats subtractClamped(NetworkStats value) {
+        return subtract(value, false, true);
+    }
+
+    /**
+     * Subtract the given {@link NetworkStats}, effectively leaving the delta
+     * between two snapshots in time. Assumes that statistics rows collect over
+     * time, and that none of them have disappeared.
+     *
      * @param enforceMonotonic Validate that incoming value is strictly
      *            monotonic compared to this object.
+     * @param clampNegative Instead of throwing like {@code enforceMonotonic},
+     *            clamp resulting counters at 0 to prevent negative values.
      */
-    public NetworkStats subtract(NetworkStats value, boolean enforceMonotonic) {
+    private NetworkStats subtract(
+            NetworkStats value, boolean enforceMonotonic, boolean clampNegative) {
         final long deltaRealtime = this.elapsedRealtime - value.elapsedRealtime;
         if (enforceMonotonic && deltaRealtime < 0) {
             throw new IllegalArgumentException("found non-monotonic realtime");
@@ -181,10 +208,14 @@ public class NetworkStats implements Parcelable {
                 result.addEntry(iface, uid, this.rx[i], this.tx[i]);
             } else {
                 // existing row, subtract remote value
-                final long rx = this.rx[i] - value.rx[j];
-                final long tx = this.tx[i] - value.tx[j];
+                long rx = this.rx[i] - value.rx[j];
+                long tx = this.tx[i] - value.tx[j];
                 if (enforceMonotonic && (rx < 0 || tx < 0)) {
                     throw new IllegalArgumentException("found non-monotonic values");
+                }
+                if (clampNegative) {
+                    rx = Math.max(0, rx);
+                    tx = Math.max(0, tx);
                 }
                 result.addEntry(iface, uid, rx, tx);
             }

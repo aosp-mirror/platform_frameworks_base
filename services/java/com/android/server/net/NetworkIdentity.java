@@ -66,7 +66,7 @@ public class NetworkIdentity {
             case VERSION_CURRENT: {
                 type = in.readInt();
                 subType = in.readInt();
-                subscriberId = in.readUTF();
+                subscriberId = readOptionalString(in);
                 break;
             }
             default: {
@@ -79,7 +79,7 @@ public class NetworkIdentity {
         out.writeInt(VERSION_CURRENT);
         out.writeInt(type);
         out.writeInt(subType);
-        out.writeUTF(subscriberId);
+        writeOptionalString(out, subscriberId);
     }
 
     @Override
@@ -203,6 +203,23 @@ public class NetworkIdentity {
             subscriberId = null;
         }
         return new NetworkIdentity(type, subType, subscriberId);
+    }
+
+    private static void writeOptionalString(DataOutputStream out, String value) throws IOException {
+        if (value != null) {
+            out.writeByte(1);
+            out.writeUTF(value);
+        } else {
+            out.writeByte(0);
+        }
+    }
+
+    private static String readOptionalString(DataInputStream in) throws IOException {
+        if (in.readByte() != 0) {
+            return in.readUTF();
+        } else {
+            return null;
+        }
     }
 
 }

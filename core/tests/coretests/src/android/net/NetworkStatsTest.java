@@ -47,7 +47,7 @@ public class NetworkStatsTest extends TestCase {
                 .addEntry(TEST_IFACE, 100, 1024, 0)
                 .addEntry(TEST_IFACE, 101, 0, 1024).build();
 
-        final NetworkStats result = after.subtract(before, true);
+        final NetworkStats result = after.subtract(before);
 
         // identical data should result in zero delta
         assertEquals(0, result.rx[0]);
@@ -65,7 +65,7 @@ public class NetworkStatsTest extends TestCase {
                 .addEntry(TEST_IFACE, 100, 1025, 2)
                 .addEntry(TEST_IFACE, 101, 3, 1028).build();
 
-        final NetworkStats result = after.subtract(before, true);
+        final NetworkStats result = after.subtract(before);
 
         // expect delta between measurements
         assertEquals(1, result.rx[0]);
@@ -84,7 +84,7 @@ public class NetworkStatsTest extends TestCase {
                 .addEntry(TEST_IFACE, 101, 0, 1024)
                 .addEntry(TEST_IFACE, 102, 1024, 1024).build();
 
-        final NetworkStats result = after.subtract(before, true);
+        final NetworkStats result = after.subtract(before);
 
         // its okay to have new rows
         assertEquals(0, result.rx[0]);
