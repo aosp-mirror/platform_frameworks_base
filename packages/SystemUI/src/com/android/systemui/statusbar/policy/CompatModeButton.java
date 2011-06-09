@@ -54,8 +54,9 @@ public class CompatModeButton extends ImageView implements View.OnClickListener 
     }
 
     public void refresh() {
-        setVisibility(
-                (mAM.getFrontActivityScreenCompatMode() == ActivityManager.COMPAT_MODE_NEVER)
+        int mode = mAM.getFrontActivityScreenCompatMode();
+        setVisibility((mode == ActivityManager.COMPAT_MODE_NEVER
+                        || mode == ActivityManager.COMPAT_MODE_ALWAYS)
                 ? View.GONE
                 : View.VISIBLE
             );
