@@ -16,6 +16,7 @@
 
 package com.android.internal.widget;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
@@ -32,6 +33,7 @@ import android.widget.FrameLayout;
 public class ActionBarContainer extends FrameLayout {
     private boolean mIsTransitioning;
     private View mTabContainer;
+    private ActionBarView mActionBarView;
 
     public ActionBarContainer(Context context) {
         this(context, null);
@@ -44,6 +46,12 @@ public class ActionBarContainer extends FrameLayout {
                 com.android.internal.R.styleable.ActionBar);
         setBackgroundDrawable(a.getDrawable(com.android.internal.R.styleable.ActionBar_background));
         a.recycle();
+    }
+
+    @Override
+    public void onFinishInflate() {
+        super.onFinishInflate();
+        mActionBarView = (ActionBarView) findViewById(com.android.internal.R.id.action_bar);
     }
 
     /**
@@ -101,9 +109,8 @@ public class ActionBarContainer extends FrameLayout {
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            if (child == mTabContainer) {
-                continue;
-            }
+
+            if (child == mTabContainer) continue;
 
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             nonTabHeight = Math.max(nonTabHeight,
@@ -125,8 +132,22 @@ public class ActionBarContainer extends FrameLayout {
         super.onLayout(changed, l, t, r, b);
         if (mTabContainer != null && mTabContainer.getVisibility() != GONE) {
             final int containerHeight = getMeasuredHeight();
-            mTabContainer.layout(l, containerHeight - mTabContainer.getMeasuredHeight(),
-                    r, containerHeight);
+            final int tabHeight = mTabContainer.getMeasuredHeight();
+
+            if ((mActionBarView.getDisplayOptions() & ActionBar.DISPLAY_SHOW_HOME) == 0) {
+                // Not showing home, put tabs on top.
+                final int count = getChildCount();
+                for (int i = 0; i < count; i++){
+                    final View child = getChildAt(i);
+
+                    if (child == mTabContainer) continue;
+
+                    child.offsetTopAndBottom(tabHeight);
+                }
+                mTabContainer.layout(l, 0, r, tabHeight);
+            } else {
+                mTabContainer.layout(l, containerHeight - tabHeight, r, containerHeight);
+            }
         }
     }
 }
