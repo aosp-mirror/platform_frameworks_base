@@ -538,7 +538,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
 
                 // layout
                 mScreenLocked.setVisibility(View.VISIBLE);
-                mEmergencyCallText.setVisibility(View.VISIBLE);
+                mLockPatternUtils.updateEmergencyCallText(mEmergencyCallText);
                 enableUnlock(); // do not need to show the e-call button; user may unlock
                 break;
 
@@ -552,8 +552,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
 
                 // layout
                 mScreenLocked.setVisibility(View.VISIBLE);
-                mEmergencyCallText.setVisibility(View.VISIBLE);
-                mEmergencyCallButton.setVisibility(View.VISIBLE);
+                mLockPatternUtils.updateEmergencyCallText(mEmergencyCallText);
+                mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
                 disableUnlock();
                 break;
 
@@ -579,14 +579,13 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
                 mScreenLocked.setText(R.string.lockscreen_sim_puk_locked_instructions);
 
                 // layout
+                mLockPatternUtils.updateEmergencyCallText(mEmergencyCallText);
+                mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
                 if (mLockPatternUtils.isPukUnlockScreenEnable()) {
                     mScreenLocked.setVisibility(View.INVISIBLE);
-                    mEmergencyCallText.setVisibility(View.GONE);
                     enableUnlock();
                 } else {
                     mScreenLocked.setVisibility(View.VISIBLE);
-                    mEmergencyCallText.setVisibility(View.VISIBLE);
-                    mEmergencyCallButton.setVisibility(View.VISIBLE);
                     disableUnlock();
                 }
                 break;

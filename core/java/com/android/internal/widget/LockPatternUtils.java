@@ -35,6 +35,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -867,6 +868,18 @@ public class LockPatternUtils {
             button.setCompoundDrawablesWithIntrinsicBounds(emergencyIcon, 0, 0, 0);
         }
         button.setText(textId);
+    }
+
+    /**
+     * Sets the visibility of emergency call prompt based on emergency capable
+     * @param emergencyText the emergency call text to be updated
+     */
+    public void updateEmergencyCallText(TextView emergencyText) {
+        if (isEmergencyCallCapable()) {
+            emergencyText.setVisibility(View.VISIBLE);
+        } else {
+            emergencyText.setVisibility(View.GONE);
+        }
     }
 
     /**
