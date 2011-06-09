@@ -21,9 +21,11 @@
 #include "rsProgramFragment.h"
 #include <cutils/properties.h>
 
+#ifndef ANDROID_RS_SERIALIZE
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_BITMAP_H
+#endif //ANDROID_RS_SERIALIZE
 
 using namespace android;
 using namespace android::renderscript;
@@ -35,6 +37,7 @@ Font::Font(Context *rsc) : ObjectBase(rsc), mCachedGlyphs(NULL) {
 }
 
 bool Font::init(const char *name, float fontSize, uint32_t dpi, const void *data, uint32_t dataLen) {
+#ifndef ANDROID_RS_SERIALIZE
     if (mInitialized) {
         LOGE("Reinitialization of fonts not supported");
         return false;
@@ -65,6 +68,7 @@ bool Font::init(const char *name, float fontSize, uint32_t dpi, const void *data
     mHasKerning = FT_HAS_KERNING(mFace);
 
     mInitialized = true;
+#endif //ANDROID_RS_SERIALIZE
     return true;
 }
 
@@ -230,6 +234,7 @@ Font::CachedGlyphInfo* Font::getCachedUTFChar(int32_t utfChar) {
 }
 
 void Font::updateGlyphCache(CachedGlyphInfo *glyph) {
+#ifndef ANDROID_RS_SERIALIZE
     FT_Error error = FT_Load_Glyph( mFace, glyph->mGlyphIndex, FT_LOAD_RENDER );
     if (error) {
         LOGE("Couldn't load glyph.");
@@ -270,15 +275,16 @@ void Font::updateGlyphCache(CachedGlyphInfo *glyph) {
     glyph->mBitmapMinV = (float)startY / (float)cacheHeight;
     glyph->mBitmapMaxU = (float)endX / (float)cacheWidth;
     glyph->mBitmapMaxV = (float)endY / (float)cacheHeight;
+#endif //ANDROID_RS_SERIALIZE
 }
 
 Font::CachedGlyphInfo *Font::cacheGlyph(uint32_t glyph) {
     CachedGlyphInfo *newGlyph = new CachedGlyphInfo();
     mCachedGlyphs.add(glyph, newGlyph);
-
+#ifndef ANDROID_RS_SERIALIZE
     newGlyph->mGlyphIndex = FT_Get_Char_Index(mFace, glyph);
     newGlyph->mIsValid = false;
-
+#endif //ANDROID_RS_SERIALIZE
     updateGlyphCache(newGlyph);
 
     return newGlyph;
@@ -309,9 +315,11 @@ Font * Font::create(Context *rsc, const char *name, float fontSize, uint32_t dpi
 }
 
 Font::~Font() {
+#ifndef ANDROID_RS_SERIALIZE
     if (mFace) {
         FT_Done_Face(mFace);
     }
+#endif
 
     for (uint32_t i = 0; i < mCachedGlyphs.size(); i ++) {
         CachedGlyphInfo *glyph = mCachedGlyphs.valueAt(i);
@@ -324,7 +332,9 @@ FontState::FontState() {
     mMaxNumberOfQuads = 1024;
     mCurrentQuadIndex = 0;
     mRSC = NULL;
+#ifndef ANDROID_RS_SERIALIZE
     mLibrary = NULL;
+#endif //ANDROID_RS_SERIALIZE
 
     // Get the renderer properties
     char property[PROPERTY_VALUE_MAX];
@@ -363,7 +373,7 @@ FontState::~FontState() {
 
     rsAssert(!mActiveFonts.size());
 }
-
+#ifndef ANDROID_RS_SERIALIZE
 FT_Library FontState::getLib() {
     if (!mLibrary) {
         FT_Error error = FT_Init_FreeType(&mLibrary);
@@ -375,6 +385,8 @@ FT_Library FontState::getLib() {
 
     return mLibrary;
 }
+#endif //ANDROID_RS_SERIALIZE
+
 
 void FontState::init(Context *rsc) {
     mRSC = rsc;
@@ -393,6 +405,7 @@ void FontState::flushAllAndInvalidate() {
     }
 }
 
+#ifndef ANDROID_RS_SERIALIZE
 bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *retOriginY) {
     // If the glyph is too tall, don't cache it
     if ((uint32_t)bitmap->rows > mCacheLines[mCacheLines.size()-1]->mMaxHeight) {
@@ -466,6 +479,7 @@ bool FontState::cacheBitmap(FT_Bitmap *bitmap, uint32_t *retOriginX, uint32_t *r
 
     return true;
 }
+#endif //ANDROID_RS_SERIALIZE
 
 void FontState::initRenderState() {
     String8 shaderString("varying vec2 varTex0;\n");
@@ -791,13 +805,15 @@ void FontState::deinit(Context *rsc) {
     mCacheLines.clear();
 
     mDefault.clear();
-
+#ifndef ANDROID_RS_SERIALIZE
     if (mLibrary) {
         FT_Done_FreeType( mLibrary );
         mLibrary = NULL;
     }
+#endif //ANDROID_RS_SERIALIZE
 }
 
+#ifndef ANDROID_RS_SERIALIZE
 bool FontState::CacheTextureLine::fitBitmap(FT_Bitmap_ *bitmap, uint32_t *retOriginX, uint32_t *retOriginY) {
     if ((uint32_t)bitmap->rows > mMaxHeight) {
         return false;
@@ -813,6 +829,7 @@ bool FontState::CacheTextureLine::fitBitmap(FT_Bitmap_ *bitmap, uint32_t *retOri
 
     return false;
 }
+#endif //ANDROID_RS_SERIALIZE
 
 namespace android {
 namespace renderscript {

@@ -149,24 +149,82 @@ include $(BUILD_SHARED_LIBRARY)
 
 # Now build a host version for serialization
 include $(CLEAR_VARS)
+LOCAL_MODULE:= libRS
+LOCAL_MODULE_TAGS := optional
+
+intermediates := $(call intermediates-dir-for,STATIC_LIBRARIES,libRS,HOST,)
+
+# Generate custom headers
+
+GEN := $(addprefix $(intermediates)/, \
+            rsgApiStructs.h \
+            rsgApiFuncDecl.h \
+        )
+
+$(GEN) : PRIVATE_PATH := $(LOCAL_PATH)
+$(GEN) : PRIVATE_CUSTOM_TOOL = $(RSG_GENERATOR) $< $@ <$(PRIVATE_PATH)/rs.spec
+$(GEN) : $(RSG_GENERATOR) $(LOCAL_PATH)/rs.spec
+$(GEN): $(intermediates)/%.h : $(LOCAL_PATH)/%.h.rsg
+	$(transform-generated-source)
+
+LOCAL_GENERATED_SOURCES += $(GEN)
+
+# Generate custom source files
+
+GEN := $(addprefix $(intermediates)/, \
+            rsgApi.cpp \
+            rsgApiReplay.cpp \
+        )
+
+$(GEN) : PRIVATE_PATH := $(LOCAL_PATH)
+$(GEN) : PRIVATE_CUSTOM_TOOL = $(RSG_GENERATOR) $< $@ <$(PRIVATE_PATH)/rs.spec
+$(GEN) : $(RSG_GENERATOR) $(LOCAL_PATH)/rs.spec
+$(GEN): $(intermediates)/%.cpp : $(LOCAL_PATH)/%.cpp.rsg
+	$(transform-generated-source)
+
+LOCAL_GENERATED_SOURCES += $(GEN)
+
 LOCAL_CFLAGS += -Werror -Wall -Wno-unused-parameter -Wno-unused-variable
 LOCAL_CFLAGS += -DANDROID_RS_SERIALIZE
+LOCAL_CFLAGS += -fPIC
 
 LOCAL_SRC_FILES:= \
+	rsAdapter.cpp \
 	rsAllocation.cpp \
+	rsAnimation.cpp \
 	rsComponent.cpp \
+	rsContext.cpp \
+	rsDevice.cpp \
 	rsElement.cpp \
+	rsFBOCache.cpp \
+	rsFifoSocket.cpp \
 	rsFileA3D.cpp \
+	rsFont.cpp \
+	rsLocklessFifo.cpp \
 	rsObjectBase.cpp \
+	rsMatrix2x2.cpp \
+	rsMatrix3x3.cpp \
+	rsMatrix4x4.cpp \
 	rsMesh.cpp \
+	rsMutex.cpp \
+	rsProgram.cpp \
+	rsProgramFragment.cpp \
+	rsProgramStore.cpp \
+	rsProgramRaster.cpp \
+	rsProgramVertex.cpp \
+	rsSampler.cpp \
+	rsScript.cpp \
+	rsScriptC.cpp \
+	rsScriptC_Lib.cpp \
+	rsScriptC_LibGL.cpp \
+	rsSignal.cpp \
 	rsStream.cpp \
+	rsThreadIO.cpp \
 	rsType.cpp
 
 LOCAL_STATIC_LIBRARIES := libcutils libutils
 
 LOCAL_LDLIBS := -lpthread
-LOCAL_MODULE:= libRSserialize
-LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_HOST_STATIC_LIBRARY)
 

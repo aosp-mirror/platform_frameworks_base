@@ -92,9 +92,13 @@ uint32_t Context::runRootScript() {
 }
 
 uint64_t Context::getTime() const {
+#ifndef ANDROID_RS_SERIALIZE
     struct timespec t;
     clock_gettime(CLOCK_MONOTONIC, &t);
     return t.tv_nsec + ((uint64_t)t.tv_sec * 1000 * 1000 * 1000);
+#else
+    return 0;
+#endif //ANDROID_RS_SERIALIZE
 }
 
 void Context::timerReset() {
@@ -200,11 +204,11 @@ void Context::displayDebugStats() {
 
 void * Context::threadProc(void *vrsc) {
     Context *rsc = static_cast<Context *>(vrsc);
+#ifndef ANDROID_RS_SERIALIZE
     rsc->mNativeThreadId = gettid();
-
     setpriority(PRIO_PROCESS, rsc->mNativeThreadId, ANDROID_PRIORITY_DISPLAY);
     rsc->mThreadPriority = ANDROID_PRIORITY_DISPLAY;
-
+#endif //ANDROID_RS_SERIALIZE
     rsc->props.mLogTimes = getProp("debug.rs.profile");
     rsc->props.mLogScripts = getProp("debug.rs.script");
     rsc->props.mLogObjects = getProp("debug.rs.object");
@@ -330,14 +334,26 @@ Context::Context() {
     mObjHead = NULL;
     mError = RS_ERROR_NONE;
     mDPI = 96;
+    mIsContextLite = false;
 }
 
 Context * Context::createContext(Device *dev, const RsSurfaceConfig *sc) {
     Context * rsc = new Context();
+
+    // Temporary to avoid breaking the tools
+    if (!dev) {
+        return rsc;
+    }
     if (!rsc->initContext(dev, sc)) {
         delete rsc;
         return NULL;
     }
+    return rsc;
+}
+
+Context * Context::createContextLite() {
+    Context * rsc = new Context();
+    rsc->mIsContextLite = true;
     return rsc;
 }
 
@@ -395,26 +411,28 @@ bool Context::initContext(Device *dev, const RsSurfaceConfig *sc) {
 Context::~Context() {
     LOGV("Context::~Context");
 
-    mIO.coreFlush();
-    rsAssert(mExit);
-    mExit = true;
-    mPaused = false;
-    void *res;
+    if (!mIsContextLite) {
+        mIO.coreFlush();
+        rsAssert(mExit);
+        mExit = true;
+        mPaused = false;
+        void *res;
 
-    mIO.shutdown();
-    int status = pthread_join(mThreadId, &res);
+        mIO.shutdown();
+        int status = pthread_join(mThreadId, &res);
 
-    if (mHal.funcs.shutdownDriver) {
-        mHal.funcs.shutdownDriver(this);
+        if (mHal.funcs.shutdownDriver) {
+            mHal.funcs.shutdownDriver(this);
+        }
+
+        // Global structure cleanup.
+        pthread_mutex_lock(&gInitMutex);
+        if (mDev) {
+            mDev->removeContext(this);
+            mDev = NULL;
+        }
+        pthread_mutex_unlock(&gInitMutex);
     }
-
-    // Global structure cleanup.
-    pthread_mutex_lock(&gInitMutex);
-    if (mDev) {
-        mDev->removeContext(this);
-        mDev = NULL;
-    }
-    pthread_mutex_unlock(&gInitMutex);
     LOGV("Context::~Context done");
 }
 
@@ -542,7 +560,7 @@ void Context::dumpDebug() const {
 
     LOGE(" RS width %i, height %i", mWidth, mHeight);
     LOGE(" RS running %i, exit %i, paused %i", mRunning, mExit, mPaused);
-    LOGE(" RS pThreadID %li, nativeThreadID %i", mThreadId, mNativeThreadId);
+    LOGE(" RS pThreadID %li, nativeThreadID %i", (long int)mThreadId, mNativeThreadId);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -595,7 +613,7 @@ void rsi_ContextBindFont(Context *rsc, RsFont vfont) {
     rsc->setFont(font);
 }
 
-void rsi_AssignName(Context *rsc, RsObjectBase obj, const char *name, uint32_t name_length) {
+void rsi_AssignName(Context *rsc, RsObjectBase obj, const char *name, size_t name_length) {
     ObjectBase *ob = static_cast<ObjectBase *>(obj);
     rsc->assignName(ob, name, name_length);
 }
@@ -627,7 +645,7 @@ void rsi_ContextDump(Context *rsc, int32_t bits) {
 }
 
 void rsi_ContextDestroyWorker(Context *rsc) {
-    rsc->destroyWorkerThreadResources();;
+    rsc->destroyWorkerThreadResources();
 }
 
 void rsi_ContextDestroy(Context *rsc) {

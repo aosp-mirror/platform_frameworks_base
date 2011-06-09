@@ -36,6 +36,7 @@
 #include <cutils/sched_policy.h>
 #include <sys/syscall.h>
 #include <string.h>
+#include <bcc/bcc.h>
 
 using namespace android;
 using namespace android::renderscript;

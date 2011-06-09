@@ -18,7 +18,6 @@
 #define RS_HAL_H
 
 #include <RenderScriptDefines.h>
-#include <ui/egl/android_natives.h>
 
 namespace android {
 namespace renderscript {

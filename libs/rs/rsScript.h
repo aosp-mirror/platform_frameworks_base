@@ -70,7 +70,7 @@ public:
 
     void initSlots();
     void setSlot(uint32_t slot, Allocation *a);
-    void setVar(uint32_t slot, const void *val, uint32_t len);
+    void setVar(uint32_t slot, const void *val, size_t len);
     void setVarObj(uint32_t slot, ObjectBase *val);
 
     virtual void runForEach(Context *rsc,
@@ -80,7 +80,7 @@ public:
                             size_t usrBytes,
                             const RsScriptCall *sc = NULL) = 0;
 
-    virtual void Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len) = 0;
+    virtual void Invoke(Context *rsc, uint32_t slot, const void *data, size_t len) = 0;
     virtual void setupScript(Context *rsc) = 0;
     virtual uint32_t run(Context *) = 0;
 protected:

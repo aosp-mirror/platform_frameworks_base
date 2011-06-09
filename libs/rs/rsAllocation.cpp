@@ -168,13 +168,10 @@ void Allocation::elementData(Context *rsc, uint32_t x, uint32_t y,
 }
 
 void Allocation::addProgramToDirty(const Program *p) {
-#ifndef ANDROID_RS_SERIALIZE
     mToDirtyList.push(p);
-#endif //ANDROID_RS_SERIALIZE
 }
 
 void Allocation::removeProgramToDirty(const Program *p) {
-#ifndef ANDROID_RS_SERIALIZE
     for (size_t ct=0; ct < mToDirtyList.size(); ct++) {
         if (mToDirtyList[ct] == p) {
             mToDirtyList.removeAt(ct);
@@ -182,7 +179,6 @@ void Allocation::removeProgramToDirty(const Program *p) {
         }
     }
     rsAssert(0);
-#endif //ANDROID_RS_SERIALIZE
 }
 
 void Allocation::dumpLOGV(const char *prefix) const {
@@ -254,11 +250,9 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
 }
 
 void Allocation::sendDirty(const Context *rsc) const {
-#ifndef ANDROID_RS_SERIALIZE
     for (size_t ct=0; ct < mToDirtyList.size(); ct++) {
         mToDirtyList[ct]->forceDirty();
     }
-#endif //ANDROID_RS_SERIALIZE
     mRSC->mHal.funcs.allocation.markDirty(rsc, this);
 }
 
@@ -312,8 +306,6 @@ void Allocation::resize2D(Context *rsc, uint32_t dimX, uint32_t dimY) {
 
 /////////////////
 //
-#ifndef ANDROID_RS_SERIALIZE
-
 
 namespace android {
 namespace renderscript {
@@ -413,25 +405,25 @@ void rsi_AllocationCopyToBitmap(Context *rsc, RsAllocation va, void *data, size_
 }
 
 void rsi_Allocation1DData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t lod,
-                          uint32_t count, const void *data, uint32_t sizeBytes) {
+                          uint32_t count, const void *data, size_t sizeBytes) {
     Allocation *a = static_cast<Allocation *>(va);
     a->data(rsc, xoff, lod, count, data, sizeBytes);
 }
 
 void rsi_Allocation2DElementData(Context *rsc, RsAllocation va, uint32_t x, uint32_t y, uint32_t lod, RsAllocationCubemapFace face,
-                                 const void *data, uint32_t eoff, uint32_t sizeBytes) {
+                                 const void *data, size_t eoff, uint32_t sizeBytes) { // TODO: this seems wrong, eoff and sizeBytes may be swapped
     Allocation *a = static_cast<Allocation *>(va);
     a->elementData(rsc, x, y, data, eoff, sizeBytes);
 }
 
 void rsi_Allocation1DElementData(Context *rsc, RsAllocation va, uint32_t x, uint32_t lod,
-                                 const void *data, uint32_t eoff, uint32_t sizeBytes) {
+                                 const void *data, size_t eoff, uint32_t sizeBytes) { // TODO: this seems wrong, eoff and sizeBytes may be swapped
     Allocation *a = static_cast<Allocation *>(va);
     a->elementData(rsc, x, data, eoff, sizeBytes);
 }
 
 void rsi_Allocation2DData(Context *rsc, RsAllocation va, uint32_t xoff, uint32_t yoff, uint32_t lod, RsAllocationCubemapFace face,
-                          uint32_t w, uint32_t h, const void *data, uint32_t sizeBytes) {
+                          uint32_t w, uint32_t h, const void *data, size_t sizeBytes) {
     Allocation *a = static_cast<Allocation *>(va);
     a->data(rsc, xoff, yoff, lod, face, w, h, data, sizeBytes);
 }
@@ -549,5 +541,3 @@ const void * rsaAllocationGetType(RsContext con, RsAllocation va) {
 
     return a->getType();
 }
-
-#endif //ANDROID_RS_SERIALIZE

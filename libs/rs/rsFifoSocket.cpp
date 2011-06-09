@@ -70,9 +70,9 @@ size_t FifoSocket::read(void *data, size_t bytes) {
 }
 
 void FifoSocket::readReturn(const void *data, size_t bytes) {
-    LOGE("readReturn %p %i", data, bytes);
+    LOGE("readReturn %p %Zu", data, bytes);
     size_t ret = ::send(sv[1], data, bytes, 0);
-    LOGE("readReturn %i", ret);
+    LOGE("readReturn %Zu", ret);
     rsAssert(ret == bytes);
 }
 

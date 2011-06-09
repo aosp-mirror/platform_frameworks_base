@@ -59,7 +59,6 @@ public:
 
     static Allocation * createAllocation(Context *rsc, const Type *, uint32_t usages,
                                   RsAllocationMipmapControl mc = RS_ALLOCATION_MIPMAP_NONE);
-
     virtual ~Allocation();
     void updateCache();
 
@@ -121,14 +120,6 @@ protected:
 
 private:
     Allocation(Context *rsc, const Type *, uint32_t usages, RsAllocationMipmapControl mc);
-
-    void upload2DTexture(bool isFirstUpload);
-    void update2DTexture(const void *ptr, uint32_t xoff, uint32_t yoff,
-                         uint32_t lod, RsAllocationCubemapFace face, uint32_t w, uint32_t h);
-
-    void allocScriptMemory();
-    void freeScriptMemory();
-
 };
 
 }

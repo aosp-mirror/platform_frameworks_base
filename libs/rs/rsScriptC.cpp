@@ -19,11 +19,6 @@
 #include "utils/Timers.h"
 #include "utils/StopWatch.h"
 
-#include <GLES/gl.h>
-#include <GLES/glext.h>
-
-#include <bcc/bcc.h>
-
 using namespace android;
 using namespace android::renderscript;
 
@@ -129,7 +124,7 @@ void ScriptC::runForEach(Context *rsc,
     rsc->mHal.funcs.script.invokeForEach(rsc, this, ain, aout, usr, usrBytes, sc);
 }
 
-void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, uint32_t len) {
+void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, size_t len) {
     if (slot >= mHal.info.exportedFunctionCount) {
         rsc->setError(RS_ERROR_BAD_SCRIPT, "Calling invoke on bad script");
         return;
@@ -269,7 +264,7 @@ namespace renderscript {
 RsScript rsi_ScriptCCreate(Context *rsc,
                            const char *resName, size_t resName_length,
                            const char *cacheDir, size_t cacheDir_length,
-                           const char *text, uint32_t text_length)
+                           const char *text, size_t text_length)
 {
     ScriptC *s = new ScriptC(rsc);
 

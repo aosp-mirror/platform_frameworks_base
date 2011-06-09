@@ -149,7 +149,7 @@ RsMessageToClientType ThreadIO::getClientHeader(size_t *receiveLen, uint32_t *us
         mToClientSocket.read(&mLastClientHeader, sizeof(mLastClientHeader));
     } else {
         size_t bytesData = 0;
-        const uint32_t *d = (const uint32_t *)mToClient.get(&mLastClientHeader.cmdID, &bytesData);
+        const uint32_t *d = (const uint32_t *)mToClient.get(&mLastClientHeader.cmdID, (uint32_t*)&bytesData);
         if (bytesData >= sizeof(uint32_t)) {
             mLastClientHeader.userID = d[0];
             mLastClientHeader.bytes = bytesData - sizeof(uint32_t);

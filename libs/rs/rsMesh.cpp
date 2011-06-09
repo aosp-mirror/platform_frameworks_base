@@ -161,8 +161,6 @@ Mesh *Mesh::createFromStream(Context *rsc, IStream *stream) {
     return mesh;
 }
 
-#ifndef ANDROID_RS_SERIALIZE
-
 void Mesh::render(Context *rsc) const {
     for (uint32_t ct = 0; ct < mHal.state.primitivesCount; ct ++) {
         renderPrimitive(rsc, ct);
@@ -255,9 +253,9 @@ namespace android {
 namespace renderscript {
 
 RsMesh rsi_MeshCreate(Context *rsc,
-                      RsAllocation *vtx, uint32_t vtxCount,
-                      RsAllocation *idx, uint32_t idxCount,
-                      uint32_t *primType, uint32_t primTypeCount) {
+                      RsAllocation * vtx, size_t vtxCount,
+                      RsAllocation * idx, size_t idxCount,
+                      uint32_t * primType, size_t primTypeCount) {
     rsAssert(idxCount == primTypeCount);
     Mesh *sm = new Mesh(rsc, vtxCount, idxCount);
     sm->incUserRef();
@@ -309,5 +307,3 @@ void rsaMeshGetIndices(RsContext con, RsMesh mv, RsAllocation *va, uint32_t *pri
         }
     }
 }
-
-#endif

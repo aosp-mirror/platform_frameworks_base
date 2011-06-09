@@ -127,8 +127,8 @@ namespace android {
 namespace renderscript {
 
 RsProgramFragment rsi_ProgramFragmentCreate(Context *rsc, const char * shaderText,
-                             uint32_t shaderLength, const uint32_t * params,
-                             uint32_t paramLength) {
+                             size_t shaderLength, const uint32_t * params,
+                             size_t paramLength) {
     ProgramFragment *pf = new ProgramFragment(rsc, shaderText, shaderLength, params, paramLength);
     pf->incUserRef();
     //LOGE("rsi_ProgramFragmentCreate %p", pf);
