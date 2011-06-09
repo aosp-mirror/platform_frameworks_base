@@ -634,8 +634,17 @@ class ZoomManager {
         } else {
             newTextWrapScale = mActualScale;
         }
+        final boolean firstTimeReflow = !exceedsMinScaleIncrement(mActualScale, mTextWrapScale);
+        if (firstTimeReflow || mInZoomOverview) {
+            // In case first time reflow or in zoom overview mode, let reflow and zoom
+            // happen at the same time.
+            mTextWrapScale = newTextWrapScale;
+        }
         if (settings.isNarrowColumnLayout()
-                && exceedsMinScaleIncrement(mTextWrapScale, newTextWrapScale)) {
+                && exceedsMinScaleIncrement(mTextWrapScale, newTextWrapScale)
+                && !firstTimeReflow
+                && !mInZoomOverview) {
+            // Reflow only.
             mTextWrapScale = newTextWrapScale;
             refreshZoomScale(true);
         } else if (!mInZoomOverview && willScaleTriggerZoom(getZoomOverviewScale())) {

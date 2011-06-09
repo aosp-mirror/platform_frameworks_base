@@ -1903,7 +1903,7 @@ public final class WebViewCore {
                 width = mViewportWidth;
             } else {
                 // For mobile web site.
-                width = viewWidth;
+                width = mWebView.getViewWidth();
             }
         }
         return width;
