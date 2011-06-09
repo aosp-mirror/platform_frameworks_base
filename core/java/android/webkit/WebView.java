@@ -1818,9 +1818,9 @@ public class WebView extends AbsoluteLayout
      */
     public boolean loadViewState(InputStream stream) {
         try {
-            DrawData draw = ViewStateSerializer.deserializeViewState(stream, this);
+            mLoadedPicture = ViewStateSerializer.deserializeViewState(stream, this);
             mBlockWebkitViewMessages = true;
-            setNewPicture(draw);
+            setNewPicture(mLoadedPicture, true);
             return true;
         } catch (IOException e) {
             Log.w(LOGTAG, "Failed to loadViewState", e);
@@ -1835,6 +1835,7 @@ public class WebView extends AbsoluteLayout
      */
     public void clearViewState() {
         mBlockWebkitViewMessages = false;
+        mLoadedPicture = null;
         invalidate();
     }
 
@@ -5531,6 +5532,13 @@ public class WebView extends AbsoluteLayout
         }
 
         mZoomManager.onSizeChanged(w, h, ow, oh);
+
+        if (mLoadedPicture != null && mDelaySetPicture == null) {
+            // Size changes normally result in a new picture
+            // Re-set the loaded picture to simulate that
+            // However, do not update the base layer as that hasn't changed
+            setNewPicture(mLoadedPicture, false);
+        }
     }
 
     @Override
@@ -6504,6 +6512,7 @@ public class WebView extends AbsoluteLayout
     private boolean mMapTrackballToArrowKeys = true;
 
     private DrawData mDelaySetPicture;
+    private DrawData mLoadedPicture;
 
     public void setMapTrackballToArrowKeys(boolean setMap) {
         checkThread();
@@ -8054,7 +8063,7 @@ public class WebView extends AbsoluteLayout
                 case NEW_PICTURE_MSG_ID: {
                     // called for new content
                     final WebViewCore.DrawData draw = (WebViewCore.DrawData) msg.obj;
-                    setNewPicture(draw);
+                    setNewPicture(draw, true);
                     break;
                 }
                 case WEBCORE_INITIALIZED_MSG_ID:
@@ -8064,7 +8073,7 @@ public class WebView extends AbsoluteLayout
                     AssetManager am = mContext.getAssets();
                     nativeCreate(msg.arg1, drawableDir, am);
                     if (mDelaySetPicture != null) {
-                        setNewPicture(mDelaySetPicture);
+                        setNewPicture(mDelaySetPicture, true);
                         mDelaySetPicture = null;
                     }
                     break;
@@ -8377,11 +8386,11 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    void setNewPicture(final WebViewCore.DrawData draw) {
+    void setNewPicture(final WebViewCore.DrawData draw, boolean updateBaseLayer) {
         if (mNativeClass == 0) {
             if (mDelaySetPicture != null) {
-                throw new IllegalStateException(
-                        "Tried to setNewPicture with a delay picture already set! (memory leak)");
+                throw new IllegalStateException("Tried to setNewPicture with"
+                        + " a delay picture already set! (memory leak)");
             }
             // Not initialized yet, delay set
             mDelaySetPicture = draw;
@@ -8389,9 +8398,11 @@ public class WebView extends AbsoluteLayout
         }
         WebViewCore.ViewState viewState = draw.mViewState;
         boolean isPictureAfterFirstLayout = viewState != null;
-        setBaseLayer(draw.mBaseLayer, draw.mInvalRegion,
-                getSettings().getShowVisualIndicator(),
-                isPictureAfterFirstLayout);
+        if (updateBaseLayer) {
+            setBaseLayer(draw.mBaseLayer, draw.mInvalRegion,
+                    getSettings().getShowVisualIndicator(),
+                    isPictureAfterFirstLayout);
+        }
         final Point viewSize = draw.mViewSize;
         if (isPictureAfterFirstLayout) {
             // Reset the last sent data here since dealing with new page.
