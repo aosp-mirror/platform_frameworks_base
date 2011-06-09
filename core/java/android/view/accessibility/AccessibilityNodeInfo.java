@@ -93,9 +93,9 @@ public class AccessibilityNodeInfo implements Parcelable {
     private boolean mSealed;
 
     // Data.
-    private int mAccessibilityViewId;
-    private int mAccessibilityWindowId;
-    private int mParentAccessibilityViewId;
+    private int mAccessibilityViewId = View.NO_ID;
+    private int mAccessibilityWindowId = View.NO_ID;
+    private int mParentAccessibilityViewId = View.NO_ID;
     private int mBooleanProperties;
     private final Rect mBounds = new Rect();
 
@@ -723,6 +723,7 @@ public class AccessibilityNodeInfo implements Parcelable {
                 sPoolSize--;
                 info.mNext = null;
                 info.mIsInPool = false;
+                return info;
             }
             return new AccessibilityNodeInfo();
         }
