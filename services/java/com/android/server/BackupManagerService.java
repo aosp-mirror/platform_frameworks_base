@@ -1939,6 +1939,18 @@ class BackupManagerService extends IBackupManager.Stub {
         long mode;                      // e.g. 0666 (actually int)
         long mtime;                     // last mod time, UTC time_t (actually int)
         long size;                      // bytes of content
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("FileMetadata{");
+            sb.append(packageName); sb.append(',');
+            sb.append(type); sb.append(',');
+            sb.append(domain); sb.append(':'); sb.append(path); sb.append(',');
+            sb.append(size);
+            sb.append('}');
+            return sb.toString();
+        }
     }
 
     enum RestorePolicy {
@@ -1955,6 +1967,8 @@ class BackupManagerService extends IBackupManager.Stub {
         String mAgentPackage;
         ApplicationInfo mTargetApp;
         ParcelFileDescriptor[] mPipes = null;
+
+        long mBytes;
 
         // possible handling states for a given package in the restore dataset
         final HashMap<String, RestorePolicy> mPackagePolicies
@@ -2029,6 +2043,7 @@ class BackupManagerService extends IBackupManager.Stub {
             }
 
             try {
+                mBytes = 0;
                 byte[] buffer = new byte[32 * 1024];
                 FileInputStream instream = new FileInputStream(mInputFile.getFileDescriptor());
 
@@ -2037,7 +2052,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     didRestore = restoreOneFile(instream, buffer);
                 } while (didRestore);
 
-                if (DEBUG) Slog.v(TAG, "Done consuming input tarfile");
+                if (DEBUG) Slog.v(TAG, "Done consuming input tarfile, total bytes=" + mBytes);
             } finally {
                 tearDownPipes();
                 tearDownAgent(mTargetApp);
@@ -2045,6 +2060,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 try {
                     mInputFile.close();
                 } catch (IOException e) {
+                    Slog.w(TAG, "Close of restore data pipe threw", e);
                     /* nothing we can do about this */
                 }
                 synchronized (mCurrentOpLock) {
@@ -2258,6 +2274,7 @@ class BackupManagerService extends IBackupManager.Stub {
                                     int toRead = (toCopy > buffer.length)
                                     ? buffer.length : (int)toCopy;
                                     int nRead = instream.read(buffer, 0, toRead);
+                                    if (nRead >= 0) mBytes += nRead;
                                     if (nRead <= 0) break;
                                     toCopy -= nRead;
 
@@ -2267,8 +2284,7 @@ class BackupManagerService extends IBackupManager.Stub {
                                         try {
                                             pipe.write(buffer, 0, nRead);
                                         } catch (IOException e) {
-                                            Slog.e(TAG,
-                                                    "Failed to write to restore pipe", e);
+                                            Slog.e(TAG, "Failed to write to restore pipe", e);
                                             pipeOkay = false;
                                         }
                                     }
@@ -2304,6 +2320,7 @@ class BackupManagerService extends IBackupManager.Stub {
                                 int toRead = (bytesToConsume > buffer.length)
                                 ? buffer.length : (int)bytesToConsume;
                                 long nRead = instream.read(buffer, 0, toRead);
+                                if (nRead >= 0) mBytes += nRead;
                                 if (nRead <= 0) break;
                                 bytesToConsume -= nRead;
                             }
@@ -2325,15 +2342,13 @@ class BackupManagerService extends IBackupManager.Stub {
 
         void tearDownPipes() {
             if (mPipes != null) {
-                if (mPipes[0] != null) {
-                    try {
-                        mPipes[0].close();
-                        mPipes[0] = null;
-                        mPipes[1].close();
-                        mPipes[1] = null;
-                    } catch (IOException e) {
-                        Slog.w(TAG, "Couldn't close agent pipes", e);
-                    }
+                try {
+                    mPipes[0].close();
+                    mPipes[0] = null;
+                    mPipes[1].close();
+                    mPipes[1] = null;
+                } catch (IOException e) {
+                    Slog.w(TAG, "Couldn't close agent pipes", e);
                 }
                 mPipes = null;
             }
@@ -2447,6 +2462,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 while (size > 0) {
                     long toRead = (buffer.length < size) ? buffer.length : size;
                     int didRead = instream.read(buffer, 0, (int)toRead);
+                    if (didRead >= 0) mBytes += didRead;
                     apkStream.write(buffer, 0, didRead);
                     size -= didRead;
                 }
@@ -2529,7 +2545,8 @@ class BackupManagerService extends IBackupManager.Stub {
             long partial = (size + 512) % 512;
             if (partial > 0) {
                 byte[] buffer = new byte[512];
-                instream.read(buffer, 0, 512 - (int)partial);
+                int nRead = instream.read(buffer, 0, 512 - (int)partial);
+                if (nRead >= 0) mBytes += nRead;
             }
         }
 
@@ -2545,6 +2562,7 @@ class BackupManagerService extends IBackupManager.Stub {
             while (nRead < info.size) {
                 nRead += instream.read(buffer, nRead, (int)info.size - nRead);
             }
+            if (nRead >= 0) mBytes += nRead;
 
             RestorePolicy policy = RestorePolicy.IGNORE;
             String[] str = new String[1];
@@ -2729,9 +2747,17 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 switch (typeChar) {
                     case '0': info.type = FullBackup.TYPE_FILE; break;
-                    case '5': info.type = FullBackup.TYPE_DIRECTORY; break;
+                    case '5': {
+                        info.type = FullBackup.TYPE_DIRECTORY;
+                        if (info.size != 0) {
+                            Slog.w(TAG, "Directory entry with nonzero size in header");
+                            info.size = 0;
+                        }
+                        break;
+                    }
                     case 0: {
                         // presume EOF
+                        if (DEBUG) Slog.w(TAG, "Saw type=0 in tar header block, info=" + info);
                         return null;
                     }
                     default: {
@@ -2788,6 +2814,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
         boolean readTarHeader(InputStream instream, byte[] block) throws IOException {
             int nRead = instream.read(block, 0, 512);
+            if (nRead >= 0) mBytes += nRead;
             if (nRead > 0 && nRead != 512) {
                 // if we read only a partial block, then things are
                 // clearly screwed up.  terminate the restore.
@@ -2810,6 +2837,7 @@ class BackupManagerService extends IBackupManager.Stub {
             int numBlocks = (int)((info.size + 511) >> 9);
             byte[] data = new byte[numBlocks * 512];
             int nRead = instream.read(data);
+            if (nRead >= 0) mBytes += nRead;
             if (nRead != data.length) {
                 return false;
             }

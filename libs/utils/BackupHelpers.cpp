@@ -525,6 +525,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
     String8 prefix;
 
     const int isdir = S_ISDIR(s.st_mode);
+    if (isdir) s.st_size = 0;   // directories get no actual data in the tar stream
 
     // !!! TODO: use mmap when possible to avoid churning the buffer cache
     // !!! TODO: this will break with symlinks; need to use readlink(2)
