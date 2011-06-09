@@ -6294,13 +6294,17 @@ public final class ContactsContract {
      * toward {@link Data#CONTENT_URI}.
      * </p>
      * <p>
+     * {@link ContentResolver#update(Uri, ContentValues, String, String[])} returns a positive
+     * integer when successful, and returns 0 if no contact with that id was found.
+     * </p>
+     * <p>
      * Example:
      * <pre>
      * Uri uri = DataUsageFeedback.UPDATE_URI.buildUpon()
      *         .appendPath(TextUtils.join(",", dataIds))
      *         .appendQueryParameter(DataUsageFeedback.METHOD, DataUsageFeedback.METHOD_CALL)
      *         .build();
-     * resolver.update(uri, new ContentValues(), null, null);
+     * boolean successful = resolver.update(uri, new ContentValues(), null, null) > 0;
      * </pre>
      * </p>
      * @hide
@@ -6319,7 +6323,7 @@ public final class ContactsContract {
          * Name for query parameter specifying the type of data usage.
          * </p>
          */
-        public static final String USAGE_TYPE = "method";
+        public static final String USAGE_TYPE = "type";
 
         /**
          * <p>
