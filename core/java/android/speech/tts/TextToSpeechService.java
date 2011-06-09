@@ -94,9 +94,8 @@ public abstract class TextToSpeechService extends Service {
         synthThread.start();
         mSynthHandler = new SynthHandler(synthThread.getLooper());
 
-        HandlerThread audioTrackThread = new HandlerThread("TTS.audioTrackThread");
-        audioTrackThread.start();
-        mAudioPlaybackHandler = new AudioPlaybackHandler(audioTrackThread.getLooper());
+        mAudioPlaybackHandler = new AudioPlaybackHandler();
+        mAudioPlaybackHandler.start();
 
         mCallbacks = new CallbackMap();
 
@@ -299,11 +298,16 @@ public abstract class TextToSpeechService extends Service {
             if (!speechItem.isValid()) {
                 return TextToSpeech.ERROR;
             }
-            // TODO: The old code also supported the undocumented queueMode == 2,
-            // which clears out all pending items from the calling app, as well as all
-            // non-file items from other apps.
+
             if (queueMode == TextToSpeech.QUEUE_FLUSH) {
                 stop(speechItem.getCallingApp());
+            } else if (queueMode == 2) {
+                // Stop the current speech item.
+                stop(speechItem.getCallingApp());
+                // Remove all other items from the queue.
+                removeCallbacksAndMessages(null);
+                // Remove all pending playback as well.
+                mAudioPlaybackHandler.removeAllItems();
             }
             Runnable runnable = new Runnable() {
                 @Override
@@ -334,11 +338,15 @@ public abstract class TextToSpeechService extends Service {
             if (TextUtils.isEmpty(callingApp)) {
                 return TextToSpeech.ERROR;
             }
+
             removeCallbacksAndMessages(callingApp);
             SpeechItem current = setCurrentSpeechItem(null);
             if (current != null && TextUtils.equals(callingApp, current.getCallingApp())) {
                 current.stop();
             }
+
+            // Remove any enqueued audio too.
+            mAudioPlaybackHandler.removePlaybackItems(callingApp);
 
             return TextToSpeech.SUCCESS;
         }
@@ -490,7 +498,7 @@ public abstract class TextToSpeechService extends Service {
 
         protected AbstractSynthesisCallback createSynthesisCallback() {
             return new PlaybackSynthesisCallback(getStreamType(), getVolume(), getPan(),
-                    mAudioPlaybackHandler, this);
+                    mAudioPlaybackHandler, this, getCallingApp());
         }
 
         private void setRequestParams(SynthesisRequest request) {
@@ -617,7 +625,7 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected int playImpl() {
-            mToken = new AudioMessageParams(this, mPlayer);
+            mToken = new AudioMessageParams(this, getCallingApp(), mPlayer);
             mAudioPlaybackHandler.enqueueAudio(mToken);
             return TextToSpeech.SUCCESS;
         }
@@ -646,7 +654,7 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected int playImpl() {
-            mToken = new SilenceMessageParams(this, mDuration);
+            mToken = new SilenceMessageParams(this, getCallingApp(), mDuration);
             mAudioPlaybackHandler.enqueueSilence(mToken);
             return TextToSpeech.SUCCESS;
         }

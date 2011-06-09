@@ -20,8 +20,9 @@ import android.speech.tts.TextToSpeechService.UtteranceCompletedDispatcher;
 class AudioMessageParams extends MessageParams {
     private final BlockingMediaPlayer mPlayer;
 
-    AudioMessageParams(UtteranceCompletedDispatcher dispatcher, BlockingMediaPlayer player) {
-        super(dispatcher);
+    AudioMessageParams(UtteranceCompletedDispatcher dispatcher,
+            String callingApp, BlockingMediaPlayer player) {
+        super(dispatcher, callingApp);
         mPlayer = player;
     }
 

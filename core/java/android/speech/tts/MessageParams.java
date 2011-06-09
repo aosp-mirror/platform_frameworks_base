@@ -18,18 +18,24 @@ package android.speech.tts;
 import android.speech.tts.TextToSpeechService.UtteranceCompletedDispatcher;
 
 abstract class MessageParams {
-    private final UtteranceCompletedDispatcher mDispatcher;
-
     static final int TYPE_SYNTHESIS = 1;
     static final int TYPE_AUDIO = 2;
     static final int TYPE_SILENCE = 3;
 
-    MessageParams(UtteranceCompletedDispatcher dispatcher) {
+    private final UtteranceCompletedDispatcher mDispatcher;
+    private final String mCallingApp;
+
+    MessageParams(UtteranceCompletedDispatcher dispatcher, String callingApp) {
         mDispatcher = dispatcher;
+        mCallingApp = callingApp;
     }
 
     UtteranceCompletedDispatcher getDispatcher() {
         return mDispatcher;
+    }
+
+    String getCallingApp() {
+        return mCallingApp;
     }
 
     abstract int getType();
