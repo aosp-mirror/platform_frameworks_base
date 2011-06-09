@@ -19,11 +19,13 @@ package android.view;
 import java.util.HashMap;
 
 import android.content.res.CompatibilityInfo;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.AndroidRuntimeException;
 import android.util.Config;
 import android.util.Log;
+import android.util.Slog;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 
@@ -88,29 +90,32 @@ public class WindowManagerImpl implements WindowManager {
             = new HashMap<CompatibilityInfo, WindowManager>();
 
     static class CompatModeWrapper implements WindowManager {
-        private final WindowManager mWindowManager;
+        private final WindowManagerImpl mWindowManager;
         private final Display mDefaultDisplay;
+        private final CompatibilityInfoHolder mCompatibilityInfo;
 
-        CompatModeWrapper(WindowManager wm, CompatibilityInfo ci) {
-            mWindowManager = wm;
+        CompatModeWrapper(WindowManager wm, CompatibilityInfoHolder ci) {
+            mWindowManager = wm instanceof CompatModeWrapper
+                    ? ((CompatModeWrapper)wm).mWindowManager : (WindowManagerImpl)wm;
 
             // Use the original display if there is no compatibility mode
             // to apply, or the underlying window manager is already a
             // compatibility mode wrapper.  (We assume that if it is a
             // wrapper, it is applying the same compatibility mode.)
-            if (ci == null || wm instanceof CompatModeWrapper
-                    || (!ci.isScalingRequired() && ci.supportsScreen())) {
+            if (ci == null) {
                 mDefaultDisplay = mWindowManager.getDefaultDisplay();
             } else {
                 //mDefaultDisplay = mWindowManager.getDefaultDisplay();
                 mDefaultDisplay = Display.createCompatibleDisplay(
                         mWindowManager.getDefaultDisplay().getDisplayId(), ci);
             }
+
+            mCompatibilityInfo = ci;
         }
 
         @Override
         public void addView(View view, android.view.ViewGroup.LayoutParams params) {
-            mWindowManager.addView(view, params);
+            mWindowManager.addView(view, params, mCompatibilityInfo);
         }
 
         @Override
@@ -146,8 +151,9 @@ public class WindowManagerImpl implements WindowManager {
     }
 
     public static WindowManager getDefault(CompatibilityInfo compatInfo) {
-        if (compatInfo == null || (!compatInfo.isScalingRequired()
-                && compatInfo.supportsScreen())) {
+        CompatibilityInfoHolder cih = new CompatibilityInfoHolder();
+        cih.set(compatInfo);
+        if (cih.getIfNeeded() == null) {
             return sWindowManager;
         }
 
@@ -159,35 +165,40 @@ public class WindowManagerImpl implements WindowManager {
             // having to make wrappers.
             WindowManager wm = sCompatWindowManagers.get(compatInfo);
             if (wm == null) {
-                wm = new CompatModeWrapper(sWindowManager, compatInfo);
+                wm = new CompatModeWrapper(sWindowManager, cih);
                 sCompatWindowManagers.put(compatInfo, wm);
             }
             return wm;
         }
+    }
+
+    public static WindowManager getDefault(CompatibilityInfoHolder compatInfo) {
+        return new CompatModeWrapper(sWindowManager, compatInfo);
     }
     
     public boolean isHardwareAccelerated() {
         return false;
     }
     
-    public void addView(View view)
-    {
+    public void addView(View view) {
         addView(view, new WindowManager.LayoutParams(
             WindowManager.LayoutParams.TYPE_APPLICATION, 0, PixelFormat.OPAQUE));
     }
 
-    public void addView(View view, ViewGroup.LayoutParams params)
-    {
-        addView(view, params, false);
+    public void addView(View view, ViewGroup.LayoutParams params) {
+        addView(view, params, null, false);
     }
     
-    public void addViewNesting(View view, ViewGroup.LayoutParams params)
-    {
-        addView(view, params, false);
+    public void addView(View view, ViewGroup.LayoutParams params, CompatibilityInfoHolder cih) {
+        addView(view, params, cih, false);
     }
     
-    private void addView(View view, ViewGroup.LayoutParams params, boolean nest)
-    {
+    public void addViewNesting(View view, ViewGroup.LayoutParams params) {
+        addView(view, params, null, false);
+    }
+
+    private void addView(View view, ViewGroup.LayoutParams params,
+            CompatibilityInfoHolder cih, boolean nest) {
         if (Config.LOGV) Log.v("WindowManager", "addView view=" + view);
 
         if (!(params instanceof WindowManager.LayoutParams)) {
@@ -237,6 +248,11 @@ public class WindowManagerImpl implements WindowManager {
             
             root = new ViewRoot(view.getContext());
             root.mAddNesting = 1;
+            if (cih == null) {
+                root.mCompatibilityInfo = new CompatibilityInfoHolder();
+            } else {
+                root.mCompatibilityInfo = cih;
+            }
 
             view.setLayoutParams(wparams);
             
@@ -402,6 +418,17 @@ public class WindowManagerImpl implements WindowManager {
         }
     }
     
+    public void reportNewConfiguration(Configuration config) {
+        synchronized (this) {
+            int count = mViews.length;
+            config = new Configuration(config);
+            for (int i=0; i<count; i++) {
+                ViewRoot root = mRoots[i];
+                root.requestUpdateConfiguration(config);
+            }
+        }
+    }
+
     public WindowManager.LayoutParams getRootViewLayoutParameter(View view) {
         ViewParent vp = view.getParent();
         while (vp != null && !(vp instanceof ViewRoot)) {

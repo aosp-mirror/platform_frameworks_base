@@ -37,6 +37,8 @@ import android.content.res.Configuration;
  * when first constructing the singleton.</p>
  */
 public class Application extends ContextWrapper implements ComponentCallbacks {
+    /** @hide */
+    public LoadedApk mLoadedApk;
     
     public Application() {
         super(null);
@@ -75,6 +77,6 @@ public class Application extends ContextWrapper implements ComponentCallbacks {
      */
     /* package */ final void attach(Context context) {
         attachBaseContext(context);
+        mLoadedApk = ContextImpl.getImpl(context).mPackageInfo;
     }
-
 }
