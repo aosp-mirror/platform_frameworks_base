@@ -2663,6 +2663,9 @@ uint32_t ResTable::identifierForName(const char16_t* name, size_t nameLen,
                     goto nope;
                 }
             }
+            if (outTypeSpecFlags) {
+                *outTypeSpecFlags = ResTable_typeSpec::SPEC_PUBLIC;
+            }
             return m->id;
 nope:
             ;
@@ -2677,6 +2680,9 @@ nope:
                          index);
                     return 0;
                 }
+                if (outTypeSpecFlags) {
+                    *outTypeSpecFlags = ResTable_typeSpec::SPEC_PUBLIC;
+                }
                 return  Res_MAKEARRAY(index);
             }
         }
@@ -2686,6 +2692,8 @@ nope:
     if (mError != NO_ERROR) {
         return 0;
     }
+
+    bool fakePublic = false;
 
     // Figure out the package and type we are looking in...
 
@@ -2698,7 +2706,13 @@ nope:
         else if (*p == '/') typeEnd = p;
         p++;
     }
-    if (*name == '@') name++;
+    if (*name == '@') {
+        name++;
+        if (*name == '*') {
+            fakePublic = true;
+            name++;
+        }
+    }
     if (name >= nameEnd) {
         return 0;
     }
@@ -2803,6 +2817,9 @@ nope:
                 if (dtohl(entry->key.index) == (size_t)ei) {
                     if (outTypeSpecFlags) {
                         *outTypeSpecFlags = typeConfigs->typeSpecFlags[i];
+                        if (fakePublic) {
+                            *outTypeSpecFlags |= ResTable_typeSpec::SPEC_PUBLIC;
+                        }
                     }
                     return Res_MAKEID(group->id-1, ti, i);
                 }
@@ -2819,7 +2836,8 @@ bool ResTable::expandResourceRef(const uint16_t* refStr, size_t refLen,
                                  String16* outName,
                                  const String16* defType,
                                  const String16* defPackage,
-                                 const char** outErrorMsg)
+                                 const char** outErrorMsg,
+                                 bool* outPublicOnly)
 {
     const char16_t* packageEnd = NULL;
     const char16_t* typeEnd = NULL;
@@ -2835,6 +2853,16 @@ bool ResTable::expandResourceRef(const uint16_t* refStr, size_t refLen,
     }
     p = refStr;
     if (*p == '@') p++;
+
+    if (outPublicOnly != NULL) {
+        *outPublicOnly = true;
+    }
+    if (*p == '*') {
+        p++;
+        if (outPublicOnly != NULL) {
+            *outPublicOnly = false;
+        }
+    }
 
     if (packageEnd) {
         *outPackage = String16(p, packageEnd-p);
