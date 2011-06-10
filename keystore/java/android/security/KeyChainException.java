@@ -18,8 +18,6 @@ package android.security;
 
 /**
  * Thrown on problems accessing the {@link KeyChain}.
- *
- * @hide to be unhidden as part of KeyChain API
  */
 public class KeyChainException extends Exception {
 

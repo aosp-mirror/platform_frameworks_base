@@ -76,8 +76,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  * avoid prompting the user with {@link #choosePrivateKeyAlias
  * choosePrivateKeyAlias} on subsequent connections. If the alias is
  * no longer valid, null will be returned on lookups using that value
- *
- * @hide to be unhidden as part of KeyChain API
  */
 // TODO reference intent for credential installation when public
 public final class KeyChain {
