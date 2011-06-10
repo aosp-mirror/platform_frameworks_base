@@ -135,6 +135,9 @@ public class WapPushOverSms {
                 case WspTypeDecoder.CONTENT_TYPE_B_SUPL_INIT:
                     mimeType = WspTypeDecoder.CONTENT_MIME_TYPE_B_SUPL_INIT;
                     break;
+                case WspTypeDecoder.CONTENT_TYPE_B_PUSH_SYNCML_NOTI:
+                    mimeType = WspTypeDecoder.CONTENT_MIME_TYPE_B_PUSH_SYNCML_NOTI;
+                    break;
                 default:
                     if (Config.LOGD) {
                         Log.w(LOG_TAG,
@@ -159,6 +162,8 @@ public class WapPushOverSms {
                 binaryContentType = WspTypeDecoder.CONTENT_TYPE_B_VND_DOCOMO_PF;
             } else if (mimeType.equals(WspTypeDecoder.CONTENT_MIME_TYPE_B_SUPL_INIT)) {
                 binaryContentType = WspTypeDecoder.CONTENT_TYPE_B_SUPL_INIT;
+            } else if (mimeType.equals(WspTypeDecoder.CONTENT_MIME_TYPE_B_PUSH_SYNCML_NOTI)) {
+                binaryContentType = WspTypeDecoder.CONTENT_TYPE_B_PUSH_SYNCML_NOTI;
             } else {
                 if (Config.LOGD) Log.w(LOG_TAG, "Received PDU. Unknown Content-Type = " + mimeType);
                 return Intents.RESULT_SMS_HANDLED;

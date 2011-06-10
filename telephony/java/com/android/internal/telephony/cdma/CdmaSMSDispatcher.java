@@ -42,6 +42,7 @@ import com.android.internal.telephony.SmsHeader;
 import com.android.internal.telephony.SmsMessageBase;
 import com.android.internal.telephony.SmsMessageBase.TextEncodingDetails;
 import com.android.internal.telephony.TelephonyProperties;
+import com.android.internal.telephony.WspTypeDecoder;
 import com.android.internal.telephony.cdma.sms.SmsEnvelope;
 import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.util.HexDump;
@@ -51,12 +52,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import android.content.res.Resources;
+
 
 final class CdmaSMSDispatcher extends SMSDispatcher {
     private static final String TAG = "CDMA";
 
     private byte[] mLastDispatchedSmsFingerprint;
     private byte[] mLastAcknowledgedSmsFingerprint;
+
+    private boolean mCheckForDuplicatePortsInOmadmWapPush = Resources.getSystem().getBoolean(
+            com.android.internal.R.bool.config_duplicate_port_omadm_wappush);
 
     CdmaSMSDispatcher(CDMAPhone phone) {
         super(phone);
@@ -245,6 +251,13 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
             sourcePort |= 0xFF & pdu[index++];
             destinationPort = (0xFF & pdu[index++]) << 8;
             destinationPort |= 0xFF & pdu[index++];
+            // Some carriers incorrectly send duplicate port fields in omadm wap pushes.
+            // If configured, check for that here
+            if (mCheckForDuplicatePortsInOmadmWapPush) {
+                if (checkDuplicatePortOmadmWappush(pdu,index)) {
+                    index = index + 4; // skip duplicate port fields
+                }
+            }
         }
 
         // Lookup all other related parts
@@ -487,5 +500,46 @@ final class CdmaSMSDispatcher extends SMSDispatcher {
         default:
             return CommandsInterface.CDMA_SMS_FAIL_CAUSE_ENCODING_PROBLEM;
         }
+    }
+
+    /**
+     * Optional check to see if the received WapPush is an OMADM notification with erroneous
+     * extra port fields.
+     * - Some carriers make this mistake.
+     * ex: MSGTYPE-TotalSegments-CurrentSegment
+     *       -SourcePortDestPort-SourcePortDestPort-OMADM PDU
+     * @param origPdu The WAP-WDP PDU segment
+     * @param index Current Index while parsing the PDU.
+     * @return True if OrigPdu is OmaDM Push Message which has duplicate ports.
+     *         False if OrigPdu is NOT OmaDM Push Message which has duplicate ports.
+     */
+    private boolean checkDuplicatePortOmadmWappush(byte[] origPdu, int index) {
+        index += 4;
+        byte[] omaPdu = new byte[origPdu.length - index];
+        System.arraycopy(origPdu, index, omaPdu, 0, omaPdu.length);
+
+        WspTypeDecoder pduDecoder = new WspTypeDecoder(omaPdu);
+        int wspIndex = 2;
+
+        // Process header length field
+        if (pduDecoder.decodeUintvarInteger(wspIndex) == false) {
+            return false;
+        }
+
+        wspIndex += pduDecoder.getDecodedDataLength(); // advance to next field
+
+        // Process content type field
+        if (pduDecoder.decodeContentType(wspIndex) == false) {
+            return false;
+        }
+
+        String mimeType = pduDecoder.getValueString();
+        if (mimeType == null) {
+            int binaryContentType = (int)pduDecoder.getValue32();
+            if (binaryContentType == WspTypeDecoder.CONTENT_TYPE_B_PUSH_SYNCML_NOTI) {
+                return true;
+            }
+        }
+        return false;
     }
 }
