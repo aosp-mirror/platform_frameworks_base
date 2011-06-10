@@ -46,6 +46,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -107,6 +108,12 @@ public final class ViewAncestor extends Handler implements ViewParent,
     private static final boolean DEBUG_CONFIGURATION = false || LOCAL_LOGV;
     private static final boolean WATCH_POINTER = false;
 
+    /**
+     * Set this system property to true to force the view hierarchy to render
+     * at 60 Hz. This can be used to measure the potential framerate.
+     */
+    private static final String PROPERTY_PROFILE_RENDERING = "viewancestor.profile_rendering";    
+    
     private static final boolean MEASURE_LATENCY = false;
     private static LatencyTimer lt;
 
@@ -128,7 +135,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
     
     static final ArrayList<ComponentCallbacks> sConfigCallbacks
             = new ArrayList<ComponentCallbacks>();
-    
+
     long mLastTrackballTime = 0;
     final TrackballAxis mTrackballAxisX = new TrackballAxis();
     final TrackballAxis mTrackballAxisY = new TrackballAxis();
@@ -223,7 +230,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
 
     final Configuration mLastConfiguration = new Configuration();
     final Configuration mPendingConfiguration = new Configuration();
-    
+
     class ResizedInfo {
         Rect coveredInsets;
         Rect visibleInsets;
@@ -250,6 +257,10 @@ public final class ViewAncestor extends Handler implements ViewParent,
     volatile Object mLocalDragState;
     final PointF mDragPoint = new PointF();
     final PointF mLastTouchPoint = new PointF();
+    
+    private boolean mProfileRendering;    
+    private Thread mRenderProfiler;
+    private volatile boolean mRenderProfilingEnabled;
 
     /**
      * see {@link #playSoundEffect(int)}
@@ -325,6 +336,8 @@ public final class ViewAncestor extends Handler implements ViewParent,
         mViewConfiguration = ViewConfiguration.get(context);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
         mFallbackEventHandler = PolicyManager.makeNewFallbackEventHandler(context);
+        mProfileRendering = Boolean.parseBoolean(
+                SystemProperties.get(PROPERTY_PROFILE_RENDERING, "false"));
     }
 
     public static void addFirstDrawHandler(Runnable callback) {
@@ -1595,11 +1608,45 @@ public final class ViewAncestor extends Handler implements ViewParent,
      */
     void outputDisplayList(View view) {
         if (mAttachInfo != null && mAttachInfo.mHardwareCanvas != null) {
-
-            HardwareCanvas canvas = (HardwareCanvas) mAttachInfo.mHardwareCanvas;
             DisplayList displayList = view.getDisplayList();
             if (displayList != null) {
-                canvas.outputDisplayList(displayList);
+                mAttachInfo.mHardwareCanvas.outputDisplayList(displayList);
+            }
+        }
+    }
+
+    /**
+     * @see #PROPERTY_PROFILE_RENDERING
+     */
+    private void profileRendering(boolean enabled) {
+        if (mProfileRendering) {
+            mRenderProfilingEnabled = enabled;
+            if (mRenderProfiler == null) {
+                mRenderProfiler = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Log.d(TAG, "Starting profiling thread");
+                        while (mRenderProfilingEnabled) {
+                            mAttachInfo.mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mDirty.set(0, 0, mWidth, mHeight);
+                                    scheduleTraversals();
+                                }
+                            });
+                            try {
+                                // TODO: This should use vsync when we get an API
+                                Thread.sleep(15);
+                            } catch (InterruptedException e) {
+                                Log.d(TAG, "Exiting profiling thread");
+                            }                            
+                        }
+                    }
+                }, "Rendering Profiler");
+                mRenderProfiler.start();
+            } else {
+                mRenderProfiler.interrupt();
+                mRenderProfiler = null;
             }
         }
     }
@@ -1619,7 +1666,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
                 }
             }
         }
-        
+
         scrollToRectOrFocus(null, false);
 
         if (mAttachInfo.mViewScrollChanged) {
@@ -2217,6 +2264,9 @@ public final class ViewAncestor extends Handler implements ViewParent,
             if (mAdded) {
                 boolean hasWindowFocus = msg.arg1 != 0;
                 mAttachInfo.mHasWindowFocus = hasWindowFocus;
+                
+                profileRendering(hasWindowFocus);
+
                 if (hasWindowFocus) {
                     boolean inTouchMode = msg.arg2 != 0;
                     ensureTouchModeLocally(inTouchMode);
