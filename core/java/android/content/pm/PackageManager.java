@@ -893,6 +893,38 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device does not have a touch screen, but
+     * does support touch emulation for basic events that supports distinct
+     * tracking of two or more fingers.  This is an extension of
+     * {@link #FEATURE_FAKETOUCH} for input devices with this capability.  Note
+     * that unlike a distinct multitouch screen as defined by
+     * {@link #FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT}, these kinds of input
+     * devices will not actually provide full two-finger gestures since the
+     * input is being transformed to cursor movement on the screen.  That is,
+     * single finger gestures will move a cursor; two-finger swipes will
+     * result in single-finger touch events; other two-finger gestures will
+     * result in the corresponding two-finger touch event.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_FAKETOUCH_MULTITOUCH_DISTINCT = "android.hardware.faketouch.multitouch.distinct";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device does not have a touch screen, but
+     * does support touch emulation for basic events that supports tracking
+     * a hand of fingers (5 or more fingers) fully independently.
+     * This is an extension of
+     * {@link #FEATURE_FAKETOUCH} for input devices with this capability.  Note
+     * that unlike a multitouch screen as defined by
+     * {@link #FEATURE_TOUCHSCREEN_MULTITOUCH_JAZZHAND}, not all two finger
+     * gestures can be detected due to the limitations described for
+     * {@link #FEATURE_FAKETOUCH_MULTITOUCH_DISTINCT}.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_FAKETOUCH_MULTITOUCH_JAZZHAND = "android.hardware.faketouch.multitouch.jazzhand";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports live wallpapers.
      */
     @SdkConstant(SdkConstantType.FEATURE)
