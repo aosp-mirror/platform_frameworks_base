@@ -468,6 +468,9 @@ public class StatusBarPolicy {
     ServiceState mServiceState;
     SignalStrength mSignalStrength;
 
+    // flag for signal strength behavior
+    private boolean mAlwaysUseCdmaRssi;
+
     // data connection
     private boolean mDataIconVisible;
     private boolean mHspaDataDistinguishable;
@@ -600,6 +603,8 @@ public class StatusBarPolicy {
         mPhone = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
         mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
         mService.setIcon("phone_signal", mPhoneSignalIconId, 0);
+        mAlwaysUseCdmaRssi = mContext.getResources().getBoolean(
+            com.android.internal.R.bool.config_alwaysUseCdmaRssi);
 
         // register for phone state notifications.
         ((TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE))
@@ -1075,13 +1080,11 @@ public class StatusBarPolicy {
         } else {
             iconList = sSignalImages[mInetCondition];
 
-            boolean alwaysUseCdmaRssi = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_alwaysUseCdmaRssi);
             // If 3G(EV) and 1x network are available than 3G should be
             // displayed, displayed RSSI should be from the EV side.
             // If a voice call is made then RSSI should switch to 1x.
             if ((mPhoneState == TelephonyManager.CALL_STATE_IDLE) && isEvdo()
-                && !alwaysUseCdmaRssi) {
+                && !mAlwaysUseCdmaRssi) {
                 iconLevel = getEvdoLevel();
                 if (false) {
                     Slog.d(TAG, "use Evdo level=" + iconLevel + " to replace Cdma Level=" + getCdmaLevel());
