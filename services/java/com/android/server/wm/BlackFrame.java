@@ -38,6 +38,9 @@ public class BlackFrame {
             top = t;
             surface = new Surface(session, 0, "BlackSurface",
                     -1, w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
+            if (WindowManagerService.SHOW_TRANSACTIONS ||
+                    WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
+                            "  BLACK " + surface + ": CREATE layer=" + layer);
             surface.setAlpha(1.0f);
             surface.setLayer(layer);
         }
@@ -104,6 +107,10 @@ public class BlackFrame {
         if (mBlackSurfaces != null) {
             for (int i=0; i<mBlackSurfaces.length; i++) {
                 if (mBlackSurfaces[i] != null) {
+                    if (WindowManagerService.SHOW_TRANSACTIONS ||
+                            WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(
+                                    WindowManagerService.TAG,
+                                    "  BLACK " + mBlackSurfaces[i].surface + ": DESTROY");
                     mBlackSurfaces[i].surface.destroy();
                     mBlackSurfaces[i] = null;
                 }

@@ -269,6 +269,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
      */
     public int smallestScreenWidthDp;
 
+    /** @hide Hack to get this information from WM to app running in compat mode. */
+    public int compatScreenWidthDp;
+    /** @hide Hack to get this information from WM to app running in compat mode. */
+    public int compatScreenHeightDp;
+    /** @hide Hack to get this information from WM to app running in compat mode. */
+    public int compatSmallestScreenWidthDp;
+
     /**
      * @hide
      */
@@ -330,6 +337,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         screenWidthDp = o.screenWidthDp;
         screenHeightDp = o.screenHeightDp;
         smallestScreenWidthDp = o.smallestScreenWidthDp;
+        compatScreenWidthDp = o.compatScreenWidthDp;
+        compatScreenHeightDp = o.compatScreenHeightDp;
+        compatSmallestScreenWidthDp = o.compatSmallestScreenWidthDp;
         seq = o.seq;
     }
     
@@ -470,9 +480,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         orientation = ORIENTATION_UNDEFINED;
         screenLayout = SCREENLAYOUT_SIZE_UNDEFINED;
         uiMode = UI_MODE_TYPE_UNDEFINED;
-        screenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
-        screenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
-        smallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+        screenWidthDp = compatScreenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
+        screenHeightDp = compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
+        smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
         seq = 0;
         layoutDirection = LAYOUT_DIRECTION_LTR;
     }
@@ -578,10 +588,17 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_SCREEN_SIZE;
             screenHeightDp = delta.screenHeightDp;
         }
-        if (delta.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED
-                && smallestScreenWidthDp != delta.smallestScreenWidthDp) {
-            changed |= ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+        if (delta.smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
             smallestScreenWidthDp = delta.smallestScreenWidthDp;
+        }
+        if (delta.compatScreenWidthDp != SCREEN_WIDTH_DP_UNDEFINED) {
+            compatScreenWidthDp = delta.compatScreenWidthDp;
+        }
+        if (delta.compatScreenHeightDp != SCREEN_HEIGHT_DP_UNDEFINED) {
+            compatScreenHeightDp = delta.compatScreenHeightDp;
+        }
+        if (delta.compatSmallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
+            compatSmallestScreenWidthDp = delta.compatSmallestScreenWidthDp;
         }
         
         if (delta.seq != 0) {
@@ -790,6 +807,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(screenWidthDp);
         dest.writeInt(screenHeightDp);
         dest.writeInt(smallestScreenWidthDp);
+        dest.writeInt(compatScreenWidthDp);
+        dest.writeInt(compatScreenHeightDp);
+        dest.writeInt(compatSmallestScreenWidthDp);
         dest.writeInt(layoutDirection);
         dest.writeInt(seq);
     }
@@ -815,6 +835,9 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         screenWidthDp = source.readInt();
         screenHeightDp = source.readInt();
         smallestScreenWidthDp = source.readInt();
+        compatScreenWidthDp = source.readInt();
+        compatScreenHeightDp = source.readInt();
+        compatSmallestScreenWidthDp = source.readInt();
         layoutDirection = source.readInt();
         seq = source.readInt();
     }

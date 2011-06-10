@@ -41,8 +41,9 @@ class DimAnimator {
 
     DimAnimator (SurfaceSession session) {
         if (mDimSurface == null) {
-            if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG, "  DIM "
-                    + mDimSurface + ": CREATE");
+            if (WindowManagerService.SHOW_TRANSACTIONS ||
+                    WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
+                            "  DIM " + mDimSurface + ": CREATE");
             try {
                 mDimSurface = new Surface(session, 0,
                         "DimAnimator",
