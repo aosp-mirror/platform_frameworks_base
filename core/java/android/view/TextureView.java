@@ -56,14 +56,7 @@ import android.util.Log;
  *          setContentView(mTextureView);
  *      }
  *
- *      protected void onDestroy() {
- *          super.onDestroy();
- *
- *          mCamera.stopPreview();
- *          mCamera.release();
- *      }
- *
- *      public void onSurfaceTextureAvailable(SurfaceTexture surface) {
+ *      public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
  *          mCamera = Camera.open();
  *
  *          try {
@@ -76,6 +69,11 @@ import android.util.Log;
  *      
  *      public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
  *          // Ignored, Camera does all the work for us
+ *      }
+ *      
+ *      public void onSurfaceTextureDestroyed(SurfaceTexture surface) {
+ *          mCamera.stopPreview();
+ *          mCamera.release();
  *      }
  *  }
  * </pre>
@@ -155,6 +153,21 @@ public class TextureView extends View {
         }
     }
 
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+
+        if (isHardwareAccelerated() && mLayer != null) {
+            if (mListener != null) {
+                mListener.onSurfaceTextureDestroyed(mSurface);
+            }
+
+            mLayer.destroy();            
+            mSurface = null;
+            mLayer = null;
+        }
+    }
+
     /**
      * The layer type of a TextureView is ignored since a TextureView is always
      * considered to act as a hardware layer. The optional paint supplied to this
@@ -217,6 +230,9 @@ public class TextureView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         if (mSurface != null) {
             nSetDefaultBufferSize(mSurface.mSurfaceTexture, getWidth(), getHeight());
+            if (mListener != null) {
+                mListener.onSurfaceTextureSizeChanged(mSurface, getWidth(), getHeight());
+            }
         }
     }
 
@@ -242,7 +258,7 @@ public class TextureView extends View {
             mSurface.setOnFrameAvailableListener(mUpdateListener);
 
             if (mListener != null) {
-                mListener.onSurfaceTextureAvailable(mSurface);
+                mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());
             }
         }
 
@@ -316,8 +332,10 @@ public class TextureView extends View {
          * 
          * @param surface The surface returned by
          *                {@link android.view.TextureView#getSurfaceTexture()}
+         * @param width The width of the surface
+         * @param height The height of the surface
          */
-        public void onSurfaceTextureAvailable(SurfaceTexture surface);
+        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height);
 
         /**
          * Invoked when the {@link SurfaceTexture}'s buffers size changed.
@@ -328,6 +346,15 @@ public class TextureView extends View {
          * @param height The new height of the surface
          */
         public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height);
+
+        /**
+         * Invoked when the specified {@link SurfaceTexture} is about to be destroyed.
+         * After this method is invoked, no rendering should happen inside the surface
+         * texture.
+         * 
+         * @param surface The surface about to be destroyed
+         */
+        public void onSurfaceTextureDestroyed(SurfaceTexture surface);
     }
 
     private static native void nSetDefaultBufferSize(int surfaceTexture, int width, int height);
