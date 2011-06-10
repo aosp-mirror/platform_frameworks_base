@@ -25,11 +25,11 @@ import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.Stack;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;
 
-import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -201,6 +201,9 @@ public final class BridgeContext extends Activity {
      * @param parser the parser to add.
      */
     public void pushParser(BridgeXmlBlockParser parser) {
+        if (ParserFactory.LOG_PARSER) {
+            System.out.println("PUSH " + parser.getParser().toString());
+        }
         mParserStack.push(parser);
     }
 
@@ -208,7 +211,10 @@ public final class BridgeContext extends Activity {
      * Removes the parser at the top of the stack
      */
     public void popParser() {
-        mParserStack.pop();
+        BridgeXmlBlockParser parser = mParserStack.pop();
+        if (ParserFactory.LOG_PARSER) {
+            System.out.println("POPD " + parser.getParser().toString());
+        }
     }
 
     /**
@@ -341,9 +347,7 @@ public final class BridgeContext extends Activity {
                 // we need to create a pull parser around the layout XML file, and then
                 // give that to our XmlBlockParser
                 try {
-                    KXmlParser parser = new KXmlParser();
-                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                    parser.setInput(new FileInputStream(xml), "UTF-8"); //$NON-NLS-1$);
+                    XmlPullParser parser = ParserFactory.create(xml);
 
                     // set the resource ref to have correct view cookies
                     mBridgeInflater.setResourceReference(resource);
@@ -682,25 +686,25 @@ public final class BridgeContext extends Activity {
      */
     private BridgeTypedArray createStyleBasedTypedArray(StyleResourceValue style, int[] attrs)
             throws Resources.NotFoundException {
-        AtomicBoolean frameworkAttributes = new AtomicBoolean();
-        AtomicReference<String> attrName = new AtomicReference<String>();
-        TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, frameworkAttributes, attrName);
 
         BridgeTypedArray ta = ((BridgeResources) mSystemResources).newTypeArray(attrs.length,
-                style.isFramework(), frameworkAttributes.get(), attrName.get());
+                false, true, null);
 
-        // loop through all the values in the style map, and init the TypedArray with
-        // the style we got from the dynamic id
-        for (Entry<Integer, String> styleAttribute : styleNameMap.entrySet()) {
-            int index = styleAttribute.getKey().intValue();
+        // for each attribute, get its name so that we can search it in the style
+        for (int i = 0 ; i < attrs.length ; i++) {
+            Pair<ResourceType, String> resolvedResource = Bridge.resolveResourceId(attrs[i]);
+            if (resolvedResource != null) {
+                String attrName = resolvedResource.getSecond();
+                // look for the value in the given style
+                ResourceValue resValue = mRenderResources.findItemInStyle(style, attrName);
 
-            String name = styleAttribute.getValue();
+                if (resValue != null) {
+                    // resolve it to make sure there are no references left.
+                    ta.bridgeSetValue(i, attrName, mRenderResources.resolveResValue(resValue));
 
-            // get the value from the style, or its parent styles.
-            ResourceValue resValue = mRenderResources.findItemInStyle(style, name);
-
-            // resolve it to make sure there are no references left.
-            ta.bridgeSetValue(index, name, mRenderResources.resolveResValue(resValue));
+                    resValue = mRenderResources.resolveResValue(resValue);
+                }
+            }
         }
 
         ta.sealArray();

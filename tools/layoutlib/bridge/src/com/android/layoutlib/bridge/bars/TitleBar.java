@@ -29,7 +29,7 @@ public class TitleBar extends CustomBar {
 
     public TitleBar(Context context, Density density, String label)
             throws XmlPullParserException {
-        super(context, density, "/bars/title_bar.xml");
+        super(context, density, "/bars/title_bar.xml", "title_bar.xml");
 
         // Cannot access the inside items through id because no R.id values have been
         // created for them.
