@@ -552,7 +552,7 @@ private:
 #define anw(n) __to_anw(((struct camera_preview_window *)n)->user)
 
     static int __dequeue_buffer(struct preview_stream_ops* w,
-                      buffer_handle_t** buffer)
+                                buffer_handle_t** buffer, int *stride)
     {
         int rc;
         ANativeWindow *a = anw(w);
@@ -560,8 +560,10 @@ private:
         rc = a->dequeueBuffer(a, &anb);
         if (!rc) {
             rc = a->lockBuffer(a, anb);
-            if (!rc)
+            if (!rc) {
                 *buffer = &anb->handle;
+                *stride = anb->stride;
+            }
             else
                 a->cancelBuffer(a, anb);
         }
