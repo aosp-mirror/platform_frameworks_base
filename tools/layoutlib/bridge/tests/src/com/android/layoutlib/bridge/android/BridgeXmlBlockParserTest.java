@@ -16,13 +16,10 @@
 
 package com.android.layoutlib.bridge.android;
 
-import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
+import com.android.layoutlib.bridge.impl.ParserFactory;
 
-import org.kxml2.io.KXmlParser;
 import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlPullParser;
-
-import java.io.InputStream;
 
 import junit.framework.TestCase;
 
@@ -39,12 +36,12 @@ public class BridgeXmlBlockParserTest extends TestCase {
     }
 
     public void testXmlBlockParser() throws Exception {
-        XmlPullParser parser = new KXmlParser();
-        parser = new BridgeXmlBlockParser(parser, null, false /* platformResourceFlag */);
 
-        InputStream input = this.getClass().getClassLoader().getResourceAsStream(
-            "com/android/layoutlib/testdata/layout1.xml");
-        parser.setInput(input, "UTF-8"); //$NON-NLS-1$
+        XmlPullParser parser = ParserFactory.create(
+                getClass().getResourceAsStream("com/android/layoutlib/testdata/layout1.xml"),
+                        "layout1.xml");
+
+        parser = new BridgeXmlBlockParser(parser, null, false /* platformResourceFlag */);
 
         assertEquals(XmlPullParser.START_DOCUMENT, parser.next());
 

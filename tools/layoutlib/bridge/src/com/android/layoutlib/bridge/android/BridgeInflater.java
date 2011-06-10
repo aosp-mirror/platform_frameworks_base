@@ -22,10 +22,10 @@ import com.android.ide.common.rendering.api.MergeCookie;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;
 
-import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 
 import android.content.Context;
@@ -36,7 +36,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.io.File;
-import java.io.FileInputStream;
 
 /**
  * Custom implementation of {@link LayoutInflater} to handle custom views.
@@ -175,9 +174,7 @@ public final class BridgeInflater extends LayoutInflater {
                 File f = new File(value.getValue());
                 if (f.isFile()) {
                     try {
-                        KXmlParser parser = new KXmlParser();
-                        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                        parser.setInput(new FileInputStream(f), "UTF-8"); //$NON-NLS-1$
+                        XmlPullParser parser = ParserFactory.create(f);
 
                         BridgeXmlBlockParser bridgeParser = new BridgeXmlBlockParser(
                                 parser, bridgeContext, false);
