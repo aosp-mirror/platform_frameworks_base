@@ -1414,18 +1414,6 @@ public class Resources {
             if (compat != null) {
                 mCompatibilityInfo = compat;
             }
-            int configChanges = 0xfffffff;
-            if (config != null) {
-                mTmpConfig.setTo(config);
-                if (mCompatibilityInfo != null) {
-                    mCompatibilityInfo.applyToConfiguration(mTmpConfig);
-                }
-                configChanges = mConfiguration.updateFrom(mTmpConfig);
-                configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
-            }
-            if (mConfiguration.locale == null) {
-                mConfiguration.locale = Locale.getDefault();
-            }
             if (metrics != null) {
                 mMetrics.setTo(metrics);
                 // NOTE: We should re-arrange this code to create a Display
@@ -1441,7 +1429,25 @@ public class Resources {
                     mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
                 }
             }
+            if (mCompatibilityInfo != null) {
+                mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
+            }
             mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
+            int configChanges = 0xfffffff;
+            if (config != null) {
+                mTmpConfig.setTo(config);
+                if (mCompatibilityInfo != null) {
+                    mCompatibilityInfo.applyToConfiguration(mTmpConfig);
+                }
+                if (mTmpConfig.locale == null) {
+                    mTmpConfig.locale = Locale.getDefault();
+                }
+                configChanges = mConfiguration.updateFrom(mTmpConfig);
+                configChanges = ActivityInfo.activityInfoConfigToNative(configChanges);
+            }
+            if (mConfiguration.locale == null) {
+                mConfiguration.locale = Locale.getDefault();
+            }
 
             String locale = null;
             if (mConfiguration.locale != null) {
@@ -1476,7 +1482,7 @@ public class Resources {
                     mConfiguration.screenLayout, mConfiguration.uiMode,
                     Build.VERSION.RESOURCES_SDK_INT);
 
-            if (false) {
+            if (DEBUG_CONFIG) {
                 Slog.i(TAG, "**** Updating config of " + this + ": final config is " + mConfiguration
                         + " final compat is " + mCompatibilityInfo);
             }
@@ -1558,6 +1564,8 @@ public class Resources {
      * @return The resource's current display metrics. 
      */
     public DisplayMetrics getDisplayMetrics() {
+        if (DEBUG_CONFIG) Slog.v(TAG, "Returning DisplayMetrics: " + mMetrics.widthPixels
+                + "x" + mMetrics.heightPixels + " " + mMetrics.density);
         return mMetrics;
     }
 

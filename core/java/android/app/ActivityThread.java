@@ -155,7 +155,9 @@ public final class ActivityThread {
             = new HashMap<IBinder, Service>();
     AppBindData mBoundApplication;
     Configuration mConfiguration;
+    Configuration mCompatConfiguration;
     Configuration mResConfiguration;
+    CompatibilityInfo mResCompatibilityInfo;
     Application mInitialApplication;
     final ArrayList<Application> mAllApplications
             = new ArrayList<Application>();
@@ -181,8 +183,8 @@ public final class ActivityThread {
             = new HashMap<String, WeakReference<LoadedApk>>();
     final HashMap<String, WeakReference<LoadedApk>> mResourcePackages
             = new HashMap<String, WeakReference<LoadedApk>>();
-    Display mDisplay = null;
-    DisplayMetrics mDisplayMetrics = null;
+    final HashMap<CompatibilityInfo, DisplayMetrics> mDisplayMetrics
+            = new HashMap<CompatibilityInfo, DisplayMetrics>();
     final HashMap<ResourcesKey, WeakReference<Resources> > mActiveResources
             = new HashMap<ResourcesKey, WeakReference<Resources> >();
     final ArrayList<ActivityClientRecord> mRelaunchingActivities
@@ -1276,20 +1278,45 @@ public final class ActivityThread {
         return sPackageManager;
     }
 
-    DisplayMetrics getDisplayMetricsLocked(boolean forceUpdate) {
-        if (mDisplayMetrics != null && !forceUpdate) {
-            return mDisplayMetrics;
+    DisplayMetrics getDisplayMetricsLocked(CompatibilityInfo ci, boolean forceUpdate) {
+        DisplayMetrics dm = mDisplayMetrics.get(ci);
+        if (dm != null && !forceUpdate) {
+            return dm;
         }
-        if (mDisplay == null) {
-            WindowManager wm = WindowManagerImpl.getDefault();
-            mDisplay = wm.getDefaultDisplay();
+        if (dm == null) {
+            dm = new DisplayMetrics();
+            mDisplayMetrics.put(ci, dm);
         }
-        DisplayMetrics metrics = mDisplayMetrics = new DisplayMetrics();
-        mDisplay.getMetrics(metrics);
+        Display d = WindowManagerImpl.getDefault(ci).getDefaultDisplay();
+        d.getMetrics(dm);
         //Slog.i("foo", "New metrics: w=" + metrics.widthPixels + " h="
         //        + metrics.heightPixels + " den=" + metrics.density
         //        + " xdpi=" + metrics.xdpi + " ydpi=" + metrics.ydpi);
-        return metrics;
+        return dm;
+    }
+
+    static Configuration applyConfigCompat(Configuration config, CompatibilityInfo compat) {
+        if (config == null) {
+            return null;
+        }
+        if (compat != null && !compat.supportsScreen()) {
+            config = new Configuration(config);
+            compat.applyToConfiguration(config);
+        }
+        return config;
+    }
+
+    private final Configuration mMainThreadConfig = new Configuration();
+    Configuration applyConfigCompatMainThread(Configuration config, CompatibilityInfo compat) {
+        if (config == null) {
+            return null;
+        }
+        if (compat != null && !compat.supportsScreen()) {
+            mMainThreadConfig.setTo(config);
+            config = mMainThreadConfig;
+            compat.applyToConfiguration(config);
+        }
+        return config;
     }
 
     /**
@@ -1331,7 +1358,7 @@ public final class ActivityThread {
         }
 
         //Slog.i(TAG, "Resource: key=" + key + ", display metrics=" + metrics);
-        DisplayMetrics metrics = getDisplayMetricsLocked(false);
+        DisplayMetrics metrics = getDisplayMetricsLocked(compInfo, false);
         r = new Resources(assets, metrics, getConfiguration(), compInfo);
         if (false) {
             Slog.i(TAG, "Created app resources " + resDir + " " + r + ": "
@@ -1359,7 +1386,7 @@ public final class ActivityThread {
      * Creates the top level resources for the given package.
      */
     Resources getTopLevelResources(String resDir, LoadedApk pkgInfo) {
-        return getTopLevelResources(resDir, pkgInfo.mCompatibilityInfo);
+        return getTopLevelResources(resDir, pkgInfo.mCompatibilityInfo.get());
     }
 
     final Handler getHandler() {
@@ -1526,7 +1553,8 @@ public final class ActivityThread {
                         CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO);
                 context.init(info, null, this);
                 context.getResources().updateConfiguration(
-                        getConfiguration(), getDisplayMetricsLocked(false));
+                        getConfiguration(), getDisplayMetricsLocked(
+                                CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, false));
                 mSystemContext = context;
                 //Slog.i(TAG, "Created system resources " + context.getResources()
                 //        + ": " + context.getResources().getConfiguration());
@@ -1739,7 +1767,7 @@ public final class ActivityThread {
                 appContext.init(r.packageInfo, r.token, this);
                 appContext.setOuterContext(activity);
                 CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());
-                Configuration config = new Configuration(mConfiguration);
+                Configuration config = new Configuration(mCompatConfiguration);
                 if (DEBUG_CONFIGURATION) Slog.v(TAG, "Launching activity "
                         + r.activityInfo.name + " with config " + config);
                 activity.attach(appContext, this, getInstrumentation(), r.token,
@@ -2782,13 +2810,14 @@ public final class ActivityThread {
     private void handleUpdatePackageCompatibilityInfo(UpdateCompatibilityData data) {
         LoadedApk apk = peekPackageInfo(data.pkg, false);
         if (apk != null) {
-            apk.mCompatibilityInfo = data.info;
+            apk.mCompatibilityInfo.set(data.info);
         }
         apk = peekPackageInfo(data.pkg, true);
         if (apk != null) {
-            apk.mCompatibilityInfo = data.info;
+            apk.mCompatibilityInfo.set(data.info);
         }
         handleConfigurationChanged(mConfiguration, data.info);
+        WindowManagerImpl.getDefault().reportNewConfiguration(mConfiguration);
     }
 
     private final void deliverResults(ActivityClientRecord r, List<ResultInfo> results) {
@@ -3211,20 +3240,22 @@ public final class ActivityThread {
                 ActivityClientRecord ar = it.next();
                 Activity a = ar.activity;
                 if (a != null) {
+                    Configuration thisConfig = applyConfigCompatMainThread(newConfig,
+                            ar.packageInfo.mCompatibilityInfo.getIfNeeded());
                     if (!ar.activity.mFinished && (allActivities ||
                             (a != null && !ar.paused))) {
                         // If the activity is currently resumed, its configuration
                         // needs to change right now.
                         callbacks.add(a);
-                    } else if (newConfig != null) {
+                    } else if (thisConfig != null) {
                         // Otherwise, we will tell it about the change
                         // the next time it is resumed or shown.  Note that
                         // the activity manager may, before then, decide the
                         // activity needs to be destroyed to handle its new
                         // configuration.
                         if (DEBUG_CONFIGURATION) Slog.v(TAG, "Setting activity "
-                                + ar.activityInfo.name + " newConfig=" + newConfig);
-                        ar.newConfig = newConfig;
+                                + ar.activityInfo.name + " newConfig=" + thisConfig);
+                        ar.newConfig = thisConfig;
                     }
                 }
             }
@@ -3271,7 +3302,6 @@ public final class ActivityThread {
             // onConfigurationChanged
             int diff = activity.mCurrentConfig.diff(config);
             if (diff != 0) {
-
                 // If this activity doesn't handle any of the config changes
                 // then don't bother calling onConfigurationChanged as we're
                 // going to destroy it.
@@ -3315,7 +3345,15 @@ public final class ActivityThread {
             return false;
         }
         int changes = mResConfiguration.updateFrom(config);
-        DisplayMetrics dm = getDisplayMetricsLocked(true);
+        DisplayMetrics dm = getDisplayMetricsLocked(compat, true);
+
+        if (compat != null && (mResCompatibilityInfo == null ||
+                !mResCompatibilityInfo.equals(compat))) {
+            mResCompatibilityInfo = compat;
+            changes |= ActivityInfo.CONFIG_SCREEN_LAYOUT
+                    | ActivityInfo.CONFIG_SCREEN_SIZE
+                    | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE;
+        }
 
         // set it for java, this also affects newly created Resources
         if (config.locale != null) {
@@ -3377,13 +3415,14 @@ public final class ActivityThread {
                 return;
             }
             mConfiguration.updateFrom(config);
-            if (compat != null) {
-                // Can't do this here, because it causes us to report the
-                // comatible config back to the am as the current config
-                // of the activity, and much unhappiness results.
-                //compat.applyToConfiguration(mConfiguration);
+            if (mCompatConfiguration == null) {
+                mCompatConfiguration = new Configuration();
             }
-
+            mCompatConfiguration.setTo(mConfiguration);
+            if (mResCompatibilityInfo != null && !mResCompatibilityInfo.supportsScreen()) {
+                mResCompatibilityInfo.applyToConfiguration(mCompatConfiguration);
+                config = mCompatConfiguration;
+            }
             callbacks = collectComponentCallbacksLocked(false, config);
         }
 
@@ -3404,7 +3443,7 @@ public final class ActivityThread {
         if (DEBUG_CONFIGURATION) Slog.v(TAG, "Handle activity config changed: "
                 + r.activityInfo.name);
         
-        performConfigurationChanged(r.activity, mConfiguration);
+        performConfigurationChanged(r.activity, mCompatConfiguration);
     }
 
     final void handleProfilerControl(boolean start, ProfilerControlData pcd) {
@@ -3498,6 +3537,7 @@ public final class ActivityThread {
     private final void handleBindApplication(AppBindData data) {
         mBoundApplication = data;
         mConfiguration = new Configuration(data.config);
+        mCompatConfiguration = new Configuration(data.config);
 
         // send up app name; do this *before* waiting for debugger
         Process.setArgV0(data.processName);

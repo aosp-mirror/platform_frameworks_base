@@ -102,6 +102,10 @@ class ScreenRotationAnimation {
                 Slog.w(TAG, "Unable to allocate freeze surface", e);
             }
 
+            if (WindowManagerService.SHOW_TRANSACTIONS ||
+                    WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
+                            "  FREEZE " + mSurface + ": CREATE");
+
             setRotation(display.getRotation());
 
             if (mSurface != null) {
@@ -284,6 +288,9 @@ class ScreenRotationAnimation {
 
     public void kill() {
         if (mSurface != null) {
+            if (WindowManagerService.SHOW_TRANSACTIONS ||
+                    WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
+                            "  FREEZE " + mSurface + ": DESTROY");
             mSurface.destroy();
             mSurface = null;
         }

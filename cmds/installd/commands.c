@@ -237,7 +237,7 @@ int move_dex(const char *src, const char *dst)
     if (create_cache_path(src_dex, src)) return -1;
     if (create_cache_path(dst_dex, dst)) return -1;
 
-    LOGI("move %s -> %s\n", src_dex, dst_dex);
+    LOGV("move %s -> %s\n", src_dex, dst_dex);
     if (rename(src_dex, dst_dex) < 0) {
         LOGE("Couldn't move %s: %s\n", src_dex, strerror(errno));
         return -1;
@@ -253,7 +253,7 @@ int rm_dex(const char *path)
     if (validate_apk_path(path)) return -1;
     if (create_cache_path(dex_path, path)) return -1;
 
-    LOGI("unlink %s\n", dex_path);
+    LOGV("unlink %s\n", dex_path);
     if (unlink(dex_path) < 0) {
         LOGE("Couldn't unlink %s: %s\n", dex_path, strerror(errno));
         return -1;
@@ -452,7 +452,7 @@ static int wait_dexopt(pid_t pid, const char* apk_path)
     }
 
     if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
-        LOGD("DexInv: --- END '%s' (success) ---\n", apk_path);
+        LOGV("DexInv: --- END '%s' (success) ---\n", apk_path);
         return 0;
     } else {
         LOGW("DexInv: --- END '%s' --- status=0x%04x, process failed\n",
@@ -519,7 +519,7 @@ int dexopt(const char *apk_path, uid_t uid, int is_public)
         goto fail;
     }
 
-    LOGD("DexInv: --- BEGIN '%s' ---\n", apk_path);
+    LOGV("DexInv: --- BEGIN '%s' ---\n", apk_path);
 
     pid_t pid;
     pid = fork();
@@ -587,7 +587,7 @@ void mkinnerdirs(char* path, int basepos, mode_t mode, int uid, int gid,
         if (path[basepos] == '/') {
             path[basepos] = 0;
             if (lstat(path, statbuf) < 0) {
-                LOGI("Making directory: %s\n", path);
+                LOGV("Making directory: %s\n", path);
                 if (mkdir(path, mode) == 0) {
                     chown(path, uid, gid);
                 } else {
@@ -619,7 +619,7 @@ int movefileordir(char* srcpath, char* dstpath, int dstbasepos,
     if ((statbuf->st_mode&S_IFDIR) == 0) {
         mkinnerdirs(dstpath, dstbasepos, S_IRWXU|S_IRWXG|S_IXOTH,
                 dstuid, dstgid, statbuf);
-        LOGI("Renaming %s to %s (uid %d)\n", srcpath, dstpath, dstuid);
+        LOGV("Renaming %s to %s (uid %d)\n", srcpath, dstpath, dstuid);
         if (rename(srcpath, dstpath) >= 0) {
             if (chown(dstpath, dstuid, dstgid) < 0) {
                 LOGE("cannot chown %s: %s\n", dstpath, strerror(errno));

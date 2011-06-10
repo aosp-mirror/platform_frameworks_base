@@ -38,6 +38,7 @@ import android.os.RemoteException;
 import android.os.StrictMode;
 import android.util.AndroidRuntimeException;
 import android.util.Slog;
+import android.view.CompatibilityInfoHolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +65,7 @@ final class ServiceConnectionLeaked extends AndroidRuntimeException {
  * Local state maintained about a currently loaded .apk.
  * @hide
  */
-final class LoadedApk {
+public final class LoadedApk {
 
     private final ActivityThread mActivityThread;
     private final ApplicationInfo mApplicationInfo;
@@ -78,10 +79,10 @@ final class LoadedApk {
     private final ClassLoader mBaseClassLoader;
     private final boolean mSecurityViolation;
     private final boolean mIncludeCode;
+    public final CompatibilityInfoHolder mCompatibilityInfo = new CompatibilityInfoHolder();
     Resources mResources;
     private ClassLoader mClassLoader;
     private Application mApplication;
-    CompatibilityInfo mCompatibilityInfo;
 
     private final HashMap<Context, HashMap<BroadcastReceiver, LoadedApk.ReceiverDispatcher>> mReceivers
         = new HashMap<Context, HashMap<BroadcastReceiver, LoadedApk.ReceiverDispatcher>>();
@@ -121,7 +122,7 @@ final class LoadedApk {
         mBaseClassLoader = baseLoader;
         mSecurityViolation = securityViolation;
         mIncludeCode = includeCode;
-        mCompatibilityInfo = compatInfo;
+        mCompatibilityInfo.set(compatInfo);
 
         if (mAppDir == null) {
             if (ActivityThread.mSystemContext == null) {
@@ -129,7 +130,7 @@ final class LoadedApk {
                     ContextImpl.createSystemContext(mainThread);
                 ActivityThread.mSystemContext.getResources().updateConfiguration(
                          mainThread.getConfiguration(),
-                         mainThread.getDisplayMetricsLocked(false),
+                         mainThread.getDisplayMetricsLocked(compatInfo, false),
                          compatInfo);
                 //Slog.i(TAG, "Created system resources "
                 //        + mSystemContext.getResources() + ": "
@@ -157,7 +158,7 @@ final class LoadedApk {
         mIncludeCode = true;
         mClassLoader = systemContext.getClassLoader();
         mResources = systemContext.getResources();
-        mCompatibilityInfo = compatInfo;
+        mCompatibilityInfo.set(compatInfo);
     }
 
     public String getPackageName() {
