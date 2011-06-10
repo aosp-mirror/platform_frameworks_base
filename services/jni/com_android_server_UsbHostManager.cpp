@@ -125,7 +125,7 @@ static int usb_device_removed(const char *devname, void* client_data) {
     jobject thiz = (jobject)client_data;
 
     jstring deviceName = env->NewStringUTF(devname);
-    env->CallVoidMethod(thiz, method_usbDeviceRemoved, env->NewStringUTF(devname));
+    env->CallVoidMethod(thiz, method_usbDeviceRemoved, deviceName);
     env->DeleteLocalRef(deviceName);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return 0;
