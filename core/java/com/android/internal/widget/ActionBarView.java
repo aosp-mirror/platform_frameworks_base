@@ -273,6 +273,10 @@ public class ActionBarView extends AbsActionBarView {
         requestLayout();
     }
 
+    public int getContentHeight() {
+        return mContentHeight;
+    }
+
     public void setSplitActionBar(boolean splitActionBar) {
         if (mSplitActionBar != splitActionBar) {
             if (mMenuView != null) {
