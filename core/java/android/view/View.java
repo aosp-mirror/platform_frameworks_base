@@ -9176,7 +9176,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                 mLocalDirtyRect.setEmpty();
             }
 
-            Canvas currentCanvas = mAttachInfo.mHardwareCanvas;
+            HardwareCanvas currentCanvas = mAttachInfo.mHardwareCanvas;
             final HardwareCanvas canvas = mHardwareLayer.start(currentCanvas);
             mAttachInfo.mHardwareCanvas = canvas;
             try {
@@ -13054,7 +13054,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
         final Callbacks mRootCallbacks;
 
-        Canvas mHardwareCanvas;
+        HardwareCanvas mHardwareCanvas;
 
         /**
          * The top view of the hierarchy.
