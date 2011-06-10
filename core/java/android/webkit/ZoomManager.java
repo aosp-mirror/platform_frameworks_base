@@ -991,16 +991,16 @@ class ZoomManager {
             settings.getUseFixedViewport() &&
             (mInitialZoomOverview || mInZoomOverview)) {
             // Keep mobile site's text wrap scale unchanged.  For mobile sites,
-            // the text wrap scale is the same as zoom overview scale, which is 1.0f.
-            if (exceedsMinScaleIncrement(mTextWrapScale, 1.0f) ||
-                    exceedsMinScaleIncrement(newZoomOverviewScale, 1.0f)) {
+            // the text wrap scale is the same as zoom overview scale.
+            if (exceedsMinScaleIncrement(mTextWrapScale, mDefaultScale) ||
+                    exceedsMinScaleIncrement(newZoomOverviewScale, mDefaultScale)) {
                 mTextWrapScale = getReadingLevelScale();
             } else {
                 mTextWrapScale = newZoomOverviewScale;
             }
         }
 
-        if (!mMinZoomScaleFixed) {
+        if (!mMinZoomScaleFixed || settings.getUseWideViewPort()) {
             mMinZoomScale = newZoomOverviewScale;
             mMaxZoomScale = Math.max(mMaxZoomScale, mMinZoomScale);
         }
@@ -1013,9 +1013,9 @@ class ZoomManager {
         // Make sure mobile sites are correctly handled since mobile site will
         // change content width after rotating.
         boolean mobileSiteInOverview = mInZoomOverview &&
-                !exceedsMinScaleIncrement(newZoomOverviewScale, 1.0f);
+                !exceedsMinScaleIncrement(newZoomOverviewScale, mDefaultScale);
         if (!mWebView.drawHistory() &&
-            (scaleLessThanOverview ||
+            ((scaleLessThanOverview && settings.getUseWideViewPort())||
                 ((mInitialZoomOverview || mobileSiteInOverview) &&
                     scaleHasDiff && zoomOverviewWidthChanged))) {
             mInitialZoomOverview = false;
@@ -1071,7 +1071,8 @@ class ZoomManager {
         updateZoomRange(viewState, viewSize.x, drawData.mMinPrefWidth);
         setupZoomOverviewWidth(drawData, mWebView.getViewWidth());
         final float overviewScale = getZoomOverviewScale();
-        if (!mMinZoomScaleFixed) {
+        WebSettings settings = mWebView.getSettings();
+        if (!mMinZoomScaleFixed || settings.getUseWideViewPort()) {
             mMinZoomScale = (mInitialScale > 0) ?
                     Math.min(mInitialScale, overviewScale) : overviewScale;
             mMaxZoomScale = Math.max(mMaxZoomScale, mMinZoomScale);
@@ -1079,8 +1080,6 @@ class ZoomManager {
 
         if (!mWebView.drawHistory()) {
             float scale;
-            WebSettings settings = mWebView.getSettings();
-
             if (mInitialScale > 0) {
                 scale = mInitialScale;
             } else if (viewState.mViewScale > 0) {
