@@ -156,9 +156,7 @@ public class ActionBarImpl extends ActionBar {
         mContextDisplayMode = mActionView.isSplitActionBar() ?
                 CONTEXT_DISPLAY_SPLIT : CONTEXT_DISPLAY_NORMAL;
 
-        TypedArray a = mContext.obtainStyledAttributes(null, R.styleable.ActionBar);
-        mContentHeight = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
-        a.recycle();
+        mContentHeight = mActionView.getContentHeight();
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
@@ -179,9 +177,7 @@ public class ActionBarImpl extends ActionBar {
         mActionView.setCollapsable(!mHasEmbeddedTabs &&
                 getNavigationMode() == NAVIGATION_MODE_TABS);
 
-        TypedArray a = mContext.obtainStyledAttributes(null, R.styleable.ActionBar);
-        mContentHeight = a.getLayoutDimension(R.styleable.ActionBar_height, 0);
-        a.recycle();
+        mContentHeight = mActionView.getContentHeight();
 
         if (mTabScrollView != null) {
             mTabScrollView.getLayoutParams().height = mContentHeight;

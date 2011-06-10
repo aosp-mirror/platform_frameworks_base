@@ -1783,7 +1783,6 @@
         <item name="android:gravity">center</item>
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">16dip</item>
-        <item name="android:minHeight">56dip</item>
         <item name="android:scaleType">center</item>
     </style>
 
