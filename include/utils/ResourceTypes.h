@@ -1988,7 +1988,8 @@ public:
                                   String16* outName,
                                   const String16* defType = NULL,
                                   const String16* defPackage = NULL,
-                                  const char** outErrorMsg = NULL);
+                                  const char** outErrorMsg = NULL,
+                                  bool* outPublicOnly = NULL);
 
     static bool stringToInt(const char16_t* s, size_t len, Res_value* outValue);
     static bool stringToFloat(const char16_t* s, size_t len, Res_value* outValue);

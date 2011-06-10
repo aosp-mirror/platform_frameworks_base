@@ -1671,6 +1671,35 @@
   <public type="style" name="Widget.Holo.Light.ActionBar.TabView" />
   <public type="style" name="Widget.Holo.Light.ActionBar.TabText" />
   <public type="style" name="Widget.Holo.Light.ActionBar.TabBar" />
+  <public type="style" name="TextAppearance.Holo" />
+  <public type="style" name="TextAppearance.Holo.Inverse" />
+  <public type="style" name="TextAppearance.Holo.Large" />
+  <public type="style" name="TextAppearance.Holo.Large.Inverse" />
+  <public type="style" name="TextAppearance.Holo.Medium" />
+  <public type="style" name="TextAppearance.Holo.Medium.Inverse" />
+  <public type="style" name="TextAppearance.Holo.Small" />
+  <public type="style" name="TextAppearance.Holo.Small.Inverse" />
+  <public type="style" name="TextAppearance.Holo.SearchResult.Title" />
+  <public type="style" name="TextAppearance.Holo.SearchResult.Subtitle" />
+  <public type="style" name="TextAppearance.Holo.Widget" />
+  <public type="style" name="TextAppearance.Holo.Widget.Button" />
+  <public type="style" name="TextAppearance.Holo.Widget.IconMenu.Item" />
+  <public type="style" name="TextAppearance.Holo.Widget.TabWidget" />
+  <public type="style" name="TextAppearance.Holo.Widget.TextView" />
+  <public type="style" name="TextAppearance.Holo.Widget.TextView.PopupMenu" />
+  <public type="style" name="TextAppearance.Holo.Widget.DropDownHint" />
+  <public type="style" name="TextAppearance.Holo.Widget.DropDownItem" />
+  <public type="style" name="TextAppearance.Holo.Widget.TextView.SpinnerItem" />
+  <public type="style" name="TextAppearance.Holo.Widget.EditText" />
+  <public type="style" name="TextAppearance.Holo.Widget.PopupMenu" />
+  <public type="style" name="TextAppearance.Holo.Widget.PopupMenu.Large" />
+  <public type="style" name="TextAppearance.Holo.Widget.PopupMenu.Small" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Title" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Subtitle" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Title" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Subtitle" />
+  <public type="style" name="TextAppearance.Holo.WindowTitle" />
+  <public type="style" name="TextAppearance.Holo.DialogWindowTitle" />
 
 <!-- ===============================================================
      Resources added in version 14 of the platform (Ice Cream Sandwich)

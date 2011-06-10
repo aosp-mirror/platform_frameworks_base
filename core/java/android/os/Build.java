@@ -232,7 +232,7 @@ public class Build {
         public static final int HONEYCOMB_MR1 = 12;
         
         /**
-         * Current development version.
+         * June 2011: Android 3.2.
          *
          * <p>Update to Honeycomb MR1 to support 7 inch tablets, improve
          * screen compatibility mode, etc.</p>
@@ -244,7 +244,7 @@ public class Build {
          * large as the current screen will provide the user with a UI to
          * switch them in to screen size compatibility mode.</p>
          */
-        public static final int HONEYCOMB_MR2 = CUR_DEVELOPMENT;
+        public static final int HONEYCOMB_MR2 = 13;
 
         /**
          * Current version under development.
