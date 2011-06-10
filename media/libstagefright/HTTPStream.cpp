@@ -139,6 +139,9 @@ static ssize_t MySendReceive(
         int s, void *data, size_t size, int flags, bool sendData) {
     ssize_t result = 0;
 
+    if (s < 0) {
+        return -1;
+    }
     while (size > 0) {
         fd_set rs, ws, es;
         FD_ZERO(&rs);
