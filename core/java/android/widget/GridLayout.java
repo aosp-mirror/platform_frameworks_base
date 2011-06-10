@@ -536,70 +536,76 @@ public class GridLayout extends ViewGroup {
         return margin == UNDEFINED ? getDefaultMarginValue(view, lp, leading, horizontal) : margin;
     }
 
-    private static boolean isUndefined(Interval span) {
-        return span.min == UNDEFINED || span.max == UNDEFINED;
+    private static int valueIfDefined(int value, int defaultValue) {
+        return (value != UNDEFINED) ? value : defaultValue;
     }
 
+    // install default indices for cells that don't define them
     private void validateLayoutParams() {
-        // install default indices for cells if *none* are defined
-        if (mHorizontalAxis.maxIndex1() == UNDEFINED || (mVerticalAxis.maxIndex1() == UNDEFINED)) {
-            boolean horizontal = mOrientation == HORIZONTAL;
-            int count = horizontal ? mHorizontalAxis.count : mVerticalAxis.count;
-            if (count == UNDEFINED) {
-                count = Integer.MAX_VALUE;
-            }
-            int x = 0;
-            int y = 0;
-            int maxSize = 0;
-            for (int i = 0, size = getChildCount(); i < size; i++) {
-                LayoutParams lp = getLayoutParams1(getChildAt(i));
+        new Object() {
+            public int maxSize = 0;
 
-                Interval hSpan = lp.columnGroup.span;
-                int cellWidth = hSpan.size();
-
-                Interval vSpan = lp.rowGroup.span;
-                int cellHeight = vSpan.size();
-
-                if (horizontal) {
-                    if (x + cellWidth > count) {
-                        x = 0;
-                        y += maxSize;
-                        maxSize = 0;
-                    }
+            private int valueIfDefined2(int value, int defaultValue) {
+                if (value != UNDEFINED) {
+                    maxSize = 0;
+                    return value;
                 } else {
-                    if (y + cellHeight > count) {
-                        y = 0;
-                        x += maxSize;
-                        maxSize = 0;
+                    return defaultValue;
+                }
+            }
+
+            {
+                final boolean horizontal = (mOrientation == HORIZONTAL);
+                final int axis = horizontal ? mHorizontalAxis.count : mVerticalAxis.count;
+                final int count = valueIfDefined(axis, Integer.MAX_VALUE);
+
+                int row = 0;
+                int col = 0;
+                for (int i = 0, N = getChildCount(); i < N; i++) {
+                    LayoutParams lp = getLayoutParams1(getChildAt(i));
+
+                    Group colGroup = lp.columnGroup;
+                    Interval cols = colGroup.span;
+                    int colSpan = cols.size();
+
+                    Group rowGroup = lp.rowGroup;
+                    Interval rows = rowGroup.span;
+                    int rowSpan = rows.size();
+
+                    if (horizontal) {
+                        row = valueIfDefined2(rows.min, row);
+
+                        int newCol = valueIfDefined(cols.min, (col + colSpan > count) ? 0 : col);
+                        if (newCol < col) {
+                            row += maxSize;
+                            maxSize = 0;
+                        }
+                        col = newCol;
+                        maxSize = max(maxSize, rowSpan);
+                    } else {
+                        col = valueIfDefined2(cols.min, col);
+
+                        int newRow = valueIfDefined(rows.min, (row + rowSpan > count) ? 0 : row);
+                        if (newRow < row) {
+                            col += maxSize;
+                            maxSize = 0;
+                        }
+                        row = newRow;
+                        maxSize = max(maxSize, colSpan);
+                    }
+
+                    lp.setColumnGroupSpan(new Interval(col, col + colSpan));
+                    lp.setRowGroupSpan(new Interval(row, row + rowSpan));
+
+                    if (horizontal) {
+                        col = col + colSpan;
+                    } else {
+                        row = row + rowSpan;
                     }
                 }
-                lp.setHorizontalGroupSpan(new Interval(x, x + cellWidth));
-                lp.setVerticalGroupSpan(new Interval(y, y + cellHeight));
-
-                if (horizontal) {
-                    x = x + cellWidth;
-                } else {
-                    y = y + cellHeight;
-                }
-                maxSize = max(maxSize, horizontal ? cellHeight : cellWidth);
             }
-        } else {
-            /*
-            At least one row and one column index have been defined.
-            Assume missing row/cols are in error and set them to zero so that
-            they will display top/left and the developer can add the right indices.
-            Without this UNDEFINED would cause ArrayIndexOutOfBoundsException.
-            */
-            for (int i = 0, size = getChildCount(); i < size; i++) {
-                LayoutParams lp = getLayoutParams1(getChildAt(i));
-                if (isUndefined(lp.columnGroup.span)) {
-                    lp.setHorizontalGroupSpan(LayoutParams.DEFAULT_SPAN);
-                }
-                if (isUndefined(lp.rowGroup.span)) {
-                    lp.setVerticalGroupSpan(LayoutParams.DEFAULT_SPAN);
-                }
-            }
-        }
+        };
+        invalidateStructure();
     }
 
     private void invalidateStructure() {
@@ -927,13 +933,11 @@ public class GridLayout extends ViewGroup {
             this.horizontal = horizontal;
         }
 
-        private int maxIndex(boolean internal) {
+        private int maxIndex() {
             // note the number Integer.MIN_VALUE + 1 comes up in undefined cells
             int count = -1;
             for (int i = 0, size = getChildCount(); i < size; i++) {
-                LayoutParams params = internal ?
-                        getLayoutParams1(getChildAt(i)) :
-                        getLayoutParams(getChildAt(i));
+                LayoutParams params = getLayoutParams(getChildAt(i));
                 Group g = horizontal ? params.columnGroup : params.rowGroup;
                 count = max(count, g.span.min);
                 count = max(count, g.span.max);
@@ -941,13 +945,9 @@ public class GridLayout extends ViewGroup {
             return count == -1 ? UNDEFINED : count;
         }
 
-        private int maxIndex1() {
-            return maxIndex(true);
-        }
-
         public int getCount() {
-            if (!countWasExplicitySet && !countValid) {
-                count = max(0, maxIndex(false)); // if there are no cells, the count is zero
+            if (!countValid) {
+                count = max(0, maxIndex()); // if there are no cells, the count is zero
                 countValid = true;
             }
             return count;
@@ -1391,7 +1391,7 @@ public class GridLayout extends ViewGroup {
 
         private float[] getWeights() {
             if (weights == null) {
-                int N = getCount() + 1;
+                int N = getCount();
                 weights = new float[N];
             }
             computeWeights();
@@ -1424,7 +1424,7 @@ public class GridLayout extends ViewGroup {
             float[] weights = getWeights();
             float totalWeight = sum(weights);
 
-            if (totalWeight == 0f) {
+            if (totalWeight == 0f && weights.length > 0) {
                 weights[weights.length - 1] = 1;
                 totalWeight = 1;
             }
@@ -1432,11 +1432,12 @@ public class GridLayout extends ViewGroup {
             int[] locations = getLocations();
             int cumulativeDelta = 0;
 
-            for (int i = 0; i < locations.length; i++) {
+            // note |weights| = |locations| - 1
+            for (int i = 0; i < weights.length; i++) {
                 float weight = weights[i];
                 int delta = (int) (totalDelta * weight / totalWeight);
                 cumulativeDelta += delta;
-                locations[i] = mins[i] + cumulativeDelta;
+                locations[i + 1] = mins[i + 1] + cumulativeDelta;
 
                 totalDelta -= delta;
                 totalWeight -= weight;
@@ -1534,22 +1535,22 @@ public class GridLayout extends ViewGroup {
         private static final int DEFAULT_MARGIN = UNDEFINED;
         private static final int DEFAULT_ROW = UNDEFINED;
         private static final int DEFAULT_COLUMN = UNDEFINED;
-        private static final Interval DEFAULT_SPAN = new Interval(0, 1);
+        private static final Interval DEFAULT_SPAN = new Interval(UNDEFINED, UNDEFINED + 1);
         private static final int DEFAULT_SPAN_SIZE = DEFAULT_SPAN.size();
-        private static final Alignment DEFAULT_HORIZONTAL_ALIGNMENT = LEFT;
-        private static final Alignment DEFAULT_VERTCIAL_ALGIGNMENT = BASELINE;
-        private static final Group DEFAULT_HORIZONTAL_GROUP =
-                new Group(DEFAULT_SPAN, DEFAULT_HORIZONTAL_ALIGNMENT);
-        private static final Group DEFAULT_VERTICAL_GROUP =
-                new Group(DEFAULT_SPAN, DEFAULT_VERTCIAL_ALGIGNMENT);
+        private static final Alignment DEFAULT_COLUMN_ALIGNMENT = LEFT;
+        private static final Alignment DEFAULT_ROW_ALIGNMENT = BASELINE;
+        private static final Group DEFAULT_COLUMN_GROUP =
+                new Group(DEFAULT_SPAN, DEFAULT_COLUMN_ALIGNMENT);
+        private static final Group DEFAULT_ROW_GROUP =
+                new Group(DEFAULT_SPAN, DEFAULT_ROW_ALIGNMENT);
         private static final int DEFAULT_WEIGHT_0 = 0;
         private static final int DEFAULT_WEIGHT_1 = 1;
 
         // Misc
 
         private static final Rect CONTAINER_BOUNDS = new Rect(0, 0, 2, 2);
-        private static final Alignment[] HORIZONTAL_ALIGNMENTS = { LEFT, CENTER, RIGHT };
-        private static final Alignment[] VERTICAL_ALIGNMENTS = { TOP, CENTER, BOTTOM };
+        private static final Alignment[] COLUMN_ALIGNMENTS = { LEFT, CENTER, RIGHT };
+        private static final Alignment[] ROW_ALIGNMENTS = { TOP, CENTER, BOTTOM };
 
         // TypedArray indices
 
@@ -1623,7 +1624,7 @@ public class GridLayout extends ViewGroup {
          * Constructs a new LayoutParams with default values as defined in {@link LayoutParams}.
          */
         public LayoutParams() {
-            this(DEFAULT_HORIZONTAL_GROUP, DEFAULT_VERTICAL_GROUP);
+            this(DEFAULT_ROW_GROUP, DEFAULT_COLUMN_GROUP);
         }
 
         // Copying constructors
@@ -1714,23 +1715,23 @@ public class GridLayout extends ViewGroup {
 
         // Gravity. For conversion from the static the integers defined in the Gravity class,
         // use Gravity.apply() to apply gravity to a view of zero size and see where it ends up.
-        private static Alignment getHorizontalAlignment(int gravity, int width) {
+        private static Alignment getColumnAlignment(int gravity, int width) {
             Rect r = new Rect(0, 0, 0, 0);
             Gravity.apply(gravity, 0, 0, CONTAINER_BOUNDS, r);
 
-            boolean fill = width == MATCH_PARENT;
-            Alignment defaultAlignment = fill ? FILL : DEFAULT_HORIZONTAL_ALIGNMENT;
-            return getAlignment(HORIZONTAL_ALIGNMENTS, FILL, r.left, r.right,
+            boolean fill = (width == MATCH_PARENT);
+            Alignment defaultAlignment = fill ? FILL : DEFAULT_COLUMN_ALIGNMENT;
+            return getAlignment(COLUMN_ALIGNMENTS, FILL, r.left, r.right,
                     !definesHorizontal(gravity), defaultAlignment);
         }
 
-        private static Alignment getVerticalAlignment(int gravity, int height) {
+        private static Alignment getRowAlignment(int gravity, int height) {
             Rect r = new Rect(0, 0, 0, 0);
             Gravity.apply(gravity, 0, 0, CONTAINER_BOUNDS, r);
 
-            boolean fill = height == MATCH_PARENT;
-            Alignment defaultAlignment = fill ? FILL : DEFAULT_VERTCIAL_ALGIGNMENT;
-            return getAlignment(VERTICAL_ALIGNMENTS, FILL, r.top, r.bottom,
+            boolean fill = (height == MATCH_PARENT);
+            Alignment defaultAlignment = fill ? FILL : DEFAULT_ROW_ALIGNMENT;
+            return getAlignment(ROW_ALIGNMENTS, FILL, r.top, r.bottom,
                     !definesVertical(gravity), defaultAlignment);
         }
 
@@ -1746,13 +1747,13 @@ public class GridLayout extends ViewGroup {
                 int column = a.getInteger(COLUMN, DEFAULT_COLUMN);
                 int columnSpan = a.getInteger(COLUMN_SPAN, DEFAULT_SPAN_SIZE);
                 Interval hSpan = new Interval(column, column + columnSpan);
-                this.columnGroup = new Group(hSpan, getHorizontalAlignment(gravity, width));
+                this.columnGroup = new Group(hSpan, getColumnAlignment(gravity, width));
                 this.columnWeight = a.getFloat(COLUMN_WEIGHT, getDefaultWeight(width));
 
                 int row = a.getInteger(ROW, DEFAULT_ROW);
                 int rowSpan = a.getInteger(ROW_SPAN, DEFAULT_SPAN_SIZE);
                 Interval vSpan = new Interval(row, row + rowSpan);
-                this.rowGroup = new Group(vSpan, getVerticalAlignment(gravity, height));
+                this.rowGroup = new Group(vSpan, getRowAlignment(gravity, height));
                 this.rowWeight = a.getFloat(ROW_WEIGHT, getDefaultWeight(height));
             } finally {
                 a.recycle();
@@ -1768,8 +1769,8 @@ public class GridLayout extends ViewGroup {
          * @attr ref android.R.styleable#GridLayout_Layout_layout_gravity
          */
         public void setGravity(int gravity) {
-            columnGroup = columnGroup.copyWriteAlignment(getHorizontalAlignment(gravity, width));
-            rowGroup = rowGroup.copyWriteAlignment(getVerticalAlignment(gravity, height));
+            columnGroup = columnGroup.copyWriteAlignment(getColumnAlignment(gravity, width));
+            rowGroup = rowGroup.copyWriteAlignment(getRowAlignment(gravity, height));
         }
 
         @Override
@@ -1778,11 +1779,11 @@ public class GridLayout extends ViewGroup {
             this.height = attributes.getLayoutDimension(heightAttr, DEFAULT_HEIGHT);
         }
 
-        private void setVerticalGroupSpan(Interval span) {
+        private void setRowGroupSpan(Interval span) {
             rowGroup = rowGroup.copyWriteSpan(span);
         }
 
-        private void setHorizontalGroupSpan(Interval span) {
+        private void setColumnGroupSpan(Interval span) {
             columnGroup = columnGroup.copyWriteSpan(span);
         }
     }
@@ -2073,30 +2074,30 @@ public class GridLayout extends ViewGroup {
         /**
          * Construct a new Group, {@code group}, where:
          * <ul>
-         *     <li> {@code group.span = [min, max]} </li>
+         *     <li> {@code group.span = [start, start + size]} </li>
          *     <li> {@code group.alignment = alignment} </li>
          * </ul>
          *
-         * @param min       the minimum
-         * @param max       the maximum
+         * @param start     the start
+         * @param size      the size
          * @param alignment the alignment
          */
-        public Group(int min, int max, Alignment alignment) {
-            this(new Interval(min, max), alignment);
+        public Group(int start, int size, Alignment alignment) {
+            this(new Interval(start, start + size), alignment);
         }
 
         /**
          * Construct a new Group, {@code group}, where:
          * <ul>
-         *     <li> {@code group.span = [min, min + 1]} </li>
+         *     <li> {@code group.span = [start, start + 1]} </li>
          *     <li> {@code group.alignment = alignment} </li>
          * </ul>
          *
-         * @param min       the minimum
+         * @param start     the start index
          * @param alignment the alignment
          */
-        public Group(int min, Alignment alignment) {
-            this(min, min + 1, alignment);
+        public Group(int start, Alignment alignment) {
+            this(start, 1, alignment);
         }
 
         private Group copyWriteSpan(Interval span) {

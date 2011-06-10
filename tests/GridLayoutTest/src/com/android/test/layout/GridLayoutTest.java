@@ -36,6 +36,7 @@ public class GridLayoutTest extends AbstractLayoutTest {
                 GridLayout.Group rowGroup = new GridLayout.Group(UNDEFINED, null);
                 GridLayout.Group colGroup = new GridLayout.Group(UNDEFINED, null);
                 GridLayout.LayoutParams lp = new GridLayout.LayoutParams(rowGroup, colGroup);
+                //GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
                 lp.setGravity(va | ha);
                 View v = create(context, VERTICAL_NAMES[i] + "-" + HORIZONTAL_NAMES[j], 20);
                 container.addView(v, lp);
