@@ -19,19 +19,19 @@ package com.android.test.layout;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Debug;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import static android.view.Gravity.*;
+
 public abstract class AbstractLayoutTest extends Activity {
 
-    public static final String[] HORIZONTAL_NAMES = new String[] { "LEFT", "center", "east", "fill" };
-    public static final int[] HORIZONTAL_ALIGNMENTS = new int[] { Gravity.LEFT, Gravity.CENTER, Gravity.RIGHT, Gravity.FILL };
-    public static final String[] VERTICAL_NAMES = new String[] { "north", "center", "baseline", "south", "fill" };
-    public static final int[] VERTICAL_ALIGNMENTS = new int[] { Gravity.TOP, Gravity.CENTER, Gravity.NO_GRAVITY, Gravity.BOTTOM, Gravity.FILL };
+    public static final String[] HORIZONTAL_NAMES = { "LEFT", "CENTER", "RIGHT", "FILL" };
+    public static final int[] HORIZONTAL_ALIGNMENTS = { LEFT, CENTER, RIGHT, FILL };
+    public static final String[] VERTICAL_NAMES = { "TOP", "CENTER", "BASELINE", "BOTTOM", "FILL" };
+    public static final int[] VERTICAL_ALIGNMENTS = { TOP, CENTER, NO_GRAVITY, BOTTOM, FILL };
 
     public View create(Context context, String name, int size) {
         Button result = new Button(context);
