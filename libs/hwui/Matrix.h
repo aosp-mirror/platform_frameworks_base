@@ -111,6 +111,7 @@ public:
     }
 
     bool isPureTranslate();
+    bool isSimple();
 
     bool changesBounds();
 

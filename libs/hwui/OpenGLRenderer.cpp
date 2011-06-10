@@ -1478,8 +1478,7 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
  * within that boundary region and how far into the region it is.
  */
 void OpenGLRenderer::drawAARect(float left, float top, float right, float bottom,
-        int color, SkXfermode::Mode mode)
-{
+        int color, SkXfermode::Mode mode) {
     float inverseScaleX = 1.0f;
     float inverseScaleY = 1.0f;
     // The quad that we use needs to account for scaling.
@@ -1935,7 +1934,7 @@ void OpenGLRenderer::drawRect(float left, float top, float right, float bottom, 
     }
 
     int color = p->getColor();
-    if (p->isAntiAlias()) {
+    if (p->isAntiAlias() && !mSnapshot->transform->isSimple()) {
         drawAARect(left, top, right, bottom, color, mode);
     } else {
         drawColorRect(left, top, right, bottom, color, mode);
