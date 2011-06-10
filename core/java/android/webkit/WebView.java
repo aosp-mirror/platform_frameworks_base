@@ -422,6 +422,9 @@ public class WebView extends AbsoluteLayout
      */
     private int mLastTouchX;
     private int mLastTouchY;
+    private int mStartTouchX;
+    private int mStartTouchY;
+    private float mAverageAngle;
 
     /**
      * Time of the last touch event.
@@ -1189,7 +1192,6 @@ public class WebView extends AbsoluteLayout
         final ViewConfiguration configuration = ViewConfiguration.get(getContext());
         int slop = configuration.getScaledTouchSlop();
         mTouchSlopSquare = slop * slop;
-        mMinLockSnapReverseDistance = slop;
         slop = configuration.getScaledDoubleTapSlop();
         mDoubleTapSlopSquare = slop * slop;
         final float density = getContext().getResources().getDisplayMetrics().density;
@@ -5595,15 +5597,26 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    // Here are the snap align logic:
-    // 1. If it starts nearly horizontally or vertically, snap align;
-    // 2. If there is a dramitic direction change, let it go;
-    // 3. If there is a same direction back and forth, lock it.
-
-    // adjustable parameters
-    private int mMinLockSnapReverseDistance;
-    private static final float MAX_SLOPE_FOR_DIAG = 1.5f;
-    private static final int MIN_BREAK_SNAP_CROSS_DISTANCE = 80;
+    /*
+     * Here is the snap align logic:
+     * 1. If it starts nearly horizontally or vertically, snap align;
+     * 2. If there is a dramitic direction change, let it go;
+     *
+     * Adjustable parameters. Angle is the radians on a unit circle, limited
+     * to quadrant 1. Values range from 0f (horizontal) to PI/2 (vertical)
+     */
+    private static final float HSLOPE_TO_START_SNAP = .1f;
+    private static final float HSLOPE_TO_BREAK_SNAP = .2f;
+    private static final float VSLOPE_TO_START_SNAP = 1.25f;
+    private static final float VSLOPE_TO_BREAK_SNAP = .95f;
+    /*
+     *  These values are used to influence the average angle when entering
+     *  snap mode. If is is the first movement entering snap, we set the average
+     *  to the appropriate ideal. If the user is entering into snap after the
+     *  first movement, then we average the average angle with these values.
+     */
+    private static final float ANGLE_VERT = 2f;
+    private static final float ANGLE_HORIZ = 0f;
 
     private boolean hitFocusedPlugin(int contentX, int contentY) {
         if (DebugFlags.WEB_VIEW) {
@@ -5707,6 +5720,12 @@ public class WebView extends AbsoluteLayout
 
         // Since all events are handled asynchronously, we always want the gesture stream.
         return true;
+    }
+
+    private float calculateDragAngle(int dx, int dy) {
+        dx = Math.abs(dx);
+        dy = Math.abs(dy);
+        return (float) Math.atan2(dy, dx);
     }
 
     /*
@@ -5954,16 +5973,17 @@ public class WebView extends AbsoluteLayout
                     // if mZoomManager.supportsPanDuringZoom() is true.
                     final ScaleGestureDetector detector =
                       mZoomManager.getMultiTouchGestureDetector();
+                    mAverageAngle = calculateDragAngle(deltaX, deltaY);
                     if (detector == null || !detector.isInProgress()) {
                         // if it starts nearly horizontal or vertical, enforce it
-                        int ax = Math.abs(deltaX);
-                        int ay = Math.abs(deltaY);
-                        if (ax > MAX_SLOPE_FOR_DIAG * ay) {
+                        if (mAverageAngle < HSLOPE_TO_START_SNAP) {
                             mSnapScrollMode = SNAP_X;
                             mSnapPositive = deltaX > 0;
-                        } else if (ay > MAX_SLOPE_FOR_DIAG * ax) {
+                            mAverageAngle = ANGLE_HORIZ;
+                        } else if (mAverageAngle > VSLOPE_TO_START_SNAP) {
                             mSnapScrollMode = SNAP_Y;
                             mSnapPositive = deltaY > 0;
+                            mAverageAngle = ANGLE_VERT;
                         }
                     }
 
@@ -5983,35 +6003,30 @@ public class WebView extends AbsoluteLayout
                 if (deltaX == 0 && deltaY == 0) {
                     keepScrollBarsVisible = done = true;
                 } else {
-                    if (mSnapScrollMode == SNAP_X || mSnapScrollMode == SNAP_Y) {
-                        int ax = Math.abs(deltaX);
-                        int ay = Math.abs(deltaY);
+                    mAverageAngle = (mAverageAngle +
+                            calculateDragAngle(deltaX, deltaY)) / 2;
+                    if (mSnapScrollMode != SNAP_NONE) {
+                        if (mSnapScrollMode == SNAP_Y) {
+                            // radical change means getting out of snap mode
+                            if (mAverageAngle < VSLOPE_TO_BREAK_SNAP) {
+                                mSnapScrollMode = SNAP_NONE;
+                            }
+                        }
                         if (mSnapScrollMode == SNAP_X) {
                             // radical change means getting out of snap mode
-                            if (ay > MAX_SLOPE_FOR_DIAG * ax
-                                    && ay > MIN_BREAK_SNAP_CROSS_DISTANCE) {
+                            if (mAverageAngle > HSLOPE_TO_BREAK_SNAP) {
                                 mSnapScrollMode = SNAP_NONE;
                             }
-                            // reverse direction means lock in the snap mode
-                            if (ax > MAX_SLOPE_FOR_DIAG * ay &&
-                                    (mSnapPositive
-                                    ? deltaX < -mMinLockSnapReverseDistance
-                                    : deltaX > mMinLockSnapReverseDistance)) {
-                                mSnapScrollMode |= SNAP_LOCK;
-                            }
-                        } else {
-                            // radical change means getting out of snap mode
-                            if (ax > MAX_SLOPE_FOR_DIAG * ay
-                                    && ax > MIN_BREAK_SNAP_CROSS_DISTANCE) {
-                                mSnapScrollMode = SNAP_NONE;
-                            }
-                            // reverse direction means lock in the snap mode
-                            if (ay > MAX_SLOPE_FOR_DIAG * ax &&
-                                    (mSnapPositive
-                                    ? deltaY < -mMinLockSnapReverseDistance
-                                    : deltaY > mMinLockSnapReverseDistance)) {
-                                mSnapScrollMode |= SNAP_LOCK;
-                            }
+                        }
+                    } else {
+                        if (mAverageAngle < HSLOPE_TO_START_SNAP) {
+                            mSnapScrollMode = SNAP_X;
+                            mSnapPositive = deltaX > 0;
+                            mAverageAngle = (mAverageAngle + ANGLE_HORIZ) / 2;
+                        } else if (mAverageAngle > VSLOPE_TO_START_SNAP) {
+                            mSnapScrollMode = SNAP_Y;
+                            mSnapPositive = deltaY > 0;
+                            mAverageAngle = (mAverageAngle + ANGLE_VERT) / 2;
                         }
                     }
                     if (mSnapScrollMode != SNAP_NONE) {
@@ -6021,13 +6036,9 @@ public class WebView extends AbsoluteLayout
                             deltaX = 0;
                         }
                     }
+                    mLastTouchX = x;
+                    mLastTouchY = y;
                     if ((deltaX | deltaY) != 0) {
-                        if (deltaX != 0) {
-                            mLastTouchX = x;
-                        }
-                        if (deltaY != 0) {
-                            mLastTouchY = y;
-                        }
                         mHeldMotionless = MOTIONLESS_FALSE;
                     }
                     mLastTouchTime = eventTime;
@@ -6337,8 +6348,8 @@ public class WebView extends AbsoluteLayout
 
     private void startTouch(float x, float y, long eventTime) {
         // Remember where the motion event started
-        mLastTouchX = Math.round(x);
-        mLastTouchY = Math.round(y);
+        mStartTouchX = mLastTouchX = Math.round(x);
+        mStartTouchY = mLastTouchY = Math.round(y);
         mLastTouchTime = eventTime;
         mVelocityTracker = VelocityTracker.obtain();
         mSnapScrollMode = SNAP_NONE;
