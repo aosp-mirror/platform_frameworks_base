@@ -870,6 +870,27 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (object == null) {
+            return false;
+        }
+        if (getClass() != object.getClass()) {
+            return false;
+        }
+        AccessibilityNodeInfo other = (AccessibilityNodeInfo) object;
+        if (mAccessibilityViewId != other.mAccessibilityViewId) {
+            return false;
+        }
+        if (mAccessibilityWindowId != other.mAccessibilityWindowId) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;

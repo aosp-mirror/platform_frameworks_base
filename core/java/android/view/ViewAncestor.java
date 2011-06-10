@@ -4364,17 +4364,16 @@ public final class ViewAncestor extends Handler implements ViewParent,
             final IAccessibilityInteractionConnectionCallback callback =
                 (IAccessibilityInteractionConnectionCallback) message.obj;
 
-            View root = ViewAncestor.this.mView;
-            if (root == null) {
-                return;
-            }
-
-            FindByAccessibilitytIdPredicate predicate = mFindByAccessibilityIdPredicate;
-            predicate.init(accessibilityId);
-
-            View target = root.findViewByPredicate(predicate);
-            if (target != null) {
-                AccessibilityNodeInfo info = target.createAccessibilityNodeInfo();
+            AccessibilityNodeInfo info = null;
+            try {
+                FindByAccessibilitytIdPredicate predicate = mFindByAccessibilityIdPredicate;
+                predicate.init(accessibilityId);
+                View root = ViewAncestor.this.mView;
+                View target = root.findViewByPredicate(predicate);
+                if (target != null) {
+                    info = target.createAccessibilityNodeInfo();
+                }
+            } finally {
                 try {
                     callback.setFindAccessibilityNodeInfoResult(info, interactionId);
                 } catch (RemoteException re) {
@@ -4399,13 +4398,14 @@ public final class ViewAncestor extends Handler implements ViewParent,
             final IAccessibilityInteractionConnectionCallback callback =
                 (IAccessibilityInteractionConnectionCallback) message.obj;
 
-            View root = ViewAncestor.this.mView;
-            if (root == null) {
-                return;
-            }
-            View target = root.findViewById(viewId);
-            if (target != null) {
-                AccessibilityNodeInfo info = target.createAccessibilityNodeInfo();
+            AccessibilityNodeInfo info = null;
+            try {
+                View root = ViewAncestor.this.mView;
+                View target = root.findViewById(viewId);
+                if (target != null) {
+                    info = target.createAccessibilityNodeInfo();
+                }
+            } finally {
                 try {
                     callback.setFindAccessibilityNodeInfoResult(info, interactionId);
                 } catch (RemoteException re) {
@@ -4434,32 +4434,32 @@ public final class ViewAncestor extends Handler implements ViewParent,
                 (IAccessibilityInteractionConnectionCallback) args.arg2;
             mPool.release(args);
 
-            View root = ViewAncestor.this.mView;
-            if (root == null) {
-                return;
-            }
-
-            ArrayList<View> foundViews = mAttachInfo.mFocusablesTempList;
-            foundViews.clear();
-
-            root.findViewsWithText(foundViews, text);
-            if (foundViews.isEmpty()) {
-                return;
-            }
-
-            List<AccessibilityNodeInfo> infos = mTempAccessibilityNodeInfoList;
-            infos.clear();
-
-            final int viewCount = foundViews.size();
-            for (int i = 0; i < viewCount; i++) {
-                View foundView = foundViews.get(i);
-                infos.add(foundView.createAccessibilityNodeInfo());
-            }
-
+            List<AccessibilityNodeInfo> infos = null;
             try {
-                callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
-            } catch (RemoteException re) {
-                /* ignore - the other side will time out */
+                View root = ViewAncestor.this.mView;
+
+                ArrayList<View> foundViews = mAttachInfo.mFocusablesTempList;
+                foundViews.clear();
+
+                root.findViewsWithText(foundViews, text);
+                if (foundViews.isEmpty()) {
+                    return;
+                }
+
+                infos = mTempAccessibilityNodeInfoList;
+                infos.clear();
+
+                final int viewCount = foundViews.size();
+                for (int i = 0; i < viewCount; i++) {
+                    View foundView = foundViews.get(i);
+                    infos.add(foundView.createAccessibilityNodeInfo());
+                 }
+            } finally {
+                try {
+                    callback.setFindAccessibilityNodeInfosResult(infos, interactionId);
+                } catch (RemoteException re) {
+                    /* ignore - the other side will time out */
+                }
             }
         }
 
@@ -4485,30 +4485,28 @@ public final class ViewAncestor extends Handler implements ViewParent,
                 (IAccessibilityInteractionConnectionCallback) args.arg1;
             mPool.release(args);
 
-            if (ViewAncestor.this.mView == null) {
-                return;
-            }
-
             boolean succeeded = false;
-            switch (action) {
-                case AccessibilityNodeInfo.ACTION_FOCUS: {
-                    succeeded = performActionFocus(accessibilityId);
-                } break;
-                case AccessibilityNodeInfo.ACTION_CLEAR_FOCUS: {
-                    succeeded = performActionClearFocus(accessibilityId);
-                } break;
-                case AccessibilityNodeInfo.ACTION_SELECT: {
-                    succeeded = performActionSelect(accessibilityId);
-                } break;
-                case AccessibilityNodeInfo.ACTION_CLEAR_SELECTION: {
-                    succeeded = performActionClearSelection(accessibilityId);
-                } break;
-            }
-
             try {
-                callback.setPerformAccessibilityActionResult(succeeded, interactionId);
-            } catch (RemoteException re) {
-                /* ignore - the other side will time out */
+                switch (action) {
+                    case AccessibilityNodeInfo.ACTION_FOCUS: {
+                        succeeded = performActionFocus(accessibilityId);
+                    } break;
+                    case AccessibilityNodeInfo.ACTION_CLEAR_FOCUS: {
+                        succeeded = performActionClearFocus(accessibilityId);
+                    } break;
+                    case AccessibilityNodeInfo.ACTION_SELECT: {
+                        succeeded = performActionSelect(accessibilityId);
+                    } break;
+                    case AccessibilityNodeInfo.ACTION_CLEAR_SELECTION: {
+                        succeeded = performActionClearSelection(accessibilityId);
+                    } break;
+                }
+            } finally {
+                try {
+                    callback.setPerformAccessibilityActionResult(succeeded, interactionId);
+                } catch (RemoteException re) {
+                    /* ignore - the other side will time out */
+                }
             }
         }
 
