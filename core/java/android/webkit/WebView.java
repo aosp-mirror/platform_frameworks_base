@@ -9023,8 +9023,9 @@ public class WebView extends AbsoluteLayout
     /**
      *  Update our cache with updatedText.
      *  @param updatedText  The new text to put in our cache.
+     *  @hide
      */
-    /* package */ void updateCachedTextfield(String updatedText) {
+    protected void updateCachedTextfield(String updatedText) {
         // Also place our generation number so that when we look at the cache
         // we recognize that it is up to date.
         nativeUpdateCachedTextfield(updatedText, mTextGeneration);
