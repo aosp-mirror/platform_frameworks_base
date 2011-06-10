@@ -67,6 +67,7 @@ private:
 
     uint32_t mWidth, mHeight, mPictureSize;
     uint32_t mCropLeft, mCropTop;
+    uint32_t mCropWidth, mCropHeight;
 
     uint8_t *mFirstPicture;
     int32_t mFirstPictureId;
