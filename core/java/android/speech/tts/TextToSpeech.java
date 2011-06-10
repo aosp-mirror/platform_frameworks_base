@@ -1052,13 +1052,15 @@ public class TextToSpeech {
     /**
      * Sets the TTS engine to use.
      *
+     * @deprecated This doesn't inform callers when the TTS engine has been
+     *        initialized. {@link #TextToSpeech(Context, OnInitListener, String)}
+     *        can be used with the appropriate engine name.
+     *
      * @param enginePackageName The package name for the synthesis engine (e.g. "com.svox.pico")
      *
      * @return {@link #ERROR} or {@link #SUCCESS}.
      */
-    // TODO: add @Deprecated{This method does not tell the caller when the new engine
-    // has been initialized. You should create a new TextToSpeech object with the new
-    // engine instead.}
+    @Deprecated
     public int setEngineByPackageName(String enginePackageName) {
         mRequestedEngine = enginePackageName;
         return initTts();
