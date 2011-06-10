@@ -19,6 +19,7 @@ import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OP
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccUtils;
+import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.telephony.gsm.SIMRecords;
@@ -182,6 +183,12 @@ public final class CdmaLteUiccRecords extends SIMRecords {
             Log.e(LOG_TAG, "SIMRecords: recordsToLoad <0, programmer error suspected");
             recordsToLoad = 0;
         }
+    }
+
+    @Override
+    protected void onAllRecordsLoaded() {
+        super.onAllRecordsLoaded();
+        setLocaleFromCsim();
     }
 
     @Override
@@ -355,12 +362,58 @@ public final class CdmaLteUiccRecords extends SIMRecords {
         if (DBG) log("CSIM PRL version=" + mPrlVersion);
     }
 
-    public byte[] getPreferredLanguage() {
-        return mEFpl;
+    private void setLocaleFromCsim() {
+        String prefLang = null;
+        // check EFli then EFpl
+        prefLang = findBestLanguage(mEFli);
+
+        if (prefLang == null) {
+            prefLang = findBestLanguage(mEFpl);
+        }
+
+        if (prefLang != null) {
+            // check country code from SIM
+            String imsi = getIMSI();
+            String country = null;
+            if (imsi != null) {
+                country = MccTable.countryCodeForMcc(
+                                    Integer.parseInt(imsi.substring(0,3)));
+            }
+            log("Setting locale to " + prefLang + "_" + country);
+            phone.setSystemLocale(prefLang, country, false);
+        } else {
+            log ("No suitable CSIM selected locale");
+        }
     }
 
-    public byte[] getLanguageIndication() {
-        return mEFli;
+    private String findBestLanguage(byte[] languages) {
+        String bestMatch = null;
+        String[] locales = phone.getContext().getAssets().getLocales();
+
+        if ((languages == null) || (locales == null)) return null;
+
+        // Each 2-bytes consists of one language
+        for (int i = 0; (i + 1) < languages.length; i += 2) {
+            try {
+                String lang = new String(languages, i, 2, "ISO-8859-1");
+                for (int j = 0; j < locales.length; j++) {
+                    if (locales[j] != null && locales[j].length() >= 2 &&
+                        locales[j].substring(0, 2).equals(lang)) {
+                        return lang;
+                    }
+                }
+                if (bestMatch != null) break;
+            } catch(java.io.UnsupportedEncodingException e) {
+                log ("Failed to parse SIM language records");
+            }
+        }
+        // no match found. return null
+        return null;
+    }
+
+    @Override
+    protected void log(String s) {
+        if (DBG) Log.d(LOG_TAG, "[CSIM] " + s);
     }
 
     public String getMdn() {
