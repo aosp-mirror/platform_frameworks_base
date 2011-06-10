@@ -67,12 +67,22 @@ public class TextToSpeech {
     /**
      * Queue mode where all entries in the playback queue (media to be played
      * and text to be synthesized) are dropped and replaced by the new entry.
+     * Queues are flushed with respect to a given calling app. Entries in the queue
+     * from other callees are not discarded.
      */
     public static final int QUEUE_FLUSH = 0;
     /**
      * Queue mode where the new entry is added at the end of the playback queue.
      */
     public static final int QUEUE_ADD = 1;
+    /**
+     * Queue mode where the entire playback queue is purged. This is different
+     * from {@link #QUEUE_FLUSH} in that all entries are purged, not just entries
+     * from a given caller.
+     *
+     * @hide
+     */
+    static final int QUEUE_DESTROY = 2;
 
     /**
      * Denotes the language is available exactly as specified by the locale.

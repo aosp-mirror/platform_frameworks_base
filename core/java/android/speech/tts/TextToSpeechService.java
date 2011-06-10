@@ -301,7 +301,7 @@ public abstract class TextToSpeechService extends Service {
 
             if (queueMode == TextToSpeech.QUEUE_FLUSH) {
                 stop(speechItem.getCallingApp());
-            } else if (queueMode == 2) {
+            } else if (queueMode == TextToSpeech.QUEUE_DESTROY) {
                 // Stop the current speech item.
                 stop(speechItem.getCallingApp());
                 // Remove all other items from the queue.
@@ -319,6 +319,8 @@ public abstract class TextToSpeechService extends Service {
             };
             Message msg = Message.obtain(this, runnable);
             // The obj is used to remove all callbacks from the given app in stop(String).
+            //
+            // Note that this string is interned, so the == comparison works.
             msg.obj = speechItem.getCallingApp();
             if (sendMessage(msg)) {
                 return TextToSpeech.SUCCESS;
@@ -679,27 +681,46 @@ public abstract class TextToSpeechService extends Service {
      * Binder returned from {@code #onBind(Intent)}. The methods in this class can be
      * called called from several different threads.
      */
+    // NOTE: All calls that are passed in a calling app are interned so that
+    // they can be used as message objects (which are tested for equality using ==).
     private final ITextToSpeechService.Stub mBinder = new ITextToSpeechService.Stub() {
 
         public int speak(String callingApp, String text, int queueMode, Bundle params) {
-            SpeechItem item = new SynthesisSpeechItem(callingApp, params, text);
+            if (!checkNonNull(callingApp, text, params)) {
+                return TextToSpeech.ERROR;
+            }
+
+            SpeechItem item = new SynthesisSpeechItem(intern(callingApp), params, text);
             return mSynthHandler.enqueueSpeechItem(queueMode, item);
         }
 
         public int synthesizeToFile(String callingApp, String text, String filename,
                 Bundle params) {
+            if (!checkNonNull(callingApp, text, filename, params)) {
+                return TextToSpeech.ERROR;
+            }
+
             File file = new File(filename);
-            SpeechItem item = new SynthesisToFileSpeechItem(callingApp, params, text, file);
+            SpeechItem item = new SynthesisToFileSpeechItem(intern(callingApp),
+                    params, text, file);
             return mSynthHandler.enqueueSpeechItem(TextToSpeech.QUEUE_ADD, item);
         }
 
         public int playAudio(String callingApp, Uri audioUri, int queueMode, Bundle params) {
-            SpeechItem item = new AudioSpeechItem(callingApp, params, audioUri);
+            if (!checkNonNull(callingApp, audioUri, params)) {
+                return TextToSpeech.ERROR;
+            }
+
+            SpeechItem item = new AudioSpeechItem(intern(callingApp), params, audioUri);
             return mSynthHandler.enqueueSpeechItem(queueMode, item);
         }
 
         public int playSilence(String callingApp, long duration, int queueMode, Bundle params) {
-            SpeechItem item = new SilenceSpeechItem(callingApp, params, duration);
+            if (!checkNonNull(callingApp, params)) {
+                return TextToSpeech.ERROR;
+            }
+
+            SpeechItem item = new SilenceSpeechItem(intern(callingApp), params, duration);
             return mSynthHandler.enqueueSpeechItem(queueMode, item);
         }
 
@@ -708,7 +729,11 @@ public abstract class TextToSpeechService extends Service {
         }
 
         public int stop(String callingApp) {
-            return mSynthHandler.stop(callingApp);
+            if (!checkNonNull(callingApp)) {
+                return TextToSpeech.ERROR;
+            }
+
+            return mSynthHandler.stop(intern(callingApp));
         }
 
         public String[] getLanguage() {
@@ -720,6 +745,10 @@ public abstract class TextToSpeechService extends Service {
          * perhaps the default language selected by the user.
          */
         public int isLanguageAvailable(String lang, String country, String variant) {
+            if (!checkNonNull(lang)) {
+                return TextToSpeech.ERROR;
+            }
+
             if (areDefaultsEnforced()) {
                 if (isDefault(lang, country, variant)) {
                     return mDefaultAvailability;
@@ -735,6 +764,10 @@ public abstract class TextToSpeechService extends Service {
          * are enforced.
          */
         public int loadLanguage(String lang, String country, String variant) {
+            if (!checkNonNull(lang)) {
+                return TextToSpeech.ERROR;
+            }
+
             if (areDefaultsEnforced()) {
                 if (isDefault(lang, country, variant)) {
                     return mDefaultAvailability;
@@ -746,11 +779,28 @@ public abstract class TextToSpeechService extends Service {
         }
 
         public void setCallback(String packageName, ITextToSpeechCallback cb) {
+            // Note that passing in a null callback is a valid use case.
+            if (!checkNonNull(packageName)) {
+                return;
+            }
+
             mCallbacks.setCallback(packageName, cb);
         }
 
         private boolean isDefault(String lang, String country, String variant) {
             return Locale.getDefault().equals(new Locale(lang, country, variant));
+        }
+
+        private String intern(String in) {
+            // The input parameter will be non null.
+            return in.intern();
+        }
+
+        private boolean checkNonNull(Object... args) {
+            for (Object o : args) {
+                if (o == null) return false;
+            }
+            return true;
         }
     };
 
