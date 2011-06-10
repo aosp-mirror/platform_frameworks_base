@@ -277,24 +277,24 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int compatSmallestScreenWidthDp;
 
     /**
-     * @hide
+     * @hide Do not use. Implementation not finished.
      */
-    public static final int LAYOUT_DIRECTION_UNDEFINED = -1;
+    public static final int TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE = -1;
 
     /**
-     * @hide
+     * @hide Do not use. Implementation not finished.
      */
-    public static final int LAYOUT_DIRECTION_LTR = 0;
+    public static final int TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE = 0;
 
     /**
-     * @hide
+     * @hide Do not use. Implementation not finished.
      */
-    public static final int LAYOUT_DIRECTION_RTL = 1;
+    public static final int TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE = 1;
 
     /**
-     * @hide The layout direction associated to the current Locale
+     * @hide The text layout direction associated to the current Locale
      */
-    public int layoutDirection;
+    public int textLayoutDirection;
 
     /**
      * @hide Internal book-keeping.
@@ -322,7 +322,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         mnc = o.mnc;
         if (o.locale != null) {
             locale = (Locale) o.locale.clone();
-            layoutDirection = o.layoutDirection;
+            textLayoutDirection = o.textLayoutDirection;
         }
         userSetLocale = o.userSetLocale;
         touchscreen = o.touchscreen;
@@ -357,6 +357,11 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             sb.append(locale);
         } else {
             sb.append(" (no locale)");
+        }
+        switch (textLayoutDirection) {
+            case TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE: sb.append(" ?layoutdir"); break;
+            case TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE: sb.append(" rtl"); break;
+            default: sb.append(" layoutdir="); sb.append(textLayoutDirection); break;
         }
         if (smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
             sb.append(" sw"); sb.append(smallestScreenWidthDp); sb.append("dp");
@@ -450,11 +455,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             case NAVIGATIONHIDDEN_YES: sb.append("/h"); break;
             default: sb.append("/"); sb.append(navigationHidden); break;
         }
-        switch (layoutDirection) {
-            case LAYOUT_DIRECTION_UNDEFINED: sb.append(" ?layoutdir"); break;
-            case LAYOUT_DIRECTION_LTR: sb.append(" ltr"); break;
-            case LAYOUT_DIRECTION_RTL: sb.append(" rtl"); break;
-        }
         if (seq != 0) {
             sb.append(" s.");
             sb.append(seq);
@@ -483,8 +483,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         screenWidthDp = compatScreenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
         screenHeightDp = compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
         smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
+        textLayoutDirection = TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE;
         seq = 0;
-        layoutDirection = LAYOUT_DIRECTION_LTR;
     }
 
     /** {@hide} */
@@ -519,7 +519,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_LOCALE;
             locale = delta.locale != null
                     ? (Locale) delta.locale.clone() : null;
-            layoutDirection = getLayoutDirectionFromLocale(locale);
+            textLayoutDirection = getLayoutDirectionFromLocale(locale);
         }
         if (delta.userSetLocale && (!userSetLocale || ((changed & ActivityInfo.CONFIG_LOCALE) != 0)))
         {
@@ -611,23 +611,25 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     /**
      * Return the layout direction for a given Locale
      * @param locale the Locale for which we want the layout direction. Can be null.
-     * @return the layout direction. This may be one of {@link #LAYOUT_DIRECTION_UNDEFINED},
-     * {@link #LAYOUT_DIRECTION_LTR} or {@link #LAYOUT_DIRECTION_RTL}.
+     * @return the layout direction. This may be one of:
+     * {@link #TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE} or
+     * {@link #TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE} or
+     * {@link #TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE}.
      *
      * @hide
      */
     public static int getLayoutDirectionFromLocale(Locale locale) {
-        if (locale == null || locale.equals(Locale.ROOT)) return LAYOUT_DIRECTION_UNDEFINED;
+        if (locale == null || locale.equals(Locale.ROOT)) return TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE;
         // Be careful: this code will need to be changed when vertical scripts will be supported
         // OR if ICU4C is updated to have the "likelySubtags" file
         switch(Character.getDirectionality(locale.getDisplayName(locale).charAt(0))) {
             case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
-                return LAYOUT_DIRECTION_LTR;
+                return TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE;
             case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
             case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
-                return LAYOUT_DIRECTION_RTL;
+                return TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE;
             default:
-                return LAYOUT_DIRECTION_UNDEFINED;
+                return TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE;
         }
     }
 
@@ -810,7 +812,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         dest.writeInt(compatScreenWidthDp);
         dest.writeInt(compatScreenHeightDp);
         dest.writeInt(compatSmallestScreenWidthDp);
-        dest.writeInt(layoutDirection);
+        dest.writeInt(textLayoutDirection);
         dest.writeInt(seq);
     }
 
@@ -838,7 +840,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         compatScreenWidthDp = source.readInt();
         compatScreenHeightDp = source.readInt();
         compatSmallestScreenWidthDp = source.readInt();
-        layoutDirection = source.readInt();
+        textLayoutDirection = source.readInt();
         seq = source.readInt();
     }
     
