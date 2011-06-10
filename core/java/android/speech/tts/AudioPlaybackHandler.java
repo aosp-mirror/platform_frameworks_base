@@ -46,10 +46,7 @@ class AudioPlaybackHandler {
             new PriorityBlockingQueue<ListEntry>();
     private final Thread mHandlerThread;
 
-    private final Object mStateLock = new Object();
-
-    // Accessed by multiple threads, synchronized by "mStateLock".
-    private MessageParams mCurrentParams = null;
+    private volatile MessageParams mCurrentParams = null;
     // Used only for book keeping and error detection.
     private volatile SynthesisMessageParams mLastSynthesisRequest = null;
     // Used to order incoming messages in our priority queue.
@@ -79,7 +76,7 @@ class AudioPlaybackHandler {
         if (token.getType() == MessageParams.TYPE_SYNTHESIS) {
             mQueue.add(new ListEntry(SYNTHESIS_DONE, token, HIGH_PRIORITY));
         } else  {
-            MessageParams current = getCurrentParams();
+            final MessageParams current = getCurrentParams();
 
             if (current != null) {
                 if (token.getType() == MessageParams.TYPE_AUDIO) {
@@ -257,15 +254,11 @@ class AudioPlaybackHandler {
     }
 
     private void setCurrentParams(MessageParams p) {
-        synchronized (mStateLock) {
-            mCurrentParams = p;
-        }
+        mCurrentParams = p;
     }
 
     private MessageParams getCurrentParams() {
-        synchronized (mStateLock) {
-            return mCurrentParams;
-        }
+        return mCurrentParams;
     }
 
     // -----------------------------------------
