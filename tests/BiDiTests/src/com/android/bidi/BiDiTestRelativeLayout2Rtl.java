@@ -16,15 +16,18 @@
 
 package com.android.bidi;
 
-import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-public class BiDiTestLinearLayoutLtrActivity extends Activity {
+public class BiDiTestRelativeLayout2Rtl extends Fragment {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.linear_layout_ltr);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.relative_layout_2_rtl, container, false);
     }
 }
+

@@ -16,30 +16,39 @@
 
 package com.android.bidi;
 
-import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.SeekBar;
 
 import static com.android.bidi.BiDiTestConstants.FONT_MAX_SIZE;
 import static com.android.bidi.BiDiTestConstants.FONT_MIN_SIZE;
 
-public class BiDiTestCanvasActivity extends Activity {
+public class BiDiTestCanvas extends Fragment {
 
     static final int INIT_TEXT_SIZE = (FONT_MAX_SIZE - FONT_MIN_SIZE) / 2;
 
     private BiDiTestView testView;
     private SeekBar textSizeSeekBar;
+    private View currentView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        currentView = inflater.inflate(R.layout.canvas, container, false);
+        return currentView;
+    }
 
-        setContentView(R.layout.canvas);
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        testView = (BiDiTestView) findViewById(R.id.testview);
+        testView = (BiDiTestView) currentView.findViewById(R.id.testview);
         testView.setCurrentTextSize(INIT_TEXT_SIZE);
 
-        textSizeSeekBar = (SeekBar) findViewById(R.id.seekbar);
+        textSizeSeekBar = (SeekBar) currentView.findViewById(R.id.seekbar);
         textSizeSeekBar.setProgress(INIT_TEXT_SIZE);
         textSizeSeekBar.setMax(FONT_MAX_SIZE - FONT_MIN_SIZE);
 

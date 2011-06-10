@@ -14,245 +14,245 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/linear_layout_ltr"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layoutDirection="locale">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/table_layout_locale"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:stretchColumns="1,2">
+    <LinearLayout android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:layoutDirection="locale">
 
-        <TableRow>
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button1_text"
-                    android:textSize="24dip"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_right_text"
-                    android:textSize="24dip"
-                    android:gravity="right"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_after_text"
-                    android:textSize="24dip"
-                    android:gravity="after"
-                    />
-        </TableRow>
+        <TableLayout android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:stretchColumns="1,2">
 
-        <TableRow>
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button2_text"
-                    android:textSize="24dip"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_left_text"
-                    android:textSize="24dip"
-                    android:gravity="left"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_before_text"
-                    android:textSize="24dip"
-                    android:gravity="before"
-                    />
-        </TableRow>
-    </TableLayout>
+            <TableRow>
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button1_text"
+                        android:textSize="24dip"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_right_text"
+                        android:textSize="24dip"
+                        android:gravity="right"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_after_text"
+                        android:textSize="24dip"
+                        android:gravity="after"
+                        />
+            </TableRow>
 
-    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:stretchColumns="1,2"
-                 android:layoutDirection="inherit">
+            <TableRow>
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button2_text"
+                        android:textSize="24dip"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_left_text"
+                        android:textSize="24dip"
+                        android:gravity="left"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_before_text"
+                        android:textSize="24dip"
+                        android:gravity="before"
+                        />
+            </TableRow>
+        </TableLayout>
 
-        <TableRow>
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button1_text"
-                    android:textSize="24dip"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_right_text"
-                    android:textSize="24dip"
-                    android:gravity="right"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_after_text"
-                    android:textSize="24dip"
-                    android:gravity="after"
-                    />
-        </TableRow>
+        <TableLayout android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:stretchColumns="1,2"
+                     android:layoutDirection="inherit">
+    
+            <TableRow>
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button1_text"
+                        android:textSize="24dip"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_right_text"
+                        android:textSize="24dip"
+                        android:gravity="right"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_after_text"
+                        android:textSize="24dip"
+                        android:gravity="after"
+                        />
+            </TableRow>
 
-        <TableRow>
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button2_text"
-                    android:textSize="24dip"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_left_text"
-                    android:textSize="24dip"
-                    android:gravity="left"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_before_text"
-                    android:textSize="24dip"
-                    android:gravity="before"
-                    />
-        </TableRow>
-    </TableLayout>
+            <TableRow>
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button2_text"
+                        android:textSize="24dip"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_left_text"
+                        android:textSize="24dip"
+                        android:gravity="left"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_before_text"
+                        android:textSize="24dip"
+                        android:gravity="before"
+                        />
+            </TableRow>
+        </TableLayout>
 
-    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:stretchColumns="1,2"
-                 android:layoutDirection="ltr">
+        <TableLayout android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:stretchColumns="1,2"
+                     android:layoutDirection="ltr">
+    
+            <TableRow>
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button1_text"
+                        android:textSize="24dip"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_right_text"
+                        android:textSize="24dip"
+                        android:gravity="right"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_after_text"
+                        android:textSize="24dip"
+                        android:gravity="after"
+                        />
+            </TableRow>
 
-        <TableRow>
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button1_text"
-                    android:textSize="24dip"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_right_text"
-                    android:textSize="24dip"
-                    android:gravity="right"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_after_text"
-                    android:textSize="24dip"
-                    android:gravity="after"
-                    />
-        </TableRow>
+            <TableRow>
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button2_text"
+                        android:textSize="24dip"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_left_text"
+                        android:textSize="24dip"
+                        android:gravity="left"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_before_text"
+                        android:textSize="24dip"
+                        android:gravity="before"
+                        />
+            </TableRow>
+        </TableLayout>
 
-        <TableRow>
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button2_text"
-                    android:textSize="24dip"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_left_text"
-                    android:textSize="24dip"
-                    android:gravity="left"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_before_text"
-                    android:textSize="24dip"
-                    android:gravity="before"
-                    />
-        </TableRow>
-    </TableLayout>
+        <TableLayout android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:stretchColumns="1,2"
+                     android:layoutDirection="rtl">
+    
+            <TableRow>
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button1_text"
+                        android:textSize="24dip"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_right_text"
+                        android:textSize="24dip"
+                        android:gravity="right"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_after_text"
+                        android:textSize="24dip"
+                        android:gravity="after"
+                        />
+            </TableRow>
 
-    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:stretchColumns="1,2"
-                 android:layoutDirection="rtl">
+            <TableRow>
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button2_text"
+                        android:textSize="24dip"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_left_text"
+                        android:textSize="24dip"
+                        android:gravity="left"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_before_text"
+                        android:textSize="24dip"
+                        android:gravity="before"
+                        />
+            </TableRow>
+        </TableLayout>
 
-        <TableRow>
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button1_text"
-                    android:textSize="24dip"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_right_text"
-                    android:textSize="24dip"
-                    android:gravity="right"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_after_text"
-                    android:textSize="24dip"
-                    android:gravity="after"
-                    />
-        </TableRow>
+        <TableLayout android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:stretchColumns="1,2"
+                     android:layoutDirection="locale">
+    
+            <TableRow>
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button1_text"
+                        android:textSize="24dip"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_right_text"
+                        android:textSize="24dip"
+                        android:gravity="right"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_after_text"
+                        android:textSize="24dip"
+                        android:gravity="after"
+                        />
+            </TableRow>
 
-        <TableRow>
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button2_text"
-                    android:textSize="24dip"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_left_text"
-                    android:textSize="24dip"
-                    android:gravity="left"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_before_text"
-                    android:textSize="24dip"
-                    android:gravity="before"
-                    />
-        </TableRow>
-    </TableLayout>
+            <TableRow>
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button2_text"
+                        android:textSize="24dip"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_left_text"
+                        android:textSize="24dip"
+                        android:gravity="left"
+                        />
+                <Button android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
+                        android:text="@string/button_before_text"
+                        android:textSize="24dip"
+                        android:gravity="before"
+                        />
+            </TableRow>
+        </TableLayout>
 
-    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:stretchColumns="1,2"
-                 android:layoutDirection="locale">
+    </LinearLayout>
 
-        <TableRow>
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button1_text"
-                    android:textSize="24dip"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_right_text"
-                    android:textSize="24dip"
-                    android:gravity="right"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_after_text"
-                    android:textSize="24dip"
-                    android:gravity="after"
-                    />
-        </TableRow>
-
-        <TableRow>
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button2_text"
-                    android:textSize="24dip"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_left_text"
-                    android:textSize="24dip"
-                    android:gravity="left"
-                    />
-            <Button android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:text="@string/button_before_text"
-                    android:textSize="24dip"
-                    android:gravity="before"
-                    />
-        </TableRow>
-    </TableLayout>
-
-</LinearLayout>
+</FrameLayout>

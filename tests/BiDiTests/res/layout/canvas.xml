@@ -14,21 +14,27 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/canvas"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+    <LinearLayout android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent">
+
+        <SeekBar android:id="@+id/seekbar"
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                />
+
+        <view class="com.android.bidi.BiDiTestView"
+              android:id="@+id/testview"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="wrap_content"
+              android:background="#FF0000"
+                />
 
-    <SeekBar android:id="@+id/seekbar"
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-            />
+    </LinearLayout>
 
-    <view class="com.android.bidi.BiDiTestView"
-          android:id="@+id/testview"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:background="#FF0000"
-            />
-
-</LinearLayout>
+</FrameLayout>

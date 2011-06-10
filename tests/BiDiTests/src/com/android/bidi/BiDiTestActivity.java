@@ -16,12 +16,56 @@
 
 package com.android.bidi;
 
-import android.app.TabActivity;
-import android.content.Intent;
-import android.os.Bundle;
-import android.widget.TabHost;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class BiDiTestActivity extends TabActivity {
+import android.app.Activity;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+
+public class BiDiTestActivity extends Activity {
+
+    private static final String KEY_CLASS = "class";
+    private static final String KEY_TITLE = "title";
+    private static final String KEY_FRAGMENT_ID = "id";
+    
+    private ListView mList;
+    
+    private AdapterView.OnItemClickListener mOnClickListener = 
+            new AdapterView.OnItemClickListener() {
+                public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+                    onListItemClick((ListView)parent, v, position, id);
+                }
+    };
+
+    private void onListItemClick(ListView lv, View v, int position, long id) {
+        // Show the test
+        Map<String, Object> map = (Map<String, Object>)lv.getItemAtPosition(position);
+        int fragmentId = (Integer) map.get(KEY_FRAGMENT_ID);
+        Fragment fragment = getFragmentManager().findFragmentById(fragmentId);
+        if (fragment == null) {
+            try {
+                // Create an instance of the test
+                Class<? extends Fragment> clazz = (Class<? extends Fragment>) map.get(KEY_CLASS);  
+                fragment = clazz.newInstance();
+                
+                // Replace the old test fragment with the new one
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.testframe, fragment);
+                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                ft.commit();
+            } catch (InstantiationException e) {
+            } catch (IllegalAccessException e) {
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,94 +73,52 @@ public class BiDiTestActivity extends TabActivity {
 
         setContentView(R.layout.main);
 
-        TabHost tabHost = getTabHost();
-        TabHost.TabSpec spec;
-        Intent intent;
+        mList = (ListView) findViewById(R.id.testlist);
+        mList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        mList.setFocusableInTouchMode(true);
+        
+        final SimpleAdapter adapter = new SimpleAdapter(this, getTests(),
+                R.layout.custom_list_item, new String[]{"title"},
+                new int[]{android.R.id.text1});
+        mList.setAdapter(adapter);
+        
+        mList.setOnItemClickListener(mOnClickListener);
+    }
 
-        // Create an Intent to launch an Activity for the tab (to be reused)
-        intent = new Intent().setClass(this, BiDiTestBasicActivity.class);
+    private void addItem(List<Map<String, Object>> data, String name,
+            Class<? extends Fragment> clazz, int fragmentId) {
+        Map<String, Object> temp = new HashMap<String, Object>();
+        temp.put(KEY_TITLE, name);
+        temp.put(KEY_CLASS, clazz);
+        temp.put(KEY_FRAGMENT_ID, fragmentId);
+        data.add(temp);
+    }
 
-        // Initialize a TabSpec for each tab and add it to the TabHost
-        spec = tabHost.newTabSpec("basic").setIndicator("Basic").
-            setContent(intent);
-        tabHost.addTab(spec);
+    private List<Map<String, Object>> getTests() {
+        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
 
-        // Do the same for the other tabs
-        intent = new Intent().setClass(this, BiDiTestCanvasActivity.class);
-        spec = tabHost.newTabSpec("canvas").setIndicator("Canvas").
-            setContent(intent);
-        tabHost.addTab(spec);
+        addItem(result, "Basic", BiDiTestBasic.class, R.id.basic);
+        addItem(result, "Canvas", BiDiTestCanvas.class, R.id.canvas);
+        
+        addItem(result, "Linear LTR", BiDiTestLinearLayoutLtr.class, R.id.linear_layout_ltr);
+        addItem(result, "Linear RTL", BiDiTestLinearLayoutRtl.class, R.id.linear_layout_rtl);
+        addItem(result, "Linear LOC", BiDiTestLinearLayoutLocale.class, R.id.linear_layout_locale);
+        
+        addItem(result, "Frame LTR", BiDiTestFrameLayoutLtr.class, R.id.frame_layout_ltr);
+        addItem(result, "Frame RTL", BiDiTestFrameLayoutRtl.class, R.id.frame_layout_rtl);
+        addItem(result, "Frame LOC", BiDiTestFrameLayoutLocale.class, R.id.frame_layout_locale);
+        
+        addItem(result, "Relative LTR", BiDiTestRelativeLayoutLtr.class, R.id.relative_layout_ltr);
+        addItem(result, "Relative RTL", BiDiTestRelativeLayoutRtl.class, R.id.relative_layout_rtl);
+        
+        addItem(result, "Relative2 LTR", BiDiTestRelativeLayout2Ltr.class, R.id.relative_layout_2_ltr);
+        addItem(result, "Relative2 RTL", BiDiTestRelativeLayout2Rtl.class, R.id.relative_layout_2_rtl);
+        addItem(result, "Relative2 LOC", BiDiTestRelativeLayout2Locale.class, R.id.relative_layout_2_locale);
+        
+        addItem(result, "Table LTR", BiDiTestTableLayoutLtr.class, R.id.table_layout_ltr);
+        addItem(result, "Table RTL", BiDiTestTableLayoutRtl.class, R.id.table_layout_rtl);
+        addItem(result, "Table LOC", BiDiTestTableLayoutLocale.class, R.id.table_layout_locale);
 
-        intent = new Intent().setClass(this, BiDiTestLinearLayoutLtrActivity.class);
-        spec = tabHost.newTabSpec("linear-layout-ltr").setIndicator("Linear LTR").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestLinearLayoutRtlActivity.class);
-        spec = tabHost.newTabSpec("linear-layout-rtl").setIndicator("Linear RTL").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestLinearLayoutLocaleActivity.class);
-        spec = tabHost.newTabSpec("linear-layout-locale").setIndicator("Linear LOC").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestFrameLayoutLtrActivity.class);
-        spec = tabHost.newTabSpec("frame-layout-ltr").setIndicator("Frame LTR").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestFrameLayoutRtlActivity.class);
-        spec = tabHost.newTabSpec("frame-layout-rtl").setIndicator("Frame RTL").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestFrameLayoutLocaleActivity.class);
-        spec = tabHost.newTabSpec("frame-layout-locale").setIndicator("Frame LOC").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestRelativeLayoutLtrActivity.class);
-        spec = tabHost.newTabSpec("relative-layout-ltr").setIndicator("Relative LTR").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestRelativeLayoutRtlActivity.class);
-        spec = tabHost.newTabSpec("relative-layout-rtl").setIndicator("Relative RTL").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestRelativeLayoutLtrActivity2.class);
-        spec = tabHost.newTabSpec("relative-layout-ltr-2").setIndicator("Relative2 LTR").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestRelativeLayoutRtlActivity2.class);
-        spec = tabHost.newTabSpec("relative-layout-rtl-2").setIndicator("Relative2 RTL").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestRelativeLayoutLocaleActivity2.class);
-        spec = tabHost.newTabSpec("relative-layout-locale-2").setIndicator("Relative2 LOC").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestTableLayoutLtrActivity.class);
-        spec = tabHost.newTabSpec("table-layout-ltr").setIndicator("Table LTR").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestTableLayoutRtlActivity.class);
-        spec = tabHost.newTabSpec("table-layout-rtl").setIndicator("Table RTL").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        intent = new Intent().setClass(this, BiDiTestTableLayoutLocaleActivity.class);
-        spec = tabHost.newTabSpec("table-layout-locale").setIndicator("Table LOC").
-            setContent(intent);
-        tabHost.addTab(spec);
-
-        tabHost.setCurrentTab(0);
+        return result;
     }
 }

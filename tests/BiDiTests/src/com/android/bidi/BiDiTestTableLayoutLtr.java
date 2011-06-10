@@ -16,16 +16,18 @@
 
 package com.android.bidi;
 
-import android.app.Activity;
+import android.app.Fragment;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-public class BiDiTestRelativeLayoutRtlActivity2 extends Activity {
+public class BiDiTestTableLayoutLtr extends Fragment {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.relative_layout_2_rtl);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.table_layout_ltr, container, false);
     }
 }
 

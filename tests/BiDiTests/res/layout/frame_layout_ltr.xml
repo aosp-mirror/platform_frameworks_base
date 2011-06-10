@@ -15,74 +15,78 @@
 -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:id="@+id/frame_layout_ltr"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:layoutDirection="ltr"
-             android:background="#FF000000">
+        android:id="@+id/frame_layout_ltr"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-    <FrameLayout
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="right|center_vertical"
-            android:background="#FFFF0000">
-    </FrameLayout>
+    <FrameLayout android:layout_width="match_parent"
+                 android:layout_height="match_parent"
+                 android:layoutDirection="ltr"
+                 android:background="#FF000000">
 
-    <FrameLayout
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="left|center_vertical"
-            android:background="#FF00FF00">
-    </FrameLayout>
+        <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="right|center_vertical"
+                android:background="#FFFF0000">
+        </FrameLayout>
 
-    <FrameLayout
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="top|center_horizontal"
-            android:background="#FF0000FF">
-    </FrameLayout>
+        <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="left|center_vertical"
+                android:background="#FF00FF00">
+        </FrameLayout>
 
-    <FrameLayout
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="bottom|center_horizontal"
-            android:background="#FF00FFFF">
-    </FrameLayout>
+        <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="top|center_horizontal"
+                android:background="#FF0000FF">
+        </FrameLayout>
 
-    <FrameLayout
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="top|start"
-            android:background="#FFFFFFFF">
-    </FrameLayout>
+        <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:background="#FF00FFFF">
+        </FrameLayout>
 
-    <FrameLayout
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="top|end"
-            android:background="#FFFFFF00">
-    </FrameLayout>
+        <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="top|start"
+                android:background="#FFFFFFFF">
+        </FrameLayout>
 
-    <FrameLayout
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="bottom|start"
-            android:background="#FFFFFFFF">
-    </FrameLayout>
+        <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="top|end"
+                android:background="#FFFFFF00">
+        </FrameLayout>
 
-    <FrameLayout
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="bottom|end"
-            android:background="#FFFFFF00">
-    </FrameLayout>
+        <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="bottom|start"
+                android:background="#FFFFFFFF">
+        </FrameLayout>
 
-    <FrameLayout
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:background="#FF888888">
+        <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="bottom|end"
+                android:background="#FFFFFF00">
+        </FrameLayout>
+
+        <FrameLayout
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal|center_vertical"
+                android:background="#FF888888">
+        </FrameLayout>
+
     </FrameLayout>
 
 </FrameLayout>
-
