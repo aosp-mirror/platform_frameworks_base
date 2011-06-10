@@ -78,6 +78,8 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Custom implementation of Context/Activity to handle non compiled resources.
@@ -299,12 +301,17 @@ public final class BridgeContext extends Activity {
 
     public Pair<View, Boolean> inflateView(ResourceReference resource, ViewGroup parent,
             boolean attachToRoot, boolean skipCallbackParser) {
-        String layoutName = resource.getName();
         boolean isPlatformLayout = resource.isFramework();
 
         if (isPlatformLayout == false && skipCallbackParser == false) {
             // check if the project callback can provide us with a custom parser.
-            ILayoutPullParser parser = mProjectCallback.getParser(layoutName);
+            ILayoutPullParser parser;
+            if (resource instanceof ResourceValue) {
+                parser = mProjectCallback.getParser((ResourceValue) resource);
+            } else {
+                parser = mProjectCallback.getParser(resource.getName());
+            }
+
             if (parser != null) {
                 BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(parser,
                         this, resource.isFramework());
@@ -372,7 +379,7 @@ public final class BridgeContext extends Activity {
         } else {
             Bridge.getLog().error(LayoutLog.TAG_BROKEN,
                     String.format("Layout %s%s does not exist.", isPlatformLayout ? "android:" : "",
-                            layoutName), null);
+                            resource.getName()), null);
         }
 
         return Pair.of(null, false);
@@ -507,11 +514,12 @@ public final class BridgeContext extends Activity {
             return null;
         }
 
-        boolean[] frameworkAttributes = new boolean[1];
-        TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, frameworkAttributes);
+        AtomicBoolean frameworkAttributes = new AtomicBoolean();
+        AtomicReference<String> attrName = new AtomicReference<String>();
+        TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, frameworkAttributes, attrName);
 
         BridgeTypedArray ta = ((BridgeResources) mSystemResources).newTypeArray(attrs.length,
-                isPlatformFile);
+                isPlatformFile, frameworkAttributes.get(), attrName.get());
 
         // look for a custom style.
         String customStyle = null;
@@ -602,7 +610,7 @@ public final class BridgeContext extends Activity {
         }
 
         String namespace = BridgeConstants.NS_RESOURCES;
-        if (frameworkAttributes[0] == false) {
+        if (frameworkAttributes.get() == false) {
             // need to use the application namespace
             namespace = mProjectCallback.getNamespace();
         }
@@ -679,10 +687,12 @@ public final class BridgeContext extends Activity {
      */
     private BridgeTypedArray createStyleBasedTypedArray(StyleResourceValue style, int[] attrs)
             throws Resources.NotFoundException {
-        TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, null);
+        AtomicBoolean frameworkAttributes = new AtomicBoolean();
+        AtomicReference<String> attrName = new AtomicReference<String>();
+        TreeMap<Integer, String> styleNameMap = searchAttrs(attrs, frameworkAttributes, attrName);
 
         BridgeTypedArray ta = ((BridgeResources) mSystemResources).newTypeArray(attrs.length,
-                false /* platformResourceFlag */);
+                style.isFramework(), frameworkAttributes.get(), attrName.get());
 
         // loop through all the values in the style map, and init the TypedArray with
         // the style we got from the dynamic id
@@ -714,10 +724,13 @@ public final class BridgeContext extends Activity {
      * that is used to reference the attribute later in the TypedArray.
      *
      * @param attrs An attribute array reference given to obtainStyledAttributes.
+     * @param outFrameworkFlag out value indicating if the attr array is a framework value
+     * @param outAttrName out value for the resolved attr name.
      * @return A sorted map Attribute-Value to Attribute-Name for all attributes declared by the
      *         attribute array. Returns null if nothing is found.
      */
-    private TreeMap<Integer,String> searchAttrs(int[] attrs, boolean[] outFrameworkFlag) {
+    private TreeMap<Integer,String> searchAttrs(int[] attrs, AtomicBoolean outFrameworkFlag,
+            AtomicReference<String> outAttrName) {
         // get the name of the array from the framework resources
         String arrayName = Bridge.resolveResourceId(attrs);
         if (arrayName != null) {
@@ -734,7 +747,10 @@ public final class BridgeContext extends Activity {
             }
 
             if (outFrameworkFlag != null) {
-                outFrameworkFlag[0] = true;
+                outFrameworkFlag.set(true);
+            }
+            if (outAttrName != null) {
+                outAttrName.set(arrayName);
             }
 
             return attributes;
@@ -756,7 +772,10 @@ public final class BridgeContext extends Activity {
             }
 
             if (outFrameworkFlag != null) {
-                outFrameworkFlag[0] = false;
+                outFrameworkFlag.set(false);
+            }
+            if (outAttrName != null) {
+                outAttrName.set(arrayName);
             }
 
             return attributes;
