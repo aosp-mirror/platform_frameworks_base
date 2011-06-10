@@ -22,8 +22,6 @@ import java.security.cert.X509Certificate;
 /**
  * The KeyChainAliasCallback is the callback for {@link
  * KeyChain#choosePrivateKeyAlias}.
- *
- * @hide to be unhidden as part of KeyChain API
  */
 public interface KeyChainAliasCallback {
 
