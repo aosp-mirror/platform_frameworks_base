@@ -327,15 +327,15 @@ public class ActionBarView extends AbsActionBarView {
             mActionMenuPresenter.setCallback(cb);
             mExpandedMenuPresenter = new ExpandedActionViewMenuPresenter();
         }
-        builder.addMenuPresenter(mActionMenuPresenter);
-        builder.addMenuPresenter(mExpandedMenuPresenter);
 
-        final ActionMenuView menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
+        ActionMenuView menuView;
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
-        menuView.setLayoutParams(layoutParams);
         if (!mSplitActionBar) {
-            addView(menuView);
+            builder.addMenuPresenter(mActionMenuPresenter);
+            builder.addMenuPresenter(mExpandedMenuPresenter);
+            menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
+            addView(menuView, layoutParams);
         } else {
             // Allow full screen width in split mode.
             mActionMenuPresenter.setWidthLimit(
@@ -344,9 +344,15 @@ public class ActionBarView extends AbsActionBarView {
             mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
             // Span the whole width
             layoutParams.width = LayoutParams.MATCH_PARENT;
+            builder.addMenuPresenter(mActionMenuPresenter);
+            builder.addMenuPresenter(mExpandedMenuPresenter);
+            menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
             if (mSplitView != null) {
-                mSplitView.addView(menuView);
-            } // We'll add this later if we missed it this time.
+                mSplitView.addView(menuView, layoutParams);
+            } else {
+                // We'll add this later if we missed it this time.
+                menuView.setLayoutParams(layoutParams);
+            }
         }
         mMenuView = menuView;
     }

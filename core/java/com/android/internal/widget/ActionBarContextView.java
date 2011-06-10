@@ -168,14 +168,14 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
 
         final MenuBuilder menu = (MenuBuilder) mode.getMenu();
         mActionMenuPresenter = new ActionMenuPresenter();
-        menu.addMenuPresenter(mActionMenuPresenter);
-        mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
+        mActionMenuPresenter.setReserveOverflow(true);
 
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
-        mMenuView.setLayoutParams(layoutParams);
         if (mSplitView == null) {
-            addView(mMenuView);
+            menu.addMenuPresenter(mActionMenuPresenter);
+            mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
+            addView(mMenuView, layoutParams);
         } else {
             // Allow full screen width in split mode.
             mActionMenuPresenter.setWidthLimit(
@@ -184,7 +184,10 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
             mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
             // Span the whole width
             layoutParams.width = LayoutParams.MATCH_PARENT;
-            mSplitView.addView(mMenuView);
+            layoutParams.height = mContentHeight;
+            menu.addMenuPresenter(mActionMenuPresenter);
+            mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
+            mSplitView.addView(mMenuView, layoutParams);
         }
 
         mAnimateInOnLayout = true;
