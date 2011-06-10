@@ -52,13 +52,7 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mRenderThread.finish();
-    }
-
-    @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture surface) {
+    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         mRenderThread = new RenderThread(surface);
         mRenderThread.start();
 
@@ -79,6 +73,16 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+    }
+
+    @Override
+    public void onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        mRenderThread.finish();
+        try {
+            mRenderThread.join();
+        } catch (InterruptedException e) {
+            Log.e(RenderThread.LOG_TAG, "Could not wait for render thread");
+        }
     }
 
     private static class RenderThread extends Thread {
@@ -108,26 +112,23 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
         public void run() {
             initGL();
 
-            float red = 0.0f;
+            float red = 1.0f;
             while (!mFinished) {
                 checkCurrent();
 
+                Log.d(LOG_TAG, "Rendering frame");
+
                 GLES20.glClearColor(red, 0.0f, 0.0f, 1.0f);
-                int error = GLES20.glGetError();
-                if (error != GLES20.GL_NO_ERROR) {
-                    Log.w(LOG_TAG, "GL error = 0x" + Integer.toHexString(error));
-                }
+                checkGlError();
 
                 GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-                error = GLES20.glGetError();
-                if (error != GLES20.GL_NO_ERROR) {
-                    Log.w(LOG_TAG, "GL error = 0x" + Integer.toHexString(error));
-                }
+                checkGlError();
 
                 if (!mEgl.eglSwapBuffers(mEglDisplay, mEglSurface)) {
                     throw new RuntimeException("Cannot swap buffers");
                 }
-                
+                checkEglError();
+
                 try {
                     Thread.sleep(20);
                 } catch (InterruptedException e) {
@@ -139,6 +140,20 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
             }
 
             finishGL();
+        }
+
+        private void checkEglError() {
+            int error = mEgl.eglGetError();
+            if (error != EGL10.EGL_SUCCESS) {
+                Log.w(LOG_TAG, "EGL error = 0x" + Integer.toHexString(error));
+            }
+        }
+
+        private void checkGlError() {
+            int error = GLES20.glGetError();
+            if (error != GLES20.GL_NO_ERROR) {
+                Log.w(LOG_TAG, "GL error = 0x" + Integer.toHexString(error));
+            }
         }
 
         private void finishGL() {

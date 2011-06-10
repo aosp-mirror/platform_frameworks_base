@@ -16,6 +16,7 @@
 
 package com.android.test.hwui;
 
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
@@ -25,6 +26,7 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 
 import java.io.IOException;
@@ -33,27 +35,44 @@ import java.io.IOException;
 public class TextureViewActivity extends Activity implements TextureView.SurfaceTextureListener {
     private Camera mCamera;
     private TextureView mTextureView;
+    private FrameLayout mContent;
+    private AnimatorSet mAnimatorSet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mContent = new FrameLayout(this);
+
         mTextureView = new TextureView(this);
         mTextureView.setSurfaceTextureListener(this);
 
-        setContentView(mTextureView, new FrameLayout.LayoutParams(500, 400, Gravity.CENTER));
+        Button button = new Button(this);
+        button.setText("Remove/Add");
+        button.setOnClickListener(new View.OnClickListener() {
+            private boolean mAdded = true;
+
+            @Override
+            public void onClick(View v) {
+                if (mAdded) {
+                    mAnimatorSet.cancel();
+                    mContent.removeView(mTextureView);
+                } else {
+                    mContent.addView(mTextureView);
+                }
+                mAdded = !mAdded;
+            }
+        });
+
+        mContent.addView(mTextureView, new FrameLayout.LayoutParams(500, 400, Gravity.CENTER));
+        mContent.addView(button, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM));
+        setContentView(mContent);
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        mCamera.stopPreview();
-        mCamera.release();
-    }
-
-    @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture surface) {
+    public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         mCamera = Camera.open();
 
         try {
@@ -66,27 +85,35 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
 
         mTextureView.setCameraDistance(5000);
 
-        ObjectAnimator animator = ObjectAnimator.ofFloat(mTextureView, "rotationY", 0.0f, 360.0f);
-        animator.setRepeatMode(ObjectAnimator.REVERSE);
-        animator.setRepeatCount(ObjectAnimator.INFINITE);
-        animator.setDuration(4000);
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        ObjectAnimator rotationY = ObjectAnimator.ofFloat(mTextureView, "rotationY", 0.0f, 360.0f);
+        rotationY.setRepeatMode(ObjectAnimator.REVERSE);
+        rotationY.setRepeatCount(ObjectAnimator.INFINITE);
+        rotationY.setDuration(4000);
+        rotationY.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 ((View) mTextureView.getParent()).invalidate();
             }
         });
-        animator.start();
 
-        animator = ObjectAnimator.ofFloat(mTextureView, "alpha", 1.0f, 0.0f);
-        animator.setRepeatMode(ObjectAnimator.REVERSE);
-        animator.setRepeatCount(ObjectAnimator.INFINITE);
-        animator.setDuration(4000);
-        animator.start();
+        ObjectAnimator alpha = ObjectAnimator.ofFloat(mTextureView, "alpha", 1.0f, 0.0f);
+        alpha.setRepeatMode(ObjectAnimator.REVERSE);
+        alpha.setRepeatCount(ObjectAnimator.INFINITE);
+        alpha.setDuration(4000);
+
+        mAnimatorSet = new AnimatorSet();
+        mAnimatorSet.play(alpha).with(rotationY);
+        mAnimatorSet.start();
     }
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
         // Ignored, the Camera does all the work for us
+    }
+
+    @Override
+    public void onSurfaceTextureDestroyed(SurfaceTexture surface) {
+        mCamera.stopPreview();
+        mCamera.release();
     }
 }
