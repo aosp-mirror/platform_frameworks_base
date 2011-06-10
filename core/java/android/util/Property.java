@@ -78,11 +78,11 @@ public abstract class Property<T, V> {
 
     /**
      * Sets the value on <code>object</code> which this property represents. If the method is unable
-     * to set the value on the target object, it will throw a {@link NoSuchPropertyException}
+     * to set the value on the target object it will throw an {@link UnsupportedOperationException}
      * exception.
      */
     public void set(T object, V value) {
-        throw new NoSuchPropertyException("Property is read-only; set() is not implemented");
+        throw new UnsupportedOperationException("Property " + getName() +" is read-only");
     }
 
     /**
