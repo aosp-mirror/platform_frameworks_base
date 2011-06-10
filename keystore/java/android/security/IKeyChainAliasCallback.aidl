@@ -15,21 +15,12 @@
  */
 package android.security;
 
-import android.content.Intent;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
-
 /**
- * The KeyChainAliasResponse is the callback for {@link
- * KeyChain#chooseAlias}.
+ * Used by the {@code KeyChainActivity} to return alias for {@link KeyStore#chooseAlias}.
  *
  * @hide
  */
-public interface KeyChainAliasResponse {
+interface IKeyChainAliasCallback {
 
-    /**
-     * Called with the alias of the certificate chosen by the user, or
-     * null if no value was chosen.
-     */
-    public void alias(String alias);
+    void alias(String alias);
 }

@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
@@ -47,8 +48,38 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * @hide
+ * The {@code KeyChain} class provides access to private keys and
+ * their corresponding certificate chains in credential storage.
+ *
+ * <p>Applications accessing the {@code KeyChain} normally go through
+ * these steps:
+ *
+ * <ol>
+ *
+ * <li>Receive a callback from an {@link javax.net.ssl.X509KeyManager
+ * X509KeyManager} that a private key is requested.
+ *
+ * <li>Call {@link #choosePrivateKeyAlias
+ * choosePrivateKeyAlias} to allow the user to select from a
+ * list of currently available private keys and corresponding
+ * certificate chains. The chosen alias will be returned by the
+ * callback {@link KeyChainAliasCallback#alias}, or null if no private
+ * key is available or the user cancels the request.
+ *
+ * <li>Call {@link #getPrivateKey} and {@link #getCertificateChain} to
+ * retrieve the credentials to return to the corresponding {@link
+ * javax.net.ssl.X509KeyManager} callbacks.
+ *
+ * </ol>
+ *
+ * <p>An application may remember the value of a selected alias to
+ * avoid prompting the user with {@link #choosePrivateKeyAlias
+ * choosePrivateKeyAlias} on subsequent connections. If the alias is
+ * no longer valid, null will be returned on lookups using that value
+ *
+ * @hide to be unhidden as part of KeyChain API
  */
+// TODO reference intent for credential installation when public
 public final class KeyChain {
 
     private static final String TAG = "KeyChain";
@@ -67,9 +98,58 @@ public final class KeyChain {
      * Launches an {@code Activity} for the user to select the alias
      * for a private key and certificate pair for authentication. The
      * selected alias or null will be returned via the
-     * IKeyChainAliasResponse callback.
+     * KeyChainAliasCallback callback.
+     *
+     * <p>{@code keyTypes} and {@code issuers} may be used to
+     * highlight suggested choices to the user, although to cope with
+     * sometimes erroneous values provided by servers, the user may be
+     * able to override these suggestions.
+     *
+     * <p>{@code host} and {@code port} may be used to give the user
+     * more context about the server requesting the credentials.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#USE_CREDENTIALS}.
+     *
+     * @param activity The {@link Activity} context to use for
+     *     launching the new sub-Activity to prompt the user to select
+     *     a private key; used only to call startActivity(); must not
+     *     be null.
+     * @param response Callback to invoke when the request completes;
+     *     must not be null
+     * @param keyTypes The acceptable types of asymmetric keys such as
+     *     "RSA" or "DSA", or a null array.
+     * @param issuers The acceptable certificate issuers for the
+     *     certificate matching the private key, or null.
+     * @param host The host name of the server requesting the
+     *     certificate, or null if unavailable.
+     * @param port The port number of the server requesting the
+     *     certificate, or -1 if unavailable.
      */
-    public static void choosePrivateKeyAlias(Activity activity, KeyChainAliasResponse response) {
+    public static void choosePrivateKeyAlias(Activity activity, KeyChainAliasCallback response,
+                                             String[] keyTypes, Principal[] issuers,
+                                             String host, int port) {
+        /*
+         * TODO currently keyTypes, issuers, host, and port are
+         * unused. They are meant to follow the semantics and purpose
+         * of X509KeyManager method arguments.
+         *
+         * keyTypes would allow the list to be filtered and typically
+         * will be set correctly by the server. In practice today,
+         * most all users will want only RSA, rarely DSA, and usually
+         * only a small number of certs will be available.
+         *
+         * issuers is typically not useful. Some servers historically
+         * will send the entire list of public CAs known to the
+         * server. Others will send none. If this is used, if there
+         * are no matches after applying the constraint, it should be
+         * ignored.
+         *
+         * host and port may be shown to the user if available, but it
+         * should be clear that they are not validated values, perhaps
+         * shown along with requesting application identity to clarify
+         * the source of the request.
+         */
         if (activity == null) {
             throw new NullPointerException("activity == null");
         }
@@ -81,10 +161,10 @@ public final class KeyChain {
         activity.startActivity(intent);
     }
 
-    private static class AliasResponse extends IKeyChainAliasResponse.Stub {
+    private static class AliasResponse extends IKeyChainAliasCallback.Stub {
         private final Activity activity;
-        private final KeyChainAliasResponse keyChainAliasResponse;
-        private AliasResponse(Activity activity, KeyChainAliasResponse keyChainAliasResponse) {
+        private final KeyChainAliasCallback keyChainAliasResponse;
+        private AliasResponse(Activity activity, KeyChainAliasCallback keyChainAliasResponse) {
             this.activity = activity;
             this.keyChainAliasResponse = keyChainAliasResponse;
         }
@@ -105,9 +185,9 @@ public final class KeyChain {
     }
 
     private static class AliasAccountManagerCallback implements AccountManagerCallback<Bundle> {
-        private final KeyChainAliasResponse keyChainAliasResponse;
+        private final KeyChainAliasCallback keyChainAliasResponse;
         private final String alias;
-        private AliasAccountManagerCallback(KeyChainAliasResponse keyChainAliasResponse,
+        private AliasAccountManagerCallback(KeyChainAliasCallback keyChainAliasResponse,
                                             String alias) {
             this.keyChainAliasResponse = keyChainAliasResponse;
             this.alias = alias;
@@ -138,9 +218,16 @@ public final class KeyChain {
     /**
      * Returns the {@code PrivateKey} for the requested alias, or null
      * if no there is no result.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#USE_CREDENTIALS}.
+     *
+     * @param alias The alias of the desired private key, typically
+     * returned via {@link KeyChainAliasCallback#alias}.
+     * @throws KeyChainException if the alias was valid but there was some problem accessing it.
      */
     public static PrivateKey getPrivateKey(Context context, String alias)
-            throws InterruptedException, RemoteException {
+            throws KeyChainException, InterruptedException {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
@@ -153,6 +240,11 @@ public final class KeyChain {
             IKeyChainService keyChainService = keyChainConnection.getService();
             byte[] privateKeyBytes = keyChainService.getPrivateKey(alias, authToken);
             return toPrivateKey(privateKeyBytes);
+        } catch (RemoteException e) {
+            throw new KeyChainException(e);
+        } catch (RuntimeException e) {
+            // only certain RuntimeExceptions can be propagated across the IKeyChainService call
+            throw new KeyChainException(e);
         } finally {
             keyChainConnection.close();
         }
@@ -161,9 +253,16 @@ public final class KeyChain {
     /**
      * Returns the {@code X509Certificate} chain for the requested
      * alias, or null if no there is no result.
+     *
+     * <p>This method requires the caller to hold the permission
+     * {@link android.Manifest.permission#USE_CREDENTIALS}.
+     *
+     * @param alias The alias of the desired certificate chain, typically
+     * returned via {@link KeyChainAliasCallback#alias}.
+     * @throws KeyChainException if the alias was valid but there was some problem accessing it.
      */
     public static X509Certificate[] getCertificateChain(Context context, String alias)
-            throws InterruptedException, RemoteException {
+            throws KeyChainException, InterruptedException {
         if (alias == null) {
             throw new NullPointerException("alias == null");
         }
@@ -176,6 +275,11 @@ public final class KeyChain {
             IKeyChainService keyChainService = keyChainConnection.getService();
             byte[] certificateBytes = keyChainService.getCertificate(alias, authToken);
             return new X509Certificate[] { toCertificate(certificateBytes) };
+        } catch (RemoteException e) {
+            throw new KeyChainException(e);
+        } catch (RuntimeException e) {
+            // only certain RuntimeExceptions can be propagated across the IKeyChainService call
+            throw new KeyChainException(e);
         } finally {
             keyChainConnection.close();
         }
