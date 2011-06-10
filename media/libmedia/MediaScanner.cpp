@@ -89,7 +89,7 @@ status_t MediaScanner::doProcessDirectory(
     if (pathRemaining >= 8 /* strlen(".nomedia") */ ) {
         strcpy(fileSpot, ".nomedia");
         if (access(path, F_OK) == 0) {
-            LOGD("found .nomedia, setting noMedia flag\n");
+            LOGV("found .nomedia, setting noMedia flag\n");
             noMedia = true;
         }
 
