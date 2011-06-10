@@ -318,10 +318,12 @@ public class HTML5VideoFullScreen extends HTML5VideoView
 
     @Override
     protected void switchProgressView(boolean playerBuffering) {
-        if (playerBuffering) {
-            mProgressView.setVisibility(View.VISIBLE);
-        } else {
-            mProgressView.setVisibility(View.GONE);
+        if (mProgressView != null) {
+            if (playerBuffering) {
+                mProgressView.setVisibility(View.VISIBLE);
+            } else {
+                mProgressView.setVisibility(View.GONE);
+            }
         }
         return;
     }
