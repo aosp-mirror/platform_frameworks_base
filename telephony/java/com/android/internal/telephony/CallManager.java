@@ -1803,33 +1803,33 @@ public final class CallManager {
         Call call;
         StringBuilder b = new StringBuilder();
 
-        b.append("########### Dump CallManager ############");
-        b.append("\nCallManager state = " + getState());
+        b.append("CallManager {");
+        b.append("\nstate = " + getState());
         call = getActiveFgCall();
-        b.append("\n   - Foreground: " + getActiveFgCallState());
+        b.append("\n- Foreground: " + getActiveFgCallState());
         b.append(" from " + call.getPhone());
-        b.append("\n     Conn: ").append(getFgCallConnections());
+        b.append("\n  Conn: ").append(getFgCallConnections());
         call = getFirstActiveBgCall();
-        b.append("\n   - Background: " + call.getState());
+        b.append("\n- Background: " + call.getState());
         b.append(" from " + call.getPhone());
-        b.append("\n     Conn: ").append(getBgCallConnections());
+        b.append("\n  Conn: ").append(getBgCallConnections());
         call = getFirstActiveRingingCall();
-        b.append("\n   - Ringing: " +call.getState());
+        b.append("\n- Ringing: " +call.getState());
         b.append(" from " + call.getPhone());
 
         for (Phone phone : getAllPhones()) {
             if (phone != null) {
-                b.append("\n Phone: " + phone + ", name = " + phone.getPhoneName()
+                b.append("\nPhone: " + phone + ", name = " + phone.getPhoneName()
                         + ", state = " + phone.getState());
                 call = phone.getForegroundCall();
-                b.append("\n   - Foreground: ").append(call);
+                b.append("\n- Foreground: ").append(call);
                 call = phone.getBackgroundCall();
                 b.append(" Background: ").append(call);
                 call = phone.getRingingCall();
                 b.append(" Ringing: ").append(call);
             }
         }
-        b.append("\n########## End Dump CallManager ##########");
+        b.append("\n}");
         return b.toString();
     }
 }
