@@ -1228,6 +1228,45 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by an application that is administering the device to disable all cameras
+     * on the device.  After setting this, no applications will be able to access any cameras
+     * on the device.
+     *
+     * <p>The calling device admin must have requested
+     * {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} to be able to call
+     * this method; if it has not, a security exception will be thrown.
+     *
+     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param disabled Whether or not the camera should be disabled.
+     */
+    public void setCameraDisabled(ComponentName admin, boolean disabled) {
+        if (mService != null) {
+            try {
+                mService.setCameraDisabled(admin, disabled);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+    }
+
+    /**
+     * Determine whether or not the device's cameras have been disabled either by the current
+     * admin, if specified, or all admins.
+     * @param admin The name of the admin component to check, or null to check if any admins
+     * have disabled the camera
+     */
+    public boolean getCameraDisabled(ComponentName admin) {
+        if (mService != null) {
+            try {
+                return mService.getCameraDisabled(admin);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Failed talking with device policy service", e);
+            }
+        }
+        return false;
+    }
+
+    /**
      * @hide
      */
     public void setActiveAdmin(ComponentName policyReceiver, boolean refreshing) {

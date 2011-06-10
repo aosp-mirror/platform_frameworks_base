@@ -79,6 +79,9 @@ interface IDevicePolicyManager {
     boolean getStorageEncryption(in ComponentName who);
     int getStorageEncryptionStatus();
 
+    void setCameraDisabled(in ComponentName who, boolean disabled);
+    boolean getCameraDisabled(in ComponentName who);
+
     void setActiveAdmin(in ComponentName policyReceiver, boolean refreshing);
     boolean isAdminActive(in ComponentName policyReceiver);
     List<ComponentName> getActiveAdmins();

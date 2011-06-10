@@ -172,6 +172,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         long passwordExpirationDate = DEF_PASSWORD_EXPIRATION_DATE;
 
         boolean encryptionRequested = false;
+        boolean disableCamera = false;
 
         // TODO: review implementation decisions with frameworks team
         boolean specifiesGlobalProxy = false;
@@ -274,6 +275,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 out.attribute(null, "value", Boolean.toString(encryptionRequested));
                 out.endTag(null, "encryption-requested");
             }
+            if (disableCamera) {
+                out.startTag(null, "disable-camera");
+                out.attribute(null, "value", Boolean.toString(disableCamera));
+                out.endTag(null, "disable-camera");
+            }
         }
 
         void readFromXml(XmlPullParser parser)
@@ -339,6 +345,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 } else if ("encryption-requested".equals(tag)) {
                     encryptionRequested = Boolean.parseBoolean(
                             parser.getAttributeValue(null, "value"));
+                } else if ("disable-camera".equals(tag)) {
+                    disableCamera = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, "value"));
                 } else {
                     Slog.w(TAG, "Unknown admin tag: " + tag);
                 }
@@ -393,6 +402,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
             pw.print(prefix); pw.print("encryptionRequested=");
                     pw.println(encryptionRequested);
+            pw.print(prefix); pw.print("disableCamera=");
+                    pw.println(disableCamera);
         }
     }
 
@@ -424,6 +435,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 if (removed) {
                     validatePasswordOwnerLocked();
+                    syncDeviceCapabilitiesLocked();
                     saveSettingsLocked();
                 }
             }
@@ -578,6 +590,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                 mAdminList.remove(admin);
                                 mAdminMap.remove(adminReceiver);
                                 validatePasswordOwnerLocked();
+                                syncDeviceCapabilitiesLocked();
                                 if (doProxyCleanup) {
                                     resetGlobalProxy();
                                 }
@@ -801,6 +814,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         validatePasswordOwnerLocked();
+        syncDeviceCapabilitiesLocked();
 
         long timeMs = getMaximumTimeToLock(null);
         if (timeMs <= 0) {
@@ -840,6 +854,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Slog.w(TAG, "Previous password owner " + mPasswordOwner
                         + " no longer active; disabling");
                 mPasswordOwner = -1;
+            }
+        }
+    }
+
+    /**
+     * Pushes down policy information to the system for any policies related to general device
+     * capabilities that need to be enforced by lower level services (e.g. Camera services).
+     */
+    void syncDeviceCapabilitiesLocked() {
+        // Ensure the status of the camera is synced down to the system. Interested native services
+        // should monitor this value and act accordingly.
+        boolean systemState = SystemProperties.getBoolean(SYSTEM_PROP_DISABLE_CAMERA, false);
+        boolean cameraDisabled = getCameraDisabled(null);
+        if (cameraDisabled != systemState) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                String value = cameraDisabled ? "1" : "0";
+                Slog.v(TAG, "Change in camera state ["
+                        + SYSTEM_PROP_DISABLE_CAMERA + "] = " + value);
+                SystemProperties.set(SYSTEM_PROP_DISABLE_CAMERA, value);
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
@@ -1980,6 +2016,53 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * Hook to low-levels:  If needed, record the new admin setting for encryption.
      */
     private void setEncryptionRequested(boolean encrypt) {
+    }
+
+    /**
+     * The system property used to share the state of the camera. The native camera service
+     * is expected to read this property and act accordingly.
+     */
+    public static final String SYSTEM_PROP_DISABLE_CAMERA = "sys.secpolicy.camera.disabled";
+
+    /**
+     * Disables all device cameras according to the specified admin.
+     */
+    public void setCameraDisabled(ComponentName who, boolean disabled) {
+        synchronized (this) {
+            if (who == null) {
+                throw new NullPointerException("ComponentName is null");
+            }
+            ActiveAdmin ap = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_DISABLE_CAMERA);
+            if (ap.disableCamera != disabled) {
+                ap.disableCamera = disabled;
+                saveSettingsLocked();
+            }
+            syncDeviceCapabilitiesLocked();
+        }
+    }
+
+    /**
+     * Gets whether or not all device cameras are disabled for a given admin, or disabled for any
+     * active admins.
+     */
+    public boolean getCameraDisabled(ComponentName who) {
+        synchronized (this) {
+            if (who != null) {
+                ActiveAdmin admin = getActiveAdminUncheckedLocked(who);
+                return (admin != null) ? admin.disableCamera : false;
+            }
+
+            // Determine whether or not the device camera is disabled for any active admins.
+            final int N = mAdminList.size();
+            for (int i = 0; i < N; i++) {
+                ActiveAdmin admin = mAdminList.get(i);
+                if (admin.disableCamera) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
     @Override
