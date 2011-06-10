@@ -35,6 +35,7 @@ namespace android {
 
 static const char* const OutOfResourcesException =
     "android/graphics/SurfaceTexture$OutOfResourcesException";
+const char* const kSurfaceTextureClassPathName = "android/graphics/SurfaceTexture";
 
 struct fields_t {
     jfieldID  surfaceTexture;
@@ -72,6 +73,12 @@ sp<ANativeWindow> android_SurfaceTexture_getNativeWindow(
     sp<SurfaceTextureClient> surfaceTextureClient(surfaceTexture != NULL ?
             new SurfaceTextureClient(surfaceTexture) : NULL);
     return surfaceTextureClient;
+}
+
+bool android_SurfaceTexture_isInstanceOf(JNIEnv* env, jobject thiz)
+{
+    jclass surfaceTextureClass = env->FindClass(kSurfaceTextureClassPathName);
+    return env->IsInstanceOf(thiz, surfaceTextureClass);
 }
 
 // ----------------------------------------------------------------------------
@@ -123,7 +130,6 @@ static void SurfaceTexture_classInit(JNIEnv* env, jclass clazz)
     if (fields.postEvent == NULL) {
         LOGE("can't find android/graphics/SurfaceTexture.postEventFromNative");
     }
-
 }
 
 static void SurfaceTexture_init(JNIEnv* env, jobject thiz, jint texName,
@@ -156,6 +162,13 @@ static void SurfaceTexture_finalize(JNIEnv* env, jobject thiz)
     SurfaceTexture_setSurfaceTexture(env, thiz, 0);
 }
 
+static void SurfaceTexture_setDefaultBufferSize(
+        JNIEnv* env, jobject thiz, jint width, jint height)
+{
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
+    surfaceTexture->setDefaultBufferSize(width, height);
+}
+
 static void SurfaceTexture_updateTexImage(JNIEnv* env, jobject thiz)
 {
     sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
@@ -179,12 +192,11 @@ static jlong SurfaceTexture_getTimestamp(JNIEnv* env, jobject thiz)
 
 // ----------------------------------------------------------------------------
 
-const char* const kSurfaceTextureClassPathName = "android/graphics/SurfaceTexture";
-
 static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeClassInit",          "()V",   (void*)SurfaceTexture_classInit },
     {"nativeInit",               "(ILjava/lang/Object;)V", (void*)SurfaceTexture_init },
     {"nativeFinalize",           "()V",   (void*)SurfaceTexture_finalize },
+    {"nativeSetDefaultBufferSize", "(II)V", (void*)SurfaceTexture_setDefaultBufferSize },
     {"nativeUpdateTexImage",     "()V",   (void*)SurfaceTexture_updateTexImage },
     {"nativeGetTransformMatrix", "([F)V", (void*)SurfaceTexture_getTransformMatrix },
     {"nativeGetTimestamp",       "()J",   (void*)SurfaceTexture_getTimestamp }
