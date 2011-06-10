@@ -337,9 +337,11 @@ public class WindowManagerImpl implements WindowManager {
             return view;
         }
 
-        InputMethodManager imm = InputMethodManager.getInstance(view.getContext());
-        if (imm != null) {
-            imm.windowDismissed(mViews[index].getWindowToken());
+        if (view != null) {
+            InputMethodManager imm = InputMethodManager.getInstance(view.getContext());
+            if (imm != null) {
+                imm.windowDismissed(mViews[index].getWindowToken());
+            }
         }
         root.die(false);
         finishRemoveViewLocked(view, index);
@@ -363,9 +365,11 @@ public class WindowManagerImpl implements WindowManager {
         removeItem(tmpParams, mParams, index);
         mParams = tmpParams;
 
-        view.assignParent(null);
-        // func doesn't allow null...  does it matter if we clear them?
-        //view.setLayoutParams(null);
+        if (view != null) {
+            view.assignParent(null);
+            // func doesn't allow null...  does it matter if we clear them?
+            //view.setLayoutParams(null);
+        }
     }
 
     public void closeAll(IBinder token, String who, String what) {
