@@ -1651,53 +1651,53 @@
 
 
 <!-- ===============================================================
-     Resources added in version 13 of the platform (Honeycomb MR 2)
+     Resources added in version 13 of the platform (Honeycomb MR 2 / 3.2)
      =============================================================== -->
   <eat-comment />
   <public type="attr" name="requiresSmallestWidthDp" id="0x01010364" />
-  <public type="attr" name="compatibleWidthLimitDp" />
-  <public type="attr" name="largestWidthLimitDp" />
+  <public type="attr" name="compatibleWidthLimitDp" id="0x01010365" />
+  <public type="attr" name="largestWidthLimitDp" id="0x01010366" />
 
-  <public type="style" name="Theme.Holo.Light.NoActionBar" />
-  <public type="style" name="Theme.Holo.Light.NoActionBar.Fullscreen" />
+  <public type="style" name="Theme.Holo.Light.NoActionBar" id="0x010300f0" />
+  <public type="style" name="Theme.Holo.Light.NoActionBar.Fullscreen" id="0x010300f1" />
 
-  <public type="style" name="Widget.ActionBar.TabView" />
-  <public type="style" name="Widget.ActionBar.TabText" />
-  <public type="style" name="Widget.ActionBar.TabBar" />
-  <public type="style" name="Widget.Holo.ActionBar.TabView" />
-  <public type="style" name="Widget.Holo.ActionBar.TabText" />
-  <public type="style" name="Widget.Holo.ActionBar.TabBar" />
-  <public type="style" name="Widget.Holo.Light.ActionBar.TabView" />
-  <public type="style" name="Widget.Holo.Light.ActionBar.TabText" />
-  <public type="style" name="Widget.Holo.Light.ActionBar.TabBar" />
-  <public type="style" name="TextAppearance.Holo" />
-  <public type="style" name="TextAppearance.Holo.Inverse" />
-  <public type="style" name="TextAppearance.Holo.Large" />
-  <public type="style" name="TextAppearance.Holo.Large.Inverse" />
-  <public type="style" name="TextAppearance.Holo.Medium" />
-  <public type="style" name="TextAppearance.Holo.Medium.Inverse" />
-  <public type="style" name="TextAppearance.Holo.Small" />
-  <public type="style" name="TextAppearance.Holo.Small.Inverse" />
-  <public type="style" name="TextAppearance.Holo.SearchResult.Title" />
-  <public type="style" name="TextAppearance.Holo.SearchResult.Subtitle" />
-  <public type="style" name="TextAppearance.Holo.Widget" />
-  <public type="style" name="TextAppearance.Holo.Widget.Button" />
-  <public type="style" name="TextAppearance.Holo.Widget.IconMenu.Item" />
-  <public type="style" name="TextAppearance.Holo.Widget.TabWidget" />
-  <public type="style" name="TextAppearance.Holo.Widget.TextView" />
-  <public type="style" name="TextAppearance.Holo.Widget.TextView.PopupMenu" />
-  <public type="style" name="TextAppearance.Holo.Widget.DropDownHint" />
-  <public type="style" name="TextAppearance.Holo.Widget.DropDownItem" />
-  <public type="style" name="TextAppearance.Holo.Widget.TextView.SpinnerItem" />
-  <public type="style" name="TextAppearance.Holo.Widget.EditText" />
-  <public type="style" name="TextAppearance.Holo.Widget.PopupMenu" />
-  <public type="style" name="TextAppearance.Holo.Widget.PopupMenu.Large" />
-  <public type="style" name="TextAppearance.Holo.Widget.PopupMenu.Small" />
-  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Title" />
-  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Subtitle" />
-  <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Title" />
-  <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Subtitle" />
-  <public type="style" name="TextAppearance.Holo.WindowTitle" />
-  <public type="style" name="TextAppearance.Holo.DialogWindowTitle" />
+  <public type="style" name="Widget.ActionBar.TabView" id="0x010300f2" />
+  <public type="style" name="Widget.ActionBar.TabText" id="0x010300f3" />
+  <public type="style" name="Widget.ActionBar.TabBar" id="0x010300f4" />
+  <public type="style" name="Widget.Holo.ActionBar.TabView" id="0x010300f5" />
+  <public type="style" name="Widget.Holo.ActionBar.TabText" id="0x010300f6" />
+  <public type="style" name="Widget.Holo.ActionBar.TabBar" id="0x010300f7" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.TabView" id="0x010300f8" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.TabText" id="0x010300f9" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.TabBar" id="0x010300fa" />
+  <public type="style" name="TextAppearance.Holo" id="0x010300fb" />
+  <public type="style" name="TextAppearance.Holo.Inverse" id="0x010300fc" />
+  <public type="style" name="TextAppearance.Holo.Large" id="0x010300fd" />
+  <public type="style" name="TextAppearance.Holo.Large.Inverse" id="0x010300fe" />
+  <public type="style" name="TextAppearance.Holo.Medium" id="0x010300ff" />
+  <public type="style" name="TextAppearance.Holo.Medium.Inverse" id="0x01030100" />
+  <public type="style" name="TextAppearance.Holo.Small" id="0x01030101" />
+  <public type="style" name="TextAppearance.Holo.Small.Inverse" id="0x01030102" />
+  <public type="style" name="TextAppearance.Holo.SearchResult.Title" id="0x01030103" />
+  <public type="style" name="TextAppearance.Holo.SearchResult.Subtitle" id="0x01030104" />
+  <public type="style" name="TextAppearance.Holo.Widget" id="0x01030105" />
+  <public type="style" name="TextAppearance.Holo.Widget.Button" id="0x01030106" />
+  <public type="style" name="TextAppearance.Holo.Widget.IconMenu.Item" id="0x01030107" />
+  <public type="style" name="TextAppearance.Holo.Widget.TabWidget" id="0x01030108" />
+  <public type="style" name="TextAppearance.Holo.Widget.TextView" id="0x01030109" />
+  <public type="style" name="TextAppearance.Holo.Widget.TextView.PopupMenu" id="0x0103010a" />
+  <public type="style" name="TextAppearance.Holo.Widget.DropDownHint" id="0x0103010b" />
+  <public type="style" name="TextAppearance.Holo.Widget.DropDownItem" id="0x0103010c" />
+  <public type="style" name="TextAppearance.Holo.Widget.TextView.SpinnerItem" id="0x0103010d" />
+  <public type="style" name="TextAppearance.Holo.Widget.EditText" id="0x0103010e" />
+  <public type="style" name="TextAppearance.Holo.Widget.PopupMenu" id="0x0103010f" />
+  <public type="style" name="TextAppearance.Holo.Widget.PopupMenu.Large" id="0x01030110" />
+  <public type="style" name="TextAppearance.Holo.Widget.PopupMenu.Small" id="0x01030111" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Title" id="0x01030112" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Subtitle" id="0x01030113" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Title" id="0x01030114" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Subtitle" id="0x01030115" />
+  <public type="style" name="TextAppearance.Holo.WindowTitle" id="0x01030116" />
+  <public type="style" name="TextAppearance.Holo.DialogWindowTitle" id="0x01030117" />
 
 </resources>
