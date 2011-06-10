@@ -368,7 +368,7 @@ public class ActionBarImpl extends ActionBar {
             mode.invalidate();
             mContextView.initForMode(mode);
             animateToMode(true);
-            if (mSplitView != null) {
+            if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
                 // TODO animate this
                 mSplitView.setVisibility(View.VISIBLE);
             }
@@ -526,7 +526,7 @@ public class ActionBarImpl extends ActionBar {
                 mContainerView.setTranslationY(-mContainerView.getHeight());
                 b.with(ObjectAnimator.ofFloat(mContainerView, "translationY", 0));
             }
-            if (mSplitView != null) {
+            if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
                 mSplitView.setAlpha(0);
                 b.with(ObjectAnimator.ofFloat(mSplitView, "alpha", 1));
             }
@@ -560,7 +560,7 @@ public class ActionBarImpl extends ActionBar {
                 b.with(ObjectAnimator.ofFloat(mContainerView, "translationY",
                         -mContainerView.getHeight()));
             }
-            if (mSplitView != null) {
+            if (mSplitView != null && mSplitView.getVisibility() == View.VISIBLE) {
                 mSplitView.setAlpha(1);
                 b.with(ObjectAnimator.ofFloat(mSplitView, "alpha", 0));
             }

@@ -39,10 +39,13 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
 
     private View mOverflowButton;
     private boolean mReserveOverflow;
+    private boolean mReserveOverflowSet;
     private int mWidthLimit;
     private int mActionItemWidthLimit;
     private int mMaxItems;
+    private boolean mMaxItemsSet;
     private boolean mStrictWidthLimit;
+    private boolean mWidthLimitSet;
 
     // Group IDs that have been added as actions - used temporarily, allocated here for reuse.
     private final SparseBooleanArray mActionButtonGroups = new SparseBooleanArray();
@@ -64,14 +67,21 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         super.initForMenu(context, menu);
 
         final Resources res = context.getResources();
-        final int screen = res.getConfiguration().screenLayout;
-        // TODO Use the no-buttons specifier instead here
-        mReserveOverflow = (screen & Configuration.SCREENLAYOUT_SIZE_MASK) ==
-                Configuration.SCREENLAYOUT_SIZE_XLARGE;
-        mWidthLimit = res.getDisplayMetrics().widthPixels / 2;
+
+        if (!mReserveOverflowSet) {
+            // TODO Use the no-buttons specifier instead here
+            mReserveOverflow = res.getConfiguration()
+                    .isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_LARGE);
+        }
+
+        if (!mWidthLimitSet) {
+            mWidthLimit = res.getDisplayMetrics().widthPixels / 2;
+        }
 
         // Measure for initial configuration
-        mMaxItems = res.getInteger(com.android.internal.R.integer.max_action_buttons);
+        if (!mMaxItemsSet) {
+            mMaxItems = res.getInteger(com.android.internal.R.integer.max_action_buttons);
+        }
 
         int width = mWidthLimit;
         if (mReserveOverflow) {
@@ -92,15 +102,19 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
     }
 
     public void setWidthLimit(int width, boolean strict) {
-        if (mReserveOverflow) {
-            width -= mOverflowButton.getMeasuredWidth();
-        }
-        mActionItemWidthLimit = width;
+        mWidthLimit = width;
         mStrictWidthLimit = strict;
+        mWidthLimitSet = true;
+    }
+
+    public void setReserveOverflow(boolean reserveOverflow) {
+        mReserveOverflow = reserveOverflow;
+        mReserveOverflowSet = true;
     }
 
     public void setItemLimit(int itemCount) {
         mMaxItems = itemCount;
+        mMaxItemsSet = true;
     }
 
     @Override
