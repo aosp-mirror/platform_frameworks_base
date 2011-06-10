@@ -1121,6 +1121,7 @@
         <item name="android:paddingLeft">16dip</item>
         <item name="android:paddingRight">16dip</item>
         <item name="android:minWidth">64dip</item>
+        <item name="android:minHeight">?android:attr/actionBarSize</item>
     </style>
 
     <style name="Widget.ActionButton.Overflow">
