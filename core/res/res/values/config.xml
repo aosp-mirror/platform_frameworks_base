@@ -627,4 +627,7 @@
          Example 2: devices sold in India should include tables 4 through 13
          to enable use of the new Release 9 tables for Indic languages. -->
     <integer-array name="config_sms_enabled_locking_shift_tables"></integer-array>
+
+    <!-- Set to true if the RSSI should always display CDMA signal strength even on EVDO -->
+    <bool name="config_alwaysUseCdmaRssi">false</bool>
 </resources>
