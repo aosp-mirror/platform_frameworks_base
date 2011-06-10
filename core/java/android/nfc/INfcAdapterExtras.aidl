@@ -29,6 +29,4 @@ interface INfcAdapterExtras {
     Bundle transceive(in byte[] data_in);
     int getCardEmulationRoute();
     void setCardEmulationRoute(int route);
-    void registerTearDownApdus(String packageName, in ApduList apdu);
-    void unregisterTearDownApdus(String packageName);
 }
