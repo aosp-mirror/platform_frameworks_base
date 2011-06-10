@@ -76,6 +76,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -8665,7 +8666,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
     /**
      * Resolving the layout direction. LTR is set initially.
-     * We are supposing here that the parent directionality will be resolved before its children
+     * We are supposing here that the parent directionality will be resolved before its children.
      */
     private void resolveLayoutDirection() {
         mPrivateFlags2 &= ~RESOLVED_LAYOUT_RTL;
@@ -8680,6 +8681,34 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             case LAYOUT_DIRECTION_RTL:
                 mPrivateFlags2 |= RESOLVED_LAYOUT_RTL;
                 break;
+            case LAYOUT_DIRECTION_LOCALE:
+                if(isLayoutDirectionRtl(Locale.getDefault())) {
+                    mPrivateFlags2 |= RESOLVED_LAYOUT_RTL;
+                }
+                break;
+            default:
+                // Nothing to do, LTR by default
+        }
+    }
+
+    /**
+     * Check if a Locale is corresponding to a RTL script.
+     *
+     * @param locale Locale to check
+     * @return true if a Locale is corresponding to a RTL script.
+     */
+    private static boolean isLayoutDirectionRtl(Locale locale) {
+        if (locale == null || locale.equals(Locale.ROOT)) return false;
+        // Be careful: this code will need to be changed when vertical scripts will be supported
+        // OR if ICU4C is updated to have the "likelySubtags" file
+        switch(Character.getDirectionality(locale.getDisplayName(locale).charAt(0))) {
+            case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
+                return false;
+            case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
+            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
+                return true;
+            default:
+                return false;
         }
     }
 
