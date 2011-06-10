@@ -30,6 +30,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.graphics.Bitmap;
+import android.graphics.ParcelSurfaceTexture;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 
@@ -509,7 +510,7 @@ public class MediaPlayer
     private int mListenerContext; // accessed by native methods
     private Surface mSurface; // accessed by native methods
     private SurfaceHolder  mSurfaceHolder;
-    private SurfaceTexture mSurfaceTexture; // accessed by native methods
+    private ParcelSurfaceTexture mParcelSurfaceTexture; // accessed by native methods
     private EventHandler mEventHandler;
     private PowerManager.WakeLock mWakeLock = null;
     private boolean mScreenOnWhilePlaying;
@@ -541,7 +542,7 @@ public class MediaPlayer
 
     /*
      * Update the MediaPlayer ISurface and ISurfaceTexture.
-     * Call after updating mSurface and/or mSurfaceTexture.
+     * Call after updating mSurface and/or mParcelSurfaceTexture.
      */
     private native void _setVideoSurfaceOrSurfaceTexture();
 
@@ -607,7 +608,7 @@ public class MediaPlayer
         } else {
             mSurface = null;
         }
-        mSurfaceTexture = null;
+        mParcelSurfaceTexture = null;
         _setVideoSurfaceOrSurfaceTexture();
         updateSurfaceScreenOn();
     }
@@ -630,12 +631,32 @@ public class MediaPlayer
      * program.
      */
     public void setTexture(SurfaceTexture st) {
-        if (mScreenOnWhilePlaying && st != null && mSurfaceTexture == null) {
+        ParcelSurfaceTexture pst = null;
+        if (st != null) {
+            pst = ParcelSurfaceTexture.fromSurfaceTexture(st);
+        }
+        setParcelSurfaceTexture(pst);
+    }
+
+    /**
+     * Sets the {@link ParcelSurfaceTexture} to be used as the sink for the video portion of
+     * the media. This is similar to {@link #setTexture(SurfaceTexture)}, but supports using
+     * a {@link ParcelSurfaceTexture} to transport the texture to be used via Binder. Setting
+     * a parceled surface texture will un-set any surface or surface texture that was previously
+     * set. See {@link #setTexture(SurfaceTexture)} for more details.
+     *
+     * @param pst The {@link ParcelSurfaceTexture} to be used as the sink for
+     * the video portion of the media.
+     *
+     * @hide Pending review by API council.
+     */
+    public void setParcelSurfaceTexture(ParcelSurfaceTexture pst) {
+        if (mScreenOnWhilePlaying && pst != null && mParcelSurfaceTexture == null) {
             Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective for SurfaceTexture");
         }
         mSurfaceHolder = null;
         mSurface = null;
-        mSurfaceTexture = st;
+        mParcelSurfaceTexture = pst;
         _setVideoSurfaceOrSurfaceTexture();
         updateSurfaceScreenOn();
     }
@@ -962,7 +983,7 @@ public class MediaPlayer
      */
     public void setScreenOnWhilePlaying(boolean screenOn) {
         if (mScreenOnWhilePlaying != screenOn) {
-            if (screenOn && mSurfaceTexture != null) {
+            if (screenOn && mParcelSurfaceTexture != null) {
                 Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective for SurfaceTexture");
             }
             mScreenOnWhilePlaying = screenOn;

@@ -19,6 +19,7 @@
 #include <gui/SurfaceTextureClient.h>
 
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_graphics_SurfaceTexture.h>
 
 #include <utils/Log.h>
 
@@ -27,7 +28,6 @@
 #include "android_util_Binder.h"
 #include "jni.h"
 #include "JNIHelp.h"
-#include "SurfaceTexture.h"
 
 // ----------------------------------------------------------------------------
 
@@ -59,7 +59,7 @@ static void ParcelSurfaceTexture_setISurfaceTexture(
     env->SetIntField(thiz, fields.iSurfaceTexture, (int)iSurfaceTexture.get());
 }
 
-static sp<ISurfaceTexture> ParcelSurfaceTexture_getISurfaceTexture(
+sp<ISurfaceTexture> ParcelSurfaceTexture_getISurfaceTexture(
         JNIEnv* env, jobject thiz)
 {
     sp<ISurfaceTexture> iSurfaceTexture(
