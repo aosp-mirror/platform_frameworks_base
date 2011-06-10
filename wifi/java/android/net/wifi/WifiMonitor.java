@@ -107,7 +107,7 @@ public class WifiMonitor {
      * <pre>
      * CTRL-EVENT-DRIVER-STATE state
      * </pre>
-     * <code>state</code> is either STARTED or STOPPED
+     * <code>state</code> can be HANGED
      */
     private static final String driverStateEvent = "DRIVER-STATE";
     /**
@@ -304,11 +304,7 @@ public class WifiMonitor {
             if (state == null) {
                 return;
             }
-            if (state.equals("STOPPED")) {
-                mWifiStateMachine.notifyDriverStopped();
-            } else if (state.equals("STARTED")) {
-                mWifiStateMachine.notifyDriverStarted();
-            } else if (state.equals("HANGED")) {
+            if (state.equals("HANGED")) {
                 mWifiStateMachine.notifyDriverHung();
             }
         }

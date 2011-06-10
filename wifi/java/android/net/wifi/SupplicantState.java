@@ -216,6 +216,28 @@ public enum SupplicantState implements Parcelable {
         }
     }
 
+    static boolean isDriverActive(SupplicantState state) {
+        switch(state) {
+            case DISCONNECTED:
+            case DORMANT:
+            case INACTIVE:
+            case AUTHENTICATING:
+            case ASSOCIATING:
+            case ASSOCIATED:
+            case SCANNING:
+            case FOUR_WAY_HANDSHAKE:
+            case GROUP_HANDSHAKE:
+            case COMPLETED:
+                return true;
+            case INTERFACE_DISABLED:
+            case UNINITIALIZED:
+            case INVALID:
+                return false;
+            default:
+                throw new IllegalArgumentException("Unknown supplicant state");
+        }
+    }
+
     /** Implement the Parcelable interface {@hide} */
     public int describeContents() {
         return 0;
