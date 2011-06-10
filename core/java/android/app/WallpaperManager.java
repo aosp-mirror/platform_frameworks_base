@@ -25,6 +25,8 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -115,7 +117,9 @@ public class WallpaperManager {
 
         @Override
         public void draw(Canvas canvas) {
-            canvas.drawBitmap(mBitmap, mDrawLeft, mDrawTop, null);
+            Paint paint = new Paint();
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+            canvas.drawBitmap(mBitmap, mDrawLeft, mDrawTop, paint);
         }
 
         @Override
@@ -245,40 +249,20 @@ public class WallpaperManager {
                 if (fd != null) {
                     int width = params.getInt("width", 0);
                     int height = params.getInt("height", 0);
-                    
-                    if (width <= 0 || height <= 0) {
-                        // Degenerate case: no size requested, just load
-                        // bitmap as-is.
-                        Bitmap bm = null;
-                        try {
-                            bm = BitmapFactory.decodeFileDescriptor(
-                                   fd.getFileDescriptor(), null, null);
-                        } catch (OutOfMemoryError e) {
-                            Log.w(TAG, "Can't decode file", e);
-                        }
+
+                    try {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        Bitmap bm = BitmapFactory.decodeFileDescriptor(
+                                fd.getFileDescriptor(), null, options);
+                        return generateBitmap(context, bm, width, height);
+                    } catch (OutOfMemoryError e) {
+                        Log.w(TAG, "Can't decode file", e);
+                    } finally {
                         try {
                             fd.close();
                         } catch (IOException e) {
                         }
-                        if (bm != null) {
-                            bm.setDensity(DisplayMetrics.DENSITY_DEVICE);
-                        }
-                        return bm;
                     }
-                    
-                    // Load the bitmap with full color depth, to preserve
-                    // quality for later processing.
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inDither = false;
-                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    Bitmap bm = BitmapFactory.decodeFileDescriptor(
-                            fd.getFileDescriptor(), null, options);
-                    try {
-                        fd.close();
-                    } catch (IOException e) {
-                    }
-                    
-                    return generateBitmap(context, bm, width, height);
                 }
             } catch (RemoteException e) {
             }
@@ -292,42 +276,18 @@ public class WallpaperManager {
                 if (is != null) {
                     int width = mService.getWidthHint();
                     int height = mService.getHeightHint();
-                    
-                    if (width <= 0 || height <= 0) {
-                        // Degenerate case: no size requested, just load
-                        // bitmap as-is.
-                        Bitmap bm = null;
-                        try {
-                            bm = BitmapFactory.decodeStream(is, null, null);
-                        } catch (OutOfMemoryError e) {
-                            Log.w(TAG, "Can't decode stream", e);
-                        }
+
+                    try {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        Bitmap bm = BitmapFactory.decodeStream(is, null, options);
+                        return generateBitmap(context, bm, width, height);
+                    } catch (OutOfMemoryError e) {
+                        Log.w(TAG, "Can't decode stream", e);
+                    } finally {
                         try {
                             is.close();
                         } catch (IOException e) {
                         }
-                        if (bm != null) {
-                            bm.setDensity(DisplayMetrics.DENSITY_DEVICE);
-                        }
-                        return bm;
-                    }
-                    
-                    // Load the bitmap with full color depth, to preserve
-                    // quality for later processing.
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    options.inDither = false;
-                    options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                    Bitmap bm = BitmapFactory.decodeStream(is, null, options);
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                    }
-                    
-                    try {
-                        return generateBitmap(context, bm, width, height);
-                    } catch (OutOfMemoryError e) {
-                        Log.w(TAG, "Can't generate default bitmap", e);
-                        return bm;
                     }
                 }
             } catch (RemoteException e) {
@@ -711,48 +671,54 @@ public class WallpaperManager {
     
     static Bitmap generateBitmap(Context context, Bitmap bm, int width, int height) {
         if (bm == null) {
+            return null;
+        }
+
+        bm.setDensity(DisplayMetrics.DENSITY_DEVICE);
+
+        if (bm.getWidth() == width && bm.getHeight() == height) {
             return bm;
         }
-        bm.setDensity(DisplayMetrics.DENSITY_DEVICE);
-        
+
         // This is the final bitmap we want to return.
-        // XXX We should get the pixel depth from the system (to match the
-        // physical display depth), when there is a way.
-        Bitmap newbm = Bitmap.createBitmap(width, height,
-                Bitmap.Config.RGB_565);
-        newbm.setDensity(DisplayMetrics.DENSITY_DEVICE);
-        Canvas c = new Canvas(newbm);
-        c.setDensity(DisplayMetrics.DENSITY_DEVICE);
-        Rect targetRect = new Rect();
-        targetRect.left = targetRect.top = 0;
-        targetRect.right = bm.getWidth();
-        targetRect.bottom = bm.getHeight();
-        
-        int deltaw = width - targetRect.right;
-        int deltah = height - targetRect.bottom;
-        
-        if (deltaw > 0 || deltah > 0) {
-            // We need to scale up so it covers the entire
-            // area.
-            float scale = 1.0f;
-            if (deltaw > deltah) {
-                scale = width / (float)targetRect.right;
-            } else {
-                scale = height / (float)targetRect.bottom;
+        try {
+            Bitmap newbm = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            newbm.setDensity(DisplayMetrics.DENSITY_DEVICE);
+
+            Canvas c = new Canvas(newbm);
+            Rect targetRect = new Rect();
+            targetRect.right = bm.getWidth();
+            targetRect.bottom = bm.getHeight();
+
+            int deltaw = width - targetRect.right;
+            int deltah = height - targetRect.bottom;
+
+            if (deltaw > 0 || deltah > 0) {
+                // We need to scale up so it covers the entire area.
+                float scale = 1.0f;
+                if (deltaw > deltah) {
+                    scale = width / (float)targetRect.right;
+                } else {
+                    scale = height / (float)targetRect.bottom;
+                }
+                targetRect.right = (int)(targetRect.right*scale);
+                targetRect.bottom = (int)(targetRect.bottom*scale);
+                deltaw = width - targetRect.right;
+                deltah = height - targetRect.bottom;
             }
-            targetRect.right = (int)(targetRect.right*scale);
-            targetRect.bottom = (int)(targetRect.bottom*scale);
-            deltaw = width - targetRect.right;
-            deltah = height - targetRect.bottom;
+
+            targetRect.offset(deltaw/2, deltah/2);
+
+            Paint paint = new Paint();
+            paint.setFilterBitmap(true);
+            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+            c.drawBitmap(bm, null, targetRect, paint);
+
+            bm.recycle();
+            return newbm;
+        } catch (OutOfMemoryError e) {
+            Log.w(TAG, "Can't generate default bitmap", e);
+            return bm;
         }
-        
-        targetRect.offset(deltaw/2, deltah/2);
-        Paint paint = new Paint();
-        paint.setFilterBitmap(true);
-        paint.setDither(true);
-        c.drawBitmap(bm, null, targetRect, paint);
-        
-        bm.recycle();
-        return newbm;
     }
 }

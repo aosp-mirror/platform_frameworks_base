@@ -25,6 +25,7 @@ import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
@@ -46,19 +47,20 @@ public class ImageWallpaper extends WallpaperService {
 
     WallpaperManager mWallpaperManager;
     private HandlerThread mThread;
+    private Handler mHandler;
 
     @Override
     public void onCreate() {
         super.onCreate();
         mWallpaperManager = (WallpaperManager) getSystemService(WALLPAPER_SERVICE);
         Looper looper = WindowManagerPolicyThread.getLooper();
-        if (looper != null) {
-            setCallbackLooper(looper);
-        } else {
+        if (looper == null) {
             mThread = new HandlerThread("Wallpaper", Process.THREAD_PRIORITY_FOREGROUND);
             mThread.start();
-            setCallbackLooper(mThread.getLooper());
+            looper = mThread.getLooper();
         }
+        setCallbackLooper(looper);
+        mHandler = new Handler(looper);
     }
 
     public Engine onCreateEngine() {
@@ -96,10 +98,6 @@ public class ImageWallpaper extends WallpaperService {
                     updateWallpaperLocked();
                     drawFrameLocked();
                 }
-
-                // Assume we are the only one using the wallpaper in this
-                // process, and force a GC now to release the old wallpaper.
-                System.gc();
             }
         }
 
@@ -112,7 +110,7 @@ public class ImageWallpaper extends WallpaperService {
             super.onCreate(surfaceHolder);
             IntentFilter filter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
             mReceiver = new WallpaperObserver();
-            registerReceiver(mReceiver, filter);
+            registerReceiver(mReceiver, filter, null, mHandler);
 
             updateSurfaceSize(surfaceHolder);
 
