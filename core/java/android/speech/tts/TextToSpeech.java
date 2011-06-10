@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -36,6 +37,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -184,10 +186,14 @@ public class TextToSpeech {
         /**
          * Package name of the default TTS engine.
          *
-         * TODO: This should come from a system property
-         *
          * @hide
+         * @deprecated No longer in use, the default engine is determined by
+         *         the sort order defined in {@link EngineInfoComparator}. Note that
+         *         this doesn't "break" anything because there is no guarantee that
+         *         the engine specified below is installed on a given build, let
+         *         alone be the default.
          */
+        @Deprecated
         public static final String DEFAULT_ENGINE = "com.svox.pico";
 
         /**
@@ -514,10 +520,11 @@ public class TextToSpeech {
             }
         }
 
+        final String highestRanked = getHighestRankedEngineName();
         // Fall back to the hardcoded default if different from the two above
-        if (!defaultEngine.equals(Engine.DEFAULT_ENGINE)
-                && !engine.equals(Engine.DEFAULT_ENGINE)) {
-            if (connectToEngine(Engine.DEFAULT_ENGINE)) {
+        if (!defaultEngine.equals(highestRanked)
+                && !engine.equals(highestRanked)) {
+            if (connectToEngine(highestRanked)) {
                 return SUCCESS;
             }
         }
@@ -1065,12 +1072,13 @@ public class TextToSpeech {
     /**
      * Gets the package name of the default speech synthesis engine.
      *
-     * @return Package name of the TTS engine that the user has chosen as their default.
+     * @return Package name of the TTS engine that the user has chosen
+     *        as their default.
      */
     public String getDefaultEngine() {
         String engine = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.TTS_DEFAULT_SYNTH);
-        return engine != null ? engine : Engine.DEFAULT_ENGINE;
+        return engine != null ? engine : getHighestRankedEngineName();
     }
 
     /**
@@ -1083,10 +1091,13 @@ public class TextToSpeech {
     }
 
     private boolean isEngineEnabled(String engine) {
-        if (Engine.DEFAULT_ENGINE.equals(engine)) {
+        // System engines are enabled by default always.
+        EngineInfo info = getEngineInfo(engine);
+        if (info != null && info.system) {
             return true;
         }
-        for (String enabled : getEnabledEngines()) {
+
+        for (String enabled : getUserEnabledEngines()) {
             if (engine.equals(enabled)) {
                 return true;
             }
@@ -1094,7 +1105,9 @@ public class TextToSpeech {
         return false;
     }
 
-    private String[] getEnabledEngines() {
+    // Note that in addition to this list, all engines that are a part
+    // of the system are enabled by default.
+    private String[] getUserEnabledEngines() {
         String str = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.TTS_ENABLED_PLUGINS);
         if (TextUtils.isEmpty(str)) {
@@ -1106,7 +1119,7 @@ public class TextToSpeech {
     /**
      * Gets a list of all installed TTS engines.
      *
-     * @return A list of engine info objects. The list can be empty, but will never by {@code null}.
+     * @return A list of engine info objects. The list can be empty, but never {@code null}.
      */
     public List<EngineInfo> getEngines() {
         PackageManager pm = mContext.getPackageManager();
@@ -1114,21 +1127,70 @@ public class TextToSpeech {
         List<ResolveInfo> resolveInfos =
                 pm.queryIntentServices(intent, PackageManager.MATCH_DEFAULT_ONLY);
         if (resolveInfos == null) return Collections.emptyList();
+
         List<EngineInfo> engines = new ArrayList<EngineInfo>(resolveInfos.size());
+
         for (ResolveInfo resolveInfo : resolveInfos) {
-            ServiceInfo service = resolveInfo.serviceInfo;
-            if (service != null) {
-                EngineInfo engine = new EngineInfo();
-                // Using just the package name isn't great, since it disallows having
-                // multiple engines in the same package, but that's what the existing API does.
-                engine.name = service.packageName;
-                CharSequence label = service.loadLabel(pm);
-                engine.label = TextUtils.isEmpty(label) ? engine.name : label.toString();
-                engine.icon = service.getIconResource();
+            EngineInfo engine = getEngineInfo(resolveInfo, pm);
+            if (engine != null) {
                 engines.add(engine);
             }
         }
+        Collections.sort(engines, EngineInfoComparator.INSTANCE);
+
         return engines;
+    }
+
+    /*
+     * Returns the highest ranked engine in the system.
+     */
+    private String getHighestRankedEngineName() {
+        final List<EngineInfo> engines = getEngines();
+
+        if (engines.size() > 0 && engines.get(0).system) {
+            return engines.get(0).name;
+        }
+
+        return null;
+    }
+
+    private EngineInfo getEngineInfo(String packageName) {
+        PackageManager pm = mContext.getPackageManager();
+        Intent intent = new Intent(Engine.INTENT_ACTION_TTS_SERVICE);
+        intent.setPackage(packageName);
+        List<ResolveInfo> resolveInfos = pm.queryIntentServices(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+        // Note that the current API allows only one engine per
+        // package name. Since the "engine name" is the same as
+        // the package name.
+        if (resolveInfos != null && resolveInfos.size() == 1) {
+            return getEngineInfo(resolveInfos.get(0), pm);
+        }
+
+        return null;
+    }
+
+    private EngineInfo getEngineInfo(ResolveInfo resolve, PackageManager pm) {
+        ServiceInfo service = resolve.serviceInfo;
+        if (service != null) {
+            EngineInfo engine = new EngineInfo();
+            // Using just the package name isn't great, since it disallows having
+            // multiple engines in the same package, but that's what the existing API does.
+            engine.name = service.packageName;
+            CharSequence label = service.loadLabel(pm);
+            engine.label = TextUtils.isEmpty(label) ? engine.name : label.toString();
+            engine.icon = service.getIconResource();
+            engine.priority = resolve.priority;
+            engine.system = isSystemApp(service);
+            return engine;
+        }
+
+        return null;
+    }
+
+    private boolean isSystemApp(ServiceInfo info) {
+        final ApplicationInfo appInfo = info.applicationInfo;
+        return appInfo != null && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
     }
 
     private class Connection implements ServiceConnection {
@@ -1203,11 +1265,48 @@ public class TextToSpeech {
          * Icon for the engine.
          */
         public int icon;
+        /**
+         * Whether this engine is a part of the system
+         * image.
+         */
+        boolean system;
+        /**
+         * The priority the engine declares for the the intent filter
+         * {@code android.intent.action.TTS_SERVICE}
+         */
+        int priority;
 
         @Override
         public String toString() {
             return "EngineInfo{name=" + name + "}";
         }
 
+    }
+
+    private static class EngineInfoComparator implements Comparator<EngineInfo> {
+        private EngineInfoComparator() { }
+
+        static EngineInfoComparator INSTANCE = new EngineInfoComparator();
+
+        /**
+         * Engines that are a part of the system image are always lesser
+         * than those that are not. Within system engines / non system engines
+         * the engines are sorted in order of their declared priority.
+         */
+        @Override
+        public int compare(EngineInfo lhs, EngineInfo rhs) {
+            if (lhs.system && !rhs.system) {
+                return -1;
+            } else if (rhs.system && !lhs.system) {
+                return 1;
+            } else {
+                // Either both system engines, or both non system
+                // engines.
+                //
+                // Note, this isn't a typo. Higher priority numbers imply
+                // higher priority, but are "lower" in the sort order.
+                return rhs.priority - lhs.priority;
+            }
+        }
     }
 }
