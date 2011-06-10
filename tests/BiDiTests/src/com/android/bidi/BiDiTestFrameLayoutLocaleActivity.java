@@ -19,13 +19,13 @@ package com.android.bidi;
 import android.app.Activity;
 import android.os.Bundle;
 
-public class BiDiTestRelativeLayoutLtrActivity2 extends Activity {
+public class BiDiTestFrameLayoutLocaleActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.relative_layout_2_ltr);
+        setContentView(R.layout.frame_layout_locale);
     }
 }
 

@@ -57,6 +57,11 @@ public class BiDiTestActivity extends TabActivity {
             setContent(intent);
         tabHost.addTab(spec);
 
+        intent = new Intent().setClass(this, BiDiTestLinearLayoutLocaleActivity.class);
+        spec = tabHost.newTabSpec("linear-layout-locale").setIndicator("Linear LOC").
+            setContent(intent);
+        tabHost.addTab(spec);
+
         intent = new Intent().setClass(this, BiDiTestFrameLayoutLtrActivity.class);
         spec = tabHost.newTabSpec("frame-layout-ltr").setIndicator("Frame LTR").
             setContent(intent);
@@ -64,6 +69,11 @@ public class BiDiTestActivity extends TabActivity {
 
         intent = new Intent().setClass(this, BiDiTestFrameLayoutRtlActivity.class);
         spec = tabHost.newTabSpec("frame-layout-rtl").setIndicator("Frame RTL").
+            setContent(intent);
+        tabHost.addTab(spec);
+
+        intent = new Intent().setClass(this, BiDiTestFrameLayoutLocaleActivity.class);
+        spec = tabHost.newTabSpec("frame-layout-locale").setIndicator("Frame LOC").
             setContent(intent);
         tabHost.addTab(spec);
 
@@ -87,6 +97,11 @@ public class BiDiTestActivity extends TabActivity {
             setContent(intent);
         tabHost.addTab(spec);
 
+        intent = new Intent().setClass(this, BiDiTestRelativeLayoutLocaleActivity2.class);
+        spec = tabHost.newTabSpec("relative-layout-locale-2").setIndicator("Relative2 LOC").
+            setContent(intent);
+        tabHost.addTab(spec);
+
         intent = new Intent().setClass(this, BiDiTestTableLayoutLtrActivity.class);
         spec = tabHost.newTabSpec("table-layout-ltr").setIndicator("Table LTR").
             setContent(intent);
@@ -94,6 +109,11 @@ public class BiDiTestActivity extends TabActivity {
 
         intent = new Intent().setClass(this, BiDiTestTableLayoutRtlActivity.class);
         spec = tabHost.newTabSpec("table-layout-rtl").setIndicator("Table RTL").
+            setContent(intent);
+        tabHost.addTab(spec);
+
+        intent = new Intent().setClass(this, BiDiTestTableLayoutLocaleActivity.class);
+        spec = tabHost.newTabSpec("table-layout-locale").setIndicator("Table LOC").
             setContent(intent);
         tabHost.addTab(spec);
 

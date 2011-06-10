@@ -15,198 +15,243 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/linear_layout_ltr"
-    android:orientation="vertical"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layoutDirection="ltr">
+              android:id="@+id/linear_layout_ltr"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layoutDirection="ltr">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+                  android:orientation="horizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content">
 
-       <Button android:layout_height="wrap_content"
-               android:layout_width="wrap_content"
-               android:text="@string/button1_text"
-               android:textSize="24dip"
-        />
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/button1_text"
+                android:textSize="24dip"
+                />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
                   android:textSize="24dip"
                   android:text="@string/textview_text"
-        />
+                />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
                 android:textSize="24dip"
-         />
-
+                />
     </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layoutDirection="inherit">
+                  android:orientation="horizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layoutDirection="inherit">
 
-       <Button android:layout_height="wrap_content"
-               android:layout_width="wrap_content"
-               android:text="@string/button1_text"
-               android:textSize="24dip"
-        />
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/button1_text"
+                android:textSize="24dip"
+                />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
                   android:textSize="24dip"
                   android:text="@string/textview_text"
-        />
+                />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
                 android:textSize="24dip"
-         />
-
+                />
     </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layoutDirection="ltr">
+                  android:orientation="horizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layoutDirection="ltr">
 
-       <Button android:layout_height="wrap_content"
-               android:layout_width="wrap_content"
-               android:text="@string/button1_text"
-               android:textSize="24dip"
-        />
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/button1_text"
+                android:textSize="24dip"
+                />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
                   android:textSize="24dip"
                   android:text="@string/textview_text"
-        />
+                />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
                 android:textSize="24dip"
-         />
-
+                />
     </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layoutDirection="rtl">
+                  android:orientation="horizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layoutDirection="rtl">
 
-       <Button android:layout_height="wrap_content"
-               android:layout_width="wrap_content"
-               android:text="@string/button1_text"
-               android:textSize="24dip"
-        />
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/button1_text"
+                android:textSize="24dip"
+                />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
                   android:textSize="24dip"
                   android:text="@string/textview_text"
-        />
+                />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
                 android:textSize="24dip"
-         />
-
+                />
     </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layoutDirection="inherit">
+                  android:orientation="horizontal"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layoutDirection="locale">
 
-       <Button android:layout_height="wrap_content"
-               android:layout_width="wrap_content"
-               android:text="@string/button1_text"
-               android:textSize="24dip"
-        />
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/button1_text"
+                android:textSize="24dip"
+                />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
                   android:textSize="24dip"
                   android:text="@string/textview_text"
-        />
+                />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
                 android:textSize="24dip"
-         />
-
+                />
     </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layoutDirection="ltr">
+                  android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layoutDirection="inherit">
 
-       <Button android:layout_height="wrap_content"
-               android:layout_width="wrap_content"
-               android:text="@string/button1_text"
-               android:textSize="24dip"
-        />
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/button1_text"
+                android:textSize="24dip"
+                />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
                   android:textSize="24dip"
                   android:text="@string/textview_text"
-        />
+                />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
                 android:textSize="24dip"
-         />
-
+                />
     </LinearLayout>
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layoutDirection="rtl">
+                  android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layoutDirection="ltr">
 
-       <Button android:layout_height="wrap_content"
-               android:layout_width="wrap_content"
-               android:text="@string/button1_text"
-               android:textSize="24dip"
-        />
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/button1_text"
+                android:textSize="24dip"
+                />
 
         <TextView android:id="@+id/textview"
                   android:layout_height="wrap_content"
                   android:layout_width="wrap_content"
                   android:textSize="24dip"
                   android:text="@string/textview_text"
-        />
+                />
 
         <Button android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="@string/button2_text"
                 android:textSize="24dip"
-         />
+                />
+    </LinearLayout>
 
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layoutDirection="rtl">
+
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/button1_text"
+                android:textSize="24dip"
+                />
+
+        <TextView android:id="@+id/textview"
+                  android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:textSize="24dip"
+                  android:text="@string/textview_text"
+                />
+
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/button2_text"
+                android:textSize="24dip"
+                />
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:layoutDirection="locale">
+
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/button1_text"
+                android:textSize="24dip"
+                />
+
+        <TextView android:id="@+id/textview"
+                  android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:textSize="24dip"
+                  android:text="@string/textview_text"
+                />
+
+        <Button android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="@string/button2_text"
+                android:textSize="24dip"
+                />
     </LinearLayout>
 
 </LinearLayout>

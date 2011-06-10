@@ -57,6 +57,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".BiDiTestLinearLayoutLocaleActivity"
+                  android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".BiDiTestFrameLayoutLtrActivity"
                   android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
@@ -65,6 +72,13 @@
         </activity>
 
         <activity android:name=".BiDiTestFrameLayoutRtlActivity"
+                  android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".BiDiTestFrameLayoutLocaleActivity"
                   android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -99,6 +113,13 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".BiDiTestRelativeLayoutLocaleActivity2"
+                  android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
         <activity android:name=".BiDiTestTableLayoutLtrActivity"
                   android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
@@ -107,6 +128,13 @@
         </activity>
 
         <activity android:name=".BiDiTestTableLayoutRtlActivity"
+                  android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".BiDiTestTableLayoutLocaleActivity"
                   android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
