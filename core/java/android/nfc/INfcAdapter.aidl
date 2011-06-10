@@ -62,6 +62,4 @@ interface INfcAdapter
     int createLlcpSocket(int sap, int miu, int rw, int linearBufferLength);
     boolean disable();
     boolean enable();
-    String getProperties(String param);
-    int setProperties(String param, String value);
 }
