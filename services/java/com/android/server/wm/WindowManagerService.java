@@ -428,7 +428,6 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mDisplayFrozen = false;
     boolean mWaitingForConfig = false;
     boolean mWindowsFreezingScreen = false;
-    long mFreezeGcPending = 0;
     int mAppsFreezingScreen = 0;
     int mLastWindowForcedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 
@@ -4975,9 +4974,11 @@ public class WindowManagerService extends IWindowManager.Stub
      * MUST CALL setNewConfiguration() TO UNFREEZE THE SCREEN.
      */
     public boolean setRotationUncheckedLocked(int rotation, int animFlags, boolean inTransaction) {
-        if (mDragState != null || mScreenRotationAnimation != null) {
-            // Potential rotation during a drag.  Don't do the rotation now, but make
-            // a note to perform the rotation later.
+        if (mDragState != null
+                || (mScreenRotationAnimation != null && mScreenRotationAnimation.isAnimating())) {
+            // Potential rotation during a drag or while waiting for a previous orientation
+            // change to finish (rotation animation will be dismissed).
+            // Don't do the rotation now, but make a note to perform the rotation later.
             if (DEBUG_ORIENTATION) Slog.v(TAG, "Deferring rotation.");
             if (rotation != WindowManagerPolicy.USE_LAST_ROTATION) {
                 mDeferredRotation = rotation;
@@ -6435,7 +6436,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         if (mDisplayFrozen) {
                             return;
                         }
-                        mFreezeGcPending = 0;
                     }
                     Runtime.getRuntime().gc();
                     break;
@@ -8652,19 +8652,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         mScreenFrozenLock.acquire();
-
-        long now = SystemClock.uptimeMillis();
-        //Slog.i(TAG, "Freezing, gc pending: " + mFreezeGcPending + ", now " + now);
-        if (mFreezeGcPending != 0) {
-            if (now > (mFreezeGcPending+1000)) {
-                //Slog.i(TAG, "Gc!  " + now + " > " + (mFreezeGcPending+1000));
-                mH.removeMessages(H.FORCE_GC);
-                Runtime.getRuntime().gc();
-                mFreezeGcPending = now;
-            }
-        } else {
-            mFreezeGcPending = now;
-        }
 
         mDisplayFrozen = true;
         

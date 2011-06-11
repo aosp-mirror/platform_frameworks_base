@@ -181,7 +181,7 @@ public abstract class WallpaperService extends Service {
         
         final BaseSurfaceHolder mSurfaceHolder = new BaseSurfaceHolder() {
             {
-                mRequestedFormat = PixelFormat.RGB_565;
+                mRequestedFormat = PixelFormat.RGBX_8888;
             }
 
             @Override
