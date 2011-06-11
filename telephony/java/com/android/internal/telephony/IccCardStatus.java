@@ -144,4 +144,33 @@ public class IccCardStatus {
         return mApplications.get(index);
     }
 
+    @Override
+    public String toString() {
+        IccCardApplication app;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("IccCardState {").append(mCardState).append(",")
+        .append(mUniversalPinState)
+        .append(",num_apps=").append(mNumApplications)
+        .append(",gsm_id=").append(mGsmUmtsSubscriptionAppIndex);
+        if (mGsmUmtsSubscriptionAppIndex >=0
+                && mGsmUmtsSubscriptionAppIndex <CARD_MAX_APPS) {
+            app = getApplication(mGsmUmtsSubscriptionAppIndex);
+            sb.append(app == null ? "null" : app);
+        }
+
+        sb.append(",cmda_id=").append(mCdmaSubscriptionAppIndex);
+        if (mCdmaSubscriptionAppIndex >=0
+                && mCdmaSubscriptionAppIndex <CARD_MAX_APPS) {
+            app = getApplication(mCdmaSubscriptionAppIndex);
+            sb.append(app == null ? "null" : app);
+        }
+
+        sb.append(",ism_id=").append(mImsSubscriptionAppIndex);
+
+        sb.append("}");
+
+        return sb.toString();
+    }
+
 }
