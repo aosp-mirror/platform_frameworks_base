@@ -55,7 +55,7 @@ enum {
 
     PIXEL_FORMAT_OPAQUE         = -1,
         // System chooses an opaque format (no alpha bits required)
-    
+
     // real pixel formats supported for rendering -----------------------------
 
     PIXEL_FORMAT_RGBA_8888   = HAL_PIXEL_FORMAT_RGBA_8888,  // 4x8-bit RGBA
@@ -84,7 +84,7 @@ struct PixelFormatInfo
         INDEX_GREEN   = 2,
         INDEX_BLUE    = 3
     };
-    
+
     enum { // components
         ALPHA               = 1,
         RGB                 = 2,
@@ -98,10 +98,10 @@ struct PixelFormatInfo
         uint8_t h;
         uint8_t l;
     };
-    
+
     inline PixelFormatInfo() : version(sizeof(PixelFormatInfo)) { }
     size_t getScanlineSize(unsigned int width) const;
-    size_t getSize(size_t ci) const { 
+    size_t getSize(size_t ci) const {
         return (ci <= 3) ? (cinfo[ci].h - cinfo[ci].l) : 0;
     }
     size_t      version;
@@ -112,7 +112,7 @@ struct PixelFormatInfo
         szinfo      cinfo[4];
         struct {
             uint8_t     h_alpha;
-            uint8_t     l_alpha;    
+            uint8_t     l_alpha;
             uint8_t     h_red;
             uint8_t     l_red;
             uint8_t     h_green;
