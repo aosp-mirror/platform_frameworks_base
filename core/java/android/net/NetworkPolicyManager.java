@@ -16,8 +16,11 @@
 
 package android.net;
 
+import static android.text.format.Time.MONTH_DAY;
+
 import android.content.Context;
 import android.os.RemoteException;
+import android.text.format.Time;
 
 import java.io.PrintWriter;
 
@@ -88,7 +91,83 @@ public class NetworkPolicyManager {
             return POLICY_NONE;
         }
     }
-    
+
+    /**
+     * Compute the last cycle boundary for the given {@link NetworkPolicy}. For
+     * example, if cycle day is 20th, and today is June 15th, it will return May
+     * 20th. When cycle day doesn't exist in current month, it snaps to the 1st
+     * of following month.
+     *
+     * @hide
+     */
+    public static long computeLastCycleBoundary(long currentTime, NetworkPolicy policy) {
+        final Time now = new Time(Time.TIMEZONE_UTC);
+        now.set(currentTime);
+
+        // first, find cycle boundary for current month
+        final Time cycle = new Time(now);
+        cycle.hour = cycle.minute = cycle.second = 0;
+        snapToCycleDay(cycle, policy.cycleDay);
+
+        if (Time.compare(cycle, now) >= 0) {
+            // cycle boundary is beyond now, use last cycle boundary; start by
+            // pushing ourselves squarely into last month.
+            final Time lastMonth = new Time(now);
+            lastMonth.hour = lastMonth.minute = lastMonth.second = 0;
+            lastMonth.monthDay = 1;
+            lastMonth.month -= 1;
+            lastMonth.normalize(true);
+
+            cycle.set(lastMonth);
+            snapToCycleDay(cycle, policy.cycleDay);
+        }
+
+        return cycle.toMillis(true);
+    }
+
+    /** {@hide} */
+    public static long computeNextCycleBoundary(long currentTime, NetworkPolicy policy) {
+        final Time now = new Time(Time.TIMEZONE_UTC);
+        now.set(currentTime);
+
+        // first, find cycle boundary for current month
+        final Time cycle = new Time(now);
+        cycle.hour = cycle.minute = cycle.second = 0;
+        snapToCycleDay(cycle, policy.cycleDay);
+
+        if (Time.compare(cycle, now) <= 0) {
+            // cycle boundary is before now, use next cycle boundary; start by
+            // pushing ourselves squarely into next month.
+            final Time nextMonth = new Time(now);
+            nextMonth.hour = nextMonth.minute = nextMonth.second = 0;
+            nextMonth.monthDay = 1;
+            nextMonth.month += 1;
+            nextMonth.normalize(true);
+
+            cycle.set(nextMonth);
+            snapToCycleDay(cycle, policy.cycleDay);
+        }
+
+        return cycle.toMillis(true);
+    }
+
+    /**
+     * Snap to the cycle day for the current month given; when cycle day doesn't
+     * exist, it snaps to 1st of following month.
+     *
+     * @hide
+     */
+    public static void snapToCycleDay(Time time, int cycleDay) {
+        if (cycleDay > time.getActualMaximum(MONTH_DAY)) {
+            // cycle day isn't valid this month; snap to 1st of next month
+            time.month += 1;
+            time.monthDay = 1;
+        } else {
+            time.monthDay = cycleDay;
+        }
+        time.normalize(true);
+    }
+
     /** {@hide} */
     public static void dumpPolicy(PrintWriter fout, int policy) {
         fout.write("[");

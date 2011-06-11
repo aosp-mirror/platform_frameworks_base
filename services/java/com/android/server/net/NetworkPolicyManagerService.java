@@ -25,10 +25,10 @@ import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_PAID_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_PAID;
+import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkPolicyManager.dumpPolicy;
 import static android.net.NetworkPolicyManager.dumpRules;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
-import static android.text.format.Time.MONTH_DAY;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -53,7 +53,6 @@ import android.os.HandlerThread;
 import android.os.IPowerManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.text.format.Time;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -365,53 +364,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // TODO: push rule down through NetworkManagementService.setInterfaceQuota()
 
         }
-    }
-
-    /**
-     * Compute the last cycle boundary for the given {@link NetworkPolicy}. For
-     * example, if cycle day is 20th, and today is June 15th, it will return May
-     * 20th. When cycle day doesn't exist in current month, it snaps to the 1st
-     * of following month.
-     */
-    // @VisibleForTesting
-    public static long computeLastCycleBoundary(long currentTime, NetworkPolicy policy) {
-        final Time now = new Time(Time.TIMEZONE_UTC);
-        now.set(currentTime);
-
-        // first, find cycle boundary for current month
-        final Time cycle = new Time(now);
-        cycle.hour = cycle.minute = cycle.second = 0;
-        snapToCycleDay(cycle, policy.cycleDay);
-
-        if (cycle.after(now)) {
-            // cycle boundary is beyond now, use last cycle boundary; start by
-            // pushing ourselves squarely into last month.
-            final Time lastMonth = new Time(now);
-            lastMonth.hour = lastMonth.minute = lastMonth.second = 0;
-            lastMonth.monthDay = 1;
-            lastMonth.month -= 1;
-            lastMonth.normalize(true);
-
-            cycle.set(lastMonth);
-            snapToCycleDay(cycle, policy.cycleDay);
-        }
-
-        return cycle.toMillis(true);
-    }
-
-    /**
-     * Snap to the cycle day for the current month given; when cycle day doesn't
-     * exist, it snaps to 1st of following month.
-     */
-    private static void snapToCycleDay(Time time, int cycleDay) {
-        if (cycleDay > time.getActualMaximum(MONTH_DAY)) {
-            // cycle day isn't valid this month; snap to 1st of next month
-            time.month += 1;
-            time.monthDay = 1;
-        } else {
-            time.monthDay = cycleDay;
-        }
-        time.normalize(true);
     }
 
     private void readPolicyLocked() {
