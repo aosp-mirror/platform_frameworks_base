@@ -1827,19 +1827,30 @@ public final class StrictMode {
             new HashMap<Class, Integer>();
 
     /**
+     * Returns an object that is used to track instances of activites.
+     * The activity should store a reference to the tracker object in one of its fields.
+     * @hide
+     */
+    public static Object trackActivity(Object instance) {
+        return new InstanceTracker(instance);
+    }
+
+    /**
      * @hide
      */
     public static void incrementExpectedActivityCount(Class klass) {
-        if (klass == null || (sVmPolicy.mask & DETECT_VM_ACTIVITY_LEAKS) == 0) {
+        if (klass == null) {
             return;
         }
+
         synchronized (StrictMode.class) {
+            if ((sVmPolicy.mask & DETECT_VM_ACTIVITY_LEAKS) == 0) {
+                return;
+            }
+
             Integer expected = sExpectedActivityInstanceCount.get(klass);
             Integer newExpected = expected == null ? 1 : expected + 1;
             sExpectedActivityInstanceCount.put(klass, newExpected);
-            // Note: adding 1 here to give some breathing room during
-            // orientation changes.  (shouldn't be necessary, though?)
-            setExpectedClassInstanceCount(klass, newExpected + 1);
         }
     }
 
@@ -1847,31 +1858,48 @@ public final class StrictMode {
      * @hide
      */
     public static void decrementExpectedActivityCount(Class klass) {
-        if (klass == null || (sVmPolicy.mask & DETECT_VM_ACTIVITY_LEAKS) == 0) {
+        if (klass == null) {
             return;
         }
+
+        final int limit;
         synchronized (StrictMode.class) {
+            if ((sVmPolicy.mask & DETECT_VM_ACTIVITY_LEAKS) == 0) {
+                return;
+            }
+
             Integer expected = sExpectedActivityInstanceCount.get(klass);
-            Integer newExpected = (expected == null || expected == 0) ? 0 : expected - 1;
+            int newExpected = (expected == null || expected == 0) ? 0 : expected - 1;
             if (newExpected == 0) {
                 sExpectedActivityInstanceCount.remove(klass);
             } else {
                 sExpectedActivityInstanceCount.put(klass, newExpected);
             }
+
             // Note: adding 1 here to give some breathing room during
             // orientation changes.  (shouldn't be necessary, though?)
-            setExpectedClassInstanceCount(klass, newExpected + 1);
+            limit = newExpected + 1;
         }
-    }
 
-    /**
-     * @hide
-     */
-    public static void setExpectedClassInstanceCount(Class klass, int count) {
-        synchronized (StrictMode.class) {
-            setVmPolicy(new VmPolicy.Builder(sVmPolicy)
-                        .setClassInstanceLimit(klass, count)
-                        .build());
+        // Quick check.
+        int actual = InstanceTracker.getInstanceCount(klass);
+        if (actual <= limit) {
+            return;
+        }
+
+        // Do a GC and explicit count to double-check.
+        // This is the work that we are trying to avoid by tracking the object instances
+        // explicity.  Running an explicit GC can be expensive (80ms) and so can walking
+        // the heap to count instance (30ms).  This extra work can make the system feel
+        // noticeably less responsive during orientation changes when activities are
+        // being restarted.  Granted, it is only a problem when StrictMode is enabled
+        // but it is annoying.
+        Runtime.getRuntime().gc();
+
+        long instances = VMDebug.countInstancesOfClass(klass, false);
+        if (instances > limit) {
+            Throwable tr = new InstanceCountViolation(klass, instances, limit);
+            onVmPolicyViolation(tr.getMessage(), tr);
         }
     }
 
@@ -2093,6 +2121,49 @@ public final class StrictMode {
             mClass = klass;
             mInstances = instances;
             mLimit = limit;
+        }
+    }
+
+    private static final class InstanceTracker {
+        private static final HashMap<Class<?>, Integer> sInstanceCounts =
+                new HashMap<Class<?>, Integer>();
+
+        private final Class<?> mKlass;
+
+        public InstanceTracker(Object instance) {
+            mKlass = instance.getClass();
+
+            synchronized (sInstanceCounts) {
+                final Integer value = sInstanceCounts.get(mKlass);
+                final int newValue = value != null ? value + 1 : 1;
+                sInstanceCounts.put(mKlass, newValue);
+            }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                synchronized (sInstanceCounts) {
+                    final Integer value = sInstanceCounts.get(mKlass);
+                    if (value != null) {
+                        final int newValue = value - 1;
+                        if (newValue > 0) {
+                            sInstanceCounts.put(mKlass, newValue);
+                        } else {
+                            sInstanceCounts.remove(mKlass);
+                        }
+                    }
+                }
+            } finally {
+                super.finalize();
+            }
+        }
+
+        public static int getInstanceCount(Class<?> klass) {
+            synchronized (sInstanceCounts) {
+                final Integer value = sInstanceCounts.get(klass);
+                return value != null ? value : 0;
+            }
         }
     }
 }
