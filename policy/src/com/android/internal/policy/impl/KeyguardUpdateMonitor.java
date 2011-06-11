@@ -114,7 +114,15 @@ public class KeyguardUpdateMonitor {
             }
             String stateExtra = intent.getStringExtra(IccCard.INTENT_KEY_ICC_STATE);
             if (IccCard.INTENT_VALUE_ICC_ABSENT.equals(stateExtra)) {
-                this.simState = IccCard.State.ABSENT;
+                final String absentReason = intent
+                    .getStringExtra(IccCard.INTENT_KEY_LOCKED_REASON);
+
+                if (IccCard.INTENT_VALUE_ABSENT_ON_PERM_DISABLED.equals(
+                        absentReason)) {
+                    this.simState = IccCard.State.PERM_DISABLED;
+                } else {
+                    this.simState = IccCard.State.ABSENT;
+                }
             } else if (IccCard.INTENT_VALUE_ICC_READY.equals(stateExtra)) {
                 this.simState = IccCard.State.READY;
             } else if (IccCard.INTENT_VALUE_ICC_LOCKED.equals(stateExtra)) {

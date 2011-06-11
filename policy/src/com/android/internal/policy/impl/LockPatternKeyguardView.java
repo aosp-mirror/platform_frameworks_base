@@ -181,7 +181,8 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
     private boolean stuckOnLockScreenBecauseSimMissing() {
         return mRequiresSim
                 && (!mUpdateMonitor.isDeviceProvisioned())
-                && (mUpdateMonitor.getSimState() == IccCard.State.ABSENT);
+                && (mUpdateMonitor.getSimState() == IccCard.State.ABSENT ||
+                    mUpdateMonitor.getSimState() == IccCard.State.PERM_DISABLED);
     }
 
     /**
