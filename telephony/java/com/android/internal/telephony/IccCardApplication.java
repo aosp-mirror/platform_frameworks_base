@@ -177,4 +177,15 @@ public class IccCardApplication {
         return newSubState;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("{").append(app_type).append(",").append(app_state);
+        if (app_state == AppState.APPSTATE_SUBSCRIPTION_PERSO) {
+            sb.append(",").append(perso_substate);
+        }
+        sb.append("}");
+        return sb.toString();
+    }
 }
