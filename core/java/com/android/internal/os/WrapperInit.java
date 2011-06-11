@@ -54,6 +54,8 @@ public class WrapperInit {
      */
     public static void main(String[] args) {
         try {
+            // Tell the Zygote what our actual PID is (since it only knows about the
+            // wrapper that it directly forked).
             int fdNum = Integer.parseInt(args[0], 10);
             if (fdNum != 0) {
                 try {
@@ -67,6 +69,10 @@ public class WrapperInit {
                 }
             }
 
+            // Mimic Zygote preloading.
+            ZygoteInit.preload();
+
+            // Launch the application.
             String[] runtimeArgs = new String[args.length - 1];
             System.arraycopy(args, 1, runtimeArgs, 0, runtimeArgs.length);
             RuntimeInit.wrapperInit(runtimeArgs);

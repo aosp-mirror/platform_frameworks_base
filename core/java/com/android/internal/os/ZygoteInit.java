@@ -228,6 +228,11 @@ public class ZygoteInit {
         }
     }
 
+    static void preload() {
+        preloadClasses();
+        preloadResources();
+    }
+
     /**
      * Performs Zygote process initialization. Loads and initializes
      * commonly used classes.
@@ -509,8 +514,7 @@ public class ZygoteInit {
             registerZygoteSocket();
             EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_START,
                 SystemClock.uptimeMillis());
-            preloadClasses();
-            preloadResources();
+            preload();
             EventLog.writeEvent(LOG_BOOT_PROGRESS_PRELOAD_END,
                 SystemClock.uptimeMillis());
 
