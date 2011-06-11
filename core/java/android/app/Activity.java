@@ -4417,7 +4417,9 @@ public class Activity extends ContextThemeWrapper
         mFragments.dispatchStart();
         if (mAllLoaderManagers != null) {
             for (int i=mAllLoaderManagers.size()-1; i>=0; i--) {
-                mAllLoaderManagers.valueAt(i).finishRetain();
+                LoaderManagerImpl lm = mAllLoaderManagers.valueAt(i);
+                lm.finishRetain();
+                lm.doReportStart();
             }
         }
     }
