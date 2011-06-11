@@ -16,7 +16,10 @@
 
 package android.view.accessibility;
 
+import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,26 +48,29 @@ public class AccessibilityRecord {
     private static int sPoolSize;
     private AccessibilityRecord mNext;
     private boolean mIsInPool;
-    private boolean mSealed;
 
-    protected int mBooleanProperties;
-    protected int mCurrentItemIndex;
-    protected int mItemCount;
-    protected int mFromIndex;
-    protected int mAddedCount;
-    protected int mRemovedCount;
+    boolean mSealed;
+    int mBooleanProperties;
+    int mCurrentItemIndex;
+    int mItemCount;
+    int mFromIndex;
+    int mAddedCount;
+    int mRemovedCount;
+    int mSourceViewId = View.NO_ID;
+    int mSourceWindowId = View.NO_ID;
 
-    protected CharSequence mClassName;
-    protected CharSequence mContentDescription;
-    protected CharSequence mBeforeText;
-    protected Parcelable mParcelableData;
+    CharSequence mClassName;
+    CharSequence mContentDescription;
+    CharSequence mBeforeText;
+    Parcelable mParcelableData;
 
-    protected final List<CharSequence> mText = new ArrayList<CharSequence>();
+    final List<CharSequence> mText = new ArrayList<CharSequence>();
+    IAccessibilityServiceConnection mConnection;
 
     /*
      * Hide constructor.
      */
-    protected AccessibilityRecord() {
+    AccessibilityRecord() {
 
     }
 
@@ -74,7 +80,7 @@ public class AccessibilityRecord {
      * @param record The to initialize from.
      */
     void init(AccessibilityRecord record) {
-        mSealed = record.isSealed();
+        mSealed = record.mSealed;
         mBooleanProperties = record.mBooleanProperties;
         mCurrentItemIndex = record.mCurrentItemIndex;
         mItemCount = record.mItemCount;
@@ -86,6 +92,73 @@ public class AccessibilityRecord {
         mBeforeText = record.mBeforeText;
         mParcelableData = record.mParcelableData;
         mText.addAll(record.mText);
+        mSourceWindowId = record.mSourceWindowId;
+        mSourceViewId = record.mSourceViewId;
+        mConnection = record.mConnection;
+    }
+
+    /**
+     * Sets the event source.
+     *
+     * @param source The source.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setSource(View source) {
+        enforceNotSealed();
+        if (source != null) {
+            mSourceWindowId = source.getAccessibilityWindowId();
+            mSourceViewId = source.getAccessibilityViewId();
+        } else {
+            mSourceWindowId = View.NO_ID;
+            mSourceViewId = View.NO_ID;
+        }
+    }
+
+    /**
+     * Gets the {@link AccessibilityNodeInfo} of the event source.
+     * <p>
+     *   <strong>
+     *     It is a client responsibility to recycle the received info by
+     *     calling {@link AccessibilityNodeInfo#recycle()} to avoid creating
+     *     of multiple instances.
+     *   </strong>
+     * </p>
+     * @return The info.
+     */
+    public AccessibilityNodeInfo getSource() {
+        enforceSealed();
+        if (mSourceWindowId == View.NO_ID || mSourceViewId == View.NO_ID || mConnection == null) {
+            return null;
+        }
+        try {
+            return mConnection.findAccessibilityNodeInfoByAccessibilityId(mSourceWindowId,
+                    mSourceViewId);
+        } catch (RemoteException e) {
+           /* ignore */
+        }
+        return null;
+    }
+
+    /**
+     * Sets the connection for interacting with the AccessibilityManagerService.
+     *
+     * @param connection The connection.
+     *
+     * @hide
+     */
+    public void setConnection(IAccessibilityServiceConnection connection) {
+        enforceNotSealed();
+        mConnection = connection;
+    }
+
+    /**
+     * Gets the id of the window from which the event comes from.
+     *
+     * @return The window id.
+     */
+    public int getWindowId() {
+        return mSourceWindowId;
     }
 
     /**
@@ -386,10 +459,8 @@ public class AccessibilityRecord {
      * Gets if this instance is sealed.
      *
      * @return Whether is sealed.
-     *
-     * @hide
      */
-    public boolean isSealed() {
+    boolean isSealed() {
         return mSealed;
     }
 
@@ -397,10 +468,8 @@ public class AccessibilityRecord {
      * Enforces that this instance is sealed.
      *
      * @throws IllegalStateException If this instance is not sealed.
-     *
-     * @hide
      */
-    protected void enforceSealed() {
+    void enforceSealed() {
         if (!isSealed()) {
             throw new IllegalStateException("Cannot perform this "
                     + "action on a not sealed instance.");
@@ -411,10 +480,8 @@ public class AccessibilityRecord {
      * Enforces that this instance is not sealed.
      *
      * @throws IllegalStateException If this instance is sealed.
-     *
-     * @hide
      */
-    protected void enforceNotSealed() {
+    void enforceNotSealed() {
         if (isSealed()) {
             throw new IllegalStateException("Cannot perform this "
                     + "action on an sealed instance.");
@@ -502,10 +569,8 @@ public class AccessibilityRecord {
 
     /**
      * Clears the state of this instance.
-     *
-     * @hide
      */
-    protected void clear() {
+    void clear() {
         mSealed = false;
         mBooleanProperties = 0;
         mCurrentItemIndex = INVALID_POSITION;
@@ -518,6 +583,8 @@ public class AccessibilityRecord {
         mBeforeText = null;
         mParcelableData = null;
         mText.clear();
+        mSourceViewId = View.NO_ID;
+        mSourceWindowId = View.NO_ID;
     }
 
     @Override

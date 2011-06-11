@@ -3704,7 +3704,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * The base implementation sets:
      * <ul>
      *   <li>{@link AccessibilityNodeInfo#setParent(View)},</li>
-     *   <li>{@link AccessibilityNodeInfo#setBounds(Rect)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setBoundsInParent(Rect)},</li>
+     *   <li>{@link AccessibilityNodeInfo#setBoundsInScreen(Rect)},</li>
      *   <li>{@link AccessibilityNodeInfo#setPackageName(CharSequence)},</li>
      *   <li>{@link AccessibilityNodeInfo#setClassName(CharSequence)},</li>
      *   <li>{@link AccessibilityNodeInfo#setContentDescription(CharSequence)},</li>
@@ -3724,7 +3725,12 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         Rect bounds = mAttachInfo.mTmpInvalRect;
         getDrawingRect(bounds);
-        info.setBounds(bounds);
+        info.setBoundsInParent(bounds);
+
+        int[] locationOnScreen = mAttachInfo.mInvalidateChildLocation;
+        getLocationOnScreen(locationOnScreen);
+        bounds.offset(locationOnScreen[0], locationOnScreen[1]);
+        info.setBoundsInScreen(bounds);
 
         ViewParent parent = getParent();
         if (parent instanceof View) {

@@ -26,6 +26,9 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.View;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * This class represents a node of the screen content. From the point of
  * view of an accessibility service the screen content is presented as tree
@@ -97,7 +100,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     private int mAccessibilityWindowId = View.NO_ID;
     private int mParentAccessibilityViewId = View.NO_ID;
     private int mBooleanProperties;
-    private final Rect mBounds = new Rect();
+    private final Rect mBoundsInParent = new Rect();
+    private final Rect mBoundsInScreen = new Rect();
 
     private CharSequence mPackageName;
     private CharSequence mClassName;
@@ -132,7 +136,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @return The window id.
      */
-    public int getAccessibilityWindowId() {
+    public int getWindowId() {
         return mAccessibilityWindowId;
     }
 
@@ -163,12 +167,16 @@ public class AccessibilityNodeInfo implements Parcelable {
     public AccessibilityNodeInfo getChild(int index) {
         enforceSealed();
         final int childAccessibilityViewId = mChildAccessibilityIds.get(index);
+        if (!canPerformRequestOverConnection(childAccessibilityViewId)) {
+            return null;
+        }
         try {
             return mConnection.findAccessibilityNodeInfoByAccessibilityId(mAccessibilityWindowId,
                     childAccessibilityViewId);
-        } catch (RemoteException e) {
-             return null;
+        } catch (RemoteException re) {
+             /* ignore*/
         }
+        return null;
     }
 
     /**
@@ -230,12 +238,37 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public boolean performAction(int action) {
         enforceSealed();
+        if (!canPerformRequestOverConnection(mAccessibilityViewId)) {
+            return false;
+        }
         try {
             return mConnection.performAccessibilityAction(mAccessibilityWindowId,
                     mAccessibilityViewId, action);
         } catch (RemoteException e) {
-            return false;
+            /* ignore */
         }
+        return false;
+    }
+
+    /**
+     * Finds {@link AccessibilityNodeInfo}s by text. The match is case
+     * insensitive containment.
+     *
+     * @param text The searched text.
+     * @return A list of node info.
+     */
+    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String text) {
+        enforceSealed();
+        if (!canPerformRequestOverConnection(mAccessibilityViewId)) {
+            return null;
+        }
+        try {
+            return mConnection.findAccessibilityNodeInfosByViewText(text, mAccessibilityWindowId,
+                    mAccessibilityViewId);
+        } catch (RemoteException e) {
+            /* ignore */
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -251,12 +284,16 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public AccessibilityNodeInfo getParent() {
         enforceSealed();
-        try {
-            return mConnection.findAccessibilityNodeInfoByAccessibilityId(mAccessibilityWindowId,
-                    mParentAccessibilityViewId);
-        } catch (RemoteException e) {
+        if (!canPerformRequestOverConnection(mAccessibilityViewId)) {
             return null;
         }
+        try {
+            return mConnection.findAccessibilityNodeInfoByAccessibilityId(
+                    mAccessibilityWindowId, mParentAccessibilityViewId);
+        } catch (RemoteException e) {
+            /* ignore */
+        }
+        return null;
     }
 
     /**
@@ -279,8 +316,9 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @param outBounds The output node bounds.
      */
-    public void getBounds(Rect outBounds) {
-        outBounds.set(mBounds.left, mBounds.top, mBounds.right, mBounds.bottom);
+    public void getBoundsInParent(Rect outBounds) {
+        outBounds.set(mBoundsInParent.left, mBoundsInParent.top,
+                mBoundsInParent.right, mBoundsInParent.bottom);
     }
 
     /**
@@ -293,9 +331,34 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
-    public void setBounds(Rect bounds) {
+    public void setBoundsInParent(Rect bounds) {
         enforceNotSealed();
-        mBounds.set(bounds.left, bounds.top, bounds.right, bounds.bottom);
+        mBoundsInParent.set(bounds.left, bounds.top, bounds.right, bounds.bottom);
+    }
+
+    /**
+     * Gets the node bounds in screen coordinates.
+     *
+     * @param outBounds The output node bounds.
+     */
+    public void getBoundsInScreen(Rect outBounds) {
+        outBounds.set(mBoundsInScreen.left, mBoundsInScreen.top,
+                mBoundsInScreen.right, mBoundsInScreen.bottom);
+    }
+
+    /**
+     * Sets the node bounds in screen coordinates.
+     * <p>
+     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     * @param bounds The node bounds.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setBoundsInScreen(Rect bounds) {
+        enforceNotSealed();
+        mBoundsInScreen.set(bounds.left, bounds.top, bounds.right, bounds.bottom);
     }
 
     /**
@@ -636,6 +699,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @hide
      */
     public final void setConnection(IAccessibilityServiceConnection connection) {
+        enforceNotSealed();
         mConnection = connection;
     }
 
@@ -777,10 +841,15 @@ public class AccessibilityNodeInfo implements Parcelable {
             parcel.writeInt(childIds.valueAt(i));
         }
 
-        parcel.writeInt(mBounds.top);
-        parcel.writeInt(mBounds.bottom);
-        parcel.writeInt(mBounds.left);
-        parcel.writeInt(mBounds.right);
+        parcel.writeInt(mBoundsInParent.top);
+        parcel.writeInt(mBoundsInParent.bottom);
+        parcel.writeInt(mBoundsInParent.left);
+        parcel.writeInt(mBoundsInParent.right);
+
+        parcel.writeInt(mBoundsInScreen.top);
+        parcel.writeInt(mBoundsInScreen.bottom);
+        parcel.writeInt(mBoundsInScreen.left);
+        parcel.writeInt(mBoundsInScreen.right);
 
         parcel.writeInt(mActions);
 
@@ -818,10 +887,15 @@ public class AccessibilityNodeInfo implements Parcelable {
             childIds.put(i, childId);
         }
 
-        mBounds.top = parcel.readInt();
-        mBounds.bottom = parcel.readInt();
-        mBounds.left = parcel.readInt();
-        mBounds.right = parcel.readInt();
+        mBoundsInParent.top = parcel.readInt();
+        mBoundsInParent.bottom = parcel.readInt();
+        mBoundsInParent.left = parcel.readInt();
+        mBoundsInParent.right = parcel.readInt();
+
+        mBoundsInScreen.top = parcel.readInt();
+        mBoundsInScreen.bottom = parcel.readInt();
+        mBoundsInScreen.left = parcel.readInt();
+        mBoundsInScreen.right = parcel.readInt();
 
         mActions = parcel.readInt();
 
@@ -842,7 +916,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         mAccessibilityViewId = View.NO_ID;
         mParentAccessibilityViewId = View.NO_ID;
         mChildAccessibilityIds.clear();
-        mBounds.set(0, 0, 0, 0);
+        mBoundsInParent.set(0, 0, 0, 0);
+        mBoundsInScreen.set(0, 0, 0, 0);
         mBooleanProperties = 0;
         mPackageName = null;
         mClassName = null;
@@ -867,6 +942,12 @@ public class AccessibilityNodeInfo implements Parcelable {
             actionSymbolicNames.put(ACTION_CLEAR_SELECTION, "ACTION_UNSELECT");
         }
         return actionSymbolicNames.get(action);
+    }
+
+    private boolean canPerformRequestOverConnection(int accessibilityViewId) {
+        return (mAccessibilityWindowId != View.NO_ID
+                && accessibilityViewId != View.NO_ID
+                && mConnection != null);
     }
 
     @Override
@@ -918,7 +999,8 @@ public class AccessibilityNodeInfo implements Parcelable {
            builder.append("]");
         }
 
-        builder.append("; bounds: " + mBounds);
+        builder.append("; boundsInParent: " + mBoundsInParent);
+        builder.append("; boundsInScreen: " + mBoundsInScreen);
 
         builder.append("; packageName: ").append(mPackageName);
         builder.append("; className: ").append(mClassName);

@@ -33,8 +33,8 @@ oneway interface IAccessibilityInteractionConnection {
     void findAccessibilityNodeInfoByViewId(int id, int interactionId,
         IAccessibilityInteractionConnectionCallback callback);
 
-    void findAccessibilityNodeInfosByViewText(String text, int interactionId,
-        IAccessibilityInteractionConnectionCallback callback);
+    void findAccessibilityNodeInfosByViewText(String text, int accessibilityViewId,
+        int interactionId, IAccessibilityInteractionConnectionCallback callback);
 
     void performAccessibilityAction(int accessibilityId, int action, int interactionId,
         IAccessibilityInteractionConnectionCallback callback);

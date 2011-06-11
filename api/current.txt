@@ -22719,13 +22719,11 @@ package android.view.accessibility {
     method public void appendRecord(android.view.accessibility.AccessibilityRecord);
     method public int describeContents();
     method public static java.lang.String eventTypeToString(int);
-    method public int getAccessibilityWindowId();
     method public long getEventTime();
     method public int getEventType();
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityRecord getRecord(int);
     method public int getRecordCount();
-    method public android.view.accessibility.AccessibilityNodeInfo getSource();
     method public void initFromParcel(android.os.Parcel);
     method public static android.view.accessibility.AccessibilityEvent obtain(int);
     method public static android.view.accessibility.AccessibilityEvent obtain(android.view.accessibility.AccessibilityEvent);
@@ -22733,7 +22731,6 @@ package android.view.accessibility {
     method public void setEventTime(long);
     method public void setEventType(int);
     method public void setPackageName(java.lang.CharSequence);
-    method public void setSource(android.view.View);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int INVALID_POSITION = -1; // 0xffffffff
@@ -22749,6 +22746,7 @@ package android.view.accessibility {
     field public static final int TYPE_VIEW_LONG_CLICKED = 2; // 0x2
     field public static final int TYPE_VIEW_SELECTED = 4; // 0x4
     field public static final int TYPE_VIEW_TEXT_CHANGED = 16; // 0x10
+    field public static final int TYPE_WINDOW_CONTENT_CHANGED = 2048; // 0x800
     field public static final int TYPE_WINDOW_STATE_CHANGED = 32; // 0x20
   }
 
@@ -22776,9 +22774,10 @@ package android.view.accessibility {
     method public void addAction(int);
     method public void addChild(android.view.View);
     method public int describeContents();
-    method public int getAccessibilityWindowId();
+    method public java.util.List<android.view.accessibility.AccessibilityNodeInfo> findAccessibilityNodeInfosByText(java.lang.String);
     method public int getActions();
-    method public void getBounds(android.graphics.Rect);
+    method public void getBoundsInParent(android.graphics.Rect);
+    method public void getBoundsInScreen(android.graphics.Rect);
     method public android.view.accessibility.AccessibilityNodeInfo getChild(int);
     method public int getChildCount();
     method public java.lang.CharSequence getClassName();
@@ -22786,6 +22785,7 @@ package android.view.accessibility {
     method public java.lang.CharSequence getPackageName();
     method public android.view.accessibility.AccessibilityNodeInfo getParent();
     method public java.lang.CharSequence getText();
+    method public int getWindowId();
     method public boolean isCheckable();
     method public boolean isChecked();
     method public boolean isClickable();
@@ -22799,7 +22799,8 @@ package android.view.accessibility {
     method public static android.view.accessibility.AccessibilityNodeInfo obtain();
     method public boolean performAction(int);
     method public void recycle();
-    method public void setBounds(android.graphics.Rect);
+    method public void setBoundsInParent(android.graphics.Rect);
+    method public void setBoundsInScreen(android.graphics.Rect);
     method public void setCheckable(boolean);
     method public void setChecked(boolean);
     method public void setClassName(java.lang.CharSequence);
@@ -22824,7 +22825,6 @@ package android.view.accessibility {
   }
 
   public class AccessibilityRecord {
-    ctor protected AccessibilityRecord();
     method public int getAddedCount();
     method public java.lang.CharSequence getBeforeText();
     method public java.lang.CharSequence getClassName();
@@ -22834,7 +22834,9 @@ package android.view.accessibility {
     method public int getItemCount();
     method public android.os.Parcelable getParcelableData();
     method public int getRemovedCount();
+    method public android.view.accessibility.AccessibilityNodeInfo getSource();
     method public java.util.List<java.lang.CharSequence> getText();
+    method public int getWindowId();
     method public boolean isChecked();
     method public boolean isEnabled();
     method public boolean isFullScreen();
@@ -22855,17 +22857,7 @@ package android.view.accessibility {
     method public void setParcelableData(android.os.Parcelable);
     method public void setPassword(boolean);
     method public void setRemovedCount(int);
-    field protected int mAddedCount;
-    field protected java.lang.CharSequence mBeforeText;
-    field protected int mBooleanProperties;
-    field protected java.lang.CharSequence mClassName;
-    field protected java.lang.CharSequence mContentDescription;
-    field protected int mCurrentItemIndex;
-    field protected int mFromIndex;
-    field protected int mItemCount;
-    field protected android.os.Parcelable mParcelableData;
-    field protected int mRemovedCount;
-    field protected final java.util.List mText;
+    method public void setSource(android.view.View);
   }
 
 }

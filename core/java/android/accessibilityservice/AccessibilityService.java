@@ -190,9 +190,9 @@ public abstract class AccessibilityService extends Service {
      *            <li>
      *              Register for all event types with no notification timeout and keep track
      *              for the active window by calling
-     *              {@link AccessibilityEvent#getAccessibilityWindowId()} of the last received
+     *              {@link AccessibilityEvent#getWindowId()} of the last received
      *              event and compare this with the
-     *              {@link AccessibilityNodeInfo#getAccessibilityWindowId()} before calling
+     *              {@link AccessibilityNodeInfo#getWindowId()} before calling
      *              retrieval methods on the latter.
      *            </li>
      *            <li>

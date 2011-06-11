@@ -22239,7 +22239,6 @@ package android.view.accessibility {
   }
 
   public class AccessibilityRecord {
-    ctor protected AccessibilityRecord();
     method public int getAddedCount();
     method public java.lang.CharSequence getBeforeText();
     method public java.lang.CharSequence getClassName();
@@ -22269,17 +22268,6 @@ package android.view.accessibility {
     method public void setParcelableData(android.os.Parcelable);
     method public void setPassword(boolean);
     method public void setRemovedCount(int);
-    field protected int mAddedCount;
-    field protected java.lang.CharSequence mBeforeText;
-    field protected int mBooleanProperties;
-    field protected java.lang.CharSequence mClassName;
-    field protected java.lang.CharSequence mContentDescription;
-    field protected int mCurrentItemIndex;
-    field protected int mFromIndex;
-    field protected int mItemCount;
-    field protected android.os.Parcelable mParcelableData;
-    field protected int mRemovedCount;
-    field protected final java.util.List mText;
   }
 }
 
