@@ -2924,6 +2924,7 @@ package android.app {
     method public static android.app.Fragment instantiate(android.content.Context, java.lang.String);
     method public static android.app.Fragment instantiate(android.content.Context, java.lang.String, android.os.Bundle);
     method public final boolean isAdded();
+    method public final boolean isDetached();
     method public final boolean isHidden();
     method public final boolean isInLayout();
     method public final boolean isRemoving();
