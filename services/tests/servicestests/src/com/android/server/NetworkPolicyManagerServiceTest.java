@@ -16,10 +16,15 @@
 
 package com.android.server;
 
+import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_PAID_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_PAID;
+import static android.net.NetworkStats.UID_ALL;
+import static android.net.TrafficStats.TEMPLATE_WIFI;
+import static com.android.server.net.NetworkPolicyManagerService.computeLastCycleBoundary;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
@@ -31,20 +36,30 @@ import android.app.IProcessObserver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.net.IConnectivityManager;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkStatsService;
+import android.net.LinkProperties;
+import android.net.NetworkInfo;
+import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkPolicy;
+import android.net.NetworkState;
+import android.net.NetworkStats;
 import android.os.Binder;
 import android.os.IPowerManager;
 import android.test.AndroidTestCase;
 import android.test.mock.MockPackageManager;
 import android.test.suitebuilder.annotation.LargeTest;
 import android.test.suitebuilder.annotation.Suppress;
+import android.text.format.Time;
+import android.util.TrustedTime;
 
 import com.android.server.net.NetworkPolicyManagerService;
 
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 
+import java.io.File;
 import java.util.concurrent.Future;
 
 /**
@@ -54,12 +69,18 @@ import java.util.concurrent.Future;
 public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     private static final String TAG = "NetworkPolicyManagerServiceTest";
 
+    private static final long TEST_START = 1194220800000L;
+    private static final String TEST_IFACE = "test0";
+
     private BroadcastInterceptingContext mServiceContext;
+    private File mPolicyDir;
 
     private IActivityManager mActivityManager;
     private IPowerManager mPowerManager;
     private INetworkStatsService mStatsService;
     private INetworkPolicyListener mPolicyListener;
+    private TrustedTime mTime;
+    private IConnectivityManager mConnManager;
 
     private NetworkPolicyManagerService mService;
     private IProcessObserver mProcessObserver;
@@ -90,13 +111,18 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
             }
         };
 
+        mPolicyDir = getContext().getFilesDir();
+
         mActivityManager = createMock(IActivityManager.class);
         mPowerManager = createMock(IPowerManager.class);
         mStatsService = createMock(INetworkStatsService.class);
         mPolicyListener = createMock(INetworkPolicyListener.class);
+        mTime = createMock(TrustedTime.class);
+        mConnManager = createMock(IConnectivityManager.class);
 
         mService = new NetworkPolicyManagerService(
-                mServiceContext, mActivityManager, mPowerManager, mStatsService);
+                mServiceContext, mActivityManager, mPowerManager, mStatsService, mTime, mPolicyDir);
+        mService.bindConnectivityManager(mConnManager);
 
         // RemoteCallbackList needs a binder to use as key
         expect(mPolicyListener.asBinder()).andReturn(mStubBinder).atLeastOnce();
@@ -122,12 +148,18 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     @Override
     public void tearDown() throws Exception {
+        for (File file : mPolicyDir.listFiles()) {
+            file.delete();
+        }
+
         mServiceContext = null;
+        mPolicyDir = null;
 
         mActivityManager = null;
         mPowerManager = null;
         mStatsService = null;
         mPolicyListener = null;
+        mTime = null;
 
         mService = null;
         mProcessObserver = null;
@@ -260,17 +292,120 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         verifyAndReset();
     }
 
+    public void testLastCycleBoundaryThisMonth() throws Exception {
+        // assume cycle day of "5th", which should be in same month
+        final long currentTime = parseTime("2007-11-14T00:00:00.000Z");
+        final long expectedCycle = parseTime("2007-11-05T00:00:00.000Z");
+
+        final NetworkPolicy policy = new NetworkPolicy(5, 1024L, 1024L);
+        final long actualCycle = computeLastCycleBoundary(currentTime, policy);
+        assertEquals(expectedCycle, actualCycle);
+    }
+
+    public void testLastCycleBoundaryLastMonth() throws Exception {
+        // assume cycle day of "20th", which should be in last month
+        final long currentTime = parseTime("2007-11-14T00:00:00.000Z");
+        final long expectedCycle = parseTime("2007-10-20T00:00:00.000Z");
+
+        final NetworkPolicy policy = new NetworkPolicy(20, 1024L, 1024L);
+        final long actualCycle = computeLastCycleBoundary(currentTime, policy);
+        assertEquals(expectedCycle, actualCycle);
+    }
+
+    public void testLastCycleBoundaryThisMonthFebruary() throws Exception {
+        // assume cycle day of "30th" in february; should go to january
+        final long currentTime = parseTime("2007-02-14T00:00:00.000Z");
+        final long expectedCycle = parseTime("2007-01-30T00:00:00.000Z");
+
+        final NetworkPolicy policy = new NetworkPolicy(30, 1024L, 1024L);
+        final long actualCycle = computeLastCycleBoundary(currentTime, policy);
+        assertEquals(expectedCycle, actualCycle);
+    }
+
+    public void testLastCycleBoundaryLastMonthFebruary() throws Exception {
+        // assume cycle day of "30th" in february, which should clamp
+        final long currentTime = parseTime("2007-03-14T00:00:00.000Z");
+        final long expectedCycle = parseTime("2007-03-01T00:00:00.000Z");
+
+        final NetworkPolicy policy = new NetworkPolicy(30, 1024L, 1024L);
+        final long actualCycle = computeLastCycleBoundary(currentTime, policy);
+        assertEquals(expectedCycle, actualCycle);
+    }
+
+    public void testNetworkPolicyAppliedCycleLastMonth() throws Exception {
+        long elapsedRealtime = 0;
+        NetworkState[] state = null;
+        NetworkStats stats = null;
+
+        final long TIME_FEB_15 = 1171497600000L;
+        final long TIME_MAR_10 = 1173484800000L;
+        final int CYCLE_DAY = 15;
+
+        // first, pretend that wifi network comes online. no policy active,
+        // which means we shouldn't push limit to interface.
+        state = new NetworkState[] { buildWifi() };
+        expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
+        expectTime(TIME_MAR_10 + elapsedRealtime);
+
+        replay();
+        mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        verifyAndReset();
+
+        // now change cycle to be on 15th, and test in early march, to verify we
+        // pick cycle day in previous month.
+        expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
+        expectTime(TIME_MAR_10 + elapsedRealtime);
+
+        // pretend that 512 bytes total have happened
+        stats = new NetworkStats.Builder(elapsedRealtime, 1).addEntry(
+                TEST_IFACE, UID_ALL, 256L, 256L).build();
+        expect(mStatsService.getSummaryForNetwork(TIME_FEB_15, TIME_MAR_10, TEMPLATE_WIFI, null))
+                .andReturn(stats).atLeastOnce();
+
+        // expect that quota remaining should be 1536 bytes
+        // TODO: write up NetworkManagementService mock
+
+        replay();
+        mService.setNetworkPolicy(TEMPLATE_WIFI, null, new NetworkPolicy(CYCLE_DAY, 1024L, 2048L));
+        verifyAndReset();
+    }
+
+    private static long parseTime(String time) {
+        final Time result = new Time();
+        result.parse3339(time);
+        return result.toMillis(true);
+    }
+
+    private static NetworkState buildWifi() {
+        final NetworkInfo info = new NetworkInfo(TYPE_WIFI, 0, null, null);
+        info.setDetailedState(DetailedState.CONNECTED, null, null);
+        final LinkProperties prop = new LinkProperties();
+        prop.setInterfaceName(TEST_IFACE);
+        return new NetworkState(info, prop, null);
+    }
+
+    public void expectTime(long currentTime) throws Exception {
+        expect(mTime.forceRefresh()).andReturn(false).anyTimes();
+        expect(mTime.hasCache()).andReturn(true).anyTimes();
+        expect(mTime.currentTimeMillis()).andReturn(currentTime).anyTimes();
+        expect(mTime.getCacheAge()).andReturn(0L).anyTimes();
+        expect(mTime.getCacheCertainty()).andReturn(0L).anyTimes();
+    }
+
     private void expectRulesChanged(int uid, int policy) throws Exception {
         mPolicyListener.onRulesChanged(eq(uid), eq(policy));
         expectLastCall().atLeastOnce();
     }
 
     private void replay() {
-        EasyMock.replay(mActivityManager, mPowerManager, mStatsService, mPolicyListener);
+        EasyMock.replay(mActivityManager, mPowerManager, mStatsService, mPolicyListener, mTime,
+                mConnManager);
     }
 
     private void verifyAndReset() {
-        EasyMock.verify(mActivityManager, mPowerManager, mStatsService, mPolicyListener);
-        EasyMock.reset(mActivityManager, mPowerManager, mStatsService, mPolicyListener);
+        EasyMock.verify(mActivityManager, mPowerManager, mStatsService, mPolicyListener, mTime,
+                mConnManager);
+        EasyMock.reset(mActivityManager, mPowerManager, mStatsService, mPolicyListener, mTime,
+                mConnManager);
     }
 }

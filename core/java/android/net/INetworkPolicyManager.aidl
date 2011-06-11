@@ -17,6 +17,7 @@
 package android.net;
 
 import android.net.INetworkPolicyListener;
+import android.net.NetworkPolicy;
 
 /**
  * Interface that creates and modifies network policy rules.
@@ -33,6 +34,7 @@ interface INetworkPolicyManager {
     void registerListener(INetworkPolicyListener listener);
     void unregisterListener(INetworkPolicyListener listener);
 
-    // TODO: build API to surface stats details for settings UI
+    void setNetworkPolicy(int networkType, String subscriberId, in NetworkPolicy policy);
+    NetworkPolicy getNetworkPolicy(int networkType, String subscriberId);
 
 }

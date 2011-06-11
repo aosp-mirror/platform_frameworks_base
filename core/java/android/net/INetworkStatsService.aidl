@@ -27,6 +27,8 @@ interface INetworkStatsService {
     /** Return historical stats for specific UID traffic that matches template. */
     NetworkStatsHistory getHistoryForUid(int uid, int networkTemplate);
 
+    /** Return usage summary for traffic that matches template. */
+    NetworkStats getSummaryForNetwork(long start, long end, int networkTemplate, String subscriberId);
     /** Return usage summary per UID for traffic that matches template. */
     NetworkStats getSummaryForAllUid(long start, long end, int networkTemplate);
 

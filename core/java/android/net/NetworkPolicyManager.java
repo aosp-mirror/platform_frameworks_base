@@ -51,6 +51,23 @@ public class NetworkPolicyManager {
         return (NetworkPolicyManager) context.getSystemService(Context.NETWORK_POLICY_SERVICE);
     }
 
+    /** {@hide} */
+    public void setNetworkPolicy(int networkType, String subscriberId, NetworkPolicy policy) {
+        try {
+            mService.setNetworkPolicy(networkType, subscriberId, policy);
+        } catch (RemoteException e) {
+        }
+    }
+
+    /** {@hide} */
+    public NetworkPolicy getNetworkPolicy(int networkType, String subscriberId) {
+        try {
+            return mService.getNetworkPolicy(networkType, subscriberId);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     /**
      * Set policy flags for specific UID.
      *
