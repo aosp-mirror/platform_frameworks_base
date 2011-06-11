@@ -14,170 +14,170 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/relative_layout_ltr"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:layoutDirection="ltr">
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/relative_layout_2_ltr"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="fill_parent"
+    <LinearLayout android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:layoutDirection="ltr">
+
+        <RelativeLayout android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#FF000000"
+                        android:padding="10px">
+
+            <TextView android:id="@+id/label_1"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:text="Type here:"/>
+
+            <EditText android:id="@+id/entry_1"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_below="@id/label_1"/>
+
+            <Button android:id="@+id/ok_1"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#FF000000"
-                    android:padding="10px">
+                    android:layout_below="@id/entry_1"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="10px"
+                    android:text="OK"/>
 
-        <TextView android:id="@+id/label_1"
-                  android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-                  android:text="Type here:"/>
-
-        <EditText android:id="@+id/entry_1"
-                  android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_below="@id/label_1"/>
-
-        <Button android:id="@+id/ok_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/entry_1"
-                android:layout_alignParentRight="true"
-                android:layout_marginLeft="10px"
-                android:text="OK"/>
-
-        <Button android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/ok_1"
-                android:layout_alignTop="@id/ok_1"
-                android:text="Cancel"/>
-    </RelativeLayout>
-
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="fill_parent"
+            <Button android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#FF000000"
-                    android:padding="10px"
-                    android:layoutDirection="ltr">
+                    android:layout_toLeftOf="@id/ok_1"
+                    android:layout_alignTop="@id/ok_1"
+                    android:text="Cancel"/>
+        </RelativeLayout>
 
-        <TextView android:id="@+id/label_2"
-                  android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-                  android:text="Type here:"/>
+        <RelativeLayout android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#FF000000"
+                        android:padding="10px"
+                        android:layoutDirection="ltr">
 
-        <EditText android:id="@+id/entry_2"
-                  android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_below="@id/label_2"/>
+            <TextView android:id="@+id/label_2"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:text="Type here:"/>
 
-        <Button android:id="@+id/ok_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/entry_2"
-                android:layout_alignParentRight="true"
-                android:layout_marginLeft="10px"
-                android:text="OK"/>
+            <EditText android:id="@+id/entry_2"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_below="@id/label_2"/>
 
-        <Button android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/ok_2"
-                android:layout_alignTop="@id/ok_2"
-                android:text="Cancel"/>
-    </RelativeLayout>
-
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="fill_parent"
+            <Button android:id="@+id/ok_2"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#FF000000"
-                    android:padding="10px"
-                    android:layoutDirection="inherit">
+                    android:layout_below="@id/entry_2"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="10px"
+                    android:text="OK"/>
 
-        <TextView android:id="@+id/label_3"
-                  android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-                  android:text="Type here:"/>
-
-        <EditText android:id="@+id/entry_3"
-                  android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_below="@id/label_3"/>
-
-        <Button android:id="@+id/ok_3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/entry_3"
-                android:layout_alignParentRight="true"
-                android:layout_marginLeft="10px"
-                android:text="OK"/>
-
-        <Button android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/ok_3"
-                android:layout_alignTop="@id/ok_3"
-                android:text="Cancel"/>
-    </RelativeLayout>
-
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="fill_parent"
+            <Button android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#FF000000"
-                    android:padding="10px"
-                    android:layoutDirection="rtl">
+                    android:layout_toLeftOf="@id/ok_2"
+                    android:layout_alignTop="@id/ok_2"
+                    android:text="Cancel"/>
+        </RelativeLayout>
 
-        <TextView android:id="@+id/label_4"
-                  android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-                  android:text="Type here:"/>
-
-        <EditText android:id="@+id/entry_4"
-                  android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_below="@id/label_4"/>
-
-        <Button android:id="@+id/ok_4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/entry_4"
-                android:layout_alignParentRight="true"
-                android:layout_marginLeft="10px"
-                android:text="OK"/>
-
-        <Button android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/ok_4"
-                android:layout_alignTop="@id/ok_4"
-                android:text="Cancel"/>
-    </RelativeLayout>
-
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="fill_parent"
+        <RelativeLayout android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#FF000000"
+                        android:padding="10px"
+                        android:layoutDirection="inherit">
+    
+            <TextView android:id="@+id/label_3"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:text="Type here:"/>
+    
+            <EditText android:id="@+id/entry_3"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_below="@id/label_3"/>
+    
+            <Button android:id="@+id/ok_3"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="#FF000000"
-                    android:padding="10px"
-                    android:layoutDirection="locale">
+                    android:layout_below="@id/entry_3"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="10px"
+                    android:text="OK"/>
+    
+            <Button android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/ok_3"
+                    android:layout_alignTop="@id/ok_3"
+                    android:text="Cancel"/>
+        </RelativeLayout>
 
-        <TextView android:id="@+id/label_4"
-                  android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-                  android:text="Type here:"/>
+        <RelativeLayout android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#FF000000"
+                        android:padding="10px"
+                        android:layoutDirection="rtl">
 
-        <EditText android:id="@+id/entry_4"
-                  android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_below="@id/label_4"/>
+            <TextView android:id="@+id/label_4"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:text="Type here:"/>
 
-        <Button android:id="@+id/ok_4"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/entry_4"
-                android:layout_alignParentRight="true"
-                android:layout_marginLeft="10px"
-                android:text="OK"/>
+            <EditText android:id="@+id/entry_4"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_below="@id/label_4"/>
 
-        <Button android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toLeftOf="@id/ok_4"
-                android:layout_alignTop="@id/ok_4"
-                android:text="Cancel"/>
-    </RelativeLayout>
+            <Button android:id="@+id/ok_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/entry_4"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="10px"
+                    android:text="OK"/>
 
-</LinearLayout>
+            <Button android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/ok_4"
+                    android:layout_alignTop="@id/ok_4"
+                    android:text="Cancel"/>
+        </RelativeLayout>
+
+        <RelativeLayout android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#FF000000"
+                        android:padding="10px"
+                        android:layoutDirection="locale">
+    
+            <TextView android:id="@+id/label_4"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:text="Type here:"/>
+    
+            <EditText android:id="@+id/entry_4"
+                      android:layout_width="fill_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_below="@id/label_4"/>
+
+            <Button android:id="@+id/ok_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/entry_4"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginLeft="10px"
+                    android:text="OK"/>
+    
+            <Button android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@id/ok_4"
+                    android:layout_alignTop="@id/ok_4"
+                    android:text="Cancel"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
