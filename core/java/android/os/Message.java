@@ -249,9 +249,10 @@ public final class Message implements Parcelable {
      * freed.
      */
     public void recycle() {
+        clearForRecycle();
+
         synchronized (sPoolSync) {
             if (sPoolSize < MAX_POOL_SIZE) {
-                clearForRecycle();
                 next = sPool;
                 sPool = this;
                 sPoolSize++;
