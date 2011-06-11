@@ -711,6 +711,17 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         requestBindService();
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            if (mWorkerThread != null) {
+                mWorkerThread.quit();
+            }
+        } finally {
+            super.finalize();
+        }
+    }
+
     private void loadNextIndexInBackground() {
         mWorkerQueue.post(new Runnable() {
             @Override
