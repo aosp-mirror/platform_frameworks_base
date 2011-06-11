@@ -803,7 +803,7 @@ final class FragmentManagerImpl extends FragmentManager {
                     if (newState > Fragment.STOPPED) {
                         if (DEBUG) Log.v(TAG, "moveto STARTED: " + f);
                         f.mCalled = false;
-                        f.onStart();
+                        f.performStart();
                         if (!f.mCalled) {
                             throw new SuperNotCalledException("Fragment " + f
                                     + " did not call through to super.onStart()");
@@ -856,7 +856,7 @@ final class FragmentManagerImpl extends FragmentManager {
                             }
                         }
                         f.mCalled = false;
-                        f.onDestroyView();
+                        f.performDestroyView();
                         if (!f.mCalled) {
                             throw new SuperNotCalledException("Fragment " + f
                                     + " did not call through to super.onDestroyView()");
@@ -1006,7 +1006,7 @@ final class FragmentManagerImpl extends FragmentManager {
         }
         mAvailIndices.add(f.mIndex);
         mActivity.invalidateFragmentIndex(f.mIndex);
-        f.clearIndex();
+        f.initState();
     }
     
     public void addFragment(Fragment fragment, boolean moveToStateNow) {

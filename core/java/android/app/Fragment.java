@@ -587,11 +587,6 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         mWho = "android:fragment:" + mIndex;
    }
     
-    final void clearIndex() {
-        mIndex = -1;
-        mWho = null;
-    }
-    
     final boolean isInBackStack() {
         return mBackStackNesting > 0;
     }
@@ -780,6 +775,15 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
      */
     final public boolean isAdded() {
         return mActivity != null && mAdded;
+    }
+
+    /**
+     * Return true if the fragment has been explicitly detached from the UI.
+     * That is, {@link FragmentTransaction#detach(Fragment)
+     * FragmentTransaction.detach(Fragment)} has been used on it.
+     */
+    final public boolean isDetached() {
+        return mDetached;
     }
 
     /**
@@ -1203,6 +1207,35 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     }
 
     /**
+     * Called by the fragment manager once this fragment has been removed,
+     * so that we don't have any left-over state if the application decides
+     * to re-use the instance.  This only clears state that the framework
+     * internally manages, not things the application sets.
+     */
+    void initState() {
+        mIndex = -1;
+        mWho = null;
+        mAdded = false;
+        mRemoving = false;
+        mResumed = false;
+        mFromLayout = false;
+        mInLayout = false;
+        mRestored = false;
+        mBackStackNesting = 0;
+        mFragmentManager = null;
+        mActivity = mImmediateActivity = null;
+        mFragmentId = 0;
+        mContainerId = 0;
+        mTag = null;
+        mHidden = false;
+        mDetached = false;
+        mRetaining = false;
+        mLoaderManager = null;
+        mLoadersStarted = false;
+        mCheckedForLoaderManager = false;
+    }
+
+    /**
      * Called when the fragment is no longer attached to its activity.  This
      * is called after {@link #onDestroy()}.
      */
@@ -1429,6 +1462,13 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         }
     }
 
+    void performStart() {
+        onStart();
+        if (mLoaderManager != null) {
+            mLoaderManager.doReportStart();
+        }
+    }
+
     void performStop() {
         onStop();
         
@@ -1445,6 +1485,13 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
                     mLoaderManager.doRetain();
                 }
             }
+        }
+    }
+
+    void performDestroyView() {
+        onDestroyView();
+        if (mLoaderManager != null) {
+            mLoaderManager.doReportNextStart();
         }
     }
 }
