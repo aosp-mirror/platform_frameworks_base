@@ -676,7 +676,8 @@ public class WallpaperManager {
 
         bm.setDensity(DisplayMetrics.DENSITY_DEVICE);
 
-        if (bm.getWidth() == width && bm.getHeight() == height) {
+        if (width <= 0 || height <= 0
+                || (bm.getWidth() == width && bm.getHeight() == height)) {
             return bm;
         }
 
