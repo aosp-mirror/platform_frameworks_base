@@ -293,9 +293,9 @@ private:
     // by calling setBufferCount or setBufferCountServer
     int mBufferCount;
 
-    // mRequestedBufferCount is the number of buffer slots requested by the
-    // client. The default is zero, which means the client doesn't care how
-    // many buffers there is.
+    // mClientBufferCount is the number of buffer slots requested by the client.
+    // The default is zero, which means the client doesn't care how many buffers
+    // there is.
     int mClientBufferCount;
 
     // mServerBufferCount buffer count requested by the server-side
