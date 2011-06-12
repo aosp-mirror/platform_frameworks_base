@@ -3800,13 +3800,13 @@ public final class Settings {
         /** {@hide} */
         public static final String NETSTATS_PERSIST_THRESHOLD = "netstats_persist_threshold";
         /** {@hide} */
-        public static final String NETSTATS_SUMMARY_BUCKET_DURATION = "netstats_summary_bucket_duration";
+        public static final String NETSTATS_NETWORK_BUCKET_DURATION = "netstats_network_bucket_duration";
         /** {@hide} */
-        public static final String NETSTATS_SUMMARY_MAX_HISTORY = "netstats_summary_max_history";
+        public static final String NETSTATS_NETWORK_MAX_HISTORY = "netstats_network_max_history";
         /** {@hide} */
-        public static final String NETSTATS_DETAIL_BUCKET_DURATION = "netstats_detail_bucket_duration";
+        public static final String NETSTATS_UID_BUCKET_DURATION = "netstats_uid_bucket_duration";
         /** {@hide} */
-        public static final String NETSTATS_DETAIL_MAX_HISTORY = "netstats_detail_max_history";
+        public static final String NETSTATS_UID_MAX_HISTORY = "netstats_uid_max_history";
 
         /**
          * @hide
