@@ -882,8 +882,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
 
         final String[] ifaces = listInterfaces();
-        final NetworkStats.Builder stats = new NetworkStats.Builder(
-                SystemClock.elapsedRealtime(), ifaces.length);
+        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), ifaces.length);
 
         for (String iface : ifaces) {
             final long rx = getInterfaceCounter(iface, true);
@@ -891,7 +890,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             stats.addEntry(iface, NetworkStats.UID_ALL, rx, tx);
         }
 
-        return stats.build();
+        return stats;
     }
 
     @Override
@@ -900,7 +899,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
 
         final String[] knownUids = PATH_PROC_UID_STAT.list();
-        final NetworkStats.Builder stats = new NetworkStats.Builder(
+        final NetworkStats stats = new NetworkStats(
                 SystemClock.elapsedRealtime(), knownUids.length);
 
         for (String uid : knownUids) {
@@ -908,7 +907,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             collectNetworkStatsDetail(stats, uidInt);
         }
 
-        return stats.build();
+        return stats;
     }
 
     @Override
@@ -918,13 +917,12 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                     android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
         }
 
-        final NetworkStats.Builder stats = new NetworkStats.Builder(
-                SystemClock.elapsedRealtime(), 1);
+        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 1);
         collectNetworkStatsDetail(stats, uid);
-        return stats.build();
+        return stats;
     }
 
-    private void collectNetworkStatsDetail(NetworkStats.Builder stats, int uid) {
+    private void collectNetworkStatsDetail(NetworkStats stats, int uid) {
         // TODO: kernel module will provide interface-level stats in future
         // TODO: migrate these stats to come across netd in bulk, instead of all
         // these individual file reads.

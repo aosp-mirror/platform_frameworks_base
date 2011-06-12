@@ -16,7 +16,6 @@
 
 package android.net;
 
-import android.os.SystemClock;
 import android.test.suitebuilder.annotation.SmallTest;
 
 import junit.framework.TestCase;
@@ -25,12 +24,14 @@ import junit.framework.TestCase;
 public class NetworkStatsTest extends TestCase {
 
     private static final String TEST_IFACE = "test0";
+    private static final int TEST_UID = 1001;
+    private static final long TEST_START = 1194220800000L;
 
     public void testFindIndex() throws Exception {
-        final NetworkStats stats = new NetworkStats.Builder(SystemClock.elapsedRealtime(), 3)
+        final NetworkStats stats = new NetworkStats(TEST_START, 3)
                 .addEntry(TEST_IFACE, 100, 1024, 0)
                 .addEntry(TEST_IFACE, 101, 0, 1024)
-                .addEntry(TEST_IFACE, 102, 1024, 1024).build();
+                .addEntry(TEST_IFACE, 102, 1024, 1024);
 
         assertEquals(2, stats.findIndex(TEST_IFACE, 102));
         assertEquals(2, stats.findIndex(TEST_IFACE, 102));
@@ -38,14 +39,40 @@ public class NetworkStatsTest extends TestCase {
         assertEquals(-1, stats.findIndex(TEST_IFACE, 6));
     }
 
-    public void testSubtractIdenticalData() throws Exception {
-        final NetworkStats before = new NetworkStats.Builder(SystemClock.elapsedRealtime(), 2)
-                .addEntry(TEST_IFACE, 100, 1024, 0)
-                .addEntry(TEST_IFACE, 101, 0, 1024).build();
+    public void testAddEntryGrow() throws Exception {
+        final NetworkStats stats = new NetworkStats(TEST_START, 2);
 
-        final NetworkStats after = new NetworkStats.Builder(SystemClock.elapsedRealtime(), 2)
+        assertEquals(0, stats.size);
+        assertEquals(2, stats.iface.length);
+
+        stats.addEntry(TEST_IFACE, TEST_UID, 1L, 2L);
+        stats.addEntry(TEST_IFACE, TEST_UID, 2L, 2L);
+
+        assertEquals(2, stats.size);
+        assertEquals(2, stats.iface.length);
+
+        stats.addEntry(TEST_IFACE, TEST_UID, 3L, 4L);
+        stats.addEntry(TEST_IFACE, TEST_UID, 4L, 4L);
+        stats.addEntry(TEST_IFACE, TEST_UID, 5L, 5L);
+
+        assertEquals(5, stats.size);
+        assertTrue(stats.iface.length >= 5);
+
+        assertEquals(1L, stats.rx[0]);
+        assertEquals(2L, stats.rx[1]);
+        assertEquals(3L, stats.rx[2]);
+        assertEquals(4L, stats.rx[3]);
+        assertEquals(5L, stats.rx[4]);
+    }
+
+    public void testSubtractIdenticalData() throws Exception {
+        final NetworkStats before = new NetworkStats(TEST_START, 2)
                 .addEntry(TEST_IFACE, 100, 1024, 0)
-                .addEntry(TEST_IFACE, 101, 0, 1024).build();
+                .addEntry(TEST_IFACE, 101, 0, 1024);
+
+        final NetworkStats after = new NetworkStats(TEST_START, 2)
+                .addEntry(TEST_IFACE, 100, 1024, 0)
+                .addEntry(TEST_IFACE, 101, 0, 1024);
 
         final NetworkStats result = after.subtract(before);
 
@@ -57,13 +84,13 @@ public class NetworkStatsTest extends TestCase {
     }
 
     public void testSubtractIdenticalRows() throws Exception {
-        final NetworkStats before = new NetworkStats.Builder(SystemClock.elapsedRealtime(), 2)
+        final NetworkStats before = new NetworkStats(TEST_START, 2)
                 .addEntry(TEST_IFACE, 100, 1024, 0)
-                .addEntry(TEST_IFACE, 101, 0, 1024).build();
+                .addEntry(TEST_IFACE, 101, 0, 1024);
 
-        final NetworkStats after = new NetworkStats.Builder(SystemClock.elapsedRealtime(), 2)
+        final NetworkStats after = new NetworkStats(TEST_START, 2)
                 .addEntry(TEST_IFACE, 100, 1025, 2)
-                .addEntry(TEST_IFACE, 101, 3, 1028).build();
+                .addEntry(TEST_IFACE, 101, 3, 1028);
 
         final NetworkStats result = after.subtract(before);
 
@@ -75,14 +102,14 @@ public class NetworkStatsTest extends TestCase {
     }
 
     public void testSubtractNewRows() throws Exception {
-        final NetworkStats before = new NetworkStats.Builder(SystemClock.elapsedRealtime(), 2)
+        final NetworkStats before = new NetworkStats(TEST_START, 2)
                 .addEntry(TEST_IFACE, 100, 1024, 0)
-                .addEntry(TEST_IFACE, 101, 0, 1024).build();
+                .addEntry(TEST_IFACE, 101, 0, 1024);
 
-        final NetworkStats after = new NetworkStats.Builder(SystemClock.elapsedRealtime(), 3)
+        final NetworkStats after = new NetworkStats(TEST_START, 3)
                 .addEntry(TEST_IFACE, 100, 1024, 0)
                 .addEntry(TEST_IFACE, 101, 0, 1024)
-                .addEntry(TEST_IFACE, 102, 1024, 1024).build();
+                .addEntry(TEST_IFACE, 102, 1024, 1024);
 
         final NetworkStats result = after.subtract(before);
 

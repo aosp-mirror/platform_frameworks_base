@@ -255,7 +255,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // combine all interfaces that match template
             final String subscriberId = getActiveSubscriberId();
             final NetworkStatsHistory combined = new NetworkStatsHistory(
-                    mSettings.getNetworkBucketDuration());
+                    mSettings.getNetworkBucketDuration(), estimateNetworkBuckets());
             for (InterfaceIdentity ident : mNetworkStats.keySet()) {
                 final NetworkStatsHistory history = mNetworkStats.get(ident);
                 if (ident.matchesTemplate(networkTemplate, subscriberId)) {
@@ -297,9 +297,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 }
             }
 
-            final NetworkStats.Builder stats = new NetworkStats.Builder(end - start, 1);
+            final NetworkStats stats = new NetworkStats(end - start, 1);
             stats.addEntry(IFACE_ALL, UID_ALL, tx, tx);
-            return stats.build();
+            return stats;
         }
     }
 
@@ -313,7 +313,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             ensureUidStatsLoadedLocked();
 
             final int size = mUidStats.size();
-            final NetworkStats.Builder stats = new NetworkStats.Builder(end - start, size);
+            final NetworkStats stats = new NetworkStats(end - start, size);
 
             long[] total = new long[2];
             for (int i = 0; i < size; i++) {
@@ -322,7 +322,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 total = history.getTotalData(start, end, total);
                 stats.addEntry(IFACE_ALL, uid, total[0], total[1]);
             }
-            return stats.build();
+            return stats;
         }
     }
 
@@ -510,9 +510,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // update when no existing, or when bucket duration changed
         NetworkStatsHistory updated = null;
         if (existing == null) {
-            updated = new NetworkStatsHistory(bucketDuration);
+            updated = new NetworkStatsHistory(bucketDuration, 10);
         } else if (existing.bucketDuration != bucketDuration) {
-            updated = new NetworkStatsHistory(bucketDuration);
+            updated = new NetworkStatsHistory(
+                    bucketDuration, estimateResizeBuckets(existing, bucketDuration));
             updated.recordEntireHistory(existing);
         }
 
@@ -531,9 +532,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // update when no existing, or when bucket duration changed
         NetworkStatsHistory updated = null;
         if (existing == null) {
-            updated = new NetworkStatsHistory(bucketDuration);
+            updated = new NetworkStatsHistory(bucketDuration, 10);
         } else if (existing.bucketDuration != bucketDuration) {
-            updated = new NetworkStatsHistory(bucketDuration);
+            updated = new NetworkStatsHistory(
+                    bucketDuration, estimateResizeBuckets(existing, bucketDuration));
             updated.recordEntireHistory(existing);
         }
 
@@ -807,6 +809,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final TelephonyManager telephony = (TelephonyManager) mContext.getSystemService(
                 Context.TELEPHONY_SERVICE);
         return telephony.getSubscriberId();
+    }
+
+    private int estimateNetworkBuckets() {
+        return (int) (mSettings.getNetworkMaxHistory() / mSettings.getNetworkBucketDuration());
+    }
+
+    private int estimateUidBuckets() {
+        return (int) (mSettings.getUidMaxHistory() / mSettings.getUidBucketDuration());
+    }
+
+    private static int estimateResizeBuckets(NetworkStatsHistory existing, long newBucketDuration) {
+        return (int) (existing.bucketCount * existing.bucketDuration / newBucketDuration);
     }
 
     /**

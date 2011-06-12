@@ -145,8 +145,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         elapsedRealtime += HOUR_IN_MILLIS;
         expectTime(TEST_START + elapsedRealtime);
         expectDefaultSettings();
-        expectNetworkStatsSummary(new NetworkStats.Builder(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, 1024L, 2048L).build());
+        expectNetworkStatsSummary(new NetworkStats(elapsedRealtime, 1)
+                .addEntry(TEST_IFACE, UID_ALL, 1024L, 2048L));
         expectNetworkStatsDetail(buildEmptyStats(elapsedRealtime));
 
         replay();
@@ -161,8 +161,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         elapsedRealtime += DAY_IN_MILLIS;
         expectTime(TEST_START + elapsedRealtime);
         expectDefaultSettings();
-        expectNetworkStatsSummary(new NetworkStats.Builder(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, 4096L, 8192L).build());
+        expectNetworkStatsSummary(new NetworkStats(elapsedRealtime, 1)
+                .addEntry(TEST_IFACE, UID_ALL, 4096L, 8192L));
         expectNetworkStatsDetail(buildEmptyStats(elapsedRealtime));
 
         replay();
@@ -196,12 +196,12 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         elapsedRealtime += HOUR_IN_MILLIS;
         expectTime(TEST_START + elapsedRealtime);
         expectDefaultSettings();
-        expectNetworkStatsSummary(new NetworkStats.Builder(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, 1024L, 2048L).build());
+        expectNetworkStatsSummary(new NetworkStats(elapsedRealtime, 1)
+                .addEntry(TEST_IFACE, UID_ALL, 1024L, 2048L));
         // TODO: switch these stats to specific iface
-        expectNetworkStatsDetail(new NetworkStats.Builder(elapsedRealtime, 2)
+        expectNetworkStatsDetail(new NetworkStats(elapsedRealtime, 2)
                 .addEntry(IFACE_ALL, TEST_UID_1, 512L, 256L)
-                .addEntry(IFACE_ALL, TEST_UID_2, 128L, 128L).build());
+                .addEntry(IFACE_ALL, TEST_UID_2, 128L, 128L));
 
         replay();
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
@@ -262,8 +262,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         elapsedRealtime += 2 * HOUR_IN_MILLIS;
         expectTime(TEST_START + elapsedRealtime);
         expectSettings(0L, HOUR_IN_MILLIS, WEEK_IN_MILLIS);
-        expectNetworkStatsSummary(new NetworkStats.Builder(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, 512L, 512L).build());
+        expectNetworkStatsSummary(new NetworkStats(elapsedRealtime, 1)
+                .addEntry(TEST_IFACE, UID_ALL, 512L, 512L));
         expectNetworkStatsDetail(buildEmptyStats(elapsedRealtime));
 
         replay();
@@ -378,7 +378,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     }
 
     private static NetworkStats buildEmptyStats(long elapsedRealtime) {
-        return new NetworkStats.Builder(elapsedRealtime, 0).build();
+        return new NetworkStats(elapsedRealtime, 0);
     }
 
     private void replay() {

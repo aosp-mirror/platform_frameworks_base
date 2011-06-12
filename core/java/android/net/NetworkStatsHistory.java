@@ -53,11 +53,15 @@ public class NetworkStatsHistory implements Parcelable {
     public long[] tx;
 
     public NetworkStatsHistory(long bucketDuration) {
+        this(bucketDuration, 10);
+    }
+
+    public NetworkStatsHistory(long bucketDuration, int initialSize) {
         this.bucketDuration = bucketDuration;
-        bucketStart = new long[0];
-        rx = new long[0];
-        tx = new long[0];
-        bucketCount = bucketStart.length;
+        bucketStart = new long[initialSize];
+        rx = new long[initialSize];
+        tx = new long[initialSize];
+        bucketCount = 0;
     }
 
     public NetworkStatsHistory(Parcel in) {
@@ -168,8 +172,8 @@ public class NetworkStatsHistory implements Parcelable {
      */
     private void insertBucket(int index, long start) {
         // create more buckets when needed
-        if (bucketCount + 1 > bucketStart.length) {
-            final int newLength = bucketStart.length + 10;
+        if (bucketCount >= bucketStart.length) {
+            final int newLength = Math.max(bucketStart.length, 10) * 3 / 2;
             bucketStart = Arrays.copyOf(bucketStart, newLength);
             rx = Arrays.copyOf(rx, newLength);
             tx = Arrays.copyOf(tx, newLength);

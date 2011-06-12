@@ -23,6 +23,7 @@ import android.util.SparseBooleanArray;
 
 import java.io.CharArrayWriter;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashSet;
 
 /**
@@ -48,74 +49,60 @@ public class NetworkStats implements Parcelable {
      * generated.
      */
     public final long elapsedRealtime;
-    public final String[] iface;
-    public final int[] uid;
-    public final long[] rx;
-    public final long[] tx;
+    public int size;
+    public String[] iface;
+    public int[] uid;
+    public long[] rx;
+    public long[] tx;
 
     // TODO: add fg/bg stats once reported by kernel
 
-    private NetworkStats(long elapsedRealtime, String[] iface, int[] uid, long[] rx, long[] tx) {
+    public NetworkStats(long elapsedRealtime, int initialSize) {
         this.elapsedRealtime = elapsedRealtime;
-        this.iface = iface;
-        this.uid = uid;
-        this.rx = rx;
-        this.tx = tx;
+        this.size = 0;
+        this.iface = new String[initialSize];
+        this.uid = new int[initialSize];
+        this.rx = new long[initialSize];
+        this.tx = new long[initialSize];
     }
 
     public NetworkStats(Parcel parcel) {
         elapsedRealtime = parcel.readLong();
+        size = parcel.readInt();
         iface = parcel.createStringArray();
         uid = parcel.createIntArray();
         rx = parcel.createLongArray();
         tx = parcel.createLongArray();
     }
 
-    public static class Builder {
-        private long mElapsedRealtime;
-        private final String[] mIface;
-        private final int[] mUid;
-        private final long[] mRx;
-        private final long[] mTx;
-
-        private int mIndex = 0;
-
-        public Builder(long elapsedRealtime, int size) {
-            mElapsedRealtime = elapsedRealtime;
-            mIface = new String[size];
-            mUid = new int[size];
-            mRx = new long[size];
-            mTx = new long[size];
+    public NetworkStats addEntry(String iface, int uid, long rx, long tx) {
+        if (size >= this.iface.length) {
+            final int newLength = Math.max(this.iface.length, 10) * 3 / 2;
+            this.iface = Arrays.copyOf(this.iface, newLength);
+            this.uid = Arrays.copyOf(this.uid, newLength);
+            this.rx = Arrays.copyOf(this.rx, newLength);
+            this.tx = Arrays.copyOf(this.tx, newLength);
         }
 
-        public Builder addEntry(String iface, int uid, long rx, long tx) {
-            mIface[mIndex] = iface;
-            mUid[mIndex] = uid;
-            mRx[mIndex] = rx;
-            mTx[mIndex] = tx;
-            mIndex++;
-            return this;
-        }
+        this.iface[size] = iface;
+        this.uid[size] = uid;
+        this.rx[size] = rx;
+        this.tx[size] = tx;
+        size++;
 
-        public NetworkStats build() {
-            if (mIndex != mIface.length) {
-                throw new IllegalArgumentException("unexpected number of entries");
-            }
-            return new NetworkStats(mElapsedRealtime, mIface, mUid, mRx, mTx);
-        }
+        return this;
     }
 
+    @Deprecated
     public int length() {
-        // length is identical for all fields
-        return iface.length;
+        return size;
     }
 
     /**
      * Find first stats index that matches the requested parameters.
      */
     public int findIndex(String iface, int uid) {
-        final int length = length();
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < size; i++) {
             if (equal(iface, this.iface[i]) && uid == this.uid[i]) {
                 return i;
             }
@@ -195,9 +182,8 @@ public class NetworkStats implements Parcelable {
         }
 
         // result will have our rows, and elapsed time between snapshots
-        final int length = length();
-        final NetworkStats.Builder result = new NetworkStats.Builder(deltaRealtime, length);
-        for (int i = 0; i < length; i++) {
+        final NetworkStats result = new NetworkStats(deltaRealtime, size);
+        for (int i = 0; i < size; i++) {
             final String iface = this.iface[i];
             final int uid = this.uid[i];
 
@@ -221,7 +207,7 @@ public class NetworkStats implements Parcelable {
             }
         }
 
-        return result.build();
+        return result;
     }
 
     private static boolean equal(Object a, Object b) {
@@ -255,6 +241,7 @@ public class NetworkStats implements Parcelable {
     /** {@inheritDoc} */
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(elapsedRealtime);
+        dest.writeInt(size);
         dest.writeStringArray(iface);
         dest.writeIntArray(uid);
         dest.writeLongArray(rx);
