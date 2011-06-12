@@ -622,4 +622,29 @@ TEST_F(SurfaceTextureClientTest, GetTransformMatrixSucceedsAfterFreeingBuffersWi
     EXPECT_EQ(1.f, mtx[15]);
 }
 
+// This test verifies that the buffer format can be queried immediately after
+// it is set.
+TEST_F(SurfaceTextureClientTest, DISABLED_QueryFormatAfterSettingWorks) {
+    sp<ANativeWindow> anw(mSTC);
+    int fmts[] = {
+        // RGBA_8888 should not come first, as it's the default
+        HAL_PIXEL_FORMAT_RGBX_8888,
+        HAL_PIXEL_FORMAT_RGBA_8888,
+        HAL_PIXEL_FORMAT_RGB_888,
+        HAL_PIXEL_FORMAT_RGB_565,
+        HAL_PIXEL_FORMAT_BGRA_8888,
+        HAL_PIXEL_FORMAT_RGBA_5551,
+        HAL_PIXEL_FORMAT_RGBA_4444,
+        HAL_PIXEL_FORMAT_YV12,
+    };
+
+    const int numFmts = (sizeof(fmts) / sizeof(fmts[0]));
+    for (int i = 0; i < numFmts; i++) {
+      int fmt = -1;
+      ASSERT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 0, 0, fmts[i]));
+      ASSERT_EQ(OK, anw->query(anw.get(), NATIVE_WINDOW_FORMAT, &fmt));
+      EXPECT_EQ(fmts[i], fmt);
+    }
+}
+
 } // namespace android
