@@ -38,15 +38,9 @@
 
 #include "jni.h"
 #include "JNIHelp.h"
-#include "android_util_Binder.h"
 
 namespace android
 {
-
-static inline void init_sockaddr(sockaddr *sa) {
-    ((sockaddr_in *)sa)->sin_family = AF_INET;
-    ((sockaddr_in *)sa)->sin_port = 0;
-}
 
 static inline in_addr_t *as_in_addr(sockaddr *sa) {
     return &((sockaddr_in *)sa)->sin_addr.s_addr;
@@ -112,7 +106,7 @@ static int set_addresses(const char *name, int index, const char *addresses)
     ifreq ifr4;
     memset(&ifr4, 0, sizeof(ifr4));
     strcpy(ifr4.ifr_name, name);
-    init_sockaddr(&ifr4.ifr_addr);
+    ifr4.ifr_addr.sa_family = AF_INET;
 
     in6_ifreq ifr6;
     memset(&ifr6, 0, sizeof(ifr6));
@@ -190,9 +184,9 @@ static int set_routes(const char *name, int index, const char *routes)
     memset(&rt4, 0, sizeof(rt4));
     rt4.rt_dev = (char *)name;
     rt4.rt_flags = RTF_UP;
-    init_sockaddr(&rt4.rt_dst);
-    init_sockaddr(&rt4.rt_genmask);
-    init_sockaddr(&rt4.rt_gateway);
+    rt4.rt_dst.sa_family = AF_INET;
+    rt4.rt_genmask.sa_family = AF_INET;
+    rt4.rt_gateway.sa_family = AF_INET;
 
     in6_rtmsg rt6;
     memset(&rt6, 0, sizeof(rt6));
@@ -328,7 +322,7 @@ static void throwException(JNIEnv *env, int error, const char *message)
     }
 }
 
-static jobject configure(JNIEnv *env, jobject thiz,
+static jint establish(JNIEnv *env, jobject thiz,
         jstring jAddresses, jstring jRoutes)
 {
     char name[IFNAMSIZ];
@@ -336,7 +330,7 @@ static jobject configure(JNIEnv *env, jobject thiz,
     int tun = create_interface(name, &index);
     if (tun < 0) {
         throwException(env, tun, "Cannot create interface");
-        return NULL;
+        return -1;
     }
     LOGD("%s is created", name);
 
@@ -370,12 +364,12 @@ static jobject configure(JNIEnv *env, jobject thiz,
         LOGD("Configured %d route(s) on %s", count, name);
     }
 
-    return newParcelFileDescriptor(env, jniCreateFileDescriptor(env, tun));
+    return tun;
 
 error:
     close(tun);
     LOGD("%s is destroyed", name);
-    return NULL;
+    return -1;
 }
 
 static jstring getName(JNIEnv *env, jobject thiz, jint fd)
@@ -434,7 +428,7 @@ static void protect(JNIEnv *env, jobject thiz, jint fd, jstring jName)
 //------------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"nativeConfigure", "(Ljava/lang/String;Ljava/lang/String;)Landroid/os/ParcelFileDescriptor;", (void *)configure},
+    {"nativeEstablish", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)establish},
     {"nativeGetName", "(I)Ljava/lang/String;", (void *)getName},
     {"nativeReset", "(Ljava/lang/String;)V", (void *)reset},
     {"nativeCheck", "(Ljava/lang/String;)I", (void *)check},

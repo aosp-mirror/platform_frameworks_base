@@ -131,8 +131,9 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         String routes = config.getString("routes");
         String dnsServers = config.getString("dnsServers");
 
-        // Create interface and configure addresses and routes.
-        ParcelFileDescriptor descriptor = nativeConfigure(addresses, routes);
+        // Create and configure the interface.
+        ParcelFileDescriptor descriptor =
+                ParcelFileDescriptor.adoptFd(nativeEstablish(addresses, routes));
 
         // Replace the interface and abort if it fails.
         try {
@@ -250,7 +251,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
     }
 
-    private native ParcelFileDescriptor nativeConfigure(String addresses, String routes);
+    private native int nativeEstablish(String addresses, String routes);
     private native String nativeGetName(int fd);
     private native void nativeReset(String name);
     private native int nativeCheck(String name);
