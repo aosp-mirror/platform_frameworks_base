@@ -63,6 +63,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
     private Context mContext;
 
     private static EthernetDataTracker sInstance;
+    private static String sIfaceMatch = "";
     private static String mIface = "";
 
     private static class InterfaceObserver extends INetworkManagementEventObserver.Stub {
@@ -96,7 +97,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
     }
 
     private void interfaceAdded(String iface) {
-        if (!iface.matches("eth\\d"))
+        if (!iface.matches(sIfaceMatch))
             return;
 
         Log.d(TAG, "Adding " + iface);
@@ -186,6 +187,22 @@ public class EthernetDataTracker implements NetworkStateTracker {
             service.registerObserver(mInterfaceObserver);
         } catch (RemoteException e) {
             Log.e(TAG, "Could not register InterfaceObserver " + e);
+        }
+
+        // connect to an ethernet interface that already exists
+        sIfaceMatch = context.getResources().getString(
+            com.android.internal.R.string.config_ethernet_iface_regex);
+        try {
+            final String[] ifaces = service.listInterfaces();
+            for (String iface : ifaces) {
+                if (iface.matches(sIfaceMatch)) {
+                    mIface = iface;
+                    reconnect();
+                    break;
+                }
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not get list of interfaces " + e);
         }
     }
 
