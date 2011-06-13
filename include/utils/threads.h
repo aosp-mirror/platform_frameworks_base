@@ -526,6 +526,7 @@ private:
     Thread& operator=(const Thread&);
     static  int             _threadLoop(void* user);
     const   bool            mCanCallJava;
+    // always hold mLock when reading or writing
             thread_id_t     mThread;
     mutable Mutex           mLock;
             Condition       mThreadExitedCondition;
