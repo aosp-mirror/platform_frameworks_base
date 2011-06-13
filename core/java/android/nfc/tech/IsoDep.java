@@ -16,6 +16,7 @@
 
 package android.nfc.tech;
 
+import android.nfc.ErrorCodes;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -90,7 +91,10 @@ public final class IsoDep extends BasicTagTechnology {
      */
     public void setTimeout(int timeout) {
         try {
-            mTag.getTagService().setIsoDepTimeout(timeout);
+            int err = mTag.getTagService().setTimeout(TagTechnology.ISO_DEP, timeout);
+            if (err != ErrorCodes.SUCCESS) {
+                throw new IllegalArgumentException("The supplied timeout is not valid");
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "NFC service dead", e);
         }
