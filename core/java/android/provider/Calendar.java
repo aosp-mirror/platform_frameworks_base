@@ -236,7 +236,7 @@ public final class Calendar {
     /**
      * Columns specific to the Calendars Uri that other Uris can query.
      */
-    private interface CalendarsColumns {
+    protected interface CalendarsColumns {
         /**
          * The color of the calendar
          * <P>Type: INTEGER (color value)</P>
@@ -549,7 +549,7 @@ public final class Calendar {
     /**
      * Columns from the Attendees table that other tables join into themselves.
      */
-    private interface AttendeesColumns {
+    protected interface AttendeesColumns {
 
         /**
          * The id of the event. Column name.
@@ -639,7 +639,7 @@ public final class Calendar {
     /**
      * Columns from the Events table that other tables join into themselves.
      */
-    private interface EventsColumns {
+    protected interface EventsColumns {
 
         /**
          * The {@link Calendars#_ID} of the calendar the event belongs to.
@@ -1525,7 +1525,7 @@ public final class Calendar {
      * time zone for the instaces. These settings are stored using a key/value
      * scheme.
      */
-    private interface CalendarCacheColumns {
+    protected interface CalendarCacheColumns {
         /**
          * The key for the setting. Keys are defined in {@link CalendarCache}.
          */
@@ -1597,7 +1597,7 @@ public final class Calendar {
      * the Instances table and these are all stored in the first (and only)
      * row of the CalendarMetaData table.
      */
-    private interface CalendarMetaDataColumns {
+    protected interface CalendarMetaDataColumns {
         /**
          * The local timezone that was used for precomputing the fields
          * in the Instances table.
@@ -1637,7 +1637,7 @@ public final class Calendar {
     public static final class CalendarMetaData implements CalendarMetaDataColumns, BaseColumns {
     }
 
-    private interface EventDaysColumns {
+    protected interface EventDaysColumns {
         /**
          * The Julian starting day number. Column name.
          * <P>Type: INTEGER (int)</P>
@@ -1655,7 +1655,7 @@ public final class Calendar {
      * Fields and helpers for querying for a list of days that contain events.
      */
     public static final class EventDays implements EventDaysColumns {
-        private static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
                 + "/instances/groupbyday");
 
         /**
@@ -1690,7 +1690,7 @@ public final class Calendar {
         }
     }
 
-    private interface RemindersColumns {
+    protected interface RemindersColumns {
         /**
          * The event the reminder belongs to. Column name.
          * <P>Type: INTEGER (foreign key to the Events table)</P>
@@ -1755,7 +1755,7 @@ public final class Calendar {
         }
     }
 
-    private interface CalendarAlertsColumns {
+    protected interface CalendarAlertsColumns {
         /**
          * The event that the alert belongs to. Column name.
          * <P>Type: INTEGER (foreign key to the Events table)</P>
@@ -2069,7 +2069,7 @@ public final class Calendar {
         }
     }
 
-    private interface ExtendedPropertiesColumns {
+    protected interface ExtendedPropertiesColumns {
         /**
          * The event the extended property belongs to. Column name.
          * <P>Type: INTEGER (foreign key to the Events table)</P>
@@ -2128,7 +2128,7 @@ public final class Calendar {
     /**
      * Columns from the EventsRawTimes table
      */
-    private interface EventsRawTimesColumns {
+    protected interface EventsRawTimesColumns {
         /**
          * The corresponding event id. Column name.
          * <P>Type: INTEGER (long)</P>
