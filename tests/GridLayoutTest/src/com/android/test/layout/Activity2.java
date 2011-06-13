@@ -20,11 +20,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
-
-import android.widget.*;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.GridLayout;
+import android.widget.Space;
+import android.widget.TextView;
 
 import static android.text.InputType.TYPE_CLASS_TEXT;
-import static android.view.inputmethod.EditorInfo.*;
+import static android.view.inputmethod.EditorInfo.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
+import static android.view.inputmethod.EditorInfo.TYPE_TEXT_VARIATION_PASSWORD;
 import static android.widget.GridLayout.*;
 
 public class Activity2 extends Activity {
@@ -42,12 +46,12 @@ public class Activity2 extends Activity {
         Group row6 = new Group(6, CENTER);
         Group row7 = new Group(7, CENTER);
 
-        Group col1a = new Group(1, 5, CENTER);
-        Group col1b = new Group(1, 5, LEFT);
+        Group col1a = new Group(1, 4, CENTER);
+        Group col1b = new Group(1, 4, LEFT);
         Group col1c = new Group(1, RIGHT);
-        Group col2 =  new Group(2, LEFT);
-        Group col3 =  new Group(3, FILL);
-        Group col4 =  new Group(4, FILL);
+        Group col2 = new Group(2, LEFT);
+        Group col3 = new Group(3, FILL);
+        Group col4 = new Group(4, FILL);
 
         {
             TextView v = new TextView(context);
@@ -55,20 +59,17 @@ public class Activity2 extends Activity {
             v.setText("Email setup");
             vg.addView(v, new LayoutParams(row1, col1a));
         }
-
         {
             TextView v = new TextView(context);
             v.setTextSize(20);
             v.setText("You can configure email in just a few steps:");
             vg.addView(v, new LayoutParams(row2, col1b));
         }
-
         {
             TextView v = new TextView(context);
             v.setText("Email address:");
             vg.addView(v, new LayoutParams(row3, col1c));
         }
-
         {
             EditText v = new EditText(context);
             v.setInputType(TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
@@ -78,13 +79,11 @@ public class Activity2 extends Activity {
                 vg.addView(v, lp);
             }
         }
-
         {
             TextView v = new TextView(context);
             v.setText("Password:");
             vg.addView(v, new LayoutParams(row4, col1c));
         }
-
         {
             TextView v = new EditText(context);
             v.setInputType(TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_PASSWORD);
@@ -94,7 +93,6 @@ public class Activity2 extends Activity {
                 vg.addView(v, lp);
             }
         }
-
         {
             Space v = new Space(context);
             {
@@ -104,13 +102,11 @@ public class Activity2 extends Activity {
                 vg.addView(v, lp);
             }
         }
-
         {
             Button v = new Button(context);
             v.setText("Manual setup");
             vg.addView(v, new LayoutParams(row6, col4));
         }
-
         {
             Button v = new Button(context);
             v.setText("Next");
