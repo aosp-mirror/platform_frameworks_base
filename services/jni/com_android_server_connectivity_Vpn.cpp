@@ -68,7 +68,7 @@ static int create_interface(int mtu, char *name, int *index)
     memset(&ifr4, 0, sizeof(ifr4));
 
     // Allocate interface.
-    ifr4.ifr_flags = IFF_TUN;
+    ifr4.ifr_flags = IFF_TUN | IFF_NO_PI;
     if (ioctl(tun, TUNSETIFF, &ifr4)) {
         LOGE("Cannot allocate TUN: %s", strerror(errno));
         goto error;
