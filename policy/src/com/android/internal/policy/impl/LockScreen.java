@@ -534,7 +534,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
             case SimMissing:
                 // text
                 mStatusView.setCarrierText(R.string.lockscreen_missing_sim_message_short);
-                mScreenLocked.setText(R.string.lockscreen_missing_sim_instructions);
+                mScreenLocked.setText(R.string.lockscreen_missing_sim_instructions_long);
 
                 // layout
                 mScreenLocked.setVisibility(View.VISIBLE);
