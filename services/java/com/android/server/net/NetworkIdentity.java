@@ -26,6 +26,7 @@ import static android.net.TrafficStats.TEMPLATE_WIFI;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_2_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_3_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_4_G;
+import static android.telephony.TelephonyManager.NETWORK_CLASS_UNKNOWN;
 import static android.telephony.TelephonyManager.getNetworkClass;
 
 import android.content.Context;
@@ -148,6 +149,7 @@ public class NetworkIdentity {
         if (isNetworkTypeMobile(type)
                 && Objects.equal(this.subscriberId, subscriberId)) {
             switch (getNetworkClass(subType)) {
+                case NETWORK_CLASS_UNKNOWN:
                 case NETWORK_CLASS_2_G:
                 case NETWORK_CLASS_3_G:
                     return true;

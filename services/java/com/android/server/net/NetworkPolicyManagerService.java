@@ -20,7 +20,9 @@ import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
+import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_PAID_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
@@ -28,6 +30,8 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_PAID;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkPolicyManager.dumpPolicy;
 import static android.net.NetworkPolicyManager.dumpRules;
+import static android.net.TrafficStats.TEMPLATE_MOBILE_ALL;
+import static android.net.TrafficStats.isNetworkTemplateMobile;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
@@ -51,8 +55,11 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IPowerManager;
+import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.telephony.TelephonyManager;
+import android.text.format.Time;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -96,8 +103,13 @@ import libcore.io.IoUtils;
 public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String TAG = "NetworkPolicy";
     private static final boolean LOGD = true;
+    private static final boolean LOGV = false;
 
     private static final int VERSION_CURRENT = 1;
+
+    private static final long KB_IN_BYTES = 1024;
+    private static final long MB_IN_BYTES = KB_IN_BYTES * 1024;
+    private static final long GB_IN_BYTES = MB_IN_BYTES * 1024;
 
     private static final String TAG_POLICY_LIST = "policy-list";
     private static final String TAG_NETWORK_POLICY = "network-policy";
@@ -114,6 +126,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final long TIME_CACHE_MAX_AGE = DAY_IN_MILLIS;
 
+    private static final int MSG_RULES_CHANGED = 0x1;
+
     private final Context mContext;
     private final IActivityManager mActivityManager;
     private final IPowerManager mPowerManager;
@@ -126,13 +140,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private boolean mScreenOn;
 
-    /** Current network policy for each UID. */
+    /** Current policy for network templates. */
+    private ArrayList<NetworkPolicy> mNetworkPolicy = Lists.newArrayList();
+
+    /** Current policy for each UID. */
     private SparseIntArray mUidPolicy = new SparseIntArray();
     /** Current derived network rules for each UID. */
     private SparseIntArray mUidRules = new SparseIntArray();
-
-    /** Set of policies for strong network templates. */
-    private HashMap<StrongTemplate, NetworkPolicy> mTemplatePolicy = Maps.newHashMap();
 
     /** Foreground at both UID and PID granularity. */
     private SparseBooleanArray mUidForeground = new SparseBooleanArray();
@@ -149,8 +163,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     // TODO: keep whitelist of system-critical services that should never have
     // rules enforced, such as system, phone, and radio UIDs.
-
-    // TODO: dispatch callbacks through handler when locked
 
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             IPowerManager powerManager, INetworkStatsService networkStats) {
@@ -174,7 +186,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
+        mHandler = new Handler(mHandlerThread.getLooper(), mHandlerCallback);
 
         mPolicyFile = new AtomicFile(new File(systemDir, "netpolicy.xml"));
     }
@@ -264,8 +276,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /**
      * Receiver that watches for {@link IConnectivityManager} to claim network
-     * interfaces. Used to apply {@link NetworkPolicy} when networks match
-     * {@link StrongTemplate}.
+     * interfaces. Used to apply {@link NetworkPolicy} to matching networks.
      */
     private BroadcastReceiver mIfaceReceiver = new BroadcastReceiver() {
         @Override
@@ -273,6 +284,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // on background handler thread, and verified CONNECTIVITY_INTERNAL
             // permission above.
             synchronized (mRulesLock) {
+                ensureActiveMobilePolicyLocked();
                 updateIfacesLocked();
             }
         }
@@ -284,7 +296,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * remaining quota based on usage cycle and historical stats.
      */
     private void updateIfacesLocked() {
-        if (LOGD) Slog.v(TAG, "updateIfacesLocked()");
+        if (LOGV) Slog.v(TAG, "updateIfacesLocked()");
 
         final NetworkState[] states;
         try {
@@ -307,14 +319,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         // build list of rules and ifaces to enforce them against
-        final HashMap<StrongTemplate, String[]> rules = Maps.newHashMap();
+        final HashMap<NetworkPolicy, String[]> rules = Maps.newHashMap();
         final ArrayList<String> ifaceList = Lists.newArrayList();
-        for (StrongTemplate template : mTemplatePolicy.keySet()) {
+        for (NetworkPolicy policy : mNetworkPolicy) {
 
             // collect all active ifaces that match this template
             ifaceList.clear();
             for (NetworkIdentity ident : networks.keySet()) {
-                if (ident.matchesTemplate(template.networkTemplate, template.subscriberId)) {
+                if (ident.matchesTemplate(policy.networkTemplate, policy.subscriberId)) {
                     final String iface = networks.get(ident);
                     ifaceList.add(iface);
                 }
@@ -322,7 +334,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             if (ifaceList.size() > 0) {
                 final String[] ifaces = ifaceList.toArray(new String[ifaceList.size()]);
-                rules.put(template, ifaces);
+                rules.put(policy, ifaces);
             }
         }
 
@@ -336,41 +348,81 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // apply each policy that we found ifaces for; compute remaining data
         // based on current cycle and historical stats, and push to kernel.
-        for (StrongTemplate template : rules.keySet()) {
-            final NetworkPolicy policy = mTemplatePolicy.get(template);
+        for (NetworkPolicy policy : rules.keySet()) {
             final String[] ifaces = rules.get(policy);
 
             final long start = computeLastCycleBoundary(currentTime, policy);
             final long end = currentTime;
 
             final NetworkStats stats;
+            final long total;
             try {
                 stats = mNetworkStats.getSummaryForNetwork(
-                        start, end, template.networkTemplate, template.subscriberId);
+                        start, end, policy.networkTemplate, policy.subscriberId);
+                total = stats.rx[0] + stats.tx[0];
             } catch (RemoteException e) {
-                Slog.w(TAG, "problem reading summary for template " + template.networkTemplate);
+                Slog.w(TAG, "problem reading summary for template " + policy.networkTemplate);
                 continue;
             }
 
-            // remaining "quota" is based on usage in current cycle
-            final long total = stats.rx[0] + stats.tx[0];
-            final long quota = Math.max(0, policy.limitBytes - total);
-
             if (LOGD) {
                 Slog.d(TAG, "applying policy " + policy.toString() + " to ifaces "
-                        + Arrays.toString(ifaces) + " with quota " + quota);
+                        + Arrays.toString(ifaces));
             }
 
-            // TODO: push rule down through NetworkManagementService.setInterfaceQuota()
+            // TODO: register for warning notification trigger through NMS
 
+            if (policy.limitBytes != NetworkPolicy.LIMIT_DISABLED) {
+                // remaining "quota" is based on usage in current cycle
+                final long quota = Math.max(0, policy.limitBytes - total);
+
+                // TODO: push quota rule down through NMS
+            }
+        }
+    }
+
+    /**
+     * Once any {@link #mNetworkPolicy} are loaded from disk, ensure that we
+     * have at least a default mobile policy defined.
+     */
+    private void ensureActiveMobilePolicyLocked() {
+        if (LOGV) Slog.v(TAG, "ensureActiveMobilePolicyLocked()");
+        final String subscriberId = getActiveSubscriberId();
+        if (subscriberId == null) {
+            if (LOGV) Slog.v(TAG, "no active mobile network, ignoring policy check");
+            return;
+        }
+
+        // examine to see if any policy is defined for active mobile
+        boolean mobileDefined = false;
+        for (NetworkPolicy policy : mNetworkPolicy) {
+            if (isNetworkTemplateMobile(policy.networkTemplate)
+                    && Objects.equal(subscriberId, policy.subscriberId)) {
+                mobileDefined = true;
+            }
+        }
+
+        if (!mobileDefined) {
+            Slog.i(TAG, "no policy for active mobile network; generating default policy");
+
+            // default mobile policy has combined 4GB warning, and assume usage
+            // cycle starts today today.
+
+            // TODO: move this policy definition to overlay or secure setting
+            final Time time = new Time(Time.TIMEZONE_UTC);
+            time.setToNow();
+            final int cycleDay = time.monthDay;
+
+            mNetworkPolicy.add(new NetworkPolicy(
+                    TEMPLATE_MOBILE_ALL, subscriberId, cycleDay, 4 * GB_IN_BYTES, LIMIT_DISABLED));
         }
     }
 
     private void readPolicyLocked() {
-        if (LOGD) Slog.v(TAG, "readPolicyLocked()");
+        if (LOGV) Slog.v(TAG, "readPolicyLocked()");
 
         // clear any existing policy and read from disk
-        mTemplatePolicy.clear();
+        mNetworkPolicy.clear();
         mUidPolicy.clear();
 
         FileInputStream fis = null;
@@ -390,13 +442,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     } else if (TAG_NETWORK_POLICY.equals(tag)) {
                         final int networkTemplate = readIntAttribute(in, ATTR_NETWORK_TEMPLATE);
                         final String subscriberId = in.getAttributeValue(null, ATTR_SUBSCRIBER_ID);
-
                         final int cycleDay = readIntAttribute(in, ATTR_CYCLE_DAY);
                         final long warningBytes = readLongAttribute(in, ATTR_WARNING_BYTES);
                         final long limitBytes = readLongAttribute(in, ATTR_LIMIT_BYTES);
 
-                        mTemplatePolicy.put(new StrongTemplate(networkTemplate, subscriberId),
-                                new NetworkPolicy(cycleDay, warningBytes, limitBytes));
+                        mNetworkPolicy.add(new NetworkPolicy(
+                                networkTemplate, subscriberId, cycleDay, warningBytes, limitBytes));
 
                     } else if (TAG_UID_POLICY.equals(tag)) {
                         final int uid = readIntAttribute(in, ATTR_UID);
@@ -419,7 +470,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void writePolicyLocked() {
-        if (LOGD) Slog.v(TAG, "writePolicyLocked()");
+        if (LOGV) Slog.v(TAG, "writePolicyLocked()");
 
         FileOutputStream fos = null;
         try {
@@ -433,13 +484,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             writeIntAttribute(out, ATTR_VERSION, VERSION_CURRENT);
 
             // write all known network policies
-            for (StrongTemplate template : mTemplatePolicy.keySet()) {
-                final NetworkPolicy policy = mTemplatePolicy.get(template);
-
+            for (NetworkPolicy policy : mNetworkPolicy) {
                 out.startTag(null, TAG_NETWORK_POLICY);
-                writeIntAttribute(out, ATTR_NETWORK_TEMPLATE, template.networkTemplate);
-                if (template.subscriberId != null) {
-                    out.attribute(null, ATTR_SUBSCRIBER_ID, template.subscriberId);
+                writeIntAttribute(out, ATTR_NETWORK_TEMPLATE, policy.networkTemplate);
+                if (policy.subscriberId != null) {
+                    out.attribute(null, ATTR_SUBSCRIBER_ID, policy.subscriberId);
                 }
                 writeIntAttribute(out, ATTR_CYCLE_DAY, policy.cycleDay);
                 writeLongAttribute(out, ATTR_WARNING_BYTES, policy.warningBytes);
@@ -519,25 +568,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
-    public void setNetworkPolicy(int networkType, String subscriberId, NetworkPolicy policy) {
+    public void setNetworkPolicies(NetworkPolicy[] policies) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
         synchronized (mRulesLock) {
-            mTemplatePolicy.put(new StrongTemplate(networkType, subscriberId), policy);
+            mNetworkPolicy.clear();
+            for (NetworkPolicy policy : policies) {
+                mNetworkPolicy.add(policy);
+            }
 
-            // network policy changed, recompute template rules based on active
-            // interfaces and persist policy.
             updateIfacesLocked();
             writePolicyLocked();
         }
     }
 
     @Override
-    public NetworkPolicy getNetworkPolicy(int networkType, String subscriberId) {
+    public NetworkPolicy[] getNetworkPolicies() {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        mContext.enforceCallingOrSelfPermission(READ_PHONE_STATE, TAG);
 
         synchronized (mRulesLock) {
-            return mTemplatePolicy.get(new StrongTemplate(networkType, subscriberId));
+            return mNetworkPolicy.toArray(new NetworkPolicy[mNetworkPolicy.size()]);
         }
     }
 
@@ -547,10 +598,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         synchronized (mRulesLock) {
             fout.println("Network policies:");
-            for (StrongTemplate template : mTemplatePolicy.keySet()) {
-                final NetworkPolicy policy = mTemplatePolicy.get(template);
-                fout.print("  "); fout.println(template.toString());
-                fout.print("    "); fout.println(policy.toString());
+            for (NetworkPolicy policy : mNetworkPolicy) {
+                fout.print("  "); fout.println(policy.toString());
             }
 
             fout.println("Policy status for known UIDs:");
@@ -669,18 +718,42 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mUidRules.put(uid, uidRules);
 
         // dispatch changed rule to existing listeners
-        final int length = mListeners.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
-            if (listener != null) {
-                try {
-                    listener.onRulesChanged(uid, uidRules);
-                } catch (RemoteException e) {
+        mHandler.obtainMessage(MSG_RULES_CHANGED, uid, uidRules).sendToTarget();
+
+    }
+
+    private String getActiveSubscriberId() {
+        final TelephonyManager telephony = (TelephonyManager) mContext.getSystemService(
+                Context.TELEPHONY_SERVICE);
+        return telephony.getSubscriberId();
+    }
+
+    private Handler.Callback mHandlerCallback = new Handler.Callback() {
+        /** {@inheritDoc} */
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_RULES_CHANGED: {
+                    final int uid = msg.arg1;
+                    final int uidRules = msg.arg2;
+                    final int length = mListeners.beginBroadcast();
+                    for (int i = 0; i < length; i++) {
+                        final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
+                        if (listener != null) {
+                            try {
+                                listener.onRulesChanged(uid, uidRules);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                    }
+                    mListeners.finishBroadcast();
+                    return true;
+                }
+                default: {
+                    return false;
                 }
             }
         }
-        mListeners.finishBroadcast();
-    }
+    };
 
     private static void collectKeys(SparseIntArray source, SparseBooleanArray target) {
         final int size = source.size();
@@ -732,42 +805,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static void writeLongAttribute(XmlSerializer out, String name, long value)
             throws IOException {
         out.attribute(null, name, Long.toString(value));
-    }
-
-    /**
-     * Network template with strong subscriber ID, used as key when defining
-     * {@link NetworkPolicy}.
-     */
-    private static class StrongTemplate {
-        public final int networkTemplate;
-        public final String subscriberId;
-
-        public StrongTemplate(int networkTemplate, String subscriberId) {
-            this.networkTemplate = networkTemplate;
-            this.subscriberId = subscriberId;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(networkTemplate, subscriberId);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof StrongTemplate) {
-                final StrongTemplate template = (StrongTemplate) obj;
-                return template.networkTemplate == networkTemplate
-                        && Objects.equal(template.subscriberId, subscriberId);
-            }
-            return false;
-        }
-
-        @Override
-        public String toString() {
-            return "TemplateIdentity: networkTemplate=" + networkTemplate + ", subscriberId="
-                    + subscriberId;
-        }
-
     }
 
 }
