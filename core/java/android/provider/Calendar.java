@@ -178,9 +178,8 @@ public final class Calendar {
      * have specific uses which are expected to be consistent by the app and
      * sync adapter.
      *
-     * @hide
      */
-    public interface SyncColumns extends CalendarSyncColumns {
+    protected interface SyncColumns extends CalendarSyncColumns {
         /**
          * The account that was used to sync the entry to the device. If the
          * account_type is not {@link #ACCOUNT_TYPE_LOCAL} then the name and
@@ -223,7 +222,7 @@ public final class Calendar {
 
         /**
          * If set to 1 this causes events on this calendar to be duplicated with
-         * {@link EventsColumns#LAST_SYNCED} set to 1 whenever the event
+         * {@link Events#LAST_SYNCED} set to 1 whenever the event
          * transitions from non-dirty to dirty. The duplicated event will not be
          * expanded in the instances table and will only show up in sync adapter
          * queries of the events table. It will also be deleted when the
