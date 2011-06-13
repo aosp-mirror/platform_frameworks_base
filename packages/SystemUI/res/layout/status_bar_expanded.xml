@@ -18,7 +18,9 @@
 */
 -->
 
-<com.android.systemui.statusbar.phone.ExpandedView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.systemui.statusbar.phone.ExpandedView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:orientation="vertical"
     android:focusable="true"
     android:descendantFocusability="afterDescendants"
@@ -97,10 +99,11 @@
                     android:textAppearance="@style/TextAppearance.StatusBar.Title"
                     android:text="@string/status_bar_ongoing_events_title"
                     />
-                <LinearLayout android:id="@+id/ongoingItems"
+                <com.android.systemui.statusbar.policy.NotificationRowLayout
+                    android:id="@+id/ongoingItems"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    systemui:rowHeight="@dimen/notification_height"
                     />
 
                 <TextView android:id="@+id/latestTitle"
@@ -111,10 +114,11 @@
                     android:textAppearance="@style/TextAppearance.StatusBar.Title"
                     android:text="@string/status_bar_latest_events_title"
                     />
-                <LinearLayout android:id="@+id/latestItems"
+                <com.android.systemui.statusbar.policy.NotificationRowLayout
+                    android:id="@+id/latestItems"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
+                    systemui:rowHeight="@dimen/notification_height"
                     />
             </LinearLayout>
         </ScrollView>

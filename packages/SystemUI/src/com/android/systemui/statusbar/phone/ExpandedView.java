@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.LayoutTransition;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.Display;
@@ -37,6 +38,8 @@ public class ExpandedView extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+
+        setLayerType(LAYER_TYPE_HARDWARE, null);
     }
 
     /** We want to shrink down to 0, and ignore the background. */
