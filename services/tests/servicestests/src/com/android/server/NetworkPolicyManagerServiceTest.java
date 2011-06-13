@@ -297,7 +297,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long currentTime = parseTime("2007-11-14T00:00:00.000Z");
         final long expectedCycle = parseTime("2007-11-05T00:00:00.000Z");
 
-        final NetworkPolicy policy = new NetworkPolicy(5, 1024L, 1024L);
+        final NetworkPolicy policy = new NetworkPolicy(TEMPLATE_WIFI, null, 5, 1024L, 1024L);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertEquals(expectedCycle, actualCycle);
     }
@@ -307,7 +307,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long currentTime = parseTime("2007-11-14T00:00:00.000Z");
         final long expectedCycle = parseTime("2007-10-20T00:00:00.000Z");
 
-        final NetworkPolicy policy = new NetworkPolicy(20, 1024L, 1024L);
+        final NetworkPolicy policy = new NetworkPolicy(TEMPLATE_WIFI, null, 20, 1024L, 1024L);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertEquals(expectedCycle, actualCycle);
     }
@@ -317,7 +317,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long currentTime = parseTime("2007-02-14T00:00:00.000Z");
         final long expectedCycle = parseTime("2007-01-30T00:00:00.000Z");
 
-        final NetworkPolicy policy = new NetworkPolicy(30, 1024L, 1024L);
+        final NetworkPolicy policy = new NetworkPolicy(TEMPLATE_WIFI, null, 30, 1024L, 1024L);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertEquals(expectedCycle, actualCycle);
     }
@@ -327,7 +327,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long currentTime = parseTime("2007-03-14T00:00:00.000Z");
         final long expectedCycle = parseTime("2007-03-01T00:00:00.000Z");
 
-        final NetworkPolicy policy = new NetworkPolicy(30, 1024L, 1024L);
+        final NetworkPolicy policy = new NetworkPolicy(TEMPLATE_WIFI, null, 30, 1024L, 1024L);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertEquals(expectedCycle, actualCycle);
     }
@@ -366,7 +366,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         // TODO: write up NetworkManagementService mock
 
         replay();
-        mService.setNetworkPolicy(TEMPLATE_WIFI, null, new NetworkPolicy(CYCLE_DAY, 1024L, 2048L));
+        setNetworkPolicies(new NetworkPolicy(TEMPLATE_WIFI, null, CYCLE_DAY, 1024L, 2048L));
         verifyAndReset();
     }
 
@@ -374,6 +374,10 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final Time result = new Time();
         result.parse3339(time);
         return result.toMillis(true);
+    }
+
+    private void setNetworkPolicies(NetworkPolicy... policies) {
+        mService.setNetworkPolicies(policies);
     }
 
     private static NetworkState buildWifi() {
