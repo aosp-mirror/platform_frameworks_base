@@ -387,7 +387,7 @@ public class Switch extends CompoundButton {
             case MotionEvent.ACTION_DOWN: {
                 final float x = ev.getX();
                 final float y = ev.getY();
-                if (hitThumb(x, y)) {
+                if (isEnabled() && hitThumb(x, y)) {
                     mTouchMode = TOUCH_MODE_DOWN;
                     mTouchX = x;
                     mTouchY = y;
@@ -460,7 +460,8 @@ public class Switch extends CompoundButton {
      */
     private void stopDrag(MotionEvent ev) {
         mTouchMode = TOUCH_MODE_IDLE;
-        boolean commitChange = ev.getAction() == MotionEvent.ACTION_UP;
+        // Up and not canceled, also checks the switch has not been disabled during the drag
+        boolean commitChange = ev.getAction() == MotionEvent.ACTION_UP && isEnabled();
 
         cancelSuperTouch(ev);
 
