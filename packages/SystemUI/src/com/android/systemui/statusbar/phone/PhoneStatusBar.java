@@ -28,10 +28,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Handler;
@@ -74,6 +76,7 @@ import com.android.internal.statusbar.StatusBarIconList;
 import com.android.internal.statusbar.StatusBarNotification;
 
 import com.android.systemui.R;
+import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBar;
 import com.android.systemui.statusbar.StatusBarIconView;
@@ -83,6 +86,7 @@ import com.android.systemui.statusbar.policy.DateView;
 public class PhoneStatusBar extends StatusBar {
     static final String TAG = "PhoneStatusBar";
     static final boolean SPEW = false;
+    public static final boolean DEBUG = false;
 
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
@@ -94,6 +98,8 @@ public class PhoneStatusBar extends StatusBar {
     private static final int MSG_ANIMATE_REVEAL = 1001;
     private static final int MSG_SHOW_INTRUDER = 1002;
     private static final int MSG_HIDE_INTRUDER = 1003;
+    private static final int MSG_OPEN_RECENTS_PANEL = 1020;
+    private static final int MSG_CLOSE_RECENTS_PANEL = 1021;
 
     // will likely move to a resource or other tunable param at some point
     private static final int INTRUDER_ALERT_DECAY_MS = 10000;
@@ -159,6 +165,9 @@ public class PhoneStatusBar extends StatusBar {
     private Ticker mTicker;
     private View mTickerView;
     private boolean mTicking;
+
+    // Recent applications
+    private RecentsPanelView mRecentsPanel;
 
     // Tracking finger for opening/closing.
     int mEdgeBorder; // corresponds to R.dimen.status_bar_edge_ignore
@@ -296,6 +305,9 @@ public class PhoneStatusBar extends StatusBar {
         setAreThereNotifications();
         mDateView.setVisibility(View.INVISIBLE);
 
+        // Recents Panel
+        initializeRecentsPanel();
+
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
@@ -304,6 +316,51 @@ public class PhoneStatusBar extends StatusBar {
         context.registerReceiver(mBroadcastReceiver, filter);
 
         return sb;
+    }
+
+    protected WindowManager.LayoutParams getRecentsLayoutParams() {
+        boolean translucent = false;
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                (translucent ? PixelFormat.OPAQUE : PixelFormat.TRANSLUCENT));
+        lp.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        lp.setTitle("RecentsPanel");
+        lp.windowAnimations = R.style.Animation_RecentPanel;
+        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
+        | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+        return lp;
+    }
+
+    protected void initializeRecentsPanel() {
+        // Recents Panel
+        boolean visible = false;
+        if (mRecentsPanel != null) {
+            visible = mRecentsPanel.getVisibility() == View.VISIBLE;
+            WindowManagerImpl.getDefault().removeView(mRecentsPanel);
+        }
+        mRecentsPanel = (RecentsPanelView) View.inflate(mContext,
+                R.layout.status_bar_recent_panel, null);
+
+        mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
+                mRecentsPanel));
+        mRecentsPanel.setVisibility(View.GONE);
+        WindowManager.LayoutParams lp = getRecentsLayoutParams();
+
+        WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
+        mRecentsPanel.setBar(this);
+        if (visible) {
+            // need to set visibility to View.GONE earlier since that
+            // triggers refreshing application list
+            mRecentsPanel.setVisibility(View.VISIBLE);
+            mRecentsPanel.show(true, false);
+        }
+
     }
 
     protected int getStatusBarGravity() {
@@ -581,6 +638,12 @@ public class PhoneStatusBar extends StatusBar {
         }
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        initializeRecentsPanel();
+    }
+
+
     View[] makeNotificationView(StatusBarNotification notification, ViewGroup parent) {
         Notification n = notification.notification;
         RemoteViews remoteViews = n.contentView;
@@ -789,6 +852,21 @@ public class PhoneStatusBar extends StatusBar {
                 case MSG_HIDE_INTRUDER:
                     setIntruderAlertVisibility(false);
                     break;
+                case MSG_OPEN_RECENTS_PANEL:
+                    if (DEBUG) Slog.d(TAG, "opening recents panel");
+                    if (mRecentsPanel != null) {
+                        disable(StatusBarManager.DISABLE_BACK);
+                        mRecentsPanel.setVisibility(View.VISIBLE);
+                        mRecentsPanel.show(true, true);
+                    }
+                    break;
+                case MSG_CLOSE_RECENTS_PANEL:
+                    if (DEBUG) Slog.d(TAG, "closing recents panel");
+                    if (mRecentsPanel != null && mRecentsPanel.isShowing()) {
+                        disable(StatusBarManager.DISABLE_NONE);
+                        mRecentsPanel.show(false, true);
+                    }
+                    break;
             }
         }
     }
@@ -835,6 +913,10 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     public void animateCollapse() {
+        animateCollapse(false);
+    }
+
+    public void animateCollapse(boolean excludeRecents) {
         if (SPEW) {
             Slog.d(TAG, "animateCollapse(): mExpanded=" + mExpanded
                     + " mExpandedVisible=" + mExpandedVisible
@@ -842,6 +924,11 @@ public class PhoneStatusBar extends StatusBar {
                     + " mAnimating=" + mAnimating
                     + " mAnimY=" + mAnimY
                     + " mAnimVel=" + mAnimVel);
+        }
+
+        if (!excludeRecents) {
+            mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
+            mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
         }
 
         if (!mExpandedVisible) {
@@ -1557,6 +1644,13 @@ public class PhoneStatusBar extends StatusBar {
         } catch (RemoteException ex) { }
     }
 
+    public void toggleRecentApps() {
+        int msg = (mRecentsPanel.getVisibility() == View.GONE)
+                ? MSG_OPEN_RECENTS_PANEL : MSG_CLOSE_RECENTS_PANEL;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
     /**
      * The LEDs are turned o)ff when the notification panel is shown, even just a little bit.
      * This was added last-minute and is inconsistent with the way the rest of the notifications
@@ -1625,7 +1719,14 @@ public class PhoneStatusBar extends StatusBar {
             String action = intent.getAction();
             if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
-                animateCollapse();
+                boolean excludeRecents = false;
+                if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
+                    String reason = intent.getExtras().getString("reason");
+                    if (reason != null) {
+                        excludeRecents = reason.equals("recentapps");
+                    }
+                }
+                animateCollapse(excludeRecents);
             }
             else if (Intent.ACTION_CONFIGURATION_CHANGED.equals(action)) {
                 repositionNavigationBar();
@@ -1690,5 +1791,27 @@ public class PhoneStatusBar extends StatusBar {
             vibrate();
         }
     };
+
+    public class TouchOutsideListener implements View.OnTouchListener {
+        private int mMsg;
+        private RecentsPanelView mPanel;
+
+        public TouchOutsideListener(int msg, RecentsPanelView panel) {
+            mMsg = msg;
+            mPanel = panel;
+        }
+
+        public boolean onTouch(View v, MotionEvent ev) {
+            final int action = ev.getAction();
+            if (action == MotionEvent.ACTION_OUTSIDE
+                || (action == MotionEvent.ACTION_DOWN
+                    && !mPanel.isInContentArea((int)ev.getX(), (int)ev.getY()))) {
+                mHandler.removeMessages(mMsg);
+                mHandler.sendEmptyMessage(mMsg);
+                return true;
+            }
+            return false;
+        }
+    }
 }
 

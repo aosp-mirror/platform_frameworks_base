@@ -27,10 +27,9 @@
     <FrameLayout
         android:id="@+id/recents_bg_protect"
         android:background="@drawable/recents_bg_protect_tile"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:paddingBottom="@*android:dimen/status_bar_height"
         android:clipToPadding="false"
         android:clipChildren="false">

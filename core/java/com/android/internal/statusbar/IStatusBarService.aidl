@@ -47,4 +47,5 @@ interface IStatusBarService
     void setSystemUiVisibility(int vis);
     void setHardKeyboardEnabled(boolean enabled);
     void userActivity();
+    void toggleRecentApps();
 }

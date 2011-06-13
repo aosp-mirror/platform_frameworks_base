@@ -149,10 +149,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int LONG_PRESS_POWER_NOTHING = 0;
     static final int LONG_PRESS_POWER_GLOBAL_ACTIONS = 1;
     static final int LONG_PRESS_POWER_SHUT_OFF = 2;
-    
+
+    // These need to match the documentation/constant in
+    // core/res/res/values/config.xml
     static final int LONG_PRESS_HOME_NOTHING = 0;
     static final int LONG_PRESS_HOME_RECENT_DIALOG = 1;
-    static final int LONG_PRESS_HOME_RECENT_ACTIVITY = 2;
+    static final int LONG_PRESS_HOME_RECENT_SYSTEM_UI = 2;
 
     // wallpaper is at the bottom, though the window manager may move it.
     static final int WALLPAPER_LAYER = 2;
@@ -623,7 +625,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mLongPressOnHomeBehavior
                     = mContext.getResources().getInteger(R.integer.config_longPressOnHomeBehavior);
             if (mLongPressOnHomeBehavior < LONG_PRESS_HOME_NOTHING ||
-                    mLongPressOnHomeBehavior > LONG_PRESS_HOME_RECENT_ACTIVITY) {
+                    mLongPressOnHomeBehavior > LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
                 mLongPressOnHomeBehavior = LONG_PRESS_HOME_NOTHING;
             }
         }
@@ -639,17 +641,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_DIALOG) {
             showOrHideRecentAppsDialog(0, true /*dismissIfShown*/);
-        } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_ACTIVITY) {
+        } else if (mLongPressOnHomeBehavior == LONG_PRESS_HOME_RECENT_SYSTEM_UI) {
             try {
-                Intent intent = new Intent();
-                intent.setClassName("com.android.systemui", 
-                        "com.android.systemui.recent.RecentApplicationsActivity");
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK 
-                        | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                mContext.startActivity(intent);
-                return;
-            } catch (ActivityNotFoundException e) {
-                Log.e(TAG, "Failed to launch RecentAppsIntent", e);
+                mStatusBarService.toggleRecentApps();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "RemoteException when showing recent apps", e);
             }
         }
     }

@@ -22,12 +22,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/recents_root"
     android:layout_height="match_parent"
-    android:layout_width="wrap_content">
+    android:layout_width="match_parent">
 
     <FrameLayout
         android:id="@+id/recents_bg_protect"
         android:background="@drawable/recents_bg_protect_tile"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
         android:paddingBottom="@*android:dimen/status_bar_height"
@@ -35,9 +35,9 @@
         android:clipChildren="false">
 
         <LinearLayout android:id="@+id/recents_glow"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="-49dip"
+            android:layout_marginBottom="0dp"
             android:layout_gravity="bottom"
             android:background="@drawable/recents_blue_glow"
             android:orientation="horizontal"
@@ -47,7 +47,7 @@
             <com.android.systemui.recent.RecentsVerticalScrollView android:id="@+id/recents_container"
                 android:layout_width="@dimen/status_bar_recents_width"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/status_bar_recents_right_glow_margin"
+                android:layout_marginRight="0dp"
                 android:divider="@null"
                 android:stackFromBottom="true"
                 android:fadingEdge="vertical"

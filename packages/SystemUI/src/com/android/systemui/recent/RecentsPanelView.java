@@ -19,6 +19,7 @@ package com.android.systemui.recent;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.app.ActivityManager;
 import android.content.Context;
@@ -52,27 +53,33 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.StatusBar;
+import com.android.systemui.statusbar.phone.PhoneStatusBar;
 import com.android.systemui.statusbar.tablet.StatusBarPanel;
 import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
 public class RecentsPanelView extends RelativeLayout
-        implements OnItemClickListener, RecentsCallback, StatusBarPanel {
-    private static final int GLOW_PADDING = 15;
+        implements OnItemClickListener, RecentsCallback, StatusBarPanel, Animator.AnimatorListener {
     static final String TAG = "RecentsListView";
-    static final boolean DEBUG = TabletStatusBar.DEBUG;
+    static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG;
     private static final int DISPLAY_TASKS = 20;
     private static final int MAX_TASKS = DISPLAY_TASKS + 1; // allow extra for non-apps
-    private TabletStatusBar mBar;
+    private StatusBar mBar;
     private ArrayList<ActivityDescription> mActivityDescriptions;
     private int mIconDpi;
     private View mRecentsScrim;
     private View mRecentsGlowView;
     private View mRecentsContainer;
     private Bitmap mGlowBitmap;
+    // TODO: add these widgets attributes to the layout file
+    private int mGlowBitmapPaddingLeftPx;
+    private int mGlowBitmapPaddingTopPx;
+    private int mGlowBitmapPaddingRightPx;
+    private int mGlowBitmapPaddingBottomPx;
     private boolean mShowing;
     private Choreographer mChoreo;
     private View mRecentsDismissButton;
-    private ActvityDescriptionAdapter mListAdapter;
+    private ActivityDescriptionAdapter mListAdapter;
 
     /* package */ final static class ActivityDescription {
         int taskId; // application task id for curating apps
@@ -108,10 +115,10 @@ public class RecentsPanelView extends RelativeLayout
         ActivityDescription activityDescription;
     }
 
-    /* package */ final class ActvityDescriptionAdapter extends BaseAdapter {
+    /* package */ final class ActivityDescriptionAdapter extends BaseAdapter {
         private LayoutInflater mInflater;
 
-        public ActvityDescriptionAdapter(Context context) {
+        public ActivityDescriptionAdapter(Context context) {
             mInflater = LayoutInflater.from(context);
         }
 
@@ -183,6 +190,26 @@ public class RecentsPanelView extends RelativeLayout
         }
     }
 
+    public void onAnimationCancel(Animator animation) {
+    }
+
+    public void onAnimationEnd(Animator animation) {
+        if (mShowing) {
+            final LayoutTransition transitioner = new LayoutTransition();
+            ((ViewGroup)mRecentsContainer).setLayoutTransition(transitioner);
+            createCustomAnimations(transitioner);
+        } else {
+            ((ViewGroup)mRecentsContainer).setLayoutTransition(null);
+        }
+    }
+
+    public void onAnimationRepeat(Animator animation) {
+    }
+
+    public void onAnimationStart(Animator animation) {
+    }
+
+
     /**
      * We need to be aligned at the bottom.  LinearLayout can't do this, so instead,
      * let LinearLayout do all the hard work, and then shift everything down to the bottom.
@@ -201,7 +228,7 @@ public class RecentsPanelView extends RelativeLayout
         return mShowing;
     }
 
-    public void setBar(TabletStatusBar bar) {
+    public void setBar(StatusBar bar) {
         mBar = bar;
     }
 
@@ -217,7 +244,16 @@ public class RecentsPanelView extends RelativeLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_XLARGE;
 
         mIconDpi = xlarge ? DisplayMetrics.DENSITY_HIGH : res.getDisplayMetrics().densityDpi;
+
         mGlowBitmap = BitmapFactory.decodeResource(res, R.drawable.recents_thumbnail_bg);
+        mGlowBitmapPaddingLeftPx =
+                res.getDimensionPixelSize(R.dimen.recents_thumbnail_bg_padding_left);
+        mGlowBitmapPaddingTopPx =
+                res.getDimensionPixelSize(R.dimen.recents_thumbnail_bg_padding_top);
+        mGlowBitmapPaddingRightPx =
+                res.getDimensionPixelSize(R.dimen.recents_thumbnail_bg_padding_right);
+        mGlowBitmapPaddingBottomPx =
+                res.getDimensionPixelSize(R.dimen.recents_thumbnail_bg_padding_bottom);
     }
 
     @Override
@@ -225,7 +261,7 @@ public class RecentsPanelView extends RelativeLayout
         super.onFinishInflate();
         mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mRecentsContainer = findViewById(R.id.recents_container);
-        mListAdapter = new ActvityDescriptionAdapter(mContext);
+        mListAdapter = new ActivityDescriptionAdapter(mContext);
         if (mRecentsContainer instanceof RecentsListView) {
             RecentsListView listView = (RecentsListView) mRecentsContainer;
             listView.setAdapter(mListAdapter);
@@ -246,13 +282,10 @@ public class RecentsPanelView extends RelativeLayout
             throw new IllegalArgumentException("missing RecentsListView/RecentsScrollView");
         }
 
-        final LayoutTransition transitioner = new LayoutTransition();
-        ((ViewGroup)mRecentsContainer).setLayoutTransition(transitioner);
-        createCustomAnimations(transitioner);
 
         mRecentsGlowView = findViewById(R.id.recents_glow);
         mRecentsScrim = (View) findViewById(R.id.recents_bg_protect);
-        mChoreo = new Choreographer(this, mRecentsScrim, mRecentsGlowView);
+        mChoreo = new Choreographer(this, mRecentsScrim, mRecentsGlowView, this);
         mRecentsDismissButton = findViewById(R.id.recents_dismiss_button);
         mRecentsDismissButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
@@ -402,10 +435,9 @@ public class RecentsPanelView extends RelativeLayout
             Log.v(TAG, "Source thumb: " + srcWidth + "x" + srcHeight);
             canvas.drawBitmap(thumbnail,
                     new Rect(0, 0, srcWidth-1, srcHeight-1),
-                    new RectF(GLOW_PADDING,
-                            GLOW_PADDING - 7.0f,
-                            outBitmap.getWidth() - GLOW_PADDING + 3.0f,
-                            outBitmap.getHeight() - GLOW_PADDING + 7.0f), paint);
+                    new RectF(mGlowBitmapPaddingLeftPx, mGlowBitmapPaddingTopPx,
+                            outBitmap.getWidth() - mGlowBitmapPaddingRightPx,
+                            outBitmap.getHeight() - mGlowBitmapPaddingBottomPx), paint);
         }
         return outBitmap;
     }
