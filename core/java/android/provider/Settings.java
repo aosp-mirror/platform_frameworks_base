@@ -1768,12 +1768,6 @@ public final class Settings {
         public static final String UNLOCK_SOUND = "unlock_sound";
 
         /**
-         * True if we should appear as a PTP device instead of MTP.
-         * @hide
-         */
-        public static final String USE_PTP_INTERFACE = "use_ptp_interface";
-
-        /**
          * Receive incoming SIP calls?
          * 0 = no
          * 1 = yes
@@ -1879,7 +1873,6 @@ public final class Settings {
             LOCKSCREEN_SOUNDS_ENABLED,
             SHOW_WEB_SUGGESTIONS,
             NOTIFICATION_LIGHT_PULSE,
-            USE_PTP_INTERFACE,
             SIP_CALL_OPTIONS,
             SIP_RECEIVE_CALLS,
             POINTER_SPEED,

@@ -77,8 +77,6 @@
     <!-- Default for Settings.System.VIBRATE_IN_SILENT -->
     <bool name="def_vibrate_in_silent">true</bool>
 
-    <bool name="def_use_ptp_interface">false</bool>
-
     <!-- Default for Settings.Secure.ACCESSIBILITY_SCRIPT_INJECTION -->
     <bool name="def_accessibility_script_injection">false</bool>
 
