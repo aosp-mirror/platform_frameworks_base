@@ -57,15 +57,15 @@
                 android:layout_width="match_parent"
                 android:layout_weight="1"
                 >
-                <LinearLayout
+                <com.android.systemui.statusbar.policy.NotificationRowLayout
                     android:id="@+id/content"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal|bottom"
-                    android:orientation="vertical"
                     android:clickable="true"
                     android:focusable="true"
                     android:descendantFocusability="afterDescendants"
+                    systemui:rowHeight="@dimen/notification_height"
                     />
             </ScrollView>
         </LinearLayout>
