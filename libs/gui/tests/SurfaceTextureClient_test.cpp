@@ -514,4 +514,112 @@ TEST_F(SurfaceTextureClientTest, DISABLED_SurfaceTextureSyncModeWaitRetire) {
     thread->requestExitAndWait();
 }
 
+TEST_F(SurfaceTextureClientTest, GetTransformMatrixReturnsVerticalFlip) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    android_native_buffer_t* buf[3];
+    float mtx[16] = {};
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, st->updateTexImage());
+    st->getTransformMatrix(mtx);
+
+    EXPECT_EQ(1.f, mtx[0]);
+    EXPECT_EQ(0.f, mtx[1]);
+    EXPECT_EQ(0.f, mtx[2]);
+    EXPECT_EQ(0.f, mtx[3]);
+
+    EXPECT_EQ(0.f, mtx[4]);
+    EXPECT_EQ(-1.f, mtx[5]);
+    EXPECT_EQ(0.f, mtx[6]);
+    EXPECT_EQ(0.f, mtx[7]);
+
+    EXPECT_EQ(0.f, mtx[8]);
+    EXPECT_EQ(0.f, mtx[9]);
+    EXPECT_EQ(1.f, mtx[10]);
+    EXPECT_EQ(0.f, mtx[11]);
+
+    EXPECT_EQ(0.f, mtx[12]);
+    EXPECT_EQ(1.f, mtx[13]);
+    EXPECT_EQ(0.f, mtx[14]);
+    EXPECT_EQ(1.f, mtx[15]);
 }
+
+TEST_F(SurfaceTextureClientTest, GetTransformMatrixSucceedsAfterFreeingBuffers) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    android_native_buffer_t* buf[3];
+    float mtx[16] = {};
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, st->updateTexImage());
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 6)); // frees buffers
+    st->getTransformMatrix(mtx);
+
+    EXPECT_EQ(1.f, mtx[0]);
+    EXPECT_EQ(0.f, mtx[1]);
+    EXPECT_EQ(0.f, mtx[2]);
+    EXPECT_EQ(0.f, mtx[3]);
+
+    EXPECT_EQ(0.f, mtx[4]);
+    EXPECT_EQ(-1.f, mtx[5]);
+    EXPECT_EQ(0.f, mtx[6]);
+    EXPECT_EQ(0.f, mtx[7]);
+
+    EXPECT_EQ(0.f, mtx[8]);
+    EXPECT_EQ(0.f, mtx[9]);
+    EXPECT_EQ(1.f, mtx[10]);
+    EXPECT_EQ(0.f, mtx[11]);
+
+    EXPECT_EQ(0.f, mtx[12]);
+    EXPECT_EQ(1.f, mtx[13]);
+    EXPECT_EQ(0.f, mtx[14]);
+    EXPECT_EQ(1.f, mtx[15]);
+}
+
+TEST_F(SurfaceTextureClientTest, GetTransformMatrixSucceedsAfterFreeingBuffersWithCrop) {
+    sp<ANativeWindow> anw(mSTC);
+    sp<SurfaceTexture> st(mST);
+    android_native_buffer_t* buf[3];
+    float mtx[16] = {};
+    android_native_rect_t crop;
+    crop.left = 0;
+    crop.top = 0;
+    crop.right = 5;
+    crop.bottom = 5;
+
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 4));
+    ASSERT_EQ(OK, native_window_set_buffers_geometry(anw.get(), 8, 8, 0));
+    ASSERT_EQ(OK, anw->dequeueBuffer(anw.get(), &buf[0]));
+    ASSERT_EQ(OK, native_window_set_crop(anw.get(), &crop));
+    ASSERT_EQ(OK, anw->queueBuffer(anw.get(), buf[0]));
+    ASSERT_EQ(OK, st->updateTexImage());
+    ASSERT_EQ(OK, native_window_set_buffer_count(anw.get(), 6)); // frees buffers
+    st->getTransformMatrix(mtx);
+
+    // This accounts for the 1 texel shrink for each edge that's included in the
+    // transform matrix to avoid texturing outside the crop region.
+    EXPECT_EQ(.5f, mtx[0]);
+    EXPECT_EQ(0.f, mtx[1]);
+    EXPECT_EQ(0.f, mtx[2]);
+    EXPECT_EQ(0.f, mtx[3]);
+
+    EXPECT_EQ(0.f, mtx[4]);
+    EXPECT_EQ(-.5f, mtx[5]);
+    EXPECT_EQ(0.f, mtx[6]);
+    EXPECT_EQ(0.f, mtx[7]);
+
+    EXPECT_EQ(0.f, mtx[8]);
+    EXPECT_EQ(0.f, mtx[9]);
+    EXPECT_EQ(1.f, mtx[10]);
+    EXPECT_EQ(0.f, mtx[11]);
+
+    EXPECT_EQ(0.f, mtx[12]);
+    EXPECT_EQ(.5f, mtx[13]);
+    EXPECT_EQ(0.f, mtx[14]);
+    EXPECT_EQ(1.f, mtx[15]);
+}
+
+} // namespace android

@@ -96,6 +96,7 @@ SurfaceTexture::SurfaceTexture(GLuint tex) :
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
     mNextCrop.makeInvalid();
+    memcpy(mCurrentTransformMatrix, mtxIdentity, sizeof(mCurrentTransformMatrix));
 }
 
 SurfaceTexture::~SurfaceTexture() {
@@ -547,6 +548,7 @@ status_t SurfaceTexture::updateTexImage() {
         mCurrentCrop = mSlots[buf].mCrop;
         mCurrentTransform = mSlots[buf].mTransform;
         mCurrentTimestamp = mSlots[buf].mTimestamp;
+        computeCurrentTransformMatrix();
         mDequeueCondition.signal();
     } else {
         // We always bind the texture even if we don't update its contents.
@@ -596,8 +598,12 @@ GLenum SurfaceTexture::getCurrentTextureTarget() const {
 }
 
 void SurfaceTexture::getTransformMatrix(float mtx[16]) {
-    LOGV("SurfaceTexture::getTransformMatrix");
     Mutex::Autolock lock(mMutex);
+    memcpy(mtx, mCurrentTransformMatrix, sizeof(mCurrentTransformMatrix));
+}
+
+void SurfaceTexture::computeCurrentTransformMatrix() {
+    LOGV("SurfaceTexture::computeCurrentTransformMatrix");
 
     float xform[16];
     for (int i = 0; i < 16; i++) {
@@ -684,7 +690,7 @@ void SurfaceTexture::getTransformMatrix(float mtx[16]) {
     // coordinate of 0, so SurfaceTexture must behave the same way.  We don't
     // want to expose this to applications, however, so we must add an
     // additional vertical flip to the transform after all the other transforms.
-    mtxMul(mtx, mtxFlipV, mtxBeforeFlipV);
+    mtxMul(mCurrentTransformMatrix, mtxFlipV, mtxBeforeFlipV);
 }
 
 nsecs_t SurfaceTexture::getTimestamp() {
