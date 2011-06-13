@@ -212,22 +212,18 @@ public class WifiStateMachine extends StateMachine {
     static final int SUP_CONNECTION_EVENT                 = BASE + 31;
     /* Connection to supplicant lost */
     static final int SUP_DISCONNECTION_EVENT              = BASE + 32;
-    /* Driver start completed */
-    static final int DRIVER_START_EVENT                   = BASE + 33;
-    /* Driver stop completed */
-    static final int DRIVER_STOP_EVENT                    = BASE + 34;
-    /* Network connection completed */
-    static final int NETWORK_CONNECTION_EVENT             = BASE + 36;
+   /* Network connection completed */
+    static final int NETWORK_CONNECTION_EVENT             = BASE + 33;
     /* Network disconnection completed */
-    static final int NETWORK_DISCONNECTION_EVENT          = BASE + 37;
+    static final int NETWORK_DISCONNECTION_EVENT          = BASE + 34;
     /* Scan results are available */
-    static final int SCAN_RESULTS_EVENT                   = BASE + 38;
+    static final int SCAN_RESULTS_EVENT                   = BASE + 35;
     /* Supplicate state changed */
-    static final int SUPPLICANT_STATE_CHANGE_EVENT        = BASE + 39;
+    static final int SUPPLICANT_STATE_CHANGE_EVENT        = BASE + 36;
     /* Password failure and EAP authentication failure */
-    static final int AUTHENTICATION_FAILURE_EVENT         = BASE + 40;
+    static final int AUTHENTICATION_FAILURE_EVENT         = BASE + 37;
     /* WPS overlap detected */
-    static final int WPS_OVERLAP_EVENT                    = BASE + 41;
+    static final int WPS_OVERLAP_EVENT                    = BASE + 38;
 
 
     /* Supplicant commands */
@@ -1421,6 +1417,35 @@ public class WifiStateMachine extends StateMachine {
         return mNetworkInfo.getDetailedState();
     }
 
+
+    private SupplicantState handleSupplicantStateChange(Message message) {
+        StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
+        SupplicantState state = stateChangeResult.state;
+        // Supplicant state change
+        // [31-13] Reserved for future use
+        // [8 - 0] Supplicant state (as defined in SupplicantState.java)
+        // 50023 supplicant_state_changed (custom|1|5)
+        EventLog.writeEvent(EVENTLOG_SUPPLICANT_STATE_CHANGED, state.ordinal());
+        mWifiInfo.setSupplicantState(state);
+        // Network id is only valid when we start connecting
+        if (SupplicantState.isConnecting(state)) {
+            mWifiInfo.setNetworkId(stateChangeResult.networkId);
+        } else {
+            mWifiInfo.setNetworkId(WifiConfiguration.INVALID_NETWORK_ID);
+        }
+
+        if (state == SupplicantState.ASSOCIATING) {
+            /* BSSID is valid only in ASSOCIATING state */
+            mWifiInfo.setBSSID(stateChangeResult.BSSID);
+        }
+        setNetworkDetailedState(WifiInfo.getDetailedStateOf(state));
+
+        mSupplicantStateTracker.sendMessage(Message.obtain(message));
+        mWpsStateMachine.sendMessage(Message.obtain(message));
+
+        return state;
+    }
+
     /**
      * Resets the Wi-Fi Connections by clearing any state, resetting any sockets
      * using the interface, stopping DHCP & disabling interface
@@ -1674,14 +1699,6 @@ public class WifiStateMachine extends StateMachine {
         sendMessage(SCAN_RESULTS_EVENT);
     }
 
-    void notifyDriverStarted() {
-        sendMessage(DRIVER_START_EVENT);
-    }
-
-    void notifyDriverStopped() {
-        sendMessage(DRIVER_STOP_EVENT);
-    }
-
     void notifyDriverHung() {
         setWifiEnabled(false);
         setWifiEnabled(true);
@@ -1737,8 +1754,6 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_REASSOCIATE:
                 case SUP_CONNECTION_EVENT:
                 case SUP_DISCONNECTION_EVENT:
-                case DRIVER_START_EVENT:
-                case DRIVER_STOP_EVENT:
                 case NETWORK_CONNECTION_EVENT:
                 case NETWORK_DISCONNECTION_EVENT:
                 case SCAN_RESULTS_EVENT:
@@ -2284,13 +2299,19 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch(message.what) {
-                case DRIVER_START_EVENT:
-                    transitionTo(mDriverStartedState);
+               case SUPPLICANT_STATE_CHANGE_EVENT:
+                    SupplicantState state = handleSupplicantStateChange(message);
+                    /* If suplicant is exiting out of INTERFACE_DISABLED state into
+                     * a state that indicates driver has started, it is ready to
+                     * receive driver commands
+                     */
+                    if (SupplicantState.isDriverActive(state)) {
+                        transitionTo(mDriverStartedState);
+                    }
                     break;
                     /* Queue driver commands & connection events */
                 case CMD_START_DRIVER:
                 case CMD_STOP_DRIVER:
-                case SUPPLICANT_STATE_CHANGE_EVENT:
                 case NETWORK_CONNECTION_EVENT:
                 case NETWORK_DISCONNECTION_EVENT:
                 case AUTHENTICATION_FAILURE_EVENT:
@@ -2429,8 +2450,11 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch(message.what) {
-                case DRIVER_STOP_EVENT:
-                    transitionTo(mDriverStoppedState);
+                case SUPPLICANT_STATE_CHANGE_EVENT:
+                    SupplicantState state = handleSupplicantStateChange(message);
+                    if (state == SupplicantState.INTERFACE_DISABLED) {
+                        transitionTo(mDriverStoppedState);
+                    }
                     break;
                     /* Queue driver commands */
                 case CMD_START_DRIVER:
@@ -2465,11 +2489,23 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch (message.what) {
-                case CMD_START_DRIVER:
-                    mWakeLock.acquire();
-                    WifiNative.startDriverCommand();
-                    transitionTo(mDriverStartingState);
-                    mWakeLock.release();
+               case CMD_START_DRIVER:
+                   mWakeLock.acquire();
+                   WifiNative.startDriverCommand();
+                   mWakeLock.release();
+                   break;
+                case SUPPLICANT_STATE_CHANGE_EVENT:
+                    SupplicantState state = handleSupplicantStateChange(message);
+                    /* A driver start causes supplicant to first report an INTERFACE_DISABLED
+                     * state before transitioning out of it for connection. Stay in
+                     * DriverStoppedState until we get an INTERFACE_DISABLED state and transition
+                     * to DriverStarting upon getting that
+                     * TODO: Fix this when the supplicant can be made to just transition out of
+                     * INTERFACE_DISABLED state when driver gets started
+                     */
+                    if (state == SupplicantState.INTERFACE_DISABLED) {
+                        transitionTo(mDriverStartingState);
+                    }
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2535,29 +2571,8 @@ public class WifiStateMachine extends StateMachine {
                     sendErrorBroadcast(WifiManager.WPS_OVERLAP_ERROR);
                     break;
                 case SUPPLICANT_STATE_CHANGE_EVENT:
-                    stateChangeResult = (StateChangeResult) message.obj;
-                    SupplicantState state = stateChangeResult.state;
-                    // Supplicant state change
-                    // [31-13] Reserved for future use
-                    // [8 - 0] Supplicant state (as defined in SupplicantState.java)
-                    // 50023 supplicant_state_changed (custom|1|5)
-                    EventLog.writeEvent(EVENTLOG_SUPPLICANT_STATE_CHANGED, state.ordinal());
-                    mWifiInfo.setSupplicantState(state);
-                    // Network id is only valid when we start connecting
-                    if (SupplicantState.isConnecting(state)) {
-                        mWifiInfo.setNetworkId(stateChangeResult.networkId);
-                    } else {
-                        mWifiInfo.setNetworkId(WifiConfiguration.INVALID_NETWORK_ID);
-                    }
-
-                    if (state == SupplicantState.ASSOCIATING) {
-                        /* BSSID is valid only in ASSOCIATING state */
-                        mWifiInfo.setBSSID(stateChangeResult.BSSID);
-                    }
-
-                    mSupplicantStateTracker.sendMessage(Message.obtain(message));
-                    mWpsStateMachine.sendMessage(Message.obtain(message));
-                    break;
+                    handleSupplicantStateChange(message);
+                   break;
                     /* Do a redundant disconnect without transition */
                 case CMD_DISCONNECT:
                     WifiNative.disconnectCommand();
@@ -2964,12 +2979,7 @@ public class WifiStateMachine extends StateMachine {
                     /* Ignore network disconnect */
                 case NETWORK_DISCONNECTION_EVENT:
                     break;
-                case SUPPLICANT_STATE_CHANGE_EVENT:
-                    StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
-                    setNetworkDetailedState(WifiInfo.getDetailedStateOf(stateChangeResult.state));
-                    /* DriverStartedState does the rest of the handling */
-                    return NOT_HANDLED;
-                case CMD_START_SCAN:
+               case CMD_START_SCAN:
                     /* Disable background scan temporarily during a regular scan */
                     if (mEnableBackgroundScan) {
                         WifiNative.enableBackgroundScanCommand(false);
