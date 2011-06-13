@@ -19,14 +19,17 @@
 
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+
         android:useDefaultMargins="true"
         android:marginsIncludedInAlignment="false"
+
         android:columnCount="4"
         >
 
     <TextView
             android:text="Email account"
             android:textSize="48dip"
+
             android:layout_columnSpan="4"
             android:layout_gravity="center_horizontal"
             />
@@ -34,12 +37,14 @@
     <TextView
             android:text="You can configure email in just a few steps:"
             android:textSize="20dip"
+
             android:layout_columnSpan="4"
             android:layout_gravity="left"
             />
 
     <TextView
             android:text="Email address:"
+
             android:layout_gravity="right"
             />
 
@@ -49,6 +54,7 @@
 
     <TextView
             android:text="Password:"
+
             android:layout_column="0"
             android:layout_gravity="right"
             />
@@ -58,14 +64,15 @@
             />
 
     <Space
-            android:layout_rowWeight="1"
-            android:layout_columnWeight="1"
             android:layout_row="4"
             android:layout_column="2"
+            android:layout_rowWeight="1"
+            android:layout_columnWeight="1"
             />
 
     <Button
             android:text="Manual setup"
+
             android:layout_row="5"
             android:layout_column="3"
             android:layout_gravity="fill_horizontal"
@@ -73,6 +80,7 @@
 
     <Button
             android:text="Next"
+
             android:layout_column="3"
             android:layout_gravity="fill_horizontal"
             />

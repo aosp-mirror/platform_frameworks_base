@@ -494,6 +494,14 @@ public class GridLayout extends ViewGroup {
         requestLayout();
     }
 
+    private static int max2(int[] a, int valueIfEmpty) {
+        int result = valueIfEmpty;
+        for (int i = 0, N = a.length; i < N; i++) {
+            result = Math.max(result, a[i]);
+        }
+        return result;
+    }
+
     private static int sum(float[] a) {
         int result = 0;
         for (int i = 0, length = a.length; i < length; i++) {
@@ -1409,7 +1417,7 @@ public class GridLayout extends ViewGroup {
         // External entry points
 
         private int size(int[] locations) {
-            return locations[locations.length - 1] - locations[0];
+            return max2(locations, 0) - locations[0];
         }
 
         private int getMin() {
@@ -1878,21 +1886,13 @@ public class GridLayout extends ViewGroup {
             return result;
         }
 
-        private static int max(int[] a, int valueIfEmpty) {
-            int result = valueIfEmpty;
-            for (int i = 0, length = a.length; i < length; i++) {
-                result = Math.max(result, a[i]);
-            }
-            return result;
-        }
-
         /*
         Create a compact array of keys or values using the supplied index.
          */
         private static <K> K[] compact(K[] a, int[] index) {
             int size = a.length;
             Class<?> componentType = a.getClass().getComponentType();
-            K[] result = (K[]) Array.newInstance(componentType, max(index, -1) + 1);
+            K[] result = (K[]) Array.newInstance(componentType, max2(index, -1) + 1);
 
             // this overwrite duplicates, retaining the last equivalent entry
             for (int i = 0; i < size; i++) {
