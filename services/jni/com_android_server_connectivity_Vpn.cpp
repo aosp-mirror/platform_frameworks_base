@@ -224,7 +224,7 @@ static int set_routes(const char *name, int index, const char *routes)
             if (memcmp(&rt6.rtmsg_gateway, &in6addr_any, sizeof(in6addr_any))) {
                 rt6.rtmsg_flags |= RTF_GATEWAY;
             }
-            if (ioctl(inet6, SIOCADDRT, &rt6)) {
+            if (ioctl(inet6, SIOCADDRT, &rt6) && errno != EEXIST) {
                 count = (errno == EINVAL) ? BAD_ARGUMENT : SYSTEM_ERROR;
                 break;
             }
@@ -242,7 +242,7 @@ static int set_routes(const char *name, int index, const char *routes)
             if (*as_in_addr(&rt4.rt_gateway)) {
                 rt4.rt_flags |= RTF_GATEWAY;
             }
-            if (ioctl(inet4, SIOCADDRT, &rt4)) {
+            if (ioctl(inet4, SIOCADDRT, &rt4) && errno != EEXIST) {
                 count = (errno == EINVAL) ? BAD_ARGUMENT : SYSTEM_ERROR;
                 break;
             }
