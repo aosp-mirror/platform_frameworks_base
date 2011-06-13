@@ -814,7 +814,8 @@ TEST_F(SurfaceTextureGLToGLTest, DISABLED_UpdateTexImageBeforeFrameFinishedWorks
     // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
 }
 
-TEST_F(SurfaceTextureGLToGLTest, UpdateTexImageAfterFrameFinishedWorks) {
+// XXX: This test is disabled because it causes hangs on some devices.
+TEST_F(SurfaceTextureGLToGLTest, DISABLED_UpdateTexImageAfterFrameFinishedWorks) {
     class PT : public ProducerThread {
         virtual void render() {
             glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
