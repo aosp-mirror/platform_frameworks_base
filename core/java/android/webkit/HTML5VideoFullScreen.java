@@ -253,18 +253,19 @@ public class HTML5VideoFullScreen extends HTML5VideoView
         mLayout.setVisibility(View.VISIBLE);
 
         WebChromeClient client = webView.getWebChromeClient();
-        client.onShowCustomView(mLayout, mCallback);
-        // Plugins like Flash will draw over the video so hide
-        // them while we're playing.
-        if (webView.getViewManager() != null)
-            webView.getViewManager().hideAll();
+        if (client != null) {
+            client.onShowCustomView(mLayout, mCallback);
+            // Plugins like Flash will draw over the video so hide
+            // them while we're playing.
+            if (webView.getViewManager() != null)
+                webView.getViewManager().hideAll();
 
-        mProgressView = client.getVideoLoadingProgressView();
-        if (mProgressView != null) {
-            mLayout.addView(mProgressView, layoutParams);
-            mProgressView.setVisibility(View.VISIBLE);
+            mProgressView = client.getVideoLoadingProgressView();
+            if (mProgressView != null) {
+                mLayout.addView(mProgressView, layoutParams);
+                mProgressView.setVisibility(View.VISIBLE);
+            }
         }
-
     }
 
     /**
