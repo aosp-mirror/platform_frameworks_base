@@ -300,10 +300,10 @@ static int check_interface(const char *name)
 
     ifreq ifr4;
     strncpy(ifr4.ifr_name, name, IFNAMSIZ);
+    ifr4.ifr_flags = 0;
 
     if (ioctl(inet4, SIOCGIFFLAGS, &ifr4) && errno != ENODEV) {
         LOGE("Cannot check %s: %s", name, strerror(errno));
-        ifr4.ifr_flags = 0;
     }
     close(inet4);
     return ifr4.ifr_flags;
