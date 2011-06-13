@@ -26,17 +26,27 @@ import android.os.Parcelable;
  * @hide
  */
 public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
-    public final int cycleDay;
-    public final long warningBytes;
-    public final long limitBytes;
+    public final int networkTemplate;
+    public final String subscriberId;
+    public int cycleDay;
+    public long warningBytes;
+    public long limitBytes;
 
-    public NetworkPolicy(int cycleDay, long warningBytes, long limitBytes) {
+    public static final long WARNING_DISABLED = -1;
+    public static final long LIMIT_DISABLED = -1;
+
+    public NetworkPolicy(int networkTemplate, String subscriberId, int cycleDay, long warningBytes,
+            long limitBytes) {
+        this.networkTemplate = networkTemplate;
+        this.subscriberId = subscriberId;
         this.cycleDay = cycleDay;
         this.warningBytes = warningBytes;
         this.limitBytes = limitBytes;
     }
 
     public NetworkPolicy(Parcel in) {
+        networkTemplate = in.readInt();
+        subscriberId = in.readString();
         cycleDay = in.readInt();
         warningBytes = in.readLong();
         limitBytes = in.readLong();
@@ -44,6 +54,8 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
 
     /** {@inheritDoc} */
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(networkTemplate);
+        dest.writeString(subscriberId);
         dest.writeInt(cycleDay);
         dest.writeLong(warningBytes);
         dest.writeLong(limitBytes);
@@ -56,17 +68,21 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
 
     /** {@inheritDoc} */
     public int compareTo(NetworkPolicy another) {
-        if (another == null || limitBytes < another.limitBytes) {
+        if (another == null || another.limitBytes == LIMIT_DISABLED) {
+            // other value is missing or disabled; we win
             return -1;
-        } else {
+        }
+        if (limitBytes == LIMIT_DISABLED || another.limitBytes < limitBytes) {
+            // we're disabled or other limit is smaller; they win
             return 1;
         }
+        return 0;
     }
 
     @Override
     public String toString() {
-        return "NetworkPolicy: cycleDay=" + cycleDay + ", warningBytes=" + warningBytes
-                + ", limitBytes=" + limitBytes;
+        return "NetworkPolicy: networkTemplate=" + networkTemplate + ", cycleDay=" + cycleDay
+                + ", warningBytes=" + warningBytes + ", limitBytes=" + limitBytes;
     }
 
     public static final Creator<NetworkPolicy> CREATOR = new Creator<NetworkPolicy>() {

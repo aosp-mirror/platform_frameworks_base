@@ -55,17 +55,17 @@ public class NetworkPolicyManager {
     }
 
     /** {@hide} */
-    public void setNetworkPolicy(int networkType, String subscriberId, NetworkPolicy policy) {
+    public void setNetworkPolicies(NetworkPolicy[] policies) {
         try {
-            mService.setNetworkPolicy(networkType, subscriberId, policy);
+            mService.setNetworkPolicies(policies);
         } catch (RemoteException e) {
         }
     }
 
     /** {@hide} */
-    public NetworkPolicy getNetworkPolicy(int networkType, String subscriberId) {
+    public NetworkPolicy[] getNetworkPolicies() {
         try {
-            return mService.getNetworkPolicy(networkType, subscriberId);
+            return mService.getNetworkPolicies();
         } catch (RemoteException e) {
             return null;
         }

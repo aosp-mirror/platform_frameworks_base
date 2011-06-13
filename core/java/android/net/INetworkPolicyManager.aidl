@@ -34,7 +34,7 @@ interface INetworkPolicyManager {
     void registerListener(INetworkPolicyListener listener);
     void unregisterListener(INetworkPolicyListener listener);
 
-    void setNetworkPolicy(int networkType, String subscriberId, in NetworkPolicy policy);
-    NetworkPolicy getNetworkPolicy(int networkType, String subscriberId);
+    void setNetworkPolicies(in NetworkPolicy[] policies);
+    NetworkPolicy[] getNetworkPolicies();
 
 }

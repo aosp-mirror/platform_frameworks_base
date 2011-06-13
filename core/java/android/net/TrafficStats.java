@@ -41,11 +41,9 @@ public class TrafficStats {
      */
     public final static int UNSUPPORTED = -1;
 
-    // TODO: find better home for these template constants
-
     /**
      * Template to combine all {@link ConnectivityManager#TYPE_MOBILE} style
-     * networks together. Only uses statistics for currently active IMSI.
+     * networks together. Only uses statistics for requested IMSI.
      *
      * @hide
      */
@@ -54,7 +52,7 @@ public class TrafficStats {
     /**
      * Template to combine all {@link ConnectivityManager#TYPE_MOBILE} style
      * networks together that roughly meet a "3G" definition, or lower. Only
-     * uses statistics for currently active IMSI.
+     * uses statistics for requested IMSI.
      *
      * @hide
      */
@@ -63,7 +61,7 @@ public class TrafficStats {
     /**
      * Template to combine all {@link ConnectivityManager#TYPE_MOBILE} style
      * networks together that meet a "4G" definition. Only uses statistics for
-     * currently active IMSI.
+     * requested IMSI.
      *
      * @hide
      */
@@ -182,6 +180,17 @@ public class TrafficStats {
             sActiveProfilingStart = null;
             return profilingDelta;
         }
+    }
+
+    /** {@hide} */
+    public static boolean isNetworkTemplateMobile(int networkTemplate) {
+        switch (networkTemplate) {
+            case TEMPLATE_MOBILE_3G_LOWER:
+            case TEMPLATE_MOBILE_4G:
+            case TEMPLATE_MOBILE_ALL:
+                return true;
+        }
+        return false;
     }
 
     /**
