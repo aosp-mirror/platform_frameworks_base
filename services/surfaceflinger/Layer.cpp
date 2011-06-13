@@ -69,13 +69,15 @@ Layer::Layer(SurfaceFlinger* flinger,
     glGenTextures(1, &mTextureName);
 }
 
-void Layer::destroy() const {
-    mFlinger->destroyLayer(this);
+void Layer::destroy(RefBase const* base) {
+    mFlinger->destroyLayer(static_cast<LayerBase const*>(base));
 }
 
 void Layer::onFirstRef()
 {
     LayerBaseClient::onFirstRef();
+    setDestroyer(this);
+
     struct FrameQueuedListener : public SurfaceTexture::FrameAvailableListener {
         FrameQueuedListener(Layer* layer) : mLayer(layer) { }
     private:
