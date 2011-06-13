@@ -5605,8 +5605,8 @@ public class WebView extends AbsoluteLayout
      * Adjustable parameters. Angle is the radians on a unit circle, limited
      * to quadrant 1. Values range from 0f (horizontal) to PI/2 (vertical)
      */
-    private static final float HSLOPE_TO_START_SNAP = .1f;
-    private static final float HSLOPE_TO_BREAK_SNAP = .2f;
+    private static final float HSLOPE_TO_START_SNAP = .25f;
+    private static final float HSLOPE_TO_BREAK_SNAP = .4f;
     private static final float VSLOPE_TO_START_SNAP = 1.25f;
     private static final float VSLOPE_TO_BREAK_SNAP = .95f;
     /*
@@ -5617,6 +5617,11 @@ public class WebView extends AbsoluteLayout
      */
     private static final float ANGLE_VERT = 2f;
     private static final float ANGLE_HORIZ = 0f;
+    /*
+     *  The modified moving average weight.
+     *  Formula: MAV[t]=MAV[t-1] + (P[t]-MAV[t-1])/n
+     */
+    private static final float MMA_WEIGHT_N = 5;
 
     private boolean hitFocusedPlugin(int contentX, int contentY) {
         if (DebugFlags.WEB_VIEW) {
@@ -6003,8 +6008,9 @@ public class WebView extends AbsoluteLayout
                 if (deltaX == 0 && deltaY == 0) {
                     keepScrollBarsVisible = done = true;
                 } else {
-                    mAverageAngle = (mAverageAngle +
-                            calculateDragAngle(deltaX, deltaY)) / 2;
+                    mAverageAngle +=
+                        (calculateDragAngle(deltaX, deltaY) - mAverageAngle)
+                        / MMA_WEIGHT_N;
                     if (mSnapScrollMode != SNAP_NONE) {
                         if (mSnapScrollMode == SNAP_Y) {
                             // radical change means getting out of snap mode
