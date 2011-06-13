@@ -55,7 +55,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IPowerManager;
-import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
@@ -126,8 +125,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final long TIME_CACHE_MAX_AGE = DAY_IN_MILLIS;
 
-    private static final int MSG_RULES_CHANGED = 0x1;
-
     private final Context mContext;
     private final IActivityManager mActivityManager;
     private final IPowerManager mPowerManager;
@@ -186,7 +183,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper(), mHandlerCallback);
+        mHandler = new Handler(mHandlerThread.getLooper());
 
         mPolicyFile = new AtomicFile(new File(systemDir, "netpolicy.xml"));
     }
@@ -718,8 +715,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mUidRules.put(uid, uidRules);
 
         // dispatch changed rule to existing listeners
-        mHandler.obtainMessage(MSG_RULES_CHANGED, uid, uidRules).sendToTarget();
-
+        final int length = mListeners.beginBroadcast();
+        for (int i = 0; i < length; i++) {
+            final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
+            if (listener != null) {
+                try {
+                    listener.onRulesChanged(uid, uidRules);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        mListeners.finishBroadcast();
     }
 
     private String getActiveSubscriberId() {
@@ -727,33 +733,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 Context.TELEPHONY_SERVICE);
         return telephony.getSubscriberId();
     }
-
-    private Handler.Callback mHandlerCallback = new Handler.Callback() {
-        /** {@inheritDoc} */
-        public boolean handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_RULES_CHANGED: {
-                    final int uid = msg.arg1;
-                    final int uidRules = msg.arg2;
-                    final int length = mListeners.beginBroadcast();
-                    for (int i = 0; i < length; i++) {
-                        final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
-                        if (listener != null) {
-                            try {
-                                listener.onRulesChanged(uid, uidRules);
-                            } catch (RemoteException e) {
-                            }
-                        }
-                    }
-                    mListeners.finishBroadcast();
-                    return true;
-                }
-                default: {
-                    return false;
-                }
-            }
-        }
-    };
 
     private static void collectKeys(SparseIntArray source, SparseBooleanArray target) {
         final int size = source.size();
