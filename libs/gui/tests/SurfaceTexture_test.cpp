@@ -273,8 +273,12 @@ protected:
         *outPgm = program;
     }
 
+    static int abs(int value) {
+        return value > 0 ? value : -value;
+    }
+
     ::testing::AssertionResult checkPixel(int x, int y, int r,
-            int g, int b, int a) {
+            int g, int b, int a, int tolerance=2) {
         GLubyte pixel[4];
         String8 msg;
         glReadPixels(x, y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
@@ -288,22 +292,22 @@ protected:
             return ::testing::AssertionFailure(
                     ::testing::Message(msg.string()));
         }
-        if (r >= 0 && GLubyte(r) != pixel[0]) {
+        if (r >= 0 && abs(r - int(pixel[0])) > tolerance) {
             msg += String8::format("r(%d isn't %d)", pixel[0], r);
         }
-        if (g >= 0 && GLubyte(g) != pixel[1]) {
+        if (g >= 0 && abs(g - int(pixel[1])) > tolerance) {
             if (!msg.isEmpty()) {
                 msg += " ";
             }
             msg += String8::format("g(%d isn't %d)", pixel[1], g);
         }
-        if (b >= 0 && GLubyte(b) != pixel[2]) {
+        if (b >= 0 && abs(b - int(pixel[2])) > tolerance) {
             if (!msg.isEmpty()) {
                 msg += " ";
             }
             msg += String8::format("b(%d isn't %d)", pixel[2], b);
         }
-        if (a >= 0 && GLubyte(a) != pixel[3]) {
+        if (a >= 0 && abs(a - int(pixel[3])) > tolerance) {
             if (!msg.isEmpty()) {
                 msg += " ";
             }
@@ -810,7 +814,8 @@ TEST_F(SurfaceTextureGLToGLTest, DISABLED_UpdateTexImageBeforeFrameFinishedWorks
     // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
 }
 
-TEST_F(SurfaceTextureGLToGLTest, UpdateTexImageAfterFrameFinishedWorks) {
+// XXX: This test is disabled because it causes hangs on some devices.
+TEST_F(SurfaceTextureGLToGLTest, DISABLED_UpdateTexImageAfterFrameFinishedWorks) {
     class PT : public ProducerThread {
         virtual void render() {
             glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
