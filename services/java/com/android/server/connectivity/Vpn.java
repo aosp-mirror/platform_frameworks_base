@@ -126,6 +126,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
 
         // Unpack the config.
         // TODO: move constants into VpnBuilder.
+        int mtu = config.getInt("mtu", -1);
         String session = config.getString("session");
         String addresses = config.getString("addresses");
         String routes = config.getString("routes");
@@ -133,7 +134,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
 
         // Create and configure the interface.
         ParcelFileDescriptor descriptor =
-                ParcelFileDescriptor.adoptFd(nativeEstablish(addresses, routes));
+                ParcelFileDescriptor.adoptFd(nativeEstablish(mtu, addresses, routes));
 
         // Replace the interface and abort if it fails.
         try {
@@ -251,7 +252,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
     }
 
-    private native int nativeEstablish(String addresses, String routes);
+    private native int nativeEstablish(int mtu, String addresses, String routes);
     private native String nativeGetName(int fd);
     private native void nativeReset(String name);
     private native int nativeCheck(String name);

@@ -59,7 +59,7 @@ static inline in6_addr *as_in6_addr(sockaddr_storage *ss) {
 #define SYSTEM_ERROR -1
 #define BAD_ARGUMENT -2
 
-static int create_interface(char *name, int *index)
+static int create_interface(int mtu, char *name, int *index)
 {
     int tun = open("/dev/tun", O_RDWR);
     int inet4 = socket(AF_INET, SOCK_DGRAM, 0);
@@ -78,6 +78,13 @@ static int create_interface(char *name, int *index)
     ifr4.ifr_flags = IFF_UP;
     if (ioctl(inet4, SIOCSIFFLAGS, &ifr4)) {
         LOGE("Cannot activate %s: %s", ifr4.ifr_name, strerror(errno));
+        goto error;
+    }
+
+    // Set MTU if it is specified.
+    ifr4.ifr_mtu = mtu;
+    if (mtu > 0 && ioctl(inet4, SIOCSIFMTU, &ifr4)) {
+        LOGE("Cannot set MTU on %s: %s", ifr4.ifr_name, strerror(errno));
         goto error;
     }
 
@@ -323,11 +330,11 @@ static void throwException(JNIEnv *env, int error, const char *message)
 }
 
 static jint establish(JNIEnv *env, jobject thiz,
-        jstring jAddresses, jstring jRoutes)
+        jint mtu, jstring jAddresses, jstring jRoutes)
 {
     char name[IFNAMSIZ];
     int index;
-    int tun = create_interface(name, &index);
+    int tun = create_interface(mtu, name, &index);
     if (tun < 0) {
         throwException(env, tun, "Cannot create interface");
         return -1;
@@ -428,7 +435,7 @@ static void protect(JNIEnv *env, jobject thiz, jint fd, jstring jName)
 //------------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"nativeEstablish", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)establish},
+    {"nativeEstablish", "(ILjava/lang/String;Ljava/lang/String;)I", (void *)establish},
     {"nativeGetName", "(I)Ljava/lang/String;", (void *)getName},
     {"nativeReset", "(Ljava/lang/String;)V", (void *)reset},
     {"nativeCheck", "(Ljava/lang/String;)I", (void *)check},
