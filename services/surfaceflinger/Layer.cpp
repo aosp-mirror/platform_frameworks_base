@@ -61,6 +61,7 @@ Layer::Layer(SurfaceFlinger* flinger,
         mBufferManager(mTextureManager),
         mWidth(0), mHeight(0), mNeedsScaling(false), mFixedSize(false)
 {
+    setDestroyer(this);
 }
 
 Layer::~Layer()
@@ -77,8 +78,8 @@ Layer::~Layer()
     }
 }
 
-void Layer::destroy() const {
-    mFlinger->destroyLayer(this);
+void Layer::destroy(RefBase const* base) {
+    mFlinger->destroyLayer(static_cast<LayerBase const*>(base));
 }
 
 status_t Layer::setToken(const sp<UserClient>& userClient,
