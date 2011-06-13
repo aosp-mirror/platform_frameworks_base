@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.provider.CallLog.Calls;
+
 /**
  * The contract between the voicemail provider and applications. Contains
  * definitions for the supported URIs and columns.
@@ -45,13 +46,17 @@ import android.provider.CallLog.Calls;
  */
 // TODO: unhide when the API is approved by android-api-council
 public class VoicemailContract {
+    /** Not instantiable. */
+    private VoicemailContract() {
+    }
+
     /** The authority used by the voicemail provider. */
     public static final String AUTHORITY = "com.android.voicemail";
 
     /** URI to insert/retrieve all voicemails. */
     public static final Uri CONTENT_URI =
             Uri.parse("content://" + AUTHORITY + "/voicemail");
-    /** URI to insert/retrieve voicemails by a given voicemai source. */
+    /** URI to insert/retrieve voicemails by a given voicemail source. */
     public static final Uri CONTENT_URI_SOURCE =
             Uri.parse("content://" + AUTHORITY + "/voicemail/source/");
 
@@ -72,6 +77,10 @@ public class VoicemailContract {
             "vnd.android.cursor.dir/voicemails";
 
     public static final class Voicemails implements BaseColumns {
+        /** Not instantiable. */
+        private Voicemails() {
+        }
+
         /**
          * Phone number of the voicemail sender.
          * <P>Type: TEXT</P>
