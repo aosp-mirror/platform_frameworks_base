@@ -188,6 +188,11 @@ private:
 
     status_t setBufferCountServerLocked(int bufferCount);
 
+    // computeCurrentTransformMatrix computes the transform matrix for the
+    // current texture.  It uses mCurrentTransform and the current GraphicBuffer
+    // to compute this matrix and stores it in mCurrentTransformMatrix.
+    void computeCurrentTransformMatrix();
+
     enum { INVALID_BUFFER_SLOT = -1 };
 
     struct BufferSlot {
@@ -322,6 +327,11 @@ private:
     // gets set to mLastQueuedTransform each time updateTexImage is called.
     uint32_t mCurrentTransform;
 
+    // mCurrentTransformMatrix is the transform matrix for the current texture.
+    // It gets computed by computeTransformMatrix each time updateTexImage is
+    // called.
+    float mCurrentTransformMatrix[16];
+
     // mCurrentTimestamp is the timestamp for the current texture. It
     // gets set to mLastQueuedTimestamp each time updateTexImage is called.
     int64_t mCurrentTimestamp;
@@ -362,6 +372,7 @@ private:
     // variables of SurfaceTexture objects. It must be locked whenever the
     // member variables are accessed.
     mutable Mutex mMutex;
+
 };
 
 // ----------------------------------------------------------------------------
