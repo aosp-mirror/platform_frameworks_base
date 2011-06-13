@@ -47,7 +47,9 @@ interface IAccessibilityServiceConnection {
 
     /**
      * Finds {@link AccessibilityNodeInfo}s by View text. The match is case
-     * insensitive containment.
+     * insensitive containment. The search is performed in the window whose
+     * id is specified and starts from the View whose accessibility id is
+     * specified.
      * <p>
      *   <strong>
      *     It is a client responsibility to recycle the received infos by
@@ -57,12 +59,35 @@ interface IAccessibilityServiceConnection {
      * </p>
      *
      * @param text The searched text.
+     * @param accessibilityId The id of the view from which to start searching.
+     *        Use {@link android.view.View#NO_ID} to start from the root.
      * @return A list of node info.
      */
-    List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewText(String text);
+    List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewText(String text,
+        int accessibilityWindowId, int accessibilityViewId);
 
     /**
-     * Finds an {@link AccessibilityNodeInfo} by View id.
+     * Finds {@link AccessibilityNodeInfo}s by View text. The match is case
+     * insensitive containment. The search is performed in the currently
+     * active window and start from the root View in the window.
+     * <p>
+     *   <strong>
+     *     It is a client responsibility to recycle the received infos by
+     *     calling {@link AccessibilityNodeInfo#recycle()} to avoid creating
+     *     of multiple instances.
+     *   </strong>
+     * </p>
+     *
+     * @param text The searched text.
+     * @param accessibilityId The id of the view from which to start searching.
+     *        Use {@link android.view.View#NO_ID} to start from the root.
+     * @return A list of node info.
+     */
+    List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewTextInActiveWindow(String text);
+
+    /**
+     * Finds an {@link AccessibilityNodeInfo} by View id. The search is performed
+     * in the currently active window and start from the root View in the window.
      * <p>
      *   <strong>
      *     It is a client responsibility to recycle the received info by
@@ -74,7 +99,7 @@ interface IAccessibilityServiceConnection {
      * @param id The id of the node.
      * @return The node info.
      */
-    AccessibilityNodeInfo findAccessibilityNodeInfoByViewId(int viewId);
+    AccessibilityNodeInfo findAccessibilityNodeInfoByViewIdInActiveWindow(int viewId);
 
     /**
      * Performs an accessibility action on an {@link AccessibilityNodeInfo}.

@@ -19,11 +19,10 @@ package android.view.accessibility;
 import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.text.TextUtils;
-import android.view.View;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents accessibility events that are sent by the system when
@@ -130,10 +129,20 @@ import java.util.ArrayList;
  * <p>
  * <b>TRANSITION TYPES</b> <br>
  * <p>
- * <b>Window state changed</b> - represents the event of opening/closing a
+ * <b>Window state changed</b> - represents the event of opening a
  * {@link android.widget.PopupWindow}, {@link android.view.Menu},
  * {@link android.app.Dialog}, etc. <br>
  * Type: {@link #TYPE_WINDOW_STATE_CHANGED} <br>
+ * Properties:
+ * {@link #getClassName()},
+ * {@link #getPackageName()},
+ * {@link #getEventTime()},
+ * {@link #getText()}
+ * <p>
+ * <b>Window content changed</b> - represents the event of change in the
+ * content of a window. This change can be adding/removing view, changing
+ * a view size, etc.<br>
+ * Type: {@link #TYPE_WINDOW_CONTENT_CHANGED} <br>
  * Properties:
  * {@link #getClassName()},
  * {@link #getPackageName()},
@@ -244,6 +253,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_TOUCH_EXPLORATION_GESTURE_END = 0x00000400;
 
     /**
+     * Represents the event of changing the content of a window.
+     */
+    public static final int TYPE_WINDOW_CONTENT_CHANGED = 0x00000800;
+
+    /**
      * Mask for {@link AccessibilityEvent} all types.
      *
      * @see #TYPE_VIEW_CLICKED
@@ -264,14 +278,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     private boolean mIsInPool;
 
     private int mEventType;
-    private int mSourceAccessibilityViewId = View.NO_ID;
-    private int mSourceAccessibilityWindowId = View.NO_ID;
     private CharSequence mPackageName;
     private long mEventTime;
 
     private final ArrayList<AccessibilityRecord> mRecords = new ArrayList<AccessibilityRecord>();
-
-    private IAccessibilityServiceConnection mConnection;
 
     /*
      * Hide constructor from clients.
@@ -288,10 +298,43 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         super.init(event);
         mEventType = event.mEventType;
         mEventTime = event.mEventTime;
-        mSourceAccessibilityWindowId = event.mSourceAccessibilityWindowId;
-        mSourceAccessibilityViewId = event.mSourceAccessibilityViewId;
         mPackageName = event.mPackageName;
-        mConnection = event.mConnection;
+    }
+
+    /**
+     * Sets the connection for interacting with the AccessibilityManagerService.
+     *
+     * @param connection The connection.
+     *
+     * @hide
+     */
+    @Override
+    public void setConnection(IAccessibilityServiceConnection connection) {
+        super.setConnection(connection);
+        List<AccessibilityRecord> records = mRecords;
+        final int recordCount = records.size();
+        for (int i = 0; i < recordCount; i++) {
+            AccessibilityRecord record = records.get(i);
+            record.setConnection(connection);
+        }
+    }
+
+    /**
+     * Sets if this instance is sealed.
+     *
+     * @param sealed Whether is sealed.
+     *
+     * @hide
+     */
+    @Override
+    public void setSealed(boolean sealed) {
+        super.setSealed(sealed);
+        List<AccessibilityRecord> records = mRecords;
+        final int recordCount = records.size();
+        for (int i = 0; i < recordCount; i++) {
+            AccessibilityRecord record = records.get(i);
+            record.setSealed(sealed);
+        }
     }
 
     /**
@@ -332,81 +375,6 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      */
     public int getEventType() {
         return mEventType;
-    }
-
-    /**
-     * Sets the event source.
-     *
-     * @param source The source.
-     *
-     * @throws IllegalStateException If called from an AccessibilityService.
-     */
-    public void setSource(View source) {
-        enforceNotSealed();
-        if (source != null) {
-            mSourceAccessibilityWindowId = source.getAccessibilityWindowId();
-            mSourceAccessibilityViewId = source.getAccessibilityViewId();
-        } else {
-            mSourceAccessibilityWindowId = View.NO_ID;
-            mSourceAccessibilityViewId = View.NO_ID;
-        }
-    }
-
-    /**
-     * Gets the {@link AccessibilityNodeInfo} of the event source.
-     * <p>
-     *   <strong>
-     *     It is a client responsibility to recycle the received info by
-     *     calling {@link AccessibilityNodeInfo#recycle()} to avoid creating
-     *     of multiple instances.
-     *   </strong>
-     * </p>
-     * @return The info.
-     */
-    public AccessibilityNodeInfo getSource() {
-        enforceSealed();
-        if (mSourceAccessibilityWindowId == View.NO_ID
-                || mSourceAccessibilityViewId == View.NO_ID) {
-            return null;
-        }
-        try {
-            return mConnection.findAccessibilityNodeInfoByAccessibilityId(
-                    mSourceAccessibilityWindowId, mSourceAccessibilityViewId);
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Gets the id of the window from which the event comes from.
-     *
-     * @return The window id.
-     */
-    public int getAccessibilityWindowId() {
-        return mSourceAccessibilityWindowId;
-    }
-
-    /**
-     * Sets the client token for the accessibility service that
-     * provided this node info.
-     *
-     * @param connection The connection.
-     *
-     * @hide
-     */
-    public final void setConnection(IAccessibilityServiceConnection connection) {
-        mConnection = connection;
-    }
-
-    /**
-     * Gets the accessibility window id of the source window.
-     *
-     * @return The id.
-     *
-     * @hide
-     */
-    public int getSourceAccessibilityWindowId() {
-        return mSourceAccessibilityWindowId;
     }
 
     /**
@@ -548,10 +516,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     @Override
     protected void clear() {
         super.clear();
-        mConnection = null;
         mEventType = 0;
-        mSourceAccessibilityViewId = View.NO_ID;
-        mSourceAccessibilityWindowId = View.NO_ID;
         mPackageName = null;
         mEventTime = 0;
         while (!mRecords.isEmpty()) {
@@ -572,8 +537,6 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         }
         setSealed(parcel.readInt() == 1);
         mEventType = parcel.readInt();
-        mSourceAccessibilityWindowId = parcel.readInt();
-        mSourceAccessibilityViewId = parcel.readInt();
         mPackageName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         mEventTime = parcel.readLong();
         readAccessibilityRecordFromParcel(this, parcel);
@@ -583,6 +546,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         for (int i = 0; i < recordCount; i++) {
             AccessibilityRecord record = AccessibilityRecord.obtain();
             readAccessibilityRecordFromParcel(record, parcel);
+            // Do this to write the connection only once.
+            record.setConnection(mConnection);
             mRecords.add(record);
         }
     }
@@ -606,6 +571,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         record.mBeforeText = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
         record.mParcelableData = parcel.readParcelable(null);
         parcel.readList(record.mText, null);
+        record.mSourceWindowId = parcel.readInt();
+        record.mSourceViewId = parcel.readInt();
+        record.mSealed = (parcel.readInt() == 1);
     }
 
     /**
@@ -620,8 +588,6 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         }
         parcel.writeInt(isSealed() ? 1 : 0);
         parcel.writeInt(mEventType);
-        parcel.writeInt(mSourceAccessibilityWindowId);
-        parcel.writeInt(mSourceAccessibilityViewId);
         TextUtils.writeToParcel(mPackageName, parcel, 0);
         parcel.writeLong(mEventTime);
         writeAccessibilityRecordToParcel(this, parcel, flags);
@@ -654,6 +620,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         TextUtils.writeToParcel(record.mBeforeText, parcel, flags);
         parcel.writeParcelable(record.mParcelableData, flags);
         parcel.writeList(record.mText);
+        parcel.writeInt(record.mSourceWindowId);
+        parcel.writeInt(record.mSourceViewId);
+        parcel.writeInt(record.mSealed ? 1 : 0);
     }
 
     /**
@@ -672,8 +641,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         builder.append(super.toString());
         if (DEBUG) {
             builder.append("\n");
-            builder.append("; sourceAccessibilityWindowId: ").append(mSourceAccessibilityWindowId);
-            builder.append("; sourceAccessibilityViewId: ").append(mSourceAccessibilityViewId);
+            builder.append("; sourceWindowId: ").append(mSourceWindowId);
+            builder.append("; sourceViewId: ").append(mSourceViewId);
             for (int i = 0; i < mRecords.size(); i++) {
                 AccessibilityRecord record = mRecords.get(i);
                 builder.append("  Record ");
@@ -733,6 +702,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 return "TYPE_TOUCH_EXPLORATION_GESTURE_START";
             case TYPE_TOUCH_EXPLORATION_GESTURE_END:
                 return "TYPE_TOUCH_EXPLORATION_GESTURE_END";
+            case TYPE_WINDOW_CONTENT_CHANGED:
+                return "TYPE_WINDOW_CONTENT_CHANGED";
             default:
                 return null;
         }

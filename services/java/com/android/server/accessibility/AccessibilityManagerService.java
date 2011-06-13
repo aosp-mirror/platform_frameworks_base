@@ -46,6 +46,7 @@ import android.text.TextUtils.SimpleStringSplitter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IWindow;
+import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
@@ -149,9 +150,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             synchronized (mLock) {
                 notifyEventListenerLocked(service, eventType);
-                AccessibilityEvent oldEvent = service.mPendingEvents.get(eventType);
-                service.mPendingEvents.remove(eventType);
-                tryRecycleLocked(oldEvent);
             }
         }
     };
@@ -319,17 +317,14 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     public boolean sendAccessibilityEvent(AccessibilityEvent event) {
         synchronized (mLock) {
-            mSecurityPolicy.updateRetrievalAllowingWindowAndEventSourceLocked(event);
-            notifyAccessibilityServicesDelayedLocked(event, false);
-            notifyAccessibilityServicesDelayedLocked(event, true);
+            if (mSecurityPolicy.canDispatchAccessibilityEvent(event)) {
+                mSecurityPolicy.updateRetrievalAllowingWindowAndEventSourceLocked(event);
+                notifyAccessibilityServicesDelayedLocked(event, false);
+                notifyAccessibilityServicesDelayedLocked(event, true);
+            }
         }
-        // event not scheduled for dispatch => recycle
-        if (mHandledFeedbackTypes == 0) {
-            event.recycle();
-        } else {
-            mHandledFeedbackTypes = 0;
-        }
-
+        event.recycle();
+        mHandledFeedbackTypes = 0;
         return (OWN_PROCESS_ID != Binder.getCallingPid());
     }
 
@@ -517,43 +512,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void notifyAccessibilityServiceDelayedLocked(Service service,
             AccessibilityEvent event) {
         synchronized (mLock) {
-            int eventType = event.getEventType();
+            final int eventType = event.getEventType();
+            // Make a copy since during dispatch it is possible the event to
+            // be modified to remove its source if the receiving service does
+            // not have permission to access the window content.
+            AccessibilityEvent newEvent = AccessibilityEvent.obtain(event);
             AccessibilityEvent oldEvent = service.mPendingEvents.get(eventType);
-            service.mPendingEvents.put(eventType, event);
+            service.mPendingEvents.put(eventType, newEvent);
 
-            int what = eventType | (service.mId << 16);
+            final int what = eventType | (service.mId << 16);
             if (oldEvent != null) {
                 mHandler.removeMessages(what);
-                tryRecycleLocked(oldEvent);
+                oldEvent.recycle();
             }
 
             Message message = mHandler.obtainMessage(what, service);
-            message.arg1 = event.getEventType();
+            message.arg1 = eventType;
             mHandler.sendMessageDelayed(message, service.mNotificationTimeout);
         }
-    }
-
-    /**
-     * Recycles an event if it can be safely recycled. The condition is that no
-     * not notified service is interested in the event.
-     *
-     * @param event The event.
-     */
-    private void tryRecycleLocked(AccessibilityEvent event) {
-        if (event == null) {
-            return;
-        }
-        int eventType = event.getEventType();
-        List<Service> services = mServices;
-
-        // linear in the number of service which is not large
-        for (int i = 0, count = services.size(); i < count; i++) {
-            Service service = services.get(i);
-            if (service.mPendingEvents.get(eventType) == event) {
-                return;
-            }
-        }
-        event.recycle();
     }
 
     /**
@@ -565,7 +541,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void notifyEventListenerLocked(Service service, int eventType) {
         IEventListener listener = service.mServiceInterface;
         AccessibilityEvent event = service.mPendingEvents.get(eventType);
-
+        service.mPendingEvents.remove(eventType);
         try {
             if (mSecurityPolicy.canRetrieveWindowContent(service)) {
                 event.setConnection(service);
@@ -574,6 +550,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             event.setSealed(true);
             listener.onAccessibilityEvent(event);
+            event.recycle();
             if (DEBUG) {
                 Slog.i(LOG_TAG, "Event " + event + " sent to " + listener);
             }
@@ -926,7 +903,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
 
-        public AccessibilityNodeInfo findAccessibilityNodeInfoByViewId(int viewId) {
+        public AccessibilityNodeInfo findAccessibilityNodeInfoByViewIdInActiveWindow(int viewId) {
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 final boolean permissionGranted = mSecurityPolicy.canRetrieveWindowContent(this);
@@ -961,10 +938,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return null;
         }
 
-        public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewText(String text) {
+        public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewTextInActiveWindow(
+                String text) {
+            return findAccessibilityNodeInfosByViewText(text,
+                    mSecurityPolicy.mRetrievalAlowingWindowId, View.NO_ID);
+        }
+
+        public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewText(String text,
+                int accessibilityWindowId, int accessibilityViewId) {
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
-                final boolean permissionGranted = mSecurityPolicy.canRetrieveWindowContent(this);
+                final boolean permissionGranted =
+                    mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, accessibilityWindowId);
                 if (permissionGranted) {
                     connection = getConnectionToRetrievalAllowingWindowLocked();
                 }
@@ -978,7 +963,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             final long identityToken = Binder.clearCallingIdentity();
             try {
                 final int interactionId = mInteractionIdCounter.getAndIncrement();
-                connection.findAccessibilityNodeInfosByViewText(text, interactionId, mCallback);
+                connection.findAccessibilityNodeInfosByViewText(text, accessibilityViewId,
+                        interactionId, mCallback);
                 List<AccessibilityNodeInfo> infos =
                     mCallback.getFindAccessibilityNodeInfosResultAndClear(interactionId);
                 if (infos != null) {
@@ -1112,16 +1098,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             | AccessibilityEvent.TYPE_VIEW_CLICKED | AccessibilityEvent.TYPE_VIEW_FOCUSED
             | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
             | AccessibilityEvent.TYPE_VIEW_LONG_CLICKED | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
-            | AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
+            | AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | AccessibilityEvent.TYPE_VIEW_SELECTED
+            | AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED;
 
         private int mRetrievalAlowingWindowId;
 
+        private boolean canDispatchAccessibilityEvent(AccessibilityEvent event) {
+            // Send window changed event only for the retrieval allowing window.
+            return (event.getEventType() != AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
+                    || event.getWindowId() == mRetrievalAlowingWindowId);
+        }
+
         public void updateRetrievalAllowingWindowAndEventSourceLocked(AccessibilityEvent event) {
-            final int windowId = event.getSourceAccessibilityWindowId();
+            final int windowId = event.getWindowId();
             final int eventType = event.getEventType();
             if ((eventType & RETRIEVAL_ALLOWING_EVENT_TYPES) != 0) {
                 mRetrievalAlowingWindowId = windowId;
-            } else {
+            } else { 
                 event.setSource(null);
             }
         }

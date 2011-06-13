@@ -904,8 +904,10 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
     public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
         // Add a record for ourselves as well.
         AccessibilityEvent record = AccessibilityEvent.obtain();
+        record.setSource(this);
         // Set the class since it is not populated in #dispatchPopulateAccessibilityEvent
         record.setClassName(getClass().getName());
+        child.onInitializeAccessibilityEvent(record);
         child.dispatchPopulateAccessibilityEvent(record);
         event.appendRecord(record);
         return true;

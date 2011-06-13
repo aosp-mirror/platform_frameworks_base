@@ -136,6 +136,13 @@ public final class ViewAncestor extends Handler implements ViewParent,
     static final ArrayList<ComponentCallbacks> sConfigCallbacks
             = new ArrayList<ComponentCallbacks>();
 
+    /**
+     * Delay before dispatching an accessibility event that the window
+     * content has changed. The window content is considered changed
+     * after a layout pass.
+     */
+    private static final long SEND_WINDOW_CONTENT_CHANGED_DELAY_MILLIS = 500;
+
     long mLastTrackballTime = 0;
     final TrackballAxis mTrackballAxisX = new TrackballAxis();
     final TrackballAxis mTrackballAxisY = new TrackballAxis();
@@ -276,6 +283,8 @@ public final class ViewAncestor extends Handler implements ViewParent,
     AccessibilityInteractionController mAccessibilityInteractionContrtoller;
 
     AccessibilityInteractionConnectionManager mAccessibilityInteractionConnectionManager;
+
+    SendWindowContentChanged mSendWindowContentChanged;
 
     private final int mDensity;
 
@@ -1427,6 +1436,10 @@ public final class ViewAncestor extends Handler implements ViewParent,
         if (triggerGlobalLayoutListener) {
             attachInfo.mRecomputeGlobalAttributes = false;
             attachInfo.mTreeObserver.dispatchOnGlobalLayout();
+
+            if (AccessibilityManager.getInstance(host.mContext).isEnabled()) {
+                postSendWindowContentChangedCallback();
+            }
         }
 
         if (computesInternalInsets) {
@@ -2086,6 +2099,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
         mAccessibilityInteractionConnectionManager.ensureNoConnection();
         mAccessibilityManager.removeAccessibilityStateChangeListener(
                 mAccessibilityInteractionConnectionManager);
+        removeSendWindowContentChangedCallback();
 
         mView = null;
         mAttachInfo.mRootView = null;
@@ -3671,6 +3685,29 @@ public final class ViewAncestor extends Handler implements ViewParent,
         }
     }
 
+    /**
+     * Post a callback to send a
+     * {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} event.
+     */
+    private void postSendWindowContentChangedCallback() {
+        if (mSendWindowContentChanged == null) {
+            mSendWindowContentChanged = new SendWindowContentChanged();
+        } else {
+            removeCallbacks(mSendWindowContentChanged);
+        }
+        postDelayed(mSendWindowContentChanged, SEND_WINDOW_CONTENT_CHANGED_DELAY_MILLIS);
+    }
+
+    /**
+     * Remove a posted callback to send a
+     * {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} event.
+     */
+    private void removeSendWindowContentChangedCallback() {
+        if (mSendWindowContentChanged != null) {
+            removeCallbacks(mSendWindowContentChanged);
+        }
+    }
+
     public boolean showContextMenuForChild(View originalView) {
         return false;
     }
@@ -4268,12 +4305,12 @@ public final class ViewAncestor extends Handler implements ViewParent,
             }
         }
 
-        public void findAccessibilityNodeInfosByViewText(String text, int interactionId,
-                IAccessibilityInteractionConnectionCallback callback) {
+        public void findAccessibilityNodeInfosByViewText(String text, int accessibilityId,
+                int interactionId, IAccessibilityInteractionConnectionCallback callback) {
             if (mViewAncestor.get() != null) {
                 getAccessibilityInteractionController()
-                    .findAccessibilityNodeInfosByViewTextClientThread(text, interactionId,
-                            callback);
+                    .findAccessibilityNodeInfosByViewTextClientThread(text, accessibilityId,
+                            interactionId, callback);
             }
         }
     }
@@ -4414,13 +4451,15 @@ public final class ViewAncestor extends Handler implements ViewParent,
             }
         }
 
-        public void findAccessibilityNodeInfosByViewTextClientThread(String text, int interactionId,
+        public void findAccessibilityNodeInfosByViewTextClientThread(String text,
+                int accessibilityViewId, int interactionId,
                 IAccessibilityInteractionConnectionCallback callback) {
             Message message = Message.obtain();
             message.what = DO_FIND_ACCESSIBLITY_NODE_INFO_BY_VIEW_TEXT;
             SomeArgs args = mPool.acquire();
             args.arg1 = text;
-            args.argi1 = interactionId;
+            args.argi1 = accessibilityViewId;
+            args.argi2 = interactionId;
             args.arg2 = callback;
             message.obj = args;
             sendMessage(message);
@@ -4429,17 +4468,27 @@ public final class ViewAncestor extends Handler implements ViewParent,
         public void findAccessibilityNodeInfosByViewTextUiThread(Message message) {
             SomeArgs args = (SomeArgs) message.obj;
             final String text = (String) args.arg1;
-            final int interactionId = args.argi1;
+            final int accessibilityViewId = args.argi1;
+            final int interactionId = args.argi2;
             final IAccessibilityInteractionConnectionCallback callback =
                 (IAccessibilityInteractionConnectionCallback) args.arg2;
             mPool.release(args);
 
             List<AccessibilityNodeInfo> infos = null;
             try {
-                View root = ViewAncestor.this.mView;
-
                 ArrayList<View> foundViews = mAttachInfo.mFocusablesTempList;
                 foundViews.clear();
+
+                View root = null;
+                if (accessibilityViewId != View.NO_ID) {
+                    root = findViewByAccessibilityId(accessibilityViewId);
+                } else {
+                    root = ViewAncestor.this.mView;
+                }
+
+                if (root == null) {
+                    return;
+                }
 
                 root.findViewsWithText(foundViews, text);
                 if (foundViews.isEmpty()) {
@@ -4574,6 +4623,14 @@ public final class ViewAncestor extends Handler implements ViewParent,
 
             public boolean apply(View view) {
                 return (view.getAccessibilityViewId() == mSerchedId);
+            }
+        }
+    }
+
+    private class SendWindowContentChanged implements Runnable {
+        public void run() {
+            if (mView != null) {
+                mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
             }
         }
     }
