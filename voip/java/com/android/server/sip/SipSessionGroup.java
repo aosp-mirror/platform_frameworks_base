@@ -528,12 +528,8 @@ class SipSessionGroup implements SipListener {
         public void answerCall(String sessionDescription, int timeout) {
             synchronized (SipSessionGroup.this) {
                 if (mPeerProfile == null) return;
-                try {
-                    processCommand(new MakeCallCommand(mPeerProfile,
-                            sessionDescription, timeout));
-                } catch (SipException e) {
-                    onError(e);
-                }
+                doCommandAsync(new MakeCallCommand(mPeerProfile,
+                        sessionDescription, timeout));
             }
         }
 
