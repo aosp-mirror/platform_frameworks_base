@@ -186,9 +186,13 @@ public class ImageView extends View {
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
-    public boolean isLayoutRtl(Drawable dr) {
-        return (dr == mDrawable) ? isLayoutRtl() : super.isLayoutRtl(dr);
+    public int getResolvedLayoutDirection(Drawable dr) {
+        return (dr == mDrawable) ?
+                getResolvedLayoutDirection() : super.getResolvedLayoutDirection(dr);
     }
 
     @Override

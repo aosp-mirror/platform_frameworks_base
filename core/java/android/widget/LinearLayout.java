@@ -1446,7 +1446,8 @@ public class LinearLayout extends ViewGroup {
                 if (gravity < 0) {
                     gravity = minorGravity;
                 }
-                final int absoluteGravity = Gravity.getAbsoluteGravity(gravity, isLayoutRtl());
+                final int layoutDirection = getResolvedLayoutDirection();
+                final int absoluteGravity = Gravity.getAbsoluteGravity(gravity, layoutDirection);
                 switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.CENTER_HORIZONTAL:
                         childLeft = paddingLeft + ((childSpace - childWidth) / 2)
@@ -1509,7 +1510,8 @@ public class LinearLayout extends ViewGroup {
         final int[] maxAscent = mMaxAscent;
         final int[] maxDescent = mMaxDescent;
 
-        switch (Gravity.getAbsoluteGravity(majorGravity, isLayoutRtl())) {
+        final int layoutDirection = getResolvedLayoutDirection();
+        switch (Gravity.getAbsoluteGravity(majorGravity, layoutDirection)) {
             case Gravity.RIGHT:
                 // mTotalLength contains the padding already
                 childLeft = mPaddingLeft + mRight - mLeft - mTotalLength;

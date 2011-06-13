@@ -915,10 +915,13 @@ public class ProgressBar extends View {
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
-    public boolean isLayoutRtl(Drawable who) {
+    public int getResolvedLayoutDirection(Drawable who) {
         return (who == mProgressDrawable || who == mIndeterminateDrawable) ?
-            isLayoutRtl() : super.isLayoutRtl(who);
+            getResolvedLayoutDirection() : super.getResolvedLayoutDirection(who);
     }
 
     @Override

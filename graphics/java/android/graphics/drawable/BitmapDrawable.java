@@ -30,6 +30,7 @@ import android.graphics.BitmapShader;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.View;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -386,8 +387,9 @@ public class BitmapDrawable extends Drawable {
             Shader shader = state.mPaint.getShader();
             if (shader == null) {
                 if (mApplyGravity) {
+                    final int layoutDirection = getResolvedLayoutDirectionSelf();
                     Gravity.apply(state.mGravity, mBitmapWidth, mBitmapHeight,
-                            getBounds(), mDstRect, isLayoutRtlSelf());
+                            getBounds(), mDstRect, layoutDirection);
                     mApplyGravity = false;
                 }
                 canvas.drawBitmap(bitmap, null, mDstRect, state.mPaint);

@@ -151,13 +151,13 @@ public class Gravity
      *                  width and height of the object.
      * @param outRect Receives the computed frame of the object in its
      *                container.
-     * @param isRtl Whether the layout is right-to-left.
+     * @param layoutDirection The layout direction.
      *
      * @hide
      */
     public static void apply(int gravity, int w, int h, Rect container,
-            Rect outRect, boolean isRtl) {
-        int absGravity = getAbsoluteGravity(gravity, isRtl);
+            Rect outRect, int layoutDirection) {
+        int absGravity = getAbsoluteGravity(gravity, layoutDirection);
         apply(absGravity, w, h, container, 0, 0, outRect);
     }
 
@@ -347,18 +347,19 @@ public class Gravity
      * if horizontal direction is LTR, then START will set LEFT and END will set RIGHT.
      * if horizontal direction is RTL, then START will set RIGHT and END will set LEFT.
      *
+     *
      * @param gravity The gravity to convert to absolute (horizontal) values.
-     * @param isRtl Whether the layout is right-to-left.
+     * @param layoutDirection The layout direction.
      * @return gravity converted to absolute (horizontal) values.
      */
-    public static int getAbsoluteGravity(int gravity, boolean isRtl) {
+    public static int getAbsoluteGravity(int gravity, int layoutDirection) {
         int result = gravity;
         // If layout is script specific and gravity is horizontal relative (START or END)
         if ((result & RELATIVE_LAYOUT_DIRECTION) > 0) {
             if ((result & Gravity.START) == Gravity.START) {
                 // Remove the START bit
                 result &= ~START;
-                if (isRtl) {
+                if (layoutDirection == View.LAYOUT_DIRECTION_RTL) {
                     // Set the RIGHT bit
                     result |= RIGHT;
                 } else {
@@ -368,7 +369,7 @@ public class Gravity
             } else if ((result & Gravity.END) == Gravity.END) {
                 // Remove the END bit
                 result &= ~END;
-                if (isRtl) {
+                if (layoutDirection == View.LAYOUT_DIRECTION_RTL) {
                     // Set the LEFT bit
                     result |= LEFT;
                 } else {

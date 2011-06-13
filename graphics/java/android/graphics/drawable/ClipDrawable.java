@@ -24,6 +24,7 @@ import android.content.res.TypedArray;
 import android.graphics.*;
 import android.view.Gravity;
 import android.util.AttributeSet;
+import android.view.View;
 
 import java.io.IOException;
 
@@ -209,7 +210,8 @@ public class ClipDrawable extends Drawable implements Drawable.Callback {
         if ((mClipState.mOrientation & VERTICAL) != 0) {
             h -= (h - ih) * (10000 - level) / 10000;
         }
-        Gravity.apply(mClipState.mGravity, w, h, bounds, r, isLayoutRtlSelf());
+        final int layoutDirection = getResolvedLayoutDirectionSelf();
+        Gravity.apply(mClipState.mGravity, w, h, bounds, r, layoutDirection);
 
         if (w > 0 && h > 0) {
             canvas.save();

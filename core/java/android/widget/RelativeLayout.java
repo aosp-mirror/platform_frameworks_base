@@ -495,8 +495,9 @@ public class RelativeLayout extends ViewGroup {
                     height - mPaddingBottom);
 
             final Rect contentBounds = mContentBounds;
+            final int layoutDirection = getResolvedLayoutDirection();
             Gravity.apply(mGravity, right - left, bottom - top, selfBounds, contentBounds,
-                    isLayoutRtl());
+                    layoutDirection);
 
             final int horizontalOffset = contentBounds.left - left;
             final int verticalOffset = contentBounds.top - top;
