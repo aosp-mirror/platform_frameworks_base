@@ -128,7 +128,6 @@ private:
     size_t        mNumStssTableEntries;
     List<int32_t> mStssTableEntries;
 
-    size_t        mNumSttsTableEntries;
     struct SttsTableEntry {
 
         SttsTableEntry(uint32_t count, uint32_t duration)
@@ -137,7 +136,19 @@ private:
         uint32_t sampleCount;
         uint32_t sampleDuration;  // time scale based
     };
+    size_t        mNumSttsTableEntries;
     List<SttsTableEntry> mSttsTableEntries;
+
+    struct CttsTableEntry {
+        CttsTableEntry(uint32_t count, int32_t timescaledDur)
+            : sampleCount(count), sampleDuration(timescaledDur) {}
+
+        uint32_t sampleCount;
+        int32_t sampleDuration;  // time scale based
+    };
+    bool          mHasNegativeCttsDeltaDuration;
+    size_t        mNumCttsTableEntries;
+    List<CttsTableEntry> mCttsTableEntries;
 
     // Sequence parameter set or picture parameter set
     struct AVCParamSet {
@@ -219,6 +230,7 @@ private:
 
     // Duration is time scale based
     void addOneSttsTableEntry(size_t sampleCount, int32_t timescaledDur);
+    void addOneCttsTableEntry(size_t sampleCount, int32_t timescaledDur);
     void sendTrackSummary(bool hasMultipleTracks);
 
     // Write the boxes
@@ -227,6 +239,7 @@ private:
     void writeStszBox();
     void writeStssBox();
     void writeSttsBox();
+    void writeCttsBox();
     void writeD263Box();
     void writePaspBox();
     void writeAvccBox();
@@ -1147,6 +1160,7 @@ void MPEG4Writer::Track::updateTrackSizeEstimate() {
         mEstimatedTrackSizeBytes += mNumStscTableEntries * 12 +  // stsc box size
                                     mNumStssTableEntries * 4 +   // stss box size
                                     mNumSttsTableEntries * 8 +   // stts box size
+                                    mNumCttsTableEntries * 8 +   // ctts box size
                                     stcoBoxSizeBytes +           // stco box size
                                     stszBoxSizeBytes;            // stsz box size
     }
@@ -1171,6 +1185,20 @@ void MPEG4Writer::Track::addOneSttsTableEntry(
     SttsTableEntry sttsEntry(sampleCount, duration);
     mSttsTableEntries.push_back(sttsEntry);
     ++mNumSttsTableEntries;
+}
+
+void MPEG4Writer::Track::addOneCttsTableEntry(
+        size_t sampleCount, int32_t duration) {
+
+    if (mIsAudio) {
+        return;
+    }
+    if (duration < 0 && !mHasNegativeCttsDeltaDuration) {
+        mHasNegativeCttsDeltaDuration = true;
+    }
+    CttsTableEntry cttsEntry(sampleCount, duration);
+    mCttsTableEntries.push_back(cttsEntry);
+    ++mNumCttsTableEntries;
 }
 
 void MPEG4Writer::Track::addChunkOffset(off64_t offset) {
@@ -1483,6 +1511,7 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
     mNumStssTableEntries = 0;
     mNumStscTableEntries = 0;
     mNumSttsTableEntries = 0;
+    mNumCttsTableEntries = 0;
     mMdatSizeBytes = 0;
     mIsMediaTimeAdjustmentOn = false;
     mPrevMediaTimeAdjustTimestampUs = 0;
@@ -1491,6 +1520,7 @@ status_t MPEG4Writer::Track::start(MetaData *params) {
     mTotalDriftTimeToAdjustUs = 0;
     mPrevTotalAccumDriftTimeUs = 0;
     mMaxChunkDurationUs = 0;
+    mHasNegativeCttsDeltaDuration = false;
 
     pthread_create(&mThread, &attr, ThreadWrapper, this);
     pthread_attr_destroy(&attr);
@@ -1932,14 +1962,19 @@ status_t MPEG4Writer::Track::threadEntry() {
     int64_t chunkTimestampUs = 0;
     int32_t nChunks = 0;
     int32_t nZeroLengthFrames = 0;
-    int64_t lastTimestampUs = 0;  // Previous sample time stamp in ms
-    int64_t lastDurationUs = 0;   // Between the previous two samples in ms
-    int64_t currDurationTicks = 0;  // Timescale based ticks
-    int64_t lastDurationTicks = 0;  // Timescale based ticks
-    int32_t sampleCount = 1;      // Sample count in the current stts table entry
-    uint32_t previousSampleSize = 0;  // Size of the previous sample
+    int64_t lastTimestampUs = 0;      // Previous sample time stamp
+    int64_t lastCttsTimeUs = 0;       // Previous sample time stamp
+    int64_t lastDurationUs = 0;       // Between the previous two samples
+    int64_t currDurationTicks = 0;    // Timescale based ticks
+    int64_t lastDurationTicks = 0;    // Timescale based ticks
+    int32_t sampleCount = 1;          // Sample count in the current stts table entry
+    int64_t currCttsDurTicks = 0;     // Timescale based ticks
+    int64_t lastCttsDurTicks = 0;     // Timescale based ticks
+    int32_t cttsSampleCount = 1;      // Sample count in the current ctts table entry
+    uint32_t previousSampleSize = 0;      // Size of the previous sample
     int64_t previousPausedDurationUs = 0;
-    int64_t timestampUs;
+    int64_t timestampUs = 0;
+    int64_t cttsDeltaTimeUs = 0;
 
     if (mIsAudio) {
         prctl(PR_SET_NAME, (unsigned long)"AudioTrackEncoding", 0, 0, 0);
@@ -2063,7 +2098,6 @@ status_t MPEG4Writer::Track::threadEntry() {
          *
          */
         CHECK(meta_data->findInt64(kKeyTime, &timestampUs));
-        LOGV("%s timestampUs: %lld", mIsAudio? "Audio": "Video", timestampUs);
 
 ////////////////////////////////////////////////////////////////////////////////
         if (mNumSamples == 0) {
@@ -2084,6 +2118,24 @@ status_t MPEG4Writer::Track::threadEntry() {
 
         timestampUs -= previousPausedDurationUs;
         CHECK(timestampUs >= 0);
+        if (!mIsAudio) {
+            /*
+             * Composition time: timestampUs
+             * Decoding time: decodingTimeUs
+             * Composition time delta = composition time - decoding time
+             *
+             * We save picture decoding time stamp delta in stts table entries,
+             * and composition time delta duration in ctts table entries.
+             */
+            int64_t decodingTimeUs;
+            CHECK(meta_data->findInt64(kKeyDecodingTime, &decodingTimeUs));
+            decodingTimeUs -= previousPausedDurationUs;
+            int64_t timeUs = decodingTimeUs;
+            cttsDeltaTimeUs = timestampUs - decodingTimeUs;
+            timestampUs = decodingTimeUs;
+            LOGV("decoding time: %lld and ctts delta time: %lld",
+                timestampUs, cttsDeltaTimeUs);
+        }
 
         // Media time adjustment for real-time applications
         if (mIsRealTimeRecording) {
@@ -2139,6 +2191,18 @@ status_t MPEG4Writer::Track::threadEntry() {
             } else {
                 ++sampleCount;
             }
+
+            if (!mIsAudio) {
+                currCttsDurTicks =
+                     ((cttsDeltaTimeUs * mTimeScale + 500000LL) / 1000000LL -
+                     (lastCttsTimeUs * mTimeScale + 500000LL) / 1000000LL);
+                if (currCttsDurTicks != lastCttsDurTicks) {
+                    addOneCttsTableEntry(cttsSampleCount, lastCttsDurTicks);
+                    cttsSampleCount = 1;
+                } else {
+                    ++cttsSampleCount;
+                }
+            }
         }
         if (mSamplesHaveSameSize) {
             if (mNumSamples >= 2 && previousSampleSize != sampleSize) {
@@ -2151,6 +2215,11 @@ status_t MPEG4Writer::Track::threadEntry() {
         lastDurationUs = timestampUs - lastTimestampUs;
         lastDurationTicks = currDurationTicks;
         lastTimestampUs = timestampUs;
+
+        if (!mIsAudio) {
+            lastCttsDurTicks = currCttsDurTicks;
+            lastCttsTimeUs = cttsDeltaTimeUs;
+        }
 
         if (isSync != 0) {
             addOneStssTableEntry(mNumSamples);
@@ -2221,8 +2290,10 @@ status_t MPEG4Writer::Track::threadEntry() {
     if (mNumSamples == 1) {
         lastDurationUs = 0;  // A single sample's duration
         lastDurationTicks = 0;
+        lastCttsDurTicks = 0;
     } else {
         ++sampleCount;  // Count for the last sample
+        ++cttsSampleCount;
     }
 
     if (mNumSamples <= 2) {
@@ -2234,6 +2305,7 @@ status_t MPEG4Writer::Track::threadEntry() {
         addOneSttsTableEntry(sampleCount, lastDurationTicks);
     }
 
+    addOneCttsTableEntry(cttsSampleCount, lastCttsDurTicks);
     mTrackDurationUs += lastDurationUs;
     mReachedEOS = true;
 
@@ -2432,6 +2504,7 @@ void MPEG4Writer::Track::writeStblBox(bool use32BitOffset) {
     }
     mOwner->endBox();  // stsd
     writeSttsBox();
+    writeCttsBox();
     if (!mIsAudio) {
         writeStssBox();
     }
@@ -2782,11 +2855,47 @@ void MPEG4Writer::Track::writeSttsBox() {
     int32_t dur = (trackStartTimeOffsetUs * mTimeScale + 500000LL) / 1000000LL;
     mOwner->writeInt32(dur + it->sampleDuration);
 
+    int64_t totalCount = 1;
     while (++it != mSttsTableEntries.end()) {
         mOwner->writeInt32(it->sampleCount);
         mOwner->writeInt32(it->sampleDuration);
+        totalCount += it->sampleCount;
     }
+    CHECK(totalCount == mNumSamples);
     mOwner->endBox();  // stts
+}
+
+void MPEG4Writer::Track::writeCttsBox() {
+    if (mIsAudio) {  // ctts is not for audio
+        return;
+    }
+
+    // Do not write ctts box when there is no need to have it.
+    if ((mNumCttsTableEntries == 1 &&
+        mCttsTableEntries.begin()->sampleDuration == 0) ||
+        mNumCttsTableEntries == 0) {
+        return;
+    }
+
+    LOGV("ctts box has %d entries", mNumCttsTableEntries);
+
+    mOwner->beginBox("ctts");
+    if (mHasNegativeCttsDeltaDuration) {
+        mOwner->writeInt32(0x00010000);  // version=1, flags=0
+    } else {
+        mOwner->writeInt32(0);  // version=0, flags=0
+    }
+    mOwner->writeInt32(mNumCttsTableEntries);
+
+    int64_t totalCount = 0;
+    for (List<CttsTableEntry>::iterator it = mCttsTableEntries.begin();
+         it != mCttsTableEntries.end(); ++it) {
+        mOwner->writeInt32(it->sampleCount);
+        mOwner->writeInt32(it->sampleDuration);
+        totalCount += it->sampleCount;
+    }
+    CHECK(totalCount == mNumSamples);
+    mOwner->endBox();  // ctts
 }
 
 void MPEG4Writer::Track::writeStssBox() {
