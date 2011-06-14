@@ -175,8 +175,7 @@ class="new">new!</span></li>
       <span style="display:none" class="zh-TW"></span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r5c <span
-       class="new">new!</span></a>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r5b</a>
         </li>
       <li><a href="<?cs var:toroot ?>sdk/ndk/overview.html">What is the NDK?</a></li>
     </ul>
