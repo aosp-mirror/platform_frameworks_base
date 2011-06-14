@@ -85,7 +85,7 @@ protected:
             ASSERT_TRUE(mSurfaceControl->isValid());
 
             ASSERT_EQ(NO_ERROR, mComposerClient->openTransaction());
-            ASSERT_EQ(NO_ERROR, mSurfaceControl->setLayer(30000));
+            ASSERT_EQ(NO_ERROR, mSurfaceControl->setLayer(0x7FFFFFFF));
             ASSERT_EQ(NO_ERROR, mSurfaceControl->show());
             ASSERT_EQ(NO_ERROR, mComposerClient->closeTransaction());
 
