@@ -244,9 +244,6 @@
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/opengl.html">
                 <span class="en">3D with OpenGL</span>
               </a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/graphics/renderscript.html">
-                <span class="en">3D with Renderscript</span>
-              </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/animation.html">
                 <span class="en">Property Animation</span>
               </a></li>
@@ -255,6 +252,23 @@
               </a></li>
         </ul>
       </li>
+      <li class="toggle-list">
+	        <div><a href="<?cs var:toroot ?>guide/topics/renderscript/index.html">
+	            <span class="en">RenderScript</span>
+	          </a>
+	          <span class="new-child">new!</span></div>
+	        <ul>
+	          <li><a href="<?cs var:toroot ?>guide/topics/renderscript/graphics.html">
+	                <span class="en">3D Graphics</span>
+	              </a>
+	          </li>
+	          <li><a href="<?cs var:toroot ?>guide/topics/renderscript/compute.html">
+	                <span class="en">Compute</span>
+	              </a>
+	          </li>         
+	        </ul>
+  	  </li>
+
       <li><a href="<?cs var:toroot ?>guide/topics/media/index.html">
             <span class="en">Audio and Video</span>
           </a></li>
