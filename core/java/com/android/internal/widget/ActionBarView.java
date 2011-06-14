@@ -302,6 +302,9 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     public void setEmbeddedTabView(ScrollingTabContainerView tabs) {
+        if (mTabScrollView != null) {
+            removeView(mTabScrollView);
+        }
         mTabScrollView = tabs;
         mIncludeTabs = tabs != null;
         if (mIncludeTabs && mNavigationMode == ActionBar.NAVIGATION_MODE_TABS) {
