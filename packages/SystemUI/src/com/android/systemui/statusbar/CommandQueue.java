@@ -54,7 +54,7 @@ public class CommandQueue extends IStatusBar.Stub {
 
     private static final int MSG_SET_LIGHTS_ON = 0x00070000;
 
-    private static final int MSG_SHOW_MENU = 0x00080000;
+    private static final int MSG_TOP_APP_WINDOW_CHANGED = 0x00080000;
     private static final int MSG_SHOW_IME_BUTTON = 0x00090000;
     private static final int MSG_SET_HARD_KEYBOARD_STATUS = 0x000a0000;
 
@@ -82,7 +82,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void animateExpand();
         public void animateCollapse();
         public void setLightsOn(boolean on);
-        public void setMenuKeyVisible(boolean visible);
+        public void topAppWindowChanged(boolean visible);
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition);
         public void setHardKeyboardStatus(boolean available, boolean enabled);
     }
@@ -160,10 +160,11 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void setMenuKeyVisible(boolean visible) {
+    public void topAppWindowChanged(boolean menuVisible) {
         synchronized (mList) {
-            mHandler.removeMessages(MSG_SHOW_MENU);
-            mHandler.obtainMessage(MSG_SHOW_MENU, visible ? 1 : 0, 0, null).sendToTarget();
+            mHandler.removeMessages(MSG_TOP_APP_WINDOW_CHANGED);
+            mHandler.obtainMessage(MSG_TOP_APP_WINDOW_CHANGED, menuVisible ? 1 : 0, 0,
+                    null).sendToTarget();
         }
     }
 
@@ -240,8 +241,8 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_SET_LIGHTS_ON:
                     mCallbacks.setLightsOn(msg.arg1 != 0);
                     break;
-                case MSG_SHOW_MENU:
-                    mCallbacks.setMenuKeyVisible(msg.arg1 != 0);
+                case MSG_TOP_APP_WINDOW_CHANGED:
+                    mCallbacks.topAppWindowChanged(msg.arg1 != 0);
                     break;
                 case MSG_SHOW_IME_BUTTON:
                     mCallbacks.setImeWindowStatus((IBinder)msg.obj, msg.arg1, msg.arg2);
