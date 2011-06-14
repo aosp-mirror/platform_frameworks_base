@@ -27,8 +27,9 @@ import android.widget.FrameLayout;
 public class TabletStatusBarView extends FrameLayout {
     private Handler mHandler;
 
-    private final View[] mIgnoreChildren = new View[4];
-    private final View[] mPanels = new View[4];
+    private final int MAX_PANELS = 5;
+    private final View[] mIgnoreChildren = new View[MAX_PANELS];
+    private final View[] mPanels = new View[MAX_PANELS];
     private final int[] mPos = new int[2];
 
     public TabletStatusBarView(Context context) {

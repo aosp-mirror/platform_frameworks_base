@@ -143,4 +143,11 @@
     <!-- Checkbox label for USB accessory dialogs.  [CHAR LIMIT=50] -->
     <string name="always_use_accessory">Use by default for this USB accessory</string>
 
+    <!-- Checkbox label for application compatibility mode ON (zooming app to look like it's running
+         on a phone).  [CHAR LIMIT=25] -->
+    <string name="compat_mode_on">Zoom to fill screen</string>
+
+    <!-- Checkbox label for application compatibility mode OFF (normal mode on tablets).
+         [CHAR LIMIT=25] -->
+    <string name="compat_mode_off">Stretch to fill screen</string>
 </resources>

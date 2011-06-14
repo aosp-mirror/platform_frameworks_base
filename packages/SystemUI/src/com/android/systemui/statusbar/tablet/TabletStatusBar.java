@@ -92,6 +92,8 @@ public class TabletStatusBar extends StatusBar implements
     public static final int MSG_HIDE_CHROME = 1031;
     public static final int MSG_OPEN_INPUT_METHODS_PANEL = 1040;
     public static final int MSG_CLOSE_INPUT_METHODS_PANEL = 1041;
+    public static final int MSG_OPEN_COMPAT_MODE_PANEL = 1050;
+    public static final int MSG_CLOSE_COMPAT_MODE_PANEL = 1051;
     public static final int MSG_STOP_TICKER = 2000;
 
     // Fitts' Law assistance for LatinIME; see policy.EventHole
@@ -125,8 +127,9 @@ public class TabletStatusBar extends StatusBar implements
     View mMenuButton;
     View mRecentButton;
 
-    ViewGroup mNotificationAndImeArea;
+    ViewGroup mFeedbackIconArea; // notification icons, IME icon, compat icon
     InputMethodButton mInputMethodSwitchButton;
+    CompatModeButton mCompatModeButton;
 
     NotificationPanel mNotificationPanel;
     WindowManager.LayoutParams mNotificationPanelParams;
@@ -165,6 +168,7 @@ public class TabletStatusBar extends StatusBar implements
 
     private RecentAppsPanel mRecentsPanel;
     private InputMethodsPanel mInputMethodsPanel;
+    private CompatModePanel mCompatModePanel;
 
     public Context getContext() { return mContext; }
 
@@ -304,6 +308,29 @@ public class TabletStatusBar extends StatusBar implements
         lp.windowAnimations = R.style.Animation_RecentPanel;
 
         WindowManagerImpl.getDefault().addView(mInputMethodsPanel, lp);
+        
+        // Compatibility mode selector panel
+        mCompatModePanel = (CompatModePanel) View.inflate(context,
+                R.layout.status_bar_compat_mode_panel, null);
+        mCompatModePanel.setOnTouchListener(new TouchOutsideListener(
+                MSG_CLOSE_COMPAT_MODE_PANEL, mCompatModePanel));
+        mCompatModePanel.setTrigger(mCompatModeButton);
+        mCompatModePanel.setVisibility(View.GONE);
+        mStatusBarView.setIgnoreChildren(4, mCompatModeButton, mCompatModePanel);
+        lp = new WindowManager.LayoutParams(
+                250,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+                    | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                    | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+                PixelFormat.TRANSLUCENT);
+        lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+        lp.setTitle("CompatModePanel");
+        lp.windowAnimations = android.R.style.Animation_Dialog;
+
+        WindowManagerImpl.getDefault().addView(mCompatModePanel, lp);
     }
 
     private int getNotificationPanelHeight() {
@@ -430,10 +457,13 @@ public class TabletStatusBar extends StatusBar implements
         mNavigationArea.setLayoutTransition(mBarContentsLayoutTransition);
 
         // The bar contents buttons
-        mNotificationAndImeArea = (ViewGroup)sb.findViewById(R.id.notificationAndImeArea);
+        mFeedbackIconArea = (ViewGroup)sb.findViewById(R.id.feedbackIconArea);
         mInputMethodSwitchButton = (InputMethodButton) sb.findViewById(R.id.imeSwitchButton);
         // Overwrite the lister
         mInputMethodSwitchButton.setOnClickListener(mOnClickListener);
+
+        mCompatModeButton = (CompatModeButton) sb.findViewById(R.id.compatModeButton);
+        mCompatModeButton.setOnClickListener(mOnClickListener);
 
         // for redirecting errant bar taps to the IME
         mFakeSpaceBar = sb.findViewById(R.id.fake_space_bar);
@@ -645,6 +675,14 @@ public class TabletStatusBar extends StatusBar implements
                 case MSG_CLOSE_INPUT_METHODS_PANEL:
                     if (DEBUG) Slog.d(TAG, "closing input methods panel");
                     if (mInputMethodsPanel != null) mInputMethodsPanel.closePanel(false);
+                    break;
+                case MSG_OPEN_COMPAT_MODE_PANEL:
+                    if (DEBUG) Slog.d(TAG, "opening compat panel");
+                    if (mCompatModePanel != null) mCompatModePanel.openPanel();
+                    break;
+                case MSG_CLOSE_COMPAT_MODE_PANEL:
+                    if (DEBUG) Slog.d(TAG, "closing compat panel");
+                    if (mCompatModePanel != null) mCompatModePanel.closePanel();
                     break;
                 case MSG_SHOW_CHROME:
                     if (DEBUG) Slog.d(TAG, "hiding shadows (lights on)");
@@ -914,14 +952,14 @@ public class TabletStatusBar extends StatusBar implements
             if (0 == (mDisabled & (StatusBarManager.DISABLE_NOTIFICATION_ICONS
                             | StatusBarManager.DISABLE_NOTIFICATION_TICKER))) {
                 mTicker.add(key, n);
-                mNotificationAndImeArea.setVisibility(View.GONE);
+                mFeedbackIconArea.setVisibility(View.GONE);
             }
         }
     }
 
     // called by TabletTicker when it's done with all queued ticks
     public void doneTicking() {
-        mNotificationAndImeArea.setVisibility(View.VISIBLE);
+        mFeedbackIconArea.setVisibility(View.VISIBLE);
     }
 
     public void animateExpand() {
@@ -939,6 +977,8 @@ public class TabletStatusBar extends StatusBar implements
         mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
         mHandler.removeMessages(MSG_CLOSE_INPUT_METHODS_PANEL);
         mHandler.sendEmptyMessage(MSG_CLOSE_INPUT_METHODS_PANEL);
+        mHandler.removeMessages(MSG_CLOSE_COMPAT_MODE_PANEL);
+        mHandler.sendEmptyMessage(MSG_CLOSE_COMPAT_MODE_PANEL);
         mHandler.removeMessages(MSG_CLOSE_NOTIFICATION_PEEK);
         mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PEEK);
     }
@@ -965,9 +1005,8 @@ public class TabletStatusBar extends StatusBar implements
         // See above re: lights-out policy for legacy apps.
         if (windowVisible) setLightsOn(true);
 
-        // XXX: HACK: not sure if this is the best way to catch a new activity that might require a
-        // change in compatibility features, but it's a start.
-        ((CompatModeButton) mBarContents.findViewById(R.id.compat_button)).refresh();
+        // XXX: this is broken: http://b/4603422
+        mCompatModeButton.refresh();
     }
 
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
@@ -1060,6 +1099,8 @@ public class TabletStatusBar extends StatusBar implements
                 onClickRecentButton();
             } else if (v == mInputMethodSwitchButton) {
                 onClickInputMethodSwitchButton();
+            } else if (v == mCompatModeButton) {
+                onClickCompatModeButton();
             }
         }
     };
@@ -1098,6 +1139,13 @@ public class TabletStatusBar extends StatusBar implements
         if (DEBUG) Slog.d(TAG, "clicked input methods panel; disabled=" + mDisabled);
         int msg = (mInputMethodsPanel.getVisibility() == View.GONE) ?
                 MSG_OPEN_INPUT_METHODS_PANEL : MSG_CLOSE_INPUT_METHODS_PANEL;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
+    }
+
+    public void onClickCompatModeButton() {
+        int msg = (mCompatModePanel.getVisibility() == View.GONE) ?
+                MSG_OPEN_COMPAT_MODE_PANEL : MSG_CLOSE_COMPAT_MODE_PANEL;
         mHandler.removeMessages(msg);
         mHandler.sendEmptyMessage(msg);
     }
@@ -1438,13 +1486,13 @@ public class TabletStatusBar extends StatusBar implements
 
         ArrayList<View> toShow = new ArrayList<View>();
 
-        // When IME button is visible, the number of notification icons should be decremented
-        // to fit the upper limit.
-        // IME switcher icon is big and occupy width of one icon
-        final int maxNotificationIconsImeButtonVisible = mMaxNotificationIcons - 1;
-        final int maxNotificationIconsCount =
-                (mInputMethodSwitchButton.getVisibility() != View.GONE) ?
-                        maxNotificationIconsImeButtonVisible : mMaxNotificationIcons;
+        // Extra Special Icons
+        // The IME switcher and compatibility mode icons take the place of notifications. You didn't
+        // need to see all those new emails, did you?
+        int maxNotificationIconsCount = mMaxNotificationIcons;
+        if (mInputMethodSwitchButton.getVisibility() != View.GONE) maxNotificationIconsCount --;
+        if (mCompatModeButton.getVisibility()        != View.GONE) maxNotificationIconsCount --;
+
         for (int i=0; i< maxNotificationIconsCount; i++) {
             if (i>=N) break;
             toShow.add(mNotificationData.get(N-i-1).icon);
