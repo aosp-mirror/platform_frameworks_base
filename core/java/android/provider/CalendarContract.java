@@ -17,6 +17,8 @@
 package android.provider;
 
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ContentProviderClient;
@@ -83,7 +85,6 @@ import android.util.Log;
  * adapters</li>
  * </ul>
  *
- * @hide
  */
 public final class CalendarContract {
     private static final String TAG = "Calendar";
@@ -92,8 +93,8 @@ public final class CalendarContract {
      * Broadcast Action: This is the intent that gets fired when an alarm
      * notification needs to be posted for a reminder.
      *
-     * @SdkConstant
      */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_EVENT_REMINDER = "android.intent.action.EVENT_REMINDER";
 
     /**
@@ -144,6 +145,11 @@ public final class CalendarContract {
      * @see SyncColumns#ACCOUNT_TYPE
      */
     public static final String ACCOUNT_TYPE_LOCAL = "LOCAL";
+
+    /**
+     * This utility class cannot be instantiated
+     */
+    private CalendarContract() {}
 
     /**
      * Generic columns for use by sync adapters. The specific functions of these
@@ -384,7 +390,7 @@ public final class CalendarContract {
      * Class that represents a Calendar Entity. There is one entry per calendar.
      * This is a helper class to make batch operations easier.
      */
-    public static class CalendarEntity implements BaseColumns, SyncColumns, CalendarColumns {
+    public static final class CalendarEntity implements BaseColumns, SyncColumns, CalendarColumns {
 
         /**
          * The default Uri used when creating a new calendar EntityIterator.
@@ -392,6 +398,11 @@ public final class CalendarContract {
         @SuppressWarnings("hiding")
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
                 "/calendar_entities");
+
+        /**
+         * This utility class cannot be instantiated
+         */
+        private CalendarEntity() {}
 
         /**
          * Creates an entity iterator for the given cursor. It assumes the
@@ -566,7 +577,13 @@ public final class CalendarContract {
      * <li>{@link #CAL_SYNC10}</li>
      * </ul>
      */
-    public static class Calendars implements BaseColumns, SyncColumns, CalendarColumns {
+    public static final class Calendars implements BaseColumns, SyncColumns, CalendarColumns {
+
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Calendars() {}
+
         /**
          * The content:// style URL for accessing Calendars
          */
@@ -711,9 +728,14 @@ public final class CalendarContract {
         private static final String ATTENDEES_WHERE = Attendees.EVENT_ID + "=?";
 
         /**
+         * This utility class cannot be instantiated
+         */
+        private Attendees() {}
+
+        /**
          * Queries all attendees associated with the given event. This is a
          * blocking call and should not be done on the UI thread.
-         * 
+         *
          * @param cr The content resolver to use for the query
          * @param eventId The id of the event to retrieve attendees for
          * @param projection the columns to return in the cursor
@@ -1064,6 +1086,11 @@ public final class CalendarContract {
                 "/event_entities");
 
         /**
+         * This utility class cannot be instantiated
+         */
+        private EventsEntity() {}
+
+        /**
          * Creates a new iterator for events
          *
          * @param cursor An event query
@@ -1407,6 +1434,11 @@ public final class CalendarContract {
                 Uri.parse("content://" + AUTHORITY + "/exception");
 
         /**
+         * This utility class cannot be instantiated
+         */
+        private Events() {}
+
+        /**
          * The default sort order for this table
          */
         private static final String DEFAULT_SORT_ORDER = "";
@@ -1478,6 +1510,11 @@ public final class CalendarContract {
         private static final String[] WHERE_CALENDARS_ARGS = {
             "1"
         };
+
+        /**
+         * This utility class cannot be instantiated
+         */
+        private Instances() {}
 
         /**
          * Performs a query to return all visible instances in the given range.
@@ -1632,12 +1669,17 @@ public final class CalendarContract {
      * time zone for the instances. These settings are stored using a key/value
      * scheme. A {@link #KEY} must be specified when updating these values.
      */
-    public static class CalendarCache implements CalendarCacheColumns {
+    public static final class CalendarCache implements CalendarCacheColumns {
         /**
          * The URI to use for retrieving the properties from the Calendar db.
          */
         public static final Uri URI =
                 Uri.parse("content://" + AUTHORITY + "/properties");
+
+        /**
+         * This utility class cannot be instantiated
+         */
+        private CalendarCache() {}
 
         /**
          * They key for updating the use of auto/home time zones in Calendar.
@@ -1720,6 +1762,11 @@ public final class CalendarContract {
      * @hide
      */
     public static final class CalendarMetaData implements CalendarMetaDataColumns, BaseColumns {
+
+        /**
+         * This utility class cannot be instantiated
+         */
+        private CalendarMetaData() {}
     }
 
     protected interface EventDaysColumns {
@@ -1745,12 +1792,17 @@ public final class CalendarContract {
         private static final String SELECTION = "selected=1";
 
         /**
+         * This utility class cannot be instantiated
+         */
+        private EventDays() {}
+
+        /**
          * Retrieves the days with events for the Julian days starting at
          * "startDay" for "numDays". It returns a cursor containing startday and
          * endday representing the max range of days for all events beginning on
          * each startday.This is a blocking function and should not be done on
          * the UI thread.
-         * 
+         *
          * @param cr the ContentResolver
          * @param startDay the first Julian day in the range
          * @param numDays the number of days to load (must be at least 1)
@@ -1828,9 +1880,14 @@ public final class CalendarContract {
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/reminders");
 
         /**
+         * This utility class cannot be instantiated
+         */
+        private Reminders() {}
+
+        /**
          * Queries all reminders associated with the given event. This is a
          * blocking call and should not be done on the UI thread.
-         * 
+         *
          * @param cr The content resolver to use for the query
          * @param eventId The id of the event to retrieve reminders for
          * @param projection the columns to return in the cursor
@@ -1950,6 +2007,11 @@ public final class CalendarContract {
         @SuppressWarnings("hiding")
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY +
                 "/calendar_alerts");
+
+        /**
+         * This utility class cannot be instantiated
+         */
+        private CalendarAlerts() {}
 
         private static final String WHERE_ALARM_EXISTS = EVENT_ID + "=?"
                 + " AND " + BEGIN + "=?"
@@ -2190,6 +2252,11 @@ public final class CalendarContract {
         public static final Uri CONTENT_URI =
                 Uri.parse("content://" + AUTHORITY + "/extendedproperties");
 
+        /**
+         * This utility class cannot be instantiated
+         */
+        private ExtendedProperties() {}
+
         // TODO: fill out this class when we actually start utilizing extendedproperties
         // in the calendar application.
    }
@@ -2258,5 +2325,10 @@ public final class CalendarContract {
      * @hide
      */
     public static final class EventsRawTimes implements BaseColumns, EventsRawTimesColumns {
+
+        /**
+         * This utility class cannot be instantiated
+         */
+        private EventsRawTimes() {}
     }
 }
