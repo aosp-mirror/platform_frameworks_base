@@ -66,6 +66,7 @@ static long gNumRepetitions;
 static long gMaxNumFrames;  // 0 means decode all available.
 static long gReproduceBug;  // if not -1.
 static bool gPreferSoftwareCodec;
+static bool gForceToUseHardwareCodec;
 static bool gPlaybackAudio;
 static bool gWriteMP4;
 static bool gDisplayHistogram;
@@ -144,10 +145,18 @@ static void playSource(OMXClient *client, sp<MediaSource> &source) {
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_RAW, mime)) {
         rawSource = source;
     } else {
+        int flags = 0;
+        if (gPreferSoftwareCodec) {
+            flags |= OMXCodec::kPreferSoftwareCodecs;
+        }
+        if (gForceToUseHardwareCodec) {
+            CHECK(!gPreferSoftwareCodec);
+            flags |= OMXCodec::kHardwareCodecsOnly;
+        }
         rawSource = OMXCodec::Create(
             client->interface(), meta, false /* createEncoder */, source,
             NULL /* matchComponentName */,
-            gPreferSoftwareCodec ? OMXCodec::kPreferSoftwareCodecs : 0,
+            flags,
             gSurface);
 
         if (rawSource == NULL) {
@@ -545,6 +554,7 @@ static void usage(const char *me) {
     fprintf(stderr, "       -p(rofiles) dump decoder profiles supported\n");
     fprintf(stderr, "       -t(humbnail) extract video thumbnail or album art\n");
     fprintf(stderr, "       -s(oftware) prefer software codec\n");
+    fprintf(stderr, "       -r(hardware) force to use hardware codec\n");
     fprintf(stderr, "       -o playback audio\n");
     fprintf(stderr, "       -w(rite) filename (write to .mp4 file)\n");
     fprintf(stderr, "       -k seek test\n");
@@ -566,6 +576,7 @@ int main(int argc, char **argv) {
     gMaxNumFrames = 0;
     gReproduceBug = -1;
     gPreferSoftwareCodec = false;
+    gForceToUseHardwareCodec = false;
     gPlaybackAudio = false;
     gWriteMP4 = false;
     gDisplayHistogram = false;
@@ -575,7 +586,7 @@ int main(int argc, char **argv) {
     sp<LiveSession> liveSession;
 
     int res;
-    while ((res = getopt(argc, argv, "han:lm:b:ptsow:kxS")) >= 0) {
+    while ((res = getopt(argc, argv, "han:lm:b:ptsrow:kxS")) >= 0) {
         switch (res) {
             case 'a':
             {
@@ -633,6 +644,12 @@ int main(int argc, char **argv) {
             case 's':
             {
                 gPreferSoftwareCodec = true;
+                break;
+            }
+
+            case 'r':
+            {
+                gForceToUseHardwareCodec = true;
                 break;
             }
 
