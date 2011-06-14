@@ -385,10 +385,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void ensureActiveMobilePolicyLocked() {
         if (LOGV) Slog.v(TAG, "ensureActiveMobilePolicyLocked()");
         final String subscriberId = getActiveSubscriberId();
-        if (subscriberId == null) {
-            if (LOGV) Slog.v(TAG, "no active mobile network, ignoring policy check");
-            return;
-        }
 
         // examine to see if any policy is defined for active mobile
         boolean mobileDefined = false;
@@ -412,6 +408,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             mNetworkPolicy.add(new NetworkPolicy(
                     TEMPLATE_MOBILE_ALL, subscriberId, cycleDay, 4 * GB_IN_BYTES, LIMIT_DISABLED));
+            writePolicyLocked();
         }
     }
 
