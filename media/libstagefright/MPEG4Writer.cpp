@@ -1946,7 +1946,7 @@ status_t MPEG4Writer::Track::threadEntry() {
     } else {
         prctl(PR_SET_NAME, (unsigned long)"VideoTrackEncoding", 0, 0, 0);
     }
-    setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_AUDIO);
+    androidSetThreadPriority(0, ANDROID_PRIORITY_AUDIO);
 
     sp<MetaData> meta_data;
 
