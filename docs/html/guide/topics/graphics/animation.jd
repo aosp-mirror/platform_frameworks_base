@@ -81,6 +81,12 @@ parent.link=index.html
   If view animation accomplishes everything that you need to do, or if your existing code already
   works the way you want, there is no need to use the property animation system.</p>
   
+    <p class="note"><strong>Tip:</strong> To see how the ADT layout editor allows you to develop and
+preview animations in your layout, watch the <a
+href="http://www.youtube.com/watch?v=Oq05KqjXTvs&feature=player_detailpage#t=1709s">Android
+Developer Tools session</a> from Google I/O '11</p>
+
+
   <h2 id="what">What is Property Animation?</h2>
   A property animation changes a property's (a field in
   an object) value over a specified length of time. To animate something, you specify the
@@ -108,6 +114,7 @@ parent.link=index.html
     default is set to  refresh every 10 ms, but the speed in which your application can refresh frames is
     ultimately dependent on how busy the system is overall and how fast the system can service the underlying timer.</li>
   </ul>
+  
 
   <h3 id="how">How the property animation system works</h3>
 
@@ -894,99 +901,5 @@ resources.</p>
     <li>{@link android.animation.AnimatorSet} - <code>&lt;set&gt;</code></li>
   </ul>
 
-  <p>Both <code>&lt;animator&gt;</code> ({@link android.animation.ValueAnimator}) and
-  <code>&lt;objectAnimator&gt;</code> ({@link android.animation.ObjectAnimator}) have the following
-  attributes:</p>
+<p>See <a href="{@docRoot}guide/topics/resources/animation-resource.html#Property">Animation Resources</a>
 
-  <dl>
-    <dt><code>android:duration</code></dt>
-
-    <dd>The number of milliseconds that the animation runs. The default is 300 ms.</dd>
-
-    <dt><code>android:valueFrom</code> and <code>android:valueTo</code></dt>
-
-    <dd>The values being animated between. These are restricted to numbers (<code>float</code> or
-    <code>int</code>) and color values (such as #00ff00). They can be <code>float</code>, <code>int</code>, colors, 
-    or any kind of <code>Object</code> when creating animations programmatically.</dd>
-
-    <dt><code>android:valueType</code></dt>
-
-    <dd>Set to either <code>"floatType"</code> or <code>"intType"</code>. The default is 
-    <code>"floatType"</code> unless you specify something else or if the <code>valuesFrom</code>
-    and <code>valuesTo</code> values are colors.</dd>
-
-    <dt><code>android:startOffset</code></dt>
-
-    <dd>The delay, in milliseconds, before the animation begins playing (after calling {@link
-    android.animation.ValueAnimator#start start()}).</dd>
-
-    <dt><code>android:repeatCount</code></dt>
-
-    <dd>How many times to repeat an animation. Set to <code>"-1"</code> to infinitely repeat or
-    to a positive integer. For example, a value of <code>"1"</code> means that the animation is
-    repeated once after the initial run of the animation, so the animation plays a total of two
-    times. The default value is <code>"0"</code>, which means no repetition.</dd>
-
-    <dt><code>android:repeatMode</code></dt>
-
-    <dd>How an animation behaves when it reaches the end of the animation.
-    <code>android:repeatCount</code> must be set to a positive integer or <code>"-1"</code> for
-    this attribute to have an effect. Set to <code>"reverse"</code> to have the animation reverse
-    direction with each iteration or <code>"repeat"</code> to have the animation loop from the
-    beginning each time.</dd>
-  </dl>
-
-  <p>The <code>&lt;objectAnimator&gt;</code> ({@link android.animation.ObjectAnimator}) element has the
-  additional attribute <code>android:propertyName</code>, that lets you specify the name of the
-property
-  being animated. The <code>&lt;objectAnimator&gt;</code> element does not expose a <code>target</code>
-  attribute, however, so you cannot set the object to animate in the XML declaration. You have to
-  inflate the XML resource by calling {@link android.animation.AnimatorInflater#loadAnimator
-  loadAnimator()} and call {@link android.animation.ObjectAnimator#setTarget setTarget()} to set
-  the target object unlike the underlying {@link android.animation.ObjectAnimator},
-  before calling {@link android.animation.ObjectAnimator#start start()}.</p>
-
-  <p>The <code>&lt;set&gt;</code> element ({@link android.animation.AnimatorSet}) exposes a single
-  attribute, <code>android:ordering</code>. Set this attribute to <code>"together"</code> (default)
-to play
-  all the animations in this set at once. Set this attribute to <code>"sequentially"</code> to play
-  the animations in the order they are declared.</p>
-
-  <p>You can specify nested <code>&lt;set&gt;</code> elements to further group animations together.
-The
-  animations that you want to group together should be children of the <code>&lt;set&gt;</code> tag and can
-  define their own <code>ordering</code> attribute.</p>
-
-  <p>As an example, this XML code creates an {@link android.animation.AnimatorSet} object that
-  animates x and y at the same time, then runs an animation that fades an object out:</p>
-  <pre>
-&lt;set android:ordering="sequentially"&gt;
-    &lt;set&gt;
-        &lt;objectAnimator
-            android:propertyName="x"
-            android:duration="500"
-            android:valueTo="400"
-            android:valueType="int"/&gt;
-        &lt;objectAnimator
-            android:propertyName="y"
-            android:duration="500"
-            android:valueTo="300"
-            android:valueType="int"/&gt;
-    &lt;/set&gt;
-    &lt;objectAnimator
-        android:propertyName="alpha"
-        android:duration="500"
-        android:valueTo="0f"/&gt;
-&lt;/set&gt;
-</pre>
-
-  <p>In order to run this animation, you must inflate the XML resources in your code to an {@link
-  android.animation.AnimatorSet} object, and then set the target objects for all of the animations
-  before starting the animation set. Calling {@link android.animation.AnimatorSet#setTarget
-  setTarget()} sets a single target object for all children of the {@link
-  android.animation.AnimatorSet}.</p>
-
-<p class="note"><strong>Tip:</strong> To see how the ADT layout editor allows you to develop and
-preview animations in your layout, watch the <a
-href="http://www.youtube.com/watch?v=Oq05KqjXTvs&feature=player_detailpage#t=1709s">Android
-Developer Tools session</a> from Google I/O '11</p>
