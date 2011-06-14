@@ -147,7 +147,7 @@ EventRecurrence_parse(JNIEnv* env, jobject This, jstring jstr)
  */
 static JNINativeMethod METHODS[] = {
     /* name, signature, funcPtr */
-    { "parse", "(Ljava/lang/String;)V", (void*)EventRecurrence_parse }
+    { "parseNative", "(Ljava/lang/String;)V", (void*)EventRecurrence_parse }
 };
 
 static const char*const CLASS_NAME = "android/pim/EventRecurrence";
