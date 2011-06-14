@@ -84,10 +84,10 @@ import android.util.Log;
  * {@link SyncState}, which contains free-form data maintained by the sync
  * adapters</li>
  * </ul>
- * 
+ *
  * @hide
  */
-public final class Calendar {
+public final class CalendarContract {
     private static final String TAG = "Calendar";
 
     /**
@@ -528,7 +528,7 @@ public final class Calendar {
          */
         public static int deleteCalendarsForAccount(ContentResolver cr, Account account) {
             // delete all calendars that match this account
-            return Calendar.Calendars.delete(cr,
+            return CalendarContract.Calendars.delete(cr,
                     WHERE_DELETE_FOR_ACCOUNT,
                     new String[] { account.name, account.type });
         }
@@ -1774,7 +1774,7 @@ public final class Calendar {
      * Fields and helpers for accessing reminders for an event.
      */
     public static final class Reminders implements BaseColumns, RemindersColumns, EventsColumns {
-        private static final String REMINDERS_WHERE = Calendar.Reminders.EVENT_ID + "=?";
+        private static final String REMINDERS_WHERE = CalendarContract.Reminders.EVENT_ID + "=?";
         /**
          * The projection used by the reminders query.
          */
@@ -2066,7 +2066,7 @@ public final class Calendar {
             }
 
             Intent intent = new Intent(EVENT_REMINDER_ACTION);
-            intent.setData(ContentUris.withAppendedId(Calendar.CONTENT_URI, alarmTime));
+            intent.setData(ContentUris.withAppendedId(CalendarContract.CONTENT_URI, alarmTime));
             intent.putExtra(ALARM_TIME, alarmTime);
             PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
             manager.set(AlarmManager.RTC_WAKEUP, alarmTime, pi);
@@ -2165,7 +2165,7 @@ public final class Calendar {
          * The content:// style URI for this table
          */
         public static final Uri CONTENT_URI =
-                Uri.withAppendedPath(Calendar.CONTENT_URI, CONTENT_DIRECTORY);
+                Uri.withAppendedPath(CalendarContract.CONTENT_URI, CONTENT_DIRECTORY);
     }
 
     /**
