@@ -575,9 +575,13 @@ public class AlertController {
         params.weight = 0.5f;
         button.setLayoutParams(params);
         View leftSpacer = mWindow.findViewById(R.id.leftSpacer);
-        leftSpacer.setVisibility(View.VISIBLE);
+        if (leftSpacer != null) {
+            leftSpacer.setVisibility(View.VISIBLE);
+        }
         View rightSpacer = mWindow.findViewById(R.id.rightSpacer);
-        rightSpacer.setVisibility(View.VISIBLE);
+        if (rightSpacer != null) {
+            rightSpacer.setVisibility(View.VISIBLE);
+        }
     }
 
     private void setBackground(LinearLayout topPanel, LinearLayout contentPanel,
