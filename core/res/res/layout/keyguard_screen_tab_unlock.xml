@@ -176,7 +176,6 @@
         android:snapMargin="@*android:dimen/multiwaveview_snap_margin"
         android:hitRadius="@*android:dimen/multiwaveview_hit_radius"
         android:vibrationDuration="20"
-        android:leftChevronDrawable="@drawable/ic_lockscreen_chevron_left"
         android:rightChevronDrawable="@drawable/ic_lockscreen_chevron_right"
         android:feedbackCount="3"
         android:horizontalOffset="0dip"

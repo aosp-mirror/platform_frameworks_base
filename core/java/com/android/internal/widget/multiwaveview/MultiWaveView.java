@@ -134,18 +134,26 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
         mTapRadius = mHandleDrawable.getWidth()/2;
         mOuterRing = new TargetDrawable(res, a.getDrawable(R.styleable.MultiWaveView_waveDrawable));
 
-        // Read animation drawables
+        // Read chevron animation drawables
         Drawable leftChevron = a.getDrawable(R.styleable.MultiWaveView_leftChevronDrawable);
-        if (leftChevron != null) {
-            for (int i = 0; i < mFeedbackCount; i++) {
-                mChevronDrawables.add(new TargetDrawable(res, leftChevron));
-            }
+        for (int i = 0; i < mFeedbackCount; i++) {
+            mChevronDrawables.add(
+                    leftChevron != null ? new TargetDrawable(res, leftChevron) : null);
         }
         Drawable rightChevron = a.getDrawable(R.styleable.MultiWaveView_rightChevronDrawable);
-        if (rightChevron != null) {
-            for (int i = 0; i < mFeedbackCount; i++) {
-                mChevronDrawables.add(new TargetDrawable(res, rightChevron));
-            }
+        for (int i = 0; i < mFeedbackCount; i++) {
+            mChevronDrawables.add(
+                    rightChevron != null ? new TargetDrawable(res, rightChevron) : null);
+        }
+        Drawable topChevron = a.getDrawable(R.styleable.MultiWaveView_topChevronDrawable);
+        for (int i = 0; i < mFeedbackCount; i++) {
+            mChevronDrawables.add(
+                    topChevron != null ? new TargetDrawable(res, topChevron) : null);
+        }
+        Drawable bottomChevron = a.getDrawable(R.styleable.MultiWaveView_bottomChevronDrawable);
+        for (int i = 0; i < mFeedbackCount; i++) {
+            mChevronDrawables.add(
+                    bottomChevron != null ? new TargetDrawable(res, bottomChevron) : null);
         }
 
         // Read array of target drawables
@@ -190,7 +198,6 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
     private void switchToState(int state, float x, float y) {
         switch (state) {
             case STATE_IDLE:
-                stopChevronAnimation();
                 deactivateTargets();
                 mHandleDrawable.setState(TargetDrawable.STATE_INACTIVE);
                 break;
@@ -221,33 +228,32 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
      * followed by right chevrons.
      */
     private void startChevronAnimation() {
-        final int icons = mChevronDrawables.size();
-        for (Tweener tween : mChevronAnimations) {
-            tween.animator.cancel();
-        }
-        for (int i = 0; i < icons; i++) {
-            TargetDrawable icon = mChevronDrawables.get(i);
-            icon.setY(mWaveCenterY);
-            icon.setAlpha(1.0f);
-            mChevronAnimations.clear();
-            int delay = (int) (Math.abs(0.5f + i - icons / 2) * CHEVRON_INCREMENTAL_DELAY);
-            if (i < icons/2) {
-                // Left chevrons
-                icon.setX(mWaveCenterX - mHandleDrawable.getWidth() / 2);
+        final float r = mHandleDrawable.getWidth() / 2;
+        final float from[][] = {
+                {mWaveCenterX - r, mWaveCenterY},  // left
+                {mWaveCenterX + r, mWaveCenterY},  // right
+                {mWaveCenterX, mWaveCenterY - r},  // top
+                {mWaveCenterX, mWaveCenterY + r} }; // bottom
+        final float to[][] = {
+                {mWaveCenterX - mOuterRadius, mWaveCenterY},  // left
+                {mWaveCenterX + mOuterRadius, mWaveCenterY},  // right
+                {mWaveCenterX, mWaveCenterY - mOuterRadius},  // top
+                {mWaveCenterX, mWaveCenterY + mOuterRadius} }; // bottom
+
+        mChevronAnimations.clear();
+        for (int direction = 0; direction < 4; direction++) {
+            for (int count = 0; count < mFeedbackCount; count++) {
+                int delay = count * CHEVRON_INCREMENTAL_DELAY;
+                final TargetDrawable icon = mChevronDrawables.get(direction*mFeedbackCount + count);
+                if (icon == null) {
+                    continue;
+                }
                 mChevronAnimations.add(Tweener.to(icon, CHEVRON_ANIMATION_DURATION,
                         "ease", mChevronAnimationInterpolator,
                         "delay", delay,
-                        "x", mWaveCenterX - mOuterRadius,
-                        "alpha", 0.0f,
-                        "onUpdate", this));
-            } else {
-                // Right chevrons
-                icon.setX(mWaveCenterX + mHandleDrawable.getWidth() / 2);
-                mChevronAnimations.add(Tweener.to(icon, CHEVRON_ANIMATION_DURATION,
-                        "ease", mChevronAnimationInterpolator,
-                        "delay", delay,
-                        "x", mWaveCenterX + mOuterRadius,
-                        "alpha", 0.0f,
+                        "x", new float[] { from[direction][0], to[direction][0] },
+                        "y", new float[] { from[direction][1], to[direction][1] },
+                        "alpha", new float[] {1.0f, 0.0f},
                         "onUpdate", this));
             }
         }
@@ -330,8 +336,6 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
         if (targetHit) {
             mTargetDrawables.get(activeTarget).setState(TargetDrawable.STATE_ACTIVE);
         }
-
-        stopChevronAnimation();
     }
 
     private void hideTargets(boolean animate) {
@@ -392,11 +396,12 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
         Resources res = getContext().getResources();
         TypedArray array = res.obtainTypedArray(resourceId);
         int count = array.length();
-        mTargetDrawables = new ArrayList<TargetDrawable>(count);
+        ArrayList<TargetDrawable> targetDrawables = new ArrayList<TargetDrawable>(count);
         for (int i = 0; i < count; i++) {
             Drawable drawable = array.getDrawable(i);
-            mTargetDrawables.add(new TargetDrawable(res, drawable));
+            targetDrawables.add(new TargetDrawable(res, drawable));
         }
+        mTargetDrawables = targetDrawables;
     }
 
     /**
@@ -472,12 +477,19 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
         return handled ? true : super.onTouchEvent(event);
     }
 
+    private void moveHandleTo(float x, float y, boolean animate) {
+        // TODO: animate the handle based on the current state/position
+        mHandleDrawable.setX(x);
+        mHandleDrawable.setY(y);
+    }
+
     private void handleDown(float x, float y) {
         final float dx = x - mWaveCenterX;
         final float dy = y - mWaveCenterY;
         if (dist2(dx,dy) <= square(mTapRadius)) {
             if (DEBUG) Log.v(TAG, "** Handle HIT");
             switchToState(STATE_FIRST_TOUCH, x, y);
+            moveHandleTo(x, y, false);
             mDragging = true;
         } else {
             mDragging = false;
@@ -528,11 +540,14 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
                     best = dist2;
                 }
             }
+            x = limitX;
+            y = limitY;
         }
         if (activeTarget != -1) {
             switchToState(STATE_SNAP, x,y);
-            mHandleDrawable.setX(singleTarget ? limitX : mTargetDrawables.get(activeTarget).getX());
-            mHandleDrawable.setY(singleTarget ? limitY : mTargetDrawables.get(activeTarget).getY());
+            float newX = singleTarget ? limitX : mTargetDrawables.get(activeTarget).getX();
+            float newY = singleTarget ? limitY : mTargetDrawables.get(activeTarget).getY();
+            moveHandleTo(newX, newY, false);
             TargetDrawable currentTarget = mTargetDrawables.get(activeTarget);
             if (currentTarget.hasState(TargetDrawable.STATE_FOCUSED)) {
                 currentTarget.setState(TargetDrawable.STATE_FOCUSED);
@@ -540,8 +555,7 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
             }
         } else {
             switchToState(STATE_TRACKING, x, y);
-            mHandleDrawable.setX(x);
-            mHandleDrawable.setY(y);
+            moveHandleTo(x, y, false);
             mHandleDrawable.setAlpha(1.0f);
         }
         // Draw handle outside parent's bounds
@@ -577,8 +591,7 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
 
         mWaveCenterX = mHorizontalOffset + Math.max(width, mOuterRing.getWidth() ) / 2;
         mWaveCenterY = mVerticalOffset + Math.max(height, mOuterRing.getHeight()) / 2;
-        mHandleDrawable.setX(mWaveCenterX);
-        mHandleDrawable.setY(mWaveCenterY);
+        moveHandleTo(mWaveCenterX, mWaveCenterY, false);
         mOuterRing.setX(mWaveCenterX);
         mOuterRing.setY(Math.max(mWaveCenterY, mWaveCenterY));
         mOuterRing.setAlpha(0.0f);
@@ -609,7 +622,9 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
 
     private void hideChevrons() {
         for (TargetDrawable chevron : mChevronDrawables) {
-            chevron.setAlpha(0.0f);
+            if (chevron != null) {
+                chevron.setAlpha(0.0f);
+            }
         }
     }
 
@@ -617,10 +632,14 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
     protected void onDraw(Canvas canvas) {
         mOuterRing.draw(canvas);
         for (TargetDrawable target : mTargetDrawables) {
-            target.draw(canvas);
+            if (target != null) {
+                target.draw(canvas);
+            }
         }
         for (TargetDrawable target : mChevronDrawables) {
-            target.draw(canvas);
+            if (target != null) {
+                target.draw(canvas);
+            }
         }
         mHandleDrawable.draw(canvas);
     }

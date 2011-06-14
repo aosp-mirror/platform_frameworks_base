@@ -63,14 +63,15 @@ class Tweener {
                 delay = ((Number) value).longValue();
             } else if ("syncWith".equals(key)) {
                 // TODO
-            } else if (value instanceof Number[]) {
-                // TODO: support Tween.from()
+            } else if (value instanceof float[]) {
+                props.add(PropertyValuesHolder.ofFloat(key,
+                        ((float[])value)[0], ((float[])value)[1]));
             } else if (value instanceof Number) {
                 float floatValue = ((Number)value).floatValue();
                 props.add(PropertyValuesHolder.ofFloat(key, floatValue));
             } else {
                 throw new IllegalArgumentException(
-                        "Bad argument for key \"" + key + "with value" + value);
+                        "Bad argument for key \"" + key + "\" with value " + value.getClass());
             }
         }
 

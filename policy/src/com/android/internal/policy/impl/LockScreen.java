@@ -710,11 +710,17 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
         if (mEnergyWave != null) {
             mEnergyWave.reset();
         }
+        if (mMultiWaveView != null) {
+            mMultiWaveView.reset(false);
+        }
     }
 
     /** {@inheritDoc} */
     public void onResume() {
         resetStatusInfo(mUpdateMonitor);
+        if (mMultiWaveView != null) {
+            mMultiWaveView.ping();
+        }
     }
 
     /** {@inheritDoc} */

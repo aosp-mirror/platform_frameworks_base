@@ -1756,6 +1756,8 @@
   <public type="attr" name="handleDrawable" />
   <public type="attr" name="leftChevronDrawable" />
   <public type="attr" name="rightChevronDrawable" />
+  <public type="attr" name="topChevronDrawable" />
+  <public type="attr" name="bottomChevronDrawable" />
   <public type="attr" name="waveDrawable" />
   <public type="attr" name="outerRadius" />
   <public type="attr" name="hitRadius" />

@@ -5019,11 +5019,17 @@
         <!-- Sets a drawable as the drag center. -->
         <attr name="handleDrawable" format="reference" />
 
-        <!-- Drawable to use for chevron animation on the left. -->
+        <!-- Drawable to use for chevron animation on the left. May be null. -->
         <attr name="leftChevronDrawable" format="reference" />
 
-        <!-- Drawable to use for chevron animation on the right. -->
+        <!-- Drawable to use for chevron animation on the right. May be null. -->
         <attr name="rightChevronDrawable" format="reference" />
+
+        <!-- Drawable to use for chevron animation on the top. May be null. -->
+        <attr name="topChevronDrawable" format="reference" />
+
+        <!-- Drawable to use for chevron animation on the bottom. May be null. -->
+        <attr name="bottomChevronDrawable" format="reference" />
 
         <!-- Drawable to use for wave ripple animation. -->
         <attr name="waveDrawable" format="reference" />
