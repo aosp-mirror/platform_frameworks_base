@@ -16,6 +16,8 @@
 
 package android.os;
 
+import com.android.internal.telephony.TelephonyProperties;
+
 /**
  * Information about the current build, extracted from system properties.
  */
@@ -56,8 +58,16 @@ public class Build {
     /** The system bootloader version number. */
     public static final String BOOTLOADER = getString("ro.bootloader");
 
-    /** The radio firmware version number. */
-    public static final String RADIO = getString("gsm.version.baseband");
+    /**
+     * The radio firmware version number.
+     *
+     * @deprecated The radio firmware version is frequently not
+     * available when this class is initialized, leading to a blank or
+     * "unknown" value for this string.  Use
+     * {@link #getRadioVersion} instead.
+     */
+    @Deprecated
+    public static final String RADIO = getString(TelephonyProperties.PROPERTY_BASEBAND_VERSION);
 
     /** The name of the hardware (from the kernel command line or /proc). */
     public static final String HARDWARE = getString("ro.hardware");
@@ -265,6 +275,14 @@ public class Build {
     public static final long TIME = getLong("ro.build.date.utc") * 1000;
     public static final String USER = getString("ro.build.user");
     public static final String HOST = getString("ro.build.host");
+
+    /**
+     * Returns the version string for the radio firmware.  May return
+     * null (if, for instance, the radio is not currently on).
+     */
+    public static String getRadioVersion() {
+        return SystemProperties.get(TelephonyProperties.PROPERTY_BASEBAND_VERSION, null);
+    }
 
     private static String getString(String property) {
         return SystemProperties.get(property, UNKNOWN);

@@ -13588,6 +13588,7 @@ package android.os {
 
   public class Build {
     ctor public Build();
+    method public static java.lang.String getRadioVersion();
     field public static final java.lang.String BOARD;
     field public static final java.lang.String BOOTLOADER;
     field public static final java.lang.String BRAND;
@@ -13602,7 +13603,7 @@ package android.os {
     field public static final java.lang.String MANUFACTURER;
     field public static final java.lang.String MODEL;
     field public static final java.lang.String PRODUCT;
-    field public static final java.lang.String RADIO;
+    field public static final deprecated java.lang.String RADIO;
     field public static final java.lang.String SERIAL;
     field public static final java.lang.String TAGS;
     field public static final long TIME;
