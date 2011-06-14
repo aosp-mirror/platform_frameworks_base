@@ -16,21 +16,16 @@
 
 package com.android.server;
 
-import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.net.Uri;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Slog;
 import android.view.View;
 
@@ -248,25 +243,23 @@ public class StatusBarManagerService extends IStatusBarService.Stub
      * Hide or show the on-screen Menu key. Only call this from the window manager, typically in
      * response to a window with FLAG_NEEDS_MENU_KEY set.
      */
-    public void setMenuKeyVisible(final boolean visible) {
+    public void topAppWindowChanged(final boolean menuVisible) {
         enforceStatusBar();
 
-        if (SPEW) Slog.d(TAG, (visible?"showing":"hiding") + " MENU key");
+        if (SPEW) Slog.d(TAG, (menuVisible?"showing":"hiding") + " MENU key");
 
         synchronized(mLock) {
-            if (mMenuVisible != visible) {
-                mMenuVisible = visible;
-                mHandler.post(new Runnable() {
-                        public void run() {
-                            if (mBar != null) {
-                                try {
-                                    mBar.setMenuKeyVisible(visible);
-                                } catch (RemoteException ex) {
-                                }
+            mMenuVisible = menuVisible;
+            mHandler.post(new Runnable() {
+                    public void run() {
+                        if (mBar != null) {
+                            try {
+                                mBar.topAppWindowChanged(menuVisible);
+                            } catch (RemoteException ex) {
                             }
                         }
-                    });
-            }
+                    }
+                });
         }
     }
 
