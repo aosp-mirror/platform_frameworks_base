@@ -41,10 +41,7 @@ public class MediaMetadataTest extends AndroidTestCase {
     }
     
     public static enum MP3_TEST_FILE{
-        ID3V1V2, ID3V2, ID3V1,
-        CORRUPTED_ID3V1, CORRUPTED_ID3V2_TALB, CORRUPTED_ID3V2_TCOM,
-        CORRUPTED_ID3V2_TCOM_2, CORRUPTED_ID3V2_TRCK, CORRUPTED_D3V2_TRCK_2,
-        CORRUPTED_ID3V2_TYER, CORRUPTED_ID3V2_TYER_2, CORRUPTED_ID3V2_TIT
+        ID3V1V2, ID3V2, ID3V1
     }
     
     public static METADATA_EXPECTEDRESULT meta;
@@ -64,53 +61,7 @@ public class MediaMetadataTest extends AndroidTestCase {
     public static void testID3V1Metadata() throws Exception {
         validateMetatData(mp3_test_file.ID3V1.ordinal(), MediaNames.META_DATA_MP3);
     }
-    
-    @MediumTest
-    public static void testCorruptedID3V1Metadata() throws Exception {
-        validateMetatData(mp3_test_file.CORRUPTED_ID3V1.ordinal(), MediaNames.META_DATA_MP3);
-    }
 
-    @MediumTest
-    public static void testCorrupted_ID3V2_TALBMetadata() throws Exception {
-        validateMetatData(mp3_test_file.CORRUPTED_ID3V2_TALB.ordinal(), MediaNames.META_DATA_MP3);
-    }
-    
-    @MediumTest
-    public static void testCorrupted_ID3V2_TCOMMetadata() throws Exception {
-        validateMetatData(mp3_test_file.CORRUPTED_ID3V2_TCOM.ordinal(), MediaNames.META_DATA_MP3);
-    }
-    
-    @MediumTest
-    public static void testCorrupted_ID3V2_TCOMM2etadata() throws Exception {
-        validateMetatData(mp3_test_file.CORRUPTED_ID3V2_TCOM_2.ordinal(), MediaNames.META_DATA_MP3);
-    }
-    
-    @MediumTest
-    public static void testCorrupted_ID3V2_TRCKMetadata() throws Exception {
-        validateMetatData(mp3_test_file.CORRUPTED_ID3V2_TRCK.ordinal(), MediaNames.META_DATA_MP3);
-    }
-    
-    @MediumTest
-    public static void testCorrupted_ID3V2_TRCK2Metadata() throws Exception {
-        validateMetatData(mp3_test_file.CORRUPTED_D3V2_TRCK_2.ordinal(), MediaNames.META_DATA_MP3);
-    }
-   
-    @MediumTest
-    public static void testCorrupted_ID3V2_TYERMetadata() throws Exception {
-        validateMetatData(mp3_test_file.CORRUPTED_ID3V2_TYER.ordinal(), MediaNames.META_DATA_MP3);
-    }
-    
-    @MediumTest
-    public static void testCorrupted_ID3V2_TYER2Metadata() throws Exception {
-        validateMetatData(mp3_test_file.CORRUPTED_ID3V2_TYER_2.ordinal(), MediaNames.META_DATA_MP3);
-    }
-    
-    @MediumTest
-    public static void testCorrupted_ID3V2_TITMetadata() throws Exception {
-        validateMetatData(mp3_test_file.CORRUPTED_ID3V2_TIT.ordinal(), MediaNames.META_DATA_MP3);
-    }
-   
-     
     private static void validateMetatData(int fileIndex, String meta_data_file[][]) {
         Log.v(TAG, "filePath = "+ meta_data_file[fileIndex][0]);
         if ((meta_data_file[fileIndex][0].endsWith("wma") && !MediaProfileReader.getWMAEnable()) ||
