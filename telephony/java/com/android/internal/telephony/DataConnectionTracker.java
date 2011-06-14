@@ -145,8 +145,10 @@ public abstract class DataConnectionTracker extends Handler {
 
     public static final String APN_TYPE_KEY = "apnType";
 
-    /** Delay between APN attempts */
-    protected static final int APN_DELAY_MILLIS = 5000;
+    /** Delay between APN attempts.
+        Note the property override mechanism is there just for testing purpose only. */
+    protected static final int APN_DELAY_MILLIS =
+                                SystemProperties.getInt("persist.radio.apn_delay", 5000);
 
     // responds to the setInternalDataEnabled call - used internally to turn off data
     // for example during emergency calls
