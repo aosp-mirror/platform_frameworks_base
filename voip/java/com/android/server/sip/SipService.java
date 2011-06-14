@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeSet;
+import java.util.concurrent.Executor;
 import javax.sip.SipException;
 
 /**
@@ -68,8 +69,7 @@ import javax.sip.SipException;
 public final class SipService extends ISipService.Stub {
     static final String TAG = "SipService";
     static final boolean DEBUGV = false;
-    private static final boolean DEBUG = false;
-    private static final boolean DEBUG_TIMER = DEBUG && false;
+    static final boolean DEBUG = false;
     private static final int EXPIRY_TIME = 3600;
     private static final int SHORT_EXPIRY_TIME = 10;
     private static final int MIN_EXPIRY_TIME = 60;
@@ -78,13 +78,13 @@ public final class SipService extends ISipService.Stub {
     private String mLocalIp;
     private String mNetworkType;
     private boolean mConnected;
-    private WakeupTimer mTimer;
+    private SipWakeupTimer mTimer;
     private WifiScanProcess mWifiScanProcess;
     private WifiManager.WifiLock mWifiLock;
     private boolean mWifiOnly;
     private IntervalMeasurementProcess mIntervalMeasurementProcess;
 
-    private MyExecutor mExecutor;
+    private MyExecutor mExecutor = new MyExecutor();
 
     // SipProfile URI --> group
     private Map<String, SipSessionGroupExt> mSipGroups =
@@ -118,7 +118,7 @@ public final class SipService extends ISipService.Stub {
         mMyWakeLock = new SipWakeLock((PowerManager)
                 context.getSystemService(Context.POWER_SERVICE));
 
-        mTimer = new WakeupTimer(context);
+        mTimer = new SipWakeupTimer(context, mExecutor);
         mWifiOnly = SipManager.isSipWifiOnly(context);
     }
 
@@ -157,12 +157,6 @@ public final class SipService extends ISipService.Stub {
         mContext.unregisterReceiver(mConnectivityReceiver);
         mContext.unregisterReceiver(mWifiStateReceiver);
         if (DEBUG) Log.d(TAG, " --- unregister receivers");
-    }
-
-    private MyExecutor getExecutor() {
-        // create mExecutor lazily
-        if (mExecutor == null) mExecutor = new MyExecutor();
-        return mExecutor;
     }
 
     public synchronized SipProfile[] getListOfProfiles() {
@@ -716,8 +710,8 @@ public final class SipService extends ISipService.Stub {
         private int mMaxInterval = MAX_INTERVAL;
         private int mInterval = MAX_INTERVAL / 2;
         private int mPassCounter = 0;
-        private WakeupTimer mTimer = new WakeupTimer(mContext);
-
+        private SipWakeupTimer mTimer = new SipWakeupTimer(mContext, mExecutor);
+        // TODO: fix SipWakeupTimer so that we only use one instance of the timer
 
         public IntervalMeasurementProcess(SipSessionGroup group) {
             try {
@@ -1123,7 +1117,7 @@ public final class SipService extends ISipService.Stub {
         @Override
         public void onReceive(final Context context, final Intent intent) {
             // Run the handler in MyExecutor to be protected by wake lock
-            getExecutor().execute(new Runnable() {
+            mExecutor.execute(new Runnable() {
                 public void run() {
                     onReceiveInternal(context, intent);
                 }
@@ -1227,7 +1221,7 @@ public final class SipService extends ISipService.Stub {
             @Override
             public void run() {
                 // delegate to mExecutor
-                getExecutor().execute(new Runnable() {
+                mExecutor.execute(new Runnable() {
                     public void run() {
                         realRun();
                     }
@@ -1252,300 +1246,6 @@ public final class SipService extends ISipService.Stub {
         }
     }
 
-    /**
-     * Timer that can schedule events to occur even when the device is in sleep.
-     * Only used internally in this package.
-     */
-    class WakeupTimer extends BroadcastReceiver {
-        private static final String TAG = "_SIP.WkTimer_";
-        private static final String TRIGGER_TIME = "TriggerTime";
-
-        private Context mContext;
-        private AlarmManager mAlarmManager;
-
-        // runnable --> time to execute in SystemClock
-        private TreeSet<MyEvent> mEventQueue =
-                new TreeSet<MyEvent>(new MyEventComparator());
-
-        private PendingIntent mPendingIntent;
-
-        public WakeupTimer(Context context) {
-            mContext = context;
-            mAlarmManager = (AlarmManager)
-                    context.getSystemService(Context.ALARM_SERVICE);
-
-            IntentFilter filter = new IntentFilter(getAction());
-            context.registerReceiver(this, filter);
-        }
-
-        /**
-         * Stops the timer. No event can be scheduled after this method is called.
-         */
-        public synchronized void stop() {
-            mContext.unregisterReceiver(this);
-            if (mPendingIntent != null) {
-                mAlarmManager.cancel(mPendingIntent);
-                mPendingIntent = null;
-            }
-            mEventQueue.clear();
-            mEventQueue = null;
-        }
-
-        private synchronized boolean stopped() {
-            if (mEventQueue == null) {
-                Log.w(TAG, "Timer stopped");
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        private void cancelAlarm() {
-            mAlarmManager.cancel(mPendingIntent);
-            mPendingIntent = null;
-        }
-
-        private void recalculatePeriods() {
-            if (mEventQueue.isEmpty()) return;
-
-            MyEvent firstEvent = mEventQueue.first();
-            int minPeriod = firstEvent.mMaxPeriod;
-            long minTriggerTime = firstEvent.mTriggerTime;
-            for (MyEvent e : mEventQueue) {
-                e.mPeriod = e.mMaxPeriod / minPeriod * minPeriod;
-                int interval = (int) (e.mLastTriggerTime + e.mMaxPeriod
-                        - minTriggerTime);
-                interval = interval / minPeriod * minPeriod;
-                e.mTriggerTime = minTriggerTime + interval;
-            }
-            TreeSet<MyEvent> newQueue = new TreeSet<MyEvent>(
-                    mEventQueue.comparator());
-            newQueue.addAll((Collection<MyEvent>) mEventQueue);
-            mEventQueue.clear();
-            mEventQueue = newQueue;
-            if (DEBUG_TIMER) {
-                Log.d(TAG, "queue re-calculated");
-                printQueue();
-            }
-        }
-
-        // Determines the period and the trigger time of the new event and insert it
-        // to the queue.
-        private void insertEvent(MyEvent event) {
-            long now = SystemClock.elapsedRealtime();
-            if (mEventQueue.isEmpty()) {
-                event.mTriggerTime = now + event.mPeriod;
-                mEventQueue.add(event);
-                return;
-            }
-            MyEvent firstEvent = mEventQueue.first();
-            int minPeriod = firstEvent.mPeriod;
-            if (minPeriod <= event.mMaxPeriod) {
-                event.mPeriod = event.mMaxPeriod / minPeriod * minPeriod;
-                int interval = event.mMaxPeriod;
-                interval -= (int) (firstEvent.mTriggerTime - now);
-                interval = interval / minPeriod * minPeriod;
-                event.mTriggerTime = firstEvent.mTriggerTime + interval;
-                mEventQueue.add(event);
-            } else {
-                long triggerTime = now + event.mPeriod;
-                if (firstEvent.mTriggerTime < triggerTime) {
-                    event.mTriggerTime = firstEvent.mTriggerTime;
-                    event.mLastTriggerTime -= event.mPeriod;
-                } else {
-                    event.mTriggerTime = triggerTime;
-                }
-                mEventQueue.add(event);
-                recalculatePeriods();
-            }
-        }
-
-        /**
-         * Sets a periodic timer.
-         *
-         * @param period the timer period; in milli-second
-         * @param callback is called back when the timer goes off; the same callback
-         *      can be specified in multiple timer events
-         */
-        public synchronized void set(int period, Runnable callback) {
-            if (stopped()) return;
-
-            long now = SystemClock.elapsedRealtime();
-            MyEvent event = new MyEvent(period, callback, now);
-            insertEvent(event);
-
-            if (mEventQueue.first() == event) {
-                if (mEventQueue.size() > 1) cancelAlarm();
-                scheduleNext();
-            }
-
-            long triggerTime = event.mTriggerTime;
-            if (DEBUG_TIMER) {
-                Log.d(TAG, " add event " + event + " scheduled at "
-                        + showTime(triggerTime) + " at " + showTime(now)
-                        + ", #events=" + mEventQueue.size());
-                printQueue();
-            }
-        }
-
-        /**
-         * Cancels all the timer events with the specified callback.
-         *
-         * @param callback the callback
-         */
-        public synchronized void cancel(Runnable callback) {
-            if (stopped() || mEventQueue.isEmpty()) return;
-            if (DEBUG_TIMER) Log.d(TAG, "cancel:" + callback);
-
-            MyEvent firstEvent = mEventQueue.first();
-            for (Iterator<MyEvent> iter = mEventQueue.iterator();
-                    iter.hasNext();) {
-                MyEvent event = iter.next();
-                if (event.mCallback == callback) {
-                    iter.remove();
-                    if (DEBUG_TIMER) Log.d(TAG, "    cancel found:" + event);
-                }
-            }
-            if (mEventQueue.isEmpty()) {
-                cancelAlarm();
-            } else if (mEventQueue.first() != firstEvent) {
-                cancelAlarm();
-                firstEvent = mEventQueue.first();
-                firstEvent.mPeriod = firstEvent.mMaxPeriod;
-                firstEvent.mTriggerTime = firstEvent.mLastTriggerTime
-                        + firstEvent.mPeriod;
-                recalculatePeriods();
-                scheduleNext();
-            }
-            if (DEBUG_TIMER) {
-                Log.d(TAG, "after cancel:");
-                printQueue();
-            }
-        }
-
-        private void scheduleNext() {
-            if (stopped() || mEventQueue.isEmpty()) return;
-
-            if (mPendingIntent != null) {
-                throw new RuntimeException("pendingIntent is not null!");
-            }
-
-            MyEvent event = mEventQueue.first();
-            Intent intent = new Intent(getAction());
-            intent.putExtra(TRIGGER_TIME, event.mTriggerTime);
-            PendingIntent pendingIntent = mPendingIntent =
-                    PendingIntent.getBroadcast(mContext, 0, intent,
-                            PendingIntent.FLAG_UPDATE_CURRENT);
-            mAlarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,
-                    event.mTriggerTime, pendingIntent);
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // This callback is already protected by AlarmManager's wake lock.
-            String action = intent.getAction();
-            if (getAction().equals(action)
-                    && intent.getExtras().containsKey(TRIGGER_TIME)) {
-                mPendingIntent = null;
-                long triggerTime = intent.getLongExtra(TRIGGER_TIME, -1L);
-                execute(triggerTime);
-            } else {
-                Log.d(TAG, "unrecognized intent: " + intent);
-            }
-        }
-
-        private void printQueue() {
-            int count = 0;
-            for (MyEvent event : mEventQueue) {
-                Log.d(TAG, "     " + event + ": scheduled at "
-                        + showTime(event.mTriggerTime) + ": last at "
-                        + showTime(event.mLastTriggerTime));
-                if (++count >= 5) break;
-            }
-            if (mEventQueue.size() > count) {
-                Log.d(TAG, "     .....");
-            } else if (count == 0) {
-                Log.d(TAG, "     <empty>");
-            }
-        }
-
-        private synchronized void execute(long triggerTime) {
-            if (DEBUG_TIMER) Log.d(TAG, "time's up, triggerTime = "
-                    + showTime(triggerTime) + ": " + mEventQueue.size());
-            if (stopped() || mEventQueue.isEmpty()) return;
-
-            for (MyEvent event : mEventQueue) {
-                if (event.mTriggerTime != triggerTime) break;
-                if (DEBUG_TIMER) Log.d(TAG, "execute " + event);
-
-                event.mLastTriggerTime = event.mTriggerTime;
-                event.mTriggerTime += event.mPeriod;
-
-                // run the callback in the handler thread to prevent deadlock
-                getExecutor().execute(event.mCallback);
-            }
-            if (DEBUG_TIMER) {
-                Log.d(TAG, "after timeout execution");
-                printQueue();
-            }
-            scheduleNext();
-        }
-
-        private String getAction() {
-            return toString();
-        }
-
-        private String showTime(long time) {
-            int ms = (int) (time % 1000);
-            int s = (int) (time / 1000);
-            int m = s / 60;
-            s %= 60;
-            return String.format("%d.%d.%d", m, s, ms);
-        }
-    }
-
-    private static class MyEvent {
-        int mPeriod;
-        int mMaxPeriod;
-        long mTriggerTime;
-        long mLastTriggerTime;
-        Runnable mCallback;
-
-        MyEvent(int period, Runnable callback, long now) {
-            mPeriod = mMaxPeriod = period;
-            mCallback = callback;
-            mLastTriggerTime = now;
-        }
-
-        @Override
-        public String toString() {
-            String s = super.toString();
-            s = s.substring(s.indexOf("@"));
-            return s + ":" + (mPeriod / 1000) + ":" + (mMaxPeriod / 1000) + ":"
-                    + toString(mCallback);
-        }
-
-        private String toString(Object o) {
-            String s = o.toString();
-            int index = s.indexOf("$");
-            if (index > 0) s = s.substring(index + 1);
-            return s;
-        }
-    }
-
-    private static class MyEventComparator implements Comparator<MyEvent> {
-        public int compare(MyEvent e1, MyEvent e2) {
-            if (e1 == e2) return 0;
-            int diff = e1.mMaxPeriod - e2.mMaxPeriod;
-            if (diff == 0) diff = -1;
-            return diff;
-        }
-
-        public boolean equals(Object that) {
-            return (this == that);
-        }
-    }
-
     private static Looper createLooper() {
         HandlerThread thread = new HandlerThread("SipService.Executor");
         thread.start();
@@ -1554,12 +1254,13 @@ public final class SipService extends ISipService.Stub {
 
     // Executes immediate tasks in a single thread.
     // Hold/release wake lock for running tasks
-    private class MyExecutor extends Handler {
+    private class MyExecutor extends Handler implements Executor {
         MyExecutor() {
             super(createLooper());
         }
 
-        void execute(Runnable task) {
+        @Override
+        public void execute(Runnable task) {
             mMyWakeLock.acquire(task);
             Message.obtain(this, 0/* don't care */, task).sendToTarget();
         }
