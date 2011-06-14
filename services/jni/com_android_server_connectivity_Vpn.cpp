@@ -203,7 +203,7 @@ static int set_routes(const char *name, int index, const char *routes)
         if (strchr(address, ':')) {
             // Add an IPv6 route.
             if (inet_pton(AF_INET6, address, &rt6.rtmsg_dst) != 1 ||
-                    prefix < 0 || prefix > 128) {
+                    prefix < 1 || prefix > 128) {
                 count = BAD_ARGUMENT;
                 break;
             }
@@ -216,7 +216,7 @@ static int set_routes(const char *name, int index, const char *routes)
         } else {
             // Add an IPv4 route.
             if (inet_pton(AF_INET, address, as_in_addr(&rt4.rt_dst)) != 1 ||
-                    prefix < 0 || prefix > 32) {
+                    prefix < 1 || prefix > 32) {
                 count = BAD_ARGUMENT;
                 break;
             }
