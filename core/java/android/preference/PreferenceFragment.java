@@ -145,7 +145,6 @@ public abstract class PreferenceFragment extends Fragment implements
         super.onCreate(savedInstanceState);
         mPreferenceManager = new PreferenceManager(getActivity(), FIRST_REQUEST_CODE);
         mPreferenceManager.setFragment(this);
-        mPreferenceManager.setOnPreferenceTreeClickListener(this);
     }
 
     @Override
@@ -178,9 +177,16 @@ public abstract class PreferenceFragment extends Fragment implements
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        mPreferenceManager.setOnPreferenceTreeClickListener(this);
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
         mPreferenceManager.dispatchActivityStop();
+        mPreferenceManager.setOnPreferenceTreeClickListener(null);
     }
 
     @Override
@@ -195,7 +201,6 @@ public abstract class PreferenceFragment extends Fragment implements
     public void onDestroy() {
         super.onDestroy();
         mPreferenceManager.dispatchActivityDestroy();
-        mPreferenceManager.setOnPreferenceTreeClickListener(null);
     }
 
     @Override
