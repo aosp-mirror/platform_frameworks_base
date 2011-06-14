@@ -55,7 +55,9 @@ page.title=Android Open Accessory Development Kit
           </ol>
         </li>
       </ol>
+
       
+
       <h2>See also</h2>
 
       <ol>
@@ -66,12 +68,6 @@ page.title=Android Open Accessory Development Kit
       <h2>Where to buy</h2>
 
       <ol>
-      <li><a href="http://shop.moderndevice.com/products/freeduino-usb-host-board">
-        Modern Device</a></li>
-
-      <li><a href="http://www.seeedstudio.com/depot/seeeduino-adk-main-board-p-846.html">
-        Seeed Studio</a></li>
-
         <li><a href=
         "http://www.rt-net.jp/shop/index.php?main_page=product_info&cPath=3_4&products_id=1">
         RT Corp</a></li>
@@ -82,7 +78,6 @@ page.title=Android Open Accessory Development Kit
 
         <li><a href="https://store.diydrones.com/ProductDetails.asp?ProductCode=BR-PhoneDrone">
         DIY Drones</a></li>
-
       </ol>
     </div>
   </div>
@@ -110,25 +105,13 @@ page.title=Android Open Accessory Development Kit
   development boards:</p>
 
   <ul>
-    <li><a href="http://shop.moderndevice.com/products/freeduino-usb-host-board">Modern
-    Device</a> provides an Arduino-compatible board that supports the ADK firmware.</li>
-
-    <li><a href="http://www.seeedstudio.com/depot/seeeduino-adk-main-board-p-846.html">
-    Seeed Studio</a> provides an Arduino-compatible board that supports the ADK firmware.</li>
-
     <li><a href="http://www.rt-net.jp/shop/index.php?main_page=product_info&cPath=3_4&products_id=1">
     RT Corp</a> provides an Arduino-compatible board based on the Android ADK board design.</li>
-
     <li><a href="http://www.microchip.com/android">Microchip</a> provides a A PIC based USB
     microcontroller board.</li>
-
     <li><a href="https://store.diydrones.com/ProductDetails.asp?ProductCode=BR-PhoneDrone">DIY
     Drones</a> provides an Arduino-compatible board geared towards RC (radio controlled) and UAV
     (unmanned aerial vehicle) enthusiasts.</li>
-<<<<<<< HEAD
-=======
-
->>>>>>> c38ed22... doc change: add link to seeedstudio board
   </ul>
 
   <p>We expect more hardware distributers to create a variety of kits, so please stay tuned for
@@ -139,7 +122,7 @@ page.title=Android Open Accessory Development Kit
   accessory that is based on the <a href="http://www.arduino.cc/">Arduino open source electronics
   prototyping platform</a>, the accessory's hardware design files, code that implements the
   accessory's firmware, and the Android application that interacts with the accessory. The hardware
-  design files and firmware code are contained in the <a href=ctive 
+  design files and firmware code are contained in the <a href=
   "https://dl-ssl.google.com/android/adk/adk_release_0512.zip">ADK package download</a>.</p>
   <p>The main hardware and software components of the ADK include:</p>
 
