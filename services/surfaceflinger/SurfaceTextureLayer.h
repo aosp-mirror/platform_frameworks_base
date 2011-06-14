@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,46 +14,42 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_SF_SHARED_BUFFER_STACK_H
-#define ANDROID_SF_SHARED_BUFFER_STACK_H
+#ifndef ANDROID_SURFACE_TEXTURE_LAYER_H
+#define ANDROID_SURFACE_TEXTURE_LAYER_H
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/Debug.h>
+#include <utils/Errors.h>
+#include <gui/SurfaceTexture.h>
 
 namespace android {
 // ---------------------------------------------------------------------------
 
-#define NUM_DISPLAY_MAX 4
+class Layer;
 
-struct display_cblk_t
+class SurfaceTextureLayer : public SurfaceTexture
 {
-    uint16_t    w;
-    uint16_t    h;
-    uint8_t     format;
-    uint8_t     orientation;
-    uint8_t     reserved[2];
-    float       fps;
-    float       density;
-    float       xdpi;
-    float       ydpi;
-    uint32_t    pad[2];
+    wp<Layer> mLayer;
+    uint32_t mDefaultFormat;
+
+public:
+    SurfaceTextureLayer(GLuint tex, const sp<Layer>& layer);
+    ~SurfaceTextureLayer();
+
+    status_t setDefaultBufferSize(uint32_t w, uint32_t h);
+    status_t setDefaultBufferFormat(uint32_t format);
+
+public:
+    virtual status_t setBufferCount(int bufferCount);
+
+protected:
+    virtual status_t dequeueBuffer(int *buf, uint32_t w, uint32_t h,
+            uint32_t format, uint32_t usage);
 };
-
-struct surface_flinger_cblk_t   // 4KB max
-{
-    uint8_t         connected;
-    uint8_t         reserved[3];
-    uint32_t        pad[7];
-    display_cblk_t  displays[NUM_DISPLAY_MAX];
-};
-
-// ---------------------------------------------------------------------------
-
-COMPILE_TIME_ASSERT(sizeof(surface_flinger_cblk_t) <= 4096)
 
 // ---------------------------------------------------------------------------
 }; // namespace android
 
-#endif /* ANDROID_SF_SHARED_BUFFER_STACK_H */
+#endif // ANDROID_SURFACE_TEXTURE_LAYER_H

@@ -2,18 +2,18 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-    clz.cpp.arm \
-    DisplayHardware/DisplayHardware.cpp \
+    Layer.cpp 								\
+    LayerBase.cpp 							\
+    LayerDim.cpp 							\
+    DisplayHardware/DisplayHardware.cpp 	\
     DisplayHardware/DisplayHardwareBase.cpp \
-    DisplayHardware/HWComposer.cpp \
-    GLExtensions.cpp \
-    Layer.cpp \
-    LayerBase.cpp \
-    LayerDim.cpp \
-    MessageQueue.cpp \
-    SurfaceFlinger.cpp \
-    TextureManager.cpp \
-    Transform.cpp
+    DisplayHardware/HWComposer.cpp 			\
+    GLExtensions.cpp 						\
+    MessageQueue.cpp 						\
+    SurfaceFlinger.cpp 						\
+    SurfaceTextureLayer.cpp 				\
+    Transform.cpp 							\
+    
 
 LOCAL_CFLAGS:= -DLOG_TAG=\"SurfaceFlinger\"
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES

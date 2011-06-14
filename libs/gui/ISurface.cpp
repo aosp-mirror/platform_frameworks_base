@@ -22,9 +22,7 @@
 
 #include <binder/Parcel.h>
 
-#include <ui/GraphicBuffer.h>
-
-#include <surfaceflinger/Surface.h>
+#include <gui/ISurfaceTexture.h>
 #include <surfaceflinger/ISurface.h>
 
 namespace android {
@@ -39,30 +37,11 @@ public:
     {
     }
 
-    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
-            uint32_t w, uint32_t h, uint32_t format, uint32_t usage)
-    {
+    virtual sp<ISurfaceTexture> getSurfaceTexture() const {
         Parcel data, reply;
         data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
-        data.writeInt32(bufferIdx);
-        data.writeInt32(w);
-        data.writeInt32(h);
-        data.writeInt32(format);
-        data.writeInt32(usage);
-        remote()->transact(REQUEST_BUFFER, data, &reply);
-        sp<GraphicBuffer> buffer = new GraphicBuffer();
-        reply.read(*buffer);
-        return buffer;
-    }
-
-    virtual status_t setBufferCount(int bufferCount)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurface::getInterfaceDescriptor());
-        data.writeInt32(bufferCount);
-        remote()->transact(SET_BUFFER_COUNT, data, &reply);
-        status_t err = reply.readInt32();
-        return err;
+        remote()->transact(GET_SURFACE_TEXTURE, data, &reply);
+        return interface_cast<ISurfaceTexture>(reply.readStrongBinder());
     }
 };
 
@@ -74,23 +53,9 @@ status_t BnSurface::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
     switch(code) {
-        case REQUEST_BUFFER: {
+        case GET_SURFACE_TEXTURE: {
             CHECK_INTERFACE(ISurface, data, reply);
-            int bufferIdx = data.readInt32();
-            uint32_t w = data.readInt32();
-            uint32_t h = data.readInt32();
-            uint32_t format = data.readInt32();
-            uint32_t usage = data.readInt32();
-            sp<GraphicBuffer> buffer(requestBuffer(bufferIdx, w, h, format, usage));
-            if (buffer == NULL)
-                return BAD_VALUE;
-            return reply->write(*buffer);
-        }
-        case SET_BUFFER_COUNT: {
-            CHECK_INTERFACE(ISurface, data, reply);
-            int bufferCount = data.readInt32();
-            status_t err = setBufferCount(bufferCount);
-            reply->writeInt32(err);
+            reply->writeStrongBinder( getSurfaceTexture()->asBinder() );
             return NO_ERROR;
         }
         default:

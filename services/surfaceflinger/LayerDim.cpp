@@ -65,8 +65,6 @@ void LayerDim::onDraw(const Region& clip) const
             glDisable(GL_TEXTURE_EXTERNAL_OES);
         }
 #endif
-        glDisable(GL_TEXTURE_2D);
-
         glVertexPointer(2, GL_FLOAT, 0, mVertices);
 
         while (it != end) {

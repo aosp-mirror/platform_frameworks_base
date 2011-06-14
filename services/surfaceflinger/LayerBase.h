@@ -29,7 +29,6 @@
 #include <ui/Region.h>
 
 #include <surfaceflinger/ISurfaceComposerClient.h>
-#include <private/surfaceflinger/SharedBufferStack.h>
 #include <private/surfaceflinger/LayerState.h>
 
 #include <pixelflinger/pixelflinger.h>
@@ -43,13 +42,12 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-class DisplayHardware;
 class Client;
+class DisplayHardware;
 class GraphicBuffer;
 class GraphicPlane;
 class LayerBaseClient;
 class SurfaceFlinger;
-class Texture;
 
 // ---------------------------------------------------------------------------
 
@@ -121,7 +119,7 @@ public:
      * to perform the actual drawing.  
      */
     virtual void draw(const Region& clip) const;
-    virtual void drawForSreenShot() const;
+    virtual void drawForSreenShot();
     
     /**
      * onDraw - draws the surface.
@@ -174,9 +172,9 @@ public:
     virtual void unlockPageFlip(const Transform& planeTransform, Region& outDirtyRegion);
     
     /**
-     * needsBlending - true if this surface needs blending
+     * isOpaque - true if this surface is opaque
      */
-    virtual bool needsBlending() const  { return false; }
+    virtual bool isOpaque() const  { return true; }
 
     /**
      * needsDithering - true if this surface needs dithering
@@ -184,11 +182,9 @@ public:
     virtual bool needsDithering() const { return false; }
 
     /**
-     * needsLinearFiltering - true if this surface needs filtering
+     * needsLinearFiltering - true if this surface's state requires filtering
      */
-    virtual bool needsFiltering() const {
-        return (!(mFlags & DisplayHardware::SLOW_CONFIG)) && mNeedsFiltering;
-    }
+    virtual bool needsFiltering() const { return mNeedsFiltering; }
 
     /**
      * isSecure - true if this surface is secure, that is if it prevents
@@ -231,21 +227,25 @@ protected:
           void clearWithOpenGL(const Region& clip, GLclampf r, GLclampf g,
                                GLclampf b, GLclampf alpha) const;
           void clearWithOpenGL(const Region& clip) const;
-          void drawWithOpenGL(const Region& clip, const Texture& texture) const;
-          
-          // these must be called from the post/drawing thread
-          void setBufferCrop(const Rect& crop);
-          void setBufferTransform(uint32_t transform);
+          void drawWithOpenGL(const Region& clip) const;
+
+          void setFiltering(bool filtering);
+          bool getFiltering() const;
 
                 sp<SurfaceFlinger> mFlinger;
                 uint32_t        mFlags;
 
-                // post/drawing thread
-                Rect mBufferCrop;
-                uint32_t mBufferTransform;
+private:
+                // accessed only in the main thread
+                // Whether filtering is forced on or not
+                bool            mFiltering;
 
                 // cached during validateVisibility()
+                // Whether filtering is needed b/c of the drawingstate
                 bool            mNeedsFiltering;
+
+protected:
+                // cached during validateVisibility()
                 int32_t         mOrientation;
                 GLfloat         mVertices[4][2];
                 Rect            mTransformedBounds;
@@ -281,52 +281,38 @@ private:
 class LayerBaseClient : public LayerBase
 {
 public:
-    class Surface;
-
             LayerBaseClient(SurfaceFlinger* flinger, DisplayID display,
                         const sp<Client>& client);
-    virtual ~LayerBaseClient();
 
-            sp<Surface> getSurface();
+            virtual ~LayerBaseClient();
+
+            sp<ISurface> getSurface();
             wp<IBinder> getSurfaceBinder() const;
-    virtual sp<Surface> createSurface() const;
+
     virtual sp<LayerBaseClient> getLayerBaseClient() const {
         return const_cast<LayerBaseClient*>(this); }
+
     virtual const char* getTypeId() const { return "LayerBaseClient"; }
 
     uint32_t getIdentity() const { return mIdentity; }
-
-    class Surface : public BnSurface  {
-    public:
-        int32_t getIdentity() const { return mIdentity; }
-        
-    protected:
-        Surface(const sp<SurfaceFlinger>& flinger, int identity,
-                const sp<LayerBaseClient>& owner);
-        virtual ~Surface();
-        virtual status_t onTransact(uint32_t code, const Parcel& data,
-                Parcel* reply, uint32_t flags);
-        sp<LayerBaseClient> getOwner() const;
-
-    private:
-        virtual sp<GraphicBuffer> requestBuffer(int bufferIdx,
-                uint32_t w, uint32_t h, uint32_t format, uint32_t usage);
-        virtual status_t setBufferCount(int bufferCount);
-
-    protected:
-        friend class LayerBaseClient;
-        sp<SurfaceFlinger>  mFlinger;
-        int32_t             mIdentity;
-        wp<LayerBaseClient> mOwner;
-    };
-
-    friend class Surface;
 
 protected:
     virtual void dump(String8& result, char* scratch, size_t size) const;
     virtual void shortDump(String8& result, char* scratch, size_t size) const;
 
+    class LayerCleaner {
+        sp<SurfaceFlinger> mFlinger;
+        wp<LayerBaseClient> mLayer;
+    protected:
+        ~LayerCleaner();
+    public:
+        LayerCleaner(const sp<SurfaceFlinger>& flinger,
+                const sp<LayerBaseClient>& layer);
+    };
+
 private:
+    virtual sp<ISurface> createSurface();
+
     mutable Mutex mLock;
     mutable bool mHasSurface;
     wp<IBinder> mClientSurfaceBinder;

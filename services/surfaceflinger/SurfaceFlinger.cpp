@@ -53,6 +53,8 @@
 #include "DisplayHardware/DisplayHardware.h"
 #include "DisplayHardware/HWComposer.h"
 
+#include <private/surfaceflinger/SharedBufferStack.h>
+
 /* ideally AID_GRAPHICS would be in a semi-public header
  * or there would be a way to map a user/group name to its id
  */
@@ -126,17 +128,6 @@ sp<ISurfaceComposerClient> SurfaceFlinger::createConnection()
 {
     sp<ISurfaceComposerClient> bclient;
     sp<Client> client(new Client(this));
-    status_t err = client->initCheck();
-    if (err == NO_ERROR) {
-        bclient = client;
-    }
-    return bclient;
-}
-
-sp<ISurfaceComposerClient> SurfaceFlinger::createClientConnection()
-{
-    sp<ISurfaceComposerClient> bclient;
-    sp<UserClient> client(new UserClient(this));
     status_t err = client->initCheck();
     if (err == NO_ERROR) {
         bclient = client;
@@ -320,11 +311,6 @@ void SurfaceFlinger::waitForEvent()
 
 void SurfaceFlinger::signalEvent() {
     mEventQueue.invalidate();
-}
-
-void SurfaceFlinger::signal() const {
-    // this is the IPC call
-    const_cast<SurfaceFlinger*>(this)->signalEvent();
 }
 
 bool SurfaceFlinger::authenticateSurface(const sp<ISurface>& surface) const {
@@ -658,7 +644,7 @@ void SurfaceFlinger::computeVisibleRegions(
 
         // handle hidden surfaces by setting the visible region to empty
         if (LIKELY(!(s.flags & ISurfaceComposer::eLayerHidden) && s.alpha)) {
-            const bool translucent = layer->needsBlending();
+            const bool translucent = !layer->isOpaque();
             const Rect bounds(layer->visibleBounds());
             visibleRegion.set(bounds);
             visibleRegion.andSelf(screenRegion);
@@ -921,7 +907,7 @@ void SurfaceFlinger::composeSurfaces(const Region& dirty)
             for (size_t i=0 ; i<count ; i++) {
                 if (cur[i].hints & HWC_HINT_CLEAR_FB) {
                     const sp<LayerBase>& layer(layers[i]);
-                    if (!(layer->needsBlending())) {
+                    if (layer->isOpaque()) {
                         transparent.orSelf(layer->visibleRegionScreen);
                     }
                 }
@@ -978,8 +964,6 @@ void SurfaceFlinger::debugFlashRegions()
                 mDirtyRegion.bounds() : hw.bounds());
         composeSurfaces(repaint);
     }
-
-    TextureManager::deactivateTextures();
 
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
@@ -1070,6 +1054,7 @@ void SurfaceFlinger::drawWormhole() const
             glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
         }
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisable(GL_TEXTURE_2D);
         glLoadIdentity();
         glMatrixMode(GL_MODELVIEW);
     }
@@ -1269,7 +1254,7 @@ sp<ISurface> SurfaceFlinger::createSurface(
         uint32_t flags)
 {
     sp<LayerBaseClient> layer;
-    sp<LayerBaseClient::Surface> surfaceHandle;
+    sp<ISurface> surfaceHandle;
 
     if (int32_t(w|h) < 0) {
         LOGE("createSurface() failed, w or h is negative (w=%d, h=%d)",
@@ -1300,13 +1285,13 @@ sp<ISurface> SurfaceFlinger::createSurface(
         surfaceHandle = layer->getSurface();
         if (surfaceHandle != 0) {
             params->token = token;
-            params->identity = surfaceHandle->getIdentity();
+            params->identity = layer->getIdentity();
             params->width = w;
             params->height = h;
             params->format = format;
             if (normalLayer != 0) {
                 Mutex::Autolock _l(mStateLock);
-                mLayerMap.add(surfaceHandle->asBinder(), normalLayer);
+                mLayerMap.add(layer->getSurfaceBinder(), normalLayer);
             }
         }
 
@@ -1782,7 +1767,6 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
 
     GLfloat vtx[8];
     const GLfloat texCoords[4][2] = { {0,v}, {0,0}, {u,0}, {u,v} };
-    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tname);
     glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1900,6 +1884,7 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
     glEnable(GL_SCISSOR_TEST);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDeleteTextures(1, &tname);
+    glDisable(GL_TEXTURE_2D);
     return NO_ERROR;
 }
 
@@ -1930,7 +1915,6 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
 
     GLfloat vtx[8];
     const GLfloat texCoords[4][2] = { {0,v}, {0,0}, {u,0}, {u,v} };
-    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tname);
     glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -2044,6 +2028,7 @@ status_t SurfaceFlinger::electronBeamOnAnimationImplLocked()
     glEnable(GL_SCISSOR_TEST);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDeleteTextures(1, &tname);
+    glDisable(GL_TEXTURE_2D);
 
     return NO_ERROR;
 }
@@ -2408,133 +2393,78 @@ sp<LayerBaseClient> Client::getLayerUser(int32_t i) const
     return lbc;
 }
 
-sp<IMemoryHeap> Client::getControlBlock() const {
-    return 0;
+
+status_t Client::onTransact(
+    uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
+{
+    // these must be checked
+     IPCThreadState* ipc = IPCThreadState::self();
+     const int pid = ipc->getCallingPid();
+     const int uid = ipc->getCallingUid();
+     const int self_pid = getpid();
+     if (UNLIKELY(pid != self_pid && uid != AID_GRAPHICS && uid != 0)) {
+         // we're called from a different process, do the real check
+         if (!checkCallingPermission(
+                 String16("android.permission.ACCESS_SURFACE_FLINGER")))
+         {
+             LOGE("Permission Denial: "
+                     "can't openGlobalTransaction pid=%d, uid=%d", pid, uid);
+             return PERMISSION_DENIED;
+         }
+     }
+     return BnSurfaceComposerClient::onTransact(code, data, reply, flags);
 }
-ssize_t Client::getTokenForSurface(const sp<ISurface>& sur) const {
-    return -1;
-}
+
+
 sp<ISurface> Client::createSurface(
         ISurfaceComposerClient::surface_data_t* params,
         const String8& name,
         DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
         uint32_t flags)
 {
-    return mFlinger->createSurface(params, name, this,
-            display, w, h, format, flags);
+    /*
+     * createSurface must be called from the GL thread so that it can
+     * have access to the GL context.
+     */
+
+    class MessageCreateSurface : public MessageBase {
+        sp<ISurface> result;
+        SurfaceFlinger* flinger;
+        ISurfaceComposerClient::surface_data_t* params;
+        Client* client;
+        const String8& name;
+        DisplayID display;
+        uint32_t w, h;
+        PixelFormat format;
+        uint32_t flags;
+    public:
+        MessageCreateSurface(SurfaceFlinger* flinger,
+                ISurfaceComposerClient::surface_data_t* params,
+                const String8& name, Client* client,
+                DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
+                uint32_t flags)
+            : flinger(flinger), params(params), client(client), name(name),
+              display(display), w(w), h(h), format(format), flags(flags)
+        {
+        }
+        sp<ISurface> getResult() const { return result; }
+        virtual bool handler() {
+            result = flinger->createSurface(params, name, client,
+                    display, w, h, format, flags);
+            return true;
+        }
+    };
+
+    sp<MessageBase> msg = new MessageCreateSurface(mFlinger.get(),
+            params, name, this, display, w, h, format, flags);
+    mFlinger->postMessageSync(msg);
+    return static_cast<MessageCreateSurface*>( msg.get() )->getResult();
 }
 status_t Client::destroySurface(SurfaceID sid) {
     return mFlinger->removeSurface(this, sid);
 }
 status_t Client::setState(int32_t count, const layer_state_t* states) {
     return mFlinger->setClientState(this, count, states);
-}
-
-// ---------------------------------------------------------------------------
-
-UserClient::UserClient(const sp<SurfaceFlinger>& flinger)
-    : ctrlblk(0), mBitmap(0), mFlinger(flinger)
-{
-    const int pgsize = getpagesize();
-    const int cblksize = ((sizeof(SharedClient)+(pgsize-1))&~(pgsize-1));
-
-    mCblkHeap = new MemoryHeapBase(cblksize, 0,
-            "SurfaceFlinger Client control-block");
-
-    ctrlblk = static_cast<SharedClient *>(mCblkHeap->getBase());
-    if (ctrlblk) { // construct the shared structure in-place.
-        new(ctrlblk) SharedClient;
-    }
-}
-
-UserClient::~UserClient()
-{
-    if (ctrlblk) {
-        ctrlblk->~SharedClient();  // destroy our shared-structure.
-    }
-
-    /*
-     * When a UserClient dies, it's unclear what to do exactly.
-     * We could go ahead and destroy all surfaces linked to that client
-     * however, it wouldn't be fair to the main Client
-     * (usually the the window-manager), which might want to re-target
-     * the layer to another UserClient.
-     * I think the best is to do nothing, or not much; in most cases the
-     * WM itself will go ahead and clean things up when it detects a client of
-     * his has died.
-     * The remaining question is what to display? currently we keep
-     * just keep the current buffer.
-     */
-}
-
-status_t UserClient::initCheck() const {
-    return ctrlblk == 0 ? NO_INIT : NO_ERROR;
-}
-
-void UserClient::detachLayer(const Layer* layer)
-{
-    int32_t name = layer->getToken();
-    if (name >= 0) {
-        int32_t mask = 1LU<<name;
-        if ((android_atomic_and(~mask, &mBitmap) & mask) == 0) {
-            LOGW("token %d wasn't marked as used %08x", name, int(mBitmap));
-        }
-    }
-}
-
-sp<IMemoryHeap> UserClient::getControlBlock() const {
-    return mCblkHeap;
-}
-
-ssize_t UserClient::getTokenForSurface(const sp<ISurface>& sur) const
-{
-    int32_t name = NAME_NOT_FOUND;
-    sp<Layer> layer(mFlinger->getLayer(sur));
-    if (layer == 0) {
-        return name;
-    }
-
-    // if this layer already has a token, just return it
-    name = layer->getToken();
-    if ((name >= 0) && (layer->getClient() == this)) {
-        return name;
-    }
-
-    name = 0;
-    do {
-        int32_t mask = 1LU<<name;
-        if ((android_atomic_or(mask, &mBitmap) & mask) == 0) {
-            // we found and locked that name
-            status_t err = layer->setToken(
-                    const_cast<UserClient*>(this), ctrlblk, name);
-            if (err != NO_ERROR) {
-                // free the name
-                android_atomic_and(~mask, &mBitmap);
-                name = err;
-            }
-            break;
-        }
-        if (++name >= int32_t(SharedBufferStack::NUM_LAYERS_MAX))
-            name = NO_MEMORY;
-    } while(name >= 0);
-
-    //LOGD("getTokenForSurface(%p) => %d (client=%p, bitmap=%08lx)",
-    //        sur->asBinder().get(), name, this, mBitmap);
-    return name;
-}
-
-sp<ISurface> UserClient::createSurface(
-        ISurfaceComposerClient::surface_data_t* params,
-        const String8& name,
-        DisplayID display, uint32_t w, uint32_t h, PixelFormat format,
-        uint32_t flags) {
-    return 0;
-}
-status_t UserClient::destroySurface(SurfaceID sid) {
-    return INVALID_OPERATION;
-}
-status_t UserClient::setState(int32_t count, const layer_state_t* states) {
-    return INVALID_OPERATION;
 }
 
 // ---------------------------------------------------------------------------
@@ -2547,11 +2477,11 @@ sp<GraphicBuffer> GraphicBufferAlloc::createGraphicBuffer(uint32_t w, uint32_t h
         PixelFormat format, uint32_t usage) {
     sp<GraphicBuffer> graphicBuffer(new GraphicBuffer(w, h, format, usage));
     status_t err = graphicBuffer->initCheck();
-    if (err != 0) {
-        LOGE("createGraphicBuffer: init check failed: %d", err);
-        return 0;
-    } else if (graphicBuffer->handle == 0) {
-        LOGE("createGraphicBuffer: unable to create GraphicBuffer");
+    if (err != 0 || graphicBuffer->handle == 0) {
+        GraphicBuffer::dumpAllocationsToSystemLog();
+        LOGE("GraphicBufferAlloc::createGraphicBuffer(w=%d, h=%d) "
+             "failed (%s), handle=%p",
+                w, h, strerror(-err), graphicBuffer->handle);
         return 0;
     }
     return graphicBuffer;

@@ -50,9 +50,7 @@
 namespace android {
 
 enum {
-    GET_CBLK = IBinder::FIRST_CALL_TRANSACTION,
-    GET_TOKEN,
-    CREATE_SURFACE,
+    CREATE_SURFACE = IBinder::FIRST_CALL_TRANSACTION,
     DESTROY_SURFACE,
     SET_STATE
 };
@@ -63,23 +61,6 @@ public:
     BpSurfaceComposerClient(const sp<IBinder>& impl)
         : BpInterface<ISurfaceComposerClient>(impl)
     {
-    }
-
-    virtual sp<IMemoryHeap> getControlBlock() const
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceComposerClient::getInterfaceDescriptor());
-        remote()->transact(GET_CBLK, data, &reply);
-        return interface_cast<IMemoryHeap>(reply.readStrongBinder());
-    }
-
-    virtual ssize_t getTokenForSurface(const sp<ISurface>& sur) const
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceComposerClient::getInterfaceDescriptor());
-        data.writeStrongBinder(sur->asBinder());
-        remote()->transact(GET_TOKEN, data, &reply);
-        return reply.readInt32();
     }
 
     virtual sp<ISurface> createSurface( surface_data_t* params,
@@ -131,41 +112,6 @@ IMPLEMENT_META_INTERFACE(SurfaceComposerClient, "android.ui.ISurfaceComposerClie
 status_t BnSurfaceComposerClient::onTransact(
     uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags)
 {
-    // codes that don't require permission check
-
-    switch(code) {
-        case GET_CBLK: {
-            CHECK_INTERFACE(ISurfaceComposerClient, data, reply);
-            sp<IMemoryHeap> ctl(getControlBlock());
-            reply->writeStrongBinder(ctl->asBinder());
-            return NO_ERROR;
-        } break;
-        case GET_TOKEN: {
-            CHECK_INTERFACE(ISurfaceComposerClient, data, reply);
-            sp<ISurface> sur = interface_cast<ISurface>(data.readStrongBinder());
-            ssize_t token = getTokenForSurface(sur);
-            reply->writeInt32(token);
-            return NO_ERROR;
-        } break;
-    }
-
-    // these must be checked
-
-     IPCThreadState* ipc = IPCThreadState::self();
-     const int pid = ipc->getCallingPid();
-     const int uid = ipc->getCallingUid();
-     const int self_pid = getpid();
-     if (UNLIKELY(pid != self_pid && uid != AID_GRAPHICS && uid != 0)) {
-         // we're called from a different process, do the real check
-         if (!checkCallingPermission(
-                 String16("android.permission.ACCESS_SURFACE_FLINGER")))
-         {
-             LOGE("Permission Denial: "
-                     "can't openGlobalTransaction pid=%d, uid=%d", pid, uid);
-             return PERMISSION_DENIED;
-         }
-     }
-
      switch(code) {
         case CREATE_SURFACE: {
             CHECK_INTERFACE(ISurfaceComposerClient, data, reply);

@@ -20,17 +20,9 @@
 
 namespace android {
 
-int clz_impl(int32_t x);
-
-int inline clz(int32_t x)
-{
-#if defined(__arm__) && !defined(__thumb__)
+int inline clz(int32_t x) {
     return __builtin_clz(x);
-#else
-    return clz_impl(x);
-#endif
 }
-
 
 }; // namespace android
 

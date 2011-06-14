@@ -271,7 +271,7 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             if (state == BufferSlot::DEQUEUED) {
                 dequeuedCount++;
             }
-            if (state == BufferSlot::FREE || i == mCurrentTexture) {
+            if (state == BufferSlot::FREE /*|| i == mCurrentTexture*/) {
                 foundSync = i;
                 if (i != mCurrentTexture) {
                     found = i;

@@ -20,19 +20,20 @@
 #include <sys/types.h>
 
 #include <utils/Errors.h>
-#include <utils/threads.h>
-#include <utils/SortedVector.h>
 #include <utils/Log.h>
 #include <utils/Singleton.h>
+#include <utils/SortedVector.h>
+#include <utils/String8.h>
+#include <utils/threads.h>
 
-#include <binder/IServiceManager.h>
 #include <binder/IMemory.h>
+#include <binder/IServiceManager.h>
 
 #include <ui/DisplayInfo.h>
 
+#include <surfaceflinger/ISurface.h>
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/ISurfaceComposerClient.h>
-#include <surfaceflinger/ISurface.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
 
 #include <private/surfaceflinger/LayerState.h>
@@ -217,7 +218,7 @@ void SurfaceComposerClient::dispose()
 status_t SurfaceComposerClient::getDisplayInfo(
         DisplayID dpy, DisplayInfo* info)
 {
-    if (uint32_t(dpy)>=SharedBufferStack::NUM_DISPLAY_MAX)
+    if (uint32_t(dpy)>=NUM_DISPLAY_MAX)
         return BAD_VALUE;
 
     volatile surface_flinger_cblk_t const * cblk = get_cblk();
@@ -235,7 +236,7 @@ status_t SurfaceComposerClient::getDisplayInfo(
 
 ssize_t SurfaceComposerClient::getDisplayWidth(DisplayID dpy)
 {
-    if (uint32_t(dpy)>=SharedBufferStack::NUM_DISPLAY_MAX)
+    if (uint32_t(dpy)>=NUM_DISPLAY_MAX)
         return BAD_VALUE;
     volatile surface_flinger_cblk_t const * cblk = get_cblk();
     volatile display_cblk_t const * dcblk = cblk->displays + dpy;
@@ -244,7 +245,7 @@ ssize_t SurfaceComposerClient::getDisplayWidth(DisplayID dpy)
 
 ssize_t SurfaceComposerClient::getDisplayHeight(DisplayID dpy)
 {
-    if (uint32_t(dpy)>=SharedBufferStack::NUM_DISPLAY_MAX)
+    if (uint32_t(dpy)>=NUM_DISPLAY_MAX)
         return BAD_VALUE;
     volatile surface_flinger_cblk_t const * cblk = get_cblk();
     volatile display_cblk_t const * dcblk = cblk->displays + dpy;
@@ -253,7 +254,7 @@ ssize_t SurfaceComposerClient::getDisplayHeight(DisplayID dpy)
 
 ssize_t SurfaceComposerClient::getDisplayOrientation(DisplayID dpy)
 {
-    if (uint32_t(dpy)>=SharedBufferStack::NUM_DISPLAY_MAX)
+    if (uint32_t(dpy)>=NUM_DISPLAY_MAX)
         return BAD_VALUE;
     volatile surface_flinger_cblk_t const * cblk = get_cblk();
     volatile display_cblk_t const * dcblk = cblk->displays + dpy;
