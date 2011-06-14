@@ -17,6 +17,7 @@ package com.android.internal.telephony.cdma;
 
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
 import com.android.internal.telephony.GsmAlphabet;
+import com.android.internal.telephony.IccCardApplication.AppType;
 import com.android.internal.telephony.IccFileHandler;
 import com.android.internal.telephony.IccUtils;
 import com.android.internal.telephony.MccTable;
@@ -438,9 +439,14 @@ public final class CdmaLteUiccRecords extends SIMRecords {
 
     @Override
     public boolean isProvisioned() {
-        // Look for MDN and MIN field to determine if the SIM is provisioned.
-        if ((mMdn != null) && (mMin != null)) return true;
-
-        return false;
+        // If UICC card has CSIM app, look for MDN and MIN field
+        // to determine if the SIM is provisioned.  Otherwise,
+        // consider the SIM is provisioned. (for case of ordinal
+        // USIM only UICC.)
+        if (phone.mIccCard.isApplicationOnIcc(AppType.APPTYPE_CSIM) &&
+            ((mMdn == null) || (mMin == null))) {
+            return false;
+        }
+        return true;
     }
 }
