@@ -1,0 +1,38 @@
+page.title=Compute
+parent.title=RenderScript
+parent.link=index.html 
+@jd:body
+
+  <div id="qv-wrapper">
+    <div id="qv">
+
+      <h2>Related Samples</h2>
+
+      <ol>
+        <li><a href="{@docRoot}resources/samples/RenderScript/HelloCompute/index.html">Hello
+        Compute</a></li>
+        <li><a href="{@docRoot}resources/samples/RenderScript/Balls/index.html">Balls</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <p>RenderScript exposes a set of compute APIs that you can use to do intensive computational operations.
+  You can use the compute APIs in the context of a graphics RenderScript such as calculating the
+  transformation of many geometric objects in a scene. You can also create a standalone compute RenderScript that does not
+  draw anything to the screen such as bitmap image processing for a photo editor application.
+  The RenderScript compute APIs are mainly defined in the <code>rs_cl.rsh</code> header</p>
+  
+  <p>Compute RenderScripts are simpler to setup and implement as there is no graphics rendering involved.
+  You can offload computational aspects of your application to RenderScript by creating a native RenderScript
+  file (.rs) and using the generated reflected layer class to call functions in the <code>.rs</code> file. 
+
+  <p>See the <a href="{@docRoot}resources/samples/RenderScript/HelloCompute/index.html">HelloCompute</a>
+  sample in the Android SDK for more
+  information on how to create a simple compute RenderScript.</p>
+  <p>  
+  See the <a href="{@docRoot}resources/samples/RenderScript/Balls/index.html">Balls</a>
+  sample in the Android SDK for more
+  information on how to create a compute RenderScript that is used in a graphics RenderScript.
+  The compute RenderScript is contained in 
+  <a href="{@docRoot}resources/samples/RenderScript/Balls/src/com/example/android/rs/balls/ball_physics.html">balls_physics.rs</a>.
+  </p>
