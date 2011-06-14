@@ -1788,6 +1788,8 @@
     <string name="lockscreen_missing_sim_message" product="default">No SIM card in phone.</string>
     <!-- Shown in the lock screen to ask the user to insert a SIM card. -->
     <string name="lockscreen_missing_sim_instructions">Please insert a SIM card.</string>
+    <!-- Shown in the lock screen to ask the user to insert a SIM card when sim is missing or not readable. -->
+    <string name="lockscreen_missing_sim_instructions_long">The SIM card is missing or not readable. Please insert a SIM card.</string>
 
     <!-- Shown in the lock screen when there is emergency calls only mode. -->
     <string name="emergency_calls_only" msgid="2485604591272668370">Emergency calls only</string>
