@@ -22,7 +22,7 @@
 #include <media/IAudioFlinger.h>
 
 #include <system/audio.h>
-#include <hardware/audio_policy.h>
+#include <system/audio_policy.h>
 
 /* XXX: Should be include by all the users instead */
 #include <media/AudioParameter.h>

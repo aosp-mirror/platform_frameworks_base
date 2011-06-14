@@ -39,7 +39,7 @@
 #include <binder/MemoryDealer.h>
 
 #include <system/audio.h>
-#include <hardware/audio_hal.h>
+#include <hardware/audio.h>
 
 #include "AudioBufferProvider.h"
 

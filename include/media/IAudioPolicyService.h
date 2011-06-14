@@ -26,7 +26,7 @@
 #include <binder/IInterface.h>
 #include <media/AudioSystem.h>
 
-#include <hardware/audio_policy.h>
+#include <system/audio_policy.h>
 
 namespace android {
 
