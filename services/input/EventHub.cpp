@@ -192,6 +192,7 @@ status_t EventHub::getAbsoluteAxisInfo(int32_t deviceId, int axis,
         outAxisInfo->maxValue = info.maximum;
         outAxisInfo->flat = info.flat;
         outAxisInfo->fuzz = info.fuzz;
+        outAxisInfo->resolution = info.resolution;
     }
     return OK;
 }

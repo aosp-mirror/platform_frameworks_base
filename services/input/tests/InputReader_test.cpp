@@ -481,7 +481,7 @@ public:
     }
 
     void addAbsoluteAxis(int32_t deviceId, int axis,
-            int32_t minValue, int32_t maxValue, int flat, int fuzz) {
+            int32_t minValue, int32_t maxValue, int flat, int fuzz, int resolution = 0) {
         Device* device = getDevice(deviceId);
 
         RawAbsoluteAxisInfo info;
@@ -490,6 +490,7 @@ public:
         info.maxValue = maxValue;
         info.flat = flat;
         info.fuzz = fuzz;
+        info.resolution = resolution;
         device->absoluteAxes.add(axis, info);
     }
 

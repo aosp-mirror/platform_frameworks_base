@@ -1044,8 +1044,8 @@ void InputMapper::fadePointer() {
 void InputMapper::dumpRawAbsoluteAxisInfo(String8& dump,
         const RawAbsoluteAxisInfo& axis, const char* name) {
     if (axis.valid) {
-        dump.appendFormat(INDENT4 "%s: min=%d, max=%d, flat=%d, fuzz=%d\n",
-                name, axis.minValue, axis.maxValue, axis.flat, axis.fuzz);
+        dump.appendFormat(INDENT4 "%s: min=%d, max=%d, flat=%d, fuzz=%d, resolution=%d\n",
+                name, axis.minValue, axis.maxValue, axis.flat, axis.fuzz, axis.resolution);
     } else {
         dump.appendFormat(INDENT4 "%s: unknown range\n", name);
     }
@@ -5656,9 +5656,10 @@ void JoystickInputMapper::dump(String8& dump) {
         dump.appendFormat(INDENT4 "  scale=%0.5f, offset=%0.5f, "
                 "highScale=%0.5f, highOffset=%0.5f\n",
                 axis.scale, axis.offset, axis.highScale, axis.highOffset);
-        dump.appendFormat(INDENT4 "  rawAxis=%d, rawMin=%d, rawMax=%d, rawFlat=%d, rawFuzz=%d\n",
+        dump.appendFormat(INDENT4 "  rawAxis=%d, rawMin=%d, rawMax=%d, "
+                "rawFlat=%d, rawFuzz=%d, rawResolution=%d\n",
                 mAxes.keyAt(i), axis.rawAxisInfo.minValue, axis.rawAxisInfo.maxValue,
-                axis.rawAxisInfo.flat, axis.rawAxisInfo.fuzz);
+                axis.rawAxisInfo.flat, axis.rawAxisInfo.fuzz, axis.rawAxisInfo.resolution);
     }
 }
 

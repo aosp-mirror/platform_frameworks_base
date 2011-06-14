@@ -34,39 +34,6 @@
 
 #include <linux/input.h>
 
-/* These constants are not defined in linux/input.h in the version of the kernel
- * headers currently provided with Bionic. */
-
-#define EVIOCGPROP(len) _IOC(_IOC_READ, 'E', 0x09, len)
-
-#define INPUT_PROP_POINTER 0x00
-#define INPUT_PROP_DIRECT 0x01
-#define INPUT_PROP_BUTTONPAD 0x02
-#define INPUT_PROP_SEMI_MT 0x03
-#define INPUT_PROP_MAX 0x1f
-#define INPUT_PROP_CNT (INPUT_PROP_MAX + 1)
-
-#define ABS_MT_SLOT 0x2f
-#define ABS_MT_TOUCH_MAJOR 0x30
-#define ABS_MT_TOUCH_MINOR 0x31
-#define ABS_MT_WIDTH_MAJOR 0x32
-#define ABS_MT_WIDTH_MINOR 0x33
-#define ABS_MT_ORIENTATION 0x34
-#define ABS_MT_POSITION_X 0x35
-#define ABS_MT_POSITION_Y 0x36
-#define ABS_MT_TOOL_TYPE 0x37
-#define ABS_MT_BLOB_ID 0x38
-#define ABS_MT_TRACKING_ID 0x39
-#define ABS_MT_PRESSURE 0x3a
-#define ABS_MT_DISTANCE 0x3b
-
-#define MT_TOOL_FINGER 0
-#define MT_TOOL_PEN 1
-
-#define SYN_MT_REPORT 2
-#define SYN_DROPPED 3
-
-
 /* Convenience constants. */
 
 #define BTN_FIRST 0x100  // first button scancode
@@ -97,6 +64,7 @@ struct RawAbsoluteAxisInfo {
     int32_t maxValue;  // maximum value
     int32_t flat;      // center flat position, eg. flat == 8 means center is between -8 and 8
     int32_t fuzz;      // error tolerance, eg. fuzz == 4 means value is +/- 4 due to noise
+    int32_t resolution; // resolution in units per mm or radians per mm
 
     inline void clear() {
         valid = false;
@@ -104,6 +72,7 @@ struct RawAbsoluteAxisInfo {
         maxValue = 0;
         flat = 0;
         fuzz = 0;
+        resolution = 0;
     }
 };
 
