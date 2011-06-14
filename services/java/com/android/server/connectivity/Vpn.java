@@ -160,15 +160,6 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         return descriptor;
     }
 
-    public synchronized boolean onInterfaceRemoved(String name) {
-        if (name.equals(mInterfaceName) && nativeCheck(name) == 0) {
-            hideNotification();
-            mInterfaceName = null;
-            return true;
-        }
-        return false;
-    }
-
     // INetworkManagementEventObserver.Stub
     public void interfaceLinkStatusChanged(String name, boolean up) {
     }
@@ -186,7 +177,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
     }
 
-    private void showNotification(PackageManager pm, ApplicationInfo app, String session) {
+    private void showNotification(PackageManager pm, ApplicationInfo app, String sessionName) {
         NotificationManager nm = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -207,11 +198,6 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             // Load the label.
             String label = app.loadLabel(pm).toString();
 
-            // If session is null, use the application name instead.
-            if (session == null) {
-                session = label;
-            }
-
             // Build the intent.
             // TODO: move these into VpnBuilder.
             Intent intent = new Intent();
@@ -219,23 +205,24 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     "com.android.vpndialogs.ManageDialog");
             intent.putExtra("packageName", mPackageName);
             intent.putExtra("interfaceName", mInterfaceName);
-            intent.putExtra("session", session);
+            intent.putExtra("session", sessionName);
             intent.putExtra("startTime", android.os.SystemClock.elapsedRealtime());
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
 
             // Build the notification.
+            String text = (sessionName == null) ? mContext.getString(R.string.vpn_text) :
+                    mContext.getString(R.string.vpn_text_long, sessionName);
             long identity = Binder.clearCallingIdentity();
             Notification notification = new Notification.Builder(mContext)
                     .setSmallIcon(R.drawable.vpn_connected)
                     .setLargeIcon(bitmap)
                     .setTicker(mContext.getString(R.string.vpn_ticker, label))
                     .setContentTitle(mContext.getString(R.string.vpn_title, label))
-                    .setContentText(mContext.getString(R.string.vpn_text, session))
+                    .setContentText(text)
                     .setContentIntent(PendingIntent.getActivity(mContext, 0, intent, 0))
                     .setDefaults(Notification.DEFAULT_ALL)
                     .setOngoing(true)
                     .getNotification();
-
             nm.notify(R.drawable.vpn_connected, notification);
             Binder.restoreCallingIdentity(identity);
         }
