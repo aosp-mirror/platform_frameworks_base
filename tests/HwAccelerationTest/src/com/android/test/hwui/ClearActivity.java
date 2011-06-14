@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -79,6 +78,9 @@ public class ClearActivity extends Activity {
                 }
                 canvas.restore();
                 canvas.drawText("OpenGLRenderer", 50.0f, 50.0f, mClearPaint);
+                mClearPaint.setColor(0xff000000);
+                canvas.drawRect(800.0f, 100.0f, 900.0f, 200.0f, mClearPaint);
+                mClearPaint.setColor(0x0000ff00);
             }
             canvas.restore();
         }

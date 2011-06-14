@@ -476,13 +476,8 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
                         snapshot->height - bounds.bottom, bounds.getWidth(), bounds.getHeight());
             }
 
-            // Clear the framebuffer where the layer will draw
-            glScissor(bounds.left, mSnapshot->height - bounds.bottom,
-                    bounds.getWidth(), bounds.getHeight());
-            glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            dirtyClip();
+            // Enqueue the buffer coordinates to clear the corresponding region later
+            mLayers.push(new Rect(bounds));
         }
     }
 
@@ -817,6 +812,58 @@ void OpenGLRenderer::dirtyLayerUnchecked(Rect& bounds, Region* region) {
 #endif
 }
 
+void OpenGLRenderer::clearLayerRegions() {
+    const size_t count = mLayers.size();
+    if (count == 0) return;
+
+    if (!mSnapshot->isIgnored()) {
+        // Doing several glScissor/glClear here can negatively impact
+        // GPUs with a tiler architecture, instead we draw quads with
+        // the Clear blending mode
+
+        // The list contains bounds that have already been clipped
+        // against their initial clip rect, and the current clip
+        // is likely different so we need to disable clipping here
+        glDisable(GL_SCISSOR_TEST);
+
+        Vertex mesh[count * 6];
+        Vertex* vertex = mesh;
+
+        for (uint32_t i = 0; i < count; i++) {
+            Rect* bounds = mLayers.itemAt(i);
+
+            Vertex::set(vertex++, bounds->left, bounds->bottom);
+            Vertex::set(vertex++, bounds->left, bounds->top);
+            Vertex::set(vertex++, bounds->right, bounds->top);
+            Vertex::set(vertex++, bounds->left, bounds->bottom);
+            Vertex::set(vertex++, bounds->right, bounds->top);
+            Vertex::set(vertex++, bounds->right, bounds->bottom);
+
+            delete bounds;
+        }
+
+        setupDraw(false);
+        setupDrawColor(0.0f, 0.0f, 0.0f, 1.0f);
+        setupDrawBlending(true, SkXfermode::kClear_Mode);
+        setupDrawProgram();
+        setupDrawPureColorUniforms();
+        setupDrawModelViewTranslate(0.0f, 0.0f, 0.0f, 0.0f, true);
+
+        mCaches.unbindMeshBuffer();
+        glVertexAttribPointer(mCaches.currentProgram->position, 2, GL_FLOAT, GL_FALSE,
+                gVertexStride, &mesh[0].position[0]);
+        glDrawArrays(GL_TRIANGLES, 0, count * 6);
+
+        glEnable(GL_SCISSOR_TEST);
+    } else {
+        for (uint32_t i = 0; i < count; i++) {
+            delete mLayers.itemAt(i);
+        }
+    }
+
+    mLayers.clear();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Transforms
 ///////////////////////////////////////////////////////////////////////////////
@@ -901,7 +948,8 @@ bool OpenGLRenderer::clipRect(float left, float top, float right, float bottom, 
 // Drawing commands
 ///////////////////////////////////////////////////////////////////////////////
 
-void OpenGLRenderer::setupDraw() {
+void OpenGLRenderer::setupDraw(bool clear) {
+    if (clear) clearLayerRegions();
     if (mDirtyClip) {
         setScissorFromClip();
     }
@@ -994,7 +1042,7 @@ void OpenGLRenderer::accountForClear(SkXfermode::Mode mode) {
     if (mColorSet && mode == SkXfermode::kClear_Mode) {
         mColorA = 1.0f;
         mColorR = mColorG = mColorB = 0.0f;
-        mSetShaderColor = mDescription.setAlpha8Color(mColorR, mColorG, mColorB, mColorA);
+        mSetShaderColor = mDescription.modulate = true;
     }
 }
 

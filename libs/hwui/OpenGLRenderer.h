@@ -249,6 +249,18 @@ private:
      */
     void composeLayerRect(Layer* layer, const Rect& rect, bool swap = false);
 
+    /**
+     * Clears all the regions corresponding to the current list of layers.
+     * This method MUST be invoked before any drawing operation.
+     */
+    void clearLayerRegions();
+
+    /**
+     * Renders the specified layer as a textured quad.
+     *
+     * @param layer The layer to render
+     * @param rect The bounds of the layer
+     */
     void drawTextureLayer(Layer* layer, const Rect& rect);
 
     /**
@@ -280,11 +292,53 @@ private:
     void drawColorRect(float left, float top, float right, float bottom,
             int color, SkXfermode::Mode mode, bool ignoreTransform = false);
 
+    /**
+     * Draws the shape represented by the specified path texture.
+     * This method invokes drawPathTexture() but takes into account
+     * the extra left/top offset and the texture offset to correctly
+     * position the final shape.
+     *
+     * @param left The left coordinate of the shape to render
+     * @param top The top coordinate of the shape to render
+     * @param texture The texture reprsenting the shape
+     * @param paint The paint to draw the shape with
+     */
     void drawShape(float left, float top, const PathTexture* texture, SkPaint* paint);
+
+    /**
+     * Renders the rect defined by the specified bounds as a shape.
+     * This will render the rect using a path texture, which is used to render
+     * rects with stroke effects.
+     *
+     * @param left The left coordinate of the rect to draw
+     * @param top The top coordinate of the rect to draw
+     * @param right The right coordinate of the rect to draw
+     * @param bottom The bottom coordinate of the rect to draw
+     * @param p The paint to draw the rect with
+     */
     void drawRectAsShape(float left, float top, float right, float bottom, SkPaint* p);
 
+    /**
+     * Draws the specified texture as an alpha bitmap. Alpha bitmaps obey
+     * different compositing rules.
+     *
+     * @param texture The texture to draw with
+     * @param left The x coordinate of the bitmap
+     * @param top The y coordinate of the bitmap
+     * @param paint The paint to render with
+     */
     void drawAlphaBitmap(Texture* texture, float left, float top, SkPaint* paint);
 
+    /**
+     * Renders the rect defined by the specified bounds as an anti-aliased rect.
+     *
+     * @param left The left coordinate of the rect to draw
+     * @param top The top coordinate of the rect to draw
+     * @param right The right coordinate of the rect to draw
+     * @param bottom The bottom coordinate of the rect to draw
+     * @param color The color of the rect
+     * @param mode The blending mode to draw the rect
+     */
     void drawAARect(float left, float top, float right, float bottom,
             int color, SkXfermode::Mode mode);
 
@@ -359,6 +413,15 @@ private:
     void drawTextDecorations(const char* text, int bytesCount, float length,
             float x, float y, SkPaint* paint);
 
+    /**
+     * Draws a path texture. Path textures are alpha8 bitmaps that need special
+     * compositing to apply colors/filters/etc.
+     *
+     * @param texture The texture to render
+     * @param x The x coordinate where the texture will be drawn
+     * @param y The y coordinate where the texture will be drawn
+     * @param paint The paint to draw the texture with
+     */
     void drawPathTexture(const PathTexture* texture, float x, float y, SkPaint* paint);
 
     /**
@@ -434,7 +497,7 @@ private:
     /**
      * Invoked before any drawing operation. This sets required state.
      */
-    void setupDraw();
+    void setupDraw(bool clear = true);
     /**
      * Various methods to setup OpenGL rendering.
      */
@@ -521,6 +584,9 @@ private:
 
     // Various caches
     Caches& mCaches;
+
+    // List of rectagnles to clear after saveLayer() is invoked
+    Vector<Rect*> mLayers;
 
     // Indentity matrix
     const mat4 mIdentity;
