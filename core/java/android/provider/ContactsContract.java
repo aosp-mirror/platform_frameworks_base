@@ -6300,9 +6300,10 @@ public final class ContactsContract {
      * <p>
      * Example:
      * <pre>
-     * Uri uri = DataUsageFeedback.UPDATE_URI.buildUpon()
+     * Uri uri = DataUsageFeedback.FEEDBACK_URI.buildUpon()
      *         .appendPath(TextUtils.join(",", dataIds))
-     *         .appendQueryParameter(DataUsageFeedback.METHOD, DataUsageFeedback.METHOD_CALL)
+     *         .appendQueryParameter(DataUsageFeedback.USAGE_TYPE,
+     *                 DataUsageFeedback.USAGE_TYPE_CALL)
      *         .build();
      * boolean successful = resolver.update(uri, new ContentValues(), null, null) > 0;
      * </pre>
