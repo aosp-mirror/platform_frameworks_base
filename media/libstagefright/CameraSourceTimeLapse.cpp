@@ -486,7 +486,8 @@ bool CameraSourceTimeLapse::skipFrameAndModifyTimeStamp(int64_t *timestampUs) {
             if (mForceRead) {
                 LOGV("dataCallbackTimestamp timelapse: forced read");
                 mForceRead = false;
-                *timestampUs = mLastFrameTimestampUs;
+                *timestampUs =
+                    mLastFrameTimestampUs + mTimeBetweenTimeLapseVideoFramesUs;
                 return false;
             }
         }
