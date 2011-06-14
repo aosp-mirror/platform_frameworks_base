@@ -46,8 +46,6 @@ protected:
     }
 
     virtual void SetUp() {
-        EGLBoolean returnValue;
-
         mEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
         ASSERT_EQ(EGL_SUCCESS, eglGetError());
         ASSERT_NE(EGL_NO_DISPLAY, mEglDisplay);
@@ -59,9 +57,8 @@ protected:
         RecordProperty("EglVersionMajor", majorVersion);
         RecordProperty("EglVersionMajor", minorVersion);
 
-        EGLConfig myConfig = {0};
         EGLint numConfigs = 0;
-        EXPECT_TRUE(eglChooseConfig(mEglDisplay, getConfigAttribs(), &myConfig,
+        EXPECT_TRUE(eglChooseConfig(mEglDisplay, getConfigAttribs(), &mGlConfig,
                 1, &numConfigs));
         ASSERT_EQ(EGL_SUCCESS, eglGetError());
 
@@ -88,12 +85,12 @@ protected:
             ASSERT_TRUE(mSurfaceControl->isValid());
 
             ASSERT_EQ(NO_ERROR, mComposerClient->openTransaction());
-            ASSERT_EQ(NO_ERROR, mSurfaceControl->setLayer(30000));
+            ASSERT_EQ(NO_ERROR, mSurfaceControl->setLayer(0x7FFFFFFF));
             ASSERT_EQ(NO_ERROR, mSurfaceControl->show());
             ASSERT_EQ(NO_ERROR, mComposerClient->closeTransaction());
 
             sp<ANativeWindow> window = mSurfaceControl->getSurface();
-            mEglSurface = eglCreateWindowSurface(mEglDisplay, myConfig,
+            mEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
                     window.get(), NULL);
         } else {
             EGLint pbufferAttribs[] = {
@@ -101,13 +98,13 @@ protected:
                 EGL_HEIGHT, getSurfaceHeight(),
                 EGL_NONE };
 
-            mEglSurface = eglCreatePbufferSurface(mEglDisplay, myConfig,
+            mEglSurface = eglCreatePbufferSurface(mEglDisplay, mGlConfig,
                     pbufferAttribs);
         }
         ASSERT_EQ(EGL_SUCCESS, eglGetError());
         ASSERT_NE(EGL_NO_SURFACE, mEglSurface);
 
-        mEglContext = eglCreateContext(mEglDisplay, myConfig, EGL_NO_CONTEXT,
+        mEglContext = eglCreateContext(mEglDisplay, mGlConfig, EGL_NO_CONTEXT,
                 getContextAttribs());
         ASSERT_EQ(EGL_SUCCESS, eglGetError());
         ASSERT_NE(EGL_NO_CONTEXT, mEglContext);
@@ -329,6 +326,7 @@ protected:
     EGLDisplay mEglDisplay;
     EGLSurface mEglSurface;
     EGLContext mEglContext;
+    EGLConfig  mGlConfig;
 };
 
 // XXX: Code above this point should live elsewhere
@@ -399,6 +397,18 @@ protected:
         glUniform1i(mTexSamplerHandle, 0);
         ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
         glBindTexture(GL_TEXTURE_EXTERNAL_OES, TEX_ID);
+        ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
+
+        // XXX: These calls are not needed for GL_TEXTURE_EXTERNAL_OES as
+        // they're setting the defautls for that target, but when hacking things
+        // to use GL_TEXTURE_2D they are needed to achieve the same behavior.
+        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
+        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
+        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
+        glTexParameteri(GL_TEXTURE_EXTERNAL_OES, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
 
         GLfloat texMatrix[16];
@@ -474,12 +484,26 @@ void fillYV12BufferRect(uint8_t* buf, int w, int h, int stride,
     }
 }
 
+void fillRGBA8Buffer(uint8_t* buf, int w, int h, int stride) {
+    const size_t PIXEL_SIZE = 4;
+    for (int x = 0; x < w; x++) {
+        for (int y = 0; y < h; y++) {
+            off_t offset = (y * stride + x) * PIXEL_SIZE;
+            for (int c = 0; c < 4; c++) {
+                int parityX = (x / (1 << (c+2))) & 1;
+                int parityY = (y / (1 << (c+2))) & 1;
+                buf[offset + c] = (parityX ^ parityY) ? 231 : 35;
+            }
+        }
+    }
+}
+
 TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferNpot) {
-    const int yuvTexWidth = 64;
-    const int yuvTexHeight = 66;
+    const int texWidth = 64;
+    const int texHeight = 66;
 
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
-            yuvTexWidth, yuvTexHeight, HAL_PIXEL_FORMAT_YV12));
+            texWidth, texHeight, HAL_PIXEL_FORMAT_YV12));
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
 
@@ -493,7 +517,7 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferNpot) {
     // Fill the buffer with the a checkerboard pattern
     uint8_t* img = NULL;
     buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
-    fillYV12Buffer(img, yuvTexWidth, yuvTexHeight, buf->getStride());
+    fillYV12Buffer(img, texWidth, texHeight, buf->getStride());
     buf->unlock();
     ASSERT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(), buf->getNativeBuffer()));
 
@@ -523,11 +547,11 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferNpot) {
 // I just copied them from the npot test above and haven't bothered to figure
 // out the correct values.
 TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledYV12BufferPow2) {
-    const int yuvTexWidth = 64;
-    const int yuvTexHeight = 64;
+    const int texWidth = 64;
+    const int texHeight = 64;
 
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
-            yuvTexWidth, yuvTexHeight, HAL_PIXEL_FORMAT_YV12));
+            texWidth, texHeight, HAL_PIXEL_FORMAT_YV12));
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
 
@@ -541,7 +565,7 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledYV12BufferPow2) {
     // Fill the buffer with the a checkerboard pattern
     uint8_t* img = NULL;
     buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
-    fillYV12Buffer(img, yuvTexWidth, yuvTexHeight, buf->getStride());
+    fillYV12Buffer(img, texWidth, texHeight, buf->getStride());
     buf->unlock();
     ASSERT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(), buf->getNativeBuffer()));
 
@@ -567,11 +591,11 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledYV12BufferPow2) {
 }
 
 TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferWithCrop) {
-    const int yuvTexWidth = 64;
-    const int yuvTexHeight = 66;
+    const int texWidth = 64;
+    const int texHeight = 66;
 
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
-            yuvTexWidth, yuvTexHeight, HAL_PIXEL_FORMAT_YV12));
+            texWidth, texHeight, HAL_PIXEL_FORMAT_YV12));
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
 
@@ -579,8 +603,8 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferWithCrop) {
         {4, 6, 22, 36},
         {0, 6, 22, 36},
         {4, 0, 22, 36},
-        {4, 6, yuvTexWidth, 36},
-        {4, 6, 22, yuvTexHeight},
+        {4, 6, texWidth, 36},
+        {4, 6, 22, texHeight},
     };
 
     for (int i = 0; i < 5; i++) {
@@ -599,7 +623,7 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferWithCrop) {
 
         uint8_t* img = NULL;
         buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
-        fillYV12BufferRect(img, yuvTexWidth, yuvTexHeight, buf->getStride(), crop);
+        fillYV12BufferRect(img, texWidth, texHeight, buf->getStride(), crop);
         buf->unlock();
         ASSERT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(), buf->getNativeBuffer()));
 
@@ -623,6 +647,189 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferWithCrop) {
         EXPECT_TRUE(checkPixel(16, 26,  82, 255,  35, 255));
         EXPECT_TRUE(checkPixel(46, 51,  82, 255,  35, 255));
     }
+}
+
+// XXX: This test is disabled because there are currently no drivers that can
+// handle RGBA textures with the GL_TEXTURE_EXTERNAL_OES target.
+TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledRGBABufferNpot) {
+    const int texWidth = 64;
+    const int texHeight = 66;
+
+    ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
+            texWidth, texHeight, HAL_PIXEL_FORMAT_RGBA_8888));
+    ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
+            GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
+
+    android_native_buffer_t* anb;
+    ASSERT_EQ(NO_ERROR, mANW->dequeueBuffer(mANW.get(), &anb));
+    ASSERT_TRUE(anb != NULL);
+
+    sp<GraphicBuffer> buf(new GraphicBuffer(anb, false));
+    ASSERT_EQ(NO_ERROR, mANW->lockBuffer(mANW.get(), buf->getNativeBuffer()));
+
+    // Fill the buffer with the a checkerboard pattern
+    uint8_t* img = NULL;
+    buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
+    fillRGBA8Buffer(img, texWidth, texHeight, buf->getStride());
+    buf->unlock();
+    ASSERT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(), buf->getNativeBuffer()));
+
+    mST->updateTexImage();
+
+    glClearColor(0.2, 0.2, 0.2, 0.2);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    drawTexture();
+
+    EXPECT_TRUE(checkPixel( 0,  0,  35,  35,  35,  35));
+    EXPECT_TRUE(checkPixel(63,  0, 231, 231, 231, 231));
+    EXPECT_TRUE(checkPixel(63, 63, 231, 231, 231, 231));
+    EXPECT_TRUE(checkPixel( 0, 63,  35,  35,  35,  35));
+
+    EXPECT_TRUE(checkPixel(15, 10,  35, 231, 231, 231));
+    EXPECT_TRUE(checkPixel(24, 63,  35, 231, 231,  35));
+    EXPECT_TRUE(checkPixel(19, 40,  87, 179,  35,  35));
+    EXPECT_TRUE(checkPixel(38, 30, 231,  35,  35,  35));
+    EXPECT_TRUE(checkPixel(42, 54,  35,  35,  35, 231));
+    EXPECT_TRUE(checkPixel(37, 33,  35, 231, 231, 231));
+    EXPECT_TRUE(checkPixel(31,  8, 231,  35,  35, 231));
+    EXPECT_TRUE(checkPixel(36, 47, 231,  35, 231, 231));
+    EXPECT_TRUE(checkPixel(24, 63,  35, 231, 231,  35));
+    EXPECT_TRUE(checkPixel(48,  3, 231, 231,  35,  35));
+    EXPECT_TRUE(checkPixel(54, 50,  35, 231, 231, 231));
+    EXPECT_TRUE(checkPixel(24, 25, 191, 191, 231, 231));
+    EXPECT_TRUE(checkPixel(10,  9,  93,  93, 231, 231));
+    EXPECT_TRUE(checkPixel(29,  4,  35,  35,  35, 231));
+    EXPECT_TRUE(checkPixel(56, 31,  35, 231, 231,  35));
+    EXPECT_TRUE(checkPixel(58, 55,  35,  35, 231, 231));
+}
+
+// XXX: This test is disabled because there are currently no drivers that can
+// handle RGBA textures with the GL_TEXTURE_EXTERNAL_OES target.
+TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledRGBABufferPow2) {
+    const int texWidth = 64;
+    const int texHeight = 64;
+
+    ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
+            texWidth, texHeight, HAL_PIXEL_FORMAT_RGBA_8888));
+    ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
+            GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
+
+    android_native_buffer_t* anb;
+    ASSERT_EQ(NO_ERROR, mANW->dequeueBuffer(mANW.get(), &anb));
+    ASSERT_TRUE(anb != NULL);
+
+    sp<GraphicBuffer> buf(new GraphicBuffer(anb, false));
+    ASSERT_EQ(NO_ERROR, mANW->lockBuffer(mANW.get(), buf->getNativeBuffer()));
+
+    // Fill the buffer with the a checkerboard pattern
+    uint8_t* img = NULL;
+    buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
+    fillRGBA8Buffer(img, texWidth, texHeight, buf->getStride());
+    buf->unlock();
+    ASSERT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(), buf->getNativeBuffer()));
+
+    mST->updateTexImage();
+
+    glClearColor(0.2, 0.2, 0.2, 0.2);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    drawTexture();
+
+    EXPECT_TRUE(checkPixel( 0,  0, 231, 231, 231, 231));
+    EXPECT_TRUE(checkPixel(63,  0,  35,  35,  35,  35));
+    EXPECT_TRUE(checkPixel(63, 63, 231, 231, 231, 231));
+    EXPECT_TRUE(checkPixel( 0, 63,  35,  35,  35,  35));
+
+    EXPECT_TRUE(checkPixel(12, 46, 231, 231, 231,  35));
+    EXPECT_TRUE(checkPixel(16,  1, 231, 231,  35, 231));
+    EXPECT_TRUE(checkPixel(21, 12, 231,  35,  35, 231));
+    EXPECT_TRUE(checkPixel(26, 51, 231,  35, 231,  35));
+    EXPECT_TRUE(checkPixel( 5, 32,  35, 231, 231,  35));
+    EXPECT_TRUE(checkPixel(13,  8,  35, 231, 231, 231));
+    EXPECT_TRUE(checkPixel(46,  3,  35,  35, 231,  35));
+    EXPECT_TRUE(checkPixel(30, 33,  35,  35,  35,  35));
+    EXPECT_TRUE(checkPixel( 6, 52, 231, 231,  35,  35));
+    EXPECT_TRUE(checkPixel(55, 33,  35, 231,  35, 231));
+    EXPECT_TRUE(checkPixel(16, 29,  35,  35, 231, 231));
+    EXPECT_TRUE(checkPixel( 1, 30,  35,  35,  35, 231));
+    EXPECT_TRUE(checkPixel(41, 37,  35,  35, 231, 231));
+    EXPECT_TRUE(checkPixel(46, 29, 231, 231,  35,  35));
+    EXPECT_TRUE(checkPixel(15, 25,  35, 231,  35, 231));
+    EXPECT_TRUE(checkPixel( 3, 52,  35, 231,  35,  35));
+}
+
+// XXX: This test is disabled because there are currently no drivers that can
+// handle RGBA textures with the GL_TEXTURE_EXTERNAL_OES target.
+TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromGLFilledRGBABufferPow2) {
+    const int texWidth = 64;
+    const int texHeight = 64;
+
+    mST->setDefaultBufferSize(texWidth, texHeight);
+
+    // Do the producer side of things
+    EGLSurface stcEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
+            mANW.get(), NULL);
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+    ASSERT_NE(EGL_NO_SURFACE, mEglSurface);
+
+    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, stcEglSurface, stcEglSurface,
+            mEglContext));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+    glClearColor(0.6, 0.6, 0.6, 0.6);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(4, 4, 4, 4);
+    glClearColor(1.0, 0.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glScissor(24, 48, 4, 4);
+    glClearColor(0.0, 1.0, 0.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glScissor(37, 17, 4, 4);
+    glClearColor(0.0, 0.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    eglSwapBuffers(mEglDisplay, stcEglSurface);
+
+    // Do the consumer side of things
+    EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface,
+            mEglContext));
+    ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+    glDisable(GL_SCISSOR_TEST);
+
+    mST->updateTexImage();
+
+    glClearColor(0.2, 0.2, 0.2, 0.2);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    drawTexture();
+
+    EXPECT_TRUE(checkPixel( 0,  0, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel(63,  0, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel(63, 63, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel( 0, 63, 153, 153, 153, 153));
+
+    EXPECT_TRUE(checkPixel( 4,  7, 255,   0,   0, 255));
+    EXPECT_TRUE(checkPixel(25, 51,   0, 255,   0, 255));
+    EXPECT_TRUE(checkPixel(40, 19,   0,   0, 255, 255));
+    EXPECT_TRUE(checkPixel(29, 51, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel( 5, 32, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel(13,  8, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel(46,  3, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel(30, 33, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel( 6, 52, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel(55, 33, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel(16, 29, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel( 1, 30, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel(41, 37, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel(46, 29, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel(15, 25, 153, 153, 153, 153));
+    EXPECT_TRUE(checkPixel( 3, 52, 153, 153, 153, 153));
 }
 
 /*
