@@ -925,6 +925,26 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports portrait orientation
+     * screens.  For backwards compatibility, you can assume that if neither
+     * this nor {@link #FEATURE_SCREEN_LANDSCAPE} is set then the device supports
+     * both portrait and landscape.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SCREEN_PORTRAIT = "android.hardware.screen.portrait";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports landscape orientation
+     * screens.  For backwards compatibility, you can assume that if neither
+     * this nor {@link #FEATURE_SCREEN_PORTRAIT} is set then the device supports
+     * both portrait and landscape.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SCREEN_LANDSCAPE = "android.hardware.screen.landscape";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports live wallpapers.
      */
     @SdkConstant(SdkConstantType.FEATURE)
