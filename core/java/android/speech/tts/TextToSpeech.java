@@ -505,12 +505,14 @@ public class TextToSpeech {
 
         // Try requested engine
         if (connectToEngine(engine)) {
+            mCurrentEngine = engine;
             return SUCCESS;
         }
 
         // Fall back to user's default engine if different from the already tested one
         if (!engine.equals(defaultEngine)) {
             if (connectToEngine(defaultEngine)) {
+                mCurrentEngine = engine;
                 return SUCCESS;
             }
         }
@@ -520,10 +522,12 @@ public class TextToSpeech {
         if (!defaultEngine.equals(highestRanked)
                 && !engine.equals(highestRanked)) {
             if (connectToEngine(highestRanked)) {
+                mCurrentEngine = engine;
                 return SUCCESS;
             }
         }
 
+        dispatchOnInit(ERROR);
         return ERROR;
     }
 
@@ -534,10 +538,9 @@ public class TextToSpeech {
         boolean bound = mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE);
         if (!bound) {
             Log.e(TAG, "Failed to bind to " + engine);
-            dispatchOnInit(ERROR);
             return false;
         } else {
-            mCurrentEngine = engine;
+            Log.i(TAG, "Sucessfully bound to " + engine);
             return true;
         }
     }

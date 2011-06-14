@@ -48,14 +48,14 @@ public class TtsEngines {
     }
 
     /**
-     * @return the default TTS engine. If the user has set a default, that
-     *         value is returned else the highest ranked engine is returned,
-     *         as per {@link EngineInfoComparator}.
+     * @return the default TTS engine. If the user has set a default, and the engine
+     *         is available on the device, the default is returned. Otherwise,
+     *         the highest ranked engine is returned as per {@link EngineInfoComparator}.
      */
     public String getDefaultEngine() {
         String engine = Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.TTS_DEFAULT_SYNTH);
-        return engine != null ? engine : getHighestRankedEngineName();
+        return isEngineInstalled(engine) ? engine : getHighestRankedEngineName();
     }
 
     /**
@@ -124,7 +124,14 @@ public class TtsEngines {
     public boolean isEngineEnabled(String engine) {
         // System engines are enabled by default always.
         EngineInfo info = getEngineInfo(engine);
-        if (info != null && info.system) {
+        if (info == null) {
+            // The engine is not installed, and therefore cannot
+            // be enabled.
+            return false;
+        }
+
+        if (info.system) {
+            // All system engines are enabled by default.
             return true;
         }
 
@@ -139,6 +146,25 @@ public class TtsEngines {
     private boolean isSystemEngine(ServiceInfo info) {
         final ApplicationInfo appInfo = info.applicationInfo;
         return appInfo != null && (appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    /**
+     * @return true if a given engine is installed on the system. Useful to deal
+     *         with cases where an engine has been uninstalled by the user or removed
+     *         for any other reason.
+     */
+    private boolean isEngineInstalled(String engine) {
+        if (engine == null) {
+            return false;
+        }
+
+        for (EngineInfo info : getEngines()) {
+            if (engine.equals(info.name)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private EngineInfo getEngineInfo(ResolveInfo resolve, PackageManager pm) {
