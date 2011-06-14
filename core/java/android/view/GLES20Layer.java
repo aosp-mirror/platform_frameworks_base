@@ -17,6 +17,8 @@
 
 package android.view;
 
+import android.graphics.Bitmap;
+
 /**
  * An OpenGL ES 2.0 implementation of {@link HardwareLayer}.
  */
@@ -40,7 +42,10 @@ abstract class GLES20Layer extends HardwareLayer {
         return mLayer;
     }
 
-    
+    boolean copyInto(Bitmap bitmap) {
+        return GLES20Canvas.nCopyLayer(mLayer, bitmap.mNativeBitmap);
+    }    
+
     @Override
     void destroy() {
         if (mFinalizer != null) mFinalizer.destroy();

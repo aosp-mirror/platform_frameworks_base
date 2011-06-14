@@ -17,6 +17,7 @@
 
 package android.view;
 
+import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -204,8 +205,18 @@ public abstract class HardwareRenderer {
      * @param surface The surface to update
      */
     abstract void updateTextureLayer(HardwareLayer layer, int width, int height,
-            SurfaceTexture surface);    
-    
+            SurfaceTexture surface);
+
+    /**
+     * Copies the content of the specified layer into the specified bitmap.
+     * 
+     * @param layer The hardware layer to copy
+     * @param bitmap The bitmap to copy the layer into
+     * 
+     * @return True if the copy was successful, false otherwise
+     */
+    abstract boolean copyLayer(HardwareLayer layer, Bitmap bitmap);    
+
     /**
      * Initializes the hardware renderer for the specified surface and setup the
      * renderer for drawing, if needed. This is invoked when the ViewAncestor has
@@ -812,6 +823,11 @@ public abstract class HardwareRenderer {
         void updateTextureLayer(HardwareLayer layer, int width, int height,
                 SurfaceTexture surface) {
             ((GLES20TextureLayer) layer).update(width, height, surface.mSurfaceTexture);
+        }
+
+        @Override
+        boolean copyLayer(HardwareLayer layer, Bitmap bitmap) {
+            return ((GLES20Layer) layer).copyInto(bitmap);
         }
 
         static HardwareRenderer create(boolean translucent) {

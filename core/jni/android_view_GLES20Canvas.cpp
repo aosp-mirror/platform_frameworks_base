@@ -667,6 +667,11 @@ static void android_view_GLES20Canvas_drawLayer(JNIEnv* env, jobject clazz,
     renderer->drawLayer(layer, x, y, paint);
 }
 
+static jboolean android_view_GLES20Canvas_copyLayer(JNIEnv* env, jobject clazz,
+        Layer* layer, SkBitmap* bitmap) {
+    return LayerRenderer::copyLayer(layer, bitmap);
+}
+
 #endif // USE_OPENGL_RENDERER
 
 // ----------------------------------------------------------------------------
@@ -792,6 +797,7 @@ static JNINativeMethod gMethods[] = {
     { "nDestroyLayer",           "(I)V",       (void*) android_view_GLES20Canvas_destroyLayer },
     { "nDestroyLayerDeferred",   "(I)V",       (void*) android_view_GLES20Canvas_destroyLayerDeferred },
     { "nDrawLayer",              "(IIFFI)V",   (void*) android_view_GLES20Canvas_drawLayer },
+    { "nCopyLayer",              "(II)Z",      (void*) android_view_GLES20Canvas_copyLayer },
 
 #endif
 };
