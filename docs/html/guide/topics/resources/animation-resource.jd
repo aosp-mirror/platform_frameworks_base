@@ -5,28 +5,348 @@ parent.link=available-resources.html
 
 <div id="qv-wrapper">
   <div id="qv">
+   <h2>In this document</h2>
+    <ol>
+      <li><a href="#Property">Property Animation</a></li>
+      <li><a href="#View">View Animation</a>
+        <ol>
+          <li><a href="Tween">Tween animation</li>
+          <li><a href="Frame">Frame animation</li>
+        </ol>      
+      </li>
+    </ol>
     <h2>See also</h2>
     <ol>
-      <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html#tween-animation">2D
-Graphics</a></li>
+      <li><a href="{@docRoot}guide/topics/graphics/view-animation.html">View Animation</a></li>
+      <li><a href="{@docRoot}guide/topics/graphics/animation.html">Property Animation</a></li>
     </ol>
   </div>
 </div>
 
 
 <p>An animation resource can define one of two types of animations:</p>
+
 <dl>
-  <dt><a href="#Tween">Tween Animation</a></dt>
-  <dd>Creates an animation by performing a series of transformations on a single image.
-    An {@link android.view.animation.Animation}.</dd>
-  <dt><a href="#Frame">Frame Animation</a></dt>
-  <dd>Creates an animation by showing a sequence of images in order.
-    An {@link android.graphics.drawable.AnimationDrawable}.</dd>
+  <dt><a href="#Property">Property Animation</a></dt>
+  <dd>Creates an animation by modifying an object's property values over a set period
+  of time with an {@link android.animation.Animator}.</dd>
+  <dt><a href="#View">View Animation</a></dt>
+  <dd>
+  <p>There are two types of animations that you can do with the view animation framework:</p>
+  <ul>
+    <li><a href="#Tween">Tween animation</a>: Creates an animation by performing a series of transformations on a single image
+    with an {@link android.view.animation.Animation}</li>
+    <li><a href="#Frame">Frame animation</a>: or creates an animation by showing a sequence of images in order
+    with an {@link android.graphics.drawable.AnimationDrawable}.</li>
+  </ul>
+  </dd>
 </dl>
 
 
+<h2 id="Property">Property Animation</h2>
+<p>An animation defined in XML that modifies properties of the target object, such as
+background color or alpha value, over a set amount of time.</p>
 
-<h2 id="Tween">Tween Animation</h2>
+<dl class="xml">
+
+<dt>file location:</dt>
+<dd><code>res/animator/<em>filename</em>.xml</code><br/>
+The filename will be used as the resource ID.</dd>
+
+<dt>compiled resource datatype:</dt>
+<dd>Resource pointer to a {@link android.animation.ValueAnimator}, {@link android.animation.ObjectAnimator},
+or {@link android.animation.AnimatorSet}.</dd>
+
+<dt>resource reference:</dt>
+<dd>
+In Java: <code>R.animator.<em>filename</em></code><br/>
+In XML: <code>@[<em>package</em>:]animator/<em>filename</em></code>
+</dd>
+
+<dt>syntax:</dt>
+<dd>
+<pre class="stx">
+&lt;<a href="#animator-set-element">set</a>
+  android:ordering=["together" | "sequentially"]&gt;
+
+    &lt;<a href="#obj-animator-element">objectAnimator</a>
+        android:propertyName="<em>string</em>"
+        android:duration="<em>int</em>"
+        android:valueFrom="<em>float</em> | <em>int</em> | <em>color</em>"
+        android:valueTo="<em>float</em> | <em>int</em> | <em>color</em>"
+        android:startOffset="<em>int</em>"
+        android:repeatCount="<em>int</em>"
+        android:repeatMode=["repeat" | "reverse"]
+        android:valueType=["intType" | "floatType"]/&gt;
+
+    &lt;<a href="#val-animator-element">animator</a>
+        android:duration="<em>int</em>"
+        android:valueFrom="<em>float</em> | <em>int</em> | <em>color</em>"
+        android:valueTo="<em>float</em> | <em>int</em> | <em>color</em>"
+        android:startOffset="<em>int</em>"
+        android:repeatCount="<em>int</em>"
+        android:repeatMode=["repeat" | "reverse"]
+        android:valueType=["intType" | "floatType"]/&gt;
+
+    &lt;<a href="#animator-set-element">set</a>&gt;
+        ...
+    &lt;/set&gt;
+&lt;/set&gt;
+</pre>
+
+<p>The file must have a single root element: either 
+<code>&lt;set&gt;</code>, <code>&lt;objectAnimator&gt;</code>, or <code>&lt;valueAnimator&gt;</code>. You can
+group animation elements together inside the <code>&lt;set&gt;</code> element, including other
+<code>&lt;set&gt;</code> elements.
+</p>
+</dd>
+
+<dt>elements:</dt>
+  <dd>
+  <dl class="tag-list">
+    <dt id="animator-set-element"><code>&lt;set&gt;</code></dt>
+    <dd>A container that holds other animation elements (<code>&lt;objectAnimator&gt;</code>,
+    <code>&lt;valueAnimator&gt;</code>, or other <code>&lt;set&gt;</code> elements).  Represents
+    an {@link android.animation.AnimatorSet}.
+    <p>You can specify nested <code>&lt;set&gt;</code> tags to further
+    group animations together. Each <code>&lt;set&gt;</code> can define its own 
+    <code>ordering</code> attribute.</p>
+
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt>
+          <code>android:ordering</code>
+        </dt>
+        <dd>
+          <em>Keyword</em>. Specifies the play ordering of animations in this set.
+          <table> 
+            <tr><th>Value</th><th>Description</th></tr> 
+            <tr><td><code>sequentially</code></td><td>Play animations in this set sequentially</td></tr> 
+            <tr><td><code>together</code> (default)</td><td>Play animations in this set at the same time.</td></tr> 
+          </table> 
+        </dd>
+      </dl>
+    </dd>
+
+  <dt id="obj-animator-element"><code>&lt;objectAnimator&gt;</code></dt>
+    <dd>Animates a specific property of an object over a specific amount of time. Represents
+    an {@link android.animation.ObjectAnimator}.</p>
+    
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt>
+          <code>android:propertyName</code> 
+        </dt>
+        <dd>
+          <em>String</em>. <strong>Required</strong>. The object's property to animate, referenced by its name. For example you can specify
+          <code>"alpha"</code> or <code>"backgroundColor"</code> for a View object.
+          The <code>objectAnimator</code> element does not expose a <code>target</code>
+          attribute, however, so you cannot set the object to animate in the XML declaration. You have to
+          inflate your animation XML resource by calling {@link android.animation.AnimatorInflater#loadAnimator
+          loadAnimator()} and call {@link android.animation.ObjectAnimator#setTarget setTarget()} to set
+          the target object that contains this property.
+        </dd>
+
+        <dt>
+          <code>android:valueTo</code>
+        </dt>
+        <dd>
+          <em>float, int, or color</em>. <strong>Required</strong>. The value where the animated property ends. Colors are represented
+          as six digit hexadecimal numbers (for example, #333333).
+        </dd>
+
+        <dt>
+          <code>android:valueFrom</code>
+        </dt>
+        <dd>
+          <em>float, int, or color</em>. The value where the animated property starts. If not
+          specified, the animation starts at the value obtained by the property's get method. Colors are represented
+          as six digit hexadecimal numbers (for example, #333333).
+        </dd>
+
+        <dt>
+          <code>android:duration</code>
+        </dt>
+        <dd>
+          <em>int</em>. The time in milliseconds of the animation. 300 milliseconds is the default.
+        </dd>
+
+        <dt>
+          <code>android:startOffset</code>
+        </dt>
+        <dd>
+          <em>int</em>. The amount of milliseconds the animation delays after
+          {@link android.animation.ObjectAnimator#start start()} is called.
+        </dd>
+
+        <dt>
+          <code>android:repeatCount</code>
+        </dt>
+        <dd>
+          <em>int</em>. How many times to repeat an animation. Set to <code>"-1"</code> to infinitely
+          repeat or to a positive integer. For example, a value of <code>"1"</code> means that the animation
+          is repeated once after the initial run of the animation, so the animation plays a total
+          of two times. The default value is <code>"0"</code>, which means no repetition.
+
+        </dd>
+
+        <dt>
+          <code>android:repeatMode</code>
+        </dt>
+        <dd>
+          <em>int</em>. How an animation behaves when it reaches the end of the animation. <code>android:repeatCount</code>
+          must be set to a positive integer or <code>"-1"</code> for this attribute to have an effect. Set to <code>"reverse"</code>
+          to have the animation reverse direction with each iteration or <code>"repeat"</code> to have the animation
+          loop from the beginning each time.
+        </dd>
+
+        <dt>
+          <code>android:valueType</code>
+        </dt>
+        <dd>
+          <em>Keyword</em>. Do not specify this attribute if the value is a color. The animation framework automatically handles color
+          values
+          <table> 
+            <tr><th>Value</th><th>Description</th></tr> 
+            <tr><td><code>intType</code></td><td>Specifies that the animated values are integers</td></tr> 
+            <tr><td><code>floatType</code> (default)</td><td>Specifies that the animated values are floats</td></tr> 
+          </table> 
+        </dd>
+
+      </dl>
+    </dd>
+
+<dt id="val-animator-element"><code>&lt;animator&gt;</code></dt>
+    <dd>Animates a over a specified amount of time.
+    Represents a {@link android.animation.ValueAnimator}.
+
+      <p class="caps">attributes:</p>
+      <dl class="atn-list">
+        <dt>
+          <code>android:valueTo</code>
+        </dt>
+        <dd>
+          <em>float, int, or color</em>. <strong>Required</strong>. The value where the animation ends. Colors are represented
+          as six digit hexadecimal numbers (for example, #333333).
+        </dd>
+
+        <dt>
+          <code>android:valueFrom</code>
+        </dt>
+        <dd>
+          <em>float, int, or color</em>. <strong>Required</strong>. The value where the animation starts. Colors are represented
+          as six digit hexadecimal numbers (for example, #333333).
+        </dd>
+
+        <dt>
+          <code>android:duration</code>
+        </dt>
+        <dd>
+          <em>int</em>. The time in milliseconds of the animation. 300ms is the default.
+        </dd>
+
+        <dt>
+          <code>android:startOffset</code>
+        </dt>
+        <dd>
+          <em>int</em>. The amount of milliseconds the animation delays after
+          {@link android.animation.ValueAnimator#start start()} is called.
+        </dd>
+
+        <dt>
+          <code>android:repeatCount</code>
+        </dt>
+        <dd>
+          <em>int</em>. How many times to repeat an animation. Set to <code>"-1"</code> to infinitely
+          repeat or to a positive integer. For example, a value of <code>"1"</code> means that the animation
+          is repeated once after the initial run of the animation, so the animation plays a total
+          of two times. The default value is <code>"0"</code>, which means no repetition.
+        </dd>
+
+        <dt>
+          <code>android:repeatMode</code>
+        </dt>
+        <dd>
+          <em>int</em>. How an animation behaves when it reaches the end of the animation. <code>android:repeatCount</code>
+          must be set to a positive integer or <code>"-1"</code> for this attribute to have an effect. Set to <code>"reverse"</code>
+          to have the animation reverse direction with each iteration or <code>"repeat"</code> to have the animation
+          loop from the beginning each time.
+        </dd>
+
+        <dt>
+          <code>android:valueType</code>
+        </dt>
+        <dd>
+          <em>Keyword</em>. Do not specify this attribute if the value is a color. The animation framework automatically handles color
+          values.
+          <table> 
+            <tr><th>Value</th><th>Description</th></tr> 
+            <tr><td><code>intType</code></td><td>Specifies that the animated values are integers</td></tr> 
+            <tr><td><code>floatType</code> (default)</td><td>Specifies that the animated values are floats</td></tr> 
+          </table> 
+        </dd>
+
+      </dl>
+    </dd>
+  </dl>
+
+</dd> <!-- end  elements and attributes -->
+
+<dt>example:</dt>
+<dd>
+  <pp>XML file saved at <code>res/animator/property_animator.xml</code>:</p>
+<pre>
+&lt;set android:ordering="sequentially"&gt;
+    &lt;set&gt;
+        &lt;objectAnimator
+            android:propertyName="x"
+            android:duration="500"
+            android:valueTo="400"
+            android:valueType="intType"/&gt;
+        &lt;objectAnimator
+            android:propertyName="y"
+            android:duration="500"
+            android:valueTo="300"
+            android:valueType="intType"/&gt;
+    &lt;/set&gt;
+    &lt;objectAnimator
+        android:propertyName="alpha"
+        android:duration="500"
+        android:valueTo="1f"/&gt;
+&lt;/set&gt;
+</pre>
+  <p>In order to run this animation, you must inflate the XML resources in your code to an {@link
+  android.animation.AnimatorSet} object, and then set the target objects for all of the animations
+  before starting the animation set. Calling {@link android.animation.AnimatorSet#setTarget
+  setTarget()} sets a single target object for all children of the {@link
+  android.animation.AnimatorSet} as a convenience. The following code shows how to do this:</p>
+  
+<pre>
+AnimatorSet set = (AnimatorSet) AnimatorInflater.loadAnimator(myContext,
+    R.anim.property_animator);
+set.setTarget(myObject);
+set.start();
+</pre>
+
+
+</dd> <!-- end example -->
+
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li><a href="{@docRoot}guide/topics/graphics/animation.html">Property Animation</a></li>
+  <li><a href="http://zoso:8080/resources/samples/ApiDemos/src/com/example/android/apis/animation/index.html">API Demos</a> for examples
+  on how to use the property animation system.</li>
+</ul>
+</dd>
+
+</dl>
+
+<h2 id="View">View Animation</h2>
+The view animation framework supports both tween and frame by frame animations, which can both be declared
+in XML. The following sections describe how to use both methods.
+
+<h3 id="Tween">Tween animation</h3>
 
 <p>An animation defined in XML that performs transitions such as rotating,
 fading, moving, and stretching on a graphic.
@@ -254,18 +574,14 @@ image.{@link android.view.View#startAnimation(Animation) startAnimation}(hypersp
 <dt>see also:</dt>
 <dd>
 <ul>
-  <li><a href="{@docRoot}guide/topics/graphics/2d-graphics.html#tween-animation">2D
+  <li><a href="{@docRoot}guide/topics/graphics/view-animation.html#tween-animation">2D
 Graphics: Tween Animation</a></li>
 </ul>
 </dd>
 
 </dl>
 
-
-
-
-
-<h3 id="Interpolators">Interpolators</h3>
+<h4 id="Interpolators">Interpolators</h4>
 
 <p>An interpolator is an animation modifier defined in XML that affects the rate of change in an
 animation. This allows your existing animation effects to be accelerated, decelerated, repeated,
@@ -456,22 +772,7 @@ sinusoidal pattern.
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h2 id="Frame">Frame Animation</h2>
+<h3 id="Frame">Frame animation</h3>
 
 <p>An animation defined in XML that shows a sequence of images in order (like a film).
 </p>
@@ -562,7 +863,11 @@ rocketAnimation.{@link android.graphics.drawable.AnimationDrawable#start()};
   </dl>
 </dd> <!-- end example -->
 
+<dt>see also:</dt>
+<dd>
+<ul>
+  <li><a href="{@docRoot}guide/topics/graphics/view-animation.html#frame-animation">2D
+Graphics: Frame Animation</a></li>
+</ul>
+</dd>
 </dl>
-
-
-
