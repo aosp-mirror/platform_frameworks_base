@@ -22,12 +22,9 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.Log;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashMap;
 
 /**
@@ -50,7 +47,7 @@ public class UsbManager {
      * This is a sticky broadcast for clients that includes USB connected/disconnected state,
      * <ul>
      * <li> {@link #USB_CONNECTED} boolean indicating whether USB is connected or disconnected.
-     * <li> {@link #USB_CONFIGURATION} integer containing current USB configuration
+     * <li> {@link #USB_CONFIGURED} boolean indicating whether USB is configured.
      * currently zero if not configured, one for configured.
      * <li> {@link #USB_FUNCTION_MASS_STORAGE} boolean extra indicating whether the
      * mass storage function is enabled
@@ -128,12 +125,12 @@ public class UsbManager {
     public static final String USB_CONNECTED = "connected";
 
     /**
-     * Integer extra containing currently set USB configuration.
+     * Boolean extra indicating whether USB is configured.
      * Used in extras for the {@link #ACTION_USB_STATE} broadcast.
      *
      * {@hide}
      */
-    public static final String USB_CONFIGURATION = "configuration";
+    public static final String USB_CONFIGURED = "configured";
 
     /**
      * Name of the USB mass storage USB function.
@@ -388,21 +385,14 @@ public class UsbManager {
         }
     }
 
-    private static File getFunctionEnableFile(String function) {
-        return new File("/sys/class/usb_composite/" + function + "/enable");
-    }
-
-    /**
-     * Returns true if the specified USB function is supported by the kernel.
-     * Note that a USB function maybe supported but disabled.
-     *
-     * @param function name of the USB function
-     * @return true if the USB function is supported.
-     *
-     * {@hide}
-     */
-    public static boolean isFunctionSupported(String function) {
-        return getFunctionEnableFile(function).exists();
+    private static boolean propertyContainsFunction(String property, String function) {
+        String functions = SystemProperties.get(property, "");
+        int index = functions.indexOf(function);
+        if (index < 0) return false;
+        if (index > 0 && functions.charAt(index - 1) != ',') return false;
+        int charAfter = index + function.length();
+        if (charAfter < functions.length() && functions.charAt(charAfter) != ',') return false;
+        return true;
     }
 
     /**
@@ -413,30 +403,52 @@ public class UsbManager {
      *
      * {@hide}
      */
-    public static boolean isFunctionEnabled(String function) {
+    public boolean isFunctionEnabled(String function) {
+        return propertyContainsFunction("sys.usb.config", function);
+    }
+
+    /**
+     * Sets the primary USB function.
+     *
+     * @param function name of the USB function
+     *
+     * {@hide}
+     */
+    public void setPrimaryFunction(String function) {
         try {
-            FileInputStream stream = new FileInputStream(getFunctionEnableFile(function));
-            boolean enabled = (stream.read() == '1');
-            stream.close();
-            return enabled;
-        } catch (IOException e) {
-            return false;
+            mService.setPrimaryFunction(function);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in setPrimaryFunction", e);
         }
     }
 
     /**
-     * Enables or disables a USB function.
+     * Sets the default primary USB function.
+     *
+     * @param function name of the USB function
      *
      * {@hide}
      */
-    public static boolean setFunctionEnabled(String function, boolean enable) {
+    public void setDefaultFunction(String function) {
         try {
-            FileOutputStream stream = new FileOutputStream(getFunctionEnableFile(function));
-            stream.write(enable ? '1' : '0');
-            stream.close();
-            return true;
-        } catch (IOException e) {
-            return false;
+            mService.setDefaultFunction(function);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in setDefaultFunction", e);
+        }
+    }
+
+    /**
+     * Sets the file path for USB mass storage backing file.
+     *
+     * @param path backing file path
+     *
+     * {@hide}
+     */
+    public void setMassStorageBackingFile(String path) {
+        try {
+            mService.setMassStorageBackingFile(path);
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException in setDefaultFunction", e);
         }
     }
 }
