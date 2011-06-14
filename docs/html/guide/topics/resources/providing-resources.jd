@@ -333,6 +333,86 @@ your application for other languages.</p>
 indicates the current locale.</p>
       </td>
     </tr>
+    <tr id="SmallestScreenWidthQualifier">
+      <td>Smallest screen width</td>
+      <td>Examples:<br/>
+        <code>sw320dp</code><br/>
+        <code>sw600dp</code><br/>
+        <code>sw720dp</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>Specifies a minimum "smallest screen width," in "dp" units, at which the resource
+          should be used.  This configuration value represents the base screen size
+          of the device, regardless of the orientation of the display.  It is based
+          on the smallest width the application will have in which to perform its
+          UI layout (in dp units) regardless of the orientation of the screen.  The
+          value here takes into account screen decorations so if the device has some
+          persistent UI elements on the left or right edge of the display it must
+          present a value here that is smaller than the real screen size, accounting
+          for these UI elements reducing the application's available space.</p>
+        <p>Some values you may use here for common screen sizes:</p>
+        <ul>
+          <li>240x320 ldpi (QVGA phone): 320
+          <li>320x480 mdpi (phone): 320
+          <li>480x800 hdpi (high density phone): 320
+          <li>480x800 mdpi (tablet/phone): 480
+          <li>600x1024 mdpi (7" tablet): 600
+          <li>720x1280 mdpi (10" tablet): 720
+        </ul>
+        <p><em>Added in API Level 13.</em></p>
+        <p>Also see the {@link android.content.res.Configuration#smallestScreenWidthDp}
+          configuration field, which holds the current smallest screen width.</p>
+      </td>
+    </tr>
+    <tr id="ScreenWidthQualifier">
+      <td>Screen width</td>
+      <td>Examples:<br/>
+        <code>w720dp</code><br/>
+        <code>w1024dp</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>Specifies a minimum screen width, in "dp" units, at which the resource
+          should be used.  This configuration value will change when the orientation
+          changes between landscape and portrait to match the current actual width.
+          When multiple screen width configurations are available, the closest to
+          the current screen width will be used.  The
+          value here takes into account screen decorations so if the device has some
+          persistent UI elements on the left or right edge of the display it must
+          present a value here that is smaller than the real screen size, accounting
+          for these UI elements reducing the application's available space.</p>
+        <p><em>Added in API Level 13.</em></p>
+        <p>Also see the {@link android.content.res.Configuration#screenWidthDp}
+          configuration field, which holds the current screen width.</p>
+      </td>
+    </tr>
+    <tr id="ScreenHeightQualifier">
+      <td>Screen height</td>
+      <td>Examples:<br/>
+        <code>h720dp</code><br/>
+        <code>h1024dp</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>Specifies a minimum screen height, in "dp" units, at which the resource
+          should be used.  This configuration value will change when the orientation
+          changes between landscape and portrait to match the current actual height.
+          When multiple screen height configurations are available, the closest to
+          the current screen height will be used.  The
+          value here takes into account screen decorations so if the device has some
+          persistent UI elements on the left or right edge of the display it must
+          present a value here that is smaller than the real screen size, accounting
+          for these UI elements reducing the application's available space.  Screen
+          decorations that are not fixed (such as a phone status bar that can be
+          hidden when full screen) are <em>not</em> accounted for here, nor are
+          window decorations like title bar, so applications must be prepared to
+          deal with a somewhat smaller space than they specify.
+        <p><em>Added in API Level 13.</em></p>
+        <p>Also see the {@link android.content.res.Configuration#screenHeightDp}
+          configuration field, which holds the current screen width.</p>
+      </td>
+    </tr>
     <tr id="ScreenSizeQualifier">
       <td>Screen size</td>
       <td>
@@ -390,46 +470,6 @@ or large.</p>
 is not related to the screen orientation.</p>
         <p>Also see the {@link android.content.res.Configuration#screenLayout} configuration field,
 which indicates whether the screen is long.</p>
-      </td>
-    </tr>
-    <tr id="ScreenWidthQualifier">
-      <td>Screen width</td>
-      <td>Examples:<br/>
-        <code>w720dp</code><br/>
-        <code>w1024dp</code><br/>
-        etc.
-      </td>
-      <td>
-        <p>Specifies a minimum screen width, in "dp" units, at which the resource
-          should be used.  This configuration value will change when the orientation
-          changes between landscape and portrait to match the current actual width.
-          When multiple screen width configurations are available, the closest to
-          the current screen width will be used.  The value specified here is
-          approximate; screen decorations like a status bar or system bar may cause
-          the actual space available in your UI to be slightly smaller.
-        <p><em>Added in API Level 13.</em></p>
-        <p>Also see the {@link android.content.res.Configuration#screenWidthDp}
-          configuration field, which holds the current screen width.</p>
-      </td>
-    </tr>
-    <tr id="ScreenHeightQualifier">
-      <td>Screen height</td>
-      <td>Examples:<br/>
-        <code>h720dp</code><br/>
-        <code>h1024dp</code><br/>
-        etc.
-      </td>
-      <td>
-        <p>Specifies a minimum screen height, in "dp" units, at which the resource
-          should be used.  This configuration value will change when the orientation
-          changes between landscape and portrait to match the current actual height.
-          When multiple screen height configurations are available, the closest to
-          the current screen height will be used.  The value specified here is
-          approximate; screen decorations like a status bar or system bar may cause
-          the actual space available in your UI to be slightly smaller.
-        <p><em>Added in API Level 13.</em></p>
-        <p>Also see the {@link android.content.res.Configuration#screenHeightDp}
-          configuration field, which holds the current screen width.</p>
       </td>
     </tr>
     <tr id="OrientationQualifier">
