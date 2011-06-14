@@ -343,6 +343,9 @@ enum {
     REQUIRED_ATTR = 0x0101028e,
     SCREEN_SIZE_ATTR = 0x010102ca,
     SCREEN_DENSITY_ATTR = 0x010102cb,
+    REQUIRES_SMALLEST_WIDTH_DP_ATTR = 0x01010364,
+    COMPATIBLE_WIDTH_LIMIT_DP_ATTR = 0x01010365,
+    LARGEST_WIDTH_LIMIT_DP_ATTR = 0x01010366,
 };
 
 const char *getComponentName(String8 &pkgName, String8 &componentName) {
@@ -422,6 +425,24 @@ int doDump(Bundle* bundle)
         fprintf(stderr, "ERROR: dump failed because assets could not be loaded\n");
         return 1;
     }
+
+    // Make a dummy config for retrieving resources...  we need to supply
+    // non-default values for some configs so that we can retrieve resources
+    // in the app that don't have a default.  The most important of these is
+    // the API version because key resources like icons will have an implicit
+    // version if they are using newer config types like density.
+    ResTable_config config;
+    config.language[0] = 'e';
+    config.language[1] = 'n';
+    config.country[0] = 'U';
+    config.country[1] = 'S';
+    config.orientation = ResTable_config::ORIENTATION_PORT;
+    config.density = ResTable_config::DENSITY_MEDIUM;
+    config.sdkVersion = 10000; // Very high.
+    config.screenWidthDp = 320;
+    config.screenHeightDp = 480;
+    config.smallestScreenWidthDp = 320;
+    assets.setConfiguration(config);
 
     const ResTable& res = assets.getResources(false);
     if (&res == NULL) {
@@ -542,6 +563,19 @@ int doDump(Bundle* bundle)
                 }
             }
         } else if (strcmp("badging", option) == 0) {
+            Vector<String8> locales;
+            res.getLocales(&locales);
+
+            Vector<ResTable_config> configs;
+            res.getConfigurations(&configs);
+            SortedVector<int> densities;
+            const size_t NC = configs.size();
+            for (size_t i=0; i<NC; i++) {
+                int dens = configs[i].density;
+                if (dens == 0) dens = 160;
+                densities.add(dens);
+            }
+
             size_t len;
             ResXMLTree::event_code_t code;
             int depth = 0;
@@ -598,6 +632,8 @@ int doDump(Bundle* bundle)
             bool specTouchscreenFeature = false; // touchscreen-related
             bool specMultitouchFeature = false;
             bool reqDistinctMultitouchFeature = false;
+            bool specScreenPortraitFeature = false;
+            bool specScreenLandscapeFeature = false;
             // 2.2 also added some other features that apps can request, but that
             // have no corresponding permission, so we cannot implement any
             // back-compatibility heuristic for them. The below are thus unnecessary
@@ -614,6 +650,9 @@ int doDump(Bundle* bundle)
             int largeScreen = 1;
             int xlargeScreen = 1;
             int anyDensity = 1;
+            int requiresSmallestWidthDp = 0;
+            int compatibleWidthLimitDp = 0;
+            int largestWidthLimitDp = 0;
             String8 pkg;
             String8 activityName;
             String8 activityLabel;
@@ -628,10 +667,11 @@ int doDump(Bundle* bundle)
                     } else if (depth < 3) {
                         if (withinActivity && isMainActivity && isLauncherActivity) {
                             const char *aName = getComponentName(pkg, activityName);
+                            printf("launchable-activity:");
                             if (aName != NULL) {
-                                printf("launchable activity name='%s'", aName);
+                                printf(" name='%s' ", aName);
                             }
-                            printf("label='%s' icon='%s'\n",
+                            printf(" label='%s' icon='%s'\n",
                                     activityLabel.string(),
                                     activityIcon.string());
                         }
@@ -696,23 +736,51 @@ int doDump(Bundle* bundle)
                     withinApplication = false;
                     if (tag == "application") {
                         withinApplication = true;
-                        String8 label = getResolvedAttribute(&res, tree, LABEL_ATTR, &error);
-                         if (error != "") {
-                             fprintf(stderr, "ERROR getting 'android:label' attribute: %s\n", error.string());
-                             goto bail;
+
+                        String8 label;
+                        const size_t NL = locales.size();
+                        for (size_t i=0; i<NL; i++) {
+                            const char* localeStr =  locales[i].string();
+                            assets.setLocale(localeStr != NULL ? localeStr : "");
+                            String8 llabel = getResolvedAttribute(&res, tree, LABEL_ATTR, &error);
+                            if (llabel != "") {
+                                if (localeStr == NULL || strlen(localeStr) == 0) {
+                                    label = llabel;
+                                    printf("application-label:'%s'\n", llabel.string());
+                                } else {
+                                    if (label == "") {
+                                        label = llabel;
+                                    }
+                                    printf("application-label-%s:'%s'\n", localeStr,
+                                            llabel.string());
+                                }
+                            }
                         }
-                        printf("application: label='%s' ", label.string());
+
+                        ResTable_config tmpConfig = config;
+                        const size_t ND = densities.size();
+                        for (size_t i=0; i<ND; i++) {
+                            tmpConfig.density = densities[i];
+                            assets.setConfiguration(tmpConfig);
+                            String8 icon = getResolvedAttribute(&res, tree, ICON_ATTR, &error);
+                            if (icon != "") {
+                                printf("application-icon-%d:'%s'\n", densities[i], icon.string());
+                            }
+                        }
+                        assets.setConfiguration(config);
+
                         String8 icon = getResolvedAttribute(&res, tree, ICON_ATTR, &error);
                         if (error != "") {
                             fprintf(stderr, "ERROR getting 'android:icon' attribute: %s\n", error.string());
                             goto bail;
                         }
-                        printf("icon='%s'\n", icon.string());
                         int32_t testOnly = getIntegerAttribute(tree, TEST_ONLY_ATTR, &error, 0);
                         if (error != "") {
                             fprintf(stderr, "ERROR getting 'android:testOnly' attribute: %s\n", error.string());
                             goto bail;
                         }
+                        printf("application: label='%s' ", label.string());
+                        printf("icon='%s'\n", icon.string());
                         if (testOnly != 0) {
                             printf("testOnly='%d'\n", testOnly);
                         }
@@ -792,6 +860,12 @@ int doDump(Bundle* bundle)
                                 XLARGE_SCREEN_ATTR, NULL, 1);
                         anyDensity = getIntegerAttribute(tree,
                                 ANY_DENSITY_ATTR, NULL, 1);
+                        requiresSmallestWidthDp = getIntegerAttribute(tree,
+                                REQUIRES_SMALLEST_WIDTH_DP_ATTR, NULL, 0);
+                        compatibleWidthLimitDp = getIntegerAttribute(tree,
+                                COMPATIBLE_WIDTH_LIMIT_DP_ATTR, NULL, 0);
+                        largestWidthLimitDp = getIntegerAttribute(tree,
+                                LARGEST_WIDTH_LIMIT_DP_ATTR, NULL, 0);
                     } else if (tag == "uses-feature") {
                         String8 name = getAttribute(tree, NAME_ATTR, &error);
 
@@ -837,6 +911,10 @@ int doDump(Bundle* bundle)
                                 // these have no corresponding permission to check for,
                                 // but should imply the foundational telephony permission
                                 reqTelephonySubFeature = true;
+                            } else if (name == "android.hardware.screen.portrait") {
+                                specScreenPortraitFeature = true;
+                            } else if (name == "android.hardware.screen.landscape") {
+                                specScreenLandscapeFeature = true;
                             }
                             printf("uses-feature%s:'%s'\n",
                                     req ? "" : "-not-required", name.string());
@@ -1103,6 +1181,15 @@ int doDump(Bundle* bundle)
                 printf("uses-feature:'android.hardware.touchscreen.multitouch'\n");
             }
 
+            // Landscape/portrait-related compatibility logic
+            if (!specScreenLandscapeFeature && !specScreenPortraitFeature && (targetSdk < 13)) {
+                // If app has not specified whether it requires portrait or landscape
+                // and is targeting an API before Honeycomb MR2, then assume it requires
+                // both.
+                printf("uses-feature:'android.hardware.screen.portrait'\n");
+                printf("uses-feature:'android.hardware.screen.landscape'\n");
+            }
+
             if (hasMainActivity) {
                 printf("main\n");
             }
@@ -1128,6 +1215,34 @@ int doDump(Bundle* bundle)
                 printf("other-services\n");
             }
 
+            // For modern apps, if screen size buckets haven't been specified
+            // but the new width ranges have, then infer the buckets from them.
+            if (smallScreen > 0 && normalScreen > 0 && largeScreen > 0 && xlargeScreen > 0
+                    && requiresSmallestWidthDp > 0) {
+                int compatWidth = compatibleWidthLimitDp;
+                if (compatWidth <= 0) compatWidth = requiresSmallestWidthDp;
+                if (requiresSmallestWidthDp <= 240 && compatWidth >= 240) {
+                    smallScreen = -1;
+                } else {
+                    smallScreen = 0;
+                }
+                if (requiresSmallestWidthDp <= 320 && compatWidth >= 320) {
+                    normalScreen = -1;
+                } else {
+                    normalScreen = 0;
+                }
+                if (requiresSmallestWidthDp <= 480 && compatWidth >= 480) {
+                    largeScreen = -1;
+                } else {
+                    largeScreen = 0;
+                }
+                if (requiresSmallestWidthDp <= 720 && compatWidth >= 720) {
+                    xlargeScreen = -1;
+                } else {
+                    xlargeScreen = 0;
+                }
+            }
+
             // Determine default values for any unspecified screen sizes,
             // based on the target SDK of the package.  As of 4 (donut)
             // the screen size support was introduced, so all default to
@@ -1146,7 +1261,8 @@ int doDump(Bundle* bundle)
                 xlargeScreen = targetSdk >= 9 ? -1 : 0;
             }
             if (anyDensity > 0) {
-                anyDensity = targetSdk >= 4 ? -1 : 0;
+                anyDensity = (targetSdk >= 4 || requiresSmallestWidthDp > 0
+                        || compatibleWidthLimitDp > 0) ? -1 : 0;
             }
             printf("supports-screens:");
             if (smallScreen != 0) printf(" 'small'");
@@ -1154,12 +1270,18 @@ int doDump(Bundle* bundle)
             if (largeScreen != 0) printf(" 'large'");
             if (xlargeScreen != 0) printf(" 'xlarge'");
             printf("\n");
-
             printf("supports-any-density: '%s'\n", anyDensity ? "true" : "false");
+            if (requiresSmallestWidthDp > 0) {
+                printf("requires-smallest-width:'%d'\n", requiresSmallestWidthDp);
+            }
+            if (compatibleWidthLimitDp > 0) {
+                printf("compatible-width-limit:'%d'\n", compatibleWidthLimitDp);
+            }
+            if (largestWidthLimitDp > 0) {
+                printf("largest-width-limit:'%d'\n", largestWidthLimitDp);
+            }
 
             printf("locales:");
-            Vector<String8> locales;
-            res.getLocales(&locales);
             const size_t NL = locales.size();
             for (size_t i=0; i<NL; i++) {
                 const char* localeStr =  locales[i].string();
@@ -1169,16 +1291,6 @@ int doDump(Bundle* bundle)
                 printf(" '%s'", localeStr);
             }
             printf("\n");
-
-            Vector<ResTable_config> configs;
-            res.getConfigurations(&configs);
-            SortedVector<int> densities;
-            const size_t NC = configs.size();
-            for (size_t i=0; i<NC; i++) {
-                int dens = configs[i].density;
-                if (dens == 0) dens = 160;
-                densities.add(dens);
-            }
 
             printf("densities:");
             const size_t ND = densities.size();

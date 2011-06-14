@@ -243,6 +243,26 @@ public class Build {
          * later.  Applications that don't support a screen size at least as
          * large as the current screen will provide the user with a UI to
          * switch them in to screen size compatibility mode.</p>
+         *
+         * <p>This version introduces new screen size resource qualifiers
+         * based on the screen size in dp: see
+         * {@link android.content.res.Configuration#screenWidthDp},
+         * {@link android.content.res.Configuration#screenHeightDp}, and
+         * {@link android.content.res.Configuration#smallestScreenWidthDp}.
+         * Supplying these in &lt;supports-screens&gt; as per
+         * {@link android.content.pm.ApplicationInfo#requiresSmallestWidthDp},
+         * {@link android.content.pm.ApplicationInfo#compatibleWidthLimitDp}, and
+         * {@link android.content.pm.ApplicationInfo#largestWidthLimitDp} is
+         * preferred over the older screen size buckets and for older devices
+         * the appropriate buckets will be inferred from them.</p>
+         *
+         * <p>New {@link android.content.pm.PackageManager#FEATURE_SCREEN_PORTRAIT}
+         * and {@link android.content.pm.PackageManager#FEATURE_SCREEN_LANDSCAPE}
+         * features are introduced in this release.  Applications that target
+         * previous platform versions are assumed to require both portrait and
+         * landscape support in the device; when targeting Honeycomb MR1 or
+         * greater the application is responsible for specifying any specific
+         * orientation it requires.</p>
          */
         public static final int HONEYCOMB_MR2 = 13;
     }
