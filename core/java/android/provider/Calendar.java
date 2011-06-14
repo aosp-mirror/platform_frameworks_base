@@ -39,8 +39,52 @@ import android.text.format.Time;
 import android.util.Log;
 
 /**
- * The Calendar provider contains all calendar events.
- *
+ * <p>
+ * The contract between the calendar provider and applications. Contains
+ * definitions for the supported URIs and data columns.
+ * </p>
+ * <h3>Overview</h3>
+ * <p>
+ * CalendarContract defines the data model of calendar and event related
+ * information. This data is stored in a number of tables:
+ * </p>
+ * <ul>
+ * <li>The {@link Calendars} table holds the calendar specific information. Each
+ * row in this table contains the details for a single calendar, such as the
+ * name, color, sync info, etc.</li>
+ * <li>The {@link Events} table holds the event specific information. Each row
+ * in this table has the info for a single event. It contains information such
+ * as event title, location, start time, end time, etc. The event can occur
+ * one-time or can recur multiple times. Attendees, reminders, and extended
+ * properties are stored on separate tables and reference the {@link Events#_ID}
+ * to link them with the event.</li>
+ * <li>The {@link Instances} table holds the start and end time for occurrences
+ * of an event. Each row in this table represents a single occurrence. For
+ * one-time events there will be a 1:1 mapping of instances to events. For
+ * recurring events, multiple rows will automatically be generated which
+ * correspond to multiple occurrences of that event.</li>
+ * <li>The {@link Attendees} table holds the event attendee or guest
+ * information. Each row represents a single guest of an event. It specifies the
+ * type of guest they are and their attendance response for the event.</li>
+ * <li>The {@link Reminders} table holds the alert/notification data. Each row
+ * represents a single alert for an event. An event can have multiple reminders.
+ * The number of reminders per event is specified in
+ * {@link Calendars#MAX_REMINDERS} which is set by the Sync Adapter that owns
+ * the given calendar. Reminders are specified in minutes before the event and
+ * have a type.</li>
+ * <li>The {@link ExtendedProperties} table hold opaque data fields used by the
+ * sync adapter. The provider takes no action with items in this table except to
+ * delete them when their related events are deleted.</li>
+ * </ul>
+ * <p>
+ * Other tables include:
+ * </p>
+ * <ul>
+ * <li>
+ * {@link SyncState}, which contains free-form data maintained by the sync
+ * adapters</li>
+ * </ul>
+ * 
  * @hide
  */
 public final class Calendar {
