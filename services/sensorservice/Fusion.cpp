@@ -24,10 +24,28 @@ namespace android {
 
 // -----------------------------------------------------------------------
 
-static const float gyroSTDEV = 3.16e-4; // rad/s^3/2
+/*
+ * gyroVAR gives the measured variance of the gyro's output per
+ * Hz (or variance at 1 Hz). This is an "intrinsic" parameter of the gyro,
+ * which is independent of the sampling frequency.
+ *
+ * The variance of gyro's output at a given sampling period can be
+ * calculated as:
+ *      variance(T) = gyroVAR / T
+ *
+ * The variance of the INTEGRATED OUTPUT at a given sampling period can be
+ * calculated as:
+ *       variance_integrate_output(T) = gyroVAR * T
+ *
+ */
+static const float gyroVAR = 1e-7;      // (rad/s)^2 / Hz
+static const float biasVAR = 1e-8;      // (rad/s)^2 / s (guessed)
+
+/*
+ * Standard deviations of accelerometer and magnetometer
+ */
 static const float accSTDEV  = 0.05f;   // m/s^2 (measured 0.08 / CDD 0.05)
 static const float magSTDEV  = 0.5f;    // uT    (measured 0.7  / CDD 0.5)
-static const float biasSTDEV = 3.16e-5; // rad/s^1/2 (guessed)
 
 static const float FREE_FALL_THRESHOLD = 0.981f;
 
@@ -129,23 +147,34 @@ void Fusion::initFusion(const vec4_t& q, float dT)
     x0 = q;
     x1 = 0;
 
-    // process noise covariance matrix
-    //  G = | -1 0 |
-    //      |  0 1 |
+    // process noise covariance matrix: G.Q.Gt, with
+    //
+    //  G = | -1 0 |        Q = | q00 q10 |
+    //      |  0 1 |            | q01 q11 |
+    //
+    // q00 = sv^2.dt + 1/3.su^2.dt^3
+    // q10 = q01 = 1/2.su^2.dt^2
+    // q11 = su^2.dt
+    //
 
-    const float v = gyroSTDEV;
-    const float u = biasSTDEV;
-    const float q00 = v*v*dT + 0.33333f*(dT*dT*dT)*u*u;
-    const float q10 =              0.5f*(dT*dT)   *u*u;
+    // variance of integrated output at 1/dT Hz
+    // (random drift)
+    const float q00 = gyroVAR * dT;
+
+    // variance of drift rate ramp
+    const float q11 = biasVAR * dT;
+
+    const float u   = q11 / dT;
+    const float q10 = 0.5f*u*dT*dT;
     const float q01 = q10;
-    const float q11 = u*u*dT;
-    GQGt[0][0] =  q00;
+
+    GQGt[0][0] =  q00;      // rad^2
     GQGt[1][0] = -q10;
     GQGt[0][1] = -q01;
-    GQGt[1][1] =  q11;
-
+    GQGt[1][1] =  q11;      // (rad/s)^2
 
     // initial covariance: Var{ x(t0) }
+    // TODO: initialize P correctly
     P = 0;
 }
 
