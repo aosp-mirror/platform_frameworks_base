@@ -112,6 +112,27 @@ typedef struct {
                        uint32_t lod, RsAllocationCubemapFace face,
                        uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes);
 
+        // Allocation to allocation copies
+        void (*allocData1D)(const Context *rsc,
+                            const Allocation *dstAlloc,
+                            uint32_t dstXoff, uint32_t dstLod, uint32_t count,
+                            const Allocation *srcAlloc, uint32_t srcXoff, uint32_t srcLod);
+        void (*allocData2D)(const Context *rsc,
+                            const Allocation *dstAlloc,
+                            uint32_t dstXoff, uint32_t dstYoff, uint32_t dstLod,
+                            RsAllocationCubemapFace dstFace, uint32_t w, uint32_t h,
+                            const Allocation *srcAlloc,
+                            uint32_t srcXoff, uint32_t srcYoff, uint32_t srcLod,
+                            RsAllocationCubemapFace srcFace);
+        void (*allocData3D)(const Context *rsc,
+                            const Allocation *dstAlloc,
+                            uint32_t dstXoff, uint32_t dstYoff, uint32_t dstZoff,
+                            uint32_t dstLod, RsAllocationCubemapFace dstFace,
+                            uint32_t w, uint32_t h, uint32_t d,
+                            const Allocation *srcAlloc,
+                            uint32_t srcXoff, uint32_t srcYoff, uint32_t srcZoff,
+                            uint32_t srcLod, RsAllocationCubemapFace srcFace);
+
         void (*elementData1D)(const Context *rsc, const Allocation *alloc, uint32_t x,
                               const void *data, uint32_t elementOff, uint32_t sizeBytes);
         void (*elementData2D)(const Context *rsc, const Allocation *alloc, uint32_t x, uint32_t y,

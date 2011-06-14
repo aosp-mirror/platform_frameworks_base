@@ -88,6 +88,26 @@ static void SC_AllocationSyncAll(Allocation *a) {
     rsrAllocationSyncAll(rsc, sc, a, RS_ALLOCATION_USAGE_SCRIPT);
 }
 
+static void SC_AllocationCopy1DRange(Allocation *dstAlloc,
+                                     uint32_t dstOff,
+                                     uint32_t dstMip,
+                                     uint32_t count,
+                                     Allocation *srcAlloc,
+                                     uint32_t srcOff, uint32_t srcMip) {
+    GET_TLS();
+}
+
+static void SC_AllocationCopy2DRange(Allocation *dstAlloc,
+                                     uint32_t dstXoff, uint32_t dstYoff,
+                                     uint32_t dstMip, uint32_t dstFace,
+                                     uint32_t width, uint32_t height,
+                                     Allocation *srcAlloc,
+                                     uint32_t srcXoff, uint32_t srcYoff,
+                                     uint32_t srcMip, uint32_t srcFace) {
+    GET_TLS();
+}
+
+
 const Allocation * SC_getAllocation(const void *ptr) {
     GET_TLS();
     return rsrGetAllocation(rsc, sc, ptr);
@@ -566,8 +586,11 @@ static RsdSymbolTable gSyms[] = {
     { "_Z21rsAllocationMarkDirty13rs_allocation", (void *)&SC_AllocationSyncAll, true },
     { "_Z20rsgAllocationSyncAll13rs_allocation", (void *)&SC_AllocationSyncAll, false },
     { "_Z20rsgAllocationSyncAll13rs_allocationj", (void *)&SC_AllocationSyncAll2, false },
+    { "_Z20rsgAllocationSyncAll13rs_allocation24rs_allocation_usage_type", (void *)&SC_AllocationSyncAll2, false },
     { "_Z15rsGetAllocationPKv", (void *)&SC_GetAllocation, true },
 
+    { "_Z23rsAllocationCopy1DRange13rs_allocationjjjS_jj", (void *)&SC_AllocationCopy1DRange, false },
+    { "_Z23rsAllocationCopy2DRange13rs_allocationjjj26rs_allocation_cubemap_facejjS_jjjS0_", (void *)&SC_AllocationCopy2DRange, false },
 
     // Messaging
 

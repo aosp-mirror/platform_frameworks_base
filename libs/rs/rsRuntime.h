@@ -85,6 +85,21 @@ void rsrMeshComputeBoundingBox(Context *, Script *, Mesh *,
 void rsrColor(Context *, Script *, float r, float g, float b, float a);
 void rsrFinish(Context *, Script *);
 void rsrAllocationSyncAll(Context *, Script *, Allocation *);
+
+void rsrAllocationCopy1DRange(Context *, Allocation *dstAlloc,
+                              uint32_t dstOff,
+                              uint32_t dstMip,
+                              uint32_t count,
+                              Allocation *srcAlloc,
+                              uint32_t srcOff, uint32_t srcMip);
+void rsrAllocationCopy2DRange(Context *, Allocation *dstAlloc,
+                              uint32_t dstXoff, uint32_t dstYoff,
+                              uint32_t dstMip, uint32_t dstFace,
+                              uint32_t width, uint32_t height,
+                              Allocation *srcAlloc,
+                              uint32_t srcXoff, uint32_t srcYoff,
+                              uint32_t srcMip, uint32_t srcFace);
+
 void rsrClearColor(Context *, Script *, float r, float g, float b, float a);
 void rsrClearDepth(Context *, Script *, float v);
 uint32_t rsrGetWidth(Context *, Script *);

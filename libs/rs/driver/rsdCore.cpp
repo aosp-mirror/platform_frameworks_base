@@ -74,6 +74,9 @@ static RsdHalFunctions FunctionTable = {
         rsdAllocationData1D,
         rsdAllocationData2D,
         rsdAllocationData3D,
+        rsdAllocationData1D_alloc,
+        rsdAllocationData2D_alloc,
+        rsdAllocationData3D_alloc,
         rsdAllocationElementData1D,
         rsdAllocationElementData2D
     },

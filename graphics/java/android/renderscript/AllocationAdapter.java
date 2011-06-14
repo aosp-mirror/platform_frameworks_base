@@ -33,7 +33,7 @@ public class AllocationAdapter extends Allocation {
     private Allocation mAlloc;
 
     private int mSelectedLOD = 0;
-    private Type.CubemapFace mSelectedFace = Type.CubemapFace.POSITVE_X;;
+    private Type.CubemapFace mSelectedFace = Type.CubemapFace.POSITVE_X;
 
     AllocationAdapter(int id, RenderScript rs, Allocation alloc) {
         super(id, rs, null, alloc.mUsage);
@@ -163,15 +163,54 @@ public class AllocationAdapter extends Allocation {
         mRS.nAllocationData1D(getID(), off, mSelectedLOD, count, d, dataSize);
     }
 
+    /**
+     * Copy part of an allocation from another allocation.
+     *
+     * @param off The offset of the first element to be copied.
+     * @param count The number of elements to be copied.
+     * @param data the source data allocation.
+     * @param dataOff off The offset of the first element in data to
+     *          be copied.
+     */
+    public void subData1D(int off, int count, AllocationAdapter data, int dataOff) {
+        mRS.nAllocationData2D(getID(), off, 0,
+                              mSelectedLOD, mSelectedFace.mID,
+                              count, 1, data.getID(), dataOff, 0,
+                              data.mSelectedLOD, data.mSelectedFace.mID);
+    }
+
 
     public void subData2D(int xoff, int yoff, int w, int h, int[] d) {
         mRS.validate();
-        mRS.nAllocationData2D(getID(), xoff, yoff, mSelectedLOD, mSelectedFace.mID, w, h, d, d.length * 4);
+        mRS.nAllocationData2D(getID(), xoff, yoff, mSelectedLOD, mSelectedFace.mID,
+                              w, h, d, d.length * 4);
     }
 
     public void subData2D(int xoff, int yoff, int w, int h, float[] d) {
         mRS.validate();
-        mRS.nAllocationData2D(getID(), xoff, yoff, mSelectedLOD, mSelectedFace.mID, w, h, d, d.length * 4);
+        mRS.nAllocationData2D(getID(), xoff, yoff, mSelectedLOD, mSelectedFace.mID,
+                              w, h, d, d.length * 4);
+    }
+
+    /**
+     * Copy a rectangular region into the allocation from another
+     * allocation.
+     *
+     * @param xoff X offset of the region to update.
+     * @param yoff Y offset of the region to update.
+     * @param w Width of the incoming region to update.
+     * @param h Height of the incoming region to update.
+     * @param data source allocation.
+     * @param dataXoff X offset in data of the region to update.
+     * @param dataYoff Y offset in data of the region to update.
+     */
+    public void subData2D(int xoff, int yoff, int w, int h,
+                          AllocationAdapter data, int dataXoff, int dataYoff) {
+        mRS.validate();
+        mRS.nAllocationData2D(getID(), xoff, yoff,
+                              mSelectedLOD, mSelectedFace.mID,
+                              w, h, data.getID(), dataXoff, dataYoff,
+                              data.mSelectedLOD, data.mSelectedFace.mID);
     }
 
     public void readData(int[] d) {
@@ -185,12 +224,15 @@ public class AllocationAdapter extends Allocation {
     }
 
     public void setLOD(int lod) {
+        mSelectedLOD = lod;
     }
 
     public void setFace(Type.CubemapFace cf) {
+        mSelectedFace = cf;
     }
 
     public void setY(int y) {
+        mSelectedDimY = y;
     }
 
     public void setZ(int z) {

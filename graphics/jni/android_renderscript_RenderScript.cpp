@@ -468,7 +468,7 @@ nAllocationCopyFromBitmap(JNIEnv *_env, jobject _this, RsContext con, jint alloc
     bitmap.lockPixels();
     const void* ptr = bitmap.getPixels();
     rsAllocation2DData(con, (RsAllocation)alloc, 0, 0,
-                       0, RS_ALLOCATION_CUBMAP_FACE_POSITVE_X,
+                       0, RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X,
                        w, h, ptr, bitmap.getSize());
     bitmap.unlockPixels();
 }
@@ -586,6 +586,30 @@ nAllocationData2D_f(JNIEnv *_env, jobject _this, RsContext con, jint alloc, jint
     jfloat *ptr = _env->GetFloatArrayElements(data, NULL);
     rsAllocation2DData(con, (RsAllocation)alloc, xoff, yoff, lod, (RsAllocationCubemapFace)face, w, h, ptr, sizeBytes);
     _env->ReleaseFloatArrayElements(data, ptr, JNI_ABORT);
+}
+
+static void
+nAllocationData2D_alloc(JNIEnv *_env, jobject _this, RsContext con,
+                        jint dstAlloc, jint dstXoff, jint dstYoff,
+                        jint dstMip, jint dstFace,
+                        jint width, jint height,
+                        jint srcAlloc, jint srcXoff, jint srcYoff,
+                        jint srcMip, jint srcFace)
+{
+    LOG_API("nAllocation2DData_s, con(%p), dstAlloc(%p), dstXoff, dstYoff,"
+            " dstMip(%i), dstFace(%i), width(%i), height(%i),"
+            " srcAlloc(%p), srcXoff(%i), srcYoff(%i), srcMip(%i), srcFace(%i)",
+            con, (RsAllocation)dstAlloc, dstXoff, dstYoff, dstMip, dstFace,
+            width, height, (RsAllocation)srcAlloc, srcXoff, srcYoff, srcMip, srcFace);
+
+    rsAllocationCopy2DRange(con,
+                            (RsAllocation)dstAlloc,
+                            dstXoff, dstYoff,
+                            dstMip, dstFace,
+                            width, height,
+                            (RsAllocation)srcAlloc,
+                            srcXoff, srcYoff,
+                            srcMip, srcFace);
 }
 
 static void
@@ -1217,6 +1241,7 @@ static JNINativeMethod methods[] = {
 {"rsnAllocationData2D",              "(IIIIIIII[SI)V",                        (void*)nAllocationData2D_s },
 {"rsnAllocationData2D",              "(IIIIIIII[BI)V",                        (void*)nAllocationData2D_b },
 {"rsnAllocationData2D",              "(IIIIIIII[FI)V",                        (void*)nAllocationData2D_f },
+{"rsnAllocationData2D",              "(IIIIIIIIIIIII)V",                      (void*)nAllocationData2D_alloc },
 {"rsnAllocationRead",                "(II[I)V",                               (void*)nAllocationRead_i },
 {"rsnAllocationRead",                "(II[S)V",                               (void*)nAllocationRead_s },
 {"rsnAllocationRead",                "(II[B)V",                               (void*)nAllocationRead_b },

@@ -144,6 +144,17 @@ extern void __attribute__((overloadable))
     rsgAllocationSyncAll(rs_allocation alloc);
 
 /**
+ * Sync the contents of an allocation from memory space
+ * specified by source.
+ *
+ * @param alloc
+ * @param source
+ */
+extern void __attribute__((overloadable))
+    rsgAllocationSyncAll(rs_allocation alloc,
+                         rs_allocation_usage_type source);
+
+/**
  * Low performance utility function for drawing a simple rectangle.  Not
  * intended for drawing large quantities of geometry.
  *

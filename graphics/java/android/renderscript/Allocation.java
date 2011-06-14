@@ -588,11 +588,27 @@ public class Allocation extends BaseObj {
      *
      * @param off The offset of the first element to be copied.
      * @param count The number of elements to be copied.
-     * @param d the source data array
+     * @param d the source data array.
      */
     public void copy1DRangeFrom(int off, int count, float[] d) {
         validateIsFloat32();
         copy1DRangeFromUnchecked(off, count, d);
+    }
+
+     /**
+     * Copy part of an allocation from another allocation.
+     *
+     * @param off The offset of the first element to be copied.
+     * @param count The number of elements to be copied.
+     * @param data the source data allocation.
+     * @param dataOff off The offset of the first element in data to
+     *          be copied.
+     */
+    public void copy1DRangeFrom(int off, int count, Allocation data, int dataOff) {
+        mRS.nAllocationData2D(getID(), off, 0,
+                              0, Type.CubemapFace.POSITVE_X.mID,
+                              count, 1, data.getID(), dataOff, 0,
+                              0, Type.CubemapFace.POSITVE_X.mID);
     }
 
     private void validate2DRange(int xoff, int yoff, int w, int h) {
@@ -609,9 +625,8 @@ public class Allocation extends BaseObj {
     }
 
     /**
-     * Copy a rectanglular region from the array into the
-     * allocation.  The incoming array is assumed to be tightly
-     * packed.
+     * Copy a rectangular region from the array into the allocation.
+     * The incoming array is assumed to be tightly packed.
      *
      * @param xoff X offset of the region to update
      * @param yoff Y offset of the region to update
@@ -641,6 +656,28 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
         mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length * 4);
+    }
+
+    /**
+     * Copy a rectangular region into the allocation from another
+     * allocation.
+     *
+     * @param xoff X offset of the region to update.
+     * @param yoff Y offset of the region to update.
+     * @param w Width of the incoming region to update.
+     * @param h Height of the incoming region to update.
+     * @param data source allocation.
+     * @param dataXoff X offset in data of the region to update.
+     * @param dataYoff Y offset in data of the region to update.
+     */
+    public void copy2DRangeFrom(int xoff, int yoff, int w, int h,
+                                Allocation data, int dataXoff, int dataYoff) {
+        mRS.validate();
+        validate2DRange(xoff, yoff, w, h);
+        mRS.nAllocationData2D(getID(), xoff, yoff,
+                              0, Type.CubemapFace.POSITVE_X.mID,
+                              w, h, data.getID(), dataXoff, dataYoff,
+                              0, Type.CubemapFace.POSITVE_X.mID);
     }
 
     /**
