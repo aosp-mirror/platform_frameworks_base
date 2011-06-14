@@ -27,7 +27,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -37,7 +36,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.ContentObserver;
-import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Binder;
@@ -47,7 +45,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -111,10 +108,6 @@ public class NotificationManagerService extends INotificationManager.Stub
     // (that is, if mLedNotification was set while the screen was off)
     // This is reset to false when the screen is turned on.
     private boolean mPendingPulseNotification;
-
-    // for adb connected notifications
-    private boolean mAdbNotificationShown = false;
-    private Notification mAdbNotification;
 
     private final ArrayList<NotificationRecord> mNotificationList =
             new ArrayList<NotificationRecord>();
@@ -330,12 +323,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
             boolean queryRestart = false;
             
-            if (action.equals(UsbManager.ACTION_USB_STATE)) {
-                Bundle extras = intent.getExtras();
-                boolean usbConnected = extras.getBoolean(UsbManager.USB_CONNECTED);
-                boolean adbEnabled = extras.getBoolean(UsbManager.USB_FUNCTION_ADB);
-                updateAdbNotification(usbConnected && adbEnabled);
-            } else if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
+            if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
                     || (queryRestart=action.equals(Intent.ACTION_QUERY_PACKAGE_RESTART))
                     || action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
@@ -436,7 +424,6 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         // register for various Intents
         IntentFilter filter = new IntentFilter();
-        filter.addAction(UsbManager.ACTION_USB_STATE);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
@@ -1114,67 +1101,6 @@ public class NotificationManagerService extends INotificationManager.Stub
             }
         }
         return -1;
-    }
-
-    // This is here instead of StatusBarPolicy because it is an important
-    // security feature that we don't want people customizing the platform
-    // to accidentally lose.
-    private void updateAdbNotification(boolean adbEnabled) {
-        if (adbEnabled) {
-            if ("0".equals(SystemProperties.get("persist.adb.notify"))) {
-                return;
-            }
-            if (!mAdbNotificationShown) {
-                NotificationManager notificationManager = (NotificationManager) mContext
-                        .getSystemService(Context.NOTIFICATION_SERVICE);
-                if (notificationManager != null) {
-                    Resources r = mContext.getResources();
-                    CharSequence title = r.getText(
-                            com.android.internal.R.string.adb_active_notification_title);
-                    CharSequence message = r.getText(
-                            com.android.internal.R.string.adb_active_notification_message);
-
-                    if (mAdbNotification == null) {
-                        mAdbNotification = new Notification();
-                        mAdbNotification.icon = com.android.internal.R.drawable.stat_sys_adb;
-                        mAdbNotification.when = 0;
-                        mAdbNotification.flags = Notification.FLAG_ONGOING_EVENT;
-                        mAdbNotification.tickerText = title;
-                        mAdbNotification.defaults = 0; // please be quiet
-                        mAdbNotification.sound = null;
-                        mAdbNotification.vibrate = null;
-                    }
-
-                    Intent intent = new Intent(
-                            Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
-                            Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                    // Note: we are hard-coding the component because this is
-                    // an important security UI that we don't want anyone
-                    // intercepting.
-                    intent.setComponent(new ComponentName("com.android.settings",
-                            "com.android.settings.DevelopmentSettings"));
-                    PendingIntent pi = PendingIntent.getActivity(mContext, 0,
-                            intent, 0);
-
-                    mAdbNotification.setLatestEventInfo(mContext, title, message, pi);
-
-                    mAdbNotificationShown = true;
-                    notificationManager.notify(
-                            com.android.internal.R.string.adb_active_notification_title,
-                            mAdbNotification);
-                }
-            }
-
-        } else if (mAdbNotificationShown) {
-            NotificationManager notificationManager = (NotificationManager) mContext
-                    .getSystemService(Context.NOTIFICATION_SERVICE);
-            if (notificationManager != null) {
-                mAdbNotificationShown = false;
-                notificationManager.cancel(
-                        com.android.internal.R.string.adb_active_notification_title);
-            }
-        }
     }
 
     private void updateNotificationPulse() {

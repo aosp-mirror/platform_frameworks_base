@@ -17,12 +17,17 @@
 package com.android.server.usb;
 
 import android.app.PendingIntent;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
@@ -32,6 +37,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.ParcelFileDescriptor;
+import android.os.SystemProperties;
 import android.os.UEventObserver;
 import android.provider.Settings;
 import android.util.Log;
@@ -92,9 +98,80 @@ public class UsbDeviceManager {
     private final ArrayList<String> mDefaultFunctions = new ArrayList<String>();
 
     private final Context mContext;
+    ContentResolver mContentResolver;
     private final Object mLock = new Object();
     private final UsbSettingsManager mSettingsManager;
+    private NotificationManager mNotificationManager;
     private final boolean mHasUsbAccessory;
+
+    // for adb connected notifications
+    private boolean mAdbNotificationShown = false;
+    private Notification mAdbNotification;
+    private boolean mAdbEnabled;
+
+    private class AdbSettingsObserver extends ContentObserver {
+        public AdbSettingsObserver() {
+            super(null);
+        }
+        @Override
+        public void onChange(boolean selfChange) {
+            mAdbEnabled = (Settings.Secure.getInt(mContentResolver,
+                Settings.Secure.ADB_ENABLED, 0) > 0);
+            // setting this secure property will start or stop adbd
+           SystemProperties.set("persist.service.adb.enable", mAdbEnabled ? "1" : "0");
+           updateAdbNotification();
+        }
+    }
+
+    private void updateAdbNotification() {
+        if (mNotificationManager == null) return;
+        boolean adbEnabled = mAdbEnabled && (mConnected == 1);
+        if (adbEnabled) {
+            if ("0".equals(SystemProperties.get("persist.adb.notify"))) return;
+
+            if (!mAdbNotificationShown) {
+                Resources r = mContext.getResources();
+                CharSequence title = r.getText(
+                        com.android.internal.R.string.adb_active_notification_title);
+                CharSequence message = r.getText(
+                        com.android.internal.R.string.adb_active_notification_message);
+
+                if (mAdbNotification == null) {
+                    mAdbNotification = new Notification();
+                    mAdbNotification.icon = com.android.internal.R.drawable.stat_sys_adb;
+                    mAdbNotification.when = 0;
+                    mAdbNotification.flags = Notification.FLAG_ONGOING_EVENT;
+                    mAdbNotification.tickerText = title;
+                    mAdbNotification.defaults = 0; // please be quiet
+                    mAdbNotification.sound = null;
+                    mAdbNotification.vibrate = null;
+                }
+
+                Intent intent = new Intent(
+                        Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                        Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                // Note: we are hard-coding the component because this is
+                // an important security UI that we don't want anyone
+                // intercepting.
+                intent.setComponent(new ComponentName("com.android.settings",
+                        "com.android.settings.DevelopmentSettings"));
+                PendingIntent pi = PendingIntent.getActivity(mContext, 0,
+                        intent, 0);
+
+                mAdbNotification.setLatestEventInfo(mContext, title, message, pi);
+
+                mAdbNotificationShown = true;
+                mNotificationManager.notify(
+                        com.android.internal.R.string.adb_active_notification_title,
+                        mAdbNotification);
+            }
+        } else if (mAdbNotificationShown) {
+            mAdbNotificationShown = false;
+            mNotificationManager.cancel(
+                    com.android.internal.R.string.adb_active_notification_title);
+        }
+    }
 
     private final void readCurrentAccessoryLocked() {
         if (mHasUsbAccessory) {
@@ -191,12 +268,23 @@ public class UsbDeviceManager {
 
     public UsbDeviceManager(Context context, UsbSettingsManager settingsManager) {
         mContext = context;
+        mContentResolver = context.getContentResolver();
         mSettingsManager = settingsManager;
         PackageManager pm = mContext.getPackageManager();
         mHasUsbAccessory = pm.hasSystemFeature(PackageManager.FEATURE_USB_ACCESSORY);
 
         synchronized (mLock) {
             init();  // set initial status
+
+            // make sure the ADB_ENABLED setting value matches the secure property value
+            mAdbEnabled = "1".equals(SystemProperties.get("persist.service.adb.enable"));
+            Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_ENABLED,
+                    mAdbEnabled ? 1 : 0);
+
+            // register observer to listen for settings changes
+            mContentResolver.registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.ADB_ENABLED),
+                            false, new AdbSettingsObserver());
 
             // Watch for USB configuration changes
             if (mConfiguration >= 0) {
@@ -281,6 +369,9 @@ public class UsbDeviceManager {
 
     public void systemReady() {
         synchronized (mLock) {
+                mNotificationManager = (NotificationManager)
+                        mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+
             update(false);
             if (mCurrentAccessory != null) {
                 Log.d(TAG, "accessoryAttached at systemReady");
@@ -335,6 +426,7 @@ public class UsbDeviceManager {
                 switch (msg.what) {
                     case MSG_UPDATE_STATE:
                         if (mConnected != mLastConnected || mConfiguration != mLastConfiguration) {
+                            updateAdbNotification();
                             if (mConnected == 0) {
                                 if (UsbManager.isFunctionEnabled(
                                             UsbManager.USB_FUNCTION_ACCESSORY)) {
