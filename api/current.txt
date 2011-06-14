@@ -21608,6 +21608,8 @@ package android.view {
     method public void buildDrawingCache();
     method public void buildDrawingCache(boolean);
     method public void buildLayer();
+    method public boolean canScrollHorizontally(int);
+    method public boolean canScrollVertically(int);
     method public void cancelLongPress();
     method public boolean checkInputConnectionProxy(android.view.View);
     method public void clearAnimation();
