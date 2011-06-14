@@ -532,6 +532,23 @@ RsAllocation rsi_AllocationCubeCreateFromBitmap(Context *rsc, RsType vtype,
     return texAlloc;
 }
 
+void rsi_AllocationCopy2DRange(Context *rsc,
+                               RsAllocation dstAlloc,
+                               uint32_t dstXoff, uint32_t dstYoff,
+                               uint32_t dstMip, uint32_t dstFace,
+                               uint32_t width, uint32_t height,
+                               RsAllocation srcAlloc,
+                               uint32_t srcXoff, uint32_t srcYoff,
+                               uint32_t srcMip, uint32_t srcFace) {
+    Allocation *dst = static_cast<Allocation *>(dstAlloc);
+    Allocation *src= static_cast<Allocation *>(srcAlloc);
+    rsc->mHal.funcs.allocation.allocData2D(rsc, dst, dstXoff, dstYoff, dstMip,
+                                           (RsAllocationCubemapFace)dstFace,
+                                           width, height,
+                                           src, srcXoff, srcYoff,srcMip,
+                                           (RsAllocationCubemapFace)srcFace);
+}
+
 }
 }
 

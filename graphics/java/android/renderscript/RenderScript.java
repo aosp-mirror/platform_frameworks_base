@@ -295,6 +295,26 @@ public class RenderScript {
         rsnAllocationElementData1D(mContext, id, xoff, mip, compIdx, d, sizeBytes);
     }
 
+    native void rsnAllocationData2D(int con,
+                                    int dstAlloc, int dstXoff, int dstYoff,
+                                    int dstMip, int dstFace,
+                                    int width, int height,
+                                    int srcAlloc, int srcXoff, int srcYoff,
+                                    int srcMip, int srcFace);
+    synchronized void nAllocationData2D(int dstAlloc, int dstXoff, int dstYoff,
+                                        int dstMip, int dstFace,
+                                        int width, int height,
+                                        int srcAlloc, int srcXoff, int srcYoff,
+                                        int srcMip, int srcFace) {
+        validate();
+        rsnAllocationData2D(mContext,
+                            dstAlloc, dstXoff, dstYoff,
+                            dstMip, dstFace,
+                            width, height,
+                            srcAlloc, srcXoff, srcYoff,
+                            srcMip, srcFace);
+    }
+
     native void rsnAllocationData2D(int con, int id, int xoff, int yoff, int mip, int face, int w, int h, byte[] d, int sizeBytes);
     synchronized void nAllocationData2D(int id, int xoff, int yoff, int mip, int face, int w, int h, byte[] d, int sizeBytes) {
         validate();

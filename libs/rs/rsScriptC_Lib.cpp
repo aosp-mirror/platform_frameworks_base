@@ -164,6 +164,29 @@ void rsrAllocationSyncAll(Context *rsc, Script *sc, Allocation *a, RsAllocationU
     a->syncAll(rsc, usage);
 }
 
+void rsrAllocationCopy1DRange(Context *rsc, Allocation *dstAlloc,
+                              uint32_t dstOff,
+                              uint32_t dstMip,
+                              uint32_t count,
+                              Allocation *srcAlloc,
+                              uint32_t srcOff, uint32_t srcMip) {
+    rsi_AllocationCopy2DRange(rsc, dstAlloc, dstOff, 0,
+                              dstMip, 0, count, 1,
+                              srcAlloc, srcOff, 0, srcMip, 0);
+}
+
+void rsrAllocationCopy2DRange(Context *rsc, Allocation *dstAlloc,
+                              uint32_t dstXoff, uint32_t dstYoff,
+                              uint32_t dstMip, uint32_t dstFace,
+                              uint32_t width, uint32_t height,
+                              Allocation *srcAlloc,
+                              uint32_t srcXoff, uint32_t srcYoff,
+                              uint32_t srcMip, uint32_t srcFace) {
+    rsi_AllocationCopy2DRange(rsc, dstAlloc, dstXoff, dstYoff,
+                              dstMip, dstFace, width, height,
+                              srcAlloc, srcXoff, srcYoff, srcMip, srcFace);
+}
+
 const Allocation * rsrGetAllocation(Context *rsc, Script *s, const void *ptr) {
     ScriptC *sc = (ScriptC *)s;
     return sc->ptrToAllocation(ptr);

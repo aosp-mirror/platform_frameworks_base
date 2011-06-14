@@ -80,6 +80,27 @@ void rsdAllocationData3D(const android::renderscript::Context *rsc,
                          uint32_t lod, RsAllocationCubemapFace face,
                          uint32_t w, uint32_t h, uint32_t d, const void *data, uint32_t sizeBytes);
 
+void rsdAllocationData1D_alloc(const android::renderscript::Context *rsc,
+                               const android::renderscript::Allocation *dstAlloc,
+                               uint32_t dstXoff, uint32_t dstLod, uint32_t count,
+                               const android::renderscript::Allocation *srcAlloc,
+                               uint32_t srcXoff, uint32_t srcLod);
+void rsdAllocationData2D_alloc(const android::renderscript::Context *rsc,
+                               const android::renderscript::Allocation *dstAlloc,
+                               uint32_t dstXoff, uint32_t dstYoff, uint32_t dstLod,
+                               RsAllocationCubemapFace dstFace, uint32_t w, uint32_t h,
+                               const android::renderscript::Allocation *srcAlloc,
+                               uint32_t srcXoff, uint32_t srcYoff, uint32_t srcLod,
+                               RsAllocationCubemapFace srcFace);
+void rsdAllocationData3D_alloc(const android::renderscript::Context *rsc,
+                               const android::renderscript::Allocation *dstAlloc,
+                               uint32_t dstXoff, uint32_t dstYoff, uint32_t dstZoff,
+                               uint32_t dstLod, RsAllocationCubemapFace dstFace,
+                               uint32_t w, uint32_t h, uint32_t d,
+                               const android::renderscript::Allocation *srcAlloc,
+                               uint32_t srcXoff, uint32_t srcYoff, uint32_t srcZoff,
+                               uint32_t srcLod, RsAllocationCubemapFace srcFace);
+
 void rsdAllocationElementData1D(const android::renderscript::Context *rsc,
                                 const android::renderscript::Allocation *alloc,
                                 uint32_t x,

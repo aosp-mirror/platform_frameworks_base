@@ -16497,6 +16497,7 @@ package android.renderscript {
     method public void copy1DRangeFrom(int, int, short[]);
     method public void copy1DRangeFrom(int, int, byte[]);
     method public void copy1DRangeFrom(int, int, float[]);
+    method public void copy1DRangeFrom(int, int, android.renderscript.Allocation, int);
     method public void copy1DRangeFromUnchecked(int, int, int[]);
     method public void copy1DRangeFromUnchecked(int, int, short[]);
     method public void copy1DRangeFromUnchecked(int, int, byte[]);
@@ -16505,6 +16506,7 @@ package android.renderscript {
     method public void copy2DRangeFrom(int, int, int, int, short[]);
     method public void copy2DRangeFrom(int, int, int, int, int[]);
     method public void copy2DRangeFrom(int, int, int, int, float[]);
+    method public void copy2DRangeFrom(int, int, int, int, android.renderscript.Allocation, int, int);
     method public void copy2DRangeFrom(int, int, android.graphics.Bitmap);
     method public void copyFrom(android.renderscript.BaseObj[]);
     method public void copyFrom(int[]);
@@ -16569,8 +16571,10 @@ package android.renderscript {
     method public void subData1D(int, int, short[]);
     method public void subData1D(int, int, byte[]);
     method public void subData1D(int, int, float[]);
+    method public void subData1D(int, int, android.renderscript.AllocationAdapter, int);
     method public void subData2D(int, int, int, int, int[]);
     method public void subData2D(int, int, int, int, float[]);
+    method public void subData2D(int, int, int, int, android.renderscript.AllocationAdapter, int, int);
     method public void subElementData(int, int, android.renderscript.FieldPacker);
   }
 

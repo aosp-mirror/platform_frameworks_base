@@ -209,6 +209,21 @@ AllocationResize2D {
 	param uint32_t dimY
 	}
 
+AllocationCopy2DRange {
+	param RsAllocation dest
+	param uint32_t destXoff
+	param uint32_t destYoff
+	param uint32_t destMip
+	param uint32_t destFace
+	param uint32_t width
+	param uint32_t height
+	param RsAllocation src
+	param uint32_t srcXoff
+	param uint32_t srcYoff
+	param uint32_t srcMip
+	param uint32_t srcFace
+	}
+
 SamplerCreate {
     param RsSamplerValue magFilter
     param RsSamplerValue minFilter
