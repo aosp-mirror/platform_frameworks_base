@@ -47,7 +47,7 @@ import android.util.Log;
  *     [-e pan_address <address>] \
  *     [-e pair_pin <pin>] \
  *     [-e pair_passkey <passkey>] \
- *     -w com.android.frameworks.coretests/android.bluetooth.BluetoothTestRunner
+ *     -w com.android.bluetooth.tests/android.bluetooth.BluetoothTestRunner
  * }
  * </pre>
  */

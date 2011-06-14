@@ -290,7 +290,7 @@ public class BluetoothTestUtils extends Assert {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (AudioManager.ACTION_SCO_AUDIO_STATE_CHANGED.equals(intent.getAction())) {
+            if (AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED.equals(intent.getAction())) {
                 int state = intent.getIntExtra(AudioManager.EXTRA_SCO_AUDIO_STATE,
                         AudioManager.SCO_AUDIO_STATE_ERROR);
                 assertNotSame(AudioManager.SCO_AUDIO_STATE_ERROR, state);
