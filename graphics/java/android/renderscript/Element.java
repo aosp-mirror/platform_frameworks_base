@@ -32,8 +32,8 @@ import android.util.Log;
  * <p>Complex elements contain a list of sub-elements and names that
  * represents a structure of data. The fields can be accessed by name
  * from a script or shader. The memory layout is defined and ordered. Data
- * alignment is determinied by the most basic primitive type. i.e. a float4
- * vector will be alligned to sizeof(float) and not sizeof(float4).  The
+ * alignment is determined by the most basic primitive type. i.e. a float4
+ * vector will be aligned to sizeof(float) and not sizeof(float4). The
  * ordering of elements in memory will be the order in which they were added
  * with each component aligned as necessary. No re-ordering will be done.</p>
  *
@@ -581,6 +581,33 @@ public class Element extends BaseObj {
         boolean norm = true;
         int id = rs.nElementCreate(dt.mID, dk.mID, norm, size);
         return new Element(id, rs, dt, dk, norm, size);
+    }
+
+    /**
+     * Check if the current Element is compatible with another Element.
+     * Primitive Elements are compatible if they share the same underlying
+     * size and type (i.e. U8 is compatible with A_8). User-defined Elements
+     * must be equal in order to be compatible. This requires strict name
+     * equivalence for all sub-Elements (in addition to structural equivalence).
+     *
+     * @param e The Element to check compatibility with.
+     *
+     * @return boolean true if the Elements are compatible, otherwise false.
+     */
+    public boolean isCompatible(Element e) {
+        // Try strict BaseObj equality to start with.
+        if (this.equals(e)) {
+            return true;
+        }
+
+        // Ignore mKind because it is allowed to be different (user vs. pixel).
+        // We also ignore mNormalized because it can be different. The mType
+        // field must be non-null since we require name equivalence for
+        // user-created Elements.
+        return ((mSize == e.mSize) &&
+                (mType != null) &&
+                (mType == e.mType) &&
+                (mVectorSize == e.mVectorSize));
     }
 
     /**
