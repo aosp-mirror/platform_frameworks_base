@@ -57,7 +57,7 @@ public:
     /*
      * Open a new or existing archive.
      */
-    typedef enum {
+    enum {
         kOpenReadOnly   = 0x01,
         kOpenReadWrite  = 0x02,
         kOpenCreate     = 0x04,     // create if it doesn't exist
