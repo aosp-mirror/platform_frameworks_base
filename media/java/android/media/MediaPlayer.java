@@ -52,6 +52,7 @@ import java.lang.ref.WeakReference;
  * <li><a href="#StateDiagram">State Diagram</a>
  * <li><a href="#Valid_and_Invalid_States">Valid and Invalid States</a>
  * <li><a href="#Permissions">Permissions</a>
+ * <li><a href="#Callbacks">Register informational and error callbacks</a>
  * </ol>
  *
  * <a name="StateDiagram"></a>
@@ -458,6 +459,26 @@ import java.lang.ref.WeakReference;
  * <p>One may need to declare a corresponding WAKE_LOCK permission {@link
  * android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}
  * element.
+ *
+ * <a name="Callbacks"></a>
+ * <h3>Callbacks</h3>
+ * <p>Applications may want to register for informational and error
+ * events in order to be informed of some internal state update and
+ * possible runtime errors during playback or streaming. Registration for
+ * these events is done by properly setting the appropriate listeners (via calls
+ * to
+ * {@link #setOnPreparedListener(OnPreparedListener)}setOnPreparedListener,
+ * {@link #setOnVideoSizeChangedListener(OnVideoSizeChangedListener)}setOnVideoSizeChangedListener,
+ * {@link #setOnSeekCompleteListener(OnSeekCompleteListener)}setOnSeekCompleteListener,
+ * {@link #setOnCompletionListener(OnCompletionListener)}setOnCompletionListener,
+ * {@link #setOnBufferingUpdateListener(OnBufferingUpdateListener)setOnBufferingUpdateListener,
+ * {@link #setOnTimedTextListener(OnTimedTextListener)}setOnTimedTextListener,
+ * {@link #setOnInfoListener(OnInfoListener)}setOnInfoListener,
+ * {@link #setOnErrorListener(OnErrorListener)}setOnErrorListener, etc).
+ * In order to receive the respective callback
+ * associated with these listeners, applications are required to create
+ * MediaPlayer objects on a thread with its own Looper running (main UI
+ * thread by default has a Looper running).
  *
  */
 public class MediaPlayer
