@@ -36,6 +36,7 @@ import android.util.DisplayMetrics;
 import android.util.StateSet;
 import android.util.TypedValue;
 import android.util.Xml;
+import android.view.View;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -292,11 +293,11 @@ public abstract class Drawable {
      */
     public static interface Callback2 extends Callback {
         /**
-         * A Drawable can call this to know whether the <var>who</var> is in RTL layout direction.
+         * A Drawable can call this to get the resolved layout direction of the <var>who</var>.
          *
-         * @param who The drawable being unscheduled.
+         * @param who The drawable being queried.
          */
-        public boolean isLayoutRtl(Drawable who);
+        public int getResolvedLayoutDirection(Drawable who);
     }
 
     /**
@@ -376,15 +377,15 @@ public abstract class Drawable {
     }
 
     /**
-     * Use the current {@link android.graphics.drawable.Drawable.Callback2} implementation to know
-     * if this Drawable is having a layout in RTL direction.
+     * Use the current {@link android.graphics.drawable.Drawable.Callback2} implementation to get
+     * the resolved layout direction of this Drawable.
      */
-    public boolean isLayoutRtlSelf() {
+    public int getResolvedLayoutDirectionSelf() {
         final Callback callback = getCallback();
         if (callback == null || !(callback instanceof Callback2)) {
-            return false;
+            return View.LAYOUT_DIRECTION_LTR;
         }
-        return ((Callback2) callback).isLayoutRtl(this);
+        return ((Callback2) callback).getResolvedLayoutDirection(this);
     }
 
     /**

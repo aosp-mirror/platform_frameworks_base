@@ -8512,11 +8512,11 @@ package android.graphics.drawable {
     method public int getMinimumWidth();
     method public abstract int getOpacity();
     method public boolean getPadding(android.graphics.Rect);
+    method public int getResolvedLayoutDirectionSelf();
     method public int[] getState();
     method public android.graphics.Region getTransparentRegion();
     method public void inflate(android.content.res.Resources, org.xmlpull.v1.XmlPullParser, android.util.AttributeSet) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public void invalidateSelf();
-    method public boolean isLayoutRtlSelf();
     method public boolean isStateful();
     method public final boolean isVisible();
     method public void jumpToCurrentState();
@@ -8548,7 +8548,7 @@ package android.graphics.drawable {
   }
 
   public static abstract interface Drawable.Callback2 implements android.graphics.drawable.Drawable.Callback {
-    method public abstract boolean isLayoutRtl(android.graphics.drawable.Drawable);
+    method public abstract int getResolvedLayoutDirection(android.graphics.drawable.Drawable);
   }
 
   public static abstract class Drawable.ConstantState {
@@ -20583,7 +20583,7 @@ package android.view {
     method public static void apply(int, int, int, android.graphics.Rect, android.graphics.Rect);
     method public static void apply(int, int, int, android.graphics.Rect, int, int, android.graphics.Rect);
     method public static void applyDisplay(int, android.graphics.Rect, android.graphics.Rect);
-    method public static int getAbsoluteGravity(int, boolean);
+    method public static int getAbsoluteGravity(int, int);
     method public static boolean isHorizontal(int);
     method public static boolean isVertical(int);
     field public static final int AXIS_CLIP = 8; // 0x8
@@ -21724,6 +21724,7 @@ package android.view {
     method public final android.view.ViewParent getParent();
     method public float getPivotX();
     method public float getPivotY();
+    method public int getResolvedLayoutDirection(android.graphics.drawable.Drawable);
     method public android.content.res.Resources getResources();
     method public final int getRight();
     method protected float getRightFadingEdgeStrength();
@@ -21789,8 +21790,6 @@ package android.view {
     method public boolean isInEditMode();
     method public boolean isInTouchMode();
     method public boolean isLayoutRequested();
-    method public boolean isLayoutRtl();
-    method public boolean isLayoutRtl(android.graphics.drawable.Drawable);
     method public boolean isLongClickable();
     method public boolean isOpaque();
     method protected boolean isPaddingOffsetRequired();

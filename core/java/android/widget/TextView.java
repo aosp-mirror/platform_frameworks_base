@@ -4145,17 +4145,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /**
+     * @hide
+     */
     @Override
-    public boolean isLayoutRtl(Drawable who) {
-        if (who == null) return false;
+    public int getResolvedLayoutDirection(Drawable who) {
+        if (who == null) return View.LAYOUT_DIRECTION_LTR;
         if (mDrawables != null) {
             final Drawables drawables = mDrawables;
             if (who == drawables.mDrawableLeft || who == drawables.mDrawableRight ||
                 who == drawables.mDrawableTop || who == drawables.mDrawableBottom) {
-                return isLayoutRtl();
+                return getResolvedLayoutDirection();
             }
         }
-        return super.isLayoutRtl(who);
+        return super.getResolvedLayoutDirection(who);
     }
 
     @Override
@@ -4397,7 +4400,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             canvas.translate(compoundPaddingLeft, extendedPaddingTop + voffsetText);
         }
 
-        final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, isLayoutRtl());
+        final int layoutDirection = getResolvedLayoutDirection();
+        final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
         if (mEllipsize == TextUtils.TruncateAt.MARQUEE) {
             if (!mSingleLine && getLineCount() == 1 && canMarquee() &&
                     (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) != Gravity.LEFT) {
@@ -5545,8 +5549,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             hintWidth = 0;
         }
 
+        final int layoutDirection = getResolvedLayoutDirection();
+        final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
+
         Layout.Alignment alignment;
-        final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, isLayoutRtl());
         switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
             case Gravity.CENTER_HORIZONTAL:
                 alignment = Layout.Alignment.ALIGN_CENTER;
@@ -7582,7 +7588,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     return 0.0f;
                 }
             } else if (getLineCount() == 1) {
-                final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, isLayoutRtl());
+                final int layoutDirection = getResolvedLayoutDirection();
+                final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
                 switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
                         return 0.0f;
@@ -7606,7 +7613,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 final Marquee marquee = mMarquee;
                 return (marquee.mMaxFadeScroll - marquee.mScroll) / getHorizontalFadingEdgeLength();
             } else if (getLineCount() == 1) {
-                final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, isLayoutRtl());
+                final int layoutDirection = getResolvedLayoutDirection();
+                final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
                 switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
                     case Gravity.LEFT:
                         final int textWidth = (mRight - mLeft) - getCompoundPaddingLeft() -

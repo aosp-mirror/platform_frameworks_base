@@ -67,6 +67,8 @@ public class GravityTest extends AndroidTestCase {
     }
 
     private void assertOneGravity(int expected, int initial, boolean isRtl) {
-        assertEquals(expected, Gravity.getAbsoluteGravity(initial, isRtl));
+        final int layoutDirection = isRtl ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR;
+
+        assertEquals(expected, Gravity.getAbsoluteGravity(initial, layoutDirection));
     }
 }

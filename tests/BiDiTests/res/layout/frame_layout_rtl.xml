@@ -21,7 +21,7 @@
 
     <FrameLayout android:layout_width="match_parent"
                  android:layout_height="match_parent"
-                 android:layoutDirection="ltr"
+                 android:layoutDirection="rtl"
                  android:background="#FF000000">
 
         <FrameLayout

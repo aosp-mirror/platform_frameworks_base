@@ -4272,6 +4272,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      *   {@link #LAYOUT_DIRECTION_INHERIT} or
      *   {@link #LAYOUT_DIRECTION_LOCALE}.
      * @attr ref android.R.styleable#View_layoutDirection
+     *
      * @hide
      */
     @ViewDebug.ExportedProperty(category = "layout", mapping = {
@@ -4292,11 +4293,43 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      *   {@link #LAYOUT_DIRECTION_INHERIT} or
      *   {@link #LAYOUT_DIRECTION_LOCALE}.
      * @attr ref android.R.styleable#View_layoutDirection
+     *
      * @hide
      */
     @RemotableViewMethod
     public void setLayoutDirection(int layoutDirection) {
         setFlags(layoutDirection, LAYOUT_DIRECTION_MASK);
+    }
+
+    /**
+     * Returns the resolved layout direction for this view.
+     *
+     * @return {@link #LAYOUT_DIRECTION_RTL} if the layout direction is RTL or returns
+     * {@link #LAYOUT_DIRECTION_LTR} id the layout direction is not RTL.
+     *
+     * @hide
+     */
+    @ViewDebug.ExportedProperty(category = "layout", mapping = {
+        @ViewDebug.IntToString(from = LAYOUT_DIRECTION_LTR,     to = "RESOLVED_DIRECTION_LTR"),
+        @ViewDebug.IntToString(from = LAYOUT_DIRECTION_RTL,     to = "RESOLVED_DIRECTION_RTL")
+    })
+    public int getResolvedLayoutDirection() {
+        resolveLayoutDirection();
+        return ((mPrivateFlags2 & RESOLVED_LAYOUT_RTL) == RESOLVED_LAYOUT_RTL) ?
+                LAYOUT_DIRECTION_RTL : LAYOUT_DIRECTION_LTR;
+    }
+
+    /**
+     * <p>Indicates whether or not this view's layout is right-to-left. This is resolved from
+     * layout attribute and/or the inherited value from the parent.</p>
+     *
+     * @return true if the layout is right-to-left.
+     *
+     * @hide
+     */
+    @ViewDebug.ExportedProperty(category = "layout")
+    public boolean isLayoutRtl() {
+        return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL);
     }
 
     /**
@@ -8713,8 +8746,9 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         switch (getLayoutDirection()) {
             case LAYOUT_DIRECTION_INHERIT:
                 // If this is root view, no need to look at parent's layout dir.
-                if (mParent != null && mParent instanceof ViewGroup &&
-                        ((ViewGroup) mParent).isLayoutRtl()) {
+                if (mParent != null &&
+                        mParent instanceof ViewGroup &&
+                        ((ViewGroup) mParent).getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) {
                     mPrivateFlags2 |= RESOLVED_LAYOUT_RTL;
                 }
                 break;
@@ -10237,17 +10271,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
-     * <p>Indicates whether or not this view's layout is right-to-left. This is resolved from
-     * layout attribute and/or the inherited value from the parent.</p>
-     *
-     * @return true if the layout is right-to-left.
-     */
-    @ViewDebug.ExportedProperty(category = "layout")
-    public boolean isLayoutRtl() {
-        return (mPrivateFlags2 & RESOLVED_LAYOUT_RTL) == RESOLVED_LAYOUT_RTL;
-    }
-
-    /**
      * Assign a size and position to a view and all of its
      * descendants
      *
@@ -10459,13 +10482,15 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         }
     }
 
-     /**
-     * Check if a given Drawable is in RTL layout direction.
-     *
-     * @param who the recipient of the action
-     */
-    public boolean isLayoutRtl(Drawable who) {
-        return (who == mBGDrawable) && isLayoutRtl();
+    /**
+    * Return the layout direction of a given Drawable.
+    *
+    * @param who the Drawable to query
+    *
+    * @hide
+    */
+    public int getResolvedLayoutDirection(Drawable who) {
+        return (who == mBGDrawable) ? getResolvedLayoutDirection() : LAYOUT_DIRECTION_DEFAULT;
     }
 
     /**
