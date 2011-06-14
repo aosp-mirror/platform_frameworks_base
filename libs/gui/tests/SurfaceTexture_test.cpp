@@ -542,11 +542,7 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferNpot) {
     EXPECT_TRUE(checkPixel(36, 22, 155,  29,   0, 255));
 }
 
-// XXX: This test is disabled because it it currently broken on all devices to
-// which I have access.  Some of the checkPixel calls are not correct because
-// I just copied them from the npot test above and haven't bothered to figure
-// out the correct values.
-TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledYV12BufferPow2) {
+TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferPow2) {
     const int texWidth = 64;
     const int texHeight = 64;
 
@@ -576,18 +572,18 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledYV12BufferPow2) {
 
     drawTexture();
 
-    EXPECT_TRUE(checkPixel( 0,  0, 255, 127, 255, 255));
-    EXPECT_TRUE(checkPixel(63,  0,   0, 133,   0, 255));
+    EXPECT_TRUE(checkPixel( 0,  0,   0, 133,   0, 255));
+    EXPECT_TRUE(checkPixel(63,  0, 255, 127, 255, 255));
     EXPECT_TRUE(checkPixel(63, 63,   0, 133,   0, 255));
     EXPECT_TRUE(checkPixel( 0, 63, 255, 127, 255, 255));
 
-    EXPECT_TRUE(checkPixel(22, 19, 247,  70, 255, 255));
-    EXPECT_TRUE(checkPixel(45, 11, 209,  32, 235, 255));
-    EXPECT_TRUE(checkPixel(52, 12, 100, 255,  73, 255));
-    EXPECT_TRUE(checkPixel( 7, 32, 155,   0, 118, 255));
-    EXPECT_TRUE(checkPixel(31, 54, 148,  71, 110, 255));
-    EXPECT_TRUE(checkPixel(29, 28, 255, 127, 255, 255));
-    EXPECT_TRUE(checkPixel(36, 41, 155,  29,   0, 255));
+    EXPECT_TRUE(checkPixel(22, 19, 100, 255,  74, 255));
+    EXPECT_TRUE(checkPixel(45, 11, 100, 255,  74, 255));
+    EXPECT_TRUE(checkPixel(52, 12, 155,   0, 181, 255));
+    EXPECT_TRUE(checkPixel( 7, 32, 150, 237, 170, 255));
+    EXPECT_TRUE(checkPixel(31, 54,   0,  71, 117, 255));
+    EXPECT_TRUE(checkPixel(29, 28,   0, 133,   0, 255));
+    EXPECT_TRUE(checkPixel(36, 41, 100, 232, 255, 255));
 }
 
 TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferWithCrop) {
