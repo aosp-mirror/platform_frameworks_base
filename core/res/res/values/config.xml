@@ -160,6 +160,9 @@
     <string-array translatable="false" name="config_tether_upstream_regexs">
     </string-array>
 
+    <!-- Regex of wired ethernet ifaces -->
+    <string translatable="false" name="config_ethernet_iface_regex">eth\\d</string>
+
     <!-- Boolean indicating if we require the use of DUN on mobile for tethering.
          Note that this defaults to false so that if you move to a carrier that
          hasn't configured anything tethering will still work.  If you'd rather
