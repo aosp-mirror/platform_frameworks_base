@@ -30,6 +30,8 @@
     <dimen name="status_bar_recents_thumbnail_max_height">64dp</dimen>
     <!-- Width of scrollable area in recents -->
     <dimen name="status_bar_recents_width">356dp</dimen>
+    <!-- Amount to offset bottom of notification peek window from top of status bar. -->
+    <dimen name="peek_window_y_offset">-12dp</dimen>
 
 </resources>
 

@@ -245,11 +245,12 @@ public class TabletStatusBar extends StatusBar implements
                 512, // ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
                     | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+        lp.y = res.getDimensionPixelOffset(R.dimen.peek_window_y_offset);
         lp.setTitle("NotificationPeekWindow");
         lp.windowAnimations = com.android.internal.R.style.Animation_Toast;
 
@@ -955,14 +956,14 @@ public class TabletStatusBar extends StatusBar implements
         mHandler.sendEmptyMessage(on ? MSG_SHOW_CHROME : MSG_HIDE_CHROME);
     }
 
-    public void setMenuKeyVisible(boolean visible) {
+    public void topAppWindowChanged(boolean windowVisible) {
         if (DEBUG) {
-            Slog.d(TAG, (visible?"showing":"hiding") + " the MENU button");
+            Slog.d(TAG, (windowVisible?"showing":"hiding") + " the MENU button");
         }
-        mMenuButton.setVisibility(visible ? View.VISIBLE : View.GONE);
+        mMenuButton.setVisibility(windowVisible ? View.VISIBLE : View.GONE);
 
         // See above re: lights-out policy for legacy apps.
-        if (visible) setLightsOn(true);
+        if (windowVisible) setLightsOn(true);
 
         // XXX: HACK: not sure if this is the best way to catch a new activity that might require a
         // change in compatibility features, but it's a start.
