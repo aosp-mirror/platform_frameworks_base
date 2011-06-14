@@ -52,14 +52,97 @@ padding: .25em 1em;
   text-decoration:underline;
 }
 .toggleable.closed .toggleme {
-  display:none;
-}
+  display:none;}
 #jd-content .toggle-img {
   margin:0;
 }
 </style>
 
+
 <div class="toggleable open">
+  <a href="#" onclick="return toggleDiv(this)"><img src=
+  "{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px">
+  Android NDK, Revision 5c</a> <em>(June 2011)</em>
+
+  <div class="toggleme">
+    <p>This release of the NDK does not include any new features compared to r5b. The r5c release
+    addresses the following problems in the r5b release:</p>
+    <dl>
+      <dt>Important bug fixes:</dt>
+      <dd>
+        <ul>
+          <li><code>ndk-build</code>: Fixed a rare bug that appeared when trying to perform parallel
+          builds of debuggable projects.</li>
+
+          <li>Fixed a typo that prevented <code>LOCAL_WHOLE_STATIC_LIBRARIES</code> to work
+          correctly with the new toolchain and added documentation for this in
+          <code>docs/ANDROID-MK.html</code>.</li>
+
+          <li>Fixed a bug where code linked against <code>gnustl_static</code> crashed when run on
+          platform releases older than API level 8 (Android 2.2).</li>
+
+          <li><code>ndk-gdb</code>: Fixed a bug that caused a segmentation fault when debugging Android 3.0
+          or newer devices.</li>
+
+          <li><code>&lt;android/input.h&gt;</code>: Two functions that were introduced in API level
+          9 (Android 2.3) were incorrect and are fixed. While this breaks the source API, the
+          binary interface to the system is unchanged. The incorrect functions were missing a
+          <code>history_index</code> parameter, and the correct definitions are shown below:
+<pre>
+float AMotionEvent_getHistoricalRawX(const AInputEvent* motion_event,
+                                           size_t pointer_index,
+                                           size_t history_index);
+
+float AMotionEvent_getHistoricalRawY(const AInputEvent* motion_event,
+                                           size_t pointer_index,
+                                           size_t history_index);
+</pre>
+          </li>
+
+          <li>Updated the C library ARM binary for API level 9 (Android 2.3) to correctly expose at
+          link time new functions that were added in that API level (for example,
+          <code>pthread_rwlock_init</code>).</li>
+
+        </ul>
+      </dd>
+
+      <dt>Minor improvements and fixes:</dt>
+      <dd>
+        <ul>
+          <li>Object files are now always linked in the order they appear in
+          <code>LOCAL_SRC_FILES</code>. This was not the case previously because the files were
+          grouped by source extensions instead.</li>
+
+          <li>When <code>import-module</code> fails, it now prints the list of directories that
+          were searched. This is useful to check that the <code>NDK_MODULE_PATH</code> definition
+          used by the build system is correct.</li>
+
+          <li>When <code>import-module</code> succeeds, it now prints the directory where the
+          module was found to the log (visible with <code>NDK_LOG=1</code>).</li>
+
+          <li>Increased the build speed of debuggable applications when there is a very large number
+          of include directories in the project.</li>
+
+          <li><code>ndk-gdb</code>: Better detection of <code>adb shell</code> failures and improved
+          error messages.</li>
+
+          <li><code>&lt;pthread.h&gt;</code>: Fixed the definition of
+          <code>PTHREAD_RWLOCK_INITIALIZER</code> for API level 9 (Android 2.3) and higher.</li>
+
+          <li>Fixed an issue where a module could import itself, resulting in an infinite loop in
+          GNU Make.</li>
+
+          <li>Fixed a bug that caused the build to fail if <code>LOCAL_ARM_NEON</code> was set to
+          true (typo in <code>build/core/build-binary.mk</code>).</li>
+
+          <li>Fixed a bug that prevented the compilation of </code>.s</code> assembly files
+          (<code>.S</code> files were okay).</li>
+        </ul>
+      </dd>
+  </div>
+</div>
+
+<div class="toggleable closed">
     <a href="#"
          onclick="return toggleDiv(this)"><img src="{@docRoot}assets/images/triangle-closed.png"
          class="toggle-img"
