@@ -23,9 +23,14 @@
 
 namespace android {
 
+class ISurfaceTexture;
+
 extern sp<ANativeWindow> android_ParcelSurfaceTexture_getNativeWindow(
         JNIEnv* env, jobject thiz);
 extern bool android_ParcelSurfaceTexture_isInstanceOf(JNIEnv* env, jobject thiz);
+
+/* Gets the underlying ISurfaceTexture from a ParcelSurfaceTexture Java object. */
+extern sp<ISurfaceTexture> ParcelSurfaceTexture_getISurfaceTexture(JNIEnv* env, jobject thiz);
 
 } // namespace android
 

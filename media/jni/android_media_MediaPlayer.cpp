@@ -30,6 +30,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
+#include "android_runtime/android_graphics_ParcelSurfaceTexture.h"
 #include "utils/Errors.h"  // for status_t
 #include "utils/KeyedVector.h"
 #include "utils/String8.h"
@@ -37,7 +38,6 @@
 
 #include "android_util_Binder.h"
 #include <binder/Parcel.h>
-#include <gui/SurfaceTexture.h>
 #include <gui/ISurfaceTexture.h>
 #include <surfaceflinger/Surface.h>
 #include <binder/IPCThreadState.h>
@@ -52,11 +52,9 @@ using namespace android;
 struct fields_t {
     jfieldID    context;
     jfieldID    surface;
-    jfieldID    surfaceTexture;
+    jfieldID    parcelSurfaceTexture;
     /* actually in android.view.Surface XXX */
     jfieldID    surface_native;
-    // actually in android.graphics.SurfaceTexture
-    jfieldID    surfaceTexture_native;
 
     jmethodID   post_event;
 };
@@ -128,13 +126,6 @@ void JNIMediaPlayerListener::notify(int msg, int ext1, int ext2, const Parcel *o
 static Surface* get_surface(JNIEnv* env, jobject clazz)
 {
     return (Surface*)env->GetIntField(clazz, fields.surface_native);
-}
-
-sp<ISurfaceTexture> getSurfaceTexture(JNIEnv* env, jobject clazz)
-{
-    sp<ISurfaceTexture> surfaceTexture(
-        (ISurfaceTexture*)env->GetIntField(clazz, fields.surfaceTexture_native));
-    return surfaceTexture;
 }
 
 static sp<MediaPlayer> getMediaPlayer(JNIEnv* env, jobject thiz)
@@ -257,8 +248,8 @@ static void setVideoSurfaceOrSurfaceTexture(
         const sp<MediaPlayer>& mp, JNIEnv *env, jobject thiz, const char *prefix)
 {
     // The Java MediaPlayer class makes sure that at most one of mSurface and
-    // mSurfaceTexture is non-null.  But just in case, we give priority to
-    // mSurface over mSurfaceTexture.
+    // mParcelSurfaceTexture is non-null.  But just in case, we give priority to
+    // mSurface over mParcelSurfaceTexture.
     jobject surface = env->GetObjectField(thiz, fields.surface);
     if (surface != NULL) {
         sp<Surface> native_surface(get_surface(env, surface));
@@ -266,10 +257,10 @@ static void setVideoSurfaceOrSurfaceTexture(
              native_surface.get(), native_surface->getIdentity());
         mp->setVideoSurface(native_surface);
     } else {
-        jobject surfaceTexture = env->GetObjectField(thiz, fields.surfaceTexture);
-        if (surfaceTexture != NULL) {
+        jobject parcelSurfaceTexture = env->GetObjectField(thiz, fields.parcelSurfaceTexture);
+        if (parcelSurfaceTexture != NULL) {
             sp<ISurfaceTexture> native_surfaceTexture(
-                    getSurfaceTexture(env, surfaceTexture));
+                    ParcelSurfaceTexture_getISurfaceTexture(env, parcelSurfaceTexture));
             LOGV("%s: texture=%p", prefix, native_surfaceTexture.get());
             mp->setVideoSurfaceTexture(native_surfaceTexture);
         }
@@ -610,23 +601,11 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
         return;
     }
 
-    fields.surfaceTexture = env->GetFieldID(clazz, "mSurfaceTexture",
-            "Landroid/graphics/SurfaceTexture;");
-    if (fields.surfaceTexture == NULL) {
+    fields.parcelSurfaceTexture = env->GetFieldID(clazz, "mParcelSurfaceTexture",
+            "Landroid/graphics/ParcelSurfaceTexture;");
+    if (fields.parcelSurfaceTexture == NULL) {
         return;
     }
-
-    jclass surfaceTexture = env->FindClass("android/graphics/SurfaceTexture");
-    if (surfaceTexture == NULL) {
-        return;
-    }
-
-    fields.surfaceTexture_native = env->GetFieldID(surfaceTexture,
-            ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID, "I");
-    if (fields.surfaceTexture_native == NULL) {
-        return;
-    }
-
 }
 
 static void
