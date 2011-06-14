@@ -18,7 +18,7 @@ package android.pim;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.provider.Calendar;
+import android.provider.CalendarContract;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.Log;
@@ -50,10 +50,10 @@ public class RecurrenceSet {
      */
     public RecurrenceSet(ContentValues values)
             throws EventRecurrence.InvalidFormatException {
-        String rruleStr = values.getAsString(Calendar.Events.RRULE);
-        String rdateStr = values.getAsString(Calendar.Events.RDATE);
-        String exruleStr = values.getAsString(Calendar.Events.EXRULE);
-        String exdateStr = values.getAsString(Calendar.Events.EXDATE);
+        String rruleStr = values.getAsString(CalendarContract.Events.RRULE);
+        String rdateStr = values.getAsString(CalendarContract.Events.RDATE);
+        String exruleStr = values.getAsString(CalendarContract.Events.EXRULE);
+        String exdateStr = values.getAsString(CalendarContract.Events.EXDATE);
         init(rruleStr, rdateStr, exruleStr, exdateStr);
     }
 
@@ -68,10 +68,10 @@ public class RecurrenceSet {
      */
     public RecurrenceSet(Cursor cursor)
             throws EventRecurrence.InvalidFormatException {
-        int rruleColumn = cursor.getColumnIndex(Calendar.Events.RRULE);
-        int rdateColumn = cursor.getColumnIndex(Calendar.Events.RDATE);
-        int exruleColumn = cursor.getColumnIndex(Calendar.Events.EXRULE);
-        int exdateColumn = cursor.getColumnIndex(Calendar.Events.EXDATE);
+        int rruleColumn = cursor.getColumnIndex(CalendarContract.Events.RRULE);
+        int rdateColumn = cursor.getColumnIndex(CalendarContract.Events.RDATE);
+        int exruleColumn = cursor.getColumnIndex(CalendarContract.Events.EXRULE);
+        int exdateColumn = cursor.getColumnIndex(CalendarContract.Events.EXDATE);
         String rruleStr = cursor.getString(rruleColumn);
         String rdateStr = cursor.getString(rdateColumn);
         String exruleStr = cursor.getString(exruleColumn);
@@ -208,7 +208,7 @@ public class RecurrenceSet {
             start.timezone = Time.TIMEZONE_UTC;
         }
         long millis = start.toMillis(false /* use isDst */);
-        values.put(Calendar.Events.DTSTART, millis);
+        values.put(CalendarContract.Events.DTSTART, millis);
         if (millis == -1) {
             if (false) {
                 Log.d(TAG, "DTSTART is out of range: " + component.toString());
@@ -216,13 +216,13 @@ public class RecurrenceSet {
             return false;
         }
         
-        values.put(Calendar.Events.RRULE, rrule);
-        values.put(Calendar.Events.RDATE, rdate);
-        values.put(Calendar.Events.EXRULE, exrule);
-        values.put(Calendar.Events.EXDATE, exdate);
-        values.put(Calendar.Events.EVENT_TIMEZONE, tzid);
-        values.put(Calendar.Events.DURATION, duration);
-        values.put(Calendar.Events.ALL_DAY, allDay ? 1 : 0);
+        values.put(CalendarContract.Events.RRULE, rrule);
+        values.put(CalendarContract.Events.RDATE, rdate);
+        values.put(CalendarContract.Events.EXRULE, exrule);
+        values.put(CalendarContract.Events.EXDATE, exdate);
+        values.put(CalendarContract.Events.EVENT_TIMEZONE, tzid);
+        values.put(CalendarContract.Events.DURATION, duration);
+        values.put(CalendarContract.Events.ALL_DAY, allDay ? 1 : 0);
         return true;
     }
 
@@ -230,14 +230,14 @@ public class RecurrenceSet {
     public static boolean populateComponent(Cursor cursor,
                                             ICalendar.Component component) {
         
-        int dtstartColumn = cursor.getColumnIndex(Calendar.Events.DTSTART);
-        int durationColumn = cursor.getColumnIndex(Calendar.Events.DURATION);
-        int tzidColumn = cursor.getColumnIndex(Calendar.Events.EVENT_TIMEZONE);
-        int rruleColumn = cursor.getColumnIndex(Calendar.Events.RRULE);
-        int rdateColumn = cursor.getColumnIndex(Calendar.Events.RDATE);
-        int exruleColumn = cursor.getColumnIndex(Calendar.Events.EXRULE);
-        int exdateColumn = cursor.getColumnIndex(Calendar.Events.EXDATE);
-        int allDayColumn = cursor.getColumnIndex(Calendar.Events.ALL_DAY);
+        int dtstartColumn = cursor.getColumnIndex(CalendarContract.Events.DTSTART);
+        int durationColumn = cursor.getColumnIndex(CalendarContract.Events.DURATION);
+        int tzidColumn = cursor.getColumnIndex(CalendarContract.Events.EVENT_TIMEZONE);
+        int rruleColumn = cursor.getColumnIndex(CalendarContract.Events.RRULE);
+        int rdateColumn = cursor.getColumnIndex(CalendarContract.Events.RDATE);
+        int exruleColumn = cursor.getColumnIndex(CalendarContract.Events.EXRULE);
+        int exdateColumn = cursor.getColumnIndex(CalendarContract.Events.EXDATE);
+        int allDayColumn = cursor.getColumnIndex(CalendarContract.Events.ALL_DAY);
 
 
         long dtstart = -1;
@@ -299,16 +299,16 @@ public class RecurrenceSet {
 public static boolean populateComponent(ContentValues values,
                                             ICalendar.Component component) {
         long dtstart = -1;
-        if (values.containsKey(Calendar.Events.DTSTART)) {
-            dtstart = values.getAsLong(Calendar.Events.DTSTART);
+        if (values.containsKey(CalendarContract.Events.DTSTART)) {
+            dtstart = values.getAsLong(CalendarContract.Events.DTSTART);
         }
-        String duration = values.getAsString(Calendar.Events.DURATION);
-        String tzid = values.getAsString(Calendar.Events.EVENT_TIMEZONE);
-        String rruleStr = values.getAsString(Calendar.Events.RRULE);
-        String rdateStr = values.getAsString(Calendar.Events.RDATE);
-        String exruleStr = values.getAsString(Calendar.Events.EXRULE);
-        String exdateStr = values.getAsString(Calendar.Events.EXDATE);
-        Integer allDayInteger = values.getAsInteger(Calendar.Events.ALL_DAY);
+        String duration = values.getAsString(CalendarContract.Events.DURATION);
+        String tzid = values.getAsString(CalendarContract.Events.EVENT_TIMEZONE);
+        String rruleStr = values.getAsString(CalendarContract.Events.RRULE);
+        String rdateStr = values.getAsString(CalendarContract.Events.RDATE);
+        String exruleStr = values.getAsString(CalendarContract.Events.EXRULE);
+        String exdateStr = values.getAsString(CalendarContract.Events.EXDATE);
+        Integer allDayInteger = values.getAsInteger(CalendarContract.Events.ALL_DAY);
         boolean allDay = (null != allDayInteger) ? (allDayInteger == 1) : false;
 
         if ((dtstart == -1) ||

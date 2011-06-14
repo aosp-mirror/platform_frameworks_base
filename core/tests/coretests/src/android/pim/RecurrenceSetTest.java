@@ -21,7 +21,7 @@ import android.pim.ICalendar;
 import android.pim.RecurrenceSet;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.Log;
-import android.provider.Calendar;
+import android.provider.CalendarContract;
 import junit.framework.TestCase;
 
 /**
@@ -69,14 +69,14 @@ public class RecurrenceSetTest extends TestCase {
         RecurrenceSet.populateContentValues(recurrenceComponent, values);
         Log.d("KS", "values " + values);
 
-        assertEquals(rrule, values.get(android.provider.Calendar.Events.RRULE));
-        assertEquals(rdate, values.get(android.provider.Calendar.Events.RDATE));
-        assertEquals(exrule, values.get(android.provider.Calendar.Events.EXRULE));
-        assertEquals(exdate, values.get(android.provider.Calendar.Events.EXDATE));
-        assertEquals(dtstart, (long) values.getAsLong(Calendar.Events.DTSTART));
-        assertEquals(tzid, values.get(android.provider.Calendar.Events.EVENT_TIMEZONE));
-        assertEquals(duration, values.get(android.provider.Calendar.Events.DURATION));
+        assertEquals(rrule, values.get(android.provider.CalendarContract.Events.RRULE));
+        assertEquals(rdate, values.get(android.provider.CalendarContract.Events.RDATE));
+        assertEquals(exrule, values.get(android.provider.CalendarContract.Events.EXRULE));
+        assertEquals(exdate, values.get(android.provider.CalendarContract.Events.EXDATE));
+        assertEquals(dtstart, (long) values.getAsLong(CalendarContract.Events.DTSTART));
+        assertEquals(tzid, values.get(android.provider.CalendarContract.Events.EVENT_TIMEZONE));
+        assertEquals(duration, values.get(android.provider.CalendarContract.Events.DURATION));
         assertEquals(allDay,
-                (int) values.getAsInteger(android.provider.Calendar.Events.ALL_DAY));
+                (int) values.getAsInteger(android.provider.CalendarContract.Events.ALL_DAY));
     }
 }
