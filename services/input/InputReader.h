@@ -45,6 +45,18 @@ class InputMapper;
  * Specifies various options that modify the behavior of the input reader.
  */
 struct InputReaderConfiguration {
+    // Describes changes that have occurred.
+    enum {
+        // The pointer speed changed.
+        CHANGE_POINTER_SPEED = 1 << 0,
+
+        // The pointer gesture control changed.
+        CHANGE_POINTER_GESTURE_ENABLEMENT = 1 << 1,
+
+        // All devices must be reopened.
+        CHANGE_MUST_REOPEN = 1 << 31,
+    };
+
     // Determines whether to turn on some hacks we have to improve the touch interaction with a
     // certain device whose screen currently is not all that good.
     bool filterTouchEvents;
@@ -67,6 +79,9 @@ struct InputReaderConfiguration {
 
     // Velocity control parameters for mouse wheel movements.
     VelocityControlParameters wheelVelocityControlParameters;
+
+    // True if pointer gestures are enabled.
+    bool pointerGesturesEnabled;
 
     // Quiet time between certain pointer gesture transitions.
     // Time to allow for all fingers or buttons to settle into a stable state before
@@ -136,6 +151,7 @@ struct InputReaderConfiguration {
             virtualKeyQuietTime(0),
             pointerVelocityControlParameters(1.0f, 500.0f, 3000.0f, 3.0f),
             wheelVelocityControlParameters(1.0f, 15.0f, 50.0f, 4.0f),
+            pointerGesturesEnabled(true),
             pointerGestureQuietInterval(100 * 1000000LL), // 100 ms
             pointerGestureDragMinSwitchSpeed(50), // 50 pixels per second
             pointerGestureTapInterval(150 * 1000000LL), // 150 ms
@@ -235,8 +251,10 @@ public:
     virtual bool hasKeys(int32_t deviceId, uint32_t sourceMask,
             size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags) = 0;
 
-    /* Reopens and reconfigures all input devices. */
-    virtual void refreshConfiguration() = 0;
+    /* Requests that a reconfiguration of all input devices.
+     * The changes flag is a bitfield that indicates what has changed and whether
+     * the input devices must all be reopened. */
+    virtual void requestRefreshConfiguration(uint32_t changes) = 0;
 };
 
 
@@ -260,7 +278,6 @@ public:
     virtual void requestTimeoutAtTime(nsecs_t when) = 0;
 
     virtual InputReaderPolicyInterface* getPolicy() = 0;
-    virtual const InputReaderConfiguration* getConfig() = 0;
     virtual InputDispatcherInterface* getDispatcher() = 0;
     virtual EventHubInterface* getEventHub() = 0;
 };
@@ -301,7 +318,7 @@ public:
     virtual bool hasKeys(int32_t deviceId, uint32_t sourceMask,
             size_t numCodes, const int32_t* keyCodes, uint8_t* outFlags);
 
-    virtual void refreshConfiguration();
+    virtual void requestRefreshConfiguration(uint32_t changes);
 
 protected:
     // These methods are protected virtual so they can be overridden and instrumented
@@ -316,7 +333,6 @@ private:
     InputReaderConfiguration mConfig;
 
     virtual InputReaderPolicyInterface* getPolicy() { return mPolicy.get(); }
-    virtual const InputReaderConfiguration* getConfig() { return &mConfig; }
     virtual InputDispatcherInterface* getDispatcher() { return mDispatcher.get(); }
     virtual EventHubInterface* getEventHub() { return mEventHub.get(); }
 
@@ -365,8 +381,8 @@ private:
     nsecs_t mNextTimeout; // only accessed by reader thread, not guarded
     virtual void requestTimeoutAtTime(nsecs_t when);
 
-    volatile int32_t mRefreshConfiguration; // atomic
-    void configure(bool firstTime);
+    uint32_t mConfigurationChangesToRefresh; // guarded by mStateLock
+    void refreshConfiguration(uint32_t changes);
 
     // state queries
     typedef int32_t (InputDevice::*GetStateFunc)(uint32_t sourceMask, int32_t code);
@@ -408,7 +424,7 @@ public:
 
     void dump(String8& dump);
     void addMapper(InputMapper* mapper);
-    void configure();
+    void configure(const InputReaderConfiguration* config, uint32_t changes);
     void reset();
     void process(const RawEvent* rawEvents, size_t count);
     void timeoutExpired(nsecs_t when);
@@ -460,14 +476,13 @@ public:
     inline const String8 getDeviceName() { return mDevice->getName(); }
     inline InputReaderContext* getContext() { return mContext; }
     inline InputReaderPolicyInterface* getPolicy() { return mContext->getPolicy(); }
-    inline const InputReaderConfiguration* getConfig() { return mContext->getConfig(); }
     inline InputDispatcherInterface* getDispatcher() { return mContext->getDispatcher(); }
     inline EventHubInterface* getEventHub() { return mContext->getEventHub(); }
 
     virtual uint32_t getSources() = 0;
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
     virtual void dump(String8& dump);
-    virtual void configure();
+    virtual void configure(const InputReaderConfiguration* config, uint32_t changes);
     virtual void reset();
     virtual void process(const RawEvent* rawEvent) = 0;
     virtual void timeoutExpired(nsecs_t when);
@@ -514,7 +529,7 @@ public:
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
     virtual void dump(String8& dump);
-    virtual void configure();
+    virtual void configure(const InputReaderConfiguration* config, uint32_t changes);
     virtual void reset();
     virtual void process(const RawEvent* rawEvent);
 
@@ -584,7 +599,7 @@ public:
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
     virtual void dump(String8& dump);
-    virtual void configure();
+    virtual void configure(const InputReaderConfiguration* config, uint32_t changes);
     virtual void reset();
     virtual void process(const RawEvent* rawEvent);
 
@@ -675,7 +690,7 @@ public:
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
     virtual void dump(String8& dump);
-    virtual void configure();
+    virtual void configure(const InputReaderConfiguration* config, uint32_t changes);
     virtual void reset();
 
     virtual int32_t getKeyCodeState(uint32_t sourceMask, int32_t keyCode);
@@ -783,7 +798,7 @@ protected:
     uint32_t mPointerSource; // sources when reporting pointer gestures
 
     // The reader's configuration.
-    const InputReaderConfiguration* mConfig;
+    InputReaderConfiguration mConfig;
 
     // Immutable configuration parameters.
     struct Parameters {
@@ -1400,7 +1415,7 @@ public:
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
     virtual void dump(String8& dump);
-    virtual void configure();
+    virtual void configure(const InputReaderConfiguration* config, uint32_t changes);
     virtual void reset();
     virtual void process(const RawEvent* rawEvent);
 

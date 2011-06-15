@@ -38,7 +38,6 @@
 
 #include "InputReader.h"
 
-#include <cutils/atomic.h>
 #include <cutils/log.h>
 #include <ui/Keyboard.h>
 #include <ui/VirtualKeyMap.h>
@@ -245,8 +244,8 @@ InputReader::InputReader(const sp<EventHubInterface>& eventHub,
         const sp<InputDispatcherInterface>& dispatcher) :
         mEventHub(eventHub), mPolicy(policy), mDispatcher(dispatcher),
         mGlobalMetaState(0), mDisableVirtualKeysTimeout(LLONG_MIN), mNextTimeout(LLONG_MAX),
-        mRefreshConfiguration(0) {
-    configure(true /*firstTime*/);
+        mConfigurationChangesToRefresh(0) {
+    refreshConfiguration(0);
     updateGlobalMetaState();
     updateInputConfiguration();
 }
@@ -258,9 +257,16 @@ InputReader::~InputReader() {
 }
 
 void InputReader::loopOnce() {
-    if (android_atomic_acquire_load(&mRefreshConfiguration)) {
-        android_atomic_release_store(0, &mRefreshConfiguration);
-        configure(false /*firstTime*/);
+    uint32_t changes;
+    { // acquire lock
+        AutoMutex _l(mStateLock);
+
+        changes = mConfigurationChangesToRefresh;
+        mConfigurationChangesToRefresh = 0;
+    } // release lock
+
+    if (changes) {
+        refreshConfiguration(changes);
     }
 
     int32_t timeoutMillis = -1;
@@ -326,7 +332,7 @@ void InputReader::addDevice(int32_t deviceId) {
     uint32_t classes = mEventHub->getDeviceClasses(deviceId);
 
     InputDevice* device = createDevice(deviceId, name, classes);
-    device->configure();
+    device->configure(&mConfig, 0);
 
     if (device->isIgnored()) {
         LOGI("Device added: id=%d, name='%s' (ignored non-input device)", deviceId, name.string());
@@ -483,12 +489,25 @@ void InputReader::handleConfigurationChanged(nsecs_t when) {
     mDispatcher->notifyConfigurationChanged(when);
 }
 
-void InputReader::configure(bool firstTime) {
+void InputReader::refreshConfiguration(uint32_t changes) {
     mPolicy->getReaderConfiguration(&mConfig);
     mEventHub->setExcludedDevices(mConfig.excludedDeviceNames);
 
-    if (!firstTime) {
-        mEventHub->requestReopenDevices();
+    if (changes) {
+        LOGI("Reconfiguring input devices.  changes=0x%08x", changes);
+
+        if (changes & InputReaderConfiguration::CHANGE_MUST_REOPEN) {
+            mEventHub->requestReopenDevices();
+        } else {
+            { // acquire device registry reader lock
+                RWLock::AutoRLock _rl(mDeviceRegistryLock);
+
+                for (size_t i = 0; i < mDevices.size(); i++) {
+                    InputDevice* device = mDevices.valueAt(i);
+                    device->configure(&mConfig, changes);
+                }
+            } // release device registry reader lock
+        }
     }
 }
 
@@ -709,10 +728,20 @@ bool InputReader::markSupportedKeyCodes(int32_t deviceId, uint32_t sourceMask, s
     } // release device registy reader lock
 }
 
-void InputReader::refreshConfiguration() {
-    android_atomic_release_store(1, &mRefreshConfiguration);
+void InputReader::requestRefreshConfiguration(uint32_t changes) {
+    if (changes) {
+        bool needWake;
+        { // acquire lock
+            AutoMutex _l(mStateLock);
 
-    mEventHub->wake();
+            needWake = !mConfigurationChangesToRefresh;
+            mConfigurationChangesToRefresh |= changes;
+        } // release lock
+
+        if (needWake) {
+            mEventHub->wake();
+        }
+    }
 }
 
 void InputReader::dump(String8& dump) {
@@ -760,6 +789,8 @@ void InputReader::dump(String8& dump) {
             mConfig.wheelVelocityControlParameters.acceleration);
 
     dump.appendFormat(INDENT2 "PointerGesture:\n");
+    dump.appendFormat(INDENT3 "Enabled: %s\n",
+            toString(mConfig.pointerGesturesEnabled));
     dump.appendFormat(INDENT3 "QuietInterval: %0.1fms\n",
             mConfig.pointerGestureQuietInterval * 0.000001f);
     dump.appendFormat(INDENT3 "DragMinSwitchSpeed: %0.1fpx/s\n",
@@ -855,18 +886,20 @@ void InputDevice::addMapper(InputMapper* mapper) {
     mMappers.add(mapper);
 }
 
-void InputDevice::configure() {
-    if (! isIgnored()) {
-        mContext->getEventHub()->getConfiguration(mId, &mConfiguration);
-    }
-
+void InputDevice::configure(const InputReaderConfiguration* config, uint32_t changes) {
     mSources = 0;
 
-    size_t numMappers = mMappers.size();
-    for (size_t i = 0; i < numMappers; i++) {
-        InputMapper* mapper = mMappers[i];
-        mapper->configure();
-        mSources |= mapper->getSources();
+    if (!isIgnored()) {
+        if (!changes) { // first time only
+            mContext->getEventHub()->getConfiguration(mId, &mConfiguration);
+        }
+
+        size_t numMappers = mMappers.size();
+        for (size_t i = 0; i < numMappers; i++) {
+            InputMapper* mapper = mMappers[i];
+            mapper->configure(config, changes);
+            mSources |= mapper->getSources();
+        }
     }
 }
 
@@ -1010,7 +1043,7 @@ void InputMapper::populateDeviceInfo(InputDeviceInfo* info) {
 void InputMapper::dump(String8& dump) {
 }
 
-void InputMapper::configure() {
+void InputMapper::configure(const InputReaderConfiguration* config, uint32_t changes) {
 }
 
 void InputMapper::reset() {
@@ -1124,16 +1157,18 @@ void KeyboardInputMapper::dump(String8& dump) {
 }
 
 
-void KeyboardInputMapper::configure() {
-    InputMapper::configure();
+void KeyboardInputMapper::configure(const InputReaderConfiguration* config, uint32_t changes) {
+    InputMapper::configure(config, changes);
 
-    // Configure basic parameters.
-    configureParameters();
+    if (!changes) { // first time only
+        // Configure basic parameters.
+        configureParameters();
 
-    // Reset LEDs.
-    {
-        AutoMutex _l(mLock);
-        resetLedStateLocked();
+        // Reset LEDs.
+        {
+            AutoMutex _l(mLock);
+            resetLedStateLocked();
+        }
     }
 }
 
@@ -1411,40 +1446,44 @@ void CursorInputMapper::dump(String8& dump) {
     } // release lock
 }
 
-void CursorInputMapper::configure() {
-    InputMapper::configure();
+void CursorInputMapper::configure(const InputReaderConfiguration* config, uint32_t changes) {
+    InputMapper::configure(config, changes);
 
-    // Configure basic parameters.
-    configureParameters();
+    if (!changes) { // first time only
+        // Configure basic parameters.
+        configureParameters();
 
-    // Configure device mode.
-    switch (mParameters.mode) {
-    case Parameters::MODE_POINTER:
-        mSource = AINPUT_SOURCE_MOUSE;
-        mXPrecision = 1.0f;
-        mYPrecision = 1.0f;
-        mXScale = 1.0f;
-        mYScale = 1.0f;
-        mPointerController = getPolicy()->obtainPointerController(getDeviceId());
-        break;
-    case Parameters::MODE_NAVIGATION:
-        mSource = AINPUT_SOURCE_TRACKBALL;
-        mXPrecision = TRACKBALL_MOVEMENT_THRESHOLD;
-        mYPrecision = TRACKBALL_MOVEMENT_THRESHOLD;
-        mXScale = 1.0f / TRACKBALL_MOVEMENT_THRESHOLD;
-        mYScale = 1.0f / TRACKBALL_MOVEMENT_THRESHOLD;
-        break;
+        // Configure device mode.
+        switch (mParameters.mode) {
+        case Parameters::MODE_POINTER:
+            mSource = AINPUT_SOURCE_MOUSE;
+            mXPrecision = 1.0f;
+            mYPrecision = 1.0f;
+            mXScale = 1.0f;
+            mYScale = 1.0f;
+            mPointerController = getPolicy()->obtainPointerController(getDeviceId());
+            break;
+        case Parameters::MODE_NAVIGATION:
+            mSource = AINPUT_SOURCE_TRACKBALL;
+            mXPrecision = TRACKBALL_MOVEMENT_THRESHOLD;
+            mYPrecision = TRACKBALL_MOVEMENT_THRESHOLD;
+            mXScale = 1.0f / TRACKBALL_MOVEMENT_THRESHOLD;
+            mYScale = 1.0f / TRACKBALL_MOVEMENT_THRESHOLD;
+            break;
+        }
+
+        mVWheelScale = 1.0f;
+        mHWheelScale = 1.0f;
+
+        mHaveVWheel = getEventHub()->hasRelativeAxis(getDeviceId(), REL_WHEEL);
+        mHaveHWheel = getEventHub()->hasRelativeAxis(getDeviceId(), REL_HWHEEL);
     }
 
-    mVWheelScale = 1.0f;
-    mHWheelScale = 1.0f;
-
-    mHaveVWheel = getEventHub()->hasRelativeAxis(getDeviceId(), REL_WHEEL);
-    mHaveHWheel = getEventHub()->hasRelativeAxis(getDeviceId(), REL_HWHEEL);
-
-    mPointerVelocityControl.setParameters(getConfig()->pointerVelocityControlParameters);
-    mWheelXVelocityControl.setParameters(getConfig()->wheelVelocityControlParameters);
-    mWheelYVelocityControl.setParameters(getConfig()->wheelVelocityControlParameters);
+    if (!changes || (changes & InputReaderConfiguration::CHANGE_POINTER_SPEED)) {
+        mPointerVelocityControl.setParameters(config->pointerVelocityControlParameters);
+        mWheelXVelocityControl.setParameters(config->wheelVelocityControlParameters);
+        mWheelYVelocityControl.setParameters(config->wheelVelocityControlParameters);
+    }
 }
 
 void CursorInputMapper::configureParameters() {
@@ -1787,8 +1826,6 @@ void CursorInputMapper::fadePointer() {
 
 TouchInputMapper::TouchInputMapper(InputDevice* device) :
         InputMapper(device) {
-    mConfig = getConfig();
-
     mLocked.surfaceOrientation = -1;
     mLocked.surfaceWidth = -1;
     mLocked.surfaceHeight = -1;
@@ -1925,52 +1962,65 @@ void TouchInputMapper::initializeLocked() {
     mLocked.orientedRanges.haveDistance = false;
 
     mPointerGesture.reset();
-    mPointerGesture.pointerVelocityControl.setParameters(mConfig->pointerVelocityControlParameters);
 }
 
-void TouchInputMapper::configure() {
-    InputMapper::configure();
+void TouchInputMapper::configure(const InputReaderConfiguration* config, uint32_t changes) {
+    InputMapper::configure(config, changes);
 
-    // Configure basic parameters.
-    configureParameters();
+    mConfig = *config;
 
-    // Configure sources.
-    switch (mParameters.deviceType) {
-    case Parameters::DEVICE_TYPE_TOUCH_SCREEN:
-        mTouchSource = AINPUT_SOURCE_TOUCHSCREEN;
-        mPointerSource = 0;
-        break;
-    case Parameters::DEVICE_TYPE_TOUCH_PAD:
-        mTouchSource = AINPUT_SOURCE_TOUCHPAD;
-        mPointerSource = 0;
-        break;
-    case Parameters::DEVICE_TYPE_POINTER:
-        mTouchSource = AINPUT_SOURCE_TOUCHPAD;
-        mPointerSource = AINPUT_SOURCE_MOUSE;
-        break;
-    default:
-        LOG_ASSERT(false);
+    if (!changes) { // first time only
+        // Configure basic parameters.
+        configureParameters();
+
+        // Configure sources.
+        switch (mParameters.deviceType) {
+        case Parameters::DEVICE_TYPE_TOUCH_SCREEN:
+            mTouchSource = AINPUT_SOURCE_TOUCHSCREEN;
+            mPointerSource = 0;
+            break;
+        case Parameters::DEVICE_TYPE_TOUCH_PAD:
+            mTouchSource = AINPUT_SOURCE_TOUCHPAD;
+            mPointerSource = 0;
+            break;
+        case Parameters::DEVICE_TYPE_POINTER:
+            mTouchSource = AINPUT_SOURCE_TOUCHPAD;
+            mPointerSource = AINPUT_SOURCE_MOUSE;
+            break;
+        default:
+            LOG_ASSERT(false);
+        }
+
+        // Configure absolute axis information.
+        configureRawAxes();
+
+        // Prepare input device calibration.
+        parseCalibration();
+        resolveCalibration();
+
+        { // acquire lock
+            AutoMutex _l(mLock);
+
+             // Configure surface dimensions and orientation.
+            configureSurfaceLocked();
+        } // release lock
     }
 
-    // Configure absolute axis information.
-    configureRawAxes();
+    if (!changes || (changes & InputReaderConfiguration::CHANGE_POINTER_SPEED)) {
+        mPointerGesture.pointerVelocityControl.setParameters(
+                mConfig.pointerVelocityControlParameters);
+    }
 
-    // Prepare input device calibration.
-    parseCalibration();
-    resolveCalibration();
-
-    { // acquire lock
-        AutoMutex _l(mLock);
-
-         // Configure surface dimensions and orientation.
-        configureSurfaceLocked();
-    } // release lock
+    if (!changes || (changes & InputReaderConfiguration::CHANGE_POINTER_GESTURE_ENABLEMENT)) {
+        // Reset the touch screen when pointer gesture enablement changes.
+        reset();
+    }
 }
 
 void TouchInputMapper::configureParameters() {
-    mParameters.useBadTouchFilter = mConfig->filterTouchEvents;
-    mParameters.useAveragingTouchFilter = mConfig->filterTouchEvents;
-    mParameters.useJumpyTouchFilter = mConfig->filterJumpyTouchEvents;
+    mParameters.useBadTouchFilter = mConfig.filterTouchEvents;
+    mParameters.useAveragingTouchFilter = mConfig.filterTouchEvents;
+    mParameters.useJumpyTouchFilter = mConfig.filterJumpyTouchEvents;
 
     // Use the pointer presentation mode for devices that do not support distinct
     // multitouch.  The spot-based presentation relies on being able to accurately
@@ -2401,14 +2451,14 @@ bool TouchInputMapper::configureSurfaceLocked() {
             // is applied.
             // Assume that the touch pad has a square aspect ratio such that movements in
             // X and Y of the same number of raw units cover the same physical distance.
-            mLocked.pointerGestureXMovementScale = mConfig->pointerGestureMovementSpeedRatio
+            mLocked.pointerGestureXMovementScale = mConfig.pointerGestureMovementSpeedRatio
                     * displayDiagonal / rawDiagonal;
             mLocked.pointerGestureYMovementScale = mLocked.pointerGestureXMovementScale;
 
             // Scale zooms to cover a smaller range of the display than movements do.
             // This value determines the area around the pointer that is affected by freeform
             // pointer gestures.
-            mLocked.pointerGestureXZoomScale = mConfig->pointerGestureZoomSpeedRatio
+            mLocked.pointerGestureXZoomScale = mConfig.pointerGestureZoomSpeedRatio
                     * displayDiagonal / rawDiagonal;
             mLocked.pointerGestureYZoomScale = mLocked.pointerGestureXZoomScale;
 
@@ -2416,7 +2466,7 @@ bool TouchInputMapper::configureSurfaceLocked() {
             // of the diagonal axis of the touch pad.  Touches that are wider than this are
             // translated into freeform gestures.
             mLocked.pointerGestureMaxSwipeWidth =
-                    mConfig->pointerGestureSwipeMaxWidthRatio * rawDiagonal;
+                    mConfig.pointerGestureSwipeMaxWidthRatio * rawDiagonal;
 
             // Reset the current pointer gesture.
             mPointerGesture.reset();
@@ -2902,6 +2952,7 @@ void TouchInputMapper::reset() {
 
         if (mPointerController != NULL
                 && mParameters.gestureMode == Parameters::GESTURE_MODE_SPOTS) {
+            mPointerController->fade(PointerControllerInterface::TRANSITION_GRADUAL);
             mPointerController->clearSpots();
         }
     } // release lock
@@ -2982,7 +3033,7 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
         touchResult = consumeOffScreenTouches(when, policyFlags);
         if (touchResult == DISPATCH_TOUCH) {
             suppressSwipeOntoVirtualKeys(when);
-            if (mPointerController != NULL) {
+            if (mPointerController != NULL && mConfig.pointerGesturesEnabled) {
                 dispatchPointerGestures(when, policyFlags, false /*isTimeout*/);
             }
             dispatchTouches(when, policyFlags);
@@ -3139,8 +3190,8 @@ void TouchInputMapper::suppressSwipeOntoVirtualKeys(nsecs_t when) {
     //    area and accidentally triggers a virtual key.  This often happens when virtual keys
     //    are layed out below the screen near to where the on screen keyboard's space bar
     //    is displayed.
-    if (mConfig->virtualKeyQuietTime > 0 && mCurrentTouch.pointerCount != 0) {
-        mContext->disableVirtualKeysUntil(when + mConfig->virtualKeyQuietTime);
+    if (mConfig.virtualKeyQuietTime > 0 && mCurrentTouch.pointerCount != 0) {
+        mContext->disableVirtualKeysUntil(when + mConfig.virtualKeyQuietTime);
     }
 }
 
@@ -3688,10 +3739,10 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 #endif
 
         if (mPointerGesture.lastGestureMode == PointerGesture::TAP) {
-            if (when <= mPointerGesture.tapUpTime + mConfig->pointerGestureTapDragInterval) {
+            if (when <= mPointerGesture.tapUpTime + mConfig.pointerGestureTapDragInterval) {
                 // The tap/drag timeout has not yet expired.
                 getContext()->requestTimeoutAtTime(mPointerGesture.tapUpTime
-                        + mConfig->pointerGestureTapDragInterval);
+                        + mConfig.pointerGestureTapDragInterval);
             } else {
                 // The tap is finished.
 #if DEBUG_GESTURES
@@ -3756,7 +3807,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
     if (activeTouchId < 0) {
         mPointerGesture.resetQuietTime();
     } else {
-        isQuietTime = when < mPointerGesture.quietTime + mConfig->pointerGestureQuietInterval;
+        isQuietTime = when < mPointerGesture.quietTime + mConfig.pointerGestureQuietInterval;
         if (!isQuietTime) {
             if ((mPointerGesture.lastGestureMode == PointerGesture::PRESS
                     || mPointerGesture.lastGestureMode == PointerGesture::SWIPE
@@ -3785,7 +3836,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         // Case 1: Quiet time. (QUIET)
 #if DEBUG_GESTURES
         LOGD("Gestures: QUIET for next %0.3fms", (mPointerGesture.quietTime
-                + mConfig->pointerGestureQuietInterval - when) * 0.000001f);
+                + mConfig.pointerGestureQuietInterval - when) * 0.000001f);
 #endif
         if (mPointerGesture.lastGestureMode != PointerGesture::QUIET) {
             *outFinishPreviousGesture = true;
@@ -3824,7 +3875,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         // Find the fastest pointer and follow it.
         if (activeTouchId >= 0 && mCurrentTouch.pointerCount > 1) {
             int32_t bestId = -1;
-            float bestSpeed = mConfig->pointerGestureDragMinSwitchSpeed;
+            float bestSpeed = mConfig.pointerGestureDragMinSwitchSpeed;
             for (uint32_t i = 0; i < mCurrentTouch.pointerCount; i++) {
                 uint32_t id = mCurrentTouch.pointers[i].id;
                 float vx, vy;
@@ -3893,18 +3944,18 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         if ((mPointerGesture.lastGestureMode == PointerGesture::HOVER
                 || mPointerGesture.lastGestureMode == PointerGesture::TAP_DRAG)
                 && mLastTouch.pointerCount == 1) {
-            if (when <= mPointerGesture.tapDownTime + mConfig->pointerGestureTapInterval) {
+            if (when <= mPointerGesture.tapDownTime + mConfig.pointerGestureTapInterval) {
                 float x, y;
                 mPointerController->getPosition(&x, &y);
-                if (fabs(x - mPointerGesture.tapX) <= mConfig->pointerGestureTapSlop
-                        && fabs(y - mPointerGesture.tapY) <= mConfig->pointerGestureTapSlop) {
+                if (fabs(x - mPointerGesture.tapX) <= mConfig.pointerGestureTapSlop
+                        && fabs(y - mPointerGesture.tapY) <= mConfig.pointerGestureTapSlop) {
 #if DEBUG_GESTURES
                     LOGD("Gestures: TAP");
 #endif
 
                     mPointerGesture.tapUpTime = when;
                     getContext()->requestTimeoutAtTime(when
-                            + mConfig->pointerGestureTapDragInterval);
+                            + mConfig.pointerGestureTapDragInterval);
 
                     mPointerGesture.activeGestureId = 0;
                     mPointerGesture.currentGestureMode = PointerGesture::TAP;
@@ -3961,11 +4012,11 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 
         mPointerGesture.currentGestureMode = PointerGesture::HOVER;
         if (mPointerGesture.lastGestureMode == PointerGesture::TAP) {
-            if (when <= mPointerGesture.tapUpTime + mConfig->pointerGestureTapDragInterval) {
+            if (when <= mPointerGesture.tapUpTime + mConfig.pointerGestureTapDragInterval) {
                 float x, y;
                 mPointerController->getPosition(&x, &y);
-                if (fabs(x - mPointerGesture.tapX) <= mConfig->pointerGestureTapSlop
-                        && fabs(y - mPointerGesture.tapY) <= mConfig->pointerGestureTapSlop) {
+                if (fabs(x - mPointerGesture.tapX) <= mConfig.pointerGestureTapSlop
+                        && fabs(y - mPointerGesture.tapY) <= mConfig.pointerGestureTapSlop) {
                     mPointerGesture.currentGestureMode = PointerGesture::TAP_DRAG;
                 } else {
 #if DEBUG_GESTURES
@@ -4059,7 +4110,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         LOG_ASSERT(activeTouchId >= 0);
 
         bool settled = when >= mPointerGesture.firstTouchTime
-                + mConfig->pointerGestureMultitouchSettleInterval;
+                + mConfig.pointerGestureMultitouchSettleInterval;
         if (mPointerGesture.lastGestureMode != PointerGesture::PRESS
                 && mPointerGesture.lastGestureMode != PointerGesture::SWIPE
                 && mPointerGesture.lastGestureMode != PointerGesture::FREEFORM) {
@@ -4070,7 +4121,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 #if DEBUG_GESTURES
             LOGD("Gestures: Resetting gesture since additional pointers went down for MULTITOUCH, "
                     "settle time remaining %0.3fms", (mPointerGesture.firstTouchTime
-                            + mConfig->pointerGestureMultitouchSettleInterval - when)
+                            + mConfig.pointerGestureMultitouchSettleInterval - when)
                             * 0.000001f);
 #endif
             *outCancelPreviousGesture = true;
@@ -4089,7 +4140,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 #if DEBUG_GESTURES
             LOGD("Gestures: Using centroid as reference for MULTITOUCH, "
                     "settle time remaining %0.3fms", (mPointerGesture.firstTouchTime
-                            + mConfig->pointerGestureMultitouchSettleInterval - when)
+                            + mConfig.pointerGestureMultitouchSettleInterval - when)
                             * 0.000001f);
 #endif
             mCurrentTouch.getCentroid(&mPointerGesture.referenceTouchX,
@@ -4143,7 +4194,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 PointerGesture::Delta& delta = mPointerGesture.referenceDeltas[id];
                 dist[id] = hypotf(delta.dx * mLocked.pointerGestureXZoomScale,
                         delta.dy * mLocked.pointerGestureYZoomScale);
-                if (dist[id] > mConfig->pointerGestureMultitouchMinDistance) {
+                if (dist[id] > mConfig.pointerGestureMultitouchMinDistance) {
                     distOverThreshold += 1;
                 }
             }
@@ -4179,8 +4230,8 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                     uint32_t id2 = mCurrentTouch.pointers[1].id;
                     float dist1 = dist[id1];
                     float dist2 = dist[id2];
-                    if (dist1 >= mConfig->pointerGestureMultitouchMinDistance
-                            && dist2 >= mConfig->pointerGestureMultitouchMinDistance) {
+                    if (dist1 >= mConfig.pointerGestureMultitouchMinDistance
+                            && dist2 >= mConfig.pointerGestureMultitouchMinDistance) {
                         // Calculate the dot product of the displacement vectors.
                         // When the vectors are oriented in approximately the same direction,
                         // the angle betweeen them is near zero and the cosine of the angle
@@ -4193,15 +4244,15 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                         float dy2 = delta2.dy * mLocked.pointerGestureYZoomScale;
                         float dot = dx1 * dx2 + dy1 * dy2;
                         float cosine = dot / (dist1 * dist2); // denominator always > 0
-                        if (cosine >= mConfig->pointerGestureSwipeTransitionAngleCosine) {
+                        if (cosine >= mConfig.pointerGestureSwipeTransitionAngleCosine) {
                             // Pointers are moving in the same direction.  Switch to SWIPE.
 #if DEBUG_GESTURES
                             LOGD("Gestures: PRESS transitioned to SWIPE, "
                                     "dist1 %0.3f >= %0.3f, dist2 %0.3f >= %0.3f, "
                                     "cosine %0.3f >= %0.3f",
-                                    dist1, mConfig->pointerGestureMultitouchMinDistance,
-                                    dist2, mConfig->pointerGestureMultitouchMinDistance,
-                                    cosine, mConfig->pointerGestureSwipeTransitionAngleCosine);
+                                    dist1, mConfig.pointerGestureMultitouchMinDistance,
+                                    dist2, mConfig.pointerGestureMultitouchMinDistance,
+                                    cosine, mConfig.pointerGestureSwipeTransitionAngleCosine);
 #endif
                             mPointerGesture.currentGestureMode = PointerGesture::SWIPE;
                         } else {
@@ -4210,9 +4261,9 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                             LOGD("Gestures: PRESS transitioned to FREEFORM, "
                                     "dist1 %0.3f >= %0.3f, dist2 %0.3f >= %0.3f, "
                                     "cosine %0.3f < %0.3f",
-                                    dist1, mConfig->pointerGestureMultitouchMinDistance,
-                                    dist2, mConfig->pointerGestureMultitouchMinDistance,
-                                    cosine, mConfig->pointerGestureSwipeTransitionAngleCosine);
+                                    dist1, mConfig.pointerGestureMultitouchMinDistance,
+                                    dist2, mConfig.pointerGestureMultitouchMinDistance,
+                                    cosine, mConfig.pointerGestureSwipeTransitionAngleCosine);
 #endif
                             *outCancelPreviousGesture = true;
                             mPointerGesture.currentGestureMode = PointerGesture::FREEFORM;
@@ -5665,85 +5716,87 @@ void JoystickInputMapper::dump(String8& dump) {
     }
 }
 
-void JoystickInputMapper::configure() {
-    InputMapper::configure();
+void JoystickInputMapper::configure(const InputReaderConfiguration* config, uint32_t changes) {
+    InputMapper::configure(config, changes);
 
-    // Collect all axes.
-    for (int32_t abs = 0; abs <= ABS_MAX; abs++) {
-        RawAbsoluteAxisInfo rawAxisInfo;
-        getEventHub()->getAbsoluteAxisInfo(getDeviceId(), abs, &rawAxisInfo);
-        if (rawAxisInfo.valid) {
-            // Map axis.
-            AxisInfo axisInfo;
-            bool explicitlyMapped = !getEventHub()->mapAxis(getDeviceId(), abs, &axisInfo);
-            if (!explicitlyMapped) {
-                // Axis is not explicitly mapped, will choose a generic axis later.
-                axisInfo.mode = AxisInfo::MODE_NORMAL;
-                axisInfo.axis = -1;
+    if (!changes) { // first time only
+        // Collect all axes.
+        for (int32_t abs = 0; abs <= ABS_MAX; abs++) {
+            RawAbsoluteAxisInfo rawAxisInfo;
+            getEventHub()->getAbsoluteAxisInfo(getDeviceId(), abs, &rawAxisInfo);
+            if (rawAxisInfo.valid) {
+                // Map axis.
+                AxisInfo axisInfo;
+                bool explicitlyMapped = !getEventHub()->mapAxis(getDeviceId(), abs, &axisInfo);
+                if (!explicitlyMapped) {
+                    // Axis is not explicitly mapped, will choose a generic axis later.
+                    axisInfo.mode = AxisInfo::MODE_NORMAL;
+                    axisInfo.axis = -1;
+                }
+
+                // Apply flat override.
+                int32_t rawFlat = axisInfo.flatOverride < 0
+                        ? rawAxisInfo.flat : axisInfo.flatOverride;
+
+                // Calculate scaling factors and limits.
+                Axis axis;
+                if (axisInfo.mode == AxisInfo::MODE_SPLIT) {
+                    float scale = 1.0f / (axisInfo.splitValue - rawAxisInfo.minValue);
+                    float highScale = 1.0f / (rawAxisInfo.maxValue - axisInfo.splitValue);
+                    axis.initialize(rawAxisInfo, axisInfo, explicitlyMapped,
+                            scale, 0.0f, highScale, 0.0f,
+                            0.0f, 1.0f, rawFlat * scale, rawAxisInfo.fuzz * scale);
+                } else if (isCenteredAxis(axisInfo.axis)) {
+                    float scale = 2.0f / (rawAxisInfo.maxValue - rawAxisInfo.minValue);
+                    float offset = avg(rawAxisInfo.minValue, rawAxisInfo.maxValue) * -scale;
+                    axis.initialize(rawAxisInfo, axisInfo, explicitlyMapped,
+                            scale, offset, scale, offset,
+                            -1.0f, 1.0f, rawFlat * scale, rawAxisInfo.fuzz * scale);
+                } else {
+                    float scale = 1.0f / (rawAxisInfo.maxValue - rawAxisInfo.minValue);
+                    axis.initialize(rawAxisInfo, axisInfo, explicitlyMapped,
+                            scale, 0.0f, scale, 0.0f,
+                            0.0f, 1.0f, rawFlat * scale, rawAxisInfo.fuzz * scale);
+                }
+
+                // To eliminate noise while the joystick is at rest, filter out small variations
+                // in axis values up front.
+                axis.filter = axis.flat * 0.25f;
+
+                mAxes.add(abs, axis);
             }
-
-            // Apply flat override.
-            int32_t rawFlat = axisInfo.flatOverride < 0
-                    ? rawAxisInfo.flat : axisInfo.flatOverride;
-
-            // Calculate scaling factors and limits.
-            Axis axis;
-            if (axisInfo.mode == AxisInfo::MODE_SPLIT) {
-                float scale = 1.0f / (axisInfo.splitValue - rawAxisInfo.minValue);
-                float highScale = 1.0f / (rawAxisInfo.maxValue - axisInfo.splitValue);
-                axis.initialize(rawAxisInfo, axisInfo, explicitlyMapped,
-                        scale, 0.0f, highScale, 0.0f,
-                        0.0f, 1.0f, rawFlat * scale, rawAxisInfo.fuzz * scale);
-            } else if (isCenteredAxis(axisInfo.axis)) {
-                float scale = 2.0f / (rawAxisInfo.maxValue - rawAxisInfo.minValue);
-                float offset = avg(rawAxisInfo.minValue, rawAxisInfo.maxValue) * -scale;
-                axis.initialize(rawAxisInfo, axisInfo, explicitlyMapped,
-                        scale, offset, scale, offset,
-                        -1.0f, 1.0f, rawFlat * scale, rawAxisInfo.fuzz * scale);
-            } else {
-                float scale = 1.0f / (rawAxisInfo.maxValue - rawAxisInfo.minValue);
-                axis.initialize(rawAxisInfo, axisInfo, explicitlyMapped,
-                        scale, 0.0f, scale, 0.0f,
-                        0.0f, 1.0f, rawFlat * scale, rawAxisInfo.fuzz * scale);
-            }
-
-            // To eliminate noise while the joystick is at rest, filter out small variations
-            // in axis values up front.
-            axis.filter = axis.flat * 0.25f;
-
-            mAxes.add(abs, axis);
         }
-    }
 
-    // If there are too many axes, start dropping them.
-    // Prefer to keep explicitly mapped axes.
-    if (mAxes.size() > PointerCoords::MAX_AXES) {
-        LOGI("Joystick '%s' has %d axes but the framework only supports a maximum of %d.",
-                getDeviceName().string(), mAxes.size(), PointerCoords::MAX_AXES);
-        pruneAxes(true);
-        pruneAxes(false);
-    }
+        // If there are too many axes, start dropping them.
+        // Prefer to keep explicitly mapped axes.
+        if (mAxes.size() > PointerCoords::MAX_AXES) {
+            LOGI("Joystick '%s' has %d axes but the framework only supports a maximum of %d.",
+                    getDeviceName().string(), mAxes.size(), PointerCoords::MAX_AXES);
+            pruneAxes(true);
+            pruneAxes(false);
+        }
 
-    // Assign generic axis ids to remaining axes.
-    int32_t nextGenericAxisId = AMOTION_EVENT_AXIS_GENERIC_1;
-    size_t numAxes = mAxes.size();
-    for (size_t i = 0; i < numAxes; i++) {
-        Axis& axis = mAxes.editValueAt(i);
-        if (axis.axisInfo.axis < 0) {
-            while (nextGenericAxisId <= AMOTION_EVENT_AXIS_GENERIC_16
-                    && haveAxis(nextGenericAxisId)) {
-                nextGenericAxisId += 1;
-            }
+        // Assign generic axis ids to remaining axes.
+        int32_t nextGenericAxisId = AMOTION_EVENT_AXIS_GENERIC_1;
+        size_t numAxes = mAxes.size();
+        for (size_t i = 0; i < numAxes; i++) {
+            Axis& axis = mAxes.editValueAt(i);
+            if (axis.axisInfo.axis < 0) {
+                while (nextGenericAxisId <= AMOTION_EVENT_AXIS_GENERIC_16
+                        && haveAxis(nextGenericAxisId)) {
+                    nextGenericAxisId += 1;
+                }
 
-            if (nextGenericAxisId <= AMOTION_EVENT_AXIS_GENERIC_16) {
-                axis.axisInfo.axis = nextGenericAxisId;
-                nextGenericAxisId += 1;
-            } else {
-                LOGI("Ignoring joystick '%s' axis %d because all of the generic axis ids "
-                        "have already been assigned to other axes.",
-                        getDeviceName().string(), mAxes.keyAt(i));
-                mAxes.removeItemsAt(i--);
-                numAxes -= 1;
+                if (nextGenericAxisId <= AMOTION_EVENT_AXIS_GENERIC_16) {
+                    axis.axisInfo.axis = nextGenericAxisId;
+                    nextGenericAxisId += 1;
+                } else {
+                    LOGI("Ignoring joystick '%s' axis %d because all of the generic axis ids "
+                            "have already been assigned to other axes.",
+                            getDeviceName().string(), mAxes.keyAt(i));
+                    mAxes.removeItemsAt(i--);
+                    numAxes -= 1;
+                }
             }
         }
     }

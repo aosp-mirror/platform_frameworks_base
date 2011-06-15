@@ -48,6 +48,7 @@ static struct {
     jfieldID layer;
     jfieldID ownerPid;
     jfieldID ownerUid;
+    jfieldID inputFeatures;
 } gInputWindowClassInfo;
 
 
@@ -130,6 +131,8 @@ void android_server_InputWindow_toNative(
             gInputWindowClassInfo.ownerPid);
     outInputWindow->ownerUid = env->GetIntField(inputWindowObj,
             gInputWindowClassInfo.ownerUid);
+    outInputWindow->inputFeatures = env->GetIntField(inputWindowObj,
+            gInputWindowClassInfo.inputFeatures);
 }
 
 
@@ -206,6 +209,9 @@ int register_android_server_InputWindow(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowClassInfo.ownerUid, clazz,
             "ownerUid", "I");
+
+    GET_FIELD_ID(gInputWindowClassInfo.inputFeatures, clazz,
+            "inputFeatures", "I");
     return 0;
 }
 

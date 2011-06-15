@@ -75,6 +75,9 @@ public final class InputWindow {
     public int ownerPid;
     public int ownerUid;
 
+    // Window input features.
+    public int inputFeatures;
+
     public void recycle() {
         inputWindowHandle = null;
         inputChannel = null;
