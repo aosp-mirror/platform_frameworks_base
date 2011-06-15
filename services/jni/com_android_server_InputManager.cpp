@@ -234,6 +234,9 @@ private:
         // Pointer speed.
         int32_t pointerSpeed;
 
+        // True if pointer gestures are enabled.
+        bool pointerGesturesEnabled;
+
         // Sprite controller singleton, created on first use.
         sp<SpriteController> spriteController;
 
@@ -274,6 +277,7 @@ NativeInputManager::NativeInputManager(jobject contextObj,
 
         mLocked.systemUiVisibility = ASYSTEM_UI_VISIBILITY_STATUS_BAR_VISIBLE;
         mLocked.pointerSpeed = 0;
+        mLocked.pointerGesturesEnabled = true;
     }
 
     sp<EventHub> eventHub = new EventHub();
@@ -443,6 +447,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
 
         outConfig->pointerVelocityControlParameters.scale = exp2f(mLocked.pointerSpeed
                 * POINTER_SPEED_EXPONENT);
+        outConfig->pointerGesturesEnabled = mLocked.pointerGesturesEnabled;
     } // release lock
 }
 
@@ -594,6 +599,7 @@ bool NativeInputManager::isKeyRepeatEnabled() {
 void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowObjArray) {
     Vector<InputWindow> windows;
 
+    bool newPointerGesturesEnabled = true;
     jsize length = env->GetArrayLength(windowObjArray);
     for (jsize i = 0; i < length; i++) {
         jobject windowObj = env->GetObjectArrayElement(windowObjArray, i);
@@ -606,11 +612,29 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowObjArra
         android_server_InputWindow_toNative(env, windowObj, &window);
         if (window.inputChannel == NULL) {
             windows.pop();
+        } else if (window.hasFocus) {
+            if (window.inputFeatures & InputWindow::INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES) {
+                newPointerGesturesEnabled = false;
+            }
         }
         env->DeleteLocalRef(windowObj);
     }
 
     mInputManager->getDispatcher()->setInputWindows(windows);
+
+    uint32_t changes = 0;
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        if (mLocked.pointerGesturesEnabled != newPointerGesturesEnabled) {
+            mLocked.pointerGesturesEnabled = newPointerGesturesEnabled;
+            changes |= InputReaderConfiguration::CHANGE_POINTER_GESTURE_ENABLEMENT;
+        }
+    } // release lock
+
+    if (changes) {
+        mInputManager->getReader()->requestRefreshConfiguration(changes);
+    }
 }
 
 void NativeInputManager::setFocusedApplication(JNIEnv* env, jobject applicationObj) {
@@ -650,14 +674,19 @@ void NativeInputManager::updateInactivityTimeoutLocked(const sp<PointerControlle
 }
 
 void NativeInputManager::setPointerSpeed(int32_t speed) {
-    AutoMutex _l(mLock);
+    { // acquire lock
+        AutoMutex _l(mLock);
 
-    if (mLocked.pointerSpeed != speed) {
+        if (mLocked.pointerSpeed == speed) {
+            return;
+        }
+
         LOGI("Setting pointer speed to %d.", speed);
         mLocked.pointerSpeed = speed;
+    } // release lock
 
-        mInputManager->getReader()->refreshConfiguration();
-    }
+    mInputManager->getReader()->requestRefreshConfiguration(
+            InputReaderConfiguration::CHANGE_POINTER_SPEED);
 }
 
 bool NativeInputManager::isScreenOn() {

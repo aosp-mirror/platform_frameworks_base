@@ -127,6 +127,10 @@ struct InputWindow {
         LAST_SYSTEM_WINDOW      = 2999,
     };
 
+    enum {
+        INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES = 0x00000001,
+    };
+
     sp<InputWindowHandle> inputWindowHandle;
     sp<InputChannel> inputChannel;
     String8 name;
@@ -147,6 +151,7 @@ struct InputWindow {
     int32_t layer;
     int32_t ownerPid;
     int32_t ownerUid;
+    int32_t inputFeatures;
 
     bool touchableRegionContainsPoint(int32_t x, int32_t y) const;
     bool frameContainsPoint(int32_t x, int32_t y) const;

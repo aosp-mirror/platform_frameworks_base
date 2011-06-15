@@ -3395,6 +3395,7 @@ void InputDispatcher::dumpDispatchStateLocked(String8& dump) {
                     window.frameRight, window.frameBottom,
                     window.scaleFactor);
             dumpRegion(dump, window.touchableRegion);
+            dump.appendFormat(", inputFeatures=0x%08x", window.inputFeatures);
             dump.appendFormat(", ownerPid=%d, ownerUid=%d, dispatchingTimeout=%0.3fms\n",
                     window.ownerPid, window.ownerUid,
                     window.dispatchingTimeout / 1000000.0);

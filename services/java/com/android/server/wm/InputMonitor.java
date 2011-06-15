@@ -128,6 +128,8 @@ final class InputMonitor {
         inputWindow.layer = mService.mDragState.getDragLayerLw();
         inputWindow.ownerPid = Process.myPid();
         inputWindow.ownerUid = Process.myUid();
+        inputWindow.inputFeatures = 0;
+        inputWindow.scaleFactor = 1.0f;
 
         // The drag window covers the entire display
         inputWindow.frameLeft = 0;
@@ -204,7 +206,8 @@ final class InputMonitor {
             inputWindow.layer = child.mLayer;
             inputWindow.ownerPid = child.mSession.mPid;
             inputWindow.ownerUid = child.mSession.mUid;
-            
+            inputWindow.inputFeatures = child.mAttrs.inputFeatures;
+
             final Rect frame = child.mFrame;
             inputWindow.frameLeft = frame.left;
             inputWindow.frameTop = frame.top;

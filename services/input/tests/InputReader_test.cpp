@@ -747,8 +747,6 @@ class FakeInputReaderContext : public InputReaderContext {
     int32_t mGlobalMetaState;
     bool mUpdateGlobalMetaStateWasCalled;
 
-    InputReaderConfiguration mConfig;
-
 public:
     FakeInputReaderContext(const sp<EventHubInterface>& eventHub,
             const sp<InputReaderPolicyInterface>& policy,
@@ -784,11 +782,6 @@ private:
 
     virtual InputReaderPolicyInterface* getPolicy() {
         return mPolicy.get();
-    }
-
-    virtual const InputReaderConfiguration* getConfig() {
-        mPolicy->getReaderConfiguration(&mConfig);
-        return &mConfig;
     }
 
     virtual InputDispatcherInterface* getDispatcher() {
@@ -895,7 +888,7 @@ private:
         }
     }
 
-    virtual void configure() {
+    virtual void configure(const InputReaderConfiguration* config, uint32_t changes) {
         mConfigureWasCalled = true;
     }
 
@@ -1359,7 +1352,8 @@ TEST_F(InputDeviceTest, ImmutableProperties) {
 
 TEST_F(InputDeviceTest, WhenNoMappersAreRegistered_DeviceIsIgnored) {
     // Configuration.
-    mDevice->configure();
+    InputReaderConfiguration config;
+    mDevice->configure(&config, 0);
 
     // Metadata.
     ASSERT_TRUE(mDevice->isIgnored());
@@ -1413,7 +1407,8 @@ TEST_F(InputDeviceTest, WhenMappersAreRegistered_DeviceIsNotIgnoredAndForwardsRe
     mapper2->setMetaState(AMETA_SHIFT_ON);
     mDevice->addMapper(mapper2);
 
-    mDevice->configure();
+    InputReaderConfiguration config;
+    mDevice->configure(&config, 0);
 
     String8 propertyValue;
     ASSERT_TRUE(mDevice->getConfiguration().tryGetProperty(String8("key"), propertyValue))
@@ -1519,8 +1514,10 @@ protected:
     }
 
     void addMapperAndConfigure(InputMapper* mapper) {
+        InputReaderConfiguration config;
+
         mDevice->addMapper(mapper);
-        mDevice->configure();
+        mDevice->configure(&config, 0);
     }
 
     static void process(InputMapper* mapper, nsecs_t when, int32_t deviceId, int32_t type,

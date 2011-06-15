@@ -1004,6 +1004,23 @@ public interface WindowManager extends ViewManager {
          */
         public boolean hasSystemUiListeners;
 
+        /**
+         * When this window has focus, disable touch pad pointer gesture processing.
+         * The window will receive raw position updates from the touch pad instead
+         * of pointer movements and synthetic touch events.
+         *
+         * @hide
+         */
+        public static final int INPUT_FEATURE_DISABLE_POINTER_GESTURES = 0x00000001;
+
+        /**
+         * Control special features of the input subsystem.
+         *
+         * @see #INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES
+         * @hide
+         */
+        public int inputFeatures;
+
         public LayoutParams() {
             super(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
             type = TYPE_APPLICATION;
@@ -1086,6 +1103,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(systemUiVisibility);
             out.writeInt(subtreeSystemUiVisibility);
             out.writeInt(hasSystemUiListeners ? 1 : 0);
+            out.writeInt(inputFeatures);
         }
         
         public static final Parcelable.Creator<LayoutParams> CREATOR
@@ -1124,6 +1142,7 @@ public interface WindowManager extends ViewManager {
             systemUiVisibility = in.readInt();
             subtreeSystemUiVisibility = in.readInt();
             hasSystemUiListeners = in.readInt() != 0;
+            inputFeatures = in.readInt();
         }
     
         @SuppressWarnings({"PointlessBitwiseExpression"})
@@ -1145,6 +1164,8 @@ public interface WindowManager extends ViewManager {
         public static final int SYSTEM_UI_VISIBILITY_CHANGED = 1<<13;
         /** {@hide} */
         public static final int SYSTEM_UI_LISTENER_CHANGED = 1<<14;
+        /** {@hide} */
+        public static final int INPUT_FEATURES_CHANGED = 1<<15;
     
         // internal buffer to backup/restore parameters under compatibility mode.
         private int[] mCompatibilityParamsBackup = null;
@@ -1256,6 +1277,11 @@ public interface WindowManager extends ViewManager {
                 changes |= SYSTEM_UI_LISTENER_CHANGED;
             }
 
+            if (inputFeatures != o.inputFeatures) {
+                inputFeatures = o.inputFeatures;
+                changes |= INPUT_FEATURES_CHANGED;
+            }
+
             return changes;
         }
     
@@ -1340,6 +1366,7 @@ public interface WindowManager extends ViewManager {
                 sb.append(" sysuil=");
                 sb.append(hasSystemUiListeners);
             }
+            sb.append(" if=0x").append(Integer.toHexString(inputFeatures));
             sb.append('}');
             return sb.toString();
         }
