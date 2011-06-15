@@ -27,7 +27,7 @@
     >
 
     <LinearLayout
-        android:id="@+id/notificationAndImeArea"
+        android:id="@+id/feedbackIconArea"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:orientation="horizontal"
@@ -41,7 +41,16 @@
             android:src="@drawable/ic_sysbar_ime_default"
             android:visibility="gone"
             />
-        
+
+        <com.android.systemui.statusbar.policy.CompatModeButton
+            android:id="@+id/compatModeButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="8dip"
+            android:src="@drawable/ic_sysbar_zoom"
+            android:visibility="gone"
+            />
+
         <com.android.systemui.statusbar.tablet.NotificationIconArea
             android:id="@+id/notificationIcons"
             android:layout_width="wrap_content"
@@ -144,4 +153,3 @@
         </LinearLayout>
     </LinearLayout>
 </LinearLayout>
-
