@@ -53,4 +53,12 @@
     <string name="label_view" msgid="6304565553218192990">"Lihat"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Gunakan secara bawaan untuk perangkat USB ini"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Gunakan secara bawaan untuk aksesori USB ini"</string>
+    <!-- no translation found for compat_mode_on (6623839244840638213) -->
+    <skip />
+    <!-- no translation found for compat_mode_off (4434467572461327898) -->
+    <skip />
+    <!-- no translation found for compat_mode_help_header (7020175705401506719) -->
+    <skip />
+    <!-- no translation found for compat_mode_help_body (4946726776359270040) -->
+    <skip />
 </resources>

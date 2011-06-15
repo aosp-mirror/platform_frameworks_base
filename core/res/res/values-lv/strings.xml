@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Ļauj īpašniekam sūtīt nolūkus ierīces administratoram. Nekad nav nepieciešams parastajām lietojumprogrammām."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"mainīt ekrāna orientāciju"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Ļauj lietojumprogrammai jebkurā brīdī mainīt ekrāna pagriešanas iestatījumu. Parastajām lietojumprogrammām nekad nav nepieciešama."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"Rādītāja ātruma mainīšana"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Ļauj lietojumprogrammai jebkurā laikā mainīt peles vai skārienpaliktņa rādītāja ātrumu. Parastās lietojumprogrammās šī funkcija nav nepieciešama."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"sūtīt Linux signālus uz lietojumprogrammām"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Ļauj lietojumprogrammai pieprasīt, lai piegādātais signāls tiktu sūtīts uz visiem pastāvīgajiem procesiem."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"likt lietojumprogrammai vienmēr darboties"</string>

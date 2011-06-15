@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Омогућава власнику да шаље своје намере администратору уређаја. Обичне апликације никада не би требало да је користе."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"промена положаја екрана"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Омогућава да апликација у сваком тренутку промени ротацију екрана. Обичне апликације никада не би требало да је користе."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"промена брзине показивача"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Дозвољава апликацији да у било ком тренутку промени брзину показивача миша или показивачког уређаја са плочицом. Никада не би требало да буде потребно за обичне апликације."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"слање Linux сигнала апликацијама"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Омогућава да апликација захтева да испоручени сигнал буде послат свим трајним процесима."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"омогућавање непрекидне активности апликације"</string>

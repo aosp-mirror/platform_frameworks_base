@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Разрешава на притежателя да изпраща намерения до администратор на устройството. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"промяна на ориентацията на екрана"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Разрешава на приложението да променя ориентацията на екрана по всяко време. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"промяна на скоростта на курсор"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Разрешава на приложението да променя скоростта на курсора на мишката или на тракпада по всяко време. Обичайните приложения не би трябвало никога да се нуждаят от това."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"изпращане на сигнали от Linux до приложенията"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Разрешава на приложението да подаде заявка предоставеният сигнал да се изпрати до всички постоянни процеси."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"задаване на постоянно изпълнение на приложението"</string>
