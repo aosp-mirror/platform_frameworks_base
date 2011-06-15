@@ -21566,8 +21566,12 @@ package android.view {
     ctor public TextureView(android.content.Context, android.util.AttributeSet);
     ctor public TextureView(android.content.Context, android.util.AttributeSet, int);
     method public final void draw(android.graphics.Canvas);
+    method public android.graphics.Bitmap getBitmap();
+    method public android.graphics.Bitmap getBitmap(int, int);
+    method public android.graphics.Bitmap getBitmap(android.graphics.Bitmap);
     method public android.graphics.SurfaceTexture getSurfaceTexture();
     method public android.view.TextureView.SurfaceTextureListener getSurfaceTextureListener();
+    method public boolean isAvailable();
     method protected final void onDraw(android.graphics.Canvas);
     method public void setSurfaceTextureListener(android.view.TextureView.SurfaceTextureListener);
   }

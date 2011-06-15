@@ -315,5 +315,95 @@ void LayerRenderer::destroyLayerDeferred(Layer* layer) {
     }
 }
 
+bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
+    Caches& caches = Caches::getInstance();
+    if (layer && layer->isTextureLayer && bitmap->width() <= caches.maxTextureSize &&
+            bitmap->height() <= caches.maxTextureSize) {
+
+        GLuint fbo = caches.fboCache.get();
+        if (!fbo) {
+            LOGW("Could not obtain an FBO");
+            return false;
+        }
+
+        GLuint texture;
+        GLuint previousFbo;
+
+        GLenum format;
+        GLenum type;
+
+        switch (bitmap->config()) {
+            case SkBitmap::kA8_Config:
+                format = GL_ALPHA;
+                type = GL_UNSIGNED_BYTE;
+                break;
+            case SkBitmap::kRGB_565_Config:
+                format = GL_RGB;
+                type = GL_UNSIGNED_SHORT_5_6_5;
+                break;
+            case SkBitmap::kARGB_4444_Config:
+                format = GL_RGBA;
+                type = GL_UNSIGNED_SHORT_4_4_4_4;
+                break;
+            case SkBitmap::kARGB_8888_Config:
+            default:
+                format = GL_RGBA;
+                type = GL_UNSIGNED_BYTE;
+                break;
+        }
+
+        glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+        glGenTextures(1, &texture);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, format, bitmap->width(), bitmap->height(),
+                0, format, type, NULL);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                GL_TEXTURE_2D, texture, 0);
+
+        glBindTexture(GL_TEXTURE_2D, layer->texture);
+
+        float alpha = layer->alpha;
+        SkXfermode::Mode mode = layer->mode;
+
+        layer->mode = SkXfermode::kSrc_Mode;
+        layer->alpha = 255;
+        layer->fbo = fbo;
+
+        LayerRenderer renderer(layer);
+        renderer.setViewport(bitmap->width(), bitmap->height());
+        renderer.OpenGLRenderer::prepareDirty(0.0f, 0.0f,
+                bitmap->width(), bitmap->height(), !layer->blend);
+
+        Rect bounds;
+        bounds.set(0.0f, 0.0f, bitmap->width(), bitmap->height());
+        renderer.drawTextureLayer(layer, bounds);
+
+        SkAutoLockPixels alp(*bitmap);
+        glReadPixels(0, 0, bitmap->width(), bitmap->height(), format, type, bitmap->getPixels());
+
+        glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
+
+        layer->mode = mode;
+        layer->alpha = alpha;
+        layer->fbo = 0;
+        glDeleteTextures(1, &texture);
+        caches.fboCache.put(fbo);
+
+        return true;
+    }
+    return false;
+}
+
 }; // namespace uirenderer
 }; // namespace android

@@ -178,6 +178,14 @@ protected:
         return 0;
     }
 
+    /**
+     * Renders the specified layer as a textured quad.
+     *
+     * @param layer The layer to render
+     * @param rect The bounds of the layer
+     */
+    void drawTextureLayer(Layer* layer, const Rect& rect);
+
 private:
     /**
      * Saves the current state of the renderer as a new snapshot.
@@ -254,14 +262,6 @@ private:
      * This method MUST be invoked before any drawing operation.
      */
     void clearLayerRegions();
-
-    /**
-     * Renders the specified layer as a textured quad.
-     *
-     * @param layer The layer to render
-     * @param rect The bounds of the layer
-     */
-    void drawTextureLayer(Layer* layer, const Rect& rect);
 
     /**
      * Mark the layer as dirty at the specified coordinates. The coordinates

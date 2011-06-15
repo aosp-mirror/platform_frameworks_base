@@ -20,6 +20,8 @@
 #include "OpenGLRenderer.h"
 #include "Layer.h"
 
+#include <SkBitmap.h>
+
 namespace android {
 namespace uirenderer {
 
@@ -60,6 +62,7 @@ public:
             GLenum renderTarget, float* transform);
     static void destroyLayer(Layer* layer);
     static void destroyLayerDeferred(Layer* layer);
+    static bool copyLayer(Layer* layer, SkBitmap* bitmap);
 
 private:
     void generateMesh();

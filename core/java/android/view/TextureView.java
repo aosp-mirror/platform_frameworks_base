@@ -17,6 +17,7 @@
 package android.view;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
@@ -89,6 +90,8 @@ import android.util.Log;
  * @see SurfaceTexture
  */
 public class TextureView extends View {
+    private static final String LOG_TAG = "TextureView";
+
     private HardwareLayer mLayer;
     private SurfaceTexture mSurface;
     private SurfaceTextureListener mListener;
@@ -148,7 +151,7 @@ public class TextureView extends View {
         super.onAttachedToWindow();
 
         if (!isHardwareAccelerated()) {
-            Log.w("TextureView", "A TextureView or a subclass can only be "
+            Log.w(LOG_TAG, "A TextureView or a subclass can only be "
                     + "used with hardware acceleration enabled.");
         }
     }
@@ -293,8 +296,95 @@ public class TextureView extends View {
     }
 
     /**
+     * <p>Returns a {@link android.graphics.Bitmap} representation of the content
+     * of the associated surface texture. If the surface texture is not available,
+     * this method returns null.</p>
+     * 
+     * <p>The bitmap returned by this method uses the {@link Bitmap.Config#ARGB_8888}
+     * pixel format and its dimensions are the same as this view's.</p>
+     * 
+     * <p><strong>Do not</strong> invoke this method from a drawing method
+     * ({@link #onDraw(android.graphics.Canvas)} for instance).</p>
+     * 
+     * @return A valid {@link Bitmap.Config#ARGB_8888} bitmap, or null if the surface
+     *         texture is not available or the width &lt;= 0 or the height &lt;= 0
+     * 
+     * @see #isAvailable() 
+     * @see #getBitmap(android.graphics.Bitmap) 
+     * @see #getBitmap(int, int) 
+     */
+    public Bitmap getBitmap() {
+        return getBitmap(getWidth(), getHeight());
+    }
+
+    /**
+     * <p>Returns a {@link android.graphics.Bitmap} representation of the content
+     * of the associated surface texture. If the surface texture is not available,
+     * this method returns null.</p>
+     * 
+     * <p>The bitmap returned by this method uses the {@link Bitmap.Config#ARGB_8888}
+     * pixel format.</p>
+     * 
+     * <p><strong>Do not</strong> invoke this method from a drawing method
+     * ({@link #onDraw(android.graphics.Canvas)} for instance).</p>
+     * 
+     * @param width The width of the bitmap to create
+     * @param height The height of the bitmap to create
+     * 
+     * @return A valid {@link Bitmap.Config#ARGB_8888} bitmap, or null if the surface
+     *         texture is not available or width is &lt;= 0 or height is &lt;= 0
+     * 
+     * @see #isAvailable() 
+     * @see #getBitmap(android.graphics.Bitmap) 
+     * @see #getBitmap() 
+     */
+    public Bitmap getBitmap(int width, int height) {
+        if (isAvailable() && width > 0 && height > 0) {
+            return getBitmap(Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888));
+        }
+        return null;
+    }
+
+    /**
+     * <p>Copies the content of this view's surface texture into the specified
+     * bitmap. If the surface texture is not available, the copy is not executed.
+     * The content of the surface texture will be scaled to fit exactly inside
+     * the specified bitmap.</p>
+     * 
+     * <p><strong>Do not</strong> invoke this method from a drawing method
+     * ({@link #onDraw(android.graphics.Canvas)} for instance).</p>
+     * 
+     * @param bitmap The bitmap to copy the content of the surface texture into,
+     *               cannot be null, all configurations are supported
+     * 
+     * @return The bitmap specified as a parameter
+     * 
+     * @see #isAvailable() 
+     * @see #getBitmap(int, int)  
+     * @see #getBitmap() 
+     */
+    public Bitmap getBitmap(Bitmap bitmap) {
+        if (bitmap != null && isAvailable()) {
+            mAttachInfo.mHardwareRenderer.copyLayer(mLayer, bitmap);
+        }
+        return bitmap;
+    }
+
+    /**
+     * Returns true if the {@link SurfaceTexture} associated with this
+     * TextureView is available for rendering. When this method returns
+     * true, {@link #getSurfaceTexture()} returns a valid surface texture.
+     */
+    public boolean isAvailable() {
+        return mSurface != null;
+    }
+
+    /**
      * Returns the {@link SurfaceTexture} used by this view. This method
-     * may return null if the view is not attached to a window.
+     * may return null if the view is not attached to a window or if the surface
+     * texture has not been initialized yet.
+     * 
+     * @see #isAvailable() 
      */
     public SurfaceTexture getSurfaceTexture() {
         return mSurface;
