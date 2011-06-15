@@ -75,13 +75,6 @@
                     systemui:keyCode="82"
                     android:visibility="invisible"
                     />
-                <com.android.systemui.statusbar.policy.CompatModeButton
-                    android:id="@+id/compat_button"
-                    android:layout_width="80dip"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_sysbar_zoom"
-                    android:visibility="invisible"
-                    />
             </LinearLayout>
 
             <!-- fake space bar zone -->

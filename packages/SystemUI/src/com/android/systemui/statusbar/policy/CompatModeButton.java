@@ -27,7 +27,8 @@ import android.widget.ImageView;
 
 import com.android.systemui.R;
 
-public class CompatModeButton extends ImageView implements View.OnClickListener {
+public class CompatModeButton extends ImageView {
+    private static final boolean DEBUG = false;
     private static final String TAG = "StatusBar.CompatModeButton";
 
     private ActivityManager mAM;
@@ -43,22 +44,14 @@ public class CompatModeButton extends ImageView implements View.OnClickListener 
 
         mAM = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
 
-        setOnClickListener(this);
-
         refresh();
-    }
-
-    @Override
-    public void onClick(View v) {
-        mAM.setFrontActivityScreenCompatMode(ActivityManager.COMPAT_MODE_TOGGLE);
     }
 
     public void refresh() {
         int mode = mAM.getFrontActivityScreenCompatMode();
-        setVisibility((mode == ActivityManager.COMPAT_MODE_NEVER
-                        || mode == ActivityManager.COMPAT_MODE_ALWAYS)
-                ? View.GONE
-                : View.VISIBLE
-            );
+        final boolean vis = (mode != ActivityManager.COMPAT_MODE_NEVER
+                          && mode != ActivityManager.COMPAT_MODE_ALWAYS);
+        if (DEBUG) Slog.d(TAG, "compat mode is " + mode + "; icon will " + (vis ? "show" : "hide"));
+        setVisibility(vis ? View.VISIBLE : View.GONE);
     }
 }
