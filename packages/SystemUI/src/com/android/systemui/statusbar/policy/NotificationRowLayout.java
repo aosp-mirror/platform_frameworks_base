@@ -20,6 +20,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
@@ -30,6 +31,8 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Slog;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
@@ -45,10 +48,15 @@ import com.android.systemui.R;
 public class NotificationRowLayout extends ViewGroup {
     private static final String TAG = "NotificationRowLayout";
     private static final boolean DEBUG = false;
+    private static final boolean SLOW_ANIMATIONS = false; // DEBUG;
 
     private static final boolean ANIMATE_LAYOUT = true;
 
-    private static final int ANIM_LEN = DEBUG ? 5000 : 250;
+    private static final int APPEAR_ANIM_LEN = SLOW_ANIMATIONS ? 5000 : 250;
+    private static final int DISAPPEAR_ANIM_LEN = APPEAR_ANIM_LEN;
+    private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 250;
+
+    private static final float SWIPE_ESCAPE_VELOCITY = 1500f;
 
     Rect mTmpRect = new Rect();
     int mNumRows = 0;
@@ -58,12 +66,19 @@ public class NotificationRowLayout extends ViewGroup {
     HashSet<View> mAppearingViews = new HashSet<View>();
     HashSet<View> mDisappearingViews = new HashSet<View>();
 
+    VelocityTracker mVT;
+    float mInitialTouchX, mInitialTouchY;
+    View mSlidingChild = null;
+    float mLiftoffVelocity;
+
     public NotificationRowLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
     public NotificationRowLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
+        mVT = VelocityTracker.obtain();
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.NotificationRowLayout,
                 defStyle, 0);
@@ -89,6 +104,92 @@ public class NotificationRowLayout extends ViewGroup {
 
     }
 
+    // Swipey code
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        final int action = ev.getAction();
+//        if (DEBUG) Slog.d(TAG, "intercepting touch event: " + ev);
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                mVT.clear();
+                mVT.addMovement(ev);
+                mInitialTouchX = ev.getX();
+                mInitialTouchY = ev.getY();
+                mSlidingChild = null;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                mVT.addMovement(ev);
+                if (mSlidingChild == null) {
+                    if (Math.abs(ev.getX() - mInitialTouchX) > 4) { // slide slop
+
+                        // find the view under the pointer, accounting for GONE views
+                        final int count = getChildCount();
+                        int y = 0;
+                        int childIdx = 0;
+                        for (; childIdx < count; childIdx++) {
+                            mSlidingChild = getChildAt(childIdx);
+                            if (mSlidingChild.getVisibility() == GONE) {
+                                continue;
+                            }
+                            y += mRowHeight;
+                            if (mInitialTouchY < y) break;
+                        }
+
+                        mInitialTouchX -= mSlidingChild.getTranslationX();
+                        mSlidingChild.animate().cancel();
+
+                        if (DEBUG) {
+                            Slog.d(TAG, String.format(
+                                "now sliding child %d: %s (touchY=%.1f, rowHeight=%d, count=%d)",
+                                childIdx, mSlidingChild, mInitialTouchY, mRowHeight, count));
+                        }
+                    }
+                }
+                break;
+        }
+        return mSlidingChild != null;
+    }
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        final int action = ev.getAction();
+//        if (DEBUG) Slog.d(TAG, "touch event: " + ev + " sliding: " + mSlidingChild);
+        if (mSlidingChild != null) {
+            switch (action) {
+                case MotionEvent.ACTION_OUTSIDE:
+                case MotionEvent.ACTION_MOVE:
+                    mVT.addMovement(ev);
+
+                    mSlidingChild.setTranslationX(ev.getX() - mInitialTouchX);
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    mVT.addMovement(ev);
+                    mVT.computeCurrentVelocity(1000 /* px/sec */);
+                    if (DEBUG) Slog.d(TAG, "exit velocity: " + mVT.getXVelocity());
+                    boolean restore = true;
+                    mLiftoffVelocity = mVT.getXVelocity();
+                    if (Math.abs(mLiftoffVelocity) > SWIPE_ESCAPE_VELOCITY) {
+                        // flingadingy
+
+                        View veto = mSlidingChild.findViewById(R.id.veto);
+                        if (veto != null && veto.getVisibility() == View.VISIBLE) {
+                            veto.performClick();
+                            restore = false;
+                        }
+                    }
+                    if (restore) {
+                        // snappity
+                        mSlidingChild.animate().translationX(0)
+                            .setDuration(SNAP_ANIM_LEN)
+                            .start();
+                    }
+                    break;
+            }
+            return true;
+        }
+        return false;
+    }
+
     //**
     @Override
     public void addView(View child, int index, LayoutParams params) {
@@ -105,7 +206,7 @@ public class NotificationRowLayout extends ViewGroup {
                     ObjectAnimator.ofFloat(child, "alpha", 0f, 1f)
 //                    ,ObjectAnimator.ofFloat(child, "scaleY", 0f, 1f)
             );
-            a.setDuration(ANIM_LEN);
+            a.setDuration(APPEAR_ANIM_LEN);
             a.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -127,21 +228,36 @@ public class NotificationRowLayout extends ViewGroup {
             mDisappearingViews.add(child);
 
             child.setPivotY(0);
-            AnimatorSet a = new AnimatorSet();
-            a.playTogether(
-                    ObjectAnimator.ofFloat(child, "alpha", 0f)
-//                    ,ObjectAnimator.ofFloat(child, "scaleY", 0f)
-                    ,ObjectAnimator.ofFloat(child, "translationX", 300f)
-            );
-            a.setDuration(ANIM_LEN);
-            a.addListener(new AnimatorListenerAdapter() {
+
+            final float velocity = (mSlidingChild == child) 
+                    ? mLiftoffVelocity : SWIPE_ESCAPE_VELOCITY;
+            final TimeAnimator zoom = new TimeAnimator();
+            zoom.setTimeListener(new TimeAnimator.TimeListener() {
+                @Override
+                public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
+                    childF.setTranslationX(childF.getTranslationX() + deltaTime / 1000f * velocity);
+                }
+            });
+
+            final ObjectAnimator alphaFade = ObjectAnimator.ofFloat(child, "alpha", 0f);
+            alphaFade.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    zoom.cancel(); // it won't end on its own
+                    if (DEBUG) Slog.d(TAG, "actually removing child: " + childF);
                     NotificationRowLayout.super.removeView(childF);
                     childF.setAlpha(1f);
                     mDisappearingViews.remove(childF);
                 }
             });
+
+            AnimatorSet a = new AnimatorSet();
+            a.playTogether(alphaFade, zoom);
+                    
+//                    ,ObjectAnimator.ofFloat(child, "scaleY", 0f)
+//                    ,ObjectAnimator.ofFloat(child, "translationX", child.getTranslationX() + 300f)
+
+            a.setDuration(DISAPPEAR_ANIM_LEN);
             a.start();
             requestLayout(); // start the container animation
         } else {
@@ -160,8 +276,8 @@ public class NotificationRowLayout extends ViewGroup {
     public void onDraw(android.graphics.Canvas c) {
         super.onDraw(c);
         if (DEBUG) {
-            Slog.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
-                    + getMeasuredHeight() + "px");
+            //Slog.d(TAG, "onDraw: canvas height: " + c.getHeight() + "px; measured height: "
+            //        + getMeasuredHeight() + "px");
             c.save();
             c.clipRect(6, 6, c.getWidth() - 6, getMeasuredHeight() - 6,
                     android.graphics.Region.Op.DIFFERENCE);
@@ -199,7 +315,7 @@ public class NotificationRowLayout extends ViewGroup {
 
             if (ANIMATE_LAYOUT && isShown()) {
                 ObjectAnimator.ofInt(this, "forcedHeight", computedHeight)
-                    .setDuration(ANIM_LEN)
+                    .setDuration(APPEAR_ANIM_LEN)
                     .start();
             } else {
                 setForcedHeight(computedHeight);
@@ -230,7 +346,7 @@ public class NotificationRowLayout extends ViewGroup {
         final int width = right - left;
         final int height = bottom - top;
 
-        if (DEBUG) Slog.d(TAG, "onLayout: height=" + height);
+        //if (DEBUG) Slog.d(TAG, "onLayout: height=" + height);
 
         final int count = getChildCount();
         int y = 0;
@@ -252,7 +368,7 @@ public class NotificationRowLayout extends ViewGroup {
     }
 
     public void setForcedHeight(int h) {
-        if (DEBUG) Slog.d(TAG, "forcedHeight: " + h);
+        //if (DEBUG) Slog.d(TAG, "forcedHeight: " + h);
         if (h != mHeight) {
             mHeight = h;
             requestLayout();
