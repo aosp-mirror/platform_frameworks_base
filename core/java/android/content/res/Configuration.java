@@ -19,6 +19,7 @@ package android.content.res;
 import android.content.pm.ActivityInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.LocaleUtil;
 
 import java.util.Locale;
 
@@ -277,21 +278,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
     public int compatSmallestScreenWidthDp;
 
     /**
-     * @hide Do not use. Implementation not finished.
-     */
-    public static final int TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE = -1;
-
-    /**
-     * @hide Do not use. Implementation not finished.
-     */
-    public static final int TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE = 0;
-
-    /**
-     * @hide Do not use. Implementation not finished.
-     */
-    public static final int TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE = 1;
-
-    /**
      * @hide The text layout direction associated to the current Locale
      */
     public int textLayoutDirection;
@@ -359,8 +345,8 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             sb.append(" (no locale)");
         }
         switch (textLayoutDirection) {
-            case TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE: sb.append(" ?layoutdir"); break;
-            case TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE: sb.append(" rtl"); break;
+            case LocaleUtil.TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE: sb.append(" ?layoutdir"); break;
+            case LocaleUtil.TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE: sb.append(" rtl"); break;
             default: sb.append(" layoutdir="); sb.append(textLayoutDirection); break;
         }
         if (smallestScreenWidthDp != SMALLEST_SCREEN_WIDTH_DP_UNDEFINED) {
@@ -483,7 +469,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         screenWidthDp = compatScreenWidthDp = SCREEN_WIDTH_DP_UNDEFINED;
         screenHeightDp = compatScreenHeightDp = SCREEN_HEIGHT_DP_UNDEFINED;
         smallestScreenWidthDp = compatSmallestScreenWidthDp = SMALLEST_SCREEN_WIDTH_DP_UNDEFINED;
-        textLayoutDirection = TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE;
+        textLayoutDirection = LocaleUtil.TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE;
         seq = 0;
     }
 
@@ -519,7 +505,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             changed |= ActivityInfo.CONFIG_LOCALE;
             locale = delta.locale != null
                     ? (Locale) delta.locale.clone() : null;
-            textLayoutDirection = getLayoutDirectionFromLocale(locale);
+            textLayoutDirection = LocaleUtil.getLayoutDirectionFromLocale(locale);
         }
         if (delta.userSetLocale && (!userSetLocale || ((changed & ActivityInfo.CONFIG_LOCALE) != 0)))
         {
@@ -606,31 +592,6 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         }
         
         return changed;
-    }
-
-    /**
-     * Return the layout direction for a given Locale
-     * @param locale the Locale for which we want the layout direction. Can be null.
-     * @return the layout direction. This may be one of:
-     * {@link #TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE} or
-     * {@link #TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE} or
-     * {@link #TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE}.
-     *
-     * @hide
-     */
-    public static int getLayoutDirectionFromLocale(Locale locale) {
-        if (locale == null || locale.equals(Locale.ROOT)) return TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE;
-        // Be careful: this code will need to be changed when vertical scripts will be supported
-        // OR if ICU4C is updated to have the "likelySubtags" file
-        switch(Character.getDirectionality(locale.getDisplayName(locale).charAt(0))) {
-            case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
-                return TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE;
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
-                return TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE;
-            default:
-                return TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE;
-        }
     }
 
     /**
