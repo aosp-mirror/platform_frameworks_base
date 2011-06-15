@@ -18,6 +18,7 @@
 #include "JNIHelp.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
+#include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <utils/misc.h>
 
 #include <EGL/egl.h>
@@ -323,7 +324,7 @@ not_valid_surface:
 }
 
 static jint jni_eglCreateWindowSurfaceTexture(JNIEnv *_env, jobject _this, jobject display,
-        jobject config, jint native_window, jintArray attrib_list) {
+        jobject config, jobject native_window, jintArray attrib_list) {
     if (display == NULL || config == NULL
         || !validAttribList(_env, attrib_list)) {
         jniThrowException(_env, "java/lang/IllegalArgumentException", NULL);
@@ -339,7 +340,7 @@ not_valid_surface:
         return 0;
     }
     
-    sp<SurfaceTexture> surfaceTexture = reinterpret_cast<SurfaceTexture*>(native_window);
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(_env, native_window));
 
     window = new SurfaceTextureClient(surfaceTexture);
     if (window == NULL)

@@ -66,11 +66,8 @@ public class SurfaceTexture {
 
     /**
      * This field is used by native code, do not access or modify.
-     * 
-     * @hide
      */
-    @SuppressWarnings({"UnusedDeclaration"})
-    public int mSurfaceTexture;
+    private int mSurfaceTexture;
 
     /**
      * Callback interface for being notified that a new stream frame is available.

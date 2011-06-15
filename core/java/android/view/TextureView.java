@@ -232,7 +232,7 @@ public class TextureView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         if (mSurface != null) {
-            nSetDefaultBufferSize(mSurface.mSurfaceTexture, getWidth(), getHeight());
+            nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
             if (mListener != null) {
                 mListener.onSurfaceTextureSizeChanged(mSurface, getWidth(), getHeight());
             }
@@ -247,8 +247,8 @@ public class TextureView extends View {
 
         if (mLayer == null) {
             mLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer();
-            mSurface = mAttachInfo.mHardwareRenderer.createSuraceTexture(mLayer);
-            nSetDefaultBufferSize(mSurface.mSurfaceTexture, getWidth(), getHeight());
+            mSurface = mAttachInfo.mHardwareRenderer.createSurfaceTexture(mLayer);
+            nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
 
             mUpdateListener = new SurfaceTexture.OnFrameAvailableListener() {
                 @Override
@@ -290,7 +290,7 @@ public class TextureView extends View {
             return;
         }
 
-        mAttachInfo.mHardwareRenderer.updateTextureLayer(mLayer, getWidth(), getHeight(), mSurface);
+        mAttachInfo.mHardwareRenderer.updateTextureLayer(mLayer, getWidth(), getHeight());
 
         invalidate();
     }
@@ -447,5 +447,5 @@ public class TextureView extends View {
         public void onSurfaceTextureDestroyed(SurfaceTexture surface);
     }
 
-    private static native void nSetDefaultBufferSize(int surfaceTexture, int width, int height);
+    private static native void nSetDefaultBufferSize(SurfaceTexture surfaceTexture, int width, int height);
 }

@@ -85,7 +85,7 @@ public class EGLImpl implements EGL10 {
             eglSurfaceId = _eglCreateWindowSurface(display, config, sur, attrib_list);
         } else if (native_window instanceof SurfaceTexture) {
             eglSurfaceId = _eglCreateWindowSurfaceTexture(display, config,
-                    ((SurfaceTexture) native_window).mSurfaceTexture, attrib_list);
+                    (SurfaceTexture) native_window, attrib_list);
         } else {
             throw new java.lang.UnsupportedOperationException(
                 "eglCreateWindowSurface() can only be called with an instance of " +
@@ -143,7 +143,7 @@ public class EGLImpl implements EGL10 {
     private native int _eglCreatePbufferSurface(EGLDisplay display, EGLConfig config, int[] attrib_list);
     private native void _eglCreatePixmapSurface(EGLSurface sur, EGLDisplay display, EGLConfig config, Object native_pixmap, int[] attrib_list);
     private native int _eglCreateWindowSurface(EGLDisplay display, EGLConfig config, Object native_window, int[] attrib_list);
-    private native int _eglCreateWindowSurfaceTexture(EGLDisplay display, EGLConfig config, int native_window, int[] attrib_list);
+    private native int _eglCreateWindowSurfaceTexture(EGLDisplay display, EGLConfig config, Object native_window, int[] attrib_list);
     private native int _eglGetDisplay(Object native_display);
     private native int _eglGetCurrentContext();
     private native int _eglGetCurrentDisplay();
