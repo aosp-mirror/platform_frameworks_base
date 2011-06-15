@@ -127,7 +127,7 @@ public class VoicemailContract {
          * <P>Type: TEXT</P>
          * <P> Note that this is NOT the voicemail media content data.
          */
-        public static final String SOURCE_DATA = "provider_data";
+        public static final String SOURCE_DATA = "source_data";
         /**
          * Whether the media content for this voicemail is available for
          * consumption.
