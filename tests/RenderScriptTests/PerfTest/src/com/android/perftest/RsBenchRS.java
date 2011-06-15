@@ -45,6 +45,8 @@ public class RsBenchRS {
 
     private static final String TAG = "RsBenchRS";
     private static final String SAMPLE_TEXT = "Bench Test";
+    private static final String LIST_TEXT =
+      "This is a sample list of text to show in the list view";
 
     int mWidth;
     int mHeight;
@@ -128,6 +130,7 @@ public class RsBenchRS {
 
     private ScriptField_ListAllocs_s mTextureAllocs;
     private ScriptField_ListAllocs_s mSampleTextAllocs;
+    private ScriptField_ListAllocs_s mSampleListViewAllocs;
 
     private ScriptC_rsbench mScript;
 
@@ -566,6 +569,15 @@ public class RsBenchRS {
         }
         mSampleTextAllocs.copyAll();
         mScript.bind_gSampleTextList100(mSampleTextAllocs);
+
+        mSampleListViewAllocs = new ScriptField_ListAllocs_s(mRS, 1000);
+        for (int i = 0; i < 1000; i++) {
+            ScriptField_ListAllocs_s.Item textElem = new ScriptField_ListAllocs_s.Item();
+            textElem.item = Allocation.createFromString(mRS, LIST_TEXT, Allocation.USAGE_SCRIPT);
+            mSampleListViewAllocs.set(textElem, i, false);
+        }
+        mSampleListViewAllocs.copyAll();
+        mScript.bind_gListViewText(mSampleListViewAllocs);
 
         mRS.bindRootScript(mScript);
     }
