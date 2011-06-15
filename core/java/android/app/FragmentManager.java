@@ -695,6 +695,10 @@ final class FragmentManagerImpl extends FragmentManager {
         if (!f.mAdded && newState > Fragment.CREATED) {
             newState = Fragment.CREATED;
         }
+        if (f.mRemoving && newState > f.mState) {
+            // While removing a fragment, we can't change it to a higher state.
+            newState = f.mState;
+        }
         
         if (f.mState < newState) {
             // For fragments that are created from a layout, when restoring from
@@ -915,6 +919,7 @@ final class FragmentManagerImpl extends FragmentManager {
                             // the fragment now should move to once the animation
                             // is done.
                             f.mStateAfterAnimating = newState;
+                            newState = Fragment.CREATED;
                         } else {
                             if (DEBUG) Log.v(TAG, "movefrom CREATED: " + f);
                             if (!f.mRetaining) {
@@ -932,9 +937,13 @@ final class FragmentManagerImpl extends FragmentManager {
                                 throw new SuperNotCalledException("Fragment " + f
                                         + " did not call through to super.onDetach()");
                             }
-                            f.mImmediateActivity = null;
-                            f.mActivity = null;
-                            f.mFragmentManager = null;
+                            if (!f.mRetaining) {
+                                makeInactive(f);
+                            } else {
+                                f.mImmediateActivity = null;
+                                f.mActivity = null;
+                                f.mFragmentManager = null;
+                            }
                         }
                     }
             }
@@ -1040,9 +1049,6 @@ final class FragmentManagerImpl extends FragmentManager {
             fragment.mRemoving = true;
             moveToState(fragment, inactive ? Fragment.INITIALIZING : Fragment.CREATED,
                     transition, transitionStyle);
-            if (inactive) {
-                makeInactive(fragment);
-            }
         }
     }
     
@@ -1397,6 +1403,7 @@ final class FragmentManagerImpl extends FragmentManager {
                     }
                     fragments.add(f);
                     f.mRetaining = true;
+                    f.mTargetIndex = f.mTarget != null ? f.mTarget.mIndex : -1;
                 }
             }
         }
@@ -1561,6 +1568,7 @@ final class FragmentManagerImpl extends FragmentManager {
                 f.mBackStackNesting = 0;
                 f.mInLayout = false;
                 f.mAdded = false;
+                f.mTarget = null;
                 if (fs.mSavedFragmentState != null) {
                     fs.mSavedFragmentState.setClassLoader(mActivity.getClassLoader());
                     f.mSavedViewState = fs.mSavedFragmentState.getSparseParcelableArray(
@@ -1600,12 +1608,12 @@ final class FragmentManagerImpl extends FragmentManager {
         if (nonConfig != null) {
             for (int i=0; i<nonConfig.size(); i++) {
                 Fragment f = nonConfig.get(i);
-                if (f.mTarget != null) {
-                    if (f.mTarget.mIndex < mActive.size()) {
-                        f.mTarget = mActive.get(f.mTarget.mIndex);
+                if (f.mTargetIndex >= 0) {
+                    if (f.mTargetIndex < mActive.size()) {
+                        f.mTarget = mActive.get(f.mTargetIndex);
                     } else {
                         Log.w(TAG, "Re-attaching retained fragment " + f
-                                + " target no longer exists: " + f.mTarget);
+                                + " target no longer exists: " + f.mTargetIndex);
                         f.mTarget = null;
                     }
                 }

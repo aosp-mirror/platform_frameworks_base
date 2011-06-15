@@ -367,6 +367,9 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     // Target fragment.
     Fragment mTarget;
 
+    // For use when retaining a fragment: this is the index of the last mTarget.
+    int mTargetIndex = -1;
+
     // Target request code.
     int mTargetRequestCode;
 
