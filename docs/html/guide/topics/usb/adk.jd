@@ -24,8 +24,7 @@ page.title=Android Open Accessory Development Kit
         </li>
 
         <li>
-          <a href="#how">How an Accessory Communicates with an Android-powered Device in Accessory
-          Mode</a>
+          <a href="#accessory-protocol">Implementing the Android Accessory Protocol</a>
 
           <ol>
             <li><a href="#wait">Wait for and detect connected devices</a></li>
@@ -40,8 +39,7 @@ page.title=Android Open Accessory Development Kit
         </li>
 
         <li>
-          <a href="#firmware">How the ADK board communicates with an Android-powered Device in
-          Accessory Mode</a>
+          <a href="#firmware">How the ADK board implements the Android Accessory Protocol</a>
 
           <ol>
             <li><a href="#wait-adk">Wait for and detect connected devices</a></li>
@@ -56,7 +54,7 @@ page.title=Android Open Accessory Development Kit
         </li>
       </ol>
 
-      
+
 
       <h2>See also</h2>
 
@@ -64,7 +62,7 @@ page.title=Android Open Accessory Development Kit
         <li><a href="http://www.youtube.com/watch?v=s7szcpXf2rE">Google I/O Session Video</a></li>
         <li><a href="{@docRoot}guide/topics/usb/accessory.html">USB Accessory Dev Guide</a></li>
       </ol>
-      
+
       <h2>Where to buy</h2>
 
       <ol>
@@ -78,6 +76,9 @@ page.title=Android Open Accessory Development Kit
 
         <li><a href="https://store.diydrones.com/ProductDetails.asp?ProductCode=BR-PhoneDrone">
         DIY Drones</a></li>
+
+    <li><a href="http://shop.moderndevice.com/products/freeduino-usb-host-board">
+        Modern Device</a></li>
       </ol>
     </div>
   </div>
@@ -86,7 +87,7 @@ page.title=Android Open Accessory Development Kit
   support, which allows external USB hardware (an Android USB accessory) to interact with an
   Android-powered device in a special "accessory" mode. When an Android-powered powered device is
   in accessory mode, the connected accessory acts as the USB host (powers the bus and enumerates
-  devices) and the Android-powered device acts as the device. Android USB accessories are
+  devices) and the Android-powered device acts as the USB device. Android USB accessories are
   specifically designed to attach to Android-powered devices and adhere to a simple protocol
   (Android accessory protocol) that allows them to detect Android-powered devices that support
   accessory mode. Accessories must also provide 500mA at 5V for charging power. Many previously
@@ -112,6 +113,8 @@ page.title=Android Open Accessory Development Kit
     <li><a href="https://store.diydrones.com/ProductDetails.asp?ProductCode=BR-PhoneDrone">DIY
     Drones</a> provides an Arduino-compatible board geared towards RC (radio controlled) and UAV
     (unmanned aerial vehicle) enthusiasts.</li>
+    <li><a href="http://shop.moderndevice.com/products/freeduino-usb-host-board">Modern
+        Device</a> provides an Arduino-compatible board that supports the ADK firmware.</li>
   </ul>
 
   <p>We expect more hardware distributers to create a variety of kits, so please stay tuned for
@@ -380,14 +383,11 @@ page.title=Android Open Accessory Development Kit
   accessories communicate with Android-powered devices describe much of what you should be doing in
   your own accessory.</p>
 
-  <h2 id="how">How an Accessory Communicates with an Android-powered Device in Accessory Mode</h2>
+  <h2 id="accessory-protocol">Implementing the Android Accessory Protocol</h2>
 
-  <p>When you connect an accessory to an Android-powered device, the accessory's firmware must
-  carry out some standard steps to set up communication with the Android-powered device. If you are
-  building an accessory along with an application, this section goes over some general steps that
-  your firmware should carry out.</p>
-
-  <p>In general, an accessory should carry out the following steps:</p>
+  <p>An Android USB accessory must adhere to Android Accessory Protocol, which defines how
+  an accessory detects and sets up communication with an Android-powered device. In general, an
+  accessory should carry out the following steps:</p>
 
   <ol>
     <li>Wait for and detect connected devices</li>
@@ -398,6 +398,8 @@ page.title=Android Open Accessory Development Kit
 
     <li>Establish communication with the device if it supports the Android accessory protocol</li>
   </ol>
+
+  <p>The following sections go into depth about how to implement these steps.</p>
 
   <h3 id="wait">Wait for and detect connected devices</h3>
 
@@ -476,12 +478,12 @@ data            zero terminated UTF8 string sent from accessory to device
       <p>The following string IDs are supported, with a maximum size of 256 bytes for each string
       (must be zero terminated with \0).</p>
       <pre>
-manufacturer name:  1
-model name:         2
-description:        3
-version:            4
-URI:                5
-serial number:      6
+manufacturer name:  0
+model name:         1
+description:        2
+version:            3
+URI:                4
+serial number:      5
 </pre>
     </li>
 
@@ -520,12 +522,11 @@ data:           none
   device's configuration to a value of 1 with a SET_CONFIGURATION (0x09) device request, then
   communicate using the endpoints.</p>
 
-  <h2 id="firmware">How the ADK board communicates with an Android-powered Device in Accessory
-  Mode</h2>
+  <h2 id="firmware">How the ADK board implements the Android Accessory protocol</h2>
 
   <p>If you have access to the ADK board and shield, the following sections describe the firmware
   code that you installed onto the ADK board. The firmware demonstrates a practical example of how
-  to communicate with an Android-powered device. Even if you do not have the ADK board and shield,
+  to implement the Android Accessory protocol. Even if you do not have the ADK board and shield,
   reading through how the hardware detects and interacts with devices in accessory mode is still
   useful if you want to port the code over for your own accessories.</p>
 
@@ -540,8 +541,7 @@ data:           none
   sections.</p>
 
   <p>The following sections describe the firmware code in the context of the algorithm described in
-  <a href="#how">How an Accessory Communicates with an Android-powered Device in Accessory
-  Mode</a>.</p>
+  <a href="#accessory-protocol">Implementing the Android Accessory Protocol</a>.</p>
 
   <h3 id="wait-adk">Wait for and detect connected devices</h3>
 
@@ -559,13 +559,13 @@ AndroidAccessory acc("Google, Inc.",
                      "1.0",
                      "http://www.android.com",
                      "0000000012345678");
-                     
+
 ...
 void loop()
 {
 ...
-    if (acc.isConnected()) {  
-        //communicate with Android application 
+    if (acc.isConnected()) {
+        //communicate with Android application
     }
     else{
         //set the accessory to its default state
@@ -728,7 +728,7 @@ bool AndroidAccessory::findEndpoints(byte addr, EP_RECORD *inEp, EP_RECORD *outE
         Serial.print("Can't get config descriptor\n");
         return false;
     }
-    
+
 ...
 </pre>
 
@@ -859,13 +859,13 @@ bool AndroidAccessory::configureAndroid(void)
   changes the state of the accessory, such as lighting up or changing the color of the LED
   lights.</p>
   <pre>
-int AndroidAccessory::read(void *buff, int len, unsigned int nakLimit) { 
-  return usb.newInTransfer(1, in, len, (char *)buff, nakLimit); } 
-  
-int AndroidAccessory::write(void *buff, int len) { 
-  usb.outTransfer(1, out, len, (char *)buff); 
+int AndroidAccessory::read(void *buff, int len, unsigned int nakLimit) {
+  return usb.newInTransfer(1, in, len, (char *)buff, nakLimit); }
+
+int AndroidAccessory::write(void *buff, int len) {
+  usb.outTransfer(1, out, len, (char *)buff);
   return len; }
-  
+
 </pre>
 
   <p>See the <code>firmware/demokit/demokit.pde</code> file for information about how the ADK board
