@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillåter att innehavaren skickar avsikter till en enhetsadministratör. Vanliga program behöver aldrig göra detta."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"ändra bildskärmens rikting"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Tillåter att ett program när som helst ändrar skärmens rotering. Behövs inte för vanliga program."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"ändra markörens hastighet"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Tillåter att en app när som helst ändrar hastigheten för musens eller styrplattans markör. Ska inte behövas för vanliga appar."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"skicka Linux-signaler till appar"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Tillåter att programmet begär att den angivna signalen skickas till alla beständiga processer."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"se till att programmet alltid körs"</string>

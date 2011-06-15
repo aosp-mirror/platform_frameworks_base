@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Consente l\'invio di intent a un amministratore del dispositivo. L\'autorizzazione non deve mai essere necessaria per le normali applicazioni."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"modifica orientamento dello schermo"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Consente a un\'applicazione di cambiare la rotazione dello schermo in qualsiasi momento. Non dovrebbe essere mai necessario per le normali applicazioni."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"cambio velocità del puntatore"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Consente a un\'applicazione di modificare la velocità del puntatore del mouse o del trackpad in qualsiasi momento. Non dovrebbe mai essere necessario per le normali applicazioni."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"invio segnali Linuz alle applicazioni"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Consente all\'applicazione di richiedere l\'invio del segnale fornito a tutti i processi persistenti."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"esecuzione permanente delle applicazioni"</string>

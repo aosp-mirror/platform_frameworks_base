@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Επιτρέπει στον κάτοχο την αποστολή στόχων σε έναν διαχειριστή συσκευής. Δεν θα χρειαστεί ποτέ για κανονικές εφαρμογές."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"αλλαγή προσανατολισμού οθόνης"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Επιτρέπει σε μια εφαρμογή την αλλαγή της περιστροφής της οθόνης οποιαδήποτε στιγμή. Δεν είναι απαραίτητο για κανονικές εφαρμογές."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"αλλαγή ταχύτητας δείκτη"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Επιτρέπει σε μια εφαρμογή την αλλαγή της ταχύτητας του δείκτη του ποντικιού ή της επιφάνειας αφής ανά πάσα στιγμή. Υπό κανονικές συνθήκες, δεν απαιτείται για κανονικές εφαρμογές."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"αποστολή σημάτων Linux σε εφαρμογές"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Επιτρέπει σε μια εφαρμογή την αποστολή αιτήματος για την αποστολή του παρεχόμενου σήματος σε όλες τις υπάρχουσες διαδικασίες."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"η εφαρμογή να εκτελείται συνεχώς"</string>

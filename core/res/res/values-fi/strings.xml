@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Antaa sovelluksen lähettää kyselyitä laitteen järjestelmänvalvojalle. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"muuta näytön suuntaa"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Antaa sovelluksen vaihtaa näytön suuntaa milloin tahansa. Ei tavallisten sovelluksien käyttöön."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"muuta osoittimen nopeutta"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Antaa sovelluksen muuttaa hiiren tai ohjauslevyn osoittimen nopeutta milloin tahansa. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"lähettää sovelluksiin Linux-signaaleja"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Antaa sovelluksen pyytää, että signaali lähetetään kaikille kiinteille prosesseille."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"aseta sovellus olemaan jatkuvasti käynnissä"</string>

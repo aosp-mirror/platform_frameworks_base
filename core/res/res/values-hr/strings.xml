@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Nositelju omogućuje slanje namjera administratoru uređaja. Nikad ne bi trebalo koristiti za uobičajene aplikacije."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"promjena orijentacije zaslona"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Aplikaciji omogućuje promjenu rotacije zaslona u svakom trenutku. Nikad ne bi trebalo koristiti za uobičajene aplikacije."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"promjena brzine pokazivača"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Omogućuje aplikaciji promjenu brzine pokazivača miša ili dodirne pločice u bilo koje vrijeme. Ne bi smjelo biti potrebno za normalne aplikacije."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"slanje Linux signala u aplikaciju"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Aplikacijama omogućuje traženje zahtjeva da se dobiveni signal pošalje na sve trajne postupke."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"uvijek pokrenuta aplikacija"</string>
