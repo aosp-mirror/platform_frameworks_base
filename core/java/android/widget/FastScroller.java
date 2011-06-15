@@ -468,7 +468,9 @@ class FastScroller {
                 mListAdapter = (BaseAdapter) adapter;
                 mSectionIndexer = (SectionIndexer) adapter;
                 mSections = mSectionIndexer.getSections();
-                
+                if (mSections == null) {
+                    mSections = new String[] { " " };
+                }
             } else {
                 mListAdapter = (BaseAdapter) adapter;
                 mSections = new String[] { " " };
@@ -609,7 +611,7 @@ class FastScroller {
         final int section = mSectionIndexer.getSectionForPosition(firstVisibleItem);
         final int sectionPos = mSectionIndexer.getPositionForSection(section);
         final int nextSectionPos = mSectionIndexer.getPositionForSection(section + 1);
-        final int sectionCount = mSectionIndexer.getSections().length;
+        final int sectionCount = mSections.length;
         final int positionsInSection = nextSectionPos - sectionPos;
 
         final View child = mList.getChildAt(0);
