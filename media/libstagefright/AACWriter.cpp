@@ -27,7 +27,6 @@
 #include <media/stagefright/MetaData.h>
 #include <media/mediarecorder.h>
 #include <sys/prctl.h>
-#include <sys/resource.h>
 #include <fcntl.h>
 
 namespace android {

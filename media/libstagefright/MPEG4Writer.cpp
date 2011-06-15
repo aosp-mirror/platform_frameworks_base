@@ -22,7 +22,6 @@
 
 #include <pthread.h>
 #include <sys/prctl.h>
-#include <sys/resource.h>
 
 #include <media/stagefright/MPEG4Writer.h>
 #include <media/stagefright/MediaBuffer.h>

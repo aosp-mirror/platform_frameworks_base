@@ -21,7 +21,6 @@
 #include <dlfcn.h>
 
 #include <sys/prctl.h>
-#include <sys/resource.h>
 
 #include "../include/OMX.h"
 

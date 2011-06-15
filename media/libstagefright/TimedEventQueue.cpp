@@ -30,7 +30,6 @@
 
 #include <sys/prctl.h>
 #include <sys/time.h>
-#include <sys/resource.h>
 
 #include <media/stagefright/MediaDebug.h>
 
