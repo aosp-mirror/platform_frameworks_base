@@ -472,7 +472,6 @@ import java.lang.ref.WeakReference;
  * {@link #setOnSeekCompleteListener(OnSeekCompleteListener)}setOnSeekCompleteListener,
  * {@link #setOnCompletionListener(OnCompletionListener)}setOnCompletionListener,
  * {@link #setOnBufferingUpdateListener(OnBufferingUpdateListener)}setOnBufferingUpdateListener,
- * {@link #setOnTimedTextListener(OnTimedTextListener)}setOnTimedTextListener,
  * {@link #setOnInfoListener(OnInfoListener)}setOnInfoListener,
  * {@link #setOnErrorListener(OnErrorListener)}setOnErrorListener, etc).
  * In order to receive the respective callback
