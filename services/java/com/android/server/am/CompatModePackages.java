@@ -131,13 +131,7 @@ public class CompatModePackages {
         final boolean mayCompat = !ci.alwaysSupportsScreen()
                 && !ci.neverSupportsScreen();
 
-        if (!updated) {
-            // First time -- if the app may run in compat mode, enable that
-            // by default.
-            if (mayCompat) {
-                setPackageScreenCompatModeLocked(ai, ActivityManager.COMPAT_MODE_ENABLED);
-            }
-        } else {
+        if (updated) {
             // Update -- if the app no longer can run in compat mode, clear
             // any current settings for it.
             if (!mayCompat && mPackages.containsKey(packageName)) {
