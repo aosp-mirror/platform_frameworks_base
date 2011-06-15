@@ -23,7 +23,7 @@
 const int RS_MSG_TEST_DONE = 100;
 const int RS_MSG_RESULTS_READY = 101;
 
-const int gMaxModes = 27;
+const int gMaxModes = 29;
 int gMaxLoops;
 
 // Allocation to send test names back to java
@@ -46,11 +46,12 @@ rs_allocation gTexTransparent;
 rs_allocation gTexChecker;
 rs_allocation gTexGlobe;
 
-typedef struct TexAllocs_s {
-    rs_allocation texture;
-} TexAllocs;
+typedef struct ListAllocs_s {
+    rs_allocation item;
+} ListAllocs;
 
-TexAllocs *gTexList100;
+ListAllocs *gTexList100;
+ListAllocs *gSampleTextList100;
 
 rs_mesh g10by10Mesh;
 rs_mesh g100by100Mesh;
@@ -195,6 +196,7 @@ static void displayMeshSamples(int meshNum) {
     rsgBindProgramStore(gProgStoreBlendNone);
     rsgBindProgramFragment(gProgFragmentTexture);
     rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
+
     rsgBindTexture(gProgFragmentTexture, 0, gTexOpaque);
 
     if (meshNum == 0) {
@@ -207,7 +209,7 @@ static void displayMeshSamples(int meshNum) {
 }
 
 // Display sample images in a mesh with different texture
-static void displayMeshWithMultiTexture(int meshMode) {
+static void displayIcons(int meshMode) {
     bindProgramVertexOrtho();
 
     // Fragment shader with texture
@@ -217,19 +219,87 @@ static void displayMeshWithMultiTexture(int meshMode) {
 
     int meshCount = (int)pow(10.0f, (float)(meshMode + 1));
 
+    float size = 50.0;
+    rs_matrix4x4 matrix;
+    rsMatrixLoadScale(&matrix, size, size, 1.0);
+
     float yPos = 0;
     for (int y = 0; y < meshCount; y++) {
         yPos = (y + 1) * 50;
         float xPos = 0;
         for (int x = 0; x < meshCount; x++) {
             xPos = (x + 1) * 50;
-            rs_matrix4x4 matrix;
-            rsMatrixLoadTranslate(&matrix, xPos, yPos, 0);
-            rsgProgramVertexLoadModelMatrix(&matrix);
+            rs_matrix4x4 transMatrix;
+            rsMatrixLoadTranslate(&transMatrix, xPos, yPos, 0);
+            rsMatrixMultiply(&transMatrix, &matrix);
+            rsgProgramVertexLoadModelMatrix(&transMatrix);
             int i = (x + y * meshCount) % 100;
-            rsgBindTexture(gProgFragmentTexture, 0, gTexList100[i].texture);
+            rsgBindTexture(gProgFragmentTexture, 0, gTexList100[i].item);
             rsgDrawMesh(gSingleMesh);
         }
+    }
+}
+
+// Draw meshes in a single page with top left corner coordinates (xStart, yStart)
+static void drawMeshInPage(float xStart, float yStart, int wResolution, int hResolution) {
+    // Draw wResolution * hResolution meshes in one page
+    float wMargin = 100.0f;
+    float hMargin = 100.0f;
+    float xPad = 50.0f;
+    float yPad = 20.0f;
+    float size = 100.0f;  // size of images
+
+    // font info
+    rs_font font = gFontSans;
+    rsgBindFont(font);
+    rsgFontColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+    // Measure text size
+    int left = 0, right = 0, top = 0, bottom = 0;
+    rsgMeasureText(gSampleTextList100[0].item, &left, &right, &top, &bottom);
+    float textHeight = (float)(top - bottom);
+    float textWidth = (float)(right - left);
+
+    rs_matrix4x4 matrix;
+    rsMatrixLoadScale(&matrix, size, size, 1.0);
+
+    for (int y = 0; y < hResolution; y++) {
+        float yPos = yStart + hMargin + y * size + y * yPad;
+        for (int x = 0; x < wResolution; x++) {
+            float xPos = xStart + wMargin + x * size + x * xPad;
+
+            rs_matrix4x4 transMatrix;
+            rsMatrixLoadTranslate(&transMatrix, xPos + size/2, yPos + size/2, 0);
+            rsMatrixMultiply(&transMatrix, &matrix);  // scale the mesh
+            rsgProgramVertexLoadModelMatrix(&transMatrix);
+
+            int i = (y * wResolution + x) % 100;
+            rsgBindTexture(gProgFragmentTexture, 0, gTexList100[i].item);
+            rsgDrawMesh(gSingleMesh);
+            rsgDrawText(gSampleTextList100[i].item, xPos, yPos + size + yPad/2 + textHeight);
+        }
+    }
+}
+
+// Display both images and text as shown in launcher and homepage
+// meshMode will decide how many pages we draw
+// meshMode = 0: draw 3 pages of meshes
+// meshMode = 1: draw 5 pages of meshes
+static void displayImageWithText(int wResolution, int hResolution, int meshMode) {
+    bindProgramVertexOrtho();
+
+    // Fragment shader with texture
+    rsgBindProgramStore(gProgStoreBlendAlpha);
+    rsgBindProgramFragment(gProgFragmentTexture);
+    rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
+
+    drawMeshInPage(0, 0, wResolution, hResolution);
+    drawMeshInPage(-1.0f*gRenderSurfaceW, 0, wResolution, hResolution);
+    drawMeshInPage(1.0f*gRenderSurfaceW, 0, wResolution, hResolution);
+    if (meshMode == 1) {
+        // draw another two pages of meshes
+        drawMeshInPage(-2.0f*gRenderSurfaceW, 0, wResolution, hResolution);
+        drawMeshInPage(2.0f*gRenderSurfaceW, 0, wResolution, hResolution);
     }
 }
 
@@ -532,8 +602,14 @@ static const char *testNames[] = {
     "Geo test 25.6k heavy fragment heavy vertex",
     "Geo test 51.2k heavy fragment heavy vertex",
     "Geo test 204.8k small tries heavy fragment heavy vertex",
-    "Mesh with 10 by 10 texture",
-    "Mesh with 100 by 100 texture",
+    "UI test with icon display 10 by 10",     // 25
+    "UI test with icon display 100 by 100",   // 26
+    "UI test with image and text display 3 pages",  // 27
+    "UI test with image and text display 5 pages",  // 28
+    "UI test with list view",                       // 29
+//    "UI test with live wallpaper",                  // 30
+//    "Mesh with 10 by 10 texture",
+//    "Mesh with 100 by 100 texture",
 };
 
 void getTestName(int testIndex) {
@@ -627,10 +703,16 @@ static void runTest(int index) {
         displayPixelLightSamples(8, true);
         break;
     case 25:
-        displayMeshWithMultiTexture(0);
+        displayIcons(0);
         break;
     case 26:
-        displayMeshWithMultiTexture(1);
+        displayIcons(1);
+        break;
+    case 27:
+        displayImageWithText(7, 5, 0);
+        break;
+    case 28:
+        displayImageWithText(7, 5, 1);
         break;
     }
 }
@@ -683,6 +765,7 @@ int root(void) {
         gRenderSurfaceW = rsgGetWidth();
         gRenderSurfaceH = rsgGetHeight();
         int size = 8;
+        // draw each frame at (8, 3/4 gRenderSurfaceH) with size
         drawOffscreenResult((drawPos+=size)%gRenderSurfaceW, (gRenderSurfaceH * 3) / 4, size, size);
     }
 
@@ -692,11 +775,9 @@ int root(void) {
     float fps = (float)(frameCount) / ((float)(end - start)*0.001f);
     rsDebug(testNames[benchMode], fps);
     gResultBuffer[benchMode] = fps;
-
     drawOffscreenResult(0, 0,
                         gRenderSurfaceW / 2,
                         gRenderSurfaceH / 2);
-
     const char* text = testNames[benchMode];
     int left = 0, right = 0, top = 0, bottom = 0;
     uint width = rsgGetWidth();

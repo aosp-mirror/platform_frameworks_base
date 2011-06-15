@@ -44,6 +44,7 @@ import android.util.Log;
 public class RsBenchRS {
 
     private static final String TAG = "RsBenchRS";
+    private static final String SAMPLE_TEXT = "Bench Test";
 
     int mWidth;
     int mHeight;
@@ -125,7 +126,8 @@ public class RsBenchRS {
     Font mFontSerif;
     private Allocation mTextAlloc;
 
-    private ScriptField_TexAllocs_s mTextureAllocs;
+    private ScriptField_ListAllocs_s mTextureAllocs;
+    private ScriptField_ListAllocs_s mSampleTextAllocs;
 
     private ScriptC_rsbench mScript;
 
@@ -445,7 +447,7 @@ public class RsBenchRS {
         mScript.set_g100by100Mesh(m100by100Mesh);
         mWbyHMesh= getMbyNMesh(mBenchmarkDimX, mBenchmarkDimY, mBenchmarkDimX/4, mBenchmarkDimY/4);
         mScript.set_gWbyHMesh(mWbyHMesh);
-        mSingleMesh = getSingleMesh(50, 50);
+        mSingleMesh = getSingleMesh(1, 1);  // a unit size mesh
         mScript.set_gSingleMesh(mSingleMesh);
 
         FileA3D model = FileA3D.createFromResource(mRS, mRes, R.raw.torus);
@@ -547,14 +549,23 @@ public class RsBenchRS {
         mScript.set_gRenderBufferDepth(offscreen);
 
 
-        mTextureAllocs = new ScriptField_TexAllocs_s(mRS, 100);
+        mTextureAllocs = new ScriptField_ListAllocs_s(mRS, 100);
         for (int i = 0; i < 100; i++) {
-            ScriptField_TexAllocs_s.Item texElem = new ScriptField_TexAllocs_s.Item();
-            texElem.texture = loadTextureRGB(R.drawable.globe);
+            ScriptField_ListAllocs_s.Item texElem = new ScriptField_ListAllocs_s.Item();
+            texElem.item = loadTextureRGB(R.drawable.globe);
             mTextureAllocs.set(texElem, i, false);
         }
         mTextureAllocs.copyAll();
         mScript.bind_gTexList100(mTextureAllocs);
+
+        mSampleTextAllocs = new ScriptField_ListAllocs_s(mRS, 100);
+        for (int i = 0; i < 100; i++) {
+            ScriptField_ListAllocs_s.Item textElem = new ScriptField_ListAllocs_s.Item();
+            textElem.item = Allocation.createFromString(mRS, SAMPLE_TEXT, Allocation.USAGE_SCRIPT);
+            mSampleTextAllocs.set(textElem, i, false);
+        }
+        mSampleTextAllocs.copyAll();
+        mScript.bind_gSampleTextList100(mSampleTextAllocs);
 
         mRS.bindRootScript(mScript);
     }
