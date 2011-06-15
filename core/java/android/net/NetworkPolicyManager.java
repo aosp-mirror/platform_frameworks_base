@@ -19,6 +19,7 @@ package android.net;
 import static android.text.format.Time.MONTH_DAY;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.RemoteException;
 import android.text.format.Time;
 
@@ -40,6 +41,28 @@ public class NetworkPolicyManager {
     public static final int RULE_ALLOW_ALL = 0x0;
     /** Reject traffic on paid networks. */
     public static final int RULE_REJECT_PAID = 0x1;
+
+    /**
+     * {@link Intent} action launched when user selects {@link NetworkPolicy}
+     * warning notification.
+     */
+    public static final String ACTION_DATA_USAGE_WARNING =
+            "android.intent.action.DATA_USAGE_WARNING";
+
+    /**
+     * {@link Intent} action launched when user selects {@link NetworkPolicy}
+     * limit notification.
+     */
+    public static final String ACTION_DATA_USAGE_LIMIT =
+            "android.intent.action.DATA_USAGE_LIMIT";
+
+    /**
+     * {@link Intent} extra included in {@link #ACTION_DATA_USAGE_WARNING} and
+     * {@link #ACTION_DATA_USAGE_LIMIT} to indicate which
+     * {@link NetworkPolicy#networkTemplate} it applies to.
+     */
+    public static final String EXTRA_NETWORK_TEMPLATE =
+            "android.intent.extra.NETWORK_TEMPLATE";
 
     private INetworkPolicyManager mService;
 
