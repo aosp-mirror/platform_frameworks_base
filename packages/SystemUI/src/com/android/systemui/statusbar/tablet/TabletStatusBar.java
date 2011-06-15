@@ -165,6 +165,8 @@ public class TabletStatusBar extends StatusBar implements
     View mFakeSpaceBar;
     KeyEvent mSpaceBarKeyEvent = null;
 
+    View mCompatibilityHelpDialog = null;
+    
     // for disabling the status bar
     int mDisabled = 0;
 
@@ -1012,17 +1014,27 @@ public class TabletStatusBar extends StatusBar implements
             if (! Prefs.read(mContext).getBoolean(Prefs.SHOWN_COMPAT_MODE_HELP, false)) {
                 showCompatibilityHelp();
             }
+        } else {
+            hideCompatibilityHelp();
+            mCompatModePanel.closePanel();
         }
     }
 
     private void showCompatibilityHelp() {
-        final View dlg = View.inflate(mContext, R.layout.compat_mode_help, null);
-        View button = dlg.findViewById(R.id.button);
+        if (mCompatibilityHelpDialog != null) {
+            return;
+        }
+        
+        mCompatibilityHelpDialog = View.inflate(mContext, R.layout.compat_mode_help, null);
+        View button = mCompatibilityHelpDialog.findViewById(R.id.button);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WindowManagerImpl.getDefault().removeView(dlg);
+                hideCompatibilityHelp();
+                SharedPreferences.Editor editor = Prefs.edit(mContext);
+                editor.putBoolean(Prefs.SHOWN_COMPAT_MODE_HELP, true);
+                editor.apply();
             }
         });
 
@@ -1039,13 +1051,16 @@ public class TabletStatusBar extends StatusBar implements
                 | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
         lp.windowAnimations = com.android.internal.R.style.Animation_ZoomButtons; // simple fade
 
-        WindowManagerImpl.getDefault().addView(dlg, lp);
-
-        SharedPreferences.Editor editor = Prefs.edit(mContext);
-        editor.putBoolean(Prefs.SHOWN_COMPAT_MODE_HELP, true);
-        editor.apply();
+        WindowManagerImpl.getDefault().addView(mCompatibilityHelpDialog, lp);
     }
 
+    private void hideCompatibilityHelp() {
+        if (mCompatibilityHelpDialog != null) {
+            WindowManagerImpl.getDefault().removeView(mCompatibilityHelpDialog);
+            mCompatibilityHelpDialog = null;
+        }
+    }
+    
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
         mInputMethodSwitchButton.setImeWindowStatus(token,
                 (vis & InputMethodService.IME_ACTIVE) != 0);
