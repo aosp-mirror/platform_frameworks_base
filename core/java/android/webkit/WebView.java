@@ -3062,6 +3062,13 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
+     * @hide
+     */
+    public int getPageBackgroundColor() {
+        return nativeGetBackgroundColor();
+    }
+
+    /**
      * Pause all layout, parsing, and JavaScript timers for all webviews. This
      * is a global requests, not restricted to just this webview. This can be
      * useful if the application has been paused.
@@ -9216,4 +9223,5 @@ public class WebView extends AbsoluteLayout
      * @return True if the layer is successfully scrolled.
      */
     private native boolean  nativeScrollLayer(int layer, int newX, int newY);
+    private native int      nativeGetBackgroundColor();
 }
