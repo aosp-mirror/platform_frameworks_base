@@ -330,6 +330,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final Rect mTmpVisibleFrame = new Rect();
     
     WindowState mTopFullscreenOpaqueWindowState;
+    WindowState mTopAppWindowState;
+    WindowState mLastTopAppWindowState;
     boolean mTopIsFullscreen;
     boolean mForceStatusBar;
     boolean mHideLockScreen;
@@ -340,7 +342,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     Intent mDeskDockIntent;
     int mShortcutKeyPressed = -1;
     boolean mConsumeShortcutKeyUp;
-    boolean mShowMenuKey = false; // track FLAG_NEEDS_MENU_KEY on frontmost window
 
     // support for activating the lock screen while the screen is on
     boolean mAllowLockscreenWhenOn;
@@ -1957,12 +1958,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     // the status bar.  They are protected by the STATUS_BAR_SERVICE
                     // permission, so they have the same privileges as the status
                     // bar itself.
-                    pf.left = df.left = cf.left = vf.left = mUnrestrictedScreenLeft;
-                    pf.top = df.top = cf.top = vf.top = mUnrestrictedScreenTop;
-                    pf.right = df.right = cf.right = vf.right
-                            = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
-                    pf.bottom = df.bottom = cf.bottom = vf.bottom
-                            = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
+                    pf.left = df.left = cf.left = mRestrictedScreenLeft;
+                    pf.top = df.top = cf.top = mRestrictedScreenTop;
+                    pf.right = df.right = cf.right = mRestrictedScreenLeft+mRestrictedScreenWidth;
+                    pf.bottom = df.bottom = cf.bottom
+                            = mRestrictedScreenTop+mRestrictedScreenHeight;
                 } else {
                     pf.left = mContentLeft;
                     pf.top = mContentTop;
@@ -2032,6 +2032,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public void beginAnimationLw(int displayWidth, int displayHeight) {
         mTopFullscreenOpaqueWindowState = null;
+        mTopAppWindowState = null;
         mForceStatusBar = false;
         
         mHideLockScreen = false;
@@ -2065,6 +2066,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 if ((attrs.flags & FLAG_ALLOW_LOCK_WHILE_SCREEN_ON) != 0) {
                     mAllowLockscreenWhenOn = true;
                 }
+            }
+        }
+        if (mTopAppWindowState == null && win.isVisibleOrBehindKeyguardLw()) {
+            if (attrs.type >= FIRST_APPLICATION_WINDOW
+                    && attrs.type <= LAST_APPLICATION_WINDOW) {
+                mTopAppWindowState = win;
             }
         }
     }
@@ -2110,22 +2117,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        boolean topNeedsMenu = mShowMenuKey;
-        if (lp != null) {
-            topNeedsMenu = (lp.flags & WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0;
-        }
-
-        if (DEBUG_LAYOUT) Log.v(TAG, "Top window " 
-                + (topNeedsMenu ? "needs" : "does not need")
-                + " the MENU key");
-
         mTopIsFullscreen = topIsFullscreen;
-        final boolean changedMenu = (topNeedsMenu != mShowMenuKey);
 
-        if (changedMenu) {
-            final boolean topNeedsMenuF = topNeedsMenu;
+        if (mTopAppWindowState != null && mTopAppWindowState != mLastTopAppWindowState) {
+            mLastTopAppWindowState = mTopAppWindowState;
 
-            mShowMenuKey = topNeedsMenu;
+            final boolean topNeedsMenu = (mTopAppWindowState.getAttrs().flags
+                    & WindowManager.LayoutParams.FLAG_NEEDS_MENU_KEY) != 0;
 
             mHandler.post(new Runnable() {
                     public void run() {
@@ -2140,9 +2138,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         final IStatusBarService sbs = mStatusBarService;
                         if (mStatusBarService != null) {
                             try {
-                                if (changedMenu) {
-                                    sbs.setMenuKeyVisible(topNeedsMenuF);
-                                }
+                                sbs.topAppWindowChanged(topNeedsMenu);
                             } catch (RemoteException e) {
                                 // This should be impossible because we're in the same process.
                                 mStatusBarService = null;

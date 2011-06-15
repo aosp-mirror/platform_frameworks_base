@@ -1144,7 +1144,7 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     // Not supported
-    public void setMenuKeyVisible(boolean visible) { }
+    public void topAppWindowChanged(boolean visible) { }
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) { }
     @Override
     public void setHardKeyboardStatus(boolean available, boolean enabled) { }

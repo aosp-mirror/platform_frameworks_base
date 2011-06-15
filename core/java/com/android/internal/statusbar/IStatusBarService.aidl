@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and 
  * limitations under the License.
  */
- 
+
 package com.android.internal.statusbar;
 
 import com.android.internal.statusbar.IStatusBar;
@@ -30,7 +30,7 @@ interface IStatusBarService
     void setIcon(String slot, String iconPackage, int iconId, int iconLevel);
     void setIconVisibility(String slot, boolean visible);
     void removeIcon(String slot);
-    void setMenuKeyVisible(boolean visible);
+    void topAppWindowChanged(boolean menuVisible);
     void setImeWindowStatus(in IBinder token, int vis, int backDisposition);
 
     // ---- Methods below are for use by the status bar policy services ----
