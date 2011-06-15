@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permet à l\'application d\'envoyer des intentions à l\'administrateur de l\'appareil. Les applications standard ne devraient jamais avoir recours à cette fonctionnalité."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"Changement d\'orientation de l\'écran"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Permet à une application de modifier la rotation de l\'écran à tout moment. Les applications normales ne devraient jamais avoir recours à cette fonctionnalité."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"changer la vitesse du pointeur"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Permet à une application de modifier la vitesse du pointeur de la souris ou du pavé tactile à tout moment. Cette autorisation ne devrait jamais être nécessaire pour les applications standards."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"Envoi de signaux Linux aux applications"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Permet à une application de demander que le signal fourni soit envoyé à tous les processus persistants."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"Exécution de l\'application en continu"</string>

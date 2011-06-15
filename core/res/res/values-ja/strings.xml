@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"デバイス管理者へのintentの送信を所有者に許可します。通常のアプリケーションでは不要です。"</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"画面の向きの変更"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"いつでも画面の回転を変更することをアプリケーションに許可します。通常のアプリケーションにはまったく必要ありません。"</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"ポインタの速度の変更"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"マウスまたはトラックパッドのポインタの速度をいつでも変更することをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"Linuxのシグナルをアプリケーションに送信"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"受信した電波を継続プロセスに送信することをアプリケーションに許可します。"</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"アプリケーションを常に実行する"</string>
