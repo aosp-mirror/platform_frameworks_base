@@ -70,7 +70,7 @@ class GLES20TextureLayer extends GLES20Layer {
         return mSurface;
     }
 
-    void update(int width, int height, int surface) {
-        GLES20Canvas.nUpdateTextureLayer(mLayer, width, height, surface);
+    void update(int width, int height) {
+        GLES20Canvas.nUpdateTextureLayer(mLayer, width, height, mSurface);
     }
 }

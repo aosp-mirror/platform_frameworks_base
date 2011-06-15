@@ -29,6 +29,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Shader;
+import android.graphics.SurfaceTexture;
 import android.graphics.TemporaryBuffer;
 import android.text.GraphicsOperations;
 import android.text.SpannableString;
@@ -163,7 +164,7 @@ class GLES20Canvas extends HardwareCanvas {
     static native int nCreateTextureLayer(int[] layerInfo);
     static native int nCreateLayer(int width, int height, boolean isOpaque, int[] layerInfo);
     static native void nResizeLayer(int layerId, int width, int height, int[] layerInfo);
-    static native void nUpdateTextureLayer(int layerId, int width, int height, int surface);
+    static native void nUpdateTextureLayer(int layerId, int width, int height, SurfaceTexture surface);
     static native void nDestroyLayer(int layerId);
     static native void nDestroyLayerDeferred(int layerId);
     static native boolean nCopyLayer(int layerId, int bitmap);

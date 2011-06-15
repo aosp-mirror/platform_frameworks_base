@@ -194,7 +194,7 @@ public abstract class HardwareRenderer {
      * 
      * @return A {@link SurfaceTexture}
      */
-    abstract SurfaceTexture createSuraceTexture(HardwareLayer layer);
+    abstract SurfaceTexture createSurfaceTexture(HardwareLayer layer);
 
     /**
      * Updates the specified layer.
@@ -202,10 +202,8 @@ public abstract class HardwareRenderer {
      * @param layer The hardware layer to update
      * @param width The layer's width
      * @param height The layer's height
-     * @param surface The surface to update
      */
-    abstract void updateTextureLayer(HardwareLayer layer, int width, int height,
-            SurfaceTexture surface);
+    abstract void updateTextureLayer(HardwareLayer layer, int width, int height);
 
     /**
      * Copies the content of the specified layer into the specified bitmap.
@@ -815,14 +813,13 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        SurfaceTexture createSuraceTexture(HardwareLayer layer) {
+        SurfaceTexture createSurfaceTexture(HardwareLayer layer) {
             return ((GLES20TextureLayer) layer).getSurfaceTexture();
         }
 
         @Override
-        void updateTextureLayer(HardwareLayer layer, int width, int height,
-                SurfaceTexture surface) {
-            ((GLES20TextureLayer) layer).update(width, height, surface.mSurfaceTexture);
+        void updateTextureLayer(HardwareLayer layer, int width, int height) {
+            ((GLES20TextureLayer) layer).update(width, height);
         }
 
         @Override

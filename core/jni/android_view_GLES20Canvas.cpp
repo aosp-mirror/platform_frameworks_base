@@ -22,6 +22,7 @@
 #include "GraphicsJNI.h"
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <utils/ResourceTypes.h>
 
 #include <gui/SurfaceTexture.h>
@@ -644,11 +645,13 @@ static void android_view_GLES20Canvas_resizeLayer(JNIEnv* env, jobject clazz,
 }
 
 static void android_view_GLES20Canvas_updateTextureLayer(JNIEnv* env, jobject clazz,
-        Layer* layer, jint width, jint height, SurfaceTexture* surface) {
+        Layer* layer, jint width, jint height, jobject surface) {
     float transform[16];
-    surface->updateTexImage();
-    surface->getTransformMatrix(transform);
-    GLenum renderTarget = surface->getCurrentTextureTarget();
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
+
+    surfaceTexture->updateTexImage();
+    surfaceTexture->getTransformMatrix(transform);
+    GLenum renderTarget = surfaceTexture->getCurrentTextureTarget();
 
     LayerRenderer::updateTextureLayer(layer, width, height, renderTarget, transform);
 }
@@ -793,7 +796,8 @@ static JNINativeMethod gMethods[] = {
     { "nCreateLayer",            "(IIZ[I)I",   (void*) android_view_GLES20Canvas_createLayer },
     { "nResizeLayer",            "(III[I)V" ,  (void*) android_view_GLES20Canvas_resizeLayer },
     { "nCreateTextureLayer",     "([I)I",      (void*) android_view_GLES20Canvas_createTextureLayer },
-    { "nUpdateTextureLayer",     "(IIII)V",    (void*) android_view_GLES20Canvas_updateTextureLayer },
+    { "nUpdateTextureLayer",     "(IIILjava/lang/String;)V",
+                                               (void*) android_view_GLES20Canvas_updateTextureLayer },
     { "nDestroyLayer",           "(I)V",       (void*) android_view_GLES20Canvas_destroyLayer },
     { "nDestroyLayerDeferred",   "(I)V",       (void*) android_view_GLES20Canvas_destroyLayerDeferred },
     { "nDrawLayer",              "(IIFFI)V",   (void*) android_view_GLES20Canvas_drawLayer },
