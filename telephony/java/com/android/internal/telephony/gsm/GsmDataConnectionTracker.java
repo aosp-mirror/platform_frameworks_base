@@ -1850,7 +1850,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (!dc.configureRetry(SystemProperties.get("ro.gsm.data_retry_config"))) {
                 if (!dc.configureRetry(DEFAULT_DATA_RETRY_CONFIG)) {
                     // Should never happen, log an error and default to a simple linear sequence.
-                    loge("createDataConnection: Could not configure using " +
+                    loge("configureRetry: Could not configure using " +
                             "DEFAULT_DATA_RETRY_CONFIG=" + DEFAULT_DATA_RETRY_CONFIG);
                     dc.configureRetry(20, 2000, 1000);
                 }
@@ -1859,7 +1859,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (!dc.configureRetry(SystemProperties.get("ro.gsm.2nd_data_retry_config"))) {
                 if (!dc.configureRetry(SECONDARY_DATA_RETRY_CONFIG)) {
                     // Should never happen, log an error and default to a simple sequence.
-                    loge("createDataConnection: Could note configure using " +
+                    loge("configureRetry: Could note configure using " +
                             "SECONDARY_DATA_RETRY_CONFIG=" + SECONDARY_DATA_RETRY_CONFIG);
                     dc.configureRetry("max_retries=3, 333, 333, 333");
                 }
@@ -1872,7 +1872,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (DBG) log("destroyDataConnections: clear mDataConnectionList");
             mDataConnections.clear();
         } else {
-            if (DBG) log("destroyDataConnectionList mDataConnecitonList is empty, ignore");
+            if (DBG) log("destroyDataConnections: mDataConnecitonList is empty, ignore");
         }
     }
 
