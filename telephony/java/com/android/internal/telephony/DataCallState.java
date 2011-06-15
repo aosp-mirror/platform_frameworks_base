@@ -202,7 +202,7 @@ public class DataCallState {
 
                 result = SetupResult.SUCCESS;
             } catch (UnknownHostException e) {
-                Log.d(LOG_TAG, "onSetupCompleted: UnknownHostException " + e);
+                Log.d(LOG_TAG, "setLinkProperties: UnknownHostException " + e);
                 e.printStackTrace();
                 result = SetupResult.ERR_UnacceptableParameter;
             }
@@ -216,8 +216,10 @@ public class DataCallState {
 
         // An error occurred so clear properties
         if (result != SetupResult.SUCCESS) {
-            if(DBG) Log.d(LOG_TAG,
-                    "onSetupConnectionCompleted with an error, clearing LinkProperties");
+            if(DBG) {
+                Log.d(LOG_TAG, "setLinkProperties: error clearing LinkProperties " +
+                        "status=" + status + " result=" + result);
+            }
             linkProperties.clear();
         }
 
