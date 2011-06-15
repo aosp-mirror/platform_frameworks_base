@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManagerNative;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.app.Notification;
 import android.app.StatusBarManager;
@@ -35,6 +36,7 @@ import android.inputmethodservice.InputMethodService;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.LayerDrawable;
+import android.provider.Settings;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -1006,8 +1008,43 @@ public class TabletStatusBar extends StatusBar implements
         // See above re: lights-out policy for legacy apps.
         if (windowVisible) setLightsOn(true);
 
-        // XXX: this is broken: http://b/4603422
         mCompatModeButton.refresh();
+        if (mCompatModeButton.getVisibility() == View.VISIBLE) {
+            if (! Prefs.read(mContext).getBoolean(Prefs.SHOWN_COMPAT_MODE_HELP, false)) {
+                showCompatibilityHelp();
+            }
+        }
+    }
+
+    private void showCompatibilityHelp() {
+        final View dlg = View.inflate(mContext, R.layout.compat_mode_help, null);
+        View button = dlg.findViewById(R.id.button);
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                WindowManagerImpl.getDefault().removeView(dlg);
+            }
+        });
+
+        WindowManager.LayoutParams lp = mNotificationPanelParams = new WindowManager.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                    | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
+                PixelFormat.TRANSLUCENT);
+        lp.setTitle("CompatibilityModeDialog");
+        lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED
+                | WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+        lp.windowAnimations = com.android.internal.R.style.Animation_ZoomButtons; // simple fade
+
+        WindowManagerImpl.getDefault().addView(dlg, lp);
+
+        SharedPreferences.Editor editor = Prefs.edit(mContext);
+        editor.putBoolean(Prefs.SHOWN_COMPAT_MODE_HELP, true);
+        editor.apply();
     }
 
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
