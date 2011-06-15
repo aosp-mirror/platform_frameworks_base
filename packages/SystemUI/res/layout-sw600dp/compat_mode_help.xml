@@ -27,51 +27,62 @@
         android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="160dp"
+        android:layout_marginLeft="80dp"
         android:layout_marginTop="80dp"
+        android:layout_marginRight="80dp"
         android:textSize="60sp"
         android:maxLines="1"
         android:shadowRadius="8"
         android:shadowColor="#FF000000"
         android:text="@string/compat_mode_help_header"
+        android:background="@drawable/compat_mode_help_divider_top"
         />
     <ImageView
         android:id="@+id/diagram"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="160dp"
-        android:layout_marginTop="80dp"
         android:layout_centerInParent="true"
         android:src="@drawable/compat_mode_help_diagram"
         />
-    <TextView
-        android:id="@+id/explanation"
+    <RelativeLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="80dp"
-        android:layout_marginRight="240dp"
+        android:layout_height="190dp"
+        android:background="@drawable/compat_mode_help_divider_bottom"
+        android:layout_marginBottom="55dp"
+        android:layout_marginRight="80dp"
         android:layout_alignLeft="@id/header"
         android:layout_alignParentBottom="true"
-        android:shadowRadius="4"
-        android:shadowColor="#FF000000"
-        android:textSize="28sp"
-        android:text="@string/compat_mode_help_body"
-        />
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="80dp"
-        android:layout_alignBottom="@id/explanation"
-        android:layout_alignParentRight="true"
-        android:src="@drawable/compat_mode_help_icon"
-        />
+        >
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/compat_mode_help_icon"
+            />
+        <TextView
+            android:id="@+id/explanation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@id/icon"
+            android:layout_marginRight="10dp"
+            android:shadowRadius="4"
+            android:shadowColor="#FF000000"
+            android:textSize="28sp"
+            android:text="@string/compat_mode_help_body"
+            />
+    </RelativeLayout>
     <Button
         android:id="@+id/button"
         android:layout_width="208dp"
         android:layout_height="48dp"
         android:layout_alignLeft="@id/header"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="10dp"
+        android:layout_marginBottom="20dp"
         android:textSize="28sp"
         android:text="@android:string/ok"
         />
