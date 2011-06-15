@@ -37,7 +37,7 @@
 
 using namespace android;
 
-static void writeDecrptHandleToParcelData(
+static void writeDecryptHandleToParcelData(
         const DecryptHandle* handle, Parcel* data) {
     data->writeInt32(handle->decryptId);
     data->writeString8(handle->mimeType);
@@ -46,14 +46,14 @@ static void writeDecrptHandleToParcelData(
 
     int size = handle->copyControlVector.size();
     data->writeInt32(size);
-    for(int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         data->writeInt32(handle->copyControlVector.keyAt(i));
         data->writeInt32(handle->copyControlVector.valueAt(i));
     }
 
     size = handle->extendedData.size();
     data->writeInt32(size);
-    for(int i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         data->writeString8(handle->extendedData.keyAt(i));
         data->writeString8(handle->extendedData.valueAt(i));
     }
@@ -77,14 +77,14 @@ static void readDecryptHandleFromParcelData(
     handle->status = data.readInt32();
 
     int size = data.readInt32();
-    for (int i = 0; i < size; i ++) {
+    for (int i = 0; i < size; i++) {
         DrmCopyControl key = (DrmCopyControl)data.readInt32();
         int value = data.readInt32();
         handle->copyControlVector.add(key, value);
     }
 
     size = data.readInt32();
-    for (int i = 0; i < size; i ++) {
+    for (int i = 0; i < size; i++) {
         String8 key = data.readString8();
         String8 value = data.readString8();
         handle->extendedData.add(key, value);
@@ -416,7 +416,7 @@ status_t BpDrmManagerService::consumeRights(
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    writeDecrptHandleToParcelData(decryptHandle, &data);
+    writeDecryptHandleToParcelData(decryptHandle, &data);
 
     data.writeInt32(action);
     data.writeInt32(static_cast< int>(reserve));
@@ -433,7 +433,7 @@ status_t BpDrmManagerService::setPlaybackStatus(
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    writeDecrptHandleToParcelData(decryptHandle, &data);
+    writeDecryptHandleToParcelData(decryptHandle, &data);
 
     data.writeInt32(playbackStatus);
     data.writeInt64(position);
@@ -646,7 +646,7 @@ status_t BpDrmManagerService::closeDecryptSession(int uniqueId, DecryptHandle* d
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    writeDecrptHandleToParcelData(decryptHandle, &data);
+    writeDecryptHandleToParcelData(decryptHandle, &data);
 
     remote()->transact(CLOSE_DECRYPT_SESSION, data, &reply);
 
@@ -662,7 +662,7 @@ status_t BpDrmManagerService::initializeDecryptUnit(
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    writeDecrptHandleToParcelData(decryptHandle, &data);
+    writeDecryptHandleToParcelData(decryptHandle, &data);
 
     data.writeInt32(decryptUnitId);
 
@@ -682,7 +682,7 @@ status_t BpDrmManagerService::decrypt(
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    writeDecrptHandleToParcelData(decryptHandle, &data);
+    writeDecryptHandleToParcelData(decryptHandle, &data);
 
     data.writeInt32(decryptUnitId);
     data.writeInt32((*decBuffer)->length);
@@ -715,7 +715,7 @@ status_t BpDrmManagerService::finalizeDecryptUnit(
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    writeDecrptHandleToParcelData(decryptHandle, &data);
+    writeDecryptHandleToParcelData(decryptHandle, &data);
 
     data.writeInt32(decryptUnitId);
 
@@ -733,7 +733,7 @@ ssize_t BpDrmManagerService::pread(
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
     data.writeInt32(uniqueId);
 
-    writeDecrptHandleToParcelData(decryptHandle, &data);
+    writeDecryptHandleToParcelData(decryptHandle, &data);
 
     data.writeInt32(numBytes);
     data.writeInt64(offset);
@@ -1244,7 +1244,7 @@ status_t BnDrmManagerService::onTransact(
             = openDecryptSession(uniqueId, fd, data.readInt64(), data.readInt64());
 
         if (NULL != handle) {
-            writeDecrptHandleToParcelData(handle, reply);
+            writeDecryptHandleToParcelData(handle, reply);
             clearDecryptHandle(handle);
             delete handle; handle = NULL;
         }
@@ -1262,7 +1262,7 @@ status_t BnDrmManagerService::onTransact(
         DecryptHandle* handle = openDecryptSession(uniqueId, uri.string());
 
         if (NULL != handle) {
-            writeDecrptHandleToParcelData(handle, reply);
+            writeDecryptHandleToParcelData(handle, reply);
 
             clearDecryptHandle(handle);
             delete handle; handle = NULL;

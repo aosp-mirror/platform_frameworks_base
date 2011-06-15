@@ -32,16 +32,16 @@ public class DrmInfoRequest {
      */
     public static final int TYPE_REGISTRATION_INFO = 1;
     /**
-    * Acquires information for unregistering the DRM server.
-    */
+     * Acquires information for unregistering the DRM server.
+     */
     public static final int TYPE_UNREGISTRATION_INFO = 2;
     /**
-    * Acquires rights information.
-    */
+     * Acquires rights information.
+     */
     public static final int TYPE_RIGHTS_ACQUISITION_INFO = 3;
     /**
-    * Acquires the progress of the rights acquisition.
-    */
+     * Acquires the progress of the rights acquisition.
+     */
     public static final int TYPE_RIGHTS_ACQUISITION_PROGRESS_INFO = 4;
 
     /**
