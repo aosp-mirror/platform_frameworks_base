@@ -168,6 +168,15 @@ public class NetworkPolicyManager {
         time.normalize(true);
     }
 
+    /**
+     * Check if given UID can have a {@link #setUidPolicy(int, int)} defined,
+     * usually to protect critical system services.
+     */
+    public static boolean isUidValidForPolicy(Context context, int uid) {
+        return (uid >= android.os.Process.FIRST_APPLICATION_UID
+                && uid <= android.os.Process.LAST_APPLICATION_UID);
+    }
+
     /** {@hide} */
     public static void dumpPolicy(PrintWriter fout, int policy) {
         fout.write("[");

@@ -329,6 +329,7 @@ class ServerThread extends Thread {
                 Slog.i(TAG, "Notification Manager");
                 notification = new NotificationManagerService(context, statusBar, lights);
                 ServiceManager.addService(Context.NOTIFICATION_SERVICE, notification);
+                networkPolicy.bindNotificationManager(notification);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Notification Manager", e);
             }

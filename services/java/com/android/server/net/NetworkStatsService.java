@@ -106,6 +106,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     // @VisibleForTesting
     public static final String ACTION_NETWORK_STATS_POLL =
             "com.android.server.action.NETWORK_STATS_POLL";
+    public static final String ACTION_NETWORK_STATS_UPDATED =
+            "com.android.server.action.NETWORK_STATS_UPDATED";
 
     private PendingIntent mPollIntent;
 
@@ -203,7 +205,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mContext.registerReceiver(mIfaceReceiver, ifaceFilter, CONNECTIVITY_INTERNAL, mHandler);
 
         // listen for periodic polling events
-        // TODO: switch to stronger internal permission
         final IntentFilter pollFilter = new IntentFilter(ACTION_NETWORK_STATS_POLL);
         mContext.registerReceiver(mPollReceiver, pollFilter, READ_NETWORK_USAGE_HISTORY, mHandler);
 
@@ -298,7 +299,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
 
             final NetworkStats stats = new NetworkStats(end - start, 1);
-            stats.addEntry(IFACE_ALL, UID_ALL, tx, tx);
+            stats.addEntry(IFACE_ALL, UID_ALL, rx, tx);
             return stats;
         }
     }
@@ -446,6 +447,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 break;
             }
         }
+
+        // finally, dispatch updated event to any listeners
+        final Intent updatedIntent = new Intent(ACTION_NETWORK_STATS_UPDATED);
+        updatedIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        mContext.sendBroadcast(updatedIntent, READ_NETWORK_USAGE_HISTORY);
     }
 
     /**
