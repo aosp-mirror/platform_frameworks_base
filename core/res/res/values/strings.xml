@@ -2774,11 +2774,13 @@
     <string name="l2tp_ipsec_crt_vpn_description">Certificate based L2TP/IPSec VPN</string>
 
     <!-- Ticker text to show when VPN is active. -->
-    <string name="vpn_ticker">Activating <xliff:g id="app">%s</xliff:g> VPN...</string>
+    <string name="vpn_ticker"><xliff:g id="app" example="FooVPN client">%s</xliff:g> is activating VPN...</string>
     <!-- The title of the notification when VPN is active. -->
-    <string name="vpn_title"><xliff:g id="app">%s</xliff:g> VPN is active</string>
+    <string name="vpn_title">VPN is activated by <xliff:g id="app" example="FooVPN client">%s</xliff:g></string>
     <!-- The text of the notification when VPN is active. -->
-    <string name="vpn_text">VPN is connected to <xliff:g id="profile">%s</xliff:g>. Tap to manage the network.</string>
+    <string name="vpn_text">Tap to manage the network.</string>
+    <!-- The text of the notification when VPN is active with a session name. -->
+    <string name="vpn_text_long">Connected to <xliff:g id="session" example="office">%s</xliff:g>. Tap to manage the network.</string>
 
     <!-- Localized strings for WebView -->
     <!-- Label for button in a WebView that will open a chooser to choose a file to upload -->
