@@ -191,11 +191,6 @@ public abstract class TextToSpeechService extends Service {
     protected abstract void onSynthesizeText(SynthesisRequest request,
             SynthesisCallback callback);
 
-    private boolean areDefaultsEnforced() {
-        return getSecureSettingInt(Settings.Secure.TTS_USE_DEFAULTS,
-                TextToSpeech.Engine.USE_DEFAULTS) == 1;
-    }
-
     private int getDefaultSpeechRate() {
         return getSecureSettingInt(Settings.Secure.TTS_DEFAULT_RATE, Engine.DEFAULT_RATE);
     }
@@ -504,13 +499,9 @@ public abstract class TextToSpeechService extends Service {
         }
 
         private void setRequestParams(SynthesisRequest request) {
-            if (areDefaultsEnforced()) {
-                request.setLanguage(getDefaultLanguage(), getDefaultCountry(), getDefaultVariant());
-                request.setSpeechRate(getDefaultSpeechRate());
-            } else {
-                request.setLanguage(getLanguage(), getCountry(), getVariant());
-                request.setSpeechRate(getSpeechRate());
-            }
+            request.setLanguage(getLanguage(), getCountry(), getVariant());
+            request.setSpeechRate(getSpeechRate());
+
             request.setPitch(getPitch());
         }
 
@@ -749,13 +740,6 @@ public abstract class TextToSpeechService extends Service {
                 return TextToSpeech.ERROR;
             }
 
-            if (areDefaultsEnforced()) {
-                if (isDefault(lang, country, variant)) {
-                    return mDefaultAvailability;
-                } else {
-                    return TextToSpeech.LANG_NOT_SUPPORTED;
-                }
-            }
             return onIsLanguageAvailable(lang, country, variant);
         }
 
@@ -768,13 +752,6 @@ public abstract class TextToSpeechService extends Service {
                 return TextToSpeech.ERROR;
             }
 
-            if (areDefaultsEnforced()) {
-                if (isDefault(lang, country, variant)) {
-                    return mDefaultAvailability;
-                } else {
-                    return TextToSpeech.LANG_NOT_SUPPORTED;
-                }
-            }
             return onLoadLanguage(lang, country, variant);
         }
 
