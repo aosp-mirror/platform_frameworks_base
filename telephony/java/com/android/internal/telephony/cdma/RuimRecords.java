@@ -119,8 +119,11 @@ public final class RuimRecords extends IccRecords {
 
         adnCache.reset();
 
-        phone.setSystemProperty(PROPERTY_ICC_OPERATOR_NUMERIC, null);
-        phone.setSystemProperty(PROPERTY_ICC_OPERATOR_ISO_COUNTRY, null);
+        // Don't clean up PROPERTY_ICC_OPERATOR_ISO_COUNTRY and
+        // PROPERTY_ICC_OPERATOR_NUMERIC here. Since not all CDMA
+        // devices have RUIM, these properties should keep the original
+        // values, e.g. build time settings, when there is no RUIM but
+        // set new values when RUIM is available and loaded.
 
         // recordsRequested is set to false indicating that the SIM
         // read requests made so far are not valid. This is set to
