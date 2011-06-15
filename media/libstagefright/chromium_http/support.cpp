@@ -40,7 +40,7 @@ namespace android {
 
 static Mutex gNetworkThreadLock;
 static base::Thread *gNetworkThread = NULL;
-static scoped_refptr<URLRequestContext> gReqContext;
+static scoped_refptr<net::URLRequestContext> gReqContext;
 
 static void InitializeNetworkThreadIfNecessary() {
     Mutex::Autolock autoLock(gNetworkThreadLock);
@@ -214,7 +214,7 @@ void SfDelegate::OnSetCookie(
 }
 
 void SfDelegate::OnResponseStarted(net::URLRequest *request) {
-    if (request->status().status() != URLRequestStatus::SUCCESS) {
+    if (request->status().status() != net::URLRequestStatus::SUCCESS) {
         MY_LOGI(StringPrintf(
                     "Request failed with status %d and os_error %d",
                     request->status().status(),
@@ -325,7 +325,7 @@ void SfDelegate::readMore(net::URLRequest *request) {
         } else {
             MY_LOGV("readMore pending read");
 
-            if (request->status().status() != URLRequestStatus::IO_PENDING) {
+            if (request->status().status() != net::URLRequestStatus::IO_PENDING) {
                 MY_LOGI(StringPrintf(
                             "Direct read failed w/ status %d\n",
                             request->status().status()).c_str());
