@@ -15262,6 +15262,8 @@ package android.provider {
     field public static final java.lang.String DIRECTORY_PARAM_KEY = "directory";
     field public static final java.lang.String INCLUDE_PROFILE = "include_profile";
     field public static final java.lang.String LIMIT_PARAM_KEY = "limit";
+    field public static final java.lang.String PRIMARY_ACCOUNT_NAME = "name_for_primary_account";
+    field public static final java.lang.String PRIMARY_ACCOUNT_TYPE = "type_for_primary_account";
   }
 
   public static final class ContactsContract.AggregationExceptions implements android.provider.BaseColumns {
@@ -15602,6 +15604,15 @@ package android.provider {
   }
 
   protected static abstract interface ContactsContract.DataColumnsWithJoins implements android.provider.BaseColumns android.provider.ContactsContract.ContactNameColumns android.provider.ContactsContract.ContactOptionsColumns android.provider.ContactsContract.ContactStatusColumns android.provider.ContactsContract.ContactsColumns android.provider.ContactsContract.DataColumns android.provider.ContactsContract.RawContactsColumns android.provider.ContactsContract.StatusColumns {
+  }
+
+  public static final class ContactsContract.DataUsageFeedback {
+    ctor public ContactsContract.DataUsageFeedback();
+    field public static final android.net.Uri FEEDBACK_URI;
+    field public static final java.lang.String USAGE_TYPE = "type";
+    field public static final java.lang.String USAGE_TYPE_CALL = "call";
+    field public static final java.lang.String USAGE_TYPE_LONG_TEXT = "long_text";
+    field public static final java.lang.String USAGE_TYPE_SHORT_TEXT = "short_text";
   }
 
   public static final class ContactsContract.Directory implements android.provider.BaseColumns {

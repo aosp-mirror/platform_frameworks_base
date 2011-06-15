@@ -163,14 +163,12 @@ public final class ContactsContract {
      * obtaining possible recipients, letting the provider know which account is selected during
      * the composition. The provider may use the "primary account" information to optimize
      * the search result.
-     * @hide
      */
     public static final String PRIMARY_ACCOUNT_NAME = "name_for_primary_account";
 
     /**
      * A query parameter specifing a primary account. This parameter should be used with
      * {@link #PRIMARY_ACCOUNT_NAME}. See the doc in {@link #PRIMARY_ACCOUNT_NAME}.
-     * @hide
      */
     public static final String PRIMARY_ACCOUNT_TYPE = "type_for_primary_account";
 
@@ -6308,7 +6306,6 @@ public final class ContactsContract {
      * boolean successful = resolver.update(uri, new ContentValues(), null, null) > 0;
      * </pre>
      * </p>
-     * @hide
      */
     public static final class DataUsageFeedback {
 
