@@ -471,7 +471,7 @@ import java.lang.ref.WeakReference;
  * {@link #setOnVideoSizeChangedListener(OnVideoSizeChangedListener)}setOnVideoSizeChangedListener,
  * {@link #setOnSeekCompleteListener(OnSeekCompleteListener)}setOnSeekCompleteListener,
  * {@link #setOnCompletionListener(OnCompletionListener)}setOnCompletionListener,
- * {@link #setOnBufferingUpdateListener(OnBufferingUpdateListener)setOnBufferingUpdateListener,
+ * {@link #setOnBufferingUpdateListener(OnBufferingUpdateListener)}setOnBufferingUpdateListener,
  * {@link #setOnTimedTextListener(OnTimedTextListener)}setOnTimedTextListener,
  * {@link #setOnInfoListener(OnInfoListener)}setOnInfoListener,
  * {@link #setOnErrorListener(OnErrorListener)}setOnErrorListener, etc).
