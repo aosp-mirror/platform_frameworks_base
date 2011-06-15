@@ -44,6 +44,16 @@ public class ICU_Delegate {
     // --- Native methods accessing ICU's database.
 
     @LayoutlibDelegate
+    /*package*/ static String getIcuVersion() {
+        return "unknown_layoutlib";
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static String getUnicodeVersion() {
+        return "5.2";
+    }
+
+    @LayoutlibDelegate
     /*package*/ static String[] getAvailableBreakIteratorLocalesNative() {
         return new String[0];
     }
@@ -74,17 +84,27 @@ public class ICU_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static String getCurrencyCodeNative(String locale) {
+    /*package*/ static String[] getAvailableCurrencyCodes() {
+        return new String[0];
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static String getCurrencyCode(String locale) {
         return "";
     }
 
     @LayoutlibDelegate
-    /*package*/ static int getCurrencyFractionDigitsNative(String currencyCode) {
+    /*package*/ static String getCurrencyDisplayName(String locale, String currencyCode) {
+        return "";
+    }
+
+    @LayoutlibDelegate
+    /*package*/ static int getCurrencyFractionDigits(String currencyCode) {
         return 0;
     }
 
     @LayoutlibDelegate
-    /*package*/ static String getCurrencySymbolNative(String locale, String currencyCode) {
+    /*package*/ static String getCurrencySymbol(String locale, String currencyCode) {
         return "";
     }
 
@@ -112,6 +132,12 @@ public class ICU_Delegate {
     /*package*/ static String getISO3LanguageNative(String locale) {
         return "";
     }
+
+    @LayoutlibDelegate
+    /*package*/ static String addLikelySubtags(String locale) {
+        return "";
+    }
+
 
     @LayoutlibDelegate
     /*package*/ static String[] getISOLanguagesNative() {

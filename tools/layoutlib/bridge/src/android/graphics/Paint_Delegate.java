@@ -940,9 +940,16 @@ public class Paint_Delegate {
     }
 
     @LayoutlibDelegate
+    /* package */static int native_getTextGlyphs(int native_object, String text, int start,
+            int end, int contextStart, int contextEnd, int flags, char[] glyphs) {
+        // FIXME
+        return 0;
+    }
+
+    @LayoutlibDelegate
     /*package*/ static float native_getTextRunAdvances(int native_object,
             char[] text, int index, int count, int contextIndex, int contextCount,
-            int flags, float[] advances, int advancesIndex) {
+            int flags, float[] advances, int advancesIndex, int reserved) {
         // get the delegate from the native int.
         Paint_Delegate delegate = sManager.getDelegate(native_object);
         if (delegate == null) {
@@ -986,14 +993,14 @@ public class Paint_Delegate {
     @LayoutlibDelegate
     /*package*/ static float native_getTextRunAdvances(int native_object,
             String text, int start, int end, int contextStart, int contextEnd,
-            int flags, float[] advances, int advancesIndex) {
+            int flags, float[] advances, int advancesIndex, int reserved) {
         // FIXME: support contextStart, contextEnd and direction flag
         int count = end - start;
         char[] buffer = TemporaryBuffer.obtain(count);
         TextUtils.getChars(text, start, end, buffer, 0);
 
         return native_getTextRunAdvances(native_object, buffer, 0, count, contextStart,
-                contextEnd - contextStart, flags, advances, advancesIndex);
+                contextEnd - contextStart, flags, advances, advancesIndex, reserved);
     }
 
     @LayoutlibDelegate
