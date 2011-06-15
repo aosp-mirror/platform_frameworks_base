@@ -730,7 +730,10 @@ private:
     virtual void dump(String8& dump) {
     }
 
-    virtual void reopenDevices() {
+    virtual void requestReopenDevices() {
+    }
+
+    virtual void wake() {
     }
 };
 

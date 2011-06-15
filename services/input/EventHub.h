@@ -31,15 +31,15 @@
 #include <utils/Errors.h>
 #include <utils/PropertyMap.h>
 #include <utils/Vector.h>
+#include <utils/KeyedVector.h>
 
 #include <linux/input.h>
+#include <sys/epoll.h>
 
 /* Convenience constants. */
 
 #define BTN_FIRST 0x100  // first button scancode
 #define BTN_LAST 0x15f   // last button scancode
-
-struct pollfd;
 
 namespace android {
 
@@ -199,7 +199,11 @@ public:
     virtual void getVirtualKeyDefinitions(int32_t deviceId,
             Vector<VirtualKeyDefinition>& outVirtualKeys) const = 0;
 
-    virtual void reopenDevices() = 0;
+    /* Requests the EventHub to reopen all input devices on the next call to getEvents(). */
+    virtual void requestReopenDevices() = 0;
+
+    /* Wakes up getEvents() if it is blocked on a read. */
+    virtual void wake() = 0;
 
     virtual void dump(String8& dump) = 0;
 };
@@ -208,8 +212,6 @@ class EventHub : public EventHubInterface
 {
 public:
     EventHub();
-
-    status_t errorCheck() const;
 
     virtual uint32_t getDeviceClasses(int32_t deviceId) const;
 
@@ -247,25 +249,16 @@ public:
     virtual void getVirtualKeyDefinitions(int32_t deviceId,
             Vector<VirtualKeyDefinition>& outVirtualKeys) const;
 
-    virtual void reopenDevices();
+    virtual void requestReopenDevices();
+
+    virtual void wake();
 
     virtual void dump(String8& dump);
 
 protected:
     virtual ~EventHub();
-    
+
 private:
-    bool openPlatformInput(void);
-
-    int openDevice(const char *devicePath);
-    int closeDevice(const char *devicePath);
-    int closeDeviceAtIndexLocked(int index);
-    int scanDir(const char *dirname);
-    void scanDevices();
-    int readNotify(int nfd);
-
-    status_t mError;
-
     struct Device {
         Device* next;
 
@@ -275,9 +268,14 @@ private:
         const InputDeviceIdentifier identifier;
 
         uint32_t classes;
-        uint8_t* keyBitmask;
-        uint8_t* relBitmask;
-        uint8_t* propBitmask;
+
+        uint8_t keyBitmask[(KEY_MAX + 1) / 8];
+        uint8_t absBitmask[(ABS_MAX + 1) / 8];
+        uint8_t relBitmask[(REL_MAX + 1) / 8];
+        uint8_t swBitmask[(SW_MAX + 1) / 8];
+        uint8_t ledBitmask[(LED_MAX + 1) / 8];
+        uint8_t propBitmask[(INPUT_PROP_MAX + 1) / 8];
+
         String8 configurationFile;
         PropertyMap* configuration;
         VirtualKeyMap* virtualKeyMap;
@@ -289,7 +287,19 @@ private:
         void close();
     };
 
+    status_t openDeviceLocked(const char *devicePath);
+    status_t closeDeviceByPathLocked(const char *devicePath);
+
+    void closeDeviceLocked(Device* device);
+    void closeAllDevicesLocked();
+
+    status_t scanDirLocked(const char *dirname);
+    void scanDevicesLocked();
+    status_t readNotifyLocked();
+
     Device* getDeviceLocked(int32_t deviceId) const;
+    Device* getDeviceByPathLocked(const char* devicePath) const;
+
     bool hasKeycodeLocked(Device* device, int keycode) const;
 
     int32_t getScanCodeStateLocked(Device* device, int32_t scanCode) const;
@@ -298,13 +308,13 @@ private:
     bool markSupportedKeyCodesLocked(Device* device, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags) const;
 
-    void loadConfiguration(Device* device);
-    status_t loadVirtualKeyMap(Device* device);
-    status_t loadKeyMap(Device* device);
-    void setKeyboardProperties(Device* device, bool builtInKeyboard);
-    void clearKeyboardProperties(Device* device, bool builtInKeyboard);
+    void loadConfigurationLocked(Device* device);
+    status_t loadVirtualKeyMapLocked(Device* device);
+    status_t loadKeyMapLocked(Device* device);
+    void setKeyboardPropertiesLocked(Device* device, bool builtInKeyboard);
+    void clearKeyboardPropertiesLocked(Device* device, bool builtInKeyboard);
 
-    bool isExternalDevice(Device* device);
+    bool isExternalDeviceLocked(Device* device);
 
     // Protect all internal state.
     mutable Mutex mLock;
@@ -315,25 +325,36 @@ private:
 
     int32_t mNextDeviceId;
 
-    // Parallel arrays of fds and devices.
-    // First index is reserved for inotify.
-    Vector<struct pollfd> mFds;
-    Vector<Device*> mDevices;
+    KeyedVector<int32_t, Device*> mDevices;
 
     Device *mOpeningDevices;
     Device *mClosingDevices;
 
-    bool mOpened;
     bool mNeedToSendFinishedDeviceScan;
-    volatile int32_t mNeedToReopenDevices; // must be modified atomically
+    bool mNeedToReopenDevices;
     bool mNeedToScanDevices;
     Vector<String8> mExcludedDevices;
 
-    // device ids that report particular switches.
-    int32_t mSwitches[SW_MAX + 1];
+    int mEpollFd;
+    int mINotifyFd;
+    int mWakeReadPipeFd;
+    int mWakeWritePipeFd;
 
-    // The index of the next file descriptor that needs to be read.
-    size_t mInputFdIndex;
+    // Ids used for epoll notifications not associated with devices.
+    static const uint32_t EPOLL_ID_INOTIFY = 0x80000001;
+    static const uint32_t EPOLL_ID_WAKE = 0x80000002;
+
+    // Epoll FD list size hint.
+    static const int EPOLL_SIZE_HINT = 8;
+
+    // Maximum number of signalled FDs to handle at a time.
+    static const int EPOLL_MAX_EVENTS = 16;
+
+    // The array of pending epoll events and the index of the next event to be handled.
+    struct epoll_event mPendingEventItems[EPOLL_MAX_EVENTS];
+    size_t mPendingEventCount;
+    size_t mPendingEventIndex;
+    bool mPendingINotify;
 
     // Set to the number of CPUs.
     int32_t mNumCpus;

@@ -488,7 +488,7 @@ void InputReader::configure(bool firstTime) {
     mEventHub->setExcludedDevices(mConfig.excludedDeviceNames);
 
     if (!firstTime) {
-        mEventHub->reopenDevices();
+        mEventHub->requestReopenDevices();
     }
 }
 
@@ -711,6 +711,8 @@ bool InputReader::markSupportedKeyCodes(int32_t deviceId, uint32_t sourceMask, s
 
 void InputReader::refreshConfiguration() {
     android_atomic_release_store(1, &mRefreshConfiguration);
+
+    mEventHub->wake();
 }
 
 void InputReader::dump(String8& dump) {
