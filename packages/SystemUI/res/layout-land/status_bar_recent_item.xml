@@ -39,8 +39,8 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@id/app_thumbnail"
         android:layout_alignTop="@id/app_thumbnail"
-        android:layout_marginLeft="@dimen/status_bar_recents_thumbnail_border_width"
-        android:layout_marginTop="@dimen/status_bar_recents_thumbnail_border_height"
+        android:layout_marginTop="@dimen/status_bar_recents_app_icon_top_margin"
+        android:layout_marginLeft="@dimen/status_bar_recents_app_icon_left_margin"
         android:maxWidth="@dimen/status_bar_recents_thumbnail_max_width"
         android:maxHeight="@dimen/status_bar_recents_thumbnail_max_height"
         android:adjustViewBounds="true"
@@ -56,7 +56,7 @@
         android:layout_alignLeft="@id/app_thumbnail"
         android:layout_below="@id/app_thumbnail"
         android:layout_marginTop="@dimen/status_bar_recents_text_description_padding"
-        android:layout_marginLeft="@dimen/status_bar_recents_thumbnail_border_width"
+        android:layout_marginLeft="@dimen/recents_thumbnail_bg_padding_left"
         android:singleLine="true"
         android:ellipsize="marquee"
     />
@@ -71,7 +71,7 @@
         android:layout_alignLeft="@id/app_thumbnail"
         android:layout_below="@id/app_label"
         android:layout_marginTop="@dimen/status_bar_recents_text_description_padding"
-        android:layout_marginLeft="@dimen/status_bar_recents_thumbnail_border_width"
+        android:layout_marginLeft="@dimen/recents_thumbnail_bg_padding_left"
         android:singleLine="true"
         android:ellipsize="marquee"
     />

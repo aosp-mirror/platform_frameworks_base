@@ -33,13 +33,6 @@
                 android:excludeFromRecents="true">
         </activity>
 
-        <activity android:name=".recent.RecentApplicationsActivity"
-            android:theme="@android:style/Theme.NoTitleBar"
-            android:excludeFromRecents="true"
-            android:launchMode="singleInstance"
-            android:exported="true">
-        </activity>
-
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"
             android:exported="true"

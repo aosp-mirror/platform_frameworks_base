@@ -76,7 +76,6 @@ import com.android.systemui.statusbar.policy.LocationController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.statusbar.policy.Prefs;
 import com.android.systemui.recent.RecentsPanelView;
-import com.android.systemui.recent.carousel.RecentApplicationsActivity;
 
 public class TabletStatusBar extends StatusBar implements
         HeightReceiver.OnBarHeightChangedListener,
@@ -1173,20 +1172,12 @@ public class TabletStatusBar extends StatusBar implements
 
     public void onClickRecentButton() {
         if (DEBUG) Slog.d(TAG, "clicked recent apps; disabled=" + mDisabled);
-        if (mRecentsPanel == null) {
-            Intent intent = new Intent();
-            intent.setClass(mContext, RecentApplicationsActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                    | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-            mContext.startActivity(intent);
-        } else {
-            if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
-                int msg = (mRecentsPanel.getVisibility() == View.GONE)
-                    ? MSG_OPEN_RECENTS_PANEL
-                    : MSG_CLOSE_RECENTS_PANEL;
-                mHandler.removeMessages(msg);
-                mHandler.sendEmptyMessage(msg);
-            }
+        if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
+            int msg = (mRecentsPanel.getVisibility() == View.GONE)
+                ? MSG_OPEN_RECENTS_PANEL
+                : MSG_CLOSE_RECENTS_PANEL;
+            mHandler.removeMessages(msg);
+            mHandler.sendEmptyMessage(msg);
         }
     }
 
@@ -1696,6 +1687,13 @@ public class TabletStatusBar extends StatusBar implements
     }
 
     public void userActivity() {
+    }
+
+    public void toggleRecentApps() {
+        int msg = (mRecentsPanel.getVisibility() == View.GONE)
+                ? MSG_OPEN_RECENTS_PANEL : MSG_CLOSE_RECENTS_PANEL;
+        mHandler.removeMessages(msg);
+        mHandler.sendEmptyMessage(msg);
     }
 
     public class TouchOutsideListener implements View.OnTouchListener {

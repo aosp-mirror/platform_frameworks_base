@@ -36,14 +36,16 @@ import android.view.View;
     View mScrimView;
     View mContentView;
     AnimatorSet mContentAnim;
+    Animator.AnimatorListener mListener;
 
     // the panel will start to appear this many px from the end
     final int HYPERSPACE_OFFRAMP = 200;
 
-    public Choreographer(View root, View scrim, View content) {
+    public Choreographer(View root, View scrim, View content, Animator.AnimatorListener listener) {
         mRootView = root;
         mScrimView = scrim;
         mContentView = content;
+        mListener = listener;
     }
 
     void createAnimation(boolean appearing) {
@@ -86,6 +88,9 @@ import android.view.View;
                 .with(posAnim);
         mContentAnim.setDuration(appearing ? OPEN_DURATION : CLOSE_DURATION);
         mContentAnim.addListener(this);
+        if (mListener != null) {
+            mContentAnim.addListener(mListener);
+        }
     }
 
     void startAnimation(boolean appearing) {

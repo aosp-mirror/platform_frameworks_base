@@ -16,7 +16,7 @@
 
 package com.android.systemui.recent;
 
-import com.android.systemui.recent.RecentsPanelView.ActvityDescriptionAdapter;
+import com.android.systemui.recent.RecentsPanelView.ActivityDescriptionAdapter;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -49,7 +49,7 @@ public class RecentsVerticalScrollView extends ScrollView
     private static final float THRESHHOLD = 50;
     private static final boolean DEBUG_INVALIDATE = false;
     private LinearLayout mLinearLayout;
-    private ActvityDescriptionAdapter mAdapter;
+    private ActivityDescriptionAdapter mAdapter;
     private RecentsCallback mCallback;
     protected int mLastScrollPosition;
     private View mCurrentView;
@@ -275,7 +275,7 @@ public class RecentsVerticalScrollView extends ScrollView
         }
     }
 
-    public void setAdapter(ActvityDescriptionAdapter adapter) {
+    public void setAdapter(ActivityDescriptionAdapter adapter) {
         mAdapter = adapter;
         mAdapter.registerDataSetObserver(new DataSetObserver() {
             public void onChanged() {
