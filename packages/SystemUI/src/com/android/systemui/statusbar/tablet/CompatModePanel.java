@@ -107,9 +107,14 @@ public class CompatModePanel extends FrameLayout implements StatusBarPanel,
 
     private void refresh() {
         int mode = mAM.getFrontActivityScreenCompatMode();
+        if (mode == ActivityManager.COMPAT_MODE_ALWAYS
+                || mode == ActivityManager.COMPAT_MODE_NEVER) {
+            // No longer have something to switch.
+            closePanel();
+            return;
+        }
         final boolean on = (mode == ActivityManager.COMPAT_MODE_ENABLED);
         mOnButton.setChecked(on);
         mOffButton.setChecked(!on);
     }
-
 }
