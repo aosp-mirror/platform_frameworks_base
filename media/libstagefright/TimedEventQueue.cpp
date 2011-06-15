@@ -210,8 +210,7 @@ void *TimedEventQueue::ThreadWrapper(void *me) {
     vm->AttachCurrentThread(&env, NULL);
 #endif
 
-    setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_FOREGROUND);
-    set_sched_policy(androidGetTid(), SP_FOREGROUND);
+    androidSetThreadPriority(0, ANDROID_PRIORITY_FOREGROUND);
 
     static_cast<TimedEventQueue *>(me)->threadEntry();
 

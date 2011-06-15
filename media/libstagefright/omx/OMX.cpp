@@ -116,7 +116,7 @@ void *OMX::CallbackDispatcher::ThreadWrapper(void *me) {
 }
 
 void OMX::CallbackDispatcher::threadEntry() {
-    setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_AUDIO);
+    androidSetThreadPriority(0, ANDROID_PRIORITY_AUDIO);
     prctl(PR_SET_NAME, (unsigned long)"OMXCallbackDisp", 0, 0, 0);
 
     for (;;) {

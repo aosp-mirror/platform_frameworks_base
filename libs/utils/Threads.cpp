@@ -335,10 +335,17 @@ int androidSetThreadPriority(pid_t tid, int pri)
 
     pthread_once(&gDoSchedulingGroupOnce, checkDoSchedulingGroup);
     if (gDoSchedulingGroup) {
+        // set_sched_policy does not support tid == 0
+        int policy_tid;
+        if (tid == 0) {
+            policy_tid = androidGetTid();
+        } else {
+            policy_tid = tid;
+        }
         if (pri >= ANDROID_PRIORITY_BACKGROUND) {
-            rc = set_sched_policy(tid, SP_BACKGROUND);
+            rc = set_sched_policy(policy_tid, SP_BACKGROUND);
         } else if (getpriority(PRIO_PROCESS, tid) >= ANDROID_PRIORITY_BACKGROUND) {
-            rc = set_sched_policy(tid, SP_FOREGROUND);
+            rc = set_sched_policy(policy_tid, SP_FOREGROUND);
         }
     }
 
