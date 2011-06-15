@@ -499,7 +499,7 @@ public class TextToSpeech {
         String defaultEngine = getDefaultEngine();
         String engine = defaultEngine;
         if (!areDefaultsEnforced() && !TextUtils.isEmpty(mRequestedEngine)
-                && mEnginesHelper.isEngineEnabled(engine)) {
+                && mEnginesHelper.isEngineEnabled(mRequestedEngine)) {
             engine = mRequestedEngine;
         }
 
