@@ -244,12 +244,12 @@ final class FragmentState implements Parcelable {
  * on {@link ListFragment} for most of its work.  Note the implementation of
  * clicking an item: depending on the current activity's layout, it can either
  * create and display a new fragment to show the details in-place (more about
- * this later), or start a new activity show the details.</p>
+ * this later), or start a new activity to show the details.</p>
  *
  * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
  *      titles}
  *
- * <p>The details fragment showing the contents of selected item here just
+ * <p>The details fragment showing the contents of a selected item just
  * displays a string of text based on an index of a string array built in to
  * the app:</p>
  *
@@ -257,7 +257,7 @@ final class FragmentState implements Parcelable {
  *      details}
  *
  * <p>In this case when the user clicks on a title, there is no details
- * container in the current activity, so the title title fragment's click code will
+ * container in the current activity, so the titles fragment's click code will
  * launch a new activity to display the details fragment:</p>
  *
  * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentLayout.java
