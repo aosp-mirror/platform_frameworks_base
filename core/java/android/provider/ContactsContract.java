@@ -1298,6 +1298,15 @@ public final class ContactsContract {
         public static final Uri CONTENT_VCARD_URI = Uri.withAppendedPath(CONTENT_URI,
                 "as_vcard");
 
+       /**
+        * Boolean parameter that may be used with {@link #CONTENT_VCARD_URI}
+        * and {@link #CONTENT_MULTI_VCARD_URI} to indicate that the returned
+        * vcard should not contain a photo.
+        *
+        * @hide
+        */
+        public static final String QUERY_PARAMETER_VCARD_NO_PHOTO = "nophoto";
+
         /**
          * Base {@link Uri} for referencing multiple {@link Contacts} entry,
          * created by appending {@link #LOOKUP_KEY} using
