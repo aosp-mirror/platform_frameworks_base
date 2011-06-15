@@ -228,7 +228,6 @@ public abstract class DataConnection extends StateMachine {
         mId = id;
         mRetryMgr = rm;
         this.cid = -1;
-        clearSettings();
 
         setDbg(false);
         addState(mDefaultState);
@@ -313,7 +312,6 @@ public abstract class DataConnection extends StateMachine {
             AsyncResult.forMessage(msg);
             msg.sendToTarget();
         }
-        clearSettings();
         if (DBG) log("NotifyDisconnectCompleted DisconnectParams=" + dp);
     }
 
@@ -632,7 +630,6 @@ public abstract class DataConnection extends StateMachine {
                 }
                 case DataConnectionAc.REQ_RESET:
                     if (VDBG) log("DcDefaultState: msg.what=REQ_RESET");
-                    clearSettings();
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_RESET);
                     transitionTo(mInactiveState);
                     break;
@@ -718,6 +715,7 @@ public abstract class DataConnection extends StateMachine {
                 if (VDBG) log("DcInactiveState: enter notifyDisconnectCompleted");
                 notifyDisconnectCompleted(mDisconnectParams);
             }
+            clearSettings();
         }
 
         @Override
