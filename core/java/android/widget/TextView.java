@@ -8574,17 +8574,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     final String originalText = mText.subSequence(spanStart, spanEnd).toString();
                     ((Editable) mText).replace(spanStart, spanEnd, suggestion);
 
-                    // Swap text content between actual text and Suggestion span
-                    String[] suggestions = suggestionInfo.suggestionSpan.getSuggestions();
-                    suggestions[suggestionInfo.suggestionIndex] = originalText;
-
-                    // Notify source IME of the suggestion pick
+                    // Notify source IME of the suggestion pick. Do this before swaping texts.
                     if (!TextUtils.isEmpty(
                             suggestionInfo.suggestionSpan.getNotificationTargetClassName())) {
                         InputMethodManager imm = InputMethodManager.peekInstance();
                         imm.notifySuggestionPicked(suggestionInfo.suggestionSpan, originalText,
                                 suggestionInfo.suggestionIndex);
                     }
+
+                    // Swap text content between actual text and Suggestion span
+                    String[] suggestions = suggestionInfo.suggestionSpan.getSuggestions();
+                    suggestions[suggestionInfo.suggestionIndex] = originalText;
 
                     // Restore previous SuggestionSpans
                     final int lengthDifference = suggestion.length() - (spanEnd - spanStart);
