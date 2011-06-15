@@ -7667,7 +7667,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("  COMP_SPEC may also be a component name (com.foo/.myApp),");
                 pw.println("    a partial substring in a component name, an");
                 pw.println("    ActivityRecord hex object identifier, or");
-                pw.println("    \"all\" for all objects");
+                pw.println("    \"all\" for all objects, or");
+                pw.println("    \"top\" for the top activity.");
                 pw.println("  -a: include all available server state.");
                 pw.println("  -c: include client state.");
                 return;
@@ -8219,6 +8220,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (this) {
                 for (ActivityRecord r1 : (ArrayList<ActivityRecord>)mMainStack.mHistory) {
                     activities.add(r1);
+                }
+            }
+        } else if ("top".equals(name)) {
+            synchronized (this) {
+                final int N = mMainStack.mHistory.size();
+                if (N > 0) {
+                    activities.add((ActivityRecord)mMainStack.mHistory.get(N-1));
                 }
             }
         } else {
