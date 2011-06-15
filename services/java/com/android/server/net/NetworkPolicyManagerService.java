@@ -25,6 +25,9 @@ import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
+import static android.net.NetworkPolicyManager.ACTION_DATA_USAGE_LIMIT;
+import static android.net.NetworkPolicyManager.ACTION_DATA_USAGE_WARNING;
+import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_PAID_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
@@ -137,11 +140,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_LIMIT_BYTES = "limitBytes";
     private static final String ATTR_UID = "uid";
     private static final String ATTR_POLICY = "policy";
-
-    public static final String ACTION_DATA_USAGE_WARNING =
-            "android.intent.action.DATA_USAGE_WARNING";
-    public static final String ACTION_DATA_USAGE_LIMIT =
-            "android.intent.action.DATA_USAGE_LIMIT";
 
     private static final long TIME_CACHE_MAX_AGE = DAY_IN_MILLIS;
 
@@ -402,9 +400,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 builder.setTicker(title);
                 builder.setContentTitle(title);
                 builder.setContentText(body);
-                builder.setContentIntent(PendingIntent.getActivity(mContext, 0,
-                        new Intent(ACTION_DATA_USAGE_WARNING),
-                        PendingIntent.FLAG_UPDATE_CURRENT));
+
+                final Intent intent = new Intent(ACTION_DATA_USAGE_WARNING);
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                intent.putExtra(EXTRA_NETWORK_TEMPLATE, policy.networkTemplate);
+                builder.setContentIntent(PendingIntent.getActivity(
+                        mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
                 break;
             }
             case TYPE_LIMIT: {
@@ -426,9 +427,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 builder.setTicker(title);
                 builder.setContentTitle(title);
                 builder.setContentText(body);
-                builder.setContentIntent(PendingIntent.getActivity(mContext, 0,
-                        new Intent(ACTION_DATA_USAGE_LIMIT),
-                        PendingIntent.FLAG_UPDATE_CURRENT));
+
+                final Intent intent = new Intent(ACTION_DATA_USAGE_LIMIT);
+                intent.addCategory(Intent.CATEGORY_DEFAULT);
+                intent.putExtra(EXTRA_NETWORK_TEMPLATE, policy.networkTemplate);
+                builder.setContentIntent(PendingIntent.getActivity(
+                        mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
                 break;
             }
         }
