@@ -42,7 +42,7 @@ public final class SynthesisRequest {
     private int mSpeechRate;
     private int mPitch;
 
-    SynthesisRequest(String text, Bundle params) {
+    public SynthesisRequest(String text, Bundle params) {
         mText = text;
         // Makes a copy of params.
         mParams = new Bundle(params);
