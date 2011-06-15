@@ -25,13 +25,16 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_PAID;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.TEMPLATE_WIFI;
+import static org.easymock.EasyMock.anyInt;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.isA;
 
 import android.app.IActivityManager;
+import android.app.INotificationManager;
 import android.app.IProcessObserver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -81,14 +84,15 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     private INetworkPolicyListener mPolicyListener;
     private TrustedTime mTime;
     private IConnectivityManager mConnManager;
+    private INotificationManager mNotifManager;
 
     private NetworkPolicyManagerService mService;
     private IProcessObserver mProcessObserver;
 
     private Binder mStubBinder = new Binder();
 
-    private static final int UID_A = 800;
-    private static final int UID_B = 801;
+    private static final int UID_A = android.os.Process.FIRST_APPLICATION_UID + 800;
+    private static final int UID_B = android.os.Process.FIRST_APPLICATION_UID + 801;
 
     private static final int PID_1 = 400;
     private static final int PID_2 = 401;
@@ -119,10 +123,12 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         mPolicyListener = createMock(INetworkPolicyListener.class);
         mTime = createMock(TrustedTime.class);
         mConnManager = createMock(IConnectivityManager.class);
+        mNotifManager = createMock(INotificationManager.class);
 
         mService = new NetworkPolicyManagerService(
                 mServiceContext, mActivityManager, mPowerManager, mStatsService, mTime, mPolicyDir);
         mService.bindConnectivityManager(mConnManager);
+        mService.bindNotificationManager(mNotifManager);
 
         // RemoteCallbackList needs a binder to use as key
         expect(mPolicyListener.asBinder()).andReturn(mStubBinder).atLeastOnce();
@@ -137,6 +143,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // expect to answer screen status during systemReady()
         expect(mPowerManager.isScreenOn()).andReturn(true).atLeastOnce();
+        expectTime(System.currentTimeMillis());
 
         replay();
         mService.systemReady();
@@ -365,6 +372,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         // expect that quota remaining should be 1536 bytes
         // TODO: write up NetworkManagementService mock
 
+        expectClearNotifications();
+
         replay();
         setNetworkPolicies(new NetworkPolicy(TEMPLATE_WIFI, null, CYCLE_DAY, 1024L, 2048L));
         verifyAndReset();
@@ -388,12 +397,17 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         return new NetworkState(info, prop, null);
     }
 
-    public void expectTime(long currentTime) throws Exception {
+    private void expectTime(long currentTime) throws Exception {
         expect(mTime.forceRefresh()).andReturn(false).anyTimes();
         expect(mTime.hasCache()).andReturn(true).anyTimes();
         expect(mTime.currentTimeMillis()).andReturn(currentTime).anyTimes();
         expect(mTime.getCacheAge()).andReturn(0L).anyTimes();
         expect(mTime.getCacheCertainty()).andReturn(0L).anyTimes();
+    }
+
+    private void expectClearNotifications() throws Exception {
+        mNotifManager.cancelNotificationWithTag(isA(String.class), isA(String.class), anyInt());
+        expectLastCall().anyTimes();
     }
 
     private void expectRulesChanged(int uid, int policy) throws Exception {
@@ -403,13 +417,13 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     private void replay() {
         EasyMock.replay(mActivityManager, mPowerManager, mStatsService, mPolicyListener, mTime,
-                mConnManager);
+                mConnManager, mNotifManager);
     }
 
     private void verifyAndReset() {
         EasyMock.verify(mActivityManager, mPowerManager, mStatsService, mPolicyListener, mTime,
-                mConnManager);
+                mConnManager, mNotifManager);
         EasyMock.reset(mActivityManager, mPowerManager, mStatsService, mPolicyListener, mTime,
-                mConnManager);
+                mConnManager, mNotifManager);
     }
 }
