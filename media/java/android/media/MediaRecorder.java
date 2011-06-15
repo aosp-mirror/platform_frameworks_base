@@ -51,6 +51,16 @@ import java.lang.ref.WeakReference;
  * recorder.release(); // Now the object cannot be reused
  * </pre>
  *
+ * <p>Applications may want to register for informational and error
+ * events in order to be informed of some internal update and possible
+ * runtime errors during recording. Registration for such events is
+ * done by setting the appropriate listeners (via calls
+ * (to {@link #setOnInfoListener(OnInfoListener)}setOnInfoListener and/or
+ * {@link #setOnErrorListener(OnErrorListener)}setOnErrorListener).
+ * In order to receive the respective callback associated with these listeners,
+ * applications are required to create MediaRecorder objects on threads with a
+ * Looper running (the main UI thread by default already has a Looper running).
+ *
  * <p>See the <a href="{@docRoot}guide/topics/media/index.html">Audio and Video</a>
  * documentation for additional help with using MediaRecorder.
  * <p>Note: Currently, MediaRecorder does not work on the emulator.
