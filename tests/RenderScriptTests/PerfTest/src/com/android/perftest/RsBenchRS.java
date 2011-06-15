@@ -38,6 +38,10 @@ import android.renderscript.ProgramStore.BlendSrcFunc;
 import android.renderscript.ProgramStore.BlendDstFunc;
 import android.renderscript.RenderScript.RSMessageHandler;
 import android.renderscript.Sampler.Value;
+import android.renderscript.Mesh.Primitive;
+import android.renderscript.Matrix4f;
+import android.renderscript.ProgramVertexFixedFunction;
+
 import android.util.Log;
 
 
@@ -47,7 +51,7 @@ public class RsBenchRS {
     private static final String SAMPLE_TEXT = "Bench Test";
     private static final String LIST_TEXT =
       "This is a sample list of text to show in the list view";
-
+    private static int PARTICLES_COUNT = 12000;
     int mWidth;
     int mHeight;
     int mLoops;
@@ -84,6 +88,7 @@ public class RsBenchRS {
     private Sampler mLinearWrap;
     private Sampler mMipLinearWrap;
     private Sampler mNearestClamp;
+    private Sampler mNearesWrap;
 
     private ProgramStore mProgStoreBlendNoneDepth;
     private ProgramStore mProgStoreBlendNone;
@@ -108,6 +113,7 @@ public class RsBenchRS {
     private ScriptField_VertexShaderConstants3_s mVSConstPixel;
     private ScriptField_FragentShaderConstants3_s mFSConstPixel;
 
+
     private ProgramRaster mCullBack;
     private ProgramRaster mCullFront;
     private ProgramRaster mCullNone;
@@ -123,6 +129,7 @@ public class RsBenchRS {
     private Mesh mWbyHMesh;
     private Mesh mTorus;
     private Mesh mSingleMesh;
+    private Mesh mParticlesMesh;
 
     Font mFontSans;
     Font mFontSerif;
@@ -131,6 +138,8 @@ public class RsBenchRS {
     private ScriptField_ListAllocs_s mTextureAllocs;
     private ScriptField_ListAllocs_s mSampleTextAllocs;
     private ScriptField_ListAllocs_s mSampleListViewAllocs;
+    private ScriptField_VpConsts mPvStarAlloc;
+
 
     private ScriptC_rsbench mScript;
 
@@ -303,6 +312,15 @@ public class RsBenchRS {
         mScript.set_gProgStoreBlendNone(mProgStoreBlendNone);
         mScript.set_gProgStoreBlendAlpha(mProgStoreBlendAlpha);
         mScript.set_gProgStoreBlendAdd(mProgStoreBlendAdd);
+
+        // For GALAXY
+        builder = new ProgramStore.Builder(mRS);
+        builder.setBlendFunc(BlendSrcFunc.ONE, BlendDstFunc.ZERO);
+        mRS.bindProgramStore(builder.create());
+
+        builder.setBlendFunc(BlendSrcFunc.SRC_ALPHA, BlendDstFunc.ONE);
+        mScript.set_gPSLights(builder.create());
+
     }
 
     private void initProgramFragment() {
@@ -319,7 +337,58 @@ public class RsBenchRS {
 
         mScript.set_gProgFragmentColor(mProgFragmentColor);
         mScript.set_gProgFragmentTexture(mProgFragmentTexture);
+
+
+        // For Galaxy live wallpaper drawing
+        ProgramFragmentFixedFunction.Builder builder = new ProgramFragmentFixedFunction.Builder(mRS);
+        builder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.REPLACE,
+                           ProgramFragmentFixedFunction.Builder.Format.RGB, 0);
+        ProgramFragment pfb = builder.create();
+        pfb.bindSampler(mNearesWrap, 0);
+        mScript.set_gPFBackground(pfb);
+
+        builder = new ProgramFragmentFixedFunction.Builder(mRS);
+        builder.setPointSpriteTexCoordinateReplacement(true);
+        builder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.MODULATE,
+                           ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
+        builder.setVaryingColor(true);
+        ProgramFragment pfs = builder.create();
+        pfs.bindSampler(mMipLinearWrap, 0);
+        mScript.set_gPFStars(pfs);
+
     }
+
+    private Matrix4f getProjectionNormalized(int w, int h) {
+      // range -1,1 in the narrow axis at z = 0.
+      Matrix4f m1 = new Matrix4f();
+      Matrix4f m2 = new Matrix4f();
+
+      if(w > h) {
+          float aspect = ((float)w) / h;
+          m1.loadFrustum(-aspect,aspect,  -1,1,  1,100);
+      } else {
+          float aspect = ((float)h) / w;
+          m1.loadFrustum(-1,1, -aspect,aspect, 1,100);
+      }
+
+      m2.loadRotate(180, 0, 1, 0);
+      m1.loadMultiply(m1, m2);
+
+      m2.loadScale(-2, 2, 1);
+      m1.loadMultiply(m1, m2);
+
+      m2.loadTranslate(0, 0, 2);
+      m1.loadMultiply(m1, m2);
+      return m1;
+  }
+
+    private void updateProjectionMatrices() {
+      Matrix4f projNorm = getProjectionNormalized(mBenchmarkDimX, mBenchmarkDimY);
+      ScriptField_VpConsts.Item i = new ScriptField_VpConsts.Item();
+      i.Proj = projNorm;
+      i.MVP = projNorm;
+      mPvStarAlloc.set(i, 0, true);
+  }
 
     private void initProgramVertex() {
         ProgramVertexFixedFunction.Builder pvb = new ProgramVertexFixedFunction.Builder(mRS);
@@ -332,6 +401,39 @@ public class RsBenchRS {
         mPVA.setProjection(proj);
 
         mScript.set_gProgVertex(mProgVertex);
+
+        // For galaxy live wallpaper
+        mPvStarAlloc = new ScriptField_VpConsts(mRS, 1);
+        mScript.bind_vpConstants(mPvStarAlloc);
+        updateProjectionMatrices();
+
+        ProgramVertex.Builder sb = new ProgramVertex.Builder(mRS);
+        String t =  "varying vec4 varColor;\n" +
+                    "varying vec2 varTex0;\n" +
+                    "void main() {\n" +
+                    "  float dist = ATTRIB_position.y;\n" +
+                    "  float angle = ATTRIB_position.x;\n" +
+                    "  float x = dist * sin(angle);\n" +
+                    "  float y = dist * cos(angle) * 0.892;\n" +
+                    "  float p = dist * 5.5;\n" +
+                    "  float s = cos(p);\n" +
+                    "  float t = sin(p);\n" +
+                    "  vec4 pos;\n" +
+                    "  pos.x = t * x + s * y;\n" +
+                    "  pos.y = s * x - t * y;\n" +
+                    "  pos.z = ATTRIB_position.z;\n" +
+                    "  pos.w = 1.0;\n" +
+                    "  gl_Position = UNI_MVP * pos;\n" +
+                    "  gl_PointSize = ATTRIB_color.a * 10.0;\n" +
+                    "  varColor.rgb = ATTRIB_color.rgb;\n" +
+                    "  varColor.a = 1.0;\n" +
+                    "}\n";
+        sb.setShader(t);
+        sb.addInput(mParticlesMesh.getVertexAllocation(0).getType().getElement());
+        sb.addConstant(mPvStarAlloc.getType());
+        ProgramVertex pvs = sb.create();
+        pvs.bindConstants(mPvStarAlloc.getAllocation(), 0);
+        mScript.set_gPVStars(pvs);
     }
 
     private void initCustomShaders() {
@@ -429,6 +531,11 @@ public class RsBenchRS {
         mScript.set_gTexTransparent(mTexTransparent);
         mScript.set_gTexChecker(mTexChecker);
         mScript.set_gTexGlobe(mTexGlobe);
+
+        // For Galaxy live wallpaper
+        mScript.set_gTSpace(loadTextureRGB(R.drawable.space));
+        mScript.set_gTLight1(loadTextureRGB(R.drawable.light1));
+        mScript.set_gTFlares(loadTextureARGB(R.drawable.flares));
     }
 
     private void initFonts() {
@@ -441,6 +548,19 @@ public class RsBenchRS {
 
         mScript.set_gFontSans(mFontSans);
         mScript.set_gFontSerif(mFontSerif);
+    }
+
+    private void createParticlesMesh() {
+        ScriptField_Particle p = new ScriptField_Particle(mRS, PARTICLES_COUNT);
+
+        final Mesh.AllocationBuilder meshBuilder = new Mesh.AllocationBuilder(mRS);
+        meshBuilder.addVertexAllocation(p.getAllocation());
+        final int vertexSlot = meshBuilder.getCurrentVertexTypeIndex();
+        meshBuilder.addIndexSetType(Primitive.POINT);
+        mParticlesMesh = meshBuilder.create();
+
+        mScript.set_gParticlesMesh(mParticlesMesh);
+        mScript.bind_Particles(p);
     }
 
     private void initMesh() {
@@ -461,6 +581,8 @@ public class RsBenchRS {
             mTorus = (Mesh)entry.getObject();
             mScript.set_gTorusMesh(mTorus);
         }
+
+        createParticlesMesh();
     }
 
     private void initSamplers() {
@@ -474,6 +596,7 @@ public class RsBenchRS {
         mLinearClamp = Sampler.CLAMP_LINEAR(mRS);
         mNearestClamp = Sampler.CLAMP_NEAREST(mRS);
         mMipLinearWrap = Sampler.WRAP_LINEAR_MIP_LINEAR(mRS);
+        mNearesWrap = Sampler.WRAP_NEAREST(mRS);
 
         mScript.set_gLinearClamp(mLinearClamp);
         mScript.set_gLinearWrap(mLinearWrap);
@@ -527,10 +650,10 @@ public class RsBenchRS {
         initSamplers();
         initProgramStore();
         initProgramFragment();
+        initMesh();
         initProgramVertex();
         initFonts();
         loadImages();
-        initMesh();
         initProgramRaster();
         initCustomShaders();
 
