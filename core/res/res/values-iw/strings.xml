@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"מאפשר למשתמש לשלוח כוונות למנהל התקן. לא אמור להידרש לעולם ביישומים רגילים."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"שנה את כיוון המסך"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"מאפשר ליישום לשנות את סיבוב המסך בכל עת. לא אמור להידרש לעולם ביישומים רגילים."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"שינוי מהירות המצביע"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"מאפשר ליישום לשנות את מהירות מצביע העכבר או משטח העקיבה בכל עת. הגדרה זו אף פעם לא נחוצה עבור יישומים רגילים."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"שלח אותות Linux ליישומים"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"מאפשר ליישום לבקש שהאות המסופק יישלח לכל התהליכים המתמשכים."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"הגדר את היישום לפעול תמיד"</string>

@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Leidžia savininkui siųsti tikslus įrenginio administratoriui. Neturėtų reikėti įprastose programose."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"keisti ekrano padėtį"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Leidžia programai bet kuriuo metu keisti ekrano sukimą. Neturėtų reikėti įprastoms programoms."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"keisti žymiklio greitį"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Galima programa bet kuriuo metu pakeisti pelės ar jutiklinės planšetės žymiklio greitį. Nereikalingas naudojant įprastas programas."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"programoms siųsti „Linux“ signalus"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Leidžia programai pateikti užklausą, kad teikiamas signalas būtų siunčiamas visiems nuolatiniams procesams."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"nustatyti, kad programa būtų visada paleista"</string>

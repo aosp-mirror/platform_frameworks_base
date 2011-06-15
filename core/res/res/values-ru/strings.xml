@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Позволяет владельцу отправлять целевые значения администратору устройства. Никогда не используется обычными приложениями."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"изменять ориентацию экрана"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Позволяет приложению изменять ориентацию экрана в любое время. Не требуется для обычных приложений."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"изменять скорость указателя"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Позволяет приложению изменять скорость указателя мыши или трекпада. Для большинства приложений это не требуется."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"отправлять приложениям сигналы Linux"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Позволяет приложению направлять запрос на передачу предоставленного сигнала всем постоянным процессам."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"запускать постоянную работу приложения"</string>

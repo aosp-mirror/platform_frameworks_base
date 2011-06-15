@@ -261,10 +261,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillater innehaveren å sende hensikter til enhetsadministrator. Bør aldri være nødvendig for normale programmer."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"snu skjermen"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Lar applikasjonen rotere skjermen når som helst. Vanlige applikasjoner bør aldri trenge dette."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"endre pekerhastighet"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Tillater at en applikasjon endrer hastigheten til musen eller styreflatepekeren til enhver tid. Skal aldri være nødvendig ved normal bruk."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"sende Linux-signaler til applikasjoner"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Lar applikasjonen spørre om at et gitt signal blir sendt til alle varige prosesser."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"forbli kjørende"</string>
