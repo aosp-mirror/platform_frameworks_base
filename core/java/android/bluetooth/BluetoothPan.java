@@ -140,7 +140,21 @@ public final class BluetoothPan implements BluetoothProfile {
     }
 
     /**
-     * {@inheritDoc}
+     * Initiate connection to a profile of the remote bluetooth device.
+     *
+     * <p> This API returns false in scenarios like the profile on the
+     * device is already connected or Bluetooth is not turned on.
+     * When this API returns true, it is guaranteed that
+     * connection state intent for the profile will be broadcasted with
+     * the state. Users can get the connection state of the profile
+     * from this intent.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
+     *
+     * @param device Remote Bluetooth Device
+     * @return false on immediate error,
+     *               true otherwise
      * @hide
      */
     public boolean connect(BluetoothDevice device) {
@@ -159,7 +173,29 @@ public final class BluetoothPan implements BluetoothProfile {
     }
 
     /**
-     * {@inheritDoc}
+     * Initiate disconnection from a profile
+     *
+     * <p> This API will return false in scenarios like the profile on the
+     * Bluetooth device is not in connected state etc. When this API returns,
+     * true, it is guaranteed that the connection state change
+     * intent will be broadcasted with the state. Users can get the
+     * disconnection state of the profile from this intent.
+     *
+     * <p> If the disconnection is initiated by a remote device, the state
+     * will transition from {@link #STATE_CONNECTED} to
+     * {@link #STATE_DISCONNECTED}. If the disconnect is initiated by the
+     * host (local) device the state will transition from
+     * {@link #STATE_CONNECTED} to state {@link #STATE_DISCONNECTING} to
+     * state {@link #STATE_DISCONNECTED}. The transition to
+     * {@link #STATE_DISCONNECTING} can be used to distinguish between the
+     * two scenarios.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
+     *
+     * @param device Remote Bluetooth Device
+     * @return false on immediate error,
+     *               true otherwise
      * @hide
      */
     public boolean disconnect(BluetoothDevice device) {
@@ -227,27 +263,6 @@ public final class BluetoothPan implements BluetoothProfile {
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
         return BluetoothProfile.STATE_DISCONNECTED;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @hide
-     */
-    public boolean setPriority(BluetoothDevice device, int priority) {
-        // Priorities are not supported for PAN devices - since we don't
-        // auto connect.
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     * @hide
-     */
-    public int getPriority(BluetoothDevice device) {
-        if (DBG) log("getPriority(" + device + ")");
-        // Priorities are not supported for PAN devices - since we don't
-        // auto connect.
-        return BluetoothProfile.PRIORITY_ON;
     }
 
     public void setBluetoothTethering(boolean value) {

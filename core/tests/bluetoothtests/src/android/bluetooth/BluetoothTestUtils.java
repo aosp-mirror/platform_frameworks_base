@@ -936,7 +936,13 @@ public class BluetoothTestUtils extends Assert {
             case BluetoothProfile.STATE_DISCONNECTED:
             case BluetoothProfile.STATE_DISCONNECTING:
                 start = System.currentTimeMillis();
-                assertTrue(proxy.connect(device));
+                if (profile == BluetoothProfile.A2DP) {
+                    assertTrue(((BluetoothA2dp)proxy).connect(device));
+                } else if (profile == BluetoothProfile.HEADSET) {
+                    assertTrue(((BluetoothHeadset)proxy).connect(device));
+                } else if (profile == BluetoothProfile.INPUT_DEVICE) {
+                    assertTrue(((BluetoothInputDevice)proxy).connect(device));
+                }
                 break;
             default:
                 removeReceiver(receiver);
@@ -1005,7 +1011,13 @@ public class BluetoothTestUtils extends Assert {
             case BluetoothProfile.STATE_CONNECTED:
             case BluetoothProfile.STATE_CONNECTING:
                 start = System.currentTimeMillis();
-                assertTrue(proxy.disconnect(device));
+                if (profile == BluetoothProfile.A2DP) {
+                    assertTrue(((BluetoothA2dp)proxy).disconnect(device));
+                } else if (profile == BluetoothProfile.HEADSET) {
+                    assertTrue(((BluetoothHeadset)proxy).disconnect(device));
+                } else if (profile == BluetoothProfile.INPUT_DEVICE) {
+                    assertTrue(((BluetoothInputDevice)proxy).disconnect(device));
+                }
                 break;
             case BluetoothProfile.STATE_DISCONNECTED:
                 removeReceiver(receiver);

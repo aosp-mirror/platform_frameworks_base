@@ -130,7 +130,25 @@ public final class BluetoothA2dp implements BluetoothProfile {
     }
 
     /**
-     * {@inheritDoc}
+     * Initiate connection to a profile of the remote bluetooth device.
+     *
+     * <p> Currently, the system supports only 1 connection to the
+     * A2DP profile. The API will automatically disconnect connected
+     * devices before connecting.
+     *
+     * <p> This API returns false in scenarios like the profile on the
+     * device is already connected or Bluetooth is not turned on.
+     * When this API returns true, it is guaranteed that
+     * connection state intent for the profile will be broadcasted with
+     * the state. Users can get the connection state of the profile
+     * from this intent.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
+     *
+     * @param device Remote Bluetooth Device
+     * @return false on immediate error,
+     *               true otherwise
      * @hide
      */
     public boolean connect(BluetoothDevice device) {
@@ -149,7 +167,29 @@ public final class BluetoothA2dp implements BluetoothProfile {
     }
 
     /**
-     * {@inheritDoc}
+     * Initiate disconnection from a profile
+     *
+     * <p> This API will return false in scenarios like the profile on the
+     * Bluetooth device is not in connected state etc. When this API returns,
+     * true, it is guaranteed that the connection state change
+     * intent will be broadcasted with the state. Users can get the
+     * disconnection state of the profile from this intent.
+     *
+     * <p> If the disconnection is initiated by a remote device, the state
+     * will transition from {@link #STATE_CONNECTED} to
+     * {@link #STATE_DISCONNECTED}. If the disconnect is initiated by the
+     * host (local) device the state will transition from
+     * {@link #STATE_CONNECTED} to state {@link #STATE_DISCONNECTING} to
+     * state {@link #STATE_DISCONNECTED}. The transition to
+     * {@link #STATE_DISCONNECTING} can be used to distinguish between the
+     * two scenarios.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
+     *
+     * @param device Remote Bluetooth Device
+     * @return false on immediate error,
+     *               true otherwise
      * @hide
      */
     public boolean disconnect(BluetoothDevice device) {
@@ -220,7 +260,18 @@ public final class BluetoothA2dp implements BluetoothProfile {
     }
 
     /**
-     * {@inheritDoc}
+     * Set priority of the profile
+     *
+     * <p> The device should already be paired.
+     *  Priority can be one of {@link #PRIORITY_ON} or
+     * {@link #PRIORITY_OFF},
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
+     * permission.
+     *
+     * @param device Paired bluetooth device
+     * @param priority
+     * @return true if priority is set, false on error
      * @hide
      */
     public boolean setPriority(BluetoothDevice device, int priority) {
@@ -243,7 +294,16 @@ public final class BluetoothA2dp implements BluetoothProfile {
     }
 
     /**
-     * {@inheritDoc}
+     * Get the priority of the profile.
+     *
+     * <p> The priority can be any of:
+     * {@link #PRIORITY_AUTO_CONNECT}, {@link #PRIORITY_OFF},
+     * {@link #PRIORITY_ON}, {@link #PRIORITY_UNDEFINED}
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
+     *
+     * @param device Bluetooth device
+     * @return priority of the device
      * @hide
      */
     public int getPriority(BluetoothDevice device) {
