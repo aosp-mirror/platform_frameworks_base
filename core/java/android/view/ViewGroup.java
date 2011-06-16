@@ -2023,10 +2023,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-
         for (int i = 0, count = mChildrenCount; i < count; i++) {
             View child = mChildren[i];
-            info.addChild(child);
+            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
+                info.addChild(child);
+            }
         }
     }
 
