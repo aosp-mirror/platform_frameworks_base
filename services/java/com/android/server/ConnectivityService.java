@@ -48,7 +48,6 @@ import android.net.RouteInfo;
 import android.net.vpn.VpnManager;
 import android.net.wifi.WifiStateTracker;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -67,6 +66,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
+import com.android.internal.net.VpnConfig;
 import com.android.internal.telephony.Phone;
 import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
@@ -2396,24 +2396,37 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return value;
     }
 
-    // @see ConnectivityManager#protectVpn(ParcelFileDescriptor)
-    // Permission checks are done in Vpn class.
+    /**
+     * Protect a socket from VPN routing rules. This method is used by
+     * VpnBuilder and not available in ConnectivityManager. Permission
+     * checks are done in Vpn class.
+     * @hide
+     */
     @Override
     public void protectVpn(ParcelFileDescriptor socket) {
         mVpn.protect(socket, getDefaultInterface());
     }
 
-    // @see ConnectivityManager#prepareVpn(String)
-    // Permission checks are done in Vpn class.
+    /**
+     * Prepare for a VPN application. This method is used by VpnDialogs
+     * and not available in ConnectivityManager. Permission checks are
+     * done in Vpn class.
+     * @hide
+     */
     @Override
     public String prepareVpn(String packageName) {
         return mVpn.prepare(packageName);
     }
 
-    // @see ConnectivityManager#establishVpn(Bundle)
-    // Permission checks are done in Vpn class.
+    /**
+     * Configure a TUN interface and return its file descriptor. Parameters
+     * are encoded and opaque to this class. This method is used by VpnBuilder
+     * and not available in ConnectivityManager. Permission checks are done
+     * in Vpn class.
+     * @hide
+     */
     @Override
-    public ParcelFileDescriptor establishVpn(Bundle config) {
+    public ParcelFileDescriptor establishVpn(VpnConfig config) {
         return mVpn.establish(config);
     }
 
