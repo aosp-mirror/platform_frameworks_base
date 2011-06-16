@@ -1374,7 +1374,7 @@ public class WifiStateMachine extends StateMachine {
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
                 | Intent.FLAG_RECEIVER_REPLACE_PENDING);
         intent.putExtra(WifiManager.EXTRA_NETWORK_INFO, mNetworkInfo);
-        intent.putExtra(WifiManager.EXTRA_LINK_PROPERTIES, mLinkProperties);
+        intent.putExtra(WifiManager.EXTRA_LINK_PROPERTIES, new LinkProperties (mLinkProperties));
         if (bssid != null)
             intent.putExtra(WifiManager.EXTRA_BSSID, bssid);
         mContext.sendStickyBroadcast(intent);
@@ -1390,7 +1390,7 @@ public class WifiStateMachine extends StateMachine {
     private void sendLinkConfigurationChangedBroadcast() {
         Intent intent = new Intent(WifiManager.LINK_CONFIGURATION_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        intent.putExtra(WifiManager.EXTRA_LINK_PROPERTIES, mLinkProperties);
+        intent.putExtra(WifiManager.EXTRA_LINK_PROPERTIES, new LinkProperties(mLinkProperties));
         mContext.sendBroadcast(intent);
     }
 
@@ -1454,10 +1454,8 @@ public class WifiStateMachine extends StateMachine {
         Log.d(TAG, "Reset connections and stopping DHCP");
 
         /*
-         * Reset connections & stop DHCP
+         * stop DHCP
          */
-        NetworkUtils.resetConnections(mInterfaceName);
-
         if (mDhcpStateMachine != null) {
             mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
             mDhcpStateMachine.quit();
@@ -1547,7 +1545,6 @@ public class WifiStateMachine extends StateMachine {
             if (!linkProperties.equals(mLinkProperties)) {
                 Log.d(TAG, "Link configuration changed for netId: " + mLastNetworkId
                     + " old: " + mLinkProperties + "new: " + linkProperties);
-                NetworkUtils.resetConnections(mInterfaceName);
                 mLinkProperties = linkProperties;
                 sendLinkConfigurationChangedBroadcast();
             }
@@ -2820,7 +2817,6 @@ public class WifiStateMachine extends StateMachine {
                     if (mWifiInfo.getNetworkId() == result.getNetworkId()) {
                         if (result.hasIpChanged()) {
                             Log.d(TAG,"Reconfiguring IP on connection");
-                            NetworkUtils.resetConnections(mInterfaceName);
                             transitionTo(mConnectingState);
                         }
                         if (result.hasProxyChanged()) {
