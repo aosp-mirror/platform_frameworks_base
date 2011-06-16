@@ -349,7 +349,7 @@ public class ViewPropertyAnimator {
             }
         }
         mPendingAnimations.clear();
-        mView.getHandler().removeCallbacks(mAnimationStarter);
+        mView.removeCallbacks(mAnimationStarter);
     }
 
     /**
@@ -705,7 +705,7 @@ public class ViewPropertyAnimator {
 
         NameValuesHolder nameValuePair = new NameValuesHolder(constantName, startValue, byValue);
         mPendingAnimations.add(nameValuePair);
-        mView.getHandler().removeCallbacks(mAnimationStarter);
+        mView.removeCallbacks(mAnimationStarter);
         mView.post(mAnimationStarter);
     }
 
