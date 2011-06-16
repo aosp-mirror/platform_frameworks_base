@@ -59,6 +59,11 @@ interface INetworkManagementService
     void setInterfaceConfig(String iface, in InterfaceConfiguration cfg);
 
     /**
+     * Clear all IP addresses on the specified interface
+     */
+    void clearInterfaceAddresses(String iface);
+
+    /**
      * Retrieves the network routes currently configured on the specified
      * interface
      */
