@@ -24802,9 +24802,10 @@ package android.widget {
     field public static final int VERTICAL = 1; // 0x1
   }
 
-  public static abstract interface GridLayout.Alignment {
-    method public abstract int getAlignmentValue(android.view.View, int);
-    method public abstract int getSizeInCell(android.view.View, int, int);
+  public static abstract class GridLayout.Alignment {
+    ctor public GridLayout.Alignment();
+    method public abstract int getAlignmentValue(android.view.View, int, int);
+    method public int getSizeInCell(android.view.View, int, int, int);
   }
 
   public static class GridLayout.Group {

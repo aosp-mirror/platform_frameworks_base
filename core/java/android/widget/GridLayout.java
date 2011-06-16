@@ -844,8 +844,8 @@ public class GridLayout extends ViewGroup {
             int pWidth = getMeasurement(view, true, PRF);
             int pHeight = getMeasurement(view, false, PRF);
 
-            Alignment hAlignment = columnGroup.alignment;
-            Alignment vAlignment = rowGroup.alignment;
+            Alignment hAlign = columnGroup.alignment;
+            Alignment vAlign = rowGroup.alignment;
 
             int dx, dy;
 
@@ -853,8 +853,9 @@ public class GridLayout extends ViewGroup {
             Bounds rowBounds = mVerticalAxis.getGroupBounds().getValue(i);
 
             // Gravity offsets: the location of the alignment group relative to its cell group.
-            int c2ax = protect(hAlignment.getAlignmentValue(null, cellWidth - colBounds.size()));
-            int c2ay = protect(vAlignment.getAlignmentValue(null, cellHeight - rowBounds.size()));
+            int type = PRF;
+            int c2ax = protect(hAlign.getAlignmentValue(null, cellWidth - colBounds.size(), type));
+            int c2ay = protect(vAlign.getAlignmentValue(null, cellHeight - rowBounds.size(), type));
 
             if (mMarginsIncludedInAlignment) {
                 int leftMargin = getMargin(view, true, true);
@@ -863,12 +864,12 @@ public class GridLayout extends ViewGroup {
                 int bottomMargin = getMargin(view, false, false);
 
                 // Same calculation as getMeasurementIncludingMargin()
-                int measuredWidth = leftMargin + pWidth + rightMargin;
-                int measuredHeight = topMargin + pHeight + bottomMargin;
+                int mWidth = leftMargin + pWidth + rightMargin;
+                int mHeight = topMargin + pHeight + bottomMargin;
 
                 // Alignment offsets: the location of the view relative to its alignment group.
-                int a2vx = colBounds.before - hAlignment.getAlignmentValue(view, measuredWidth);
-                int a2vy = rowBounds.before - vAlignment.getAlignmentValue(view, measuredHeight);
+                int a2vx = colBounds.before - hAlign.getAlignmentValue(view, mWidth, type);
+                int a2vy = rowBounds.before - vAlign.getAlignmentValue(view, mHeight, type);
 
                 dx = c2ax + a2vx + leftMargin;
                 dy = c2ay + a2vy + topMargin;
@@ -877,15 +878,15 @@ public class GridLayout extends ViewGroup {
                 cellHeight -= topMargin + bottomMargin;
             } else {
                 // Alignment offsets: the location of the view relative to its alignment group.
-                int a2vx = colBounds.before - hAlignment.getAlignmentValue(view, pWidth);
-                int a2vy = rowBounds.before - vAlignment.getAlignmentValue(view, pHeight);
+                int a2vx = colBounds.before - hAlign.getAlignmentValue(view, pWidth, type);
+                int a2vy = rowBounds.before - vAlign.getAlignmentValue(view, pHeight, type);
 
                 dx = c2ax + a2vx;
                 dy = c2ay + a2vy;
             }
 
-            int width = hAlignment.getSizeInCell(view, pWidth, cellWidth);
-            int height = vAlignment.getSizeInCell(view, pHeight, cellHeight);
+            int width = hAlign.getSizeInCell(view, pWidth, cellWidth, type);
+            int height = vAlign.getSizeInCell(view, pHeight, cellHeight, type);
 
             int cx = paddingLeft + x1 + dx;
             int cy = paddingTop + y1 + dy;
@@ -1003,7 +1004,7 @@ public class GridLayout extends ViewGroup {
 
                 int size = getMeasurementIncludingMargin(c, horizontal, PRF);
                 // todo test this works correctly when the returned value is UNDEFINED
-                int before = g.alignment.getAlignmentValue(c, size);
+                int before = g.alignment.getAlignmentValue(c, size, PRF);
                 bounds.include(before, size - before);
             }
         }
@@ -1459,6 +1460,7 @@ public class GridLayout extends ViewGroup {
             spanSizes = null;
             leadingMargins = null;
             trailingMargins = null;
+            arcs = null;
             minima = null;
             weights = null;
             locations = null;
@@ -2156,57 +2158,59 @@ public class GridLayout extends ViewGroup {
      * {@link Group#alignment alignment}. Overall placement of the view in the cell
      * group is specified by the two alignments which act along each axis independently.
      * <p>
-     * An Alignment implementation must define the {@link #getAlignmentValue(View, int)}
+     * An Alignment implementation must define {@link #getAlignmentValue(View, int, int)},
      * to return the appropriate value for the type of alignment being defined.
      * The enclosing algorithms position the children
-     * so that the values returned from the alignment
+     * so that the locations defined by the alignmnet values
      * are the same for all of the views in a group.
      * <p>
      *  The GridLayout class defines the most common alignments used in general layout:
      * {@link #TOP}, {@link #LEFT}, {@link #BOTTOM}, {@link #RIGHT}, {@link #CENTER}, {@link
      * #BASELINE} and {@link #FILL}.
      */
-    public static interface Alignment {
+    public static abstract class Alignment {
         /**
          * Returns an alignment value. In the case of vertical alignments the value
          * returned should indicate the distance from the top of the view to the
          * alignment location.
          * For horizontal alignments measurement is made from the left edge of the component.
          *
-         * @param view     the view to which this alignment should be applied
-         * @param viewSize the measured size of the view
-         * @return         the alignment value
+         * @param view              the view to which this alignment should be applied
+         * @param viewSize          the measured size of the view
+         * @param measurementType   the type of measurement that should be made
+         *
+         * @return                  the alignment value
          */
-        public int getAlignmentValue(View view, int viewSize);
+        public abstract int getAlignmentValue(View view, int viewSize, int measurementType);
 
         /**
          * Returns the size of the view specified by this alignment.
          * In the case of vertical alignments this method should return a height; for
          * horizontal alignments this method should return the width.
+         * <p>
+         * The default implementation returns {@code viewSize}.
          *
-         * @param view     the view to which this alignment should be applied
-         * @param viewSize the measured size of the view
-         * @param cellSize the size of the cell into which this view will be placed
-         * @return         the aligned size
+         * @param view              the view to which this alignment should be applied
+         * @param viewSize          the measured size of the view
+         * @param cellSize          the size of the cell into which this view will be placed
+         * @param measurementType   the type of measurement that should be made
+         *
+         * @return                  the aligned size
          */
-        public int getSizeInCell(View view, int viewSize, int cellSize);
-    }
-
-    private static abstract class AbstractAlignment implements Alignment {
-        public int getSizeInCell(View view, int viewSize, int cellSize) {
+        public int getSizeInCell(View view, int viewSize, int cellSize, int measurementType) {
             return viewSize;
         }
     }
 
-    private static final Alignment LEADING = new AbstractAlignment() {
-        public int getAlignmentValue(View view, int viewSize) {
+    private static final Alignment LEADING = new Alignment() {
+        public int getAlignmentValue(View view, int viewSize, int measurementType) {
             return 0;
         }
 
     };
 
-    private static final Alignment TRAILING = new AbstractAlignment() {
-        public int getAlignmentValue(View view, int viewSize) {
+    private static final Alignment TRAILING = new Alignment() {
+        public int getAlignmentValue(View view, int viewSize, int measurementType) {
             return viewSize;
         }
     };
@@ -2240,8 +2244,8 @@ public class GridLayout extends ViewGroup {
      * This constant may be used in both {@link LayoutParams#rowGroup rowGroups} and {@link
      * LayoutParams#columnGroup columnGroups}.
      */
-    public static final Alignment CENTER = new AbstractAlignment() {
-        public int getAlignmentValue(View view, int viewSize) {
+    public static final Alignment CENTER = new Alignment() {
+        public int getAlignmentValue(View view, int viewSize, int measurementType) {
             return viewSize >> 1;
         }
     };
@@ -2253,8 +2257,8 @@ public class GridLayout extends ViewGroup {
      *
      * @see View#getBaseline()
      */
-    public static final Alignment BASELINE = new AbstractAlignment() {
-        public int getAlignmentValue(View view, int height) {
+    public static final Alignment BASELINE = new Alignment() {
+        public int getAlignmentValue(View view, int viewSize, int measurementType) {
             if (view == null) {
                 return UNDEFINED;
             }
@@ -2274,11 +2278,12 @@ public class GridLayout extends ViewGroup {
      * {@link LayoutParams#columnGroup columnGroups}.
      */
     public static final Alignment FILL = new Alignment() {
-        public int getAlignmentValue(View view, int viewSize) {
+        public int getAlignmentValue(View view, int viewSize, int measurementType) {
             return UNDEFINED;
         }
 
-        public int getSizeInCell(View view, int viewSize, int cellSize) {
+        @Override
+        public int getSizeInCell(View view, int viewSize, int cellSize, int measurementType) {
             return cellSize;
         }
     };
