@@ -1129,8 +1129,30 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         intent.putExtra(ConnectivityManager.EXTRA_INET_CONDITION, mDefaultInetConditionPublished);
+
+        // Reset interface if no other connections are using the same interface
+        boolean doReset = true;
+        LinkProperties linkProperties = mNetTrackers[prevNetType].getLinkProperties();
+        if (linkProperties != null) {
+            String oldIface = linkProperties.getInterfaceName();
+            if (TextUtils.isEmpty(oldIface) == false) {
+                for (NetworkStateTracker networkStateTracker : mNetTrackers) {
+                    if (networkStateTracker == null) continue;
+                    NetworkInfo networkInfo = networkStateTracker.getNetworkInfo();
+                    if (networkInfo.isConnected() && networkInfo.getType() != prevNetType) {
+                        LinkProperties l = networkStateTracker.getLinkProperties();
+                        if (l == null) continue;
+                        if (oldIface.equals(l.getInterfaceName())) {
+                            doReset = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         // do this before we broadcast the change
-        handleConnectivityChange(prevNetType);
+        handleConnectivityChange(prevNetType, doReset);
 
         sendStickyBroadcast(intent);
         /*
@@ -1355,7 +1377,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         thisNet.setTeardownRequested(false);
         updateNetworkSettings(thisNet);
-        handleConnectivityChange(type);
+        handleConnectivityChange(type, false);
         sendConnectedBroadcast(info);
     }
 
@@ -1365,7 +1387,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * according to which networks are connected, and ensuring that the
      * right routing table entries exist.
      */
-    private void handleConnectivityChange(int netType) {
+    private void handleConnectivityChange(int netType, boolean doReset) {
         /*
          * If a non-default network is enabled, add the host routes that
          * will allow it's DNS servers to be accessed.
@@ -1403,6 +1425,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 removeDefaultRoute(mNetTrackers[netType]);
             } else {
                 removePrivateDnsRoutes(mNetTrackers[netType]);
+            }
+        }
+
+        if (doReset) {
+            LinkProperties linkProperties = mNetTrackers[netType].getLinkProperties();
+            if (linkProperties != null) {
+                String iface = linkProperties.getInterfaceName();
+                if (TextUtils.isEmpty(iface) == false) {
+                    if (DBG) log("resetConnections(" + iface + ")");
+                    NetworkUtils.resetConnections(iface);
+                }
             }
         }
     }
@@ -1847,7 +1880,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     break;
                 case NetworkStateTracker.EVENT_CONFIGURATION_CHANGED:
                     info = (NetworkInfo) msg.obj;
-                    handleConnectivityChange(info.getType());
+                    handleConnectivityChange(info.getType(), true);
                     break;
                 case EVENT_CLEAR_NET_TRANSITION_WAKELOCK:
                     String causedBy = null;
