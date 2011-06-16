@@ -29,7 +29,7 @@ import android.widget.TextView;
 public class TabletSystemBar extends CustomBar {
 
     public TabletSystemBar(Context context, Density density) throws XmlPullParserException {
-        super(context, density, "/bars/tablet_system_bar.xml");
+        super(context, density, "/bars/tablet_system_bar.xml", "tablet_system_bar.xml");
 
         setBackgroundColor(0xFF000000);
 

@@ -22,11 +22,11 @@ import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
+import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.resources.Density;
 import com.android.resources.ResourceType;
 
-import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -60,7 +60,7 @@ abstract class CustomBar extends LinearLayout {
 
     protected abstract TextView getStyleableTextView();
 
-    protected CustomBar(Context context, Density density, String layoutPath)
+    protected CustomBar(Context context, Density density, String layoutPath, String name)
             throws XmlPullParserException {
         super(context);
         setOrientation(LinearLayout.HORIZONTAL);
@@ -69,11 +69,8 @@ abstract class CustomBar extends LinearLayout {
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
 
-        KXmlParser parser = new KXmlParser();
-        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-        parser.setInput(
-                getClass().getResourceAsStream(layoutPath),
-                "UTF8"); //$NON-NLS-1$
+        XmlPullParser parser = ParserFactory.create(getClass().getResourceAsStream(layoutPath),
+                name);
 
         BridgeXmlBlockParser bridgeParser = new BridgeXmlBlockParser(
                 parser, (BridgeContext) context, false /*platformFile*/);
@@ -230,7 +227,8 @@ abstract class CustomBar extends LinearLayout {
 
                 if (textSize != null) {
                     TypedValue out = new TypedValue();
-                    if (ResourceHelper.stringToFloat(textSize.getValue(), out)) {
+                    if (ResourceHelper.parseFloatAttribute("textSize", textSize.getValue(), out,
+                            true /*requireUnit*/)) {
                         textView.setTextSize(
                                 out.getDimension(bridgeContext.getResources().mMetrics));
                     }
