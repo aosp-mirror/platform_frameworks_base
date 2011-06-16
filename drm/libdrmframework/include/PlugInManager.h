@@ -202,7 +202,7 @@ private:
     Vector<String8> getPlugInPathList(const String8& rsDirPath) {
         Vector<String8> fileList;
         DIR* pDir = opendir(rsDirPath.string());
-        struct dirent* pEntry = new dirent();
+        struct dirent* pEntry;
 
         while (NULL != pDir && NULL != (pEntry = readdir(pDir))) {
             if (!isPlugIn(pEntry)) {
@@ -219,8 +219,6 @@ private:
         if (NULL != pDir) {
             closedir(pDir);
         }
-        delete pEntry;
-        pEntry = NULL;
 
         return fileList;
     }

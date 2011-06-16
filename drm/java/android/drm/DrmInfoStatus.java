@@ -31,20 +31,20 @@ public class DrmInfoStatus {
     public static final int STATUS_ERROR = 2;
 
     /**
-    * The status of the communication.
-    */
+     * The status of the communication.
+     */
     public final int statusCode;
     /**
-    * The type of DRM information processed.
-    */
+     * The type of DRM information processed.
+     */
     public final int infoType;
     /**
-    * The MIME type of the content.
-    */
+     * The MIME type of the content.
+     */
     public final String mimeType;
     /**
-    * The processed data.
-    */
+     * The processed data.
+     */
     public final ProcessedData data;
 
     /**
