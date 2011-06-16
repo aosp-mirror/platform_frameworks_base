@@ -19,6 +19,7 @@
 #include "rsdBcc.h"
 #include "rsdRuntime.h"
 #include "rsdAllocation.h"
+#include "rsdFrameBufferObj.h"
 
 #include "rsAllocation.h"
 
@@ -244,6 +245,9 @@ bool rsdAllocationInit(const Context *rsc, Allocation *alloc, bool forceZero) {
     if (alloc->mHal.state.usageFlags & ~RS_ALLOCATION_USAGE_SCRIPT) {
         drv->uploadDeferred = true;
     }
+
+    drv->readBackFBO = NULL;
+
     return true;
 }
 
@@ -269,6 +273,10 @@ void rsdAllocationDestroy(const Context *rsc, Allocation *alloc) {
         free(drv->mallocPtr);
         drv->mallocPtr = NULL;
     }
+    if (drv->readBackFBO != NULL) {
+        delete drv->readBackFBO;
+        drv->readBackFBO = NULL;
+    }
     free(drv);
     alloc->mHal.drv = NULL;
 }
@@ -292,13 +300,52 @@ void rsdAllocationResize(const Context *rsc, const Allocation *alloc,
     }
 }
 
+static void rsdAllocationSyncFromFBO(const Context *rsc, const Allocation *alloc) {
+    if (!alloc->getIsScript()) {
+        return; // nothing to sync
+    }
+
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
+    RsdFrameBufferObj *lastFbo = dc->gl.currentFrameBuffer;
+
+    DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
+    if (!drv->textureID && !drv->renderTargetID) {
+        return; // nothing was rendered here yet, so nothing to sync
+    }
+    if (drv->readBackFBO == NULL) {
+        drv->readBackFBO = new RsdFrameBufferObj();
+        drv->readBackFBO->setColorTarget(drv, 0);
+        drv->readBackFBO->setDimensions(alloc->getType()->getDimX(),
+                                        alloc->getType()->getDimY());
+    }
+
+    // Bind the framebuffer object so we can read back from it
+    drv->readBackFBO->setActive(rsc);
+
+    // Do the readback
+    glReadPixels(0, 0, alloc->getType()->getDimX(), alloc->getType()->getDimY(),
+                 drv->glFormat, drv->glType, alloc->getPtr());
+
+    // Revert framebuffer to its original
+    lastFbo->setActive(rsc);
+}
 
 
 void rsdAllocationSyncAll(const Context *rsc, const Allocation *alloc,
                          RsAllocationUsageType src) {
     DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
 
-    if (!drv->uploadDeferred) {
+    if (src == RS_ALLOCATION_USAGE_GRAPHICS_RENDER_TARGET) {
+        if(!alloc->getIsRenderTarget()) {
+            rsc->setError(RS_ERROR_FATAL_DRIVER,
+                          "Attempting to sync allocation from render target, "
+                          "for non-render target allocation");
+        } else if (alloc->getType()->getElement()->getKind() != RS_KIND_PIXEL_RGBA) {
+            rsc->setError(RS_ERROR_FATAL_DRIVER, "Cannot only sync from RGBA"
+                                                 "render target");
+        } else {
+            rsdAllocationSyncFromFBO(rsc, alloc);
+        }
         return;
     }
 
@@ -382,7 +429,40 @@ void rsdAllocationData1D_alloc(const android::renderscript::Context *rsc,
                                const android::renderscript::Allocation *dstAlloc,
                                uint32_t dstXoff, uint32_t dstLod, uint32_t count,
                                const android::renderscript::Allocation *srcAlloc,
-                               uint32_t srcXoff, uint32_t srcLod){
+                               uint32_t srcXoff, uint32_t srcLod) {
+}
+
+uint8_t *getOffsetPtr(const android::renderscript::Allocation *alloc,
+                      uint32_t xoff, uint32_t yoff, uint32_t lod,
+                      RsAllocationCubemapFace face) {
+    uint8_t *ptr = static_cast<uint8_t *>(alloc->getPtr());
+    ptr += alloc->getType()->getLODOffset(lod, xoff, yoff);
+
+    if (face != 0) {
+        uint32_t totalSizeBytes = alloc->getType()->getSizeBytes();
+        uint32_t faceOffset = totalSizeBytes / 6;
+        ptr += faceOffset * (uint32_t)face;
+    }
+    return ptr;
+}
+
+
+void rsdAllocationData2D_alloc_script(const android::renderscript::Context *rsc,
+                                      const android::renderscript::Allocation *dstAlloc,
+                                      uint32_t dstXoff, uint32_t dstYoff, uint32_t dstLod,
+                                      RsAllocationCubemapFace dstFace, uint32_t w, uint32_t h,
+                                      const android::renderscript::Allocation *srcAlloc,
+                                      uint32_t srcXoff, uint32_t srcYoff, uint32_t srcLod,
+                                      RsAllocationCubemapFace srcFace) {
+    uint32_t elementSize = dstAlloc->getType()->getElementSizeBytes();
+    for (uint32_t i = 0; i < h; i ++) {
+        uint8_t *dstPtr = getOffsetPtr(dstAlloc, dstXoff, dstYoff + i, dstLod, dstFace);
+        uint8_t *srcPtr = getOffsetPtr(srcAlloc, srcXoff, srcYoff + i, srcLod, srcFace);
+        memcpy(dstPtr, srcPtr, w * elementSize);
+
+        LOGE("COPIED dstXoff(%u), dstYoff(%u), dstLod(%u), dstFace(%u), w(%u), h(%u), srcXoff(%u), srcYoff(%u), srcLod(%u), srcFace(%u)",
+             dstXoff, dstYoff, dstLod, dstFace, w, h, srcXoff, srcYoff, srcLod, srcFace);
+    }
 }
 
 void rsdAllocationData2D_alloc(const android::renderscript::Context *rsc,
@@ -392,6 +472,14 @@ void rsdAllocationData2D_alloc(const android::renderscript::Context *rsc,
                                const android::renderscript::Allocation *srcAlloc,
                                uint32_t srcXoff, uint32_t srcYoff, uint32_t srcLod,
                                RsAllocationCubemapFace srcFace) {
+    if (!dstAlloc->getIsScript() && !srcAlloc->getIsScript()) {
+        rsc->setError(RS_ERROR_FATAL_DRIVER, "Non-script allocation copies not "
+                                             "yet implemented.");
+        return;
+    }
+    rsdAllocationData2D_alloc_script(rsc, dstAlloc, dstXoff, dstYoff,
+                                     dstLod, dstFace, w, h, srcAlloc,
+                                     srcXoff, srcYoff, srcLod, srcFace);
 }
 
 void rsdAllocationData3D_alloc(const android::renderscript::Context *rsc,

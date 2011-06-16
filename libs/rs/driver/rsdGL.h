@@ -22,6 +22,7 @@
 
 class RsdShaderCache;
 class RsdVertexArrayState;
+class RsdFrameBufferObj;
 
 typedef void (* InvokeFunc_t)(void);
 typedef void (*WorkerCallback_t)(void *usr, uint32_t idx);
@@ -68,6 +69,7 @@ typedef struct RsdGLRec {
     uint32_t height;
     RsdShaderCache *shaderCache;
     RsdVertexArrayState *vertexArrayState;
+    RsdFrameBufferObj *currentFrameBuffer;
 } RsdGL;
 
 

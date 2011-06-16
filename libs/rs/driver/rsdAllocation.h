@@ -23,6 +23,8 @@
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 
+class RsdFrameBufferObj;
+
 struct DrvAllocation {
     // Is this a legal structure to be used as a texture source.
     // Initially this will require 1D or 2D and color data
@@ -42,8 +44,9 @@ struct DrvAllocation {
     GLenum glType;
     GLenum glFormat;
 
-
     bool uploadDeferred;
+
+    RsdFrameBufferObj * readBackFBO;
 };
 
 GLenum rsdTypeToGLType(RsDataType t);

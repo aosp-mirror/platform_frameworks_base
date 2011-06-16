@@ -80,16 +80,6 @@ void FBOCache::setup(Context *rsc) {
         return;
     }
 
-    if (mHal.state.depthTarget.get() != NULL) {
-        mHal.state.depthTarget->syncAll(rsc, RS_ALLOCATION_USAGE_SCRIPT);
-    }
-
-    for (uint32_t i = 0; i < mHal.state.colorTargetsCount; i ++) {
-        if (mHal.state.colorTargets[i].get() != NULL) {
-            mHal.state.colorTargets[i]->syncAll(rsc, RS_ALLOCATION_USAGE_SCRIPT);
-        }
-    }
-
     rsc->mHal.funcs.framebuffer.setActive(rsc, this);
 
     mDirty = false;
