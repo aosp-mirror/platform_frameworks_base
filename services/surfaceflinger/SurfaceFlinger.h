@@ -233,6 +233,7 @@ public:
     status_t addLayer(const sp<LayerBase>& layer);
     status_t invalidateLayerVisibility(const sp<LayerBase>& layer);
     void invalidateHwcGeometry();
+    void destroyLayer(LayerBase const* layer);
 
     sp<Layer> getLayer(const sp<ISurface>& sur) const;
 
@@ -306,6 +307,7 @@ private:
             void        handleConsoleEvents();
             void        handleTransaction(uint32_t transactionFlags);
             void        handleTransactionLocked(uint32_t transactionFlags);
+            void        handleDestroyLayers();
 
             void        computeVisibleRegions(
                             LayerVector& currentLayers,
@@ -427,6 +429,10 @@ private:
                 // these are thread safe
     mutable     Barrier                     mReadyToRunBarrier;
 
+
+                // protected by mDestroyedLayerLock;
+    mutable     Mutex                       mDestroyedLayerLock;
+                Vector<LayerBase const *>   mDestroyedLayers;
 
                 // atomic variables
                 enum {
