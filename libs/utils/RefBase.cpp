@@ -49,6 +49,11 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
+RefBase::Destroyer::~Destroyer() {
+}
+
+// ---------------------------------------------------------------------------
+
 class RefBase::weakref_impl : public RefBase::weakref_type
 {
 public:
@@ -56,7 +61,7 @@ public:
     volatile int32_t    mWeak;
     RefBase* const      mBase;
     volatile int32_t    mFlags;
-
+    Destroyer*          mDestroyer;
 
 #if !DEBUG_REFS
 
@@ -65,6 +70,7 @@ public:
         , mWeak(0)
         , mBase(base)
         , mFlags(0)
+        , mDestroyer(0)
     {
     }
 
@@ -357,7 +363,11 @@ void RefBase::decStrong(const void* id) const
     if (c == 1) {
         const_cast<RefBase*>(this)->onLastStrongRef(id);
         if ((refs->mFlags&OBJECT_LIFETIME_WEAK) != OBJECT_LIFETIME_WEAK) {
-            delete this;
+            if (refs->mDestroyer) {
+                refs->mDestroyer->destroy(this);
+            } else {
+                delete this;
+            }
         }
     }
     refs->decWeak(id);
@@ -390,7 +400,9 @@ int32_t RefBase::getStrongCount() const
     return mRefs->mStrong;
 }
 
-
+void RefBase::setDestroyer(RefBase::Destroyer* destroyer) {
+    mRefs->mDestroyer = destroyer;
+}
 
 RefBase* RefBase::weakref_type::refBase() const
 {
@@ -414,16 +426,28 @@ void RefBase::weakref_type::decWeak(const void* id)
     if (c != 1) return;
     
     if ((impl->mFlags&OBJECT_LIFETIME_WEAK) != OBJECT_LIFETIME_WEAK) {
-        if (impl->mStrong == INITIAL_STRONG_VALUE)
-            delete impl->mBase;
-        else {
+        if (impl->mStrong == INITIAL_STRONG_VALUE) {
+            if (impl->mBase) {
+                if (impl->mDestroyer) {
+                    impl->mDestroyer->destroy(impl->mBase);
+                } else {
+                    delete impl->mBase;
+                }
+            }
+        } else {
             // LOGV("Freeing refs %p of old RefBase %p\n", this, impl->mBase);
             delete impl;
         }
     } else {
         impl->mBase->onLastWeakRef(id);
         if ((impl->mFlags&OBJECT_LIFETIME_FOREVER) != OBJECT_LIFETIME_FOREVER) {
-            delete impl->mBase;
+            if (impl->mBase) {
+                if (impl->mDestroyer) {
+                    impl->mDestroyer->destroy(impl->mBase);
+                } else {
+                    delete impl->mBase;
+                }
+            }
         }
     }
 }
@@ -545,8 +569,10 @@ RefBase::RefBase()
 
 RefBase::~RefBase()
 {
-    if (mRefs->mWeak == 0) {
-        delete mRefs;
+    if ((mRefs->mFlags & OBJECT_LIFETIME_WEAK) == OBJECT_LIFETIME_WEAK) {
+        if (mRefs->mWeak == 0) {
+            delete mRefs;
+        }
     }
 }
 
