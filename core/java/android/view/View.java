@@ -17,6 +17,7 @@
 package android.view;
 
 import android.util.FloatProperty;
+import android.util.LocaleUtil;
 import android.util.Property;
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
@@ -8772,18 +8773,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @return true if a Locale is corresponding to a RTL script.
      */
     private static boolean isLayoutDirectionRtl(Locale locale) {
-        if (locale == null || locale.equals(Locale.ROOT)) return false;
-        // Be careful: this code will need to be changed when vertical scripts will be supported
-        // OR if ICU4C is updated to have the "likelySubtags" file
-        switch(Character.getDirectionality(locale.getDisplayName(locale).charAt(0))) {
-            case Character.DIRECTIONALITY_LEFT_TO_RIGHT:
-                return false;
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT:
-            case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
-                return true;
-            default:
-                return false;
-        }
+        return (LocaleUtil.TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE ==
+                LocaleUtil.getLayoutDirectionFromLocale(locale));
     }
 
     /**
