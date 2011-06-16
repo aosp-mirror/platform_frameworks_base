@@ -29,6 +29,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.AbsSavedState;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -955,6 +956,17 @@ public class Preference implements Comparable<Preference>, OnDependencyChangeLis
             Context context = getContext();
             context.startActivity(mIntent);
         }
+    }
+
+    /**
+     * Allows a Preference to intercept key events without having focus.
+     * For example, SeekBarPreference uses this to intercept +/- to adjust
+     * the progress.
+     * @return True if the Preference handled the key. Returns false by default.
+     * @hide
+     */
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        return false;
     }
     
     /**

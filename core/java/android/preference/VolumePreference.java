@@ -38,19 +38,19 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 /**
  * @hide
  */
-public class VolumePreference extends SeekBarPreference implements 
+public class VolumePreference extends SeekBarDialogPreference implements
         PreferenceManager.OnActivityStopListener, View.OnKeyListener {
 
     private static final String TAG = "VolumePreference";
-    
+
     private int mStreamType;
 
     /** May be null if the dialog isn't visible. */
     private SeekBarVolumizer mSeekBarVolumizer;
-    
+
     public VolumePreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        
+
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.VolumePreference, 0, 0);
         mStreamType = a.getInt(android.R.styleable.VolumePreference_streamType, 0);
@@ -64,7 +64,7 @@ public class VolumePreference extends SeekBarPreference implements
     @Override
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
-    
+
         final SeekBar seekBar = (SeekBar) view.findViewById(com.android.internal.R.id.seekbar);
         mSeekBarVolumizer = new SeekBarVolumizer(getContext(), seekBar, mStreamType);
 
@@ -105,7 +105,7 @@ public class VolumePreference extends SeekBarPreference implements
     @Override
     protected void onDialogClosed(boolean positiveResult) {
         super.onDialogClosed(positiveResult);
-        
+
         if (!positiveResult && mSeekBarVolumizer != null) {
             mSeekBarVolumizer.revertVolume();
         }
@@ -222,16 +222,16 @@ public class VolumePreference extends SeekBarPreference implements
 
         private Context mContext;
         private Handler mHandler = new Handler();
-    
+
         private AudioManager mAudioManager;
         private int mStreamType;
-        private int mOriginalStreamVolume; 
+        private int mOriginalStreamVolume;
         private Ringtone mRingtone;
-    
+
         private int mLastProgress = -1;
         private SeekBar mSeekBar;
         private int mVolumeBeforeMute = -1;
-        
+
         private ContentObserver mVolumeObserver = new ContentObserver(mHandler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -263,7 +263,7 @@ public class VolumePreference extends SeekBarPreference implements
             mOriginalStreamVolume = mAudioManager.getStreamVolume(mStreamType);
             seekBar.setProgress(mOriginalStreamVolume);
             seekBar.setOnSeekBarChangeListener(this);
-            
+
             mContext.getContentResolver().registerContentObserver(
                     System.getUriFor(System.VOLUME_SETTINGS[mStreamType]),
                     false, mVolumeObserver);
@@ -290,17 +290,17 @@ public class VolumePreference extends SeekBarPreference implements
             mContext.getContentResolver().unregisterContentObserver(mVolumeObserver);
             mSeekBar.setOnSeekBarChangeListener(null);
         }
-        
+
         public void revertVolume() {
             mAudioManager.setStreamVolume(mStreamType, mOriginalStreamVolume, 0);
         }
-        
+
         public void onProgressChanged(SeekBar seekBar, int progress,
                 boolean fromTouch) {
             if (!fromTouch) {
                 return;
             }
-    
+
             postSetVolume(progress);
         }
 
@@ -310,7 +310,7 @@ public class VolumePreference extends SeekBarPreference implements
             mHandler.removeCallbacks(this);
             mHandler.post(this);
         }
-    
+
         public void onStartTrackingTouch(SeekBar seekBar) {
         }
 
@@ -319,7 +319,7 @@ public class VolumePreference extends SeekBarPreference implements
                 startSample();
             }
         }
-        
+
         public void run() {
             mAudioManager.setStreamVolume(mStreamType, mLastProgress, 0);
         }
@@ -334,7 +334,7 @@ public class VolumePreference extends SeekBarPreference implements
                 mRingtone.play();
             }
         }
-    
+
         public void stopSample() {
             if (mRingtone != null) {
                 mRingtone.stop();
@@ -344,7 +344,7 @@ public class VolumePreference extends SeekBarPreference implements
         public SeekBar getSeekBar() {
             return mSeekBar;
         }
-        
+
         public void changeVolumeBy(int amount) {
             mSeekBar.incrementProgressBy(amount);
             if (!isSamplePlaying()) {
