@@ -984,7 +984,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                         "status_bar_height");
 
                 if (value != null) {
-                    TypedValue typedValue = ResourceHelper.getValue(value.getValue());
+                    TypedValue typedValue = ResourceHelper.getValue("status_bar_height",
+                            value.getValue(), true /*requireUnit*/);
                     if (typedValue != null) {
                         // compute the pixel value based on the display metrics
                         mStatusBarSize = (int)typedValue.getDimension(metrics);
@@ -1016,7 +1017,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
             if (value != null) {
                 // get the numerical value, if available
-                TypedValue typedValue = ResourceHelper.getValue(value.getValue());
+                TypedValue typedValue = ResourceHelper.getValue("actionBarSize", value.getValue(),
+                        true /*requireUnit*/);
                 if (typedValue != null) {
                     // compute the pixel value based on the display metrics
                     mActionBarSize = (int)typedValue.getDimension(metrics);
@@ -1040,7 +1042,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
 
                 if (value != null) {
                     // get the numerical value, if available
-                    TypedValue typedValue = ResourceHelper.getValue(value.getValue());
+                    TypedValue typedValue = ResourceHelper.getValue("windowTitleSize",
+                            value.getValue(), true /*requireUnit*/);
                     if (typedValue != null) {
                         // compute the pixel value based on the display metrics
                         mTitleBarSize = (int)typedValue.getDimension(metrics);
@@ -1062,7 +1065,8 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                     "status_bar_height");
 
             if (value != null) {
-                TypedValue typedValue = ResourceHelper.getValue(value.getValue());
+                TypedValue typedValue = ResourceHelper.getValue("status_bar_height",
+                        value.getValue(), true /*requireUnit*/);
                 if (typedValue != null) {
                     // compute the pixel value based on the display metrics
                     mSystemBarSize = (int)typedValue.getDimension(metrics);

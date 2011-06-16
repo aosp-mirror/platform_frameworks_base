@@ -27,7 +27,6 @@ import com.android.ninepatch.NinePatch;
 import com.android.ninepatch.NinePatchChunk;
 import com.android.resources.Density;
 
-import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -121,9 +120,7 @@ public final class ResourceHelper {
                 try {
                     // let the framework inflate the ColorStateList from the XML file, by
                     // providing an XmlPullParser
-                    KXmlParser parser = new KXmlParser();
-                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                    parser.setInput(new FileInputStream(f), "UTF-8"); //$NON-NLS-1$);
+                    XmlPullParser parser = ParserFactory.create(f);
 
                     BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
                             parser, context, resValue.isFramework());
@@ -203,9 +200,7 @@ public final class ResourceHelper {
             if (f.isFile()) {
                 try {
                     // let the framework inflate the Drawable from the XML file.
-                    KXmlParser parser = new KXmlParser();
-                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                    parser.setInput(new FileInputStream(f), "UTF-8"); //$NON-NLS-1$);
+                    XmlPullParser parser = ParserFactory.create(f);
 
                     BridgeXmlBlockParser blockParser = new BridgeXmlBlockParser(
                             parser, context, value.isFramework());
@@ -341,11 +336,11 @@ public final class ResourceHelper {
     };
 
     /**
-     * Returns the raw value from the given string.
+     * Returns the raw value from the given attribute float-type value string.
      * This object is only valid until the next call on to {@link ResourceHelper}.
      */
-    public static TypedValue getValue(String s) {
-        if (stringToFloat(s, mValue)) {
+    public static TypedValue getValue(String attribute, String value, boolean requireUnit) {
+        if (parseFloatAttribute(attribute, value, mValue, requireUnit)) {
             return mValue;
         }
 
@@ -353,22 +348,27 @@ public final class ResourceHelper {
     }
 
     /**
-     * Convert the string into a {@link TypedValue}.
-     * @param s
-     * @param outValue
+     * Parse a float attribute and return the parsed value into a given TypedValue.
+     * @param attribute the name of the attribute. Can be null if <var>requireUnit</var> is false.
+     * @param value the string value of the attribute
+     * @param outValue the TypedValue to receive the parsed value
+     * @param requireUnit whether the value is expected to contain a unit.
      * @return true if success.
      */
-    public static boolean stringToFloat(String s, TypedValue outValue) {
+    public static boolean parseFloatAttribute(String attribute, String value,
+            TypedValue outValue, boolean requireUnit) {
+        assert requireUnit == false || attribute != null;
+
         // remove the space before and after
-        s = s.trim();
-        int len = s.length();
+        value = value.trim();
+        int len = value.length();
 
         if (len <= 0) {
             return false;
         }
 
         // check that there's no non ascii characters.
-        char[] buf = s.toCharArray();
+        char[] buf = value.toCharArray();
         for (int i = 0 ; i < len ; i++) {
             if (buf[i] > 255) {
                 return false;
@@ -381,7 +381,7 @@ public final class ResourceHelper {
         }
 
         // now look for the string that is after the float...
-        Matcher m = sFloatPattern.matcher(s);
+        Matcher m = sFloatPattern.matcher(value);
         if (m.matches()) {
             String f_str = m.group(1);
             String end = m.group(2);
@@ -397,45 +397,7 @@ public final class ResourceHelper {
             if (end.length() > 0 && end.charAt(0) != ' ') {
                 // Might be a unit...
                 if (parseUnit(end, outValue, sFloatOut)) {
-
-                    f *= sFloatOut[0];
-                    boolean neg = f < 0;
-                    if (neg) {
-                        f = -f;
-                    }
-                    long bits = (long)(f*(1<<23)+.5f);
-                    int radix;
-                    int shift;
-                    if ((bits&0x7fffff) == 0) {
-                        // Always use 23p0 if there is no fraction, just to make
-                        // things easier to read.
-                        radix = TypedValue.COMPLEX_RADIX_23p0;
-                        shift = 23;
-                    } else if ((bits&0xffffffffff800000L) == 0) {
-                        // Magnitude is zero -- can fit in 0 bits of precision.
-                        radix = TypedValue.COMPLEX_RADIX_0p23;
-                        shift = 0;
-                    } else if ((bits&0xffffffff80000000L) == 0) {
-                        // Magnitude can fit in 8 bits of precision.
-                        radix = TypedValue.COMPLEX_RADIX_8p15;
-                        shift = 8;
-                    } else if ((bits&0xffffff8000000000L) == 0) {
-                        // Magnitude can fit in 16 bits of precision.
-                        radix = TypedValue.COMPLEX_RADIX_16p7;
-                        shift = 16;
-                    } else {
-                        // Magnitude needs entire range, so no fractional part.
-                        radix = TypedValue.COMPLEX_RADIX_23p0;
-                        shift = 23;
-                    }
-                    int mantissa = (int)(
-                        (bits>>shift) & TypedValue.COMPLEX_MANTISSA_MASK);
-                    if (neg) {
-                        mantissa = (-mantissa) & TypedValue.COMPLEX_MANTISSA_MASK;
-                    }
-                    outValue.data |=
-                        (radix<<TypedValue.COMPLEX_RADIX_SHIFT)
-                        | (mantissa<<TypedValue.COMPLEX_MANTISSA_SHIFT);
+                    computeTypedValue(outValue, f, sFloatOut[0]);
                     return true;
                 }
                 return false;
@@ -446,8 +408,20 @@ public final class ResourceHelper {
 
             if (end.length() == 0) {
                 if (outValue != null) {
-                    outValue.type = TypedValue.TYPE_FLOAT;
-                    outValue.data = Float.floatToIntBits(f);
+                    if (requireUnit == false) {
+                        outValue.type = TypedValue.TYPE_FLOAT;
+                        outValue.data = Float.floatToIntBits(f);
+                    } else {
+                        // no unit when required? Use dp and out an error.
+                        applyUnit(sUnitNames[1], outValue, sFloatOut);
+                        computeTypedValue(outValue, f, sFloatOut[0]);
+
+                        Bridge.getLog().error(LayoutLog.TAG_RESOURCES_RESOLVE,
+                                String.format(
+                                        "Dimension \"%1$s\" in attribute \"%2$s\" is missing unit!",
+                                        value, attribute),
+                                null);
+                    }
                     return true;
                 }
             }
@@ -456,20 +430,64 @@ public final class ResourceHelper {
         return false;
     }
 
+    private static void computeTypedValue(TypedValue outValue, float value, float scale) {
+        value *= scale;
+        boolean neg = value < 0;
+        if (neg) {
+            value = -value;
+        }
+        long bits = (long)(value*(1<<23)+.5f);
+        int radix;
+        int shift;
+        if ((bits&0x7fffff) == 0) {
+            // Always use 23p0 if there is no fraction, just to make
+            // things easier to read.
+            radix = TypedValue.COMPLEX_RADIX_23p0;
+            shift = 23;
+        } else if ((bits&0xffffffffff800000L) == 0) {
+            // Magnitude is zero -- can fit in 0 bits of precision.
+            radix = TypedValue.COMPLEX_RADIX_0p23;
+            shift = 0;
+        } else if ((bits&0xffffffff80000000L) == 0) {
+            // Magnitude can fit in 8 bits of precision.
+            radix = TypedValue.COMPLEX_RADIX_8p15;
+            shift = 8;
+        } else if ((bits&0xffffff8000000000L) == 0) {
+            // Magnitude can fit in 16 bits of precision.
+            radix = TypedValue.COMPLEX_RADIX_16p7;
+            shift = 16;
+        } else {
+            // Magnitude needs entire range, so no fractional part.
+            radix = TypedValue.COMPLEX_RADIX_23p0;
+            shift = 23;
+        }
+        int mantissa = (int)(
+            (bits>>shift) & TypedValue.COMPLEX_MANTISSA_MASK);
+        if (neg) {
+            mantissa = (-mantissa) & TypedValue.COMPLEX_MANTISSA_MASK;
+        }
+        outValue.data |=
+            (radix<<TypedValue.COMPLEX_RADIX_SHIFT)
+            | (mantissa<<TypedValue.COMPLEX_MANTISSA_SHIFT);
+    }
+
     private static boolean parseUnit(String str, TypedValue outValue, float[] outScale) {
         str = str.trim();
 
         for (UnitEntry unit : sUnitNames) {
             if (unit.name.equals(str)) {
-                outValue.type = unit.type;
-                outValue.data = unit.unit << TypedValue.COMPLEX_UNIT_SHIFT;
-                outScale[0] = unit.scale;
-
+                applyUnit(unit, outValue, outScale);
                 return true;
             }
         }
 
         return false;
+    }
+
+    private static void applyUnit(UnitEntry unit, TypedValue outValue, float[] outScale) {
+        outValue.type = unit.type;
+        outValue.data = unit.unit << TypedValue.COMPLEX_UNIT_SHIFT;
+        outScale[0] = unit.scale;
     }
 }
 
