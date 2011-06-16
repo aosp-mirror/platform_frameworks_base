@@ -28,12 +28,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Helper class for managing multiple running embedded activities in the same
+ * @deprecated Use the new {@link Fragment} and {@link FragmentManager} APIs
+ * instead; these are also
+ * available on older platforms through the Android compatibility package.
+ *
+ * <p>Helper class for managing multiple running embedded activities in the same
  * process. This class is not normally used directly, but rather created for
  * you as part of the {@link android.app.ActivityGroup} implementation.
  *
  * @see ActivityGroup
  */
+@Deprecated
 public class LocalActivityManager {
     private static final String TAG = "LocalActivityManager";
     private static final boolean localLOGV = false;

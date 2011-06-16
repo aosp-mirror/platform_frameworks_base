@@ -390,8 +390,12 @@ web_docs_sample_code_flags := \
 		            resources/samples/AccessibilityService "Accessibility Service" \
 		-samplecode $(sample_dir)/AccelerometerPlay \
 		            resources/samples/AccelerometerPlay "Accelerometer Play" \
-	  -samplecode $(sample_dir)/ApiDemos \
+		-samplecode $(sample_dir)/ApiDemos \
 		            resources/samples/ApiDemos "API Demos" \
+		-samplecode $(sample_dir)/Support4Demos \
+		            resources/samples/Support4Demos "API 4+ Support Demos" \
+		-samplecode $(sample_dir)/Support13Demos \
+		            resources/samples/Support13Demos "API 13+ Support Demos" \
 		-samplecode $(sample_dir)/BackupRestore \
 		            resources/samples/BackupRestore "Backup and Restore" \
 		-samplecode $(sample_dir)/BluetoothChat \

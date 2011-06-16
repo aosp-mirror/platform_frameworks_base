@@ -23,8 +23,13 @@ import android.os.Bundle;
 import android.util.Log;
 
 /**
+ * @deprecated Use the new {@link Fragment} and {@link FragmentManager} APIs
+ * instead; these are also
+ * available on older platforms through the Android compatibility package.
+ *
  * A screen that contains and runs multiple embedded activities.
  */
+@Deprecated
 public class ActivityGroup extends Activity {
     private static final String TAG = "ActivityGroup";
     private static final String STATES_KEY = "android:states";

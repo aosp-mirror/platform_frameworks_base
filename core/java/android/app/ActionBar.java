@@ -400,6 +400,12 @@ public abstract class ActionBar {
      * Create and return a new {@link Tab}.
      * This tab will not be included in the action bar until it is added.
      *
+     * <p>Very often tabs will be used to switch between {@link Fragment}
+     * objects.  Here is a typical implementation of such tabs:</p>
+     *
+     * {@sample development/samples/ApiDemos/src/com/example/android/apis/app/FragmentTabs.java
+     *      complete}
+     *
      * @return A new Tab
      *
      * @see #addTab(Tab)
