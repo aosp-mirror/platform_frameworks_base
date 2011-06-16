@@ -117,20 +117,6 @@ public:
 
     typedef RefBase basetype;
 
-    // used to override the RefBase destruction.
-    class Destroyer {
-        friend class RefBase;
-        friend class weakref_type;
-    public:
-        virtual ~Destroyer();
-    private:
-        virtual void destroy(RefBase const* base) = 0;
-    };
-
-    // Make sure to never acquire a strong reference from this function. The
-    // same restrictions than for destructors apply.
-    void setDestroyer(Destroyer* destroyer);
-
 protected:
                             RefBase();
     virtual                 ~RefBase();
