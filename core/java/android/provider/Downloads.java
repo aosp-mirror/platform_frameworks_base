@@ -548,14 +548,6 @@ public final class Downloads {
         }
 
         /**
-         * This download has been paused because requesting application has been
-         * blocked by {@link NetworkPolicyManager}.
-         *
-         * @hide
-         */
-        public static final int STATUS_PAUSED_BY_POLICY = 189;
-
-        /**
          * This download hasn't stated yet
          */
         public static final int STATUS_PENDING = 190;
@@ -702,6 +694,14 @@ public final class Downloads {
          * too many redirects.
          */
         public static final int STATUS_TOO_MANY_REDIRECTS = 497;
+
+        /**
+         * This download has failed because requesting application has been
+         * blocked by {@link NetworkPolicyManager}.
+         *
+         * @hide
+         */
+        public static final int STATUS_BLOCKED = 498;
 
         /**
          * This download is visible but only shows in the notifications

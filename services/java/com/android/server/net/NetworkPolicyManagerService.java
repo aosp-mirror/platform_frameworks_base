@@ -29,9 +29,9 @@ import static android.net.NetworkPolicyManager.ACTION_DATA_USAGE_LIMIT;
 import static android.net.NetworkPolicyManager.ACTION_DATA_USAGE_WARNING;
 import static android.net.NetworkPolicyManager.EXTRA_NETWORK_TEMPLATE;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
-import static android.net.NetworkPolicyManager.POLICY_REJECT_PAID_BACKGROUND;
+import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
-import static android.net.NetworkPolicyManager.RULE_REJECT_PAID;
+import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkPolicyManager.dumpPolicy;
 import static android.net.NetworkPolicyManager.dumpRules;
@@ -87,6 +87,7 @@ import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Objects;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
+import com.google.android.collect.Sets;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -103,6 +104,7 @@ import java.net.ProtocolException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import libcore.io.IoUtils;
 
@@ -163,6 +165,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private SparseIntArray mUidPolicy = new SparseIntArray();
     /** Current derived network rules for each UID. */
     private SparseIntArray mUidRules = new SparseIntArray();
+
+    /** Set of ifaces that are metered. */
+    private HashSet<String> mMeteredIfaces = Sets.newHashSet();
 
     /** Foreground at both UID and PID granularity. */
     private SparseBooleanArray mUidForeground = new SparseBooleanArray();
@@ -536,6 +541,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
                 : System.currentTimeMillis();
 
+        mMeteredIfaces.clear();
+
         // apply each policy that we found ifaces for; compute remaining data
         // based on current cycle and historical stats, and push to kernel.
         for (NetworkPolicy policy : rules.keySet()) {
@@ -566,8 +573,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // remaining "quota" is based on usage in current cycle
                 final long quota = Math.max(0, policy.limitBytes - total);
                 //kernelSetIfacesQuota(ifaces, quota);
+
+                for (String iface : ifaces) {
+                    mMeteredIfaces.add(iface);
+                }
             }
         }
+
+        // dispatch changed rule to existing listeners
+        // TODO: dispatch outside of holding lock
+        final String[] meteredIfaces = mMeteredIfaces.toArray(new String[mMeteredIfaces.size()]);
+        final int length = mListeners.beginBroadcast();
+        for (int i = 0; i < length; i++) {
+            final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
+            if (listener != null) {
+                try {
+                    listener.onMeteredIfacesChanged(meteredIfaces);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        mListeners.finishBroadcast();
     }
 
     /**
@@ -754,15 +780,27 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         synchronized (mRulesLock) {
             // dispatch any existing rules to new listeners
+            // TODO: dispatch outside of holding lock
             final int size = mUidRules.size();
             for (int i = 0; i < size; i++) {
                 final int uid = mUidRules.keyAt(i);
                 final int uidRules = mUidRules.valueAt(i);
                 if (uidRules != RULE_ALLOW_ALL) {
                     try {
-                        listener.onRulesChanged(uid, uidRules);
+                        listener.onUidRulesChanged(uid, uidRules);
                     } catch (RemoteException e) {
                     }
+                }
+            }
+
+            // dispatch any metered ifaces to new listeners
+            // TODO: dispatch outside of holding lock
+            if (mMeteredIfaces.size() > 0) {
+                final String[] meteredIfaces = mMeteredIfaces.toArray(
+                        new String[mMeteredIfaces.size()]);
+                try {
+                    listener.onMeteredIfacesChanged(meteredIfaces);
+                } catch (RemoteException e) {
                 }
             }
         }
@@ -921,9 +959,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // derive active rules based on policy and active state
         int uidRules = RULE_ALLOW_ALL;
-        if (!uidForeground && (uidPolicy & POLICY_REJECT_PAID_BACKGROUND) != 0) {
-            // uid in background, and policy says to block paid data
-            uidRules = RULE_REJECT_PAID;
+        if (!uidForeground && (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0) {
+            // uid in background, and policy says to block metered data
+            uidRules = RULE_REJECT_METERED;
         }
 
         // TODO: only dispatch when rules actually change
@@ -931,16 +969,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // record rule locally to dispatch to new listeners
         mUidRules.put(uid, uidRules);
 
-        final boolean rejectPaid = (uidRules & RULE_REJECT_PAID) != 0;
+        final boolean rejectMetered = (uidRules & RULE_REJECT_METERED) != 0;
         //kernelSetUidRejectPaid(uid, rejectPaid);
 
         // dispatch changed rule to existing listeners
+        // TODO: dispatch outside of holding lock
         final int length = mListeners.beginBroadcast();
         for (int i = 0; i < length; i++) {
             final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
             if (listener != null) {
                 try {
-                    listener.onRulesChanged(uid, uidRules);
+                    listener.onUidRulesChanged(uid, uidRules);
                 } catch (RemoteException e) {
                 }
             }

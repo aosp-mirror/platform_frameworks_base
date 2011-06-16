@@ -19,13 +19,14 @@ package com.android.server;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
-import static android.net.NetworkPolicyManager.POLICY_REJECT_PAID_BACKGROUND;
+import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
-import static android.net.NetworkPolicyManager.RULE_REJECT_PAID;
+import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.TEMPLATE_WIFI;
 import static org.easymock.EasyMock.anyInt;
+import static org.easymock.EasyMock.aryEq;
 import static org.easymock.EasyMock.capture;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
@@ -182,7 +183,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final Future<Intent> backgroundChanged = mServiceContext.nextBroadcastIntent(
                 ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED);
 
-        mService.setUidPolicy(UID_A, POLICY_REJECT_PAID_BACKGROUND);
+        mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
 
         backgroundChanged.get();
     }
@@ -225,12 +226,12 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, true);
-        mService.setUidPolicy(UID_A, POLICY_REJECT_PAID_BACKGROUND);
+        mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
         verifyAndReset();
 
         // now turn screen off and verify REJECT rule
         expect(mPowerManager.isScreenOn()).andReturn(false).atLeastOnce();
-        expectRulesChanged(UID_A, RULE_REJECT_PAID);
+        expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
         mServiceContext.sendBroadcast(new Intent(Intent.ACTION_SCREEN_OFF));
         verifyAndReset();
@@ -260,9 +261,9 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     public void testPolicyReject() throws Exception {
         // POLICY_REJECT should RULE_ALLOW in background
-        expectRulesChanged(UID_A, RULE_REJECT_PAID);
+        expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
-        mService.setUidPolicy(UID_A, POLICY_REJECT_PAID_BACKGROUND);
+        mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
         verifyAndReset();
 
         // POLICY_REJECT should RULE_ALLOW in foreground
@@ -272,7 +273,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         verifyAndReset();
 
         // POLICY_REJECT should RULE_REJECT in background
-        expectRulesChanged(UID_A, RULE_REJECT_PAID);
+        expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, false);
         verifyAndReset();
@@ -287,9 +288,9 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         verifyAndReset();
 
         // adding POLICY_REJECT should cause RULE_REJECT
-        expectRulesChanged(UID_A, RULE_REJECT_PAID);
+        expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
-        mService.setUidPolicy(UID_A, POLICY_REJECT_PAID_BACKGROUND);
+        mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
         verifyAndReset();
 
         // removing POLICY_REJECT should return us to RULE_ALLOW
@@ -353,6 +354,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         state = new NetworkState[] { buildWifi() };
         expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
         expectTime(TIME_MAR_10 + elapsedRealtime);
+        expectMeteredIfacesChanged();
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
@@ -373,6 +375,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         // TODO: write up NetworkManagementService mock
 
         expectClearNotifications();
+        expectMeteredIfacesChanged(TEST_IFACE);
 
         replay();
         setNetworkPolicies(new NetworkPolicy(TEMPLATE_WIFI, null, CYCLE_DAY, 1024L, 2048L));
@@ -411,7 +414,12 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     }
 
     private void expectRulesChanged(int uid, int policy) throws Exception {
-        mPolicyListener.onRulesChanged(eq(uid), eq(policy));
+        mPolicyListener.onUidRulesChanged(eq(uid), eq(policy));
+        expectLastCall().atLeastOnce();
+    }
+
+    private void expectMeteredIfacesChanged(String... ifaces) throws Exception {
+        mPolicyListener.onMeteredIfacesChanged(aryEq(ifaces));
         expectLastCall().atLeastOnce();
     }
 

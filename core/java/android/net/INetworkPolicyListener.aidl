@@ -19,6 +19,7 @@ package android.net;
 /** {@hide} */
 oneway interface INetworkPolicyListener {
 
-    void onRulesChanged(int uid, int uidRules);
+    void onUidRulesChanged(int uid, int uidRules);
+    void onMeteredIfacesChanged(in String[] meteredIfaces);
 
 }

@@ -34,13 +34,13 @@ public class NetworkPolicyManager {
 
     /** No specific network policy, use system default. */
     public static final int POLICY_NONE = 0x0;
-    /** Reject network usage on paid networks when application in background. */
-    public static final int POLICY_REJECT_PAID_BACKGROUND = 0x1;
+    /** Reject network usage on metered networks when application in background. */
+    public static final int POLICY_REJECT_METERED_BACKGROUND = 0x1;
 
     /** All network traffic should be allowed. */
     public static final int RULE_ALLOW_ALL = 0x0;
-    /** Reject traffic on paid networks. */
-    public static final int RULE_REJECT_PAID = 0x1;
+    /** Reject traffic on metered networks. */
+    public static final int RULE_REJECT_METERED = 0x1;
 
     /**
      * {@link Intent} action launched when user selects {@link NetworkPolicy}
@@ -98,7 +98,7 @@ public class NetworkPolicyManager {
      * Set policy flags for specific UID.
      *
      * @param policy {@link #POLICY_NONE} or combination of flags like
-     *            {@link #POLICY_REJECT_PAID_BACKGROUND}.
+     *            {@link #POLICY_REJECT_METERED_BACKGROUND}.
      */
     public void setUidPolicy(int uid, int policy) {
         try {
@@ -217,8 +217,8 @@ public class NetworkPolicyManager {
     /** {@hide} */
     public static void dumpPolicy(PrintWriter fout, int policy) {
         fout.write("[");
-        if ((policy & POLICY_REJECT_PAID_BACKGROUND) != 0) {
-            fout.write("REJECT_PAID_BACKGROUND");
+        if ((policy & POLICY_REJECT_METERED_BACKGROUND) != 0) {
+            fout.write("REJECT_METERED_BACKGROUND");
         }
         fout.write("]");
     }
@@ -226,8 +226,8 @@ public class NetworkPolicyManager {
     /** {@hide} */
     public static void dumpRules(PrintWriter fout, int rules) {
         fout.write("[");
-        if ((rules & RULE_REJECT_PAID) != 0) {
-            fout.write("REJECT_PAID");
+        if ((rules & RULE_REJECT_METERED) != 0) {
+            fout.write("REJECT_METERED");
         }
         fout.write("]");
     }
