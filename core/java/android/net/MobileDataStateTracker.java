@@ -69,10 +69,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     private boolean mPrivateDnsRouteSet = false;
     private boolean mDefaultRouteSet = false;
 
-    // DEFAULT and HIPRI are the same connection.  If we're one of these we need to check if
-    // the other is also disconnected before we reset sockets
-    private boolean mIsDefaultOrHipri = false;
-
     private Handler mHandler;
     private AsyncChannel mDataConnectionTrackerAc;
     private Messenger mMessenger;
@@ -87,12 +83,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 TelephonyManager.getDefault().getNetworkType(), tag,
                 TelephonyManager.getDefault().getNetworkTypeName());
         mApnType = networkTypeToApnType(netType);
-        if (netType == ConnectivityManager.TYPE_MOBILE ||
-                netType == ConnectivityManager.TYPE_MOBILE_HIPRI) {
-            mIsDefaultOrHipri = true;
-        }
-
-        mPhoneService = null;
     }
 
     /**
@@ -180,8 +170,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     }
 
     private class MobileDataStateReceiver extends BroadcastReceiver {
-        IConnectivityManager mConnectivityManager;
-
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(TelephonyIntents.
@@ -218,35 +206,6 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                             }
 
                             setDetailedState(DetailedState.DISCONNECTED, reason, apnName);
-                            boolean doReset = true;
-                            if (mIsDefaultOrHipri == true) {
-                                // both default and hipri must go down before we reset
-                                int typeToCheck = (Phone.APN_TYPE_DEFAULT.equals(mApnType) ?
-                                    ConnectivityManager.TYPE_MOBILE_HIPRI :
-                                    ConnectivityManager.TYPE_MOBILE);
-                                if (mConnectivityManager == null) {
-                                    IBinder b = ServiceManager.getService(
-                                            Context.CONNECTIVITY_SERVICE);
-                                    mConnectivityManager = IConnectivityManager.Stub.asInterface(b);
-                                }
-                                try {
-                                    if (mConnectivityManager != null) {
-                                        NetworkInfo info = mConnectivityManager.getNetworkInfo(
-                                                typeToCheck);
-                                        if (info.isConnected() == true) {
-                                            doReset = false;
-                                        }
-                                    }
-                                } catch (RemoteException e) {
-                                    // just go ahead with the reset
-                                    loge("Exception trying to contact ConnService: " + e);
-                                }
-                            }
-                            if (doReset && mLinkProperties != null) {
-                                String iface = mLinkProperties.getInterfaceName();
-                                if (iface != null) NetworkUtils.resetConnections(iface);
-                            }
-                            // TODO - check this
                             // can't do this here - ConnectivityService needs it to clear stuff
                             // it's ok though - just leave it to be refreshed next time
                             // we connect.
