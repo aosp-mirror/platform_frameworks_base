@@ -67,17 +67,8 @@ public class LocaleUtil {
             return TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE;
         }
 
-        final String localeWithSubtags = ICU.addLikelySubtags(locale.toString());
-        if (localeWithSubtags == null) return getLayoutDirectionFromFirstChar(locale);
-
-        // Need to check if we can extract the script subtag. For example, "Latn" in  "en_Latn_US"
-        if (localeWithSubtags.length() <= 7
-                || localeWithSubtags.charAt(2) != UNDERSCORE_CHAR
-                || localeWithSubtags.charAt(7) != UNDERSCORE_CHAR) {
-            return getLayoutDirectionFromFirstChar(locale);
-        }
-        // Extract the script subtag
-        final String scriptSubtag = localeWithSubtags.substring(3, 7);
+        final String scriptSubtag = ICU.getScript(ICU.addLikelySubtags(locale.toString()));
+        if (scriptSubtag == null) return getLayoutDirectionFromFirstChar(locale);
 
         if (scriptSubtag.equalsIgnoreCase(ARAB_SCRIPT_SUBTAG) ||
                 scriptSubtag.equalsIgnoreCase(HEBR_SCRIPT_SUBTAG)) {

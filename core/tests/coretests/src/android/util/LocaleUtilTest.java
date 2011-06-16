@@ -18,14 +18,12 @@ package android.util;
 
 import java.util.Locale;
 
-import android.content.res.Configuration;
 import android.test.AndroidTestCase;
 import dalvik.annotation.TestLevel;
 import dalvik.annotation.TestTargetNew;
 
-import static android.util.LocaleUtil.TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE;
 import static android.util.LocaleUtil.TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE;
-import static android.util.LocaleUtil.TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE;
+import static android.util.LocaleUtil.TEXT_LAYOUT_DIRECTION_UNDEFINED_DO_NOT_USE;
 
 public class LocaleUtilTest extends AndroidTestCase {
 
