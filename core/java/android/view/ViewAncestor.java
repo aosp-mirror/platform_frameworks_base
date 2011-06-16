@@ -4407,7 +4407,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
                 predicate.init(accessibilityId);
                 View root = ViewAncestor.this.mView;
                 View target = root.findViewByPredicate(predicate);
-                if (target != null) {
+                if (target != null && target.isShown()) {
                     info = target.createAccessibilityNodeInfo();
                 }
             } finally {
@@ -4439,7 +4439,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
             try {
                 View root = ViewAncestor.this.mView;
                 View target = root.findViewById(viewId);
-                if (target != null) {
+                if (target != null && target.isShown()) {
                     info = target.createAccessibilityNodeInfo();
                 }
             } finally {
@@ -4486,7 +4486,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
                     root = ViewAncestor.this.mView;
                 }
 
-                if (root == null) {
+                if (root == null || !root.isShown()) {
                     return;
                 }
 
@@ -4501,7 +4501,9 @@ public final class ViewAncestor extends Handler implements ViewParent,
                 final int viewCount = foundViews.size();
                 for (int i = 0; i < viewCount; i++) {
                     View foundView = foundViews.get(i);
-                    infos.add(foundView.createAccessibilityNodeInfo());
+                    if (foundView.isShown()) {
+                        infos.add(foundView.createAccessibilityNodeInfo());
+                    }
                  }
             } finally {
                 try {
@@ -4611,7 +4613,8 @@ public final class ViewAncestor extends Handler implements ViewParent,
                 return null;
             }
             mFindByAccessibilityIdPredicate.init(accessibilityId);
-            return root.findViewByPredicate(mFindByAccessibilityIdPredicate);
+            View foundView = root.findViewByPredicate(mFindByAccessibilityIdPredicate);
+            return (foundView != null && foundView.isShown()) ? foundView : null;
         }
 
         private final class FindByAccessibilitytIdPredicate implements Predicate<View> {
