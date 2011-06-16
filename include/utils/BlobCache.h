@@ -82,6 +82,9 @@ private:
     BlobCache(const BlobCache&);
     void operator=(const BlobCache&);
 
+    // A random function helper to get around MinGW not having nrand48()
+    long int blob_random();
+
     // clean evicts a randomly chosen set of entries from the cache such that
     // the total size of all remaining entries is less than mMaxTotalSize/2.
     void clean();

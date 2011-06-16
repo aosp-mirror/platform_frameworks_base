@@ -31,9 +31,13 @@ BlobCache::BlobCache(size_t maxKeySize, size_t maxValueSize, size_t maxTotalSize
         mMaxTotalSize(maxTotalSize),
         mTotalSize(0) {
     nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);
+#ifdef _WIN32
+    srand(now);
+#else
     mRandState[0] = (now >> 0) & 0xFFFF;
     mRandState[1] = (now >> 16) & 0xFFFF;
     mRandState[2] = (now >> 32) & 0xFFFF;
+#endif
     LOGV("initializing random seed using %lld", now);
 }
 
@@ -148,11 +152,19 @@ size_t BlobCache::get(const void* key, size_t keySize, void* value,
     return valueBlobSize;
 }
 
+long int BlobCache::blob_random() {
+#ifdef _WIN32
+    return rand();
+#else
+    return nrand48(mRandState);
+#endif
+}
+
 void BlobCache::clean() {
     // Remove a random cache entry until the total cache size gets below half
     // the maximum total cache size.
     while (mTotalSize > mMaxTotalSize / 2) {
-        size_t i = size_t(nrand48(mRandState) % (mCacheEntries.size()));
+        size_t i = size_t(blob_random() % (mCacheEntries.size()));
         const CacheEntry& entry(mCacheEntries[i]);
         mTotalSize -= entry.getKey()->getSize() + entry.getValue()->getSize();
         mCacheEntries.removeAt(i);
