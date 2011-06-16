@@ -42,7 +42,19 @@ public class IccCardStatus {
         PINSTATE_ENABLED_VERIFIED,
         PINSTATE_DISABLED,
         PINSTATE_ENABLED_BLOCKED,
-        PINSTATE_ENABLED_PERM_BLOCKED
+        PINSTATE_ENABLED_PERM_BLOCKED;
+
+        boolean isPermBlocked() {
+            return this == PINSTATE_ENABLED_PERM_BLOCKED;
+        }
+
+        boolean isPinRequired() {
+            return this == PINSTATE_ENABLED_NOT_VERIFIED;
+        }
+
+        boolean isPukRequired() {
+            return this == PINSTATE_ENABLED_BLOCKED;
+        }
     }
 
     private CardState  mCardState;

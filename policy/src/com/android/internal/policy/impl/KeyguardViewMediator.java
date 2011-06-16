@@ -581,7 +581,9 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             final boolean provisioned = mUpdateMonitor.isDeviceProvisioned();
             final IccCard.State state = mUpdateMonitor.getSimState();
             final boolean lockedOrMissing = state.isPinLocked()
-                    || ((state == IccCard.State.ABSENT) && requireSim);
+                    || ((state == IccCard.State.ABSENT
+                            || state == IccCard.State.PERM_DISABLED)
+                            && requireSim);
 
             if (!lockedOrMissing && !provisioned) {
                 if (DEBUG) Log.d(TAG, "doKeyguard: not showing because device isn't provisioned"
@@ -688,12 +690,15 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
         switch (simState) {
             case ABSENT:
+            case PERM_DISABLED:
                 // only force lock screen in case of missing sim if user hasn't
                 // gone through setup wizard
                 if (!mUpdateMonitor.isDeviceProvisioned()) {
                     if (!isShowing()) {
-                        if (DEBUG) Log.d(TAG, "INTENT_VALUE_ICC_ABSENT and keygaurd isn't showing, we need "
-                             + "to show the keyguard since the device isn't provisioned yet.");
+                        if (DEBUG) Log.d(TAG, "INTENT_VALUE_ICC_ABSENT "
+                                + "or PERM_DISABLED and keygaurd isn't showing,"
+                                + " we need to show the keyguard since the "
+                                + "device isn't provisioned yet.");
                         doKeyguard();
                     } else {
                         resetStateLocked();
