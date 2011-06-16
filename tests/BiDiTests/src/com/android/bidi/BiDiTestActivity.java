@@ -119,6 +119,8 @@ public class BiDiTestActivity extends Activity {
         addItem(result, "Table RTL", BiDiTestTableLayoutRtl.class, R.id.table_layout_rtl);
         addItem(result, "Table LOC", BiDiTestTableLayoutLocale.class, R.id.table_layout_locale);
 
+        addItem(result, "ViewPadding", BiDiTestViewPadding.class, R.id.view_padding);
+
         return result;
     }
 }
