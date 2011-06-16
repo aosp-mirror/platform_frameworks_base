@@ -747,6 +747,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Override
     public void registerListener(INetworkPolicyListener listener) {
+        // TODO: create permission for observing network policy
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
         mListeners.register(listener);
 
         synchronized (mRulesLock) {
@@ -767,6 +770,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     @Override
     public void unregisterListener(INetworkPolicyListener listener) {
+        // TODO: create permission for observing network policy
+        mContext.enforceCallingOrSelfPermission(CONNECTIVITY_INTERNAL, TAG);
+
         mListeners.unregister(listener);
     }
 

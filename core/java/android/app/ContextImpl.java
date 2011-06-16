@@ -52,6 +52,8 @@ import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
+import android.net.INetworkPolicyManager;
+import android.net.NetworkPolicyManager;
 import android.net.ThrottleManager;
 import android.net.IThrottleManager;
 import android.net.Uri;
@@ -338,6 +340,14 @@ class ContextImpl extends Context {
                     IBinder b = ServiceManager.getService(LOCATION_SERVICE);
                     return new LocationManager(ILocationManager.Stub.asInterface(b));
                 }});
+
+        registerService(NETWORK_POLICY_SERVICE, new ServiceFetcher() {
+            @Override
+            public Object createService(ContextImpl ctx) {
+                return new NetworkPolicyManager(INetworkPolicyManager.Stub.asInterface(
+                        ServiceManager.getService(NETWORK_POLICY_SERVICE)));
+            }
+        });
 
         registerService(NOTIFICATION_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
