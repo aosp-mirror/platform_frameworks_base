@@ -291,6 +291,27 @@ static int32_t getIntegerAttribute(const ResXMLTree& tree, uint32_t attrRes,
     return value.data;
 }
 
+static int32_t getResolvedIntegerAttribute(const ResTable* resTable, const ResXMLTree& tree,
+        uint32_t attrRes, String8* outError, int32_t defValue = -1)
+{
+    ssize_t idx = indexOfAttribute(tree, attrRes);
+    if (idx < 0) {
+        return defValue;
+    }
+    Res_value value;
+    if (tree.getAttributeValue(idx, &value) != NO_ERROR) {
+        if (value.dataType == Res_value::TYPE_REFERENCE) {
+            resTable->resolveReference(&value, 0);
+        }
+        if (value.dataType < Res_value::TYPE_FIRST_INT
+                || value.dataType > Res_value::TYPE_LAST_INT) {
+            if (outError != NULL) *outError = "attribute is not an integer value";
+            return defValue;
+        }
+    }
+    return value.data;
+}
+
 static String8 getResolvedAttribute(const ResTable* resTable, const ResXMLTree& tree,
         uint32_t attrRes, String8* outError)
 {
@@ -320,11 +341,12 @@ static String8 getResolvedAttribute(const ResTable* resTable, const ResXMLTree& 
 // These are attribute resource constants for the platform, as found
 // in android.R.attr
 enum {
+    LABEL_ATTR = 0x01010001,
+    ICON_ATTR = 0x01010002,
     NAME_ATTR = 0x01010003,
     VERSION_CODE_ATTR = 0x0101021b,
     VERSION_NAME_ATTR = 0x0101021c,
-    LABEL_ATTR = 0x01010001,
-    ICON_ATTR = 0x01010002,
+    SCREEN_ORIENTATION_ATTR = 0x0101001e,
     MIN_SDK_VERSION_ATTR = 0x0101020c,
     MAX_SDK_VERSION_ATTR = 0x01010271,
     REQ_TOUCH_SCREEN_ATTR = 0x01010227,
@@ -634,6 +656,8 @@ int doDump(Bundle* bundle)
             bool reqDistinctMultitouchFeature = false;
             bool specScreenPortraitFeature = false;
             bool specScreenLandscapeFeature = false;
+            bool reqScreenPortraitFeature = false;
+            bool reqScreenLandscapeFeature = false;
             // 2.2 also added some other features that apps can request, but that
             // have no corresponding permission, so we cannot implement any
             // back-compatibility heuristic for them. The below are thus unnecessary
@@ -1022,6 +1046,18 @@ int doDump(Bundle* bundle)
                             fprintf(stderr, "ERROR getting 'android:icon' attribute: %s\n", error.string());
                             goto bail;
                         }
+
+                        int32_t orien = getResolvedIntegerAttribute(&res, tree,
+                                SCREEN_ORIENTATION_ATTR, &error);
+                        if (error == "") {
+                            if (orien == 0 || orien == 6 || orien == 8) {
+                                // Requests landscape, sensorLandscape, or reverseLandscape.
+                                reqScreenLandscapeFeature = true;
+                            } else if (orien == 1 || orien == 7 || orien == 9) {
+                                // Requests portrait, sensorPortrait, or reversePortrait.
+                                reqScreenPortraitFeature = true;
+                            }
+                        }
                     } else if (tag == "uses-library") {
                         String8 libraryName = getAttribute(tree, NAME_ATTR, &error);
                         if (error != "") {
@@ -1182,12 +1218,16 @@ int doDump(Bundle* bundle)
             }
 
             // Landscape/portrait-related compatibility logic
-            if (!specScreenLandscapeFeature && !specScreenPortraitFeature && (targetSdk < 13)) {
-                // If app has not specified whether it requires portrait or landscape
-                // and is targeting an API before Honeycomb MR2, then assume it requires
-                // both.
-                printf("uses-feature:'android.hardware.screen.portrait'\n");
-                printf("uses-feature:'android.hardware.screen.landscape'\n");
+            if (!specScreenLandscapeFeature && !specScreenPortraitFeature) {
+                // If the app has specified any activities in its manifest
+                // that request a specific orientation, then assume that
+                // orientation is required.
+                if (reqScreenLandscapeFeature) {
+                    printf("uses-feature:'android.hardware.screen.landscape'\n");
+                }
+                if (reqScreenPortraitFeature) {
+                    printf("uses-feature:'android.hardware.screen.portrait'\n");
+                }
             }
 
             if (hasMainActivity) {
