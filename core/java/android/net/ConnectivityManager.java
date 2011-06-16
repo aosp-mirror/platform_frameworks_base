@@ -19,7 +19,6 @@ package android.net;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
@@ -756,45 +755,6 @@ public class ConnectivityManager {
         try {
             mService.setDataDependency(networkType, met);
         } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Protect a socket from routing changes. This method is limited to VPN
-     * applications, and it is always hidden to avoid direct use.
-     * @hide
-     */
-    public void protectVpn(ParcelFileDescriptor socket) {
-        try {
-            mService.protectVpn(socket);
-        } catch (RemoteException e) {
-        }
-    }
-
-    /**
-     * Prepare for a VPN application. This method is limited to VpnDialogs,
-     * and it is always hidden to avoid direct use.
-     * @hide
-     */
-    public String prepareVpn(String packageName) {
-        try {
-            return mService.prepareVpn(packageName);
-        } catch (RemoteException e) {
-            return null;
-        }
-    }
-
-    /**
-     * Configure a TUN interface and return its file descriptor. Parameters
-     * are encoded and opaque to this class. This method is limited to VPN
-     * applications, and it is always hidden to avoid direct use.
-     * @hide
-     */
-    public ParcelFileDescriptor establishVpn(Bundle config) {
-        try {
-            return mService.establishVpn(config);
-        } catch (RemoteException e) {
-            return null;
         }
     }
 }

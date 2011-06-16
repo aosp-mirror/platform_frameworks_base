@@ -29,12 +29,12 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.INetworkManagementEventObserver;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.net.VpnConfig;
 import com.android.server.ConnectivityService.VpnCallback;
 
 /**
@@ -108,7 +108,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
      * @param configuration The parameters to configure the interface.
      * @return The file descriptor of the interface.
      */
-    public synchronized ParcelFileDescriptor establish(Bundle config) {
+    public synchronized ParcelFileDescriptor establish(VpnConfig config) {
         // Check the permission of the caller.
         mContext.enforceCallingPermission(VPN, "establish");
 
@@ -124,17 +124,9 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             throw new SecurityException("Not prepared");
         }
 
-        // Unpack the config.
-        // TODO: move constants into VpnBuilder.
-        int mtu = config.getInt("mtu", -1);
-        String session = config.getString("session");
-        String addresses = config.getString("addresses");
-        String routes = config.getString("routes");
-        String dnsServers = config.getString("dnsServers");
-
         // Create and configure the interface.
-        ParcelFileDescriptor descriptor =
-                ParcelFileDescriptor.adoptFd(nativeEstablish(mtu, addresses, routes));
+        ParcelFileDescriptor descriptor = ParcelFileDescriptor.adoptFd(
+                nativeEstablish(config.mtu, config.addresses, config.routes));
 
         // Replace the interface and abort if it fails.
         try {
@@ -153,10 +145,10 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             throw e;
         }
 
-        dnsServers = (dnsServers == null) ? "" : dnsServers.trim();
+        String dnsServers = (config.dnsServers == null) ? "" : config.dnsServers.trim();
         mCallback.override(dnsServers.isEmpty() ? null : dnsServers.split(" "));
 
-        showNotification(pm, app, session);
+        showNotification(pm, app, config.sessionName);
         return descriptor;
     }
 

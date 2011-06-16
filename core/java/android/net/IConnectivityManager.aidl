@@ -20,9 +20,10 @@ import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkState;
 import android.net.ProxyProperties;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
+
+import com.android.internal.net.VpnConfig;
 
 /**
  * Interface that answers queries about, and allows changing, the
@@ -102,5 +103,5 @@ interface IConnectivityManager
 
     String prepareVpn(String packageName);
 
-    ParcelFileDescriptor establishVpn(in Bundle config);
+    ParcelFileDescriptor establishVpn(in VpnConfig config);
 }
