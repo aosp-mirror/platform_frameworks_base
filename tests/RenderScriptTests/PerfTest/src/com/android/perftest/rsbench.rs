@@ -23,7 +23,7 @@
 const int RS_MSG_TEST_DONE = 100;
 const int RS_MSG_RESULTS_READY = 101;
 
-const int gMaxModes = 29;
+const int gMaxModes = 30;
 int gMaxLoops;
 
 // Allocation to send test names back to java
@@ -52,6 +52,7 @@ typedef struct ListAllocs_s {
 
 ListAllocs *gTexList100;
 ListAllocs *gSampleTextList100;
+ListAllocs *gListViewText;
 
 rs_mesh g10by10Mesh;
 rs_mesh g100by100Mesh;
@@ -300,6 +301,35 @@ static void displayImageWithText(int wResolution, int hResolution, int meshMode)
         // draw another two pages of meshes
         drawMeshInPage(-2.0f*gRenderSurfaceW, 0, wResolution, hResolution);
         drawMeshInPage(2.0f*gRenderSurfaceW, 0, wResolution, hResolution);
+    }
+}
+
+// Display a list of text as the list view
+static void displayListView() {
+    // set text color
+    rsgFontColor(0.9f, 0.9f, 0.9f, 1.0f);
+    rsgBindFont(gFontSans);
+
+    // get the size of the list
+    rs_allocation textAlloc;
+    textAlloc = rsGetAllocation(gListViewText);
+    int allocSize = rsAllocationGetDimX(textAlloc);
+
+    int listItemHeight = 80;
+    int yOffset = listItemHeight;
+
+    // set the color for the list divider
+    rsgBindProgramFragment(gProgFragmentColor);
+    rsgProgramFragmentConstantColor(gProgFragmentColor, 1.0, 1.0, 1.0, 1);
+
+    // draw the list with divider
+    for (int i = 0; i < allocSize; i++) {
+        if (yOffset - listItemHeight > gRenderSurfaceH) {
+            break;
+        }
+        rsgDrawRect(0, yOffset - 1, gRenderSurfaceW, yOffset, 0);
+        rsgDrawText(gListViewText[i].item, 20, yOffset - 10);
+        yOffset += listItemHeight;
     }
 }
 
@@ -602,14 +632,11 @@ static const char *testNames[] = {
     "Geo test 25.6k heavy fragment heavy vertex",
     "Geo test 51.2k heavy fragment heavy vertex",
     "Geo test 204.8k small tries heavy fragment heavy vertex",
-    "UI test with icon display 10 by 10",     // 25
-    "UI test with icon display 100 by 100",   // 26
-    "UI test with image and text display 3 pages",  // 27
-    "UI test with image and text display 5 pages",  // 28
-    "UI test with list view",                       // 29
-//    "UI test with live wallpaper",                  // 30
-//    "Mesh with 10 by 10 texture",
-//    "Mesh with 100 by 100 texture",
+    "UI test with icon display 10 by 10",
+    "UI test with icon display 100 by 100",
+    "UI test with image and text display 3 pages",
+    "UI test with image and text display 5 pages",
+    "UI test with list view",
 };
 
 void getTestName(int testIndex) {
@@ -713,6 +740,9 @@ static void runTest(int index) {
         break;
     case 28:
         displayImageWithText(7, 5, 1);
+        break;
+    case 29:
+        displayListView();
         break;
     }
 }
