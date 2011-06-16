@@ -23,8 +23,49 @@
 const int RS_MSG_TEST_DONE = 100;
 const int RS_MSG_RESULTS_READY = 101;
 
-const int gMaxModes = 30;
+const int gMaxModes = 31;
 int gMaxLoops;
+
+// Parameters for galaxy live wallpaper
+rs_allocation gTSpace;
+rs_allocation gTLight1;
+rs_allocation gTFlares;
+rs_mesh gParticlesMesh;
+
+rs_program_fragment gPFBackground;
+rs_program_fragment gPFStars;
+rs_program_vertex gPVStars;
+rs_program_vertex gPVBkProj;
+rs_program_store gPSLights;
+
+float gXOffset = 0.5f;
+
+#define ELLIPSE_RATIO 0.892f
+#define PI 3.1415f
+#define TWO_PI 6.283f
+#define ELLIPSE_TWIST 0.023333333f
+
+static float angle = 50.f;
+static int gOldWidth;
+static int gOldHeight;
+static int gWidth;
+static int gHeight;
+static float gSpeed[12000];
+static int gGalaxyRadius = 300;
+static rs_allocation gParticlesBuffer;
+
+typedef struct __attribute__((packed, aligned(4))) Particle {
+    uchar4 color;
+    float3 position;
+} Particle_t;
+Particle_t *Particles;
+
+typedef struct VpConsts {
+    rs_matrix4x4 Proj;
+    rs_matrix4x4 MVP;
+} VpConsts_t;
+VpConsts_t *vpConstants;
+// End of parameters for galaxy live wallpaper
 
 // Allocation to send test names back to java
 char *gStringBuffer = 0;
@@ -109,6 +150,141 @@ static float textColors[] = {1.0f, 1.0f, 1.0f, 1.0f,
                              0.5f, 0.5f, 0.7f, 1.0f,
                              0.5f, 0.6f, 0.7f, 1.0f,
 };
+
+/**
+  * Methods to draw the galaxy live wall paper
+  */
+static float mapf(float minStart, float minStop, float maxStart, float maxStop, float value) {
+    return maxStart + (maxStart - maxStop) * ((value - minStart) / (minStop - minStart));
+}
+
+/**
+ * Helper function to generate the stars.
+ */
+static float randomGauss() {
+    float x1;
+    float x2;
+    float w = 2.f;
+
+    while (w >= 1.0f) {
+        x1 = rsRand(2.0f) - 1.0f;
+        x2 = rsRand(2.0f) - 1.0f;
+        w = x1 * x1 + x2 * x2;
+    }
+
+    w = sqrt(-2.0f * log(w) / w);
+    return x1 * w;
+}
+
+/**
+ * Generates the properties for a given star.
+ */
+static void createParticle(Particle_t *part, int idx, float scale) {
+    float d = fabs(randomGauss()) * gGalaxyRadius * 0.5f + rsRand(64.0f);
+    float id = d / gGalaxyRadius;
+    float z = randomGauss() * 0.4f * (1.0f - id);
+    float p = -d * ELLIPSE_TWIST;
+
+    if (d < gGalaxyRadius * 0.33f) {
+        part->color.x = (uchar) (220 + id * 35);
+        part->color.y = 220;
+        part->color.z = 220;
+    } else {
+        part->color.x = 180;
+        part->color.y = 180;
+        part->color.z = (uchar) clamp(140.f + id * 115.f, 140.f, 255.f);
+    }
+    // Stash point size * 10 in Alpha
+    part->color.w = (uchar) (rsRand(1.2f, 2.1f) * 60);
+
+    if (d > gGalaxyRadius * 0.15f) {
+        z *= 0.6f * (1.0f - id);
+    } else {
+        z *= 0.72f;
+    }
+
+    // Map to the projection coordinates (viewport.x = -1.0 -> 1.0)
+    d = mapf(-4.0f, gGalaxyRadius + 4.0f, 0.0f, scale, d);
+
+    part->position.x = rsRand(TWO_PI);
+    part->position.y = d;
+    gSpeed[idx] = rsRand(0.0015f, 0.0025f) * (0.5f + (scale / d)) * 0.8f;
+
+    part->position.z = z / 5.0f;
+}
+
+/**
+ * Initialize all the starts, called from Java
+ */
+void initParticles() {
+    Particle_t *part = Particles;
+    float scale = gGalaxyRadius / (gWidth * 0.5f);
+    int count = rsAllocationGetDimX(gParticlesBuffer);
+    for (int i = 0; i < count; i ++) {
+        createParticle(part, i, scale);
+        part++;
+    }
+}
+
+static void drawSpace() {
+    rsgBindProgramFragment(gPFBackground);
+    rsgBindTexture(gPFBackground, 0, gTSpace);
+    rsgDrawQuadTexCoords(
+            0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            gWidth, 0.0f, 0.0f, 2.0f, 1.0f,
+            gWidth, gHeight, 0.0f, 2.0f, 0.0f,
+            0.0f, gHeight, 0.0f, 0.0f, 0.0f);
+}
+
+static void drawLights() {
+    rsgBindProgramVertex(gPVBkProj);
+    rsgBindProgramFragment(gPFBackground);
+    rsgBindTexture(gPFBackground, 0, gTLight1);
+
+    float scale = 512.0f / gWidth;
+    float x = -scale - scale * 0.05f;
+    float y = -scale;
+
+    scale *= 2.0f;
+
+    rsgDrawQuad(x, y, 0.0f,
+             x + scale * 1.1f, y, 0.0f,
+             x + scale * 1.1f, y + scale, 0.0f,
+             x, y + scale, 0.0f);
+}
+
+static void drawParticles(float offset) {
+    float a = offset * angle;
+    float absoluteAngle = fabs(a);
+
+    rs_matrix4x4 matrix;
+    rsMatrixLoadTranslate(&matrix, 0.0f, 0.0f, 10.0f - 6.0f * absoluteAngle / 50.0f);
+    if (gHeight > gWidth) {
+        rsMatrixScale(&matrix, 6.6f, 6.0f, 1.0f);
+    } else {
+        rsMatrixScale(&matrix, 12.6f, 12.0f, 1.0f);
+    }
+    rsMatrixRotate(&matrix, absoluteAngle, 1.0f, 0.0f, 0.0f);
+    rsMatrixRotate(&matrix, a, 0.0f, 0.4f, 0.1f);
+    rsMatrixLoad(&vpConstants->MVP, &vpConstants->Proj);
+    rsMatrixMultiply(&vpConstants->MVP, &matrix);
+    rsgAllocationSyncAll(rsGetAllocation(vpConstants));
+
+    rsgBindProgramVertex(gPVStars);
+    rsgBindProgramFragment(gPFStars);
+    rsgBindProgramStore(gPSLights);
+    rsgBindTexture(gPFStars, 0, gTFlares);
+
+    Particle_t *vtx = Particles;
+    int count = rsAllocationGetDimX(gParticlesBuffer);
+    for (int i = 0; i < count; i++) {
+        vtx->position.x = vtx->position.x + gSpeed[i];
+        vtx++;
+    }
+
+    rsgDrawMesh(gParticlesMesh);
+}
+/* end of methods for drawing galaxy */
 
 static void setupOffscreenTarget() {
     rsgBindColorTarget(gRenderBufferColor, 0);
@@ -331,6 +507,42 @@ static void displayListView() {
         rsgDrawText(gListViewText[i].item, 20, yOffset - 10);
         yOffset += listItemHeight;
     }
+}
+
+static void drawGalaxy() {
+    rsgClearColor(0.f, 0.f, 0.f, 1.f);
+    gParticlesBuffer = rsGetAllocation(Particles);
+    rsgBindProgramFragment(gPFBackground);
+
+    gWidth = rsgGetWidth();
+    gHeight = rsgGetHeight();
+    if ((gWidth != gOldWidth) || (gHeight != gOldHeight)) {
+        initParticles();
+        gOldWidth = gWidth;
+        gOldHeight = gHeight;
+    }
+
+    float offset = mix(-1.0f, 1.0f, gXOffset);
+    drawSpace();
+    drawParticles(offset);
+    drawLights();
+}
+
+// Display images and text with live wallpaper in the background
+static void dispalyLiveWallPaper(int wResolution, int hResolution) {
+    bindProgramVertexOrtho();
+
+    drawGalaxy();
+
+    rsgBindProgramStore(gProgStoreBlendAlpha);
+    rsgBindProgramFragment(gProgFragmentTexture);
+    rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
+
+    drawMeshInPage(0, 0, wResolution, hResolution);
+    drawMeshInPage(-1.0f*gRenderSurfaceW, 0, wResolution, hResolution);
+    drawMeshInPage(1.0f*gRenderSurfaceW, 0, wResolution, hResolution);
+    drawMeshInPage(-2.0f*gRenderSurfaceW, 0, wResolution, hResolution);
+    drawMeshInPage(2.0f*gRenderSurfaceW, 0, wResolution, hResolution);
 }
 
 static float gTorusRotation = 0;
@@ -637,6 +849,7 @@ static const char *testNames[] = {
     "UI test with image and text display 3 pages",
     "UI test with image and text display 5 pages",
     "UI test with list view",
+    "UI test with live wallpaper",
 };
 
 void getTestName(int testIndex) {
@@ -744,6 +957,9 @@ static void runTest(int index) {
     case 29:
         displayListView();
         break;
+    case 30:
+        dispalyLiveWallPaper(7, 5);
+        break;
     }
 }
 
@@ -767,7 +983,6 @@ static void drawOffscreenResult(int posX, int posY, int width, int height) {
 }
 
 int root(void) {
-
     gRenderSurfaceW = rsgGetWidth();
     gRenderSurfaceH = rsgGetHeight();
     rsgClearColor(0.2f, 0.2f, 0.2f, 1.0f);
