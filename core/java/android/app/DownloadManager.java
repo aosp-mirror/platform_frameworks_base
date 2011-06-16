@@ -23,6 +23,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.CursorWrapper;
 import android.net.ConnectivityManager;
+import android.net.NetworkPolicyManager;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
@@ -170,7 +171,6 @@ public class DownloadManager {
      */
     public final static int STATUS_FAILED = 1 << 4;
 
-
     /**
      * Value of COLUMN_ERROR_CODE when the download has completed with an error that doesn't fit
      * under any other error code.
@@ -247,6 +247,14 @@ public class DownloadManager {
      * Value of {@link #COLUMN_REASON} when the download is paused for some other reason.
      */
     public final static int PAUSED_UNKNOWN = 4;
+
+    /**
+     * Value of {@link #COLUMN_REASON} when the download has been paused because
+     * of {@link NetworkPolicyManager} controls on the requesting application.
+     *
+     * @hide
+     */
+    public final static int PAUSED_BY_POLICY = 5;
 
     /**
      * Broadcast intent action sent by the download manager when a download completes.
@@ -796,6 +804,7 @@ public class DownloadManager {
                     parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_TO_RETRY));
                     parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_FOR_NETWORK));
                     parts.add(statusClause("=", Downloads.Impl.STATUS_QUEUED_FOR_WIFI));
+                    parts.add(statusClause("=", Downloads.Impl.STATUS_PAUSED_BY_POLICY));
                 }
                 if ((mStatusFlags & STATUS_SUCCESSFUL) != 0) {
                     parts.add(statusClause("=", Downloads.Impl.STATUS_SUCCESS));
@@ -1266,6 +1275,9 @@ public class DownloadManager {
                 case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
                     return PAUSED_QUEUED_FOR_WIFI;
 
+                case Downloads.Impl.STATUS_PAUSED_BY_POLICY:
+                    return PAUSED_BY_POLICY;
+
                 default:
                     return PAUSED_UNKNOWN;
             }
@@ -1321,6 +1333,7 @@ public class DownloadManager {
                 case Downloads.Impl.STATUS_WAITING_TO_RETRY:
                 case Downloads.Impl.STATUS_WAITING_FOR_NETWORK:
                 case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
+                case Downloads.Impl.STATUS_PAUSED_BY_POLICY:
                     return STATUS_PAUSED;
 
                 case Downloads.Impl.STATUS_SUCCESS:

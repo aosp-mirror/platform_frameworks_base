@@ -115,6 +115,20 @@ public class NetworkPolicyManager {
         }
     }
 
+    public void registerListener(INetworkPolicyListener listener) {
+        try {
+            mService.registerListener(listener);
+        } catch (RemoteException e) {
+        }
+    }
+
+    public void unregisterListener(INetworkPolicyListener listener) {
+        try {
+            mService.unregisterListener(listener);
+        } catch (RemoteException e) {
+        }
+    }
+
     /**
      * Compute the last cycle boundary for the given {@link NetworkPolicy}. For
      * example, if cycle day is 20th, and today is June 15th, it will return May

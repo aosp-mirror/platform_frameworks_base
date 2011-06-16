@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.app.DownloadManager;
+import android.net.NetworkPolicyManager;
 import android.net.Uri;
 
 /**
@@ -545,6 +546,14 @@ public final class Downloads {
         public static boolean isStatusCompleted(int status) {
             return (status >= 200 && status < 300) || (status >= 400 && status < 600);
         }
+
+        /**
+         * This download has been paused because requesting application has been
+         * blocked by {@link NetworkPolicyManager}.
+         *
+         * @hide
+         */
+        public static final int STATUS_PAUSED_BY_POLICY = 189;
 
         /**
          * This download hasn't stated yet

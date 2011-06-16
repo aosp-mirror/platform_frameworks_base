@@ -16,8 +16,7 @@
 
 package com.android.server;
 
-import static android.Manifest.permission.READ_PHONE_STATE;
-import static android.Manifest.permission.UPDATE_DEVICE_STATS;
+import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_PAID;
@@ -1142,8 +1141,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         @Override
         public void onRulesChanged(int uid, int uidRules) {
             // only someone like NPMS should only be calling us
-            // TODO: create permission for modifying data policy
-            mContext.enforceCallingOrSelfPermission(UPDATE_DEVICE_STATS, TAG);
+            mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
             if (LOGD_RULES) {
                 Slog.d(TAG, "onRulesChanged(uid=" + uid + ", uidRules=" + uidRules + ")");
