@@ -541,7 +541,7 @@ static JNINativeMethod methods[] = {
 {"_eglCreatePbufferSurface","(" DISPLAY CONFIG "[I)I", (void*)jni_eglCreatePbufferSurface },
 {"_eglCreatePixmapSurface", "(" SURFACE DISPLAY CONFIG OBJECT "[I)V", (void*)jni_eglCreatePixmapSurface },
 {"_eglCreateWindowSurface", "(" DISPLAY CONFIG OBJECT "[I)I", (void*)jni_eglCreateWindowSurface },
-{"_eglCreateWindowSurfaceTexture", "(" DISPLAY CONFIG "I[I)I", (void*)jni_eglCreateWindowSurfaceTexture },
+{"_eglCreateWindowSurfaceTexture", "(" DISPLAY CONFIG OBJECT "[I)I", (void*)jni_eglCreateWindowSurfaceTexture },
 {"eglDestroyContext",      "(" DISPLAY CONTEXT ")Z", (void*)jni_eglDestroyContext },
 {"eglDestroySurface",      "(" DISPLAY SURFACE ")Z", (void*)jni_eglDestroySurface },
 {"eglMakeCurrent",         "(" DISPLAY SURFACE SURFACE CONTEXT")Z", (void*)jni_eglMakeCurrent },
