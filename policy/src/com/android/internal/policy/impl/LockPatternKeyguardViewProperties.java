@@ -55,8 +55,10 @@ public class LockPatternKeyguardViewProperties implements KeyguardViewProperties
 
     private boolean isSimPinSecure() {
         final IccCard.State simState = mUpdateMonitor.getSimState();
-        return (simState == IccCard.State.PIN_REQUIRED || simState == IccCard.State.PUK_REQUIRED
-            || simState == IccCard.State.ABSENT);
+        return (simState == IccCard.State.PIN_REQUIRED
+                || simState == IccCard.State.PUK_REQUIRED
+                || simState == IccCard.State.ABSENT
+                || simState == IccCard.State.PERM_DISABLED);
     }
 
 }

@@ -84,6 +84,9 @@ public abstract class IccCard {
     static public final String INTENT_VALUE_LOCKED_ON_PUK = "PUK";
     /* NETWORK means ICC is locked on NETWORK PERSONALIZATION */
     static public final String INTENT_VALUE_LOCKED_NETWORK = "NETWORK";
+    /* PERM_DISABLED means ICC is permanently disabled due to puk fails */
+    static public final String INTENT_VALUE_ABSENT_ON_PERM_DISABLED = "PERM_DISABLED";
+
 
     protected static final int EVENT_ICC_LOCKED_OR_ABSENT = 1;
     private static final int EVENT_GET_ICC_STATUS_DONE = 2;
@@ -112,7 +115,8 @@ public abstract class IccCard {
         PUK_REQUIRED,
         NETWORK_LOCKED,
         READY,
-        NOT_READY;
+        NOT_READY,
+        PERM_DISABLED;
 
         public boolean isPinLocked() {
             return ((this == PIN_REQUIRED) || (this == PUK_REQUIRED));
@@ -120,7 +124,8 @@ public abstract class IccCard {
 
         public boolean iccCardExist() {
             return ((this == PIN_REQUIRED) || (this == PUK_REQUIRED)
-                    || (this == NETWORK_LOCKED) || (this == READY));
+                    || (this == NETWORK_LOCKED) || (this == READY)
+                    || (this == PERM_DISABLED));
         }
     }
 
@@ -416,6 +421,7 @@ public abstract class IccCard {
         boolean transitionedIntoPinLocked;
         boolean transitionedIntoAbsent;
         boolean transitionedIntoNetworkLocked;
+        boolean transitionedIntoPermBlocked;
         boolean isIccCardRemoved;
         boolean isIccCardAdded;
 
@@ -434,6 +440,8 @@ public abstract class IccCard {
         transitionedIntoAbsent = (oldState != State.ABSENT && newState == State.ABSENT);
         transitionedIntoNetworkLocked = (oldState != State.NETWORK_LOCKED
                 && newState == State.NETWORK_LOCKED);
+        transitionedIntoPermBlocked = (oldState != State.PERM_DISABLED
+                && newState == State.PERM_DISABLED);
         isIccCardRemoved = (oldState != null &&
                         oldState.iccCardExist() && newState == State.ABSENT);
         isIccCardAdded = (oldState == State.ABSENT &&
@@ -454,6 +462,10 @@ public abstract class IccCard {
             mNetworkLockedRegistrants.notifyRegistrants();
             broadcastIccStateChangedIntent(INTENT_VALUE_ICC_LOCKED,
                   INTENT_VALUE_LOCKED_NETWORK);
+        } else if (transitionedIntoPermBlocked) {
+            if (mDbg) log("Notify SIM permanently disabled.");
+            broadcastIccStateChangedIntent(INTENT_VALUE_ICC_ABSENT,
+                    INTENT_VALUE_ABSENT_ON_PERM_DISABLED);
         }
 
         if (isIccCardRemoved) {
@@ -762,6 +774,9 @@ public abstract class IccCard {
         }
 
         // check if PIN required
+        if (app.pin1.isPermBlocked()) {
+            return IccCard.State.PERM_DISABLED;
+        }
         if (app.app_state.isPinRequired()) {
             return IccCard.State.PIN_REQUIRED;
         }
