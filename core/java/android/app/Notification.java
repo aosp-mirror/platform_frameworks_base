@@ -929,15 +929,15 @@ public class Notification implements Parcelable
             if (mContentInfo != null) {
                 contentView.setTextViewText(R.id.info, mContentInfo);
             } else if (mNumber > 0) {
-                if (mNumber > 999) {
-                    contentView.setTextViewText(R.id.info, "999+");
+                final int tooBig = mContext.getResources().getInteger(
+                        R.integer.status_bar_notification_info_maxnum);
+                if (mNumber > tooBig) {
+                    contentView.setTextViewText(R.id.info, mContext.getResources().getString(
+                                R.string.status_bar_notification_info_overflow));
                 } else {
                     NumberFormat f = NumberFormat.getIntegerInstance();
                     contentView.setTextViewText(R.id.info, f.format(mNumber));
                 }
-                contentView.setFloat(R.id.info, "setTextSize",
-                        mContext.getResources().getDimensionPixelSize(
-                            R.dimen.status_bar_content_number_size));
             } else {
                 contentView.setViewVisibility(R.id.info, View.GONE);
             }

@@ -9,6 +9,7 @@
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
+        android:layout_marginRight="-80dp"
         android:src="@drawable/status_bar_veto"
         android:scaleType="center"
         android:background="@null"
@@ -30,7 +31,7 @@
         android:layout_height="64dp"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@id/large_icon"
-        android:layout_toLeftOf="@id/veto"
+        android:layout_alignParentRight="true"
         android:focusable="true"
         android:clickable="true"
         />

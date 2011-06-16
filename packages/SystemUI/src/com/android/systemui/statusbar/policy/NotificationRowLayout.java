@@ -52,11 +52,16 @@ public class NotificationRowLayout extends ViewGroup {
 
     private static final boolean ANIMATE_LAYOUT = true;
 
+    private static final boolean CLEAR_IF_SWIPED_FAR_ENOUGH = true;
+    
+    private static final boolean CONSTRAIN_SWIPE_ON_PERMANENT = true;
+
     private static final int APPEAR_ANIM_LEN = SLOW_ANIMATIONS ? 5000 : 250;
     private static final int DISAPPEAR_ANIM_LEN = APPEAR_ANIM_LEN;
     private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 250;
 
     private static final float SWIPE_ESCAPE_VELOCITY = 1500f;
+    private static final float SWIPE_ANIM_VELOCITY_MIN = 1000f;
 
     Rect mTmpRect = new Rect();
     int mNumRows = 0;
@@ -149,6 +154,21 @@ public class NotificationRowLayout extends ViewGroup {
         }
         return mSlidingChild != null;
     }
+
+    protected boolean canBeCleared(View v) {
+        final View veto = v.findViewById(R.id.veto);
+        return (veto != null && veto.getVisibility() != View.GONE);
+    }
+
+    protected boolean clear(View v) {
+        final View veto = v.findViewById(R.id.veto);
+        if (veto != null && veto.getVisibility() != View.GONE) {
+            veto.performClick();
+            return true;
+        }
+        return false;
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         final int action = ev.getAction();
@@ -159,7 +179,13 @@ public class NotificationRowLayout extends ViewGroup {
                 case MotionEvent.ACTION_MOVE:
                     mVT.addMovement(ev);
 
-                    mSlidingChild.setTranslationX(ev.getX() - mInitialTouchX);
+                    float delta = (ev.getX() - mInitialTouchX);
+                    if (CONSTRAIN_SWIPE_ON_PERMANENT && !canBeCleared(mSlidingChild)) {
+                        delta = Math.copySign(
+                                    Math.min(Math.abs(delta),
+                                    mSlidingChild.getMeasuredWidth() * 0.2f), delta);
+                    }
+                    mSlidingChild.setTranslationX(delta);
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
@@ -168,14 +194,13 @@ public class NotificationRowLayout extends ViewGroup {
                     if (DEBUG) Slog.d(TAG, "exit velocity: " + mVT.getXVelocity());
                     boolean restore = true;
                     mLiftoffVelocity = mVT.getXVelocity();
-                    if (Math.abs(mLiftoffVelocity) > SWIPE_ESCAPE_VELOCITY) {
-                        // flingadingy
+                    if (Math.abs(mLiftoffVelocity) > SWIPE_ESCAPE_VELOCITY
+                        || (CLEAR_IF_SWIPED_FAR_ENOUGH && 
+                            (mSlidingChild.getTranslationX() * 2) > mSlidingChild.getMeasuredWidth()))
+                    {
 
-                        View veto = mSlidingChild.findViewById(R.id.veto);
-                        if (veto != null && veto.getVisibility() == View.VISIBLE) {
-                            veto.performClick();
-                            restore = false;
-                        }
+                        // flingadingy
+                        restore = ! clear(mSlidingChild);
                     }
                     if (restore) {
                         // snappity
@@ -230,7 +255,8 @@ public class NotificationRowLayout extends ViewGroup {
             child.setPivotY(0);
 
             final float velocity = (mSlidingChild == child) 
-                    ? mLiftoffVelocity : SWIPE_ESCAPE_VELOCITY;
+                    ? Math.min(mLiftoffVelocity, SWIPE_ANIM_VELOCITY_MIN)
+                    : SWIPE_ESCAPE_VELOCITY;
             final TimeAnimator zoom = new TimeAnimator();
             zoom.setTimeListener(new TimeAnimator.TimeListener() {
                 @Override

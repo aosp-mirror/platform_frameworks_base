@@ -1374,6 +1374,7 @@ package android {
     field public static final int config_longAnimTime = 17694722; // 0x10e0002
     field public static final int config_mediumAnimTime = 17694721; // 0x10e0001
     field public static final int config_shortAnimTime = 17694720; // 0x10e0000
+    field public static final int status_bar_notification_info_maxnum = 17694723; // 0x10e0003
   }
 
   public static final class R.interpolator {
@@ -1460,6 +1461,7 @@ package android {
     field public static final int search_go = 17039372; // 0x104000c
     field public static final int selectAll = 17039373; // 0x104000d
     field public static final int selectTextMode = 17039382; // 0x1040016
+    field public static final int status_bar_notification_info_overflow = 17039383; // 0x1040017
     field public static final int unknownName = 17039374; // 0x104000e
     field public static final int untitled = 17039375; // 0x104000f
     field public static final int yes = 17039379; // 0x1040013
