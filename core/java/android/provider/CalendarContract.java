@@ -648,7 +648,21 @@ public final class CalendarContract {
     }
 
     /**
-     * Fields and helpers for interacting with Attendees.
+     * Fields and helpers for interacting with Attendees. Each row of this table
+     * represents a single attendee or guest of an event. Calling
+     * {@link #query(ContentResolver, long)} will return a list of attendees for
+     * the event with the given eventId. Both apps and sync adapters may write
+     * to this table. There are six writable fields and all of them except
+     * {@link #ATTENDEE_NAME} must be included when inserting a new attendee.
+     * They are:
+     * <ul>
+     * <li>{@link #EVENT_ID}</li>
+     * <li>{@link #ATTENDEE_NAME}</li>
+     * <li>{@link #ATTENDEE_EMAIL}</li>
+     * <li>{@link #ATTENDEE_RELATIONSHIP}</li>
+     * <li>{@link #ATTENDEE_TYPE}</li>
+     * <li>{@link #ATTENDEE_STATUS}</li>
+     * </ul>
      */
     public static final class Attendees implements BaseColumns, AttendeesColumns, EventsColumns {
 
@@ -1446,7 +1460,8 @@ public final class CalendarContract {
     /**
      * Fields and helpers for interacting with Instances. An instance is a
      * single occurrence of an event including time zone specific start and end
-     * days and minutes.
+     * days and minutes. The instances table is not writable and only provides a
+     * way to query event occurrences.
      */
     public static final class Instances implements BaseColumns, EventsColumns, CalendarsColumns {
 
@@ -1867,7 +1882,17 @@ public final class CalendarContract {
     }
 
     /**
-     * Fields and helpers for accessing reminders for an event.
+     * Fields and helpers for accessing reminders for an event. Each row of this
+     * table represents a single reminder for an event. Calling
+     * {@link #query(ContentResolver, long)} will return a list of reminders for
+     * the event with the given eventId. Both apps and sync adapters may write
+     * to this table. There are three writable fields and all of them must be
+     * included when inserting a new reminder. They are:
+     * <ul>
+     * <li>{@link #EVENT_ID}</li>
+     * <li>{@link #MINUTES}</li>
+     * <li>{@link #METHOD}</li>
+     * </ul>
      */
     public static final class Reminders implements BaseColumns, RemindersColumns, EventsColumns {
         private static final String REMINDERS_WHERE = CalendarContract.Reminders.EVENT_ID + "=?";
@@ -1968,7 +1993,14 @@ public final class CalendarContract {
 
     /**
      * Fields and helpers for accessing calendar alerts information. These
-     * fields are for tracking which alerts have been fired.
+     * fields are for tracking which alerts have been fired. Scheduled alarms
+     * will generate an intent using {@link #EVENT_REMINDER_ACTION}. Apps that
+     * receive this action may update the {@link #STATE} for the reminder when
+     * they have finished handling it. Apps that have their notifications
+     * disabled should not modify the table to ensure that they do not conflict
+     * with another app that is generating a notification. In general, apps
+     * should not need to write to this table directly except to update the
+     * state of a reminder.
      */
     public static final class CalendarAlerts implements BaseColumns,
             CalendarAlertsColumns, EventsColumns, CalendarsColumns {
@@ -2140,9 +2172,11 @@ public final class CalendarContract {
 
         /**
          * Schedules an alarm intent with the system AlarmManager that will
-         * cause the Calendar provider to recheck alarms. This is used to wake
-         * the Calendar alarm handler when an alarm is expected or to do a
-         * periodic refresh of alarm data.
+         * notify listeners when a reminder should be fired. The provider will
+         * keep scheduled reminders up to date but apps may use this to
+         * implement snooze functionality without modifying the reminders table.
+         * Scheduled alarms will generate an intent using
+         * {@link #EVENT_REMINDER_ACTION}.
          *
          * @param context A context for referencing system resources
          * @param manager The AlarmManager to use or null
@@ -2232,7 +2266,13 @@ public final class CalendarContract {
     /**
      * Fields for accessing the Extended Properties. This is a generic set of
      * name/value pairs for use by sync adapters or apps to add extra
-     * information to events.
+     * information to events. There are three writable columns and all three
+     * must be present when inserting a new value. They are:
+     * <ul>
+     * <li>{@link #EVENT_ID}</li>
+     * <li>{@link #NAME}</li>
+     * <li>{@link #VALUE}</li>
+     * </ul>
      */
    public static final class ExtendedProperties implements BaseColumns,
             ExtendedPropertiesColumns, EventsColumns {
@@ -2266,6 +2306,8 @@ public final class CalendarContract {
 
     /**
      * Columns from the EventsRawTimes table
+     *
+     * @hide
      */
     protected interface EventsRawTimesColumns {
         /**
