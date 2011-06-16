@@ -796,7 +796,7 @@ static JNINativeMethod gMethods[] = {
     { "nCreateLayer",            "(IIZ[I)I",   (void*) android_view_GLES20Canvas_createLayer },
     { "nResizeLayer",            "(III[I)V" ,  (void*) android_view_GLES20Canvas_resizeLayer },
     { "nCreateTextureLayer",     "([I)I",      (void*) android_view_GLES20Canvas_createTextureLayer },
-    { "nUpdateTextureLayer",     "(IIILjava/lang/String;)V",
+    { "nUpdateTextureLayer",     "(IIILandroid/graphics/SurfaceTexture;)V",
                                                (void*) android_view_GLES20Canvas_updateTextureLayer },
     { "nDestroyLayer",           "(I)V",       (void*) android_view_GLES20Canvas_destroyLayer },
     { "nDestroyLayerDeferred",   "(I)V",       (void*) android_view_GLES20Canvas_destroyLayerDeferred },

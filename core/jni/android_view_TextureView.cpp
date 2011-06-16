@@ -17,6 +17,7 @@
 #include "jni.h"
 #include <nativehelper/JNIHelp.h>
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/android_graphics_SurfaceTexture.h>
 
 #include <gui/SurfaceTexture.h>
 
@@ -27,10 +28,10 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 static void android_view_TextureView_setDefaultBufferSize(JNIEnv* env, jobject,
-    jint surfaceTexture, jint width, jint height) {
+    jobject surface, jint width, jint height) {
 
-    sp<SurfaceTexture> surface = reinterpret_cast<SurfaceTexture*>(surfaceTexture);
-    surface->setDefaultBufferSize(width, height);
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
+    surfaceTexture->setDefaultBufferSize(width, height);
 }
 
 // ----------------------------------------------------------------------------
@@ -40,7 +41,8 @@ static void android_view_TextureView_setDefaultBufferSize(JNIEnv* env, jobject,
 const char* const kClassPathName = "android/view/TextureView";
 
 static JNINativeMethod gMethods[] = {
-    {   "nSetDefaultBufferSize", "(III)V", (void*) android_view_TextureView_setDefaultBufferSize }
+    {   "nSetDefaultBufferSize", "(Landroid/graphics/SurfaceTexture;II)V",
+            (void*) android_view_TextureView_setDefaultBufferSize }
 };
 
 int register_android_view_TextureView(JNIEnv* env) {
