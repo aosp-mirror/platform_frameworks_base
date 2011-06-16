@@ -138,7 +138,10 @@ void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex, ui
 
     for (uint32_t ct=0; ct < mRSMesh->mHal.state.vertexBuffersCount; ct++) {
         const Allocation *alloc = mRSMesh->mHal.state.vertexBuffers[ct].get();
-        rsdAllocationSyncAll(rsc, alloc, RS_ALLOCATION_USAGE_SCRIPT);
+        DrvAllocation *drv = (DrvAllocation *)alloc->mHal.drv;
+        if (drv->uploadDeferred) {
+            rsdAllocationSyncAll(rsc, alloc, RS_ALLOCATION_USAGE_SCRIPT);
+        }
     }
 
     // update attributes with either buffer information or data ptr based on their current state
@@ -163,7 +166,9 @@ void RsdMeshObj::renderPrimitiveRange(const Context *rsc, uint32_t primIndex, ui
     const Allocation *idxAlloc = prim->mIndexBuffer.get();
     if (idxAlloc) {
         DrvAllocation *drvAlloc = (DrvAllocation *)idxAlloc->mHal.drv;
-        rsdAllocationSyncAll(rsc, idxAlloc, RS_ALLOCATION_USAGE_SCRIPT);
+        if (drvAlloc->uploadDeferred) {
+            rsdAllocationSyncAll(rsc, idxAlloc, RS_ALLOCATION_USAGE_SCRIPT);
+        }
 
         if (drvAlloc->bufferID) {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drvAlloc->bufferID);

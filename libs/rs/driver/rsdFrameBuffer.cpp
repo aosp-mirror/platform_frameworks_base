@@ -17,6 +17,7 @@
 
 #include "rsdCore.h"
 #include "rsdFrameBuffer.h"
+#include "rsdFrameBufferObj.h"
 #include "rsdAllocation.h"
 
 #include "rsContext.h"
@@ -28,133 +29,70 @@
 using namespace android;
 using namespace android::renderscript;
 
-struct DrvFrameBuffer {
-    GLuint mFBOId;
-};
-
-void checkError(const Context *rsc) {
-    GLenum status;
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    switch (status) {
-    case GL_FRAMEBUFFER_COMPLETE:
-        break;
-    case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-        rsc->setError(RS_ERROR_BAD_VALUE,
-                      "Unable to set up render Target: RFRAMEBUFFER_INCOMPLETE_ATTACHMENT");
-        break;
-    case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-        rsc->setError(RS_ERROR_BAD_VALUE,
-                      "Unable to set up render Target: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
-        break;
-    case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-        rsc->setError(RS_ERROR_BAD_VALUE,
-                      "Unable to set up render Target: GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
-        break;
-    case GL_FRAMEBUFFER_UNSUPPORTED:
-        rsc->setError(RS_ERROR_BAD_VALUE,
-                      "Unable to set up render Target: GL_FRAMEBUFFER_UNSUPPORTED");
-        break;
-    }
-}
-
-
 void setDepthAttachment(const Context *rsc, const FBOCache *fb) {
-    if (fb->mHal.state.depthTarget.get() != NULL) {
-        DrvAllocation *drv = (DrvAllocation *)fb->mHal.state.depthTarget->mHal.drv;
+    RsdFrameBufferObj *fbo = (RsdFrameBufferObj*)fb->mHal.drv;
 
-        if (drv->textureID) {
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                   GL_TEXTURE_2D, drv->textureID, 0);
-        } else {
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                      GL_RENDERBUFFER, drv->renderTargetID);
+    DrvAllocation *depth = NULL;
+    if (fb->mHal.state.depthTarget.get() != NULL) {
+        depth = (DrvAllocation *)fb->mHal.state.depthTarget->mHal.drv;
+
+        if (depth->uploadDeferred) {
+            rsdAllocationSyncAll(rsc, fb->mHal.state.depthTarget.get(),
+                                 RS_ALLOCATION_USAGE_SCRIPT);
         }
-    } else {
-        // Reset last attachment
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
     }
+    fbo->setDepthTarget(depth);
 }
 
 void setColorAttachment(const Context *rsc, const FBOCache *fb) {
+    RsdFrameBufferObj *fbo = (RsdFrameBufferObj*)fb->mHal.drv;
     // Now attach color targets
     for (uint32_t i = 0; i < fb->mHal.state.colorTargetsCount; i ++) {
-        uint32_t texID = 0;
+        DrvAllocation *color = NULL;
         if (fb->mHal.state.colorTargets[i].get() != NULL) {
-            DrvAllocation *drv = (DrvAllocation *)fb->mHal.state.colorTargets[i]->mHal.drv;
+            color = (DrvAllocation *)fb->mHal.state.colorTargets[i]->mHal.drv;
 
-            if (drv->textureID) {
-                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                                       GL_TEXTURE_2D, drv->textureID, 0);
-            } else {
-                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                                          GL_RENDERBUFFER, drv->renderTargetID);
+            if (color->uploadDeferred) {
+                rsdAllocationSyncAll(rsc, fb->mHal.state.colorTargets[i].get(),
+                                     RS_ALLOCATION_USAGE_SCRIPT);
             }
-        } else {
-            // Reset last attachment
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                                      GL_RENDERBUFFER, 0);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i,
-                                   GL_TEXTURE_2D, 0, 0);
         }
+        fbo->setColorTarget(color, i);
     }
 }
-
-bool renderToFramebuffer(const FBOCache *fb) {
-    if (fb->mHal.state.depthTarget.get() != NULL) {
-        return false;
-    }
-
-    for (uint32_t i = 0; i < fb->mHal.state.colorTargetsCount; i ++) {
-        if (fb->mHal.state.colorTargets[i].get() != NULL) {
-            return false;
-        }
-    }
-    return true;
-}
-
 
 bool rsdFrameBufferInit(const Context *rsc, const FBOCache *fb) {
-    DrvFrameBuffer *drv = (DrvFrameBuffer *)calloc(1, sizeof(DrvFrameBuffer));
-    if (drv == NULL) {
+    RsdFrameBufferObj *fbo = new RsdFrameBufferObj();
+    if (fbo == NULL) {
         return false;
     }
-    fb->mHal.drv = drv;
-    drv->mFBOId = 0;
+    fb->mHal.drv = fbo;
+
+    RsdHal *dc = (RsdHal *)rsc->mHal.drv;
+    dc->gl.currentFrameBuffer = fbo;
 
     return true;
 }
 
 void rsdFrameBufferSetActive(const Context *rsc, const FBOCache *fb) {
-    DrvFrameBuffer *drv = (DrvFrameBuffer *)fb->mHal.drv;
+    setDepthAttachment(rsc, fb);
+    setColorAttachment(rsc, fb);
 
-    bool framebuffer = renderToFramebuffer(fb);
-    if (!framebuffer) {
-        if(drv->mFBOId == 0) {
-            glGenFramebuffers(1, &drv->mFBOId);
-        }
-        glBindFramebuffer(GL_FRAMEBUFFER, drv->mFBOId);
-
-        setDepthAttachment(rsc, fb);
-        setColorAttachment(rsc, fb);
-
-        glViewport(0, 0, fb->mHal.state.colorTargets[0]->getType()->getDimX(),
-                         fb->mHal.state.colorTargets[0]->getType()->getDimY());
-
-        checkError(rsc);
-    } else {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glViewport(0, 0, rsc->getWidth(), rsc->getHeight());
+    RsdFrameBufferObj *fbo = (RsdFrameBufferObj *)fb->mHal.drv;
+    if (fb->mHal.state.colorTargets[0].get()) {
+        fbo->setDimensions(fb->mHal.state.colorTargets[0]->getType()->getDimX(),
+                           fb->mHal.state.colorTargets[0]->getType()->getDimY());
+    } else if (fb->mHal.state.depthTarget.get()) {
+        fbo->setDimensions(fb->mHal.state.depthTarget->getType()->getDimX(),
+                           fb->mHal.state.depthTarget->getType()->getDimY());
     }
+
+    fbo->setActive(rsc);
 }
 
 void rsdFrameBufferDestroy(const Context *rsc, const FBOCache *fb) {
-    DrvFrameBuffer *drv = (DrvFrameBuffer *)fb->mHal.drv;
-    if(drv->mFBOId != 0) {
-        glDeleteFramebuffers(1, &drv->mFBOId);
-    }
-
-    free(fb->mHal.drv);
+    RsdFrameBufferObj *fbo = (RsdFrameBufferObj *)fb->mHal.drv;
+    delete fbo;
     fb->mHal.drv = NULL;
 }
 

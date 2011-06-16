@@ -39,6 +39,7 @@
 #include "rsContext.h"
 #include "rsdShaderCache.h"
 #include "rsdVertexArray.h"
+#include "rsdFrameBufferObj.h"
 
 using namespace android;
 using namespace android::renderscript;
@@ -294,6 +295,7 @@ bool rsdGLInit(const Context *rsc) {
     dc->gl.shaderCache = new RsdShaderCache();
     dc->gl.vertexArrayState = new RsdVertexArrayState();
     dc->gl.vertexArrayState->init(dc->gl.gl.maxVertexAttribs);
+    dc->gl.currentFrameBuffer = NULL;
 
     LOGV("initGLThread end %p", rsc);
     return true;

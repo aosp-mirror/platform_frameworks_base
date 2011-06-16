@@ -95,6 +95,8 @@ static void SC_AllocationCopy1DRange(Allocation *dstAlloc,
                                      Allocation *srcAlloc,
                                      uint32_t srcOff, uint32_t srcMip) {
     GET_TLS();
+    rsrAllocationCopy1DRange(rsc, dstAlloc, dstOff, dstMip, count,
+                             srcAlloc, srcOff, srcMip);
 }
 
 static void SC_AllocationCopy2DRange(Allocation *dstAlloc,
@@ -105,6 +107,11 @@ static void SC_AllocationCopy2DRange(Allocation *dstAlloc,
                                      uint32_t srcXoff, uint32_t srcYoff,
                                      uint32_t srcMip, uint32_t srcFace) {
     GET_TLS();
+    rsrAllocationCopy2DRange(rsc, dstAlloc,
+                             dstXoff, dstYoff, dstMip, dstFace,
+                             width, height,
+                             srcAlloc,
+                             srcXoff, srcYoff, srcMip, srcFace);
 }
 
 

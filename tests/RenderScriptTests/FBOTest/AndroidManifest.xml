@@ -3,11 +3,20 @@
     package="com.android.fbotest">
     <application android:label="_FBOTest">
         <activity android:name="FBOTest"
+                  android:label="FBO Base Test"
                   android:theme="@android:style/Theme.Black.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>        
+        </activity>
+        <activity android:name="FBOSync"
+                  android:label="FBO Sync Test"
+                  android:theme="@android:style/Theme.Black.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
