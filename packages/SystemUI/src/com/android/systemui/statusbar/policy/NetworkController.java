@@ -442,12 +442,14 @@ public class NetworkController extends BroadcastReceiver {
     }
 
     boolean isCdmaEri() {
-        final int iconIndex = mServiceState.getCdmaEriIconIndex();
-        if (iconIndex != EriInfo.ROAMING_INDICATOR_OFF) {
-            final int iconMode = mServiceState.getCdmaEriIconMode();
-            if (iconMode == EriInfo.ROAMING_ICON_MODE_NORMAL
-                    || iconMode == EriInfo.ROAMING_ICON_MODE_FLASH) {
-                return true;
+        if (mServiceState != null) {
+            final int iconIndex = mServiceState.getCdmaEriIconIndex();
+            if (iconIndex != EriInfo.ROAMING_INDICATOR_OFF) {
+                final int iconMode = mServiceState.getCdmaEriIconMode();
+                if (iconMode == EriInfo.ROAMING_ICON_MODE_NORMAL
+                        || iconMode == EriInfo.ROAMING_ICON_MODE_FLASH) {
+                    return true;
+                }
             }
         }
         return false;
@@ -850,7 +852,7 @@ public class NetworkController extends BroadcastReceiver {
         pw.print("  mDataActivity=");
         pw.println(mDataActivity);
         pw.print("  mServiceState=");
-        pw.println(mServiceState.toString());
+        pw.println(mServiceState);
         pw.print("  mNetworkName=");
         pw.println(mNetworkName);
         pw.print("  mNetworkNameDefault=");
