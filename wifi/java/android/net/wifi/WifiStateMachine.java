@@ -1438,7 +1438,6 @@ public class WifiStateMachine extends StateMachine {
             /* BSSID is valid only in ASSOCIATING state */
             mWifiInfo.setBSSID(stateChangeResult.BSSID);
         }
-        setNetworkDetailedState(WifiInfo.getDetailedStateOf(state));
 
         mSupplicantStateTracker.sendMessage(Message.obtain(message));
         mWpsStateMachine.sendMessage(Message.obtain(message));
@@ -2975,7 +2974,12 @@ public class WifiStateMachine extends StateMachine {
                     /* Ignore network disconnect */
                 case NETWORK_DISCONNECTION_EVENT:
                     break;
-               case CMD_START_SCAN:
+                case SUPPLICANT_STATE_CHANGE_EVENT:
+                    StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
+                    setNetworkDetailedState(WifiInfo.getDetailedStateOf(stateChangeResult.state));
+                    /* ConnectModeState does the rest of the handling */
+                    return NOT_HANDLED;
+                case CMD_START_SCAN:
                     /* Disable background scan temporarily during a regular scan */
                     if (mEnableBackgroundScan) {
                         WifiNative.enableBackgroundScanCommand(false);
