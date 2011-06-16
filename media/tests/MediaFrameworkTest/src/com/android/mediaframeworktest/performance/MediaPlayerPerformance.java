@@ -356,26 +356,6 @@ public class MediaPlayerPerformance extends ActivityInstrumentationTestCase2<Med
         assertTrue("H264 playback memory test", memoryResult);
     }
 
-    // Test case 3: Capture the memory usage after each 20 WMV playback
-    @LargeTest
-    public void testWMVVideoPlaybackMemoryUsage() throws Exception {
-        boolean memoryResult = false;
-        if (MediaProfileReader.getWMVEnable()){
-            mStartPid = getMediaserverPid();
-            File wmvMemoryOut = new File(MEDIA_MEMORY_OUTPUT);
-            Writer output = new BufferedWriter(new FileWriter(wmvMemoryOut, true));
-            output.write("WMV video playback only\n");
-            for (int i = 0; i < NUM_STRESS_LOOP; i++) {
-                mediaStressPlayback(MediaNames.VIDEO_WMV);
-                getMemoryWriteToLog(output, i);
-            }
-            output.write("\n");
-            memoryResult = validateMemoryResult(mStartPid, mStartMemory, output, DECODER_LIMIT);
-            output.close();
-            assertTrue("wmv playback memory test", memoryResult);
-        }
-    }
-
     // Test case 4: Capture the memory usage after every 20 video only recorded
     @LargeTest
     public void testH263RecordVideoOnlyMemoryUsage() throws Exception {

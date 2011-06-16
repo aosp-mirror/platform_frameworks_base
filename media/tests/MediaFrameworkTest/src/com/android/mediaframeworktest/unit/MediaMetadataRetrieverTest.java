@@ -76,29 +76,29 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         boolean hasFailed = false;
         Log.v(TAG, "Thumbnail processing starts");
         long startedAt = System.currentTimeMillis();
-        for(int i = 0, n = MediaNames.THUMBNAIL_CAPTURE_TEST_FILES.length; i < n; ++i) {
+        for(int i = 0, n = MediaNames.THUMBNAIL_METADATA_TEST_FILES.length; i < n; ++i) {
             try {
-                Log.v(TAG, "File " + i + ": " + MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i]);
-                if ((MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i].endsWith(".wma") && !supportWMA) ||
-                    (MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i].endsWith(".wmv") && !supportWMV)
+                Log.v(TAG, "File " + i + ": " + MediaNames.THUMBNAIL_METADATA_TEST_FILES[i]);
+                if ((MediaNames.THUMBNAIL_METADATA_TEST_FILES[i].endsWith(".wma") && !supportWMA) ||
+                    (MediaNames.THUMBNAIL_METADATA_TEST_FILES[i].endsWith(".wmv") && !supportWMV)
                    ) {
                     Log.v(TAG, "windows media is not supported and thus we will skip the test for this file");
                     continue;
                 }
-                retriever.setDataSource(MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i]);
+                retriever.setDataSource(MediaNames.THUMBNAIL_METADATA_TEST_FILES[i]);
                 Bitmap bitmap = retriever.getFrameAtTime(-1);
                 assertTrue(bitmap != null);
                 try {
-                    java.io.OutputStream stream = new FileOutputStream(MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i] + ".jpg");
+                    java.io.OutputStream stream = new FileOutputStream(MediaNames.THUMBNAIL_METADATA_TEST_FILES[i] + ".jpg");
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 75, stream);
                     stream.close();
                 } catch (Exception e) {
-                    Log.e(TAG, "Fails to convert the bitmap to a JPEG file for " + MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i]);
+                    Log.e(TAG, "Fails to convert the bitmap to a JPEG file for " + MediaNames.THUMBNAIL_METADATA_TEST_FILES[i]);
                     hasFailed = true;
                     Log.e(TAG, e.toString());
                 }
             } catch(Exception e) {
-                Log.e(TAG, "Fails to setDataSource for file " + MediaNames.THUMBNAIL_CAPTURE_TEST_FILES[i]);
+                Log.e(TAG, "Fails to setDataSource for file " + MediaNames.THUMBNAIL_METADATA_TEST_FILES[i]);
                 hasFailed = true;
             }
             Thread.yield();  // Don't be evil
@@ -106,7 +106,7 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         long endedAt = System.currentTimeMillis();
         retriever.release();
         assertTrue(!hasFailed);
-        Log.v(TAG, "Average processing time per thumbnail: " + (endedAt - startedAt)/MediaNames.THUMBNAIL_CAPTURE_TEST_FILES.length + " ms");
+        Log.v(TAG, "Average processing time per thumbnail: " + (endedAt - startedAt)/MediaNames.THUMBNAIL_METADATA_TEST_FILES.length + " ms");
     }
     
     @LargeTest
@@ -115,19 +115,19 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
         boolean supportWMV = MediaProfileReader.getWMVEnable();
         boolean hasFailed = false;
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        for(int i = 0, n = MediaNames.METADATA_RETRIEVAL_TEST_FILES.length; i < n; ++i) {
+        for(int i = 0, n = MediaNames.THUMBNAIL_METADATA_TEST_FILES.length; i < n; ++i) {
             try {
-                Log.v(TAG, "File " + i + ": " + MediaNames.METADATA_RETRIEVAL_TEST_FILES[i]);
-                if ((MediaNames.METADATA_RETRIEVAL_TEST_FILES[i].endsWith(".wma") && !supportWMA) ||
-                    (MediaNames.METADATA_RETRIEVAL_TEST_FILES[i].endsWith(".wmv") && !supportWMV)
+                Log.v(TAG, "File " + i + ": " + MediaNames.THUMBNAIL_METADATA_TEST_FILES[i]);
+                if ((MediaNames.THUMBNAIL_METADATA_TEST_FILES[i].endsWith(".wma") && !supportWMA) ||
+                    (MediaNames.THUMBNAIL_METADATA_TEST_FILES[i].endsWith(".wmv") && !supportWMV)
                    ) {
                     Log.v(TAG, "windows media is not supported and thus we will skip the test for this file");
                     continue;
                 }
-                retriever.setDataSource(MediaNames.METADATA_RETRIEVAL_TEST_FILES[i]);
+                retriever.setDataSource(MediaNames.THUMBNAIL_METADATA_TEST_FILES[i]);
                 extractAllSupportedMetadataValues(retriever);
             } catch(Exception e) {
-                Log.e(TAG, "Fails to setDataSource for file " + MediaNames.METADATA_RETRIEVAL_TEST_FILES[i]);
+                Log.e(TAG, "Fails to setDataSource for file " + MediaNames.THUMBNAIL_METADATA_TEST_FILES[i]);
                 hasFailed = true;
             }
             Thread.yield();  // Don't be evil
@@ -235,45 +235,6 @@ public class MediaMetadataRetrieverTest extends AndroidTestCase {
             }
         }
         
-        retriever.release();
-        assertTrue(!hasFailed);
-    }
-
-    @MediumTest
-    public static void testIntendedUsage() {
-        // By default, capture frame and retrieve metadata
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        boolean hasFailed = false;
-        retriever.setDataSource(MediaNames.TEST_PATH_1);
-        assertTrue(retriever.getFrameAtTime(-1) != null);
-        assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) != null);
-
-        // Do not capture frame or retrieve metadata
-        retriever.setDataSource(MediaNames.TEST_PATH_1);
-        if (retriever.getFrameAtTime(-1) != null) {
-            Log.e(TAG, "No frame expected, but is available");
-            hasFailed = true;
-        }
-        if (retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) != null) {
-            Log.e(TAG, "No num track metadata expected, but is available");
-            hasFailed = true;
-        }
-
-        // Capture frame only
-        retriever.setDataSource(MediaNames.TEST_PATH_1);
-        assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) == null);
-
-        // Retriever metadata only
-        retriever.setDataSource(MediaNames.TEST_PATH_1);
-        if (retriever.getFrameAtTime(-1) != null) {
-            Log.e(TAG, "No frame expected, but is available");
-            hasFailed = true;
-        }
-
-        // Capture frame and retrieve metadata
-        retriever.setDataSource(MediaNames.TEST_PATH_1);
-        assertTrue(retriever.getFrameAtTime(-1) != null);
-        assertTrue(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS) != null);
         retriever.release();
         assertTrue(!hasFailed);
     }

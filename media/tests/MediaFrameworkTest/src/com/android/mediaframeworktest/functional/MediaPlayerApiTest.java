@@ -84,15 +84,6 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       duratoinWithinTolerence = verifyDuration(duration, MediaNames.MIDI_LENGTH);
       assertTrue("MIDI getDuration", duratoinWithinTolerence);  
     }
-    
-    @MediumTest
-    public void testWMA9GetDuration() throws Exception {
-      if (isWMAEnable) {
-            int duration = CodecTest.getDuration(MediaNames.WMA9);
-            duratoinWithinTolerence = verifyDuration(duration, MediaNames.WMA9_LENGTH);
-            assertTrue("WMA9 getDuration", duratoinWithinTolerence);
-        }
-    }
 
     @MediumTest
     public void testAMRGetDuration() throws Exception {
@@ -127,15 +118,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       boolean currentPosition = CodecTest.getCurrentPosition(MediaNames.MIDI);  
       assertTrue("MIDI GetCurrentPosition", currentPosition);  
     }
-    
-    @LargeTest
-    public void testWMA9GetCurrentPosition() throws Exception {
-        if (isWMAEnable) {
-            boolean currentPosition = CodecTest.getCurrentPosition(MediaNames.WMA9);
-            assertTrue("WMA9 GetCurrentPosition", currentPosition);
-        }
-    }
-    
+
     @LargeTest
     public void testAMRGetCurrentPosition() throws Exception {
       boolean currentPosition = CodecTest.getCurrentPosition(MediaNames.AMR);  
@@ -166,15 +149,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       boolean isPaused = CodecTest.pause(MediaNames.MIDI);  
       assertTrue("MIDI Pause", isPaused);  
     }
-   
-    @LargeTest
-    public void testWMA9Pause() throws Exception {
-        if (isWMAEnable) {
-            boolean isPaused = CodecTest.pause(MediaNames.WMA9);
-            assertTrue("WMA9 Pause", isPaused);
-        }
-    }
-  
+
     @LargeTest
     public void testAMRPause() throws Exception {
       boolean isPaused = CodecTest.pause(MediaNames.AMR);  
@@ -239,15 +214,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       boolean isLoop = CodecTest.setLooping(MediaNames.MIDI);  
       assertTrue("MIDI setLooping", isLoop);  
     }
-    
-    @LargeTest
-    public void testWMA9SetLooping() throws Exception {
-      if (isWMAEnable) {
-        boolean isLoop = CodecTest.setLooping(MediaNames.WMA9);
-        assertTrue("WMA9 setLooping", isLoop);
-      }
-    }
-    
+
     @LargeTest
     public void testAMRSetLooping() throws Exception {
       boolean isLoop = CodecTest.setLooping(MediaNames.AMR);  
@@ -279,15 +246,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       boolean isLoop = CodecTest.seekTo(MediaNames.MIDI);  
       assertTrue("MIDI seekTo", isLoop);  
     }
-    
-    @LargeTest
-    public void testWMA9SeekTo() throws Exception {
-        if (isWMAEnable) {
-            boolean isLoop = CodecTest.seekTo(MediaNames.WMA9);
-            assertTrue("WMA9 seekTo", isLoop);
-        }
-    }
-    
+
     @LargeTest
     public void testAMRSeekTo() throws Exception {
       boolean isLoop = CodecTest.seekTo(MediaNames.AMR);  
@@ -319,15 +278,6 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
     public void testMIDISeekToEnd() throws Exception {
       boolean isEnd = CodecTest.seekToEnd(MediaNames.MIDI);  
       assertTrue("MIDI seekToEnd", isEnd);  
-    }
-
-    @Suppress
-    @LargeTest
-    public void testWMA9SeekToEnd() throws Exception {
-        if (isWMAEnable) {
-            boolean isEnd = CodecTest.seekToEnd(MediaNames.WMA9);
-            assertTrue("WMA9 seekToEnd", isEnd);
-        }
     }
     
     @LargeTest
@@ -393,17 +343,13 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
       boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_H264_AMR);
       assertTrue("H264AMR SeekTo", isSeek);         
     }
-   
+
     @LargeTest
-    public void testVideoWMVSeekTo() throws Exception {
-        Log.v(TAG, "wmv not enable");
-        if (isWMVEnable) {
-            Log.v(TAG, "wmv enable");
-            boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_WMV);
-            assertTrue("WMV SeekTo", isSeek);
-        }
+    public void testVideoWebmSeekTo() throws Exception {
+      boolean isSeek = CodecTest.videoSeekTo(MediaNames.VIDEO_WEBM);
+      assertTrue("WEBM SeekTo", isSeek);
     }
-    
+
     @LargeTest
     public void testSoundRecord() throws Exception {
       boolean isRecordered = CodecTest.mediaRecorderRecord(MediaNames.RECORDER_OUTPUT);
@@ -412,7 +358,7 @@ public class MediaPlayerApiTest extends ActivityInstrumentationTestCase<MediaFra
   
     @LargeTest
     public void testGetThumbnail() throws Exception {
-      boolean getThumbnail = CodecTest.getThumbnail(MediaNames.VIDEO_H264_AAC, MediaNames.GOLDEN_THUMBNAIL_OUTPUT_2);
+      boolean getThumbnail = CodecTest.getThumbnail(MediaNames.VIDEO_H264_AAC, MediaNames.GOLDEN_THUMBNAIL_OUTPUT);
       assertTrue("Get Thumbnail", getThumbnail);         
     }
     
