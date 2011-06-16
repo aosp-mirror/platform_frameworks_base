@@ -1238,7 +1238,103 @@ public final class CalendarContract {
     }
 
     /**
-     * Fields and helpers for interacting with Events.
+     * Constants and helpers for the Events table, which contains details of a
+     * single event. <h3>Operations</h3> All operations can be done either as an
+     * app or as a sync adapter. To perform an operation as a sync adapter
+     * {@link #CALLER_IS_SYNCADAPTER} should be set to true in the Uri
+     * parameters and {@link #ACCOUNT_NAME} and {@link #ACCOUNT_TYPE} must be
+     * set. Sync adapters have write access to more columns but are restricted
+     * to a single account at a time.
+     * <dl>
+     * <dt><b>Insert</b></dt>
+     * <dd>When inserting a new event the following fields must be included:
+     * <ul>
+     * <li>dtstart</li>
+     * <li>dtend -or- a (rrule or rdate) and a duration</li>
+     * <li>a calendar_id</li>
+     * </ul>
+     * There are also further requirements when inserting or updating an event.
+     * See the section on Writing to Events.</dd>
+     * <dt><b>Update</b></dt>
+     * <dd>To perform an update on an Event the {@link Events#_ID} of the event
+     * must be provided either as an appended id to the Uri (
+     * {@link ContentUris#withAppendedId}) or as the first selection item--the
+     * selection should start with "_id=?" and the first selectionArg should be
+     * the _id of the event. Updating an event must respect the same rules as
+     * inserting and is further restricted in the fields that can be written.
+     * See the section on Writing to Events.</dd>
+     * <dt><b>Delete</b></dt>
+     * <dd>Events can be deleted either by the {@link Events#_ID} as an appended
+     * id on the Uri or using any standard selection. If an appended id is used
+     * a selection is not allowed. There are two versions of delete: as an app
+     * and as a sync adapter. An app delete will set the deleted column on an
+     * event and remove all instances of that event. A sync adapter delete will
+     * remove the event from the database and all associated data.</dd>
+     * <dt><b>Query</b></dt>
+     * <dd>Querying the Events table will get you all information about a set of
+     * events except their reminders, attendees, and extended properties. There
+     * will be one row returned for each event that matches the query selection,
+     * or at most a single row if the {@link Events#_ID} is appended to the Uri.
+     * Recurring events will only return a single row regardless of the number
+     * of times that event repeats.</dd>
+     * </dl>
+     * <h3>Writing to Events</h3> There are further restrictions on all Updates
+     * and Inserts in the Events table:
+     * <ul>
+     * <li>If allDay is set to 1 eventTimezone must be {@link Time#TIMEZONE_UTC}
+     * and the time must correspond to a midnight boundary.</li>
+     * <li>Exceptions are not allowed to recur. If rrule or rdate is not empty,
+     * original_id and original_sync_id must be empty.</li>
+     * <li>In general a calendar_id should not be modified after insertion. This
+     * is not explicitly forbidden but many sync adapters will not behave in an
+     * expected way if the calendar_id is modified.</li>
+     * </ul>
+     * The following Events columns are writable by both an app and a sync
+     * adapter.
+     * <ul>
+     * <li>{@link #CALENDAR_ID}</li>
+     * <li>{@link #ORGANIZER}</li>
+     * <li>{@link #TITLE}</li>
+     * <li>{@link #EVENT_LOCATION}</li>
+     * <li>{@link #DESCRIPTION}</li>
+     * <li>{@link #EVENT_COLOR}</li>
+     * <li>{@link #DTSTART}</li>
+     * <li>{@link #DTEND}</li>
+     * <li>{@link #EVENT_TIMEZONE}</li>
+     * <li>{@link #EVENT_END_TIMEZONE}</li>
+     * <li>{@link #DURATION}</li>
+     * <li>{@link #ALL_DAY}</li>
+     * <li>{@link #RRULE}</li>
+     * <li>{@link #RDATE}</li>
+     * <li>{@link #EXRULE}</li>
+     * <li>{@link #EXDATE}</li>
+     * <li>{@link #ORIGINAL_ID}</li>
+     * <li>{@link #ORIGINAL_SYNC_ID}</li>
+     * <li>{@link #ORIGINAL_INSTANCE_TIME}</li>
+     * <li>{@link #ORIGINAL_ALL_DAY}</li>
+     * <li>{@link #ACCESS_LEVEL}</li>
+     * <li>{@link #AVAILABILITY}</li>
+     * <li>{@link #GUESTS_CAN_MODIFY}</li>
+     * <li>{@link #GUESTS_CAN_INVITE_OTHERS}</li>
+     * <li>{@link #GUESTS_CAN_SEE_GUESTS}</li>
+     * </ul>
+     * The following Events columns are writable only by a sync adapter
+     * <ul>
+     * <li>{@link #DIRTY}</li>
+     * <li>{@link #_SYNC_ID}</li>
+     * <li>{@link #SYNC_DATA1}</li>
+     * <li>{@link #SYNC_DATA2}</li>
+     * <li>{@link #SYNC_DATA3}</li>
+     * <li>{@link #SYNC_DATA4}</li>
+     * <li>{@link #SYNC_DATA5}</li>
+     * <li>{@link #SYNC_DATA6}</li>
+     * <li>{@link #SYNC_DATA7}</li>
+     * <li>{@link #SYNC_DATA8}</li>
+     * <li>{@link #SYNC_DATA9}</li>
+     * <li>{@link #SYNC_DATA10}</li>
+     * </ul>
+     * The remaining columns are either updated by the provider only or are
+     * views into other tables and cannot be changed through the Events table.
      */
     public static final class Events implements BaseColumns, SyncColumns, EventsColumns,
             CalendarsColumns {
