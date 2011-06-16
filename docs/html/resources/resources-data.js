@@ -407,6 +407,26 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['sample', 'layout', 'ui', 'fragment', 'loader', 'new'],
+    path: 'samples/Support4Demos/index.html',
+    title: {
+      en: 'API 4+ Support Demos'
+    },
+    description: {
+      en: 'A variety of small applications that demonstrate the use of the helper classes in the Android API 4+ Support Library (classes which work down to API level 4 or version 1.6 of the platform).'
+    }
+  },
+  {
+    tags: ['sample', 'layout', 'ui', 'new'],
+    path: 'samples/Support13Demos/index.html',
+    title: {
+      en: 'API 13+ Support Demos'
+    },
+    description: {
+      en: 'A variety of small applications that demonstrate the use of the helper classes in the Android API 13+ Support Library (classes which work down to API level 13 or version 3.2 of the platform).'
+    }
+  },
+  {
     tags: ['sample', 'data', 'newfeature', 'accountsync'],
     path: 'samples/BackupRestore/index.html',
     title: {
