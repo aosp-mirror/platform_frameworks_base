@@ -210,6 +210,16 @@ interface INetworkManagementService
     NetworkStats getNetworkStatsUidDetail(int uid);
 
     /**
+     * Set an overall quota for a group of interfaces.
+     */
+    void setInterfaceQuota(in String[] iface, long quota);
+
+    /**
+     * Control network activity of a UID over interfaces with a quota limit.
+     */
+    void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces);
+
+    /**
      * Configures bandwidth throttling on an interface.
      */
     void setInterfaceThrottle(String iface, int rxKbps, int txKbps);
