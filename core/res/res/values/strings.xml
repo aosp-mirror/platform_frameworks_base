@@ -1790,6 +1790,9 @@
     <string name="lockscreen_missing_sim_instructions">Please insert a SIM card.</string>
     <!-- Shown in the lock screen to ask the user to insert a SIM card when sim is missing or not readable. -->
     <string name="lockscreen_missing_sim_instructions_long">The SIM card is missing or not readable. Please insert a SIM card.</string>
+    <!-- Shown in the lock screen to inform the user to SIM card is permanently disabled. -->
+    <string name="lockscreen_permanent_disabled_sim_instructions">Your SIM card is permanently disabled.\n
+    Please contact your wireless service provider to obtain another SIM card.</string>
 
     <!-- Shown in the lock screen when there is emergency calls only mode. -->
     <string name="emergency_calls_only" msgid="2485604591272668370">Emergency calls only</string>

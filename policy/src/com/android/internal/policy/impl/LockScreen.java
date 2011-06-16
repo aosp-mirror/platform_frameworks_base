@@ -129,7 +129,12 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
         /**
          * The sim card is locked.
          */
-        SimLocked(true);
+        SimLocked(true),
+
+        /**
+         * The sim card is permanently disabled due to puk unlock failure
+         */
+        SimPermDisabled(false);
 
         private final boolean mShowStatusLines;
 
@@ -503,7 +508,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
      */
     private Status getCurrentStatus(IccCard.State simState) {
         boolean missingAndNotProvisioned = (!mUpdateMonitor.isDeviceProvisioned()
-                && simState == IccCard.State.ABSENT);
+                && (simState == IccCard.State.ABSENT
+                        || simState == IccCard.State.PERM_DISABLED));
+
         if (missingAndNotProvisioned) {
             return Status.SimMissingLocked;
         }
@@ -521,6 +528,8 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
                 return Status.SimPukLocked;
             case READY:
                 return Status.Normal;
+            case PERM_DISABLED:
+                return Status.SimPermDisabled;
             case UNKNOWN:
                 return Status.SimMissing;
         }
@@ -588,6 +597,18 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
                 // text
                 mStatusView.setCarrierText(R.string.lockscreen_missing_sim_message_short);
                 mScreenLocked.setText(R.string.lockscreen_missing_sim_instructions_long);
+
+                // layout
+                mScreenLocked.setVisibility(View.VISIBLE);
+                mLockPatternUtils.updateEmergencyCallText(mEmergencyCallText);
+                enableUnlock(); // do not need to show the e-call button; user may unlock
+                break;
+
+            case SimPermDisabled:
+                // text
+                mStatusView.setCarrierText(R.string.lockscreen_missing_sim_message_short);
+                mScreenLocked.setText(
+                        R.string.lockscreen_permanent_disabled_sim_instructions);
 
                 // layout
                 mScreenLocked.setVisibility(View.VISIBLE);
