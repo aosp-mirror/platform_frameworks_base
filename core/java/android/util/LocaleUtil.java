@@ -71,8 +71,9 @@ public class LocaleUtil {
         if (localeWithSubtags == null) return getLayoutDirectionFromFirstChar(locale);
 
         // Need to check if we can extract the script subtag. For example, "Latn" in  "en_Latn_US"
-        if (localeWithSubtags.charAt(2) != UNDERSCORE_CHAR ||
-                localeWithSubtags.charAt(7) != UNDERSCORE_CHAR) {
+        if (localeWithSubtags.length() <= 7
+                || localeWithSubtags.charAt(2) != UNDERSCORE_CHAR
+                || localeWithSubtags.charAt(7) != UNDERSCORE_CHAR) {
             return getLayoutDirectionFromFirstChar(locale);
         }
         // Extract the script subtag

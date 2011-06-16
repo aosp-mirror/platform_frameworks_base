@@ -193,5 +193,10 @@ public class LocaleUtilTest extends AndroidTestCase {
         locale = new Locale("uz_Arab", "AF");
         assertEquals(LocaleUtil.TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE,
             LocaleUtil.getLayoutDirectionFromLocale(locale));
+
+        // Locale without a real language
+        locale = new Locale("zz");
+        assertEquals(LocaleUtil.TEXT_LAYOUT_DIRECTION_LTR_DO_NOT_USE,
+            LocaleUtil.getLayoutDirectionFromLocale(locale));
     }
 }
