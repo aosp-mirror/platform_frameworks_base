@@ -234,6 +234,14 @@ public class TextToSpeech {
         public static final String INTENT_ACTION_TTS_SERVICE =
                 "android.intent.action.TTS_SERVICE";
 
+        /**
+         * Name under which a text to speech engine publishes information about itself.
+         * This meta-data should reference an XML resource containing a
+         * <code>&lt;{@link android.R.styleable#TextToSpeechEngine tts-engine}&gt;</code>
+         * tag.
+         */
+        public static final String SERVICE_META_DATA = "android.speech.tts";
+
         // intents to ask engine to install data or check its data
         /**
          * Activity Action: Triggers the platform TextToSpeech engine to

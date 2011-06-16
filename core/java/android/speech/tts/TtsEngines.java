@@ -15,17 +15,27 @@
  */
 package android.speech.tts;
 
+import org.xmlpull.v1.XmlPullParserException;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.provider.Settings;
 import android.speech.tts.TextToSpeech.Engine;
 import android.speech.tts.TextToSpeech.EngineInfo;
 import android.text.TextUtils;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.util.Xml;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -41,6 +51,8 @@ import java.util.List;
  * @hide
  */
 public class TtsEngines {
+    private static final String TAG = "TtsEngines";
+
     private final Context mContext;
 
     public TtsEngines(Context ctx) {
@@ -137,6 +149,89 @@ public class TtsEngines {
         }
 
         return getEngineInfo(engine) != null;
+    }
+
+    /**
+     * @return an intent that can launch the settings activity for a given tts engine.
+     */
+    public Intent getSettingsIntent(String engine) {
+        PackageManager pm = mContext.getPackageManager();
+        Intent intent = new Intent(Engine.INTENT_ACTION_TTS_SERVICE);
+        intent.setPackage(engine);
+        List<ResolveInfo> resolveInfos = pm.queryIntentServices(intent,
+                PackageManager.MATCH_DEFAULT_ONLY | PackageManager.GET_META_DATA);
+        // Note that the current API allows only one engine per
+        // package name. Since the "engine name" is the same as
+        // the package name.
+        if (resolveInfos != null && resolveInfos.size() == 1) {
+            ServiceInfo service = resolveInfos.get(0).serviceInfo;
+            if (service != null) {
+                final String settings = settingsActivityFromServiceInfo(service, pm);
+                if (settings != null) {
+                    Intent i = new Intent();
+                    i.setClassName(engine, settings);
+                    return i;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The name of the XML tag that text to speech engines must use to
+     * declare their meta data.
+     *
+     * {@link com.android.internal.R.styleable.TextToSpeechEngine}
+     */
+    private static final String XML_TAG_NAME = "tts-engine";
+
+    private String settingsActivityFromServiceInfo(ServiceInfo si, PackageManager pm) {
+        XmlResourceParser parser = null;
+        try {
+            parser = si.loadXmlMetaData(pm, TextToSpeech.Engine.SERVICE_META_DATA);
+            if (parser == null) {
+                Log.w(TAG, "No meta-data found for :" + si);
+                return null;
+            }
+
+            final Resources res = pm.getResourcesForApplication(si.applicationInfo);
+
+            int type;
+            while ((type = parser.next()) != XmlResourceParser.END_DOCUMENT) {
+                if (type == XmlResourceParser.START_TAG) {
+                    if (!XML_TAG_NAME.equals(parser.getName())) {
+                        Log.w(TAG, "Package " + si + " uses unknown tag :"
+                                + parser.getName());
+                        return null;
+                    }
+
+                    final AttributeSet attrs = Xml.asAttributeSet(parser);
+                    final TypedArray array = res.obtainAttributes(attrs,
+                            com.android.internal.R.styleable.TextToSpeechEngine);
+                    final String settings = array.getString(
+                            com.android.internal.R.styleable.TextToSpeechEngine_settingsActivity);
+                    array.recycle();
+
+                    return settings;
+                }
+            }
+
+            return null;
+        } catch (NameNotFoundException e) {
+            Log.w(TAG, "Could not load resources for : " + si);
+            return null;
+        } catch (XmlPullParserException e) {
+            Log.w(TAG, "Error parsing metadata for " + si + ":" + e);
+            return null;
+        } catch (IOException e) {
+            Log.w(TAG, "Error parsing metadata for " + si + ":" + e);
+            return null;
+        } finally {
+            if (parser != null) {
+                parser.close();
+            }
+        }
     }
 
     private EngineInfo getEngineInfo(ResolveInfo resolve, PackageManager pm) {

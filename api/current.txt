@@ -17706,6 +17706,7 @@ package android.speech.tts {
     field public static final java.lang.String KEY_PARAM_STREAM = "streamType";
     field public static final java.lang.String KEY_PARAM_UTTERANCE_ID = "utteranceId";
     field public static final java.lang.String KEY_PARAM_VOLUME = "volume";
+    field public static final java.lang.String SERVICE_META_DATA = "android.speech.tts";
   }
 
   public static class TextToSpeech.EngineInfo {

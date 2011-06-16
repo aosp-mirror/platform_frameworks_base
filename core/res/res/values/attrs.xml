@@ -5249,4 +5249,15 @@
         <attr name="disableDependentsState" />
     </declare-styleable>
 
+    <!-- Use <code>tts-engine</code> as the root tag of the XML resource that
+         describes a text to speech engine implemented as a subclass of
+         {@link android.speech.tts.TextToSpeechService}.
+
+         The XML resource must be referenced from its
+         {@link android.speech.tts.TextToSpeech.Engine#SERVICE_META_DATA} meta-data
+         entry. -->
+    <declare-styleable name="TextToSpeechEngine">
+        <attr name="settingsActivity" />
+    </declare-styleable>
+
 </resources>
