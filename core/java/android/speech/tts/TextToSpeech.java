@@ -498,8 +498,7 @@ public class TextToSpeech {
     private int initTts() {
         String defaultEngine = getDefaultEngine();
         String engine = defaultEngine;
-        if (!areDefaultsEnforced() && !TextUtils.isEmpty(mRequestedEngine)
-                && mEnginesHelper.isEngineEnabled(mRequestedEngine)) {
+        if (mEnginesHelper.isEngineInstalled(mRequestedEngine)) {
             engine = mRequestedEngine;
         }
 
@@ -1080,12 +1079,12 @@ public class TextToSpeech {
     }
 
     /**
-     * Checks whether the user's settings should override settings requested by the calling
-     * application.
+     * Checks whether the user's settings should override settings requested
+     * by the calling application. As of the Ice cream sandwich release,
+     * user settings never forcibly override the app's settings.
      */
     public boolean areDefaultsEnforced() {
-        return Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.TTS_USE_DEFAULTS, Engine.USE_DEFAULTS) == 1;
+        return false;
     }
 
     /**

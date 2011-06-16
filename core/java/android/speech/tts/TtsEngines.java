@@ -117,30 +117,10 @@ public class TtsEngines {
         return engines;
     }
 
-    /**
-     * Checks whether a given engine is enabled or not. Note that all system
-     * engines are enabled by default.
-     */
+    // TODO: Used only by the settings app. Remove once
+    // the settings UI change has been finalized.
     public boolean isEngineEnabled(String engine) {
-        // System engines are enabled by default always.
-        EngineInfo info = getEngineInfo(engine);
-        if (info == null) {
-            // The engine is not installed, and therefore cannot
-            // be enabled.
-            return false;
-        }
-
-        if (info.system) {
-            // All system engines are enabled by default.
-            return true;
-        }
-
-        for (String enabled : getUserEnabledEngines()) {
-            if (engine.equals(enabled)) {
-                return true;
-            }
-        }
-        return false;
+        return isEngineInstalled(engine);
     }
 
     private boolean isSystemEngine(ServiceInfo info) {
@@ -149,22 +129,14 @@ public class TtsEngines {
     }
 
     /**
-     * @return true if a given engine is installed on the system. Useful to deal
-     *         with cases where an engine has been uninstalled by the user or removed
-     *         for any other reason.
+     * @return true if a given engine is installed on the system.
      */
-    private boolean isEngineInstalled(String engine) {
+    public boolean isEngineInstalled(String engine) {
         if (engine == null) {
             return false;
         }
 
-        for (EngineInfo info : getEngines()) {
-            if (engine.equals(info.name)) {
-                return true;
-            }
-        }
-
-        return false;
+        return getEngineInfo(engine) != null;
     }
 
     private EngineInfo getEngineInfo(ResolveInfo resolve, PackageManager pm) {
@@ -183,17 +155,6 @@ public class TtsEngines {
         }
 
         return null;
-    }
-
-    // Note that in addition to this list, all engines that are a part
-    // of the system are enabled by default.
-    private String[] getUserEnabledEngines() {
-        String str = Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.TTS_ENABLED_PLUGINS);
-        if (TextUtils.isEmpty(str)) {
-            return new String[0];
-        }
-        return str.split(" ");
     }
 
     private static class EngineInfoComparator implements Comparator<EngineInfo> {
