@@ -2448,7 +2448,7 @@ package android.app {
     field public static final int RESULT_OK = -1; // 0xffffffff
   }
 
-  public class ActivityGroup extends android.app.Activity {
+  public deprecated class ActivityGroup extends android.app.Activity {
     ctor public ActivityGroup();
     ctor public ActivityGroup(boolean);
     method public android.app.Activity getCurrentActivity();
@@ -3237,7 +3237,7 @@ package android.app {
     method public abstract void onLoaderReset(android.content.Loader<D>);
   }
 
-  public class LocalActivityManager {
+  public deprecated class LocalActivityManager {
     ctor public LocalActivityManager(android.app.Activity, boolean);
     method public android.view.Window destroyActivity(java.lang.String, boolean);
     method public void dispatchCreate(android.os.Bundle);
@@ -3520,7 +3520,7 @@ package android.app {
     field public static final int START_STICKY_COMPATIBILITY = 0; // 0x0
   }
 
-  public class TabActivity extends android.app.ActivityGroup {
+  public deprecated class TabActivity extends android.app.ActivityGroup {
     ctor public TabActivity();
     method public android.widget.TabHost getTabHost();
     method public android.widget.TabWidget getTabWidget();
