@@ -20,6 +20,8 @@ package android.util;
  * @hide
  */
 class FinitePool<T extends Poolable<T>> implements Pool<T> {
+    private static final String LOG_TAG = "FinitePool";
+
     /**
      * Factory used to create new pool objects
      */
@@ -77,15 +79,16 @@ class FinitePool<T extends Poolable<T>> implements Pool<T> {
     }
 
     public void release(T element) {
-        if (element.isPooled()) {
-            throw new IllegalArgumentException("Element already in the pool.");
+        if (!element.isPooled()) {
+            if (mInfinite || mPoolCount < mLimit) {
+                mPoolCount++;
+                element.setNextPoolable(mRoot);
+                element.setPooled(true);
+                mRoot = element;
+            }
+            mManager.onReleased(element);
+        } else {
+            Log.w(LOG_TAG, "Element is already in pool: " + element);
         }
-        if (mInfinite || mPoolCount < mLimit) {
-            mPoolCount++;
-            element.setNextPoolable(mRoot);
-            element.setPooled(true);
-            mRoot = element;
-        }
-        mManager.onReleased(element);
     }
 }
