@@ -23,9 +23,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
+import android.net.IConnectivityManager;
 import android.os.Handler;
 import android.os.Message;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
@@ -45,7 +46,7 @@ public class ManageDialog extends Activity implements
     private String mInterfaceName;
     private long mStartTime;
 
-    private ConnectivityManager mService;
+    private IConnectivityManager mService;
 
     private AlertDialog mDialog;
     private TextView mDuration;
@@ -64,7 +65,8 @@ public class ManageDialog extends Activity implements
             mInterfaceName = intent.getStringExtra("interfaceName");
             mStartTime = intent.getLongExtra("startTime", 0);
 
-            mService = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            mService = IConnectivityManager.Stub.asInterface(
+                    ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
 
             PackageManager pm = getPackageManager();
             ApplicationInfo app = pm.getApplicationInfo(mPackageName, 0);

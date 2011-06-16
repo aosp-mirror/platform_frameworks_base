@@ -23,7 +23,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
+import android.net.IConnectivityManager;
+import android.os.ServiceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -37,7 +38,7 @@ public class ConfirmDialog extends Activity implements CompoundButton.OnCheckedC
 
     private String mPackageName;
 
-    private ConnectivityManager mService;
+    private IConnectivityManager mService;
 
     private AlertDialog mDialog;
     private Button mButton;
@@ -47,7 +48,9 @@ public class ConfirmDialog extends Activity implements CompoundButton.OnCheckedC
         super.onResume();
         try {
             mPackageName = getCallingPackage();
-            mService = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            mService = IConnectivityManager.Stub.asInterface(
+                    ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
 
             if (mPackageName.equals(mService.prepareVpn(null))) {
                 setResult(RESULT_OK);
