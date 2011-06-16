@@ -395,41 +395,47 @@ class AppWidgetService extends IAppWidgetService.Stub
     public void bindAppWidgetId(int appWidgetId, ComponentName provider) {
         mContext.enforceCallingPermission(android.Manifest.permission.BIND_APPWIDGET,
                 "bindGagetId appWidgetId=" + appWidgetId + " provider=" + provider);
-        synchronized (mAppWidgetIds) {
-            AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
-            if (id == null) {
-                throw new IllegalArgumentException("bad appWidgetId");
+        
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            synchronized (mAppWidgetIds) {
+                AppWidgetId id = lookupAppWidgetIdLocked(appWidgetId);
+                if (id == null) {
+                    throw new IllegalArgumentException("bad appWidgetId");
+                }
+                if (id.provider != null) {
+                    throw new IllegalArgumentException("appWidgetId " + appWidgetId + " already bound to "
+                            + id.provider.info.provider);
+                }
+                Provider p = lookupProviderLocked(provider);
+                if (p == null) {
+                    throw new IllegalArgumentException("not a appwidget provider: " + provider);
+                }
+                if (p.zombie) {
+                    throw new IllegalArgumentException("can't bind to a 3rd party provider in"
+                            + " safe mode: " + provider);
+                }
+    
+                id.provider = p;
+                p.instances.add(id);
+                int instancesSize = p.instances.size();
+                if (instancesSize == 1) {
+                    // tell the provider that it's ready
+                    sendEnableIntentLocked(p);
+                }
+    
+                // send an update now -- We need this update now, and just for this appWidgetId.
+                // It's less critical when the next one happens, so when we schdule the next one,
+                // we add updatePeriodMillis to its start time.  That time will have some slop,
+                // but that's okay.
+                sendUpdateIntentLocked(p, new int[] { appWidgetId });
+    
+                // schedule the future updates
+                registerForBroadcastsLocked(p, getAppWidgetIds(p));
+                saveStateLocked();
             }
-            if (id.provider != null) {
-                throw new IllegalArgumentException("appWidgetId " + appWidgetId + " already bound to "
-                        + id.provider.info.provider);
-            }
-            Provider p = lookupProviderLocked(provider);
-            if (p == null) {
-                throw new IllegalArgumentException("not a appwidget provider: " + provider);
-            }
-            if (p.zombie) {
-                throw new IllegalArgumentException("can't bind to a 3rd party provider in"
-                        + " safe mode: " + provider);
-            }
-
-            id.provider = p;
-            p.instances.add(id);
-            int instancesSize = p.instances.size();
-            if (instancesSize == 1) {
-                // tell the provider that it's ready
-                sendEnableIntentLocked(p);
-            }
-
-            // send an update now -- We need this update now, and just for this appWidgetId.
-            // It's less critical when the next one happens, so when we schdule the next one,
-            // we add updatePeriodMillis to its start time.  That time will have some slop,
-            // but that's okay.
-            sendUpdateIntentLocked(p, new int[] { appWidgetId });
-
-            // schedule the future updates
-            registerForBroadcastsLocked(p, getAppWidgetIds(p));
-            saveStateLocked();
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
     }
 
