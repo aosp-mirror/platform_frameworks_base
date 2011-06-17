@@ -298,7 +298,7 @@ uint32_t AudioTrack::frameCount() const
 int AudioTrack::frameSize() const
 {
     if (audio_is_linear_pcm(mFormat)) {
-        return channelCount()*((format() == AUDIO_FORMAT_PCM_8_BIT) ? sizeof(uint8_t) : sizeof(int16_t));
+        return channelCount()*audio_bytes_per_sample(mFormat);
     } else {
         return sizeof(uint8_t);
     }
