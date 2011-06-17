@@ -1332,7 +1332,8 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return retry;
     }
 
-    private void reconnectAfterFail(FailCause lastFailCauseCode, ApnContext apnContext) {
+    private void reconnectAfterFail(FailCause lastFailCauseCode,
+                                    ApnContext apnContext, int retryOverride) {
         if (apnContext == null) {
             loge("reconnectAfterFail: apnContext == null, impossible");
             return;
@@ -1357,9 +1358,14 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 }
             }
 
-            int nextReconnectDelay = apnContext.getDataConnection().getRetryTimer();
+            // If retry needs to be backed off for specific case (determined by RIL/Modem)
+            // use the specified timer instead of pre-configured retry pattern.
+            int nextReconnectDelay = retryOverride;
+            if (nextReconnectDelay < 0) {
+                nextReconnectDelay = apnContext.getDataConnection().getRetryTimer();
+                apnContext.getDataConnection().increaseRetryCount();
+            }
             startAlarmForReconnect(nextReconnectDelay, apnContext);
-            apnContext.getDataConnection().increaseRetryCount();
 
             if (!shouldPostNotification(lastFailCauseCode)) {
                 if (DBG) {
@@ -1664,7 +1670,13 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     }
                 } else {
                     if (DBG) log("onDataSetupComplete: Not all permanent failures, retry");
-                    startDelayedRetry(cause, apnContext);
+                    // check to see if retry should be overridden for this failure.
+                    int retryOverride = -1;
+                    if (ar.exception instanceof DataConnection.CallSetupException) {
+                        retryOverride =
+                            ((DataConnection.CallSetupException)ar.exception).getRetryOverride();
+                    }
+                    startDelayedRetry(cause, apnContext, retryOverride);
                 }
             } else {
                 if (DBG) log("onDataSetupComplete: Try next APN");
@@ -1936,9 +1948,10 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return result.toString();
     }
 
-    private void startDelayedRetry(GsmDataConnection.FailCause cause, ApnContext apnContext) {
+    private void startDelayedRetry(GsmDataConnection.FailCause cause,
+                                   ApnContext apnContext, int retryOverride) {
         notifyNoData(cause, apnContext);
-        reconnectAfterFail(cause, apnContext);
+        reconnectAfterFail(cause, apnContext, retryOverride);
     }
 
     private void setPreferredApn(int pos) {

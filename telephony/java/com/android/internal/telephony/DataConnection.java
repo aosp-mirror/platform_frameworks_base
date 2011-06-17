@@ -182,6 +182,18 @@ public abstract class DataConnection extends StateMachine {
         }
     }
 
+    public static class CallSetupException extends Exception {
+        private int mRetryOverride = -1;
+
+        CallSetupException (int retryOverride) {
+            mRetryOverride = retryOverride;
+        }
+
+        public int getRetryOverride() {
+            return mRetryOverride;
+        }
+    }
+
     // ***** Event codes for driving the state machine
     protected static final int BASE = Protocol.BASE_DATA_CONNECTION;
     protected static final int EVENT_CONNECT = BASE + 0;
@@ -205,6 +217,7 @@ public abstract class DataConnection extends StateMachine {
     protected long createTime;
     protected long lastFailTime;
     protected FailCause lastFailCause;
+    protected int mRetryOverride = -1;
     protected static final String NULL_IP = "0.0.0.0";
     private int mRefCount;
     Object userData;
@@ -288,7 +301,8 @@ public abstract class DataConnection extends StateMachine {
         } else {
             lastFailCause = cause;
             lastFailTime = timeStamp;
-            AsyncResult.forMessage(connectionCompletedMsg, cause, new Exception());
+            AsyncResult.forMessage(connectionCompletedMsg, cause,
+                                   new CallSetupException(mRetryOverride));
         }
         if (DBG) log("notifyConnectionCompleted at " + timeStamp + " cause=" + cause);
 
@@ -430,6 +444,7 @@ public abstract class DataConnection extends StateMachine {
         createTime = -1;
         lastFailTime = -1;
         lastFailCause = FailCause.NONE;
+        mRetryOverride = -1;
         mRefCount = 0;
 
         mLinkProperties = new LinkProperties();
@@ -480,6 +495,15 @@ public abstract class DataConnection extends StateMachine {
         }
 
         return result;
+    }
+
+    private int getSuggestedRetryTime(AsyncResult ar) {
+        int retry = -1;
+        if (ar.exception == null) {
+            DataCallState response = (DataCallState) ar.result;
+            retry =  response.suggestedRetryTime;
+        }
+        return retry;
     }
 
     private DataCallState.SetupResult setLinkProperties(DataCallState response,
@@ -685,10 +709,12 @@ public abstract class DataConnection extends StateMachine {
         private FailCause mFailCause = null;
         private DisconnectParams mDisconnectParams = null;
 
-        public void setEnterNotificationParams(ConnectionParams cp, FailCause cause) {
+        public void setEnterNotificationParams(ConnectionParams cp, FailCause cause,
+                                               int retryOverride) {
             if (VDBG) log("DcInactiveState: setEnterNoticationParams cp,cause");
             mConnectionParams = cp;
             mFailCause = cause;
+            mRetryOverride = retryOverride;
         }
 
         public void setEnterNotificationParams(DisconnectParams dp) {
@@ -808,7 +834,7 @@ public abstract class DataConnection extends StateMachine {
                             // Vendor ril rejected the command and didn't connect.
                             // Transition to inactive but send notifications after
                             // we've entered the mInactive state.
-                            mInactiveState.setEnterNotificationParams(cp, result.mFailCause);
+                            mInactiveState.setEnterNotificationParams(cp, result.mFailCause, -1);
                             transitionTo(mInactiveState);
                             break;
                         case ERR_UnacceptableParameter:
@@ -823,7 +849,8 @@ public abstract class DataConnection extends StateMachine {
                             break;
                         case ERR_RilError:
                             // Request failed and mFailCause has the reason
-                            mInactiveState.setEnterNotificationParams(cp, result.mFailCause);
+                            mInactiveState.setEnterNotificationParams(cp, result.mFailCause,
+                                                                      getSuggestedRetryTime(ar));
                             transitionTo(mInactiveState);
                             break;
                         case ERR_Stale:
@@ -848,8 +875,8 @@ public abstract class DataConnection extends StateMachine {
                         }
                         // Transition to inactive but send notifications after
                         // we've entered the mInactive state.
-                         mInactiveState.setEnterNotificationParams(cp, cause);
-                         transitionTo(mInactiveState);
+                        mInactiveState.setEnterNotificationParams(cp, cause, -1);
+                        transitionTo(mInactiveState);
                     } else {
                         if (DBG) {
                             log("DcActivatingState EVENT_GET_LAST_FAIL_DONE is stale cp.tag="
@@ -1016,7 +1043,7 @@ public abstract class DataConnection extends StateMachine {
                         // Transition to inactive but send notifications after
                         // we've entered the mInactive state.
                         mInactiveState.setEnterNotificationParams(cp,
-                                FailCause.UNACCEPTABLE_NETWORK_PARAMETER);
+                                FailCause.UNACCEPTABLE_NETWORK_PARAMETER, -1);
                         transitionTo(mInactiveState);
                     } else {
                         if (DBG) {

@@ -47,6 +47,7 @@ public class DataCallState {
     public String [] addresses = new String[0];
     public String [] dnses = new String[0];
     public String[] gateways = new String[0];
+    public int suggestedRetryTime = -1;
 
     /**
      * Class returned by onSetupConnectionCompleted.
@@ -77,6 +78,7 @@ public class DataCallState {
         sb.append("DataCallState: {")
            .append("version=").append(version)
            .append(" status=").append(status)
+           .append(" retry=").append(suggestedRetryTime)
            .append(" cid=").append(cid)
            .append(" active=").append(active)
            .append(" type=").append(type)
