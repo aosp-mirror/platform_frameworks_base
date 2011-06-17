@@ -606,9 +606,9 @@ public class Allocation extends BaseObj {
      */
     public void copy1DRangeFrom(int off, int count, Allocation data, int dataOff) {
         mRS.nAllocationData2D(getID(), off, 0,
-                              0, Type.CubemapFace.POSITVE_X.mID,
+                              0, Type.CubemapFace.POSITIVE_X.mID,
                               count, 1, data.getID(), dataOff, 0,
-                              0, Type.CubemapFace.POSITVE_X.mID);
+                              0, Type.CubemapFace.POSITIVE_X.mID);
     }
 
     private void validate2DRange(int xoff, int yoff, int w, int h) {
@@ -675,9 +675,9 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
         mRS.nAllocationData2D(getID(), xoff, yoff,
-                              0, Type.CubemapFace.POSITVE_X.mID,
+                              0, Type.CubemapFace.POSITIVE_X.mID,
                               w, h, data.getID(), dataXoff, dataYoff,
-                              0, Type.CubemapFace.POSITVE_X.mID);
+                              0, Type.CubemapFace.POSITIVE_X.mID);
     }
 
     /**
@@ -1048,15 +1048,15 @@ public class Allocation extends BaseObj {
         Allocation cubemap = Allocation.createTyped(rs, t, mips, usage);
 
         AllocationAdapter adapter = AllocationAdapter.create2D(rs, cubemap);
-        adapter.setFace(Type.CubemapFace.POSITVE_X);
+        adapter.setFace(Type.CubemapFace.POSITIVE_X);
         adapter.copyFrom(xpos);
         adapter.setFace(Type.CubemapFace.NEGATIVE_X);
         adapter.copyFrom(xneg);
-        adapter.setFace(Type.CubemapFace.POSITVE_Y);
+        adapter.setFace(Type.CubemapFace.POSITIVE_Y);
         adapter.copyFrom(ypos);
         adapter.setFace(Type.CubemapFace.NEGATIVE_Y);
         adapter.copyFrom(yneg);
-        adapter.setFace(Type.CubemapFace.POSITVE_Z);
+        adapter.setFace(Type.CubemapFace.POSITIVE_Z);
         adapter.copyFrom(zpos);
         adapter.setFace(Type.CubemapFace.NEGATIVE_Z);
         adapter.copyFrom(zneg);
