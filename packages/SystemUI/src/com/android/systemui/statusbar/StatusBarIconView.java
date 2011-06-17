@@ -29,6 +29,8 @@ import android.view.View;
 import android.view.ViewDebug;
 import android.widget.FrameLayout;
 
+import java.text.NumberFormat;
+
 import com.android.internal.statusbar.StatusBarIcon;
 
 import com.android.systemui.R;
@@ -180,7 +182,18 @@ public class StatusBarIconView extends AnimatedImageView {
     }
 
     void placeNumber() {
-        final String str = mNumberText = Integer.toString(mIcon.number);
+        final String str;
+        final int tooBig = mContext.getResources().getInteger(
+                android.R.integer.status_bar_notification_info_maxnum);
+        if (mIcon.number > tooBig) {
+            str = mContext.getResources().getString(
+                        android.R.string.status_bar_notification_info_overflow);
+        } else {
+            NumberFormat f = NumberFormat.getIntegerInstance();
+            str = f.format(mIcon.number);
+        }
+        mNumberText = str;
+
         final int w = getWidth();
         final int h = getHeight();
         final Rect r = new Rect();
