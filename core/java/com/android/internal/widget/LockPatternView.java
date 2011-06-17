@@ -603,178 +603,20 @@ public class LockPatternView extends View {
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent motionEvent) {
+    public boolean onTouchEvent(MotionEvent event) {
         if (!mInputEnabled || !isEnabled()) {
             return false;
         }
 
-        final float x = motionEvent.getX();
-        final float y = motionEvent.getY();
-        Cell hitCell;
-        switch(motionEvent.getAction()) {
+        switch(event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                resetPattern();
-                hitCell = detectAndAddHit(x, y);
-                if (hitCell != null && mOnPatternListener != null) {
-                    mPatternInProgress = true;
-                    mPatternDisplayMode = DisplayMode.Correct;
-                    mOnPatternListener.onPatternStart();
-                } else if (mOnPatternListener != null) {
-                    mPatternInProgress = false;
-                    mOnPatternListener.onPatternCleared();
-                }
-                if (hitCell != null) {
-                    final float startX = getCenterXForColumn(hitCell.column);
-                    final float startY = getCenterYForRow(hitCell.row);
-
-                    final float widthOffset = mSquareWidth / 2f;
-                    final float heightOffset = mSquareHeight / 2f;
-
-                    invalidate((int) (startX - widthOffset), (int) (startY - heightOffset),
-                            (int) (startX + widthOffset), (int) (startY + heightOffset));
-                }
-                mInProgressX = x;
-                mInProgressY = y;
-                if (PROFILE_DRAWING) {
-                    if (!mDrawingProfilingStarted) {
-                        Debug.startMethodTracing("LockPatternDrawing");
-                        mDrawingProfilingStarted = true;
-                    }
-                }
+                handleActionDown(event);
                 return true;
             case MotionEvent.ACTION_UP:
-                // report pattern detected
-                if (!mPattern.isEmpty() && mOnPatternListener != null) {
-                    mPatternInProgress = false;
-                    mOnPatternListener.onPatternDetected(mPattern);
-                    invalidate();
-                }
-                if (PROFILE_DRAWING) {
-                    if (mDrawingProfilingStarted) {
-                        Debug.stopMethodTracing();
-                        mDrawingProfilingStarted = false;
-                    }
-                }
+                handleActionUp(event);
                 return true;
             case MotionEvent.ACTION_MOVE:
-                final int patternSizePreHitDetect = mPattern.size();
-                hitCell = detectAndAddHit(x, y);
-                final int patternSize = mPattern.size();
-                if (hitCell != null && (mOnPatternListener != null) && (patternSize == 1)) {
-                    mPatternInProgress = true;
-                    mOnPatternListener.onPatternStart();
-                }
-                // note current x and y for rubber banding of in progress
-                // patterns
-                final float dx = Math.abs(x - mInProgressX);
-                final float dy = Math.abs(y - mInProgressY);
-                if (dx + dy > mSquareWidth * 0.01f) {
-                    float oldX = mInProgressX;
-                    float oldY = mInProgressY;
-
-                    mInProgressX = x;
-                    mInProgressY = y;
-
-                    if (mPatternInProgress && patternSize > 0) {
-                        final ArrayList<Cell> pattern = mPattern;
-                        final float radius = mSquareWidth * mDiameterFactor * 0.5f;
-
-                        final Cell lastCell = pattern.get(patternSize - 1);
-
-                        float startX = getCenterXForColumn(lastCell.column);
-                        float startY = getCenterYForRow(lastCell.row);
-
-                        float left;
-                        float top;
-                        float right;
-                        float bottom;
-
-                        final Rect invalidateRect = mInvalidate;
-
-                        if (startX < x) {
-                            left = startX;
-                            right = x;
-                        } else {
-                            left = x;
-                            right = startX;
-                        }
-
-                        if (startY < y) {
-                            top = startY;
-                            bottom = y;
-                        } else {
-                            top = y;
-                            bottom = startY;
-                        }
-
-                        // Invalidate between the pattern's last cell and the current location
-                        invalidateRect.set((int) (left - radius), (int) (top - radius),
-                                (int) (right + radius), (int) (bottom + radius));
-
-                        if (startX < oldX) {
-                            left = startX;
-                            right = oldX;
-                        } else {
-                            left = oldX;
-                            right = startX;
-                        }
-
-                        if (startY < oldY) {
-                            top = startY;
-                            bottom = oldY;
-                        } else {
-                            top = oldY;
-                            bottom = startY;
-                        }
-
-                        // Invalidate between the pattern's last cell and the previous location
-                        invalidateRect.union((int) (left - radius), (int) (top - radius),
-                                (int) (right + radius), (int) (bottom + radius));
-
-                        // Invalidate between the pattern's new cell and the pattern's previous cell
-                        if (hitCell != null) {
-                            startX = getCenterXForColumn(hitCell.column);
-                            startY = getCenterYForRow(hitCell.row);
-
-                            if (patternSize >= 2) {
-                                // (re-using hitcell for old cell)
-                                hitCell = pattern.get(patternSize - 1 - (patternSize - patternSizePreHitDetect));
-                                oldX = getCenterXForColumn(hitCell.column);
-                                oldY = getCenterYForRow(hitCell.row);
-
-                                if (startX < oldX) {
-                                    left = startX;
-                                    right = oldX;
-                                } else {
-                                    left = oldX;
-                                    right = startX;
-                                }
-
-                                if (startY < oldY) {
-                                    top = startY;
-                                    bottom = oldY;
-                                } else {
-                                    top = oldY;
-                                    bottom = startY;
-                                }
-                            } else {
-                                left = right = startX;
-                                top = bottom = startY;
-                            }
-
-                            final float widthOffset = mSquareWidth / 2f;
-                            final float heightOffset = mSquareHeight / 2f;
-
-                            invalidateRect.set((int) (left - widthOffset),
-                                    (int) (top - heightOffset), (int) (right + widthOffset),
-                                    (int) (bottom + heightOffset));
-                        }
-
-                        invalidate(invalidateRect);
-                    } else {
-                        invalidate();
-                    }
-                }
+                handleActionMove(event);
                 return true;
             case MotionEvent.ACTION_CANCEL:
                 resetPattern();
@@ -791,6 +633,181 @@ public class LockPatternView extends View {
                 return true;
         }
         return false;
+    }
+
+    private void handleActionMove(MotionEvent event) {
+        // Handle all recent motion events so we don't skip any cells even when the device
+        // is busy...
+        final int historySize = event.getHistorySize();
+        for (int i = 0; i < historySize + 1; i++) {
+            final float x = i < historySize ? event.getHistoricalX(i) : event.getX();
+            final float y = i < historySize ? event.getHistoricalY(i) : event.getY();
+            final int patternSizePreHitDetect = mPattern.size();
+            Cell hitCell = detectAndAddHit(x, y);
+            final int patternSize = mPattern.size();
+            if (hitCell != null && (mOnPatternListener != null) && (patternSize == 1)) {
+                mPatternInProgress = true;
+                mOnPatternListener.onPatternStart();
+            }
+            // note current x and y for rubber banding of in progress patterns
+            final float dx = Math.abs(x - mInProgressX);
+            final float dy = Math.abs(y - mInProgressY);
+            if (dx + dy > mSquareWidth * 0.01f) {
+                float oldX = mInProgressX;
+                float oldY = mInProgressY;
+
+                mInProgressX = x;
+                mInProgressY = y;
+
+                if (mPatternInProgress && patternSize > 0) {
+                    final ArrayList<Cell> pattern = mPattern;
+                    final float radius = mSquareWidth * mDiameterFactor * 0.5f;
+
+                    final Cell lastCell = pattern.get(patternSize - 1);
+
+                    float startX = getCenterXForColumn(lastCell.column);
+                    float startY = getCenterYForRow(lastCell.row);
+
+                    float left;
+                    float top;
+                    float right;
+                    float bottom;
+
+                    final Rect invalidateRect = mInvalidate;
+
+                    if (startX < x) {
+                        left = startX;
+                        right = x;
+                    } else {
+                        left = x;
+                        right = startX;
+                    }
+
+                    if (startY < y) {
+                        top = startY;
+                        bottom = y;
+                    } else {
+                        top = y;
+                        bottom = startY;
+                    }
+
+                    // Invalidate between the pattern's last cell and the current location
+                    invalidateRect.set((int) (left - radius), (int) (top - radius),
+                            (int) (right + radius), (int) (bottom + radius));
+
+                    if (startX < oldX) {
+                        left = startX;
+                        right = oldX;
+                    } else {
+                        left = oldX;
+                        right = startX;
+                    }
+
+                    if (startY < oldY) {
+                        top = startY;
+                        bottom = oldY;
+                    } else {
+                        top = oldY;
+                        bottom = startY;
+                    }
+
+                    // Invalidate between the pattern's last cell and the previous location
+                    invalidateRect.union((int) (left - radius), (int) (top - radius),
+                            (int) (right + radius), (int) (bottom + radius));
+
+                    // Invalidate between the pattern's new cell and the pattern's previous cell
+                    if (hitCell != null) {
+                        startX = getCenterXForColumn(hitCell.column);
+                        startY = getCenterYForRow(hitCell.row);
+
+                        if (patternSize >= 2) {
+                            // (re-using hitcell for old cell)
+                            hitCell = pattern.get(patternSize - 1 - (patternSize - patternSizePreHitDetect));
+                            oldX = getCenterXForColumn(hitCell.column);
+                            oldY = getCenterYForRow(hitCell.row);
+
+                            if (startX < oldX) {
+                                left = startX;
+                                right = oldX;
+                            } else {
+                                left = oldX;
+                                right = startX;
+                            }
+
+                            if (startY < oldY) {
+                                top = startY;
+                                bottom = oldY;
+                            } else {
+                                top = oldY;
+                                bottom = startY;
+                            }
+                        } else {
+                            left = right = startX;
+                            top = bottom = startY;
+                        }
+
+                        final float widthOffset = mSquareWidth / 2f;
+                        final float heightOffset = mSquareHeight / 2f;
+
+                        invalidateRect.set((int) (left - widthOffset),
+                                (int) (top - heightOffset), (int) (right + widthOffset),
+                                (int) (bottom + heightOffset));
+                    }
+
+                    invalidate(invalidateRect);
+                } else {
+                    invalidate();
+                }
+            }
+        }
+    }
+
+    private void handleActionUp(MotionEvent event) {
+        // report pattern detected
+        if (!mPattern.isEmpty() && mOnPatternListener != null) {
+            mPatternInProgress = false;
+            mOnPatternListener.onPatternDetected(mPattern);
+            invalidate();
+        }
+        if (PROFILE_DRAWING) {
+            if (mDrawingProfilingStarted) {
+                Debug.stopMethodTracing();
+                mDrawingProfilingStarted = false;
+            }
+        }
+    }
+
+    private void handleActionDown(MotionEvent event) {
+        resetPattern();
+        final float x = event.getX();
+        final float y = event.getY();
+        final Cell hitCell = detectAndAddHit(x, y);
+        if (hitCell != null && mOnPatternListener != null) {
+            mPatternInProgress = true;
+            mPatternDisplayMode = DisplayMode.Correct;
+            mOnPatternListener.onPatternStart();
+        } else if (mOnPatternListener != null) {
+            mPatternInProgress = false;
+            mOnPatternListener.onPatternCleared();
+        }
+        if (hitCell != null) {
+            final float startX = getCenterXForColumn(hitCell.column);
+            final float startY = getCenterYForRow(hitCell.row);
+
+            final float widthOffset = mSquareWidth / 2f;
+            final float heightOffset = mSquareHeight / 2f;
+
+            invalidate((int) (startX - widthOffset), (int) (startY - heightOffset),
+                    (int) (startX + widthOffset), (int) (startY + heightOffset));
+        }
+        mInProgressX = x;
+        mInProgressY = y;
+        if (PROFILE_DRAWING) {
+            if (!mDrawingProfilingStarted) {
+                Debug.startMethodTracing("LockPatternDrawing");
+                mDrawingProfilingStarted = true;
+            }
+        }
     }
 
     private float getCenterXForColumn(int column) {
