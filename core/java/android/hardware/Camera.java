@@ -216,7 +216,9 @@ public class Camera {
      *     {@link #getNumberOfCameras()}-1.
      * @return a new Camera object, connected, locked and ready for use.
      * @throws RuntimeException if connection to the camera service fails (for
-     *     example, if the camera is in use by another process).
+     *     example, if the camera is in use by another process or device policy
+     *     manager has disabled the camera).
+     * @see android.app.admin.DevicePolicyManager#getCameraDisabled(android.content.ComponentName)
      */
     public static Camera open(int cameraId) {
         return new Camera(cameraId);
