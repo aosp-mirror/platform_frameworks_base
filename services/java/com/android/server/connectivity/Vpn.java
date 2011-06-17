@@ -18,7 +18,6 @@ package com.android.server.connectivity;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -64,29 +63,40 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
      * @return The name of the current prepared package.
      */
     public synchronized String prepare(String packageName) {
-
-        // TODO: Check if the caller is VpnDialogs.
-
+        // Return the current prepared package if the new one is null.
         if (packageName == null) {
             return mPackageName;
         }
 
-        // Check the permission of the given application.
+        // Check the permission of the caller.
         PackageManager pm = mContext.getPackageManager();
-        if (pm.checkPermission(VPN, packageName) != PackageManager.PERMISSION_GRANTED) {
+        VpnConfig.enforceCallingPackage(pm.getNameForUid(Binder.getCallingUid()));
+
+        // Check the permission of the given package.
+        if (packageName.isEmpty()) {
+            packageName = null;
+        } else if (pm.checkPermission(VPN, packageName) != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException(packageName + " does not have " + VPN);
         }
 
         // Reset the interface and hide the notification.
         if (mInterfaceName != null) {
             nativeReset(mInterfaceName);
-            mInterfaceName = null;
+            mCallback.restore();
             hideNotification();
-            // TODO: Send out a broadcast.
+            mInterfaceName = null;
         }
 
+        // Notify the package being revoked.
+        if (mPackageName != null) {
+            Intent intent = new Intent(VpnConfig.ACTION_VPN_REVOKED);
+            intent.setPackage(mPackageName);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            mContext.sendBroadcast(intent);
+        }
+
+        Log.i(TAG, "Switched from " + mPackageName + " to " + packageName);
         mPackageName = packageName;
-        Log.i(TAG, "Prepared for " + packageName);
         return mPackageName;
     }
 
@@ -118,10 +128,10 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         try {
             app = pm.getApplicationInfo(mPackageName, 0);
         } catch (Exception e) {
-            throw new SecurityException("Not prepared");
+            return null;
         }
         if (Binder.getCallingUid() != app.uid) {
-            throw new SecurityException("Not prepared");
+            return null;
         }
 
         // Create and configure the interface.
@@ -148,7 +158,9 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         String dnsServers = (config.dnsServers == null) ? "" : config.dnsServers.trim();
         mCallback.override(dnsServers.isEmpty() ? null : dnsServers.split(" "));
 
-        showNotification(pm, app, config.sessionName);
+        config.packageName = mPackageName;
+        config.interfaceName = mInterfaceName;
+        showNotification(pm, app, config);
         return descriptor;
     }
 
@@ -169,7 +181,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
     }
 
-    private void showNotification(PackageManager pm, ApplicationInfo app, String sessionName) {
+    private void showNotification(PackageManager pm, ApplicationInfo app, VpnConfig config) {
         NotificationManager nm = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -190,20 +202,9 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             // Load the label.
             String label = app.loadLabel(pm).toString();
 
-            // Build the intent.
-            // TODO: move these into VpnBuilder.
-            Intent intent = new Intent();
-            intent.setClassName("com.android.vpndialogs",
-                    "com.android.vpndialogs.ManageDialog");
-            intent.putExtra("packageName", mPackageName);
-            intent.putExtra("interfaceName", mInterfaceName);
-            intent.putExtra("session", sessionName);
-            intent.putExtra("startTime", android.os.SystemClock.elapsedRealtime());
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-
             // Build the notification.
-            String text = (sessionName == null) ? mContext.getString(R.string.vpn_text) :
-                    mContext.getString(R.string.vpn_text_long, sessionName);
+            String text = (config.sessionName == null) ? mContext.getString(R.string.vpn_text) :
+                    mContext.getString(R.string.vpn_text_long, config.sessionName);
             long identity = Binder.clearCallingIdentity();
             Notification notification = new Notification.Builder(mContext)
                     .setSmallIcon(R.drawable.vpn_connected)
@@ -211,7 +212,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     .setTicker(mContext.getString(R.string.vpn_ticker, label))
                     .setContentTitle(mContext.getString(R.string.vpn_title, label))
                     .setContentText(text)
-                    .setContentIntent(PendingIntent.getActivity(mContext, 0, intent, 0))
+                    .setContentIntent(VpnConfig.getIntentForNotification(mContext, config))
                     .setDefaults(Notification.DEFAULT_ALL)
                     .setOngoing(true)
                     .getNotification();

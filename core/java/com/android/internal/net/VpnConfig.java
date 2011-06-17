@@ -16,8 +16,12 @@
 
 package com.android.internal.net;
 
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 
 /**
  * A simple container used to carry information in VpnBuilder, VpnDialogs,
@@ -26,6 +30,30 @@ import android.os.Parcelable;
  * @hide
  */
 public class VpnConfig implements Parcelable {
+
+    public static final String ACTION_VPN_REVOKED = "android.net.vpn.action.REVOKED";
+
+    public static void enforceCallingPackage(String packageName) {
+        if (!"com.android.vpndialogs".equals(packageName)) {
+            throw new SecurityException("Unauthorized Caller");
+        }
+    }
+
+    public static Intent getIntentForConfirmation() {
+        Intent intent = new Intent();
+        intent.setClassName("com.android.vpndialogs", "com.android.vpndialogs.ConfirmDialog");
+        return intent;
+    }
+
+    public static PendingIntent getIntentForNotification(Context context, VpnConfig config) {
+        config.startTime = SystemClock.elapsedRealtime();
+        Intent intent = new Intent();
+        intent.setClassName("com.android.vpndialogs", "com.android.vpndialogs.ManageDialog");
+        intent.putExtra("config", config);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY |
+                Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+    }
 
     public String packageName;
     public String sessionName;
