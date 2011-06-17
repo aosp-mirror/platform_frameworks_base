@@ -19,7 +19,7 @@ package com.android.server;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.net.ConnectivityManager.isNetworkTypeValid;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
-import static android.net.NetworkPolicyManager.RULE_REJECT_PAID;
+import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 
 import android.bluetooth.BluetoothTetheringDataTracker;
 import android.content.ContentResolver;
@@ -71,6 +71,7 @@ import com.android.server.connectivity.Tethering;
 import com.android.server.connectivity.Vpn;
 
 import com.google.android.collect.Lists;
+import com.google.android.collect.Sets;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -78,8 +79,10 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -108,8 +111,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private Vpn mVpn;
 
+    /** Lock around {@link #mUidRules} and {@link #mMeteredIfaces}. */
+    private Object mRulesLock = new Object();
     /** Currently active network rules by UID. */
     private SparseIntArray mUidRules = new SparseIntArray();
+    /** Set of ifaces that are costly. */
+    private HashSet<String> mMeteredIfaces = Sets.newHashSet();
 
     /**
      * Sometimes we want to refer to the individual network state
@@ -570,31 +577,35 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     /**
-     * Check if UID is blocked from using the given {@link NetworkInfo}.
+     * Check if UID should be blocked from using the network represented by the
+     * given {@link NetworkStateTracker}.
      */
-    private boolean isNetworkBlocked(NetworkInfo info, int uid) {
-        synchronized (mUidRules) {
-            // TODO: expand definition of "paid" network to cover tethered or
-            // paid hotspot use cases.
-            final boolean networkIsPaid = info.getType() != ConnectivityManager.TYPE_WIFI;
-            final int uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
+    private boolean isNetworkBlocked(NetworkStateTracker tracker, int uid) {
+        final String iface = tracker.getLinkProperties().getInterfaceName();
 
-            if (networkIsPaid && (uidRules & RULE_REJECT_PAID) != 0) {
-                return true;
-            }
-
-            // no restrictive rules; network is visible
-            return false;
+        final boolean networkCostly;
+        final int uidRules;
+        synchronized (mRulesLock) {
+            networkCostly = mMeteredIfaces.contains(iface);
+            uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
         }
+
+        if (networkCostly && (uidRules & RULE_REJECT_METERED) != 0) {
+            return true;
+        }
+
+        // no restrictive rules; network is visible
+        return false;
     }
 
     /**
-     * Return a filtered version of the given {@link NetworkInfo}, potentially
-     * marked {@link DetailedState#BLOCKED} based on
-     * {@link #isNetworkBlocked(NetworkInfo, int)}.
+     * Return a filtered {@link NetworkInfo}, potentially marked
+     * {@link DetailedState#BLOCKED} based on
+     * {@link #isNetworkBlocked(NetworkStateTracker, int)}.
      */
-    private NetworkInfo filterNetworkInfo(NetworkInfo info, int uid) {
-        if (isNetworkBlocked(info, uid)) {
+    private NetworkInfo getFilteredNetworkInfo(NetworkStateTracker tracker, int uid) {
+        NetworkInfo info = tracker.getNetworkInfo();
+        if (isNetworkBlocked(tracker, uid)) {
             // network is blocked; clone and override state
             info = new NetworkInfo(info);
             info.setDetailedState(DetailedState.BLOCKED, null, null);
@@ -634,7 +645,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (isNetworkTypeValid(networkType)) {
             final NetworkStateTracker tracker = mNetTrackers[networkType];
             if (tracker != null) {
-                info = filterNetworkInfo(tracker.getNetworkInfo(), uid);
+                info = getFilteredNetworkInfo(tracker, uid);
             }
         }
         return info;
@@ -645,10 +656,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
         final ArrayList<NetworkInfo> result = Lists.newArrayList();
-        synchronized (mUidRules) {
+        synchronized (mRulesLock) {
             for (NetworkStateTracker tracker : mNetTrackers) {
                 if (tracker != null) {
-                    result.add(filterNetworkInfo(tracker.getNetworkInfo(), uid));
+                    result.add(getFilteredNetworkInfo(tracker, uid));
                 }
             }
         }
@@ -685,10 +696,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceAccessPermission();
         final int uid = Binder.getCallingUid();
         final ArrayList<NetworkState> result = Lists.newArrayList();
-        synchronized (mUidRules) {
+        synchronized (mRulesLock) {
             for (NetworkStateTracker tracker : mNetTrackers) {
                 if (tracker != null) {
-                    final NetworkInfo info = filterNetworkInfo(tracker.getNetworkInfo(), uid);
+                    final NetworkInfo info = getFilteredNetworkInfo(tracker, uid);
                     result.add(new NetworkState(
                             info, tracker.getLinkProperties(), tracker.getLinkCapabilities()));
                 }
@@ -1139,15 +1150,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private INetworkPolicyListener mPolicyListener = new INetworkPolicyListener.Stub() {
         @Override
-        public void onRulesChanged(int uid, int uidRules) {
+        public void onUidRulesChanged(int uid, int uidRules) {
             // only someone like NPMS should only be calling us
             mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
             if (LOGD_RULES) {
-                Slog.d(TAG, "onRulesChanged(uid=" + uid + ", uidRules=" + uidRules + ")");
+                Slog.d(TAG, "onUidRulesChanged(uid=" + uid + ", uidRules=" + uidRules + ")");
             }
 
-            synchronized (mUidRules) {
+            synchronized (mRulesLock) {
                 // skip update when we've already applied rules
                 final int oldRules = mUidRules.get(uid, RULE_ALLOW_ALL);
                 if (oldRules == uidRules) return;
@@ -1157,6 +1168,24 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
             // TODO: dispatch into NMS to push rules towards kernel module
             // TODO: notify UID when it has requested targeted updates
+        }
+
+        @Override
+        public void onMeteredIfacesChanged(String[] meteredIfaces) {
+            // only someone like NPMS should only be calling us
+            mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+            if (LOGD_RULES) {
+                Slog.d(TAG,
+                        "onMeteredIfacesChanged(ifaces=" + Arrays.toString(meteredIfaces) + ")");
+            }
+
+            synchronized (mRulesLock) {
+                mMeteredIfaces.clear();
+                for (String iface : meteredIfaces) {
+                    mMeteredIfaces.add(iface);
+                }
+            }
         }
     };
 

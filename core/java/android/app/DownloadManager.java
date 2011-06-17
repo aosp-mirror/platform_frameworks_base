@@ -226,6 +226,14 @@ public class DownloadManager {
     public final static int ERROR_FILE_ALREADY_EXISTS = 1009;
 
     /**
+     * Value of {@link #COLUMN_REASON} when the download has failed because of
+     * {@link NetworkPolicyManager} controls on the requesting application.
+     *
+     * @hide
+     */
+    public final static int ERROR_BLOCKED = 1010;
+
+    /**
      * Value of {@link #COLUMN_REASON} when the download is paused because some network error
      * occurred and the download manager is waiting before retrying the request.
      */
@@ -247,14 +255,6 @@ public class DownloadManager {
      * Value of {@link #COLUMN_REASON} when the download is paused for some other reason.
      */
     public final static int PAUSED_UNKNOWN = 4;
-
-    /**
-     * Value of {@link #COLUMN_REASON} when the download has been paused because
-     * of {@link NetworkPolicyManager} controls on the requesting application.
-     *
-     * @hide
-     */
-    public final static int PAUSED_BY_POLICY = 5;
 
     /**
      * Broadcast intent action sent by the download manager when a download completes.
@@ -804,7 +804,6 @@ public class DownloadManager {
                     parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_TO_RETRY));
                     parts.add(statusClause("=", Downloads.Impl.STATUS_WAITING_FOR_NETWORK));
                     parts.add(statusClause("=", Downloads.Impl.STATUS_QUEUED_FOR_WIFI));
-                    parts.add(statusClause("=", Downloads.Impl.STATUS_PAUSED_BY_POLICY));
                 }
                 if ((mStatusFlags & STATUS_SUCCESSFUL) != 0) {
                     parts.add(statusClause("=", Downloads.Impl.STATUS_SUCCESS));
@@ -1275,9 +1274,6 @@ public class DownloadManager {
                 case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
                     return PAUSED_QUEUED_FOR_WIFI;
 
-                case Downloads.Impl.STATUS_PAUSED_BY_POLICY:
-                    return PAUSED_BY_POLICY;
-
                 default:
                     return PAUSED_UNKNOWN;
             }
@@ -1316,6 +1312,9 @@ public class DownloadManager {
                 case Downloads.Impl.STATUS_FILE_ALREADY_EXISTS_ERROR:
                     return ERROR_FILE_ALREADY_EXISTS;
 
+                case Downloads.Impl.STATUS_BLOCKED:
+                    return ERROR_BLOCKED;
+
                 default:
                     return ERROR_UNKNOWN;
             }
@@ -1333,7 +1332,6 @@ public class DownloadManager {
                 case Downloads.Impl.STATUS_WAITING_TO_RETRY:
                 case Downloads.Impl.STATUS_WAITING_FOR_NETWORK:
                 case Downloads.Impl.STATUS_QUEUED_FOR_WIFI:
-                case Downloads.Impl.STATUS_PAUSED_BY_POLICY:
                     return STATUS_PAUSED;
 
                 case Downloads.Impl.STATUS_SUCCESS:
