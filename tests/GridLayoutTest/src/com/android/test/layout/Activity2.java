@@ -36,7 +36,7 @@ public class Activity2 extends Activity {
     public static View create(Context context) {
         GridLayout vg = new GridLayout(context);
         vg.setUseDefaultMargins(true);
-        vg.setMarginsIncludedInAlignment(false);
+        vg.setAlignmentMode(ALIGN_BOUNDS);
 
         Group row1 = new Group(1, CENTER);
         Group row2 = new Group(2, CENTER);

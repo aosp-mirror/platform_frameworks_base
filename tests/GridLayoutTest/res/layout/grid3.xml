@@ -21,7 +21,7 @@
         android:layout_height="match_parent"
 
         android:useDefaultMargins="true"
-        android:marginsIncludedInAlignment="false"
+        android:alignmentMode="alignBounds"
 
         android:columnCount="4"
         >

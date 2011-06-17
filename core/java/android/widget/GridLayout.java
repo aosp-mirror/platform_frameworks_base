@@ -135,11 +135,44 @@ public class GridLayout extends ViewGroup {
      */
     public static final int UNDEFINED = Integer.MIN_VALUE;
 
+    /**
+     * This constant is an {@link #setAlignmentMode(int) alignmentMode}.
+     * When the {@code alignmentMode} is set to {@link #ALIGN_BOUNDS}, alignment
+     * is made between the edges of each component's raw
+     * view boundary: i.e. the area delimited by the component's:
+     * {@link android.view.View#getTop() top},
+     * {@link android.view.View#getLeft() left},
+     * {@link android.view.View#getBottom() bottom} and
+     * {@link android.view.View#getRight() right} properties.
+     * <p>
+     * For example, when {@code GridLayout} is in {@link #ALIGN_BOUNDS} mode,
+     * children that belong to a row group that uses {@link #TOP} alignment will
+     * all return the same value when their {@link android.view.View#getTop()}
+     * method is called.
+     *
+     * @see #setAlignmentMode(int)
+     */
+    public static final int ALIGN_BOUNDS = 0;
+
+    /**
+     * This constant is an {@link #setAlignmentMode(int) alignmentMode}.
+     * When the {@code alignmentMode} is set to {@link #ALIGN_MARGINS},
+     * the bounds of each view are extended outwards, according
+     * to their margins, before the edges of the resulting rectangle are aligned.
+     * <p>
+     * For example, when {@code GridLayout} is in {@link #ALIGN_MARGINS} mode,
+     * the quantity {@code top - layoutParams.topMargin} is the same for all children that
+     * belong to a row group that uses {@link #TOP} alignment.
+     *
+     * @see #setAlignmentMode(int)
+     */
+    public static final int ALIGN_MARGINS = 1;
+
     // Misc constants
 
     private static final String TAG = GridLayout.class.getName();
     private static final boolean DEBUG = false;
-    private static final Paint GRID_PAINT = new Paint();
+    private static Paint GRID_PAINT;
     private static final double GOLDEN_RATIO = (1 + Math.sqrt(5)) / 2;
     private static final int MIN = 0;
     private static final int PRF = 1;
@@ -151,7 +184,7 @@ public class GridLayout extends ViewGroup {
     private static final int DEFAULT_COUNT = UNDEFINED;
     private static final boolean DEFAULT_USE_DEFAULT_MARGINS = false;
     private static final boolean DEFAULT_ORDER_PRESERVED = false;
-    private static final boolean DEFAULT_MARGINS_INCLUDED = true;
+    private static final int DEFAULT_ALIGNMENT_MODE = ALIGN_MARGINS;
     // todo remove this
     private static final int DEFAULT_CONTAINER_MARGIN = 20;
 
@@ -161,14 +194,17 @@ public class GridLayout extends ViewGroup {
     private static final int ROW_COUNT = styleable.GridLayout_rowCount;
     private static final int COLUMN_COUNT = styleable.GridLayout_columnCount;
     private static final int USE_DEFAULT_MARGINS = styleable.GridLayout_useDefaultMargins;
-    private static final int MARGINS_INCLUDED = styleable.GridLayout_marginsIncludedInAlignment;
+    private static final int ALIGNMENT_MODE = styleable.GridLayout_alignmentMode;
     private static final int ROW_ORDER_PRESERVED = styleable.GridLayout_rowOrderPreserved;
     private static final int COLUMN_ORDER_PRESERVED = styleable.GridLayout_columnOrderPreserved;
 
     // Static initialization
 
     static {
-        GRID_PAINT.setColor(Color.argb(50, 255, 255, 255));
+        if (DEBUG) {
+            GRID_PAINT = new Paint();
+            GRID_PAINT.setColor(Color.argb(50, 255, 255, 255));
+        }
     }
 
     // Instance variables
@@ -178,7 +214,7 @@ public class GridLayout extends ViewGroup {
     private boolean mLayoutParamsValid = false;
     private int mOrientation = DEFAULT_ORIENTATION;
     private boolean mUseDefaultMargins = DEFAULT_USE_DEFAULT_MARGINS;
-    private boolean mMarginsIncludedInAlignment = DEFAULT_MARGINS_INCLUDED;
+    private int mAlignmentMode = DEFAULT_ALIGNMENT_MODE;
     private int mDefaultGravity = Gravity.NO_GRAVITY;
 
     /* package */ boolean accommodateBothMinAndMax = false;
@@ -213,11 +249,11 @@ public class GridLayout extends ViewGroup {
     private void processAttributes(Context context, AttributeSet attrs) {
         TypedArray a = context.obtainStyledAttributes(attrs, styleable.GridLayout);
         try {
-            setRowCount(a.getInteger(ROW_COUNT, DEFAULT_COUNT));
-            setColumnCount(a.getInteger(COLUMN_COUNT, DEFAULT_COUNT));
-            mOrientation = a.getInteger(ORIENTATION, DEFAULT_ORIENTATION);
+            setRowCount(a.getInt(ROW_COUNT, DEFAULT_COUNT));
+            setColumnCount(a.getInt(COLUMN_COUNT, DEFAULT_COUNT));
+            mOrientation = a.getInt(ORIENTATION, DEFAULT_ORIENTATION);
             mUseDefaultMargins = a.getBoolean(USE_DEFAULT_MARGINS, DEFAULT_USE_DEFAULT_MARGINS);
-            mMarginsIncludedInAlignment = a.getBoolean(MARGINS_INCLUDED, DEFAULT_MARGINS_INCLUDED);
+            mAlignmentMode = a.getInt(ALIGNMENT_MODE, DEFAULT_ALIGNMENT_MODE);
             setRowOrderPreserved(a.getBoolean(ROW_ORDER_PRESERVED, DEFAULT_ORDER_PRESERVED));
             setColumnOrderPreserved(a.getBoolean(COLUMN_ORDER_PRESERVED, DEFAULT_ORDER_PRESERVED));
         } finally {
@@ -347,15 +383,15 @@ public class GridLayout extends ViewGroup {
      * When {@code false}, the default value of all margins is zero.
      * <p>
      * When setting to {@code true}, consider setting the value of the
-     * {@link #setMarginsIncludedInAlignment(boolean) marginsIncludedInAlignment}
-     * property to {@code false}.
+     * {@link #setAlignmentMode(int) alignmentMode}
+     * property to {@link #ALIGN_BOUNDS}.
      * <p>
      * The default value of this property is {@code false}.
      *
      * @param useDefaultMargins use {@code true} to make GridLayout allocate default margins
      *
      * @see #getUseDefaultMargins()
-     * @see #setMarginsIncludedInAlignment(boolean)
+     * @see #setAlignmentMode(int)
      *
      * @see MarginLayoutParams#leftMargin
      * @see MarginLayoutParams#topMargin
@@ -370,36 +406,38 @@ public class GridLayout extends ViewGroup {
     }
 
     /**
-     * Returns whether GridLayout aligns the edges of the view or the edges
-     * of the larger rectangle created by extending the view by its associated
-     * margins.
+     * Returns the alignment mode.
      *
-     * @see #setMarginsIncludedInAlignment(boolean)
+     * @return the alignment mode; either {@link #ALIGN_BOUNDS} or {@link #ALIGN_MARGINS}
      *
-     * @return {@code true} if alignment is between edges including margins
+     * @see #ALIGN_BOUNDS
+     * @see #ALIGN_MARGINS
      *
-     * @attr ref android.R.styleable#GridLayout_marginsIncludedInAlignment
+     * @see #setAlignmentMode(int)
+     *
+     * @attr ref android.R.styleable#GridLayout_alignmentMode
      */
-    public boolean getMarginsIncludedInAlignment() {
-        return mMarginsIncludedInAlignment;
+    public int getAlignmentMode() {
+        return mAlignmentMode;
     }
 
     /**
-     * When {@code true}, the bounds of a view are extended outwards according to its
-     * margins before the edges of the resulting rectangle are aligned.
-     * When {@code false}, alignment occurs between the bounds of the view - i.e.
-     * {@link #LEFT} alignment means align the left edges of the view.
+     * Sets the alignment mode to be used for all of the alignments between the
+     * children of this container.
      * <p>
-     * The default value of this property is {@code true}.
+     * The default value of this property is {@link #ALIGN_MARGINS}.
      *
-     * @param marginsIncludedInAlignment {@code true} if alignment between edges includes margins
+     * @param alignmentMode either {@link #ALIGN_BOUNDS} or {@link #ALIGN_MARGINS}
      *
-     * @see #getMarginsIncludedInAlignment()
+     * @see #ALIGN_BOUNDS
+     * @see #ALIGN_MARGINS
      *
-     * @attr ref android.R.styleable#GridLayout_marginsIncludedInAlignment
+     * @see #getAlignmentMode()
+     *
+     * @attr ref android.R.styleable#GridLayout_alignmentMode
      */
-    public void setMarginsIncludedInAlignment(boolean marginsIncludedInAlignment) {
-        mMarginsIncludedInAlignment = marginsIncludedInAlignment;
+    public void setAlignmentMode(int alignmentMode) {
+        mAlignmentMode = alignmentMode;
         requestLayout();
     }
 
@@ -781,7 +819,7 @@ public class GridLayout extends ViewGroup {
 
     private int getMeasurementIncludingMargin(View c, boolean horizontal, int measurementType) {
         int result = getMeasurement(c, horizontal, measurementType);
-        if (mMarginsIncludedInAlignment) {
+        if (mAlignmentMode == ALIGN_MARGINS) {
             int leadingMargin = getMargin(c, true, horizontal);
             int trailingMargin = getMargin(c, false, horizontal);
             return result + leadingMargin + trailingMargin;
@@ -856,7 +894,7 @@ public class GridLayout extends ViewGroup {
             int c2ax = protect(hAlign.getAlignmentValue(null, cellWidth - colBounds.size(), type));
             int c2ay = protect(vAlign.getAlignmentValue(null, cellHeight - rowBounds.size(), type));
 
-            if (mMarginsIncludedInAlignment) {
+            if (mAlignmentMode == ALIGN_MARGINS) {
                 int leftMargin = getMargin(view, true, true);
                 int topMargin = getMargin(view, true, false);
                 int rightMargin = getMargin(view, false, true);
@@ -1358,7 +1396,7 @@ public class GridLayout extends ViewGroup {
         private int getLocationIncludingMargin(View view, boolean leading, int index) {
             int location = locations[index];
             int margin;
-            if (!mMarginsIncludedInAlignment) {
+            if (mAlignmentMode != ALIGN_MARGINS) {
                 margin = (leading ? leadingMargins : trailingMargins)[index];
             } else {
                 margin = 0;
@@ -1370,7 +1408,7 @@ public class GridLayout extends ViewGroup {
             Arrays.fill(a, MIN_VALUE);
             a[0] = 0;
             solve(getArcs(), a);
-            if (!mMarginsIncludedInAlignment) {
+            if (mAlignmentMode != ALIGN_MARGINS) {
                 addMargins();
             }
         }
@@ -1751,16 +1789,16 @@ public class GridLayout extends ViewGroup {
         private void init(Context context, AttributeSet attrs, int defaultGravity) {
             TypedArray a = context.obtainStyledAttributes(attrs, styleable.GridLayout_Layout);
             try {
-                int gravity = a.getInteger(GRAVITY, defaultGravity);
+                int gravity = a.getInt(GRAVITY, defaultGravity);
 
-                int column = a.getInteger(COLUMN, DEFAULT_COLUMN);
-                int columnSpan = a.getInteger(COLUMN_SPAN, DEFAULT_SPAN_SIZE);
+                int column = a.getInt(COLUMN, DEFAULT_COLUMN);
+                int columnSpan = a.getInt(COLUMN_SPAN, DEFAULT_SPAN_SIZE);
                 Interval hSpan = new Interval(column, column + columnSpan);
                 this.columnGroup = new Group(hSpan, getColumnAlignment(gravity, width));
                 this.columnWeight = a.getFloat(COLUMN_WEIGHT, getDefaultWeight(width));
 
-                int row = a.getInteger(ROW, DEFAULT_ROW);
-                int rowSpan = a.getInteger(ROW_SPAN, DEFAULT_SPAN_SIZE);
+                int row = a.getInt(ROW, DEFAULT_ROW);
+                int rowSpan = a.getInt(ROW_SPAN, DEFAULT_SPAN_SIZE);
                 Interval vSpan = new Interval(row, row + rowSpan);
                 this.rowGroup = new Group(vSpan, getRowAlignment(gravity, height));
                 this.rowWeight = a.getFloat(ROW_WEIGHT, getDefaultWeight(height));
@@ -2160,7 +2198,7 @@ public class GridLayout extends ViewGroup {
      * An Alignment implementation must define {@link #getAlignmentValue(View, int, int)},
      * to return the appropriate value for the type of alignment being defined.
      * The enclosing algorithms position the children
-     * so that the locations defined by the alignmnet values
+     * so that the locations defined by the alignment values
      * are the same for all of the views in a group.
      * <p>
      *  The GridLayout class defines the most common alignments used in general layout:

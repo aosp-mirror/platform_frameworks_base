@@ -1206,6 +1206,16 @@
         <enum name="vertical" value="1" />
     </attr>
 
+    <!-- Alignment constants. -->
+    <attr name="alignmentMode">
+        <!-- Align the bounds of the children.
+        See {@link android.widget.GridLayout#ALIGN_BOUNDS}. -->
+        <enum name="alignBounds" value="0" />
+        <!-- Align the margins of the children.
+        See {@link android.widget.GridLayout#ALIGN_MARGINS}. -->
+        <enum name="alignMargins" value="1" />
+    </attr>
+
     <!-- ========================== -->
     <!-- Key Codes                  -->
     <!-- ========================== -->
@@ -2541,12 +2551,12 @@
         The default value is false.
         See {@link android.widget.GridLayout#setUseDefaultMargins(boolean)}.-->
         <attr name="useDefaultMargins" format="boolean" />
-        <!-- When set to true, causes alignment to take place between the outer
-        boundary of a view, as defined by its margins. When set to false,
+        <!-- When set to alignMargins, causes alignment to take place between the outer
+        boundary of a view, as defined by its margins. When set to alignBounds,
         causes alignment to take place between the edges of the view.
-        The default is true.
-        See {@link android.widget.GridLayout#setMarginsIncludedInAlignment(boolean)}.-->
-        <attr name="marginsIncludedInAlignment" format="boolean" />
+        The default is alignMargins.
+        See {@link android.widget.GridLayout#setAlignmentMode(int)}.-->
+        <attr name="alignmentMode" />
         <!-- When set to true, forces row boundaries to appear in the same order
         as row indices.
         The default is false.
