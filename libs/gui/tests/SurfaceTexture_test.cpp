@@ -419,6 +419,31 @@ protected:
         ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
     }
 
+    class FrameWaiter : public SurfaceTexture::FrameAvailableListener {
+    public:
+        FrameWaiter():
+                mPendingFrames(0) {
+        }
+
+        void waitForFrame() {
+            Mutex::Autolock lock(mMutex);
+            while (mPendingFrames == 0) {
+                mCondition.wait(mMutex);
+            }
+            mPendingFrames--;
+        }
+
+        virtual void onFrameAvailable() {
+            Mutex::Autolock lock(mMutex);
+            mPendingFrames++;
+            mCondition.signal();
+        }
+
+        int mPendingFrames;
+        Mutex mMutex;
+        Condition mCondition;
+    };
+
     sp<SurfaceTexture> mST;
     sp<SurfaceTextureClient> mSTC;
     sp<ANativeWindow> mANW;
@@ -646,6 +671,157 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferWithCrop) {
         EXPECT_TRUE(checkPixel(16, 26,  82, 255,  35, 255));
         EXPECT_TRUE(checkPixel(46, 51,  82, 255,  35, 255));
     }
+}
+
+// This test is intended to catch synchronization bugs between the CPU-written
+// and GPU-read buffers.
+TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BuffersRepeatedly) {
+    enum { texWidth = 16 };
+    enum { texHeight = 16 };
+    enum { numFrames = 1024 };
+
+    ASSERT_EQ(NO_ERROR, mST->setSynchronousMode(true));
+    ASSERT_EQ(NO_ERROR, mST->setBufferCountServer(2));
+    ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
+            texWidth, texHeight, HAL_PIXEL_FORMAT_YV12));
+    ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
+            GRALLOC_USAGE_SW_WRITE_OFTEN));
+
+    struct TestPixel {
+        int x;
+        int y;
+    };
+    const TestPixel testPixels[] = {
+        {  4, 11 },
+        { 12, 14 },
+        {  7,  2 },
+    };
+    enum {numTestPixels = sizeof(testPixels) / sizeof(testPixels[0])};
+
+    class ProducerThread : public Thread {
+    public:
+        ProducerThread(const sp<ANativeWindow>& anw, const TestPixel* testPixels):
+                mANW(anw),
+                mTestPixels(testPixels) {
+        }
+
+        virtual ~ProducerThread() {
+        }
+
+        virtual bool threadLoop() {
+            for (int i = 0; i < numFrames; i++) {
+                ANativeWindowBuffer* anb;
+                if (mANW->dequeueBuffer(mANW.get(), &anb) != NO_ERROR) {
+                    return false;
+                }
+                if (anb == NULL) {
+                    return false;
+                }
+
+                sp<GraphicBuffer> buf(new GraphicBuffer(anb, false));
+                if (mANW->lockBuffer(mANW.get(), buf->getNativeBuffer())
+                        != NO_ERROR) {
+                    return false;
+                }
+
+                const int yuvTexOffsetY = 0;
+                int stride = buf->getStride();
+                int yuvTexStrideY = stride;
+                int yuvTexOffsetV = yuvTexStrideY * texHeight;
+                int yuvTexStrideV = (yuvTexStrideY/2 + 0xf) & ~0xf;
+                int yuvTexOffsetU = yuvTexOffsetV + yuvTexStrideV * texHeight/2;
+                int yuvTexStrideU = yuvTexStrideV;
+
+                uint8_t* img = NULL;
+                buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
+
+                // Gray out all the test pixels first, so we're more likely to
+                // see a failure if GL is still texturing from the buffer we
+                // just dequeued.
+                for (int j = 0; j < numTestPixels; j++) {
+                    int x = mTestPixels[j].x;
+                    int y = mTestPixels[j].y;
+                    uint8_t value = 128;
+                    img[y*stride + x] = value;
+                }
+
+                // Fill the buffer with gray.
+                for (int y = 0; y < texHeight; y++) {
+                    for (int x = 0; x < texWidth; x++) {
+                        img[yuvTexOffsetY + y*yuvTexStrideY + x] = 128;
+                        img[yuvTexOffsetU + (y/2)*yuvTexStrideU + x/2] = 128;
+                        img[yuvTexOffsetV + (y/2)*yuvTexStrideV + x/2] = 128;
+                    }
+                }
+
+                // Set the test pixels to either white or black.
+                for (int j = 0; j < numTestPixels; j++) {
+                    int x = mTestPixels[j].x;
+                    int y = mTestPixels[j].y;
+                    uint8_t value = 0;
+                    if (j == (i % numTestPixels)) {
+                        value = 255;
+                    }
+                    img[y*stride + x] = value;
+                }
+
+                buf->unlock();
+                if (mANW->queueBuffer(mANW.get(), buf->getNativeBuffer())
+                        != NO_ERROR) {
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        sp<ANativeWindow> mANW;
+        const TestPixel* mTestPixels;
+    };
+
+    sp<FrameWaiter> fw(new FrameWaiter);
+    mST->setFrameAvailableListener(fw);
+
+    sp<Thread> pt(new ProducerThread(mANW, testPixels));
+    pt->run();
+
+    glViewport(0, 0, texWidth, texHeight);
+
+    glClearColor(0.2, 0.2, 0.2, 0.2);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // We wait for the first two frames up front so that the producer will be
+    // likely to dequeue the buffer that's currently being textured from.
+    fw->waitForFrame();
+    fw->waitForFrame();
+
+    for (int i = 0; i < numFrames; i++) {
+        SCOPED_TRACE(String8::format("frame %d", i).string());
+
+        // We must wait for each frame to come in because if we ever do an
+        // updateTexImage call that doesn't consume a newly available buffer
+        // then the producer and consumer will get out of sync, which will cause
+        // a deadlock.
+        if (i > 1) {
+            fw->waitForFrame();
+        }
+        mST->updateTexImage();
+        drawTexture();
+
+        for (int j = 0; j < numTestPixels; j++) {
+            int x = testPixels[j].x;
+            int y = testPixels[j].y;
+            uint8_t value = 0;
+            if (j == (i % numTestPixels)) {
+                // We must y-invert the texture coords
+                EXPECT_TRUE(checkPixel(x, texHeight-y-1, 255, 255, 255, 255));
+            } else {
+                // We must y-invert the texture coords
+                EXPECT_TRUE(checkPixel(x, texHeight-y-1, 0, 0, 0, 255));
+            }
+        }
+    }
+
+    pt->requestExitAndWait();
 }
 
 // XXX: This test is disabled because there are currently no drivers that can
