@@ -1933,6 +1933,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             int debugFlags = 0;
             if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
                 debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
+                // Also turn on CheckJNI for debuggable apps. It's quite
+                // awkward to turn on otherwise.
+                debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
             }
             // Run the app in safe mode if its manifest requests so or the
             // system is booted in safe mode.
