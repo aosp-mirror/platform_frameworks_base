@@ -131,6 +131,7 @@ public class LockPatternView extends View {
 
     private int mAspect;
     private final Matrix mArrowMatrix = new Matrix();
+    private final Matrix mCircleMatrix = new Matrix();
 
     /**
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
@@ -281,9 +282,14 @@ public class LockPatternView extends View {
         mBitmapArrowGreenUp = getBitmapFor(R.drawable.indicator_code_lock_drag_direction_green_up);
         mBitmapArrowRedUp = getBitmapFor(R.drawable.indicator_code_lock_drag_direction_red_up);
 
-        // we assume all bitmaps have the same size
-        mBitmapWidth = mBitmapBtnDefault.getWidth();
-        mBitmapHeight = mBitmapBtnDefault.getHeight();
+        // bitmaps have the size of the largest bitmap in this group
+        final Bitmap bitmaps[] = { mBitmapBtnDefault, mBitmapBtnTouched, mBitmapCircleDefault,
+                mBitmapCircleGreen, mBitmapCircleRed };
+
+        for (Bitmap bitmap : bitmaps) {
+            mBitmapWidth = Math.max(mBitmapWidth, bitmap.getWidth());
+            mBitmapHeight = Math.max(mBitmapHeight, bitmap.getHeight());
+        }
 
         // allow vibration pattern to be customized
         mVibePattern = loadVibratePattern(com.android.internal.R.array.config_virtualKeyVibePattern);
@@ -458,31 +464,40 @@ public class LockPatternView extends View {
                 break;
             case MeasureSpec.EXACTLY:
             default:
-                result = specSize;
+                // use the specified size, if non-zero
+                result = specSize != 0 ? specSize : desired;
         }
         return result;
     }
 
     @Override
+    protected int getSuggestedMinimumWidth() {
+        // View should be large enough to contain 3 side-by-side target bitmaps
+        return 3 * mBitmapWidth;
+    }
+
+    @Override
+    protected int getSuggestedMinimumHeight() {
+        // View should be large enough to contain 3 side-by-side target bitmaps
+        return 3 * mBitmapWidth;
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int minimumWidth = 3 * mBitmapCircleDefault.getWidth();
-        final int minimumHeight = 3 * mBitmapCircleDefault.getHeight();
+        final int minimumWidth = getSuggestedMinimumWidth();
+        final int minimumHeight = getSuggestedMinimumHeight();
         int viewWidth = resolveMeasured(widthMeasureSpec, minimumWidth);
         int viewHeight = resolveMeasured(heightMeasureSpec, minimumHeight);
 
-        int requestedWidth = MeasureSpec.getSize(widthMeasureSpec);
-        int requestedHeight = MeasureSpec.getSize(heightMeasureSpec);
         switch (mAspect) {
             case ASPECT_SQUARE:
-                viewWidth = viewHeight = Math.min(requestedWidth, requestedHeight);
+                viewWidth = viewHeight = Math.min(viewWidth, viewHeight);
                 break;
             case ASPECT_LOCK_WIDTH:
-                viewWidth = requestedWidth;
-                viewHeight = Math.min(requestedWidth, requestedHeight);
+                viewHeight = Math.min(viewWidth, viewHeight);
                 break;
             case ASPECT_LOCK_HEIGHT:
-                viewWidth = Math.min(requestedWidth, requestedHeight);
-                viewHeight = requestedHeight;
+                viewWidth = Math.min(viewWidth, viewHeight);
                 break;
         }
         // Log.v(TAG, "LockPatternView dimensions: " + viewWidth + "x" + viewHeight);
@@ -947,8 +962,8 @@ public class LockPatternView extends View {
         // This assumes that the arrow image is drawn at 12:00 with it's top edge
         // coincident with the circle bitmap's top edge.
         Bitmap arrow = green ? mBitmapArrowGreenUp : mBitmapArrowRedUp;
-        final int cellWidth = mBitmapCircleDefault.getWidth();
-        final int cellHeight = mBitmapCircleDefault.getHeight();
+        final int cellWidth = mBitmapWidth;
+        final int cellHeight = mBitmapHeight;
 
         // the up arrow bitmap is at 12:00, so find the rotation from x axis and add 90 degrees.
         final float theta = (float) Math.atan2(
@@ -956,7 +971,12 @@ public class LockPatternView extends View {
         final float angle = (float) Math.toDegrees(theta) + 90.0f;
 
         // compose matrix
+        float sx = Math.min(mSquareWidth / mBitmapWidth, 1.0f);
+        float sy = Math.min(mSquareHeight / mBitmapHeight, 1.0f);
         mArrowMatrix.setTranslate(leftX + offsetX, topY + offsetY); // transform to cell position
+        mArrowMatrix.preTranslate(mBitmapWidth/2, mBitmapHeight/2);
+        mArrowMatrix.preScale(sx, sy);
+        mArrowMatrix.preTranslate(-mBitmapWidth/2, -mBitmapHeight/2);
         mArrowMatrix.preRotate(angle, cellWidth / 2.0f, cellHeight / 2.0f);  // rotate about cell center
         mArrowMatrix.preTranslate((cellWidth - arrow.getWidth()) / 2.0f, 0.0f); // translate to 12:00 pos
         canvas.drawBitmap(arrow, mArrowMatrix, mPaint);
@@ -1002,8 +1022,17 @@ public class LockPatternView extends View {
         int offsetX = (int) ((squareWidth - width) / 2f);
         int offsetY = (int) ((squareHeight - height) / 2f);
 
-        canvas.drawBitmap(outerCircle, leftX + offsetX, topY + offsetY, mPaint);
-        canvas.drawBitmap(innerCircle, leftX + offsetX, topY + offsetY, mPaint);
+        // Allow circles to shrink if the view is too small to hold them.
+        float sx = Math.min(mSquareWidth / mBitmapWidth, 1.0f);
+        float sy = Math.min(mSquareHeight / mBitmapHeight, 1.0f);
+
+        mCircleMatrix.setTranslate(leftX + offsetX, topY + offsetY);
+        mCircleMatrix.preTranslate(mBitmapWidth/2, mBitmapHeight/2);
+        mCircleMatrix.preScale(sx, sy);
+        mCircleMatrix.preTranslate(-mBitmapWidth/2, -mBitmapHeight/2);
+
+        canvas.drawBitmap(outerCircle, mCircleMatrix, mPaint);
+        canvas.drawBitmap(innerCircle, mCircleMatrix, mPaint);
     }
 
     @Override
