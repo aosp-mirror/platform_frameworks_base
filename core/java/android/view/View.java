@@ -11701,7 +11701,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
     /**
      * Utility to return a default size. Uses the supplied size if the
-     * MeasureSpec imposed no contraints. Will get larger if allowed
+     * MeasureSpec imposed no constraints. Will get larger if allowed
      * by the MeasureSpec.
      *
      * @param size Default size for this view
@@ -11711,7 +11711,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     public static int getDefaultSize(int size, int measureSpec) {
         int result = size;
         int specMode = MeasureSpec.getMode(measureSpec);
-        int specSize =  MeasureSpec.getSize(measureSpec);
+        int specSize = MeasureSpec.getSize(measureSpec);
 
         switch (specMode) {
         case MeasureSpec.UNSPECIFIED:
