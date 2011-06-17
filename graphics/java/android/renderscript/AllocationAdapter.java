@@ -33,7 +33,7 @@ public class AllocationAdapter extends Allocation {
     private Allocation mAlloc;
 
     private int mSelectedLOD = 0;
-    private Type.CubemapFace mSelectedFace = Type.CubemapFace.POSITVE_X;
+    private Type.CubemapFace mSelectedFace = Type.CubemapFace.POSITIVE_X;
 
     AllocationAdapter(int id, RenderScript rs, Allocation alloc) {
         super(id, rs, null, alloc.mUsage);

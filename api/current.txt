@@ -17387,9 +17387,12 @@ package android.renderscript {
     enum_constant public static final android.renderscript.Type.CubemapFace NEGATIVE_X;
     enum_constant public static final android.renderscript.Type.CubemapFace NEGATIVE_Y;
     enum_constant public static final android.renderscript.Type.CubemapFace NEGATIVE_Z;
-    enum_constant public static final android.renderscript.Type.CubemapFace POSITVE_X;
-    enum_constant public static final android.renderscript.Type.CubemapFace POSITVE_Y;
-    enum_constant public static final android.renderscript.Type.CubemapFace POSITVE_Z;
+    enum_constant public static final android.renderscript.Type.CubemapFace POSITIVE_X;
+    enum_constant public static final android.renderscript.Type.CubemapFace POSITIVE_Y;
+    enum_constant public static final android.renderscript.Type.CubemapFace POSITIVE_Z;
+    enum_constant public static final deprecated android.renderscript.Type.CubemapFace POSITVE_X;
+    enum_constant public static final deprecated android.renderscript.Type.CubemapFace POSITVE_Y;
+    enum_constant public static final deprecated android.renderscript.Type.CubemapFace POSITVE_Z;
   }
 
 }

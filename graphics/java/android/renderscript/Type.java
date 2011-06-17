@@ -46,12 +46,18 @@ public class Type extends BaseObj {
     Element mElement;
 
     public enum CubemapFace {
-        POSITVE_X (0),
+        POSITIVE_X (0),
         NEGATIVE_X (1),
-        POSITVE_Y (2),
+        POSITIVE_Y (2),
         NEGATIVE_Y (3),
-        POSITVE_Z (4),
-        NEGATIVE_Z (5);
+        POSITIVE_Z (4),
+        NEGATIVE_Z (5),
+        @Deprecated
+        POSITVE_X (0),
+        @Deprecated
+        POSITVE_Y (2),
+        @Deprecated
+        POSITVE_Z (4);
 
         int mID;
         CubemapFace(int id) {
