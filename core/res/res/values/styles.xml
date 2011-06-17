@@ -1496,6 +1496,7 @@
 
     <style name="Holo.ButtonBar.AlertDialog">
         <item name="android:background">@null</item>
+        <item name="android:dividerPadding">0dp</item>
     </style>
 
     <style name="Widget.Holo.TextView" parent="Widget.TextView">
@@ -1905,6 +1906,7 @@
 
     <style name="Holo.Light.ButtonBar.AlertDialog">
         <item name="android:background">@null</item>
+        <item name="android:dividerPadding">0dp</item>
     </style>
 
     <style name="Holo.Light.SegmentedButton" parent="SegmentedButton">

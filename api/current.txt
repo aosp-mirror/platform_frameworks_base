@@ -628,6 +628,8 @@ package android {
     field public static final int listDividerAlertDialog = 16843525; // 0x1010305
     field public static final int listPopupWindowStyle = 16843519; // 0x10102ff
     field public static final int listPreferredItemHeight = 16842829; // 0x101004d
+    field public static final int listPreferredItemHeightLarge = 16843670; // 0x1010396
+    field public static final int listPreferredItemHeightSmall = 16843671; // 0x1010397
     field public static final int listSelector = 16843003; // 0x10100fb
     field public static final int listSeparatorTextViewStyle = 16843272; // 0x1010208
     field public static final int listViewStyle = 16842868; // 0x1010074

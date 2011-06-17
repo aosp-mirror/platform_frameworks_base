@@ -1766,6 +1766,8 @@
   <public type="attr" name="feedbackCount" />
   <public type="attr" name="verticalOffset" />
   <public type="attr" name="horizontalOffset" />
+  <public type="attr" name="listPreferredItemHeightLarge" />
+  <public type="attr" name="listPreferredItemHeightSmall" />
 
   <public type="style" name="Widget.Holo.Button.Borderless.Small" />
   <public type="style" name="Widget.Holo.Light.Button.Borderless.Small" />
