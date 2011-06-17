@@ -106,7 +106,7 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
                                                          "(Ljava/lang/String;Z)V");
 
     method_onAgentAuthorize = env->GetMethodID(clazz, "onAgentAuthorize",
-                                               "(Ljava/lang/String;Ljava/lang/String;)Z");
+                                               "(Ljava/lang/String;Ljava/lang/String;I)V");
     method_onAgentOutOfBandDataAvailable = env->GetMethodID(clazz, "onAgentOutOfBandDataAvailable",
                                                "(Ljava/lang/String;)Z");
     method_onAgentCancel = env->GetMethodID(clazz, "onAgentCancel", "()V");
@@ -917,29 +917,11 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         LOGV("... object_path = %s", object_path);
         LOGV("... uuid = %s", uuid);
 
-        bool auth_granted =
-            env->CallBooleanMethod(nat->me, method_onAgentAuthorize,
-                env->NewStringUTF(object_path), env->NewStringUTF(uuid));
+        dbus_message_ref(msg);  // increment refcount because we pass to java
+        env->CallBooleanMethod(nat->me, method_onAgentAuthorize,
+                env->NewStringUTF(object_path), env->NewStringUTF(uuid),
+                int(msg));
 
-        // reply
-        if (auth_granted) {
-            DBusMessage *reply = dbus_message_new_method_return(msg);
-            if (!reply) {
-                LOGE("%s: Cannot create message reply\n", __FUNCTION__);
-                goto failure;
-            }
-            dbus_connection_send(nat->conn, reply, NULL);
-            dbus_message_unref(reply);
-        } else {
-            DBusMessage *reply = dbus_message_new_error(msg,
-                    "org.bluez.Error.Rejected", "Authorization rejected");
-            if (!reply) {
-                LOGE("%s: Cannot create message reply\n", __FUNCTION__);
-                goto failure;
-            }
-            dbus_connection_send(nat->conn, reply, NULL);
-            dbus_message_unref(reply);
-        }
         goto success;
     } else if (dbus_message_is_method_call(msg,
             "org.bluez.Agent", "OutOfBandAvailable")) {
