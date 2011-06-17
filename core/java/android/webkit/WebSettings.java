@@ -59,6 +59,7 @@ public class WebSettings {
      * NORMAL is 100%
      * LARGER is 150%
      * LARGEST is 200%
+     * @deprecated Use {@link WebSettings#setTextZoom(int)} and {@link WebSettings#getTextZoom()} instead.
      */
     public enum TextSize {
         SMALLEST(50),
@@ -711,7 +712,6 @@ public class WebSettings {
     /**
      * Set the text zoom of the page in percent. Default is 100.
      * @param textZoom A percent value for increasing or decreasing the text.
-     * @hide
      */
     public synchronized void setTextZoom(int textZoom) {
         if (mTextSize != textZoom) {
@@ -728,7 +728,6 @@ public class WebSettings {
      * Get the text zoom of the page in percent.
      * @return A percent value describing the text zoom.
      * @see setTextSizeZoom
-     * @hide
      */
     public synchronized int getTextZoom() {
         return mTextSize;
@@ -738,15 +737,19 @@ public class WebSettings {
      * Set the text size of the page.
      * @param t A TextSize value for increasing or decreasing the text.
      * @see WebSettings.TextSize
+     * @deprecated Use {@link #setTextZoom(int)} instead
      */
     public synchronized void setTextSize(TextSize t) {
         setTextZoom(t.value);
     }
 
     /**
-     * Get the text size of the page.
+     * Get the text size of the page. If the text size was previously specified
+     * in percent using {@link #setTextZoom(int)}, this will return
+     * the closest matching {@link TextSize}.
      * @return A TextSize enum value describing the text size.
      * @see WebSettings.TextSize
+     * @deprecated Use {@link #getTextZoom()} instead
      */
     public synchronized TextSize getTextSize() {
         TextSize closestSize = null;

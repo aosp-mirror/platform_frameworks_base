@@ -23717,7 +23717,8 @@ package android.webkit {
     method public boolean getSavePassword();
     method public synchronized java.lang.String getSerifFontFamily();
     method public synchronized java.lang.String getStandardFontFamily();
-    method public synchronized android.webkit.WebSettings.TextSize getTextSize();
+    method public deprecated synchronized android.webkit.WebSettings.TextSize getTextSize();
+    method public synchronized int getTextZoom();
     method public deprecated synchronized boolean getUseDoubleTree();
     method public deprecated boolean getUseWebViewBackgroundForOverscrollBackground();
     method public synchronized boolean getUseWideViewPort();
@@ -23767,7 +23768,8 @@ package android.webkit {
     method public synchronized void setStandardFontFamily(java.lang.String);
     method public synchronized void setSupportMultipleWindows(boolean);
     method public void setSupportZoom(boolean);
-    method public synchronized void setTextSize(android.webkit.WebSettings.TextSize);
+    method public deprecated synchronized void setTextSize(android.webkit.WebSettings.TextSize);
+    method public synchronized void setTextZoom(int);
     method public deprecated synchronized void setUseDoubleTree(boolean);
     method public deprecated void setUseWebViewBackgroundForOverscrollBackground(boolean);
     method public synchronized void setUseWideViewPort(boolean);
@@ -23806,7 +23808,7 @@ package android.webkit {
     enum_constant public static final android.webkit.WebSettings.RenderPriority NORMAL;
   }
 
-  public static final class WebSettings.TextSize extends java.lang.Enum {
+  public static final deprecated class WebSettings.TextSize extends java.lang.Enum {
     method public static android.webkit.WebSettings.TextSize valueOf(java.lang.String);
     method public static final android.webkit.WebSettings.TextSize[] values();
     enum_constant public static final android.webkit.WebSettings.TextSize LARGER;
