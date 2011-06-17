@@ -4586,6 +4586,25 @@
              for more info. -->
         <attr name="actionViewClass" format="string" />
 
+        <!-- The name of an optional ActionProvider class to instantiate an action view
+             and perform operations such as default action for that menu item.
+             See {@link android.view.MenuItem#setActionProvider(android.view.ActionProvider)}
+             for more info. -->
+        <attr name="actionProviderClass" format="string" />
+
+    </declare-styleable>
+
+    <!-- Attrbitutes for a ActvityChooserView. -->
+    <declare-styleable name="ActivityChooserView">
+        <!-- The maximal number of items initially shown in the activity list. -->
+        <attr name="initialActivityCount" format="string" />
+        <!-- The drawable to show in the button for expanding the activities overflow popup.
+             <strong>Note:</strong> Clients would like to set this drawable
+             as a clue about the action the chosen activity will perform. For
+             example, if share activity is to be chosen the drawable should
+             give a clue that sharing is to be performed.
+         -->
+        <attr name="expandActivityOverflowButtonDrawable" format="reference" />
     </declare-styleable>
 
     <!-- **************************************************************** -->

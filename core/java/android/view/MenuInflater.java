@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Xml;
 
 import java.io.IOException;
@@ -42,6 +43,8 @@ import java.lang.reflect.Method;
  * <em>something</em> file.)
  */
 public class MenuInflater {
+    private static final String LOG_TAG = "MenuInflater";
+
     /** Menu tag name in XML. */
     private static final String XML_MENU = "menu";
     
@@ -53,10 +56,16 @@ public class MenuInflater {
 
     private static final int NO_ID = 0;
     
-    private static final Class<?>[] ACTION_VIEW_CONSTRUCTOR_SIGNATURE = new Class[]{Context.class};
+    private static final Class<?>[] ACTION_VIEW_CONSTRUCTOR_SIGNATURE = new Class[] {Context.class};
+
+    private static final Class<?>[] ACTION_PROVIDER_CONSTRUCTOR_SIGNATURE = ACTION_VIEW_CONSTRUCTOR_SIGNATURE;
+
+    private final Object[] mActionViewConstructorArguments;
+
+    private final Object[] mActionProviderConstructorArguments;
 
     private Context mContext;
-    
+
     /**
      * Constructs a menu inflater.
      * 
@@ -64,6 +73,8 @@ public class MenuInflater {
      */
     public MenuInflater(Context context) {
         mContext = context;
+        mActionViewConstructorArguments = new Object[] {context};
+        mActionProviderConstructorArguments = mActionViewConstructorArguments;
     }
 
     /**
@@ -172,14 +183,14 @@ public class MenuInflater {
     
     private static class InflatedOnMenuItemClickListener
             implements MenuItem.OnMenuItemClickListener {
-        private static final Class[] PARAM_TYPES = new Class[] { MenuItem.class };
+        private static final Class<?>[] PARAM_TYPES = new Class[] { MenuItem.class };
         
         private Context mContext;
         private Method mMethod;
         
         public InflatedOnMenuItemClickListener(Context context, String methodName) {
             mContext = context;
-            Class c = context.getClass();
+            Class<?> c = context.getClass();
             try {
                 mMethod = c.getMethod(methodName, PARAM_TYPES);
             } catch (Exception e) {
@@ -255,7 +266,8 @@ public class MenuInflater {
 
         private int itemActionViewLayout;
         private String itemActionViewClassName;
-        
+        private String itemActionProviderClassName;
+
         private String itemListenerMethodName;
         
         private static final int defaultGroupId = NO_ID;
@@ -333,9 +345,10 @@ public class MenuInflater {
             itemListenerMethodName = a.getString(com.android.internal.R.styleable.MenuItem_onClick);
             itemActionViewLayout = a.getResourceId(com.android.internal.R.styleable.MenuItem_actionLayout, 0);
             itemActionViewClassName = a.getString(com.android.internal.R.styleable.MenuItem_actionViewClass);
-            
+            itemActionProviderClassName = a.getString(com.android.internal.R.styleable.MenuItem_actionProviderClass);
+
             a.recycle();
-            
+
             itemAdded = false;
         }
 
@@ -377,20 +390,35 @@ public class MenuInflater {
                 }
             }
 
+            boolean actionViewSpecified = false;
             if (itemActionViewClassName != null) {
-                try {
-                    final Class<?> clazz = Class.forName(itemActionViewClassName, true,
-                            mContext.getClassLoader());
-                    Constructor<?> c = clazz.getConstructor(ACTION_VIEW_CONSTRUCTOR_SIGNATURE);
-                    item.setActionView((View) c.newInstance(mContext));
-                } catch (Exception e) {
-                    throw new InflateException(e);
+                View actionView = (View) newInstance(itemActionViewClassName,
+                        ACTION_VIEW_CONSTRUCTOR_SIGNATURE, mActionViewConstructorArguments);
+                item.setActionView(actionView);
+                actionViewSpecified = true;
+            }
+            if (itemActionViewLayout > 0) {
+                if (!actionViewSpecified) {
+                    item.setActionView(itemActionViewLayout);
+                    actionViewSpecified = true;
+                } else {
+                    Log.w(LOG_TAG, "Ignoring attribute 'itemActionViewLayout'."
+                            + " Action view already specified.");
                 }
-            } else if (itemActionViewLayout > 0) {
-                item.setActionView(itemActionViewLayout);
+            }
+            if (itemActionProviderClassName != null) {
+                if (!actionViewSpecified) {
+                    ActionProvider actionProvider = newInstance(itemActionProviderClassName,
+                            ACTION_PROVIDER_CONSTRUCTOR_SIGNATURE,
+                            mActionProviderConstructorArguments);
+                    item.setActionProvider(actionProvider);
+                } else {
+                    Log.w(LOG_TAG, "Ignoring attribute 'itemActionProviderClass'."
+                            + " Action view already specified.");
+                }
             }
         }
-        
+
         public void addItem() {
             itemAdded = true;
             setItem(menu.add(groupId, itemId, itemCategoryOrder, itemTitle));
@@ -406,6 +434,18 @@ public class MenuInflater {
         public boolean hasAddedItem() {
             return itemAdded;
         }
+
+        @SuppressWarnings("unchecked")
+        private <T> T newInstance(String className, Class<?>[] constructorSignature,
+                Object[] arguments) {
+            try {
+                Class<?> clazz = mContext.getClassLoader().loadClass(className);
+                Constructor<?> constructor = clazz.getConstructor(constructorSignature);
+                return (T) constructor.newInstance(arguments);
+            } catch (Exception e) {
+                Log.w(LOG_TAG, "Cannot instantiate class: " + className, e);
+            }
+            return null;
+        }
     }
-    
 }

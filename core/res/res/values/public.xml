@@ -1785,4 +1785,7 @@
   <public type="string" name="status_bar_notification_info_overflow" />
 
   <public type="attr" name="textDirection"/>
+
+  <public type="attr" name="actionProviderClass" />
+
 </resources>

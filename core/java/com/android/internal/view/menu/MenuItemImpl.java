@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
+import android.view.ActionProvider;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -79,6 +80,7 @@ public final class MenuItemImpl implements MenuItem {
     private int mShowAsAction = SHOW_AS_ACTION_NEVER;
 
     private View mActionView;
+    private ActionProvider mActionProvider;
     private OnActionExpandListener mOnActionExpandListener;
     private boolean mIsActionViewExpanded = false;
 
@@ -98,10 +100,8 @@ public final class MenuItemImpl implements MenuItem {
     
     
     /**
-     * Instantiates this menu item. The constructor
-     * {@link #MenuItemData(MenuBuilder, int, int, int, CharSequence, int)} is
-     * preferred due to lazy loading of the icon Drawable.
-     * 
+     * Instantiates this menu item.
+     *
      * @param menu
      * @param group Item ordering grouping control. The item will be added after
      *            all other items whose order is <= this number, and before any
@@ -154,7 +154,7 @@ public final class MenuItemImpl implements MenuItem {
             mItemCallback.run();
             return true;
         }
-        
+
         if (mIntent != null) {
             try {
                 mMenu.getContext().startActivity(mIntent);
@@ -163,7 +163,14 @@ public final class MenuItemImpl implements MenuItem {
                 Log.e(TAG, "Can't find activity to handle intent; ignoring", e);
             }
         }
-        
+
+        if (mActionProvider != null) {
+            // The action view is created by the provider in this case.
+            View actionView = getActionView();
+            mActionProvider.onPerformDefaultAction(actionView);
+            return true;
+        }
+
         return false;
     }
     
@@ -551,6 +558,7 @@ public final class MenuItemImpl implements MenuItem {
 
     public MenuItem setActionView(View view) {
         mActionView = view;
+        mActionProvider = null;
         mMenu.onItemActionRequestChanged(this);
         return this;
     }
@@ -563,7 +571,25 @@ public final class MenuItemImpl implements MenuItem {
     }
 
     public View getActionView() {
-        return mActionView;
+        if (mActionView != null) {
+            return mActionView;
+        } else if (mActionProvider != null) {
+            mActionView = mActionProvider.onCreateActionView();
+            return mActionView;
+        } else {
+            return null;
+        }
+    }
+
+    public ActionProvider getActionProvider() {
+        return mActionProvider;
+    }
+
+    public MenuItem setActionProvider(ActionProvider actionProvider) {
+        mActionView = null;
+        mActionProvider = actionProvider;
+        mMenu.onItemsChanged(false);
+        return this;
     }
 
     @Override

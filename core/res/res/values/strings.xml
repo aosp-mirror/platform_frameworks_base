@@ -3002,4 +3002,11 @@
     <!-- Label for an information field on an SSL Certificate Dialog -->
     <string name="expires_on">Expires on:</string>
 
+    <!-- Title for a button to expand the list of activities in ActivityChooserView [CHAR LIMIT=25] -->
+    <string name="activity_chooser_view_see_all">See all...</string>
+    <!-- Title for a message that there are no activities in ActivityChooserView [CHAR LIMIT=25] -->
+    <string name="activity_chooser_view_no_activities">No activities</string>
+    <!-- Title for a message that prompts selection of a default share handler in ActivityChooserView [CHAR LIMIT=25] -->
+    <string name="activity_chooser_view_select_default">Select default</string>
+
 </resources>

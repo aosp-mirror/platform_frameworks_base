@@ -208,6 +208,7 @@ package android {
     field public static final int actionModePasteDrawable = 16843539; // 0x1010313
     field public static final int actionModeSelectAllDrawable = 16843648; // 0x1010380
     field public static final int actionOverflowButtonStyle = 16843510; // 0x10102f6
+    field public static final int actionProviderClass = 16843678; // 0x101039e
     field public static final int actionViewClass = 16843516; // 0x10102fc
     field public static final int activatedBackgroundIndicator = 16843517; // 0x10102fd
     field public static final int activityCloseEnterAnimation = 16842938; // 0x10100ba
@@ -20568,6 +20569,12 @@ package android.view {
     method public abstract boolean onPrepareActionMode(android.view.ActionMode, android.view.Menu);
   }
 
+  public abstract class ActionProvider {
+    ctor public ActionProvider(android.content.Context);
+    method public abstract android.view.View onCreateActionView();
+    method public void onPerformDefaultAction(android.view.View);
+  }
+
   public abstract interface ContextMenu implements android.view.Menu {
     method public abstract void clearHeader();
     method public abstract android.view.ContextMenu setHeaderIcon(int);
@@ -21236,6 +21243,7 @@ package android.view {
   public abstract interface MenuItem {
     method public abstract boolean collapseActionView();
     method public abstract boolean expandActionView();
+    method public abstract android.view.ActionProvider getActionProvider();
     method public abstract android.view.View getActionView();
     method public abstract char getAlphabeticShortcut();
     method public abstract int getGroupId();
@@ -21254,6 +21262,7 @@ package android.view {
     method public abstract boolean isChecked();
     method public abstract boolean isEnabled();
     method public abstract boolean isVisible();
+    method public abstract android.view.MenuItem setActionProvider(android.view.ActionProvider);
     method public abstract android.view.MenuItem setActionView(android.view.View);
     method public abstract android.view.MenuItem setActionView(int);
     method public abstract android.view.MenuItem setAlphabeticShortcut(char);
@@ -25737,6 +25746,14 @@ package android.widget {
     method public abstract void onProgressChanged(android.widget.SeekBar, int, boolean);
     method public abstract void onStartTrackingTouch(android.widget.SeekBar);
     method public abstract void onStopTrackingTouch(android.widget.SeekBar);
+  }
+
+  public class ShareActionProvider extends android.view.ActionProvider {
+    ctor public ShareActionProvider(android.content.Context);
+    method public android.view.View onCreateActionView();
+    method public void setShareHistoryFileName(java.lang.String);
+    method public void setShareIntent(android.view.View, android.content.Intent);
+    field public static final java.lang.String DEFAULT_SHARE_HISTORY_FILE_NAME = "share_history.xml";
   }
 
   public class SimpleAdapter extends android.widget.BaseAdapter implements android.widget.Filterable {

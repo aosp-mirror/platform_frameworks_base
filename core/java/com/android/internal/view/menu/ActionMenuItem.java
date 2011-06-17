@@ -19,6 +19,7 @@ package com.android.internal.view.menu;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.view.ActionProvider;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -234,6 +235,16 @@ public class ActionMenuItem implements MenuItem {
 
     @Override
     public MenuItem setActionView(int resId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ActionProvider getActionProvider() {
+        return null;
+    }
+
+    @Override
+    public MenuItem setActionProvider(ActionProvider actionProvider) {
         throw new UnsupportedOperationException();
     }
 

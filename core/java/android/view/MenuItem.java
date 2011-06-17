@@ -88,7 +88,6 @@ public interface MenuItem {
      * @see MenuItem#expandActionView()
      * @see MenuItem#collapseActionView()
      * @see MenuItem#setShowAsActionFlags(int)
-     * @see MenuItem#
      */
     public interface OnActionExpandListener {
         /**
@@ -480,6 +479,10 @@ public interface MenuItem {
      * Set an action view for this menu item. An action view will be displayed in place
      * of an automatically generated menu item element in the UI when this item is shown
      * as an action within a parent.
+     * <p>
+     *   <strong>Note:</strong> Setting an action view overrides the action provider
+     *           set via {@link #setActionProvider(ActionProvider)}.
+     * </p>
      *
      * @param view View to use for presenting this item to the user.
      * @return This Item so additional setters can be called.
@@ -492,6 +495,10 @@ public interface MenuItem {
      * Set an action view for this menu item. An action view will be displayed in place
      * of an automatically generated menu item element in the UI when this item is shown
      * as an action within a parent.
+     * <p>
+     *   <strong>Note:</strong> Setting an action view overrides the action provider
+     *           set via {@link #setActionProvider(ActionProvider)}.
+     * </p>
      *
      * @param resId Layout resource to use for presenting this item to the user.
      * @return This Item so additional setters can be called.
@@ -509,6 +516,32 @@ public interface MenuItem {
      * @see #setShowAsAction(int)
      */
     public View getActionView();
+
+    /**
+     * Sets the {@link ActionProvider} responsible for creating an action view if
+     * the item is placed on the action bar. The provider also provides a default
+     * action invoked if the item is placed in the overflow menu.
+     * <p>
+     *   <strong>Note:</strong> Setting an action provider overrides the action view
+     *           set via {@link #setActionView(int)} or {@link #setActionView(View)}.
+     * </p>
+     *
+     * @param actionProvider The action provider.
+     * @return This Item so additional setters can be called.
+     *
+     * @see ActionProvider
+     */
+    public MenuItem setActionProvider(ActionProvider actionProvider);
+
+    /**
+     * Gets the {@link ActionProvider}.
+     *
+     * @return The action provider.
+     *
+     * @see ActionProvider
+     * @see #setActionProvider(ActionProvider)
+     */
+    public ActionProvider getActionProvider();
 
     /**
      * Expand the action view associated with this menu item.
