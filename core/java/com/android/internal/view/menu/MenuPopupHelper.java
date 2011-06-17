@@ -17,6 +17,7 @@
 package com.android.internal.view.menu;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -71,8 +72,9 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         mMenu = menu;
         mOverflowOnly = overflowOnly;
 
-        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-        mPopupMaxWidth = metrics.widthPixels / 2;
+        final Resources res = context.getResources();
+        mPopupMaxWidth = Math.max(res.getDisplayMetrics().widthPixels / 2,
+                res.getDimensionPixelSize(com.android.internal.R.dimen.config_prefDialogWidth));
 
         mAnchorView = anchorView;
 
