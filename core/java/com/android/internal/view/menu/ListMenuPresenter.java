@@ -177,7 +177,9 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
 
     public void restoreHierarchyState(Bundle inState) {
         SparseArray<Parcelable> viewStates = inState.getSparseParcelableArray(VIEWS_TAG);
-        ((View) mMenuView).restoreHierarchyState(viewStates);
+        if (viewStates != null) {
+            ((View) mMenuView).restoreHierarchyState(viewStates);
+        }
     }
 
     private class MenuAdapter extends BaseAdapter {
