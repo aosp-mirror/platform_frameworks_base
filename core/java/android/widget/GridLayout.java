@@ -189,10 +189,7 @@ public class GridLayout extends ViewGroup {
      * {@inheritDoc}
      */
     public GridLayout(Context context) {
-        super(context);
-        if (DEBUG) {
-            setWillNotDraw(false);
-        }
+        this(context, null, 0);
     }
 
     /**
@@ -200,6 +197,9 @@ public class GridLayout extends ViewGroup {
      */
     public GridLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        if (DEBUG) {
+            setWillNotDraw(false);
+        }
         processAttributes(context, attrs);
     }
 
@@ -207,8 +207,7 @@ public class GridLayout extends ViewGroup {
      * {@inheritDoc}
      */
     public GridLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        processAttributes(context, attrs);
+        this(context, attrs, 0);
     }
 
     private void processAttributes(Context context, AttributeSet attrs) {
