@@ -120,6 +120,7 @@ public class BiDiTestActivity extends Activity {
         addItem(result, "Table LOC", BiDiTestTableLayoutLocale.class, R.id.table_layout_locale);
 
         addItem(result, "ViewPadding", BiDiTestViewPadding.class, R.id.view_padding);
+        addItem(result, "ViewPadding MIXED", BiDiTestViewPaddingMixed.class, R.id.view_padding_mixed);
 
         return result;
     }

@@ -696,8 +696,10 @@ package android {
     field public static final int packageNames = 16843651; // 0x1010383
     field public static final int padding = 16842965; // 0x10100d5
     field public static final int paddingBottom = 16842969; // 0x10100d9
+    field public static final int paddingEnd = 16843673; // 0x1010399
     field public static final int paddingLeft = 16842966; // 0x10100d6
     field public static final int paddingRight = 16842968; // 0x10100d8
+    field public static final int paddingStart = 16843672; // 0x1010398
     field public static final int paddingTop = 16842967; // 0x10100d7
     field public static final int panelBackground = 16842846; // 0x101005e
     field public static final int panelColorBackground = 16842849; // 0x1010061

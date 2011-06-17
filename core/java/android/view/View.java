@@ -345,7 +345,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * 2 pixels to the right of the left edge. Padding can be set using the
  * {@link #setPadding(int, int, int, int)} method and queried by calling
  * {@link #getPaddingLeft()}, {@link #getPaddingTop()},
- * {@link #getPaddingRight()} and {@link #getPaddingBottom()}.
+ * {@link #getPaddingRight()}, {@link #getPaddingBottom()}.
  * </p>
  *
  * <p>
@@ -607,6 +607,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @attr ref android.R.styleable#View_paddingLeft
  * @attr ref android.R.styleable#View_paddingRight
  * @attr ref android.R.styleable#View_paddingTop
+ * @attr ref android.R.styleable#View_paddingStart
+ * @attr ref android.R.styleable#View_paddingEnd
  * @attr ref android.R.styleable#View_saveEnabled
  * @attr ref android.R.styleable#View_rotation
  * @attr ref android.R.styleable#View_rotationX
@@ -1734,11 +1736,20 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     static final int DRAG_HOVERED                 = 0x00000002;
 
     /**
-     * Indicates whether the view is drawn in right-to-left direction.
+     * Indicates whether the view layout direction has been resolved and drawn to the
+     * right-to-left direction.
      *
      * @hide
      */
-    static final int RESOLVED_LAYOUT_RTL          = 0x00000004;
+    static final int LAYOUT_DIRECTION_RESOLVED_RTL = 0x00000004;
+
+    /**
+     * Indicates whether the view layout direction has been resolved.
+     *
+     * @hide
+     */
+    static final int LAYOUT_DIRECTION_RESOLVED = 0x00000008;
+
 
     /* End of masks for mPrivateFlags2 */
 
@@ -2173,6 +2184,33 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     int mUserPaddingLeft;
 
     /**
+     * Cache the paddingTop set by the user to append to the scrollbar's size.
+     */
+    @ViewDebug.ExportedProperty(category = "padding")
+    int mUserPaddingTop;
+
+    /**
+     * Cache if the user padding is relative.
+     *
+     */
+    @ViewDebug.ExportedProperty(category = "padding")
+    boolean mUserPaddingRelative;
+
+    /**
+     * Cache the paddingStart set by the user to append to the scrollbar's size.
+     *
+     */
+    @ViewDebug.ExportedProperty(category = "padding")
+    int mUserPaddingStart;
+
+    /**
+     * Cache the paddingEnd set by the user to append to the scrollbar's size.
+     *
+     */
+    @ViewDebug.ExportedProperty(category = "padding")
+    int mUserPaddingEnd;
+
+    /**
      * @hide
      */
     int mOldWidthMeasureSpec = Integer.MIN_VALUE;
@@ -2523,6 +2561,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         int topPadding = -1;
         int rightPadding = -1;
         int bottomPadding = -1;
+        int startPadding = -1;
+        int endPadding = -1;
 
         int padding = -1;
 
@@ -2567,6 +2607,12 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                     break;
                 case com.android.internal.R.styleable.View_paddingBottom:
                     bottomPadding = a.getDimensionPixelSize(attr, -1);
+                    break;
+                case com.android.internal.R.styleable.View_paddingStart:
+                    startPadding = a.getDimensionPixelSize(attr, -1);
+                    break;
+                case com.android.internal.R.styleable.View_paddingEnd:
+                    endPadding = a.getDimensionPixelSize(attr, -1);
                     break;
                 case com.android.internal.R.styleable.View_scrollX:
                     x = a.getDimensionPixelOffset(attr, 0);
@@ -2822,11 +2868,15 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             setBackgroundDrawable(background);
         }
 
+        mUserPaddingRelative = (startPadding >= 0 || endPadding >= 0);
+
         if (padding >= 0) {
             leftPadding = padding;
             topPadding = padding;
             rightPadding = padding;
             bottomPadding = padding;
+            startPadding = padding;
+            endPadding = padding;
         }
 
         // If the user specified the padding (either with android:padding or
@@ -2837,6 +2887,15 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                 topPadding >= 0 ? topPadding : mPaddingTop,
                 rightPadding >= 0 ? rightPadding : mPaddingRight,
                 bottomPadding >= 0 ? bottomPadding : mPaddingBottom);
+
+        // Cache user padding as we cannot fully resolve padding here (we dont have yet the resolved
+        // layout direction). Those cached values will be used later during padding resolution.
+        mUserPaddingLeft = leftPadding;
+        mUserPaddingRight = rightPadding;
+        mUserPaddingStart = startPadding;
+        mUserPaddingEnd = endPadding;
+        mUserPaddingTop = topPadding;
+        mUserPaddingBottom = bottomPadding;
 
         if (viewFlagMasks != 0) {
             setFlags(viewFlagValues, viewFlagMasks);
@@ -3059,7 +3118,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         }
 
         // Re-apply user/background padding so that scrollbar(s) get added
-        recomputePadding();
+        resolvePadding();
     }
 
     /**
@@ -3084,7 +3143,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         if (mVerticalScrollbarPosition != position) {
             mVerticalScrollbarPosition = position;
             computeOpaqueFlags();
-            recomputePadding();
+            resolvePadding();
         }
     }
 
@@ -4315,8 +4374,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         @ViewDebug.IntToString(from = LAYOUT_DIRECTION_RTL,     to = "RESOLVED_DIRECTION_RTL")
     })
     public int getResolvedLayoutDirection() {
-        resolveLayoutDirection();
-        return ((mPrivateFlags2 & RESOLVED_LAYOUT_RTL) == RESOLVED_LAYOUT_RTL) ?
+        resolveLayoutDirectionIfNeeded();
+        return ((mPrivateFlags2 & LAYOUT_DIRECTION_RESOLVED_RTL) == LAYOUT_DIRECTION_RESOLVED_RTL) ?
                 LAYOUT_DIRECTION_RTL : LAYOUT_DIRECTION_LTR;
     }
 
@@ -8265,7 +8324,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         if (isHorizontalScrollBarEnabled() != horizontalScrollBarEnabled) {
             mViewFlags ^= SCROLLBARS_HORIZONTAL;
             computeOpaqueFlags();
-            recomputePadding();
+            resolvePadding();
         }
     }
 
@@ -8295,7 +8354,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         if (isVerticalScrollBarEnabled() != verticalScrollBarEnabled) {
             mViewFlags ^= SCROLLBARS_VERTICAL;
             computeOpaqueFlags();
-            recomputePadding();
+            resolvePadding();
         }
     }
 
@@ -8354,7 +8413,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         if (style != (mViewFlags & SCROLLBARS_STYLE_MASK)) {
             mViewFlags = (mViewFlags & ~SCROLLBARS_STYLE_MASK) | (style & SCROLLBARS_STYLE_MASK);
             computeOpaqueFlags();
-            recomputePadding();
+            resolvePadding();
         }
     }
 
@@ -8739,7 +8798,9 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             mPrivateFlags &= ~AWAKEN_SCROLL_BARS_ON_ATTACH;
         }
         jumpDrawablesToCurrentState();
-        resolveLayoutDirection();
+        resetLayoutDirectionResolution();
+        resolveLayoutDirectionIfNeeded();
+        resolvePadding();
         if (isFocused()) {
             InputMethodManager imm = InputMethodManager.peekInstance();
             imm.focusIn(this);
@@ -8747,31 +8808,91 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
-     * Resolving the layout direction. LTR is set initially.
-     * We are supposing here that the parent directionality will be resolved before its children.
+     * Resolve and cache the layout direction. LTR is set initially. This is implicitly supposing
+     * that the parent directionality can and will be resolved before its children.
      */
-    private void resolveLayoutDirection() {
-        mPrivateFlags2 &= ~RESOLVED_LAYOUT_RTL;
+    private void resolveLayoutDirectionIfNeeded() {
+        // Do not resolve if it is not needed
+        if ((mPrivateFlags2 & LAYOUT_DIRECTION_RESOLVED) == LAYOUT_DIRECTION_RESOLVED) return;
+
+        // Clear any previous layout direction resolution
+        mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED_RTL;
+
+        // Set resolved depending on layout direction
         switch (getLayoutDirection()) {
             case LAYOUT_DIRECTION_INHERIT:
                 // If this is root view, no need to look at parent's layout dir.
                 if (mParent != null &&
                         mParent instanceof ViewGroup &&
                         ((ViewGroup) mParent).getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) {
-                    mPrivateFlags2 |= RESOLVED_LAYOUT_RTL;
+                    mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
                 }
                 break;
             case LAYOUT_DIRECTION_RTL:
-                mPrivateFlags2 |= RESOLVED_LAYOUT_RTL;
+                mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
                 break;
             case LAYOUT_DIRECTION_LOCALE:
                 if(isLayoutDirectionRtl(Locale.getDefault())) {
-                    mPrivateFlags2 |= RESOLVED_LAYOUT_RTL;
+                    mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
                 }
                 break;
             default:
                 // Nothing to do, LTR by default
         }
+
+        // Set to resolved
+        mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED;
+    }
+
+    private void resolvePadding() {
+        // If the user specified the absolute padding (either with android:padding or
+        // android:paddingLeft/Top/Right/Bottom), use this padding, otherwise
+        // use the default padding or the padding from the background drawable
+        // (stored at this point in mPadding*)
+        switch (getResolvedLayoutDirection()) {
+            case LAYOUT_DIRECTION_RTL:
+                // Start user padding override Right user padding. Otherwise, if Right user
+                // padding is not defined, use the default Right padding. If Right user padding
+                // is defined, just use it.
+                if (mUserPaddingStart >= 0) {
+                    mUserPaddingRight = mUserPaddingStart;
+                } else if (mUserPaddingRight < 0) {
+                    mUserPaddingRight = mPaddingRight;
+                }
+                if (mUserPaddingEnd >= 0) {
+                    mUserPaddingLeft = mUserPaddingEnd;
+                } else if (mUserPaddingLeft < 0) {
+                    mUserPaddingLeft = mPaddingLeft;
+                }
+                break;
+            case LAYOUT_DIRECTION_LTR:
+            default:
+                // Start user padding override Left user padding. Otherwise, if Left user
+                // padding is not defined, use the default left padding. If Left user padding
+                // is defined, just use it.
+                if (mUserPaddingStart >= 0) {
+                    mUserPaddingLeft = mUserPaddingStart;
+                } else if (mUserPaddingLeft < 0) {
+                    mUserPaddingLeft = mPaddingLeft;
+                }
+                if (mUserPaddingEnd >= 0) {
+                    mUserPaddingRight = mUserPaddingEnd;
+                } else if (mUserPaddingRight < 0) {
+                    mUserPaddingRight = mPaddingRight;
+                }
+        }
+
+        mPaddingTop = (mUserPaddingTop >= 0) ? mUserPaddingTop : mPaddingTop;
+        mUserPaddingBottom = (mUserPaddingBottom >= 0) ? mUserPaddingBottom : mPaddingBottom;
+
+        recomputePadding();
+    }
+
+    /**
+     * Reset the resolved layout direction by clearing the corresponding flag
+     */
+    private void resetLayoutDirectionResolution() {
+        mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED;
     }
 
     /**
@@ -10745,7 +10866,14 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                 sThreadLocal.set(padding);
             }
             if (d.getPadding(padding)) {
-                setPadding(padding.left, padding.top, padding.right, padding.bottom);
+                switch (d.getResolvedLayoutDirectionSelf()) {
+                    case LAYOUT_DIRECTION_RTL:
+                        setPadding(padding.right, padding.top, padding.left, padding.bottom);
+                        break;
+                    case LAYOUT_DIRECTION_LTR:
+                    default:
+                        setPadding(padding.left, padding.top, padding.right, padding.bottom);
+                }
             }
 
             // Compare the minimum sizes of the old Drawable and the new.  If there isn't an old or
@@ -10831,6 +10959,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     public void setPadding(int left, int top, int right, int bottom) {
         boolean changed = false;
 
+        mUserPaddingRelative = false;
+
         mUserPaddingLeft = left;
         mUserPaddingRight = right;
         mUserPaddingBottom = bottom;
@@ -10840,11 +10970,16 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         // Common case is there are no scroll bars.
         if ((viewFlags & (SCROLLBARS_VERTICAL|SCROLLBARS_HORIZONTAL)) != 0) {
             if ((viewFlags & SCROLLBARS_VERTICAL) != 0) {
-                // TODO Determine what to do with SCROLLBAR_POSITION_DEFAULT based on RTL settings.
                 final int offset = (viewFlags & SCROLLBARS_INSET_MASK) == 0
                         ? 0 : getVerticalScrollbarWidth();
                 switch (mVerticalScrollbarPosition) {
                     case SCROLLBAR_POSITION_DEFAULT:
+                        if (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                            left += offset;
+                        } else {
+                            right += offset;
+                        }
+                        break;
                     case SCROLLBAR_POSITION_RIGHT:
                         right += offset;
                         break;
@@ -10882,6 +11017,37 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
+     * Sets the relative padding. The view may add on the space required to display
+     * the scrollbars, depending on the style and visibility of the scrollbars.
+     * So the values returned from {@link #getPaddingStart}, {@link #getPaddingTop},
+     * {@link #getPaddingEnd} and {@link #getPaddingBottom} may be different
+     * from the values set in this call.
+     *
+     * @attr ref android.R.styleable#View_padding
+     * @attr ref android.R.styleable#View_paddingBottom
+     * @attr ref android.R.styleable#View_paddingStart
+     * @attr ref android.R.styleable#View_paddingEnd
+     * @attr ref android.R.styleable#View_paddingTop
+     * @param start the start padding in pixels
+     * @param top the top padding in pixels
+     * @param end the end padding in pixels
+     * @param bottom the bottom padding in pixels
+     *
+     * @hide
+     */
+    public void setPaddingRelative(int start, int top, int end, int bottom) {
+        mUserPaddingRelative = true;
+        switch(getResolvedLayoutDirection()) {
+            case LAYOUT_DIRECTION_RTL:
+                setPadding(end, top, start, bottom);
+                break;
+            case LAYOUT_DIRECTION_LTR:
+            default:
+                setPadding(start, top, end, bottom);
+        }
+    }
+
+    /**
      * Returns the top padding of this view.
      *
      * @return the top padding in pixels
@@ -10913,6 +11079,20 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
+     * Returns the start padding of this view. If there are inset and enabled
+     * scrollbars, this value may include the space required to display the
+     * scrollbars as well.
+     *
+     * @return the start padding in pixels
+     *
+     * @hide
+     */
+    public int getPaddingStart() {
+        return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
+                mPaddingRight : mPaddingLeft;
+    }
+
+    /**
      * Returns the right padding of this view. If there are inset and enabled
      * scrollbars, this value may include the space required to display the
      * scrollbars as well.
@@ -10921,6 +11101,34 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      */
     public int getPaddingRight() {
         return mPaddingRight;
+    }
+
+    /**
+     * Returns the end padding of this view. If there are inset and enabled
+     * scrollbars, this value may include the space required to display the
+     * scrollbars as well.
+     *
+     * @return the end padding in pixels
+     *
+     * @hide
+     */
+    public int getPaddingEnd() {
+        return (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
+                mPaddingLeft : mPaddingRight;
+    }
+
+    /**
+     * Return if the padding as been set thru relative values
+     * {@link #setPaddingRelative(int, int, int, int)} or thru
+     * @attr ref android.R.styleable#View_paddingStart or
+     * @attr ref android.R.styleable#View_paddingEnd
+     *
+     * @return true if the padding is relative or false if it is not.
+     *
+     * @hide
+     */
+    public boolean isPaddingRelative() {
+        return mUserPaddingRelative;
     }
 
     /**
