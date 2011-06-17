@@ -92,13 +92,18 @@ public class MtpDatabase {
     };
     private static final String ID_WHERE = Files.FileColumns._ID + "=?";
     private static final String PATH_WHERE = Files.FileColumns.DATA + "=?";
-    private static final String PARENT_WHERE = Files.FileColumns.PARENT + "=?";
-    private static final String PARENT_FORMAT_WHERE = PARENT_WHERE + " AND "
+
+    private static final String STORAGE_WHERE = Files.FileColumns.STORAGE_ID + "=?";
+    private static final String FORMAT_WHERE = Files.FileColumns.PARENT + "=?";
+    private static final String PARENT_WHERE = Files.FileColumns.FORMAT + "=?";
+    private static final String STORAGE_FORMAT_WHERE = STORAGE_WHERE + " AND "
                                             + Files.FileColumns.FORMAT + "=?";
-    private static final String PARENT_STORAGE_WHERE = PARENT_WHERE + " AND "
-                                            + Files.FileColumns.STORAGE_ID + "=?";
-    private static final String PARENT_STORAGE_FORMAT_WHERE = PARENT_STORAGE_WHERE + " AND "
-                                            + Files.FileColumns.FORMAT + "=?";
+    private static final String STORAGE_PARENT_WHERE = STORAGE_WHERE + " AND "
+                                            + Files.FileColumns.PARENT + "=?";
+    private static final String FORMAT_PARENT_WHERE = FORMAT_WHERE + " AND "
+                                            + Files.FileColumns.PARENT + "=?";
+    private static final String STORAGE_FORMAT_PARENT_WHERE = STORAGE_FORMAT_WHERE + " AND "
+                                            + Files.FileColumns.PARENT + "=?";
 
     private final MediaScanner mMediaScanner;
 
@@ -249,26 +254,67 @@ public class MtpDatabase {
     }
 
     private Cursor createObjectQuery(int storageID, int format, int parent) throws RemoteException {
-        if (storageID != 0) {
-            if (format != 0) {
-                return mMediaProvider.query(mObjectsUri, ID_PROJECTION,
-                        PARENT_STORAGE_FORMAT_WHERE,
-                        new String[] { Integer.toString(parent), Integer.toString(storageID),
-                                Integer.toString(format) }, null);
+        if (storageID == 0xFFFFFFFF) {
+            // query all stores
+            if (format == 0) {
+                // query all formats
+                if (parent == 0) {
+                    // query all objects
+                    return mMediaProvider.query(mObjectsUri, ID_PROJECTION, null, null, null);
+                }
+                if (parent == 0xFFFFFFFF) {
+                    // all objects in root of store
+                    parent = 0;
+                }
+                return mMediaProvider.query(mObjectsUri, ID_PROJECTION, PARENT_WHERE,
+                        new String[] { Integer.toString(parent) }, null);
             } else {
-                return mMediaProvider.query(mObjectsUri, ID_PROJECTION,
-                        PARENT_STORAGE_WHERE, new String[]
-                                { Integer.toString(parent), Integer.toString(storageID) }, null);
+                // query specific format
+                if (parent == 0) {
+                    // query all objects
+                    return mMediaProvider.query(mObjectsUri, ID_PROJECTION, FORMAT_WHERE,
+                            new String[] { Integer.toString(format) }, null);
+                }
+                if (parent == 0xFFFFFFFF) {
+                    // all objects in root of store
+                    parent = 0;
+                }
+                return mMediaProvider.query(mObjectsUri, ID_PROJECTION, FORMAT_PARENT_WHERE,
+                        new String[] { Integer.toString(format), Integer.toString(parent) }, null);
             }
         } else {
-            if (format != 0) {
-                return mMediaProvider.query(mObjectsUri, ID_PROJECTION,
-                            PARENT_FORMAT_WHERE,
-                            new String[] { Integer.toString(parent), Integer.toString(format) },
-                             null);
+            // query specific store
+            if (format == 0) {
+                // query all formats
+                if (parent == 0) {
+                    // query all objects
+                    return mMediaProvider.query(mObjectsUri, ID_PROJECTION, STORAGE_WHERE,
+                            new String[] { Integer.toString(storageID) }, null);
+                }
+                if (parent == 0xFFFFFFFF) {
+                    // all objects in root of store
+                    parent = 0;
+                }
+                return mMediaProvider.query(mObjectsUri, ID_PROJECTION, STORAGE_PARENT_WHERE,
+                        new String[] { Integer.toString(storageID), Integer.toString(parent) },
+                        null);
             } else {
-                return mMediaProvider.query(mObjectsUri, ID_PROJECTION,
-                            PARENT_WHERE, new String[] { Integer.toString(parent) }, null);
+                // query specific format
+                if (parent == 0) {
+                    // query all objects
+                    return mMediaProvider.query(mObjectsUri, ID_PROJECTION, STORAGE_FORMAT_WHERE,
+                            new String[] {  Integer.toString(storageID), Integer.toString(format) },
+                            null);
+                }
+                if (parent == 0xFFFFFFFF) {
+                    // all objects in root of store
+                    parent = 0;
+                }
+                return mMediaProvider.query(mObjectsUri, ID_PROJECTION, STORAGE_FORMAT_PARENT_WHERE,
+                        new String[] { Integer.toString(storageID),
+                                       Integer.toString(format),
+                                       Integer.toString(parent) },
+                        null);
             }
         }
     }
