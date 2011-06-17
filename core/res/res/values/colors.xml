@@ -148,5 +148,14 @@
 
     <color name="group_button_dialog_pressed_holo_light">#ffffffff</color>
     <color name="group_button_dialog_focused_holo_light">#4699cc00</color>
+
+    <!-- General purpose colors for Holo-themed elements -->
+    <eat-comment />
+
+    <!-- A Holo shade of blue -->
+    <color name="holo_blue">#ff6699ff</color>
+    <!-- A Holo shade of green -->
+    <color name="holo_green">#ff99cc00</color>
+
 </resources>
 

@@ -1321,7 +1321,8 @@
     </style>
 
     <style name="TextAppearance.Holo.DialogWindowTitle">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@android:color/holo_blue</item>
     </style>
 
     <style name="TextAppearance.Holo.CalendarViewWeekDayView" parent="TextAppearance.Small.CalendarViewWeekDayView">
@@ -1419,7 +1420,8 @@
     </style>
 
     <style name="TextAppearance.Holo.Light.DialogWindowTitle">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@android:color/holo_blue</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.CalendarViewWeekDayView" parent="TextAppearance.Small.CalendarViewWeekDayView">
@@ -1448,6 +1450,12 @@
 
     <style name="Widget.Holo.Button.Borderless">
         <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:paddingLeft">4dip</item>
+        <item name="android:paddingRight">4dip</item>
+    </style>
+
+    <style name="Widget.Holo.Button.Borderless.Small">
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="Widget.Holo.Button.Small">
@@ -1864,6 +1872,12 @@
 
     <style name="Widget.Holo.Light.Button.Borderless">
         <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:paddingLeft">4dip</item>
+        <item name="android:paddingRight">4dip</item>
+    </style>
+
+    <style name="Widget.Holo.Light.Button.Borderless.Small">
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="Widget.Holo.Light.Button.Small">

@@ -17,8 +17,6 @@
 */
 -->
 <resources>
-    <!-- Dialog title height -->
-    <dimen name="alert_dialog_title_height">54dip</dimen>
     <!-- Dialog button bar height -->
     <dimen name="alert_dialog_button_bar_height">54dip</dimen>
     <!-- Preference fragment padding, bottom -->

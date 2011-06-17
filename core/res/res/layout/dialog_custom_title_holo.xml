@@ -23,18 +23,16 @@ This is an custom layout for a dialog.
     android:fitsSystemWindows="true">
     <FrameLayout android:id="@android:id/title_container"
         android:layout_width="match_parent"
-        android:layout_height="60dip"
+        android:layout_height="@dimen/alert_dialog_title_height"
         android:layout_weight="0"
         android:gravity="center_vertical|left"
         style="?android:attr/windowTitleBackgroundStyle">
     </FrameLayout>
     <ImageView android:id="@+id/titleDivider"
             android:layout_width="match_parent"
-            android:layout_height="4dip"
+            android:layout_height="1dip"
             android:scaleType="fitXY"
             android:gravity="fill_horizontal"
-            android:paddingLeft="16dip"
-            android:paddingRight="16dip"
             android:src="@android:drawable/divider_strong_holo" />
     <FrameLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"

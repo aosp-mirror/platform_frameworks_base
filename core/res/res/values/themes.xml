@@ -1411,6 +1411,7 @@
         <item name="android:colorBackgroundCacheHint">@null</item>
 
         <item name="android:buttonBarStyle">@android:style/Holo.ButtonBar.AlertDialog</item>
+        <item name="borderlessButtonStyle">@android:style/Widget.Holo.Button.Borderless.Small</item>
         
         <item name="textAppearance">@android:style/TextAppearance.Holo</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Inverse</item>
@@ -1420,7 +1421,7 @@
          a regular dialog. -->
     <style name="Theme.Holo.Dialog.MinWidth">
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
-        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
     <!-- Variation of Theme.Holo.Dialog that does not include a title bar. -->
@@ -1433,7 +1434,7 @@
          a regular dialog. -->
     <style name="Theme.Holo.Dialog.NoActionBar.MinWidth">
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
-        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
     <!-- Variation of Theme.Holo.Dialog that does not include a frame (or background).
@@ -1460,7 +1461,7 @@
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.Holo</item>
         <item name="windowContentOverlay">@null</item>
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
-        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
     <!-- Theme for a window that will be displayed either full-screen on
@@ -1499,6 +1500,7 @@
         <item name="android:colorBackgroundCacheHint">@null</item>
 
         <item name="android:buttonBarStyle">@android:style/Holo.Light.ButtonBar.AlertDialog</item>
+        <item name="borderlessButtonStyle">@android:style/Widget.Holo.Light.Button.Borderless.Small</item>
 
         <item name="textAppearance">@android:style/TextAppearance.Holo.Light</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Light.Inverse</item>
@@ -1508,7 +1510,7 @@
          a regular dialog. -->
     <style name="Theme.Holo.Light.Dialog.MinWidth">
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
-        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
     <!-- Variation of Theme.Holo.Light.Dialog that does not include a title bar. -->
@@ -1521,7 +1523,7 @@
          a regular dialog. -->
     <style name="Theme.Holo.Light.Dialog.NoActionBar.MinWidth">
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
-        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
     <!-- Theme for a window that will be displayed either full-screen on
@@ -1547,7 +1549,7 @@
         <item name="windowTitleStyle">@android:style/DialogWindowTitle.Holo.Light</item>
         <item name="windowContentOverlay">@null</item>
         <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
-        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_major</item>
+        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
     </style>
 
     <!-- Default holographic (dark) for windows that want to have the user's selected

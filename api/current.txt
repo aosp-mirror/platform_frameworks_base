@@ -1632,6 +1632,7 @@ package android {
     field public static final int Widget_Holo_AutoCompleteTextView = 16973968; // 0x1030090
     field public static final int Widget_Holo_Button = 16973963; // 0x103008b
     field public static final int Widget_Holo_Button_Borderless = 16974050; // 0x10300e2
+    field public static final int Widget_Holo_Button_Borderless_Small = 16974107; // 0x103011b
     field public static final int Widget_Holo_Button_Inset = 16973965; // 0x103008d
     field public static final int Widget_Holo_Button_Small = 16973964; // 0x103008c
     field public static final int Widget_Holo_Button_Toggle = 16973966; // 0x103008e
@@ -1658,6 +1659,7 @@ package android {
     field public static final int Widget_Holo_Light_ActionMode = 16974047; // 0x10300df
     field public static final int Widget_Holo_Light_AutoCompleteTextView = 16974011; // 0x10300bb
     field public static final int Widget_Holo_Light_Button = 16974006; // 0x10300b6
+    field public static final int Widget_Holo_Light_Button_Borderless_Small = 16974108; // 0x103011c
     field public static final int Widget_Holo_Light_Button_Inset = 16974008; // 0x10300b8
     field public static final int Widget_Holo_Light_Button_Small = 16974007; // 0x10300b7
     field public static final int Widget_Holo_Light_Button_Toggle = 16974009; // 0x10300b9

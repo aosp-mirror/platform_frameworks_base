@@ -54,15 +54,19 @@ public class DialogTitle extends TextView {
                 if (ellipsisCount > 0) {
                     setSingleLine(false);
                     
-                    TypedArray a = mContext.obtainStyledAttributes(
-                            android.R.style.TextAppearance_Medium,
-                            android.R.styleable.TextAppearance);
+                    TypedArray a = mContext.obtainStyledAttributes(null,
+                            android.R.styleable.TextAppearance,
+                            android.R.attr.textAppearanceMedium,
+                            android.R.style.TextAppearance_Medium);
                     final int textSize = a.getDimensionPixelSize(
                             android.R.styleable.TextAppearance_textSize,
                             (int) (20 * getResources().getDisplayMetrics().density));
+                    final int textColor = a.getColor(
+                            android.R.styleable.TextAppearance_textColor, 0xffffffff);
 
                     // textSize is already expressed in pixels
                     setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize);
+                    setTextColor(textColor);
                     setMaxLines(2);
                     super.onMeasure(widthMeasureSpec, heightMeasureSpec);      
                 }

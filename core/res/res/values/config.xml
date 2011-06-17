@@ -82,7 +82,7 @@
     <!-- The maximum width we would prefer dialogs to be.  0 if there is no
          maximum (let them grow as large as the screen).  Actual values are
          specified for -large and -xlarge configurations. -->
-    <dimen name="config_prefDialogWidth">0px</dimen>
+    <dimen name="config_prefDialogWidth">320dp</dimen>
     
     <!-- Whether dialogs should close automatically when the user touches outside
          of them.  This should not normally be modified. -->

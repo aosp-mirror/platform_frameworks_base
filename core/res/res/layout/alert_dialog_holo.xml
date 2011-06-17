@@ -32,12 +32,10 @@
         android:orientation="vertical">
         <ImageView android:id="@+id/titleDividerTop"
             android:layout_width="match_parent"
-            android:layout_height="4dip"
+            android:layout_height="1dip"
             android:visibility="gone"
             android:scaleType="fitXY"
             android:gravity="fill_horizontal"
-            android:paddingLeft="16dip"
-            android:paddingRight="16dip"
             android:src="@android:drawable/divider_strong_holo" />
         <LinearLayout android:id="@+id/title_template"
             android:layout_width="match_parent"
@@ -45,15 +43,16 @@
             android:orientation="horizontal"
             android:gravity="center_vertical|left"
             android:minHeight="@dimen/alert_dialog_title_height"
-            android:layout_marginLeft="32dip"
-            android:layout_marginRight="32dip">
+            android:layout_marginLeft="16dip"
+            android:layout_marginRight="16dip">
             <ImageView android:id="@+id/icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingRight="16dip"
+                android:paddingRight="8dip"
                 android:src="@null" />
             <com.android.internal.widget.DialogTitle android:id="@+id/alertTitle"
-                style="?android:attr/textAppearanceMedium"
+                style="?android:attr/textAppearanceLarge"
+                android:textColor="@android:color/holo_blue"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:layout_width="match_parent"
@@ -61,12 +60,10 @@
         </LinearLayout>
         <ImageView android:id="@+id/titleDivider"
             android:layout_width="match_parent"
-            android:layout_height="4dip"
+            android:layout_height="1dip"
             android:visibility="gone"
             android:scaleType="fitXY"
             android:gravity="fill_horizontal"
-            android:paddingLeft="16dip"
-            android:paddingRight="16dip"
             android:src="@android:drawable/divider_strong_holo" />
         <!-- If the client uses a customTitle, it will be added here. -->
     </LinearLayout>
@@ -79,10 +76,6 @@
         <ScrollView android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dip"
-            android:layout_marginRight="16dip"
-            android:paddingTop="32dip"
-            android:paddingBottom="32dip"
             android:clipToPadding="false">
             <TextView android:id="@+id/message"
                 style="?android:attr/textAppearanceMedium"
@@ -99,11 +92,7 @@
         android:layout_weight="1">
         <FrameLayout android:id="@+android:id/custom"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="8dip"
-            android:paddingBottom="8dip"
-            android:paddingLeft="32dip"
-            android:paddingRight="32dip" />
+            android:layout_height="wrap_content" />
     </FrameLayout>
 
     <LinearLayout android:id="@+id/buttonPanel"
@@ -113,27 +102,21 @@
         android:orientation="vertical"
         android:divider="?android:attr/dividerHorizontal"
         android:showDividers="beginning"
-        android:dividerPadding="16dip">
+        android:dividerPadding="0dip">
         <LinearLayout
             style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingLeft="2dip"
-            android:paddingRight="2dip"
+            android:layoutDirection="locale"
             android:measureWithLargestChild="true">
-            <LinearLayout android:id="@+id/leftSpacer"
-                android:layout_weight="0.25"
-                android:layout_width="0dip"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone" />
-            <Button android:id="@+id/button1"
+            <Button android:id="@+id/button2"
                 android:layout_width="0dip"
                 android:layout_gravity="left"
                 android:layout_weight="1"
                 android:maxLines="2"
                 style="?android:attr/buttonBarButtonStyle"
+                android:textSize="14sp"
                 android:minHeight="@dimen/alert_dialog_button_bar_height"
                 android:layout_height="wrap_content" />
             <Button android:id="@+id/button3"
@@ -142,22 +125,18 @@
                 android:layout_weight="1"
                 android:maxLines="2"
                 style="?android:attr/buttonBarButtonStyle"
+                android:textSize="14sp"
                 android:minHeight="@dimen/alert_dialog_button_bar_height"
                 android:layout_height="wrap_content" />
-            <Button android:id="@+id/button2"
+            <Button android:id="@+id/button1"
                 android:layout_width="0dip"
                 android:layout_gravity="right"
                 android:layout_weight="1"
                 android:maxLines="2"
                 android:minHeight="@dimen/alert_dialog_button_bar_height"
                 style="?android:attr/buttonBarButtonStyle"
+                android:textSize="14sp"
                 android:layout_height="wrap_content" />
-            <LinearLayout android:id="@+id/rightSpacer"
-                android:layout_width="0dip"
-                android:layout_weight="0.25"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone" />
         </LinearLayout>
      </LinearLayout>
 </LinearLayout>
