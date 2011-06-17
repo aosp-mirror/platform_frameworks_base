@@ -3128,9 +3128,11 @@ public class PackageParser {
         }
         if (p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
             ai.enabled = true;
-        } else if (p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+        } else if (p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+                || p.mSetEnabled == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER) {
             ai.enabled = false;
         }
+        ai.enabledSetting = p.mSetEnabled;
         return ai;
     }
 

@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
 import com.android.internal.app.IMediaContainerService;
@@ -7048,7 +7049,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             final String packageName, String className, int newState, final int flags) {
         if (!(newState == COMPONENT_ENABLED_STATE_DEFAULT
               || newState == COMPONENT_ENABLED_STATE_ENABLED
-              || newState == COMPONENT_ENABLED_STATE_DISABLED)) {
+              || newState == COMPONENT_ENABLED_STATE_DISABLED
+              || newState == COMPONENT_ENABLED_STATE_DISABLED_USER)) {
             throw new IllegalArgumentException("Invalid new component state: "
                     + newState);
         }

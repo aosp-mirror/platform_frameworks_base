@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 
 import com.android.internal.util.FastXmlSerializer;
@@ -1912,6 +1913,7 @@ final class Settings {
             return false;
         }
         if (packageSettings.enabled == COMPONENT_ENABLED_STATE_DISABLED
+                || packageSettings.enabled == COMPONENT_ENABLED_STATE_DISABLED_USER
                 || (packageSettings.pkg != null && !packageSettings.pkg.applicationInfo.enabled
                         && packageSettings.enabled == COMPONENT_ENABLED_STATE_DEFAULT)) {
             return false;
