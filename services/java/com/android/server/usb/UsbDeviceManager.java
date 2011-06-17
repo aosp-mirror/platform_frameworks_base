@@ -95,10 +95,16 @@ public class UsbDeviceManager {
     private NotificationManager mNotificationManager;
     private final boolean mHasUsbAccessory;
 
-    // for adb connected notifications
+    // for USB connected notification
+    private boolean mUsbNotificationShown;
+    private boolean mUseUsbNotification;
+    private Notification mUsbNotification;
+
+    // for adb connected notification
     private boolean mAdbNotificationShown;
     private Notification mAdbNotification;
     private boolean mAdbEnabled;
+
 
     private class AdbSettingsObserver extends ContentObserver {
         public AdbSettingsObserver() {
@@ -109,6 +115,50 @@ public class UsbDeviceManager {
             boolean enable = (Settings.Secure.getInt(mContentResolver,
                     Settings.Secure.ADB_ENABLED, 0) > 0);
             mHandler.sendMessage(MSG_ENABLE_ADB, enable);
+        }
+    }
+
+    private void updateUsbNotification(boolean connected) {
+        if (mNotificationManager == null || !mUseUsbNotification) return;
+        if (connected) {
+            if (!mUsbNotificationShown) {
+                Resources r = mContext.getResources();
+                CharSequence title = r.getText(
+                        com.android.internal.R.string.usb_preferences_notification_title);
+                CharSequence message = r.getText(
+                        com.android.internal.R.string.usb_preferece_notification_message);
+
+                if (mUsbNotification == null) {
+                    mUsbNotification = new Notification();
+                    mUsbNotification.icon = com.android.internal.R.drawable.stat_sys_data_usb;
+                    mUsbNotification.when = 0;
+                    mUsbNotification.flags = Notification.FLAG_ONGOING_EVENT;
+                    mUsbNotification.tickerText = title;
+                    mUsbNotification.defaults = 0; // please be quiet
+                    mUsbNotification.sound = null;
+                    mUsbNotification.vibrate = null;
+                }
+
+                Intent intent = new Intent();
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                        Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                intent.setClassName("com.android.systemui",
+                        "com.android.systemui.usb.UsbPreferenceActivity");
+                PendingIntent pi = PendingIntent.getActivity(mContext, 0,
+                        intent, 0);
+
+                mUsbNotification.setLatestEventInfo(mContext, title, message, pi);
+
+                mUsbNotificationShown = true;
+                mNotificationManager.notify(
+                        com.android.internal.R.string.usb_preferences_notification_title,
+                        mUsbNotification);
+            }
+
+        } else if (mUsbNotificationShown) {
+            mUsbNotificationShown = false;
+            mNotificationManager.cancel(
+                    com.android.internal.R.string.usb_preferences_notification_title);
         }
     }
 
@@ -204,6 +254,17 @@ public class UsbDeviceManager {
 
         mNotificationManager = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // We do not show the USB notification if the primary volume supports mass storage.
+        // The legacy mass storage UI will be used instead.
+        boolean massStorageSupported = false;
+        StorageManager storageManager = (StorageManager)
+                mContext.getSystemService(Context.STORAGE_SERVICE);
+        StorageVolume[] volumes = storageManager.getVolumeList();
+        if (volumes.length > 0) {
+            massStorageSupported = volumes[0].allowMassStorage();
+        }
+        mUseUsbNotification = !massStorageSupported;
 
         // make sure the ADB_ENABLED setting value matches the current state
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_ENABLED, mAdbEnabled ? 1 : 0);
@@ -448,6 +509,7 @@ public class UsbDeviceManager {
                 case MSG_UPDATE_STATE:
                     mConnected = (msg.arg1 == 1);
                     mConfigured = (msg.arg2 == 1);
+                    updateUsbNotification(mConnected);
                     updateAdbNotification(mAdbEnabled && mConnected);
                     if (containsFunction(mCurrentFunctions,
                             UsbManager.USB_FUNCTION_ACCESSORY)) {
@@ -481,6 +543,7 @@ public class UsbDeviceManager {
                     mDefaultFunctions = function;
                     break;
                 case MSG_SYSTEM_READY:
+                    updateUsbNotification(mConnected);
                     updateAdbNotification(mAdbEnabled && mConnected);
                     updateUsbState();
                     if (mCurrentAccessory != null && mDeferAccessoryAttached) {
