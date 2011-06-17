@@ -38,8 +38,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static android.view.View.MeasureSpec.EXACTLY;
-import static android.view.View.MeasureSpec.UNSPECIFIED;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -760,43 +758,6 @@ public class GridLayout extends ViewGroup {
 
     // Measurement
 
-    private static int getChildMeasureSpec2(int spec, int padding, int childDimension) {
-        int resultSize;
-        int resultMode;
-
-        if (childDimension >= 0) {
-            resultSize = childDimension;
-            resultMode = EXACTLY;
-        } else {
-            /*
-            using the following lines would replicate the logic of ViewGroup.getChildMeasureSpec()
-
-            int specMode = MeasureSpec.getMode(spec);
-            int specSize = MeasureSpec.getSize(spec);
-            int size = Math.max(0, specSize - padding);
-
-            resultSize = size;
-            resultMode = (specMode == EXACTLY && childDimension == LayoutParams.WRAP_CONTENT) ?
-                    AT_MOST : specMode;
-            */
-            resultSize = 0;
-            resultMode = UNSPECIFIED;
-        }
-        return MeasureSpec.makeMeasureSpec(resultSize, resultMode);
-    }
-
-    @Override
-    protected void measureChild(View child, int parentWidthSpec, int parentHeightSpec) {
-        ViewGroup.LayoutParams lp = child.getLayoutParams();
-
-        int childWidthMeasureSpec = getChildMeasureSpec2(parentWidthSpec,
-                mPaddingLeft + mPaddingRight, lp.width);
-        int childHeightMeasureSpec = getChildMeasureSpec2(parentHeightSpec,
-                mPaddingTop + mPaddingBottom, lp.height);
-
-        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-    }
-
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
         measureChildren(widthSpec, heightSpec);
@@ -1145,9 +1106,6 @@ public class GridLayout extends ViewGroup {
             return result;
         }
 
-        /*
-        Topological sort.
-         */
         private Arc[] topologicalSort(final Arc[] arcs, int start) {
         // todo ensure the <start> vertex is added in edge cases
             final List<Arc> result = new ArrayList<Arc>();
@@ -2214,7 +2172,9 @@ public class GridLayout extends ViewGroup {
          *
          * @param view              the view to which this alignment should be applied
          * @param viewSize          the measured size of the view
-         * @param measurementType   the type of measurement that should be made
+         * @param measurementType   The type of measurement that should be made. This feature
+         *                          is currently unused as GridLayout only supports one
+         *                          type of measurement: {@link View#measure(int, int)}.
          *
          * @return                  the alignment value
          */
@@ -2230,7 +2190,9 @@ public class GridLayout extends ViewGroup {
          * @param view              the view to which this alignment should be applied
          * @param viewSize          the measured size of the view
          * @param cellSize          the size of the cell into which this view will be placed
-         * @param measurementType   the type of measurement that should be made
+         * @param measurementType   The type of measurement that should be made. This feature
+         *                          is currently unused as GridLayout only supports one
+         *                          type of measurement: {@link View#measure(int, int)}.
          *
          * @return                  the aligned size
          */
