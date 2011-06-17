@@ -158,7 +158,7 @@ public class WebSettings {
     // know what they are.
     private LayoutAlgorithm mLayoutAlgorithm = LayoutAlgorithm.NARROW_COLUMNS;
     private Context         mContext;
-    private TextSize        mTextSize = TextSize.NORMAL;
+    private int             mTextSize = 100;
     private String          mStandardFontFamily = "sans-serif";
     private String          mFixedFontFamily = "monospace";
     private String          mSansSerifFontFamily = "sans-serif";
@@ -709,17 +709,38 @@ public class WebSettings {
     }
 
     /**
+     * Set the text zoom of the page in percent. Default is 100.
+     * @param textZoom A percent value for increasing or decreasing the text.
+     * @hide
+     */
+    public synchronized void setTextZoom(int textZoom) {
+        if (mTextSize != textZoom) {
+            if (WebView.mLogEvent) {
+                EventLog.writeEvent(EventLogTags.BROWSER_TEXT_SIZE_CHANGE,
+                        mTextSize, textZoom);
+            }
+            mTextSize = textZoom;
+            postSync();
+        }
+    }
+
+    /**
+     * Get the text zoom of the page in percent.
+     * @return A percent value describing the text zoom.
+     * @see setTextSizeZoom
+     * @hide
+     */
+    public synchronized int getTextZoom() {
+        return mTextSize;
+    }
+
+    /**
      * Set the text size of the page.
      * @param t A TextSize value for increasing or decreasing the text.
      * @see WebSettings.TextSize
      */
     public synchronized void setTextSize(TextSize t) {
-        if (WebView.mLogEvent && mTextSize != t ) {
-            EventLog.writeEvent(EventLogTags.BROWSER_TEXT_SIZE_CHANGE,
-                    mTextSize.value, t.value);
-        }
-        mTextSize = t;
-        postSync();
+        setTextZoom(t.value);
     }
 
     /**
@@ -728,7 +749,19 @@ public class WebSettings {
      * @see WebSettings.TextSize
      */
     public synchronized TextSize getTextSize() {
-        return mTextSize;
+        TextSize closestSize = null;
+        int smallestDelta = Integer.MAX_VALUE;
+        for (TextSize size : TextSize.values()) {
+            int delta = Math.abs(mTextSize - size.value);
+            if (delta == 0) {
+                return size;
+            }
+            if (delta < smallestDelta) {
+                smallestDelta = delta;
+                closestSize = size;
+            }
+        }
+        return closestSize != null ? closestSize : TextSize.NORMAL;
     }
 
     /**
