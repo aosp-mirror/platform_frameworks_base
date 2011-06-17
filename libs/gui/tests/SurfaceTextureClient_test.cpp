@@ -590,7 +590,7 @@ TEST_F(SurfaceTextureClientTest, GetTransformMatrixSucceedsAfterFreeingBuffersWi
 
 // This test verifies that the buffer format can be queried immediately after
 // it is set.
-TEST_F(SurfaceTextureClientTest, DISABLED_QueryFormatAfterSettingWorks) {
+TEST_F(SurfaceTextureClientTest, QueryFormatAfterSettingWorks) {
     sp<ANativeWindow> anw(mSTC);
     int fmts[] = {
         // RGBA_8888 should not come first, as it's the default
