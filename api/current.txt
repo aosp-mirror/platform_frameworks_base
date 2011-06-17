@@ -218,6 +218,7 @@ package android {
     field public static final int alertDialogIcon = 16843605; // 0x1010355
     field public static final int alertDialogStyle = 16842845; // 0x101005d
     field public static final int alertDialogTheme = 16843529; // 0x1010309
+    field public static final int alignmentMode = 16843642; // 0x101037a
     field public static final int allContactsName = 16843468; // 0x10102cc
     field public static final int allowBackup = 16843392; // 0x1010280
     field public static final int allowClearUserData = 16842757; // 0x1010005
@@ -636,7 +637,6 @@ package android {
     field public static final int loopViews = 16843527; // 0x1010307
     field public static final int manageSpaceActivity = 16842756; // 0x1010004
     field public static final int mapViewStyle = 16842890; // 0x101008a
-    field public static final int marginsIncludedInAlignment = 16843642; // 0x101037a
     field public static final int marqueeRepeatLimit = 16843293; // 0x101021d
     field public static final int max = 16843062; // 0x1010136
     field public static final int maxDate = 16843584; // 0x1010340
@@ -24777,21 +24777,23 @@ package android.widget {
     ctor public GridLayout(android.content.Context);
     ctor public GridLayout(android.content.Context, android.util.AttributeSet, int);
     ctor public GridLayout(android.content.Context, android.util.AttributeSet);
+    method public int getAlignmentMode();
     method public int getColumnCount();
-    method public boolean getMarginsIncludedInAlignment();
     method public int getOrientation();
     method public int getRowCount();
     method public boolean getUseDefaultMargins();
     method public boolean isColumnOrderPreserved();
     method public boolean isRowOrderPreserved();
     method protected void onLayout(boolean, int, int, int, int);
+    method public void setAlignmentMode(int);
     method public void setColumnCount(int);
     method public void setColumnOrderPreserved(boolean);
-    method public void setMarginsIncludedInAlignment(boolean);
     method public void setOrientation(int);
     method public void setRowCount(int);
     method public void setRowOrderPreserved(boolean);
     method public void setUseDefaultMargins(boolean);
+    field public static final int ALIGN_BOUNDS = 0; // 0x0
+    field public static final int ALIGN_MARGINS = 1; // 0x1
     field public static final android.widget.GridLayout.Alignment BASELINE;
     field public static final android.widget.GridLayout.Alignment BOTTOM;
     field public static final android.widget.GridLayout.Alignment CENTER;
