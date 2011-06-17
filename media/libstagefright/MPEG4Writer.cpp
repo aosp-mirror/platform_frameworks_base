@@ -1975,7 +1975,17 @@ status_t MPEG4Writer::Track::threadEntry() {
     int64_t previousPausedDurationUs = 0;
     int64_t timestampUs = 0;
     int64_t cttsDeltaTimeUs = 0;
+    bool hasBFrames = false;
 
+#if 1
+    // XXX: Samsung's video encoder's output buffer timestamp
+    // is not correct. see bug 4724339
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("rw.media.record.hasb", value, NULL) &&
+        (!strcasecmp(value, "true") || !strcasecmp(value, "1"))) {
+        hasBFrames = true;
+    }
+#endif
     if (mIsAudio) {
         prctl(PR_SET_NAME, (unsigned long)"AudioTrackEncoding", 0, 0, 0);
     } else {
@@ -2118,7 +2128,7 @@ status_t MPEG4Writer::Track::threadEntry() {
 
         timestampUs -= previousPausedDurationUs;
         CHECK(timestampUs >= 0);
-        if (!mIsAudio) {
+        if (!mIsAudio && hasBFrames) {
             /*
              * Composition time: timestampUs
              * Decoding time: decodingTimeUs
