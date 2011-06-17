@@ -1028,9 +1028,6 @@ public class WifiStateMachine extends StateMachine {
         boolean wifiTethered = false;
         boolean wifiAvailable = false;
 
-        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
-
         if (mCm == null) {
             mCm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         }
@@ -1043,14 +1040,14 @@ public class WifiStateMachine extends StateMachine {
 
                     InterfaceConfiguration ifcg = null;
                     try {
-                        ifcg = service.getInterfaceConfig(intf);
+                        ifcg = nwService.getInterfaceConfig(intf);
                         if (ifcg != null) {
                             /* IP/netmask: 192.168.43.1/255.255.255.0 */
                             ifcg.addr = new LinkAddress(NetworkUtils.numericToInetAddress(
                                     "192.168.43.1"), 24);
                             ifcg.interfaceFlags = "[up]";
 
-                            service.setInterfaceConfig(intf, ifcg);
+                            nwService.setInterfaceConfig(intf, ifcg);
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "Error configuring interface " + intf + ", :" + e);
@@ -1450,7 +1447,7 @@ public class WifiStateMachine extends StateMachine {
      * using the interface, stopping DHCP & disabling interface
      */
     private void handleNetworkDisconnect() {
-        Log.d(TAG, "Reset connections and stopping DHCP");
+        Log.d(TAG, "Stopping DHCP and clearing IP");
 
         /*
          * stop DHCP
@@ -1459,6 +1456,12 @@ public class WifiStateMachine extends StateMachine {
             mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
             mDhcpStateMachine.quit();
             mDhcpStateMachine = null;
+        }
+
+        try {
+            nwService.clearInterfaceAddresses(mInterfaceName);
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to clear IP addresses on disconnect" + e);
         }
 
         /* Reset data structures */
@@ -2656,13 +2659,11 @@ public class WifiStateMachine extends StateMachine {
             } else {
                 DhcpInfoInternal dhcpInfoInternal = WifiConfigStore.getIpConfiguration(
                         mLastNetworkId);
-                IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-                INetworkManagementService netd = INetworkManagementService.Stub.asInterface(b);
                 InterfaceConfiguration ifcg = new InterfaceConfiguration();
                 ifcg.addr = dhcpInfoInternal.makeLinkAddress();
                 ifcg.interfaceFlags = "[up]";
                 try {
-                    netd.setInterfaceConfig(mInterfaceName, ifcg);
+                    nwService.setInterfaceConfig(mInterfaceName, ifcg);
                     Log.v(TAG, "Static IP configuration succeeded");
                     sendMessage(CMD_STATIC_IP_SUCCESS, dhcpInfoInternal);
                 } catch (RemoteException re) {
