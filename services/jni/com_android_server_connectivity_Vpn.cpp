@@ -55,6 +55,7 @@ static int create_interface(int mtu, char *name, int *index)
 {
     int tun = open("/dev/tun", O_RDWR);
     int inet4 = socket(AF_INET, SOCK_DGRAM, 0);
+    int flags;
 
     ifreq ifr4;
     memset(&ifr4, 0, sizeof(ifr4));
@@ -83,6 +84,13 @@ static int create_interface(int mtu, char *name, int *index)
     // Get interface index.
     if (ioctl(inet4, SIOGIFINDEX, &ifr4)) {
         LOGE("Cannot get index of %s: %s", ifr4.ifr_name, strerror(errno));
+        goto error;
+    }
+
+    // Make it non-blocking.
+    flags = fcntl(tun, F_GETFL, 0);
+    if (flags == -1 || fcntl(tun, F_SETFL, flags | O_NONBLOCK)) {
+        LOGE("Cannot set non-blocking on %s: %s", ifr4.ifr_name, strerror(errno));
         goto error;
     }
 
