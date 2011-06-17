@@ -507,7 +507,7 @@ public final class CalendarContract {
      * generally a good idea to include:
      * <ul>
      * <li>{@link #SYNC_EVENTS} set to 1</li>
-     * <li>{@link #CALENDAR_TIMEZONE}</li>
+     * <li>{@link #CALENDAR_TIME_ZONE}</li>
      * <li>{@link #ALLOWED_REMINDERS}</li>
      * </ul>
      * <dt><b>Update</b></dt>
