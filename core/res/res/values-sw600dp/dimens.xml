@@ -24,5 +24,12 @@
     <dimen name="status_bar_icon_size">32dip</dimen>
     <!-- Size of the giant number (unread count) in the notifications -->
     <dimen name="status_bar_content_number_size">48sp</dimen>
+
+    <!-- Size of clock font in LockScreen. -->
+    <dimen name="keyguard_pattern_unlock_clock_font_size">98sp</dimen>
+
+    <!-- Size of status line font in LockScreen. -->
+    <dimen name="keyguard_pattern_unlock_status_line_font_size">14sp</dimen>
+
 </resources>
 

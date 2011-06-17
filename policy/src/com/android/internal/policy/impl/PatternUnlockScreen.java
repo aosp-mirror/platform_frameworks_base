@@ -23,6 +23,7 @@ import android.os.SystemClock;
 import android.security.KeyStore;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.MotionEvent;
 import android.widget.Button;
@@ -73,11 +74,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     private boolean mEnableFallback;
 
     private StatusView mStatusView;
-
     private LockPatternView mLockPatternView;
-
-    private ViewGroup mFooterNormal;
-    private ViewGroup mFooterForgotPattern;
 
     /**
      * Keeps track of the last time we poked the wake lock during dispatching
@@ -96,9 +93,20 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         }
     };
 
+    private final OnClickListener mEmergencyClick = new OnClickListener() {
+        public void onClick(View v) {
+            mCallback.takeEmergencyCallAction();
+        }
+    };
+
+    private final OnClickListener mForgotPatternClick = new OnClickListener() {
+        public void onClick(View v) {
+            mCallback.forgotPattern(true);
+        }
+    };
+
     private Button mForgotPatternButton;
-    private Button mEmergencyAlone;
-    private Button mEmergencyTogether;
+    private Button mEmergencyButton;
     private int mCreationOrientation;
 
     enum FooterMode {
@@ -107,23 +115,27 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         VerifyUnlocked
     }
 
+    private void hideForgotPatternButton() {
+        mForgotPatternButton.setVisibility(View.GONE);
+    }
+
+    private void showForgotPatternButton() {
+        mForgotPatternButton.setVisibility(View.VISIBLE);
+    }
+
     private void updateFooter(FooterMode mode) {
         switch (mode) {
             case Normal:
-                Log.d(TAG, "mode normal");
-                mFooterNormal.setVisibility(View.VISIBLE);
-                mFooterForgotPattern.setVisibility(View.GONE);
+                if (DEBUG) Log.d(TAG, "mode normal");
+                hideForgotPatternButton();
                 break;
             case ForgotLockPattern:
-                Log.d(TAG, "mode ForgotLockPattern");
-                mFooterNormal.setVisibility(View.GONE);
-                mFooterForgotPattern.setVisibility(View.VISIBLE);
-                mForgotPatternButton.setVisibility(View.VISIBLE);
+                if (DEBUG) Log.d(TAG, "mode ForgotLockPattern");
+                showForgotPatternButton();
                 break;
             case VerifyUnlocked:
-                Log.d(TAG, "mode VerifyUnlocked");
-                mFooterNormal.setVisibility(View.GONE);
-                mFooterForgotPattern.setVisibility(View.GONE);
+                if (DEBUG) Log.d(TAG, "mode VerifyUnlocked");
+                hideForgotPatternButton();
         }
     }
 
@@ -176,32 +188,16 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
         mLockPatternView = (LockPatternView) findViewById(R.id.lockPattern);
 
-        mFooterNormal = (ViewGroup) findViewById(R.id.footerNormal);
-        mFooterForgotPattern = (ViewGroup) findViewById(R.id.footerForgotPattern);
-
         // emergency call buttons
-        final OnClickListener emergencyClick = new OnClickListener() {
-            public void onClick(View v) {
-                mCallback.takeEmergencyCallAction();
-            }
-        };
+        mEmergencyButton = (Button) findViewById(R.id.emergencyCallButton);
+        mEmergencyButton.setFocusable(false); // touch only!
+        mEmergencyButton.setOnClickListener(mEmergencyClick);
 
-        mEmergencyAlone = (Button) findViewById(R.id.emergencyCallAlone);
-        mEmergencyAlone.setFocusable(false); // touch only!
-        mEmergencyAlone.setOnClickListener(emergencyClick);
-        mEmergencyTogether = (Button) findViewById(R.id.emergencyCallTogether);
-        mEmergencyTogether.setFocusable(false);
-        mEmergencyTogether.setOnClickListener(emergencyClick);
         refreshEmergencyButtonText();
 
-        mForgotPatternButton = (Button) findViewById(R.id.forgotPattern);
+        mForgotPatternButton = (Button) findViewById(R.id.forgotPatternButton);
         mForgotPatternButton.setText(R.string.lockscreen_forgot_pattern_button_text);
-        mForgotPatternButton.setOnClickListener(new OnClickListener() {
-
-            public void onClick(View v) {
-                mCallback.forgotPattern(true);
-            }
-        });
+        mForgotPatternButton.setOnClickListener(mForgotPatternClick);
 
         // make it so unhandled touch events within the unlock screen go to the
         // lock pattern view.
@@ -232,8 +228,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     }
 
     private void refreshEmergencyButtonText() {
-        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyAlone);
-        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyTogether);
+        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyButton);
     }
 
     public void setEnableFallback(boolean state) {
@@ -338,8 +333,11 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         mLockPatternView.clearPattern();
 
         // show "forgot pattern?" button if we have an alternate authentication method
-        mForgotPatternButton.setVisibility(mCallback.doesFallbackUnlockScreenExist()
-                ? View.VISIBLE : View.INVISIBLE);
+        if (mCallback.doesFallbackUnlockScreenExist()) {
+            showForgotPatternButton();
+        } else {
+            hideForgotPatternButton();
+        }
 
         // if the user is currently locked out, enforce it.
         long deadline = mLockPatternUtils.getLockoutAttemptDeadline();

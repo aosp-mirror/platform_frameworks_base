@@ -21,198 +21,124 @@
      the user how to unlock their device, or make an emergency call.  This
      is the portrait layout.  -->
 
-<com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:rowCount="9">
 
-    <!-- left side: instructions and emergency call button -->
-    <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="0dip"
-            android:layout_height="match_parent"
-            android:layout_weight="1.0"
-            android:layout_marginLeft="24dip"
-            android:gravity="left"
-            >
+    <!-- Column 0: Time, date and status -->
+    <com.android.internal.widget.DigitalClock android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dip"
+        android:layout_marginBottom="12dip"
+        android:layout_gravity="right">
 
-        <TextView
-            android:id="@+id/alarm_status"
+        <!-- Because we can't have multi-tone fonts, we render two TextViews, one on
+        top of the other. Hence the redundant layout... -->
+        <TextView android:id="@+id/timeDisplayBackground"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="18sp"
-            android:drawablePadding="4dip"
-            />
-        <TextView
-            android:id="@+id/status1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            />
-
-        <TextView
-            android:id="@+id/carrier"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="17sp"
-            android:drawablePadding="4dip"
-            android:layout_marginTop="32dip"
             android:singleLine="true"
-            android:ellipsize="marquee"
-            android:gravity="right|bottom"
-            />
-
-        <com.android.internal.widget.DigitalClock android:id="@+id/time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_marginTop="8dip"
-            android:layout_marginBottom="8dip"
-            >
-
-            <!-- Because we can't have multi-tone fonts, we render two TextViews, one on
-            top of the other. Hence the redundant layout... -->
-            <TextView android:id="@+id/timeDisplayBackground"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:ellipsize="none"
-                android:textSize="72sp"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="6dip"
-                android:textColor="@color/lockscreen_clock_background"
-                />
-
-            <TextView android:id="@+id/timeDisplayForeground"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:ellipsize="none"
-                android:textSize="72sp"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginBottom="6dip"
-                android:layout_alignLeft="@id/timeDisplayBackground"
-                android:layout_alignTop="@id/timeDisplayBackground"
-                android:textColor="@color/lockscreen_clock_foreground"
-                />
-
-
-
-            <TextView android:id="@+id/am_pm"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/timeDisplayBackground"
-                android:layout_alignBaseline="@id/timeDisplayBackground"
-                android:singleLine="true"
-                android:ellipsize="none"
-                android:textSize="22sp"
-                android:layout_marginLeft="8dip"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/lockscreen_clock_am_pm"
-                />
-
-        </com.android.internal.widget.DigitalClock>
-
-        <TextView
-            android:id="@+id/date"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/time"
+            android:ellipsize="none"
             android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="@dimen/keyguard_pattern_unlock_clock_font_size"
+            android:layout_marginBottom="6dip"
+            android:textColor="@color/lockscreen_clock_background"
             />
 
-        <!-- used for instructions such as "draw pattern to unlock", the next alarm, and charging
-             status.  -->
-        <LinearLayout
-            android:orientation="horizontal"
+        <TextView android:id="@+id/timeDisplayForeground"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dip"
-            android:gravity="center"
-            >
-            <TextView
-                android:id="@+id/statusSep"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dip"
-                android:layout_marginRight="5dip"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="17sp"
-                />
-            <TextView
-                android:id="@+id/status2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textSize="17sp"
-                android:drawablePadding="4dip"
-                />
-        </LinearLayout>
-
-        <!-- fill space between header and button below -->
-        <View
-            android:layout_weight="1.0"
-            android:layout_width="match_parent"
-            android:layout_height="0dip"
+            android:singleLine="true"
+            android:ellipsize="none"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="@dimen/keyguard_pattern_unlock_clock_font_size"
+            android:layout_marginBottom="6dip"
+            android:layout_alignLeft="@id/timeDisplayBackground"
+            android:layout_alignTop="@id/timeDisplayBackground"
+            android:textColor="@color/lockscreen_clock_foreground"
             />
 
-        <!-- footer -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dip"
-            >
+    </com.android.internal.widget.DigitalClock>
 
-            <!-- option 1: a single emergency call button -->
-            <RelativeLayout android:id="@+id/footerNormal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                >
-                <Button android:id="@+id/emergencyCallAlone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/lockscreen_emergency_call"
-                    style="@style/Widget.Button.Transparent"
-                    android:drawableLeft="@drawable/ic_emergency"
-                    android:drawablePadding="8dip"
-                    />
-            </RelativeLayout>
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/keyguard_pattern_unlock_status_line_font_size"
+        android:layout_gravity="right"
+        />
 
-            <!-- option 2: an emergency call button, and a 'forgot pattern?' button -->
-            <LinearLayout android:id="@+id/footerForgotPattern"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                >
-                <Button android:id="@+id/forgotPattern"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.Button.Transparent"
-                    android:visibility="invisible"
-                    />
-                <Button android:id="@+id/emergencyCallTogether"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/lockscreen_emergency_call"
-                    style="@style/Widget.Button.Transparent"
-                    android:drawableLeft="@drawable/ic_emergency"
-                    android:drawablePadding="8dip"
-                    />
-            </LinearLayout>
-        </FrameLayout>
-    </LinearLayout>
+    <TextView
+        android:id="@+id/alarm_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/keyguard_pattern_unlock_status_line_font_size"
+        android:layout_gravity="right"
+        android:drawablePadding="4dip"
+        />
 
-    <!-- right side: lock pattern -->
+    <TextView
+        android:id="@+id/status1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/keyguard_pattern_unlock_status_line_font_size"
+        android:layout_gravity="right"
+        />
+
+    <TextView
+        android:id="@+id/status2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/keyguard_pattern_unlock_status_line_font_size"
+        android:layout_gravity="right"
+        android:drawablePadding="4dip"
+        android:visibility="gone"
+        />
+
+    <Space android:layout_rowWeight="1" android:layout_columnWeight="1" />
+
+    <TextView android:id="@+id/carrier"
+        android:layout_gravity="right"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/keyguard_pattern_unlock_status_line_font_size"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        />
+
+    <Button android:id="@+id/emergencyCallButton"
+        android:layout_gravity="right"
+        style="@*android:style/Widget.Button.Transparent"
+        android:textSize="@dimen/keyguard_pattern_unlock_status_line_font_size"
+        android:text="@string/lockscreen_emergency_call"
+        android:drawableLeft="@*android:drawable/lockscreen_emergency_button"
+        android:drawablePadding="0dip"
+    />
+
+    <Button android:id="@+id/forgotPatternButton"
+        android:layout_gravity="right"
+        style="@*android:style/Widget.Button.Transparent"
+        android:textSize="@dimen/keyguard_pattern_unlock_status_line_font_size"
+        android:text="@*android:string/lockscreen_forgot_pattern_button_text"
+        android:drawableLeft="@*android:drawable/lockscreen_forgot_password_button"
+        android:drawablePadding="0dip"
+    />
+
+    <!-- Column 1: lock pattern -->
     <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
-         android:layout_width="wrap_content"
-         android:layout_height="wrap_content" />
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:layout_marginTop="8dip"
+         android:layout_marginRight="8dip"
+         android:layout_marginBottom="8dip"
+         android:layout_marginLeft="8dip"
+         android:layout_rowSpan="9"/>
 
-</com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient>
+</GridLayout>

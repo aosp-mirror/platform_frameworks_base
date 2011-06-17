@@ -96,13 +96,13 @@ public class DigitalClock extends RelativeLayout {
     };
 
     static class AmPm {
-        private TextView mAmPm;
+        private TextView mAmPmTextView;
         private String mAmString, mPmString;
 
         AmPm(View parent, Typeface tf) {
-            mAmPm = (TextView) parent.findViewById(R.id.am_pm);
-            if (tf != null) {
-                mAmPm.setTypeface(tf);
+            mAmPmTextView = (TextView) parent.findViewById(R.id.am_pm);
+            if (mAmPmTextView != null && tf != null) {
+                mAmPmTextView.setTypeface(tf);
             }
 
             String[] ampm = new DateFormatSymbols().getAmPmStrings();
@@ -111,11 +111,15 @@ public class DigitalClock extends RelativeLayout {
         }
 
         void setShowAmPm(boolean show) {
-            mAmPm.setVisibility(show ? View.VISIBLE : View.GONE);
+            if (mAmPmTextView != null) {
+                mAmPmTextView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
         }
 
         void setIsMorning(boolean isMorning) {
-            mAmPm.setText(isMorning ? mAmString : mPmString);
+            if (mAmPmTextView != null) {
+                mAmPmTextView.setText(isMorning ? mAmString : mPmString);
+            }
         }
     }
 
