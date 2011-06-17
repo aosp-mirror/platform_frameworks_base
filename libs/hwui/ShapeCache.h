@@ -537,14 +537,15 @@ PathTexture* ShapeCache<Entry>::addTexture(const Entry& entry, const SkPath *pat
     const float pathWidth = fmax(bounds.width(), 1.0f);
     const float pathHeight = fmax(bounds.height(), 1.0f);
 
-    if (pathWidth > mMaxTextureSize || pathHeight > mMaxTextureSize) {
+    const float offset = fmax(paint->getStrokeWidth(), 1.0f) * 1.5f;
+
+    const uint32_t width = uint32_t(pathWidth + offset * 2.0 + 0.5);
+    const uint32_t height = uint32_t(pathHeight + offset * 2.0 + 0.5);
+
+    if (width > mMaxTextureSize || height > mMaxTextureSize) {
         LOGW("Shape %s too large to be rendered into a texture", mName);
         return NULL;
     }
-
-    const float offset = paint->getStrokeWidth() * 1.5f;
-    const uint32_t width = uint32_t(pathWidth + offset * 2.0 + 0.5);
-    const uint32_t height = uint32_t(pathHeight + offset * 2.0 + 0.5);
 
     const uint32_t size = width * height;
     // Don't even try to cache a bitmap that's bigger than the cache
