@@ -636,6 +636,7 @@
     <!-- Set to true if the RSSI should always display CDMA signal strength even on EVDO -->
     <bool name="config_alwaysUseCdmaRssi">false</bool>
 
+
     <!-- If this value is true, duplicate Source/Destination port fields
          in WDP header of some carriers OMADM wap push are supported.
          ex: MSGTYPE-TotalSegments-CurrentSegment
@@ -648,4 +649,9 @@
          with @string/status_bar_notification_info_overflow when shown in the
          UI. -->
     <integer name="status_bar_notification_info_maxnum">999</integer>
+
+    <!-- Path to an ISO image to be shared with via USB mass storage.
+         This is intended to allow packaging drivers or tools for installation on a PC. -->
+    <string translatable="false" name="config_isoImagePath"></string>
+
 </resources>
