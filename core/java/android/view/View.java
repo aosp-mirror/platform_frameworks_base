@@ -6089,7 +6089,11 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         /* Check if the VISIBLE bit has changed */
         if ((changed & INVISIBLE) != 0) {
             needGlobalAttributesUpdate(false);
-            invalidate(true);
+            /*
+             * If this view is becoming invisible, set the DRAWN flag so that
+             * the next invalidate() will not be skipped.
+             */
+            mPrivateFlags |= DRAWN;
 
             if (((mViewFlags & VISIBILITY_MASK) == INVISIBLE) && hasFocus()) {
                 // root view becoming invisible shouldn't clear focus
