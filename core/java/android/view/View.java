@@ -8736,6 +8736,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         }
         jumpDrawablesToCurrentState();
         resolveLayoutDirection();
+        if (isFocused()) {
+            InputMethodManager imm = InputMethodManager.peekInstance();
+            imm.focusIn(this);
+        }
     }
 
     /**
