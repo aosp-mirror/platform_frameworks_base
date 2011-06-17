@@ -27,8 +27,8 @@ package android.server;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothDeviceProfileState;
+import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfileState;
 import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothUuid;
@@ -67,6 +67,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -142,6 +143,11 @@ public class BluetoothService extends IBluetooth.Stub {
     private static String mDockAddress;
     private String mDockPin;
 
+    private static final String INCOMING_CONNECTION_FILE =
+      "/data/misc/bluetooth/incoming_connection.conf";
+    private HashMap<String, Pair<Integer, String>> mIncomingConnections;
+
+
     private static class RemoteService {
         public String address;
         public ParcelUuid uuid;
@@ -209,6 +215,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
         filter.addAction(Intent.ACTION_DOCK_EVENT);
         mContext.registerReceiver(mReceiver, filter);
+        mIncomingConnections = new HashMap<String, Pair<Integer, String>>();
     }
 
     public static synchronized String readDockBluetoothAddress() {
@@ -733,8 +740,6 @@ public class BluetoothService extends IBluetooth.Stub {
 
             if (state == BluetoothDevice.BOND_BONDED) {
                 addProfileState(address);
-            } else if (state == BluetoothDevice.BOND_NONE) {
-                removeProfileState(address);
             }
 
             if (DBG) log(address + " bond state " + oldState + " -> " + state + " (" +
@@ -1312,6 +1317,8 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     public synchronized boolean removeBondInternal(String address) {
+        // Unset the trusted device state and then unpair
+        setTrust(address, false);
         return removeDeviceNative(getObjectPathFromAddress(address));
     }
 
@@ -2161,10 +2168,6 @@ public class BluetoothService extends IBluetooth.Stub {
         return state;
     }
 
-    private void removeProfileState(String address) {
-        mDeviceProfileState.remove(address);
-    }
-
     private void initProfileState() {
         String []bonds = null;
         String val = getPropertyInternal("Devices");
@@ -2213,6 +2216,11 @@ public class BluetoothService extends IBluetooth.Stub {
         mA2dpService = a2dpService;
     }
 
+    /*package*/ Integer getAuthorizationAgentRequestData(String address) {
+        Integer data = mEventLoop.getAuthorizationAgentRequestData().remove(address);
+        return data;
+    }
+
     public void sendProfileStateMessage(int profile, int cmd) {
         Message msg = new Message();
         msg.what = cmd;
@@ -2220,6 +2228,116 @@ public class BluetoothService extends IBluetooth.Stub {
             mHfpProfileState.sendMessage(msg);
         } else if (profile == BluetoothProfileState.A2DP) {
             mA2dpProfileState.sendMessage(msg);
+        }
+    }
+
+    private void createIncomingConnectionStateFile() {
+        File f = new File(INCOMING_CONNECTION_FILE);
+        if (!f.exists()) {
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                Log.e(TAG, "IOException: cannot create file");
+            }
+        }
+    }
+
+    /** @hide */
+    public Pair<Integer, String> getIncomingState(String address) {
+        if (mIncomingConnections.isEmpty()) {
+            createIncomingConnectionStateFile();
+            readIncomingConnectionState();
+        }
+        return mIncomingConnections.get(address);
+    }
+
+    private void readIncomingConnectionState() {
+        synchronized(mIncomingConnections) {
+            FileInputStream fstream = null;
+            try {
+              fstream = new FileInputStream(INCOMING_CONNECTION_FILE);
+              DataInputStream in = new DataInputStream(fstream);
+              BufferedReader file = new BufferedReader(new InputStreamReader(in));
+              String line;
+              while((line = file.readLine()) != null) {
+                  line = line.trim();
+                  if (line.length() == 0) continue;
+                  String[] value = line.split(",");
+                  if (value != null && value.length == 3) {
+                      Integer val1 = Integer.parseInt(value[1]);
+                      Pair<Integer, String> val = new Pair(val1, value[2]);
+                      mIncomingConnections.put(value[0], val);
+                  }
+              }
+            } catch (FileNotFoundException e) {
+                log("FileNotFoundException: readIncomingConnectionState" + e.toString());
+            } catch (IOException e) {
+                log("IOException: readIncomingConnectionState" + e.toString());
+            } finally {
+                if (fstream != null) {
+                    try {
+                        fstream.close();
+                    } catch (IOException e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
+
+    private void truncateIncomingConnectionFile() {
+        RandomAccessFile r = null;
+        try {
+            r = new RandomAccessFile(INCOMING_CONNECTION_FILE, "rw");
+            r.setLength(0);
+        } catch (FileNotFoundException e) {
+            log("FileNotFoundException: truncateIncomingConnectionState" + e.toString());
+        } catch (IOException e) {
+            log("IOException: truncateIncomingConnectionState" + e.toString());
+        } finally {
+            if (r != null) {
+                try {
+                    r.close();
+                } catch (IOException e) {
+                    // ignore
+                 }
+            }
+        }
+    }
+
+    /** @hide */
+    public void writeIncomingConnectionState(String address, Pair<Integer, String> data) {
+        synchronized(mIncomingConnections) {
+            mIncomingConnections.put(address, data);
+
+            truncateIncomingConnectionFile();
+            BufferedWriter out = null;
+            StringBuilder value = new StringBuilder();
+            try {
+                out = new BufferedWriter(new FileWriter(INCOMING_CONNECTION_FILE, true));
+                for (String devAddress: mIncomingConnections.keySet()) {
+                  Pair<Integer, String> val = mIncomingConnections.get(devAddress);
+                  value.append(devAddress);
+                  value.append(",");
+                  value.append(val.first.toString());
+                  value.append(",");
+                  value.append(val.second);
+                  value.append("\n");
+                }
+                out.write(value.toString());
+            } catch (FileNotFoundException e) {
+                log("FileNotFoundException: writeIncomingConnectionState" + e.toString());
+            } catch (IOException e) {
+                log("IOException: writeIncomingConnectionState" + e.toString());
+            } finally {
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e) {
+                        // Ignore
+                    }
+                }
+            }
         }
     }
 
@@ -2273,4 +2391,5 @@ public class BluetoothService extends IBluetooth.Stub {
             short channel);
     private native boolean removeServiceRecordNative(int handle);
     private native boolean setLinkTimeoutNative(String path, int num_slots);
+    native boolean setAuthorizationNative(String address, boolean value, int data);
 }
