@@ -1748,8 +1748,10 @@ public final class CalendarContract {
 
     /**
      * A few Calendar globals are needed in the CalendarProvider for expanding
-     * the Instances table and these are all stored in the first (and only)
-     * row of the CalendarMetaData table.
+     * the Instances table and these are all stored in the first (and only) row
+     * of the CalendarMetaData table.
+     *
+     * @hide
      */
     protected interface CalendarMetaDataColumns {
         /**
