@@ -120,6 +120,11 @@ public final class Pm {
             return;
         }
 
+        if ("disable-user".equals(op)) {
+            runSetEnabledSetting(PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER);
+            return;
+        }
+
         if ("setInstallLocation".equals(op)) {
             runSetInstallLocation();
             return;
@@ -970,6 +975,8 @@ public final class Pm {
                 return "enabled";
             case PackageManager.COMPONENT_ENABLED_STATE_DISABLED:
                 return "disabled";
+            case PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER:
+                return "disabled-user";
         }
         return "unknown";
     }

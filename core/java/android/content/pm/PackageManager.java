@@ -224,9 +224,39 @@ public abstract class PackageManager {
      */
     public static final int SIGNATURE_UNKNOWN_PACKAGE = -4;
 
+    /**
+     * Flag for {@link #setApplicationEnabledSetting(String, int, int)}
+     * and {@link #setComponentEnabledSetting(ComponentName, int, int)}: This
+     * component or application is in its default enabled state (as specified
+     * in its manifest).
+     */
     public static final int COMPONENT_ENABLED_STATE_DEFAULT = 0;
+
+    /**
+     * Flag for {@link #setApplicationEnabledSetting(String, int, int)}
+     * and {@link #setComponentEnabledSetting(ComponentName, int, int)}: This
+     * component or application has been explictily enabled, regardless of
+     * what it has specified in its manifest.
+     */
     public static final int COMPONENT_ENABLED_STATE_ENABLED = 1;
+
+    /**
+     * Flag for {@link #setApplicationEnabledSetting(String, int, int)}
+     * and {@link #setComponentEnabledSetting(ComponentName, int, int)}: This
+     * component or application has been explicitly disabled, regardless of
+     * what it has specified in its manifest.
+     */
     public static final int COMPONENT_ENABLED_STATE_DISABLED = 2;
+
+    /**
+     * Flag for {@link #setApplicationEnabledSetting(String, int, int)} only: The
+     * user has explicitly disabled the application, regardless of what it has
+     * specified in its manifest.  Because this is due to the user's request,
+     * they may re-enable it if desired through the appropriate system UI.  This
+     * option currently <strong>can not</strong> be used with
+     * {@link #setComponentEnabledSetting(ComponentName, int, int)}.
+     */
+    public static final int COMPONENT_ENABLED_STATE_DISABLED_USER = 3;
 
     /**
      * Flag parameter for {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} to

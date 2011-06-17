@@ -417,6 +417,12 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public boolean enabled = true;
 
     /**
+     * For convenient access to the current enabled setting of this app.
+     * @hide
+     */
+    public int enabledSetting = PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
+
+    /**
      * For convenient access to package's install location.
      * @hide
      */
@@ -508,6 +514,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         uid = orig.uid;
         targetSdkVersion = orig.targetSdkVersion;
         enabled = orig.enabled;
+        enabledSetting = orig.enabledSetting;
         installLocation = orig.installLocation;
         manageSpaceActivityName = orig.manageSpaceActivityName;
         descriptionRes = orig.descriptionRes;
@@ -544,6 +551,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(uid);
         dest.writeInt(targetSdkVersion);
         dest.writeInt(enabled ? 1 : 0);
+        dest.writeInt(enabledSetting);
         dest.writeInt(installLocation);
         dest.writeString(manageSpaceActivityName);
         dest.writeString(backupAgentName);
@@ -581,6 +589,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         uid = source.readInt();
         targetSdkVersion = source.readInt();
         enabled = source.readInt() != 0;
+        enabledSetting = source.readInt();
         installLocation = source.readInt();
         manageSpaceActivityName = source.readString();
         backupAgentName = source.readString();
