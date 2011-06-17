@@ -225,7 +225,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mContext.unregisterReceiver(mShutdownReceiver);
 
         writeNetworkStatsLocked();
-        writeUidStatsLocked();
+        if (mUidStatsLoaded) {
+            writeUidStatsLocked();
+        }
         mNetworkStats.clear();
         mUidStats.clear();
         mUidStatsLoaded = false;
@@ -442,7 +444,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             if (persistDelta.rx[index] > persistThreshold
                     || persistDelta.tx[index] > persistThreshold) {
                 writeNetworkStatsLocked();
-                writeUidStatsLocked();
+                if (mUidStatsLoaded) {
+                    writeUidStatsLocked();
+                }
                 mLastNetworkPersist = networkStats;
                 break;
             }
