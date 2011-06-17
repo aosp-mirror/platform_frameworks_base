@@ -35,16 +35,16 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.internal.net.VpnConfig;
+
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 
-public class ManageDialog extends Activity implements
+public class ManageDialog extends Activity implements Handler.Callback,
         DialogInterface.OnClickListener, DialogInterface.OnDismissListener {
     private static final String TAG = "VpnManage";
 
-    private String mPackageName;
-    private String mInterfaceName;
-    private long mStartTime;
+    private VpnConfig mConfig;
 
     private IConnectivityManager mService;
 
@@ -53,28 +53,23 @@ public class ManageDialog extends Activity implements
     private TextView mDataTransmitted;
     private TextView mDataReceived;
 
-    private Updater mUpdater;
+    private Handler mHandler;
 
     @Override
     protected void onResume() {
         super.onResume();
         try {
-            Intent intent = getIntent();
-            // TODO: Move constants into VpnBuilder.
-            mPackageName = intent.getStringExtra("packageName");
-            mInterfaceName = intent.getStringExtra("interfaceName");
-            mStartTime = intent.getLongExtra("startTime", 0);
+            mConfig = getIntent().getParcelableExtra("config");
 
             mService = IConnectivityManager.Stub.asInterface(
                     ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
 
             PackageManager pm = getPackageManager();
-            ApplicationInfo app = pm.getApplicationInfo(mPackageName, 0);
+            ApplicationInfo app = pm.getApplicationInfo(mConfig.packageName, 0);
 
             View view = View.inflate(this, R.layout.manage, null);
-            String session = intent.getStringExtra("session");
-            if (session != null) {
-                ((TextView) view.findViewById(R.id.session)).setText(session);
+            if (mConfig.sessionName != null) {
+                ((TextView) view.findViewById(R.id.session)).setText(mConfig.sessionName);
             }
             mDuration = (TextView) view.findViewById(R.id.duration);
             mDataTransmitted = (TextView) view.findViewById(R.id.data_transmitted);
@@ -84,15 +79,21 @@ public class ManageDialog extends Activity implements
                     .setIcon(app.loadIcon(pm))
                     .setTitle(app.loadLabel(pm))
                     .setView(view)
-                    .setPositiveButton(R.string.configure, this)
                     .setNeutralButton(R.string.disconnect, this)
                     .setNegativeButton(android.R.string.cancel, this)
                     .create();
+
+            if (mConfig.configureActivity != null) {
+                mDialog.setButton(DialogInterface.BUTTON_POSITIVE,
+                        getText(R.string.configure), this);
+            }
             mDialog.setOnDismissListener(this);
             mDialog.show();
 
-            mUpdater = new Updater();
-            mUpdater.sendEmptyMessage(0);
+            if (mHandler == null) {
+                mHandler = new Handler(this);
+            }
+            mHandler.sendEmptyMessage(0);
         } catch (Exception e) {
             Log.e(TAG, "onResume", e);
             finish();
@@ -112,14 +113,15 @@ public class ManageDialog extends Activity implements
     public void onClick(DialogInterface dialog, int which) {
         try {
             if (which == AlertDialog.BUTTON_POSITIVE) {
-                Intent intent = new Intent(Intent.ACTION_MAIN);
-                intent.setPackage(mPackageName);
+                Intent intent = new Intent();
+                intent.setClassName(mConfig.packageName, mConfig.configureActivity);
                 startActivity(intent);
             } else if (which == AlertDialog.BUTTON_NEUTRAL) {
-                mService.prepareVpn(mPackageName);
+                mService.prepareVpn("");
             }
         } catch (Exception e) {
             Log.e(TAG, "onClick", e);
+            finish();
         }
     }
 
@@ -128,30 +130,30 @@ public class ManageDialog extends Activity implements
         finish();
     }
 
-    private class Updater extends Handler {
-        public void handleMessage(Message message) {
-            removeMessages(0);
+    @Override
+    public boolean handleMessage(Message message) {
+        mHandler.removeMessages(0);
 
-            if (mDialog.isShowing()) {
-                if (mStartTime != 0) {
-                    long seconds = (SystemClock.elapsedRealtime() - mStartTime) / 1000;
-                    mDuration.setText(String.format("%02d:%02d:%02d",
-                            seconds / 3600, seconds / 60 % 60, seconds % 60));
-                }
-
-                String[] numbers = getStatistics();
-                if (numbers != null) {
-                    // [1] and [2] are received data in bytes and packets.
-                    mDataReceived.setText(getString(R.string.data_value_format,
-                            numbers[1], numbers[2]));
-
-                    // [9] and [10] are transmitted data in bytes and packets.
-                    mDataTransmitted.setText(getString(R.string.data_value_format,
-                            numbers[9], numbers[10]));
-                }
-                sendEmptyMessageDelayed(0, 1000);
+        if (mDialog.isShowing()) {
+            if (mConfig.startTime != 0) {
+                long seconds = (SystemClock.elapsedRealtime() - mConfig.startTime) / 1000;
+                mDuration.setText(String.format("%02d:%02d:%02d",
+                        seconds / 3600, seconds / 60 % 60, seconds % 60));
             }
+
+            String[] numbers = getStatistics();
+            if (numbers != null) {
+                // [1] and [2] are received data in bytes and packets.
+                mDataReceived.setText(getString(R.string.data_value_format,
+                        numbers[1], numbers[2]));
+
+                // [9] and [10] are transmitted data in bytes and packets.
+                mDataTransmitted.setText(getString(R.string.data_value_format,
+                        numbers[9], numbers[10]));
+            }
+            mHandler.sendEmptyMessageDelayed(0, 1000);
         }
+        return true;
     }
 
     private String[] getStatistics() {
@@ -159,7 +161,7 @@ public class ManageDialog extends Activity implements
         try {
             // See dev_seq_printf_stats() in net/core/dev.c.
             in = new DataInputStream(new FileInputStream("/proc/net/dev"));
-            String prefix = mInterfaceName + ':';
+            String prefix = mConfig.interfaceName + ':';
 
             while (true) {
                 String line = in.readLine().trim();
