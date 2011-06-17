@@ -16688,6 +16688,7 @@ package android.renderscript {
     method public static android.renderscript.Element U8_4(android.renderscript.RenderScript);
     method public static android.renderscript.Element createPixel(android.renderscript.RenderScript, android.renderscript.Element.DataType, android.renderscript.Element.DataKind);
     method public static android.renderscript.Element createVector(android.renderscript.RenderScript, android.renderscript.Element.DataType, int);
+    method public boolean isCompatible(android.renderscript.Element);
     method public boolean isComplex();
   }
 
