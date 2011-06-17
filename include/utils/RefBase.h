@@ -120,7 +120,7 @@ public:
 protected:
                             RefBase();
     virtual                 ~RefBase();
-
+    
     //! Flags for extendObjectLifetime()
     enum {
         OBJECT_LIFETIME_WEAK    = 0x0001,

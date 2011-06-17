@@ -202,6 +202,10 @@ public:
      */
     virtual bool isProtected() const   { return false; }
 
+    /** Called from the main thread, when the surface is removed from the
+     * draw list */
+    virtual status_t ditch() { return NO_ERROR; }
+
     /** called with the state lock when the surface is removed from the
      *  current list */
     virtual void onRemoved() { };
@@ -267,8 +271,7 @@ protected:
     volatile    int32_t         mInvalidate;
                 
 
-public:
-    // called from class SurfaceFlinger
+protected:
     virtual ~LayerBase();
 
 private:

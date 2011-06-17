@@ -65,7 +65,7 @@ public:
     status_t initCheck() const;
 
     // protected by SurfaceFlinger::mStateLock
-    size_t attachLayer(const sp<LayerBaseClient>& layer);
+    ssize_t attachLayer(const sp<LayerBaseClient>& layer);
     void detachLayer(const LayerBaseClient* layer);
     sp<LayerBaseClient> getLayerUser(int32_t i) const;
 
@@ -81,15 +81,9 @@ private:
     virtual status_t destroySurface(SurfaceID surfaceId);
     virtual status_t setState(int32_t count, const layer_state_t* states);
 
-    // constant
-    sp<SurfaceFlinger> mFlinger;
-
-    // protected by mLock
     DefaultKeyedVector< size_t, wp<LayerBaseClient> > mLayers;
-    size_t mNameGenerator;
-
-    // thread-safe
-    mutable Mutex mLock;
+    sp<SurfaceFlinger> mFlinger;
+    int32_t mNameGenerator;
 };
 
 class UserClient : public BnSurfaceComposerClient
@@ -260,7 +254,7 @@ private:
             uint32_t w, uint32_t h, uint32_t flags);
 
     status_t removeSurface(const sp<Client>& client, SurfaceID sid);
-    status_t destroySurface(const wp<LayerBaseClient>& layer);
+    status_t destroySurface(const sp<LayerBaseClient>& layer);
     status_t setClientState(const sp<Client>& client,
             int32_t count, const layer_state_t* states);
 
@@ -305,7 +299,9 @@ public:     // hack to work around gcc 4.0.3 bug
 private:
             void        handleConsoleEvents();
             void        handleTransaction(uint32_t transactionFlags);
-            void        handleTransactionLocked(uint32_t transactionFlags);
+            void        handleTransactionLocked(
+                            uint32_t transactionFlags, 
+                            Vector< sp<LayerBase> >& ditchedLayers);
 
             void        computeVisibleRegions(
                             LayerVector& currentLayers,
@@ -328,7 +324,6 @@ private:
             status_t    purgatorizeLayer_l(const sp<LayerBase>& layer);
 
             uint32_t    getTransactionFlags(uint32_t flags);
-            uint32_t    peekTransactionFlags(uint32_t flags);
             uint32_t    setTransactionFlags(uint32_t flags);
             void        commitTransaction();
 
@@ -426,7 +421,6 @@ private:
 
                 // these are thread safe
     mutable     Barrier                     mReadyToRunBarrier;
-
 
                 // atomic variables
                 enum {
