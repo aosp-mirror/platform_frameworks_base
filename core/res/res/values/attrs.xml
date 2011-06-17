@@ -202,9 +202,14 @@
 
         <!-- The preferred list item height. -->
         <attr name="listPreferredItemHeight" format="dimension" />
-        <!-- The drawable for the list divider. -->
+        <!-- A smaller, sleeker list item height. -->
+        <attr name="listPreferredItemHeightSmall" format="dimension" />
+        <!-- A larger, more robust list item height. -->
+        <attr name="listPreferredItemHeightLarge" format="dimension" />
         <!-- The list item height for search results. @hide -->
         <attr name="searchResultListItemHeight" format="dimension" />
+
+        <!-- The drawable for the list divider. -->
         <attr name="listDivider" format="reference" />
         <!-- The list divider used in alert dialogs. -->
         <attr name="listDividerAlertDialog" format="reference" />

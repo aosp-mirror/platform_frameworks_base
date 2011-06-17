@@ -95,7 +95,9 @@
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
-        <item name="dropdownListPreferredItemHeight">64dip</item>
+        <item name="listPreferredItemHeightSmall">?android:attr/listPreferredItemHeight</item>
+        <item name="listPreferredItemHeightLarge">?android:attr/listPreferredItemHeight</item>
+        <item name="dropdownListPreferredItemHeight">?android:attr/listPreferredItemHeight</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
@@ -861,7 +863,9 @@
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
-        <item name="dropdownListPreferredItemHeight">48dip</item>
+        <item name="listPreferredItemHeightSmall">48dip</item>
+        <item name="listPreferredItemHeightLarge">80dip</item>
+        <item name="dropdownListPreferredItemHeight">?android:attr/listPreferredItemHeightSmall</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
@@ -1150,7 +1154,9 @@
 
         <!-- List attributes -->
         <item name="listPreferredItemHeight">64dip</item>
-        <item name="dropdownListPreferredItemHeight">48dip</item>
+        <item name="listPreferredItemHeightSmall">48dip</item>
+        <item name="listPreferredItemHeightLarge">80dip</item>
+        <item name="dropdownListPreferredItemHeight">?android:attr/listPreferredItemHeightSmall</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
