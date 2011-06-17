@@ -257,7 +257,7 @@ int EffectCreate(effect_uuid_t *uuid, int32_t sessionId, int32_t ioId, effect_ha
     }
 
     // create effect in library
-    l->desc->create_effect(uuid, sessionId, ioId, &itfe);
+    ret = l->desc->create_effect(uuid, sessionId, ioId, &itfe);
     if (ret != 0) {
         LOGW("EffectCreate() library %s: could not create fx %s, error %d", l->name, d->name, ret);
         goto exit;
