@@ -82,6 +82,7 @@ public:
     virtual bool isSecure() const           { return mSecure; }
     virtual bool isProtected() const;
     virtual sp<Surface> createSurface() const;
+    virtual status_t ditch();
     virtual void onRemoved();
 
     // only for debugging

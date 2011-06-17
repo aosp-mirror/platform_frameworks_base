@@ -145,6 +145,18 @@ sp<LayerBaseClient::Surface> Layer::createSurface() const
     return sur;
 }
 
+status_t Layer::ditch()
+{
+    // NOTE: Called from the main UI thread
+
+    // the layer is not on screen anymore. free as much resources as possible
+    mFreezeLock.clear();
+
+    Mutex::Autolock _l(mLock);
+    mWidth = mHeight = 0;
+    return NO_ERROR;
+}
+
 status_t Layer::setBuffers( uint32_t w, uint32_t h,
                             PixelFormat format, uint32_t flags)
 {
