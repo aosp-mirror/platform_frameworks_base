@@ -476,7 +476,96 @@ public final class CalendarContract {
      }
 
     /**
-     * Fields and helpers for interacting with Calendars.
+     * Constants and helpers for the Calendars table, which contains details for
+     * individual calendars. <h3>Operations</h3> All operations can be done
+     * either as an app or as a sync adapter. To perform an operation as a sync
+     * adapter {@link #CALLER_IS_SYNCADAPTER} should be set to true and
+     * {@link #ACCOUNT_NAME} and {@link #ACCOUNT_TYPE} must be set in the Uri
+     * parameters. See
+     * {@link Uri.Builder#appendQueryParameter(java.lang.String, java.lang.String)}
+     * for details on adding parameters. Sync adapters have write access to more
+     * columns but are restricted to a single account at a time. Calendars are
+     * designed to be primarily managed by a sync adapter and inserting new
+     * calendars should be done as a sync adapter. For the most part, apps
+     * should only update calendars (such as changing the color or display
+     * name). If a local calendar is required an app can do so by inserting as a
+     * sync adapter and using an {@link #ACCOUNT_TYPE} of
+     * {@link #ACCOUNT_TYPE_LOCAL} .
+     * <dl>
+     * <dt><b>Insert</b></dt>
+     * <dd>When inserting a new calendar the following fields must be included:
+     * <ul>
+     * <li>{@link #ACCOUNT_NAME}</li>
+     * <li>{@link #ACCOUNT_TYPE}</li>
+     * <li>{@link #NAME}</li>
+     * <li>{@link #CALENDAR_DISPLAY_NAME}</li>
+     * <li>{@link #CALENDAR_COLOR}</li>
+     * <li>{@link #CALENDAR_ACCESS_LEVEL}</li>
+     * <li>{@link #OWNER_ACCOUNT}</li>
+     * </ul>
+     * The following fields are not required when inserting a Calendar but are
+     * generally a good idea to include:
+     * <ul>
+     * <li>{@link #SYNC_EVENTS} set to 1</li>
+     * <li>{@link #CALENDAR_TIMEZONE}</li>
+     * <li>{@link #ALLOWED_REMINDERS}</li>
+     * </ul>
+     * <dt><b>Update</b></dt>
+     * <dd>To perform an update on a calendar the {@link #_ID} of the calendar
+     * should be provided either as an appended id to the Uri (
+     * {@link ContentUris#withAppendedId}) or as the first selection item--the
+     * selection should start with "_id=?" and the first selectionArg should be
+     * the _id of the calendar. Calendars may also be updated using a selection
+     * without the id. In general, the {@link #ACCOUNT_NAME} and
+     * {@link #ACCOUNT_TYPE} should not be changed after a calendar is created
+     * as this can cause issues for sync adapters.
+     * <dt><b>Delete</b></dt>
+     * <dd>Calendars can be deleted either by the {@link #_ID} as an appended id
+     * on the Uri or using any standard selection. Deleting a calendar should
+     * generally be handled by a sync adapter as it will remove the calendar
+     * from the database and all associated data (aka events).</dd>
+     * <dt><b>Query</b></dt>
+     * <dd>Querying the Calendars table will get you all information about a set
+     * of calendars. There will be one row returned for each calendar that
+     * matches the query selection, or at most a single row if the {@link #_ID}
+     * is appended to the Uri.</dd>
+     * </dl>
+     * <h3>Calendar Columns</h3> The following Calendar columns are writable by
+     * both an app and a sync adapter.
+     * <ul>
+     * <li>{@link #NAME}</li>
+     * <li>{@link #CALENDAR_DISPLAY_NAME}</li>
+     * <li>{@link #CALENDAR_COLOR}</li>
+     * <li>{@link #VISIBLE}</li>
+     * <li>{@link #SYNC_EVENTS}</li>
+     * </ul>
+     * The following Calendars columns are writable only by a sync adapter
+     * <ul>
+     * <li>{@link #ACCOUNT_NAME}</li>
+     * <li>{@link #ACCOUNT_TYPE}</li>
+     * <li>{@link #_SYNC_ID}</li>
+     * <li>{@link #DIRTY}</li>
+     * <li>{@link #OWNER_ACCOUNT}</li>
+     * <li>{@link #MAX_REMINDERS}</li>
+     * <li>{@link #ALLOWED_REMINDERS}</li>
+     * <li>{@link #CAN_MODIFY_TIME_ZONE}</li>
+     * <li>{@link #CAN_ORGANIZER_RESPOND}</li>
+     * <li>{@link #CAN_PARTIALLY_UPDATE}</li>
+     * <li>{@link #CALENDAR_LOCATION}</li>
+     * <li>{@link #CALENDAR_TIME_ZONE}</li>
+     * <li>{@link #CALENDAR_ACCESS_LEVEL}</li>
+     * <li>{@link #DELETED}</li>
+     * <li>{@link #CAL_SYNC1}</li>
+     * <li>{@link #CAL_SYNC2}</li>
+     * <li>{@link #CAL_SYNC3}</li>
+     * <li>{@link #CAL_SYNC4}</li>
+     * <li>{@link #CAL_SYNC5}</li>
+     * <li>{@link #CAL_SYNC6}</li>
+     * <li>{@link #CAL_SYNC7}</li>
+     * <li>{@link #CAL_SYNC8}</li>
+     * <li>{@link #CAL_SYNC9}</li>
+     * <li>{@link #CAL_SYNC10}</li>
+     * </ul>
      */
     public static class Calendars implements BaseColumns, SyncColumns, CalendarsColumns {
         private static final String WHERE_DELETE_FOR_ACCOUNT = Calendars.ACCOUNT_NAME + "=?"
@@ -569,6 +658,7 @@ public final class CalendarContract {
             DIRTY,
             OWNER_ACCOUNT,
             MAX_REMINDERS,
+            ALLOWED_REMINDERS,
             CAN_MODIFY_TIME_ZONE,
             CAN_ORGANIZER_RESPOND,
             CAN_PARTIALLY_UPDATE,
@@ -1252,13 +1342,15 @@ public final class CalendarContract {
     }
 
     /**
-     * Constants and helpers for the Events table, which contains details of a
-     * single event. <h3>Operations</h3> All operations can be done either as an
-     * app or as a sync adapter. To perform an operation as a sync adapter
-     * {@link #CALLER_IS_SYNCADAPTER} should be set to true in the Uri
-     * parameters and {@link #ACCOUNT_NAME} and {@link #ACCOUNT_TYPE} must be
-     * set. Sync adapters have write access to more columns but are restricted
-     * to a single account at a time.
+     * Constants and helpers for the Events table, which contains details for
+     * individual events. <h3>Operations</h3> All operations can be done either
+     * as an app or as a sync adapter. To perform an operation as a sync adapter
+     * {@link #CALLER_IS_SYNCADAPTER} should be set to true and
+     * {@link #ACCOUNT_NAME} and {@link #ACCOUNT_TYPE} must be set in the Uri
+     * parameters. See
+     * {@link Uri.Builder#appendQueryParameter(java.lang.String, java.lang.String)}
+     * for details on adding parameters. Sync adapters have write access to more
+     * columns but are restricted to a single account at a time.
      * <dl>
      * <dt><b>Insert</b></dt>
      * <dd>When inserting a new event the following fields must be included:
@@ -1270,13 +1362,14 @@ public final class CalendarContract {
      * There are also further requirements when inserting or updating an event.
      * See the section on Writing to Events.</dd>
      * <dt><b>Update</b></dt>
-     * <dd>To perform an update on an Event the {@link Events#_ID} of the event
-     * must be provided either as an appended id to the Uri (
+     * <dd>To perform an update of an Event the {@link Events#_ID} of the event
+     * should be provided either as an appended id to the Uri (
      * {@link ContentUris#withAppendedId}) or as the first selection item--the
      * selection should start with "_id=?" and the first selectionArg should be
-     * the _id of the event. Updating an event must respect the same rules as
-     * inserting and is further restricted in the fields that can be written.
-     * See the section on Writing to Events.</dd>
+     * the _id of the event. Updates may also be done using a selection and no
+     * id. Updating an event must respect the same rules as inserting and is
+     * further restricted in the fields that can be written. See the section on
+     * Writing to Events.</dd>
      * <dt><b>Delete</b></dt>
      * <dd>Events can be deleted either by the {@link Events#_ID} as an appended
      * id on the Uri or using any standard selection. If an appended id is used
