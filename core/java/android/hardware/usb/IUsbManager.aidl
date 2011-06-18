@@ -81,4 +81,13 @@ interface IUsbManager
 
     /* Clears default preferences and permissions for the package */
     void clearDefaults(String packageName);
+
+    /* Sets the current primary USB function. */
+    void setPrimaryFunction(String functions);
+
+    /* Sets the default primary USB function. */
+    void setDefaultFunction(String functions);
+
+    /* Sets the file path for USB mass storage backing file. */
+    void setMassStorageBackingFile(String path);
 }

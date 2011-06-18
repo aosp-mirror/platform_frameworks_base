@@ -50,7 +50,7 @@ public class UsbService extends IUsbManager.Stub {
         if (pm.hasSystemFeature(PackageManager.FEATURE_USB_HOST)) {
             mHostManager = new UsbHostManager(context, mSettingsManager);
         }
-        if (new File("/sys/class/usb_composite").exists()) {
+        if (new File("/sys/class/android_usb").exists()) {
             mDeviceManager = new UsbDeviceManager(context, mSettingsManager);
         }
     }
@@ -92,7 +92,7 @@ public class UsbService extends IUsbManager.Stub {
     /* opens the currently attached USB accessory (device mode) */
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory) {
         if (mDeviceManager != null) {
-            return openAccessory(accessory);
+            return mDeviceManager.openAccessory(accessory);
         } else {
             return null;
         }
@@ -144,6 +144,33 @@ public class UsbService extends IUsbManager.Stub {
     public void clearDefaults(String packageName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         mSettingsManager.clearDefaults(packageName);
+    }
+
+    public void setPrimaryFunction(String function) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        if (mDeviceManager != null) {
+            mDeviceManager.setPrimaryFunction(function);
+        } else {
+            throw new IllegalStateException("USB device mode not supported");
+        }
+    }
+
+    public void setDefaultFunction(String function) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        if (mDeviceManager != null) {
+            mDeviceManager.setDefaultFunction(function);
+        } else {
+            throw new IllegalStateException("USB device mode not supported");
+        }
+    }
+
+    public void setMassStorageBackingFile(String path) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
+        if (mDeviceManager != null) {
+            mDeviceManager.setMassStorageBackingFile(path);
+        } else {
+            throw new IllegalStateException("USB device mode not supported");
+        }
     }
 
     @Override
