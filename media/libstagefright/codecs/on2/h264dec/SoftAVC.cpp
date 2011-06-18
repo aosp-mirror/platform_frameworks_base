@@ -139,7 +139,8 @@ void SoftAVC::initPorts() {
 }
 
 status_t SoftAVC::initDecoder() {
-    if (H264SwDecInit(&mHandle, 1) == H264SWDEC_OK) {
+    // Force decoder to output buffers in display order.
+    if (H264SwDecInit(&mHandle, 0) == H264SWDEC_OK) {
         return OK;
     }
     return UNKNOWN_ERROR;

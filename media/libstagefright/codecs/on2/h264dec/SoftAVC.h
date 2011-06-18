@@ -52,7 +52,7 @@ private:
         kInputPortIndex   = 0,
         kOutputPortIndex  = 1,
         kNumInputBuffers  = 8,
-        kNumOutputBuffers = 16,
+        kNumOutputBuffers = 2,
     };
 
     enum EOSStatus {
