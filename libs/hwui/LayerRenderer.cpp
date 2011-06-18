@@ -326,11 +326,16 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
             return false;
         }
 
+        SkAutoLockPixels alp(*bitmap);
+
         GLuint texture;
         GLuint previousFbo;
 
         GLenum format;
         GLenum type;
+
+        GLenum error = GL_NO_ERROR;
+        bool status = false;
 
         switch (bitmap->config()) {
             case SkBitmap::kA8_Config:
@@ -352,10 +357,18 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
                 break;
         }
 
+        float alpha = layer->alpha;
+        SkXfermode::Mode mode = layer->mode;
+
+        layer->mode = SkXfermode::kSrc_Mode;
+        layer->alpha = 255;
+        layer->fbo = fbo;
+
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*) &previousFbo);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
         glGenTextures(1, &texture);
+        if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -368,39 +381,48 @@ bool LayerRenderer::copyLayer(Layer* layer, SkBitmap* bitmap) {
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, bitmap->width(), bitmap->height(),
                 0, format, type, NULL);
+        if ((error = glGetError()) != GL_NO_ERROR) goto error;
+
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                 GL_TEXTURE_2D, texture, 0);
+        if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
-        glBindTexture(GL_TEXTURE_2D, layer->texture);
+        {
+            LayerRenderer renderer(layer);
+            renderer.setViewport(bitmap->width(), bitmap->height());
+            renderer.OpenGLRenderer::prepareDirty(0.0f, 0.0f,
+                    bitmap->width(), bitmap->height(), !layer->blend);
+            if ((error = glGetError()) != GL_NO_ERROR) goto error;
 
-        float alpha = layer->alpha;
-        SkXfermode::Mode mode = layer->mode;
+            {
+                Rect bounds;
+                bounds.set(0.0f, 0.0f, bitmap->width(), bitmap->height());
+                renderer.drawTextureLayer(layer, bounds);
 
-        layer->mode = SkXfermode::kSrc_Mode;
-        layer->alpha = 255;
-        layer->fbo = fbo;
+                glReadPixels(0, 0, bitmap->width(), bitmap->height(), format,
+                        type, bitmap->getPixels());
 
-        LayerRenderer renderer(layer);
-        renderer.setViewport(bitmap->width(), bitmap->height());
-        renderer.OpenGLRenderer::prepareDirty(0.0f, 0.0f,
-                bitmap->width(), bitmap->height(), !layer->blend);
+                if ((error = glGetError()) != GL_NO_ERROR) goto error;
+            }
 
-        Rect bounds;
-        bounds.set(0.0f, 0.0f, bitmap->width(), bitmap->height());
-        renderer.drawTextureLayer(layer, bounds);
+            status = true;
+        }
 
-        SkAutoLockPixels alp(*bitmap);
-        glReadPixels(0, 0, bitmap->width(), bitmap->height(), format, type, bitmap->getPixels());
+error:
+#if DEBUG_OPENGL
+        if (error != GL_NO_ERROR) {
+            LOGD("GL error while copying layer into bitmap = 0x%x", error);
+        }
+#endif
 
         glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-
         layer->mode = mode;
         layer->alpha = alpha;
         layer->fbo = 0;
         glDeleteTextures(1, &texture);
         caches.fboCache.put(fbo);
 
-        return true;
+        return status;
     }
     return false;
 }

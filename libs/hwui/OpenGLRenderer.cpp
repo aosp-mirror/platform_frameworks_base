@@ -151,7 +151,6 @@ void OpenGLRenderer::prepareDirty(float left, float top, float right, float bott
     mSaveCount = 1;
 
     glViewport(0, 0, mWidth, mHeight);
-
     glDisable(GL_DITHER);
 
     glEnable(GL_SCISSOR_TEST);

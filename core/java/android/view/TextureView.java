@@ -306,6 +306,8 @@ public class TextureView extends View {
      * <p><strong>Do not</strong> invoke this method from a drawing method
      * ({@link #onDraw(android.graphics.Canvas)} for instance).</p>
      * 
+     * <p>If an error occurs during the copy, an empty bitmap will be returned.</p>
+     * 
      * @return A valid {@link Bitmap.Config#ARGB_8888} bitmap, or null if the surface
      *         texture is not available or the width &lt;= 0 or the height &lt;= 0
      * 
@@ -327,6 +329,8 @@ public class TextureView extends View {
      * 
      * <p><strong>Do not</strong> invoke this method from a drawing method
      * ({@link #onDraw(android.graphics.Canvas)} for instance).</p>
+     * 
+     * <p>If an error occurs during the copy, an empty bitmap will be returned.</p>
      * 
      * @param width The width of the bitmap to create
      * @param height The height of the bitmap to create
@@ -353,6 +357,8 @@ public class TextureView extends View {
      * 
      * <p><strong>Do not</strong> invoke this method from a drawing method
      * ({@link #onDraw(android.graphics.Canvas)} for instance).</p>
+     * 
+     * <p>If an error occurs, the bitmap is left unchanged.</p>
      * 
      * @param bitmap The bitmap to copy the content of the surface texture into,
      *               cannot be null, all configurations are supported
@@ -447,5 +453,6 @@ public class TextureView extends View {
         public void onSurfaceTextureDestroyed(SurfaceTexture surface);
     }
 
-    private static native void nSetDefaultBufferSize(SurfaceTexture surfaceTexture, int width, int height);
+    private static native void nSetDefaultBufferSize(SurfaceTexture surfaceTexture,
+            int width, int height);
 }

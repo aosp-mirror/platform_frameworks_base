@@ -74,7 +74,7 @@ static const GLsizei gMeshCount = 4;
 
 struct CacheLogger {
     CacheLogger() {
-        LOGD("Creating OpenGL renderer caches");
+        INIT_LOGD("Creating OpenGL renderer caches");
     }
 }; // struct CacheLogger
 
