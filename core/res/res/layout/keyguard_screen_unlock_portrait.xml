@@ -63,10 +63,8 @@
 
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="0dip"
-        android:layout_marginLeft="12dip"
         android:layout_gravity="right">
 
         <TextView
@@ -114,8 +112,8 @@
 
     <com.android.internal.widget.LockPatternView
         android:id="@+id/lockPattern"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="300dip"
+        android:layout_height="300dip"
         android:layout_rowWeight="1"
         android:layout_marginTop="8dip"
         android:layout_marginRight="8dip"
