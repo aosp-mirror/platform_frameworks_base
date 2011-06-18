@@ -63,6 +63,7 @@ typedef struct android_native_buffer_t
     void* reserved_proc[8];
 } android_native_buffer_t;
 
+#define ANativeWindowBuffer android_native_buffer_t
 
 /*****************************************************************************/
 
