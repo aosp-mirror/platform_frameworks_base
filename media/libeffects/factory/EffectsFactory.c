@@ -130,10 +130,43 @@ int Effect_GetDescriptor(effect_handle_t self,
     return ret;
 }
 
+int Effect_ProcessReverse(effect_handle_t self, audio_buffer_t *inBuffer, audio_buffer_t *outBuffer)
+{
+    int ret = init();
+    if (ret < 0) {
+        return ret;
+    }
+    effect_entry_t *fx = (effect_entry_t *)self;
+    pthread_mutex_lock(&gLibLock);
+    if (fx->lib == NULL) {
+        pthread_mutex_unlock(&gLibLock);
+        return -EPIPE;
+    }
+    pthread_mutex_lock(&fx->lib->lock);
+    pthread_mutex_unlock(&gLibLock);
+
+    if ((*fx->subItfe)->process_reverse != NULL) {
+        ret = (*fx->subItfe)->process_reverse(fx->subItfe, inBuffer, outBuffer);
+    } else {
+        ret = -ENOSYS;
+    }
+    pthread_mutex_unlock(&fx->lib->lock);
+    return ret;
+}
+
+
 const struct effect_interface_s gInterface = {
         Effect_Process,
         Effect_Command,
-        Effect_GetDescriptor
+        Effect_GetDescriptor,
+        NULL
+};
+
+const struct effect_interface_s gInterfaceWithReverse = {
+        Effect_Process,
+        Effect_Command,
+        Effect_GetDescriptor,
+        Effect_ProcessReverse
 };
 
 /////////////////////////////////////////////////
@@ -266,7 +299,13 @@ int EffectCreate(effect_uuid_t *uuid, int32_t sessionId, int32_t ioId, effect_ha
     // add entry to effect list
     fx = (effect_entry_t *)malloc(sizeof(effect_entry_t));
     fx->subItfe = itfe;
-    fx->itfe = (struct effect_interface_s *)&gInterface;
+    if ((*itfe)->process_reverse != NULL) {
+        fx->itfe = (struct effect_interface_s *)&gInterfaceWithReverse;
+        LOGV("EffectCreate() gInterfaceWithReverse");
+    }   else {
+        fx->itfe = (struct effect_interface_s *)&gInterface;
+        LOGV("EffectCreate() gInterface");
+    }
     fx->lib = l;
 
     e = (list_elem_t *)malloc(sizeof(list_elem_t));
