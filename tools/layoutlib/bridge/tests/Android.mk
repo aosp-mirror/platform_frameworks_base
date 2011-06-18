@@ -19,6 +19,8 @@ include $(CLEAR_VARS)
 # Only compile source java files in this lib.
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
+LOCAL_JAVA_RESOURCE_DIRS := res
+
 LOCAL_MODULE := layoutlib-tests
 LOCAL_MODULE_TAGS := optional
 
