@@ -185,7 +185,10 @@ public class AudioRecord
      * Size of the native audio buffer.
      */
     private int mNativeBufferSizeInBytes = 0;
-
+    /**
+     * Audio session ID
+     */
+    private int mSessionId = 0;
 
     //---------------------------------------------------------
     // Constructor, Finalize
@@ -227,14 +230,19 @@ public class AudioRecord
         audioBuffSizeCheck(bufferSizeInBytes);
 
         // native initialization
+        int[] session = new int[1];
+        session[0] = 0;
         //TODO: update native initialization when information about hardware init failure
         //      due to capture device already open is available.
         int initResult = native_setup( new WeakReference<AudioRecord>(this), 
-                mRecordSource, mSampleRate, mChannels, mAudioFormat, mNativeBufferSizeInBytes);
+                mRecordSource, mSampleRate, mChannels, mAudioFormat, mNativeBufferSizeInBytes,
+                session);
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing native AudioRecord object.");
             return; // with mState == STATE_UNINITIALIZED
         }
+
+        mSessionId = session[0];
 
         mState = STATE_INITIALIZED;
     }
@@ -485,6 +493,15 @@ public class AudioRecord
         }
     }
 
+    /**
+     * Returns the audio session ID.
+     *
+     * @return the ID of the audio session this AudioRecord belongs to.
+     * @hide
+     */
+    public int getAudioSessionId() {
+        return mSessionId;
+    }
 
     //---------------------------------------------------------
     // Transport control methods
@@ -763,7 +780,8 @@ public class AudioRecord
     //--------------------
 
     private native final int native_setup(Object audiorecord_this, 
-            int recordSource, int sampleRate, int nbChannels, int audioFormat, int buffSizeInBytes);
+            int recordSource, int sampleRate, int nbChannels, int audioFormat,
+            int buffSizeInBytes, int[] sessionId);
 
     private native final void native_finalize();
     
