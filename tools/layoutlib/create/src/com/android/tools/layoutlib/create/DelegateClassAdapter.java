@@ -31,6 +31,11 @@ import java.util.Set;
  */
 public class DelegateClassAdapter extends ClassAdapter {
 
+    /** Suffix added to original methods. */
+    private static final String ORIGINAL_SUFFIX = "_Original";
+    private static String CONSTRUCTOR = "<init>";
+    private static String CLASS_INIT = "<clinit>";
+
     public final static String ALL_NATIVES = "<<all_natives>>";
 
     private final String mClassName;
@@ -73,22 +78,55 @@ public class DelegateClassAdapter extends ClassAdapter {
         boolean useDelegate = (isNative && mDelegateMethods.contains(ALL_NATIVES)) ||
                               mDelegateMethods.contains(name);
 
-        if (useDelegate) {
-            // remove native
-            access = access & ~Opcodes.ACC_NATIVE;
+        if (!useDelegate) {
+            // Not creating a delegate for this method, pass it as-is from the reader
+            // to the writer.
+            return super.visitMethod(access, name, desc, signature, exceptions);
         }
 
-        MethodVisitor mw = super.visitMethod(access, name, desc, signature, exceptions);
         if (useDelegate) {
-            DelegateMethodAdapter a = new DelegateMethodAdapter(mLog, mw, mClassName,
-                                                                name, desc, isStatic);
-            if (isNative) {
-                // A native has no code to visit, so we need to generate it directly.
-                a.generateCode();
-            } else {
-                return a;
+            if (CONSTRUCTOR.equals(name) || CLASS_INIT.equals(name)) {
+                // We don't currently support generating delegates for constructors.
+                throw new UnsupportedOperationException(
+                    String.format(
+                        "Delegate doesn't support overriding constructor %1$s:%2$s(%3$s)",  //$NON-NLS-1$
+                        mClassName, name, desc));
             }
         }
-        return mw;
+
+        if (isNative) {
+            // Remove native flag
+            access = access & ~Opcodes.ACC_NATIVE;
+            MethodVisitor mwDelegate = super.visitMethod(access, name, desc, signature, exceptions);
+
+            DelegateMethodAdapter2 a = new DelegateMethodAdapter2(
+                    mLog, null /*mwOriginal*/, mwDelegate, mClassName, name, desc, isStatic);
+
+            // A native has no code to visit, so we need to generate it directly.
+            a.generateDelegateCode();
+
+            return mwDelegate;
+        }
+
+        // Given a non-native SomeClass.MethodName(), we want to generate 2 methods:
+        // - A copy of the original method named SomeClass.MethodName_Original().
+        //   The content is the original method as-is from the reader.
+        // - A brand new implementation of SomeClass.MethodName() which calls to a
+        //   non-existing method named SomeClass_Delegate.MethodName().
+        //   The implementation of this 'delegate' method is done in layoutlib_brigde.
+
+        int accessDelegate = access;
+        // change access to public for the original one
+        access &= ~(Opcodes.ACC_PROTECTED | Opcodes.ACC_PRIVATE);
+        access |= Opcodes.ACC_PUBLIC;
+
+        MethodVisitor mwOriginal = super.visitMethod(access, name + ORIGINAL_SUFFIX,
+                                                     desc, signature, exceptions);
+        MethodVisitor mwDelegate = super.visitMethod(accessDelegate, name,
+                                                     desc, signature, exceptions);
+
+        DelegateMethodAdapter2 a = new DelegateMethodAdapter2(
+                mLog, mwOriginal, mwDelegate, mClassName, name, desc, isStatic);
+        return a;
     }
 }

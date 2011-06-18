@@ -130,7 +130,7 @@ public class DelegateClassAdapterTest {
     }
 
     /**
-     * {@link DelegateMethodAdapter} does not support overriding constructors yet,
+     * {@link DelegateMethodAdapter2} does not support overriding constructors yet,
      * so this should fail with an {@link UnsupportedOperationException}.
      *
      * Although not tested here, the message of the exception should contain the
@@ -202,6 +202,7 @@ public class DelegateClassAdapterTest {
         // We'll delegate the "get" method of both the inner and outer class.
         HashSet<String> delegateMethods = new HashSet<String>();
         delegateMethods.add("get");
+        delegateMethods.add("privateMethod");
 
         // Generate the delegate for the outer class.
         ClassWriter cwOuter = new ClassWriter(0 /*flags*/);
@@ -234,6 +235,25 @@ public class DelegateClassAdapterTest {
                     // The original Outer.get returns 1+10+20,
                     // but the delegate makes it return 4+10+20
                     assertEquals(4+10+20, callGet(o2, 10, 20));
+                    assertEquals(1+10+20, callGet_Original(o2, 10, 20));
+
+                    // The original Outer has a private method that is
+                    // delegated. We should be able to call both the delegate
+                    // and the original (which is now public).
+                    assertEquals("outerPrivateMethod",
+                                 callMethod(o2, "privateMethod_Original", false /*makePublic*/));
+
+                    // The original method is private, so by default we can't access it
+                    boolean gotIllegalAccessException = false;
+                    try {
+                         callMethod(o2, "privateMethod", false /*makePublic*/);
+                    } catch(IllegalAccessException e) {
+                        gotIllegalAccessException = true;
+                    }
+                    assertTrue(gotIllegalAccessException);
+                    // Try again, but now making it accessible
+                    assertEquals("outerPrivate_Delegate",
+                            callMethod(o2, "privateMethod", true /*makePublic*/));
 
                     // Check the inner class. Since it's not a static inner class, we need
                     // to use the hidden constructor that takes the outer class as first parameter.
@@ -246,6 +266,7 @@ public class DelegateClassAdapterTest {
                     // The original Inner.get returns 3+10+20,
                     // but the delegate makes it return 6+10+20
                     assertEquals(6+10+20, callGet(i2, 10, 20));
+                    assertEquals(3+10+20, callGet_Original(i2, 10, 20));
                 }
             };
             cl2.add(OUTER_CLASS_NAME, cwOuter.toByteArray());
@@ -319,7 +340,7 @@ public class DelegateClassAdapterTest {
         }
 
         /**
-         * Accesses {@link OuterClass#get()} or {@link InnerClass#get() }via reflection.
+         * Accesses {@link OuterClass#get} or {@link InnerClass#get}via reflection.
          */
         public int callGet(Object instance, int a, long b) throws Exception {
             Method m = instance.getClass().getMethod("get",
@@ -327,6 +348,39 @@ public class DelegateClassAdapterTest {
 
             Object result = m.invoke(instance, new Object[] { a, b });
             return ((Integer) result).intValue();
+        }
+
+        /**
+         * Accesses the "_Original" methods for {@link OuterClass#get}
+         * or {@link InnerClass#get}via reflection.
+         */
+        public int callGet_Original(Object instance, int a, long b) throws Exception {
+            Method m = instance.getClass().getMethod("get_Original",
+                    new Class<?>[] { int.class, long.class } );
+
+            Object result = m.invoke(instance, new Object[] { a, b });
+            return ((Integer) result).intValue();
+        }
+
+        /**
+         * Accesses the any declared method that takes no parameter via reflection.
+         */
+        @SuppressWarnings("unchecked")
+        public <T> T callMethod(Object instance, String methodName, boolean makePublic) throws Exception {
+            Method m = instance.getClass().getDeclaredMethod(methodName, (Class<?>[])null);
+
+            boolean wasAccessible = m.isAccessible();
+            if (makePublic && !wasAccessible) {
+                m.setAccessible(true);
+            }
+
+            Object result = m.invoke(instance, (Object[])null);
+
+            if (makePublic && !wasAccessible) {
+                m.setAccessible(false);
+            }
+
+            return (T) result;
         }
 
         /**
