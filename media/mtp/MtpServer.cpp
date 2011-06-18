@@ -533,12 +533,10 @@ MtpResponseCode MtpServer::doGetObjectHandles() {
     MtpStorageID storageID = mRequest.getParameter(1);      // 0xFFFFFFFF for all storage
     MtpObjectFormat format = mRequest.getParameter(2);      // 0 for all formats
     MtpObjectHandle parent = mRequest.getParameter(3);      // 0xFFFFFFFF for objects with no parent
-                                                            // 0x00000000 for all objects?
+                                                            // 0x00000000 for all objects
 
     if (!hasStorage(storageID))
         return MTP_RESPONSE_INVALID_STORAGE_ID;
-    if (parent == 0xFFFFFFFF)
-        parent = 0;
 
     MtpObjectHandleList* handles = mDatabase->getObjectList(storageID, format, parent);
     mData.putAUInt32(handles);
@@ -552,11 +550,9 @@ MtpResponseCode MtpServer::doGetNumObjects() {
     MtpStorageID storageID = mRequest.getParameter(1);      // 0xFFFFFFFF for all storage
     MtpObjectFormat format = mRequest.getParameter(2);      // 0 for all formats
     MtpObjectHandle parent = mRequest.getParameter(3);      // 0xFFFFFFFF for objects with no parent
-                                                            // 0x00000000 for all objects?
+                                                            // 0x00000000 for all objects
     if (!hasStorage(storageID))
         return MTP_RESPONSE_INVALID_STORAGE_ID;
-    if (parent == 0xFFFFFFFF)
-        parent = 0;
 
     int count = mDatabase->getNumObjects(storageID, format, parent);
     if (count >= 0) {
