@@ -4479,7 +4479,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
                 ArrayList<View> foundViews = mAttachInfo.mFocusablesTempList;
                 foundViews.clear();
 
-                View root = null;
+                View root;
                 if (accessibilityViewId != View.NO_ID) {
                     root = findViewByAccessibilityId(accessibilityViewId);
                 } else {
