@@ -184,7 +184,8 @@ public:
                                     uint32_t samplingRate,
                                     uint32_t format,
                                     uint32_t channels,
-                                    audio_in_acoustics_t acoustics)
+                                    audio_in_acoustics_t acoustics,
+                                    int audioSession)
     {
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
@@ -193,6 +194,7 @@ public:
         data.writeInt32(static_cast <uint32_t>(format));
         data.writeInt32(channels);
         data.writeInt32(static_cast <uint32_t>(acoustics));
+        data.writeInt32(audioSession);
         remote()->transact(GET_INPUT, data, &reply);
         return static_cast <audio_io_handle_t> (reply.readInt32());
     }
@@ -285,7 +287,7 @@ public:
     }
 
     virtual status_t registerEffect(effect_descriptor_t *desc,
-                                        audio_io_handle_t output,
+                                        audio_io_handle_t io,
                                         uint32_t strategy,
                                         int session,
                                         int id)
@@ -293,7 +295,7 @@ public:
         Parcel data, reply;
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
         data.write(desc, sizeof(effect_descriptor_t));
-        data.writeInt32(output);
+        data.writeInt32(io);
         data.writeInt32(strategy);
         data.writeInt32(session);
         data.writeInt32(id);
@@ -439,11 +441,13 @@ status_t BnAudioPolicyService::onTransact(
             uint32_t channels = data.readInt32();
             audio_in_acoustics_t acoustics =
                     static_cast <audio_in_acoustics_t>(data.readInt32());
+            int audioSession = data.readInt32();
             audio_io_handle_t input = getInput(inputSource,
                                                samplingRate,
                                                format,
                                                channels,
-                                               acoustics);
+                                               acoustics,
+                                               audioSession);
             reply->writeInt32(static_cast <int>(input));
             return NO_ERROR;
         } break;
@@ -528,12 +532,12 @@ status_t BnAudioPolicyService::onTransact(
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
             effect_descriptor_t desc;
             data.read(&desc, sizeof(effect_descriptor_t));
-            audio_io_handle_t output = data.readInt32();
+            audio_io_handle_t io = data.readInt32();
             uint32_t strategy = data.readInt32();
             int session = data.readInt32();
             int id = data.readInt32();
             reply->writeInt32(static_cast <int32_t>(registerEffect(&desc,
-                                                                   output,
+                                                                   io,
                                                                    strategy,
                                                                    session,
                                                                    id)));

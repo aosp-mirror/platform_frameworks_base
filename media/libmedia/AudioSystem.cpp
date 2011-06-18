@@ -605,11 +605,12 @@ audio_io_handle_t AudioSystem::getInput(int inputSource,
                                     uint32_t samplingRate,
                                     uint32_t format,
                                     uint32_t channels,
-                                    audio_in_acoustics_t acoustics)
+                                    audio_in_acoustics_t acoustics,
+                                    int sessionId)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return 0;
-    return aps->getInput(inputSource, samplingRate, format, channels, acoustics);
+    return aps->getInput(inputSource, samplingRate, format, channels, acoustics, sessionId);
 }
 
 status_t AudioSystem::startInput(audio_io_handle_t input)
@@ -678,14 +679,14 @@ audio_io_handle_t AudioSystem::getOutputForEffect(effect_descriptor_t *desc)
 }
 
 status_t AudioSystem::registerEffect(effect_descriptor_t *desc,
-                                audio_io_handle_t output,
+                                audio_io_handle_t io,
                                 uint32_t strategy,
                                 int session,
                                 int id)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;
-    return aps->registerEffect(desc, output, strategy, session, id);
+    return aps->registerEffect(desc, io, strategy, session, id);
 }
 
 status_t AudioSystem::unregisterEffect(int id)
@@ -695,9 +696,11 @@ status_t AudioSystem::unregisterEffect(int id)
     return aps->unregisterEffect(id);
 }
 
-status_t AudioSystem::isStreamActive(int stream, bool* state, uint32_t inPastMs) {
+status_t AudioSystem::isStreamActive(int stream, bool* state, uint32_t inPastMs)
+{
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
     if (aps == 0) return PERMISSION_DENIED;
+    if (state == NULL) return BAD_VALUE;
     *state = aps->isStreamActive(stream, inPastMs);
     return NO_ERROR;
 }

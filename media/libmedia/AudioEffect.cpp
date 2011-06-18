@@ -47,11 +47,11 @@ AudioEffect::AudioEffect(const effect_uuid_t *type,
                 effect_callback_t cbf,
                 void* user,
                 int sessionId,
-                audio_io_handle_t output
+                audio_io_handle_t io
                 )
     : mStatus(NO_INIT)
 {
-    mStatus = set(type, uuid, priority, cbf, user, sessionId, output);
+    mStatus = set(type, uuid, priority, cbf, user, sessionId, io);
 }
 
 AudioEffect::AudioEffect(const char *typeStr,
@@ -60,7 +60,7 @@ AudioEffect::AudioEffect(const char *typeStr,
                 effect_callback_t cbf,
                 void* user,
                 int sessionId,
-                audio_io_handle_t output
+                audio_io_handle_t io
                 )
     : mStatus(NO_INIT)
 {
@@ -83,7 +83,7 @@ AudioEffect::AudioEffect(const char *typeStr,
         }
     }
 
-    mStatus = set(pType, pUuid, priority, cbf, user, sessionId, output);
+    mStatus = set(pType, pUuid, priority, cbf, user, sessionId, io);
 }
 
 status_t AudioEffect::set(const effect_uuid_t *type,
@@ -92,13 +92,13 @@ status_t AudioEffect::set(const effect_uuid_t *type,
                 effect_callback_t cbf,
                 void* user,
                 int sessionId,
-                audio_io_handle_t output)
+                audio_io_handle_t io)
 {
     sp<IEffect> iEffect;
     sp<IMemory> cblk;
     int enabled;
 
-    LOGV("set %p mUserData: %p", this, user);
+    LOGV("set %p mUserData: %p uuid: %p timeLow %08x", this, user, type, type ? type->timeLow : 0);
 
     if (mIEffect != 0) {
         LOGW("Effect already in use");
@@ -135,7 +135,7 @@ status_t AudioEffect::set(const effect_uuid_t *type,
     mIEffectClient = new EffectClient(this);
 
     iEffect = audioFlinger->createEffect(getpid(), (effect_descriptor_t *)&mDescriptor,
-            mIEffectClient, priority, output, mSessionId, &mStatus, &mId, &enabled);
+            mIEffectClient, priority, io, mSessionId, &mStatus, &mId, &enabled);
 
     if (iEffect == 0 || (mStatus != NO_ERROR && mStatus != ALREADY_EXISTS)) {
         LOGE("set(): AudioFlinger could not create effect, status: %d", mStatus);

@@ -17,14 +17,17 @@
 #ifndef ANDROID_AUDIOPOLICYSERVICE_H
 #define ANDROID_AUDIOPOLICYSERVICE_H
 
-#include <media/IAudioPolicyService.h>
-#include <media/ToneGenerator.h>
+#include <cutils/misc.h>
+#include <cutils/config_utils.h>
 #include <utils/Vector.h>
+#include <utils/SortedVector.h>
 #include <binder/BinderService.h>
-
 #include <system/audio.h>
 #include <system/audio_policy.h>
 #include <hardware/audio_policy.h>
+#include <media/IAudioPolicyService.h>
+#include <media/ToneGenerator.h>
+#include <media/AudioEffect.h>
 
 namespace android {
 
@@ -78,7 +81,8 @@ public:
                                     uint32_t format = AUDIO_FORMAT_DEFAULT,
                                     uint32_t channels = 0,
                                     audio_in_acoustics_t acoustics =
-                                            (audio_in_acoustics_t)0);
+                                            (audio_in_acoustics_t)0,
+                                    int audioSession = 0);
     virtual status_t startInput(audio_io_handle_t input);
     virtual status_t stopInput(audio_io_handle_t input);
     virtual void releaseInput(audio_io_handle_t input);
@@ -93,7 +97,7 @@ public:
 
     virtual audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc);
     virtual status_t registerEffect(effect_descriptor_t *desc,
-                                    audio_io_handle_t output,
+                                    audio_io_handle_t io,
                                     uint32_t strategy,
                                     int session,
                                     int id);
@@ -218,6 +222,51 @@ private:
         String8 mName;                      // string used by wake lock fo delayed commands
     };
 
+    class EffectDesc {
+    public:
+        EffectDesc() {}
+        virtual ~EffectDesc() {}
+        char *mName;
+        effect_uuid_t mUuid;
+        Vector <effect_param_t *> mParams;
+    };
+
+    class InputSourceDesc {
+    public:
+        InputSourceDesc() {}
+        virtual ~InputSourceDesc() {}
+        Vector <EffectDesc *> mEffects;
+    };
+
+
+    class InputDesc {
+    public:
+        InputDesc() {}
+        virtual ~InputDesc() {}
+        int mSessionId;
+        Vector< sp<AudioEffect> >mEffects;
+    };
+
+    static const char *kInputSourceNames[AUDIO_SOURCE_CNT -1];
+
+    void setPreProcessorEnabled(InputDesc *inputDesc, bool enabled);
+    status_t loadPreProcessorConfig(const char *path);
+    status_t loadEffects(cnode *root, Vector <EffectDesc *>& effects);
+    EffectDesc *loadEffect(cnode *root);
+    status_t loadInputSources(cnode *root, const Vector <EffectDesc *>& effects);
+    audio_source_t inputSourceNameToEnum(const char *name);
+    InputSourceDesc *loadInputSource(cnode *root, const Vector <EffectDesc *>& effects);
+    void loadEffectParameters(cnode *root, Vector <effect_param_t *>& params);
+    effect_param_t *loadEffectParameter(cnode *root);
+    size_t readParamValue(cnode *node,
+                          char *param,
+                          size_t *curSize,
+                          size_t *totSize);
+    size_t growParamSize(char *param,
+                         size_t size,
+                         size_t *curSize,
+                         size_t *totSize);
+
     // Internal dump utilities.
     status_t dumpPermissionDenial(int fd);
 
@@ -226,9 +275,10 @@ private:
                             // device connection state  or routing
     sp <AudioCommandThread> mAudioCommandThread;    // audio commands thread
     sp <AudioCommandThread> mTonePlaybackThread;     // tone playback thread
-
     struct audio_policy_device *mpAudioPolicyDev;
     struct audio_policy *mpAudioPolicy;
+    KeyedVector< audio_source_t, InputSourceDesc* > mInputSources;
+    KeyedVector< audio_io_handle_t, InputDesc* > mInputs;
 };
 
 }; // namespace android

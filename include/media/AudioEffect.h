@@ -188,7 +188,7 @@ public:
      * sessionID:   audio session this effect is associated to. If 0, the effect will be global to
      *      the output mix. If not 0, the effect will be applied to all players
      *      (AudioTrack or MediaPLayer) within the same audio session.
-     * output:  HAL audio output stream to which this effect must be attached. Leave at 0 for
+     * io:  HAL audio output or input stream to which this effect must be attached. Leave at 0 for
      *      automatic output selection by AudioFlinger.
      */
 
@@ -198,7 +198,7 @@ public:
                   effect_callback_t cbf = 0,
                   void* user = 0,
                   int sessionId = 0,
-                  audio_io_handle_t output = 0
+                  audio_io_handle_t io = 0
                   );
 
     /* Constructor.
@@ -210,7 +210,7 @@ public:
                     effect_callback_t cbf = 0,
                     void* user = 0,
                     int sessionId = 0,
-                    audio_io_handle_t output = 0
+                    audio_io_handle_t io = 0
                     );
 
     /* Terminates the AudioEffect and unregisters it from AudioFlinger.
@@ -232,7 +232,7 @@ public:
                             effect_callback_t cbf = 0,
                             void* user = 0,
                             int sessionId = 0,
-                            audio_io_handle_t output = 0
+                            audio_io_handle_t io = 0
                             );
 
     /* Result of constructing the AudioEffect. This must be checked
