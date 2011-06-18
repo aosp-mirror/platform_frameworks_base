@@ -33,6 +33,7 @@ import android.content.res.ObbInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
@@ -152,7 +153,6 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
          * 600 series - Unsolicited broadcasts.
          */
         public static final int VolumeStateChange              = 605;
-        public static final int ShareAvailabilityChange        = 620;
         public static final int VolumeDiskInserted             = 630;
         public static final int VolumeDiskRemoved              = 631;
         public static final int VolumeBadRemoval               = 632;
@@ -167,6 +167,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
     private String                                mExternalStoragePath;
     private PackageManagerService                 mPms;
     private boolean                               mUmsEnabling;
+    private boolean                               mUmsAvailable = false;
     // Used as a lock for methods that register/unregister listeners.
     final private ArrayList<MountServiceBinderListener> mListeners =
             new ArrayList<MountServiceBinderListener>();
@@ -525,6 +526,10 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                         }
                     }
                 }.start();
+            } else if (action.equals(UsbManager.ACTION_USB_STATE)) {
+                boolean available = (intent.getBooleanExtra(UsbManager.USB_CONNECTED, false) &&
+                        intent.getBooleanExtra(UsbManager.USB_FUNCTION_MASS_STORAGE, false));
+                notifyShareAvailabilityChange(available);
             }
         }
     };
@@ -654,12 +659,6 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                     updatePublicVolumeState(mExternalStoragePath, Environment.MEDIA_REMOVED);
                 }
 
-                try {
-                    boolean avail = doGetShareMethodAvailable("ums");
-                    notifyShareAvailabilityChange("ums", avail);
-                } catch (Exception ex) {
-                    Slog.w(TAG, "Failed to get share availability");
-                }
                 /*
                  * Now that we've done our initialization, release
                  * the hounds!
@@ -694,13 +693,6 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
             notifyVolumeStateChange(
                     cooked[2], cooked[3], Integer.parseInt(cooked[7]),
                             Integer.parseInt(cooked[10]));
-        } else if (code == VoldResponseCode.ShareAvailabilityChange) {
-            // FMT: NNN Share method <method> now <available|unavailable>
-            boolean avail = false;
-            if (cooked[5].equals("available")) {
-                avail = true;
-            }
-            notifyShareAvailabilityChange(cooked[3], avail);
         } else if ((code == VoldResponseCode.VolumeDiskInserted) ||
                    (code == VoldResponseCode.VolumeDiskRemoved) ||
                    (code == VoldResponseCode.VolumeBadRemoval)) {
@@ -833,42 +825,6 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         if (action != null) {
             sendStorageIntent(action, path);
         }
-    }
-
-    private boolean doGetShareMethodAvailable(String method) {
-        ArrayList<String> rsp;
-        try {
-            rsp = mConnector.doCommand("share status " + method);
-        } catch (NativeDaemonConnectorException ex) {
-            Slog.e(TAG, "Failed to determine whether share method " + method + " is available.");
-            return false;
-        }
-
-        for (String line : rsp) {
-            String[] tok = line.split(" ");
-            if (tok.length < 3) {
-                Slog.e(TAG, "Malformed response to share status " + method);
-                return false;
-            }
-
-            int code;
-            try {
-                code = Integer.parseInt(tok[0]);
-            } catch (NumberFormatException nfe) {
-                Slog.e(TAG, String.format("Error parsing code %s", tok[0]));
-                return false;
-            }
-            if (code == VoldResponseCode.ShareStatusResult) {
-                if (tok[2].equals("available"))
-                    return true;
-                return false;
-            } else {
-                Slog.e(TAG, String.format("Unexpected response code %d", code));
-                return false;
-            }
-        }
-        Slog.e(TAG, "Got an empty response");
-        return false;
     }
 
     private int doMountVolume(String path) {
@@ -1018,13 +974,9 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         return false;
     }
 
-    private void notifyShareAvailabilityChange(String method, final boolean avail) {
-        if (!method.equals("ums")) {
-           Slog.w(TAG, "Ignoring unsupported share method {" + method + "}");
-           return;
-        }
-
+    private void notifyShareAvailabilityChange(final boolean avail) {
         synchronized (mListeners) {
+            mUmsAvailable = avail;
             for (int i = mListeners.size() -1; i >= 0; i--) {
                 MountServiceBinderListener bl = mListeners.get(i);
                 try {
@@ -1189,8 +1141,13 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         // XXX: This will go away soon in favor of IMountServiceObserver
         mPms = (PackageManagerService) ServiceManager.getService("package");
 
-        mContext.registerReceiver(mBroadcastReceiver,
-                new IntentFilter(Intent.ACTION_BOOT_COMPLETED), null, null);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
+        // don't bother monitoring USB if mass storage is not supported on our primary volume
+        if (mPrimaryVolume != null && mPrimaryVolume.allowMassStorage()) {
+            filter.addAction(UsbManager.ACTION_USB_STATE);
+        }
+        mContext.registerReceiver(mBroadcastReceiver, filter, null, null);
 
         mHandlerThread = new HandlerThread("MountService");
         mHandlerThread.start();
@@ -1323,7 +1280,9 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         if (getUmsEnabling()) {
             return true;
         }
-        return doGetShareMethodAvailable("ums");
+        synchronized (mListeners) {
+            return mUmsAvailable;
+        }
     }
 
     public void setUsbMassStorageEnabled(boolean enable) {
@@ -1419,7 +1378,7 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         return doFormatVolume(path);
     }
 
-    public int []getStorageUsers(String path) {
+    public int[] getStorageUsers(String path) {
         validatePermission(android.Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS);
         waitForReady();
         try {
