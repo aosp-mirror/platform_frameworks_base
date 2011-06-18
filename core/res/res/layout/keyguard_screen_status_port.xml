@@ -130,16 +130,4 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         />
 
-    <TextView
-        android:id="@+id/propertyOf"
-        android:lineSpacingExtra="8dip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dip"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="17sp"
-        android:singleLine="false"
-        android:visibility="gone"
-        android:textColor="@color/lockscreen_owner_info"
-        />
 </LinearLayout>
