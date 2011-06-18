@@ -96,6 +96,8 @@ public class ActionBarView extends AbsActionBarView {
     private LinearLayout mTitleLayout;
     private TextView mTitleView;
     private TextView mSubtitleView;
+    private View mTitleUpView;
+
     private Spinner mSpinner;
     private LinearLayout mListNavLayout;
     private ScrollingTabContainerView mTabScrollView;
@@ -148,6 +150,16 @@ public class ActionBarView extends AbsActionBarView {
             final MenuItemImpl item = mExpandedMenuPresenter.mCurrentExpandedItem;
             if (item != null) {
                 item.collapseActionView();
+            }
+        }
+    };
+
+    private final OnClickListener mUpClickListener = new OnClickListener() {
+        public void onClick(View v) {
+            Context context = getContext();
+            if (context instanceof Activity) {
+                Activity activity = (Activity) context;
+                activity.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, mLogoNavItem);
             }
         }
     };
@@ -230,15 +242,7 @@ public class ActionBarView extends AbsActionBarView {
         a.recycle();
         
         mLogoNavItem = new ActionMenuItem(context, 0, android.R.id.home, 0, 0, mTitle);
-        mHomeLayout.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                Context context = getContext();
-                if (context instanceof Activity) {
-                    Activity activity = (Activity) context;
-                    activity.onMenuItemSelected(Window.FEATURE_OPTIONS_PANEL, mLogoNavItem);
-                }
-            }
-        });
+        mHomeLayout.setOnClickListener(mUpClickListener);
         mHomeLayout.setClickable(true);
         mHomeLayout.setFocusable(true);
     }
@@ -438,7 +442,8 @@ public class ActionBarView extends AbsActionBarView {
         }
 
         if ((flagsChanged & DISPLAY_RELAYOUT_MASK) != 0) {
-            final int vis = (options & ActionBar.DISPLAY_SHOW_HOME) != 0 ? VISIBLE : GONE;
+            final boolean showHome = (options & ActionBar.DISPLAY_SHOW_HOME) != 0;
+            final int vis = showHome ? VISIBLE : GONE;
             mHomeLayout.setVisibility(vis);
 
             if ((flagsChanged & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
@@ -456,6 +461,14 @@ public class ActionBarView extends AbsActionBarView {
                 } else {
                     removeView(mTitleLayout);
                 }
+            }
+
+            if ((flagsChanged &
+                    (ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME)) != 0) {
+                final boolean homeAsUp = (options & ActionBar.DISPLAY_HOME_AS_UP) != 0;
+                final boolean titleUp = homeAsUp && !showHome;
+                mTitleUpView.setVisibility(titleUp ? VISIBLE : GONE);
+                mTitleLayout.setEnabled(titleUp);
             }
 
             if ((flagsChanged & ActionBar.DISPLAY_SHOW_CUSTOM) != 0 && mCustomNavView != null) {
@@ -641,6 +654,9 @@ public class ActionBarView extends AbsActionBarView {
         mTitleLayout = (LinearLayout) inflater.inflate(R.layout.action_bar_title_item, null);
         mTitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_title);
         mSubtitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_subtitle);
+        mTitleUpView = (View) mTitleLayout.findViewById(R.id.up);
+
+        mTitleLayout.setOnClickListener(mUpClickListener);
 
         if (mTitleStyleRes != 0) {
             mTitleView.setTextAppearance(mContext, mTitleStyleRes);
