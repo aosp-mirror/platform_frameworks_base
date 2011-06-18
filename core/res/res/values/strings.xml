@@ -2608,6 +2608,11 @@
     <!-- USB_STORAGE_ERROR dialog  ok button-->
     <string name="dlg_ok">OK</string>
 
+    <!-- USB_PREFERENCES: When the user connects the phone to a computer via USB, we show a notification asking if he wants to share files across.  This is the title -->
+    <string name="usb_preferences_notification_title">USB connected</string>
+    <!-- See USB_PREFERENCES. This is the message. -->
+    <string name="usb_preferece_notification_message">Select to configure USB file transfer.</string>
+
     <!-- External media format dialog strings -->
     <!-- This is the label for the activity, and should never be visible to the user. -->
     <!-- See EXTMEDIA_FORMAT.  EXTMEDIA_FORMAT_DIALOG:  After the user selects the notification, a dialog is shown asking if he wants to format the SD card.  This is the title. [CHAR LIMIT=20] -->
