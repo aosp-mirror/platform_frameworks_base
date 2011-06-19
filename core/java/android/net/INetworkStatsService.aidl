@@ -18,18 +18,19 @@ package android.net;
 
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
+import android.net.NetworkTemplate;
 
 /** {@hide} */
 interface INetworkStatsService {
 
     /** Return historical stats for traffic that matches template. */
-    NetworkStatsHistory getHistoryForNetwork(int networkTemplate);
+    NetworkStatsHistory getHistoryForNetwork(in NetworkTemplate template);
     /** Return historical stats for specific UID traffic that matches template. */
-    NetworkStatsHistory getHistoryForUid(int uid, int networkTemplate);
+    NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid);
 
     /** Return usage summary for traffic that matches template. */
-    NetworkStats getSummaryForNetwork(long start, long end, int networkTemplate, String subscriberId);
+    NetworkStats getSummaryForNetwork(in NetworkTemplate template, long start, long end);
     /** Return usage summary per UID for traffic that matches template. */
-    NetworkStats getSummaryForAllUid(long start, long end, int networkTemplate);
+    NetworkStats getSummaryForAllUid(in NetworkTemplate template, long start, long end);
 
 }

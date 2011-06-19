@@ -16,37 +16,38 @@
 
 package android.net;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Policy for a specific network, including usage cycle and limits to be
- * enforced.
+ * Policy for networks matching a {@link NetworkTemplate}, including usage cycle
+ * and limits to be enforced.
  *
  * @hide
  */
 public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
-    public final int networkTemplate;
-    public final String subscriberId;
+    public static final long WARNING_DISABLED = -1;
+    public static final long LIMIT_DISABLED = -1;
+
+    public final NetworkTemplate template;
     public int cycleDay;
     public long warningBytes;
     public long limitBytes;
 
-    public static final long WARNING_DISABLED = -1;
-    public static final long LIMIT_DISABLED = -1;
+    // TODO: teach how to snooze limit for current cycle
 
-    public NetworkPolicy(int networkTemplate, String subscriberId, int cycleDay, long warningBytes,
-            long limitBytes) {
-        this.networkTemplate = networkTemplate;
-        this.subscriberId = subscriberId;
+    public NetworkPolicy(
+            NetworkTemplate template, int cycleDay, long warningBytes, long limitBytes) {
+        this.template = checkNotNull(template, "missing NetworkTemplate");
         this.cycleDay = cycleDay;
         this.warningBytes = warningBytes;
         this.limitBytes = limitBytes;
     }
 
     public NetworkPolicy(Parcel in) {
-        networkTemplate = in.readInt();
-        subscriberId = in.readString();
+        template = in.readParcelable(null);
         cycleDay = in.readInt();
         warningBytes = in.readLong();
         limitBytes = in.readLong();
@@ -54,8 +55,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
 
     /** {@inheritDoc} */
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(networkTemplate);
-        dest.writeString(subscriberId);
+        dest.writeParcelable(template, flags);
         dest.writeInt(cycleDay);
         dest.writeLong(warningBytes);
         dest.writeLong(limitBytes);
@@ -81,8 +81,8 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
 
     @Override
     public String toString() {
-        return "NetworkPolicy: networkTemplate=" + networkTemplate + ", cycleDay=" + cycleDay
-                + ", warningBytes=" + warningBytes + ", limitBytes=" + limitBytes;
+        return "NetworkPolicy[" + template + "]: cycleDay=" + cycleDay + ", warningBytes="
+                + warningBytes + ", limitBytes=" + limitBytes;
     }
 
     public static final Creator<NetworkPolicy> CREATOR = new Creator<NetworkPolicy>() {

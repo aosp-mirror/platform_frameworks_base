@@ -40,9 +40,8 @@ public class NetworkStats implements Parcelable {
     public static final String IFACE_ALL = null;
     /** {@link #uid} value when UID details unavailable. */
     public static final int UID_ALL = -1;
-
-    // NOTE: data should only be accounted for once in this structure; if data
-    // is broken out, the summarized version should not be included.
+    /** {@link #tag} value for without tag. */
+    public static final int TAG_NONE = 0;
 
     /**
      * {@link SystemClock#elapsedRealtime()} timestamp when this data was
@@ -52,16 +51,16 @@ public class NetworkStats implements Parcelable {
     public int size;
     public String[] iface;
     public int[] uid;
+    public int[] tag;
     public long[] rx;
     public long[] tx;
-
-    // TODO: add fg/bg stats once reported by kernel
 
     public NetworkStats(long elapsedRealtime, int initialSize) {
         this.elapsedRealtime = elapsedRealtime;
         this.size = 0;
         this.iface = new String[initialSize];
         this.uid = new int[initialSize];
+        this.tag = new int[initialSize];
         this.rx = new long[initialSize];
         this.tx = new long[initialSize];
     }
@@ -71,21 +70,27 @@ public class NetworkStats implements Parcelable {
         size = parcel.readInt();
         iface = parcel.createStringArray();
         uid = parcel.createIntArray();
+        tag = parcel.createIntArray();
         rx = parcel.createLongArray();
         tx = parcel.createLongArray();
     }
 
-    public NetworkStats addEntry(String iface, int uid, long rx, long tx) {
+    /**
+     * Add new stats entry with given values.
+     */
+    public NetworkStats addEntry(String iface, int uid, int tag, long rx, long tx) {
         if (size >= this.iface.length) {
             final int newLength = Math.max(this.iface.length, 10) * 3 / 2;
             this.iface = Arrays.copyOf(this.iface, newLength);
             this.uid = Arrays.copyOf(this.uid, newLength);
+            this.tag = Arrays.copyOf(this.tag, newLength);
             this.rx = Arrays.copyOf(this.rx, newLength);
             this.tx = Arrays.copyOf(this.tx, newLength);
         }
 
         this.iface[size] = iface;
         this.uid[size] = uid;
+        this.tag[size] = tag;
         this.rx[size] = rx;
         this.tx[size] = tx;
         size++;
@@ -93,17 +98,29 @@ public class NetworkStats implements Parcelable {
         return this;
     }
 
-    @Deprecated
-    public int length() {
-        return size;
+    /**
+     * Combine given values with an existing row, or create a new row if
+     * {@link #findIndex(String, int, int)} is unable to find match. Can also be
+     * used to subtract values from existing rows.
+     */
+    public NetworkStats combineEntry(String iface, int uid, int tag, long rx, long tx) {
+        final int i = findIndex(iface, uid, tag);
+        if (i == -1) {
+            // only create new entry when positive contribution
+            addEntry(iface, uid, tag, rx, tx);
+        } else {
+            this.rx[i] += rx;
+            this.tx[i] += tx;
+        }
+        return this;
     }
 
     /**
      * Find first stats index that matches the requested parameters.
      */
-    public int findIndex(String iface, int uid) {
+    public int findIndex(String iface, int uid, int tag) {
         for (int i = 0; i < size; i++) {
-            if (equal(iface, this.iface[i]) && uid == this.uid[i]) {
+            if (equal(iface, this.iface[i]) && uid == this.uid[i] && tag == this.tag[i]) {
                 return i;
             }
         }
@@ -186,12 +203,13 @@ public class NetworkStats implements Parcelable {
         for (int i = 0; i < size; i++) {
             final String iface = this.iface[i];
             final int uid = this.uid[i];
+            final int tag = this.tag[i];
 
             // find remote row that matches, and subtract
-            final int j = value.findIndex(iface, uid);
+            final int j = value.findIndex(iface, uid, tag);
             if (j == -1) {
                 // newly appearing row, return entire value
-                result.addEntry(iface, uid, this.rx[i], this.tx[i]);
+                result.addEntry(iface, uid, tag, this.rx[i], this.tx[i]);
             } else {
                 // existing row, subtract remote value
                 long rx = this.rx[i] - value.rx[j];
@@ -203,7 +221,7 @@ public class NetworkStats implements Parcelable {
                     rx = Math.max(0, rx);
                     tx = Math.max(0, tx);
                 }
-                result.addEntry(iface, uid, rx, tx);
+                result.addEntry(iface, uid, tag, rx, tx);
             }
         }
 
@@ -221,6 +239,7 @@ public class NetworkStats implements Parcelable {
             pw.print(prefix);
             pw.print("  iface="); pw.print(iface[i]);
             pw.print(" uid="); pw.print(uid[i]);
+            pw.print(" tag="); pw.print(tag[i]);
             pw.print(" rx="); pw.print(rx[i]);
             pw.print(" tx="); pw.println(tx[i]);
         }
@@ -244,6 +263,7 @@ public class NetworkStats implements Parcelable {
         dest.writeInt(size);
         dest.writeStringArray(iface);
         dest.writeIntArray(uid);
+        dest.writeIntArray(tag);
         dest.writeLongArray(rx);
         dest.writeLongArray(tx);
     }

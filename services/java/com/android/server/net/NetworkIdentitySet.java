@@ -16,6 +16,8 @@
 
 package com.android.server.net;
 
+import android.net.NetworkIdentity;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -28,19 +30,23 @@ import java.util.HashSet;
  *
  * @hide
  */
-public class InterfaceIdentity extends HashSet<NetworkIdentity> {
-    private static final int VERSION_CURRENT = 1;
+public class NetworkIdentitySet extends HashSet<NetworkIdentity> {
+    private static final int VERSION_INIT = 1;
 
-    public InterfaceIdentity() {
+    public NetworkIdentitySet() {
     }
 
-    public InterfaceIdentity(DataInputStream in) throws IOException {
+    public NetworkIdentitySet(DataInputStream in) throws IOException {
         final int version = in.readInt();
         switch (version) {
-            case VERSION_CURRENT: {
+            case VERSION_INIT: {
                 final int size = in.readInt();
                 for (int i = 0; i < size; i++) {
-                    add(new NetworkIdentity(in));
+                    final int ignoredVersion = in.readInt();
+                    final int type = in.readInt();
+                    final int subType = in.readInt();
+                    final String subscriberId = readOptionalString(in);
+                    add(new NetworkIdentity(type, subType, subscriberId));
                 }
                 break;
             }
@@ -51,23 +57,30 @@ public class InterfaceIdentity extends HashSet<NetworkIdentity> {
     }
 
     public void writeToStream(DataOutputStream out) throws IOException {
-        out.writeInt(VERSION_CURRENT);
+        out.writeInt(VERSION_INIT);
         out.writeInt(size());
         for (NetworkIdentity ident : this) {
-            ident.writeToStream(out);
+            out.writeInt(VERSION_INIT);
+            out.writeInt(ident.getType());
+            out.writeInt(ident.getSubType());
+            writeOptionalString(out, ident.getSubscriberId());
         }
     }
 
-    /**
-     * Test if any {@link NetworkIdentity} on this interface matches the given
-     * template and IMEI.
-     */
-    public boolean matchesTemplate(int networkTemplate, String subscriberId) {
-        for (NetworkIdentity ident : this) {
-            if (ident.matchesTemplate(networkTemplate, subscriberId)) {
-                return true;
-            }
+    private static void writeOptionalString(DataOutputStream out, String value) throws IOException {
+        if (value != null) {
+            out.writeByte(1);
+            out.writeUTF(value);
+        } else {
+            out.writeByte(0);
         }
-        return false;
+    }
+
+    private static String readOptionalString(DataInputStream in) throws IOException {
+        if (in.readByte() != 0) {
+            return in.readUTF();
+        } else {
+            return null;
+        }
     }
 }

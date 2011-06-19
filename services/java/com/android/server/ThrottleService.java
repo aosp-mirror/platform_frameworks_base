@@ -533,7 +533,8 @@ public class ThrottleService extends IThrottleManager.Stub {
             long incWrite = 0;
             try {
                 final NetworkStats stats = mNMService.getNetworkStatsSummary();
-                final int index = stats.findIndex(mIface, NetworkStats.UID_ALL);
+                final int index = stats.findIndex(
+                        mIface, NetworkStats.UID_ALL, NetworkStats.TAG_NONE);
 
                 if (index != -1) {
                     incRead = stats.rx[index] - mLastRead;

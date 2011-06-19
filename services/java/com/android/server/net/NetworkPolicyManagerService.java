@@ -23,6 +23,7 @@ import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkPolicyManager.ACTION_DATA_USAGE_LIMIT;
@@ -36,10 +37,9 @@ import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkPolicyManager.dumpPolicy;
 import static android.net.NetworkPolicyManager.dumpRules;
 import static android.net.NetworkPolicyManager.isUidValidForPolicy;
-import static android.net.TrafficStats.TEMPLATE_MOBILE_3G_LOWER;
-import static android.net.TrafficStats.TEMPLATE_MOBILE_4G;
-import static android.net.TrafficStats.TEMPLATE_MOBILE_ALL;
-import static android.net.TrafficStats.isNetworkTemplateMobile;
+import static android.net.NetworkTemplate.MATCH_MOBILE_3G_LOWER;
+import static android.net.NetworkTemplate.MATCH_MOBILE_4G;
+import static android.net.NetworkTemplate.MATCH_MOBILE_ALL;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
@@ -61,9 +61,11 @@ import android.net.IConnectivityManager;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
+import android.net.NetworkIdentity;
 import android.net.NetworkPolicy;
 import android.net.NetworkState;
 import android.net.NetworkStats;
+import android.net.NetworkTemplate;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -84,7 +86,6 @@ import android.util.Xml;
 import com.android.internal.R;
 import com.android.internal.os.AtomicFile;
 import com.android.internal.util.FastXmlSerializer;
-import com.android.internal.util.Objects;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
@@ -353,10 +354,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final long total;
             try {
                 final NetworkStats stats = mNetworkStats.getSummaryForNetwork(
-                        start, end, policy.networkTemplate, policy.subscriberId);
+                        policy.template, start, end);
                 total = stats.rx[0] + stats.tx[0];
             } catch (RemoteException e) {
-                Slog.w(TAG, "problem reading summary for template " + policy.networkTemplate);
+                Slog.w(TAG, "problem reading summary for template " + policy.template);
                 continue;
             }
 
@@ -380,8 +381,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * notification of a specific type, like {@link #TYPE_LIMIT}.
      */
     private String buildNotificationTag(NetworkPolicy policy, int type) {
-        // TODO: consider splicing subscriberId hash into mix
-        return TAG + ":" + policy.networkTemplate + ":" + type;
+        return TAG + ":" + policy.template.hashCode() + ":" + type;
     }
 
     /**
@@ -408,7 +408,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 final Intent intent = new Intent(ACTION_DATA_USAGE_WARNING);
                 intent.addCategory(Intent.CATEGORY_DEFAULT);
-                intent.putExtra(EXTRA_NETWORK_TEMPLATE, policy.networkTemplate);
+                intent.putExtra(EXTRA_NETWORK_TEMPLATE, policy.template.getMatchRule());
                 builder.setContentIntent(PendingIntent.getActivity(
                         mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
                 break;
@@ -416,11 +416,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             case TYPE_LIMIT: {
                 final String title;
                 final String body = res.getString(R.string.data_usage_limit_body);
-                switch (policy.networkTemplate) {
-                    case TEMPLATE_MOBILE_3G_LOWER:
+                switch (policy.template.getMatchRule()) {
+                    case MATCH_MOBILE_3G_LOWER:
                         title = res.getString(R.string.data_usage_3g_limit_title);
                         break;
-                    case TEMPLATE_MOBILE_4G:
+                    case MATCH_MOBILE_4G:
                         title = res.getString(R.string.data_usage_4g_limit_title);
                         break;
                     default:
@@ -435,7 +435,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
                 final Intent intent = new Intent(ACTION_DATA_USAGE_LIMIT);
                 intent.addCategory(Intent.CATEGORY_DEFAULT);
-                intent.putExtra(EXTRA_NETWORK_TEMPLATE, policy.networkTemplate);
+                intent.putExtra(EXTRA_NETWORK_TEMPLATE, policy.template.getMatchRule());
                 builder.setContentIntent(PendingIntent.getActivity(
                         mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
                 break;
@@ -521,7 +521,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // collect all active ifaces that match this template
             ifaceList.clear();
             for (NetworkIdentity ident : networks.keySet()) {
-                if (ident.matchesTemplate(policy.networkTemplate, policy.subscriberId)) {
+                if (policy.template.matches(ident)) {
                     final String iface = networks.get(ident);
                     ifaceList.add(iface);
                 }
@@ -554,11 +554,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final NetworkStats stats;
             final long total;
             try {
-                stats = mNetworkStats.getSummaryForNetwork(
-                        start, end, policy.networkTemplate, policy.subscriberId);
+                stats = mNetworkStats.getSummaryForNetwork(policy.template, start, end);
                 total = stats.rx[0] + stats.tx[0];
             } catch (RemoteException e) {
-                Slog.w(TAG, "problem reading summary for template " + policy.networkTemplate);
+                Slog.w(TAG, "problem reading summary for template " + policy.template);
                 continue;
             }
 
@@ -603,12 +602,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private void ensureActiveMobilePolicyLocked() {
         if (LOGV) Slog.v(TAG, "ensureActiveMobilePolicyLocked()");
         final String subscriberId = getActiveSubscriberId();
+        final NetworkIdentity probeIdent = new NetworkIdentity(
+                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId);
 
         // examine to see if any policy is defined for active mobile
         boolean mobileDefined = false;
         for (NetworkPolicy policy : mNetworkPolicy) {
-            if (isNetworkTemplateMobile(policy.networkTemplate)
-                    && Objects.equal(subscriberId, policy.subscriberId)) {
+            if (policy.template.matches(probeIdent)) {
                 mobileDefined = true;
             }
         }
@@ -624,8 +624,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             time.setToNow();
             final int cycleDay = time.monthDay;
 
-            mNetworkPolicy.add(new NetworkPolicy(
-                    TEMPLATE_MOBILE_ALL, subscriberId, cycleDay, 4 * GB_IN_BYTES, LIMIT_DISABLED));
+            final NetworkTemplate template = new NetworkTemplate(MATCH_MOBILE_ALL, subscriberId);
+            mNetworkPolicy.add(
+                    new NetworkPolicy(template, cycleDay, 4 * GB_IN_BYTES, LIMIT_DISABLED));
             writePolicyLocked();
         }
     }
@@ -658,8 +659,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         final long warningBytes = readLongAttribute(in, ATTR_WARNING_BYTES);
                         final long limitBytes = readLongAttribute(in, ATTR_LIMIT_BYTES);
 
-                        mNetworkPolicy.add(new NetworkPolicy(
-                                networkTemplate, subscriberId, cycleDay, warningBytes, limitBytes));
+                        final NetworkTemplate template = new NetworkTemplate(
+                                networkTemplate, subscriberId);
+                        mNetworkPolicy.add(
+                                new NetworkPolicy(template, cycleDay, warningBytes, limitBytes));
 
                     } else if (TAG_UID_POLICY.equals(tag)) {
                         final int uid = readIntAttribute(in, ATTR_UID);
@@ -701,10 +704,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             // write all known network policies
             for (NetworkPolicy policy : mNetworkPolicy) {
+                final NetworkTemplate template = policy.template;
+
                 out.startTag(null, TAG_NETWORK_POLICY);
-                writeIntAttribute(out, ATTR_NETWORK_TEMPLATE, policy.networkTemplate);
-                if (policy.subscriberId != null) {
-                    out.attribute(null, ATTR_SUBSCRIBER_ID, policy.subscriberId);
+                writeIntAttribute(out, ATTR_NETWORK_TEMPLATE, template.getMatchRule());
+                final String subscriberId = template.getSubscriberId();
+                if (subscriberId != null) {
+                    out.attribute(null, ATTR_SUBSCRIBER_ID, subscriberId);
                 }
                 writeIntAttribute(out, ATTR_CYCLE_DAY, policy.cycleDay);
                 writeLongAttribute(out, ATTR_WARNING_BYTES, policy.warningBytes);
