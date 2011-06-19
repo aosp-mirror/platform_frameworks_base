@@ -40,10 +40,9 @@ import java.util.Random;
  * @hide
  */
 public class NetworkStatsHistory implements Parcelable {
-    private static final int VERSION_CURRENT = 1;
+    private static final int VERSION_INIT = 1;
 
-    // TODO: teach about zigzag encoding to use less disk space
-    // TODO: teach how to convert between bucket sizes
+    // TODO: teach about varint encoding to use less disk space
 
     public final long bucketDuration;
 
@@ -83,7 +82,7 @@ public class NetworkStatsHistory implements Parcelable {
     public NetworkStatsHistory(DataInputStream in) throws IOException {
         final int version = in.readInt();
         switch (version) {
-            case VERSION_CURRENT: {
+            case VERSION_INIT: {
                 bucketDuration = in.readLong();
                 bucketStart = readLongArray(in);
                 rx = readLongArray(in);
@@ -98,7 +97,7 @@ public class NetworkStatsHistory implements Parcelable {
     }
 
     public void writeToStream(DataOutputStream out) throws IOException {
-        out.writeInt(VERSION_CURRENT);
+        out.writeInt(VERSION_INIT);
         out.writeLong(bucketDuration);
         writeLongArray(out, bucketStart, bucketCount);
         writeLongArray(out, rx, bucketCount);
@@ -115,6 +114,11 @@ public class NetworkStatsHistory implements Parcelable {
      * distribute across internal buckets, creating new buckets as needed.
      */
     public void recordData(long start, long end, long rx, long tx) {
+        if (rx < 0 || tx < 0) {
+            throw new IllegalArgumentException(
+                    "tried recording negative data: rx=" + rx + ", tx=" + tx);
+        }
+
         // create any buckets needed by this range
         ensureBuckets(start, end);
 

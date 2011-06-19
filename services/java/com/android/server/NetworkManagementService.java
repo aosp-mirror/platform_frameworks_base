@@ -16,6 +16,10 @@
 
 package com.android.server;
 
+import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.TAG_NONE;
+import static android.net.NetworkStats.UID_ALL;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.INetworkManagementEventObserver;
@@ -37,6 +41,7 @@ import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Inet4Address;
@@ -59,8 +64,9 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     private static final int ADD = 1;
     private static final int REMOVE = 2;
 
-    /** Base path to UID-granularity network statistics. */
-    private static final File PATH_PROC_UID_STAT = new File("/proc/uid_stat");
+    @Deprecated
+    private static final File STATS_UIDSTAT = new File("/proc/uid_stat");
+    private static final File STATS_NETFILTER = new File("/proc/net/xt_qtaguid/stats");
 
     class NetdResponseCode {
         public static final int InterfaceListResult       = 110;
@@ -899,7 +905,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         for (String iface : ifaces) {
             final long rx = getInterfaceCounter(iface, true);
             final long tx = getInterfaceCounter(iface, false);
-            stats.addEntry(iface, NetworkStats.UID_ALL, rx, tx);
+            stats.addEntry(iface, UID_ALL, TAG_NONE, rx, tx);
         }
 
         return stats;
@@ -910,16 +916,11 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
 
-        final String[] knownUids = PATH_PROC_UID_STAT.list();
-        final NetworkStats stats = new NetworkStats(
-                SystemClock.elapsedRealtime(), knownUids.length);
-
-        for (String uid : knownUids) {
-            final int uidInt = Integer.parseInt(uid);
-            collectNetworkStatsDetail(stats, uidInt);
+        if (STATS_NETFILTER.exists()) {
+            return getNetworkStatsDetailNetfilter(UID_ALL);
+        } else {
+            return getNetworkStatsDetailUidstat(UID_ALL);
         }
-
-        return stats;
     }
 
     @Override
@@ -929,19 +930,89 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                     android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
         }
 
-        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 1);
-        collectNetworkStatsDetail(stats, uid);
+        if (STATS_NETFILTER.exists()) {
+            return getNetworkStatsDetailNetfilter(uid);
+        } else {
+            return getNetworkStatsDetailUidstat(uid);
+        }
+    }
+
+    /**
+     * Build {@link NetworkStats} with detailed UID statistics.
+     */
+    private NetworkStats getNetworkStatsDetailNetfilter(int limitUid) {
+        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 24);
+
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(STATS_NETFILTER));
+
+            // assumes format from kernel:
+            // idx iface acct_tag_hex uid_tag_int rx_bytes tx_bytes
+
+            // skip first line, which is legend
+            String line = reader.readLine();
+            while ((line = reader.readLine()) != null) {
+                final StringTokenizer t = new StringTokenizer(line);
+
+                final String idx = t.nextToken();
+                final String iface = t.nextToken();
+
+                try {
+                    // TODO: kernel currently emits tag in upper half of long;
+                    // eventually switch to directly using int.
+                    final int tag = (int) (Long.parseLong(t.nextToken().substring(2), 16) >> 32);
+                    final int uid = Integer.parseInt(t.nextToken());
+                    final long rx = Long.parseLong(t.nextToken());
+                    final long tx = Long.parseLong(t.nextToken());
+    
+                    if (limitUid == UID_ALL || limitUid == uid) {
+                        stats.addEntry(iface, uid, tag, rx, tx);
+                        if (tag != TAG_NONE) {
+                            // proc also counts tagged data in generic tag, so
+                            // we subtract it here to avoid double-counting.
+                            stats.combineEntry(iface, uid, TAG_NONE, -rx, -tx);
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    Slog.w(TAG, "problem parsing stats for idx " + idx + ": " + e);
+                }
+            }
+        } catch (IOException e) {
+            Slog.w(TAG, "problem parsing stats: " + e);
+        } finally {
+            IoUtils.closeQuietly(reader);
+        }
+
         return stats;
     }
 
-    private void collectNetworkStatsDetail(NetworkStats stats, int uid) {
-        // TODO: kernel module will provide interface-level stats in future
-        // TODO: migrate these stats to come across netd in bulk, instead of all
-        // these individual file reads.
-        final File uidPath = new File(PATH_PROC_UID_STAT, Integer.toString(uid));
-        final long rx = readSingleLongFromFile(new File(uidPath, "tcp_rcv"));
-        final long tx = readSingleLongFromFile(new File(uidPath, "tcp_snd"));
-        stats.addEntry(NetworkStats.IFACE_ALL, uid, rx, tx);
+    /**
+     * Build {@link NetworkStats} with detailed UID statistics.
+     *
+     * @deprecated since this uses older "uid_stat" data, and doesn't provide
+     *             tag-level granularity or additional variables.
+     */
+    @Deprecated
+    private NetworkStats getNetworkStatsDetailUidstat(int limitUid) {
+        final String[] knownUids;
+        if (limitUid == UID_ALL) {
+            knownUids = STATS_UIDSTAT.list();
+        } else {
+            knownUids = new String[] { String.valueOf(limitUid) };
+        }
+
+        final NetworkStats stats = new NetworkStats(
+                SystemClock.elapsedRealtime(), knownUids.length);
+        for (String uid : knownUids) {
+            final int uidInt = Integer.parseInt(uid);
+            final File uidPath = new File(STATS_UIDSTAT, uid);
+            final long rx = readSingleLongFromFile(new File(uidPath, "tcp_rcv"));
+            final long tx = readSingleLongFromFile(new File(uidPath, "tcp_snd"));
+            stats.addEntry(IFACE_ALL, uidInt, TAG_NONE, rx, tx);
+        }
+
+        return stats;
     }
 
     public void setInterfaceThrottle(String iface, int rxKbps, int txKbps) {

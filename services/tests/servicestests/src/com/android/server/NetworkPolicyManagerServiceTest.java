@@ -23,8 +23,9 @@ import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
+import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
-import static android.net.TrafficStats.TEMPLATE_WIFI;
+import static android.net.NetworkTemplate.MATCH_WIFI;
 import static org.easymock.EasyMock.anyInt;
 import static org.easymock.EasyMock.aryEq;
 import static org.easymock.EasyMock.capture;
@@ -49,6 +50,7 @@ import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkPolicy;
 import android.net.NetworkState;
 import android.net.NetworkStats;
+import android.net.NetworkTemplate;
 import android.os.Binder;
 import android.os.IPowerManager;
 import android.test.AndroidTestCase;
@@ -75,6 +77,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
     private static final long TEST_START = 1194220800000L;
     private static final String TEST_IFACE = "test0";
+
+    private static NetworkTemplate sTemplateWifi = new NetworkTemplate(MATCH_WIFI, null);
 
     private BroadcastInterceptingContext mServiceContext;
     private File mPolicyDir;
@@ -305,7 +309,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long currentTime = parseTime("2007-11-14T00:00:00.000Z");
         final long expectedCycle = parseTime("2007-11-05T00:00:00.000Z");
 
-        final NetworkPolicy policy = new NetworkPolicy(TEMPLATE_WIFI, null, 5, 1024L, 1024L);
+        final NetworkPolicy policy = new NetworkPolicy(sTemplateWifi, 5, 1024L, 1024L);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertEquals(expectedCycle, actualCycle);
     }
@@ -315,7 +319,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long currentTime = parseTime("2007-11-14T00:00:00.000Z");
         final long expectedCycle = parseTime("2007-10-20T00:00:00.000Z");
 
-        final NetworkPolicy policy = new NetworkPolicy(TEMPLATE_WIFI, null, 20, 1024L, 1024L);
+        final NetworkPolicy policy = new NetworkPolicy(sTemplateWifi, 20, 1024L, 1024L);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertEquals(expectedCycle, actualCycle);
     }
@@ -325,7 +329,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long currentTime = parseTime("2007-02-14T00:00:00.000Z");
         final long expectedCycle = parseTime("2007-01-30T00:00:00.000Z");
 
-        final NetworkPolicy policy = new NetworkPolicy(TEMPLATE_WIFI, null, 30, 1024L, 1024L);
+        final NetworkPolicy policy = new NetworkPolicy(sTemplateWifi, 30, 1024L, 1024L);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertEquals(expectedCycle, actualCycle);
     }
@@ -335,7 +339,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final long currentTime = parseTime("2007-03-14T00:00:00.000Z");
         final long expectedCycle = parseTime("2007-03-01T00:00:00.000Z");
 
-        final NetworkPolicy policy = new NetworkPolicy(TEMPLATE_WIFI, null, 30, 1024L, 1024L);
+        final NetworkPolicy policy = new NetworkPolicy(sTemplateWifi, 30, 1024L, 1024L);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
         assertEquals(expectedCycle, actualCycle);
     }
@@ -367,8 +371,8 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // pretend that 512 bytes total have happened
         stats = new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, 256L, 256L);
-        expect(mStatsService.getSummaryForNetwork(TIME_FEB_15, TIME_MAR_10, TEMPLATE_WIFI, null))
+                .addEntry(TEST_IFACE, UID_ALL, TAG_NONE, 256L, 256L);
+        expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, TIME_MAR_10))
                 .andReturn(stats).atLeastOnce();
 
         // expect that quota remaining should be 1536 bytes
@@ -378,7 +382,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         expectMeteredIfacesChanged(TEST_IFACE);
 
         replay();
-        setNetworkPolicies(new NetworkPolicy(TEMPLATE_WIFI, null, CYCLE_DAY, 1024L, 2048L));
+        setNetworkPolicies(new NetworkPolicy(sTemplateWifi, CYCLE_DAY, 1024L, 2048L));
         verifyAndReset();
     }
 

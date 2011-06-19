@@ -59,7 +59,7 @@ public class NetworkPolicyManager {
     /**
      * {@link Intent} extra included in {@link #ACTION_DATA_USAGE_WARNING} and
      * {@link #ACTION_DATA_USAGE_LIMIT} to indicate which
-     * {@link NetworkPolicy#networkTemplate} it applies to.
+     * {@link NetworkTemplate} rule it applies to.
      */
     public static final String EXTRA_NETWORK_TEMPLATE =
             "android.intent.extra.NETWORK_TEMPLATE";
