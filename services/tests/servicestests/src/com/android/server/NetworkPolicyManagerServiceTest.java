@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.content.Intent.ACTION_UID_REMOVED;
+import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
@@ -383,6 +385,22 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         replay();
         setNetworkPolicies(new NetworkPolicy(sTemplateWifi, CYCLE_DAY, 1024L, 2048L));
+        verifyAndReset();
+    }
+
+    public void testUidRemovedPolicyCleared() throws Exception {
+        // POLICY_REJECT should RULE_REJECT in background
+        expectRulesChanged(UID_A, RULE_REJECT_METERED);
+        replay();
+        mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
+        verifyAndReset();
+
+        // uninstall should clear RULE_REJECT
+        expectRulesChanged(UID_A, RULE_ALLOW_ALL);
+        replay();
+        final Intent intent = new Intent(ACTION_UID_REMOVED);
+        intent.putExtra(EXTRA_UID, UID_A);
+        mServiceContext.sendBroadcast(intent);
         verifyAndReset();
     }
 

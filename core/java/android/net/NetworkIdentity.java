@@ -95,9 +95,13 @@ public class NetworkIdentity {
 
         final String subscriberId;
         if (isNetworkTypeMobile(type)) {
-            final TelephonyManager telephony = (TelephonyManager) context.getSystemService(
-                    Context.TELEPHONY_SERVICE);
-            subscriberId = telephony.getSubscriberId();
+            if (state.subscriberId != null) {
+                subscriberId = state.subscriberId;
+            } else {
+                final TelephonyManager telephony = (TelephonyManager) context.getSystemService(
+                        Context.TELEPHONY_SERVICE);
+                subscriberId = telephony.getSubscriberId();
+            }
         } else {
             subscriberId = null;
         }

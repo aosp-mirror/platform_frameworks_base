@@ -42,6 +42,14 @@ public class TrafficStats {
     public final static int UNSUPPORTED = -1;
 
     /**
+     * Special UID value used when collecting {@link NetworkStatsHistory} for
+     * removed applications.
+     *
+     * @hide
+     */
+    public static final int UID_REMOVED = -4;
+
+    /**
      * Snapshot of {@link NetworkStats} when the currently active profiling
      * session started, or {@code null} if no session active.
      *
