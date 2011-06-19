@@ -89,6 +89,11 @@ public class ApnContext {
     }
 
     public synchronized void setDataConnectionAc(DataConnectionAc dcac) {
+        if (dcac != null) {
+            dcac.addApnContext(this);
+        } else {
+            if (mDataConnectionAc != null) mDataConnectionAc.removeApnContext(this);
+        }
         mDataConnectionAc = dcac;
     }
 

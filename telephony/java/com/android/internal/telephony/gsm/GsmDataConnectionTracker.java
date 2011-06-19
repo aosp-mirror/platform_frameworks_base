@@ -68,7 +68,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -969,6 +971,49 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     }
 
     /**
+     * @param cid Connection id provided from RIL.
+     * @return DataConnectionAc associated with specified cid.
+     */
+    private DataConnectionAc findDataConnectionAcByCid(int cid) {
+        for (DataConnectionAc dcac : mDataConnectionAsyncChannels.values()) {
+            if (dcac.getCidSync() == cid) {
+                return dcac;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @param dcacs Collection of DataConnectionAc reported from RIL.
+     * @return List of ApnContext whihc is connected, but does not present in
+     *         data connection list reported from RIL.
+     */
+    private List<ApnContext> findApnContextToClean(Collection<DataConnectionAc> dcacs) {
+        if (dcacs == null) return null;
+
+        ArrayList<ApnContext> list = new ArrayList<ApnContext>();
+        for (ApnContext apnContext : mApnContexts.values()) {
+            if (apnContext.getState() == State.CONNECTED) {
+                boolean found = false;
+                for (DataConnectionAc dcac : dcacs) {
+                    if (dcac == apnContext.getDataConnectionAc()) {
+                        // ApnContext holds the ref to dcac present in data call list.
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    // ApnContext does not have dcan reorted in data call list.
+                    if (DBG) log("onDataStateChanged(ar): Connected apn not found in the list (" +
+                                 apnContext.toString() + ")");
+                    list.add(apnContext);
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
      * @param ar is the result of RIL_REQUEST_DATA_CALL_LIST
      * or RIL_UNSOL_DATA_CALL_LIST_CHANGED
      */
@@ -985,91 +1030,103 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (DBG) log("onDataStateChanged(ar): exception; likely radio not available, ignore");
             return;
         }
+        if (DBG) log("onDataStateChanged(ar): DataCallState size=" + dataCallStates.size());
 
-        // Create a hash map to store the dataCallState of each call id
+        // Create a hash map to store the dataCallState of each DataConnectionAc
         // TODO: Depends on how frequent the DATA_CALL_LIST got updated,
         //       may cache response to reduce comparison.
-        HashMap<Integer, DataCallState> response;
-        response = new HashMap<Integer, DataCallState>();
-        if (DBG) log("onDataStateChanged(ar): DataCallState size=" + dataCallStates.size());
-        for (DataCallState dc : dataCallStates) {
-            response.put(dc.cid, dc);
-            if (DBG) log("onDataStateChanged(ar): " + dc.cid + ": " + dc.toString());
+        HashMap<DataCallState, DataConnectionAc> response;
+        response = new HashMap<DataCallState, DataConnectionAc>();
+        for (DataCallState dataCallState : dataCallStates) {
+            DataConnectionAc dcac = findDataConnectionAcByCid(dataCallState.cid);
+
+            if (dcac != null) response.put(dataCallState, dcac);
         }
 
-        // For each connected apn, check if there is a matched active
-        // data call state, which has the same link properties.
-        if (DBG) log("    ApnContext size=" + mApnContexts.values().size());
-        for (ApnContext apnContext : mApnContexts.values()) {
-            if (DBG){
-                log("onDataStateChanged(ar): " + apnContext.toString());
-                if (apnContext.getDataConnection() != null) {
-                    log("onDataStateChanged(ar): " +  apnContext.getDataConnection().toString());
+        // step1: Find a list of "connected" APN which does not have reference to
+        //        calls listed in the Data Call List.
+        List<ApnContext> apnsToClear = findApnContextToClean(response.values());
+
+        // step2: Check status of each calls in Data Call List.
+        //        Collect list of ApnContext associated with the data call if the link
+        //        has to be cleared.
+        for (DataCallState newState : dataCallStates) {
+            DataConnectionAc dcac = response.get(newState);
+
+            // no associated DataConnection found. Ignore.
+            if (dcac == null) continue;
+
+            Collection<ApnContext> apns = dcac.getApnList();
+
+            // filter out ApnContext with "Connected" state.
+            ArrayList<ApnContext> connectedApns = new ArrayList<ApnContext>();
+            for (ApnContext apnContext : apns) {
+                if ((apnContext != null) &&
+                    (apnContext.getState() == State.CONNECTED)) {
+                    connectedApns.add(apnContext);
                 }
             }
-            DataConnectionAc dcac = apnContext.getDataConnectionAc();
-            if (dcac == null) {
+
+            // No "Connected" ApnContext associated with this CID. Ignore.
+            if (connectedApns.isEmpty()) {
                 continue;
             }
-            int connectionId = dcac.getCidSync();
 
-            if (apnContext.getState() == State.CONNECTED) {
-                // The way things are supposed to work, the PDP list
-                // should not contain the CID after it disconnects.
-                // However, the way things really work, sometimes the PDP
-                // context is still listed with active = false, which
-                // makes it hard to distinguish an activating context from
-                // an activated-and-then de-activated one.
-                if (response.containsKey(connectionId)) {
-                    DataCallState newState = response.get(connectionId);
-                    if (DBG) log("onDataStateChanged(ar): Found ConnId=" + connectionId
+            if (DBG) log("onDataStateChanged(ar): Found ConnId=" + newState.cid
                             + " newState=" + newState.toString());
-                    if (newState.active != 0) {
-                        boolean resetConnection;
-                        switch (dcac.updateLinkPropertiesDataCallStateSync(newState)) {
-                        case NONE:
-                            if (DBG) log("onDataStateChanged(ar): Found but no change, skip");
-                            resetConnection = false;
-                            break;
-                        case CHANGED:
-                            if (DBG) log("onDataStateChanged(ar): Found and changed, notify");
-                            mPhone.notifyDataConnection(Phone.REASON_LINK_PROPERTIES_CHANGED,
-                                                        apnContext.getApnType());
-                            // Temporary hack, at this time a transition from CDMA -> Global
-                            // fails so we'll hope for the best and not reset the connection.
-                            // @see bug/4455071
-                            if (SystemProperties.getBoolean("telephony.ignore-state-changes",
-                                                            true)) {
-                                log("onDataStateChanged(ar): STOPSHIP don't reset, continue");
-                                resetConnection = false;
-                            } else {
-                                // Things changed so reset connection, when hack is removed
-                                // this is the normal path.
-                                log("onDataStateChanged(ar): changed so resetting connection");
-                                resetConnection = true;
-                            }
-                            break;
-                        case RESET:
-                        default:
-                            if (DBG) log("onDataStateChanged(ar): an error, reset connection");
-                            resetConnection = true;
-                            break;
-                        }
-                        if (resetConnection == false) continue;
+            if (newState.active != 0) {
+                boolean resetConnection;
+                switch (dcac.updateLinkPropertiesDataCallStateSync(newState)) {
+                case NONE:
+                    if (DBG) log("onDataStateChanged(ar): Found but no change, skip");
+                    resetConnection = false;
+                    break;
+                case CHANGED:
+                    for (ApnContext apnContext : connectedApns) {
+                        if (DBG) log("onDataStateChanged(ar): Found and changed, notify (" +
+                                     apnContext.toString() + ")");
+                        mPhone.notifyDataConnection(Phone.REASON_LINK_PROPERTIES_CHANGED,
+                                                    apnContext.getApnType());
                     }
+                    // Temporary hack, at this time a transition from CDMA -> Global
+                    // fails so we'll hope for the best and not reset the connection.
+                    // @see bug/4455071
+                    if (SystemProperties.getBoolean("telephony.ignore-state-changes",
+                                                    true)) {
+                        log("onDataStateChanged(ar): STOPSHIP don't reset, continue");
+                        resetConnection = false;
+                    } else {
+                        // Things changed so reset connection, when hack is removed
+                        // this is the normal path.
+                        log("onDataStateChanged(ar): changed so resetting connection");
+                        resetConnection = true;
+                    }
+                    break;
+                case RESET:
+                default:
+                    if (DBG) log("onDataStateChanged(ar): an error, reset connection");
+                    resetConnection = true;
+                    break;
                 }
-
-                if (DBG) log("onDataStateChanged(ar): reset connection.");
-
-                // Add an event log when the network drops PDP
-                int cid = getCellLocationId();
-                EventLog.writeEvent(EventLogTags.PDP_NETWORK_DROP, cid,
-                        TelephonyManager.getDefault().getNetworkType());
-
-                cleanUpConnection(true, apnContext);
+                if (resetConnection == false) continue;
             }
+
+            if (DBG) log("onDataStateChanged(ar): reset connection.");
+
+            apnsToClear.addAll(connectedApns);
         }
 
+        // step3: Clear apn connection if applicable.
+        if (!apnsToClear.isEmpty()) {
+            // Add an event log when the network drops PDP
+            int cid = getCellLocationId();
+            EventLog.writeEvent(EventLogTags.PDP_NETWORK_DROP, cid,
+                                TelephonyManager.getDefault().getNetworkType());
+        }
+
+        for (ApnContext apnContext : apnsToClear) {
+            cleanUpConnection(true, apnContext);
+        }
         if (DBG) log("onDataStateChanged(ar): X");
     }
 
