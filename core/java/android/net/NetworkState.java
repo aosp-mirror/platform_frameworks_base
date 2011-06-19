@@ -29,18 +29,27 @@ public class NetworkState implements Parcelable {
     public final NetworkInfo networkInfo;
     public final LinkProperties linkProperties;
     public final LinkCapabilities linkCapabilities;
+    /** Currently only used by testing. */
+    public final String subscriberId;
 
     public NetworkState(NetworkInfo networkInfo, LinkProperties linkProperties,
             LinkCapabilities linkCapabilities) {
+        this(networkInfo, linkProperties, linkCapabilities, null);
+    }
+
+    public NetworkState(NetworkInfo networkInfo, LinkProperties linkProperties,
+            LinkCapabilities linkCapabilities, String subscriberId) {
         this.networkInfo = networkInfo;
         this.linkProperties = linkProperties;
         this.linkCapabilities = linkCapabilities;
+        this.subscriberId = subscriberId;
     }
 
     public NetworkState(Parcel in) {
         networkInfo = in.readParcelable(null);
         linkProperties = in.readParcelable(null);
         linkCapabilities = in.readParcelable(null);
+        subscriberId = in.readString();
     }
 
     /** {@inheritDoc} */
@@ -53,6 +62,7 @@ public class NetworkState implements Parcelable {
         out.writeParcelable(networkInfo, flags);
         out.writeParcelable(linkProperties, flags);
         out.writeParcelable(linkCapabilities, flags);
+        out.writeString(subscriberId);
     }
 
     public static final Creator<NetworkState> CREATOR = new Creator<NetworkState>() {

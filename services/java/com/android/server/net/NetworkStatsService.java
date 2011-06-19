@@ -19,11 +19,14 @@ package com.android.server.net;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
-import static android.Manifest.permission.SHUTDOWN;
+import static android.content.Intent.ACTION_SHUTDOWN;
+import static android.content.Intent.ACTION_UID_REMOVED;
+import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+import static android.net.TrafficStats.UID_REMOVED;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_MAX_HISTORY;
 import static android.provider.Settings.Secure.NETSTATS_PERSIST_THRESHOLD;
@@ -206,17 +209,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // watch for network interfaces to be claimed
-        final IntentFilter ifaceFilter = new IntentFilter();
-        ifaceFilter.addAction(CONNECTIVITY_ACTION);
-        mContext.registerReceiver(mIfaceReceiver, ifaceFilter, CONNECTIVITY_INTERNAL, mHandler);
+        final IntentFilter connFilter = new IntentFilter(CONNECTIVITY_ACTION);
+        mContext.registerReceiver(mConnReceiver, connFilter, CONNECTIVITY_INTERNAL, mHandler);
 
         // listen for periodic polling events
         final IntentFilter pollFilter = new IntentFilter(ACTION_NETWORK_STATS_POLL);
         mContext.registerReceiver(mPollReceiver, pollFilter, READ_NETWORK_USAGE_HISTORY, mHandler);
 
+        // listen for uid removal to clean stats
+        final IntentFilter removedFilter = new IntentFilter(ACTION_UID_REMOVED);
+        mContext.registerReceiver(mRemovedReceiver, removedFilter, null, mHandler);
+
         // persist stats during clean shutdown
-        final IntentFilter shutdownFilter = new IntentFilter(Intent.ACTION_SHUTDOWN);
-        mContext.registerReceiver(mShutdownReceiver, shutdownFilter, SHUTDOWN, null);
+        final IntentFilter shutdownFilter = new IntentFilter(ACTION_SHUTDOWN);
+        mContext.registerReceiver(mShutdownReceiver, shutdownFilter);
 
         try {
             registerPollAlarmLocked();
@@ -226,8 +232,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private void shutdownLocked() {
-        mContext.unregisterReceiver(mIfaceReceiver);
+        mContext.unregisterReceiver(mConnReceiver);
         mContext.unregisterReceiver(mPollReceiver);
+        mContext.unregisterReceiver(mRemovedReceiver);
         mContext.unregisterReceiver(mShutdownReceiver);
 
         writeNetworkStatsLocked();
@@ -352,7 +359,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * interfaces. Used to associate {@link TelephonyManager#getSubscriberId()}
      * with mobile interfaces.
      */
-    private BroadcastReceiver mIfaceReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // on background handler thread, and verified CONNECTIVITY_INTERNAL
@@ -375,10 +382,22 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     };
 
+    private BroadcastReceiver mRemovedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // on background handler thread, and UID_REMOVED is protected
+            // broadcast.
+            final int uid = intent.getIntExtra(EXTRA_UID, 0);
+            synchronized (mStatsLock) {
+                removeUidLocked(uid);
+            }
+        }
+    };
+
     private BroadcastReceiver mShutdownReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // verified SHUTDOWN permission above.
+            // SHUTDOWN is protected broadcast.
             synchronized (mStatsLock) {
                 shutdownLocked();
             }
@@ -545,6 +564,31 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mLastUidPoll = uidStats;
     }
 
+    /**
+     * Clean up {@link #mUidStats} after UID is removed.
+     */
+    private void removeUidLocked(int uid) {
+        ensureUidStatsLoadedLocked();
+
+        // migrate all UID stats into special "removed" bucket
+        for (NetworkIdentitySet ident : mUidStats.keySet()) {
+            final SparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
+            final NetworkStatsHistory uidHistory = uidStats.get(uid);
+            if (uidHistory != null) {
+                final NetworkStatsHistory removedHistory = findOrCreateUidStatsLocked(
+                        ident, UID_REMOVED);
+                removedHistory.recordEntireHistory(uidHistory);
+                uidStats.remove(uid);
+            }
+        }
+
+        // TODO: push kernel event to wipe stats for UID, otherwise we risk
+        // picking them up again during next poll.
+
+        // since this was radical rewrite, push to disk
+        writeUidStatsLocked();
+    }
+
     private NetworkStatsHistory findOrCreateNetworkStatsLocked(NetworkIdentitySet ident) {
         final long bucketDuration = mSettings.getNetworkBucketDuration();
         final NetworkStatsHistory existing = mNetworkStats.get(ident);
@@ -568,6 +612,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private NetworkStatsHistory findOrCreateUidStatsLocked(NetworkIdentitySet ident, int uid) {
+        ensureUidStatsLoadedLocked();
+
         // find bucket for identity first, then find uid
         SparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
         if (uidStats == null) {
@@ -733,6 +779,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private void writeUidStatsLocked() {
         if (LOGV) Slog.v(TAG, "writeUidStatsLocked()");
+
+        if (!mUidStatsLoaded) {
+            Slog.w(TAG, "asked to write UID stats when not loaded; skipping");
+            return;
+        }
 
         // TODO: consider duplicating stats and releasing lock while writing
 

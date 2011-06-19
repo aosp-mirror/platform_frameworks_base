@@ -22,6 +22,8 @@ import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
+import static android.content.Intent.ACTION_UID_REMOVED;
+import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
@@ -247,9 +249,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mContext.registerReceiver(mScreenReceiver, screenFilter);
 
         // watch for network interfaces to be claimed
-        final IntentFilter ifaceFilter = new IntentFilter();
-        ifaceFilter.addAction(CONNECTIVITY_ACTION);
-        mContext.registerReceiver(mIfaceReceiver, ifaceFilter, CONNECTIVITY_INTERNAL, mHandler);
+        final IntentFilter connFilter = new IntentFilter(CONNECTIVITY_ACTION);
+        mContext.registerReceiver(mConnReceiver, connFilter, CONNECTIVITY_INTERNAL, mHandler);
+
+        // listen for uid removal to clean policy
+        final IntentFilter removedFilter = new IntentFilter(ACTION_UID_REMOVED);
+        mContext.registerReceiver(mRemovedReceiver, removedFilter, null, mHandler);
 
         // listen for warning polling events; currently dispatched by
         final IntentFilter statsFilter = new IntentFilter(ACTION_NETWORK_STATS_UPDATED);
@@ -308,6 +313,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // screen-related broadcasts are protected by system, no need
                 // for permissions check.
                 updateScreenOn();
+            }
+        }
+    };
+
+    private BroadcastReceiver mRemovedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // on background handler thread, and UID_REMOVED is protected
+            // broadcast.
+            final int uid = intent.getIntExtra(EXTRA_UID, 0);
+            synchronized (mRulesLock) {
+                // remove any policy and update rules to clean up
+                mUidPolicy.delete(uid);
+                updateRulesForUidLocked(uid);
+                writePolicyLocked();
             }
         }
     };
@@ -473,7 +493,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * Receiver that watches for {@link IConnectivityManager} to claim network
      * interfaces. Used to apply {@link NetworkPolicy} to matching networks.
      */
-    private BroadcastReceiver mIfaceReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mConnReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // on background handler thread, and verified CONNECTIVITY_INTERNAL
